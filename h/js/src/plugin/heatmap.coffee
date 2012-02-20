@@ -11,13 +11,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
                   xmlns="http://www.w3.org/2000/svg"
                   xmlns:xlink="http://www.w3.org/1999/xlink">
                 <defs>
-                  <linearGradient id="bgGradient"
-                                  x1="0%" y1="0%"
-                                  x2="100%" y2="0%">
-                    <stop offset="20%" stop-color="#ffffff" stop-opacity="1" />
-                    <stop offset="40%" stop-color="#f2f0e3" stop-opacity="0" />
-                    <stop offset="100%" stop-color="#000000" stop-opacity="1" />
-                  </linearGradient>
                   <linearGradient id="heatmapGradient"
                                   x1="0%" y1="0%"
                                   x2="0%" y2="100%">
@@ -30,8 +23,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
                 <rect x="0" y="0" width="100%" height="100%"
                       fill="url(#heatmapGradient)"
                       filter="url(#heatBlend)" />
-                <rect x="0" y="0" width="100%" height="100%"
-                      fill="url(#bgGradient)" />
              </svg>
              """ #" coffee-mode font lock bug
 
