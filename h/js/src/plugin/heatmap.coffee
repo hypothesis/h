@@ -16,8 +16,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
                                   x2="0%" y2="100%">
                   </linearGradient>
                   <filter id="heatBlend">
-                    <feGaussianBlur stdDeviation="1"><feGaussianBlur>
-                    <feBlend mode="screen" in="SourceAlpha"><feBlend>
+                    <feGaussianBlur stdDeviation="3"><feGaussianBlur>
                   </filter>
                 </defs>
                 <rect x="0" y="0" width="100%" height="100%"
