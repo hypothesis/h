@@ -84,14 +84,10 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   #
   # Returns a jQuery collection of the elements.
   updateHeatmap: =>
+    # Grab some attributes of the document for computing layout
     context = @annotator.wrapper.context
     scale = context.scrollHeight / window.innerHeight
     translate = window.pageYOffset / context.scrollHeight * scale
-
-    # Get the heatmap gradient
-    gradient = d3.select(@heatmap.find('#heatmapGradient').get(0))
-    # Translate it based on the window scroll
-    gradient.attr('gradientTransform', "translate(0,-#{translate})")
 
     # Get all the visible annotations
     annotations = @annotator.element.find('.annotator-hl:visible')
@@ -101,27 +97,29 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       # ... get the top and height of each annotation
       .map () ->
         {
-          top: $(this).offset().top / context.scrollHeight * scale
-          height: $(this).innerHeight() / context.scrollHeight * scale
+          el: this
+          top: $(this).offset().top / context.scrollHeight
+          height: $(this).innerHeight() / context.scrollHeight
         }
        # ... de-jQuery-ify to get the underlying array
       .get()
       # ... calculate the gradient control points
       .reduce((acc, m) ->
         acc.concat [
-          [m.top, 0]
-          [m.top + 0.5 * m.height, 1]
-          [m.top + m.height, -1]
+          [m.top, 0, "top"+m.el]
+          [m.top + 0.5 * m.height, 1, "mid"+m.el]
+          [m.top + m.height, -1, "bot"+m.el]
         ]
-      , [[0,0], [scale,0]])
+      , [[0,0,"top"], [1,0,"bot"]])
       # ... then sort the points and count the overlap
       .sort()
       .reduce((acc, n) ->
-        [y, d] = n
+        [y, d, i] = n
         acc.count += d
         acc.points.push {
           offset: y,
           count: acc.count
+          id: i
         }
         acc.max = acc.count if acc.count > acc.max
         acc
@@ -132,17 +130,23 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       })
 
     # Bind the heatmap to the control points
-    heatmap = gradient.selectAll('stop').data(points, (p) -> p[0])
+    heatmap = d3.select(@heatmap.find('#heatmapGradient').get(0))
+      .selectAll('stop').data(points, (p) -> p[0])
 
     # Colorize it
     heatmap.enter().append("stop")
       .attr("offset", (p) -> p.offset)
-      .attr("stop-color", (p) => @_colorize(p.count / max))
-      .attr("stop-opacity", (p) -> d3.scale.pow().domain([0,max])(p.count))
+      .transition().duration(1000)
+        .attr("stop-color", (p) => @_colorize(p.count / max))
+        .attr("stop-opacity", (p) -> d3.scale.pow().domain([0,max])(p.count))
 
-    heatmap.transition()
+    heatmap
       .attr("offset", (p) -> p.offset)
-      .attr("stop-color", (p) => @_colorize(p.count / max))
-      .attr("stop-opacity", (p) -> d3.scale.pow().domain([0,max])(p.count))
+      .transition().duration(1000)
+        .attr("stop-color", (p) => @_colorize(p.count / max))
+        .attr("stop-opacity", (p) -> d3.scale.pow().domain([0,max])(p.count))
 
-    heatmap.exit().remove()
+    heatmap.exit()
+      .transition().duration(1000)
+        .attr("stop-opacity", 0)
+        .remove()
