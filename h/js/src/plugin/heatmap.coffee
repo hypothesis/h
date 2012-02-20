@@ -76,10 +76,12 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     h = d3.scale.log()
       .domain([1, 2])
       .range([300, 0])
+    s = d3.scale.log()
+      .domain([1, 2])
     l = d3.scale.log()
       .domain([1, 1.02, 1.1, 2])
-      .range([0, 0, 0.375, 0.5])
-    d3.hsl(h(v), 1.0, l(v)).toString()
+      .range([0.25, 0.25, 0.375, 0.5])
+    d3.hsl(h(v), s(v), l(v)).toString()
 
   # Public: Updates the @heatmap property with the latest annotation
   # elements in the DOM.
