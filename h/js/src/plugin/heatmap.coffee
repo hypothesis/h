@@ -81,6 +81,13 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     $(window).scroll this.updateHeatmap
     $(window).resize this.updateHeatmap
 
+  _colorize: (v) ->
+    # calculate the color components, blue to red
+    r = if 0.6 <= v then 100 * Math.abs(v - 0.6) * 2.5 else 0
+    g = 100 * (1 - Math.abs(2*v - 1))
+    b = if v < 0.4 then 100 * (0.4 - v) / 0.4 else 0
+    "rgb(#{r}%, #{g}%, #{b}%)"
+
   # Public: Updates the @heatmap property with the latest annotation
   # elements in the DOM.
   #
@@ -134,22 +141,17 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       })
 
     # Bind the heatmap to the control points
-    heatmap = gradient.selectAll('stop').data(points)
+    heatmap = gradient.selectAll('stop').data(points, (p) -> p[0])
 
     # Colorize it
     heatmap.enter().append("stop")
-
-    heatmap
       .attr("offset", (p) -> p.offset)
-      .attr("stop-color", (p) ->
-        v = (p.count / max)
+      .attr("stop-color", (p) => @_colorize(p.count / max))
+      .attr("stop-opacity", (p) -> d3.scale.pow().domain([0,max])(p.count))
 
-        # calculate the color components, blue to red
-        r = if 0.6 <= v then 100 * Math.abs(v - 0.6) * 2.5 else 0
-        g = 100 * (1 - Math.abs(2*v - 1))
-        b = if v < 0.4 then 100 * (0.4 - v) / 0.4 else 0
-        "rgb(#{r}%, #{g}%, #{b}%)"
-      )
+    heatmap.transition()
+      .attr("offset", (p) -> p.offset)
+      .attr("stop-color", (p) => @_colorize(p.count / max))
       .attr("stop-opacity", (p) -> d3.scale.pow().domain([0,max])(p.count))
 
     heatmap.exit().remove()
