@@ -72,9 +72,14 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     $(window).resize this.updateHeatmap
 
   _colorize: (v) ->
-    hue = d3.scale.log()
-      .range([300, 360])
-    d3.hsl(hue(v), 0.8, 0.5)
+    v = v + 1 # prep for log scale
+    h = d3.scale.log()
+      .domain([1, 2])
+      .range([300, 0])
+    l = d3.scale.log()
+      .domain([1, 1.02, 1.1, 2])
+      .range([0, 0, 0.375, 0.5])
+    d3.hsl(h(v), 1.0, l(v)).toString()
 
   # Public: Updates the @heatmap property with the latest annotation
   # elements in the DOM.
@@ -107,37 +112,39 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           [m.top + 0.5 * m.height, 1]
           [m.top + m.height, -1]
         ]
-      , [[0,0], [1,0]])
+      , [])
       # ... then sort the points and count the overlap
       .sort()
       .reduce((acc, n) ->
         [y, d] = n
-        acc.count += d
-        acc.points.push {
-          offset: y,
-          count: acc.count
-        }
-        acc.max = acc.count if acc.count > acc.max
+        {points} = acc
+        last = points[points.length-1]
+        {offset, count} = last
+        count += d
+        if y is offset
+          last.count = count
+        else
+          points.push
+            offset: y,
+            count: count
+        acc.max = count if count > acc.max
         acc
-      , {
-        points: []
-        count: 0
-        max: 0
-      })
+      ,
+        points: [offset: 0, count: 0]
+        max: 1)
 
     # Bind the heatmap to the control points
+    d3.select(@heatmap.get(0))
+      .attr("height", window.innerHeight)
+
     heatmap = d3.select(@heatmap.find('#heatmapGradient').get(0))
-      .selectAll('stop').data(points, (p) -> p[0])
+      .selectAll('stop').data(points, (p) -> p.offset)
 
     # Colorize it
     heatmap.enter().append("stop")
-      .attr("offset", (p) -> p.offset)
-      .attr("stop-color", (p) => @_colorize(p.count / max))
 
-    heatmap
+    heatmap.order()
       .attr("offset", (p) -> p.offset)
-      .transition().duration(1000)
-        .attr("stop-color", (p) => @_colorize(p.count / max))
+      .attr("stop-color", (p) => @_colorize p.count / max)
 
-    heatmap.exit()
-        .remove()
+    heatmap.exit().remove()
