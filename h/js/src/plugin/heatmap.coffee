@@ -73,11 +73,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     $(window).resize this.updateHeatmap
 
   _colorize: (v) ->
-    # calculate the color components, blue to red
-    r = if 0.6 <= v then 100 * Math.abs(v - 0.6) * 2.5 else 0
-    g = 100 * (1 - Math.abs(2*v - 1))
-    b = if v < 0.4 then 100 * (0.4 - v) / 0.4 else 0
-    "rgb(#{r}%, #{g}%, #{b}%)"
+    hue = d3.scale.log()
+      .range([300, 360])
+    d3.hsl(hue(v), 0.8, 0.5)
 
   # Public: Updates the @heatmap property with the latest annotation
   # elements in the DOM.
@@ -106,20 +104,19 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       # ... calculate the gradient control points
       .reduce((acc, m) ->
         acc.concat [
-          [m.top, 0, "top"+m.el]
-          [m.top + 0.5 * m.height, 1, "mid"+m.el]
-          [m.top + m.height, -1, "bot"+m.el]
+          [m.top, 0]
+          [m.top + 0.5 * m.height, 1]
+          [m.top + m.height, -1]
         ]
-      , [[0,0,"top"], [1,0,"bot"]])
+      , [[0,0], [1,0]])
       # ... then sort the points and count the overlap
       .sort()
       .reduce((acc, n) ->
-        [y, d, i] = n
+        [y, d] = n
         acc.count += d
         acc.points.push {
           offset: y,
           count: acc.count
-          id: i
         }
         acc.max = acc.count if acc.count > acc.max
         acc
@@ -136,17 +133,12 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     # Colorize it
     heatmap.enter().append("stop")
       .attr("offset", (p) -> p.offset)
-      .transition().duration(1000)
-        .attr("stop-color", (p) => @_colorize(p.count / max))
-        .attr("stop-opacity", (p) -> d3.scale.pow().domain([0,max])(p.count))
+      .attr("stop-color", (p) => @_colorize(p.count / max))
 
     heatmap
       .attr("offset", (p) -> p.offset)
       .transition().duration(1000)
         .attr("stop-color", (p) => @_colorize(p.count / max))
-        .attr("stop-opacity", (p) -> d3.scale.pow().domain([0,max])(p.count))
 
     heatmap.exit()
-      .transition().duration(1000)
-        .attr("stop-opacity", 0)
         .remove()
