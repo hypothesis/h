@@ -1,0 +1,16 @@
+.*
+!.gitignore
+
+bin
+develop-eggs
+eggs
+include
+lib
+local
+parts
+
+*.egg-info
+*.pyc
+*.pyo
+
+*.db

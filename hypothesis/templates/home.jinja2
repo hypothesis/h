@@ -1,0 +1,36 @@
+{% extends "base.jinja2" %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+<article about="{{baseURL}}#">
+  <h1>Hypothes.is</h1>
+  <h2>Introduction</h2>
+  <p>
+    Hypothes.is is a community of users and developers collaborating to create
+    a new platform for productive conversation on the web. Our work is the result
+    of a broad collaboration to develop flexible and powerful tools for
+    publishing and discovering references in the web of annotations.
+  </p>
+  <p>
+    Central to the project is an open annotation directory, an experiment to
+    create a solution for organizations and individuals to create and organize
+    annotations of content on the open web. It includes an annotation client
+    based on work from the
+    <a href="http://okfn.org">Open Knowledge Foundation</a> and a storage
+    API for querying and updating annotations. The storage server can output
+    annotations in a variety of formats and includes rich semantic information
+    conforming to the emerging
+    <a href="http://www.openannotation.org/">Open Annotation</a> ontology.
+  </p>
+  <p>
+    The annotation directory is a work in progress.
+  </p>
+  <h2>Getting started</h2>
+  <p>
+    Soon you will be able to discover annotations of this page and to add
+    your own. A sample set of annotations will guide you through the rest
+    of this introduction.
+  </p>
+</article>
+{% endblock %}

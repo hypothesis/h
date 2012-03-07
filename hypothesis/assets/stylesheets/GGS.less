@@ -1,0 +1,409 @@
+/*
+*
+*  Golden Grid System (1.01)	<http://goldengridsystem.com/>
+*  by Joni Korpi 				<http://jonikorpi.com/>
+*  licensed under MIT			<http://opensource.org/licenses/mit-license.php>
+*	
+*/
+
+
+//
+// Important numbers
+//
+
+@line: 24;
+@column: 100% / 18;
+@font-size: 16;
+@em:@font-size*1em;
+
+
+/*
+*
+*  Margin, padding, and border resets
+*  except for form elements
+*
+*/
+
+body,
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+th,
+td,
+article,
+aside,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+
+/*
+*
+*  Consistency fixes
+*  adopted from http://necolas.github.com/normalize.css/
+*
+*/
+
+html {
+	height: 100%; 
+	-webkit-text-size-adjust: 100%; 
+	-ms-text-size-adjust: 100%;
+}
+body {
+	min-height: 100%; 
+	font-size: 100%;
+}
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, nav, section, audio, canvas, video {
+	display: block;
+}
+sub, sup {
+	font-size: 75%; 
+	line-height: 0; 
+	position: relative; 
+	vertical-align: baseline;
+}
+sup {
+	top: -0.5em;
+}
+sub {
+	bottom: -0.25em;
+}
+pre {
+	white-space: pre; 
+	white-space: pre-wrap; 
+	word-wrap: break-word;
+}
+b, strong {
+	font-weight: bold;
+}
+abbr[title] {
+	border-bottom: 1px dotted;
+}
+input, textarea, button, select {
+	margin: 0;
+	font-size: 100%;
+	line-height: normal;
+	vertical-align: baseline;
+}
+button,
+html input[type="button"], 
+input[type="reset"], 
+input[type="submit"] {
+    cursor: pointer;
+    -webkit-appearance: button;
+}
+input[type="checkbox"],
+input[type="radio"] {
+	-webkit-box-sizing: border-box;
+	   -moz-box-sizing: border-box;
+		 -o-box-sizing: border-box;
+		-ms-box-sizing: border-box;
+			box-sizing: border-box;
+}
+textarea {
+	overflow: auto;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+
+/*
+*
+*  Simple fluid media
+*
+*/
+
+figure {
+	position: relative;
+}
+figure img, figure object, figure embed, figure video {
+	max-width: 100%; 
+	display: block;
+}
+img {
+	border: 0; 
+	-ms-interpolation-mode: bicubic;
+}
+
+
+/*
+*
+*	Zoomable baseline grid
+*	type size presets
+*
+*/
+
+body {
+	/* 16px / 24px */
+	font-size: @font-size / 16 * 1em; 
+	line-height: @line / @em;
+}
+
+.small {
+	/* 13px / 18px */
+	font-size: (@font-size*0.8125) / @em;
+	line-height: (@line*0.75) / (@font-size*0.8125) * 1em;
+}
+
+.normal, h3 {
+	/* 16px / 24px */
+	font-size: @font-size / @em;
+	line-height: @line / @em; /* 24 */
+}
+
+.large, h2, h1 {
+	/* 26 / 36px */
+	font-size: 26 / @em;
+	line-height: (@line*1.5) / 26 * 1em;
+}
+
+.huge {
+	/* 42px / 48px */
+	font-size: 42 / @em;
+	line-height: (@line*2) / 42 * 1em;
+}
+
+.massive {
+	/* 68px / 72px */
+	font-size: 68 / @em;
+	line-height: (@line*3) / 68 * 1em;
+}
+
+.gigantic {
+	/* 110px / 120px */
+	font-size: 110 / @em;
+	line-height: (@line*5) / 110 * 1em;
+}
+
+
+/*
+*
+*  Four-column grid active
+*  ----------------------------------------
+*  Margin   | #  1   2   3   4   |   Margin
+*  5.55555% | %  25  50  75  100 | 5.55555%
+*
+*/
+
+header, #twoway {
+	margin: 0 @column;
+}
+
+h1, h2 {
+	margin: (24/26*1em) 0 (36/26*1em);
+}
+
+h2 {
+	font-weight: normal;
+}
+
+h3 {
+	margin: (24/@em) 0 (24/@em);
+}
+
+/*
+*  Simple elastic gutters
+*  Note: box-sizing will not work in IE6-7
+*/
+
+.wrapper {
+	padding: 0 (@line/2)/@em;
+	-webkit-box-sizing: border-box;
+	   -moz-box-sizing: border-box;
+			box-sizing: border-box;
+}
+
+
+/*
+*
+*  Fixes for IE6-8
+*  http://jonikorpi.com/leaving-old-IE-behind/
+*
+*/
+
+.ie body {
+	width: 640/@em;
+	margin: 0 auto;
+	font-size: (@font-size + 1) / @em;
+}
+
+.ie h1 {
+	.huge();
+	margin: (48/42*1em) 0 (24/42*1em);
+}
+
+/* @media screen and (min-width: 640px) */
+@media screen and (min-width: 40em) {
+	
+	body {
+		/* Zoom baseline grid to 17/16 = 1.0625 */
+		font-size: (@font-size + 1) / @em;
+	}
+	
+	h1 {
+		.huge();
+		margin: (48/42*1em) 0 (24/42*1em);
+	}
+	
+}
+
+
+/*
+*
+*  Eight-column grid active
+*  ----------------------------------------------------------------------
+*  Margin   | #  1     2     3     4     5     6     7     8   |   Margin
+*  5.55555% | %  12.5  25.0  37.5  50.0  62.5  75.0  87.5  100 | 5.55555%
+*	
+*
+*/
+
+/* @media screen and (min-width: 720px) */
+@media screen and (min-width: 45em) {
+	
+	body {
+		/* Reset baseline grid to 16/16 = 1 */
+		font-size: (@font-size) / @em;
+	}
+	
+	#twoway .wrapper {
+		float: left;
+		width: 50%;
+	}
+	
+}
+
+
+/* @media screen and (min-width: 888px) */
+@media screen and (min-width: 55.5em) {
+	
+	body {
+		/* Zoom baseline grid to 17/16 = 1.0625 */
+		font-size: (@font-size + 1) / @em;
+	}
+}
+
+
+/* @media screen and (min-width: 984px) */
+@media screen and (min-width: 61.5em) {
+	
+	body {
+		/* Reset baseline grid to 16/16 = 1.0 */
+		font-size: (@font-size) / @em; 
+	}
+	
+	header, #twoway {
+		margin: 0 @column*3;
+	}
+
+}
+
+
+/* @media screen and (min-width: 1200px) */
+@media screen and (min-width: 75em) {
+	
+	body {
+		/* Zoom baseline grid to 17/16 = 1.0625 */
+		font-size: (@font-size + 1) / @em;
+	}
+	
+}
+
+
+/* @media screen and (min-width: 1392px) */
+@media screen and (min-width: 87em) {
+	
+	body {
+		/* Reset baseline grid to 16/16 = 1.0 */
+		font-size: (@font-size) / @em;
+	}
+	
+	header, #twoway {
+		margin: 0 @column*5;
+	}
+	
+}
+
+
+/* @media screen and (min-width: 1680px) */
+@media screen and (min-width: 105em) {
+	
+	body {
+		/* Zoom baseline grid to 17/16 = 1.0625 */
+		font-size: (@font-size + 1) / @em;
+	}
+	
+}
+
+
+/*
+*
+*  Sixteen-column grid active
+*  ----------------------------------------------------------------------------------------------------------------------
+*  Margin   | #  1     2     3     4     5     6     7     8     9     10    11    12    13    14    15    16  |   Margin
+*  5.55555% | %  6.25  12.5  18.75 25.0  31.25 37.5  43.75 50.0  56.25 62.5  68.75 75.0  81.25 87.5  93.75 100 | 5.55555%
+*	
+*
+*/
+
+/* @media screen and (min-width: 1872px) */
+@media screen and (min-width: 117em) {
+	
+	header, #twoway {
+		margin: 0 @column*1;
+	}
+	
+	header .wrapper {
+		width: 37.5%;
+		margin-left: 25%;
+	}
+	
+	#twoway .wrapper {
+		width: 25%;
+	}
+	
+	#twoway .wrapper:first-child {
+		margin-left: 25%;
+	}
+	
+}
+
+
+/* @media screen and (min-width: 2080px) */
+@media screen and (min-width: 130em) {
+
+	body {
+		/* Zoom baseline grid to 18/16 = 1.125 */
+		font-size: (@font-size + 2) / @em;
+		max-width: 2560/@em;
+	}
+	
+}
