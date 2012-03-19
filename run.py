@@ -14,10 +14,21 @@ if __name__ == '__main__':
         'reload_all': True,
         'debug_all': True,
 
-        'sqlalchemy.url': 'sqlite:///hypothesis.db'
-    }
+        'sqlalchemy.url': 'sqlite:///hypothesis.db',
 
+        'apex.session_secret': '535510n_53cr37',
+        'apex.auth_secret': '4u7h_53cr37',
+        'apex.came_from_route': 'home',
+        'apex.velruse_providers': [],
+        'apex.no_csrf': 'apex:apex_callback',
+
+        'velruse.endpoint': 'http://localhost:8080/auth/apex_callback',
+        'velruse.store': 'velruse.store.sqlstore',
+        'velruse.providers': []
+    }
+    
     config = Configurator(settings=settings)
+    config.include('pyramid_debugtoolbar')
     app = create_app(config)
 
     log.info("Starting server...")

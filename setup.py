@@ -6,10 +6,10 @@ setup(
     packages = find_packages(),
 
     install_requires = [
-        'pyramid==1.3',
-        'pyramid_jinja2==1.3',
-        'pyramid_fanstatic==0.3',
-        'which==1.0'
+        'pyramid>=1.2',
+        'pyramid_jinja2>=1.2',
+        'pyramid_fanstatic>=0.3',
+        'which>=1.0'
     ],
 
     author = 'Randall Leeds (Hypothes.is Project)',
@@ -29,5 +29,5 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python'
-    ],
+    ]
 )

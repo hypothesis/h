@@ -1,20 +1,22 @@
-@import "annotator.less";
-@import "GGS.less";
+@import "variables.less";
 
-html { font-smoothing: antialiased; }
-@baseFontFamily:
-  "Gentium Book Basic", "Helvetica Neue", Helvetica, Arial, sans-serif;
-@baseFontSize: 15px;
-@baseLineHeight: 20px;
+a {
+  color: @linkColor;
+  text-decoration: none;
+  &:hover {
+    color: @linkColorHover;
+  }
+}
 
-::selection { background: #f2f0e3; text-shadow: none; }
+html {font-smoothing: antialiased;}
 
-@linkColor: rgb(189, 30, 45);
-@linkColorHover: darken(@linkColor, 10);
-a:hover { text-decoration: none; }
+::selection
+::-moz-selection {
+  background: #f2f0e3;
+  text-shadow: none;
+}
 
-.content { box-shadow: 3px 1px 3px rgba(0, 0, 0, 0.05); }
-.navbar-static .navbar-inner { border-radius: 0; }
+.red {color:  @red;}
 
 /* Credit to Initializr for most of what follows.
    ==========================================================================

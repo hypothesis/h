@@ -1,0 +1,16 @@
+{% import "flash_template.jinja2" as flash with context -%}
+
+{% extends "base.jinja2" %}
+
+{% block head %}
+{{ super() }}
+{{ flash.apex_head() }}
+{% endblock %}
+
+{% block content %}
+<h1>Hypothes<span class="red">.</span>is</h1>
+<div id="flash-msg">{{ flash.apex_flash() }}</div>
+{% if form is defined %}
+  {{ form.render() | safe }}
+{% endif %}
+{% endblock %}
