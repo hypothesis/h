@@ -12,9 +12,24 @@ def home_view(request):
     site_styles.need()
 
     if request.user is None:
-        form = LoginForm().render(
-            action='/auth/login',
-            submit_text='Log In')
-        return {'form': form}
+        action = request.params.get('action', 'login')
+        print action
+
+        form = None
+        form_kwargs = {
+            'action': '/auth/' + action,
+            'template': 'apex:templates/forms/fieldsetform.mako'
+        }
+
+        if action == 'login':
+            form = LoginForm().render(submit_text='Sign In', **form_kwargs)
+        elif action == 'register':
+            print 'yep'
+            form = RegisterForm().render(submit_text='Register', **form_kwargs)
+        print form
+        return {
+            'action': action,
+            'form': form
+        }
     else:
         return {}

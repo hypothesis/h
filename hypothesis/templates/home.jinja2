@@ -5,7 +5,14 @@
 
 {% block content %}
 <article id="home">
-  {% if request.user is none %}{{ form | safe }}{% endif %}
+  {% if request.user is none %}
+  <div id="auth">
+    {{ form | safe }}
+    {% if action != 'register' %}
+    <a href="?action=register">New here?</a>
+    {% endif %}
+  </div>
+  {% endif %}
   <section id="introduction">
     <h1>Hypothes<span class="red">.</span>is</h1>
     <h2>Introduction</h2>
