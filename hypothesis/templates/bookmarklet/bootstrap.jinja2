@@ -1,0 +1,10 @@
+(function (window, document) {
+  window._annotatorConfig = {
+    "auth": { "tokenUrl": "{{request.relative_url('/api/token', True)}}" },
+    "store": { "prefix": "{{request.relative_url('/api', True)}}" },
+    "tags": true
+  };
+  s = document.body.appendChild(document.createElement('script'));
+  s.language = 'javascript';
+  s.src = '{{request.route_url('bookmarklet.js')}}';
+})(this, this.document);

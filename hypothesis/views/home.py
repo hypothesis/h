@@ -1,5 +1,6 @@
 from pyramid.exceptions import NotFound
 from pyramid.httpexceptions import HTTPFound
+from pyramid.renderers import render
 from pyramid.view import view_config
 
 from .. assets import site_styles
@@ -13,7 +14,6 @@ def home_view(request):
 
     if request.user is None:
         action = request.params.get('action', 'login')
-        print action
 
         form = None
         form_kwargs = {
@@ -26,10 +26,12 @@ def home_view(request):
         elif action == 'register':
             print 'yep'
             form = RegisterForm().render(submit_text='Register', **form_kwargs)
-        print form
         return {
             'action': action,
             'form': form
         }
     else:
-        return {}
+        bookmarklet = render('bookmarklet/bootstrap.jinja2', {}, request=request)
+        return {
+            'bookmarklet': bookmarklet
+        }

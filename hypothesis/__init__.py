@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
 routes = [
-    ('home', '/')
+    ('home', '/'),
+    
+    ('api_token', '/api/token'),
+
+    ('bookmarklet.js', '/bookmarklet')
 ]
 
 def create_app(config):
