@@ -4,9 +4,7 @@ from pyramid.renderers import render
 from pyramid.view import view_config
 
 from .. assets import site_styles
-from .. models.auth import LoginForm, RegisterForm
-
-import json
+from .. forms.auth import LoginForm, RegisterForm
 
 @view_config(route_name='home', renderer='home.jinja2')
 def home_view(request):
