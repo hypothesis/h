@@ -32,5 +32,5 @@ def includeme(config):
     config.include('pyramid_fanstatic')
 
     # Set up the static routes
-    config.add_static_view('images', 'hypothesis:resources/images/')
-    config.add_static_view('graphics', 'hypothesis:resources/graphics/')
+    config.add_static_view('assets/images', 'hypothesis:resources/images/')
+    config.add_static_view('assets/graphics', 'hypothesis:resources/graphics/')
