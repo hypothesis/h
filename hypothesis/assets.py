@@ -2,8 +2,11 @@ import os
 from os.path import dirname
 
 from fanstatic import Library, Resource, get_library_registry
+
+from js.annotator import annotator
 from js.jquery import jquery
 from js.lesscss import LessResource
+
 from which import which
 
 library = Library('hypothesis', 'resources')

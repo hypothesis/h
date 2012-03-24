@@ -2,10 +2,11 @@
 
 routes = [
     ('home', '/'),
-    
-    ('api_token', '/api/token'),
 
-    ('bookmarklet.js', '/bookmarklet')
+    ('store', '/api/*subpath'),
+    ('token', '/token'),
+
+    ('bookmarklet', '/bookmarklet.js')
 ]
 
 def create_app(config):

@@ -20,11 +20,14 @@ if __name__ == '__main__':
         'apex.auth_secret': '4u7h_53cr37',
         'apex.came_from_route': 'home',
         'apex.velruse_providers': [],
-        'apex.no_csrf': 'apex:apex_callback',
+        'apex.no_csrf': 'apex_callback,store',
 
         'velruse.endpoint': 'http://localhost:8080/auth/apex_callback',
         'velruse.store': 'velruse.store.sqlstore',
-        'velruse.providers': []
+        'velruse.providers': [],
+
+        'hypothesis.api_secret': '00000000-0000-0000-0000-000000000000',
+        'hypothesis.consumer_key': 'hypothes.is'
     }
     
     config = Configurator(settings=settings)
