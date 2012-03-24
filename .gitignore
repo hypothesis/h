@@ -2,12 +2,10 @@
 !.gitignore
 
 bin
-develop-eggs
-eggs
 include
 lib
 local
-parts
+share
 
 *.egg-info
 *.pyc
