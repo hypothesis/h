@@ -12,16 +12,7 @@ from which import which
 library = Library('hypothesis', 'resources')
 get_library_registry().add(library)
 
-if not 'LESSC' in os.environ:
-    os.environ['LESSC'] = which('lessc')
-
-# Work aroud bug in js.lesscss, which tries to del os.environ['PYTHONPATH']
-old = os.environ.get('PYTHONPATH', '')
-if not old:
-    os.environ['PYTHONPATH'] = ''
-site_styles = LessResource(library, 'stylesheets/site.less',
-                           minified='stylesheets/site.less.min.css')
-os.environ['PYTHONPATH'] = old
+site_styles = LessResource(library, 'stylesheets/site.less')
 
 def includeme(config):
     """Sets up fanstatic and the static view routes"""
