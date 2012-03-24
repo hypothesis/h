@@ -1,2 +1,2 @@
-include *.txt *.ini *.cfg *.rst LICENSE NOTICE
-recursive-include hypothesis *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml *.less
+include *.txt *.rst LICENSE NOTICE
+recursive-include hypothesis *.ico *.png *.css *.gif *.jpg *.txt *.jinja2 *.js *.less
