@@ -7,8 +7,6 @@ from js.annotator import annotator
 from js.jquery import jquery
 from js.lesscss import LessResource
 
-from which import which
-
 library = Library('hypothesis', 'resources')
 get_library_registry().add(library)
 
