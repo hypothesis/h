@@ -19,7 +19,8 @@ if not 'LESSC' in os.environ:
 old = os.environ.get('PYTHONPATH', '')
 if not old:
     os.environ['PYTHONPATH'] = ''
-site_styles = LessResource(library, 'stylesheets/site.less')
+site_styles = LessResource(library, 'stylesheets/site.less',
+                           minified='stylesheets/site.less.min.css')
 os.environ['PYTHONPATH'] = old
 
 def includeme(config):
