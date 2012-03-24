@@ -8,6 +8,7 @@ from pyramid.view import view_config, view_defaults
 from pyramid.wsgi import wsgiapp2
 
 from annotator import auth, authz, store, es
+from annotator.annotation import Annotation
 
 from .. models.api import Consumer
 
@@ -61,6 +62,8 @@ def includeme(config):
     app = Flask('annotator')
     # Set up the elastic-search configuration
     es.init_app(app)
+    with app.test_request_context():
+        Annotation.create_all()
     # Set up the store blueprint
     app.register_blueprint(store.store)
 
