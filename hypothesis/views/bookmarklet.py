@@ -6,15 +6,22 @@ from fanstatic import NEEDED
 import js.annotator
 import js.jquery
 
+class Root(dict):
+    __name__ = ''
+
 @view_config(route_name='bookmarklet', renderer='bookmarklet/bookmarklet.jinja2')
 def bookmarklet_view(request):
-    annotator_base = request.environ[NEEDED].library_url(js.annotator.library)
-    jquery_base = request.environ[NEEDED].library_url(js.jquery.library)
+    annotator = request.environ[NEEDED].library_url(js.annotator.library)
+    jquery = request.environ[NEEDED].library_url(js.jquery.library)
 
+    root = Root()
     externals = {
-        'source': '/'.join([annotator_base, js.annotator.js.relpath]),
-        'styles': '/'.join([annotator_base, js.annotator.css.relpath]),
-        'jQuery': '/'.join([jquery_base, js.jquery.jquery.relpath])
+        'source': request.resource_url(root, annotator,
+                                       js.annotator.js.relpath),
+        'styles': request.resource_url(root, annotator,
+                                       js.annotator.css.relpath),
+        'jQuery': request.resource_url(root, jquery,
+                                       js.jquery.jquery.relpath)
     }
 
     config = {
