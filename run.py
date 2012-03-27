@@ -1,9 +1,11 @@
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from pyramid.config import Configurator
 
 from hypothesis import create_app
 
 # Development setup
-
 settings = {
     'reload_all': True,
     'debug_all': True,
