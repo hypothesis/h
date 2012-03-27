@@ -32,8 +32,8 @@ application = create_app(config)
 # Serve the demo configuration if run from the command line
 
 if __name__ == '__main__':
-    from functools import partial
     try:
+        from functools import partial
         from waitress import serve
         run = partial(serve, application, host='127.0.0.1', port=8080)
     except ImportError:
