@@ -22,7 +22,6 @@ def home_view(request):
         if action == 'login':
             form = LoginForm().render(submit_text='Sign In', **form_kwargs)
         elif action == 'register':
-            print 'yep'
             form = RegisterForm().render(submit_text='Register', **form_kwargs)
         return {
             'action': action,
