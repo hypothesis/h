@@ -10,9 +10,9 @@ routes = [
 ]
 
 def create_app(config):
-    config.include('hypothesis.assets')
-    config.include('hypothesis.models')
-    config.include('hypothesis.views')
+    config.include('.assets')
+    config.include('.models')
+    config.include('.views')
 
     for view, path in routes:
         config.add_route(view, path)

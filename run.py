@@ -23,7 +23,7 @@ settings = {
     'hypothesis.api_secret': '00000000-0000-0000-0000-000000000000',
     'hypothesis.consumer_key': 'hypothes.is'
 }
-config = Configurator(settings=settings)
+config = Configurator(package='hypothesis', settings=settings)
 config.include('pyramid_debugtoolbar')
 application = create_app(config)
 
