@@ -9,10 +9,13 @@ routes = [
     ('bookmarklet', '/bookmarklet.js')
 ]
 
-def create_app(config):
+def includeme(config):
     config.include('.assets')
     config.include('.models')
     config.include('.views')
+
+def create_app(config):
+    config.include('.')
 
     for view, path in routes:
         config.add_route(view, path)
