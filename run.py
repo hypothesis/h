@@ -1,3 +1,20 @@
+import os
+import os.path
+
+"""
+If a virtual environment is active, make sure it's being used.
+Globally-installed console scripts use an absolute shebang path which
+prevents them from importing virtualenv packages. Detect that case here
+and correct for it.
+"""
+if 'VIRTUAL_ENV' in os.environ:
+    print 'okay'
+    env = os.environ['VIRTUAL_ENV']
+    print env
+    activate = os.path.join(env, 'bin', 'activate_this.py')
+    print activate
+    execfile(activate, dict(__file__=activate))
+
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
