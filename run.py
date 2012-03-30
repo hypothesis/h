@@ -1,62 +1,15 @@
-import os
-import os.path
-
-"""
-If a virtual environment is active, make sure it's being used.
-Globally-installed console scripts use an absolute shebang path which
-prevents them from importing virtualenv packages. Detect that case here
-and correct for it.
-"""
-if 'VIRTUAL_ENV' in os.environ:
-    print 'okay'
-    env = os.environ['VIRTUAL_ENV']
-    print env
-    activate = os.path.join(env, 'bin', 'activate_this.py')
-    print activate
-    execfile(activate, dict(__file__=activate))
-
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-from pyramid.config import Configurator
-
 from hypothesis import create_app
-
-# Development setup
-settings = {
-    'reload_all': True,
-    'debug_all': True,
-
-    'sqlalchemy.url': 'sqlite:///hypothesis.db',
-
-    'apex.session_secret': '535510n_53cr37',
-    'apex.auth_secret': '4u7h_53cr37',
-    'apex.came_from_route': 'home',
-    'apex.velruse_providers': [],
-    'apex.no_csrf': 'apex_callback,store',
-
-    'velruse.endpoint': 'http://localhost:8080/auth/apex_callback',
-    'velruse.store': 'velruse.store.sqlstore',
-    'velruse.providers': [],
-
-    'hypothesis.api_secret': '00000000-0000-0000-0000-000000000000',
-    'hypothesis.consumer_key': 'hypothes.is'
-}
-config = Configurator(package='hypothesis', settings=settings)
-config.include('pyramid_debugtoolbar')
-application = create_app(config)
-
-# Serve the demo configuration if run from the command line
+application = create_app('development.ini')
 
 if __name__ == '__main__':
     try:
         from functools import partial
         from waitress import serve
-        run = partial(serve, application, host='127.0.0.1', port=8080)
+        run = partial(serve, application, host='127.0.0.1', port=8000)
     except ImportError:
         from wsgiref.simple_server import make_server
-        run = make_server('127.0.0.1', 8080, application).serve_forever
-        print 'serving on http://localhost:8080'
+        run = make_server('127.0.0.1', 8000, application).serve_forever
+        print 'serving on http://localhost:8000'
 
     try:
         run()

@@ -12,17 +12,10 @@ def home_view(request):
 
     if request.user is None:
         action = request.params.get('action', 'login')
-
-        form = None
-        form_kwargs = {
-            'action': '/auth/' + action,
-            'template': 'apex:templates/forms/fieldsetform.mako'
-        }
-
         if action == 'login':
-            form = LoginForm().render(submit_text='Sign In', **form_kwargs)
+            form = LoginForm().render(submit_text='Sign In', action=action)
         elif action == 'register':
-            form = RegisterForm().render(submit_text='Register', **form_kwargs)
+            form = RegisterForm().render(submit_text='Register', action=action)
         return {
             'action': action,
             'form': form
