@@ -42,6 +42,7 @@ def main(context, **settings):
     return config.make_wsgi_app()
 
 def includeme(config):
+    config.include('.api')
     config.include('.assets')
     config.include('.models')
     config.include('.views')

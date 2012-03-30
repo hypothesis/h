@@ -10,7 +10,7 @@ from pyramid.wsgi import wsgiapp2
 from annotator import auth, authz, store, es
 from annotator.annotation import Annotation
 
-from .. models.api import Consumer
+from . models.api import Consumer
 
 def consumer_fetcher(key):
     request = get_current_request()
