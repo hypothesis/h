@@ -1,5 +1,3 @@
-import pyramid_jinja2
-
 def includeme(config):
     # Set up jinja2 templating
     config.include('pyramid_jinja2')
