@@ -67,7 +67,7 @@ def includeme(config):
         raise KeyError('hypothesis.consumer_secret')
 
     # Create the annotator-store app
-    app = Flask('annotator')
+    app = Flask(__name__)
     app.register_blueprint(store.store)
 
     # Set up the models
