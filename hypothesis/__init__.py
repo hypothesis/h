@@ -3,7 +3,7 @@
 routes = [
     ('home', '/'),
 
-    ('store', '/api/*subpath'),
+    ('api', '/api/*subpath'),
     ('token', '/token'),
 
     ('bookmarklet', '/bookmarklet.js')

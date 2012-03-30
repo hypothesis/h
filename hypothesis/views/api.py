@@ -58,20 +58,28 @@ def token_options(request):
     return Response(headerlist=headers.items())
 
 def includeme(config):
-    # Create the annotator-store flask app and configure it
+    settings = config.registry.settings
+
+    if not settings.has_key('hypothesis.consumer_key'):
+        raise KeyError('hypothesis.consumer_key')
+
+    if not settings.has_key('hypothesis.consumer_secret'):
+        raise KeyError('hypothesis.consumer_secret')
+
+    # Create the annotator-store app
     app = Flask('annotator')
-    # Set up the elastic-search configuration
+    app.register_blueprint(store.store)
+
+    # Set up the models
     es.init_app(app)
     with app.test_request_context():
         Annotation.create_all()
-    # Set up the store blueprint
-    app.register_blueprint(store.store)
 
-    # Wrapper function to set up authorization hooks for the store
+    # Configure authentication (ours) and authorization (store)
     def before_request():
         g.auth = auth.Authenticator(consumer_fetcher)
         g.authorize = authz.authorize
     app.before_request(before_request)
 
     # Set up a view to delegate API calls
-    config.add_view(wsgiapp2(app), route_name='store')
+    config.add_view(wsgiapp2(app), route_name='api')
