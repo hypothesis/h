@@ -4,17 +4,18 @@
 {% endblock %}
 
 {% block content %}
-<article id="home">
-  {% if request.user is none %}
-  <div id="auth">
-    {{ form | safe }}
-    {% if action != 'register' %}
-    <a href="?action=register">New here?</a>
-    {% endif %}
-  </div>
-  {% else %}
-  <a href="javascript:{{bookmarklet}}">Discuss</a>
+{% if request.user is none %}
+<div id="auth">
+  {{ form | safe }}
+  {% if action != 'register' %}
+  New? <a href="?action=register">Sign up.</a>
   {% endif %}
+</div>
+{% else %}
+<a href="javascript:{{bookmarklet}}">Discuss</a>
+{% endif %}
+
+<article id="home">
   <section id="introduction">
     <h1>Hypothes<span class="red">.</span>is</h1>
     <h2>Introduction</h2>
