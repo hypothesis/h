@@ -25,11 +25,17 @@ def consumer_fetcher(key):
         return request.db.query(Consumer).get(key)
 
 def cors_headers(request):
-    return {
+    headers = {
         'Access-Control-Allow-Origin': request.headers.get('origin', '*'),
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Expose-Headers': 'Location, Content-Type, Content-Length'
     }
+    if request.method == 'OPTIONS': headers.update({
+        'Access-Control-Allow-Headers': 'X-Requested-With, Content-Type, Content-Length',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Max-Age': '86400'
+    })
+    return headers
 
 @view_config(route_name='token', request_method='GET',
              permission='authenticated')
@@ -49,13 +55,7 @@ def token_get(request):
 
 @view_config(route_name='token', request_method='OPTIONS')
 def token_options(request):
-    headers = cors_headers(request)
-    headers.update({
-        'Access-Control-Allow-Headers': 'X-Requested-With, Content-Type, Content-Length',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Max-Age': '86400'
-    })
-    return Response(headerlist=headers.items())
+    return Response(headerlist=cors_headers(request).items())
 
 def includeme(config):
     settings = config.registry.settings
