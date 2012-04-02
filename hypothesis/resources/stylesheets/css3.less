@@ -3,7 +3,8 @@
 // LESS CSS3 Mixins
 //
 // @description CSS3 mixins for projects using LESS
-// @version 1.00
+// @see http://lesscss.org/
+// @version 2.00
 //
 // @author Matthew Wagerfield
 // @see http://matthew.wagerfield.com
@@ -19,6 +20,7 @@
 // @mixin box-flex
 // @mixin box-sizing
 // @mixin user-select
+// @mixin appearance
 // 
 // Decoration:
 // @mixin border-radius
@@ -57,7 +59,7 @@
 //
 //============================================================
 
-.display-box() {
+.display-box(...) {
     display: -webkit-box;
     display: -moz-box;
     display: -ms-box;
@@ -80,7 +82,7 @@
 //
 //============================================================
 
-.box-orient() {
+.box-orient(...) {
     .display-box();
     -webkit-box-orient: @arguments;
        -moz-box-orient: @arguments;
@@ -105,7 +107,7 @@
 //
 //============================================================
 
-.box-pack() {
+.box-pack(...) {
     .display-box();
     -webkit-box-pack: @arguments;
        -moz-box-pack: @arguments;
@@ -131,7 +133,7 @@
 //
 //============================================================
 
-.box-align() {
+.box-align(...) {
     .display-box();
     -webkit-box-align: @arguments;
        -moz-box-align: @arguments;
@@ -153,7 +155,7 @@
 //
 //============================================================
 
-.box-flex() {
+.box-flex(...) {
     .display-box();
     -webkit-box-flex: @arguments;
        -moz-box-flex: @arguments;
@@ -170,14 +172,14 @@
 //
 // @param value               :  content-box |
 //                               padding-box |
-//                               border-box  | 
+//                               border-box  |
 //                               inherit
 //
 // @see http://www.w3.org/TR/css3-ui/#box-sizing
 //
 //============================================================
 
-.box-sizing() {
+.box-sizing(...) {
     -webkit-box-sizing: @arguments;
        -moz-box-sizing: @arguments;
             box-sizing: @arguments;
@@ -189,19 +191,19 @@
 //
 // user-select
 //
-// @param value               :  none     ||    
-//                               text     ||     
-//                               toggle   ||  
-//                               element  || 
-//                               elements ||
-//                               all      ||     
+// @param value               :  none     |
+//                               text     |
+//                               toggle   |
+//                               element  |
+//                               elements |
+//                               all      |
 //                               inherit
 //
 // @see http://www.w3.org/TR/2000/WD-css3-userint-20000216#user-select
 //
 //============================================================
 
-.user-select() {
+.user-select(...) {
     -webkit-touch-callout: @arguments;
       -webkit-user-select: @arguments;
          -moz-user-select: @arguments;
@@ -214,18 +216,53 @@
 
 //============================================================
 //
+// appearance
+//
+// @param value               :  button         |
+//                               push-button    |
+//                               hyperlink      |
+//                               radio-button   |
+//                               checkbox       |
+//                               pop-up-menu    |
+//                               list-menu      |
+//                               radio-group    |
+//                               checkbox-group |
+//                               field          |
+//                               password       |
+//                               normal         |
+//                               inherit        |
+//                               none
+//
+// @see http://www.w3.org/TR/css3-ui/#appearance
+// @see http://www.cssportal.com/css-properties/appearance.htm
+// @see https://developer.mozilla.org/en/CSS/-moz-appearance
+//
+//============================================================
+
+.appearance(...) {
+    -webkit-appearance: @arguments;
+       -moz-appearance: @arguments;
+        -ms-appearance: @arguments;
+         -o-appearance: @arguments;
+            appearance: @arguments;
+}
+
+
+
+//============================================================
+//
 // border-radius
 //
-// @param top-left-radius     :  px, em, %;
-// @param top-right-radius    :  px, em, %;
-// @param bottom-right-radius :  px, em, %;
-// @param bottom-left-radius  :  px, em, %;
+// @param top-left-radius     :  px, em, %
+// @param top-right-radius    :  px, em, %
+// @param bottom-right-radius :  px, em, %
+// @param bottom-left-radius  :  px, em, %
 //
 // @see http://www.w3.org/TR/css3-background/#border-radius
 //
 //============================================================
 
-.border-radius() {
+.border-radius(...) {
       -webkit-border-radius: @arguments;
          -moz-border-radius: @arguments;
               border-radius: @arguments;
@@ -241,18 +278,18 @@
 //
 // box-shadow
 //
-// @param colour              :  #000, rgba, hsla;
-// @param horizontal-offset   :  px, em;
-// @param vertical-offset     :  px, em;
-// @param blur-radius         :  px, em;
-// @param spread-distance     :  px, em,
-// @param inset               :  inset;
+// @param colour              :  #000, rgba, hsla
+// @param horizontal-offset   :  px, em
+// @param vertical-offset     :  px, em
+// @param blur-radius         :  px, em
+// @param spread-distance     :  px, em
+// @param inset               :  inset
 //
 // @see http://www.w3.org/TR/css3-background/#box-shadow
 //
 //============================================================
 
-.box-shadow() {
+.box-shadow(...) {
     -webkit-box-shadow: @arguments;
        -moz-box-shadow: @arguments;
             box-shadow: @arguments;
@@ -264,16 +301,16 @@
 //
 // text-shadow
 //
-// @param colour              :  #000, rgba, hsla;
-// @param horizontal-offset   :  px, em;
-// @param vertical-offset     :  px, em;
-// @param blur-radius         :  px, em;
+// @param colour              :  #000, rgba, hsla
+// @param horizontal-offset   :  px, em
+// @param vertical-offset     :  px, em
+// @param blur-radius         :  px, em
 //
 // @see http://www.w3.org/TR/css3-text/#text-shadow
 //
 //============================================================
 
-.text-shadow() {
+.text-shadow(...) {
     text-shadow: @arguments;
 }
 
@@ -283,10 +320,10 @@
 //
 // linear-gradient
 //
-// @param angle               :  top, left, 90deg;
-// @param colourA             :  #000 0%, red 0%;
-// @param colourB             :  #000 50%, red 50%;
-// @param colourC             :  #000 100%, red 100%;
+// @param angle               :  top, left, 90deg
+// @param colourA             :  #000 0%, red 0%
+// @param colourB             :  #000 50%, red 50%
+// @param colourC             :  #000 100%, red 100%
 //
 // @example .linear-gradient(top, ~',crimson 0%', ~',black 100%');
 //
@@ -294,7 +331,7 @@
 //
 //============================================================
 
-.linear-gradient() {
+.linear-gradient(...) {
     background-image: -webkit-linear-gradient(@arguments);
     background-image: -moz-linear-gradient(@arguments);
     background-image: -ms-linear-gradient(@arguments);
@@ -308,11 +345,11 @@
 //
 // radial-gradient
 //
-// @param location            :  left top, 50% 50%;
-// @param shape               :  circle, ellipse, 100% 75%;
-// @param colourA             :  #000 0%, red 0%;
-// @param colourB             :  #000 50%, red 50%;
-// @param colourC             :  #000 100%, red 100%;
+// @param location            :  left top, 50% 50%
+// @param shape               :  circle, ellipse, 100% 75%
+// @param colourA             :  #000 0%, red 0%
+// @param colourB             :  #000 50%, red 50%
+// @param colourC             :  #000 100%, red 100%
 //
 // @example .radial-gradient(~'50% 50%,', circle, ~',crimson 0%', ~',black 100%');
 //
@@ -320,7 +357,7 @@
 //
 //============================================================
 
-.radial-gradient() {
+.radial-gradient(...) {
     background-image: -webkit-radial-gradient(@arguments);
     background-image: -moz-radial-gradient(@arguments);
     background-image: -ms-radial-gradient(@arguments);
@@ -344,7 +381,7 @@
 //
 //============================================================
 
-.transform() {
+.transform(...) {
     -webkit-transform: @arguments;
        -moz-transform: @arguments;
         -ms-transform: @arguments;
@@ -358,9 +395,9 @@
 //
 // transform-origin
 //
-// @param value               :  left   | 
-//                               center | 
-//                               right  | 
+// @param value               :  left   |
+//                               center |
+//                               right  |
 //                               px     |
 //                               em     |
 //                               %;
@@ -369,7 +406,7 @@
 //
 //============================================================
 
-.transform-origin() {
+.transform-origin(...) {
     -webkit-transform-origin: @arguments;
        -moz-transform-origin: @arguments;
         -ms-transform-origin: @arguments;
@@ -383,13 +420,13 @@
 //
 // transform-style
 //
-// @param value               :  preserve-3d | flat;
+// @param value               :  preserve-3d | flat
 //
 // @see http://www.w3.org/TR/css3-3d-transforms/#transform-style-property
 //
 //============================================================
 
-.transform-style() {
+.transform-style(...) {
     -webkit-transform-style: @arguments;
        -moz-transform-style: @arguments;
         -ms-transform-style: @arguments;
@@ -403,13 +440,13 @@
 //
 // perspective
 //
-// @param value               :  none | 0, 1, 100, 1000, etc;
+// @param value               :  none | 0, 1, 100, 1000, etc
 //
 // @see http://www.w3.org/TR/css3-3d-transforms/#perspective-property
 //
 //============================================================
 
-.perspective() {
+.perspective(...) {
     -webkit-perspective: @arguments;
        -moz-perspective: @arguments;
         -ms-perspective: @arguments;
@@ -423,18 +460,18 @@
 //
 // perspective-origin
 //
-// @param value               :  left   | 
-//                               center | 
-//                               right  | 
+// @param value               :  left   |
+//                               center |
+//                               right  |
 //                               px     |
 //                               em     |
-//                               %;
+//                               %
 //
 // @see http://www.w3.org/TR/css3-3d-transforms/#perspective-origin-property
 //
 //============================================================
 
-.perspective-origin() {
+.perspective-origin(...) {
     -webkit-perspective-origin: @arguments;
        -moz-perspective-origin: @arguments;
         -ms-perspective-origin: @arguments;
@@ -448,13 +485,13 @@
 //
 // backface-visibility
 //
-// @param value               :  visible | hidden;
+// @param value               :  visible | hidden
 //
 // @see http://www.w3.org/TR/css3-3d-transforms/#backface-visibility-property
 //
 //============================================================
 
-.backface-visibility() {
+.backface-visibility(...) {
     -webkit-backface-visibility: @arguments;
        -moz-backface-visibility: @arguments;
         -ms-backface-visibility: @arguments;
@@ -468,18 +505,18 @@
 //
 // matrix
 //
-// @param a                   :  Number;
-// @param b                   :  Number;
-// @param c                   :  Number;
-// @param d                   :  Number;
-// @param e                   :  Number;
-// @param f                   :  Number;
+// @param a                   :  Number
+// @param b                   :  Number
+// @param c                   :  Number
+// @param d                   :  Number
+// @param e                   :  Number
+// @param f                   :  Number
 //
 // http://www.w3.org/TR/css3-3d-transforms/#transform-functions
 //
 //============================================================
 
-.matrix() {
+.matrix(...) {
     -webkit-transform: matrix(@arguments);
        -moz-transform: matrix(@arguments);
         -ms-transform: matrix(@arguments);
@@ -493,14 +530,14 @@
 //
 // translate
 //
-// @param translate-x         :  px;
-// @param translate-y         :  px;
+// @param translate-x         :  px
+// @param translate-y         :  px
 //
 // http://www.w3.org/TR/css3-3d-transforms/#transform-functions
 //
 //============================================================
 
-.translate() {
+.translate(...) {
     -webkit-transform: translate(@arguments);
        -moz-transform: translate(@arguments);
         -ms-transform: translate(@arguments);
@@ -514,14 +551,14 @@
 //
 // scale
 //
-// @param scale-x             :  0.5, 2, etc;
-// @param scale-y             :  0.5, 2, etc;
+// @param scale-x             :  0.5, 2, etc
+// @param scale-y             :  0.5, 2, etc
 //
 // http://www.w3.org/TR/css3-3d-transforms/#transform-functions
 //
 //============================================================
 
-.scale() {
+.scale(...) {
     -webkit-transform: scale(@arguments);
        -moz-transform: scale(@arguments);
         -ms-transform: scale(@arguments);
@@ -535,13 +572,13 @@
 //
 // rotate
 //
-// @param angle               :  0deg;
+// @param angle               :  0deg
 //
 // http://www.w3.org/TR/css3-3d-transforms/#transform-functions
 //
 //============================================================
 
-.rotate() {
+.rotate(...) {
     -webkit-transform: rotate(@arguments);
        -moz-transform: rotate(@arguments);
         -ms-transform: rotate(@arguments);
@@ -555,14 +592,14 @@
 //
 // skew
 //
-// @param axis-x              :  0deg;
-// @param axis-y              :  0deg;
+// @param axis-x              :  0deg
+// @param axis-y              :  0deg
 //
 // http://www.w3.org/TR/css3-3d-transforms/#transform-functions
 //
 //============================================================
 
-.skew() {
+.skew(...) {
     -webkit-transform: skew(@arguments);
        -moz-transform: skew(@arguments);
         -ms-transform: skew(@arguments);
@@ -576,16 +613,16 @@
 //
 // transition
 //
-// @param properties          :  all, left, opacity, etc;
-// @param duration            :  1s, 1000ms;
-// @param delay               :  1s, 1000ms;
-// @param easing              :  linear, ease-in-out, etc;
+// @param properties          :  all, left, opacity, etc
+// @param duration            :  1s, 1000ms
+// @param delay               :  1s, 1000ms
+// @param easing              :  linear, ease-in-out, etc
 //
 // @see http://www.w3.org/TR/css3-transitions/
 //
 //============================================================
 
-.transition() {
+.transition(...) {
     -webkit-transition: @arguments;
        -moz-transition: @arguments;
         -ms-transition: @arguments;
