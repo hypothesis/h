@@ -14,8 +14,9 @@ setup(
         'pyramid_tm>=0.3'
     ],
 
-    author = 'Randall Leeds (Hypothes.is Project)',
-    author_email = 'tilgovi@hypothes.is',
+    author = 'Hypothes.is Project & contributors',
+    maintainter = 'Randall Leeds'
+    maintainer_email = 'tilgovi@hypothes.is',
     description = 'The Internet. Peer-reviewed.',
     long_description = """A platform for collaborative evaluation of information.""",
     license = 'Simplified (2-Clause) BSD License',
