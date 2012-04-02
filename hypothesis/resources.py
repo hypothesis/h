@@ -24,7 +24,6 @@ def includeme(config):
 
     # Set up the routes
     config.add_route('home', '/')
-    config.add_route('bookmarklet', '/bookmarklet.js')
     config.add_route('token', '/token')
     config.add_route('api', '/api/*subpath')
 

@@ -21,7 +21,4 @@ def home_view(request):
             'form': form
         }
     else:
-        bookmarklet = render('bookmarklet/bootstrap.jinja2', {}, request=request)
-        return {
-            'bookmarklet': bookmarklet
-        }
+        return {}

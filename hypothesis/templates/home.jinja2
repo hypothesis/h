@@ -5,14 +5,14 @@
 
 {% block content %}
 {% if request.user is none %}
-<div id="auth">
+<aside id="auth">
   {{ form | safe }}
   {% if action != 'register' %}
   New? <a href="?action=register">Sign up.</a>
+  {% else %}
+  or <a href="?action=login">sign in.</a>
   {% endif %}
-</div>
-{% else %}
-<a href="javascript:{{bookmarklet}}">Discuss</a>
+</aside>
 {% endif %}
 
 <article id="home">
