@@ -6,10 +6,12 @@ setup(
     packages = find_packages(),
 
     install_requires = [
-        'pyramid>=1.2',
+        'annotator>=0.7.6',
+        'apex',
+        'pyramid>=1.3',
         'pyramid_jinja2>=1.2',
         'pyramid_fanstatic>=0.3',
-        'which>=1.0'
+        'pyramid_tm>=0.3'
     ],
 
     author = 'Randall Leeds (Hypothes.is Project)',
