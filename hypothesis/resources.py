@@ -1,9 +1,5 @@
 from fanstatic import Library, Resource, get_library_registry
 
-#from js.annotator import library as annotator
-from js.jquery import library as jquery
-from js.lesscss import LessResource
-
 hypothesis = Library('hypothesis', 'resources')
 site_styles = Resource(hypothesis, 'stylesheets/site.less')
 
@@ -18,8 +14,6 @@ def includeme(config):
 
     # Add the asset libraries to the fanstatic registry
     registry = get_library_registry()
-    #registry.add(annotator)
-    registry.add(jquery)
     registry.add(hypothesis)
 
     # Set up the routes
