@@ -8,7 +8,16 @@ a {
   }
 }
 
-html {font-smoothing: antialiased;}
+html {
+  font-family: @baseFontFamily;
+  font-size: @baseFontSize;
+  font-smoothing: antialiased;
+  line-height: @baseLineHeight;
+}
+
+input {
+  .border-radius(0.3em);
+}
 
 ::selection
 ::-moz-selection {
@@ -17,6 +26,7 @@ html {font-smoothing: antialiased;}
 }
 
 .red {color:  @red;}
+
 
 /* Credit to Initializr for most of what follows.
    ==========================================================================

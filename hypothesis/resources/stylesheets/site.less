@@ -1,3 +1,4 @@
+@import "css3.less";
 @import "common.less";
 @import "frameless.less";
 
@@ -5,35 +6,12 @@ article p {
   margin-top: @line/@em;
 }
 
-#content {
-  box-shadow: 3px 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-#home {
-  #auth {
-    background-color: lighten(@blue, 50%);
-    margin: 1em;
-    padding: 1em;
-    float: right;
-    form {
-      display: inline;
-      input {
-        margin-top: 0.25em;
-      }
-    }
-  }
+input {
+  margin: 0.25em 0 0.5em 0;
 }
 
 .required_star {
   color: @red;
-}
-
-
-/*
-	Style overrides for IE6-8
-*/
-
-.ie {
 }
 
 /*
@@ -43,6 +21,20 @@ article p {
 */
 
 @media screen and (min-width: 15em) {
+  article {
+		text-align: justify;
+    margin: @line/@em 1em 5em 1em;
+
+  }
+
+	#auth {
+    background-color: lighten(@blue, 50%);
+    padding: 1em;
+    fieldset input {
+      width: 100%;
+    }
+    text-align: center;
+	}
 }
 
 /*
@@ -52,6 +44,20 @@ article p {
 */
 
 @media screen and (min-width: 30em) {
+  #auth {
+    float: right;
+    margin: 0 0 1em 1em;
+    form {
+      display: inline;
+    }
+    input {
+      width: auto;
+    }
+    text-align: left;
+    legend {
+      text-align: left;
+    }
+  }
 }
 
 /*
@@ -72,6 +78,7 @@ article p {
 
 @media screen and (min-width: 57em) {
   #content {
+    box-shadow: 3px 1px 3px rgba(0, 0, 0, 0.05);
     margin: auto;
     .width(10);
   }
