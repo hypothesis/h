@@ -1,9 +1,7 @@
-@import "css3.less";
 @import "common.less";
-@import "frameless.less";
 
 article p {
-  margin-top: @line/@em;
+  margin-top: @baseLineHeight/@em;
 }
 
 input {
@@ -23,7 +21,7 @@ input {
 @media screen and (min-width: 15em) {
   article {
 		text-align: justify;
-    margin: @line/@em 1em 5em 1em;
+    margin: @baseLineHeight/@em 1em 5em 1em;
 
   }
 
@@ -80,7 +78,7 @@ input {
   #content {
     box-shadow: 3px 1px 3px rgba(0, 0, 0, 0.05);
     margin: auto;
-    .width(10);
+    .columns(10);
   }
 }
 
