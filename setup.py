@@ -15,7 +15,7 @@ setup(
     ],
 
     author = 'Hypothes.is Project & contributors',
-    maintainter = 'Randall Leeds'
+    maintainer = 'Randall Leeds',
     maintainer_email = 'tilgovi@hypothes.is',
     description = 'The Internet. Peer-reviewed.',
     long_description = """A platform for collaborative evaluation of information.""",
