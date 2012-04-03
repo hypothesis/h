@@ -1,3 +1,6 @@
+from annotator import auth, authz, store, es
+from annotator.annotation import Annotation
+
 from flask import Flask, g
 
 from pyramid.exceptions import Forbidden
@@ -6,9 +9,6 @@ from pyramid.security import Authenticated
 from pyramid.threadlocal import get_current_request
 from pyramid.view import view_config, view_defaults
 from pyramid.wsgi import wsgiapp2
-
-from annotator import auth, authz, store, es
-from annotator.annotation import Annotation
 
 from . models import Consumer
 
