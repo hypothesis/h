@@ -1,12 +1,10 @@
-from pyramid.renderers import render
 from pyramid.view import view_config
 
-from . resources import site_styles
 from . forms.auth import LoginForm, RegisterForm
 
 @view_config(route_name='home', renderer='home.jinja2')
 def home(request):
-    site_styles.need()
+    request.need('.resources:site_styles')
 
     if request.user is None:
         action = request.params.get('action', 'login')
