@@ -8,7 +8,7 @@
 <aside id="auth">
   {{ form | safe }}
   {% if action != 'register' %}
-  New? <a href="?action=register">Sign up.</a>
+  or <a href="?action=register">Sign up?</a>
   {% else %}
   or <a href="?action=login">sign in.</a>
   {% endif %}
