@@ -1,15 +1,23 @@
 @import "common.less";
 
+body {
+  background-color: lighten(@orange, 45%);
+}
+
+#content {
+  background-color: fade(lighten(@yellow, 50%), 50%);
+}
+
 article p {
   margin-top: @baseLineHeight/@em;
 }
 
 input {
-  margin: 0.25em 0 0.5em 0;
+  margin: 0.25em 0 0.25em 0;
 }
 
 .required_star {
-  color: @red;
+  display: none;
 }
 
 /*
@@ -22,16 +30,44 @@ input {
   article {
 		text-align: justify;
     margin: @baseLineHeight/@em 1em 5em 1em;
-
   }
 
 	#auth {
     background-color: lighten(@blue, 50%);
+    .box-shadow(@gray 0 0 0.5em -0.25em inset);
     padding: 1em;
-    fieldset input {
-      width: 100%;
+    form {
+      display: inline;
+      .small;
+
+      legend {
+        color: @grayLight;
+        display: inline;
+        opacity: 0.5;
+        position: absolute;
+        z-index: 2;
+
+        label, span {
+          cursor: text;
+          position: relative;
+          top: 0.5em; left: 0.25em;
+          .user-select(none);
+        }
+      }
+      input {
+        .border-radius(0.25em);
+        display: inline;
+        z-index: 2;
+      }
+      input[type="submit"] {
+        border: 0;
+        .box-shadow(@grayDark 0.1em 0 0.3em 0 inset);
+        color: white;
+        .radial-gradient(~'25% 25%,', circle cover, ~',white -50%, red 50%, black 250%');
+        text-shadow: black -0.01em 0.1em 0.1em;
+      }
     }
-    text-align: center;
+    text-align: left;
 	}
 }
 
@@ -44,17 +80,7 @@ input {
 @media screen and (min-width: 30em) {
   #auth {
     float: right;
-    margin: 0 0 1em 1em;
-    form {
-      display: inline;
-    }
-    input {
-      width: auto;
-    }
-    text-align: left;
-    legend {
-      text-align: left;
-    }
+    margin-left: 1em;
   }
 }
 
@@ -76,7 +102,7 @@ input {
 
 @media screen and (min-width: 57em) {
   #content {
-    box-shadow: 3px 1px 3px rgba(0, 0, 0, 0.05);
+    .box-shadow(rgba(0, 0, 0, 0.05) 0 5px 5px 5px);
     margin: auto;
     .columns(10);
   }
