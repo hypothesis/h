@@ -6,19 +6,31 @@ body {
 
 #content {
   background-color: fade(lighten(@yellow, 50%), 50%);
-  padding: 1em;
 }
 
 input {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-article p {
+article {
+  margin: 0 2em;
+  padding: 1em 0 2em;
+}
+
+section {
+  margin: 2em 0;
+}
+
+p {
   margin-top: @baseLineHeight/@em;
 }
 
 .required_star {
   display: none;
+}
+
+.red {
+  color: @red;
 }
 
 /*
@@ -30,24 +42,23 @@ article p {
 @media screen and (min-width: 15em) {
   article {
 		text-align: justify;
-    margin: @baseLineHeight/@em 1em 5em 1em;
   }
 
 	#auth {
-    background-color: desaturate(lighten(@blue, 50%), 90%);
-    .box-shadow(@gray 0 0 0.5em -0.25em inset);
-    padding: 1em;
+    background-color: desaturate(lighten(@blue, 45%), 95%);
+    .box-shadow(@gray 0 0 0.5em -0.25em );
+    //margin: 2em;
 
     fieldset {
-      margin: 1em;
+      padding: 0.5em;
     }
 
     form {
       display: inline;
       .small;
 
+      /* TODO: remove this legend when JS not present */
       legend {
-
         color: @grayLight;
         display: inline;
         opacity: 0.5;
@@ -65,7 +76,7 @@ article p {
         }
       }
       input {
-        .border-radius(0.25em);
+        .border-radius(0.2em);
         display: inline;
         z-index: 2;
       }
@@ -74,8 +85,8 @@ article p {
         .box-shadow(@grayDark 0.1em 0 0.3em 0 inset);
         background-color: desaturate(@blue, 50%);
         color: white;
-        margin-left: 1em;
         padding: 0.5em;
+        margin: 0.5em;
         font-weight: bold;
         text-shadow: black -0.01em 0.1em 0.1em;
       }
