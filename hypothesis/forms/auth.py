@@ -4,13 +4,7 @@ from wtforms import validators
 
 from pyramid.i18n import TranslationString as _
 
-import apex.forms
+from apex.forms import LoginForm, RegisterForm
+from apex.lib.form import ExtendedForm
 
 from .. models import DBSession
-
-class LoginForm(apex.forms.LoginForm):
-    pass
-
-class RegisterForm(apex.forms.RegisterForm):
-    def after_signup(self, user):
-        DBSession.flush()

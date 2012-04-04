@@ -4,16 +4,15 @@
 {% endblock %}
 
 {% block content %}
-{% if request.user is none %}
 <aside id="auth">
   {{ form | safe }}
-  {% if action != 'register' %}
-  or <a href="?action=register">Sign up?</a>
+  {% if request.user %}
+  {% elif action != 'register' %}
+  or <a href="?action=register">register</a><span class="red">.</span>
   {% else %}
   or <a href="?action=login">sign in.</a>
   {% endif %}
 </aside>
-{% endif %}
 
 <article id="home">
   <h1>Hypothes<span class="red">.</span>is</h1>

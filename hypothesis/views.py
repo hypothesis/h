@@ -6,18 +6,18 @@ from . forms.auth import LoginForm, RegisterForm
 def home(request):
     request.need('.resources:site_styles')
 
+    action = request.params.get('action', request.user and 'logout' or 'login')
+    form = '<a href="' + request.route_url('apex_logout') + '">' + \
+           'Log out.' + '</a>'
     if request.user is None:
-        action = request.params.get('action', 'login')
         if action == 'login':
             form = LoginForm().render(submit_text='Sign In', action=action)
-        elif action == 'register':
+        else:
             form = RegisterForm().render(submit_text='Register', action=action)
-        return {
-            'action': action,
-            'form': form
-        }
-    else:
-        return {}
+    return {
+        'action': action,
+        'form': form
+    }
 
 def includeme(config):
     config.scan(__name__)
