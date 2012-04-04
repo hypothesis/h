@@ -6,14 +6,15 @@ body {
 
 #content {
   background-color: fade(lighten(@yellow, 50%), 50%);
+  padding: 1em;
+}
+
+input {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 article p {
   margin-top: @baseLineHeight/@em;
-}
-
-input {
-  margin: 0.25em 0 0.25em 0;
 }
 
 .required_star {
@@ -33,14 +34,20 @@ input {
   }
 
 	#auth {
-    background-color: lighten(@blue, 50%);
+    background-color: desaturate(lighten(@blue, 50%), 90%);
     .box-shadow(@gray 0 0 0.5em -0.25em inset);
     padding: 1em;
+
+    fieldset {
+      margin: 1em;
+    }
+
     form {
       display: inline;
       .small;
 
       legend {
+
         color: @grayLight;
         display: inline;
         opacity: 0.5;
@@ -48,9 +55,12 @@ input {
         z-index: 2;
 
         label, span {
+          top: (@baseLineHeight/4) / @em;
           cursor: text;
           position: relative;
-          top: 0.5em; left: 0.25em;
+          text-align: center;
+          left: 0.25em;
+
           .user-select(none);
         }
       }
@@ -62,12 +72,14 @@ input {
       input[type="submit"] {
         border: 0;
         .box-shadow(@grayDark 0.1em 0 0.3em 0 inset);
+        background-color: desaturate(@blue, 50%);
         color: white;
-        .radial-gradient(~'25% 25%,', circle cover, ~',white -50%, red 50%, black 250%');
+        margin-left: 1em;
+        padding: 0.5em;
+        font-weight: bold;
         text-shadow: black -0.01em 0.1em 0.1em;
       }
     }
-    text-align: left;
 	}
 }
 
