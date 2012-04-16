@@ -141,9 +141,16 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     # Colorize it
     heatmap.enter().append("stop")
+      .attr("stop-color", @_colorize 0)
+      .transition().duration(1000)
+        .attr("stop-color", (p) => @_colorize p.count / max)
 
     heatmap.order()
       .attr("offset", (p) -> p.offset)
-      .attr("stop-color", (p) => @_colorize p.count / max)
+      .transition().duration(250)
+        .attr("stop-color", (p) => @_colorize p.count / max)
 
-    heatmap.exit().remove()
+    heatmap.exit()
+      .transition().duration(1000)
+        .attr("stop-color", @_colorize 0)
+        .remove()
