@@ -28,14 +28,16 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     @heatmap = $(@html.element)
     @heatmap.appendTo(@annotator.wrapper)
 
-    this._setupListeners()
-
     unless d3? or @d3?
         console.error('d3.js is required to use the heatmap plugin')
     if not d3?
-      $.getScript(@d3, @updateHeatmap)
-        .error(->
-          Annotator.showNotification(@options.message))
+      setTimeout(
+        =>
+          $.getScript(@d3, =>
+            this._setupListeners()
+            this.updateHeatmap()
+          ).error(-> Annotator.showNotification(@options.message))
+      , 0)
 
   # Public: Creates a new instance of the Heatmap plugin.
   #
@@ -85,6 +87,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   #
   # Returns a jQuery collection of the elements.
   updateHeatmap: =>
+    return unless d3?
     # Grab some attributes of the document for computing layout
     context = @annotator.wrapper.context
     scale = context.scrollHeight / window.innerHeight
