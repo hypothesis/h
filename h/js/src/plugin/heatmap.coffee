@@ -91,7 +91,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     # Grab some attributes of the document for computing layout
     context = @annotator.wrapper.context
     scale = context.scrollHeight / window.innerHeight
-    translate = window.pageYOffset / context.scrollHeight * scale
 
     # Get all the visible annotations
     annotations = @annotator.element.find('.annotator-hl:visible')
