@@ -36,11 +36,11 @@ if __name__ == '__main__':
     try:
         from functools import partial
         from waitress import serve
-        run = partial(serve, application, host='127.0.0.1', port=8000)
+        run = partial(serve, application, host='0.0.0.0', port=5000)
     except ImportError:
         from wsgiref.simple_server import make_server
-        run = make_server('127.0.0.1', 8000, application).serve_forever
-        print 'serving on http://localhost:8000'
+        run = make_server('0.0.0.0', 5000, application).serve_forever
+        print 'serving on http://0.0.0.0:5000'
 
     try:
         run()
