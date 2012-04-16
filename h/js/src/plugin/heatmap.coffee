@@ -68,7 +68,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       @annotator.subscribe event, this.updateHeatmap
     this
 
-    $(window).scroll this.updateHeatmap
     $(window).resize this.updateHeatmap
 
   _colorize: (v) ->
@@ -136,8 +135,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         max: 1)
 
     # Bind the heatmap to the control points
-    d3.select(@heatmap.get(0))
-      .attr("height", window.innerHeight)
+    d3.select(@heatmap.get(0)).attr("height", context.scrollHeight)
 
     heatmap = d3.select(@heatmap.find('#heatmapGradient').get(0))
       .selectAll('stop').data(points, (p) -> p.offset)
