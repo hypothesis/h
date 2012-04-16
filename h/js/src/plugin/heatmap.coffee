@@ -1,9 +1,4 @@
 class Annotator.Plugin.Heatmap extends Annotator.Plugin
-  classes:
-    hl:
-      hide:   'annotator-hl-filtered'
-      active: 'annotator-hl-active'
-
   # HTML templates for the plugin UI.
   html:
     element: """
