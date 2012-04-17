@@ -24,5 +24,32 @@
   <div id="header">{% block nav %}{% endblock %}</div>
   <div id="content">{% block content %}{% endblock %}</div>
   <div id="footer">{% block footer %}{% endblock %}</div>
+  <script>
+    var elem = document.getElementById('content');
+    (function ($) {
+    {% if request.user is not none %}
+      var annotator = new Annotator(elem)
+        .addPlugin('Auth', {
+          tokenUrl: '{{ request.route_url("token") }}'
+        })
+    {% else %}
+      var annotator = new Annotator(elem, {readOnly: true})
+    {% endif %}
+        .addPlugin('Unsupported')
+        .addPlugin('Store', {
+          prefix: '{{ request.route_url("api", subpath="") }}',
+          loadFromSearch: {
+            uri: document.location.href
+          },
+          annotationData: {
+            uri: document.location.href
+          }
+        })
+        .addPlugin('Selector', {})
+        .addPlugin('Heatmap', {
+          d3: "http://cdnjs.cloudflare.com/ajax/libs/d3/2.8.1/d3.v2.min.js"
+        })
+    })(jQuery);
+  </script>
 </body>
 </html>
