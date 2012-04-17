@@ -3,11 +3,8 @@ from annotator.annotation import Annotation
 
 from flask import Flask, g
 
-from pyramid.exceptions import Forbidden
 from pyramid.response import Response
-from pyramid.security import Authenticated
 from pyramid.threadlocal import get_current_request
-from pyramid.view import view_config, view_defaults
 from pyramid.wsgi import wsgiapp2
 
 from . models import Consumer

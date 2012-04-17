@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from pyramid.config import Configurator
-from pyramid.paster import bootstrap
 
 def includeme(config):
     config.include('.api')
