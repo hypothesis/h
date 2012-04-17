@@ -1,3 +1,9 @@
+{% import "flash_template.jinja2" as flash with context -%}
+{% do request.need('hypothesis.resources:site_styles') %}
+{% do request.need('js.annotator:annotator') %}
+{% do request.need('js.annotator:selector') %}
+{% do request.need('js.annotator:kitchen_sink') %}
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.1//EN"
     "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-2.dtd">
 <!--[if lt IE 9]><html class="ie"><![endif]-->
@@ -14,6 +20,7 @@
   <link href="http://fonts.googleapis.com/css?family=Cardo:400,700,400italic" rel="stylesheet" type="text/css" />
 </head>
 <body>
+  <div id="flash-msg">{{ flash.apex_flash() }}</div>
   <div id="header">{% block nav %}{% endblock %}</div>
   <div id="content">{% block content %}{% endblock %}</div>
   <div id="footer">{% block footer %}{% endblock %}</div>

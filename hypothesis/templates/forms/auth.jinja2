@@ -1,10 +1,6 @@
-{% import "flash_template.jinja2" as flash with context -%}
-
 {% extends "base.jinja2" %}
-
 {% block head %}
 {{ super() }}
-{{ flash.apex_head() }}
 {% endblock %}
 
 {% block content %}
