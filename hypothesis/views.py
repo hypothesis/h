@@ -1,8 +1,14 @@
 from apex import login
 
 def home(request):
-    if request.user is None: return login(request)
-    return {}
+    context = {'title': 'hypothes.is'}
+    if request.user is None:
+        if request.POST:
+            return login(request)
+        result = login(request)
+        result.update(context)
+        context = result
+    return context
 
 def includeme(config):
     config.include('pyramid_jinja2')
