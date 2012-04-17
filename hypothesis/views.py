@@ -1,22 +1,12 @@
-from pyramid.view import view_config
+from apex import login, logout, register
 
-from . forms.auth import LoginForm, RegisterForm
+from pyramid.security import authenticated_userid
+from pyramid.view import view_config
 
 @view_config(route_name='home', renderer='home.jinja2')
 def home(request):
-    action = request.params.get('action', request.user and 'logout' or 'login')
-    form = None
-    if request.user is None:
-        if action == 'login':
-            submit_text = 'Sign in'
-            form = LoginForm().render(action=action, submit_text=submit_text)
-        else:
-            submit_text = 'Sign up'
-            form = RegisterForm().render(action=action, submit_text=submit_text)
-    return {
-        'action': action,
-        'form': form
-    }
+    if request.user is None: return login(request)
+    return {}
 
 def includeme(config):
     config.scan(__name__)
