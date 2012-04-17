@@ -67,8 +67,9 @@ def includeme(config):
         Annotation.create_all()
 
     # Configure authentication (ours) and authorization (store)
+    authenticator = auth.Authenticator(consumer_fetcher)
     def before_request():
-        g.auth = auth.Authenticator(consumer_fetcher)
+        g.auth = authenticator
         g.authorize = authz.authorize
     app.before_request(before_request)
 
