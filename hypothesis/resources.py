@@ -6,6 +6,13 @@ library = Library('hypothesis', 'resources')
 site_styles = Resource(library, 'stylesheets/site.less')
 
 def fanstatic_need_property(request):
+    """A pyramid request property for fanstatic resource inclusions
+
+    Views and templates may use this function wherever the pyramid request object
+    is available to require that fanstatic inject links to assets required by
+    the request.
+
+    """
     resolver = DottedNameResolver()
     need = request.environ[NEEDED].need
     return (
