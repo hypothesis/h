@@ -15,7 +15,7 @@ def fanstatic_need_property(request):
 def includeme(config):
     # Set up the routes
     config.add_route('home', '/')
-    config.add_route('token', '/token')
+    config.add_route('token', '/api/token')
     config.add_route('api', '/api/*subpath')
 
     # Set up fanstatic

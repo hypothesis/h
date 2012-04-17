@@ -34,9 +34,7 @@ def cors_headers(request):
     })
     return headers
 
-@view_config(name='token', request_method='GET',
-             permission='authenticated')
-def token_get(request):
+def token(request):
     settings = request.registry.settings
     secret = settings.get('hypothesis.api_secret')
     key = settings.get('hypothesis.consumer_key')
@@ -49,10 +47,6 @@ def token_get(request):
     }
     body = auth.encode_token(message, secret)
     return Response(body=body, headerlist=cors_headers(request).items())
-
-@view_config(name='token', request_method='OPTIONS')
-def token_options(request):
-    return Response(headerlist=cors_headers(request).items())
 
 def includeme(config):
     settings = config.registry.settings
@@ -78,5 +72,9 @@ def includeme(config):
         g.authorize = authz.authorize
     app.before_request(before_request)
 
-    # Set up a view to delegate API calls
-    config.add_view(wsgiapp2(app), name='api')
+    # Configure the API views
+    config.add_view(wsgiapp2(app), route_name='api')
+    config.add_view(token, route_name='token', request_method='GET',
+                    permission='authenticated')
+    config.add_view(lambda r: Response(headerlist=cors_headers(r).items()),
+                    route_name='token', request_method='OPTIONS')
