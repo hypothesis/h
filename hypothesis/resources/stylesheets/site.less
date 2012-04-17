@@ -64,8 +64,13 @@ p {
     .small;
     text-align: center;
 
-    form {
+    .field_error {
+      color: @black;
+      display: block;
+      text-shadow: @white -0.05em 0.05em 0.01em;
+    }
 
+    form {
       display: inline;
       .box-sizing(border-box);
 
