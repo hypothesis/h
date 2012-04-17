@@ -38,6 +38,9 @@ setup(
     zip_safe = False,
 
     entry_points = {
+        'fanstatic.libraries': [
+            'hypothesis=hypothesis.resources:library'
+        ],
         'paste.app_factory': [
             'main=hypothesis:main'
         ]
