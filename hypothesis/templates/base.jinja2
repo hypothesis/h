@@ -1,8 +1,11 @@
 {% import "flash_template.jinja2" as flash with context -%}
 {% do request.need('hypothesis.resources:site_styles') %}
 {% do request.need('js.annotator:annotator') %}
+{% do request.need('js.annotator:auth') %}
+{% do request.need('js.annotator:heatmap') %}
 {% do request.need('js.annotator:selector') %}
-{% do request.need('js.annotator:kitchen_sink') %}
+{% do request.need('js.annotator:store') %}
+{% do request.need('js.annotator:unsupported') %}
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.1//EN"
     "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-2.dtd">
