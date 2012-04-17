@@ -122,10 +122,14 @@ p {
 */
 
 @media screen and (min-width: 30em) {
-  #auth {
+  aside#auth {
+    float: right;
+    margin: 2em;
+    margin-right: 0;
+    right: -0.25em;
     text-align: left;
 
-    form input {
+    input[type="submit"] {
       width: auto;
     }
   }
@@ -138,13 +142,6 @@ p {
 */
 
 @media screen and (min-width: 37.5em) {
-  aside#auth {
-    float: right;
-    margin: 2em;
-    margin-right: 0;
-    right: -0.25em;
-  }
-
   article {
     padding: 2em 4em 4em 4em;
   }
