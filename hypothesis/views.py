@@ -7,13 +7,14 @@ def home(request):
     request.need('.resources:site_styles')
 
     action = request.params.get('action', request.user and 'logout' or 'login')
-    form = '<a href="' + request.route_url('apex_logout') + '">' + \
-           'Log out.' + '</a>'
+    form = None
     if request.user is None:
         if action == 'login':
-            form = LoginForm().render(submit_text='Sign In', action=action)
+            submit_text = 'Sign in'
+            form = LoginForm().render(action=action, submit_text=submit_text)
         else:
-            form = RegisterForm().render(submit_text='Register', action=action)
+            submit_text = 'Sign up'
+            form = RegisterForm().render(action=action, submit_text=submit_text)
     return {
         'action': action,
         'form': form

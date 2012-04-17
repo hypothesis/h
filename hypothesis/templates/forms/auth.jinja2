@@ -8,9 +8,18 @@
 {% endblock %}
 
 {% block content %}
-<h1>Hypothes<span class="red">.</span>is</h1>
-<div id="flash-msg">{{ flash.apex_flash() }}</div>
-{% if form is defined %}
-  {{ form.render() | safe }}
-{% endif %}
+<div id="content">
+  <div id="auth">
+    <h1>hypothes<span class="red">.</span>is</h1>
+    {% if form is not none %}
+      {{ form.render() | safe }}
+      {% if action != 'register' %}
+        or <a href="{{ request.route_url('apex_register') }}">register</a>
+      {% else %}
+        or <a href="{{ request.route_url('apex_login') }}">sign in</a>
+      {% endif %}
+    {% else %}
+      <a href="{{ request.route_url('apex_logout') }}">Log out</a>
+    {% endif %}
+  </div>
 {% endblock %}
