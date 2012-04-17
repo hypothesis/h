@@ -20,7 +20,7 @@ article {
 }
 
 section {
-  margin: 6em 0;
+  margin: 2em 0;
   text-align: justify;
 }
 
@@ -54,7 +54,6 @@ p {
   padding: 1em;
   position: relative;
   z-index: 1;
-  .small;
   text-align: center;
 
   .field_error {
@@ -81,7 +80,7 @@ p {
       label, span {
         cursor: text;
         position: relative;
-        top: 1.25em;
+        top: 0.875em;
         left: 1.25em;
         .user-select(none);
       }
@@ -101,7 +100,7 @@ p {
       background-color: desaturate(lighten(@blue, 5%), 65%);
       color: @grayLighter;
       font-weight: bold;
-      text-shadow: @grayDark -0.05em -0.05em 0.01em;
+      text-shadow: @grayDark 0 -0.1em 0.01em;
     }
   }
 }
@@ -123,9 +122,13 @@ p {
 */
 
 @media screen and (min-width: 30em) {
+  section {
+    margin: 6em 0em;
+  }
+
   aside#auth {
     float: right;
-    margin: 2em 4em;
+    margin: 1em;
     max-width: 15em;
     text-align: left;
 
@@ -145,6 +148,10 @@ p {
   article {
     padding: 4em;
   }
+
+  aside#auth {
+    margin: 2em 4em;
+  }
 }
 
 /*
@@ -154,13 +161,13 @@ p {
 */
 
 @media screen and (min-width: 57em) {
+  section {
+    margin: 6em 2em;
+  }
+
   #content {
     .columns(12);
     margin: auto;
-  }
-
-  section {
-    margin: 6em 2em;
   }
 }
 
