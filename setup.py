@@ -44,6 +44,9 @@ setup(
         ],
         'paste.app_factory': [
             'main=hypothesis:main'
+        ],
+        'zest.releaser.prereleaser.middle': [
+            'prepare=hypothesis.scripts:prepare'
         ]
     }
 )
