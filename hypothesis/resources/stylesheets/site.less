@@ -1,28 +1,41 @@
 @import "common.less";
 
 body {
-  background-color: lighten(@orange, 45%);
+  background-color: desaturate(lighten(@red, 45%), 50%);
+  color: lighten(@grayDark, 25%);
+  padding-bottom: 4em;
 }
 
 #content {
-  background-color: fade(lighten(@yellow, 50%), 50%);
+  background-color: desaturate(lighten(@orange, 45%), 75%);
+  .box-shadow(@grayLight 0 0 1em 0);
 }
 
-input {
+h1, legend {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 article {
-  margin: 0 2em;
-  padding: 1em 0 2em;
+  padding: 1em;
 }
 
 section {
   margin: 2em 0;
+  text-align: justify;
+}
+
+h1, h2, h3, h4 {
+  padding-bottom: 0.5em;
+}
+
+h3 {
+  border-bottom-style: solid;
+  border-color: @grayLighter;
+  border-width: 0.1em;
 }
 
 p {
-  margin-top: @baseLineHeight/@em;
+  margin: 1em 0;
 }
 
 .required_star {
