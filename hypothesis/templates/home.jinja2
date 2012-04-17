@@ -7,16 +7,16 @@
 
 <aside id="auth">
   {% if form is defined %}
-    {{ form.render(action=action) | safe }}
+    {{ form.render(action=action, submit_text=_(action)) | safe }}
     {% if action != 'login' %}
-     or <a href="{{ request.route_path('apex_login') }}">log in</a>
+     or <a href="{{ request.route_path('apex_login') }}">{{ _('log in') }}</a>
     {% elif action != 'register' %}
-      or <a href="{{ request.route_path('apex_register') }}">register</a>
+      or <a href="{{ request.route_path('apex_register') }}">{{ _('register') }}</a>
     {% elif action != 'forgot' %}
-      or <a href="{{ request.route_path('apex_forgot') }}">forgot password?</a>
+      or <a href="{{ request.route_path('apex_forgot') }}">{{ _('forgot') }}</a>
     {% endif %}
   {% else %}
-    <a href="{{ request.route_path('apex_logout') }}">Log out</a>
+    <a href="{{ request.route_path('apex_logout') }}">{{ _('log out') }}</a>
   {% endif %}
   {% if velruse_forms is defined %}
     {% for provider_form in velruse_forms %}
