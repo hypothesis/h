@@ -20,18 +20,18 @@ article {
 }
 
 section {
-  margin: 2em 0;
+  margin: 6em 0;
   text-align: justify;
 }
 
 h1, h2, h3, h4 {
-  padding-bottom: 0.5em;
+  padding-bottom: 0.25em;
 }
 
 h3 {
   border-bottom-style: solid;
   border-color: lighten(@grayLight, 25%);
-  border-width: 0.05em;
+  border-width: 0.1em;
 }
 
 p {
@@ -124,9 +124,8 @@ p {
 @media screen and (min-width: 30em) {
   aside#auth {
     float: right;
-    margin: 2em;
-    margin-right: 0;
-    right: -0.25em;
+    margin: 2em 4em;
+    max-width: 15em;
     text-align: left;
 
     input[type="submit"] {
@@ -143,7 +142,7 @@ p {
 
 @media screen and (min-width: 37.5em) {
   article {
-    padding: 2em 4em 4em 4em;
+    padding: 4em;
   }
 }
 
@@ -157,6 +156,10 @@ p {
   #content {
     .columns(12);
     margin: auto;
+  }
+
+  section {
+    margin: 6em 2em;
   }
 }
 
