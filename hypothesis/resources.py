@@ -2,8 +2,8 @@ from fanstatic import Library, Resource, get_library_registry, NEEDED
 
 from pyramid.path import DottedNameResolver
 
-hypothesis = Library('hypothesis', 'resources')
-site_styles = Resource(hypothesis, 'stylesheets/site.less')
+library = Library('hypothesis', 'resources')
+site_styles = Resource(library, 'stylesheets/site.less')
 
 def fanstatic_need_property(request):
     resolver = DottedNameResolver()
