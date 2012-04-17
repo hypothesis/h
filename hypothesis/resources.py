@@ -22,5 +22,5 @@ def includeme(config):
     config.include('pyramid_fanstatic')
     config.set_request_property(fanstatic_need_property, name='need', reify=True)
 
-    registry = get_library_registry()
-    registry.add(hypothesis)
+    # Set up other static views
+    config.add_static_view('images', 'resources/images')
