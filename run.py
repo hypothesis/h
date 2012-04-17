@@ -45,7 +45,6 @@ if __name__ == '__main__':
     try:
         run()
     except KeyboardInterrupt:
-        # Catch this to avoid logging a traceback
         pass
 
     print "\nTerminated."
