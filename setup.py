@@ -7,11 +7,12 @@ setup(
 
     install_requires = [
         'annotator>=0.7.6',
-        'apex',
+        'apex>=0.9.5dev',
         'pyramid>=1.3',
         'pyramid_jinja2>=1.2',
         'pyramid_fanstatic>=0.3',
-        'pyramid_tm>=0.3'
+        'pyramid_tm>=0.3',
+        'setuptools>=0.6c11'
     ],
 
     author = 'Hypothes.is Project & contributors',
