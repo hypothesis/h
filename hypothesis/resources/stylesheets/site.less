@@ -46,73 +46,74 @@ p {
   color: @red;
 }
 
+#auth {
+  background-color: desaturate(lighten(@blue, 50%), 95%);
+  .border-radius(0.25em);
+  .box-shadow(@gray 0 0.5em 1em -0.5em ~','
+              desaturate(lighten(@blue, 25%), 75%) 0 -0.1em 1em -0.5em inset);
+  padding: 1em;
+  position: relative;
+  z-index: 1;
+  .small;
+  text-align: center;
+
+  .field_error {
+    color: @black;
+    display: block;
+    text-shadow: @white -0.05em 0.05em 0.01em;
+  }
+
+  form {
+    display: inline;
+
+    fieldset {
+      margin: 0.5em 0;
+    }
+
+    /* TODO: remove this legend when JS not present */
+    legend {
+      color: @grayLight;
+      display: inline;
+      opacity: 0.5;
+      position: absolute;
+      z-index: 2;
+
+      label, span {
+        cursor: text;
+        position: relative;
+        top: 1.25em;
+        left: 1.25em;
+        .user-select(none);
+      }
+    }
+
+    input {
+      .border-radius(0.25em);
+      .box-sizing(border-box);
+      margin: 0.5em 0;
+      padding: 0.5em 1em;
+      z-index: 2;
+    }
+
+    input[type="submit"] {
+      border: 0;
+      .box-shadow(@gray 0 -0.5em 1em 0.1em inset);
+      background-color: desaturate(lighten(@blue, 5%), 65%);
+      color: @grayLighter;
+      font-weight: bold;
+      text-shadow: @grayDark -0.05em -0.05em 0.01em;
+    }
+  }
+}
+
 /*
-	Mobile layout 
+	Mobile layout
 	240–479 px
 	Zoomed out below 320 px
 */
 
 @media screen and (min-width: 15em) {
-	#auth {
-    background-color: desaturate(lighten(@blue, 45%), 95%);
-    .border-radius(0.25em);
-    .box-shadow(@grayLight 0 0.25em 0.5em -0.25em ~','
-                desaturate(lighten(@blue, 20%), 75%) -0.2em -0.1em 1em -0.5em inset);
-    padding: 1em;
-    position: relative;
-    z-index: 1;
-    .small;
-    text-align: center;
-
-    .field_error {
-      color: @black;
-      display: block;
-      text-shadow: @white -0.05em 0.05em 0.01em;
-    }
-
-    form {
-      display: inline;
-
-      fieldset {
-        margin: 0.5em 0;
-      }
-
-      /* TODO: remove this legend when JS not present */
-      legend {
-        color: @grayLight;
-        display: inline;
-        opacity: 0.5;
-        position: absolute;
-        z-index: 2;
-
-        label, span {
-          cursor: text;
-          position: relative;
-          top: 1.25em;
-          left: 1.25em;
-          .user-select(none);
-        }
-      }
-
-      input {
-        .border-radius(0.25em);
-        .box-sizing(border-box);
-        margin: 0.5em 0;
-        padding: 0.5em 1em;
-        z-index: 2;
-        width: 100%;
-      }
-
-      input[type="submit"] {
-        border: 0;
-        .box-shadow(@gray 0 0 0.25em 0 inset);
-        background-color: desaturate(lighten(@blue, 5%), 65%);
-        color: @grayLighter;
-        font-weight: bold;
-        text-shadow: @grayDark -0.05em -0.05em 0.01em;
-      }
-    }
-	}
+  #auth input { width: 100%; }
 }
 
 /*
