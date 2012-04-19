@@ -24,7 +24,28 @@
 </head>
 <body>
   <div id="flash-msg">{{ flash.apex_flash() }}</div>
-  <div id="header">{% block nav %}{% endblock %}</div>
+  <div id="header">
+    {% if form is defined %}
+      {{ form.render(action=action, submit_text=_(action)) | safe }}
+      {% if action != 'login' %}
+        or <a href="{{ request.route_path('apex_login') }}">{{ _('log in') }}</a>
+      {% elif action != 'register' %}
+        or <a href="{{ request.route_path('apex_register') }}">{{ _('register') }}</a>
+      {% elif action != 'forgot' %}
+        or <a href="{{ request.route_path('apex_forgot') }}">{{ _('forgot') }}</a>
+      {% endif %}
+    {% else %}
+      <a href="{{ request.route_path('apex_logout') }}">{{ _('log out') }}</a>
+    {% endif %}
+    {% if velruse_forms is defined %}
+      {% for provider_form in velruse_forms %}
+        {{ provider_form.render(
+             action='/velruse/%s/login' % provider_form.provider_name,
+             submit_text=provider_form.provider_proper_name,
+           ) | safe }}
+        {% endfor %}
+    {% endif %}
+  </div>
   <div id="content">{% block content %}{% endblock %}</div>
   <div id="footer">{% block footer %}{% endblock %}</div>
   <script>
