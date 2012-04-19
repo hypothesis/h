@@ -48,6 +48,7 @@ class GUID(TypeDecorator):
 
 
 class Consumer(Base):
+    """API Consumer."""
     __tablename__ = 'consumers'
 
     key = Column(GUID, unique=True, primary_key=True)
