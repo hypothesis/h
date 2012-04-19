@@ -3,12 +3,12 @@
 body {
   background-color: desaturate(lighten(@red, 40%), 85%);
   color: lighten(@grayDark, 25%);
-  padding-bottom: 4em;
 }
 
 #content {
   background-color: desaturate(lighten(@yellow, 45%), 95%);
   .box-shadow(@gray 0 0 1em 0);
+  margin-bottom: 8em;
 }
 
 h1, fieldset {
@@ -16,7 +16,7 @@ h1, fieldset {
 }
 
 article {
-  padding: 1em;
+  padding: 6em 1em;
 }
 
 section {
@@ -24,7 +24,11 @@ section {
   text-align: justify;
 }
 
+h1 {
+}
+
 h1, h2, h3, h4 {
+  line-height: @baseLineHeight / @em * 1.5;
   padding-bottom: 0.25em;
 }
 
@@ -46,14 +50,15 @@ p {
   color: @red;
 }
 
-#auth {
+#header {
   background-color: desaturate(lighten(@blue, 50%), 95%);
-  .border-radius(0.25em);
-  .box-shadow(@gray 0 0.5em 1em -0.5em ~','
-              desaturate(lighten(@blue, 25%), 75%) 0 -0.1em 1em -0.5em inset);
+  .border-radius(0 0 1em 1em);
+  .box-shadow(@gray 0 0em 0.25em 0 ~','
+              desaturate(lighten(@blue, 25%), 75%) 0 -0.25em 1em -0.5em inset);
+  margin-bottom: -1em;
   padding: 1em;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   text-align: center;
 
   .field_error {
@@ -80,7 +85,7 @@ p {
       label, span {
         cursor: text;
         position: relative;
-        top: 0.875em;
+        top: 1em;
         left: 1.25em;
         .user-select(none);
       }
@@ -91,7 +96,6 @@ p {
       .box-sizing(border-box);
       margin: 0.5em 0;
       padding: 0.5em 1em;
-      z-index: 2;
     }
 
     input[type="submit"] {
@@ -112,7 +116,8 @@ p {
 */
 
 @media screen and (min-width: 15em) {
-  #auth input { width: 100%; }
+  article { padding-top: 2em; }
+  #header input { width: 100%; }
 }
 
 /*
@@ -122,14 +127,14 @@ p {
 */
 
 @media screen and (min-width: 30em) {
+  article { padding-top: 6em; }
   section {
     margin: 6em 0em;
   }
 
-  aside#auth {
+  #header {
     float: right;
-    margin: 1em;
-    max-width: 15em;
+    margin: 0 1em 1em 1em;
     text-align: left;
 
     input[type="submit"] {
@@ -146,11 +151,11 @@ p {
 
 @media screen and (min-width: 37.5em) {
   article {
-    padding: 4em;
+    padding: 6em 4em;
   }
 
-  aside#auth {
-    margin: 2em 4em;
+  #header {
+    margin: 0 2em 4em;
   }
 }
 
@@ -161,13 +166,13 @@ p {
 */
 
 @media screen and (min-width: 57em) {
-  section {
-    margin: 6em 2em;
-  }
-
-  #content {
+  body {
     .columns(12);
     margin: auto;
+  }
+
+  section {
+    margin: 6em 2em;
   }
 }
 
