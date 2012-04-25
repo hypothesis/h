@@ -50,7 +50,7 @@
   <div id="content">{% block content %}{% endblock %}</div>
   <div id="footer">{% block footer %}{% endblock %}</div>
   <script>
-    var elem = document.getElementById('content');
+    var elem = document.body;
     (function ($) {
     {% if request.user is not none %}
       var annotator = new Annotator(elem)
