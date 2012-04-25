@@ -1,23 +1,56 @@
 @import "common.less";
 
-body {
-  background-color: desaturate(lighten(@red, 40%), 85%);
-  color: lighten(@gray-dark, 20%);
-}
-
-#content {
-  background-color: desaturate(lighten(@yellow, 45%), 95%);
-  .box-shadow(@gray 0 0 3em 0);
-  margin-bottom: 8em;
+a {
+  color: @link-color;
+  text-decoration: none;
+  &:hover {
+    color: @link-color-hover;
+  }
 }
 
 article {
   padding: 6em 1em;
 }
 
-section {
-  margin: 4em 0;
-  text-align: justify;
+body {
+  background-color: desaturate(lighten(@yellow, 40%), 66%);
+  color: @gray;
+}
+
+form {
+  display: inline;
+  fieldset { margin: 0.5em 0; }
+
+  legend {
+    color: @gray-light;
+    display: inline;
+    opacity: 0.5;
+    position: absolute;
+    z-index: 2;
+
+    label, span {
+      cursor: text;
+      position: relative;
+      top: 0.5em;
+      left: 1em;
+      .user-select(none);
+    }
+  }
+
+  input {
+    border: solid lighten(@gray-light, 20%) 0.1em;
+    .border-radius(0.25em);
+    .box-sizing(border-box);
+    padding: 0.5em 1em;
+  }
+
+  input[type="submit"] {
+    color: @gray-lighter;
+    font-weight: bold;
+    .linear-gradient(top ~','
+                     desaturate(lighten(@blue, 20%), 50%) -50% ~','
+                     @black 400%);
+  }
 }
 
 h1, h2, h3, h4 {
@@ -35,20 +68,24 @@ h3 {
   border-width: 0.1em;
 }
 
-h3:first-letter {
-  font-size: 110%;
-}
-
 p {
   margin: 1em 0;
 }
 
-.required_star {
+section {
+  margin: 4em 0;
+  text-align: justify;
+}
+
+.red, .required_star, .field_error {
   color: @red;
 }
 
-.red {
-  color: @red;
+.field_error {
+  display: block;
+  margin-top: -0.5em;
+  .small;
+  text-shadow: @white -0.05em 0.05em 0.01em;
 }
 
 #header {
@@ -59,60 +96,15 @@ p {
   margin-bottom: -0.25em; //pull content under the rounded corners in mobile
   padding: 1em;
   position: relative;
-  z-index: 2;
   text-align: center;
+  z-index: 2;
+}
 
-  .field_error {
-    color: @red;
-    display: block;
-    margin-top: -0.5em;
-    .small;
-    text-shadow: @white -0.05em 0.05em 0.01em;
-  }
-
-  form {
-    display: inline;
-
-    fieldset {
-      margin: 0.5em 0;
-    }
-
-    /* TODO: remove this legend when JS not present */
-    legend {
-      color: @gray-light;
-      display: inline;
-      opacity: 0.5;
-      position: absolute;
-      z-index: 2;
-
-      label, span {
-        cursor: text;
-        position: relative;
-        top: 1em;
-        left: 1em;
-        .user-select(none);
-      }
-    }
-
-    input {
-      border: solid lighten(@gray-light, 20%) 0.1em;
-      .box-sizing(border-box);
-      margin: 0.5em 0;
-      padding: 0.5em 1em;
-    }
-
-    input[type="submit"] {
-      border: 0;
-      .border-radius(0.25em);
-      .box-shadow(0 0.1em 0.1em 0 desaturate(lighten(@blue, 25%), 50%) inset ~','
-                  0 0.05em 0.1em 0 @gray-light);
-      color: @gray-lighter;
-      font-weight: bold;
-      .linear-gradient(top ~','
-                       desaturate(lighten(@blue, 20%), 50%) -50% ~','
-                       @black 400%);
-    }
-  }
+#content {
+  background-color: desaturate(lighten(@yellow, 50%), 66%);
+  .box-shadow(@gray 0 0 3em 0);
+  font-size: (@font-size + 4) / @font-size * 1em;
+  margin-bottom: 8em;
 }
 
 /*
