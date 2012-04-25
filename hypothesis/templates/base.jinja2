@@ -52,14 +52,12 @@
   <script>
     var elem = document.body;
     (function ($) {
-    {% if request.user is not none %}
       var annotator = new Annotator(elem)
+      {% if request.user is not none %}
         .addPlugin('Auth', {
           tokenUrl: '{{ request.route_url("token") }}'
         })
-    {% else %}
-      var annotator = new Annotator(elem, {readOnly: true})
-    {% endif %}
+      {% endif %}
         .addPlugin('Unsupported')
         .addPlugin('Store', {
           prefix: '{{ request.route_url("api", subpath="") }}',
