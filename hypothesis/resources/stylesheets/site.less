@@ -54,11 +54,10 @@ form {
 }
 
 h1, h2, h3, h4 {
-  padding-bottom: 0.25em;
+  padding: 0.25em 0;
 }
 
 h1 {
-  display: inline-block;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -115,6 +114,7 @@ section {
 
 @media screen and (min-width: 15em) {
   article { padding-top: 2em; }
+  h1, h2 { text-align: center; }
   #header input { width: 100%; }
 }
 
@@ -126,8 +126,10 @@ section {
 
 @media screen and (min-width: 30em) {
   section {
-    margin: 6em 1em;
+    margin: 2em 1em;
   }
+
+  h1, h2 { text-align: left; }
 
   #header {
     float: right;
@@ -148,11 +150,7 @@ section {
 
 @media screen and (min-width: 37.5em) {
   article {
-    padding: 6em 4em;
-  }
-
-  section {
-    margin: 6em 2em;
+    padding: 4em;
   }
 }
 
