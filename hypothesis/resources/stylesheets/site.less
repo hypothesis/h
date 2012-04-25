@@ -2,17 +2,13 @@
 
 body {
   background-color: desaturate(lighten(@red, 40%), 85%);
-  color: lighten(@grayDark, 25%);
+  color: lighten(@gray-dark, 20%);
 }
 
 #content {
   background-color: desaturate(lighten(@yellow, 45%), 95%);
-  .box-shadow(@gray 0 0 1em 0);
+  .box-shadow(@gray 0 0 3em 0);
   margin-bottom: 8em;
-}
-
-h1, fieldset {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 article {
@@ -24,18 +20,23 @@ section {
   text-align: justify;
 }
 
-h1 {
+h1, h2, h3, h4 {
+  padding-bottom: 0.25em;
 }
 
-h1, h2, h3, h4 {
-  line-height: @baseLineHeight / @em * 1.5;
-  padding-bottom: 0.25em;
+h1 {
+  display: inline-block;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 h3 {
   border-bottom-style: solid;
-  border-color: lighten(@grayLight, 25%);
+  border-color: lighten(@gray-light, 25%);
   border-width: 0.1em;
+}
+
+h3:first-letter {
+  font-size: 110%;
 }
 
 p {
@@ -52,18 +53,20 @@ p {
 
 #header {
   background-color: desaturate(lighten(@blue, 50%), 95%);
-  .border-radius(0 0 1em 1em);
-  .box-shadow(@gray 0 0em 0.25em 0 ~','
+  .border-radius(0 0 0.25em 0.25em ~'/' 0 0 0.5em 0.5em);
+  .box-shadow(@gray-light 0 0 1em 0 ~','
               desaturate(lighten(@blue, 25%), 75%) 0 -0.25em 1em -0.5em inset);
-  margin-bottom: -1em;
+  margin-bottom: -0.25em; //pull content under the rounded corners in mobile
   padding: 1em;
   position: relative;
   z-index: 2;
   text-align: center;
 
   .field_error {
-    color: @black;
+    color: @red;
     display: block;
+    margin-top: -0.5em;
+    .small;
     text-shadow: @white -0.05em 0.05em 0.01em;
   }
 
@@ -76,7 +79,7 @@ p {
 
     /* TODO: remove this legend when JS not present */
     legend {
-      color: @grayLight;
+      color: @gray-light;
       display: inline;
       opacity: 0.5;
       position: absolute;
@@ -86,13 +89,13 @@ p {
         cursor: text;
         position: relative;
         top: 1em;
-        left: 1.25em;
+        left: 1em;
         .user-select(none);
       }
     }
 
     input {
-      .border-radius(0.25em);
+      border: solid lighten(@gray-light, 20%) 0.1em;
       .box-sizing(border-box);
       margin: 0.5em 0;
       padding: 0.5em 1em;
@@ -100,11 +103,14 @@ p {
 
     input[type="submit"] {
       border: 0;
-      .box-shadow(@gray 0 -0.5em 1em 0.1em inset);
-      background-color: desaturate(lighten(@blue, 5%), 65%);
-      color: @grayLighter;
+      .border-radius(0.25em);
+      .box-shadow(0 0.1em 0.1em 0 desaturate(lighten(@blue, 25%), 50%) inset ~','
+                  0 0.05em 0.1em 0 @gray-light);
+      color: @gray-lighter;
       font-weight: bold;
-      text-shadow: @grayDark 0 -0.1em 0.01em;
+      .linear-gradient(top ~','
+                       desaturate(lighten(@blue, 20%), 50%) -50% ~','
+                       @black 400%);
     }
   }
 }
@@ -127,14 +133,13 @@ p {
 */
 
 @media screen and (min-width: 30em) {
-  article { padding-top: 6em; }
   section {
-    margin: 6em 0em;
+    margin: 6em 1em;
   }
 
   #header {
     float: right;
-    margin: 0 1em 1em 1em;
+    margin: 0 2em 4em;
     text-align: left;
 
     input[type="submit"] {
@@ -154,8 +159,8 @@ p {
     padding: 6em 4em;
   }
 
-  #header {
-    margin: 0 2em 4em;
+  section {
+    margin: 6em 2em;
   }
 }
 
@@ -170,13 +175,6 @@ p {
     .columns(12);
     margin: auto;
   }
-
-  section {
-    margin: 6em 2em;
-  }
-}
-
-@media screen and (min-width: 57em) and (max-width: 117.9375em) {
 }
 
 /*

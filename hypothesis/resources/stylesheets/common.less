@@ -2,16 +2,16 @@
 
 // Grays
 @black:                 #000;
-@grayDarker:            #222;
-@grayDark:              #333;
+@gray-darker:           #222;
+@gray-dark:             #333;
 @gray:                  #555;
-@grayLight:             #999;
-@grayLighter:           #eee;
+@gray-light:            #999;
+@gray-lighter:          #eee;
 @white:                 #fff;
 
 // Accent colors
 @blue:                  #049cdb;
-@blueDark:              #0064cd;
+@blue-dark:             #0064cd;
 @green:                 #46a546;
 @red:                   #bd1e2d;
 @yellow:                #ffc40d;
@@ -20,21 +20,21 @@
 @purple:                #7a43b6;
 
 // Typography
-@baseFontSize:          14px;
-@baseFontFamily:        Georgia, serif;
-@baseLineHeight:        24px;
-@em:                    @baseFontSize / 14 * 1em;
+@font-size:             16;
+@font-family:           "Sorts Mill Goudy", Georgia, serif;
+@line-height:           24;
+@em:                    @font-size*1em;
 
 // Links
-@linkColor:             @red;
-@linkColorHover:        darken(@linkColor, 15%);
+@link-color:            @red;
+@link-color-hover:      darken(@link-color, 15%);
 
 // Columns
 @column: 48;
 @gutter: 24;
 
 .columns(@cols:1) {
-	width: (@cols * (@column + @gutter) - @gutter) / @em;
+  width: (@cols * (@column + @gutter) - @gutter) / @em;
 }
 
 /*
@@ -46,8 +46,8 @@
 */
 
 /*
-	Margin, padding, and border resets
-	except for form elements
+  Margin, padding, and border resets
+  except for form elements
   */
 
 body, div,
@@ -55,44 +55,44 @@ h1, h2, h3, h4, h5, h6,
 p, blockquote, pre, dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend, th, td,
 article, aside, figure, footer, header, hgroup, menu, nav, section {
-	margin: 0;
-	padding: 0;
-	border: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 
 /*
-	Consistency fixes
-	adopted from http://necolas.github.com/normalize.css/
+  Consistency fixes
+  adopted from http://necolas.github.com/normalize.css/
   */
 
 article, aside, details, figcaption, figure, 
 footer, header, hgroup, nav, section, audio, canvas, video {
-	display: block;
+  display: block;
 }
 
 html {
-	height: 100%; 
-	-webkit-text-size-adjust: 100%; 
-	-ms-text-size-adjust: 100%;
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
 }
 
-body {min-height: 100%; font-size: 100%;}
+body { min-height: 100%; font-size: 100%; }
 
 sub, sup {
-	font-size: 75%; 
-	line-height: 0; 
-	position: relative; 
-	vertical-align: baseline;
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
 }
 
 sup {top: -0.5em;}
 sub {bottom: -0.25em;}
 
 pre {
-	white-space: pre; 
-	white-space: pre-wrap; 
-	word-wrap: break-word;
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 b, strong {font-weight: bold;}
@@ -104,15 +104,15 @@ table {
 }
 
 a img, img {
-	-ms-interpolation-mode: bicubic;
-	border: 0;
+  -ms-interpolation-mode: bicubic;
+  border: 0;
 }
 
 input, textarea, button, select {
-	margin: 0;
-	font-size: 100%;
-	line-height: normal;
-	vertical-align: baseline;
+  margin: 0;
+  font-size: 100%;
+  line-height: normal;
+  vertical-align: baseline;
 }
 
 button,
@@ -132,64 +132,64 @@ textarea {overflow: auto;}
 
 img::selection
 img::-moz-selection {
-	background: transparent;
+  background: transparent;
 }
 
 body {
-	-webkit-tap-highlight-color: rgba(255, 0, 0, 0.62);
+  -webkit-tap-highlight-color: @red;
 }
 
 /*
-	Type presets
+  Type presets
   */
 
 body {
-  font-family: @baseFontFamily;
-	font-size: @baseFontSize/@em;
+  font-family: @font-family;
+  font-size: @font-size/@em;
   font-smoothing: antialiased;
-	line-height: @baseLineHeight / @em;
+  line-height: @line-height / @em;
 }
 
 .small, {
-	font-size: 13/@em;
-	line-height: 14/13*1em;
+  font-size: 13/@em;
+  line-height: 14/13*1em;
 }
 
 .normal {
-	font-size: 1em;
+  font-size: 1em;
 }
 
 .big {
-	font-size: 23/@em;
-	line-height: 24/23*1em;
+  font-size: 23/@em;
+  line-height: 24/23*1em;
 }
 
 .large {
-	font-size: 27/@em;
-	line-height: 36/27*1em;
+  font-size: 27/@em;
+  line-height: 36/27*1em;
 }
 
 .huge {
-	font-size: 44/@em;
-	line-height: 48/44*1em;
+  font-size: 44/@em;
+  line-height: 48/44*1em;
 }
 
 .enormous {
-	font-size: 72/@em;
-	line-height: 72/72*1em;
+  font-size: 72/@em;
+  line-height: 72/72*1em;
 }
 
 .gigantic {
-	font-size: 116/@em;
-	line-height: 120/116*1em;
+  font-size: 116/@em;
+  line-height: 120/116*1em;
 }
 
 /* Typography */
 
 article p {
-	-webkit-hyphens: auto;
-	   -moz-hyphens: auto;
-	        hyphens: auto;
+  -webkit-hyphens: auto;
+     -moz-hyphens: auto;
+          hyphens: auto;
 }
 
 h1 {.large;}
@@ -201,9 +201,9 @@ h1, h2, h3 {
 
 /* Links */
 a {
-  color: @linkColor;
+  color: @link-color;
   text-decoration: none;
   &:hover {
-    color: @linkColorHover;
+    color: @link-color-hover;
   }
 }
