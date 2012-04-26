@@ -22,29 +22,29 @@ body {
 
 form {
   display: inline;
-  fieldset { margin: 0.5em 0; }
+  fieldset { margin: .5em 0; }
 
   legend {
     color: $gray-light;
     display: inline;
-    opacity: 0.5;
+    opacity: .5;
     position: absolute;
     z-index: 2;
 
     label, span {
       cursor: text;
       position: relative;
-      top: 0.5em;
+      top: .5em;
       left: 1em;
       @include user-select(none);
     }
   }
 
   input {
-    border: solid lighten($gray-light, 30%) 0.1em;
-    @include border-radius(0.25em);
+    border: solid lighten($gray-light, 30%) .1em;
+    @include border-radius(.25em);
     @include box-sizing(border-box);
-    padding: 0.5em 1em;
+    padding: .5em 1em;
   }
 
   input[type="submit"] {
@@ -58,7 +58,7 @@ form {
 }
 
 h1, h2, h3, h4 {
-  padding: 0.25em 0;
+  padding: .25em 0;
 }
 
 h1 {
@@ -68,7 +68,7 @@ h1 {
 h3 {
   border-bottom-style: solid;
   border-color: $gray-lighter;
-  border-width: 0.1em;
+  border-width: .1em;
 }
 
 p {
@@ -86,7 +86,7 @@ section {
 .field_error {
   display: block;
   text-align: right;
-  text-shadow: $white -0.05em 0.05em 0.01em;
+  text-shadow: $white -.05em .05em .01em;
 }
 
 .outline {
@@ -95,13 +95,13 @@ section {
 
 #header {
   background-color: desaturate(lighten($blue, 50%), 95%);
-  border: 0.1em lighten($gray-light, 30%) solid;
-  @include border-radius(0 0 0.25em 0.25em);
+  border: .1em lighten($gray-light, 30%) solid;
+  @include border-radius(0 0 .25em .25em);
   @include box-shadow(
-    $gray-light 0 0 0.5em 0,
-    desaturate(lighten($blue, 25%), 75%) 0 -0.25em 1em -0.5em inset
+    $gray-light 0 0 .5em 0,
+    desaturate(lighten($blue, 25%), 75%) 0 -.25em 1em -.5em inset
   );
-  margin-bottom: -0.25em; //pull content under the rounded corners in mobile
+  margin-bottom: -.25em; //pull content under the rounded corners in mobile
   padding: 1em;
   position: relative;
   text-align: center;
@@ -109,7 +109,7 @@ section {
 }
 
 #content {
-  border: 0.1em lighten($gray-light, 30%) solid;
+  border: .1em lighten($gray-light, 30%) solid;
   background-color: desaturate(lighten($yellow, 50%), 66%);
   @include box-shadow($gray 0 0 1em 0);
   font-size: ($font-size + 2) / $font-size * 1em;
