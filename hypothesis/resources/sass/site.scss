@@ -41,7 +41,7 @@ form {
   }
 
   input {
-    border: solid lighten($gray-light, 20%) 0.1em;
+    border: solid lighten($gray-light, 30%) 0.1em;
     @include border-radius(0.25em);
     @include box-sizing(border-box);
     padding: 0.5em 1em;
@@ -67,7 +67,7 @@ h1 {
 
 h3 {
   border-bottom-style: solid;
-  border-color: lighten($gray-light, 25%);
+  border-color: $gray-lighter;
   border-width: 0.1em;
 }
 
@@ -89,11 +89,16 @@ section {
   text-shadow: $white -0.05em 0.05em 0.01em;
 }
 
+.outline {
+
+}
+
 #header {
   background-color: desaturate(lighten($blue, 50%), 95%);
-  @include border-radius(0 0 0.25em 0.25em, 0 0 0.5em 0.5em);
+  border: 0.1em lighten($gray-light, 30%) solid;
+  @include border-radius(0 0 0.25em 0.25em);
   @include box-shadow(
-    $gray-light 0 0 1em 0,
+    $gray-light 0 0 0.5em 0,
     desaturate(lighten($blue, 25%), 75%) 0 -0.25em 1em -0.5em inset
   );
   margin-bottom: -0.25em; //pull content under the rounded corners in mobile
@@ -104,8 +109,9 @@ section {
 }
 
 #content {
+  border: 0.1em lighten($gray-light, 30%) solid;
   background-color: desaturate(lighten($yellow, 50%), 66%);
-  @include box-shadow($gray 0 0 3em 0);
+  @include box-shadow($gray 0 0 1em 0);
   font-size: ($font-size + 2) / $font-size * 1em;
   margin-bottom: 8em;
 }
