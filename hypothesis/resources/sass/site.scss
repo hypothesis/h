@@ -98,7 +98,7 @@ section {
   border: .1em lighten($gray-light, 30%) solid;
   @include border-radius(0 0 .25em .25em);
   @include box-shadow(
-    $gray-light 0 0 .5em 0,
+    $gray-light 0 0 .25em 0,
     desaturate(lighten($blue, 25%), 75%) 0 -.25em 1em -.5em inset
   );
   margin-bottom: -.25em; //pull content under the rounded corners in mobile
@@ -111,7 +111,7 @@ section {
 #content {
   border: .1em lighten($gray-light, 30%) solid;
   background-color: desaturate(lighten($yellow, 50%), 66%);
-  @include box-shadow($gray 0 0 1em 0);
+  @include box-shadow($gray-light 0 0 .5em 0);
   font-size: ($font-size + 2) / $font-size * 1em;
   margin-bottom: 8em;
 }
