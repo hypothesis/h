@@ -70,16 +70,16 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   _colorize: (v) ->
     # TODO: a better colorize function could incorporate confidence in
     # determining where to place the cutoffs for the first log step.
-    v = v + 1 # prep for log scale
+    v = v + Math.ceil(v)  # prep for log scale
     h = d3.scale.log()
-      .domain([1, 1.02, 1.5, 1.5, 2])
-      .range([300, 300, 360, 0, 60])
-    s = d3.scale.log()
-      .domain([1, 1.01, 2])
-      .range([0, 0.5, 1])
-    l = d3.scale.log()
-      .domain([1, 1.02, 1.1, 2])
-      .range([0.75, 0.25, 0.375, 0.5])
+      .domain([1, 2])
+      .range([360, 180])
+    s = d3.scale.linear()
+      .domain([0, 1, 1.5, 2])
+      .range([0, 1, 1, 1])
+    l = d3.scale.linear()
+      .domain([0, 1, 1.31, 1.69, 2])
+      .range([0.5, 0.25, 0.25, 0.25, 0.25])
     d3.hsl(h(v), s(v), l(v)).toString()
 
   # Public: Updates the @heatmap property with the latest annotation
