@@ -1,12 +1,4 @@
 {% import "flash_template.jinja2" as flash with context -%}
-{% do request.need('hypothesis.resources:site_styles') %}
-{% do request.need('js.annotator:annotator') %}
-{% do request.need('js.annotator.plugins:auth') %}
-{% do request.need('js.annotator.plugins:heatmap') %}
-{% do request.need('js.annotator.plugins:store') %}
-{% do request.need('js.annotator.plugins:selector') %}
-{% do request.need('js.annotator.plugins:unsupported') %}
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.1//EN"
     "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-2.dtd">
 <!--[if lt IE 9]><html class="ie"><![endif]-->
@@ -22,6 +14,9 @@
   <link rel="profile" href="http://www.w3.org/1999/xhtml/vocab" />
   <link href='http://fonts.googleapis.com/css?family=Sorts+Mill+Goudy:400,400italic' rel='stylesheet' type='text/css'>
   {{ flash.apex_head() }}
+  {% assets filters='compass', output='css/site.css', 'sass/site.scss' %}
+     <link rel="stylesheet" href="{{ ASSET_URL }}" />
+  {% endassets %}
 </head>
 <body>
   <div id="flash-msg">{{ flash.apex_flash() }}</div>

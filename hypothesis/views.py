@@ -11,7 +11,16 @@ def home(request):
 
 def includeme(config):
     config.include('pyramid_jinja2')
-    config.add_jinja2_extension('jinja2.ext.do')
+
+    # Set up webassets extension
+    config.include('pyramid_webassets')
+    assets_environment = config.get_webassets_env()
+    config.add_jinja2_extension('webassets.ext.jinja2.AssetsExtension')
+    config.get_jinja2_environment().assets_environment = assets_environment
+
+    # Set up template search paths
     config.add_jinja2_search_path('hypothesis:templates')
     config.add_jinja2_search_path('apex:templates')
+
+    # Set up views
     config.add_view(home, route_name='home', renderer='home.jinja2')
