@@ -1,10 +1,13 @@
-@import "common.less";
+@import "compass/css3";
+@import "compass/css3/user-interface";
+
+@import "common";
 
 a {
-  color: @link-color;
+  color: $link-color;
   text-decoration: none;
   &:hover {
-    color: @link-color-hover;
+    color: $link-color-hover;
   }
 }
 
@@ -13,8 +16,8 @@ article {
 }
 
 body {
-  background-color: desaturate(lighten(@yellow, 40%), 66%);
-  color: @gray;
+  background-color: desaturate(lighten($yellow, 40%), 66%);
+  color: $gray;
 }
 
 form {
@@ -22,7 +25,7 @@ form {
   fieldset { margin: 0.5em 0; }
 
   legend {
-    color: @gray-light;
+    color: $gray-light;
     display: inline;
     opacity: 0.5;
     position: absolute;
@@ -33,23 +36,24 @@ form {
       position: relative;
       top: 0.5em;
       left: 1em;
-      .user-select(none);
+      @include user-select(none);
     }
   }
 
   input {
-    border: solid lighten(@gray-light, 20%) 0.1em;
-    .border-radius(0.25em);
-    .box-sizing(border-box);
+    border: solid lighten($gray-light, 20%) 0.1em;
+    @include border-radius(0.25em);
+    @include box-sizing(border-box);
     padding: 0.5em 1em;
   }
 
   input[type="submit"] {
-    color: @gray-lighter;
+    color: $gray-lighter;
     font-weight: bold;
-    .linear-gradient(top ~','
-                     desaturate(lighten(@blue, 20%), 50%) -50% ~','
-                     @black 400%);
+    @include background-image(
+      linear-gradient(top,
+                     desaturate(lighten($blue, 20%), 50%) -50%,
+                     $black 400%));
   }
 }
 
@@ -63,7 +67,7 @@ h1 {
 
 h3 {
   border-bottom-style: solid;
-  border-color: lighten(@gray-light, 25%);
+  border-color: lighten($gray-light, 25%);
   border-width: 0.1em;
 }
 
@@ -76,20 +80,22 @@ section {
 }
 
 .red, .required_star, .field_error {
-  color: @red;
+  color: $red;
 }
 
 .field_error {
   display: block;
   text-align: right;
-  text-shadow: @white -0.05em 0.05em 0.01em;
+  text-shadow: $white -0.05em 0.05em 0.01em;
 }
 
 #header {
-  background-color: desaturate(lighten(@blue, 50%), 95%);
-  .border-radius(0 0 0.25em 0.25em ~'/' 0 0 0.5em 0.5em);
-  .box-shadow(@gray-light 0 0 1em 0 ~','
-              desaturate(lighten(@blue, 25%), 75%) 0 -0.25em 1em -0.5em inset);
+  background-color: desaturate(lighten($blue, 50%), 95%);
+  @include border-radius(0 0 0.25em 0.25em, 0 0 0.5em 0.5em);
+  @include box-shadow(
+    $gray-light 0 0 1em 0,
+    desaturate(lighten($blue, 25%), 75%) 0 -0.25em 1em -0.5em inset
+  );
   margin-bottom: -0.25em; //pull content under the rounded corners in mobile
   padding: 1em;
   position: relative;
@@ -98,9 +104,9 @@ section {
 }
 
 #content {
-  background-color: desaturate(lighten(@yellow, 50%), 66%);
-  .box-shadow(@gray 0 0 3em 0);
-  font-size: (@font-size + 4) / @font-size * 1em;
+  background-color: desaturate(lighten($yellow, 50%), 66%);
+  @include box-shadow($gray 0 0 3em 0);
+  font-size: ($font-size + 2) / $font-size * 1em;
   margin-bottom: 8em;
 }
 
@@ -117,7 +123,7 @@ section {
 }
 
 /*
-	Wide mobile layout 
+	Wide mobile layout
 	480-767 px
 	Zoomed in above 480 px
 */
@@ -141,7 +147,7 @@ section {
 }
 
 /*
-	Tablet layout 
+	Tablet layout
 	600-911 px
 	Zoomed in above 600 px
 */
@@ -153,20 +159,20 @@ section {
 }
 
 /*
-	Widescreen layout 
+	Widescreen layout
 	912-1887 px
 	Zoomed in above 912 px
 */
 
 @media screen and (min-width: 57em) {
   body {
-    .columns(12);
+    @include width(12);
     margin: auto;
   }
 }
 
 /*
-	Huge-screen layout 
+	Huge-screen layout
 	1888-2520 px
 	Zoomed in above 1920 px
 */

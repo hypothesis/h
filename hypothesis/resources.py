@@ -3,7 +3,7 @@ from fanstatic import Library, Resource, get_library_registry, NEEDED
 from pyramid.path import DottedNameResolver
 
 library = Library('hypothesis', 'resources')
-site_styles = Resource(library, 'stylesheets/site.less')
+site_styles = Resource(library, 'css/site.css')
 
 def fanstatic_need_property(request):
     """A pyramid request property for fanstatic resource inclusions
