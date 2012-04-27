@@ -14,7 +14,10 @@
   <link rel="profile" href="http://www.w3.org/1999/xhtml/vocab" />
   <link href='http://fonts.googleapis.com/css?family=Sorts+Mill+Goudy:400,400italic' rel='stylesheet' type='text/css'>
   {{ flash.apex_head() }}
-  {% assets filters='compass', output='css/site.css', 'sass/site.scss' %}
+  {% assets 'annotator_css' %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}" />
+  {% endassets %}
+  {% assets 'site_css' %}
      <link rel="stylesheet" href="{{ ASSET_URL }}" />
   {% endassets %}
 </head>
@@ -44,6 +47,11 @@
   </div>
   <div id="content">{% block content %}{% endblock %}</div>
   <div id="footer">{% block footer %}{% endblock %}</div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js">
+  </script>
+  {% assets 'annotator_js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
   <script>
     var elem = document.body;
     (function ($) {
@@ -62,10 +70,6 @@
           annotationData: {
             uri: document.location.href
           }
-        })
-        .addPlugin('Selector', {})
-        .addPlugin('Heatmap', {
-          d3: "http://cdnjs.cloudflare.com/ajax/libs/d3/2.8.1/d3.v2.min.js"
         })
     })(jQuery);
   </script>

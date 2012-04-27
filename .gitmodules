@@ -1,0 +1,3 @@
+[submodule "hypothesis/resources/annotator"]
+	path = hypothesis/resources/annotator
+	url = https://github.com/hypothesis/annotator.git
