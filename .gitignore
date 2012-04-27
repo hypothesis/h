@@ -7,7 +7,9 @@ dist
 include
 lib
 local
+man
 share
+src
 
 *.egg-info
 *.pyc
