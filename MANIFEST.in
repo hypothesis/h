@@ -1,2 +1,2 @@
 include *.txt *.rst LICENSE NOTICE
-recursive-include hypothesis *.ico *.coffee *.css *.gif *.jpg *.txt *.jinja2 *.js *.scss *.png
+recursive-include hypothesis *.ico *.css *.gif *.jpg *.png *.txt *.jinja2 *.js 
