@@ -35,7 +35,7 @@ form {
       cursor: text;
       position: relative;
       top: .5em;
-      left: 1em;
+      left: .5em;
       @include user-select(none);
     }
   }
@@ -44,7 +44,7 @@ form {
     border: solid lighten($gray-light, 30%) .1em;
     @include border-radius(.25em);
     @include box-sizing(border-box);
-    padding: .5em 1em;
+    padding: .5em .5em;
   }
 
   input[type="submit"] {
