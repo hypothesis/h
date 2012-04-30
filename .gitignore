@@ -1,18 +1,19 @@
 .*
 !.gitignore
 
-bin
-build
-dist
-include
-lib
-local
-man
-share
-src
+/*.db
+/*.egg-info
+/*.ini
+/bin
+/build
+/dist
+/include
+/lib
+/local
+/man
+/share
+/src
 
-*.egg-info
 *.pyc
 *.pyo
 
-*.db
