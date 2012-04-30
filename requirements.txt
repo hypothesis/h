@@ -4,8 +4,10 @@ Flask==0.8
 Jinja2==2.6
 Mako==0.7.0
 MarkupSafe==0.15
+Paste==1.7.5.1
 PasteDeploy==1.5.0
 PyJWT==0.1.4
+Pygments==1.5
 SQLAlchemy==0.7.6
 WTForms==1.0.1
 WebOb==1.2b3
@@ -18,6 +20,7 @@ chardet==1.0.1
 cryptacular==1.4.1
 distribute==0.6.24
 httplib2==0.7.4
+-e git+hypothes.is:src/hypothes.is.git@a5ac04176f9ec2901ae263e0da52dd9959e5be74#egg=hypothesis-dev
 iso8601==0.1.4
 mock==0.8.0
 nose==1.1.2
@@ -25,6 +28,7 @@ oauth2==1.5.211
 pbkdf2==1.3
 pyes==0.16.0
 pyramid==1.3
+pyramid-debugtoolbar==1.0.2
 pyramid-jinja2==1.3
 pyramid-mailer==0.8
 pyramid-tm==0.4
