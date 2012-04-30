@@ -32,7 +32,7 @@ pyramid-debugtoolbar==1.0.2
 pyramid-jinja2==1.3
 pyramid-mailer==0.8
 pyramid-tm==0.4
-pyramid-webassets==0.1
+-e git+https://github.com/sontek/pyramid_webassets.git@38b0b9f9f4e36dc22b3a5c10eabf4d9228d97740#egg=pyramid_webassets-dev
 python-openid==2.2.5
 repoze.lru==0.5
 repoze.sendmail==3.1
