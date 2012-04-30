@@ -25,7 +25,7 @@
   <div id="flash-msg">{{ flash.apex_flash() }}</div>
   <div id="header">
     {%- if form is defined %}
-      {{ form.render(action=action, submit_text=_(action)) | safe }}
+      {{ form.render(action=action, submit_text=_(action.title())) | safe }}
       {% if velruse_forms is defined -%}
         {% for provider_form in velruse_forms -%}
          {{ provider_form.render(
