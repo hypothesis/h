@@ -21,7 +21,7 @@ body {
 }
 
 form {
-  display: inline;
+  display: inline-block;
   fieldset { margin: .5em 0; }
 
   legend {
@@ -106,6 +106,10 @@ section {
   position: relative;
   text-align: center;
   z-index: 2;
+}
+
+#header > :first-child {
+  display: inline;
 }
 
 #content {
