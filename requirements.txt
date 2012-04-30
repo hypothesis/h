@@ -1,3 +1,4 @@
+-e .
 -e git+https://github.com/cd34/apex.git@2d7f14ba324518c2f4310b008ab931c617c197be#egg=Apex-dev
 Chameleon==2.8.4
 Flask==0.8
@@ -20,7 +21,6 @@ chardet==1.0.1
 cryptacular==1.4.1
 distribute==0.6.24
 httplib2==0.7.4
--e git+hypothes.is:src/hypothes.is.git@a5ac04176f9ec2901ae263e0da52dd9959e5be74#egg=hypothesis-dev
 iso8601==0.1.4
 mock==0.8.0
 nose==1.1.2
