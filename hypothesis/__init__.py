@@ -12,5 +12,5 @@ def create_app(settings):
     config.include('.')
     return config.make_wsgi_app()
 
-def main(context, **settings):
+def main(global_config, **settings):
     return create_app(settings)
