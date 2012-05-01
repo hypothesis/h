@@ -39,7 +39,7 @@ form {
   }
 
   input {
-    border: solid lighten($gray-light, 30%) .1em;
+    border: solid lighten($gray-light, 25%) .1em;
     @include border-radius(.25em);
     margin: .25em 0;
     padding: .5em;
