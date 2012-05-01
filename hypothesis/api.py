@@ -39,7 +39,8 @@ def token(request):
     secret = settings.get('hypothesis.api_secret')
     key = settings.get('hypothesis.consumer_key')
     ttl = settings.get('hypothesis.api_ttl', auth.DEFAULT_TTL)
-    user_id = request.user.id
+    # @@ make this deal with oid+realms, oauth etc better
+    user_id = 'acct:%s@%s' % (request.user.users[0].login, request.host)
     message = {
         'userId': user_id,
         'consumerKey': key,
