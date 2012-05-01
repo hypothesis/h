@@ -49,6 +49,8 @@
   <div id="footer">{% block footer %}{% endblock %}</div>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js">
   </script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.0.0rc6/angular-1.0.0rc6.min.js">
+  </script>
   {% assets 'annotator_js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
@@ -70,7 +72,10 @@
           annotationData: {
             uri: document.location.href
           }
-        })
+        }).addPlugin('Selector').addPlugin('Mouse')
+        .addPlugin('Heatmap', {
+          d3: 'http://cdnjs.cloudflare.com/ajax/libs/d3/2.8.1/d3.v2.min.js'
+        });
     })(jQuery);
   </script>
 </body>

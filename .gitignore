@@ -17,3 +17,5 @@
 *.pyc
 *.pyo
 
+/hypothesis/css/site.css
+/hypothesis/js/lib/annotator
