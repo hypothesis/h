@@ -66,6 +66,8 @@ article, aside, figure, footer, header, hgroup, menu, nav, section {
   adopted from http://necolas.github.com/normalize.css/
   */
 
+* { @include box-sizing(border-box); }
+
 article, aside, details, figcaption, figure,
 footer, header, hgroup, nav, section, audio, canvas, video {
   display: block;
@@ -121,11 +123,6 @@ input[type="reset"],
 input[type="submit"] {
   cursor: pointer;
   -webkit-appearance: button;
-}
-
-input[type="checkbox"],
-input[type="radio"] {
-  @include box-sizing(border-box);
 }
 
 textarea {overflow: auto;}

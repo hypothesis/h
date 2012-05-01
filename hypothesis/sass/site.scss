@@ -22,11 +22,9 @@ body {
 
 form {
   display: inline-block;
-  fieldset { margin: .5em 0; }
 
   legend {
     color: $gray-light;
-    display: inline;
     opacity: .5;
     position: absolute;
     z-index: 2;
@@ -34,7 +32,7 @@ form {
     label, span {
       cursor: text;
       position: relative;
-      top: .5em;
+      top: .75em;
       left: .5em;
       @include user-select(none);
     }
@@ -43,17 +41,13 @@ form {
   input {
     border: solid lighten($gray-light, 30%) .1em;
     @include border-radius(.25em);
-    @include box-sizing(border-box);
-    padding: .5em .5em;
+    margin: .25em 0;
+    padding: .5em;
   }
 
   input[type="submit"] {
     color: $gray-lighter;
-    font-weight: bold;
-    @include background-image(
-      linear-gradient(top,
-                     desaturate(lighten($blue, 20%), 50%) -50%,
-                     $black 400%));
+    background-color: desaturate(lighten($blue, 0%), 75%);
   }
 }
 
@@ -101,15 +95,15 @@ section {
     $gray-light 0 0 .25em 0,
     desaturate(lighten($blue, 25%), 75%) 0 -.25em 1em -.5em inset
   );
-  margin-bottom: -.25em; //pull content under the rounded corners in mobile
-  padding: 1em;
+  padding: .5em 1em;
   position: relative;
   text-align: center;
-  z-index: 2;
+  z-index: 3;
 }
 
-#header > :first-child {
-  display: inline;
+#header {
+  @include box-sizing(border-box);
+  form:first-child { display: inline }
 }
 
 #content {
@@ -129,7 +123,11 @@ section {
 @media screen and (min-width: 15em) {
   article { padding-top: 2em; }
   h1, h2 { text-align: center; }
-  #header input { width: 100%; }
+  #header form {
+    margin-bottom: -.25em; //pull content under the rounded corners in mobile
+    width: 100%;
+    input { width: 100%; }
+  }
 }
 
 /*
@@ -150,8 +148,9 @@ section {
     margin: 0 2em 4em;
     text-align: left;
 
-    input[type="submit"] {
+    form {
       width: auto;
+      input[type=submit] { width: auto; }
     }
   }
 }
