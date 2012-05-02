@@ -57,11 +57,13 @@
   <script>
     var elem = document.body;
     (function ($) {
-      var annotator = new Annotator(elem)
       {% if request.user is not none %}
+        var annotator = new Annotator(elem)
         .addPlugin('Auth', {
           tokenUrl: '{{ request.route_url("token") }}'
         })
+      {% else %}
+        var annotator = new Annotator(elem, {readOnly: true})
       {% endif %}
         .addPlugin('Unsupported')
         .addPlugin('Store', {
