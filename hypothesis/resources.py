@@ -42,7 +42,7 @@ def register_bundles(environment):
         'sass/site.scss',
         debug=False,
         filters='compass',
-        output='css/site.css')
+        output='css/site.min.css')
 
 def includeme(config):
     config.include('pyramid_webassets')
