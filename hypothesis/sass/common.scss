@@ -1,4 +1,5 @@
 @import 'compass/css3';
+@import 'compass/reset';
 
 // Grays
 $black:                 #000;
@@ -47,31 +48,11 @@ $gutter: 24;
 }
 
 /*
-  Margin, padding, and border resets
-  except for form elements
-  */
-
-body, div,
-h1, h2, h3, h4, h5, h6,
-pp, blockquote, pre, dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend, th, td,
-article, aside, figure, footer, header, hgroup, menu, nav, section {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-/*
   Consistency fixes
   adopted from http://necolas.github.com/normalize.css/
   */
 
 * { @include box-sizing(border-box); }
-
-article, aside, details, figcaption, figure,
-footer, header, hgroup, nav, section, audio, canvas, video {
-  display: block;
-}
 
 html {
   height: 100%;
@@ -85,7 +66,6 @@ sub, sup {
   font-size: 75%;
   line-height: 0;
   position: relative;
-  vertical-align: baseline;
 }
 
 sup {top: -.5em;}
@@ -100,21 +80,14 @@ pre {
 b, strong {font-weight: bold;}
 abbr[title] {border-bottom: 1px dotted;}
 
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-
 a img, img {
   -ms-interpolation-mode: bicubic;
-  border: 0;
 }
 
 input, textarea, button, select {
-  margin: 0;
-  font-size: 100%;
+  @include reset-font;
   line-height: normal;
-  vertical-align: baseline;
+  margin: 0;
 }
 
 button,
@@ -133,7 +106,7 @@ img::-moz-selection {
 }
 
 body {
-  -webkit-tap-highlight-color: $link-color;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 /*
