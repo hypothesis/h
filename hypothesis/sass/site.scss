@@ -157,7 +157,6 @@ span.error {
   );
   padding: 1.5em;
   position: relative;
-  text-align: center;
   z-index: 3;
 }
 
@@ -171,7 +170,6 @@ span.error {
   h1, h2 { text-align: center; }
   #header {
     form {
-      width: 100%;
       button, input, legend { width: 100%; }
     }
   }
@@ -197,7 +195,6 @@ span.error {
     text-align: left;
 
     form {
-      width: auto;
       button { width: auto; }
     }
   }
