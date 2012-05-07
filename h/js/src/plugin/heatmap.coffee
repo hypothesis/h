@@ -28,13 +28,16 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     @heatmap = $(@html.element)
     @heatmap.appendTo(@annotator.wrapper)
 
-    unless d3? or @d3?
-        console.error('d3.js is required to use the heatmap plugin')
+    unless d3 or @d3?
+      console.error('d3.js is required to use the heatmap plugin')
+      return
+
+    this._setupListeners()
+
     if not d3?
       setTimeout(
         =>
           $.getScript(@d3, =>
-            this._setupListeners()
             this.updateHeatmap()
           ).error(-> Annotator.showNotification(@options.message))
       , 0)
@@ -47,7 +50,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # Returns a new instance of the plugin.
   constructor: (element, options) ->
     super element, options
-    @d3 = options.d3
+    @d3 = d3 or options?.d3
 
   # Listens to annotation change events on the Annotator in order to refresh
   # the @annotations collection.
