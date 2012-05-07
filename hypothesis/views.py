@@ -107,7 +107,7 @@ class AuthView(NgFormView):
     @property
     def buttons(self):
         if self.request.user:
-            return ('sign out',)
+            return tuple()
         else:
             return ('sign in',)
 
@@ -119,11 +119,6 @@ class AuthView(NgFormView):
             # TODO: Investigate why request.set_property doesn't seem to work
             self.request.user = AuthID.get_by_id(user.auth_id)
         self.request.response.headers.extend(headers)
-
-    def sign_out_success(self, form):
-        headers = forget(self.request)
-        self.request.response.headers.extend(headers)
-        self.request.user = None
 
 class home(object):
     def __init__(self, request):

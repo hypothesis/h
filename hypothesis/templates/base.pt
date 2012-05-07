@@ -27,6 +27,9 @@
   <div id="header">
     <metal:content define-slot="header" />
     <form tal:condition="auth" tal:replace="structure auth.form" />
+    <a tal:condition="request.user" href="${request.route_path('apex_logout')}">
+      Sign out
+    </a>
   </div>
   <div id="content" oa-target>
     <metal:content define-slot="content" />
