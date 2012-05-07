@@ -41,6 +41,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
             this.updateHeatmap()
           ).error(-> Annotator.showNotification(@options.message))
       , 0)
+    else
+      this.updateHeatmap()
 
   # Public: Creates a new instance of the Heatmap plugin.
   #
