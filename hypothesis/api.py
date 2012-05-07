@@ -28,7 +28,7 @@ def cors_headers(request):
         'Access-Control-Expose-Headers': 'Location, Content-Type, Content-Length'
     }
     if request.method == 'OPTIONS': headers.update({
-        'Access-Control-Allow-Headers': 'X-Requested-With, Content-Type, Content-Length',
+        'Access-Control-Allow-Headers': 'Content-Type, Content-Length, X-Requested-With',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
         'Access-Control-Max-Age': '86400'
     })
