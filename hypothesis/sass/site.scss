@@ -143,7 +143,7 @@ span.error {
 #content {
   border: lighten($gray-light, 30%) solid thin;
   background-color: lighten($yellow, 45%);
-  @include box-shadow($gray 0 0 1em -.25em);
+  @include box-shadow($gray-dark 0 0 1em -.5em);
   font-size: ($font-size + 2) / $font-size * 1em;
 }
 
@@ -152,7 +152,7 @@ span.error {
   background-color: desaturate(lighten($blue, 50%), 95%);
   border: lighten($gray-light, 30%) solid thin;
   @include box-shadow(
-    $gray-light 0 .25em 1em -.25em,
+    $gray-light 0 0 .5em,
     desaturate(lighten($blue, 25%), 85%) 0 0 6em -3em inset
   );
   padding: 1.5em;
