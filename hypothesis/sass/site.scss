@@ -21,37 +21,6 @@ body {
   color: $gray;
 }
 
-button, input, textarea {
-  border: solid lighten($gray-light, 20%) thin;
-  @include border-radius(.25em);
-  margin: .25em 0;
-  padding: .5em;
-}
-
-button {
-  background-color: desaturate($blue, 25%);
-  border-color: desaturate(darken($blue, 10%), 25%);
-  color: $gray-lighter;
-  @include linear-gradient(
-    color-stops(
-      desaturate($blue, 25%) -50%,
-      $black 400%
-    )
-  );
-  text-shadow: 0 .1em adjust-color(lighten($gray, 10%), $alpha: -.4);
-  font-weight: bold;
-}
-
-button:hover {
-  background-color: desaturate(darken($blue, 5%), 25%);
-  @include linear-gradient(
-    color-stops(
-      desaturate(darken($blue, 5%), 25%) -50%,
-      $black 400%
-    )
-  );
-}
-
 h1, h2, h3, h4 {
   padding: .25em 0;
 }
@@ -112,21 +81,54 @@ span.error {
   display: none;
 }
 
-.error, .red {
+.deform button,
+.deform input,
+.deform textarea {
+  border: solid lighten($gray-light, 20%) thin;
+  @include border-radius(.25em);
+  margin: .25em 0;
+  padding: .5em;
+}
+
+.deform button {
+  background-color: desaturate($blue, 25%);
+  border-color: desaturate(darken($blue, 10%), 25%);
+  color: $gray-lighter;
+  @include linear-gradient(
+    color-stops(
+      desaturate($blue, 25%) -50%,
+      $black 400%
+    )
+  );
+  text-shadow: 0 .1em adjust-color(lighten($gray, 10%), $alpha: -.4);
+  font-weight: bold;
+}
+
+.deform button:hover {
+  background-color: desaturate(darken($blue, 5%), 25%);
+  @include linear-gradient(
+    color-stops(
+      desaturate(darken($blue, 5%), 25%) -50%,
+      $black 400%
+    )
+  );
+}
+
+.deform .error, .red {
   color: $red;
 }
 
-.error {
+.deform .error {
   text-shadow: $white -.05em .05em .01em;
 }
 
-.form-horizontal {
+.deform.form-horizontal {
   div, label, legend, fieldset, input, button, select, textarea {
     display: inline-block;
   }
 }
 
-.form-vertical {
+.deform.form-vertical {
    legend {
      padding-bottom: 1em;
    }
@@ -136,7 +138,7 @@ span.error {
   }
 }
 
-.req {
+.deform .req {
   display: none;
 }
 
