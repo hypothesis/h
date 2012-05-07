@@ -161,6 +161,8 @@ article p {
           hyphens: auto;
 }
 
+em { font-style: italic; }
+
 h1 { @extend .large; }
 h2 { @extend .big; }
 
