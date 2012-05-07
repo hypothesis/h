@@ -92,8 +92,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   updateHeatmap: =>
     return unless d3?
     # Grab some attributes of the document for computing layout
-    context = @annotator.wrapper.context
-    scale = context.scrollHeight / window.innerHeight
+    context = $(@annotator.wrapper.context)
 
     # Get all the visible annotations
     annotations = @annotator.element.find('.annotator-hl:visible')
@@ -104,8 +103,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .map () ->
         {
           el: this
-          top: $(this).offset().top / context.scrollHeight
-          height: $(this).innerHeight() / context.scrollHeight
+          top: $(this).offset().top / context.innerHeight()
+          height: $(this).innerHeight() / context.innerHeight()
         }
        # ... de-jQuery-ify to get the underlying array
       .get()
@@ -116,7 +115,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           [m.top + 0.5 * m.height, 1]
           [m.top + m.height, -1]
         ]
-      , [])
+      , [[0, 0], [1, 0]])
       # ... then sort the points and count the overlap
       .sort()
       .reduce((acc, n) ->
