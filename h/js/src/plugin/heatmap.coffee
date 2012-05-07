@@ -20,8 +20,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
              </svg>
              """ #" coffee-mode font lock bug
 
-    options:
-      message: Annotator._t("Sorry, some features of the Annotator failed to load.")
+  options:
+    message: Annotator._t("Sorry, some features of the Annotator failed to load.")
 
   # Initializes the heatmap plugin
   pluginInit: ->
