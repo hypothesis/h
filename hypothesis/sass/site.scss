@@ -22,15 +22,15 @@ body {
 }
 
 button, input, textarea {
-  border: solid lighten($gray-light, 20%) .1em;
-  @include border-radius(.1em);
+  border: solid lighten($gray-light, 20%) thin;
+  @include border-radius(.25em);
   margin: .25em 0;
   padding: .5em;
 }
 
 button {
-  background-color: desaturate(lighten($blue, 3%), 25%);
-  border-color: desaturate(darken($blue, 3%), 25%);
+  background-color: desaturate(lighten($blue, 0%), 25%);
+  border-color: desaturate(darken($blue, 10%), 25%);
   color: $gray-lighter;
   text-shadow: 0 .1em adjust-color(lighten($gray, 10%), $alpha: -.4);
   font-weight: bold;
@@ -126,7 +126,7 @@ span.error {
 #header {
   @extend .small;
   background-color: desaturate(lighten($blue, 50%), 95%);
-  border: .1em lighten($gray-light, 30%) solid;
+  border: lighten($gray-light, 30%) solid thin;
   @include box-shadow(
     $gray-light 0 0 .5em -.25em,
     desaturate(lighten($blue, 25%), 85%) 0 0 6em -3em inset
@@ -138,7 +138,7 @@ span.error {
 }
 
 #content {
-  border: .1em lighten($gray-light, 30%) solid;
+  border: lighten($gray-light, 30%) solid thin;
   background-color: desaturate(lighten($yellow, 50%), 66%);
   @include box-shadow($gray-light 0 0 .5em -.25em);
   font-size: ($font-size + 2) / $font-size * 1em;
