@@ -23,7 +23,7 @@ def consumer_fetcher(key):
 
 def cors_headers(request):
     headers = {
-        'Access-Control-Allow-Origin': request.headers.get('origin', '*'),
+        'Access-Control-Allow-Origin': request.headers.get('origin'),
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Expose-Headers': 'Location, Content-Type, Content-Length'
     }
