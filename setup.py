@@ -8,8 +8,9 @@ setup(
     install_requires = [
         'annotator>=0.7.6',
         'apex>=0.9.5dev',
+        'deform_bootstrap>=0.2.1',
         'pyramid>=1.3',
-        'pyramid_jinja2>=1.2',
+        'pyramid_deform>=0.2a4',
         'pyramid_tm>=0.3',
         'pyramid_webassets',
         'setuptools>=0.6c11',
