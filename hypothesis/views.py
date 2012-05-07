@@ -102,6 +102,7 @@ class NgFormView(FormView):
 
 class AuthView(NgFormView):
     schema = AuthSchema(after_bind=AuthSchema.after_bind)
+    use_ajax = False
 
     @property
     def buttons(self):
