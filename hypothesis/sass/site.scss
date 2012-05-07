@@ -21,23 +21,26 @@ body {
   color: $gray;
 }
 
-button, input {
-  border: solid lighten($gray-light, 25%) .1em;
-  @include border-radius(.25em);
+button, input, textarea {
+  border: solid lighten($gray-light, 20%) .1em;
+  @include border-radius(.1em);
   margin: .25em 0;
   padding: .5em;
 }
 
 button {
+  background-color: desaturate(lighten($blue, 3%), 25%);
+  border-color: desaturate(darken($blue, 3%), 25%);
   color: $gray-lighter;
-  background-color: desaturate(lighten($blue, 0%), 75%);
+  text-shadow: 0 .1em adjust-color(lighten($gray, 10%), $alpha: -.4);
+  font-weight: bold;
 }
 
 h1, h2, h3, h4 {
   padding: .25em 0;
 }
 
-h1 {
+h1, form {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -47,7 +50,6 @@ h3 {
   border-width: .1em;
 }
 
-
 input,
 textarea {
   @include box-shadow(inset 0 .1em .1em rgba(0, 0, 0, 0.075));
@@ -56,10 +58,8 @@ textarea {
 
 input:focus,
 textarea:focus {
-  @include box-shadow(
-    inset 0 .1em .1em rgba(0, 0, 0, .075),
-    0 0 .1em adjust-color($gray, $alpha: -.4)
-  );
+  @include box-shadow(inset 0 .25em .25em rgba(0, 0, 0, .075));
+  border: $blue solid thin;
 }
 
 input[type="file"]:focus,
@@ -69,23 +69,8 @@ select:focus {
    @include box-shadow(none);
 }
 
-legend {
-  color: $gray;
+label {
   font-weight: bold;
-  z-index: 2;
-}
-
-legend.placeholder {
-  opacity: .5;
-  position: absolute;
-
-  label, span {
-    cursor: text;
-    position: relative;
-    top: 1.25em;
-    left: .75em;
-    @include user-select(none);
-  }
 }
 
 p {
@@ -125,8 +110,12 @@ span.error {
 }
 
 .form-vertical {
+   legend {
+     padding-bottom: 1em;
+   }
+
   .control-group {
-    margin: 1em 0;
+    margin-bottom: 1em;
   }
 }
 
@@ -142,7 +131,7 @@ span.error {
     $gray-light 0 0 .5em -.25em,
     desaturate(lighten($blue, 25%), 85%) 0 0 6em -3em inset
   );
-  padding: .5em 1em;
+  padding: 1.5em;
   position: relative;
   text-align: center;
   z-index: 3;
