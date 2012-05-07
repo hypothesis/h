@@ -126,9 +126,10 @@ class home(object):
 
     @property
     def auth(self):
+        form_style = 'form-horizontal' if self.request.user else 'form-vertical'
         return AuthView(
             self.request,
-            bootstrap_form_style='form-vertical',
+            bootstrap_form_style=form_style,
             formid='auth')
 
     @property
