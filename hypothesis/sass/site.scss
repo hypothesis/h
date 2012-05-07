@@ -17,7 +17,7 @@ article {
 }
 
 body {
-  background-color: desaturate(lighten($yellow, 40%), 66%);
+  background-color: desaturate(lighten($yellow, 35%), 25%);
   color: $gray;
 }
 
@@ -29,11 +29,27 @@ button, input, textarea {
 }
 
 button {
-  background-color: desaturate(lighten($blue, 0%), 25%);
+  background-color: desaturate($blue, 25%);
   border-color: desaturate(darken($blue, 10%), 25%);
   color: $gray-lighter;
+  @include linear-gradient(
+    color-stops(
+      desaturate($blue, 25%) -50%,
+      $black 400%
+    )
+  );
   text-shadow: 0 .1em adjust-color(lighten($gray, 10%), $alpha: -.4);
   font-weight: bold;
+}
+
+button:hover {
+  background-color: desaturate(darken($blue, 5%), 25%);
+  @include linear-gradient(
+    color-stops(
+      desaturate(darken($blue, 5%), 25%) -50%,
+      $black 400%
+    )
+  );
 }
 
 h1, h2, h3, h4 {
@@ -79,7 +95,7 @@ p {
 }
 
 section {
-  margin: 4em 0;
+  margin: 5em 0;
 }
 
 span.error {
@@ -124,25 +140,25 @@ span.error {
   display: none;
 }
 
+#content {
+  border: lighten($gray-light, 30%) solid thin;
+  background-color: lighten($yellow, 45%);
+  @include box-shadow($gray 0 0 1em -.25em);
+  font-size: ($font-size + 2) / $font-size * 1em;
+}
+
 #header {
   @extend .small;
   background-color: desaturate(lighten($blue, 50%), 95%);
   border: lighten($gray-light, 30%) solid thin;
   @include box-shadow(
-    $gray-light 0 0 .5em -.25em,
+    $gray-light 0 .25em 1em -.25em,
     desaturate(lighten($blue, 25%), 85%) 0 0 6em -3em inset
   );
   padding: 1.5em;
   position: relative;
   text-align: center;
   z-index: 3;
-}
-
-#content {
-  border: lighten($gray-light, 30%) solid thin;
-  background-color: desaturate(lighten($yellow, 50%), 66%);
-  @include box-shadow($gray-light 0 0 .5em -.25em);
-  font-size: ($font-size + 2) / $font-size * 1em;
 }
 
 /*
@@ -156,7 +172,7 @@ span.error {
   #header {
     form {
       width: 100%;
-      button, input { width: 100%; }
+      button, input, legend { width: 100%; }
     }
   }
 }
@@ -169,7 +185,7 @@ span.error {
 
 @media screen and (min-width: 30em) {
   section {
-    margin: 4em 1em;
+    margin: 5em 1em;
   }
 
   h1, h2 { text-align: left; }
