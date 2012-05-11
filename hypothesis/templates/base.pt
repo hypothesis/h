@@ -40,10 +40,7 @@
   <script src="${request.static_url('deform:static/scripts/jquery.form.js')}">
   </script>
   <script tal:attributes="src src"
-          tal:repeat="src environment['hypothesis_full_js'].urls()">
-  </script>
-  <script>
-    hypothesis(document.body, "${request.route_path('api', subpath='')}")
+          tal:repeat="src environment['app_js'].urls()">
   </script>
 </body>
 </html>

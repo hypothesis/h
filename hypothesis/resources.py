@@ -32,14 +32,7 @@ def register_annotator(config):
     # Registration
     add_webasset(
         config,
-        'annotator_css',
-        Bundle(
-            join('annotator', 'css', 'annotator.css'),
-            filters='cssrewrite',
-            output=join('css', 'annotator.min.css')))
-    add_webasset(
-        config,
-        'annotator_js',
+        'annotator',
         Bundle(
             js,
             output=join('js', 'annotator.min.js')))
@@ -53,29 +46,27 @@ def add_webassets(config):
         Bundle(
             'annotator/lib/vendor/jquery.js',
             output='js/jquery.min.js'))
+    add_webasset(config, 'd3', 'js/lib/d3.v2.min.js')
     add_webasset(
         config,
-        'hypothesis_css',
+        'app_css',
         Bundle(
-            environment['annotator_css'],
-            Bundle('sass/common.scss',
+            Bundle('sass/app.scss',
                    debug=False,
                    filters='compass',
-                   output='css/common.css'),
+                   output='css/app.css'),
             output='css/hypothesis.min.css'))
     add_webasset(
         config,
-        'hypothesis_js',
+        'app_js',
         Bundle(
-            environment['annotator_js'],
-            Bundle('js/hypothesis.js'),
+            environment['d3'],
+            environment['annotator'],
+            Bundle('js/src/hypothesis.coffee',
+                   debug=False,
+                   filters='coffeescript',
+                   output='js/lib/hypothesis.js'),
             output='js/hypothesis.min.js'))
-    add_webasset(
-        config,
-        'hypothesis_full_js',
-        Bundle(
-            environment['hypothesis_js'],
-            output='js/hypothesis-full.min.js'))
     add_webasset(
         config,
         'site_css',
@@ -88,9 +79,8 @@ def add_webassets(config):
         config,
         'css',
         Bundle(
-               environment['annotator_css'],
-               environment['site_css'],
-               output='css/site-full.min.css'))
+            environment['site_css'],
+            output='css/site-full.min.css'))
 
 @subscriber(BeforeRender)
 def add_global(event):

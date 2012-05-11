@@ -10,7 +10,6 @@ This product also includes the following third-party components:
 
    Copyright 2009-2012, Open Knowledge Foundation
 
- * css3.less (https://github.com/MatthewWagerfield/LESS-CSS3-Mixins)
+ * d3.js (http://d3js.org/)
 
-   Copyright 2012, Matthew Wagerfield
-
+   Copyright (c) 2012, Michael Bostock
