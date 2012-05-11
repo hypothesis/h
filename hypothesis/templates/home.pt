@@ -1,7 +1,14 @@
 <metal:main use-macro="load: base.pt">
+  <div id="header" metal:fill-slot="header" tal:condition="not request.user">
+    <form tal:replace="structure auth.form" />
+  </div>
+
   <article metal:fill-slot="content">
-    <h1>hypothes<span class="red">.</span>is</h1>
-    <h2>the&nbsp;Internet, peer&nbsp;reviewed<span class="red">.</span></h2>
+    <div class="title">
+      <img src="${request.static_url('hypothesis:images/logo.png')}" />
+      <h1>hypothes<span class="red">.</span>is</h1>
+      <h2>the&#160;Internet, peer&#160;reviewed.</h2>
+    </div>
 
     <section>
       <h3>Imagine<span class="red">:</span></h3>

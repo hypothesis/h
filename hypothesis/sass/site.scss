@@ -21,12 +21,12 @@ article {
 }
 
 body {
-  background-color: desaturate(lighten($yellow, 35%), 25%);
+  background-color: desaturate(lighten($blue, 35%), 95%);
   color: $gray;
 }
 
 h1, h2, h3, h4 {
-  padding: .25em 0;
+  padding: .5em 0 0 0;
 }
 
 h1, form {
@@ -43,26 +43,12 @@ label {
   font-weight: bold;
 }
 
-p {
-  margin: 1em 0;
-}
-
 section {
   margin: 5em 0;
 }
 
 span.error {
   @extend .small;
-  text-align: right;
-  display: block;
-}
-
-.alert-block {
-  display: none;
-}
-
-.alert-message p:first-child {
-  display: none;
 }
 
 .deform button,
@@ -70,8 +56,8 @@ span.error {
 .deform textarea {
   border: solid lighten($gray-light, 20%) thin;
   @include border-radius(.25em);
-  margin: .25em 0;
-  padding: .5em;
+  margin: .5em 0;
+  padding: .25em;
 }
 
 .deform button {
@@ -85,7 +71,6 @@ span.error {
     )
   );
   text-shadow: 0 .1em adjust-color(lighten($gray, 10%), $alpha: -.4);
-  font-weight: bold;
 }
 
 .deform button:hover {
@@ -127,21 +112,32 @@ span.error {
 }
 
 .deform.form-horizontal {
-  div, label, legend, fieldset, input, button, select, textarea {
+  .controls, .control-group, div, fieldset,
+  input, button, select, textarea {
     display: inline-block;
+  }
+  .error .controls {
+    overflow: visible;
   }
 }
 
 .deform.form-vertical {
-   legend {
-     padding-bottom: 1em;
-   }
+  .alert-message {
+    padding: .25em 0;
+  }
 
   .control-group {
-    margin-bottom: 1em;
+    margin-bottom: .25em;
+  }
+
+  .control-group:first-of-type {
+    padding-top: 1em;
   }
 }
 
+.deform div.alert-block,
+.deform .alert-message p:first-child,
+.deform legend,
 .deform .req {
   display: none;
 }
@@ -149,11 +145,11 @@ span.error {
 #content {
   border: lighten($gray-light, 30%) solid thin;
   background-color: lighten($yellow, 45%);
-  @include box-shadow($gray-dark 0 0 1em -.5em);
+  @include box-shadow(desaturate($yellow, 75%) 0 0 .5em);
   font-size: ($font-size + 2) / $font-size * 1em;
 }
 
-#header {
+#toolbar, #header {
   @extend .small;
   background-color: desaturate(lighten($blue, 50%), 95%);
   border: lighten($gray-light, 30%) solid thin;
@@ -161,9 +157,19 @@ span.error {
     $gray-light 0 0 .5em,
     desaturate(lighten($blue, 25%), 85%) 0 0 6em -3em inset
   );
-  padding: 1.5em;
+}
+
+#header {
+  padding: 1.2em;
   position: relative;
-  z-index: 3;
+  z-index: 2;
+}
+
+#toolbar {
+  position: fixed;
+  height: 3em;
+  width: 100%;
+  z-index: 10;
 }
 
 /*
@@ -173,12 +179,18 @@ span.error {
 */
 
 @media screen and (min-width: 15em) {
-  h1, h2 { text-align: center; }
+  .title { text-align: center; }
   #content { padding-top: 2em; }
+  #auth {
+    button, input {
+      width: 100%;
+    }
+  }
+  #content { padding-top: 3em; }
   #header {
-    form {
-      top: -3em;
-      margin-bottom: -3em;
+      position: relative;
+      top: -4.2em;
+      margin-bottom: -4.2em;
   }
 }
 
@@ -193,15 +205,25 @@ span.error {
     margin: 5em 1em;
   }
 
-  h1, h2 { text-align: left; }
+  .title {
+      text-align: left;
+      img { margin-bottom: 1em; }
+  }
+
+  #auth {
+    .controls, .control-group, .form-actions, fieldset, button, input {
+      width: auto;
+    }
+  }
 
   #header {
     float: right;
     margin-bottom: inherit;
-    margin-right: 1em;
     text-align: left;
+    top: inherit;
 
-    form {
+    #auth {
+      margin-top: inherit;
       button { width: auto; }
     }
   }
@@ -215,7 +237,9 @@ span.error {
 
 @media screen and (min-width: 37.5em) {
   article { padding: 2em; }
-  #header { margin-right: 2em; }
+  h1, h2 { text-align: left; }
+  .title { text-align: left; }
+  #header { margin-right: 4em; }
 }
 
 /*
@@ -225,12 +249,24 @@ span.error {
 */
 
 @media screen and (min-width: 57em) {
-  article { padding: 4em; }
-  body {
+  article { padding: 2em 4em; }
+
+  .title img {
+    float: left;
+    position: relative;
+    top: -1.5em;
+    left: -2em;
+    margin-right: -2em;
+  }
+
+  #content {
     @include width(12);
     margin: auto;
   }
-  #header { margin-right: 4em; }
+
+  #header {
+    margin-right: 4em;
+  }
 }
 
 /*
