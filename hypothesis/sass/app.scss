@@ -1,0 +1,82 @@
+@import 'common';
+
+/* Annotator styles */
+
+.annotator-adder {
+	background-image: url(../annotator/img/annotator-icon-sprite.png);
+	background-repeat: no-repeat;
+	margin-top: -48px;
+	margin-left: -24px;
+	width: 48px;
+	height: 48px;
+	background-position: left top;
+	position: absolute;
+  z-index: 999;
+}
+
+.annotator-adder:hover {
+	background-position: center top;
+}
+
+.annotator-adder:active {
+	background-position: center right;
+}
+
+.annotator-adder button {
+	display: block;
+	width: 36px;
+	height: 41px;
+	margin: 0 auto;
+	border: none;
+	background: none;
+	text-indent: -999em;
+	cursor: pointer;
+}
+
+
+.annotator-resize,
+.annotator-widget::after,
+.annotator-editor a::after,
+.annotator-viewer .annotator-controls button,
+.annotator-viewer .annotator-controls a,
+.annotator-filter .annotator-filter-navigation button::after,
+.annotator-filter .annotator-filter-property .annotator-filter-clear {
+	background-image: url(../annotator/img/annotator-glyph-sprite.png);
+	background-repeat: no-repeat;
+}
+
+.annotator-hide {
+	display: none;
+	visibility: hidden;
+}
+
+.annotator-hl {
+	background: rgba(255, 255, 10, 0.3);
+}
+
+.annotator-outer {
+  @include width(5);
+}
+
+.annotator-wrapper {
+	position: relative;
+}
+
+/* Hypothesis Styles */
+
+#hypothesis-sidebar {
+  float: right;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+
+  .annotator-widget {
+    position: static;
+    width: auto;
+  }
+
+  .annotator-heatmap {
+    float: left;
+    width: 10px;
+  }
+}

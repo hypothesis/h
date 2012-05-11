@@ -170,10 +170,11 @@ span.error {
 
 @media screen and (min-width: 15em) {
   h1, h2 { text-align: center; }
+  #content { padding-top: 2em; }
   #header {
     form {
-      button, input, legend { width: 100%; }
-    }
+      top: -3em;
+      margin-bottom: -3em;
   }
 }
 
