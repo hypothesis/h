@@ -32,13 +32,13 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   pluginInit: ->
     if d3?
       this._setupListeners()
-      this._updateHeatmap()
+      this.updateHeatmap()
     else if @options.d3?
       setTimeout(
         =>
           $.getScript(@options.d3, =>
             this._setupListeners()
-            this._updateHeatmap()
+            this.updateHeatmap()
           ).error(-> Annotator.showNotification(@options.message))
       , 0)
     else
@@ -59,7 +59,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     ]
 
     for event in events
-      @annotator.subscribe event, this._updateHeatmap
+      @annotator.subscribe event, this.updateHeatmap
 
     # Throttle indo resize events and update the heatmap
     $(window).resize () =>
@@ -67,7 +67,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         @updateTimer = setTimeout(
           () =>
             @updateTimer = null
-            this._updateHeatmap()
+            this.updateHeatmap()
           100
         )
 
@@ -79,7 +79,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .range([1, .45])
     d3.hsl(210, s(v), l(v)).toString()
 
-  _updateHeatmap: =>
+  updateHeatmap: =>
     return unless d3?
 
     wrapper = $(@annotator.wrapper)
