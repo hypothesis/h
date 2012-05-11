@@ -21,9 +21,9 @@ def consumer_fetcher(key):
     else:
         return request.db.query(Consumer).get(key)
 
-def cors_headers(request):
+def token_headers(request):
     headers = {
-        'Access-Control-Allow-Origin': request.headers.get('origin'),
+        'Access-Control-Allow-Origin': request.headers.get('host'),
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Expose-Headers': 'Location, Content-Type, Content-Length'
     }
@@ -47,7 +47,7 @@ def token(request):
         'ttl': ttl
     }
     body = auth.encode_token(message, secret)
-    return Response(body=body, headerlist=cors_headers(request).items())
+    return Response(body=body, headerlist=token_headers(request).items())
 
 def includeme(config):
     settings = config.registry.settings
