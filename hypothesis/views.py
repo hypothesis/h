@@ -26,7 +26,7 @@ def login_validator(node, kw):
     if not valid:
         raise Invalid(
             node,
-            "User or passord incorrect"
+            "Please, try again."
         )
 
 def users(request):
@@ -78,25 +78,16 @@ class NgFormView(FormView):
         super(NgFormView, self).__init__(request)
         self.form_class = partial(self.form_class, **kwargs)
 
-    def failure(self, e):
-        if self.request.is_xhr:
-            return super(NgFormView, self).failure(e)
-        raise HTTPSeeOther(location=self.request.url)
-
     def show(self, form):
-        if self.request.method == 'POST':
-            if self.request.is_xhr:
-                formid = self.request.params.get('__formid__')
-                new_request = self.request.copy_get()
-                new_request.user = self.request.user
-                new_request.registry = self.request.registry
-                context = getattr(self.request, 'context', None)
-                response = render_view_to_response(context, new_request, formid)
-                response.headers.update(self.request.response.headers)
-                return response
-            else:
-                raise HTTPSeeOther(headers=self.request.response.headers,
-                                   location=self.request.url)
+        if self.request.method == 'POST' and self.request.is_xhr:
+            formid = self.request.params.get('__formid__')
+            new_request = self.request.copy_get()
+            new_request.user = self.request.user
+            new_request.registry = self.request.registry
+            context = getattr(self.request, 'context', None)
+            response = render_view_to_response(context, new_request, formid)
+            response.headers.update(self.request.response.headers)
+            return response
         else:
             return super(NgFormView, self).show(form)
 
@@ -118,7 +109,7 @@ class AuthView(NgFormView):
             headers = remember(self.request, user.auth_id)
             # TODO: Investigate why request.set_property doesn't seem to work
             self.request.user = AuthID.get_by_id(user.auth_id)
-        self.request.response.headers.extend(headers)
+        raise HTTPSeeOther(headers=headers, location=self.request.url)
 
 class home(object):
     def __init__(self, request):
