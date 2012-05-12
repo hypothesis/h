@@ -91,6 +91,7 @@ def includeme(config):
     config.add_route('home', '/', use_global_views=True)
     config.add_route('token', '/api/token')
     config.add_route('api', '/api/*subpath')
+    config.add_route('embed', '/embed.js')
 
     config.scan(__name__)
     config.include('pyramid_webassets')

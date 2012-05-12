@@ -140,6 +140,8 @@ def includeme(config):
     config.add_view(home, attr='partial', renderer='templates/form.pt', xhr=True)
     config.add_view(home, name='auth', attr='auth', renderer='templates/form.pt')
 
+    config.add_view(route_name='embed', renderer='templates/embed.pt')
+
     config.add_static_view('assets/annotator', 'annotator')
     config.add_static_view('assets/css', 'css')
     config.add_static_view('assets/js', 'js')
