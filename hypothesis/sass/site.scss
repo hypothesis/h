@@ -143,20 +143,10 @@ span.error {
 }
 
 #content {
-  border: lighten($gray-light, 30%) solid thin;
-  background-color: lighten($yellow, 45%);
   @include box-shadow(desaturate($yellow, 75%) 0 0 .5em);
-  font-size: ($font-size + 2) / $font-size * 1em;
-}
-
-#toolbar, #header {
-  @extend .small;
-  background-color: desaturate(lighten($blue, 50%), 95%);
   border: lighten($gray-light, 30%) solid thin;
-  @include box-shadow(
-    $gray-light 0 0 .5em,
-    desaturate(lighten($blue, 25%), 85%) 0 0 6em -3em inset
-  );
+  background-color: lighten($gray-lighter, 2%);
+  font-size: ($font-size + 2) / $font-size * 1em;
 }
 
 #header {
@@ -166,6 +156,14 @@ span.error {
 }
 
 #toolbar {
+  @extend .small;
+  @include box-shadow(
+    $gray-light 0 0 .5em,
+    desaturate(lighten($blue, 25%), 85%) 0 0 6em -3em inset
+  );
+  background-color: desaturate(lighten($blue, 50%), 95%);
+  border: lighten($gray-light, 30%) solid thin;
+  padding: 0 1em;
   position: fixed;
   height: 3em;
   width: 100%;
