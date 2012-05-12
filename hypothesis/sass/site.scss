@@ -55,33 +55,32 @@ span.error {
 .deform button,
 .deform input,
 .deform textarea {
-  border: solid lighten($gray-light, 20%) thin;
   @include border-radius(.25em);
-  margin: .5em 0;
-  padding: .25em;
+  border: solid lighten($gray-light, 20%) thin;
+  padding: .33em .5em;
 }
 
 .deform button {
+  @include linear-gradient(
+    color-stops(
+      desaturate($blue, 40%) -50%,
+      $black 300%
+    )
+  );
   background-color: desaturate($blue, 25%);
   border-color: desaturate(darken($blue, 10%), 25%);
   color: $gray-lighter;
-  @include linear-gradient(
-    color-stops(
-      desaturate($blue, 25%) -50%,
-      $black 400%
-    )
-  );
   text-shadow: 0 .1em adjust-color(lighten($gray, 10%), $alpha: -.4);
 }
 
 .deform button:hover {
-  background-color: desaturate(darken($blue, 5%), 25%);
   @include linear-gradient(
     color-stops(
-      desaturate(darken($blue, 5%), 25%) -50%,
-      $black 400%
+      desaturate(darken($blue, 5%), 40%) -50%,
+      $black 300%
     )
   );
+  background-color: desaturate(darken($blue, 5%), 25%);
 }
 
 .deform input,
@@ -128,7 +127,7 @@ span.error {
   }
 
   .control-group {
-    margin-bottom: .25em;
+    margin-bottom: 1.25em;
   }
 
   .control-group:first-of-type {
