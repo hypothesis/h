@@ -43,7 +43,8 @@ class Hypothesis extends Annotator
     this
 
   onHeatmapClick: (event) =>
-    target = d3.bisect(@heatmap.index, event.offsetY)-1
+    y = event.clientY - @wrapper.offset().top
+    target = d3.bisect(@heatmap.index, y)-1
     annotations = @heatmap.buckets[target]
 
     if annotations?.length
