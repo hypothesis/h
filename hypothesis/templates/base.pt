@@ -23,7 +23,7 @@
         tal:attributes="href href"
         tal:repeat="href environment['css'].urls()" />
 </head>
-<body>
+<body tal:attributes="class 'toolbar' if request.user else default">
   <div id="flash-msg">
   </div>
   <div tal:condition="request.user" id="toolbar">

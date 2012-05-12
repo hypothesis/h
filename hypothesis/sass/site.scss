@@ -127,11 +127,11 @@ span.error {
   }
 
   .control-group {
-    margin-bottom: 1.25em;
+    margin: 1em 0;
   }
 
   .control-group:first-of-type {
-    padding-top: 1em;
+    margin-top: 0;
   }
 }
 
@@ -150,7 +150,7 @@ span.error {
 }
 
 #header {
-  padding: 1.2em;
+  padding: 1em;
   position: relative;
   z-index: 2;
 }
@@ -178,18 +178,12 @@ span.error {
 
 @media screen and (min-width: 15em) {
   .title { text-align: center; }
-  #content { padding-top: 2em; }
   #auth {
     button, input {
       width: 100%;
     }
   }
-  #content { padding-top: 3em; }
-  #header {
-      position: relative;
-      top: -4.2em;
-      margin-bottom: -4.2em;
-  }
+  .toolbar #content { padding-top: 2em; }
 }
 
 /*
@@ -205,25 +199,28 @@ span.error {
 
   .title {
       text-align: left;
-      img { margin-bottom: 1em; }
+      img {
+        position: relative;
+        top: -1em;
+        left: -1em;
+        margin-bottom: -2em;
+      }
   }
 
   #auth {
+    button { width: auto; }
+
     .controls, .control-group, .form-actions, fieldset, button, input {
       width: auto;
     }
   }
 
   #header {
+    @include small;
     float: right;
-    margin-bottom: inherit;
     text-align: left;
     top: inherit;
-
-    #auth {
-      margin-top: inherit;
-      button { width: auto; }
-    }
+    margin-top: .25em;
   }
 }
 
@@ -236,8 +233,7 @@ span.error {
 @media screen and (min-width: 37.5em) {
   article { padding: 2em; }
   h1, h2 { text-align: left; }
-  .title { text-align: left; }
-  #header { margin-right: 4em; }
+  #header { margin-top: 1.5em; }
 }
 
 /*
@@ -247,23 +243,24 @@ span.error {
 */
 
 @media screen and (min-width: 57em) {
-  article { padding: 2em 4em; }
+  article { padding: 4em; }
 
   .title img {
     float: left;
     position: relative;
-    top: -1.5em;
+    top: -2em;
     left: -2em;
     margin-right: -2em;
   }
 
   #content {
-    @include width(12);
+    @include width(11);
     margin: auto;
   }
 
   #header {
-    margin-right: 4em;
+    margin-right: 2.5em;
+    margin-top: 3.25em;
   }
 }
 
