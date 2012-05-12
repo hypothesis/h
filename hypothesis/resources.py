@@ -46,7 +46,7 @@ def add_webassets(config):
         Bundle(
             'annotator/lib/vendor/jquery.js',
             output='js/jquery.min.js'))
-    add_webasset(config, 'd3', 'js/lib/d3.v2.min.js')
+    add_webasset(config, 'd3', Bundle('js/lib/d3.v2.min.js', debug=False))
     add_webasset(
         config,
         'app_css',
