@@ -1,5 +1,5 @@
 from glob import glob
-from os.path import basename, join, relpath, splitext
+from os.path import basename, relpath, splitext
 from operator import concat
 
 from pyramid.events import subscriber
@@ -13,12 +13,12 @@ from webassets import Bundle
 def register_annotator(config):
     # Path utilities
     _name = lambda src: splitext(basename(src))[0]
-    _src = lambda name: join('annotator', 'src', '%s.coffee' % name)
-    _plugin = lambda name: join('annotator', 'src', 'plugin', '%s.coffee' % name)
+    _src = lambda name: 'annotator/src/%s.coffee' % name
+    _plugin = lambda name: 'annotator/src/plugin/%s.coffee' % name
     _lib = lambda src: Bundle(
         src, debug=False, filters='coffeescript',
-        output=join('js', 'lib', 'annotator',
-                    splitext(relpath(src, join('annotator', 'src')))[0]) + '.js')
+        output='js/lib/annotator/%s' %
+                    splitext(relpath(src, 'annotator/src'))[0] + '.js')
 
     # Plugins
     plugins = aslist(config.get_settings().get('annotator.plugins', ''))
@@ -35,7 +35,7 @@ def register_annotator(config):
         'annotator',
         Bundle(
             js,
-            output=join('js', 'annotator.min.js')))
+            output='js/annotator.min.js'))
 
 def add_webassets(config):
     environment = config.registry.queryUtility(IWebAssetsEnvironment)
