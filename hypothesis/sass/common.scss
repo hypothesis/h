@@ -119,39 +119,46 @@ body {
   line-height: $line-height / $em;
 }
 
-.small, {
+@mixin small {
   font-size: 13/$em;
   line-height: 14/13*1em;
 }
+.small { @include small; }
 
-.normal {
+@mixin normal {
   font-size: 1em;
 }
+.normal { @include normal; }
 
-.big {
+@mixin big {
   font-size: 23/$em;
   line-height: 24/23*1em;
 }
+.big { @include big; }
 
-.large {
+@mixin large {
   font-size: 27/$em;
   line-height: 36/27*1em;
 }
+.large { @include large; }
 
-.huge {
+@mixin huge {
   font-size: 44/$em;
   line-height: 48/44*1em;
 }
+.huge { @include huge; }
 
-.enormous {
+@mixin enormous {
   font-size: 72/$em;
   line-height: 72/72*1em;
 }
+.enormous { @include enormous; }
 
-.gigantic {
+@mixin gigantic {
   font-size: 116/$em;
   line-height: 120/116*1em;
 }
+.gigantic { @include gigantic; }
 
 /* Typography */
 
