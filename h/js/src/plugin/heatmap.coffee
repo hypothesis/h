@@ -4,12 +4,16 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         <svg class="annotator-heatmap"
              xmlns="http://www.w3.org/2000/svg"
              version="1.1">
-         <defs>
-           <linearGradient id="heatmap-gradient" x2="0" y2="100%">
-           </linearGradient>
-         </defs>
-           <rect x="0" y="0" width="100%" height="100%" stroke="gray"
-                 fill="url('#heatmap-gradient')">
+           <defs>
+             <linearGradient id="heatmap-gradient" x2="0" y2="100%">
+             </linearGradient>
+             <filter id="heatmap-blur">
+               <feGaussianBlur stdDeviation="0 2"></feGaussianBlur>
+             </filter>
+           </defs>
+           <rect x="0" y="0" width="100%" height="100%"
+                 fill="url('#heatmap-gradient')"
+                 filter="url('#heatmap-blur')" >
            </rect>
          </svg>
          """
