@@ -146,4 +146,4 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     stops.order()
       .attr('offset', (v) => v[0] / wrapper.height())
       .attr('stop-color', (v) => this._colorize(v[1] / max))
-      .attr('stop-opacity', (v) -> d3.format('p')(opacity(v[1])))
+      .attr('stop-opacity', (v) -> opacity(v[1]))
