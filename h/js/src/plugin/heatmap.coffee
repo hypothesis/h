@@ -89,7 +89,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     wrapper = $(@annotator.wrapper)
     highlights = @annotator.element.find('.annotator-hl:visible')
 
-    @element.css({height: wrapper.height()})
+    # Re-set the 100% because some browsers might not adjust to events like
+    # user zoom change properly.
+    @element.css({height: '100%'})
 
     # Construct control points for the heatmap highlights
     points = highlights.map () ->
