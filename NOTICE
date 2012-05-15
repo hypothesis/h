@@ -13,3 +13,7 @@ This product also includes the following third-party components:
  * d3.js (http://d3js.org/)
 
    Copyright (c) 2012, Michael Bostock
+
+ * handlebars.js (http://handlebarsjs.com/)
+
+   Copyright (C) 2011 by Yehuda Katz

@@ -1,0 +1,19 @@
+<ul class="annotator-listing">
+  {{#each annotations}}
+    <li class="hyp-summary">
+      <div class="hyp-nothread">
+        <div class="hyp-meta">
+          {{#splitUser user}}
+            <div class="hyp-user">
+              {{name}} <span class="hyp-provider">on {{provider}}</span>
+            </div>
+          {{/splitUser}}
+          <div class="hyp-time">{{fuzzyTime created}}</div>
+        </div>
+        <div class="hyp-body">
+          <div class="hyp-content">{{text}}</div>
+        </div>
+      </div>
+    </li>
+  {{/each}}
+</ul>

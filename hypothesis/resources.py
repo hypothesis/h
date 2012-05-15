@@ -55,8 +55,24 @@ def add_webassets(config):
                    output='css/app.css'),
             output='css/hypothesis.min.css'))
     config.add_webasset(
+        'app_templates',
+        Bundle(
+            Bundle('js/lib/handlebars-runtime.min.js', debug=False),
+            Bundle(
+                Bundle('templates/sidebar.handlebars',
+                       debug=False,
+                       filters='handlebars',
+                       output='js/lib/templates/sidebar.js'),
+                Bundle('templates/viewer.handlebars',
+                       debug=False,
+                       filters='handlebars',
+                       output='js/lib/templates/viewer.js'),
+                Bundle('js/helpers.js'),
+                output='js/templates.js.min')))
+    config.add_webasset(
         'app_js',
         Bundle(
+            environment['app_templates'],
             Bundle('js/src/hypothesis.coffee',
                    debug=False,
                    filters='coffeescript',
