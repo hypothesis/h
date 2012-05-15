@@ -176,3 +176,8 @@ h2 { @extend .big; }
 h1, h2, h3 {
   font-weight: 700;
 }
+
+/* Shadows */
+@mixin smallshadow($a: 2px, $b: 2px, $c: .1) {
+  @include box-shadow($a $b 1em hsla(0, 0%, 0%, $c));
+}

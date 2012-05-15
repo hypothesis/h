@@ -16,11 +16,6 @@ class Hypothesis extends Annotator
     Unsupported: {}
 
   constructor: (element, options) ->
-    # Create a sidebar if one does not exist. This is a singleton element
-    # even if multiple instances of the app are loaded on a page (some day).
-    @sidebar = $('#hypothesis-sidebar').get(0)
-    if not @sidebar?
-      @sidebar = $("<div class='annotator-wrapper' id='hypothesis-sidebar'></div>")
     super
 
     # Load plugins
@@ -29,27 +24,89 @@ class Hypothesis extends Annotator
       if not @plugins[name]
         this.addPlugin name, opts
 
+    # Set up interface elements
+    this._setupHeatmap()._setupSidebar()
+
+    @heatmap.element.prependTo(@sidebar)
+    @sidebar.prependTo(@wrapper)
+
+    #
+    # Interface patching. Nasty nasty. We should make this easier.
+    #
+
     # Pull the viewer and editor into the sidebar, instead of the wrapper
     @viewer.element.detach().appendTo(@sidebar)
     @editor.element.detach().appendTo(@sidebar)
 
-    # Pull the heatmap into the sidebar
-    @heatmap = @plugins.Heatmap
-    @heatmap.element.prependTo(@sidebar)
-
-    # Drop the sidebar into the beginning of the wrapper (so it can be floated)
-    @sidebar.prependTo(@wrapper)
-
     this
 
   onHeatmapClick: (event) =>
-    y = event.clientY - @wrapper.offset().top
+    event?.stopPropagation()
+    y = event.pageY - @wrapper.offset().top
     target = d3.bisect(@heatmap.index, y)-1
     annotations = @heatmap.buckets[target]
 
     if annotations?.length
-      this.showViewer(annotations, {})
+      this.showViewer(annotations)
     else
-      this.viewer.hide(event)
+      @sidebar.addClass('collapse')
+      $(document.documentElement).removeClass('hyp-collapse')
 
     @heatmap.updateHeatmap()
+
+  showViewer: (annotations) ->
+    @viewer.element.find('.annotator-listing').replaceWith(
+      Handlebars.templates['viewer']({
+        annotations: annotations
+      })
+    )
+    @viewer.show()
+    $(document.documentElement).addClass('hyp-collapse')
+    @sidebar.removeClass('collapse')
+
+  # Sets up the selection event listeners to watch mouse actions on the document.
+  #
+  # Returns itself for chaining.
+  _setupDocumentEvents: ->
+    super
+    $(document).on('mousedown', () =>
+      @sidebar.addClass('collapse')
+      $(document.documentElement).removeClass('hyp-collapse')
+      setTimeout((() -> $(window).resize()), 600)
+    )
+    this
+
+  _setupHeatmap: () ->
+    # Pull the heatmap into the sidebar
+    @heatmap = @plugins.Heatmap
+    this
+
+  _setupSidebar: () ->
+    # Create a sidebar if one does not exist. This is a singleton element --
+    # even if multiple instances of the app are loaded on a page (some day).
+    if not @sidebar?
+      sidebar = $(Handlebars.templates['sidebar']())
+      Annotator.prototype.sidebar = sidebar
+      @sidebar = sidebar
+      @sidebar.addClass('collapse')
+    this
+
+  # Creates an instance of Annotator.Viewer and assigns it to the @viewer
+  # property, appends it to the @wrapper and sets up event listeners.
+  #
+  # Returns itself to allow chaining.
+  _setupViewer: ->
+    @viewer = new Annotator.Viewer(readOnly: @options.readOnly)
+    @viewer.hide()
+      .on("edit", this.onEditAnnotation)
+      .on("delete", this.onDeleteAnnotation)
+      .addField({
+        load: (field, annotation) =>
+          if annotation.text
+            $(field).escape(annotation.text)
+          else
+            $(field).html("<i>#{_t 'No Comment'}</i>")
+          this.publish('annotationViewerTextField', [field, annotation])
+      })
+      .element.appendTo(@wrapper)
+    this

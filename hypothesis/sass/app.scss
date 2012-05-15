@@ -1,4 +1,5 @@
 @import 'common';
+@import 'compass';
 
 /* Annotator styles */
 
@@ -33,18 +34,6 @@
 	cursor: pointer;
 }
 
-
-.annotator-resize,
-.annotator-widget::after,
-.annotator-editor a::after,
-.annotator-viewer .annotator-controls button,
-.annotator-viewer .annotator-controls a,
-.annotator-filter .annotator-filter-navigation button::after,
-.annotator-filter .annotator-filter-property .annotator-filter-clear {
-	background-image: url(../annotator/img/annotator-glyph-sprite.png);
-	background-repeat: no-repeat;
-}
-
 .annotator-hide {
 	display: none;
 	visibility: hidden;
@@ -54,29 +43,230 @@
 	background: rgba(255, 255, 10, 0.3);
 }
 
-.annotator-outer {
-  @include width(5);
-}
-
 .annotator-wrapper {
 	position: relative;
 }
 
-/* Hypothesis Styles */
+/*
+ * Hypothesis Styles
+ */
 
-#hypothesis-sidebar {
-  float: right;
+$cool-hue: 220;
+$warm-hue: 45;
+
+$thread-padding: 1.5em;
+
+$scorewidth: 40px;
+$scoreheight: $scorewidth;
+
+@mixin bodytext {
+  color: hsla($warm-hue, 10%, 40%, 1);
+  line-height: 1.2em;
+  text-align: left;
+}
+
+@mixin primarytext {
+  color: #666;
+  font-weight: bold;
+}
+
+@mixin secondarytext {
+  color: #666;
+  font-size: .8em;
+}
+
+html {
+  @include single-transition(right, 0.6s, ease-in-out);
+  position: absolute;
+  width: auto;
   height: 100%;
+  right: 0;
+  left: 0;
+}
+
+.annotator-heatmap {
+  background: hsla(0, 0, 90%, 0.4);
+  position: absolute;
+  width: 10px;
+  left: -10px;
+  outline: solid $gray-lighter thin;
+}
+
+// body
+.hyp-body {
+  margin-top: .5em;
   position: relative;
-  z-index: 2;
-
-  .annotator-widget {
-    position: static;
-    width: auto;
+  .hyp-score {
+    position: absolute;
+    left: -$scorewidth / 2;
+    &.hyp-positive {
+      top: .2em;
+    }
+    &.hyp-negative {
+      top: -.2em;
+    }
+    &.hyp-neutral {
+      top: -.2em;
+    }
   }
+}
 
-  .annotator-heatmap {
+.hyp-nothread {
+  padding-right: $thread-padding;
+  padding-bottom: 1em;
+}
+
+// meta - applies to the bar at the top of annotations and replies.
+.hyp-meta {
+  @include pie-clearfix;
+  position: relative;
+  .hyp-user {
     float: left;
-    width: 10px;
+    font-weight: bold;
+    font-size: 1.3em;
   }
+  .hyp-time {
+    bottom: 0;
+    right: 0;
+    position: absolute;
+  }
+  .hyp-threadexp {
+    bottom: -1px;
+    left: -7px;
+    font-size: 1.8em;
+    font-weight: bold;
+    position: absolute;
+  }
+}
+
+// Styles for the sidebar
+.hyp-sidebar {
+  @include single-transition(all, 0.6s, ease-in-out);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: $font-size / $em * .8;
+  height: 100%;
+  line-height: $line-height / $em * .8;
+  overflow: visible;
+  position: absolute;
+  right: 0;
+  left: 100%;
+  z-index: 500;
+
+  .annotator-outer {
+    @include single-transition(margin-left, 0.6s, ease-in-out);
+    background: url('../images/noise_1.png');
+    height: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 501;
+  }
+}
+
+.hyp-sidebar.collapse {
+  width: 0;
+  margin-left: 0;
+}
+
+// Applies to the summary view of an annotation
+.hyp-summary {
+  @include smallshadow(2px, 3px, .2);
+  position: relative;
+  background: hsla(0, 0%, 100%, 1);
+  cursor: pointer;
+  margin: 1em 1em 0 1em;
+
+  &:hover {
+    @include smallshadow(2px, 4px, .2);
+    bottom: 1px;
+  }
+  &:active {
+    @include smallshadow(2px, 3px, .2);
+    bottom: -1px;
+  }
+}
+
+// misc
+.hyp-provider {
+  @extend .small;
+  color: $gray-light;
+}
+
+.hyp-tag {
+  background: #ddd;
+  border-radius: 2px;
+  border: 1px solid #999;
+  color: #666;
+  padding: .1em .4em;
+  padding-bottom: .2em;
+}
+
+.hyp-time {
+  @include secondarytext;
+}
+
+/*
+	Mobile layout
+	240–479 px
+	Zoomed out below 320 px
+*/
+
+@media screen and (min-width: 15em) {
+  .hyp-sidebar {
+    width: 90%;
+    margin-left: -90%;
+    .annotator-outer {
+      width: 90%;
+    }
+  }
+}
+
+/*
+	Wide mobile layout
+	480-767 px
+	Zoomed in above 480 px
+*/
+
+@media screen and (min-width: 30em) {
+}
+
+/*
+	Tablet layout
+	600-911 px
+	Zoomed in above 600 px
+*/
+
+@media screen and (min-width: 37.5em) {
+  .hyp-sidebar {
+    width: 400px;
+    margin-left: -400px;
+    .annotator-outer {
+      width: 400px;
+    }
+  }
+}
+
+/*
+	Widescreen layout
+	912-1887 px
+	Zoomed in above 912 px
+*/
+
+@media screen and (min-width: 57em) {
+  .hyp-sidebar {
+    margin-left: 0;
+  }
+  html.hyp-collapse {
+    width: auto;
+    right: 400px;
+  }
+}
+
+/*
+	Huge-screen layout
+	1888-2520 px
+	Zoomed in above 1920 px
+*/
+
+@media screen and (min-width: 118em) {
+
 }
