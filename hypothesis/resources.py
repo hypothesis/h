@@ -38,17 +38,15 @@ def register_annotator(config):
             output='js/annotator.min.js'))
 
 def add_webassets(config):
-    environment = config.registry.queryUtility(IWebAssetsEnvironment)
+    environment = config.get_webassets_env()
     register_annotator(config)
-    add_webasset(
-        config,
+    config.add_webasset(
         'jquery',
         Bundle(
             'annotator/lib/vendor/jquery.js',
             output='js/jquery.min.js'))
-    add_webasset(config, 'd3', Bundle('js/lib/d3.v2.min.js', debug=False))
-    add_webasset(
-        config,
+    config.add_webasset('d3', Bundle('js/lib/d3.v2.min.js', debug=False))
+    config.add_webasset(
         'app_css',
         Bundle(
             Bundle('sass/app.scss',
@@ -56,27 +54,30 @@ def add_webassets(config):
                    filters='compass',
                    output='css/app.css'),
             output='css/hypothesis.min.css'))
-    add_webasset(
-        config,
+    config.add_webasset(
         'app_js',
         Bundle(
-            environment['d3'],
-            environment['annotator'],
             Bundle('js/src/hypothesis.coffee',
                    debug=False,
                    filters='coffeescript',
                    output='js/lib/hypothesis.js'),
             output='js/hypothesis.min.js'))
-    add_webasset(
-        config,
+    config.add_webasset(
+        'all_js',
+        Bundle(
+            environment['jquery'],
+            environment['d3'],
+            environment['annotator'],
+            environment['app_js'],
+            output='js/hypothesis-full.min.js'))
+    config.add_webasset(
         'site_css',
         Bundle(
             'sass/site.scss',
             debug=False,
             filters='compass',
             output='css/site.css'))
-    add_webasset(
-        config,
+    config.add_webasset(
         'css',
         Bundle(
             environment['site_css'],
