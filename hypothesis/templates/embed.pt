@@ -1,6 +1,6 @@
 var $, Hypothesis
 (function () {
-  return new Hypothesis($('#content'), {
+  return new Hypothesis($(document.body), {
     Auth: {
       tokenUrl: '${request.route_url("token")}'
     },
