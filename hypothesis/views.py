@@ -9,7 +9,7 @@ from deform.form import Form
 from deform.widget import FormWidget, PasswordWidget, SelectWidget
 
 from pyramid.httpexceptions import HTTPRedirection, HTTPSeeOther
-from pyramid.renderers import get_renderer
+from pyramid.renderers import get_renderer, render
 from pyramid.response import Response
 from pyramid.security import forget, remember
 from pyramid.view import render_view_to_response
@@ -129,7 +129,8 @@ class home(object):
 
     def __call__(self):
         return {
-            'auth': self.auth()
+            'auth': self.auth(),
+            'embed': render('templates/embed.pt', {}, request=self.request)
         }
 
 def includeme(config):

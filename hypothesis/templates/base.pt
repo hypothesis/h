@@ -33,6 +33,6 @@
   <script tal:attributes="src url"
           tal:repeat="url environment['all_js'].urls()">
   </script>
-  <script tal:define="embed load: embed.js">${embed(request=request)}</script>
+  <script tal:content="structure embed"></script>
 </body>
 </html>
