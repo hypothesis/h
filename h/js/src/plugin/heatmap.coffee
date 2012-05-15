@@ -149,7 +149,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .selectAll('stop').data(stopData)
     stops.enter().append('stop')
     stops.exit().remove()
-    stops.order()
+    stops.sort((s, t) -> (s[0] > t[0]) - (t[0] > s[0]))
       .attr('offset', (v) => v[0] / wrapper.height())
       .attr('stop-color', (v) => this._colorize(v[1] / max))
       .attr('stop-opacity', (v) -> opacity(v[1]))
