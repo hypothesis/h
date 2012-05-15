@@ -14,11 +14,6 @@
 <![endif]-->
   <title>hypothes.is</title>
   <link rel="api" href="${request.route_path('api', subpath='')}" />
-  <script tal:attributes="src src"
-          tal:repeat="src environment['jquery'].urls()">
-  </script>
-  <script src="${request.static_url('deform:static/scripts/deform.js')}">
-  </script>
   <link rel="stylesheet"
         tal:attributes="href href"
         tal:repeat="href environment['css'].urls()" />
@@ -35,10 +30,8 @@
     <metal:content define-slot="content" />
     <metal:content define-slot="footer" />
   </div>
-  <script src="${request.static_url('deform:static/scripts/jquery.form.js')}">
-  </script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['app_js'].urls()">
+  <script tal:attributes="src url"
+          tal:repeat="url environment['all_js'].urls()">
   </script>
   <script tal:define="embed load: embed.js">${embed(request=request)}</script>
 </body>
