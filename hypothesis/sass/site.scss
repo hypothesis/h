@@ -1,4 +1,5 @@
 @import "compass/css3";
+@import "compass/css3/images";
 @import "compass/css3/user-interface";
 @import "compass/utilities/color";
 
@@ -61,10 +62,10 @@ span.error {
 }
 
 .deform button {
-  @include linear-gradient(
-    color-stops(
-      desaturate($blue, 40%) -50%,
-      $black 300%
+  @include background(
+    linear-gradient(
+      desaturate($blue, 40%),
+      darken(desaturate($blue, 40%), 10%)
     )
   );
   background-color: desaturate($blue, 25%);
@@ -74,10 +75,10 @@ span.error {
 }
 
 .deform button:hover {
-  @include linear-gradient(
-    color-stops(
-      desaturate(darken($blue, 5%), 40%) -50%,
-      $black 300%
+  @include background(
+    linear-gradient(
+      desaturate(darken($blue, 5%), 40%),
+      darken(desaturate(darken($blue, 5%), 40%), 10%)
     )
   );
   background-color: desaturate(darken($blue, 5%), 25%);
