@@ -45,17 +45,9 @@ def add_webassets(config):
         Bundle(
             'annotator/lib/vendor/jquery.js',
             output='js/jquery.min.js'))
-    config.add_webasset('d3', Bundle('js/lib/d3.v2.min.js', debug=False))
+    config.add_webasset('d3', Bundle('js/lib/d3.v2.min.js'))
     config.add_webasset(
-        'app_css',
-        Bundle(
-            Bundle('sass/app.scss',
-                   debug=False,
-                   filters='compass',
-                   output='css/app.css'),
-            output='css/hypothesis.min.css'))
-    config.add_webasset(
-        'app_templates',
+        'templates',
         Bundle(
             Bundle('js/lib/handlebars-runtime.min.js', debug=False),
             Bundle(
@@ -72,43 +64,39 @@ def add_webassets(config):
     config.add_webasset(
         'app_js',
         Bundle(
-            environment['app_templates'],
-            Bundle('js/src/hypothesis.coffee',
-                   debug=False,
-                   filters='coffeescript',
-                   output='js/lib/hypothesis.js'),
+            environment['annotator'],
+            environment['templates'],
+            Bundle(
+                'js/src/hypothesis.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/lib/hypothesis.js'),
             output='js/hypothesis.min.js'))
     config.add_webasset(
-        'all_js',
+        'app_css',
         Bundle(
-            environment['jquery'],
-            environment['d3'],
-            environment['annotator'],
-            environment['app_js'],
-            output='js/hypothesis-full.min.js'))
+            Bundle('sass/app.scss',
+                debug=False,
+                filters='compass',
+                output='css/app.css'),
+            output='css/hypothesis.min.css'))
     config.add_webasset(
-        'site_css',
+        'css',
         Bundle(
             'sass/site.scss',
             debug=False,
             filters='compass',
-            output='css/site.css'))
-    config.add_webasset(
-        'css',
-        Bundle(
-            environment['site_css'],
-            output='css/site-full.min.css'))
+            output='css/site.min.css'))
 
 @subscriber(BeforeRender)
 def add_global(event):
-    event['environment'] = event['request'].registry.queryUtility(
-        IWebAssetsEnvironment)
+    environment = event['request'].registry.queryUtility(IWebAssetsEnvironment)
+    event['environment'] = environment
 
 def includeme(config):
     config.add_route('home', '/', use_global_views=True)
     config.add_route('token', '/api/token')
     config.add_route('api', '/api/*subpath')
-    config.add_route('embed', '/embed.js')
 
     config.scan(__name__)
     config.include('pyramid_webassets')

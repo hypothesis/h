@@ -15,6 +15,7 @@ from pyramid.security import forget, remember
 from pyramid.view import render_view_to_response
 
 from pyramid_deform import FormView
+from pyramid_webassets import IWebAssetsEnvironment
 
 def login_validator(node, kw):
     valid = False
@@ -128,9 +129,18 @@ class home(object):
         return getattr(self, self.request.params['__formid__'])
 
     def __call__(self):
+        environment = self.request.registry.queryUtility(IWebAssetsEnvironment)
         return {
-            'auth': self.auth(),
-            'embed': render('templates/embed.pt', {}, request=self.request)
+            'embed': render(
+                'templates/embed.pt',
+                {
+                    'jquery': json.dumps(environment['jquery'].urls()),
+                    'd3': json.dumps(environment['d3'].urls()),
+                    'hypothesis': json.dumps(environment['app_js'].urls() +
+                                             environment['app_css'].urls())
+                },
+                request=self.request),
+            'auth': self.auth()
         }
 
 def includeme(config):
@@ -140,8 +150,6 @@ def includeme(config):
     config.add_view(home, renderer='templates/home.pt')
     config.add_view(home, attr='partial', renderer='templates/form.pt', xhr=True)
     config.add_view(home, name='auth', attr='auth', renderer='templates/form.pt')
-
-    config.add_view(route_name='embed', renderer='templates/embed.pt')
 
     config.add_static_view('assets/annotator', 'annotator')
     config.add_static_view('assets/css', 'css')
