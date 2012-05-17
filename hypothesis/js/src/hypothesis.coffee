@@ -27,16 +27,13 @@ class Hypothesis extends Annotator
     # Set up interface elements
     this._setupHeatmap()._setupSidebar()
 
-    @heatmap.element.prependTo(@sidebar)
+    @heatmap.element.appendTo(@sidebar)
+    @viewer.element.appendTo(@sidebar)
+    @editor.element.appendTo(@sidebar)
     @sidebar.prependTo(@wrapper)
 
-    #
-    # Interface patching. Nasty nasty. We should make this easier.
-    #
-
-    # Pull the viewer and editor into the sidebar, instead of the wrapper
-    @viewer.element.detach().appendTo(@sidebar)
-    @editor.element.detach().appendTo(@sidebar)
+    @plugins.Auth.withToken (token) =>
+      @plugins.Permissions.setUser token.userId
 
     this
 
@@ -63,6 +60,18 @@ class Hypothesis extends Annotator
     @viewer.show()
     $(document.documentElement).addClass('hyp-collapse')
     @sidebar.removeClass('collapse')
+
+  showEditor: (annotation) =>
+    if @plugins.Permissions?.user
+      annotation['user'] = @plugins.Permissions.user
+      @editor.element.find('.annotator-listing').replaceWith(
+        Handlebars.templates['editor'](annotation)
+      )
+      @editor.load(annotation)
+      $(document.documentElement).addClass('hyp-collapse')
+      @sidebar.removeClass('collapse')
+    else
+      alert("Not logged in!")
 
   # Sets up the selection event listeners to watch mouse actions on the document.
   #
@@ -108,5 +117,24 @@ class Hypothesis extends Annotator
             $(field).html("<i>#{_t 'No Comment'}</i>")
           this.publish('annotationViewerTextField', [field, annotation])
       })
-      .element.appendTo(@wrapper)
+    this
+
+
+  # Creates an instance of the Annotator.Editor and assigns it to @editor.
+  # Appends this to the @wrapper and sets up event listeners.
+  #
+  # Returns itself for chaining.
+  _setupEditor: ->
+    @editor = new Annotator.Editor()
+    @editor.hide()
+    .on('hide', this.onEditorHide)
+    .on('save', this.onEditorSubmit)
+    .addField({
+      type: 'textarea',
+      label: _t('Comments') + '\u2026'
+      load: (field, annotation) ->
+        $(field).find('textarea').val(annotation.text || '')
+      submit: (field, annotation) ->
+        annotation.text = $(field).find('textarea').val()
+      })
     this

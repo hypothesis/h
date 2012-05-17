@@ -7,6 +7,10 @@ handlebars:
 templates:
   contents:
     - contents:
+      - contents: templates/editor.handlebars
+        debug: False
+        filters: handlebars
+        output: js/lib/templates/editor.js
       - contents: templates/sidebar.handlebars
         debug: False
         filters: handlebars
