@@ -3,6 +3,7 @@ class Hypothesis extends Annotator
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-heatmap click":          "onHeatmapClick"
+    "annotationEditorHidden":            "showViewer"
 
   pluginConfig:
     Heatmap: {}
