@@ -47,16 +47,25 @@ Please see the platform-specific INSTALL files for additional assistance.
 Development
 -----------
 
-Join us.
+See `#hypothes.is`_.
+
+The `Annotator project`_ is included as a git sub-module to encourage upstream
+contribution and flexible collaboration. To make sure you have the appropriate
+version of the sub-module source, run the following commands::
+
+    $ git submodule init
+    $ git submodule update
+
+The ``annotator`` directory will be checked out into the ``hypothesis``
+package directory.
 
 License
 -------
 
 Hypothes.is is released under the `2-Clause BSD License`_, sometimes referred
-to as the "Simplified BSD License" or the "FreeBSD License". Additional, third-
-party components included have their own licenses. Details may be found in a
-file called LICENSE which should be included with every distribution of the
-project.
+to as the "Simplified BSD License" or the "FreeBSD License". Some third-party
+components are included. They are subject to their own licenses. All of the
+license information can be found in the included LICENSE file.
 
 .. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
 .. _freenode: http://freenode.net/
