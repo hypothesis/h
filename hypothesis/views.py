@@ -136,8 +136,12 @@ class home(object):
                 {
                     'jquery': json.dumps(environment['jquery'].urls()),
                     'd3': json.dumps(environment['d3'].urls()),
-                    'hypothesis': json.dumps(environment['app_js'].urls() +
-                                             environment['app_css'].urls())
+                    'hypothesis': json.dumps(
+                        environment['annotator'].urls() +
+                        environment['handlebars'].urls() +
+                        environment['templates'].urls() +
+                        environment['app_js'].urls() +
+                        environment['app_css'].urls())
                 },
                 request=self.request),
             'auth': self.auth()

@@ -1,5 +1,5 @@
 from glob import glob
-from os.path import basename, relpath, splitext
+from os.path import basename, dirname, join, relpath, splitext
 from operator import concat
 
 from pyramid.events import subscriber
@@ -9,6 +9,7 @@ from pyramid.settings import aslist
 from pyramid_webassets import add_webasset, IWebAssetsEnvironment
 
 from webassets import Bundle
+from webassets.loaders import YAMLLoader
 
 def register_annotator(config):
     # Path utilities
@@ -39,54 +40,13 @@ def register_annotator(config):
 
 def add_webassets(config):
     environment = config.get_webassets_env()
+
     register_annotator(config)
-    config.add_webasset(
-        'jquery',
-        Bundle(
-            'annotator/lib/vendor/jquery.js',
-            output='js/jquery.min.js'))
-    config.add_webasset('d3', Bundle('js/lib/d3.v2.min.js'))
-    config.add_webasset(
-        'templates',
-        Bundle(
-            Bundle('js/lib/handlebars-runtime.min.js', debug=False),
-            Bundle(
-                Bundle('templates/sidebar.handlebars',
-                       debug=False,
-                       filters='handlebars',
-                       output='js/lib/templates/sidebar.js'),
-                Bundle('templates/viewer.handlebars',
-                       debug=False,
-                       filters='handlebars',
-                       output='js/lib/templates/viewer.js'),
-                Bundle('js/helpers.js'),
-                output='js/templates.js.min')))
-    config.add_webasset(
-        'app_js',
-        Bundle(
-            environment['annotator'],
-            environment['templates'],
-            Bundle(
-                'js/src/hypothesis.coffee',
-                debug=False,
-                filters='coffeescript',
-                output='js/lib/hypothesis.js'),
-            output='js/hypothesis.min.js'))
-    config.add_webasset(
-        'app_css',
-        Bundle(
-            Bundle('sass/app.scss',
-                debug=False,
-                filters='compass',
-                output='css/app.css'),
-            output='css/hypothesis.min.css'))
-    config.add_webasset(
-        'css',
-        Bundle(
-            'sass/site.scss',
-            debug=False,
-            filters='compass',
-            output='css/site.min.css'))
+
+    loader = YAMLLoader(join(dirname(__file__), 'resources.yaml'))
+    bundles = loader.load_bundles()
+    for name in bundles:
+        config.add_webasset(name, bundles[name])
 
 @subscriber(BeforeRender)
 def add_global(event):

@@ -8,6 +8,7 @@ MarkupSafe==0.15
 Paste==1.7.5.1
 PasteDeploy==1.5.0
 PyJWT==0.1.4
+PyYAML==3.10
 Pygments==1.5
 SQLAlchemy==0.7.6
 WTForms==1.0.1
