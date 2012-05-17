@@ -38,17 +38,11 @@ class Hypothesis extends Annotator
     this
 
   onHeatmapClick: (event) =>
-    event?.stopPropagation()
     y = event.pageY - @wrapper.offset().top
     target = d3.bisect(@heatmap.index, y)-1
     annotations = @heatmap.buckets[target]
 
-    if annotations?.length
-      this.showViewer(annotations)
-    else
-      @sidebar.addClass('collapse')
-      $(document.documentElement).removeClass('hyp-collapse')
-
+    this.showViewer(annotations)
     @heatmap.updateHeatmap()
 
   showViewer: (annotations) ->
@@ -98,6 +92,11 @@ class Hypothesis extends Annotator
       Annotator.prototype.sidebar = sidebar
       @sidebar = sidebar
       @sidebar.addClass('collapse')
+
+      # Capture mouse down so as not to close to sidebar.
+      @sidebar.on('mousedown', (event) =>
+        event.stopImmediatePropagation()
+      )
     this
 
   # Creates an instance of Annotator.Viewer and assigns it to the @viewer
