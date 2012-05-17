@@ -1,50 +1,51 @@
-@import 'common';
 @import 'compass';
+
+@import 'common';
 
 /* Annotator styles */
 
 .annotator-adder {
-	background-image: url(../annotator/img/annotator-icon-sprite.png);
-	background-repeat: no-repeat;
-	margin-top: -48px;
-	margin-left: -24px;
-	width: 48px;
-	height: 48px;
-	background-position: left top;
-	position: absolute;
+  background-image: url(../annotator/img/annotator-icon-sprite.png);
+  background-repeat: no-repeat;
+  margin-top: -48px;
+  margin-left: -24px;
+  width: 48px;
+  height: 48px;
+  background-position: left top;
+  position: absolute;
   z-index: 999;
 }
 
 .annotator-adder:hover {
-	background-position: center top;
+  background-position: center top;
 }
 
 .annotator-adder:active {
-	background-position: center right;
+  background-position: center right;
 }
 
 .annotator-adder button {
-	display: block;
-	width: 36px;
-	height: 41px;
-	margin: 0 auto;
-	border: none;
-	background: none;
-	text-indent: -999em;
-	cursor: pointer;
+  display: block;
+  width: 36px;
+  height: 41px;
+  margin: 0 auto;
+  border: none;
+  background: none;
+  text-indent: -999em;
+  cursor: pointer;
 }
 
 .annotator-hide {
-	display: none;
-	visibility: hidden;
+  display: none;
+  visibility: hidden;
 }
 
 .annotator-hl {
-	background: rgba(255, 255, 10, 0.3);
+  background: rgba(255, 255, 10, 0.3);
 }
 
 .annotator-wrapper {
-	position: relative;
+  position: relative;
 }
 
 /*
@@ -88,8 +89,8 @@ html {
   background: hsla(0, 0, 90%, 0.4);
   position: absolute;
   width: 10px;
-  left: -10px;
-  outline: solid $gray-lighter thin;
+  left: -11px;
+  outline: solid #999 thin;
 }
 
 // body
@@ -188,7 +189,7 @@ html {
 // misc
 .hyp-provider {
   @extend .small;
-  color: $gray-light;
+  color: #999;
 }
 
 .hyp-tag {
@@ -205,9 +206,9 @@ html {
 }
 
 /*
-	Mobile layout
-	240–479 px
-	Zoomed out below 320 px
+    Mobile layout
+    240–479 px
+    Zoomed out below 320 px
 */
 
 @media screen and (min-width: 15em) {
@@ -221,9 +222,9 @@ html {
 }
 
 /*
-	Wide mobile layout
-	480-767 px
-	Zoomed in above 480 px
+    Wide mobile layout
+    480-767 px
+    Zoomed in above 480 px
 */
 
 @media screen and (min-width: 30em) {

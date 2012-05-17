@@ -1,0 +1,59 @@
+@import "compass/reset";
+
+/*
+  Consistency fixes
+  adopted from http://necolas.github.com/normalize.css/
+  */
+
+* { @include box-sizing(border-box); }
+
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body { min-height: 100%; font-size: 100%; }
+
+sub, sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+}
+
+sup {top: -.5em;}
+sub {bottom: -.25em;}
+
+pre {
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+b, strong {font-weight: bold;}
+abbr[title] {border-bottom: 1px dotted;}
+
+a img, img {
+  -ms-interpolation-mode: bicubic;
+}
+
+input, textarea, button, select {
+  @include reset-font;
+  line-height: normal;
+  margin: 0;
+}
+
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  cursor: pointer;
+  -webkit-appearance: button;
+}
+
+textarea {overflow: auto;}
+
+img::selection,
+img::-moz-selection {
+  background: transparent;
+}

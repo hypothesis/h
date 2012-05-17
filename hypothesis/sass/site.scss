@@ -3,7 +3,8 @@
 @import "compass/css3/user-interface";
 @import "compass/utilities/color";
 
-@import "app";
+@import "reset";
+@import "common";
 
 a {
   color: $link-color;
@@ -25,6 +26,10 @@ body {
   background-image: url('../images/noise_1.png');
   color: $gray;
   font-family: "Georgia", "Gentium Basic", "Times New Roman", serif;
+  font-size: $font-size / $em;
+  font-smoothing: antialiased;
+  line-height: $line-height / $em;
+
 }
 
 h1, h2, h3, h4 {
@@ -172,9 +177,9 @@ span.error {
 }
 
 /*
-	Mobile layout
-	240–479 px
-	Zoomed out below 320 px
+    Mobile layout
+    240–479 px
+    Zoomed out below 320 px
 */
 
 @media screen and (min-width: 15em) {
@@ -188,9 +193,9 @@ span.error {
 }
 
 /*
-	Wide mobile layout
-	480-767 px
-	Zoomed in above 480 px
+    Wide mobile layout
+    480-767 px
+    Zoomed in above 480 px
 */
 
 @media screen and (min-width: 30em) {
@@ -226,9 +231,9 @@ span.error {
 }
 
 /*
-	Tablet layout
-	600-911 px
-	Zoomed in above 600 px
+    Tablet layout
+    600-911 px
+    Zoomed in above 600 px
 */
 
 @media screen and (min-width: 37.5em) {
@@ -238,9 +243,9 @@ span.error {
 }
 
 /*
-	Widescreen layout
-	912-1887 px
-	Zoomed in above 912 px
+    Widescreen layout
+    912-1887 px
+    Zoomed in above 912 px
 */
 
 @media screen and (min-width: 57em) {
@@ -266,9 +271,9 @@ span.error {
 }
 
 /*
-	Huge-screen layout
-	1888-2520 px
-	Zoomed in above 1920 px
+    Huge-screen layout
+    1888-2520 px
+    Zoomed in above 1920 px
 */
 
 @media screen and (min-width: 118em) {
