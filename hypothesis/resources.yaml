@@ -1,34 +1,34 @@
 jquery:
-    contents: annotator/lib/vendor/jquery.js
+  contents: annotator/lib/vendor/jquery.js
 d3:
-    contents: js/lib/d3.v2.min.js
+  contents: js/lib/d3.v2.min.js
 handlebars:
-    contents: js/lib/handlebars-runtime.min.js
+  contents: js/lib/handlebars-runtime.min.js
 templates:
-    contents:
-      - contents:
-          - contents: templates/sidebar.handlebars
-            debug: False
-            filters: handlebars
-            output: js/lib/templates/sidebar.js
-          - contents: templates/viewer.handlebars
-            debug: False
-            filters: handlebars
-            output: js/lib/templates/viewer.js
-      - js/lib/helpers.js
-    output: js/lib/templates.js
+  contents:
+    - contents:
+      - contents: templates/sidebar.handlebars
+        debug: False
+        filters: handlebars
+        output: js/lib/templates/sidebar.js
+      - contents: templates/viewer.handlebars
+        debug: False
+        filters: handlebars
+        output: js/lib/templates/viewer.js
+    - js/lib/helpers.js
+  output: js/lib/templates.js
 app_js:
-    contents: js/src/hypothesis.coffee
-    debug: False
-    filters: coffeescript
-    output: js/lib/hypothesis.js
+  contents: js/src/hypothesis.coffee
+  debug: False
+  filters: coffeescript
+  output: js/lib/hypothesis.js
 app_css:
-    contents: sass/app.scss
-    debug: False
-    filters: compass
-    output: css/app.css
+  contents: sass/app.scss
+  debug: False
+  filters: compass
+  output: css/app.css
 css:
-    contents: sass/site.scss
-    debug: False
-    filters: compass
-    output: css/site.min.css
+  contents: sass/site.scss
+  debug: False
+  filters: compass
+  output: css/site.min.css
