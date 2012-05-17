@@ -51,7 +51,6 @@ html {
   @include single-transition(right, 0.6s, ease-in-out);
   position: absolute;
   width: auto;
-  height: 100%;
   right: 0;
   left: 0;
 }
@@ -185,6 +184,11 @@ $iconset: iconset_wireframe;
     top: 0;
     z-index: 501;
   }
+}
+
+.hyp-sidebar.collapse {
+  width: 0;
+  margin-left: 0;
 }
 
 //LOGO
