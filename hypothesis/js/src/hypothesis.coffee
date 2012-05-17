@@ -130,7 +130,6 @@ class Hypothesis extends Annotator
 
   showEditor: (annotation) =>
     if @plugins.Permissions?.user
-      annotation['user'] = @plugins.Permissions.user
       @editor.element.find('.annotator-listing').replaceWith(
         Handlebars.templates['editor'](annotation)
       )
