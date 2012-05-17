@@ -56,7 +56,7 @@ class Hypothesis extends Annotator
 
   showViewer: (annotations) ->
     @viewer.element.find('.annotator-listing').replaceWith(
-      Handlebars.templates['viewer']({
+      Handlebars.templates['summaries']({
         annotations: annotations
       })
     )

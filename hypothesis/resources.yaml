@@ -11,10 +11,10 @@ templates:
         debug: False
         filters: handlebars
         output: js/lib/templates/sidebar.js
-      - contents: templates/viewer.handlebars
+      - contents: templates/summaries.handlebars
         debug: False
         filters: handlebars
-        output: js/lib/templates/viewer.js
+        output: js/lib/templates/summaries.js
     - js/lib/helpers.js
   output: js/lib/templates.js
 app_js:
