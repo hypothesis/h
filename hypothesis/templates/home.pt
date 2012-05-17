@@ -7,7 +7,7 @@
     <div class="title">
       <img src="${request.static_url('hypothesis:images/logo.png')}" />
       <h1>hypothes<span class="red">.</span>is</h1>
-      <h2>the&#160;Internet, peer&#160;reviewed.</h2>
+      <h2>The&#160;Internet, peer&#160;reviewed.</h2>
     </div>
 
     <section>
