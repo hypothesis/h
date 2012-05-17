@@ -26,30 +26,5 @@
       <p>These goals are possible with today's technologies.</p>
       <p>They are the objectives of Hypothes<span class="red">.</span>is.</p>
     </section>
-
-    <section>
-      <h3>Who are we<span class="red">?</span></h3>
-      <p>Our work is the product of a broad collaboration between developers,
-        designers, journalists, researchers, scientists and writers to create
-        flexible and powerful tools for publishing, curating and navigating
-        within the web of annotations.</p>
-      <p>Central to the project is an open annotation directory, an experiment to
-        create a solution for organizations and individuals to create and
-        discover annotations on the open web. It includes an annotation client
-        and storage API based on work from the
-        <a href="http://okfn.org">Open Knowledge Foundation</a> The storage
-        server can output annotations in a variety of formats and includes rich
-        semantic information conforming to the emerging
-        <a href="http://www.openannotation.org/spec/core/">Open Annotation</a>
-        specification.</p>
-    </section>
-
-    <section>
-      <h3>Getting started</h3>
-      <p>Soon you will be able to discover annotations of this page and to add
-        your own. A sample set of annotations will guide you through the rest
-        of this introduction.</p>
-      <p>Hypothes<span class="red">.</span>is is a work in progress.</p>
-    </section>
   </article>
 </metal:main>
