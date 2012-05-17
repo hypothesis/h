@@ -1,79 +1,50 @@
-@import 'compass';
-
 @import 'common';
+@import 'compass';
 
 /* Annotator styles */
 
 .annotator-adder {
-  background-image: url(../annotator/img/annotator-icon-sprite.png);
-  background-repeat: no-repeat;
-  margin-top: -48px;
-  margin-left: -24px;
-  width: 48px;
-  height: 48px;
-  background-position: left top;
-  position: absolute;
+	background-image: url(../annotator/img/annotator-icon-sprite.png);
+	background-repeat: no-repeat;
+	margin-top: -48px;
+	margin-left: -24px;
+	width: 48px;
+	height: 48px;
+	background-position: left top;
+	position: absolute;
   z-index: 999;
 }
 
 .annotator-adder:hover {
-  background-position: center top;
+	background-position: center top;
 }
 
 .annotator-adder:active {
-  background-position: center right;
+	background-position: center right;
 }
 
 .annotator-adder button {
-  display: block;
-  width: 36px;
-  height: 41px;
-  margin: 0 auto;
-  border: none;
-  background: none;
-  text-indent: -999em;
-  cursor: pointer;
+	display: block;
+	width: 36px;
+	height: 41px;
+	margin: 0 auto;
+	border: none;
+	background: none;
+	text-indent: -999em;
+	cursor: pointer;
 }
 
 .annotator-hide {
-  display: none;
-  visibility: hidden;
+	display: none;
+	visibility: hidden;
 }
 
 .annotator-hl {
-  background: rgba(255, 255, 10, 0.3);
+	background: rgba(255, 255, 10, 0.3);
 }
 
 .annotator-wrapper {
-  position: relative;
-}
-
-/*
- * Hypothesis Styles
- */
-
-$cool-hue: 220;
-$warm-hue: 45;
-
-$thread-padding: 1.5em;
-
-$scorewidth: 40px;
-$scoreheight: $scorewidth;
-
-@mixin bodytext {
-  color: hsla($warm-hue, 10%, 40%, 1);
-  line-height: 1.2em;
-  text-align: left;
-}
-
-@mixin primarytext {
-  color: #666;
-  font-weight: bold;
-}
-
-@mixin secondarytext {
-  color: #666;
-  font-size: .8em;
+	position: relative;
 }
 
 html {
@@ -90,55 +61,108 @@ html {
   position: absolute;
   width: 10px;
   left: -11px;
-  outline: solid #999 thin;
+  outline: solid $gray-lighter thin;
 }
 
-// body
-.hyp-body {
-  margin-top: .5em;
+//STANCE COLORS
+$positive: #3aab39;
+$negative: #d11c2b;
+$neutral: #0171ba;
+
+//OTHER VARIABLES
+$thread-padding: 1.5em;
+$score-width: 40px;
+$score-height: $score-width;
+$sidepane-width: 510px;
+
+//ANNOTATOR TEXT STYLES
+@mixin primarytext {
+  font-weight: bold;
+  font-size: 1.3em; }
+
+@mixin secondarytext {
+  font-size: 1.1em;
+  font-weight: bold; }
+
+@mixin tertiarytext {
+  color: #666666;
+  font-size: 0.8em; }
+
+//ANNOTATOR SHADOW STYLES
+@mixin smallshadow($a: 2px, $b: 2px, $c: 0.1) {
+  @include box-shadow($a $b 1em hsla(0, 0%, 0%, $c)); }
+
+@mixin tinyshadow($a: 1px, $b: 1px, $c: 0.1) {
+  @include box-shadow($a $b 3px hsla(0, 0%, 0%, $c)); }
+
+@mixin medshadow($a: 2px, $b: 2px, $c: 0.1) {
+  @include box-shadow($a $b 2em hsla(0, 0%, 0%, $c)); }
+
+//ANNOTATOR BOX STYLES
+@mixin buttonbox {
   position: relative;
-  .hyp-score {
-    position: absolute;
-    left: -$scorewidth / 2;
-    &.hyp-positive {
-      top: .2em;
-    }
-    &.hyp-negative {
-      top: -.2em;
-    }
-    &.hyp-neutral {
-      top: -.2em;
-    }
-  }
-}
-
-.hyp-nothread {
-  padding-right: $thread-padding;
-  padding-bottom: 1em;
-}
-
-// meta - applies to the bar at the top of annotations and replies.
-.hyp-meta {
-  @include pie-clearfix;
+  border: 1px solid black;
+  border-radius: 3px;
+  @include box-shadow(0px 1px 0px #999999);
   position: relative;
-  .hyp-user {
-    float: left;
-    font-weight: bold;
-    font-size: 1.3em;
-  }
-  .hyp-time {
-    bottom: 0;
-    right: 0;
-    position: absolute;
-  }
-  .hyp-threadexp {
-    bottom: -1px;
-    left: -7px;
-    font-size: 1.8em;
-    font-weight: bold;
-    position: absolute;
-  }
-}
+  &:hover {}
+  &:active {
+    top: 1px;
+    @include box-shadow(none); } }
+
+@mixin invisibox {
+  &:active {
+    border: none;
+    outline: none; }
+  background: none;
+  border: none;
+  outline: none;
+  box-shadow: none; }
+
+//ICON IMAGES
+$iconset: iconset_wireframe;
+
+@mixin icon_resets {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%; }
+
+@mixin icon($icon) {
+  @include icon_resets;
+  background-image: url("../images/#{$icon}"); }
+
+//#annotator {
+//  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+//  font-weight: normal;
+//  font-size: 13px;
+//  line-height: 1.2em;
+//  color: #666666;
+//  overflow: hidden;
+//  p {
+//    margin: 0;
+//    margin-bottom: 0.5em; }
+//  input, textarea {
+//    @include invisibox;
+//    @include box-sizing(border-box);
+//    font: sans-serif;
+//    &:focus {
+//      outline: none; } } }
+
+//LISTING
+.annotator-listing {
+  list-style-type: none;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  background: none;
+  button {
+    border: none;
+    padding: 0;
+    position: relative;
+    background: none;
+    &:hover {}
+    &:active {
+      top: 1px; } } }
 
 // Styles for the sidebar
 .hyp-sidebar {
@@ -163,52 +187,530 @@ html {
   }
 }
 
-.hyp-sidebar.collapse {
-  width: 0;
-  margin-left: 0;
-}
+//LOGO
+.hypothesis-logo {
+  font-size: 2em;
+  padding: 0.25em;
+  text-shadow: 0px 2px 1px white; }
 
-// Applies to the summary view of an annotation
+.hypothesis-logotype_b {
+  color: $negative; }
+
+//ANNOTATOR LAYOUT STUFF
+.hyp-hl_positive {
+  background: rgba($positive, 0.3);
+  @include tinyshadow(1px, 1px, 0.2); }
+
+.hyp-hl_negative {
+  background: rgba($negative, 0.3);
+  @include tinyshadow(1px, 1px, 0.2); }
+
+.hyp-hl_neutral {
+  background: rgba($neutral, 0.3);
+  @include tinyshadow(1px, 1px, 0.2); }
+
+//ANNOTATOR
+.hyp-sidepane {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  margin: {
+    left: 1em; };
+  padding: {
+    bottom: 1em; };
+  overflow: auto;
+  width: $sidepane-width;
+  border-left: 1px solid #dddddd;
+  background-image: url("../images/noise_1.png");
+  background-attachment: fixed; }
+
+//TAB BAR
+.hyp-tabs {
+  @include clearfix;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  .hyp-tab {
+    float: left;
+    padding: 0.25em 0.5em;
+    margin-right: 0.5em;
+    margin-bottom: -1px;
+    background: hsla(0, 0%, 99%, 1);
+    @include box-shadow(2px -10px 13px -8px hsla(0, 0%, 0%, 0.2) inset);
+    border-top-right-radius: 0.25em;
+    border-top-left-radius: 0.25em;
+    color: #999999;
+    &:hover {
+      background: #eeeeee; }
+    &:active {
+      box-shadow: none; }
+    &.hyp-selected {
+      @include box-shadow(none);
+      color: #333333;
+      font-weight: bold;
+      background: hsla(0, 0%, 100%, 1); } } }
+
+//META BAR
+.hyp-meta {
+  @include pie-clearfix;
+  position: relative;
+  .hyp-user {
+    float: left;
+    @include primarytext;
+    text-decoration: underline; }
+  .hyp-time {
+    float: right;
+    display: inline-block;
+    vertical-align: bottom; }
+  .hyp-threadexp {
+    bottom: -1px;
+    left: -7px;
+    font-size: 1.8em;
+    font-weight: bold;
+    position: absolute; } }
+
+//THREADEXP
+$threadexp-width: 12px;
+.hyp-threadexp {
+  height: $threadexp-width;
+  width: $threadexp-width;
+  border: 1px dotted #aaaaaa;
+  background-image: url("../images/minus_1.png");
+  background-size: 100% 100%;
+  background-position: center;
+  &.hyp-closed {
+    background-image: url("../images/plus_1.png");
+    background-size: 100% 100%;
+    background-position: center; }
+  &.hyp-dot {
+    background-image: url("../images/dot_2.png");
+    background-size: 100% 100%;
+    background-position: center; } }
+
+//CONTROLS
+.hyp-fakecontrols {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-block;
+  background: white;
+  z-index: 1;
+  button {
+    text-decoration: underline;
+    cursor: pointer;
+    padding-left: 1.3em;
+    line-height: 1.2em;
+    background-size: 1em 1em;
+    background-repeat: no-repeat;
+    &.hyp-write {
+      background-image: url("../images/pen_1.png"); }
+    &.hyp-fave {
+      background-image: url("../images/fave_1.png"); }
+    &.hyp-flag {
+      background-image: url("../images/flag_1.png"); }
+    &.hyp-save {
+      background-image: url("../images/submit_1.png"); }
+    &.hyp-delete {
+      background-image: url("../images/delete_1.png"); } } }
+
+//SCORE BADGE
+.hyp-score {
+  font-size: 14px;
+  font-weight: bold;
+  height: $score-height;
+  line-height: $score-height;
+  overflow: hidden;
+  text-align: center;
+  width: $score-width;
+  background-image: url("../images/neutral_inact.png");
+  background-size: 100% 100%;
+  &.hyp-positive {
+    background-image: url("../images/up_1.png");
+    background-size: 100% 100%; }
+  &.hyp-negative {
+    background-image: url("../images/down_1.png");
+    background-size: 100% 100%; }
+  &.hyp-neutral {
+    background-image: url("../images/neutral_1.png");
+    background-size: 100% 100%; } }
+
+//SCORE CONTROL
+.hyp-scorecontrol {
+  position: relative;
+  top: 0;
+  font-size: 14px;
+  font-weight: bold;
+  height: $score-height;
+  width: $score-width;
+  line-height: $score-height;
+  overflow: hidden;
+  text-align: center;
+  background-image: url("../images/neutral_inact.png");
+  background-size: 100% 100%;
+  .hyp-top {
+    position: absolute;
+    top: 0;
+    bottom: 66%;
+    left: 0;
+    right: 0; }
+  .hyp-mid {
+    position: absolute;
+    top: 33%;
+    bottom: 33%;
+    left: 0;
+    right: 0; }
+  .hyp-bottom {
+    position: absolute;
+    top: 66%;
+    bottom: 0;
+    left: 0;
+    right: 0; }
+  &.hyp-positive {
+    background-image: url("../images/up_1.png");
+    background-size: 100% 100%; }
+  &.hyp-negative {
+    background-image: url("../images/down_1.png");
+    background-size: 100% 100%; }
+  &.hyp-neutral {
+    background-image: url("../images/neutral_1.png");
+    background-size: 100% 100%; }
+  &.hyp-temppositive {
+    background-image: url("../images/up_1.png");
+    background-size: 100% 100%; }
+  &.hyp-tempnegative {
+    background-image: url("../images/down_1.png");
+    background-size: 100% 100%; }
+  &.hyp-tempneutral {
+    background-image: url("../images/neutral_1.png");
+    background-size: 100% 100%; } }
+
+//TINY SCORE
+.hyp-tinyscore {
+  font-size: 14px;
+  font-weight: bold;
+  height: $score-height;
+  line-height: $score-height;
+  overflow: hidden;
+  text-align: center;
+  width: $score-width;
+  &.hyp-positive {
+    background-image: url("../images/uptiny_1.png");
+    background-size: 100% 100%; }
+  &.hyp-negative {
+    background-image: url("../images/downtiny_1.png");
+    background-size: 100% 100%; }
+  &.hyp-neutral {
+    background-image: url("../images/neutral_1.png");
+    background-size: 100% 100%; } }
+
+
+//ADDER
+.hyp-adder {
+  border: 1px dotted #999999;
+  position: absolute;
+  background-image: url("../images/noise_1.png");
+  @include smallshadow;
+  button {
+    border: none;
+    padding: 0;
+    position: relative;
+    background: none;
+    &:hover {}
+    &:active {
+      top: 1px; }
+    width: 2em;
+    height: 2em;
+    margin: 0.5em; }
+  .hyp-write {
+    background-image: url("../images/pen_1.png");
+    background-size: 100% 100%; }
+  .hyp-fave {
+    background-image: url("../images/fave_1.png");
+    background-size: 100% 100%; } }
+
+//TAG
+.hyp-tag {
+  display: inline-block;
+  background: #f3f3f3;
+  color: #666666;
+  border-radius: 2px;
+  border: 1px solid #999999;
+  padding: 0.1em 0.4em;
+  padding-bottom: 0.2em;
+  vertical-align: bottom;
+  @include box-shadow(1px 1px 10px hsla(0, 0%, 0%, 0.05)); }
+
+//TIME IN META BAR
+.hyp-time {
+  @include tertiarytext; }
+
+//COOL BUTTON STYLE
+.hyp-buttonstyle {
+  border: 1px solid #999999;
+  border-radius: 3px;
+  @include box-shadow(0px 1px 0px #999999);
+  position: relative;
+  &:active {
+    top: 1px;
+    @include box-shadow(none); } }
+
+//HEATMAP
+$heatmap-width: 15px;
+
+.hyp-heatmap {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: $heatmap-width;
+  background: white;
+  border-left: 1px solid #bbbbbb;
+  @include smallshadow;
+  .hyp-heatmap_tab {
+    text-align: center;
+    background: #666666;
+    color: white;
+    text-shadow: 1px 1px 1px black;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    font-weight: bold;
+    position: absolute;
+    top: 75%;
+    width: 2em;
+    right: 0;
+    padding: 0.25em 0;
+    font-family: sans-serif;
+    font-size: 1em;
+    @include smallshadow; }
+  .hyp-gr_bg {
+    stop-color: white; }
+  .hyp-gr_positive {
+    stop-color: $positive + #222222; }
+  .hyp-gr_negative {
+    stop-color: $negative + #333333; }
+  .hyp-gr_neutral {
+    stop-color: $neutral + #666666; } }
+
+//ANNOTATION
+.hyp-annotation {
+  background: white;
+  @include smallshadow(0px, -2px);
+  padding: {
+    left: 0;
+    top: 1em;
+    bottom: 1em; };
+  margin: {
+    left: 0.5em;
+    right: 0.5em; }; }
+
+//EXCERPT
+.hyp-excerpt {
+  @include smallshadow;
+  background: white;
+  font-family: serif;
+  font-size: 1.1em;
+  color: black;
+  font-family: serif;
+  font-size: 1.1em;
+  margin-bottom: 1em;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  margin-top: 0.5em;
+  padding: 1em; }
+
+//BASE ANNOTATION OBJECT
+@mixin base-annotation {
+  line-height: 1.25em;
+  position: relative;
+  padding-top: 1em;
+  margin-left: $thread-padding;
+
+  }
+
+//ANNOTATION DETAIL
+.hyp-reply {
+  @include base-annotation;
+  border-left: 1px dotted #999999;
+  .hyp-meta {
+    padding-left: $thread-padding; }
+  .hyp-body {
+    padding-left: $thread-padding;
+    margin-top: 0.6em;
+    position: relative; }
+  .hyp-nothread {
+    padding-right: $thread-padding;
+    padding-bottom: 1em; }
+
+  .hyp-score {
+    position: absolute;
+    left: -$score-width / 2;
+    &.hyp-positive {
+      top: 0.2em; }
+    &.hyp-negative {
+      top: -0.2em; }
+    &.hyp-neutral {
+      top: -0.2em; } }
+
+  .hyp-bottombar {
+    margin-top: 0.8em;
+    @include pie-clearfix;
+    .hyp-left {
+      float: left; }
+    .hyp-right {
+      float: right;
+      position: relative; } }
+
+  .hyp-repliesbadge {
+    display: inline-block;
+    position: relative;
+    left: $thread-padding;
+    @include secondarytext;
+    .hyp-blocker {
+      display: inline-block;
+      padding: 0.25em;
+      margin-right: 0.5em; }
+    .hyp-inner {
+      padding: 0.25em;
+      background: white;
+      position: absolute;
+      border: 1px solid #aaaaaa;
+      top: 0;
+      left: 0; }
+    .hyp-offset_1 {
+      @extend .hyp-inner;
+      top: 0px;
+      left: 1px;
+      @include rotate(15deg); }
+    .hyp-offset_2 {
+      @extend .hyp-inner;
+      top: -1px;
+      left: -1px;
+      @include rotate(-10deg); } }
+
+  .hyp-collapsed {
+    font-size: 0.9em;
+    padding-right: $thread-padding;
+    .hyp-content {
+      padding-left: 0.5em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -o-text-overflow: ellipsis;
+      white-space: nowrap;
+      position: relative;
+      bottom: -0.3em; }
+    .hyp-body {
+      @include pie-clearfix;
+      margin-top: 0.5em;
+      .hyp-left {
+        font-weight: bold;
+        float: left; }
+      .hyp-right {
+        float: right;
+        margin-top: 0.25em; } }
+    .hyp-tinyscore {
+      position: absolute;
+      left: -$score-width / 2; }
+    .hyp-tag {
+      padding: 0.1em 0.3em; } } }
+
+
+//EDITOR
+.hyp-writer {
+  background: white;
+  @include base-annotation;
+  @include smallshadow;
+  textarea {
+    width: 100%;
+    max-width: 100%;
+    min-height: 8em;
+    font-family: sans-serif; }
+  .hyp-innerwrap {
+    position: relative;
+    margin: .5em; }
+  .hyp-meta {
+    padding-left: $thread-padding * 2; }
+  .hyp-body {
+    padding-left: $thread-padding * 2;
+    margin-top: 0.5em;
+    position: relative; }
+  .hyp-nothread {
+    padding-right: $thread-padding;
+    padding-bottom: 1em; }
+  .hyp-scorecontrol {
+    position: absolute;
+    z-index: 1; } }
+
+//BUCKET VIEW REPLY SUMMARIES
 .hyp-summary {
-  @include smallshadow(2px, 3px, .2);
+  line-height: 1.25em;
   position: relative;
   background: hsla(0, 0%, 100%, 1);
+  @include smallshadow(2px, 3px, 0.2);
   cursor: pointer;
-  margin: 1em 1em 0 1em;
-
+  margin: {
+    left: 1em;
+    right: 1em;
+    top: 1em; };
+  padding: 1em;
   &:hover {
-    @include smallshadow(2px, 4px, .2);
-    bottom: 1px;
-  }
+    @include smallshadow(2px, 4px, 0.2);
+    bottom: 1px; }
   &:active {
-    @include smallshadow(2px, 3px, .2);
-    bottom: -1px;
-  }
-}
+    @include smallshadow(2px, 3px, 0.2);
+    bottom: -1px; }
+  .hyp-innerwrap {
+    position: relative;
+    }
+  .hyp-meta {
+//    padding-left: $thread-padding * 2;
+    }
+  .hyp-body {
+//    padding-left: $thread-padding * 2;
+    }
+  .hyp-nothread {
+//    padding-right: $thread-padding;
+//    padding-bottom: 1em;
+    }
+  .hyp-body {
+    margin-top: 0.5em;
+    position: relative;
+    }
 
-// misc
-.hyp-provider {
-  @extend .small;
-  color: #999;
-}
+  .hyp-bottombar {
+    margin-top: 0.8em;
+    @include pie-clearfix;
+    .hyp-left {
+      float: left; }
+    .hyp-right {
+      float: right;
+      position: relative; } }
 
-.hyp-tag {
-  background: #ddd;
-  border-radius: 2px;
-  border: 1px solid #999;
-  color: #666;
-  padding: .1em .4em;
-  padding-bottom: .2em;
-}
+  .hyp-repliesbadge {
+    display: inline-block;
+    position: relative;
+    @include secondarytext;
+    display: none;
+    }
 
-.hyp-time {
-  @include secondarytext;
-}
+  .hyp-score {
+    display: none;
+    position: absolute;
+    top: 0.8em;
+    &.hyp-positive {
+      top: 0.2em; }
+    &.hyp-negative {
+      top: -0.2em; }
+    &.hyp-neutral {
+      top: -0.2em; } }
+
+    }
+
+
 
 /*
-    Mobile layout
-    240–479 px
-    Zoomed out below 320 px
+	Mobile layout
+	240–479 px
+	Zoomed out below 320 px
 */
 
 @media screen and (min-width: 15em) {
@@ -222,9 +724,9 @@ html {
 }
 
 /*
-    Wide mobile layout
-    480-767 px
-    Zoomed in above 480 px
+	Wide mobile layout
+	480-767 px
+	Zoomed in above 480 px
 */
 
 @media screen and (min-width: 30em) {

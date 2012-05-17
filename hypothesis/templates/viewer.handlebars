@@ -1,17 +1,31 @@
 <ul class="annotator-listing">
   {{#each annotations}}
-    <li class="hyp-summary">
-      <div class="hyp-nothread">
-        <div class="hyp-meta">
+    <li class="hyp-widget hyp-summary">
+      <div class="hyp-innerwrap">
+        <div class="hyp-score hyp-negative">
+          <label></label>
+        </div>
+        <div class="hyp-nothread">
+          <div class="hyp-meta">
           {{#splitUser user}}
             <div class="hyp-user">
               {{name}} <span class="hyp-provider">on {{provider}}</span>
             </div>
           {{/splitUser}}
-          <div class="hyp-time">{{fuzzyTime created}}</div>
-        </div>
-        <div class="hyp-body">
-          <div class="hyp-content">{{text}}</div>
+            <div class="hyp-time">{{fuzzyTime created}}</div>
+          </div>
+          <div class="hyp-body">
+            <div class="hyp-content">
+              {{text}}
+            </div>
+          </div>
+          <div class="hyp-bottombar">
+            <div class="hyp-repliesbadge">
+            </div>
+            <div class="hyp-right">
+              <span class="hyp-tag">WorkingAnnotations</span>
+            </div>
+          </div>
         </div>
       </div>
     </li>
