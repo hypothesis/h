@@ -147,25 +147,10 @@ $iconset: iconset_wireframe;
 //    &:focus {
 //      outline: none; } } }
 
-//LISTING
-.annotator-listing {
-  list-style-type: none;
-  text-align: left;
-  margin: 0;
-  padding: 0;
-  background: none;
-  button {
-    border: none;
-    padding: 0;
-    position: relative;
-    background: none;
-    &:hover {}
-    &:active {
-      top: 1px; } } }
-
 // Styles for the sidebar
 .hyp-sidebar {
   @include single-transition(all, 0.6s, ease-in-out);
+  color: #666666;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: $font-size / $em * .8;
   height: 100%;
@@ -175,6 +160,19 @@ $iconset: iconset_wireframe;
   right: 0;
   left: 100%;
   z-index: 500;
+
+  p {
+    margin: 0 0 .5em 0;
+  }
+
+  input, textarea {
+    @include invisibox;
+    @include box-sizing(border-box);
+    font: sans-serif;
+    &:focus {
+      outline: none;
+    }
+  }
 
   .annotator-outer {
     @include single-transition(margin-left, 0.6s, ease-in-out);
@@ -292,29 +290,30 @@ $threadexp-width: 12px;
     background-position: center; } }
 
 //CONTROLS
-.hyp-fakecontrols {
+.annotator-controls {
   position: absolute;
   top: 0;
   right: 0;
   display: inline-block;
   background: white;
   z-index: 1;
-  button {
+  a {
     text-decoration: underline;
     cursor: pointer;
     padding-left: 1.3em;
     line-height: 1.2em;
     background-size: 1em 1em;
     background-repeat: no-repeat;
+    color: #666;
     &.hyp-write {
       background-image: url("../images/pen_1.png"); }
     &.hyp-fave {
       background-image: url("../images/fave_1.png"); }
     &.hyp-flag {
       background-image: url("../images/flag_1.png"); }
-    &.hyp-save {
+    &.annotator-save {
       background-image: url("../images/submit_1.png"); }
-    &.hyp-delete {
+    &.annotator-cancel {
       background-image: url("../images/delete_1.png"); } } }
 
 //SCORE BADGE
@@ -562,7 +561,8 @@ $heatmap-width: 15px;
       float: left; }
     .hyp-right {
       float: right;
-      position: relative; } }
+    }
+  }
 
   .hyp-repliesbadge {
     display: inline-block;
@@ -621,26 +621,30 @@ $heatmap-width: 15px;
 //EDITOR
 .hyp-writer {
   background: white;
-  @include base-annotation;
-  @include smallshadow;
+  @include smallshadow(2px, 3px, 0.2);
   textarea {
     width: 100%;
     max-width: 100%;
     min-height: 8em;
     font-family: sans-serif; }
+  padding: 1em;
+  margin: 1em;
   .hyp-innerwrap {
     position: relative;
-    margin: .5em; }
+  }
   .hyp-meta {
-    padding-left: $thread-padding * 2; }
+    //padding-left: $thread-padding * 2; }
+  }
   .hyp-body {
-    padding-left: $thread-padding * 2;
+    //padding-left: $thread-padding * 2;
     margin-top: 0.5em;
     position: relative; }
   .hyp-nothread {
-    padding-right: $thread-padding;
-    padding-bottom: 1em; }
+    //padding-right: $thread-padding;
+    //padding-bottom: 1em; }
+  }
   .hyp-scorecontrol {
+    display: none;
     position: absolute;
     z-index: 1; } }
 
@@ -656,12 +660,12 @@ $heatmap-width: 15px;
     right: 1em;
     top: 1em; };
   padding: 1em;
-  &:hover {
+/*  &:hover {
     @include smallshadow(2px, 4px, 0.2);
     bottom: 1px; }
   &:active {
     @include smallshadow(2px, 3px, 0.2);
-    bottom: -1px; }
+    bottom: -1px; }*/
   .hyp-innerwrap {
     position: relative;
     }
@@ -677,7 +681,6 @@ $heatmap-width: 15px;
     }
   .hyp-body {
     margin-top: 0.5em;
-    position: relative;
     }
 
   .hyp-bottombar {
@@ -687,7 +690,8 @@ $heatmap-width: 15px;
       float: left; }
     .hyp-right {
       float: right;
-      position: relative; } }
+    }
+  }
 
   .hyp-repliesbadge {
     display: inline-block;
