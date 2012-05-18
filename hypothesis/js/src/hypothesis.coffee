@@ -3,7 +3,6 @@ class Hypothesis extends Annotator
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-heatmap click":          "onHeatmapClick"
-    "annotationEditorHidden":            "showViewer"
 
   pluginConfig:
     Heatmap: {}
@@ -99,14 +98,19 @@ class Hypothesis extends Annotator
     @editor.hide()
     .on('hide', this.onEditorHide)
     .on('save', this.onEditorSubmit)
-    .addField({
-      type: 'textarea',
-      label: _t('Comments') + '\u2026'
+    @editor.fields = [{
+      element: @editor.element,
       load: (field, annotation) ->
         $(field).find('textarea').val(annotation.text || '')
       submit: (field, annotation) ->
         annotation.text = $(field).find('textarea').val()
-      })
+    }]
+    this.subscribe('annotationEditorHidden', this.showViewer)
+    this.subscribe(
+      'annotationEditorSubmit',
+      (editor, annotation) =>
+        setTimeout(() => this.showViewer([annotation]))
+    )
     this
 
 
