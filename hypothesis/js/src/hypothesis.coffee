@@ -130,10 +130,12 @@ class Hypothesis extends Annotator
 
   showEditor: (annotation) =>
     if @plugins.Permissions?.user
+      @editor.load(annotation)
+      controls = @editor.element.find('.annotator-controls')
       @editor.element.find('.annotator-listing').replaceWith(
         Handlebars.templates['editor'](annotation)
       )
-      @editor.load(annotation)
+      controls.detach().appendTo(@editor.element.find('.hyp-meta'))
       $(document.documentElement).addClass('hyp-collapse')
       @sidebar.removeClass('collapse')
     else
