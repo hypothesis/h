@@ -132,9 +132,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         curve = d3.scale.pow().exponent(.1)
           .domain([0, .5, 1])
           .range([
-            [offsets[0], start]
-            [d3.mean(offsets), annotations.length]
-            [offsets[1], end]
+            [offsets[0], i, 0, start]
+            [d3.mean(offsets), i, .5, annotations.length]
+            [offsets[1], i, 1, end]
           ])
           .interpolate(d3.interpolateArray)
         curve(v).slice() for v in d3.range(0, 1.1, .1)
@@ -149,7 +149,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .selectAll('stop').data(stopData)
     stops.enter().append('stop')
     stops.exit().remove()
-    stops.sort((s, t) -> (s[0] > t[0]) - (t[0] > s[0]))
+    stops.sort()
       .attr('offset', (v) => v[0] / wrapper.height())
-      .attr('stop-color', (v) => this._colorize(v[1] / max))
-      .attr('stop-opacity', (v) -> opacity(v[1]))
+      .attr('stop-color', (v) => this._colorize(v[3] / max))
+      .attr('stop-opacity', (v) -> opacity(v[3]))
