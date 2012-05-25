@@ -2,7 +2,6 @@ class Hypothesis extends Annotator
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
-    ".annotator-heatmap click":          "onHeatmapClick"
 
   pluginConfig:
     Heatmap: {}
@@ -67,6 +66,7 @@ class Hypothesis extends Annotator
   _setupHeatmap: () ->
     # Pull the heatmap into the sidebar
     @heatmap = @plugins.Heatmap
+    d3.select(@heatmap.element.get(0)).on('click', this.onHeatmapClick)
     this
 
   # Creates an instance of Annotator.Viewer and assigns it to the @viewer
@@ -105,8 +105,8 @@ class Hypothesis extends Annotator
     )
     this
 
-  onHeatmapClick: (event) =>
-    y = event.pageY - @wrapper.offset().top
+  onHeatmapClick: () =>
+    [x, y] = d3.mouse(d3.event.target)
     target = d3.bisect(@heatmap.index, y)-1
     annotations = @heatmap.buckets[target]
 
