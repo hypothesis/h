@@ -53,7 +53,7 @@ class Hypothesis extends Annotator
     # Create a sidebar if one does not exist. This is a singleton element --
     # even if multiple instances of the app are loaded on a page (some day).
     if not @sidebar?
-      sidebar = $(Handlebars.templates['sidebar']())
+      sidebar = $(Handlebars.templates.sidebar())
       Annotator.prototype.sidebar = sidebar
       @sidebar = sidebar
       @sidebar.addClass('collapse')
@@ -78,14 +78,6 @@ class Hypothesis extends Annotator
     @viewer.hide()
     .on("edit", this.onEditAnnotation)
     .on("delete", this.onDeleteAnnotation)
-    .addField({
-      load: (field, annotation) =>
-        if annotation.text
-          $(field).escape(annotation.text)
-        else
-          $(field).html("<i>#{_t 'No Comment'}</i>")
-        this.publish('annotationViewerTextField', [field, annotation])
-      })
     this
 
 
@@ -113,7 +105,6 @@ class Hypothesis extends Annotator
     )
     this
 
-
   onHeatmapClick: (event) =>
     y = event.pageY - @wrapper.offset().top
     target = d3.bisect(@heatmap.index, y)-1
@@ -122,12 +113,42 @@ class Hypothesis extends Annotator
     this.showViewer(annotations)
     @heatmap.updateHeatmap()
 
-  showViewer: (annotations) ->
-    @viewer.element.find('.annotator-listing').replaceWith(
-      Handlebars.templates['summaries']({
-        annotations: annotations
-      })
-    )
+  showViewer: (annotations=[], detail=false) ->
+    listing = d3.select(@viewer.element.find('.annotator-listing').get(0))
+
+    if not detail
+      summaries = listing.selectAll('li').data(annotations)
+
+      summaries.enter().append('li')
+      summaries.exit().remove()
+      summaries
+        .classed('hyp-widget', true)
+        .classed('hyp-reply', false)
+        .classed('hyp-summary', true)
+        .html((a, i) => Handlebars.templates.summary(a))
+        .on 'click', (d, i) =>
+          this.showViewer([d], true)
+    else
+      details = listing.selectAll('li').data(annotations)
+
+      details.enter().append('li')
+      details.exit().remove()
+      details
+        .classed('hyp-widget', true)
+        .classed('hyp-annotation', true)
+        .classed('hyp-summary', false)
+        .html((a, i) => Handlebars.templates.detail(a))
+
+      excerpt = listing.selectAll('.hyp-widget.hyp-excerpt')
+        .data(annotations[0..1])
+
+      excerpt.enter().insert('li', '.hyp-annotation')
+      excerpt.exit().remove()
+      excerpt
+        .classed('hyp-widget', true)
+        .classed('hyp-excerpt', true)
+        .text((d) -> d.quote)
+
     @viewer.show()
     $(document.documentElement).addClass('hyp-collapse')
     @sidebar.removeClass('collapse')
@@ -137,7 +158,7 @@ class Hypothesis extends Annotator
       @editor.load(annotation)
       controls = @editor.element.find('.annotator-controls')
       @editor.element.find('.annotator-listing').replaceWith(
-        Handlebars.templates['editor'](annotation)
+        Handlebars.templates.editor(annotation)
       )
       controls.detach().appendTo(@editor.element.find('.hyp-meta'))
       $(document.documentElement).addClass('hyp-collapse')

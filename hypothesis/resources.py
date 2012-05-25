@@ -11,7 +11,7 @@ from pyramid_webassets import add_webasset, IWebAssetsEnvironment
 from webassets import Bundle
 from webassets.loaders import YAMLLoader
 
-def register_annotator(config):
+def annotator_bundle(config):
     # Path utilities
     _name = lambda src: splitext(basename(src))[0]
     _src = lambda name: 'annotator/src/%s.coffee' % name
@@ -30,19 +30,13 @@ def register_annotator(config):
     ui = map(_lib, map(_src, ['notification', 'widget', 'editor', 'viewer']))
     js = Bundle(*(lib + [_lib(_src('annotator'))] +  ui + plugins))
 
-    # Registration
-    add_webasset(
-        config,
-        'annotator',
-        Bundle(
-            js,
-            output='js/annotator.min.js'))
+    return Bundle(
+        js,
+        output='js/annotator.min.js'
+    )
 
 def add_webassets(config):
-    environment = config.get_webassets_env()
-
-    register_annotator(config)
-
+    add_webasset(config, 'annotator', annotator_bundle(config))
     loader = YAMLLoader(join(dirname(__file__), 'resources.yaml'))
     bundles = loader.load_bundles()
     for name in bundles:

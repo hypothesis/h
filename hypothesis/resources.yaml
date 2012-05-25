@@ -7,18 +7,22 @@ handlebars:
 templates:
   contents:
     - contents:
-      - contents: templates/editor.hbs
+      - contents: templates/detail.handlebars
+        debug: False
+        filters: handlebars
+        output: js/lib/templates/detail.js
+      - contents: templates/editor.handlebars
         debug: False
         filters: handlebars
         output: js/lib/templates/editor.js
-      - contents: templates/sidebar.hbs
+      - contents: templates/sidebar.handlebars
         debug: False
         filters: handlebars
         output: js/lib/templates/sidebar.js
-      - contents: templates/summaries.hbs
+      - contents: templates/summary.handlebars
         debug: False
         filters: handlebars
-        output: js/lib/templates/summaries.js
+        output: js/lib/templates/summary.js
     - js/lib/helpers.js
   output: js/lib/templates.js
 app_js:

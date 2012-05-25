@@ -534,15 +534,12 @@ $heatmap-width: 15px;
 .hyp-reply {
   @include base-annotation;
   border-left: 1px dotted #999999;
-  .hyp-meta {
-    padding-left: $thread-padding; }
+
   .hyp-body {
-    padding-left: $thread-padding;
     margin-top: 0.6em;
-    position: relative; }
-  .hyp-nothread {
-    padding-right: $thread-padding;
-    padding-bottom: 1em; }
+    padding-left: $thread-padding;
+    position: relative;
+  }
 
   .hyp-score {
     position: absolute;
@@ -593,7 +590,6 @@ $heatmap-width: 15px;
 
   .hyp-collapsed {
     font-size: 0.9em;
-    padding-right: $thread-padding;
     .hyp-content {
       padding-left: 0.5em;
       overflow: hidden;
@@ -632,17 +628,11 @@ $heatmap-width: 15px;
   .hyp-innerwrap {
     position: relative;
   }
-  .hyp-meta {
-    //padding-left: $thread-padding * 2; }
-  }
+
   .hyp-body {
-    //padding-left: $thread-padding * 2;
     margin-top: 0.5em;
     position: relative; }
-  .hyp-nothread {
-    //padding-right: $thread-padding;
-    //padding-bottom: 1em; }
-  }
+
   .hyp-scorecontrol {
     display: none;
     position: absolute;
@@ -655,33 +645,24 @@ $heatmap-width: 15px;
   background: hsla(0, 0%, 100%, 1);
   @include smallshadow(2px, 3px, 0.2);
   cursor: pointer;
-  margin: {
-    left: 1em;
-    right: 1em;
-    top: 1em; };
+  margin: 1em;
   padding: 1em;
-/*  &:hover {
+
+  &:hover {
     @include smallshadow(2px, 4px, 0.2);
     bottom: 1px; }
   &:active {
     @include smallshadow(2px, 3px, 0.2);
-    bottom: -1px; }*/
+    bottom: -1px;
+  }
+
   .hyp-innerwrap {
     position: relative;
-    }
-  .hyp-meta {
-//    padding-left: $thread-padding * 2;
-    }
-  .hyp-body {
-//    padding-left: $thread-padding * 2;
-    }
-  .hyp-nothread {
-//    padding-right: $thread-padding;
-//    padding-bottom: 1em;
-    }
+  }
+
   .hyp-body {
     margin-top: 0.5em;
-    }
+  }
 
   .hyp-bottombar {
     margin-top: 0.8em;
@@ -714,6 +695,9 @@ $heatmap-width: 15px;
     }
 
 
+.hyp-widget {
+  @include border-radius(.2em);
+}
 
 /*
 	Mobile layout
