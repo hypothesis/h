@@ -41,11 +41,9 @@ class Hypothesis extends Annotator
   # Returns itself for chaining.
   _setupDocumentEvents: ->
     super
-    $(document).on('mousedown', () =>
+    $(document).on 'mousedown', () =>
       @sidebar.addClass('collapse')
       $(document.documentElement).removeClass('hyp-collapse')
-      setTimeout((() -> $(window).resize()), 600)
-    )
     this
 
   _setupSidebar: () ->
