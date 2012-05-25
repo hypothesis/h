@@ -130,23 +130,6 @@ $iconset: iconset_wireframe;
   @include icon_resets;
   background-image: url("../images/#{$icon}"); }
 
-//#annotator {
-//  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
-//  font-weight: normal;
-//  font-size: 13px;
-//  line-height: 1.2em;
-//  color: #666666;
-//  overflow: hidden;
-//  p {
-//    margin: 0;
-//    margin-bottom: 0.5em; }
-//  input, textarea {
-//    @include invisibox;
-//    @include box-sizing(border-box);
-//    font: sans-serif;
-//    &:focus {
-//      outline: none; } } }
-
 // Styles for the sidebar
 .hyp-sidebar {
   @include single-transition(all, 0.6s, ease-in-out);
@@ -255,27 +238,22 @@ $iconset: iconset_wireframe;
 //META BAR
 .hyp-meta {
   @include pie-clearfix;
-  position: relative;
   .hyp-user {
     float: left;
     @include primarytext;
     text-decoration: underline; }
   .hyp-time {
     float: right;
-    display: inline-block;
-    vertical-align: bottom; }
-  .hyp-threadexp {
-    bottom: -1px;
-    left: -7px;
-    font-size: 1.8em;
-    font-weight: bold;
-    position: absolute; } }
+    display: inline-block; } }
 
 //THREADEXP
 $threadexp-width: 12px;
 .hyp-threadexp {
+  display: inline-block;
   height: $threadexp-width;
   width: $threadexp-width;
+  position: absolute;
+  left: -$threadexp-width / 2;
   border: 1px dotted #aaaaaa;
   background-image: url("../images/minus_1.png");
   background-size: 100% 100%;
@@ -457,51 +435,10 @@ $threadexp-width: 12px;
     top: 1px;
     @include box-shadow(none); } }
 
-//HEATMAP
-$heatmap-width: 15px;
-
-.hyp-heatmap {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: $heatmap-width;
-  background: white;
-  border-left: 1px solid #bbbbbb;
-  @include smallshadow;
-  .hyp-heatmap_tab {
-    text-align: center;
-    background: #666666;
-    color: white;
-    text-shadow: 1px 1px 1px black;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
-    font-weight: bold;
-    position: absolute;
-    top: 75%;
-    width: 2em;
-    right: 0;
-    padding: 0.25em 0;
-    font-family: sans-serif;
-    font-size: 1em;
-    @include smallshadow; }
-  .hyp-gr_bg {
-    stop-color: white; }
-  .hyp-gr_positive {
-    stop-color: $positive + #222222; }
-  .hyp-gr_negative {
-    stop-color: $negative + #333333; }
-  .hyp-gr_neutral {
-    stop-color: $neutral + #666666; } }
-
 //ANNOTATION
 .hyp-annotation {
   background: white;
   @include smallshadow(0px, -2px);
-  padding: {
-    left: 0;
-    top: 1em;
-    bottom: 1em; };
   margin: {
     left: 0.5em;
     right: 0.5em; }; }
@@ -525,19 +462,17 @@ $heatmap-width: 15px;
 @mixin base-annotation {
   line-height: 1.25em;
   position: relative;
-  padding-top: 1em;
-  margin-left: $thread-padding;
-
-  }
+}
 
 //ANNOTATION DETAIL
 .hyp-reply {
   @include base-annotation;
   border-left: 1px dotted #999999;
+  margin-left: .5em;
+  padding-left: 1em;
 
   .hyp-body {
     margin-top: 0.6em;
-    padding-left: $thread-padding;
     position: relative;
   }
 
@@ -625,8 +560,8 @@ $heatmap-width: 15px;
     font-family: sans-serif; }
   padding: 1em;
   margin: 1em;
-  .hyp-innerwrap {
-    position: relative;
+  .hyp-meta {
+    padding-left: $thread-padding * 2;
   }
 
   .hyp-body {
@@ -645,8 +580,6 @@ $heatmap-width: 15px;
   background: hsla(0, 0%, 100%, 1);
   @include smallshadow(2px, 3px, 0.2);
   cursor: pointer;
-  margin: 1em;
-  padding: 1em;
 
   &:hover {
     @include smallshadow(2px, 4px, 0.2);
@@ -654,10 +587,6 @@ $heatmap-width: 15px;
   &:active {
     @include smallshadow(2px, 3px, 0.2);
     bottom: -1px;
-  }
-
-  .hyp-innerwrap {
-    position: relative;
   }
 
   .hyp-body {
@@ -697,6 +626,8 @@ $heatmap-width: 15px;
 
 .hyp-widget {
   @include border-radius(.2em);
+  margin: 1em;
+  padding: 1em;
 }
 
 /*
