@@ -4,6 +4,7 @@
 var Handlebars
 
 Handlebars.registerHelper('fuzzyTime', function (date) {
+  if (!date) return ''
   var delta = Math.round((+new Date - new Date(date)) / 1000)
 
   var minute = 60,
