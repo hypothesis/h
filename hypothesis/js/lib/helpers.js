@@ -9,7 +9,8 @@ Handlebars.registerHelper('fuzzyTime', function (date) {
   var minute = 60,
   hour = minute * 60,
   day = hour * 24,
-  week = day * 7
+  week = day * 7,
+  month = day * 30
 
   var fuzzy
 
@@ -27,6 +28,10 @@ Handlebars.registerHelper('fuzzyTime', function (date) {
     fuzzy = Math.floor(delta / hour) + ' hours ago.'
   } else if (delta < day * 2) {
     fuzzy = 'yesterday'
+  } else if (delta < month) {
+    fuzzy = Math.round(delta / day) + ' days ago'
+  } else {
+    fuzzy = date.toLocaleDateString()
   }
   
   return fuzzy
