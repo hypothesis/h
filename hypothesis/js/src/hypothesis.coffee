@@ -225,6 +225,7 @@ class Hypothesis extends Annotator
 
             switch d3.event.target.getAttribute('href')
               when '#reply'
+                d3.event.preventDefault()
                 parent = d3.select(event.currentTarget).datum()
                 reply = this.createAnnotation()
                 reply.thread = this.threadId(parent.message.annotation)
