@@ -271,7 +271,6 @@ $threadexp-width: 1em;
 .annotator-controls {
   float: right;
   display: inline-block;
-  background: white;
   z-index: 1;
   a {
     text-decoration: underline;
@@ -280,7 +279,9 @@ $threadexp-width: 1em;
     line-height: 1.2em;
     background-size: 1em 1em;
     background-repeat: no-repeat;
+    background-position: left center;
     color: #666;
+    margin: .25em;
     &.hyp-write {
       background-image: url("../images/pen_1.png"); }
     &.hyp-fave {
@@ -486,7 +487,6 @@ $threadexp-width: 1em;
       margin-right: 0.5em; }
     .hyp-inner {
       padding: 0.25em;
-      background: white;
       position: absolute;
       border: 1px solid #aaaaaa;
       top: 0;
@@ -530,8 +530,7 @@ $threadexp-width: 1em;
 
 //EDITOR
 .hyp-writer {
-  background: white;
-  @include smallshadow(2px, 3px, 0.2);
+  @include tinyshadow(0, 2px, 0.2);
   textarea {
     width: 100%;
     max-width: 100%;
@@ -552,17 +551,17 @@ $threadexp-width: 1em;
 //BUCKET VIEW REPLY SUMMARIES
 .hyp-summary {
   line-height: 1.25em;
-  position: relative;
   background: hsla(0, 0%, 100%, 1);
   @include smallshadow(2px, 3px, 0.2);
   cursor: pointer;
 
   &:hover {
     @include smallshadow(2px, 4px, 0.2);
-    bottom: 1px; }
+    bottom: 1px;
+  }
   &:active {
-    @include smallshadow(2px, 3px, 0.2);
-    bottom: -1px;
+    @include smallshadow(2px, 1px, 0.2);
+    bottom: -2px;
   }
 
   .hyp-body {
@@ -572,11 +571,8 @@ $threadexp-width: 1em;
   .hyp-bottombar {
     margin-top: 0.8em;
     @include pie-clearfix;
-    .hyp-left {
-      float: left; }
-    .hyp-right {
-      float: right;
-    }
+    .hyp-left { float: left; }
+    .hyp-right { float: right; }
   }
 
   .hyp-repliesbadge {
@@ -584,21 +580,17 @@ $threadexp-width: 1em;
     position: relative;
     @include secondarytext;
     display: none;
-    }
+  }
 
   .hyp-score {
     display: none;
     position: absolute;
     top: 0.8em;
-    &.hyp-positive {
-      top: 0.2em; }
-    &.hyp-negative {
-      top: -0.2em; }
-    &.hyp-neutral {
-      top: -0.2em; } }
-
-    }
-
+    &.hyp-positive { top: 0.2em; }
+    &.hyp-negative { top: -0.2em; }
+    &.hyp-neutral {  top: -0.2em; }
+  }
+}
 
 .hyp-widget {
   @include border-radius(.2em);
