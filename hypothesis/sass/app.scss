@@ -133,6 +133,7 @@ $iconset: iconset_wireframe;
 // Styles for the sidebar
 .hyp-sidebar {
   @include single-transition(all, 0.6s, ease-in-out);
+  background: url('../images/noise_1.png');
   color: #666666;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: $font-size / $em * .8;
@@ -159,7 +160,6 @@ $iconset: iconset_wireframe;
 
   .annotator-outer {
     @include single-transition(margin-left, 0.6s, ease-in-out);
-    background: url('../images/noise_1.png');
     height: 100%;
     position: fixed;
     top: 0;
@@ -247,13 +247,13 @@ $iconset: iconset_wireframe;
     display: inline-block; } }
 
 //THREADEXP
-$threadexp-width: 12px;
+$threadexp-width: 1em;
 .hyp-threadexp {
-  display: inline-block;
   height: $threadexp-width;
   width: $threadexp-width;
   position: absolute;
-  left: -$threadexp-width / 2;
+  margin-left: (-$threadexp-width / 2) - $thread-padding;
+
   border: 1px dotted #aaaaaa;
   background-image: url("../images/minus_1.png");
   background-size: 100% 100%;
@@ -269,9 +269,7 @@ $threadexp-width: 12px;
 
 //CONTROLS
 .annotator-controls {
-  position: absolute;
-  top: 0;
-  right: 0;
+  float: right;
   display: inline-block;
   background: white;
   z-index: 1;
@@ -435,41 +433,22 @@ $threadexp-width: 12px;
     top: 1px;
     @include box-shadow(none); } }
 
-//ANNOTATION
-.hyp-annotation {
-  background: white;
-  @include smallshadow(0px, -2px);
-  margin: {
-    left: 0.5em;
-    right: 0.5em; }; }
-
 //EXCERPT
 .hyp-excerpt {
-  @include smallshadow;
-  background: white;
   font-family: serif;
   font-size: 1.1em;
-  color: black;
-  font-family: serif;
-  font-size: 1.1em;
-  margin-bottom: 1em;
-  margin-left: 0.5em;
-  margin-right: 0.5em;
-  margin-top: 0.5em;
-  padding: 1em; }
-
-//BASE ANNOTATION OBJECT
-@mixin base-annotation {
-  line-height: 1.25em;
-  position: relative;
-}
+  color: black; }
 
 //ANNOTATION DETAIL
 .hyp-reply {
-  @include base-annotation;
   border-left: 1px dotted #999999;
-  margin-left: .5em;
-  padding-left: 1em;
+  padding-left: $thread-padding;
+  padding-top: 1em;
+  margin-left: $thread-padding / 2;
+
+  .hyp-detail {
+    margin-left: -$thread-padding / 2;
+  }
 
   .hyp-body {
     margin-top: 0.6em;
@@ -559,14 +538,11 @@ $threadexp-width: 12px;
     min-height: 8em;
     font-family: sans-serif; }
   padding: 1em;
-  margin: 1em;
-  .hyp-meta {
-    padding-left: $thread-padding * 2;
-  }
+  margin: 1em -1em;
 
   .hyp-body {
     margin-top: 0.5em;
-    position: relative; }
+  }
 
   .hyp-scorecontrol {
     display: none;
@@ -626,6 +602,8 @@ $threadexp-width: 12px;
 
 .hyp-widget {
   @include border-radius(.2em);
+  @include smallshadow;
+  background: white;
   margin: 1em;
   padding: 1em;
 }

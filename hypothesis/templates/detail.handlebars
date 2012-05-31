@@ -1,5 +1,5 @@
 <div class="hyp-reply">
-  <a class="hyp-threadexp" href="#"></a>
+  <div class="hyp-threadexp"></div>
   <div class="hyp-meta">
     {{#splitUser user}}
     <div class="hyp-user">{{name}}</div>
@@ -10,7 +10,11 @@
     <div class="hyp-content">{{text}}</div>
   </div>
   <div class="hyp-bottombar">
+    <div class="annotator-controls">
+       <a href="#reply" class="hyp-write">Reply</a>
+    </div>
     <div class="hyp-repliesbadge"></div>
     <div class="hyp-right"></div>
   </div>
+  <ul class="annotator-listing"></ul>
 </div>

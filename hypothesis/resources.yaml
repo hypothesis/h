@@ -4,6 +4,10 @@ d3:
   contents: js/lib/d3.v2.min.js
 handlebars:
   contents: js/lib/handlebars-runtime.min.js
+jwz:
+  contents: js/lib/jwz.min.js
+underscore:
+  contents: js/lib/underscore-min.js
 templates:
   contents:
     - contents:

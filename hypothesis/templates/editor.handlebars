@@ -1,25 +1,16 @@
-<ul class="annotator-listing">
-  <li class="hyp-widget hyp-writer">
-    <div class="hyp-innerwrap">
-      <div class="hyp-nothread">
-        <div class="hyp-meta">
-          {{#splitUser user}}
-            <div class="hyp-user">
-              {{name}}
-            </div>
-          {{/splitUser}}
-        </div>
-        <div class="hyp-body">
-          <div class="hyp-scorecontrol hyp-neutral">
-          </div>
-          <textarea class="hyp-content" placeholder="Thoughts…"
-                    value="{{text}}"></textarea>
-        </div>
-        <div class="hyp-bottombar">
-          <div class="hyp-right">
-          </div>
-        </div>
-      </div>
-    </div>
-  </li>
-</ul>
+<div class="hyp-meta">
+  {{#splitUser user}}
+  <div class="hyp-user">{{name}}</div>
+  {{/splitUser}}
+  <div class="annotator-controls">
+    <a href="#save" class="annotator-save">Save</a>
+    <a href="#cancel" class="annotator-cancel">Cancel</a>
+  </div>
+</div>
+<div class="hyp-body">
+  <div class="hyp-scorecontrol hyp-neutral"></div>
+  <textarea class="hyp-content" placeholder="Thoughts…">{{text}}</textarea>
+</div>
+<div class="hyp-bottombar">
+  <div class="hyp-right"></div>
+</div>
