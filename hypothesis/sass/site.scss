@@ -24,7 +24,7 @@ article {
 
 body {
   background-image: url('../images/noise_1.png');
-  color: $gray;
+  color: $gray-light;
   font-family: "Georgia", "Gentium Basic", "Times New Roman", serif;
   font-size: $font-size / $em;
   font-smoothing: antialiased;
@@ -33,17 +33,12 @@ body {
 }
 
 h1, h2, h3, h4 {
+  color: darken($gray-light, 15%);
   margin: .33em 0;
 }
 
 h1, form {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-h3 {
-  border-bottom-style: solid;
-  border-color: $gray-light;
-  border-width: .1em;
 }
 
 label {
@@ -152,7 +147,7 @@ span.error {
 #content {
   @include box-shadow(desaturate($yellow, 75%) 0 0 .5em);
   border: lighten($gray-light, 30%) solid thin;
-  background-color: lighten($gray-lighter, 2%);
+  background-color: lighten($gray-lighter, 3%);
   font-size: ($font-size + 2) / $font-size * 1em;
 }
 
