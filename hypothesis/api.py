@@ -23,7 +23,7 @@ def consumer_fetcher(key):
 
 def token_headers(request):
     headers = {
-        'Access-Control-Allow-Origin': request.headers.get('host'),
+        'Access-Control-Allow-Origin': request.headers.get('origin'),
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Expose-Headers': 'Location, Content-Type, Content-Length'
     }
@@ -78,5 +78,5 @@ def includeme(config):
     config.add_view(wsgiapp2(app), route_name='api')
     config.add_view(token, route_name='token', request_method='GET',
                     permission='authenticated')
-    config.add_view(lambda r: Response(headerlist=cors_headers(r).items()),
+    config.add_view(lambda r: Response(headerlist=token_headers(r).items()),
                     route_name='token', request_method='OPTIONS')
