@@ -134,16 +134,23 @@ class home(object):
             'embed': render(
                 'templates/embed.pt',
                 {
-                    'jquery': json.dumps(environment['jquery'].urls()),
-                    'd3': json.dumps(environment['d3'].urls()),
-                    'underscore': json.dumps(environment['underscore'].urls()),
+                    'jquery': json.dumps(
+                        map(lambda url: self.request.relative_url(url, True),
+                            environment['jquery'].urls())),
+                    'd3': json.dumps(
+                        map(lambda url: self.request.relative_url(url, True),
+                            environment['d3'].urls())),
+                    'underscore': json.dumps(
+                        map(lambda url: self.request.relative_url(url, True),
+                            environment['underscore'].urls())),
                     'hypothesis': json.dumps(
-                        environment['annotator'].urls() +
-                        environment['handlebars'].urls() +
-                        environment['templates'].urls() +
-                        environment['jwz'].urls() +
-                        environment['app_js'].urls() +
-                        environment['app_css'].urls())
+                        map(lambda url: self.request.relative_url(url, True),
+                            environment['annotator'].urls() +
+                            environment['handlebars'].urls() +
+                            environment['templates'].urls() +
+                            environment['jwz'].urls() +
+                            environment['app_js'].urls() +
+                            environment['app_css'].urls()))
                 },
                 request=self.request),
             'auth': self.auth()
