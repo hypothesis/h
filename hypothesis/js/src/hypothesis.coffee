@@ -56,7 +56,11 @@ class Hypothesis extends Annotator
   _setupHeatmap: () ->
     # Pull the heatmap into the sidebar
     @heatmap = @plugins.Heatmap
-    d3.select(@heatmap.element.get(0)).on('click', this.onHeatmapClick)
+    d3.select(@heatmap.element.get(0)).on 'click', =>
+      [x, y] = d3.mouse(d3.event.target)
+      target = d3.bisect(@heatmap.index, y)-1
+      annotations = @heatmap.buckets[target]
+      this.showViewer(annotations) if annotations?.length
     this
 
   # Creates an instance of Annotator.Viewer and assigns it to the @viewer
@@ -139,12 +143,6 @@ class Hypothesis extends Annotator
     if annotation.thread
       annotation.ranges = annotation.ranges or []
     super annotation, args...
-
-  onHeatmapClick: () =>
-    [x, y] = d3.mouse(d3.event.target)
-    target = d3.bisect(@heatmap.index, y)-1
-    annotations = @heatmap.buckets[target]
-    this.showViewer(annotations) if annotations?.length
 
   showViewer: (annotations=[], detail=false) ->
     viewer = d3.select(@viewer.element.get(0))
