@@ -432,9 +432,12 @@ $threadexp-width: 1em;
 
 //EXCERPT
 .hyp-excerpt {
-  font-family: serif;
-  font-size: 1.1em;
-  color: black; }
+  div {
+    font-family: serif;
+    font-size: 1.1em;
+    color: black;
+  }
+}
 
 //ANNOTATION DETAIL
 .hyp-reply {

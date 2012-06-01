@@ -181,10 +181,12 @@ class Hypothesis extends Annotator
           this.showViewer([a], true)
     else
       excerpts.enter()
-        .insert('li', '.hyp-annotation').classed('hyp-widget', true)
-        .append('div').classed('hyp-excerpt', true)
+        .insert('li', '.hyp-annotation')
+          .classed('hyp-widget', true)
+          .classed('hyp-excerpt', true)
+        .append('div')
       excerpts.exit().remove()
-      excerpts.select('div.hyp-excerpt').text((d) -> d.message.annotation.quote)
+      excerpts.select('div').text((d) -> d.message.annotation.quote)
 
       loop
         context = context.select('.annotator-listing')
