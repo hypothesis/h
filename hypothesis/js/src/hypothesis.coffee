@@ -147,7 +147,6 @@ class Hypothesis extends Annotator
     this.showViewer(annotations) if annotations?.length
 
   showViewer: (annotations=[], detail=false) ->
-    @editor.hide()
     viewer = d3.select(@viewer.element.get(0))
 
     messages = annotations.map (a) ->
@@ -256,6 +255,7 @@ class Hypothesis extends Annotator
 
         context = items
 
+    @editor.hide()
     @viewer.show()
     this.showSidebar()
 
