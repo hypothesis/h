@@ -631,10 +631,10 @@ $threadexp-width: 1em;
 
 @media screen and (min-width: 37.5em) {
   .hyp-sidebar {
-    width: 400px;
-    margin-left: -400px;
+    width: 500px;
+    margin-left: -500px;
     .annotator-outer {
-      width: 400px;
+      width: 500px;
     }
   }
 }
@@ -651,7 +651,7 @@ $threadexp-width: 1em;
   }
   html.hyp-collapse {
     width: auto;
-    right: 400px;
+    right: 500px;
   }
 }
 
