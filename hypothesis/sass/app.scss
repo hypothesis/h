@@ -55,8 +55,8 @@ html {
   background: hsla(0, 0, 90%, 0.4);
   position: absolute;
   width: 10px;
-  left: -11px;
   outline: solid $gray-lighter thin;
+  z-index: 1;
 }
 
 //STANCE COLORS
@@ -135,7 +135,6 @@ $iconset: iconset_wireframe;
   font-size: $font-size / $em * .8;
   height: 100%;
   line-height: $line-height / $em * .8;
-  overflow: visible;
   position: absolute;
   right: 0;
   left: 100%;
@@ -159,13 +158,13 @@ $iconset: iconset_wireframe;
     height: 100%;
     position: fixed;
     top: 0;
-    z-index: 501;
+    padding-left: 10px;
   }
 }
 
 .hyp-sidebar.collapse {
-  width: 0;
-  margin-left: 0;
+  width: 10px;
+  margin-left: -10px;
 }
 
 //LOGO
