@@ -169,7 +169,25 @@ span.error {
   position: fixed;
   height: 3em;
   width: 100%;
-  z-index: 10;
+  text-align: center;
+  z-index: 501;
+
+  & > div {
+    display: inline-block;
+    position: relative;
+
+    &:last-child {
+      position: absolute;
+      right: 1em;
+      text-align: left;
+    }
+
+    &:first-child {
+      position: absolute;
+      left: 1em;
+      text-align: left;
+    }
+  }
 }
 
 /*
