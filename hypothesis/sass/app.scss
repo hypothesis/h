@@ -52,14 +52,6 @@ html {
   left: 0;
 }
 
-.annotator-heatmap {
-  background: hsla(0, 0, 90%, 0.4);
-  position: absolute;
-  width: 10px;
-  outline: solid $gray-lighter thin;
-  z-index: 1;
-}
-
 //STANCE COLORS
 $positive: #3aab39;
 $negative: #d11c2b;
@@ -128,6 +120,14 @@ $iconset: iconset_wireframe;
   background-image: url("../images/#{$icon}"); }
 
 // Styles for base annotator elements
+.annotator-heatmap {
+  @include tinyshadow(-1px, 0, 0.2);
+  background: hsla(0, 0, 90%, 0.4);
+  position: absolute;
+  width: 15px;
+  z-index: 1;
+}
+
 .annotator-listing {
   @include reset-box-model;
   @include reset-list-style;
@@ -165,13 +165,13 @@ $iconset: iconset_wireframe;
     height: 100%;
     position: fixed;
     top: 0;
-    padding-left: 10px;
+    padding-left: 15px;
   }
 }
 
 .hyp-sidebar.collapse {
-  width: 10px;
-  margin-left: -10px;
+  width: 15px;
+  margin-left: -15px;
 }
 
 //LOGO
