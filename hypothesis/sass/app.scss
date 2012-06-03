@@ -271,8 +271,10 @@ $threadexp-width: 1em;
 
 //CONTROLS
 .annotator-controls {
-  float: right;
-  display: inline-block;
+  @include box-shadow(-2em 0 2em 0 #fff);
+  background-color: #fff;
+  position: absolute;
+  right: 2em;
   z-index: 1;
   a {
     text-decoration: underline;
