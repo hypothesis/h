@@ -525,6 +525,15 @@ $threadexp-width: 1em;
     .hyp-tag {
       padding: 0.1em 0.3em; } } }
 
+// Remove the expander from the top level annotation
+.hyp-widget > .hyp-reply {
+  border-left: none;
+  margin-left: 0;
+
+  & > .hyp-threadexp {
+    display: none;
+  }
+}
 
 //EDITOR
 .hyp-writer {
