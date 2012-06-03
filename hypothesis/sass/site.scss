@@ -19,6 +19,9 @@ article {
 
   p {
     margin: 1em 0;
+    -webkit-hyphens: auto;
+       -moz-hyphens: auto;
+            hyphens: auto;
   }
 }
 
@@ -32,10 +35,19 @@ body {
 
 }
 
+em { font-style: italic; }
+
 h1, h2, h3, h4 {
   color: darken($gray-light, 15%);
   margin: .33em 0;
 }
+
+h1, h2, h3 {
+  font-weight: 700;
+}
+
+h1 { @include large; }
+h2 { @include big; }
 
 h1, form {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -50,7 +62,7 @@ section {
 }
 
 span.error {
-  @extend .small;
+  @include small;
 }
 
 .deform button,
@@ -158,7 +170,7 @@ span.error {
 }
 
 #toolbar {
-  @extend .small;
+  @include small;
   @include box-shadow(
     $gray-light 0 0 .5em,
     desaturate(lighten($blue, 25%), 85%) 0 0 6em -3em inset

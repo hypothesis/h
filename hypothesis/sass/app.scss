@@ -1,5 +1,6 @@
 @import 'common';
 @import 'compass';
+@import 'compass/reset/utilities';
 
 /* Annotator styles */
 
@@ -125,6 +126,12 @@ $iconset: iconset_wireframe;
 @mixin icon($icon) {
   @include icon_resets;
   background-image: url("../images/#{$icon}"); }
+
+// Styles for base annotator elements
+.annotator-listing {
+  @include reset-box-model;
+  @include reset-list-style;
+}
 
 // Styles for the sidebar
 .hyp-sidebar {

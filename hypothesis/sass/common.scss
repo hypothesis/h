@@ -54,58 +54,34 @@ $gutter: 24;
   font-size: 13/$em;
   line-height: 14/13*1em;
 }
-.small { @include small; }
 
 @mixin normal {
   font-size: 1em;
 }
-.normal { @include normal; }
 
 @mixin big {
   font-size: 23/$em;
   line-height: 24/23*1em;
 }
-.big { @include big; }
 
 @mixin large {
   font-size: 27/$em;
   line-height: 36/27*1em;
 }
-.large { @include large; }
 
 @mixin huge {
   font-size: 44/$em;
   line-height: 48/44*1em;
 }
-.huge { @include huge; }
 
 @mixin enormous {
   font-size: 72/$em;
   line-height: 72/72*1em;
 }
-.enormous { @include enormous; }
 
 @mixin gigantic {
   font-size: 116/$em;
   line-height: 120/116*1em;
-}
-.gigantic { @include gigantic; }
-
-/* Typography */
-
-article p {
-  -webkit-hyphens: auto;
-     -moz-hyphens: auto;
-          hyphens: auto;
-}
-
-em { font-style: italic; }
-
-h1 { @extend .large; }
-h2 { @extend .big; }
-
-h1, h2, h3 {
-  font-weight: 700;
 }
 
 /* Shadows */
