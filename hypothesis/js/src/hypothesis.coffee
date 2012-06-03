@@ -204,17 +204,11 @@ class Hypothesis extends Annotator
 
           .on 'mouseover', =>
             d3.event.stopPropagation()
-            d3.select(d3.event.currentTarget).select('.annotator-controls')
-              .transition()
-                .style('display', '')
-                .style('opacity', 1)
+            d3.select(d3.event.currentTarget).classed('hyp-hover', true)
 
           .on 'mouseout', =>
             d3.event.stopPropagation()
-            d3.select(d3.event.currentTarget).select('.annotator-controls')
-              .transition()
-                .style('display', 'none')
-                .style('opacity', 1e-6)
+            d3.select(d3.event.currentTarget).classed('hyp-hover', false)
 
           .on 'click', =>
             event = d3.event
@@ -248,10 +242,6 @@ class Hypothesis extends Annotator
                       .on 'mouseover', => d3.event.stopPropagation()
 
                 editor.on('hide', => item.remove())
-
-          .select('.annotator-controls')
-            .style('display', 'none')
-            .style('opacity', 1e-6)
 
         context = items
 

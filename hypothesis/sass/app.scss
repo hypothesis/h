@@ -448,15 +448,31 @@ $threadexp-width: 1em;
 }
 
 //ANNOTATION DETAIL
+.hyp-detail {
+  @include single-transition(all, 0.6s, ease-in-out);
+  margin-left: -$thread-padding / 2;
+
+  .annotator-controls {
+    @include single-transition(all, 0.25s, ease-in-out);
+    opacity: 0;
+  }
+
+  &.hyp-hover {
+    @include box-shadow(-.25em 0 1em -.25em #999);
+    outline-left: thin solid $gray-lighter;
+
+    & > .hyp-reply > .hyp-meta > .annotator-controls {
+      opacity: 1;
+    }
+  }
+}
+
+//ANNOTATION REPLY
 .hyp-reply {
   border-left: 1px dotted #999999;
   padding-left: $thread-padding;
   padding-top: 1em;
   margin-left: $thread-padding / 2;
-
-  .hyp-detail {
-    margin-left: -$thread-padding / 2;
-  }
 
   .hyp-body {
     margin-top: 0.6em;
