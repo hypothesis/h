@@ -458,9 +458,6 @@ $threadexp-width: 1em;
   }
 
   &.hyp-hover {
-    @include box-shadow(-.25em 0 1em -.25em #999);
-    outline-left: thin solid $gray-lighter;
-
     & > .hyp-reply > .hyp-meta > .annotator-controls {
       opacity: 1;
     }
@@ -473,6 +470,11 @@ $threadexp-width: 1em;
   padding-left: $thread-padding;
   padding-top: 1em;
   margin-left: $thread-padding / 2;
+
+  .hyp-detail.hyp-hover {
+    @include box-shadow(-.5em 0 .5em -.5em #999);
+    outline-left: thin solid $gray-lighter;
+  }
 
   .hyp-body {
     margin-top: 0.6em;
