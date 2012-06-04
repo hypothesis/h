@@ -20,11 +20,17 @@ yepnope([
     test: window.annotator,
     nope: ${hypothesis},
     complete: function () {
+      var uri = document.location.href;
+      if (document.location.hash) {
+        uri = url.slice(0, -1 * document.location.hash.length)
+      }
       window.annotator = new Hypothesis(document.body, {
         Auth: {
           tokenUrl: '${request.route_url('token')}'
         },
         Store: {
+          annotationData: { uri: uri },
+          loadFromSearch: { uri: uri },
           prefix: '${request.route_url('api', subpath="")}'
         }
       });
