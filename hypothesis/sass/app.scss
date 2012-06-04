@@ -44,14 +44,6 @@
 	position: relative;
 }
 
-html {
-  @include single-transition(right, 0.6s, ease-in-out);
-  position: absolute;
-  width: auto;
-  right: 0;
-  left: 0;
-}
-
 //STANCE COLORS
 $positive: #3aab39;
 $negative: #d11c2b;
@@ -682,13 +674,6 @@ $threadexp-width: 1em;
 */
 
 @media screen and (min-width: 57em) {
-  .hyp-sidebar {
-    margin-left: 0;
-  }
-  html.hyp-collapse {
-    width: auto;
-    right: 500px;
-  }
 }
 
 /*
