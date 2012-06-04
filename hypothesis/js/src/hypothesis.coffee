@@ -34,6 +34,11 @@ class Hypothesis extends Annotator
     @plugins.Auth.withToken (token) =>
       @plugins.Permissions.setUser token.userId
 
+    this.subscribe 'beforeAnnotationCreated', (annotation) =>
+      annotation.created = annotation.updated = (new Date()).toString()
+      annotation.user = @plugins.Permissions.options.userId(
+        @plugins.Permissions.user)
+
     this
 
   _setupWrapper: ->
