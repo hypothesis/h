@@ -152,6 +152,7 @@ class Hypothesis extends Annotator
   showViewer: (annotations=[], detail=false) ->
     viewer = d3.select(@viewer.element.get(0))
 
+    # Thread the messages using JWZ
     messages = annotations.map (a) ->
       m = mail.message(null, a.id, a.thread?.split('/') or [])
       m.annotation = a
@@ -160,11 +161,15 @@ class Hypothesis extends Annotator
     root = mail.messageThread().thread(messages)
     context = viewer.datum(root)
 
+    # Bind the excerpt data so the excerpt can be removed in the bucket view
+    # or updated and rendered in the detail view.
     excerpts = context.select('.annotator-listing').selectAll('.hyp-excerpt')
       .data ( -> if detail then root.children else []), (c) -> c.message.id
 
     if not detail
+      # Remove the excerpts
       excerpts.exit().remove()
+
       context = context.select('.annotator-listing')
       context.select('.annotator-listing > li.hyp-excerpt').remove()
       items = context.selectAll('.annotator-listing > li.hyp-annotation')
