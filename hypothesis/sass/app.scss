@@ -271,7 +271,7 @@ $threadexp-width: 1em;
 
 //CONTROLS
 .annotator-controls {
-  @include box-shadow(-2em 0 2em 0 #fff);
+  @include box-shadow(0 0 1em 1em #fff);
   background-color: #fff;
   position: absolute;
   right: 2em;
