@@ -270,9 +270,13 @@ $threadexp-width: 1em;
 .annotator-controls {
   @include box-shadow(-1em 0 1em 0 #fff);
   background-color: #fff;
-  position: absolute;
-  right: 0;
-  z-index: 1;
+
+  .hyp-meta > & {
+    position: absolute;
+    right: 0;
+    z-index: 1;
+  }
+
   a {
     text-decoration: underline;
     cursor: pointer;
