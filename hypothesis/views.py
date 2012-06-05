@@ -112,6 +112,31 @@ class AuthView(NgFormView):
             self.request.user = AuthID.get_by_id(user.auth_id)
         raise HTTPSeeOther(headers=headers, location=self.request.url)
 
+def embed(request):
+    environment = request.registry.queryUtility(IWebAssetsEnvironment)
+    return render(
+        'templates/embed.pt',
+        {
+            'jquery': json.dumps(
+                map(lambda url: request.relative_url(url, True),
+                    environment['jquery'].urls())),
+            'd3': json.dumps(
+                map(lambda url: request.relative_url(url, True),
+                    environment['d3'].urls())),
+            'underscore': json.dumps(
+                map(lambda url: request.relative_url(url, True),
+                    environment['underscore'].urls())),
+            'hypothesis': json.dumps(
+                map(lambda url: request.relative_url(url, True),
+                    environment['annotator'].urls() +
+                    environment['handlebars'].urls() +
+                    environment['templates'].urls() +
+                    environment['jwz'].urls() +
+                    environment['app_js'].urls() +
+                    environment['app_css'].urls()))
+        },
+        request=request)
+
 class home(object):
     def __init__(self, request):
         self.request = request
@@ -129,31 +154,9 @@ class home(object):
         return getattr(self, self.request.params['__formid__'])
 
     def __call__(self):
-        environment = self.request.registry.queryUtility(IWebAssetsEnvironment)
         return {
-            'embed': render(
-                'templates/embed.pt',
-                {
-                    'jquery': json.dumps(
-                        map(lambda url: self.request.relative_url(url, True),
-                            environment['jquery'].urls())),
-                    'd3': json.dumps(
-                        map(lambda url: self.request.relative_url(url, True),
-                            environment['d3'].urls())),
-                    'underscore': json.dumps(
-                        map(lambda url: self.request.relative_url(url, True),
-                            environment['underscore'].urls())),
-                    'hypothesis': json.dumps(
-                        map(lambda url: self.request.relative_url(url, True),
-                            environment['annotator'].urls() +
-                            environment['handlebars'].urls() +
-                            environment['templates'].urls() +
-                            environment['jwz'].urls() +
-                            environment['app_js'].urls() +
-                            environment['app_css'].urls()))
-                },
-                request=self.request),
-            'auth': self.auth()
+            'auth': self.auth(),
+            'embed': embed(self.request)
         }
 
 def includeme(config):
@@ -163,6 +166,11 @@ def includeme(config):
     config.add_view(home, renderer='templates/home.pt')
     config.add_view(home, attr='partial', renderer='templates/form.pt', xhr=True)
     config.add_view(home, name='auth', attr='auth', renderer='templates/form.pt')
+
+    config.add_view(lambda r: Response(body=embed(r),
+                                       content_type='application/javascript',
+                                       charset='utf-8'),
+                    route_name='embed')
 
     config.add_static_view('assets/annotator', 'annotator')
     config.add_static_view('assets/css', 'css')

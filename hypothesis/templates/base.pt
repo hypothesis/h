@@ -22,7 +22,9 @@
       <a href="${request.route_path('apex_logout')}">Sign out</a>
     </div>
     <div></div>
-    <div><a href="javascript:${embed}">Commons</a></div>
+    <div>
+      <a href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()">Commons</a>
+    </div>
   </div>
   <div id="content">
     <metal:content define-slot="header" />
