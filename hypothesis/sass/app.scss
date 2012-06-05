@@ -125,6 +125,10 @@ $iconset: iconset_wireframe;
   @include reset-list-style;
 }
 
+.annotator-hl.hyp-active {
+       background: rgba(255, 255, 10, 0.3);
+}
+
 // Styles for the sidebar
 .hyp-sidebar {
   @include single-transition(margin-left, 0.6s, ease-in-out);

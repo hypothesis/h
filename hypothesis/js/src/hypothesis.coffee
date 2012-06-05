@@ -70,11 +70,23 @@ class Hypothesis extends Annotator
   _setupHeatmap: () ->
     # Pull the heatmap into the sidebar
     @heatmap = @plugins.Heatmap
-    d3.select(@heatmap.element.get(0)).on 'click', =>
+
+    bucket = []
+
+    d3.select(@heatmap.element.get(0))
+    .on 'mousemove', =>
       [x, y] = d3.mouse(d3.event.target)
       target = d3.bisect(@heatmap.index, y)-1
-      annotations = @heatmap.buckets[target]
-      this.showViewer(annotations) if annotations?.length
+      for a in bucket
+        d3.selectAll(a.highlights).classed('hyp-active', false)
+      bucket = @heatmap.buckets[target] or []
+      for a in bucket
+        d3.selectAll(a.highlights).classed('hyp-active', true)
+    .on 'mouseout', =>
+      for a in bucket
+        d3.selectAll(a.highlights).classed('hyp-active', false)
+    .on 'click', =>
+      this.showViewer(bucket) if bucket?.length
     this
 
   # Creates an instance of Annotator.Viewer and assigns it to the @viewer
