@@ -1,13 +1,13 @@
 <div class="hyp-reply">
-  <div class="hyp-threadexp"></div>
+  <a class="hyp-threadexp" href="#collapse"></a>
   <div class="hyp-meta">
     <div class="annotator-controls">
        <a href="#reply" class="hyp-write">Reply</a>
     </div>
+    <div class="hyp-time">{{fuzzyTime created}}</div>
     {{#splitUser user}}
     <div class="hyp-user">{{name}}</div>
     {{/splitUser}}
-    <div class="hyp-time">{{fuzzyTime created}}</div>
   </div>
   <div class="hyp-body">
     <div class="hyp-content">{{text}}</div>

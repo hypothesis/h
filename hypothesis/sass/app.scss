@@ -261,14 +261,9 @@ $threadexp-width: 1em;
   background-image: url("../images/minus_1.png");
   background-size: 100% 100%;
   background-position: center;
-  &.hyp-closed {
-    background-image: url("../images/plus_1.png");
-    background-size: 100% 100%;
-    background-position: center; }
-  &.hyp-dot {
-    background-image: url("../images/dot_2.png");
-    background-size: 100% 100%;
-    background-position: center; } }
+
+  .hyp-collapsed & { background-image: url("../images/plus_1.png"); }
+}
 
 //CONTROLS
 .annotator-controls {
@@ -536,8 +531,7 @@ $threadexp-width: 1em;
       text-overflow: ellipsis;
       -o-text-overflow: ellipsis;
       white-space: nowrap;
-      position: relative;
-      bottom: -0.3em; }
+    }
     .hyp-body {
       @include pie-clearfix;
       margin-top: 0.5em;
@@ -551,7 +545,16 @@ $threadexp-width: 1em;
       position: absolute;
       left: -$score-width / 2; }
     .hyp-tag {
-      padding: 0.1em 0.3em; } } }
+      padding: 0.1em 0.3em;
+    }
+    .hyp-time { display: none; }
+    .hyp-detail { display: none; }
+    .hyp-body, .hyp-meta {
+      float: left;
+      margin: 0;
+    }
+  }
+}
 
 // Remove the expander from the top level annotation
 .hyp-widget > .hyp-reply {

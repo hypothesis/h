@@ -282,6 +282,11 @@ class Hypothesis extends Annotator
             event.stopPropagation()
 
             switch d3.event.target.getAttribute('href')
+              when '#collapse'
+                d3.event.preventDefault()
+                parent = d3.select(event.currentTarget)
+                parent.classed('hyp-collapsed', !parent.classed('hyp-collapsed'))
+
               when '#reply'
                 d3.event.preventDefault()
                 parent = d3.select(event.currentTarget).datum()
