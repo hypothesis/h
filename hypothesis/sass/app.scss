@@ -115,7 +115,7 @@ $iconset: iconset_wireframe;
 .annotator-heatmap {
   @include tinyshadow(-1px, 0, 0.2);
   background: hsla(0, 0, 90%, 0.4);
-  position: absolute;
+  position: fixed;
   width: 15px;
   z-index: 1;
 }
