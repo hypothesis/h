@@ -446,7 +446,7 @@ $threadexp-width: 1em;
   @include single-transition(all, 0.6s, ease-in-out);
   margin-left: -$thread-padding / 2;
 
-  .annotator-controls {
+  & > .hyp-reply > .hyp-meta > .annotator-controls {
     @include single-transition(all, 0.25s, ease-in-out);
     opacity: 0;
   }
