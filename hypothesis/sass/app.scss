@@ -267,10 +267,10 @@ $threadexp-width: 1em;
 
 //CONTROLS
 .annotator-controls {
-  @include box-shadow(0 0 1em 1em #fff);
+  @include box-shadow(-1em 0 1em 0 #fff);
   background-color: #fff;
   position: absolute;
-  right: 2em;
+  right: 0;
   z-index: 1;
   a {
     text-decoration: underline;
@@ -445,8 +445,9 @@ $threadexp-width: 1em;
 
 //ANNOTATION DETAIL
 .hyp-detail {
-  @include single-transition(opacity, 0.6s, ease-in-out);
+  @include single-transition(all, 0.1s, ease-in-out);
   margin-left: -$thread-padding / 2;
+  position: relative;
 
   & > .hyp-reply > .hyp-meta > .annotator-controls {
     @include single-transition(opacity, 0.25s, ease-in-out);
@@ -468,8 +469,9 @@ $threadexp-width: 1em;
   margin-left: $thread-padding / 2;
 
   .hyp-detail.hyp-hover {
-    @include box-shadow(-.5em 0 .5em -.5em #999);
+    @include box-shadow(-.1em 0 .5em #999);
     outline-left: thin solid $gray-lighter;
+    left: 3px;
   }
 
   .hyp-body {
