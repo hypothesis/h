@@ -256,7 +256,7 @@ $threadexp-width: 1em;
   position: absolute;
   margin-left: (-$threadexp-width / 2) - $thread-padding;
 
-  border: 1px dotted #aaaaaa;
+  outline: 1px dotted #aaaaaa;
   background-image: url("../images/minus_1.png");
   background-size: 100% 100%;
   background-position: center;
@@ -463,7 +463,7 @@ $threadexp-width: 1em;
 .hyp-reply {
   border-left: 1px dotted #999999;
   padding-left: $thread-padding;
-  padding-top: 1em;
+  padding-top: .5em;
   margin-left: $thread-padding / 2;
 
   .hyp-detail.hyp-hover {
@@ -523,7 +523,7 @@ $threadexp-width: 1em;
       @include rotate(-10deg); } }
 
   .hyp-collapsed {
-    font-size: 0.9em;
+    .hyp-user, .hyp-body, .hyp-bottombar { font-size: 0.9em };
     .hyp-content {
       padding-left: 0.5em;
       overflow: hidden;
