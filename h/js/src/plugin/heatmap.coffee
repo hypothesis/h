@@ -65,8 +65,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     for event in events
       @annotator.subscribe event, this.updateHeatmap
 
-    # Throttle indo resize events and update the heatmap
-    $(window).resize () =>
+    # Throttle resize events and update the heatmap
+    throttledUpdate = () =>
       unless @updateTimer
         @updateTimer = setTimeout(
           () =>
@@ -74,6 +74,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
             this.updateHeatmap()
           100
         )
+
+    $(window).resize(throttledUpdate).scroll(throttledUpdate)
 
   _colorize: (v) ->
     s = d3.scale.pow().exponent(8)
@@ -95,8 +97,10 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     # Construct control points for the heatmap highlights
     points = highlights.map () ->
-      x = $(this).offset().top - wrapper.offset().top
+      offset = wrapper.offsetParent().scrollTop()
+      x = $(this).offset().top - wrapper.offset().top - offset
       h = $(this).outerHeight(true)
+      console.log x, wrapper.scrollTop(), wrapper.offset().top
       data = $(this).data('annotation')
       [ [x, 1, data],
         [x + h, -1, data] ]
@@ -150,6 +154,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     stops.enter().append('stop')
     stops.exit().remove()
     stops.sort()
-      .attr('offset', (v) => v[0] / wrapper.height())
+      .attr('offset', (v) => v[0] / @element.height())
       .attr('stop-color', (v) => this._colorize(v[3] / max))
       .attr('stop-opacity', (v) -> opacity(v[3]))
