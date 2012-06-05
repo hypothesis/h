@@ -242,7 +242,6 @@ $iconset: iconset_wireframe;
 .hyp-meta {
   @include pie-clearfix;
   .hyp-user {
-    float: left;
     @include primarytext;
     text-decoration: underline; }
   .hyp-time {
@@ -549,10 +548,6 @@ $threadexp-width: 1em;
     }
     .hyp-time { display: none; }
     .hyp-detail { display: none; }
-    .hyp-body, .hyp-meta {
-      float: left;
-      margin: 0;
-    }
   }
 }
 
