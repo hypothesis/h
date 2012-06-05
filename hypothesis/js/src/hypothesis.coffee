@@ -227,6 +227,14 @@ class Hypothesis extends Annotator
           @plugins.Store._apiRequest 'search', query, (data) =>
             if data?.rows then this.updateViewer(data.rows || [])
           this.showViewer([a], true)
+        .on 'mouseover', =>
+          d3.event.stopPropagation()
+          item = d3.select(d3.event.currentTarget).datum().message.annotation
+          d3.selectAll(item.highlights).classed('hyp-active', true)
+        .on 'mouseout', =>
+          d3.event.stopPropagation()
+          item = d3.select(d3.event.currentTarget).datum().message.annotation
+          d3.selectAll(item.highlights).classed('hyp-active', false)
     else
       # Mark that the detail view is now shown, so that exiting returns to the
       # bucket view rather than the document.
