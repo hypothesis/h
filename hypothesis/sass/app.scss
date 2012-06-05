@@ -642,10 +642,10 @@ $threadexp-width: 1em;
 
 @media screen and (min-width: 15em) {
   .hyp-sidebar {
-    width: 90%;
-    margin-left: -90%;
+    width: 300px;
+    margin-left: -300px;
     .annotator-outer {
-      width: 90%;
+      width: 300px;
     }
   }
 }
@@ -657,6 +657,13 @@ $threadexp-width: 1em;
 */
 
 @media screen and (min-width: 30em) {
+  .hyp-sidebar {
+    width: 440px;
+    margin-left: -440px;
+    .annotator-outer {
+      width: 440px;
+    }
+  }
 }
 
 /*
