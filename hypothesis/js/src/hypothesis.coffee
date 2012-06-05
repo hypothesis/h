@@ -262,6 +262,11 @@ class Hypothesis extends Annotator
           .classed('hyp-detail', true)
           .classed('hyp-summary', false)
 
+          .sort (d, e) =>
+            n = d.message.annotation.created
+            m = e.message.annotation.created
+            (n < m) - (m < n)
+
           .on 'mouseover', =>
             d3.event.stopPropagation()
             d3.select(d3.event.currentTarget).classed('hyp-hover', true)
