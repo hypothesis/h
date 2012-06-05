@@ -65,7 +65,11 @@ def includeme(config):
     # Set up the models
     es.init_app(app)
     with app.test_request_context():
-        Annotation.create_all()
+        try:
+            Annotation.create_all()
+        except:
+            Annotation.update_settings()
+            Annotation.create_all()
 
     # Configure authentication (ours) and authorization (store)
     authenticator = auth.Authenticator(consumer_fetcher)
