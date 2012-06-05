@@ -140,10 +140,6 @@ class Hypothesis extends Annotator
         annotation.text = $(field).find('textarea').val()
     }]
 
-    # Patch the editor, taking out the controls which will be added via
-    # Handlebars as part of the editor template.
-    editor.element.find('.annotator-controls').remove()
-
     editor
 
   # Sets up the selection event listeners to watch mouse actions on the document.
@@ -296,6 +292,7 @@ class Hypothesis extends Annotator
 
                 editor = this._createEditor()
                 editor.load(reply)
+                editor.element.find('.annotator-controls').remove()
                 editor.element.removeClass('annotator-outer')
 
                 item = d3.select(d3.event.currentTarget)
@@ -327,6 +324,7 @@ class Hypothesis extends Annotator
 
     @viewer.hide()
     @editor.load(annotation)
+    @editor.element.find('.annotator-controls').remove()
 
     this.setupAnnotation(annotation, false)
     delete annotation.ranges
