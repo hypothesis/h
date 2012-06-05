@@ -35,7 +35,7 @@ class Hypothesis extends Annotator
     @heatmap.element.appendTo(@sidebar)
     @viewer.element.appendTo(@sidebar)
     @editor.element.appendTo(@sidebar)
-    @sidebar.prependTo(@wrapper)
+    @sidebar.appendTo(@wrapper)
 
     @plugins.Auth.withToken (token) =>
       @plugins.Permissions.setUser token.userId
