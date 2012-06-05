@@ -289,9 +289,10 @@ class Hypothesis extends Annotator
 
               when '#reply'
                 d3.event.preventDefault()
-                parent = d3.select(event.currentTarget).datum()
+                parent = d3.select(event.currentTarget)
+                parent.classed('hyp-collapsed', false)
                 reply = this.createAnnotation()
-                reply.thread = this.threadId(parent.message.annotation)
+                reply.thread = this.threadId(parent.datum().message.annotation)
 
                 editor = this._createEditor()
                 editor.load(reply)
