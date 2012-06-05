@@ -242,6 +242,7 @@ $iconset: iconset_wireframe;
 //META BAR
 .hyp-meta {
   @include pie-clearfix;
+  position: relative;
   .hyp-user {
     @include primarytext;
     text-decoration: underline; }
@@ -443,11 +444,15 @@ $threadexp-width: 1em;
   }
 }
 
+//ANNOTATION COMMON STYLES
+.hyp-annotation {
+  position: relative;
+}
+
 //ANNOTATION DETAIL
 .hyp-detail {
   @include single-transition(all, 0.1s, ease-in-out);
   margin-left: -$thread-padding / 2;
-  position: relative;
 
   & > .hyp-reply > .hyp-meta > .annotator-controls {
     @include single-transition(opacity, 0.25s, ease-in-out);
