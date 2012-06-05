@@ -14,6 +14,12 @@ class Hypothesis extends Annotator
       annotationData: document.location.href
     Unsupported: {}
 
+  # The last bucket of annotations shown
+  @bucket = null
+
+  # Whether the detail view is shown
+  @detail = false
+
   constructor: (element, options) ->
     super
 
@@ -44,7 +50,10 @@ class Hypothesis extends Annotator
   _setupWrapper: ->
     super
     @wrapper.on 'click', (event) =>
-      this.hideSidebar() unless @selectedRanges?.length
+      if @bucket and @detail
+        this.showViewer(@bucket)
+      else
+        this.hideSidebar() unless @selectedRanges?.length
     this
 
   _setupSidebar: ->
@@ -167,6 +176,11 @@ class Hypothesis extends Annotator
       .data ( -> if detail then root.children else []), (c) -> c.message.id
 
     if not detail
+      # Save the state so the bucket view can be restored when exiting
+      # the detail view.
+      @bucket = annotations
+      @detail = false
+
       # Remove the excerpts
       excerpts.exit().remove()
 
@@ -190,6 +204,10 @@ class Hypothesis extends Annotator
             if data?.rows then this.updateViewer(data.rows || [])
           this.showViewer([a], true)
     else
+      # Mark that the detail view is now shown, so that exiting returns to the
+      # bucket view rather than the document.
+      @detail = true
+
       excerpts.enter()
         .insert('li', '.hyp-annotation')
           .classed('hyp-widget', true)
