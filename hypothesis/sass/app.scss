@@ -131,7 +131,7 @@ $iconset: iconset_wireframe;
 
 // Styles for the sidebar
 .hyp-sidebar {
-  @include single-transition(all, 0.6s, ease-in-out);
+  @include single-transition(margin-left, 0.6s, ease-in-out);
   background: url('../images/noise_1.png');
   background-attachment: fixed;
   color: #666666;
@@ -450,11 +450,11 @@ $threadexp-width: 1em;
 
 //ANNOTATION DETAIL
 .hyp-detail {
-  @include single-transition(all, 0.6s, ease-in-out);
+  @include single-transition(opacity, 0.6s, ease-in-out);
   margin-left: -$thread-padding / 2;
 
   & > .hyp-reply > .hyp-meta > .annotator-controls {
-    @include single-transition(all, 0.25s, ease-in-out);
+    @include single-transition(opacity, 0.25s, ease-in-out);
     opacity: 0;
   }
 
