@@ -22,7 +22,7 @@ yepnope([
     complete: function () {
       var uri = document.location.href;
       if (document.location.hash) {
-        uri = url.slice(0, -1 * document.location.hash.length)
+        uri = uri.slice(0, -1 * document.location.hash.length)
       }
       window.annotator = new Hypothesis(document.body, {
         Auth: {
