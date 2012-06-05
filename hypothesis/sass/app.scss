@@ -73,7 +73,7 @@ $sidepane-width: 510px;
   @include box-shadow($a $b 1em hsla(0, 0%, 0%, $c)); }
 
 @mixin tinyshadow($a: 1px, $b: 1px, $c: 0.1) {
-  @include box-shadow($a $b 3px hsla(0, 0%, 0%, $c)); }
+  @include box-shadow($a $b .5em hsla(0, 0%, 0%, $c)); }
 
 @mixin medshadow($a: 2px, $b: 2px, $c: 0.1) {
   @include box-shadow($a $b 2em hsla(0, 0%, 0%, $c)); }
