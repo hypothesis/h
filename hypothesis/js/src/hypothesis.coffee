@@ -106,8 +106,20 @@ class Hypothesis extends Annotator
   _createEditor: ->
     editor = new Annotator.Editor()
     editor.hide()
-    .on('hide', this.onEditorHide)
-    .on('save', this.onEditorSubmit)
+    # TODO: this is ugly... we shouldn't need to do this in both clauses --
+    # Annotator should handle highlights better
+    .on('hide', =>
+      if editor.annotation?.highlights? and not editor.annotation.ranges?
+        for h in editor.annotation.highlights
+          $(h).replaceWith(h.childNodes)
+      this.onEditorHide()
+    )
+    .on('save', (annotation) =>
+      if annotation?.highlights?
+        for h in annotation.highlights
+          $(h).replaceWith(h.childNodes)
+      this.onEditorSubmit(annotation)
+    )
     editor.fields = [{
       element: editor.element,
       load: (field, annotation) ->
@@ -285,9 +297,18 @@ class Hypothesis extends Annotator
     @viewer.hide()
     @editor.load(annotation)
 
+    this.setupAnnotation(annotation, false)
+    delete annotation.ranges
+
+    excerpt = $('<li class="hyp-widget hyp-excerpt">')
+    excerpt.append($("<div>#{annotation.quote}</div>"))
+
     item = $('<li class="hyp-widget hyp-writer">')
     item.append($(Handlebars.templates.editor(annotation)))
-    @editor.element.find('.annotator-listing').empty().append(item)
+
+    @editor.element.find('.annotator-listing').empty()
+      .append(excerpt)
+      .append(item)
 
     d3.select(@viewer.element.get(0)).datum(null)
     this.showSidebar()
