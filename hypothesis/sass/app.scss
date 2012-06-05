@@ -131,7 +131,7 @@ $iconset: iconset_wireframe;
 
 // Styles for the sidebar
 .hyp-sidebar {
-  @include single-transition(all, 0.6s, ease-in-out);
+  @include single-transition('margin-left,width', 0.6s, ease-in-out);
   background: url('../images/noise_1.png');
   background-attachment: fixed;
   color: #666666;
@@ -455,7 +455,7 @@ $threadexp-width: 1em;
 
 //ANNOTATION DETAIL
 .hyp-detail {
-  @include single-transition(all, 0.1s, ease-in-out);
+  background-color: white;
   margin-left: -$thread-padding / 2;
 
   & > .hyp-reply > .hyp-meta > .annotator-controls {
@@ -472,15 +472,23 @@ $threadexp-width: 1em;
 
 //ANNOTATION REPLY
 .hyp-reply {
+  background: white;
   border-left: 1px dotted #999999;
   padding-left: $thread-padding;
   padding-top: .5em;
   margin-left: $thread-padding / 2;
 
+  .hyp-detail {
+    @include single-transition(
+      "box-shadow,-moz-box-shadow,-webkit-box-shadow,-o-box-shadow,left,z-index",
+      .25s, ease-in-out, .125s);
+  }
+
   .hyp-detail.hyp-hover {
-    @include box-shadow(-.1em 0 .5em #999);
+    @include smallshadow(2px, 2px, .2);
     outline-left: thin solid $gray-lighter;
-    left: 3px;
+    left: 2px;
+    z-index: 10;
   }
 
   .hyp-body {
@@ -571,11 +579,17 @@ $threadexp-width: 1em;
   & > .hyp-threadexp {
     display: none;
   }
+
+  & .annotator-listing > .hyp-detail {
+    padding-right: 1em;
+    margin-right: -1em;
+  }
 }
 
 //EDITOR
 .hyp-writer {
-  @include tinyshadow(0, 2px, 0.2);
+  @include smallshadow(0, 2px, 0.2);
+  background-color: white;
   textarea {
     width: 100%;
     max-width: 100%;
@@ -595,6 +609,9 @@ $threadexp-width: 1em;
 
 //BUCKET VIEW REPLY SUMMARIES
 .hyp-summary {
+  @include single-transition(
+    "box-shadow,-moz-box-shadow,-webkit-box-shadow,bottom",
+    .1s, ease-in-out);
   line-height: 1.25em;
   background: hsla(0, 0%, 100%, 1);
   @include smallshadow(2px, 3px, 0.2);
