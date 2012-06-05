@@ -63,7 +63,7 @@ class Hypothesis extends Annotator
       sidebar = $(Handlebars.templates.sidebar())
       Annotator.prototype.sidebar = sidebar
       @sidebar = sidebar
-      @sidebar.addClass('collapse')
+      @sidebar.addClass('hyp-collapsed')
       @sidebar.on 'click', (event) =>  event.stopPropagation()
     this
 
@@ -334,12 +334,10 @@ class Hypothesis extends Annotator
     this.showSidebar()
 
   showSidebar: =>
-    $(document.documentElement).addClass('hyp-collapse')
-    @sidebar.removeClass('collapse')
+    @sidebar.removeClass('hyp-collapsed')
 
   hideSidebar: =>
-    @sidebar.addClass('collapse')
-    $(document.documentElement).removeClass('hyp-collapse')
+    @sidebar.addClass('hyp-collapsed')
 
   updateViewer: (annotations) =>
     existing = d3.select(@viewer.element.get(0)).datum()

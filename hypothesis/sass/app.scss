@@ -131,7 +131,7 @@ $iconset: iconset_wireframe;
 
 // Styles for the sidebar
 .hyp-sidebar {
-  @include single-transition(margin-left, 0.6s, ease-in-out);
+  @include single-transition(all, 0.6s, ease-in-out);
   background: url('../images/noise_1.png');
   color: #666666;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -164,8 +164,9 @@ $iconset: iconset_wireframe;
   }
 }
 
-.hyp-sidebar.collapse {
+.hyp-sidebar.hyp-collapsed {
   margin-left: -15px;
+  width: 0;
 
   .annotator-outer {
     margin-left: 100%;
