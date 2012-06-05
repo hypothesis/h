@@ -90,6 +90,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     wrapper = $(@annotator.wrapper)
     highlights = @annotator.element.find('.annotator-hl:visible')
+    offset = wrapper.offsetParent().scrollTop()
 
     # Re-set the 100% because some browsers might not adjust to events like
     # user zoom change properly.
@@ -97,10 +98,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     # Construct control points for the heatmap highlights
     points = highlights.map () ->
-      offset = wrapper.offsetParent().scrollTop()
       x = $(this).offset().top - wrapper.offset().top - offset
-      if x < 0 then return []
       h = $(this).outerHeight(true)
+      if x + h < 0 or x + h > $(window).outerHeight() then return []
       data = $(this).data('annotation')
       [ [x, 1, data],
         [x + h, -1, data] ]
@@ -154,6 +154,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     stops.enter().append('stop')
     stops.exit().remove()
     stops.sort()
-      .attr('offset', (v) => v[0] / @element.height())
+      .attr('offset', (v) => v[0] / $(window).outerHeight())
       .attr('stop-color', (v) => this._colorize(v[3] / max))
       .attr('stop-opacity', (v) -> opacity(v[3]))
