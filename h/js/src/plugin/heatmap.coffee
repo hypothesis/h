@@ -99,8 +99,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     points = highlights.map () ->
       offset = wrapper.offsetParent().scrollTop()
       x = $(this).offset().top - wrapper.offset().top - offset
+      if x < 0 then return []
       h = $(this).outerHeight(true)
-      console.log x, wrapper.scrollTop(), wrapper.offset().top
       data = $(this).data('annotation')
       [ [x, 1, data],
         [x + h, -1, data] ]
