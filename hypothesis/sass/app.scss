@@ -17,43 +17,43 @@ $heatmap-width: 27px;
 /* Annotator styles */
 
 .annotator-adder {
-	background-image: url(../annotator/img/annotator-icon-sprite.png);
-	background-repeat: no-repeat;
-	margin-top: -48px;
-	margin-left: -24px;
-	width: 48px;
-	height: 48px;
-	background-position: left top;
-	position: absolute;
+  background-image: url(../annotator/img/annotator-icon-sprite.png);
+  background-repeat: no-repeat;
+  margin-top: -48px;
+  margin-left: -24px;
+  width: 48px;
+  height: 48px;
+  background-position: left top;
+  position: absolute;
   z-index: 999;
 }
 
 .annotator-adder:hover {
-	background-position: center top;
+  background-position: center top;
 }
 
 .annotator-adder:active {
-	background-position: center right;
+  background-position: center right;
 }
 
 .annotator-adder button {
-	display: block;
-	width: 36px;
-	height: 41px;
-	margin: 0 auto;
-	border: none;
-	background: none;
-	text-indent: -999em;
-	cursor: pointer;
+  display: block;
+  width: 36px;
+  height: 41px;
+  margin: 0 auto;
+  border: none;
+  background: none;
+  text-indent: -999em;
+  cursor: pointer;
 }
 
 .annotator-hide {
-	display: none;
-	visibility: hidden;
+  display: none;
+  visibility: hidden;
 }
 
 .annotator-wrapper {
-	position: relative;
+  position: relative;
   padding-right: $heatmap-width;
 }
 
@@ -128,7 +128,7 @@ $iconset: iconset_wireframe;
 }
 
 .annotator-hl.hyp-active {
-       background: rgba(255, 255, 10, 0.3);
+  background: rgba(255, 255, 10, 0.3);
 }
 
 // Styles for the sidebar
@@ -665,9 +665,9 @@ $threadexp-width: 1em;
 }
 
 /*
-	Mobile layout
-	240–479 px
-	Zoomed out below 320 px
+  Mobile layout
+  240–479 px
+  Zoomed out below 320 px
 */
 
 @media screen and (min-width: 15em) {
@@ -681,9 +681,9 @@ $threadexp-width: 1em;
 }
 
 /*
-	Wide mobile layout
-	480-767 px
-	Zoomed in above 480 px
+  Wide mobile layout
+  480-767 px
+  Zoomed in above 480 px
 */
 
 @media screen and (min-width: 30em) {
@@ -697,9 +697,9 @@ $threadexp-width: 1em;
 }
 
 /*
-	Tablet layout
-	600-911 px
-	Zoomed in above 600 px
+  Tablet layout
+  600-911 px
+  Zoomed in above 600 px
 */
 
 @media screen and (min-width: 37.5em) {
@@ -713,18 +713,18 @@ $threadexp-width: 1em;
 }
 
 /*
-	Widescreen layout
-	912-1887 px
-	Zoomed in above 912 px
+  Widescreen layout
+  912-1887 px
+  Zoomed in above 912 px
 */
 
 @media screen and (min-width: 57em) {
 }
 
 /*
-	Huge-screen layout
-	1888-2520 px
-	Zoomed in above 1920 px
+  Huge-screen layout
+  1888-2520 px
+  Zoomed in above 1920 px
 */
 
 @media screen and (min-width: 118em) {
