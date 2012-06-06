@@ -146,6 +146,8 @@ $iconset: iconset_wireframe;
   left: 100%;
   z-index: 500;
 
+  * { @include box-sizing(border-box); }
+
   p {
     margin: 0 0 .5em 0;
   }
