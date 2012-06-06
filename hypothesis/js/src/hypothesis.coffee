@@ -281,12 +281,24 @@ class Hypothesis extends Annotator
               when '#collapse'
                 d3.event.preventDefault()
                 parent = d3.select(event.currentTarget)
-                parent.classed('hyp-collapsed', !parent.classed('hyp-collapsed'))
+                collapsed = parent.classed('hyp-collapsed')
+
+                parent.classed('hyp-collapsed', !collapsed)
+                parent.select('.annotator-listing').selectAll(-> this.children)
+                  .transition().duration(600)
+                    .style 'height', ->
+                      if collapsed
+                        "#{$(this).find('.hyp-reply').outerHeight(true)}px"
+                      else
+                        "0px"
+                    .each 'end', ->
+                      if collapsed
+                        d3.select(this)
+                          .style('height', null)
 
               when '#reply'
                 d3.event.preventDefault()
                 parent = d3.select(event.currentTarget)
-                parent.classed('hyp-collapsed', false)
                 reply = this.createAnnotation()
                 reply.thread = this.threadId(parent.datum().message.annotation)
 

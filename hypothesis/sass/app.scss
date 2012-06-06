@@ -474,28 +474,43 @@ $threadexp-width: 1em;
       opacity: 1;
     }
   }
+
+  & > .hyp-reply > .hyp-body,
+  & > .hyp-reply > .hyp-bottombar,
+  & > .hyp-reply > .hyp-meta > .hyp-user {
+    @include single-transition(font-size, .1s, linear);
+  }
+
+  &.hyp-collapsed {
+    & > .hyp-reply > .hyp-body,
+    & > .hyp-reply > .hyp-bottombar,
+    & > .hyp-reply > .hyp-meta > .hyp-user {
+      font-size: 0.9em;
+    }
+  }
+
+  .hyp-detail {
+    @include transition(
+      (max-height .6s ease),
+      (box-shadow .1s ease .125s),
+      (z-index .1s ease .125s),
+      (left .1s ease .125s));
+    overflow: hidden;
+
+    &.hyp-hover {
+      @include smallshadow(2px, 2px, .2);
+      left: 2px;
+      z-index: 10;
+    }
+  }
 }
 
 //ANNOTATION REPLY
 .hyp-reply {
   background: white;
   border-left: 1px dotted #999999;
-  padding-left: $thread-padding;
-  padding-top: .5em;
   margin-left: $thread-padding / 2;
-
-  .hyp-detail {
-    @include single-transition(
-      "box-shadow,-moz-box-shadow,-webkit-box-shadow,-o-box-shadow,left,z-index",
-      .25s, ease-in-out, .125s);
-  }
-
-  .hyp-detail.hyp-hover {
-    @include smallshadow(2px, 2px, .2);
-    outline-left: thin solid $gray-lighter;
-    left: 2px;
-    z-index: 10;
-  }
+  padding: .5em 0 .5em $thread-padding;
 
   .hyp-body {
     margin-top: 0.6em;
@@ -573,7 +588,6 @@ $threadexp-width: 1em;
       padding: 0.1em 0.3em;
     }
     .hyp-time { display: none; }
-    .hyp-detail { display: none; }
   }
 }
 
