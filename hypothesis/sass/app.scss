@@ -2,6 +2,18 @@
 @import 'compass';
 @import 'compass/reset/utilities';
 
+//STANCE COLORS
+$positive: #3aab39;
+$negative: #d11c2b;
+$neutral: #0171ba;
+
+//OTHER VARIABLES
+$thread-padding: 1.5em;
+$score-width: 40px;
+$score-height: $score-width;
+$sidepane-width: 510px;
+$heatmap-width: 27px;
+
 /* Annotator styles */
 
 .annotator-adder {
@@ -42,18 +54,8 @@
 
 .annotator-wrapper {
 	position: relative;
+  padding-right: $heatmap-width;
 }
-
-//STANCE COLORS
-$positive: #3aab39;
-$negative: #d11c2b;
-$neutral: #0171ba;
-
-//OTHER VARIABLES
-$thread-padding: 1.5em;
-$score-width: 40px;
-$score-height: $score-width;
-$sidepane-width: 510px;
 
 //ANNOTATOR TEXT STYLES
 @mixin primarytext {
@@ -116,7 +118,7 @@ $iconset: iconset_wireframe;
   @include tinyshadow(-1px, 0, 0.2);
   background: hsla(0, 0, 90%, 0.4);
   position: fixed;
-  width: 15px;
+  width: $heatmap-width;
   z-index: 1;
 }
 
@@ -163,12 +165,12 @@ $iconset: iconset_wireframe;
     position: fixed;
     top: 0;
     overflow-y: auto;
-    padding-left: 15px;
+    padding-left: $heatmap-width;
   }
 }
 
 .hyp-sidebar.hyp-collapsed {
-  margin-left: -15px;
+  margin-left: -$heatmap-width;
   width: 0;
 
   .annotator-outer {
