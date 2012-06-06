@@ -507,7 +507,7 @@ $threadexp-width: 1em;
 
 //ANNOTATION REPLY
 .hyp-reply {
-  background: white;
+  background-color: white;
   border-left: 1px dotted #999999;
   margin-left: $thread-padding / 2;
   padding: .5em 0 .5em $thread-padding;
@@ -564,30 +564,18 @@ $threadexp-width: 1em;
       @include rotate(-10deg); } }
 
   .hyp-collapsed {
-    .hyp-user, .hyp-body, .hyp-bottombar { font-size: 0.9em };
     .hyp-content {
-      padding-left: 0.5em;
       overflow: hidden;
       text-overflow: ellipsis;
       -o-text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .hyp-body {
-      @include pie-clearfix;
-      margin-top: 0.5em;
-      .hyp-left {
-        font-weight: bold;
-        float: left; }
-      .hyp-right {
-        float: right;
-        margin-top: 0.25em; } }
     .hyp-tinyscore {
       position: absolute;
       left: -$score-width / 2; }
     .hyp-tag {
       padding: 0.1em 0.3em;
     }
-    .hyp-time { display: none; }
   }
 }
 
@@ -630,7 +618,7 @@ $threadexp-width: 1em;
 //BUCKET VIEW REPLY SUMMARIES
 .hyp-summary {
   @include single-transition(
-    "box-shadow,-moz-box-shadow,-webkit-box-shadow,bottom",
+    "box-shadow,-moz-box-shadow,-webkit-box-shadow",
     .1s, ease-in-out);
   line-height: 1.25em;
   background: hsla(0, 0%, 100%, 1);
