@@ -267,7 +267,9 @@ $threadexp-width: 1em;
   background-size: 100% 100%;
   background-position: center;
 
-  .hyp-collapsed & { background-image: url("../images/plus_1.png"); }
+  .hyp-collapsed > .hyp-reply > & {
+    background-image: url("../images/plus_1.png");
+  }
 }
 
 //CONTROLS
