@@ -286,6 +286,7 @@ class Hypothesis extends Annotator
                 parent.classed('hyp-collapsed', !collapsed)
                 parent.select('.annotator-listing').selectAll(-> this.children)
                   .transition().duration(600)
+                    .style('overflow', 'hidden')
                     .style 'height', ->
                       if collapsed
                         "#{$(this).find('.hyp-reply').outerHeight(true)}px"
@@ -295,6 +296,7 @@ class Hypothesis extends Annotator
                       if collapsed
                         d3.select(this)
                           .style('height', null)
+                          .style('overflow', null)
 
               when '#reply'
                 d3.event.preventDefault()

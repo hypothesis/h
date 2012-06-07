@@ -256,7 +256,8 @@ $threadexp-width: 1em;
   height: $threadexp-width;
   width: $threadexp-width;
   position: absolute;
-  margin-left: (-$threadexp-width / 2) - $thread-padding;
+  top: 1em;
+  left: -$threadexp-width / 2;
 
   outline: 1px dotted #aaaaaa;
   background-image: url("../images/minus_1.png");
@@ -483,15 +484,14 @@ $threadexp-width: 1em;
     & > .hyp-reply > .hyp-meta > .hyp-user {
       font-size: 0.9em;
     }
+
+    & > .hyp-reply > .annotator-listing {
+      overflow: hidden;
+    }
   }
 
   .hyp-detail {
-    @include transition(
-      (max-height .6s ease),
-      (box-shadow .1s ease .125s));
-    overflow: hidden;
-
-    &.hyp-hover {
+    &.hyp-hover > .hyp-reply {
       @include smallshadow(2px, 2px, .2);
       z-index: 10;
     }
@@ -500,10 +500,15 @@ $threadexp-width: 1em;
 
 //ANNOTATION REPLY
 .hyp-reply {
-  background-color: white;
+  @include transition(
+    (max-height .6s ease),
+    (box-shadow .1s ease .125s),
+    (z-index .1 ease .125s));
   border-left: 1px dotted #999999;
-  margin-left: $thread-padding / 2;
-  padding: .5em 0 .5em $thread-padding;
+  margin-left: $thread-padding;
+  padding: 1em 1em 0 1em;
+  margin-right: -1em;
+  position: relative;
 
   .hyp-body {
     margin-top: 0.6em;
