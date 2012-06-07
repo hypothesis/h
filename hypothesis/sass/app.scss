@@ -258,7 +258,7 @@ $threadexp-width: 1em;
   height: $threadexp-width;
   width: $threadexp-width;
   position: absolute;
-  top: 1em;
+  top: 1.5em;
   left: -$threadexp-width / 2;
 
   outline: 1px dotted #aaaaaa;
@@ -511,7 +511,7 @@ $threadexp-width: 1em;
     (z-index .1 ease .125s));
   border-left: 1px dotted #999999;
   margin-left: $thread-padding;
-  padding: 1em 1em 0 1em;
+  padding: 1.5em 1em 0 1.5em;
   margin-right: -1em;
   position: relative;
 
@@ -586,14 +586,10 @@ $threadexp-width: 1em;
 .hyp-widget > .hyp-reply {
   border-left: none;
   margin-left: 0;
+  padding: .5em 1em 0 0;
 
   & > .hyp-threadexp {
     display: none;
-  }
-
-  & .annotator-listing > .hyp-detail {
-    padding-right: 1em;
-    margin-right: -1em;
   }
 }
 
