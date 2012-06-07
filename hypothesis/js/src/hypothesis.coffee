@@ -285,7 +285,7 @@ class Hypothesis extends Annotator
 
                 parent.classed('hyp-collapsed', !collapsed)
                 parent.select('.annotator-listing').selectAll(-> this.children)
-                  .transition().duration(600)
+                  .transition().duration(300)
                     .style('overflow', 'hidden')
                     .style 'height', ->
                       if collapsed
