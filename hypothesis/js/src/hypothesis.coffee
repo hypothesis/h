@@ -351,6 +351,8 @@ class Hypothesis extends Annotator
       .append(excerpt)
       .append(item)
 
+    @element.find(":input:first").focus()
+
     d3.select(@viewer.element.get(0)).datum(null)
     this.showSidebar()
 
