@@ -492,14 +492,11 @@ $threadexp-width: 1em;
   .hyp-detail {
     @include transition(
       (max-height .6s ease),
-      (box-shadow .1s ease .125s),
-      (z-index .1s ease .125s),
-      (left .1s ease .125s));
+      (box-shadow .1s ease .125s));
     overflow: hidden;
 
     &.hyp-hover {
       @include smallshadow(2px, 2px, .2);
-      left: 2px;
       z-index: 10;
     }
   }
