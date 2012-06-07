@@ -32,9 +32,9 @@ class Hypothesis extends Annotator
     # Set up interface elements
     this._setupHeatmap()._setupSidebar()
 
-    @heatmap.element.appendTo(@sidebar)
     @viewer.element.appendTo(@sidebar)
     @editor.element.appendTo(@sidebar)
+    @heatmap.element.appendTo(@sidebar)
     @sidebar.appendTo(@wrapper)
 
     @plugins.Auth.withToken (token) =>

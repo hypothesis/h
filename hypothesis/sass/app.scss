@@ -118,6 +118,8 @@ $iconset: iconset_wireframe;
   @include tinyshadow(-1px, 0, 0.2);
   background: hsla(0, 0, 90%, 0.4);
   position: fixed;
+  top: 0;
+  margin-left: -$heatmap-width;
   width: $heatmap-width;
   z-index: 1;
 }
