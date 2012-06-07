@@ -117,7 +117,7 @@ $iconset: iconset_wireframe;
 .annotator-heatmap {
   @include tinyshadow(-1px, 0, 0.2);
   background: hsla(0, 0, 90%, 0.4);
-  position: absolute;
+  position: fixed;
   top: 0;
   margin-left: -$heatmap-width;
   width: $heatmap-width;
@@ -143,6 +143,8 @@ $iconset: iconset_wireframe;
   font-size: $font-size / $em * .8;
   height: 100%;
   line-height: $line-height / $em * .8;
+  overflow: auto;
+  padding-left: $heatmap-width;
   position: fixed;
   top: 0;
   left: 100%;
@@ -169,7 +171,7 @@ $iconset: iconset_wireframe;
 }
 
 .hyp-sidebar.hyp-collapsed {
-  margin-left: 0;
+  margin-left: -$heatmap-width;
 }
 
 //LOGO
@@ -689,9 +691,6 @@ $threadexp-width: 1em;
   .hyp-sidebar {
     width: 300px;
     margin-left: -300px;
-    .annotator-outer {
-      width: 300px;
-    }
   }
 }
 
@@ -705,9 +704,6 @@ $threadexp-width: 1em;
   .hyp-sidebar {
     width: 440px;
     margin-left: -440px;
-    .annotator-outer {
-      width: 440px;
-    }
   }
 }
 
@@ -721,9 +717,6 @@ $threadexp-width: 1em;
   .hyp-sidebar {
     width: 500px;
     margin-left: -500px;
-    .annotator-outer {
-      width: 500px;
-    }
   }
 }
 
