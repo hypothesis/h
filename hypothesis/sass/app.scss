@@ -60,46 +60,57 @@ $heatmap-width: 27px;
 //ANNOTATOR TEXT STYLES
 @mixin primarytext {
   font-weight: bold;
-  font-size: 1.3em; }
+  font-size: 1.3em;
+}
 
 @mixin secondarytext {
   font-size: 1.1em;
-  font-weight: bold; }
+  font-weight: bold;
+}
 
 @mixin tertiarytext {
   color: #666666;
-  font-size: 0.8em; }
+  font-size: 0.8em;
+}
 
 //ANNOTATOR SHADOW STYLES
 @mixin smallshadow($a: 2px, $b: 2px, $c: 0.1) {
-  @include box-shadow($a $b 1em hsla(0, 0%, 0%, $c)); }
+  @include box-shadow($a $b 1em hsla(0, 0%, 0%, $c));
+}
 
 @mixin tinyshadow($a: 1px, $b: 1px, $c: 0.1) {
-  @include box-shadow($a $b .5em hsla(0, 0%, 0%, $c)); }
+  @include box-shadow($a $b .5em hsla(0, 0%, 0%, $c));
+}
 
 @mixin medshadow($a: 2px, $b: 2px, $c: 0.1) {
-  @include box-shadow($a $b 2em hsla(0, 0%, 0%, $c)); }
+  @include box-shadow($a $b 2em hsla(0, 0%, 0%, $c));
+}
 
 //ANNOTATOR BOX STYLES
 @mixin buttonbox {
+  @include box-shadow(0px 1px 0px #999999);
   position: relative;
   border: 1px solid black;
   border-radius: 3px;
-  @include box-shadow(0px 1px 0px #999999);
   position: relative;
-  &:hover {}
+
   &:active {
+    @include box-shadow(none);
     top: 1px;
-    @include box-shadow(none); } }
+  }
+}
 
 @mixin invisibox {
   &:active {
     border: none;
-    outline: none; }
+    outline: none;
+  }
+
   background: none;
   border: none;
   outline: 1px dashed $gray-light;
-  box-shadow: none; }
+  box-shadow: none;
+}
 
 //ICON IMAGES
 $iconset: iconset_wireframe;
@@ -107,11 +118,13 @@ $iconset: iconset_wireframe;
 @mixin icon_resets {
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 100% 100%; }
+  background-size: 100% 100%;
+}
 
 @mixin icon($icon) {
   @include icon_resets;
-  background-image: url("../images/#{$icon}"); }
+  background-image: url("../images/#{$icon}");
+}
 
 // Styles for base annotator elements
 .annotator-heatmap {
@@ -160,9 +173,8 @@ $iconset: iconset_wireframe;
     @include invisibox;
     @include box-sizing(border-box);
     font: sans-serif;
-    &:focus {
-      outline: none;
-    }
+
+    &:focus { outline: none; }
   }
 
   .annotator-outer {
@@ -178,79 +190,77 @@ $iconset: iconset_wireframe;
 .hyp-logo {
   font-size: 2em;
   padding: 0.25em;
-  text-shadow: 0px 2px 1px #fff; }
+  text-shadow: 0px 2px 1px #fff;
+}
 
 .hyp-red {
   color: $red;
 }
 
 .hypothesis-logotype_b {
-  color: $negative; }
+  color: $negative;
+}
 
 //ANNOTATOR LAYOUT STUFF
 .hyp-hl_positive {
+  @include tinyshadow(1px, 1px, 0.2);
   background: rgba($positive, 0.3);
-  @include tinyshadow(1px, 1px, 0.2); }
+}
 
 .hyp-hl_negative {
+  @include tinyshadow(1px, 1px, 0.2);
   background: rgba($negative, 0.3);
-  @include tinyshadow(1px, 1px, 0.2); }
+}
 
 .hyp-hl_neutral {
+  @include tinyshadow(1px, 1px, 0.2);
   background: rgba($neutral, 0.3);
-  @include tinyshadow(1px, 1px, 0.2); }
-
-//ANNOTATOR
-.hyp-sidepane {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  margin: {
-    left: 1em; };
-  padding: {
-    bottom: 1em; };
-  overflow: auto;
-  width: $sidepane-width;
-  border-left: 1px solid #dddddd;
-  background-image: url("../images/noise_1.png");
-  background-attachment: fixed; }
+}
 
 //TAB BAR
 .hyp-tabs {
   @include clearfix;
   margin-left: 0.5em;
   margin-right: 0.5em;
+
   .hyp-tab {
+    @include box-shadow(2px -10px 13px -8px hsla(0, 0%, 0%, 0.2) inset);
     float: left;
     padding: 0.25em 0.5em;
     margin-right: 0.5em;
     margin-bottom: -1px;
     background: hsla(0, 0%, 99%, 1);
-    @include box-shadow(2px -10px 13px -8px hsla(0, 0%, 0%, 0.2) inset);
     border-top-right-radius: 0.25em;
     border-top-left-radius: 0.25em;
     color: #999999;
-    &:hover {
-      background: #eeeeee; }
-    &:active {
-      box-shadow: none; }
+
+    &:hover { background: #eeeeee; }
+    &:active { box-shadow: none; }
+
     &.hyp-selected {
       @include box-shadow(none);
       color: #333333;
       font-weight: bold;
-      background: hsla(0, 0%, 100%, 1); } } }
+      background: hsla(0, 0%, 100%, 1);
+    }
+  }
+}
 
 //META BAR
 .hyp-meta {
   @include pie-clearfix;
   position: relative;
+
   .hyp-user {
     @include primarytext;
-    text-decoration: underline; }
+    text-decoration: underline;
+  }
+
   .hyp-time {
     float: right;
-    display: inline-block; } }
+    display: inline-block;
+  }
+}
 
 //THREADEXP
 $threadexp-width: 1em;
@@ -295,16 +305,28 @@ $threadexp-width: 1em;
     background-repeat: no-repeat;
     background-position: left center;
     color: #666;
+
     &.hyp-write {
-      background-image: url("../images/pen_1.png"); }
+      background-image: url("../images/pen_1.png");
+    }
+
     &.hyp-fave {
-      background-image: url("../images/fave_1.png"); }
+      background-image: url("../images/fave_1.png");
+    }
+
     &.hyp-flag {
-      background-image: url("../images/flag_1.png"); }
+      background-image: url("../images/flag_1.png");
+    }
+
     &.annotator-save {
-      background-image: url("../images/submit_1.png"); }
+      background-image: url("../images/submit_1.png");
+    }
+
     &.annotator-cancel {
-      background-image: url("../images/delete_1.png"); } } }
+      background-image: url("../images/delete_1.png");
+    }
+  }
+}
 
 //SCORE BADGE
 .hyp-score {
@@ -317,15 +339,22 @@ $threadexp-width: 1em;
   width: $score-width;
   background-image: url("../images/neutral_inact.png");
   background-size: 100% 100%;
+
   &.hyp-positive {
     background-image: url("../images/up_1.png");
-    background-size: 100% 100%; }
+    background-size: 100% 100%;
+  }
+
   &.hyp-negative {
     background-image: url("../images/down_1.png");
-    background-size: 100% 100%; }
+    background-size: 100% 100%;
+  }
+
   &.hyp-neutral {
     background-image: url("../images/neutral_1.png");
-    background-size: 100% 100%; } }
+    background-size: 100% 100%;
+  }
+}
 
 //SCORE CONTROL
 .hyp-scorecontrol {
@@ -340,42 +369,61 @@ $threadexp-width: 1em;
   text-align: center;
   background-image: url("../images/neutral_inact.png");
   background-size: 100% 100%;
+
   .hyp-top {
     position: absolute;
     top: 0;
     bottom: 66%;
     left: 0;
-    right: 0; }
+    right: 0;
+  }
+
   .hyp-mid {
     position: absolute;
     top: 33%;
     bottom: 33%;
     left: 0;
-    right: 0; }
+    right: 0;
+  }
+
   .hyp-bottom {
     position: absolute;
     top: 66%;
     bottom: 0;
     left: 0;
-    right: 0; }
+    right: 0;
+  }
+
   &.hyp-positive {
     background-image: url("../images/up_1.png");
-    background-size: 100% 100%; }
+    background-size: 100% 100%;
+  }
+
   &.hyp-negative {
     background-image: url("../images/down_1.png");
-    background-size: 100% 100%; }
+    background-size: 100% 100%;
+  }
+
   &.hyp-neutral {
     background-image: url("../images/neutral_1.png");
-    background-size: 100% 100%; }
+    background-size: 100% 100%;
+  }
+
   &.hyp-temppositive {
     background-image: url("../images/up_1.png");
-    background-size: 100% 100%; }
+    background-size: 100% 100%;
+  }
+
   &.hyp-tempnegative {
     background-image: url("../images/down_1.png");
-    background-size: 100% 100%; }
+    background-size: 100% 100%;
+  }
+
   &.hyp-tempneutral {
     background-image: url("../images/neutral_1.png");
-    background-size: 100% 100%; } }
+    background-size: 100% 100%;
+  }
+}
 
 //TINY SCORE
 .hyp-tinyscore {
@@ -386,43 +434,55 @@ $threadexp-width: 1em;
   overflow: hidden;
   text-align: center;
   width: $score-width;
+
   &.hyp-positive {
     background-image: url("../images/uptiny_1.png");
-    background-size: 100% 100%; }
+    background-size: 100% 100%;
+  }
+
   &.hyp-negative {
     background-image: url("../images/downtiny_1.png");
-    background-size: 100% 100%; }
+    background-size: 100% 100%;
+  }
+
   &.hyp-neutral {
     background-image: url("../images/neutral_1.png");
-    background-size: 100% 100%; } }
-
+    background-size: 100% 100%;
+  }
+}
 
 //ADDER
 .hyp-adder {
+  @include smallshadow;
   border: 1px dotted #999999;
   position: absolute;
   background-image: url("../images/noise_1.png");
-  @include smallshadow;
   button {
     border: none;
+    height: 2em;
+    margin: 0.5em;
     padding: 0;
     position: relative;
     background: none;
-    &:hover {}
-    &:active {
-      top: 1px; }
     width: 2em;
-    height: 2em;
-    margin: 0.5em; }
+
+    &:active { top: 1px; }
+  }
+
   .hyp-write {
     background-image: url("../images/pen_1.png");
-    background-size: 100% 100%; }
+    background-size: 100% 100%;
+  }
+
   .hyp-fave {
     background-image: url("../images/fave_1.png");
-    background-size: 100% 100%; } }
+    background-size: 100% 100%;
+  }
+}
 
 //TAG
 .hyp-tag {
+  @include box-shadow(1px 1px 10px hsla(0, 0%, 0%, 0.05));
   display: inline-block;
   background: #f3f3f3;
   color: #666666;
@@ -431,22 +491,25 @@ $threadexp-width: 1em;
   padding: 0.1em 0.4em;
   padding-bottom: 0.2em;
   vertical-align: bottom;
-  @include box-shadow(1px 1px 10px hsla(0, 0%, 0%, 0.05)); }
+}
 
 //TIME IN META BAR
 .hyp-time {
-  @include tertiarytext; }
+  @include tertiarytext;
+}
 
 //COOL BUTTON STYLE
 .hyp-buttonstyle {
+  @include box-shadow(0px 1px 0px #999999);
   border: 1px solid #999999;
   border-radius: 3px;
-  @include box-shadow(0px 1px 0px #999999);
   padding: 0 .5em;
   position: relative;
   &:active {
+    @include box-shadow(none);
     top: 1px;
-    @include box-shadow(none); } }
+  }
+}
 
 //EXCERPT
 .hyp-excerpt {
@@ -523,48 +586,59 @@ $threadexp-width: 1em;
   .hyp-score {
     position: absolute;
     left: -$score-width / 2;
-    &.hyp-positive {
-      top: 0.2em; }
-    &.hyp-negative {
-      top: -0.2em; }
-    &.hyp-neutral {
-      top: -0.2em; } }
+
+    &.hyp-positive { top: 0.2em; }
+    &.hyp-negative { top: -0.2em; }
+    &.hyp-neutral { top: -0.2em; }
+  }
 
   .hyp-bottombar {
-    margin-top: 0.8em;
     @include pie-clearfix;
+    margin-top: 0.8em;
+
     .hyp-left {
-      float: left; }
+      float: left;
+    }
+
     .hyp-right {
       float: right;
     }
   }
 
   .hyp-repliesbadge {
+    @include secondarytext;
     display: inline-block;
     position: relative;
     left: $thread-padding;
-    @include secondarytext;
+
     .hyp-blocker {
       display: inline-block;
       padding: 0.25em;
-      margin-right: 0.5em; }
+      margin-right: 0.5em;
+    }
+
     .hyp-inner {
       padding: 0.25em;
       position: absolute;
       border: 1px solid #aaaaaa;
       top: 0;
-      left: 0; }
+      left: 0;
+    }
+
     .hyp-offset_1 {
       @extend .hyp-inner;
+      @include rotate(15deg);
       top: 0px;
       left: 1px;
-      @include rotate(15deg); }
+    }
+
     .hyp-offset_2 {
       @extend .hyp-inner;
+      @include rotate(-10deg);
       top: -1px;
       left: -1px;
-      @include rotate(-10deg); } }
+    }
+  }
 
   .hyp-collapsed {
     .hyp-content {
@@ -573,9 +647,12 @@ $threadexp-width: 1em;
       -o-text-overflow: ellipsis;
       white-space: nowrap;
     }
+
     .hyp-tinyscore {
       position: absolute;
-      left: -$score-width / 2; }
+      left: -$score-width / 2;
+    }
+
     .hyp-tag {
       padding: 0.1em 0.3em;
     }
@@ -609,8 +686,8 @@ $threadexp-width: 1em;
   }
 
   .hyp-bottombar {
-    margin-top: 0.8em;
     @include pie-clearfix;
+    margin-top: 0.8em;
     .hyp-left {
       float: left; }
     .hyp-right {
@@ -628,14 +705,15 @@ $threadexp-width: 1em;
   @include single-transition(
     "box-shadow,-moz-box-shadow,-webkit-box-shadow",
     .1s, ease-in-out);
-  line-height: 1.25em;
   @include smallshadow(2px, 3px, 0.2);
+  line-height: 1.25em;
   cursor: pointer;
 
   &:hover {
     @include smallshadow(2px, 4px, 0.2);
     bottom: 1px;
   }
+
   &:active {
     @include smallshadow(2px, 1px, 0.2);
     bottom: -2px;
@@ -646,16 +724,16 @@ $threadexp-width: 1em;
   }
 
   .hyp-bottombar {
-    margin-top: 0.8em;
     @include pie-clearfix;
+    margin-top: 0.8em;
     .hyp-left { float: left; }
     .hyp-right { float: right; }
   }
 
   .hyp-repliesbadge {
+    @include secondarytext;
     display: inline-block;
     position: relative;
-    @include secondarytext;
     display: none;
   }
 
@@ -665,7 +743,7 @@ $threadexp-width: 1em;
     top: 0.8em;
     &.hyp-positive { top: 0.2em; }
     &.hyp-negative { top: -0.2em; }
-    &.hyp-neutral {  top: -0.2em; }
+    &.hyp-neutral { top: -0.2em; }
   }
 }
 
@@ -732,5 +810,4 @@ $threadexp-width: 1em;
 */
 
 @media screen and (min-width: 118em) {
-
 }
