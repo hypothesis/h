@@ -280,8 +280,12 @@ $threadexp-width: 1em;
     z-index: 1;
   }
 
+  & > * {
+    margin-right: .5em;
+  }
+
   a {
-    text-decoration: underline;
+    text-decoration: none;
     cursor: pointer;
     padding-left: 1.3em;
     line-height: 1.2em;
@@ -289,7 +293,6 @@ $threadexp-width: 1em;
     background-repeat: no-repeat;
     background-position: left center;
     color: #666;
-    margin: .25em;
     &.hyp-write {
       background-image: url("../images/pen_1.png"); }
     &.hyp-fave {
@@ -437,6 +440,7 @@ $threadexp-width: 1em;
   border: 1px solid #999999;
   border-radius: 3px;
   @include box-shadow(0px 1px 0px #999999);
+  padding: 0 .5em;
   position: relative;
   &:active {
     top: 1px;
@@ -604,6 +608,16 @@ $threadexp-width: 1em;
 
   .hyp-body {
     margin-top: 0.5em;
+  }
+
+  .hyp-bottombar {
+    margin-top: 0.8em;
+    @include pie-clearfix;
+    .hyp-left {
+      float: left; }
+    .hyp-right {
+      float: right;
+    }
   }
 
   .hyp-scorecontrol {
