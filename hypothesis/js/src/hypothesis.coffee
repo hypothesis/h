@@ -324,6 +324,7 @@ class Hypothesis extends Annotator
                       .on 'mouseover', => d3.event.stopPropagation()
 
                 editor.on('hide', => item.remove())
+                editor.element.find(":input:first").focus()
 
         context = items
 
@@ -352,8 +353,7 @@ class Hypothesis extends Annotator
     @editor.element.find('.annotator-listing').empty()
       .append(excerpt)
       .append(item)
-
-    @element.find(":input:first").focus()
+      .find(":input:first").focus()
 
     d3.select(@viewer.element.get(0)).datum(null)
     this.showSidebar()
