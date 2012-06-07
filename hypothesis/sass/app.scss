@@ -176,7 +176,7 @@ $iconset: iconset_wireframe;
 .hyp-logo {
   font-size: 2em;
   padding: 0.25em;
-  text-shadow: 0px 2px 1px white; }
+  text-shadow: 0px 2px 1px #fff; }
 
 .hyp-red {
   color: $red;
@@ -272,7 +272,7 @@ $threadexp-width: 1em;
 //CONTROLS
 .annotator-controls {
   @include box-shadow(-1em 0 1em 0 #fff);
-  background-color: #fff;
+  background: #fff;
 
   .hyp-meta > & {
     position: absolute;
@@ -458,7 +458,6 @@ $threadexp-width: 1em;
 
 //ANNOTATION DETAIL
 .hyp-detail {
-  background-color: white;
   margin-left: -$thread-padding / 2;
 
   & > .hyp-reply > .hyp-meta > .annotator-controls {
@@ -595,7 +594,6 @@ $threadexp-width: 1em;
 //EDITOR
 .hyp-writer {
   @include smallshadow(0, 2px, 0.2);
-  background-color: white;
   textarea {
     width: 100%;
     max-width: 100%;
@@ -619,7 +617,6 @@ $threadexp-width: 1em;
     "box-shadow,-moz-box-shadow,-webkit-box-shadow",
     .1s, ease-in-out);
   line-height: 1.25em;
-  background: hsla(0, 0%, 100%, 1);
   @include smallshadow(2px, 3px, 0.2);
   cursor: pointer;
 
@@ -663,7 +660,7 @@ $threadexp-width: 1em;
 .hyp-widget {
   @include border-radius(.2em);
   @include smallshadow;
-  background: white;
+  background: #fff;
   margin: 1em;
   padding: 1em;
 }
