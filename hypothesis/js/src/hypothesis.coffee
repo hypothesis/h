@@ -205,8 +205,8 @@ class Hypothesis extends Annotator
       excerpts.exit().remove()
 
       context = context.select('.annotator-listing')
-      context.select('.annotator-listing > li.hyp-excerpt').remove()
-      items = context.selectAll('.annotator-listing > li.hyp-annotation')
+      context.selectAll(-> this.children).remove()
+      items = context.selectAll('.hyp-annotation')
         .data ((c) -> c.children), ((c) -> c.message.id)
       items.enter().append('li')
         .classed('hyp-annotation', true)
