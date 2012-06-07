@@ -173,10 +173,14 @@ $iconset: iconset_wireframe;
 }
 
 //LOGO
-.hypothesis-logo {
+.hyp-logo {
   font-size: 2em;
   padding: 0.25em;
   text-shadow: 0px 2px 1px white; }
+
+.hyp-red {
+  color: $red;
+}
 
 .hypothesis-logotype_b {
   color: $negative; }
