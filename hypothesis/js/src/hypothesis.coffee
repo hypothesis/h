@@ -246,7 +246,7 @@ class Hypothesis extends Annotator
 
       loop
         context = context.select('.annotator-listing')
-        items = context.selectAll('.annotator-listing > li.hyp-annotation')
+        items = context.selectAll(-> this.children).filter('.hyp-annotation')
           .data ((c) -> c.children), ((c) -> c.message.id)
         break unless items.length
 
