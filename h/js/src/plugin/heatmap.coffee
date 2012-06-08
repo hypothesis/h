@@ -72,7 +72,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           () =>
             @updateTimer = null
             this.updateHeatmap()
-          100
+          10
         )
 
     $(window).resize(throttledUpdate).scroll(throttledUpdate)
