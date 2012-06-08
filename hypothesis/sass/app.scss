@@ -173,8 +173,6 @@ $iconset: iconset_wireframe;
     @include invisibox;
     @include box-sizing(border-box);
     font: sans-serif;
-
-    &:focus { outline: none; }
   }
 
   .annotator-outer {
@@ -580,7 +578,6 @@ $threadexp-width: 1em;
 
   .hyp-body {
     margin-top: 0.6em;
-    position: relative;
   }
 
   .hyp-score {
@@ -593,16 +590,10 @@ $threadexp-width: 1em;
   }
 
   .hyp-bottombar {
-    @include pie-clearfix;
     margin-top: 0.8em;
 
-    .hyp-left {
-      float: left;
-    }
-
-    .hyp-right {
-      float: right;
-    }
+    .hyp-left { float: left; }
+    .hyp-right { float: right; }
   }
 
   .hyp-repliesbadge {
@@ -672,39 +663,33 @@ $threadexp-width: 1em;
 
 //EDITOR
 .hyp-writer {
-  @include smallshadow(0, 2px, 0.2);
+  //@include smallshadow(0, 2px, 0.2);
+  background-color: #fff;
+  position: relative;
+  z-index: 20;
+
   textarea {
+    //@include box-shadow(inset 0 -.25em .25em 0 $gray-lighter);
     width: 100%;
     max-width: 100%;
     min-height: 8em;
-    font-family: sans-serif; }
-  padding: 1em;
-  margin: 1em -1em;
-
-  .hyp-body {
-    margin-top: 0.5em;
   }
 
-  .hyp-bottombar {
-    @include pie-clearfix;
-    margin-top: 0.8em;
-    .hyp-left {
-      float: left; }
-    .hyp-right {
-      float: right;
-    }
+  .hyp-body {
+    margin-top: 0.6em;
   }
 
   .hyp-scorecontrol {
     display: none;
     position: absolute;
-    z-index: 1; } }
+    z-index: 1;
+  }
+}
 
 //BUCKET VIEW REPLY SUMMARIES
 .hyp-summary {
   @include single-transition(
-    "box-shadow,-moz-box-shadow,-webkit-box-shadow",
-    .1s, ease-in-out);
+    "box-shadow,-moz-box-shadow,-webkit-box-shadow", .1s, ease-in-out);
   @include smallshadow(2px, 3px, 0.2);
   line-height: 1.25em;
   cursor: pointer;
@@ -724,8 +709,8 @@ $threadexp-width: 1em;
   }
 
   .hyp-bottombar {
-    @include pie-clearfix;
     margin-top: 0.8em;
+
     .hyp-left { float: left; }
     .hyp-right { float: right; }
   }
