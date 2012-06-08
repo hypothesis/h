@@ -650,14 +650,8 @@ $iconset: iconset_wireframe;
 }
 
 // Remove the expander from the top level annotation
-.hyp-widget > .hyp-reply {
-  border-left: none;
-  margin-left: 0;
-  padding: 0;
-
-  & > .hyp-threadexp {
-    display: none;
-  }
+.hyp-widget > .hyp-reply > .hyp-threadexp {
+  display: none;
 }
 
 //EDITOR
