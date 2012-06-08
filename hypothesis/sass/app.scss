@@ -659,12 +659,12 @@ $iconset: iconset_wireframe;
 
 //EDITOR
 .hyp-writer {
-  //@include smallshadow(0, 2px, 0.2);
+  @include smallshadow(0, 2px, 0.2);
   position: relative;
   z-index: 20;
 
   textarea {
-    //@include box-shadow(inset 0 -.25em .25em 0 $gray-lighter);
+    @include box-shadow(inset 0 -.25em .25em 0 $gray-lighter);
     width: 100%;
     max-width: 100%;
     min-height: 8em;
