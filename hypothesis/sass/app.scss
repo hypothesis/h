@@ -748,8 +748,8 @@ $threadexp-width: 1em;
 
 @media screen and (min-width: 15em) {
   .hyp-sidebar {
-    width: 300px;
-    margin-left: -300px;
+    width: 300px + $heatmap-width;
+    margin-left: -300px - $heatmap-width;
   }
 }
 
@@ -761,8 +761,8 @@ $threadexp-width: 1em;
 
 @media screen and (min-width: 30em) {
   .hyp-sidebar {
-    width: 440px;
-    margin-left: -440px;
+    width: 440px + $heatmap-width;
+    margin-left: -440px - heatmap-width;
   }
 }
 
@@ -774,8 +774,8 @@ $threadexp-width: 1em;
 
 @media screen and (min-width: 37.5em) {
   .hyp-sidebar {
-    width: 500px;
-    margin-left: -500px;
+    width: 500px + $heatmap-width;
+    margin-left: -500px - $heatmap-width;
   }
 }
 
