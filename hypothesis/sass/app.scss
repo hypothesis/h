@@ -9,6 +9,7 @@ $neutral: #0171ba;
 
 //OTHER VARIABLES
 $thread-padding: 1.5em;
+$threadexp-width: 1em;
 $score-width: 40px;
 $score-height: $score-width;
 $sidepane-width: 510px;
@@ -108,7 +109,7 @@ $heatmap-width: 27px;
 
   background: none;
   border: none;
-  outline: 1px dashed $gray-light;
+  outline: 1px solid $gray-lighter;
   box-shadow: none;
 }
 
@@ -260,14 +261,25 @@ $iconset: iconset_wireframe;
   }
 }
 
+//THREAD INDENTATION
+.hyp-thread {
+  margin-left: -$thread-padding / 2;
+  padding: 0 0 0 ($thread-padding / 2);
+
+  & > .annotator-listing > * {
+    border-left: 1px dotted #999999;
+    margin: 1em -1em -1em 0;
+    padding: 1em 1em 1em $thread-padding;
+  }
+}
+
 //THREADEXP
-$threadexp-width: 1em;
 .hyp-threadexp {
   height: $threadexp-width;
   width: $threadexp-width;
   position: absolute;
-  top: 1.5em;
-  left: -$threadexp-width / 2;
+  top: 0;
+  left: -($thread-padding + $threadexp-width / 2);
 
   outline: 1px dotted #aaaaaa;
   background-image: url("../images/minus_1.png");
@@ -283,12 +295,6 @@ $threadexp-width: 1em;
 .annotator-controls {
   @include box-shadow(-1em 0 1em 0 #fff);
   background: #fff;
-
-  .hyp-meta > & {
-    position: absolute;
-    right: 0;
-    z-index: 1;
-  }
 
   & > * {
     margin-right: .5em;
@@ -525,15 +531,13 @@ $threadexp-width: 1em;
 
 //ANNOTATION DETAIL
 .hyp-detail {
-  margin-left: -$thread-padding / 2;
-
-  & > .hyp-reply > .hyp-meta > .annotator-controls {
+  & > .hyp-reply > .hyp-bottombar > .annotator-controls {
     @include single-transition(opacity, 0.25s, ease-in-out);
     opacity: 0;
   }
 
   &.hyp-hover {
-    & > .hyp-reply > .hyp-meta > .annotator-controls {
+    & > .hyp-reply > .hyp-bottombar > .annotator-controls {
       opacity: 1;
     }
   }
@@ -551,13 +555,16 @@ $threadexp-width: 1em;
       font-size: 0.9em;
     }
 
-    & > .hyp-reply > .annotator-listing {
+    & > .hyp-reply > .hyp-thread {
       overflow: hidden;
     }
   }
 
   .hyp-detail {
-    &.hyp-hover > .hyp-reply {
+    @include single-transition(
+      "box-shadow,-moz-box-shadow,-webkit-box-shadow,z-index", .1s, ease, .125s);
+
+    &.hyp-hover {
       @include smallshadow(2px, 2px, .2);
       z-index: 10;
     }
@@ -566,14 +573,6 @@ $threadexp-width: 1em;
 
 //ANNOTATION REPLY
 .hyp-reply {
-  @include transition(
-    (max-height .6s ease),
-    (box-shadow .1s ease .125s),
-    (z-index .1 ease .125s));
-  border-left: 1px dotted #999999;
-  margin-left: $thread-padding;
-  padding: 1.5em 1em 0 1.5em;
-  margin-right: -1em;
   position: relative;
 
   .hyp-body {
@@ -654,7 +653,7 @@ $threadexp-width: 1em;
 .hyp-widget > .hyp-reply {
   border-left: none;
   margin-left: 0;
-  padding: .5em 1em 0 0;
+  padding: 0;
 
   & > .hyp-threadexp {
     display: none;

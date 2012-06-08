@@ -284,12 +284,12 @@ class Hypothesis extends Annotator
                 collapsed = parent.classed('hyp-collapsed')
 
                 parent.classed('hyp-collapsed', !collapsed)
-                parent.select('.annotator-listing').selectAll(-> this.children)
+                parent.select('.hyp-thread')
                   .transition().duration(300)
                     .style('overflow', 'hidden')
                     .style 'height', ->
                       if collapsed
-                        "#{$(this).find('.hyp-reply').outerHeight(true)}px"
+                        "#{$(this).children().outerHeight(true)}px"
                       else
                         "0px"
                     .each 'end', ->

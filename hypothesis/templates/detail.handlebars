@@ -1,8 +1,5 @@
 <div class="hyp-reply">
   <div class="hyp-meta">
-    <div class="annotator-controls">
-       <a href="#reply" class="hyp-write">Reply</a>
-    </div>
     <div class="hyp-time">{{fuzzyTime created}}</div>
     {{#splitUser user}}
     <div class="hyp-user">{{name}}</div>
@@ -12,9 +9,14 @@
     <div class="hyp-content">{{text}}</div>
   </div>
   <div class="hyp-bottombar">
+    <div class="annotator-controls">
+     <a href="#reply" class="hyp-write">Reply</a>
+    </div>
     <div class="hyp-repliesbadge"></div>
     <div class="hyp-right"></div>
   </div>
   <a class="hyp-threadexp" href="#collapse"></a>
-  <ul class="annotator-listing"></ul>
+  <div class="hyp-thread">
+    <ul class="annotator-listing"></ul>
+  </div>
 </div>
