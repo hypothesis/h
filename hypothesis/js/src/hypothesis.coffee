@@ -306,23 +306,21 @@ class Hypothesis extends Annotator
 
                 editor = this._createEditor()
                 editor.load(reply)
-                editor.element.find('.annotator-controls').remove()
                 editor.element.removeClass('annotator-outer')
+
+                d3.select(editor.element.get(0)).select('form')
+                  .data([reply])
+                    .html(Handlebars.templates.editor)
+                    .on 'mouseover', => d3.event.stopPropagation()
 
                 item = d3.select(d3.event.currentTarget)
                   .select('.annotator-listing')
-                  .insert('li', 'li')
+                  .insert('li', '.hyp-annotation')
+                    .classed('hyp-annotation', true)
+                    .classed('hyp-reply', true)
                     .classed('hyp-writer', true)
 
                 editor.element.appendTo(item.node())
-
-                item.select('.annotator-listing')
-                  .selectAll('li')
-                    .data([reply])
-                    .enter().append('li')
-                      .html(Handlebars.templates.editor)
-                      .on 'mouseover', => d3.event.stopPropagation()
-
                 editor.on('hide', => item.remove())
                 editor.element.find(":input:first").focus()
 
