@@ -264,12 +264,15 @@ $iconset: iconset_wireframe;
 //THREAD INDENTATION
 .hyp-thread {
   margin-left: -$thread-padding / 2;
-  padding: 0 0 0 ($thread-padding / 2);
+  padding-left: $thread-padding / 2;
 
-  & > .annotator-listing > * {
+  & > .annotator-listing {
     border-left: 1px dotted #999999;
-    margin: 1em -1em -1em 0;
-    padding: 1em 1em 1em $thread-padding;
+    margin: 0 -1em -1em 0;
+
+    & > * {
+      padding: 1em 1em 1em $thread-padding;
+    }
   }
 }
 
@@ -657,7 +660,6 @@ $iconset: iconset_wireframe;
 //EDITOR
 .hyp-writer {
   //@include smallshadow(0, 2px, 0.2);
-  background-color: #fff;
   position: relative;
   z-index: 20;
 
