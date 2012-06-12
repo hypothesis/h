@@ -56,7 +56,7 @@ version of the sub-module source, run the following commands::
     $ git submodule init
     $ git submodule update
 
-The ``annotator`` directory will be checked out into the ``hypothesis``
+The ``annotator`` directory will be checked out into the ``h``
 package directory.
 
 License
