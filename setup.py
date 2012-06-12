@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = 'hypothesis',
+    name = 'h',
     version = '0.0.1',
     packages = find_packages(),
 
@@ -27,7 +27,7 @@ setup(
     keywords = 'annotation web javascript',
 
     url = 'http://hypothes.is/',
-    download_url = 'https://github.com/hypothesis/hypothes.is',
+    download_url = 'https://github.com/hypothesis/h',
 
     classifiers = [
         'Development Status :: 3 - Alpha',
@@ -43,10 +43,10 @@ setup(
 
     entry_points = {
         'paste.app_factory': [
-            'main=hypothesis:main'
+            'main=h:main'
         ],
         'zest.releaser.prereleaser.middle': [
-            'prepare=hypothesis.scripts:prepare'
+            'prepare=h.scripts:prepare'
         ]
     }
 )

@@ -12,11 +12,11 @@ from . models import Consumer
 def consumer_fetcher(key):
     request = get_current_request()
     settings = request.registry.settings
-    hypothesis_key = settings.get('hypothesis.consumer_key')
+    hypothesis_key = settings.get('h.consumer_key')
     if key == hypothesis_key:
         consumer = Consumer(key=hypothesis_key)
-        consumer.secret = settings.get('hypothesis.api_secret')
-        consumer.ttl = settings.get('hypothesis.api_ttl', auth.DEFAULT_TTL)
+        consumer.secret = settings.get('h.api_secret')
+        consumer.ttl = settings.get('h.api_ttl', auth.DEFAULT_TTL)
         return consumer
     else:
         return request.db.query(Consumer).get(key)
@@ -36,9 +36,9 @@ def token_headers(request):
 
 def token(request):
     settings = request.registry.settings
-    secret = settings.get('hypothesis.api_secret')
-    key = settings.get('hypothesis.consumer_key')
-    ttl = settings.get('hypothesis.api_ttl', auth.DEFAULT_TTL)
+    secret = settings.get('h.api_secret')
+    key = settings.get('h.consumer_key')
+    ttl = settings.get('h.api_ttl', auth.DEFAULT_TTL)
     # @@ make this deal with oid+realms, oauth etc better
     user_id = 'acct:%s@%s' % (request.user.users[0].login, request.host)
     message = {
@@ -52,11 +52,11 @@ def token(request):
 def includeme(config):
     settings = config.registry.settings
 
-    if not settings.has_key('hypothesis.consumer_key'):
-        raise KeyError('hypothesis.consumer_key')
+    if not settings.has_key('h.consumer_key'):
+        raise KeyError('h.consumer_key')
 
-    if not settings.has_key('hypothesis.consumer_secret'):
-        raise KeyError('hypothesis.consumer_secret')
+    if not settings.has_key('h.consumer_secret'):
+        raise KeyError('h.consumer_secret')
 
     # Create the annotator-store app
     app = Flask(__name__)
