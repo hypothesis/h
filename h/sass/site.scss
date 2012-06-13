@@ -65,35 +65,13 @@ span.error {
   @include small;
 }
 
-.deform button,
+.deform button { @extend .hyp-button; }
+
 .deform input,
 .deform textarea {
   @include border-radius(.25em);
   border: solid lighten($gray-light, 20%) thin;
   padding: .33em .5em;
-}
-
-.deform button {
-  @include background(
-    linear-gradient(
-      desaturate($blue, 40%),
-      darken(desaturate($blue, 40%), 10%)
-    )
-  );
-  background-color: desaturate($blue, 25%);
-  border-color: desaturate(darken($blue, 10%), 25%);
-  color: $gray-lighter;
-  text-shadow: 0 .1em adjust-color(lighten($gray, 10%), $alpha: -.4);
-}
-
-.deform button:hover {
-  @include background(
-    linear-gradient(
-      desaturate(darken($blue, 5%), 40%),
-      darken(desaturate(darken($blue, 5%), 40%), 10%)
-    )
-  );
-  background-color: desaturate(darken($blue, 5%), 25%);
 }
 
 .deform input,

@@ -507,19 +507,6 @@ $iconset: iconset_wireframe;
   @include tertiarytext;
 }
 
-//COOL BUTTON STYLE
-.hyp-buttonstyle {
-  @include box-shadow(0px 1px 0px #999999);
-  border: 1px solid #999999;
-  border-radius: 3px;
-  padding: 0 .5em;
-  position: relative;
-  &:active {
-    @include box-shadow(none);
-    top: 1px;
-  }
-}
-
 //EXCERPT
 .hyp-excerpt {
   div {
