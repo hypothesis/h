@@ -5,7 +5,8 @@
 
   <article metal:fill-slot="content">
     <div class="title">
-      <img src="${request.static_url('h:images/logo.png')}" />
+      <img height="150px" width="150px"
+           src="${request.static_url('h:images/hypothelogo_square.png')}" />
       <h1>hypothes<span class="red">.</span>is</h1>
       <h2>The&#160;Internet, peer&#160;reviewed.</h2>
     </div>
