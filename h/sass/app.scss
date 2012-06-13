@@ -300,6 +300,11 @@ $iconset: iconset_wireframe;
     margin-right: .5em;
   }
 
+  .hyp-meta > & {
+    position: absolute;
+    right: 0;
+  }
+
   a {
     text-decoration: none;
     cursor: pointer;
@@ -531,13 +536,13 @@ $iconset: iconset_wireframe;
 
 //ANNOTATION DETAIL
 .hyp-detail {
-  & > .hyp-reply > .hyp-bottombar > .annotator-controls {
+  & > .hyp-reply > .hyp-meta > .annotator-controls {
     @include single-transition(opacity, 0.25s, ease-in-out);
     opacity: 0;
   }
 
   &.hyp-hover {
-    & > .hyp-reply > .hyp-bottombar > .annotator-controls {
+    & > .hyp-reply > .hyp-meta > .annotator-controls {
       opacity: 1;
     }
   }
