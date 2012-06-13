@@ -545,23 +545,7 @@ $iconset: iconset_wireframe;
     }
   }
 
-  & > .hyp-reply > .hyp-body,
-  & > .hyp-reply > .hyp-bottombar,
-  & > .hyp-reply > .hyp-meta > .hyp-user {
-    @include single-transition(font-size, .1s, linear);
-  }
-
-  &.hyp-collapsed {
-    & > .hyp-reply > .hyp-body,
-    & > .hyp-reply > .hyp-bottombar,
-    & > .hyp-reply > .hyp-meta > .hyp-user {
-      font-size: 0.9em;
-    }
-
-    & > .hyp-reply > .hyp-thread {
-      overflow: hidden;
-    }
-  }
+  &.hyp-collapsed > .hyp-reply > .hyp-thread { overflow: hidden; }
 
   .hyp-detail {
     @include single-transition(
