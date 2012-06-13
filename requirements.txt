@@ -14,7 +14,7 @@ SQLAlchemy==0.7.6
 WTForms==1.0.1
 WebOb==1.2b3
 Werkzeug==0.8.3
-annotator==0.7.7
+-e git+https://github.com/hypothesis/annotator-store@37f6a077064b6d1728d49e6d1e538b8fbf588e06#egg=annotator-dev
 anykeystore==0.2
 argparse==1.2.1
 certifi==0.0.8
