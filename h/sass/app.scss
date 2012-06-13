@@ -175,10 +175,6 @@ $iconset: iconset_wireframe;
     @include box-sizing(border-box);
     font: sans-serif;
   }
-
-  .annotator-outer {
-    padding: 0 1em;
-  }
 }
 
 .hyp-sidebar.hyp-collapsed {
@@ -188,7 +184,7 @@ $iconset: iconset_wireframe;
 //LOGO
 .hyp-logo {
   font-size: 2em;
-  padding: 0.25em;
+  padding: 0.25em .5em;
   text-shadow: 0px 2px 1px #fff;
 }
 
