@@ -157,3 +157,5 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .attr('offset', (v) => v[0] / $(window).outerHeight())
       .attr('stop-color', (v) => this._colorize(v[3] / max))
       .attr('stop-opacity', (v) -> opacity(v[3]))
+
+    this.publish('updated')
