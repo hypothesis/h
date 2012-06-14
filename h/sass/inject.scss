@@ -33,6 +33,10 @@
   cursor: pointer;
 }
 
+.annotator-hl.hyp-active {
+  background: rgb(230, 236, 249);
+}
+
 .annotator-wrapper {
   position: relative;
   padding-right: $heatmap-width;

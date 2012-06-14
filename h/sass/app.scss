@@ -96,10 +96,6 @@ $iconset: iconset_wireframe;
   @include reset-list-style;
 }
 
-.annotator-hl.hyp-active {
-  background: rgb(230, 236, 249);
-}
-
 // Hetmap tabs
 .hyp-heatmap-tab {
   @include single-transition(left, .2s);
