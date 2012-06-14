@@ -14,14 +14,19 @@ class Hypothesis extends Annotator
       annotationData: document.location.href
     Unsupported: {}
 
+  # Asset URLs
+  @assets = {}
+
   # The last bucket of annotations shown
   @bucket = null
 
   # Whether the detail view is shown
   @detail = false
 
-  constructor: (element, options, assets = []) ->
+  constructor: (element, options, assets) ->
     super
+
+    @assets = assets
 
     # Load plugins
     $.extend @pluginConfig, options
@@ -46,7 +51,7 @@ class Hypothesis extends Annotator
       .style('padding', 0)
     d3.select(@iframe[0].contentDocument.head)
       .selectAll('link')
-      .data(assets)
+      .data(assets.css)
       .enter().append('link')
         .attr('rel', 'stylesheet')
         .attr('href', (d) => d)
@@ -85,7 +90,7 @@ class Hypothesis extends Annotator
     # Create a sidebar if one does not exist. This is a singleton element --
     # even if multiple instances of the app are loaded on a page (some day).
     if not @sidebar?
-      sidebar = $(Handlebars.templates.sidebar())
+      sidebar = $(Handlebars.templates.sidebar(@assets))
       Annotator.prototype.sidebar = sidebar
     this
 
