@@ -269,9 +269,10 @@ body {
     margin-right: .5em;
   }
 
-  .hyp-meta > & {
+  .hyp-reply > & {
     position: absolute;
     right: 0;
+    z-index: 1;
   }
 
   a {
@@ -521,18 +522,27 @@ body {
 
 //ANNOTATION DETAIL
 .hyp-detail {
-  & > .hyp-reply > .hyp-meta > .annotator-controls {
+  & > .hyp-reply > .annotator-controls {
     @include single-transition(opacity, 0.25s, ease-in-out);
     opacity: 0;
   }
 
   &.hyp-hover {
-    & > .hyp-reply > .hyp-meta > .annotator-controls {
+    & > .hyp-reply > .annotator-controls {
       opacity: 1;
     }
   }
 
   &.hyp-collapsed > .hyp-reply > .hyp-thread { overflow: hidden; }
+  &.hyp-collapsed > .hyp-reply {
+    & > .hyp-body {
+      font-style: italic;
+      margin-top: 0;
+      padding-left: .25em;
+    }
+    & > .hyp-user { float: left; }
+    & > .hyp-thread { overflow: hidden; }
+  }
 
   .hyp-detail {
     @include single-transition(
@@ -605,7 +615,7 @@ body {
   }
 
   .hyp-collapsed {
-    .hyp-content {
+    .hyp-body {
       overflow: hidden;
       text-overflow: ellipsis;
       -o-text-overflow: ellipsis;
