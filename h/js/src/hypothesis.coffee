@@ -296,7 +296,7 @@ class Hypothesis extends Annotator
           .on 'click', =>
             event = d3.event
             target = event.target
-            unless target instanceof HTMLAnchorElement then return
+            unless target.tagName is 'A' then return
             event.stopPropagation()
 
             switch d3.event.target.getAttribute('href')
