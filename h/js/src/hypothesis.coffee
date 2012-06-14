@@ -262,9 +262,9 @@ class Hypothesis extends Annotator
         .insert('li', '.hyp-annotation')
           .classed('hyp-widget', true)
           .classed('hyp-excerpt', true)
-        .append('div')
+        .append('blockquote')
       excerpts.exit().remove()
-      excerpts.select('div').text((d) -> d.message.annotation.quote)
+      excerpts.select('blockquote').text((d) -> d.message.annotation.quote)
 
       loop
         context = context.select('.annotator-listing')
@@ -365,7 +365,7 @@ class Hypothesis extends Annotator
     delete annotation.ranges
 
     excerpt = $('<li class="hyp-widget hyp-excerpt">')
-    excerpt.append($("<div>#{annotation.quote}</div>"))
+    excerpt.append($("<blockquote>#{annotation.quote}</blockquote>"))
 
     item = $('<li class="hyp-widget hyp-writer">')
     item.append($(Handlebars.templates.editor(annotation)))

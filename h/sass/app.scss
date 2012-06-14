@@ -2,6 +2,8 @@
 @import 'compass';
 @import 'compass/reset/utilities';
 
+@import url(//fonts.googleapis.com/css?family=Open+Sans|Merriweather|PT+Serif);
+
 /* Annotator styles */
 
 .annotator-hide {
@@ -478,10 +480,39 @@ $iconset: iconset_wireframe;
 
 //EXCERPT
 .hyp-excerpt {
-  div {
-    font-family: serif;
+  @include box-shadow(1px 3px 8px rgba(0, 0, 0, .2));
+  position: relative;
+
+  blockquote {
+    color: #666;
+    font-family: "Merriweather";
     font-size: 1.1em;
-    color: black;
+    line-height: 1.3em;
+    margin: 0;
+    padding: 0 2em;
+  }
+
+  &:before {
+    color: rgba(150, 150, 150, .5);
+    content: "“";
+    font-family: "PT Serif";
+    font-size: 6em;
+    vertical-align: text-bottom;
+
+    position: absolute;
+    top: .4em;
+    left: 0;
+  }
+
+  &:after {
+    color: rgba(150, 150, 150, .5);
+    content: "„";
+    font-family: "PT Serif";
+    font-size: 5em;
+
+    position: absolute;
+    right: 0;
+    bottom: .45em;
   }
 }
 
