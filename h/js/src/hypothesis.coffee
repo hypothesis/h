@@ -95,20 +95,48 @@ class Hypothesis extends Annotator
 
     bucket = []
 
-    d3.select(@heatmap.element.get(0))
-    .on 'mousemove', =>
-      [x, y] = d3.mouse(d3.event.target)
-      target = d3.bisect(@heatmap.index, y)-1
-      for a in bucket
-        d3.selectAll(a.highlights).classed('hyp-active', false)
-      bucket = @heatmap.buckets[target] or []
-      for a in bucket
-        d3.selectAll(a.highlights).classed('hyp-active', true)
-    .on 'mouseout', =>
-      for a in bucket
-        d3.selectAll(a.highlights).classed('hyp-active', false)
-    .on 'click', =>
-      this.showViewer(bucket) if bucket?.length
+    makeBucketTarget = (selection) =>
+      selection
+        .on 'mousemove', =>
+          for a in bucket
+            d3.selectAll(a.highlights).classed('hyp-active', false)
+
+          [x, y] = d3.mouse(@heatmap.element[0])
+          target = d3.bisect(@heatmap.index, y)-1
+          bucket = @heatmap.buckets[target] or []
+
+          for a in bucket
+            d3.selectAll(a.highlights).classed('hyp-active', true)
+
+        .on 'mouseout', =>
+          for a in bucket
+            d3.selectAll(a.highlights).classed('hyp-active', false)
+
+        .on 'click', =>
+          this.showViewer(bucket) if bucket?.length
+
+    makeBucketTarget(d3.select(@heatmap.element[0]))
+
+    @heatmap.subscribe 'updated', =>
+      tabs = d3.select(@iframe[0].contentDocument.body)
+        .selectAll('div.hyp-heatmap-tab')
+        .data =>
+          buckets = []
+          @heatmap.index.forEach (b, i) =>
+            if @heatmap.buckets[i].length > 0
+              buckets.push i
+          buckets
+
+      tabs.enter().append('div').classed('hyp-heatmap-tab', true)
+        .on 'click', =>
+          this.showViewer(bucket) if bucket?.length
+      tabs.exit().remove()
+      tabs
+        .style('top', (i) => "#{@heatmap.index[i]}px")
+        .text((i) => @heatmap.buckets[i].length)
+
+      makeBucketTarget(tabs)
+
     this
 
   # Creates an instance of Annotator.Viewer and assigns it to the @viewer
