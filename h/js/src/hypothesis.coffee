@@ -47,7 +47,9 @@ class Hypothesis extends Annotator
     @iframe[0].contentDocument.close()
 
     d3.select(@iframe[0].contentDocument.body)
+      .style('border', 0)
       .style('margin', 0)
+      .style('outline', 0)
       .style('padding', 0)
     d3.select(@iframe[0].contentDocument.head)
       .selectAll('link')
