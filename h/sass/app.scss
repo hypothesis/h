@@ -229,12 +229,12 @@ body {
 
 //THREAD INDENTATION
 .hyp-thread {
-  margin-left: -$thread-padding / 2;
+  margin: 0 -1em -1em (-$thread-padding / 2);
   padding-left: $thread-padding / 2;
 
   & > .annotator-listing {
     border-left: 1px dotted #999999;
-    margin: 0 -1em -1em 0;
+    margin-left: $threadexp-width / 2;
 
     & > * {
       padding: 1em 1em 1em $thread-padding;
