@@ -133,7 +133,7 @@ def embed(request):
                     environment['templates'].urls() +
                     environment['jwz'].urls() +
                     environment['app_js'].urls() +
-                    environment['app_css'].urls())),
+                    environment['inject_css'].urls())),
             'assets': json.dumps(
                 map(lambda url: request.relative_url(url, True),
                     environment['app_css'].urls()))

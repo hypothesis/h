@@ -2,59 +2,11 @@
 @import 'compass';
 @import 'compass/reset/utilities';
 
-//STANCE COLORS
-$positive: #3aab39;
-$negative: #d11c2b;
-$neutral: #0171ba;
-
-//OTHER VARIABLES
-$thread-padding: 1.5em;
-$threadexp-width: 1em;
-$score-width: 40px;
-$score-height: $score-width;
-$heatmap-width: 30px;
-
 /* Annotator styles */
-
-.annotator-adder {
-  background-image: url(../annotator/img/annotator-icon-sprite.png);
-  background-repeat: no-repeat;
-  margin-top: -48px;
-  margin-left: -24px;
-  width: 48px;
-  height: 48px;
-  background-position: left top;
-  position: absolute;
-  z-index: 999;
-}
-
-.annotator-adder:hover {
-  background-position: center top;
-}
-
-.annotator-adder:active {
-  background-position: center right;
-}
-
-.annotator-adder button {
-  display: block;
-  width: 36px;
-  height: 41px;
-  margin: 0 auto;
-  border: none;
-  background: none;
-  text-indent: -999em;
-  cursor: pointer;
-}
 
 .annotator-hide {
   display: none;
   visibility: hidden;
-}
-
-.annotator-wrapper {
-  position: relative;
-  padding-right: $heatmap-width;
 }
 
 //ANNOTATOR TEXT STYLES
@@ -170,19 +122,6 @@ $iconset: iconset_wireframe;
 
   &:hover { left: 0; }
 }
-
-// Styles for the iframe
-.hyp-iframe {
-  @include single-transition('margin-left', 0.3s, ease-in-out);
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 100%;
-  z-index: 500;
-
-  &.hyp-collapsed { margin-left: -$heatmap-width - 10px; }
-}
-
 
 // Styles for the sidebar
 .hyp-sidebar {
@@ -749,10 +688,6 @@ $iconset: iconset_wireframe;
 */
 
 @media screen and (min-width: 15em) {
-  .hyp-iframe {
-    width: 300px + $heatmap-width + 10px;
-    margin-left: -300px - $heatmap-width - 10px;
-  }
 }
 
 /*
@@ -762,10 +697,6 @@ $iconset: iconset_wireframe;
 */
 
 @media screen and (min-width: 30em) {
-  .hyp-iframe {
-    width: 440px + $heatmap-width + 10px;
-    margin-left: -440px - heatmap-width - 10px;
-  }
 }
 
 /*
@@ -775,10 +706,6 @@ $iconset: iconset_wireframe;
 */
 
 @media screen and (min-width: 37.5em) {
-  .hyp-iframe {
-    width: 500px + $heatmap-width + 10px;
-    margin-left: -500px - $heatmap-width - 10px;
-  }
 }
 
 /*

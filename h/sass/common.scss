@@ -46,6 +46,20 @@ $gutter: 24;
   width: ($cols * ($column + $gutter) - $gutter) / $em;
 }
 
+// Common styling variables
+
+//STANCE COLORS
+$positive: #3aab39;
+$negative: #d11c2b;
+$neutral: #0171ba;
+
+//OTHER VARIABLES
+$thread-padding: 1.5em;
+$threadexp-width: 1em;
+$score-width: 40px;
+$score-height: $score-width;
+$heatmap-width: 30px;
+
 /*
   Type presets
   */

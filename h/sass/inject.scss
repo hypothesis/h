@@ -1,0 +1,110 @@
+@import 'common';
+
+/* Annotator styles */
+
+.annotator-adder {
+  background-image: url(../annotator/img/annotator-icon-sprite.png);
+  background-repeat: no-repeat;
+  margin-top: -48px;
+  margin-left: -24px;
+  width: 48px;
+  height: 48px;
+  background-position: left top;
+  position: absolute;
+  z-index: 999;
+}
+
+.annotator-adder:hover {
+  background-position: center top;
+}
+
+.annotator-adder:active {
+  background-position: center right;
+}
+
+.annotator-adder button {
+  display: block;
+  width: 36px;
+  height: 41px;
+  margin: 0 auto;
+  border: none;
+  background: none;
+  text-indent: -999em;
+  cursor: pointer;
+}
+
+.annotator-wrapper {
+  position: relative;
+  padding-right: $heatmap-width;
+}
+
+/* iframe styles */
+
+.hyp-iframe {
+  @include single-transition('margin-left', 0.3s, ease-in-out);
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 100%;
+  z-index: 500;
+
+  &.hyp-collapsed { margin-left: -$heatmap-width - 10px; }
+}
+
+
+/*
+  Mobile layout
+  240–479 px
+  Zoomed out below 320 px
+*/
+
+@media screen and (min-width: 15em) {
+  .hyp-iframe {
+    width: 300px + $heatmap-width + 10px;
+    margin-left: -300px - $heatmap-width - 10px;
+  }
+}
+
+/*
+  Wide mobile layout
+  480-767 px
+  Zoomed in above 480 px
+*/
+
+@media screen and (min-width: 30em) {
+  .hyp-iframe {
+    width: 440px + $heatmap-width + 10px;
+    margin-left: -440px - heatmap-width - 10px;
+  }
+}
+
+/*
+  Tablet layout
+  600-911 px
+  Zoomed in above 600 px
+*/
+
+@media screen and (min-width: 37.5em) {
+  .hyp-iframe {
+    width: 500px + $heatmap-width + 10px;
+    margin-left: -500px - $heatmap-width - 10px;
+  }
+}
+
+/*
+  Widescreen layout
+  912-1887 px
+  Zoomed in above 912 px
+*/
+
+@media screen and (min-width: 57em) {
+}
+
+/*
+  Huge-screen layout
+  1888-2520 px
+  Zoomed in above 1920 px
+*/
+
+@media screen and (min-width: 118em) {
+}

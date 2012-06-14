@@ -39,7 +39,12 @@ app_css:
   debug: False
   filters: compass
   output: css/app.css
-css:
+inject_css:
+  contents: sass/inject.scss
+  debug: False
+  filters: compass
+  output: css/inject.css
+site_css:
   contents: sass/site.scss
   debug: False
   filters: compass

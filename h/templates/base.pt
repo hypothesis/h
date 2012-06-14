@@ -11,7 +11,7 @@
   <link rel="api" href="${request.route_path('api', subpath='')}" />
   <link rel="stylesheet"
         tal:attributes="href href"
-        tal:repeat="href environment['css'].urls()" />
+        tal:repeat="href environment['site_css'].urls()" />
 </head>
 <body tal:attributes="class 'toolbar' if request.user else default">
   <div id="flash-msg">
