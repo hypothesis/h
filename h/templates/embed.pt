@@ -5,7 +5,7 @@
 /*]]>{/literal}*/
 yepnope([
   {
-    test: window.jQuery,
+    test: window.jQuery && window.jQuery.fn.jquery >= '1.7.2',
     nope: ${jquery}
   },
   {
