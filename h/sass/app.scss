@@ -211,20 +211,26 @@ body {
   }
 }
 
-//META BAR
-.hyp-meta {
-  @include pie-clearfix;
-  position: relative;
+//META INFO
+.hyp-user {
+  font-weight: bold;
+  text-decoration: underline;
+}
 
-  .hyp-user {
-    @include primarytext;
-    text-decoration: underline;
-  }
+.hyp-time {
+  float: right;
+  display: inline-block;
+}
 
-  .hyp-time {
-    float: right;
-    display: inline-block;
-  }
+//BODY
+.hyp-body { margin-top: 0.2em; }
+
+//BOTTOM BAR
+.hyp-bottombar {
+  margin-top: 0.8em;
+
+  .hyp-left { float: left; }
+  .hyp-right { float: right; }
 }
 
 //THREAD INDENTATION
@@ -559,10 +565,6 @@ body {
 .hyp-reply {
   position: relative;
 
-  .hyp-body {
-    margin-top: 0.6em;
-  }
-
   .hyp-score {
     position: absolute;
     left: -$score-width / 2;
@@ -570,13 +572,6 @@ body {
     &.hyp-positive { top: 0.2em; }
     &.hyp-negative { top: -0.2em; }
     &.hyp-neutral { top: -0.2em; }
-  }
-
-  .hyp-bottombar {
-    margin-top: 0.8em;
-
-    .hyp-left { float: left; }
-    .hyp-right { float: right; }
   }
 
   .hyp-repliesbadge {
@@ -651,14 +646,6 @@ body {
     min-height: 8em;
   }
 
-  .hyp-body {
-    margin-top: 0.6em;
-  }
-
-  .hyp-bottombar {
-    margin-top: 0.8em;
-  }
-
   .hyp-scorecontrol {
     display: none;
     position: absolute;
@@ -682,17 +669,6 @@ body {
   &:active {
     @include smallshadow(2px, 1px, 0.2);
     bottom: -2px;
-  }
-
-  .hyp-body {
-    margin-top: 0.6em;
-  }
-
-  .hyp-bottombar {
-    margin-top: 0.8em;
-
-    .hyp-left { float: left; }
-    .hyp-right { float: right; }
   }
 
   .hyp-repliesbadge {
