@@ -33,7 +33,7 @@ yepnope([
           loadFromSearch: { uri: uri },
           prefix: '${request.route_url('api', subpath="")}'
         }
-      });
+      }, ${assets});
     }
   }
 ])

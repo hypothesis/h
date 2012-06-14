@@ -20,7 +20,7 @@ class Hypothesis extends Annotator
   # Whether the detail view is shown
   @detail = false
 
-  constructor: (element, options) ->
+  constructor: (element, options, assets = []) ->
     super
 
     # Load plugins
@@ -30,12 +30,28 @@ class Hypothesis extends Annotator
         this.addPlugin name, opts
 
     # Set up interface elements
-    this._setupHeatmap()._setupSidebar()
+    this._setupHeatmap()._setupSidebar()._setupIframe()
 
     @viewer.element.appendTo(@sidebar)
     @editor.element.appendTo(@sidebar)
     @heatmap.element.appendTo(@sidebar)
-    @sidebar.appendTo(@wrapper)
+
+    @iframe.appendTo(@wrapper)
+
+    @iframe[0].contentDocument.open()
+    @iframe[0].contentDocument.close()
+
+    d3.select(@iframe[0].contentDocument.body)
+      .style('margin', 0)
+      .style('padding', 0)
+    d3.select(@iframe[0].contentDocument.head)
+      .selectAll('link')
+      .data(assets)
+      .enter().append('link')
+        .attr('rel', 'stylesheet')
+        .attr('href', (d) => d)
+
+    @sidebar.appendTo(@iframe[0].contentDocument.body)
 
     @plugins.Auth.withToken (token) =>
       @plugins.Permissions.setUser token.userId
@@ -56,15 +72,21 @@ class Hypothesis extends Annotator
         this.hideSidebar() unless @selectedRanges?.length
     this
 
+  _setupIframe: ->
+    if not @iframe?
+      iframe = $('<iframe></iframe>')
+      Annotator.prototype.iframe = iframe
+      @iframe.addClass('hyp-iframe')
+      @iframe.addClass('hyp-collapsed')
+      @iframe.on 'click', (event) =>  event.stopPropagation()
+    this
+
   _setupSidebar: ->
     # Create a sidebar if one does not exist. This is a singleton element --
     # even if multiple instances of the app are loaded on a page (some day).
     if not @sidebar?
       sidebar = $(Handlebars.templates.sidebar())
       Annotator.prototype.sidebar = sidebar
-      @sidebar = sidebar
-      @sidebar.addClass('hyp-collapsed')
-      @sidebar.on 'click', (event) =>  event.stopPropagation()
     this
 
   _setupHeatmap: () ->
@@ -357,10 +379,10 @@ class Hypothesis extends Annotator
     this.showSidebar()
 
   showSidebar: =>
-    @sidebar.removeClass('hyp-collapsed')
+    @iframe.removeClass('hyp-collapsed')
 
   hideSidebar: =>
-    @sidebar.addClass('hyp-collapsed')
+    @iframe.addClass('hyp-collapsed')
 
   updateViewer: (annotations) =>
     existing = d3.select(@viewer.element.get(0)).datum()

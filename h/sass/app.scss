@@ -12,8 +12,7 @@ $thread-padding: 1.5em;
 $threadexp-width: 1em;
 $score-width: 40px;
 $score-height: $score-width;
-$sidepane-width: 510px;
-$heatmap-width: 27px;
+$heatmap-width: 30px;
 
 /* Annotator styles */
 
@@ -133,7 +132,7 @@ $iconset: iconset_wireframe;
   background: hsla(0, 0, 90%, 0.4);
   position: fixed;
   top: 0;
-  margin-left: -$heatmap-width;
+  left: 10px;
   width: $heatmap-width;
   z-index: 1;
 }
@@ -147,9 +146,46 @@ $iconset: iconset_wireframe;
   background: rgb(230, 236, 249);
 }
 
+// Hetmap tabs
+.hyp-heatmap-tab {
+  @include single-transition(left, .2s);
+  background-image: url("../images/side_tab.svg");
+  background-size: 100% 100%;
+  color: rgb(238, 238, 238);
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 1em;
+  line-height: 1em;
+  padding: 4px 0;
+  position: fixed;
+  left: 5px;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 1px 1px 1px rgb(51, 51, 51);
+  width: $heatmap-width + 5px;
+  z-index: 502;
+  vertical-align: middle;
+
+  &:hover { left: 0; }
+}
+
+// Styles for the iframe
+.hyp-iframe {
+  @include single-transition('margin-left', 0.3s, ease-in-out);
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 100%;
+  z-index: 500;
+
+  &.hyp-collapsed { margin-left: -$heatmap-width - 10px; }
+}
+
+
 // Styles for the sidebar
 .hyp-sidebar {
-  @include single-transition('margin-left', 0.3s, ease-in-out);
   background: url('../images/noise_1.png');
   background-attachment: fixed;
   color: #666666;
@@ -157,12 +193,10 @@ $iconset: iconset_wireframe;
   font-size: $font-size / $em * .8;
   height: 100%;
   line-height: $line-height / $em * .8;
+  margin-left: 10px;
   overflow: auto;
   padding-left: $heatmap-width;
-  position: fixed;
-  top: 0;
-  left: 100%;
-  z-index: 500;
+  position: relative;
 
   * { @include box-sizing(border-box); }
 
@@ -175,10 +209,6 @@ $iconset: iconset_wireframe;
     @include box-sizing(border-box);
     font: sans-serif;
   }
-}
-
-.hyp-sidebar.hyp-collapsed {
-  margin-left: -$heatmap-width;
 }
 
 //LOGO
@@ -719,9 +749,9 @@ $iconset: iconset_wireframe;
 */
 
 @media screen and (min-width: 15em) {
-  .hyp-sidebar {
-    width: 300px + $heatmap-width;
-    margin-left: -300px - $heatmap-width;
+  .hyp-iframe {
+    width: 300px + $heatmap-width + 10px;
+    margin-left: -300px - $heatmap-width - 10px;
   }
 }
 
@@ -732,9 +762,9 @@ $iconset: iconset_wireframe;
 */
 
 @media screen and (min-width: 30em) {
-  .hyp-sidebar {
-    width: 440px + $heatmap-width;
-    margin-left: -440px - heatmap-width;
+  .hyp-iframe {
+    width: 440px + $heatmap-width + 10px;
+    margin-left: -440px - heatmap-width - 10px;
   }
 }
 
@@ -745,9 +775,9 @@ $iconset: iconset_wireframe;
 */
 
 @media screen and (min-width: 37.5em) {
-  .hyp-sidebar {
-    width: 500px + $heatmap-width;
-    margin-left: -500px - $heatmap-width;
+  .hyp-iframe {
+    width: 500px + $heatmap-width + 10px;
+    margin-left: -500px - $heatmap-width - 10px;
   }
 }
 
