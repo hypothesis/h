@@ -6,6 +6,8 @@
 @import "reset";
 @import "common";
 
+@import url(//fonts.googleapis.com/css?family=Open+Sans|Merriweather|PT+Serif);
+
 a {
   color: $link-color;
   text-decoration: none;
@@ -28,7 +30,7 @@ article {
 body {
   background-image: url('../images/noise_1.png');
   color: $gray-light;
-  font-family: "Georgia", "Gentium Basic", "Times New Roman", serif;
+  font-family: "Merriweather", "Georgia", serif;
   font-size: $font-size / $em;
   font-smoothing: antialiased;
   line-height: $line-height / $em;
@@ -50,7 +52,7 @@ h1 { @include large; }
 h2 { @include big; }
 
 h1, form {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 label {

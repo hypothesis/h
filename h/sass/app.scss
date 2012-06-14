@@ -96,6 +96,12 @@ $iconset: iconset_wireframe;
   @include reset-list-style;
 }
 
+body {
+  font-family: "Open Sans", sans-serif;
+  font-size: $font-size / $em * .8;
+  line-height: $line-height / $em * .8;
+}
+
 // Hetmap tabs
 .hyp-heatmap-tab {
   @include single-transition(left, .2s);
@@ -105,7 +111,6 @@ $iconset: iconset_wireframe;
   font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
-  font-family: sans-serif;
   font-size: 1em;
   line-height: 1em;
   padding: 4px 0;
@@ -126,10 +131,7 @@ $iconset: iconset_wireframe;
   background: url('../images/noise_1.png');
   background-attachment: fixed;
   color: #666666;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: $font-size / $em * .8;
   height: 100%;
-  line-height: $line-height / $em * .8;
   margin-left: 10px;
   overflow: auto;
   padding-left: $heatmap-width;
