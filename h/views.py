@@ -171,6 +171,7 @@ def includeme(config):
     config.add_view(home, name='auth', attr='auth', renderer='templates/form.pt')
 
     config.add_view(lambda r: Response(body=embed(r),
+                                       cache_control='must-revalidate',
                                        content_type='application/javascript',
                                        charset='utf-8'),
                     route_name='embed')
