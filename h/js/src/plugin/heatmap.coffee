@@ -160,11 +160,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     this.publish('updated')
 
-  highlight: (bucket, active) =>
+  highlight: (bucket, fn) =>
     annotations = @buckets[bucket] or []
-    highlights = [a.highlights for a in annotations]
-
     lights = d3.select(@annotator.wrapper[0]).selectAll('.annotator-hl')
-      .data(annotations, (d, i) => [bucket, i])
-    lights.classed('hyp-active', active)
-    lights.exit().classed('hyp-active', not active)
+    lights.classed 'hyp-active', fn or ->
+      $(this).data('annotation') in annotations
