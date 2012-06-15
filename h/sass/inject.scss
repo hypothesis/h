@@ -65,8 +65,8 @@
 
 @media screen and (min-width: 15em) {
   .hyp-iframe {
-    width: 300px + $heatmap-width + 10px;
-    margin-left: -300px - $heatmap-width - 10px;
+    width: 90%;
+    margin-left: -90%;
   }
 }
 
@@ -78,8 +78,8 @@
 
 @media screen and (min-width: 30em) {
   .hyp-iframe {
-    width: 440px + $heatmap-width + 10px;
-    margin-left: -440px - $heatmap-width - 10px;
+    width: 70%;
+    margin-left: -70%;
   }
 }
 
