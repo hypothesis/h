@@ -1,8 +1,17 @@
 class Hypothesis extends Annotator
+  # Override the events to be bound on Annotator#element to get rid of
+  # the the highlight hover behaviour.
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
 
+  # The Annotator state is augmented with three state variables.
+
+  @assets = null  # * An object storing asset urls
+  @bucket = -1    # * The index of the active bucket shown in the summary view
+  @detail = false # * Whether the viewer shows a summary or detail listing
+
+  # * Plugin configuration
   pluginConfig:
     Heatmap: {}
     Permissions:
@@ -14,19 +23,12 @@ class Hypothesis extends Annotator
       annotationData: document.location.href
     Unsupported: {}
 
-  # Asset URLs
-  @assets = {}
-
-  # The last bucket of annotations shown
-  @bucket = null
-
-  # Whether the detail view is shown
-  @detail = false
-
   constructor: (element, options, assets) ->
     super
 
     @assets = assets
+    @bucket = -1
+    @detail = false
 
     # Load plugins
     $.extend @pluginConfig, options
@@ -73,10 +75,13 @@ class Hypothesis extends Annotator
   _setupWrapper: ->
     super
     @wrapper.on 'click', (event) =>
-      if @bucket and @detail
-        this.showViewer(@bucket)
+      if @detail
+        this.showViewer(@heatmap.buckets[@bucket])
       else
-        this.hideSidebar() unless @selectedRanges?.length
+        unless @selectedRanges?.length
+          @bucket = -1
+          @heatmap.highlight(@bucket, true)
+          this.hideSidebar()
     this
 
   _setupIframe: ->
@@ -97,32 +102,30 @@ class Hypothesis extends Annotator
     this
 
   _setupHeatmap: () ->
-    # Pull the heatmap into the sidebar
     @heatmap = @plugins.Heatmap
 
-    bucket = []
+    getBucket = (event) =>
+      [x, y] = d3.mouse(@heatmap.element[0])
+      bucket = d3.bisect(@heatmap.index, y) - 1
 
-    makeBucketTarget = (selection) =>
+    bindHeatmapEvents = (selection) =>
       selection
         .on 'mousemove', =>
-          for a in bucket
-            d3.selectAll(a.highlights).classed('hyp-active', false)
-
-          [x, y] = d3.mouse(@heatmap.element[0])
-          target = d3.bisect(@heatmap.index, y)-1
-          bucket = @heatmap.buckets[target] or []
-
-          for a in bucket
-            d3.selectAll(a.highlights).classed('hyp-active', true)
-
+          unless @viewer.isShown() and @detail
+            @heatmap.highlight(getBucket(), true)
         .on 'mouseout', =>
-          for a in bucket
-            d3.selectAll(a.highlights).classed('hyp-active', false)
-
+          unless @viewer.isShown() and @detail
+            @heatmap.highlight(@bucket, true)
         .on 'click', =>
-          this.showViewer(bucket) if bucket?.length
+          d3.event.preventDefault()
+          bucket = getBucket()
+          annotations = @heatmap.buckets[bucket]
+          if annotations?.length
+            @bucket = bucket
+            this.showViewer(annotations)
+            this.showSidebar()
 
-    makeBucketTarget(d3.select(@heatmap.element[0]))
+    d3.select(@heatmap.element[0]).call(bindHeatmapEvents)
 
     @heatmap.subscribe 'updated', =>
       tabs = d3.select(@iframe[0].contentDocument.body)
@@ -135,15 +138,11 @@ class Hypothesis extends Annotator
           buckets
 
       tabs.enter().append('div').classed('hyp-heatmap-tab', true)
-        .on 'click', =>
-          this.showViewer(bucket) if bucket?.length
       tabs.exit().remove()
       tabs
         .style('top', (i) => "#{@heatmap.index[i]}px")
         .text((i) => @heatmap.buckets[i].length)
-
-      makeBucketTarget(tabs)
-
+        .call(bindHeatmapEvents)
     this
 
   # Creates an instance of Annotator.Viewer and assigns it to the @viewer
@@ -235,8 +234,8 @@ class Hypothesis extends Annotator
       annotation.ranges = annotation.ranges or []
     super annotation, args...
 
-  showViewer: (annotations=[], detail=false) ->
-    viewer = d3.select(@viewer.element.get(0))
+  showViewer: (annotations=[], _position=null, detail=false) ->
+    viewer = d3.select(@viewer.element[0])
 
     # Thread the messages using JWZ
     messages = annotations.map (a) ->
@@ -255,7 +254,6 @@ class Hypothesis extends Annotator
     if not detail
       # Save the state so the bucket view can be restored when exiting
       # the detail view.
-      @bucket = annotations
       @detail = false
 
       # Remove the excerpts
@@ -279,15 +277,15 @@ class Hypothesis extends Annotator
             thread: if a.thread then [a.thread, a.id].join('/') else a.id
           @plugins.Store._apiRequest 'search', query, (data) =>
             if data?.rows then this.updateViewer(data.rows || [])
-          this.showViewer([a], true)
+          this.showViewer([a], null, true)
         .on 'mouseover', =>
           d3.event.stopPropagation()
           item = d3.select(d3.event.currentTarget).datum().message.annotation
-          d3.selectAll(item.highlights).classed('hyp-active', true)
+          @heatmap.highlight(@bucket, (d) => d != item)
         .on 'mouseout', =>
           d3.event.stopPropagation()
           item = d3.select(d3.event.currentTarget).datum().message.annotation
-          d3.selectAll(item.highlights).classed('hyp-active', false)
+          @heatmap.highlight(@bucket, true)
     else
       # Mark that the detail view is now shown, so that exiting returns to the
       # bucket view rather than the document.
@@ -385,7 +383,13 @@ class Hypothesis extends Annotator
 
     @editor.hide()
     @viewer.show()
-    this.showSidebar()
+
+  updateViewer: (annotations) =>
+    existing = d3.select(@viewer.element[0]).datum()
+    if existing?
+      annotations = existing.flattenChildren()?.map((c) -> c.annotation)
+        .concat(annotations)
+    this.showViewer(annotations or [], null, true)
 
   showEditor: (annotation) =>
     unless @plugins.Permissions?.user
@@ -410,7 +414,7 @@ class Hypothesis extends Annotator
       .append(item)
       .find(":input:first").focus()
 
-    d3.select(@viewer.element.get(0)).datum(null)
+    d3.select(@viewer.element[0]).datum(null)
     this.showSidebar()
 
   showSidebar: =>
@@ -418,13 +422,6 @@ class Hypothesis extends Annotator
 
   hideSidebar: =>
     @iframe.addClass('hyp-collapsed')
-
-  updateViewer: (annotations) =>
-    existing = d3.select(@viewer.element.get(0)).datum()
-    if existing?
-      annotations = existing.flattenChildren()?.map((c) -> c.annotation)
-        .concat(annotations)
-    this.showViewer(annotations or [], true)
 
   threadId: (annotation) ->
     if annotation?.thread?
