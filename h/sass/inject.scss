@@ -34,7 +34,8 @@
 }
 
 .annotator-hl.hyp-active {
-  background: rgb(230, 236, 249);
+  @include box-shadow(2px 2px 4px $gray-light);
+  background: #c9d7f1;
 }
 
 .annotator-wrapper {
