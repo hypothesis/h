@@ -79,7 +79,7 @@
 @media screen and (min-width: 30em) {
   .hyp-iframe {
     width: 440px + $heatmap-width + 10px;
-    margin-left: -440px - heatmap-width - 10px;
+    margin-left: -440px - $heatmap-width - 10px;
   }
 }
 
