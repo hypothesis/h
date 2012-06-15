@@ -167,7 +167,7 @@ class Hypothesis extends Annotator
   _setupEditor: ->
     @editor = this._createEditor()
     @editor.on 'hide', () =>
-      if not d3.select(@viewer.element.get(0)).datum()
+      if not d3.select(@viewer.element[0]).datum()
         this.hideSidebar()
     this
 
@@ -363,7 +363,7 @@ class Hypothesis extends Annotator
                 editor.load(reply)
                 editor.element.removeClass('annotator-outer')
 
-                d3.select(editor.element.get(0)).select('form')
+                d3.select(editor.element[0]).select('form')
                   .data([reply])
                     .html(Handlebars.templates.editor)
                     .on 'mouseover', => d3.event.stopPropagation()
