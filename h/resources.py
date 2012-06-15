@@ -52,6 +52,7 @@ def includeme(config):
     config.add_route('home', '/', use_global_views=True)
     config.add_route('embed', '/embed.js')
     config.add_route('token', '/api/token')
+    config.add_route('users', '/api/u')
     config.add_route('api', '/api/*subpath')
 
     config.scan(__name__)

@@ -49,6 +49,12 @@ def token(request):
     body = auth.encode_token(message, secret)
     return Response(body=body, headerlist=token_headers(request).items())
 
+def users(request):
+    return map(
+        lambda user: (user.id, (user.login if user.provider == 'local'
+                                else '%s@%s' % (user.login, user.provider))),
+        request.user and request.user.users or [])
+
 def includeme(config):
     settings = config.registry.settings
 
@@ -82,5 +88,8 @@ def includeme(config):
     config.add_view(wsgiapp2(app), route_name='api')
     config.add_view(token, route_name='token', request_method='GET',
                     permission='authenticated')
+    config.add_view(users, route_name='users', request_method='GET',
+                    permission='authenticated',
+                    renderer='json')
     config.add_view(lambda r: Response(headerlist=token_headers(r).items()),
                     route_name='token', request_method='OPTIONS')

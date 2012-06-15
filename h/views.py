@@ -17,6 +17,8 @@ from pyramid.view import render_view_to_response
 from pyramid_deform import FormView
 from pyramid_webassets import IWebAssetsEnvironment
 
+from . api import users
+
 def login_validator(node, kw):
     valid = False
     if 'username' in kw:
@@ -30,16 +32,6 @@ def login_validator(node, kw):
             "Please, try again."
         )
 
-def users(request):
-    if not request.user:
-        return []
-    return [
-        (user.id, '%s@%s' % (
-            user.login,
-            re.sub('^local$', request.host, user.provider)))
-        for user in request.user.users
-    ]
-
 class LoginSchema(Schema):
     username = SchemaNode(
         String(),
@@ -51,10 +43,11 @@ class LoginSchema(Schema):
     )
 
 class UserSelectSchema(Schema):
-    accounts = SchemaNode(
+    persona = SchemaNode(
         String(),
         widget=deferred(
-            lambda node, kw: SelectWidget(values=users(kw['request']))
+            lambda node, kw: SelectWidget(
+                values=users(kw['request']) + [(-1, 'Sign out')])
         ),
     )
 
