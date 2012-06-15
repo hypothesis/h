@@ -67,26 +67,10 @@ span.error {
   @include small;
 }
 
-button { @extend .hyp-button; }
-
-input,
-textarea {
-  @include border-radius(.25em);
-  border: solid lighten($gray-light, 20%) thin;
+input, textarea {
+  @include blue-glow;
+  @include invisibox;
   padding: .33em .5em;
-}
-
-input,
-textarea {
-  @include box-shadow(inset 0 .1em .1em rgba(0, 0, 0, 0.075));
-  @include transition(border linear .2s, box-shadow linear .2s);
-}
-
-input:focus,
-textarea:focus {
-  @include box-shadow(inset 0 .25em .25em rgba(0, 0, 0, .075));
-  border: $blue solid thin;
-  outline: 0;
 }
 
 input[type="file"]:focus,
@@ -96,6 +80,7 @@ select:focus {
    @include box-shadow(none);
 }
 
+form button { @extend .hyp-button; }
 
 .error, .red {
   color: $red;
@@ -118,6 +103,10 @@ select:focus {
 .form-vertical {
   .alert-message {
     padding: .25em 0;
+  }
+
+  .controls {
+    margin: .25em 0;
   }
 
   .control-group {
