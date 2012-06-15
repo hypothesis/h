@@ -159,3 +159,12 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .attr('stop-opacity', (v) -> opacity(v[3]))
 
     this.publish('updated')
+
+  highlight: (bucket, active) =>
+    annotations = @buckets[bucket] or []
+    highlights = [a.highlights for a in annotations]
+
+    lights = d3.select(@annotator.wrapper[0]).selectAll('.annotator-hl')
+      .data(annotations, (d, i) => [bucket, i])
+    lights.classed('hyp-active', active)
+    lights.exit().classed('hyp-active', not active)
