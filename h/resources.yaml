@@ -1,5 +1,5 @@
 jquery:
-  contents: annotator/lib/vendor/jquery.js
+  contents: js/lib//jquery.min.js
 d3:
   contents: js/lib/d3.v2.min.js
 handlebars:
@@ -8,7 +8,7 @@ jwz:
   contents: js/lib/jwz.min.js
 underscore:
   contents: js/lib/underscore-min.js
-templates:
+app_js:
   contents:
     - contents:
       - contents: templates/detail.handlebars
@@ -28,24 +28,33 @@ templates:
         filters: handlebars
         output: js/lib/templates/summary.js
     - js/lib/helpers.js
-  output: js/lib/templates.js
-app_js:
-  contents: js/src/hypothesis.coffee
-  debug: False
-  filters: coffeescript
-  output: js/lib/hypothesis.js
+    - contents: js/src/hypothesis.coffee
+      filters: coffeescript
+      debug: False
+      output: js/lib/hypothesis.js
+  filters: uglifyjs
+  output: js/lib/hypothesis.min.js
 app_css:
-  contents: sass/app.scss
-  debug: False
-  filters: compass
-  output: css/app.css
+  contents:
+    - contents: sass/app.scss
+      debug: False
+      filters: compass
+      output: css/app.css
+  filters: cssutils
+  output: css/app.min.css
 inject_css:
-  contents: sass/inject.scss
-  debug: False
-  filters: compass
-  output: css/inject.css
+  contents:
+    - contents: sass/inject.scss
+      debug: False
+      filters: compass
+      output: css/inject.css
+  filters: cssutils
+  output: css/inject.min.css
 site_css:
-  contents: sass/site.scss
-  debug: False
-  filters: compass
+  contents:
+    - contents: sass/site.scss
+      debug: False
+      filters: compass
+      output: css/site.css
+  filters: cssutils
   output: css/site.min.css

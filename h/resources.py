@@ -32,6 +32,7 @@ def annotator_bundle(config):
 
     return Bundle(
         js,
+        filters='uglifyjs',
         output='js/annotator.min.js'
     )
 

@@ -21,6 +21,7 @@ certifi==0.0.8
 chardet==1.0.1
 colander==0.9.8
 cryptacular==1.4.1
+cssutils==0.9.10b1
 deform==0.9.5
 deform-bootstrap==0.2.1
 distribute==0.6.24

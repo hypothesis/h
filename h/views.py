@@ -130,7 +130,6 @@ def embed(request):
                 map(lambda url: request.relative_url(url, True),
                     environment['annotator'].urls() +
                     environment['handlebars'].urls() +
-                    environment['templates'].urls() +
                     environment['jwz'].urls() +
                     environment['app_js'].urls() +
                     environment['inject_css'].urls())),
