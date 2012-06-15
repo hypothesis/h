@@ -80,7 +80,7 @@ class Hypothesis extends Annotator
       else
         unless @selectedRanges?.length
           @bucket = -1
-          @heatmap.highlight(@bucket, true)
+          @heatmap.highlight(-1)
           this.hideSidebar()
     this
 
@@ -112,10 +112,12 @@ class Hypothesis extends Annotator
       selection
         .on 'mousemove', =>
           unless @viewer.isShown() and @detail
-            @heatmap.highlight(getBucket(), true)
+            bucket = getBucket()
+            unless @heatmap.buckets[bucket]?.length then bucket = @bucket
+            @heatmap.highlight(bucket)
         .on 'mouseout', =>
           unless @viewer.isShown() and @detail
-            @heatmap.highlight(@bucket, true)
+            @heatmap.highlight(@bucket)
         .on 'click', =>
           d3.event.preventDefault()
           bucket = getBucket()
@@ -281,11 +283,11 @@ class Hypothesis extends Annotator
         .on 'mouseover', =>
           d3.event.stopPropagation()
           item = d3.select(d3.event.currentTarget).datum().message.annotation
-          @heatmap.highlight(@bucket, (d) => d != item)
+          @heatmap.highlight(@bucket, -> $(this).data('annotation') is item)
         .on 'mouseout', =>
           d3.event.stopPropagation()
           item = d3.select(d3.event.currentTarget).datum().message.annotation
-          @heatmap.highlight(@bucket, true)
+          @heatmap.highlight(@bucket)
     else
       # Mark that the detail view is now shown, so that exiting returns to the
       # bucket view rather than the document.
