@@ -340,7 +340,7 @@ class Hypothesis extends Annotator
 
                 parent.classed('hyp-collapsed', !collapsed)
                 parent.select('.hyp-thread')
-                  .transition().duration(300)
+                  .transition().duration(200)
                     .style('overflow', 'hidden')
                     .style 'height', ->
                       if collapsed

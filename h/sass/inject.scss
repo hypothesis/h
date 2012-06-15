@@ -46,7 +46,7 @@
 /* iframe styles */
 
 .hyp-iframe {
-  @include single-transition('margin-left', 0.3s, ease-in-out);
+  @include single-transition('margin-left', 0.2s, ease-in-out);
   height: 100%;
   position: fixed;
   top: 0;
