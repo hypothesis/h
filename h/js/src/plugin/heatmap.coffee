@@ -67,13 +67,13 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     # Throttle resize events and update the heatmap
     throttledUpdate = () =>
-      unless @updateTimer
-        @updateTimer = setTimeout(
-          () =>
-            @updateTimer = null
-            this.updateHeatmap()
-          10
-        )
+      clearTimeout(@updateTimer) if @updateTimer?
+      @updateTimer = setTimeout(
+        () =>
+          @updateTimer = null
+          this.updateHeatmap()
+        10
+      )
 
     $(window).resize(throttledUpdate).scroll(throttledUpdate)
 
