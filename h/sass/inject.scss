@@ -52,6 +52,7 @@
   top: 0;
   left: 100%;
   z-index: 500;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
   &.hyp-collapsed { margin-left: -$heatmap-width - 10px; }
 }
