@@ -140,34 +140,18 @@ legend,
 
 #toolbar {
   @include small;
-  @include box-shadow(
-    $gray-light 0 0 .5em,
-    desaturate(lighten($blue, 25%), 85%) 0 0 6em -3em inset
-  );
-  background-color: desaturate(lighten($blue, 50%), 95%);
-  border: lighten($gray-light, 30%) solid thin;
-  padding: 0 1em;
-  position: fixed;
-  height: 3em;
-  width: 100%;
-  text-align: center;
-  z-index: 501;
+  position: absolute;
+  left: 1em;
+  z-index: 500;
 
   & > div {
-    display: inline-block;
-    position: relative;
+    margin: .5em 0;
+    width: 100%;
+  }
 
-    &:last-child {
-      position: absolute;
-      right: 1em;
-      text-align: left;
-    }
-
-    &:first-child {
-      position: absolute;
-      left: 1em;
-      text-align: left;
-    }
+  a {
+    @extend .hyp-button;
+    border: thin dashed $gray;
   }
 }
 
@@ -178,14 +162,16 @@ legend,
 */
 
 @media screen and (min-width: 15em) {
+  article { padding: 2em 1em; }
+
   .title { text-align: center; }
+  .toolbar #content { padding-top: 3em; }
+
   #auth {
     button, input {
       width: 100%;
     }
   }
-  .toolbar #content { padding-top: 2em; }
-  .toolbar .hyp-iframe { padding-top: 2em; }
 }
 
 /*
@@ -195,9 +181,8 @@ legend,
 */
 
 @media screen and (min-width: 30em) {
-  section {
-    margin: 5em 1em;
-  }
+  article { padding: 4em 2em; }
+  section { margin: 4em 0em; }
 
   .title {
       text-align: left;
@@ -233,8 +218,15 @@ legend,
 */
 
 @media screen and (min-width: 37.5em) {
-  article { padding: 2em; }
+  article { padding: 4em; }
   h1, h2 { text-align: left; }
+  .title img {
+    float: left;
+    position: relative;
+    top: -2em;
+    left: -2em;
+    margin-right: -2em;
+  }
   #header { margin-top: 1.5em; }
 }
 
@@ -246,14 +238,6 @@ legend,
 
 @media screen and (min-width: 57em) {
   article { padding: 4em; }
-
-  .title img {
-    float: left;
-    position: relative;
-    top: -2em;
-    left: -2em;
-    margin-right: -2em;
-  }
 
   #content {
     @include width(11);

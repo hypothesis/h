@@ -17,13 +17,12 @@
   <div id="flash-msg">
   </div>
   <div tal:condition="request.user" id="toolbar">
+    <div><form tal:replace="structure auth.form" /></div>
     <div>
-      <form tal:replace="structure auth.form" />
-      <a href="${request.route_path('apex_logout')}">Sign out</a>
-    </div>
-    <div></div>
-    <div>
-      <a href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()">Commons</a>
+      <a tal:condition="request.user"
+         class="hyp-button"
+         href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
+         >Contribute</a>
     </div>
   </div>
   <div id="content">
