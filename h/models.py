@@ -4,7 +4,7 @@ from uuid import uuid1, uuid4, UUID
 
 from annotator.auth import DEFAULT_TTL
 
-from apex import initialize_sql, groupfinder
+from apex import initialize_sql, groupfinder, RootFactory
 from apex.models import AuthID, Base, DBSession
 
 from pyramid.authentication import AuthTktAuthenticationPolicy
@@ -92,3 +92,5 @@ def includeme(config):
         authn_policy = AuthTktAuthenticationPolicy(
             auth_secret, callback=groupfinder)
         config.set_authentication_policy(authn_policy)
+
+    config.set_root_factory(RootFactory)
