@@ -4,8 +4,16 @@ from uuid import uuid1, uuid4, UUID
 
 from annotator.auth import DEFAULT_TTL
 
-from apex.models import Base, DBSession
+from apex import initialize_sql, groupfinder
+from apex.models import AuthID, Base, DBSession
 
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.interfaces import IAuthenticationPolicy
+from pyramid.interfaces import IAuthorizationPolicy
+from pyramid.security import authenticated_userid
+
+from sqlalchemy import engine_from_config
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
 from sqlalchemy.types import DateTime, Integer, TypeDecorator, CHAR
@@ -66,6 +74,21 @@ class Consumer(Base):
 
 def includeme(config):
     config.scan(__name__)
-    config.include('apex')
     config.include('pyramid_tm')
     config.set_request_property(lambda request: DBSession(), 'db', reify=True)
+    config.set_request_property(
+        lambda request: AuthID.get_by_id(authenticated_userid(request)),
+        'user', reify=True)
+
+    settings = config.registry.settings
+    initialize_sql(engine_from_config(settings, 'sqlalchemy.'), settings)
+
+    if not config.registry.queryUtility(IAuthorizationPolicy):
+        authz_policy = ACLAuthorizationPolicy()
+        config.set_authorization_policy(authz_policy)
+
+    if not config.registry.queryUtility(IAuthenticationPolicy):
+        auth_secret = settings['h.auth_secret']
+        authn_policy = AuthTktAuthenticationPolicy(
+            auth_secret, callback=groupfinder)
+        config.set_authentication_policy(authn_policy)

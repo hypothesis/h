@@ -2,6 +2,7 @@ from functools import partial
 import json
 import re
 
+from apex import logout
 from apex.models import AuthID, AuthUser
 
 from colander import deferred, Invalid, Length, Schema, SchemaNode, String
@@ -11,13 +12,13 @@ from deform.widget import FormWidget, PasswordWidget, SelectWidget
 from pyramid.httpexceptions import HTTPRedirection, HTTPSeeOther
 from pyramid.renderers import get_renderer, render
 from pyramid.response import Response
-from pyramid.security import forget, remember
+from pyramid.security import forget, remember, NO_PERMISSION_REQUIRED
 from pyramid.view import render_view_to_response
 
-from pyramid_deform import FormView
+from pyramid_deform import CSRFSchema, FormView
 from pyramid_webassets import IWebAssetsEnvironment
 
-from . api import users
+import api
 
 def login_validator(node, kw):
     valid = False
@@ -32,7 +33,7 @@ def login_validator(node, kw):
             "Please, try again."
         )
 
-class LoginSchema(Schema):
+class LoginSchema(CSRFSchema):
     username = SchemaNode(
         String(),
         validator=Length(min=4, max=25),
@@ -42,34 +43,23 @@ class LoginSchema(Schema):
         widget=PasswordWidget(),
     )
 
-class UserSelectSchema(Schema):
+class RegisterSchema(CSRFSchema):
+    pass
+
+class PersonaSchema(CSRFSchema):
     persona = SchemaNode(
         String(),
         widget=deferred(
             lambda node, kw: SelectWidget(
-                values=users(kw['request']) + [(-1, 'Sign out')])
+                values=api.users(kw['request']) + [(-1, 'Sign out')])
         ),
     )
 
-class AuthSchema(Schema):
-    login = LoginSchema(
-        title='Sign in',
-        validator=login_validator
-    )
-    user = UserSelectSchema()
-
-    @staticmethod
-    def after_bind(node, kw):
-        if kw['request'].user:
-            del node['login']
-        else:
-            del node['user']
-
-class NgFormView(FormView):
+class FormView(FormView):
     use_ajax = True
 
     def __init__(self, request, **kwargs):
-        super(NgFormView, self).__init__(request)
+        super(FormView, self).__init__(request)
         self.form_class = partial(self.form_class, **kwargs)
 
     def show(self, form):
@@ -83,27 +73,25 @@ class NgFormView(FormView):
             response.headers.update(self.request.response.headers)
             return response
         else:
-            return super(NgFormView, self).show(form)
+            return super(FormView, self).show(form)
 
-class AuthView(NgFormView):
-    schema = AuthSchema(after_bind=AuthSchema.after_bind)
+class login(FormView):
+    schema = LoginSchema(validator=login_validator)
+    buttons = ('sign in',)
     use_ajax = False
 
-    @property
-    def buttons(self):
-        if self.request.user:
-            return tuple()
-        else:
-            return ('sign in',)
-
     def sign_in_success(self, form):
-        user = AuthUser.get_by_login(form['login']['username'])
+        user = AuthUser.get_by_login(form['username'])
         headers = {}
         if user:
             headers = remember(self.request, user.auth_id)
             # TODO: Investigate why request.set_property doesn't seem to work
             self.request.user = AuthID.get_by_id(user.auth_id)
         raise HTTPSeeOther(headers=headers, location=self.request.url)
+
+class persona(FormView):
+    schema = PersonaSchema()
+    use_ajax = False
 
 def embed(request):
     environment = request.registry.queryUtility(IWebAssetsEnvironment)
@@ -137,30 +125,36 @@ class home(object):
         self.request = request
 
     @property
-    def auth(self):
-        form_style = 'form-horizontal' if self.request.user else 'form-vertical'
-        return AuthView(
-            self.request,
-            bootstrap_form_style=form_style,
-            formid='auth')
-
-    @property
     def partial(self):
         return getattr(self, self.request.params['__formid__'])
 
     def __call__(self):
+        if self.request.user:
+            form = persona
+            form_style = 'form-horizontal'
+        else:
+            form = login
+            form_style = 'form-vertical'
+
         return {
-            'auth': self.auth(),
-            'embed': embed(self.request)
+            'embed': embed(self.request),
+            'form': form(self.request,
+                         bootstrap_form_style=form_style,
+                         method='POST')()['form']
         }
+        return result
 
 def includeme(config):
     config.include('deform_bootstrap')
     config.include('pyramid_deform')
+    config.include('velruse.app')
 
     config.add_view(home, renderer='templates/home.pt')
     config.add_view(home, attr='partial', renderer='templates/form.pt', xhr=True)
     config.add_view(home, name='auth', attr='auth', renderer='templates/form.pt')
+
+    config.add_view(login, name='login', renderer='templates/auth.pt')
+    config.add_view(logout, route_name='logout')
 
     config.add_view(lambda r: Response(body=embed(r),
                                        cache_control='must-revalidate',

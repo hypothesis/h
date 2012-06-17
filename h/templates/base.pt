@@ -18,12 +18,12 @@
   <div id="flash-msg">
   </div>
   <div tal:condition="request.user" id="toolbar">
-    <div><form tal:replace="structure auth.form" /></div>
-    <div>
-      <a tal:condition="request.user"
-         class="hyp-button"
+    <div tal:condition="request.user">
+      <form id='auth' tal:replace="structure python:form" />
+      <a class="bookmarklet"
          href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
          >Contribute</a>
+      <a href="${request.route_url('logout')}">Sign out</a>
     </div>
   </div>
   <div id="content">

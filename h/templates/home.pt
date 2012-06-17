@@ -1,9 +1,11 @@
 <metal:main use-macro="load: base.pt">
   <div id="header" metal:fill-slot="header" tal:condition="not request.user">
-    <form tal:replace="structure auth.form" />
+    <form id='auth'
+          tal:condition="form"
+          tal:replace="structure python:form" />
   </div>
 
-  <article metal:fill-slot="content">
+  <article id="home" metal:fill-slot="content">
     <div class="title">
       <img height="150px" width="150px"
            src="${request.static_url('h:images/hypothelogo_square.png')}" />

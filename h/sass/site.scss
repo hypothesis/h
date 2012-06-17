@@ -91,6 +91,8 @@ form button { @extend .hyp-button; }
 }
 
 .form-horizontal {
+  display: inline-block;
+
   .controls, .control-group, div, fieldset,
   input, button, select, textarea {
     display: inline-block;
@@ -141,7 +143,8 @@ legend,
 #toolbar {
   @include small;
   position: absolute;
-  left: 1em;
+  text-align: center;
+  width: 100%;
   z-index: 500;
 
   & > div {
@@ -149,7 +152,7 @@ legend,
     width: 100%;
   }
 
-  a {
+  .bookmarklet {
     @extend .hyp-button;
     border: thin dashed $gray;
   }
@@ -165,7 +168,6 @@ legend,
   article { padding: 2em 1em; }
 
   .title { text-align: center; }
-  .toolbar #content { padding-top: 3em; }
 
   #auth {
     button, input {

@@ -55,6 +55,10 @@ def includeme(config):
     config.add_route('users', '/api/u')
     config.add_route('api', '/api/*subpath')
 
+    config.add_route('login', '/login')
+    config.add_route('logout', '/logout')
+    config.add_route('register', '/register')
+
     config.scan(__name__)
     config.include('pyramid_webassets')
     add_webassets(config)
