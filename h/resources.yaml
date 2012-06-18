@@ -1,5 +1,7 @@
 d3:
   contents: h:js/lib/d3.v2.min.js
+easyXDM:
+  contents: h:js/lib/easyXDM.min.js
 handlebars:
   contents: h:js/lib/handlebars-runtime.min.js
 jquery:

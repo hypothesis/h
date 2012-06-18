@@ -122,6 +122,7 @@ def embed(request):
         'templates/embed.pt',
         {
             'd3': json.dumps(environment['d3'].urls()),
+            'easyXDM': json.dumps(environment['easyXDM'].urls()),
             'jquery': json.dumps(environment['jquery'].urls()),
             'underscore': json.dumps(environment['underscore'].urls()),
             'hypothesis': json.dumps(

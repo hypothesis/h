@@ -12,6 +12,10 @@ yepnope([
     nope: ${d3}
   },
   {
+    test: window.easyXDM,
+    nope: ${easyXDM}
+  },
+  {
     test: window._,
     nope: ${underscore}
   },
