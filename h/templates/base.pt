@@ -35,6 +35,6 @@
     <metal:content define-slot="content" />
     <metal:content define-slot="footer" />
   </div>
-  <script tal:content="structure embed"></script>
+  <script tal:condition="exists: embed" tal:content="structure embed"></script>
 </body>
 </html>
