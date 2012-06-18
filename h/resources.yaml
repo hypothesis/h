@@ -1,9 +1,9 @@
-jquery:
-  contents: deform:static/scripts/jquery-1.7.2.min.js
 d3:
   contents: h:js/lib/d3.v2.min.js
 handlebars:
   contents: h:js/lib/handlebars-runtime.min.js
+jquery:
+  contents: deform:static/scripts/jquery-1.7.2.min.js
 jwz:
   contents: h:js/lib/jwz.min.js
 underscore:

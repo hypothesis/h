@@ -38,7 +38,7 @@ pyramid-debugtoolbar==1.0.2
 pyramid-deform==0.2a4
 pyramid-mailer==0.8
 pyramid-tm==0.4
--e git+https://github.com/sontek/pyramid_webassets.git@a8e3e7a7e10d80dd62a0d51f734dc3db16940f08#egg=pyramid_webassets-dev
+-e git+https://github.com/tilgovi/pyramid_webassets.git@0ebd6fcc20c1f73d26ef14ec5d883328b86039e8#egg=pyramid_webassets-dev
 python-openid==2.2.5
 repoze.lru==0.5
 repoze.sendmail==3.1

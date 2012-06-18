@@ -121,25 +121,16 @@ def embed(request):
     return render(
         'templates/embed.pt',
         {
-            'jquery': json.dumps(
-                map(lambda url: request.relative_url(url, True),
-                    environment['jquery'].urls())),
-            'd3': json.dumps(
-                map(lambda url: request.relative_url(url, True),
-                    environment['d3'].urls())),
-            'underscore': json.dumps(
-                map(lambda url: request.relative_url(url, True),
-                    environment['underscore'].urls())),
+            'd3': json.dumps(environment['d3'].urls()),
+            'jquery': json.dumps(environment['jquery'].urls()),
+            'underscore': json.dumps(environment['underscore'].urls()),
             'hypothesis': json.dumps(
-                map(lambda url: request.relative_url(url, True),
                     environment['annotator'].urls() +
                     environment['handlebars'].urls() +
                     environment['jwz'].urls() +
                     environment['app_js'].urls() +
-                    environment['inject_css'].urls())),
-            'app_css': json.dumps(
-                map(lambda url: request.relative_url(url, True),
-                    environment['app_css'].urls()))
+                    environment['inject_css'].urls()),
+            'app_css': json.dumps(environment['app_css'].urls())
         },
         request=request)
 
@@ -186,7 +177,7 @@ def includeme(config):
                                        charset='utf-8'),
                     route_name='embed')
 
-    config.add_static_view('assets/annotator', 'annotator')
-    config.add_static_view('assets/css', 'css')
-    config.add_static_view('assets/js', 'js')
-    config.add_static_view('assets/images', 'images')
+    config.add_static_view('h/annotator', 'h:annotator')
+    config.add_static_view('h/sass', 'h:sass')
+    config.add_static_view('h/js', 'h:js')
+    config.add_static_view('h/images', 'h:images')
