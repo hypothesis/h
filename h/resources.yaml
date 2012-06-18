@@ -1,34 +1,34 @@
 jquery:
-  contents: js/lib//jquery.min.js
+  contents: deform:static/scripts/jquery-1.7.2.min.js
 d3:
-  contents: js/lib/d3.v2.min.js
+  contents: h:js/lib/d3.v2.min.js
 handlebars:
-  contents: js/lib/handlebars-runtime.min.js
+  contents: h:js/lib/handlebars-runtime.min.js
 jwz:
-  contents: js/lib/jwz.min.js
+  contents: h:js/lib/jwz.min.js
 underscore:
-  contents: js/lib/underscore-min.js
+  contents: h:js/lib/underscore-min.js
 app_js:
   contents:
     - contents:
-      - contents: templates/detail.handlebars
+      - contents: h:templates/detail.handlebars
         debug: False
         filters: handlebars
         output: js/lib/templates/detail.js
-      - contents: templates/editor.handlebars
+      - contents: h:templates/editor.handlebars
         debug: False
         filters: handlebars
         output: js/lib/templates/editor.js
-      - contents: templates/iframe.handlebars
+      - contents: h:templates/iframe.handlebars
         debug: False
         filters: handlebars
         output: js/lib/templates/iframe.js
-      - contents: templates/summary.handlebars
+      - contents: h:templates/summary.handlebars
         debug: False
         filters: handlebars
         output: js/lib/templates/summary.js
-    - js/lib/helpers.js
-    - contents: js/src/hypothesis.coffee
+    - h:js/lib/helpers.js
+    - contents: h:js/src/hypothesis.coffee
       filters: coffeescript
       debug: False
       output: js/lib/hypothesis.js
@@ -36,7 +36,7 @@ app_js:
   output: js/lib/hypothesis.min.js
 app_css:
   contents:
-    - contents: sass/app.scss
+    - contents: h:sass/app.scss
       debug: False
       filters: compass
       output: css/app.css
@@ -44,7 +44,7 @@ app_css:
   output: css/app.min.css
 inject_css:
   contents:
-    - contents: sass/inject.scss
+    - contents: h:sass/inject.scss
       debug: False
       filters: compass
       output: css/inject.css
@@ -52,7 +52,7 @@ inject_css:
   output: css/inject.min.css
 site_css:
   contents:
-    - contents: sass/site.scss
+    - contents: h:sass/site.scss
       debug: False
       filters: compass
       output: css/site.css

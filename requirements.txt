@@ -38,7 +38,7 @@ pyramid-debugtoolbar==1.0.2
 pyramid-deform==0.2a4
 pyramid-mailer==0.8
 pyramid-tm==0.4
--e git+https://github.com/sontek/pyramid_webassets.git@38b0b9f9f4e36dc22b3a5c10eabf4d9228d97740#egg=pyramid_webassets-dev
+-e git+https://github.com/sontek/pyramid_webassets.git@a8e3e7a7e10d80dd62a0d51f734dc3db16940f08#egg=pyramid_webassets-dev
 python-openid==2.2.5
 repoze.lru==0.5
 repoze.sendmail==3.1
@@ -47,7 +47,7 @@ transaction==1.2.0
 translationstring==1.1
 -e git+https://github.com/bbangert/velruse.git@e81ea007aaca0fe541f1f59659789bf4748f4c96#egg=velruse-dev
 venusian==1.0a6
-webassets==0.7
+webassets==0.7.1
 wsgiref==0.1.2
 wtforms-recaptcha==0.2.0
 zope.deprecation==3.5.1

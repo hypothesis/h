@@ -14,12 +14,12 @@ from webassets.loaders import YAMLLoader
 def annotator_bundle(config):
     # Path utilities
     _name = lambda src: splitext(basename(src))[0]
-    _src = lambda name: 'annotator/src/%s.coffee' % name
-    _plugin = lambda name: 'annotator/src/plugin/%s.coffee' % name
+    _src = lambda name: 'h:annotator/src/%s.coffee' % name
+    _plugin = lambda name: 'h:annotator/src/plugin/%s.coffee' % name
     _lib = lambda src: Bundle(
         src, debug=False, filters='coffeescript',
         output='js/lib/annotator/%s' %
-                    splitext(relpath(src, 'annotator/src'))[0] + '.js')
+                    splitext(relpath(src, 'h:annotator/src'))[0] + '.js')
 
     # Plugins
     plugins = aslist(config.get_settings().get('annotator.plugins', ''))
