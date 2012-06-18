@@ -13,6 +13,10 @@
   <link rel="stylesheet"
         tal:attributes="href href"
         tal:repeat="href environment['site_css'].urls()" />
+  <!-- TODO: make deform use_ajax widgets delay after jQuery loads -->
+  <script tal:attributes="src request.static_url('deform:static/' + src)"
+          tal:condition="js_links"
+          tal:repeat="src js_links"></script>
 </head>
 <body tal:attributes="class 'toolbar' if request.user else default">
   <div id="flash-msg">
