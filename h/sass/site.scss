@@ -4,9 +4,8 @@
 @import "compass/utilities/color";
 
 @import "reset";
+@import "base";
 @import "common";
-
-@import url(//fonts.googleapis.com/css?family=Open+Sans|Merriweather|PT+Serif);
 
 a {
   color: $link-color;
@@ -18,13 +17,6 @@ a {
 
 article {
   padding: 1em;
-
-  p {
-    margin: 1em 0;
-    -webkit-hyphens: auto;
-       -moz-hyphens: auto;
-            hyphens: auto;
-  }
 }
 
 body {
@@ -32,9 +24,7 @@ body {
   color: $gray-light;
   font-family: "Merriweather", "Georgia", serif;
   font-size: $font-size / $em;
-  font-smoothing: antialiased;
   line-height: $line-height / $em;
-
 }
 
 em { font-style: italic; }
@@ -63,77 +53,6 @@ section {
   margin: 2em 0;
 }
 
-span.error {
-  @include small;
-}
-
-input, textarea {
-  @include blue-glow;
-  @include invisibox;
-  padding: .33em .5em;
-}
-
-input[type="file"]:focus,
-input[type="radio"]:focus,
-input[type="checkbox"]:focus,
-select:focus {
-   @include box-shadow(none);
-}
-
-form button { @extend .hyp-button; }
-
-.error, .red {
-  color: $red;
-}
-
-.error {
-  text-shadow: $white -.05em .05em .01em;
-}
-
-.form-horizontal {
-  display: inline-block;
-
-  .controls, .control-group, div, fieldset,
-  input, button, select, textarea {
-    display: inline-block;
-  }
-  .error .controls {
-    overflow: visible;
-  }
-}
-
-.form-vertical {
-  .alert-message {
-    padding: .25em 0;
-  }
-
-  .controls {
-    margin: .25em 0;
-  }
-
-  .control-group {
-    margin: 1em 0;
-  }
-
-  .control-group:first-of-type {
-    margin-top: 0;
-  }
-}
-
-div.alert-block,
-.alert-message p:first-child,
-legend,
-.req {
-  display: none;
-}
-
-#content {
-  @include box-shadow(desaturate($yellow, 75%) 0 0 .5em);
-  border: lighten($gray-light, 30%) solid thin;
-  background-color: lighten($gray-lighter, 3%);
-  font-size: ($font-size + 2) / $font-size * 1em;
-}
-
 #header {
   padding: 1em;
   position: relative;
@@ -156,6 +75,13 @@ legend,
     @extend .hyp-button;
     border: thin dashed $gray;
   }
+}
+
+#wrapper {
+  @include box-shadow(desaturate($yellow, 75%) 0 0 .5em);
+  border: lighten($gray-light, 30%) solid thin;
+  background-color: lighten($gray-lighter, 3%);
+  font-size: ($font-size + 2) / $font-size * 1em;
 }
 
 /*
@@ -241,14 +167,14 @@ legend,
 @media screen and (min-width: 57em) {
   article { padding: 4em; }
 
-  #content {
-    @include width(11);
-    margin: auto;
-  }
-
   #header {
     margin-right: 2.5em;
     margin-top: 3.25em;
+  }
+
+  #wrapper {
+    @include width(11);
+    margin: auto;
   }
 }
 

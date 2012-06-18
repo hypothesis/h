@@ -1,15 +1,10 @@
-@import 'common';
 @import 'compass';
-@import 'compass/reset/utilities';
 
-@import url('//fonts.googleapis.com/css?family=Open+Sans|Merriweather');
-@import url('//fonts.googleapis.com/css?family=PT+Serif&text=„“');
-
-/* Border box all the things */
-* { @include box-sizing(border-box); }
+@import 'reset';
+@import 'base';
+@import 'common';
 
 body {
-  @include reset-box-model;
   font-family: "Open Sans", sans-serif;
   font-size: $font-size / $em * .8;
   line-height: $line-height / $em * .8;
@@ -18,18 +13,6 @@ body {
   overflow: auto;
   position: fixed;
   width: 100%;
-}
-
-input,
-textarea {
-  @include blue-glow;
-  @include invisibox;
-  font: sans-serif;
-  padding: .33em .5em;
-}
-
-p {
-  margin: 0 0 .5em 0;
 }
 
 //ICON IMAGES
@@ -67,7 +50,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 @mixin tertiarytext {
-  color: #666666;
   font-size: 0.8em;
 }
 
@@ -82,10 +64,10 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   z-index: 1;
 }
 
-.annotator-listing {
+/*.annotator-listing {
   @include reset-box-model;
   @include reset-list-style;
-}
+}*/
 
 // Hetmap tabs
 .hyp-heatmap-tab {
@@ -657,11 +639,12 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   padding: 1em;
 }
 
-#content {
+#wrapper {
   background: url('../images/noise_1.png');
   background-attachment: fixed;
   height: 100%;
-  margin-left: $heatmap-width + 10px;
+  margin-left: 10px;
+  padding-left: $heatmap-width;
   overflow: auto;
 }
 

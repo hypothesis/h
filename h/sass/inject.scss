@@ -1,4 +1,4 @@
-@import 'common';
+@import 'base';
 @import 'compass/reset/utilities';
 
 /* Annotator styles */
@@ -45,13 +45,13 @@
 
 .annotator-wrapper {
   position: relative;
-  padding-right: $heatmap-width;
+  margin-right: $heatmap-width;
 }
 
 /* iframe styles */
 
 .hyp-iframe {
-  @include single-transition('margin-left', 0.2s, ease-in-out);
+  @include single-transition('margin-left', .2s, ease-in-out);
   height: 100%;
   position: fixed;
   top: 0;

@@ -30,10 +30,10 @@
       <a href="${request.route_url('logout')}">Sign out</a>
     </div>
   </div>
-  <div id="content">
-    <metal:content define-slot="header" />
-    <metal:content define-slot="content" />
-    <metal:content define-slot="footer" />
+  <div id="wrapper">
+    <metal:main define-slot="header" />
+    <metal:main define-slot="content" />
+    <metal:main define-slot="footer" />
   </div>
   <script tal:condition="exists: embed" tal:content="structure embed"></script>
 </body>

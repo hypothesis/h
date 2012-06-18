@@ -75,7 +75,7 @@ class Hypothesis extends Annotator
     document.write(Handlebars.templates.iframe(@assets))
     document.close()
 
-    $(document.body).find('#content').append(
+    $(document.body).find('#wrapper').append(
         @viewer.element,
         @editor.element,
         @heatmap.element)

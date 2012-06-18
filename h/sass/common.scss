@@ -1,139 +1,5 @@
-@import 'compass/css3';
-
-// Grays
-$black:                 #000;
-$gray-darker:           #222;
-$gray-dark:             #333;
-$gray:                  #555;
-$gray-light:            #999;
-$gray-lighter:          #eee;
-$white:                 #fff;
-
-// Accent colors
-$blue:                  #049cdb;
-$blue-dark:             #0064cd;
-$green:                 #46a546;
-$red:                   #bd1e2d;
-$yellow:                #ffc40d;
-$orange:                #f89406;
-$pink:                  #c3325f;
-$purple:                #7a43b6;
-
-// Links
-$link-color:            $red;
-$link-color-hover:      darken($link-color, 15%);
-
-/*
-  Thanks:
-
-  Frameless               <http://framelessgrid.com/>
-  by Joni Korpi           <http://jonikorpi.com/>
-  licensed under CC0      <http://creativecommons.org/publicdomain/zero/1.0/>
-
-  Modified to add line height
-*/
-
-// Typography
-$font-size:             16;
-$line-height:           25;
-$em:                    $font-size / 1em;
-
-// Columns
-$column: 48;
-$gutter: 24;
-
-@mixin width($cols:1) {
-  width: ($cols * ($column + $gutter) - $gutter) / $em;
-}
-
-// Common styling variables
-
-//STANCE COLORS
-$positive: #3aab39;
-$negative: #d11c2b;
-$neutral: #0171ba;
-
-//OTHER VARIABLES
-$thread-padding: 1.5em;
-$threadexp-width: 1em;
-$score-width: 40px;
-$score-height: $score-width;
-$heatmap-width: 30px;
-
-/*
-  Type presets
-  */
-
-@mixin small {
-  font-size: 13/$em;
-  line-height: 14/13*1em;
-}
-
-@mixin normal {
-  font-size: 1em;
-}
-
-@mixin big {
-  font-size: 23/$em;
-  line-height: 24/23*1em;
-}
-
-@mixin large {
-  font-size: 27/$em;
-  line-height: 36/27*1em;
-}
-
-@mixin huge {
-  font-size: 44/$em;
-  line-height: 48/44*1em;
-}
-
-@mixin enormous {
-  font-size: 72/$em;
-  line-height: 72/72*1em;
-}
-
-@mixin gigantic {
-  font-size: 116/$em;
-  line-height: 120/116*1em;
-}
-
-/* Shadow mixins */
-@mixin smallshadow($a: 2px, $b: 2px, $c: 0.1) {
-  @include box-shadow($a $b 1em hsla(0, 0%, 0%, $c));
-}
-
-@mixin tinyshadow($a: 1px, $b: 1px, $c: 0.1) {
-  @include box-shadow($a $b .5em hsla(0, 0%, 0%, $c));
-}
-
-@mixin medshadow($a: 2px, $b: 2px, $c: 0.1) {
-  @include box-shadow($a $b 2em hsla(0, 0%, 0%, $c));
-}
-
-/* Form mixins */
-
-@mixin blue-glow {
-  @include single-transition(
-    "box-shadow,-moz-box-shadow,-webkit-box-shadow", .6s, ease);
-  &:focus {
-    @include box-shadow(
-      inset 0 .25em .25em rgba(0, 0, 0, .075),
-      desaturate(lighten($blue, 5%), 35%) 0 0 .25em);
-  }
-}
-
-@mixin invisibox {
-  @include box-shadow(inset 0 .1em .1em rgba(0, 0, 0, .075));
-  @include border-radius(.2em);
-  &:active {
-    border: none;
-    outline: none;
-  }
-  background: none;
-  border: none;
-  outline: thin solid $gray-lighter;
-}
+@import url('//fonts.googleapis.com/css?family=Open+Sans|Merriweather');
+@import url('//fonts.googleapis.com/css?family=PT+Serif&text=„“');
 
 /* Button style */
 .hyp-button {
@@ -168,4 +34,82 @@ $heatmap-width: 30px;
     border-color: rgba(0, 0, 0, 0.25) rgba(0, 0, 0, 0.25) rgba(0, 0, 0, 0.25);
     top: .1em;
   }
+}
+
+body {
+  font-smoothing: antialiased;
+}
+
+p {
+  margin: 1em 0;
+  -webkit-hyphens: auto;
+     -moz-hyphens: auto;
+          hyphens: auto;
+}
+
+
+input, textarea {
+  @include blue-glow;
+  @include invisibox;
+  font-style: sans-serif;
+  padding: .33em .5em;
+}
+
+input[type="file"]:focus,
+input[type="radio"]:focus,
+input[type="checkbox"]:focus,
+select:focus {
+   @include box-shadow(none);
+}
+
+form button { @extend .hyp-button; }
+
+span.error {
+  @include small;
+}
+
+.error, .red {
+  color: $red;
+}
+
+.error {
+  text-shadow: $white -.05em .05em .01em;
+}
+
+.form-horizontal {
+  display: inline-block;
+
+  .controls, .control-group, div, fieldset,
+  input, button, select, textarea {
+    display: inline-block;
+  }
+  .error .controls {
+    overflow: visible;
+  }
+}
+
+.form-vertical {
+  .alert-message {
+    padding: .25em 0;
+  }
+
+  .controls {
+    margin: .25em 0;
+  }
+
+  .control-group {
+    margin: 1em 0;
+  }
+
+  .control-group:first-of-type {
+    margin-top: 0;
+  }
+}
+
+/* Some stuff that can be hidden */
+div.alert-block,
+.alert-message p:first-child,
+legend,
+.req {
+  display: none;
 }
