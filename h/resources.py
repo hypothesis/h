@@ -54,6 +54,7 @@ def includeme(config):
     config.add_route('token', '/api/token')
     config.add_route('users', '/api/u')
     config.add_route('api', '/api/*subpath')
+    config.add_route('app', '/app')
 
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')

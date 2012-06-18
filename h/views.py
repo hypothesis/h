@@ -5,7 +5,7 @@ import re
 from apex import logout
 from apex.models import AuthID, AuthUser
 
-from colander import deferred, Invalid, Length, Schema, SchemaNode, String
+from colander import deferred, Invalid, Length, Schema, SchemaNode, String, Email
 from deform.form import Form
 from deform.widget import FormWidget, PasswordWidget, SelectWidget
 
@@ -33,6 +33,12 @@ def login_validator(node, kw):
             "Please, try again."
         )
 
+def register_validator(node, kw):
+    valid = False
+    if 'password' in kw:
+        if kw['password'] != kw.get('password2', None):
+            raise Invalid(node, "Passwords should match!")
+
 class LoginSchema(CSRFSchema):
     username = SchemaNode(
         String(),
@@ -43,8 +49,16 @@ class LoginSchema(CSRFSchema):
         widget=PasswordWidget(),
     )
 
-class RegisterSchema(CSRFSchema):
-    pass
+class RegisterSchema(LoginSchema):
+    email = SchemaNode(
+        String(),
+        validator=Email()
+    )
+    passord2 = SchemaNode(
+        String(),
+        title='Password',
+        widget=PasswordWidget(),
+    )
 
 class PersonaSchema(CSRFSchema):
     persona = SchemaNode(
@@ -79,6 +93,7 @@ class login(FormView):
     schema = LoginSchema(validator=login_validator)
     buttons = ('sign in',)
     use_ajax = False
+    form_class = partial(Form, bootstrap_form_style='form-vertical')
 
     def sign_in_success(self, form):
         user = AuthUser.get_by_login(form['username'])
@@ -89,9 +104,17 @@ class login(FormView):
             self.request.user = AuthID.get_by_id(user.auth_id)
         raise HTTPSeeOther(headers=headers, location=self.request.url)
 
+class register(FormView):
+    schema = RegisterSchema(validator=register_validator)
+    buttons = ('register',)
+    use_ajax = False
+
 class persona(FormView):
     schema = PersonaSchema()
-    use_ajax = False
+    use_ajax = True
+
+def app(request):
+    return {}
 
 def embed(request):
     environment = request.registry.queryUtility(IWebAssetsEnvironment)
@@ -129,19 +152,15 @@ class home(object):
         return getattr(self, self.request.params['__formid__'])
 
     def __call__(self):
+        action = self.request.get('action', 'login')
         if self.request.user:
-            form = persona
-            form_style = 'form-horizontal'
+            form = persona(self.request)
         else:
-            form = login
-            form_style = 'form-vertical'
-
-        return {
-            'embed': embed(self.request),
-            'form': form(self.request,
-                         bootstrap_form_style=form_style,
-                         method='POST')()['form']
-        }
+            form = login(self.request, bootstrap_form_style='form-vertical')
+        result = form()
+        result.update({
+            'embed': embed(self.request)
+        })
         return result
 
 def includeme(config):
@@ -153,8 +172,13 @@ def includeme(config):
     config.add_view(home, attr='partial', renderer='templates/form.pt', xhr=True)
     config.add_view(home, name='auth', attr='auth', renderer='templates/form.pt')
 
-    config.add_view(login, name='login', renderer='templates/auth.pt')
+    config.add_view(app, renderer='templates/sidebar.pt', route_name='app')
+
+    config.add_view(login, renderer='templates/auth.pt',
+                    route_name='login')
     config.add_view(logout, route_name='logout')
+    config.add_view(register, renderer='templates/auth.pt',
+                    route_name='register')
 
     config.add_view(lambda r: Response(body=embed(r),
                                        cache_control='must-revalidate',

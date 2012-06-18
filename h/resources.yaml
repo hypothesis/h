@@ -14,24 +14,20 @@ app_js:
       - contents: h:templates/detail.handlebars
         debug: False
         filters: handlebars
-        output: js/lib/templates/detail.js
+        output: js/templates/detail.js
       - contents: h:templates/editor.handlebars
         debug: False
         filters: handlebars
-        output: js/lib/templates/editor.js
-      - contents: h:templates/iframe.handlebars
-        debug: False
-        filters: handlebars
-        output: js/lib/templates/iframe.js
+        output: js/templates/editor.js
       - contents: h:templates/summary.handlebars
         debug: False
         filters: handlebars
-        output: js/lib/templates/summary.js
+        output: js/templates/summary.js
     - h:js/lib/helpers.js
     - contents: h:js/src/hypothesis.coffee
       filters: coffeescript
       debug: False
-      output: js/lib/hypothesis.js
+      output: js/hypothesis.js
   filters: uglifyjs
   output: js/lib/hypothesis.min.js
 app_css:

@@ -19,23 +19,31 @@ yepnope([
     test: window.annotator,
     nope: ${hypothesis},
     complete: function () {
+      var iframe = document.createElement('iframe')
+      $(iframe)
+        .addClass('hyp-iframe')
+        .addClass('hyp-collapsed')
+        .attr('src', '${request.route_url("app")}')
+        .appendTo(document.body)
+
       var uri = document.location.href;
       if (document.location.hash) {
         uri = uri.slice(0, -1 * document.location.hash.length)
       }
-      window.annotator = new Hypothesis(document.body, {
-        Auth: {
-          tokenUrl: '${request.route_url('token')}'
-        },
-        Store: {
-          annotationData: { uri: uri },
-          loadFromSearch: { uri: uri },
-          prefix: '${request.route_url('api', subpath="")}'
-        }
-      }, {
-        'css': ${app_css},
-        'logo': '${request.static_url("h:images/hypothesis.png")}'
-      });
+
+      $(iframe).one('load', function () {
+        debugger
+        window.annotator = new Hypothesis(top.document.body, {
+          Auth: {
+            tokenUrl: '${request.route_url('token')}'
+          },
+          Store: {
+            annotationData: { uri: uri },
+            loadFromSearch: { uri: uri },
+            prefix: '${request.route_url('api', subpath="")}'
+          }
+        })
+      })
     }
   }
 ])
