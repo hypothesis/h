@@ -39,6 +39,10 @@
   background: #c9d7f1;
 }
 
+.annotator-notice {
+  display: none;
+}
+
 .annotator-wrapper {
   position: relative;
   padding-right: $heatmap-width;
