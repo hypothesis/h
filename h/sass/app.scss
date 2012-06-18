@@ -5,6 +5,49 @@
 @import url('//fonts.googleapis.com/css?family=Open+Sans|Merriweather');
 @import url('//fonts.googleapis.com/css?family=PT+Serif&text=„“');
 
+/* Border box all the things */
+* { @include box-sizing(border-box); }
+
+body {
+  @include reset-box-model;
+  font-family: "Open Sans", sans-serif;
+  font-size: $font-size / $em * .8;
+  line-height: $line-height / $em * .8;
+  color: #666666;
+  height: 100%;
+  overflow: auto;
+  position: fixed;
+  width: 100%;
+}
+
+input,
+textarea {
+  @include blue-glow;
+  @include invisibox;
+  font: sans-serif;
+  padding: .33em .5em;
+}
+
+p {
+  margin: 0 0 .5em 0;
+}
+
+//ICON IMAGES
+$iconset: iconset_wireframe;
+
+@mixin icon_resets {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+}
+
+@mixin icon($icon) {
+  @include icon_resets;
+  background-image: url("../images/#{$icon}");
+}
+
+svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
+
 /* Annotator styles */
 
 .annotator-hide {
@@ -28,29 +71,6 @@
   font-size: 0.8em;
 }
 
-input,
-textarea {
-  @include blue-glow;
-  @include invisibox;
-  padding: .33em .5em;
-}
-
-//ICON IMAGES
-$iconset: iconset_wireframe;
-
-@mixin icon_resets {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
-}
-
-@mixin icon($icon) {
-  @include icon_resets;
-  background-image: url("../images/#{$icon}");
-}
-
-svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
-
 // Styles for base annotator elements
 .annotator-heatmap {
   @include tinyshadow(-1px, 0, 0.2);
@@ -65,12 +85,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .annotator-listing {
   @include reset-box-model;
   @include reset-list-style;
-}
-
-body {
-  font-family: "Open Sans", sans-serif;
-  font-size: $font-size / $em * .8;
-  line-height: $line-height / $em * .8;
 }
 
 // Hetmap tabs
@@ -95,31 +109,6 @@ body {
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
   &:hover { left: 0; }
-}
-
-// Styles for the sidebar
-.hyp-sidebar {
-  background: url('../images/noise_1.png');
-  background-attachment: fixed;
-  color: #666666;
-  height: 100%;
-  margin-left: 10px;
-  overflow: auto;
-  padding-left: $heatmap-width;
-  position: relative;
-
-  * { @include box-sizing(border-box); }
-
-  p {
-    margin: 0 0 .5em 0;
-  }
-
-  input, textarea {
-    @include blue-glow;
-    @include invisibox;
-    @include box-sizing(border-box);
-    font: sans-serif;
-  }
 }
 
 //LOGO
@@ -666,6 +655,14 @@ body {
   background: #fff;
   margin: 1em;
   padding: 1em;
+}
+
+#content {
+  background: url('../images/noise_1.png');
+  background-attachment: fixed;
+  height: 100%;
+  margin-left: $heatmap-width + 10px;
+  overflow: auto;
 }
 
 /*

@@ -37,30 +37,7 @@ class Hypothesis extends Annotator
         this.addPlugin name, opts
 
     # Set up interface elements
-    this._setupHeatmap()._setupSidebar()._setupIframe()
-
-    @viewer.element.appendTo(@sidebar)
-    @editor.element.appendTo(@sidebar)
-    @heatmap.element.appendTo(@sidebar)
-
-    @iframe.appendTo(@wrapper)
-
-    @iframe[0].contentDocument.open()
-    @iframe[0].contentDocument.close()
-
-    d3.select(@iframe[0].contentDocument.body)
-      .style('border', 0)
-      .style('margin', 0)
-      .style('outline', 0)
-      .style('padding', 0)
-    d3.select(@iframe[0].contentDocument.head)
-      .selectAll('link')
-      .data(assets.css)
-      .enter().append('link')
-        .attr('rel', 'stylesheet')
-        .attr('href', (d) => d)
-
-    @sidebar.appendTo(@iframe[0].contentDocument.body)
+    this._setupHeatmap()._setupIframe()
 
     @plugins.Auth.withToken (token) =>
       @plugins.Permissions.setUser token.userId
@@ -81,24 +58,28 @@ class Hypothesis extends Annotator
         unless @selectedRanges?.length
           @bucket = -1
           @heatmap.highlight(-1)
-          this.hideSidebar()
+          this.hide()
     this
 
   _setupIframe: ->
-    if not @iframe?
-      iframe = $('<iframe></iframe>')
-      Annotator.prototype.iframe = iframe
-      @iframe.addClass('hyp-iframe')
-      @iframe.addClass('hyp-collapsed')
-      @iframe.on 'click', (event) =>  event.stopPropagation()
-    this
+    @iframe = top.document.createElement('iframe')
 
-  _setupSidebar: ->
-    # Create a sidebar if one does not exist. This is a singleton element --
-    # even if multiple instances of the app are loaded on a page (some day).
-    if not @sidebar?
-      sidebar = $(Handlebars.templates.sidebar(@assets))
-      Annotator.prototype.sidebar = sidebar
+    $(@iframe)
+      .addClass('hyp-iframe')
+      .addClass('hyp-collapsed')
+      .appendTo(@wrapper)
+      .on 'click', (event) =>  event.stopPropagation()
+
+    document = @iframe.contentDocument
+    document.open()
+    document.write(Handlebars.templates.iframe(@assets))
+    document.close()
+
+    $(document.body).find('#content').append(
+        @viewer.element,
+        @editor.element,
+        @heatmap.element)
+
     this
 
   _setupHeatmap: () ->
@@ -125,12 +106,12 @@ class Hypothesis extends Annotator
           if annotations?.length
             @bucket = bucket
             this.showViewer(annotations)
-            this.showSidebar()
+            this.show()
 
     d3.select(@heatmap.element[0]).call(bindHeatmapEvents)
 
     @heatmap.subscribe 'updated', =>
-      tabs = d3.select(@iframe[0].contentDocument.body)
+      tabs = d3.select(@iframe.contentDocument.body)
         .selectAll('div.hyp-heatmap-tab')
         .data =>
           buckets = []
@@ -170,7 +151,7 @@ class Hypothesis extends Annotator
     @editor = this._createEditor()
     @editor.on 'hide', () =>
       if not d3.select(@viewer.element[0]).datum()
-        this.hideSidebar()
+        this.hide()
     this
 
   _createEditor: ->
@@ -417,13 +398,13 @@ class Hypothesis extends Annotator
       .find(":input:first").focus()
 
     d3.select(@viewer.element[0]).datum(null)
-    this.showSidebar()
+    this.show()
 
-  showSidebar: =>
-    @iframe.removeClass('hyp-collapsed')
+  show: =>
+    $(@iframe).removeClass('hyp-collapsed')
 
-  hideSidebar: =>
-    @iframe.addClass('hyp-collapsed')
+  hide: =>
+    $(@iframe).addClass('hyp-collapsed')
 
   threadId: (annotation) ->
     if annotation?.thread?

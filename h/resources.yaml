@@ -19,10 +19,10 @@ app_js:
         debug: False
         filters: handlebars
         output: js/lib/templates/editor.js
-      - contents: templates/sidebar.handlebars
+      - contents: templates/iframe.handlebars
         debug: False
         filters: handlebars
-        output: js/lib/templates/sidebar.js
+        output: js/lib/templates/iframe.js
       - contents: templates/summary.handlebars
         debug: False
         filters: handlebars
