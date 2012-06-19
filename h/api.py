@@ -56,7 +56,7 @@ def users(request):
         request.user and request.user.users or [])
 
 def includeme(config):
-    settings = config.registry.settings
+    settings = config.get_settings()
 
     if not settings.has_key('h.consumer_key'):
         raise KeyError('h.consumer_key')
