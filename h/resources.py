@@ -6,14 +6,13 @@ from pyramid.events import subscriber
 from pyramid.events import BeforeRender
 from pyramid.settings import aslist
 
-from pyramid_webassets import add_webasset, IWebAssetsEnvironment
+from pyramid_webassets import IWebAssetsEnvironment
 
 from webassets import Bundle
 from webassets.loaders import YAMLLoader
 
 def annotator_bundle(config):
     # Path utilities
-    _name = lambda src: splitext(basename(src))[0]
     _src = lambda name: 'h:annotator/src/%s.coffee' % name
     _plugin = lambda name: 'h:annotator/src/plugin/%s.coffee' % name
     _lib = lambda src: Bundle(
@@ -37,7 +36,7 @@ def annotator_bundle(config):
     )
 
 def add_webassets(config):
-    add_webasset(config, 'annotator', annotator_bundle(config))
+    config.add_webasset('annotator', annotator_bundle(config))
     loader = YAMLLoader(join(dirname(__file__), 'resources.yaml'))
     bundles = loader.load_bundles()
     for name in bundles:
