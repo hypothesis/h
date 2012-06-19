@@ -32,19 +32,33 @@ app_js:
       output: js/hypothesis.js
   filters: uglifyjs
   output: js/lib/hypothesis.min.js
+common_css:
+  contents: h:sass/common.scss
+  debug: False
+  depends:
+    - h:sass/reset.scss
+    - h:sass/base.scss
+  filters: cssrewrite
+  output: css/common.css
 app_css:
   contents:
     - contents: h:sass/app.scss
       debug: False
-      filters: compass
+      filters:
+        - compass
+        - cssrewrite
       output: css/app.css
+    - common_css
   filters: cssutils
   output: css/app.min.css
 inject_css:
   contents:
     - contents: h:sass/inject.scss
       debug: False
-      filters: compass
+      depends: h:sass/base.scss
+      filters:
+        - compass
+        - cssrewrite
       output: css/inject.css
   filters: cssutils
   output: css/inject.min.css
@@ -52,7 +66,14 @@ site_css:
   contents:
     - contents: h:sass/site.scss
       debug: False
-      filters: compass
+      depends:
+        - h:sass/reset.scss
+        - h:sass/base.scss
+        - h:sass/common.scss
+      filters:
+        - compass
+        - cssrewrite
       output: css/site.css
+    - common_css
   filters: cssutils
   output: css/site.min.css
