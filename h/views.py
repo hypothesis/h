@@ -38,6 +38,10 @@ def register_validator(node, kw):
     if 'password' in kw:
         if kw['password'] != kw.get('password2', None):
             raise Invalid(node, "Passwords should match!")
+    used = AuthUser.get_by_login(kw['username'])
+    used = used or AuthUser.get_by_email(kw['email'])
+    if used:
+        raise Invalid(node, "That username or email is taken.")
 
 class LoginSchema(CSRFSchema):
     username = SchemaNode(
@@ -50,14 +54,14 @@ class LoginSchema(CSRFSchema):
     )
 
 class RegisterSchema(LoginSchema):
-    email = SchemaNode(
-        String(),
-        validator=Email()
-    )
-    passord2 = SchemaNode(
+    password2 = SchemaNode(
         String(),
         title='Password',
         widget=PasswordWidget(),
+    )
+    email = SchemaNode(
+        String(),
+        validator=Email()
     )
 
 class PersonaSchema(CSRFSchema):
