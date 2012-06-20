@@ -1,0 +1,11 @@
+<metal:main use-macro="load: base.pt">
+  <article metal:fill-slot="content">
+    <div class="title">
+      <img height="150px" width="150px"
+           src="${request.static_url('h:images/hypothelogo_square.png')}" />
+      <h1>hypothes<span class="red">.</span>is</h1>
+      <h2>The&#160;Internet, peer&#160;reviewed.</h2>
+    </div>
+    <section><form tal:replace="structure form" /></section>
+  </article>
+</metal:main>
