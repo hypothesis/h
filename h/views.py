@@ -99,6 +99,11 @@ class login(FormView):
     use_ajax = False
     form_class = partial(Form, bootstrap_form_style='form-vertical')
 
+    def __call__(self):
+        if self.request.user:
+            raise HTTPSeeOther(location=self.request.route_url('home'))
+        return super(FormView, self).__call__()
+
     def sign_in_success(self, form):
         user = AuthUser.get_by_login(form['username'])
         headers = {}
@@ -106,12 +111,18 @@ class login(FormView):
             headers = remember(self.request, user.auth_id)
             # TODO: Investigate why request.set_property doesn't seem to work
             self.request.user = AuthID.get_by_id(user.auth_id)
-        raise HTTPSeeOther(headers=headers, location=self.request.url)
+        raise HTTPSeeOther(headers=headers, location=self.request.route_url('home'))
 
 class register(FormView):
     schema = RegisterSchema(validator=register_validator)
     buttons = ('register',)
     use_ajax = False
+    form_class = partial(Form, bootstrap_form_style='form-vertical')
+
+    def __call__(self):
+        if self.request.user:
+            raise HTTPSeeOther(location=self.request.route_url('home'))
+        return super(FormView, self).__call__()
 
 class persona(FormView):
     schema = PersonaSchema()
