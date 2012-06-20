@@ -73,9 +73,8 @@ class Consumer(Base):
         return '<Consumer %r>' % self.key
 
 def includeme(config):
-    config.scan(__name__)
     config.include('pyramid_tm')
-    config.set_request_property(lambda request: DBSession(), 'db', reify=True)
+    config.set_request_property(lambda request: DBSession, 'db', reify=True)
     config.set_request_property(
         lambda request: AuthID.get_by_id(authenticated_userid(request)),
         'user', reify=True)
