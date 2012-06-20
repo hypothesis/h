@@ -101,17 +101,13 @@ class login(FormView):
 
     def __call__(self):
         if self.request.user:
-            raise HTTPSeeOther(location=self.request.route_url('home'))
+            return HTTPSeeOther(location=self.request.route_url('home'))
         return super(FormView, self).__call__()
 
     def sign_in_success(self, form):
         user = AuthUser.get_by_login(form['username'])
-        headers = {}
-        if user:
-            headers = remember(self.request, user.auth_id)
-            # TODO: Investigate why request.set_property doesn't seem to work
-            self.request.user = AuthID.get_by_id(user.auth_id)
-        raise HTTPSeeOther(headers=headers, location=self.request.route_url('home'))
+        headers = remember(self.request, user.auth_id)
+        return HTTPSeeOther(headers=headers, location=self.request.route_url('home'))
 
 class register(FormView):
     schema = RegisterSchema(validator=register_validator)
@@ -121,8 +117,21 @@ class register(FormView):
 
     def __call__(self):
         if self.request.user:
-            raise HTTPSeeOther(location=self.request.route_url('home'))
+            return HTTPSeeOther(location=self.request.route_url('home'))
         return super(FormView, self).__call__()
+
+    def register_success(self, form):
+        session = request.db
+        id = AuthID()
+        session.add(id)
+        user = AuthUser(login=form['username'],
+                        password=form['password'],
+                        email=form['email'])
+        id.users.append(user)
+        session.add(user)
+        session.flush()
+        headers = remember(self.request, user.auth_id)
+        return HTTPSeeOther(headers=headers, location=self.request.route_url('home'))
 
 class persona(FormView):
     schema = PersonaSchema()
