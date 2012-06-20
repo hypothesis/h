@@ -47,6 +47,7 @@ p {
           hyphens: auto;
 }
 
+form button { @extend .hyp-button; }
 
 input, textarea {
   @include blue-glow;
@@ -62,18 +63,18 @@ select:focus {
    @include box-shadow(none);
 }
 
-form button { @extend .hyp-button; }
+span.error, p.errorMsg {
+  @include small;
+  color: red;
+  text-shadow: $white -.05em .05em .01em;
+}
 
-span.error {
+span.errorMsg {
   @include small;
 }
 
-.error, .red {
+.red {
   color: $red;
-}
-
-.error {
-  text-shadow: $white -.05em .05em .01em;
 }
 
 .form-horizontal {
@@ -82,9 +83,6 @@ span.error {
   .controls, .control-group, div, fieldset,
   input, button, select, textarea {
     display: inline-block;
-  }
-  .error .controls {
-    overflow: visible;
   }
 }
 
@@ -106,10 +104,6 @@ span.error {
   }
 }
 
-/* Some stuff that can be hidden */
-div.alert-block,
-.alert-message p:first-child,
-legend,
 .req {
   display: none;
 }
