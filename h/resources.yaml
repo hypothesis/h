@@ -74,6 +74,5 @@ site_css:
         - compass
         - cssrewrite
       output: css/site.css
-    - common_css
   filters: cssutils
   output: css/site.min.css
