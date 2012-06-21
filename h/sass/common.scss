@@ -47,7 +47,21 @@ p {
           hyphens: auto;
 }
 
+em { font-style: italic; }
+
 form button { @extend .hyp-button; }
+
+h1 { @include large; }
+h2 { @include big; }
+h1, h2, h3 { font-weight: 700; }
+h1, h2, h3, h4 {
+  color: darken($gray-light, 15%);
+  margin: .33em 0;
+}
+
+h1, form {
+  font-family: "Open Sans", sans-serif;
+}
 
 input, textarea {
   @include plainform;
@@ -55,11 +69,8 @@ input, textarea {
   padding: .33em .5em;
 }
 
-input[type="file"]:focus,
-input[type="radio"]:focus,
-input[type="checkbox"]:focus,
-select:focus {
-   @include box-shadow(none);
+label {
+  font-weight: bold;
 }
 
 span.error, p.errorMsg {

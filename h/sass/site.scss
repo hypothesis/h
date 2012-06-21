@@ -27,28 +27,6 @@ body {
   line-height: $line-height / $em;
 }
 
-em { font-style: italic; }
-
-h1, h2, h3, h4 {
-  color: darken($gray-light, 15%);
-  margin: .33em 0;
-}
-
-h1, h2, h3 {
-  font-weight: 700;
-}
-
-h1 { @include large; }
-h2 { @include big; }
-
-h1, form {
-  font-family: "Open Sans", sans-serif;
-}
-
-label {
-  font-weight: bold;
-}
-
 section {
   margin: 2em 0;
 }
