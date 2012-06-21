@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>models.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id="background"></div>
+<div id='container'>
+  <div class='section'>
+    <div class='docs'><h1>models.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid1</span><span class="p">,</span> <span class="n">uuid4</span><span class="p">,</span> <span class="n">UUID</span>
+
+<span class="kn">from</span> <span class="nn">annotator.auth</span> <span class="kn">import</span> <span class="n">DEFAULT_TTL</span>
+
+<span class="kn">from</span> <span class="nn">apex</span> <span class="kn">import</span> <span class="n">initialize_sql</span><span class="p">,</span> <span class="n">groupfinder</span><span class="p">,</span> <span class="n">RootFactory</span>
+<span class="kn">from</span> <span class="nn">apex.models</span> <span class="kn">import</span> <span class="n">AuthID</span><span class="p">,</span> <span class="n">Base</span><span class="p">,</span> <span class="n">DBSession</span>
+
+<span class="kn">from</span> <span class="nn">pyramid.authentication</span> <span class="kn">import</span> <span class="n">AuthTktAuthenticationPolicy</span>
+<span class="kn">from</span> <span class="nn">pyramid.authorization</span> <span class="kn">import</span> <span class="n">ACLAuthorizationPolicy</span>
+<span class="kn">from</span> <span class="nn">pyramid.interfaces</span> <span class="kn">import</span> <span class="n">IAuthenticationPolicy</span>
+<span class="kn">from</span> <span class="nn">pyramid.interfaces</span> <span class="kn">import</span> <span class="n">IAuthorizationPolicy</span>
+<span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="kn">import</span> <span class="n">authenticated_userid</span>
+
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">engine_from_config</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.dialects</span> <span class="kn">import</span> <span class="n">postgresql</span> <span class="k">as</span> <span class="n">pg</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.schema</span> <span class="kn">import</span> <span class="n">Column</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.types</span> <span class="kn">import</span> <span class="n">DateTime</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">TypeDecorator</span><span class="p">,</span> <span class="n">CHAR</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Platform-independent GUID type.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">GUID</span><span class="p">(</span><span class="n">TypeDecorator</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>From http://docs.sqlalchemy.org/en/latest/core/types.html
+Copyright (C) 2005-2011 the SQLAlchemy authors and contributors</p>
+<p>Uses Postgresql's UUID type, otherwise uses
+CHAR(32), storing as stringified hex values.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">impl</span> <span class="o">=</span> <span class="n">CHAR</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">load_dialect_impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dialect</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dialect</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;postgresql&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">dialect</span><span class="o">.</span><span class="n">type_descriptor</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">UUID</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">dialect</span><span class="o">.</span><span class="n">type_descriptor</span><span class="p">(</span><span class="n">CHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">process_bind_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dialect</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">dialect</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;postgresql&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">UUID</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s">&quot;</span><span class="si">%.32x</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">UUID</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>hexstring</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="k">return</span> <span class="s">&quot;</span><span class="si">%.32x</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">value</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">process_result_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dialect</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">UUID</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>API Consumer.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">Consumer</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s">&#39;consumers&#39;</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">GUID</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">secret</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">GUID</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">uuid4</span><span class="p">)</span>
+    <span class="n">ttl</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">DEFAULT_TTL</span><span class="p">)</span>
+
+    <span class="n">created_at</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">DateTime</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+    <span class="n">updated_at</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">DateTime</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">,</span> <span class="n">onupdate</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">uuid1</span><span class="p">,</span> <span class="n">clock_seq</span><span class="o">=</span><span class="nb">id</span><span class="p">(</span><span class="n">Base</span><span class="p">))):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;&lt;Consumer </span><span class="si">%r</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s">&#39;pyramid_tm&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">set_request_property</span><span class="p">(</span><span class="k">lambda</span> <span class="n">request</span><span class="p">:</span> <span class="n">DBSession</span><span class="p">(),</span> <span class="s">&#39;db&#39;</span><span class="p">,</span> <span class="n">reify</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">set_request_property</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">request</span><span class="p">:</span> <span class="n">AuthID</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">authenticated_userid</span><span class="p">(</span><span class="n">request</span><span class="p">)),</span>
+        <span class="s">&#39;user&#39;</span><span class="p">,</span> <span class="n">reify</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span>
+    <span class="n">initialize_sql</span><span class="p">(</span><span class="n">engine_from_config</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s">&#39;sqlalchemy.&#39;</span><span class="p">),</span> <span class="n">settings</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">queryUtility</span><span class="p">(</span><span class="n">IAuthorizationPolicy</span><span class="p">):</span>
+        <span class="n">authz_policy</span> <span class="o">=</span> <span class="n">ACLAuthorizationPolicy</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">set_authorization_policy</span><span class="p">(</span><span class="n">authz_policy</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">queryUtility</span><span class="p">(</span><span class="n">IAuthenticationPolicy</span><span class="p">):</span>
+        <span class="n">auth_secret</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s">&#39;h.auth_secret&#39;</span><span class="p">]</span>
+        <span class="n">authn_policy</span> <span class="o">=</span> <span class="n">AuthTktAuthenticationPolicy</span><span class="p">(</span>
+            <span class="n">auth_secret</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">groupfinder</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">set_authentication_policy</span><span class="p">(</span><span class="n">authn_policy</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">set_root_factory</span><span class="p">(</span><span class="n">RootFactory</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

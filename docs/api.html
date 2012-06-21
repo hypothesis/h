@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>api.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id="background"></div>
+<div id='container'>
+  <div class='section'>
+    <div class='docs'><h1>api.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">annotator</span> <span class="kn">import</span> <span class="n">auth</span><span class="p">,</span> <span class="n">authz</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">es</span>
+<span class="kn">from</span> <span class="nn">annotator.annotation</span> <span class="kn">import</span> <span class="n">Annotation</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">g</span>
+
+<span class="kn">from</span> <span class="nn">pyramid.response</span> <span class="kn">import</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">pyramid.threadlocal</span> <span class="kn">import</span> <span class="n">get_current_request</span>
+<span class="kn">from</span> <span class="nn">pyramid.wsgi</span> <span class="kn">import</span> <span class="n">wsgiapp2</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">Consumer</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Look an api consumer up by key.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">consumer_fetcher</span><span class="p">(</span><span class="n">key</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>The annotator-store <code>annotator.Authenticator</code> uses this function in the
+process of authenticating requests to verify the secrets of the JSON Web
+Token passed by the consumer client.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">request</span> <span class="o">=</span> <span class="n">get_current_request</span><span class="p">()</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span>
+    <span class="n">hypothesis_key</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;h.consumer_key&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">hypothesis_key</span><span class="p">:</span>
+        <span class="n">consumer</span> <span class="o">=</span> <span class="n">Consumer</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">hypothesis_key</span><span class="p">)</span>
+        <span class="n">consumer</span><span class="o">.</span><span class="n">secret</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;h.api_secret&#39;</span><span class="p">)</span>
+        <span class="n">consumer</span><span class="o">.</span><span class="n">ttl</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;h.api_ttl&#39;</span><span class="p">,</span> <span class="n">auth</span><span class="o">.</span><span class="n">DEFAULT_TTL</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">consumer</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Consumer</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>Get an API token for the logged in user.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">token</span><span class="p">(</span><span class="n">request</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>Cross-Origin Resource Sharing headers needed for the token request
+include credentials so that the user can be authenticated.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;Access-Control-Allow-Origin&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;origin&#39;</span><span class="p">),</span>
+        <span class="s">&#39;Access-Control-Allow-Credentials&#39;</span><span class="p">:</span> <span class="s">&#39;true&#39;</span><span class="p">,</span>
+        <span class="s">&#39;Access-Control-Expose-Headers&#39;</span><span class="p">:</span> <span class="s">&#39;Location, Content-Type, Content-Length&#39;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s">&#39;Access-Control-Allow-Headers&#39;</span><span class="p">:</span> <span class="s">&#39;Content-Type, Content-Length, X-Requested-With&#39;</span><span class="p">,</span>
+        <span class="s">&#39;Access-Control-Allow-Methods&#39;</span><span class="p">:</span> <span class="s">&#39;GET, OPTIONS&#39;</span><span class="p">,</span>
+        <span class="s">&#39;Access-Control-Max-Age&#39;</span><span class="p">:</span> <span class="s">&#39;86400&#39;</span>
+    <span class="p">})</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>The response is a JSON Web Token signed with the application's consumer
+key and secret. In the future, other applications may have their own
+consumer keys. Although, most of this should go away in favor of more
+traditional OAuth tools and the need for the token request might be
+made to vanish when the iframe architecture settles and cross-domain
+communication is handled at the browser runtime via postMessage.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">settings</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span>
+    <span class="n">secret</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;h.api_secret&#39;</span><span class="p">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;h.consumer_key&#39;</span><span class="p">)</span>
+    <span class="n">ttl</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;h.api_ttl&#39;</span><span class="p">,</span> <span class="n">auth</span><span class="o">.</span><span class="n">DEFAULT_TTL</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>@@ make this deal with oid+realms, oauth etc better</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">user_id</span> <span class="o">=</span> <span class="s">&#39;acct:</span><span class="si">%s</span><span class="s">@</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">users</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">login</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">host</span><span class="p">)</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;userId&#39;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span>
+        <span class="s">&#39;consumerKey&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
+        <span class="s">&#39;ttl&#39;</span><span class="p">:</span> <span class="n">ttl</span>
+    <span class="p">}</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">encode_token</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">secret</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span> <span class="n">headerlist</span><span class="o">=</span><span class="n">token_headers</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">())</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>Retrieve all the profiles assocatied with a principal.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">users</span><span class="p">(</span><span class="n">request</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">return</span> <span class="nb">map</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">user</span><span class="p">:</span> <span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">login</span> <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">provider</span> <span class="o">==</span> <span class="s">&#39;local&#39;</span>
+                                <span class="k">else</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">@</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">login</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">provider</span><span class="p">))),</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">users</span> <span class="ow">or</span> <span class="p">[])</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Include the annotator-store API backend.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Example INI file:</p>
+<pre><code>[app:h]
+consumer_key: primary_consumer
+consumer_secret: 00000000-0000-0000-0000-000000000000
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">settings</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get_settings</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;h.consumer_key&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&#39;h.consumer_key&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;h.consumer_secret&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&#39;h.consumer_secret&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>Create the annotator-store app</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">store</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>Set up the models</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">es</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Annotation</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">Annotation</span><span class="o">.</span><span class="n">update_settings</span><span class="p">()</span>
+            <span class="n">Annotation</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>Configure authentication (ours) and authorization (store)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">authenticator</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">Authenticator</span><span class="p">(</span><span class="n">consumer_fetcher</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">before_request</span><span class="p">():</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">auth</span> <span class="o">=</span> <span class="n">authenticator</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">authorize</span> <span class="o">=</span> <span class="n">authz</span><span class="o">.</span><span class="n">authorize</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">before_request</span><span class="p">(</span><span class="n">before_request</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>Configure the API views</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">wsgiapp2</span><span class="p">(</span><span class="n">app</span><span class="p">),</span> <span class="n">route_name</span><span class="o">=</span><span class="s">&#39;api&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">route_name</span><span class="o">=</span><span class="s">&#39;token&#39;</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s">&#39;authenticated&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="n">route_name</span><span class="o">=</span><span class="s">&#39;users&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s">&#39;GET&#39;</span><span class="p">,</span>
+                    <span class="n">permission</span><span class="o">=</span><span class="s">&#39;authenticated&#39;</span><span class="p">,</span>
+                    <span class="n">renderer</span><span class="o">=</span><span class="s">&#39;json&#39;</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

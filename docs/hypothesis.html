@@ -1,0 +1,363 @@
+<!DOCTYPE html>  <html> <head>   <title>hypothesis.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="annotator.host.html">                 annotator.host.coffee               </a>                                           <a class="source" href="hypothesis.html">                 hypothesis.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               hypothesis.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">Hypothesis</span> <span class="k">extends</span> <span class="nx">Annotator</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>Override the events to be bound on Annotator#element to get rid of
+the the highlight hover behaviour.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">events:</span>
+    <span class="s">&quot;.annotator-adder button click&quot;</span><span class="o">:</span>     <span class="s">&quot;onAdderClick&quot;</span>
+    <span class="s">&quot;.annotator-adder button mousedown&quot;</span><span class="o">:</span> <span class="s">&quot;onAdderMousedown&quot;</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>The Annotator state is augmented with three state variables.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="vi">@routes = </span><span class="kc">null</span>  <span class="c1"># * An object storing route urls</span>
+  <span class="vi">@bucket = </span><span class="o">-</span><span class="mi">1</span>    <span class="c1"># * The index of the active bucket shown in the summary view</span>
+  <span class="vi">@detail = </span><span class="kc">false</span> <span class="c1"># * Whether the viewer shows a summary or detail listing</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>Plugin configuration</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">pluginConfig:</span>
+    <span class="nv">Heatmap: </span><span class="p">{}</span>
+    <span class="nv">Permissions:</span>
+      <span class="nv">showEditPermissionsCheckbox: </span><span class="kc">false</span><span class="p">,</span>
+      <span class="nv">showViewPermissionsCheckbox: </span><span class="kc">false</span><span class="p">,</span>
+      <span class="nv">userString: </span><span class="nf">(user) -&gt;</span> <span class="nx">user</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/^acct:(.+)@(.+)$/</span><span class="p">,</span> <span class="s">&#39;$1 on $2&#39;</span><span class="p">)</span>
+    <span class="nv">Store:</span>
+      <span class="nv">loadFromSearch: </span><span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">href</span>
+      <span class="nv">annotationData: </span><span class="nb">document</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">href</span>
+    <span class="nv">Unsupported: </span><span class="p">{}</span>
+
+  <span class="nv">constructor: </span><span class="nf">(element, options, routes) -&gt;</span>
+    <span class="k">super</span>
+
+    <span class="vi">@routes = </span><span class="nx">routes</span>
+    <span class="vi">@bucket = </span><span class="o">-</span><span class="mi">1</span>
+    <span class="vi">@detail = </span><span class="kc">false</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>Set up interface elements</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">this</span><span class="p">.</span><span class="nx">_setupHeatmap</span><span class="p">().</span><span class="nx">_setupIframe</span><span class="p">()</span>
+    <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">updateHeatmap</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>Load plugins</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">for</span> <span class="nx">own</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">opts</span> <span class="k">of</span> <span class="nx">options</span>
+      <span class="k">if</span> <span class="o">not</span> <span class="nx">@plugins</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">addPlugin</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">$</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">opts</span><span class="p">,</span> <span class="nx">@pluginConfig</span><span class="p">[</span><span class="nx">name</span><span class="p">]))</span>
+
+    <span class="nx">@plugins</span><span class="p">.</span><span class="nx">Auth</span><span class="p">.</span><span class="nx">withToken</span> <span class="p">(</span><span class="nx">token</span><span class="p">)</span> <span class="o">=&gt;</span>
+      <span class="nx">@plugins</span><span class="p">.</span><span class="nx">Permissions</span><span class="p">.</span><span class="nx">setUser</span> <span class="nx">token</span><span class="p">.</span><span class="nx">userId</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">subscribe</span> <span class="s">&#39;beforeAnnotationCreated&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">annotation</span><span class="p">)</span> <span class="o">=&gt;</span>
+      <span class="nv">annotation.created = annotation.updated = </span><span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">()).</span><span class="nx">toString</span><span class="p">()</span>
+      <span class="nv">annotation.user = </span><span class="nx">@plugins</span><span class="p">.</span><span class="nx">Permissions</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">userId</span><span class="p">(</span>
+        <span class="nx">@plugins</span><span class="p">.</span><span class="nx">Permissions</span><span class="p">.</span><span class="nx">user</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>Establish cross-domain communication to the widget host</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="vi">@widget = </span><span class="nx">easyXDM</span><span class="p">.</span><span class="nx">Widget</span>
+      <span class="nv">initialized: </span><span class="p">(</span><span class="nx">widget</span><span class="p">,</span> <span class="nx">host</span><span class="p">)</span> <span class="o">=&gt;</span>
+
+    <span class="k">this</span>
+
+  <span class="nv">_setupWrapper: </span><span class="o">-&gt;</span>
+    <span class="k">super</span>
+    <span class="nx">@wrapper</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;click&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="o">=&gt;</span>
+      <span class="k">if</span> <span class="nx">@detail</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">showViewer</span><span class="p">(</span><span class="nx">@heatmap</span><span class="p">.</span><span class="nx">buckets</span><span class="p">[</span><span class="nx">@bucket</span><span class="p">])</span>
+      <span class="k">else</span>
+        <span class="nx">unless</span> <span class="nx">@selectedRanges</span><span class="o">?</span><span class="p">.</span><span class="nx">length</span>
+          <span class="vi">@bucket = </span><span class="o">-</span><span class="mi">1</span>
+          <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">highlight</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">hide</span><span class="p">()</span>
+    <span class="k">this</span>
+
+  <span class="nv">_setupIframe: </span><span class="o">-&gt;</span>
+    <span class="vi">@iframe = </span><span class="nx">$</span><span class="p">(</span><span class="s">&#39;iframe.hyp-iframe&#39;</span><span class="p">)</span>
+
+    <span class="nb">document</span> <span class="o">=</span> <span class="nx">@iframe</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">contentDocument</span>
+
+    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;#wrapper&#39;</span><span class="p">).</span><span class="nx">append</span><span class="p">(</span>
+        <span class="nx">@viewer</span><span class="p">.</span><span class="nx">element</span><span class="p">,</span>
+        <span class="nx">@editor</span><span class="p">.</span><span class="nx">element</span><span class="p">,</span>
+        <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">element</span><span class="p">)</span>
+
+    <span class="k">this</span>
+
+  <span class="nv">_setupHeatmap: </span><span class="nf">() -&gt;</span>
+    <span class="vi">@heatmap = </span><span class="nx">@plugins</span><span class="p">.</span><span class="nx">Heatmap</span>
+
+    <span class="nv">getBucket = </span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="o">=&gt;</span>
+      <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">mouse</span><span class="p">(</span><span class="nx">@heatmap</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="nv">bucket = </span><span class="nx">d3</span><span class="p">.</span><span class="nx">bisect</span><span class="p">(</span><span class="nx">@heatmap</span><span class="p">.</span><span class="nx">index</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="nv">bindHeatmapEvents = </span><span class="p">(</span><span class="nx">selection</span><span class="p">)</span> <span class="o">=&gt;</span>
+      <span class="nx">selection</span>
+        <span class="p">.</span><span class="kc">on</span> <span class="s">&#39;mousemove&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
+          <span class="nx">unless</span> <span class="nx">@viewer</span><span class="p">.</span><span class="nx">isShown</span><span class="p">()</span> <span class="o">and</span> <span class="nx">@detail</span>
+            <span class="nv">bucket = </span><span class="nx">getBucket</span><span class="p">()</span>
+            <span class="nx">unless</span> <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">buckets</span><span class="p">[</span><span class="nx">bucket</span><span class="p">]</span><span class="o">?</span><span class="p">.</span><span class="nx">length</span> <span class="k">then</span> <span class="nv">bucket = </span><span class="nx">@bucket</span>
+            <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">highlight</span><span class="p">(</span><span class="nx">bucket</span><span class="p">)</span>
+        <span class="p">.</span><span class="kc">on</span> <span class="s">&#39;mouseout&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
+          <span class="nx">unless</span> <span class="nx">@viewer</span><span class="p">.</span><span class="nx">isShown</span><span class="p">()</span> <span class="o">and</span> <span class="nx">@detail</span>
+            <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">highlight</span><span class="p">(</span><span class="nx">@bucket</span><span class="p">)</span>
+        <span class="p">.</span><span class="kc">on</span> <span class="s">&#39;click&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
+          <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">()</span>
+          <span class="nv">bucket = </span><span class="nx">getBucket</span><span class="p">()</span>
+          <span class="nv">annotations = </span><span class="nx">@heatmap</span><span class="p">.</span><span class="nx">buckets</span><span class="p">[</span><span class="nx">bucket</span><span class="p">]</span>
+          <span class="k">if</span> <span class="nx">annotations</span><span class="o">?</span><span class="p">.</span><span class="nx">length</span>
+            <span class="vi">@bucket = </span><span class="nx">bucket</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">showViewer</span><span class="p">(</span><span class="nx">annotations</span><span class="p">)</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">show</span><span class="p">()</span>
+
+    <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">@heatmap</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]).</span><span class="nx">call</span><span class="p">(</span><span class="nx">bindHeatmapEvents</span><span class="p">)</span>
+
+    <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">subscribe</span> <span class="s">&#39;updated&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
+      <span class="nv">tabs = </span><span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">@iframe</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">contentDocument</span><span class="p">.</span><span class="nx">body</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s">&#39;div.hyp-heatmap-tab&#39;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">data</span> <span class="o">=&gt;</span>
+          <span class="nv">buckets = </span><span class="p">[]</span>
+          <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">index</span><span class="p">.</span><span class="nx">forEach</span> <span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span>
+            <span class="k">if</span> <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">buckets</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+              <span class="nx">buckets</span><span class="p">.</span><span class="nx">push</span> <span class="nx">i</span>
+          <span class="nx">buckets</span>
+
+      <span class="nx">tabs</span><span class="p">.</span><span class="nx">enter</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="s">&#39;div&#39;</span><span class="p">).</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-heatmap-tab&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+      <span class="nx">tabs</span><span class="p">.</span><span class="nx">exit</span><span class="p">().</span><span class="nx">remove</span><span class="p">()</span>
+      <span class="nx">tabs</span>
+        <span class="p">.</span><span class="nx">style</span><span class="p">(</span><span class="s">&#39;top&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="s">&quot;</span><span class="si">#{</span><span class="nx">@heatmap</span><span class="p">.</span><span class="nx">index</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="si">}</span><span class="s">px&quot;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">text</span><span class="p">((</span><span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">buckets</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">length</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">bindHeatmapEvents</span><span class="p">)</span>
+    <span class="k">this</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>Creates an instance of Annotator.Viewer and assigns it to the @viewer
+property, appends it to the @wrapper and sets up event listeners.</p>
+
+<p>Returns itself to allow chaining.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_setupViewer: </span><span class="o">-&gt;</span>
+    <span class="vi">@viewer = </span><span class="k">new</span> <span class="nx">Annotator</span><span class="p">.</span><span class="nx">Viewer</span><span class="p">(</span><span class="nv">readOnly: </span><span class="nx">@options</span><span class="p">.</span><span class="nx">readOnly</span><span class="p">)</span>
+    <span class="nx">@viewer</span><span class="p">.</span><span class="nx">hide</span><span class="p">()</span>
+    <span class="p">.</span><span class="kc">on</span><span class="p">(</span><span class="s">&quot;edit&quot;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">onEditAnnotation</span><span class="p">)</span>
+    <span class="p">.</span><span class="kc">on</span><span class="p">(</span><span class="s">&quot;delete&quot;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">onDeleteAnnotation</span><span class="p">)</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">subscribe</span> <span class="s">&#39;annotationCreated&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">annotation</span><span class="p">)</span> <span class="o">=&gt;</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">updateViewer</span> <span class="p">[</span><span class="nx">annotation</span><span class="p">]</span>
+
+    <span class="k">this</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>Creates an instance of the Annotator.Editor and assigns it to @editor.
+Appends this to the @wrapper and sets up event listeners.</p>
+
+<p>Returns itself for chaining.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_setupEditor: </span><span class="o">-&gt;</span>
+    <span class="vi">@editor = </span><span class="k">this</span><span class="p">.</span><span class="nx">_createEditor</span><span class="p">()</span>
+    <span class="nx">@editor</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;hide&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="k">if</span> <span class="o">not</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">@viewer</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]).</span><span class="nx">datum</span><span class="p">()</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">hide</span><span class="p">()</span>
+    <span class="k">this</span>
+
+  <span class="nv">_createEditor: </span><span class="o">-&gt;</span>
+    <span class="nv">editor = </span><span class="k">new</span> <span class="nx">Annotator</span><span class="p">.</span><span class="nx">Editor</span><span class="p">()</span>
+    <span class="nx">editor</span><span class="p">.</span><span class="nx">hide</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>TODO: this is ugly... we shouldn't need to do this in both clauses --
+Annotator should handle highlights better</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="p">.</span><span class="kc">on</span><span class="p">(</span><span class="s">&#39;hide&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
+      <span class="k">if</span> <span class="nx">editor</span><span class="p">.</span><span class="nx">annotation</span><span class="o">?</span><span class="p">.</span><span class="nx">highlights</span><span class="o">?</span> <span class="o">and</span> <span class="o">not</span> <span class="nx">editor</span><span class="p">.</span><span class="nx">annotation</span><span class="p">.</span><span class="nx">ranges</span><span class="o">?</span>
+        <span class="k">for</span> <span class="nx">h</span> <span class="k">in</span> <span class="nx">editor</span><span class="p">.</span><span class="nx">annotation</span><span class="p">.</span><span class="nx">highlights</span>
+          <span class="nx">$</span><span class="p">(</span><span class="nx">h</span><span class="p">).</span><span class="nx">replaceWith</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">)</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">onEditorHide</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="p">.</span><span class="kc">on</span><span class="p">(</span><span class="s">&#39;save&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">annotation</span><span class="p">)</span> <span class="o">=&gt;</span>
+      <span class="k">if</span> <span class="nx">annotation</span><span class="o">?</span><span class="p">.</span><span class="nx">highlights</span><span class="o">?</span>
+        <span class="k">for</span> <span class="nx">h</span> <span class="k">in</span> <span class="nx">annotation</span><span class="p">.</span><span class="nx">highlights</span>
+          <span class="nx">$</span><span class="p">(</span><span class="nx">h</span><span class="p">).</span><span class="nx">replaceWith</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">)</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">onEditorSubmit</span><span class="p">(</span><span class="nx">annotation</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="nv">editor.fields = </span><span class="p">[{</span>
+      <span class="nv">element: </span><span class="nx">editor</span><span class="p">.</span><span class="nx">element</span><span class="p">,</span>
+      <span class="nv">load: </span><span class="nf">(field, annotation) -&gt;</span>
+        <span class="nx">$</span><span class="p">(</span><span class="nx">field</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;textarea&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="nx">annotation</span><span class="p">.</span><span class="nx">text</span> <span class="o">||</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+      <span class="nv">submit: </span><span class="nf">(field, annotation) -&gt;</span>
+        <span class="nv">annotation.text = </span><span class="nx">$</span><span class="p">(</span><span class="nx">field</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;textarea&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">()</span>
+    <span class="p">}]</span>
+
+    <span class="nx">editor</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>Sets up the selection event listeners to watch mouse actions on the document.</p>
+
+<p>Returns itself for chaining.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_setupDocumentEvents: </span><span class="o">-&gt;</span>
+    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">bind</span><span class="p">({</span>
+      <span class="s">&quot;mouseup&quot;</span><span class="o">:</span>   <span class="k">this</span><span class="p">.</span><span class="nx">checkForEndSelection</span>
+    <span class="p">})</span>
+    <span class="k">this</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>Public: Initialises an annotation either from an object representation or
+an annotation created with Annotator#createAnnotation(). It finds the
+selected range and higlights the selection in the DOM.</p>
+
+<p>annotation - An annotation Object to initialise.
+fireEvents - Will fire the 'annotationCreated' event if true.</p>
+
+<p>Examples</p>
+
+<p># Create a brand new annotation from the currently selected text.
+  annotation = annotator.createAnnotation()
+  annotation = annotator.setupAnnotation(annotation)
+  # annotation has now been assigned the currently selected range
+  # and a highlight appended to the DOM.</p>
+
+<p># Add an existing annotation that has been stored elsewere to the DOM.
+  annotation = getStoredAnnotationWithSerializedRanges()
+  annotation = annotator.setupAnnotation(annotation)</p>
+
+<p>Returns the initialised annotation.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">setupAnnotation: </span><span class="nf">(annotation, args...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p>Delagate to Annotator implementation after we give it a valid array of
+ranges</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="nx">annotation</span><span class="p">.</span><span class="nx">thread</span>
+      <span class="nv">annotation.ranges = </span><span class="nx">annotation</span><span class="p">.</span><span class="nx">ranges</span> <span class="o">or</span> <span class="p">[]</span>
+    <span class="k">super</span> <span class="nx">annotation</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span>
+
+  <span class="nv">showViewer: </span><span class="nf">(annotations=[], _position=null, detail=false) -&gt;</span>
+    <span class="nv">viewer = </span><span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">@viewer</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>Thread the messages using JWZ</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">messages = </span><span class="nx">annotations</span><span class="p">.</span><span class="nx">map</span> <span class="nf">(a) -&gt;</span>
+      <span class="nv">m = </span><span class="nx">mail</span><span class="p">.</span><span class="nx">message</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">a</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">a</span><span class="p">.</span><span class="nx">thread</span><span class="o">?</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span> <span class="o">or</span> <span class="p">[])</span>
+      <span class="nv">m.annotation = </span><span class="nx">a</span>
+      <span class="nx">m</span>
+
+    <span class="nv">root = </span><span class="nx">mail</span><span class="p">.</span><span class="nx">messageThread</span><span class="p">().</span><span class="nx">thread</span><span class="p">(</span><span class="nx">messages</span><span class="p">)</span>
+    <span class="nv">context = </span><span class="nx">viewer</span><span class="p">.</span><span class="nx">datum</span><span class="p">(</span><span class="nx">root</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <p>Bind the excerpt data so the excerpt can be removed in the bucket view
+or updated and rendered in the detail view.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">excerpts = </span><span class="nx">context</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s">&#39;.annotator-listing&#39;</span><span class="p">).</span><span class="nx">selectAll</span><span class="p">(</span><span class="s">&#39;.hyp-excerpt&#39;</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">data</span> <span class="p">(</span> <span class="o">-&gt;</span> <span class="k">if</span> <span class="nx">detail</span> <span class="k">then</span> <span class="nx">root</span><span class="p">.</span><span class="nx">children</span> <span class="k">else</span> <span class="p">[]),</span> <span class="nf">(c) -&gt;</span> <span class="nx">c</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">id</span>
+
+    <span class="k">if</span> <span class="o">not</span> <span class="nx">detail</span></pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <p>Save the state so the bucket view can be restored when exiting
+the detail view.</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="vi">@detail = </span><span class="kc">false</span></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <p>Remove the excerpts</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">excerpts</span><span class="p">.</span><span class="nx">exit</span><span class="p">().</span><span class="nx">remove</span><span class="p">()</span>
+
+      <span class="nv">context = </span><span class="nx">context</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s">&#39;.annotator-listing&#39;</span><span class="p">)</span>
+      <span class="nx">context</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="o">-&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">children</span><span class="p">).</span><span class="nx">remove</span><span class="p">()</span>
+      <span class="nv">items = </span><span class="nx">context</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="s">&#39;.hyp-annotation&#39;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">data</span> <span class="p">(</span><span class="nf">(c) -&gt;</span> <span class="nx">c</span><span class="p">.</span><span class="nx">children</span><span class="p">),</span> <span class="p">(</span><span class="nf">(c) -&gt;</span> <span class="nx">c</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">id</span><span class="p">)</span>
+      <span class="nx">items</span><span class="p">.</span><span class="nx">enter</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="s">&#39;li&#39;</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-annotation&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+      <span class="nx">items</span><span class="p">.</span><span class="nx">exit</span><span class="p">().</span><span class="nx">remove</span><span class="p">()</span>
+      <span class="nx">items</span>
+        <span class="p">.</span><span class="nx">html</span><span class="p">((</span><span class="nx">d</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">Handlebars</span><span class="p">.</span><span class="nx">templates</span><span class="p">.</span><span class="nx">summary</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">annotation</span><span class="p">))</span>
+        <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-detail&#39;</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-summary&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-widget&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+        <span class="p">.</span><span class="kc">on</span> <span class="s">&#39;click&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">d</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span>
+          <span class="nv">a = </span><span class="nx">d</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">annotation</span>
+          <span class="nv">query =</span>
+            <span class="nv">thread: </span><span class="k">if</span> <span class="nx">a</span><span class="p">.</span><span class="nx">thread</span> <span class="k">then</span> <span class="p">[</span><span class="nx">a</span><span class="p">.</span><span class="nx">thread</span><span class="p">,</span> <span class="nx">a</span><span class="p">.</span><span class="nx">id</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="nx">a</span><span class="p">.</span><span class="nx">id</span>
+          <span class="nx">@plugins</span><span class="p">.</span><span class="nx">Store</span><span class="p">.</span><span class="nx">_apiRequest</span> <span class="s">&#39;search&#39;</span><span class="p">,</span> <span class="nx">query</span><span class="p">,</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span>
+            <span class="k">if</span> <span class="nx">data</span><span class="o">?</span><span class="p">.</span><span class="nx">rows</span> <span class="k">then</span> <span class="k">this</span><span class="p">.</span><span class="nx">updateViewer</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">rows</span> <span class="o">||</span> <span class="p">[])</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">showViewer</span><span class="p">([</span><span class="nx">a</span><span class="p">],</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+        <span class="p">.</span><span class="kc">on</span> <span class="s">&#39;mouseover&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
+          <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">()</span>
+          <span class="nv">item = </span><span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">).</span><span class="nx">datum</span><span class="p">().</span><span class="nx">message</span><span class="p">.</span><span class="nx">annotation</span>
+          <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">highlight</span><span class="p">(</span><span class="nx">@bucket</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s">&#39;annotation&#39;</span><span class="p">)</span> <span class="o">is</span> <span class="nx">item</span><span class="p">)</span>
+        <span class="p">.</span><span class="kc">on</span> <span class="s">&#39;mouseout&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
+          <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">()</span>
+          <span class="nv">item = </span><span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">).</span><span class="nx">datum</span><span class="p">().</span><span class="nx">message</span><span class="p">.</span><span class="nx">annotation</span>
+          <span class="nx">@heatmap</span><span class="p">.</span><span class="nx">highlight</span><span class="p">(</span><span class="nx">@bucket</span><span class="p">)</span>
+    <span class="k">else</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <p>Mark that the detail view is now shown, so that exiting returns to the
+bucket view rather than the document.</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="vi">@detail = </span><span class="kc">true</span>
+
+      <span class="nx">excerpts</span><span class="p">.</span><span class="nx">enter</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="s">&#39;li&#39;</span><span class="p">,</span> <span class="s">&#39;.hyp-annotation&#39;</span><span class="p">)</span>
+          <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-widget&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+          <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-excerpt&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s">&#39;blockquote&#39;</span><span class="p">)</span>
+      <span class="nx">excerpts</span><span class="p">.</span><span class="nx">exit</span><span class="p">().</span><span class="nx">remove</span><span class="p">()</span>
+      <span class="nx">excerpts</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s">&#39;blockquote&#39;</span><span class="p">).</span><span class="nx">text</span><span class="p">(</span><span class="nf">(d) -&gt;</span> <span class="nx">d</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">annotation</span><span class="p">.</span><span class="nx">quote</span><span class="p">)</span>
+
+      <span class="nx">loop</span>
+        <span class="nv">context = </span><span class="nx">context</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s">&#39;.annotator-listing&#39;</span><span class="p">)</span>
+        <span class="nv">items = </span><span class="nx">context</span><span class="p">.</span><span class="nx">selectAll</span><span class="p">(</span><span class="o">-&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">children</span><span class="p">).</span><span class="nx">filter</span><span class="p">(</span><span class="s">&#39;.hyp-annotation&#39;</span><span class="p">)</span>
+          <span class="p">.</span><span class="nx">data</span> <span class="p">(</span><span class="nf">(c) -&gt;</span> <span class="nx">c</span><span class="p">.</span><span class="nx">children</span><span class="p">),</span> <span class="p">(</span><span class="nf">(c) -&gt;</span> <span class="nx">c</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">id</span><span class="p">)</span>
+        <span class="k">break</span> <span class="nx">unless</span> <span class="nx">items</span><span class="p">.</span><span class="nx">length</span>
+
+        <span class="nx">items</span><span class="p">.</span><span class="nx">enter</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="s">&#39;li&#39;</span><span class="p">).</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-annotation&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+        <span class="nx">items</span><span class="p">.</span><span class="nx">exit</span><span class="p">().</span><span class="nx">remove</span><span class="p">()</span>
+        <span class="nx">items</span>
+          <span class="p">.</span><span class="nx">html</span><span class="p">((</span><span class="nx">d</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">Handlebars</span><span class="p">.</span><span class="nx">templates</span><span class="p">.</span><span class="nx">detail</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">annotation</span><span class="p">))</span>
+          <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-widget&#39;</span><span class="p">,</span> <span class="nf">(c) -&gt;</span> <span class="o">not</span> <span class="nx">c</span><span class="p">.</span><span class="nx">parent</span><span class="p">.</span><span class="nx">message</span><span class="o">?</span><span class="p">)</span>
+          <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-detail&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+          <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-summary&#39;</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+
+          <span class="p">.</span><span class="nx">sort</span> <span class="p">(</span><span class="nx">d</span><span class="p">,</span> <span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span>
+            <span class="nv">n = </span><span class="nx">d</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">annotation</span><span class="p">.</span><span class="nx">created</span>
+            <span class="nv">m = </span><span class="nx">e</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">annotation</span><span class="p">.</span><span class="nx">created</span>
+            <span class="p">(</span><span class="nx">n</span> <span class="o">&lt;</span> <span class="nx">m</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="nx">m</span> <span class="o">&lt;</span> <span class="nx">n</span><span class="p">)</span>
+
+          <span class="p">.</span><span class="kc">on</span> <span class="s">&#39;mouseover&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
+            <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">()</span>
+            <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">).</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-hover&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+
+          <span class="p">.</span><span class="kc">on</span> <span class="s">&#39;mouseout&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
+            <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">()</span>
+            <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">).</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-hover&#39;</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+
+          <span class="p">.</span><span class="kc">on</span> <span class="s">&#39;click&#39;</span><span class="p">,</span> <span class="o">=&gt;</span>
+            <span class="nv">event = </span><span class="nx">d3</span><span class="p">.</span><span class="nx">event</span>
+            <span class="nv">target = </span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span>
+            <span class="nx">unless</span> <span class="nx">target</span><span class="p">.</span><span class="nx">tagName</span> <span class="o">is</span> <span class="s">&#39;A&#39;</span> <span class="k">then</span> <span class="k">return</span>
+            <span class="nx">event</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">()</span>
+
+            <span class="k">switch</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s">&#39;href&#39;</span><span class="p">)</span>
+              <span class="k">when</span> <span class="s">&#39;#collapse&#39;</span>
+                <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">()</span>
+                <span class="nv">parent = </span><span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">)</span>
+                <span class="nv">collapsed = </span><span class="nx">parent</span><span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-collapsed&#39;</span><span class="p">)</span>
+
+                <span class="nx">parent</span><span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-collapsed&#39;</span><span class="p">,</span> <span class="o">!</span><span class="nx">collapsed</span><span class="p">)</span>
+                <span class="nx">parent</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s">&#39;.hyp-thread&#39;</span><span class="p">)</span>
+                  <span class="p">.</span><span class="nx">transition</span><span class="p">().</span><span class="nx">duration</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+                    <span class="p">.</span><span class="nx">style</span><span class="p">(</span><span class="s">&#39;overflow&#39;</span><span class="p">,</span> <span class="s">&#39;hidden&#39;</span><span class="p">)</span>
+                    <span class="p">.</span><span class="nx">style</span> <span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+                      <span class="k">if</span> <span class="nx">collapsed</span>
+                        <span class="s">&quot;</span><span class="si">#{</span><span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">children</span><span class="p">().</span><span class="nx">outerHeight</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="si">}</span><span class="s">px&quot;</span>
+                      <span class="k">else</span>
+                        <span class="s">&quot;0px&quot;</span>
+                    <span class="p">.</span><span class="nx">each</span> <span class="s">&#39;end&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+                      <span class="k">if</span> <span class="nx">collapsed</span>
+                        <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+                          <span class="p">.</span><span class="nx">style</span><span class="p">(</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="kc">null</span><span class="p">)</span>
+                          <span class="p">.</span><span class="nx">style</span><span class="p">(</span><span class="s">&#39;overflow&#39;</span><span class="p">,</span> <span class="kc">null</span><span class="p">)</span>
+
+              <span class="k">when</span> <span class="s">&#39;#reply&#39;</span>
+                <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">()</span>
+                <span class="nv">parent = </span><span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">)</span>
+                <span class="nv">reply = </span><span class="k">this</span><span class="p">.</span><span class="nx">createAnnotation</span><span class="p">()</span>
+                <span class="nv">reply.thread = </span><span class="k">this</span><span class="p">.</span><span class="nx">threadId</span><span class="p">(</span><span class="nx">parent</span><span class="p">.</span><span class="nx">datum</span><span class="p">().</span><span class="nx">message</span><span class="p">.</span><span class="nx">annotation</span><span class="p">)</span>
+
+                <span class="nv">editor = </span><span class="k">this</span><span class="p">.</span><span class="nx">_createEditor</span><span class="p">()</span>
+                <span class="nx">editor</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="nx">reply</span><span class="p">)</span>
+                <span class="nx">editor</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">removeClass</span><span class="p">(</span><span class="s">&#39;annotator-outer&#39;</span><span class="p">)</span>
+
+                <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">editor</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]).</span><span class="nx">select</span><span class="p">(</span><span class="s">&#39;form&#39;</span><span class="p">)</span>
+                  <span class="p">.</span><span class="nx">data</span><span class="p">([</span><span class="nx">reply</span><span class="p">])</span>
+                    <span class="p">.</span><span class="nx">html</span><span class="p">(</span><span class="nx">Handlebars</span><span class="p">.</span><span class="nx">templates</span><span class="p">.</span><span class="nx">editor</span><span class="p">)</span>
+                    <span class="p">.</span><span class="kc">on</span> <span class="s">&#39;mouseover&#39;</span><span class="p">,</span> <span class="o">=&gt;</span> <span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">stopPropagation</span><span class="p">()</span>
+
+                <span class="nv">item = </span><span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">d3</span><span class="p">.</span><span class="nx">event</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">)</span>
+                  <span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s">&#39;.annotator-listing&#39;</span><span class="p">)</span>
+                  <span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="s">&#39;li&#39;</span><span class="p">,</span> <span class="s">&#39;.hyp-annotation&#39;</span><span class="p">)</span>
+                    <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-annotation&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+                    <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-reply&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+                    <span class="p">.</span><span class="nx">classed</span><span class="p">(</span><span class="s">&#39;hyp-writer&#39;</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+
+                <span class="nx">editor</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">appendTo</span><span class="p">(</span><span class="nx">item</span><span class="p">.</span><span class="nx">node</span><span class="p">())</span>
+                <span class="nx">editor</span><span class="p">.</span><span class="kc">on</span><span class="p">(</span><span class="s">&#39;hide&#39;</span><span class="p">,</span> <span class="o">=&gt;</span> <span class="nx">item</span><span class="p">.</span><span class="nx">remove</span><span class="p">())</span>
+                <span class="nx">editor</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s">&quot;:input:first&quot;</span><span class="p">).</span><span class="nx">focus</span><span class="p">()</span>
+
+        <span class="nv">context = </span><span class="nx">items</span>
+
+    <span class="nx">@editor</span><span class="p">.</span><span class="nx">hide</span><span class="p">()</span>
+    <span class="nx">@viewer</span><span class="p">.</span><span class="nx">show</span><span class="p">()</span>
+
+  <span class="nv">updateViewer: </span><span class="p">(</span><span class="nx">annotations</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="nv">existing = </span><span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">@viewer</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]).</span><span class="nx">datum</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nx">existing</span><span class="o">?</span>
+      <span class="nv">annotations = </span><span class="nx">existing</span><span class="p">.</span><span class="nx">flattenChildren</span><span class="p">()</span><span class="o">?</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nf">(c) -&gt;</span> <span class="nx">c</span><span class="p">.</span><span class="nx">annotation</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">annotations</span><span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">showViewer</span><span class="p">(</span><span class="nx">annotations</span> <span class="o">or</span> <span class="p">[],</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+
+  <span class="nv">showEditor: </span><span class="p">(</span><span class="nx">annotation</span><span class="p">)</span> <span class="o">=&gt;</span>
+    <span class="nx">unless</span> <span class="nx">@plugins</span><span class="p">.</span><span class="nx">Permissions</span><span class="o">?</span><span class="p">.</span><span class="nx">user</span>
+      <span class="nx">alert</span><span class="p">(</span><span class="s">&quot;Not logged in!&quot;</span><span class="p">)</span>
+      <span class="k">return</span>
+
+    <span class="nx">@viewer</span><span class="p">.</span><span class="nx">hide</span><span class="p">()</span>
+    <span class="nx">@editor</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="nx">annotation</span><span class="p">)</span>
+    <span class="nx">@editor</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;.annotator-controls&#39;</span><span class="p">).</span><span class="nx">remove</span><span class="p">()</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">setupAnnotation</span><span class="p">(</span><span class="nx">annotation</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+    <span class="k">delete</span> <span class="nx">annotation</span><span class="p">.</span><span class="nx">ranges</span>
+
+    <span class="nv">excerpt = </span><span class="nx">$</span><span class="p">(</span><span class="s">&#39;&lt;li class=&quot;hyp-widget hyp-excerpt&quot;&gt;&#39;</span><span class="p">)</span>
+    <span class="nx">excerpt</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s">&quot;&lt;blockquote&gt;</span><span class="si">#{</span><span class="nx">annotation</span><span class="p">.</span><span class="nx">quote</span><span class="si">}</span><span class="s">&lt;/blockquote&gt;&quot;</span><span class="p">))</span>
+
+    <span class="nv">item = </span><span class="nx">$</span><span class="p">(</span><span class="s">&#39;&lt;li class=&quot;hyp-widget hyp-writer&quot;&gt;&#39;</span><span class="p">)</span>
+    <span class="nx">item</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">Handlebars</span><span class="p">.</span><span class="nx">templates</span><span class="p">.</span><span class="nx">editor</span><span class="p">(</span><span class="nx">annotation</span><span class="p">)))</span>
+
+    <span class="nx">@editor</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;.annotator-listing&#39;</span><span class="p">).</span><span class="nx">empty</span><span class="p">()</span>
+      <span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">excerpt</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s">&quot;:input:first&quot;</span><span class="p">).</span><span class="nx">focus</span><span class="p">()</span>
+
+    <span class="nx">d3</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="nx">@viewer</span><span class="p">.</span><span class="nx">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]).</span><span class="nx">datum</span><span class="p">(</span><span class="kc">null</span><span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">show</span><span class="p">()</span>
+
+  <span class="nv">show: </span><span class="o">=&gt;</span>
+    <span class="nx">@iframe</span><span class="p">.</span><span class="nx">removeClass</span><span class="p">(</span><span class="s">&#39;hyp-collapsed&#39;</span><span class="p">)</span>
+
+  <span class="nv">hide: </span><span class="o">=&gt;</span>
+    <span class="nx">@iframe</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s">&#39;hyp-collapsed&#39;</span><span class="p">)</span>
+
+  <span class="nv">threadId: </span><span class="nf">(annotation) -&gt;</span>
+    <span class="k">if</span> <span class="nx">annotation</span><span class="o">?</span><span class="p">.</span><span class="nx">thread</span><span class="o">?</span>
+      <span class="nx">annotation</span><span class="p">.</span><span class="nx">thread</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="nx">annotation</span><span class="p">.</span><span class="nx">id</span>
+    <span class="k">else</span>
+      <span class="nx">annotation</span><span class="p">.</span><span class="nx">id</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

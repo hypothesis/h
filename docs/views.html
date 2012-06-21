@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>views.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id="background"></div>
+<div id='container'>
+  <div class='section'>
+    <div class='docs'><h1>views.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">apex</span> <span class="kn">import</span> <span class="n">logout</span>
+<span class="kn">from</span> <span class="nn">apex.models</span> <span class="kn">import</span> <span class="n">AuthID</span><span class="p">,</span> <span class="n">AuthUser</span>
+
+<span class="kn">from</span> <span class="nn">colander</span> <span class="kn">import</span> <span class="n">deferred</span><span class="p">,</span> <span class="n">Invalid</span><span class="p">,</span> <span class="n">Length</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">SchemaNode</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Email</span>
+<span class="kn">from</span> <span class="nn">deform.form</span> <span class="kn">import</span> <span class="n">Form</span>
+<span class="kn">from</span> <span class="nn">deform.widget</span> <span class="kn">import</span> <span class="n">FormWidget</span><span class="p">,</span> <span class="n">PasswordWidget</span><span class="p">,</span> <span class="n">SelectWidget</span>
+
+<span class="kn">from</span> <span class="nn">pyramid.httpexceptions</span> <span class="kn">import</span> <span class="n">HTTPRedirection</span><span class="p">,</span> <span class="n">HTTPSeeOther</span>
+<span class="kn">from</span> <span class="nn">pyramid.renderers</span> <span class="kn">import</span> <span class="n">render</span>
+<span class="kn">from</span> <span class="nn">pyramid.response</span> <span class="kn">import</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="kn">import</span> <span class="n">forget</span><span class="p">,</span> <span class="n">remember</span><span class="p">,</span> <span class="n">NO_PERMISSION_REQUIRED</span>
+<span class="kn">from</span> <span class="nn">pyramid.view</span> <span class="kn">import</span> <span class="n">render_view_to_response</span>
+
+<span class="kn">from</span> <span class="nn">pyramid_deform</span> <span class="kn">import</span> <span class="n">CSRFSchema</span><span class="p">,</span> <span class="n">FormView</span>
+<span class="kn">from</span> <span class="nn">pyramid_webassets</span> <span class="kn">import</span> <span class="n">IWebAssetsEnvironment</span>
+
+<span class="kn">import</span> <span class="nn">api</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <h1>Deform validators</h1>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>Validate a username and password.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">login_validator</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">kw</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">valid</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="s">&#39;username&#39;</span> <span class="ow">in</span> <span class="n">kw</span><span class="p">:</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="n">AuthUser</span><span class="o">.</span><span class="n">check_password</span><span class="p">(</span>
+            <span class="n">login</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;username&#39;</span><span class="p">],</span>
+            <span class="n">password</span><span class="o">=</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;password&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span>
+            <span class="n">node</span><span class="p">,</span>
+            <span class="s">&quot;Please, try again.&quot;</span>
+        <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Validate a username and password.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">register_validator</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">kw</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">valid</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="s">&#39;password&#39;</span> <span class="ow">in</span> <span class="n">kw</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">kw</span><span class="p">[</span><span class="s">&#39;password&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">kw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;password2&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s">&quot;Passwords should match!&quot;</span><span class="p">)</span>
+    <span class="n">used</span> <span class="o">=</span> <span class="n">AuthUser</span><span class="o">.</span><span class="n">get_by_login</span><span class="p">(</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;username&#39;</span><span class="p">])</span>
+    <span class="n">used</span> <span class="o">=</span> <span class="n">used</span> <span class="ow">or</span> <span class="n">AuthUser</span><span class="o">.</span><span class="n">get_by_email</span><span class="p">(</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;email&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">used</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">Invalid</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s">&quot;That username or email is taken.&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <h1>Form Schemas</h1>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">LoginSchema</span><span class="p">(</span><span class="n">CSRFSchema</span><span class="p">):</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">SchemaNode</span><span class="p">(</span>
+        <span class="n">String</span><span class="p">(),</span>
+        <span class="n">validator</span><span class="o">=</span><span class="n">Length</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">25</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">SchemaNode</span><span class="p">(</span>
+        <span class="n">String</span><span class="p">(),</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">PasswordWidget</span><span class="p">(),</span>
+    <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">RegisterSchema</span><span class="p">(</span><span class="n">LoginSchema</span><span class="p">):</span>
+    <span class="n">password2</span> <span class="o">=</span> <span class="n">SchemaNode</span><span class="p">(</span>
+        <span class="n">String</span><span class="p">(),</span>
+        <span class="n">title</span><span class="o">=</span><span class="s">&#39;Password&#39;</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">PasswordWidget</span><span class="p">(),</span>
+    <span class="p">)</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">SchemaNode</span><span class="p">(</span>
+        <span class="n">String</span><span class="p">(),</span>
+        <span class="n">validator</span><span class="o">=</span><span class="n">Email</span><span class="p">()</span>
+    <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">PersonaSchema</span><span class="p">(</span><span class="n">CSRFSchema</span><span class="p">):</span>
+    <span class="n">persona</span> <span class="o">=</span> <span class="n">SchemaNode</span><span class="p">(</span>
+        <span class="n">String</span><span class="p">(),</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">deferred</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">node</span><span class="p">,</span> <span class="n">kw</span><span class="p">:</span> <span class="n">SelectWidget</span><span class="p">(</span>
+                <span class="n">values</span><span class="o">=</span><span class="n">api</span><span class="o">.</span><span class="n">users</span><span class="p">(</span><span class="n">kw</span><span class="p">[</span><span class="s">&#39;request&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Sign out&#39;</span><span class="p">)])</span>
+        <span class="p">),</span>
+    <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Base class for form views that adds additional capabilities to forms.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">FormView</span><span class="p">(</span><span class="n">FormView</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Primarily, this passes any keyword arguments received by the constructor
+to the form class. This addition allows customizing a form slightly at
+instantiation time, such as based on request parameters or session state.
+Perhaps this should be merged into pyramid_deform.</p>
+<p>Deform comes with AJAH support in the form of <code>use_ajax = True</code> on the
+form class but this attemps to go further. Using the form id, the page should
+post back its URL with XHR and, by defining a mapping of form ids to
+form views for from the original view handler, construct pages which are
+a composite of forms.</p>
+<p>I'm sure there are some well tread patterns around for this. For now it's
+a sketch of an idea and a harmless base class.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">use_ajax</span> <span class="o">=</span> <span class="bp">True</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FormView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form_class</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form_class</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">is_xhr</span><span class="p">:</span>
+            <span class="n">formid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;__formid__&#39;</span><span class="p">)</span>
+            <span class="n">new_request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">copy_get</span><span class="p">()</span>
+            <span class="n">new_request</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span>
+            <span class="n">new_request</span><span class="o">.</span><span class="n">registry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">registry</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="s">&#39;context&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">render_view_to_response</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">new_request</span><span class="p">,</span> <span class="n">formid</span><span class="p">)</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FormView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">form</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <h1>Forms</h1>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">login</span><span class="p">(</span><span class="n">FormView</span><span class="p">):</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">LoginSchema</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">login_validator</span><span class="p">)</span>
+    <span class="n">buttons</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;sign in&#39;</span><span class="p">,)</span>
+    <span class="n">use_ajax</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">Form</span><span class="p">,</span> <span class="n">bootstrap_form_style</span><span class="o">=</span><span class="s">&#39;form-vertical&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HTTPSeeOther</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">route_url</span><span class="p">(</span><span class="s">&#39;home&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FormView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">sign_in_success</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">AuthUser</span><span class="o">.</span><span class="n">get_by_login</span><span class="p">(</span><span class="n">form</span><span class="p">[</span><span class="s">&#39;username&#39;</span><span class="p">])</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="n">remember</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">auth_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HTTPSeeOther</span><span class="p">(</span><span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">route_url</span><span class="p">(</span><span class="s">&#39;home&#39;</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">register</span><span class="p">(</span><span class="n">FormView</span><span class="p">):</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">RegisterSchema</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">register_validator</span><span class="p">)</span>
+    <span class="n">buttons</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;register&#39;</span><span class="p">,)</span>
+    <span class="n">use_ajax</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">Form</span><span class="p">,</span> <span class="n">bootstrap_form_style</span><span class="o">=</span><span class="s">&#39;form-vertical&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HTTPSeeOther</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">route_url</span><span class="p">(</span><span class="s">&#39;home&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FormView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">register_success</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">db</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">AuthID</span><span class="p">()</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">AuthUser</span><span class="p">(</span><span class="n">login</span><span class="o">=</span><span class="n">form</span><span class="p">[</span><span class="s">&#39;username&#39;</span><span class="p">],</span>
+                        <span class="n">password</span><span class="o">=</span><span class="n">form</span><span class="p">[</span><span class="s">&#39;password&#39;</span><span class="p">],</span>
+                        <span class="n">email</span><span class="o">=</span><span class="n">form</span><span class="p">[</span><span class="s">&#39;email&#39;</span><span class="p">])</span>
+        <span class="nb">id</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="n">remember</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">auth_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HTTPSeeOther</span><span class="p">(</span><span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">route_url</span><span class="p">(</span><span class="s">&#39;home&#39;</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">persona</span><span class="p">(</span><span class="n">FormView</span><span class="p">):</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">PersonaSchema</span><span class="p">()</span>
+    <span class="n">use_ajax</span> <span class="o">=</span> <span class="bp">True</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <h1>Views</h1>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">app</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">assets_env</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">queryUtility</span><span class="p">(</span><span class="n">IWebAssetsEnvironment</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">persona</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">bootstrap_form_style</span><span class="o">=</span><span class="s">&#39;form-vertical&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">form</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">embed</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">assets_env</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">queryUtility</span><span class="p">(</span><span class="n">IWebAssetsEnvironment</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">pkg</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">assets_env</span><span class="p">[</span><span class="n">pkg</span><span class="p">]</span><span class="o">.</span><span class="n">urls</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;injector&#39;</span><span class="p">,</span> <span class="s">&#39;easyXDM&#39;</span><span class="p">,</span> <span class="s">&#39;jquery&#39;</span><span class="p">,</span> <span class="s">&#39;inject_css&#39;</span><span class="p">]</span>
+    <span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">home</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="o">=</span> <span class="n">request</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-27'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-27'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&#39;__formid__&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;action&#39;</span><span class="p">,</span> <span class="s">&#39;login&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">persona</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">login</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">bootstrap_form_style</span><span class="o">=</span><span class="s">&#39;form-vertical&#39;</span><span class="p">)</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="s">&#39;h:templates/embed.pt&#39;</span><span class="p">,</span> <span class="n">embed</span><span class="p">(</span><span class="n">request</span><span class="p">),</span> <span class="n">request</span><span class="o">=</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">form</span><span class="p">()</span>
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;embed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s">&#39;deform_bootstrap&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s">&#39;pyramid_deform&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s">&#39;velruse.app&#39;</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="n">renderer</span><span class="o">=</span><span class="s">&#39;templates/home.pt&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="s">&#39;partial&#39;</span><span class="p">,</span> <span class="n">renderer</span><span class="o">=</span><span class="s">&#39;templates/form.pt&#39;</span><span class="p">,</span> <span class="n">xhr</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">home</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;auth&#39;</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="s">&#39;auth&#39;</span><span class="p">,</span> <span class="n">renderer</span><span class="o">=</span><span class="s">&#39;templates/form.pt&#39;</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">renderer</span><span class="o">=</span><span class="s">&#39;templates/sidebar.pt&#39;</span><span class="p">,</span> <span class="n">route_name</span><span class="o">=</span><span class="s">&#39;app&#39;</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">login</span><span class="p">,</span> <span class="n">renderer</span><span class="o">=</span><span class="s">&#39;templates/auth.pt&#39;</span><span class="p">,</span>
+                    <span class="n">route_name</span><span class="o">=</span><span class="s">&#39;login&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">logout</span><span class="p">,</span> <span class="n">route_name</span><span class="o">=</span><span class="s">&#39;logout&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">register</span><span class="p">,</span> <span class="n">renderer</span><span class="o">=</span><span class="s">&#39;templates/auth.pt&#39;</span><span class="p">,</span>
+                    <span class="n">route_name</span><span class="o">=</span><span class="s">&#39;register&#39;</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">Response</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">embed</span><span class="p">(</span><span class="n">r</span><span class="p">),</span>
+                                       <span class="n">cache_control</span><span class="o">=</span><span class="s">&#39;must-revalidate&#39;</span><span class="p">,</span>
+                                       <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/javascript&#39;</span><span class="p">,</span>
+                                       <span class="n">charset</span><span class="o">=</span><span class="s">&#39;utf-8&#39;</span><span class="p">),</span>
+                    <span class="n">route_name</span><span class="o">=</span><span class="s">&#39;embed&#39;</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_static_view</span><span class="p">(</span><span class="s">&#39;h/annotator&#39;</span><span class="p">,</span> <span class="s">&#39;h:annotator&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_static_view</span><span class="p">(</span><span class="s">&#39;h/sass&#39;</span><span class="p">,</span> <span class="s">&#39;h:sass&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_static_view</span><span class="p">(</span><span class="s">&#39;h/js&#39;</span><span class="p">,</span> <span class="s">&#39;h:js&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_static_view</span><span class="p">(</span><span class="s">&#39;h/images&#39;</span><span class="p">,</span> <span class="s">&#39;h:images&#39;</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
