@@ -20,7 +20,11 @@ from pyramid_webassets import IWebAssetsEnvironment
 
 import api
 
+# Deform validators
+# =================
+
 def login_validator(node, kw):
+    """Validate a username and password."""
     valid = False
     if 'username' in kw:
         valid = AuthUser.check_password(
@@ -34,6 +38,7 @@ def login_validator(node, kw):
         )
 
 def register_validator(node, kw):
+    """Validate a username and password."""
     valid = False
     if 'password' in kw:
         if kw['password'] != kw.get('password2', None):
@@ -42,6 +47,9 @@ def register_validator(node, kw):
     used = used or AuthUser.get_by_email(kw['email'])
     if used:
         raise Invalid(node, "That username or email is taken.")
+
+# Form Schemas
+# ============
 
 class LoginSchema(CSRFSchema):
     username = SchemaNode(
@@ -74,6 +82,24 @@ class PersonaSchema(CSRFSchema):
     )
 
 class FormView(FormView):
+    """Base class for form views that adds additional capabilities to forms.
+
+    Primarily, this passes any keyword arguments received by the constructor
+    to the form class. This addition allows customizing a form slightly at
+    instantiation time, such as based on request parameters or session state.
+    Perhaps this should be merged into pyramid_deform.
+
+    Deform comes with AJAH support in the form of `use_ajax = True` on the
+    form class but this attemps to go further. Using the form id, the page should
+    post back its URL with XHR and, by defining a mapping of form ids to
+    form views for from the original view handler, construct pages which are
+    a composite of forms.
+
+    I'm sure there are some well tread patterns around for this. For now it's
+    a sketch of an idea and a harmless base class.
+
+    """
+
     use_ajax = True
 
     def __init__(self, request, **kwargs):
@@ -92,6 +118,9 @@ class FormView(FormView):
             return response
         else:
             return super(FormView, self).show(form)
+
+# Forms
+# =====
 
 class login(FormView):
     schema = LoginSchema(validator=login_validator)
@@ -136,6 +165,9 @@ class register(FormView):
 class persona(FormView):
     schema = PersonaSchema()
     use_ajax = True
+
+# Views
+# =====
 
 def app(request):
     assets_env = request.registry.queryUtility(IWebAssetsEnvironment)

@@ -11,7 +11,7 @@ class Hypothesis extends Annotator
   @bucket = -1    # * The index of the active bucket shown in the summary view
   @detail = false # * Whether the viewer shows a summary or detail listing
 
-  # * Plugin configuration
+  # Plugin configuration
   pluginConfig:
     Heatmap: {}
     Permissions:
