@@ -8,7 +8,6 @@ body {
   font-family: "Open Sans", sans-serif;
   font-size: $font-size / $em * .8;
   line-height: $line-height / $em * .8;
-  color: #666666;
   height: 100%;
   overflow: auto;
   position: fixed;
@@ -50,13 +49,13 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 @mixin tertiarytext {
-  font-size: 0.8em;
+  font-size: .8em;
 }
 
 // Styles for base annotator elements
 .annotator-heatmap {
-  @include tinyshadow(-1px, 0, 0.2);
-  background: hsla(0, 0, 90%, 0.4);
+  @include tinyshadow(-1px, 0, .2);
+  background: hsla(0, 0, 90%, .4);
   position: fixed;
   top: 0;
   left: 10px;
@@ -111,43 +110,43 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //ANNOTATOR LAYOUT STUFF
 .hyp-hl_positive {
-  @include tinyshadow(1px, 1px, 0.2);
-  background: rgba($positive, 0.3);
+  @include tinyshadow(1px, 1px, .2);
+  background: rgba($positive, .3);
 }
 
 .hyp-hl_negative {
-  @include tinyshadow(1px, 1px, 0.2);
-  background: rgba($negative, 0.3);
+  @include tinyshadow(1px, 1px, .2);
+  background: rgba($negative, .3);
 }
 
 .hyp-hl_neutral {
-  @include tinyshadow(1px, 1px, 0.2);
-  background: rgba($neutral, 0.3);
+  @include tinyshadow(1px, 1px, .2);
+  background: rgba($neutral, .3);
 }
 
 //TAB BAR
 .hyp-tabs {
   @include clearfix;
-  margin-left: 0.5em;
-  margin-right: 0.5em;
+  margin-left: .5em;
+  margin-right: .5em;
 
   .hyp-tab {
-    @include box-shadow(2px -10px 13px -8px hsla(0, 0%, 0%, 0.2) inset);
+    @include box-shadow(2px -10px 13px -8px hsla(0, 0%, 0%, .2) inset);
     float: left;
-    padding: 0.25em 0.5em;
-    margin-right: 0.5em;
+    padding: .25em .5em;
+    margin-right: .5em;
     margin-bottom: -1px;
     background: hsla(0, 0%, 99%, 1);
-    border-top-right-radius: 0.25em;
-    border-top-left-radius: 0.25em;
-    color: #999999;
+    border-top-right-radius: .25em;
+    border-top-left-radius: .25em;
+    color: $gray-light;
 
-    &:hover { background: #eeeeee; }
+    &:hover { background: $gray-lighter; }
     &:active { box-shadow: none; }
 
     &.hyp-selected {
       @include box-shadow(none);
-      color: #333333;
+      color: $gray-dark;
       font-weight: bold;
       background: hsla(0, 0%, 100%, 1);
     }
@@ -166,11 +165,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 //BODY
-.hyp-body { margin-top: 0.2em; }
+.hyp-body { margin-top: .2em; }
 
 //BOTTOM BAR
 .hyp-bottombar {
-  margin-top: 0.8em;
+  margin-top: .8em;
 
   .hyp-left { float: left; }
   .hyp-right { float: right; }
@@ -182,7 +181,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   padding-left: $thread-padding / 2;
 
   & > .annotator-listing {
-    border-left: 1px dotted #999999;
+    border-left: 1px dotted $gray-light;
     margin-left: $threadexp-width / 2;
 
     & > * {
@@ -199,7 +198,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   top: 0;
   left: -($thread-padding + $threadexp-width / 2);
 
-  outline: 1px dotted #aaaaaa;
+  outline: 1px dotted #aaa;
   background-image: url("../images/minus_1.png");
   background-size: 100% 100%;
   background-position: center;
@@ -232,7 +231,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     background-size: 1em 1em;
     background-repeat: no-repeat;
     background-position: left center;
-    color: #666;
+    color: $gray;
 
     &.hyp-write {
       background-image: url("../images/pen_1.png");
@@ -382,13 +381,13 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //ADDER
 .hyp-adder {
   @include smallshadow;
-  border: 1px dotted #999999;
+  border: 1px dotted $gray-light;
   position: absolute;
   background-image: url("../images/noise_1.png");
   button {
     border: none;
     height: 2em;
-    margin: 0.5em;
+    margin: .5em;
     padding: 0;
     position: relative;
     background: none;
@@ -410,14 +409,14 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //TAG
 .hyp-tag {
-  @include box-shadow(1px 1px 10px hsla(0, 0%, 0%, 0.05));
+  @include box-shadow(1px 1px 10px hsla(0, 0%, 0%, .05));
   display: inline-block;
   background: #f3f3f3;
-  color: #666666;
+  color: $gray;
   border-radius: 2px;
-  border: 1px solid #999999;
-  padding: 0.1em 0.4em;
-  padding-bottom: 0.2em;
+  border: 1px solid $gray-light;
+  padding: .1em .4em;
+  padding-bottom: .2em;
   vertical-align: bottom;
 }
 
@@ -432,7 +431,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   position: relative;
 
   blockquote {
-    color: #666;
+    color: $gray;
     font-family: "Merriweather";
     font-size: 1.1em;
     line-height: 1.3em;
@@ -472,7 +471,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //ANNOTATION DETAIL
 .hyp-detail {
   & > .hyp-reply > .annotator-controls {
-    @include single-transition(opacity, 0.25s, ease-in-out);
+    @include single-transition(opacity, .25s, ease-in-out);
     opacity: 0;
   }
 
@@ -512,9 +511,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     position: absolute;
     left: -$score-width / 2;
 
-    &.hyp-positive { top: 0.2em; }
-    &.hyp-negative { top: -0.2em; }
-    &.hyp-neutral { top: -0.2em; }
+    &.hyp-positive { top: .2em; }
+    &.hyp-negative { top: -.2em; }
+    &.hyp-neutral { top: -.2em; }
   }
 
   .hyp-repliesbadge {
@@ -525,14 +524,14 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
     .hyp-blocker {
       display: inline-block;
-      padding: 0.25em;
-      margin-right: 0.5em;
+      padding: .25em;
+      margin-right: .5em;
     }
 
     .hyp-inner {
-      padding: 0.25em;
+      padding: .25em;
       position: absolute;
-      border: 1px solid #aaaaaa;
+      border: 1px solid #aaa;
       top: 0;
       left: 0;
     }
@@ -566,7 +565,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     }
 
     .hyp-tag {
-      padding: 0.1em 0.3em;
+      padding: .1em .3em;
     }
   }
 }
@@ -578,7 +577,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //EDITOR
 .hyp-writer {
-  @include smallshadow(0, 2px, 0.2);
+  @include smallshadow(0, 2px, .2);
   position: relative;
   z-index: 20;
 
@@ -600,17 +599,17 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .hyp-summary {
   @include single-transition(
     "box-shadow,-moz-box-shadow,-webkit-box-shadow", .1s, ease-in-out);
-  @include smallshadow(2px, 3px, 0.2);
+  @include smallshadow(2px, 3px, .2);
   line-height: 1.25em;
   cursor: pointer;
 
   &:hover {
-    @include smallshadow(2px, 4px, 0.2);
+    @include smallshadow(2px, 4px, .2);
     bottom: 1px;
   }
 
   &:active {
-    @include smallshadow(2px, 1px, 0.2);
+    @include smallshadow(2px, 1px, .2);
     bottom: -2px;
   }
 
@@ -624,10 +623,10 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   .hyp-score {
     display: none;
     position: absolute;
-    top: 0.8em;
-    &.hyp-positive { top: 0.2em; }
-    &.hyp-negative { top: -0.2em; }
-    &.hyp-neutral { top: -0.2em; }
+    top: .8em;
+    &.hyp-positive { top: .2em; }
+    &.hyp-negative { top: -.2em; }
+    &.hyp-neutral { top: -.2em; }
   }
 }
 
