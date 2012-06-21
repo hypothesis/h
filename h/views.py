@@ -10,7 +10,7 @@ from deform.form import Form
 from deform.widget import FormWidget, PasswordWidget, SelectWidget
 
 from pyramid.httpexceptions import HTTPRedirection, HTTPSeeOther
-from pyramid.renderers import get_renderer, render
+from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.security import forget, remember, NO_PERMISSION_REQUIRED
 from pyramid.view import render_view_to_response
