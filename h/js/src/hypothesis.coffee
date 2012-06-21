@@ -62,18 +62,9 @@ class Hypothesis extends Annotator
     this
 
   _setupIframe: ->
-    @iframe = top.document.createElement('iframe')
+    @iframe = $('iframe.hyp-iframe')
 
-    $(@iframe)
-      .addClass('hyp-iframe')
-      .addClass('hyp-collapsed')
-      .appendTo(@wrapper)
-      .on 'click', (event) =>  event.stopPropagation()
-
-    document = @iframe.contentDocument
-    document.open()
-    document.write(Handlebars.templates.iframe(@assets))
-    document.close()
+    document = @iframe[0].contentDocument
 
     $(document.body).find('#wrapper').append(
         @viewer.element,
@@ -111,7 +102,7 @@ class Hypothesis extends Annotator
     d3.select(@heatmap.element[0]).call(bindHeatmapEvents)
 
     @heatmap.subscribe 'updated', =>
-      tabs = d3.select(@iframe.contentDocument.body)
+      tabs = d3.select(@iframe[0].contentDocument.body)
         .selectAll('div.hyp-heatmap-tab')
         .data =>
           buckets = []
@@ -401,10 +392,10 @@ class Hypothesis extends Annotator
     this.show()
 
   show: =>
-    $(@iframe).removeClass('hyp-collapsed')
+    @iframe.removeClass('hyp-collapsed')
 
   hide: =>
-    $(@iframe).addClass('hyp-collapsed')
+    @iframe.addClass('hyp-collapsed')
 
   threadId: (annotation) ->
     if annotation?.thread?
