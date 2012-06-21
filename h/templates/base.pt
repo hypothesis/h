@@ -8,15 +8,16 @@
 <!--[if lt IE 9]>
   <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->
-  <title>hypothes.is</title>
-  <link rel="api" href="${request.route_path('api', subpath='')}" />
-  <link rel="stylesheet"
-        tal:attributes="href href"
-        tal:repeat="href environment['site_css'].urls()" />
   <!-- TODO: make deform use_ajax widgets delay after jQuery loads -->
   <script tal:attributes="src request.static_url('deform:static/' + src)"
           tal:condition="exists: js_links"
           tal:repeat="src js_links"></script>
+  <script tal:condition="exists: embed" tal:content="structure embed"></script>
+  <link rel="stylesheet"
+        tal:attributes="href href"
+        tal:repeat="href environment['site_css'].urls()" />
+  <link rel="api" href="${request.route_path('api', subpath='')}" />
+  <title>hypothes.is</title>
 </head>
 <body tal:attributes="class 'toolbar' if request.user else default">
   <div id="flash-msg">
@@ -35,6 +36,5 @@
     <metal:main define-slot="content" />
     <metal:main define-slot="footer" />
   </div>
-  <script tal:condition="exists: embed" tal:content="structure embed"></script>
 </body>
 </html>
