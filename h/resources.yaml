@@ -1,3 +1,5 @@
+# The main annotation application is a combination of upstream Annotator
+# core components and plugins with additional downstream plugins from here.
 annotator:
   contents:
     - contents:
@@ -17,6 +19,8 @@ annotator:
       filters: uglifyjs
   output: js/hypothesis-full.min.js
 
+# The injector is a easyXDM widget host application which exists to manage
+# collapsible, iframe'd widgets and cross-domain communication channels.
 injector:
   contents:
     - contents: h:js/lib/annotator.min.js
@@ -28,6 +32,8 @@ injector:
       filters: uglifyjs
   output: js/hypothesis-host.min.js
 
+# The full application dependencies are as follows, with easyXDM as a common
+# component for both the annotator and injector.
 d3:
   contents: h:js/lib/d3.v2.min.js
 easyXDM:
@@ -43,6 +49,8 @@ jwz:
 underscore:
   contents: h:js/lib/underscore-min.js
 
+# The user interface of the application is structured around these Handlebars
+# templates.
 templates:
   contents:
     - contents:
@@ -60,6 +68,7 @@ templates:
         output: js/templates/summary.js
     - h:js/lib/helpers.js
 
+# CSS specific to the application
 app_css:
   contents:
     - contents: h:sass/app.scss
@@ -74,6 +83,8 @@ app_css:
     - common_css
   filters: cssutils
   output: css/app.min.css
+
+# Host-page CSS for widget placement.
 inject_css:
   contents:
     - contents: h:sass/inject.scss
@@ -85,6 +96,8 @@ inject_css:
       output: css/inject.css
   filters: cssutils
   output: css/inject.min.css
+
+# CSS specific to the destination site
 site_css:
   contents:
     - contents: h:sass/site.scss
