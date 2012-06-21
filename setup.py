@@ -12,9 +12,8 @@ setup(
         'pyramid>=1.3',
         'pyramid_deform>=0.2a4',
         'pyramid_tm>=0.3',
-        'pyramid_webassets',
+        'pyramid_webassets>=0.5',
         'setuptools>=0.6c11',
-        'webassets>=0.7',
         'PyYAML>=3.0'
     ],
 
