@@ -9,7 +9,7 @@ yepnope([
   },
   {
     test: window.annotator,
-    nope: Array.prototype.concat.call(${annotator}, ${easyXDM}, ${inject_css}),
+    nope: Array.prototype.concat.call(${injector}, ${easyXDM}, ${inject_css}),
     complete: function () {
       var location = document.location
       var uri = location.href;

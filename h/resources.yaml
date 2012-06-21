@@ -17,6 +17,17 @@ annotator:
       filters: uglifyjs
   output: js/hypothesis-full.min.js
 
+injector:
+  contents:
+    - contents: h:js/lib/annotator.min.js
+    - contents:
+        - contents: h:js/src/annotator.host.coffee
+          filters: coffeescript
+          debug: False
+          output: js/annotator.host.js
+      filters: uglifyjs
+  output: js/hypothesis-host.min.js
+
 d3:
   contents: h:js/lib/d3.v2.min.js
 easyXDM:
