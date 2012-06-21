@@ -6,6 +6,10 @@ annotator:
         - h:js/lib/annotator.permissions.min.js
         - h:js/lib/annotator.store.min.js
     - contents:
+        - contents: h:js/src/plugin/heatmap.coffee
+          filters: coffeescript
+          debug: False
+          output: js/heatmap.js
         - contents: h:js/src/hypothesis.coffee
           filters: coffeescript
           debug: False
