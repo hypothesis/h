@@ -49,16 +49,6 @@ Development
 
 See `#hypothes.is`_.
 
-The `Annotator project`_ is included as a git sub-module to encourage upstream
-contribution and flexible collaboration. To make sure you have the appropriate
-version of the sub-module source, run the following commands::
-
-    $ git submodule init
-    $ git submodule update
-
-The ``annotator`` directory will be checked out into the ``h``
-package directory.
-
 License
 -------
 

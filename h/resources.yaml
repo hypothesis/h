@@ -1,13 +1,17 @@
-injector:
+annotator:
   contents:
-    - contents: h:js/lib/annotator.min.js
     - contents:
-        - contents: h:js/src/annotator.host.coffee
+        - h:js/lib/annotator.min.js
+        - h:js/lib/annotator.auth.min.js
+        - h:js/lib/annotator.permissions.min.js
+        - h:js/lib/annotator.store.min.js
+    - contents:
+        - contents: h:js/src/hypothesis.coffee
           filters: coffeescript
           debug: False
-          output: js/annotator.host.js
+          output: js/hypothesis.js
       filters: uglifyjs
-  output: js/hypothesis-host.min.js
+  output: js/hypothesis-full.min.js
 
 d3:
   contents: h:js/lib/d3.v2.min.js
@@ -23,7 +27,8 @@ jwz:
   contents: h:js/lib/jwz.min.js
 underscore:
   contents: h:js/lib/underscore-min.js
-app_js:
+
+templates:
   contents:
     - contents:
       - contents: h:templates/detail.handlebars
@@ -39,24 +44,14 @@ app_js:
         filters: handlebars
         output: js/templates/summary.js
     - h:js/lib/helpers.js
-    - contents: h:js/src/hypothesis.coffee
-      filters: coffeescript
-      debug: False
-      output: js/hypothesis.js
-  filters: uglifyjs
-  output: js/lib/hypothesis.min.js
-common_css:
-  contents: h:sass/common.scss
-  debug: False
-  depends:
-    - h:sass/reset.scss
-    - h:sass/base.scss
-  filters: cssrewrite
-  output: css/common.css
+
 app_css:
   contents:
     - contents: h:sass/app.scss
       debug: False
+      depends:
+        - h:sass/reset.scss
+        - h:sass/base.scss
       filters:
         - compass
         - cssrewrite

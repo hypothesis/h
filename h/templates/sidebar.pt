@@ -25,19 +25,19 @@
     </h1>
     <metal:main define-slot="content" />
   </div>
-  <!--<script tal:attributes="src src"
-          tal:repeat="src environment['d3'].urls()"></script>-->
+  <script tal:attributes="src src"
+          tal:repeat="src environment['annotator'].urls()"></script>
+  <script tal:attributes="src src"
+          tal:repeat="src environment['d3'].urls()"></script>
   <script tal:attributes="src src"
           tal:repeat="src environment['easyXDM'].urls()"></script>
-  <!--<script tal:attributes="src src"
+  <script tal:attributes="src src"
           tal:repeat="src environment['handlebars'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['underscore'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['jquery'].urls()"></script>
   <script tal:attributes="src src"
           tal:repeat="src environment['jwz'].urls()"></script>
   <script tal:attributes="src src"
-          tal:repeat="src environment['annotator'].urls()"></script>
+          tal:repeat="src environment['templates'].urls()"></script>
+  <script tal:attributes="src src"
+          tal:repeat="src environment['underscore'].urls()"></script>
 </body>
 </html>

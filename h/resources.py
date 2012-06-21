@@ -11,32 +11,7 @@ from pyramid_webassets import IWebAssetsEnvironment
 from webassets import Bundle
 from webassets.loaders import YAMLLoader
 
-def annotator_bundle(config):
-    # Path utilities
-    _src = lambda name: 'h:annotator/src/%s.coffee' % name
-    _plugin = lambda name: 'h:annotator/src/plugin/%s.coffee' % name
-    _lib = lambda src: Bundle(
-        src, debug=False, filters='coffeescript',
-        output='js/lib/annotator/%s' %
-                    splitext(relpath(src, 'h:annotator/src'))[0] + '.js')
-
-    # Plugins
-    plugins = aslist(config.get_settings().get('annotator.plugins', ''))
-    plugins = map(_lib, map(_plugin, plugins))
-
-    # Bundles
-    lib = map(_lib, map(_src, ['extensions', 'console', 'class', 'range']))
-    ui = map(_lib, map(_src, ['notification', 'widget', 'editor', 'viewer']))
-    js = Bundle(*(lib + [_lib(_src('annotator'))] +  ui + plugins))
-
-    return Bundle(
-        js,
-        filters='uglifyjs',
-        output='js/annotator.min.js'
-    )
-
 def add_webassets(config):
-    config.add_webasset('annotator', annotator_bundle(config))
     loader = YAMLLoader(join(dirname(__file__), 'resources.yaml'))
     bundles = loader.load_bundles()
     for name in bundles:
