@@ -113,8 +113,10 @@ $heatmap-width: 30px;
 
 /* Form mixins */
 @mixin plainform {
-  @include single-transition(
-    "box-shadow,-moz-box-shadow,-webkit-box-shadow", .6s, ease);
+  @include single-transition("-webkit-box-shadow", .6s, ease);
+  @include single-transition("-moz-box-shadow", .6s, ease);
+  @include single-transition("-o-box-shadow", .6s, ease);
+  @include single-transition("box-shadow", .6s, ease);
   font-family: "Open Sans";
   font-size: 1em;
   display: inline-block;

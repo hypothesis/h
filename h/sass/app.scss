@@ -493,8 +493,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   .hyp-detail {
-    @include single-transition(
-      "box-shadow,-moz-box-shadow,-webkit-box-shadow,z-index", .1s, ease, .125s);
+    @include single-transition("-webkit-box-shadow,z-index", .1s, ease-in-out);
+    @include single-transition("-moz-box-shadow,z-index", .1s, ease);
+    @include single-transition("-o-box-shadow,z-index", .1s, ease);
+    @include single-transition("box-shadow,z-index", .1s, ease);
+
 
     &.hyp-hover {
       @include smallshadow(2px, 2px, .2);
@@ -597,8 +600,10 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //BUCKET VIEW REPLY SUMMARIES
 .hyp-summary {
-  @include single-transition(
-    "box-shadow,-moz-box-shadow,-webkit-box-shadow", .1s, ease-in-out);
+  @include single-transition("-webkit-box-shadow", .1s, ease);
+  @include single-transition("-moz-box-shadow", .1s, ease);
+  @include single-transition("-o-box-shadow", .1s, ease);
+  @include single-transition("box-shadow", .1s, ease);
   @include smallshadow(2px, 3px, .2);
   line-height: 1.25em;
   cursor: pointer;
