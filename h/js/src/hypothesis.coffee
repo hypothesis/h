@@ -7,7 +7,7 @@ class Hypothesis extends Annotator
 
   # The Annotator state is augmented with three state variables.
 
-  @assets = null  # * An object storing asset urls
+  @routes = null  # * An object storing route urls
   @bucket = -1    # * The index of the active bucket shown in the summary view
   @detail = false # * Whether the viewer shows a summary or detail listing
 
@@ -23,21 +23,32 @@ class Hypothesis extends Annotator
       annotationData: document.location.href
     Unsupported: {}
 
-  constructor: (element, options, assets) ->
+  constructor: (element, options, routes) ->
     super
 
-    @assets = assets
+    @routes = routes
     @bucket = -1
     @detail = false
+
+    # Establish cross-domain communication
+    @rpc = new easyXDM.Rpc
+      container: element
+      props:
+        className: 'hyp-iframe hyp-collapsed'
+      remote: @routes.app
+      onReady: =>
+        # Set up interface elements
+        this._setupHeatmap()._setupIframe()
+        @heatmap.updateHeatmap()
+    ,
+      local: {}
+      remote: {}
 
     # Load plugins
     $.extend @pluginConfig, options
     for own name, opts of @pluginConfig
       if not @plugins[name]
         this.addPlugin name, opts
-
-    # Set up interface elements
-    this._setupHeatmap()._setupIframe()
 
     @plugins.Auth.withToken (token) =>
       @plugins.Permissions.setUser token.userId
