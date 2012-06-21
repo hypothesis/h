@@ -39,17 +39,5 @@
           tal:repeat="src environment['jwz'].urls()"></script>
   <script tal:attributes="src src"
           tal:repeat="src environment['annotator'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['app_js'].urls()"></script>-->
-  <script>
-    var rpc = easyXDM.Rpc({
-    },
-    {
-      local: {
-      },
-      remote: {
-      }
-    })
-  </script>
 </body>
 </html>

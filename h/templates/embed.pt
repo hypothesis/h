@@ -21,7 +21,7 @@ yepnope([
   },
   {
     test: window.annotator,
-    nope: ${hypothesis},
+    nope: Array.prototype.concat.call(${injector}, ${easyXDM}, ${inject_css}),
     complete: function () {
       var location = document.location
       var uri = location.href;
@@ -29,18 +29,11 @@ yepnope([
         uri = uri.slice(0, -1 * location.hash.length)
       }
 
-      window.annotator = new Hypothesis(document.body, {
-        Auth: {
-          tokenUrl: '${request.route_url('token')}'
-        },
-        Store: {
-          annotationData: { uri: uri },
-          loadFromSearch: { uri: uri },
-          prefix: '${request.route_url('api', subpath="")}'
-        }
-      }, {
+      $(function () {
+        window.annotator = new Annotator.Host(document.body, {}, {
           /* @@ reflect routes with crossroads.js?? */
-        app: '${request.route_url("app")}'
+          app: '${request.route_url("app")}'
+        })
       })
     }
   }

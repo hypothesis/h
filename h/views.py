@@ -139,25 +139,19 @@ class persona(FormView):
 
 def app(request):
     return {}
+    assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
+    if request.user:
+        form = persona(request)
+    else:
+        form = login(request, bootstrap_form_style='form-vertical')
+    return form()
 
 def embed(request):
-    environment = request.registry.queryUtility(IWebAssetsEnvironment)
-    return render(
-        'templates/embed.pt',
-        {
-            'd3': json.dumps(environment['d3'].urls()),
-            'easyXDM': json.dumps(environment['easyXDM'].urls()),
-            'jquery': json.dumps(environment['jquery'].urls()),
-            'underscore': json.dumps(environment['underscore'].urls()),
-            'hypothesis': json.dumps(
-                    environment['annotator'].urls() +
-                    environment['handlebars'].urls() +
-                    environment['jwz'].urls() +
-                    environment['app_js'].urls() +
-                    environment['inject_css'].urls()),
-            'app_css': json.dumps(environment['app_css'].urls())
-        },
-        request=request)
+    assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
+    return {
+        pkg: json.dumps(assets_env[pkg].urls())
+        for pkg in ['injector', 'easyXDM', 'jquery', 'inject_css']
+    }
 
 class home(object):
     def __init__(self, request):
@@ -168,15 +162,15 @@ class home(object):
         return getattr(self, self.request.params['__formid__'])
 
     def __call__(self):
-        action = self.request.get('action', 'login')
+        request = self.request
+        action = request.get('action', 'login')
         if self.request.user:
-            form = persona(self.request)
+            form = persona(request)
         else:
-            form = login(self.request, bootstrap_form_style='form-vertical')
+            form = login(request, bootstrap_form_style='form-vertical')
+        code = render('h:templates/embed.pt', embed(request), request=request)
         result = form()
-        result.update({
-            'embed': embed(self.request)
-        })
+        result['embed'] = code
         return result
 
 def includeme(config):

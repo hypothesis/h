@@ -30,19 +30,9 @@ class Hypothesis extends Annotator
     @bucket = -1
     @detail = false
 
-    # Establish cross-domain communication
-    @rpc = new easyXDM.Rpc
-      container: element
-      props:
-        className: 'hyp-iframe hyp-collapsed'
-      remote: @routes.app
-      onReady: =>
-        # Set up interface elements
-        this._setupHeatmap()._setupIframe()
-        @heatmap.updateHeatmap()
-    ,
-      local: {}
-      remote: {}
+    # Set up interface elements
+    this._setupHeatmap()._setupIframe()
+    @heatmap.updateHeatmap()
 
     # Load plugins
     for own name, opts of options
@@ -56,6 +46,10 @@ class Hypothesis extends Annotator
       annotation.created = annotation.updated = (new Date()).toString()
       annotation.user = @plugins.Permissions.options.userId(
         @plugins.Permissions.user)
+
+    # Establish cross-domain communication to the widget host
+    @widget = easyXDM.Widget
+      initialized: (widget, host) =>
 
     this
 
