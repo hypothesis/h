@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from pyramid.config import Configurator
 
 def includeme(config):
     config.include('.api')
@@ -8,8 +7,9 @@ def includeme(config):
     config.include('.views')
 
 def create_app(settings):
+    from pyramid.config import Configurator
     config = Configurator(settings=settings)
-    config.include('.')
+    config.include(includeme)
     return config.make_wsgi_app()
 
 def main(global_config, **settings):
