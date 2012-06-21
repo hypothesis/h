@@ -45,10 +45,9 @@ class Hypothesis extends Annotator
       remote: {}
 
     # Load plugins
-    $.extend @pluginConfig, options
-    for own name, opts of @pluginConfig
+    for own name, opts of options
       if not @plugins[name]
-        this.addPlugin name, opts
+        this.addPlugin(name, $.extend(opts, @pluginConfig[name]))
 
     @plugins.Auth.withToken (token) =>
       @plugins.Permissions.setUser token.userId
