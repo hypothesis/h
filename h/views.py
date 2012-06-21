@@ -121,7 +121,7 @@ class register(FormView):
         return super(FormView, self).__call__()
 
     def register_success(self, form):
-        session = request.db
+        session = self.request.db
         id = AuthID()
         session.add(id)
         user = AuthUser(login=form['username'],
