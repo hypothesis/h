@@ -50,8 +50,7 @@ p {
 form button { @extend .hyp-button; }
 
 input, textarea {
-  @include blue-glow;
-  @include invisibox;
+  @include plainform;
   font-style: sans-serif;
   padding: .33em .5em;
 }
