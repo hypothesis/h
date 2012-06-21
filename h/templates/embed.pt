@@ -18,9 +18,12 @@ yepnope([
       }
 
       $(function () {
-        window.annotator = new Annotator.Host(document.body, {}, {
+        var annotator = window.annotator = new Annotator.Host(document.body, {
           /* @@ reflect routes with crossroads.js?? */
           app: '${request.route_url("app")}'
+        })
+        annotator.host.addWidget('${request.route_url("app")}', {
+          container: document.body
         })
       })
     }
