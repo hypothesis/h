@@ -76,11 +76,11 @@ app_css:
       depends:
         - h:sass/reset.scss
         - h:sass/base.scss
+        - h:sass/common.scss
       filters:
         - compass
         - cssrewrite
       output: css/app.css
-    - common_css
   filters: cssutils
   output: css/app.min.css
 
