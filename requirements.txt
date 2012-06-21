@@ -1,18 +1,19 @@
--e .
 -e git+https://github.com/cd34/apex.git@2d7f14ba324518c2f4310b008ab931c617c197be#egg=Apex-dev
-Chameleon==2.8.4
+Chameleon==2.9.2
 Flask==0.8
 Jinja2==2.6
 Mako==0.7.0
+Markdown==2.1.1
 MarkupSafe==0.15
 Paste==1.7.5.1
 PasteDeploy==1.5.0
 PyJWT==0.1.4
 PyYAML==3.10
+Pycco==0.3.0
 Pygments==1.5
 SQLAlchemy==0.7.6
 WTForms==1.0.1
-WebOb==1.2b3
+WebOb==1.2
 Werkzeug==0.8.3
 -e git+https://github.com/hypothesis/annotator-store@37f6a077064b6d1728d49e6d1e538b8fbf588e06#egg=annotator-dev
 anykeystore==0.2
@@ -24,7 +25,7 @@ cryptacular==1.4.1
 cssutils==0.9.10b1
 deform==0.9.5
 deform-bootstrap==0.2.1
-distribute==0.6.24
+distribute==0.6.27
 httplib2==0.7.4
 iso8601==0.1.4
 mock==0.8.0
@@ -32,24 +33,29 @@ nose==1.1.2
 oauth2==1.5.211
 pbkdf2==1.3
 peppercorn==0.4
+py==1.4.9
 pyes==0.16.0
-pyramid==1.3
+pyramid==1.3.2
 pyramid-debugtoolbar==1.0.2
 pyramid-deform==0.2a4
 pyramid-mailer==0.8
 pyramid-tm==0.4
-pyramid_webassets==0.5
+pyramid-webassets==0.5
+pystache==0.5.2
+pytest==2.2.4
 python-openid==2.2.5
 repoze.lru==0.5
 repoze.sendmail==3.1
 requests==0.11.2
+smartypants==1.6.0.3
 transaction==1.2.0
 translationstring==1.1
+unittest2==0.5.1
 -e git+https://github.com/bbangert/velruse.git@e81ea007aaca0fe541f1f59659789bf4748f4c96#egg=velruse-dev
 venusian==1.0a6
 webassets==0.7.1
 wsgiref==0.1.2
 wtforms-recaptcha==0.2.0
-zope.deprecation==3.5.1
-zope.interface==3.8.0
+zope.deprecation==4.0.0
+zope.interface==4.0.1
 zope.sqlalchemy==0.7
