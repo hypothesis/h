@@ -1,3 +1,4 @@
+-e .
 -e git+https://github.com/cd34/apex.git@2d7f14ba324518c2f4310b008ab931c617c197be#egg=Apex-dev
 Chameleon==2.9.2
 Flask==0.8
