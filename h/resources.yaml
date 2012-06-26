@@ -19,8 +19,9 @@ annotator:
       filters: uglifyjs
       output: js/hypothesis.min.js
 
-# The injector is a easyXDM widget host application which exists to manage
-# collapsible, iframe'd widgets and cross-domain communication channels.
+# The injector is a easyXDM consumer which loads the annotator in an iframe
+# and sets up a JSON-RPC channel for cross-domain communication between the
+# iframe and the host window.
 injector:
   contents:
     - contents: h:js/lib/annotator.min.js
