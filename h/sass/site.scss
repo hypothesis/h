@@ -72,7 +72,7 @@ section {
   .title { text-align: center; }
 
   #auth {
-    button, input {
+    input {
       width: 100%;
     }
   }
@@ -99,9 +99,7 @@ section {
   }
 
   #auth {
-    button { width: auto; }
-
-    .controls, .control-group, .form-actions, fieldset, button, input {
+    .controls, .control-group, .form-actions, fieldset, input {
       width: auto;
     }
   }

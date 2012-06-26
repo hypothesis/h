@@ -52,23 +52,17 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   font-size: .8em;
 }
 
-// Styles for base annotator elements
 .annotator-heatmap {
   @include tinyshadow(-1px, 0, .2);
   background: hsla(0, 0, 90%, .4);
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 10px;
   width: $heatmap-width;
   z-index: 1;
 }
 
-/*.annotator-listing {
-  @include reset-box-model;
-  @include reset-list-style;
-}*/
-
-// Hetmap tabs
+// Heatmap tabs
 .hyp-heatmap-tab {
   background-image: url("../images/side_tab.svg");
   background-size: 100% 100%;
