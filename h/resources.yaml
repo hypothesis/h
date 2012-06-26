@@ -17,7 +17,7 @@ annotator:
           debug: False
           output: js/hypothesis.js
       filters: uglifyjs
-  output: js/hypothesis-full.min.js
+      output: js/hypothesis.min.js
 
 # The injector is a easyXDM widget host application which exists to manage
 # collapsible, iframe'd widgets and cross-domain communication channels.
@@ -30,7 +30,7 @@ injector:
           debug: False
           output: js/annotator.host.js
       filters: uglifyjs
-  output: js/hypothesis-host.min.js
+      output: js/hypothesis-host.min.js
 
 # The full application dependencies are as follows, with easyXDM as a common
 # component for both the annotator and injector.
