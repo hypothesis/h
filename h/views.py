@@ -126,7 +126,9 @@ class login(FormView):
     schema = LoginSchema(validator=login_validator)
     buttons = ('sign in',)
     use_ajax = False
-    form_class = partial(Form, bootstrap_form_style='form-vertical')
+    form_class = partial(Form,
+                         bootstrap_form_style='form-vertical',
+                         formid='auth')
 
     def __call__(self):
         if self.request.user:
@@ -142,7 +144,9 @@ class register(FormView):
     schema = RegisterSchema(validator=register_validator)
     buttons = ('register',)
     use_ajax = False
-    form_class = partial(Form, bootstrap_form_style='form-vertical')
+    form_class = partial(Form,
+                         bootstrap_form_style='form-vertical',
+                         formid='auth')
 
     def __call__(self):
         if self.request.user:
@@ -198,7 +202,9 @@ class home(object):
         if self.request.user:
             form = persona(request)
         else:
-            form = login(request, bootstrap_form_style='form-vertical')
+            form = login(request,
+                         bootstrap_form_style='form-vertical',
+                         formid='auth')
         code = render('h:templates/embed.pt', embed(request), request=request)
         result = form()
         result['embed'] = code
