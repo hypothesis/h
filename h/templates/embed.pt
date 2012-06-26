@@ -5,25 +5,26 @@
 yepnope([
   {
     test: window.jQuery && window.jQuery.fn.jquery >= '1.7.2',
-    nope: ${jquery},
+    nope: ${jquery}
   },
   {
     test: window.annotator,
     nope: Array.prototype.concat.call(${injector}, ${easyXDM}, ${inject_css}),
     complete: function () {
-      var location = document.location
-      var uri = location.href;
-      if (location.hash) {
-        uri = uri.slice(0, -1 * location.hash.length)
-      }
+      var app = '${request.route_url("app")}'
+
+      var uri = document.location.href
+      if (document.location.hash) uri = uri.slice(0, -1 * location.hash.length)
 
       $(function () {
         var annotator = window.annotator = new Annotator.Host(document.body, {
           /* @@ reflect routes with crossroads.js?? */
-          app: '${request.route_url("app")}'
+          app: app,
         })
-        annotator.host.addWidget('${request.route_url("app")}', {
-          container: document.body
+        annotator.consumer.addPlugin('Store', {
+          annotationData: { uri: uri },
+          loadFromSearch: { uri: uri },
+          prefix: '${request.route_url("api", subpath="")}'
         })
       })
     }

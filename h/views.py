@@ -227,11 +227,13 @@ def includeme(config):
     config.add_view(register, renderer='templates/auth.pt',
                     route_name='register')
 
-    config.add_view(lambda r: Response(body=embed(r),
-                                       cache_control='must-revalidate',
-                                       content_type='application/javascript',
-                                       charset='utf-8'),
-                    route_name='embed')
+    config.add_view(
+        lambda r: Response(
+            body=render('h:templates/embed.pt', embed(r), request=r),
+            cache_control='must-revalidate',
+            content_type='application/javascript',
+            charset='utf-8'),
+        route_name='embed')
 
     config.add_static_view('h/annotator', 'h:annotator')
     config.add_static_view('h/sass', 'h:sass')
