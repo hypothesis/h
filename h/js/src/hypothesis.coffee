@@ -12,16 +12,13 @@ class Hypothesis extends Annotator
   @detail = false # * Whether the viewer shows a summary or detail listing
 
   # Plugin configuration
-  pluginConfig:
+  options:
+    Auth: {}
     Heatmap: {}
     Permissions:
       showEditPermissionsCheckbox: false,
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
-    Store:
-      loadFromSearch: document.location.href
-      annotationData: document.location.href
-    Unsupported: {}
 
   constructor: (element, options, routes) ->
     super
@@ -30,14 +27,60 @@ class Hypothesis extends Annotator
     @bucket = -1
     @detail = false
 
-    # Set up interface elements
-    this._setupHeatmap()._setupIframe()
-    @heatmap.updateHeatmap()
+    # Establish cross-domain communication to the widget host
+    @provider = new easyXDM.Rpc
+      swf: options.swf
+      onReady: this._initialize
+    ,
+      local:
+        addPlugin: (args...) => this.addPlugin(args...)
+        publish: =>
+          debugger
+          this.publish arguments...
+        subscribe: =>
+          this.consumer arguments..., =>
+            @provider.publish arguments...
+        showViewer: (args...) => this.showViewer(args...)
+        showEditor: (args...) => this.showEditor(args...)
+        back: =>
+          if @detail
+            this.showViewer(@heatmap.buckets[@bucket])
+          else
+            @bucket = -1
+            this.hide()
+        update: =>
+          @provider.getHighlights @heatmap.updateHeatmap
+      remote:
+        getHighlights: {}
+        setupAnnotation: {}
+        loadAnnotations: {}
+        publish: {}
+        subscribe: {}
+        showFrame: {}
+        hideFrame: {}
 
+    events = [
+      'annotationCreated'
+      'annotationUpdated'
+      'annotationDeleted'
+      'annotationsLoaded'
+    ]
+
+    for event in events
+      this.subscribe event, =>
+        @provider.getHighlights @heatmap.updateHeatmap
+
+    this
+
+  _initialize: =>
     # Load plugins
-    for own name, opts of options
+    for own name, opts of @options
       if not @plugins[name]
-        this.addPlugin(name, $.extend(opts, @pluginConfig[name]))
+        this.addPlugin(name, opts)
+
+    # Set up interface elements
+    this._setupHeatmap()
+    @wrapper.append(@viewer.element, @editor.element, @heatmap.element)
 
     @plugins.Auth.withToken (token) =>
       @plugins.Permissions.setUser token.userId
@@ -47,34 +90,8 @@ class Hypothesis extends Annotator
       annotation.user = @plugins.Permissions.options.userId(
         @plugins.Permissions.user)
 
-    # Establish cross-domain communication to the widget host
-    @widget = easyXDM.Widget
-      initialized: (widget, host) =>
-
-    this
-
   _setupWrapper: ->
-    super
-    @wrapper.on 'click', (event) =>
-      if @detail
-        this.showViewer(@heatmap.buckets[@bucket])
-      else
-        unless @selectedRanges?.length
-          @bucket = -1
-          @heatmap.highlight(-1)
-          this.hide()
-    this
-
-  _setupIframe: ->
-    @iframe = $('iframe.hyp-iframe')
-
-    document = @iframe[0].contentDocument
-
-    $(document.body).find('#wrapper').append(
-        @viewer.element,
-        @editor.element,
-        @heatmap.element)
-
+    @wrapper = $('#wrapper')
     this
 
   _setupHeatmap: () ->
@@ -90,10 +107,10 @@ class Hypothesis extends Annotator
           unless @viewer.isShown() and @detail
             bucket = getBucket()
             unless @heatmap.buckets[bucket]?.length then bucket = @bucket
-            @heatmap.highlight(bucket)
-        .on 'mouseout', =>
-          unless @viewer.isShown() and @detail
-            @heatmap.highlight(@bucket)
+            #@heatmap.highlight(bucket)
+        #.on 'mouseout', =>
+        #  unless @viewer.isShown() and @detail
+        #    @heatmap.highlight(@bucket)
         .on 'click', =>
           d3.event.preventDefault()
           bucket = getBucket()
@@ -101,12 +118,11 @@ class Hypothesis extends Annotator
           if annotations?.length
             @bucket = bucket
             this.showViewer(annotations)
-            this.show()
 
     d3.select(@heatmap.element[0]).call(bindHeatmapEvents)
 
     @heatmap.subscribe 'updated', =>
-      tabs = d3.select(@iframe[0].contentDocument.body)
+      tabs = d3.select(@wrapper[0])
         .selectAll('div.hyp-heatmap-tab')
         .data =>
           buckets = []
@@ -209,8 +225,9 @@ class Hypothesis extends Annotator
     # Delagate to Annotator implementation after we give it a valid array of
     # ranges
     if annotation.thread
-      annotation.ranges = annotation.ranges or []
-    super annotation, args...
+      annotation.ranges or= []
+    # TODO: hide non-range stuff from host
+    @provider.setupAnnotation annotation, args...
 
   showViewer: (annotations=[], _position=null, detail=false) ->
     viewer = d3.select(@viewer.element[0])
@@ -259,11 +276,11 @@ class Hypothesis extends Annotator
         .on 'mouseover', =>
           d3.event.stopPropagation()
           item = d3.select(d3.event.currentTarget).datum().message.annotation
-          @heatmap.highlight(@bucket, -> $(this).data('annotation') is item)
+          #@heatmap.highlight(@bucket, -> $(this).data('annotation') is item)
         .on 'mouseout', =>
           d3.event.stopPropagation()
           item = d3.select(d3.event.currentTarget).datum().message.annotation
-          @heatmap.highlight(@bucket)
+          #@heatmap.highlight(@bucket)
     else
       # Mark that the detail view is now shown, so that exiting returns to the
       # bucket view rather than the document.
@@ -361,6 +378,7 @@ class Hypothesis extends Annotator
 
     @editor.hide()
     @viewer.show()
+    this.show()
 
   updateViewer: (annotations) =>
     existing = d3.select(@viewer.element[0]).datum()
@@ -374,12 +392,12 @@ class Hypothesis extends Annotator
       alert("Not logged in!")
       return
 
+    if not annotation.user?
+      @plugins.Permissions.addFieldsToAnnotation(annotation)
+
     @viewer.hide()
     @editor.load(annotation)
     @editor.element.find('.annotator-controls').remove()
-
-    this.setupAnnotation(annotation, false)
-    delete annotation.ranges
 
     excerpt = $('<li class="hyp-widget hyp-excerpt">')
     excerpt.append($("<blockquote>#{annotation.quote}</blockquote>"))
@@ -396,10 +414,10 @@ class Hypothesis extends Annotator
     this.show()
 
   show: =>
-    @iframe.removeClass('hyp-collapsed')
+    @provider.showFrame()
 
   hide: =>
-    @iframe.addClass('hyp-collapsed')
+    @provider.hideFrame()
 
   threadId: (annotation) ->
     if annotation?.thread?
