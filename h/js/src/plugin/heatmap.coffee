@@ -18,12 +18,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
          </svg>
          """
 
-  options:
-    message: Annotator._t("Sorry, some features of the Annotator failed to load.")
-
-  # timer used to throttle heatmap recalculation frequency
-  updateTimer: null
-
   # buckets of annotations that overlap
   buckets: []
 
@@ -33,50 +27,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   constructor: (element, options) ->
     super $(@html, options)
 
-  pluginInit: ->
-    if d3?
-      this._setupListeners()
-      this.updateHeatmap()
-    else if @options.d3?
-      setTimeout(
-        =>
-          $.getScript(@options.d3, =>
-            this._setupListeners()
-            this.updateHeatmap()
-          ).error(-> Annotator.showNotification(@options.message))
-      , 0)
-    else
-      Annotator.showNotification(@options.message)
-
-  # Listens to annotation change events on the Annotator in order to refresh
-  # the @annotations collection.
-  # TODO: Make this more granular so the entire collection isn't reloaded for
-  # every single change.
-  #
-  # Returns itself.
-  _setupListeners: ->
-    events = [
-      'annotationsLoaded'
-      'annotationCreated'
-      'annotationUpdated'
-      'annotationDeleted'
-    ]
-
-    for event in events
-      @annotator.subscribe event, this.updateHeatmap
-
-    # Throttle resize events and update the heatmap
-    throttledUpdate = () =>
-      clearTimeout(@updateTimer) if @updateTimer?
-      @updateTimer = setTimeout(
-        () =>
-          @updateTimer = null
-          this.updateHeatmap()
-        10
-      )
-
-    $(window).resize(throttledUpdate).scroll(throttledUpdate)
-
   _colorize: (v) ->
     s = d3.scale.pow().exponent(8)
       .range([0, .3])
@@ -85,26 +35,28 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .range([1, .45])
     d3.hsl(210, s(v), l(v)).toString()
 
-  updateHeatmap: =>
+  getBucket: (event) =>
+    [x, y] = d3.mouse(@element[0])
+    bucket = d3.bisect(@index, y) - 1
+
+  updateHeatmap: (data) =>
     return unless d3?
 
-    wrapper = $(@annotator.wrapper)
-    highlights = @annotator.element.find('.annotator-hl:visible')
-    offset = wrapper.offsetParent().scrollTop()
+    wrapper = this.element.offsetParent()
+    {highlights, offset} = data
 
     # Re-set the 100% because some browsers might not adjust to events like
     # user zoom change properly.
     @element.css({height: '100%'})
 
     # Construct control points for the heatmap highlights
-    points = highlights.map () ->
-      x = $(this).offset().top - wrapper.offset().top - offset
-      h = $(this).outerHeight(true)
+    points = $.map highlights, (hl) ->
+      x = hl.top - wrapper.offset().top - offset
+      h = hl.height
       if x + h < 0 or x + h > $(window).outerHeight() then return []
-      data = $(this).data('annotation')
+      data = hl.data
       [ [x, 1, data],
         [x + h, -1, data] ]
-    .get() # de-jQuery
 
     # Sort the points and reduce to accumulate the annotation list which follows
     # and the running overlap count at each stop.
@@ -159,9 +111,3 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .attr('stop-opacity', (v) -> opacity(v[3]))
 
     this.publish('updated')
-
-  highlight: (bucket, fn) =>
-    annotations = @buckets[bucket] or []
-    lights = d3.select(@annotator.wrapper[0]).selectAll('.annotator-hl')
-    lights.classed 'hyp-active', fn or ->
-      $(this).data('annotation') in annotations
