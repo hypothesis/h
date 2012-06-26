@@ -63,7 +63,7 @@ def token(request):
         'ttl': ttl
     }
     body = auth.encode_token(message, secret)
-    return Response(body=body, headerlist=token_headers(request).items())
+    return Response(body=body, headerlist=headers.items())
 
 def users(request):
     """Retrieve all the profiles assocatied with a principal."""
