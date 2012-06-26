@@ -37,3 +37,6 @@ def includeme(config):
     config.scan(__name__)
     config.include('pyramid_webassets')
     add_webassets(config)
+
+    # wrap coffeescript output in a closure
+    config.get_webassets_env().config['coffee_no_bare'] = True

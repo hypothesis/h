@@ -406,3 +406,5 @@ class Hypothesis extends Annotator
       annotation.thread + '/' + annotation.id
     else
       annotation.id
+
+window.Hypothesis = Hypothesis
