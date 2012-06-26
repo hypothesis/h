@@ -185,7 +185,7 @@ def embed(request):
     assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
     return {
         pkg: json.dumps(assets_env[pkg].urls())
-        for pkg in ['injector', 'easyXDM', 'jquery', 'inject_css']
+        for pkg in ['easyXDM', 'injector', 'inject_css', 'jquery']
     }
 
 class home(object):
