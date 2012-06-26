@@ -39,5 +39,13 @@
           tal:repeat="src environment['templates'].urls()"></script>
   <script tal:attributes="src src"
           tal:repeat="src environment['underscore'].urls()"></script>
+  <script>
+    window.annotator = new Hypothesis(document.body, {
+      Auth: {
+        tokenUrl: '${request.route_url('token')}'
+      },
+      Heatmap: {}
+    })
+  </script>
 </body>
 </html>
