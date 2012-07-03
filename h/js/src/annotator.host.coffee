@@ -74,7 +74,7 @@ class Annotator.Host extends Annotator
         @consumer.update()
 
     $(window).resize(throttledUpdate).scroll(throttledUpdate)
-    $(wrapper).on 'click', (event) =>
+    $(@wrapper).on 'click', (event) =>
       @consumer.back()
 
   # Creates an instance of Annotator.Viewer and assigns it to the @viewer
