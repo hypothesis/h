@@ -69,12 +69,9 @@ class Annotator.Host extends Annotator
     # Throttle resize events and update the heatmap
     throttledUpdate = () =>
       clearTimeout(@updateTimer) if @updateTimer?
-      @updateTimer = setTimeout(
-        () =>
-          @updateTimer = null
-          @consumer.update()
-        10
-      )
+      @updateTimer = setTimeout =>
+        @updateTimer = null
+        @consumer.update()
 
     $(window).resize(throttledUpdate).scroll(throttledUpdate)
     $(wrapper).on 'click', (event) =>
