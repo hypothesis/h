@@ -36,6 +36,17 @@
   }
 }
 
+.link-button {
+	background: none !important;
+	background-color: transparent;
+	text-decoration: underline;
+	border: none;
+	cursor: pointer;
+	cursor: hand;
+  color: $link-color;
+  &:hover { color: $link-color-hover; }
+}
+
 body {
   color: $gray;
   font-smoothing: antialiased;
