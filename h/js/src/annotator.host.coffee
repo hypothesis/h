@@ -21,15 +21,20 @@ class Annotator.Host extends Annotator
       if not @plugins[name]
         this.addPlugin(name, opts)
 
+    # Grab this for exporting the iframe from easyXDM
+    annotator = this
+
     # Establish cross-domain communication
     @consumer = new easyXDM.Rpc
       channel: 'annotator'
       container: @wrapper[0]
       local: options.local
       onReady: () ->
+        # `this` is otherwise hidden, private to the Rpc object's closures
+        # so export the iframe element via the private `container` property
         frame = $(this.container).find('[src^="'+@props.src+'"]')
           .css('visibility', 'visible')
-        window.annotator.frame = frame
+        annotator.frame = frame
       swf: options.swf
       props:
         className: 'hyp-iframe hyp-collapsed'
