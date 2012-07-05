@@ -115,7 +115,7 @@ class Hypothesis extends Annotator
         #.on 'mouseout', =>
         #  unless @viewer.isShown() and @detail
         #    @heatmap.highlight(@bucket)
-        .on 'click', =>
+        .on 'mouseup', =>
           d3.event.preventDefault()
           bucket = getBucket()
           annotations = @heatmap.buckets[bucket]
@@ -261,7 +261,7 @@ class Hypothesis extends Annotator
         .classed('hyp-detail', false)
         .classed('hyp-summary', true)
         .classed('hyp-widget', true)
-        .on 'click', (d, i) =>
+        .on 'mouseup', (d, i) =>
           a = d.message.annotation
           query =
             thread: if a.thread then [a.thread, a.id].join('/') else a.id
@@ -316,7 +316,7 @@ class Hypothesis extends Annotator
             d3.event.stopPropagation()
             d3.select(d3.event.currentTarget).classed('hyp-hover', false)
 
-          .on 'click', =>
+          .on 'mouseup', =>
             event = d3.event
             target = event.target
             unless target.tagName is 'A' then return
