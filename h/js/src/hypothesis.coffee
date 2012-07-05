@@ -153,6 +153,7 @@ class Hypothesis extends Annotator
     .on("edit", this.onEditAnnotation)
     .on("delete", this.onDeleteAnnotation)
 
+    # Show newly created annotations in the viewer immediately
     this.subscribe 'annotationCreated', (annotation) =>
       this.updateViewer [annotation]
 
