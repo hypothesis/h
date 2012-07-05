@@ -138,7 +138,9 @@ class Hypothesis extends Annotator
       tabs.enter().append('div').classed('hyp-heatmap-tab', true)
       tabs.exit().remove()
       tabs
-        .style('top', (i) => "#{@heatmap.index[i]}px")
+        .style 'top', (i) =>
+          "#{(@heatmap.index[i] + @heatmap.index[i+1]) / 2}px"
+        .style('margin-top', '-.8em')
         .text((i) => @heatmap.buckets[i].length)
         .call(bindHeatmapEvents)
     this
