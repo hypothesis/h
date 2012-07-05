@@ -1,15 +1,10 @@
 class Hypothesis extends Annotator
-  # Override the events to be bound on Annotator#element to get rid of
-  # the the highlight hover behaviour.
-  events:
-    ".annotator-adder button click":     "onAdderClick"
-    ".annotator-adder button mousedown": "onAdderMousedown"
-
-  # The Annotator state is augmented with three state variables.
-
-  @routes = null  # * An object storing route urls
-  @bucket = -1    # * The index of the active bucket shown in the summary view
-  @detail = false # * Whether the viewer shows a summary or detail listing
+  # Annotator state variables.
+  routes = null  # * An object storing route urls
+  bucket = -1    # * The index of the active bucket shown in the summary view
+  detail = false # * Whether the viewer shows a summary or detail listing
+  hash = -1      # * cheap UUID :cake:
+  cache = {}     # * object cache
 
   # Plugin configuration
   options:
@@ -21,11 +16,11 @@ class Hypothesis extends Annotator
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
 
   constructor: (element, options, routes) ->
-    super
-
     @routes = routes
     @bucket = -1
     @detail = false
+    @hash = -1
+    @cache = {}
 
     # Establish cross-domain communication to the widget host
     @provider = new easyXDM.Rpc
@@ -33,44 +28,36 @@ class Hypothesis extends Annotator
       onReady: this._initialize
     ,
       local:
-        addPlugin: (args...) => this.addPlugin(args...)
-        publish: =>
-          debugger
-          this.publish arguments...
-        subscribe: =>
-          this.consumer arguments..., =>
-            @provider.publish arguments...
-        showViewer: (args...) => this.showViewer(args...)
-        showEditor: (args...) => this.showEditor(args...)
+        publish: (event, args, k, fk) =>
+          if event in ['annotationCreated']
+            [hash] = args
+            annotation = @cache[hash]
+            this.publish event, [annotation]
+        addPlugin: => this.addPlugin arguments...
+        createAnnotation: =>
+          @cache[hash = ++@hash] = this.createAnnotation()
+          hash
+        showEditor: (stub) =>
+          annotation = $.extend(@cache[stub.hash], stub)
+          delete annotation.hash
+          this.showEditor annotation
         back: =>
           if @detail
             this.showViewer(@heatmap.buckets[@bucket])
           else
             @bucket = -1
             this.hide()
-        update: =>
-          @provider.getHighlights @heatmap.updateHeatmap
+        update: => this.publish 'hostUpdated'
       remote:
+        publish: {}
         getHighlights: {}
         setupAnnotation: {}
-        loadAnnotations: {}
-        publish: {}
-        subscribe: {}
+        onEditorHide: {}
+        onEditorSubmit: {}
         showFrame: {}
         hideFrame: {}
 
-    events = [
-      'annotationCreated'
-      'annotationUpdated'
-      'annotationDeleted'
-      'annotationsLoaded'
-    ]
-
-    for event in events
-      this.subscribe event, =>
-        @provider.getHighlights @heatmap.updateHeatmap
-
-    this
+    super
 
   _initialize: =>
     # Load plugins
@@ -96,6 +83,23 @@ class Hypothesis extends Annotator
 
   _setupHeatmap: () ->
     @heatmap = @plugins.Heatmap
+
+    # Update the heatmap when certain events are pubished
+    events = [
+      'annotationCreated'
+      'annotationDeleted'
+      'annotationsLoaded'
+      'hostUpdated'
+    ]
+
+    for event in events
+      this.subscribe event, =>
+        @provider.getHighlights ({highlights, offset}) =>
+          @heatmap.updateHeatmap
+            highlights: highlights.map (hl) =>
+              hl.data = @cache[hl.data]
+              hl
+            offset: offset
 
     getBucket = (event) =>
       [x, y] = d3.mouse(@heatmap.element[0])
@@ -160,28 +164,13 @@ class Hypothesis extends Annotator
   # Returns itself for chaining.
   _setupEditor: ->
     @editor = this._createEditor()
-    @editor.on 'hide', () =>
-      if not d3.select(@viewer.element[0]).datum()
-        this.hide()
+    .on('hide', @provider.onEditorHide)
+    .on('save', @provider.onEditorSubmit)
     this
 
   _createEditor: ->
     editor = new Annotator.Editor()
     editor.hide()
-    # TODO: this is ugly... we shouldn't need to do this in both clauses --
-    # Annotator should handle highlights better
-    .on('hide', =>
-      if editor.annotation?.highlights? and not editor.annotation.ranges?
-        for h in editor.annotation.highlights
-          $(h).replaceWith(h.childNodes)
-      this.onEditorHide()
-    )
-    .on('save', (annotation) =>
-      if annotation?.highlights?
-        for h in annotation.highlights
-          $(h).replaceWith(h.childNodes)
-      this.onEditorSubmit(annotation)
-    )
     editor.fields = [{
       element: editor.element,
       load: (field, annotation) ->
@@ -221,15 +210,20 @@ class Hypothesis extends Annotator
   #   annotation = annotator.setupAnnotation(annotation)
   #
   # Returns the initialised annotation.
-  setupAnnotation: (annotation, args...) ->
+  setupAnnotation: (annotation) ->
     # Delagate to Annotator implementation after we give it a valid array of
-    # ranges
+    # ranges. This is needed until Annotator stops assuming ranges need to be
+    # added.
     if annotation.thread
-      annotation.ranges or= []
-    # TODO: hide non-range stuff from host
-    @provider.setupAnnotation annotation, args...
+      annotation.ranges = []
 
-  showViewer: (annotations=[], _position=null, detail=false) ->
+    @cache[hash = ++@hash] = annotation
+    stub =
+      hash: hash
+      ranges: annotation.ranges
+    @provider.setupAnnotation stub
+
+  showViewer: (annotations=[], detail=false) =>
     viewer = d3.select(@viewer.element[0])
 
     # Thread the messages using JWZ
@@ -272,7 +266,7 @@ class Hypothesis extends Annotator
             thread: if a.thread then [a.thread, a.id].join('/') else a.id
           @plugins.Store._apiRequest 'search', query, (data) =>
             if data?.rows then this.updateViewer(data.rows || [])
-          this.showViewer([a], null, true)
+          this.showViewer([a], true)
         .on 'mouseover', =>
           d3.event.stopPropagation()
           item = d3.select(d3.event.currentTarget).datum().message.annotation
@@ -357,6 +351,8 @@ class Hypothesis extends Annotator
                 editor = this._createEditor()
                 editor.load(reply)
                 editor.element.removeClass('annotator-outer')
+                editor.on 'save', (annotation) =>
+                  this.publish 'annotationCreated', [annotation]
 
                 d3.select(editor.element[0]).select('form')
                   .data([reply])
@@ -385,7 +381,7 @@ class Hypothesis extends Annotator
     if existing?
       annotations = existing.flattenChildren()?.map((c) -> c.annotation)
         .concat(annotations)
-    this.showViewer(annotations or [], null, true)
+    this.showViewer(annotations or [], true)
 
   showEditor: (annotation) =>
     unless @plugins.Permissions?.user
