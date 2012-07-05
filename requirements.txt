@@ -38,7 +38,7 @@ py==1.4.9
 pyes==0.16.0
 pyramid==1.3.2
 pyramid-debugtoolbar==1.0.2
-pyramid-deform==0.2a4
+pyramid-deform==0.2a5
 pyramid-mailer==0.8
 pyramid-tm==0.4
 pyramid-webassets==0.5
