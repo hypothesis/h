@@ -32,6 +32,8 @@
   background: none;
   text-indent: -999em;
   cursor: pointer;
+  &:active { background: none; }
+  &:hover { background: none; }
 }
 
 .annotator-hl-temporary {
