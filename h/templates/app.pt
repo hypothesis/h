@@ -18,11 +18,10 @@
 </head>
 <body>
   <div id="wrapper">
-    <h1 class="hyp-logo">
-      <img alt="hypothes.is"
-           height="30px"
-           src="${request.static_url('h:images/hypothesis.png')}" />
-    </h1>
+    <img alt="hypothes.is"
+         class="hyp-logo"
+         height="30px"
+         src="${request.static_url('h:images/hypothesis.png')}" />
     <metal:main define-slot="content" />
   </div>
   <script tal:attributes="src src"
