@@ -207,7 +207,7 @@ class home(object):
                          formid='auth')
         code = render('h:templates/embed.pt', embed(request), request=request)
         result = form()
-        result['embed'] = code
+        result.setdefault('js_scripts', []).append(code)
         return result
 
 def includeme(config):

@@ -12,7 +12,9 @@
   <script tal:attributes="src request.static_url('deform:static/' + src)"
           tal:condition="exists: js_links"
           tal:repeat="src js_links"></script>
-  <script tal:condition="exists: embed" tal:content="structure embed"></script>
+  <script tal:condition="exists: js_scripts"
+          tal:content="structure src"
+          tal:repeat="src js_scripts"></script>
   <link rel="stylesheet"
         tal:attributes="href href"
         tal:repeat="href environment['site_css'].urls()" />
