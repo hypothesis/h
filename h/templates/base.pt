@@ -17,22 +17,13 @@
           tal:repeat="src js_scripts"></script>
   <link rel="stylesheet"
         tal:attributes="href href"
-        tal:repeat="href environment['site_css'].urls()" />
+        tal:repeat="href css_links" />
   <link rel="api" href="${request.route_path('api', subpath='')}" />
   <title>hypothes.is</title>
 </head>
 <body tal:attributes="class 'toolbar' if request.user else default">
-  <div id="flash-msg">
-  </div>
-  <div tal:condition="request.user" id="toolbar">
-    <div tal:condition="request.user">
-      <form id='auth' tal:replace="structure python:form" />
-      <a class="bookmarklet"
-         href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
-         >Contribute</a>
-      <a href="${request.route_url('logout')}">Sign out</a>
-    </div>
-  </div>
+  <div id="flash-msg"></div>
+  <metal:main define-slot="toolbar" />
   <div id="wrapper">
     <metal:main define-slot="header" />
     <metal:main define-slot="content" />

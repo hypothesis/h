@@ -1,51 +1,34 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang='en' lang='en'>
-<head>
-  <meta charset="UTF-8" />
-<!--[if IE 6]><![endif]-->
-<!--[if lt IE 9]>
-  <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]-->
-  <title>hypothes.is</title>
-  <link rel="api" href="${request.route_path('api', subpath='')}" />
-  <link rel="stylesheet"
-        tal:attributes="href href"
-        tal:repeat="href environment['app_css'].urls()" />
-  <!-- TODO: make deform use_ajax widgets delay after jQuery loads -->
-  <script tal:attributes="src request.static_url('deform:static/' + src)"
-          tal:condition="exists: js_links"
-          tal:repeat="src js_links"></script>
-</head>
-<body>
-  <div id="wrapper">
+<metal:main use-macro="load: base.pt">
+  <div id="header" metal:fill-slot="header">
     <img alt="hypothes.is"
          class="hyp-logo"
          height="30px"
          src="${request.static_url('h:images/hypothesis.png')}" />
     <div metal:use-macro="auth" tal:define="auth load: auth.pt" />
-    <metal:main define-slot="content" />
   </div>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['annotator'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['d3'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['easyXDM'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['handlebars'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['jwz'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['templates'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['underscore'].urls()"></script>
-  <script>
-    window.annotator = new Hypothesis(document.body, {
+
+  <div id="app" metal:fill-slot="content">
+    <script tal:attributes="src src"
+            tal:repeat="src environment['annotator'].urls()"></script>
+    <script tal:attributes="src src"
+            tal:repeat="src environment['d3'].urls()"></script>
+    <script tal:attributes="src src"
+            tal:repeat="src environment['easyXDM'].urls()"></script>
+    <script tal:attributes="src src"
+            tal:repeat="src environment['handlebars'].urls()"></script>
+    <script tal:attributes="src src"
+            tal:repeat="src environment['jwz'].urls()"></script>
+    <script tal:attributes="src src"
+            tal:repeat="src environment['templates'].urls()"></script>
+    <script tal:attributes="src src"
+            tal:repeat="src environment['underscore'].urls()"></script>
+    <script>
+      window.annotator = new Hypothesis(document.body, {
       Auth: {
-        tokenUrl: '${request.route_url('token')}'
+      tokenUrl: '${request.route_url('token')}'
       },
       Heatmap: {}
-    })
-  </script>
-</body>
-</html>
+      })
+    </script>
+  </div>
+</metal:main>

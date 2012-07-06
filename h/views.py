@@ -103,44 +103,46 @@ class FormView(FormView):
     """
 
     use_ajax = True
+    ajax_options = "{type: 'POST'}"
 
     def __init__(self, request, **kwargs):
         super(FormView, self).__init__(request)
         self.form_class = partial(self.form_class, **kwargs)
 
-    def show(self, form):
-        if self.request.method == 'POST' and self.request.is_xhr:
-            formid = self.request.params.get('__formid__')
-            new_request = self.request.copy_get()
-            new_request.user = self.request.user
-            new_request.registry = self.request.registry
-            context = getattr(self.request, 'context', None)
-            response = render_view_to_response(context, new_request, formid)
-            response.headers.update(self.request.response.headers)
-            return response
+    def __call__(self):
+        result = super(FormView, self).__call__()
+        if self.request.is_xhr:
+            if isinstance(result, Response):
+                raise result
+            return result['form']
         else:
-            return super(FormView, self).show(form)
+            return result
+
+    @property
+    def partial(self):
+        return getattr(self, self.request.params['__formid__'])
 
 # Forms
 # =====
 
 class login(FormView):
     schema = LoginSchema(validator=login_validator)
-    buttons = ('sign in',)
-    use_ajax = False
-    form_class = partial(Form,
-                         bootstrap_form_style='form-vertical',
-                         formid='auth')
+    buttons = ('log in',)
 
     def __call__(self):
         if self.request.user:
-            return HTTPSeeOther(location=self.request.route_url('home'))
-        return super(FormView, self).__call__()
+            return HTTPSeeOther(location=self._came_from)
+        return super(login, self).__call__()
 
-    def sign_in_success(self, form):
+    @property
+    def _came_from(self):
+        app = self.request.route_url('app')
+        return self.request.params.get('came_from', app)
+
+    def log_in_success(self, form):
         user = AuthUser.get_by_login(form['username'])
         headers = remember(self.request, user.auth_id)
-        return HTTPSeeOther(headers=headers, location=self.request.route_url('home'))
+        return HTTPSeeOther(headers=headers, location=self._came_from)
 
 class register(FormView):
     schema = RegisterSchema(validator=register_validator)
@@ -153,7 +155,7 @@ class register(FormView):
     def __call__(self):
         if self.request.user:
             return HTTPSeeOther(location=self.request.route_url('home'))
-        return super(FormView, self).__call__()
+        return super(register, self).__call__()
 
     def register_success(self, form):
         session = self.request.db
@@ -170,18 +172,35 @@ class register(FormView):
 
 class persona(FormView):
     schema = PersonaSchema()
-    use_ajax = True
 
 # Views
 # =====
 
-def app(request):
-    assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
+class app(FormView):
+    def __init__(self, request):
+        self.request = request
+
+    @property
+    def auth(self):
+        return auth(self.request)(
+            self.request,
+            action='app',
+            bootstrap_form_style='form-vertical',
+            formid='auth',
+        )
+
+    def __call__(self):
+        request = self.request
+        assets_env = self.request.registry.queryUtility(IWebAssetsEnvironment)
+        form = self.auth()
+        form['css_links'].extend(assets_env['app_css'].urls())
+        return form
+
+def auth(request):
     if request.user:
-        form = persona(request)
+        return persona
     else:
-        form = login(request, bootstrap_form_style='form-vertical')
-    return form()
+        return login
 
 def embed(request):
     assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
@@ -190,27 +209,27 @@ def embed(request):
         for pkg in ['easyXDM', 'injector', 'inject_css', 'jquery']
     }
 
-class home(object):
+class home(FormView):
     def __init__(self, request):
         self.request = request
 
     @property
-    def partial(self):
-        return getattr(self, self.request.params['__formid__'])
+    def auth(self):
+        return auth(self.request)(
+            self.request,
+            action='app',
+            bootstrap_form_style='form-vertical',
+            formid='auth',
+        )
 
     def __call__(self):
         request = self.request
-        action = request.get('action', 'login')
-        if self.request.user:
-            form = persona(request)
-        else:
-            form = login(request,
-                         bootstrap_form_style='form-vertical',
-                         formid='auth')
+        assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
         code = render('h:templates/embed.pt', embed(request), request=request)
-        result = form()
-        result.setdefault('js_scripts', []).append(code)
-        return result
+        form = self.auth()
+        form.setdefault('css_links', []).extend(assets_env['site_css'].urls())
+        form.setdefault('js_scripts', []).append(code)
+        return form
 
 def includeme(config):
     config.include('deform_bootstrap')
@@ -219,12 +238,12 @@ def includeme(config):
 
     config.add_view(home, renderer='templates/home.pt')
     config.add_view(home, attr='partial', renderer='templates/form.pt', xhr=True)
-    config.add_view(home, name='auth', attr='auth', renderer='templates/form.pt')
 
     config.add_view(app, renderer='templates/app.pt', route_name='app')
+    config.add_view(app, renderer='string', route_name='app',
+                    attr='partial', xhr=True)
 
-    config.add_view(login, renderer='templates/auth.pt',
-                    route_name='login')
+    config.add_view(login, renderer='templates/base.pt', route_name='login')
     config.add_view(logout, route_name='logout')
     config.add_view(register, renderer='templates/auth.pt',
                     route_name='register')
