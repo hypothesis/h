@@ -12,6 +12,24 @@ body {
   width: 100%;
 }
 
+input { width: 100%; }
+img { vertical-align: top; }
+
+section {
+  margin-top: 2em;
+  &:first-child { margin-top: 0; }
+}
+
+.right {
+  left: 50%;
+  height: 2em;
+  margin-top: -2em;
+  max-width: 50%;
+  position: relative;
+  text-align: right;
+  a { @include small; }
+}
+
 //ICON IMAGES
 $iconset: iconset_wireframe;
 
