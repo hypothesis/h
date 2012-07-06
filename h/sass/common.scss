@@ -91,6 +91,11 @@ span.errorMsg {
   }
 }
 
+.alert-block {
+  span.errorMsgLbl { @extend .visuallyhidden; }
+  span.errorMsg { @extend .visuallyhidden; }
+}
+
 .btn-link {
 	background: none !important;
 	background-color: transparent;
