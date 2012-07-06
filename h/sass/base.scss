@@ -34,8 +34,8 @@ $link-color-hover:      darken($link-color, 15%);
 */
 
 // Typography
-$font-size:             16;
-$line-height:           25;
+$font-size:             17;
+$line-height:           24;
 $em:                    $font-size / 1em;
 
 // Columns
@@ -66,7 +66,7 @@ $heatmap-width: 40px;
 
 @mixin small {
   font-size: 13/$em;
-  line-height: 14/13*1em;
+  line-height: $line-height/13*1em;
 }
 
 @mixin normal {
