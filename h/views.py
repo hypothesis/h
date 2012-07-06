@@ -138,7 +138,8 @@ class login(FormView):
 
     @property
     def _came_from(self):
-        app = self.request.route_url('app')
+        formid = self.request.params.get('__formid__')
+        app = self.request.route_url('app', _query=(('__formid__', formid),))
         return self.request.params.get('came_from', app)
 
     def log_in_success(self, form):
