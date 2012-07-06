@@ -32,19 +32,6 @@ def consumer_fetcher(key):
 def token(request):
     """Get an API token for the logged in user."""
 
-    # Cross-Origin Resource Sharing headers needed for the token request
-    # include credentials so that the user can be authenticated.
-    headers = {
-        'Access-Control-Allow-Origin': request.headers.get('origin'),
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Expose-Headers': 'Location, Content-Type, Content-Length'
-    }
-    if request.method == 'OPTIONS': headers.update({
-        'Access-Control-Allow-Headers': 'Content-Type, Content-Length, X-Requested-With',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Max-Age': '86400'
-    })
-
     # The response is a JSON Web Token signed with the application's consumer
     # key and secret. In the future, other applications may have their own
     # consumer keys. Although, most of this should go away in favor of more
@@ -63,7 +50,7 @@ def token(request):
         'ttl': ttl
     }
     body = auth.encode_token(message, secret)
-    return Response(body=body, headerlist=headers.items())
+    return Response(body=body)
 
 def users(request):
     """Retrieve all the profiles assocatied with a principal."""
