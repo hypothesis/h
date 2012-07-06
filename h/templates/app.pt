@@ -1,10 +1,31 @@
 <metal:main use-macro="load: base.pt">
+  <div id="toolbar" metal:fill-slot="toolbar">
+    <img class="tab-logo"
+         src="${request.static_url('h:images/hypothelogo_square.png')}" />
+    <div>
+      <form tal:condition="request.user"
+            metal:use-macro="auth" tal:define="auth load: auth.pt" />
+    </div>
+  </div>
+
   <div id="header" metal:fill-slot="header">
-    <img alt="hypothes.is"
-         class="hyp-logo"
-         height="30px"
-         src="${request.static_url('h:images/hypothesis.png')}" />
-    <div metal:use-macro="auth" tal:define="auth load: auth.pt" />
+    <div tal:attributes="class 'hyp-widget'"
+         tal:condition="not request.user">
+      <form tal:replace="structure form"></form>
+      <div tal:condition="not request.user" class="right">
+        <a href="${request.route_url('forgot')}">Password help?</a>
+      </div>
+      <div tal:condition="'twitter' in request.registry.settings.get('velruse.providers', [])">
+        <a href="${request.route_url('twitter_login')}"
+           ><img alt="Sign in with twitter"
+                 src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"></a>
+      </div>
+      <div class="right"
+           tal:condition="'preauth' in request.registry.settings.get('velruse.providers', [])">
+        <a href="#"
+           >Have you already reserved a username with us?</a>
+      </div>
+    </div>
   </div>
 
   <div id="app" metal:fill-slot="content">

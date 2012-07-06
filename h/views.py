@@ -182,10 +182,11 @@ class app(FormView):
 
     @property
     def auth(self):
+        form_style = self.request.user and 'form-horizontal' or 'form-vertical'
         return auth(self.request)(
             self.request,
             action='app',
-            bootstrap_form_style='form-vertical',
+            bootstrap_form_style=form_style,
             formid='auth',
         )
 
