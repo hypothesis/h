@@ -6,8 +6,6 @@
 
 body {
   font-family: "Open Sans", sans-serif;
-  font-size: $font-size / $em * .8;
-  line-height: $line-height / $em * .8;
   height: 100%;
   overflow: auto;
   position: fixed;
@@ -252,7 +250,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //SCORE BADGE
 .hyp-score {
-  font-size: 14px;
   font-weight: bold;
   height: $score-height;
   line-height: $score-height;
@@ -282,7 +279,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .hyp-scorecontrol {
   position: relative;
   top: 0;
-  font-size: 14px;
   font-weight: bold;
   height: $score-height;
   width: $score-width;
@@ -349,7 +345,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //TINY SCORE
 .hyp-tinyscore {
-  font-size: 14px;
   font-weight: bold;
   height: $score-height;
   line-height: $score-height;

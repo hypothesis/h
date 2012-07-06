@@ -50,6 +50,12 @@
 body {
   color: $gray;
   font-smoothing: antialiased;
+  font-size: $font-size / 16 * 1em;
+  line-height: $line-height / $em;
+}
+
+html {
+  font-size: 14px;
 }
 
 p {
