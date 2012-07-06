@@ -219,7 +219,7 @@ def includeme(config):
     config.add_view(home, attr='partial', renderer='templates/form.pt', xhr=True)
     config.add_view(home, name='auth', attr='auth', renderer='templates/form.pt')
 
-    config.add_view(app, renderer='templates/sidebar.pt', route_name='app')
+    config.add_view(app, renderer='templates/app.pt', route_name='app')
 
     config.add_view(login, renderer='templates/auth.pt',
                     route_name='login')
