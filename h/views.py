@@ -103,7 +103,9 @@ class FormView(FormView):
     """
 
     use_ajax = True
-    ajax_options = "{type: 'POST'}"
+    ajax_options = json.dumps({
+        'type': 'POST'
+    })
 
     def __init__(self, request, **kwargs):
         super(FormView, self).__init__(request)
