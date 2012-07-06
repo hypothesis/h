@@ -122,6 +122,8 @@ class Hypothesis extends Annotator
           if annotations?.length
             @bucket = bucket
             this.showViewer(annotations)
+          else
+            this.show()
 
     d3.select(@heatmap.element[0]).call(bindHeatmapEvents)
 
