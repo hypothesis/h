@@ -34,7 +34,7 @@ def login_validator(node, kw):
     if not valid:
         raise Invalid(
             node,
-            "Please, try again."
+            "Your username or password is incorrect."
         )
 
 def register_validator(node, kw):
