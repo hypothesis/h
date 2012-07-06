@@ -264,7 +264,6 @@ def includeme(config):
             charset='utf-8'),
         route_name='embed')
 
-    config.add_static_view('h/annotator', 'h:annotator')
     config.add_static_view('h/sass', 'h:sass')
     config.add_static_view('h/js', 'h:js')
     config.add_static_view('h/images', 'h:images')
