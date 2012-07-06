@@ -55,10 +55,12 @@ class LoginSchema(CSRFSchema):
     username = SchemaNode(
         String(),
         validator=Length(min=4, max=25),
+        placeholder="Username or Email"
     )
     password = SchemaNode(
         String(),
         widget=PasswordWidget(),
+        placeholder="Password"
     )
 
 class RegisterSchema(LoginSchema):
