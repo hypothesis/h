@@ -29,11 +29,29 @@
             tal:repeat="src environment['underscore'].urls()"></script>
     <script>
       window.annotator = new Hypothesis(document.body, {
-      Auth: {
-      tokenUrl: '${request.route_url('token')}'
-      },
-      Heatmap: {}
+        Heatmap: {}
       })
+
+      var setupAuth = function () {
+        window.annotator.addPlugin('Auth', {
+          tokenUrl: '${request.route_url('token')}'
+        })
+        window.annotator.plugins.Auth.withToken(function (token) {
+          window.annotator.plugins.Permissions.setUser(token.userId);
+        })
+      }
+
+      <tal:b tal:condition="request.user">setupAuth()</tal:b>
+
+      var loginSuccess = function (data) {
+        deform.processCallbacks();
+        var newForm = $('#' + this.id);
+        if (newForm.find('.alert-error').length == 0) {
+          $(newForm).detach().appendTo('#toolbar');
+          $('#header').remove()
+          setupAuth();
+        }
+      }
     </script>
   </div>
 </metal:main>

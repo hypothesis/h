@@ -8,7 +8,6 @@ class Hypothesis extends Annotator
 
   # Plugin configuration
   options:
-    Auth: {}
     Heatmap: {}
     Permissions:
       showEditPermissionsCheckbox: false,
@@ -59,18 +58,17 @@ class Hypothesis extends Annotator
 
     super
 
-  _initialize: =>
     # Load plugins
     for own name, opts of @options
       if not @plugins[name]
         this.addPlugin(name, opts)
 
+    this
+
+  _initialize: =>
     # Set up interface elements
     this._setupHeatmap()
     @wrapper.append(@viewer.element, @editor.element, @heatmap.element)
-
-    @plugins.Auth.withToken (token) =>
-      @plugins.Permissions.setUser token.userId
 
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.created = annotation.updated = (new Date()).toString()
@@ -390,7 +388,8 @@ class Hypothesis extends Annotator
 
   showEditor: (annotation) =>
     unless @plugins.Permissions?.user
-      alert("Not logged in!")
+      @editor.hide();
+      this.show()
       return
 
     if not annotation.user?

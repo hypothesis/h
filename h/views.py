@@ -130,6 +130,10 @@ class FormView(FormView):
 class login(FormView):
     schema = LoginSchema(validator=login_validator)
     buttons = ('log in',)
+    ajax_options = """{
+      success: loginSuccess,
+      type: 'POST'
+    }"""
 
     def __call__(self):
         if self.request.user:
