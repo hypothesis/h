@@ -22,12 +22,11 @@ section {
 
 .right {
   left: 50%;
-  height: 2em;
   margin-top: -2em;
   max-width: 50%;
   position: relative;
   text-align: right;
-  a { @include small; }
+  span { @include small; }
 }
 
 //ICON IMAGES
@@ -659,20 +658,23 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   top: 10px;
   width: 100%;
   z-index: 2;
-
-  div {
-    text-align: right;
-    vertical-align: middle;
-  }
+  text-align: right;
+  display: table;
 
   form {
+    display: table-cell;
     pointer-events: auto;
+    vertical-align: middle;
   }
 
   img {
     @include clearfix;
-    height: $heatmap-width;
     float: left;
+    height: $heatmap-width;
+  }
+
+  span {
+    display: inline-block;
   }
 }
 
@@ -683,7 +685,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   margin-left: 10px + $heatmap-width;
   overflow: auto;
   //TODO: heatmap width is not expressable in ems
-  padding: (40 / $em + 2em) 1em 1em 1em;
+  padding: (40 / $em + 1em) 1em 1em 1em;
 }
 
 /*
