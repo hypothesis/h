@@ -33,6 +33,7 @@ def includeme(config):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
     config.add_route('register', '/register')
+    config.add_route('forgot', '/forgot')
 
     config.scan(__name__)
     config.include('pyramid_webassets')

@@ -226,6 +226,8 @@ def includeme(config):
     config.add_view(logout, route_name='logout')
     config.add_view(register, renderer='templates/auth.pt',
                     route_name='register')
+    config.add_view(lambda r: {}, renderer='templates/base.pt',
+                    route_name='forgot')
 
     config.add_view(
         lambda r: Response(
