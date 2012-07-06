@@ -84,15 +84,6 @@ class Annotator.Host extends Annotator
   _setupEditor: ->
     true
 
-  # Sets up the selection event listeners to watch mouse actions on the document.
-  #
-  # Returns itself for chaining.
-  _setupDocumentEvents: ->
-    $(document).bind({
-      "mouseup": this.checkForEndSelection
-    })
-    this
-
   showEditor: (annotation) =>
     stub =
       ranges: annotation.ranges
