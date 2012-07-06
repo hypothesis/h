@@ -79,6 +79,9 @@ class Hypothesis extends Annotator
     @wrapper = $('#wrapper')
     this
 
+  _setupDocumentEvents: ->
+    this
+
   _setupHeatmap: () ->
     @heatmap = @plugins.Heatmap
 
