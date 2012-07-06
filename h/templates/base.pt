@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang='en' lang='en'>
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-<!--[if IE 6]><![endif]-->
-<!--[if lt IE 9]>
-  <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]-->
-  <!-- TODO: make deform use_ajax widgets delay after jQuery loads -->
-  <script tal:attributes="src request.static_url('deform:static/' + src)"
-          tal:condition="exists: js_links"
-          tal:repeat="src js_links"></script>
-  <script tal:condition="exists: js_scripts"
-          tal:content="structure src"
-          tal:repeat="src js_scripts"></script>
-  <link rel="stylesheet"
-        tal:attributes="href href"
-        tal:repeat="href css_links" />
-  <link rel="api" href="${request.route_path('api', subpath='')}" />
-  <title>hypothes.is</title>
-</head>
-<body tal:attributes="class 'toolbar' if request.user else default">
-  <div id="flash-msg"></div>
-  <metal:main define-slot="toolbar" />
-  <div id="wrapper">
-    <metal:main define-slot="header" />
-    <metal:main define-slot="content" />
-    <metal:main define-slot="footer" />
-  </div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!--[if IE 6]><![endif]-->
+    <!--[if lt IE 9]>
+        <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+    <!-- TODO: make deform use_ajax widgets delay after jQuery loads -->
+    <script tal:attributes="src request.static_url('deform:static/' + src)"
+            tal:condition="exists: js_links"
+            tal:repeat="src js_links"></script>
+    <script tal:condition="exists: js_scripts"
+            tal:content="structure src"
+            tal:repeat="src js_scripts"></script>
+    <link rel="stylesheet"
+          tal:attributes="href href"
+          tal:repeat="href css_links" />
+    <link rel="api" href="${request.route_path('api', subpath='')}" />
+    <title>hypothes.is</title>
+  </head>
+  <body>
+    <div id="flash-msg"></div>
+    <metal:main define-slot="toolbar" />
+    <div id="wrapper">
+      <metal:main define-slot="header" />
+      <metal:main define-slot="content" />
+      <metal:main define-slot="footer" />
+    </div>
+  </body>
 </html>
