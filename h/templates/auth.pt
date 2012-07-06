@@ -1,14 +1,20 @@
-<form tal:replace="structure form"></form>
-<div tal:condition="not request.user" class="right">
-  <a href="${request.route_url('forgot')}">Password help?</a>
-</div>
-<div tal:condition="'twitter' in request.registry.settings.get('velruse.providers', [])">
-  <a href="${request.route_url('twitter_login')}"
-     ><img alt="Sign in with twitter"
-           src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"></a>
-</div>
-<div class="right"
-     tal:condition="'preauth' in request.registry.settings.get('velruse.providers', [])">
-  <a href="#"
-     >Have you already reserved a username with us?</a>
-</div>
+<section>
+  <form tal:replace="structure form"></form>
+  <div tal:condition="not request.user" class="right">
+    <span><a href="${request.route_url('forgot')}">Password help?</a></span>
+  </div>
+</section>
+
+<section tal:condition="request.registry.settings.get('velruse.providers', False)">
+  <div tal:condition="'twitter' in request.registry.settings.get('velruse.providers', [])">
+    <a href="${request.route_url('twitter_login')}"
+       ><img alt="Sign in with twitter"
+             src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"></a>
+  </div>
+  <div class="right"
+       tal:condition="'preauth' not in request.registry.settings.get('velruse.providers', [])">
+    <span><a href="#preauth"
+             >Have you already reserved a username with us?</a>
+    </span>
+  </div>
+</section>
