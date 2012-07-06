@@ -6,14 +6,6 @@
 @import "base";
 @import "common";
 
-a {
-  color: $link-color;
-  text-decoration: none;
-  &:hover {
-    color: $link-color-hover;
-  }
-}
-
 article {
   padding: 1em;
 }

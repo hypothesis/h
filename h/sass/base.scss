@@ -113,25 +113,18 @@ $heatmap-width: 30px;
 
 /* Form mixins */
 @mixin plainform {
-  @include single-transition("-webkit-box-shadow", .6s, ease);
-  @include single-transition("-moz-box-shadow", .6s, ease);
-  @include single-transition("-o-box-shadow", .6s, ease);
-  @include single-transition("box-shadow", .6s, ease);
+  @include single-transition("-webkit-box-shadow,border-color", .6s, ease);
+  @include single-transition("-moz-box-shadow,border-color", .6s, ease);
+  @include single-transition("-o-box-shadow,border-color", .6s, ease);
+  @include single-transition("box-shadow,border-color", .6s, ease);
   font-family: "Open Sans";
-  font-size: 1em;
-  display: inline-block;
-  box-sizing: border-box;
-  padding: 6px 6px;
-  margin-bottom: 9px;
-  color: $gray;
+  color: $gray-light;
   background-color: #fff;
-  border: 1px solid #666;
-  border-radius: 3px;
+  border: 1px solid #e0e0e0;
+  border-radius: .15em;
   &:focus {
-    @include box-shadow(
-      inset 0 1px 1px rgba(0, 0, 0, .075),
-      0 0 8px rgba(82, 168, 236, .6 ));
-    border-color: rgba(82, 168, 236, .8);
+    @include box-shadow(inset 0 1px 1px #959595);
+    border-color: $gray-light;
     outline: 0;
   }
 }
