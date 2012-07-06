@@ -1,11 +1,20 @@
-<metal:main use-macro="load: base.pt">
-  <article metal:fill-slot="content">
-    <div class="title">
-      <img height="150px" width="150px"
-           src="${request.static_url('h:images/hypothelogo_square.png')}" />
-      <h1>hypothes<span class="red">.</span>is</h1>
-      <h2>The&#160;Internet, peer&#160;reviewed.</h2>
+<div tal:attributes="class python: not request.user and 'hyp-widget' or ''">
+  <section>
+    <form tal:replace="structure form"></form>
+    <div tal:condition="not request.user" class="right">
+      <a href="${request.route_url('forgot')}">Password help?</a>
     </div>
-    <section><form tal:replace="structure form" /></section>
-  </article>
-</metal:main>
+  </section>
+  <section tal:condition="not request.user">
+    <div tal:condition="'twitter' in request.registry.settings.get('velruse.providers', [])">
+      <a href="${request.route_url('twitter_login')}"
+         ><img alt="Sign in with twitter"
+               src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"></a>
+    </div>
+    <div class="right"
+         tal:condition="'preauth' in request.registry.settings.get('velruse.providers', [])">
+      <a href="#"
+         >Have you already reserved a username with us?</a>
+    </div>
+  </section>
+</div>

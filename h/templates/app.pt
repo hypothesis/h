@@ -22,6 +22,7 @@
          class="hyp-logo"
          height="30px"
          src="${request.static_url('h:images/hypothesis.png')}" />
+    <div metal:use-macro="auth" tal:define="auth load: auth.pt" />
     <metal:main define-slot="content" />
   </div>
   <script tal:attributes="src src"
