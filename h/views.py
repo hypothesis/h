@@ -237,19 +237,17 @@ def includeme(config):
     config.include('pyramid_deform')
     config.include('velruse.app')
 
-    config.add_view(home, renderer='templates/home.pt')
-    config.add_view(home, attr='partial', renderer='templates/form.pt', xhr=True)
-
     config.add_view(app, renderer='templates/app.pt', route_name='app')
     config.add_view(app, renderer='string', route_name='app',
                     attr='partial', xhr=True)
 
-    config.add_view(login, renderer='templates/base.pt', route_name='login')
+    config.add_view(home, renderer='templates/home.pt')
+    config.add_view(home, attr='partial', renderer='templates/form.pt', xhr=True)
+
+    config.add_view(login, route_name='login')
     config.add_view(logout, route_name='logout')
-    config.add_view(register, renderer='templates/auth.pt',
-                    route_name='register')
-    config.add_view(lambda r: {}, renderer='templates/base.pt',
-                    route_name='forgot')
+    config.add_view(register, route_name='register')
+    config.add_view(lambda r: {}, route_name='forgot')
 
     config.add_view(
         lambda r: Response(
