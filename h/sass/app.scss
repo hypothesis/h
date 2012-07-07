@@ -29,10 +29,8 @@ section {
   span { @include small; }
 }
 
-//ICON IMAGES
-$iconset: iconset_wireframe;
-
 @mixin icon_resets {
+//ICON IMAGES
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100% 100%;
@@ -443,7 +441,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     font-size: 1.1em;
     line-height: 1.3em;
     margin: 0;
-    padding: 0 2em;
+    padding: 0 1em;
   }
 
   &:before {
@@ -451,11 +449,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     content: "“";
     font-family: "PT Serif";
     font-size: 6em;
-    vertical-align: text-bottom;
-
     position: absolute;
-    top: .4em;
-    left: 0;
+    top: .45em;
+    left: -.15em;
   }
 
   &:after {
@@ -463,10 +459,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     content: "„";
     font-family: "PT Serif";
     font-size: 5em;
-
     position: absolute;
-    right: 0;
-    bottom: .45em;
+    right: -.15em;
+    bottom: .5em;
   }
 }
 
