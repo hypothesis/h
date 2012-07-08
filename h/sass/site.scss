@@ -39,15 +39,13 @@ section {
 
   .bookmarklet {
     @extend .hyp-button;
-    border: thin dashed $gray;
+    border: 1px dashed $base-gray;
   }
 }
 
 #wrapper {
-  @include box-shadow(desaturate($yellow, 75%) 0 0 .5em);
-  border: lighten($gray-light, 30%) solid thin;
-  background-color: lighten($gray-lighter, 3%);
-  font-size: ($font-size + 2) / $font-size * 1em;
+  border: $light-gray solid 1px;
+  background-color: $lighter-gray;
 }
 
 /*

@@ -103,7 +103,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //LOGO
 .hyp-logo {
-  color: $gray-light;
+  color: $light-gray;
   display: inline-block;
   font-size: 2em;
   text-shadow: 0px 2px 1px #fff;
@@ -111,7 +111,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 .hyp-red {
-  color: $red;
+  color: $hypothered;
 }
 
 .hypothesis-logotype_b {
@@ -149,14 +149,14 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     background: hsla(0, 0%, 99%, 1);
     border-top-right-radius: .25em;
     border-top-left-radius: .25em;
-    color: $gray-light;
+    color: $light-gray;
 
-    &:hover { background: $gray-lighter; }
+    &:hover { background: $lighter-gray; }
     &:active { box-shadow: none; }
 
     &.hyp-selected {
       @include box-shadow(none);
-      color: $gray-dark;
+      color: $base-gray;
       font-weight: bold;
       background: hsla(0, 0%, 100%, 1);
     }
@@ -191,7 +191,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   padding-left: $thread-padding / 2;
 
   & > .annotator-listing {
-    border-left: 1px dotted $gray-light;
+    border-left: 1px dotted $light-gray;
     margin-left: $threadexp-width / 2;
 
     & > * {
@@ -241,7 +241,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     background-size: 1em 1em;
     background-repeat: no-repeat;
     background-position: left center;
-    color: $gray;
+    color: $base-gray;
 
     &.hyp-write {
       background-image: url("../images/pen_1.png");
@@ -388,7 +388,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //ADDER
 .hyp-adder {
   @include smallshadow;
-  border: 1px dotted $gray-light;
+  border: 1px dotted $light-gray;
   position: absolute;
   background-image: url("../images/noise_1.png");
   button {
@@ -419,9 +419,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include box-shadow(1px 1px 10px hsla(0, 0%, 0%, .05));
   display: inline-block;
   background: #f3f3f3;
-  color: $gray;
+  color: $base-gray;
   border-radius: 2px;
-  border: 1px solid $gray-light;
+  border: 1px solid $light-gray;
   padding: .1em .4em;
   padding-bottom: .2em;
   vertical-align: bottom;
@@ -438,7 +438,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   position: relative;
 
   blockquote {
-    color: $gray;
+    color: $base-gray;
     font-family: "Merriweather";
     font-size: 1.1em;
     line-height: 1.3em;
@@ -589,7 +589,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   z-index: 20;
 
   textarea {
-    @include box-shadow(inset 0 -.25em .25em 0 $gray-lighter);
+    @include box-shadow(inset 0 -.25em .25em 0 $lighter-gray);
     width: 100%;
     max-width: 100%;
     min-height: 8em;
@@ -648,9 +648,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 #toolbar {
-  background: $white;
+  background: white;
   left: 1px;
-  outline: solid 1px $black;
+  outline: solid 1px black;
   padding-right: 1em;
   pointer-events: none;
   position: absolute;
