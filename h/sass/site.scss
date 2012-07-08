@@ -26,7 +26,7 @@ section {
 }
 
 #toolbar {
-  @include small;
+  font-size: .9em;
   position: absolute;
   text-align: center;
   width: 100%;
@@ -93,7 +93,7 @@ section {
   }
 
   #header {
-    @include small;
+    font-size: .9em;
     float: right;
     text-align: left;
     top: inherit;

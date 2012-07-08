@@ -26,7 +26,7 @@ section {
   max-width: 50%;
   position: relative;
   text-align: right;
-  span { @include small; }
+  span { font-size: .9em; }
 }
 
 @mixin icon_resets {
