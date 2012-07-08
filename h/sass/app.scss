@@ -66,7 +66,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 .annotator-heatmap {
-  @include tinyshadow(-1px, 0, .2);
   background: hsla(0, 0, 0, .1);
   position: absolute;
   top: 0;
@@ -118,17 +117,14 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //ANNOTATOR LAYOUT STUFF
 .hyp-hl_positive {
-  @include tinyshadow(1px, 1px, .2);
   background: rgba($positive, .3);
 }
 
 .hyp-hl_negative {
-  @include tinyshadow(1px, 1px, .2);
   background: rgba($negative, .3);
 }
 
 .hyp-hl_neutral {
-  @include tinyshadow(1px, 1px, .2);
   background: rgba($neutral, .3);
 }
 

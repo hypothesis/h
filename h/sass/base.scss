@@ -57,15 +57,6 @@ $heatmap-width: 40px;
   @include box-shadow($a $b 1em hsla(0, 0%, 0%, $c));
 }
 
-@mixin tinyshadow($a: 1px, $b: 1px, $c: .1) {
-  @include box-shadow($a $b .5em hsla(0, 0%, 0%, $c));
-}
-
-@mixin medshadow($a: 2px, $b: 2px, $c: .1) {
-  @include box-shadow($a $b 2em hsla(0, 0%, 0%, $c));
-}
-
-
 @mixin plainform {
   font-family: "Open Sans", sans-serif;
   font-size: 1em;
