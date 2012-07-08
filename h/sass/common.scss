@@ -9,11 +9,11 @@ a {
 body {
   color: $base-gray;
   font-smoothing: antialiased;
-  font-size: $font-size / 16 * 1em;
-  line-height: $line-height / $em;
+  font-size: 1em;
+  line-height: 1em;
 }
 
-button { @extend .btn; }
+//button { @extend .btn; }
 
 html {
   font-size: 14px;
