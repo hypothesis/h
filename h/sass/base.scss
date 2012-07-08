@@ -1,27 +1,18 @@
 @import 'compass/css3';
 
-// Grays
-$black:                 #000;
-$gray-darker:           #222;
-$gray-dark:             #333;
-$gray:                  #666;
-$gray-light:            #999;
-$gray-lighter:          #eee;
-$white:                 #fff;
+// GRAYS
+$base-gray: #777;
+$gray-interval: #1e1e1e;
+$light-gray: $base-gray + ( $gray-interval * 1 );
+$lighter-gray: $base-gray + ( $gray-interval * 3.5 );
 
-// Accent colors
-$blue:                  #049cdb;
-$blue-dark:             #0064cd;
-$green:                 #46a546;
-$red:                   #bd1e2d;
-$yellow:                #ffc40d;
-$orange:                #f89406;
-$pink:                  #c3325f;
-$purple:                #7a43b6;
+//COLORS
+$hypothered: #bd1c2b;
+$hypothered-desat: #bd5862;
 
-// Links
-$link-color:            $red;
-$link-color-hover:      darken($link-color, 15%);
+//LINKS
+$link-color:            $hypothered-desat;
+$link-color-hover:      $hypothered;
 
 /*
   Thanks:
@@ -118,13 +109,13 @@ $heatmap-width: 40px;
   @include single-transition("-o-box-shadow,border-color", .6s, ease);
   @include single-transition("box-shadow,border-color", .6s, ease);
   font-family: "Open Sans";
-  color: $gray-light;
+  color: $light-gray;
   background-color: #fff;
   border: 1px solid #e0e0e0;
   border-radius: .15em;
   &:focus {
     @include box-shadow(inset 0 1px 1px #959595);
-    border-color: $gray-light;
+    border-color: $light-gray;
     outline: 0;
   }
 }

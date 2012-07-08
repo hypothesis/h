@@ -7,7 +7,7 @@ a {
 }
 
 body {
-  color: $gray;
+  color: $base-gray;
   font-smoothing: antialiased;
   font-size: $font-size / 16 * 1em;
   line-height: $line-height / $em;
@@ -32,7 +32,7 @@ h1 { @include large; }
 h2 { @include big; }
 h1, h2, h3 { font-weight: 700; }
 h1, h2, h3, h4 {
-  color: darken($gray, 15%);
+  color: darken($base-gray, 15%);
   margin: .33em 0;
 }
 
@@ -53,7 +53,7 @@ label {
 span.error, p.errorMsg {
   @include small;
   color: red;
-  text-shadow: $white -.05em .05em .01em;
+  text-shadow: white -.05em .05em .01em;
 }
 
 span.errorMsg {
@@ -68,7 +68,7 @@ span.errorMsg {
   @include box-shadow(
     inset 0 .2em 0 rgba(255, 255, 255, .2),
     0 .05em .1em rgba(0, 0, 0, .08));
-  color: $black;
+  color: black;
   cursor: pointer;
   display: inline-block;
   padding: .4em .9em .5em;
@@ -108,7 +108,7 @@ span.errorMsg {
 }
 
 .red {
-  color: $red;
+  color: $hypothered;
 }
 
 .form-horizontal {
