@@ -28,16 +28,35 @@ p {
 
 em { font-style: italic; }
 
-h1 { @include large; }
-h2 { @include big; }
-h1, h2, h3 { font-weight: 700; }
-h1, h2, h3, h4 {
-  color: darken($base-gray, 15%);
-  margin: .33em 0;
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Open Sans", sans-serif;
+  line-height: 1.2em;
+  margin: 0 0 .4em;
+  padding: 0 0 .1em;
+  color: $base-gray;
 }
 
-h1, form {
-  font-family: "Open Sans", sans-serif;
+h1 {
+  font-size: 2.5em;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1em;
+  margin: 0;
+}
+
+h4 {
+  font-size: 1.25em;
+  margin: 0 0 .1em;
+}
+
+h5, h6 {
+  font-size: 1em;
+  margin: 0 0 .1em;
 }
 
 input, textarea {
@@ -51,13 +70,13 @@ label {
 }
 
 span.error, p.errorMsg {
-  @include small;
+  font-size: .9em;
   color: red;
   text-shadow: white -.05em .05em .01em;
 }
 
 span.errorMsg {
-  @include small;
+  font-size: .9em;
 }
 
 .btn {
