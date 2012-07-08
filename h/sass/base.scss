@@ -51,34 +51,6 @@ $score-width: 40px;
 $score-height: $score-width;
 $heatmap-width: 40px;
 
-/*
-  Type presets
-  */
-
-@mixin big {
-  font-size: 23/$em;
-  line-height: 24/23*1em;
-}
-
-@mixin large {
-  font-size: 27/$em;
-  line-height: 36/27*1em;
-}
-
-@mixin huge {
-  font-size: 44/$em;
-  line-height: 48/44*1em;
-}
-
-@mixin enormous {
-  font-size: 72/$em;
-  line-height: 72/72*1em;
-}
-
-@mixin gigantic {
-  font-size: 116/$em;
-  line-height: 120/116*1em;
-}
 
 /* Shadow mixins */
 @mixin smallshadow($a: 2px, $b: 2px, $c: .1) {
