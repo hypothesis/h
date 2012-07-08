@@ -646,8 +646,10 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 #toolbar {
   background: white;
   left: 1px;
-  outline: solid 1px black;
+  outline: solid 1px $lighter-gray;
   padding-right: 1em;
+  border-radius: .25em;
+  @include smallshadow;
   pointer-events: none;
   position: absolute;
   top: 10px;
