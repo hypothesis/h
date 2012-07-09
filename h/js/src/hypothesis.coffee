@@ -77,6 +77,14 @@ class Hypothesis extends Annotator
 
   _setupWrapper: ->
     @wrapper = $('#wrapper')
+    .on 'mousewheel', (event, delta) ->
+      scrollTop = $(this).scrollTop()
+      scrollBottom = $(this).get(0).scrollHeight - $(this).innerHeight()
+      console.log scrollTop, scrollBottom
+      if delta > 0 and scrollTop == 0
+        event.preventDefault()
+      else if delta < 0 and scrollTop == scrollBottom
+        event.preventDefault()
     this
 
   _setupDocumentEvents: ->
