@@ -1,3 +1,12 @@
+utils =
+  debounce: (delay=0, fn) =>
+      timer = null
+      =>
+        if timer then clearTimeout(timer)
+        setTimeout delay, =>
+          timer = null
+          fn()
+
 class Annotator.Host extends Annotator
   # Events to be bound on Annotator#element.
   events:
@@ -66,15 +75,8 @@ class Annotator.Host extends Annotator
         back: {}
         update: {}
 
-    # Throttle resize events and update the heatmap
-    throttledUpdate = () =>
-      clearTimeout(@updateTimer) if @updateTimer?
-      @updateTimer = setTimeout =>
-        @updateTimer = null
-        @consumer.update()
-
-    $(window).resize(throttledUpdate).scroll(throttledUpdate)
-    $(@wrapper).on 'mouseup', (event) =>
+    $(window).on 'resize scroll', utils.debounce => @consumer.update()
+    @wrapper.on 'mouseup', (event) =>
       @consumer.back() unless @ignoreMouseup
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
