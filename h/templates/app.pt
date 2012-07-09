@@ -1,7 +1,7 @@
 <metal:main use-macro="load: base.pt">
   <div id="toolbar" metal:fill-slot="toolbar">
     <img class="tab-logo"
-         src="${request.static_url('h:images/hypothelogo_square.png')}" />
+         src="${request.static_url('h:images/hbar-logo-small.png')}" />
     <form tal:condition="request.user" tal:replace="structure form" />
   </div>
 
