@@ -2,9 +2,8 @@
 
 // GRAYS
 $gray: #777;
-$gray-interval: 12%;
-$gray-light: lighten($gray, $gray-interval);
-$gray-lighter: lighten($gray, $gray-interval * 3.5);
+$gray-light: lighten($gray, 12%);
+$gray-lighter: lighten($gray, 24%);
 
 //COLORS
 $hypothered: #bd1c2b;
@@ -46,7 +45,7 @@ $gutter: 24;
   color: $gray;
   background-color: #ffffff !important;
   border: 1px solid $gray-lighter;
-  border-radius: 3px;
+  border-radius: .2em;
   box-sizing: border-box;
   font-family: "Open Sans", sans-serif;
   font-size: 1em;
@@ -54,7 +53,7 @@ $gutter: 24;
   &:focus {
     outline: 0;
     border: 1px solid $gray-light;
-    @include box-shadow( inset 1px 1px 6px -2px $gray-light);
+    @include box-shadow( inset 1px 1px 6px -2px $gray-lighter);
     }
   }
 
