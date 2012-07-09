@@ -8,16 +8,17 @@ yepnope([
     nope: ${jquery}
   },
   {
-    test: window.annotator,
+    test: window.Annotator,
     nope: Array.prototype.concat.call(${injector}, ${easyXDM}, ${inject_css}),
     complete: function () {
+      if (window.Annotator._instance) return;
       var app = '${request.route_url("app")}'
 
       var uri = document.location.href
       if (document.location.hash) uri = uri.slice(0, -1 * location.hash.length)
 
       $(function () {
-        var annotator = window.annotator = new Annotator.Host(document.body, {
+        var annotator = new Annotator.Host(document.body, {
           /* @@ reflect routes with crossroads.js?? */
           app: app,
         })
@@ -26,6 +27,7 @@ yepnope([
           loadFromSearch: { uri: uri },
           prefix: '${request.route_url("api", subpath="")}'
         })
+        window.Annotator._instance = annotator;
       })
     }
   }
