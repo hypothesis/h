@@ -12,7 +12,7 @@
              src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"></a>
   </div>
   <div class="right"
-       tal:condition="'preauth' not in request.registry.settings.get('velruse.providers', [])">
+       tal:condition="'preauth' in request.registry.settings.get('velruse.providers', [])">
     <span><a href="#preauth"
              >Have you already reserved a username with us?</a>
     </span>
