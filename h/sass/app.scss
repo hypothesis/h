@@ -78,7 +78,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   top: 0;
   left: 10px;
   width: $heatmap-width;
-  z-index: 1;
   cursor: pointer;
   cursor: hand;
 }
@@ -100,7 +99,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   text-decoration: none;
   text-shadow: 1px 1px 1px rgb(51, 51, 51);
   width: 3.5em;
-  z-index: 502;
   vertical-align: middle;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
