@@ -82,6 +82,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   cursor: hand;
 }
 
+.annotator-outer {
+  padding: 1em;
+  margin-top: 3em;
+}
+
 // Heatmap tabs
 .hyp-heatmap-tab {
   background-image: url("../images/side_tab.svg");
@@ -576,11 +581,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   border-radius: .25em;
   display: table;
   left: 1px;
+  margin-top: 1em;
   padding-right: 1em;
   pointer-events: none;
   position: absolute;
   text-align: right;
-  top: 10px;
   width: 100%;
   z-index: 2;
 
@@ -608,9 +613,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   height: 100%;
   margin-left: 10px + $heatmap-width;
   overflow: auto;
-  //TODO: heatmap width is not expressable in ems
-  padding: 1em;
-  padding-top: 50px;
 }
 
 /*

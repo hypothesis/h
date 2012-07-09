@@ -6,9 +6,11 @@
   </div>
 
   <div id="header" metal:fill-slot="header">
-    <div tal:attributes="class 'hyp-widget'"
+    <div tal:attributes="class 'annotator-outer'"
          tal:condition="not request.user">
-      <form metal:use-macro="auth" tal:define="auth load: auth.pt" />
+      <div class="hyp-widget">
+        <form metal:use-macro="auth" tal:define="auth load: auth.pt" />
+      </div>
     </div>
   </div>
 
