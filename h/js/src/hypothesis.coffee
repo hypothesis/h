@@ -72,9 +72,8 @@ class Hypothesis extends Annotator
     @wrapper.append(@viewer.element, @editor.element, @heatmap.element)
 
     @provider.getMaxBottom (max) =>
-      top = parseInt @wrapper.css('padding-top')
-      @wrapper.css("padding-top", "#{max + top}px")
       $('#toolbar').css("top", "#{max}px")
+      @wrapper.css("padding-top", "#{max}px")
 
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.created = annotation.updated = (new Date()).toString()
