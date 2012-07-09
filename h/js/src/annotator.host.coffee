@@ -67,6 +67,13 @@ class Annotator.Host extends Annotator
             data: $(this).data('annotation').hash
           .get()
           offset: $(@wrapper[0].ownerDocument).scrollTop()
+        setActiveHighlights: (hashes=[]) =>
+          @wrapper.find('.annotator-hl')
+          .each ->
+            if $(this).data('annotation').hash in hashes
+              $(this).addClass('annotator-hl-active')
+            else
+              $(this).removeClass('annotator-hl-active')
         getMaxBottom: =>
           sel = '*' + (":not(.annotator-#{x})" for x in [
             'adder', 'outer', 'notice', 'filter', 'frame'

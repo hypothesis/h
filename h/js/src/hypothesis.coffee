@@ -29,22 +29,26 @@ class Hypothesis extends Annotator
       local:
         publish: (event, args, k, fk) =>
           if event in ['annotationCreated']
-            [hash] = args
-            annotation = @cache[hash]
+            [h] = args
+            annotation = @cache[h]
             this.publish event, [annotation]
         addPlugin: => this.addPlugin arguments...
         createAnnotation: =>
-          @cache[hash = ++@hash] = this.createAnnotation()
-          hash
+          @cache[h = ++@hash] = this.createAnnotation()
+          h
         showEditor: (stub) =>
-          annotation = $.extend(@cache[stub.hash], stub)
-          delete annotation.hash
+          h = stub.hash
+          annotation = $.extend @cache[h], stub,
+            hash:
+              toJSON: => undefined
+              valueOf: => h
           this.showEditor annotation
         back: =>
           if @detail
             this.showViewer(@heatmap.buckets[@bucket])
           else
             @bucket = -1
+            @provider.setActiveHighlights []
             this.hide()
         update: => this.publish 'hostUpdated'
       remote:
@@ -55,6 +59,7 @@ class Hypothesis extends Annotator
         showFrame: {}
         hideFrame: {}
         getHighlights: {}
+        setActiveHighlights: {}
         getMaxBottom: {}
 
     super
@@ -126,10 +131,12 @@ class Hypothesis extends Annotator
           unless @viewer.isShown() and @detail
             bucket = getBucket()
             unless @heatmap.buckets[bucket]?.length then bucket = @bucket
-            #@heatmap.highlight(bucket)
-        #.on 'mouseout', =>
-        #  unless @viewer.isShown() and @detail
-        #    @heatmap.highlight(@bucket)
+            @provider.setActiveHighlights @heatmap.buckets[bucket]?.map (a) =>
+              a.hash.valueOf()
+        .on 'mouseout', =>
+          unless @viewer.isShown() and @detail
+            @provider.setActiveHighlights @heatmap.buckets[@bucket]?.map (a) =>
+              a.hash.valueOf()
         .on 'mouseup', =>
           d3.event.preventDefault()
           bucket = getBucket()
@@ -228,9 +235,13 @@ class Hypothesis extends Annotator
     if annotation.thread
       annotation.ranges = []
 
-    @cache[hash = ++@hash] = annotation
+    if not annotation.hash
+      @cache[h = ++@hash] = $.extend annotation,
+        hash:
+          toJSON: => undefined
+          valueOf: => h
     stub =
-      hash: hash
+      hash: annotation.hash.valueOf()
       ranges: annotation.ranges
     @provider.setupAnnotation stub
 
@@ -281,15 +292,19 @@ class Hypothesis extends Annotator
         .on 'mouseover', =>
           d3.event.stopPropagation()
           item = d3.select(d3.event.currentTarget).datum().message.annotation
-          #@heatmap.highlight(@bucket, -> $(this).data('annotation') is item)
+          @provider.setActiveHighlights [item.hash.valueOf()]
         .on 'mouseout', =>
           d3.event.stopPropagation()
           item = d3.select(d3.event.currentTarget).datum().message.annotation
-          #@heatmap.highlight(@bucket)
+          @provider.setActiveHighlights @heatmap.buckets[@bucket]?.map (a) =>
+            a.hash.valueOf()
     else
       # Mark that the detail view is now shown, so that exiting returns to the
       # bucket view rather than the document.
       @detail = true
+
+      # Highlight the excerpts
+      @provider.setActiveHighlights annotations.map (a) => a.hash.valueOf()
 
       excerpts.enter()
         .insert('li', '.hyp-annotation')
