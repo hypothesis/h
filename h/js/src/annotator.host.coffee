@@ -79,6 +79,10 @@ class Annotator.Host extends Annotator
     @wrapper.on 'mouseup', (event) =>
       @consumer.back() unless @ignoreMouseup
 
+  _setupWrapper: ->
+    @wrapper = @element
+    this
+
   # These methods aren't used in the iframe-hosted configuration of Annotator.
   _setupViewer: ->
     this
