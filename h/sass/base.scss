@@ -26,6 +26,18 @@ $score-width: 40px;
 $score-height: $score-width;
 $heatmap-width: 30px;
 
+// TYPOGRAPHY
+$font-size: 17;
+$line-height: 24;
+$em: $font-size / 1em;
+
+// Columns
+$column: 48;
+$gutter: 24;
+
+@function grid($cols:1) {
+  @return (($cols * $column) + (($cols - 1) * $gutter)) / $em;
+}
 
 /* Shadow mixins */
 @mixin smallshadow($a: 2px, $b: 2px, $c: .1) {

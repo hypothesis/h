@@ -9,8 +9,8 @@ a {
 body {
   color: $base-gray;
   font-smoothing: antialiased;
-  font-size: 1em;
-  line-height: 1em;
+  font-size: $font-size / 16 * 1em;
+  line-height: $line-height / $em;
 }
 
 html {
