@@ -14,42 +14,17 @@ $hypothered-desat: #bd5862;
 $link-color:            $hypothered-desat;
 $link-color-hover:      $hypothered;
 
-/*
-  Thanks:
-
-  Frameless               <http://framelessgrid.com/>
-  by Joni Korpi           <http://jonikorpi.com/>
-  licensed under CC0      <http://creativecommons.org/publicdomain/zero/1.0/>
-
-  Modified to add line height
-*/
-
-// Typography
-$font-size:             10;
-$line-height:           24;
-$em:                    $font-size / 1em;
-
-// Columns
-$column: 48;
-$gutter: 24;
-
-@mixin width($cols:1) {
-  width: ($cols * ($column + $gutter) - $gutter) / $em;
-}
-
-// Common styling variables
-
 //STANCE COLORS
 $positive: #3aab39;
 $negative: #d11c2b;
 $neutral: #0171ba;
 
 //OTHER VARIABLES
-$thread-padding: 1.5em;
+$thread-padding: 1em;
 $threadexp-width: 1em;
 $score-width: 40px;
 $score-height: $score-width;
-$heatmap-width: 40px;
+$heatmap-width: 30px;
 
 
 /* Shadow mixins */
@@ -75,3 +50,34 @@ $heatmap-width: 40px;
     @include box-shadow( inset 1px 1px 6px -2px $light-gray);
     }
   }
+
+@mixin sweetbutton {
+  @include plainform;
+  @include background-image(
+    linear-gradient(top, rgb(255, 255, 255) 0%, rgb(249, 249, 249) 100%));
+  @include border-radius(.15em);
+  @include box-shadow(
+    inset 0 .2em 0 rgba(255, 255, 255, .2),
+    0 .05em .1em rgba(0, 0, 0, .08));
+  color: black;
+  cursor: pointer;
+  display: inline-block;
+  padding: .4em .9em .5em;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, .9);
+
+  &:hover {
+    @include background-image(
+      linear-gradient(top, #fefefe 0%, #f4f4f4 50%, #e2e2e2 51%, #fdfdfd 100%));
+    border-color: rgba(0, 0, 0, .25) rgba(0, 0, 0, .25) rgba(0, 0, 0, .45);
+  }
+
+  &:active {
+    @include background-image(
+      linear-gradient(top, #fcfcfc 0%, #f3f3f3 50%, #e1e1e1 51%, #fbfbfb 100%));
+    @include box-shadow(
+      inset 0 .15em .25em rgba(0, 0, 0, .15),
+      0 .05em .1em rgba(0, 0, 0, .0));
+    border-color: rgba(0, 0, 0, .25) rgba(0, 0, 0, .25) rgba(0, 0, 0, .25);
+    top: .1em;
+  }
+}

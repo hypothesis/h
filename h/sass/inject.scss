@@ -29,7 +29,7 @@
   height: 41px;
   margin: 0 auto;
   border: none;
-  background: none;
+  background: none !important;
   text-indent: -999em;
   cursor: pointer;
   &:active { background: none; }

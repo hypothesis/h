@@ -135,7 +135,7 @@ section {
   }
 
   #wrapper {
-    @include width(11);
+    width: 960px;
     margin: auto;
   }
 }

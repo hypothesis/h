@@ -161,6 +161,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .hyp-user {
   font-weight: bold;
   text-decoration: underline;
+  margin-bottom: .5em
 }
 
 .hyp-time {
@@ -168,51 +169,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   display: inline-block;
 }
 
-//BODY
-.hyp-body { margin-top: .2em; }
-
-//BOTTOM BAR
-.hyp-bottombar {
-  margin-top: .8em;
-
-  .hyp-left { float: left; }
-  .hyp-right { float: right; }
-}
-
-//THREAD INDENTATION
-.hyp-thread {
-  margin: 0 -1em -1em (-$thread-padding / 2);
-  padding-left: $thread-padding / 2;
-
-  & > .annotator-listing {
-    border-left: 1px dotted $light-gray;
-    margin-left: $threadexp-width / 2;
-
-    & > * {
-      padding: 1em 1em 1em $thread-padding;
-    }
-  }
-}
-
-//THREADEXP
-.hyp-threadexp {
-  height: $threadexp-width;
-  width: $threadexp-width;
-  position: absolute;
-  top: 0;
-  left: -($thread-padding + $threadexp-width / 2);
-
-  outline: 1px dotted #aaa;
-  background-image: url("../images/minus_1.png");
-  background-size: 100% 100%;
-  background-position: center;
-
-  .hyp-collapsed > .hyp-reply > & {
-    background-image: url("../images/plus_1.png");
-  }
-}
-
-//CONTROLS
 .annotator-controls {
   @include box-shadow(-1em 0 1em 0 #fff);
   background: #fff;
@@ -236,6 +192,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     background-repeat: no-repeat;
     background-position: left center;
     color: $base-gray;
+    text-align: right;
 
     &.hyp-write {
       background-image: url("../images/pen_1.png");
@@ -258,6 +215,52 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     }
   }
 }
+
+//BODY
+.hyp-body { margin-top: .2em; }
+
+//BOTTOM BAR
+.hyp-bottombar {
+  margin-top: .8em;
+
+  .hyp-left { float: left; }
+  .hyp-right { float: right; }
+}
+
+//THREAD INDENTATION
+.hyp-thread {
+  margin: 0 -1em -1em (-$thread-padding / 2);
+  padding-left: $thread-padding / 2;
+
+  & > .annotator-listing {
+    border-left: 1px dotted $light-gray;
+    margin-left: $threadexp-width / 2;
+
+    & > * {
+      padding: .5em 1em 1em $thread-padding;
+    }
+  }
+}
+
+//THREADEXP
+.hyp-threadexp {
+  height: $threadexp-width;
+  width: $threadexp-width;
+  position: absolute;
+  top: .3em;
+  left: -($thread-padding + $threadexp-width / 2);
+
+  outline: 1px dotted #aaa;
+  background-image: url("../images/minus_1.png");
+  background-size: 100% 100%;
+  background-position: center;
+
+  .hyp-collapsed > .hyp-reply > & {
+    background-image: url("../images/plus_1.png");
+  }
+}
+
+//CONTROLS
 
 //SCORE BADGE
 .hyp-score {
@@ -379,35 +382,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 }
 
-//ADDER
-.hyp-adder {
-  @include smallshadow;
-  border: 1px dotted $light-gray;
-  position: absolute;
-  background-image: url("../images/noise_1.png");
-  button {
-    border: none;
-    height: 2em;
-    margin: .5em;
-    padding: 0;
-    position: relative;
-    background: none;
-    width: 2em;
-
-    &:active { top: 1px; }
-  }
-
-  .hyp-write {
-    background-image: url("../images/pen_1.png");
-    background-size: 100% 100%;
-  }
-
-  .hyp-fave {
-    background-image: url("../images/fave_1.png");
-    background-size: 100% 100%;
-  }
-}
-
 //TAG
 .hyp-tag {
   @include box-shadow(1px 1px 10px hsla(0, 0%, 0%, .05));
@@ -434,7 +408,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   blockquote {
     color: $base-gray;
     font-family: "Merriweather";
-    font-size: 1.1em;
+    font-size: 1em;
     line-height: 1.3em;
     margin: 0;
     padding: 0 1em;
@@ -583,9 +557,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   z-index: 20;
 
   textarea {
-    @include box-shadow(inset 0 -.25em .25em 0 $lighter-gray);
     width: 100%;
-    max-width: 100%;
     min-height: 8em;
   }
 
@@ -641,6 +613,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   padding: 1em;
 }
 
+
+//H BAR
 #toolbar {
   background: white;
   left: 1px;
@@ -664,7 +638,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   img {
     @include clearfix;
     float: left;
-    height: $heatmap-width;
+    height: 25px;
+    margin: 5px;
   }
 
   span {
@@ -679,7 +654,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   margin-left: 10px + $heatmap-width;
   overflow: auto;
   //TODO: heatmap width is not expressable in ems
-  padding: (40 / $em + 1em) 1em 1em 1em;
+  padding: 1em
 }
 
 /*
