@@ -45,7 +45,7 @@ $gutter: 24;
   @include single-transition("-webkit-box-shadow", .6s, ease);
   color: $gray;
   background-color: #ffffff !important;
-  border: 1px solid $gray-light;
+  border: 1px solid $gray-lighter;
   border-radius: 3px;
   box-sizing: border-box;
   font-family: "Open Sans", sans-serif;
