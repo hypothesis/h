@@ -51,7 +51,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     # Construct control points for the heatmap highlights
     points = $.map highlights, (hl, i) ->
-      x = hl.position.top - wrapper.offset().top - offset
+      x = hl.offset.top - wrapper.offset().top - offset
       h = hl.height
       if x + h < 0 or x + h > $(window).outerHeight() then return []
       data = hl.data

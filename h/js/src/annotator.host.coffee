@@ -46,7 +46,7 @@ class Annotator.Host extends Annotator
         publish: (args..., k, fk) => this.publish args...
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
-            position: $(this).position()
+            offset: $(this).offset()
             height: $(this).outerHeight(true)
             data: $(this).data('annotation').hash
           .get()
