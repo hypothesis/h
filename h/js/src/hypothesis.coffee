@@ -55,6 +55,7 @@ class Hypothesis extends Annotator
         showFrame: {}
         hideFrame: {}
         getHighlights: {}
+        getMaxBottom: {}
 
     super
 
@@ -69,6 +70,11 @@ class Hypothesis extends Annotator
     # Set up interface elements
     this._setupHeatmap()
     @wrapper.append(@viewer.element, @editor.element, @heatmap.element)
+
+    @provider.getMaxBottom (max) =>
+      top = parseInt @wrapper.css('padding-top')
+      @wrapper.css("padding-top", "#{max + top}px")
+      $('#toolbar').css("top", "#{max}px")
 
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.created = annotation.updated = (new Date()).toString()

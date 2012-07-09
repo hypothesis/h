@@ -74,7 +74,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 .annotator-heatmap {
   background: hsla(0, 0, 0, .1);
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 10px;
   width: $heatmap-width;

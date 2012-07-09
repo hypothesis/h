@@ -67,6 +67,21 @@ class Annotator.Host extends Annotator
             data: $(this).data('annotation').hash
           .get()
           offset: $(@wrapper[0].ownerDocument).scrollTop()
+        getMaxBottom: =>
+          sel = '*' + (":not(.annotator-#{x})" for x in [
+            'adder', 'outer', 'notice', 'filter', 'frame'
+          ]).join('')
+
+          # use the maximum bottom position in the page
+          all = for el in $(document.body).find(sel)
+            p = $(el).css('position')
+            if (p == 'absolute' or p == 'fixed') and $(el).offset().top == 0
+              bottom = $(el).offset().top + $(el).outerHeight(false)
+              # but don't go larger than 80, because this isn't bulletproof
+              if bottom > 80 then 0 else bottom
+            else
+              0
+          Math.max.apply(Math, all)
       remote:
         publish: {}
         addPlugin: {}
