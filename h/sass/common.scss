@@ -78,34 +78,7 @@ span.errorMsg {
 }
 
 .btn {
-  @include plainform;
-  @include background-image(
-    linear-gradient(top, rgb(255, 255, 255) 0%, rgb(249, 249, 249) 100%));
-  @include border-radius(.15em);
-  @include box-shadow(
-    inset 0 .2em 0 rgba(255, 255, 255, .2),
-    0 .05em .1em rgba(0, 0, 0, .08));
-  color: black;
-  cursor: pointer;
-  display: inline-block;
-  padding: .4em .9em .5em;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, .9);
-
-  &:hover {
-    @include background-image(
-      linear-gradient(top, #fefefe 0%, #f4f4f4 50%, #e2e2e2 51%, #fdfdfd 100%));
-    border-color: rgba(0, 0, 0, .25) rgba(0, 0, 0, .25) rgba(0, 0, 0, .45);
-  }
-
-  &:active {
-    @include background-image(
-      linear-gradient(top, #fcfcfc 0%, #f3f3f3 50%, #e1e1e1 51%, #fbfbfb 100%));
-    @include box-shadow(
-      inset 0 .15em .25em rgba(0, 0, 0, .15),
-      0 .05em .1em rgba(0, 0, 0, .0));
-    border-color: rgba(0, 0, 0, .25) rgba(0, 0, 0, .25) rgba(0, 0, 0, .25);
-    top: .1em;
-  }
+  @include sweetbutton;
 }
 
 .alert-block {
