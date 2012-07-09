@@ -53,7 +53,7 @@ $gutter: 24;
   &:focus {
     outline: 0;
     border: 1px solid $gray-light;
-    @include box-shadow( inset 1px 1px 6px -2px $gray-lighter);
+    @include box-shadow( inset 1px 1px 6px -1px $gray-lighter);
     }
   }
 

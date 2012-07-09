@@ -453,7 +453,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     & > .hyp-body {
       font-style: italic;
       margin-top: 0;
-      padding-left: .25em;
+      padding-left: 1em;
     }
     & > .hyp-user { float: left; }
     & > .hyp-thread { overflow: hidden; }
@@ -578,7 +578,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 #toolbar {
   @include smallshadow;
   background: white;
-  border-radius: .25em;
+  border: 1px solid $gray-lighter;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
   display: table;
   left: 1px;
   margin-top: 1em;
