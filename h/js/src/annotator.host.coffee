@@ -1,4 +1,4 @@
-utils =
+util =
   debounce: (delay=0, fn) =>
       timer = null
       =>
@@ -75,7 +75,7 @@ class Annotator.Host extends Annotator
         back: {}
         update: {}
 
-    $(window).on 'resize scroll', utils.debounce => @consumer.update()
+    $(window).on 'resize scroll', util.debounce => @consumer.update()
     @wrapper.on 'mouseup', (event) =>
       @consumer.back() unless @ignoreMouseup
 
