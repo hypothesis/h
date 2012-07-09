@@ -567,19 +567,19 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //H BAR
 #toolbar {
+  @include smallshadow;
   background: white;
+  border-radius: .25em;
+  display: table;
   left: 1px;
   outline: solid 1px $gray-lighter;
   padding-right: 1em;
-  border-radius: .25em;
-  @include smallshadow;
   pointer-events: none;
   position: absolute;
+  text-align: right;
   top: 10px;
   width: 100%;
   z-index: 2;
-  text-align: right;
-  display: table;
 
   form {
     display: table-cell;
