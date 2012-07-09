@@ -195,15 +195,6 @@ class Hypothesis extends Annotator
 
     editor
 
-  # Sets up the selection event listeners to watch mouse actions on the document.
-  #
-  # Returns itself for chaining.
-  _setupDocumentEvents: ->
-    $(document).bind({
-      "mouseup":   this.checkForEndSelection
-    })
-    this
-
   # Public: Initialises an annotation either from an object representation or
   # an annotation created with Annotator#createAnnotation(). It finds the
   # selected range and higlights the selection in the DOM.
