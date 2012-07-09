@@ -61,14 +61,19 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     # Sort the points and reduce to accumulate the annotation list which follows
     # and the running overlap count at each stop.
     {@buckets, @index, max} = points.sort().reduce(
-      ({annotations, buckets, index, max}, [x, d, a]) ->
+      ({annotations, buckets, index, max}, [x, d, a], i, points) ->
         # use split and merge to eliminate any duplicates
         annotations = d3.merge(d3.split(annotations, (b) -> a is b))
         if d > 0
           annotations.push a
           max = Math.max(max, annotations.length)
-        buckets.push annotations
-        index.push x
+
+        if buckets.length and x == points[i-1][0]
+          buckets[buckets.length-1] = annotations
+        else
+          buckets.push annotations
+          index.push x
+
         {annotations, buckets, index, max}
       ,
       annotations: []
