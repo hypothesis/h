@@ -29,8 +29,8 @@ section {
   span { font-size: .9em; }
 }
 
-@mixin icon_resets {
 //ICON IMAGES
+@mixin icon_resets {
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100% 100%;
@@ -98,14 +98,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   &:hover { left: 0; }
 }
 
-
-.hyp-red {
-  color: $hypothered;
-}
-
-.hypothesis-logotype_b {
-  color: $negative;
-}
 
 //ANNOTATOR LAYOUT STUFF
 .hyp-hl_positive {
@@ -481,41 +473,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     &.hyp-positive { top: .2em; }
     &.hyp-negative { top: -.2em; }
     &.hyp-neutral { top: -.2em; }
-  }
-
-  .hyp-repliesbadge {
-    @include secondarytext;
-    display: inline-block;
-    position: relative;
-    left: $thread-padding;
-
-    .hyp-blocker {
-      display: inline-block;
-      padding: .25em;
-      margin-right: .5em;
-    }
-
-    .hyp-inner {
-      padding: .25em;
-      position: absolute;
-      border: 1px solid #aaa;
-      top: 0;
-      left: 0;
-    }
-
-    .hyp-offset_1 {
-      @extend .hyp-inner;
-      @include rotate(15deg);
-      top: 0px;
-      left: 1px;
-    }
-
-    .hyp-offset_2 {
-      @extend .hyp-inner;
-      @include rotate(-10deg);
-      top: -1px;
-      left: -1px;
-    }
   }
 
   .hyp-collapsed {
