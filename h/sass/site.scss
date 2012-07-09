@@ -39,13 +39,13 @@ section {
 
   .bookmarklet {
     @extend .hyp-button;
-    border: 1px dashed $base-gray;
+    border: 1px dashed $gray;
   }
 }
 
 #wrapper {
-  border: $light-gray solid 1px;
-  background-color: $lighter-gray;
+  border: $gray-light solid 1px;
+  background-color: $gray-lighter;
 }
 
 /*

@@ -129,14 +129,14 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     background: hsla(0, 0%, 99%, 1);
     border-top-right-radius: .25em;
     border-top-left-radius: .25em;
-    color: $light-gray;
+    color: $gray-light;
 
-    &:hover { background: $lighter-gray; }
+    &:hover { background: $gray-lighter; }
     &:active { box-shadow: none; }
 
     &.hyp-selected {
       @include box-shadow(none);
-      color: $base-gray;
+      color: $gray;
       font-weight: bold;
       background: hsla(0, 0%, 100%, 1);
     }
@@ -177,7 +177,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     background-size: 1em 1em;
     background-repeat: no-repeat;
     background-position: left center;
-    color: $base-gray;
+    color: $gray;
     text-align: right;
 
     &.hyp-write {
@@ -219,7 +219,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   padding-left: $thread-padding / 2;
 
   & > .annotator-listing {
-    border-left: 1px dotted $light-gray;
+    border-left: 1px dotted $gray-light;
     margin-left: $threadexp-width / 2;
 
     & > * {
@@ -373,9 +373,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include box-shadow(1px 1px 10px hsla(0, 0%, 0%, .05));
   display: inline-block;
   background: #f3f3f3;
-  color: $base-gray;
+  color: $gray;
   border-radius: 2px;
-  border: 1px solid $light-gray;
+  border: 1px solid $gray-light;
   padding: .1em .4em;
   padding-bottom: .2em;
   vertical-align: bottom;
@@ -392,7 +392,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   position: relative;
 
   blockquote {
-    color: $base-gray;
+    color: $gray;
     font-family: "Merriweather";
     font-size: 1em;
     line-height: 1.3em;
@@ -569,7 +569,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 #toolbar {
   background: white;
   left: 1px;
-  outline: solid 1px $lighter-gray;
+  outline: solid 1px $gray-lighter;
   padding-right: 1em;
   border-radius: .25em;
   @include smallshadow;

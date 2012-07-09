@@ -1,10 +1,10 @@
 @import 'compass/css3';
 
 // GRAYS
-$base-gray: #777;
-$gray-interval: #1e1e1e;
-$light-gray: $base-gray + ( $gray-interval * 1 );
-$lighter-gray: $base-gray + ( $gray-interval * 3.5 );
+$gray: #777;
+$gray-interval: 12%;
+$gray-light: lighten($gray, $gray-interval);
+$gray-lighter: lighten($gray, $gray-interval * 3.5);
 
 //COLORS
 $hypothered: #bd1c2b;
@@ -51,15 +51,15 @@ $gutter: 24;
   box-sizing: border-box;
   padding: 6px 6px;
   margin-bottom: 9px;
-  color: $base-gray;
+  color: $gray;
   background-color: #ffffff !important;
-  border: 1px solid $lighter-gray;
+  border: 1px solid $gray-light;
   border-radius: 3px;
   @include single-transition("box-shadow,-moz-box-shadow,-webkit-box-shadow", 0.6s, ease);
   &:focus {
     outline: 0;
-    border: 1px solid $light-gray;
-    @include box-shadow( inset 1px 1px 6px -2px $light-gray);
+    border: 1px solid $gray-light;
+    @include box-shadow( inset 1px 1px 6px -2px $gray-light);
     }
   }
 
