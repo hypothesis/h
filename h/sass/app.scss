@@ -4,12 +4,19 @@
 @import 'base';
 @import 'common';
 
+$font-size: 13;
+$em: $font-size / 1em;
+
 body {
   font-family: "Open Sans", sans-serif;
   height: 100%;
   overflow: auto;
   position: fixed;
   width: 100%;
+}
+
+html {
+  font-size: $font-size / 16 * 1em;
 }
 
 input { width: 100%; }

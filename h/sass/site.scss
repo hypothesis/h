@@ -6,6 +6,9 @@
 @import "base";
 @import "common";
 
+$font-size: 17;
+$em: $font-size / 1em;
+
 article {
   padding: 1em;
 }
@@ -13,6 +16,10 @@ article {
 body {
   background-image: url('../images/noise_1.png');
   font-family: "Merriweather", "Georgia", serif;
+}
+
+html {
+  font-size: $font-size / 16 * 1em;
 }
 
 section {
