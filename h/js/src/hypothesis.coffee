@@ -78,9 +78,10 @@ class Hypothesis extends Annotator
   _setupWrapper: ->
     @wrapper = $('#wrapper')
     .on 'mousewheel', (event, delta) ->
+      # prevent overscroll from scrolling host frame
+      # http://stackoverflow.com/questions/5802467
       scrollTop = $(this).scrollTop()
       scrollBottom = $(this).get(0).scrollHeight - $(this).innerHeight()
-      console.log scrollTop, scrollBottom
       if delta > 0 and scrollTop == 0
         event.preventDefault()
       else if delta < 0 and scrollTop == scrollBottom
