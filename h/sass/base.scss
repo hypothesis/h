@@ -50,6 +50,7 @@ $gutter: 24;
   box-sizing: border-box;
   font-family: "Open Sans", sans-serif;
   font-size: 1em;
+  padding: .33em .5em;
   &:focus {
     outline: 0;
     border: 1px solid $gray-light;

@@ -55,7 +55,6 @@ h5, h6 {
 input, textarea {
   @include plainform;
   font-style: sans-serif;
-  padding: .33em .5em;
 }
 
 label {
