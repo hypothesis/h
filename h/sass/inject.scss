@@ -47,7 +47,7 @@
 
 /* iframe styles */
 
-.hyp-iframe {
+.annotator-frame {
   @include single-transition('margin-left', .2s, ease-in-out);
   height: 100%;
   position: fixed;
@@ -56,7 +56,7 @@
   z-index: 500;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
-  &.hyp-collapsed { margin-left: -$heatmap-width - 10px; }
+  &.annotator-collapsed { margin-left: -$heatmap-width - 10px; }
 }
 
 
@@ -67,7 +67,7 @@
 */
 
 @media screen and (min-width: 15em) {
-  .hyp-iframe {
+  .annotator-frame {
     width: 90%;
     margin-left: -90%;
   }
@@ -80,7 +80,7 @@
 */
 
 @media screen and (min-width: 30em) {
-  .hyp-iframe {
+  .annotator-frame {
     width: 70%;
     margin-left: -70%;
   }
@@ -93,7 +93,7 @@
 */
 
 @media screen and (min-width: 37.5em) {
-  .hyp-iframe {
+  .annotator-frame {
     width: 428px + $heatmap-width + 10px;
     margin-left: -428px - $heatmap-width - 10px;
   }

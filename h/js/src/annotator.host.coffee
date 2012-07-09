@@ -46,7 +46,7 @@ class Annotator.Host extends Annotator
         annotator.frame = frame
       swf: options.swf
       props:
-        className: 'hyp-iframe hyp-collapsed'
+        className: 'annotator-frame annotator-collapsed'
         style:
           visibility: 'hidden'
       remote: @app
@@ -57,9 +57,9 @@ class Annotator.Host extends Annotator
         onEditorHide: this.onEditorHide
         onEditorSubmit: this.onEditorSubmit
         showFrame: =>
-          @frame.removeClass('hyp-collapsed')
+          @frame.removeClass('annotator-collapsed')
         hideFrame: =>
-          @frame.addClass('hyp-collapsed')
+          @frame.addClass('annotator-collapsed')
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
