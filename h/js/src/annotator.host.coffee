@@ -103,3 +103,14 @@ class Annotator.Host extends Annotator
       [annotation] = args
       @consumer.publish event, [annotation.hash]
     super arguments...
+
+  setupAnnotation: (annotation) =>
+    annotation = super
+
+    # If any of the parents of the highlight elements are scrollable,
+    # scrolling those should trigger an update.
+    containers = $(annotation.highlights).parents()
+    containers.off 'resize scroll', @consumer.update # don't register twice
+    containers.on 'resize scroll', @consumer.update
+
+    annotation
