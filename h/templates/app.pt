@@ -5,10 +5,12 @@
     <form tal:condition="request.user" tal:replace="structure form" />
   </div>
 
-  <div id="header" class="annotator-outer" metal:fill-slot="header">
-    <div tal:attributes="class 'hyp-widget'"
+  <div id="header" metal:fill-slot="header">
+    <div tal:attributes="class 'annotator-outer'"
          tal:condition="not request.user">
-      <form metal:use-macro="auth" tal:define="auth load: auth.pt" />
+      <div class="hyp-widget">
+        <form metal:use-macro="auth" tal:define="auth load: auth.pt" />
+      </div>
     </div>
   </div>
 
