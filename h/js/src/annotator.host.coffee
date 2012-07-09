@@ -53,13 +53,6 @@ class Annotator.Host extends Annotator
     ,
       local:
         publish: (args..., k, fk) => this.publish args...
-        getHighlights: =>
-          highlights: $(@wrapper).find('.annotator-hl').map ->
-            offset: $(this).offset()
-            height: $(this).outerHeight(true)
-            data: $(this).data('annotation').hash
-          .get()
-          offset: $(@wrapper[0].ownerDocument).scrollTop()
         setupAnnotation: => this.setupAnnotation arguments...
         onEditorHide: this.onEditorHide
         onEditorSubmit: this.onEditorSubmit
@@ -67,6 +60,13 @@ class Annotator.Host extends Annotator
           @frame.removeClass('hyp-collapsed')
         hideFrame: =>
           @frame.addClass('hyp-collapsed')
+        getHighlights: =>
+          highlights: $(@wrapper).find('.annotator-hl').map ->
+            offset: $(this).offset()
+            height: $(this).outerHeight(true)
+            data: $(this).data('annotation').hash
+          .get()
+          offset: $(@wrapper[0].ownerDocument).scrollTop()
       remote:
         publish: {}
         addPlugin: {}
@@ -78,6 +78,12 @@ class Annotator.Host extends Annotator
     $(window).on 'resize scroll', utils.debounce => @consumer.update()
     @wrapper.on 'mouseup', (event) =>
       @consumer.back() unless @ignoreMouseup
+
+  publish: (event, args) ->
+    if event in ['annotationCreated']
+      [annotation] = args
+      @consumer.publish event, [annotation.hash]
+    super arguments...
 
   _setupWrapper: ->
     @wrapper = @element
@@ -101,12 +107,6 @@ class Annotator.Host extends Annotator
         @consumer.showEditor stub
     else
       @consumer.showEditor stub
-
-  publish: (event, args) ->
-    if event in ['annotationCreated']
-      [annotation] = args
-      @consumer.publish event, [annotation.hash]
-    super arguments...
 
   setupAnnotation: (annotation) =>
     annotation = super

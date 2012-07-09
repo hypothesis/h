@@ -49,12 +49,12 @@ class Hypothesis extends Annotator
         update: => this.publish 'hostUpdated'
       remote:
         publish: {}
-        getHighlights: {}
         setupAnnotation: {}
         onEditorHide: {}
         onEditorSubmit: {}
         showFrame: {}
         hideFrame: {}
+        getHighlights: {}
 
     super
 
