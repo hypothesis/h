@@ -56,6 +56,16 @@ input, textarea {
   @include plainform;
 }
 
+select {
+  @include plainform;
+  padding: 0;
+  text-decoration: underline;
+  border: 0;
+  &:focus {
+    border: 0;
+  }
+}
+
 label {
   @extend .visuallyhidden;
 }
