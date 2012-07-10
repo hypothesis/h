@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang='en' lang='en'>
   <head>
+    <title>hypothes.is</title>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -9,14 +10,12 @@
         <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
     <!-- TODO: make deform use_ajax widgets delay after jQuery loads -->
-    <script tal:attributes="src request.static_url('deform:static/' + src)"
-            tal:condition="exists: js_links"
-            tal:repeat="src js_links"></script>
     <link rel="stylesheet"
           tal:attributes="href href"
           tal:repeat="href css_links" />
-    <link rel="api" href="${request.route_path('api', subpath='')}" />
-    <title>hypothes.is</title>
+    <script tal:attributes="src request.static_url('deform:static/' + src)"
+            tal:condition="exists: js_links"
+            tal:repeat="src js_links"></script>
     <script type="text/javascript">
       WebFontConfig = {
         google: { families: ['Merriweather', 'Open Sans', 'PT Serif'] }
