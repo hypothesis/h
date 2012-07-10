@@ -37,8 +37,16 @@
 }
 
 .annotator-hl-active, .annotator-hl-temporary {
-  @include box-shadow(2px 2px 4px $gray-light);
   background: #c9d7f1;
+  color: black;
+  &::selection {
+    background: #c9d7f1;
+    color: black;
+  }
+  &::-moz-selection {
+    background: #c9d7f1;
+    color: black;
+  }
 }
 
 .annotator-notice {
