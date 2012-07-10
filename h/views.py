@@ -236,7 +236,7 @@ class home(FormView):
         code = render('h:templates/embed.pt', embed(request), request=request)
         form = self.auth()
         form.setdefault('css_links', []).extend(assets_env['site_css'].urls())
-        form.setdefault('js_scripts', []).append(code)
+        form['embed'] = code
         return form
 
 def includeme(config):

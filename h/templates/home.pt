@@ -34,4 +34,8 @@
       <p>They are the objectives of Hypothes<span class="red">.</span>is.</p>
     </section>
   </article>
+
+  <div id="footer" metal:fill-slot="footer">
+    <script tal:content="structure embed" />
+  </div>
 </metal:main>
