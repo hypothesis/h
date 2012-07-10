@@ -303,9 +303,6 @@ class Hypothesis extends Annotator
       # bucket view rather than the document.
       @detail = true
 
-      # Highlight the excerpts
-      @provider.setActiveHighlights annotations.map (a) => a.hash.valueOf()
-
       excerpts.enter()
         .insert('li', '.hyp-annotation')
           .classed('hyp-widget', true)
@@ -313,6 +310,13 @@ class Hypothesis extends Annotator
         .append('blockquote')
       excerpts.exit().remove()
       excerpts.select('blockquote').text((d) -> d.message.annotation.quote)
+
+      highlights = []
+      excerpts.each (d) =>
+        console.log d
+        h = d.message.annotation.hash
+        if h then highlights.push h.valueOf()
+      @provider.setActiveHighlights highlights
 
       loop
         context = context.select('.annotator-listing')
