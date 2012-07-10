@@ -39,11 +39,15 @@
 .annotator-hl-active, .annotator-hl-temporary {
   background: #c9d7f1;
   color: black;
-  &::selection {
+  &::-moz-selection {
     background: #c9d7f1;
     color: black;
   }
-  &::-moz-selection {
+  &::-moz-selection:-moz-window-inactive {
+    background: #c9d7f1;
+    color: black;
+  }
+  &::selection, ::selection:window-inactive {
     background: #c9d7f1;
     color: black;
   }
