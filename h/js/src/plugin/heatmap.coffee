@@ -35,10 +35,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .range([1, .45])
     d3.hsl(210, s(v), l(v)).toString()
 
-  getBucket: (event) =>
-    [x, y] = d3.mouse(@element[0])
-    bucket = d3.bisect(@index, y) - 1
-
   updateHeatmap: (data) =>
     return unless d3?
 
