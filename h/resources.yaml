@@ -81,7 +81,7 @@ app_css:
         - compass
         - cssrewrite
       output: css/app.css
-  filters: cssutils
+  filters: cleancss
   output: css/app.min.css
 
 # Host-page CSS for widget placement.
@@ -94,7 +94,7 @@ inject_css:
         - compass
         - cssrewrite
       output: css/inject.css
-  filters: cssutils
+  filters: cleancss
   output: css/inject.min.css
 
 # CSS specific to the destination site
@@ -110,5 +110,5 @@ site_css:
         - compass
         - cssrewrite
       output: css/site.css
-  filters: cssutils
+  filters: cleancss
   output: css/site.min.css

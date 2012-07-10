@@ -40,6 +40,9 @@ For building the static assets, requirements currently include CoffeeScript_
 (needed by the Annotator), Sass_, Compass_ and Handlebars_. These dependencies
 should be easily installable via common package management utilities.
 
+For production use, the application can also be configured to use UglifyJS_ and
+clean-css_ for minification needs. These are *not* required for development.
+
 To run an annotation storage backend elasticsearch_ is required.
 
 Please see the platform-specific INSTALL files for additional assistance.
@@ -69,4 +72,6 @@ license information can be found in the included LICENSE file.
 .. _Sass: http://sass-lang.com/
 .. _Compass: http://compass-style.org/
 .. _Handlebars: http://handlebarsjs.com/
+.. _UglifyJS: http://marijnhaverbeke.nl//uglifyjs
+.. _clean-css: https://github.com/GoalSmashers/clean-css
 .. _2-Clause BSD License: http://www.opensource.org/licenses/BSD-2-Clause

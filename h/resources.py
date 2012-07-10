@@ -9,7 +9,10 @@ from pyramid.settings import aslist
 from pyramid_webassets import IWebAssetsEnvironment
 
 from webassets import Bundle
+from webassets.filter import register_filter
 from webassets.loaders import YAMLLoader
+
+from cleancss import CleanCSS
 
 def add_webassets(config):
     loader = YAMLLoader(join(dirname(__file__), 'resources.yaml'))
@@ -37,7 +40,11 @@ def includeme(config):
 
     config.scan(__name__)
     config.include('pyramid_webassets')
-    add_webassets(config)
 
     # wrap coffeescript output in a closure
     config.get_webassets_env().config['coffee_no_bare'] = True
+
+    # register our backported cleancss filter until webassets 0.8 is released
+    register_filter(CleanCSS)
+
+    add_webassets(config)
