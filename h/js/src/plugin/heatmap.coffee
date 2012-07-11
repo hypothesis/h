@@ -1,4 +1,9 @@
 class Annotator.Plugin.Heatmap extends Annotator.Plugin
+
+  # Padding at the edge of the screen for offscreen buckets
+  BUCKET_THRESHOLD_PAD = 40
+  BUCKET_SIZE = 40
+
   # heatmap svg skeleton
   html: """
         <svg class="annotator-heatmap"
@@ -41,14 +46,23 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     wrapper = this.element.offsetParent()
     {highlights, offset} = data
 
+    # Keep track of buckets of annotations above and below the viewport
+    above = []
+    below = []
+
     # Construct control points for the heatmap highlights
     points = $.map highlights, (hl, i) ->
       x = hl.offset.top - wrapper.offset().top - offset
       h = hl.height
-      if x < 0 or x + h > $(window).height() then return []
       data = hl.data
-      [ [x, 1, data],
-        [x + h, -1, data] ]
+
+      if x <= 80
+        above.push data; []
+      else if x + h >= $(window).height() - BUCKET_THRESHOLD_PAD
+        below.push data; []
+      else
+        [ [x, 1, data],
+          [x + h, -1, data] ]
 
     # Accumulate the overlapping annotations into buckets
     {@buckets, @index, max} = points
@@ -117,14 +131,18 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       else
         break
 
+    @buckets.unshift above, []
+    @buckets.push below, []
+    @index.unshift BUCKET_THRESHOLD_PAD, BUCKET_THRESHOLD_PAD + BUCKET_SIZE
+    @index.push $(window).height() - BUCKET_SIZE, $(window).height()
+
     # Set up the stop interpolations for data binding
     stopData = $.map(@buckets, (annotations, i) =>
+      x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
+      offsets = [@index[i], x2]
       if annotations.length
-        x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
-        offsets = [@index[i], x2]
         start = @buckets[i-1]?.length and ((@buckets[i-1].length + @buckets[i].length) / 2) or 1e-6
         end = @buckets[i+1]?.length and ((@buckets[i+1].length + @buckets[i].length) / 2) or 1e-6
-
         curve = d3.scale.pow().exponent(.1)
           .domain([0, .5, 1])
           .range([
@@ -134,6 +152,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           ])
           .interpolate(d3.interpolateArray)
         curve(v).slice() for v in d3.range(0, 1.05, .05)
+      else
+        [ [offsets[0], i, 0, 1e-6]
+          [offsets[1], i, 1, 1e-6] ]
     )
 
     # And a little opacity spice
@@ -145,9 +166,11 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .selectAll('stop').data(stopData)
     stops.enter().append('stop')
     stops.exit().remove()
-    stops.sort()
+    stops.order()
       .attr('offset', (v) => v[0] / $(window).height())
-      .attr('stop-color', (v) => this._colorize(v[3] / max))
-      .attr('stop-opacity', (v) -> opacity(v[3]))
+      .attr('stop-color', (v) =>
+        if max == 0 then this._colorize(1e-6) else this._colorize(v[3] / max))
+      .attr('stop-opacity', (v) ->
+        if max == 0 then .1 else opacity(v[3]))
 
     this.publish('updated')
