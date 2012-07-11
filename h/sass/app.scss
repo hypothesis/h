@@ -85,8 +85,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 .annotator-outer {
-  padding: 1em;
-  margin-top: 3em;
+  padding: 0 1em;
+  margin-top: 5em;
 }
 
 // Heatmap tabs
@@ -572,7 +572,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include border-radius(.2em);
   @include smallshadow;
   background: #fff;
-  margin: 1em 0;
+  margin-bottom: 1em;
   padding: 1em;
 }
 
