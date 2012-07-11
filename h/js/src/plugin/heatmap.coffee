@@ -68,6 +68,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
         if d > 0
           # if this is a +1 control point, (re-)include the current annotation
+          # by removing and then adding, duplicates are easily avoided
           annotations.push a
           buckets.push annotations
           index.push x
