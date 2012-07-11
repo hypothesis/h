@@ -216,7 +216,10 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 //BODY
-.hyp-body { margin-top: .2em; }
+.hyp-body {
+  margin-top: .2em;
+  .hyp-content { white-space: pre-wrap; }
+}
 
 //BOTTOM BAR
 .hyp-bottombar {
