@@ -82,7 +82,7 @@ class Annotator.Host extends Annotator
           # use the maximum bottom position in the page
           all = for el in $(document.body).find(sel)
             p = $(el).css('position')
-            t = parseInt $(el).css('top')
+            t = $(el).offset().top
             z = $(el).css('z-index')
             if (p == 'absolute' or p == 'fixed') and t == 0 and z != 'auto'
               bottom = $(el).offset().top + $(el).outerHeight(false)
