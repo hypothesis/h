@@ -133,11 +133,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       else
         break
 
-    @buckets.unshift above, []
-    @buckets.push below, []
-    @index.unshift BUCKET_THRESHOLD_PAD, BUCKET_THRESHOLD_PAD + BUCKET_SIZE
-    @index.push $(window).height() - BUCKET_SIZE, $(window).height()
-
     # Set up the stop interpolations for data binding
     stopData = $.map(@buckets, (annotations, i) =>
       x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
@@ -174,6 +169,11 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         if max == 0 then this._colorize(1e-6) else this._colorize(v[3] / max))
       .attr('stop-opacity', (v) ->
         if max == 0 then .1 else opacity(v[3]))
+
+    @buckets.unshift above, []
+    @buckets.push below, []
+    @index.unshift BUCKET_THRESHOLD_PAD, BUCKET_THRESHOLD_PAD + BUCKET_SIZE
+    @index.push $(window).height() - BUCKET_SIZE, $(window).height()
 
     this.publish('updated')
 
