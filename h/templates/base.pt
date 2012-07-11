@@ -32,7 +32,11 @@
     </script>
   </head>
   <body>
-    <div id="flash-msg"></div>
+    <div id="flash-msg">
+      <span tal:content="message"
+            tal:omit-tag=""
+            tal:repeat="message request.session.pop_flash()" />
+    </div>
     <metal:main define-slot="toolbar" />
     <div id="wrapper">
       <metal:main define-slot="header" />
