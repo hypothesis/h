@@ -47,11 +47,11 @@
     background: #c9d7f1;
     color: black;
   }
-  &::-moz-selection:-moz-window-inactive {
+  &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
     background: #c9d7f1;
     color: black;
   }
-  &::selection, ::selection:window-inactive {
+  &::selection, &::selection:window-inactive {
     background: #c9d7f1;
     color: black;
   }
