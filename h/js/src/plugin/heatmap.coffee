@@ -41,10 +41,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     wrapper = this.element.offsetParent()
     {highlights, offset} = data
 
-    # Re-set the 100% because some browsers might not adjust to events like
-    # user zoom change properly.
-    @element.css({height: '100%'})
-
     # Construct control points for the heatmap highlights
     points = $.map highlights, (hl, i) ->
       x = hl.offset.top - wrapper.offset().top - offset
