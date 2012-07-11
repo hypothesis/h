@@ -1,10 +1,11 @@
 <metal:main use-macro="load: base.pt">
   <div id="toolbar" metal:fill-slot="toolbar">
-    <div tal:condition="request.user">
+    <div>
       <a class="btn bookmarklet"
          href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
          >Contribute</a>
-      <a href="${request.route_url('logout')}">Sign out</a>
+      <a href="${request.route_url('logout')}"
+         tal:condition="request.user">Sign out</a>
     </div>
   </div>
 
