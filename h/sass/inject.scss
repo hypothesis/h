@@ -3,38 +3,99 @@
 
 /* Annotator styles */
 
+//.annotator-adder {
+//  background-image: url(../images/annotator-icon-sprite.png);
+//  background-repeat: no-repeat;
+//  margin-top: -48px;
+//  margin-left: -24px;
+//  width: 48px;
+//  height: 48px;
+//  background-position: left top;
+//  position: absolute;
+//  z-index: 999;
+//}
+
+//.annotator-adder:hover {
+//  background-position: center top;
+//}
+
+//.annotator-adder:active {
+//  background-position: center right;
+//}
+
+//.annotator-adder button {
+//  display: block;
+//  width: 36px;
+//  height: 41px;
+//  margin: 0 auto;
+//  border: none;
+//  background: none !important;
+//  text-indent: -999em;
+//  cursor: pointer;
+//  &:active { background: none; }
+//  &:hover { background: none; }
+//}
+
 .annotator-adder {
-  background-image: url(../images/annotator-icon-sprite.png);
-  background-repeat: no-repeat;
-  margin-top: -48px;
-  margin-left: -24px;
-  width: 48px;
-  height: 48px;
-  background-position: left top;
+  $border: #333;
+  $hoverborder: #000;
+  @include box-sizing( border-box);
+  @include sweetbutton;
   position: absolute;
+  width: 40px;
+  height: 40px;
+  margin-top: -50px;
+  margin-left: -20px;
+  padding: 5px;
+  border-radius: 7px;
+//  border-top-left-radius: 0px;
+  border: 4px solid $border;
   z-index: 999;
+
+  &:before {
+    @include rotate(45deg);
+    bottom: -8px;
+    border-bottom: 4px solid $border;
+    border-right: 4px solid $border;
+    background: #fdfdfd;
+    content: "";
+    display: block;
+    height: 6px;
+    width: 6px;
+    left: 0%;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    right: 0%;
+  }
+
+  button {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: url("../images/pen_1.png");
+    background-size: 95% 95%;
+    background-position: center;
+    background-repeat: no-repeat;
+    text-indent: -999px;
+    cursor: pointer;
+    opacity: .8;
+    &::-moz-focus-inner {
+      border: 0;
+    }
+  }
+  &:hover {
+    @include box-shadow(1px 1px 6px -2px $gray-light);
+    border-color: $hoverborder;
+    &:before {
+      border-color: $hoverborder;
+    }
+    button {
+      opacity: 1;
+    }
+  }
 }
 
-.annotator-adder:hover {
-  background-position: center top;
-}
-
-.annotator-adder:active {
-  background-position: center right;
-}
-
-.annotator-adder button {
-  display: block;
-  width: 36px;
-  height: 41px;
-  margin: 0 auto;
-  border: none;
-  background: none !important;
-  text-indent: -999em;
-  cursor: pointer;
-  &:active { background: none; }
-  &:hover { background: none; }
-}
 
 .annotator-hl {
   @include single-transition('background-color,color', .03s, linear, .1s);
