@@ -92,7 +92,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       small = 0
       threshold = min = 60
       for i in [0..@index.length-2]
-        if (w = @index[i+1] - @index[i]) < min
+        # ignore buckets followed by an empty bucket
+        # prevents erroneous deletion of isolated buckets
+        if @buckets[i+1].length and (w = @index[i+1] - @index[i]) < min
           small = i
           min = w
 
