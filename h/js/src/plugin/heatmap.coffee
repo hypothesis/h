@@ -16,7 +16,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
                <feGaussianBlur stdDeviation="0 2"></feGaussianBlur>
              </filter>
            </defs>
-           <rect x="0" y="0" width="100%" height="100%"
+           <rect x="0" y="0" width="1" height="1"
                  fill="url('#heatmap-gradient')"
                  filter="url('#heatmap-blur')" >
            </rect>
