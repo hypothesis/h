@@ -113,6 +113,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         if @buckets[i+1].length and (w = @index[i+1] - @index[i]) < min
           small = i
           min = w
+          break if min == 0 # short-circuit optimization
 
       # Merge them if they are closer enough
       if min < threshold
