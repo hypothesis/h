@@ -37,11 +37,11 @@
             tal:omit-tag=""
             tal:repeat="message request.session.pop_flash()" />
     </div>
-    <metal:main define-slot="toolbar" />
+    <div id="toolbar"><metal:main define-slot="toolbar" /></div>
     <div id="wrapper">
-      <metal:main define-slot="header" />
-      <metal:main define-slot="content" />
-      <metal:main define-slot="footer" />
+      <div id="header"><metal:main define-slot="header" /></div>
+      <div id="content"><metal:main define-slot="content" /></div>
+      <div id="footer"><metal:main define-slot="footer" /></div>
     </div>
   </body>
 </html>

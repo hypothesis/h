@@ -1,15 +1,15 @@
 <metal:main use-macro="load: base.pt">
-  <div id="toolbar" metal:fill-slot="toolbar">
-    <div>
-      <a class="btn bookmarklet"
-         href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
-         >Contribute</a>
-      <a href="${request.route_url('logout')}"
-         tal:condition="request.user">Sign out</a>
-    </div>
-  </div>
 
-  <article id="home" metal:fill-slot="content">
+<metal:main fill-slot="toolbar">
+  <div>
+    <a class="btn bookmarklet"
+       href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
+       >Contribute</a>
+  </div>
+</metal:main>
+
+<metal:main fill-slot="content">
+  <article id="home">
     <div class="title">
       <img height="150px" width="150px"
            src="${request.static_url('h:images/hypothelogo_square.png')}" />
@@ -34,8 +34,10 @@
       <p>They are the objectives of Hypothes<span class="red">.</span>is.</p>
     </section>
   </article>
+</metal:main>
 
-  <div id="footer" metal:fill-slot="footer">
-    <script tal:content="structure embed" />
-  </div>
+<metal:main fill-slot="footer">
+  <script tal:content="structure embed" />
+</metal:main>
+
 </metal:main>

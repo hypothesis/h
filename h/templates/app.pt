@@ -1,59 +1,61 @@
 <metal:main use-macro="load: base.pt">
-  <div id="toolbar" metal:fill-slot="toolbar">
-    <img class="tab-logo"
-         src="${request.static_url('h:images/hbar-logo-small.png')}" />
-    <form tal:condition="request.user" tal:replace="structure form" />
-  </div>
 
-  <div id="header" metal:fill-slot="header">
-    <div tal:attributes="class 'annotator-outer'"
-         tal:condition="not request.user">
-      <div class="hyp-widget">
-        <form metal:use-macro="auth" tal:define="auth load: auth.pt" />
-      </div>
+<metal:main fill-slot="toolbar">
+  <img class="tab-logo"
+       src="${request.static_url('h:images/hbar-logo-small.png')}" />
+  <form tal:condition="request.user" tal:replace="structure form" />
+</metal:main>
+
+<metal:main fill-slot="header">
+  <div tal:attributes="class 'annotator-outer'"
+       tal:condition="not request.user">
+    <div class="hyp-widget">
+      <form metal:use-macro="auth" tal:define="auth load: auth.pt" />
     </div>
   </div>
+</metal:main>
 
-  <div id="app" metal:fill-slot="content">
-    <script tal:attributes="src src"
-            tal:repeat="src environment['annotator'].urls()"></script>
-    <script tal:attributes="src src"
-            tal:repeat="src environment['d3'].urls()"></script>
-    <script tal:attributes="src src"
-            tal:repeat="src environment['easyXDM'].urls()"></script>
-    <script tal:attributes="src src"
-            tal:repeat="src environment['handlebars'].urls()"></script>
-    <script tal:attributes="src src"
-            tal:repeat="src environment['jwz'].urls()"></script>
-    <script tal:attributes="src src"
-            tal:repeat="src environment['templates'].urls()"></script>
-    <script tal:attributes="src src"
-            tal:repeat="src environment['underscore'].urls()"></script>
-    <script>
-      window.annotator = new Hypothesis(document.body, {
-        Heatmap: {}
+<metal:main fill-slot="content">
+  <script tal:attributes="src src"
+          tal:repeat="src environment['annotator'].urls()"></script>
+  <script tal:attributes="src src"
+          tal:repeat="src environment['d3'].urls()"></script>
+  <script tal:attributes="src src"
+          tal:repeat="src environment['easyXDM'].urls()"></script>
+  <script tal:attributes="src src"
+          tal:repeat="src environment['handlebars'].urls()"></script>
+  <script tal:attributes="src src"
+          tal:repeat="src environment['jwz'].urls()"></script>
+  <script tal:attributes="src src"
+          tal:repeat="src environment['templates'].urls()"></script>
+  <script tal:attributes="src src"
+          tal:repeat="src environment['underscore'].urls()"></script>
+  <script>
+    window.annotator = new Hypothesis(document.body, {
+      Heatmap: {}
+    })
+
+    var setupAuth = function () {
+      window.annotator.addPlugin('Auth', {
+        tokenUrl: '${request.route_url('token')}'
       })
+      window.annotator.plugins.Auth.withToken(function (token) {
+      window.annotator.plugins.Permissions.setUser(token.userId);
+      })
+    }
 
-      var setupAuth = function () {
-        window.annotator.addPlugin('Auth', {
-          tokenUrl: '${request.route_url('token')}'
-        })
-        window.annotator.plugins.Auth.withToken(function (token) {
-          window.annotator.plugins.Permissions.setUser(token.userId);
-        })
-      }
-
-      <tal:b tal:condition="request.user">setupAuth()</tal:b>
-
-      var loginSuccess = function (data) {
-        deform.processCallbacks();
-        var newForm = $('#' + this.id);
-        if (newForm.find('.alert-error').length == 0) {
-          $(newForm).detach().appendTo('#toolbar');
-          $('#header').remove()
+    var loginSuccess = function (data) {
+      deform.processCallbacks();
+      var newForm = $('#' + this.id);
+      if (newForm.find('.alert-error').length == 0) {
+        $(newForm).detach().appendTo('#toolbar');
+        $('#header').remove()
           setupAuth();
-        }
       }
-    </script>
-  </div>
+    }
+  </script>
+  <script tal:condition="request.user">setupAuth()</script>
+
+</metal:main>
+
 </metal:main>
