@@ -28,11 +28,11 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     super $(@html, options)
 
   _colorize: (v) ->
-    s = d3.scale.pow().exponent(8)
-      .range([0, .3])
+    s = d3.scale.pow().exponent(2)
+      .range([0, .1])
     l = d3.scale.pow().exponent(.5)
       .domain([0, 1])
-      .range([1, .45])
+      .range([1, .5])
     d3.hsl(210, s(v), l(v)).toString()
 
   updateHeatmap: (data) =>
@@ -100,7 +100,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     )
 
     # And a little opacity spice
-    opacity = d3.scale.pow().domain([0, max]).exponent(.25)
+    opacity = d3.scale.pow().domain([0, max]).range([.1, .6]).exponent(2)
 
     # d3 selections
     stops = d3.select(@element[0])
