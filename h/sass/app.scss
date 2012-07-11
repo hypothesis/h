@@ -91,7 +91,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 // Heatmap tabs
 .hyp-heatmap-tab {
-  @include single-transition('bottom,left,top', .2s);
   @include user-select(none);
   background-image: url("../images/side_tab.svg");
   background-size: 100% 100%;
