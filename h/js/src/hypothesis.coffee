@@ -166,7 +166,6 @@ class Hypothesis extends Annotator
       tabs
         .style 'top', (i) =>
           "#{(@heatmap.index[i] + @heatmap.index[i+1]) / 2}px"
-        .style('margin-top', '-1.2em')
         .text((i) => @heatmap.buckets[i].length)
         .classed('upper', @heatmap.isUpper)
         .classed('lower', @heatmap.isLower)
