@@ -45,7 +45,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     points = $.map highlights, (hl, i) ->
       x = hl.offset.top - wrapper.offset().top - offset
       h = hl.height
-      if x + h < 0 or x + h > $(window).outerHeight() then return []
+      if x < 0 or x + h > $(window).height() then return []
       data = hl.data
       [ [x, 1, data],
         [x + h, -1, data] ]
@@ -135,7 +135,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     stops.enter().append('stop')
     stops.exit().remove()
     stops.sort()
-      .attr('offset', (v) => v[0] / $(window).outerHeight())
+      .attr('offset', (v) => v[0] / $(window).height())
       .attr('stop-color', (v) => this._colorize(v[3] / max))
       .attr('stop-opacity', (v) -> opacity(v[3]))
 
