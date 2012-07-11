@@ -313,7 +313,6 @@ class Hypothesis extends Annotator
 
       highlights = []
       excerpts.each (d) =>
-        console.log d
         h = d.message.annotation.hash
         if h then highlights.push h.valueOf()
       @provider.setActiveHighlights highlights
