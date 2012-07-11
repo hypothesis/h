@@ -10,26 +10,26 @@
 
 <metal:main fill-slot="content">
   <article id="home">
-    <div class="title">
+    <section class="title">
       <img height="150px" width="150px"
            src="${request.static_url('h:images/hypothelogo_square.png')}" />
       <h1>hypothes<span class="red">.</span>is</h1>
       <h2>The&#160;Internet, peer&#160;reviewed.</h2>
-    </div>
+    </section>
 
+    <h3>Imagine<span class="red">:</span></h3>
     <section>
-      <h3>Imagine<span class="red">:</span></h3>
-      <em>
-        <p>If wherever we encountered new information, sentence by sentence,
-          frame by frame, we could easily know the best thinking on it.</p>
-        <p>If we had confidence that this represented the combined wisdom of
-          the most informed people – not as anointed by editors, but as
-          weighed over time by our peers, objectively, statistically and
-          transparently.</p>
-        <p>If this created a powerful incentive for people to ensure that their
-          works met a higher standard, and made it perceptibly harder to spread
-          information that didn't meet that standard.</p>
-      </em>
+      <p>If wherever we encountered new information, sentence by sentence,
+        frame by frame, we could easily know the best thinking on it.</p>
+      <p>If we had confidence that this represented the combined wisdom of
+        the most informed people – not as anointed by editors, but as
+        weighed over time by our peers, objectively, statistically and
+        transparently.</p>
+      <p>If this created a powerful incentive for people to ensure that their
+        works met a higher standard, and made it perceptibly harder to spread
+        information that didn't meet that standard.</p>
+    </section>
+    <section>
       <p>These goals are possible with today's technologies.</p>
       <p>They are the objectives of Hypothes<span class="red">.</span>is.</p>
     </section>

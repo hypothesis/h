@@ -1,0 +1,12 @@
+article#home {
+  section.title {
+    h1, h2 {
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+  }
+
+  section:nth-of-type(2) {
+    p { font-style: italic; }
+  }
+}
