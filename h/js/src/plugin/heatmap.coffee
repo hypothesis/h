@@ -115,8 +115,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       if annotations.length
         x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
         offsets = [@index[i], x2]
-        start = @buckets[i-1]?.length or 1e-6
-        end = @buckets[i+1]?.length or 1e-6
+        start = @buckets[i-1]?.length and ((@buckets[i-1].length + @buckets[i].length) / 2) or 1e-6
+        end = @buckets[i+1]?.length and ((@buckets[i+1].length + @buckets[i].length) / 2) or 1e-6
 
         curve = d3.scale.pow().exponent(.1)
           .domain([0, .5, 1])
@@ -126,7 +126,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
             [offsets[1], i, 1, end]
           ])
           .interpolate(d3.interpolateArray)
-        curve(v).slice() for v in d3.range(0, 1.1, .1)
+        curve(v).slice() for v in d3.range(0, 1.05, .05)
     )
 
     # And a little opacity spice
