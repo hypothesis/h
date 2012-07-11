@@ -65,12 +65,15 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       data = hl.data
 
       if x <= BUCKET_SIZE + BUCKET_THRESHOLD_PAD
-        above.push data; []
+        if data not in above then above.push data
       else if x + h >= $(window).height() - BUCKET_SIZE
-        below.push data; []
+        if data not in below then below.push data
       else
-        [ [x, 1, data],
-          [x + h, -1, data] ]
+        return [
+          [x, 1, data]
+          [x + h, -1, data]
+        ]
+      return []
 
     # Accumulate the overlapping annotations into buckets
     {@buckets, @index, max} = points.sort(this._collate)
