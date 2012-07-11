@@ -174,3 +174,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         if max == 0 then .1 else opacity(v[3]))
 
     this.publish('updated')
+
+  isUpper: (i) => @index[i] == BUCKET_THRESHOLD_PAD
+  isLower: (i) => @index[i] == $(window).height() - BUCKET_THRESHOLD_PAD

@@ -164,9 +164,12 @@ class Hypothesis extends Annotator
       tabs
         .style 'top', (i) =>
           "#{(@heatmap.index[i] + @heatmap.index[i+1]) / 2}px"
-        .style('margin-top', '-.8em')
+        .style('margin-top', '-1.2em')
         .text((i) => @heatmap.buckets[i].length)
         .call(bindHeatmapEvents)
+        .classed('upper', @heatmap.isUpper)
+        .classed('lower', @heatmap.isLower)
+
     this
 
   # Creates an instance of Annotator.Viewer and assigns it to the @viewer
