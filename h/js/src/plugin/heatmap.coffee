@@ -32,6 +32,14 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   constructor: (element, options) ->
     super $(@html, options)
 
+  _collate: (a, b) =>
+    for i in [0..a.length-1]
+      if a[i] < b[i]
+        return -1
+      if a[i] > b[i]
+        return 1
+    return 0
+
   _colorize: (v) ->
     s = d3.scale.pow().exponent(2)
       .range([0, .1])
@@ -65,17 +73,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           [x + h, -1, data] ]
 
     # Accumulate the overlapping annotations into buckets
-    {@buckets, @index, max} = points
-
-    # Sort the points by offset, with previous bucket tails before new heads
-    .sort (a, b) =>
-      for i in [0..a.length-1]
-        if a[i] < b[i]
-          return -1
-        if a[i] > b[i]
-          return 1
-      return 0
-    .reduce ({annotations, buckets, index, max}, [x, d, a], i, points) =>
+    {@buckets, @index, max} = points.sort(this._collate)
+      .reduce ({annotations, buckets, index, max}, [x, d, a], i, points) =>
 
         # remove all instances of this annotation from the accumulator
         annotations = d3.merge(d3.split(annotations, (b) => a is b))
