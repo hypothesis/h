@@ -50,11 +50,20 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       [ [x, 1, data],
         [x + h, -1, data] ]
 
-    # Sort the points and reduce to accumulate the overlapping annotation buckets
-    {@buckets, @index, max} = points.sort().reduce(
-      ({annotations, buckets, index, max}, [x, d, a], i, points) =>
+    # Accumulate the overlapping annotations into buckets
+    {@buckets, @index, max} = points
 
-        # use split then merge to remove all instances of this annotation
+    # Sort the points by offset, with previous bucket tails before new heads
+    .sort (a, b) =>
+      for i in [0..a.length-1]
+        if a[i] < b[i]
+          return -1
+        if a[i] > b[i]
+          return 1
+      return 0
+    .reduce ({annotations, buckets, index, max}, [x, d, a], i, points) =>
+
+        # remove all instances of this annotation from the accumulator
         annotations = d3.merge(d3.split(annotations, (b) => a is b))
 
         if d > 0
@@ -74,7 +83,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       buckets: []
       index: []
       max: 0
-    )
 
     # Remove redundant points and merge close buckets until done
     while @buckets.length > 2
