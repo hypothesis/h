@@ -64,7 +64,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       h = hl.height
       data = hl.data
 
-      if x <= 80
+      if x <= BUCKET_SIZE + BUCKET_THRESHOLD_PAD
         above.push data; []
       else if x + h >= $(window).height() - BUCKET_SIZE
         below.push data; []
