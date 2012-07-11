@@ -162,7 +162,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     # d3 selections
     stops = d3.select(@element[0])
       .select('#heatmap-gradient')
-      .selectAll('stop').data(stopData)
+      .selectAll('stop').data(stopData, (d) => d)
     stops.enter().append('stop')
     stops.exit().remove()
     stops.order()
