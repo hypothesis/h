@@ -80,6 +80,36 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       max: 0
     )
 
+    # Remove redundant points and merge close buckets until done
+    while @buckets.length > 2
+
+      # Find the two closest points
+      small = 0
+      threshold = min = 60
+      for i in [0..@index.length-2]
+        if (w = @index[i+1] - @index[i]) < min
+          small = i
+          min = w
+
+      # Merge them if they are closer enough
+      if min < threshold
+        # Prefer merging the successor bucket backward but not if it's last
+        # since the gradient must always return to 0 at the end
+        if @buckets[small+2]?
+          from = small + 1
+          to = small
+
+          for b in @buckets[from]
+            @buckets[to].push b if b not in @buckets[to]
+        else
+          from = small
+
+        # Drop the merged bucket and index
+        @buckets.splice(from, 1)
+        @index.splice(from, 1)
+      else
+        break
+
     # Set up the stop interpolations for data binding
     stopData = $.map(@buckets, (annotations, i) =>
       if annotations.length
