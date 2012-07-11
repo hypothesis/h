@@ -159,14 +159,15 @@ class Hypothesis extends Annotator
               buckets.push i
           buckets
 
-      tabs.enter().append('div').classed('hyp-heatmap-tab', true)
+      tabs.enter().append('div')
+        .classed('hyp-heatmap-tab', true)
+        .call(bindHeatmapEvents)
       tabs.exit().remove()
       tabs
         .style 'top', (i) =>
           "#{(@heatmap.index[i] + @heatmap.index[i+1]) / 2}px"
         .style('margin-top', '-1.2em')
         .text((i) => @heatmap.buckets[i].length)
-        .call(bindHeatmapEvents)
         .classed('upper', @heatmap.isUpper)
         .classed('lower', @heatmap.isLower)
 
