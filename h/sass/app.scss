@@ -144,33 +144,28 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 //TAB BAR
-.hyp-tabs {
-  @include clearfix;
-  margin-left: .5em;
+.hyp-tab {
+  @include box-shadow(2px -10px 13px -8px hsla(0, 0%, 0%, .2) inset);
+  float: left;
+  padding: .25em .5em;
   margin-right: .5em;
+  margin-bottom: -1px;
+  background: hsla(0, 0%, 99%, 1);
+  border-top-right-radius: .25em;
+  border-top-left-radius: .25em;
+  color: $gray-light;
 
-  .hyp-tab {
-    @include box-shadow(2px -10px 13px -8px hsla(0, 0%, 0%, .2) inset);
-    float: left;
-    padding: .25em .5em;
-    margin-right: .5em;
-    margin-bottom: -1px;
-    background: hsla(0, 0%, 99%, 1);
-    border-top-right-radius: .25em;
-    border-top-left-radius: .25em;
-    color: $gray-light;
+  &:hover { background: $gray-lighter; }
+  &:active { box-shadow: none; }
 
-    &:hover { background: $gray-lighter; }
-    &:active { box-shadow: none; }
-
-    &.hyp-selected {
-      @include box-shadow(none);
-      color: $gray;
-      font-weight: bold;
-      background: hsla(0, 0%, 100%, 1);
-    }
+  &.hyp-selected {
+    @include box-shadow(none);
+    color: $gray;
+    font-weight: bold;
+    background: hsla(0, 0%, 100%, 1);
   }
 }
+
 
 //META INFO
 .hyp-user {
@@ -184,6 +179,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   display: inline-block;
 }
 
+
+//CONTROLS OBJECT
 .annotator-controls {
   @include box-shadow(-1em 0 1em 0 #fff);
   background: #fff;
@@ -240,7 +237,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //BOTTOM BAR
 .hyp-bottombar {
   margin-top: .8em;
-
   .hyp-left { float: left; }
   .hyp-right { float: right; }
 }
@@ -260,7 +256,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 }
 
-//THREADEXP
+//THREADEXP OBJECT
 .hyp-threadexp {
   height: $threadexp-width;
   width: $threadexp-width;
