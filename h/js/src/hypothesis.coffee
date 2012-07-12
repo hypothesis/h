@@ -312,7 +312,8 @@ class Hypothesis extends Annotator
           .classed('hyp-excerpt', true)
         .append('blockquote')
       excerpts.exit().remove()
-      excerpts.select('blockquote').text((d) -> d.message.annotation.quote)
+      excerpts.select('blockquote').text (d) =>
+        d.message.annotation.quote.replace(/\u00a0/g, ' ')
 
       highlights = []
       excerpts.each (d) =>
@@ -428,8 +429,9 @@ class Hypothesis extends Annotator
     @editor.load(annotation)
     @editor.element.find('.annotator-controls').remove()
 
+    quote = annotation.quote.replace(/\u00a0/g, ' ')
     excerpt = $('<li class="hyp-widget hyp-excerpt">')
-    excerpt.append($("<blockquote>#{annotation.quote}</blockquote>"))
+    excerpt.append($("<blockquote>#{quote}</blockquote>"))
 
     item = $('<li class="hyp-widget hyp-writer">')
     item.append($(Handlebars.templates.editor(annotation)))
