@@ -1,3 +1,5 @@
+$ = Annotator.$
+
 util =
   debounce: (delay=0, fn) =>
       timer = null
