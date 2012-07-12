@@ -9,7 +9,7 @@
 <metal:main fill-slot="header">
   <div tal:attributes="class 'annotator-outer'"
        tal:condition="not request.user">
-    <div class="hyp-widget">
+    <div class="hyp-paper">
       <form metal:use-macro="auth" tal:define="auth load: auth.pt" />
     </div>
   </div>

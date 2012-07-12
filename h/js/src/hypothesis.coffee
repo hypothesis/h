@@ -300,7 +300,7 @@ class Hypothesis extends Annotator
         .html((d, i) => Handlebars.templates.summary(d.message.annotation))
         .classed('hyp-detail', false)
         .classed('hyp-summary', true)
-        .classed('hyp-widget', true)
+        .classed('hyp-paper', true)
         .on 'mouseup', (d, i) =>
           a = d.message.annotation
           query =
@@ -324,7 +324,7 @@ class Hypothesis extends Annotator
 
       excerpts.enter()
         .insert('li', '.hyp-annotation')
-          .classed('hyp-widget', true)
+          .classed('hyp-paper', true)
           .classed('hyp-excerpt', true)
         .append('blockquote')
       excerpts.exit().remove()
@@ -347,7 +347,7 @@ class Hypothesis extends Annotator
         items.exit().remove()
         items
           .html((d, i) => Handlebars.templates.detail(d.message.annotation))
-          .classed('hyp-widget', (c) -> not c.parent.message?)
+          .classed('hyp-paper', (c) -> not c.parent.message?)
           .classed('hyp-detail', true)
           .classed('hyp-summary', false)
 
@@ -446,10 +446,10 @@ class Hypothesis extends Annotator
     @editor.element.find('.annotator-controls').remove()
 
     quote = annotation.quote.replace(/\u00a0/g, ' ')
-    excerpt = $('<li class="hyp-widget hyp-excerpt">')
+    excerpt = $('<li class="hyp-paper hyp-excerpt">')
     excerpt.append($("<blockquote>#{quote}</blockquote>"))
 
-    item = $('<li class="hyp-widget hyp-writer">')
+    item = $('<li class="hyp-paper hyp-writer">')
     item.append($(Handlebars.templates.editor(annotation)))
 
     @editor.element.find('.annotator-listing').empty()
