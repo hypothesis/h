@@ -451,15 +451,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .hyp-reply {
   position: relative;
 
-  .hyp-score {
-    position: absolute;
-    left: -$score-width / 2;
-
-    &.hyp-positive { top: .2em; }
-    &.hyp-negative { top: -.2em; }
-    &.hyp-neutral { top: -.2em; }
-  }
-
   .hyp-collapsed {
     .hyp-content {
       overflow: hidden;
