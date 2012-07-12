@@ -14,10 +14,14 @@ yepnope([
       if (window.Annotator._instance) return;
       var app = '${request.route_url("app")}'
 
-      var uri = document.location.href
-      if (document.location.hash) uri = uri.slice(0, -1 * location.hash.length)
-
       $(function () {
+        // Get the canonical URL from any of several sources
+        var uri = document.location.href
+        if (document.location.hash) uri = uri.slice(0, -1 * location.hash.length)
+        $('meta[property^="og:url"]').each(function () { uri = this.content })
+        $('link[rel^="canonical"]').each(function () { uri = this.href })
+
+        // Load the annotator
         var annotator = new Annotator.Host(document.body, {
           /* @@ reflect routes with crossroads.js?? */
           app: app,
