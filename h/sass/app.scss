@@ -152,12 +152,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     margin-right: .5em;
   }
 
-  .hyp-reply > & {
-    position: absolute;
-    right: 0;
-    z-index: 1;
-  }
-
   a {
     text-decoration: none;
     cursor: pointer;
@@ -411,6 +405,13 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //ANNOTATION DETAIL
 .hyp-detail {
+
+  .annotator-controls {
+    position: absolute;
+    right: 0;
+    z-index: 1;
+  }
+
   .hyp-collapsed {
     .hyp-content {
       overflow: hidden;
@@ -419,6 +420,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       white-space: nowrap;
     }
   }
+
   & > .hyp-reply > .annotator-controls {
     @include single-transition(opacity, .25s, ease-in-out);
     opacity: 0;
