@@ -90,7 +90,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   margin-top: 5em;
 }
 
-// Heatmap tabs
+//HEATMAP TABS
 .hyp-heatmap-tab {
   @include user-select(none);
   background-image: url("../images/side_tab.svg");
@@ -235,8 +235,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     background-image: url("../images/plus_1.png");
   }
 }
-
-//CONTROLS
 
 //SCORE BADGE
 .hyp-score {
@@ -409,11 +407,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     right: -.15em;
     bottom: .5em;
   }
-}
-
-//ANNOTATION COMMON STYLES
-.hyp-annotation {
-  position: relative;
 }
 
 //ANNOTATION DETAIL
