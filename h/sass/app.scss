@@ -458,15 +458,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       -o-text-overflow: ellipsis;
       white-space: nowrap;
     }
-
-    .hyp-tinyscore {
-      position: absolute;
-      left: -$score-width / 2;
-    }
-
-    .hyp-tag {
-      padding: .1em .3em;
-    }
   }
 }
 
