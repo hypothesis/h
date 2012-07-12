@@ -130,20 +130,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 
-//ANNOTATOR LAYOUT STUFF
-.hyp-hl_positive {
-  background: rgba($positive, .3);
-}
-
-.hyp-hl_negative {
-  background: rgba($negative, .3);
-}
-
-.hyp-hl_neutral {
-  background: rgba($neutral, .3);
-}
-
-
 //META INFO
 .hyp-user {
   font-weight: bold;
