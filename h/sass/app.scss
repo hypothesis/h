@@ -285,7 +285,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //ANNOTATION DETAIL
 .hyp-detail {
-
+  position: relative;
   .annotator-controls {
     position: absolute;
     right: 0;
@@ -301,19 +301,19 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     }
   }
 
-  & > .hyp-reply > .annotator-controls {
+  & > .annotator-controls {
     @include single-transition(opacity, .25s, ease-in-out);
     opacity: 0;
   }
 
   &.hyp-hover {
-    & > .hyp-reply > .annotator-controls {
+    & > .annotator-controls {
       opacity: 1;
     }
   }
 
-  &.hyp-collapsed > .hyp-reply > .hyp-thread { overflow: hidden; }
-  &.hyp-collapsed > .hyp-reply {
+  &.hyp-collapsed > .hyp-thread { overflow: hidden; }
+  &.hyp-collapsed {
     & > .hyp-body {
       font-style: italic;
       margin-top: 0;
@@ -344,7 +344,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 // Remove the expander from the top level annotation
-.hyp-paper > .hyp-reply > .hyp-threadexp {
+.hyp-paper > .hyp-threadexp {
   display: none;
 }
 
