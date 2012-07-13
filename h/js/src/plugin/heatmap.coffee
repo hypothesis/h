@@ -150,7 +150,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
             [offsets[1], i, 1, end]
           ])
           .interpolate(d3.interpolateArray)
-        curve(v).slice() for v in d3.range(0, 1.05, .05)
+        curve(v).slice() for v in d3.range(0, 1, .05)
       else
         [ [offsets[0], i, 0, 1e-6]
           [offsets[1], i, 1, 1e-6] ]
