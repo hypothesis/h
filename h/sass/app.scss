@@ -134,7 +134,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .hyp-user {
   font-weight: bold;
   text-decoration: underline;
-  margin-bottom: .5em
 }
 
 .hyp-time {
@@ -215,8 +214,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   height: $threadexp-width;
   width: $threadexp-width;
   position: absolute;
-  top: .4em;
-  left: -($thread-padding + $threadexp-width / 2);
+  top: .9em;
+  left: -($threadexp-width / 2);
   outline: 1px dotted #aaa;
   background-image: url("../images/minus_1.png");
   background-size: 100% 100%;
