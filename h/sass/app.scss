@@ -131,15 +131,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 //META INFO
-.hyp-user {
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-.hyp-time {
-  float: right;
-  display: inline-block;
-}
 
 
 //CONTROLS OBJECT
@@ -187,13 +178,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //BODY
 .hyp-content { white-space: pre-wrap; }
 
-//BOTTOM BAR
-.hyp-bottombar {
-  margin-top: .8em;
-  .hyp-left { float: left; }
-  .hyp-right { float: right; }
-}
-
 //THREAD INDENTATION
 .hyp-thread {
   margin: 0 -1em -1em (-$thread-padding / 2);
@@ -224,24 +208,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   .hyp-collapsed > & {
     background-image: url("../images/plus_1.png");
   }
-}
-
-//TAG
-.hyp-tag {
-  @include box-shadow(1px 1px 10px hsla(0, 0%, 0%, .05));
-  display: inline-block;
-  background: #f3f3f3;
-  color: $gray;
-  border-radius: 2px;
-  border: 1px solid $gray-light;
-  padding: .1em .4em;
-  padding-bottom: .2em;
-  vertical-align: bottom;
-}
-
-//TIME IN META BAR
-.hyp-time {
-  @include tertiarytext;
 }
 
 //EXCERPT
@@ -279,6 +245,21 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 }
 
+.topbar {
+  @include pie-clearfix;
+  .hyp-user {
+    float: left;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+  .hyp-time {
+    float: right;
+    display: inline-block;
+    @include tertiarytext;
+  }
+}
+
+
 //ANNOTATION DETAIL
 .hyp-detail {
   position: relative;
@@ -286,20 +267,25 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include single-transition("-moz-box-shadow,z-index", .5s, ease);
   @include single-transition("-o-box-shadow,z-index", .5s, ease);
   @include single-transition("box-shadow,z-index", .5s, ease);
-
-  &.hyp-hover {
-    @include smallshadow(2px, 2px, .2);
-    z-index: 10;
-    & > .annotator-controls {
-      opacity: 1;
-    }
-  }
-
   .annotator-controls {
     position: absolute;
     right: 0;
     z-index: 1;
   }
+
+  & > .topbar > .annotator-controls {
+    @include single-transition(opacity, .25s, ease-in-out);
+    opacity: 0;
+  }
+
+  &.hyp-hover {
+    @include smallshadow(2px, 2px, .2);
+    z-index: 10;
+    & > .topbar > .annotator-controls {
+      opacity: 1;
+    }
+  }
+
 
   &.hyp-collapsed {
     .hyp-content {
@@ -311,14 +297,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       margin-top: 0;
       padding-left: 1em;
     }
-    & > .hyp-user { float: left; }
     & > .hyp-thread { overflow: hidden; }
   }
 
-  & > .annotator-controls {
-    @include single-transition(opacity, .25s, ease-in-out);
-    opacity: 0;
-  }
 }
 
 // Remove the expander from the top level annotation
