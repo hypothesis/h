@@ -63,7 +63,17 @@ class LoginSchema(CSRFSchema):
         placeholder="Password"
     )
 
-class RegisterSchema(LoginSchema):
+class RegisterSchema(CSRFSchema):
+    username = SchemaNode(
+        String(),
+        validator=Length(min=4, max=25),
+        placeholder="Username"
+    )
+    password = SchemaNode(
+        String(),
+        widget=PasswordWidget(),
+        placeholder="Password"
+    )
     password2 = SchemaNode(
         String(),
         title='Password',
