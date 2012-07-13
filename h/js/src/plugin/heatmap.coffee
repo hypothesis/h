@@ -62,16 +62,16 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     points = $.map highlights, (hl, i) ->
       x = hl.offset.top - wrapper.offset().top - offset
       h = hl.height
-      data = hl.data
+      d = hl.data
 
       if x <= BUCKET_SIZE + BUCKET_THRESHOLD_PAD
-        if data not in above then above.push data
+        if d not in above then above.push d
       else if x + h >= $(window).height() - BUCKET_SIZE
-        if data not in below then below.push data
+        if d not in below then below.push d
       else
         return [
-          [x, 1, data]
-          [x + h, -1, data]
+          [x, 1, d]
+          [x + h, -1, d]
         ]
       return []
 
