@@ -105,6 +105,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     while @buckets.length > 2
 
       # Find the two closest points
+      # TODO: dynamic programming
       small = 0
       threshold = min = 60
       for i in [0..@index.length-2]
