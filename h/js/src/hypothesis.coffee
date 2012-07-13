@@ -412,7 +412,6 @@ class Hypothesis extends Annotator
                   .select('.annotator-listing')
                   .insert('li', '.hyp-annotation')
                     .classed('hyp-annotation', true)
-                    .classed('hyp-reply', true)
                     .classed('hyp-writer', true)
 
                 editor.element.appendTo(item.node())

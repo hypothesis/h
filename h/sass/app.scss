@@ -225,7 +225,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   background-size: 100% 100%;
   background-position: center;
 
-  .hyp-collapsed > .hyp-reply > & {
+  .hyp-collapsed > & {
     background-image: url("../images/plus_1.png");
   }
 }
@@ -286,19 +286,40 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //ANNOTATION DETAIL
 .hyp-detail {
   position: relative;
+
+  .hyp-detail {
+    @include single-transition("-webkit-box-shadow,z-index", .1s, ease-in-out);
+    @include single-transition("-moz-box-shadow,z-index", .1s, ease);
+    @include single-transition("-o-box-shadow,z-index", .1s, ease);
+    @include single-transition("box-shadow,z-index", .1s, ease);
+
+    &.hyp-hover {
+      @include smallshadow(2px, 2px, .2);
+      z-index: 10;
+    }
+  }
+
   .annotator-controls {
     position: absolute;
     right: 0;
     z-index: 1;
   }
 
-  .hyp-collapsed {
+  &.hyp-collapsed {
     .hyp-content {
       overflow: hidden;
       text-overflow: ellipsis;
       -o-text-overflow: ellipsis;
       white-space: nowrap;
+      font-style: italic;
+      margin-top: 0;
+      padding-left: 1em;
     }
+
+    .hyp-body {
+    }
+    & > .hyp-user { float: left; }
+    & > .hyp-thread { overflow: hidden; }
   }
 
   & > .annotator-controls {
@@ -311,35 +332,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       opacity: 1;
     }
   }
-
-  &.hyp-collapsed > .hyp-thread { overflow: hidden; }
-  &.hyp-collapsed {
-    & > .hyp-body {
-      font-style: italic;
-      margin-top: 0;
-      padding-left: 1em;
-    }
-    & > .hyp-user { float: left; }
-    & > .hyp-thread { overflow: hidden; }
-  }
-
-  .hyp-detail {
-    @include single-transition("-webkit-box-shadow,z-index", .1s, ease-in-out);
-    @include single-transition("-moz-box-shadow,z-index", .1s, ease);
-    @include single-transition("-o-box-shadow,z-index", .1s, ease);
-    @include single-transition("box-shadow,z-index", .1s, ease);
-
-
-    &.hyp-hover {
-      @include smallshadow(2px, 2px, .2);
-      z-index: 10;
-    }
-  }
-}
-
-//ANNOTATION REPLY
-.hyp-reply {
-  position: relative;
 
 }
 
