@@ -141,12 +141,27 @@ class Hypothesis extends Annotator
         .on 'mouseup', =>
           d3.event.preventDefault()
           bucket = getBucket()
-          annotations = @heatmap.buckets[bucket]
-          if annotations?.length
-            @bucket = bucket
-            this.showViewer(annotations)
+          if @heatmap.isUpper bucket
+            {highlights, offset} = d3.select(@heatmap.element[0]).datum()
+            @provider.scrollTop highlights.reduce(
+              (next, hl) ->
+                if next < hl.offset.top < offset then hl.offset.top else next
+            , 0)
+          else if @heatmap.isLower bucket
+            {highlights, offset} = d3.select(@heatmap.element[0]).datum()
+            @provider.scrollTop highlights.reduce(
+              (next, hl) ->
+                if hl.offset.top < next and hl.offset.top > offset
+                  hl.offset.top
+                else next
+            , 1e6)
           else
-            this.show()
+            annotations = @heatmap.buckets[bucket]
+            if annotations?.length
+              @bucket = bucket
+              this.showViewer(annotations)
+            else
+              this.show()
 
     d3.select(@heatmap.element[0]).call(bindHeatmapEvents)
 
