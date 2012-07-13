@@ -245,8 +245,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 }
 
+//TOPBAR
+//At the top of annotations mostly provides some clearfixng
 .topbar {
   @include pie-clearfix;
+  margin-bottom: .25em;
   .hyp-user {
     float: left;
     font-weight: bold;
@@ -260,6 +263,14 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 
+//COMMON CLASSES (PUT INTO ONE OF THE CLASSES COMMON TO ALL ANNOTATION OBJECTS)
+.hyp-content {
+  margin-bottom: .5em
+}
+.bottombar {
+  @include pie-clearfix;
+}
+
 //ANNOTATION DETAIL
 .hyp-detail {
   position: relative;
@@ -267,7 +278,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include single-transition("-moz-box-shadow,z-index", .5s, ease);
   @include single-transition("-o-box-shadow,z-index", .5s, ease);
   @include single-transition("box-shadow,z-index", .5s, ease);
-  .annotator-controls {
+  & > .topbar > .annotator-controls {
     position: absolute;
     right: 0;
     z-index: 1;
@@ -295,7 +306,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       white-space: nowrap;
       font-style: italic;
       margin-top: 0;
-      padding-left: 1em;
     }
     & > .hyp-thread { overflow: hidden; }
   }
@@ -316,6 +326,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   textarea {
     width: 100%;
     min-height: 8em;
+  }
+  .annotator-controls {
+     float: left;
   }
 }
 
