@@ -159,7 +159,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     opacity = d3.scale.pow().domain([0, max]).range([.1, .6]).exponent(2)
 
     # d3 selections
-    stops = d3.select(@element[0])
+    stops = d3.select(@element[0]).datum(data) # cache highlights
       .select('#heatmap-gradient')
       .selectAll('stop').data(stopData, (d) => d)
     stops.enter().append('stop')
