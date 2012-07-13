@@ -283,16 +283,16 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //ANNOTATION DETAIL
 .hyp-detail {
   position: relative;
+  @include single-transition("-webkit-box-shadow,z-index", .5s, ease-in-out);
+  @include single-transition("-moz-box-shadow,z-index", .5s, ease);
+  @include single-transition("-o-box-shadow,z-index", .5s, ease);
+  @include single-transition("box-shadow,z-index", .5s, ease);
 
-  .hyp-detail {
-    @include single-transition("-webkit-box-shadow,z-index", .1s, ease-in-out);
-    @include single-transition("-moz-box-shadow,z-index", .1s, ease);
-    @include single-transition("-o-box-shadow,z-index", .1s, ease);
-    @include single-transition("box-shadow,z-index", .1s, ease);
-
-    &.hyp-hover {
-      @include smallshadow(2px, 2px, .2);
-      z-index: 10;
+  &.hyp-hover {
+    @include smallshadow(2px, 2px, .2);
+    z-index: 10;
+    & > .annotator-controls {
+      opacity: 1;
     }
   }
 
@@ -312,7 +312,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       margin-top: 0;
       padding-left: 1em;
     }
-
     & > .hyp-user { float: left; }
     & > .hyp-thread { overflow: hidden; }
   }
@@ -321,13 +320,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     @include single-transition(opacity, .25s, ease-in-out);
     opacity: 0;
   }
-
-  &.hyp-hover {
-    & > .annotator-controls {
-      opacity: 1;
-    }
-  }
-
 }
 
 // Remove the expander from the top level annotation
@@ -344,12 +336,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   textarea {
     width: 100%;
     min-height: 8em;
-  }
-
-  .hyp-scorecontrol {
-    display: none;
-    position: absolute;
-    z-index: 1;
   }
 }
 
@@ -372,24 +358,10 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     @include smallshadow(2px, 1px, .2);
     bottom: -2px;
   }
-
-  .hyp-repliesbadge {
-    @include secondarytext;
-    display: inline-block;
-    position: relative;
     display: none;
-  }
-
-  .hyp-score {
-    display: none;
-    position: absolute;
-    top: .8em;
-    &.hyp-positive { top: .2em; }
-    &.hyp-negative { top: -.2em; }
-    &.hyp-neutral { top: -.2em; }
-  }
 }
 
+//Provides the white background upon which items sit
 .hyp-paper {
   @include border-radius(.2em);
   @include smallshadow;
