@@ -61,6 +61,7 @@ class Hypothesis extends Annotator
         getHighlights: {}
         setActiveHighlights: {}
         getMaxBottom: {}
+        scrollTop: {}
 
     super
 
