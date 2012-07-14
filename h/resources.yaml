@@ -98,10 +98,11 @@ inject_css:
       depends: h:sass/base.scss
       filters:
         - compass
-        - datauri
         - cssrewrite
       output: css/inject.css
-  filters: cleancss
+  filters:
+    - cleancss
+    - datauri
   output: css/inject.min.css
 
 # CSS specific to the destination site
