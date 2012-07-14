@@ -1,0 +1,55 @@
+CACHE MANIFEST
+
+CACHE:
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['app_css'].urls()" />
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['inject_css'].urls()" />
+
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['annotator'].urls()" />
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['d3'].urls()" />
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['deform'].urls()" />
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['easyXDM'].urls()" />
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['handlebars'].urls()" />
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['jquery'].urls()" />
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['jwz'].urls()" />
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['templates'].urls()" />
+<span tal:content="src" tal:omit-tag
+      tal:repeat="src environment['underscore'].urls()" />
+
+${request.static_url('h:images/down_tab.svg')}
+${request.static_url('h:images/side_tab.svg')}
+${request.static_url('h:images/up_tab.svg')}
+
+${request.static_url('h:images/fave_1.png')}
+${request.static_url('h:images/flag_1.png')}
+${request.static_url('h:images/delete_1.png')}
+${request.static_url('h:images/minus_1.png')}
+${request.static_url('h:images/noise_1.png')}
+${request.static_url('h:images/pen_1.png')}
+${request.static_url('h:images/plus_1.png')}
+${request.static_url('h:images/submit_1.png')}
+
+${request.static_url('h:images/hbar-logo-small.png')}
+
+//ajax.googleapis.com/ajax/libs/webfont/1/webfont.js
+//fonts.googleapis.com/css?family=Merriweather%7COpen+Sans%7CPT+Serif
+//themes.googleusercontent.com/static/fonts/opensans/v6/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff
+//themes.googleusercontent.com/static/fonts/merriweather/v4/RFda8w1V0eDZheqfcyQ4EHhCUOGz7vYGh680lGh-uXM.woff
+//themes.googleusercontent.com/static/fonts/ptserif/v4/sDRi4fY9bOiJUbgq53yZCfesZW2xOQ-xsNqO47m55DA.woff
+
+NETWORK:
+${request.route_url('api', subpath='')}
+${request.route_url('api', subpath='')}*
+${request.route_url('forgot')}
+${request.route_url('login')}
+${request.route_url('logout')}
+${request.route_url('register')}
