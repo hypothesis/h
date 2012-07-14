@@ -70,7 +70,9 @@ templates:
         debug: False
         filters: handlebars
         output: js/templates/summary.js
-    - h:js/lib/helpers.js
+    - contents: h:js/lib/helpers.js
+  filters: uglifyjs
+  output: js/hypothesis-templates.min.js
 
 # CSS specific to the application
 app_css:
