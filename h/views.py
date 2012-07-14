@@ -212,6 +212,7 @@ class app(FormView):
         assets_env = self.request.registry.queryUtility(IWebAssetsEnvironment)
         form = self.auth()
         form['css_links'].extend(assets_env['app_css'].urls())
+        form['manifest'] = 'appcache.mf'
         return form
 
 def auth(request):
@@ -257,6 +258,9 @@ def includeme(config):
     config.add_view(app, renderer='templates/app.pt', route_name='app')
     config.add_view(app, renderer='string', route_name='app',
                     attr='partial', xhr=True)
+
+    config.add_view(lambda r: {}, name='appcache.mf',
+                    renderer='templates/appcache.pt')
 
     config.add_view(home, renderer='templates/home.pt')
     config.add_view(home, attr='partial', renderer='templates/form.pt', xhr=True)
