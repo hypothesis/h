@@ -273,7 +273,7 @@ def includeme(config):
     config.add_view(
         lambda r: Response(
             body=render('h:templates/embed.pt', embed(r), request=r),
-            cache_control='must-revalidate',
+            cache_control='max-age=86400; must-revalidate',
             content_type='application/javascript',
             charset='utf-8'),
         route_name='embed')
