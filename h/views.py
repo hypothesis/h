@@ -212,7 +212,6 @@ class app(FormView):
         assets_env = self.request.registry.queryUtility(IWebAssetsEnvironment)
         form = self.auth()
         form['css_links'].extend(assets_env['app_css'].urls())
-        form['manifest'] = 'appcache.mf'
         return form
 
 def auth(request):
