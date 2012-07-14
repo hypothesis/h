@@ -96,6 +96,7 @@ inject_css:
       depends: h:sass/base.scss
       filters:
         - compass
+        - datauri
         - cssrewrite
       output: css/inject.css
   filters: cleancss
