@@ -38,6 +38,10 @@ injector:
 # component for both the annotator and injector.
 d3:
   contents: h:js/lib/d3.v2.min.js
+deform:
+  contents:
+    - deform:static/scripts/jquery.form-3.09.js
+    - deform:static/scripts/deform.js
 easyXDM:
   contents: h:js/lib/easyXDM.min.js
 handlebars:
