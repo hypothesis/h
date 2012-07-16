@@ -2,7 +2,9 @@
     <input type="text" name="${field.name}" value="${cstruct}"
            tal:attributes="size field.widget.size;
                            class field.widget.css_class;
-                           placeholder getattr(field.schema, 'placeholder', '')"
+                           placeholder field.widget.placeholder | nothing;
+                           autocapitalize field.widget.autocapitalize | nothing;
+                           autocomplete field.widget.autocomplete | nothing"
            id="${field.oid}"/>
     <script tal:condition="field.widget.mask" type="text/javascript">
       deform.addCallback(

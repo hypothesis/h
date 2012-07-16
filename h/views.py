@@ -7,7 +7,8 @@ from apex.models import AuthID, AuthUser
 
 from colander import deferred, Invalid, Length, Schema, SchemaNode, String, Email
 from deform.form import Form
-from deform.widget import FormWidget, PasswordWidget, SelectWidget
+from deform.widget import (FormWidget, PasswordWidget, SelectWidget,
+                           TextInputWidget)
 
 from pyramid.httpexceptions import HTTPRedirection, HTTPSeeOther
 from pyramid.renderers import render
@@ -55,33 +56,39 @@ class LoginSchema(CSRFSchema):
     username = SchemaNode(
         String(),
         validator=Length(min=4, max=25),
-        placeholder="Username or Email"
+        widget=TextInputWidget(
+            autocapitalize="off",
+            autocomplete="off",
+            placeholder="Username or Email"
+        )
     )
     password = SchemaNode(
         String(),
-        widget=PasswordWidget(),
-        placeholder="Password"
+        widget=PasswordWidget(placeholder="Password"),
     )
 
 class RegisterSchema(CSRFSchema):
     username = SchemaNode(
         String(),
         validator=Length(min=4, max=25),
-        placeholder="Username"
+        widget=TextInputWidget(
+            autocapitalize="off",
+            autocomplete="off",
+            placeholder="Username"
+        )
     )
     password = SchemaNode(
         String(),
-        widget=PasswordWidget(),
-        placeholder="Password"
-    )
-    password2 = SchemaNode(
-        String(),
-        title='Password',
-        widget=PasswordWidget(),
+        widget=PasswordWidget(placeholder="Password"),
     )
     email = SchemaNode(
         String(),
-        validator=Email()
+        validator=Email(),
+        widget=TextInputWidget(
+            autocapitalize="off",
+            autocomplete="off",
+            placeholder="Email"
+        )
     )
 
 class PersonaSchema(CSRFSchema):
