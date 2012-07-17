@@ -1,3 +1,4 @@
+@import "compass";
 @import "compass/css3";
 @import "compass/css3/images";
 @import "compass/utilities/color";
@@ -84,16 +85,6 @@ section {
   article { padding: 4em 2em; }
   section { margin: 4em 0em; }
 
-  .title {
-      text-align: left;
-      img {
-        position: relative;
-        top: -1em;
-        left: -1em;
-        margin-bottom: -2em;
-      }
-  }
-
   #auth {
     .controls, .control-group, .form-actions, fieldset, input {
       width: auto;
@@ -118,13 +109,18 @@ section {
 @media screen and (min-width: 37.5em) {
   article { padding: 5em; }
   h1, h2 { text-align: left; }
-  .title img {
-    float: left;
-    position: relative;
-    top: -2em;
+
+  .title {
     left: -2em;
-    margin-right: -2em;
+    position: relative;
+    text-align: left;
+
+    img {
+      @include pie-clearfix;
+      float: left;
+    }
   }
+
   #header { margin-top: 1.5em; }
 }
 
