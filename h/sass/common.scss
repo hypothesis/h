@@ -6,7 +6,7 @@ a {
 body {
   color: $gray;
   font-smoothing: antialiased;
-  line-height: 1.25em;
+  line-height: 1.25;
 }
 
 p {
@@ -20,7 +20,6 @@ em { font-style: italic; }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: "Open Sans", sans-serif;
-  line-height: 1.2em;
   margin: 0 0 .4em;
   padding: 0 0 .1em;
   color: $gray;

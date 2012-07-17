@@ -100,7 +100,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   border-radius: 5px;
   cursor: pointer;
   font-size: .8em;
-  line-height: 1.2em;
   margin-top: -1em;
   padding: .4em 0;
   position: fixed;
@@ -146,7 +145,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     text-decoration: none;
     cursor: pointer;
     padding-left: 1.3em;
-    line-height: 1.2em;
     background-size: 1em 1em;
     background-repeat: no-repeat;
     background-position: left center;
@@ -219,7 +217,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     color: $gray;
     font-family: "Merriweather";
     font-size: 1em;
-    line-height: 1.3em;
     margin: 0;
     padding: 0 1em;
   }
@@ -230,7 +227,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     font-family: "PT Serif";
     font-size: 6em;
     position: absolute;
-    top: .45em;
+    top: -.1em;
     left: -.15em;
   }
 
@@ -241,7 +238,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     font-size: 5em;
     position: absolute;
     right: -.15em;
-    bottom: .5em;
+    bottom: -.05em;
   }
 }
 
@@ -339,7 +336,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include single-transition("-o-box-shadow", .1s, ease);
   @include single-transition("box-shadow", .1s, ease);
   @include smallshadow(2px, 3px, .2);
-  line-height: 1.25em;
   cursor: pointer;
 
   &:hover {
