@@ -67,7 +67,7 @@ class Hypothesis extends Annotator
 
     # Load plugins
     for own name, opts of @options
-      if not @plugins[name]
+      if not @plugins[name] and name of Annotator.Plugin
         this.addPlugin(name, opts)
 
     this
