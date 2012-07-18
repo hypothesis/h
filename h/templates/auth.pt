@@ -1,6 +1,6 @@
 <section>
   <form tal:replace="structure form"></form>
-  <div tal:condition="not request.user" class="right">
+  <div class="right">
     <span><a href="${request.route_url('forgot')}">Password help?</a></span>
   </div>
 </section>

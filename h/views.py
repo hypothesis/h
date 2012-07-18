@@ -196,6 +196,10 @@ class register(FormView):
 
 class persona(FormView):
     schema = PersonaSchema()
+    ajax_options = """{
+      success: personaSuccess,
+      type: 'POST'
+    }"""
 
 # Views
 # =====
@@ -206,9 +210,17 @@ class app(FormView):
 
     @property
     def auth(self):
-        form_style = self.request.user and 'form-horizontal' or 'form-vertical'
-        return auth(self.request)(
-            self.request,
+        request = self.request
+
+        # log out request
+        if request.POST.get('persona', None) == '-1':
+            request.response.merge_cookies(logout(request))
+            request.session.invalidate()
+            request.user = None
+
+        form_style = request.user and 'form-horizontal' or 'form-vertical'
+        return auth(request)(
+            request,
             action='app',
             bootstrap_form_style=form_style,
             formid='auth',

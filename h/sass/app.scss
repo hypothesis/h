@@ -376,7 +376,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   width: 100%;
   z-index: 2;
 
-  form {
+  & > * {
     display: table-cell;
     pointer-events: auto;
     vertical-align: middle;
@@ -385,12 +385,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   img {
     @include clearfix;
     float: left;
-    height: 25px;
-    margin: 5px;
-  }
-
-  span {
-    display: inline-block;
+    margin: .5em;
   }
 }
 

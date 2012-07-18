@@ -3,12 +3,15 @@
 <metal:main fill-slot="toolbar">
   <img class="tab-logo"
        src="${request.static_url('h:images/hbar-logo-small.png')}" />
-  <form tal:condition="request.user" tal:replace="structure form" />
+  <span id="persona"><form tal:condition="request.user"
+                           tal:replace="structure form" /></span>
+  <script>
+  </script>
 </metal:main>
 
 <metal:main fill-slot="header">
-  <div tal:attributes="class 'annotator-outer'"
-       tal:condition="not request.user">
+  <div tal:attributes="class 'annotator-outer';
+                       style request.user and 'display: none' | nothing">
     <div class="hyp-paper">
       <form metal:use-macro="auth" tal:define="auth load: auth.pt" />
     </div>
@@ -31,16 +34,37 @@
   <script tal:attributes="src src"
           tal:repeat="src environment['underscore'].urls()"></script>
   <script>
-    window.annotator = new Hypothesis(document.body, {
+    var annotator = window.Annotator._instance = new Hypothesis(document.body, {
       Heatmap: {}
     })
 
     var setupAuth = function () {
-      window.annotator.addPlugin('Auth', {
-        tokenUrl: '${request.route_url('token')}'
+      if (!annotator.plugins.Auth) {
+        annotator.addPlugin('Auth', {
+          autoFetch: false,
+          tokenUrl: '${request.route_url('token')}'
+        })
+      }
+
+      annotator.plugins.Auth.withToken(function (token) {
+        annotator.plugins.Permissions.setUser(token.userId);
       })
-      window.annotator.plugins.Auth.withToken(function (token) {
-      window.annotator.plugins.Permissions.setUser(token.userId);
+    }
+
+    var setupPersona = function () {
+      $('select').filter('[name^="persona"]').change(function (e) {
+        if (e.target.value == -1) {
+          var annotator = window.Annotator._instance
+          try {
+            annotator.plugins.Permissions.setUser(null)
+            // FIXME: always throws
+            annotator.plugins.Auth.setToken(null)
+          } catch(e) { }
+          annotator.plugins.Auth.updateHeaders()
+        }
+
+        $(e.target).parents('form:first').submit()
+        document.cookie = 'auth_tkt='
       })
     }
 
@@ -48,11 +72,26 @@
       deform.processCallbacks();
       var newForm = $('#' + this.id);
       if (newForm.find('.alert-error').length == 0) {
-        $(newForm).detach().appendTo('#toolbar');
-        $('#header').remove()
-          setupAuth();
+        $('#header .annotator-outer').hide()
+        $('#toolbar #persona')
+          .remove('form')
+          .prepend(newForm.detach())
+        setupAuth();
+        setupPersona();
       }
     }
+
+    var personaSuccess = function (data) {
+      deform.processCallbacks();
+      var newForm = $('#' + this.id);
+      var header = $('#header');
+      header.find('section:first')
+        .remove('form')
+        .prepend(newForm.detach());
+      $('#header .annotator-outer').show();
+      setupPersona();
+    }
+    setupPersona();
   </script>
   <script tal:condition="request.user">setupAuth()</script>
 
