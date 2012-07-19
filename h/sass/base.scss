@@ -87,3 +87,32 @@ $gutter: 24;
     top: .1em;
   }
 }
+
+
+//ICON IMAGES
+@mixin icon_resets {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+}
+
+@mixin icon($icon) {
+  @include icon_resets;
+  background-image: url("../images/#{$icon}");
+}
+
+
+//ANNOTATOR TEXT STYLES
+@mixin primarytext {
+  font-weight: bold;
+  font-size: 1.3em;
+}
+
+@mixin secondarytext {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+@mixin tertiarytext {
+  font-size: .8em;
+}

@@ -37,18 +37,6 @@ section {
   span { font-size: .9em; }
 }
 
-//ICON IMAGES
-@mixin icon_resets {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
-}
-
-@mixin icon($icon) {
-  @include icon_resets;
-  background-image: url("../images/#{$icon}");
-}
-
 svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 /* Annotator styles */
@@ -56,21 +44,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .annotator-hide {
   display: none;
   visibility: hidden;
-}
-
-//ANNOTATOR TEXT STYLES
-@mixin primarytext {
-  font-weight: bold;
-  font-size: 1.3em;
-}
-
-@mixin secondarytext {
-  font-size: 1.1em;
-  font-weight: bold;
-}
-
-@mixin tertiarytext {
-  font-size: .8em;
 }
 
 .annotator-heatmap {
