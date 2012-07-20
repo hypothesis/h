@@ -17,22 +17,17 @@
       <h2>The&#160;Internet, peer&#160;reviewed.</h2>
     </section>
 
-    <h3>Imagine<span class="red">:</span></h3>
-    <section>
-      <p>If wherever we encountered new information, sentence by sentence,
-        frame by frame, we could easily know the best thinking on it.</p>
-      <p>If we had confidence that this represented the combined wisdom of
-        the most informed people – not as anointed by editors, but as
-        weighed over time by our peers, objectively, statistically and
-        transparently.</p>
-      <p>If this created a powerful incentive for people to ensure that their
-        works met a higher standard, and made it perceptibly harder to spread
-        information that didn't meet that standard.</p>
-    </section>
-    <section>
-      <p>These goals are possible with today's technologies.</p>
-      <p>They are the objectives of Hypothes<span class="red">.</span>is.</p>
-    </section>
+    <p>Welcome to Hypothesis. We are in a limited alpha test period while we get our service up and running. If you have been given a test account, please keep reading. If not, you can visit www.hypothes.is to learn more about the project, reserve a username, and sign up to be notified when more accounts become available.</p>
+    <h2>Get Started</h2>
+    <ol>
+      <li>Open the hypothes.is sidebar by clicking on the white h. tab in the upper right corner.</li>
+      <li>Enter your login credentials to claim your account.</li>
+      <li>You can see the annotations on any page by looking at the heatmap on the right side of the page. Click on one of the tabs to see the annotations on that part of the page.</li>
+      <li>Click on an annotation to see it in detail. In the detail view, you can see replies that people have left on the annotation. Move your mouse over the annotation and click the "reply" link to leave a reply.</li>
+      <li>Highlight any piece of text to leave an annotation of your own. Try annotating these instructions.</li>
+      <li>Drag our _bookmarklet_ to your bookmarks bar, or install our extension (Firefox only) to annotate any page on the internet.</li>
+      <li>Visit the Hypothesis activity stream to see what other people have been annotating around the internet!</li>
+    </ol>
   </article>
 </metal:main>
 

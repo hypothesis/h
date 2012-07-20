@@ -16,17 +16,24 @@ article {
   padding: 1em;
 }
 
-body {
-  background-image: url('../images/noise_1.png');
-  font-family: "Merriweather", "Georgia", serif;
-}
-
 html {
   font-size: $font-size / 16 * 1em;
 }
 
+body {
+  font-family: "Merriweather", "Georgia", serif;
+}
+
 section {
   margin: 2em 0;
+}
+
+ol {
+  list-style-type: decimal;
+  margin: .5em 0;
+  li {
+    margin: .5em 0;
+  }
 }
 
 #header {
@@ -53,8 +60,6 @@ section {
 }
 
 #wrapper {
-  border: $gray-light solid 1px;
-  background-color: $gray-lighter;
 }
 
 /*
