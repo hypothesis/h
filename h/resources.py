@@ -38,7 +38,6 @@ def includeme(config):
     config.add_route('register', '/register')
     config.add_route('forgot', '/forgot')
 
-    config.scan(__name__)
     config.include('pyramid_webassets')
 
     # wrap coffeescript output in a closure
@@ -48,3 +47,5 @@ def includeme(config):
     register_filter(CleanCSS)
 
     add_webassets(config)
+
+    config.scan(__name__)
