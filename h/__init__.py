@@ -2,6 +2,7 @@
 
 def includeme(config):
     config.include('.api')
+    config.include('.app')
     config.include('.models')
     config.include('.resources')
     config.include('.views')
