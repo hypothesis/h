@@ -85,9 +85,8 @@
       deform.processCallbacks();
       var newForm = $('#' + this.id);
       var header = $('#header');
-      header.find('section:first')
-        .remove('form')
-        .prepend(newForm.detach());
+      header.find('form').remove()
+      header.find('section:first').prepend(newForm.detach());
       $('#header .annotator-outer').show();
       setupPersona();
     }
