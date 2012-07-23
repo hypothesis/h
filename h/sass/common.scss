@@ -354,6 +354,7 @@ span.errorMsg {
 //BUCKET VIEW REPLY SUMMARIES
 .hyp-summary {
   @include smallshadow(2px, 3px, .2);
+  position: relative;
   cursor: pointer;
 
   &:hover {
