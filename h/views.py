@@ -3,9 +3,22 @@ import json
 
 from pyramid.renderers import render
 from pyramid.response import Response
+from pyramid.view import view_config
 
 from pyramid_deform import FormView
 from pyramid_webassets import IWebAssetsEnvironment
+
+@view_config(http_cache=(0, { 'must-revalidate': True}),
+             renderer='h:templates/embed.pt', route_name='embed')
+def embed(request, standalone=True):
+    assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
+    if standalone:
+        request.response.content_type = 'application/javascript'
+        request.response.charset = 'UTF-8'
+    return {
+        pkg: json.dumps(assets_env[pkg].urls())
+        for pkg in ['easyXDM', 'injector', 'inject_css', 'jquery']
+    }
 
 class FormView(FormView):
     """Base class for form views that adds additional capabilities to forms.
@@ -48,26 +61,20 @@ class FormView(FormView):
     def partial(self):
         return getattr(self, self.request.params['__formid__'])
 
-def embed(request):
-    assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
-    return {
-        pkg: json.dumps(assets_env[pkg].urls())
-        for pkg in ['easyXDM', 'injector', 'inject_css', 'jquery']
-    }
-
+@view_config(renderer='templates/home.pt', route_name='home')
 def home(request):
     assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
     return {
         'css_links': assets_env['site_css'].urls(),
-        'embed': render('h:templates/embed.pt', embed(request), request=request)
+        'embed': render('h:templates/embed.pt', embed(request, False), request)
     }
 
 def includeme(config):
     config.include('deform_bootstrap')
     config.include('pyramid_deform')
 
-    config.add_view(home, renderer='templates/home.pt')
-
     config.add_static_view('h/sass', 'h:sass')
     config.add_static_view('h/js', 'h:js')
     config.add_static_view('h/images', 'h:images')
+
+    config.scan(__name__)

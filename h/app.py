@@ -1,12 +1,14 @@
 from functools import partial
 
-from apex import logout
+import apex
 from apex.models import AuthID, AuthUser
 
 from deform import Form
 
 from pyramid.httpexceptions import HTTPRedirection, HTTPSeeOther
+from pyramid.renderers import render
 from pyramid.security import forget, remember
+from pyramid.view import view_config
 
 from pyramid_webassets import IWebAssetsEnvironment
 
@@ -14,6 +16,7 @@ from . schemas import (login_validator, register_validator,
                        LoginSchema, RegisterSchema, PersonaSchema)
 from . views import FormView
 
+@view_config(name='app')
 class app(FormView):
     def __init__(self, request):
         self.request = request
@@ -43,6 +46,11 @@ class app(FormView):
         form['css_links'].extend(assets_env['app_css'].urls())
         return form
 
+@view_config(route_name='forgot')
+class forgot(FormView):
+    pass
+
+@view_config(route_name='login')
 class login(FormView):
     schema = LoginSchema(validator=login_validator)
     buttons = ('log in',)
@@ -67,6 +75,11 @@ class login(FormView):
         headers = remember(self.request, user.auth_id)
         return HTTPSeeOther(headers=headers, location=self._came_from)
 
+@view_config(route_name='logout')
+def logout(request):
+    apex.logout(request)
+
+@view_config(route_name='register')
 class register(FormView):
     schema = RegisterSchema(validator=register_validator)
     buttons = ('register',)
@@ -112,16 +125,5 @@ def includeme(config):
     config.add_view(lambda r: {}, name='appcache.mf',
                     renderer='templates/appcache.pt')
 
-    config.add_view(
-        lambda r: Response(
-            body=render('h:templates/embed.pt', embed(r), request=r),
-            cache_control='must-revalidate',
-            content_type='application/javascript',
-            charset='utf-8'),
-        route_name='embed')
-
-    config.add_view(login, route_name='login')
-    config.add_view(logout, route_name='logout')
-    config.add_view(register, route_name='register')
-    config.add_view(lambda r: {}, route_name='forgot')
+    config.scan(__name__)
 
