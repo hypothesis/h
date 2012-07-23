@@ -214,6 +214,10 @@ span.errorMsg {
     & > * {
       padding: .5em 1em 1em $thread-padding;
     }
+
+    & .hyp-detail {
+      font-size: .95em;
+    }
   }
 }
 
