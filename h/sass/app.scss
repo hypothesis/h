@@ -47,7 +47,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 .annotator-heatmap {
-  @include box-shadow(2px 2px 1em rgba(0, 0, 0, 0.1));
   background: hsla(0, 0, 0, .1);
   left: 10px;
   height: 100%;

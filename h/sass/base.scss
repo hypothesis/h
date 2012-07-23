@@ -35,13 +35,10 @@ $gutter: 24;
 
 /* Shadow mixins */
 @mixin smallshadow($a: 2px, $b: 2px, $c: .1) {
-  @include box-shadow($a $b 1em hsla(0, 0%, 0%, $c));
+  @include box-shadow($a $b 3px hsla(0, 0%, 0%, $c));
 }
 
 @mixin plainform {
-  @include single-transition("box-shadow", .6s, ease);
-  @include single-transition("-moz-box-shadow", .6s, ease);
-  @include single-transition("-webkit-box-shadow", .6s, ease);
   color: $gray;
   background-color: #ffffff !important;
   border: 1px solid $gray-lighter;

@@ -297,10 +297,6 @@ span.errorMsg {
 //ANNOTATION DETAIL
 .hyp-detail {
   position: relative;
-  @include single-transition("-webkit-box-shadow,z-index", .5s, ease-in-out);
-  @include single-transition("-moz-box-shadow,z-index", .5s, ease);
-  @include single-transition("-o-box-shadow,z-index", .5s, ease);
-  @include single-transition("box-shadow,z-index", .5s, ease);
   & > .topbar > .annotator-controls {
     position: absolute;
     right: 0;
@@ -357,10 +353,6 @@ span.errorMsg {
 
 //BUCKET VIEW REPLY SUMMARIES
 .hyp-summary {
-  @include single-transition("-webkit-box-shadow", .1s, ease);
-  @include single-transition("-moz-box-shadow", .1s, ease);
-  @include single-transition("-o-box-shadow", .1s, ease);
-  @include single-transition("box-shadow", .1s, ease);
   @include smallshadow(2px, 3px, .2);
   cursor: pointer;
 
