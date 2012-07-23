@@ -102,6 +102,9 @@ class Hypothesis extends Annotator
   _setupDocumentEvents: ->
     this
 
+  _setupDynamicStyle: ->
+    this
+
   _setupHeatmap: () ->
     @heatmap = @plugins.Heatmap
 
