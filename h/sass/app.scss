@@ -65,37 +65,41 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .hyp-heatmap-tab {
   @include user-select(none);
   background-image: url("../images/side_tab.svg");
-  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 1.43em; // (30% smaller than 2em)
   color: rgb(238, 238, 238);
   font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
   font-size: .8em;
-  margin-top: -1em;
-  padding: .4em 0;
+  margin-top: -1.6em; // v-align half of 1.2em (line-height) + 2em of padding
+  padding: 1em 0;
   position: fixed;
-  left: 0;
+  left: 2px;
   text-align: center;
   text-decoration: none;
   text-shadow: 1px 1px 1px rgb(51, 51, 51);
-  width: 3.5em;
+  width: $heatmap-width + 8px;
   vertical-align: middle;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
-  &:hover { left: -2px; }
+  &:hover { left: 0; }
+
+  &.lower, &.upper {
+    background-size: 100% 2em;
+    margin-top: -1em;
+    &:hover { left: 2px; }
+  }
 
   &.lower {
     background-image: url("../images/down_tab.svg");
-    left: 0;
-    padding-bottom: 0.7em;
-    padding-top: 0.4em;
+    background-position-y: .955em; // 1em + .45em in svg (TODO: crop)
   }
 
   &.upper {
     background-image: url("../images/up_tab.svg");
-    left: 0;
-    padding-bottom: 0.3em;
-    padding-top: 0.8em;
+    background-position-y: .355em; // 1em - .645em in svg (TODO: crop)
   }
 }
 
@@ -123,7 +127,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   img {
     @include clearfix;
     float: left;
-    margin: .5em;
+    padding: .5em;
     cursor: pointer;
   }
 }
