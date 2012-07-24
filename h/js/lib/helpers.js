@@ -32,7 +32,7 @@ Handlebars.registerHelper('fuzzyTime', function (date) {
   } else if (delta < month) {
     fuzzy = Math.round(delta / day) + ' days ago'
   } else {
-    fuzzy = date.toLocaleDateString()
+    fuzzy = new Date(date).toLocaleDateString()
   }
   
   return fuzzy
