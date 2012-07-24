@@ -49,8 +49,6 @@ class Hypothesis extends Annotator
           if @detail
             this.showViewer(@heatmap.buckets[@bucket])
           else
-            @bucket = -1
-            @provider.setActiveHighlights []
             this.hide()
         update: => this.publish 'hostUpdated'
       remote:
@@ -102,18 +100,10 @@ class Hypothesis extends Annotator
     this
 
   _setupDocumentEvents: ->
-    bucket = -1
     $('#toolbar img.tab-logo').click =>
       if @visible
-        bucket = @bucket # remember the active bucket
-        @bucket = -1
-        @provider.setActiveHighlights []
-        @editor.hide()
         this.hide()
       else
-        @bucket = bucket
-        @provider.setActiveHighlights @heatmap.buckets[@bucket]?.map (a) =>
-          a.hash.valueOf()
         this.show()
     this
 
@@ -484,10 +474,18 @@ class Hypothesis extends Annotator
     this.show()
 
   show: =>
+    if @detail
+      annotations = d3.select(@viewer.element[0]).datum().children.map (c) =>
+        c.message.annotation.hash.valueOf()
+    else
+      annotations = @heatmap.buckets[@bucket]?.map (a) => a.hash.valueOf()
+
+    @provider.setActiveHighlights annotations
     @provider.showFrame()
     @visible = true
 
   hide: =>
+    @provider.setActiveHighlights []
     @provider.hideFrame()
     @visible = false
 
