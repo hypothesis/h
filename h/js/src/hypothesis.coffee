@@ -45,6 +45,13 @@ class Hypothesis extends Annotator
               toJSON: => undefined
               valueOf: => h
           this.showEditor annotation
+        back: =>
+          if @detail
+            this.showViewer(@heatmap.buckets[@bucket])
+          else
+            @bucket = -1
+            @provider.setActiveHighlights []
+            this.hide()
         update: => this.publish 'hostUpdated'
       remote:
         publish: {}
