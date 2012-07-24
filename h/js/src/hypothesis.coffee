@@ -188,6 +188,8 @@ class Hypothesis extends Annotator
           @heatmap.index.forEach (b, i) =>
             if @heatmap.buckets[i].length > 0
               buckets.push i
+            else if @heatmap.isUpper(i) or @heatmap.isLower(i)
+              buckets.push i
           buckets
 
       tabs.enter().append('div')
