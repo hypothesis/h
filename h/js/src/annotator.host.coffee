@@ -91,7 +91,8 @@ class Annotator.Host extends Annotator
             else
               0
           Math.max.apply(Math, all)
-        scrollTop: (y) => $(window).scrollTop y
+        scrollTop: (y) =>
+          $('html, body').stop().animate {scrollTop: y}, 600
       remote:
         publish: {}
         addPlugin: {}
