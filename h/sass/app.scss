@@ -111,7 +111,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   left: 1px;
   margin-top: 1em;
   padding-right: 1em;
-  pointer-events: none;
   position: absolute;
   text-align: right;
   width: 100%;
@@ -119,7 +118,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
   & > * {
     display: table-cell;
-    pointer-events: auto;
     vertical-align: middle;
   }
 
@@ -127,6 +125,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     @include clearfix;
     float: left;
     margin: .5em;
+    cursor: pointer;
   }
 }
 

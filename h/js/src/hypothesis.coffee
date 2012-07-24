@@ -1,10 +1,11 @@
 class Hypothesis extends Annotator
   # Annotator state variables.
-  routes = null  # * An object storing route urls
-  bucket = -1    # * The index of the active bucket shown in the summary view
-  detail = false # * Whether the viewer shows a summary or detail listing
-  hash = -1      # * cheap UUID :cake:
-  cache = {}     # * object cache
+  routes = null   # * An object storing route urls
+  bucket = -1     # * The index of the active bucket shown in the summary view
+  detail = false  # * Whether the viewer shows a summary or detail listing
+  hash = -1       # * cheap UUID :cake:
+  cache = {}      # * object cache
+  visible = false # * Whether the sidebar is visible
 
   # Plugin configuration
   options:
@@ -20,6 +21,7 @@ class Hypothesis extends Annotator
     @detail = false
     @hash = -1
     @cache = {}
+    @visible = false
 
     # Establish cross-domain communication to the widget host
     @provider = new easyXDM.Rpc
@@ -43,13 +45,6 @@ class Hypothesis extends Annotator
               toJSON: => undefined
               valueOf: => h
           this.showEditor annotation
-        back: =>
-          if @detail
-            this.showViewer(@heatmap.buckets[@bucket])
-          else
-            @bucket = -1
-            @provider.setActiveHighlights []
-            this.hide()
         update: => this.publish 'hostUpdated'
       remote:
         publish: {}
@@ -100,6 +95,19 @@ class Hypothesis extends Annotator
     this
 
   _setupDocumentEvents: ->
+    bucket = -1
+    $('#toolbar img.tab-logo').click =>
+      if @visible
+        bucket = @bucket # remember the active bucket
+        @bucket = -1
+        @provider.setActiveHighlights []
+        @editor.hide()
+        this.hide()
+      else
+        @bucket = bucket
+        @provider.setActiveHighlights @heatmap.buckets[@bucket]?.map (a) =>
+          a.hash.valueOf()
+        this.show()
     this
 
   _setupDynamicStyle: ->
@@ -464,9 +472,11 @@ class Hypothesis extends Annotator
 
   show: =>
     @provider.showFrame()
+    @visible = true
 
   hide: =>
     @provider.hideFrame()
+    @visible = false
 
   threadId: (annotation) ->
     if annotation?.thread?

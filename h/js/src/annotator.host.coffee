@@ -99,12 +99,9 @@ class Annotator.Host extends Annotator
         addPlugin: {}
         createAnnotation: {}
         showEditor: {}
-        back: {}
         update: {}
 
     $(window).on 'resize scroll', util.debounce => @consumer.update()
-    @wrapper.on 'mouseup', (event) =>
-      @consumer.back() unless @ignoreMouseup
 
   publish: (event, args) ->
     if event in ['annotationCreated']
