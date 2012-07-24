@@ -66,7 +66,7 @@ class Annotator.Host extends Annotator
             height: $(this).outerHeight(true)
             data: $(this).data('annotation').hash
           .get()
-          offset: $(@wrapper[0].ownerDocument).scrollTop()
+          offset: $(window).scrollTop()
         setActiveHighlights: (hashes=[]) =>
           @wrapper.find('.annotator-hl')
           .each ->
