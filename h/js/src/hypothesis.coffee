@@ -154,18 +154,22 @@ class Hypothesis extends Annotator
           bucket = getBucket()
           if @heatmap.isUpper bucket
             {highlights, offset} = d3.select(@heatmap.element[0]).datum()
-            @provider.scrollTop highlights.reduce(
-              (next, hl) ->
-                if next < hl.offset.top < offset then hl.offset.top else next
-            , 0)
+            offset += @heatmap.index[bucket]
+            next = highlights.reduce (next, hl) ->
+              if next < hl.offset.top < offset then hl.offset.top else next
+            , 0
+            pad = $(window).outerHeight(true) * .3
+            @provider.scrollTop next - pad
           else if @heatmap.isLower bucket
             {highlights, offset} = d3.select(@heatmap.element[0]).datum()
-            @provider.scrollTop highlights.reduce(
-              (next, hl) ->
-                if hl.offset.top < next and hl.offset.top > offset
-                  hl.offset.top
-                else next
-            , 1e6)
+            offset += @heatmap.index[bucket+1]
+            next = highlights.reduce (next, hl) ->
+              if hl.offset.top < next and hl.offset.top > offset
+                hl.offset.top
+              else next
+            , 1e6
+            pad = $(window).outerHeight(true) * .3
+            @provider.scrollTop next - pad
           else
             annotations = @heatmap.buckets[bucket]
             if annotations?.length
