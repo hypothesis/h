@@ -13,20 +13,29 @@
     <section class="title">
       <img height="150px" width="150px"
            src="${request.static_url('h:images/hypothelogo_square.png')}" />
-      <h1>hypothes<span class="red">.</span>is</h1>
+      <h1>Hypothes<span class="red">.</span>is</h1>
       <h2>The&#160;Internet, peer&#160;reviewed.</h2>
     </section>
 
-    <p>Welcome to Hypothesis. We are in a limited alpha test period while we get our service up and running. If you have been given a test account, please keep reading. If not, you can visit www.hypothes.is to learn more about the project, reserve a username, and sign up to be notified when more accounts become available.</p>
+    <p>Welcome to Hypothesis. For general information about the project, please
+      visit the <a href="http://hypothes.is">home page</a> where you can reserve
+      reserve a username, sign up for our newsletter or learn how to get
+      involved in working to improve Hypothesis.</p>
     <h2>Get Started</h2>
     <ol>
-      <li>Open the hypothes.is sidebar by clicking on the white h. tab in the upper right corner.</li>
+      <li>Open the annotation sidebar by clicking on the white "h" tab in the
+        upper right corner.</li>
       <li>Enter your login credentials to claim your account.</li>
-      <li>You can see the annotations on any page by looking at the heatmap on the right side of the page. Click on one of the tabs to see the annotations on that part of the page.</li>
-      <li>Click on an annotation to see it in detail. In the detail view, you can see replies that people have left on the annotation. Move your mouse over the annotation and click the "reply" link to leave a reply.</li>
-      <li>Highlight any piece of text to leave an annotation of your own. Try annotating these instructions.</li>
-      <li>Drag our _bookmarklet_ to your bookmarks bar, or install our extension (Firefox only) to annotate any page on the internet.</li>
-      <li>Visit the Hypothesis activity stream to see what other people have been annotating around the internet!</li>
+      <li>You can see the annotations on any page by looking at the heatmap on
+        the right side of the page. Click on one of the tabs to see the
+        annotations on that part of the page.</li>
+      <li>Click on an annotation to see it in detail. In the detail view, you
+        can see replies that people have left on the annotation. Move your mouse
+        over the annotation and click the "reply" link to leave a reply.</li>
+      <li>Highlight any piece of text to leave an annotation of your own. (Try
+        annotating these instructions!)</li>
+      <li>Drag our bookmarklet to your bookmarks bar to annotate any page on the
+        internet.</li>
     </ol>
   </article>
 </metal:main>
