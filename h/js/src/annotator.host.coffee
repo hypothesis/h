@@ -58,10 +58,8 @@ class Annotator.Host extends Annotator
         setupAnnotation: => this.setupAnnotation arguments...
         onEditorHide: this.onEditorHide
         onEditorSubmit: this.onEditorSubmit
-        showFrame: =>
-          @frame.removeClass('annotator-collapsed')
-        hideFrame: =>
-          @frame.addClass('annotator-collapsed')
+        showFrame: => @frame.removeClass('annotator-collapsed')
+        hideFrame: => @frame.addClass('annotator-collapsed')
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
