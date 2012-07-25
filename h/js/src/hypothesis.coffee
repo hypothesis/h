@@ -129,13 +129,30 @@ class Hypothesis extends Annotator
               hl.data = @cache[hl.data]
               hl
             offset: offset
+          if @viewer.isShown() and @bucket == -1 then this._fillDynamicBucket()
 
     getBucket = (event) =>
       [x, y] = d3.mouse(@heatmap.element[0])
       bucket = d3.bisect(@heatmap.index, y) - 1
 
-    bindHeatmapEvents = (selection) =>
-      selection
+    @heatmap.element.click =>
+      @bucket = -1
+      this._fillDynamicBucket()
+
+    @heatmap.subscribe 'updated', =>
+      tabs = d3.select(@wrapper[0])
+        .selectAll('div.hyp-heatmap-tab')
+        .data =>
+          buckets = []
+          @heatmap.index.forEach (b, i) =>
+            if @heatmap.buckets[i].length > 0
+              buckets.push i
+            else if @heatmap.isUpper(i) or @heatmap.isLower(i)
+              buckets.push i
+          buckets
+
+      tabs.enter().append('div')
+        .classed('hyp-heatmap-tab', true)
         .on 'mousemove', =>
           unless @viewer.isShown() and @detail
             bucket = getBucket()
@@ -174,24 +191,6 @@ class Hypothesis extends Annotator
               this.showViewer(annotations)
             else
               this.show()
-
-    d3.select(@heatmap.element[0]).call(bindHeatmapEvents)
-
-    @heatmap.subscribe 'updated', =>
-      tabs = d3.select(@wrapper[0])
-        .selectAll('div.hyp-heatmap-tab')
-        .data =>
-          buckets = []
-          @heatmap.index.forEach (b, i) =>
-            if @heatmap.buckets[i].length > 0
-              buckets.push i
-            else if @heatmap.isUpper(i) or @heatmap.isLower(i)
-              buckets.push i
-          buckets
-
-      tabs.enter().append('div')
-        .classed('hyp-heatmap-tab', true)
-        .call(bindHeatmapEvents)
       tabs.exit().remove()
       tabs
         .style 'top', (i) =>
@@ -240,6 +239,15 @@ class Hypothesis extends Annotator
     }]
 
     editor
+
+  _fillDynamicBucket: ->
+    {highlights, offset} = d3.select(@heatmap.element[0]).datum()
+    bottom = offset + @heatmap.element.height()
+    this.showViewer highlights.reduce (acc, hl) =>
+      if hl.offset.top >= offset and hl.offset.top <= bottom
+        acc.push hl.data
+      acc
+    , []
 
   # Public: Initialises an annotation either from an object representation or
   # an annotation created with Annotator#createAnnotation(). It finds the
