@@ -76,6 +76,7 @@ class Hypothesis extends Annotator
     # Set up interface elements
     this._setupHeatmap()
     @wrapper.append(@viewer.element, @editor.element, @heatmap.element)
+    @viewer.show()
 
     @provider.getMaxBottom (max) =>
       $('#toolbar').css("top", "#{max}px")
@@ -104,7 +105,10 @@ class Hypothesis extends Annotator
       if @visible
         this.hide()
       else
-        this.show()
+        if @viewer.isShown() and @bucket == -1
+          this._fillDynamicBucket()
+        else
+          this.show()
     this
 
   _setupDynamicStyle: ->
