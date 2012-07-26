@@ -133,7 +133,8 @@ class Hypothesis extends Annotator
               hl.data = @cache[hl.data]
               hl
             offset: offset
-          if @viewer.isShown() and @bucket == -1 then this._fillDynamicBucket()
+          if @visible and @viewer.isShown() and @bucket == -1
+            this._fillDynamicBucket()
 
     getBucket = (event) =>
       [x, y] = d3.mouse(@heatmap.element[0])
@@ -492,14 +493,14 @@ class Hypothesis extends Annotator
     else
       annotations = @heatmap.buckets[@bucket]?.map (a) => a.hash.valueOf()
 
+    @visible = true
     @provider.setActiveHighlights annotations
     @provider.showFrame()
-    @visible = true
 
   hide: =>
+    @visible = false
     @provider.setActiveHighlights []
     @provider.hideFrame()
-    @visible = false
 
   threadId: (annotation) ->
     if annotation?.thread?
