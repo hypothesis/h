@@ -14,7 +14,6 @@ setup(
         'pyramid_tm>=0.3',
         'pyramid_webassets>=0.7',
         'setuptools>=0.6c11',
-        'PyYAML>=3.0'
     ],
 
     author = 'Hypothes.is Project & contributors',
