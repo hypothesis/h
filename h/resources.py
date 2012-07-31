@@ -2,11 +2,7 @@ from glob import glob
 from os.path import basename, dirname, join, relpath, splitext
 from operator import concat
 
-from pyramid.events import subscriber
-from pyramid.events import BeforeRender
 from pyramid.settings import aslist
-
-from pyramid_webassets import IWebAssetsEnvironment
 
 from webassets import Bundle
 from webassets.filter import register_filter
@@ -19,11 +15,6 @@ def add_webassets(config):
     bundles = loader.load_bundles()
     for name in bundles:
         config.add_webasset(name, bundles[name])
-
-@subscriber(BeforeRender)
-def add_global(event):
-    environment = event['request'].registry.queryUtility(IWebAssetsEnvironment)
-    event['environment'] = environment
 
 def includeme(config):
     config.add_route('home', '/', use_global_views=True)
@@ -47,5 +38,3 @@ def includeme(config):
     register_filter(CleanCSS)
 
     add_webassets(config)
-
-    config.scan(__name__)

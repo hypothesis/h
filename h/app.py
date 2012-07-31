@@ -10,8 +10,6 @@ from pyramid.renderers import render
 from pyramid.security import forget, remember
 from pyramid.view import view_config
 
-from pyramid_webassets import IWebAssetsEnvironment
-
 from . schemas import (login_validator, register_validator,
                        LoginSchema, RegisterSchema, PersonaSchema)
 from . views import FormView
@@ -41,9 +39,8 @@ class app(FormView):
 
     def __call__(self):
         request = self.request
-        assets_env = self.request.registry.queryUtility(IWebAssetsEnvironment)
         form = self.auth()
-        form['css_links'].extend(assets_env['app_css'].urls())
+        form['css_links'].extend(request.webassets_env['app_css'].urls())
         return form
 
 @view_config(route_name='forgot')

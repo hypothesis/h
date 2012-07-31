@@ -40,7 +40,7 @@ pyramid-debugtoolbar==1.0.2
 pyramid-deform==0.2a5
 pyramid-mailer==0.8
 pyramid-tm==0.4
-pyramid-webassets==0.5
+pyramid-webassets==0.7
 pystache==0.5.2
 pytest==2.2.4
 python-openid==2.2.5

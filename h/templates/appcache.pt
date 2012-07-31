@@ -2,30 +2,21 @@ CACHE MANIFEST
 
 CACHE:
 <span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['app_css'].urls()" />
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['inject_css'].urls()" />
+      tal:repeat="src webassets(request,
+                  'deform',
+                  'jquery',
 
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['annotator'].urls()" />
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['d3'].urls()" />
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['deform'].urls()" />
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['easyXDM'].urls()" />
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['handlebars'].urls()" />
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['injector'].urls()" />
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['jquery'].urls()" />
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['jwz'].urls()" />
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['templates'].urls()" />
-<span tal:content="src" tal:omit-tag
-      tal:repeat="src environment['underscore'].urls()" />
+                  'app_css',
+                  'inject_css',
+
+                  'annotator',
+                  'd3',
+                  'easyXDM',
+                  'handlebars',
+                  'injector',
+                  'jwz',
+                  'templates',
+                  'underscore')">
 
 ${request.static_url('h:images/down_tab.svg')}
 ${request.static_url('h:images/side_tab.svg')}

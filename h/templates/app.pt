@@ -20,19 +20,15 @@
 
 <metal:main fill-slot="content">
   <script tal:attributes="src src"
-          tal:repeat="src environment['annotator'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['d3'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['easyXDM'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['handlebars'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['jwz'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['templates'].urls()"></script>
-  <script tal:attributes="src src"
-          tal:repeat="src environment['underscore'].urls()"></script>
+          tal:repeat="src webassets(
+                      request,
+                      'annotator',
+                      'd3',
+                      'easyXDM',
+                      'handlebars',
+                      'jwz',
+                      'templates',
+                      'underscore')"></script>
   <script>
     var annotator = window.Annotator._instance = new Hypothesis(document.body, {
       Heatmap: {}

@@ -6,17 +6,15 @@ from pyramid.response import Response
 from pyramid.view import view_config
 
 from pyramid_deform import FormView
-from pyramid_webassets import IWebAssetsEnvironment
 
 @view_config(http_cache=(0, { 'must-revalidate': True}),
              renderer='h:templates/embed.pt', route_name='embed')
 def embed(request, standalone=True):
-    assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
     if standalone:
         request.response.content_type = 'application/javascript'
         request.response.charset = 'UTF-8'
     return {
-        pkg: json.dumps(assets_env[pkg].urls())
+        pkg: json.dumps(request.webassets_env[pkg].urls())
         for pkg in ['easyXDM', 'injector', 'inject_css', 'jquery']
     }
 
@@ -63,9 +61,8 @@ class FormView(FormView):
 
 @view_config(renderer='templates/home.pt', route_name='home')
 def home(request):
-    assets_env = request.registry.queryUtility(IWebAssetsEnvironment)
     return {
-        'css_links': assets_env['site_css'].urls(),
+        'css_links': request.webassets_env['site_css'].urls(),
         'embed': render('h:templates/embed.pt', embed(request, False), request)
     }
 
