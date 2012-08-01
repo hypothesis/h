@@ -179,6 +179,8 @@ class Hypothesis extends Annotator
             , 0
             pad = $(window).outerHeight(true) * .3
             @provider.scrollTop next - pad
+            @bucket = -1
+            this._fillDynamicBucket()
           else if @heatmap.isLower bucket
             {highlights, offset} = d3.select(@heatmap.element[0]).datum()
             offset += @heatmap.index[bucket+1]
@@ -189,6 +191,8 @@ class Hypothesis extends Annotator
             , 1e6
             pad = $(window).outerHeight(true) * .3
             @provider.scrollTop next - pad
+            @bucket = -1
+            this._fillDynamicBucket()
           else
             annotations = @heatmap.buckets[bucket]
             if annotations?.length
