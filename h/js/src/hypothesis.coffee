@@ -1,11 +1,11 @@
 class Hypothesis extends Annotator
   # Annotator state variables.
-  routes = null   # * An object storing route urls
-  bucket = -1     # * The index of the active bucket shown in the summary view
-  detail = false  # * Whether the viewer shows a summary or detail listing
-  hash = -1       # * cheap UUID :cake:
-  cache = {}      # * object cache
-  visible = false # * Whether the sidebar is visible
+  this::routes = null   # * An object storing route urls
+  this::bucket = -1     # * The index of the bucket shown in the summary view
+  this::detail = false  # * Whether the viewer shows a summary or detail listing
+  this::hash = -1       # * cheap UUID :cake:
+  this::cache = {}      # * object cache
+  this::visible = false # * Whether the sidebar is visible
 
   # Plugin configuration
   options:
@@ -17,11 +17,6 @@ class Hypothesis extends Annotator
 
   constructor: (element, options, routes) ->
     @routes = routes
-    @bucket = -1
-    @detail = false
-    @hash = -1
-    @cache = {}
-    @visible = false
 
     # Establish cross-domain communication to the widget host
     @provider = new easyXDM.Rpc
