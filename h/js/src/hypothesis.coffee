@@ -323,12 +323,15 @@ class Hypothesis extends Annotator
       context = context.select('.annotator-listing')
       context.selectAll(-> this.children).remove()
       items = context.selectAll('.hyp-annotation')
-        .data ((c) -> c.children), ((c) -> c.message.id)
-      items.enter().append('li')
-        .classed('hyp-annotation', true)
+        .data ((c) -> c.children), ((c, i) -> c.message.id)
+      items.enter().append('li').classed('hyp-annotation', true)
       items.exit().remove()
       items
-        .html((d, i) => Handlebars.templates.summary(d.message.annotation))
+        .html (d, i) ->
+          if this and d3.select(this).classed('hyp-summary')
+            this.innerHTML
+          else
+            Handlebars.templates.summary(d.message.annotation)
         .classed('hyp-detail', false)
         .classed('hyp-summary', true)
         .classed('hyp-paper', true)
@@ -377,7 +380,11 @@ class Hypothesis extends Annotator
         items.enter().append('li').classed('hyp-annotation', true)
         items.exit().remove()
         items
-          .html((d, i) => Handlebars.templates.detail(d.message.annotation))
+          .html (d, i) ->
+            if this and d3.select(this).classed('hyp-detail')
+              this.innerHTML
+            else
+              Handlebars.templates.detail(d.message.annotation)
           .classed('hyp-paper', (c) -> not c.parent.message?)
           .classed('hyp-detail', true)
           .classed('hyp-summary', false)
@@ -401,30 +408,32 @@ class Hypothesis extends Annotator
             unless target.tagName is 'A' then return
             event.stopPropagation()
 
+            animate = (parent) ->
+              collapsed = parent.classed('hyp-collapsed')
+              parent.select('.hyp-thread')
+                .transition().duration(200)
+                  .style('overflow', 'hidden')
+                  .style 'height', ->
+                    if collapsed
+                      "0px"
+                    else
+                      "#{$(this).children().outerHeight(true)}px"
+                  .each 'end', ->
+                    unless collapsed
+                      d3.select(this)
+                        .style('height', null)
+                        .style('overflow', null)
+
+            parent = d3.select(event.currentTarget)
             switch d3.event.target.getAttribute('href')
               when '#collapse'
                 d3.event.preventDefault()
-                parent = d3.select(event.currentTarget)
                 collapsed = parent.classed('hyp-collapsed')
-
-                parent.classed('hyp-collapsed', !collapsed)
-                parent.select('.hyp-thread')
-                  .transition().duration(200)
-                    .style('overflow', 'hidden')
-                    .style 'height', ->
-                      if collapsed
-                        "#{$(this).children().outerHeight(true)}px"
-                      else
-                        "0px"
-                    .each 'end', ->
-                      if collapsed
-                        d3.select(this)
-                          .style('height', null)
-                          .style('overflow', null)
-
+                animate parent.classed('hyp-collapsed', !collapsed)
               when '#reply'
                 d3.event.preventDefault()
                 parent = d3.select(event.currentTarget)
+                animate parent.classed('hyp-collapsed', false)
                 reply = this.createAnnotation()
                 reply.thread = this.threadId(parent.datum().message.annotation)
 
