@@ -75,13 +75,11 @@ _template = lambda tf: Bundle(
     debug=False,
     output='js/templates/%s.js' % tf)
 templates = Bundle(
-    Bundle(
-        _template('detail'),
-        _template('editor'),
-        _template('summary'),
-    ),
-    'h:js/lib/helpers.js',
-    filters='uglifyjs',
+    _template('detail'),
+    _template('editor'),
+    _template('summary'),
+    Bundle('h:js/lib/helpers.js'),
+    filters=('uglifyjs',),
     output='js/hypothesis-templates.min.js',
 )
 
