@@ -291,42 +291,35 @@ class Hypothesis extends Annotator
     @provider.setupAnnotation stub
 
   showViewer: (annotations=[], detail=false) =>
-    viewer = d3.select(@viewer.element[0])
-
     # Thread the messages using JWZ
-    messages = annotations.map (a) ->
+    messages = mail.messageThread().thread annotations.map (a) ->
       m = mail.message(null, a.id, a.thread?.split('/') or [])
       m.annotation = a
       m
 
-    root = mail.messageThread().thread(messages)
-    context = viewer.datum(root)
+    thread = (context, selector) ->
+      context.select('.annotator-listing')
+        .selectAll(-> d3.selectAll(this.children).filter(selector)[0])
+        .data ((m) -> m.children), ((d) -> d.message.id)
 
-    # Bind the excerpt data so the excerpt can be removed in the bucket view
-    # or updated and rendered in the detail view.
-    excerpts = context.select('.annotator-listing').selectAll('.hyp-excerpt')
-      .data ( -> if detail then root.children else []), (c) -> c.message.id
+    context = d3.select(@viewer.element[0]).datum(messages)
+    items = thread context, '.hyp-annotation'
+    excerpts = thread context, '.hyp-excerpt'
 
     if not detail
       # Save the state so the bucket view can be restored when exiting
       # the detail view.
       @detail = false
 
-      # Remove the excerpts
-      excerpts.exit().remove()
+      excerpts.remove()
 
-      context = context.select('.annotator-listing')
-      context.selectAll(-> this.children).remove()
-      items = context.selectAll('.hyp-annotation')
-        .data ((c) -> c.children), ((c, i) -> c.message.id)
       items.enter().append('li').classed('hyp-annotation', true)
       items.exit().remove()
       items
-        .html (d, i) ->
-          if this and d3.select(this).classed('hyp-summary')
-            this.innerHTML
-          else
-            Handlebars.templates.summary(d.message.annotation)
+        .each (d) ->
+          _t = d3.select(this)
+          unless this and _t.classed('hyp-summary')
+            _t.html Handlebars.templates.summary d.message.annotation
         .classed('hyp-detail', false)
         .classed('hyp-summary', true)
         .classed('hyp-paper', true)
@@ -366,20 +359,14 @@ class Hypothesis extends Annotator
         if h then highlights.push h.valueOf()
       @provider.setActiveHighlights highlights
 
-      loop
-        context = context.select('.annotator-listing')
-        items = context.selectAll(-> this.children).filter('.hyp-annotation')
-          .data ((c) -> c.children), ((c) -> c.message.id)
-        break unless items.length
-
+      while items.length
         items.enter().append('li').classed('hyp-annotation', true)
         items.exit().remove()
         items
-          .html (d, i) ->
-            if this and d3.select(this).classed('hyp-detail')
-              this.innerHTML
-            else
-              Handlebars.templates.detail(d.message.annotation)
+          .each (d) ->
+            _t = d3.select(this)
+            unless this and _t.classed('hyp-detail')
+              _t.html Handlebars.templates.detail d.message.annotation
           .classed('hyp-paper', (c) -> not c.parent.message?)
           .classed('hyp-detail', true)
           .classed('hyp-summary', false)
@@ -453,7 +440,8 @@ class Hypothesis extends Annotator
                 editor.on('hide', => item.remove())
                 editor.element.find(":input:first").focus()
 
-        context = items
+        context = items.select '.hyp-thread'
+        items = thread context, '.hyp-annotation'
 
     @editor.hide()
     @viewer.show()
