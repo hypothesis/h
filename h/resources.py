@@ -23,15 +23,17 @@ annotator = Bundle(
     ),
     Bundle(
         Bundle('h:js/lib/jquery.mousewheel.min.js'),
-        Bundle('h:js/src/plugin/heatmap.coffee',
-               debug=False,
-               filters='coffeescript',
-               output='js/heatmap.js',
+        Bundle(
+            'h:js/src/plugin/heatmap.coffee',
+            debug=False,
+            filters='coffeescript',
+            output='js/heatmap.js',
         ),
-        Bundle('h:js/src/hypothesis.coffee',
-               debug=False,
-               filters='coffeescript',
-               output='js/hypothesis.js',
+        Bundle(
+            'h:js/src/hypothesis.coffee',
+            debug=False,
+            filters='coffeescript',
+            output='js/hypothesis.js',
         ),
         filters='uglifyjs',
         output='js/hypothes.is.min.js',
@@ -44,10 +46,11 @@ annotator = Bundle(
 injector = Bundle(
     Bundle('h:js/lib/annotator.min.js'),
     Bundle(
-        Bundle('h:js/src/annotator.host.coffee',
-               debug=False,
-               filters='coffeescript',
-               output='js/annotator.host.js',
+        Bundle(
+            'h:js/src/annotator.host.coffee',
+            debug=False,
+            filters='coffeescript',
+            output='js/annotator.host.js',
         ),
         filters='uglifyjs',
         output='js/hypothesis-host.min.js',
@@ -85,15 +88,16 @@ templates = Bundle(
 
 # CSS specific to the application
 app_css = Bundle(
-    Bundle('h:sass/app.scss',
-           debug=False,
-           depends=(
-               'h:sass/reset.scss',
-               'h:sass/base.scss',
-               'h:sass/common.scss',
-           ),
-           filters=('compass', 'cssrewrite',),
-           output='css/app.css',
+    Bundle(
+        'h:sass/app.scss',
+        debug=False,
+        depends=(
+            'h:sass/reset.scss',
+            'h:sass/base.scss',
+            'h:sass/common.scss',
+        ),
+        filters=('compass', 'cssrewrite',),
+        output='css/app.css',
     ),
     filters=('cleancss',),
     output='css/app.min.css',
@@ -101,11 +105,12 @@ app_css = Bundle(
 
 # Host-page CSS for widget placement.
 inject_css = Bundle(
-    Bundle('h:sass/inject.scss',
-           debug=False,
-           depends=('h:sass/base.scss',),
-           filters=('compass', 'cssrewrite',),
-           output='css/inject.css',
+    Bundle(
+        'h:sass/inject.scss',
+        debug=False,
+        depends=('h:sass/base.scss',),
+        filters=('compass', 'cssrewrite',),
+        output='css/inject.css',
     ),
     filters=('cleancss', 'datauri'),
     output=('css/inject.min.css'),
