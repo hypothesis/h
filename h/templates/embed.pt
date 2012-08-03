@@ -28,7 +28,10 @@ yepnope([
         })
         annotator.consumer.addPlugin('Store', {
           annotationData: { uri: uri },
-          loadFromSearch: { uri: uri },
+          loadFromSearch: {
+            limit: 1000,
+            uri: uri
+          },
           prefix: '${request.route_url("api", subpath="")}'
         })
         window.Annotator._instance = annotator;
