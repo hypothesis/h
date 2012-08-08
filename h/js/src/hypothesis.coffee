@@ -127,7 +127,7 @@ class Hypothesis extends Annotator
               hl.data = @cache[hl.data]
               hl
             offset: offset
-          if @visible and @viewer.isShown() and @bucket == -1
+          if @visible and @viewer.isShown() and @bucket == -1 and not @detail
             this._fillDynamicBucket()
 
     getBucket = (event) =>
