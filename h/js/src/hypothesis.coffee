@@ -363,8 +363,8 @@ class Hypothesis extends Annotator
         items.exit().remove()
         items
           .each (d) ->
-            _t = d3.select(this)
-            unless this and _t.classed('hyp-detail')
+            _t = this and d3.select(this)
+            unless _t and _t.classed('hyp-detail')
               _t.html Handlebars.templates.detail d.message.annotation
           .classed('hyp-paper', (c) -> not c.parent.message?)
           .classed('hyp-detail', true)
@@ -451,7 +451,7 @@ class Hypothesis extends Annotator
     if existing?
       annotations = existing.flattenChildren()?.map((c) -> c.annotation)
         .concat(annotations)
-    this.showViewer(annotations or [], true)
+    this.showViewer(annotations or [], @detail)
 
   showEditor: (annotation) =>
     unless @plugins.Permissions?.user
