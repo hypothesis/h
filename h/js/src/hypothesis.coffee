@@ -82,6 +82,8 @@ class Hypothesis extends Annotator
       annotation.user = @plugins.Permissions.options.userId(
         @plugins.Permissions.user)
 
+    this.publish 'hostUpdated'
+
   _setupWrapper: ->
     @wrapper = $('#wrapper')
     .on 'mousewheel', (event, delta) ->
