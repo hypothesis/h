@@ -24,11 +24,6 @@ def login_validator(node, kw):
         )
 
 def register_validator(node, kw):
-    """Validate a username and password."""
-    valid = False
-    if 'password' in kw:
-        if kw['password'] != kw.get('password2', None):
-            raise Invalid(node, "Passwords should match!")
     used = AuthUser.get_by_login(kw['username'])
     used = used or AuthUser.get_by_email(kw['email'])
     if used:

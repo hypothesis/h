@@ -1,6 +1,5 @@
 class Hypothesis extends Annotator
   # Annotator state variables.
-  this::routes = null   # * An object storing route urls
   this::bucket = -1     # * The index of the bucket shown in the summary view
   this::detail = false  # * Whether the viewer shows a summary or detail listing
   this::hash = -1       # * cheap UUID :cake:
@@ -15,9 +14,7 @@ class Hypothesis extends Annotator
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
 
-  constructor: (element, options, routes) ->
-    @routes = routes
-
+  constructor: (element, options) ->
     # Establish cross-domain communication to the widget host
     @provider = new easyXDM.Rpc
       swf: options.swf
