@@ -33,6 +33,7 @@ class app(FormView):
 
         return form(
             request,
+            action="?action=%s" % action,
             bootstrap_form_style='form-vertical',
             formid='auth',
         )
@@ -86,7 +87,7 @@ class login(FormView):
     schema = LoginSchema(validator=login_validator)
     buttons = ('log in',)
     ajax_options = """{
-      success: loginSuccess,
+      success: authSuccess,
       target: null,
       type: 'POST'
     }"""
@@ -105,33 +106,39 @@ class login(FormView):
 @view_config(route_name='register')
 class register(FormView):
     schema = RegisterSchema(validator=register_validator)
-    buttons = ('register',)
+    buttons = ('sign up',)
     form_class = partial(Form,
                          bootstrap_form_style='form-vertical',
                          formid='auth')
+    ajax_options = """{
+      success: authSuccess,
+      target: null,
+      type: 'POST'
+    }"""
 
-    def __call__(self):
-        if self.request.user:
-            return HTTPSeeOther(location=self.request.route_url('home'))
-        return super(register, self).__call__()
+    @property
+    def _came_from(self):
+        formid = self.request.params.get('__formid__')
+        app = self.request.route_url('app', _query=(('__formid__', formid),))
+        return self.request.params.get('came_from', app)
 
-    def register_success(self, form):
-        session = self.request.db
+    def sign_up_success(self, form):
+        db = self.request.db
         id = AuthID()
-        session.add(id)
+        db.add(id)
         user = AuthUser(login=form['username'],
                         password=form['password'],
                         email=form['email'])
         id.users.append(user)
-        session.add(user)
-        session.flush()
+        db.add(user)
+        db.flush()
         headers = remember(self.request, user.auth_id)
-        return HTTPSeeOther(headers=headers, location=self.request.route_url('home'))
+        return HTTPSeeOther(headers=headers, location=self._came_from)
 
 class persona(FormView):
     schema = PersonaSchema()
     ajax_options = """{
-      success: personaSuccess,
+      success: authSuccess,
       target: null,
       type: 'POST'
     }"""

@@ -1,5 +1,7 @@
 <div class="right">
-  <a class="btn" href="?action=register">Sign Up</a>
+  <a class="btn"
+     onclick="$('#auth').clearForm().attr('action', '?action=register').submit()"
+     >Sign up</a>
 </div>
 
 <form tal:replace="structure form['auth']"></form>

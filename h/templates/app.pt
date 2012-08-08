@@ -15,8 +15,7 @@
   </div>
 
   <div id="wrapper">
-    <header tal:attributes="style request.user and 'display: none' | nothing"
-            class="annotator-outer">
+    <header class="annotator-outer">
       <div class="hyp-paper">
         <span metal:use-macro="auth" tal:define="auth load: auth.pt" />
       </div>
@@ -37,58 +36,41 @@
     var annotator = window.Annotator._instance = new Hypothesis(document.body, {
       Heatmap: {}
     })
+    var plugins = annotator.plugins
 
     var setupAuth = function () {
-      if (!annotator.plugins.Auth) {
-        annotator.addPlugin('Auth', {
-          autoFetch: false,
-          tokenUrl: '${request.route_url('token')}'
-        })
-      }
-
-      annotator.plugins.Auth.withToken(function (token) {
-        annotator.plugins.Permissions.setUser(token.userId);
+      $('#persona').on('change', function () {
+        $(this).submit()
       })
-    }
 
-    var setupPersona = function () {
-      $('select').filter('[name^="persona"]').change(function (e) {
-        if (e.target.value == -1) {
-          var annotator = window.Annotator._instance
-          try {
-            annotator.plugins.Permissions.setUser(null)
-            // FIXME: always throws
-            annotator.plugins.Auth.setToken(null)
-          } catch(e) { }
-          annotator.plugins.Auth.updateHeaders()
-        }
-
-        $(e.target).parents('form:first').submit()
-      })
-    }
-
-    var loginSuccess = function (data) {
-      var auth = $(data.form.auth).replaceAll('#auth')
-      var persona = $(data.form.persona).replaceAll('#persona')
-      // TODO: somehow avoid calling the success function on errors
-      if (auth.find('.alert-error').length == 0) {
+      // TODO: use less janky cookie stuff (and below)
+      if (document.cookie.indexOf('auth_tkt=') != -1) {
         $('header').hide()
-        setupAuth();
+        if (!plugins.Auth) {
+          annotator.addPlugin('Auth', {
+            tokenUrl: '${request.route_url('token')}'
+          })
+        }
+        plugins.Auth.withToken(plugins.Permissions._setAuthFromToken)
+      } else {
+        $('header').show()
+        plugins.Permissions.setUser(null)
+        if (plugins.Auth) {
+          plugins.Auth.token = null
+          plugins.Auth.updateHeaders()
+          delete plugins.Auth
+        }
       }
-      setupPersona();
-      deform.processCallbacks();
-      deform.focusFirstInput()
     }
 
-    var personaSuccess = function (data) {
+    var authSuccess = function (data) {
       var auth = $(data.form.auth).replaceAll('#auth')
       var persona = $(data.form.persona).replaceAll('#persona')
-      $('header').show()
       deform.processCallbacks();
       deform.focusFirstInput()
-      setupPersona();
+      setupAuth();
     }
-    setupPersona();
+    setupAuth();
   </script>
   <script tal:condition="request.user">setupAuth()</script>
 
