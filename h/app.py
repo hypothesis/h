@@ -44,7 +44,9 @@ class app(FormView):
 
         # logout request
         if request.params.get('persona', None) == '-1':
-            logout(request).merge_cookies(request.response)
+            request.add_response_callback(
+                lambda req, res: logout(req).merge_cookies(res)
+            )
             request.user = None
 
         return persona(
