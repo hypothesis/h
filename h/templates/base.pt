@@ -12,11 +12,12 @@
         <![endif]-->
     <!-- TODO: make deform use_ajax widgets delay after jQuery loads -->
     <link rel="stylesheet"
-          tal:attributes="href href"
-          tal:repeat="href css_links" />
-    <script tal:attributes="src request.static_url('deform:static/' + src)"
-            tal:condition="exists: js_links"
-            tal:repeat="src js_links"></script>
+          tal:attributes="href request.static_url('deform:static/%s' % href)"
+          tal:repeat="href css_links | []" />
+    <metal:main define-slot="head" />
+    <script type="text/javascript"
+            tal:attributes="src request.static_url('deform:static/%s' % src)"
+            tal:repeat="src js_links | []"></script>
     <script type="text/javascript">
       WebFontConfig = {
         google: { families: ['Merriweather', 'Source Sans Pro', 'PT Serif'] }
@@ -33,16 +34,6 @@
     </script>
   </head>
   <body>
-    <div id="flash-msg">
-      <span tal:content="message"
-            tal:omit-tag=""
-            tal:repeat="message request.session.pop_flash()" />
-    </div>
-    <div id="toolbar"><metal:main define-slot="toolbar" /></div>
-    <div id="wrapper">
-      <div id="header"><metal:main define-slot="header" /></div>
-      <div id="content"><metal:main define-slot="content" /></div>
-      <div id="footer"><metal:main define-slot="footer" /></div>
-    </div>
+    <metal:main define-slot="body" />
   </body>
 </html>

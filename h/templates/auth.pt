@@ -1,11 +1,13 @@
-<section>
-  <form tal:replace="structure form"></form>
-  <div class="right">
-    <span><a href="${request.route_url('forgot')}">Password help?</a></span>
-  </div>
-</section>
+<div class="right">
+  <a class="btn" href="?action=register">Sign Up</a>
+</div>
 
-<section tal:condition="request.registry.settings.get('velruse.providers', False)">
+<form tal:replace="structure form['auth']"></form>
+<div class="right">
+  <span><a href="${request.route_url('forgot')}">Password help?</a></span>
+</div>
+
+<metal:main tal:condition="request.registry.settings.get('velruse.providers', False)">
   <div tal:condition="'twitter' in request.registry.settings.get('velruse.providers', [])">
     <a href="${request.route_url('twitter_login')}"
        ><img alt="Sign in with twitter"
@@ -17,4 +19,4 @@
              >Have you already reserved a username with us?</a>
     </span>
   </div>
-</section>
+</metal:main>

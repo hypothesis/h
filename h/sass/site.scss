@@ -36,12 +36,6 @@ ol {
   }
 }
 
-#header {
-  padding: 1em;
-  position: relative;
-  z-index: 2;
-}
-
 #toolbar {
   font-size: .9em;
   position: absolute;
@@ -59,9 +53,6 @@ ol {
   }
 }
 
-#wrapper {
-}
-
 /*
     Mobile layout
     240–479 px
@@ -69,9 +60,12 @@ ol {
 */
 
 @media screen and (min-width: 15em) {
-  article { padding: 2em 1em; }
+  article { padding: 4em 2em; }
 
-  .title { text-align: center; }
+  header {
+    margin: 0 -2em 2em;
+    text-align: center;
+  }
 
   #auth {
     input {
@@ -87,21 +81,18 @@ ol {
 */
 
 @media screen and (min-width: 30em) {
-  article { padding: 4em 2em; }
+  header {
+    @include pie-clearfix;
+    text-align: left;
+    img { float: left; }
+  }
+
   section { margin: 4em 0em; }
 
   #auth {
     .controls, .control-group, .form-actions, fieldset, input {
       width: auto;
     }
-  }
-
-  #header {
-    font-size: .9em;
-    float: right;
-    text-align: left;
-    top: inherit;
-    margin-top: .25em;
   }
 }
 
@@ -112,21 +103,11 @@ ol {
 */
 
 @media screen and (min-width: 37.5em) {
-  article { padding: 5em; }
-  h1, h2 { text-align: left; }
+  article { padding: 6em; }
 
-  .title {
-    left: -2em;
-    position: relative;
-    text-align: left;
+  header {
 
-    img {
-      @include pie-clearfix;
-      float: left;
-    }
   }
-
-  #header { margin-top: 1.5em; }
 }
 
 /*
@@ -136,12 +117,7 @@ ol {
 */
 
 @media screen and (min-width: 57em) {
-  #header {
-    margin-right: 2.5em;
-    margin-top: 3.25em;
-  }
-
-  #wrapper {
+  article {
     width: grid(12);
     margin: auto;
   }

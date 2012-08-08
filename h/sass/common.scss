@@ -66,16 +66,6 @@ label {
   @extend .visuallyhidden;
 }
 
-span.error, p.errorMsg {
-  font-size: .9em;
-  color: red;
-  text-shadow: white -.05em .05em .01em;
-}
-
-span.errorMsg {
-  font-size: .9em;
-}
-
 .btn {
   @include sweetbutton;
 }

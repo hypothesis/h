@@ -1,11 +1,14 @@
 from functools import partial
 
-import apex
+from apex import logout
 from apex.models import AuthID, AuthUser
 
-from deform import Form
+from colander import Schema, SchemaNode
 
-from pyramid.httpexceptions import HTTPRedirection, HTTPSeeOther
+from deform import Form, Field
+from deform.widget import MappingWidget
+
+from pyramid.httpexceptions import HTTPBadRequest, HTTPRedirection, HTTPSeeOther
 from pyramid.renderers import render
 from pyramid.security import forget, remember
 from pyramid.view import view_config
@@ -16,32 +19,63 @@ from . views import FormView
 
 @view_config(name='app')
 class app(FormView):
-    def __init__(self, request):
-        self.request = request
-
     @property
     def auth(self):
         request = self.request
+        action = request.params.get('action', 'login')
 
-        # log out request
-        if request.POST.get('persona', None) == '-1':
-            request.response.merge_cookies(logout(request))
-            request.session.invalidate()
-            request.user = None
+        if action == 'login':
+            form = login
+        elif action == 'register':
+            form = register
+        else:
+            raise HTTPBadRequest()
 
-        form_style = request.user and 'form-horizontal' or 'form-vertical'
-        return (request.user and persona or login)(
+        return form(
             request,
-            action='app',
-            bootstrap_form_style=form_style,
+            bootstrap_form_style='form-vertical',
             formid='auth',
         )
 
-    def __call__(self):
+    @property
+    def persona(self):
         request = self.request
-        form = self.auth()
-        form['css_links'].extend(request.webassets_env['app_css'].urls())
-        return form
+
+        # logout request
+        if request.params.get('persona', None) == '-1':
+            logout(request).merge_cookies(request.response)
+            request.user = None
+
+        return persona(
+            request,
+            bootstrap_form_style='form-horizontal',
+            readonly=bool(not request.user),
+            formid='persona',
+        )
+
+    def __init__(self, request):
+        self.request = request
+
+    def __call__(self):
+        self.requirements = []
+        result = {
+            'css_links': [],
+            'js_links': [],
+            'form': {},
+        }
+        for name in ['auth', 'persona']:
+            view = getattr(self, name)
+            form = view()
+            if isinstance(form, dict):
+                for links in ['css_links', 'js_links']:
+                    for l in form.pop(links, []):
+                        if l not in result[links]:
+                            result[links].append(l)
+                result['form'][name] = form['form']
+            else:
+                return form
+
+        return result
 
 @view_config(route_name='forgot')
 class forgot(FormView):
@@ -53,13 +87,9 @@ class login(FormView):
     buttons = ('log in',)
     ajax_options = """{
       success: loginSuccess,
+      target: null,
       type: 'POST'
     }"""
-
-    def __call__(self):
-        if self.request.user:
-            return HTTPSeeOther(location=self._came_from)
-        return super(login, self).__call__()
 
     @property
     def _came_from(self):
@@ -72,15 +102,10 @@ class login(FormView):
         headers = remember(self.request, user.auth_id)
         return HTTPSeeOther(headers=headers, location=self._came_from)
 
-@view_config(route_name='logout')
-def logout(request):
-    apex.logout(request)
-
 @view_config(route_name='register')
 class register(FormView):
     schema = RegisterSchema(validator=register_validator)
     buttons = ('register',)
-    use_ajax = False
     form_class = partial(Form,
                          bootstrap_form_style='form-vertical',
                          formid='auth')
@@ -107,6 +132,7 @@ class persona(FormView):
     schema = PersonaSchema()
     ajax_options = """{
       success: personaSuccess,
+      target: null,
       type: 'POST'
     }"""
 
@@ -116,8 +142,7 @@ def includeme(config):
     config.include('velruse.app')
 
     config.add_view(app, renderer='templates/app.pt', route_name='app')
-    config.add_view(app, renderer='string', route_name='app',
-                    attr='partial', xhr=True)
+    config.add_view(app, renderer='json', route_name='app', xhr=True)
 
     config.add_view(lambda r: {}, name='appcache.mf',
                     renderer='templates/appcache.pt')

@@ -82,6 +82,10 @@ class PersonaSchema(CSRFSchema):
         String(),
         widget=deferred(
             lambda node, kw: SelectWidget(
-                values=api.users(kw['request']) + [(-1, 'Sign out')])
+                values=(
+                    api.users(kw['request']) +
+                    [(-1, kw['request'].user and 'Sign out' or 'Not signed in')]
+                )
+            )
         ),
     )

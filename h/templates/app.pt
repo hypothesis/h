@@ -1,24 +1,28 @@
 <metal:main use-macro="load: base.pt">
 
-<metal:main fill-slot="toolbar">
-  <img class="tab-logo"
-       src="${request.static_url('h:images/hbar-logo-small.png')}" />
-  <span id="persona"><form tal:condition="request.user"
-                           tal:replace="structure form" /></span>
-  <script>
-  </script>
+<metal:main fill-slot="head">
+    <link rel="stylesheet"
+          tal:attributes="href href"
+          tal:repeat="href webassets(request, 'app_css') | []" />
 </metal:main>
 
-<metal:main fill-slot="header">
-  <div tal:attributes="class 'annotator-outer';
-                       style request.user and 'display: none' | nothing">
-    <div class="hyp-paper">
-      <form metal:use-macro="auth" tal:define="auth load: auth.pt" />
-    </div>
+<metal:main fill-slot="body">
+
+  <div id="toolbar">
+    <img class="tab-logo"
+         src="${request.static_url('h:images/hbar-logo-small.png')}" />
+    <form tal:replace="structure form['persona']"/>
   </div>
-</metal:main>
 
-<metal:main fill-slot="content">
+  <div id="wrapper">
+    <header tal:attributes="style request.user and 'display: none' | nothing"
+            class="annotator-outer">
+      <div class="hyp-paper">
+        <span metal:use-macro="auth" tal:define="auth load: auth.pt" />
+      </div>
+    </header>
+  </div>
+
   <script tal:attributes="src src"
           tal:repeat="src webassets(
                       request,
@@ -60,30 +64,28 @@
         }
 
         $(e.target).parents('form:first').submit()
-        document.cookie = 'auth_tkt='
       })
     }
 
     var loginSuccess = function (data) {
-      deform.processCallbacks();
-      var newForm = $('#' + this.id);
-      if (newForm.find('.alert-error').length == 0) {
-        $('#header .annotator-outer').hide()
-        $('#toolbar #persona')
-          .remove('form')
-          .prepend(newForm.detach())
+      var auth = $(data.form.auth).replaceAll('#auth')
+      var persona = $(data.form.persona).replaceAll('#persona')
+      // TODO: somehow avoid calling the success function on errors
+      if (auth.find('.alert-error').length == 0) {
+        $('header').hide()
         setupAuth();
-        setupPersona();
       }
+      setupPersona();
+      deform.processCallbacks();
+      deform.focusFirstInput()
     }
 
     var personaSuccess = function (data) {
+      var auth = $(data.form.auth).replaceAll('#auth')
+      var persona = $(data.form.persona).replaceAll('#persona')
+      $('header').show()
       deform.processCallbacks();
-      var newForm = $('#' + this.id);
-      var header = $('#header');
-      header.find('form').remove()
-      header.find('section:first').prepend(newForm.detach());
-      $('#header .annotator-outer').show();
+      deform.focusFirstInput()
       setupPersona();
     }
     setupPersona();

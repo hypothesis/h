@@ -1,6 +1,8 @@
 from functools import partial
 import json
 
+from deform import Form
+
 from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.view import view_config
@@ -26,43 +28,20 @@ class FormView(FormView):
     instantiation time, such as based on request parameters or session state.
     Perhaps this should be merged into pyramid_deform.
 
-    Deform comes with AJAH support in the form of `use_ajax = True` on the
-    form class but this attemps to go further. Using the form id, the page should
-    post back its URL with XHR and, by defining a mapping of form ids to
-    form views for from the original view handler, construct pages which are
-    a composite of forms.
-
-    I'm sure there are some well tread patterns around for this. For now it's
-    a sketch of an idea and a harmless base class.
-
     """
 
     use_ajax = True
-    ajax_options = json.dumps({
-        'type': 'POST'
-    })
+    ajax_options = """{
+        type: 'POST'
+    }"""
 
     def __init__(self, request, **kwargs):
         super(FormView, self).__init__(request)
         self.form_class = partial(self.form_class, **kwargs)
 
-    def __call__(self):
-        result = super(FormView, self).__call__()
-        if self.request.is_xhr:
-            if isinstance(result, Response):
-                raise result
-            return result['form']
-        else:
-            return result
-
-    @property
-    def partial(self):
-        return getattr(self, self.request.params['__formid__'])
-
 @view_config(renderer='templates/home.pt', route_name='home')
 def home(request):
     return {
-        'css_links': request.webassets_env['site_css'].urls(),
         'embed': render('h:templates/embed.pt', embed(request, False), request)
     }
 
