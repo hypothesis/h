@@ -43,7 +43,6 @@ $gutter: 24;
   background-color: #ffffff !important;
   border: 1px solid $gray-lighter;
   border-radius: .2em;
-  box-sizing: border-box;
   font-family: "Source Sans Pro", "Open Sans", sans-serif;
   font-size: 1em;
   padding: .33em .5em;
@@ -51,8 +50,8 @@ $gutter: 24;
     outline: 0;
     border: 1px solid $gray-light;
     @include box-shadow( inset 1px 1px 6px -1px $gray-lighter);
-    }
   }
+}
 
 @mixin sweetbutton {
   @include background-image(
@@ -66,6 +65,7 @@ $gutter: 24;
   cursor: pointer;
   display: inline-block;
   padding: .4em .9em .5em;
+  position: relative;
   text-decoration: none;
   text-shadow: 0 1px 2px rgba(255, 255, 255, .9);
 
