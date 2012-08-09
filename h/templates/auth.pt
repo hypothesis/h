@@ -1,8 +1,11 @@
-<div class="right">
-  <a class="btn"
+<ul class="right">
+  <li data-action="login"><a href="#auth"
+       onclick="$('#auth').clearForm().attr('action', '?action=login').submit()"
+       >Log in</a></li>
+  <li data-action="register"><a href="#auth"
      onclick="$('#auth').clearForm().attr('action', '?action=register').submit()"
-     >Sign up</a>
-</div>
+     >Sign up</a></li>
+</ul>
 
 <form tal:replace="structure form['auth']"></form>
 <div class="right">

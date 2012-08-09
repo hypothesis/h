@@ -43,6 +43,18 @@
         $(this).submit()
       })
 
+      var action = decodeURIComponent(
+        (RegExp('action=(.+?)(&|$)').exec($('#auth').attr('action')) ||
+         [,'login']
+        )[1]
+      )
+      $('[data-action]')
+        .hide()
+        .filter(function () {
+          return $(this).data('action') != action
+        })
+        .show()
+
       // TODO: use less janky cookie stuff (and below)
       if (document.cookie.indexOf('auth_tkt=') != -1) {
         $('header').hide()
