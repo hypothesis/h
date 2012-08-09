@@ -45,6 +45,7 @@ class LoginSchema(CSRFSchema):
     )
     password = SchemaNode(
         String(),
+        validator=Length(min=6),
         widget=PasswordWidget(placeholder="Password"),
     )
 
@@ -60,6 +61,7 @@ class RegisterSchema(CSRFSchema):
     )
     password = SchemaNode(
         String(),
+        validator=Length(min=6),
         widget=PasswordWidget(placeholder="Password"),
     )
     email = SchemaNode(
