@@ -64,11 +64,13 @@
     }
 
     var authSuccess = function (data) {
-      var auth = $(data.form.auth).replaceAll('#auth')
-      var persona = $(data.form.persona).replaceAll('#persona')
-      deform.processCallbacks();
-      deform.focusFirstInput()
-      setupAuth();
+      $('#auth').fadeOut(function () {
+        $('#persona').replaceWith(data.form.persona)
+        $(this).replaceWith($(data.form.auth).fadeIn())
+        deform.processCallbacks()
+        deform.focusFirstInput()
+        setupAuth();
+      })
     }
     setupAuth();
   </script>
