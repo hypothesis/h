@@ -214,7 +214,7 @@ label {
   height: $threadexp-width;
   width: $threadexp-width;
   position: absolute;
-  top: .9em;
+  top: .8em;
   left: -($threadexp-width / 2);
   outline: 1px dotted #aaa;
   background-image: url("../images/minus_1.png");
@@ -311,7 +311,7 @@ label {
 
 
   &.hyp-collapsed {
-    .hyp-content {
+    & > .hyp-content {
       overflow: hidden;
       text-overflow: ellipsis;
       -o-text-overflow: ellipsis;
