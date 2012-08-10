@@ -40,6 +40,7 @@ class Hypothesis extends Annotator
         back: =>
           if @detail
             this.showViewer(@heatmap.buckets[@bucket])
+            this.publish('hostUpdated')
           else
             this.hide()
         update: => this.publish 'hostUpdated'
