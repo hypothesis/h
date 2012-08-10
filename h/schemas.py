@@ -45,7 +45,6 @@ class LoginSchema(CSRFSchema):
     )
     password = SchemaNode(
         String(),
-        validator=Length(min=6),
         widget=PasswordWidget(placeholder="Password"),
     )
 
