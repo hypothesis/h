@@ -21,8 +21,8 @@ annotator = Bundle(
         'h:js/lib/annotator.permissions.min.js',
         'h:js/lib/annotator.store.min.js',
     ),
+    Bundle('h:js/lib/jquery.mousewheel.min.js'),
     Bundle(
-        Bundle('h:js/lib/jquery.mousewheel.min.js'),
         Bundle(
             'h:js/src/plugin/heatmap.coffee',
             debug=False,
