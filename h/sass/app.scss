@@ -114,18 +114,17 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .hyp-heatmap-tab {
   @include user-select(none);
   background-image: url("../images/side_tab.svg");
-  background-position: center;
+  background-position: center .9em;
   background-repeat: no-repeat;
-  background-size: 100% 1.43em; // (30% smaller than 2em)
+  background-size: 100% 1.4em;
   color: rgb(238, 238, 238);
-  font-weight: bold;
-  border-radius: 5px;
   cursor: pointer;
+  font-weight: bold;
   font-size: .8em;
-  margin-top: -1.6em; // v-align half of 1.2em (line-height) + 2em of padding
+  left: 2px;
+  margin-top: (1.4 + 2) / 2 * -1em;
   padding: 1em 0;
   position: fixed;
-  left: 2px;
   text-align: center;
   text-decoration: none;
   text-shadow: 1px 1px 1px rgb(51, 51, 51);
