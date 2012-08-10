@@ -50,6 +50,15 @@ class LoginSchema(CSRFSchema):
     )
 
 class RegisterSchema(CSRFSchema):
+    email = SchemaNode(
+        String(),
+        validator=Email(),
+        widget=TextInputWidget(
+            autocapitalize="off",
+            autocomplete="off",
+            placeholder="Email"
+        )
+    )
     username = SchemaNode(
         String(),
         validator=Length(min=4, max=25),
@@ -63,15 +72,6 @@ class RegisterSchema(CSRFSchema):
         String(),
         validator=Length(min=6),
         widget=PasswordWidget(placeholder="Password"),
-    )
-    email = SchemaNode(
-        String(),
-        validator=Email(),
-        widget=TextInputWidget(
-            autocapitalize="off",
-            autocomplete="off",
-            placeholder="Email"
-        )
     )
 
 class PersonaSchema(CSRFSchema):
