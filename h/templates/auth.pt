@@ -1,27 +1,32 @@
+<section>
+<a class="close" onclick="showAuth(false)"
+   ><img src="${request.static_url('h:images/delete_1.png')}" /></a>
 <ul class="right">
-  <li data-action="login"><a href="#auth"
-       onclick="$('#auth').clearForm().attr('action', '?action=login').submit()"
+  <li data-action="login">
+    <a onclick="$('#auth').clearForm().attr('action', '?action=login').submit()"
        >Log in</a></li>
-  <li data-action="register"><a href="#auth"
-     onclick="$('#auth').clearForm().attr('action', '?action=register').submit()"
-     >Sign up</a></li>
+  <li data-action="register">
+    <a onclick="$('#auth').clearForm().attr('action', '?action=register').submit()"
+       >Sign up</a></li>
 </ul>
+</section>
 
+<section>
 <form tal:replace="structure form['auth']"></form>
-<div class="right">
-  <span><a href="${request.route_url('forgot')}">Password help?</a></span>
-</div>
+</section>
 
-<metal:main tal:condition="request.registry.settings.get('velruse.providers', False)">
-  <div tal:condition="'twitter' in request.registry.settings.get('velruse.providers', [])">
-    <a href="${request.route_url('twitter_login')}"
-       ><img alt="Sign in with twitter"
-             src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"></a>
-  </div>
+<section
+   tal:condition="request.registry.settings.get('velruse.providers', False)">
   <div class="right"
-       tal:condition="'preauth' in request.registry.settings.get('velruse.providers', [])">
-    <span><a href="#preauth"
-             >Have you already reserved a username with us?</a>
+       tal:condition="'preauth' in
+                      request.registry.settings.get('velruse.providers', [])">
+    <span><a>Have you already reserved a username with us?</a>
     </span>
   </div>
-</metal:main>
+  <div tal:condition="'twitter' in
+                      request.registry.settings.get('velruse.providers', [])">
+    <a><img alt="Sign in with twitter"
+            src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"
+            ></a>
+  </div>
+</section>

@@ -5,7 +5,7 @@ from apex.models import AuthID, AuthUser
 
 from colander import Schema, SchemaNode
 
-from deform import Form, Field
+from deform import Button, Form, Field
 from deform.widget import MappingWidget
 
 from pyramid.httpexceptions import HTTPBadRequest, HTTPRedirection, HTTPSeeOther
@@ -52,7 +52,6 @@ class app(FormView):
         return persona(
             request,
             bootstrap_form_style='form-horizontal',
-            readonly=bool(not request.user),
             formid='persona',
         )
 
@@ -87,7 +86,10 @@ class forgot(FormView):
 @view_config(route_name='login')
 class login(FormView):
     schema = LoginSchema(validator=login_validator)
-    buttons = ('log in',)
+    buttons = (
+        Button('log in', type='submit'),
+        Button('forgot', title='Password help?'),
+    )
     ajax_options = """{
       success: authSuccess,
       target: null,

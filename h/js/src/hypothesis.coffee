@@ -72,7 +72,7 @@ class Hypothesis extends Annotator
 
     @provider.getMaxBottom (max) =>
       $('#toolbar').css("top", "#{max}px")
-      @wrapper.css("padding-top", "#{max}px")
+      $('#gutter').css("padding-top", "#{max}px")
 
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.created = annotation.updated = (new Date()).toString()

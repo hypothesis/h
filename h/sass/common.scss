@@ -188,7 +188,6 @@ label {
   @include border-radius(.2em);
   @include smallshadow;
   background: #fff;
-  margin-bottom: 1em;
   padding: 1em;
 }
 
@@ -231,6 +230,7 @@ label {
 .hyp-excerpt {
   @include box-shadow(1px 3px 8px rgba(0, 0, 0, .2));
   position: relative;
+  margin: 1em 0;
 
   blockquote {
     color: $gray;
@@ -347,6 +347,7 @@ label {
 //BUCKET VIEW REPLY SUMMARIES
 .hyp-summary {
   @include smallshadow(2px, 3px, .2);
+  margin: 1em 0;
   position: relative;
   cursor: pointer;
 

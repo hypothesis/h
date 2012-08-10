@@ -1,5 +1,7 @@
 @import 'compass';
+@import 'compass/css3/transform';
 @import 'compass/css3/user-interface';
+@import "compass/reset/utilities";
 
 @import 'reset';
 @import 'base';
@@ -11,9 +13,77 @@ $em: $font-size / 1em;
 body {
   font-family: "Open Sans", sans-serif;
   height: 100%;
-  overflow: auto;
   position: fixed;
   width: 100%;
+}
+
+header {
+  @include border-radius(.5em);
+  @include single-transition(all, .4s, 'ease-in-out');
+  @include smallshadow;
+  @include transform-origin(50%, 0);
+  background: white;
+  left: 0;
+  margin-top: 3.5em;
+  padding: 2em;
+  position: absolute;
+  width: 100%;
+  z-index: 1;
+
+  a {
+    cursor: pointer;
+    font-size: .9em;
+    text-decoration: underline;
+  }
+
+  a.close {
+    color: $gray;
+    position: absolute;
+    left: 1em;
+    top: 1em;
+
+    img {
+      height: .9em;
+      width: .9em;
+      margin-right: .3em;
+    }
+  }
+
+  form {
+    button[name^="forgot"] {
+      @include box-shadow(none);
+      @include reset-box-model;
+      float: right;
+      font-size: .9em;
+      color: $link-color;
+      text-decoration: underline;
+      text-shadow: none;
+
+      &:hover {
+        background: none;
+        color: $link-color-hover;
+      }
+    }
+  }
+
+  section {
+    clear: both;
+    & > div {
+      display: inline-block;
+      width: 50%;
+    }
+    & > form { width: 100%; }
+  }
+
+  .right {
+    float: right;
+    text-align: right;
+  }
+
+  &.hyp-collapsed {
+    @include rotateX(90deg);
+    opacity: 0;
+  }
 }
 
 html {
@@ -21,18 +91,6 @@ html {
 }
 
 input { width: 100%; }
-img { vertical-align: top; }
-
-section {
-  margin-top: 2em;
-  &:first-child { margin-top: 0; }
-}
-
-.right {
-  text-align: right;
-  span { font-size: .9em; }
-}
-
 svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 /* Annotator styles */
@@ -50,11 +108,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   top: 0;
   width: $heatmap-width;
   cursor: pointer;
-}
-
-.annotator-outer {
-  padding: 0 1em;
-  margin-top: 5em;
 }
 
 //HEATMAP TABS
@@ -99,6 +152,20 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 }
 
+#gutter {
+  background: url('../images/noise_1.png');
+  background-attachment: fixed;
+  height: 100%;
+  margin-left: $heatmap-width + 10px;
+  position: relative;
+}
+
+#persona {
+  select {
+    cursor: pointer;
+  }
+}
+
 //H BAR
 #toolbar {
   @include clearfix;
@@ -129,9 +196,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 #wrapper {
-  background: url('../images/noise_1.png');
-  background-attachment: fixed;
   height: 100%;
-  margin-left: 10px + $heatmap-width;
   overflow: auto;
+  padding: 3.5em 1em 1em 1em;
 }

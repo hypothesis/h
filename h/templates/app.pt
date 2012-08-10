@@ -13,13 +13,12 @@
          src="${request.static_url('h:images/hbar-logo-small.png')}" />
     <form tal:replace="structure form['persona']"/>
   </div>
-
-  <div id="wrapper">
-    <header class="annotator-outer">
-      <div class="hyp-paper">
-        <span metal:use-macro="auth" tal:define="auth load: auth.pt" />
-      </div>
+  <div id="gutter">
+    <header>
+      <span metal:use-macro="auth" tal:define="auth load: auth.pt" />
     </header>
+    <div id="wrapper">
+    </div>
   </div>
 
   <script tal:attributes="src src"
@@ -38,11 +37,18 @@
     })
     var plugins = annotator.plugins
 
-    var setupAuth = function () {
-      $('#persona').on('change', function () {
-        $(this).submit()
-      })
+    var showAuth = function (visible, cb) {
+      var $header = $('header')
+      if ($header.hasClass('hyp-collapsed') == visible) {
+        $header.one('webkitTransitionEnd transitionend OTransitionEnd', cb)
+        if (visible) $header.removeClass('hyp-collapsed')
+        else $header.addClass('hyp-collapsed')
+      } else {
+        if (cb) cb()
+      }
+    }
 
+    var setupAuth = function (cb) {
       var action = decodeURIComponent(
         (RegExp('action=(.+?)(&|$)').exec($('#auth').attr('action')) ||
          [,'login']
@@ -57,7 +63,10 @@
 
       // TODO: use less janky cookie stuff (and below)
       if (document.cookie.indexOf('auth_tkt=') != -1) {
-        $('header').hide()
+        showAuth(false, cb)
+        $('#persona').off('change mousedown').on('change', function () {
+          $(this).submit()
+        })
         if (!plugins.Auth) {
           annotator.addPlugin('Auth', {
             tokenUrl: '${request.route_url('token')}'
@@ -65,7 +74,15 @@
         }
         plugins.Auth.withToken(plugins.Permissions._setAuthFromToken)
       } else {
-        $('header').show()
+        showAuth(true, function () {
+          if (cb) cb()
+          // XXX: deform.js is broken -- it selects hidden fields
+          $('#auth input[type!="hidden"]').first().focus()
+        })
+        $('#persona').off('change mousedown').on('mousedown', function (e) {
+          e.preventDefault()
+          setupAuth()
+        })
         plugins.Permissions.setUser(null)
         if (plugins.Auth) {
           plugins.Auth.token = null
@@ -76,15 +93,16 @@
     }
 
     var authSuccess = function (data) {
-      $('#auth').fadeOut(function () {
+      showAuth(false, function () {
+        $('#auth').replaceWith(data.form.auth)
         $('#persona').replaceWith(data.form.persona)
-        $(this).replaceWith($(data.form.auth).fadeIn())
-        deform.processCallbacks()
-        deform.focusFirstInput()
-        setupAuth();
+        setupAuth(function () {
+          deform.processCallbacks()
+        })
       })
     }
-    setupAuth();
+    setupAuth()
+    showAuth(false)
   </script>
   <script tal:condition="request.user">setupAuth()</script>
 
