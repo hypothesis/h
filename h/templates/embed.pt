@@ -31,7 +31,7 @@ yepnope([
             limit: 1000,
             uri: uri
           },
-          prefix: '${request.route_url("api", subpath="")}'
+          prefix: '${request.route_url("api", subpath="").strip('/')}'
         })
         window.Annotator._instance = annotator;
       })
