@@ -2,7 +2,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   # prototype constants
   this::BUCKET_THRESHOLD_PAD = 40
-  this::BUCKET_SIZE = 40
+  this::BUCKET_SIZE = 45
 
   # heatmap svg skeleton
   html: """
