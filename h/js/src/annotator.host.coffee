@@ -84,8 +84,10 @@ class Annotator.Host extends Annotator
             p = $(el).css('position')
             t = $(el).offset().top
             z = $(el).css('z-index')
+            if (y = /\d+/.exec($(el).css('top'))?[0])
+              t = Math.min(Number y, t)
             if (p == 'absolute' or p == 'fixed') and t == 0 and z != 'auto'
-              bottom = $(el).offset().top + $(el).outerHeight(false)
+              bottom = $(el).outerHeight(false)
               # but don't go larger than 80, because this isn't bulletproof
               if bottom > 80 then 0 else bottom
             else
