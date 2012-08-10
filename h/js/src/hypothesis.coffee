@@ -459,8 +459,9 @@ class Hypothesis extends Annotator
 
   showEditor: (annotation) =>
     unless @plugins.Permissions?.user
-      @editor.hide();
-      this.show()
+      setupAuth =>
+        @editor.hide()
+        this.show()
       return
 
     if not annotation.user?
