@@ -93,12 +93,14 @@
     }
 
     var authSuccess = function (data) {
+      var visible = $('#auth').hasClass('hyp-collapsed')
       showAuth(false, function () {
         $('#auth').replaceWith(data.form.auth)
         $('#persona').replaceWith(data.form.persona)
         setupAuth(function () {
           deform.processCallbacks()
         })
+        if (!visible) showAuth(false)
       })
     }
     setupAuth()
