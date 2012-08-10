@@ -28,7 +28,7 @@ header {
   padding: 2em;
   position: absolute;
   width: 100%;
-  z-index: 1;
+  z-index: 4;
 
   a {
     cursor: pointer;
@@ -180,7 +180,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   position: absolute;
   text-align: right;
   width: 100%;
-  z-index: 2;
+  z-index: 5;
 
   & > * {
     display: table-cell;

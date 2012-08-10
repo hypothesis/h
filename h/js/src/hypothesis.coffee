@@ -413,6 +413,9 @@ class Hypothesis extends Annotator
                 collapsed = parent.classed('hyp-collapsed')
                 animate parent.classed('hyp-collapsed', !collapsed)
               when '#reply'
+                unless @plugins.Permissions?.user
+                  do setupAuth
+                  break
                 d3.event.preventDefault()
                 parent = d3.select(event.currentTarget)
                 animate parent.classed('hyp-collapsed', false)

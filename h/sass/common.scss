@@ -303,7 +303,7 @@ label {
 
   &.hyp-hover {
     @include smallshadow(2px, 2px, .2);
-    z-index: 10;
+    z-index: 2;
     & > .topbar > .annotator-controls {
       opacity: 1;
     }
@@ -333,7 +333,6 @@ label {
 .hyp-writer {
   @include smallshadow(0, 2px, .2);
   position: relative;
-  z-index: 20;
 
   textarea {
     width: 100%;
