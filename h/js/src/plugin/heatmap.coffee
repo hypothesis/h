@@ -1,8 +1,8 @@
 class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
-  # Padding at the edge of the screen for offscreen buckets
-  BUCKET_THRESHOLD_PAD = 40
-  BUCKET_SIZE = 40
+  # prototype constants
+  this::BUCKET_THRESHOLD_PAD = 40
+  this::BUCKET_SIZE = 40
 
   # heatmap svg skeleton
   html: """
@@ -59,14 +59,14 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     below = []
 
     # Construct control points for the heatmap highlights
-    points = $.map highlights, (hl, i) ->
+    points = $.map highlights, (hl, i) =>
       x = hl.offset.top - wrapper.offset().top - offset
       h = hl.height
       d = hl.data
 
-      if x <= BUCKET_SIZE + BUCKET_THRESHOLD_PAD
+      if x <= @BUCKET_SIZE + @BUCKET_THRESHOLD_PAD
         if d not in above then above.push d
-      else if x + h >= $(window).height() - BUCKET_SIZE
+      else if x + h >= $(window).height() - @BUCKET_SIZE
         if d not in below then below.push d
       else
         return [
@@ -174,10 +174,11 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     @buckets.unshift above, []
     @buckets.push below, []
-    @index.unshift BUCKET_THRESHOLD_PAD, BUCKET_THRESHOLD_PAD + BUCKET_SIZE
-    @index.push $(window).height() - BUCKET_SIZE, $(window).height()
+    @index.unshift @BUCKET_THRESHOLD_PAD,
+      (@BUCKET_THRESHOLD_PAD + @BUCKET_SIZE)
+    @index.push $(window).height() - @BUCKET_SIZE, $(window).height()
 
     this.publish('updated')
 
-  isUpper: (i) => @index[i] == BUCKET_THRESHOLD_PAD
-  isLower: (i) => @index[i] == $(window).height() - BUCKET_THRESHOLD_PAD
+  isUpper: (i) => i == 0
+  isLower: (i) => i == @index.length - 2
