@@ -17,16 +17,17 @@
 
 <section
    tal:condition="request.registry.settings.get('velruse.providers', False)">
-  <div class="right"
-       tal:condition="'preauth' in
-                      request.registry.settings.get('velruse.providers', [])">
-    <span><a>Have you already reserved a username with us?</a>
-    </span>
-  </div>
   <div tal:condition="'twitter' in
                       request.registry.settings.get('velruse.providers', [])">
-    <a><img alt="Sign in with twitter"
-            src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"
-            ></a>
+    <a href="${request.route_url('velruse.twitter-login')}" target="hyp-auth"
+       ><img alt="Sign in with twitter"
+             src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"
+             ></a>
+  </div><!--
+  --><div class="right"
+          tal:condition="'preauth' in
+                         request.registry.settings.get('velruse.providers', [])">
+    <span><a>Have you already reserved a username with us?</a>
+    </span>
   </div>
 </section>

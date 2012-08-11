@@ -75,10 +75,7 @@ header {
     & > form { width: 100%; }
   }
 
-  .right {
-    float: right;
-    text-align: right;
-  }
+  .right { text-align: right; }
 
   &.hyp-collapsed {
     @include rotateX(90deg);
