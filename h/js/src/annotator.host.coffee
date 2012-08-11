@@ -1,13 +1,14 @@
 $ = Annotator.$
 
 util =
-  debounce: (delay=0, fn) =>
+  debounce: (fn, delay=0) =>
       timer = null
-      =>
+      (args...) =>
         if timer then clearTimeout(timer)
-        setTimeout delay, =>
+        setTimeout =>
           timer = null
-          fn()
+          fn args...
+        , delay
 
 class Annotator.Host extends Annotator
   # Events to be bound on Annotator#element.
