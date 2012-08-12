@@ -2,7 +2,7 @@ from apex.models import AuthID, AuthUser
 from colander import deferred, Invalid, Length, Schema, SchemaNode, String, Email
 from deform.widget import (FormWidget, PasswordWidget, SelectWidget,
                            TextInputWidget)
-from pyramid_deform import CSRFSchema
+from hem.schemas import CSRFSchema
 
 from . import api
 

@@ -7,6 +7,8 @@ from annotator.auth import DEFAULT_TTL
 from apex import initialize_sql, groupfinder, RootFactory
 from apex.models import AuthID, Base, DBSession
 
+from hem.interfaces import IDBSession
+
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.interfaces import IAuthenticationPolicy
@@ -74,13 +76,14 @@ class Consumer(Base):
 
 def includeme(config):
     config.include('pyramid_tm')
-    config.set_request_property(lambda request: DBSession(), 'db', reify=True)
+    config.set_request_property('hem.db.get_session', 'db', reify=True)
     config.set_request_property(
         lambda request: AuthID.get_by_id(authenticated_userid(request)),
         'user', reify=True)
 
     settings = config.registry.settings
     initialize_sql(engine_from_config(settings, 'sqlalchemy.'), settings)
+    config.registry.registerUtility(DBSession, IDBSession)
 
     if not config.registry.queryUtility(IAuthorizationPolicy):
         authz_policy = ACLAuthorizationPolicy()
