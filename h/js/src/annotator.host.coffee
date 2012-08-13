@@ -1,7 +1,7 @@
 $ = Annotator.$
 
 util =
-  debounce: (fn, delay=0) =>
+  debounce: (fn, delay=200) =>
       timer = null
       (args...) =>
         if timer then clearTimeout(timer)
