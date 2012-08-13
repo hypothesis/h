@@ -105,6 +105,7 @@ class Annotator.Host extends Annotator
         update: {}
 
     $(window).on 'resize scroll', util.debounce => @consumer.update()
+    $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
     @wrapper.on 'mouseup', (event) =>
       @consumer.back() unless @ignoreMouseup
 
@@ -139,17 +140,6 @@ class Annotator.Host extends Annotator
 
   _setupEditor: ->
     true
-
-  setupAnnotation: (annotation) =>
-    annotation = super
-
-    # If any of the parents of the highlight elements are scrollable,
-    # scrolling those should trigger an update.
-    containers = $(annotation.highlights).parents()
-    containers.off 'resize scroll', @consumer.update # don't register twice
-    containers.on 'resize scroll', @consumer.update
-
-    annotation
 
   showEditor: (annotation) =>
     stub =
