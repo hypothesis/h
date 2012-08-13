@@ -37,12 +37,18 @@
     })
     var plugins = annotator.plugins
 
-    var showAuth = function (visible, cb) {
-      var $header = $('header')
-      if ($header.hasClass('hyp-collapsed') == visible) {
+    var showAuth = function (show, cb) {
+      var $header = $('header'),
+          visible = !$header.hasClass('hyp-collapsed')
+      if (visible != show) {
+        if (show) {
+          $header.removeClass('hyp-collapsed')
+          // XXX: deform.js is broken -- it selects hidden fields
+          $('#auth input[type!="hidden"]').first().focus()
+        } else {
+          $header.addClass('hyp-collapsed')
+        }
         $header.one('webkitTransitionEnd transitionend OTransitionEnd', cb)
-        if (visible) $header.removeClass('hyp-collapsed')
-        else $header.addClass('hyp-collapsed')
       } else {
         if (cb) cb()
       }
@@ -63,7 +69,6 @@
 
       // TODO: use less janky cookie stuff (and below)
       if (document.cookie.indexOf('auth_tkt=') != -1) {
-        showAuth(false, cb)
         $('#persona').off('change mousedown').on('change', function () {
           $(this).submit()
         })
@@ -73,11 +78,11 @@
           })
         }
         plugins.Auth.withToken(plugins.Permissions._setAuthFromToken)
+        if (cb) cb(true)
       } else {
-        showAuth(true, cb)
         $('#persona').off('change mousedown').on('mousedown', function (e) {
           e.preventDefault()
-          setupAuth()
+          setupAuth(function (auth) { showAuth(!auth) })
         })
         plugins.Permissions.setUser(null)
         if (plugins.Auth) {
@@ -85,6 +90,7 @@
           plugins.Auth.updateHeaders()
           delete plugins.Auth
         }
+        if (cb) cb(false)
       }
     }
 
@@ -93,14 +99,10 @@
       showAuth(false, function () {
         $('#auth').replaceWith(data.form.auth)
         $('#persona').replaceWith(data.form.persona)
-        setupAuth(function () {
-          deform.processCallbacks()
-          if (visible) {
-            // XXX: deform.js is broken -- it selects hidden fields
-            $('#auth input[type!="hidden"]').first().focus()
-          }
+        deform.processCallbacks()
+        setupAuth(function (auth) {
+          if (visible && !auth) showAuth(true)
         })
-        if (!visible) showAuth(false)
       })
     }
     setupAuth()
