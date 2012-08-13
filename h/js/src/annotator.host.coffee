@@ -118,6 +118,21 @@ class Annotator.Host extends Annotator
     @wrapper = @element
     this
 
+  _setupDocumentEvents: ->
+    # CSS "position: fixed" is hell of broken on most mobile devices
+    # In this code, fixed is used *during* scroll on touch devices to prevent
+    # jerky re-positioning of the sidebar. After scroll ends, the sidebar
+    # is reset to "position: absolute" and positioned accordingly.
+    touched = false
+    $(window).on 'touchstart', =>
+      touched = true
+      @frame?.css('position', 'fixed').css('top', 0)
+    $(window).on 'touchend scroll', util.debounce =>
+      return unless touched
+      @frame?.css('position', 'absolute').css('top', $(window).scrollTop())
+    , 1000
+    super
+
   # These methods aren't used in the iframe-hosted configuration of Annotator.
   _setupViewer: ->
     this
