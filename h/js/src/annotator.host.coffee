@@ -140,6 +140,17 @@ class Annotator.Host extends Annotator
   _setupEditor: ->
     true
 
+  setupAnnotation: (annotation) =>
+    annotation = super
+
+    # If any of the parents of the highlight elements are scrollable,
+    # scrolling those should trigger an update.
+    containers = $(annotation.highlights).parents()
+    containers.off 'resize scroll', @consumer.update # don't register twice
+    containers.on 'resize scroll', @consumer.update
+
+    annotation
+
   showEditor: (annotation) =>
     stub =
       ranges: annotation.ranges
@@ -151,14 +162,3 @@ class Annotator.Host extends Annotator
         @consumer.showEditor stub
     else
       @consumer.showEditor stub
-
-  setupAnnotation: (annotation) =>
-    annotation = super
-
-    # If any of the parents of the highlight elements are scrollable,
-    # scrolling those should trigger an update.
-    containers = $(annotation.highlights).parents()
-    containers.off 'resize scroll', @consumer.update # don't register twice
-    containers.on 'resize scroll', @consumer.update
-
-    annotation
