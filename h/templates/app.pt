@@ -74,11 +74,7 @@
         }
         plugins.Auth.withToken(plugins.Permissions._setAuthFromToken)
       } else {
-        showAuth(true, function () {
-          if (cb) cb()
-          // XXX: deform.js is broken -- it selects hidden fields
-          $('#auth input[type!="hidden"]').first().focus()
-        })
+        showAuth(true, cb)
         $('#persona').off('change mousedown').on('mousedown', function (e) {
           e.preventDefault()
           setupAuth()
@@ -99,6 +95,10 @@
         $('#persona').replaceWith(data.form.persona)
         setupAuth(function () {
           deform.processCallbacks()
+          if (visible) {
+            // XXX: deform.js is broken -- it selects hidden fields
+            $('#auth input[type!="hidden"]').first().focus()
+          }
         })
         if (!visible) showAuth(false)
       })
