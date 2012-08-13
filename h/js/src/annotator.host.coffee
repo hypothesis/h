@@ -107,7 +107,7 @@ class Annotator.Host extends Annotator
     $(window).on 'resize scroll', util.debounce => @consumer.update()
     $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
     @wrapper.on 'mouseup', (event) =>
-      @consumer.back() unless @ignoreMouseup
+      @consumer.back() unless @mouseIsDown or @ignoreMouseup
 
   publish: (event, args) ->
     if event in ['annotationCreated']
@@ -152,3 +152,10 @@ class Annotator.Host extends Annotator
         @consumer.showEditor stub
     else
       @consumer.showEditor stub
+
+  checkForStartSelection: (event) =>
+    # Annotator chokes on this callback hen trying to access
+    # this.viewer.hide since there is no viewer. The `mouseIsDown` state
+    # is needed for preventing the sidebar from closing while annotating.
+    unless event and this.isAnnotator(event.target)
+      @mouseIsDown = true
