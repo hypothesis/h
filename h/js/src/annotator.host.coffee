@@ -106,8 +106,6 @@ class Annotator.Host extends Annotator
 
     $(window).on 'resize scroll', util.debounce => @consumer.update()
     $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
-    @wrapper.on 'mouseup', (event) =>
-      @consumer.back() unless @mouseIsDown or @ignoreMouseup
 
   publish: (event, args) ->
     if event in ['annotationCreated']
@@ -117,6 +115,10 @@ class Annotator.Host extends Annotator
 
   _setupWrapper: ->
     @wrapper = @element
+    .on 'mouseup', =>
+      if not @ignoreMouseup
+        setTimeout =>
+          @consumer.back() unless @selectedRanges?.length
     this
 
   _setupDocumentEvents: ->
