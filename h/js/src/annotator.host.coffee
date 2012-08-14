@@ -123,15 +123,30 @@ class Annotator.Host extends Annotator
     # In this code, fixed is used *during* scroll on touch devices to prevent
     # jerky re-positioning of the sidebar. After scroll ends, the sidebar
     # is reset to "position: absolute" and positioned accordingly.
-    touched = false
-    $(window).on 'touchstart', =>
-      touched = true
-      @frame?.css('position', 'fixed').css('top', 0)
-    $(window).on 'touchend scroll', util.debounce =>
-      return unless touched
-      @frame?.css('position', 'absolute').css('top', $(window).scrollTop())
-    , 1000
-    $(window).on 'resize scroll', util.debounce => @consumer.update()
+    timeout = null
+    touch = false
+    update = util.debounce =>
+      unless touch
+        @consumer.update()
+        return
+      if timeout then cancelTimeout timeout
+      timeout = setTimeout =>
+        timeout = null
+        @frame?.css
+          display: ''
+          height: $(window).height()
+          position: 'absolute'
+          top: $(window).scrollTop()
+        @consumer.update()
+      , 400
+    document.addEventListener 'touchmove', =>
+      @frame?.css
+        display: 'none'
+      do update
+    document.addEventListener 'touchstart', =>
+      touch = true
+      do update
+    $(window).on 'resize scroll', update
     $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
     super
 

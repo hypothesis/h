@@ -95,7 +95,6 @@
 /* iframe styles */
 
 .annotator-frame {
-  @include single-transition('margin-left', .2s, ease-in-out);
   height: 100%;
   position: fixed;
   top: 0;
@@ -105,7 +104,6 @@
 
   &.annotator-collapsed {
     margin-left: -$heatmap-width - 10px;
-    width: $heatmap-width + 10px;
   }
 }
 
@@ -120,6 +118,7 @@
   .annotator-frame {
     width: 99%;
     margin-left: -99%;
+    &.annotator-collapsed { width: $heatmap-width + 10px; }
   }
 }
 
@@ -144,8 +143,10 @@
 
 @media screen and (min-width: 37.5em) {
   .annotator-frame {
+    @include single-transition('margin-left', .2s, ease-in-out);
     width: 428px + $heatmap-width + 10px;
     margin-left: -428px - $heatmap-width - 10px;
+    &.annotator-collapsed { width: inherit; }
   }
 }
 

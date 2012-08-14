@@ -68,7 +68,8 @@ class Hypothesis extends Annotator
   _initialize: =>
     # Set up interface elements
     this._setupHeatmap()
-    @wrapper.append(@viewer.element, @editor.element, @heatmap.element)
+    @wrapper.append(@viewer.element, @editor.element)
+    @heatmap.element.appendTo(document.body)
     @viewer.show()
 
     @provider.getMaxBottom (max) =>
@@ -143,7 +144,7 @@ class Hypothesis extends Annotator
       this._fillDynamicBucket()
 
     @heatmap.subscribe 'updated', =>
-      tabs = d3.select(@wrapper[0])
+      tabs = d3.select(document.body)
         .selectAll('div.hyp-heatmap-tab')
         .data =>
           buckets = []
