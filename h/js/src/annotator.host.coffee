@@ -104,9 +104,6 @@ class Annotator.Host extends Annotator
         back: {}
         update: {}
 
-    $(window).on 'resize scroll', util.debounce => @consumer.update()
-    $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
-
   publish: (event, args) ->
     if event in ['annotationCreated']
       [annotation] = args
@@ -134,6 +131,8 @@ class Annotator.Host extends Annotator
       return unless touched
       @frame?.css('position', 'absolute').css('top', $(window).scrollTop())
     , 1000
+    $(window).on 'resize scroll', util.debounce => @consumer.update()
+    $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
     super
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
