@@ -36,7 +36,12 @@ class Hypothesis extends Annotator
             hash:
               toJSON: => undefined
               valueOf: => h
-          this.showEditor annotation
+          if @plugins.Permissions.user?
+            this.showEditor annotation
+          else
+            showAuth true
+            @editor.hide()
+            this.show()
         back: =>
           if @detail
             this.showViewer(@heatmap.buckets[@bucket])
@@ -417,7 +422,7 @@ class Hypothesis extends Annotator
                 animate parent.classed('hyp-collapsed', !collapsed)
               when '#reply'
                 unless @plugins.Permissions?.user
-                  do setupAuth
+                  showAuth true
                   break
                 d3.event.preventDefault()
                 parent = d3.select(event.currentTarget)
@@ -461,12 +466,6 @@ class Hypothesis extends Annotator
     this.showViewer(annotations or [], @detail)
 
   showEditor: (annotation) =>
-    unless @plugins.Permissions?.user
-      setupAuth =>
-        @editor.hide()
-        this.show()
-      return
-
     if not annotation.user?
       @plugins.Permissions.addFieldsToAnnotation(annotation)
 
