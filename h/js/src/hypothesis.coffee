@@ -199,9 +199,9 @@ class Hypothesis extends Annotator
               this.show()
       tabs.exit().remove()
       tabs
-        .style 'top', (i) =>
-          "#{(@heatmap.index[i] + @heatmap.index[i+1]) / 2}px"
-        .text((i) => @heatmap.buckets[i].length)
+        .style 'top', (d) =>
+          "#{(@heatmap.index[d] + @heatmap.index[d+1]) / 2}px"
+        .text((d) => @heatmap.buckets[d].length)
         .classed('upper', @heatmap.isUpper)
         .classed('lower', @heatmap.isLower)
 
