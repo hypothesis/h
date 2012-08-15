@@ -1,13 +1,13 @@
 <metal:main use-macro="load: base.pt">
 
-<metal:main fill-slot="head">
+<tal:block metal:fill-slot="head">
     <link rel="stylesheet"
           tal:attributes="href href"
           tal:repeat="href webassets(request, 'site_css') | []" />
     <script type="text/javascript" tal:content="structure embed" />
-</metal:main>
+</tal:block>
 
-<metal:main fill-slot="body">
+<tal:block metal:fill-slot="body">
   <a href="https://github.com/hypothesis/h"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_white_ffffff.png" alt="Fork me on GitHub"></a>
 
   <div id="flash-msg">
@@ -52,6 +52,6 @@
         internet.</li>
     </ol>
   </div>
-</metal:main>
+</tal:block>
 
 </metal:main>

@@ -14,7 +14,7 @@
     <link rel="stylesheet"
           tal:attributes="href request.static_url('deform:static/%s' % href)"
           tal:repeat="href css_links | []" />
-    <metal:main define-slot="head" />
+    <tal:block metal:define-slot="head" />
     <script type="text/javascript"
             tal:attributes="src request.static_url('deform:static/%s' % src)"
             tal:repeat="src js_links | []"></script>
@@ -40,6 +40,6 @@
     </script>
   </head>
   <body>
-    <metal:main define-slot="body" />
+    <tal:block metal:define-slot="body" />
   </body>
 </html>

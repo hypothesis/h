@@ -1,12 +1,12 @@
 <metal:main use-macro="load: base.pt">
 
-<metal:main fill-slot="head">
+<tal:block metal:fill-slot="head">
     <link rel="stylesheet"
           tal:attributes="href href"
           tal:repeat="href webassets(request, 'site_css') | []" />
-</metal:main>
+</tal:block>
 
-<metal:main fill-slot="body">
+<tal:block metal:fill-slot="body">
 
   <div class="content">
     <header>
@@ -23,6 +23,6 @@
     </div>
   </div>
 
-</metal:main>
+</tal:block>
 
 </metal:main>
