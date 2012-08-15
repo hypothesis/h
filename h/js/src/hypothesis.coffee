@@ -320,6 +320,7 @@ class Hypothesis extends Annotator
       @detail = false
 
       excerpts.remove()
+      excerpts.exit().remove()
 
       items.enter().append('li').classed('hyp-annotation', true)
       items.exit().remove()
