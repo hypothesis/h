@@ -105,7 +105,10 @@ class login(FormView):
 
     def log_in_success(self, form):
         request = self.request
-        user = AuthUser.get_by_login(form['username'])
+        user = (
+            AuthUser.get_by_login(form['username']) or
+            AuthUser.get_by_email(form['username'])
+        )
         headers = remember(request, user.auth_id)
         return HTTPSeeOther(headers=headers, location=get_came_from(request))
 

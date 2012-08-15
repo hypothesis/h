@@ -17,10 +17,18 @@ def login_validator(node, kw):
     """Validate a username and password."""
     valid = False
     if 'username' in kw:
-        valid = AuthUser.check_password(
-            login=kw['username'],
-            password=kw['password']
-        )
+        kwargs = {
+            'login': kw['username'],
+            'password': kw['password'],
+        }
+        valid = AuthUser.check_password(**kwargs)
+        # XXX: extend apex to get user by login or email
+        if not valid:
+            user = AuthUser.get_by_email(kw['username'])
+            if user:
+                del kwargs['login']
+                kwargs['id'] = user.id
+                valid = AuthUser.check_password(**kwargs)
     if not valid:
         raise Invalid(
             node,
