@@ -28,6 +28,7 @@ $heatmap-width: 25px;
 // Columns
 $column: 48;
 $gutter: 24;
+$em: 16 / 1em;
 
 @function grid($cols:1) {
   @return (($cols * $column) + (($cols - 1) * $gutter)) / $em;
