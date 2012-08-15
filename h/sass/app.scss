@@ -18,8 +18,8 @@ body {
 
 header {
   @include border-radius(.5em);
+  @include box-shadow(5px 5px 40px hsla(0, 0%, 0%, .1));
   @include single-transition(all, .4s, 'ease-in-out');
-  @include smallshadow;
   @include transform-origin(50%, 0);
   background: white;
   margin-top: 2.5em;
