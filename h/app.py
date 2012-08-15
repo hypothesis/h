@@ -147,4 +147,3 @@ def includeme(config):
                     renderer='templates/appcache.pt')
 
     config.scan(__name__)
-
