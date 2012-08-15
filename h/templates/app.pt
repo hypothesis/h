@@ -14,8 +14,23 @@
     <form tal:replace="structure form['persona']"/>
   </div>
   <div id="gutter">
-    <header>
-      <span metal:use-macro="auth" tal:define="auth load: auth.pt" />
+    <header class="auth">
+      <section>
+        <a class="close" onclick="showAuth(false)"
+           ><img src="${request.static_url('h:images/delete_1.png')}" /></a>
+        <ul class="right">
+          <li data-action="login">
+            <a onclick="$('#auth').clearForm()
+                        .attr('action', '?action=login')
+                        .submit()">Log in</a></li>
+          <li data-action="register">
+            <a onclick="$('#auth').clearForm()
+                        .attr('action', '?action=register')
+                        .submit()">Sign up</a></li>
+        </ul>
+      </section>
+      <span tal:define="form form['auth']"
+          metal:use-macro="blocks.macros['auth']" />
     </header>
     <div id="wrapper">
     </div>

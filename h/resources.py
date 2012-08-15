@@ -90,6 +90,7 @@ templates = Bundle(
 app_css = Bundle(
     Bundle(
         'h:sass/app.scss',
+        'h:sass/auth.scss',
         debug=False,
         depends=(
             'h:sass/reset.scss',
@@ -118,15 +119,18 @@ inject_css = Bundle(
 
 # CSS specific to the destination site
 site_css = Bundle(
-    Bundle('h:sass/site.scss',
-           debug=False,
-           depends=(
-               'h:sass/reset.scss',
-               'h:sass/base.scss',
-               'h:sass/common.scss',
-           ),
+    Bundle(
+        'h:sass/site.scss',
+        'h:sass/auth.scss',
+        'h:sass/home.scss',
+        debug=False,
+        depends=(
+            'h:sass/reset.scss',
+            'h:sass/base.scss',
+            'h:sass/common.scss',
+        ),
            filters=('compass', 'cssrewrite',),
-           output='css/site.css',
+        output='css/site.css',
     ),
     filters=('cleancss',),
     output='css/site.min.css',

@@ -9,10 +9,6 @@
 
 $font-size: 17;
 
-article {
-  padding: 1em;
-}
-
 html {
   font-size: $font-size / 16 * 1em;
 }
@@ -31,6 +27,10 @@ ol {
   li {
     margin: .5em 0;
   }
+}
+
+.content {
+  padding: 1em;
 }
 
 #toolbar {
@@ -57,18 +57,13 @@ ol {
 */
 
 @media screen and (min-width: 15em) {
-  article { padding: 4em 2em; }
+  .auth { width: 100%; }
+  .content { padding: 4em 2em; }
 
   header {
     margin: 0 -2em 2em;
     text-align: center;
     text-shadow: -2px 2px 4px #aaa;
-  }
-
-  #auth {
-    input {
-      width: 100%;
-    }
   }
 }
 
@@ -86,12 +81,6 @@ ol {
   }
 
   section { margin: 4em 0em; }
-
-  #auth {
-    .controls, .control-group, .form-actions, fieldset, input {
-      width: auto;
-    }
-  }
 }
 
 /*
@@ -101,7 +90,8 @@ ol {
 */
 
 @media screen and (min-width: 37.5em) {
-  article { padding: 6em; }
+  .auth { width: grid(4); }
+  .content { padding: 6em; }
 }
 
 /*
@@ -111,7 +101,7 @@ ol {
 */
 
 @media screen and (min-width: 57em) {
-  article {
+  .content {
     width: grid(12);
     margin: auto;
   }

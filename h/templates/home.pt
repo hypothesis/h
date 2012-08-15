@@ -22,7 +22,7 @@
        >Contribute</a>
   </div>
 
-  <article id="home">
+  <div id="home" class="content">
     <header>
       <img height="150px" width="150px"
            src="${request.static_url('h:images/hypothelogo_square.png')}" />
@@ -51,7 +51,7 @@
       <li>Drag our bookmarklet to your bookmarks bar to annotate any page on the
         internet.</li>
     </ol>
-  </article>
+  </div>
 </metal:main>
 
 </metal:main>

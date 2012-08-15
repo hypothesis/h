@@ -22,17 +22,15 @@ header {
   @include smallshadow;
   @include transform-origin(50%, 0);
   background: white;
-  left: 0;
   margin-top: 2.5em;
   padding: 2.5em 2em 1em;
   position: absolute;
   width: 100%;
   z-index: 4;
 
-  a {
-    cursor: pointer;
-    font-size: .9em;
-    text-decoration: underline;
+  &.hyp-collapsed {
+    @include rotateX(90deg);
+    opacity: 0;
   }
 
   a.close {
@@ -46,39 +44,6 @@ header {
       width: .9em;
       margin-right: .3em;
     }
-  }
-
-  form {
-    button[name^="forgot"] {
-      @include box-shadow(none);
-      @include reset-box-model;
-      float: right;
-      font-size: .9em;
-      color: $link-color;
-      text-decoration: underline;
-      text-shadow: none;
-
-      &:hover {
-        background: none;
-        color: $link-color-hover;
-      }
-    }
-  }
-
-  section {
-    clear: both;
-    & > div {
-      display: inline-block;
-      width: 50%;
-    }
-    & > form { width: 100%; }
-  }
-
-  .right { text-align: right; }
-
-  &.hyp-collapsed {
-    @include rotateX(90deg);
-    opacity: 0;
   }
 }
 

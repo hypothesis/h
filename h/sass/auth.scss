@@ -1,0 +1,44 @@
+@import "compass";
+@import "compass/css3";
+@import "compass/css3/images";
+@import "compass/utilities/color";
+
+@import "base";
+
+.auth {
+  a {
+    cursor: pointer;
+    font-size: .9em;
+    text-decoration: underline;
+  }
+
+  form {
+    button[name^="forgot"] {
+      @include box-shadow(none);
+      @include reset-box-model;
+      float: right;
+      font-size: .9em;
+      color: $link-color;
+      text-decoration: underline;
+      text-shadow: none;
+
+      &:hover {
+        background: none;
+        color: $link-color-hover;
+      }
+    }
+
+    input { width: 100%; }
+  }
+
+  div.section {
+    clear: both;
+    & > div {
+      display: inline-block;
+      width: 50%;
+    }
+    & > form { width: 100%; }
+  }
+
+  .right { text-align: right; }
+}

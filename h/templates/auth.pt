@@ -1,33 +1,27 @@
-<section>
-<a class="close" onclick="showAuth(false)"
-   ><img src="${request.static_url('h:images/delete_1.png')}" /></a>
-<ul class="right">
-  <li data-action="login">
-    <a onclick="$('#auth').clearForm().attr('action', '?action=login').submit()"
-       >Log in</a></li>
-  <li data-action="register">
-    <a onclick="$('#auth').clearForm().attr('action', '?action=register').submit()"
-       >Sign up</a></li>
-</ul>
-</section>
+<metal:main use-macro="load: base.pt">
 
-<section>
-<form tal:replace="structure form['auth']"></form>
-</section>
+<metal:main fill-slot="head">
+    <link rel="stylesheet"
+          tal:attributes="href href"
+          tal:repeat="href webassets(request, 'site_css') | []" />
+</metal:main>
 
-<section
-   tal:condition="request.registry.settings.get('velruse.providers', False)">
-  <div tal:condition="'twitter' in
-                      request.registry.settings.get('velruse.providers', [])">
-    <a href="${request.route_url('velruse.twitter-login')}" target="hyp-auth"
-       ><img alt="Sign in with twitter"
-             src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"
-             ></a>
-  </div><!--
-  --><div class="right"
-          tal:condition="'preauth' in
-                         request.registry.settings.get('velruse.providers', [])">
-    <span><a>Have you already reserved a username with us?</a>
-    </span>
+<metal:main fill-slot="body">
+
+  <div class="content">
+    <header>
+      <img height="150px" width="150px"
+           src="${request.static_url('h:images/hypothelogo_square.png')}" />
+      <hgroup>
+        <h1>Hypothes<span class="red">.</span>is</h1>
+        <h2>The&#160;Internet, peer&#160;reviewed.</h2>
+      </hgroup>
+    </header>
+    <div class="auth">
+      <tal:block metal:use-macro="blocks.macros['auth']">
+    </div>
   </div>
-</section>
+
+</metal:main>
+
+</metal:main>
