@@ -18,7 +18,8 @@
       </hgroup>
     </header>
     <div class="auth">
-      <tal:block metal:use-macro="blocks.macros['auth']">
+      <tal:block tal:define="blocks load: blocks.pt"
+                 metal:use-macro="blocks.macros['auth']">
     </div>
   </div>
 

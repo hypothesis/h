@@ -29,8 +29,9 @@
                         .submit()">Sign up</a></li>
         </ul>
       </section>
-      <span tal:define="form form['auth']"
-          metal:use-macro="blocks.macros['auth']" />
+      <span tal:define="blocks load: blocks.pt;
+                        form form['auth']"
+            metal:use-macro="blocks.macros['auth']" />
     </header>
     <div id="wrapper">
     </div>
