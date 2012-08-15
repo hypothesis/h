@@ -2,6 +2,7 @@ from functools import partial
 
 from apex import logout
 from apex.models import AuthID, AuthUser
+from apex.views import get_came_from
 
 from colander import Schema, SchemaNode
 
@@ -17,7 +18,8 @@ from . schemas import (login_validator, register_validator,
                        LoginSchema, RegisterSchema, PersonaSchema)
 from . views import FormView
 
-@view_config(name='app')
+@view_config(renderer='templates/app.pt', route_name='app', )
+@view_config(renderer='json', route_name='app', xhr=True)
 class app(FormView):
     @property
     def auth(self):
@@ -33,7 +35,10 @@ class app(FormView):
 
         return form(
             request,
-            action="?action=%s" % action,
+            action="?action=%s&came_from=%s" % (
+                action,
+                request.current_route_path()
+            ),
             bootstrap_form_style='form-vertical',
             formid='auth',
         )
@@ -67,6 +72,12 @@ class app(FormView):
         }
         for name in ['auth', 'persona']:
             view = getattr(self, name)
+            view.ajax_options = """{
+              success: authSuccess,
+              target: null,
+              type: 'POST'
+            }"""
+            view.use_ajax = True
             form = view()
             if isinstance(form, dict):
                 for links in ['css_links', 'js_links']:
@@ -79,55 +90,35 @@ class app(FormView):
 
         return result
 
-@view_config(route_name='forgot')
 class forgot(FormView):
     pass
 
-@view_config(route_name='login')
 class login(FormView):
     schema = LoginSchema(validator=login_validator)
     buttons = (
         Button('log in', type='submit'),
         Button('forgot', title='Password help?'),
     )
-    ajax_options = """{
-      success: authSuccess,
-      target: null,
-      type: 'POST'
-    }"""
-
-    @property
-    def _came_from(self):
-        formid = self.request.params.get('__formid__')
-        app = self.request.route_url('app', _query=(('__formid__', formid),))
-        return self.request.params.get('came_from', app)
+    form_class = partial(Form,
+                         bootstrap_form_style='form-vertical',
+                         formid='auth')
 
     def log_in_success(self, form):
+        request = self.request
         user = AuthUser.get_by_login(form['username'])
-        headers = remember(self.request, user.auth_id)
-        return HTTPSeeOther(headers=headers, location=self._came_from)
+        headers = remember(request, user.auth_id)
+        return HTTPSeeOther(headers=headers, location=get_came_from(request))
 
-@view_config(route_name='register')
 class register(FormView):
     schema = RegisterSchema(validator=register_validator)
     buttons = ('sign up',)
     form_class = partial(Form,
                          bootstrap_form_style='form-vertical',
                          formid='auth')
-    ajax_options = """{
-      success: authSuccess,
-      target: null,
-      type: 'POST'
-    }"""
-
-    @property
-    def _came_from(self):
-        formid = self.request.params.get('__formid__')
-        app = self.request.route_url('app', _query=(('__formid__', formid),))
-        return self.request.params.get('came_from', app)
 
     def sign_up_success(self, form):
-        db = self.request.db
+        request = self.request
+        db = request.db
         id = AuthID()
         db.add(id)
         user = AuthUser(login=form['username'],
@@ -136,8 +127,8 @@ class register(FormView):
         id.users.append(user)
         db.add(user)
         db.flush()
-        headers = remember(self.request, user.auth_id)
-        return HTTPSeeOther(headers=headers, location=self._came_from)
+        headers = remember(request, user.auth_id)
+        return HTTPSeeOther(headers=headers, location=get_came_from(request))
 
 class persona(FormView):
     schema = PersonaSchema()
@@ -151,9 +142,6 @@ def includeme(config):
     config.include('deform_bootstrap')
     config.include('pyramid_deform')
     config.include('velruse.app')
-
-    config.add_view(app, renderer='templates/app.pt', route_name='app')
-    config.add_view(app, renderer='json', route_name='app', xhr=True)
 
     config.add_view(lambda r: {}, name='appcache.mf',
                     renderer='templates/appcache.pt')

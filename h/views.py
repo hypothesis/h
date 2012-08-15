@@ -30,14 +30,16 @@ class FormView(FormView):
 
     """
 
-    use_ajax = True
-    ajax_options = """{
-        type: 'POST'
-    }"""
-
     def __init__(self, request, **kwargs):
         super(FormView, self).__init__(request)
         self.form_class = partial(self.form_class, **kwargs)
+
+    def partial(self):
+        result = self()
+        if isinstance(result, dict):
+            return result['form']
+        else:
+            return result
 
 @view_config(renderer='templates/home.pt', route_name='home')
 def home(request):
