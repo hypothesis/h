@@ -18,7 +18,7 @@ from . schemas import (login_validator, register_validator,
                        LoginSchema, RegisterSchema, PersonaSchema)
 from . views import FormView
 
-@view_config(renderer='templates/app.pt', route_name='app', )
+@view_config(renderer='templates/app.pt', route_name='app')
 @view_config(renderer='json', route_name='app', xhr=True)
 class app(FormView):
     @property
@@ -37,7 +37,7 @@ class app(FormView):
             request,
             action="?action=%s&came_from=%s" % (
                 action,
-                request.current_route_path()
+                request.current_route_path(),
             ),
             bootstrap_form_style='form-vertical',
             formid='auth',
