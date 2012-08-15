@@ -10,7 +10,7 @@ from pyramid.view import view_config
 from pyramid_deform import FormView
 
 @view_config(http_cache=(0, { 'must-revalidate': True}),
-             renderer='h:templates/embed.pt', route_name='embed')
+             renderer='templates/embed.txt', route_name='embed')
 def embed(request, standalone=True):
     if standalone:
         request.response.content_type = 'application/javascript'
@@ -44,7 +44,7 @@ class FormView(FormView):
 @view_config(renderer='templates/home.pt', route_name='home')
 def home(request):
     return {
-        'embed': render('h:templates/embed.pt', embed(request, False), request)
+        'embed': render('templates/embed.txt', embed(request, False), request)
     }
 
 def includeme(config):
