@@ -1,10 +1,10 @@
 <metal:main use-macro="load: base.pt">
 
 <tal:block metal:fill-slot="head">
-    <link rel="stylesheet"
-          tal:attributes="href href"
-          tal:repeat="href webassets(request, 'site_css') | []" />
-    <script type="text/javascript" tal:content="structure embed" />
+  <link rel="stylesheet"
+        tal:attributes="href href"
+        tal:repeat="href webassets(request, 'site_css') | []" />
+  <script type="text/javascript" tal:content="structure embed" />
 </tal:block>
 
 <tal:block metal:fill-slot="body">
