@@ -76,12 +76,12 @@ label {
 }
 
 .btn-link {
-	background: none !important;
-	background-color: transparent;
-	text-decoration: underline;
-	border: none;
-	cursor: pointer;
-	cursor: hand;
+  background: none !important;
+  background-color: transparent;
+  text-decoration: underline;
+  border: none;
+  cursor: pointer;
+  cursor: hand;
   color: $link-color;
   &:hover { color: $link-color-hover; }
 }
