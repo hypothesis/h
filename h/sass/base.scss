@@ -41,7 +41,7 @@ $em: 16 / 1em;
 
 @mixin plainform {
   color: $gray;
-  background-color: #ffffff !important;
+  background-color: #ffffff;
   border: 1px solid $gray-lighter;
   border-radius: .2em;
   font-family: "Source Sans Pro", "Open Sans", sans-serif;
