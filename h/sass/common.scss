@@ -76,19 +76,21 @@ label {
 }
 
 .btn-link {
-  background: none !important;
+  @include box-shadow(none);
+  @include reset-box-model;
+  background: none;
   background-color: transparent;
   text-decoration: underline;
   border: none;
   cursor: pointer;
-  cursor: hand;
   color: $link-color;
+  position: static;
   &:hover { color: $link-color-hover; }
 }
 
 .btn-twitter {
+  @extend .btn-link;
   background: url('../images/sign-in-with-twitter-l.png');
-  display: inline-block;
 }
 
 .red {
