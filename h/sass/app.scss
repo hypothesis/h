@@ -147,7 +147,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
   &.upper {
     background-image: url("../images/up_tab.svg");
-    background-position-y: .355em; // 1em - .645em in svg (TODO: crop)
+    background-position-y: .7em; // 1em - .645em in svg (TODO: crop)
   }
 }
 
@@ -193,7 +193,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     float: left;
     width: 1.7em;
     height: 1.7em;
-    margin: .3em;
+    margin-top: .3em;
+    margin-left: .2em;
     margin-bottom: .4em;
     cursor: pointer;
   }
@@ -201,6 +202,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   &.shown {
     .tab {
       @include icon("tri-right.png");
+
     }
   }
 }
