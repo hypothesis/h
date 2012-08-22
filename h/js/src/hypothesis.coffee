@@ -99,7 +99,7 @@ class Hypothesis extends Annotator
     this
 
   _setupDocumentEvents: ->
-    $('#toolbar img.tab-logo').click =>
+    $('#toolbar .tab').click =>
       if @visible
         this.hide()
       else

@@ -187,19 +187,21 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     vertical-align: middle;
   }
 
-  &.shown {
-    img {
-      @include rotate(180deg);
-    }
+
+  .tab {
+    @include icon("tri-left.png");
+    float: left;
+    width: 1.7em;
+    height: 1.7em;
+    margin: .3em;
+    margin-bottom: .4em;
+    cursor: pointer;
   }
 
-  img {
-    float: left;
-    width: 2.2em;
-    height: 2.2em;
-    padding: .4em;
-    padding-bottom: .5em;
-    cursor: pointer;
+  &.shown {
+    .tab {
+      @include icon("tri-right.png");
+    }
   }
 }
 

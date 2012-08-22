@@ -9,8 +9,7 @@
 <metal:main fill-slot="body">
 
   <div id="toolbar">
-    <img class="tab-logo"
-         src="${request.static_url('h:images/tri.png')}" />
+    <div class="tab"></div>
     <form tal:replace="structure form['persona']"/>
   </div>
   <div id="gutter">
