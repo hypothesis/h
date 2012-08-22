@@ -499,11 +499,14 @@ class Hypothesis extends Annotator
     @visible = true
     @provider.setActiveHighlights annotations
     @provider.showFrame()
+    $("#toolbar").addClass "shown"
 
   hide: =>
     @visible = false
     @provider.setActiveHighlights []
     @provider.hideFrame()
+    $("#toolbar").removeClass "shown"
+
 
   threadId: (annotation) ->
     if annotation?.thread?
