@@ -8,9 +8,7 @@
   </head>
   <body metal:fill-slot="body">
     <div id="toolbar">
-      <img
-         class="tab-logo"
-         src="${request.static_url('h:images/tri.png')}" />
+      <div class="tab"></div>
       ${structure: persona.form}
     </div>
     <div id="gutter">
