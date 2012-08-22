@@ -23,7 +23,7 @@
         google: {
           families: [
             'Merriweather',
-            'Source Sans Pro:latin,italic',
+            'Open Sans',
             'PT Serif'
           ]
         }
