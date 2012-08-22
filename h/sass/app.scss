@@ -150,9 +150,18 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     vertical-align: middle;
   }
 
+  &.shown {
+    img {
+      @include rotate(180deg);
+    }
+  }
+
   img {
     float: left;
-    padding: .5em;
+    width: 2.2em;
+    height: 2.2em;
+    padding: .4em;
+    padding-bottom: .5em;
     cursor: pointer;
   }
 }

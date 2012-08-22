@@ -10,7 +10,7 @@
     <div id="toolbar">
       <img
          class="tab-logo"
-         src="${request.static_url('h:images/hbar-logo-small.png')}" />
+         src="${request.static_url('h:images/tri.png')}" />
       ${structure: persona.form}
     </div>
     <div id="gutter">
