@@ -80,7 +80,7 @@ class PersonaSchema(CSRFSchema):
             lambda node, kw: SelectWidget(
                 values=(
                     api.users(kw['request']) +
-                    [(-1, kw['request'].user and 'Sign out' or 'Not signed in')]
+                    [(-1, kw['request'].user and 'Sign out' or 'Sign in')]
                 )
             )
         ),

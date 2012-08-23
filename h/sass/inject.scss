@@ -95,7 +95,7 @@
 /* iframe styles */
 
 .annotator-frame {
-  @include single-transition('margin-left', .2s, ease-in-out);
+  @include single-transition(margin-left, .4s);
   height: 100%;
   position: fixed;
   top: 0;
@@ -103,7 +103,9 @@
   z-index: 500;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
-  &.annotator-collapsed { margin-left: -$heatmap-width - 10px; }
+  &.annotator-collapsed { 
+    margin-left: -$heatmap-width - 10px;
+  }
 }
 
 
