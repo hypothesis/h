@@ -143,7 +143,7 @@
 
 @media screen and (min-width: 37.5em) {
   .annotator-frame {
-    @include single-transition('margin-left', .2s, ease-in-out);
+    @include single-transition(margin-left, .4s);
     width: 428px + $heatmap-width + 10px;
     margin-left: -428px - $heatmap-width - 10px;
     &.annotator-collapsed { width: inherit; }
