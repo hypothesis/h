@@ -1,21 +1,12 @@
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:tal="http://xml.zope.org/namespaces/tal"
-      xmlns:metal="http://xml.zope.org/namespaces/metal">
-  <tal:block metal:define-macro="auth">
-    <div class="section"><form tal:replace="structure form"></form></div>
-    <div class="section"
-       tal:condition="len(providers)"
-       tal:define="providers getattr(request.registry, 'velruse_providers', {})">
-      <div tal:condition="'twitter' in providers">
-        <a href="${request.route_url('velruse.twitter-login')}" target="hyp-auth"
-           ><img alt="Sign in with twitter"
-                 src="${request.static_url('h:images/sign-in-with-twitter-l.png')}"
-                 ></a>
-      </div><!--
-              --><div class="right"
-                      tal:condition="'preauth' in providers">
-        <span><a>Have you already reserved a username with us?</a></span>
-      </div>
-    </div>
-  </tal:block>
+<!DOCTYPE html>
+<html lang='en'>
+  <head><title>Macro Blocks</title></head>
+  <body>
+    <tal:block
+       define="action request.route_url('apex_%s' % action)|action|string:;
+               include_came_from include_came_from|nothing;"
+       metal:define-macro="auth">
+      <tal:block i18n:translate="" content="structure form" />
+    </tal:block>
+  </body>
 </html>
