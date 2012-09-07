@@ -154,7 +154,5 @@ def includeme(config):
 
     config.include('pyramid_webassets')
 
-    # wrap coffeescript output in a closure
-    config.get_webassets_env().config['coffee_no_bare'] = True
 
     add_webassets(config)
