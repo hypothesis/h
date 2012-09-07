@@ -22,10 +22,6 @@
                      rndr(tmpl,field=f,cstruct=cstruct.get(f.name, null))" />
 
     <div class="alert alert-block alert-error" tal:condition="field.error">
-      <h3 class="errorMsgLbl" i18n:translate=""
-          >There was a problem with your submission</h3>
-      <p class="error" i18n:translate=""
-         >Errors have been highlighted above</p>
       <p class="error">${field.errormsg}</p>
     </div>
 
