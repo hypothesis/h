@@ -75,6 +75,33 @@ label {
   span.errorMsg { @extend .visuallyhidden; }
 }
 
+.auth {
+  a {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  form {
+    button[name^="forgot"] {
+      @extend .btn-link;
+      float: right;
+    }
+
+    input { width: 100%; }
+  }
+
+  div.section {
+    clear: both;
+    & > div {
+      display: inline-block;
+      width: 50%;
+    }
+    & > form { width: 100%; }
+  }
+
+  .right { text-align: right; }
+}
+
 .btn-link {
   @include box-shadow(none);
   @include reset-box-model;
@@ -357,4 +384,15 @@ label {
     @include smallshadow(2px, 1px, .2);
     bottom: -2px;
   }
+}
+
+
+#TwitterLogin button {
+  @extend .btn-link;
+  background: url('../images/sign-in-with-twitter_0.png');
+  background-size: 100% 100%;
+  height: 24px;
+  font-size: 0;
+  margin: -4px;
+  width: 150px;
 }

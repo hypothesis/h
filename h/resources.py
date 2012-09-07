@@ -90,7 +90,6 @@ templates = Bundle(
 app_css = Bundle(
     Bundle(
         'h:sass/app.scss',
-        'h:sass/auth.scss',
         debug=False,
         depends=(
             'h:sass/reset.scss',
@@ -121,8 +120,6 @@ inject_css = Bundle(
 site_css = Bundle(
     Bundle(
         'h:sass/site.scss',
-        'h:sass/auth.scss',
-        'h:sass/home.scss',
         debug=False,
         depends=(
             'h:sass/reset.scss',
