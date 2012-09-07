@@ -33,15 +33,18 @@ header {
   }
 
   a.close {
-    color: $gray;
+    line-height: 0;
+    padding: .4em;
     position: absolute;
-    left: 1em;
     top: 1.5em;
 
+    &:hover {
+      outline: solid thin $grayLighter;
+    }
+
     img {
-      height: .9em;
-      width: .9em;
-      margin-right: .3em;
+      height: .6em;
+      width: .6em;
     }
   }
 
