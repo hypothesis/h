@@ -52,7 +52,7 @@ def token(request):
     """Get an API token for the logged in user."""
 
     if not request.user:
-        msg = _(messages.NOT_LOGGED_IN)
+        msg = messages.NOT_LOGGED_IN
         raise HTTPForbidden(msg)
 
     consumer = request.consumer
