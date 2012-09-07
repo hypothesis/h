@@ -1,15 +1,13 @@
-from glob import glob
-from os.path import basename, dirname, join, relpath, splitext
-from operator import concat
-
-from pyramid.settings import aslist
+import horus
 
 from webassets import Bundle
 from webassets.filter import register_filter
 from webassets.loaders import PythonLoader
 
+from h import api, app
+
 # register our backported cleancss filter until webassets 0.8 is released
-from cleancss import CleanCSS
+from h.cleancss import CleanCSS
 register_filter(CleanCSS)
 
 # The main annotation application is a combination of upstream Annotator
@@ -133,26 +131,57 @@ site_css = Bundle(
     output='css/site.min.css',
 )
 
+
 def add_webassets(config):
+    config.include('pyramid_webassets')
     loader = PythonLoader(__name__)
     bundles = loader.load_bundles()
     for name in bundles:
         config.add_webasset(name, bundles[name])
 
+
+class RootFactory(horus.resources.RootFactory):
+    __name__ = ''
+    __parent__ = None
+
+    def __getitem__(self, key):
+        child = None
+
+        if key == 'api':
+            child = APIFactory(self.request)
+            child.__name__ = 'api'
+
+        if key == 'app':
+            child = app.AppController(self.request)
+            child.__name__ = 'app'
+
+        if child is not None:
+            child.__parent__ = self
+            return child
+
+        raise KeyError
+
+
+class APIFactory(horus.resources.BaseFactory):
+    __name__ = 'api'
+    __parent__ = None
+
+    def __init__(self, request):
+        super(APIFactory, self).__init__(request)
+
+        if not 'x-annotator-auth-token' in request.headers:
+            token = None
+
+            if 'access_token' in request.params:
+                token = request.params['access_token']
+            elif request.user:
+                token = api.token(request)
+
+            if token:
+                request.headers['x-annotator-auth-token'] = token
+
+
 def includeme(config):
-    config.add_route('home', '/', use_global_views=True)
     config.add_route('embed', '/embed.js')
-    config.add_route('token', '/api/token')
-    config.add_route('users', '/api/u')
-    config.add_route('api', '/api/*subpath')
-    config.add_route('app', '/app')
-
-    config.add_route('login', '/login')
-    config.add_route('logout', '/logout')
-    config.add_route('register', '/register')
-    config.add_route('forgot', '/forgot')
-
-    config.include('pyramid_webassets')
-
-
+    config.add_route('index', '/', factory=RootFactory)
     add_webassets(config)

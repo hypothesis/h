@@ -1,15 +1,44 @@
 def includeme(config):
-    config.include('.api')
-    config.include('.app')
-    config.include('.models')
-    config.include('.resources')
-    config.include('.views')
+    config.include('horus')
+    config.include('velruse.app')
+    config.commit()
+
+    config.include('h.api')
+    config.include('h.app')
+    config.include('h.layouts')
+    config.include('h.models')
+    config.include('h.panels')
+    config.include('h.resources')
+    config.include('h.subscribers')
+    config.include('h.views')
+
 
 def create_app(settings):
+    from horus import groupfinder
     from pyramid.config import Configurator
-    config = Configurator(settings=settings)
+    from pyramid.authentication import AuthTktAuthenticationPolicy
+    from pyramid.authorization import ACLAuthorizationPolicy
+
+    settings.setdefault('horus.activation_class', 'h.models.Activation')
+    settings.setdefault('horus.user_class', 'h.models.User')
+
+    authn_policy = AuthTktAuthenticationPolicy(
+        settings['auth.secret'],
+        callback=groupfinder
+    )
+
+    authz_policy = ACLAuthorizationPolicy()
+
+    config = Configurator(
+        settings=settings,
+        authentication_policy=authn_policy,
+        authorization_policy=authz_policy,
+        root_factory='h.resources.RootFactory'
+    )
+
     config.include(includeme)
     return config.make_wsgi_app()
+
 
 def main(global_config, **settings):
     return create_app(settings)

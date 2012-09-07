@@ -3,61 +3,70 @@ from annotator.annotation import Annotation
 
 from flask import Flask, g
 
-from pyramid.response import Response
-from pyramid.threadlocal import get_current_request
+from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
+from pyramid.view import view_config
 from pyramid.wsgi import wsgiapp2
 
-from . models import Consumer
+from h import messages, models
 
-def consumer_fetcher(key):
-    """Look an api consumer up by key.
 
-    The annotator-store `annotator.Authenticator` uses this function in the
-    process of authenticating requests to verify the secrets of the JSON Web
-    Token passed by the consumer client.
+def get_consumer(request):
+    if not request.params:
+        settings = request.registry.settings
 
-    """
+        key = settings['api.key']
+        secret = settings.get('api.secret')
+        ttl = settings.get('api.ttl')
 
-    request = get_current_request()
-    settings = request.registry.settings
-    hypothesis_key = settings.get('h.consumer_key')
-    if key == hypothesis_key:
-        consumer = Consumer(key=hypothesis_key)
-        consumer.secret = settings.get('h.api_secret')
-        consumer.ttl = settings.get('h.api_ttl', auth.DEFAULT_TTL)
-        return consumer
+        consumer = models.Consumer.get_by_key(key)
+        if consumer is None and secret:
+            consumer = models.Consumer(key)
+            consumer.secret = secret
+            consumer.ttl = ttl
     else:
-        return request.db.query(Consumer).get(key)
+        consumer = None
+        for name in [
+            'client_id',
+            'client_secret',
+            'code',
+            'state'
+        ]:
+            if name not in request.params:
+                msg = '%s "%s".' % (messages.MISSING_PARAMETER, name)
+                raise HTTPBadRequest(msg)
 
+        raise NotImplementedError('OAuth provider not implemented yet.')
+
+    return consumer
+
+
+def personas(request):
+    if request.user:
+        return list(enumerate([request.user.user_name]))
+    return []
+
+
+@view_config(context='h.resources.RootFactory', name='access_token',
+             renderer='string')
 def token(request):
     """Get an API token for the logged in user."""
 
-    # The response is a JSON Web Token signed with the application's consumer
-    # key and secret. In the future, other applications may have their own
-    # consumer keys. Although, most of this should go away in favor of more
-    # traditional OAuth tools and the need for the token request might be
-    # made to vanish when the iframe architecture settles and cross-domain
-    # communication is handled at the browser runtime via postMessage.
-    settings = request.registry.settings
-    secret = settings.get('h.api_secret')
-    key = settings.get('h.consumer_key')
-    ttl = settings.get('h.api_ttl', auth.DEFAULT_TTL)
-    # @@ make this deal with oid+realms, oauth etc better
-    user_id = 'acct:%s@%s' % (request.user.users[0].login, request.host)
+    if not request.user:
+        msg = _(messages.NOT_LOGGED_IN)
+        raise HTTPForbidden(msg)
+
+    consumer = request.consumer
+    # TODO make this deal with oid+realms, oauth etc
+    user_id = 'acct:%s@%s' % (request.user.user_name, request.host)
+
     message = {
         'userId': user_id,
-        'consumerKey': key,
-        'ttl': ttl
+        'consumerKey': str(consumer.key),
+        'ttl': consumer.ttl,
     }
-    body = auth.encode_token(message, secret)
-    return Response(body=body)
 
-def users(request):
-    """Retrieve all the profiles assocatied with a principal."""
-    return map(
-        lambda user: (user.id, (user.login if user.provider == 'local'
-                                else '%s@%s' % (user.login, user.provider))),
-        request.user and request.user.users or [])
+    return auth.encode_token(message, consumer.secret)
+
 
 def includeme(config):
     """Include the annotator-store API backend.
@@ -65,22 +74,17 @@ def includeme(config):
     Example INI file:
 
         [app:h]
-        consumer_key: primary_consumer
-        consumer_secret: 00000000-0000-0000-0000-000000000000
+        api.key: 00000000-0000-0000-0000-000000000000
 
     """
 
-    settings = config.get_settings()
+    # Configure a reified request property for easy access to the API consumer
+    # represented by the application or the request. See
+    # :class:`h.models.Consumer` for details about this object.
+    config.set_request_property(get_consumer, 'consumer', reify=True)
 
-    if not settings.has_key('h.consumer_key'):
-        raise KeyError('h.consumer_key')
-
-    if not settings.has_key('h.consumer_secret'):
-        raise KeyError('h.consumer_secret')
-
-    # Create the annotator-store app
-    app = Flask(__name__)
-    app.register_blueprint(store.store)
+    app = Flask('annotator')  # Create the annotator-store app
+    app.register_blueprint(store.store)  # and register the store api.
 
     # Set up the models
     es.init_app(app)
@@ -92,15 +96,16 @@ def includeme(config):
             Annotation.create_all()
 
     # Configure authentication (ours) and authorization (store)
-    authenticator = auth.Authenticator(consumer_fetcher)
+    authenticator = auth.Authenticator(models.Consumer.get_by_key)
+
     def before_request():
         g.auth = authenticator
         g.authorize = authz.authorize
+
     app.before_request(before_request)
 
-    # Configure the API views
-    config.add_view(wsgiapp2(app), route_name='api')
-    config.add_view(token, route_name='token', permission='authenticated')
-    config.add_view(users, route_name='users', request_method='GET',
-                    permission='authenticated',
-                    renderer='json')
+    # Configure the API view -- version 1 is just annotator.store proxied
+    config.add_view(wsgiapp2(app), context='h.resources.APIFactory', name='v1')
+
+    # And pick up the token view
+    config.scan(__name__)

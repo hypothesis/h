@@ -1,22 +1,26 @@
-from datetime import datetime
 from functools import partial
 from uuid import uuid1, uuid4, UUID
 
 from annotator.auth import DEFAULT_TTL
 
-from apex import initialize_sql, groupfinder, RootFactory
-from apex.models import AuthID, Base, DBSession
+from hem.interfaces import IDBSession
 
-from pyramid.authentication import AuthTktAuthenticationPolicy
-from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.interfaces import IAuthenticationPolicy
-from pyramid.interfaces import IAuthorizationPolicy
-from pyramid.security import authenticated_userid
+from horus.models import (
+    BaseModel,
+    ActivationMixin,
+    GroupMixin,
+    UserMixin,
+    UserGroupMixin,
+)
 
-from sqlalchemy import engine_from_config
+import transaction
+
+from pyramid_basemodel import Base, Session
+
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
-from sqlalchemy.types import DateTime, Integer, TypeDecorator, CHAR
+from sqlalchemy.types import Integer, TypeDecorator, CHAR
+
 
 class GUID(TypeDecorator):
     """Platform-independent GUID type.
@@ -55,16 +59,19 @@ class GUID(TypeDecorator):
             return UUID(value)
 
 
-class Consumer(Base):
-    """API Consumer."""
-    __tablename__ = 'consumers'
+class Consumer(BaseModel, Base):
+    """
+    API Consumer
+
+    The annotator-store :py:class:`annotator.auth.Authenticator` uses this
+    function in the process of authenticating requests to verify the secrets of
+    the JSON Web Token passed by the consumer client.
+
+    """
 
     key = Column(GUID, default=partial(uuid1, clock_seq=id(Base)), index=True)
     secret = Column(GUID, default=uuid4)
     ttl = Column(Integer, default=DEFAULT_TTL)
-
-    created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     def __init__(self, key=None):
         super(Consumer, self).__init__(self)
@@ -74,24 +81,40 @@ class Consumer(Base):
     def __repr__(self):
         return '<Consumer %r>' % self.key
 
+    @classmethod
+    def get_by_key(cls, key):
+        return Session().query(cls).filter(cls.key == key).first()
+
+
+class Activation(ActivationMixin, Base):
+    pass
+
+
+class Group(GroupMixin, Base):
+    pass
+
+
+class User(UserMixin, Base):
+    pass
+
+
+class UserGroup(UserGroupMixin, Base):
+    pass
+
+
 def includeme(config):
+    if not config.registry.queryUtility(IDBSession):
+        config.registry.registerUtility(Session, IDBSession)
+
+    config.include('pyramid_basemodel')
     config.include('pyramid_tm')
-    config.set_request_property(lambda request: DBSession(), 'db', reify=True)
-    config.set_request_property(
-        lambda request: AuthID.get_by_id(authenticated_userid(request)),
-        'user', reify=True)
 
-    settings = config.registry.settings
-    initialize_sql(engine_from_config(settings, 'sqlalchemy.'), settings)
+    settings = config.get_settings()
+    key = settings['api.key']
+    ttl = settings.get('api.ttl', DEFAULT_TTL)
 
-    if not config.registry.queryUtility(IAuthorizationPolicy):
-        authz_policy = ACLAuthorizationPolicy()
-        config.set_authorization_policy(authz_policy)
-
-    if not config.registry.queryUtility(IAuthenticationPolicy):
-        auth_secret = settings['h.auth_secret']
-        authn_policy = AuthTktAuthenticationPolicy(
-            auth_secret, callback=groupfinder)
-        config.set_authentication_policy(authn_policy)
-
-    config.set_root_factory(RootFactory)
+    with transaction.manager:
+        consumer = Consumer.get_by_key(key)
+        if not consumer:
+            consumer = Consumer(key=key, ttl=ttl)
+            Session().add(consumer)

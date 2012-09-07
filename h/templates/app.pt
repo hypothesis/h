@@ -1,21 +1,20 @@
-<metal:main use-macro="load: base.pt">
-
-<tal:block metal:fill-slot="head">
-  <link rel="stylesheet"
-        tal:attributes="href href"
-        tal:repeat="href webassets(request, 'app_css') | []" />
-</tal:block>
-
-<tal:block metal:fill-slot="body">
-
-  <div id="toolbar">
-    <img class="tab-logo"
+<!DOCTYPE html>
+<html lang="en" metal:use-macro="main_template">
+  <head>
+    <link rel="stylesheet"
+          metal:fill-slot="css_links"
+          tal:attributes="href href"
+          tal:repeat="href webassets(request, 'app_css') | []" />
+  </head>
+  <body metal:fill-slot="body">
+    <div id="toolbar">
+      <img
+         class="tab-logo"
          src="${request.static_url('h:images/hbar-logo-small.png')}" />
-    <form tal:replace="structure form['persona']"/>
-  </div>
-  <div id="gutter">
-    <header class="auth">
-      <section>
+      ${structure: persona.form}
+    </div>
+    <div id="gutter">
+      <header class="auth">
         <a class="close" onclick="showAuth(false)"
            ><img src="${request.static_url('h:images/delete_1.png')}" /></a>
         <ul class="right">
@@ -28,104 +27,102 @@
                         .attr('action', '?action=register')
                         .submit()">Sign up</a></li>
         </ul>
-      </section>
-      <span tal:define="blocks load: blocks.pt;
-                        form form['auth']"
-            metal:use-macro="blocks.macros['auth']" />
-    </header>
-    <div id="wrapper">
+        <tal:block define="form auth.form"
+                   metal:use-macro="blocks.macros['auth']" />
+      </header>
+      <div id="wrapper">
+      </div>
     </div>
-  </div>
-
-  <script tal:attributes="src src"
-          tal:repeat="src webassets(
-                      request,
-                      'annotator',
-                      'd3',
-                      'easyXDM',
-                      'handlebars',
-                      'jwz',
-                      'templates',
-                      'underscore')"></script>
-  <script>
-    var annotator = window.Annotator._instance = new Hypothesis(document.body, {
-      Heatmap: {}
-    })
-    var plugins = annotator.plugins
-
-    var showAuth = function (show, cb) {
-      var $header = $('header'),
-          visible = !$header.hasClass('hyp-collapsed')
-      if (visible != show) {
-        if (show) {
-          $header.removeClass('hyp-collapsed')
-          // XXX: deform.js is broken -- it selects hidden fields
-          $('#auth input[type!="hidden"]').first().focus()
-        } else {
-          $header.addClass('hyp-collapsed')
-        }
-        $header.one('webkitTransitionEnd transitionend OTransitionEnd', cb)
-      } else {
-        if (cb) cb()
-      }
-    }
-
-    var setupAuth = function (cb) {
-      var action = decodeURIComponent(
-        (RegExp('action=(.+?)(&|$)').exec($('#auth').attr('action')) ||
-         [,'login']
-        )[1]
-      )
-      $('[data-action]')
-        .hide()
-        .filter(function () {
-          return $(this).data('action') != action
-        })
-        .show()
-
-      // TODO: use less janky cookie stuff (and below)
-      if (document.cookie.indexOf('auth_tkt=') != -1) {
-        $('#persona').off('change mousedown').on('change', function () {
-          $(this).submit()
-        })
-        if (!plugins.Auth) {
-          annotator.addPlugin('Auth', {
-            tokenUrl: '${request.route_url('token')}'
-          })
-        }
-        plugins.Auth.withToken(plugins.Permissions._setAuthFromToken)
-        if (cb) cb(true)
-      } else {
-        $('#persona').off('change mousedown').on('mousedown', function (e) {
-          e.preventDefault()
-          setupAuth(function (auth) { showAuth(!auth) })
-        })
-        plugins.Permissions.setUser(null)
-        if (plugins.Auth) {
-          plugins.Auth.token = null
-          plugins.Auth.updateHeaders()
-          delete plugins.Auth
-        }
-        if (cb) cb(false)
-      }
-    }
-
-    var authSuccess = function (data) {
-      var visible = !$('header').hasClass('hyp-collapsed')
-      showAuth(false, function () {
-        $('#auth').replaceWith(data.form.auth)
-        $('#persona').replaceWith(data.form.persona)
-        deform.processCallbacks()
-        setupAuth(function (auth) {
-          if (visible && !auth) showAuth(true)
-        })
+    <script type="text/javascript"
+            tal:attributes="src src"
+            tal:repeat="src webassets(
+                        request,
+                        'annotator',
+                        'd3',
+                        'easyXDM',
+                        'handlebars',
+                        'jwz',
+                        'templates',
+                        'underscore')"></script>
+    <script type="text/javascript">
+      var annotator = window.Annotator._instance = new Hypothesis(document.body, {
+        Heatmap: {}
       })
-    }
-    setupAuth()
-    showAuth(false)
-  </script>
-  <script tal:condition="request.user">setupAuth()</script>
+      var plugins = annotator.plugins
 
-</tal:block>
+      var showAuth = function (show, cb) {
+        var $header = $('header'),
+            visible = !$header.hasClass('hyp-collapsed')
+        if (visible != show) {
+          if (show) {
+            $header.removeClass('hyp-collapsed')
+            // TODO: deform.js is broken -- it selects hidden fields
+            $('#auth input[type!="hidden"]').first().focus()
+          } else {
+            $header.addClass('hyp-collapsed')
+          }
+          $header.one('webkitTransitionEnd transitionend OTransitionEnd', cb)
+        } else {
+          if (cb) cb()
+        }
+      }
 
-</metal:main>
+      var setupAuth = function (cb) {
+        var action = decodeURIComponent(
+          (RegExp('action=(.+?)(&|$)').exec($('#auth').attr('action')) ||
+           [,'login']
+          )[1]
+        )
+        $('[data-action]')
+          .hide()
+          .filter(function () {
+            return $(this).data('action') != action
+          })
+          .show()
+
+        // TODO: use less janky cookie stuff (and below)
+        if (document.cookie.indexOf('auth_tkt=') != -1) {
+          $('#persona').off('change mousedown').on('change', function () {
+            $(this).submit()
+          })
+          if (!plugins.Auth) {
+            annotator.addPlugin('Auth', {
+              tokenUrl: '${request.resource_url(request.root, 'access_token')}'
+            })
+          }
+          plugins.Auth.withToken(plugins.Permissions._setAuthFromToken)
+          if (cb) cb(true)
+        } else {
+          $('#persona').off('change mousedown').on('mousedown', function (e) {
+            e.preventDefault()
+            showAuth(true)
+          })
+          plugins.Permissions.setUser(null)
+          if (plugins.Auth) {
+            plugins.Auth.token = null
+            plugins.Auth.updateHeaders()
+            delete plugins.Auth
+          }
+          if (cb) cb(false)
+        }
+      }
+
+      var authSuccess = function (data) {
+        var visible = !$('header').hasClass('hyp-collapsed')
+        showAuth(false, function () {
+          Object.getOwnPropertyNames(data).map(function (oid) {
+            if (data[oid].form) $('#' + oid).replaceWith(data[oid].form)
+          })
+          deform.processCallbacks()
+          setupAuth(function (auth) {
+            if (visible && !auth) showAuth(true)
+          })
+        })
+      }
+      setupAuth()
+      showAuth(false)
+    </script>
+    <script type="text/javascript"
+            tal:condition="request.user">setupAuth()</script>
+  </body>
+</html>

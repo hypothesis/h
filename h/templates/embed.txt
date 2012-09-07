@@ -12,7 +12,6 @@ yepnope([
     nope: Array.prototype.concat.call(${injector}, ${easyXDM}, ${inject_css}),
     complete: function () {
       if (window.Annotator._instance) return;
-      var app = '${request.route_url("app")}'
 
       // Get the canonical URL from any of several sources
       var uri = document.location.href
@@ -23,7 +22,7 @@ yepnope([
       // Load the annotator
       var annotator = new Annotator.Host(document.body, {
         /* @@ reflect routes with crossroads.js?? */
-        app: app,
+        app: '${request.resource_url(context['app'])}',
       })
       annotator.consumer.addPlugin('Store', {
         annotationData: { uri: uri },
@@ -31,7 +30,7 @@ yepnope([
           limit: 1000,
           uri: uri
         },
-        prefix: '${request.route_url("api", subpath="").strip('/')}'
+        prefix: '${request.resource_url(context, 'api', 'v1')}'
       })
       window.Annotator._instance = annotator;
       $(function () { annotator.consumer.update() })

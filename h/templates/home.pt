@@ -1,57 +1,59 @@
-<metal:main use-macro="load: base.pt">
-
-<tal:block metal:fill-slot="head">
-  <link rel="stylesheet"
-        tal:attributes="href href"
-        tal:repeat="href webassets(request, 'site_css') | []" />
-  <script type="text/javascript" tal:content="structure embed" />
-</tal:block>
-
-<tal:block metal:fill-slot="body">
-  <a href="https://github.com/hypothesis/h"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_white_ffffff.png" alt="Fork me on GitHub"></a>
-
-  <div id="flash-msg">
-    <span tal:content="message"
-          tal:omit-tag=""
-          tal:repeat="message request.session.pop_flash()" />
-  </div>
-
-  <div id="toolbar">
-    <a class="btn bookmarklet"
-       href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
-       >Contribute</a>
-  </div>
-
-  <div id="home" class="content">
-    <header>
-      <img height="150px" width="150px"
-           src="${request.static_url('h:images/hypothelogo_square.png')}" />
-      <hgroup>
-        <h1>Hypothes<span class="red">.</span>is</h1>
-        <h2>The&#160;Internet, peer&#160;reviewed.</h2>
-      </hgroup>
-    </header>
-    <p>Welcome to Hypothesis. For general information about the project, please
-      visit the <a href="http://hypothes.is">home page</a> where you can reserve
-      reserve a username, sign up for our newsletter or learn how to get
-      involved in working to improve Hypothesis.</p>
-    <h2>Get Started</h2>
-    <ol>
-      <li>Open the annotation sidebar by clicking on the white "h" tab in the
-        upper right corner.</li>
-      <li>Enter your login credentials to claim your account.</li>
-      <li>You can see the annotations on any page by looking at the heatmap on
-        the right side of the page. Click on one of the tabs to see the
-        annotations on that part of the page.</li>
-      <li>Click on an annotation to see it in detail. In the detail view, you
-        can see replies that people have left on the annotation. Move your mouse
-        over the annotation and click the "reply" link to leave a reply.</li>
-      <li>Highlight any piece of text to leave an annotation of your own. (Try
-        annotating these instructions!)</li>
-      <li>Drag our bookmarklet to your bookmarks bar to annotate any page on the
-        internet.</li>
-    </ol>
-  </div>
-</tal:block>
-
-</metal:main>
+<!DOCTYPE html>
+<html lang="en" metal:use-macro="main_template">
+  <head>
+    <link rel="stylesheet"
+          metal:fill-slot="css_links"
+          tal:attributes="href href"
+          tal:repeat="href webassets(request, 'site_css') | []" />
+    <script type="text/javascript"
+            metal:fill-slot="embed"
+            tal:content="structure embed" />
+  </head>
+  <body metal:fill-slot="body">
+    <a href="https://github.com/hypothesis/h"
+       ><img
+           alt="Fork me on GitHub"
+           src="https://s3.amazonaws.com/github/ribbons/forkme_left_white_ffffff.png"
+           style="position: absolute; top: 0; left: 0; border: 0;" /></a>
+    <div id="flash-msg">
+      <span tal:content="message"
+            tal:omit-tag=""
+            tal:repeat="message request.session.pop_flash()" />
+    </div>
+    <div id="toolbar">
+      <a class="btn bookmarklet"
+         href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
+         >Contribute</a>
+    </div>
+    <div id="home" class="content">
+      <header>
+        <img height="150px" width="150px"
+             src="${request.static_url('h:images/hypothelogo_square.png')}" />
+        <hgroup>
+          <h1>Hypothes<span class="red">.</span>is</h1>
+          <h2>The&#160;Internet, peer&#160;reviewed.</h2>
+        </hgroup>
+      </header>
+      <p>Welcome to Hypothesis. For general information about the project, please
+        visit the <a href="http://hypothes.is">home page</a> where you can
+        reserve a username, sign up for our newsletter or learn how to get
+        involved in working to improve Hypothesis.</p>
+      <h2>Get Started</h2>
+      <ol>
+        <li>Open the annotation sidebar by clicking on the white <em>h</em> tab
+          in the upper right corner.</li>
+        <li>Enter your login credentials to claim your account.</li>
+        <li>You can see the annotations on any page by looking at the heatmap on
+          the right side of the page. Click on one of the tabs to see the
+          annotations on that part of the page.</li>
+        <li>Click on an annotation to see it in detail. In the detail view, you
+          can see replies that people have left on the annotation. Click the
+          "reply" link to leave your own.</li>
+        <li>Highlight any piece of text to leave an annotation of your own (try
+          annotating these instructions).</li>
+        <li>Drag our bookmarklet to your bookmarks bar to annotate any page on
+          the Internet!</li>
+      </ol>
+    </div>
+  </body>
+</html>

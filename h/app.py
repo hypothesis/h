@@ -1,152 +1,114 @@
-from functools import partial
+import deform
 
-from apex import logout
-from apex.models import AuthID, AuthUser
-from apex.views import get_came_from
+import horus.views
+from horus.views import BaseController
 
-from colander import Schema, SchemaNode
+from pyramid.httpexceptions import HTTPRedirection
+from pyramid.view import view_config, view_defaults
 
-from deform import Button, Form, Field
-from deform.widget import MappingWidget
+from h import schemas
 
-from pyramid.httpexceptions import HTTPBadRequest, HTTPRedirection, HTTPSeeOther
-from pyramid.renderers import render
-from pyramid.security import forget, remember
-from pyramid.view import view_config
 
-from . schemas import (login_validator, register_validator,
-                       LoginSchema, RegisterSchema, PersonaSchema)
-from . views import FormView
-
-@view_config(renderer='templates/app.pt', route_name='app')
-@view_config(renderer='json', route_name='app', xhr=True)
-class app(FormView):
-    @property
-    def auth(self):
-        request = self.request
-        action = request.params.get('action', 'login')
-
-        if action == 'login':
-            form = login
-        elif action == 'register':
-            form = register
-        else:
-            raise HTTPBadRequest()
-
-        return form(
-            request,
-            action="?action=%s&came_from=%s" % (
-                action,
-                request.current_route_path(),
-            ),
-            bootstrap_form_style='form-vertical',
-            formid='auth',
-        )
-
-    @property
-    def persona(self):
-        request = self.request
-
-        # logout request
-        if request.params.get('persona', None) == '-1':
-            request.add_response_callback(
-                lambda req, res: logout(req).merge_cookies(res)
-            )
-            request.user = None
-
-        return persona(
-            request,
-            bootstrap_form_style='form-horizontal',
-            formid='persona',
-        )
+@view_defaults(context='h.app.AppController', renderer='json')
+class AppController(BaseController):
+    ajax_options = """{
+      target: null,
+      success: authSuccess
+    }"""
 
     def __init__(self, request):
-        self.request = request
+        super(AppController, self).__init__(request)
 
+        if request.method == 'POST':
+            request.add_response_callback(self._handle_redirects)
+
+    @view_config(name='auth')
+    def auth(self):
+        request = self.request
+        lm = request.layout_manager
+        action = request.params.get('action')
+
+        if action == 'activate' or action == 'register':
+            controller = horus.views.RegisterController(request)
+        else:
+            action = 'login'
+            controller = horus.views.AuthController(request)
+
+        form = controller.form
+        form.action = '%s?action=%s' % (request.view_name or 'auth', action)
+        form.formid = 'auth'
+        form.use_ajax = True
+        form.ajax_options = self.ajax_options
+        lm.layout.add_form('auth', form)
+
+        if request.method == 'POST':
+            if request.view_name == 'auth':
+                result = getattr(controller, action)()
+                if isinstance(result, dict):
+                    if 'errors' in result:
+                        result['errors'] = [str(e) for e in result['errors']]
+                else:
+                    return result
+                return dict(auth=result)
+
+        return dict(auth={'form': form.render()})
+
+    @view_config(name='persona')
+    def persona(self):
+        request = self.request
+        lm = request.layout_manager
+        schema = schemas.PersonaSchema().bind(request=request)
+        form = deform.Form(schema)
+        form.action = request.view_name or 'persona'
+        form.formid = 'persona'
+        form.use_ajax = True
+        form.ajax_options = self.ajax_options
+
+        persona = dict(id=0 if self.request.user else -1)
+        try:
+            if request.method == 'POST':
+                if request.view_name == 'persona':
+                    persona = form.validate(request.POST.items())
+                    if persona.get('id', None) == -1:
+                        controller = horus.views.AuthController(request)
+                        return controller.logout()
+                    else:
+                        # TODO: multiple personas
+                        persona = None
+            lm.layout.add_form('persona', form)
+        except deform.exception.ValidationFailure as e:
+            lm.layout.add_form('persona', e)
+            return dict(persona={'form': e})
+
+        if persona:
+            return dict(persona={'form': form.render(persona)})
+        else:
+            return dict(persona={'form': form.render()})
+
+    def _handle_redirects(self, request, response):
+        if isinstance(response, HTTPRedirection):
+            response.location = request.resource_path(request.context)
+        return response
+
+    @view_config(renderer='h:templates/app.pt')
+    @view_config(renderer='json', xhr=True)
     def __call__(self):
-        self.requirements = []
-        result = {
-            'css_links': [],
-            'js_links': [],
-            'form': {},
-        }
+        request = self.request
+        lm = request.layout_manager
+        result = {}
+
         for name in ['auth', 'persona']:
-            view = getattr(self, name)
-            view.ajax_options = """{
-              success: authSuccess,
-              target: null,
-              type: 'POST'
-            }"""
-            view.use_ajax = True
-            form = view()
-            if isinstance(form, dict):
-                for links in ['css_links', 'js_links']:
-                    for l in form.pop(links, []):
-                        if l not in result[links]:
-                            result[links].append(l)
-                result['form'][name] = form['form']
-            else:
-                return form
+            subresult = getattr(self, name)()
+            if isinstance(subresult, dict):
+                result.update(subresult)
+
+        result.update(
+            css_links=lm.layout.css_links,
+            js_links=lm.layout.js_links
+        )
 
         return result
 
-class forgot(FormView):
-    pass
-
-class login(FormView):
-    schema = LoginSchema(validator=login_validator)
-    buttons = (
-        Button('log in', type='submit'),
-        Button('forgot', title='Password help?'),
-    )
-    form_class = partial(Form,
-                         bootstrap_form_style='form-vertical',
-                         formid='auth')
-
-    def log_in_success(self, form):
-        request = self.request
-        user = (
-            AuthUser.get_by_login(form['username']) or
-            AuthUser.get_by_email(form['username'])
-        )
-        headers = remember(request, user.auth_id)
-        return HTTPSeeOther(headers=headers, location=get_came_from(request))
-
-class register(FormView):
-    schema = RegisterSchema(validator=register_validator)
-    buttons = ('sign up',)
-    form_class = partial(Form,
-                         bootstrap_form_style='form-vertical',
-                         formid='auth')
-
-    def sign_up_success(self, form):
-        request = self.request
-        db = request.db
-        id = AuthID()
-        db.add(id)
-        user = AuthUser(login=form['username'],
-                        password=form['password'],
-                        email=form['email'])
-        id.users.append(user)
-        db.add(user)
-        db.flush()
-        headers = remember(request, user.auth_id)
-        return HTTPSeeOther(headers=headers, location=get_came_from(request))
-
-class persona(FormView):
-    schema = PersonaSchema()
-    ajax_options = """{
-      success: authSuccess,
-      target: null,
-      type: 'POST'
-    }"""
 
 def includeme(config):
-    config.include('deform_bootstrap')
-    config.include('pyramid_deform')
-    config.include('velruse.app')
-
-    config.add_view(lambda r: {}, name='appcache.mf',
-                    renderer='templates/appcache.pt')
-
     config.scan(__name__)

@@ -1,98 +1,63 @@
-from apex.models import AuthID, AuthUser
-from colander import deferred, Invalid, Length, Schema, SchemaNode, String, Email
-from deform.widget import (
-    FormWidget,
-    HiddenWidget,
-    PasswordWidget,
-    SelectWidget,
-    TextInputWidget)
-from pyramid_deform import CSRFSchema
+import colander
+import deform
+import pyramid_deform
 
-from . import api
-
-# Deform validators
-# =================
-
-def login_validator(node, kw):
-    """Validate a username and password."""
-    valid = False
-    if 'username' in kw:
-        kwargs = {
-            'login': kw['username'],
-            'password': kw['password'],
-        }
-        valid = AuthUser.check_password(**kwargs)
-        # XXX: extend apex to get user by login or email
-        if not valid:
-            user = AuthUser.get_by_email(kw['username'])
-            if user:
-                del kwargs['login']
-                kwargs['id'] = user.id
-                valid = AuthUser.check_password(**kwargs)
-    if not valid:
-        raise Invalid(
-            node,
-            "Your username or password is incorrect."
-        )
-
-def register_validator(node, kw):
-    used = AuthUser.get_by_login(kw['username'])
-    used = used or AuthUser.get_by_email(kw['email'])
-    if used:
-        raise Invalid(node, "That username or email is taken.")
+from h import api
 
 
-# Form schemas
-# ============
+class ControllerWidget(deform.widget.MappingWidget):
+    def deserialize(self, field, pstruct):
+        error = None
+        result = {}
 
-class LoginSchema(CSRFSchema):
-    username = SchemaNode(
-        String(),
-        validator=Length(min=4, max=25),
-        widget=TextInputWidget(
-            autocapitalize="off",
-            autocomplete="off",
-            placeholder="Username or Email"
-        )
-    )
-    password = SchemaNode(
-        String(),
-        widget=PasswordWidget(placeholder="Password"),
-    )
+        if pstruct is colander.null:
+            pstruct = {}
 
-class RegisterSchema(CSRFSchema):
-    email = SchemaNode(
-        String(),
-        validator=Email(),
-        widget=TextInputWidget(
-            autocapitalize="off",
-            autocomplete="off",
-            placeholder="Email"
-        )
-    )
-    username = SchemaNode(
-        String(),
-        validator=Length(min=4, max=25),
-        widget=TextInputWidget(
-            autocapitalize="off",
-            autocomplete="off",
-            placeholder="Username"
-        )
-    )
-    password = SchemaNode(
-        String(),
-        validator=Length(min=6),
-        widget=PasswordWidget(placeholder="Password"),
-    )
+        formid = pstruct.get('__formid__', '')
+        parts = formid.split('_')
+        if len(parts) > 1:
+            formid = parts[0]
+            parts = parts[1:].join('_')
+            pstruct['__formid__'] = parts
+        else:
+            parts = ''
 
-class PersonaSchema(CSRFSchema):
-    persona = SchemaNode(
-        String(),
-        widget=deferred(
-            lambda node, kw: SelectWidget(
+        for num, subfield in enumerate(field.children):
+            name = subfield.name
+            subval = pstruct.get(name, colander.null)
+
+            try:
+                if name != formid:
+                    result[name] = subfield.deserialize(colander.null)
+                else:
+                    result[name] = subfield.deserialize(subval)
+            except colander.Invalid as e:
+                result[name] = e.value
+                if error is None:
+                    error = colander.Invalid(field.schema, value=result)
+                error.add(e, num)
+
+        if error is not None:
+            raise error
+
+        return result
+
+    def serialize(self, field, cstruct, readonly=False):
+        if cstruct is (colander.null, None):
+            cstruct = {}
+        return
+
+class Controller(colander.Mapping):
+    widget_maker = ControllerWidget
+
+class PersonaSchema(pyramid_deform.CSRFSchema):
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=colander.deferred(
+            lambda node, kw: deform.widget.SelectWidget(
                 values=(
-                    api.users(kw['request']) +
-                    [(-1, kw['request'].user and 'Sign out' or 'Not signed in')]
+                    api.personas(kw['request']) +
+                    [(-1, 'Sign out' if kw['request'].user else 'Sign in')]
                 )
             )
         ),

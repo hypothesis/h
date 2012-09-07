@@ -1,28 +1,26 @@
-<metal:main use-macro="load: base.pt">
-
-<tal:block metal:fill-slot="head">
-  <link rel="stylesheet"
-        tal:attributes="href href"
-        tal:repeat="href webassets(request, 'site_css') | []" />
-</tal:block>
-
-<tal:block metal:fill-slot="body">
-
-  <div class="content">
-    <header>
-      <img height="150px" width="150px"
-           src="${request.static_url('h:images/hypothelogo_square.png')}" />
-      <hgroup>
-        <h1>Hypothes<span class="red">.</span>is</h1>
-        <h2>The&#160;Internet, peer&#160;reviewed.</h2>
-      </hgroup>
-    </header>
-    <div class="auth">
-      <tal:block tal:define="blocks load: blocks.pt"
-                 metal:use-macro="blocks.macros['auth']">
+<!DOCTYPE html>
+<html lang='en' metal:use-macro="main_template">
+  <head>
+    <link rel="stylesheet"
+          metal:fill-slot="css_links"
+          tal:attributes="href href"
+          tal:repeat="href webassets(request, 'site_css') | []" />
+    <tal:block metal:define-slot="css_links" />
+    <tal:block metal:define-slot="js_links" />
+  </head>
+  <body metal:fill-slot="body">
+    <div class="content">
+      <header>
+        <img height="150px" width="150px"
+             src="${request.static_url('h:images/hypothelogo_square.png')}" />
+        <hgroup>
+          <h1>Hypothes<span class="red">.</span>is</h1>
+          <h2>The&#160;Internet, peer&#160;reviewed.</h2>
+        </hgroup>
+      </header>
+      <div class="auth">
+        <tal:block metal:use-macro="blocks.macros['auth']" />
+      </div>
     </div>
-  </div>
-
-</tal:block>
-
-</metal:main>
+  </body>
+</html>

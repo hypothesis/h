@@ -7,13 +7,14 @@ setup(
 
     install_requires = [
         'annotator>=0.7.6',
-        'apex>=0.9.5dev',
         'deform_bootstrap>=0.2.1',
+        'horus>=0.9.8',
         'pyramid>=1.3',
         'pyramid_deform>=0.2a4',
         'pyramid_tm>=0.3',
         'pyramid_webassets>=0.7',
         'setuptools>=0.6c11',
+        'velruse>=1.0',
     ],
 
     author = 'Hypothes.is Project & contributors',
