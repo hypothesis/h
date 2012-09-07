@@ -2,7 +2,7 @@
     <input type="text" name="${field.name}" value="${cstruct}"
            tal:attributes="size field.widget.size;
                            class field.widget.css_class;
-                           placeholder field.widget.placeholder | nothing;
+                           placeholder field.title | nothing;
                            autocapitalize field.widget.autocapitalize | nothing;
                            autocomplete field.widget.autocomplete | nothing"
            id="${field.oid}"/>
