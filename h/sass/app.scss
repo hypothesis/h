@@ -77,7 +77,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .hyp-heatmap-tab {
   @include user-select(none);
   background-image: url("../images/side_tab.svg");
-  background-position: center .9em;
+  background-position: center 1.025em;
   background-repeat: no-repeat;
   background-size: 100% 1.4em;
   color: rgb(238, 238, 238);
@@ -110,7 +110,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
   &.upper {
     background-image: url("../images/up_tab.svg");
-    background-position-y: .355em; // 1em - .645em in svg (TODO: crop)
+    background-position-y: .455em; // 1em - .545em in svg (TODO: crop)
   }
 }
 
