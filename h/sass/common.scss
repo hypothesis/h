@@ -139,21 +139,9 @@ label {
   }
 }
 
-.form-vertical {
-  .alert-message {
-    padding: .25em 0;
-  }
-
-  .controls {
-    margin: .25em 0;
-  }
-
-  .control-group {
-    margin: 1em 0;
-  }
-
-  .form-actions {
-    margin: 1em 0
+form, .form-vertical {
+  select, textarea, input, button {
+    margin: .5em 0;
   }
 }
 
