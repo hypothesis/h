@@ -1,7 +1,6 @@
 <form
   id="${field.formid}"
-  class="deform ${field.bootstrap_form_style | 'form-horizontal'}
-         ${field.css_class}"
+  class="deform ${field.css_class}"
   action="${field.action}"
   method="${field.method}"
   enctype="multipart/form-data"
