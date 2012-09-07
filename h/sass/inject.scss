@@ -53,7 +53,7 @@
   }
 
   &:hover {
-    @include box-shadow(1px 1px 6px -2px $gray-light);
+    @include box-shadow(1px 1px 6px -2px $grayLight);
     border-color: $hoverborder;
 
     &:before {

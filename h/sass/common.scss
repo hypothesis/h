@@ -1,10 +1,17 @@
+@import "reset";
+@import 'base';
+
+$sansFontFamily: "Source Sans Pro", $sansFontFamily;
+$serifFontFamily: "Merriweather", $serifFontFamily;
+
 a {
-  color: $link-color;
-  &:hover { color: $link-color-hover; }
+  color: $linkColor;
+  &:hover { color: $linkColorHover; }
 }
 
 body {
-  color: $gray;
+  background-color: $bodyBackground;
+  color: $textColor;
   font-smoothing: antialiased;
   line-height: 1.4;
 }
@@ -18,8 +25,12 @@ p {
 
 em { font-style: italic; }
 
+html {
+  font-size: $baseFontSize / 16 * 1em;
+}
+
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Source Sans Pro", "Open Sans", sans-serif;
+  font-family: $sansFontFamily;
   margin: 0 0 .4em;
   padding: 0 0 .1em;
   color: $gray;
@@ -110,14 +121,9 @@ label {
   text-decoration: underline;
   border: none;
   cursor: pointer;
-  color: $link-color;
+  color: $linkColor;
   position: static;
-  &:hover { color: $link-color-hover; }
-}
-
-.btn-twitter {
-  @extend .btn-link;
-  background: url('../images/sign-in-with-twitter-l.png');
+  &:hover { color: $linkColorHover; }
 }
 
 .red {
@@ -222,7 +228,7 @@ label {
   padding-left: $thread-padding / 2;
 
   & > .annotator-listing {
-    border-left: 1px dotted $gray-light;
+    border-left: 1px dotted $grayLight;
 
     & > * {
       padding: .5em 1em 1em $thread-padding;

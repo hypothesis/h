@@ -3,18 +3,12 @@
 @import "compass/css3/images";
 @import "compass/utilities/color";
 
-@import "reset";
-@import "base";
+$baseFontSize: 18;
+
 @import "common";
 
-$font-size: 18;
-
-html {
-  font-size: $font-size / 16 * 1em;
-}
-
 body {
-  font-family: "Merriweather", "Georgia", serif;
+  font-family: $serifFontFamily;
 }
 
 section {

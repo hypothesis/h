@@ -3,14 +3,13 @@
 @import 'compass/css3/user-interface';
 @import "compass/reset/utilities";
 
-@import 'reset';
-@import 'base';
+$baseFontSize: 16;
+
 @import 'common';
 
-$font-size: 16;
-
 body {
-  font-family: "Source Sans Pro", "Open Sans", sans-serif;
+  background-color: transparent;
+  font-family: $sansFontFamily;
   height: 100%;
   position: fixed;
   width: 100%;
@@ -45,10 +44,10 @@ header {
       margin-right: .3em;
     }
   }
-}
 
-html {
-  font-size: $font-size / 16 * 1em;
+  #auth {
+    @extend .form-vertical;
+  }
 }
 
 input { width: 100%; }
@@ -131,7 +130,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include clearfix;
   @include smallshadow;
   background: white;
-  border: 1px solid $gray-lighter;
+  border: 1px solid $grayLighter;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
   display: table;
