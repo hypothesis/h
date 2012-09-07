@@ -59,15 +59,17 @@ class Consumer(Base):
     """API Consumer."""
     __tablename__ = 'consumers'
 
-    key = Column(GUID, unique=True, primary_key=True)
+    key = Column(GUID, default=partial(uuid1, clock_seq=id(Base)), index=True)
     secret = Column(GUID, default=uuid4)
     ttl = Column(Integer, default=DEFAULT_TTL)
 
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
-    def __init__(self, key=partial(uuid1, clock_seq=id(Base))):
-        self.key = key
+    def __init__(self, key=None):
+        super(Consumer, self).__init__(self)
+        if key is not None:
+            self.key = key
 
     def __repr__(self):
         return '<Consumer %r>' % self.key
