@@ -41,12 +41,12 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     return 0
 
   _colorize: (v) ->
-    s = d3.scale.pow().exponent(2)
-      .range([0, .1])
+    c = d3.scale.pow().exponent(2)
+      .range([0, 10])
     l = d3.scale.pow().exponent(.5)
       .domain([0, 1])
-      .range([1, .5])
-    d3.hsl(210, s(v), l(v)).toString()
+      .range([100, 50])
+    d3.hcl(270, c(v), l(v)).toString()
 
   updateHeatmap: (data) =>
     return unless d3?
