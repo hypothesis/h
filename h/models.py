@@ -58,6 +58,9 @@ class GUID(TypeDecorator):
         else:
             return UUID(value)
 
+    def python_type(self):
+        return UUID
+
 
 class Consumer(BaseModel, Base):
     """
