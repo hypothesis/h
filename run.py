@@ -1,5 +1,7 @@
+#!/usr/bin/env python
 from os import environ
 from os.path import join
+
 """
 If a virtual environment is active, make sure it's being used.
 Globally-installed console scripts use an absolute shebang path which
