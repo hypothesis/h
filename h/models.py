@@ -76,10 +76,9 @@ class Consumer(BaseModel, Base):
     secret = Column(GUID, default=uuid4)
     ttl = Column(Integer, default=DEFAULT_TTL)
 
-    def __init__(self, key=None):
-        super(Consumer, self).__init__(self)
-        if key is not None:
-            self.key = key
+    def __init__(self, **kwargs):
+        super(Consumer, self).__init__()
+        self.__dict__.update(kwargs)
 
     def __repr__(self):
         return '<Consumer %r>' % self.key
