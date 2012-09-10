@@ -2,11 +2,14 @@
 <html lang='en'>
   <head><title>Macro Blocks</title></head>
   <body>
-    <tal:block
-       define="action request.route_url('apex_%s' % action)|action|string:;
-               include_came_from include_came_from|nothing;"
-       metal:define-macro="auth">
+    <tal:block metal:define-macro="auth">
       <tal:block i18n:translate="" content="structure form" />
+      <form tal:define="providers request.registry.velruse_providers.values()"
+            tal:repeat="provider providers"
+            action="${request.route_url(provider.login_route)}"
+            target="hPopout">
+        <button class="${provider.name} login">${provider.name}</button>
+      </form>
     </tal:block>
   </body>
 </html>
