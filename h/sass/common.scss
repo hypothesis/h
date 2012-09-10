@@ -381,12 +381,13 @@ form, .form-vertical {
 }
 
 
-#TwitterLogin button {
+.login.twitter {
   @extend .btn-link;
   background: url('../images/sign-in-with-twitter_0.png');
   background-size: 100% 100%;
-  height: 24px;
+  display: inline-block;
+  height: 36px;
   font-size: 0;
   margin: -4px;
-  width: 150px;
+  width: 225px;
 }
