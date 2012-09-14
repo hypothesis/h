@@ -1,4 +1,4 @@
-/* 
+/*
  * http://stackoverflow.com/a/7641812
  */
 var Handlebars
@@ -34,7 +34,7 @@ Handlebars.registerHelper('fuzzyTime', function (date) {
   } else {
     fuzzy = new Date(date).toLocaleDateString()
   }
-  
+
   return fuzzy
 })
 
