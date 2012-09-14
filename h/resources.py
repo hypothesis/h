@@ -140,31 +140,36 @@ def add_webassets(config):
         config.add_webasset(name, bundles[name])
 
 
-class RootFactory(horus.resources.RootFactory):
-    __name__ = ''
+class BaseResource(object):
+    """Base Resource class from which all resources are derived."""
+
+    __name__ = None
     __parent__ = None
 
-    def __getitem__(self, key):
-        child = None
+    def __init__(self, request):
+        self.request = request
 
-        if key == 'api':
-            child = APIFactory(self.request)
-            child.__name__ = 'api'
+    def __getitem__(self, name):
+        """
+        While individual resources may override this method to customize
+        the construction of sub-resources returned from traversal, make the
+        common case easy by treating any attributes that are subclasses of
+        BaseResource as a factory/constructor function for a sub-resource whose
+        path component (`__name__`) is that of the attribute.
+        """
 
-        if key == 'app':
-            child = app.AppController(self.request)
-            child.__name__ = 'app'
+        factory = getattr(self, name, None)
 
-        if child is not None:
-            child.__parent__ = self
-            return child
+        if factory and issubclass(factory, BaseResource):
+            inst = factory(self.request)
+            inst.__name__ = name
+            inst.__parent__ = self
+            return inst
 
-        raise KeyError
+        raise KeyError(name)
 
 
-class APIFactory(horus.resources.BaseFactory):
-    __name__ = 'api'
-    __parent__ = None
+class APIFactory(BaseResource):
 
     def __init__(self, request):
         super(APIFactory, self).__init__(request)
@@ -179,6 +184,18 @@ class APIFactory(horus.resources.BaseFactory):
 
             if token:
                 request.headers['x-annotator-auth-token'] = token
+
+
+class AppFactory(app.AppController, BaseResource):
+    pass
+
+
+class RootFactory(BaseResource, horus.resources.RootFactory):
+    __name__ = ''
+    __parent__ = None
+
+    api = APIFactory
+    app = AppFactory
 
 
 def includeme(config):
