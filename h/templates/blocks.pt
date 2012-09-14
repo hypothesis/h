@@ -4,8 +4,8 @@
   <body>
     <tal:block metal:define-macro="auth">
       <tal:block i18n:translate="" content="structure form" />
-      <form tal:define="providers request.registry.velruse_providers.values()"
-            tal:repeat="provider providers"
+      <form tal:define="providers request.registry.velruse_providers | {}"
+            tal:repeat="provider providers.values()"
             action="${request.route_url(provider.login_route)}"
             target="hPopout">
         <button class="${provider.name} login">${provider.name}</button>
