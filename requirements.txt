@@ -1,8 +1,9 @@
 -e .
+Beaker==1.6.4
 Chameleon==2.9.2
 Flask==0.8
 Jinja2==2.6
-Mako==0.7.0
+Mako==0.7.2
 Markdown==2.1.1
 MarkupSafe==0.15
 Paste==1.7.5.1
@@ -10,9 +11,9 @@ PasteDeploy==1.5.0
 PyJWT==0.1.4
 Pycco==0.3.0
 Pygments==1.5
-SQLAlchemy==0.7.6
+SQLAlchemy==0.7.8
 WTForms==1.0.1
-WebOb==1.2
+WebOb==1.2.2
 Werkzeug==0.8.3
 -e git+https://github.com/hypothesis/annotator-store@37f6a077064b6d1728d49e6d1e538b8fbf588e06#egg=annotator-dev
 anykeystore==0.2
@@ -22,10 +23,10 @@ chardet==1.0.1
 colander==0.9.8
 cryptacular==1.4.1
 deform==0.9.5
-deform-bootstrap==0.2.1
-distribute==0.6.27
+deform-bootstrap==0.2.2
+distribute==0.6.28
 hem==0.2
-horus==0.9.8
+-e git://github.com/eventray/horus.git@cd6fdb9f9e24d0044f785a3cba3d4940a416f583#egg=horus-dev
 httplib2==0.7.4
 iso8601==0.1.4
 mock==0.8.0
@@ -35,29 +36,30 @@ pbkdf2==1.3
 peppercorn==0.4
 py==1.4.9
 pyes==0.16.0
-pyramid==1.3.2
+pyramid==1.4a1
 pyramid-basemodel==0.1.3
+pyramid-beaker==0.7
 pyramid-debugtoolbar==1.0.2
 pyramid-deform==0.2a5
 pyramid-layout==0.4
-pyramid-mailer==0.8
+pyramid-mailer==0.9
 pyramid-tm==0.4
 pyramid-webassets==0.7
 pystache==0.5.2
 pytest==2.2.4
 python-openid==2.2.5
-repoze.lru==0.5
-repoze.sendmail==3.1
+repoze.lru==0.6
+repoze.sendmail==3.2
 requests==0.11.2
 smartypants==1.6.0.3
-transaction==1.2.0
+transaction==1.3.0
 translationstring==1.1
 unittest2==0.5.1
 velruse==1.0
-venusian==1.0a6
+venusian==1.0a7
 webassets==0.7.1
 wsgiref==0.1.2
 wtforms-recaptcha==0.2.0
 zope.deprecation==4.0.0
 zope.interface==4.0.1
-zope.sqlalchemy==0.7
+zope.sqlalchemy==0.7.1
