@@ -4,7 +4,7 @@ from webassets import Bundle
 from webassets.filter import register_filter
 from webassets.loaders import PythonLoader
 
-from h import api, app
+from h import api
 
 # register our backported cleancss filter until webassets 0.8 is released
 from h.cleancss import CleanCSS
@@ -186,8 +186,9 @@ class APIFactory(BaseResource):
                 request.headers['x-annotator-auth-token'] = token
 
 
-class AppFactory(app.AppController, BaseResource):
-    pass
+class AppFactory(BaseResource):
+    def __init__(self, request):
+        super(AppFactory, self).__init__(request)
 
 
 class RootFactory(BaseResource, horus.resources.RootFactory):

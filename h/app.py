@@ -9,7 +9,7 @@ from pyramid.view import view_config, view_defaults
 from h import schemas
 
 
-@view_defaults(context='h.app.AppController', renderer='json')
+@view_defaults(context='h.resources.AppFactory', renderer='json')
 class AppController(BaseController):
     ajax_options = """{
       target: null,
