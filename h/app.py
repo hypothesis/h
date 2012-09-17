@@ -36,7 +36,7 @@ class AppController(BaseController):
             raise HTTPBadRequest()
 
         form = controller.form
-        form.action = '%s?action=%s' % (request.view_name or 'auth', action)
+        form.action = request.resource_path(request.context, 'auth', action)
         form.formid = 'auth'
         form.use_ajax = True
         form.ajax_options = self.ajax_options
