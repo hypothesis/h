@@ -79,7 +79,7 @@ class AppController(BaseController):
             lm.layout.add_form('persona', form)
         except deform.exception.ValidationFailure as e:
             lm.layout.add_form('persona', e)
-            return dict(persona={'form': e})
+            return dict(persona={'form': e.render()})
 
         if persona:
             return dict(persona={'form': form.render(persona)})
