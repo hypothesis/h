@@ -3,7 +3,7 @@ import deform
 import horus.views
 from horus.views import BaseController
 
-from pyramid.httpexceptions import HTTPRedirection
+from pyramid.httpexceptions import HTTPBadRequest, HTTPRedirection
 from pyramid.view import view_config, view_defaults
 
 from h import schemas
@@ -26,13 +26,14 @@ class AppController(BaseController):
     def auth(self):
         request = self.request
         lm = request.layout_manager
-        action = request.params.get('action')
+        action = request.params.get('action', 'login')
 
-        if action == 'activate' or action == 'register':
+        if action in ('activate', 'register'):
             controller = horus.views.RegisterController(request)
-        else:
-            action = 'login'
+        elif action in ('login', 'logout'):
             controller = horus.views.AuthController(request)
+        else:
+            raise HTTPBadRequest()
 
         form = controller.form
         form.action = '%s?action=%s' % (request.view_name or 'auth', action)
