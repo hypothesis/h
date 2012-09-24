@@ -192,6 +192,9 @@ class RootFactory(InnerResource, resources.RootFactory):
 
 
 class APIFactory(InnerResource):
+    __acl__ = [
+        (Allow, Authenticated, 'access_token')
+    ]
 
     def __init__(self, request):
         super(APIFactory, self).__init__(request)

@@ -46,8 +46,8 @@ def personas(request):
     return []
 
 
-@view_config(context='h.resources.RootFactory', name='access_token',
-             renderer='string')
+@view_config(context='h.resources.APIFactory', name='access_token',
+             permission='access_token', renderer='string')
 def token(request):
     """Get an API token for the logged in user."""
 
