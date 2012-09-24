@@ -1,8 +1,4 @@
 def includeme(config):
-    config.include('horus')
-    config.include('velruse.app')
-    config.commit()
-
     config.include('h.api')
     config.include('h.app')
     config.include('h.layouts')
@@ -11,6 +7,7 @@ def includeme(config):
     config.include('h.resources')
     config.include('h.subscribers')
     config.include('h.views')
+    config.include('velruse.app')
 
 
 def create_app(settings):

@@ -20,5 +20,8 @@
         <tal:block metal:use-macro="blocks.macros['auth']" />
       </div>
     </div>
+    <script type="text/javascript">
+      deformField2.focus()
+    </script>
   </body>
 </html>

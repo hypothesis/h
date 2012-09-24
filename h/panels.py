@@ -1,7 +1,4 @@
-import colander
-import horus
-
-from pyramid_layout.layout import layout_config
+from pyramid_layout.panel import panel_config
 
 
 def includeme(config):

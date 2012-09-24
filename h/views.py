@@ -1,5 +1,19 @@
 import json
 
+from horus import (
+    IHorusLoginSchema, LoginSchema,
+    IHorusRegisterSchema, RegisterSchema,
+    IHorusForgotPasswordSchema, ForgotPasswordSchema,
+    IHorusResetPasswordSchema, ResetPasswordSchema,
+    IHorusProfileSchema, ProfileSchema,
+
+    IHorusLoginForm, IHorusRegisterForm, IHorusForgotPasswordForm,
+    IHorusResetPasswordForm, IHorusProfileForm,
+
+    SubmitForm
+)
+from horus.views import BaseController
+
 from pyramid.renderers import render
 from pyramid.view import view_config
 
@@ -36,6 +50,12 @@ def includeme(config):
     )
 
     config.add_view(
+        'horus.views.AuthController',
+        attr='logout',
+        route_name='horus_logout'
+    )
+
+    config.add_view(
         'horus.views.ForgotPasswordController',
         attr='forgot_password',
         renderer='h:templates/auth.pt',
@@ -62,5 +82,23 @@ def includeme(config):
         renderer='h:templates/auth.pt',
         route_name='horus_profile'
     )
+
+    schemas = [
+        (IHorusLoginSchema, LoginSchema),
+        (IHorusRegisterSchema, RegisterSchema),
+        (IHorusForgotPasswordSchema, ForgotPasswordSchema),
+        (IHorusResetPasswordSchema, ResetPasswordSchema),
+        (IHorusProfileSchema, ProfileSchema)
+    ]
+    forms = [
+        IHorusLoginForm, IHorusRegisterForm, IHorusForgotPasswordForm,
+        IHorusResetPasswordForm, IHorusProfileForm
+    ]
+    for iface, schema in schemas:
+        if not config.registry.queryUtility(iface):
+            config.registry.registerUtility(schema, iface)
+    for form in forms:
+        if not config.registry.queryUtility(form):
+            config.registry.registerUtility(SubmitForm, form)
 
     config.scan(__name__)

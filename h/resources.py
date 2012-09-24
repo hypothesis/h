@@ -221,6 +221,7 @@ RootFactory.app = AppFactory
 
 
 def includeme(config):
+    config.include('horus.routes')
     config.add_route('embed', '/embed.js')
     config.add_route('index', '/', factory='h.resources.RootFactory')
     add_webassets(config)

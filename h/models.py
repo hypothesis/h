@@ -5,6 +5,12 @@ from annotator.auth import DEFAULT_TTL
 
 from hem.interfaces import IDBSession
 
+from horus import (
+    get_user,
+
+    IHorusUserClass,
+    IHorusActivationClass,
+)
 from horus.models import (
     BaseModel,
     ActivationMixin,
@@ -105,11 +111,20 @@ class UserGroup(UserGroupMixin, Base):
 
 
 def includeme(config):
-    if not config.registry.queryUtility(IDBSession):
-        config.registry.registerUtility(Session, IDBSession)
-
+    registry = config.registry
     config.include('pyramid_basemodel')
     config.include('pyramid_tm')
+
+    config.set_request_property(get_user, str('user'), reify=True)
+
+    if not registry.queryUtility(IDBSession):
+        registry.registerUtility(Session, IDBSession)
+
+    if not registry.queryUtility(IHorusUserClass):
+        registry.registerUtility(User, IHorusUserClass)
+
+    if not registry.queryUtility(IHorusActivationClass):
+        registry.registerUtility(Activation, IHorusActivationClass)
 
     settings = config.get_settings()
     key = settings['api.key']

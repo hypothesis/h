@@ -1,16 +1,17 @@
+import re
+
 import deform
 
-import horus.views
-from horus.views import BaseController
+from horus.views import AuthController, RegisterController
 
-from pyramid.httpexceptions import HTTPBadRequest, HTTPRedirection
+from pyramid.httpexceptions import HTTPRedirection
 from pyramid.view import view_config, view_defaults
 
-from h import schemas
+from h import schemas, views
 
 
 @view_defaults(context='h.resources.AppFactory', renderer='json')
-class AppController(BaseController):
+class AppController(views.BaseController):
     ajax_options = """{
       target: null,
       success: authSuccess
@@ -25,17 +26,16 @@ class AppController(BaseController):
     @view_config(name='auth')
     def auth(self):
         request = self.request
-        lm = request.layout_manager
+        context = request.context
         action = request.params.get('action', 'login')
+        controller = AuthController(request)
 
-        controller = horus.views.AuthController(request)
         form = controller.form
-        form.action = request.resource_path(request.context, 'auth', action)
+        form.action = request.resource_path(context, 'auth', action)
         form.css_class = "tab-pane"
         form.formid = 'auth'
         form.use_ajax = True
         form.ajax_options = self.ajax_options
-        lm.layout.add_form(form)
 
         if request.method == 'POST' and request.view_name == 'auth':
             result = getattr(controller, action)()
@@ -46,23 +46,24 @@ class AppController(BaseController):
                 return result
             return dict(auth=result)
 
+        lm = request.layout_manager
+        lm.layout.add_form(form)
+
         return dict(auth={'form': form.render()})
 
     @view_config(name='register')
     def register(self):
         request = self.request
         context = request.context
-        lm = request.layout_manager
         action = request.params.get('action', 'login')
+        controller = RegisterController(request)
 
-        controller = horus.views.RegisterController(request)
         form = controller.form
         form.action = request.resource_path(context, 'register', action)
         form.css_class = 'tab-pane'
         form.formid = 'register'
         form.use_ajax = True
         form.ajax_options = self.ajax_options
-        lm.layout.add_form(form)
 
         if request.method == 'POST' and request.view_name == 'register':
             result = controller.register()
@@ -73,13 +74,16 @@ class AppController(BaseController):
                 return result
             return dict(register=result)
 
+        lm = request.layout_manager
+        lm.layout.add_form(form)
+
         return dict(register={'form': form.render()})
 
     @view_config(name='persona')
     def persona(self):
         request = self.request
-        lm = request.layout_manager
         schema = schemas.PersonaSchema().bind(request=request)
+
         form = deform.Form(schema)
         form.action = request.view_name or 'persona'
         form.formid = 'persona'
@@ -91,15 +95,16 @@ class AppController(BaseController):
             if request.method == 'POST' and request.view_name == 'persona':
                 persona = form.validate(request.POST.items())
                 if persona.get('id', None) == -1:
-                    controller = horus.views.AuthController(request)
+                    controller = AuthController(request)
                     return controller.logout()
                 else:
                     # TODO: multiple personas
                     persona = None
-            lm.layout.add_form(form)
         except deform.exception.ValidationFailure as e:
-            lm.layout.add_form(e)
-            return dict(persona={'form': e.render()})
+            form = e
+
+        lm = request.layout_manager
+        lm.layout.add_form(form)
 
         if persona:
             return dict(persona={'form': form.render(persona)})
