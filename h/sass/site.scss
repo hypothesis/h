@@ -23,6 +23,17 @@ ol {
   }
 }
 
+.auth {
+  @extend .form-vertical;
+
+  button[name^="forgot"] {
+    @extend .btn-link;
+    float: right;
+  }
+
+  input { width: 100%; }
+}
+
 .content {
   padding: 1em;
 }
@@ -73,6 +84,8 @@ hgroup {
 */
 
 @media screen and (min-width: 30em) {
+  .auth { width: grid(4); }
+
   header {
     @include pie-clearfix;
     text-align: left;
@@ -89,7 +102,6 @@ hgroup {
 */
 
 @media screen and (min-width: 37.5em) {
-  .auth { width: grid(4); }
   .content { padding: 6em; }
 }
 

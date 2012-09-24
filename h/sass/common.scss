@@ -86,33 +86,6 @@ label {
   span.errorMsg { @extend .visuallyhidden; }
 }
 
-.auth {
-  a {
-    cursor: pointer;
-    text-decoration: underline;
-  }
-
-  form {
-    button[name^="forgot"] {
-      @extend .btn-link;
-      float: right;
-    }
-
-    input { width: 100%; }
-  }
-
-  div.section {
-    clear: both;
-    & > div {
-      display: inline-block;
-      width: 50%;
-    }
-    & > form { width: 100%; }
-  }
-
-  .right { text-align: right; }
-}
-
 .btn-link {
   @include box-shadow(none);
   @include reset-box-model;
@@ -124,6 +97,29 @@ label {
   color: $linkColor;
   position: static;
   &:hover { color: $linkColorHover; }
+}
+
+.dialog {
+  a.close {
+    line-height: 0;
+    padding: .4em;
+    position: absolute;
+    top: 1.5em;
+
+    &:hover {
+      outline: solid thin $grayLighter;
+    }
+
+    img {
+      height: .6em;
+      width: .6em;
+    }
+  }
+}
+
+.tab-pane {
+  display: none;
+  &.active { display: inherit !important; }
 }
 
 .red {

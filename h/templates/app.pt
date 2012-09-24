@@ -12,21 +12,17 @@
       ${structure: persona.form}
     </div>
     <div id="gutter">
-      <header class="auth">
+      <header class="dialog sheet">
         <a class="close" onclick="showAuth(false)"
            ><img src="${request.static_url('h:images/delete_1.png')}" /></a>
-        <ul class="right">
-          <li data-action="login">
-            <a onclick="$('#auth').clearForm()
-                        .attr('action', '?action=login')
-                        .submit()">Log in</a></li>
-          <li data-action="register">
-            <a onclick="$('#auth').clearForm()
-                        .attr('action', '?action=register')
-                        .submit()">Sign up</a></li>
+        <ul class="nav nav-pills right">
+          <li><a href="#auth" data-toggle="pill">Log in</a></li>
+          <li><a href="#register" data-toggle="pill">Sign up</a></li>
         </ul>
-        <tal:block define="form auth.form"
-                   metal:use-macro="blocks.macros['auth']" />
+        <div class="tab-content">
+          ${structure: layout.forms['auth'].render()}
+          ${structure: layout.forms['register'].render()}
+        </div>
       </header>
       <div id="wrapper">
       </div>
@@ -66,18 +62,6 @@
       }
 
       var setupAuth = function (cb) {
-        var action = decodeURIComponent(
-          (RegExp('action=(.+?)(&|$)').exec($('#auth').attr('action')) ||
-           [,'login']
-          )[1]
-        )
-        $('[data-action]')
-          .hide()
-          .filter(function () {
-            return $(this).data('action') != action
-          })
-          .show()
-
         // TODO: use less janky cookie stuff (and below)
         if (document.cookie.indexOf('auth_tkt=') != -1) {
           $('#persona').off('change mousedown').on('change', function () {
@@ -93,6 +77,7 @@
         } else {
           $('#persona').off('change mousedown').on('mousedown', function (e) {
             e.preventDefault()
+            $('a[href="#auth"]').tab('show')
             showAuth(true)
           })
           plugins.Permissions.setUser(null)
@@ -109,7 +94,13 @@
         var visible = !$('header').hasClass('hyp-collapsed')
         showAuth(false, function () {
           Object.getOwnPropertyNames(data).map(function (oid) {
-            if (data[oid].form) $('#' + oid).replaceWith(data[oid].form)
+            if (data[oid].form) {
+              var fragment = $('#' + oid)
+                , active = fragment.hasClass('active')
+                , form = $(data[oid].form)
+              fragment.replaceWith(form)
+              if (active) form.addClass('active')
+            }
           })
           deform.processCallbacks()
           setupAuth(function (auth) {

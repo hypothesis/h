@@ -28,31 +28,52 @@ class AppController(BaseController):
         lm = request.layout_manager
         action = request.params.get('action', 'login')
 
-        if action in ('activate', 'register'):
-            controller = horus.views.RegisterController(request)
-        elif action in ('login', 'logout'):
-            controller = horus.views.AuthController(request)
-        else:
-            raise HTTPBadRequest()
-
+        controller = horus.views.AuthController(request)
         form = controller.form
         form.action = request.resource_path(request.context, 'auth', action)
+        form.css_class = "tab-pane"
         form.formid = 'auth'
         form.use_ajax = True
         form.ajax_options = self.ajax_options
         lm.layout.add_form(form)
 
-        if request.method == 'POST':
-            if request.view_name == 'auth':
-                result = getattr(controller, action)()
-                if isinstance(result, dict):
-                    if 'errors' in result:
-                        result['errors'] = [str(e) for e in result['errors']]
-                else:
-                    return result
-                return dict(auth=result)
+        if request.method == 'POST' and request.view_name == 'auth':
+            result = getattr(controller, action)()
+            if isinstance(result, dict):
+                if 'errors' in result:
+                    result['errors'] = [str(e) for e in result['errors']]
+            else:
+                return result
+            return dict(auth=result)
 
         return dict(auth={'form': form.render()})
+
+    @view_config(name='register')
+    def register(self):
+        request = self.request
+        context = request.context
+        lm = request.layout_manager
+        action = request.params.get('action', 'login')
+
+        controller = horus.views.RegisterController(request)
+        form = controller.form
+        form.action = request.resource_path(context, 'register', action)
+        form.css_class = 'tab-pane'
+        form.formid = 'register'
+        form.use_ajax = True
+        form.ajax_options = self.ajax_options
+        lm.layout.add_form(form)
+
+        if request.method == 'POST' and request.view_name == 'register':
+            result = controller.register()
+            if isinstance(result, dict):
+                if 'errors' in result:
+                    result['errors'] = [str(e) for e in result['errors']]
+            else:
+                return result
+            return dict(register=result)
+
+        return dict(register={'form': form.render()})
 
     @view_config(name='persona')
     def persona(self):
@@ -67,15 +88,14 @@ class AppController(BaseController):
 
         persona = dict(id=0 if self.request.user else -1)
         try:
-            if request.method == 'POST':
-                if request.view_name == 'persona':
-                    persona = form.validate(request.POST.items())
-                    if persona.get('id', None) == -1:
-                        controller = horus.views.AuthController(request)
-                        return controller.logout()
-                    else:
-                        # TODO: multiple personas
-                        persona = None
+            if request.method == 'POST' and request.view_name == 'persona':
+                persona = form.validate(request.POST.items())
+                if persona.get('id', None) == -1:
+                    controller = horus.views.AuthController(request)
+                    return controller.logout()
+                else:
+                    # TODO: multiple personas
+                    persona = None
             lm.layout.add_form(form)
         except deform.exception.ValidationFailure as e:
             lm.layout.add_form(e)
@@ -94,14 +114,14 @@ class AppController(BaseController):
     @view_config(renderer='h:templates/app.pt')
     @view_config(renderer='json', xhr=True)
     def __call__(self):
-        request = self.request
-        lm = request.layout_manager
         result = {}
 
-        for name in ['auth', 'persona']:
+        for name in ['auth', 'persona', 'register']:
             subresult = getattr(self, name)()
             if isinstance(subresult, dict):
                 result.update(subresult)
+            else:
+                return subresult
 
         return result
 
