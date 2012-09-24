@@ -114,6 +114,7 @@ class AppController(BaseController):
     @view_config(renderer='h:templates/app.pt')
     @view_config(renderer='json', xhr=True)
     def __call__(self):
+        request = self.request
         result = {}
 
         for name in ['auth', 'persona', 'register']:
@@ -122,6 +123,10 @@ class AppController(BaseController):
                 result.update(subresult)
             else:
                 return subresult
+
+        result.update(
+            token_url=request.resource_url(request.root, 'api', 'access_token')
+        )
 
         return result
 

@@ -69,7 +69,7 @@
           })
           if (!plugins.Auth) {
             annotator.addPlugin('Auth', {
-              tokenUrl: '${request.resource_url(request.root, 'access_token')}'
+              tokenUrl: '${token_url}'
             })
           }
           plugins.Auth.withToken(plugins.Permissions._setAuthFromToken)
