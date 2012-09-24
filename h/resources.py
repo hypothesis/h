@@ -1,8 +1,13 @@
-import horus
+from horus import resources
+
+from pyramid.interfaces import ILocation
+from pyramid.security import Allow, Authenticated
 
 from webassets import Bundle
 from webassets.filter import register_filter
 from webassets.loaders import PythonLoader
+
+from zope.interface import implementer
 
 from h import api
 
@@ -141,36 +146,52 @@ def add_webassets(config):
         config.add_webasset(name, bundles[name])
 
 
-class BaseResource(object):
+@implementer(ILocation)
+class BaseResource(resources.BaseFactory):
     """Base Resource class from which all resources are derived."""
 
     __name__ = None
     __parent__ = None
 
-    def __init__(self, request):
-        self.request = request
 
+class InnerResource(BaseResource):
     def __getitem__(self, name):
         """
         While individual resources may override this method to customize
         the construction of sub-resources returned from traversal, make the
-        common case easy by treating any attributes that are subclasses of
-        BaseResource as a factory/constructor function for a sub-resource whose
-        path component (`__name__`) is that of the attribute.
+        common case easy by treating any attribute whose value is a class
+        implementing :class:`pyramid.interfaces.ILocation` as a factory
+        function for a sub-resource whose path component (`__name__`) is the
+        name of the attribute itself.
+
+        Any attribute which is an instance providing
+        :class:`pyramid.interfaces.ILocation` will be returned as is.
+
+        Attributes which are used as factories will replace themselves on the
+        instance by  reifying the constructed resource as the new attribute.
         """
 
-        factory = getattr(self, name, None)
+        factory_or_resource = getattr(self, name, None)
 
-        if factory and issubclass(factory, BaseResource):
-            inst = factory(self.request)
-            inst.__name__ = name
-            inst.__parent__ = self
-            return inst
+        if factory_or_resource:
+            if ILocation.implementedBy(factory_or_resource):
+                inst = factory_or_resource(self.request)
+                inst.__name__ = name
+                inst.__parent__ = self
+                setattr(self, name, inst)
+                return inst
+
+            if ILocation.providedBy(factory_or_resource):
+                return factory_or_resource
 
         raise KeyError(name)
 
 
-class APIFactory(BaseResource):
+class RootFactory(InnerResource, resources.RootFactory):
+    __name__ = ''
+
+
+class APIFactory(InnerResource):
 
     def __init__(self, request):
         super(APIFactory, self).__init__(request)
@@ -187,20 +208,16 @@ class APIFactory(BaseResource):
                 request.headers['x-annotator-auth-token'] = token
 
 
-class AppFactory(BaseResource):
+class AppFactory(InnerResource):
     def __init__(self, request):
         super(AppFactory, self).__init__(request)
 
 
-class RootFactory(BaseResource, horus.resources.RootFactory):
-    __name__ = ''
-    __parent__ = None
-
-    api = APIFactory
-    app = AppFactory
+RootFactory.api = APIFactory
+RootFactory.app = AppFactory
 
 
 def includeme(config):
     config.add_route('embed', '/embed.js')
-    config.add_route('index', '/', factory=RootFactory)
+    config.add_route('index', '/', factory='h.resources.RootFactory')
     add_webassets(config)
