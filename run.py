@@ -25,16 +25,15 @@ env['closer']()
 if __name__ == '__main__':
     """Runs the hypothes.is server.
 
-    The value of the 'HYPO_CONF' environment variable may be a path to a file
-    which is interpreted as an alternative paster configuration.
+    The value of the :envvar:`HYPO_CONF` environment variable may be a path to
+    a file which is interpreted as an alternative paster configuration.
 
     When invoked from the command line, this module uses waitress or wsgiref
     to serve the application. The included 'development.ini' file will launch
     the server using the paste built-in server. Alternatively, this module is
     also a valid gunicorn application module which can be started
-    via `gunicorn run`.
+    via :command:`gunicorn run`.
     """
-
     try:
         from functools import partial
         from waitress import serve
