@@ -40,7 +40,7 @@ class AppController(BaseController):
         form.formid = 'auth'
         form.use_ajax = True
         form.ajax_options = self.ajax_options
-        lm.layout.add_form('auth', form)
+        lm.layout.add_form(form)
 
         if request.method == 'POST':
             if request.view_name == 'auth':
@@ -76,9 +76,9 @@ class AppController(BaseController):
                     else:
                         # TODO: multiple personas
                         persona = None
-            lm.layout.add_form('persona', form)
+            lm.layout.add_form(form)
         except deform.exception.ValidationFailure as e:
-            lm.layout.add_form('persona', e)
+            lm.layout.add_form(e)
             return dict(persona={'form': e.render()})
 
         if persona:

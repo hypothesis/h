@@ -11,8 +11,10 @@ class BaseLayout(object):
         self.request = request
         self.forms = {}
 
-    def add_form(self, name, form):
-        self.forms[name] = form
+    def add_form(self, form):
+        if form.formid in self.forms:
+            raise ValueError('duplicate form id "%s"' % form.formid)
+        self.forms[form.formid] = form
 
     @reify
     def resources(self):
