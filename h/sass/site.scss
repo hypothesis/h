@@ -34,6 +34,12 @@ ol {
   input { width: 100%; }
 }
 
+.bookmarklet {
+  @extend .btn;
+  padding: .12em;
+  border: 1px dashed $gray;
+}
+
 .content {
   padding: 1em;
 }
@@ -47,11 +53,6 @@ ol {
   & > div {
     margin: .5em 0;
     width: 100%;
-  }
-
-  .bookmarklet {
-    @extend .btn;
-    border: 1px dashed $gray;
   }
 }
 

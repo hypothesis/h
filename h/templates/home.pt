@@ -21,9 +21,6 @@
             tal:repeat="message request.session.pop_flash()" />
     </div>
     <div id="toolbar">
-      <a class="btn bookmarklet"
-         href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
-         >Contribute</a>
     </div>
     <div id="home" class="content">
       <header>
@@ -51,8 +48,10 @@
           "reply" link to leave your own.</li>
         <li>Highlight any piece of text to leave an annotation of your own (try
           annotating these instructions).</li>
-        <li>Drag our bookmarklet to your bookmarks bar to annotate any page on
-          the Internet!</li>
+        <li>Use this bookmarklet to annotate any page on the Web:
+          <a class="btn bookmarklet"
+             href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
+             >Contribute</a></li>
       </ol>
     </div>
   </body>
