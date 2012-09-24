@@ -5,8 +5,6 @@
           metal:fill-slot="css_links"
           tal:attributes="href href"
           tal:repeat="href webassets(request, 'site_css') | []" />
-    <tal:block metal:define-slot="css_links" />
-    <tal:block metal:define-slot="js_links" />
   </head>
   <body metal:fill-slot="body">
     <div class="content">

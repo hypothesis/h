@@ -103,11 +103,6 @@ class AppController(BaseController):
             if isinstance(subresult, dict):
                 result.update(subresult)
 
-        result.update(
-            css_links=lm.layout.css_links,
-            js_links=lm.layout.js_links
-        )
-
         return result
 
 
