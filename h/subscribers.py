@@ -1,5 +1,4 @@
-from pyramid.events import subscriber
-from pyramid.events import BeforeRender
+from pyramid.events import subscriber, BeforeRender
 from pyramid.renderers import get_renderer
 
 
