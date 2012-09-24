@@ -104,7 +104,7 @@ def includeme(config):
 
     app.before_request(before_request)
 
-    # Configure the API view -- version 1 is just annotator.store proxied
+    # Configure the API view -- version 1 is just an annotator.store proxy
     config.add_view(wsgiapp2(app), context='h.resources.APIFactory', name='v1')
 
     # And pick up the token view
