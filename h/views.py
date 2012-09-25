@@ -77,6 +77,13 @@ def includeme(config):
     )
 
     config.add_view(
+        'horus.views.RegisterController',
+        attr='activate',
+        renderer='h:templates/auth.pt',
+        route_name='horus_activate'
+    )
+
+    config.add_view(
         'horus.views.ProfileController',
         attr='profile',
         renderer='h:templates/auth.pt',
