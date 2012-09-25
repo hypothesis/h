@@ -87,6 +87,11 @@ def includeme(config):
     app.register_blueprint(store.store)  # and register the store api.
 
     # Set up the models
+    settings = config.get_settings()
+    if 'es.host' in settings:
+        app.config['ELASTICSEARCH_HOST'] = settings['es.host']
+    if 'es.index' in settings:
+        app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
     es.init_app(app)
     with app.test_request_context():
         try:
