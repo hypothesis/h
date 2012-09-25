@@ -30,7 +30,7 @@ yepnope([
           limit: 1000,
           uri: uri
         },
-        prefix: '${request.resource_url(context, 'api', 'v1')}'
+        prefix: '${request.resource_url(context, 'api', 'current')}'
       })
       window.Annotator._instance = annotator;
       $(function () { annotator.consumer.update() })
