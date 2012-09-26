@@ -21,8 +21,8 @@
         google: {
           families: [
             'Merriweather',
-            'Source Sans Pro:latin,italic',
-            'PT Serif'
+            'Source+Sans+Pro:400,600:latin',
+            'PT+Serif'
           ]
         }
       };
