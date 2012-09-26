@@ -111,8 +111,7 @@ class Hypothesis extends Annotator
       else
         if @viewer.isShown() and @bucket == -1
           this._fillDynamicBucket()
-        else
-          this.show()
+        this.show()
     this
 
   _setupDynamicStyle: ->
@@ -147,6 +146,7 @@ class Hypothesis extends Annotator
     @heatmap.element.click =>
       @bucket = -1
       this._fillDynamicBucket()
+      this.show()
 
     @heatmap.subscribe 'updated', =>
       tabs = d3.select(document.body)
@@ -201,8 +201,7 @@ class Hypothesis extends Annotator
             if annotations?.length
               @bucket = bucket
               this.showViewer(annotations)
-            else
-              this.show()
+            this.show()
       tabs.exit().remove()
       tabs
         .style 'top', (d) =>
@@ -457,7 +456,6 @@ class Hypothesis extends Annotator
 
     @editor.hide()
     @viewer.show()
-    this.show()
 
   updateViewer: (annotations) =>
     existing = d3.select(@viewer.element[0]).datum()
