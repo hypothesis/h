@@ -325,6 +325,10 @@ form, .form-vertical {
       margin-top: 0;
     }
     & > .hyp-thread { overflow: hidden; }
+    & > .hyp-user {
+      display: run-in;
+      margin-right: .25em;
+    }
   }
 
 }
