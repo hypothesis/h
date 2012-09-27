@@ -276,21 +276,11 @@ form, .form-vertical {
   }
 }
 
-//TOPBAR
-//At the top of annotations mostly provides some clearfixng
-.topbar {
-  @include pie-clearfix;
-  margin-bottom: .25em;
-  .hyp-user {
-    float: left;
-    font-weight: bold;
-    text-decoration: underline;
-  }
-  .hyp-time {
-    float: right;
-    display: inline-block;
-    @include tertiarytext;
-  }
+//TIMESTAMP
+.hyp-time {
+  float: right;
+  display: inline-block;
+  @include tertiarytext;
 }
 
 
@@ -305,13 +295,13 @@ form, .form-vertical {
 //ANNOTATION DETAIL
 .hyp-detail {
   position: relative;
-  & > .topbar > .annotator-controls {
+  & > .annotator-controls {
     position: absolute;
     right: 0;
     z-index: 1;
   }
 
-  & > .topbar > .annotator-controls {
+  & > .annotator-controls {
     @include single-transition(opacity, .25s, ease-in-out);
     opacity: 0;
   }
@@ -319,7 +309,7 @@ form, .form-vertical {
   &.hyp-hover {
     @include smallshadow(2px, 2px, .2);
     z-index: 2;
-    & > .topbar > .annotator-controls {
+    & > .annotator-controls {
       opacity: 1;
     }
   }
@@ -342,6 +332,12 @@ form, .form-vertical {
 // Remove the expander from the top level annotation
 .hyp-paper > .hyp-threadexp {
   display: none;
+}
+
+.hyp-user {
+  margin-bottom: .25em;
+  font-weight: bold;
+  text-decoration: underline;
 }
 
 //EDITOR
