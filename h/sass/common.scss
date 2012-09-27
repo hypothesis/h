@@ -283,11 +283,11 @@ form, .form-vertical {
   @include tertiarytext;
 }
 
-
 //COMMON CLASSES (TODO: put into a class common to all annotations)
 .hyp-content {
   margin-bottom: .5em
 }
+
 .bottombar {
   @include pie-clearfix;
 }
@@ -314,7 +314,6 @@ form, .form-vertical {
     }
   }
 
-
   &.hyp-collapsed {
     & > .hyp-content {
       overflow: hidden;
@@ -330,7 +329,6 @@ form, .form-vertical {
       margin-right: .25em;
     }
   }
-
 }
 
 // Remove the expander from the top level annotation
