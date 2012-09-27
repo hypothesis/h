@@ -161,8 +161,11 @@ class Hypothesis extends Annotator
           buckets
 
       {highlights, offset} = d3.select(@heatmap.element[0]).datum()
+      height = $(window).outerHeight(true)
+      pad = height * .2
       tabs.enter().append('div')
         .classed('hyp-heatmap-tab', true)
+      tabs
         .on 'mousemove', =>
           unless @viewer.isShown() and @detail
             bucket = getBucket()
@@ -177,22 +180,18 @@ class Hypothesis extends Annotator
           d3.event.preventDefault()
           bucket = getBucket()
           if @heatmap.isUpper bucket
-            threshold = offset + @heatmap.index[bucket]
+            threshold = offset + @heatmap.index[0]
             next = highlights.reduce (next, hl) ->
               if next < hl.offset.top < threshold then hl.offset.top else next
-            , 0
-            pad = $(window).outerHeight(true) * .3
+            , threshold - height
             @provider.scrollTop next - pad
             @bucket = -1
             this._fillDynamicBucket()
           else if @heatmap.isLower bucket
-            threshold = offset + @heatmap.index[bucket+1]
+            threshold = offset + @heatmap.index[0] + pad
             next = highlights.reduce (next, hl) ->
-              if hl.offset.top < next and hl.offset.top > threshold
-                hl.offset.top
-              else next
-            , 1e6
-            pad = $(window).outerHeight(true) * .3
+              if threshold < hl.offset.top < next then hl.offset.top else next
+            , offset + height
             @provider.scrollTop next - pad
             @bucket = -1
             this._fillDynamicBucket()
