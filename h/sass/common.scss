@@ -99,21 +99,19 @@ label {
   &:hover { color: $linkColorHover; }
 }
 
-.dialog {
-  a.close {
-    line-height: 0;
-    padding: .4em;
-    position: absolute;
-    top: 1.5em;
+.close {
+  line-height: 0;
+  padding: .4em;
+  position: absolute;
+  top: 1.5em;
 
-    &:hover {
-      outline: solid thin $grayLighter;
-    }
+  &:hover {
+    outline: solid thin $grayLighter;
+  }
 
-    img {
-      height: .6em;
-      width: .6em;
-    }
+  img {
+    height: .6em;
+    width: .6em;
   }
 }
 
