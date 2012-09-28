@@ -274,6 +274,79 @@ form, .form-vertical {
   }
 }
 
+//TABS
+//This applies to tab bars
+
+.tabbar {
+  @include pie-clearfix;
+  padding-left: .5em;
+  padding-right: .5em;
+  padding-top: 5em;
+  div {
+    cursor: pointer;
+    float: left;
+    padding: .5em 1em;
+    padding-top: .25em;
+    margin-right: -.5em;
+    margin-bottom: 0px;
+    position: relative;
+  }
+
+  .bartab {
+    @include tabbox;
+    &.a-selected {
+      @include box-shadow(none);
+      color: #333;
+      font-weight: bold;
+      background: hsla(0, 0%, 100%, 1);
+      z-index: 90;
+    }
+  }
+}
+
+// .a-dropdown {
+//   @include linkbutton_right;
+//   display: inline;
+//   position: relative;
+//   background-image: url("../images/dropdown_1.png");
+ 
+//   button {
+//     margin: 0;
+//   }
+  
+//   ul {
+//     min-width: 100px;
+//     background: white;
+//     padding: .5em;
+//     padding-top: 0;
+//     margin: 0;
+//     display: none;
+//     position: absolute;
+//     top: 2em;
+//     left: .8em;
+//     z-index: 10;
+//   }
+  
+//   li {
+//     margin-top: .5em;
+//     display: block;
+//     opacity: .6;
+//     &.selected {
+//       opacity: 1;
+//     }
+    
+//     &:hover {
+//       opacity: 1;
+//     }
+//   }
+//   &:hover {
+//     // background: white;
+//     ul {
+//       display: block;
+//     }
+//   }
+// }
+
 //TOPBAR
 //At the top of annotations mostly provides some clearfixng
 .topbar {
