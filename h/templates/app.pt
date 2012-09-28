@@ -16,8 +16,8 @@
         <a class="close" onclick="showAuth(false)"
            ><img src="${request.static_url('h:images/delete_1.png')}" /></a>
         <ul class="nav nav-pills right">
-          <li><a href="#auth" data-toggle="pill">Log in</a></li>
-          <li><a href="#register" data-toggle="pill">Sign up</a></li>
+          <li><a href="#auth" class="btn" data-toggle="pill">Log in</a></li>
+          <li><a href="#register" class="btn" data-toggle="pill">Sign up</a></li>
         </ul>
         <div class="tab-content">
           ${structure: layout.forms['auth'].render()}
