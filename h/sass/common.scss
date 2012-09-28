@@ -350,6 +350,7 @@ label {
 .hyp-time {
   float: right;
   display: inline-block;
+  line-height: 2em;
   @include tertiarytext;
 }
 
