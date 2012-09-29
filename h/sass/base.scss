@@ -128,6 +128,22 @@ $em: 14 / 1em !default;
   }
 }
 
+@mixin tabbox {
+  @include box-shadow(2px -10px 13px -8px hsla(0, 0%, 0%, .1) inset);
+  background: hsla(0, 0%, 99%, 1);
+  border-top-right-radius: 2em 5em;
+  border-top-left-radius: 2em 5em;
+  color: #999;
+  border: 1px solid $grayLighter;
+  border-bottom: none;
+  &:hover {
+    background: white;
+  }
+  &:active {
+    @include box-shadow( none );
+  }
+}
+
 //ICON IMAGES
 @mixin icon_resets {
   background-repeat: no-repeat;

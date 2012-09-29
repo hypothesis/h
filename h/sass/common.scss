@@ -279,10 +279,8 @@ form, .form-vertical {
 
 .tabbar {
   @include pie-clearfix;
-  padding-left: .5em;
-  padding-right: .5em;
   padding-top: 5em;
-  div {
+  a {
     cursor: pointer;
     float: left;
     padding: .5em 1em;
@@ -290,17 +288,20 @@ form, .form-vertical {
     margin-right: -.5em;
     margin-bottom: 0px;
     position: relative;
+    text-decoration: none;
   }
 
-  .bartab {
-    @include tabbox;
-    &.a-selected {
+  .active {
+    .bartab {  
       @include box-shadow(none);
       color: #333;
       font-weight: bold;
       background: hsla(0, 0%, 100%, 1);
       z-index: 90;
     }
+  }
+  .bartab {
+    @include tabbox;
   }
 }
 
