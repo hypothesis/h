@@ -12,8 +12,8 @@
       ${structure: persona.form}
     </div>
     <div id="gutter">
-      <header class="sheet">
-        <a class="close" onclick="showAuth(false)"></a>
+      <header class="sheet bad">
+<!--         <a class="close" onclick="showAuth(false)"></a>
         <ul class="nav nav-pills right tabbar">
           <li><a href="#auth" class="bartab" data-toggle="pill">Log in</a></li>
           <li><a href="#register" class="bartab" data-toggle="pill">Sign up</a></li>
@@ -21,7 +21,8 @@
         <div class="tab-content form-vertical">
           ${structure: layout.forms['auth'].render()}
           ${structure: layout.forms['register'].render()}
-        </div>
+        </div> -->
+        For leisure the game that so many do play<br/>For a round of golf 'tis a beautiful day<br/>By the wide slow flowing river that crawls to the sea<br/>Men and women practice their strokes before their evening tea.
       </header>
       <div id="wrapper">
       </div>

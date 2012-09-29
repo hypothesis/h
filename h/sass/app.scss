@@ -85,7 +85,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include single-transition(all, .4s, 'ease-in-out');
   @include transform-origin(50%, 0);
   background: white;
-  border: solid thin $grayLighter;
+  border: solid 1px $grayLighter;
   margin-top: 2.5em;
   padding: 1em;
   z-index: 4;
@@ -112,7 +112,21 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     }
     & > form { width: 100%; }
   }
-
+  &.info {
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #98BED1;
+  }
+  &.good {
+    color: #468847;
+    background-color: #dff0d8;
+    border-color: #8DC98E;
+  }
+  &.bad {
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #F5A1A0;
+  }
 }
 
 #gutter {
