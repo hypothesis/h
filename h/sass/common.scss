@@ -122,16 +122,18 @@ label {
 
 .form-horizontal {
   display: inline-block;
-
   .controls, .control-group, div, fieldset,
   input, button, select, textarea {
     display: inline-block;
   }
-}
-
-form, .form-vertical {
   select, textarea, input, button {
     margin: .5em 0;
+  }
+}
+
+.form-vertical {
+  select, textarea, input, button {
+    margin-top: .75em;
   }
 }
 

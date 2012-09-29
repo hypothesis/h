@@ -18,7 +18,7 @@
           <li><a href="#auth" class="bartab" data-toggle="pill">Log in</a></li>
           <li><a href="#register" class="bartab" data-toggle="pill">Sign up</a></li>
         </ul>
-        <div class="tab-content">
+        <div class="tab-content form-vertical">
           ${structure: layout.forms['auth'].render()}
           ${structure: layout.forms['register'].render()}
         </div>
