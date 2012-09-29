@@ -88,8 +88,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   border: solid thin $grayLighter;
   margin-top: 2.5em;
   padding: 1em;
-  position: absolute;
-  width: 100%;
+  margin-left: 1em;
+  margin-right: 1em;
   z-index: 4;
 
   &.hyp-collapsed {
@@ -160,11 +160,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   .tab {
     @include icon("tri-left.png");
     display: inline-block;
-    width: 1.7em;
-    height: 1.7em;
-    margin: .3em;
-    margin-left: .2em;
-    margin-bottom: .4em;
+    width: 1.5em;
+    height: 1.5em;
+    margin: .4em;
     cursor: pointer;
   }
 
