@@ -105,7 +105,7 @@ class Hypothesis extends Annotator
     this
 
   _setupDocumentEvents: ->
-    $('#toolbar .tab').click =>
+    $('#toolbar .tri').click =>
       if @visible
         this.hide()
       else

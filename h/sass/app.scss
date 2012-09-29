@@ -153,7 +153,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
 
-  .tab {
+  .tri {
     @include icon("tri-left.png");
     display: inline-block;
     width: 1.5em;
@@ -163,7 +163,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   &.shown {
-    .tab {
+    .tri {
       @include icon("tri-right.png");
       margin-left: .3em;
     }

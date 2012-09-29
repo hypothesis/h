@@ -8,7 +8,7 @@
   </head>
   <body metal:fill-slot="body">
     <div id="toolbar">
-      <div class="tab"></div>
+      <div class="tri"></div>
       ${structure: persona.form}
     </div>
     <div id="gutter">
