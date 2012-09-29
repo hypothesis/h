@@ -13,8 +13,7 @@
     </div>
     <div id="gutter">
       <header class="dialog sheet">
-        <a class="close" onclick="showAuth(false)"
-           ><img src="${request.static_url('h:images/delete_1.png')}" /></a>
+        <a class="close" onclick="showAuth(false)"></a>
         <ul class="nav nav-pills right tabbar">
           <li><a href="#auth" class="bartab" data-toggle="pill">Log in</a></li>
           <li><a href="#register" class="bartab" data-toggle="pill">Sign up</a></li>

@@ -104,14 +104,13 @@ label {
   padding: .4em;
   position: absolute;
   top: 1.5em;
+  height: .6em;
+  width: .6em;
+  @include icon("delete_1.png");
+  opacity: .6;
 
   &:hover {
-    outline: solid thin $grayLighter;
-  }
-
-  img {
-    height: .6em;
-    width: .6em;
+    opacity: 1;
   }
 }
 
