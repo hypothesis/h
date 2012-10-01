@@ -77,22 +77,133 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 }
 
+
+
+// .hyp-heatmap-tab {
+//   @include user-select(none);
+//   color: rgb(238, 238, 238);
+//   cursor: pointer;
+//   left: 0px;
+//   position: fixed;
+//   text-align: center;
+//   text-decoration: none;
+//   text-shadow: 1px 1px 1px rgb(51, 51, 51);
+//   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+//   .svg {
+//     width: 100%;
+//     height: 100%;
+//   }
+//   .tab {
+//     fill: #666;
+//     stroke: black;
+//   }
+
+//   .insert {
+//     fill: #FFEA00;
+//     stroke: black;
+//   }
+
+//   .label {
+//     font-weight: bold;
+//     font-size: 13.1px;
+//     position: absolute;
+//   }
+
+//   &.emphasis {
+//     .insert {
+//       visibility: visible;
+//     }
+//   }
+
+//   &.lower, &.upper {
+//     width: 33.1px;
+//     height: 26.1px;
+//     .label {
+//       width: 100%;
+//     }
+//   }
+
+//   &.upper {
+//     .label {
+//       bottom: 1px;
+//     }
+//   }
+
+//   &.side {
+//     @include transition-property(transform, left);
+//     @include transition-duration(.5s, .2s);
+//     @include perspective(100px);
+//     left: -7px;
+//     height: 20.1px;
+//     width: 40.1px;
+//     .label {
+//       @include single-transition(transform, .5s);
+//       left: 10px;
+//       right: 2px;
+//       position: absolute;
+//       bottom: 1px;
+//     }
+//     &.flip {
+//       @include rotateY(180deg);
+//       .label {
+//         @include rotateY(180deg);
+//       }
+//       &:hover {
+//         @include rotateY(180deg);
+//         .label {
+//           @include rotateY(180deg);
+//         }
+//       }
+//     }
+//     &:hover {
+//       left: -5px;
+//     }
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//This class provides the more round cornered card that comes down from under things (like a sheet drying on the line?)
 .sheet {
   @include border-radius(.5em);
   @include box-shadow(5px 5px 40px hsla(0, 0%, 0%, .1));
   @include single-transition(all, .4s, 'ease-in-out');
   @include transform-origin(50%, 0);
   background: white;
-  border: solid thin $grayLighter;
+  border: solid 1px $grayLighter;
   margin-top: 2.5em;
-  padding: 2.5em 2em 1em;
+  padding: 1em;
+  z-index: 4;
   position: absolute;
   width: 100%;
-  z-index: 4;
+
 
   &.hyp-collapsed {
     @include rotateX(90deg);
     opacity: 0;
+  }
+
+  .close {
+    position: absolute;
+    top: 1.5em;
+    right: 1em;
   }
 
   div.section {
@@ -103,10 +214,21 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     }
     & > form { width: 100%; }
   }
-
-  .nav > .active { display: none; }
-
-  .right { text-align: right; }
+  &.info {
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #98BED1;
+  }
+  &.good {
+    color: #468847;
+    background-color: #dff0d8;
+    border-color: #8DC98E;
+  }
+  &.bad {
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #F5A1A0;
+  }
 }
 
 #gutter {
@@ -115,8 +237,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   height: 100%;
   margin-left: $heatmap-width + 10px;
   position: relative;
-
-  .dialog { @extend .sheet; }
 }
 
 #persona {
@@ -149,18 +269,17 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
 
-  .tab {
+  .tri {
     @include icon("tri-left.png");
     display: inline-block;
-    width: 1.7em;
-    height: 1.7em;
+    width: 1.5em;
+    height: 1.5em;
     margin: .3em;
-    margin-bottom: .4em;
     cursor: pointer;
   }
 
   &.shown {
-    .tab {
+    .tri {
       @include icon("tri-right.png");
     }
   }

@@ -8,18 +8,17 @@
   </head>
   <body metal:fill-slot="body">
     <div id="toolbar">
-      <div class="tab"></div>
+      <div class="tri"></div>
       ${structure: persona.form}
     </div>
     <div id="gutter">
-      <header class="dialog sheet">
-        <a class="close" onclick="showAuth(false)"
-           ><img src="${request.static_url('h:images/delete_1.png')}" /></a>
-        <ul class="nav nav-pills right">
-          <li><a href="#auth" data-toggle="pill">Log in</a></li>
-          <li><a href="#register" data-toggle="pill">Sign up</a></li>
+      <header class="sheet">
+        <a class="close" onclick="showAuth(false)"></a>
+        <ul class="nav nav-pills right tabbar">
+          <li><a href="#auth" class="bartab" data-toggle="pill">Log in</a></li>
+          <li><a href="#register" class="bartab" data-toggle="pill">Sign up</a></li>
         </ul>
-        <div class="tab-content">
+        <div class="tab-content form-vertical">
           ${structure: layout.forms['auth'].render()}
           ${structure: layout.forms['register'].render()}
         </div>
