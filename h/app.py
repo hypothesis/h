@@ -37,8 +37,11 @@ class AppController(views.BaseController):
         request = self.request
         context = request.context
         action = request.params.get('action', 'login')
-        controller = AuthController(request)
 
+        if action not in ['login', 'logout']:
+            raise HTTPBadRequest()
+
+        controller = AuthController(request)
         form = controller.form
         form.action = request.resource_path(context, 'auth', action)
         form.formid = 'auth'
@@ -64,8 +67,11 @@ class AppController(views.BaseController):
         request = self.request
         context = request.context
         action = request.params.get('action', 'register')
-        controller = RegisterController(request)
 
+        if action not in ['register', 'activate']:
+            raise HTTPBadRequest()
+
+        controller = RegisterController(request)
         form = controller.form
         form.action = request.resource_path(context, 'register', action)
         form.formid = 'register'
@@ -91,7 +97,6 @@ class AppController(views.BaseController):
         request = self.request
         context = request.context
         action = request.params.get('action', 'forgot')
-        controller = ForgotPasswordController(request)
 
         if action == 'forgot':
             schema = request.registry.getUtility(IHorusForgotPasswordSchema)
@@ -102,6 +107,7 @@ class AppController(views.BaseController):
         else:
             raise HTTPBadRequest()
 
+        controller = ForgotPasswordController(request)
         schema = schema().bind(request=self.request)
         form = form(schema)
 
