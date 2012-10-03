@@ -19,13 +19,22 @@
                  data-toggle="tab">Log in</a></li>
           <li><a data-target="#register-tab"
                  data-toggle="tab">Sign up</a></li>
+          <li><a data-target="#password-tab"
+                 data-toggle="tab">Claim username</a></li>
         </ul>
         <div class="tab-content form-vertical">
-          <div id="auth-tab" class="tab-pane">
-            ${structure: layout.forms['auth'].render()}
+          <div tal:repeat="name ['auth', 'register']"
+               tal:attributes="id '%s-tab' % name"
+               class="tab-pane">
+            ${structure: layout.forms[name].render()}
+            <div class="right">
+              <a href="#"
+                 onclick="$('a[data-target=&quot;#password-tab&quot;]')
+                          .tab('show')">Password help?</a>
+            </div>
           </div>
-          <div id="register-tab" class="tab-pane">
-            ${structure: layout.forms['register'].render()}
+          <div id="password-tab" class="tab-pane">
+            ${structure: layout.forms['password'].render()}
           </div>
         </div>
       </header>
@@ -48,6 +57,16 @@
         Heatmap: {}
       })
       var plugins = annotator.plugins
+
+      $('a[data-toggle="tab"]').on('shown', function(e) {
+        var target = $(e.target)
+          , related = $(e.relatedTarget)
+        $(target).addClass('active')
+        $(target.data('target')).addClass('active')
+        $(related).removeClass('active')
+        $(related.data('target')).removeClass('active')
+        focusFirstInput(target.data('target'))
+      })
 
       var showAuth = function (show, cb) {
         var $header = $('header'),

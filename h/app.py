@@ -2,9 +2,20 @@ import re
 
 import deform
 
-from horus.views import AuthController, RegisterController
+from horus.views import (
+    AuthController,
+    ForgotPasswordController,
+    RegisterController
+)
 
-from pyramid.httpexceptions import HTTPRedirection
+from horus import (
+    IHorusForgotPasswordForm,
+    IHorusResetPasswordForm,
+    IHorusForgotPasswordSchema,
+    IHorusResetPasswordSchema
+)
+
+from pyramid.httpexceptions import HTTPBadRequest, HTTPRedirection
 from pyramid.view import view_config, view_defaults
 
 from h import schemas, views
@@ -77,6 +88,44 @@ class AppController(views.BaseController):
 
         return dict(register={'form': form.render()})
 
+    @view_config(name='password')
+    def password(self):
+        request = self.request
+        context = request.context
+        action = request.params.get('action', 'forgot')
+        controller = ForgotPasswordController(request)
+
+        if action == 'forgot':
+            schema = request.registry.getUtility(IHorusForgotPasswordSchema)
+            form = request.registry.getUtility(IHorusForgotPasswordForm)
+        elif action == 'reset':
+            schema = request.registry.getUtility(IHorusResetPasswordSchema)
+            form = request.registry.getUtility(IHorusResetPasswordForm)
+        else:
+            raise HTTPBadRequest()
+
+        schema = schema().bind(request=self.request)
+        form = form(schema)
+
+        form.action = request.resource_path(context, 'password', action)
+        form.formid = 'password'
+        form.use_ajax = True
+        form.ajax_options = self.ajax_options
+
+        if request.method == 'POST' and request.view_name == 'password':
+            result = getattr(controller, '%s_password' % action)()
+            if isinstance(result, dict):
+                if 'errors' in result:
+                    result['errors'] = [str(e) for e in result['errors']]
+            else:
+                return result
+            return dict(register=result)
+
+        lm = request.layout_manager
+        lm.layout.add_form(form)
+
+        return dict(password={'form': form.render()})
+
     @view_config(name='persona')
     def persona(self):
         request = self.request
@@ -120,7 +169,7 @@ class AppController(views.BaseController):
         request = self.request
         result = {}
 
-        for name in ['auth', 'persona', 'register']:
+        for name in ['auth', 'password', 'persona', 'register']:
             subresult = getattr(self, name)()
             if isinstance(subresult, dict):
                 result.update(subresult)
