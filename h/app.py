@@ -1,5 +1,3 @@
-import re
-
 import deform
 
 from horus.views import (
