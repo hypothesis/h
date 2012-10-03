@@ -161,25 +161,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //This class provides the more round cornered card that comes down from under things (like a sheet drying on the line?)
 .sheet {
   @include border-radius(0 0 .5em .5em);
@@ -193,7 +174,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   z-index: 4;
   position: absolute;
   width: 100%;
-
 
   &.hyp-collapsed {
     @include rotateX(90deg);
