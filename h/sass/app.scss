@@ -184,7 +184,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .sheet {
   @include border-radius(.5em);
   @include box-shadow(5px 5px 40px hsla(0, 0%, 0%, .1));
-  @include single-transition(all, .4s, 'ease-in-out');
+  @include single-transition(all, .4s, ease-in-out);
   @include transform-origin(50%, 0);
   background: white;
   border: solid 1px $grayLighter;
