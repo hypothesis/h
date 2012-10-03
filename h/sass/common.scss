@@ -112,6 +112,10 @@ label {
   }
 }
 
+.right {
+  text-align: right;
+}
+
 .tab-pane {
   display: none;
   &.active { display: inherit !important; }

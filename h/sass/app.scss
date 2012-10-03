@@ -15,6 +15,7 @@ body {
   width: 100%;
 }
 
+header a { @include tertiarytext; }
 input { width: 100%; }
 svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
