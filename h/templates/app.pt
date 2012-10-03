@@ -58,6 +58,27 @@
       })
       var plugins = annotator.plugins
 
+      // https://github.com/Pylons/deform/pull/128
+      focusFirstInput = function (el) {
+        el = el || document.body
+        var input = $(el).find(':input')
+          .filter('[id ^= deformField]')
+          .filter('[type != hidden]')
+          .first()
+        if (input) {
+            var raw = input.get(0)
+            if (raw) {
+                if (raw.type === 'text' || raw.type === 'file' ||
+                    raw.type == 'password' || raw.type == 'text' ||
+                    raw.type == 'textarea') {
+                    if (raw.className != "hasDatepicker") {
+                        input.focus()
+                    }
+                }
+            }
+        }
+      }
+
       $('a[data-toggle="tab"]').on('shown', function(e) {
         var target = $(e.target)
           , related = $(e.relatedTarget)
@@ -74,8 +95,7 @@
         if (visible != show) {
           if (show) {
             $header.removeClass('hyp-collapsed')
-            // TODO: deform.js is broken -- it selects hidden fields
-            $('#auth input[type!="hidden"]').first().focus()
+            focusFirstInput($header.find('li.active'))
           } else {
             $header.addClass('hyp-collapsed')
           }
@@ -102,6 +122,7 @@
           $('#persona').off('change mousedown').on('mousedown', function (e) {
             e.preventDefault()
             $('a[data-target="#auth-tab"]').tab('show')
+            focusFirstInput('#auth-tab')
             showAuth(true)
           })
           plugins.Permissions.setUser(null)
@@ -127,6 +148,7 @@
             }
           })
           deform.processCallbacks()
+          deform.focusFirstInput('header .tab-pane.active')
           setupAuth(function (auth) {
             if (visible && !auth) showAuth(true)
           })
