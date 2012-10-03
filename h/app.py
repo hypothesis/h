@@ -32,7 +32,6 @@ class AppController(views.BaseController):
 
         form = controller.form
         form.action = request.resource_path(context, 'auth', action)
-        form.css_class = "tab-pane"
         form.formid = 'auth'
         form.use_ajax = True
         form.ajax_options = self.ajax_options
@@ -60,7 +59,6 @@ class AppController(views.BaseController):
 
         form = controller.form
         form.action = request.resource_path(context, 'register', action)
-        form.css_class = 'tab-pane'
         form.formid = 'register'
         form.use_ajax = True
         form.ajax_options = self.ajax_options

@@ -14,13 +14,19 @@
     <div id="gutter">
       <header class="sheet">
         <a class="close" onclick="showAuth(false)"></a>
-        <ul class="nav nav-pills right tabbar">
-          <li><a href="#auth" class="bartab" data-toggle="pill">Log in</a></li>
-          <li><a href="#register" class="bartab" data-toggle="pill">Sign up</a></li>
+        <ul class="nav nav-tabs">
+          <li><a data-target="#auth-tab"
+                 data-toggle="tab">Log in</a></li>
+          <li><a data-target="#register-tab"
+                 data-toggle="tab">Sign up</a></li>
         </ul>
         <div class="tab-content form-vertical">
-          ${structure: layout.forms['auth'].render()}
-          ${structure: layout.forms['register'].render()}
+          <div id="auth-tab" class="tab-pane">
+            ${structure: layout.forms['auth'].render()}
+          </div>
+          <div id="register-tab" class="tab-pane">
+            ${structure: layout.forms['register'].render()}
+          </div>
         </div>
       </header>
       <div id="wrapper">
@@ -76,7 +82,7 @@
         } else {
           $('#persona').off('change mousedown').on('mousedown', function (e) {
             e.preventDefault()
-            $('a[href="#auth"]').tab('show')
+            $('a[data-target="#auth-tab"]').tab('show')
             showAuth(true)
           })
           plugins.Permissions.setUser(null)

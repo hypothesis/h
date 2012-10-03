@@ -276,7 +276,7 @@ label {
 //TABS
 //This applies to tab bars
 
-.tabbar {
+.nav-tabs {
   @include pie-clearfix;
   a {
     cursor: pointer;
@@ -287,19 +287,15 @@ label {
     margin-bottom: 0px;
     position: relative;
     text-decoration: none;
+    @include tabbox;
   }
 
-  .active {
-    .bartab {  
-      @include box-shadow(none);
-      color: #333;
-      font-weight: bold;
-      background: hsla(0, 0%, 100%, 1);
-      z-index: 90;
-    }
-  }
-  .bartab {
-    @include tabbox;
+  .active a {
+    @include box-shadow(none);
+    color: #333;
+    font-weight: bold;
+    background: hsla(0, 0%, 100%, 1);
+    z-index: 90;
   }
 }
 
