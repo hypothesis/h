@@ -63,7 +63,7 @@ class AppController(views.BaseController):
     def register(self):
         request = self.request
         context = request.context
-        action = request.params.get('action', 'login')
+        action = request.params.get('action', 'register')
         controller = RegisterController(request)
 
         form = controller.form
@@ -73,7 +73,7 @@ class AppController(views.BaseController):
         form.ajax_options = self.ajax_options
 
         if request.method == 'POST' and request.view_name == 'register':
-            result = controller.register()
+            result = getattr(controller, action)()
             if isinstance(result, dict):
                 if 'errors' in result:
                     result['errors'] = [str(e) for e in result['errors']]
