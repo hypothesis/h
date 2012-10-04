@@ -20,7 +20,7 @@
           <li><a data-target="#register-tab"
                  data-toggle="tab">Sign up</a></li>
           <li><a data-target="#password-tab"
-                 data-toggle="tab">Claim username</a></li>
+                 data-toggle="tab">Recover account</a></li>
         </ul>
         <div class="tab-content form-vertical">
           <div tal:repeat="name ['auth', 'register']"
