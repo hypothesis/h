@@ -154,6 +154,7 @@ class Hypothesis extends Annotator
       this.show()
 
     @heatmap.subscribe 'updated', =>
+      # Creates tabs var by looking at all buckets on page.
       tabs = d3.select(document.body)
         .selectAll('div.hyp-heatmap-tab')
         .data =>
@@ -168,22 +169,32 @@ class Hypothesis extends Annotator
       {highlights, offset} = d3.select(@heatmap.element[0]).datum()
       height = $(window).outerHeight(true)
       pad = height * .2
+
+      # Enters into tabs var, and generates bucket pointers from them.
       tabs.enter().append('div')
         .classed('hyp-heatmap-tab', true)
       tabs
+
+        # Creates highlights corresponding to bucket when mouse is moved over tab
         .on 'mousemove', =>
           unless @viewer.isShown() and @detail
             bucket = getBucket()
             unless @heatmap.buckets[bucket]?.length then bucket = @bucket
             @provider.setActiveHighlights @heatmap.buckets[bucket]?.map (a) =>
               a.hash.valueOf()
+
+        # Gets rid of them after
         .on 'mouseout', =>
           unless @viewer.isShown() and @detail
             @provider.setActiveHighlights @heatmap.buckets[@bucket]?.map (a) =>
               a.hash.valueOf()
+
+        # Does one of a few things when a tab is clicked depending on type
         .on 'mouseup', =>
           d3.event.preventDefault()
           bucket = getBucket()
+
+          # If it's the upper tab, scroll to next bucket above
           if @heatmap.isUpper bucket
             threshold = offset + @heatmap.index[0]
             next = highlights.reduce (next, hl) ->
@@ -192,6 +203,8 @@ class Hypothesis extends Annotator
             @provider.scrollTop next - pad
             @bucket = -1
             this._fillDynamicBucket()
+
+          # If it's the lower tab, scroll to next bucket below
           else if @heatmap.isLower bucket
             threshold = offset + @heatmap.index[0] + pad
             next = highlights.reduce (next, hl) ->
@@ -200,14 +213,19 @@ class Hypothesis extends Annotator
             @provider.scrollTop next - pad
             @bucket = -1
             this._fillDynamicBucket()
+
+          # If it's neither of the above, load the current annotations into the
+          # viewer and show it
           else
             annotations = @heatmap.buckets[bucket]
-            if annotations?.length
-              @bucket = bucket
-              this.showViewer(annotations)
-            this.show()
+            @bucket = bucket
+            this.showViewer(annotations) # Loads proper annotations into bucket
+            this.show() # Shows sidebar
       tabs.exit().remove()
+
+      # Styles the tabs, adding the proper distance from top and classes.
       tabs
+        # Adds vert pos
         .style 'top', (d) =>
           "#{(@heatmap.index[d] + @heatmap.index[d+1]) / 2}px"
         .text((d) => @heatmap.buckets[d].length)
