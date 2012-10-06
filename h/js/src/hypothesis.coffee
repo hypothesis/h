@@ -42,10 +42,15 @@ class Hypothesis extends Annotator
             showAuth true
             @editor.hide()
             this.show()
+        # This guy does stuff when you "back out" of the interface. 
+        # (Currently triggered by a click on the source page.)
         back: =>
+          # If it's in the detail view, loads the bucket back up.
           if @detail
             this.showViewer(@heatmap.buckets[@bucket])
             this.publish('hostUpdated')
+          # If it's not in the detail view, the assumption is that it's in the
+          # bucket view and hides the whole interface.
           else
             this.hide()
         update: => this.publish 'hostUpdated'
@@ -206,6 +211,7 @@ class Hypothesis extends Annotator
         .style 'top', (d) =>
           "#{(@heatmap.index[d] + @heatmap.index[d+1]) / 2}px"
         .text((d) => @heatmap.buckets[d].length)
+        # Adds css class "upper" or "lower" depending on whether the tabs qualify.
         .classed('upper', @heatmap.isUpper)
         .classed('lower', @heatmap.isLower)
 
