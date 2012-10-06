@@ -65,7 +65,7 @@ class AppController(views.BaseController):
 
         return dict(auth={'form': form.render()})
 
-    @view_config(name='register')
+    @view_config(request_name='__formid__=register')
     def register(self):
         request = self.request
         context = request.context
