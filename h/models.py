@@ -5,12 +5,7 @@ from annotator.auth import DEFAULT_TTL
 
 from hem.interfaces import IDBSession
 
-from horus import (
-    get_user,
-
-    IHorusUserClass,
-    IHorusActivationClass,
-)
+from horus import get_user
 from horus.models import (
     BaseModel,
     ActivationMixin,
@@ -27,6 +22,7 @@ from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer, TypeDecorator, CHAR
 
+from h import interfaces
 
 class GUID(TypeDecorator):
     """Platform-independent GUID type.
@@ -120,11 +116,11 @@ def includeme(config):
     if not registry.queryUtility(IDBSession):
         registry.registerUtility(Session, IDBSession)
 
-    if not registry.queryUtility(IHorusUserClass):
-        registry.registerUtility(User, IHorusUserClass)
+    if not registry.queryUtility(interfaces.IUserClass):
+        registry.registerUtility(User, interfaces.IUserClass)
 
-    if not registry.queryUtility(IHorusActivationClass):
-        registry.registerUtility(Activation, IHorusActivationClass)
+    if not registry.queryUtility(interfaces.IActivationClass):
+        registry.registerUtility(Activation, interfaces.IActivationClass)
 
     settings = config.get_settings()
     key = settings['api.key']
