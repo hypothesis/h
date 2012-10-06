@@ -33,7 +33,7 @@ class AppController(views.BaseController):
         if request.method == 'POST':
             request.add_response_callback(self._handle_redirects)
 
-    @view_config(name='auth')
+    @view_config(request_param='__formid__=auth')
     def auth(self):
         request = self.request
         context = request.context
@@ -44,12 +44,11 @@ class AppController(views.BaseController):
 
         controller = AuthController(request)
         form = controller.form
-        form.action = request.resource_path(context, 'auth', action)
         form.formid = 'auth'
         form.use_ajax = True
         form.ajax_options = self.ajax_options
 
-        if request.method == 'POST' and request.view_name == 'auth':
+        if request.POST.get('__formid__', '') == 'auth':
             result = getattr(controller, action)()
             if isinstance(result, dict):
                 if 'errors' in result:
@@ -74,12 +73,11 @@ class AppController(views.BaseController):
 
         controller = RegisterController(request)
         form = controller.form
-        form.action = request.resource_path(context, 'register', action)
         form.formid = 'register'
         form.use_ajax = True
         form.ajax_options = self.ajax_options
 
-        if request.method == 'POST' and request.view_name == 'register':
+        if request.POST.get('__formid__', '') == 'register':
             result = getattr(controller, action)()
             if isinstance(result, dict):
                 if 'errors' in result:
@@ -93,7 +91,7 @@ class AppController(views.BaseController):
 
         return dict(register={'form': form.render()})
 
-    @view_config(name='password')
+    @view_config(request_param='__formid__=password')
     def password(self):
         request = self.request
         context = request.context
@@ -112,39 +110,41 @@ class AppController(views.BaseController):
         schema = schema().bind(request=self.request)
         form = form(schema)
 
-        form.action = request.resource_path(context, 'password', action)
         form.formid = 'password'
         form.use_ajax = True
         form.ajax_options = self.ajax_options
 
-        if request.method == 'POST' and request.view_name == 'password':
+        if request.POST.get('__formid__', '') == 'password':
             result = getattr(controller, '%s_password' % action)()
             if isinstance(result, dict):
                 if 'errors' in result:
                     result['errors'] = [str(e) for e in result['errors']]
             else:
                 return result
-            return dict(register=result)
+            return dict(password=result)
 
         lm = request.layout_manager
         lm.layout.add_form(form)
 
         return dict(password={'form': form.render()})
 
-    @view_config(name='persona')
+    @view_config(request_param='__formid__=persona')
     def persona(self):
         request = self.request
         schema = schemas.PersonaSchema().bind(request=request)
 
-        form = deform.Form(schema)
-        form.action = request.view_name or 'persona'
-        form.formid = 'persona'
-        form.use_ajax = True
-        form.ajax_options = self.ajax_options
+        form = deform.Form(
+            schema,
+            formid='persona',
+            use_ajax=True,
+            ajax_options=self.ajax_options
+        )
 
-        persona = dict(id=0 if self.request.user else -1)
+        lm = request.layout_manager
+        lm.layout.add_form(form)
+
         try:
-            if request.method == 'POST' and request.view_name == 'persona':
+            if request.POST.get('__formid__', '') == 'persona':
                 persona = form.validate(request.POST.items())
                 if persona.get('id', None) == -1:
                     controller = AuthController(request)
@@ -153,15 +153,10 @@ class AppController(views.BaseController):
                     # TODO: multiple personas
                     persona = None
         except deform.exception.ValidationFailure as e:
-            form = e
-
-        lm = request.layout_manager
-        lm.layout.add_form(form)
-
-        if persona:
-            return dict(persona={'form': form.render(persona)})
-        else:
             return dict(persona={'form': form.render()})
+        else:
+            persona = dict(id=0 if request.user else -1)
+            return dict(persona={'form': form.render(persona)})
 
     def _handle_redirects(self, request, response):
         if isinstance(response, HTTPRedirection):
