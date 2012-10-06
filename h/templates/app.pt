@@ -7,13 +7,13 @@
           tal:repeat="href webassets(request, 'app_css') | []" />
   </head>
   <body metal:fill-slot="body">
-    <div id="toolbar">
+    <div id="toolbar" class="form-inline">
       <div class="tri"></div>
       ${structure: persona.form}
     </div>
     <div id="gutter">
       <header class="sheet">
-        <a class="close" onclick="showAuth(false)"></a>
+        <a class="close" onclick="showAuth(false)">&times;</a>
         <ul class="nav nav-tabs">
           <li><a data-target="#auth-tab"
                  data-toggle="tab">Log in</a></li>
@@ -108,7 +108,7 @@
       var setupAuth = function (cb) {
         // TODO: use less janky cookie stuff (and below)
         if (document.cookie.indexOf('auth_tkt=') != -1) {
-          $('#persona').off('change mousedown').on('change', function () {
+          $('#persona').off('change click').on('change', function () {
             $(this).submit()
           })
           if (!plugins.Auth) {
@@ -119,10 +119,14 @@
           plugins.Auth.withToken(plugins.Permissions._setAuthFromToken)
           if (cb) cb(true)
         } else {
-          $('#persona').off('change mousedown').on('mousedown', function (e) {
-            e.preventDefault()
-            $('a[data-target="#auth-tab"]').tab('show')
-            focusFirstInput('#auth-tab')
+          $('#persona span').off('click').on('click', function (e) {
+            $('.sheet .nav a[data-target]')
+              .first()
+              .tab('show')
+              .each(function () {
+                var target = $(this).data('target')
+                focusFirstInput(target)
+              })
             showAuth(true)
           })
           plugins.Permissions.setUser(null)

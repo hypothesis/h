@@ -92,6 +92,7 @@ templates = Bundle(
 
 # CSS specific to the application
 app_css = Bundle(
+    Bundle('deform_bootstrap:static/deform_bootstrap.css'),
     Bundle(
         'h:sass/app.scss',
         debug=False,

@@ -87,6 +87,7 @@ $em: 14 / 1em !default;
   border-radius: .2em;
   font-family: "Source Sans Pro", "Open Sans", sans-serif;
   font-size: 1em;
+  height: auto !important; // bootstrap override
   padding: .33em .5em;
   &:focus {
     outline: 0;
@@ -103,7 +104,7 @@ $em: 14 / 1em !default;
     inset 0 .2em 0 rgba(255, 255, 255, .2),
     0 .05em .1em rgba(0, 0, 0, .08));
   @include plainform;
-  color: black;
+  color: $gray;
   cursor: pointer;
   display: inline-block;
   padding: .4em .9em .5em;
@@ -114,7 +115,9 @@ $em: 14 / 1em !default;
   &:hover {
     @include background-image(
       linear-gradient(top, #fefefe 0%, #f4f4f4 50%, #e2e2e2 51%, #fdfdfd 100%));
+    background-position: 0;
     border-color: $grayLight $grayLight $gray;
+    color: $gray;
   }
 
   &:active {
