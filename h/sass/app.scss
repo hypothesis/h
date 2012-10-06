@@ -223,42 +223,32 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   position: relative;
 }
 
-#persona {
-  text-align: right;
-
-  select {
-    cursor: pointer;
-  }
-}
-
 //H BAR
 #toolbar {
   @include clearfix;
   @include smallshadow;
   background: white;
   border: 1px solid $grayLighter;
+  border-right: 0;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
-  display: table;
-  left: 1px;
+  line-height: 1.2;
   margin-top: .5em;
+  padding: .3em;
   padding-right: 1em;
   position: absolute;
   width: 100%;
   z-index: 5;
 
   & > * {
-    display: table-cell;
-    vertical-align: middle;
+    display: inline-block;
+    vertical-align: text-bottom;
   }
-
 
   .tri {
     @include icon("tri-left.png");
-    display: inline-block;
-    width: 1.5em;
-    height: 1.5em;
-    margin: .3em;
+    width: 1.2em;
+    height: 1.2em;
     cursor: pointer;
   }
 
@@ -266,6 +256,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     .tri {
       @include icon("tri-right.png");
     }
+  }
+
+  #persona {
+    float: right;
+    text-align: right;
   }
 }
 
