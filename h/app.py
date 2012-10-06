@@ -96,6 +96,31 @@ class AppController(views.BaseController):
 
         return dict(register={'form': form.render()})
 
+    @view_config(request_param='__formid__=reset')
+    def reset(self):
+        request = self.request
+        context = request.context
+
+        schema = schemas.SecurityCodeSchema().bind(request=self.request)
+        form = deform.Form(schema, buttons=('Log in',))
+
+        form.formid = 'reset'
+        form.use_ajax = True
+        form.ajax_options = self.ajax_options
+
+        if request.POST.get('__formid__', '') == 'reset':
+            # if isinstance(result, dict):
+            #     if 'errors' in result:
+            #         result['errors'] = [str(e) for e in result['errors']]
+            # else:
+            #     return result
+            return dict(reset=result)
+
+        lm = request.layout_manager
+        lm.layout.add_form(form)
+
+        return dict(reset={'form': form.render()})
+
     @view_config(request_param='__formid__=password')
     def password(self):
         request = self.request
@@ -176,7 +201,7 @@ class AppController(views.BaseController):
         request = self.request
         result = {}
 
-        for name in ['auth', 'password', 'persona', 'register']:
+        for name in ['auth', 'password', 'persona', 'register', 'reset']:
             subresult = getattr(self, name)()
             if isinstance(subresult, dict):
                 result.update(subresult)
