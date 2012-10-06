@@ -135,7 +135,7 @@
         }
       }
 
-      var authSuccess = function (data) {
+      var afterRequest = function (data) {
         var visible = !$('header').hasClass('hyp-collapsed')
         showAuth(false, function () {
           Object.getOwnPropertyNames(data).map(function (oid) {

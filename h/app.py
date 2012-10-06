@@ -17,13 +17,14 @@ from pyramid.httpexceptions import HTTPBadRequest, HTTPRedirection
 from pyramid.view import view_config, view_defaults
 
 from h import schemas, views
+from h.messages import _
 
 
 @view_defaults(context='h.resources.AppFactory', renderer='json')
 class AppController(views.BaseController):
     ajax_options = """{
       target: null,
-      success: authSuccess
+      success: afterRequest
     }"""
 
     def __init__(self, request):
