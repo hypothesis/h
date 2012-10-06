@@ -1,3 +1,4 @@
+import colander
 import deform
 
 from horus.views import (
@@ -49,9 +50,11 @@ class AppController(views.BaseController):
 
         if request.POST.get('__formid__', '') == 'auth':
             result = getattr(controller, action)()
+            error = request.session.pop_flash('error')
             if isinstance(result, dict):
-                if 'errors' in result:
-                    result['errors'] = [str(e) for e in result['errors']]
+                if error:
+                    form.error = colander.Invalid(form.schema, error[0])
+                    result = {'form': form.render()}
             else:
                 return result
             return dict(auth=result)
@@ -77,9 +80,11 @@ class AppController(views.BaseController):
 
         if request.POST.get('__formid__', '') == 'register':
             result = getattr(controller, action)()
+            error = request.session.pop_flash('error')
             if isinstance(result, dict):
-                if 'errors' in result:
-                    result['errors'] = [str(e) for e in result['errors']]
+                if error:
+                    form.error = colander.Invalid(form.schema, error[0])
+                    result = {'form': form.render()}
             else:
                 return result
             return dict(register=result)
