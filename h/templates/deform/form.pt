@@ -25,7 +25,7 @@
       <p class="error">${field.errormsg}</p>
     </div>
 
-    <div class="form-actions">
+    <div tal:condition="field.buttons" class="form-actions">
       <tal:block repeat="button field.buttons">
         <button
             tal:attributes="disabled button.disabled"
