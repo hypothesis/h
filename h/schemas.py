@@ -10,10 +10,10 @@ class PersonaSchema(pyramid_deform.CSRFSchema):
         colander.Integer(),
         widget=colander.deferred(
             lambda node, kw: deform.widget.SelectWidget(
-                values=(
-                    api.personas(kw['request']) +
-                    [(-1, 'Sign out' if kw['request'].user else 'Sign in')]
-                )
-            )
+                values=api.personas(kw['request']),
+                css_class='dropdown-menu pull-right',
+                template='tinyman'
+            ),
         ),
+        missing=-1
     )
