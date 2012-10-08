@@ -24,6 +24,7 @@ from sqlalchemy.types import Integer, TypeDecorator, CHAR
 
 from h import interfaces
 
+
 class GUID(TypeDecorator):
     """Platform-independent GUID type.
 
