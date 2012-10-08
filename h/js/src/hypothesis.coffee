@@ -169,6 +169,9 @@ class Hypothesis extends Annotator
       # Enters into tabs var, and generates bucket pointers from them.
       tabs.enter().append('div')
         .classed('hyp-heatmap-tab', true)
+
+      tabs.exit().remove()
+
       tabs
 
         # Creates highlights corresponding to bucket when mouse is moved over tab
@@ -215,7 +218,6 @@ class Hypothesis extends Annotator
             @bucket = bucket
             this.showViewer(annotations) # Loads proper annotations into bucket
             this.show() # Shows sidebar
-      tabs.exit().remove()
 
       # Styles the tabs, adding the proper distance from top and classes.
       tabs
