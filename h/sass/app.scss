@@ -208,14 +208,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     pointer-events: none;
   }
 
-  div.section {
-    clear: both;
-    & > div {
-      display: inline-block;
-      width: 50%;
-    }
-    & > form { width: 100%; }
-  }
   &.info {
     color: #3a87ad;
     background-color: #d9edf7;
@@ -239,6 +231,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   height: 100%;
   margin-left: $heatmap-width + 10px;
   position: relative;
+}
+
+#auth-tab > ul.pull-right,
+#register-tab > ul.pull-right {
+  text-align: right;
 }
 
 //H BAR
