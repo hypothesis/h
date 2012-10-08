@@ -165,29 +165,47 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .nav a[data-target="#password-tab"] { display: none; }
 .nav .active a[data-target="#password-tab"] { display: initial; }
 
-//This class provides the more round cornered card that comes down from under things (like a sheet drying on the line?)
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  @include rotateX(90deg);
+  position: absolute;
+  min-width: 0;
+  opacity: 0;
+  padding: .5em;
+  pointer-events: none;
+}
+
+.open {
+  & > .dropdown-menu {
+    @include rotateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .sheet {
+  border: solid 1px $grayLighter;
+  margin-top: 2em;
+  padding: 1em;
+  position: absolute;
+  width: 100%;
+}
+
+.sheet, .dropdown-menu {
   @include border-radius(0 0 .5em .5em);
   @include box-shadow(5px 5px 40px hsla(0, 0%, 0%, .1));
   @include single-transition(all, .4s, ease-in-out);
   @include transform-origin(50%, 0);
   background: white;
-  border: solid 1px $grayLighter;
-  margin-top: 2.5em;
-  padding: 1em;
   z-index: 4;
-  position: absolute;
-  width: 100%;
 
   &.hyp-collapsed {
     @include rotateX(90deg);
     opacity: 0;
-  }
-
-  .close {
-    position: absolute;
-    top: 1.5em;
-    right: 1em;
+    pointer-events: none;
   }
 
   div.section {
@@ -225,7 +243,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //H BAR
 #toolbar {
-  @include clearfix;
   @include smallshadow;
   background: white;
   border: 1px solid $grayLighter;

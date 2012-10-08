@@ -7,13 +7,13 @@
           tal:repeat="href webassets(request, 'app_css') | []" />
   </head>
   <body metal:fill-slot="body">
-    <div id="toolbar">
+    <div id="toolbar" class="form-inline">
       <div class="tri"></div>
-      ${structure: persona.form}
+      <div class="pull-right">${structure: persona.form}</div>
     </div>
     <div id="gutter">
       <header class="sheet">
-        <a class="close" onclick="showAuth(false)"></a>
+        <a class="close" onclick="showAuth(false)">&times;</a>
         <ul class="nav nav-tabs">
           <li><a data-target="#auth-tab"
                  data-toggle="tab">Log in</a></li>
@@ -27,7 +27,7 @@
                tal:attributes="id '%s-tab' % name"
                class="tab-pane">
             ${structure: layout.forms[name].render()}
-            <div class="right">
+            <div class="pull-right">
               <a href="#"
                  onclick="$('a[data-target=&quot;#password-tab&quot;]')
                           .tab('show')">Password help?</a>
