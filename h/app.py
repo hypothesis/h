@@ -2,6 +2,7 @@ import colander
 import deform
 
 from horus.views import (
+    authenticated,
     AuthController,
     ForgotPasswordController,
     RegisterController
@@ -93,6 +94,54 @@ class AppController(views.BaseController):
         lm.layout.add_form(form)
 
         return dict(register={'form': form.render()})
+
+    @view_config(request_param='__formid__=reset')
+    def reset(self):
+        request = self.request
+
+        schema = schemas.ActivationCodeSchema().bind(request=self.request)
+        form = deform.Form(schema, buttons=('Log in',))
+
+        form.formid = 'reset'
+        form.use_ajax = True
+        form.ajax_options = self.ajax_options
+
+        appstruct = None
+
+        if request.POST.get('__formid__', '') == 'reset':
+            controls = request.POST.items()
+            print controls
+            try:
+                appstruct = form.validate(controls)
+            except deform.ValidationFailure as e:
+                result = {'form': e.render()}
+            else:
+                code = appstruct['code']
+                activation = self.Activation.get_by_code(request, code)
+                if activation:
+                    user = self.User.get_by_activation(request, activation)
+
+                    if user:
+                        user.set_password(appstruct['Password'])
+                        self.db.add(user)
+                        self.db.delete(activation)
+
+                        return authenticated(request, user.pk)
+
+                form.error = colander.Invalid(
+                    form.schema,
+                    _('This activation code is not valid.')
+                )
+
+        lm = request.layout_manager
+        lm.layout.add_form(form)
+
+        if appstruct:
+            result = {'form': form.render(appstruct)}
+        else:
+            result = {'form': form.render()}
+
+        return dict(reset=result)
 
     @view_config(request_param='__formid__=password')
     def password(self):

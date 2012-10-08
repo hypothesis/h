@@ -162,8 +162,16 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //   }
 // }
 
-.nav a[data-target="#password-tab"] { display: none; }
-.nav .active a[data-target="#password-tab"] { display: initial; }
+// Hidden tabs
+.nav a[data-target="#password-tab"],
+.nav a[data-target="#reset-tab"] {
+  display: none;
+}
+
+.nav .active a[data-target="#password-tab"],
+.nav .active a[data-target="#reset-tab"] {
+  display: initial;
+}
 
 .dropdown {
   position: relative;
