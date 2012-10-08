@@ -166,7 +166,7 @@ class Hypothesis extends Annotator
       height = $(window).outerHeight(true)
       pad = height * .2
 
-      # Enters into tabs var, and generates bucket pointers from them.
+      # Enters into tabs var, and generates bucket pointers from them
       tabs.enter().append('div')
         .classed('hyp-heatmap-tab', true)
 
@@ -174,7 +174,15 @@ class Hypothesis extends Annotator
 
       tabs
 
-        # Creates highlights corresponding to bucket when mouse is moved over tab
+        .style 'top', (d) =>
+          "#{(@heatmap.index[d] + @heatmap.index[d+1]) / 2}px"
+
+        .text((d) => @heatmap.buckets[d].length)
+
+        .classed('upper', @heatmap.isUpper)
+        .classed('lower', @heatmap.isLower)
+
+        # Creates highlights corresponding bucket when mouse is hovered
         .on 'mousemove', (bucket) =>
           unless @viewer.isShown() and @detail
             unless @heatmap.buckets[bucket]?.length then bucket = @bucket
@@ -211,23 +219,12 @@ class Hypothesis extends Annotator
             @bucket = -1
             this._fillDynamicBucket()
 
-          # If it's neither of the above, load the current annotations into the
-          # viewer and show it
+          # If it's neither of the above, load the bucket into the viewer
           else
             annotations = @heatmap.buckets[bucket]
             @bucket = bucket
-            this.showViewer(annotations) # Loads proper annotations into bucket
-            this.show() # Shows sidebar
-
-      # Styles the tabs, adding the proper distance from top and classes.
-      tabs
-        # Adds vert pos
-        .style 'top', (d) =>
-          "#{(@heatmap.index[d] + @heatmap.index[d+1]) / 2}px"
-        .text((d) => @heatmap.buckets[d].length)
-        # Adds css class "upper" or "lower" depending on whether the tabs qualify.
-        .classed('upper', @heatmap.isUpper)
-        .classed('lower', @heatmap.isLower)
+            this.showViewer(annotations)
+            this.show()
 
     this
 
