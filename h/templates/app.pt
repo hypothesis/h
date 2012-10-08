@@ -79,14 +79,9 @@
         }
       }
 
-      $('a[data-toggle="tab"]').on('shown', function(e) {
-        var target = $(e.target)
-          , related = $(e.relatedTarget)
-        $(target).addClass('active')
-        $(target.data('target')).addClass('active')
-        $(related).removeClass('active')
-        $(related.data('target')).removeClass('active')
-        focusFirstInput(target.data('target'))
+      $('a[data-toggle]').on('shown', function(e) {
+        var target = $(e.target).data('target')
+        focusFirstInput(target)
       })
 
       var showAuth = function (show, cb) {
@@ -108,7 +103,7 @@
       var setupAuth = function (cb) {
         // TODO: use less janky cookie stuff (and below)
         if (document.cookie.indexOf('auth_tkt=') != -1) {
-          $('#persona').off('change click').on('change', function () {
+          $('#persona').off('change').on('change', function () {
             $(this).submit()
           })
           if (!plugins.Auth) {

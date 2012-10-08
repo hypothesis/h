@@ -17,7 +17,7 @@
      '${field.oid}',
      function(oid) {
        var $field = $('#' + oid)
-       $field.find('.dropdown-menu > li').on('click', function (event) {
+       $field.find('.dropdown-menu > li > a').on('click', function (event) {
          $field.find(':input').attr('value', $(event.target).data('value'))
          $field.change()
        })
