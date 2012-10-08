@@ -144,10 +144,6 @@ class Hypothesis extends Annotator
           if @visible and @viewer.isShown() and @bucket == -1 and not @detail
             this._fillDynamicBucket()
 
-    getBucket = (event) =>
-      [x, y] = d3.mouse(@heatmap.element[0])
-      bucket = d3.bisect(@heatmap.index, y) - 1
-
     @heatmap.element.click =>
       @bucket = -1
       this._fillDynamicBucket()
@@ -176,9 +172,8 @@ class Hypothesis extends Annotator
       tabs
 
         # Creates highlights corresponding to bucket when mouse is moved over tab
-        .on 'mousemove', =>
+        .on 'mousemove', (bucket) =>
           unless @viewer.isShown() and @detail
-            bucket = getBucket()
             unless @heatmap.buckets[bucket]?.length then bucket = @bucket
             @provider.setActiveHighlights @heatmap.buckets[bucket]?.map (a) =>
               a.hash.valueOf()
@@ -190,9 +185,8 @@ class Hypothesis extends Annotator
               a.hash.valueOf()
 
         # Does one of a few things when a tab is clicked depending on type
-        .on 'mouseup', =>
+        .on 'mouseup', (bucket) =>
           d3.event.preventDefault()
-          bucket = getBucket()
 
           # If it's the upper tab, scroll to next bucket above
           if @heatmap.isUpper bucket
