@@ -124,6 +124,7 @@ class Hypothesis extends Annotator
 
   _setupHeatmap: () ->
     @heatmap = @plugins.Heatmap
+    tabs = null
 
     # Update the heatmap when certain events are pubished
     events = [
@@ -148,6 +149,7 @@ class Hypothesis extends Annotator
       @bucket = -1
       this._fillDynamicBucket()
       this.show()
+      tabs?.classed('flip', (d) => @bucket == d)
 
     @heatmap.subscribe 'updated', =>
       tabs = d3.select(document.body)
