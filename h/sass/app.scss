@@ -39,127 +39,90 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //HEATMAP TABS
 .heatmap-tab {
   @include user-select(none);
-  background-image: url("../images/side_tab.svg");
-  background-position: center 1.025em;
-  background-repeat: no-repeat;
-  background-size: 100% 1.4em;
+  @include transition-property(transform, left);
+  @include transition-duration(1s, .2s);
+  @include perspective(100px);
   color: rgb(238, 238, 238);
   cursor: pointer;
-  font-weight: bold;
-  font-size: .8em;
-  left: 2px;
-  margin-top: (1.4 + 2) / 2 * -1em; // TODO: Less janking v-align
-  padding: 1em 0;
+  left: -7px;
   position: fixed;
-  text-align: center;
-  text-decoration: none;
-  text-shadow: 1px 1px 1px rgb(51, 51, 51);
-  width: $heatmap-width + 8px;
+  height: 20.1px;
+  width: 40.1px;
   vertical-align: middle;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  text-align: center;
 
-  &:hover { left: 0; }
+  .svg {
+    width: 100%;
+    height: 100%;
+    background-image: url("../images/side_tab.svg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+
+  .label {
+    font-weight: bold;
+    font-size: 13.1px;
+    position: absolute;
+    text-decoration: none;
+    text-shadow: 1px 1px 1px rgb(51, 51, 51);
+    @include single-transition(transform, 1s);
+    left: 10px;
+    right: 2px;
+    position: absolute;
+    bottom: 1px;
+  }
+
+  &:hover {
+    left: -5px;
+  }
 
   &.lower, &.upper {
-    background-size: 100% 2em;
-    margin-top: -1em;
-    &:hover { left: 2px; }
+    left: 0;
+    width: 33.1px;
+    height: 26.1px;
+    .label {
+      left: 0;
+      right: 0;
+    }
+
+    &:hover {
+      left: 0px;
+    }
+  }
+  
+  &.upper {
+    .svg {
+      background-image: url("../images/up_tab.svg");
+    }
+    .label {
+      bottom: 1px;
+    }
+    &:hover {
+      margin-top: -2px;
+    }
   }
 
   &.lower {
-    background-image: url("../images/down_tab.svg");
-    background-position: center .955em; // 1em + .45em in svg (TODO: crop)
+    .svg {
+      background-image: url("../images/down_tab.svg");
+    }
+    .label {
+      top: 1px;
+    }
+    &:hover {
+      margin-top: 2px;
+    }
   }
-
-  &.upper {
-    background-image: url("../images/up_tab.svg");
-    background-position: center .455em; // 1em - .545em in svg (TODO: crop)
+  &.flip {
+    @include rotateY(180deg);
+    .label {
+      @include rotateY(180deg);
+    }
   }
 }
 
-
-
-// .heatmap-tab {
-//   @include user-select(none);
-//   color: rgb(238, 238, 238);
-//   cursor: pointer;
-//   left: 0px;
-//   position: fixed;
-//   text-align: center;
-//   text-decoration: none;
-//   text-shadow: 1px 1px 1px rgb(51, 51, 51);
-//   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-//   .svg {
-//     width: 100%;
-//     height: 100%;
-//   }
-//   .tab {
-//     fill: #666;
-//     stroke: black;
-//   }
-
-//   .insert {
-//     fill: #FFEA00;
-//     stroke: black;
-//   }
-
-//   .label {
-//     font-weight: bold;
-//     font-size: 13.1px;
-//     position: absolute;
-//   }
-
-//   &.emphasis {
-//     .insert {
-//       visibility: visible;
-//     }
-//   }
-
-//   &.lower, &.upper {
-//     width: 33.1px;
-//     height: 26.1px;
-//     .label {
-//       width: 100%;
-//     }
-//   }
-
-//   &.upper {
-//     .label {
-//       bottom: 1px;
-//     }
-//   }
-
-//   &.side {
-//     @include transition-property(transform, left);
-//     @include transition-duration(.5s, .2s);
-//     @include perspective(100px);
-//     left: -7px;
-//     height: 20.1px;
-//     width: 40.1px;
-//     .label {
-//       @include single-transition(transform, .5s);
-//       left: 10px;
-//       right: 2px;
-//       position: absolute;
-//       bottom: 1px;
-//     }
-//     &.flip {
-//       @include rotateY(180deg);
-//       .label {
-//         @include rotateY(180deg);
-//       }
-//       &:hover {
-//         @include rotateY(180deg);
-//         .label {
-//           @include rotateY(180deg);
-//         }
-//       }
-//     }
-//     &:hover {
-//       left: -5px;
-//     }
-//   }
-// }
 
 // Hidden tabs
 .nav a[data-target="#password-tab"],
