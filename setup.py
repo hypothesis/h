@@ -1,8 +1,15 @@
 from setuptools import setup, find_packages
 
+import versioneer
+
+versioneer.versionfile_source = 'h/_version.py'
+versioneer.versionfile_build = '_version.py'
+versioneer.tag_prefix = 'v'
+versioneer.parentdir_prefix = 'h-'
+
 setup(
     name = 'h',
-    version = '0.0.1',
+    version = versioneer.get_version(),
     packages = find_packages(),
 
     install_requires = [
@@ -47,5 +54,7 @@ setup(
         'zest.releaser.prereleaser.middle': [
             'prepare=h.scripts:prepare'
         ]
-    }
+    },
+
+    cmdclass = versioneer.get_cmdclass()
 )
