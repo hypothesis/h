@@ -103,7 +103,7 @@
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
   &.annotator-collapsed {
-    margin-left: -$heatmap-width - 10px;
+    margin-left: -$heatmap-width - 17px;
   }
 }
 
@@ -118,7 +118,7 @@
   .annotator-frame {
     width: 99%;
     margin-left: -99%;
-    &.annotator-collapsed { width: $heatmap-width + 10px; }
+    &.annotator-collapsed { width: $heatmap-width + 17px; }
   }
 }
 
@@ -145,7 +145,7 @@
   .annotator-frame {
     @include single-transition(margin-left, .4s);
     width: 428px + $heatmap-width + 10px;
-    margin-left: -428px - $heatmap-width - 10px;
+    margin-left: -428px - $heatmap-width - 17px;
     &.annotator-collapsed { width: inherit; }
   }
 }
