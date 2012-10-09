@@ -150,7 +150,6 @@ class Hypothesis extends Annotator
       this.show()
 
     @heatmap.subscribe 'updated', =>
-      # Creates tabs var by looking at all buckets on page.
       tabs = d3.select(document.body)
         .selectAll('div.hyp-heatmap-tab')
         .data =>
