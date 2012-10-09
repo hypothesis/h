@@ -177,7 +177,8 @@ class Hypothesis extends Annotator
         .style 'top', (d) =>
           "#{(@heatmap.index[d] + @heatmap.index[d+1]) / 2}px"
 
-        .text((d) => @heatmap.buckets[d].length)
+        .html (d) =>
+          "<div class='label'>#{@heatmap.buckets[d].length}</div><div class='svg'></div>"
 
         .classed('upper', @heatmap.isUpper)
         .classed('lower', @heatmap.isLower)
