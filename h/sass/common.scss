@@ -103,6 +103,7 @@ label {
   float: right;
   font-size: 1.4em;
   font-weight: bold;
+  line-height: 1;
   color: $black;
   text-shadow: 0 1px 0 rgba(255,255,255,1);
   opacity: .2;
@@ -315,16 +316,14 @@ label {
   @include pie-clearfix;
 
   & > li > a {
+    @include tabbox;
     cursor: pointer;
     float: left;
-    line-height: 1;
-    padding: .5em 1em;
-    padding-top: .25em;
+    padding: .33em 1em;
     margin-right: -.5em;
     margin-bottom: 0px;
     position: relative;
     text-decoration: none;
-    @include tabbox;
   }
 
   & > .active > a {

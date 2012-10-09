@@ -124,6 +124,7 @@ class Hypothesis extends Annotator
 
   _setupHeatmap: () ->
     @heatmap = @plugins.Heatmap
+    tabs = null
 
     # Update the heatmap when certain events are pubished
     events = [
@@ -148,9 +149,9 @@ class Hypothesis extends Annotator
       @bucket = -1
       this._fillDynamicBucket()
       this.show()
+      tabs?.classed('flip', (d) => @bucket == d)
 
     @heatmap.subscribe 'updated', =>
-      # Creates tabs var by looking at all buckets on page.
       tabs = d3.select(document.body)
         .selectAll('div.hyp-heatmap-tab')
         .data =>
@@ -177,7 +178,8 @@ class Hypothesis extends Annotator
         .style 'top', (d) =>
           "#{(@heatmap.index[d] + @heatmap.index[d+1]) / 2}px"
 
-        .text((d) => @heatmap.buckets[d].length)
+        .html (d) =>
+          "<div class='label'>#{@heatmap.buckets[d].length}</div><div class='svg'></div>"
 
         .classed('upper', @heatmap.isUpper)
         .classed('lower', @heatmap.isLower)
@@ -225,6 +227,8 @@ class Hypothesis extends Annotator
             @bucket = bucket
             this.showViewer(annotations)
             this.show()
+
+          tabs.classed('flip', (d) => @bucket == d)
 
     this
 
