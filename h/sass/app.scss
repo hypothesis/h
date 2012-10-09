@@ -28,7 +28,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .annotator-heatmap {
   background: hsla(0, 0, 0, .1);
   border: solid thin rgba($grayLighter, .4);
-  left: 10px;
+  left: 17px;
   height: 100%;
   position: fixed;
   top: 0;
@@ -44,7 +44,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include perspective(100px);
   color: rgb(238, 238, 238);
   cursor: pointer;
-  left: -7px;
+  left: 0px;
   position: fixed;
   height: 20.1px;
   width: 40.1px;
@@ -75,11 +75,12 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   &:hover {
-    left: -5px;
+    left: 2px;
   }
 
   &.lower, &.upper {
-    left: 0;
+    @include single-transition(margin-top, .2s);
+    left: 7px;
     width: 33.1px;
     height: 26.1px;
     .label {
@@ -88,7 +89,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     }
 
     &:hover {
-      left: 0px;
+      left: 7px;
     }
   }
   
@@ -177,7 +178,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   background: url('../images/noise_1.png');
   background-attachment: fixed;
   height: 100%;
-  margin-left: $heatmap-width + 10px;
+  margin-left: $heatmap-width + 17px;
   position: relative;
 }
 
@@ -202,6 +203,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   text-align: right;
   width: 100%;
   z-index: 5;
+  left: 7px;
 
   & > div {
     display: inline-block;
