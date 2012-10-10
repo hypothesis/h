@@ -8,11 +8,11 @@ versioneer.tag_prefix = 'v'
 versioneer.parentdir_prefix = 'h-'
 
 setup(
-    name = 'h',
-    version = versioneer.get_version(),
-    packages = find_packages(),
+    name='h',
+    version=versioneer.get_version(),
+    packages=find_packages(),
 
-    install_requires = [
+    install_requires=[
         'annotator>=0.7.6',
         'deform_bootstrap>=0.2.1',
         'horus>=0.9.8',
@@ -24,18 +24,18 @@ setup(
         'velruse>=1.0',
     ],
 
-    author = 'Hypothes.is Project & contributors',
-    maintainer = 'Randall Leeds',
-    maintainer_email = 'tilgovi@hypothes.is',
-    description = 'The Internet. Peer-reviewed.',
-    long_description = """A platform for collaborative evaluation of information.""",
-    license = 'Simplified (2-Clause) BSD License',
-    keywords = 'annotation web javascript',
+    author='Hypothes.is Project & contributors',
+    maintainer='Randall Leeds',
+    maintainer_email='tilgovi@hypothes.is',
+    description='The Internet. Peer-reviewed.',
+    long_description="A platform for collaborative evaluation of information.",
+    license='Simplified (2-Clause) BSD License',
+    keywords='annotation web javascript',
 
-    url = 'http://hypothes.is/',
-    download_url = 'https://github.com/hypothesis/h',
+    url='http://hypothes.is/',
+    download_url='https://github.com/hypothesis/h',
 
-    classifiers = [
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
@@ -44,10 +44,10 @@ setup(
         'Programming Language :: Python'
     ],
 
-    include_package_data = True,
-    zip_safe = False,
+    include_package_data=True,
+    zip_safe=False,
 
-    entry_points = {
+    entry_points={
         'paste.app_factory': [
             'main=h:main'
         ],
@@ -56,5 +56,5 @@ setup(
         ]
     },
 
-    cmdclass = versioneer.get_cmdclass()
+    cmdclass=versioneer.get_cmdclass()
 )
