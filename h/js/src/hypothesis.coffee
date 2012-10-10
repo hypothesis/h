@@ -182,6 +182,9 @@ class Hypothesis extends Annotator
         .classed('upper', @heatmap.isUpper)
         .classed('lower', @heatmap.isLower)
 
+        .style 'display', (d) =>
+          if (@heatmap.buckets[d].length is 0) then 'none' else ''
+
         # Creates highlights corresponding bucket when mouse is hovered
         .on 'mousemove', (bucket) =>
           unless @viewer.isShown() and @detail
