@@ -41,9 +41,13 @@ def get_consumer(request):
 
 
 def personas(request):
+    result = []
     if request.user:
-        return list(enumerate([request.user.user_name]))
-    return []
+        result.append({
+            'username': request.user.user_name,
+            'provider': request.host
+        })
+    return list(enumerate(result))
 
 
 @view_config(context='h.resources.APIFactory', name='access_token',
