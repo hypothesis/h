@@ -377,11 +377,17 @@ class Hypothesis extends Annotator
           .classed('hyp-excerpt', true)
         .append('blockquote')
       excerpts.exit().remove()
+
       excerpts
         .select('blockquote').html (d) =>
-          d.message.annotation.quote
-            .replace(/\u00a0/g, ' ')  # replace &nbsp;
-            .substring(0, 180).split(" ").slice(0, -1).join(" ") + "...<a id='clickForMore'>more</a>" # truncate
+          chars = 180
+          x = d.message.annotation.quote.replace(/\u00a0/g, ' ')  # replace &nbsp;
+
+          if x.length >= chars
+            x.substring(0, chars).split(" ").slice(0, -1)
+            .join(" ") + "...<a id='clickForMore'>more</a>" # truncate
+          else
+            x
 
       $('#clickForMore').click =>
         excerpts
