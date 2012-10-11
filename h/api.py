@@ -10,36 +10,6 @@ from pyramid.wsgi import wsgiapp2
 from h import messages, models
 
 
-def get_consumer(request):
-    if not request.params:
-        settings = request.registry.settings
-
-        key = settings['api.key']
-        secret = settings.get('api.secret')
-        ttl = settings.get('api.ttl')
-
-        consumer = models.Consumer.get_by_key(key)
-        if consumer is None and secret:
-            consumer = models.Consumer(key)
-            consumer.secret = secret
-            consumer.ttl = ttl
-    else:
-        consumer = None
-        for name in [
-            'client_id',
-            'client_secret',
-            'code',
-            'state'
-        ]:
-            if name not in request.params:
-                msg = '%s "%s".' % (messages.MISSING_PARAMETER, name)
-                raise HTTPBadRequest(msg)
-
-        raise NotImplementedError('OAuth provider not implemented yet.')
-
-    return consumer
-
-
 def personas(request):
     result = []
     if request.user:
@@ -55,21 +25,38 @@ def personas(request):
 def token(request):
     """Get an API token for the logged in user."""
 
-    if not request.user:
-        msg = messages.NOT_LOGGED_IN
-        raise HTTPForbidden(msg)
+    if request.method == 'POST':  # OAuth2 access token endpoint
+        for name in [
+            'client_id',
+            'client_secret',
+            'code',
+            'state'
+        ]:
+            if name not in request.params:
+                msg = '%s "%s".' % (messages.MISSING_PARAMETER, name)
+                raise HTTPBadRequest(msg)
 
-    consumer = request.consumer
-    # TODO make this deal with oid+realms, oauth etc
-    user_id = 'acct:%s@%s' % (request.user.user_name, request.host)
+        raise NotImplementedError('OAuth provider not implemented yet.')
 
-    message = {
-        'userId': user_id,
-        'consumerKey': str(consumer.key),
-        'ttl': consumer.ttl,
-    }
+    else:  # Annotator token endpoint
+        if not request.user:
+            msg = messages.NOT_LOGGED_IN
+            raise HTTPForbidden(msg)
 
-    return auth.encode_token(message, consumer.secret)
+        settings = request.registry.settings
+        key = settings['api.key']
+        consumer = models.Consumer.get_by_key(key)
+        assert(consumer)
+
+        user_id = 'acct:%s@%s' % (request.user.user_name, request.host)
+
+        message = {
+            'userId': user_id,
+            'consumerKey': str(consumer.key),
+            'ttl': consumer.ttl,
+        }
+
+        return auth.encode_token(message, consumer.secret)
 
 
 def includeme(config):
@@ -81,11 +68,6 @@ def includeme(config):
         api.key: 00000000-0000-0000-0000-000000000000
 
     """
-
-    # Configure a reified request property for easy access to the API consumer
-    # represented by the application or the request. See
-    # :class:`h.models.Consumer` for details about this object.
-    config.set_request_property(get_consumer, 'consumer', reify=True)
 
     app = Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
