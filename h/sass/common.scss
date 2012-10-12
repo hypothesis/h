@@ -341,7 +341,6 @@ blockquote {
 
 //TABS
 //This applies to tab bars
-
 .nav-tabs {
   @include pie-clearfix;
   margin: 0 .5em;
@@ -367,49 +366,6 @@ blockquote {
     z-index: 90;
   }
 }
-
-// .a-dropdown {
-//   @include linkbutton_right;
-//   display: inline;
-//   position: relative;
-//   background-image: url("../images/dropdown_1.png");
- 
-//   button {
-//     margin: 0;
-//   }
-  
-//   ul {
-//     min-width: 100px;
-//     background: white;
-//     padding: .5em;
-//     padding-top: 0;
-//     margin: 0;
-//     display: none;
-//     position: absolute;
-//     top: 2em;
-//     left: .8em;
-//     z-index: 10;
-//   }
-  
-//   li {
-//     margin-top: .5em;
-//     display: block;
-//     opacity: .6;
-//     &.selected {
-//       opacity: 1;
-//     }
-    
-//     &:hover {
-//       opacity: 1;
-//     }
-//   }
-//   &:hover {
-//     // background: white;
-//     ul {
-//       display: block;
-//     }
-//   }
-// }
 
 //TIMESTAMP
 .hyp-time {
