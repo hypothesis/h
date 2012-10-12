@@ -128,8 +128,16 @@ label {
 }
 
 .tab-pane {
+  background: $bodyBackground;
+  border: solid thin $grayLighter;
   display: none;
-  &.active { display: inherit !important; }
+  margin-top: -1px;  // Pull up and under tabs
+  padding: 1em;
+  position: relative;
+
+  &.active {
+    display: inherit !important;
+  }
 }
 
 .red {
@@ -314,6 +322,7 @@ label {
 
 .nav-tabs {
   @include pie-clearfix;
+  margin: 0 .5em;
 
   & > li > a {
     cursor: pointer;
