@@ -118,7 +118,6 @@
   .annotator-frame {
     width: 99%;
     margin-left: -99%;
-    &.annotator-collapsed { width: $heatmap-width + 10px; }
   }
 }
 
@@ -146,7 +145,6 @@
     @include single-transition(margin-left, .4s);
     width: 428px + $heatmap-width + 10px;
     margin-left: -428px - $heatmap-width - 10px;
-    &.annotator-collapsed { width: inherit; }
   }
 }
 
