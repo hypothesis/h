@@ -1,9 +1,9 @@
 import colander
 import deform
-import pyramid_deform
 
 from h import api
 from horus import schemas
+from pyramid_deform import CSRFSchema
 
 
 class ActivationCodeSchema(schemas.ResetPasswordSchema):
@@ -13,7 +13,7 @@ class ActivationCodeSchema(schemas.ResetPasswordSchema):
     )
 
 
-class PersonaSchema(pyramid_deform.CSRFSchema):
+class PersonaSchema(CSRFSchema):
     id = colander.SchemaNode(
         colander.Integer(),
         widget=colander.deferred(
