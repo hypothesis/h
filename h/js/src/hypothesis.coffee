@@ -379,21 +379,21 @@ class Hypothesis extends Annotator
       excerpts.exit().remove()
 
       excerpts
-        .select('blockquote').html (d) =>
+        .select('blockquote').each (d) ->
           chars = 180
-          x = d.message.annotation.quote.replace(/\u00a0/g, ' ')  # replace &nbsp;
-
-          if x.length >= chars
-            x.substring(0, chars).split(" ").slice(0, -1)
-            .join(" ") + "...<a id='clickForMore'>more</a>" # truncate
+          quote = d.message.annotation.quote.replace(/\u00a0/g, ' ')  # replace &nbsp;
+          if quote.length >= chars
+            d3.select(this)
+              .html(quote.substring(0, quote.lastIndexOf(' ', 180)) + "...<a class='clickForMore'>more</a>")
+              .on 'click', ->
+                d3.event.stopPropagation()
+                d3.event.preventDefault()
+                if d3.select(d3.event.target).classed('clickForMore')
+                  d3.select(this).html(quote + "<a class='clickForLess'>less</a>")
+                if d3.select(d3.event.target).classed('clickForLess')
+                  d3.select(this).html(quote.substring(0, quote.lastIndexOf(' ', 180)) + "...<a class='clickForMore'>more</a>")
           else
-            x
-
-      $('#clickForMore').click =>
-        excerpts
-          .select('blockquote').html (d) =>
-            d.message.annotation.quote
-              .replace(/\u00a0/g, ' ')  # replace &nbsp;
+            d3.select(this).html(quote)
 
 
       highlights = []
