@@ -133,3 +133,5 @@ def includeme(config):
         if not consumer and not secret:
             consumer = Consumer(key=key, secret=secret, ttl=ttl)
             Session().add(consumer)
+
+    registry.consumer = consumer
