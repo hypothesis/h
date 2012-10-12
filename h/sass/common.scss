@@ -289,7 +289,7 @@ label {
     bottom: -.1em;
   }
 
-  #clickForMore {
+  .clickForMore, .clickForLess {
     font-size: .9em;
     font-family: $sansFontFamily;
     float: right;
