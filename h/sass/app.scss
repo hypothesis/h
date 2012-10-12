@@ -173,28 +173,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   display: initial;
 }
 
-.dropdown {
-  position: relative;
-}
-
-.dropdown-menu {
-  @include rotateX(90deg);
-  background: white;
-  position: absolute;
-  min-width: 0;
-  opacity: 0;
-  padding: .5em;
-  pointer-events: none;
-}
-
-.open {
-  & > .dropdown-menu {
-    @include rotateX(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
 .sheet {
   background: url('../images/noise_1.png');
   background-attachment: fixed;

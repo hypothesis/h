@@ -296,14 +296,24 @@ label {
 }
 
 //DROPDOWNS
+.dropdown {
+  position: relative;
+}
+
 .dropdown-menu {
+  @include border-radius(0 0 .5em .5em);
+  @include rotateX(90deg);
   @include smallshadow;
+  background: $white;
   border: solid 1px $grayLighter;
   border-top: 0;
   left: 0;
   float: left;
   list-style: none;
+  min-width: 0;
+  opacity: 0;
   padding: .5em;
+  pointer-events: none;
   position: absolute;
   top: 100%;
 
@@ -311,6 +321,14 @@ label {
   &.pull-right {
     right: 0;
     left: auto;
+  }
+}
+
+.open {
+  & > .dropdown-menu {
+    @include rotateX(0);
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 
