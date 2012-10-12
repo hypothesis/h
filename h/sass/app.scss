@@ -179,6 +179,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 .dropdown-menu {
   @include rotateX(90deg);
+  background: white;
   position: absolute;
   min-width: 0;
   opacity: 0;
@@ -195,6 +196,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 .sheet {
+  background: url('../images/noise_1.png');
+  background-attachment: fixed;
   border: solid 1px $grayLighter;
   margin-top: 2em;
   padding-top: 1em;
@@ -207,7 +210,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include box-shadow(5px 5px 40px hsla(0, 0%, 0%, .1));
   @include single-transition(all, .4s, ease-in-out);
   @include transform-origin(50%, 0);
-  background: white;
   z-index: 4;
 
   &.hyp-collapsed {
