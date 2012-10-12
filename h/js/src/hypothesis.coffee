@@ -384,14 +384,14 @@ class Hypothesis extends Annotator
           quote = d.message.annotation.quote.replace(/\u00a0/g, ' ')  # replace &nbsp;
           if quote.length >= chars
             d3.select(this)
-              .html(quote.substring(0, quote.lastIndexOf(' ', 180)) + "...<a class='clickForMore'>more</a>")
+              .html(quote.substring(0, quote.lastIndexOf(' ', 180)) + "...<a href='#' class='clickForMore'>more</a>")
               .on 'click', ->
                 d3.event.stopPropagation()
                 d3.event.preventDefault()
                 if d3.select(d3.event.target).classed('clickForMore')
-                  d3.select(this).html(quote + "<a class='clickForLess'>less</a>")
+                  d3.select(this).html(quote + "<a href='#' class='clickForLess'>less</a>")
                 if d3.select(d3.event.target).classed('clickForLess')
-                  d3.select(this).html(quote.substring(0, quote.lastIndexOf(' ', 180)) + "...<a class='clickForMore'>more</a>")
+                  d3.select(this).html(quote.substring(0, quote.lastIndexOf(' ', 180)) + "...<a href='#' class='clickForMore'>more</a>")
           else
             d3.select(this).html(quote)
 
