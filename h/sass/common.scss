@@ -251,9 +251,7 @@ label {
   top: .8em;
   left: -($threadexp-width / 2);
   outline: 1px dotted #aaa;
-  background-image: url("../images/minus_1.png");
-  background-size: 100% 100%;
-  background-position: center;
+  @include icon("minus_1.png");
 
   .hyp-collapsed > & {
     background-image: url("../images/plus_1.png");
