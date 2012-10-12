@@ -258,21 +258,25 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   .tinyman {
-    float: right;
-    display: inline-block;
-    height: 1.5em;
     margin-right: 1em;
     border-left: 1px solid $grayLighter;
-    padding-left: .3em;
-    opacity: .5;
-    img {
-      height: 98%;
+    border-right: 1px solid $grayLighter;
+    padding: 0 .3em;
+    .avatar {
       border-radius: 2px;
     }
-    a {
-      vertical-align: top;
+    .dropdown-toggle {
       @include linkbutton_right;
       background-image: url("../images/dropdown_1.png");
+      .provider {
+        color: $grayLight;
+        display: none;
+      }
+      &:hover {
+        .provider {
+          display: inline;
+        }
+      }
     }
   }
 }
