@@ -26,7 +26,7 @@ p {
 em { font-style: italic; }
 
 html {
-  font-size: $baseFontSize / 16 * 1em;
+  font-size: $baseFontSize / 18 * 1em;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -261,9 +261,10 @@ label {
   margin: 1em 0;
 
   blockquote {
+    @include pie-clearfix;
     color: $gray;
     font-family: "Merriweather";
-    font-size: 1.1em;
+    font-size: 1em;
     margin: 0;
     padding: 0 1em;
   }
@@ -287,6 +288,13 @@ label {
     right: -.15em;
     bottom: -.1em;
   }
+
+  .clickForMore, .clickForLess {
+    font-size: .9em;
+    font-family: $sansFontFamily;
+    float: right;
+  }
+
 }
 
 //DROPDOWNS
