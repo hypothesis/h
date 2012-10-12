@@ -382,16 +382,17 @@ class Hypothesis extends Annotator
         .select('blockquote').each (d) ->
           chars = 180
           quote = d.message.annotation.quote.replace(/\u00a0/g, ' ')  # replace &nbsp;
+          trunc = quote.substring(0, quote.lastIndexOf(' ', 180)) + "...<a href='#' class='clickForMore'>more</a>"
           if quote.length >= chars
             d3.select(this)
-              .html(quote.substring(0, quote.lastIndexOf(' ', 180)) + "...<a href='#' class='clickForMore'>more</a>")
+              .html(trunc)
               .on 'click', ->
                 d3.event.stopPropagation()
                 d3.event.preventDefault()
                 if d3.select(d3.event.target).classed('clickForMore')
                   d3.select(this).html(quote + "<a href='#' class='clickForLess'>less</a>")
                 if d3.select(d3.event.target).classed('clickForLess')
-                  d3.select(this).html(quote.substring(0, quote.lastIndexOf(' ', 180)) + "...<a href='#' class='clickForMore'>more</a>")
+                  d3.select(this).html(trunc)
           else
             d3.select(this).html(quote)
 
