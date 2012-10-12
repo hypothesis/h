@@ -182,6 +182,9 @@ class Hypothesis extends Annotator
         .classed('upper', @heatmap.isUpper)
         .classed('lower', @heatmap.isLower)
 
+        .style 'display', (d) =>
+          if (@heatmap.buckets[d].length is 0) then 'none' else ''
+
         # Creates highlights corresponding bucket when mouse is hovered
         .on 'mousemove', (bucket) =>
           unless @viewer.isShown() and @detail
@@ -374,8 +377,25 @@ class Hypothesis extends Annotator
           .classed('hyp-excerpt', true)
         .append('blockquote')
       excerpts.exit().remove()
-      excerpts.select('blockquote').text (d) =>
-        d.message.annotation.quote.replace(/\u00a0/g, ' ')  # replace &nbsp;
+
+      excerpts
+        .select('blockquote').each (d) ->
+          chars = 180
+          quote = d.message.annotation.quote.replace(/\u00a0/g, ' ')  # replace &nbsp;
+          trunc = quote.substring(0, quote.lastIndexOf(' ', 180)) + "...<a href='#' class='more'>more</a>"
+          if quote.length >= chars
+            d3.select(this)
+              .html(trunc)
+              .on 'click', ->
+                d3.event.stopPropagation()
+                d3.event.preventDefault()
+                if d3.select(d3.event.target).classed('more')
+                  d3.select(this).html(quote + "<a href='#' class='less'>less</a>")
+                if d3.select(d3.event.target).classed('less')
+                  d3.select(this).html(trunc)
+          else
+            d3.select(this).html(quote)
+
 
       highlights = []
       excerpts.each (d) =>
