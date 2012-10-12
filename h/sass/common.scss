@@ -450,19 +450,18 @@ blockquote {
 
 //BUCKET VIEW REPLY SUMMARIES
 .hyp-summary {
-  @include smallshadow(2px, 3px, .2);
-  margin: 1em 0;
+  margin-bottom: 1em;
   position: relative;
   cursor: pointer;
 
   &:hover {
-    @include smallshadow(2px, 4px, .2);
+    @include smallshadow(2px, 3px, .1);
     bottom: 1px;
   }
 
   &:active {
-    @include smallshadow(2px, 1px, .2);
-    bottom: -2px;
+    @include smallshadow(2px, 1px, .1);
+    bottom: 0px;
   }
 }
 
