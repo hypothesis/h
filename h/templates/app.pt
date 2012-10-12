@@ -29,16 +29,18 @@
                tal:attributes="id '%s-tab' % name"
                class="tab-pane">
             ${structure: layout.forms[name].render()}
-            <ul class="pull-right">
-              <li><a href="#" onclick="$('.nav a[data-target]')
-                                         .filter('[data-target=#password-tab]')
-                                         .tab('show')"
-                     >Password help?</a></li>
-              <li><a href="#" onclick="$('.nav a[data-target]')
-                                         .filter('[data-target=#reset-tab]')
-                                         .tab('show')"
-                     >Have you already reserved a username with us?</a></li>
-            </ul>
+            <footer>
+              <ul>
+                <li><a href="#" onclick="$('.nav a[data-target]')
+                                           .filter('[data-target=#password-tab]')
+                                           .tab('show')"
+                       >Password help?</a></li>
+                <li><a href="#" onclick="$('.nav a[data-target]')
+                                           .filter('[data-target=#reset-tab]')
+                                           .tab('show')"
+                       >Have you already reserved a username with us?</a></li>
+              </ul>
+            </footer>
           </div>
           <div id="password-tab" class="tab-pane">
             ${structure: layout.forms['password'].render()}

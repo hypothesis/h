@@ -241,8 +241,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   position: relative;
 }
 
-#auth-tab > ul.pull-right,
-#register-tab > ul.pull-right {
+#auth-tab > footer > ul,
+#register-tab > footer > ul {
   text-align: right;
 }
 
