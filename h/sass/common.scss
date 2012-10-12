@@ -260,22 +260,29 @@ label {
 
 //EXCERPT
 .hyp-excerpt {
-  @include box-shadow(1px 3px 8px rgba(0, 0, 0, .2));
   position: relative;
-  margin: 1em 0;
-
+  margin-bottom: 1em;
   blockquote {
-    @include pie-clearfix;
-    color: $gray;
-    font-family: "Merriweather";
-    font-size: 1em;
-    margin: 0;
-    padding: 0 1em;
+    margin-bottom: 0;
   }
+  .more, .less {
+    font-size: .9em;
+    font-family: $sansFontFamily;
+    display: block;
+    text-align: right;
+  }
+}
+
+blockquote {
+  color: $gray;
+  font-family: "Merriweather";
+  font-size: 1em;
+  margin-bottom: 1em;
+  padding: 0 1em;
 
   &:before {
     color: rgba(150, 150, 150, .5);
-    content: "“";
+    content: "\201C";
     font-family: "PT Serif";
     font-size: 6em;
     position: absolute;
@@ -285,21 +292,15 @@ label {
 
   &:after {
     color: rgba(150, 150, 150, .5);
-    content: "„";
+    content: "\201E";
     font-family: "PT Serif";
     font-size: 5em;
     position: absolute;
     right: -.15em;
     bottom: -.1em;
   }
-
-  .more, .less {
-    font-size: .9em;
-    font-family: $sansFontFamily;
-    float: right;
-  }
-
 }
+
 
 //DROPDOWNS
 .dropdown {
