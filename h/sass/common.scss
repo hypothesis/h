@@ -267,9 +267,10 @@ label {
   margin: 1em 0;
 
   blockquote {
+    @include pie-clearfix;
     color: $gray;
     font-family: "Merriweather";
-    font-size: 1.1em;
+    font-size: 1em;
     margin: 0;
     padding: 0 1em;
   }
@@ -293,6 +294,13 @@ label {
     right: -.15em;
     bottom: -.1em;
   }
+
+  .more, .less {
+    font-size: .9em;
+    font-family: $sansFontFamily;
+    float: right;
+  }
+
 }
 
 //DROPDOWNS
