@@ -125,10 +125,11 @@ def includeme(config):
 
     settings = config.get_settings()
     key = settings['api.key']
+    secret = settings.get('api.secret')
     ttl = settings.get('api.ttl', DEFAULT_TTL)
 
     with transaction.manager:
         consumer = Consumer.get_by_key(key)
-        if not consumer:
-            consumer = Consumer(key=key, ttl=ttl)
+        if not consumer and not secret:
+            consumer = Consumer(key=key, secret=secret, ttl=ttl)
             Session().add(consumer)
