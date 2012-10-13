@@ -1,18 +1,18 @@
 <div name="${field.name}"
      id="${field.oid}"
-     class="dropdown">
+     class="tinyman dropdown">
   <input name="${field.name}" type="hidden" value="-1" />
   <span tal:condition="not len(values)">Sign in</span>
   <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown"
      tal:condition="len(values)"
-     >${values[0][1]['username']}&nbsp;/&nbsp;${values[0][1]['provider']}</a>
+     >${values[0][1]['username']}&nbsp;<span class="provider">/${values[0][1]['provider']}</span></a>
   <ul role="menu"
      tal:attributes="class field.widget.css_class | 'dropdown-menu'">
     <li tal:repeat="(value, description) values"
         ><a href="#" data-value="${value}"
             tal:define="username description['username'];
                         provider description['provider'];"
-            >${username}&nbsp;/&nbsp;${provider}</a></li>
+            >${username}&nbsp;/${provider}</a></li>
     <li><a href="#" data-value="-1" name="logout"
            tal:condition="len(values)">Sign out</a></li>
   </ul>

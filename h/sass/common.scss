@@ -305,10 +305,15 @@ blockquote {
 //DROPDOWNS
 .dropdown {
   position: relative;
+  span {
+    cursor: pointer;
+    &:hover {
+      color: black;
+    }
+  }
 }
 
 .dropdown-menu {
-  @include border-radius(0 0 .5em .5em);
   @include rotateX(90deg);
   @include smallshadow;
   background: $white;
@@ -316,18 +321,32 @@ blockquote {
   border-top: 0;
   left: 0;
   float: left;
-  list-style: none;
-  min-width: 0;
   opacity: 0;
-  padding: .5em;
   pointer-events: none;
   position: absolute;
-  top: 100%;
+
+  li {
+    line-height: 1.5;
+    margin: .25em .5em;
+    border-top: dotted 1px $grayLighter;
+    &:hover {
+      color: black;
+    }
+    &:first-child {
+      border-top: 0;
+    }
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 
   // Aligns the dropdown menu to right
   &.pull-right {
-    right: 0;
+    right: -1px;
     left: auto;
+    text-align: right;
   }
 }
 
