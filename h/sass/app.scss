@@ -226,7 +226,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //TOOL BAR
 #toolbar {
-  @include pie-clearfix;
   @include smallshadow;
   background: white;
   border: 1px solid $grayLighter;
@@ -238,9 +237,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   position: absolute;
   width: 100%;
   z-index: 5;
-  -webkit-box-sizing: content-box;
-  -moz-box-sizing: content-box;
-  box-sizing: content-box;
 
   .tri {
     @include icon("tri-left.png");
@@ -259,7 +255,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   .tinyman {
-    margin-right: 1em;
     border-left: 1px solid $grayLighter;
     border-right: 1px solid $grayLighter;
     padding: 0 .3em;
