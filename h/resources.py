@@ -148,27 +148,34 @@ def add_webassets(config):
 
 @implementer(ILocation)
 class BaseResource(resources.BaseFactory):
-    """Base Resource class from which all resources are derived."""
+    """Base Resource class from which all resources are derived"""
 
     __name__ = None
     __parent__ = None
 
 
 class InnerResource(BaseResource):
+    """Helper Resource class for declarative, traversal-based routing
+
+    Classes which inherit from this should contain attributes which are either
+    class constructors for classes whose instances provide the
+    :class:`pyramid.interfaces.ILocation` interface else attributes which are,
+    themselves, instances of such a class. Such attributes are treated as
+    valid traversal children of the Resource whose path component is the name
+    of the attribute.
+    """
+
     def __getitem__(self, name):
         """
-        While individual resources may override this method to customize
-        the construction of sub-resources returned from traversal, make the
-        common case easy by treating any attribute whose value is a class
-        implementing :class:`pyramid.interfaces.ILocation` as a factory
-        function for a sub-resource whose path component (`__name__`) is the
-        name of the attribute itself.
-
-        Any attribute which is an instance providing
+        Any class attribute which is an instance providing
         :class:`pyramid.interfaces.ILocation` will be returned as is.
 
-        Attributes which are used as factories will replace themselves on the
-        instance by  reifying the constructed resource as the new attribute.
+        Attributes which are constructors for implementing classes will
+        be replaced with a constructed instance by reifying the newly
+        constructed resource in place of the attribute.
+
+        Assignment to the sub-resources `__name__` and `__parent__` properties
+        is handled automatically.
         """
 
         factory_or_resource = getattr(self, name, None)
