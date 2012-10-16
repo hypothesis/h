@@ -1,6 +1,15 @@
 Changelog for h
 ===============
 
+0.0.3 (2012-10-16)
+------------------
+
+- Up/down tabs are hidden when count is zero
+- Long excerpts are truncated and show with less/more links
+- New persona dropdown (tinyman)
+- Password reset fixed
+- Initial sphinx documentation added
+
 0.0.2 (2012-10-09)
 ------------------
 
