@@ -7,6 +7,7 @@
 /bin
 /build
 /dist
+/docs/_build
 /include
 /lib
 /local
