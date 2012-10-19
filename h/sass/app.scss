@@ -232,18 +232,28 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
   left: 1px;
+  line-height: $baseLineHeight;
   margin-top: .5em;
   padding: .3em;
   position: absolute;
+  text-align: right;
   width: 100%;
   z-index: 5;
+
+  & > div {
+    display: inline-block;
+    vertical-align: top;
+
+    &:last-child {
+      border-left: 1px solid $grayLighter;
+    }
+  }
 
   .tri {
     @include icon("tri-left.png");
     float: left;
-    display: inline-block;
-    width: 1.5em;
-    height: 1.5em;
+    width: $baseLineHeight;
+    height: $baseLineHeight;
     cursor: pointer;
   }
 
