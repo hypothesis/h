@@ -1,3 +1,7 @@
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
+
 def includeme(config):
     config.include('h.api')
     config.include('h.app')
@@ -39,7 +43,3 @@ def create_app(settings):
 
 def main(global_config, **settings):
     return create_app(settings)
-
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
