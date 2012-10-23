@@ -32,6 +32,7 @@ follows::
 
     $ virtualenv --no-site-packages .
     $ source bin/activate
+    $ python setup.py develop
     $ pip install -r requirements.txt
 
 If there is a failure installing PyYAML, install the libyaml development files.
