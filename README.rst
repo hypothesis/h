@@ -46,7 +46,19 @@ clean-css_ for minification needs. These are *not* required for development.
 
 To run an annotation storage backend elasticsearch_ is required.
 
-Please see the platform-specific INSTALL files for additional assistance.
+Running
+-------
+
+Hopefully, installation has gone smoothly. If that's the case, the application
+can be started easily with the command `./run.py`. However, for development
+it is convenient to automatically reload the application when files are
+changed. Thankfully, there's a command for that too:
+
+    $ pserve --reload --monitor-restart development.ini
+
+This command will run the server, reloading the application whenever changes
+are made to the source code, and restarting it should it crash for some
+reason.
 
 Development
 -----------
