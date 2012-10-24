@@ -215,7 +215,7 @@ label {
 }
 
 //BODY
-.hyp-content { white-space: pre-wrap; }
+.hyp-body { white-space: pre-wrap; }
 
 //Provides the white background upon which items sit
 .hyp-paper {
@@ -395,7 +395,7 @@ blockquote {
 }
 
 //COMMON CLASSES (TODO: put into a class common to all annotations)
-.hyp-content {
+.hyp-body {
   margin-bottom: .5em
 }
 
@@ -424,7 +424,7 @@ blockquote {
   }
 
   &.hyp-collapsed {
-    & > .hyp-content {
+    & > .hyp-body {
       overflow: hidden;
       text-overflow: ellipsis;
       -o-text-overflow: ellipsis;
