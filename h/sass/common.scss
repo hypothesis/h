@@ -192,15 +192,15 @@ label {
     color: $gray;
     text-align: right;
 
-    &.hyp-write {
+    &.write {
       background-image: url("../images/pen_1.png");
     }
 
-    &.hyp-fave {
+    &.fave {
       background-image: url("../images/fave_1.png");
     }
 
-    &.hyp-flag {
+    &.flag {
       background-image: url("../images/flag_1.png");
     }
 
@@ -215,10 +215,10 @@ label {
 }
 
 //BODY
-.hyp-content { white-space: pre-wrap; }
+.body { white-space: pre-wrap; }
 
 //Provides the white background upon which items sit
-.hyp-paper {
+.paper {
   @include border-radius(.2em);
   @include smallshadow;
   background: #fff;
@@ -226,7 +226,7 @@ label {
 }
 
 //THREAD INDENTATION
-.hyp-thread {
+.thread {
   margin: 0 -1em -1em (-$thread-padding / 2);
   padding-left: $thread-padding / 2;
 
@@ -237,14 +237,14 @@ label {
       padding: .5em 1em 1em $thread-padding;
     }
 
-    & .hyp-detail {
+    & .detail {
       font-size: 1em;
     }
   }
 }
 
 //THREADEXP OBJECT
-.hyp-threadexp {
+.threadexp {
   height: $threadexp-width;
   width: $threadexp-width;
   position: absolute;
@@ -253,13 +253,13 @@ label {
   outline: 1px dotted #aaa;
   @include icon("minus_1.png");
 
-  .hyp-collapsed > & {
+  .collapsed > & {
     background-image: url("../images/plus_1.png");
   }
 }
 
 //EXCERPT
-.hyp-excerpt {
+.excerpt {
   position: relative;
   margin-bottom: 1em;
   blockquote {
@@ -387,7 +387,7 @@ blockquote {
 }
 
 //TIMESTAMP
-.hyp-time {
+.time {
   float: right;
   display: inline-block;
   line-height: 2em;
@@ -395,7 +395,7 @@ blockquote {
 }
 
 //COMMON CLASSES (TODO: put into a class common to all annotations)
-.hyp-content {
+.body {
   margin-bottom: .5em
 }
 
@@ -404,7 +404,7 @@ blockquote {
 }
 
 //ANNOTATION DETAIL
-.hyp-detail {
+.detail {
   position: relative;
   & > .annotator-controls {
     position: absolute;
@@ -417,14 +417,14 @@ blockquote {
     opacity: 0;
   }
 
-  &.hyp-hover {
+  &.hover {
     & > .annotator-controls {
       opacity: 1;
     }
   }
 
-  &.hyp-collapsed {
-    & > .hyp-content {
+  &.collapsed {
+    & > .body {
       overflow: hidden;
       text-overflow: ellipsis;
       -o-text-overflow: ellipsis;
@@ -432,8 +432,8 @@ blockquote {
       font-style: italic;
       margin-top: 0;
     }
-    & > .hyp-thread { overflow: hidden; }
-    & > .hyp-user {
+    & > .thread { overflow: hidden; }
+    & > .user {
       display: run-in;
       margin-right: .25em;
     }
@@ -441,18 +441,18 @@ blockquote {
 }
 
 // Remove the expander from the top level annotation
-.hyp-paper > .hyp-threadexp {
+.paper > .threadexp {
   display: none;
 }
 
-.hyp-user {
+.user {
   margin-bottom: .25em;
   font-weight: bold;
   text-decoration: underline;
 }
 
 //EDITOR
-.hyp-writer {
+.writer {
   @include smallshadow(0, 2px, .2);
   position: relative;
 
@@ -466,7 +466,7 @@ blockquote {
 }
 
 //BUCKET VIEW REPLY SUMMARIES
-.hyp-summary {
+.summary {
   margin-bottom: 1em;
   position: relative;
   cursor: pointer;

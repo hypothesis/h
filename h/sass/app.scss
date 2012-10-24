@@ -37,7 +37,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 //HEATMAP TABS
-.hyp-heatmap-tab {
+.heatmap-tab {
   @include user-select(none);
   background-image: url("../images/side_tab.svg");
   background-position: center 1.025em;
@@ -79,7 +79,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 
-// .hyp-heatmap-tab {
+// .heatmap-tab {
 //   @include user-select(none);
 //   color: rgb(238, 238, 238);
 //   cursor: pointer;
@@ -187,7 +187,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include transform-origin(50%, 0);
   z-index: 4;
 
-  &.hyp-collapsed {
+  &.collapsed {
     @include rotateX(90deg);
     opacity: 0;
     pointer-events: none;
