@@ -50,5 +50,5 @@ Handlebars.registerHelper('formatUser', function (user) {
   return new Handlebars.SafeString(
     user.replace(
         /^acct:([^@]+)@(.+)$/,
-      '$1 <span class="hyp-provider">on $2</span>'))
+      '$1 <span class="provider">on $2</span>'))
 })
