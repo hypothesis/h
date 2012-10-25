@@ -229,8 +229,6 @@ class Hypothesis extends Annotator
             this.showViewer(annotations)
             this.show()
 
-          tabs.classed('flip', (d) => @bucket == d)
-
     this
 
   # Creates an instance of Annotator.Viewer and assigns it to the @viewer
