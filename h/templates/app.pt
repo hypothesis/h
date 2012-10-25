@@ -98,13 +98,13 @@
 
       var showAuth = function (show, cb) {
         var $header = $('header'),
-            visible = !$header.hasClass('hyp-collapsed')
+            visible = !$header.hasClass('collapsed')
         if (visible != show) {
           if (show) {
-            $header.removeClass('hyp-collapsed')
+            $header.removeClass('collapsed')
             focusFirstInput($header.find('li.active'))
           } else {
-            $header.addClass('hyp-collapsed')
+            $header.addClass('collapsed')
           }
           $header.one('webkitTransitionEnd transitionend OTransitionEnd', cb)
         } else {
@@ -147,7 +147,7 @@
       }
 
       var afterRequest = function (data) {
-        var visible = !$('header').hasClass('hyp-collapsed')
+        var visible = !$('header').hasClass('collapsed')
         showAuth(false, function () {
           Object.getOwnPropertyNames(data).map(function (oid) {
             if (data[oid].form) {
