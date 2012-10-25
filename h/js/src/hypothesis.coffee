@@ -407,10 +407,15 @@ class Hypothesis extends Annotator
         items.enter().append('li').classed('annotation', true)
         items.exit().remove()
         items
-          .each (d) ->
-            _t = this and d3.select(this)
-            unless _t and _t.classed('detail')
-              _t.html Handlebars.templates.detail d.message.annotation
+          .each (d) ->  # XXX: SLOW! Repeats calculation alllll the time
+            replyCount =
+              toJSON: => undefined
+              valueOf: =>
+                count = d.flattenChildren()?.length or 0
+                "#{count} " + (if count == 1 then 'reply' else 'replies')
+            d.message.annotation.replyCount = replyCount
+          .html (d) ->
+              Handlebars.templates.detail d.message.annotation
           .classed('paper', (c) -> not c.parent.message?)
           .classed('detail', true)
           .classed('summary', false)
