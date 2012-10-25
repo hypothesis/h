@@ -43,8 +43,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include transition-duration(1s, .2s);
   @include perspective(100px);
   margin-top: -1em; // TODO: Less janking v-align
-  color: rgb(238, 238, 238);
-  cursor: pointer;
+  // color: rgb(238, 238, 238);
+  color: #666;
   left: 0px;
   position: fixed;
   height: 20.1px;
@@ -67,7 +67,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     font-size: 13.1px;
     position: absolute;
     text-decoration: none;
-    text-shadow: 1px 1px 1px rgb(51, 51, 51);
+    text-shadow: 1px 1px 1px #eee;
     @include single-transition(transform, 1s);
     left: 10px;
     right: 2px;
