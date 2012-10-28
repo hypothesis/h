@@ -23,6 +23,19 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 
+//HIDDEN TABS////////////////////////////////
+.nav a[data-target="#password-tab"],
+.nav a[data-target="#reset-tab"] {
+  display: none;
+}
+
+.nav .active a[data-target="#password-tab"],
+.nav .active a[data-target="#reset-tab"] {
+  display: initial;
+}
+
+
+
 //ANNOTATOR STYLES////////////////////////////////
 .annotator-hide {
   display: none;
@@ -151,19 +164,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 
-//HIDDEN TABS////////////////////////////////
-.nav a[data-target="#password-tab"],
-.nav a[data-target="#reset-tab"] {
-  display: none;
-}
-
-.nav .active a[data-target="#password-tab"],
-.nav .active a[data-target="#reset-tab"] {
-  display: initial;
-}
-
-
-
 //SHEET////////////////////////////////
 //This comes down from under things.
 .sheet {
@@ -243,30 +243,31 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       margin-right: .7em;
     }
   }
+}
 
-  .tinyman {
-    padding: 0 .3em;
+.tinyman {
+  padding: 0 .3em;
 
-    .avatar {
-      border-radius: 2px;
+  .avatar {
+    border-radius: 2px;
+  }
+
+  .dropdown-toggle {
+    @include linkbutton_right;
+    background-image: url("../images/dropdown_1.png");
+    .provider {
+      color: $grayLight;
+      display: none;
     }
-
-    .dropdown-toggle {
-      @include linkbutton_right;
-      background-image: url("../images/dropdown_1.png");
+    &:hover {
       .provider {
-        color: $grayLight;
-        display: none;
+        display: inline;
       }
-      &:hover {
-        .provider {
-          display: inline;
-        }
-      }
-    }
-
-    &.open .provider {
-      display: inline;
     }
   }
+
+  &.open .provider {
+    display: inline;
+  }
 }
+
