@@ -7,6 +7,9 @@ $baseFontSize: 14;
 
 @import 'common';
 
+
+
+//ELEMENT STYLES////////////////////////////////
 body {
   background-color: transparent;
   font-family: $sansFontFamily;
@@ -18,8 +21,9 @@ body {
 input { width: 100%; }
 svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
-/* Annotator styles */
 
+
+//ANNOTATOR STYLES////////////////////////////////
 .annotator-hide {
   display: none;
   visibility: hidden;
@@ -36,7 +40,31 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   cursor: pointer;
 }
 
-//HEATMAP TABS
+
+//SIDEBAR LAYOUT////////////////////////////////
+#gutter {
+  background: url('../images/noise_1.png');
+  background-attachment: fixed;
+  height: 100%;
+  margin-left: $heatmap-width + 17px;
+  position: relative;
+}
+
+#wrapper {
+  height: 100%;
+  overflow: auto;
+  padding: 3.75em 1em 1em 1em;
+  -webkit-overflow-scrolling: touch;
+}
+
+#auth-tab > footer > ul,
+#register-tab > footer > ul {
+  text-align: right;
+}
+
+
+
+//HEATMAP TABS////////////////////////////////
 .heatmap-tab {
   @include user-select(none);
   @include transition-property(transform, left);
@@ -126,7 +154,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 
-// Hidden tabs
+
+//HIDDEN TABS////////////////////////////////
 .nav a[data-target="#password-tab"],
 .nav a[data-target="#reset-tab"] {
   display: none;
@@ -137,20 +166,21 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   display: initial;
 }
 
+
+
+//SHEET////////////////////////////////
+//This comes down from under things.
 .sheet {
+  @include box-shadow(5px 5px 40px hsla(0, 0%, 0%, .1));
+  @include single-transition(all, .4s, ease-in-out);
+  @include transform-origin(50%, 0);
+  z-index: 4;
   background: url('../images/noise_1.png');
   background-attachment: fixed;
   margin-top: 2.5em;
   padding-top: 1em;
   position: absolute;
   width: 100%;
-}
-
-.sheet {
-  @include box-shadow(5px 5px 40px hsla(0, 0%, 0%, .1));
-  @include single-transition(all, .4s, ease-in-out);
-  @include transform-origin(50%, 0);
-  z-index: 4;
 
   &.collapsed {
     @include rotateX(90deg);
@@ -175,21 +205,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 }
 
-#gutter {
-  background: url('../images/noise_1.png');
-  background-attachment: fixed;
-  height: 100%;
-  margin-left: $heatmap-width + 17px;
-  position: relative;
-}
-
-#auth-tab > footer > ul,
-#register-tab > footer > ul {
-  text-align: right;
-}
 
 
-//TOOL BAR
+//TOOL BAR////////////////////////////////
 #toolbar {
   @include smallshadow;
   background: white;
@@ -255,12 +273,4 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       display: inline;
     }
   }
-}
-
-
-#wrapper {
-  height: 100%;
-  overflow: auto;
-  padding: 3.75em 1em 1em 1em;
-  -webkit-overflow-scrolling: touch;
 }

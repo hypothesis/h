@@ -139,22 +139,6 @@ label {
 
 
 
-//TAB PANE////////////////////////////////
-.tab-pane {
-  background: $bodyBackground;
-  border: solid thin $grayLighter;
-  display: none;
-  margin-top: -1px;  // Pull up and under tabs
-  padding: 1em;
-  position: relative;
-
-  &.active {
-    display: inherit !important;
-  }
-}
-
-
-
 //FORM RELATED////////////////////////////////
 .form-horizontal {
   display: inline-block;
@@ -352,6 +336,19 @@ blockquote {
     font-weight: bold;
     background: hsla(0, 0%, 100%, 1);
     z-index: 90;
+  }
+}
+
+.tab-pane {
+  background: $bodyBackground;
+  border: solid thin $grayLighter;
+  display: none;
+  margin-top: -1px;  // Pull up and under tabs
+  padding: 1em;
+  position: relative;
+
+  &.active {
+    display: inherit !important;
   }
 }
 
