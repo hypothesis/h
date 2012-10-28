@@ -73,8 +73,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 
-//HEATMAP TABS////////////////////////////////
-.heatmap-tab {
+//HEATMAP POINTERS////////////////////////////////
+.heatmap-pointer {
   @include user-select(none);
   @include transition-property(transform, left);
   @include transition-duration(1s, .2s);
