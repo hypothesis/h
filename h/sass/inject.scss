@@ -1,8 +1,9 @@
 @import 'base';
 @import 'compass/reset/utilities';
 
-/* Annotator styles */
 
+
+//ADDER////////////////////////////////
 .annotator-adder {
   $border: #333;
   $hoverborder: #000;
@@ -67,6 +68,8 @@
 }
 
 
+
+//HIGHLIGHTS////////////////////////////////
 .annotator-hl {
   @include single-transition('background-color,color', .03s, linear, .1s);
 }
@@ -92,8 +95,9 @@
   display: none;
 }
 
-/* iframe styles */
 
+
+//IFRAME////////////////////////////////
 .annotator-frame {
   height: 100%;
   position: fixed;
@@ -104,6 +108,7 @@
 
   &.annotator-collapsed {
     margin-left: -$heatmap-width - 17px;
+
   }
 }
 
