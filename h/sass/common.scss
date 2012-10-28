@@ -337,7 +337,6 @@ blockquote {
     background: hsla(0, 0%, 100%, 1);
     z-index: 90;
   }
-}
 
 .tab-pane {
   background: $bodyBackground;
@@ -350,7 +349,12 @@ blockquote {
   &.active {
     display: inherit !important;
   }
+
+  footer > ul {
+    text-align: right;
+  }
 }
+
 
 
 
