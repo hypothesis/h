@@ -145,7 +145,6 @@
     @include single-transition(margin-left, .4s);
     width: 428px + $heatmap-width + 17px;
     margin-left: -428px - $heatmap-width - 17px;
-    &.annotator-collapsed { width: inherit; }
   }
 }
 
