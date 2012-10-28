@@ -41,6 +41,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 
+
 //SIDEBAR LAYOUT////////////////////////////////
 #gutter {
   background: url('../images/noise_1.png');
@@ -55,11 +56,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   overflow: auto;
   padding: 3.75em 1em 1em 1em;
   -webkit-overflow-scrolling: touch;
-}
-
-#auth-tab > footer > ul,
-#register-tab > footer > ul {
-  text-align: right;
 }
 
 
