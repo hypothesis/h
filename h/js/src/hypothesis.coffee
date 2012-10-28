@@ -151,7 +151,7 @@ class Hypothesis extends Annotator
 
     @heatmap.subscribe 'updated', =>
       tabs = d3.select(document.body)
-        .selectAll('div.heatmap-tab')
+        .selectAll('div.heatmap-pointer')
         .data =>
           buckets = []
           @heatmap.index.forEach (b, i) =>
@@ -167,7 +167,7 @@ class Hypothesis extends Annotator
 
       # Enters into tabs var, and generates bucket pointers from them
       tabs.enter().append('div')
-        .classed('heatmap-tab', true)
+        .classed('heatmap-pointer', true)
 
       tabs.exit().remove()
 
