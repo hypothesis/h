@@ -13,7 +13,7 @@
     </div>
     <div id="gutter">
       <header class="sheet">
-        <a class="close" onclick="showAuth(false)">&times;</a>
+        <a class="close" onclick="showAuth(false)"></a>
         <ul class="nav nav-tabs">
           <li><a data-target="#auth-tab"
                  data-toggle="tab">Log in</a></li>

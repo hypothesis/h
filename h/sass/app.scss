@@ -178,6 +178,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   position: absolute;
   width: 100%;
 
+  .close {
+    margin-right: .5em;
+    margin-top: .25em;
+  }
+
   &.collapsed {
     @include rotateX(90deg);
     opacity: 0;
