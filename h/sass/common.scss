@@ -174,10 +174,6 @@ label {
 .annotator-controls {
   @include box-shadow(-1em 0 1em 0 #fff);
   background: #fff;
-
-  & > * {
-    margin-right: .5em;
-  }
 }
 
 a {
@@ -378,6 +374,7 @@ blockquote {
   .user {
     font-weight: bold;
     text-decoration: underline;
+    margin-bottom: .25em;
   }
 
   .time {
@@ -502,7 +499,6 @@ blockquote {
   padding-left: 1em;
 
   textarea {
-    margin-top: .5em;
     width: 100%;
     min-height: 8em;
   }
