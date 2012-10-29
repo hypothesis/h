@@ -75,9 +75,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //HEATMAP POINTERS////////////////////////////////
 .heatmap-pointer {
   @include user-select(none);
-  @include transition-property(transform, left);
+  @include transition-property(left);
   @include transition-duration(1s, .2s);
-  @include perspective(100px);
   margin-top: -1em; // TODO: Less janking v-align
   // color: rgb(238, 238, 238);
   color: #666;
@@ -104,7 +103,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     font-size: 13.1px;
     position: absolute;
     text-decoration: none;
-    @include single-transition(transform, 1s);
     left: 10px;
     right: 2px;
     position: absolute;
