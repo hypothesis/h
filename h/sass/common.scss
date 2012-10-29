@@ -92,6 +92,7 @@ label {
   span.errorMsg { @extend .visuallyhidden; }
 }
 
+//Candidate for cleanup
 .btn-link {
   @include box-shadow(none);
   @include reset-box-model;
@@ -177,29 +178,33 @@ label {
   & > * {
     margin-right: .5em;
   }
+}
 
-  a {
+a {
+
+  &.write {
     @include linkbutton;
+    background-image: url("../images/pen_1.png");
+  }
 
-    &.write {
-      background-image: url("../images/pen_1.png");
-    }
+  &.fave {
+    @include linkbutton;
+    background-image: url("../images/fave_1.png");
+  }
 
-    &.fave {
-      background-image: url("../images/fave_1.png");
-    }
+  &.flag {
+    @include linkbutton;
+    background-image: url("../images/flag_1.png");
+  }
 
-    &.flag {
-      background-image: url("../images/flag_1.png");
-    }
+  &.annotator-save {
+    @include linkbutton;
+    background-image: url("../images/submit_1.png");
+  }
 
-    &.annotator-save {
-      background-image: url("../images/submit_1.png");
-    }
-
-    &.annotator-cancel {
-      background-image: url("../images/delete_1.png");
-    }
+  &.annotator-cancel {
+    @include linkbutton;
+    background-image: url("../images/delete_1.png");
   }
 }
 
@@ -386,6 +391,10 @@ blockquote {
     margin-bottom: .5em;
     white-space: pre-wrap;
   }
+
+  .bottombar {
+    @include pie-clearfix;
+  }
 }
 
 
@@ -422,7 +431,7 @@ blockquote {
       @include icon("minus_1.png");
     }
 
-    & > .detail {
+    & > .detail, .writer {
       padding-left: $thread-padding;
       padding-top: 0;
       margin-top: 1em;
@@ -484,14 +493,18 @@ blockquote {
 //EDITOR////////////////////////////////
 //This is an input element to make annotations.
 .writer {
-  @include smallshadow(0, 2px, .2);
   position: relative;
+  padding-left: 1em;
 
   textarea {
+    margin-top: .5em;
     width: 100%;
     min-height: 8em;
   }
-  .annotator-controls {
-     float: left;
+
+  .bottombar {
+    .btn {
+      margin-right: .5em;
+    }
   }
 }
