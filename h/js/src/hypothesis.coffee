@@ -82,12 +82,12 @@ class Hypothesis extends Annotator
     @heatmap.element.appendTo(document.body)
     @viewer.show()
 
-    @provider.getMaxBottom (max) =>
-      $('#toolbar').css("top", "#{max}px")
-      $('#gutter').css("padding-top", "#{max}px")
-      @heatmap.BUCKET_THRESHOLD_PAD = (
-        max + @heatmap.constructor.prototype.BUCKET_THRESHOLD_PAD
-      )
+    # @provider.getMaxBottom (max) =>
+    #   $('#toolbar').css("top", "#{max}px")
+    #   $('#gutter').css("padding-top", "#{max}px")
+    #   @heatmap.BUCKET_THRESHOLD_PAD = (
+    #     max + @heatmap.constructor.prototype.BUCKET_THRESHOLD_PAD
+    #   )
 
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.created = annotation.updated = (new Date()).toString()
