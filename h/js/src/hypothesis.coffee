@@ -408,12 +408,13 @@ class Hypothesis extends Annotator
         items.exit().remove()
         items
           .each (d) ->  # XXX: SLOW! Repeats calculation alllll the time
+            count = d.flattenChildren()?.length or 0
             replyCount =
               toJSON: => undefined
               valueOf: =>
-                count = d.flattenChildren()?.length or 0
                 "#{count} " + (if count == 1 then 'reply' else 'replies')
-            d.message.annotation.replyCount = replyCount
+            unless count == 0
+              d.message.annotation.replyCount = replyCount
           .html (d) ->
               Handlebars.templates.detail d.message.annotation
           .classed('paper', (c) -> not c.parent.message?)
