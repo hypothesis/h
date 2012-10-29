@@ -82,12 +82,12 @@ class Hypothesis extends Annotator
     @heatmap.element.appendTo(document.body)
     @viewer.show()
 
-    @provider.getMaxBottom (max) =>
-      $('#toolbar').css("top", "#{max}px")
-      $('#gutter').css("padding-top", "#{max}px")
-      @heatmap.BUCKET_THRESHOLD_PAD = (
-        max + @heatmap.constructor.prototype.BUCKET_THRESHOLD_PAD
-      )
+    # @provider.getMaxBottom (max) =>
+    #   $('#toolbar').css("top", "#{max}px")
+    #   $('#gutter').css("padding-top", "#{max}px")
+    #   @heatmap.BUCKET_THRESHOLD_PAD = (
+    #     max + @heatmap.constructor.prototype.BUCKET_THRESHOLD_PAD
+    #   )
 
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.created = annotation.updated = (new Date()).toString()
@@ -150,9 +150,8 @@ class Hypothesis extends Annotator
       this.show()
 
     @heatmap.subscribe 'updated', =>
-      # Creates tabs var by looking at all buckets on page.
       tabs = d3.select(document.body)
-        .selectAll('div.heatmap-tab')
+        .selectAll('div.heatmap-pointer')
         .data =>
           buckets = []
           @heatmap.index.forEach (b, i) =>
@@ -168,7 +167,7 @@ class Hypothesis extends Annotator
 
       # Enters into tabs var, and generates bucket pointers from them
       tabs.enter().append('div')
-        .classed('heatmap-tab', true)
+        .classed('heatmap-pointer', true)
 
       tabs.exit().remove()
 
@@ -177,7 +176,8 @@ class Hypothesis extends Annotator
         .style 'top', (d) =>
           "#{(@heatmap.index[d] + @heatmap.index[d+1]) / 2}px"
 
-        .text((d) => @heatmap.buckets[d].length)
+        .html (d) =>
+          "<div class='label'>#{@heatmap.buckets[d].length}</div><div class='svg'></div>"
 
         .classed('upper', @heatmap.isUpper)
         .classed('lower', @heatmap.isLower)

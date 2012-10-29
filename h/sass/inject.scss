@@ -1,8 +1,9 @@
 @import 'base';
 @import 'compass/reset/utilities';
 
-/* Annotator styles */
 
+
+//ADDER////////////////////////////////
 .annotator-adder {
   $border: #333;
   $hoverborder: #000;
@@ -67,6 +68,8 @@
 }
 
 
+
+//HIGHLIGHTS////////////////////////////////
 .annotator-hl {
   @include single-transition('background-color,color', .03s, linear, .1s);
 }
@@ -92,8 +95,9 @@
   display: none;
 }
 
-/* iframe styles */
 
+
+//IFRAME////////////////////////////////
 .annotator-frame {
   height: 100%;
   position: fixed;
@@ -103,7 +107,8 @@
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
   &.annotator-collapsed {
-    margin-left: -$heatmap-width - 10px;
+    margin-left: -$heatmap-width - 17px;
+
   }
 }
 
@@ -143,8 +148,8 @@
 @media screen and (min-width: 37.5em) {
   .annotator-frame {
     @include single-transition(margin-left, .4s);
-    width: 428px + $heatmap-width + 10px;
-    margin-left: -428px - $heatmap-width - 10px;
+    width: 428px + $heatmap-width + 17px;
+    margin-left: -428px - $heatmap-width - 17px;
   }
 }
 
