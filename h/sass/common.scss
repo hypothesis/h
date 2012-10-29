@@ -388,7 +388,6 @@ blockquote {
   }
 
   .body {
-    margin-bottom: .5em;
     white-space: pre-wrap;
   }
 
@@ -403,7 +402,6 @@ blockquote {
 //This is specific to the detail view.
 .detail {
   position: relative;
-
   .paper > .threadexp {
     display: none;
   }
@@ -416,6 +414,13 @@ blockquote {
     z-index: 1;
   }
 
+  .replycount {
+    @include tertiarytext;
+  }
+
+  .bottombar {
+    margin-bottom: .25em;
+  }
 
   //Threaded discussion specific
   .annotator-listing {
@@ -425,7 +430,7 @@ blockquote {
       height: $threadexp-width;
       width: $threadexp-width;
       position: absolute;
-      top: .4em;
+      top: .8em;
       left: -($threadexp-width / 2);
       outline: 1px dotted #aaa;
       @include icon("minus_1.png");
@@ -433,8 +438,7 @@ blockquote {
 
     & > .detail, .writer {
       padding-left: $thread-padding;
-      padding-top: 0;
-      margin-top: 1em;
+      padding-top: .35em;
       &.squished {
         padding-left: 0;
       }
@@ -456,6 +460,7 @@ blockquote {
       white-space: nowrap;
       font-style: italic;
       margin-top: 0;
+      margin-bottom: 0;
     }
     & > .thread { overflow: hidden; }
     & > .user {
