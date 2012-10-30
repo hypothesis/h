@@ -518,7 +518,7 @@ class Hypothesis extends Annotator
     excerpt = $('<li class="paper excerpt">')
     excerpt.append($("<blockquote>#{quote}</blockquote>"))
 
-    item = $('<li class="paper writer">')
+    item = $('<li class="annotation paper writer">')
     item.append($(Handlebars.templates.editor(annotation)))
 
     @editor.element.find('.annotator-listing').empty()
