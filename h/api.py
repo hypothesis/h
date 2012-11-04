@@ -14,7 +14,7 @@ def personas(request):
     result = []
     if request.user:
         result.append({
-            'username': request.user.user_name,
+            'username': request.user.username,
             'provider': request.host
         })
     return list(enumerate(result))
@@ -48,7 +48,7 @@ def token(request):
         consumer = models.Consumer.get_by_key(key)
         assert(consumer)
 
-        user_id = 'acct:%s@%s' % (request.user.user_name, request.host)
+        user_id = 'acct:%s@%s' % (request.user.username, request.host)
 
         message = {
             'userId': user_id,

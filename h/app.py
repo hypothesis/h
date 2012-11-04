@@ -9,10 +9,10 @@ from horus.views import (
 )
 
 from horus import (
-    IHorusForgotPasswordForm,
-    IHorusResetPasswordForm,
-    IHorusForgotPasswordSchema,
-    IHorusResetPasswordSchema
+    IForgotPasswordForm,
+    IResetPasswordForm,
+    IForgotPasswordSchema,
+    IResetPasswordSchema
 )
 
 from pyramid.httpexceptions import HTTPBadRequest, HTTPRedirection
@@ -149,11 +149,11 @@ class AppController(views.BaseController):
         action = request.params.get('action', 'forgot')
 
         if action == 'forgot':
-            schema = request.registry.getUtility(IHorusForgotPasswordSchema)
-            form = request.registry.getUtility(IHorusForgotPasswordForm)
+            schema = request.registry.getUtility(IForgotPasswordSchema)
+            form = request.registry.getUtility(IForgotPasswordForm)
         elif action == 'reset':
-            schema = request.registry.getUtility(IHorusResetPasswordSchema)
-            form = request.registry.getUtility(IHorusResetPasswordForm)
+            schema = request.registry.getUtility(IResetPasswordSchema)
+            form = request.registry.getUtility(IResetPasswordForm)
         else:
             raise HTTPBadRequest()
 

@@ -1,14 +1,14 @@
 import json
 
 from horus import (
-    IHorusLoginSchema, LoginSchema,
-    IHorusRegisterSchema, RegisterSchema,
-    IHorusForgotPasswordSchema, ForgotPasswordSchema,
-    IHorusResetPasswordSchema, ResetPasswordSchema,
-    IHorusProfileSchema, ProfileSchema,
+    ILoginSchema, LoginSchema,
+    IRegisterSchema, RegisterSchema,
+    IForgotPasswordSchema, ForgotPasswordSchema,
+    IResetPasswordSchema, ResetPasswordSchema,
+    IProfileSchema, ProfileSchema,
 
-    IHorusLoginForm, IHorusRegisterForm, IHorusForgotPasswordForm,
-    IHorusResetPasswordForm, IHorusProfileForm,
+    ILoginForm, IRegisterForm, IForgotPasswordForm,
+    IResetPasswordForm, IProfileForm,
 
     SubmitForm
 )
@@ -46,60 +46,60 @@ def includeme(config):
         'horus.views.AuthController',
         attr='login',
         renderer='h:templates/auth.pt',
-        route_name='horus_login'
+        route_name='login'
     )
 
     config.add_view(
         'horus.views.AuthController',
         attr='logout',
-        route_name='horus_logout'
+        route_name='logout'
     )
 
     config.add_view(
         'horus.views.ForgotPasswordController',
         attr='forgot_password',
         renderer='h:templates/auth.pt',
-        route_name='horus_forgot_password'
+        route_name='forgot_password'
     )
 
     config.add_view(
         'horus.views.ForgotPasswordController',
         attr='reset_password',
         renderer='h:templates/auth.pt',
-        route_name='horus_reset_password'
+        route_name='reset_password'
     )
 
     config.add_view(
         'horus.views.RegisterController',
         attr='register',
         renderer='h:templates/auth.pt',
-        route_name='horus_register'
+        route_name='register'
     )
 
     config.add_view(
         'horus.views.RegisterController',
         attr='activate',
         renderer='h:templates/auth.pt',
-        route_name='horus_activate'
+        route_name='activate'
     )
 
     config.add_view(
         'horus.views.ProfileController',
         attr='profile',
         renderer='h:templates/auth.pt',
-        route_name='horus_profile'
+        route_name='profile'
     )
 
     schemas = [
-        (IHorusLoginSchema, LoginSchema),
-        (IHorusRegisterSchema, RegisterSchema),
-        (IHorusForgotPasswordSchema, ForgotPasswordSchema),
-        (IHorusResetPasswordSchema, ResetPasswordSchema),
-        (IHorusProfileSchema, ProfileSchema)
+        (ILoginSchema, LoginSchema),
+        (IRegisterSchema, RegisterSchema),
+        (IForgotPasswordSchema, ForgotPasswordSchema),
+        (IResetPasswordSchema, ResetPasswordSchema),
+        (IProfileSchema, ProfileSchema)
     ]
     forms = [
-        IHorusLoginForm, IHorusRegisterForm, IHorusForgotPasswordForm,
-        IHorusResetPasswordForm, IHorusProfileForm
+        ILoginForm, IRegisterForm, IForgotPasswordForm,
+        IResetPasswordForm, IProfileForm
     ]
     for iface, schema in schemas:
         if not config.registry.queryUtility(iface):
