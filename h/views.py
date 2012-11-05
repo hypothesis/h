@@ -1,3 +1,5 @@
+__all__ = ['BaseController']
+
 import json
 
 from horus import (

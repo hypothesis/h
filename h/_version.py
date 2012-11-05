@@ -194,4 +194,3 @@ def get_versions(default={"version": "unknown", "full": ""}, verbose=False):
     if not ver:
         ver = default
     return ver
-
