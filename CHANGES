@@ -1,6 +1,13 @@
 Changelog for h
 ===============
 
+0.0.4 (2012-11-6)
+-----------------
+
+- Refactoring of horus and SCSS
+- Reply counts on threads
+- Visual improvements
+
 0.0.3 (2012-10-16)
 ------------------
 
