@@ -16,7 +16,9 @@ from horus import (
 )
 from horus.views import BaseController
 
+from pyramid import path
 from pyramid.renderers import render
+from pyramid.response import FileResponse
 from pyramid.view import view_config
 
 
@@ -43,6 +45,14 @@ def includeme(config):
     config.add_static_view('h/sass', 'h:sass')
     config.add_static_view('h/js', 'h:js')
     config.add_static_view('h/images', 'h:images')
+
+    favicon_spec = 'h:images/favicon.ico'
+    favicon = path.AssetResolver().resolve(favicon_spec)
+
+    config.add_view(
+        lambda request: FileResponse(favicon.abspath(), request=request),
+        route_name='favicon'
+    )
 
     config.add_view(
         'horus.views.AuthController',
