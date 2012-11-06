@@ -130,7 +130,7 @@ site_css = Bundle(
             'h:sass/base.scss',
             'h:sass/common.scss',
         ),
-           filters=('compass', 'cssrewrite',),
+        filters=('compass', 'cssrewrite',),
         output='css/site.css',
     ),
     filters=('cleancss',),

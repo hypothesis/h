@@ -50,8 +50,12 @@
           annotating these instructions).</li>
         <li>Use this bookmarklet to annotate any page on the Web:
           <a class="btn bookmarklet"
-             href="javascript:(function(){var d=document,s=d.createElement('script');s.setAttribute('src', '${request.route_url('embed')}');d.body.appendChild(s)})()"
-             >Contribute</a></li>
+             href="javascript:(function(){
+                     var d=document
+                       , s=d.createElement('script');
+                     s.setAttribute('src', '${request.route_url('embed')}');
+                     d.body.appendChild(s)
+                   })();">Contribute</a></li>
       </ol>
     </div>
   </body>
