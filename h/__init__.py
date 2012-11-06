@@ -20,6 +20,8 @@ def create_app(settings):
     from pyramid.config import Configurator
     from pyramid.authentication import AuthTktAuthenticationPolicy
     from pyramid.authorization import ACLAuthorizationPolicy
+    from pyramid.path import AssetResolver
+    from pyramid.response import FileResponse
 
     settings.setdefault('horus.activation_class', 'h.models.Activation')
     settings.setdefault('horus.user_class', 'h.models.User')
@@ -36,6 +38,13 @@ def create_app(settings):
         authentication_policy=authn_policy,
         authorization_policy=authz_policy,
         root_factory='h.resources.RootFactory'
+    )
+
+    favicon = AssetResolver().resolve('h:favicon.ico')
+    config.add_route('favicon', '/favicon.ico')
+    config.add_view(
+        lambda request: FileResponse(favicon.abspath(), request=request),
+        route_name='favicon'
     )
 
     config.include(includeme)
