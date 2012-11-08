@@ -45,7 +45,11 @@ def token(request):
 
         settings = request.registry.settings
         key = settings['api.key']
-        consumer = models.Consumer.get_by_key(key)
+        secret = settings.get('api.secret')
+        if not secret:
+            consumer = models.Consumer.get_by_key(key)
+        else:
+            consumer = models.Consumer(key=key, secret=secret)
         assert(consumer)
 
         user_id = 'acct:%s@%s' % (request.user.username, request.host)
