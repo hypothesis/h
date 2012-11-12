@@ -562,7 +562,7 @@ class Hypothesis extends Annotator
     # so that it leaves the inserted links intact
     safe_text = Handlebars.Utils.escapeExpression(text)
     rendered_text = safe_text.replace /(https?:\/\/[^\s]+)/g, (match) ->
-      "<a href=\"" + match + "\">" + match + "</a>"
+      "<a target=\"_blank\" href=\"" + match + "\">" + match + "</a>"
     annotation.rendered_text = rendered_text
 
 
