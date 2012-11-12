@@ -346,6 +346,7 @@ class Hypothesis extends Annotator
         .each (d) ->
           _t = d3.select(this)
           unless this and _t.classed('summary')
+            window.renderAnnotation(d.message.annotation)
             _t.html Handlebars.templates.summary d.message.annotation
         .classed('detail', false)
         .classed('summary', true)
@@ -416,6 +417,7 @@ class Hypothesis extends Annotator
             unless count == 0
               d.message.annotation.replyCount = replyCount
           .html (d) ->
+              window.renderAnnotation(d.message.annotation)
               Handlebars.templates.detail d.message.annotation
           .classed('paper', (c) -> not c.parent.message?)
           .classed('detail', true)
@@ -555,3 +557,15 @@ class Hypothesis extends Annotator
       annotation.id
 
 window.Hypothesis = Hypothesis
+
+renderAnnotation = (annotation) ->
+        text = annotation.text
+        #Must do escaping manually, since we will need to disable Handlebar's autoamtic escaping,
+        # so that it leaves the inserted links intact
+        safe_text = Handlebars.Utils.escapeExpression(text)
+        rendered_text = safe_text.replace /(https?:\/\/[^\s]+)/g, (match) ->
+                "<a href=\"" + match + "\">" + match + "</a>"
+        annotation.rendered_text = rendered_text
+ 
+window.renderAnnotation = renderAnnotation
+
