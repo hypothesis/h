@@ -343,11 +343,10 @@ class Hypothesis extends Annotator
       items.enter().append('li').classed('annotation', true)
       items.exit().remove()
       items
-        .each (d) ->
-          _t = d3.select(this)
-          unless this and _t.classed('summary')
-            window.renderAnnotation(d.message.annotation)
-            _t.html Handlebars.templates.summary d.message.annotation
+        .html (d) =>
+          env = $.extend {}, d.message.annotation,
+            text: this.renderAnnotation d.message.annotation
+          Handlebars.templates.summary env
         .classed('detail', false)
         .classed('summary', true)
         .classed('paper', true)
@@ -416,9 +415,10 @@ class Hypothesis extends Annotator
                 "#{count} " + (if count == 1 then 'reply' else 'replies')
             unless count == 0
               d.message.annotation.replyCount = replyCount
-          .html (d) ->
-              window.renderAnnotation(d.message.annotation)
-              Handlebars.templates.detail d.message.annotation
+          .html (d) =>
+              env = $.extend {}, d.message.annotation,
+                text: this.renderAnnotation d.message.annotation
+              Handlebars.templates.detail env
           .classed('paper', (c) -> not c.parent.message?)
           .classed('detail', true)
           .classed('summary', false)
@@ -556,16 +556,14 @@ class Hypothesis extends Annotator
     else
       annotation.id
 
+  renderAnnotation: (annotation) ->
+    text = annotation.text
+    #Must do escaping manually, since we will need to disable Handlebar's autoamtic escaping,
+    # so that it leaves the inserted links intact
+    safe_text = Handlebars.Utils.escapeExpression(text)
+    rendered_text = safe_text.replace /(https?:\/\/[^\s]+)/g, (match) ->
+      "<a href=\"" + match + "\">" + match + "</a>"
+    annotation.rendered_text = rendered_text
+
+
 window.Hypothesis = Hypothesis
-
-renderAnnotation = (annotation) ->
-        text = annotation.text
-        #Must do escaping manually, since we will need to disable Handlebar's autoamtic escaping,
-        # so that it leaves the inserted links intact
-        safe_text = Handlebars.Utils.escapeExpression(text)
-        rendered_text = safe_text.replace /(https?:\/\/[^\s]+)/g, (match) ->
-                "<a href=\"" + match + "\">" + match + "</a>"
-        annotation.rendered_text = rendered_text
- 
-window.renderAnnotation = renderAnnotation
-
