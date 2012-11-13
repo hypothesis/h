@@ -351,7 +351,7 @@ class Hypothesis extends Annotator
       items
         .html (d) =>
           env = $.extend {}, d.message.annotation,
-            text: this.renderAnnotation d.message.annotation
+            text: @renderer.makeHtml d.message.annotation.text
           Handlebars.templates.summary env
         .classed('detail', false)
         .classed('summary', true)
@@ -423,7 +423,7 @@ class Hypothesis extends Annotator
               d.message.annotation.replyCount = replyCount
           .html (d) =>
               env = $.extend {}, d.message.annotation,
-                text: this.renderAnnotation d.message.annotation
+                text: @renderer.makeHtml d.message.annotation.text
               Handlebars.templates.detail env
           .classed('paper', (c) -> not c.parent.message?)
           .classed('detail', true)
@@ -561,8 +561,5 @@ class Hypothesis extends Annotator
       annotation.thread + '/' + annotation.id
     else
       annotation.id
-
-  renderAnnotation: (annotation) ->
-    annotation.rendered_text = @renderer.makeHtml(annotation.text)
 
 window.Hypothesis = Hypothesis
