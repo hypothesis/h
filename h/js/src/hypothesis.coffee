@@ -66,6 +66,12 @@ class Hypothesis extends Annotator
         getMaxBottom: {}
         scrollTop: {}
 
+    # Prepare a MarkDown renderer, and add some post-processing
+    # so that all created links have their target set to _blank
+    @renderer = Markdown.getSanitizingConverter()
+    @renderer.hooks.chain "postConversion", (text) ->
+        text.replace /<a href=/, "<a target=\"_blank\" href="
+
     super
 
     # Load plugins
@@ -557,13 +563,6 @@ class Hypothesis extends Annotator
       annotation.id
 
   renderAnnotation: (annotation) ->
-    text = annotation.text
-    #Must do escaping manually, since we will need to disable Handlebar's autoamtic escaping,
-    # so that it leaves the inserted links intact
-    safe_text = Handlebars.Utils.escapeExpression(text)
-    rendered_text = safe_text.replace /(https?:\/\/[^\s]+)/g, (match) ->
-      "<a target=\"_blank\" href=\"#{match}\">#{match}</a>"
-    annotation.rendered_text = rendered_text
-
+    annotation.rendered_text = @renderer.makeHtml(annotation.text)
 
 window.Hypothesis = Hypothesis

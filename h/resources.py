@@ -61,6 +61,16 @@ injector = Bundle(
     ),
 )
 
+# PageDown is used to render Markdown-formatted text to HTML
+pagedown = Bundle(
+    Bundle(
+        'h:js/lib/Markdown.Converter.js',
+        'h:js/lib/Markdown.Sanitizer.js',
+    ),
+    filters='uglifyjs',
+    output='js/markdown.min.js',
+)
+
 # The full application dependencies are as follows, with easyXDM as a common
 # component for both the annotator and injector.
 d3 = Bundle('h:js/lib/d3.v2.min.js')
