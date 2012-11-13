@@ -561,9 +561,6 @@ class Hypothesis extends Annotator
       annotation.id
 
   renderAnnotation: (annotation) ->
-    text = annotation.text
-    rendered_text = @renderer.makeHtml(text)
-    annotation.rendered_text = rendered_text
-
+    annotation.rendered_text = @renderer.makeHtml(annotation.text)
 
 window.Hypothesis = Hypothesis
