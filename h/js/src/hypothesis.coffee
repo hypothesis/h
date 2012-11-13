@@ -79,6 +79,8 @@ class Hypothesis extends Annotator
       if not @plugins[name] and name of Annotator.Plugin
         this.addPlugin(name, opts)
 
+    this
+
   _initialize: =>
     # Set up interface elements
     this._setupHeatmap()
