@@ -1,11 +1,12 @@
 class Hypothesis extends Annotator
   # Annotator state variables.
-  this::bucket = -1     # * The index of the bucket shown in the summary view
-  this::detail = false  # * Whether the viewer shows a summary or detail listing
-  this::hash = -1       # * cheap UUID :cake:
-  this::cache = {}      # * object cache
-  this::visible = false # * Whether the sidebar is visible
-
+  this::bucket = -1         # * The index of the bucket shown in the summary view
+  this::detail = false      # * Whether the viewer shows a summary or detail listing
+  this::hash = -1           # * cheap UUID :cake:
+  this::cache = {}          # * object cache
+  this::visible = false     # * Whether the sidebar is visible
+  this::reply_editor = null # * Whether there is an open reply editor
+  
   # Plugin configuration
   options:
     Heatmap: {}
@@ -323,6 +324,10 @@ class Hypothesis extends Annotator
     @provider.setupAnnotation stub
 
   showViewer: (annotations=[], detail=false) =>
+    if @visible and not detail
+      if not this._canCloseUnsaved()
+        return
+    
     # Thread the messages using JWZ
     messages = mail.messageThread().thread annotations.map (a) ->
       m = mail.message(null, a.id, a.thread?.split('/') or [])
@@ -482,9 +487,11 @@ class Hypothesis extends Annotator
 
                 editor = this._createEditor()
                 editor.load(reply)
+                @reply_editor = editor
                 editor.element.removeClass('annotator-outer')
                 editor.on 'save', (annotation) =>
                   this.publish 'annotationCreated', [annotation]
+                  @reply_editor = null
 
                 d3.select(editor.element[0]).select('form')
                   .data([reply])
@@ -498,7 +505,9 @@ class Hypothesis extends Annotator
                     .classed('writer', true)
 
                 editor.element.appendTo(item.node())
-                editor.on('hide', => item.remove())
+                editor.on('hide', => 
+                  item.remove()
+                  @reply_editor = null)
                 editor.element.find(":input:first").focus()
 
         context = items.select '.thread'
@@ -555,6 +564,18 @@ class Hypothesis extends Annotator
     @provider.hideFrame()
     $("#toolbar").removeClass "shown"
 
+  _canCloseUnsaved: ->
+    #See if there's an unsaved/uncancelled reply
+    can_close = true
+    unsaved_text = null
+    if @reply_editor
+      @reply_editor.show()
+      unsaved_text =  @reply_editor.element[0].ownerDocument.activeElement.value
+      can_close = unsaved_text == null or unsaved_text.length < 1 or confirm "You have an unsaved reply. Do you really want to close the view?"
+      if can_close
+        @reply_editor = null
+        
+    can_close
 
   threadId: (annotation) ->
     if annotation?.thread?
