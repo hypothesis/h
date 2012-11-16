@@ -5,7 +5,7 @@ class Hypothesis extends Annotator
   this::hash = -1           # * cheap UUID :cake:
   this::cache = {}          # * object cache
   this::visible = false     # * Whether the sidebar is visible
-  this::reply_editor = null # * Whether there is an open reply editor
+  this::unsaved_drafts = [] # * Unsaved drafts currenty open
   
   # Plugin configuration
   options:
@@ -487,11 +487,11 @@ class Hypothesis extends Annotator
 
                 editor = this._createEditor()
                 editor.load(reply)
-                @reply_editor = editor
+                @unsaved_drafts.push editor
                 editor.element.removeClass('annotator-outer')
                 editor.on 'save', (annotation) =>
                   this.publish 'annotationCreated', [annotation]
-                  @reply_editor = null
+                  @unsaved_drafts.splice(@unsaved_drafts.indexOf(editor),1)
 
                 d3.select(editor.element[0]).select('form')
                   .data([reply])
@@ -507,7 +507,7 @@ class Hypothesis extends Annotator
                 editor.element.appendTo(item.node())
                 editor.on('hide', => 
                   item.remove()
-                  @reply_editor = null)
+                  @unsaved_drafts.splice(@unsaved_drafts.indexOf(editor),1))
                 editor.element.find(":input:first").focus()
 
         context = items.select '.thread'
@@ -567,14 +567,17 @@ class Hypothesis extends Annotator
   _canCloseUnsaved: ->
     #See if there's an unsaved/uncancelled reply
     can_close = true
-    unsaved_text = null
-    if @reply_editor
-      @reply_editor.show()
-      unsaved_text =  @reply_editor.element[0].ownerDocument.activeElement.value
-      can_close = unsaved_text == null or unsaved_text.length < 1 or confirm "You have an unsaved reply. Do you really want to close the view?"
-      if can_close
-        @reply_editor = null
-        
+    open_editors = 0
+    for editor in @unsaved_drafts
+      editor.show()     
+      unsaved_text =  editor.element[0].ownerDocument.activeElement.value
+      if unsaved_text != null and unsaved_text.toString().length > 0 then open_editors += 1
+    
+    if open_editors > 0
+      ctext = if open_editors > 1 then "You have " + open_editors + " unsaved replies. Do you really want to close the view?" else "You have an unsaved reply. Do you really want to close the view?"
+      if not confirm ctext then can_close = false
+
+    if can_close then @unsaved_drafts = []	               
     can_close
 
   threadId: (annotation) ->
