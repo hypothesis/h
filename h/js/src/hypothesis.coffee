@@ -29,6 +29,10 @@ class Hypothesis extends Annotator
             this.publish event, [annotation]
         addPlugin: => this.addPlugin arguments...
         createAnnotation: =>
+          if not this._canCloseUnsaved()
+            @editor.hide()
+            this.show()
+            return 
           @cache[h = ++@hash] = this.createAnnotation()
           h
         showEditor: (stub) =>
@@ -42,6 +46,7 @@ class Hypothesis extends Annotator
           else
             showAuth true
             @editor.hide()
+            if @unsaved_drafts.indexOf(@editor) > -1 then @unsaved_drafts.splice(@unsaved_drafts.indexOf(@editor),1)
             this.show()
         # This guy does stuff when you "back out" of the interface. 
         # (Currently triggered by a click on the source page.)
@@ -324,9 +329,8 @@ class Hypothesis extends Annotator
     @provider.setupAnnotation stub
 
   showViewer: (annotations=[], detail=false) =>
-    if @visible and not detail
-      if not this._canCloseUnsaved()
-        return
+    if (@visible and not detail) or @unsaved_drafts.indexOf(@editor) > -1
+      if not this._canCloseUnsaved() then return
     
     # Thread the messages using JWZ
     messages = mail.messageThread().thread annotations.map (a) ->
@@ -406,7 +410,6 @@ class Hypothesis extends Annotator
                   d3.select(this).html(trunc)
           else
             d3.select(this).html(quote)
-
 
       highlights = []
       excerpts.each (d) =>
@@ -514,6 +517,7 @@ class Hypothesis extends Annotator
         items = thread context, '.annotation'
 
     @editor.hide()
+    if @unsaved_drafts.indexOf(@editor) > -1 then @unsaved_drafts.splice(@unsaved_drafts.indexOf(@editor),1)
     @viewer.show()
 
   updateViewer: (annotations) =>
@@ -527,6 +531,7 @@ class Hypothesis extends Annotator
     if not annotation.user?
       @plugins.Permissions.addFieldsToAnnotation(annotation)
 
+    @unsaved_drafts.push @editor 
     @viewer.hide()
     @editor.load(annotation)
     @editor.element.find('.annotator-controls').remove()
@@ -571,7 +576,7 @@ class Hypothesis extends Annotator
     for editor in @unsaved_drafts
       editor.show()     
       unsaved_text =  editor.element[0].ownerDocument.activeElement.value
-      if unsaved_text != null and unsaved_text.toString().length > 0 then open_editors += 1
+      if typeof unsaved_text != 'undefined' and unsaved_text.toString().length > 0 then open_editors += 1
     
     if open_editors > 0
       ctext = if open_editors > 1 then "You have " + open_editors + " unsaved replies. Do you really want to close the view?" else "You have an unsaved reply. Do you really want to close the view?"
