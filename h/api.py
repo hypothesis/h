@@ -1,4 +1,4 @@
-from annotator import auth, authz, store, es
+from annotator import auth, store, es
 from annotator.annotation import Annotation
 
 from flask import Flask, g
@@ -7,7 +7,7 @@ from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
 from pyramid.view import view_config
 from pyramid.wsgi import wsgiapp2
 
-from h import messages, models
+from h import messages, models, authz
 
 
 def personas(request):
