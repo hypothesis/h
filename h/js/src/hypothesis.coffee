@@ -5,6 +5,8 @@ class Hypothesis extends Annotator
   this::hash = -1       # * cheap UUID :cake:
   this::cache = {}      # * object cache
   this::visible = false # * Whether the sidebar is visible
+  this::dragstartposX =0# * Frame's draggin start position
+  this::lastWidth = 0   # * Frame's width before close
 
   # Plugin configuration
   options:
@@ -61,10 +63,14 @@ class Hypothesis extends Annotator
         onEditorSubmit: {}
         showFrame: {}
         hideFrame: {}
+        resetFrameWidth: {}
+        setFrameWidth: {}
+        addtoFrameWidth: {}
         getHighlights: {}
         setActiveHighlights: {}
         getMaxBottom: {}
         scrollTop: {}
+        debounce: {}
 
     # Prepare a MarkDown renderer, and add some post-processing
     # so that all created links have their target set to _blank
@@ -123,6 +129,15 @@ class Hypothesis extends Annotator
         if @viewer.isShown() and @bucket == -1
           this._fillDynamicBucket()
         this.show()
+    document.getElementById('toolbar').addEventListener 'dragstart', (event) =>
+      @dragstartposX = event.screenX
+    document.getElementById('toolbar').addEventListener 'drag', (event, ui) =>
+      @provider.debounce( =>
+        @provider.addtoFrameWidth(@dragstartposX - event.screenX, window.innerWidth)
+        @dragstartposX = event.screenX
+      , 250)
+    document.getElementById('toolbar').addEventListener 'dragend', (event) =>
+      @provider.addtoFrameWidth(@dragstartposX - event.screenX, window.innerWidth)
     this
 
   _setupDynamicStyle: ->
@@ -545,16 +560,20 @@ class Hypothesis extends Annotator
       annotations = @heatmap.buckets[@bucket]?.map (a) => a.hash.valueOf()
 
     @visible = true
+    if @lastWidth > 0 then @provider.setFrameWidth(@lastWidth)
     @provider.setActiveHighlights annotations
     @provider.showFrame()
     $("#toolbar").addClass "shown"
+    $("#toolbar").draggable = true
 
   hide: =>
+    @lastWidth = window.innerWidth
     @visible = false
     @provider.setActiveHighlights []
+    @provider.resetFrameWidth()
     @provider.hideFrame()
     $("#toolbar").removeClass "shown"
-
+    $("#toolbar").draggable = false
 
   threadId: (annotation) ->
     if annotation?.thread?
