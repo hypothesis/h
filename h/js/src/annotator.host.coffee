@@ -107,8 +107,6 @@ class Annotator.Host extends Annotator
           Math.max.apply(Math, all)
         scrollTop: (y) =>
           $('html, body').stop().animate {scrollTop: y}, 600
-        debounce: (fn, delay) =>
-          util.debounce(fn, delay)
       remote:
         publish: {}
         addPlugin: {}

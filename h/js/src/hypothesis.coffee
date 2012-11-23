@@ -70,7 +70,6 @@ class Hypothesis extends Annotator
         setActiveHighlights: {}
         getMaxBottom: {}
         scrollTop: {}
-        debounce: {}
 
     # Prepare a MarkDown renderer, and add some post-processing
     # so that all created links have their target set to _blank
@@ -129,15 +128,14 @@ class Hypothesis extends Annotator
         if @viewer.isShown() and @bucket == -1
           this._fillDynamicBucket()
         this.show()
-    document.getElementById('toolbar').addEventListener 'dragstart', (event) =>
+    document.getElementsByClassName('tri')[0].addEventListener 'dragstart', (event) =>
       @dragstartposX = event.screenX
-    document.getElementById('toolbar').addEventListener 'drag', (event, ui) =>
-      @provider.debounce( =>
-        @provider.addtoFrameWidth(@dragstartposX - event.screenX, window.innerWidth)
-        @dragstartposX = event.screenX
-      , 250)
     document.getElementById('toolbar').addEventListener 'dragend', (event) =>
       @provider.addtoFrameWidth(@dragstartposX - event.screenX, window.innerWidth)
+    document.getElementById('toolbar').addEventListener 'drag', (event) =>
+      if event.screenX > 0
+        @provider.addtoFrameWidth((@dragstartposX - event.screenX), window.innerWidth)
+        @dragstartposX = event.screenX
     this
 
   _setupDynamicStyle: ->
@@ -564,7 +562,7 @@ class Hypothesis extends Annotator
     @provider.setActiveHighlights annotations
     @provider.showFrame()
     $("#toolbar").addClass "shown"
-    $("#toolbar").draggable = true
+    document.getElementsByClassName('tri')[0].draggable = true
 
   hide: =>
     @lastWidth = window.innerWidth
@@ -573,7 +571,7 @@ class Hypothesis extends Annotator
     @provider.resetFrameWidth()
     @provider.hideFrame()
     $("#toolbar").removeClass "shown"
-    $("#toolbar").draggable = false
+    document.getElementsByClassName('tri')[0].draggable = false
 
   threadId: (annotation) ->
     if annotation?.thread?
