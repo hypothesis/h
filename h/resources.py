@@ -94,6 +94,7 @@ _template = lambda tf: Bundle(
 templates = Bundle(
     _template('detail'),
     _template('editor'),
+    _template('redact'),
     _template('summary'),
     Bundle('h:js/lib/helpers.js'),
     filters=('uglifyjs',),

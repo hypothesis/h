@@ -251,6 +251,10 @@ class Hypothesis extends Annotator
     this.subscribe 'annotationCreated', (annotation) =>
       this.updateViewer [annotation]
 
+    # Show modified/redacted annotations in the viewer immediately
+    this.subscribe 'annotationUpdated', (annotation) =>
+      this.updateViewer [annotation]
+
     this
 
   # Creates an instance of the Annotator.Editor and assigns it to @editor.
@@ -424,6 +428,8 @@ class Hypothesis extends Annotator
           .html (d) =>
               env = $.extend {}, d.message.annotation,
                 text: @renderer.makeHtml d.message.annotation.text
+                canReply: not d.message.annotation.redacted
+                canRedact: not d.message.annotation.redacted and @plugins.Permissions.authorize 'update', d.message.annotation, @plugins.Permissions.user
               Handlebars.templates.detail env
           .classed('paper', (c) -> not c.parent.message?)
           .classed('detail', true)
@@ -500,6 +506,49 @@ class Hypothesis extends Annotator
                 editor.element.appendTo(item.node())
                 editor.on('hide', => item.remove())
                 editor.element.find(":input:first").focus()
+              when '#redact'
+                unless @plugins.Permissions?.user
+                  showAuth true
+                  break
+                d3.event.preventDefault()
+                parent = d3.select(event.currentTarget)
+                redaction = parent.datum().message.annotation
+                redaction.text = ""
+                redaction.user = "acct:[deleted]@" + redaction.user.split(/(?:acct:)|@/)[2]
+                editor = this._createEditor()
+                editor.load(redaction)
+                editor.element.removeClass('annotator-outer')
+                editor.on 'save', (annotation) =>
+                  @plugins.Store.registerAnnotation(annotation)
+                  @plugins.Store.updateAnnotation annotation,                 
+                    redacted: true,
+                    text: annotation.text
+                  annotation.created = (new Date()).toString()
+                  this.updateAnnotation annotation 
+
+                d3.select(editor.element[0]).select('form')
+                  .data([redaction])
+                    .html(Handlebars.templates.redact)
+                    .on 'mouseover', => d3.event.stopPropagation()
+
+                anno = d3.select(d3.event.currentTarget)
+                item = anno
+                    .insert('div', ':first-child')
+                    .classed('annotation', true)
+                    .classed('writer', true)
+
+                hidden_keys = [".body", ".user", ".time", ".annotator-controls"]
+                
+                anno.select(key).classed("visuallyhidden", true) for key in hidden_keys
+
+                editor.element.appendTo(item.node())
+                editor.on('hide', =>
+                  item.remove()
+                  anno.select(key).classed("visuallyhidden", false) for key in hidden_keys                
+                )
+                editor.element.find(":input:first").focus()
+
+                
 
         context = items.select '.thread'
         items = thread context, '.annotation'

@@ -185,6 +185,11 @@ a {
     background-image: url("../images/pen_1.png");
   }
 
+  &.redact {
+    @include linkbutton;
+    background-image: url("../images/delete_1.png");
+  }
+
   &.fave {
     @include linkbutton;
     background-image: url("../images/fave_1.png");

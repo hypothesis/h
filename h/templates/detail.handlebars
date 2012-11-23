@@ -1,7 +1,13 @@
 <a class="threadexp" href="#collapse"></a>
 <div class="time">{{fuzzyTime created}}</div>
 <div class="annotator-controls">
- <a href="#reply" class="write">Reply</a>
+ {{#if canReply}}
+  <a href="#reply" class="write">Reply</a>
+ {{/if}}
+ {{#if canRedact}}
+  <a href="#redact" class="redact">Redact</a>
+ {{/if}}
+
 </div>
 {{#splitUser user}}
 <h3 class="user">{{name}}</h3>
