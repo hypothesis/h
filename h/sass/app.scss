@@ -7,6 +7,9 @@ $baseFontSize: 14;
 
 @import 'common';
 
+
+
+//ELEMENT STYLES////////////////////////////////
 body {
   background-color: transparent;
   font-family: $sansFontFamily;
@@ -18,150 +21,9 @@ body {
 input { width: 100%; }
 svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
-/* Annotator styles */
-
-.annotator-hide {
-  display: none;
-  visibility: hidden;
-}
-
-.annotator-heatmap {
-  background: hsla(0, 0, 0, .1);
-  border: solid thin rgba($grayLighter, .4);
-  left: 10px;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  width: $heatmap-width;
-  cursor: pointer;
-}
-
-//HEATMAP TABS
-.hyp-heatmap-tab {
-  @include user-select(none);
-  background-image: url("../images/side_tab.svg");
-  background-position: center 1.025em;
-  background-repeat: no-repeat;
-  background-size: 100% 1.4em;
-  color: rgb(238, 238, 238);
-  cursor: pointer;
-  font-weight: bold;
-  font-size: .8em;
-  left: 2px;
-  margin-top: (1.4 + 2) / 2 * -1em; // TODO: Less janking v-align
-  padding: 1em 0;
-  position: fixed;
-  text-align: center;
-  text-decoration: none;
-  text-shadow: 1px 1px 1px rgb(51, 51, 51);
-  width: $heatmap-width + 8px;
-  vertical-align: middle;
-  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-
-  &:hover { left: 0; }
-
-  &.lower, &.upper {
-    background-size: 100% 2em;
-    margin-top: -1em;
-    &:hover { left: 2px; }
-  }
-
-  &.lower {
-    background-image: url("../images/down_tab.svg");
-    background-position: center .955em; // 1em + .45em in svg (TODO: crop)
-  }
-
-  &.upper {
-    background-image: url("../images/up_tab.svg");
-    background-position: center .455em; // 1em - .545em in svg (TODO: crop)
-  }
-}
 
 
-
-// .hyp-heatmap-tab {
-//   @include user-select(none);
-//   color: rgb(238, 238, 238);
-//   cursor: pointer;
-//   left: 0px;
-//   position: fixed;
-//   text-align: center;
-//   text-decoration: none;
-//   text-shadow: 1px 1px 1px rgb(51, 51, 51);
-//   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-//   .svg {
-//     width: 100%;
-//     height: 100%;
-//   }
-//   .tab {
-//     fill: #666;
-//     stroke: black;
-//   }
-
-//   .insert {
-//     fill: #FFEA00;
-//     stroke: black;
-//   }
-
-//   .label {
-//     font-weight: bold;
-//     font-size: 13.1px;
-//     position: absolute;
-//   }
-
-//   &.emphasis {
-//     .insert {
-//       visibility: visible;
-//     }
-//   }
-
-//   &.lower, &.upper {
-//     width: 33.1px;
-//     height: 26.1px;
-//     .label {
-//       width: 100%;
-//     }
-//   }
-
-//   &.upper {
-//     .label {
-//       bottom: 1px;
-//     }
-//   }
-
-//   &.side {
-//     @include transition-property(transform, left);
-//     @include transition-duration(.5s, .2s);
-//     @include perspective(100px);
-//     left: -7px;
-//     height: 20.1px;
-//     width: 40.1px;
-//     .label {
-//       @include single-transition(transform, .5s);
-//       left: 10px;
-//       right: 2px;
-//       position: absolute;
-//       bottom: 1px;
-//     }
-//     &.flip {
-//       @include rotateY(180deg);
-//       .label {
-//         @include rotateY(180deg);
-//       }
-//       &:hover {
-//         @include rotateY(180deg);
-//         .label {
-//           @include rotateY(180deg);
-//         }
-//       }
-//     }
-//     &:hover {
-//       left: -5px;
-//     }
-//   }
-// }
-
-// Hidden tabs
+//HIDDEN TABS////////////////////////////////
 .nav a[data-target="#password-tab"],
 .nav a[data-target="#reset-tab"] {
   display: none;
@@ -172,22 +34,153 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   display: initial;
 }
 
+
+
+//ANNOTATOR STYLES////////////////////////////////
+.annotator-hide {
+  display: none;
+  visibility: hidden;
+}
+
+.annotator-heatmap {
+  background: hsla(0, 0, 0, .1);
+  border: solid thin rgba($grayLighter, .4);
+  left: 17px;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  width: $heatmap-width;
+}
+
+
+
+//SIDEBAR LAYOUT////////////////////////////////
+#gutter {
+  background: url('../images/noise_1.png');
+  background-attachment: fixed;
+  height: 100%;
+  margin-left: $heatmap-width + 17px;
+  position: relative;
+}
+
+#wrapper {
+  height: 100%;
+  overflow: auto;
+  padding: 3.75em 1em 1em 1em;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+
+//HEATMAP POINTERS////////////////////////////////
+.heatmap-pointer {
+  @include user-select(none);
+  @include transition-property(left);
+  @include transition-duration(.2s);
+  margin-top: -1em; // TODO: Less janking v-align
+  // color: rgb(238, 238, 238);
+  color: #666;
+  left: 0px;
+  position: fixed;
+  height: 20.1px;
+  width: 40.1px;
+  vertical-align: middle;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  text-align: center;
+  cursor: pointer;
+
+  .svg {
+    width: 100%;
+    height: 100%;
+    background-image: url("../images/side_tab.svg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+
+  .label {
+    font-weight: bold;
+    font-size: 13.1px;
+    position: absolute;
+    text-decoration: none;
+    left: 10px;
+    right: 2px;
+    position: absolute;
+    bottom: 1px;
+  }
+
+  &:hover {
+    left: 2px;
+  }
+
+  &.lower, &.upper {
+    @include single-transition(margin-top, .2s);
+    left: 7px;
+    width: 33.1px;
+    height: 26.1px;
+    .label {
+      left: 0;
+      right: 0;
+    }
+
+    &:hover {
+      left: 7px;
+    }
+  }
+  
+  &.upper {
+    .svg {
+      background-image: url("../images/up_tab.svg");
+    }
+    .label {
+      bottom: 1px;
+    }
+    &:hover {
+      margin-top: -1.2em;
+    }
+  }
+
+  &.lower {
+    .svg {
+      background-image: url("../images/down_tab.svg");
+    }
+    .label {
+      top: 1px;
+    }
+    &:hover {
+      margin-top: -.8em;
+    }
+  }
+  &.flip {
+    @include rotateY(180deg);
+    .label {
+      @include rotateY(180deg);
+    }
+  }
+}
+
+
+
+//SHEET////////////////////////////////
+//This comes down from under things.
 .sheet {
+  @include box-shadow(5px 5px 40px hsla(0, 0%, 0%, .1));
+  @include single-transition(all, .4s, ease-in-out);
+  @include transform-origin(50%, 0);
+  z-index: 4;
   background: url('../images/noise_1.png');
   background-attachment: fixed;
   margin-top: 2.5em;
   padding-top: 1em;
   position: absolute;
   width: 100%;
-}
 
-.sheet {
-  @include box-shadow(5px 5px 40px hsla(0, 0%, 0%, .1));
-  @include single-transition(all, .4s, ease-in-out);
-  @include transform-origin(50%, 0);
-  z-index: 4;
+  .close {
+    margin-right: .5em;
+    margin-top: .25em;
+  }
 
-  &.hyp-collapsed {
+  &.collapsed {
     @include rotateX(90deg);
     opacity: 0;
     pointer-events: none;
@@ -210,21 +203,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 }
 
-#gutter {
-  background: url('../images/noise_1.png');
-  background-attachment: fixed;
-  height: 100%;
-  margin-left: $heatmap-width + 10px;
-  position: relative;
-}
-
-#auth-tab > footer > ul,
-#register-tab > footer > ul {
-  text-align: right;
-}
 
 
-//TOOL BAR
+//TOOL BAR////////////////////////////////
 #toolbar {
   @include smallshadow;
   background: white;
@@ -232,18 +213,29 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
   left: 1px;
+  line-height: $baseLineHeight;
   margin-top: .5em;
   padding: .3em;
   position: absolute;
+  text-align: right;
   width: 100%;
   z-index: 5;
+  left: 7px;
+
+  & > div {
+    display: inline-block;
+    vertical-align: top;
+
+    &:last-child {
+      border-left: 1px solid $grayLighter;
+    }
+  }
 
   .tri {
     @include icon("tri-left.png");
     float: left;
-    display: inline-block;
-    width: 1.5em;
-    height: 1.5em;
+    width: $baseLineHeight;
+    height: $baseLineHeight;
     cursor: pointer;
   }
 
@@ -253,40 +245,31 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       margin-right: .7em;
     }
   }
+}
 
-  .tinyman {
-    border-left: 1px solid $grayLighter;
-    border-right: 1px solid $grayLighter;
-    padding: 0 .3em;
+.tinyman {
+  padding: 0 .3em;
 
-    .avatar {
-      border-radius: 2px;
+  .avatar {
+    border-radius: 2px;
+  }
+
+  .dropdown-toggle {
+    @include linkbutton_right;
+    background-image: url("../images/dropdown_1.png");
+    .provider {
+      color: $grayLight;
+      display: none;
     }
-
-    .dropdown-toggle {
-      @include linkbutton_right;
-      background-image: url("../images/dropdown_1.png");
+    &:hover {
       .provider {
-        color: $grayLight;
-        display: none;
-      }
-      &:hover {
-        .provider {
-          display: inline;
-        }
+        display: inline;
       }
     }
+  }
 
-    &.open .provider {
-      display: inline;
-    }
+  &.open .provider {
+    display: inline;
   }
 }
 
-
-#wrapper {
-  height: 100%;
-  overflow: auto;
-  padding: 3.75em 1em 1em 1em;
-  -webkit-overflow-scrolling: touch;
-}

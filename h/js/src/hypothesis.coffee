@@ -66,6 +66,12 @@ class Hypothesis extends Annotator
         getMaxBottom: {}
         scrollTop: {}
 
+    # Prepare a MarkDown renderer, and add some post-processing
+    # so that all created links have their target set to _blank
+    @renderer = Markdown.getSanitizingConverter()
+    @renderer.hooks.chain "postConversion", (text) ->
+        text.replace /<a href=/, "<a target=\"_blank\" href="
+
     super
 
     # Load plugins
@@ -150,9 +156,8 @@ class Hypothesis extends Annotator
       this.show()
 
     @heatmap.subscribe 'updated', =>
-      # Creates tabs var by looking at all buckets on page.
       tabs = d3.select(document.body)
-        .selectAll('div.hyp-heatmap-tab')
+        .selectAll('div.heatmap-pointer')
         .data =>
           buckets = []
           @heatmap.index.forEach (b, i) =>
@@ -168,7 +173,7 @@ class Hypothesis extends Annotator
 
       # Enters into tabs var, and generates bucket pointers from them
       tabs.enter().append('div')
-        .classed('hyp-heatmap-tab', true)
+        .classed('heatmap-pointer', true)
 
       tabs.exit().remove()
 
@@ -177,7 +182,8 @@ class Hypothesis extends Annotator
         .style 'top', (d) =>
           "#{(@heatmap.index[d] + @heatmap.index[d+1]) / 2}px"
 
-        .text((d) => @heatmap.buckets[d].length)
+        .html (d) =>
+          "<div class='label'>#{@heatmap.buckets[d].length}</div><div class='svg'></div>"
 
         .classed('upper', @heatmap.isUpper)
         .classed('lower', @heatmap.isLower)
@@ -243,6 +249,10 @@ class Hypothesis extends Annotator
 
     # Show newly created annotations in the viewer immediately
     this.subscribe 'annotationCreated', (annotation) =>
+      this.updateViewer [annotation]
+
+    # Show modified/redacted annotations in the viewer immediately
+    this.subscribe 'annotationUpdated', (annotation) =>
       this.updateViewer [annotation]
 
     this
@@ -329,8 +339,8 @@ class Hypothesis extends Annotator
         .data ((m) -> m.children), ((d) -> d.message.id)
 
     context = d3.select(@viewer.element[0]).datum(messages)
-    items = thread context, '.hyp-annotation'
-    excerpts = thread context, '.hyp-excerpt'
+    items = thread context, '.annotation'
+    excerpts = thread context, '.excerpt'
 
     if not detail
       # Save the state so the bucket view can be restored when exiting
@@ -340,16 +350,16 @@ class Hypothesis extends Annotator
       excerpts.remove()
       excerpts.exit().remove()
 
-      items.enter().append('li').classed('hyp-annotation', true)
+      items.enter().append('li').classed('annotation', true)
       items.exit().remove()
       items
-        .each (d) ->
-          _t = d3.select(this)
-          unless this and _t.classed('hyp-summary')
-            _t.html Handlebars.templates.summary d.message.annotation
-        .classed('hyp-detail', false)
-        .classed('hyp-summary', true)
-        .classed('hyp-paper', true)
+        .html (d) =>
+          env = $.extend {}, d.message.annotation,
+            text: @renderer.makeHtml d.message.annotation.text
+          Handlebars.templates.summary env
+        .classed('detail', false)
+        .classed('summary', true)
+        .classed('paper', true)
         .on 'mouseup', (d, i) =>
           a = d.message.annotation
           query =
@@ -372,9 +382,9 @@ class Hypothesis extends Annotator
       @detail = true
 
       excerpts.enter()
-        .insert('li', '.hyp-annotation')
-          .classed('hyp-paper', true)
-          .classed('hyp-excerpt', true)
+        .insert('li', '.annotation')
+          .classed('paper', true)
+          .classed('excerpt', true)
         .append('blockquote')
       excerpts.exit().remove()
 
@@ -404,16 +414,26 @@ class Hypothesis extends Annotator
       @provider.setActiveHighlights highlights
 
       while items.length
-        items.enter().append('li').classed('hyp-annotation', true)
+        items.enter().append('li').classed('annotation', true)
         items.exit().remove()
         items
-          .each (d) ->
-            _t = this and d3.select(this)
-            unless _t and _t.classed('hyp-detail')
-              _t.html Handlebars.templates.detail d.message.annotation
-          .classed('hyp-paper', (c) -> not c.parent.message?)
-          .classed('hyp-detail', true)
-          .classed('hyp-summary', false)
+          .each (d) ->  # XXX: SLOW! Repeats calculation alllll the time
+            count = d.flattenChildren()?.length or 0
+            replyCount =
+              toJSON: => undefined
+              valueOf: =>
+                "#{count} " + (if count == 1 then 'reply' else 'replies')
+            unless count == 0
+              d.message.annotation.replyCount = replyCount
+          .html (d) =>
+              env = $.extend {}, d.message.annotation,
+                text: @renderer.makeHtml d.message.annotation.text
+                canReply: not d.message.annotation.redacted
+                canRedact: not d.message.annotation.redacted and @plugins.Permissions.authorize 'update', d.message.annotation, @plugins.Permissions.user
+              Handlebars.templates.detail env
+          .classed('paper', (c) -> not c.parent.message?)
+          .classed('detail', true)
+          .classed('summary', false)
 
           .sort (d, e) =>
             n = d.message.annotation.created
@@ -422,11 +442,11 @@ class Hypothesis extends Annotator
 
           .on 'mouseover', =>
             d3.event.stopPropagation()
-            d3.select(d3.event.currentTarget).classed('hyp-hover', true)
+            d3.select(d3.event.currentTarget).classed('hover', true)
 
           .on 'mouseout', =>
             d3.event.stopPropagation()
-            d3.select(d3.event.currentTarget).classed('hyp-hover', false)
+            d3.select(d3.event.currentTarget).classed('hover', false)
 
           .on 'mouseup', =>
             event = d3.event
@@ -435,8 +455,8 @@ class Hypothesis extends Annotator
             event.stopPropagation()
 
             animate = (parent) ->
-              collapsed = parent.classed('hyp-collapsed')
-              parent.select('.hyp-thread')
+              collapsed = parent.classed('collapsed')
+              parent.select('.thread')
                 .transition().duration(200)
                   .style('overflow', 'hidden')
                   .style 'height', ->
@@ -454,15 +474,15 @@ class Hypothesis extends Annotator
             switch d3.event.target.getAttribute('href')
               when '#collapse'
                 d3.event.preventDefault()
-                collapsed = parent.classed('hyp-collapsed')
-                animate parent.classed('hyp-collapsed', !collapsed)
+                collapsed = parent.classed('collapsed')
+                animate parent.classed('collapsed', !collapsed)
               when '#reply'
                 unless @plugins.Permissions?.user
                   showAuth true
                   break
                 d3.event.preventDefault()
                 parent = d3.select(event.currentTarget)
-                animate parent.classed('hyp-collapsed', false)
+                animate parent.classed('collapsed', false)
                 reply = this.createAnnotation()
                 reply.thread = this.threadId(parent.datum().message.annotation)
 
@@ -479,16 +499,59 @@ class Hypothesis extends Annotator
 
                 item = d3.select(d3.event.currentTarget)
                   .select('.annotator-listing')
-                  .insert('li', '.hyp-annotation')
-                    .classed('hyp-annotation', true)
-                    .classed('hyp-writer', true)
+                  .insert('li', '.annotation')
+                    .classed('annotation', true)
+                    .classed('writer', true)
 
                 editor.element.appendTo(item.node())
                 editor.on('hide', => item.remove())
                 editor.element.find(":input:first").focus()
+              when '#redact'
+                unless @plugins.Permissions?.user
+                  showAuth true
+                  break
+                d3.event.preventDefault()
+                parent = d3.select(event.currentTarget)
+                redaction = parent.datum().message.annotation
+                redaction.text = ""
+                redaction.user = "acct:[deleted]@" + redaction.user.split(/(?:acct:)|@/)[2]
+                editor = this._createEditor()
+                editor.load(redaction)
+                editor.element.removeClass('annotator-outer')
+                editor.on 'save', (annotation) =>
+                  @plugins.Store.registerAnnotation(annotation)
+                  @plugins.Store.updateAnnotation annotation,                 
+                    redacted: true,
+                    text: annotation.text
+                  annotation.created = (new Date()).toString()
+                  this.updateAnnotation annotation 
 
-        context = items.select '.hyp-thread'
-        items = thread context, '.hyp-annotation'
+                d3.select(editor.element[0]).select('form')
+                  .data([redaction])
+                    .html(Handlebars.templates.redact)
+                    .on 'mouseover', => d3.event.stopPropagation()
+
+                anno = d3.select(d3.event.currentTarget)
+                item = anno
+                    .insert('div', ':first-child')
+                    .classed('annotation', true)
+                    .classed('writer', true)
+
+                hidden_keys = [".body", ".user", ".time", ".annotator-controls"]
+                
+                anno.select(key).classed("visuallyhidden", true) for key in hidden_keys
+
+                editor.element.appendTo(item.node())
+                editor.on('hide', =>
+                  item.remove()
+                  anno.select(key).classed("visuallyhidden", false) for key in hidden_keys                
+                )
+                editor.element.find(":input:first").focus()
+
+                
+
+        context = items.select '.thread'
+        items = thread context, '.annotation'
 
     @editor.hide()
     @viewer.show()
@@ -509,10 +572,10 @@ class Hypothesis extends Annotator
     @editor.element.find('.annotator-controls').remove()
 
     quote = annotation.quote.replace(/\u00a0/g, ' ') # replace &nbsp;
-    excerpt = $('<li class="hyp-paper hyp-excerpt">')
+    excerpt = $('<li class="paper excerpt">')
     excerpt.append($("<blockquote>#{quote}</blockquote>"))
 
-    item = $('<li class="hyp-paper hyp-writer">')
+    item = $('<li class="annotation paper writer">')
     item.append($(Handlebars.templates.editor(annotation)))
 
     @editor.element.find('.annotator-listing').empty()

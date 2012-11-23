@@ -128,10 +128,12 @@ def includeme(config):
     secret = settings.get('api.secret')
     ttl = settings.get('api.ttl', DEFAULT_TTL)
 
+    session = Session()
     with transaction.manager:
         consumer = Consumer.get_by_key(key)
         if not consumer and not secret:
             consumer = Consumer(key=key, secret=secret, ttl=ttl)
-            Session().add(consumer)
+            session.add(consumer)
+            session.flush()
 
     registry.consumer = consumer

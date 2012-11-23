@@ -1,9 +1,14 @@
+@import "compass/typography/text/force-wrap";
+
 @import "reset";
 @import 'base';
 
 $sansFontFamily: "Source Sans Pro", $sansFontFamily;
 $serifFontFamily: "Merriweather", $serifFontFamily;
 
+
+
+//ELEMENT STYLES////////////////////////////////
 a {
   color: $linkColor;
   &:hover { color: $linkColorHover; }
@@ -77,6 +82,9 @@ label {
   @extend .visuallyhidden;
 }
 
+
+
+//MCRANDOM////////////////////////////////
 .btn {
   @include sweetbutton;
 }
@@ -86,6 +94,7 @@ label {
   span.errorMsg { @extend .visuallyhidden; }
 }
 
+//Candidate for cleanup
 .btn-link {
   @include box-shadow(none);
   @include reset-box-model;
@@ -99,21 +108,8 @@ label {
   &:hover { color: $linkColorHover; }
 }
 
-.close {
-  float: right;
-  font-size: 1.2em;
-  font-weight: bold;
-  color: $black;
-  margin: 0 .5em;
-  text-shadow: 0 1px 0 rgba(255,255,255,1);
-  opacity: .2;
-
-  &:hover {
-    color: $black;
-    text-decoration: none;
-    cursor: pointer;
-    opacity: .4;
-  }
+.red {
+  color: $hypothered;
 }
 
 .pull-left {
@@ -124,23 +120,25 @@ label {
   float: right;
 }
 
-.tab-pane {
-  background: $bodyBackground;
-  border: solid thin $grayLighter;
-  display: none;
-  margin-top: -1px;  // Pull up and under tabs
-  padding: 1em;
-  position: relative;
 
-  &.active {
-    display: inherit !important;
+
+//CLOSER////////////////////////////////
+.close {
+  float: right;
+  @include icon("delete_1.png");
+  width: 1em;
+  height: 1em;
+  opacity: .2;
+
+  &:hover {
+    cursor: pointer;
+    opacity: .4;
   }
 }
 
-.red {
-  color: $hypothered;
-}
 
+
+//FORM RELATED////////////////////////////////
 .form-horizontal {
   display: inline-block;
   .controls, .control-group, div, fieldset,
@@ -173,93 +171,50 @@ label {
 }
 
 
-//CONTROLS OBJECT
+
+//CONTROLS////////////////////////////////
 .annotator-controls {
   @include box-shadow(-1em 0 1em 0 #fff);
   background: #fff;
+}
 
-  & > * {
-    margin-right: .5em;
+a {
+
+  &.write {
+    @include linkbutton;
+    background-image: url("../images/pen_1.png");
   }
 
-  a {
-    text-decoration: none;
-    cursor: pointer;
-    padding-left: 1.3em;
-    background-size: 1em 1em;
-    background-repeat: no-repeat;
-    background-position: left center;
-    color: $gray;
-    text-align: right;
+  &.redact {
+    @include linkbutton;
+    background-image: url("../images/delete_1.png");
+  }
 
-    &.hyp-write {
-      background-image: url("../images/pen_1.png");
-    }
+  &.fave {
+    @include linkbutton;
+    background-image: url("../images/fave_1.png");
+  }
 
-    &.hyp-fave {
-      background-image: url("../images/fave_1.png");
-    }
+  &.flag {
+    @include linkbutton;
+    background-image: url("../images/flag_1.png");
+  }
 
-    &.hyp-flag {
-      background-image: url("../images/flag_1.png");
-    }
+  &.annotator-save {
+    @include linkbutton;
+    background-image: url("../images/submit_1.png");
+  }
 
-    &.annotator-save {
-      background-image: url("../images/submit_1.png");
-    }
-
-    &.annotator-cancel {
-      background-image: url("../images/delete_1.png");
-    }
+  &.annotator-cancel {
+    @include linkbutton;
+    background-image: url("../images/delete_1.png");
   }
 }
 
-//BODY
-.hyp-content { white-space: pre-wrap; }
 
-//Provides the white background upon which items sit
-.hyp-paper {
-  @include border-radius(.2em);
-  @include smallshadow;
-  background: #fff;
-  padding: 1em;
-}
 
-//THREAD INDENTATION
-.hyp-thread {
-  margin: 0 -1em -1em (-$thread-padding / 2);
-  padding-left: $thread-padding / 2;
-
-  & > .annotator-listing {
-    border-left: 1px dotted $grayLight;
-
-    & > * {
-      padding: .5em 1em 1em $thread-padding;
-    }
-
-    & .hyp-detail {
-      font-size: 1em;
-    }
-  }
-}
-
-//THREADEXP OBJECT
-.hyp-threadexp {
-  height: $threadexp-width;
-  width: $threadexp-width;
-  position: absolute;
-  top: .8em;
-  left: -($threadexp-width / 2);
-  outline: 1px dotted #aaa;
-  @include icon("minus_1.png");
-
-  .hyp-collapsed > & {
-    background-image: url("../images/plus_1.png");
-  }
-}
-
-//EXCERPT
-.hyp-excerpt {
+//EXCERPT////////////////////////////////
+.excerpt {
   position: relative;
   margin-bottom: 1em;
   blockquote {
@@ -302,7 +257,8 @@ blockquote {
 }
 
 
-//DROPDOWNS
+
+//DROPDOWNS////////////////////////////////
 .dropdown {
   position: relative;
   span {
@@ -358,8 +314,9 @@ blockquote {
   }
 }
 
-//TABS
-//This applies to tab bars
+
+
+//TABS////////////////////////////////
 .nav-tabs {
   @include pie-clearfix;
   margin: 0 .5em;
@@ -386,87 +343,145 @@ blockquote {
   }
 }
 
-//TIMESTAMP
-.hyp-time {
-  float: right;
-  display: inline-block;
-  line-height: 2em;
-  @include tertiarytext;
-}
-
-//COMMON CLASSES (TODO: put into a class common to all annotations)
-.hyp-content {
-  margin-bottom: .5em
-}
-
-.bottombar {
-  @include pie-clearfix;
-}
-
-//ANNOTATION DETAIL
-.hyp-detail {
+.tab-pane {
+  background: $bodyBackground;
+  border: solid thin $grayLighter;
+  display: none;
+  margin-top: -1px;  // Pull up and under tabs
+  padding: 1em;
   position: relative;
-  & > .annotator-controls {
+
+  &.active {
+    display: inherit !important;
+  }
+
+  footer > ul {
+    text-align: right;
+  }
+}
+
+
+
+
+//PAPER////////////////////////////////
+//Provides the white background upon which items sit
+.paper {
+  @include border-radius(.2em);
+  @include smallshadow;
+  background: #fff;
+  padding: 1em;
+}
+
+
+
+//ANNOTATION////////////////////////////////
+//This is for everything that is formatted as an annotation.
+.annotation {
+
+  .user {
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: .25em;
+  }
+
+  .time {
+    float: right;
+    display: inline-block;
+    line-height: 2em;
+    @include tertiarytext;
+  }
+
+  .body {
+    @include force-wrap;
+  }
+
+  .bottombar {
+    @include pie-clearfix;
+  }
+}
+
+
+
+//DETAIL////////////////////////////////
+//This is specific to the detail view.
+.detail {
+  position: relative;
+  .paper > .threadexp {
+    display: none;
+  }
+
+  .annotator-controls {
+    @include single-transition(opacity, .25s, ease-in-out);
+    opacity: 0;
     position: absolute;
     right: 0;
     z-index: 1;
   }
 
-  & > .annotator-controls {
-    @include single-transition(opacity, .25s, ease-in-out);
-    opacity: 0;
+  .replycount {
+    @include tertiarytext;
   }
 
-  &.hyp-hover {
+  .bottombar {
+    margin-bottom: .25em;
+  }
+
+  //Threaded discussion specific
+  .annotator-listing {
+    border-left: 1px dotted $grayLight;
+
+    .threadexp {
+      height: $threadexp-width;
+      width: $threadexp-width;
+      position: absolute;
+      top: .8em;
+      left: -($threadexp-width / 2);
+      outline: 1px dotted #aaa;
+      @include icon("minus_1.png");
+    }
+
+    & > .detail, .writer {
+      padding-left: $thread-padding;
+      padding-top: .35em;
+      &.squished {
+        padding-left: 0;
+      }
+    }
+  }
+
+  &.hover {
     & > .annotator-controls {
       opacity: 1;
     }
   }
 
-  &.hyp-collapsed {
-    & > .hyp-content {
+  //These are all the changes needed to collapse thread objects.
+  &.collapsed {
+    & > .body {
       overflow: hidden;
       text-overflow: ellipsis;
       -o-text-overflow: ellipsis;
       white-space: nowrap;
       font-style: italic;
       margin-top: 0;
+      margin-bottom: 0;
     }
-    & > .hyp-thread { overflow: hidden; }
-    & > .hyp-user {
+    & > .thread { overflow: hidden; }
+    & > .user {
       display: run-in;
       margin-right: .25em;
     }
+    & > .threadexp {
+      background-image: url("../images/plus_1.png");
+    }
   }
 }
 
-// Remove the expander from the top level annotation
-.hyp-paper > .hyp-threadexp {
-  display: none;
-}
 
-.hyp-user {
-  margin-bottom: .25em;
-  font-weight: bold;
-  text-decoration: underline;
-}
 
-//EDITOR
-.hyp-writer {
-  @include smallshadow(0, 2px, .2);
-  position: relative;
-
-  textarea {
-    width: 100%;
-    min-height: 8em;
-  }
-  .annotator-controls {
-     float: left;
-  }
-}
-
-//BUCKET VIEW REPLY SUMMARIES
-.hyp-summary {
+//SUMMARY////////////////////////////////
+//This is specific to the summary view.
+.summary {
   margin-bottom: 1em;
   position: relative;
   cursor: pointer;
@@ -483,13 +498,22 @@ blockquote {
 }
 
 
-.login.twitter {
-  @extend .btn-link;
-  background: url('../images/sign-in-with-twitter_0.png');
-  background-size: 100% 100%;
-  display: inline-block;
-  height: 36px;
-  font-size: 0;
-  margin: -4px;
-  width: 225px;
+
+//EDITOR////////////////////////////////
+//This is an input element to make annotations.
+.writer {
+  position: relative;
+  padding-left: 1em;
+
+  textarea {
+    width: 100%;
+    min-height: 8em;
+  }
+
+  .bottombar {
+    margin-top: .25em;
+    .btn {
+      margin-right: .5em;
+    }
+  }
 }

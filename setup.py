@@ -13,7 +13,7 @@ setup(
     packages=find_packages(),
 
     install_requires=[
-        'annotator>=0.7.6',
+        'annotator>=0.9.1',
         'deform_bootstrap>=0.2.1',
         'horus>=0.9.8',
         'pyramid>=1.3',

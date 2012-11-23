@@ -1,3 +1,8 @@
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
+
+
 def includeme(config):
     config.include('h.api')
     config.include('h.app')
@@ -15,6 +20,8 @@ def create_app(settings):
     from pyramid.config import Configurator
     from pyramid.authentication import AuthTktAuthenticationPolicy
     from pyramid.authorization import ACLAuthorizationPolicy
+    from pyramid.path import AssetResolver
+    from pyramid.response import FileResponse
 
     settings.setdefault('horus.activation_class', 'h.models.Activation')
     settings.setdefault('horus.user_class', 'h.models.User')
@@ -33,13 +40,16 @@ def create_app(settings):
         root_factory='h.resources.RootFactory'
     )
 
+    favicon = AssetResolver().resolve('h:favicon.ico')
+    config.add_route('favicon', '/favicon.ico')
+    config.add_view(
+        lambda request: FileResponse(favicon.abspath(), request=request),
+        route_name='favicon'
+    )
+
     config.include(includeme)
     return config.make_wsgi_app()
 
 
 def main(global_config, **settings):
     return create_app(settings)
-
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions

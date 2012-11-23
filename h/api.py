@@ -1,4 +1,4 @@
-from annotator import auth, authz, store, es
+from annotator import auth, store, es
 from annotator.annotation import Annotation
 
 from flask import Flask, g
@@ -7,14 +7,14 @@ from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
 from pyramid.view import view_config
 from pyramid.wsgi import wsgiapp2
 
-from h import messages, models
+from h import messages, models, authz
 
 
 def personas(request):
     result = []
     if request.user:
         result.append({
-            'username': request.user.user_name,
+            'username': request.user.username,
             'provider': request.host
         })
     return list(enumerate(result))
@@ -45,10 +45,14 @@ def token(request):
 
         settings = request.registry.settings
         key = settings['api.key']
-        consumer = models.Consumer.get_by_key(key)
+        secret = settings.get('api.secret')
+        if not secret:
+            consumer = models.Consumer.get_by_key(key)
+        else:
+            consumer = models.Consumer(key=key, secret=secret)
         assert(consumer)
 
-        user_id = 'acct:%s@%s' % (request.user.user_name, request.host)
+        user_id = 'acct:%s@%s' % (request.user.username, request.host)
 
         message = {
             'userId': user_id,

@@ -17,35 +17,21 @@ Please join us in `#hypothes.is`_ on freenode_.
 Installation
 ------------
 
-Hypothes.is currently requires several tools to build and run from scratch.
-In the future, releases will include built versions of static assets for
-integrators wanting to produce custom embeddings of the project on their
-own sites and the project welcomes packaging efforts to make including
-the Hypothes.is service in any framework easy.
+See INSTALL.rst for installation instructions.
 
-The project code itself is a pyramid_ application which can be integrated
-into any WSGI_ compatible framework and run on any WSGI web server (such
-as gunicorn_ or uWSGI_). Until the project is ready for an alpha release,
-it may not be installable from the Python Package Index. Instead, the
-application should be built in a virtual environment which can be set up as
-follows::
+Running
+-------
 
-    $ virtualenv --no-site-packages .
-    $ source bin/activate
-    $ pip install -r requirements.txt
+Hopefully, installation has gone smoothly. If that's the case, the application
+can be started easily with the command `./run.py`. However, for development
+it is convenient to automatically reload the application when files are
+changed. Thankfully, there's a command for that too:
 
-If there is a failure installing PyYAML, install the libyaml development files.
+    $ pserve --reload --monitor-restart development.ini
 
-For building the static assets, requirements currently include CoffeeScript_
-(needed by the Annotator), Sass_, Compass_ and Handlebars_. These dependencies
-should be easily installable via common package management utilities.
-
-For production use, the application can also be configured to use UglifyJS_ and
-clean-css_ for minification needs. These are *not* required for development.
-
-To run an annotation storage backend elasticsearch_ is required.
-
-Please see the platform-specific INSTALL files for additional assistance.
+This command will run the server, reloading the application whenever changes
+are made to the source code, and restarting it should it crash for some
+reason.
 
 Development
 -----------
@@ -64,14 +50,4 @@ license information can be found in the included LICENSE file.
 .. _freenode: http://freenode.net/
 .. _Annotator project: http://okfnlabs.org/annotator/
 .. _Open Knowledge Foundation: http://okfn.org/
-.. _pyramid: http://www.pylonsproject.org/
-.. _gunicorn: http://gunicorn.org/
-.. _uWSGI: http://projects.unbit.it/uwsgi/
-.. _elasticsearch: http://www.elasticsearch.org/
-.. _CoffeeScript: http://coffeescript.org/
-.. _Sass: http://sass-lang.com/
-.. _Compass: http://compass-style.org/
-.. _Handlebars: http://handlebarsjs.com/
-.. _UglifyJS: http://marijnhaverbeke.nl//uglifyjs
-.. _clean-css: https://github.com/GoalSmashers/clean-css
 .. _2-Clause BSD License: http://www.opensource.org/licenses/BSD-2-Clause

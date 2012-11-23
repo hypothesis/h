@@ -1,16 +1,33 @@
+__all__ = [
+    'IUserClass',
+    'IActivationClass',
+
+    'ILoginForm',
+    'IRegisterForm',
+    'IForgotPasswordForm',
+    'IResetPasswordForm',
+    'IProfileForm',
+
+    'ILoginSchema',
+    'IRegisterSchema',
+    'IForgotPasswordSchema',
+    'IResetPasswordSchema',
+    'IProfileSchema'
+]
+
 from horus.interfaces import (
-    IHorusUserClass as IUserClass,
-    IHorusActivationClass as IActivationClass,
+    IUserClass as IUserClass,
+    IActivationClass as IActivationClass,
 
-    IHorusLoginForm as ILoginForm,
-    IHorusRegisterForm as IRegisterForm,
-    IHorusForgotPasswordForm as IForgotPasswordForm,
-    IHorusResetPasswordForm as IResetPasswordForm,
-    IHorusProfileForm as IProfileForm,
+    ILoginForm as ILoginForm,
+    IRegisterForm as IRegisterForm,
+    IForgotPasswordForm as IForgotPasswordForm,
+    IResetPasswordForm as IResetPasswordForm,
+    IProfileForm as IProfileForm,
 
-    IHorusLoginSchema as ILoginSchema,
-    IHorusRegisterSchema as IRegisterSchema,
-    IHorusForgotPasswordSchema as IForgotPasswordSchema,
-    IHorusResetPasswordSchema as IResetPasswordSchema,
-    IHorusProfileSchema as IProfileSchema,
+    ILoginSchema as ILoginSchema,
+    IRegisterSchema as IRegisterSchema,
+    IForgotPasswordSchema as IForgotPasswordSchema,
+    IResetPasswordSchema as IResetPasswordSchema,
+    IProfileSchema as IProfileSchema,
 )
