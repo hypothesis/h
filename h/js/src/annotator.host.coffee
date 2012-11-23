@@ -65,6 +65,13 @@ class Annotator.Host extends Annotator
         onEditorSubmit: this.onEditorSubmit
         showFrame: => @frame.removeClass('annotator-collapsed')
         hideFrame: => @frame.addClass('annotator-collapsed')
+        resetFrameWidth: =>
+          @frame.css({ "width": "", "margin-left" : "" })        
+        setFrameWidth: (width) =>
+          @frame.css({ "width": width, "margin-left" : (-1)*width })
+        addtoFrameWidth: (width, innerWidth) =>
+          if isNaN(parseInt(@frame[0].style.width)) then old = innerWidth else old = parseInt(@frame[0].style.width)
+          @frame.css({ "width": (old + width), "margin-left" : (-1)*(old + width) })   
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
@@ -149,7 +156,7 @@ class Annotator.Host extends Annotator
       do update
     document.addEventListener 'touchstart', =>
       touch = true
-      do update
+      do update      
     $(window).on 'resize scroll', update
     $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
     super
