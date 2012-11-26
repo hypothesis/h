@@ -513,14 +513,13 @@ class Hypothesis extends Annotator
                 d3.event.preventDefault()
                 parent = d3.select(event.currentTarget)
                 redaction = parent.datum().message.annotation
-                uses_emphasis = redaction.text.indexOf("*") != -1
-                original = if uses_emphasis then redaction.text else ("*" + redaction.text + "*")
-                quote = "**You are about to delete this annotation:** " + original
-                redaction.originalText = @renderer.makeHtml quote
-                redaction.text = ""
-                redaction.user = "acct:Delete annotation:@" + redaction.user.split(/(?:acct:)|@/)[2]
+                originalText = redaction.text
+                uses_emphasis = originalText.indexOf("*") != -1
+                quotedText = if uses_emphasis then originalText else "*" + originalText + "*"
+                preface = "**You are about to delete this annotation:**\n" + quotedText
+                deletingUser = "acct:Delete annotation:@" + redaction.user.split(/(?:acct:)|@/)[2]
                 editor = this._createEditor()
-                editor.load(redaction)
+                editor.load($.extend {}, redaction, text: "")
                 editor.element.removeClass('annotator-outer')
                 editor.on 'save', (annotation) =>
                   uses_emphasis = annotation.text.indexOf("*") != -1
@@ -534,7 +533,11 @@ class Hypothesis extends Annotator
                   this.updateAnnotation annotation 
 
                 d3.select(editor.element[0]).select('form')
-                  .data([redaction])
+                  .data([$.extend {}, redaction,
+                    preface: @renderer.makeHtml preface
+                    text: ""
+                    user: deletingUser
+                  ])
                     .html(Handlebars.templates.redact)
                     .on 'mouseover', => d3.event.stopPropagation()
 
@@ -551,7 +554,7 @@ class Hypothesis extends Annotator
                 editor.element.appendTo(item.node())
                 editor.on('hide', =>
                   item.remove()
-                  anno.select(key).classed("hide", false) for key in hidden_keys                
+                  anno.select(key).classed("hide", false) for key in hidden_keys
                 )
                 editor.element.find(":input:first").focus()
 
