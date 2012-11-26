@@ -513,7 +513,10 @@ class Hypothesis extends Annotator
                 d3.event.preventDefault()
                 parent = d3.select(event.currentTarget)
                 redaction = parent.datum().message.annotation
-                redaction.originalText = redaction.text
+                uses_emphasis = redaction.text.indexOf("*") != -1
+                original = if uses_emphasis then redaction.text else ("*" + redaction.text + "*")
+                quote = "**You are about to delete this annotation:** " + original
+                redaction.originalText = @renderer.makeHtml quote
                 redaction.text = ""
                 redaction.user = "acct:Delete annotation:@" + redaction.user.split(/(?:acct:)|@/)[2]
                 editor = this._createEditor()
