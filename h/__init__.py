@@ -6,14 +6,15 @@ del get_versions
 def includeme(config):
     config.include('h.api')
     config.include('h.app')
+    config.include('h.forms')
     config.include('h.layouts')
     config.include('h.models')
     config.include('h.panels')
     config.include('h.resources')
     config.include('h.session')
+    config.include('h.schemas')
     config.include('h.subscribers')
     config.include('h.views')
-    config.include('velruse.app')
 
 
 def create_app(settings):
@@ -24,14 +25,10 @@ def create_app(settings):
     from pyramid.path import AssetResolver
     from pyramid.response import FileResponse
 
-    settings.setdefault('horus.activation_class', 'h.models.Activation')
-    settings.setdefault('horus.user_class', 'h.models.User')
-
     authn_policy = AuthTktAuthenticationPolicy(
         settings['auth.secret'],
         callback=groupfinder
     )
-
     authz_policy = ACLAuthorizationPolicy()
 
     config = Configurator(
