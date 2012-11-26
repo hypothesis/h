@@ -61,6 +61,8 @@ injector = Bundle(
     ),
 )
 
+angular = Bundle('h:js/lib/angular.min.js')
+
 # PageDown is used to render Markdown-formatted text to HTML
 pagedown = Bundle(
     Bundle(
