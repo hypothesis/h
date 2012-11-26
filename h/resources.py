@@ -1,5 +1,6 @@
 from horus import resources
 
+from pyramid.decorator import reify
 from pyramid.interfaces import ILocation
 
 from webassets import Bundle
@@ -8,7 +9,7 @@ from webassets.loaders import PythonLoader
 
 from zope.interface import implementer
 
-from h import api
+from h import api, models
 
 # register our backported cleancss filter until webassets 0.8 is released
 from h.cleancss import CleanCSS
@@ -237,7 +238,7 @@ class InnerResource(BaseResource):
 
 
 class RootFactory(InnerResource, resources.RootFactory):
-    __name__ = ''
+    pass
 
 
 class APIFactory(InnerResource):
@@ -250,10 +251,56 @@ class APIFactory(InnerResource):
                 request.headers['x-annotator-auth-token'] = token
 
 
-class AppFactory(InnerResource):
+class AppFactory(BaseResource):
     def __init__(self, request):
         super(AppFactory, self).__init__(request)
 
+    @reify
+    def persona(self):
+        request = self.request
+
+        # Transition code until multiple sign-in is implemented
+        if request.user:
+            return {
+                'username': request.user.username,
+                'provider': request.host,
+            }
+
+        return None
+
+    @reify
+    def personas(self):
+        request = self.request
+
+        # Transition code until multiple sign-in is implemented
+        if request.user:
+            return [self.persona]
+
+        return []
+
+    @reify
+    def consumer(self):
+        settings = self.request.registry.settings
+        key = settings['api.key']
+        secret = settings.get('api.secret')
+        if not secret:
+            consumer = models.Consumer.get_by_key(key)
+        else:
+            consumer = models.Consumer(key=key, secret=secret)
+        assert(consumer)
+        return consumer
+
+    @reify
+    def token(self):
+        if not self.persona:
+            return None
+
+        message = {
+            'userId': 'acct:%(username)s@%(provider)s' % self.persona,
+            'consumerKey': str(self.consumer.key),
+            'ttl': self.consumer.ttl,
+        }
+        return api.auth.encode_token(message, self.consumer.secret)
 
 RootFactory.api = APIFactory
 RootFactory.app = AppFactory

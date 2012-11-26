@@ -3,21 +3,11 @@ from annotator.annotation import Annotation
 
 from flask import Flask, g
 
-from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.view import view_config
 from pyramid.wsgi import wsgiapp2
 
 from h import messages, models
-
-
-def personas(request):
-    result = []
-    if request.user:
-        result.append({
-            'username': request.user.username,
-            'provider': request.host
-        })
-    return result
 
 
 @view_config(context='h.resources.APIFactory', request_method='POST',
