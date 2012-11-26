@@ -543,12 +543,12 @@ class Hypothesis extends Annotator
 
                 hidden_keys = [".body", ".user", ".time", ".annotator-controls"]
                 
-                anno.select(key).classed("visuallyhidden", true) for key in hidden_keys
+                anno.select(key).classed("hide", true) for key in hidden_keys
 
                 editor.element.appendTo(item.node())
                 editor.on('hide', =>
                   item.remove()
-                  anno.select(key).classed("visuallyhidden", false) for key in hidden_keys                
+                  anno.select(key).classed("hide", false) for key in hidden_keys                
                 )
                 editor.element.find(":input:first").focus()
 
