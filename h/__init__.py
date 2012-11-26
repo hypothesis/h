@@ -10,6 +10,7 @@ def includeme(config):
     config.include('h.models')
     config.include('h.panels')
     config.include('h.resources')
+    config.include('h.session')
     config.include('h.subscribers')
     config.include('h.views')
     config.include('velruse.app')
