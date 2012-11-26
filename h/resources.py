@@ -28,19 +28,50 @@ annotator = Bundle(
     Bundle('deform_bootstrap:static/bootstrap.min.js'),
     Bundle(
         Bundle(
-            'h:js/src/plugin/heatmap.coffee',
-            debug=False,
-            filters='coffeescript',
-            output='js/heatmap.js',
+            Bundle(
+                'h:js/src/deform.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/deform.js',
+            ),
+            Bundle(
+                'h:js/src/app.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/app.js',
+            ),
+            Bundle(
+                'h:js/src/hypothesis.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/hypothesis.js',
+            ),
+            Bundle(
+                'h:js/src/directives.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/directives.js',
+            ),
+            Bundle(
+                'h:js/src/services.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/services.js',
+            ),
+            filters='uglifyjs',
+            output='js/hypothesis.min.js'
         ),
         Bundle(
-            'h:js/src/hypothesis.coffee',
-            debug=False,
-            filters='coffeescript',
-            output='js/hypothesis.js',
+            Bundle(
+                'h:js/src/plugin/heatmap.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/lib/annotator.heatmap.js',
+            ),
+            filters='uglifyjs',
+            output='js/lib/annotator.heatmap.min.js'
         ),
-        filters='uglifyjs',
-        output='js/hypothes.is.min.js',
+        output='js/hypothesis-full.min.js',
     ),
 )
 

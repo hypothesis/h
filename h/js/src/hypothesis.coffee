@@ -14,10 +14,23 @@ class Hypothesis extends Annotator
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
 
-  constructor: (element, options) ->
+  this.$inject = ['$rootElement', '$scope', '$compile', '$http']
+  constructor: (@element, @scope, @compile, @http) ->
+    super @element, @options
+
+    # Load plugins
+    for own name, opts of @options
+      if not @plugins[name] and name of Annotator.Plugin
+        this.addPlugin(name, opts)
+
+    # Export public, bound functions on the scope
+    for own key of this
+      if typeof this[key] == 'function' and not key.match('^_')
+        @scope[key] = this[key]
+
     # Establish cross-domain communication to the widget host
     @provider = new easyXDM.Rpc
-      swf: options.swf
+      swf: @options.swf
       onReady: this._initialize
     ,
       local:
@@ -39,8 +52,8 @@ class Hypothesis extends Annotator
           if @plugins.Permissions.user?
             this.showEditor annotation
           else
-            showAuth true
             @editor.hide()
+            this.showAuth true
             this.show()
         # This guy does stuff when you "back out" of the interface. 
         # (Currently triggered by a click on the source page.)
@@ -72,12 +85,48 @@ class Hypothesis extends Annotator
     @renderer.hooks.chain "postConversion", (text) ->
         text.replace /<a href=/, "<a target=\"_blank\" href="
 
-    super
+    @scope.$watch 'personas', (newValue, oldValue) =>
+      if newValue?.length
+        @element.find('#persona')
+          .off('change').on('change', -> $(this).submit())
+          .off('click')
+        this.showAuth(false)
+      else
+        @scope.persona = null
+        @scope.token = null
+        @element.find('#persona').off('click').on('click', => this.showAuth())
 
-    # Load plugins
-    for own name, opts of @options
-      if not @plugins[name] and name of Annotator.Plugin
-        this.addPlugin(name, opts)
+    @scope.$watch 'persona', (newValue, oldValue) =>
+      if oldValue? and not newValue?
+        @http.post 'logout', '',
+          withCredentials: true
+        .success (data) => @scope.reset()
+
+    @scope.$watch 'token', (newValue, oldValue) =>
+      if @plugins.Auth?
+        @plugins.Auth.token = newValue
+        @plugins.Auth.updateHeaders()
+
+      if newValue?
+        if not @plugins.Auth?
+          this.addPlugin 'Auth',
+            tokenUrl: @scope.tokenUrl
+            token: newValue
+        else
+          @plugins.Auth.setToken(newValue)
+        @plugins.Auth.withToken @plugins.Permissions._setAuthFromToken
+      else
+        @plugins.Permissions.setUser(null)
+        delete @plugins.Auth
+
+    # Fetch the initial model from the server
+    @http.get 'model'
+      withCredentials: true
+    .success (data) =>
+      angular.extend @scope, data
+
+    this.reset()
+    this.showAuth false
 
     this
 
@@ -89,8 +138,8 @@ class Hypothesis extends Annotator
     @viewer.show()
 
     @provider.getMaxBottom (max) =>
-      $('#toolbar').css("top", "#{max}px")
-      $('#gutter').css("padding-top", "#{max}px")
+      @element.find('#toolbar').css("top", "#{max}px")
+      @element.find('#gutter').css("padding-top", "#{max}px")
       @heatmap.BUCKET_THRESHOLD_PAD = (
         max + @heatmap.constructor.prototype.BUCKET_THRESHOLD_PAD
       )
@@ -103,7 +152,7 @@ class Hypothesis extends Annotator
     this.publish 'hostUpdated'
 
   _setupWrapper: ->
-    @wrapper = $('#wrapper')
+    @wrapper = @element.find('#wrapper')
     .on 'mousewheel', (event, delta) ->
       # prevent overscroll from scrolling host frame
       # http://stackoverflow.com/questions/5802467
@@ -116,7 +165,7 @@ class Hypothesis extends Annotator
     this
 
   _setupDocumentEvents: ->
-    $('#toolbar .tri').click =>
+    @element.find('#toolbar .tri').click =>
       if @visible
         this.hide()
       else
@@ -259,8 +308,8 @@ class Hypothesis extends Annotator
   # Returns itself for chaining.
   _setupEditor: ->
     @editor = this._createEditor()
-    .on('hide', @provider.onEditorHide)
-    .on('save', @provider.onEditorSubmit)
+    .on('hide', => @provider.onEditorHide)
+    .on('save', => @provider.onEditorSubmit)
     this
 
   _createEditor: ->
@@ -472,7 +521,7 @@ class Hypothesis extends Annotator
                 animate parent.classed('collapsed', !collapsed)
               when '#reply'
                 unless @plugins.Permissions?.user
-                  showAuth true
+                  this.showAuth true
                   break
                 d3.event.preventDefault()
                 parent = d3.select(event.currentTarget)
@@ -547,14 +596,13 @@ class Hypothesis extends Annotator
     @visible = true
     @provider.setActiveHighlights annotations
     @provider.showFrame()
-    $("#toolbar").addClass "shown"
+    @element.find("#toolbar").addClass "shown"
 
   hide: =>
     @visible = false
     @provider.setActiveHighlights []
     @provider.hideFrame()
-    $("#toolbar").removeClass "shown"
-
+    @element.find("#toolbar").removeClass "shown"
 
   threadId: (annotation) ->
     if annotation?.thread?
@@ -562,4 +610,49 @@ class Hypothesis extends Annotator
     else
       annotation.id
 
-window.Hypothesis = Hypothesis
+  showAuth: (show=true) =>
+    $header = @element.find('header')
+    visible = !$header.hasClass('collapsed')
+    if (visible != show)
+      if (show)
+        $header.removeClass('collapsed')
+      else
+        $header.addClass('collapsed')
+      $header.one 'webkitTransitionEnd transitionend OTransitionEnd', =>
+        $header.find('.nav-tabs > li.active > a').trigger('shown')
+
+  submit: =>
+    controls = @element.find('.sheet .active form').formSerialize()
+    @http.post '', controls,
+      headers:
+        'Content-Type': 'application/x-www-form-urlencoded'
+      withCredentials: true
+    .success (data) =>
+      # Extend the scope with updated model data
+      angular.extend(@scope, data.model)
+
+      # Replace any forms which were re-rendered in this response
+      for oid of data.form
+        target = '#' + oid
+
+        $form = $(data.form[oid])
+        $form.replaceAll(target)
+
+        link = @compile $form
+        link @scope
+
+        deform.focusFirstInput target
+
+  reset: =>
+    angular.extend @scope,
+      username: null
+      password: null
+      email: null
+      code: null
+      personas: []
+      persona: null
+      token: null
+
+
+angular.module('h.controllers', [])
+  .controller('Hypothesis', Hypothesis)
