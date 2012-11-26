@@ -514,11 +514,15 @@ class Hypothesis extends Annotator
                 parent = d3.select(event.currentTarget)
                 redaction = parent.datum().message.annotation
                 redaction.text = ""
-                redaction.user = "acct:[deleted]@" + redaction.user.split(/(?:acct:)|@/)[2]
+                redaction.user = "acct:Delete annotation:@" + redaction.user.split(/(?:acct:)|@/)[2]
                 editor = this._createEditor()
                 editor.load(redaction)
                 editor.element.removeClass('annotator-outer')
                 editor.on 'save', (annotation) =>
+                  uses_emphasis = annotation.text.indexOf("*") != -1
+                  reason = if uses_emphasis then annotation.text else ("*" + annotation.text + "*")
+                  annotation.text = "**Reason**: " + reason
+                  annotation.user = "acct:Annotation deleted.@" + redaction.user.split(/(?:acct:)|@/)[2]
                   @plugins.Store.registerAnnotation(annotation)
                   @plugins.Store.updateAnnotation annotation,                 
                     redacted: true,
