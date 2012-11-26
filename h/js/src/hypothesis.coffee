@@ -525,7 +525,7 @@ class Hypothesis extends Annotator
                   uses_emphasis = annotation.text.indexOf("*") != -1
                   reason = if uses_emphasis then annotation.text else ("*" + annotation.text + "*")
                   annotation.redacted = true                
-                  annotation.text = "**Reason**: " + reason
+                  annotation.text = if reason == "**" then "**(No reason given.)**" else "**Reason**: " + reason
                   annotation.user = "acct:Annotation deleted.@" + redaction.user.split(/(?:acct:)|@/)[2]
                   annotation.created = (new Date()).toString()                
                   if annotation not in @plugins.Store.annotations
