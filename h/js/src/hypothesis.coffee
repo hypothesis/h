@@ -521,13 +521,12 @@ class Hypothesis extends Annotator
                 editor.on 'save', (annotation) =>
                   uses_emphasis = annotation.text.indexOf("*") != -1
                   reason = if uses_emphasis then annotation.text else ("*" + annotation.text + "*")
+                  annotation.redacted = true                
                   annotation.text = "**Reason**: " + reason
                   annotation.user = "acct:Annotation deleted.@" + redaction.user.split(/(?:acct:)|@/)[2]
-                  @plugins.Store.registerAnnotation(annotation)
-                  @plugins.Store.updateAnnotation annotation,                 
-                    redacted: true,
-                    text: annotation.text
-                  annotation.created = (new Date()).toString()
+                  annotation.created = (new Date()).toString()                
+                  if annotation not in @plugins.Store.annotations
+                    @plugins.Store.registerAnnotation(annotation)
                   this.updateAnnotation annotation 
 
                 d3.select(editor.element[0]).select('form')
