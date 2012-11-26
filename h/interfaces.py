@@ -15,6 +15,8 @@ __all__ = [
     'IProfileSchema',
 ]
 
+from zope.interface import Interface
+
 from horus.interfaces import (
     IUserClass,
     IActivationClass,
@@ -31,3 +33,11 @@ from horus.interfaces import (
     IResetPasswordSchema,
     IProfileSchema,
 )
+
+
+class IActivateForm(Interface):
+    pass
+
+
+class IActivateSchema(Interface):
+    pass
