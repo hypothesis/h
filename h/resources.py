@@ -41,10 +41,10 @@ annotator = Bundle(
                 output='js/app.js',
             ),
             Bundle(
-                'h:js/src/hypothesis.coffee',
+                'h:js/src/controllers.coffee',
                 debug=False,
                 filters='coffeescript',
-                output='js/hypothesis.js',
+                output='js/controllers.js',
             ),
             Bundle(
                 'h:js/src/directives.coffee',
