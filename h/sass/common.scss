@@ -170,7 +170,9 @@ label {
   margin: -1px; padding: 0; border: 0;
 }
 
-
+.hide {
+  display: none;
+}
 
 //CONTROLS////////////////////////////////
 .annotator-controls {
@@ -183,6 +185,11 @@ a {
   &.write {
     @include linkbutton;
     background-image: url("../images/pen_1.png");
+  }
+
+  &.redact {
+    @include linkbutton;
+    background-image: url("../images/delete_1.png");
   }
 
   &.fave {

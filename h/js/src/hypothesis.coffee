@@ -264,6 +264,10 @@ class Hypothesis extends Annotator
     this.subscribe 'annotationCreated', (annotation) =>
       this.updateViewer [annotation]
 
+    # Show modified/redacted annotations in the viewer immediately
+    this.subscribe 'annotationUpdated', (annotation) =>
+      this.updateViewer [annotation]
+
     this
 
   # Creates an instance of the Annotator.Editor and assigns it to @editor.
@@ -437,6 +441,8 @@ class Hypothesis extends Annotator
           .html (d) =>
               env = $.extend {}, d.message.annotation,
                 text: @renderer.makeHtml d.message.annotation.text
+                canReply: not d.message.annotation.redacted
+                canRedact: not d.message.annotation.redacted and @plugins.Permissions.authorize 'update', d.message.annotation, @plugins.Permissions.user
               Handlebars.templates.detail env
           .classed('paper', (c) -> not c.parent.message?)
           .classed('detail', true)
@@ -513,6 +519,59 @@ class Hypothesis extends Annotator
                 editor.element.appendTo(item.node())
                 editor.on('hide', => item.remove())
                 editor.element.find(":input:first").focus()
+              when '#redact'
+                unless @plugins.Permissions?.user
+                  showAuth true
+                  break
+                d3.event.preventDefault()
+                parent = d3.select(event.currentTarget)
+                redaction = parent.datum().message.annotation
+                originalText = redaction.text
+                uses_emphasis = originalText.indexOf("*") != -1
+                quotedText = if uses_emphasis then originalText else "*" + originalText + "*"
+                preface = "**You are about to delete this annotation:**\n" + quotedText
+                deletingUser = "acct:Delete annotation:@" + redaction.user.split(/(?:acct:)|@/)[2]
+                editor = this._createEditor()
+                editor.load($.extend {}, redaction, text: "")
+                editor.element.removeClass('annotator-outer')
+                editor.on 'save', (annotation) =>
+                  uses_emphasis = annotation.text.indexOf("*") != -1
+                  reason = if uses_emphasis then annotation.text else ("*" + annotation.text + "*")
+                  annotation.redacted = true                
+                  annotation.text = if reason == "**" then "**(No reason given.)**" else "**Reason**: " + reason
+                  annotation.user = "acct:Annotation deleted.@" + redaction.user.split(/(?:acct:)|@/)[2]
+                  annotation.created = (new Date()).toString()                
+                  if annotation not in @plugins.Store.annotations
+                    @plugins.Store.registerAnnotation(annotation)
+                  this.updateAnnotation annotation 
+
+                d3.select(editor.element[0]).select('form')
+                  .data([$.extend {}, redaction,
+                    preface: @renderer.makeHtml preface
+                    text: ""
+                    user: deletingUser
+                  ])
+                    .html(Handlebars.templates.redact)
+                    .on 'mouseover', => d3.event.stopPropagation()
+
+                anno = d3.select(d3.event.currentTarget)
+                item = anno
+                    .insert('div', ':first-child')
+                    .classed('annotation', true)
+                    .classed('writer', true)
+
+                hidden_keys = [".body", ".user", ".time", ".annotator-controls"]
+                
+                anno.select(key).classed("hide", true) for key in hidden_keys
+
+                editor.element.appendTo(item.node())
+                editor.on('hide', =>
+                  item.remove()
+                  anno.select(key).classed("hide", false) for key in hidden_keys
+                )
+                editor.element.find(":input:first").focus()
+
+                
 
         context = items.select '.thread'
         items = thread context, '.annotation'

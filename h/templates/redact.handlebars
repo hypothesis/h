@@ -1,0 +1,15 @@
+<div class="topbar">
+  {{#splitUser user}}
+  <div class="user">{{name}}</div>
+  {{/splitUser}}
+</div>
+<div class="body">{{{preface}}}</div>
+<textarea class="body" placeholder="Please explain why you are deleting this annotation.">{{text}}</textarea>
+<div class="bottombar">
+  <button class="btn">
+    <a href="#save" class="annotator-save">Delete</a>
+  </button>
+  <span>
+    <a href="#cancel" class="annotator-cancel">Cancel</a>
+  </span>
+</div>
