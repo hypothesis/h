@@ -49,34 +49,38 @@
                  data-toggle="tab">Log in</a></li>
           <li><a data-target="#register-tab"
                  data-toggle="tab">Sign up</a></li>
-          <li><a data-target="#password-tab"
+          <li><a data-target="#forgot-tab"
                  data-toggle="tab">Forgot your password?</a></li>
-          <li><a data-target="#reset-tab"
+          <li><a data-target="#activate-tab"
                  data-toggle="tab">Set your password</a></li>
         </ul>
         <div class="tab-content form-vertical">
-          <div tal:repeat="name ['auth', 'register']"
+          <div tal:repeat="name ['login', 'register']"
                tal:attributes="id '%s-tab' % name"
                class="tab-pane">
             ${structure: layout.forms[name].render()}
             <footer>
               <ul>
-                <li><a href="#" onclick="$('.nav a[data-target]')
-                                           .filter('[data-target=#password-tab]')
-                                           .tab('show')"
-                       >Password help?</a></li>
-                <li><a href="#" onclick="$('.nav a[data-target]')
-                                           .filter('[data-target=#reset-tab]')
-                                           .tab('show')"
-                       >Have you already reserved a username with us?</a></li>
+                <li>
+                  <a onclick="$('.nav a[data-target]')
+                                .filter('[data-target=#forgot-tab]')
+                                .tab('show')"
+                     >Password help?</a>
+                </li>
+                <li>
+                  <a onclick="$('.nav a[data-target]')
+                              .filter('[data-target=#activate-tab]')
+                              .tab('show')"
+                     >Have you already reserved a username with us?</a>
+                </li>
               </ul>
             </footer>
           </div>
-          <div id="password-tab" class="tab-pane">
-            ${structure: layout.forms['password'].render()}
+          <div id="forgot-tab" class="tab-pane">
+            ${structure: layout.forms['forgot'].render()}
           </div>
-          <div id="reset-tab" class="tab-pane">
-            ${structure: layout.forms['reset'].render()}
+          <div id="activate-tab" class="tab-pane">
+            ${structure: layout.forms['activate'].render()}
           </div>
         </div>
       </header>
