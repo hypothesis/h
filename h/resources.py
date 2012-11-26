@@ -1,7 +1,6 @@
 from horus import resources
 
 from pyramid.interfaces import ILocation
-from pyramid.security import Allow, Authenticated
 
 from webassets import Bundle
 from webassets.filter import register_filter
@@ -242,22 +241,12 @@ class RootFactory(InnerResource, resources.RootFactory):
 
 
 class APIFactory(InnerResource):
-    __acl__ = [
-        (Allow, Authenticated, 'access_token')
-    ]
-
     def __init__(self, request):
         super(APIFactory, self).__init__(request)
 
         if not 'x-annotator-auth-token' in request.headers:
-            token = None
-
             if 'access_token' in request.params:
                 token = request.params['access_token']
-            elif request.user:
-                token = api.token(request)
-
-            if token:
                 request.headers['x-annotator-auth-token'] = token
 
 

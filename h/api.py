@@ -17,50 +17,24 @@ def personas(request):
             'username': request.user.username,
             'provider': request.host
         })
-    return list(enumerate(result))
+    return result
 
 
-@view_config(context='h.resources.APIFactory', name='access_token',
-             permission='access_token', renderer='string')
-def token(request):
-    """Get an API token for the logged in user."""
+@view_config(context='h.resources.APIFactory', request_method='POST',
+             name='access_token', permission='access_token', renderer='string')
+def access_token(request):
+    """OAuth2 access token provider"""
+    for name in [
+        'client_id',
+        'client_secret',
+        'code',
+        'state'
+    ]:
+        if name not in request.params:
+            msg = '%s "%s".' % (messages.MISSING_PARAMETER, name)
+            raise HTTPBadRequest(msg)
 
-    if request.method == 'POST':  # OAuth2 access token endpoint
-        for name in [
-            'client_id',
-            'client_secret',
-            'code',
-            'state'
-        ]:
-            if name not in request.params:
-                msg = '%s "%s".' % (messages.MISSING_PARAMETER, name)
-                raise HTTPBadRequest(msg)
-
-        raise NotImplementedError('OAuth provider not implemented yet.')
-
-    else:  # Annotator token endpoint
-        if not request.user:
-            msg = messages.NOT_LOGGED_IN
-            raise HTTPForbidden(msg)
-
-        settings = request.registry.settings
-        key = settings['api.key']
-        secret = settings.get('api.secret')
-        if not secret:
-            consumer = models.Consumer.get_by_key(key)
-        else:
-            consumer = models.Consumer(key=key, secret=secret)
-        assert(consumer)
-
-        user_id = 'acct:%s@%s' % (request.user.username, request.host)
-
-        message = {
-            'userId': user_id,
-            'consumerKey': str(consumer.key),
-            'ttl': consumer.ttl,
-        }
-
-        return auth.encode_token(message, consumer.secret)
+    raise NotImplementedError('OAuth provider not implemented yet.')
 
 
 def includeme(config):
