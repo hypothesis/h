@@ -6,7 +6,7 @@ from horus.schemas import (
     ForgotPasswordSchema
 )
 
-from h import api, interfaces, widgets
+from h import interfaces
 from h.messages import _
 
 
