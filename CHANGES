@@ -1,6 +1,14 @@
 Changelog for h
 ===============
 
+0.0.5 (2012-11-27)
+------------------
+
+- Use AngularJS (#198)
+- Confirm discarding of drafts (#188)
+- Markdown support (#91)
+- Resizable sidebar (#26)
+
 0.0.4 (2012-11-6)
 -----------------
 
