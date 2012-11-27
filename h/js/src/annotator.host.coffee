@@ -181,8 +181,8 @@ class Annotator.Host extends Annotator
       @consumer.showEditor stub
 
   checkForStartSelection: (event) =>
-    # Annotator chokes on this callback hen trying to access
-    # this.viewer.hide since there is no viewer. The `mouseIsDown` state
+    # Override to prevent Annotator choking when this ties to access the
+    # viewer but preserve the manipulation of the attribute `mouseIsDown` which
     # is needed for preventing the sidebar from closing while annotating.
     unless event and this.isAnnotator(event.target)
       @mouseIsDown = true
