@@ -177,13 +177,16 @@ class Hypothesis extends Annotator
         if @viewer.isShown() and @bucket == -1
           this._fillDynamicBucket()
         this.show()
-    .on 'dragstart', (event) =>
+
+    handle = @element.find('#toolbar .tri')[0]
+    handle.addEventListener 'dragstart', (event) =>
       dragStart = event.screenX
-    .on 'dragend', (event) =>
+    handle.addEventListener 'dragend', (event) =>
       @provider.addToFrameWidth (dragStart - event.screenX), window.innerWidth
-    .on 'drag', (event) =>
+    handle.addEventListener 'drag', (event) =>
       if event.screenX > 0
         @provider.addToFrameWidth (dragStart - event.screenX), window.innerWidth
+        dragStart = event.screenX
     this
 
   _setupDynamicStyle: ->
