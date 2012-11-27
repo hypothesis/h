@@ -8,11 +8,12 @@ class Hypothesis extends Annotator
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
 
   # Internal state
-  bucket: -1      # * The index of the bucket shown in the summary view
-  detail: false   # * Whether the viewer shows a summary or detail listing
-  hash: -1        # * cheap UUID :cake:
-  cache: {}       # * object cache
-  visible: false  # * Whether the sidebar is visible
+  bucket: -1         # * The index of the bucket shown in the summary view
+  detail: false      # * Whether the viewer shows a summary or detail listing
+  hash: -1           # * cheap UUID :cake:
+  cache: {}          # * object cache
+  visible: false     # * Whether the sidebar is visible
+  unsaved_drafts: [] # * Unsaved drafts currenty open
 
   this.$inject = ['$rootElement', '$scope', '$compile', '$http']
   constructor: (@element, @scope, @compile, @http) ->
@@ -49,6 +50,7 @@ class Hypothesis extends Annotator
             this.show()
             null
         showEditor: (stub) =>
+          return unless this._canCloseUnsaved()
           h = stub.hash
           annotation = $.extend @cache[h], stub,
             hash:
@@ -326,8 +328,13 @@ class Hypothesis extends Annotator
   # Returns itself for chaining.
   _setupEditor: ->
     @editor = this._createEditor()
-    .on('hide', => @provider.onEditorHide())
-    .on('save', => @provider.onEditorSubmit())
+    .on 'hide', =>
+      @provider.onEditorHide()
+    .on 'save', =>
+      @provider.onEditorSubmit()
+    .on 'hide save', =>
+      if @unsaved_drafts.indexOf(@editor) > -1
+        @unsaved_drafts.splice(@unsaved_drafts.indexOf(@editor), 1)
     this
 
   _createEditor: ->
@@ -341,6 +348,7 @@ class Hypothesis extends Annotator
         annotation.text = $(field).find('textarea').val()
     }]
 
+    @unsaved_drafts.push editor
     editor
 
   _fillDynamicBucket: ->
@@ -390,6 +398,9 @@ class Hypothesis extends Annotator
     @provider.setupAnnotation stub
 
   showViewer: (annotations=[], detail=false) =>
+    if (@visible and not detail) or @unsaved_drafts.indexOf(@editor) > -1
+      if not this._canCloseUnsaved() then return
+
     # Thread the messages using JWZ
     messages = mail.messageThread().thread annotations.map (a) ->
       m = mail.message(null, a.id, a.thread?.split('/') or [])
@@ -468,7 +479,6 @@ class Hypothesis extends Annotator
                   d3.select(this).html(trunc)
           else
             d3.select(this).html(quote)
-
 
       highlights = []
       excerpts.each (d) =>
@@ -566,6 +576,10 @@ class Hypothesis extends Annotator
 
                 editor.element.appendTo(item.node())
                 editor.on('hide', => item.remove())
+
+                editor.on 'hide save', =>
+                  @unsaved_drafts.splice(@unsaved_drafts.indexOf(editor), 1)
+
                 editor.element.find(":input:first").focus()
 
         context = items.select '.thread'
@@ -601,6 +615,8 @@ class Hypothesis extends Annotator
       .append(item)
       .find(":input:first").focus()
 
+    @unsaved_drafts.push @editor
+
     d3.select(@viewer.element[0]).datum(null)
     this.show()
 
@@ -624,6 +640,26 @@ class Hypothesis extends Annotator
     @provider.hideFrame()
     @element.find('#toolbar').removeClass('shown')
       .find('.tri').attr('draggable', false)
+
+  _canCloseUnsaved: ->
+    # See if there's an unsaved/uncancelled reply
+    can_close = true
+    open_editors = 0
+    for editor in @unsaved_drafts
+      unsaved_text = editor.element.find(':input:first').attr 'value'
+      if unsaved_text? and unsaved_text.toString().length > 0
+        open_editors += 1
+
+    if open_editors > 0
+      if open_editors > 1
+        ctext = "You have #{open_editors} unsaved replies."
+      else
+        ctext = "You have an unsaved reply."
+      ctext = ctext + " Do you really want to close the view?"
+      can_close = confirm ctext
+
+    if can_close then @unsaved_drafts = []
+    can_close
 
   threadId: (annotation) ->
     if annotation?.thread?
