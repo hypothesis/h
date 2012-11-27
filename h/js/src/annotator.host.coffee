@@ -22,6 +22,11 @@ class Annotator.Host extends Annotator
   # timer used to throttle event frequency
   updateTimer: null
 
+  # Drag state variables
+  drag:
+    delta: 0
+    tick: false
+
   constructor: (element, options) ->
     super
 
@@ -63,20 +68,19 @@ class Annotator.Host extends Annotator
         setupAnnotation: => this.setupAnnotation arguments...
         onEditorHide: this.onEditorHide
         onEditorSubmit: this.onEditorSubmit
-        showFrame: => @frame.removeClass('annotator-collapsed')
-        hideFrame: => @frame.addClass('annotator-collapsed')
-        resetFrameWidth: =>
-          @frame.css({ "width": "", "margin-left" : "" })        
-        setFrameWidth: (width) =>
-          @frame.css({ "width": width, "margin-left" : (-1)*width })
-        addToFrameWidth: (width, innerWidth) =>
-          if isNaN(parseInt(@frame[0].style.width))
-            old = innerWidth
-          else
-            old = parseInt(@frame[0].style.width)
-          @frame.css
-            width: old + width
-            'margin-left': -(old + width)
+        showFrame: =>
+          @frame.css 'margin-left': "#{-1 * @frame.width()}px"
+          @frame.removeClass 'annotator-no-transition'
+          @frame.removeClass 'annotator-collapsed'
+        hideFrame: =>
+          @frame.css 'margin-left': ''
+          @frame.removeClass 'annotator-no-transition'
+          @frame.addClass 'annotator-collapsed'
+        dragFrame: (d) =>
+          @drag.delta += d
+          unless @drag.tick
+            @drag.tick = true
+            requestAnimationFrame @dragRefresh
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
@@ -172,6 +176,21 @@ class Annotator.Host extends Annotator
 
   _setupEditor: ->
     true
+
+  dragRefresh: =>
+    d = @drag.delta
+    @drag.delta = 0
+    @drag.tick = false
+
+    m = parseInt (getComputedStyle @frame[0]).marginLeft
+    w = -1 * m
+    m += d
+    w -= d
+
+    @frame.addClass 'annotator-no-transition'
+    @frame.css
+      'margin-left': "#{m}px"
+      width: "#{w}px"
 
   showEditor: (annotation) =>
     stub =

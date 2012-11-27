@@ -5,7 +5,6 @@ class Hypothesis extends Annotator
   this::hash = -1       # * cheap UUID :cake:
   this::cache = {}      # * object cache
   this::visible = false # * Whether the sidebar is visible
-  this::lastWidth = 0   # * Frame's width before close
 
   # Plugin configuration
   options:
@@ -75,9 +74,7 @@ class Hypothesis extends Annotator
         onEditorSubmit: {}
         showFrame: {}
         hideFrame: {}
-        resetFrameWidth: {}
-        setFrameWidth: {}
-        addToFrameWidth: {}
+        dragFrame: {}
         getHighlights: {}
         setActiveHighlights: {}
         getMaxBottom: {}
@@ -169,7 +166,6 @@ class Hypothesis extends Annotator
     this
 
   _setupDocumentEvents: ->
-    dragStart = 0
     @element.find('#toolbar .tri').click =>
       if @visible
         this.hide()
@@ -178,15 +174,16 @@ class Hypothesis extends Annotator
           this._fillDynamicBucket()
         this.show()
 
+    dragLast = 0
     handle = @element.find('#toolbar .tri')[0]
     handle.addEventListener 'dragstart', (event) =>
-      dragStart = event.screenX
+      dragLast = event.screenX
     handle.addEventListener 'dragend', (event) =>
-      @provider.addToFrameWidth (dragStart - event.screenX), window.innerWidth
+      @provider.dragFrame (event.screenX - dragLast)
     handle.addEventListener 'drag', (event) =>
       if event.screenX > 0
-        @provider.addToFrameWidth (dragStart - event.screenX), window.innerWidth
-        dragStart = event.screenX
+        @provider.dragFrame (event.screenX - dragLast)
+        dragLast = event.screenX
     this
 
   _setupDynamicStyle: ->
@@ -609,7 +606,6 @@ class Hypothesis extends Annotator
       annotations = @heatmap.buckets[@bucket]?.map (a) => a.hash.valueOf()
 
     @visible = true
-    if @lastWidth > 0 then @provider.setFrameWidth(@lastWidth)
     @provider.setActiveHighlights annotations
     @provider.showFrame()
     @element.find("#toolbar").addClass "shown"
@@ -619,7 +615,6 @@ class Hypothesis extends Annotator
     @lastWidth = window.innerWidth
     @visible = false
     @provider.setActiveHighlights []
-    @provider.resetFrameWidth()
     @provider.hideFrame()
     @element.find("#toolbar").removeClass "shown"
     document.getElementsByClassName('tri')[0].draggable = false
