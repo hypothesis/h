@@ -174,16 +174,22 @@ class Hypothesis extends Annotator
           this._fillDynamicBucket()
         this.show()
 
-    dragLast = 0
+    el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
+    el.width = el.height = 1
+    @element.append el
+
     handle = @element.find('#toolbar .tri')[0]
     handle.addEventListener 'dragstart', (event) =>
-      dragLast = event.screenX
+      event.dataTransfer.setData 'text/plain', ''
+      event.dataTransfer.setDragImage(el, 0, 0)
+      @provider.dragFrame event.screenX
     handle.addEventListener 'dragend', (event) =>
-      @provider.dragFrame (event.screenX - dragLast)
-    handle.addEventListener 'drag', (event) =>
-      if event.screenX > 0
-        @provider.dragFrame (event.screenX - dragLast)
-        dragLast = event.screenX
+      @provider.dragFrame event.screenX
+    @element[0].addEventListener 'dragover', (event) =>
+      @provider.dragFrame event.screenX
+    @element[0].addEventListener 'dragleave', (event) =>
+      @provider.dragFrame event.screenX
+
     this
 
   _setupDynamicStyle: ->
@@ -608,16 +614,16 @@ class Hypothesis extends Annotator
     @visible = true
     @provider.setActiveHighlights annotations
     @provider.showFrame()
-    @element.find("#toolbar").addClass "shown"
-    document.getElementsByClassName('tri')[0].draggable = true
+    @element.find('#toolbar').addClass('shown')
+      .find('.tri').attr('draggable', true)
 
   hide: =>
     @lastWidth = window.innerWidth
     @visible = false
     @provider.setActiveHighlights []
     @provider.hideFrame()
-    @element.find("#toolbar").removeClass "shown"
-    document.getElementsByClassName('tri')[0].draggable = false
+    @element.find('#toolbar').removeClass('shown')
+      .find('.tri').attr('draggable', false)
 
   threadId: (annotation) ->
     if annotation?.thread?

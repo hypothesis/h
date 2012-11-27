@@ -115,6 +115,7 @@ easyXDM = Bundle('h:js/lib/easyXDM.min.js')
 handlebars = Bundle('h:js/lib/handlebars-runtime.min.js')
 jquery = Bundle('deform:static/scripts/jquery-1.7.2.min.js')
 jwz = Bundle('h:js/lib/jwz.min.js')
+raf = Bundle('h:js/lib/polyfills/raf.js')
 underscore = Bundle('h:js/lib/underscore-min.js')
 
 # The user interface of the application is structured around these Handlebars

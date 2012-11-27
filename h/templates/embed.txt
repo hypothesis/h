@@ -35,6 +35,10 @@ yepnope([
       window.Annotator._instance = annotator;
       $(function () { annotator.consumer.update() })
     }
+  },
+  {
+    test: window.requestAnimationFrame,
+    nope: ${raf},
   }
 ])
 /*]]>{/literal}*/

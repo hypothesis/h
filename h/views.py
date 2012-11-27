@@ -16,7 +16,7 @@ def embed(request, standalone=True):
         request.response.charset = 'UTF-8'
     return {
         pkg: json.dumps(request.webassets_env[pkg].urls())
-        for pkg in ['easyXDM', 'injector', 'inject_css', 'jquery']
+        for pkg in ['easyXDM', 'injector', 'inject_css', 'jquery', 'raf']
     }
 
 

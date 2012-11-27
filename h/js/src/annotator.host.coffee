@@ -25,6 +25,7 @@ class Annotator.Host extends Annotator
   # Drag state variables
   drag:
     delta: 0
+    last: null
     tick: false
 
   constructor: (element, options) ->
@@ -76,11 +77,14 @@ class Annotator.Host extends Annotator
           @frame.css 'margin-left': ''
           @frame.removeClass 'annotator-no-transition'
           @frame.addClass 'annotator-collapsed'
-        dragFrame: (d) =>
-          @drag.delta += d
+        dragFrame: (screenX) =>
+          if screenX > 0
+            if @drag.last?
+              @drag.delta += screenX - @drag.last
+            @drag.last = screenX
           unless @drag.tick
             @drag.tick = true
-            requestAnimationFrame @dragRefresh
+            window.requestAnimationFrame this.dragRefresh
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
@@ -166,6 +170,20 @@ class Annotator.Host extends Annotator
     document.addEventListener 'touchstart', =>
       touch = true
       do update
+    document.addEventListener 'dragover', (event) =>
+      if @drag.last?
+        @drag.delta += event.screenX - @drag.last
+      @drag.last = event.screenX
+      unless @drag.tick
+        @drag.tick = true
+        window.requestAnimationFrame this.dragRefresh
+    document.addEventListener 'dragleave', (event) =>
+      if @drag.last?
+        @drag.delta += event.screenX - @drag.last
+      @drag.last = event.screenX
+      unless @drag.tick
+        @drag.tick = true
+        window.requestAnimationFrame this.dragRefresh
     $(window).on 'resize scroll', update
     $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
     super
