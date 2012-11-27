@@ -1,11 +1,4 @@
 class Hypothesis extends Annotator
-  # Annotator state variables.
-  this::bucket = -1     # * The index of the bucket shown in the summary view
-  this::detail = false  # * Whether the viewer shows a summary or detail listing
-  this::hash = -1       # * cheap UUID :cake:
-  this::cache = {}      # * object cache
-  this::visible = false # * Whether the sidebar is visible
-
   # Plugin configuration
   options:
     Heatmap: {}
@@ -13,6 +6,13 @@ class Hypothesis extends Annotator
       showEditPermissionsCheckbox: false,
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
+
+  # Internal state
+  bucket: -1      # * The index of the bucket shown in the summary view
+  detail: false   # * Whether the viewer shows a summary or detail listing
+  hash: -1        # * cheap UUID :cake:
+  cache: {}       # * object cache
+  visible: false  # * Whether the sidebar is visible
 
   this.$inject = ['$rootElement', '$scope', '$compile', '$http']
   constructor: (@element, @scope, @compile, @http) ->
