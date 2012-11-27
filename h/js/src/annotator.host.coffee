@@ -161,7 +161,7 @@ class Annotator.Host extends Annotator
       do update
     document.addEventListener 'touchstart', =>
       touch = true
-      do update      
+      do update
     $(window).on 'resize scroll', update
     $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
     super

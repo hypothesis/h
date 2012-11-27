@@ -56,7 +56,7 @@ class Hypothesis extends Annotator
             @editor.hide()
             this.showAuth true
             this.show()
-        # This guy does stuff when you "back out" of the interface. 
+        # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
         back: =>
           # If it's in the detail view, loads the bucket back up.
