@@ -77,7 +77,7 @@ class Hypothesis extends Annotator
         hideFrame: {}
         resetFrameWidth: {}
         setFrameWidth: {}
-        addtoFrameWidth: {}
+        addToFrameWidth: {}
         getHighlights: {}
         setActiveHighlights: {}
         getMaxBottom: {}
