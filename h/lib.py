@@ -46,17 +46,18 @@ def get_user(request):
 def set_user(request, user):
     # Must extract the id here since pyramid_tm will cause the database
     # session to be invalid by the time this runs.
-    user_id = user.id
+    if user is not None:
+        user_id = user.id
+    else:
+        user_id = None
+        request.session.invalidate()
 
     def _set_auth_headers(request, response):
-        if request.user is None:
+        if user_id is None:
             headers = forget(request)
         else:
             headers = remember(request, user_id)
         response.headerlist.extend(headers)
-
-    if not user:
-        request.session.invalidate()
 
     if not hasattr(request, '_user_modified'):
         request.add_response_callback(_set_auth_headers)
