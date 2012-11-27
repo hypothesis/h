@@ -326,8 +326,8 @@ class Hypothesis extends Annotator
   # Returns itself for chaining.
   _setupEditor: ->
     @editor = this._createEditor()
-    .on('hide', => @provider.onEditorHide)
-    .on('save', => @provider.onEditorSubmit)
+    .on('hide', => @provider.onEditorHide())
+    .on('save', => @provider.onEditorSubmit())
     this
 
   _createEditor: ->
