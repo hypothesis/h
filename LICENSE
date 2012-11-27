@@ -23,11 +23,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Subcomponents
 
-The hypothes.is project includes a number of subcomponents with separate
+The project includes a number of subcomponents with separate
 copyright notices and license terms. Your use of the code for the these
 subcomponents is subject to the terms and conditions of the following licenses.
 
 For the annotator subcomponent:
+
+ Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
