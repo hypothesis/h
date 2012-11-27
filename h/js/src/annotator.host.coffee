@@ -22,6 +22,12 @@ class Annotator.Host extends Annotator
   # timer used to throttle event frequency
   updateTimer: null
 
+  # Drag state variables
+  drag:
+    delta: 0
+    last: null
+    tick: false
+
   constructor: (element, options) ->
     super
 
@@ -63,8 +69,22 @@ class Annotator.Host extends Annotator
         setupAnnotation: => this.setupAnnotation arguments...
         onEditorHide: this.onEditorHide
         onEditorSubmit: this.onEditorSubmit
-        showFrame: => @frame.removeClass('annotator-collapsed')
-        hideFrame: => @frame.addClass('annotator-collapsed')
+        showFrame: =>
+          @frame.css 'margin-left': "#{-1 * @frame.width()}px"
+          @frame.removeClass 'annotator-no-transition'
+          @frame.removeClass 'annotator-collapsed'
+        hideFrame: =>
+          @frame.css 'margin-left': ''
+          @frame.removeClass 'annotator-no-transition'
+          @frame.addClass 'annotator-collapsed'
+        dragFrame: (screenX) =>
+          if screenX > 0
+            if @drag.last?
+              @drag.delta += screenX - @drag.last
+            @drag.last = screenX
+          unless @drag.tick
+            @drag.tick = true
+            window.requestAnimationFrame this.dragRefresh
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
@@ -150,6 +170,20 @@ class Annotator.Host extends Annotator
     document.addEventListener 'touchstart', =>
       touch = true
       do update
+    document.addEventListener 'dragover', (event) =>
+      if @drag.last?
+        @drag.delta += event.screenX - @drag.last
+      @drag.last = event.screenX
+      unless @drag.tick
+        @drag.tick = true
+        window.requestAnimationFrame this.dragRefresh
+    document.addEventListener 'dragleave', (event) =>
+      if @drag.last?
+        @drag.delta += event.screenX - @drag.last
+      @drag.last = event.screenX
+      unless @drag.tick
+        @drag.tick = true
+        window.requestAnimationFrame this.dragRefresh
     $(window).on 'resize scroll', update
     $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
     super
@@ -160,6 +194,21 @@ class Annotator.Host extends Annotator
 
   _setupEditor: ->
     true
+
+  dragRefresh: =>
+    d = @drag.delta
+    @drag.delta = 0
+    @drag.tick = false
+
+    m = parseInt (getComputedStyle @frame[0]).marginLeft
+    w = -1 * m
+    m += d
+    w -= d
+
+    @frame.addClass 'annotator-no-transition'
+    @frame.css
+      'margin-left': "#{m}px"
+      width: "#{w}px"
 
   showEditor: (annotation) =>
     stub =
@@ -174,8 +223,8 @@ class Annotator.Host extends Annotator
       @consumer.showEditor stub
 
   checkForStartSelection: (event) =>
-    # Annotator chokes on this callback hen trying to access
-    # this.viewer.hide since there is no viewer. The `mouseIsDown` state
+    # Override to prevent Annotator choking when this ties to access the
+    # viewer but preserve the manipulation of the attribute `mouseIsDown` which
     # is needed for preventing the sidebar from closing while annotating.
     unless event and this.isAnnotator(event.target)
       @mouseIsDown = true

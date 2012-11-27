@@ -1,7 +1,7 @@
 from horus import resources
 
+from pyramid.decorator import reify
 from pyramid.interfaces import ILocation
-from pyramid.security import Allow, Authenticated
 
 from webassets import Bundle
 from webassets.filter import register_filter
@@ -9,7 +9,7 @@ from webassets.loaders import PythonLoader
 
 from zope.interface import implementer
 
-from h import api
+from h import api, models
 
 # register our backported cleancss filter until webassets 0.8 is released
 from h.cleancss import CleanCSS
@@ -28,19 +28,50 @@ annotator = Bundle(
     Bundle('deform_bootstrap:static/bootstrap.min.js'),
     Bundle(
         Bundle(
-            'h:js/src/plugin/heatmap.coffee',
-            debug=False,
-            filters='coffeescript',
-            output='js/heatmap.js',
+            Bundle(
+                'h:js/src/deform.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/deform.js',
+            ),
+            Bundle(
+                'h:js/src/app.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/app.js',
+            ),
+            Bundle(
+                'h:js/src/controllers.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/controllers.js',
+            ),
+            Bundle(
+                'h:js/src/directives.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/directives.js',
+            ),
+            Bundle(
+                'h:js/src/services.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/services.js',
+            ),
+            filters='uglifyjs',
+            output='js/hypothesis.min.js'
         ),
         Bundle(
-            'h:js/src/hypothesis.coffee',
-            debug=False,
-            filters='coffeescript',
-            output='js/hypothesis.js',
+            Bundle(
+                'h:js/src/plugin/heatmap.coffee',
+                debug=False,
+                filters='coffeescript',
+                output='js/lib/annotator.heatmap.js',
+            ),
+            filters='uglifyjs',
+            output='js/lib/annotator.heatmap.min.js'
         ),
-        filters='uglifyjs',
-        output='js/hypothes.is.min.js',
+        output='js/hypothesis-full.min.js',
     ),
 )
 
@@ -60,6 +91,8 @@ injector = Bundle(
         output='js/hypothesis-host.min.js',
     ),
 )
+
+angular = Bundle('h:js/lib/angular.min.js')
 
 # PageDown is used to render Markdown-formatted text to HTML
 pagedown = Bundle(
@@ -82,6 +115,7 @@ easyXDM = Bundle('h:js/lib/easyXDM.min.js')
 handlebars = Bundle('h:js/lib/handlebars-runtime.min.js')
 jquery = Bundle('deform:static/scripts/jquery-1.7.2.min.js')
 jwz = Bundle('h:js/lib/jwz.min.js')
+raf = Bundle('h:js/lib/polyfills/raf.js')
 underscore = Bundle('h:js/lib/underscore-min.js')
 
 # The user interface of the application is structured around these Handlebars
@@ -205,33 +239,69 @@ class InnerResource(BaseResource):
 
 
 class RootFactory(InnerResource, resources.RootFactory):
-    __name__ = ''
+    pass
 
 
 class APIFactory(InnerResource):
-    __acl__ = [
-        (Allow, Authenticated, 'access_token')
-    ]
-
     def __init__(self, request):
         super(APIFactory, self).__init__(request)
 
         if not 'x-annotator-auth-token' in request.headers:
-            token = None
-
             if 'access_token' in request.params:
                 token = request.params['access_token']
-            elif request.user:
-                token = api.token(request)
-
-            if token:
                 request.headers['x-annotator-auth-token'] = token
 
 
-class AppFactory(InnerResource):
+class AppFactory(BaseResource):
     def __init__(self, request):
         super(AppFactory, self).__init__(request)
 
+    @reify
+    def persona(self):
+        request = self.request
+
+        # Transition code until multiple sign-in is implemented
+        if request.user:
+            return {
+                'username': request.user.username,
+                'provider': request.host,
+            }
+
+        return None
+
+    @reify
+    def personas(self):
+        request = self.request
+
+        # Transition code until multiple sign-in is implemented
+        if request.user:
+            return [self.persona]
+
+        return []
+
+    @reify
+    def consumer(self):
+        settings = self.request.registry.settings
+        key = settings['api.key']
+        secret = settings.get('api.secret')
+        if not secret:
+            consumer = models.Consumer.get_by_key(key)
+        else:
+            consumer = models.Consumer(key=key, secret=secret)
+        assert(consumer)
+        return consumer
+
+    @reify
+    def token(self):
+        if not self.persona:
+            return None
+
+        message = {
+            'userId': 'acct:%(username)s@%(provider)s' % self.persona,
+            'consumerKey': str(self.consumer.key),
+            'ttl': self.consumer.ttl,
+        }
+        return api.auth.encode_token(message, self.consumer.secret)
 
 RootFactory.api = APIFactory
 RootFactory.app = AppFactory

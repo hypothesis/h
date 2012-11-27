@@ -2,22 +2,10 @@ __all__ = ['BaseController']
 
 import json
 
-from horus import (
-    ILoginSchema, LoginSchema,
-    IRegisterSchema, RegisterSchema,
-    IForgotPasswordSchema, ForgotPasswordSchema,
-    IResetPasswordSchema, ResetPasswordSchema,
-    IProfileSchema, ProfileSchema,
-
-    ILoginForm, IRegisterForm, IForgotPasswordForm,
-    IResetPasswordForm, IProfileForm,
-
-    SubmitForm
-)
-from horus.views import BaseController
-
 from pyramid.renderers import render
 from pyramid.view import view_config
+
+from horus.views import BaseController
 
 
 @view_config(http_cache=(0, {'must-revalidate': True}),
@@ -28,7 +16,7 @@ def embed(request, standalone=True):
         request.response.charset = 'UTF-8'
     return {
         pkg: json.dumps(request.webassets_env[pkg].urls())
-        for pkg in ['easyXDM', 'injector', 'inject_css', 'jquery']
+        for pkg in ['easyXDM', 'injector', 'inject_css', 'jquery', 'raf']
     }
 
 
@@ -91,23 +79,5 @@ def includeme(config):
         renderer='h:templates/auth.pt',
         route_name='profile'
     )
-
-    schemas = [
-        (ILoginSchema, LoginSchema),
-        (IRegisterSchema, RegisterSchema),
-        (IForgotPasswordSchema, ForgotPasswordSchema),
-        (IResetPasswordSchema, ResetPasswordSchema),
-        (IProfileSchema, ProfileSchema)
-    ]
-    forms = [
-        ILoginForm, IRegisterForm, IForgotPasswordForm,
-        IResetPasswordForm, IProfileForm
-    ]
-    for iface, schema in schemas:
-        if not config.registry.queryUtility(iface):
-            config.registry.registerUtility(schema, iface)
-    for form in forms:
-        if not config.registry.queryUtility(form):
-            config.registry.registerUtility(SubmitForm, form)
 
     config.scan(__name__)

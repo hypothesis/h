@@ -108,8 +108,11 @@
 
   &.annotator-collapsed {
     margin-left: -$heatmap-width - 17px;
-
   }
+}
+
+.annotator-no-transition {
+  @include transition(none !important);
 }
 
 

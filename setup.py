@@ -17,7 +17,6 @@ setup(
         'deform_bootstrap>=0.2.1',
         'horus>=0.9.8',
         'pyramid>=1.3',
-        'pyramid_deform>=0.2a4',
         'pyramid_tm>=0.3',
         'pyramid_webassets>=0.7',
         'setuptools>=0.6c11',
@@ -51,9 +50,6 @@ setup(
         'paste.app_factory': [
             'main=h:main'
         ],
-        'zest.releaser.prereleaser.middle': [
-            'prepare=h.scripts:prepare'
-        ]
     },
 
     cmdclass=versioneer.get_cmdclass()

@@ -1,26 +1,72 @@
 import colander
 import deform
 
-from h import api
-from horus import schemas
+from horus.schemas import (
+    CSRFSchema,
+    ForgotPasswordSchema
+)
+
+from h import interfaces
+from h.messages import _
 
 
-class ActivationCodeSchema(schemas.ResetPasswordSchema):
+class LoginSchema(CSRFSchema):
+    username = colander.SchemaNode(colander.String())
+    password = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(min=2),
+        widget=deform.widget.PasswordWidget()
+    )
+
+
+class RegisterSchema(CSRFSchema):
+    username = colander.SchemaNode(colander.String())
+    email = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Email()
+    )
+    password = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(min=2),
+        widget=deform.widget.PasswordWidget()
+    )
+
+
+class ResetPasswordSchema(CSRFSchema):
+    username = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextInputWidget(template='readonly/textinput'),
+        missing=colander.null,
+    )
+    password = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(min=2),
+        widget=deform.widget.PasswordWidget()
+    )
+
+
+class ActivateSchema(CSRFSchema):
     code = colander.SchemaNode(
         colander.String(),
         title="Security Code"
     )
-
-
-class PersonaSchema(schemas.CSRFSchema):
-    id = colander.SchemaNode(
-        colander.Integer(),
-        widget=colander.deferred(
-            lambda node, kw: deform.widget.SelectWidget(
-                values=api.personas(kw['request']),
-                css_class='dropdown-menu pull-right',
-                template='tinyman'
-            ),
-        ),
-        missing=-1
+    password = colander.SchemaNode(
+        colander.String(),
+        title=_('New Password'),
+        validator=colander.Length(min=2),
+        widget=deform.widget.PasswordWidget()
     )
+
+
+def includeme(config):
+    schemas = [
+        (interfaces.ILoginSchema, LoginSchema),
+        (interfaces.IRegisterSchema, RegisterSchema),
+        (interfaces.IForgotPasswordSchema, ForgotPasswordSchema),
+        (interfaces.IResetPasswordSchema, ResetPasswordSchema),
+        (interfaces.IActivateSchema, ActivateSchema)
+    ]
+
+    for iface, schema in schemas:
+        if not config.registry.queryUtility(iface):
+            config.registry.registerUtility(schema, iface)
