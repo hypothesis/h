@@ -12,22 +12,32 @@ __all__ = [
     'IRegisterSchema',
     'IForgotPasswordSchema',
     'IResetPasswordSchema',
-    'IProfileSchema'
+    'IProfileSchema',
 ]
 
+from zope.interface import Interface
+
 from horus.interfaces import (
-    IUserClass as IUserClass,
-    IActivationClass as IActivationClass,
+    IUserClass,
+    IActivationClass,
 
-    ILoginForm as ILoginForm,
-    IRegisterForm as IRegisterForm,
-    IForgotPasswordForm as IForgotPasswordForm,
-    IResetPasswordForm as IResetPasswordForm,
-    IProfileForm as IProfileForm,
+    ILoginForm,
+    IRegisterForm,
+    IForgotPasswordForm,
+    IResetPasswordForm,
+    IProfileForm,
 
-    ILoginSchema as ILoginSchema,
-    IRegisterSchema as IRegisterSchema,
-    IForgotPasswordSchema as IForgotPasswordSchema,
-    IResetPasswordSchema as IResetPasswordSchema,
-    IProfileSchema as IProfileSchema,
+    ILoginSchema,
+    IRegisterSchema,
+    IForgotPasswordSchema,
+    IResetPasswordSchema,
+    IProfileSchema,
 )
+
+
+class IActivateForm(Interface):
+    pass
+
+
+class IActivateSchema(Interface):
+    pass

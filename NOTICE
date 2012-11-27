@@ -6,6 +6,10 @@ Hypothes.is Project (http://hypothes.is/).
 
 This product also includes the following third-party components:
 
+ * angular (http://angularjs.org/)
+
+   Copyright (c) 2010-2012 Google, Inc.
+
  * annotator (http://okfnlabs.org/annotator/)
 
    Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning

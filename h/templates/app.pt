@@ -6,47 +6,81 @@
           tal:attributes="href href"
           tal:repeat="href webassets(request, 'app_css') | []" />
   </head>
-  <body metal:fill-slot="body">
+  <body data-ng-app="h"
+        data-ng-controller="Hypothesis"
+        metal:fill-slot="body">
     <div id="toolbar" class="form-inline">
       <div class="tri"></div>
-      <div class="pull-right">${structure: persona.form}</div>
+      <div class="tinyman">
+        <form id="persona"
+              action
+              method="POST"
+              enctype="multipart/form-data"
+              accept-charset="utf-8">
+          <input name="__formid__" type="hidden" value="persona" />
+          <a data-ng-hide="persona"
+             data-ng-click="showAuth()">Sign in</a>
+          <div class="dropdown"
+               data-ng-show="persona">
+            <a role="button"
+               class="dropdown-toggle"
+               data-toggle="dropdown"
+               >{{persona.username}}<span class="provider"
+                                          >/{{persona.provider}}</span></a>
+            <ul class="dropdown-menu pull-right"
+                role="menu">
+              <li data-ng-repeat="option in personas">
+                <a data-ng-click="persona = personas[$index]"
+                   >{{option.username}}/{{option.provider}}</a>
+              </li>
+              <li>
+                <a data-ng-click="persona = null">Sign out</a>
+              </li>
+            </ul>
+          </div>
+        </form>
+      </div>
     </div>
     <div id="gutter">
-      <header class="sheet">
-        <a class="close" onclick="showAuth(false)"></a>
+      <header class="sheet" data-ng-model="auth" data-ng-submit="submit()">
+        <a class="close" data-ng-click="showAuth(false)"></a>
         <ul class="nav nav-tabs">
           <li><a data-target="#auth-tab"
                  data-toggle="tab">Log in</a></li>
           <li><a data-target="#register-tab"
                  data-toggle="tab">Sign up</a></li>
-          <li><a data-target="#password-tab"
+          <li><a data-target="#forgot-tab"
                  data-toggle="tab">Forgot your password?</a></li>
-          <li><a data-target="#reset-tab"
+          <li><a data-target="#activate-tab"
                  data-toggle="tab">Set your password</a></li>
         </ul>
         <div class="tab-content form-vertical">
-          <div tal:repeat="name ['auth', 'register']"
+          <div tal:repeat="name ['login', 'register']"
                tal:attributes="id '%s-tab' % name"
                class="tab-pane">
             ${structure: layout.forms[name].render()}
             <footer>
               <ul>
-                <li><a href="#" onclick="$('.nav a[data-target]')
-                                           .filter('[data-target=#password-tab]')
-                                           .tab('show')"
-                       >Password help?</a></li>
-                <li><a href="#" onclick="$('.nav a[data-target]')
-                                           .filter('[data-target=#reset-tab]')
-                                           .tab('show')"
-                       >Have you already reserved a username with us?</a></li>
+                <li>
+                  <a onclick="$('.nav a[data-target]')
+                                .filter('[data-target=#forgot-tab]')
+                                .tab('show')"
+                     >Password help?</a>
+                </li>
+                <li>
+                  <a onclick="$('.nav a[data-target]')
+                              .filter('[data-target=#activate-tab]')
+                              .tab('show')"
+                     >Have you already reserved a username with us?</a>
+                </li>
               </ul>
             </footer>
           </div>
-          <div id="password-tab" class="tab-pane">
-            ${structure: layout.forms['password'].render()}
+          <div id="forgot-tab" class="tab-pane">
+            ${structure: layout.forms['forgot'].render()}
           </div>
-          <div id="reset-tab" class="tab-pane">
-            ${structure: layout.forms['reset'].render()}
+          <div id="activate-tab" class="tab-pane">
+            ${structure: layout.forms['activate'].render()}
           </div>
         </div>
       </header>
@@ -57,6 +91,7 @@
             tal:attributes="src src"
             tal:repeat="src webassets(
                         request,
+                        'angular',
                         'annotator',
                         'd3',
                         'easyXDM',
@@ -65,111 +100,5 @@
                         'pagedown',
                         'templates',
                         'underscore')"></script>
-    <script type="text/javascript">
-      var annotator = window.Annotator._instance = new Hypothesis(document.body, {
-        Heatmap: {}
-      })
-      var plugins = annotator.plugins
-
-      // https://github.com/Pylons/deform/pull/128
-      focusFirstInput = function (el) {
-        el = el || document.body
-        var input = $(el).find(':input')
-          .filter('[id ^= deformField]')
-          .filter('[type != hidden]')
-          .first()
-        if (input) {
-            var raw = input.get(0)
-            if (raw) {
-                if (raw.type === 'text' || raw.type === 'file' ||
-                    raw.type == 'password' || raw.type == 'text' ||
-                    raw.type == 'textarea') {
-                    if (raw.className != "hasDatepicker") {
-                        input.focus()
-                    }
-                }
-            }
-        }
-      }
-
-      $('a[data-toggle]').on('shown', function(e) {
-        var target = $(e.target).data('target')
-        focusFirstInput(target)
-      })
-
-      var showAuth = function (show, cb) {
-        var $header = $('header'),
-            visible = !$header.hasClass('collapsed')
-        if (visible != show) {
-          if (show) {
-            $header.removeClass('collapsed')
-            focusFirstInput($header.find('li.active'))
-          } else {
-            $header.addClass('collapsed')
-          }
-          $header.one('webkitTransitionEnd transitionend OTransitionEnd', cb)
-        } else {
-          if (cb) cb()
-        }
-      }
-
-      var setupAuth = function (cb) {
-        // TODO: use less janky cookie stuff (and below)
-        if (document.cookie.indexOf('auth_tkt=') != -1) {
-          $('#persona').off('change').on('change', function () {
-            $(this).submit()
-          })
-          if (!plugins.Auth) {
-            annotator.addPlugin('Auth', {
-              tokenUrl: '${token_url}'
-            })
-          }
-          plugins.Auth.withToken(plugins.Permissions._setAuthFromToken)
-          if (cb) cb(true)
-        } else {
-          $('#persona span').off('click').on('click', function (e) {
-            $('.sheet .nav a[data-target]')
-              .first()
-              .tab('show')
-              .each(function () {
-                var target = $(this).data('target')
-                focusFirstInput(target)
-              })
-            showAuth(true)
-          })
-          plugins.Permissions.setUser(null)
-          if (plugins.Auth) {
-            plugins.Auth.token = null
-            plugins.Auth.updateHeaders()
-            delete plugins.Auth
-          }
-          if (cb) cb(false)
-        }
-      }
-
-      var afterRequest = function (data) {
-        var visible = !$('header').hasClass('collapsed')
-        showAuth(false, function () {
-          Object.getOwnPropertyNames(data).map(function (oid) {
-            if (data[oid].form) {
-              var fragment = $('#' + oid)
-                , active = fragment.hasClass('active')
-                , form = $(data[oid].form)
-              fragment.replaceWith(form)
-              if (active) form.addClass('active')
-            }
-          })
-          deform.processCallbacks()
-          deform.focusFirstInput('header .tab-pane.active')
-          setupAuth(function (auth) {
-            if (visible && !auth) showAuth(true)
-          })
-        })
-      }
-      setupAuth()
-      showAuth(false)
-    </script>
-    <script type="text/javascript"
-            tal:condition="request.user">setupAuth()</script>
   </body>
 </html>

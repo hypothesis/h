@@ -5,7 +5,6 @@ from annotator.auth import DEFAULT_TTL
 
 from hem.interfaces import IDBSession
 
-from horus import get_user
 from horus.models import (
     BaseModel,
     ActivationMixin,
@@ -22,7 +21,7 @@ from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer, TypeDecorator, CHAR
 
-from h import interfaces
+from h import interfaces, lib
 
 
 class GUID(TypeDecorator):
@@ -112,7 +111,7 @@ def includeme(config):
     config.include('pyramid_basemodel')
     config.include('pyramid_tm')
 
-    config.set_request_property(get_user, str('user'), reify=True)
+    config.set_request_property(lib.user_property, 'user')
 
     if not registry.queryUtility(IDBSession):
         registry.registerUtility(Session, IDBSession)
