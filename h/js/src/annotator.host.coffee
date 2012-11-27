@@ -217,8 +217,12 @@ class Annotator.Host extends Annotator
       hash: annotation.hash
     if not stub.hash
       @consumer.createAnnotation (hash) =>
-        annotation.hash = stub.hash = hash
-        @consumer.showEditor stub
+        if not hash?
+          this.deleteAnnotation annotation
+          @ignoreMouseup = false
+        else
+          annotation.hash = stub.hash = hash
+          @consumer.showEditor stub
     else
       @consumer.showEditor stub
 

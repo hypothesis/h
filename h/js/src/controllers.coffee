@@ -41,20 +41,20 @@ class Hypothesis extends Annotator
             this.publish event, [annotation]
         addPlugin: => this.addPlugin arguments...
         createAnnotation: =>
-          @cache[h = ++@hash] = this.createAnnotation()
-          h
+          if @plugins.Permissions.user?
+            @cache[h = ++@hash] = this.createAnnotation()
+            h
+          else
+            this.showAuth true
+            this.show()
+            null
         showEditor: (stub) =>
           h = stub.hash
           annotation = $.extend @cache[h], stub,
             hash:
               toJSON: => undefined
               valueOf: => h
-          if @plugins.Permissions.user?
-            this.showEditor annotation
-          else
-            @editor.hide()
-            this.showAuth true
-            this.show()
+          this.showEditor annotation
         # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
         back: =>
