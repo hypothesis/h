@@ -69,9 +69,14 @@ class Annotator.Host extends Annotator
           @frame.css({ "width": "", "margin-left" : "" })        
         setFrameWidth: (width) =>
           @frame.css({ "width": width, "margin-left" : (-1)*width })
-        addtoFrameWidth: (width, innerWidth) =>
-          if isNaN(parseInt(@frame[0].style.width)) then old = innerWidth else old = parseInt(@frame[0].style.width)
-          @frame.css({ "width": (old + width), "margin-left" : (-1)*(old + width) })   
+        addToFrameWidth: (width, innerWidth) =>
+          if isNaN(parseInt(@frame[0].style.width))
+            old = innerWidth
+          else
+            old = parseInt(@frame[0].style.width)
+          @frame.css
+            width: old + width
+            'margin-left': -(old + width)
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()

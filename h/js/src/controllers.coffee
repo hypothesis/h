@@ -5,7 +5,6 @@ class Hypothesis extends Annotator
   this::hash = -1       # * cheap UUID :cake:
   this::cache = {}      # * object cache
   this::visible = false # * Whether the sidebar is visible
-  this::dragstartposX =0# * Frame's draggin start position
   this::lastWidth = 0   # * Frame's width before close
 
   # Plugin configuration
@@ -170,6 +169,7 @@ class Hypothesis extends Annotator
     this
 
   _setupDocumentEvents: ->
+    dragStart = 0
     @element.find('#toolbar .tri').click =>
       if @visible
         this.hide()
@@ -177,14 +177,13 @@ class Hypothesis extends Annotator
         if @viewer.isShown() and @bucket == -1
           this._fillDynamicBucket()
         this.show()
-    document.getElementsByClassName('tri')[0].addEventListener 'dragstart', (event) =>
-      @dragstartposX = event.screenX
-    document.getElementById('toolbar').addEventListener 'dragend', (event) =>
-      @provider.addtoFrameWidth(@dragstartposX - event.screenX, window.innerWidth)
-    document.getElementById('toolbar').addEventListener 'drag', (event) =>
+    .on 'dragstart', (event) =>
+      dragStart = event.screenX
+    .on 'dragend', (event) =>
+      @provider.addToFrameWidth (dragStart - event.screenX), window.innerWidth
+    .on 'drag', (event) =>
       if event.screenX > 0
-        @provider.addtoFrameWidth((@dragstartposX - event.screenX), window.innerWidth)
-        @dragstartposX = event.screenX
+        @provider.addToFrameWidth (dragStart - event.screenX), window.innerWidth
     this
 
   _setupDynamicStyle: ->
