@@ -50,9 +50,6 @@ setup(
         'paste.app_factory': [
             'main=h:main'
         ],
-        'zest.releaser.prereleaser.middle': [
-            'prepare=h.scripts:prepare'
-        ]
     },
 
     cmdclass=versioneer.get_cmdclass()
