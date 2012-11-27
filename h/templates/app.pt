@@ -45,7 +45,7 @@
       <header class="sheet" data-ng-model="auth" data-ng-submit="submit()">
         <a class="close" data-ng-click="showAuth(false)"></a>
         <ul class="nav nav-tabs">
-          <li><a data-target="#auth-tab"
+          <li><a data-target="#login-tab"
                  data-toggle="tab">Log in</a></li>
           <li><a data-target="#register-tab"
                  data-toggle="tab">Sign up</a></li>
