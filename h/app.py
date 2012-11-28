@@ -212,7 +212,7 @@ class AppController(views.BaseController):
             name: getattr(request.context, name)
             for name in ['persona', 'personas', 'token']
         }
-        model.update(tokenURL=request.resource_url(request.context, 'token'))
+        model.update(tokenUrl=request.resource_url(request.context, 'token'))
         return model
 
     @view_config(renderer='h:templates/app.pt')
