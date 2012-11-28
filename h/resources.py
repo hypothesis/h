@@ -1,3 +1,5 @@
+import re
+
 from horus import resources
 
 from pyramid.decorator import reify
@@ -92,7 +94,24 @@ injector = Bundle(
     ),
 )
 
+#
+# Application dependencies
+#
+
 angular = Bundle('h:js/lib/angular.min.js')
+d3 = Bundle('h:js/lib/d3.v2.min.js')
+easyXDM = Bundle('h:js/lib/easyXDM.min.js')
+handlebars = Bundle('h:js/lib/handlebars-runtime.min.js')
+jquery = Bundle('deform:static/scripts/jquery-1.7.2.min.js')
+jwz = Bundle('h:js/lib/jwz.min.js')
+
+deform = Bundle(
+    jquery,
+    Bundle(
+        'deform:static/scripts/jquery.form-3.09.js',
+        'deform:static/scripts/deform.js',
+    )
+)
 
 # PageDown is used to render Markdown-formatted text to HTML
 pagedown = Bundle(
@@ -103,18 +122,6 @@ pagedown = Bundle(
     filters='uglifyjs',
     output='js/markdown.min.js',
 )
-
-# The full application dependencies are as follows, with easyXDM as a common
-# component for both the annotator and injector.
-d3 = Bundle('h:js/lib/d3.v2.min.js')
-deform = Bundle(
-    'deform:static/scripts/jquery.form-3.09.js',
-    'deform:static/scripts/deform.js'
-)
-easyXDM = Bundle('h:js/lib/easyXDM.min.js')
-handlebars = Bundle('h:js/lib/handlebars-runtime.min.js')
-jquery = Bundle('deform:static/scripts/jquery-1.7.2.min.js')
-jwz = Bundle('h:js/lib/jwz.min.js')
 raf = Bundle('h:js/lib/polyfills/raf.js')
 underscore = Bundle('h:js/lib/underscore-min.js')
 
@@ -182,12 +189,22 @@ site_css = Bundle(
 )
 
 
-def add_webassets(config):
-    config.include('pyramid_webassets')
-    loader = PythonLoader(__name__)
-    bundles = loader.load_bundles()
-    for name in bundles:
-        config.add_webasset(name, bundles[name])
+class WebassetsResourceRegistry(object):
+    def __init__(self, environment):
+        self.environment = environment
+
+    def __call__(self, requirements):
+        result = {'js': [], 'css': []}
+        for requirement, _version in requirements:
+            if not requirement in self.environment:
+                continue
+            bundle = self.environment[requirement]
+            for source in bundle.urls():
+                for thing in ('js', 'css'):
+                    if re.search(r'/[^/?]+\.%s\??[^/]*$' % thing, source):
+                        if not source in result[thing]:
+                            result[thing].append(source)
+        return result
 
 
 @implementer(ILocation)
@@ -303,12 +320,22 @@ class AppFactory(BaseResource):
         }
         return api.auth.encode_token(message, self.consumer.secret)
 
-RootFactory.api = APIFactory
-RootFactory.app = AppFactory
-
 
 def includeme(config):
     config.include('horus.routes')
+    config.include('pyramid_webassets')
+
+    RootFactory.api = APIFactory
+    RootFactory.app = AppFactory
+
     config.add_route('embed', '/embed.js')
     config.add_route('index', '/', factory='h.resources.RootFactory')
-    add_webassets(config)
+
+    loader = PythonLoader(__name__)
+    bundles = loader.load_bundles()
+    for name in bundles:
+        config.add_webasset(name, bundles[name])
+
+    from deform.field import Field
+    resource_registry = WebassetsResourceRegistry(config.get_webassets_env())
+    Field.set_default_resource_registry(resource_registry)

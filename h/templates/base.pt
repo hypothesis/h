@@ -9,12 +9,12 @@
     <![endif]-->
     <!-- TODO: make deform use_ajax widgets delay after jQuery loads -->
     <link rel="stylesheet"
-          tal:attributes="href request.static_url('deform:static/%s' % href)"
+          tal:attributes="href href"
           tal:repeat="href layout.css_links | []" />
     <tal:block metal:define-slot="css_links" />
     <tal:block metal:define-slot="js_links" />
     <script type="text/javascript"
-            tal:attributes="src request.static_url('deform:static/%s' % src)"
+            tal:attributes="src src"
             tal:repeat="src layout.js_links | []" ></script>
     <script type="text/javascript">
       WebFontConfig = {

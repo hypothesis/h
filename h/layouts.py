@@ -1,5 +1,3 @@
-from deform.widget import default_resource_registry
-
 from pyramid.decorator import reify
 from pyramid_layout.layout import layout_config
 
@@ -18,9 +16,14 @@ class BaseLayout(object):
 
     @reify
     def resources(self):
-        return default_resource_registry(
-            sum((f.get_widget_requirements() for f in self.forms.values()), [])
-        )
+        result = {'js': [], 'css': []}
+        for form in self.forms.values():
+            resources = form.get_widget_resources()
+            for thing in ('js', 'css'):
+                for source in resources[thing]:
+                    if not source in result[thing]:
+                        result[thing].append(source)
+        return result
 
     @property
     def css_links(self):
