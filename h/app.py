@@ -49,7 +49,6 @@ class AppController(views.BaseController):
         schema = schema().bind(requeppst=self.request)
         form = request.registry.getUtility(interfaces.IResetPasswordForm)
         form = form(schema)
-        form.formid = 'reset'
         return form
 
     @reify
@@ -114,7 +113,7 @@ class AppController(views.BaseController):
                 'status': 'failure',
                 'reason': messages.INVALID_FORM,
                 'form': {
-                    'login': e.render()
+                    'register': e.render()
                 }
             }
 
@@ -144,7 +143,7 @@ class AppController(views.BaseController):
         }
 
     @view_config(request_method='POST', request_param='__formid__=activate')
-    def reset(self):
+    def activate(self):
         request = self.request
         form = self.activate_form
 
@@ -152,7 +151,13 @@ class AppController(views.BaseController):
         try:
             appstruct = form.validate(request.POST.items())
         except deform.ValidationFailure as e:
-            result = {'form': e.render()}
+            return {
+                'status': 'failure',
+                'reason': messages.INVALID_FORM,
+                'form': {
+                    'activate': e.render()
+                },
+            }
         else:
             code = appstruct['code']
             activation = self.Activation.get_by_code(request, code)
@@ -163,18 +168,25 @@ class AppController(views.BaseController):
                     user.set_password(appstruct['Password'])
                     self.db.add(user)
                     self.db.delete(activation)
+            else:
+                form.error = colander.Invalid(
+                    form.schema,
+                    _('This activation code is not valid.')
+                )
+                return {
+                    'status': 'failure',
+                    'reason': messages.INVALID_FORM,
+                    'form': {
+                        'activate': form.render(appstruct)
+                    },
+                }
 
-            form.error = colander.Invalid(
-                form.schema,
-                _('This activation code is not valid.')
-            )
-
-        if appstruct:
-            result = {'form': form.render(appstruct)}
-        else:
-            result = {'form': form.render()}
-
-        return dict(reset=result)
+        return {
+            'status': 'okay',
+            'form': {
+                'activate': form.render()
+            },
+        }
 
     @view_config(request_method='POST', request_param='__formid__=forgot')
     def forgot(self):
@@ -183,14 +195,23 @@ class AppController(views.BaseController):
         form = self.forgot_form
 
         result = controller.forgot_password()
-        error = request.session.pop_flash('error')
         if isinstance(result, dict):
-            if error:
-                form.error = colander.Invalid(form.schema, error[0])
-                result = {'form': form.render()}
-            else:
-                return result
-        return dict(password=result)
+            if 'errors' in result:
+                error = colander.Invalid(
+                    form.schema,
+                    messages.INVALID_FORM
+                )
+                error.children = result.pop('errors')
+                form.widget.handle_error(form, error)
+            result = {
+                'form': {
+                    'forgot': form.render()
+                }
+            }
+        else:
+            # TODO: take care of flash success message
+            return None
+        return result
 
     @view_config(name='logout')
     def logout(self):
