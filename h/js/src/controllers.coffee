@@ -686,7 +686,7 @@ class Hypothesis extends Annotator
       withCredentials: true
     .success (data) =>
       # Extend the scope with updated model data
-      angular.extend(@scope, data.model)
+      angular.extend(@scope, data.model) if data.model?
 
       # Replace any forms which were re-rendered in this response
       for oid of data.form
