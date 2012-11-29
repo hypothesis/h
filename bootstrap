@@ -8,8 +8,18 @@ if [ -z "$VIRTUAL_ENV" ]; then
 	source bin/activate
 fi
 
-echo "Installing dependencies..."
-pip install -r requirements.txt 1>/dev/null
+echo "Checking dependencies..."
+if test ! -d build; then mkdir build; fi
+
+diff_num=`pip freeze \
+	| diff --suppress-common-lines -y - build/frozen.txt \
+	| wc -l`
+
+if test $diff_num -gt 1; then
+	echo "Installing dependencies..."
+	pip install -r requirements.txt 1>/dev/null
+	pip freeze > build/frozen.txt &> /dev/null
+fi
 
 echo "Setting up development..."
 python setup.py develop 1>/dev/null
