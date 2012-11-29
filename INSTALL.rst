@@ -18,10 +18,14 @@ it may not be installable from the Python Package Index. Instead, the
 application should be built in a virtual environment which can be set up as
 follows::
 
-    $ virtualenv --no-site-packages .
-    $ source bin/activate
-    $ python setup.py develop
-    $ pip install -r requirements.txt
+    $ ./bootstrap
+
+The command will set up the development environment and check for development
+dependencies. Warnings will be issued for missing dependencies. When this
+script runs without successfully, the environment should be prepared. It is
+good practice to run this script whenever the source code changes, such as
+after pulling new commits from upstream or checking out a new branch that may
+have changed (for example: updated) requirements.
 
 If there is a failure installing PyYAML, install the libyaml development files.
 
