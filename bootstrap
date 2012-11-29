@@ -1,8 +1,10 @@
 #!/bin/sh -e
 
 if [ -z "$VIRTUAL_ENV" ]; then
-	echo "Creating virtualenv..."
-	virtualenv --no-site-packages .
+	if test ! -e bin/activate; then
+		echo "Creating virtualenv..."
+		virtualenv --no-site-packages .
+	fi
 	source bin/activate
 fi
 
