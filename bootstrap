@@ -29,7 +29,7 @@ echo -n "Checking for Handlebars..."
 command -v handlebars || echo "...not found!"
 
 echo -n "Checking for UglifyJS..."
-command -v uglifyjsbog|| {
+command -v uglifyjs || {
 	echo "...not found!"
 	echo
 	echo "UglifyJS was not found. You MUST run in debug mode."
