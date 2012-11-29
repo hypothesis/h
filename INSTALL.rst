@@ -27,12 +27,14 @@ good practice to run this script whenever the source code changes, such as
 after pulling new commits from upstream or checking out a new branch that may
 have changed (for example: updated) requirements.
 
-For building the static assets, requirements currently include CoffeeScript_
-(needed by the Annotator), Sass_, Compass_ and Handlebars_. These dependencies
-should be easily installable via common package management utilities.
+For building the static assets, requirements currently include CoffeeScript_,
+Sass_, Compass_ and Handlebars_. These tools are widely available in package
+repositories. Check the platform-specific installation instructions for
+details.
 
-For production use, the application can also be configured to use UglifyJS_ and
-clean-css_ for minification needs. These are *not* required for development.
+For production use, the application will use UglifyJS_ and clean-css_ for
+minification needs. These are not required when running the project in a
+development configuration.
 
 .. _pyramid: http://www.pylonsproject.org/
 .. _gunicorn: http://gunicorn.org/
