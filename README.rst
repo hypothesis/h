@@ -22,12 +22,11 @@ See INSTALL.rst for installation instructions.
 Running
 -------
 
-Hopefully, installation has gone smoothly. If that's the case, the application
-can be started easily with the command `./run.py`. However, for development
-it is convenient to automatically reload the application when files are
-changed. Thankfully, there's a command for that too:
+Installation has, hopefully, gone smoothly. If you ran into any problems, be
+sure to seek help on IRC or the mailing list. To run the server, simply use
+the ``run`` command::
 
-    $ pserve --reload --monitor-restart development.ini
+    $ ./run
 
 This command will run the server, reloading the application whenever changes
 are made to the source code, and restarting it should it crash for some
