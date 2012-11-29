@@ -32,7 +32,7 @@ echo -n "Checking for UglifyJS..."
 command -v uglifyjsbog|| {
 	echo "...not found!"
 	echo
-	echo "You MUST run in debug mode."
+	echo "UglifyJS was not found. You MUST run in debug mode."
 	echo "The development configuration does this."
 	echo
 }
