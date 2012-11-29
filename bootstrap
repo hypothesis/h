@@ -1,0 +1,31 @@
+#!/bin/sh -e
+
+if [ -z "$VIRTUAL_ENV" ]; then
+	echo "Creating virtualenv..."
+	virtualenv --no-site-packages .
+	source bin/activate
+fi
+
+echo "Installing dependencies..."
+pip install -r requirements.txt 1>/dev/null
+
+echo "Setting up development..."
+python setup.py develop 1>/dev/null
+
+echo -n "Checking for Compass..."
+command -v compass || echo "...not found!"
+
+echo -n "Checking for CoffeeScript..."
+command -v coffee || echo "...not found!"
+
+echo -n "Checking for Handlebars..."
+command -v handlebars || echo "...not found!"
+
+echo -n "Checking for UglifyJS..."
+command -v uglifyjsbog|| {
+	echo "...not found!"
+	echo
+	echo "You MUST run in debug mode."
+	echo "The development configuration does this."
+	echo
+}
