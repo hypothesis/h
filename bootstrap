@@ -10,17 +10,11 @@ if test -z "$VIRTUAL_ENV"; then
 fi
 
 echo "Checking dependencies..."
-if test ! -d build; then mkdir build; fi
-
-diff_num=`pip freeze \
-	| diff --suppress-common-lines -y - build/frozen.txt \
-	| wc -l`
-
-if test $diff_num -gt 1; then
+diff -q requirements.txt .installed.txt 2> /dev/null || {
 	echo "Installing dependencies..."
 	pip install -r requirements.txt 1>/dev/null
-	pip freeze > build/frozen.txt &> /dev/null
-fi
+	cp requirements.txt .installed.txt
+}
 
 echo "Setting up development..."
 python setup.py develop 1>/dev/null
