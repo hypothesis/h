@@ -1,9 +1,11 @@
-from pyramid.decorator import reify
+from deform import Field
 from pyramid_layout.layout import layout_config
 
 
 @layout_config(template='h:templates/base.pt')
 class BaseLayout(object):
+    requirements = ()
+
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -14,24 +16,36 @@ class BaseLayout(object):
             raise ValueError('duplicate form id "%s"' % form.formid)
         self.forms[form.formid] = form
 
-    @reify
-    def resources(self):
-        result = {'js': [], 'css': []}
+    def get_widget_requirements(self):
+        requirements = []
+        requirements.extend(self.requirements)
         for form in self.forms.values():
-            resources = form.get_widget_resources()
-            for thing in ('js', 'css'):
-                for source in resources[thing]:
-                    if not source in result[thing]:
-                        result[thing].append(source)
-        return result
+            requirements.extend(form.get_widget_requirements())
+        return requirements
+
+    def get_widget_resources(self):
+        requirements = self.get_widget_requirements()
+        return Field.default_resource_registry(requirements)
 
     @property
     def css_links(self):
-        return self.resources['css']
+        return self.get_widget_resources()['css']
 
     @property
     def js_links(self):
-        return self.resources['js']
+        return self.get_widget_resources()['js']
+
+
+@layout_config(context='h.resources.AppFactory',
+               template='h:templates/base.pt')
+class AppLayout(BaseLayout):
+    requirements = (('app', None),)
+
+
+@layout_config(context='h.resources.RootFactory',
+               template='h:templates/base.pt')
+class SiteLayout(BaseLayout):
+    requirements = (('site', None),)
 
 
 def includeme(config):

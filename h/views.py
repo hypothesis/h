@@ -16,7 +16,7 @@ def embed(request, standalone=True):
         request.response.charset = 'UTF-8'
     return {
         pkg: json.dumps(request.webassets_env[pkg].urls())
-        for pkg in ['easyXDM', 'injector', 'inject_css', 'jquery', 'raf']
+        for pkg in ['inject', 'jquery', 'raf']
     }
 
 
@@ -28,10 +28,6 @@ def home(request):
 
 
 def includeme(config):
-    config.add_static_view('h/sass', 'h:sass')
-    config.add_static_view('h/js', 'h:js')
-    config.add_static_view('h/images', 'h:images')
-
     config.add_view(
         'horus.views.AuthController',
         attr='login',

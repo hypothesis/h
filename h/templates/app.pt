@@ -1,11 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
-  <head>
-    <link rel="stylesheet"
-          metal:fill-slot="css_links"
-          tal:attributes="href href"
-          tal:repeat="href webassets(request, 'app_css') | []" />
-  </head>
   <body data-ng-app="h"
         data-ng-controller="Hypothesis"
         metal:fill-slot="body">
@@ -87,18 +81,5 @@
       <div id="wrapper">
       </div>
     </div>
-    <script type="text/javascript"
-            tal:attributes="src src"
-            tal:repeat="src webassets(
-                        request,
-                        'angular',
-                        'annotator',
-                        'd3',
-                        'easyXDM',
-                        'handlebars',
-                        'jwz',
-                        'pagedown',
-                        'templates',
-                        'underscore')"></script>
   </body>
 </html>

@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
   <head>
-    <link rel="stylesheet"
-          metal:fill-slot="css_links"
-          tal:attributes="href href"
-          tal:repeat="href webassets(request, 'site_css') | []" />
     <script type="text/javascript"
             metal:fill-slot="embed"
             tal:content="structure embed" />

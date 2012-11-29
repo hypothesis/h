@@ -6,6 +6,7 @@ del get_versions
 def includeme(config):
     config.include('h.api')
     config.include('h.app')
+    config.include('h.assets')
     config.include('h.forms')
     config.include('h.layouts')
     config.include('h.models')

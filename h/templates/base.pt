@@ -11,8 +11,6 @@
     <link rel="stylesheet"
           tal:attributes="href href"
           tal:repeat="href layout.css_links | []" />
-    <tal:block metal:define-slot="css_links" />
-    <tal:block metal:define-slot="js_links" />
     <script type="text/javascript"
             tal:attributes="src src"
             tal:repeat="src layout.js_links | []" ></script>

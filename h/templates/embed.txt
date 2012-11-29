@@ -9,7 +9,7 @@ yepnope([
   },
   {
     test: window.Annotator,
-    nope: Array.prototype.concat.call(${injector}, ${easyXDM}, ${inject_css}),
+    nope: Array.prototype.concat.call(${inject}),
     complete: function () {
       if (window.Annotator._instance) return;
 
