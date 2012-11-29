@@ -3,7 +3,7 @@ Installing Hypothes.is
 
 Hypothes.is currently requires several tools to build and run from scratch.
 
-See the platform specific INSTALL.<whatever>.rst files for more information
+See the platform specific INSTALL.<platform>.rst files for more information
 about how to install the dependencies on any specific platform.
 
 In the future, releases will include built versions of static assets for
