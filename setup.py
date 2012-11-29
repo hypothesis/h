@@ -51,6 +51,9 @@ setup(
         'paste.app_factory': [
             'main=h:main'
         ],
+        'console_scripts': [
+            'h=h.script:main'
+        ],
     },
 
     cmdclass=versioneer.get_cmdclass()
