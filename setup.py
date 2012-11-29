@@ -21,6 +21,7 @@ setup(
         'pyramid_webassets>=0.7',
         'setuptools>=0.6c11',
         'velruse>=1.0',
+        'webassets>=0.8',
     ],
 
     author='Hypothes.is Project & contributors',
