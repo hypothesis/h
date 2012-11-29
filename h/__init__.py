@@ -18,6 +18,26 @@ def includeme(config):
     config.include('h.views')
 
 
+def bootstrap(cfname, config_fn=None):
+    """Bootstrap the application with the given paste configuration file
+
+    An optional function argument may be supplied. This function will be
+    invoked with the bootstrapping environment.
+    """
+    from pyramid.paster import bootstrap, setup_logging
+
+    setup_logging(cfname)
+    env = bootstrap(cfname)
+
+    try:
+        if config_fn:
+            config_fn(env)
+    finally:
+        env['closer']()
+
+    return env['app']
+
+
 def create_app(settings):
     from horus import groupfinder
     from pyramid.config import Configurator
