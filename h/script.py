@@ -1,18 +1,27 @@
-from clint import args
-from clint.textui import colored, puts
+import clik
+
+from h import __version__
 
 
-usage = """Usage: h [COMMAND]"""
-descsription = """\
-The Hypothes.is Project Annotation System.
+version = __version__
+description = """\
+The Hypothes.is Project Annotation System
 """
 
 
-def assets():
+command = clik.App(
+    'hypothesis',
+    version=version,
+    description=description,
+)
+
+
+@command(usage='CONFIG_FILE')
+def assets(args, console):
     """Build the static assets."""
-    cfname = args.pop(0)
-    if not cfname:
-        puts(colored.red("You must supply a paste configuration."))
+
+    if len(args) == 0:
+        console.error('You must supply a paste configuration file.')
         return 2
 
     from h import bootstrap
@@ -23,26 +32,22 @@ def assets():
         for bundle in asset_env:
             bundle.urls()
 
-    bootstrap(cfname, build)
+    bootstrap(args[0], build)
 
 
-def run():
-    sub_args = args.all
-    if not len(args.not_flags):  # Default to dev mode
-        sub_args.insert(0, '--reload')
-        sub_args.insert(0, 'development.ini')
+@command
+def run(args):
+    """Run the server.
+
+    With no arguments, starts the server in development mode using the
+    configuration found in `deveopment.ini` and a hot code reloader enabled.
+    """
+    if not len(args):  # Default to dev mode
+        args.append('development.ini')
+        args.append('--reload')
 
     from pyramid.scripts.pserve import main
-    main(['h'] + sub_args)
+    main(['h'] + args)
 
 
-def main():
-    command = args.pop(0)
-    if not command:
-        return run()
-
-    try:
-        return globals()[command]()
-    except KeyError:
-        puts(colored.red("Unknown command: '%s'" % command))
-        return 2
+main = command.main

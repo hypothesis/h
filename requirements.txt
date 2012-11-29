@@ -16,7 +16,7 @@ anykeystore==0.2
 argparse==1.2.1
 certifi==0.0.8
 chardet==1.0.1
-clint==0.3.1
+clik==0.3.1
 colander==0.9.8
 cryptacular==1.4.1
 deform==0.9.5
