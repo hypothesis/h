@@ -52,7 +52,7 @@ setup(
             'main=h:main'
         ],
         'console_scripts': [
-            'h=h.script:main'
+            'hypothesis=h.script:main'
         ],
     },
 
