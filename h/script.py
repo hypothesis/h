@@ -50,7 +50,7 @@ def start(args):
     from pyramid.scripts.pserve import ensure_port_cleanup, main
 
     ensure_port_cleanup([('0.0.0.0', 5000)])
-    main(['h'] + args)
+    main(['hypothesis'] + args)
 
 
 main = command.main
