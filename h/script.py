@@ -45,8 +45,11 @@ def run(args):
     if not len(args):  # Default to dev mode
         args.append('development.ini')
         args.append('--reload')
+        args.append('--monitor-restart')
 
-    from pyramid.scripts.pserve import main
+    from pyramid.scripts.pserve import ensure_port_cleanup, main
+
+    ensure_port_cleanup([('0.0.0.0', 5000)])
     main(['h'] + args)
 
 
