@@ -36,8 +36,8 @@ def assets(args, console):
 
 
 @command
-def run(args):
-    """Run the server.
+def start(args):
+    """Start the server.
 
     With no arguments, starts the server in development mode using the
     configuration found in `deveopment.ini` and a hot code reloader enabled.
