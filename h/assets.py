@@ -138,14 +138,12 @@ class WebassetsResourceRegistry(object):
                 urls.extend(bundle.urls())
 
         for source in urls:
-            print source
             # check asset type (js or css), modulo cache-busting qs
             for thing in ('js', 'css'):
                 if re.search(r'\.%s(\??[^/]+)?$' % thing, source):
                     if not source in result[thing]:
                         result[thing].append(source)
 
-        print result
         return result
 
 
