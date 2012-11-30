@@ -328,13 +328,13 @@ class Hypothesis extends Annotator
   # Returns itself for chaining.
   _setupEditor: ->
     @editor = this._createEditor()
+    .on 'hide save', =>
+      if @unsaved_drafts.indexOf(@editor) > -1
+        @unsaved_drafts.splice(@unsaved_drafts.indexOf(@editor), 1)
     .on 'hide', =>
       @provider.onEditorHide()
     .on 'save', =>
       @provider.onEditorSubmit()
-    .on 'hide save', =>
-      if @unsaved_drafts.indexOf(@editor) > -1
-        @unsaved_drafts.splice(@unsaved_drafts.indexOf(@editor), 1)
     this
 
   _createEditor: ->
