@@ -12,5 +12,5 @@ navTabsDirective = (deform) ->
   restrict: 'C'
 navTabsDirective.$inject = ['deform']
 
-angular.module('h.directives', ['deform'])
+angular.module('h.directives', ['ngSanitize', 'deform'])
   .directive('navTabs', navTabsDirective)

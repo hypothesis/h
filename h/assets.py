@@ -26,7 +26,7 @@ def Handlebars(*names, **kw):
 
 # Included dependencies
 annotator = Bundle('h:lib/annotator.min.js', 'h:lib/annotator.*.min.js')
-angular = Bundle('h:lib/angular.min.js')
+angular = Bundle('h:lib/angular.min.js', 'h:lib/angular-*.min.js')
 d3 = Bundle('h:lib/d3.v2.min.js')
 easyXDM = Bundle('h:lib/easyXDM.min.js')
 jwz = Bundle('h:lib/jwz.min.js')
