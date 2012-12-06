@@ -1,0 +1,18 @@
+<div class="annotation">
+  <div class="time" data-ng-bind="created" />
+  <div class="annotator-controls">
+    <a class="write">Reply</a>
+  </div>
+  <div class="user" data-ng-bind="user" />
+  <div class="body" data-ng-bind-html="text" />
+  <div class="bottombar">
+    <span class="replycount" data-ng-bind="replyCount" />
+  </div>
+  <div class="thread">
+    <a class="threadexp" />
+    <ul class="annotator-listing">
+      <li data-ng-include="'annotation.html'"
+          data-ng-repeat="annotation in replies" />
+    </ul>
+  </div>
+</div>
