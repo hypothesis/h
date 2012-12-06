@@ -97,7 +97,7 @@ class Annotator.Host extends Annotator
           .each ->
             if $(this).data('annotation').hash in hashes
               $(this).addClass('annotator-hl-active')
-            else
+            else if not $(this).hasClass('annotator-hl-temporary')
               $(this).removeClass('annotator-hl-active')
         getMaxBottom: =>
           sel = '*' + (":not(.annotator-#{x})" for x in [

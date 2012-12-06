@@ -1,19 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
-  <body data-ng-app="h"
-        data-ng-controller="Hypothesis"
-        metal:fill-slot="body">
+  <body data-ng-app="h" data-ng-controller="App" metal:fill-slot="body">
     <div id="toolbar" class="form-inline">
       <div class="tri"></div>
       <div class="tinyman">
+        <a data-ng-hide="persona"
+           data-ng-click="$broadcast('showAuth')">Sign in</a>
         <form id="persona"
               action
               method="POST"
               enctype="multipart/form-data"
               accept-charset="utf-8">
           <input name="__formid__" type="hidden" value="persona" />
-          <a data-ng-hide="persona"
-             data-ng-click="showAuth()">Sign in</a>
           <div class="dropdown"
                data-ng-show="persona">
             <a role="button"
@@ -75,8 +73,7 @@
           </ul>
         </footer>
       </header>
-      <div id="wrapper">
-      </div>
+      <div id="wrapper" data-ng-view=""></div>
     </div>
     <script type="text/ng-template" id="annotation.html">
       <metal:main use-macro="load: annotation.html" />
