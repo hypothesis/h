@@ -13,7 +13,7 @@ class FormMeta(type):
         formid = name.replace('Form', '')
         formid = (
             formid[0].lower() +
-            re.sub(r'([A-Z])', lambda m: "_" + m.group(0).lower(), formid[1:])
+            re.sub(r'([A-Z])', lambda m: "-" + m.group(0).lower(), formid[1:])
         )
         attrs.setdefault('formid', formid)
         return type.__new__(cls, name, bases, attrs)
