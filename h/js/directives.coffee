@@ -1,4 +1,17 @@
+annotation = ($filter) ->
   link: (scope, iElement, iAttrs, controller) ->
+    annotation = scope.annotation
+    thread = scope.getThread annotation.id
+    angular.extend scope, annotation
+    angular.extend scope,
+      created: ($filter 'fuzzyTime') annotation.created
+      user: ($filter 'userName') annotation.user
+      text: ($filter 'converter') annotation.text
+      replies: (c.message.annotation for c in (thread?.children or []))
+      replyCount: thread?.flattenChildren()?.length or 0
+  restrict: 'C'
+  scope: true
+annotation.$inject = ['$filter']
 
 
 tabReveal = ($parse) ->
@@ -46,4 +59,5 @@ tabReveal.$inject = ['$parse']
 
 
 angular.module('h.directives', ['ngSanitize', 'deform'])
+  .directive('annotation', annotation)
   .directive('tabReveal', tabReveal)
