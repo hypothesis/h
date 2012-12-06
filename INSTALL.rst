@@ -27,8 +27,8 @@ good practice to run this script whenever the source code changes, such as
 after pulling new commits from upstream or checking out a new branch that may
 have changed (for example: updated) requirements.
 
-For building the static assets, requirements currently include CoffeeScript_,
-Sass_, Compass_ and Handlebars_. These tools are widely available in package
+For building the static assets, requirements currently include CoffeeScript_
+and Sass_ with Compass_ installed. These tools are widely available in package
 repositories. Check the platform-specific installation instructions for
 details.
 
@@ -43,6 +43,5 @@ development configuration.
 .. _CoffeeScript: http://coffeescript.org/
 .. _Sass: http://sass-lang.com/
 .. _Compass: http://compass-style.org/
-.. _Handlebars: http://handlebarsjs.com/
 .. _UglifyJS: http://marijnhaverbeke.nl//uglifyjs
 .. _clean-css: https://github.com/GoalSmashers/clean-css

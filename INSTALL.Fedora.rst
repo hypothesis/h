@@ -13,7 +13,7 @@ If not available as an RPM, you can use this::
 
 After that::
 
-    $ npm install -g coffee-script handlebars uglify-js
+    $ npm install -g coffee-script uglify-js
 
 Follow the instructions at elastisearch_rpm_ to build and install the elasticsearch server,
 but don't start it just yet: 

@@ -47,16 +47,6 @@ deform = Bundle(
 )
 
 
-# Handlebars templates
-templates = Bundle(
-    'h:lib/handlebars-runtime.min.js',
-    Uglify(
-        Handlebars('h:templates/*.handlebars', output='js/templates.js'),
-        output='js/templates.min.js'
-    ),
-)
-
-
 # Base and common SCSS
 base = ['h:css/base.scss']
 common = ['h:css/base.scss', 'h:css/common.scss']
@@ -72,7 +62,6 @@ app = Bundle(
     easyXDM,
     jwz,
     pagedown,
-    templates,
     underscore,
     'h:lib/jquery.mousewheel.min.js',
     Uglify(
