@@ -39,7 +39,25 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   width: $heatmap-width;
 }
 
+.sliding-panels > li {
+  @include single-transition(left, 0.4s, ease-in);
+  padding-left: 1.5em;
+  position: absolute;
+  height: 100%;
+  width: 100%;
 
+  & > * {
+    @include smallshadow(-2px);
+  }
+
+  &:first-of-type {
+    padding-left: 0;
+  }
+
+  &.collapsed {
+    left: 100%;
+  }
+}
 
 //SIDEBAR LAYOUT////////////////////////////////
 #gutter {
@@ -47,14 +65,15 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   background-attachment: fixed;
   height: 100%;
   margin-left: $heatmap-width + 17px;
+  padding-top: 2.5em;  // toolbar height + top margin
   position: relative;
 }
 
 #wrapper {
+  background: url('../images/noise_1.png');
+  background-attachment: fixed;
   height: 100%;
-  overflow: auto;
-  padding: 3.75em 1em 1em 1em;
-  -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
 
@@ -157,8 +176,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   z-index: 4;
   background: url('../images/noise_1.png');
   background-attachment: fixed;
-  margin-top: 2.5em;
-  padding-top: 1em;
+  padding: 1em;
   position: absolute;
   width: 100%;
 
@@ -205,15 +223,15 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   border: 1px solid $grayLighter;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
-  left: 1px;
-  line-height: $baseLineHeight;
+  height: 2em;
+  left: 7px;
+  line-height: 1.4em;  // 2em (height) - .6em (padding)
   margin-top: .5em;
   padding: .3em;
   position: absolute;
   text-align: right;
   width: 100%;
   z-index: 5;
-  left: 7px;
 
   & > div {
     display: inline-block;
