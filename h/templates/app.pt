@@ -35,7 +35,6 @@
     </div>
     <div id="gutter">
       <header data-ng-class="auth || 'collapsed'"
-              data-ng-controller="Auth"
               data-ng-model="auth"
               data-ng-submit="submit()"
               data-tab-reveal="['forgot','activate']"

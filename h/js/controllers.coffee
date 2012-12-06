@@ -1,22 +1,61 @@
 class App
-  this.$inject = ['$compile', '$http', '$location', '$scope', 'annotator']
-  constructor: ($compile, $http, $location, $scope, annotator) ->
+  this.$inject = [
+    '$compile', '$http', '$location', '$scope',
+    'annotator', 'deform'
+  ]
+  constructor: ($compile, $http, $location, $scope, annotator, deform) ->
     {plugins} = annotator
 
-    $location.path '/app/viewer'
+    angular.extend $scope,
+      auth: null
+      forms: []
 
-    $scope.$on 'reset', =>
+    $scope.reset = =>
       angular.extend $scope,
+        auth: null
+        username: null
+        password: null
+        email: null
+        code: null
         personas: []
         persona: null
         token: null
+
+    $scope.addForm = ($form, name) =>
+      $scope.forms[name] = $form
+
+    $scope.submit = ->
+      fields = switch $scope.auth
+        when 'login' then ['username', 'password']
+        when 'register' then ['username', 'password', 'email']
+        when 'forgot' then ['email']
+        when 'activate' then ['password', 'code']
+      params = ([key, $scope[key]] for key in fields when $scope[key]?)
+      params.push ['__formid__', $scope.auth]
+      data = (((p.map encodeURIComponent).join '=') for p in params).join '&'
+
+      $http.post '', data,
+        headers:
+          'Content-Type': 'application/x-www-form-urlencoded'
+        withCredentials: true
+      .success (data) =>
+        # Extend the scope with updated model data
+        angular.extend($scope, data.model) if data.model?
+
+        # Compile and link any forms which were re-rendered in this response
+        for oid of data.form
+          $form = angular.element data.form[oid]
+          if oid of $scope.forms
+            $scope.forms[oid].replaceWith $form
+          ($compile $form) $scope
+          deform.focusFirstInput $form
 
     $scope.$watch 'personas', (newValue, oldValue) =>
       if newValue?.length
         annotator.element.find('#persona')
           .off('change').on('change', -> $(this).submit())
           .off('click')
-        $scope.showAuth = false
+        $scope.auth = null
       else
         $scope.persona = null
         $scope.token = null
@@ -44,51 +83,16 @@ class App
         plugins.Permissions.setUser(null)
         delete plugins.Auth
 
+    $scope.$on 'showAuth', (event, show=true) =>
+      $scope.auth = if show then 'login' else null
+
     # Fetch the initial model from the server
+    $scope.reset()
     $http.get 'model',
       withCredentials: true
     .success (data) =>
       angular.extend $scope, data
-
-    # Set the initial state
-    # Asynchronous so that other controllers get time to initialize
-    $scope.$evalAsync "$broadcast('reset')"
-
-
-class Auth
-  this.$inject = ['$compile', '$element', '$http', '$scope', 'deform']
-  constructor: ($compile, $element, $http, $scope, deform) ->
-    $scope.submit = ->
-      controls = $element.find('.sheet .active form').formSerialize()
-      $http.post '', controls,
-        headers:
-          'Content-Type': 'application/x-www-form-urlencoded'
-        withCredentials: true
-      .success (data) =>
-        # Extend the scope with updated model data
-        angular.extend($scope, data.model) if data.model?
-
-        # Replace any forms which were re-rendered in this response
-        for oid of data.form
-          target = '#' + oid
-
-          $form = $(data.form[oid])
-          $form.replaceAll(target)
-
-          link = $compile $form
-          link $scope
-
-          deform.focusFirstInput target
-
-    $scope.$on 'reset', =>
-      angular.extend $scope,
-        auth: null
-        username: null
-        password: null
-        email: null
-        code: null
-
-    $scope.$on 'showAuth', => $scope.auth = 'login'
+      $location.path '/app/viewer'
 
 
 class Viewer
@@ -125,5 +129,4 @@ class Viewer
 
 angular.module('h.controllers', [])
   .controller('App', App)
-  .controller('Auth', Auth)
   .controller('Viewer', Viewer)
