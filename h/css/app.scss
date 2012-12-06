@@ -23,19 +23,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 
-//HIDDEN TABS////////////////////////////////
-.nav a[data-target="#activate-tab"],
-.nav a[data-target="#forgot-tab"] {
-  display: none;
-}
-
-.nav .active a[data-target="#activate-tab"],
-.nav .active a[data-target="#forgot-tab"] {
-  display: initial;
-}
-
-
-
 //ANNOTATOR STYLES////////////////////////////////
 .annotator-hide {
   display: none;
@@ -176,8 +163,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   width: 100%;
 
   .close {
-    margin-right: .5em;
-    margin-top: .25em;
+    position: absolute;
+    right: .5em;
+    top: .5em;
   }
 
   &.collapsed {
@@ -200,6 +188,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     color: #b94a48;
     background-color: #f2dede;
     border-color: #F5A1A0;
+  }
+
+  footer > ul {
+    margin-top: 1em;
+    text-align: right;
   }
 }
 

@@ -75,7 +75,6 @@ app = Bundle(
     templates,
     underscore,
     'h:lib/jquery.mousewheel.min.js',
-    'deform_bootstrap:static/bootstrap.min.js',
     Uglify(
         *[
             Coffee('h:/js/%s.coffee' % name,
