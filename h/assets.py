@@ -30,7 +30,7 @@ angular = Bundle('h:lib/angular.min.js', 'h:lib/angular-*.min.js')
 d3 = Bundle('h:lib/d3.v2.min.js')
 easyXDM = Bundle('h:lib/easyXDM.min.js')
 jwz = Bundle('h:lib/jwz.min.js')
-pagedown = Uglify('h:lib/Markdown.Converter.js', 'h:lib/Markdown.Sanitizer.js')
+pagedown = Uglify('h:lib/Markdown.Converter.js')
 raf = Uglify('h:lib/polyfills/raf.js')
 underscore = Bundle('h:lib/underscore-min.js')
 
@@ -51,7 +51,6 @@ deform = Bundle(
 templates = Bundle(
     'h:lib/handlebars-runtime.min.js',
     Uglify(
-        'h:js/helpers.js',
         Handlebars('h:templates/*.handlebars', output='js/templates.js'),
         output='js/templates.min.js'
     ),
@@ -85,8 +84,9 @@ app = Bundle(
             (
                 'app',
                 'deform',
-                'directives',
                 'controllers',
+                'filters',
+                'directives',
                 'services',
             )
         ],
