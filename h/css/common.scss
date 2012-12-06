@@ -380,6 +380,7 @@ blockquote {
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
+  position: relative;
 
   .user {
     font-weight: bold;
@@ -404,15 +405,35 @@ blockquote {
 }
 
 
+//THREADING////////////////////////////////
+//Threaded discussion specific
+.thread .annotator-listing {
+  border-left: 1px dotted $grayLight;
+
+  .threadexp {
+    height: $threadexp-width;
+    width: $threadexp-width;
+    position: absolute;
+    top: .8em;
+    left: -($threadexp-width / 2);
+    outline: 1px dotted #aaa;
+    @include icon("minus_1.png");
+  }
+
+  .annotation {
+    padding-left: $thread-padding;
+    padding-top: .35em;
+    &.squished {
+      padding-left: 0;
+    }
+  }
+}
+
+
 
 //DETAIL////////////////////////////////
 //This is specific to the detail view.
 .detail {
-  position: relative;
-  .paper > .threadexp {
-    display: none;
-  }
-
   .annotator-controls {
     @include single-transition(opacity, .25s, ease-in-out);
     opacity: 0;
@@ -429,29 +450,6 @@ blockquote {
     margin-bottom: .25em;
   }
 
-  //Threaded discussion specific
-  .annotator-listing {
-    border-left: 1px dotted $grayLight;
-
-    .threadexp {
-      height: $threadexp-width;
-      width: $threadexp-width;
-      position: absolute;
-      top: .8em;
-      left: -($threadexp-width / 2);
-      outline: 1px dotted #aaa;
-      @include icon("minus_1.png");
-    }
-
-    & > .detail, .writer {
-      padding-left: $thread-padding;
-      padding-top: .35em;
-      &.squished {
-        padding-left: 0;
-      }
-    }
-  }
-
   &.hover {
     & > .annotator-controls {
       opacity: 1;
@@ -459,7 +457,7 @@ blockquote {
   }
 
   //These are all the changes needed to collapse thread objects.
-  &.collapsed {
+  .collapsed {
     & > .body {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -497,6 +495,11 @@ blockquote {
   &:active {
     @include smallshadow(2px, 1px, .1);
     bottom: 0px;
+  }
+
+  // Things not shown in the summary view
+  .annotator-controls, .bottombar, .excerpt, .thread {
+    display: none;
   }
 }
 
