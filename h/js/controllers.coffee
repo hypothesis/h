@@ -82,14 +82,14 @@ class App
 
         # Creates highlights corresponding bucket when mouse is hovered
         .on 'mousemove', (bucket) =>
-          unless $location.path == 'viewer' and $location.search?.detail?
+          unless $location.path() == '/viewer' and $location.search()?.detail?
             provider.setActiveHighlights heatmap.buckets[bucket]?.map (a) =>
               a.hash.valueOf()
 
         # Gets rid of them after
         .on 'mouseout', =>
-          unless $location.path == 'viewer' and $location.search?.detail?
-            bucket = heatmap.buckets[$location.search?.bucket]
+          unless $location.path() == '/viewer' and $location.search()?.detail?
+            bucket = heatmap.buckets[$location.search()?.bucket]
             provider.setActiveHighlights bucket?.map (a) =>
               a.hash.valueOf()
 
@@ -104,7 +104,7 @@ class App
               if next < hl.offset.top < threshold then hl.offset.top else next
             , threshold - height
             provider.scrollTop next - pad
-            delete $location.search.bucket
+            $location.search 'bucket'
 
           # If it's the lower tab, scroll to next bucket below
           else if heatmap.isLower bucket
@@ -113,7 +113,7 @@ class App
               if threshold < hl.offset.top < next then hl.offset.top else next
             , offset + height
             provider.scrollTop next - pad
-            delete $location.search 'bucket'
+            $location.search 'bucket'
 
           # If it's neither of the above, load the bucket into the viewer
           else
@@ -229,13 +229,14 @@ class Viewer
       $location.search 'detail', annotation.id
 
     $scope.$on '$routeUpdate', =>
-      @refresh $scope, $routeParams, annotator.plugins.Heatmap.buckets
+      @refresh $scope, $routeParams, annotator
 
     $scope.$emit '$routeUpdate'
     this
 
-  refresh: ($scope, $routeParams, buckets) =>
+  refresh: ($scope, $routeParams, annotator) =>
     if $routeParams.bucket?
+      buckets = annotator.plugins.Heatmap.buckets
       $scope.annotations = buckets[$routeParams.bucket]
     else
       topics = (t.message.annotation for t in $scope.threads.children)
@@ -244,8 +245,11 @@ class Viewer
     if $routeParams.detail?
       thread = $scope.threads.getSpecificChild $routeParams.detail
       $scope.annotation = thread?.message.annotation
+      annotator.provider.setActiveHighlights [$scope.annotation.hash.valueOf()]
     else
       $scope.annotation = null
+      annotator.provider.setActiveHighlights $scope.annotations?.map (a) =>
+        a.hash.valueOf()
 
 
 angular.module('h.controllers', [])
