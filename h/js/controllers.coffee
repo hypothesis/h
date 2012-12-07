@@ -226,13 +226,15 @@ class Viewer
         bucket: null
         detail: annotation.id
 
+    $scope.$on '$routeChangeSuccess', =>
+      update = => $scope.$emit '$routeUpdate'
+      annotator.plugins.Heatmap.subscribe 'updated', update
+      $scope.$on '$routeChangeStart', =>
+        annotator.plugins.Heatmap.unsubscribe 'updated', update
+      update()
+
     $scope.$on '$routeUpdate', =>
       this.refresh $scope, $routeParams, annotator
-
-    $scope.$emit '$routeUpdate'
-
-    annotator.plugins.Heatmap.subscribe 'updated', =>
-      $scope.$emit '$routeUpdate'
 
     this
 
