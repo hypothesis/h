@@ -1,4 +1,7 @@
 class Hypothesis extends Annotator
+  # Events - overridden for good measure. Unused in the angular Annotator.
+  events: {}
+
   # Plugin configuration
   options:
     Heatmap: {}
