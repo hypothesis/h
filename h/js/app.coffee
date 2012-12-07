@@ -10,7 +10,7 @@ imports = [
 
 configure = ($routeProvider, $locationProvider) ->
   $locationProvider.html5mode = true
-  $routeProvider.when '/app/viewer',
+  $routeProvider.when '/viewer',
     controller: 'Viewer'
     reloadOnSearch: false
     templateUrl: 'viewer.html'

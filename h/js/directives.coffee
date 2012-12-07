@@ -1,7 +1,7 @@
 annotation = ($filter) ->
   link: (scope, iElement, iAttrs, controller) ->
     annotation = scope.annotation
-    thread = scope.getThread annotation.id
+    thread = scope.threads.getSpecificChild annotation.id
     angular.extend scope, annotation
     angular.extend scope,
       created: ($filter 'fuzzyTime') annotation.created

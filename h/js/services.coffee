@@ -8,16 +8,17 @@ class Hypothesis extends Annotator
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
 
   # Internal state
-  bucket: -1         # * The index of the bucket shown in the summary view
   detail: false      # * Whether the viewer shows a summary or detail listing
   hash: -1           # * cheap UUID :cake:
-  cache: {}          # * object cache
+  cache: null        # * Annotation cache
   visible: false     # * Whether the sidebar is visible
   unsaved_drafts: [] # * Unsaved drafts currenty open
 
-  this.$inject = ['$document']
-  constructor: ($document) ->
-    super
+  this.$inject = ['$cacheFactory', '$document', '$location']
+  constructor: ($cacheFactory, $document, $location) ->
+    super $document
+
+    @cache = $cacheFactory 'annotations'
 
     # Load plugins
     for own name, opts of @options
@@ -55,6 +56,8 @@ class Hypothesis extends Annotator
         # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
         back: =>
+          console.log 'back not implemented'
+          return
           # If it's in the detail view, loads the bucket back up.
           if @detail
             this.showViewer(@heatmap.buckets[@bucket])
@@ -78,10 +81,6 @@ class Hypothesis extends Annotator
         scrollTop: {}
 
   _initialize: =>
-    # Set up interface elements
-    this._setupHeatmap()
-    @heatmap.element.appendTo(document.body)
-
     @provider.getMaxBottom (max) =>
       @element.find('#toolbar').css("top", "#{max}px")
       @element.find('#gutter').css("margin-top", "#{max}px")
@@ -128,8 +127,6 @@ class Hypothesis extends Annotator
       if @visible
         this.hide()
       else
-        if @viewer.isShown() and @bucket == -1
-          this._fillDynamicBucket()
         this.show()
 
     el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
@@ -151,115 +148,6 @@ class Hypothesis extends Annotator
     this
 
   _setupDynamicStyle: ->
-    this
-
-  _setupHeatmap: () ->
-    @heatmap = @plugins.Heatmap
-
-    # Update the heatmap when certain events are pubished
-    events = [
-      'annotationCreated'
-      'annotationDeleted'
-      'annotationsLoaded'
-      'hostUpdated'
-    ]
-
-    for event in events
-      this.subscribe event, =>
-        @provider.getHighlights ({highlights, offset}) =>
-          @heatmap.updateHeatmap
-            highlights: highlights.map (hl) =>
-              hl.data = @cache[hl.data]
-              hl
-            offset: offset
-          if @visible and @viewer.isShown() and @bucket == -1 and not @detail
-            this._fillDynamicBucket()
-
-    @heatmap.element.click =>
-      @bucket = -1
-      this._fillDynamicBucket()
-      this.show()
-
-    @heatmap.subscribe 'updated', =>
-      tabs = d3.select(document.body)
-        .selectAll('div.heatmap-pointer')
-        .data =>
-          buckets = []
-          @heatmap.index.forEach (b, i) =>
-            if @heatmap.buckets[i].length > 0
-              buckets.push i
-            else if @heatmap.isUpper(i) or @heatmap.isLower(i)
-              buckets.push i
-          buckets
-
-      {highlights, offset} = d3.select(@heatmap.element[0]).datum()
-      height = $(window).outerHeight(true)
-      pad = height * .2
-
-      # Enters into tabs var, and generates bucket pointers from them
-      tabs.enter().append('div')
-        .classed('heatmap-pointer', true)
-
-      tabs.exit().remove()
-
-      tabs
-
-        .style 'top', (d) =>
-          "#{(@heatmap.index[d] + @heatmap.index[d+1]) / 2}px"
-
-        .html (d) =>
-          "<div class='label'>#{@heatmap.buckets[d].length}</div><div class='svg'></div>"
-
-        .classed('upper', @heatmap.isUpper)
-        .classed('lower', @heatmap.isLower)
-
-        .style 'display', (d) =>
-          if (@heatmap.buckets[d].length is 0) then 'none' else ''
-
-        # Creates highlights corresponding bucket when mouse is hovered
-        .on 'mousemove', (bucket) =>
-          unless @viewer.isShown() and @detail
-            unless @heatmap.buckets[bucket]?.length then bucket = @bucket
-            @provider.setActiveHighlights @heatmap.buckets[bucket]?.map (a) =>
-              a.hash.valueOf()
-
-        # Gets rid of them after
-        .on 'mouseout', =>
-          unless @viewer.isShown() and @detail
-            @provider.setActiveHighlights @heatmap.buckets[@bucket]?.map (a) =>
-              a.hash.valueOf()
-
-        # Does one of a few things when a tab is clicked depending on type
-        .on 'mouseup', (bucket) =>
-          d3.event.preventDefault()
-
-          # If it's the upper tab, scroll to next bucket above
-          if @heatmap.isUpper bucket
-            threshold = offset + @heatmap.index[0]
-            next = highlights.reduce (next, hl) ->
-              if next < hl.offset.top < threshold then hl.offset.top else next
-            , threshold - height
-            @provider.scrollTop next - pad
-            @bucket = -1
-            this._fillDynamicBucket()
-
-          # If it's the lower tab, scroll to next bucket below
-          else if @heatmap.isLower bucket
-            threshold = offset + @heatmap.index[0] + pad
-            next = highlights.reduce (next, hl) ->
-              if threshold < hl.offset.top < next then hl.offset.top else next
-            , offset + height
-            @provider.scrollTop next - pad
-            @bucket = -1
-            this._fillDynamicBucket()
-
-          # If it's neither of the above, load the bucket into the viewer
-          else
-            annotations = @heatmap.buckets[bucket]
-            @bucket = bucket
-            this.showViewer(annotations)
-            this.show()
-
     this
 
   # Creates an instance of Annotator.Viewer and assigns it to the @viewer
@@ -302,15 +190,6 @@ class Hypothesis extends Annotator
 
     @unsaved_drafts.push editor
     editor
-
-  _fillDynamicBucket: ->
-    {highlights, offset} = d3.select(@heatmap.element[0]).datum()
-    bottom = offset + @heatmap.element.height()
-    this.showViewer highlights.reduce (acc, hl) =>
-      if hl.offset.top >= offset and hl.offset.top <= bottom
-        acc.push hl.data
-      acc
-    , []
 
   # Public: Initialises an annotation either from an object representation or
   # an annotation created with Annotator#createAnnotation(). It finds the
@@ -381,14 +260,7 @@ class Hypothesis extends Annotator
     this.show()
 
   show: =>
-    if @detail
-      annotations = d3.select(@viewer.element[0]).datum().children.map (c) =>
-        c.message.annotation.hash.valueOf()
-    else
-      annotations = @heatmap.buckets[@bucket]?.map (a) => a.hash.valueOf()
-
     @visible = true
-    @provider.setActiveHighlights annotations
     @provider.showFrame()
     @element.find('#toolbar').addClass('shown')
       .find('.tri').attr('draggable', true)
