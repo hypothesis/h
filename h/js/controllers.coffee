@@ -200,7 +200,6 @@ class App
 
     # Fetch the initial model from the server
     $scope.reset()
-    $location.url('/viewer').replace()
     $http.get 'model',
       withCredentials: true
     .success (data) =>

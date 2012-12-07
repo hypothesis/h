@@ -40,7 +40,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 .sliding-panels > li {
-  @include single-transition(left, 0.4s, ease-in);
+  @include single-transition(left, .4s);
   padding-left: 1.5em;
   position: absolute;
   height: 100%;
