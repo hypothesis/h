@@ -125,7 +125,7 @@ class App
       auth: null
       forms: []
 
-    $scope.reset = =>
+    $scope.reset = ->
       angular.extend $scope,
         auth: null
         username: null
@@ -136,7 +136,7 @@ class App
         persona: null
         token: null
 
-    $scope.addForm = ($form, name) =>
+    $scope.addForm = ($form, name) ->
       $scope.forms[name] = $form
 
     $scope.submit = ->
@@ -221,7 +221,7 @@ class Viewer
     $scope.annotation = null
     $scope.annotations = []
 
-    $scope.showDetail = (annotation) =>
+    $scope.showDetail = (annotation) ->
       $location.search
         bucket: null
         detail: annotation.id
