@@ -139,16 +139,8 @@ class Hypothesis extends Annotator
   _setupDynamicStyle: ->
     this
 
-  # Creates an instance of Annotator.Viewer and assigns it to the @viewer
-  # property, appends it to the @wrapper and sets up event listeners.
-  #
-  # Returns itself to allow chaining.
   _setupViewer: ->
-    @viewer = new Annotator.Viewer(readOnly: @options.readOnly)
-    @viewer.hide()
-    .on("edit", this.onEditAnnotation)
-    .on("delete", this.onDeleteAnnotation)
-
+    # Not used in the angular version.
     this
 
   # Creates an instance of the Annotator.Editor and assigns it to @editor.
@@ -227,7 +219,6 @@ class Hypothesis extends Annotator
     if not annotation.user?
       @plugins.Permissions.addFieldsToAnnotation(annotation)
 
-    @viewer.hide()
     @editor.load(annotation)
     @editor.element.find('.annotator-controls').remove()
 
@@ -244,8 +235,6 @@ class Hypothesis extends Annotator
       .find(":input:first").focus()
 
     @unsaved_drafts.push @editor
-
-    d3.select(@viewer.element[0]).datum(null)
     this.show()
 
   show: =>
