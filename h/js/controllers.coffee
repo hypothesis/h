@@ -80,10 +80,13 @@ class App
 
         # Gets rid of them after
         .on 'mouseout', =>
-          unless $location.path() == '/viewer' and $location.search()?.detail?
-            bucket = heatmap.buckets[$location.search()?.bucket]
-            provider.setActiveHighlights bucket?.map (a) =>
-              a.hash.valueOf()
+          if $location.path() == '/viewer'
+            unless $location.search()?.detail?
+              bucket = heatmap.buckets[$location.search()?.bucket]
+              provider.setActiveHighlights bucket?.map (a) =>
+                a.hash.valueOf()
+          else
+            provider.setActiveHighlights null
 
         # Does one of a few things when a tab is clicked depending on type
         .on 'mouseup', (bucket) =>

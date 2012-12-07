@@ -57,8 +57,9 @@ class Hypothesis extends Annotator
         # (Currently triggered by a click on the source page.)
         back: =>
           if $location.path() == '/viewer' and $location.search()?.detail?
-              $rootScope.$apply => $location.search('detail', null).replace()
+            $rootScope.$apply => $location.search('detail', null).replace()
           else
+            $rootScope.$apply => $location.url('/app').replace()
             this.hide()
         update: => this.publish 'hostUpdated'
       remote:
