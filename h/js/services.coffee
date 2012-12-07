@@ -115,12 +115,6 @@ class Hypothesis extends Annotator
     this
 
   _setupDocumentEvents: ->
-    @element.find('#toolbar .tri').click =>
-      if @visible
-        this.hide()
-      else
-        this.show()
-
     el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
     el.width = el.height = 1
     @element.append el
@@ -252,26 +246,12 @@ class Hypothesis extends Annotator
     this.show()
 
   show: =>
-    @element.find('body').injector().invoke [
-      '$location', '$rootScope',
-      ($location, $rootScope) =>
-        if $location.path()?.match '^/?$'
-          $rootScope.$apply => $location.path('/viewer').replace()
-    ]
-
     @visible = true
     @provider.showFrame()
     @element.find('#toolbar').addClass('shown')
       .find('.tri').attr('draggable', true)
 
   hide: =>
-    @element.find('body').injector().invoke [
-      '$location', '$rootScope',
-      ($location, $rootScope) =>
-        $rootScope.$apply =>
-          $location.path('').replace()
-    ]
-
     @lastWidth = window.innerWidth
     @visible = false
     @provider.setActiveHighlights []

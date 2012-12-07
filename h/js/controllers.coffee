@@ -165,6 +165,15 @@ class App
           ($compile $form) $scope
           deform.focusFirstInput $form
 
+    $scope.toggleShow = ->
+      if annotator.visible
+        $location.path('').replace()
+        annotator.hide()
+      else
+        if $location.path()?.match '^/?$'
+          $location.path('/viewer').replace()
+        annotator.show()
+
     $scope.$watch 'personas', (newValue, oldValue) =>
       if newValue?.length
         annotator.element.find('#persona')

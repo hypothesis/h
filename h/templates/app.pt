@@ -2,7 +2,7 @@
 <html lang="en" metal:use-macro="main_template">
   <body data-ng-app="h" data-ng-controller="App" metal:fill-slot="body">
     <div id="toolbar" class="form-inline">
-      <div class="tri"></div>
+      <div data-ng-click="toggleShow()" class="tri"></div>
       <div class="tinyman">
         <a data-ng-hide="persona"
            data-ng-click="$broadcast('showAuth')">Sign in</a>
