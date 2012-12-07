@@ -122,7 +122,7 @@ class Hypothesis extends Annotator
     handle = @element.find('#toolbar .tri')[0]
     handle.addEventListener 'dragstart', (event) =>
       event.dataTransfer.setData 'text/plain', ''
-      event.dataTransfer.setDragImage(el, 0, 0)
+      event.dataTransfer.setDragImage el, 0, 0
       @provider.dragFrame event.screenX
     handle.addEventListener 'dragend', (event) =>
       @provider.dragFrame event.screenX
