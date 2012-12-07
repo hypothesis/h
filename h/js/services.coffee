@@ -5,7 +5,7 @@ class Hypothesis extends Annotator
   # Plugin configuration
   options:
     Heatmap: {}
-    Permissions:
+    HypothesisPermissions:
       showEditPermissionsCheckbox: false,
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
@@ -41,7 +41,7 @@ class Hypothesis extends Annotator
             this.publish event, [annotation]
         addPlugin: => this.addPlugin arguments...
         createAnnotation: =>
-          if @plugins.Permissions.user?
+          if @plugins.HypothesisPermissions.user?
             @cache[h = ++@hash] = this.createAnnotation()
             h
           else
@@ -85,8 +85,8 @@ class Hypothesis extends Annotator
 
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.created = annotation.updated = (new Date()).toString()
-      annotation.user = @plugins.Permissions.options.userId(
-        @plugins.Permissions.user)
+      annotation.user = @plugins.HypothesisPermissions.options.userId(
+        @plugins.HypothesisPermissions.user)
 
     this.publish 'hostUpdated'
 
@@ -216,9 +216,6 @@ class Hypothesis extends Annotator
     # Not implemented
 
   showEditor: (annotation) =>
-    if not annotation.user?
-      @plugins.Permissions.addFieldsToAnnotation(annotation)
-
     @editor.load(annotation)
     @editor.element.find('.annotator-controls').remove()
 

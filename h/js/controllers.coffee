@@ -202,9 +202,9 @@ class App
             token: newValue
         else
           plugins.Auth.setToken(newValue)
-        plugins.Auth.withToken plugins.Permissions._setAuthFromToken
+        plugins.Auth.withToken plugins.HypothesisPermissions._setAuthFromToken
       else
-        plugins.Permissions.setUser(null)
+        plugins.HypothesisPermissions.setUser(null)
         delete plugins.Auth
 
     $scope.$on 'showAuth', (event, show=true) =>
