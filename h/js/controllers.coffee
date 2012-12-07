@@ -225,35 +225,34 @@ class Viewer
         detail: annotation.id
 
     $scope.$on '$routeUpdate', =>
-      @refresh $scope, $routeParams, annotator
+      this.refresh $scope, $routeParams, annotator
 
     $scope.$emit '$routeUpdate'
 
     annotator.plugins.Heatmap.subscribe 'updated', =>
-      $scope.$apply =>
-        this.refresh $scope, $routeParams, annotator
+      $scope.$emit '$routeUpdate'
 
     this
-
-  fillDynamicBucket: ($scope, $routeParams, annotator) =>
-    heatmap = annotator.plugins.Heatmap
-    if not ($routeParams.bucket? or $routeParams.detail?)
-      {highlights, offset} = d3.select(heatmap.element[0]).datum()
-      bottom = offset + heatmap.element.height()
-      $scope.$apply =>
-        $scope.annotations = highlights.reduce (acc, hl) =>
-          if hl.offset.top >= offset and hl.offset.top <= bottom
-            acc.push hl.data
-          acc
-        , []
 
   refresh: ($scope, $routeParams, annotator) =>
     if $routeParams.bucket?
       buckets = annotator.plugins.Heatmap.buckets
       $scope.annotations = buckets[$routeParams.bucket]
     else
-      topics = (t.message.annotation for t in $scope.threads.children)
-      $scope.annotations = topics
+      if not $routeParams.detail?
+        heatmap = annotator.plugins.Heatmap
+        datum = (d3.select heatmap.element[0]).datum()
+        if datum
+          {highlights, offset} = d3.select(heatmap.element[0]).datum()
+          bottom = offset + heatmap.element.height()
+          $scope.annotations = highlights.reduce (acc, hl) =>
+            if hl.offset.top >= offset and hl.offset.top <= bottom
+              if hl.data not in acc
+                acc.push hl.data
+            acc
+          , []
+        else
+          $scope.annotations = []
 
     if $routeParams.detail?
       thread = $scope.threads.getSpecificChild $routeParams.detail
