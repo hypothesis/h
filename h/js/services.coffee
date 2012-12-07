@@ -117,7 +117,7 @@ class Hypothesis extends Annotator
   _setupDocumentEvents: ->
     el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
     el.width = el.height = 1
-    @element.append el
+    @element.find('body').append el
 
     handle = @element.find('#toolbar .tri')[0]
     handle.addEventListener 'dragstart', (event) =>
