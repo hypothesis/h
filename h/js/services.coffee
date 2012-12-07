@@ -59,7 +59,6 @@ class Hypothesis extends Annotator
           if $location.path() == '/viewer' and $location.search()?.detail?
             $rootScope.$apply => $location.search('detail', null).replace()
           else
-            $rootScope.$apply => $location.url('/app').replace()
             this.hide()
         update: => this.publish 'hostUpdated'
       remote:
@@ -253,12 +252,26 @@ class Hypothesis extends Annotator
     this.show()
 
   show: =>
+    @element.find('body').injector().invoke [
+      '$location', '$rootScope',
+      ($location, $rootScope) =>
+        if $location.path()?.match '^/?$'
+          $rootScope.$apply => $location.path('/viewer').replace()
+    ]
+
     @visible = true
     @provider.showFrame()
     @element.find('#toolbar').addClass('shown')
       .find('.tri').attr('draggable', true)
 
   hide: =>
+    @element.find('body').injector().invoke [
+      '$location', '$rootScope',
+      ($location, $rootScope) =>
+        $rootScope.$apply =>
+          $location.path('').replace()
+    ]
+
     @lastWidth = window.innerWidth
     @visible = false
     @provider.setActiveHighlights []
