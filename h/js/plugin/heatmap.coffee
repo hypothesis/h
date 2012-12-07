@@ -115,7 +115,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           min = w
           break if min == 0 # short-circuit optimization
 
-      # Merge them if they are closer enough
+      # Merge them if they are close enough
       if min < threshold
         # Prefer merging the successor bucket backward but not if it's last
         # since the gradient must always return to 0 at the end
