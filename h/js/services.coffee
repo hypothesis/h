@@ -14,8 +14,8 @@ class Hypothesis extends Annotator
   visible: false     # * Whether the sidebar is visible
   unsaved_drafts: [] # * Unsaved drafts currenty open
 
-  this.$inject = ['$cacheFactory', '$document', '$location']
-  constructor: ($cacheFactory, $document, $location) ->
+  this.$inject = ['$cacheFactory', '$document', '$location', '$rootScope']
+  constructor: ($cacheFactory, $document, $location, $rootScope) ->
     super $document
 
     @cache = $cacheFactory 'annotations'
@@ -56,14 +56,8 @@ class Hypothesis extends Annotator
         # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
         back: =>
-          console.log 'back not implemented'
-          return
-          # If it's in the detail view, loads the bucket back up.
-          if @detail
-            this.showViewer(@heatmap.buckets[@bucket])
-            this.publish('hostUpdated')
-          # If it's not in the detail view, the assumption is that it's in the
-          # bucket view and hides the whole interface.
+          if $location.path() == '/viewer' and $location.search()?.detail?
+              $rootScope.$apply => $location.search('detail', null).replace()
           else
             this.hide()
         update: => this.publish 'hostUpdated'
