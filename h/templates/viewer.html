@@ -12,10 +12,9 @@
     </div>
   </li>
 
-  <li data-ng-class="!annotation && 'collapsed' || ''">
+  <li data-ng-class="!detail && 'collapsed' || ''">
     <!-- Details -->
-    <div class="annotator-outer annotator-viewer"
-         data-ng-switch="annotation != null">
+    <div data-ng-switch="detail" class="annotator-outer annotator-viewer">
       <div data-ng-show="annotation.quote" class="paper excerpt">
         <blockquote data-ng-bind="annotation.quote" />
       </div>

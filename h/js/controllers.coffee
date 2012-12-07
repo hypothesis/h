@@ -18,8 +18,6 @@ class App
           m = mail.message(null, a.id, a.thread?.split('/') or [])
           m.annotation = a
           m
-        $location.path '/viewer'
-        $location.replace()
 
     # Update the heatmap when certain events are pubished
     events = [
@@ -98,7 +96,7 @@ class App
               if next < hl.offset.top < threshold then hl.offset.top else next
             , threshold - height
             provider.scrollTop next - pad
-            $location.search 'bucket'
+            $location.search('bucket').replace()
 
           # If it's the lower tab, scroll to next bucket below
           else if heatmap.isLower bucket
@@ -107,16 +105,17 @@ class App
               if threshold < hl.offset.top < next then hl.offset.top else next
             , offset + height
             provider.scrollTop next - pad
-            $location.search 'bucket'
+            $location.search('bucket').replace()
 
           # If it's neither of the above, load the bucket into the viewer
           else
             $scope.$apply =>
-              $location.path '/viewer'
-              $location.search
-                bucket: bucket
-                detail: null
-              $location.replace()
+              $location
+                .path('/viewer')
+                .search
+                  bucket: bucket
+                  detail: null
+                .replace()
             annotator.show()
 
     angular.extend $scope,
@@ -201,6 +200,7 @@ class App
 
     # Fetch the initial model from the server
     $scope.reset()
+    $location.url('/viewer').replace()
     $http.get 'model',
       withCredentials: true
     .success (data) =>
@@ -209,18 +209,20 @@ class App
 
 class Viewer
   this.$inject = [
-    '$location', '$rootElement', '$routeParams', '$scope',
+    '$location', '$routeParams', '$scope',
     'annotator'
   ]
   constructor: (
-    $location, $rootElement, $routeParams, $scope,
+    $location, $routeParams, $scope,
     annotator
   ) ->
     $scope.annotation = null
     $scope.annotations = []
 
     $scope.showDetail = (annotation) =>
-      $location.search 'detail', annotation.id
+      $location.search
+        bucket: null
+        detail: annotation.id
 
     $scope.$on '$routeUpdate', =>
       @refresh $scope, $routeParams, annotator
@@ -228,7 +230,8 @@ class Viewer
     $scope.$emit '$routeUpdate'
 
     annotator.plugins.Heatmap.subscribe 'updated', =>
-      this.fillDynamicBucket $scope, $routeParams, annotator
+      $scope.$apply =>
+        this.refresh $scope, $routeParams, annotator
 
     this
 
@@ -254,10 +257,11 @@ class Viewer
 
     if $routeParams.detail?
       thread = $scope.threads.getSpecificChild $routeParams.detail
+      $scope.detail = true
       $scope.annotation = thread?.message.annotation
       annotator.provider.setActiveHighlights [$scope.annotation.hash.valueOf()]
     else
-      $scope.annotation = null
+      $scope.detail = false
       annotator.provider.setActiveHighlights $scope.annotations?.map (a) =>
         a.hash.valueOf()
 
