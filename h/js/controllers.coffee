@@ -13,10 +13,13 @@ class App
 
     # Thread the annotations after loading
     annotator.subscribe 'annotationsLoaded', (annotations) =>
-      $scope.threads = mail.messageThread().thread annotations.map (a) =>
-        m = mail.message(null, a.id, a.thread?.split('/') or [])
-        m.annotation = a
-        m
+      $scope.$apply =>
+        $scope.threads = mail.messageThread().thread annotations.map (a) =>
+          m = mail.message(null, a.id, a.thread?.split('/') or [])
+          m.annotation = a
+          m
+        $location.path '/viewer'
+        $location.replace()
 
     # Update the heatmap when certain events are pubished
     events = [
@@ -34,15 +37,6 @@ class App
               hl.data = annotator.cache[hl.data]
               hl
             offset: offset
-          # Dynamic bucket
-          #if not ($routeParams.bucket? or $routeParams.detail?)
-          #  {highlights, offset} = d3.select(heatmap.element[0]).datum()
-          #  bottom = offset + heatmap.element.height()
-          #  @bucket = highlights.reduce (acc, hl) =>
-          #    if hl.offset.top >= offset and hl.offset.top <= bottom
-          #      acc.push hl.data
-          #    acc
-          #  , []
 
     heatmap.subscribe 'updated', =>
       tabs = d3.select(annotator.element[0].body)
@@ -232,7 +226,23 @@ class Viewer
       @refresh $scope, $routeParams, annotator
 
     $scope.$emit '$routeUpdate'
+
+    annotator.plugins.Heatmap.subscribe 'updated', =>
+      this.fillDynamicBucket $scope, $routeParams, annotator
+
     this
+
+  fillDynamicBucket: ($scope, $routeParams, annotator) =>
+    heatmap = annotator.plugins.Heatmap
+    if not ($routeParams.bucket? or $routeParams.detail?)
+      {highlights, offset} = d3.select(heatmap.element[0]).datum()
+      bottom = offset + heatmap.element.height()
+      $scope.$apply =>
+        $scope.annotations = highlights.reduce (acc, hl) =>
+          if hl.offset.top >= offset and hl.offset.top <= bottom
+            acc.push hl.data
+          acc
+        , []
 
   refresh: ($scope, $routeParams, annotator) =>
     if $routeParams.bucket?

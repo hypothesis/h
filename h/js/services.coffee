@@ -84,9 +84,7 @@ class Hypothesis extends Annotator
     @provider.getMaxBottom (max) =>
       @element.find('#toolbar').css("top", "#{max}px")
       @element.find('#gutter').css("margin-top", "#{max}px")
-      @heatmap.BUCKET_THRESHOLD_PAD = (
-        max + @heatmap.constructor.prototype.BUCKET_THRESHOLD_PAD
-      )
+      @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
 
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.created = annotation.updated = (new Date()).toString()
