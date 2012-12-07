@@ -8,12 +8,12 @@ imports = [
 ]
 
 
-configure = ($routeProvider, $locationProvider) ->
+configure = ($routeProvider) ->
   $routeProvider.when '/viewer',
     controller: 'Viewer'
     reloadOnSearch: false
     templateUrl: 'viewer.html'
-configure.$inject = ['$routeProvider', '$locationProvider']
+configure.$inject = ['$routeProvider']
 
 
 angular.module('h', imports, configure)
