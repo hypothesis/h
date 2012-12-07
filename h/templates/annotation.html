@@ -6,7 +6,13 @@
   <div class="user" data-ng-bind="user" />
   <div class="body" data-ng-bind-html="text" />
   <div class="bottombar">
-    <span class="replycount" data-ng-bind="replyCount" />
+    <span data-ng-pluralize=""
+          count="replyCount"
+          when="{ '0': 'No replies'
+                , 'one': '1 reply'
+                , 'other': '{} replies'
+                }"
+          class="replycount" />
   </div>
   <div class="thread">
     <a class="threadexp" />
