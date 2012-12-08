@@ -4,6 +4,7 @@ annotation = ($filter) ->
     thread = scope.threads.getSpecificChild annotation.id
     angular.extend scope, annotation
     angular.extend scope,
+      collapsed: false
       created: ($filter 'fuzzyTime') annotation.created
       user: ($filter 'userName') annotation.user
       text: ($filter 'converter') annotation.text

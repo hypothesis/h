@@ -407,8 +407,21 @@ blockquote {
 
 //THREADING////////////////////////////////
 //Threaded discussion specific
-.thread .annotator-listing {
-  border-left: 1px dotted $grayLight;
+.thread {
+  @include single-transition(
+    max-height, .4s, cubic-bezier(0, 1.000, 0, 1.000));
+  max-height: 65536px;
+
+  margin-left: -($thread-padding / 2);
+  padding-left: $thread-padding;
+
+  position: relative;
+
+  .annotator-listing {
+    border-left: 1px dotted $grayLight;
+    margin-left: -($thread-padding / 2);
+    padding-left: $thread-padding / 2;
+  }
 
   .threadexp {
     height: $threadexp-width;
@@ -416,13 +429,14 @@ blockquote {
     position: absolute;
     top: .8em;
     left: -($threadexp-width / 2);
+    margin-left: -($thread-padding / 2);
     outline: 1px dotted #aaa;
     @include icon("minus_1.png");
   }
 
   .annotation {
-    padding-left: $thread-padding;
     padding-top: .35em;
+    padding-left: $thread-padding / 2;
     &.squished {
       padding-left: 0;
     }
@@ -467,7 +481,10 @@ blockquote {
       margin-top: 0;
       margin-bottom: 0;
     }
-    & > .thread { overflow: hidden; }
+    & > .thread {
+      max-height: 0;
+      overflow: hidden;
+    }
     & > .user {
       display: run-in;
       margin-right: .25em;
