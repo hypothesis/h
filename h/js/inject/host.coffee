@@ -143,32 +143,37 @@ class Annotator.Host extends Annotator
     this
 
   _setupDocumentEvents: ->
-    # CSS "position: fixed" is hell of broken on most mobile devices
-    # In this code, fixed is used *during* scroll on touch devices to prevent
-    # jerky re-positioning of the sidebar. After scroll ends, the sidebar
-    # is reset to "position: absolute" and positioned accordingly.
+    tick = false
     timeout = null
     touch = false
-    update = util.debounce =>
-      unless touch
-        @consumer.update()
-        return
-      if timeout then cancelTimeout timeout
-      timeout = setTimeout =>
-        timeout = null
-        @frame?.css
-          display: ''
-          height: $(window).height()
-          position: 'absolute'
-          top: $(window).scrollTop()
-        @consumer.update()
-      , 400
-    document.addEventListener 'touchmove', =>
-      @frame?.css
-        display: 'none'
-      do update
+    update = =>
+      if touch
+        # Defer updates on mobile until after touch events are over
+        if timeout then cancelTimeout timeout
+        timeout = setTimeout =>
+          timeout = null
+          do updateFrame
+        , 400
+      else
+        do updateFrame
+    updateFrame = =>
+      unless tick
+        tick = true
+        requestAnimationFrame =>
+          tick = false
+          if touch
+            # CSS "position: fixed" is hell of broken on most mobile devices
+            @frame?.css
+              display: ''
+              height: $(window).height()
+              position: 'absolute'
+              top: $(window).scrollTop()
+          @consumer.update()
+    document.addEventListener 'touchmove', update
     document.addEventListener 'touchstart', =>
       touch = true
+      @frame?.css
+        display: 'none'
       do update
     document.addEventListener 'dragover', (event) =>
       if @drag.last?
@@ -185,7 +190,7 @@ class Annotator.Host extends Annotator
         @drag.tick = true
         window.requestAnimationFrame this.dragRefresh
     $(window).on 'resize scroll', update
-    $(document.body).on 'resize scroll', '*', util.debounce => @consumer.update()
+    $(document.body).on 'resize scroll', '*', update
     super
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
