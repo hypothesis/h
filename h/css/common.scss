@@ -179,7 +179,6 @@ label {
 }
 
 a {
-
   &.write {
     @include linkbutton;
     background-image: url("../images/pen_1.png");
