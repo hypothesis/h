@@ -37,7 +37,7 @@ class App
             offset: offset
 
     heatmap.subscribe 'updated', =>
-      tabs = d3.select(annotator.element[0].body)
+      tabs = d3.select(annotator.element[0])
         .selectAll('div.heatmap-pointer')
         .data =>
           buckets = []

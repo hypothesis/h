@@ -19,7 +19,7 @@ class Hypothesis extends Annotator
 
   this.$inject = ['$cacheFactory', '$document', '$location', '$rootScope']
   constructor: ($cacheFactory, $document, $location, $rootScope) ->
-    super $document
+    super ($document.find 'body')
 
     @cache = $cacheFactory 'annotations'
 
@@ -120,7 +120,7 @@ class Hypothesis extends Annotator
   _setupDocumentEvents: ->
     el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
     el.width = el.height = 1
-    @element.find('body').append el
+    @element.append el
 
     handle = @element.find('#toolbar .tri')[0]
     handle.addEventListener 'dragstart', (event) =>
