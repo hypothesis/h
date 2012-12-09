@@ -9,6 +9,9 @@ imports = [
 
 
 configure = ($routeProvider) ->
+  $routeProvider.when '/editor',
+    controller: 'Editor'
+    templateUrl: 'editor.html'
   $routeProvider.when '/viewer',
     controller: 'Viewer'
     reloadOnSearch: false

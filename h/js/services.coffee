@@ -216,22 +216,16 @@ class Hypothesis extends Annotator
     # Not implemented
 
   showEditor: (annotation) =>
-    @editor.load(annotation)
-    @editor.element.find('.annotator-controls').remove()
-
-    quote = annotation.quote.replace(/\u00a0/g, ' ') # replace &nbsp;
-    excerpt = $('<li class="paper excerpt">')
-    excerpt.append($("<blockquote>#{quote}</blockquote>"))
-
-    item = $('<li class="annotation paper writer">')
-    item.append($(Handlebars.templates.editor(annotation)))
-
-    @editor.element.find('.annotator-listing').empty()
-      .append(excerpt)
-      .append(item)
-      .find(":input:first").focus()
-
-    @unsaved_drafts.push @editor
+    @element.injector().invoke [
+      '$location', '$rootScope',
+      ($location, $rootScope) =>
+        $rootScope.$apply =>
+          $location.path('/editor')
+            .search
+              hash: annotation.hash.valueOf()
+            .replace()
+    ]
+    @unsaved_drafts.push annotation
     this.show()
 
   show: =>

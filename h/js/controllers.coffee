@@ -218,6 +218,15 @@ class App
       angular.extend $scope, data
 
 
+class Editor
+  this.$inject = ['$routeParams', '$scope', 'annotator']
+  constructor: ($routeParams, $scope, annotator) ->
+    angular.extend $scope,
+      annotation: annotator.cache[$routeParams.hash.valueOf()]
+      editable: true
+    this
+
+
 class Viewer
   this.$inject = [
     '$location', '$routeParams', '$scope',
@@ -280,4 +289,5 @@ class Viewer
 
 angular.module('h.controllers', [])
   .controller('App', App)
+  .controller('Editor', Editor)
   .controller('Viewer', Viewer)

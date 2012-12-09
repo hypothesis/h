@@ -7,9 +7,14 @@ annotation = ($filter) ->
       collapsed: false
       created: ($filter 'fuzzyTime') annotation.created
       user: ($filter 'userName') annotation.user
-      text: ($filter 'converter') annotation.text
       replies: (c.message.annotation for c in (thread?.children or []))
       replyCount: thread?.flattenChildren()?.length or 0
+    scope.$watch 'editable', (newValue) =>
+      if newValue
+        scope.text = scope.annotation.text
+        iElement.find('textarea').focus()
+      else
+        scope.text = ($filter 'converter') scope.annotation.text
   restrict: 'C'
   scope: true
 annotation.$inject = ['$filter']

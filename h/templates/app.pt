@@ -77,6 +77,9 @@
     <script type="text/ng-template" id="annotation.html">
       <metal:main use-macro="load: annotation.html" />
     </script>
+    <script type="text/ng-template" id="editor.html">
+      <metal:main use-macro="load: editor.html" />
+    </script>
     <script type="text/ng-template" id="viewer.html">
       <metal:main use-macro="load: viewer.html" />
     </script>
