@@ -45,7 +45,7 @@ class Hypothesis extends Annotator
             @cache[h = ++@hash] = this.createAnnotation()
             h
           else
-            this.showAuth true
+            $rootScope.$apply => $rootScope.$broadcast 'showAuth'
             this.show()
             null
         showEditor: (stub) =>
