@@ -52,6 +52,18 @@ $headingsFontFamily:    inherit !default;
 $headingsFontWeight:    bold !default;
 $headingsColor:         inherit !default;
 
+//ICON FONT IMPORT
+@font-face {
+  font-family: 'icomoon';
+  src:url('../fonts/icomoon.eot');
+  src:url('../fonts/icomoon.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/icomoon.svg#icomoon') format('svg'),
+    url('../fonts/icomoon.woff') format('woff'),
+    url('../fonts/icomoon.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 //STANCE COLORS
 $positive: #3aab39;
 $negative: #d11c2b;
