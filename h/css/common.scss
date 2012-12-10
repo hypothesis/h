@@ -450,6 +450,46 @@ blockquote {
 
 
 
+//MAGICONTROLS////////////////////////////////
+.magicontrols {
+  position: absolute;
+  @include transition(right 0.1s ease-in-out .5s);
+  right: -.5em; //ADJUSTMENT BECAUSE OF BUG HAVING TO DO WITH FONT SIZE 0
+  & > * {
+    display: inline-block;
+  }
+  .go {
+    @include transition(color 0.1s ease-in-out .5s);
+    @include tertiarytext;
+  }
+
+  .grow, .show {
+    @include transition(font-size 0.1s ease-in-out .5s, opacity 0.1s ease-in-out .5s, margin 0.15s ease-in-out .5s);
+    margin: 0;
+  }
+
+  .grow {
+    @include tertiarytext;
+  }
+  .show {
+    font-size: 0;
+    opacity: 0;
+  }
+  .annotation:hover & {
+    right: 0;
+    .go {
+      color: transparent;
+    }
+    .grow, .show {
+      margin-left: .5em;
+      font-size: 1em;
+      opacity: 1;
+    }
+  }
+}
+
+
+
 //DETAIL////////////////////////////////
 //This is specific to the detail view.
 .detail {
