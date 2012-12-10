@@ -1,35 +1,33 @@
 <div data-ng-class="{ 'collapsed': collapsed
-                    , 'writer': editable
+                    , 'writer': editing
                     }"
      class="annotation">
   <a data-ng-click="collapsed = !collapsed" class="threadexp" />
   <div class="time" data-ng-bind="created" />
   <h3 class="user" data-ng-bind="user" />
-  <ng:switch on="editable == true">
-    <textarea data-ng-model="text" data-ng-switch-when="true" />
-    <div data-ng-bind-html="text" data-ng-switch-default="" class="body" />
-  </ng:switch>
-  <div data-ng-class="bottombar">
+  <div data-ng-bind-html="text" class="body" />
+  <div class="bottombar">
     <span data-ng-show="id"
           data-ng-pluralize=""
-          count="replyCount"
+          count="thread.flattenChildren().length"
           when="{ '0': 'No replies'
                 , 'one': '1 reply'
                 , 'other': '{} replies'
                 }"
           class="replycount" />
     <div class="annotator-controls">
-      <button data-ng-click="save()" class="btn">
+      <button data-ng-click="$emit('save')" class="btn">
         <a class="annotator-save">Save</a>
       </button>
-      <a data-ng-click="cancel()" class="annotator-cancel">Cancel</a>
-      <a data-ng-click="reply()" data-ng-show="id" class="write">Reply</a>
+      <a data-ng-click="$emit('cancel')" class="annotator-cancel">Cancel</a>
+      <a data-ng-click="$emit('reply')" data-ng-show="id" class="write">Reply</a>
     </div>
   </div>
   <div class="thread">
     <ul class="annotator-listing">
       <li data-ng-include="'annotation.html'"
-          data-ng-repeat="annotation in replies" />
+          data-ng-model="reply.message.annotation"
+          data-ng-repeat="reply in thread.children" />
     </ul>
   </div>
 </div>

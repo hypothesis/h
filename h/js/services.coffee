@@ -225,7 +225,6 @@ class Hypothesis extends Annotator
               hash: annotation.hash.valueOf()
             .replace()
     ]
-    @unsaved_drafts.push annotation
     this.show()
 
   show: =>
@@ -269,5 +268,8 @@ class Hypothesis extends Annotator
       annotation.id
 
 
+
+
 angular.module('h.services', [])
   .service('annotator', Hypothesis)
+  .value('threading', mail.messageThread())

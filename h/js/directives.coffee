@@ -1,22 +1,24 @@
-annotation = ['$filter', ($filter) ->
-  link: (scope, iElement, iAttrs, controller) ->
-    annotation = scope.annotation
-    thread = scope.threads.getSpecificChild annotation.id
-    angular.extend scope, annotation
-    angular.extend scope,
-      collapsed: false
-      created: ($filter 'fuzzyTime') annotation.created
-      user: ($filter 'userName') annotation.user
-      replies: (c.message.annotation for c in (thread?.children or []))
-      replyCount: thread?.flattenChildren()?.length or 0
-    scope.$watch 'editable', (newValue) =>
-      if newValue
-        scope.text = scope.annotation.text
-        iElement.find('textarea').focus()
-      else
-        scope.text = ($filter 'converter') scope.annotation.text
-  restrict: 'C'
-  scope: true
+annotation = [
+  '$compile', '$filter', 'threading',
+  ($compile, $filter, threading) ->
+    link: (scope, iElement, iAttrs, [annotation, model]) ->
+      angular.extend scope,
+        collapsed: false
+        editable: false
+
+      model.$render = ->
+        value = model.$viewValue
+        return unless value
+        angular.extend scope,
+          created: ($filter 'fuzzyTime') value.created
+          user: ($filter 'userName') value.user
+          thread: threading.getContainer value.id
+          text: ($filter 'converter') value.text
+
+      scope.$evalAsync -> model.$render()
+    restrict: 'C'
+    require: ['?annotation', '^ngModel']
+    scope: {}
 ]
 
 

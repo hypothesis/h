@@ -5,6 +5,7 @@
       <ul class="annotator-listing">
         <li data-ng-click="showDetail(annotation)"
             data-ng-include="'annotation.html'"
+            data-ng-model="annotation"
             data-ng-repeat="annotation in annotations"
             class="paper summary">
         </li>
@@ -14,12 +15,12 @@
 
   <li data-ng-class="!detail && 'collapsed' || ''">
     <!-- Details -->
-    <div data-ng-switch="detail" class="annotator-outer annotator-viewer">
+    <div class="annotator-outer annotator-viewer">
       <div data-ng-show="annotation.quote" class="paper excerpt">
         <blockquote data-ng-bind="annotation.quote" />
       </div>
       <div data-ng-include="'annotation.html'"
-           data-ng-switch-when="true"
+           data-ng-model="annotation"
            class="paper detail" />
     </div>
   </li>

@@ -1,11 +1,11 @@
 class App
   this.$inject = [
     '$compile', '$element', '$http', '$location', '$scope',
-    'annotator', 'deform'
+    'annotator', 'deform', 'threading'
   ]
   constructor: (
     $compile, $element, $http, $location, $scope,
-    annotator, deform
+    annotator, deform, threading
   ) ->
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
@@ -13,8 +13,7 @@ class App
 
     # Thread the annotations after loading
     annotator.subscribe 'annotationsLoaded', (annotations) =>
-      $scope.$apply =>
-        $scope.threads = mail.messageThread().thread annotations.map (a) =>
+      threading.thread annotations.map (a) =>
           m = mail.message(null, a.id, a.thread?.split('/') or [])
           m.annotation = a
           m
@@ -230,19 +229,17 @@ class Editor
 class Viewer
   this.$inject = [
     '$location', '$routeParams', '$scope',
-    'annotator'
+    'annotator', 'threading'
   ]
   constructor: (
     $location, $routeParams, $scope,
-    annotator
+    annotator, threading
   ) ->
     $scope.annotation = null
     $scope.annotations = []
 
     $scope.showDetail = (annotation) ->
-      $location.search
-        bucket: null
-        detail: annotation.id
+      $location.search('detail', annotation.id).replace()
 
     $scope.$on '$routeChangeSuccess', =>
       update = => $scope.$emit '$routeUpdate'
@@ -252,11 +249,11 @@ class Viewer
       update()
 
     $scope.$on '$routeUpdate', =>
-      this.refresh $scope, $routeParams, annotator
+      this.refresh $scope, $routeParams, annotator, threading
 
     this
 
-  refresh: ($scope, $routeParams, annotator) =>
+  refresh: ($scope, $routeParams, annotator, threading) =>
     if $routeParams.bucket?
       buckets = annotator.plugins.Heatmap.buckets
       $scope.annotations = buckets[$routeParams.bucket]
@@ -277,7 +274,7 @@ class Viewer
           $scope.annotations = []
 
     if $routeParams.detail?
-      thread = $scope.threads.getSpecificChild $routeParams.detail
+      thread = threading.getContainer $routeParams.detail
       $scope.detail = true
       $scope.annotation = thread?.message.annotation
       annotator.provider.setActiveHighlights [$scope.annotation.hash.valueOf()]
