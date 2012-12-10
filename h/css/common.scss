@@ -497,22 +497,9 @@ blockquote {
 //DETAIL////////////////////////////////
 //This is specific to the detail view.
 .detail {
-  .annotator-controls {
-    @include single-transition(opacity, .25s, ease-in-out);
-    opacity: 0;
-    position: absolute;
-    right: 0;
-    z-index: 1;
-  }
 
   .bottombar {
     margin-bottom: .25em;
-  }
-
-  &.hover {
-    & > .annotator-controls {
-      opacity: 1;
-    }
   }
 
   //These are all the changes needed to collapse thread objects.

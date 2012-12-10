@@ -29,20 +29,24 @@
     </ng:switch>
 
     <div data-ng-class="bottombar">
-      <span data-ng-show="id"
+      <span data-ng-show="id && replyCount"
             data-ng-pluralize=""
             count="replyCount"
-            when="{ '0': 'No replies'
+            when="{ '0': ''
                   , 'one': '1 reply'
                   , 'other': '{} replies'
                   }"
             class="replycount" />
-      <div class="annotator-controls">
-        <button data-ng-click="save()" class="btn">
-          <a class="annotator-save">Save</a>
-        </button>
-        <a data-ng-click="cancel()" class="annotator-cancel">Cancel</a>
-      </div>
+
+      <ng:switch on="editable == true">
+        <div data-ng-switch-when="true" class="annotator-controls">
+          <button data-ng-click="save()" class="btn">
+            <a class="annotator-save">Save</a>
+          </button>
+          <a data-ng-click="cancel()" class="annotator-cancel">Cancel</a>
+        </div>
+      </ng:switch>
+
     </div>
   </div>
 
