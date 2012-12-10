@@ -1,4 +1,4 @@
-annotation = ($filter) ->
+annotation = ['$filter', ($filter) ->
   link: (scope, iElement, iAttrs, controller) ->
     annotation = scope.annotation
     thread = scope.threads.getSpecificChild annotation.id
@@ -17,10 +17,10 @@ annotation = ($filter) ->
         scope.text = ($filter 'converter') scope.annotation.text
   restrict: 'C'
   scope: true
-annotation.$inject = ['$filter']
+]
 
 
-tabReveal = ($parse) ->
+tabReveal = ['$parse', ($parse) ->
   compile: (tElement, tAttrs, transclude) ->
     panes = []
 
@@ -61,7 +61,7 @@ tabReveal = ($parse) ->
 
       scope.$watch iAttrs.ngModel, => scope.$evalAsync update
   require: ['ngModel', 'tabbable']
-tabReveal.$inject = ['$parse']
+]
 
 
 angular.module('h.directives', ['ngSanitize', 'deform'])
