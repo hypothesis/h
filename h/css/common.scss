@@ -407,6 +407,10 @@ blockquote {
   .bottombar {
     @include pie-clearfix;
   }
+
+  .replycount {
+    @include tertiarytext;
+  }
 }
 
 
@@ -475,7 +479,7 @@ blockquote {
     font-size: 0;
     opacity: 0;
   }
-  .annotation:hover & {
+  .nothread:hover & {
     right: 0;
     .go {
       color: transparent;
@@ -499,10 +503,6 @@ blockquote {
     position: absolute;
     right: 0;
     z-index: 1;
-  }
-
-  .replycount {
-    @include tertiarytext;
   }
 
   .bottombar {
@@ -538,6 +538,10 @@ blockquote {
       background-image: url("../images/plus_1.png");
     }
   }
+  // Things not shown in the detail view
+  .time {
+    display: none;
+  }
 }
 
 
@@ -548,6 +552,8 @@ blockquote {
   margin-bottom: 1em;
   position: relative;
   cursor: pointer;
+
+
 
   &:hover {
     @include smallshadow(2px, 3px, .1);
@@ -560,7 +566,7 @@ blockquote {
   }
 
   // Things not shown in the summary view
-  .annotator-controls, .bottombar, .excerpt, .thread {
+  .annotator-controls, .magicontrols, .bottombar, .excerpt, .thread {
     display: none;
   }
 }
