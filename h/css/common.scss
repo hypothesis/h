@@ -407,19 +407,18 @@ blockquote {
 //THREADING////////////////////////////////
 //Threaded discussion specific
 .thread {
-  @include single-transition(
-    max-height, .4s, cubic-bezier(0, 1.000, 0, 1.000));
+  @include single-transition(max-height, .4s, cubic-bezier(1, 0, 1, 0));
   max-height: 65536px;
+  overflow: hidden;
 
   margin-left: -($thread-padding / 2);
   padding-left: $thread-padding;
-
-  position: relative;
 
   .annotator-listing {
     border-left: 1px dotted $grayLight;
     margin-left: -($thread-padding / 2);
     padding-left: $thread-padding / 2;
+    height: 100%;
   }
 
   .threadexp {
@@ -481,8 +480,8 @@ blockquote {
       margin-bottom: 0;
     }
     & > .thread {
+      @include single-transition(max-height, .4s, cubic-bezier(0, 1, 0, 1));
       max-height: 0;
-      overflow: hidden;
     }
     & > .user {
       display: run-in;
