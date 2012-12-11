@@ -16,11 +16,11 @@
       <div class="show reply-icon" title="Reply" data-ng-click="reply()" />
       <div class="show share-icon" title="Share" data-ng-click="share()" />
       <div class="show dropdown" title="More Actions">
-        <div class="dropdown-toggle down-icon" role="button" data-toggle="dropdown" data-target="#" />
-        <ul class="dropdown-menu pull-right" role="menu" >
-          <li data-ng-click="edit()" data-ng-show="persona.username == user">Edit</li>
-          <li data-ng-click="delete()" data-ng-show="persona.username == user">Delete</li>
-          <li data-ng-click="flag()" data-ng-hide="persona.username == user">Flag</li>
+        <div class="dropdown-toggle down-icon" role="button" />
+        <ul class="dropdown-menu pull-right" role="menu">
+          <li data-ng-click="edit()">Edit</li>
+          <li data-ng-click="delete()">Delete</li>
+          <li data-ng-click="flag()">Flag</li>
         </ul>
       </div>
     </div>
