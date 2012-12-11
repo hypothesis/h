@@ -538,8 +538,6 @@ blockquote {
   position: relative;
   cursor: pointer;
 
-
-
   &:hover {
     @include smallshadow(2px, 3px, .1);
     bottom: 1px;
