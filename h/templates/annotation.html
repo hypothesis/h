@@ -28,11 +28,9 @@
     <h3 class="user" data-ng-bind="user" />
     <div data-ng-bind-html="text" class="body" />
     <div class="bottombar">
-
-    <div data-ng-class="bottombar">
-      <span data-ng-show="id && replyCount"
+      <span data-ng-show="thread.children.length"
             data-ng-pluralize=""
-            count="replyCount"
+            count="thread.flattenChildren().length"
             when="{ '0': ''
                   , 'one': '1 reply'
                   , 'other': '{} replies'

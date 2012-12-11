@@ -5,6 +5,7 @@ annotation = [
       angular.extend scope,
         collapsed: false
         editable: false
+        fave: false
 
       model.$render = ->
         value = model.$viewValue
