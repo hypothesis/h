@@ -52,6 +52,18 @@ $headingsFontFamily:    inherit !default;
 $headingsFontWeight:    bold !default;
 $headingsColor:         inherit !default;
 
+//ICON FONT IMPORT
+@font-face {
+  font-family: 'icomoon';
+  src:url('../images/icomoon.eot');
+  src:url('../images/icomoon.eot?#iefix') format('embedded-opentype'),
+    url('../images/icomoon.svg#icomoon') format('svg'),
+    url('../images/icomoon.woff') format('woff'),
+    url('../images/icomoon.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 //STANCE COLORS
 $positive: #3aab39;
 $negative: #d11c2b;
@@ -148,7 +160,9 @@ $em: 14 / 1em !default;
   }
 }
 
-//ICON IMAGES
+
+
+//ICON IMAGES////////////////////////////////
 @mixin icon_resets {
   background-repeat: no-repeat;
   background-position: center;
@@ -161,7 +175,8 @@ $em: 14 / 1em !default;
 }
 
 
-//ANNOTATOR TEXT STYLES
+
+//ANNOTATOR TEXT STYLES////////////////////////////////
 @mixin primarytext {
   font-weight: bold;
   font-size: 1.3em;
@@ -176,7 +191,9 @@ $em: 14 / 1em !default;
   font-size: .8em;
 }
 
-//LINKBUTTONS
+
+
+//LINKBUTTONS////////////////////////////////
 @mixin linkbutton {
   text-decoration: none;
   cursor: pointer;
@@ -196,4 +213,81 @@ $em: 14 / 1em !default;
   background-position: right;
   padding-left: 0;
   padding-right: 1.3em;
+}
+
+
+
+//FONTICON////////////////////////////////
+@mixin fonticon($char, $iconside: left) {
+  text-decoration: none;
+  cursor: pointer;
+  color: $gray;
+  &:hover {
+    color: black;
+    opacity: 1;
+  }
+  @if $iconside == left {
+    &:before {
+      content: $char;
+      vertical-align: -.1em;
+      font-family: 'icomoon';
+      font-style: normal;
+      // margin-right: .3em;
+      speak: none;
+      font-weight: normal;
+    }
+  }
+  @if $iconside == right {
+    &:after {
+      content: $char;
+      vertical-align: -.1em;
+      font-family: 'icomoon';
+      font-style: normal;
+      // margin-left: .3em;
+      speak: none;
+      font-weight: normal;
+    }
+  }
+}
+
+
+
+//ICON CLASSES////////////////////////////////
+.flag-icon {
+  @include fonticon("\28", left);
+}
+
+.fave-icon {
+  @include fonticon("\e006", left);
+  &.checked:before {
+    content: "\e005";
+  }
+}
+
+.reply-icon {
+  @include fonticon("\e004", left);
+}
+
+.share-icon {
+  @include fonticon("\25", left);
+}
+
+.down-icon {
+  @include fonticon("\e007", left);
+}
+
+.clipboard-icon {
+  @include fonticon("\33", left);
+}
+
+.check-icon {
+  @include fonticon("\35", left);
+}
+
+.x-icon {
+  @include fonticon("\36", left);
+}
+
+.vis-icon {
+  @include fonticon("\34", left);
 }

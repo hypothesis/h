@@ -3,26 +3,52 @@
                     }"
      class="annotation">
   <a data-ng-click="collapsed = !collapsed" class="threadexp" />
-  <div class="time" data-ng-bind="created" />
-  <h3 class="user" data-ng-bind="user" />
-  <div data-ng-bind-html="text" class="body" />
-  <div class="bottombar">
-    <span data-ng-show="id"
-          data-ng-pluralize=""
-          count="thread.flattenChildren().length"
-          when="{ '0': 'No replies'
-                , 'one': '1 reply'
-                , 'other': '{} replies'
-                }"
-          class="replycount" />
-    <div class="annotator-controls">
-      <button data-ng-click="$emit('save')" class="btn">
-        <a class="annotator-save">Save</a>
-      </button>
-      <a data-ng-click="$emit('cancel')" class="annotator-cancel">Cancel</a>
-      <a data-ng-click="$emit('reply')" data-ng-show="id" class="write">Reply</a>
+
+  <div class="nothread">
+    <div class="time" data-ng-bind="created" />
+
+    <div class="magicontrols">
+      <div class="go timestamp" data-ng-bind="created" />
+      <div class="vis-icon" title="Visibility" ng-show="vis" />
+      <div class="fave-icon" title="Favorite" ng-click="fave()" data-ng-class="{true:'grow checked', false:'show'}[fave]" />
+      <div class="show reply-icon" title="Reply" data-ng-click="reply()" />
+      <div class="show share-icon" title="Share" data-ng-click="share()" />
+      <div class="show dropdown" title="More Actions">
+        <div class="dropdown-toggle down-icon" role="button" data-toggle="dropdown" data-target="#" />
+        <ul class="dropdown-menu pull-right" role="menu" >
+          <li data-ng-click="edit()" data-ng-show="persona.username == user">Edit</li>
+          <li data-ng-click="delete()" data-ng-show="persona.username == user">Delete</li>
+          <li data-ng-click="flag()" data-ng-hide="persona.username == user">Flag</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 class="user" data-ng-bind="user" />
+    <div data-ng-bind-html="text" class="body" />
+    <div class="bottombar">
+
+    <div data-ng-class="bottombar">
+      <span data-ng-show="id && replyCount"
+            data-ng-pluralize=""
+            count="replyCount"
+            when="{ '0': ''
+                  , 'one': '1 reply'
+                  , 'other': '{} replies'
+                  }"
+            class="replycount" />
+
+      <ng:switch on="editable == true">
+        <div data-ng-switch-when="true" class="annotator-controls">
+          <button data-ng-click="save()" class="btn">
+            <a class="annotator-save">Save</a>
+          </button>
+          <a data-ng-click="cancel()" class="annotator-cancel">Cancel</a>
+        </div>
+      </ng:switch>
+
     </div>
   </div>
+
   <div class="thread">
     <ul class="annotator-listing">
       <li data-ng-include="'annotation.html'"

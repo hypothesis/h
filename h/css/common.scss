@@ -396,10 +396,20 @@ blockquote {
 
   .body {
     @include force-wrap;
+    & > *:first-child {
+      margin-top: 0;
+    }
+    & > *:last-child {
+      margin-bottom: 0;
+    }
   }
 
   .bottombar {
     @include pie-clearfix;
+  }
+
+  .replycount {
+    @include tertiarytext;
   }
 }
 
@@ -443,29 +453,52 @@ blockquote {
 
 
 
+//MAGICONTROLS////////////////////////////////
+.magicontrols {
+  position: absolute;
+  right: 0;
+
+  & > * {
+    @include transition(
+      color 0.1s ease-in-out .5s,
+      font-size .1s ease-in-out .5s,
+      margin .1s ease-in-out .5s,
+      opacity .1s ease-in-out .5s
+    );
+    @include tertiarytext;
+    float: left;
+    margin-left: .5em;
+  }
+
+  .show {
+    font-size: 0;
+    opacity: 0;
+  }
+
+  .annotation:hover & {
+    & > * {
+      font-size: 1em;
+    }
+
+    .go {
+      color: transparent;
+      font-size: 0;
+    }
+
+    .show {
+      opacity: 1;
+    }
+  }
+}
+
+
+
 //DETAIL////////////////////////////////
 //This is specific to the detail view.
 .detail {
-  .annotator-controls {
-    @include single-transition(opacity, .25s, ease-in-out);
-    opacity: 0;
-    position: absolute;
-    right: 0;
-    z-index: 1;
-  }
-
-  .replycount {
-    @include tertiarytext;
-  }
 
   .bottombar {
     margin-bottom: .25em;
-  }
-
-  &.hover {
-    & > .annotator-controls {
-      opacity: 1;
-    }
   }
 
   //These are all the changes needed to collapse thread objects.
@@ -491,6 +524,10 @@ blockquote {
       background-image: url("../images/plus_1.png");
     }
   }
+  // Things not shown in the detail view
+  .time {
+    display: none;
+  }
 }
 
 
@@ -501,6 +538,8 @@ blockquote {
   margin-bottom: 1em;
   position: relative;
   cursor: pointer;
+
+
 
   &:hover {
     @include smallshadow(2px, 3px, .1);
@@ -513,7 +552,7 @@ blockquote {
   }
 
   // Things not shown in the summary view
-  .annotator-controls, .bottombar, .excerpt, .thread {
+  .annotator-controls, .magicontrols, .bottombar, .excerpt, .thread {
     display: none;
   }
 }
