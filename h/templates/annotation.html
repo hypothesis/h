@@ -6,9 +6,10 @@
 
   <div class="nothread">
     <div class="time" data-ng-bind="created" />
+
     <div class="magicontrols">
       <div class="go timestamp" data-ng-bind="created" />
-      <div class="grow vis-icon" title="Visibility" ng-show="vis" />
+      <div class="vis-icon" title="Visibility" ng-show="vis" />
       <div class="fave-icon" title="Favorite" ng-click="fave()" data-ng-class="{true:'grow checked', false:'show'}[fave]" />
       <div class="show reply-icon" title="Reply" data-ng-click="reply()" />
       <div class="show share-icon" title="Share" data-ng-click="share()" />

@@ -457,36 +457,36 @@ blockquote {
 //MAGICONTROLS////////////////////////////////
 .magicontrols {
   position: absolute;
-  @include transition(right 0.1s ease-in-out .5s);
-  right: -.5em; //ADJUSTMENT BECAUSE OF BUG HAVING TO DO WITH FONT SIZE 0
+  right: 0;
+
   & > * {
-    display: inline-block;
-  }
-  .go {
-    @include transition(color 0.1s ease-in-out .5s);
+    @include transition(
+      color 0.1s ease-in-out .5s,
+      font-size .1s ease-in-out .5s,
+      margin .1s ease-in-out .5s,
+      opacity .1s ease-in-out .5s
+    );
     @include tertiarytext;
+    float: left;
+    margin-left: .5em;
   }
 
-  .grow, .show {
-    @include transition(font-size 0.1s ease-in-out .5s, opacity 0.1s ease-in-out .5s, margin 0.15s ease-in-out .5s);
-    margin: 0;
-  }
-
-  .grow {
-    @include tertiarytext;
-  }
   .show {
     font-size: 0;
     opacity: 0;
   }
-  .nothread:hover & {
-    right: 0;
+
+  .annotation:hover & {
+    & > * {
+      font-size: 1em;
+    }
+
     .go {
       color: transparent;
+      font-size: 0;
     }
-    .grow, .show {
-      margin-left: .5em;
-      font-size: 1em;
+
+    .show {
       opacity: 1;
     }
   }
