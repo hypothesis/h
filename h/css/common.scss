@@ -388,9 +388,6 @@ blockquote {
   }
 
   .time {
-    float: right;
-    display: inline-block;
-    line-height: 2em;
     @include tertiarytext;
   }
 
@@ -476,9 +473,14 @@ blockquote {
     opacity: 0;
   }
 
-  .nothread:hover & {
+  .detail .nothread:hover & {
     & > * {
       font-size: 1em;
+    }
+
+    .time {
+      opacity: 0;
+      text-size: 0;
     }
 
     .show {
@@ -546,7 +548,7 @@ blockquote {
   }
 
   // Things not shown in the summary view
-  .annotator-controls, .magicontrols, .bottombar, .excerpt, .thread {
+  .annotator-controls, .magicontrols .show, .bottombar, .excerpt, .thread {
     display: none;
   }
 }
