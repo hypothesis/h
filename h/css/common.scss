@@ -497,24 +497,29 @@ blockquote {
   }
 
   //These are all the changes needed to collapse thread objects.
-  .collapsed .nothread {
-    & > .body {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      -o-text-overflow: ellipsis;
-      white-space: nowrap;
-      font-style: italic;
-      margin-top: 0;
-      margin-bottom: 0;
+  .collapsed {
+    & > .nothread {
+      & > .body {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+        white-space: nowrap;
+        font-style: italic;
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      & > .user {
+        display: run-in;
+        margin-right: .25em;
+      }
     }
+
     & > .thread {
       @include single-transition(max-height, .4s, cubic-bezier(0, 1, 0, 1));
       max-height: 0;
     }
-    & > .user {
-      display: run-in;
-      margin-right: .25em;
-    }
+
     & > .threadexp {
       background-image: url("../images/plus_1.png");
     }
