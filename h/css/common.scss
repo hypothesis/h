@@ -476,7 +476,7 @@ blockquote {
     opacity: 0;
   }
 
-  .annotation:hover & {
+  .nothread:hover & {
     & > * {
       font-size: 1em;
     }
