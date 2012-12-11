@@ -475,7 +475,7 @@ blockquote {
     opacity: 0;
   }
 
-  .annotation:hover & {
+  .nothread:hover & {
     & > * {
       font-size: 1em;
     }
@@ -496,13 +496,12 @@ blockquote {
 //DETAIL////////////////////////////////
 //This is specific to the detail view.
 .detail {
-
   .bottombar {
     margin-bottom: .25em;
   }
 
   //These are all the changes needed to collapse thread objects.
-  .collapsed {
+  .collapsed .nothread {
     & > .body {
       overflow: hidden;
       text-overflow: ellipsis;
