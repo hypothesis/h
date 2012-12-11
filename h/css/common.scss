@@ -455,6 +455,7 @@ blockquote {
 
 //MAGICONTROLS////////////////////////////////
 .magicontrols {
+  background-color: $bodyBackground;
   position: absolute;
   right: 0;
 
@@ -478,11 +479,6 @@ blockquote {
   .nothread:hover & {
     & > * {
       font-size: 1em;
-    }
-
-    .go {
-      color: transparent;
-      font-size: 0;
     }
 
     .show {
@@ -522,10 +518,6 @@ blockquote {
     & > .threadexp {
       background-image: url("../images/plus_1.png");
     }
-  }
-  // Things not shown in the detail view
-  .time {
-    display: none;
   }
 }
 
