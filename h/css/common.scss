@@ -22,10 +22,14 @@ body {
 }
 
 p {
-  margin: 1em 0;
+  margin: 0 0 2em 0;
   -webkit-hyphens: auto;
      -moz-hyphens: auto;
           hyphens: auto;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 em { font-style: italic; }
@@ -393,12 +397,6 @@ blockquote {
 
   .body {
     @include force-wrap;
-    & > *:first-child {
-      margin-top: 0;
-    }
-    & > *:last-child {
-      margin-bottom: 0;
-    }
   }
 
   .bottombar {
