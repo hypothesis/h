@@ -243,17 +243,38 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   .tri {
-    @include icon("tri-left.png");
+    @include fonticon("\e00e", left);
+    color: rgba( 235, 235, 230, 0.1);
+    text-shadow: 
+      1px .5px 3px #fff, 
+      0 0 0 #666;
     float: left;
-    width: $baseLineHeight;
-    height: $baseLineHeight;
-    cursor: w-resize;
+    line-height: $baseLineHeight * .9;
+    font-size: $baseLineHeight * .9;
+    // cursor: w-resize;
+    &:before {
+      vertical-align: 0;  
+    }
+    &:hover {
+      color: rgba( 235, 235, 230, 0.1);
+    }
   }
 
   &.shown {
     .tri {
-      @include icon("tri-right.png");
-      margin-right: .7em;
+      @include fonticon("\e00d", left);
+      color: rgba( 235, 235, 230, 0.1);
+      text-shadow: 
+        1px .5px 3px #fff, 
+        0 0 0 #666;
+      line-height: $baseLineHeight * .9;
+      font-size: $baseLineHeight * .9;
+    }
+    &:before {
+      vertical-align: 0;  
+    }
+    &:hover {
+      color: rgba( 235, 235, 230, 0.1);
     }
   }
 }
