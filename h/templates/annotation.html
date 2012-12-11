@@ -9,8 +9,10 @@
 
     <div class="magicontrols">
       <div class="go timestamp" data-ng-bind="created" />
-      <div class="vis-icon" title="Visibility" ng-show="vis" />
-      <div class="fave-icon" title="Favorite" ng-click="fave()" data-ng-class="{true:'grow checked', false:'show'}[fave]" />
+      <div class="vis-icon" title="Visibility" data-ng-show="vis" />
+      <div class="fave-icon" title="Favorite"
+           data-ng-click="fave()"
+           data-ng-class="{true:'checked', false:'show'}[fave]" />
       <div class="show reply-icon" title="Reply" data-ng-click="reply()" />
       <div class="show share-icon" title="Share" data-ng-click="share()" />
       <div class="show dropdown" title="More Actions">
