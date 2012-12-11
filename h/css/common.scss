@@ -461,7 +461,7 @@ blockquote {
 
   & > * {
     @include transition(
-      color 0.1s ease-in-out .5s,
+      opacity 0.1s ease-in-out .5s,
       font-size .1s ease-in-out .5s,
       margin .1s ease-in-out .5s,
       opacity .1s ease-in-out .5s
@@ -482,7 +482,7 @@ blockquote {
     }
 
     .go {
-      color: transparent;
+      opacity: 0;
       font-size: 0;
     }
 
