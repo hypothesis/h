@@ -247,8 +247,8 @@ blockquote {
 
   &:before {
     color: rgba(150, 150, 150, .5);
-    content: "\201C";
-    font-family: "PT Serif";
+    content: "\23";
+    font-family: "icomoon";
     font-size: 6em;
     position: absolute;
     top: -.2em;
@@ -257,8 +257,8 @@ blockquote {
 
   &:after {
     color: rgba(150, 150, 150, .5);
-    content: "\201E";
-    font-family: "PT Serif";
+    content: "\24";
+    font-family: "icomoon";
     font-size: 5em;
     position: absolute;
     right: -.15em;
