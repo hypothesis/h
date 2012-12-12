@@ -39,23 +39,31 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   width: $heatmap-width;
 }
 
+
 .sliding-panels > li {
   @include single-transition(left, .4s);
-  padding-left: 1.5em;
+  background: url('../images/noise_1.png');
+  background-attachment: fixed;
+  overflow: scroll;
+  padding: 1em;
+  -webkit-overflow-scrolling: touch;
   position: absolute;
   height: 100%;
   width: 100%;
+  margin-left: 1em;
+  @include smallshadow(-2px);
 
-  & > * {
-    @include smallshadow(-2px);
-  }
-
-  &:first-of-type {
-    padding-left: 0;
+  &:first-child {
+    margin-left: 0;
+    @include box-shadow(none);
   }
 
   &.collapsed {
     left: 100%;
+  }
+
+  &.squished {
+    padding-left: .5em;
   }
 }
 

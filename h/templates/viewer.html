@@ -1,7 +1,7 @@
 <ul class="sliding-panels">
-  <li>
+  <li class="annotator-outer annotator-viewer" data-ng-class="detail && 'squished' || ''">
     <!-- Summary -->
-     <div class="annotator-outer annotator-viewer">
+     <!-- <div class="annotator-outer annotator-viewer"> -->
       <ul class="annotator-listing">
         <li data-ng-click="showDetail(annotation)"
             data-ng-include="'annotation.html'"
@@ -10,18 +10,18 @@
             class="paper summary">
         </li>
       </ul>
-    </div>
+<!--     </div> -->
   </li>
 
-  <li data-ng-class="!detail && 'collapsed' || ''">
+  <li class="annotator-outer annotator-viewer" data-ng-class="!detail && 'collapsed' || ''">
     <!-- Details -->
-    <div class="annotator-outer annotator-viewer">
+<!--     <div class="annotator-outer annotator-viewer"> -->
       <div data-ng-show="annotation.quote" class="paper excerpt">
         <blockquote data-ng-bind="annotation.quote" />
       </div>
       <div data-ng-include="'annotation.html'"
            data-ng-model="annotation"
            class="paper detail" />
-    </div>
+<!--     </div> -->
   </li>
 </ul>
