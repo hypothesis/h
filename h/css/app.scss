@@ -41,17 +41,18 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 .sliding-panels > li {
+  @include smallshadow(-2px);
   @include transition(transform .4s, left .4s, padding-left .3s cubic-bezier(0.95, 0.05, 0.795, 0.035));
   background: url('../images/noise_1.png');
   background-attachment: fixed;
+  margin-left: 1em;
   overflow: scroll;
-  padding: 1em;
   -webkit-overflow-scrolling: touch;
+  padding: 1em;
   position: absolute;
+
   height: 100%;
   width: 100%;
-  margin-left: 1em;
-  @include smallshadow(-2px);
   
   &:first-child {
     margin-left: 0;
