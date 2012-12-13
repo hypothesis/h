@@ -39,11 +39,7 @@ underscore = Bundle('h:lib/underscore-min.js')
 jquery = Bundle('deform:static/scripts/jquery-1.7.2.min.js')
 deform = Bundle(
     jquery,
-    Uglify(
-        'deform:static/scripts/jquery.form-3.09.js',
-        'deform:static/scripts/deform.js',
-        output='js/deform.min.js'
-    )
+    Uglify('deform:static/scripts/deform.js', output='js/deform.min.js'),
 )
 
 
