@@ -240,12 +240,21 @@ class Annotation
 
 
 class Editor
-  this.$inject = ['$routeParams', '$scope', 'annotator']
-  constructor: ($routeParams, $scope, annotator) ->
-    angular.extend $scope,
-      annotation: annotator.cache[$routeParams.hash.valueOf()]
-      editable: true
-    this
+  this.$inject = [
+    '$location', '$routeParams', '$scope',
+    'annotator'
+  ]
+  constructor: (
+    $location, $routeParams, $scope,
+    annotator
+  ) ->
+    $scope.$on 'cancel', ->
+      $location.url('/app').replace()
+      annotator.provider.onEditorHide()
+      annotator.hide()
+
+    $scope.$on 'save', ->
+      annotator.provider.onEditorSubmit()
 
 
 class Viewer
