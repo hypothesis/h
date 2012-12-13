@@ -218,7 +218,7 @@ $em: 14 / 1em !default;
 
 
 //FONTICON////////////////////////////////
-@mixin fonticon($char, $iconside: left) {
+@mixin fonticon($char, $iconside, $offset: 0) {
   text-decoration: none;
   cursor: pointer;
   color: $gray;
@@ -232,7 +232,7 @@ $em: 14 / 1em !default;
       vertical-align: -.1em;
       font-family: 'icomoon';
       font-style: normal;
-      // margin-right: .3em;
+      margin-right: $offset;
       speak: none;
       font-weight: normal;
     }
@@ -243,7 +243,7 @@ $em: 14 / 1em !default;
       vertical-align: -.1em;
       font-family: 'icomoon';
       font-style: normal;
-      // margin-left: .3em;
+      margin-left: $offset;
       speak: none;
       font-weight: normal;
     }

@@ -271,8 +271,8 @@ blockquote {
   @include smallshadow;
   background: $white;
   border: solid 1px $grayLighter;
-  border-top: 0;
   left: 0;
+  top: 2em;
   float: left;
   opacity: 0;
   pointer-events: none;
