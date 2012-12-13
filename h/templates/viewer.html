@@ -1,27 +1,59 @@
 <ul class="sliding-panels">
   <li>
-    <!-- Summary -->
+    <!-- Summaries -->
      <div class="annotator-outer annotator-viewer">
-      <ul class="annotator-listing">
-        <li data-ng-click="showDetail(annotation)"
-            data-ng-include="'annotation.html'"
-            data-ng-model="annotation"
+      <ul class="annotator-listing" data-ng-click="showDetail($event)">
+        <li data-ng-model="annotation"
             data-ng-repeat="annotation in annotations"
-            class="paper summary">
+            class="paper summary annotation">
+          <span data-ng-bind="annotation.created | fuzzyTime"
+                class="time" />
+          <h3 data-ng-bind="annotation.user | userName"
+              class="user" />
+          <div data-ng-bind-html="annotation.text | converter"
+               class="body" />
         </li>
       </ul>
     </div>
   </li>
 
-  <li data-ng-class="!detail && 'collapsed' || ''">
+  <li data-ng-class="!detail && 'collapsed' || ''" data-ng-switch="detail">
     <!-- Details -->
-    <div class="annotator-outer annotator-viewer">
-      <div data-ng-show="annotation.quote" class="paper excerpt">
-        <blockquote data-ng-bind="annotation.quote" />
+    <div data-ng-switch-when="true" class="annotator-outer annotator-viewer">
+      <!-- Excerpt -->
+      <div class="paper excerpt">
+        <blockquote data-ng-bind="thread.message.annotation.quote" />
       </div>
-      <div data-ng-include="'annotation.html'"
-           data-ng-model="annotation"
-           class="paper detail" />
+      <div data-recursive="" class="paper">
+        <!-- Thread view -->
+        <div class="thread">
+          <!-- Annotation -->
+          <div data-ng-model="thread.message.annotation"
+               class="detail annotation">
+            <span data-ng-bind="thread.message.annotation.created | fuzzyTime"
+                  class="time" />
+            <h3 data-ng-bind="thread.message.annotation.user | userName"
+                class="user" />
+            <div data-ng-bind-html="thread.message.annotation.text | converter"
+                 class="body" />
+          </div>
+
+          <!-- Reply count -->
+          <span data-ng-show="thread.children.length"
+                data-ng-pluralize=""
+                count="thread.flattenChildren().length"
+                when="{ 'one': '1 reply'
+                      , 'other': '{} replies'
+                      }"
+                class="reply-count" />
+
+          <!-- Replies -->
+          <ul class="annotator-listing">
+            <li data-ng-repeat="thread in thread.children"
+                data-ng-transclude="" />
+          </ul>
+        </div>
+      </div>
     </div>
   </li>
 </ul>

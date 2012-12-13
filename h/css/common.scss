@@ -393,6 +393,7 @@ blockquote {
 
   .time {
     @include tertiarytext;
+    float: right;
   }
 
   .body {
@@ -402,44 +403,53 @@ blockquote {
   .bottombar {
     @include pie-clearfix;
   }
-
-  .replycount {
-    @include tertiarytext;
-  }
 }
 
 
 //THREADING////////////////////////////////
 //Threaded discussion specific
 .thread {
-  @include single-transition(max-height, .4s, cubic-bezier(1, 0, 1, 0));
-  max-height: 65536px;
-  overflow: hidden;
-
-  margin-left: -($thread-padding / 2);
-  padding-left: $thread-padding;
+  position: relative;
 
   .annotator-listing {
-    border-left: 1px dotted $grayLight;
-    margin-left: -($thread-padding / 2);
-    padding-left: $thread-padding / 2;
+    @include single-transition(max-height, .4s, cubic-bezier(1, 0, 1, 0));
+    max-height: 65536px;
+    overflow: hidden;
+
+    padding-left: $thread-padding;
+    margin-left: -$thread-padding;
+
+    & > * {
+      border-left: 1px dotted $grayLight;
+    }
+  }
+
+  .thread {
     height: 100%;
+    padding-left: $thread-padding;
+
+    .threadexp {
+      display: inherit;
+    }
   }
 
   .threadexp {
+    display: none;
     height: $threadexp-width;
     width: $threadexp-width;
     position: absolute;
     top: .8em;
     left: -($threadexp-width / 2);
-    margin-left: -($thread-padding / 2);
     outline: 1px dotted #aaa;
     @include icon("minus_1.png");
   }
 
+  .reply-count {
+    @include tertiarytext;
+  }
+
   .annotation {
     padding-top: .35em;
-    padding-left: $thread-padding / 2;
     &.squished {
       padding-left: 0;
     }
@@ -476,11 +486,6 @@ blockquote {
       font-size: 1em;
     }
 
-    .time {
-      opacity: 0;
-      text-size: 0;
-    }
-
     .show {
       opacity: 1;
     }
@@ -498,8 +503,8 @@ blockquote {
 
   //These are all the changes needed to collapse thread objects.
   .collapsed {
-    & > .nothread {
-      & > .body {
+    &.annotation {
+      .body {
         overflow: hidden;
         text-overflow: ellipsis;
         -o-text-overflow: ellipsis;
@@ -509,13 +514,13 @@ blockquote {
         margin-bottom: 0;
       }
 
-      & > .user {
+      .user {
         display: run-in;
         margin-right: .25em;
       }
     }
 
-    & > .thread {
+    & > .annotator-listing {
       @include single-transition(max-height, .4s, cubic-bezier(0, 1, 0, 1));
       max-height: 0;
     }
@@ -546,7 +551,7 @@ blockquote {
   }
 
   // Things not shown in the summary view
-  .annotator-controls, .magicontrols .show, .bottombar, .excerpt, .thread {
+  .annotator-controls, .magicontrols .show, .bottombar, {
     display: none;
   }
 }

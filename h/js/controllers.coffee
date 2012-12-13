@@ -218,6 +218,27 @@ class App
       angular.extend $scope, data
 
 
+class Annotation
+  this.$inject = [
+    '$scope', '$route'
+    'annotator', 'threading',
+  ]
+  constructor: (
+    $scope, $route,
+    annotator, threading
+  ) ->
+    $scope.active = false
+    $scope.editable = false
+
+    $scope.$on 'cancel', ->
+    $scope.$on 'save', ->
+      console.log 'save'
+      #annotator.publish 'annotationCreated'
+
+    $scope.$on 'reply', ->
+      console.log 'reply'
+
+
 class Editor
   this.$inject = ['$routeParams', '$scope', 'annotator']
   constructor: ($routeParams, $scope, annotator) ->
@@ -236,11 +257,13 @@ class Viewer
     $location, $routeParams, $scope,
     annotator, threading
   ) ->
-    $scope.annotation = null
     $scope.annotations = []
+    $scope.thread = null
 
-    $scope.showDetail = (annotation) ->
-      $location.search('detail', annotation.id).replace()
+    $scope.showDetail = ($event) ->
+      $target = angular.element $event.target
+      annotation = $target.controller('ngModel')?.$modelValue
+      if annotation then $location.search('detail', annotation.id).replace()
 
     $scope.$on '$routeChangeSuccess', =>
       update = => $scope.$emit '$routeUpdate'
@@ -275,17 +298,20 @@ class Viewer
           $scope.annotations = []
 
     if $routeParams.detail?
-      thread = threading.getContainer $routeParams.detail
       $scope.detail = true
-      $scope.annotation = thread?.message.annotation
-      annotator.provider.setActiveHighlights [$scope.annotation.hash.valueOf()]
+      $scope.thread = threading.getContainer $routeParams.detail
+      annotator.provider.setActiveHighlights [
+        $scope.thread.message.annotation.hash.valueOf()
+      ]
     else
       $scope.detail = false
-      annotator.provider.setActiveHighlights $scope.annotations?.map (a) =>
+      $scope.thread = null
+      annotator.provider.setActiveHighlights $scope.annotations.map (a) =>
         a.hash.valueOf()
 
 
 angular.module('h.controllers', [])
   .controller('App', App)
+  .controller('Annotation', Annotation)
   .controller('Editor', Editor)
   .controller('Viewer', Viewer)

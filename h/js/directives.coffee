@@ -1,25 +1,31 @@
-annotation = [
-  '$compile', '$filter', 'threading',
-  ($compile, $filter, threading) ->
-    link: (scope, iElement, iAttrs, [annotation, model]) ->
-      angular.extend scope,
-        collapsed: false
-        editable: false
-        fave: false
+annotation = ->
+  compile: (tElement, tAttrs, transclude) ->
+    # adjust ng-model for isolate scope
+    if tAttrs.ngModel
+      tAttrs.$set 'model', tAttrs.ngModel, false
+      tAttrs.$set 'ngModel', 'model', false
+    angular.noop
+    # TODO: make the transclusion manual and run the filters on model change
+    # by hooking into the ngModel formatters. This avoids running expensive
+    # filters, such as the markdown converter, whenever the root scope is
+    # digested.
+  controller: 'Annotation'
+  priority: 100
+  require: '^ngModel'
+  restrict: 'C'
+  scope:
+    model: '='
+  templateUrl: 'annotation.html'
+  transclude: true
 
-      model.$render = ->
-        value = model.$viewValue
-        return unless value
-        angular.extend scope,
-          created: ($filter 'fuzzyTime') value.created
-          user: ($filter 'userName') value.user
-          thread: threading.getContainer value.id
-          text: ($filter 'converter') value.text
 
-      scope.$evalAsync -> model.$render()
-    restrict: 'C'
-    require: ['?annotation', '^ngModel']
-    scope: {}
+recursive = ['$compile', ($compile) ->
+  compile: (tElement, tAttrs) ->
+    linkRec = $compile tElement.contents().remove(), (scope, cloneAttachFn) ->
+      linkRec scope, cloneAttachFn
+    post: (scope, iElement, iAttrs, controller) ->
+      linkRec scope, (contents) -> iElement.append contents
+  restrict: 'A'
 ]
 
 
@@ -65,8 +71,7 @@ tabReveal = ['$parse', ($parse) ->
       scope.$watch iAttrs.ngModel, => scope.$evalAsync update
   require: ['ngModel', 'tabbable']
 ]
-
-
 angular.module('h.directives', ['ngSanitize', 'deform'])
   .directive('annotation', annotation)
+  .directive('recursive', recursive)
   .directive('tabReveal', tabReveal)

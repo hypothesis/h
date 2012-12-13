@@ -1,56 +1,32 @@
-<div data-ng-class="{ 'collapsed': collapsed
-                    , 'writer': editing
-                    }"
-     class="annotation">
-  <a data-ng-click="collapsed = !collapsed" class="threadexp" />
-
-  <div class="nothread">
-    <div class="magicontrols">
-      <div class="time" data-ng-bind="created" />
-      <div class="vis-icon" title="Visibility" data-ng-show="vis" />
-      <div class="fave-icon" title="Favorite"
-           data-ng-click="fave()"
-           data-ng-class="{true:'checked', false:'show'}[fave]" />
-      <div class="show reply-icon" title="Reply" data-ng-click="reply()" />
-      <div class="show share-icon" title="Share" data-ng-click="share()" />
-      <div class="show dropdown" title="More Actions">
-        <div class="dropdown-toggle down-icon" role="button" />
-        <ul class="dropdown-menu pull-right" role="menu">
-          <li data-ng-click="edit()">Edit</li>
-          <li data-ng-click="delete()">Delete</li>
-          <li data-ng-click="flag()">Flag</li>
-        </ul>
-      </div>
-    </div>
-
-    <h3 class="user" data-ng-bind="user" />
-    <div data-ng-bind-html="text" class="body" />
-    <div class="bottombar">
-      <span data-ng-show="thread.children.length"
-            data-ng-pluralize=""
-            count="thread.flattenChildren().length"
-            when="{ 'one': '1 reply'
-                  , 'other': '{} replies'
-                  }"
-            class="replycount" />
-
-      <ng:switch on="editable == true">
-        <div data-ng-switch-when="true" class="annotator-controls">
-          <button data-ng-click="save()" class="btn">
-            <a class="annotator-save">Save</a>
-          </button>
-          <a data-ng-click="cancel()" class="annotator-cancel">Cancel</a>
-        </div>
-      </ng:switch>
-
-    </div>
-  </div>
-
-  <div class="thread">
-    <ul class="annotator-listing">
-      <li data-ng-include="'annotation.html'"
-          data-ng-model="reply.message.annotation"
-          data-ng-repeat="reply in thread.children" />
+<!-- Top controls -->
+<div class="magicontrols">
+  <div class="vis-icon" title="Visibility"
+       data-ng-show="permissions.read.length" />
+  <div class="fave-icon show" title="Favorite"
+       data-ng-click="favorite()" />
+  <div class="show reply-icon" title="Reply"
+       data-ng-click="reply()" />
+  <div class="show share-icon" title="Share"
+       data-ng-click="share()" />
+  <div class="show dropdown" title="More Actions">
+    <div class="dropdown-toggle down-icon" role="button" />
+    <ul class="dropdown-menu pull-right" role="menu">
+      <li data-ng-click="edit()">Edit</li>
+      <li data-ng-click="delete()">Delete</li>
+      <li data-ng-click="flag()">Flag</li>
     </ul>
+  </div>
+</div>
+
+<!-- Transcluded body -->
+<div data-ng-transclude=""></div>
+
+<!-- Bottom controls -->
+<div class="bottombar">
+  <div class="annotator-controls">
+    <button data-ng-click="save()" class="btn">
+      <a class="annotator-save">Save</a>
+    </button>
+    <a data-ng-click="cancel()" class="annotator-cancel">Cancel</a>
   </div>
 </div>
