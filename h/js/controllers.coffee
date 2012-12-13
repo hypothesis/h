@@ -160,8 +160,9 @@ class App
         for oid of data.form
           $form = angular.element data.form[oid]
           if oid of $scope.forms
+            link = ($compile $form)
             $scope.forms[oid].replaceWith $form
-          ($compile $form) $scope
+            link $scope
           deform.focusFirstInput $form
 
     $scope.toggleShow = ->
