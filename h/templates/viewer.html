@@ -24,7 +24,7 @@
     <div class="paper excerpt">
       <blockquote data-ng-bind="thread.message.annotation.quote" />
     </div>
-    <div data-recursive="" class="paper">
+    <div data-recursive="" data-ng-switch-when="true" class="paper">
       <!-- Thread view -->
       <div class="thread">
         <!-- Annotation -->
