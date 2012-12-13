@@ -284,8 +284,6 @@ class Viewer
     $scope.$on '$routeUpdate', =>
       this.refresh $scope, $routeParams, annotator, threading
 
-    this
-
   refresh: ($scope, $routeParams, annotator, threading) =>
     if $routeParams.bucket?
       buckets = annotator.plugins.Heatmap.buckets
