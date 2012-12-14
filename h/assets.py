@@ -30,8 +30,11 @@ angular = Bundle('h:lib/angular.min.js', 'h:lib/angular-*.min.js')
 d3 = Bundle('h:lib/d3.v2.min.js')
 easyXDM = Bundle('h:lib/easyXDM.min.js')
 jwz = Bundle('h:lib/jwz.min.js')
-pagedown = Uglify('h:lib/Markdown.Converter.js')
-raf = Uglify('h:lib/polyfills/raf.js')
+pagedown = Uglify(
+    'h:lib/Markdown.Converter.js',
+    output='h:lib/Markdown.Converter.min.js'
+)
+raf = Uglify('h:lib/polyfills/raf.js', output='h:lib/polyfills/raf.js.min')
 underscore = Bundle('h:lib/underscore-min.js')
 
 
