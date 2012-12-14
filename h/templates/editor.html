@@ -1,6 +1,8 @@
-<div class="annotator-outer annotator-editor">
-  <div class="paper excerpt">
-    <blockquote data-ng-bind="annotation.quote" />
-  </div>
-  <div data-ng-include="'annotation.html'" class="paper" />
-</div>
+<ul class="sliding-panels">
+  <li class="annotator-outer annotator-editor">
+    <div class="paper excerpt">
+      <blockquote data-ng-bind="annotation.quote" />
+    </div>
+    <div data-ng-model="annotation" class="paper writer annotation" />
+  </li>
+</ul>

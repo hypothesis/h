@@ -219,35 +219,22 @@ class App
 
 
 class Annotation
-  this.$inject = [
-    '$scope', '$route'
-    'annotator', 'threading',
-  ]
-  constructor: (
-    $scope, $route,
-    annotator, threading
-  ) ->
-    $scope.active = false
-    $scope.editable = false
-
+  this.$inject = ['$scope', 'annotator']
+  constructor: ($scope, annotator) ->
     $scope.$on 'cancel', ->
+      console.log 'cancel'
+
     $scope.$on 'save', ->
       console.log 'save'
-      #annotator.publish 'annotationCreated'
 
     $scope.$on 'reply', ->
       console.log 'reply'
 
 
 class Editor
-  this.$inject = [
-    '$location', '$routeParams', '$scope',
-    'annotator'
-  ]
-  constructor: (
-    $location, $routeParams, $scope,
-    annotator
-  ) ->
+  this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
+  constructor: ($location, $routeParams, $scope, annotator) ->
+    $scope.annotation = annotator.cache[$routeParams.hash]
     $scope.$on 'cancel', ->
       $location.url('/app').replace()
       annotator.provider.onEditorHide()

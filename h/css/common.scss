@@ -389,6 +389,11 @@ blockquote {
   .bottombar {
     @include pie-clearfix;
   }
+
+  .tip {
+    @include tertiarytext;
+    float: right;
+  }
 }
 
 

@@ -1,26 +1,36 @@
 annotation = ['$filter', ($filter) ->
   compile: (tElement, tAttrs, transclude) ->
-    # adjust ng-model for isolate scope
+    # Adjust the ngModel directive to use the isolate scope binding.
+    # The expression will be bound in the isolate as '$modelValue'.
     if tAttrs.ngModel
-      tAttrs.$set 'model', tAttrs.ngModel, false
-      tAttrs.$set 'ngModel', 'model', false
+      tAttrs.$set '$modelValue', tAttrs.ngModel, false
+      tAttrs.$set 'ngModel', '$modelValue', false
+
     post: (scope, iElement, iAttrs, controller) ->
+      # Publish the controller
+      scope.model = controller
+
+      # Format the annotation for display
       controller.$formatters.push (value) ->
         return unless angular.isObject value
         angular.extend {}, value,
-          text: ($filter 'converter') value.text
+          text: ($filter 'converter') (value.text or '')
           created: ($filter 'fuzzyTime') value.created
           updated: ($filter 'fuzzyTime') value.updated
           user: ($filter 'userName') value.user
 
-      controller.$render = ->
-        scope.$viewValue = controller.$viewValue
+      # Update the annotation with text from the view
+      controller.$parsers.push (value) ->
+        if value.text != scope.$modelValue.text
+          angular.extend {}, scope.$modelValue, text: scope.$modelValue.text
+        else
+          scope.$modelValue
   controller: 'AnnotationController'
-  priority: 100
+  priority: 100  # Must run before ngModel
   require: '^ngModel'
   restrict: 'C'
   scope:
-    model: '='
+    $modelValue: '='
   templateUrl: 'annotation.html'
 ]
 
@@ -77,7 +87,28 @@ tabReveal = ['$parse', ($parse) ->
       scope.$watch iAttrs.ngModel, => scope.$evalAsync update
   require: ['ngModel', 'tabbable']
 ]
+
+
+
+writer = ['$filter', ($filter) ->
+  compile: (tElement, tAttrs, transclude) ->
+    post: (scope, iElement, iAttrs, [annotation, controller]) ->
+      scope.editing = true
+
+      scope.$watch 'editText', (newValue) ->
+        if scope.form.$valid
+          controller.$viewValue.text = scope.editText
+          controller.$setViewValue controller.$viewValue
+          scope.previewText = ($filter 'converter') scope.editText
+        else
+          scope.previewText = ''
+  require: ['annotation', '^ngModel']
+  restrict: 'C'
+]
+
+
 angular.module('h.directives', ['ngSanitize', 'deform'])
   .directive('annotation', annotation)
   .directive('recursive', recursive)
   .directive('tabReveal', tabReveal)
+  .directive('writer', writer)

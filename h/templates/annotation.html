@@ -19,15 +19,33 @@
   </div>
 </div>
 
-<h3 data-ng-bind="$viewValue.user" class="user" />
-<div data-ng-bind-html="$viewValue.text" class="body" />
+<h3 data-ng-bind="model.$viewValue.user" class="user" />
+<form data-ng-show="editing" name="form">
+  <textarea data-ng-model="editText"
+            class="body"
+            name="text"
+            required="" />
+  <div class="tip">
+    <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a>
+    is supported.
+  </div>
+</form>
+<div data-ng-bind-html="model.$viewValue.text"
+     data-ng-hide="editing"
+     class="body" />
 
 <!-- Bottom controls -->
 <div class="bottombar">
-  <div class="annotator-controls">
+  <div data-ng-show="editing" class="annotator-controls">
     <button data-ng-click="save()" class="btn">
       <a class="annotator-save">Save</a>
     </button>
     <a data-ng-click="cancel()" class="annotator-cancel">Cancel</a>
   </div>
+</div>
+
+<!-- Editing preview -->
+<div data-ng-show="editing && editText" class="preview">
+  <h4>Preview</h4>
+  <div data-ng-bind-html="previewText" class="body" />
 </div>
