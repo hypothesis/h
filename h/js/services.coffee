@@ -12,23 +12,18 @@ class Hypothesis extends Annotator
 
   # Internal state
   detail: false      # * Whether the viewer shows a summary or detail listing
-  cache: null        # * Annotation cache
   visible: false     # * Whether the sidebar is visible
   unsaved_drafts: [] # * Unsaved drafts currenty open
 
   this.$inject = [
-    '$cacheFactory', '$document', '$location', '$rootScope',
+    '$document', '$location', '$rootScope',
     'threading'
   ]
   constructor: (
-    $cacheFactory, $document, $location, $rootScope,
+    $document, $location, $rootScope,
     threading
   ) ->
     super ($document.find 'body')
-
-    # Prepare a cache of loaded annotations
-    @cache = $cacheFactory 'annotations'
-
     # Load plugins
     for own name, opts of @options
       if not @plugins[name] and name of Annotator.Plugin
@@ -38,6 +33,17 @@ class Hypothesis extends Annotator
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.user = @plugins.HypothesisPermissions.options.userId(
         @plugins.HypothesisPermissions.user)
+
+    # Thread the annotations after loading
+    this.subscribe 'annotationsLoaded', (annotations) ->
+      threading.thread annotations.map (a) ->
+        annotation: a
+        id: a.id
+        references: a.thread?.split('/')
+
+    # Update the thread when an annotation changes
+    this.subscribe 'annotationUpdated', (annotation) ->
+      (threading.getContainer annotation.id).message.annotation = annotation
 
     # Establish cross-domain communication to the widget host
     @provider = new easyXDM.Rpc
@@ -52,17 +58,20 @@ class Hypothesis extends Annotator
               limit: 1000
               uri: href
             prefix: '/api/current'
+
           # When the store plugin finishes a request, update the annotation
-          # using a monkey-patched update function which updates the cache
+          # using a monkey-patched update function which updates the threading
           # if the annotation has a newly-assigned id and ensures that the id
           # is enumerable.
           this.plugins.Store.updateAnnotation = (annotation, data) =>
             if annotation.id and annotation.id != data.id
-              @cache.remove annotation.id
-            @cache.put annotation.id, annotation
-            delete (threading.getContainer annotation.id).message
+              # Remove the old annotation from the threading
+              delete (threading.getContainer annotation.id).message
 
+            # Update the annotation with the new data
             annotation = angular.extend annotation, data
+
+            # Update the thread
             (threading.getContainer data.id).message =
               annotation: annotation
               id: annotation.id
@@ -90,7 +99,11 @@ class Hypothesis extends Annotator
         createAnnotation: =>
           if @plugins.HypothesisPermissions.user?
             annotation = this.createAnnotation()
-            @cache.put annotation.id, annotation
+            thread = (threading.getContainer annotation.id)
+            thread.message =
+              annotation: annotation
+              id: annotation.id
+              references: []
             annotation.id
           else
             $rootScope.$apply => $rootScope.$broadcast 'showAuth'
@@ -98,8 +111,15 @@ class Hypothesis extends Annotator
             null
         showEditor: (annotation) =>
           return unless this._canCloseUnsaved()
-          annotation = angular.extend (@cache.get annotation.id), annotation
-          this.showEditor annotation
+          thread = (threading.getContainer annotation.id)
+          if thread.message?.annotation
+            angular.extend thread.message.annotation, annotation
+          else
+            thread.message =
+              annotation: annotation
+              id: annotation.id
+              references: annotation.thread?.split('/')
+          this.showEditor thread.message.annotation
         # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
         back: =>
@@ -246,7 +266,6 @@ class Hypothesis extends Annotator
     if annotation.thread
       annotation.ranges = []
 
-    @cache.put annotation.id, annotation
     @provider.setupAnnotation
       id: annotation.id
       ranges: annotation.ranges

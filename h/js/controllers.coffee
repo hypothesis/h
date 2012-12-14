@@ -11,16 +11,6 @@ class App
     heatmap = annotator.plugins.Heatmap
     heatmap.element.appendTo $element
 
-    # Thread the annotations after loading
-    annotator.subscribe 'annotationsLoaded', (annotations) ->
-      threading.thread annotations.map (a) ->
-          m = mail.message(null, a.id, a.thread?.split('/') or [])
-          m.annotation = a
-          m
-
-    annotator.subscribe 'annotationUpdated', (annotation) ->
-      (threading.getContainer annotation.id).message.annotation = annotation
-
     # Update the heatmap when certain events are pubished
     events = [
       'annotationCreated'
@@ -34,7 +24,8 @@ class App
         provider.getHighlights ({highlights, offset}) =>
           heatmap.updateHeatmap
             highlights: highlights.map (hl) =>
-              hl.data = annotator.cache.get hl.data.id
+              thread = (threading.getContainer hl.data.id)
+              hl.data = thread.message?.annotation
               hl
             offset: offset
 
@@ -240,12 +231,19 @@ class Annotation
 
 
 class Editor
-  this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
-  constructor: ($location, $routeParams, $scope, annotator) ->
+  this.$inject = [
+    '$location', '$routeParams', '$scope',
+    'annotator', 'threading'
+  ]
+  constructor: (
+    $location, $routeParams, $scope,
+    annotator, threading
+  ) ->
     annotator.subscribe 'annotationCreated', annotator.provider.onEditorHide
     annotator.subscribe 'annotationDeleted', annotator.provider.onEditorHide
 
-    $scope.annotation = annotator.cache.get $routeParams.id
+    thread = (threading.getContainer $routeParams.id)
+    $scope.annotation = thread.message?.annotation
 
     $scope.$on '$destroy', ->
       annotator.unsubscribe 'annotationCreated',
