@@ -101,7 +101,7 @@ writer = ['$filter', ($filter) ->
         if scope.form.$valid
           controller.$viewValue.text = scope.editText
           controller.$setViewValue controller.$viewValue
-          scope.previewText = ($filter 'converter') scope.editText
+          #scope.previewText = ($filter 'converter') scope.editText
         else
           scope.previewText = ''
   require: ['annotation', '^ngModel']
