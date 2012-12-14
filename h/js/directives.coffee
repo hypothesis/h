@@ -17,9 +17,6 @@ annotation = ['$filter', ($filter) ->
         return unless angular.isObject value
         angular.extend {}, value,
           text: ($filter 'converter') (value.text or '')
-          created: ($filter 'fuzzyTime') value.created
-          updated: ($filter 'fuzzyTime') value.updated
-          user: ($filter 'userName') value.user
 
       # Update the annotation with text from the view
       controller.$parsers.push (value) ->

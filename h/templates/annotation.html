@@ -1,6 +1,6 @@
 <!-- Top controls -->
 <div class="magicontrols">
-  <span data-ng-bind="model.$viewValue.created" class="time" />
+  <span data-ng-bind="model.$viewValue.created | fuzzyTime" class="time" />
   <div class="vis-icon" title="Visibility"
        data-ng-show="model.$viewValue.permissions.read.length" />
   <div class="fave-icon show" title="Favorite"
@@ -19,7 +19,7 @@
   </div>
 </div>
 
-<h3 data-ng-bind="model.$viewValue.user" class="user" />
+<h3 data-ng-bind="model.$viewValue.user | userName" class="user" />
 <form data-ng-show="editing" name="form">
   <textarea data-ng-model="editText"
             class="body"
