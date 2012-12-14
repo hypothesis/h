@@ -7,6 +7,8 @@ annotation = ['$filter', ($filter) ->
       tAttrs.$set 'ngModel', '$modelValue', false
 
     post: (scope, iElement, iAttrs, controller) ->
+      return unless controller
+
       # Publish the controller
       scope.model = controller
 
@@ -27,7 +29,7 @@ annotation = ['$filter', ($filter) ->
           scope.$modelValue
   controller: 'AnnotationController'
   priority: 100  # Must run before ngModel
-  require: '^ngModel'
+  require: '?ngModel'
   restrict: 'C'
   scope:
     $modelValue: '='
