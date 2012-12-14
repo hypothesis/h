@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
-  <body data-ng-app="h" data-ng-controller="App" metal:fill-slot="body">
+  <body data-ng-app="h"
+        data-ng-controller="AppController"
+        metal:fill-slot="body">
     <div id="toolbar" class="form-inline">
       <div data-ng-click="toggleShow()" class="tri"></div>
       <div class="tinyman">

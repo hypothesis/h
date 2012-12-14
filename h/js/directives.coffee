@@ -15,7 +15,7 @@ annotation = ['$filter', ($filter) ->
 
       controller.$render = ->
         scope.$viewValue = controller.$viewValue
-  controller: 'Annotation'
+  controller: 'AnnotationController'
   priority: 100
   require: '^ngModel'
   restrict: 'C'

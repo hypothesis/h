@@ -10,10 +10,10 @@ imports = [
 
 configure = ($routeProvider) ->
   $routeProvider.when '/editor',
-    controller: 'Editor'
+    controller: 'EditorController'
     templateUrl: 'editor.html'
   $routeProvider.when '/viewer',
-    controller: 'Viewer'
+    controller: 'ViewerController'
     reloadOnSearch: false
     templateUrl: 'viewer.html'
 configure.$inject = ['$routeProvider']

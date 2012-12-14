@@ -318,7 +318,7 @@ class Viewer
 
 
 angular.module('h.controllers', [])
-  .controller('App', App)
-  .controller('Annotation', Annotation)
-  .controller('Editor', Editor)
-  .controller('Viewer', Viewer)
+  .controller('AppController', App)
+  .controller('AnnotationController', Annotation)
+  .controller('EditorController', Editor)
+  .controller('ViewerController', Viewer)
