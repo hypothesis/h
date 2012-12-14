@@ -1,8 +1,8 @@
 <!-- Top controls -->
 <div class="magicontrols">
-  <span data-ng-bind="$viewValue.created" class="time" />
+  <span data-ng-bind="model.$viewValue.created" class="time" />
   <div class="vis-icon" title="Visibility"
-       data-ng-show="permissions.read.length" />
+       data-ng-show="model.$viewValue.permissions.read.length" />
   <div class="fave-icon show" title="Favorite"
        data-ng-click="favorite()" />
   <div class="show reply-icon" title="Reply"
