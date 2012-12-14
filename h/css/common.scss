@@ -380,7 +380,6 @@ blockquote {
 
   .time {
     @include tertiarytext;
-    float: right;
   }
 
   .body {
@@ -448,8 +447,7 @@ blockquote {
 //MAGICONTROLS////////////////////////////////
 .magicontrols {
   background-color: $bodyBackground;
-  position: absolute;
-  right: 0;
+  float: right;
 
   & > * {
     @include transition(
@@ -468,13 +466,18 @@ blockquote {
     opacity: 0;
   }
 
-  .detail .nothread:hover & {
+  .detail.annotation:hover & {
     & > * {
       font-size: 1em;
     }
 
     .show {
       opacity: 1;
+    }
+
+    .time {
+      opacity: 0;
+      text-size: 0;
     }
   }
 }
