@@ -74,10 +74,21 @@ class Hypothesis extends Annotator
         dragFrame: {}
         getHighlights: {}
         setActiveHighlights: {}
+        getHref: {}
         getMaxBottom: {}
         scrollTop: {}
 
   _initialize: =>
+    # Get the location of the annotated document
+    @provider.getHref (href) =>
+      this.addPlugin 'Store',
+        annotationData:
+          uri: href
+        loadFromSearch:
+          limit: 1000
+          uri: href
+        prefix: '/api/current'
+
     @provider.getMaxBottom (max) =>
       @element.find('#toolbar').css("top", "#{max}px")
       @element.find('#gutter').css("margin-top", "#{max}px")

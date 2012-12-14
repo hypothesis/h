@@ -98,6 +98,13 @@ class Annotator.Host extends Annotator
               $(this).addClass('annotator-hl-active')
             else if not $(this).hasClass('annotator-hl-temporary')
               $(this).removeClass('annotator-hl-active')
+        getHref: =>
+          uri = document.location.href
+          if document.location.hash
+            uri = uri.slice 0, (-1 * location.hash.length)
+          $('meta[property^="og:url"]').each -> uri = this.content
+          $('link[rel^="canonical"]').each -> uri = this.href
+          return uri
         getMaxBottom: =>
           sel = '*' + (":not(.annotator-#{x})" for x in [
             'adder', 'outer', 'notice', 'filter', 'frame'
