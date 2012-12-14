@@ -11,13 +11,12 @@
 
   <!-- Details -->
   <li data-ng-class="!detail && 'collapsed' || ''"
-      data-ng-switch="detail"
       class="annotator-outer annotator-viewer collapsed">
     <!-- Excerpt -->
     <div class="paper excerpt">
       <blockquote data-ng-bind="thread.message.annotation.quote" />
     </div>
-    <div data-recursive="" data-ng-switch-when="true" class="paper">
+    <div data-recursive="" class="paper">
       <!-- Thread view -->
       <div class="thread">
         <!-- Annotation -->
