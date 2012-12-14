@@ -310,8 +310,6 @@ class Hypothesis extends Annotator
       annotation.id
 
 
-
-
 angular.module('h.services', [])
   .service('annotator', Hypothesis)
   .value('threading', mail.messageThread())
