@@ -48,10 +48,9 @@ class Annotator.Host extends Annotator
       container: @wrapper[0]
       local: options.local
       onReady: () ->
-        # Outside this closure, `this`, as it refers to the `easyXDM.Rpc`
-        # object, is hidden, private to the `Rpc` object. Here, exploit access
+        # easyXDM updates this configuration object which provides access
         # to the `props` attribute to find the value of the iframe's src
-        # attribute to be sure it is the iframe created by easyXDM.
+        # attribute to find the iframe created by easyXDM.
         frame = $(this.container).find('[src^="'+@props.src+'"]')
           .css('visibility', 'visible')
         # Export the iframe element via the private `annotator` variable,
