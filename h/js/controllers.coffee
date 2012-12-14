@@ -12,11 +12,14 @@ class App
     heatmap.element.appendTo $element
 
     # Thread the annotations after loading
-    annotator.subscribe 'annotationsLoaded', (annotations) =>
-      threading.thread annotations.map (a) =>
+    annotator.subscribe 'annotationsLoaded', (annotations) ->
+      threading.thread annotations.map (a) ->
           m = mail.message(null, a.id, a.thread?.split('/') or [])
           m.annotation = a
           m
+
+    annotator.subscribe 'annotationUpdated', (annotation) ->
+      (threading.getContainer annotation.id).message.annotation = annotation
 
     # Update the heatmap when certain events are pubished
     events = [
@@ -31,7 +34,7 @@ class App
         provider.getHighlights ({highlights, offset}) =>
           heatmap.updateHeatmap
             highlights: highlights.map (hl) =>
-              hl.data = annotator.cache[hl.data]
+              hl.data = annotator.cache.get hl.data.id
               hl
             offset: offset
 
@@ -75,15 +78,14 @@ class App
         .on 'mousemove', (bucket) =>
           unless $location.path() == '/viewer' and $location.search()?.detail?
             provider.setActiveHighlights heatmap.buckets[bucket]?.map (a) =>
-              a.hash.valueOf()
+              a.id
 
         # Gets rid of them after
         .on 'mouseout', =>
           if $location.path() == '/viewer'
             unless $location.search()?.detail?
               bucket = heatmap.buckets[$location.search()?.bucket]
-              provider.setActiveHighlights bucket?.map (a) =>
-                a.hash.valueOf()
+              provider.setActiveHighlights bucket?.map (a) => a.id
           else
             provider.setActiveHighlights null
 
@@ -221,27 +223,35 @@ class App
 class Annotation
   this.$inject = ['$scope', 'annotator']
   constructor: ($scope, annotator) ->
-    $scope.$on 'cancel', ->
+    $scope.editing = false
+
+    $scope.cancel = ->
       console.log 'cancel'
 
-    $scope.$on 'save', ->
-      console.log 'save'
+    $scope.save = ->
+      $scope.editing = false
+      if $scope.edited
+        annotator.publish 'annotationUpdated', $scope.$modelValue
+      else
+        annotator.publish 'annotationCreated', $scope.$modelValue
 
-    $scope.$on 'reply', ->
+    $scope.reply = ->
       console.log 'reply'
 
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
   constructor: ($location, $routeParams, $scope, annotator) ->
-    $scope.annotation = annotator.cache[$routeParams.hash]
-    $scope.$on 'cancel', ->
-      $location.url('/app').replace()
-      annotator.provider.onEditorHide()
-      annotator.hide()
+    annotator.subscribe 'annotationCreated', annotator.provider.onEditorHide
+    annotator.subscribe 'annotationDeleted', annotator.provider.onEditorHide
 
-    $scope.$on 'save', ->
-      annotator.provider.onEditorSubmit()
+    $scope.annotation = annotator.cache.get $routeParams.id
+
+    $scope.$on '$destroy', ->
+      annotator.unsubscribe 'annotationCreated',
+        annotator.provider.onEditorHide
+      annotator.unsubscribe 'annotationDeleted',
+        annotator.provider.onEditorHide
 
 
 class Viewer
@@ -295,13 +305,12 @@ class Viewer
       $scope.detail = true
       $scope.thread = threading.getContainer $routeParams.detail
       annotator.provider.setActiveHighlights [
-        $scope.thread.message.annotation.hash.valueOf()
+        $scope.thread.message.annotation.id
       ]
     else
       $scope.detail = false
       $scope.thread = null
-      annotator.provider.setActiveHighlights $scope.annotations.map (a) =>
-        a.hash.valueOf()
+      annotator.provider.setActiveHighlights $scope.annotations.map (a) => a.id
 
 
 angular.module('h.controllers', [])

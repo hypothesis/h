@@ -12,15 +12,21 @@ class Hypothesis extends Annotator
 
   # Internal state
   detail: false      # * Whether the viewer shows a summary or detail listing
-  hash: -1           # * cheap UUID :cake:
   cache: null        # * Annotation cache
   visible: false     # * Whether the sidebar is visible
   unsaved_drafts: [] # * Unsaved drafts currenty open
 
-  this.$inject = ['$cacheFactory', '$document', '$location', '$rootScope']
-  constructor: ($cacheFactory, $document, $location, $rootScope) ->
+  this.$inject = [
+    '$cacheFactory', '$document', '$location', '$rootScope',
+    'threading'
+  ]
+  constructor: (
+    $cacheFactory, $document, $location, $rootScope,
+    threading
+  ) ->
     super ($document.find 'body')
 
+    # Prepare a cache of loaded annotations
     @cache = $cacheFactory 'annotations'
 
     # Load plugins
@@ -28,33 +34,71 @@ class Hypothesis extends Annotator
       if not @plugins[name] and name of Annotator.Plugin
         this.addPlugin(name, opts)
 
+    # Add user info to new annotations
+    this.subscribe 'beforeAnnotationCreated', (annotation) =>
+      annotation.user = @plugins.HypothesisPermissions.options.userId(
+        @plugins.HypothesisPermissions.user)
+
     # Establish cross-domain communication to the widget host
     @provider = new easyXDM.Rpc
       swf: @options.swf
-      onReady: this._initialize
+      onReady: =>
+        # Get the location of the annotated document
+        @provider.getHref (href) =>
+          this.addPlugin 'Store',
+            annotationData:
+              uri: href
+            loadFromSearch:
+              limit: 1000
+              uri: href
+            prefix: '/api/current'
+          # When the store plugin finishes a request, update the annotation
+          # using a monkey-patched update function which updates the cache
+          # if the annotation has a newly-assigned id and ensures that the id
+          # is enumerable.
+          this.plugins.Store.updateAnnotation = (annotation, data) =>
+            if annotation.id and annotation.id != data.id
+              @cache.remove annotation.id
+            @cache.put annotation.id, annotation
+            delete (threading.getContainer annotation.id).message
+
+            annotation = angular.extend annotation, data
+            (threading.getContainer data.id).message =
+              annotation: annotation
+              id: annotation.id
+              references: annotation.thread?.split('/') or []
+
+            @provider.loadAnnotations [
+              id: annotation.id
+              ranges: annotation.ranges
+              quote: annotation.quote
+            ]
+
+            Object.defineProperty annotation, 'id',
+              enumerable: true
+
+        @provider.getMaxBottom (max) =>
+          @element.find('#toolbar').css("top", "#{max}px")
+          @element.find('#gutter').css("margin-top", "#{max}px")
+          @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
+
+        this.publish 'hostUpdated'
     ,
       local:
-        publish: (event, args, k, fk) =>
-          if event in ['annotationCreated']
-            [h] = args
-            annotation = @cache[h]
-            this.publish event, [annotation]
+        publish: (args..., k, fk) => this.publish args...
         addPlugin: => this.addPlugin arguments...
         createAnnotation: =>
           if @plugins.HypothesisPermissions.user?
-            @cache[h = ++@hash] = this.createAnnotation()
-            h
+            annotation = this.createAnnotation()
+            @cache.put annotation.id, annotation
+            annotation.id
           else
             $rootScope.$apply => $rootScope.$broadcast 'showAuth'
             this.show()
             null
-        showEditor: (stub) =>
+        showEditor: (annotation) =>
           return unless this._canCloseUnsaved()
-          h = stub.hash
-          annotation = $.extend @cache[h], stub,
-            hash:
-              toJSON: => undefined
-              valueOf: => h
+          annotation = angular.extend (@cache.get annotation.id), annotation
           this.showEditor annotation
         # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
@@ -67,6 +111,7 @@ class Hypothesis extends Annotator
       remote:
         publish: {}
         setupAnnotation: {}
+        loadAnnotations: {}
         onEditorHide: {}
         onEditorSubmit: {}
         showFrame: {}
@@ -77,29 +122,6 @@ class Hypothesis extends Annotator
         getHref: {}
         getMaxBottom: {}
         scrollTop: {}
-
-  _initialize: =>
-    # Get the location of the annotated document
-    @provider.getHref (href) =>
-      this.addPlugin 'Store',
-        annotationData:
-          uri: href
-        loadFromSearch:
-          limit: 1000
-          uri: href
-        prefix: '/api/current'
-
-    @provider.getMaxBottom (max) =>
-      @element.find('#toolbar').css("top", "#{max}px")
-      @element.find('#gutter').css("margin-top", "#{max}px")
-      @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
-
-    this.subscribe 'beforeAnnotationCreated', (annotation) =>
-      annotation.created = annotation.updated = (new Date()).toString()
-      annotation.user = @plugins.HypothesisPermissions.options.userId(
-        @plugins.HypothesisPermissions.user)
-
-    this.publish 'hostUpdated'
 
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
@@ -183,6 +205,20 @@ class Hypothesis extends Annotator
     @unsaved_drafts.push editor
     editor
 
+  createAnnotation: ->
+    annotation = super
+
+    # Assign temporary ids to newly created annotations. It is temporary
+    # by virtue of not being serialized (non-enumerable) and clobbered
+    # later, after saving. Use a base64 encoding the JSON representation.
+    Object.defineProperty annotation, 'id',
+      configurable: true
+      enumerable: false
+      writable: true
+      value: window.btoa (JSON.stringify annotation)
+
+    annotation
+
   # Public: Initialises an annotation either from an object representation or
   # an annotation created with Annotator#createAnnotation(). It finds the
   # selected range and higlights the selection in the DOM.
@@ -210,15 +246,10 @@ class Hypothesis extends Annotator
     if annotation.thread
       annotation.ranges = []
 
-    if not annotation.hash
-      @cache[h = ++@hash] = $.extend annotation,
-        hash:
-          toJSON: => undefined
-          valueOf: => h
-    stub =
-      hash: annotation.hash.valueOf()
+    @cache.put annotation.id, annotation
+    @provider.setupAnnotation
+      id: annotation.id
       ranges: annotation.ranges
-    @provider.setupAnnotation stub
 
   showViewer: (annotations=[], detail=false) =>
     if (@visible and not detail) or @unsaved_drafts.indexOf(@editor) > -1
@@ -233,7 +264,7 @@ class Hypothesis extends Annotator
         $rootScope.$apply =>
           $location.path('/editor')
             .search
-              hash: annotation.hash.valueOf()
+              id: annotation.id
             .replace()
     ]
     this.show()

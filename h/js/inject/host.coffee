@@ -66,6 +66,7 @@ class Annotator.Host extends Annotator
       local:
         publish: (args..., k, fk) => this.publish args...
         setupAnnotation: => this.setupAnnotation arguments...
+        loadAnnotations: => this.loadAnnotations arguments...
         onEditorHide: this.onEditorHide
         onEditorSubmit: this.onEditorSubmit
         showFrame: =>
@@ -88,13 +89,13 @@ class Annotator.Host extends Annotator
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
             height: $(this).outerHeight(true)
-            data: $(this).data('annotation').hash
+            data: $(this).data('annotation')
           .get()
           offset: $(window).scrollTop()
-        setActiveHighlights: (hashes=[]) =>
+        setActiveHighlights: (ids=[]) =>
           @wrapper.find('.annotator-hl')
           .each ->
-            if $(this).data('annotation').hash in hashes
+            if $(this).data('annotation').id in ids
               $(this).addClass('annotator-hl-active')
             else if not $(this).hasClass('annotator-hl-temporary')
               $(this).removeClass('annotator-hl-active')
@@ -133,12 +134,6 @@ class Annotator.Host extends Annotator
         showEditor: {}
         back: {}
         update: {}
-
-  publish: (event, args) ->
-    if event in ['annotationCreated']
-      [annotation] = args
-      @consumer.publish event, [annotation.hash]
-    super arguments...
 
   _setupWrapper: ->
     @wrapper = @element
@@ -206,6 +201,17 @@ class Annotator.Host extends Annotator
   _setupEditor: ->
     true
 
+  setupAnnotation: (annotation) ->
+    annotation = super
+
+    # Highlights are jQuery collections which have a circular references to the
+    # annotation via data stored with `.data()`. Therefore, reconfigure the
+    # property to hide them from serialization.
+    Object.defineProperty annotation, 'highlights',
+      enumerable: false
+
+    annotation
+
   dragRefresh: =>
     d = @drag.delta
     @drag.delta = 0
@@ -222,20 +228,16 @@ class Annotator.Host extends Annotator
       width: "#{w}px"
 
   showEditor: (annotation) =>
-    stub =
-      ranges: annotation.ranges
-      quote: annotation.quote
-      hash: annotation.hash
-    if not stub.hash
-      @consumer.createAnnotation (hash) =>
-        if hash?
-          annotation.hash = stub.hash = hash
-          @consumer.showEditor stub
+    if not annotation.id?
+      @consumer.createAnnotation (id) =>
+        if id?
+          annotation.id = id
+          @consumer.showEditor annotation
         else
           this.deleteAnnotation annotation
           @ignoreMouseup = false
     else
-      @consumer.showEditor stub
+      @consumer.showEditor annotation
 
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
