@@ -21,7 +21,7 @@ annotation = ['$filter', ($filter) ->
       # Update the annotation with text from the view
       controller.$parsers.push (value) ->
         if value.text != scope.$modelValue.text
-          angular.extend {}, scope.$modelValue, text: scope.$modelValue.text
+          angular.extend scope.$modelValue, text: value.text
         else
           scope.$modelValue
   controller: 'AnnotationController'
