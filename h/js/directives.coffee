@@ -1,14 +1,20 @@
-annotation = ->
+annotation = ['$filter', ($filter) ->
   compile: (tElement, tAttrs, transclude) ->
     # adjust ng-model for isolate scope
     if tAttrs.ngModel
       tAttrs.$set 'model', tAttrs.ngModel, false
       tAttrs.$set 'ngModel', 'model', false
-    angular.noop
-    # TODO: make the transclusion manual and run the filters on model change
-    # by hooking into the ngModel formatters. This avoids running expensive
-    # filters, such as the markdown converter, whenever the root scope is
-    # digested.
+    post: (scope, iElement, iAttrs, controller) ->
+      controller.$formatters.push (value) ->
+        return unless angular.isObject value
+        angular.extend {}, value,
+          text: ($filter 'converter') value.text
+          created: ($filter 'fuzzyTime') value.created
+          updated: ($filter 'fuzzyTime') value.updated
+          user: ($filter 'userName') value.user
+
+      controller.$render = ->
+        scope.$viewValue = controller.$viewValue
   controller: 'Annotation'
   priority: 100
   require: '^ngModel'
@@ -16,7 +22,7 @@ annotation = ->
   scope:
     model: '='
   templateUrl: 'annotation.html'
-  transclude: true
+]
 
 
 recursive = ['$compile', ($compile) ->

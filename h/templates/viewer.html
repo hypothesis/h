@@ -5,14 +5,7 @@
     <ul class="annotator-listing" data-ng-click="showDetail($event)">
       <li data-ng-model="annotation"
           data-ng-repeat="annotation in annotations"
-          class="paper summary annotation">
-        <span data-ng-bind="annotation.created | fuzzyTime"
-              class="time" />
-        <h3 data-ng-bind="annotation.user | userName"
-            class="user" />
-        <div data-ng-bind-html="annotation.text | converter"
-             class="body" />
-      </li>
+          class="paper summary annotation" />
     </ul>
   </li>
 
@@ -29,14 +22,7 @@
       <div class="thread">
         <!-- Annotation -->
         <div data-ng-model="thread.message.annotation"
-             class="detail annotation">
-          <span data-ng-bind="thread.message.annotation.created | fuzzyTime"
-                class="time" />
-          <h3 data-ng-bind="thread.message.annotation.user | userName"
-              class="user" />
-          <div data-ng-bind-html="thread.message.annotation.text | converter"
-               class="body" />
-        </div>
+             class="detail annotation" />
 
         <!-- Reply count -->
         <span data-ng-show="thread.children.length"

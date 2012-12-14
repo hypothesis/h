@@ -18,8 +18,9 @@
   </div>
 </div>
 
-<!-- Transcluded body -->
-<div data-ng-transclude=""></div>
+<span data-ng-bind="$viewValue.created" class="time" />
+<h3 data-ng-bind="$viewValue.user" class="user" />
+<div data-ng-bind-html="$viewValue.text" class="body" />
 
 <!-- Bottom controls -->
 <div class="bottombar">
