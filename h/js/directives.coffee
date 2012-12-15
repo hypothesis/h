@@ -35,12 +35,15 @@ annotation = ['$filter', ($filter) ->
 
 
 recursive = ['$compile', ($compile) ->
-  compile: (tElement, tAttrs) ->
-    linkRec = $compile tElement.contents().remove(), (scope, cloneAttachFn) ->
-      linkRec scope, cloneAttachFn
+  compile: (tElement, tAttrs, transclude) ->
+    transclude = $compile tElement, (scope, cloneAttachFn) ->
+      transclude scope, cloneAttachFn
+    , 1000
     post: (scope, iElement, iAttrs, controller) ->
-      linkRec scope, (contents) -> iElement.append contents
+      transclude scope, (el) -> iElement.replaceWith el
+  priority: 1000
   restrict: 'A'
+  terminal: true
 ]
 
 
