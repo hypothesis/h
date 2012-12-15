@@ -28,9 +28,7 @@
         <span data-ng-show="thread.children.length"
               data-ng-pluralize=""
               count="thread.flattenChildren().length"
-              when="{ 'one': '1 reply'
-                    , 'other': '{} replies'
-                    }"
+              when="{one: '1 reply', other: '{} replies'}"
               class="reply-count" />
 
         <!-- Replies -->
