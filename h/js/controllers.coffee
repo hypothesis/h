@@ -212,23 +212,43 @@ class App
 
 
 class Annotation
-  this.$inject = ['$scope', 'annotator']
-  constructor: ($scope, annotator) ->
+  this.$inject = ['$scope', 'annotator', 'threading']
+  constructor: ($scope, annotator, threading) ->
     $scope.editing = false
 
     $scope.cancel = ->
-      console.log 'cancel'
+      $scope.editing = false
+      if $scope.$modelValue.draft
+        annotator.publish 'annotationDeleted', $scope.$modelValue
 
     $scope.save = ->
       $scope.editing = false
+      $scope.$modelValue.draft = false
       if $scope.edited
         annotator.publish 'annotationUpdated', $scope.$modelValue
       else
         annotator.publish 'annotationCreated', $scope.$modelValue
 
     $scope.reply = ->
-      console.log 'reply'
+      reply = annotator.createAnnotation()
+      # TODO: ? is a problem if we start with '/' (parent is top level) ?
+      if $scope.$modelValue.thread
+        references = [$scope.$modelValue.thread, $scope.$modelValue.id]
+      else
+        references = [$scope.$modelValue.id]
+      reply.thread = references.join '/'
+      parentThread = (threading.getContainer $scope.$modelValue.id)
+      replyThread = (threading.getContainer reply.id)
+      replyThread.message =
+        annotation: reply
+        id: reply.id
+        references: references
+      parentThread.addChild replyThread
 
+      $scope.$evalAsync -> $scope.$parent.$broadcast 'edit', reply.id
+
+    $scope.$on 'edit', (event, id) ->
+      if id == $scope.$modelValue.id then $scope.editing = true
 
 class Editor
   this.$inject = [
@@ -243,7 +263,10 @@ class Editor
     annotator.subscribe 'annotationDeleted', annotator.provider.onEditorHide
 
     thread = (threading.getContainer $routeParams.id)
-    $scope.annotation = thread.message?.annotation
+    annotation = thread.message?.annotation
+    if annotation?
+      $scope.annotation = thread.message?.annotation
+      $scope.$evalAsync -> $scope.$parent.$broadcast 'edit', annotation.id
 
     $scope.$on '$destroy', ->
       annotator.unsubscribe 'annotationCreated',

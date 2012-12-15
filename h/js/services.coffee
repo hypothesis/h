@@ -33,17 +33,32 @@ class Hypothesis extends Annotator
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.user = @plugins.HypothesisPermissions.options.userId(
         @plugins.HypothesisPermissions.user)
+      Object.defineProperty annotation, 'draft',
+        configurable: true
+        enumerable: false
+        writable: true
+        value: true
+
+    # Update threads when annotations are deleted
+    this.subscribe 'annotationDeleted', (annotation) ->
+      debugger
+      thread = threading.getContainer annotation.id
+      thread.message = null
+      if thread.parent then threading.pruneEmpties thread.parent
 
     # Thread the annotations after loading
     this.subscribe 'annotationsLoaded', (annotations) ->
       threading.thread annotations.map (a) ->
         annotation: a
         id: a.id
-        references: a.thread?.split('/')
+        references: a.thread?.split '/'
 
     # Update the thread when an annotation changes
     this.subscribe 'annotationUpdated', (annotation) ->
-      (threading.getContainer annotation.id).message.annotation = annotation
+      (threading.getContainer annotation.id).message =
+        annotation: annotation
+        id: annotation.id
+        references: annotation.thread?.split '/'
 
     # Establish cross-domain communication to the widget host
     @provider = new easyXDM.Rpc
@@ -64,18 +79,26 @@ class Hypothesis extends Annotator
           # if the annotation has a newly-assigned id and ensures that the id
           # is enumerable.
           this.plugins.Store.updateAnnotation = (annotation, data) =>
-            if annotation.id and annotation.id != data.id
+            if annotation.id != data.id
               # Remove the old annotation from the threading
-              delete (threading.getContainer annotation.id).message
+              thread = (threading.getContainer annotation.id)
+              thread.message = null
+              threading.pruneEmpties thread.parent
 
             # Update the annotation with the new data
             annotation = angular.extend annotation, data
 
             # Update the thread
-            (threading.getContainer data.id).message =
+            thread = (threading.getContainer data.id)
+            references = annotation.thread?.split('/') or []
+            thread.message =
               annotation: annotation
               id: annotation.id
-              references: annotation.thread?.split('/') or []
+              references: references
+
+            if thread.message.references.length
+              parent = (threading.getContainer references[references.length-1])
+              parent.addChild thread
 
             @provider.loadAnnotations [
               id: annotation.id
@@ -85,6 +108,8 @@ class Hypothesis extends Annotator
 
             Object.defineProperty annotation, 'id',
               enumerable: true
+
+            $rootScope.$apply()
 
         @provider.getMaxBottom (max) =>
           @element.find('#toolbar').css("top", "#{max}px")

@@ -20,7 +20,8 @@
       <!-- Thread view -->
       <div data-recursive="" class="thread">
         <!-- Annotation -->
-        <div data-ng-model="thread.message.annotation"
+        <div data-ng-class="editing && 'writer' || ''"
+             data-ng-model="thread.message.annotation"
              class="detail annotation" />
 
         <!-- Reply count -->
