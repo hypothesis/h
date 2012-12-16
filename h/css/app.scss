@@ -42,7 +42,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 .sliding-panels > li {
   @include smallshadow(-2px);
-  @include transition(transform .4s, left .4s, padding-left .3s cubic-bezier(0.95, 0.05, 0.795, 0.035));
+  @include transition(transform .4s);
   background: url('../images/shattered_2.jpg');
   background-attachment: fixed;
   margin-left: 1em;
@@ -60,7 +60,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   &.collapsed {
-    left: 100%;
+    @include translateX(100%);
   }
 
   &.squished {
