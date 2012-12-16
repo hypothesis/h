@@ -42,10 +42,27 @@ annotation = ['$filter', ($filter) ->
 ]
 
 
-recursive = ['$compile', ($compile) ->
+recursive = ['$compile', '$timeout', ($compile, $timeout) ->
   compile: (tElement, tAttrs, transclude) ->
+    placeholder = angular.element '<!-- recursive -->'
+    tElement.replaceWith placeholder
+
+    attachQueue = []
+    tick = false
+
     transclude = $compile tElement, (scope, cloneAttachFn) ->
-      transclude scope, cloneAttachFn
+      clone = placeholder.clone()
+      cloneAttachFn clone
+      $timeout ->
+        transclude scope, (el, scope) -> attachQueue.push [clone, el]
+        if not tick
+          tick = true
+          requestAnimationFrame ->
+            tick = false
+            for [clone, el] in attachQueue
+              clone.replaceWith el
+            attachQueue = []
+      clone
     , 1000
     post: (scope, iElement, iAttrs, controller) ->
       transclude scope, (el) -> iElement.replaceWith el
