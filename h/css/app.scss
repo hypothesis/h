@@ -44,7 +44,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include smallshadow(-2px);
   @include transition(transform .4s);
   background: url('../images/shattered_2.jpg');
-  background-attachment: fixed;
   margin-left: 1em;
   overflow: scroll;
   -webkit-overflow-scrolling: touch;
@@ -71,7 +70,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //SIDEBAR LAYOUT////////////////////////////////
 #gutter {
   background: url('../images/noise_1.png');
-  background-attachment: fixed;
   height: 100%;
   margin-left: $heatmap-width + 17px;
   padding-top: 2.5em;  // toolbar height + top margin
@@ -80,7 +78,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 #wrapper {
   background: url('../images/noise_1.png');
-  background-attachment: fixed;
   height: 100%;
   position: relative;
 }
@@ -184,7 +181,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include transform-origin(50%, 0);
   z-index: 4;
   background: url('../images/noise_1.png');
-  background-attachment: fixed;
   padding: 1em;
   position: absolute;
   width: 100%;
