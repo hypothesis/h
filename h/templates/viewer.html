@@ -17,24 +17,23 @@
     <div class="paper excerpt">
       <blockquote data-ng-bind="thread.message.annotation.quote" />
     </div>
-    <div data-recursive="" class="paper">
+    <div class="paper">
       <!-- Thread view -->
-      <div class="thread">
+      <div data-recursive="" class="thread">
         <!-- Annotation -->
-        <div data-ng-model="thread.message.annotation"
+        <div data-ng-class="editing && 'writer' || ''"
+             data-ng-model="thread.message.annotation"
              class="detail annotation" />
 
         <!-- Reply count -->
         <span data-ng-show="thread.children.length"
               data-ng-pluralize=""
               count="thread.flattenChildren().length"
-              when="{ 'one': '1 reply'
-                    , 'other': '{} replies'
-                    }"
+              when="{one: '1 reply', other: '{} replies'}"
               class="reply-count" />
 
         <!-- Replies -->
-        <ul class="annotator-listing">
+        <ul>
           <li data-ng-repeat="thread in thread.children"
               data-ng-transclude="" />
         </ul>

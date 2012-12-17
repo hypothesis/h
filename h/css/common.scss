@@ -402,7 +402,7 @@ blockquote {
 .thread {
   position: relative;
 
-  .annotator-listing {
+  & > ul {
     @include single-transition(max-height, .4s, cubic-bezier(1, 0, 1, 0));
     max-height: 65536px;
     overflow: hidden;
@@ -515,7 +515,7 @@ blockquote {
       }
     }
 
-    & > .annotator-listing {
+    & > ul {
       @include single-transition(max-height, .4s, cubic-bezier(0, 1, 0, 1));
       max-height: 0;
     }

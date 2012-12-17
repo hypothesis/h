@@ -24,6 +24,14 @@ annotation = ['$filter', ($filter) ->
           angular.extend scope.$modelValue, text: value.text
         else
           scope.$modelValue
+
+      scope.$watch 'editText', (newValue) ->
+        if scope.form.$valid
+          controller.$viewValue.text = scope.editText
+          controller.$setViewValue controller.$viewValue
+          #scope.previewText = ($filter 'converter') scope.editText
+        else
+          scope.previewText = ''
   controller: 'AnnotationController'
   priority: 100  # Must run before ngModel
   require: '?ngModel'
@@ -35,12 +43,15 @@ annotation = ['$filter', ($filter) ->
 
 
 recursive = ['$compile', ($compile) ->
-  compile: (tElement, tAttrs) ->
-    linkRec = $compile tElement.contents().remove(), (scope, cloneAttachFn) ->
-      linkRec scope, cloneAttachFn
+  compile: (tElement, tAttrs, transclude) ->
+    transclude = $compile tElement, (scope, cloneAttachFn) ->
+      transclude scope, cloneAttachFn
+    , 1000
     post: (scope, iElement, iAttrs, controller) ->
-      linkRec scope, (contents) -> iElement.append contents
+      transclude scope, (el) -> iElement.replaceWith el
+  priority: 1000
   restrict: 'A'
+  terminal: true
 ]
 
 
@@ -88,26 +99,7 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
-
-writer = ['$filter', ($filter) ->
-  compile: (tElement, tAttrs, transclude) ->
-    post: (scope, iElement, iAttrs, [annotation, controller]) ->
-      scope.editing = true
-
-      scope.$watch 'editText', (newValue) ->
-        if scope.form.$valid
-          controller.$viewValue.text = scope.editText
-          controller.$setViewValue controller.$viewValue
-          #scope.previewText = ($filter 'converter') scope.editText
-        else
-          scope.previewText = ''
-  require: ['annotation', '^ngModel']
-  restrict: 'C'
-]
-
-
 angular.module('h.directives', ['ngSanitize', 'deform'])
   .directive('annotation', annotation)
   .directive('recursive', recursive)
   .directive('tabReveal', tabReveal)
-  .directive('writer', writer)

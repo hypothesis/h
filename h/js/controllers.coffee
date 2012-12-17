@@ -11,16 +11,6 @@ class App
     heatmap = annotator.plugins.Heatmap
     heatmap.element.appendTo $element
 
-    # Thread the annotations after loading
-    annotator.subscribe 'annotationsLoaded', (annotations) ->
-      threading.thread annotations.map (a) ->
-          m = mail.message(null, a.id, a.thread?.split('/') or [])
-          m.annotation = a
-          m
-
-    annotator.subscribe 'annotationUpdated', (annotation) ->
-      (threading.getContainer annotation.id).message.annotation = annotation
-
     # Update the heatmap when certain events are pubished
     events = [
       'annotationCreated'
@@ -34,7 +24,8 @@ class App
         provider.getHighlights ({highlights, offset}) =>
           heatmap.updateHeatmap
             highlights: highlights.map (hl) =>
-              hl.data = annotator.cache.get hl.data.id
+              thread = (threading.getContainer hl.data.id)
+              hl.data = thread.message?.annotation
               hl
             offset: offset
 
@@ -221,31 +212,61 @@ class App
 
 
 class Annotation
-  this.$inject = ['$scope', 'annotator']
-  constructor: ($scope, annotator) ->
+  this.$inject = ['$scope', 'annotator', 'threading']
+  constructor: ($scope, annotator, threading) ->
     $scope.editing = false
 
     $scope.cancel = ->
-      console.log 'cancel'
+      $scope.editing = false
+      if $scope.$modelValue.draft
+        annotator.publish 'annotationDeleted', $scope.$modelValue
 
     $scope.save = ->
       $scope.editing = false
+      $scope.$modelValue.draft = false
       if $scope.edited
         annotator.publish 'annotationUpdated', $scope.$modelValue
       else
         annotator.publish 'annotationCreated', $scope.$modelValue
 
     $scope.reply = ->
-      console.log 'reply'
+      reply = annotator.createAnnotation()
+      # TODO: ? is a problem if we start with '/' (parent is top level) ?
+      if $scope.$modelValue.thread
+        references = [$scope.$modelValue.thread, $scope.$modelValue.id]
+      else
+        references = [$scope.$modelValue.id]
+      reply.thread = references.join '/'
+      parentThread = (threading.getContainer $scope.$modelValue.id)
+      replyThread = (threading.getContainer reply.id)
+      replyThread.message =
+        annotation: reply
+        id: reply.id
+        references: references
+      parentThread.addChild replyThread
 
+      $scope.$evalAsync -> $scope.$parent.$broadcast 'edit', reply.id
+
+    $scope.$on 'edit', (event, id) ->
+      if id == $scope.$modelValue.id then $scope.editing = true
 
 class Editor
-  this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
-  constructor: ($location, $routeParams, $scope, annotator) ->
+  this.$inject = [
+    '$location', '$routeParams', '$scope',
+    'annotator', 'threading'
+  ]
+  constructor: (
+    $location, $routeParams, $scope,
+    annotator, threading
+  ) ->
     annotator.subscribe 'annotationCreated', annotator.provider.onEditorHide
     annotator.subscribe 'annotationDeleted', annotator.provider.onEditorHide
 
-    $scope.annotation = annotator.cache.get $routeParams.id
+    thread = (threading.getContainer $routeParams.id)
+    annotation = thread.message?.annotation
+    if annotation?
+      $scope.annotation = thread.message?.annotation
+      $scope.$evalAsync -> $scope.$parent.$broadcast 'edit', annotation.id
 
     $scope.$on '$destroy', ->
       annotator.unsubscribe 'annotationCreated',
