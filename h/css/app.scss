@@ -43,7 +43,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .sliding-panels > li {
   @include smallshadow(-2px);
   @include transition(transform .4s);
-  background: url('../images/shattered_2.jpg');
+  background: url('../images/noise_1.png');
   margin-left: 1em;
   overflow: scroll;
   -webkit-overflow-scrolling: touch;
@@ -248,7 +248,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   .tri {
-    @include fonticon("\e00e", left);
+    @include fonticon("\e00b", left);
     color: rgba( 200, 200, 200, 0.3);
     text-shadow:
       1px .8px 1.5px #fff,
@@ -256,7 +256,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     float: left;
     line-height: $baseLineHeight * .9;
     font-size: $baseLineHeight * .9;
-    // cursor: w-resize;
     &:before {
       vertical-align: 0;
     }
@@ -267,7 +266,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
   &.shown {
     .tri {
-      @include fonticon("\e00d", left);
+      @include fonticon("\e010", left);
       color: rgba( 200, 200, 200, 0.3);
       text-shadow:
         1px .8px 1.5px #fff,
@@ -275,7 +274,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       float: left;
       line-height: $baseLineHeight * .9;
       font-size: $baseLineHeight * .9;
-      // cursor: w-resize;
+      cursor: ew-resize;
       &:before {
         vertical-align: 0;
       }
@@ -294,7 +293,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   .dropdown-toggle {
-    @include fonticon("\e020", right, .3em);
+    @include fonticon("\002f", right, 0em);
     .provider {
       color: $grayLight;
       display: none;
