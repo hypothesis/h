@@ -330,7 +330,6 @@ class Viewer
       ]
     else
       $scope.detail = false
-      $scope.thread = null
       annotator.provider.setActiveHighlights $scope.annotations.map (a) => a.id
 
 
