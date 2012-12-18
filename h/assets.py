@@ -61,6 +61,7 @@ app = Bundle(
     easyXDM,
     jwz,
     pagedown,
+    raf,
     underscore,
     'h:lib/jquery.mousewheel.min.js',
     Uglify(
