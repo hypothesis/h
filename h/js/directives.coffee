@@ -56,7 +56,7 @@ recursive = ['$compile', '$timeout', ($compile, $timeout) ->
       cloneAttachFn clone
       $timeout ->
         transclude scope, (el, scope) -> attachQueue.push [clone, el]
-        if not tick
+        unless tick
           tick = true
           requestAnimationFrame ->
             tick = false

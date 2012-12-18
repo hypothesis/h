@@ -319,15 +319,14 @@ class Viewer
       heatmap = annotator.plugins.Heatmap
       datum = (d3.select heatmap.element[0]).datum()
       if not $routeParams.id? and datum?
-        if datum
-          {highlights, offset} = d3.select(heatmap.element[0]).datum()
-          bottom = offset + heatmap.element.height()
-          $scope.annotations = highlights.reduce (acc, hl) =>
-            if hl.offset.top >= offset and hl.offset.top <= bottom
-              if hl.data not in acc
-                acc.push hl.data
-            acc
-          , []
+        {highlights, offset} = d3.select(heatmap.element[0]).datum()
+        bottom = offset + heatmap.element.height()
+        $scope.annotations = highlights.reduce (acc, hl) =>
+          if hl.offset.top >= offset and hl.offset.top <= bottom
+            if hl.data not in acc
+              acc.push hl.data
+          acc
+        , []
       else
         $scope.annotations = []
 
