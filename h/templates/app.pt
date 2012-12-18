@@ -36,12 +36,12 @@
       </div>
     </div>
     <div id="gutter">
-      <header data-ng-class="{true: '', false: 'collapsed'}[showAuth]"
-              data-ng-model="auth"
+      <header data-ng-class="auth.collapsed && 'collapsed'"
+              data-ng-model="auth.tab"
               data-ng-submit="submit()"
               data-tab-reveal="['forgot','activate']"
               class="form-vertical sheet tabbable">
-        <a data-ng-click="auth = null" class="close"></a>
+        <a data-ng-click="auth.collapsed = true" class="close"></a>
         <div data-title="Sign in"
              data-value="login"
              class="tab-pane">
@@ -62,13 +62,13 @@
              class="tab-pane">
           ${structure: layout.forms['activate'].render()}
         </div>
-        <footer>
+        <footer data-ng-show="auth.tab == 'login' || auth.tab == 'register'">
           <ul>
             <li>
-              <a data-ng-click="auth = 'forgot'">Password help?</a>
+              <a data-ng-click="auth.tab = 'forgot'">Password help?</a>
             </li>
             <li>
-              <a data-ng-click="auth = 'activate'">Have you already reserved a
+              <a data-ng-click="auth.tab = 'activate'">Have you already reserved a
                 username with us?</a>
             </li>
           </ul>

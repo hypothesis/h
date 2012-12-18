@@ -114,13 +114,16 @@ class App
             annotator.show()
 
     angular.extend $scope,
-      auth: null
-      showAuth: false
+      auth:
+        collapsed: true
+        tab: 'login'
       forms: []
 
     $scope.reset = ->
       angular.extend $scope,
-        auth: null
+        auth:
+          collapsed: true
+          tab: 'login'
         username: null
         password: null
         email: null
@@ -133,13 +136,13 @@ class App
       $scope.forms[name] = $form
 
     $scope.submit = ->
-      fields = switch $scope.auth
+      fields = switch $scope.auth.tab
         when 'login' then ['username', 'password']
         when 'register' then ['username', 'password', 'email']
         when 'forgot' then ['email']
         when 'activate' then ['password', 'code']
       params = ([key, $scope[key]] for key in fields when $scope[key]?)
-      params.push ['__formid__', $scope.auth]
+      params.push ['__formid__', $scope.auth.tab]
       data = (((p.map encodeURIComponent).join '=') for p in params).join '&'
 
       $http.post '', data,
@@ -173,7 +176,7 @@ class App
         annotator.element.find('#persona')
           .off('change').on('change', -> $(this).submit())
           .off('click')
-        $scope.showAuth = false
+        $scope.auth.collapsed = true
       else
         $scope.persona = null
         $scope.token = null
@@ -201,9 +204,12 @@ class App
         plugins.HypothesisPermissions.setUser(null)
         delete plugins.Auth
 
-    $scope.$on 'showAuth', (event, show=true) =>
-      $scope.auth = if show then 'login' else null
-      $scope.showAuth = show
+    $scope.$on 'showAuth', (event, show=true) ->
+      angular.extend $scope.auth,
+        collapsed: !show
+        tab: 'login'
+      $scope.$evalAsync ->
+        deform.focusFirstInput $element
 
     # Fetch the initial model from the server
     $scope.reset()

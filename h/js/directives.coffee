@@ -74,6 +74,7 @@ recursive = ['$compile', '$timeout', ($compile, $timeout) ->
 tabReveal = ['$parse', ($parse) ->
   compile: (tElement, tAttrs, transclude) ->
     panes = []
+    hiddenPanesGet = $parse tAttrs.tabReveal
 
     pre: (scope, iElement, iAttrs, [ngModel, tabbable] = controller) ->
       # Hijack the tabbable controller's addPane so that the visibility of the
@@ -93,24 +94,24 @@ tabReveal = ['$parse', ($parse) ->
           removePane()
 
     post: (scope, iElement, iAttrs, [ngModel, tabbable] = controller) ->
-      tabs = angular.element(iElement.children()[0]).find('li')
-      hiddenPanes = ($parse iAttrs.tabReveal)()
-      unless angular.isArray hiddenPanes
-        throw (new TypeError 'tabReveal expression must evaluate to an Array')
+      tabs = angular.element(iElement.children()[0].childNodes)
+      render = angular.bind ngModel, ngModel.$render
 
-      update = =>
+      ngModel.$render = ->
+        render()
+        hiddenPanes = hiddenPanesGet scope
+        return unless angular.isArray hiddenPanes
+
         for i in [0..panes.length-1]
           pane = panes[i]
           value = pane.attr.value || pane.attr.title
-          if value == ngModel.$modelValue
+          if value == ngModel.$viewValue
             deform.focusFirstInput pane.element
             pane.element.css 'display', ''
             angular.element(tabs[i]).css 'display', ''
           else if value in hiddenPanes
             pane.element.css 'display', 'none'
             angular.element(tabs[i]).css 'display', 'none'
-
-      scope.$watch iAttrs.ngModel, => scope.$evalAsync update
   require: ['ngModel', 'tabbable']
 ]
 
