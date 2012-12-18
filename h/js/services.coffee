@@ -148,8 +148,8 @@ class Hypothesis extends Annotator
         # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
         back: =>
-          if $location.path() == '/viewer' and $location.search()?.detail?
-            $rootScope.$apply => $location.search('detail', null).replace()
+          if $location.path() == '/viewer' and $location.search()?.id?
+            $rootScope.$apply => $location.search('id', null).replace()
           else
             this.hide()
         update: => this.publish 'hostUpdated'

@@ -67,14 +67,14 @@ class App
 
         # Creates highlights corresponding bucket when mouse is hovered
         .on 'mousemove', (bucket) =>
-          unless $location.path() == '/viewer' and $location.search()?.detail?
+          unless $location.path() == '/viewer' and $location.search()?.id?
             provider.setActiveHighlights heatmap.buckets[bucket]?.map (a) =>
               a.id
 
         # Gets rid of them after
         .on 'mouseout', =>
           if $location.path() == '/viewer'
-            unless $location.search()?.detail?
+            unless $location.search()?.id?
               bucket = heatmap.buckets[$location.search()?.bucket]
               provider.setActiveHighlights bucket?.map (a) => a.id
           else
@@ -290,7 +290,7 @@ class Viewer
     $scope.showDetail = ($event) ->
       $target = angular.element $event.target
       annotation = $target.controller('ngModel')?.$modelValue
-      if annotation then $location.search('detail', annotation.id).replace()
+      if annotation then $location.search('id', annotation.id).replace()
 
     $scope.$on '$routeChangeSuccess', =>
       update = => $scope.$emit '$routeUpdate'
@@ -302,14 +302,18 @@ class Viewer
     $scope.$on '$routeUpdate', =>
       this.refresh $scope, $routeParams, annotator, threading
 
+    $scope.$watch 'detail && thread.message.annotation.id', (newValue) ->
+      annotations = if newValue? then [newValue] else $scope.annotations
+      annotator.provider.setActiveHighlights annotations.map (a) => a.id
+
   refresh: ($scope, $routeParams, annotator, threading) =>
     if $routeParams.bucket?
       buckets = annotator.plugins.Heatmap.buckets
       $scope.annotations = buckets[$routeParams.bucket]
     else
-      if not $routeParams.detail?
-        heatmap = annotator.plugins.Heatmap
-        datum = (d3.select heatmap.element[0]).datum()
+      heatmap = annotator.plugins.Heatmap
+      datum = (d3.select heatmap.element[0]).datum()
+      if not $routeParams.id? and datum?
         if datum
           {highlights, offset} = d3.select(heatmap.element[0]).datum()
           bottom = offset + heatmap.element.height()
@@ -319,18 +323,14 @@ class Viewer
                 acc.push hl.data
             acc
           , []
-        else
-          $scope.annotations = []
+      else
+        $scope.annotations = []
 
-    if $routeParams.detail?
+    if $routeParams.id?
       $scope.detail = true
-      $scope.thread = threading.getContainer $routeParams.detail
-      annotator.provider.setActiveHighlights [
-        $scope.thread.message.annotation.id
-      ]
+      $scope.thread = threading.getContainer $routeParams.id
     else
       $scope.detail = false
-      annotator.provider.setActiveHighlights $scope.annotations.map (a) => a.id
 
 
 angular.module('h.controllers', [])
