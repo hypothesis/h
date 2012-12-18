@@ -388,6 +388,7 @@ blockquote {
 
   .bottombar {
     @include pie-clearfix;
+    margin-top: .25em;
   }
 
   .tip {
@@ -550,10 +551,7 @@ blockquote {
     min-height: 8em;
   }
 
-  .bottombar {
-    margin-top: .25em;
-    .btn {
-      margin-right: .5em;
-    }
+  .bottombar .btn {
+    margin-right: .5em;
   }
 }
