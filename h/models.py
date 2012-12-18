@@ -130,9 +130,11 @@ def includeme(config):
     session = Session()
     with transaction.manager:
         consumer = Consumer.get_by_key(key)
-        if not consumer and not secret:
-            consumer = Consumer(key=key, secret=secret, ttl=ttl)
-            session.add(consumer)
-            session.flush()
+        if not consumer:
+            consumer = Consumer(key=key)
+        consumer.secret = secret
+        consumer.ttl = ttl
+        session.add(consumer)
+        session.flush()
 
     registry.consumer = consumer

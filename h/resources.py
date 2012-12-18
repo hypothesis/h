@@ -101,11 +101,7 @@ class AppFactory(BaseResource):
     def consumer(self):
         settings = self.request.registry.settings
         key = settings['api.key']
-        secret = settings.get('api.secret')
-        if not secret:
-            consumer = models.Consumer.get_by_key(key)
-        else:
-            consumer = models.Consumer(key=key, secret=secret)
+        consumer = models.Consumer.get_by_key(key)
         assert(consumer)
         return consumer
 
