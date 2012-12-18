@@ -45,12 +45,13 @@ annotation = ['$filter', ($filter) ->
 recursive = ['$compile', '$timeout', ($compile, $timeout) ->
   compile: (tElement, tAttrs, transclude) ->
     placeholder = angular.element '<!-- recursive -->'
-    tElement.replaceWith placeholder
-
     attachQueue = []
     tick = false
 
-    transclude = $compile tElement, (scope, cloneAttachFn) ->
+    template = tElement.contents().clone()
+    tElement.html ''
+
+    transclude = $compile template, (scope, cloneAttachFn) ->
       clone = placeholder.clone()
       cloneAttachFn clone
       $timeout ->
@@ -63,10 +64,8 @@ recursive = ['$compile', '$timeout', ($compile, $timeout) ->
               clone.replaceWith el
             attachQueue = []
       clone
-    , 1000
     post: (scope, iElement, iAttrs, controller) ->
-      transclude scope, (el) -> iElement.replaceWith el
-  priority: 1000
+      transclude scope, (contents) -> iElement.append contents
   restrict: 'A'
   terminal: true
 ]

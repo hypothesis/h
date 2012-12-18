@@ -17,30 +17,32 @@
     <div class="paper excerpt">
       <blockquote data-ng-bind="thread.message.annotation.quote" />
     </div>
-    <div class="paper">
-      <!-- Thread view -->
-      <div data-recursive="" class="thread">
-        <!-- Annotation -->
-        <div data-ng-class="editing && 'writer' || ''"
-             data-ng-model="thread.message.annotation"
-             class="detail annotation" />
+    <!-- Thread view -->
+    <div data-recursive="" class="paper thread">
+      <!-- Annotation -->
+      <div data-ng-class="editing && 'writer' || ''"
+           data-ng-model="thread.message.annotation"
+           class="detail annotation" />
 
-        <!-- Reply count -->
-        <span data-ng-show="thread.children.length"
-              data-ng-pluralize=""
-              count="thread.flattenChildren().length"
-              when="{one: '1 reply', other: '{} replies'}"
-              class="reply-count" />
+      <!-- Reply count -->
+      <span data-ng-show="thread.children.length"
+            data-ng-pluralize=""
+            count="thread.flattenChildren().length"
+            when="{one: '1 reply', other: '{} replies'}"
+            class="reply-count" />
 
-        <!-- Replies -->
-        <ul>
-          <li data-ng-repeat="thread in thread.children"
-              data-ng-transclude="" />
-        </ul>
-      </div>
-      <div data-ng-show="annotation.quote" class="paper excerpt">
-        <blockquote data-ng-bind="annotation.quote" />
-      </div>
+      <!-- Replies -->
+      <ul>
+        <li data-ng-class="collapsed && 'collapsed' || ''"
+            data-ng-repeat="thread in thread.children"
+            data-ng-transclude=""
+            class="thread">
+          <a data-ng-click="collapsed = !collapsed" class="threadexp" />
+        </li>
+      </ul>
+    </div>
+    <div data-ng-show="annotation.quote" class="paper excerpt">
+      <blockquote data-ng-bind="annotation.quote" />
     </div>
   </li>
 
