@@ -212,10 +212,8 @@ class App
 
 
 class Annotation
-  this.$inject = ['$scope', 'annotator', 'threading']
-  constructor: ($scope, annotator, threading) ->
-    $scope.editing = false
-
+  this.$inject = ['$scope', '$rootScope', 'annotator', 'threading']
+  constructor: ($scope, $rootScope, annotator, threading) ->
     $scope.cancel = ->
       $scope.editing = false
       if $scope.$modelValue.draft
