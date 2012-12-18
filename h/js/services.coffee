@@ -79,37 +79,49 @@ class Hypothesis extends Annotator
           # if the annotation has a newly-assigned id and ensures that the id
           # is enumerable.
           this.plugins.Store.updateAnnotation = (annotation, data) =>
-            if annotation.id != data.id
-              # Remove the old annotation from the threading
-              thread = (threading.getContainer annotation.id)
-              thread.message = null
-              threading.pruneEmpties thread.parent
+            {deleteAnnotation, loadAnnotations} = @provider
+            $rootScope.$apply ->
+              if annotation.id != data.id
+                # Remove the old annotation from the threading
+                thread = (threading.getContainer annotation.id)
+                if thread.parent
+                  thread.message = null
+                  threading.pruneEmpties thread.parent
+                else
+                  delete threading.idTable[annotation.id]
 
-            # Update the annotation with the new data
-            annotation = angular.extend annotation, data
+                # Create the new thread
+                thread = (threading.getContainer data.id)
+                references = data.thread?.split('/') or []
+                thread.message =
+                  annotation: annotation
+                  id: data.id
+                  references: references
 
-            # Update the thread
-            thread = (threading.getContainer data.id)
-            references = annotation.thread?.split('/') or []
-            thread.message =
-              annotation: annotation
-              id: annotation.id
-              references: references
+                if not thread.parent? and thread.message.references.length
+                  parent = (threading.getContainer references[references.length-1])
+                  parent.addChild thread
 
-            if thread.message.references.length
-              parent = (threading.getContainer references[references.length-1])
-              parent.addChild thread
+                # Remove the old annotation from the host.
+                # XXX in iframe mode it's safe to make these calls because the
+                # deletion event that gets published in the provider is not
+                # cross-published back here in the consumer and therefore
+                # the Store does not delete the annotation.
+                deleteAnnotation
+                  id: annotation.id
+                loadAnnotations [
+                  id: data.id
+                  ranges: data.ranges
+                  quote: data.quote
+                ]
 
-            @provider.loadAnnotations [
-              id: annotation.id
-              ranges: annotation.ranges
-              quote: annotation.quote
-            ]
+                # The id is no longer temporary and should be serialized
+                # on future Store requests.
+                Object.defineProperty annotation, 'id',
+                  enumerable: true
 
-            Object.defineProperty annotation, 'id',
-              enumerable: true
-
-            $rootScope.$apply()
+              # Update the annotation with the new data
+              annotation = angular.extend annotation, data
 
         @provider.getMaxBottom (max) =>
           @element.find('#toolbar').css("top", "#{max}px")
@@ -156,6 +168,7 @@ class Hypothesis extends Annotator
       remote:
         publish: {}
         setupAnnotation: {}
+        deleteAnnotation: {}
         loadAnnotations: {}
         onEditorHide: {}
         onEditorSubmit: {}

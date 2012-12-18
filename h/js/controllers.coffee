@@ -231,7 +231,9 @@ class Annotation
 
     $scope.reply = ->
       reply = annotator.createAnnotation()
-      # TODO: ? is a problem if we start with '/' (parent is top level) ?
+      Object.defineProperty reply, 'draft',
+        value: true
+        writable: true
       if $scope.$modelValue.thread
         references = [$scope.$modelValue.thread, $scope.$modelValue.id]
       else
@@ -245,10 +247,7 @@ class Annotation
         references: references
       parentThread.addChild replyThread
 
-      $scope.$evalAsync -> $scope.$parent.$broadcast 'edit', reply.id
-
-    $scope.$on 'edit', (event, id) ->
-      if id == $scope.$modelValue.id then $scope.editing = true
+    $scope.$watch '$modelValue.draft', (newValue) -> $scope.editing = newValue
 
 class Editor
   this.$inject = [
@@ -259,20 +258,28 @@ class Editor
     $location, $routeParams, $scope,
     annotator, threading
   ) ->
+    annotator.subscribe 'annotationCreated', annotator.provider.onEditorSubmit
     annotator.subscribe 'annotationCreated', annotator.provider.onEditorHide
     annotator.subscribe 'annotationDeleted', annotator.provider.onEditorHide
 
-    thread = (threading.getContainer $routeParams.id)
-    annotation = thread.message?.annotation
-    if annotation?
-      $scope.annotation = thread.message?.annotation
-      $scope.$evalAsync -> $scope.$parent.$broadcast 'edit', annotation.id
-
     $scope.$on '$destroy', ->
+      annotator.unsubscribe 'annotationCreated',
+        annotator.provider.onEditorSubmit
       annotator.unsubscribe 'annotationCreated',
         annotator.provider.onEditorHide
       annotator.unsubscribe 'annotationDeleted',
         annotator.provider.onEditorHide
+
+    $scope.$watch 'annotation.draft', (newValue, oldValue) ->
+      if oldValue and not newValue
+        $location.absUrl('/app')
+        annotator.hide()
+
+    thread = (threading.getContainer $routeParams.id)
+    annotation = thread.message?.annotation
+    if annotation?
+      annotation.draft = true
+      $scope.annotation = annotation
 
 
 class Viewer

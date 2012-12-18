@@ -66,6 +66,14 @@ class Annotator.Host extends Annotator
       local:
         publish: (args..., k, fk) => this.publish args...
         setupAnnotation: => this.setupAnnotation arguments...
+        deleteAnnotation: (annotation) =>
+          toDelete = []
+          @wrapper.find('.annotator-hl')
+          .each ->
+            data = $(this).data('annotation')
+            if data.id == annotation.id and data not in toDelete
+              toDelete.push data
+          this.deleteAnnotation d for d in toDelete
         loadAnnotations: => this.loadAnnotations arguments...
         onEditorHide: this.onEditorHide
         onEditorSubmit: this.onEditorSubmit
