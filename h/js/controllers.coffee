@@ -115,6 +115,7 @@ class App
 
     angular.extend $scope,
       auth: null
+      showAuth: false
       forms: []
 
     $scope.reset = ->
@@ -172,7 +173,7 @@ class App
         annotator.element.find('#persona')
           .off('change').on('change', -> $(this).submit())
           .off('click')
-        $scope.auth = null
+        $scope.showAuth = false
       else
         $scope.persona = null
         $scope.token = null
@@ -202,6 +203,7 @@ class App
 
     $scope.$on 'showAuth', (event, show=true) =>
       $scope.auth = if show then 'login' else null
+      $scope.showAuth = show
 
     # Fetch the initial model from the server
     $scope.reset()
