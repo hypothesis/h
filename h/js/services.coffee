@@ -123,10 +123,11 @@ class Hypothesis extends Annotator
               # Update the annotation with the new data
               annotation = angular.extend annotation, data
 
-        @provider.getMaxBottom (max) =>
-          @element.find('#toolbar').css("top", "#{max}px")
-          @element.find('#gutter').css("margin-top", "#{max}px")
-          @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
+        # Dodge toolbars [DISABLE]
+        #@provider.getMaxBottom (max) =>
+        #  @element.find('#toolbar').css("top", "#{max}px")
+        #  @element.find('#gutter').css("margin-top", "#{max}px")
+        #  @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
 
         this.publish 'hostUpdated'
     ,
