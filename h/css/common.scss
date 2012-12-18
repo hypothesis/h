@@ -412,20 +412,16 @@ blockquote {
 
     & > * {
       border-left: 1px dotted $grayLight;
+      position: relative;
     }
   }
 
   .thread {
     height: 100%;
     padding-left: $thread-padding;
-
-    .threadexp {
-      display: inherit;
-    }
   }
 
   .threadexp {
-    display: none;
     height: $threadexp-width;
     width: $threadexp-width;
     position: absolute;
@@ -443,6 +439,35 @@ blockquote {
     padding-top: .35em;
     &.squished {
       padding-left: 0;
+    }
+  }
+
+  //These are all the changes needed to collapse thread objects.
+  .collapsed {
+    & > .annotation {
+      .body {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+        white-space: nowrap;
+        font-style: italic;
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .user {
+        display: run-in;
+        margin-right: .25em;
+      }
+    }
+
+    & > ul {
+      @include single-transition(max-height, .4s, cubic-bezier(0, 1, 0, 1));
+      max-height: 0;
+    }
+
+    & > .threadexp {
+      background-image: url("../images/plus_1.png");
     }
   }
 }
@@ -483,45 +508,6 @@ blockquote {
     .time {
       opacity: 0;
       text-size: 0;
-    }
-  }
-}
-
-
-
-//DETAIL////////////////////////////////
-//This is specific to the detail view.
-.detail {
-  .bottombar {
-    margin-bottom: .25em;
-  }
-
-  //These are all the changes needed to collapse thread objects.
-  .collapsed {
-    &.annotation {
-      .body {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        -o-text-overflow: ellipsis;
-        white-space: nowrap;
-        font-style: italic;
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .user {
-        display: run-in;
-        margin-right: .25em;
-      }
-    }
-
-    & > ul {
-      @include single-transition(max-height, .4s, cubic-bezier(0, 1, 0, 1));
-      max-height: 0;
-    }
-
-    & > .threadexp {
-      background-image: url("../images/plus_1.png");
     }
   }
 }

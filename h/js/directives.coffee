@@ -115,7 +115,15 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
+thread = ->
+  link: (scope, iElement, iAttrs, controller) ->
+    scope.collapsed = false
+  restrict: 'C'
+  scope: true
+
+
 angular.module('h.directives', ['ngSanitize', 'deform'])
   .directive('annotation', annotation)
   .directive('recursive', recursive)
   .directive('tabReveal', tabReveal)
+  .directive('thread', thread)
