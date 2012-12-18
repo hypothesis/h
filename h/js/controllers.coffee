@@ -332,8 +332,6 @@ class Viewer
           , []
         else
           $scope.annotations = []
-      else
-        $scope.annotations = []
 
     if $routeParams.id?
       $scope.detail = true
