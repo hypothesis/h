@@ -318,17 +318,20 @@ class Viewer
       buckets = annotator.plugins.Heatmap.buckets
       $scope.annotations = buckets[$routeParams.bucket]
     else
-      heatmap = annotator.plugins.Heatmap
-      datum = (d3.select heatmap.element[0]).datum()
-      if not $routeParams.id? and datum?
-        {highlights, offset} = d3.select(heatmap.element[0]).datum()
-        bottom = offset + heatmap.element.height()
-        $scope.annotations = highlights.reduce (acc, hl) =>
-          if hl.offset.top >= offset and hl.offset.top <= bottom
-            if hl.data not in acc
-              acc.push hl.data
-          acc
-        , []
+      unless $routeParams.id?
+        heatmap = annotator.plugins.Heatmap
+        datum = (d3.select heatmap.element[0]).datum()
+        if datum?
+          {highlights, offset} = datum
+          bottom = offset + heatmap.element.height()
+          $scope.annotations = highlights.reduce (acc, hl) =>
+            if hl.offset.top >= offset and hl.offset.top <= bottom
+              if hl.data not in acc
+                acc.push hl.data
+            acc
+          , []
+        else
+          $scope.annotations = []
       else
         $scope.annotations = []
 
