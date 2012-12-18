@@ -181,7 +181,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include transform-origin(50%, 0);
   z-index: 4;
   background: url('../images/noise_1.png');
-  padding: 1em;
+  padding-top: 1em;
   position: absolute;
   width: 100%;
 
@@ -213,8 +213,10 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     border-color: #F5A1A0;
   }
 
-  footer > ul {
-    margin-top: 1em;
+  footer {
+    bottom: 1em;
+    right: 1em;
+    position: absolute;
     text-align: right;
   }
 }
