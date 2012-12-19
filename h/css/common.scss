@@ -491,10 +491,10 @@ blockquote {
 
   & > * {
     @include transition(
-      opacity 0.1s ease-in-out .5s,
-      font-size .1s ease-in-out .5s,
-      margin .1s ease-in-out .5s,
-      opacity .1s ease-in-out .5s
+      opacity 0.1s ease-in-out .25s,
+      font-size .1s ease-in-out .25s,
+      margin .1s ease-in-out .25s,
+      opacity .1s ease-in-out .25s
     );
     @include tertiarytext;
     float: left;
