@@ -372,6 +372,15 @@ blockquote {
 .annotation {
   position: relative;
 
+  div.body {
+    @include force-wrap;
+  }
+
+  textarea.body {
+    min-height: 8em;
+    width: 100%;
+  }
+
   .user {
     font-weight: bold;
     text-decoration: underline;
@@ -382,13 +391,13 @@ blockquote {
     @include tertiarytext;
   }
 
-  .body {
-    @include force-wrap;
-  }
-
   .bottombar {
     @include pie-clearfix;
-    margin-top: .25em;
+    margin: .25em 0;
+
+    .btn {
+      margin-right: .5em;
+    }
   }
 
   .tip {
@@ -497,7 +506,7 @@ blockquote {
     opacity: 0;
   }
 
-  .detail.annotation:hover & {
+  .detail:hover & {
     & > * {
       font-size: 1em;
     }
@@ -535,23 +544,5 @@ blockquote {
   // Things not shown in the summary view
   .annotator-controls, .magicontrols .show, .bottombar, {
     display: none;
-  }
-}
-
-
-
-//EDITOR////////////////////////////////
-//This is an input element to make annotations.
-.writer {
-  position: relative;
-  padding-left: 1em;
-
-  textarea {
-    width: 100%;
-    min-height: 8em;
-  }
-
-  .bottombar .btn {
-    margin-right: .5em;
   }
 }
