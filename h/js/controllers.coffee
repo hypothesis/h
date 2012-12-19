@@ -352,7 +352,6 @@ class Viewer
       $scope.focus $scope.thread.message.annotation
     else
       $scope.detail = false
-      console.log 'focusing', $scope.annotations
       $scope.focus $scope.annotations
 
 
