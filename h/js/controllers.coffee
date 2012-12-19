@@ -43,8 +43,7 @@ class App
           buckets
 
       heatmap.element.bind 'click', ->
-        $scope.$apply ->
-          $location.path('/viewer').search(null).replace()
+        $scope.$apply -> $location.path('/viewer').search(null).replace()
         annotator.show()
 
       {highlights, offset} = d3.select(heatmap.element[0]).datum()
@@ -100,7 +99,6 @@ class App
             , threshold - height
             provider.scrollTop next - pad
             delete search.bucket
-            $location.search(search).replace()
 
           # If it's the lower tab, scroll to next bucket below
           else if heatmap.isLower bucket
@@ -113,10 +111,10 @@ class App
 
           # If it's neither of the above, load the bucket into the viewer
           else
-            delete search.detail
+            delete search.id
             annotator.show()
 
-          $location.path('/viewer').search().replace()
+          $scope.$apply -> $location.path('/viewer').search(search).replace()
 
     angular.extend $scope,
       auth:
