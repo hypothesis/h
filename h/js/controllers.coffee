@@ -28,6 +28,7 @@ class App
               hl.data = thread.message?.annotation
               hl
             offset: offset
+          $scope.$apply -> $scope.$broadcast '$routeUpdate'
 
     heatmap.subscribe 'updated', =>
       tabs = d3.select(annotator.element[0])
@@ -40,6 +41,11 @@ class App
             else if heatmap.isUpper(i) or heatmap.isLower(i)
               buckets.push i
           buckets
+
+      heatmap.element.bind 'click', ->
+        $scope.$apply ->
+          $location.path('/viewer').search(null).replace()
+        annotator.show()
 
       {highlights, offset} = d3.select(heatmap.element[0]).datum()
       height = $(window).outerHeight(true)
@@ -83,6 +89,8 @@ class App
         # Does one of a few things when a tab is clicked depending on type
         .on 'mouseup', (bucket) =>
           d3.event.preventDefault()
+          search = $location.search() or {}
+          search.bucket = bucket
 
           # If it's the upper tab, scroll to next bucket above
           if heatmap.isUpper bucket
@@ -91,7 +99,8 @@ class App
               if next < hl.offset.top < threshold then hl.offset.top else next
             , threshold - height
             provider.scrollTop next - pad
-            $location.search('bucket').replace()
+            delete search.bucket
+            $location.search(search).replace()
 
           # If it's the lower tab, scroll to next bucket below
           else if heatmap.isLower bucket
@@ -100,18 +109,14 @@ class App
               if threshold < hl.offset.top < next then hl.offset.top else next
             , offset + height
             provider.scrollTop next - pad
-            $location.search('bucket').replace()
+            delete search.bucket
 
           # If it's neither of the above, load the bucket into the viewer
           else
-            $scope.$apply =>
-              $location
-                .path('/viewer')
-                .search
-                  bucket: bucket
-                  detail: null
-                .replace()
+            delete search.detail
             annotator.show()
+
+          $location.path('/viewer').search().replace()
 
     angular.extend $scope,
       auth:
@@ -297,13 +302,18 @@ class Viewer
     $location, $routeParams, $scope,
     annotator, threading
   ) ->
+    refresh = => this.refresh $scope, $routeParams, annotator, threading
+
     $scope.annotations = []
     $scope.thread = null
 
     $scope.showDetail = ($event) ->
       $target = angular.element $event.target
       annotation = $target.controller('ngModel')?.$modelValue
-      if annotation then $location.search('id', annotation.id).replace()
+      if annotation
+        search = $location.search() or {}
+        search.id = annotation.id
+        $location.search(search).replace()
 
     $scope.focus = (annotation=$scope.annotations) ->
       if $routeParams.id?
@@ -316,15 +326,8 @@ class Viewer
         highlights = []
       annotator.provider.setActiveHighlights highlights
 
-    $scope.$on '$routeChangeSuccess', =>
-      update = => $scope.$emit '$routeUpdate'
-      annotator.plugins.Heatmap.subscribe 'updated', update
-      $scope.$on '$routeChangeStart', =>
-        annotator.plugins.Heatmap.unsubscribe 'updated', update
-      update()
-
-    $scope.$on '$routeUpdate', =>
-      this.refresh $scope, $routeParams, annotator, threading
+    $scope.$on '$routeUpdate', refresh
+    refresh()
 
   refresh: ($scope, $routeParams, annotator, threading) =>
     if $routeParams.bucket?
