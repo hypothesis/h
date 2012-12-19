@@ -49,6 +49,9 @@ deformDirective = ->
 
     # Link function
     (scope, iElement, iAttrs, controller) ->
+      if scope.addForm?
+        name = iAttrs.name or iAttrs.ngModel or iAttrs.id
+        scope.addForm iElement, name
       deform.processCallbacks()
   restrict: 'C'
   require: 'form'

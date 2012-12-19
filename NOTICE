@@ -6,7 +6,7 @@ Hypothes.is Project (http://hypothes.is/).
 
 This product also includes the following third-party components:
 
- * angular (http://angularjs.org/)
+ * AngularJS (http://angularjs.org/)
 
    Copyright (c) 2010-2012 Google, Inc.
 
@@ -18,10 +18,6 @@ This product also includes the following third-party components:
 
    Copyright (c) 2012, Michael Bostock
 
- * handlebars.js (http://handlebarsjs.com/)
-
-   Copyright (C) 2011 by Yehuda Katz
-
  * yepnope.js (http://yepnopejs.com/)
 
    By Alex Sexton and Ralph Holzmann
@@ -29,6 +25,22 @@ This product also includes the following third-party components:
  * Gentleface icon set (http://www.gentleface.com/free_icon_set.html)
 
    Copyright © 2006-2012 Gentleface
+
+ * IcoMoon icon set (http://icomoon.io)
+
+   By Keyamoon
+
+ * Iconic icon set (http://somerandomdude.com/work/iconic/)
+
+   By P.J. Onori
+
+ * Entypo icon set (http://www.entypo.com/)
+
+   By Daniel Bruce
+
+ * Cuticons (http://drbl.in/eztK)
+
+   By Vaibhav Bhat
 
  * PageDown (http://code.google.com/p/pagedown/)
 

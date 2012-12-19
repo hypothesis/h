@@ -1,8 +1,7 @@
 class Annotator.Plugin.Heatmap extends Annotator.Plugin
-
   # prototype constants
-  this::BUCKET_THRESHOLD_PAD = 40
-  this::BUCKET_SIZE = 50
+  BUCKET_THRESHOLD_PAD: 40
+  BUCKET_SIZE: 50
 
   # heatmap svg skeleton
   html: """
@@ -30,7 +29,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   index: []
 
   constructor: (element, options) ->
-    super $(@html, options)
+    super $(@html), options
 
   _collate: (a, b) =>
     for i in [0..a.length-1]
@@ -116,7 +115,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           min = w
           break if min == 0 # short-circuit optimization
 
-      # Merge them if they are closer enough
+      # Merge them if they are close enough
       if min < threshold
         # Prefer merging the successor bucket backward but not if it's last
         # since the gradient must always return to 0 at the end

@@ -12,7 +12,7 @@
   height: 40px;
   margin-left: -20px;
   margin-top: -50px;
-  padding: 5px;
+  padding: 0;
   position: absolute;
   border: 4px solid $border;
   border-radius: 7px;
@@ -38,7 +38,7 @@
 
   button {
     background: url("../images/pen_1.png");
-    background-size: 95% 95%;
+    background-size: 65%;
     background-position: center;
     background-repeat: no-repeat;
     border: none;

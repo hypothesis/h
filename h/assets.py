@@ -26,12 +26,15 @@ def Handlebars(*names, **kw):
 
 # Included dependencies
 annotator = Bundle('h:lib/annotator.min.js', 'h:lib/annotator.*.min.js')
-angular = Bundle('h:lib/angular.min.js')
+angular = Bundle('h:lib/angular.min.js', 'h:lib/angular-*.min.js')
 d3 = Bundle('h:lib/d3.v2.min.js')
 easyXDM = Bundle('h:lib/easyXDM.min.js')
 jwz = Bundle('h:lib/jwz.min.js')
-pagedown = Uglify('h:lib/Markdown.Converter.js', 'h:lib/Markdown.Sanitizer.js')
-raf = Uglify('h:lib/polyfills/raf.js')
+pagedown = Uglify(
+    'h:lib/Markdown.Converter.js',
+    output='h:lib/Markdown.Converter.min.js'
+)
+raf = Uglify('h:lib/polyfills/raf.js', output='h:lib/polyfills/raf.js.min')
 underscore = Bundle('h:lib/underscore-min.js')
 
 
@@ -39,22 +42,7 @@ underscore = Bundle('h:lib/underscore-min.js')
 jquery = Bundle('deform:static/scripts/jquery-1.7.2.min.js')
 deform = Bundle(
     jquery,
-    Uglify(
-        'deform:static/scripts/jquery.form-3.09.js',
-        'deform:static/scripts/deform.js',
-        output='js/deform.min.js'
-    )
-)
-
-
-# Handlebars templates
-templates = Bundle(
-    'h:lib/handlebars-runtime.min.js',
-    Uglify(
-        'h:js/helpers.js',
-        Handlebars('h:templates/*.handlebars', output='js/templates.js'),
-        output='js/templates.min.js'
-    ),
+    Uglify('deform:static/scripts/deform.js', output='js/deform.min.js'),
 )
 
 
@@ -73,10 +61,9 @@ app = Bundle(
     easyXDM,
     jwz,
     pagedown,
-    templates,
+    raf,
     underscore,
     'h:lib/jquery.mousewheel.min.js',
-    'deform_bootstrap:static/bootstrap.min.js',
     Uglify(
         *[
             Coffee('h:/js/%s.coffee' % name,
@@ -85,8 +72,9 @@ app = Bundle(
             (
                 'app',
                 'deform',
-                'directives',
                 'controllers',
+                'filters',
+                'directives',
                 'services',
             )
         ],
@@ -99,6 +87,7 @@ app = Bundle(
             for name in
             (
                 'heatmap',
+                'hypothesispermissions',
             )
         ],
         output='js/hypothesis.plugins.min.js'

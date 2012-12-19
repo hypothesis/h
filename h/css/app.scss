@@ -23,19 +23,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 
-//HIDDEN TABS////////////////////////////////
-.nav a[data-target="#activate-tab"],
-.nav a[data-target="#forgot-tab"] {
-  display: none;
-}
-
-.nav .active a[data-target="#activate-tab"],
-.nav .active a[data-target="#forgot-tab"] {
-  display: initial;
-}
-
-
-
 //ANNOTATOR STYLES////////////////////////////////
 .annotator-hide {
   display: none;
@@ -53,21 +40,46 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 
+.sliding-panels > li {
+  @include smallshadow(-2px);
+  @include transition(transform .4s);
+  background: url('../images/noise_1.png');
+  margin-left: 1em;
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
+  padding: 1em;
+  position: absolute;
+
+  height: 100%;
+  width: 100%;
+  
+  &:first-child {
+    margin-left: 0;
+    @include box-shadow(none);
+  }
+
+  &.collapsed {
+    @include translateX(100%);
+  }
+
+  &.squished {
+    padding-left: .5em;
+  }
+}
 
 //SIDEBAR LAYOUT////////////////////////////////
 #gutter {
   background: url('../images/noise_1.png');
-  background-attachment: fixed;
   height: 100%;
   margin-left: $heatmap-width + 17px;
+  padding-top: 2.5em;  // toolbar height + top margin
   position: relative;
 }
 
 #wrapper {
+  background: url('../images/noise_1.png');
   height: 100%;
-  overflow: auto;
-  padding: 3.75em 1em 1em 1em;
-  -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
 
@@ -169,15 +181,14 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include transform-origin(50%, 0);
   z-index: 4;
   background: url('../images/noise_1.png');
-  background-attachment: fixed;
-  margin-top: 2.5em;
   padding-top: 1em;
   position: absolute;
   width: 100%;
 
   .close {
-    margin-right: .5em;
-    margin-top: .25em;
+    position: absolute;
+    right: 1em;
+    top: 1em;
   }
 
   &.collapsed {
@@ -201,6 +212,13 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     background-color: #f2dede;
     border-color: #F5A1A0;
   }
+
+  footer {
+    bottom: 1em;
+    right: 1em;
+    position: absolute;
+    text-align: right;
+  }
 }
 
 
@@ -212,15 +230,15 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   border: 1px solid $grayLighter;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
-  left: 1px;
-  line-height: $baseLineHeight;
+  height: 2em;
+  left: 7px;
+  line-height: 1.4em;  // 2em (height) - .6em (padding)
   margin-top: .5em;
   padding: .3em;
   position: absolute;
   text-align: right;
-  width: 100%;
+  right: 0;
   z-index: 5;
-  left: 7px;
 
   & > div {
     display: inline-block;
@@ -232,31 +250,52 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   .tri {
-    @include icon("tri-left.png");
+    @include fonticon("\e00b", left);
+    color: rgba( 200, 200, 200, 0.3);
+    text-shadow:
+      1px .8px 1.5px #fff,
+      0 0 0 #000;
     float: left;
-    width: $baseLineHeight;
-    height: $baseLineHeight;
-    cursor: w-resize;
+    line-height: $baseLineHeight * .9;
+    font-size: $baseLineHeight * .9;
+    &:before {
+      vertical-align: 0;
+    }
+    &:hover {
+      color: rgba( 235, 235, 230, 0.1);
+    }
   }
 
   &.shown {
     .tri {
-      @include icon("tri-right.png");
-      margin-right: .7em;
+      @include fonticon("\e010", left);
+      color: rgba( 200, 200, 200, 0.3);
+      text-shadow:
+        1px .8px 1.5px #fff,
+        0 0 0 #000;
+      float: left;
+      line-height: $baseLineHeight * .9;
+      font-size: $baseLineHeight * .9;
+      cursor: ew-resize;
+      &:before {
+        vertical-align: 0;
+      }
+      &:hover {
+        color: rgba( 235, 235, 230, 0.1);
+      }
     }
   }
 }
 
 .tinyman {
-  padding: 0 .3em;
+  padding: 0 .5em;
 
   .avatar {
     border-radius: 2px;
   }
 
   .dropdown-toggle {
-    @include linkbutton_right;
-    background-image: url("../images/dropdown_1.png");
+    @include fonticon("\002f", right, 0em);
     .provider {
       color: $grayLight;
       display: none;

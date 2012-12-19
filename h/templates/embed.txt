@@ -12,28 +12,11 @@ yepnope([
     nope: Array.prototype.concat.call(${inject}),
     complete: function () {
       if (window.Annotator._instance) return;
-
-      // Get the canonical URL from any of several sources
-      var uri = document.location.href
-      if (document.location.hash) uri = uri.slice(0, -1 * location.hash.length)
-      $('meta[property^="og:url"]').each(function () { uri = this.content })
-      $('link[rel^="canonical"]').each(function () { uri = this.href })
-
       // Load the annotator
-      var annotator = new Annotator.Host(document.body, {
+      window.Annotator._instance = new Annotator.Host(document.body, {
         /* @@ reflect routes with crossroads.js?? */
         app: '${request.resource_url(context['app'])}',
       })
-      annotator.consumer.addPlugin('Store', {
-        annotationData: { uri: uri },
-        loadFromSearch: {
-          limit: 1000,
-          uri: uri
-        },
-        prefix: '${request.resource_url(context, 'api', 'current')}'
-      })
-      window.Annotator._instance = annotator;
-      $(function () { annotator.consumer.update() })
     }
   },
   {

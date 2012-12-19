@@ -27,7 +27,7 @@ The project includes a number of subcomponents with separate
 copyright notices and license terms. Your use of the code for the these
 subcomponents is subject to the terms and conditions of the following licenses.
 
-For the angular subcomponent:
+For the AngularJS subcomponents:
 
  Copyright (c) 2010-2012 Google, Inc. http://angularjs.org
 
@@ -103,28 +103,6 @@ For the d3.js subcomponent:
 For the easyXDM subcomponent:
 
  Copyright (c) 2009-2011 Øyvind Sean Kinsey, oyvind@kinsey.no
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
-
-For the handlebars.js subcomponent:
-
- Copyright (C) 2011 by Yehuda Katz
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -228,6 +206,26 @@ For the Gentleface icon set:
 
  Creative Commons Attribution-NonCommercial 3.0 Unported License.
  http://creativecommons.org/licenses/by-nc/3.0/
+
+For the IcoMoon icon set:
+
+ Create Commons Attribution-ShareAlike 3.0 Unported License.
+ https://creativecommons.org/licenses/by-sa/3.0/
+
+For the Iconic icon set:
+
+ Create Commons Attribution-ShareAlike 3.0 Unported License.
+ https://creativecommons.org/licenses/by-sa/3.0/
+
+For the Entypo icon set:
+
+ Create Commons Attribution-ShareAlike 3.0 Unported License.
+ https://creativecommons.org/licenses/by-sa/3.0/
+
+For the Cuticons icon set:
+
+ Public domain.
+ https://creativecommons.org/publicdomain/zero/1.0/
 
 For the PageDown subcomponent:
 

@@ -1,0 +1,49 @@
+<!-- Top controls -->
+<div data-ng-hide="editing" class="magicontrols">
+  <span data-ng-bind="model.$viewValue.created | fuzzyTime" class="time" />
+  <div class="vis-icon" title="Visibility"
+       data-ng-show="model.$viewValue.permissions.read.length" />
+  <div class="fave-icon show" title="Favorite"
+       data-ng-click="favorite()" />
+  <div class="show reply-icon" title="Reply"
+       data-ng-click="reply()" />
+  <div class="show share-icon" title="Share"
+       data-ng-click="share()" />
+  <div class="show dropdown" title="More Actions">
+    <div class="dropdown-toggle down-icon" role="button" />
+    <ul class="dropdown-menu pull-right" role="menu">
+      <li data-ng-click="edit()">Edit</li>
+      <li data-ng-click="delete()">Delete</li>
+      <li data-ng-click="flag()">Flag</li>
+    </ul>
+  </div>
+</div>
+
+<h3 data-ng-bind="model.$viewValue.user | userName" class="user" />
+<form data-ng-show="editing" name="form">
+  <textarea data-ng-model="editText"
+            class="body"
+            name="text"
+            required="" />
+  <div class="tip">
+    <a href="https://en.wikipedia.org/wiki/Markdown"
+       target="_blank">Markdown</a> is supported.
+  </div>
+</form>
+<div data-ng-bind-html="model.$viewValue.text"
+     data-ng-hide="editing"
+     class="body" />
+
+<!-- Bottom controls -->
+<div class="bottombar">
+  <div data-ng-show="editing" class="annotator-controls">
+    <button data-ng-click="save()" class="btn check-icon">Save</button>
+    <a data-ng-click="cancel()" class="x-icon">Cancel</a>
+  </div>
+</div>
+
+<!-- Editing preview -->
+<div data-ng-show="previewText" class="preview">
+  <h4>Preview</h4>
+  <div data-ng-bind-html="previewText" class="body" />
+</div>

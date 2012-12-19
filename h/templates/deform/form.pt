@@ -1,11 +1,12 @@
 <form
   id="${field.formid}"
-  class="deform ${field.css_class}"
   action="${field.action}"
   method="${field.method}"
   enctype="multipart/form-data"
   accept-charset="utf-8"
-  i18n:domain="deform">
+  i18n:domain="deform"
+  tal:attributes="class field.css_class">
+
 
   <fieldset>
 

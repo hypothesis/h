@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
   <body data-ng-app="h"
-        data-ng-controller="Hypothesis"
+        data-ng-controller="AppController"
         metal:fill-slot="body">
     <div id="toolbar" class="form-inline">
-      <div class="tri"></div>
+      <div data-ng-click="toggleShow()" class="tri"></div>
       <div class="tinyman">
+        <a data-ng-hide="persona"
+           data-ng-click="$broadcast('showAuth')">Sign in</a>
         <form id="persona"
               action
               method="POST"
               enctype="multipart/form-data"
               accept-charset="utf-8">
           <input name="__formid__" type="hidden" value="persona" />
-          <a data-ng-hide="persona"
-             data-ng-click="showAuth()">Sign in</a>
           <div class="dropdown"
                data-ng-show="persona">
             <a role="button"
@@ -36,50 +36,54 @@
       </div>
     </div>
     <div id="gutter">
-      <header class="sheet" data-ng-model="auth" data-ng-submit="submit()">
-        <a class="close" data-ng-click="showAuth(false)"></a>
-        <ul class="nav nav-tabs">
-          <li><a data-target="#login-tab"
-                 data-toggle="tab">Log in</a></li>
-          <li><a data-target="#register-tab"
-                 data-toggle="tab">Sign up</a></li>
-          <li><a data-target="#forgot-tab"
-                 data-toggle="tab">Forgot your password?</a></li>
-          <li><a data-target="#activate-tab"
-                 data-toggle="tab">Set your password</a></li>
-        </ul>
-        <div class="tab-content form-vertical">
-          <div tal:repeat="name ['login', 'register']"
-               tal:attributes="id '%s-tab' % name"
-               class="tab-pane">
-            ${structure: layout.forms[name].render()}
-            <footer>
-              <ul>
-                <li>
-                  <a onclick="$('.nav a[data-target]')
-                                .filter('[data-target=#forgot-tab]')
-                                .tab('show')"
-                     >Password help?</a>
-                </li>
-                <li>
-                  <a onclick="$('.nav a[data-target]')
-                              .filter('[data-target=#activate-tab]')
-                              .tab('show')"
-                     >Have you already reserved a username with us?</a>
-                </li>
-              </ul>
-            </footer>
-          </div>
-          <div id="forgot-tab" class="tab-pane">
-            ${structure: layout.forms['forgot'].render()}
-          </div>
-          <div id="activate-tab" class="tab-pane">
-            ${structure: layout.forms['activate'].render()}
-          </div>
+      <header data-ng-class="auth.collapsed && 'collapsed'"
+              data-ng-model="auth.tab"
+              data-ng-submit="submit()"
+              data-tab-reveal="['forgot','activate']"
+              class="form-vertical sheet tabbable">
+        <a data-ng-click="auth.collapsed = true" class="close"></a>
+        <div data-title="Sign in"
+             data-value="login"
+             class="tab-pane">
+          ${structure: layout.forms['login'].render()}
         </div>
+        <div data-title="Create an account"
+             data-value="register"
+             class="tab-pane">
+          ${structure: layout.forms['register'].render()}
+        </div>
+        <div data-title="Forgot your password?"
+             data-value="forgot"
+             class="tab-pane">
+          ${structure: layout.forms['forgot'].render()}
+        </div>
+        <div data-title="Set your password"
+             data-value="activate"
+             class="tab-pane">
+          ${structure: layout.forms['activate'].render()}
+        </div>
+        <footer data-ng-show="auth.tab == 'login' || auth.tab == 'register'">
+          <ul>
+            <li>
+              <a data-ng-click="auth.tab = 'forgot'">Password help?</a>
+            </li>
+            <li>
+              <a data-ng-click="auth.tab = 'activate'">Have you already reserved a
+                username with us?</a>
+            </li>
+          </ul>
+        </footer>
       </header>
-      <div id="wrapper">
-      </div>
+      <div id="wrapper" data-ng-view=""></div>
     </div>
+    <script type="text/ng-template" id="annotation.html">
+      <metal:main use-macro="load: annotation.html" />
+    </script>
+    <script type="text/ng-template" id="editor.html">
+      <metal:main use-macro="load: editor.html" />
+    </script>
+    <script type="text/ng-template" id="viewer.html">
+      <metal:main use-macro="load: viewer.html" />
+    </script>
   </body>
 </html>

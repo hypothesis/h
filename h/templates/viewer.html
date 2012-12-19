@@ -1,0 +1,52 @@
+<ul class="sliding-panels">
+
+  <!-- Summaries -->
+  <li data-ng-class="detail && 'squished' || ''"
+      class="annotator-outer annotator-viewer">
+    <ul>
+      <li data-ng-click="showDetail(annotation)"
+          data-ng-mouseenter="focus(annotation)"
+          data-ng-mouseleave="focus()"
+          data-ng-repeat="annotation in annotations"
+          class="paper summary">
+        <div data-ng-model="annotation" class="annotation" />
+      </li>
+    </ul>
+  </li>
+
+  <!-- Details -->
+  <li data-ng-class="!detail && 'collapsed' || ''"
+      class="annotator-outer annotator-viewer">
+    <!-- Excerpt -->
+    <div class="paper excerpt">
+      <blockquote data-ng-bind="thread.message.annotation.quote" />
+    </div>
+    <!-- Thread view -->
+    <div data-recursive="" class="paper thread">
+      <!-- Annotation -->
+      <div data-ng-model="thread.message.annotation"
+           class="detail annotation" />
+
+      <!-- Reply count -->
+      <span data-ng-show="thread.children.length"
+            data-ng-pluralize=""
+            count="thread.flattenChildren().length"
+            when="{one: '1 reply', other: '{} replies'}"
+            class="reply-count" />
+
+      <!-- Replies -->
+      <ul>
+        <li data-ng-class="collapsed && 'collapsed' || ''"
+            data-ng-repeat="thread in thread.children"
+            data-ng-transclude=""
+            class="thread">
+          <a data-ng-click="collapsed = !collapsed" class="threadexp" />
+        </li>
+      </ul>
+    </div>
+    <div data-ng-show="annotation.quote" class="paper excerpt">
+      <blockquote data-ng-bind="annotation.quote" />
+    </div>
+  </li>
+
+</ul>
