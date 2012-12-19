@@ -205,8 +205,6 @@ class App
       angular.extend $scope.auth,
         collapsed: !show
         tab: 'login'
-      $scope.$evalAsync ->
-        deform.focusFirstInput $element
 
     # Fetch the initial model from the server
     $scope.reset()
