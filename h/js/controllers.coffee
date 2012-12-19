@@ -239,6 +239,9 @@ class Annotation
         annotator.publish 'annotationCreated', $scope.$modelValue
 
     $scope.reply = ->
+      unless annotator.plugins.Auth.haveValidToken()
+        $rootScope.$broadcast 'showAuth', true
+        return
       reply = annotator.createAnnotation()
       Object.defineProperty reply, 'draft',
         value: true
