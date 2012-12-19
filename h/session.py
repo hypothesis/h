@@ -22,7 +22,10 @@ def AngularSessionFactoryConfig(**options):
 
             def csrft_callback(request, response):
                 exception = getattr(request, 'exception', None)
-                if exception is None:
+                if (exception is None or self._cookie_on_exception
+                    and self.accessed()
+                ):
+                    self.persist()
                     csrft_cookie = self.__dict__['_csrft_cookie_']
                     if csrft_cookie and csrft_cookie.is_new:
                         value = csrft_cookie.request['cookie_out']
