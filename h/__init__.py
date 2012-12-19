@@ -41,15 +41,12 @@ def bootstrap(cfname, config_fn=None):
 def create_app(settings):
     from horus import groupfinder
     from pyramid.config import Configurator
-    from pyramid.authentication import AuthTktAuthenticationPolicy
+    from pyramid.authentication import SessionAuthenticationPolicy
     from pyramid.authorization import ACLAuthorizationPolicy
     from pyramid.path import AssetResolver
     from pyramid.response import FileResponse
 
-    authn_policy = AuthTktAuthenticationPolicy(
-        settings['auth.secret'],
-        callback=groupfinder
-    )
+    authn_policy = SessionAuthenticationPolicy(callback=groupfinder)
     authz_policy = ACLAuthorizationPolicy()
 
     config = Configurator(
