@@ -305,6 +305,17 @@ class Viewer
       annotation = $target.controller('ngModel')?.$modelValue
       if annotation then $location.search('id', annotation.id).replace()
 
+    $scope.focus = (annotation=$scope.annotations) ->
+      if $routeParams.id?
+        highlights = [$routeParams.id]
+      else if angular.isArray annotation
+        highlights = (a.id for a in annotation)
+      else if angular.isObject annotation
+        highlights = [annotation.id]
+      else
+        highlights = []
+      annotator.provider.setActiveHighlights highlights
+
     $scope.$on '$routeChangeSuccess', =>
       update = => $scope.$emit '$routeUpdate'
       annotator.plugins.Heatmap.subscribe 'updated', update
@@ -314,10 +325,6 @@ class Viewer
 
     $scope.$on '$routeUpdate', =>
       this.refresh $scope, $routeParams, annotator, threading
-
-    $scope.$watch 'detail && thread.message.annotation.id', (newValue) ->
-      annotations = if newValue? then [newValue] else $scope.annotations
-      annotator.provider.setActiveHighlights annotations.map (a) => a.id
 
   refresh: ($scope, $routeParams, annotator, threading) =>
     if $routeParams.bucket?
@@ -342,8 +349,11 @@ class Viewer
     if $routeParams.id?
       $scope.detail = true
       $scope.thread = threading.getContainer $routeParams.id
+      $scope.focus $scope.thread.message.annotation
     else
       $scope.detail = false
+      console.log 'focusing', $scope.annotations
+      $scope.focus $scope.annotations
 
 
 angular.module('h.controllers', [])

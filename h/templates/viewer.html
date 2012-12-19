@@ -3,10 +3,14 @@
   <!-- Summaries -->
   <li data-ng-class="detail && 'squished' || ''"
       class="annotator-outer annotator-viewer">
-    <ul class="annotator-listing" data-ng-click="showDetail($event)">
-      <li data-ng-model="annotation"
+    <ul data-ng-click="showDetail($event)"
+        class="annotator-listing">
+      <li data-ng-mouseenter="focus(annotation)"
+          data-ng-mouseleave="focus()"
           data-ng-repeat="annotation in annotations"
-          class="paper summary annotation" />
+          class="paper summary">
+        <div data-ng-model="annotation" class="annotation" />
+      </li>
     </ul>
   </li>
 
