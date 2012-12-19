@@ -322,13 +322,10 @@ class Viewer
     $scope.detail = false
     $scope.thread = null
 
-    $scope.showDetail = ($event) ->
-      $target = angular.element $event.target
-      annotation = $target.controller('ngModel')?.$modelValue
-      if annotation
-        search = $location.search() or {}
-        search.id = annotation.id
-        $location.search(search).replace()
+    $scope.showDetail = (annotation) ->
+      search = $location.search() or {}
+      search.id = annotation.id
+      $location.search(search).replace()
 
     $scope.focus = (annotation=$scope.annotations) ->
       if $routeParams.id?
