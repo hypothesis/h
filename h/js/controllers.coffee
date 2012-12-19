@@ -259,7 +259,9 @@ class Annotation
         references: references
       parentThread.addChild replyThread
 
-    $scope.$watch '$modelValue.draft', (newValue) -> $scope.editing = newValue
+    $scope.$watch '$modelValue.draft', (newValue) ->
+      $scope.editing = newValue
+      if newValue then $timeout -> $element.find('textarea').focus()
 
 class Editor
   this.$inject = [
