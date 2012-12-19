@@ -41,7 +41,6 @@ class Hypothesis extends Annotator
 
     # Update threads when annotations are deleted
     this.subscribe 'annotationDeleted', (annotation) ->
-      debugger
       thread = threading.getContainer annotation.id
       thread.message = null
       if thread.parent then threading.pruneEmpties thread.parent
@@ -122,6 +121,8 @@ class Hypothesis extends Annotator
 
               # Update the annotation with the new data
               annotation = angular.extend annotation, data
+
+            this.publish 'hostUpdated'
 
         # Dodge toolbars [DISABLE]
         #@provider.getMaxBottom (max) =>

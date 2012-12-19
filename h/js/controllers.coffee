@@ -11,24 +11,18 @@ class App
     heatmap = annotator.plugins.Heatmap
     heatmap.element.appendTo $element
 
-    # Update the heatmap when certain events are pubished
-    events = [
-      'annotationCreated'
-      'annotationDeleted'
-      'annotationsLoaded'
-      'hostUpdated'
-    ]
-
+    # Update the heatmap when the host is updated or annotations are loaded
+    events  = ['hostUpdated', 'annotationsLoaded']
     for event in events
-      annotator.subscribe event, =>
-        provider.getHighlights ({highlights, offset}) =>
-          heatmap.updateHeatmap
-            highlights: highlights.map (hl) =>
-              thread = (threading.getContainer hl.data.id)
-              hl.data = thread.message?.annotation
-              hl
-            offset: offset
-          $scope.$apply -> $scope.$broadcast '$routeUpdate'
+      annotator.subscribe event, ->
+        provider.getHighlights ({highlights, offset}) ->
+          $scope.$apply ->
+            heatmap.updateHeatmap
+              highlights: highlights.map (hl) ->
+                thread = (threading.getContainer hl.data.id)
+                hl.data = thread.message?.annotation
+                hl
+              offset: offset
 
     heatmap.subscribe 'updated', =>
       tabs = d3.select(annotator.element[0])
@@ -223,8 +217,14 @@ class App
 
 
 class Annotation
-  this.$inject = ['$scope', '$rootScope', 'annotator', 'threading']
-  constructor: ($scope, $rootScope, annotator, threading) ->
+  this.$inject = [
+    '$element', '$scope', '$rootScope', '$timeout',
+    'annotator', 'threading'
+  ]
+  constructor: (
+    $element, $scope, $rootScope, $timeout
+    annotator, threading
+  ) ->
     $scope.cancel = ->
       $scope.editing = false
       if $scope.$modelValue.draft
@@ -267,22 +267,20 @@ class Editor
     $location, $routeParams, $scope,
     annotator, threading
   ) ->
+    done = ->
+      $location.path('/app').search(null).replace()
+      annotator.provider.onEditorHide()
+      annotator.hide()
+
     annotator.subscribe 'annotationCreated', annotator.provider.onEditorSubmit
-    annotator.subscribe 'annotationCreated', annotator.provider.onEditorHide
-    annotator.subscribe 'annotationDeleted', annotator.provider.onEditorHide
+    annotator.subscribe 'annotationCreated', done
+    annotator.subscribe 'annotationDeleted', done
 
     $scope.$on '$destroy', ->
       annotator.unsubscribe 'annotationCreated',
         annotator.provider.onEditorSubmit
-      annotator.unsubscribe 'annotationCreated',
-        annotator.provider.onEditorHide
-      annotator.unsubscribe 'annotationDeleted',
-        annotator.provider.onEditorHide
-
-    $scope.$watch 'annotation.draft', (newValue, oldValue) ->
-      if oldValue and not newValue
-        $location.absUrl('/app')
-        annotator.hide()
+      annotator.unsubscribe 'annotationCreated', done
+      annotator.unsubscribe 'annotationDeleted', done
 
     thread = (threading.getContainer $routeParams.id)
     annotation = thread.message?.annotation
@@ -300,7 +298,9 @@ class Viewer
     $location, $routeParams, $scope,
     annotator, threading
   ) ->
-    refresh = => this.refresh $scope, $routeParams, annotator, threading
+    {plugins, provider} = annotator
+    refresh = => this.refresh $scope, $routeParams, threading, plugins.Heatmap
+    update = -> $scope.$apply refresh
 
     $scope.annotations = []
     $scope.thread = null
@@ -322,18 +322,33 @@ class Viewer
         highlights = [annotation.id]
       else
         highlights = []
-      annotator.provider.setActiveHighlights highlights
+      provider.setActiveHighlights highlights
 
-    $scope.$on '$routeUpdate', refresh
-    refresh()
+    $scope.$on '$destroy', ->
+      plugins.Heatmap.unsubscribe 'updated', refresh
 
-  refresh: ($scope, $routeParams, annotator, threading) =>
-    if $routeParams.bucket?
-      buckets = annotator.plugins.Heatmap.buckets
-      $scope.annotations = buckets[$routeParams.bucket]
+    $scope.$on '$routeUpdate', ->
+      refresh()
+      if $routeParams.bucket?
+        plugins.Heatmap.unsubscribe 'updated', refresh
+      else
+        plugins.Heatmap.subscribe 'updated', refresh
+
+    $scope.$evalAsync -> $scope.$emit '$routeUpdate'
+
+  refresh: ($scope, $routeParams, threading, heatmap) =>
+    if $routeParams.id?
+      $scope.detail = true
+      $scope.thread = threading.getContainer $routeParams.id
+      $scope.focus $scope.thread.message.annotation
     else
-      unless $routeParams.id?
-        heatmap = annotator.plugins.Heatmap
+      $scope.detail = false
+      $scope.focus $scope.annotations
+
+    if $routeParams.bucket?
+      $scope.annotations = heatmap.buckets[$routeParams.bucket]
+    else
+      unless $scope.detail
         datum = (d3.select heatmap.element[0]).datum()
         if datum?
           {highlights, offset} = datum
@@ -346,14 +361,6 @@ class Viewer
           , []
         else
           $scope.annotations = []
-
-    if $routeParams.id?
-      $scope.detail = true
-      $scope.thread = threading.getContainer $routeParams.id
-      $scope.focus $scope.thread.message.annotation
-    else
-      $scope.detail = false
-      $scope.focus $scope.annotations
 
 
 angular.module('h.controllers', [])
