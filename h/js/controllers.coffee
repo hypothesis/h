@@ -272,20 +272,23 @@ class Editor
     $location, $routeParams, $scope,
     annotator, threading
   ) ->
-    done = ->
-      $location.path('/app').search(null).replace()
+    save = ->
+      $location.path('/viewer').replace()
+      annotator.provider.onEditorSubmit()
       annotator.provider.onEditorHide()
-      annotator.hide()
 
-    annotator.subscribe 'annotationCreated', annotator.provider.onEditorSubmit
-    annotator.subscribe 'annotationCreated', done
-    annotator.subscribe 'annotationDeleted', done
+    cancel = ->
+      search = $location.search() or {}
+      delete search.id
+      $location.path('/viewer').search(search).replace()
+      annotator.provider.onEditorHide()
+
+    annotator.subscribe 'annotationCreated', save
+    annotator.subscribe 'annotationDeleted', cancel
 
     $scope.$on '$destroy', ->
-      annotator.unsubscribe 'annotationCreated',
-        annotator.provider.onEditorSubmit
-      annotator.unsubscribe 'annotationCreated', done
-      annotator.unsubscribe 'annotationDeleted', done
+      annotator.unsubscribe 'annotationCreated', save
+      annotator.unsubscribe 'annotationDeleted', cancel
 
     thread = (threading.getContainer $routeParams.id)
     annotation = thread.message?.annotation
@@ -304,10 +307,21 @@ class Viewer
     annotator, threading
   ) ->
     {plugins, provider} = annotator
-    refresh = => this.refresh $scope, $routeParams, threading, plugins.Heatmap
-    update = -> $scope.$apply refresh
+
+    listening = false
+    refresh = =>
+      this.refresh $scope, $routeParams, threading, plugins.Heatmap
+      if listening
+        if $scope.detail or $routeParams.bucket?
+          plugins.Heatmap.unsubscribe 'updated', refresh
+          listening = false
+      else
+        unless $scope.detail or $routeParams.bucket?
+          plugins.Heatmap.subscribe 'updated', refresh
+          listening = true
 
     $scope.annotations = []
+    $scope.detail = false
     $scope.thread = null
 
     $scope.showDetail = ($event) ->
@@ -330,16 +344,11 @@ class Viewer
       provider.setActiveHighlights highlights
 
     $scope.$on '$destroy', ->
-      plugins.Heatmap.unsubscribe 'updated', refresh
+      if listening then plugins.Heatmap.unsubscribe 'updated', refresh
 
-    $scope.$on '$routeUpdate', ->
-      refresh()
-      if $routeParams.bucket?
-        plugins.Heatmap.unsubscribe 'updated', refresh
-      else
-        plugins.Heatmap.subscribe 'updated', refresh
+    $scope.$on '$routeUpdate', refresh
 
-    $scope.$evalAsync -> $scope.$emit '$routeUpdate'
+    refresh()
 
   refresh: ($scope, $routeParams, threading, heatmap) =>
     if $routeParams.id?

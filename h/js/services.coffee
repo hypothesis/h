@@ -119,6 +119,13 @@ class Hypothesis extends Annotator
                 Object.defineProperty annotation, 'id',
                   enumerable: true
 
+                # If the annotation is loaded in a view, switch the view
+                # to reference the new id.
+                search = $location.search()
+                if search? and search.id == annotation.id
+                  search.id = data.id
+                  $location.search(search).replace()
+
               # Update the annotation with the new data
               annotation = angular.extend annotation, data
 
