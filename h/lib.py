@@ -6,6 +6,14 @@ from h import interfaces
 
 
 class WeakMemoizedProperty(property):
+    """A property which memoizes the result of its getter
+
+    Use this property when re-computing the value on each access is
+    undesirable but reification of the value is inappropriate because a
+    setter function is needed. All memoized values are cached using a weak
+    reference to the owner object so there is no need to worry about cache
+    cleanup.
+    """
     memo = weakref.WeakKeyDictionary()
 
     def __get__(self, obj, objtype=None):
