@@ -4,6 +4,7 @@ class Converter extends Markdown.Converter
     this.hooks.chain "postConversion", (text) ->
       text.replace /<a href=/, "<a target=\"_blank\" href="
 
+
 fuzzyTime = (date) ->
   return '' if not date
   delta = Math.round((+new Date - new Date(date)) / 1000)
@@ -31,7 +32,7 @@ fuzzyTime = (date) ->
    else if (delta < month)
     fuzzy = Math.round(delta / day) + ' days ago'
    else
-    fuzzy = new Date(date).toLocaleDateString()
+    fuzzy = new Date(date)
 
 
 userName = (user) ->

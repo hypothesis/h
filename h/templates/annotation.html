@@ -1,6 +1,7 @@
 <!-- Top controls -->
 <div data-ng-hide="editing" class="magicontrols">
-  <span data-ng-bind="model.$viewValue.created | fuzzyTime" class="time" />
+  <span data-ng-bind="model.$viewValue.created | fuzzyTime | date:'mediumDate'"
+        class="time" />
   <div class="vis-icon" title="Visibility"
        data-ng-show="model.$viewValue.permissions.read.length" />
   <div class="fave-icon show" title="Favorite"
