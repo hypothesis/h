@@ -5,23 +5,21 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   # heatmap svg skeleton
   html: """
-        <div class="annotator-heatmap">
-          <svg
-               xmlns="http://www.w3.org/2000/svg"
-               version="1.1">
-             <defs>
-               <linearGradient id="heatmap-gradient" x2="0" y2="100%">
-               </linearGradient>
-               <filter id="heatmap-blur">
-                 <feGaussianBlur stdDeviation="0 2"></feGaussianBlur>
-               </filter>
-             </defs>
-             <rect x="0" y="0" width="100%" height="100%"
-                   fill="url('#heatmap-gradient')"
-                   filter="url('#heatmap-blur')" >
-             </rect>
-           </svg>
-        </div>
+        <svg class="annotator-heatmap"
+             xmlns="http://www.w3.org/2000/svg"
+             version="1.1">
+           <defs>
+             <linearGradient id="heatmap-gradient" x2="0" y2="100%">
+             </linearGradient>
+             <filter id="heatmap-blur">
+               <feGaussianBlur stdDeviation="0 2"></feGaussianBlur>
+             </filter>
+           </defs>
+           <rect x="0" y="0" width="100%" height="100%"
+                 fill="url('#heatmap-gradient')"
+                 filter="url('#heatmap-blur')" >
+           </rect>
+         </svg>
         """
 
   # buckets of annotations that overlap
@@ -50,9 +48,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     d3.hcl(270, c(v), l(v)).toString()
 
   updateHeatmap: (data) =>
+    # debugger
     return unless d3?
-
-    wrapper = this.element.offsetParent()
+    wrapper = this.element.parents("body")
     {highlights, offset} = data
 
     # Keep track of buckets of annotations above and below the viewport

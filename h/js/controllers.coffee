@@ -9,8 +9,7 @@ class App
   ) ->
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
-    heatmap.element.appendTo $element
-
+    heatmap.element.appendTo '#heatmap-container'
     # Update the heatmap when the host is updated or annotations are loaded
     events  = ['hostUpdated', 'annotationsLoaded']
     for event in events
