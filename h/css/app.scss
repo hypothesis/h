@@ -29,15 +29,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   visibility: hidden;
 }
 
-.annotator-heatmap {
-  background: hsla(0, 0, 0, .1);
-  border: solid thin rgba($grayLighter, .4);
-  left: 17px;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  width: $heatmap-width;
-}
 
 
 .sliding-panels > li {
@@ -83,7 +74,23 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 
-//HEATMAP POINTERS////////////////////////////////
+//HEATMAP STUFF////////////////////////////////
+#heatmap-container {
+  left: 10px;
+  height: 100%;
+  position: fixed;
+}
+
+.annotator-heatmap {
+  background: hsla(0, 0, 0, .1);
+  border: solid thin rgba($grayLighter, .4);
+  left: 17px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  width: $heatmap-width;
+}
+
 .heatmap-pointer {
   @include user-select(none);
   @include transition-property(left);
@@ -92,7 +99,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   // color: rgb(238, 238, 238);
   color: #666;
   left: 0px;
-  position: fixed;
+  position: absolute;
   height: 20.1px;
   width: 40.1px;
   vertical-align: middle;
