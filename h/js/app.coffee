@@ -1,6 +1,5 @@
 imports = [
   'bootstrap'
-  'deform'
   'h.controllers'
   'h.directives'
   'h.filters'

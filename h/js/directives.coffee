@@ -106,7 +106,6 @@ tabReveal = ['$parse', ($parse) ->
           pane = panes[i]
           value = pane.attr.value || pane.attr.title
           if value == ngModel.$viewValue
-            deform.focusFirstInput pane.element
             pane.element.css 'display', ''
             angular.element(tabs[i]).css 'display', ''
           else if value in hiddenPanes
@@ -123,7 +122,7 @@ thread = ->
   scope: true
 
 
-angular.module('h.directives', ['ngSanitize', 'deform'])
+angular.module('h.directives', ['ngSanitize'])
   .directive('annotation', annotation)
   .directive('recursive', recursive)
   .directive('tabReveal', tabReveal)

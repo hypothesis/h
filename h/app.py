@@ -71,9 +71,7 @@ class AppController(views.BaseController):
             return {
                 'status': 'failure',
                 'reason': messages.INVALID_FORM,
-                'form': {
-                    'login': e.render()
-                }
+                'error': e.error.asdict(),
             }
 
         try:
@@ -82,22 +80,15 @@ class AppController(views.BaseController):
                 appstruct['password'],
             )
         except exceptions.AuthenticationFailure as e:
-            form.error = colander.Invalid(form.schema, e)
             return {
                 'status': 'failure',
-                'reason': e.message,
-                'form': {
-                    'login': form.render(appstruct),
-                }
+                'reason': str(e),
             }
 
         request.user = user
 
         return {
             'status': 'okay',
-            'form': {
-                'login': form.render()
-            },
             'model': self(),
         }
 
@@ -112,9 +103,7 @@ class AppController(views.BaseController):
             return {
                 'status': 'failure',
                 'reason': messages.INVALID_FORM,
-                'form': {
-                    'register': e.render()
-                }
+                'error': e.error.asdict(),
             }
 
         try:
@@ -124,11 +113,9 @@ class AppController(views.BaseController):
                 appstruct['password'],
             )
         except exceptions.RegistrationFailure as e:
-            form.error = colander.Invalid(form.schema, str(e))
             return {
-                'form': {
-                    'register': form.render(appstruct)
-                },
+                'status': 'failure',
+                'reason': str(e)
             }
 
         if request.registry.settings.get('horus.autologin', False):
@@ -136,9 +123,6 @@ class AppController(views.BaseController):
             request.user = user
 
         return {
-            'form': {
-                'register': form.render()
-            },
             'model': self(),
         }
 
@@ -154,9 +138,7 @@ class AppController(views.BaseController):
             return {
                 'status': 'failure',
                 'reason': messages.INVALID_FORM,
-                'form': {
-                    'activate': e.render()
-                },
+                'error': e.error.asdict(),
             }
         else:
             code = appstruct['code']
@@ -176,16 +158,11 @@ class AppController(views.BaseController):
                 return {
                     'status': 'failure',
                     'reason': messages.INVALID_FORM,
-                    'form': {
-                        'activate': form.render(appstruct)
-                    },
+                    'error': e.error.asdict(),
                 }
 
         return {
             'status': 'okay',
-            'form': {
-                'activate': form.render()
-            },
         }
 
     @view_config(request_method='POST', request_param='__formid__=forgot')
@@ -197,21 +174,15 @@ class AppController(views.BaseController):
         result = controller.forgot_password()
         if isinstance(result, dict):
             if 'errors' in result:
-                error = colander.Invalid(
-                    form.schema,
-                    messages.INVALID_FORM
-                )
-                error.children = result.pop('errors')
-                form.widget.handle_error(form, error)
-            result = {
-                'form': {
-                    'forgot': form.render()
+                error = colander.Invalid(form.schema, messages.INVALID_FORM)
+                return {
+                    'status': 'failure',
+                    'reason': messages.INVALID_FORM,
+                    'error': error.asdict(),
                 }
-            }
-        else:
-            # TODO: take care of flash success message
-            return None
-        return result
+        return {
+            'status': 'okay',
+        }
 
     @view_config(name='logout')
     def logout(self):
@@ -239,14 +210,7 @@ class AppController(views.BaseController):
     @view_config(renderer='h:templates/app.pt')
     def __html__(self):
         request = self.request
-
-        layout = request.layout_manager.layout
-        for name in ['login', 'forgot', 'register', 'activate']:
-            form = getattr(self, '%s_form' % name)
-            layout.add_form(form)
-
         token_url = request.resource_url(request.root, 'api', 'access_token')
-
         return {'token_url': token_url}
 
 

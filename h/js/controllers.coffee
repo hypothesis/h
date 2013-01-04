@@ -1,12 +1,22 @@
 class App
+  scope:
+    sheet:
+      collapsed: true
+      tab: 'login'
+    personas: []
+    persona: null
+    token: null
+
   this.$inject = [
     '$compile', '$element', '$http', '$location', '$scope',
-    'annotator', 'deform', 'threading'
+    'annotator', 'threading'
   ]
   constructor: (
     $compile, $element, $http, $location, $scope,
-    annotator, deform, threading
-  ) ->
+    annotator, threading
+    ) ->
+    $scope.reset = => angular.extend $scope, @scope
+
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
     heatmap.element.appendTo $element
@@ -110,36 +120,10 @@ class App
 
           $scope.$apply -> $location.path('/viewer').search(search).replace()
 
-    angular.extend $scope,
-      auth:
-        collapsed: true
-        tab: 'login'
-      forms: []
-
-    $scope.reset = ->
-      angular.extend $scope,
-        auth:
-          collapsed: true
-          tab: 'login'
-        username: null
-        password: null
-        email: null
-        code: null
-        personas: []
-        persona: null
-        token: null
-
-    $scope.addForm = ($form, name) ->
-      $scope.forms[name] = $form
-
-    $scope.submit = ->
-      fields = switch $scope.auth.tab
-        when 'login' then ['username', 'password']
-        when 'register' then ['username', 'password', 'email']
-        when 'forgot' then ['email']
-        when 'activate' then ['password', 'code']
-      params = ([key, $scope[key]] for key in fields when $scope[key]?)
-      params.push ['__formid__', $scope.auth.tab]
+    $scope.submit = (form) ->
+      params = for name, control of form when control.$modelValue?
+        [name, control.$modelValue]
+      params.push ['__formid__', form.$name]
       data = (((p.map encodeURIComponent).join '=') for p in params).join '&'
 
       $http.post '', data,
@@ -149,15 +133,7 @@ class App
       .success (data) =>
         # Extend the scope with updated model data
         angular.extend($scope, data.model) if data.model?
-
-        # Compile and link any forms which were re-rendered in this response
-        for oid of data.form
-          $form = angular.element data.form[oid]
-          if oid of $scope.forms
-            link = ($compile $form)
-            $scope.forms[oid].replaceWith $form
-            link $scope
-          deform.focusFirstInput $form
+        # TODO: flash data.error server messages
 
     $scope.toggleShow = ->
       if annotator.visible
@@ -173,7 +149,7 @@ class App
         annotator.element.find('#persona')
           .off('change').on('change', -> $(this).submit())
           .off('click')
-        $scope.auth.collapsed = true
+        $scope.sheet.collapsed = true
       else
         $scope.persona = null
         $scope.token = null
@@ -202,16 +178,17 @@ class App
         delete plugins.Auth
 
     $scope.$on 'showAuth', (event, show=true) ->
-      angular.extend $scope.auth,
+      angular.extend $scope.sheet,
         collapsed: !show
         tab: 'login'
 
     # Fetch the initial model from the server
-    $scope.reset()
     $http.get 'model',
       withCredentials: true
     .success (data) =>
       angular.extend $scope, data
+
+    $scope.$evalAsync 'reset()'
 
 
 class Annotation

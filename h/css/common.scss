@@ -7,7 +7,6 @@ $sansFontFamily: "Source Sans Pro", $sansFontFamily;
 $serifFontFamily: "Merriweather", $serifFontFamily;
 
 
-
 //ELEMENT STYLES////////////////////////////////
 a {
   color: $linkColor;
@@ -89,13 +88,8 @@ label {
 
 
 //MCRANDOM////////////////////////////////
-.btn {
+button, input[type=submit], .btn {
   @include sweetbutton;
-}
-
-.alert-block {
-  span.errorMsgLbl { @extend .visuallyhidden; }
-  span.errorMsg { @extend .visuallyhidden; }
 }
 
 //Candidate for cleanup
@@ -158,8 +152,13 @@ label {
 
 .form-vertical {
   select, textarea, input, button {
+    display: block;
     margin-top: .75em;
   }
+}
+
+input.ng-invalid.ng-dirty {
+  border-color: lighten($red, 35%);
 }
 
 .req {

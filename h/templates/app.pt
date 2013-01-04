@@ -2,14 +2,21 @@
 <html lang="en" metal:use-macro="main_template">
   <body data-ng-app="h"
         data-ng-controller="AppController"
+        class="ng-cloak"
         metal:fill-slot="body">
+
+    <!-- Toolbar -->
     <div id="toolbar" class="form-inline">
       <div data-ng-click="toggleShow()" class="tri"></div>
-      <div class="tinyman">
-        <a data-ng-hide="persona"
-           data-ng-click="$broadcast('showAuth')">Sign in</a>
+
+      <!-- Persona -->
+      <div data-ng-show="sheet.collapsed"
+           class="tinyman">
+        <a data-ng-click="sheet.collapsed = false;
+                          sheet.tab = 'login';"
+           data-ng-hide="persona">Sign in</a>
         <form id="persona"
-              action
+              action=""
               method="POST"
               enctype="multipart/form-data"
               accept-charset="utf-8">
@@ -34,48 +41,95 @@
           </div>
         </form>
       </div>
-    </div>
-    <div id="gutter">
-      <header data-ng-class="auth.collapsed && 'collapsed'"
-              data-ng-model="auth.tab"
-              data-ng-submit="submit()"
-              data-tab-reveal="['forgot','activate']"
-              class="form-vertical sheet tabbable">
-        <a data-ng-click="auth.collapsed = true" class="close"></a>
-        <div data-title="Sign in"
-             data-value="login"
-             class="tab-pane">
-          ${structure: layout.forms['login'].render()}
-        </div>
-        <div data-title="Create an account"
-             data-value="register"
-             class="tab-pane">
-          ${structure: layout.forms['register'].render()}
-        </div>
-        <div data-title="Forgot your password?"
-             data-value="forgot"
-             class="tab-pane">
-          ${structure: layout.forms['forgot'].render()}
-        </div>
-        <div data-title="Set your password"
-             data-value="activate"
-             class="tab-pane">
-          ${structure: layout.forms['activate'].render()}
-        </div>
-        <footer data-ng-show="auth.tab == 'login' || auth.tab == 'register'">
+      <!-- / Persona -->
+
+      <!-- Account and Authentication -->
+      <div data-ng-class="sheet.collapsed && 'collapsed'"
+           data-ng-init="sheet.collapsed = true;
+                         sheet.tab = 'login';"
+           data-ng-model="sheet.tab"
+           data-ng-submit="submit(this[sheet.tab])"
+           data-tab-reveal="['forgot','activate']"
+           class="form-vertical sheet tabbable">
+
+        <a data-ng-click="sheet.collapsed = true" class="close"></a>
+
+        <form data-title="Sign in"
+              data-value="login"
+              class="tab-pane"
+              name="login">
+          <input type="text" name="username" value="" placeholder="Username"
+                 required autocapitalize="false" data-ng-model="username"  />
+          <input type="password" name="password" value="" placeholder="Password"
+                 required autocapitalize="false" autocorrect="false"
+                 data-ng-model="password" />
+          <input type="submit" name="login" value="Sign in" />
+        </form>
+
+        <form data-title="Create an account"
+              data-value="register"
+              class="tab-pane"
+              name="register">
+          <input type="text" name="username" value="" placeholder="Username"
+                 required autocapitalize="false" data-ng-model="username"
+                 data-ng-minlength="3" data-ng-maxlength="15" />
+          <span>Usernames are between 3 and 15 characters in length.</span>
+          <input type="email" name="email" value="" placeholder="Email"
+                 required autocapitalize="false" data-ng-model="email" />
+          <input type="password" name="password" value="" placeholder="Password"
+                 required autocapitalize="false" autocorrect="false"
+                 data-ng-model="password" />
+          <input type="submit" name="sign_up" value="Sign up" />
+        </form>
+
+        <form data-title="Forgot your password?"
+              data-value="forgot"
+              class="tab-pane"
+              name="forgot">
+          <input type="email" name="email" value="" placeholder="Email"
+                 required autocapitalize="false" data-ng-model="email" />
+          <input type="submit" name="forgot" value="Send recovery email" />
+        </form>
+
+        <form data-title="Set your password"
+              data-value="activate"
+              class="tab-pane"
+              name="activate">
+          <input type="text" name="code" value="" placeholder="Activation Code"
+                 required autocorrect="false" autocapitalize="false"
+                 data-ng-model="code" />
+          <input type="password" name="password" value="" placeholder="Password"
+                 required autocapitalize="false" autocorrect="false"
+                 data-ng-model="password" />
+          <input type="submit" name="activate" value="Sign in" />
+        </form>
+
+        <footer data-ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
           <ul>
             <li>
-              <a data-ng-click="auth.tab = 'forgot'">Password help?</a>
+              <a data-ng-click="sheet.tab = 'forgot'">Password help?</a>
             </li>
             <li>
-              <a data-ng-click="auth.tab = 'activate'">Have you already reserved a
-                username with us?</a>
+              <a data-ng-click="sheet.tab = 'activate'"
+                 >Have you already reserved a username with us?</a>
             </li>
           </ul>
         </footer>
-      </header>
-      <div id="wrapper" data-ng-view=""></div>
+
+      </div>
+      <!-- / Account and Authentication -->
     </div>
+    <!-- / Toolbar -->
+
+
+    <!-- Content -->
+    <div id="wrapper">
+      <div data-ng-view=""></div>
+    </div>
+    <!-- / Content -->
+
+
+    <!-- Templates -->
     <script type="text/ng-template" id="annotation.html">
       <metal:main use-macro="load: annotation.html" />
     </script>

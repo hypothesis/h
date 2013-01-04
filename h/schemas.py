@@ -11,7 +11,10 @@ from h.messages import _
 
 
 class LoginSchema(CSRFSchema):
-    username = colander.SchemaNode(colander.String())
+    username = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(min=3, max=15),
+    )
     password = colander.SchemaNode(
         colander.String(),
         validator=colander.Length(min=2),
@@ -20,7 +23,10 @@ class LoginSchema(CSRFSchema):
 
 
 class RegisterSchema(CSRFSchema):
-    username = colander.SchemaNode(colander.String())
+    username = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(min=3, max=15),
+    )
     email = colander.SchemaNode(
         colander.String(),
         validator=colander.Email()

@@ -133,6 +133,7 @@ class Hypothesis extends Annotator
 
         # Dodge toolbars [DISABLE]
         #@provider.getMaxBottom (max) =>
+        #  @element.css('margin-top', "#{max}px")
         #  @element.find('#toolbar').css("top", "#{max}px")
         #  @element.find('#gutter').css("margin-top", "#{max}px")
         #  @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max

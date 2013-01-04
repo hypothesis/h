@@ -71,7 +71,6 @@ app = Bundle(
             for name in
             (
                 'app',
-                'deform',
                 'controllers',
                 'filters',
                 'directives',
