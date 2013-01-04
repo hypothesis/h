@@ -50,7 +50,7 @@
            data-ng-model="sheet.tab"
            data-ng-submit="submit(this[sheet.tab])"
            data-tab-reveal="['forgot','activate']"
-           class="form-vertical sheet tabbable">
+           class="form-vertical sheet tabbable collapsed">
 
         <a data-ng-click="sheet.collapsed = true" class="close"></a>
 
