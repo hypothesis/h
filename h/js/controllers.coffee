@@ -14,7 +14,7 @@ class App
   constructor: (
     $compile, $element, $http, $location, $scope,
     annotator, threading
-    ) ->
+  ) ->
     $scope.reset = => angular.extend $scope, @scope
 
     {plugins, provider} = annotator
