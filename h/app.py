@@ -87,10 +87,9 @@ class AppController(views.BaseController):
 
         request.user = user
 
-        return {
-            'status': 'okay',
-            'model': self(),
-        }
+        result = self()
+        result.update(status='okay')
+        return result
 
     @view_config(request_method='POST', request_param='__formid__=register')
     def register(self):
@@ -122,9 +121,9 @@ class AppController(views.BaseController):
             self.db.flush()  # to get the id
             request.user = user
 
-        return {
-            'model': self(),
-        }
+        result = self()
+        result.update(status='okay')
+        return result
 
     @view_config(request_method='POST', request_param='__formid__=activate')
     def activate(self):
@@ -161,9 +160,9 @@ class AppController(views.BaseController):
                     'error': e.error.asdict(),
                 }
 
-        return {
-            'status': 'okay',
-        }
+        result = self()
+        result.update(status='okay')
+        return result
 
     @view_config(request_method='POST', request_param='__formid__=forgot')
     def forgot(self):
@@ -180,14 +179,18 @@ class AppController(views.BaseController):
                     'reason': messages.INVALID_FORM,
                     'error': error.asdict(),
                 }
-        return {
-            'status': 'okay',
-        }
+        result = self()
+        result.update(status='okay')
+        return result
 
     @view_config(name='logout')
     def logout(self):
         self.auth_controller.logout()
         self.request.user = None
+
+        result = self()
+        result.update(status='okay')
+        return result
 
     @view_config(name='token', renderer='string')
     def token(self):
@@ -197,15 +200,21 @@ class AppController(views.BaseController):
         else:
             return token
 
-    @view_config(name='model', renderer='json', xhr=True)
+    @view_config(renderer='json', xhr=True)
     def __call__(self):
         request = self.request
+        session = request.session
+        flash = {
+            name[3:]: session.pop_flash(name[3:])
+            for name in session.keys()
+            if name.startswith('_f_')
+        }
         model = {
             name: getattr(request.context, name)
             for name in ['persona', 'personas', 'token']
         }
         model.update(tokenUrl=request.resource_url(request.context, 'token'))
-        return model
+        return dict(flash=flash, model=model)
 
     @view_config(renderer='h:templates/app.pt')
     def __html__(self):

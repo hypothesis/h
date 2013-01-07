@@ -183,10 +183,10 @@ class App
         tab: 'login'
 
     # Fetch the initial model from the server
-    $http.get 'model',
+    $http.get '',
       withCredentials: true
     .success (data) =>
-      angular.extend $scope, data
+      angular.extend $scope, data.model
 
     $scope.$evalAsync 'reset()'
 
