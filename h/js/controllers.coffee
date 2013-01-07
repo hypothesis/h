@@ -1,5 +1,9 @@
 class App
   scope:
+    username: null
+    email: null
+    password: null
+    code: null
     sheet:
       collapsed: true
       tab: 'login'
@@ -15,8 +19,6 @@ class App
     $compile, $element, $http, $location, $scope,
     annotator, flash, threading
   ) ->
-    $scope.reset = => angular.extend $scope, @scope
-
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
     heatmap.element.appendTo $element
@@ -159,7 +161,7 @@ class App
         $http.post 'logout', '',
           withCredentials: true
         .success (data) =>
-          $scope.reset()
+          $scope.$broadcast '$reset'
           if data.model? then angular.extend($scope, data.model)
           if data.flash? then flash q, msgs for q, msgs of data.flash
 
@@ -185,6 +187,8 @@ class App
         collapsed: !show
         tab: 'login'
 
+    $scope.$on '$reset', => angular.extend $scope, @scope
+
     # Fetch the initial model from the server
     $http.get '',
       withCredentials: true
@@ -192,7 +196,7 @@ class App
       if data.model? then angular.extend $scope, data.model
       if data.flash? then flash q, msgs for q, msgs of data.flash
 
-    $scope.$evalAsync 'reset()'
+    $scope.$broadcast '$reset'
 
 
 class Annotation

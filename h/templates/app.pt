@@ -49,6 +49,7 @@
                          sheet.tab = 'login';"
            data-ng-model="sheet.tab"
            data-ng-submit="submit(this[sheet.tab])"
+           data-resettable="true"
            data-tab-reveal="['forgot','activate']"
            class="form-vertical sheet tabbable collapsed">
 

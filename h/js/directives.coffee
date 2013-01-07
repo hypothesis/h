@@ -71,6 +71,21 @@ recursive = ['$compile', '$timeout', ($compile, $timeout) ->
 ]
 
 
+resettable = ->
+  compile: (tElement, tAttrs, transclude) ->
+    post: (scope, iElement, iAttrs) ->
+      reset = ->
+        transclude scope, (el) ->
+          iElement.replaceWith el
+          iElement = el
+          iElement[0].$reset = reset
+      reset()
+      scope.$on '$reset', reset
+  priority: 5000
+  restrict: 'A'
+  transclude: 'element'
+
+
 tabReveal = ['$parse', ($parse) ->
   compile: (tElement, tAttrs, transclude) ->
     panes = []
@@ -125,5 +140,6 @@ thread = ->
 angular.module('h.directives', ['ngSanitize'])
   .directive('annotation', annotation)
   .directive('recursive', recursive)
+  .directive('resettable', resettable)
   .directive('tabReveal', tabReveal)
   .directive('thread', thread)
