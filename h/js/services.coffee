@@ -377,6 +377,45 @@ class Hypothesis extends Annotator
       annotation.id
 
 
+class FlashProvider
+  queues:
+    info: []
+    error: []
+    success: []
+  notice: null
+  timeout: null
+
+  constructor: ->
+    # Configure notification classes
+    angular.extend Annotator.Notification,
+      INFO: 'info'
+      ERROR: 'error'
+      SUCCESS: 'success'
+
+  _process: ->
+    @timeout = null
+    for q, msgs of @queues
+      if msgs.length
+        notice = Annotator.showNotification msgs.shift(), q
+        @timeout = this._wait =>
+          # work around Annotator.Notification not removing classes
+          for _, klass of notice.options.classes
+            notice.element.removeClass klass
+          this._process()
+        break
+
+  $get: ['$timeout', 'annotator', ($timeout, annotator) ->
+    this._wait = (cb) -> $timeout cb, 5000
+    angular.bind this, this._flash
+  ]
+
+  _flash: (queue, messages) ->
+    if @queues[queue]?
+      @queues[queue] = @queues[queue]?.concat messages
+      this._process() unless @timeout?
+
+
 angular.module('h.services', [])
+  .provider('flash', FlashProvider)
   .service('annotator', Hypothesis)
   .value('threading', mail.messageThread())

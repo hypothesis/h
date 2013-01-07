@@ -9,11 +9,11 @@ class App
 
   this.$inject = [
     '$compile', '$element', '$http', '$location', '$scope',
-    'annotator', 'threading'
+    'annotator', 'flash', 'threading'
   ]
   constructor: (
     $compile, $element, $http, $location, $scope,
-    annotator, threading
+    annotator, flash, threading
   ) ->
     $scope.reset = => angular.extend $scope, @scope
 
@@ -131,9 +131,9 @@ class App
           'Content-Type': 'application/x-www-form-urlencoded'
         withCredentials: true
       .success (data) =>
-        # Extend the scope with updated model data
-        angular.extend($scope, data.model) if data.model?
-        # TODO: flash data.error server messages
+        if data.model? then angular.extend($scope, data.model)
+        if data.flash? then flash q, msgs for q, msgs of data.flash
+        if data.status is 'failure' then flash 'error', data.reason
 
     $scope.toggleShow = ->
       if annotator.visible
@@ -158,7 +158,10 @@ class App
       if oldValue? and not newValue?
         $http.post 'logout', '',
           withCredentials: true
-        .success (data) => $scope.reset()
+        .success (data) =>
+          $scope.reset()
+          if data.model? then angular.extend($scope, data.model)
+          if data.flash? then flash q, msgs for q, msgs of data.flash
 
     $scope.$watch 'token', (newValue, oldValue) =>
       if plugins.Auth?
@@ -186,7 +189,8 @@ class App
     $http.get '',
       withCredentials: true
     .success (data) =>
-      angular.extend $scope, data.model
+      if data.model? then angular.extend $scope, data.model
+      if data.flash? then flash q, msgs for q, msgs of data.flash
 
     $scope.$evalAsync 'reset()'
 
