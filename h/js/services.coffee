@@ -24,6 +24,7 @@ class Hypothesis extends Annotator
     threading
   ) ->
     super ($document.find 'body')
+
     # Load plugins
     for own name, opts of @options
       if not @plugins[name] and name of Annotator.Plugin
