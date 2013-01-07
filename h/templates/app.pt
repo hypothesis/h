@@ -78,7 +78,7 @@
                  required autocapitalize="false" data-ng-model="email" />
           <input type="password" name="password" value="" placeholder="Password"
                  required autocapitalize="false" autocorrect="false"
-                 data-ng-model="password" />
+                 data-ng-minlength="2" data-ng-model="password" />
           <input type="submit" name="sign_up" value="Sign up" />
         </form>
 
@@ -100,7 +100,7 @@
                  data-ng-model="code" />
           <input type="password" name="password" value="" placeholder="Password"
                  required autocapitalize="false" autocorrect="false"
-                 data-ng-model="password" />
+                 data-ng-minlength="2" data-ng-model="password" />
           <input type="submit" name="activate" value="Sign in" />
         </form>
 
