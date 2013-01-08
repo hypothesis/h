@@ -124,6 +124,7 @@ button, input[type=submit], .btn {
   @include border-radius(.5em);
   @include smallshadow;
   @include single-transition(opacity, .2s);
+  border: solid thin;
   left: 50%;
   margin-left: -15%;
   opacity: 0;
@@ -135,7 +136,7 @@ button, input[type=submit], .btn {
   z-index: 2000;
 
   &.show, &.annotator-notice-show {
-    opacity: 1;
+    opacity: .8;
     pointer-events: initial;
   }
 }
