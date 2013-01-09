@@ -4,6 +4,11 @@
   "manifest_version": 2,
 
   "description": "The Internet, peer reviewed.",
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
 
   "homepage_url": "https://hypothes.is/",
   "incognito": "split",
@@ -20,11 +25,5 @@
     "persistent": false,
     "scripts": ["js/background.js"]
   },
-  "page_action": {
-    "default_icon": {
-      "19": "images/icon19.png",
-      "38": "images/icon38.png"
-    },
-    "default_title": "Annotate"
-  }
+  "page_action": {}
 }
