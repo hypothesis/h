@@ -58,7 +58,8 @@
         <form data-title="Sign in"
               data-value="login"
               class="tab-pane"
-              name="login">
+              name="login"
+              novalidate>
           <input type="text" name="username" value="" placeholder="Username"
                  required autocapitalize="false" data-ng-model="username"  />
           <input type="password" name="password" value="" placeholder="Password"
@@ -70,7 +71,8 @@
         <form data-title="Create an account"
               data-value="register"
               class="tab-pane"
-              name="register">
+              name="register"
+              novalidate>
           <input type="text" name="username" value="" placeholder="Username"
                  required autocapitalize="false" data-ng-model="username"
                  data-ng-minlength="3" data-ng-maxlength="15" />
@@ -86,7 +88,8 @@
         <form data-title="Forgot your password?"
               data-value="forgot"
               class="tab-pane"
-              name="forgot">
+              name="forgot"
+              novalidate>
           <input type="email" name="email" value="" placeholder="Email"
                  required autocapitalize="false" data-ng-model="email" />
           <input type="submit" name="forgot" value="Send recovery email" />
@@ -95,7 +98,8 @@
         <form data-title="Set your password"
               data-value="activate"
               class="tab-pane"
-              name="activate">
+              name="activate"
+              novalidate>
           <input type="text" name="code" value="" placeholder="Activation Code"
                  required autocorrect="false" autocapitalize="false"
                  data-ng-model="code" />
