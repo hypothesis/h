@@ -10,8 +10,8 @@
 
   "offline_enabled": false,
   "permissions": [
-    "http://*/*",
-    "https://*/*",
+    "<all_urls>",
+
     "clipboardWrite",
     "tabs"
   ]
