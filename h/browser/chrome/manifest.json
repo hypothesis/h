@@ -14,5 +14,17 @@
 
     "clipboardWrite",
     "tabs"
-  ]
+  ],
+
+  "background": {
+    "persistent": false,
+    "scripts": ["js/background.js"]
+  },
+  "page_action": {
+    "default_icon": {
+      "19": "images/icon19.png",
+      "38": "images/icon38.png"
+    },
+    "default_title": "Annotate"
+  }
 }
