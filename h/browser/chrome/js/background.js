@@ -1,8 +1,27 @@
+var ACTION_STATES = {
+  active: {
+    icons: {
+      19: "images/active_19.png",
+      38: "images/active_38.png"
+    },
+    title: "Disable annotation"
+  },
+  sleeping: {
+    icons: {
+      19: "images/sleeping_19.png",
+      38: "images/sleeping_38.png"
+    },
+    title: "Enable annotation"
+  }
+}
+
+
 function inject(tab) {
   chrome.tabs.executeScript(null, {
     file: 'js/inject.js'
   })
 }
+
 
 function state(tabId, value) {
   var stateMap = localStorage.getItem('state')
@@ -10,43 +29,70 @@ function state(tabId, value) {
 
   if (value === undefined) {
     return stateMap[tabId]
-  } else {
-    if (value != null) {
-      stateMap[tabId] = value
-    } else {
-      delete stateMap[tabId]
-    }
-    return localStorage.setItem('state', JSON.stringify(stateMap))
   }
+
+  if (value) {
+    stateMap[tabId] = value
+  } else {
+    delete stateMap[tabId]
+  }
+
+  localStorage.setItem('state', JSON.stringify(stateMap))
+
+  return value
+}
+
+
+function setPageAction(tabId, value) {
+  chrome.pageAction.setIcon({
+    tabId: tabId,
+    path: ACTION_STATES[value].icons
+  })
+  chrome.pageAction.setTitle({
+    tabId: tabId,
+    title: ACTION_STATES[value].title
+  })
+  chrome.pageAction.show(tabId)
 }
 
 
 function onPageAction(tab) {
-  if (state(tab.id) != 'active') {
-    state(tab.id, 'active')
-    inject(tab.id)
+  var newState
+
+  if (state(tab.id) == 'active') {
+    newState = state(tab.id, 'sleeping')
   } else {
-    state(tab.id, null)
+    newState = state(tab.id, 'active')
+    if (tab.status == 'complete') {
+      inject(tab.id)
+    }
   }
+
+  setPageAction(tab.id, newState)
 }
 
 
 function onTabCreated(tab) {
+  state(tab.id, 'sleeping')
+}
+
+
+function onTabRemoved(tab) {
   state(tab.id, null)
 }
 
 
 function onTabUpdated(tabId, info) {
-  if (info.status != 'complete') return
+  var currentState = state(tabId)
 
-  switch(state(tabId)) {
-  case 'active':
+  setPageAction(tabId, currentState)
+
+  if (currentState == 'active' && info.status == 'complete') {
     inject(tabId)
-  default:
-    chrome.pageAction.show(tabId)
   }
 }
 
 chrome.pageAction.onClicked.addListener(onPageAction)
-chrome.tabs.onUpdated.addListener(onTabUpdated)
 chrome.tabs.onCreated.addListener(onTabCreated)
+chrome.tabs.onRemoved.addListener(onTabRemoved)
+chrome.tabs.onUpdated.addListener(onTabUpdated)
