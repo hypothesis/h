@@ -1,6 +1,15 @@
 Changelog for h
 ===============
 
+0.0.6 (2013-01-08)
+------------------
+
+- Flash messages (#233)
+- Static asset build script (#161)
+- Finish registration form flow (#159)
+- Separate detail and bucket views (#162)
+- Slide-over detail view (#150)
+
 0.0.5 (2012-11-27)
 ------------------
 
