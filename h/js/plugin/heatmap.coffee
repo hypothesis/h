@@ -5,22 +5,23 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   # heatmap svg skeleton
   html: """
-        <svg class="annotator-heatmap"
-             xmlns="http://www.w3.org/2000/svg"
-             version="1.1">
-           <defs>
-             <linearGradient id="heatmap-gradient" x2="0" y2="100%">
-             </linearGradient>
-             <filter id="heatmap-blur">
-               <feGaussianBlur stdDeviation="0 2"></feGaussianBlur>
-             </filter>
-           </defs>
-           <rect x="0" y="0" width="100%" height="100%"
-                 fill="url('#heatmap-gradient')"
-                 filter="url('#heatmap-blur')" >
-           </rect>
-         </svg>
-         """
+        <div class="annotator-heatmap">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               version="1.1">
+             <defs>
+               <linearGradient id="heatmap-gradient" x2="0" y2="100%">
+               </linearGradient>
+               <filter id="heatmap-blur">
+                 <feGaussianBlur stdDeviation="0 2"></feGaussianBlur>
+               </filter>
+             </defs>
+             <rect x="0" y="0" width="100%" height="100%"
+                   fill="url('#heatmap-gradient')"
+                   filter="url('#heatmap-blur')" >
+             </rect>
+           </svg>
+        </div>
+        """
 
   # buckets of annotations that overlap
   buckets: []
@@ -49,7 +50,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   updateHeatmap: (data) =>
     return unless d3?
-
+    
     wrapper = this.element.offsetParent()
     {highlights, offset} = data
 
@@ -159,7 +160,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     opacity = d3.scale.pow().domain([0, max]).range([.1, .6]).exponent(2)
 
     # d3 selections
-    stops = d3.select(@element[0]).datum(data) # cache highlights
+    stops = d3.select(@element[0]).datum(data)
       .select('#heatmap-gradient')
       .selectAll('stop').data(stopData, (d) => d)
     stops.enter().append('stop')
