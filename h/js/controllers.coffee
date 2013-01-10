@@ -40,41 +40,16 @@ class App
       annotator.show()
 
     heatmap.subscribe 'updated', =>
-      tabs = d3.select(heatmap.element[0])
-        .selectAll('div.heatmap-pointer')
-        .data =>
-          buckets = []
-          heatmap.index.forEach (b, i) =>
-            if heatmap.buckets[i].length > 0
-              buckets.push i
-            else if heatmap.isUpper(i) or heatmap.isLower(i)
-              buckets.push i
-          buckets
 
-      {highlights, offset} = d3.select(heatmap.element[0]).datum()
+      elem = d3.select(heatmap.element[0])
+      data = {highlights, offset} = elem.datum()
+      tabs = elem.selectAll('div').data data
       height = $(window).outerHeight(true)
       pad = height * .2
 
-      # Enters into tabs var, and generates bucket pointers from them
-      tabs.enter().append('div')
-        .classed('heatmap-pointer', true)
+      {highlights, offset} = elem.datum()
 
-      tabs.exit().remove()
-
-      tabs
-
-        .style 'top', (d) =>
-          "#{(heatmap.index[d] + heatmap.index[d+1]) / 2}px"
-
-        .html (d) =>
-          "<div class='label'>#{heatmap.buckets[d].length}</div><div class='svg'></div>"
-
-        .classed('upper', heatmap.isUpper)
-        .classed('lower', heatmap.isLower)
-
-        .style 'display', (d) =>
-          if (heatmap.buckets[d].length is 0) then 'none' else ''
-
+      elem.selectAll('.heatmap-pointer')
         # Creates highlights corresponding bucket when mouse is hovered
         .on 'mousemove', (bucket) =>
           unless $location.path() == '/viewer' and $location.search()?.id?

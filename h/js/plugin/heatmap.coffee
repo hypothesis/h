@@ -135,6 +135,13 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       else
         break
 
+    # Add the scroll buckets
+    @buckets.unshift above, []
+    @buckets.push below, []
+    @index.unshift @BUCKET_THRESHOLD_PAD,
+      (@BUCKET_THRESHOLD_PAD + @BUCKET_SIZE)
+    @index.push $(window).height() - @BUCKET_SIZE, $(window).height()
+
     # Set up the stop interpolations for data binding
     stopData = $.map(@buckets, (annotations, i) =>
       x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
@@ -156,13 +163,17 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           [offsets[1], i, 1, 1e-6] ]
     )
 
-    # And a little opacity spice
+    # Update the data bindings
+    element = d3.select(@element[0]).datum(data)
+
+    # Update gradient stops
     opacity = d3.scale.pow().domain([0, max]).range([.1, .6]).exponent(2)
 
-    # d3 selections
-    stops = d3.select(@element[0]).datum(data)
-      .select('#heatmap-gradient')
-      .selectAll('stop').data(stopData, (d) => d)
+    stops = element
+    .select('#heatmap-gradient')
+    .selectAll('stop')
+    .data(stopData, (d) => d)
+
     stops.enter().append('stop')
     stops.exit().remove()
     stops.order()
@@ -172,11 +183,35 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .attr('stop-opacity', (v) ->
         if max == 0 then .1 else opacity(v[3]))
 
-    @buckets.unshift above, []
-    @buckets.push below, []
-    @index.unshift @BUCKET_THRESHOLD_PAD,
-      (@BUCKET_THRESHOLD_PAD + @BUCKET_SIZE)
-    @index.push $(window).height() - @BUCKET_SIZE, $(window).height()
+    # Update bucket pointers
+    tabs = element
+    .selectAll('div.heatmap-pointer')
+
+    .data =>
+      buckets = []
+      @index.forEach (b, i) =>
+        if @buckets[i].length > 0 or @isUpper(i) or @isLower(i)
+          buckets.push i
+      buckets
+
+    tabs.enter().append('div')
+      .classed('heatmap-pointer', true)
+
+    tabs.exit().remove()
+
+    tabs
+    .style 'top', (d) =>
+      "#{(@index[d] + @index[d+1]) / 2}px"
+
+    .html (d) =>
+      "<div class='label'>#{@buckets[d].length}</div><div class='svg'></div>"
+
+    .classed('upper', @isUpper)
+    .classed('lower', @isLower)
+
+    .style 'display', (d) =>
+      if (@buckets[d].length is 0) then 'none' else ''
+
 
     this.publish('updated')
 
