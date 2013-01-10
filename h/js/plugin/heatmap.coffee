@@ -49,8 +49,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     d3.hcl(270, c(v), l(v)).toString()
 
   updateHeatmap: (data) =>
-    # debugger
     return unless d3?
+    
     wrapper = this.element.offsetParent()
     {highlights, offset} = data
 
@@ -160,7 +160,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     opacity = d3.scale.pow().domain([0, max]).range([.1, .6]).exponent(2)
 
     # d3 selections
-    stops = d3.select(@element[0]).datum(data) # cache highlights
+    stops = d3.select(@element[0]).datum(data)
       .select('#heatmap-gradient')
       .selectAll('stop').data(stopData, (d) => d)
     stops.enter().append('stop')
