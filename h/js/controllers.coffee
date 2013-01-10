@@ -93,8 +93,6 @@ class App
         # Does one of a few things when a tab is clicked depending on type
         .on 'click', (bucket) =>
           d3.event.stopPropagation()
-          search = $location.search() or {}
-          search.bucket = bucket
 
           # If it's the upper tab, scroll to next bucket above
           if heatmap.isUpper bucket
@@ -103,7 +101,6 @@ class App
               if next < hl.offset.top < threshold then hl.offset.top else next
             , threshold - height
             provider.scrollTop next - pad
-            delete search.bucket
 
           # If it's the lower tab, scroll to next bucket below
           else if heatmap.isLower bucket
@@ -112,14 +109,10 @@ class App
               if threshold < hl.offset.top < next then hl.offset.top else next
             , offset + height
             provider.scrollTop next - pad
-            delete search.bucket
 
           # If it's neither of the above, load the bucket into the viewer
           else
-            delete search.id
-            annotator.show()
-
-          $scope.$apply -> $location.path('/viewer').search(search).replace()
+            annotator.showViewer heatmap.buckets[bucket]
 
     $scope.submit = (form) ->
       params = for name, control of form when control.$modelValue?
