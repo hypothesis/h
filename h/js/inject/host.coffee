@@ -140,6 +140,7 @@ class Annotator.Host extends Annotator
         addPlugin: {}
         createAnnotation: {}
         showEditor: {}
+        showViewer: {}
         back: {}
         update: {}
 

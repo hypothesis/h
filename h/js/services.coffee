@@ -158,7 +158,6 @@ class Hypothesis extends Annotator
             this.show()
             null
         showEditor: (annotation) =>
-          return unless this._canCloseUnsaved()
           thread = (threading.getContainer annotation.id)
           if thread.message?.annotation
             angular.extend thread.message.annotation, annotation
@@ -168,6 +167,11 @@ class Hypothesis extends Annotator
               id: annotation.id
               references: annotation.thread?.split('/')
           this.showEditor thread.message.annotation
+        showViewer: (annotations) =>
+          annotations = for a in annotations
+            thread = (threading.getContainer a.id)
+            thread.message?.annotation or a
+          this.showViewer annotations
         # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
         back: =>
@@ -319,13 +323,23 @@ class Hypothesis extends Annotator
       id: annotation.id
       ranges: annotation.ranges
 
-  showViewer: (annotations=[], detail=false) =>
-    if (@visible and not detail) or @unsaved_drafts.indexOf(@editor) > -1
-      if not this._canCloseUnsaved() then return
-
-    # Not implemented
+  showViewer: (annotations=[]) =>
+    return unless this._canCloseUnsaved()
+    @element.injector().invoke [
+      '$location', '$rootScope', '$route',
+      ($location, $rootScope, $route) =>
+        $rootScope.$apply =>
+          $location.path('/viewer')
+            .search
+              bucket: -1
+            .replace()
+        $route.current.scope.annotations = annotations
+        $route.current.scope.$digest()
+    ]
+    this.show()
 
   showEditor: (annotation) =>
+    return unless this._canCloseUnsaved()
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) =>

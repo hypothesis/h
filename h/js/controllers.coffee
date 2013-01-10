@@ -338,7 +338,7 @@ class Viewer
       $scope.detail = false
       $scope.focus $scope.annotations
 
-    if $routeParams.bucket?
+    if $routeParams.bucket? and $routeParams.bucket > 0
       $scope.annotations = heatmap.buckets[$routeParams.bucket]
     else
       unless $scope.detail
