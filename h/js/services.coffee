@@ -30,6 +30,9 @@ class Hypothesis extends Annotator
       if not @plugins[name] and name of Annotator.Plugin
         this.addPlugin(name, opts)
 
+    # Set up XDM connection
+    this._setupXDM()
+
     # Add user info to new annotations
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       annotation.user = @plugins.HypothesisPermissions.options.userId(
@@ -41,26 +44,46 @@ class Hypothesis extends Annotator
         value: true
 
     # Update threads when annotations are deleted
-    this.subscribe 'annotationDeleted', (annotation) ->
-      thread = threading.getContainer annotation.id
-      thread.message = null
-      if thread.parent then threading.pruneEmpties thread.parent
+    this.subscribe 'annotationDeleted', (annotation) =>
+      $rootScope.$apply ->
+        thread = threading.getContainer annotation.id
+        thread.message = null
+        if thread.parent then threading.pruneEmpties thread.parent
 
     # Thread the annotations after loading
-    this.subscribe 'annotationsLoaded', (annotations) ->
-      threading.thread annotations.map (a) ->
-        annotation: a
-        id: a.id
-        references: a.thread?.split '/'
+    this.subscribe 'annotationsLoaded', (annotations) =>
+      $rootScope.$apply ->
+        threading.thread annotations.map (a) ->
+          annotation: a
+          id: a.id
+          references: a.thread?.split '/'
 
     # Update the thread when an annotation changes
-    this.subscribe 'annotationUpdated', (annotation) ->
-      (threading.getContainer annotation.id).message =
-        annotation: annotation
-        id: annotation.id
-        references: annotation.thread?.split '/'
+    this.subscribe 'annotationUpdated', (annotation) =>
+      $rootScope.$apply ->
+        (threading.getContainer annotation.id).message =
+          annotation: annotation
+          id: annotation.id
+          references: annotation.thread?.split '/'
 
-    # Establish cross-domain communication to the widget host
+    # Update the heatmap when the host is updated or annotations are loaded
+    heatmap = @plugins.Heatmap
+    for event in ['hostUpdated', 'annotationsLoaded']
+      this.subscribe event, =>
+        @provider.getHighlights ({highlights, offset}) ->
+          $rootScope.$apply ->
+            heatmap.updateHeatmap
+              highlights: highlights.map (hl) ->
+                thread = (threading.getContainer hl.data.id)
+                hl.data = thread.message?.annotation
+                hl
+              offset: offset
+
+  _setupXDM: ->
+    $scope = @element.scope()
+    $location = @element.injector().get '$location'
+    threading = @element.injector().get 'threading'
+
     @provider = new easyXDM.Rpc
       swf: @options.swf
       onReady: =>
@@ -80,7 +103,7 @@ class Hypothesis extends Annotator
           # is enumerable.
           this.plugins.Store.updateAnnotation = (annotation, data) =>
             {deleteAnnotation, loadAnnotations} = @provider
-            $rootScope.$apply ->
+            $scope.$apply ->
               if annotation.id != data.id
                 # Remove the old annotation from the threading
                 thread = (threading.getContainer annotation.id)
@@ -99,8 +122,8 @@ class Hypothesis extends Annotator
                   references: references
 
                 if not thread.parent? and thread.message.references.length
-                  parent = (threading.getContainer references[references.length-1])
-                  parent.addChild thread
+                  threading.getContainer(references[references.length-1])
+                  .addChild thread
 
                 # Remove the old annotation from the host.
                 # XXX in iframe mode it's safe to make these calls because the
@@ -154,7 +177,7 @@ class Hypothesis extends Annotator
               references: []
             annotation.id
           else
-            $rootScope.$apply => $rootScope.$broadcast 'showAuth'
+            $scope.$apply => $scope.$broadcast 'showAuth'
             this.show()
             null
         showEditor: (annotation) =>
@@ -166,17 +189,19 @@ class Hypothesis extends Annotator
               annotation: annotation
               id: annotation.id
               references: annotation.thread?.split('/')
-          this.showEditor thread.message.annotation
+          $scope.$apply => this.showEditor thread.message.annotation
+          this.show()
         showViewer: (annotations) =>
           annotations = for a in annotations
             thread = (threading.getContainer a.id)
             thread.message?.annotation or a
-          this.showViewer annotations
+          $scope.$apply => this.showViewer annotations
+          this.show()
         # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
         back: =>
           if $location.path() == '/viewer' and $location.search()?.id?
-            $rootScope.$apply => $location.search('id', null).replace()
+            $scope.$apply => $location.search('id', null).replace()
           else
             this.hide()
         update: => this.publish 'hostUpdated'
@@ -326,30 +351,23 @@ class Hypothesis extends Annotator
   showViewer: (annotations=[]) =>
     return unless this._canCloseUnsaved()
     @element.injector().invoke [
-      '$location', '$rootScope', '$route',
-      ($location, $rootScope, $route) =>
-        $rootScope.$apply =>
-          $location.path('/viewer')
-            .search
-              bucket: -1
-            .replace()
-        $route.current.scope.annotations = annotations
-        $route.current.scope.$digest()
+      '$location', '$rootScope',
+      ($location, $rootScope) ->
+        $rootScope.annotations = annotations
+        $location.path('/viewer')
+        .replace()
     ]
-    this.show()
 
   showEditor: (annotation) =>
     return unless this._canCloseUnsaved()
     @element.injector().invoke [
-      '$location', '$rootScope',
-      ($location, $rootScope) =>
-        $rootScope.$apply =>
-          $location.path('/editor')
-            .search
-              id: annotation.id
-            .replace()
+      '$location',
+      ($location) ->
+        $location.path('/editor')
+        .search
+          id: annotation.id
+        .replace()
     ]
-    this.show()
 
   show: =>
     @visible = true

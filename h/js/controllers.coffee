@@ -21,26 +21,16 @@ class App
   ) ->
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
-    heatmap.element.appendTo $element
-    # Update the heatmap when the host is updated or annotations are loaded
-    events  = ['hostUpdated', 'annotationsLoaded']
-    for event in events
-      annotator.subscribe event, ->
-        provider.getHighlights ({highlights, offset}) ->
-          $scope.$apply ->
-            heatmap.updateHeatmap
-              highlights: highlights.map (hl) ->
-                thread = (threading.getContainer hl.data.id)
-                hl.data = thread.message?.annotation
-                hl
-              offset: offset
+    dynamicBucket = true
 
-    heatmap.element.bind 'click', ->
-      $scope.$apply -> $location.path('/viewer').search(null).replace()
-      annotator.show()
+    heatmap.element.bind 'click', =>
+      $scope.$apply ->
+        dynamicBucket = true
+        annotator.showViewer()
+        annotator.show()
+        heatmap.publish 'updated'
 
     heatmap.subscribe 'updated', =>
-
       elem = d3.select(heatmap.element[0])
       data = {highlights, offset} = elem.datum()
       tabs = elem.selectAll('div').data data
@@ -48,6 +38,17 @@ class App
       pad = height * .2
 
       {highlights, offset} = elem.datum()
+
+      if dynamicBucket and $location.path() == '/viewer'
+        unless $location.search()?.detail
+          bottom = offset + heatmap.element.height()
+          annotations = highlights.reduce (acc, hl) =>
+            if hl.offset.top >= offset and hl.offset.top <= bottom
+              if hl.data not in acc
+                acc.push hl.data
+            acc
+          , []
+          annotator.showViewer annotations
 
       elem.selectAll('.heatmap-pointer')
         # Creates highlights corresponding bucket when mouse is hovered
@@ -87,7 +88,11 @@ class App
 
           # If it's neither of the above, load the bucket into the viewer
           else
-            annotator.showViewer heatmap.buckets[bucket]
+            dynamicBucket = false
+            $scope.$apply ->
+              $location.search('id', null)
+              annotator.showViewer heatmap.buckets[bucket]
+            annotator.show()
 
     $scope.submit = (form) ->
       params = for name, control of form when control.$modelValue?
@@ -270,7 +275,6 @@ class Viewer
           plugins.Heatmap.subscribe 'updated', refresh
           listening = true
 
-    $scope.annotations = []
     $scope.detail = false
     $scope.thread = null
 
@@ -305,23 +309,6 @@ class Viewer
     else
       $scope.detail = false
       $scope.focus $scope.annotations
-
-    if $routeParams.bucket? and $routeParams.bucket > 0
-      $scope.annotations = heatmap.buckets[$routeParams.bucket]
-    else
-      unless $scope.detail
-        datum = (d3.select heatmap.element[0]).datum()
-        if datum?
-          {highlights, offset} = datum
-          bottom = offset + heatmap.element.height()
-          $scope.annotations = highlights.reduce (acc, hl) =>
-            if hl.offset.top >= offset and hl.offset.top <= bottom
-              if hl.data not in acc
-                acc.push hl.data
-            acc
-          , []
-        else
-          $scope.annotations = []
 
 
 angular.module('h.controllers', [])

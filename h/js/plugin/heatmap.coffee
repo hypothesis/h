@@ -31,6 +31,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   constructor: (element, options) ->
     super $(@html), options
+    @element.appendTo element
 
   _collate: (a, b) =>
     for i in [0..a.length-1]
