@@ -1,12 +1,6 @@
 import colander
 import deform
 
-from horus.views import (
-    AuthController,
-    ForgotPasswordController,
-    RegisterController
-)
-
 from pyramid.decorator import reify
 from pyramid.view import view_config, view_defaults
 
@@ -18,11 +12,15 @@ from h.messages import _
 class AppController(views.BaseController):
     @reify
     def auth_controller(self):
-        return AuthController(self.request)
+        return views.AuthController(self.request)
+
+    @reify
+    def forgot_controller(self):
+        return views.ForgotPasswordController(self.request)
 
     @reify
     def register_controller(self):
-        return RegisterController(self.request)
+        return views.RegisterController(self.request)
 
     @reify
     def login_form(self):
@@ -166,10 +164,9 @@ class AppController(views.BaseController):
     @view_config(request_method='POST', request_param='__formid__=forgot')
     def forgot(self):
         request = self.request
-        controller = ForgotPasswordController(request)
         form = self.forgot_form
 
-        result = controller.forgot_password()
+        result = self.forgot_controller.forgot_password()
         if isinstance(result, dict):
             if 'errors' in result:
                 error = colander.Invalid(form.schema, messages.INVALID_FORM)

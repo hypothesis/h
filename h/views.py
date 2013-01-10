@@ -1,10 +1,21 @@
-__all__ = ['BaseController']
+__all__ = [
+    'BaseController',
+
+    'AuthController',
+    'ForgotPasswordController',
+    'RegisterController',
+]
 
 from pyramid.traversal import find_resource
 
 from pyramid.view import view_config
 
-from horus.views import BaseController
+from horus.views import (
+    AuthController,
+    BaseController,
+    ForgotPasswordController,
+    RegisterController
+)
 
 
 @view_config(layout='site', renderer='templates/home.pt', route_name='index')
