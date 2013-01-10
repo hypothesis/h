@@ -35,7 +35,6 @@
         </form>
       </div>
     </div>
-    <div id="heatmap-container"></div>
     <div id="gutter">
       <header data-ng-class="auth.collapsed && 'collapsed'"
               data-ng-model="auth.tab"

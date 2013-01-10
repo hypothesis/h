@@ -75,19 +75,20 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 //HEATMAP STUFF////////////////////////////////
-#heatmap-container {
+.annotator-heatmap {
   height: 100%;
   position: fixed;
-}
-
-.annotator-heatmap {
-  background: hsla(0, 0, 0, .1);
-  border: solid thin rgba($grayLighter, .4);
-  left: 17px;
-  height: 100%;
-  position: absolute;
   top: 0;
-  width: $heatmap-width;
+ 
+  svg {
+    background: hsla(0, 0, 0, .1);
+    border: solid thin rgba($grayLighter, .4);
+    left: 17px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    width: $heatmap-width;
+  }
 }
 
 .heatmap-pointer {

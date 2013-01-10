@@ -9,7 +9,7 @@ class App
   ) ->
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
-    heatmap.element.appendTo '#heatmap-container'
+    heatmap.element.appendTo $element
     # Update the heatmap when the host is updated or annotations are loaded
     events  = ['hostUpdated', 'annotationsLoaded']
     for event in events
@@ -23,8 +23,12 @@ class App
                 hl
               offset: offset
 
+    heatmap.element.bind 'click', ->
+      $scope.$apply -> $location.path('/viewer').search(null).replace()
+      annotator.show()
+
     heatmap.subscribe 'updated', =>
-      tabs = d3.select('#heatmap-container')
+      tabs = d3.select(heatmap.element[0])
         .selectAll('div.heatmap-pointer')
         .data =>
           buckets = []
@@ -34,10 +38,6 @@ class App
             else if heatmap.isUpper(i) or heatmap.isLower(i)
               buckets.push i
           buckets
-
-      heatmap.element.bind 'click', ->
-        $scope.$apply -> $location.path('/viewer').search(null).replace()
-        annotator.show()
 
       {highlights, offset} = d3.select(heatmap.element[0]).datum()
       height = $(window).outerHeight(true)
@@ -79,8 +79,8 @@ class App
             provider.setActiveHighlights null
 
         # Does one of a few things when a tab is clicked depending on type
-        .on 'mouseup', (bucket) =>
-          d3.event.preventDefault()
+        .on 'click', (bucket) =>
+          d3.event.stopPropagation()
           search = $location.search() or {}
           search.bucket = bucket
 
