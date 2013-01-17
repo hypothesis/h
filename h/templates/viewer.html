@@ -1,17 +1,67 @@
 <ul class="sliding-panels">
 
+
   <!-- Summaries -->
   <li data-ng-class="detail && 'squished' || ''"
       class="annotator-outer annotator-viewer">
-    <ul>
-      <li data-ng-click="showDetail(annotation)"
-          data-ng-mouseenter="focus(annotation)"
-          data-ng-mouseleave="focus()"
-          data-ng-repeat="annotation in annotations"
-          class="paper summary">
-        <div data-ng-model="annotation" class="annotation" />
-      </li>
-    </ul>
+
+      <!-- View/Sort selector -->
+      <div data-ng-class=""
+           data-ng-init="crunk = 'page';"
+           data-ng-model="crunk"
+           data-ng-submit=""
+           data-resettable="true"
+           data-tab-reveal=""
+           class="tabbable summaries-temp">
+
+        <div data-title="Page"
+              data-value="page"
+              class="tab-pane"
+              name="page">
+          <ul>
+            <li data-ng-click="showDetail(annotation)"
+                data-ng-mouseenter="focus(annotation)"
+                data-ng-mouseleave="focus()"
+                data-ng-repeat="annotation in annotations"
+                class="paper summary">
+              <div data-ng-model="annotation" class="annotation" />
+            </li>
+          </ul>
+        </div>
+
+        <div data-title="Screen"
+              data-value="screen"
+              class="tab-pane"
+              name="screen">
+          <ul>
+            <li data-ng-click="showDetail(annotation)"
+                data-ng-mouseenter="focus(annotation)"
+                data-ng-mouseleave="focus()"
+                data-ng-repeat="annotation in annotations"
+                class="paper summary">
+              <div data-ng-model="annotation" class="annotation" />
+            </li>
+          </ul>
+        </div>
+
+        <div data-title="Tab"
+              data-value="tab"
+              class="tab-pane"
+              name="tab">
+          <ul>
+            <li data-ng-click="showDetail(annotation)"
+                data-ng-mouseenter="focus(annotation)"
+                data-ng-mouseleave="focus()"
+                data-ng-repeat="annotation in annotations"
+                class="paper summary">
+              <div data-ng-model="annotation" class="annotation" />
+            </li>
+          </ul>
+        </div>
+
+      </div>
+      <!--/ View/Sort selector -->
+
   </li>
 
   <!-- Details -->
