@@ -353,31 +353,31 @@ blockquote {
 
 
 //TABS////////////////////////////////
-.nav-tabs {
-  @include pie-clearfix;
-  margin: 0 .5em;
+// .nav-tabs {
+//   @include pie-clearfix;
+//   margin: 0 .5em;
 
-  & > li > a {
-    cursor: pointer;
-    float: left;
-    line-height: 1;
-    padding: .5em 1em;
-    padding-top: .25em;
-    margin-right: -.5em;
-    margin-bottom: 0px;
-    position: relative;
-    text-decoration: none;
-    @include tabbox;
-  }
+//   & > li > a {
+//     cursor: pointer;
+//     float: left;
+//     line-height: 1;
+//     padding: .5em 1em;
+//     padding-top: .25em;
+//     margin-right: -.5em;
+//     margin-bottom: 0px;
+//     position: relative;
+//     text-decoration: none;
+//     @include tabbox;
+//   }
 
-  & > .active > a {
-    @include box-shadow(none);
-    color: #333;
-    font-weight: bold;
-    background: hsla(0, 0%, 100%, 1);
-    z-index: 90;
-  }
-}
+//   & > .active > a {
+//     @include box-shadow(none);
+//     color: #333;
+//     font-weight: bold;
+//     background: hsla(0, 0%, 100%, 1);
+//     z-index: 90;
+//   }
+// }
 
 .tab-pane {
   background: $bodyBackground;
@@ -391,6 +391,57 @@ blockquote {
     display: inherit !important;
   }
 }
+
+
+
+.nav-tabs {
+  @include pie-clearfix;
+  width: 100%;
+  font-family: sans-serif;
+  & > li {
+
+    float: left;
+    overflow: hidden;
+    position: relative;
+    @include tabbox;
+    margin-right: -.5em;
+    padding-top: .25em;
+    padding-bottom: .5em;
+    &::after {
+      content: "";
+      background-image: -webkit-linear-gradient(right, white, white, rgba(255, 255, 255, 0));
+      width: 1em;
+      height: 100%;
+      position: absolute;
+      right: 0;
+      top: 0;
+      border-top-right-radius: 2em 5em;
+      border-top-left-radius: 2em 5em;
+    }
+    &.active {
+      color: #333;
+      font-weight: bold;
+      background: hsla(0, 0%, 100%, 1);
+      z-index: 90;
+    }
+  }
+
+  & > li > a {
+    display: inline-block;
+    white-space: nowrap;
+    padding: .5em 1em;
+  }
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
