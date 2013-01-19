@@ -129,6 +129,15 @@ tabReveal = ['$parse', ($parse) ->
   require: ['ngModel', 'tabbable']
 ]
 
+tabTruncate = ->
+  link: (scope, iElement) ->
+    tabs = angular.element(iElement.children()[0].childNodes)
+    percentage = 100 / tabs.length + "%"
+    for i in [0..tabs.length-1]
+      angular.element(tabs[i]).css "width", percentage 
+      # Brittle- <a> containing label must be first element in tab <li>. 
+      a_width = tabs[i].childNodes[0].clientWidth
+      angular.element(tabs[i]).css "max-width", a_width
 
 thread = ->
   link: (scope, iElement, iAttrs, controller) ->
@@ -143,3 +152,4 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('resettable', resettable)
   .directive('tabReveal', tabReveal)
   .directive('thread', thread)
+  .directive('tabTruncate', tabTruncate)
