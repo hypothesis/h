@@ -2,7 +2,7 @@ class Converter extends Markdown.Converter
   constructor: ->
     super
     this.hooks.chain "postConversion", (text) ->
-      text.replace /<a href=/, "<a target=\"_blank\" href="
+      text.replace /<a href=/g, "<a target=\"_blank\" href="
 
 
 fuzzyTime = (date) ->
