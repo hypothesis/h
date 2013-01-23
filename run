@@ -9,7 +9,7 @@ if __name__ == '__main__':
     virtual_env = environ.get('VIRTUAL_ENV', '.')
     activate = join(virtual_env, 'bin', 'activate_this.py')
     if exists(activate):
-      execfile(activate, dict(__file__=activate))
+        execfile(activate, dict(__file__=activate))
 
     from h.script import start
     start(argv[1:])
