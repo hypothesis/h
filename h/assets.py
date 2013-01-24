@@ -18,12 +18,6 @@ def SCSS(*names, **kw):
     kw.setdefault('filters', 'cleancss,compass,cssrewrite')
     return Bundle(*names, **kw)
 
-
-def Handlebars(*names, **kw):
-    kw.setdefault('filters', 'handlebars')
-    return Bundle(*names, **kw)
-
-
 # Included dependencies
 annotator = Bundle('h:lib/annotator.min.js', 'h:lib/annotator.*.min.js')
 angular = Bundle('h:lib/angular.min.js', 'h:lib/angular-*.min.js')
