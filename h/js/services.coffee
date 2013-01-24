@@ -89,7 +89,7 @@ class Hypothesis extends Annotator
       onReady: =>
         # Get the location of the annotated document
         @provider.getHref (href) =>
-          stable_href = decodeURIComponent href
+          stable_href = ((decodeURIComponent href).split /(#.+)?$/ )[0] 
           this.addPlugin 'Store',
             annotationData:
               uri: stable_href
