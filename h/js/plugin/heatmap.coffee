@@ -81,7 +81,18 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .reduce ({annotations, buckets, index, max}, [x, d, a], i, points) =>
 
         # remove all instances of this annotation from the accumulator
-        annotations = d3.merge(d3.split(annotations, (b) => a is b))
+        annotations = annotations.reduce (acc, value) ->
+          {values, arrays} = acc
+          if value is a
+            arrays.push values
+            acc.values = []
+          else
+            values.push value
+          acc
+        ,
+          values: []
+          arrays: []
+        annotations = d3.merge annotations.arrays
 
         if d > 0
           # if this is a +1 control point, (re-)include the current annotation
