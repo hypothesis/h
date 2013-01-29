@@ -12,11 +12,11 @@ class App
     token: null
 
   this.$inject = [
-    '$compile', '$element', '$http', '$location', '$scope',
+    '$compile', '$element', '$http', '$location', '$scope', '$timeout',
     'annotator', 'flash', 'threading'
   ]
   constructor: (
-    $compile, $element, $http, $location, $scope,
+    $compile, $element, $http, $location, $scope, $timeout
     annotator, flash, threading
   ) ->
     {plugins, provider} = annotator
@@ -169,6 +169,14 @@ class App
       if data.flash? then flash q, msgs for q, msgs of data.flash
 
     $scope.$broadcast '$reset'
+
+    # Update scope with auto-filled form field values
+    $timeout ->
+      for i in $element.find('input')
+        $i = angular.element(i)
+        $i.triggerHandler('change')
+        $i.triggerHandler('input')
+    , 200  # We hope this is long enough
 
 
 class Annotation
