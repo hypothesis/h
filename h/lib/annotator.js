@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-c4fcdfe
+** Annotator 1.2.6-dev-6743e3f
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-01-29 11:20:18Z
+** Built at: 2013-01-29 18:25:34Z
 */
 
 (function() {
@@ -771,9 +771,8 @@
       return annotation;
     };
 
-    Annotator.prototype.setupAnnotation = function(annotation, fireEvents) {
+    Annotator.prototype.setupAnnotation = function(annotation) {
       var normed, normedRanges, r, root, _k, _l, _len3, _len4, _ref2;
-      if (fireEvents == null) fireEvents = true;
       root = this.wrapper[0];
       annotation.ranges || (annotation.ranges = this.selectedRanges);
       normedRanges = [];
@@ -801,7 +800,6 @@
       }
       annotation.quote = annotation.quote.join(' / ');
       $(annotation.highlights).data('annotation', annotation);
-      if (fireEvents) this.publish('annotationCreated', [annotation]);
       return annotation;
     };
 
@@ -832,7 +830,7 @@
         now = annList.splice(0, 10);
         for (_k = 0, _len3 = now.length; _k < _len3; _k++) {
           n = now[_k];
-          _this.setupAnnotation(n, false);
+          _this.setupAnnotation(n);
         }
         if (annList.length > 0) {
           return setTimeout((function() {
@@ -914,12 +912,7 @@
     };
 
     Annotator.prototype.onEditorSubmit = function(annotation) {
-      this.publish('annotationEditorSubmit', [this.editor, annotation]);
-      if (annotation.ranges === void 0) {
-        return this.setupAnnotation(annotation);
-      } else {
-        return this.updateAnnotation(annotation);
-      }
+      return this.publish('annotationEditorSubmit', [this.editor, annotation]);
     };
 
     Annotator.prototype.showViewer = function(annotations, location) {
@@ -987,38 +980,53 @@
     };
 
     Annotator.prototype.onAdderClick = function(event) {
-      var highlights, position, r, ranges;
+      var annotation, cancel, cleanup, position, save,
+        _this = this;
       if (event != null) event.preventDefault();
       position = this.adder.position();
       this.adder.hide();
-      if (this.selectedRanges && this.selectedRanges.length) {
-        ranges = (function() {
-          var _k, _len3, _ref2, _results;
-          _ref2 = this.selectedRanges;
-          _results = [];
-          for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
-            r = _ref2[_k];
-            _results.push(Range.sniff(r).normalize());
-          }
-          return _results;
-        }).call(this);
-        highlights = this.highlightRanges(ranges, 'annotator-hl annotator-hl-temporary');
-        this.editor.element.one('hide', function() {
-          var h, _k, _len3, _results;
-          _results = [];
-          for (_k = 0, _len3 = highlights.length; _k < _len3; _k++) {
-            h = highlights[_k];
-            _results.push($(h).replaceWith(h.childNodes));
-          }
-          return _results;
-        });
-      }
-      return this.showEditor(this.createAnnotation(), position);
+      annotation = this.createAnnotation();
+      annotation = this.setupAnnotation(annotation);
+      $(annotation.highlights).addClass('annotator-hl-temporary');
+      save = function() {
+        cleanup();
+        $(annotation.highlights).removeClass('annotator-hl-temporary');
+        return _this.publish('annotationCreated', [annotation]);
+      };
+      cancel = function() {
+        var h, _k, _len3, _ref2, _results;
+        cleanup();
+        _ref2 = annotation.highlights;
+        _results = [];
+        for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
+          h = _ref2[_k];
+          _results.push($(h).replaceWith(h.childNodes));
+        }
+        return _results;
+      };
+      cleanup = function() {
+        _this.unsubscribe('annotationEditorHidden', cancel);
+        return _this.unsubscribe('annotationEditorSubmit', save);
+      };
+      this.subscribe('annotationEditorHidden', cancel);
+      this.subscribe('annotationEditorSubmit', save);
+      return this.showEditor(annotation, position);
     };
 
     Annotator.prototype.onEditAnnotation = function(annotation) {
-      var offset;
+      var cleanup, offset, update,
+        _this = this;
       offset = this.viewer.element.position();
+      update = function() {
+        cleanup();
+        return _this.updateAnnotation(annotation);
+      };
+      cleanup = function() {
+        _this.unsubscribe('annotationEditorHidden', cleanup);
+        return _this.unsubscribe('annotationEditorSubmit', update);
+      };
+      this.subscribe('annotationEditorHidden', cleanup);
+      this.subscribe('annotationEditorSubmit', update);
       this.viewer.hide();
       return this.showEditor(annotation, offset);
     };
