@@ -172,7 +172,7 @@ class App
 
     # Update scope with auto-filled form field values
     $timeout ->
-      for i in $element.find('input')
+      for i in $element.find('input') when i.value
         $i = angular.element(i)
         $i.triggerHandler('change')
         $i.triggerHandler('input')
