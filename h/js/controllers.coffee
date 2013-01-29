@@ -181,25 +181,30 @@ class App
 
 class Annotation
   this.$inject = [
-    '$element', '$scope', '$rootScope', '$timeout',
+    '$element', '$location', '$scope', '$rootScope', '$timeout',
     'annotator', 'threading'
   ]
   constructor: (
-    $element, $scope, $rootScope, $timeout
+    $element, $location, $scope, $rootScope, $timeout
     annotator, threading
   ) ->
+    publish = (args...) ->
+      # Publish after a timeout to escape this digest
+      # Annotator event callbacks don't expect a digest to be active
+      $timeout (-> annotator.publish args...), 0, false
+
     $scope.cancel = ->
       $scope.editing = false
       if $scope.$modelValue.draft
-        annotator.publish 'annotationDeleted', $scope.$modelValue
+        publish 'annotationDeleted', $scope.$modelValue
 
     $scope.save = ->
       $scope.editing = false
       $scope.$modelValue.draft = false
       if $scope.edited
-        annotator.publish 'annotationUpdated', $scope.$modelValue
+        publish 'annotationUpdated', $scope.$modelValue
       else
-        annotator.publish 'annotationCreated', $scope.$modelValue
+        publish 'annotationCreated', $scope.$modelValue
 
     $scope.reply = ->
       unless annotator.plugins.Auth.haveValidToken()
@@ -236,15 +241,17 @@ class Editor
     annotator, threading
   ) ->
     save = ->
-      $location.path('/viewer').replace()
-      annotator.provider.onEditorSubmit()
-      annotator.provider.onEditorHide()
+      $scope.$apply ->
+        $location.path('/viewer').replace()
+        annotator.provider.onEditorSubmit()
+        annotator.provider.onEditorHide()
 
     cancel = ->
-      search = $location.search() or {}
-      delete search.id
-      $location.path('/viewer').search(search).replace()
-      annotator.provider.onEditorHide()
+      $scope.$apply ->
+        search = $location.search() or {}
+        delete search.id
+        $location.path('/viewer').search(search).replace()
+        annotator.provider.onEditorHide()
 
     annotator.subscribe 'annotationCreated', save
     annotator.subscribe 'annotationDeleted', cancel
