@@ -82,6 +82,7 @@ class Hypothesis extends Annotator
   _setupXDM: ->
     $scope = @element.scope()
     $location = @element.injector().get '$location'
+    drafts = @element.injector().get 'drafts'
     threading = @element.injector().get 'threading'
 
     @provider = new easyXDM.Rpc
@@ -200,6 +201,7 @@ class Hypothesis extends Annotator
         # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
         back: =>
+          return unless drafts.discard()
           if $location.path() == '/viewer' and $location.search()?.id?
             $scope.$apply => $location.search('id', null).replace()
           else
@@ -371,8 +373,9 @@ class DraftProvider
   contains: (draft) -> (@drafts.indexOf draft) != -1
 
   discard: ->
+    count = (d for d in @drafts when d.text?.length).length
     [ask, text] =
-      switch (d for d in @drafts when d.text?.length).length
+      switch count
         when 0 then [false, null]
         when 1 then [true, "You have an unsaved reply."]
         else [true, "You have #{count} unsaved replies."]

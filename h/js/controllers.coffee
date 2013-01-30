@@ -26,6 +26,7 @@ class App
     heatmap.element.bind 'click', =>
       $scope.$apply ->
         return unless drafts.discard()
+        $location.search('id', null).replace()
         dynamicBucket = true
         annotator.showViewer()
         annotator.show()
@@ -232,8 +233,8 @@ class Annotation
       (threading.getContainer $scope.$modelValue.id).addChild replyThread
       drafts.add reply
 
-    $scope.$on '$routeChangeStart', -> $scope.cancel()
-    $scope.$on '$routeUpdate', -> $scope.cancel()
+    $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
+    $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
 
     $scope.$watch 'editing', (newValue) ->
       if newValue then $timeout -> $element.find('textarea').focus()
