@@ -267,41 +267,15 @@ class Hypothesis extends Annotator
 
     this
 
+  # Override things not used in the angular version.
   _setupDynamicStyle: ->
     this
 
   _setupViewer: ->
-    # Not used in the angular version.
     this
 
-  # Creates an instance of the Annotator.Editor and assigns it to @editor.
-  # Appends this to the @wrapper and sets up event listeners.
-  #
-  # Returns itself for chaining.
   _setupEditor: ->
-    @editor = this._createEditor()
-    .on 'hide save', =>
-      if @unsaved_drafts.indexOf(@editor) > -1
-        @unsaved_drafts.splice(@unsaved_drafts.indexOf(@editor), 1)
-    .on 'hide', =>
-      @provider.onEditorHide()
-    .on 'save', =>
-      @provider.onEditorSubmit()
     this
-
-  _createEditor: ->
-    editor = new Annotator.Editor()
-    editor.hide()
-    editor.fields = [{
-      element: editor.element,
-      load: (field, annotation) ->
-        $(field).find('textarea').val(annotation.text || '')
-      submit: (field, annotation) ->
-        annotation.text = $(field).find('textarea').val()
-    }]
-
-    @unsaved_drafts.push editor
-    editor
 
   createAnnotation: ->
     annotation = super
@@ -349,7 +323,6 @@ class Hypothesis extends Annotator
       ranges: annotation.ranges
 
   showViewer: (annotations=[]) =>
-    return unless this._canCloseUnsaved()
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) ->
@@ -359,7 +332,6 @@ class Hypothesis extends Annotator
     ]
 
   showEditor: (annotation) =>
-    return unless this._canCloseUnsaved()
     @element.injector().invoke [
       '$location',
       ($location) ->
@@ -383,31 +355,33 @@ class Hypothesis extends Annotator
     @element.find('#toolbar').removeClass('shown')
       .find('.tri').attr('draggable', false)
 
-  _canCloseUnsaved: ->
-    # See if there's an unsaved/uncancelled reply
-    can_close = true
-    open_editors = 0
-    for editor in @unsaved_drafts
-      unsaved_text = editor.element.find(':input:first').attr 'value'
-      if unsaved_text? and unsaved_text.toString().length > 0
-        open_editors += 1
-
-    if open_editors > 0
-      if open_editors > 1
-        ctext = "You have #{open_editors} unsaved replies."
-      else
-        ctext = "You have an unsaved reply."
-      ctext = ctext + " Do you really want to close the view?"
-      can_close = confirm ctext
-
-    if can_close then @unsaved_drafts = []
-    can_close
-
   threadId: (annotation) ->
     if annotation?.thread?
       annotation.thread + '/' + annotation.id
     else
       annotation.id
+
+
+class DraftProvider
+  drafts: []
+
+  $get: -> this
+  add: (draft) -> @drafts.push draft unless this.contains draft
+  remove: (draft) -> @drafts = (d for d in @drafts when d isnt draft)
+  contains: (draft) -> (@drafts.indexOf draft) != -1
+
+  discard: ->
+    [ask, text] =
+      switch (d for d in @drafts when d.text?.length).length
+        when 0 then [false, null]
+        when 1 then [true, "You have an unsaved reply."]
+        else [true, "You have #{count} unsaved replies."]
+
+    if ask and not confirm "#{text} Do you really want to discard these drafts?"
+      false
+    else
+      @drafts = []
+      true
 
 
 class FlashProvider
@@ -449,6 +423,7 @@ class FlashProvider
 
 
 angular.module('h.services', [])
+  .provider('drafts', DraftProvider)
   .provider('flash', FlashProvider)
   .service('annotator', Hypothesis)
   .value('threading', mail.messageThread())

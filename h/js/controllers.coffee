@@ -13,11 +13,11 @@ class App
 
   this.$inject = [
     '$compile', '$element', '$http', '$location', '$scope', '$timeout',
-    'annotator', 'flash', 'threading'
+    'annotator', 'drafts', 'flash', 'threading'
   ]
   constructor: (
     $compile, $element, $http, $location, $scope, $timeout
-    annotator, flash, threading
+    annotator, drafts, flash, threading
   ) ->
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
@@ -25,6 +25,7 @@ class App
 
     heatmap.element.bind 'click', =>
       $scope.$apply ->
+        return unless drafts.discard()
         dynamicBucket = true
         annotator.showViewer()
         annotator.show()
@@ -90,6 +91,7 @@ class App
           else
             dynamicBucket = false
             $scope.$apply ->
+              return unless drafts.discard()
               $location.search('id', null)
               annotator.showViewer heatmap.buckets[bucket]
             annotator.show()
@@ -182,11 +184,11 @@ class App
 class Annotation
   this.$inject = [
     '$element', '$location', '$scope', '$rootScope', '$timeout',
-    'annotator', 'threading'
+    'annotator', 'drafts', 'threading'
   ]
   constructor: (
     $element, $location, $scope, $rootScope, $timeout
-    annotator, threading
+    annotator, drafts, threading
   ) ->
     publish = (args...) ->
       # Publish after a timeout to escape this digest
@@ -195,41 +197,52 @@ class Annotation
 
     $scope.cancel = ->
       $scope.editing = false
-      if $scope.$modelValue.draft
+      drafts.remove $scope.$modelValue
+      if $scope.unsaved
         publish 'annotationDeleted', $scope.$modelValue
 
     $scope.save = ->
       $scope.editing = false
-      $scope.$modelValue.draft = false
-      if $scope.edited
-        publish 'annotationUpdated', $scope.$modelValue
-      else
+      drafts.remove $scope.$modelValue
+      if $scope.unsaved
         publish 'annotationCreated', $scope.$modelValue
+      else
+        publish 'annotationUpdated', $scope.$modelValue
 
     $scope.reply = ->
       unless annotator.plugins.Auth.haveValidToken()
         $rootScope.$broadcast 'showAuth', true
         return
-      reply = annotator.createAnnotation()
-      Object.defineProperty reply, 'draft',
-        value: true
-        writable: true
-      if $scope.$modelValue.thread
-        references = [$scope.$modelValue.thread, $scope.$modelValue.id]
-      else
-        references = [$scope.$modelValue.id]
-      reply.thread = references.join '/'
-      parentThread = (threading.getContainer $scope.$modelValue.id)
-      replyThread = (threading.getContainer reply.id)
-      replyThread.message =
-        annotation: reply
-        id: reply.id
-        references: references
-      parentThread.addChild replyThread
 
-    $scope.$watch '$modelValue.draft', (newValue) ->
-      $scope.editing = newValue
+      references =
+        if $scope.$modelValue.thread
+          [$scope.$modelValue.thread, $scope.$modelValue.id]
+        else
+          [$scope.$modelValue.id]
+
+      reply = angular.extend annotator.createAnnotation(),
+        thread: references.join '/'
+
+      replyThread = angular.extend (threading.getContainer reply.id),
+        message:
+          annotation: reply
+          id: reply.id
+          references: references
+
+      (threading.getContainer $scope.$modelValue.id).addChild replyThread
+      drafts.add reply
+
+    $scope.$on '$routeChangeStart', -> $scope.cancel()
+    $scope.$on '$routeUpdate', -> $scope.cancel()
+
+    $scope.$watch 'editing', (newValue) ->
       if newValue then $timeout -> $element.find('textarea').focus()
+
+    # Check if this is a brand new annotation
+    if drafts.contains $scope.$modelValue
+      $scope.editing = true
+      $scope.unsaved = true
+
 
 class Editor
   this.$inject = [
@@ -262,9 +275,7 @@ class Editor
 
     thread = (threading.getContainer $routeParams.id)
     annotation = thread.message?.annotation
-    if annotation?
-      annotation.draft = true
-      $scope.annotation = annotation
+    $scope.annotation = annotation
 
 
 class Viewer
