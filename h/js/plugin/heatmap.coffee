@@ -224,7 +224,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     .style 'display', (d) =>
       if (@buckets[d].length is 0) then 'none' else ''
 
-
     this.publish('updated')
 
   isUpper: (i) => i == 0
