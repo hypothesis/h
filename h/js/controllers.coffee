@@ -294,11 +294,11 @@ class Viewer
     refresh = =>
       this.refresh $scope, $routeParams, threading, plugins.Heatmap
       if listening
-        if $scope.detail or $routeParams.bucket?
+        if $scope.detail
           plugins.Heatmap.unsubscribe 'updated', refresh
           listening = false
       else
-        unless $scope.detail or $routeParams.bucket?
+        unless $scope.detail
           plugins.Heatmap.subscribe 'updated', refresh
           listening = true
 
