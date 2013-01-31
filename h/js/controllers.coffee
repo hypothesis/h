@@ -248,11 +248,11 @@ class Annotation
 class Editor
   this.$inject = [
     '$location', '$routeParams', '$scope',
-    'annotator', 'threading'
+    'annotator', 'drafts', 'threading'
   ]
   constructor: (
     $location, $routeParams, $scope,
-    annotator, threading
+    annotator, drafts, threading
   ) ->
     save = ->
       $scope.$apply ->
@@ -277,6 +277,7 @@ class Editor
     thread = (threading.getContainer $routeParams.id)
     annotation = thread.message?.annotation
     $scope.annotation = annotation
+    drafts.add annotation
 
 
 class Viewer
