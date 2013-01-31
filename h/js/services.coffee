@@ -374,17 +374,23 @@ class DraftProvider
 
   discard: ->
     count = (d for d in @drafts when d.text?.length).length
-    [ask, text] =
+    text =
       switch count
-        when 0 then [false, null]
-        when 1 then [true, "You have an unsaved reply."]
-        else [true, "You have #{count} unsaved replies."]
+        when 0 then null
+        when 1
+          """You have an unsaved reply.
 
-    if ask and not confirm "#{text} Do you really want to discard these drafts?"
-      false
-    else
+          Do you really want to discard this draft?"""
+        else
+          """You have #{count} unsaved replies.
+
+          Do you really want to discard these drafts?"""
+
+    if count == 0 or confirm text
       @drafts = []
       true
+    else
+      false
 
 
 class FlashProvider
