@@ -98,6 +98,7 @@ class App
             annotator.show()
 
     $scope.submit = (form) ->
+      return unless form.$valid
       params = for name, control of form when control.$modelValue?
         [name, control.$modelValue]
       params.push ['__formid__', form.$name]
