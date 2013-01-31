@@ -289,7 +289,7 @@ class Hypothesis extends Annotator
       configurable: true
       enumerable: false
       writable: true
-      value: window.btoa (JSON.stringify annotation)
+      value: window.btoa (JSON.stringify annotation + Math.random())
 
     annotation
 
