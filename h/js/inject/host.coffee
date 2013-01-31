@@ -58,7 +58,7 @@ class Annotator.Host extends Annotator
         annotator.frame = frame
       swf: options.swf
       props:
-        className: 'annotator-frame annotator-collapsed'
+        className: 'annotator-frame annotator-outer annotator-collapsed'
         style:
           visibility: 'hidden'
       remote: @app
