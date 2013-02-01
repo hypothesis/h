@@ -108,9 +108,8 @@ class APIFactory(InnerResource):
         super(APIFactory, self).__init__(request)
 
         if not 'x-annotator-auth-token' in request.headers:
-            if 'access_token' in request.params:
-                token = request.params['access_token']
-                request.headers['x-annotator-auth-token'] = token
+            token = request.params.get('access_token', self.token)
+            request.headers['x-annotator-auth-token'] = token
 
 
 class AppFactory(BaseResource):
