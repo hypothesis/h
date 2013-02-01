@@ -11,13 +11,9 @@ from h.messages import _
 
 
 class LoginSchema(CSRFSchema):
-    username = colander.SchemaNode(
-        colander.String(),
-        validator=colander.Length(min=3, max=15),
-    )
+    username = colander.SchemaNode(colander.String())
     password = colander.SchemaNode(
         colander.String(),
-        validator=colander.Length(min=2),
         widget=deform.widget.PasswordWidget()
     )
 
