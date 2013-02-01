@@ -15,6 +15,49 @@ class BaseResource(resources.BaseFactory):
     __name__ = None
     __parent__ = None
 
+    @reify
+    def persona(self):
+        request = self.request
+
+        # Transition code until multiple sign-in is implemented
+        if request.user:
+            return {
+                'username': request.user.username,
+                'provider': request.host,
+            }
+
+        return None
+
+    @reify
+    def personas(self):
+        request = self.request
+
+        # Transition code until multiple sign-in is implemented
+        if request.user:
+            return [self.persona]
+
+        return []
+
+    @reify
+    def consumer(self):
+        settings = self.request.registry.settings
+        key = settings['api.key']
+        consumer = models.Consumer.get_by_key(key)
+        assert(consumer)
+        return consumer
+
+    @reify
+    def token(self):
+        message = {
+            'consumerKey': str(self.consumer.key),
+            'ttl': self.consumer.ttl,
+        }
+
+        if self.persona:
+            message['userId'] = 'acct:%(username)s@%(provider)s' % self.persona
+
+        return api.auth.encode_token(message, self.consumer.secret)
+
 
 class InnerResource(BaseResource):
     """Helper Resource class for declarative, traversal-based routing
@@ -73,49 +116,6 @@ class APIFactory(InnerResource):
 class AppFactory(BaseResource):
     def __init__(self, request):
         super(AppFactory, self).__init__(request)
-
-    @reify
-    def persona(self):
-        request = self.request
-
-        # Transition code until multiple sign-in is implemented
-        if request.user:
-            return {
-                'username': request.user.username,
-                'provider': request.host,
-            }
-
-        return None
-
-    @reify
-    def personas(self):
-        request = self.request
-
-        # Transition code until multiple sign-in is implemented
-        if request.user:
-            return [self.persona]
-
-        return []
-
-    @reify
-    def consumer(self):
-        settings = self.request.registry.settings
-        key = settings['api.key']
-        consumer = models.Consumer.get_by_key(key)
-        assert(consumer)
-        return consumer
-
-    @reify
-    def token(self):
-        message = {
-            'consumerKey': str(self.consumer.key),
-            'ttl': self.consumer.ttl,
-        }
-
-        if self.persona:
-            message['userId'] = 'acct:%(username)s@%(provider)s' % self.persona
-
-        return api.auth.encode_token(message, self.consumer.secret)
 
 
 def includeme(config):
