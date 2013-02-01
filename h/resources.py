@@ -107,14 +107,14 @@ class AppFactory(BaseResource):
 
     @reify
     def token(self):
-        if not self.persona:
-            return None
-
         message = {
-            'userId': 'acct:%(username)s@%(provider)s' % self.persona,
             'consumerKey': str(self.consumer.key),
             'ttl': self.consumer.ttl,
         }
+
+        if self.persona:
+            message['userId'] = 'acct:%(username)s@%(provider)s' % self.persona
+
         return api.auth.encode_token(message, self.consumer.secret)
 
 
