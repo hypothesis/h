@@ -65,6 +65,8 @@
           <input type="password" name="password" value="" placeholder="Password"
                  required autocapitalize="false" autocorrect="false"
                  data-ng-model="password" />
+         <span ng-show="login.username.$dirty && login.username.$error.required">Please enter your username.</span>
+         <span ng-show="login.username.$valid && login.password.$dirty && login.password.$error.required">Please enter your password.</span>
           <input type="submit" name="login" value="Sign in" />
         </form>
 
