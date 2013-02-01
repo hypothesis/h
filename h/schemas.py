@@ -21,7 +21,10 @@ class LoginSchema(CSRFSchema):
 class RegisterSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
-        validator=colander.Length(min=3, max=15),
+        validator=colander.All(
+            colander.Length(min=3, max=15),
+            colander.Regex('(?i)^[A-Z0-9._]+$'),
+        )
     )
     email = colander.SchemaNode(
         colander.String(),
