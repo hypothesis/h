@@ -27,6 +27,15 @@ def access_token(request):
     raise NotImplementedError('OAuth provider not implemented yet.')
 
 
+def authorize(annotation, action, user=None):
+    action_field = annotation.get('permissions', {}).get(action, [])
+
+    if not action_field:
+        return True
+    else:
+        return authz.authorize(annotation, action, user)
+
+
 def includeme(config):
     """Include the annotator-store API backend.
 
@@ -54,12 +63,12 @@ def includeme(config):
             Annotation.update_settings()
             Annotation.create_all()
 
-    # Configure authentication (ours) and authorization (store)
+    # Configure authentication and authorization
     authenticator = auth.Authenticator(models.Consumer.get_by_key)
 
     def before_request():
         g.auth = authenticator
-        g.authorize = authz.authorize
+        g.authorize = authorize
 
     app.before_request(before_request)
 
