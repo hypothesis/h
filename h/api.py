@@ -64,10 +64,10 @@ def includeme(config):
             Annotation.create_all()
 
     # Configure authentication and authorization
-    authenticator = auth.Authenticator(models.Consumer.get_by_key)
+    app.config['AUTHZ_ON'] = True
 
     def before_request():
-        g.auth = authenticator
+        g.auth = auth.Authenticator(models.Consumer.get_by_key)
         g.authorize = authorize
 
     app.before_request(before_request)
