@@ -3,7 +3,7 @@
   <span data-ng-bind="model.$viewValue.created | fuzzyTime | date:'mediumDate'"
         class="time" />
   <div class="vis-icon" title="Visibility"
-       data-ng-show="model.$viewValue.permissions.read | isPublic" />
+       data-ng-show="model.$viewValue.permissions.read | isPrivate" />
   <div class="fave-icon show" title="Favorite"
        data-ng-click="favorite()" />
   <div class="show reply-icon" title="Reply"

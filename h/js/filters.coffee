@@ -39,11 +39,11 @@ userName = (user) ->
   (user?.match /^acct:([^@]+)/)?[1]
 
 
-isPublic = (perm) ->
-	typeof perm == "string" and perm == 'group:__world__'
+isPrivate = (perm) ->
+	Object.prototype.toString.call( perm ) == '[object Array]'
 
 angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
-  .filter('isPublic', -> isPublic)
+  .filter('isPrivate', -> isPrivate)
