@@ -78,7 +78,6 @@ resettable = ->
         transclude scope, (el) ->
           iElement.replaceWith el
           iElement = el
-          iElement[0].$reset = reset
       reset()
       scope.$on '$reset', reset
   priority: 5000
