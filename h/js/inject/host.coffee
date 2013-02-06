@@ -66,6 +66,7 @@ class Annotator.Host extends Annotator
       local:
         publish: (args..., k, fk) => this.publish args...
         setupAnnotation: => this.setupAnnotation arguments...
+
         deleteAnnotation: (annotation) =>
           toDelete = []
           @wrapper.find('.annotator-hl')
@@ -74,17 +75,21 @@ class Annotator.Host extends Annotator
             if data.id == annotation.id and data not in toDelete
               toDelete.push data
           this.deleteAnnotation d for d in toDelete
+
         loadAnnotations: => this.loadAnnotations arguments...
         onEditorHide: this.onEditorHide
         onEditorSubmit: this.onEditorSubmit
+
         showFrame: =>
           @frame.css 'margin-left': "#{-1 * @frame.width()}px"
           @frame.removeClass 'annotator-no-transition'
           @frame.removeClass 'annotator-collapsed'
+
         hideFrame: =>
           @frame.css 'margin-left': ''
           @frame.removeClass 'annotator-no-transition'
           @frame.addClass 'annotator-collapsed'
+
         dragFrame: (screenX) =>
           if screenX > 0
             if @drag.last?
@@ -93,6 +98,7 @@ class Annotator.Host extends Annotator
           unless @drag.tick
             @drag.tick = true
             window.requestAnimationFrame this.dragRefresh
+
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
@@ -100,6 +106,7 @@ class Annotator.Host extends Annotator
             data: $(this).data('annotation')
           .get()
           offset: $(window).scrollTop()
+
         setActiveHighlights: (ids=[]) =>
           @wrapper.find('.annotator-hl')
           .each ->
@@ -107,6 +114,7 @@ class Annotator.Host extends Annotator
               $(this).addClass('annotator-hl-active')
             else if not $(this).hasClass('annotator-hl-temporary')
               $(this).removeClass('annotator-hl-active')
+
         getHref: =>
           uri = document.location.href
           if document.location.hash
@@ -114,6 +122,7 @@ class Annotator.Host extends Annotator
           $('meta[property^="og:url"]').each -> uri = this.content
           $('link[rel^="canonical"]').each -> uri = this.href
           return uri
+
         getMaxBottom: =>
           sel = '*' + (":not(.annotator-#{x})" for x in [
             'adder', 'outer', 'notice', 'filter', 'frame'
@@ -133,8 +142,10 @@ class Annotator.Host extends Annotator
             else
               0
           Math.max.apply(Math, all)
+
         scrollTop: (y) =>
           $('html, body').stop().animate {scrollTop: y}, 600
+
       remote:
         publish: {}
         addPlugin: {}
