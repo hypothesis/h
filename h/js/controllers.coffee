@@ -197,6 +197,12 @@ class Annotation
       # Annotator event callbacks don't expect a digest to be active
       $timeout (-> annotator.publish args...), 0, false
 
+    $scope.privacyLevels = [
+     {name: 'Public', value:  { 'read': 'group:__world__' } },
+     {name: 'Private', value: { 'read': [] } }
+    ]
+    $scope.privacy = $scope.privacyLevels[0]
+    
     $scope.cancel = ->
       $scope.editing = false
       drafts.remove $scope.$modelValue
@@ -244,6 +250,7 @@ class Annotation
     if drafts.contains $scope.$modelValue
       $scope.editing = true
       $scope.unsaved = true
+      $scope.$modelValue.permissions = { 'read': 'group:__world__' } 
 
 
 class Editor

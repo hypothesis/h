@@ -32,6 +32,16 @@ annotation = ['$filter', ($filter) ->
           #scope.previewText = ($filter 'converter') scope.editText
         else
           scope.previewText = ''
+          
+      scope.$watch 'privacy', (newValue) ->
+        res = scope.privacy['value']
+        if scope.form.$valid
+          if scope.privacy['name'] != 'Public' and 'read' of scope.privacy['value']
+          	res['read'].push(scope.$modelValue.user)
+          #controller.$viewValue.permissions = scope.privacy['value']
+          #controller.$setViewValue controller.$viewValue
+          scope.$modelValue.permissions = res
+      	
   controller: 'AnnotationController'
   priority: 100  # Must run before ngModel
   require: '?ngModel'

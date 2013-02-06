@@ -22,6 +22,7 @@
 
 <h3 data-ng-bind="model.$viewValue.user | userName" class="user" />
 <form data-ng-show="editing" name="form">
+  <select data-ng-model="privacy" ng-options="p.name for p in privacyLevels"></select>
   <textarea data-ng-model="editText"
             class="body"
             name="text"
