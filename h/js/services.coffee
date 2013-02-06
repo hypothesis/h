@@ -270,14 +270,9 @@ class Hypothesis extends Annotator
     this
 
   # Override things not used in the angular version.
-  _setupDynamicStyle: ->
-    this
-
-  _setupViewer: ->
-    this
-
-  _setupEditor: ->
-    this
+  _setupDynamicStyle: -> this
+  _setupViewer: -> this
+  _setupEditor: -> this
 
   createAnnotation: ->
     annotation = super
