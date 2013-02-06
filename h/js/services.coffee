@@ -131,6 +131,7 @@ class Hypothesis extends Annotator
                 # deletion event that gets published in the provider is not
                 # cross-published back here in the consumer and therefore
                 # the Store does not delete the annotation.
+                # XXX Maybe add provider function for updating id
                 deleteAnnotation
                   id: annotation.id
                 loadAnnotations [
