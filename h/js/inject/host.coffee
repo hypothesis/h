@@ -97,7 +97,7 @@ class Annotator.Host extends Annotator
             @drag.last = screenX
           unless @drag.tick
             @drag.tick = true
-            window.requestAnimationFrame this.dragRefresh
+            window.requestAnimationFrame this._dragRefresh
 
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
@@ -202,37 +202,23 @@ class Annotator.Host extends Annotator
       @drag.last = event.screenX
       unless @drag.tick
         @drag.tick = true
-        window.requestAnimationFrame this.dragRefresh
+        window.requestAnimationFrame this._dragRefresh
     document.addEventListener 'dragleave', (event) =>
       if @drag.last?
         @drag.delta += event.screenX - @drag.last
       @drag.last = event.screenX
       unless @drag.tick
         @drag.tick = true
-        window.requestAnimationFrame this.dragRefresh
+        window.requestAnimationFrame this._dragRefresh
     $(window).on 'resize scroll', update
     $(document.body).on 'resize scroll', '*', update
     super
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
-  _setupViewer: ->
-    this
+  _setupViewer: -> this
+  _setupEditor: -> this
 
-  _setupEditor: ->
-    true
-
-  setupAnnotation: (annotation) ->
-    annotation = super
-
-    # Highlights are jQuery collections which have a circular references to the
-    # annotation via data stored with `.data()`. Therefore, reconfigure the
-    # property to hide them from serialization.
-    Object.defineProperty annotation, 'highlights',
-      enumerable: false
-
-    annotation
-
-  dragRefresh: =>
+  _dragRefresh: =>
     d = @drag.delta
     @drag.delta = 0
     @drag.tick = false
@@ -246,6 +232,17 @@ class Annotator.Host extends Annotator
     @frame.css
       'margin-left': "#{m}px"
       width: "#{w}px"
+
+  setupAnnotation: (annotation) ->
+    annotation = super
+
+    # Highlights are jQuery collections which have a circular references to the
+    # annotation via data stored with `.data()`. Therefore, reconfigure the
+    # property to hide them from serialization.
+    Object.defineProperty annotation, 'highlights',
+      enumerable: false
+
+    annotation
 
   showEditor: (annotation) =>
     if not annotation.id?
