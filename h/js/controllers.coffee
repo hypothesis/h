@@ -109,7 +109,7 @@ class App
           'Content-Type': 'application/x-www-form-urlencoded'
         withCredentials: true
       .success (data) =>
-        if data.model? then angular.extend($scope, data.model)
+        if data.model? then angular.extend $scope, data.model
         if data.flash? then flash q, msgs for q, msgs of data.flash
         if data.status is 'failure' then flash 'error', data.reason
 
