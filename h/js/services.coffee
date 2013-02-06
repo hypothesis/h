@@ -352,12 +352,6 @@ class Hypothesis extends Annotator
     @element.find('#toolbar').removeClass('shown')
       .find('.tri').attr('draggable', false)
 
-  threadId: (annotation) ->
-    if annotation?.thread?
-      annotation.thread + '/' + annotation.id
-    else
-      annotation.id
-
 
 class DraftProvider
   drafts: []
