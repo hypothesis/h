@@ -39,7 +39,11 @@ userName = (user) ->
   (user?.match /^acct:([^@]+)/)?[1]
 
 
+isPublic = (perm) ->
+	typeof perm == "string" and perm == 'group:__world__'
+
 angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
+  .filter('isPublic', -> isPublic)
