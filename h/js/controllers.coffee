@@ -154,11 +154,14 @@ class App
         else
           plugins.Auth.setToken(newValue)
         plugins.Auth.withToken plugins.HypothesisPermissions._setAuthFromToken
-        if annotator.plugins.Store?
-          annotator.plugins.Store.loadAnnotations()            
       else
         plugins.HypothesisPermissions.setUser(null)
         delete plugins.Auth
+      provider.setActiveHighlights []
+      if annotator.plugins.Store?
+        for annotation in annotator.dumpAnnotations()
+          provider.deleteAnnotation annotation
+        annotator.plugins.Store.loadAnnotations()            
 
     $scope.$on 'showAuth', (event, show=true) ->
       angular.extend $scope.sheet,
