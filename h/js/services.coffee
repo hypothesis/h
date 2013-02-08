@@ -82,6 +82,7 @@ class Hypothesis extends Annotator
   _setupXDM: ->
     $scope = @element.scope()
     $location = @element.injector().get '$location'
+    drafts = @element.injector().get 'drafts'
     threading = @element.injector().get 'threading'
 
     @provider = new easyXDM.Rpc
@@ -131,6 +132,7 @@ class Hypothesis extends Annotator
                 # deletion event that gets published in the provider is not
                 # cross-published back here in the consumer and therefore
                 # the Store does not delete the annotation.
+                # XXX Maybe add provider function for updating id
                 deleteAnnotation
                   id: annotation.id
                 loadAnnotations [
@@ -201,6 +203,7 @@ class Hypothesis extends Annotator
         # This guy does stuff when you "back out" of the interface.
         # (Currently triggered by a click on the source page.)
         back: =>
+          return unless drafts.discard()
           if $location.path() == '/viewer' and $location.search()?.id?
             $scope.$apply => $location.search('id', null).replace()
           else
@@ -268,41 +271,10 @@ class Hypothesis extends Annotator
 
     this
 
-  _setupDynamicStyle: ->
-    this
-
-  _setupViewer: ->
-    # Not used in the angular version.
-    this
-
-  # Creates an instance of the Annotator.Editor and assigns it to @editor.
-  # Appends this to the @wrapper and sets up event listeners.
-  #
-  # Returns itself for chaining.
-  _setupEditor: ->
-    @editor = this._createEditor()
-    .on 'hide save', =>
-      if @unsaved_drafts.indexOf(@editor) > -1
-        @unsaved_drafts.splice(@unsaved_drafts.indexOf(@editor), 1)
-    .on 'hide', =>
-      @provider.onEditorHide()
-    .on 'save', =>
-      @provider.onEditorSubmit()
-    this
-
-  _createEditor: ->
-    editor = new Annotator.Editor()
-    editor.hide()
-    editor.fields = [{
-      element: editor.element,
-      load: (field, annotation) ->
-        $(field).find('textarea').val(annotation.text || '')
-      submit: (field, annotation) ->
-        annotation.text = $(field).find('textarea').val()
-    }]
-
-    @unsaved_drafts.push editor
-    editor
+  # Override things not used in the angular version.
+  _setupDynamicStyle: -> this
+  _setupViewer: -> this
+  _setupEditor: -> this
 
   createAnnotation: ->
     annotation = super
@@ -314,7 +286,7 @@ class Hypothesis extends Annotator
       configurable: true
       enumerable: false
       writable: true
-      value: window.btoa (JSON.stringify annotation)
+      value: window.btoa (JSON.stringify annotation + Math.random())
 
     annotation
 
@@ -344,13 +316,12 @@ class Hypothesis extends Annotator
     # added.
     if annotation.thread
       annotation.ranges = []
-
-    @provider.setupAnnotation
-      id: annotation.id
-      ranges: annotation.ranges
+    else
+      @provider.setupAnnotation
+        id: annotation.id
+        ranges: annotation.ranges
 
   showViewer: (annotations=[]) =>
-    return unless this._canCloseUnsaved()
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) ->
@@ -360,7 +331,6 @@ class Hypothesis extends Annotator
     ]
 
   showEditor: (annotation) =>
-    return unless this._canCloseUnsaved()
     @element.injector().invoke [
       '$location',
       ($location) ->
@@ -384,31 +354,34 @@ class Hypothesis extends Annotator
     @element.find('#toolbar').removeClass('shown')
       .find('.tri').attr('draggable', false)
 
-  _canCloseUnsaved: ->
-    # See if there's an unsaved/uncancelled reply
-    can_close = true
-    open_editors = 0
-    for editor in @unsaved_drafts
-      unsaved_text = editor.element.find(':input:first').attr 'value'
-      if unsaved_text? and unsaved_text.toString().length > 0
-        open_editors += 1
 
-    if open_editors > 0
-      if open_editors > 1
-        ctext = "You have #{open_editors} unsaved replies."
-      else
-        ctext = "You have an unsaved reply."
-      ctext = ctext + " Do you really want to close the view?"
-      can_close = confirm ctext
+class DraftProvider
+  drafts: []
 
-    if can_close then @unsaved_drafts = []
-    can_close
+  $get: -> this
+  add: (draft) -> @drafts.push draft unless this.contains draft
+  remove: (draft) -> @drafts = (d for d in @drafts when d isnt draft)
+  contains: (draft) -> (@drafts.indexOf draft) != -1
 
-  threadId: (annotation) ->
-    if annotation?.thread?
-      annotation.thread + '/' + annotation.id
+  discard: ->
+    count = (d for d in @drafts when d.text?.length).length
+    text =
+      switch count
+        when 0 then null
+        when 1
+          """You have an unsaved reply.
+
+          Do you really want to discard this draft?"""
+        else
+          """You have #{count} unsaved replies.
+
+          Do you really want to discard these drafts?"""
+
+    if count == 0 or confirm text
+      @drafts = []
+      true
     else
-      annotation.id
+      false
 
 
 class FlashProvider
@@ -450,6 +423,7 @@ class FlashProvider
 
 
 angular.module('h.services', [])
+  .provider('drafts', DraftProvider)
   .provider('flash', FlashProvider)
   .service('annotator', Hypothesis)
   .value('threading', mail.messageThread())

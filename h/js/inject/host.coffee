@@ -58,7 +58,7 @@ class Annotator.Host extends Annotator
         annotator.frame = frame
       swf: options.swf
       props:
-        className: 'annotator-frame annotator-collapsed'
+        className: 'annotator-frame annotator-outer annotator-collapsed'
         style:
           visibility: 'hidden'
       remote: @app
@@ -66,6 +66,7 @@ class Annotator.Host extends Annotator
       local:
         publish: (args..., k, fk) => this.publish args...
         setupAnnotation: => this.setupAnnotation arguments...
+
         deleteAnnotation: (annotation) =>
           toDelete = []
           @wrapper.find('.annotator-hl')
@@ -74,17 +75,21 @@ class Annotator.Host extends Annotator
             if data.id == annotation.id and data not in toDelete
               toDelete.push data
           this.deleteAnnotation d for d in toDelete
+
         loadAnnotations: => this.loadAnnotations arguments...
         onEditorHide: this.onEditorHide
         onEditorSubmit: this.onEditorSubmit
+
         showFrame: =>
           @frame.css 'margin-left': "#{-1 * @frame.width()}px"
           @frame.removeClass 'annotator-no-transition'
           @frame.removeClass 'annotator-collapsed'
+
         hideFrame: =>
           @frame.css 'margin-left': ''
           @frame.removeClass 'annotator-no-transition'
           @frame.addClass 'annotator-collapsed'
+
         dragFrame: (screenX) =>
           if screenX > 0
             if @drag.last?
@@ -92,7 +97,8 @@ class Annotator.Host extends Annotator
             @drag.last = screenX
           unless @drag.tick
             @drag.tick = true
-            window.requestAnimationFrame this.dragRefresh
+            window.requestAnimationFrame this._dragRefresh
+
         getHighlights: =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
@@ -100,6 +106,7 @@ class Annotator.Host extends Annotator
             data: $(this).data('annotation')
           .get()
           offset: $(window).scrollTop()
+
         setActiveHighlights: (ids=[]) =>
           @wrapper.find('.annotator-hl')
           .each ->
@@ -107,6 +114,7 @@ class Annotator.Host extends Annotator
               $(this).addClass('annotator-hl-active')
             else if not $(this).hasClass('annotator-hl-temporary')
               $(this).removeClass('annotator-hl-active')
+
         getHref: =>
           uri = document.location.href
           if document.location.hash
@@ -114,6 +122,7 @@ class Annotator.Host extends Annotator
           $('meta[property^="og:url"]').each -> uri = this.content
           $('link[rel^="canonical"]').each -> uri = this.href
           return uri
+
         getMaxBottom: =>
           sel = '*' + (":not(.annotator-#{x})" for x in [
             'adder', 'outer', 'notice', 'filter', 'frame'
@@ -133,8 +142,10 @@ class Annotator.Host extends Annotator
             else
               0
           Math.max.apply(Math, all)
+
         scrollTop: (y) =>
           $('html, body').stop().animate {scrollTop: y}, 600
+
       remote:
         publish: {}
         addPlugin: {}
@@ -191,37 +202,23 @@ class Annotator.Host extends Annotator
       @drag.last = event.screenX
       unless @drag.tick
         @drag.tick = true
-        window.requestAnimationFrame this.dragRefresh
+        window.requestAnimationFrame this._dragRefresh
     document.addEventListener 'dragleave', (event) =>
       if @drag.last?
         @drag.delta += event.screenX - @drag.last
       @drag.last = event.screenX
       unless @drag.tick
         @drag.tick = true
-        window.requestAnimationFrame this.dragRefresh
+        window.requestAnimationFrame this._dragRefresh
     $(window).on 'resize scroll', update
     $(document.body).on 'resize scroll', '*', update
     super
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
-  _setupViewer: ->
-    this
+  _setupViewer: -> this
+  _setupEditor: -> this
 
-  _setupEditor: ->
-    true
-
-  setupAnnotation: (annotation) ->
-    annotation = super
-
-    # Highlights are jQuery collections which have a circular references to the
-    # annotation via data stored with `.data()`. Therefore, reconfigure the
-    # property to hide them from serialization.
-    Object.defineProperty annotation, 'highlights',
-      enumerable: false
-
-    annotation
-
-  dragRefresh: =>
+  _dragRefresh: =>
     d = @drag.delta
     @drag.delta = 0
     @drag.tick = false
@@ -235,6 +232,17 @@ class Annotator.Host extends Annotator
     @frame.css
       'margin-left': "#{m}px"
       width: "#{w}px"
+
+  setupAnnotation: (annotation) ->
+    annotation = super
+
+    # Highlights are jQuery collections which have a circular references to the
+    # annotation via data stored with `.data()`. Therefore, reconfigure the
+    # property to hide them from serialization.
+    Object.defineProperty annotation, 'highlights',
+      enumerable: false
+
+    annotation
 
   showEditor: (annotation) =>
     if not annotation.id?

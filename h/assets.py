@@ -18,32 +18,58 @@ def SCSS(*names, **kw):
     kw.setdefault('filters', 'cleancss,compass,cssrewrite')
     return Bundle(*names, **kw)
 
-
-def Handlebars(*names, **kw):
-    kw.setdefault('filters', 'handlebars')
-    return Bundle(*names, **kw)
-
-
+#
 # Included dependencies
-annotator = Bundle('h:lib/annotator.min.js', 'h:lib/annotator.*.min.js')
-angular = Bundle('h:lib/angular.min.js', 'h:lib/angular-*.min.js')
-d3 = Bundle('h:lib/d3.v2.min.js')
-easyXDM = Bundle('h:lib/easyXDM.min.js')
-jwz = Bundle('h:lib/jwz.min.js')
-pagedown = Uglify(
-    'h:lib/Markdown.Converter.js',
-    output='h:lib/Markdown.Converter.min.js'
+#
+
+# Annotator
+annotator = Uglify('h:lib/annotator.js', output='lib/annotator.min.js')
+annotator_auth = Uglify(
+    'h:lib/annotator.auth.js',
+    output='lib/annotator.auth.min.js'
 )
-raf = Uglify('h:lib/polyfills/raf.js', output='h:lib/polyfills/raf.js.min')
-underscore = Bundle('h:lib/underscore-min.js')
+annotator_permissions = Uglify(
+    'h:lib/annotator.permissions.js',
+    output='lib/annotator.permissions.min.js'
+)
+annotator_store = Uglify(
+    'h:lib/annotator.store.js',
+    output='lib/annotator.store.min.js'
+)
 
+# Angular
+angular = Uglify('h:lib/angular.js', output='lib/angular.min.js')
+angular_bootstrap = Uglify(
+    'h:lib/angular-bootstrap.js',
+    output='lib/angular-bootstrap.min.js'
+)
+angular_sanitize = Uglify(
+    'h:lib/angular-sanitize.js',
+    output='lib/angular-sanitize.min.js'
+)
 
-# External dependencies
-jquery = Bundle('deform:static/scripts/jquery-1.7.2.min.js')
+# jQuery
+jquery = Uglify('h:lib/jquery-1.8.3.js', output='lib/jquery-1.8.3.min.js')
+jquery_mousewheel = Uglify(
+    'h:lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
+)
+
+# Polyfills
+raf = Uglify('h:lib/polyfills/raf.js', output='lib/polyfills/raf.js.min')
+
+# Others
+d3 = Uglify('h:lib/d3.js', output='lib/d3.min.js')
 deform = Bundle(
     jquery,
-    Uglify('deform:static/scripts/deform.js', output='js/deform.min.js'),
+    Uglify('deform:static/scripts/deform.js', output='lib/deform.min.js'),
 )
+easyXDM = Uglify('h:lib/easyXDM.js', output='lib/easyXDM.min.js')
+jwz = Uglify('h:lib/jwz.js', output='lib/jwz.min.js')
+pagedown = Uglify(
+    'h:lib/Markdown.Converter.js',
+    output='lib//Markdown.Converter.min.js'
+)
+underscore = Uglify('h:lib/underscore.js', output='lib/underscore.min.js')
 
 
 # Base and common SCSS
@@ -54,16 +80,20 @@ common = ['h:css/base.scss', 'h:css/common.scss']
 # Main resource bundles
 app = Bundle(
     jquery,
+    jquery_mousewheel,
     angular,
+    angular_bootstrap,
+    angular_sanitize,
     annotator,
-    deform,
+    annotator_auth,
+    annotator_permissions,
+    annotator_store,
     d3,
     easyXDM,
     jwz,
     pagedown,
     raf,
     underscore,
-    'h:lib/jquery.mousewheel.min.js',
     Uglify(
         *[
             Coffee('h:/js/%s.coffee' % name,
@@ -103,7 +133,8 @@ site = SCSS('h:css/site.scss', depends=(base + common), output='css/site.css')
 # iframe and the host window.
 inject = Bundle(
     easyXDM,
-    'h:lib/annotator.min.js',
+    jquery,
+    annotator,
     Uglify(
         Coffee('h:js/inject/host.coffee', output='js/host.js'),
         output='js/hypothesis-host.min.js'

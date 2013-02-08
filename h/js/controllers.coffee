@@ -12,12 +12,12 @@ class App
     token: null
 
   this.$inject = [
-    '$compile', '$element', '$http', '$location', '$scope',
-    'annotator', 'flash', 'threading'
+    '$compile', '$element', '$http', '$location', '$scope', '$timeout',
+    'annotator', 'drafts', 'flash', 'threading'
   ]
   constructor: (
-    $compile, $element, $http, $location, $scope,
-    annotator, flash, threading
+    $compile, $element, $http, $location, $scope, $timeout
+    annotator, drafts, flash, threading
   ) ->
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
@@ -25,6 +25,8 @@ class App
 
     heatmap.element.bind 'click', =>
       $scope.$apply ->
+        return unless drafts.discard()
+        $location.search('id', null).replace()
         dynamicBucket = true
         annotator.showViewer()
         annotator.show()
@@ -90,11 +92,13 @@ class App
           else
             dynamicBucket = false
             $scope.$apply ->
+              return unless drafts.discard()
               $location.search('id', null)
               annotator.showViewer heatmap.buckets[bucket]
             annotator.show()
 
     $scope.submit = (form) ->
+      return unless form.$valid
       params = for name, control of form when control.$modelValue?
         [name, control.$modelValue]
       params.push ['__formid__', form.$name]
@@ -105,7 +109,7 @@ class App
           'Content-Type': 'application/x-www-form-urlencoded'
         withCredentials: true
       .success (data) =>
-        if data.model? then angular.extend($scope, data.model)
+        if data.model? then angular.extend $scope, data.model
         if data.flash? then flash q, msgs for q, msgs of data.flash
         if data.status is 'failure' then flash 'error', data.reason
 
@@ -170,73 +174,99 @@ class App
 
     $scope.$broadcast '$reset'
 
+    # Update scope with auto-filled form field values
+    $timeout ->
+      for i in $element.find('input') when i.value
+        $i = angular.element(i)
+        $i.triggerHandler('change')
+        $i.triggerHandler('input')
+    , 200  # We hope this is long enough
+
 
 class Annotation
   this.$inject = [
-    '$element', '$scope', '$rootScope', '$timeout',
-    'annotator', 'threading'
+    '$element', '$location', '$scope', '$rootScope', '$timeout',
+    'annotator', 'drafts', 'threading'
   ]
   constructor: (
-    $element, $scope, $rootScope, $timeout
-    annotator, threading
+    $element, $location, $scope, $rootScope, $timeout
+    annotator, drafts, threading
   ) ->
+    publish = (args...) ->
+      # Publish after a timeout to escape this digest
+      # Annotator event callbacks don't expect a digest to be active
+      $timeout (-> annotator.publish args...), 0, false
+
     $scope.cancel = ->
       $scope.editing = false
-      if $scope.$modelValue.draft
-        annotator.publish 'annotationDeleted', $scope.$modelValue
+      drafts.remove $scope.$modelValue
+      if $scope.unsaved
+        publish 'annotationDeleted', $scope.$modelValue
 
     $scope.save = ->
       $scope.editing = false
-      $scope.$modelValue.draft = false
-      if $scope.edited
-        annotator.publish 'annotationUpdated', $scope.$modelValue
+      drafts.remove $scope.$modelValue
+      if $scope.unsaved
+        publish 'annotationCreated', $scope.$modelValue
       else
-        annotator.publish 'annotationCreated', $scope.$modelValue
+        publish 'annotationUpdated', $scope.$modelValue
 
     $scope.reply = ->
       unless annotator.plugins.Auth.haveValidToken()
         $rootScope.$broadcast 'showAuth', true
         return
-      reply = annotator.createAnnotation()
-      Object.defineProperty reply, 'draft',
-        value: true
-        writable: true
-      if $scope.$modelValue.thread
-        references = [$scope.$modelValue.thread, $scope.$modelValue.id]
-      else
-        references = [$scope.$modelValue.id]
-      reply.thread = references.join '/'
-      parentThread = (threading.getContainer $scope.$modelValue.id)
-      replyThread = (threading.getContainer reply.id)
-      replyThread.message =
-        annotation: reply
-        id: reply.id
-        references: references
-      parentThread.addChild replyThread
 
-    $scope.$watch '$modelValue.draft', (newValue) ->
-      $scope.editing = newValue
+      references =
+        if $scope.$modelValue.thread
+          [$scope.$modelValue.thread, $scope.$modelValue.id]
+        else
+          [$scope.$modelValue.id]
+
+      reply = angular.extend annotator.createAnnotation(),
+        thread: references.join '/'
+
+      replyThread = angular.extend (threading.getContainer reply.id),
+        message:
+          annotation: reply
+          id: reply.id
+          references: references
+
+      (threading.getContainer $scope.$modelValue.id).addChild replyThread
+      drafts.add reply
+
+    $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
+    $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
+
+    $scope.$watch 'editing', (newValue) ->
       if newValue then $timeout -> $element.find('textarea').focus()
+
+    # Check if this is a brand new annotation
+    if drafts.contains $scope.$modelValue
+      $scope.editing = true
+      $scope.unsaved = true
+
 
 class Editor
   this.$inject = [
     '$location', '$routeParams', '$scope',
-    'annotator', 'threading'
+    'annotator', 'drafts', 'threading'
   ]
   constructor: (
     $location, $routeParams, $scope,
-    annotator, threading
+    annotator, drafts, threading
   ) ->
     save = ->
-      $location.path('/viewer').replace()
-      annotator.provider.onEditorSubmit()
-      annotator.provider.onEditorHide()
+      $scope.$apply ->
+        $location.path('/viewer').replace()
+        annotator.provider.onEditorSubmit()
+        annotator.provider.onEditorHide()
 
     cancel = ->
-      search = $location.search() or {}
-      delete search.id
-      $location.path('/viewer').search(search).replace()
-      annotator.provider.onEditorHide()
+      $scope.$apply ->
+        search = $location.search() or {}
+        delete search.id
+        $location.path('/viewer').search(search).replace()
+        annotator.provider.onEditorHide()
 
     annotator.subscribe 'annotationCreated', save
     annotator.subscribe 'annotationDeleted', cancel
@@ -247,9 +277,8 @@ class Editor
 
     thread = (threading.getContainer $routeParams.id)
     annotation = thread.message?.annotation
-    if annotation?
-      annotation.draft = true
-      $scope.annotation = annotation
+    $scope.annotation = annotation
+    drafts.add annotation
 
 
 class Viewer
@@ -267,11 +296,11 @@ class Viewer
     refresh = =>
       this.refresh $scope, $routeParams, threading, plugins.Heatmap
       if listening
-        if $scope.detail or $routeParams.bucket?
+        if $scope.detail
           plugins.Heatmap.unsubscribe 'updated', refresh
           listening = false
       else
-        unless $scope.detail or $routeParams.bucket?
+        unless $scope.detail
           plugins.Heatmap.subscribe 'updated', refresh
           listening = true
 

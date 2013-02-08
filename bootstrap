@@ -25,9 +25,6 @@ command -v compass || echo "...not found!"
 echo -n "Checking for CoffeeScript..."
 command -v coffee || echo "...not found!"
 
-echo -n "Checking for Handlebars..."
-command -v handlebars || echo "...not found!"
-
 echo -n "Checking for UglifyJS..."
 command -v uglifyjs || {
 	echo "...not found!"

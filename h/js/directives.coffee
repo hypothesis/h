@@ -78,7 +78,6 @@ resettable = ->
         transclude scope, (el) ->
           iElement.replaceWith el
           iElement = el
-          iElement[0].$reset = reset
       reset()
       scope.$on '$reset', reset
   priority: 5000
@@ -130,6 +129,17 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
+tabTruncate = ->
+  link: (scope, iElement) ->
+    angular.element(iElement).addClass("truncate")
+    tabs = angular.element(iElement.children()[0].childNodes)
+    percentage = 100 / tabs.length + "%"
+    for i in [0..tabs.length-1]
+      angular.element(tabs[i]).css "width", percentage
+      a_width = tabs[i].childNodes[0].clientWidth
+      angular.element(tabs[i]).css "max-width", a_width
+
+
 thread = ->
   link: (scope, iElement, iAttrs, controller) ->
     scope.collapsed = false
@@ -143,3 +153,4 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('resettable', resettable)
   .directive('tabReveal', tabReveal)
   .directive('thread', thread)
+  .directive('tabTruncate', tabTruncate)
