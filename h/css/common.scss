@@ -124,7 +124,7 @@ button, input[type=submit], .btn {
   @include border-radius(.5em);
   @include smallshadow;
   @include single-transition(opacity, .2s);
-  border: solid thin;
+  border: solid 1px;
   left: 50%;
   margin-left: -15%;
   opacity: 0;
@@ -195,10 +195,6 @@ button, input[type=submit], .btn {
     display: block;
     margin-top: .75em;
   }
-}
-
-input.ng-invalid.ng-dirty {
-  border-color: lighten($red, 35%);
 }
 
 .req {
