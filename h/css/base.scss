@@ -9,6 +9,7 @@ $grayDark: darken($gray, 12%) !default;
 $grayDarker: darken($gray, 36%) !default;
 $grayLight: lighten($gray, 12%) !default;
 $grayLighter: lighten($gray, 36%) !default;
+$grayLightest: #f9f9f9 !default;
 
 //COLORS
 $hypothered: #bd1c2b !default;
@@ -94,7 +95,7 @@ $em: 14 / 1em !default;
 
 @mixin plainform {
   color: $gray;
-  background-color: #ffffff;
+  background-color: white;
   border: 1px solid $grayLighter;
   border-radius: .2em;
   font-family: "Source Sans Pro", "Open Sans", sans-serif;
@@ -102,14 +103,17 @@ $em: 14 / 1em !default;
   padding: .33em .5em;
   &:focus {
     outline: 0;
-    border: 1px solid $grayLight;
+    border: 1px solid $gray;
     @include box-shadow( inset 1px 1px 6px -1px $grayLighter);
+  }
+  &:disabled {
+    background-color: $grayLightest;
   }
 }
 
 @mixin sweetbutton {
   @include background-image(
-    linear-gradient(top, rgb(255, 255, 255) 0%, rgb(249, 249, 249) 100%));
+    linear-gradient(top, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 10%, rgb(240, 240, 240) 100%));
   @include border-radius(.15em);
   @include box-shadow(
     inset 0 .2em 0 rgba(255, 255, 255, .2),
@@ -121,12 +125,12 @@ $em: 14 / 1em !default;
   position: relative;
   text-decoration: none;
   text-shadow: 0 1px 2px rgba(255, 255, 255, .9);
-  color: $gray;
+  color: $grayDark;
+  border-color: $grayLight $grayLight $gray;
 
   &:hover {
     @include background-image(
       linear-gradient(top, #fefefe 0%, #f4f4f4 50%, #e2e2e2 51%, #fdfdfd 100%));
-    border-color: $grayLight $grayLight $gray;
     color: black;
     & > a {
       opacity: 1;
@@ -140,7 +144,14 @@ $em: 14 / 1em !default;
       inset 0 .15em .25em rgba(0, 0, 0, .15),
       0 .05em .1em rgba(0, 0, 0, .0));
     border-color: $grayLight $grayLight $gray;
-    top: .1em;
+    top: 1px;
+  }
+
+  &:disabled {
+    color: $grayLight;
+    border-color: $grayLighter;
+    background: $grayLightest;
+    cursor: default;
   }
 }
 
