@@ -350,28 +350,88 @@ blockquote {
 
 //TABS////////////////////////////////
 .nav-tabs {
-  @include pie-clearfix;
-  margin: 0 .5em;
-
-  & > li > a {
-    cursor: pointer;
-    float: left;
-    line-height: 1;
-    padding: .5em 1em;
-    padding-top: .25em;
-    margin-right: -.5em;
-    margin-bottom: 0px;
+  width: 100%;
+  font-family: sans-serif;
+  & > li {
     position: relative;
-    text-decoration: none;
-    @include tabbox;
-  }
-
-  & > .active > a {
-    @include box-shadow(none);
-    color: #333;
-    font-weight: bold;
-    background: hsla(0, 0%, 100%, 1);
-    z-index: 90;
+    display: inline-block;
+    overflow: hidden;
+    margin-right: -.5em;
+    background: hsla(0, 0%, 99%, 1);
+    border-top-right-radius: 2em 5em;
+    border-top-left-radius: 2em 5em;
+    border: 1px solid $grayLighter;
+    border-bottom: none;
+    & > a {
+      overflow: hidden;
+      display: inline-block;
+      white-space: nowrap;
+      padding: .5em 1em;
+      color: #999;
+      text-decoration: none;
+    }
+    &::before {
+      content: "";
+      @include background( linear-gradient(right, hsla(0, 0%, 99%, 1), hsla(0, 0%, 99%, 1), hsla(0, 0%, 99%, 0)) );
+      width: 1em;
+      height: 100%;
+      position: absolute;
+      right: 0;
+      top: 0;
+      border-top-right-radius: 2em 5em;
+    }
+    &::after {
+      content: "";
+      @include box-shadow(0px -10px 13px -8px hsla(0, 0%, 0%, .1) inset);
+      border-top-right-radius: 2em 5em;
+      border-top-left-radius: 2em 5em;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+    &:hover {
+      background: white;
+    }
+    &.active {
+      background: hsla(0, 0%, 100%, 1);
+      z-index: 90;
+      & > a {
+        color: #333;
+        font-weight: bold;
+      }
+      &::before {
+        @include background( linear-gradient(right, hsla(0, 0%, 100%, 1), hsla(0, 0%, 100%, 1), hsla(0, 0%, 100%, 0)) );
+      }
+      &::after {
+        @include box-shadow( none );
+      }
+    }
+    .tabs-below & {
+      border: 1px solid $grayLighter;
+      border-top: none;
+      border-top-right-radius: 0;
+      border-top-left-radius: 0;
+      border-bottom-right-radius: 2em 5em;
+      border-bottom-left-radius: 2em 5em;
+      &::before {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 2em 5em;
+      }
+      &::after {
+        @include box-shadow(0px 10px 13px -8px hsla(0, 0%, 0%, .1) inset);
+        border-top-right-radius: 0;
+        border-top-left-radius: 0;
+        border-bottom-right-radius: 2em 5em;
+        border-bottom-left-radius: 2em 5em;
+      }
+      &.active {
+        &::after {
+          @include box-shadow( none );
+        }
+      }
+    }
   }
 }
 
@@ -382,12 +442,10 @@ blockquote {
   margin-top: -1px;  // Pull up and under tabs
   padding: 1em;
   position: relative;
-
   &.active {
     display: inherit !important;
   }
 }
-
 
 
 
