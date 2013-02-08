@@ -76,7 +76,7 @@
             <span ng-show="login.password.$error.required">Please enter your password.</span>
           </span>
 
-          <input type="submit" name="login" value="Sign in" />
+          <input ng-disabled="!login.password.$valid" type="submit" name="login" value="Sign in" />
 
         </form>
         <!-- / Login -->
