@@ -162,6 +162,8 @@ class App
         for annotation in annotator.dumpAnnotations()
           provider.deleteAnnotation annotation
         annotator.plugins.Store.loadAnnotations()            
+        heatmap.publish 'updated'
+        provider.publish 'hostUpdated'
 
     $scope.$on 'showAuth', (event, show=true) ->
       angular.extend $scope.sheet,
