@@ -55,38 +55,69 @@
 
         <a data-ng-click="sheet.collapsed = true" class="close"></a>
 
+        <!-- Login -->
         <form data-title="Sign in"
               data-value="login"
               class="tab-pane"
               name="login"
               novalidate>
+
           <input type="text" name="username" value="" placeholder="Username"
-                 required autocapitalize="false" data-ng-model="username"  />
+                 required autocapitalize="false" data-ng-model="username" data-ng-minlength="3"/>
+          <span>
+            <span ng-show="login.username.$error.required">Please enter your username.</span>
+            <span ng-show="register.username.$error.minlength">Usernames are at least 3 characters.</span>
+          </span>
+
           <input type="password" name="password" value="" placeholder="Password"
                  required autocapitalize="false" autocorrect="false"
-                 data-ng-model="password" />
-         <span ng-show="login.username.$dirty && login.username.$error.required">Please enter your username.</span>
-         <span ng-show="login.username.$valid && login.password.$dirty && login.password.$error.required">Please enter your password.</span>
-          <input type="submit" name="login" value="Sign in" />
-        </form>
+                 data-ng-model="password" ng-disabled="!login.username.$valid" />
+          <span ng-show="login.username.$valid">
+            <span ng-show="login.password.$error.required">Please enter your password.</span>
+          </span>
 
+          <input type="submit" name="login" value="Sign in" />
+
+        </form>
+        <!-- / Login -->
+
+        <!-- Register -->
         <form data-title="Create an account"
               data-value="register"
               class="tab-pane"
               name="register"
               novalidate>
+
           <input type="text" name="username" value="" placeholder="Username"
                  required autocapitalize="false" data-ng-model="username"
                  data-ng-minlength="3" data-ng-maxlength="15" />
-          <span>Usernames are between 3 and 15 characters in length.</span>
+          <span>
+            <span ng-show="register.username.$error.required">Please choose a username.</span>
+            <span ng-show="register.username.$error.minlength">Usernames must be at least 3 characters.</span>
+            <span ng-show="register.username.$error.maxlength">Usernames must be 15 characters at most.</span>
+          </span>
+
           <input type="email" name="email" value="" placeholder="Email"
-                 required autocapitalize="false" data-ng-model="email" />
+                 required autocapitalize="false" ng-disabled="!register.username.$valid" data-ng-model="email" />
+          <span ng-show="register.username.$valid">
+            <span ng-show="register.email.$error.email">Is this an email address?</span>
+            <span ng-show="register.email.$error.required">Please enter your email.</span>
+          </span>
+
           <input type="password" name="password" value="" placeholder="Password"
                  required autocapitalize="false" autocorrect="false"
-                 data-ng-minlength="2" data-ng-model="password" />
-          <input type="submit" name="sign_up" value="Sign up" />
-        </form>
+                 data-ng-minlength="2" ng-disabled="!register.email.$valid" data-ng-model="password" />
+          <span ng-show="register.email.$valid">
+            <span ng-show="register.password.$error.required">Please enter a password.</span>
+            <span ng-show="register.password.$error.minlength">Passwords must be at least 2 characters.</span>
+          </span>
 
+          <input type="submit" name="sign_up" ng-disabled="!login.password.$valid" value="Sign up" />
+
+        </form>
+        <!-- / Register -->
+
+        <!-- Forgot -->
         <form data-title="Forgot your password?"
               data-value="forgot"
               class="tab-pane"
@@ -94,9 +125,16 @@
               novalidate>
           <input type="email" name="email" value="" placeholder="Email"
                  required autocapitalize="false" data-ng-model="email" />
-          <input type="submit" name="forgot" value="Send recovery email" />
-        </form>
+          <span>
+            <span ng-show="forgot.email.$error.email">Is this an email address?</span>
+            <span ng-show="forgot.email.$error.required">Please enter your email.</span>
+          </span>
 
+          <input type="submit" name="forgot" ng-disabled="!forgot.email.$valid" value="Send recovery email" />
+        </form>
+        <!-- / Forgot -->
+
+        <!-- Activate -->
         <form data-title="Set your password"
               data-value="activate"
               class="tab-pane"
@@ -105,10 +143,20 @@
           <input type="text" name="code" value="" placeholder="Activation Code"
                  required autocorrect="false" autocapitalize="false"
                  data-ng-model="code" />
+          <span>
+            <span ng-show="activate.code.$error.required">Please enter your validation code.</span>
+          </span>
+
           <input type="password" name="password" value="" placeholder="Password"
                  required autocapitalize="false" autocorrect="false"
-                 data-ng-minlength="2" data-ng-model="password" />
-          <input type="submit" name="activate" value="Sign in" />
+                 data-ng-minlength="2" ng-disabled="!activate.code.$valid" data-ng-model="password" />
+          <span ng-show="activate.code.$valid">
+            <span ng-show="activate.password.$error.required">Please choose a password.</span>
+            <span ng-show="activate.password.$error.minlength">Passwords must be at least 2 characters.</span>
+          </span>
+
+          <input type="submit" name="activate" value="Sign in" ng-disabled="!activate.password.$valid" />
+
         </form>
 
         <footer data-ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
@@ -122,6 +170,7 @@
             </li>
           </ul>
         </footer>
+        <!-- / Activate -->
 
       </div>
       <!-- / Account and Authentication -->
