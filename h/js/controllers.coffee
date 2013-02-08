@@ -154,6 +154,8 @@ class App
         else
           plugins.Auth.setToken(newValue)
         plugins.Auth.withToken plugins.HypothesisPermissions._setAuthFromToken
+        if annotator.plugins.Store?
+          annotator.plugins.Store.loadAnnotations()            
       else
         plugins.HypothesisPermissions.setUser(null)
         delete plugins.Auth
@@ -323,7 +325,7 @@ class Viewer
       if $routeParams.id?
         highlights = [$routeParams.id]
       else if angular.isArray annotation
-        highlights = (a.id for a in annotation)
+        highlights = (a.id for a in annotation when a?)
       else if angular.isObject annotation
         highlights = [annotation.id]
       else
