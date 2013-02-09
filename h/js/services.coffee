@@ -90,13 +90,12 @@ class Hypothesis extends Annotator
       onReady: =>
         # Get the location of the annotated document
         @provider.getHref (href) =>
-          stable_href = ((decodeURIComponent href).split /(#.+)?$/ )[0] 
           this.addPlugin 'Store',
             annotationData:
-              uri: stable_href
+              uri: href
             loadFromSearch:
               limit: 1000
-              uri: stable_href
+              uri: href
             prefix: '/api/current'
 
           # When the store plugin finishes a request, update the annotation
