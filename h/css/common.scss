@@ -92,6 +92,29 @@ button, input[type=submit], .btn {
   @include sweetbutton;
 }
 
+.alert-block {
+  span.errorMsgLbl { @extend .visuallyhidden; }
+  span.errorMsg { @extend .visuallyhidden; }
+}
+
+.inline-block {
+  display: inline-block
+}
+
+.tertiarytext {
+  @include tertiarytext;
+}
+
+//May very well be useless- checkit
+.icon-hidden {
+  &:before {
+    color: transparent;
+  }
+  &:after {
+    color: transparent;
+  }
+}
+
 //Candidate for cleanup
 .btn-link {
   @include box-shadow(none);
@@ -161,9 +184,10 @@ button, input[type=submit], .btn {
 
 
 //CLOSER////////////////////////////////
+//Make sure this shouldn't have icon font- checkit
 .close {
-  @extend .x-icon;
   float: right;
+  @include icon("delete_1.png");
   width: 1em;
   height: 1em;
   opacity: .2;
@@ -215,39 +239,45 @@ input.ng-invalid.ng-dirty {
 
 
 
-//CONTROLS////////////////////////////////
-.annotator-controls {
-  @include box-shadow(-1em 0 1em 0 #fff);
-  background: #fff;
+//ICON CLASSES////////////////////////////////
+.flag-icon {
+  @include fonticon("\28", left);
 }
 
-a {
-  &.write {
-    @include linkbutton;
-    background-image: url("../images/pen_1.png");
-  }
-
-  &.fave {
-    @include linkbutton;
-    background-image: url("../images/fave_1.png");
-  }
-
-  &.flag {
-    @include linkbutton;
-    background-image: url("../images/flag_1.png");
-  }
-
-  &.annotator-save {
-    @include linkbutton;
-    background-image: url("../images/submit_1.png");
-  }
-
-  &.annotator-cancel {
-    @include linkbutton;
-    background-image: url("../images/delete_1.png");
+.fave-icon {
+  @include fonticon("\e006", left);
+  &.checked:before {
+    content: "\e005";
   }
 }
 
+.reply-icon {
+  @include fonticon("\e004", left);
+}
+
+.share-icon {
+  @include fonticon("\25", left);
+}
+
+.down-icon {
+  @include fonticon("\e007", left);
+}
+
+.clipboard-icon {
+  @include fonticon("\33", left);
+}
+
+.check-icon {
+  @include fonticon("\35", left);
+}
+
+.x-icon {
+  @include fonticon("\36", left);
+}
+
+.vis-icon {
+  @include fonticon("\34", left);
+}
 
 //EXCERPT////////////////////////////////
 .excerpt {
@@ -305,9 +335,20 @@ blockquote {
   }
 }
 
+.dropdown-toggle {
+  background-color: white;
+  cursor: pointer;
+  &:active {
+    outline: 0;
+  }
+  &:hover {
+    color: black;
+  }
+}
+
 .dropdown-menu {
   @include rotateX(90deg);
-  @include smallshadow;
+  // @include smallshadow;
   background: $white;
   border: solid 1px $grayLighter;
   left: 0;
@@ -318,14 +359,38 @@ blockquote {
   position: absolute;
 
   li {
-    line-height: 1.5;
-    margin: .25em .5em;
-    border-top: dotted 1px $grayLighter;
+    line-height: 1;
+    margin: .4em .5em 0;
+    padding-bottom: .1em;
+    border-bottom: dotted 1px $grayLighter;
+    white-space: nowrap;
+    cursor: pointer;
     &:hover {
       color: black;
     }
-    &:first-child {
-      border-top: 0;
+
+    &.selected {
+      color: black;
+      font-weight: 600;
+      line-height: 1;
+      &:before {
+        font-size: .7em;
+        
+      }
+    }
+    &.inactive {
+      font-weight: 400;
+      color: $grayLighter;
+      cursor: default;
+      &:hover {
+        color: $grayLighter;
+      }
+      & * {
+        cursor: default;
+      }
+    }
+    &:last-child {
+      border-bottom: 0;
     }
   }
 
@@ -350,6 +415,30 @@ blockquote {
   }
 }
 
+
+
+//VISIBILITY
+.visibility {
+  .dropdown-toggle {
+    @include fonticon("\3c", right);
+  }
+  li {
+    @include fonticon("\35", right);
+    &:after {
+      opacity: 0;
+    }
+    &.selected {
+      &:after {
+        opacity: 1;
+      }
+    }
+  }
+  .vis-public {
+    border-bottom: 1px solid $grayLighter;
+    margin: .4em 0 0;
+    padding: 0 .5em 0;
+  }
+}
 
 
 //TABS////////////////////////////////
@@ -390,6 +479,11 @@ blockquote {
   &.active {
     display: inherit !important;
   }
+
+//What is this- checkit
+  footer > ul {
+    text-align: right;
+  }
 }
 
 
@@ -405,7 +499,7 @@ blockquote {
 }
 
 
-
+//Really checkit
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
