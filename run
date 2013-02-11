@@ -5,7 +5,7 @@ from sys import argv
 
 
 if __name__ == '__main__':
-    # If  a virtual environment is present make sure it's being used.
+    # If a virtual environment is present make sure it's being used.
     virtual_env = environ.get('VIRTUAL_ENV', '.')
     activate = join(virtual_env, 'bin', 'activate_this.py')
     if exists(activate):
