@@ -22,7 +22,23 @@
 
 <h3 data-ng-bind="model.$viewValue.user | userName" class="upper-left" />
 <form data-ng-show="editing" name="form">
-  <select class="privacy" data-ng-model="privacy" ng-options="p.name for p in privacyLevels"></select>
+  
+  <div class="dropdown"
+      data-ng-model="privacy">
+    <a role="button"
+      class="dropdown-toggle"
+      data-toggle="dropdown"
+      >{{privacy.name}}</a>
+    <ul class="dropdown-menu pull-right"
+        role="menu">
+      <li data-ng-repeat="p in privacyLevels">
+        <a>{{p.name}}</a>
+      </li>
+    </ul>
+  </div>
+
+<!--   <select class="privacy" data-ng-model="privacy" ng-options="p.name for p in privacyLevels"></select> -->
+
   <textarea data-ng-model="editText"
             class="body"
             name="text"
