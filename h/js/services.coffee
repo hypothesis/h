@@ -318,7 +318,7 @@ class Hypothesis extends Annotator
     else
       @provider.setupAnnotation
         id: annotation.id
-      ranges: annotation.ranges
+        ranges: annotation.ranges
 
   showViewer: (annotations=[]) =>
     @element.injector().invoke [
