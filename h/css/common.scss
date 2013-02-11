@@ -507,6 +507,20 @@ blockquote {
 
   div.body {
     @include force-wrap;
+    clear: both;
+    p:first-child {
+      margin-top: 0;
+    }
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .upper-left {
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: .25em;
+    float: left;
   }
 
   textarea.body {
@@ -514,17 +528,11 @@ blockquote {
     width: 100%;
   }
 
-  .user {
-    font-weight: bold;
-    text-decoration: underline;
-    margin-bottom: .25em;
+  .privacy {
+    float: right;
   }
 
-  .time {
-    @include tertiarytext;
-  }
-
-  .bottombar {
+  .buttonbar {
     @include pie-clearfix;
     margin: .25em 0;
 
@@ -631,7 +639,7 @@ blockquote {
     );
     @include tertiarytext;
     float: left;
-    margin-left: .5em;
+    margin-left: 1em;
   }
 
   .show {
@@ -675,7 +683,7 @@ blockquote {
   }
 
   // Things not shown in the summary view
-  .annotator-controls, .magicontrols .show, .bottombar, {
+  .annotator-controls, .magicontrols .show, .buttonbar, {
     display: none;
   }
 }
