@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+from distutils.core import run_setup
 from os import environ
 from os.path import exists, join
-from sys import argv
+import sys
 
 
 if __name__ == '__main__':
@@ -11,5 +12,16 @@ if __name__ == '__main__':
     if exists(activate):
         execfile(activate, dict(__file__=activate))
 
+    # If the distribution has not been set up for development, do so.
+    if not environ.get('PYTHONSETUP'):
+        # Use an environment variable to signal not to do this on reload
+        environ['PYTHONSETUP'] = 'True'
+        try:
+            start_args = list(sys.argv)
+            run_setup('setup.py', ['develop'])
+        finally:
+            sys.argv = start_args
+
+    # Start the application
     from h.script import start
-    start(argv[1:])
+    start(sys.argv[1:])
