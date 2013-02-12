@@ -3,7 +3,7 @@
   <span data-ng-bind="model.$viewValue.created | fuzzyTime | date:'mediumDate'"
         class="time" />
   <div class="vis-icon" title="Visibility"
-       data-ng-show="model.$viewValue.permissions.read.length" />
+       data-ng-show="model.$viewValue.permissions.read | isPrivate" />
   <div class="fave-icon show" title="Favorite"
        data-ng-click="favorite()" />
   <div class="show reply-icon" title="Reply"
@@ -20,8 +20,25 @@
   </div>
 </div>
 
-<h3 data-ng-bind="model.$viewValue.user | userName" class="user" />
+<h3 data-ng-bind="model.$viewValue.user | userName" class="upper-left" />
 <form data-ng-show="editing" name="form">
+  
+  <div class="dropdown privacy"
+      data-ng-model="privacy">
+    <a role="button"
+      class="dropdown-toggle"
+      data-toggle="dropdown"
+      >{{privacy.name}}</a>
+    <ul class="dropdown-menu pull-right"
+        role="menu">
+      <li data-ng-repeat="p in privacyLevels">
+        <a>{{p.name}}</a>
+      </li>
+    </ul>
+  </div>
+
+<!--   <select class="privacy" data-ng-model="privacy" ng-options="p.name for p in privacyLevels"></select> -->
+
   <textarea data-ng-model="editText"
             class="body"
             name="text"
@@ -36,7 +53,7 @@
      class="body" />
 
 <!-- Bottom controls -->
-<div class="bottombar">
+<div class="buttonbar">
   <div data-ng-show="editing" class="annotator-controls">
     <button data-ng-click="save()" class="btn check-icon">Save</button>
     <a data-ng-click="cancel()" class="x-icon">Cancel</a>

@@ -157,6 +157,13 @@ class App
       else
         plugins.HypothesisPermissions.setUser(null)
         delete plugins.Auth
+      provider.setActiveHighlights []
+      if annotator.plugins.Store?
+        for annotation in annotator.dumpAnnotations()
+          provider.deleteAnnotation annotation
+        annotator.plugins.Store.loadAnnotations()            
+        heatmap.publish 'updated'
+        provider.publish 'hostUpdated'
 
     $scope.$on 'showAuth', (event, show=true) ->
       angular.extend $scope.sheet,
@@ -197,6 +204,12 @@ class Annotation
       # Annotator event callbacks don't expect a digest to be active
       $timeout (-> annotator.publish args...), 0, false
 
+    $scope.privacyLevels = [
+     {name: 'Public', value:  { 'read': 'group:__world__' } },
+     {name: 'Private', value: { 'read': [] } }
+    ]
+    $scope.privacy = $scope.privacyLevels[0]
+    
     $scope.cancel = ->
       $scope.editing = false
       drafts.remove $scope.$modelValue
@@ -244,6 +257,7 @@ class Annotation
     if drafts.contains $scope.$modelValue
       $scope.editing = true
       $scope.unsaved = true
+      $scope.$modelValue.permissions = { 'read': 'group:__world__' } 
 
 
 class Editor
@@ -316,7 +330,7 @@ class Viewer
       if $routeParams.id?
         highlights = [$routeParams.id]
       else if angular.isArray annotation
-        highlights = (a.id for a in annotation)
+        highlights = (a.id for a in annotation when a?)
       else if angular.isObject annotation
         highlights = [annotation.id]
       else
