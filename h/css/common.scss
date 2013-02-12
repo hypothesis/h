@@ -407,11 +407,11 @@ blockquote {
 }
 
 .check-icon {
-  @include fonticon("\35", left);
+  @include fonticon("\35", left, .3em);
 }
 
 .x-icon {
-  @include fonticon("\36", left);
+  @include fonticon("\36", left, .3em);
 }
 
 .vis-icon {
