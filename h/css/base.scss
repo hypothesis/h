@@ -237,8 +237,14 @@ $em: 14 / 1em !default;
       speak: none;
       font-weight: normal;
     }
+    &:after {
+      content: "";
+    }
   }
   @if $iconside == right {
+    &:before {
+      content: "";
+    }
     &:after {
       content: $char;
       vertical-align: -.1em;

@@ -105,7 +105,6 @@ button, input[type=submit], .btn {
   @include tertiarytext;
 }
 
-//May very well be useless- checkit
 .icon-hidden {
   &:before {
     color: transparent;
@@ -239,46 +238,6 @@ input.ng-invalid.ng-dirty {
 
 
 
-//ICON CLASSES////////////////////////////////
-.flag-icon {
-  @include fonticon("\28", left);
-}
-
-.fave-icon {
-  @include fonticon("\e006", left);
-  &.checked:before {
-    content: "\e005";
-  }
-}
-
-.reply-icon {
-  @include fonticon("\e004", left);
-}
-
-.share-icon {
-  @include fonticon("\25", left);
-}
-
-.down-icon {
-  @include fonticon("\e007", left);
-}
-
-.clipboard-icon {
-  @include fonticon("\33", left);
-}
-
-.check-icon {
-  @include fonticon("\35", left);
-}
-
-.x-icon {
-  @include fonticon("\36", left);
-}
-
-.vis-icon {
-  @include fonticon("\34", left);
-}
-
 //EXCERPT////////////////////////////////
 .excerpt {
   position: relative;
@@ -336,6 +295,7 @@ blockquote {
 }
 
 .dropdown-toggle {
+  @include fonticon("\002f", right, 0em);
   background-color: white;
   cursor: pointer;
   &:active {
@@ -357,11 +317,12 @@ blockquote {
   opacity: 0;
   pointer-events: none;
   position: absolute;
+  z-index: 2;
 
   li {
     line-height: 1;
     margin: .4em .5em 0;
-    padding-bottom: .1em;
+    padding-bottom: .5em;
     border-bottom: dotted 1px $grayLighter;
     white-space: nowrap;
     cursor: pointer;
@@ -401,7 +362,7 @@ blockquote {
 
   // Aligns the dropdown menu to right
   &.pull-right {
-    right: -1px;
+    right: 0px;
     left: auto;
     text-align: right;
   }
@@ -413,6 +374,48 @@ blockquote {
     opacity: 1;
     pointer-events: auto;
   }
+}
+
+
+
+//ICON CLASSES////////////////////////////////
+.flag-icon {
+  @include fonticon("\28", left);
+}
+
+.fave-icon {
+  @include fonticon("\e006", left);
+  &.checked:before {
+    content: "\e005";
+  }
+}
+
+.reply-icon {
+  @include fonticon("\e004", left);
+}
+
+.share-icon {
+  @include fonticon("\25", left);
+}
+
+.down-icon {
+  @include fonticon("\e007", left);
+}
+
+.clipboard-icon {
+  @include fonticon("\33", left);
+}
+
+.check-icon {
+  @include fonticon("\35", left);
+}
+
+.x-icon {
+  @include fonticon("\36", left);
+}
+
+.vis-icon {
+  @include fonticon("\e001", left);
 }
 
 
