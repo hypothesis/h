@@ -92,6 +92,28 @@ button, input[type=submit], .btn {
   @include sweetbutton;
 }
 
+.alert-block {
+  span.errorMsgLbl { @extend .visuallyhidden; }
+  span.errorMsg { @extend .visuallyhidden; }
+}
+
+.inline-block {
+  display: inline-block
+}
+
+.tertiarytext {
+  @include tertiarytext;
+}
+
+.icon-hidden {
+  &:before {
+    color: transparent;
+  }
+  &:after {
+    color: transparent;
+  }
+}
+
 //Candidate for cleanup
 .btn-link {
   @include box-shadow(none);
@@ -161,9 +183,10 @@ button, input[type=submit], .btn {
 
 
 //CLOSER////////////////////////////////
+//Make sure this shouldn't have icon font- checkit
 .close {
-  @extend .x-icon;
   float: right;
+  @include icon("delete_1.png");
   width: 1em;
   height: 1em;
   opacity: .2;
@@ -213,40 +236,6 @@ input.ng-invalid.ng-dirty {
   margin: -1px; padding: 0; border: 0;
 }
 
-
-
-//CONTROLS////////////////////////////////
-.annotator-controls {
-  @include box-shadow(-1em 0 1em 0 #fff);
-  background: #fff;
-}
-
-a {
-  &.write {
-    @include linkbutton;
-    background-image: url("../images/pen_1.png");
-  }
-
-  &.fave {
-    @include linkbutton;
-    background-image: url("../images/fave_1.png");
-  }
-
-  &.flag {
-    @include linkbutton;
-    background-image: url("../images/flag_1.png");
-  }
-
-  &.annotator-save {
-    @include linkbutton;
-    background-image: url("../images/submit_1.png");
-  }
-
-  &.annotator-cancel {
-    @include linkbutton;
-    background-image: url("../images/delete_1.png");
-  }
-}
 
 
 //EXCERPT////////////////////////////////
@@ -305,9 +294,21 @@ blockquote {
   }
 }
 
+.dropdown-toggle {
+  @include fonticon("\002f", right, 0em);
+  background-color: white;
+  cursor: pointer;
+  &:active {
+    outline: 0;
+  }
+  &:hover {
+    color: black;
+  }
+}
+
 .dropdown-menu {
   @include rotateX(90deg);
-  @include smallshadow;
+  // @include smallshadow;
   background: $white;
   border: solid 1px $grayLighter;
   left: 0;
@@ -316,16 +317,41 @@ blockquote {
   opacity: 0;
   pointer-events: none;
   position: absolute;
+  z-index: 2;
 
   li {
-    line-height: 1.5;
-    margin: .25em .5em;
-    border-top: dotted 1px $grayLighter;
+    line-height: 1;
+    margin: .4em .5em 0;
+    padding-bottom: .5em;
+    border-bottom: dotted 1px $grayLighter;
+    white-space: nowrap;
+    cursor: pointer;
     &:hover {
       color: black;
     }
-    &:first-child {
-      border-top: 0;
+
+    &.selected {
+      color: black;
+      font-weight: 600;
+      line-height: 1;
+      &:before {
+        font-size: .7em;
+        
+      }
+    }
+    &.inactive {
+      font-weight: 400;
+      color: $grayLighter;
+      cursor: default;
+      &:hover {
+        color: $grayLighter;
+      }
+      & * {
+        cursor: default;
+      }
+    }
+    &:last-child {
+      border-bottom: 0;
     }
   }
 
@@ -336,7 +362,7 @@ blockquote {
 
   // Aligns the dropdown menu to right
   &.pull-right {
-    right: -1px;
+    right: 0px;
     left: auto;
     text-align: right;
   }
@@ -350,6 +376,72 @@ blockquote {
   }
 }
 
+
+
+//ICON CLASSES////////////////////////////////
+.flag-icon {
+  @include fonticon("\28", left);
+}
+
+.fave-icon {
+  @include fonticon("\e006", left);
+  &.checked:before {
+    content: "\e005";
+  }
+}
+
+.reply-icon {
+  @include fonticon("\e004", left);
+}
+
+.share-icon {
+  @include fonticon("\25", left);
+}
+
+.down-icon {
+  @include fonticon("\e007", left);
+}
+
+.clipboard-icon {
+  @include fonticon("\33", left);
+}
+
+.check-icon {
+  @include fonticon("\35", left, .3em);
+}
+
+.x-icon {
+  @include fonticon("\36", left, .3em);
+}
+
+.vis-icon {
+  @include fonticon("\e001", left);
+}
+
+
+
+//VISIBILITY
+.visibility {
+  .dropdown-toggle {
+    @include fonticon("\3c", right);
+  }
+  li {
+    @include fonticon("\35", right);
+    &:after {
+      opacity: 0;
+    }
+    &.selected {
+      &:after {
+        opacity: 1;
+      }
+    }
+  }
+  .vis-public {
+    border-bottom: 1px solid $grayLighter;
+    margin: .4em 0 0;
+    padding: 0 .5em 0;
+  }
+}
 
 
 //TABS////////////////////////////////
@@ -390,6 +482,11 @@ blockquote {
   &.active {
     display: inherit !important;
   }
+
+//What is this- checkit
+  footer > ul {
+    text-align: right;
+  }
 }
 
 
@@ -405,7 +502,7 @@ blockquote {
 }
 
 
-
+//Really checkit
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
@@ -413,6 +510,20 @@ blockquote {
 
   div.body {
     @include force-wrap;
+    clear: both;
+    p:first-child {
+      margin-top: 0;
+    }
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .upper-left {
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: .25em;
+    float: left;
   }
 
   textarea.body {
@@ -420,17 +531,11 @@ blockquote {
     width: 100%;
   }
 
-  .user {
-    font-weight: bold;
-    text-decoration: underline;
-    margin-bottom: .25em;
+  .privacy {
+    float: right;
   }
 
-  .time {
-    @include tertiarytext;
-  }
-
-  .bottombar {
+  .buttonbar {
     @include pie-clearfix;
     margin: .25em 0;
 
@@ -537,7 +642,7 @@ blockquote {
     );
     @include tertiarytext;
     float: left;
-    margin-left: .5em;
+    margin-left: 1em;
   }
 
   .show {
@@ -581,7 +686,7 @@ blockquote {
   }
 
   // Things not shown in the summary view
-  .annotator-controls, .magicontrols .show, .bottombar, {
+  .annotator-controls, .magicontrols .show, .buttonbar, {
     display: none;
   }
 }

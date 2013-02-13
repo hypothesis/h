@@ -55,11 +55,11 @@ $headingsColor:         inherit !default;
 //ICON FONT IMPORT
 @font-face {
   font-family: 'icomoon';
-  src:url('../images/icomoon.eot');
-  src:url('../images/icomoon.eot?#iefix') format('embedded-opentype'),
-    url('../images/icomoon.svg#icomoon') format('svg'),
-    url('../images/icomoon.woff') format('woff'),
-    url('../images/icomoon.ttf') format('truetype');
+  src:url('../images/icomoon/fonts/icomoon.eot');
+  src:url('../images/icomoon/fonts/icomoon.eot?#iefix') format('embedded-opentype'),
+    url('../images/icomoon/fonts/icomoon.svg#icomoon') format('svg'),
+    url('../images/icomoon/fonts/icomoon.woff') format('woff'),
+    url('../images/icomoon/fonts/icomoon.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -130,6 +130,7 @@ $em: 14 / 1em !default;
     color: black;
     & > a {
       opacity: 1;
+      color: black;
     }
   }
 
@@ -193,30 +194,6 @@ $em: 14 / 1em !default;
 
 
 
-//LINKBUTTONS////////////////////////////////
-@mixin linkbutton {
-  text-decoration: none;
-  cursor: pointer;
-  padding-left: 1.3em;
-  background-size: 1em 1em;
-  background-repeat: no-repeat;
-  background-position: left center;
-  color: black;
-  opacity: .6;
-  &:hover {
-    opacity: 1;
-  }
-}
-
-@mixin linkbutton_right {
-  @include linkbutton;
-  background-position: right;
-  padding-left: 0;
-  padding-right: 1.3em;
-}
-
-
-
 //FONTICON////////////////////////////////
 @mixin fonticon($char, $iconside, $offset: 0) {
   text-decoration: none;
@@ -236,8 +213,14 @@ $em: 14 / 1em !default;
       speak: none;
       font-weight: normal;
     }
+    &:after {
+      content: "";
+    }
   }
   @if $iconside == right {
+    &:before {
+      content: "";
+    }
     &:after {
       content: $char;
       vertical-align: -.1em;
