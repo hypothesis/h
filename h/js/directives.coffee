@@ -9,8 +9,12 @@ annotation = ['$filter', ($filter) ->
     post: (scope, iElement, iAttrs, controller) ->
       return unless controller
 
-      # Publish the controller
-      scope.model = controller
+      # Bind shift+enter to save
+      iElement.find('textarea').bind
+        keydown: (e) ->
+          if e.keyCode == 13 && e.shiftKey
+            e.preventDefault()
+            scope.save()
 
       # Format the annotation for display
       controller.$formatters.push (value) ->
@@ -32,6 +36,9 @@ annotation = ['$filter', ($filter) ->
           #scope.previewText = ($filter 'converter') scope.editText
         else
           scope.previewText = ''
+
+      # Publish the controller
+      scope.model = controller
   controller: 'AnnotationController'
   priority: 100  # Must run before ngModel
   require: '?ngModel'
