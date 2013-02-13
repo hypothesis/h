@@ -31,7 +31,7 @@
       >{{privacy.name}}</a>
     <ul class="dropdown-menu pull-right"
         role="menu">
-      <li data-ng-repeat="p in privacyLevels">
+      <li data-ng-repeat="p in privacyLevels" ng-click="choose_privacy(p)">
         <a>{{p.name}}</a>
       </li>
     </ul>
