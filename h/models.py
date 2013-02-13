@@ -6,6 +6,7 @@ from annotator.auth import DEFAULT_TTL
 from hem.interfaces import IDBSession
 
 from horus.models import (
+    get_session,
     BaseModel,
     ActivationMixin,
     GroupMixin,
@@ -17,6 +18,7 @@ import transaction
 
 from pyramid_basemodel import Base, Session
 
+from sqlalchemy import func, or_, text
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer, TypeDecorator, CHAR
@@ -99,7 +101,41 @@ class Group(GroupMixin, Base):
 
 
 class User(UserMixin, Base):
-    pass
+    @classmethod
+    def get_by_username(cls, request, username):
+        session = get_session(request)
+
+        if session.get_bind().name == 'postgresql':
+            lhs = func.regexp_replace(cls.username, text(r"'\.'"), '', 'g')
+            rhs = username.replace('.', '')
+            return session.query(cls).filter(
+                func.lower(lhs) == rhs.lower()
+            ).first()
+        else:
+            return session.query(cls).filter(
+                func.lower(cls.username) == username.lower()
+            ).first()
+
+    @classmethod
+    def get_by_username_or_email(cls, request, username, email):
+        session = get_session(request)
+
+        if session.get_bind().name == 'postgresql':
+            lhs = func.regexp_replace(cls.username, text(r"'\.'"), '', 'g')
+            rhs = username.replace('.', '')
+            return session.query(cls).filter(
+                or_(
+                    func.lower(lhs) == rhs.lower(),
+                    cls.email == email
+                )
+            ).first()
+        else:
+            return session.query(cls).filter(
+                or_(
+                    func.lower(cls.username) == username.lower(),
+                    cls.email == email
+                )
+            ).first()
 
 
 class UserGroup(UserGroupMixin, Base):
