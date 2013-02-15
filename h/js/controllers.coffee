@@ -257,8 +257,7 @@ class Annotation
     $scope.$watch 'editing', (newValue) ->
       if newValue then $timeout -> $element.find('textarea').focus()
 
-    $scope.choose_privacy = (p) ->
-      $scope.privacy = p
+    $scope.choose_privacy = (p) -> $scope.privacy = p
     	
     # Check if this is a brand new annotation
     if drafts.contains $scope.$modelValue
