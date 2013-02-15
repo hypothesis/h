@@ -161,9 +161,13 @@ class App
       if annotator.plugins.Store?
         for annotation in annotator.dumpAnnotations()
           provider.deleteAnnotation annotation
+          thread = (threading.getContainer annotation.id)
+          if thread.parent
+            thread.message = null
+            threading.pruneEmpties thread.parent
+          else
+            delete threading.idTable[annotation.id]
         annotator.plugins.Store.loadAnnotations()            
-        heatmap.publish 'updated'
-        provider.publish 'hostUpdated'
 
     $scope.$on 'showAuth', (event, show=true) ->
       angular.extend $scope.sheet,
