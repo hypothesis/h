@@ -105,37 +105,24 @@ class User(UserMixin, Base):
     def get_by_username(cls, request, username):
         session = get_session(request)
 
-        if session.get_bind().name == 'postgresql':
-            lhs = func.regexp_replace(cls.username, text(r"'\.'"), '', 'g')
-            rhs = username.replace('.', '')
-            return session.query(cls).filter(
-                func.lower(lhs) == rhs.lower()
-            ).first()
-        else:
-            return session.query(cls).filter(
-                func.lower(cls.username) == username.lower()
-            ).first()
+        lhs = func.replace(cls.username, '.', '')
+        rhs = username.replace('.', '')
+        return session.query(cls).filter(
+            func.lower(lhs) == rhs.lower()
+        ).first()
 
     @classmethod
     def get_by_username_or_email(cls, request, username, email):
         session = get_session(request)
 
-        if session.get_bind().name == 'postgresql':
-            lhs = func.regexp_replace(cls.username, text(r"'\.'"), '', 'g')
-            rhs = username.replace('.', '')
-            return session.query(cls).filter(
-                or_(
-                    func.lower(lhs) == rhs.lower(),
-                    cls.email == email
-                )
-            ).first()
-        else:
-            return session.query(cls).filter(
-                or_(
-                    func.lower(cls.username) == username.lower(),
-                    cls.email == email
-                )
-            ).first()
+        lhs = func.replace(cls.username, '.', '')
+        rhs = username.replace('.', '')
+        return session.query(cls).filter(
+            or_(
+                func.lower(lhs) == rhs.lower(),
+                cls.email == email
+            )
+        ).first()
 
 
 class UserGroup(UserGroupMixin, Base):
