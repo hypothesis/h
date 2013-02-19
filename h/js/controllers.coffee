@@ -328,6 +328,14 @@ class Viewer
 
     $scope.$on '$routeUpdate', refresh
 
+    $scope.directChildren = (annotation) ->
+      threading.getContainer(annotation.id).children.length
+
+    $scope.allChildren = (annotation) ->
+      if threading.getContainer(annotation.id).flattenChildren()?
+        return threading.getContainer(annotation.id).flattenChildren().length
+      0 
+
     refresh()
 
   refresh: ($scope, $routeParams, threading, heatmap) =>

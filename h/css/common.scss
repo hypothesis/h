@@ -580,4 +580,8 @@ blockquote {
   .annotator-controls, .magicontrols .show, .bottombar, {
     display: none;
   }
+  
+  .reply-count {
+    @include tertiarytext;
+  }  
 }

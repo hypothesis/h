@@ -10,6 +10,13 @@
           data-ng-repeat="annotation in annotations"
           class="paper summary">
         <div data-ng-model="annotation" class="annotation" />
+	    <!-- Reply count -->
+        <p/>
+        <span data-ng-show="directChildren(annotation)"
+	      data-ng-pluralize=""
+	      count="allChildren(annotation)"
+	      when="{one: '1 reply', other: '{} replies'}"
+	      class="reply-count" />
       </li>
     </ul>
   </li>
