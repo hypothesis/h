@@ -18,7 +18,7 @@ import transaction
 
 from pyramid_basemodel import Base, Session
 
-from sqlalchemy import func, or_, text
+from sqlalchemy import func, or_
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer, TypeDecorator, CHAR
