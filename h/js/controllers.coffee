@@ -245,6 +245,15 @@ class Annotation
       $scope.editing = true
       $scope.unsaved = true
 
+    $scope.directChildren = ->
+      if $scope.$modelValue? and (not annotator.detail) and threading.getContainer($scope.$modelValue.id).children?
+        return threading.getContainer($scope.$modelValue.id).children.length
+      0
+      
+    $scope.allChildren = ->
+      if $scope.$modelValue? and threading.getContainer($scope.$modelValue.id).flattenChildren()?
+        return threading.getContainer($scope.$modelValue.id).flattenChildren().length
+      0 
 
 class Editor
   this.$inject = [
@@ -328,13 +337,8 @@ class Viewer
 
     $scope.$on '$routeUpdate', refresh
 
-    $scope.directChildren = (annotation) ->
-      threading.getContainer(annotation.id).children.length
-
-    $scope.allChildren = (annotation) ->
-      if threading.getContainer(annotation.id).flattenChildren()?
-        return threading.getContainer(annotation.id).flattenChildren().length
-      0 
+    $scope.$watch 'detail', (newValue, oldValue) =>
+      annotator.detail = newValue
 
     refresh()
 
