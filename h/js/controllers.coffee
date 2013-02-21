@@ -113,15 +113,6 @@ class App
         if data.flash? then flash q, msgs for q, msgs of data.flash
         if data.status is 'failure' then flash 'error', data.reason
 
-    $scope.toggleShow = ->
-      if annotator.visible
-        $location.path('').replace()
-        annotator.hide()
-      else
-        if $location.path()?.match '^/?$'
-          $location.path('/viewer').replace()
-        annotator.show()
-
     $scope.$watch 'personas', (newValue, oldValue) =>
       if newValue?.length
         annotator.element.find('#persona')
@@ -157,6 +148,16 @@ class App
       else
         plugins.HypothesisPermissions.setUser(null)
         delete plugins.Auth
+
+    $scope.$watch 'visible', (newValue) ->
+      if newValue then annotator.show() else annotator.hide()
+
+    $scope.$on 'back', ->
+      return unless drafts.discard()
+      if $location.path() == '/viewer' and $location.search()?.id?
+        $location.search('id', null).replace()
+      else
+        $scope.visible = false
 
     $scope.$on 'showAuth', (event, show=true) ->
       angular.extend $scope.sheet,

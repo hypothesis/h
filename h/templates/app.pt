@@ -7,7 +7,7 @@
 
     <!-- Toolbar -->
     <div id="toolbar" class="form-inline">
-      <div data-ng-click="toggleShow()" class="tri"></div>
+      <div data-ng-click="visible = !visible" class="tri"></div>
 
       <!-- Persona -->
       <div data-ng-show="sheet.collapsed"

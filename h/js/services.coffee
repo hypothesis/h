@@ -10,10 +10,6 @@ class Hypothesis extends Annotator
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
 
-  # Internal state
-  visible: false     # * Whether the sidebar is visible
-  unsaved_drafts: [] # * Unsaved drafts currenty open
-
   this.$inject = [
     '$document', '$location', '$rootScope',
     'threading'
@@ -81,7 +77,6 @@ class Hypothesis extends Annotator
   _setupXDM: ->
     $scope = @element.scope()
     $location = @element.injector().get '$location'
-    drafts = @element.injector().get 'drafts'
     threading = @element.injector().get 'threading'
 
     @provider = new easyXDM.Rpc
@@ -198,14 +193,7 @@ class Hypothesis extends Annotator
             thread.message?.annotation or a
           $scope.$apply => this.showViewer annotations
           this.show()
-        # This guy does stuff when you "back out" of the interface.
-        # (Currently triggered by a click on the source page.)
-        back: =>
-          return unless drafts.discard()
-          if $location.path() == '/viewer' and $location.search()?.id?
-            $scope.$apply => $location.search('id', null).replace()
-          else
-            this.hide()
+        back: => $scope.$apply => $scope.$broadcast 'back'
         update: => this.publish 'hostUpdated'
       remote:
         publish: {}
@@ -339,14 +327,12 @@ class Hypothesis extends Annotator
     ]
 
   show: =>
-    @visible = true
     @provider.showFrame()
     @element.find('#toolbar').addClass('shown')
       .find('.tri').attr('draggable', true)
 
   hide: =>
     @lastWidth = window.innerWidth
-    @visible = false
     @provider.setActiveHighlights []
     @provider.hideFrame()
     @element.find('#toolbar').removeClass('shown')
