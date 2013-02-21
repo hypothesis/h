@@ -92,13 +92,16 @@
 
           <input type="text" name="username" value="" placeholder="Username"
                  required autocapitalize="false" data-ng-model="username"
-                 data-ng-minlength="3" data-ng-maxlength="15" />
+                 data-ng-minlength="3" data-ng-maxlength="15"
+                 data-ng-pattern="/^[A-Za-z0-9._]+$/" />
           <span data-ng-show="register.username.$error.required"
                 >Please choose a username.</span>
           <span data-ng-show="register.username.$error.minlength"
                 >Usernames must be at least 3 characters.</span>
           <span data-ng-show="register.username.$error.maxlength"
                 >Usernames must be 15 characters at most.</span>
+          <span data-ng-show="register.username.$error.pattern"
+                >Only letters, numbers, underscore and dot are allowed. </span>
 
           <input type="email" name="email" value="" placeholder="Email"
                  data-ng-model="email" required autocapitalize="false" />
