@@ -212,7 +212,7 @@ class Annotation
         publish 'annotationUpdated', $scope.$modelValue
 
     $scope.reply = ->
-      unless annotator.plugins.Auth.haveValidToken()
+      unless annotator.plugins.Auth? and annotator.plugins.Auth.haveValidToken()
         $rootScope.$broadcast 'showAuth', true
         return
 
@@ -338,7 +338,7 @@ class Viewer
     else
       $scope.detail = false
       $scope.focus $scope.annotations
-
+ 
 
 angular.module('h.controllers', [])
   .controller('AppController', App)
