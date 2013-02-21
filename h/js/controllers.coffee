@@ -246,7 +246,7 @@ class Annotation
       $scope.unsaved = true
 
     $scope.directChildren = ->
-      if $scope.$modelValue? and (not annotator.detail) and threading.getContainer($scope.$modelValue.id).children?
+      if $scope.$modelValue? and threading.getContainer($scope.$modelValue.id).children?
         return threading.getContainer($scope.$modelValue.id).children.length
       0
       
@@ -336,9 +336,6 @@ class Viewer
       if listening then plugins.Heatmap.unsubscribe 'updated', refresh
 
     $scope.$on '$routeUpdate', refresh
-
-    $scope.$watch 'detail', (newValue, oldValue) =>
-      annotator.detail = newValue
 
     refresh()
 

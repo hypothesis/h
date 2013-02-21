@@ -11,7 +11,6 @@ class Hypothesis extends Annotator
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
 
   # Internal state
-  detail: false      # * Whether the viewer shows a summary or detail listing
   visible: false     # * Whether the sidebar is visible
   unsaved_drafts: [] # * Unsaved drafts currenty open
 

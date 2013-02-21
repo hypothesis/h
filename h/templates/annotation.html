@@ -4,7 +4,7 @@
   <span data-ng-show="directChildren()"
         data-ng-pluralize=""
         count="allChildren()"
-        when="{one: '1 reply /', other: '{} replies / '}"
+        when="{one: '1 reply', other: '{} replies'}"
         class="reply-count" />
   <span data-ng-bind="model.$viewValue.created | fuzzyTime | date:'mediumDate'"
         class="time" />
