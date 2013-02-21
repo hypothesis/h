@@ -183,7 +183,6 @@ button, input[type=submit], .btn {
 
 
 //CLOSER////////////////////////////////
-//Make sure this shouldn't have icon font- checkit
 .close {
   float: right;
   @include icon("delete_1.png");
@@ -497,7 +496,6 @@ blockquote {
 }
 
 
-//Really checkit
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
