@@ -118,9 +118,11 @@ class Annotator.Host extends Annotator
         getHref: =>
           uri = decodeURIComponent document.location.href
           if document.location.hash
-            uri = uri.slice 0, (-1 * location.hash.length)            
-          $('meta[property^="og:url"]').each -> uri = decodeURIComponent this.content
-          $('link[rel^="canonical"]').each -> uri = decodeURIComponent this.href
+            uri = uri.slice 0, (-1 * location.hash.length)
+          $('meta[property^="og:url"]').each ->
+            uri = decodeURIComponent this.content
+          $('link[rel^="canonical"]').each ->
+            uri = decodeURIComponent this.href
           return uri
 
         getMaxBottom: =>

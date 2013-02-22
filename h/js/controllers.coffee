@@ -250,11 +250,11 @@ class Annotation
       if $scope.$modelValue? and threading.getContainer($scope.$modelValue.id).children?
         return threading.getContainer($scope.$modelValue.id).children.length
       0
-      
+
     $scope.allChildren = ->
       if $scope.$modelValue? and threading.getContainer($scope.$modelValue.id).flattenChildren()?
         return threading.getContainer($scope.$modelValue.id).flattenChildren().length
-      0 
+      0
 
 class Editor
   this.$inject = [
@@ -348,7 +348,7 @@ class Viewer
     else
       $scope.detail = false
       $scope.focus $scope.annotations
- 
+
 
 angular.module('h.controllers', [])
   .controller('AppController', App)
