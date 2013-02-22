@@ -71,7 +71,7 @@
                 >Usernames are at least 3 characters.</span>
 
           <input type="password" name="password" value="" placeholder="Password"
-                 data-ng-model="password" ng-disabled="!login.username.$valid"
+                 data-ng-model="password"
                  required autocapitalize="false" autocorrect="false" />
 
           <span data-ng-show="login.password.$error.required"
