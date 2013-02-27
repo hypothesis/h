@@ -11,13 +11,9 @@ from h.messages import _
 
 
 class LoginSchema(CSRFSchema):
-    username = colander.SchemaNode(
-        colander.String(),
-        validator=colander.Length(min=3, max=15),
-    )
+    username = colander.SchemaNode(colander.String())
     password = colander.SchemaNode(
         colander.String(),
-        validator=colander.Length(min=2),
         widget=deform.widget.PasswordWidget()
     )
 
@@ -25,7 +21,10 @@ class LoginSchema(CSRFSchema):
 class RegisterSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
-        validator=colander.Length(min=3, max=15),
+        validator=colander.All(
+            colander.Length(min=3, max=15),
+            colander.Regex('(?i)^[A-Z0-9._]+$'),
+        )
     )
     email = colander.SchemaNode(
         colander.String(),
