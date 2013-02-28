@@ -1,7 +1,9 @@
 Installing Hypothes.is on OS X ML
 ######################
 
-Install Homebrew
+Install Homebrew::
+
+    $ ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
 
 Install python::
     
