@@ -130,7 +130,7 @@ class Hypothesis extends Annotator
                   id: annotation.id
                 loadAnnotations [
                   id: data.id
-                  ranges: data.ranges
+                  target: data.target
                   quote: data.quote
                 ]
 
@@ -298,14 +298,17 @@ class Hypothesis extends Annotator
   # Returns the initialised annotation.
   setupAnnotation: (annotation) ->
     # Delagate to Annotator implementation after we give it a valid array of
-    # ranges. This is needed until Annotator stops assuming ranges need to be
+    # targets. This is needed until Annotator stops assuming targets need to be
     # added.
     if annotation.thread
-      annotation.ranges = []
+      annotation.target = []
     else
+      unless annotation.target instanceof Array
+        annotation.target = [annotation.target]
       @provider.setupAnnotation
         id: annotation.id
-        ranges: annotation.ranges
+        target: annotation.target
+      annotation.quote = this.getQuoteForTarget annotation.target[0]
 
   showViewer: (annotations=[]) =>
     @element.injector().invoke [

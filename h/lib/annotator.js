@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-6743e3f
+** Annotator 1.2.5-dev-95dc8ee
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-01-29 18:25:34Z
+** Built at: 2013-02-28 16:15:11Z
 */
 
 (function() {
@@ -629,7 +629,7 @@
 
     Annotator.prototype.viewer = null;
 
-    Annotator.prototype.selectedRanges = null;
+    Annotator.prototype.selectedTargets = null;
 
     Annotator.prototype.mouseIsDown = false;
 
@@ -650,7 +650,8 @@
       this.showViewer = __bind(this.showViewer, this);
       this.onEditorSubmit = __bind(this.onEditorSubmit, this);
       this.onEditorHide = __bind(this.onEditorHide, this);
-      this.showEditor = __bind(this.showEditor, this);      Annotator.__super__.constructor.apply(this, arguments);
+      this.showEditor = __bind(this.showEditor, this);
+      this.getHref = __bind(this.getHref, this);      Annotator.__super__.constructor.apply(this, arguments);
       this.plugins = {};
       if (!Annotator.supported()) return this;
       if (!this.options.readOnly) this._setupDocumentEvents();
@@ -734,13 +735,86 @@
       return this;
     };
 
-    Annotator.prototype.getSelectedRanges = function() {
-      var browserRange, i, normedRange, r, ranges, rangesToIgnore, selection, _k, _len3;
+    Annotator.prototype.getHref = function() {
+      var uri;
+      uri = decodeURIComponent(document.location.href);
+      if (document.location.hash) uri = uri.slice(0, -1 * location.hash.length);
+      $('meta[property^="og:url"]').each(function() {
+        return uri = decodeURIComponent(this.content);
+      });
+      $('link[rel^="canonical"]').each(function() {
+        return uri = decodeURIComponent(this.href);
+      });
+      return uri;
+    };
+
+    Annotator.prototype.getSerializedRangeFromXPathRangeSelector = function(selector) {
+      var r;
+      r = {
+        start: selector.startXpath,
+        startOffset: selector.startOffset,
+        end: selector.endXpath,
+        endOffset: selector.endOffset
+      };
+      return new Range.SerializedRange(r);
+    };
+
+    Annotator.prototype.getNormalizedRangeFromXPathRangeSelector = function(selector) {
+      var sr;
+      sr = this.getSerializedRangeFromXPathRangeSelector(selector);
+      return sr.normalize(this.wrapper[0]);
+    };
+
+    Annotator.prototype.getXPathRangeSelectorFromRange = function(range) {
+      var selector, sr;
+      sr = range.serialize(this.wrapper[0]);
+      return selector = {
+        source: this.getHref(),
+        type: "xpath range",
+        startXpath: sr.start,
+        startOffset: sr.startOffset,
+        endXpath: sr.end,
+        endOffset: sr.endOffset
+      };
+    };
+
+    Annotator.prototype.getContextQuoteSelectorFromRange = function(range) {
+      var quote, r, selector;
+      r = range.normalize(this.wrapper[0]);
+      quote = $.trim(r.text());
+      return selector = {
+        source: this.getHref(),
+        type: "context+quote",
+        exact: quote,
+        prefix: "TODO prefix",
+        suffix: "TODO suffix"
+      };
+    };
+
+    Annotator.prototype.getPositionSelectorFromRange = function(range) {
+      var selector;
+      return selector = {
+        source: this.getHref(),
+        type: "position",
+        start: "100",
+        end: "200"
+      };
+    };
+
+    Annotator.prototype.getQuoteForTarget = function(target) {
+      var mySelector;
+      mySelector = this.findSelector(target.selector, "context+quote");
+      return mySelector != null ? mySelector.exact : void 0;
+    };
+
+    Annotator.prototype.getSelectedTargets = function() {
+      var browserRange, i, normedRange, r, rangesToIgnore, selection, t, targets, _k, _len3,
+        _this = this;
       selection = util.getGlobal().getSelection();
-      ranges = [];
+      targets = [];
       rangesToIgnore = [];
       if (!selection.isCollapsed) {
-        ranges = (function() {
+        targets = (function() {
           var _ref2, _results;
           _results = [];
           for (i = 0, _ref2 = selection.rangeCount; 0 <= _ref2 ? i < _ref2 : i > _ref2; 0 <= _ref2 ? i++ : i--) {
@@ -748,7 +822,10 @@
             browserRange = new Range.BrowserRange(r);
             normedRange = browserRange.normalize().limit(this.wrapper[0]);
             if (normedRange === null) rangesToIgnore.push(r);
-            _results.push(normedRange);
+            _results.push(t = {
+              id: "",
+              selector: [this.getXPathRangeSelectorFromRange(normedRange), this.getContextQuoteSelectorFromRange(normedRange), this.getPositionSelectorFromRange(normedRange)]
+            });
           }
           return _results;
         }).call(this);
@@ -758,7 +835,12 @@
         r = rangesToIgnore[_k];
         selection.addRange(r);
       }
-      return $.grep(ranges, function(range) {
+      return $.grep(targets, function(target) {
+        var mySelector, range;
+        mySelector = _this.findSelector(target.selector, "xpath range");
+        if (mySelector != null) {
+          range = _this.getNormalizedRangeFromXPathRangeSelector(mySelector);
+        }
         if (range) selection.addRange(range.toRange());
         return range;
       });
@@ -771,34 +853,70 @@
       return annotation;
     };
 
-    Annotator.prototype.setupAnnotation = function(annotation) {
-      var normed, normedRanges, r, root, _k, _l, _len3, _len4, _ref2;
-      root = this.wrapper[0];
-      annotation.ranges || (annotation.ranges = this.selectedRanges);
-      normedRanges = [];
-      _ref2 = annotation.ranges;
-      for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
-        r = _ref2[_k];
+    Annotator.prototype.findSelector = function(selectors, type) {
+      var selector, _k, _len3;
+      for (_k = 0, _len3 = selectors.length; _k < _len3; _k++) {
+        selector = selectors[_k];
+        if (selector.type === type) return selector;
+      }
+      return null;
+    };
+
+    Annotator.prototype.findAnchorFromXPathRangeSelector = function(target) {
+      var mySelector, nRange, root;
+      mySelector = this.findSelector(target.selector, "xpath range");
+      if (mySelector != null) {
         try {
-          normedRanges.push(Range.sniff(r).normalize(root));
-        } catch (e) {
-          if (e instanceof Range.RangeError) {
-            this.publish('rangeNormalizeFail', [annotation, r, e]);
+          root = this.wrapper[0];
+          nRange = this.getNormalizedRangeFromXPathRangeSelector(mySelector);
+          return nRange;
+        } catch (exception) {
+          if (exception instanceof Range.RangeError) {
+            console.log("Could not apply XPath selector to current document. Must have changed.");
+            return null;
           } else {
-            throw e;
+            throw exception;
           }
         }
       }
-      annotation.quote = [];
-      annotation.ranges = [];
+      return null;
+    };
+
+    Annotator.prototype.findAnchor = function(target) {
+      var anchor;
+      anchor = this.findAnchorFromXPathRangeSelector(target);
+      return anchor;
+    };
+
+    Annotator.prototype.setupAnnotation = function(annotation) {
+      var normed, normedRanges, r, root, t, _k, _l, _len3, _len4, _ref2;
+      root = this.wrapper[0];
+      annotation.target || (annotation.target = this.selectedTargets);
+      if (!(annotation.target instanceof Array)) {
+        annotation.target = [annotation.target];
+      }
+      normedRanges = [];
+      _ref2 = annotation.target;
+      for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
+        t = _ref2[_k];
+        r = this.findAnchor(t);
+        if (r != null) {
+          normedRanges.push(r);
+        } else {
+          console.log("Could not find anchor for annotation target '" + t.id + "' (for annotation '" + annotation.id + "').");
+          this.publish('findAnchorFail', [annotation, t]);
+        }
+      }
+      annotation.currentQuote = [];
+      annotation.currentRanges = [];
       annotation.highlights = [];
       for (_l = 0, _len4 = normedRanges.length; _l < _len4; _l++) {
         normed = normedRanges[_l];
-        annotation.quote.push($.trim(normed.text()));
-        annotation.ranges.push(normed.serialize(this.wrapper[0], '.annotator-hl'));
+        annotation.currentQuote.push($.trim(normed.text()));
+        annotation.currentRanges.push(normed.serialize(this.wrapper[0], '.annotator-hl'));
         $.merge(annotation.highlights, this.highlightRange(normed));
       }
-      annotation.quote = annotation.quote.join(' / ');
+      annotation.currentQuote = annotation.currentQuote.join(' / ');
       $(annotation.highlights).data('annotation', annotation);
       return annotation;
     };
@@ -940,20 +1058,22 @@
     };
 
     Annotator.prototype.checkForEndSelection = function(event) {
-      var container, range, _k, _len3, _ref2;
+      var container, mySelector, range, target, _k, _len3, _ref2;
       this.mouseIsDown = false;
       if (this.ignoreMouseup) return;
-      this.selectedRanges = this.getSelectedRanges();
-      _ref2 = this.selectedRanges;
+      this.selectedTargets = this.getSelectedTargets();
+      _ref2 = this.selectedTargets;
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
-        range = _ref2[_k];
+        target = _ref2[_k];
+        mySelector = this.findSelector(target.selector, "xpath range");
+        range = this.getNormalizedRangeFromXPathRangeSelector(mySelector);
         container = range.commonAncestor;
         if ($(container).hasClass('annotator-hl')) {
           container = $(container).parents('[class^=annotator-hl]')[0];
         }
         if (this.isAnnotator(container)) return;
       }
-      if (event && this.selectedRanges.length) {
+      if (event && this.selectedTargets.length) {
         return this.adder.css(util.mousePosition(event, this.wrapper[0])).show();
       } else {
         return this.adder.hide();

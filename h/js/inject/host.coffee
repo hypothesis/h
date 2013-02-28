@@ -118,7 +118,7 @@ class Annotator.Host extends Annotator
         getHref: =>
           uri = decodeURIComponent document.location.href
           if document.location.hash
-            uri = uri.slice 0, (-1 * location.hash.length)            
+            uri = uri.slice 0, (-1 * location.hash.length)
           $('meta[property^="og:url"]').each -> uri = decodeURIComponent this.content
           $('link[rel^="canonical"]').each -> uri = decodeURIComponent this.href
           return uri
@@ -235,6 +235,7 @@ class Annotator.Host extends Annotator
 
   setupAnnotation: (annotation) ->
     annotation = super
+    annotation.quote = this.getQuoteForTarget annotation.target[0]
 
     # Highlights are jQuery collections which have a circular references to the
     # annotation via data stored with `.data()`. Therefore, reconfigure the

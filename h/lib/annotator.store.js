@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-c4fcdfe
+** Annotator 1.2.5-dev-5a5e03a
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-01-29 11:20:27Z
+** Built at: 2013-02-25 17:23:23Z
 */
 
 (function() {
@@ -180,7 +180,7 @@
     Store.prototype._urlFor = function(action, id) {
       var replaceWith, url;
       replaceWith = id != null ? '/' + id : '';
-      url = this.options.prefix != null ? this.options.prefix : '';
+      url = this.options.prefix || '/';
       url += this.options.urls[action];
       url = url.replace(/\/:id/, replaceWith);
       return url;
