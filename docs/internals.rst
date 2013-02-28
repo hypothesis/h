@@ -8,4 +8,4 @@ It is targeted at developers trying to understand how Hypothes.is works in the i
    :maxdepth: 1
 
    internals/annotation_loading
-   
+   internals/create_annotation
