@@ -23,4 +23,4 @@ After installing the above, create the virtualenv, as described in the README.rs
 (Run the commands from the directory where you've cloned the repository.)
 
 .. _elasticsearch: http://www.elasticsearch.org/
-.. _elasticsearchdeb: https://github.com/downloads/elasticsearch/elasticsearch/elasticsearch-0.19.11.deb
+.. _elasticsearchdeb: http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.5.deb
