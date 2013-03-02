@@ -70,6 +70,10 @@ pagedown = Uglify(
     output='lib//Markdown.Converter.min.js'
 )
 underscore = Uglify('h:lib/underscore.js', output='lib/underscore.min.js')
+domTextFamily = Bundle(
+    Coffee('h:lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
+    Coffee('h:lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),    
+)
 
 
 # Base and common SCSS
@@ -88,6 +92,7 @@ app = Bundle(
     annotator_auth,
     annotator_permissions,
     annotator_store,
+    domTextFamily,
     d3,
     easyXDM,
     jwz,
@@ -135,6 +140,7 @@ inject = Bundle(
     easyXDM,
     jquery,
     annotator,
+    domTextFamily,
     Uglify(
         Coffee('h:js/inject/host.coffee', output='js/host.js'),
         output='js/hypothesis-host.min.js'

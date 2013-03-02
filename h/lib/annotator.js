@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-95dc8ee
+** Annotator 1.2.5-dev-02598fb
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-02-28 16:15:11Z
+** Built at: 2013-03-02 22:47:44Z
 */
 
 (function() {
@@ -379,6 +379,9 @@
       while (nr.commonAncestor.nodeType !== 1) {
         nr.commonAncestor = nr.commonAncestor.parentNode;
       }
+      if (window.DomTextMapper != null) {
+        window.DomTextMapper.changed(nr.commonAncestor, "range normalization");
+      }
       return new Range.NormalizedRange(nr);
     };
 
@@ -654,6 +657,8 @@
       this.getHref = __bind(this.getHref, this);      Annotator.__super__.constructor.apply(this, arguments);
       this.plugins = {};
       if (!Annotator.supported()) return this;
+      this.domMapper = new DomTextMapper();
+      this.domMatcher = new DomTextMatcher(this.domMapper);
       if (!this.options.readOnly) this._setupDocumentEvents();
       this._setupWrapper()._setupViewer()._setupEditor();
       this._setupDynamicStyle();
@@ -779,25 +784,29 @@
     };
 
     Annotator.prototype.getContextQuoteSelectorFromRange = function(range) {
-      var quote, r, selector;
-      r = range.normalize(this.wrapper[0]);
-      quote = $.trim(r.text());
+      var endOffset, prefix, quote, selector, startOffset, suffix, _ref2;
+      startOffset = (this.domMapper.getMappingsForNode(range.start)).start;
+      endOffset = (this.domMapper.getMappingsForNode(range.end)).end;
+      quote = this.domMapper.getContentForRange(startOffset, endOffset);
+      _ref2 = this.domMapper.getContextForRange(startOffset, endOffset), prefix = _ref2[0], suffix = _ref2[1];
       return selector = {
         source: this.getHref(),
         type: "context+quote",
         exact: quote,
-        prefix: "TODO prefix",
-        suffix: "TODO suffix"
+        prefix: prefix,
+        suffix: suffix
       };
     };
 
     Annotator.prototype.getPositionSelectorFromRange = function(range) {
-      var selector;
+      var endOffset, selector, startOffset;
+      startOffset = (this.domMapper.getMappingsForNode(range.start)).start;
+      endOffset = (this.domMapper.getMappingsForNode(range.end)).end;
       return selector = {
         source: this.getHref(),
         type: "position",
-        start: "100",
-        end: "200"
+        start: startOffset,
+        end: endOffset
       };
     };
 
@@ -928,11 +937,13 @@
     };
 
     Annotator.prototype.deleteAnnotation = function(annotation) {
-      var h, _k, _len3, _ref2;
+      var child, h, _k, _len3, _ref2;
       _ref2 = annotation.highlights;
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
         h = _ref2[_k];
+        child = h.childNodes[0];
         $(h).replaceWith(h.childNodes);
+        window.DomTextMapper.changed(child.parentNode, "removed hilite (annotation deleted)");
       }
       this.publish('annotationDeleted', [annotation]);
       return annotation;
@@ -959,7 +970,11 @@
         }
       };
       clone = annotations.slice();
-      if (annotations.length) loader(annotations);
+      if (annotations.length) {
+        loader(annotations);
+      } else {
+        this.publish('foundNoAnnotations');
+      }
       return this;
     };
 
@@ -972,7 +987,7 @@
     };
 
     Annotator.prototype.highlightRange = function(normedRange, cssClass) {
-      var hl, node, white, _k, _len3, _ref2, _results;
+      var hl, node, r, white, _k, _len3, _ref2, _results;
       if (cssClass == null) cssClass = 'annotator-hl';
       white = /^\s*$/;
       hl = $("<span class='" + cssClass + "'></span>");
@@ -980,9 +995,10 @@
       _results = [];
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
         node = _ref2[_k];
-        if (!white.test(node.nodeValue)) {
-          _results.push($(node).wrapAll(hl).parent().show()[0]);
-        }
+        if (!(!white.test(node.nodeValue))) continue;
+        r = $(node).wrapAll(hl).parent().show()[0];
+        window.DomTextMapper.changed(node, "created hilite");
+        _results.push(r);
       }
       return _results;
     };
@@ -1114,13 +1130,15 @@
         return _this.publish('annotationCreated', [annotation]);
       };
       cancel = function() {
-        var h, _k, _len3, _ref2, _results;
+        var child, h, _k, _len3, _ref2, _results;
         cleanup();
         _ref2 = annotation.highlights;
         _results = [];
         for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
           h = _ref2[_k];
-          _results.push($(h).replaceWith(h.childNodes));
+          child = h.childNodes[0];
+          $(h).replaceWith(h.childNodes);
+          _results.push(window.DomTextMapper.changed(child.parentNode, "removed hilite, edit cancelled"));
         }
         return _results;
       };

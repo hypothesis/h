@@ -146,6 +146,11 @@ class Annotator.Host extends Annotator
         scrollTop: (y) =>
           $('html, body').stop().animate {scrollTop: y}, 600
 
+        scanDocument: (reason = "something happened") =>
+          console.log "Analyzing host frame, because " + reason + "..."
+          scanTime = @domMatcher.prepareSearch null, true
+          console.log "Traversal+scan took " + scanTime + " ms."
+ 
       remote:
         publish: {}
         addPlugin: {}
@@ -161,6 +166,7 @@ class Annotator.Host extends Annotator
       if not @ignoreMouseup
         setTimeout =>
           @consumer.back() unless @selectedRanges?.length
+    @domMatcher.setRootNode @wrapper[0]        
     this
 
   _setupDocumentEvents: ->

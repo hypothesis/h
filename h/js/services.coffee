@@ -53,6 +53,13 @@ class Hypothesis extends Annotator
           id: a.id
           references: a.thread?.split '/'
 
+    # After annotations were loaded (or none was found), scan the document
+    for event in ['annotationsLoaded', 'foundNoAnnotations']
+      this.subscribe event, =>        
+        $rootScope.$apply =>
+          @provider.scanDocument "annotations were loaded (if any)"
+
+
     # Update the thread when an annotation changes
     this.subscribe 'annotationUpdated', (annotation) =>
       $rootScope.$apply ->
@@ -210,6 +217,7 @@ class Hypothesis extends Annotator
         getHref: {}
         getMaxBottom: {}
         scrollTop: {}
+        scanDocument: {}
 
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
