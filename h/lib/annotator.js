@@ -6,7 +6,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-03 01:56:48Z
+** Built at: 2013-03-03 22:22:50Z
 */
 
 (function() {
@@ -872,18 +872,33 @@
     };
 
     Annotator.prototype.findAnchorFromXPathRangeSelector = function(target) {
-      var mySelector, nRange, root;
-      mySelector = this.findSelector(target.selector, "xpath range");
-      if (mySelector != null) {
+      var currentQuote, endOffset, nRange, quoteSelector, savedQuote, selector, startOffset;
+      selector = this.findSelector(target.selector, "xpath range");
+      if (selector != null) {
         try {
-          root = this.wrapper[0];
-          nRange = this.getNormalizedRangeFromXPathRangeSelector(mySelector);
+          nRange = this.getNormalizedRangeFromXPathRangeSelector(selector);
+          quoteSelector = this.findSelector(target.selector, "context+quote");
+          savedQuote = quoteSelector != null ? quoteSelector.exact : void 0;
+          if (savedQuote != null) {
+            startOffset = (this.domMapper.getInfoForNode(nRange.start)).start;
+            endOffset = (this.domMapper.getInfoForNode(nRange.end)).end;
+            currentQuote = this.domMapper.getContentForRange(startOffset, endOffset);
+            if (currentQuote !== savedQuote) {
+              console.log("Could not apply XPath selector to current document, because the quote has changed.");
+              console.log("Saved quote is '" + savedQuote + "'.");
+              console.log("Current quote is '" + currentQuote + "'.");
+              return null;
+            }
+          } else {
+
+          }
           return nRange;
         } catch (exception) {
           if (exception instanceof Range.RangeError) {
-            console.log("Could not apply XPath selector to current document. Must have changed.");
+            console.log("Could not apply XPath selector to current document. Structure must have changed.");
             return null;
           } else {
+            console.log(exception.stack);
             throw exception;
           }
         }
@@ -953,6 +968,7 @@
       var clone, loader,
         _this = this;
       if (annotations == null) annotations = [];
+      this.publish('loadingAnnotations');
       loader = function(annList) {
         var n, now, _k, _len3;
         if (annList == null) annList = [];
@@ -970,11 +986,7 @@
         }
       };
       clone = annotations.slice();
-      if (annotations.length) {
-        loader(annotations);
-      } else {
-        this.publish('foundNoAnnotations');
-      }
+      if (annotations.length) loader(annotations);
       return this;
     };
 

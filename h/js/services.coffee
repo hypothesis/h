@@ -53,12 +53,10 @@ class Hypothesis extends Annotator
           id: a.id
           references: a.thread?.split '/'
 
-    # After annotations were loaded (or none was found), scan the document
-    for event in ['annotationsLoaded', 'foundNoAnnotations']
-      this.subscribe event, =>        
-        $rootScope.$apply =>
-          @provider.scanDocument "annotations were loaded (if any)"
-
+    # Before annotations are loaded, scan the document
+    this.subscribe 'loadingAnnotations', =>        
+      $rootScope.$apply =>
+        @provider.scanDocument "annotations are going to be loaded"
 
     # Update the thread when an annotation changes
     this.subscribe 'annotationUpdated', (annotation) =>
