@@ -2,6 +2,7 @@ class window.DomTextMapper
 
   USE_THEAD_TBODY_WORKAROUND = true
   USE_TABLE_TEXT_WORKAROUND = true
+  USE_OL_WORKAROUND = true
   CONTEXT_LEN = 32
 
   @instances: []
@@ -108,7 +109,8 @@ class window.DomTextMapper
   # Select the given path (for visual identification), and optionally scroll to it
   selectPath: (path, scroll = false) ->
     info = @path[path]
-    node = info.node ? @lookUpNode info.path
+    node = info?.node
+    node or= @lookUpNode info.path
     @selectNode node, scroll
  
   performUpdateOnNode: (node, escalating = false) ->
@@ -360,7 +362,7 @@ class window.DomTextMapper
     xpath
 
   # This method is called recursively, to collect all the paths in a given sub-tree of the DOM.
-  collectPathsForNode: (node) ->
+  collectPathsForNode: (node, invisible = false) ->
     # Step one: get rendered node content, and store path info, if there is valuable content
     cont = @getNodeContent node, false
     if cont.length
@@ -370,13 +372,17 @@ class window.DomTextMapper
         content: cont
         length: cont.length
         node : node
+      if invisible
+        console.log "Something seems to be wrong. I see visible content @ " + path + ", while some of the ancestor nodes reported empty contents. Probably a new selection API bug...."
+    else
+      invisible = true
 
     # Step two: cover all children.
     # Q: should we check children even if the goven node had no rendered content?
-    # I seem to remember that the answer is yes, but I don't remember why.
+    # A: I seem to remember that the answer is yes, but I don't remember why.
     if node.hasChildNodes()
       for child in node.childNodes
-        @collectPathsForNode child        
+        @collectPathsForNode child, invisible
     null
 
   getBody: -> (@rootWin.document.getElementsByTagName "body")[0]
@@ -435,8 +441,9 @@ class window.DomTextMapper
     # To work around this, when told to select specific nodes, we have to
     # do various other things. See bellow.
 
-    if USE_THEAD_TBODY_WORKAROUND and node.nodeType is Node.ELEMENT_NODE and
-        node.tagName.toLowerCase() in ["thead", "tbody"] and node.hasChildNodes()
+    if node.nodeType is Node.ELEMENT_NODE and node.hasChildNodes() and
+        ((USE_THEAD_TBODY_WORKAROUND and node.tagName.toLowerCase() in ["thead", "tbody"]) or
+        (USE_OL_WORKAROUND and node.tagName.toLowerCase() is "ol"))
       # This is a thead or a tbody, and selection those is problematic,
       # because if the WebKit bug.
       # (Sometimes it selects nothing, sometimes it selects the whole table.)
