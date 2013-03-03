@@ -11,7 +11,7 @@ which is required to run the application.
 
 Before installing elastisearch_, you need some JRE, for example:
 
-    $ sudo apt-get install openjdk6-jre
+    $ sudo apt-get install openjdk-7-jre
 
 To quickest way to install elastisearch is to simply install elasticsearchdeb_.
 
