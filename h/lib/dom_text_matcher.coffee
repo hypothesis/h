@@ -2,12 +2,6 @@ class window.DomTextMatcher
 
   # ===== Public methods =======
 
-  # Switch the library into "serializable-only" mode.
-  # If set to true, all public API calls will be restricted to return
-  # strictly serializable data structures.
-  # (References to DOM objects will be omitted.)
-  restrictToSerializable: (value = true) -> @mapper.restrictToSerializable value
-
   # Consider only the sub-tree beginning with the given node.
   # 
   # This will be the root node to use for all operations.
@@ -45,23 +39,14 @@ class window.DomTextMatcher
   #   node: reference to the DOM node
   #   content: the text content of the node, as rendered by the browser
   #   length: the length of the next content
-  getAllPaths: ->
+  scan: ->
     t0 = @timestamp()
-    paths = @mapper.getAllPaths()
+    data = @mapper.scan()
     t1 = @timestamp()
-    return time: t1 - t0, paths: paths
+    return time: t1 - t0, data: data
 
   # Return the default path
   getDefaultPath: -> @mapper.getDefaultPath()
-
-  # Prepare for searching the specified path
-  # 
-  # Returns the time (in ms) it took the scan the specified path
-  prepareSearch: (path) ->
-    t0 = @timestamp()    
-    @mapper.scan path
-    t1 = @timestamp()
-    t1 - t0
 
   # Search for text using exact string matching
   #
@@ -162,7 +147,7 @@ class window.DomTextMatcher
 
     # Do some preparation, if required
     t0 = @timestamp()# 
-    if path? then @prepareSearch path
+    if path? then @scan()
     t1 = @timestamp()
 
     # Check preparations    

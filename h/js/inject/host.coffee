@@ -147,9 +147,14 @@ class Annotator.Host extends Annotator
           $('html, body').stop().animate {scrollTop: y}, 600
 
         scanDocument: (reason = "something happened") =>
-          console.log "Analyzing host frame, because " + reason + "..."
-          scanTime = @domMatcher.prepareSearch null, true
-          console.log "Traversal+scan took " + scanTime + " ms."
+          try      
+            console.log "Analyzing host frame, because " + reason + "..."
+            r = @domMatcher.scan()
+            scanTime = r.time
+            console.log "Traversal+scan took " + scanTime + " ms."
+          catch e
+            console.log e.message
+            console.log e.stack
  
       remote:
         publish: {}

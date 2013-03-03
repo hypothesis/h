@@ -7,25 +7,18 @@ class window.DomTextMapper
   @instances: []
 
   @changed: (node, reason = "no reason") ->
-    if @instances.length isnt 0
-      dm = @instances[0]
-      console.log "Node @ " + (dm.getPathTo node) + " has changed: '" + reason + "'."
+    if @instances.length is 0 then return
+#    dm = @instances[0]
+#    console.log "Node @ " + (dm.getPathTo node) + " has changed: '" + reason + "'."
     for instance in @instances
       instance.performUpdateOnNode node
     null
 
   constructor: ->
-    this.setRealRoot()
-    this.restrictToSerializable false
+    @setRealRoot()
     window.DomTextMapper.instances.push this
 
   # ===== Public methods =======
-
-  # Switch the library into "serializable-only" mode.
-  # If set to true, all public API calls will be restricted to return
-  # strictly serializable data structures.
-  # (References to DOM objects will be omitted.)
-  restrictToSerializable: (value = true) -> this.restricted = value
 
   # Consider only the sub-tree beginning with the given node.
   # 
@@ -33,8 +26,6 @@ class window.DomTextMapper
   setRootNode: (rootNode) ->
     @rootWin = window     
     @pathStartNode = @rootNode = rootNode
-#    console.log "Configured root node:"
-#    console.log rootNode
 
   # Consider only the sub-tree beginning with the node whose ID was given.
   # 
@@ -51,6 +42,9 @@ class window.DomTextMapper
     unless @rootWin? then throw new Error "Can't access contents of the spefified iframe!"
     @rootNode = @rootWin.document
     @pathStartNode = @getBody()
+
+  # Return the default path
+  getDefaultPath: -> @getPathTo @pathStartNode
 
   # Work with the whole DOM tree
   # 
@@ -72,111 +66,78 @@ class window.DomTextMapper
     @lastDOMChange = @timestamp()
 #    console.log "Registered document change."
 
-  # The available paths which can be scanned
+  # Scan the document
   #
-  # An map is returned, where the keys are the paths, and the values are objects with the following fields:
+  # Traverses the DOM, collects various information, and
+  # creates mappings between the string indices
+  # (as appearing in the rendered text) and the DOM elements.  
+  # 
+  # An map is returned, where the keys are the paths, and the
+  # values are objects with info about those parts of the DOM.
   #   path: the valid path value
   #   node: reference to the DOM node
   #   content: the text content of the node, as rendered by the browser
   #   length: the length of the next content
-  getAllPaths: ->
-#    console.log "in getAllPaths"
-    if @domStableSince @lastCollectedPaths
+  scan: ->
+    if @domStableSince @lastScanned
       # We have a valid paths structure!
 #      console.log "We have a valid DOM structure cache."
-      return if @restricted then @cleanPaths else @allPaths
+      return @path
 
-#    console.log "No valid cache, will have to calculate getAllPaths."
+#    console.log "No valid cache, will have to do a scan."
     startTime = @timestamp()
     @saveSelection()
-    @allPaths = {}
+    @path = {}
     @collectPathsForNode @pathStartNode
-    @restoreSelection()
-    @lastCollectedPaths = @timestamp()
-    console.log "Path traversal took " + (@lastCollectedPaths - startTime) + " ms."
-    if @restricted
-      @cleanPaths = {}
-      for path, info of @allPaths
-        cleanInfo = $.extend({}, info);
-        delete cleanInfo.node
-        @cleanPaths[path] = cleanInfo
-      @cleanPaths
-    else
-      @allPaths
+    t1 = @timestamp()
+    console.log "Path traversal took " + (t1 - startTime) + " ms."
 
-  # Return the default path
-  getDefaultPath: -> @getPathTo @pathStartNode
-
-  # Select the given path (for visual identification), and optionally scroll to it
-  selectPath: (path, scroll = false) ->
-    info = @allPaths[path]
-    @selectNode info.node ? @lookUpNode info.path
-
-  # Scan the given part of the document.
-  # 
-  # Creates  a list of mappings between the string indices
-  # (as appearing in the displayed text) and the DOM elements.
-  #
-  # The "path" paremater specifies the sub-tree inside the DOM that should be scanned.
-  # Must be an XPath expression, relative to the configured root node.
-  # You can check for valid input values using the getAllPaths method above.
-  #
-  # If no path is given, the whole sub-tree is scanned,
-  # starting with the configured root node.
-  #
-  # Nothing is returned; the following properties are populated:
-  #
-  #  mappings will contain the created mappings
-  #  corpus will contain the text content of the selected path# 
-  #  scannedPath will be set to the path
-  scan: (path = null) ->
-#    console.log "In scan"
-    path ?= @getDefaultPath()
-    if path is @scannedPath and @domStableSince @lastScanned
-#      console.log "We have a valid cache. Returning instead of scanning."
-      return
-#    console.log "Scanning path: " + path
-    @getAllPaths()
-    node = @allPaths[path].node
-    @mappings = {}
-    @saveSelection()        
+    path = @getPathTo @pathStartNode
+    node = @path[path].node
     @collectStrings node, path, null, 0, 0
     @restoreSelection()
-    @scannedPath = path
     @lastScanned = @timestamp()
-    @corpus = @mappings[path].pathInfo.content
+    @corpus = @path[path].content
 #    console.log "Corpus is: " + @corpus
-    null
 
+    t2 = @timestamp()    
+    console.log "Phase II of data collecting " + (t2 - t1) + " ms."
+
+    @path
+ 
+  # Select the given path (for visual identification), and optionally scroll to it
+  selectPath: (path, scroll = false) ->
+    info = @path[path]
+    node = info.node ? @lookUpNode info.path
+    @selectNode node, scroll
+ 
   performUpdateOnNode: (node, escalating = false) ->
     unless node? then throw new Error "Called performUpdate with a null node!"
-    unless @allPaths? then return #We don't have data yet. Not updating.
-      
+    unless @path? then return #We don't have data yet. Not updating.
     startTime = @timestamp()
     unless escalating then @saveSelection()
     path = @getPathTo node
-    pathInfo = @allPaths[path]
+    pathInfo = @path[path]
     unless pathInfo?
       @performUpdateOnNode node.parentNode, true
       unless escalating then @restoreSelection()        
       return
-    console.log "Performing update on node @ path " + path
-    unless @mappings[path]? then throw new error "Can not find mappings for path " + path
+#    console.log "Performing update on node @ path " + path
+
 #    if escalating then console.log "(Escalated)"
 #    console.log "Updating data about " + path + ": "
     if pathInfo.node is node and pathInfo.content is @getNodeContent node, false
 #      console.log "Good, the node and the overall content is still the same"
-#      console.log "Dropping obsolete path info and mappings for children..."
+#      console.log "Dropping obsolete path info for children..."
       prefix = path + "/"
       pathsToDrop =p
 
       # FIXME: There must be a more elegant way to do this. 
       pathsToDrop = []
-      for p, data of @allPaths when @stringStartsWith p, prefix
+      for p, data of @path when @stringStartsWith p, prefix
         pathsToDrop.push p
       for p in pathsToDrop
-        delete @mappings[p]
-        delete @allPaths[p]        
+        delete @path[p]        
         
 #      console.log "Done. Collecting new path info..."
       @collectPathsForNode node
@@ -188,14 +149,11 @@ class window.DomTextMapper
         @collectStrings node, path, null, 0, 0
       else
         parentPath = @parentPath path
-        parentPathInfo = @allPaths[parentPath]
+        parentPathInfo = @path[parentPath]
         unless parentPathInfo?
           throw new Error "While performing update on node " + path + ", no path info found for parent path: " + parentPath
-        parentMappings = @mappings[parentPath]
-        unless parentMappings?
-          throw new Error "While performing update on node " + path + ", no mappings info found for parent path: " + parentPath
-        oldIndex = @mappings[path].start - parentMappings.start
-        @collectStrings node, path, parentPathInfo.content, parentMappings.start, oldIndex
+        oldIndex = @path[path].start - parentPathInfo.start
+        @collectStrings node, path, parentPathInfo.content, parentPathInfo.start, oldIndex
         
 #      console.log "Data update took " + (@timestamp() - startTime) + " ms."
 
@@ -216,87 +174,67 @@ class window.DomTextMapper
         throw new Error "Can not keep up with the changes, since even the node configured as path start node was replaced."
     unless escalating then @restoreSelection()        
 
-
-  # Return the character range mappings for a given path in the DOM
-  getRangeForPath: (path) ->
-    result = @mappings[path]
-    unless result? then throw new Error "Found no range for path '" + path + "'!"
-    if @restricted
-      result = $.extend {}, result;
-      result.pathInfo = $.extend {}, result.pathInfo
-      delete result.pathInfo.node
+  # Return info for a given path in the DOM
+  getInfoForPath: (path) ->
+    unless @path? then throw new Error "Can't get info before running a scan() !"     
+    result = @path[path]
+    unless result? then throw new Error "Found no info for path '" + path + "'!"
     result
 
-  # Return the character range mappings for a given node in the DOM
-  getMappingsForNode: (node) -> @getRangeForPath @getPathTo node
+  # Return info for a given node in the DOM
+  getInfoForNode: (node) -> @getInfoForPath @getPathTo node
 
   # Get the matching DOM elements for a given set of text ranges
   # (Calles getMappingsForRange for each element in the givenl ist)
-  getMappingsForRanges: (ranges, path = null) ->
+  getMappingsForRanges: (ranges) ->
 #    console.log "Ranges:"
 #    console.log ranges
-    mappings = (for range in ranges
-      mapping = @getMappingsForRange range.start, range.end, path
+    (for range in ranges
+      mapping = @getMappingsForRange range.start, range.end
     )
-#    console.log "Raw mappings:"
-#    console.log mappings
 
-    if @restricted
-      mappings = (for mapping in mappings
-        cleanMapping = $.extend {}, mapping
-        delete cleanMapping.range
-        cleanMapping.nodes = (for node in cleanMapping.nodes
-          cleanNode = $.extend {}, node
-          cleanNode.element = $.extend {}, cleanNode.element
-          cleanNode.element.pathInfo = $.extend {}, cleanNode.element.pathInfo
-          delete cleanNode.element.pathInfo.node
-          cleanNode
-        )
-        cleanMapping
-      )
-#      console.log "Cleaned mappings:"
-#      console.log mappings
-
-    mappings
-
+  # Return the rendered value of a part of the dom.
+  # If path is not given, the default path is used.
   getContentForPath: (path = null) -> 
     path ?= @getDefaultPath()       
-    @allPaths[path].content
+    @path[path].content
 
+  # Return the length of the rendered value of a part of the dom.
+  # If path is not given, the default path is used.
   getLengthForPath: (path = null) ->
     path ?= @getDefaultPath()
-    @allPaths[path].length
+    @path[path].length
 
+  # Return a given range of the rendered value of a part of the dom.
+  # If path is not given, the default path is used.
   getContentForRange: (start, end, path = null) ->
     @getContentForPath(path).substr start, end - start
 
   # Get the context that encompasses the given text range
-  getContextForRange: (start, end) ->
-    content = @getContentForPath()
+  # in the rendered text of the document
+  getContextForRange: (start, end, path = null) ->
+    content = @getContentForPath path
     prefixStart = Math.max 0, start - CONTEXT_LEN
     prefixLen = start - prefixStart
     prefix = content.substr prefixStart, prefixLen
     suffix = content.substr end, prefixLen
     [prefix.trim(), suffix.trim()]
         
-
   # Get the matching DOM elements for a given text range
   # 
   # If the "path" argument is supplied, scan is called automatically.
   # (Except if the supplied path is the same as the last scanned path.)
-  getMappingsForRange: (start, end, path = null) ->
+  getMappingsForRange: (start, end) ->
     unless (start? and end?) then throw new Error "start and end is required!"    
 #    console.log "Collecting matches for [" + start + ":" + end + "]"
-    if path? then @scan path
-
-    unless @scannedPath? then throw new Error "Can not run getMappingsFor() without existing mappings. Either supply a path to scan, or call scan() beforehand!"
+    @scan()
 
     # Collect the matching mappings
 #    console.log "Collecting mappings"
     matches = []
-    for p, mapping of @mappings when mapping.atomic and @regions_overlap mapping.start, mapping.end, start, end
+    for p, mapping of @path when mapping.atomic and @regions_overlap mapping.start, mapping.end, start, end
       do (mapping) =>
-#        console.log "Checking " + mapping.pathInfo.path
+#        console.log "Checking " + mapping.path
 #        console.log mapping
         match =
           element: mapping
@@ -307,19 +245,19 @@ class window.DomTextMapper
         else
          if start <= mapping.start
             match.end = end - mapping.start
-            match.wanted = mapping.pathInfo.content.substr 0, match.end                
+            match.wanted = mapping.content.substr 0, match.end                
           else if mapping.end <= end
             match.start = start - mapping.start
-            match.wanted = mapping.pathInfo.content.substr match.start        
+            match.wanted = mapping.content.substr match.start        
           else
             match.start = start - mapping.start
             match.end = end - mapping.start
-            match.wanted = mapping.pathInfo.content.substr match.start, match.end - match.start
+            match.wanted = mapping.content.substr match.start, match.end - match.start
         
         @computeSourcePositions match
-        match.yields = mapping.pathInfo.node.data.substr match.startCorrected, match.endCorrected - match.startCorrected
+        match.yields = mapping.node.data.substr match.startCorrected, match.endCorrected - match.startCorrected
         matches.push match
-#        console.log "Done with " + mapping.pathInfo.path
+#        console.log "Done with " + mapping.path
 
     if matches.length is 0
 #      console.log "Wanted: [" + start + ":" + end + "], found: "
@@ -335,8 +273,8 @@ class window.DomTextMapper
     startMatch = matches[0]
 #    console.log "StartMatch is: "
 #    console.log startMatch
-    startNode = startMatch.element.pathInfo.node
-    startPath = startMatch.element.pathInfo.path
+    startNode = startMatch.element.node
+    startPath = startMatch.element.path
     startOffset = startMatch.startCorrected
     if startMatch.full
 #      console.log "Calling range.setStartBefore <" + startPath + ">..."
@@ -352,8 +290,8 @@ class window.DomTextMapper
     endMatch = matches[matches.length - 1]
 #    console.log "endMatch is: "
 #    console.log endMatch
-    endNode = endMatch.element.pathInfo.node
-    endPath = endMatch.element.pathInfo.path
+    endNode = endMatch.element.node
+    endPath = endMatch.element.path
     endOffset = endMatch.endCorrected
     if endMatch.full
 #      console.log "Calling range.setEndAfter <" + endPath + ">..."
@@ -427,7 +365,7 @@ class window.DomTextMapper
     cont = @getNodeContent node, false
     if cont.length
       path = @getPathTo node        
-      @allPaths[path] =
+      @path[path] =
         path: path
         content: cont
         length: cont.length
@@ -452,13 +390,20 @@ class window.DomTextMapper
 
   # save the original selection
   saveSelection: ->
-    if @oldRanges? then throw new Error "Selection already saved!"
+    if @oldRanges?
+      console.log "Selection saved at:"
+      console.log @selectionSaved
+      throw new Error "Selection already saved!"
     sel = @rootWin.getSelection()        
 #    console.log "Saving selection: " + sel.rangeCount + " ranges."
     @oldRanges = (sel.getRangeAt i) for i in [0 ... sel.rangeCount]
     switch sel.rangeCount
       when 0 then @oldRanges ?= []
       when 1 then @oldRanges = [ @oldRanges ]
+    try
+      throw new Error "Selection was saved here"
+    catch exception
+      @selectionSaved = exception.stack
 
   # restore selection
   restoreSelection: ->
@@ -535,37 +480,18 @@ class window.DomTextMapper
     text
 
 
-  # Read out the HTML source text of a given element.
-  readSourceText: (node) ->
-    unless node? then throw new Error "Called readSourceText with non-existend node."
-
-    text = if node.data?  # text nodes
-      node.data
-    else if node.innerHTML? # element nodes
-      node.innerHTML
-    else # something else? must look into this
-      console.log "Should read source text of node, but neither .data, nor .innerHtml found."
-      console.log "Node is: "
-      console.log @getPathTo node
-      console.log node
-      window.wtfnode = node
-      throw new Error "Called readSourceText with a node with no data or innerHTML.."
-
-    # Do some normalization.
-    text.replace /\n/g, " "        
-
   # Convert "display" text indices to "source" text indices.
   computeSourcePositions: (match) ->
 #    console.log "In computeSourcePosition"
-#    console.log match.element.pathInfo.path
-#    console.log match.element.pathInfo.node.data
+#    console.log match.element.path
+#    console.log match.element.node.data
 
     # the HTML source of the text inside a text element.
-    sourceText = @readSourceText match.element.pathInfo.node
+    sourceText = match.element.node.data.replace /\n/g, " "
 #    console.log "sourceText is '" + sourceText + "'"
 
     # what gets displayed, when the node is processed by the browser.
-    displayText = match.element.pathInfo.content
+    displayText = match.element.content
 #    console.log "displayText is '" + displayText + "'"
 
     # The selected range in displayText.
@@ -616,7 +542,7 @@ class window.DomTextMapper
 #    console.log "Scanning path " + path    
 #    content = @getNodeContent node, false
 
-    pathInfo = @allPaths[path]
+    pathInfo = @path[path]
     content = pathInfo?.content
 
     if not content? or content is ""
@@ -633,14 +559,9 @@ class window.DomTextMapper
 
     endIndex = startIndex + content.length
     atomic = not node.hasChildNodes()
-    @mappings[path] =
-      pathInfo: pathInfo
-      start: parentIndex + startIndex
-      end: parentIndex + endIndex
-      atomic: atomic
-
-    if @declareMappings
-      console.log "Found mappings for [" + @mappings[path].start + ":" + @mappings[path].end + "]: " + pathInfo.content
+    pathInfo.start = parentIndex + startIndex
+    pathInfo.end = parentIndex + endIndex
+    pathInfo.atomic = atomic
 
     if not atomic
       children = node.childNodes

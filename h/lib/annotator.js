@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-02598fb
+** Annotator 1.2.5-dev-4109850
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-02 22:47:44Z
+** Built at: 2013-03-03 01:56:48Z
 */
 
 (function() {
@@ -785,8 +785,8 @@
 
     Annotator.prototype.getContextQuoteSelectorFromRange = function(range) {
       var endOffset, prefix, quote, selector, startOffset, suffix, _ref2;
-      startOffset = (this.domMapper.getMappingsForNode(range.start)).start;
-      endOffset = (this.domMapper.getMappingsForNode(range.end)).end;
+      startOffset = (this.domMapper.getInfoForNode(range.start)).start;
+      endOffset = (this.domMapper.getInfoForNode(range.end)).end;
       quote = this.domMapper.getContentForRange(startOffset, endOffset);
       _ref2 = this.domMapper.getContextForRange(startOffset, endOffset), prefix = _ref2[0], suffix = _ref2[1];
       return selector = {
@@ -800,8 +800,8 @@
 
     Annotator.prototype.getPositionSelectorFromRange = function(range) {
       var endOffset, selector, startOffset;
-      startOffset = (this.domMapper.getMappingsForNode(range.start)).start;
-      endOffset = (this.domMapper.getMappingsForNode(range.end)).end;
+      startOffset = (this.domMapper.getInfoForNode(range.start)).start;
+      endOffset = (this.domMapper.getInfoForNode(range.end)).end;
       return selector = {
         source: this.getHref(),
         type: "position",
