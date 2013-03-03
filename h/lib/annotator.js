@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-4109850
+** Annotator 1.2.5-dev-f066e48
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-03 22:22:50Z
+** Built at: 2013-03-03 22:52:56Z
 */
 
 (function() {
@@ -872,43 +872,66 @@
     };
 
     Annotator.prototype.findAnchorFromXPathRangeSelector = function(target) {
-      var currentQuote, endOffset, nRange, quoteSelector, savedQuote, selector, startOffset;
+      var currentQuote, endOffset, nRange, savedQuote, selector, startOffset;
       selector = this.findSelector(target.selector, "xpath range");
-      if (selector != null) {
-        try {
-          nRange = this.getNormalizedRangeFromXPathRangeSelector(selector);
-          quoteSelector = this.findSelector(target.selector, "context+quote");
-          savedQuote = quoteSelector != null ? quoteSelector.exact : void 0;
-          if (savedQuote != null) {
-            startOffset = (this.domMapper.getInfoForNode(nRange.start)).start;
-            endOffset = (this.domMapper.getInfoForNode(nRange.end)).end;
-            currentQuote = this.domMapper.getContentForRange(startOffset, endOffset);
-            if (currentQuote !== savedQuote) {
-              console.log("Could not apply XPath selector to current document, because the quote has changed.");
-              console.log("Saved quote is '" + savedQuote + "'.");
-              console.log("Current quote is '" + currentQuote + "'.");
-              return null;
-            }
+      if (selector == null) return null;
+      try {
+        nRange = this.getNormalizedRangeFromXPathRangeSelector(selector);
+        savedQuote = this.getQuoteForTarget(target);
+        if (savedQuote != null) {
+          startOffset = (this.domMapper.getInfoForNode(nRange.start)).start;
+          endOffset = (this.domMapper.getInfoForNode(nRange.end)).end;
+          currentQuote = this.domMapper.getContentForRange(startOffset, endOffset);
+          if (currentQuote !== savedQuote) {
+            console.log("Could not apply XPath selector to current document, because the quote has changed.");
+            console.log("Saved quote is '" + savedQuote + "'.");
+            console.log("Current quote is '" + currentQuote + "'.");
+            return null;
           } else {
 
           }
-          return nRange;
-        } catch (exception) {
-          if (exception instanceof Range.RangeError) {
-            console.log("Could not apply XPath selector to current document. Structure must have changed.");
-            return null;
-          } else {
-            console.log(exception.stack);
-            throw exception;
-          }
+        } else {
+
+        }
+        return nRange;
+      } catch (exception) {
+        if (exception instanceof Range.RangeError) {
+          console.log("Could not apply XPath selector to current document. Structure must have changed.");
+          return null;
+        } else {
+          throw exception;
         }
       }
-      return null;
+    };
+
+    Annotator.prototype.findAnchorFromPositionSelector = function(target) {
+      var browserRange, currentQuote, mappings, savedQuote, selector;
+      selector = this.findSelector(target.selector, "position");
+      if (selector == null) return null;
+      savedQuote = this.getQuoteForTarget(target);
+      if (savedQuote != null) {
+        savedQuote = this.getQuoteForTarget(target);
+        currentQuote = this.domMapper.getContentForRange(selector.start, selector.end);
+        if (currentQuote !== savedQuote) {
+          console.log("Could not apply position selector to current document, because the quote has changed.");
+          console.log("Saved quote is '" + savedQuote + "'.");
+          console.log("Current quote is '" + currentQuote + "'.");
+          return null;
+        } else {
+
+        }
+      } else {
+
+      }
+      mappings = this.domMapper.getMappingsForRange(selector.start, selector.end);
+      browserRange = new Range.BrowserRange(mappings.range);
+      return browserRange.normalize();
     };
 
     Annotator.prototype.findAnchor = function(target) {
       var anchor;
       anchor = this.findAnchorFromXPathRangeSelector(target);
+      anchor || (anchor = this.findAnchorFromPositionSelector(target));
       return anchor;
     };
 
@@ -923,12 +946,18 @@
       _ref2 = annotation.target;
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
         t = _ref2[_k];
-        r = this.findAnchor(t);
-        if (r != null) {
-          normedRanges.push(r);
-        } else {
-          console.log("Could not find anchor for annotation target '" + t.id + "' (for annotation '" + annotation.id + "').");
-          this.publish('findAnchorFail', [annotation, t]);
+        try {
+          r = this.findAnchor(t);
+          if (r != null) {
+            normedRanges.push(r);
+          } else {
+            console.log("Could not find anchor for annotation target '" + t.id + "' (for annotation '" + annotation.id + "').");
+            this.publish('findAnchorFail', [annotation, t]);
+          }
+        } catch (exception) {
+          if (exception.stack != null) console.log(exception.stack);
+          console.log(exception.message);
+          console.log(exception);
         }
       }
       annotation.currentQuote = [];
