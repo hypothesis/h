@@ -207,6 +207,8 @@ class window.DomTextMapper
     path ?= @getDefaultPath()
     @path[path].length
 
+  getDocLength: -> @getLengthForPath()
+
   # Return a given range of the rendered value of a part of the dom.
   # If path is not given, the default path is used.
   getContentForRange: (start, end, path = null) ->

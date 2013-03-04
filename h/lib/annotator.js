@@ -6,7 +6,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-03 22:52:56Z
+** Built at: 2013-03-03 23:59:25Z
 */
 
 (function() {
@@ -883,9 +883,7 @@
           endOffset = (this.domMapper.getInfoForNode(nRange.end)).end;
           currentQuote = this.domMapper.getContentForRange(startOffset, endOffset);
           if (currentQuote !== savedQuote) {
-            console.log("Could not apply XPath selector to current document, because the quote has changed.");
-            console.log("Saved quote is '" + savedQuote + "'.");
-            console.log("Current quote is '" + currentQuote + "'.");
+            console.log("Could not apply XPath selector to current document, because the quote has changed. (Saved quote is '" + savedQuote + "', current quote is '" + currentQuote + "'.)");
             return null;
           } else {
 
@@ -913,9 +911,7 @@
         savedQuote = this.getQuoteForTarget(target);
         currentQuote = this.domMapper.getContentForRange(selector.start, selector.end);
         if (currentQuote !== savedQuote) {
-          console.log("Could not apply position selector to current document, because the quote has changed.");
-          console.log("Saved quote is '" + savedQuote + "'.");
-          console.log("Current quote is '" + currentQuote + "'.");
+          console.log("Could not apply position selector to current document, because the quote has changed. (Saved quote is '" + savedQuote + "', current quote is '" + currentQuote + "'.)");
           return null;
         } else {
 
@@ -928,10 +924,29 @@
       return browserRange.normalize();
     };
 
+    Annotator.prototype.findAnchorWithFuzzyMatching = function(target) {
+      var browserRange, match, posSelector, quote, quoteSelector, result, start;
+      quoteSelector = this.findSelector(target.selector, "context+quote");
+      quote = quoteSelector != null ? quoteSelector.exact : void 0;
+      if (quote == null) return null;
+      posSelector = this.findSelector(target.selector, "position");
+      start = posSelector != null ? posSelector.start : void 0;
+      start || (start = this.domMapper.getDocLength() / 2);
+      result = this.domMatcher.searchFuzzy(quote, start);
+      if (result.matches.length !== 1) return null;
+      match = result.matches[0];
+      if (!match.exact) {
+        console.log("Using fuzzy matching, found '" + match.found + "', instead of '" + quote + "'.");
+      }
+      browserRange = new Range.BrowserRange(match.range);
+      return browserRange.normalize();
+    };
+
     Annotator.prototype.findAnchor = function(target) {
       var anchor;
       anchor = this.findAnchorFromXPathRangeSelector(target);
       anchor || (anchor = this.findAnchorFromPositionSelector(target));
+      anchor || (anchor = this.findAnchorWithFuzzyMatching(target));
       return anchor;
     };
 
@@ -960,16 +975,11 @@
           console.log(exception);
         }
       }
-      annotation.currentQuote = [];
-      annotation.currentRanges = [];
       annotation.highlights = [];
       for (_l = 0, _len4 = normedRanges.length; _l < _len4; _l++) {
         normed = normedRanges[_l];
-        annotation.currentQuote.push($.trim(normed.text()));
-        annotation.currentRanges.push(normed.serialize(this.wrapper[0], '.annotator-hl'));
         $.merge(annotation.highlights, this.highlightRange(normed));
       }
-      annotation.currentQuote = annotation.currentQuote.join(' / ');
       $(annotation.highlights).data('annotation', annotation);
       return annotation;
     };

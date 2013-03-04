@@ -111,7 +111,10 @@ class window.DomTextMatcher
   # 
   # For the details about the returned data structure, see the documentation of the search() method.
   searchFuzzy: (pattern, pos, caseSensitive = false, matchDistance = 1000, matchThreshold = 0.5, path = null) ->
-    if not @dmp? then @dmp = new window.DTM_DMPMatcher
+    unless @dmp?
+      unless window.DTM_DMPMatcher?
+        throw new Error "DTM_DMPMatcher is not available. Have you loaded the text match engines?"
+      @dmp = new window.DTM_DMPMatcher
     @dmp.setMatchDistance matchDistance
     @dmp.setMatchThreshold matchThreshold
     @dmp.setCaseSensitive caseSensitive
@@ -146,7 +149,7 @@ class window.DomTextMatcher
     unless pattern? then throw new Error "Can't search an for empty pattern!"
 
     # Do some preparation, if required
-    t0 = @timestamp()# 
+    t0 = @timestamp()
     if path? then @scan()
     t1 = @timestamp()
 
