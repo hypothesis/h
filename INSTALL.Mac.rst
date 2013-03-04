@@ -1,4 +1,4 @@
-Installing Hypothes.is
+Installing Hypothes.is on Mac
 ######################
 
 Hypothes.is currently requires several tools to build and run from scratch.
