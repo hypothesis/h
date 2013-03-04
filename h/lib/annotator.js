@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-f066e48
+** Annotator 1.2.5-dev-a12bec5
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-03 23:59:25Z
+** Built at: 2013-03-04 09:29:16Z
 */
 
 (function() {
@@ -872,15 +872,17 @@
     };
 
     Annotator.prototype.findAnchorFromXPathRangeSelector = function(target) {
-      var currentQuote, endOffset, nRange, savedQuote, selector, startOffset;
+      var currentQuote, endInfo, endOffset, nRange, savedQuote, selector, startInfo, startOffset;
       selector = this.findSelector(target.selector, "xpath range");
       if (selector == null) return null;
       try {
         nRange = this.getNormalizedRangeFromXPathRangeSelector(selector);
         savedQuote = this.getQuoteForTarget(target);
         if (savedQuote != null) {
-          startOffset = (this.domMapper.getInfoForNode(nRange.start)).start;
-          endOffset = (this.domMapper.getInfoForNode(nRange.end)).end;
+          startInfo = this.domMapper.getInfoForNode(nRange.start);
+          startOffset = startInfo.start;
+          endInfo = this.domMapper.getInfoForNode(nRange.end);
+          endOffset = endInfo.end;
           currentQuote = this.domMapper.getContentForRange(startOffset, endOffset);
           if (currentQuote !== savedQuote) {
             console.log("Could not apply XPath selector to current document, because the quote has changed. (Saved quote is '" + savedQuote + "', current quote is '" + currentQuote + "'.)");

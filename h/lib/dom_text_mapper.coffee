@@ -9,8 +9,8 @@ class window.DomTextMapper
 
   @changed: (node, reason = "no reason") ->
     if @instances.length is 0 then return
-    dm = @instances[0]
-#   console.log "Node @ " + (dm.getPathTo node) + " has changed: '" + reason + "'."
+#    dm = @instances[0]
+#    console.log "Node @ " + (dm.getPathTo node) + " has changed: '" + reason + "'."
     for instance in @instances
       instance.performUpdateOnNode node
     null
@@ -212,7 +212,8 @@ class window.DomTextMapper
   # Return a given range of the rendered value of a part of the dom.
   # If path is not given, the default path is used.
   getContentForRange: (start, end, path = null) ->
-    @getContentForPath(path).substr start, end - start
+    text = @getContentForPath(path).substr start, end - start
+    text.trim()
 
   # Get the context that encompasses the given text range
   # in the rendered text of the document
@@ -558,8 +559,10 @@ class window.DomTextMapper
     content = pathInfo?.content
 
     if not content? or content is ""
-      # node has no content            
-#      console.log "No content, returning"
+      # node has no content
+      pathInfo.start = parentIndex + index
+      pathInfo.end = parentIndex + index
+      pathInfo.atomic = true
       return index
         
     startIndex = if parentContent? then (parentContent.indexOf content, index) else index
