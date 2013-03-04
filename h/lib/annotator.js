@@ -6,7 +6,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-04 09:29:16Z
+** Built at: 2013-03-04 09:58:20Z
 */
 
 (function() {
@@ -927,14 +927,15 @@
     };
 
     Annotator.prototype.findAnchorWithFuzzyMatching = function(target) {
-      var browserRange, match, posSelector, quote, quoteSelector, result, start;
+      var browserRange, len, match, posSelector, quote, quoteSelector, result, start;
       quoteSelector = this.findSelector(target.selector, "context+quote");
       quote = quoteSelector != null ? quoteSelector.exact : void 0;
       if (quote == null) return null;
       posSelector = this.findSelector(target.selector, "position");
       start = posSelector != null ? posSelector.start : void 0;
-      start || (start = this.domMapper.getDocLength() / 2);
-      result = this.domMatcher.searchFuzzy(quote, start);
+      len = this.domMapper.getDocLength();
+      start || (start = len / 2);
+      result = this.domMatcher.searchFuzzy(quote, start, false, len);
       if (result.matches.length !== 1) return null;
       match = result.matches[0];
       if (!match.exact) {
