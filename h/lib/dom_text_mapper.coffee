@@ -9,8 +9,8 @@ class window.DomTextMapper
 
   @changed: (node, reason = "no reason") ->
     if @instances.length is 0 then return
-#    dm = @instances[0]
-#    console.log "Node @ " + (dm.getPathTo node) + " has changed: '" + reason + "'."
+    dm = @instances[0]
+#   console.log "Node @ " + (dm.getPathTo node) + " has changed: '" + reason + "'."
     for instance in @instances
       instance.performUpdateOnNode node
     null
@@ -364,19 +364,22 @@ class window.DomTextMapper
     xpath
 
   # This method is called recursively, to collect all the paths in a given sub-tree of the DOM.
-  collectPathsForNode: (node, invisible = false) ->
+  collectPathsForNode: (node, invisible = false, verbose = false) ->
     # Step one: get rendered node content, and store path info, if there is valuable content
+    path = @getPathTo node
     cont = @getNodeContent node, false
+    @path[path] =
+      path: path
+      content: cont
+      length: cont.length
+      node : node
     if cont.length
-      path = @getPathTo node        
-      @path[path] =
-        path: path
-        content: cont
-        length: cont.length
-        node : node
+      if verbose then console.log "Collected info about path " + path
       if invisible
         console.log "Something seems to be wrong. I see visible content @ " + path + ", while some of the ancestor nodes reported empty contents. Probably a new selection API bug...."
+        
     else
+      if verbose then console.log "Found no content at path " + path
       invisible = true
 
     # Step two: cover all children.
@@ -384,7 +387,7 @@ class window.DomTextMapper
     # A: I seem to remember that the answer is yes, but I don't remember why.
     if node.hasChildNodes()
       for child in node.childNodes
-        @collectPathsForNode child, invisible
+        @collectPathsForNode child, invisible, verbose
     null
 
   getBody: -> (@rootWin.document.getElementsByTagName "body")[0]
