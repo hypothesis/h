@@ -3,8 +3,11 @@ Installing Hypothes.is
 
 Hypothes.is currently requires several tools to build and run from scratch.
 
-See the platform specific INSTALL.<platform>.rst files for more information
-about how to install the dependencies on any specific platform.
+These instructions have been tested on OSX 10.8.2. 
+
+A couple of dependencies are needed to get started:
++VirtualEnv
+
 
 In the future, releases will include built versions of static assets for
 integrators wanting to produce custom embeddings of the project on their
@@ -26,6 +29,32 @@ script runs without successfully, the environment should be prepared. It is
 good practice to run this script whenever the source code changes, such as
 after pulling new commits from upstream or checking out a new branch that may
 have changed (for example: updated) requirements.
+
+You are almost done, but before you can run the server you need to enter the
+virtualenv with the following command::
+    
+    $ source bin/activate
+
+Then install the additional required dependencies with::
+
+    $ pip install -r requirements.txt
+
+NOTE: if you encounter problems during this stage, (such as "ImportError: 
+No module named pkg_resources") then you need to install the Python "distribute" 
+package inside the virtual environment. To install this package, download distribute_setup.py 
+here: http://python-distribute.org/distribute_setup.py and install it while inside the 
+vitualenv with the following command:
+
+    $ python distribute_setup.py install
+
+Then run:
+
+    $ pip install -r requirements.txt
+
+Once you have successfully installed the requirements, you'll be able to start 
+the server with::
+
+    $ ./run
 
 For building the static assets, requirements currently include CoffeeScript_
 and Sass_ with Compass_ installed. These tools are widely available in package
