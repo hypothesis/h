@@ -69,7 +69,8 @@ recursive = ['$compile', '$timeout', ($compile, $timeout) ->
           requestAnimationFrame ->
             tick = false
             for [clone, el] in attachQueue
-              clone.replaceWith el
+              clone.after el
+              clone.bind '$destroy', -> el.remove()
             attachQueue = []
       clone
     post: (scope, iElement, iAttrs, controller) ->
