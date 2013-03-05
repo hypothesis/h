@@ -153,9 +153,9 @@ class App
             token: newValue
         else
           plugins.Auth.setToken(newValue)
-        plugins.Auth.withToken plugins.HypothesisPermissions._setAuthFromToken
+        plugins.Auth.withToken plugins.Permissions._setAuthFromToken
       else
-        plugins.HypothesisPermissions.setUser(null)
+        plugins.Permissions.setUser(null)
         delete plugins.Auth
       provider.setActiveHighlights []
       if annotator.plugins.Store?
@@ -263,7 +263,6 @@ class Annotation
     if drafts.contains $scope.$modelValue
       $scope.editing = true
       $scope.unsaved = true
-      $scope.$modelValue.permissions = { 'read': 'group:__world__' } 
 
 
 class Editor
