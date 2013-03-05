@@ -4,6 +4,7 @@ class window.DomTextMapper
   USE_TABLE_TEXT_WORKAROUND = true
   USE_OL_WORKAROUND = true
   USE_CAPTION_WORKAROUND = true
+  USE_FF_EMPTY_TEXT_WORKAROUND = true
   CONTEXT_LEN = 32
 
   @instances: []
@@ -428,7 +429,7 @@ class window.DomTextMapper
     delete @oldRanges
 
   # Select the given node (for visual identification), and optionally scroll to it
-  selectNode: (node, scroll = false) ->  
+  selectNode: (node, scroll = false) -> 
     sel = @rootWin.getSelection()
 
     # clear the selection
@@ -449,7 +450,7 @@ class window.DomTextMapper
     # do various other things. See bellow.
 
     if node.nodeType is Node.ELEMENT_NODE and node.hasChildNodes() and
-        ((USE_THEAD_TBODY_WORKAROUND and node.tagName.toLowerCase() in ["thead", "tbody"]) or
+       ((USE_THEAD_TBODY_WORKAROUND and node.tagName.toLowerCase() in ["thead", "tbody"]) or
         (USE_OL_WORKAROUND and node.tagName.toLowerCase() is "ol") or
         (USE_CAPTION_WORKAROUND and node.tagName.toLowerCase() is "caption"))        
       # This is a thead or a tbody, and selection those is problematic,
@@ -461,11 +462,16 @@ class window.DomTextMapper
       range.setEndAfter children[children.length - 1]
       sel.addRange range
     else
-      if USE_TABLE_TEXT_WORKAROUND and node.nodeType is Node.TEXT_NODE and node.parentNode.tagName.toLowerCase() is "table"
+      whitespace = /^\s*$/
+      if node.nodeType is Node.TEXT_NODE and 
+         ((USE_TABLE_TEXT_WORKAROUND and node.parentNode.tagName.toLowerCase() is "table")or
+          (USE_FF_EMPTY_TEXT_WORKAROUND and whitespace.test node.data ))
+        # Case 1:
         # This is a text element that should not even be here.
         # Selecting it might select the whole table,
         # so we don't select anything
-
+        # Case 2:
+        # Firefox cannot select a TextNode containing only whitespace
       else
         range.setStartBefore node
         range.setEndAfter node
@@ -517,17 +523,21 @@ class window.DomTextMapper
     sourceIndex = 0
     displayIndex = 0
 
-    until sourceStart? and sourceEnd?
-      sc = sourceText[sourceIndex]
-      dc = displayText[displayIndex]
-      if sc is dc
-        if displayIndex is displayStart
-          sourceStart = sourceIndex
-        displayIndex++        
-        if displayIndex is displayEnd
-          sourceEnd = sourceIndex + 1
-
-      sourceIndex++
+    if displayEnd > 0 
+      until sourceStart? and sourceEnd?
+        sc = sourceText[sourceIndex]
+        dc = displayText[displayIndex]
+        if sc is dc
+          if displayIndex is displayStart
+            sourceStart = sourceIndex
+          displayIndex++        
+          if displayIndex is displayEnd
+            sourceEnd = sourceIndex + 1
+  
+        sourceIndex++
+    else 
+    	sourceStart = 0
+    	sourceEnd = 0 
     match.startCorrected = sourceStart
     match.endCorrected = sourceEnd
 #    console.log "computeSourcePosition done. Corrected range is: " + match.startCorrected + "-" + match.endCorrected
