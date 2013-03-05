@@ -32,7 +32,7 @@ Before installing elastisearch_, you need some JRE, for example:
 
 To quickest way to install elastisearch is to simply install elasticsearchdeb_.
 
-Run the commands from the directory where you've cloned the repository. You can 
+Run the elasticsearch from the directory where you've cloned the repository. You can 
 run it with the following::
 
     $ bin/elasticsearch -f
