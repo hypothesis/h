@@ -51,6 +51,12 @@ Then run:
 
     $ pip install -r requirements.txt
 
+You will also need to install elasticsearch. This is required to run the application. Download it 
+at http://www.elasticsearch.org/download and unzip the ElasticSearch official distribution.
+You can run it with the following::
+
+    $ bin/elasticsearch -f
+
 Once you have successfully installed the requirements, you'll be able to start 
 the server with::
 
