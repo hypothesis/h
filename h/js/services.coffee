@@ -176,7 +176,7 @@ class Hypothesis extends Annotator
         publish: (args..., k, fk) => this.publish args...
         addPlugin: => this.addPlugin arguments...
         createAnnotation: =>
-          if @plugins.HypothesisPermissions.user?
+          if @plugins.Permissions.user?
             annotation = this.createAnnotation()
             thread = (threading.getContainer annotation.id)
             thread.message =
