@@ -144,10 +144,21 @@ class App
             token: newValue
         else
           plugins.Auth.setToken(newValue)
-        plugins.Auth.withToken plugins.HypothesisPermissions._setAuthFromToken
+        plugins.Auth.withToken plugins.Permissions._setAuthFromToken
       else
-        plugins.HypothesisPermissions.setUser(null)
+        plugins.Permissions.setUser(null)
         delete plugins.Auth
+      provider.setActiveHighlights []
+      if annotator.plugins.Store?
+        for annotation in annotator.dumpAnnotations()
+          provider.deleteAnnotation annotation
+          thread = (threading.getContainer annotation.id)
+          if thread.parent
+            thread.message = null
+            threading.pruneEmpties thread.parent
+          else
+            delete threading.idTable[annotation.id]
+        annotator.plugins.Store.loadAnnotations()
 
     $scope.$watch 'visible', (newValue) ->
       if newValue then annotator.show() else annotator.hide()
@@ -198,6 +209,11 @@ class Annotation
       # Annotator event callbacks don't expect a digest to be active
       $timeout (-> annotator.publish args...), 0, false
 
+    $scope.privacyLevels = [
+     {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
+     {name: 'Private', permissions: { 'read': [] } }
+    ]
+    
     $scope.cancel = ->
       $scope.editing = false
       drafts.remove $scope.$modelValue
@@ -206,6 +222,7 @@ class Annotation
 
     $scope.save = ->
       $scope.editing = false
+      $scope.model.$setViewValue $scope.model.$viewValue
       drafts.remove $scope.$modelValue
       if $scope.unsaved
         publish 'annotationCreated', $scope.$modelValue
@@ -235,12 +252,40 @@ class Annotation
       (threading.getContainer $scope.$modelValue.id).addChild replyThread
       drafts.add reply
 
+    $scope.getPrivacyLevel = (permissions) ->
+      for level in $scope.privacyLevels
+        roleSet = {}
+
+        # Construct a set (using a key->exist? mapping) of roles for each verb
+        for verb of permissions
+          roleSet[verb] = {}
+          for role in permissions[verb]
+            roleSet[verb][role] = true
+
+        # Check that no (verb, role) is missing from the role set
+        mismatch = false
+        for verb of level.permissions
+          for role in level.permissions[verb]
+            if roleSet[verb]?[role]?
+              delete roleSet[verb][role]
+            else
+              mismatch = true
+              break
+
+          # Check that no extra (verb, role) is missing from the privacy level
+          mismatch ||= Object.keys(roleSet[verb]).length
+          if mismatch then break else return level
+
+      # Unrecognized privacy level
+      name: 'Custom'
+      value: permissions
+
     $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
     $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
 
     $scope.$watch 'editing', (newValue) ->
       if newValue then $timeout -> $element.find('textarea').focus()
-
+    	
     # Check if this is a brand new annotation
     if drafts.contains $scope.$modelValue
       $scope.editing = true
@@ -326,7 +371,7 @@ class Viewer
       if $routeParams.id?
         highlights = [$routeParams.id]
       else if angular.isArray annotation
-        highlights = (a.id for a in annotation)
+        highlights = (a.id for a in annotation when a?)
       else if angular.isObject annotation
         highlights = [annotation.id]
       else

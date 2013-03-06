@@ -19,23 +19,21 @@ annotation = ['$filter', ($filter) ->
       # Format the annotation for display
       controller.$formatters.push (value) ->
         return unless angular.isObject value
-        angular.extend {}, value,
-          text: ($filter 'converter') (value.text or '')
+        created: value.created
+        body: ($filter 'converter') (value.text or '')
+        text: value.text
+        user: value.user
+        privacy: scope.getPrivacyLevel value.permissions
 
-      # Update the annotation with text from the view
       controller.$parsers.push (value) ->
-        if value.text != scope.$modelValue.text
-          angular.extend scope.$modelValue, text: value.text
+        return unless angular.isObject value
+        if controller.$pristine
+          controller.$modelValue
         else
-          scope.$modelValue
+          angular.extend controller.$modelValue,
+            text: value.text
+            permissions: value.privacy.permissions
 
-      scope.$watch 'editText', (newValue) ->
-        if scope.form.$valid
-          controller.$viewValue.text = scope.editText
-          controller.$setViewValue controller.$viewValue
-          #scope.previewText = ($filter 'converter') scope.editText
-        else
-          scope.previewText = ''
 
       # Publish the controller
       scope.model = controller
@@ -68,7 +66,8 @@ recursive = ['$compile', '$timeout', ($compile, $timeout) ->
           requestAnimationFrame ->
             tick = false
             for [clone, el] in attachQueue
-              clone.replaceWith el
+              clone.after el
+              clone.bind '$destroy', -> el.remove()
             attachQueue = []
       clone
     post: (scope, iElement, iAttrs, controller) ->

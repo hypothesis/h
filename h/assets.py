@@ -116,7 +116,6 @@ app = Bundle(
             for name in
             (
                 'heatmap',
-                'hypothesispermissions',
             )
         ],
         output='js/hypothesis.plugins.min.js'

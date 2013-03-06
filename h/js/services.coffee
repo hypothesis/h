@@ -5,10 +5,17 @@ class Hypothesis extends Annotator
   # Plugin configuration
   options:
     Heatmap: {}
-    HypothesisPermissions:
+    Permissions:
+      permissions:
+        read: ['group:__world__']
       showEditPermissionsCheckbox: false,
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
+
+  # Here as a noop just to make the Permissions plugin happy
+  # XXX: Change me when Annotator stops assuming things about viewers
+  viewer:
+    addField: (-> )
 
   this.$inject = [
     '$document', '$location', '$rootScope',
@@ -30,8 +37,8 @@ class Hypothesis extends Annotator
 
     # Add user info to new annotations
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
-      annotation.user = @plugins.HypothesisPermissions.options.userId(
-        @plugins.HypothesisPermissions.user)
+      permissions = @plugins.Permissions
+      annotation.user = permissions.options.userId(permissions.user)
       Object.defineProperty annotation, 'draft',
         configurable: true
         enumerable: false
@@ -164,7 +171,7 @@ class Hypothesis extends Annotator
         publish: (args..., k, fk) => this.publish args...
         addPlugin: => this.addPlugin arguments...
         createAnnotation: =>
-          if @plugins.HypothesisPermissions.user?
+          if @plugins.Permissions.user?
             annotation = this.createAnnotation()
             thread = (threading.getContainer annotation.id)
             thread.message =
