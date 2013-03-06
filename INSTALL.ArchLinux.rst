@@ -3,7 +3,7 @@ Installing Hypothes.is on ArchLinux
 
 Install the following packages::
 
-    python2-pip python2-virtualenv libpqxx python2-sphinx gcc git
+    python2-pip python2-virtualenv libpqxx gcc git
 
 From the Arch User Repository (AUR), obtain::
 
@@ -38,3 +38,20 @@ To test things out, start elasticsearch locally by issuing::
 And type::
 
     ./run
+
+Making the documentation
+------------------------
+
+In the top level directory, change into the virtual python environment that is used for development by running::
+
+    . bin/activate
+
+Then use pip to install the Sphinx documentation generator locally like so::
+
+    pip install Sphinx
+
+NOTE: not using a local version of Sphinx will fail to generate proper docs because the entire python environment is global.
+
+Finally, cd into docs/ and make your favourite documentation target. I did::
+
+    make html
