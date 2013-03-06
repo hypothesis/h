@@ -209,8 +209,8 @@ class Annotation
       $timeout (-> annotator.publish args...), 0, false
 
     $scope.privacyLevels = [
-     {name: 'Public', value:  { 'read': 'group:__world__' } },
-     {name: 'Private', value: { 'read': [] } }
+     {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
+     {name: 'Private', permissions: { 'read': [] } }
     ]
     $scope.privacy = $scope.privacyLevels[0]
     
