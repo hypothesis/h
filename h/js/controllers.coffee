@@ -167,7 +167,7 @@ class App
             threading.pruneEmpties thread.parent
           else
             delete threading.idTable[annotation.id]
-        annotator.plugins.Store.loadAnnotations()            
+        annotator.plugins.Store.loadAnnotations()
 
     $scope.$on 'showAuth', (event, show=true) ->
       angular.extend $scope.sheet,
