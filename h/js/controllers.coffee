@@ -212,7 +212,6 @@ class Annotation
      {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
      {name: 'Private', permissions: { 'read': [] } }
     ]
-    $scope.privacy = $scope.privacyLevels[0]
     
     $scope.cancel = ->
       $scope.editing = false
