@@ -213,7 +213,7 @@ class Annotation
      {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
      {name: 'Private', permissions: { 'read': [] } }
     ]
-    
+
     $scope.cancel = ->
       $scope.editing = false
       drafts.remove $scope.$modelValue
@@ -285,7 +285,7 @@ class Annotation
 
     $scope.$watch 'editing', (newValue) ->
       if newValue then $timeout -> $element.find('textarea').focus()
-    	
+
     # Check if this is a brand new annotation
     if drafts.contains $scope.$modelValue
       $scope.editing = true
