@@ -222,6 +222,7 @@ class Annotation
 
     $scope.save = ->
       $scope.editing = false
+      $scope.model.$setViewValue $scope.model.$viewValue
       drafts.remove $scope.$modelValue
       if $scope.unsaved
         publish 'annotationCreated', $scope.$modelValue
@@ -251,13 +252,39 @@ class Annotation
       (threading.getContainer $scope.$modelValue.id).addChild replyThread
       drafts.add reply
 
+    $scope.getPrivacyLevel = (permissions) ->
+      for level in $scope.privacyLevels
+        roleSet = {}
+
+        # Construct a set (using a key->exist? mapping) of roles for each verb
+        for verb of permissions
+          roleSet[verb] = {}
+          for role in permissions[verb]
+            roleSet[verb][role] = true
+
+        # Check that no (verb, role) is missing from the role set
+        mismatch = false
+        for verb of level.permissions
+          for role in level.permissions[verb]
+            if roleSet[verb]?[role]?
+              delete roleSet[verb][role]
+            else
+              mismatch = true
+              break
+
+          # Check that no extra (verb, role) is missing from the privacy level
+          mismatch ||= Object.keys(roleSet[verb]).length
+          if mismatch then break else return level
+
+      # Unrecognized privacy level
+      name: 'Custom'
+      value: permissions
+
     $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
     $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
 
     $scope.$watch 'editing', (newValue) ->
       if newValue then $timeout -> $element.find('textarea').focus()
-
-    $scope.choose_privacy = (p) -> $scope.privacy = p
     	
     # Check if this is a brand new annotation
     if drafts.contains $scope.$modelValue

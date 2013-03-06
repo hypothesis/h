@@ -2,8 +2,9 @@
 <div data-ng-hide="editing" class="magicontrols">
   <span data-ng-bind="model.$viewValue.created | fuzzyTime | date:'mediumDate'"
         class="time" />
+
   <div class="vis-icon" title="Visibility"
-       data-ng-show="model.$viewValue.permissions.read | isPrivate" />
+       data-ng-show="model.$viewValue.privacy.name != 'Public'" />
   <div class="fave-icon show" title="Favorite"
        data-ng-click="favorite()" />
   <div class="show reply-icon" title="Reply"
@@ -21,25 +22,23 @@
 </div>
 
 <h3 data-ng-bind="model.$viewValue.user | userName" class="upper-left" />
-<form data-ng-show="editing" name="form">
-  
-  <div class="dropdown privacy"
-      data-ng-model="privacy">
-    <a role="button"
-      class="dropdown-toggle"
-      data-toggle="dropdown"
-      >{{privacy.name}}</a>
-    <ul class="dropdown-menu pull-right"
-        role="menu">
-      <li data-ng-repeat="p in privacyLevels" ng-click="choose_privacy(p)">
-        <a>{{p.name}}</a>
+<ng-form data-ng-show="editing" name="form">
+
+  <div class="dropdown privacy">
+    <a name="privacy"
+       role="button"
+       class="dropdown-toggle"
+       data-ng-model="model.$viewValue.privacy"
+       data-toggle="dropdown"
+       >{{model.$viewValue.privacy.name}}</a>
+    <ul class="dropdown-menu pull-right" role="menu">
+      <li data-ng-repeat="p in privacyLevels">
+        <a href="" data-ng-click="form.privacy.$setViewValue(p)">{{p.name}}</a>
       </li>
     </ul>
   </div>
 
-<!--   <select class="privacy" data-ng-model="privacy" ng-options="p.name for p in privacyLevels"></select> -->
-
-  <textarea data-ng-model="editText"
+  <textarea data-ng-model="model.$viewValue.text"
             class="body"
             name="text"
             required="" />
@@ -47,8 +46,8 @@
     <a href="https://en.wikipedia.org/wiki/Markdown"
        target="_blank">Markdown</a> is supported.
   </div>
-</form>
-<div data-ng-bind-html="model.$viewValue.text"
+</ng-form>
+<div data-ng-bind-html="model.$viewValue.body"
      data-ng-hide="editing"
      class="body" />
 
