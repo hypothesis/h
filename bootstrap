@@ -3,7 +3,7 @@
 if test -z "$VIRTUAL_ENV"; then
 	if test ! -e bin/activate; then
 		echo "Creating virtualenv..."
-		virtualenv --no-site-packages .
+		virtualenv --no-site-packages --distribute .
 	fi
 	echo "Entering virtualenv..."
 	. bin/activate
