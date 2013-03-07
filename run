@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 from distutils.core import run_setup
 from os import environ
-from os.path import exists, join
+from os.path import abspath, exists, join
 import sys
 
 
 if __name__ == '__main__':
     # If a virtual environment is present make sure it's being used.
     virtual_env = environ.get('VIRTUAL_ENV', '.')
-    activate = join(virtual_env, 'bin', 'activate_this.py')
+    activate = abspath(join(virtual_env, 'bin', 'activate_this.py'))
     if exists(activate):
-        execfile(activate, dict(__file__=activate))
+        with open(activate) as f:
+            code = compile(f.read(), activate, 'exec')
+            exec(code, {}, dict(__file__=activate))
 
     # If the distribution has not been set up for development, do so.
     if not environ.get('PYTHONSETUP'):
