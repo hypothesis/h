@@ -307,13 +307,6 @@ class Annotation
         conf = confirm "Are you sure you want to delete this annotation?"
         if conf  
           $scope.$modelValue.highlights = []
-          if annotator.plugins.Store?
-            thread = (threading.getContainer $scope.$modelValue.id)
-            if thread.parent
-              thread.message = null
-              threading.pruneEmpties thread.parent
-            else
-              delete threading.getIdTable()[$scope.$modelValue.id]
           annotator.deleteAnnotation $scope.$modelValue	
           #annotator.provider.deleteAnnotation $scope.$modelValue	
 
