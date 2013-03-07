@@ -20,8 +20,8 @@
   <div class="show dropdown" title="More Actions">
     <div class="dropdown-toggle down-icon" role="button" />
     <ul class="dropdown-menu pull-right" role="menu">
-      <li data-ng-click="edit()">Edit</li>
-      <li data-ng-click="delete()">Delete</li>
+      <li data-ng-show="ownAnnotation(model.$viewValue.user)" data-ng-click="edit()">Edit</li>
+      <li data-ng-show="ownAnnotation(model.$viewValue.user)" data-ng-click="delete()">Delete</li>
       <li data-ng-click="flag()">Flag</li>
     </ul>
   </div>
@@ -44,6 +44,9 @@
     </ul>
   </div>
 
+  <div class="body" data-ng-show="action == 'redact'" data-ng-bind-html="preface"/>
+  <div class="body" data-ng-show="action == 'redact'" data-ng-bind-html="quotedText"/>
+  <div class="body" data-ng-show="action == 'edit'" data-ng-bind-html="preface"/>
   <textarea data-ng-model="model.$viewValue.text"
             class="body"
             name="text"
@@ -60,7 +63,11 @@
 <!-- Bottom controls -->
 <div class="buttonbar">
   <div data-ng-show="editing" class="annotator-controls">
-    <button data-ng-click="save()" class="btn check-icon">Save</button>
+    <div data-ng-switch on="action">
+      <button data-ng-switch-when="edit" data-ng-click="save()" class="btn check-icon" >Edit</button>
+      <button data-ng-switch-when="delete" data-ng-click="save()" class="btn check-icon" >Delete</button>
+      <button data-ng-switch-default data-ng-click="save()" class="btn check-icon" >Save</button>
+    </div>
     <a data-ng-click="cancel()" class="x-icon">Cancel</a>
   </div>
 </div>

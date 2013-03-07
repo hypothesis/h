@@ -197,11 +197,11 @@ class App
 
 class Annotation
   this.$inject = [
-    '$element', '$location', '$scope', '$rootScope', '$timeout',
+    '$element', '$location', '$scope', '$rootScope', '$timeout', '$routeParams'
     'annotator', 'drafts', 'threading'
   ]
   constructor: (
-    $element, $location, $scope, $rootScope, $timeout
+    $element, $location, $scope, $rootScope, $timeout, $routeParams
     annotator, drafts, threading
   ) ->
     publish = (args...) ->
@@ -209,6 +209,7 @@ class Annotation
       # Annotator event callbacks don't expect a digest to be active
       $timeout (-> annotator.publish args...), 0, false
 
+    $scope.action = $routeParams.action
     $scope.privacyLevels = [
      {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
      {name: 'Private', permissions: { 'read': [] } }
@@ -251,6 +252,12 @@ class Annotation
 
       (threading.getContainer $scope.$modelValue.id).addChild replyThread
       drafts.add reply
+
+    $scope.edit = ->
+      0
+      
+    $scope.delete = ->
+      0
 
     $scope.getPrivacyLevel = (permissions) ->
       for level in $scope.privacyLevels
