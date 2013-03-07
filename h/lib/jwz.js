@@ -112,7 +112,7 @@
     return function() {
       var idTable = {};
 
-      function getIdTable() return idTable;
+      function getIdTable() { return idTable; }
       
       function thread(messages) {
         idTable = this.createIdTable(messages);
