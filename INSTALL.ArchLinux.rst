@@ -12,16 +12,9 @@ From the Arch User Repository (AUR), obtain::
 Due to ArchLinux idiosyncracies where python 2 and python 3 are concerned, you need to run the following 
 in the top directory (i.e., inside h/) for hypothesis to correctly use python 2::
 
-    sed -i 's|virtualenv |virtualenv2 --distribute |g' bootstrap
     sed -i 's|env python|env python2|' run
 
-NOTE: I added --distribute as flag to the command line of virtualenv because I got errors with the default "setuptools". YMMV
-
 DO NOT CHANGE references to "pip" in the bootstrap script to read "pip2" even if that is the executable that was installed above. Inside the virtualenv environment, "pip" is streated special, while "pip2" is ostensibly working until it tries to write to your global PYTHONPATH (which virtualenv is meant to prevent).
-
-If you want to see what is going during bootstrap, make the script more verbose by removing pipes to /dev/null::
-
-    sed -i 's|[12]> */dev/null||g' bootstrap
 
 Before executing bootstrap it may be advisable to set the "index-url" in the [global] section of ~/.pip/pip.conf to a fast pip-mirror close to you. The default pip server had some severe bandwidth constraints in my case.
 
