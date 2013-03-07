@@ -24,10 +24,10 @@ def bootstrap(cfname, config_fn=None):
     An optional function argument may be supplied. This function will be
     invoked with the bootstrapping environment.
     """
-    from pyramid.paster import bootstrap, setup_logging
+    from pyramid import paster
 
-    setup_logging(cfname)
-    env = bootstrap(cfname)
+    paster.setup_logging(cfname)
+    env = paster.bootstrap(cfname)
 
     try:
         if config_fn:
