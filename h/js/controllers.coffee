@@ -197,11 +197,11 @@ class App
 
 class Annotation
   this.$inject = [
-    '$element', '$location', '$scope', '$rootScope', '$timeout', '$routeParams'
+    '$element', '$location', '$scope', '$rootScope', '$timeout', '$routeParams', '$filter'
     'annotator', 'drafts', 'threading'
   ]
   constructor: (
-    $element, $location, $scope, $rootScope, $timeout, $routeParams
+    $element, $location, $scope, $rootScope, $timeout, $routeParams, $filter
     annotator, drafts, threading
   ) ->
     publish = (args...) ->
@@ -209,23 +209,48 @@ class Annotation
       # Annotator event callbacks don't expect a digest to be active
       $timeout (-> annotator.publish args...), 0, false
 
-    $scope.action = $routeParams.action
+    $scope.action = if $routeParams.action? then $routeParams.action else 'create'
     $scope.privacyLevels = [
      {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
      {name: 'Private', permissions: { 'read': [] } }
     ]
 
-    $scope.cancel = ->
+    if $scope.action is 'redact'
+      $scope.preface = ($filter 'converter') "**You are about to delete this annotation:**\n"
+      $scope.origText = $scope.$modelValue.text
+      $scope.origUser = $scope.$modelValue.user
+      $scope.$modelValue.text = ""
+      $scope.$modelValue.user = "acct:Delete annotation:@" + $scope.$modelValue.user.split(/(?:acct:)|@/)[2]
+    else 
+      if $scope.action is 'edit' and $scope.$modelValue?
+        $scope.editText = $scope.$modelValue.text
+        $scope.preface = ($filter 'converter') "**You are about to edit this annotation:**\n"
+
+    #delete $routeParams.action
+    $scope.cancel = ->      
+      if $scope.action is 'redact'
+        $scope.$modelValue.user = $scope.origUser
+        $scope.$modelValue.text = $scope.origText
+        publish 'annotationUpdated', $scope.$modelValue
       $scope.editing = false
       drafts.remove $scope.$modelValue
-      if $scope.unsaved
+      if $scope.action is 'create'
         publish 'annotationDeleted', $scope.$modelValue
 
     $scope.save = ->
-      $scope.editing = false
       $scope.model.$setViewValue $scope.model.$viewValue
+      if $scope.action is 'redact'
+        $scope.$modelValue.user = "acct:Annotation deleted.@" + $scope.$modelValue.user.split(/(?:acct:)|@/)[2]
+        $scope.$modelValue.created = new Date()
+
+        text =  if $scope.origText != $scope.$modelValue.text then $scope.$modelValue.text else ''
+        uses_emphasis = if not $scope.previewText? then false else $scope.previewText.text.indexOf("*") != -1
+        reason = if uses_emphasis then text else ("*" + text + "*")
+        $scope.$modelValue.text = if reason is "**" then "**(No reason given.)**" else "**Reason**: " + reason
+          
+      $scope.editing = false
       drafts.remove $scope.$modelValue
-      if $scope.unsaved
+      if $scope.action is 'create'
         publish 'annotationCreated', $scope.$modelValue
       else
         publish 'annotationUpdated', $scope.$modelValue
@@ -254,11 +279,51 @@ class Annotation
       drafts.add reply
 
     $scope.edit = ->
-      0
+      unless annotator.plugins.Auth.haveValidToken()
+        $rootScope.$broadcast 'showAuth', true
+        return
+
+      search =
+        id: $scope.$modelValue.id
+        action: 'edit'
+      $location.path('/editor').search(search)
       
     $scope.delete = ->
-      0
+      unless annotator.plugins.Auth.haveValidToken()
+        $rootScope.$broadcast 'showAuth', true
+        return
+      
+      replies = 0
+      if threading.getContainer($scope.$modelValue.id).children? 
+        replies = threading.getContainer($scope.$modelValue.id).children.length
+      #We can delete the annotation if it hasn't got any replies or it is private.
+      
+      if replies and $scope.model.$viewValue.privacy.name == 'Public'
+        search =
+          id: $scope.$modelValue.id
+          action: 'redact'
+        $location.path('/editor').search(search)
+      else
+        conf = confirm "Are you sure you want to delete this annotation?"
+        if conf  
+          $scope.$modelValue.highlights = []
+          if annotator.plugins.Store?
+            thread = (threading.getContainer $scope.$modelValue.id)
+            if thread.parent
+              thread.message = null
+              threading.pruneEmpties thread.parent
+            else
+              delete threading.getIdTable()[$scope.$modelValue.id]
+          annotator.deleteAnnotation $scope.$modelValue	
+          #annotator.provider.deleteAnnotation $scope.$modelValue	
 
+    $scope.ownAnnotation = (user) ->
+      if annotator.plugins.Permissions.user? and 
+          user == annotator.plugins.Permissions.user and 
+          user.split(/(?:acct:)|@/)[1] != 'Annotation deleted.'
+        return true
+      false
+      
     $scope.getPrivacyLevel = (permissions) ->
       for level in $scope.privacyLevels
         roleSet = {}
@@ -296,7 +361,6 @@ class Annotation
     # Check if this is a brand new annotation
     if drafts.contains $scope.$modelValue
       $scope.editing = true
-      $scope.unsaved = true
 
     $scope.directChildren = ->
       if $scope.$modelValue? and threading.getContainer($scope.$modelValue.id).children?
@@ -319,6 +383,8 @@ class Editor
   ) ->
     save = ->
       $scope.$apply ->
+        #search = $location.search() or {}
+        #delete search.action
         $location.path('/viewer').replace()
         annotator.provider.onEditorSubmit()
         annotator.provider.onEditorHide()
@@ -326,16 +392,27 @@ class Editor
     cancel = ->
       $scope.$apply ->
         search = $location.search() or {}
+        #delete search.action
         delete search.id
         $location.path('/viewer').search(search).replace()
         annotator.provider.onEditorHide()
 
-    annotator.subscribe 'annotationCreated', save
-    annotator.subscribe 'annotationDeleted', cancel
+    $scope.action = if $routeParams.action? then $routeParams.action else 'create'
+    if $scope.action is 'create'
+      annotator.subscribe 'annotationCreated', save
+      annotator.subscribe 'annotationDeleted', cancel
+    else 
+      if $scope.action is 'edit' or $scope.action is 'redact'
+        annotator.subscribe 'annotationUpdated', save
 
     $scope.$on '$destroy', ->
-      annotator.unsubscribe 'annotationCreated', save
-      annotator.unsubscribe 'annotationDeleted', cancel
+      #delete $routeParams.action
+      if $scope.action is 'edit' or $scope.action is 'redact'
+        annotator.unsubscribe 'annotationUpdated', save
+      else 
+        if $scope.action is 'create'
+          annotator.unsubscribe 'annotationCreated', save
+          annotator.unsubscribe 'annotationDeleted', cancel
 
     thread = (threading.getContainer $routeParams.id)
     annotation = thread.message?.annotation

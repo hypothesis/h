@@ -14,6 +14,7 @@
   <div class="fave-icon show" title="Favorite"
        data-ng-click="favorite()" />
   <div class="show reply-icon" title="Reply"
+       data-ng-show="model.$viewValue.user | notDeletedUser"
        data-ng-click="reply()" />
   <div class="show share-icon" title="Share"
        data-ng-click="share()" />
@@ -45,12 +46,21 @@
   </div>
 
   <div class="body" data-ng-show="action == 'redact'" data-ng-bind-html="preface"/>
-  <div class="body" data-ng-show="action == 'redact'" data-ng-bind-html="quotedText"/>
+  <div class="body" data-ng-show="action == 'redact'" data-ng-bind-html="origText | makeQuoteText"/>
   <div class="body" data-ng-show="action == 'edit'" data-ng-bind-html="preface"/>
-  <textarea data-ng-model="model.$viewValue.text"
-            class="body"
-            name="text"
-            required="" />
+  <ng-switch on="action">
+    <textarea data-ng-model="model.$viewValue.text"
+ 	        data-ng-switch-when="redact"
+           class="body"
+           name="text"
+           placeholder="Please explain why you're deleting this annotation"
+           required="" />
+    <textarea data-ng-model="model.$viewValue.text"
+ 	        data-ng-switch-default
+           class="body"
+           name="text"
+           required="" />
+  </ng-switch>
   <div class="tip">
     <a href="https://en.wikipedia.org/wiki/Markdown"
        target="_blank">Markdown</a> is supported.
@@ -63,11 +73,11 @@
 <!-- Bottom controls -->
 <div class="buttonbar">
   <div data-ng-show="editing" class="annotator-controls">
-    <div data-ng-switch on="action">
-      <button data-ng-switch-when="edit" data-ng-click="save()" class="btn check-icon" >Edit</button>
-      <button data-ng-switch-when="delete" data-ng-click="save()" class="btn check-icon" >Delete</button>
-      <button data-ng-switch-default data-ng-click="save()" class="btn check-icon" >Save</button>
-    </div>
+    <ng-switch on="action">
+        <button data-ng-switch-when="edit" data-ng-click="save()" class="btn check-icon" >Edit</button>
+        <button data-ng-switch-when="redact" data-ng-click="save()" class="btn check-icon" >Delete</button>
+        <button data-ng-switch-default data-ng-click="save()" class="btn check-icon" >Save</button>
+    </ng-switch>
     <a data-ng-click="cancel()" class="x-icon">Cancel</a>
   </div>
 </div>

@@ -38,8 +38,20 @@ fuzzyTime = (date) ->
 userName = (user) ->
   (user?.match /^acct:([^@]+)/)?[1]
 
-
+notDeletedUser = (user) ->
+  if user?
+    return user.split(/(?:acct:)|@/)[1] != 'Annotation deleted.'
+  false 
+  
+makeQuoteText = (text) ->
+  uses_emphasis = if not text? then false else text.indexOf("*") != -1
+  quotedText = if uses_emphasis then text else "*" + text + "*"
+  quotedText = (new Converter()).makeHtml quotedText
+  #quotedText	  
+ 
 angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
+  .filter('notDeletedUser', -> notDeletedUser)
+  .filter('makeQuoteText', -> makeQuoteText)

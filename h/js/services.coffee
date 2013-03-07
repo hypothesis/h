@@ -45,13 +45,25 @@ class Hypothesis extends Annotator
         writable: true
         value: true
 
+      search = $location.search()
+      delete search.action
+      #if $location.path() is '/editor'
+      #  $location.path('/viewer').replace()
+
     # Update threads when annotations are deleted
     this.subscribe 'annotationDeleted', (annotation) =>
-      $rootScope.$apply ->
+      $rootScope.$apply =>
         thread = threading.getContainer annotation.id
         thread.message = null
         if thread.parent then threading.pruneEmpties thread.parent
-
+        @provider.deleteAnnotation annotation
+        search = $location.search()
+        if search.id and not annotation.thread
+          delete search.id
+        delete search.action
+        if $location.path() is '/editor'
+          $location.path('/viewer').replace()
+          
     # Thread the annotations after loading
     this.subscribe 'annotationsLoaded', (annotations) =>
       $rootScope.$apply ->
@@ -67,6 +79,8 @@ class Hypothesis extends Annotator
           annotation: annotation
           id: annotation.id
           references: annotation.thread?.split '/'
+        search = $location.search()
+        delete search.action
 
     # Update the heatmap when the host is updated or annotations are loaded
     heatmap = @plugins.Heatmap
@@ -327,9 +341,11 @@ class Hypothesis extends Annotator
     @element.injector().invoke [
       '$location',
       ($location) ->
-        $location.path('/editor')
-        .search
+        search =
           id: annotation.id
+          action: 'create'
+        $location.path('/editor')
+        .search(search)
         .replace()
     ]
 
