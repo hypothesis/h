@@ -12,7 +12,7 @@ fi
 echo "Checking dependencies..."
 diff -q requirements.txt .installed.txt 2> /dev/null || {
 	echo "Installing dependencies..."
-	pip install -r requirements.txt 1>/dev/null
+	pip install -r requirements.txt
 	cp requirements.txt .installed.txt
 }
 
