@@ -12,7 +12,6 @@ Install python::
 Install virtualenv::
     
     $ pip install virtualenv
-    $ sudo ln /usr/local/share/python/virtualenv /usr/bin/virtualenv
 
 Install Node and other required tools::
 
@@ -24,9 +23,8 @@ Install Node and other required tools::
 
 Add the tools' path to the $PATH variable::
 
-    $ vim ~/.profile
-    $ add '/usr/local/share/npm/bin' to the PATH variable e.g. export PATH=/usr/local/share/npm/bin:/usr/local/bin:$PATH
-    $ source ~/.profile
+    $ echo "export PATH=/usr/local/share/python:$PATH" >> ~/.profile
+    $ echo "export PATH=/usr/local/share/npm/bin:$PATH" >> ~/.profile
 
 Install Elasticsearch::
 
