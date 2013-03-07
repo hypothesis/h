@@ -1,14 +1,28 @@
 #!/usr/bin/env python
 from distutils.core import run_setup
 from os import environ
-from os.path import abspath, exists, join
+from os.path import abspath, dirname, exists, join
 import sys
 
+VIRTUAL_ENV_WARNING = """
+Please be sure to deactivate the python virtual environment and run this script
+again.
+
+The offending virtual environment is '%s'.
+"""
 
 if __name__ == '__main__':
-    # If a virtual environment is present make sure it's being used.
-    virtual_env = environ.get('VIRTUAL_ENV', '.')
-    activate = abspath(join(virtual_env, 'bin', 'activate_this.py'))
+    # Make sure a virtual environment is not active.
+    if 'VIRTUAL_ENV' in environ:
+        print VIRTUAL_ENV_WARNING % environ['VIRTUAL_ENV']
+        exit(1)
+
+    # Activate the virtual environment if it is present.
+    # While this may seem to contradict the check above, the python activation
+    # does a better job than the shell script at prioritizing the virtual site
+    # packages. Activating with the shell script can lead to issues with
+    # system-wide modules in namespace packages (such as zope.interface).
+    activate = abspath(join(dirname(__file__), 'bin', 'activate_this.py'))
     if exists(activate):
         with open(activate) as f:
             code = compile(f.read(), activate, 'exec')

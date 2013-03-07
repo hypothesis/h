@@ -11,6 +11,8 @@ else
 You appear to have a python virtual environment activated. This
 script is not designed to work unless this directory (or no
 directory) is an active python virtual environment.
+
+The offending virtual environment is '$VIRTUAL_ENV'.
 "
 		exit 1
 	fi
