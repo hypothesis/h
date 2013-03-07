@@ -204,7 +204,7 @@ class Annotation
     $element, $location, $scope, $rootScope, $timeout
     annotator, drafts, threading
   ) ->
-    publish = (args...) ->
+    publish_ = (args...) ->
       # Publish after a timeout to escape this digest
       # Annotator event callbacks don't expect a digest to be active
       $timeout (-> annotator.publish args...), 0, false
@@ -218,16 +218,16 @@ class Annotation
       $scope.editing = false
       drafts.remove $scope.$modelValue
       if $scope.unsaved
-        publish 'annotationDeleted', $scope.$modelValue
+        publish_ 'annotationDeleted', $scope.$modelValue
 
     $scope.save = ->
       $scope.editing = false
       $scope.model.$setViewValue $scope.model.$viewValue
       drafts.remove $scope.$modelValue
       if $scope.unsaved
-        publish 'annotationCreated', $scope.$modelValue
+        publish_ 'annotationCreated', $scope.$modelValue
       else
-        publish 'annotationUpdated', $scope.$modelValue
+        publish_ 'annotationUpdated', $scope.$modelValue
 
     $scope.reply = ->
       unless annotator.plugins.Auth? and annotator.plugins.Auth.haveValidToken()
