@@ -113,7 +113,7 @@ class Hypothesis extends Annotator
                   thread.message = null
                   threading.pruneEmpties thread.parent
                 else
-                  delete threading.idTable[annotation.id]
+                  delete threading.getIdTable()[annotation.id]
 
                 # Create the new thread
                 thread = (threading.getContainer data.id)

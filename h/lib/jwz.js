@@ -111,7 +111,9 @@
   function messageThread() {
     return function() {
       var idTable = {};
-    
+
+      function getIdTable() return idTable;
+      
       function thread(messages) {
         idTable = this.createIdTable(messages);
         var root = messageContainer();
@@ -269,7 +271,7 @@
         pruneEmpties: pruneEmpties,
         groupBySubject: groupBySubject,
         thread: thread,
-        idTable: idTable
+        getIdTable: getIdTable
       }
     }();
   }

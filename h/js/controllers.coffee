@@ -157,7 +157,7 @@ class App
             thread.message = null
             threading.pruneEmpties thread.parent
           else
-            delete threading.idTable[annotation.id]
+            delete threading.getIdTable()[annotation.id]
         annotator.plugins.Store.loadAnnotations()
 
     $scope.$watch 'visible', (newValue) ->
