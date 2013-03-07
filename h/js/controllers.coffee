@@ -359,9 +359,6 @@ class Viewer
           plugins.Heatmap.subscribe 'updated', refresh
           listening = true
 
-    $scope.detail = false
-    $scope.thread = null
-
     $scope.showDetail = (annotation) ->
       search = $location.search() or {}
       search.id = annotation.id
