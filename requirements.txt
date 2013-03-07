@@ -21,7 +21,6 @@ colander==0.9.8
 cryptacular==1.4.1
 deform==0.9.5
 deform-bootstrap==0.2.2
-distribute==0.6.28
 hem==0.3.2
 -e git+https://github.com/eventray/horus.git@0cd44871d20d10038e77080c894ea1a10298ecac#egg=horus-dev
 httplib2==0.7.4
