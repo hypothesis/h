@@ -16,6 +16,9 @@ diff -q requirements.txt .installed.txt 2> /dev/null || {
 	cp requirements.txt .installed.txt
 }
 
+echo -n "Setting up development links..."
+python setup.py develop
+
 echo -n "Checking for Compass..."
 command -v compass || echo "...not found!"
 
