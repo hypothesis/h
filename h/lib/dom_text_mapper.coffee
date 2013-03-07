@@ -4,6 +4,7 @@ class window.DomTextMapper
   USE_TABLE_TEXT_WORKAROUND = true
   USE_OL_WORKAROUND = true
   USE_CAPTION_WORKAROUND = true
+  USE_EMPTY_TEXT_WORKAROUND = true
   CONTEXT_LEN = 32
 
   @instances: []
@@ -92,7 +93,7 @@ class window.DomTextMapper
     @path = {}
     @collectPathsForNode @pathStartNode
     t1 = @timestamp()
-    console.log "Path traversal took " + (t1 - startTime) + " ms."
+    console.log "Phase I (Path traversal) took " + (t1 - startTime) + " ms."
 
     path = @getPathTo @pathStartNode
     node = @path[path].node
@@ -103,7 +104,7 @@ class window.DomTextMapper
 #    console.log "Corpus is: " + @corpus
 
     t2 = @timestamp()    
-    console.log "Phase II of data collecting " + (t2 - t1) + " ms."
+    console.log "Phase II (offset calculation) took " + (t2 - t1) + " ms."
 
     @path
  
@@ -465,13 +466,19 @@ class window.DomTextMapper
         # This is a text element that should not even be here.
         # Selecting it might select the whole table,
         # so we don't select anything
-
       else
-        range.setStartBefore node
-        range.setEndAfter node
-        sel.addRange range
-
-
+        # Normal element, should be selected
+        try
+          range.setStartBefore node
+          range.setEndAfter node
+          sel.addRange range
+        catch exception
+          # This might be caused by the fact that FF can't select a
+          # TextNode containing only whitespace.
+          # If this is the case, then it's OK.
+          unless USE_EMPTY_TEXT_WORKAROUND and @isWhitespace node
+            # No, this is not the case. Then this is an error.
+            throw exception
     if scroll
       sn = node
       while not sn.scrollIntoViewIfNeeded?
@@ -502,6 +509,7 @@ class window.DomTextMapper
 #    console.log match.element.node.data
 
     # the HTML source of the text inside a text element.
+#    console.log "Calculating source position at " + match.element.path
     sourceText = match.element.node.data.replace /\n/g, " "
 #    console.log "sourceText is '" + sourceText + "'"
 
@@ -513,6 +521,12 @@ class window.DomTextMapper
     displayStart = if match.start? then match.start else 0
     displayEnd = if match.end? then match.end else displayText.length
 #    console.log "Display range is: " + displayStart + "-" + displayEnd
+
+    if displayEnd is 0
+      # Handle empty text nodes  
+      match.startCorrected = 0
+      match.endCorrected = 0
+      return
 
     sourceIndex = 0
     displayIndex = 0
@@ -561,12 +575,12 @@ class window.DomTextMapper
     content = pathInfo?.content
 
     if not content? or content is ""
-      # node has no content
+      # node has no content, not interesting
       pathInfo.start = parentIndex + index
       pathInfo.end = parentIndex + index
-      pathInfo.atomic = true
+      pathInfo.atomic = false
       return index
-        
+
     startIndex = if parentContent? then (parentContent.indexOf content, index) else index
     if startIndex is -1
        # content of node is not present in parent's content - probably hidden, or something similar
@@ -597,3 +611,8 @@ class window.DomTextMapper
 
     endIndex
 
+  WHITESPACE = /^\s*$/
+
+  # Decides whether a given node is a text node that only contains whitespace
+  isWhitespace: (node) ->
+    node.nodeType is Node.TEXT_NODE and WHITESPACE.test node.data

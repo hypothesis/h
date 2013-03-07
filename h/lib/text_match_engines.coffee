@@ -102,7 +102,8 @@ class window.DTM_DMPMatcher
   #
   # If no match is found, the function returns null.
   search: (text, pattern, expectedStartLoc = 0) ->
-    unless expectedStartLoc >= 0 then throw new Error "Can't search at negavive indices!"
+#    console.log "In dtm search. text: '" + text + "', pattern: '" + pattern + "', expectedStartLoc: " + expectedStartLoc
+    if expectedStartLoc < 0 then throw new Error "Can't search at negative indices!"
 
     unless @caseSensitive
       text = text.toLowerCase()
@@ -152,12 +153,13 @@ class window.DTM_DMPMatcher
 #      else
 #        console.log "startSlice ('" + startSlice + "') not found"
 
-    return results
+    results
 
   # ============= Private part ==========================================
   # You don't need to call the functions below this point manually
 
   searchForSlice: (text, slice, expectedStartLoc) ->
+#    console.log "searchForSlice: '" + text + "', '" + slice + "', " + expectedStartLoc
 
     r1 = @dmp.match_main text, slice, expectedStartLoc
     startIndex = r1.index
@@ -176,7 +178,7 @@ class window.DTM_DMPMatcher
     lev = @dmp.diff_levenshtein diff
     @dmp.diff_cleanupSemantic diff
 
-    result = [{
+    result = [
       start: startIndex
       end: endIndex
       data:
@@ -184,5 +186,4 @@ class window.DTM_DMPMatcher
         levenshtein: lev
       hiddenData:
         diff: @dmp.diff_prettyHtml diff
-    }]
-
+    ]
