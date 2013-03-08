@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-a12bec5
+** Annotator 1.2.5-dev-f6372c3
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-04 09:58:20Z
+** Built at: 2013-03-08 18:04:18Z
 */
 
 (function() {
@@ -336,7 +336,7 @@
     }
 
     BrowserRange.prototype.normalize = function(root) {
-      var it, node, nr, offset, p, r, _k, _len3, _ref2;
+      var isImg, it, node, nr, offset, p, r, _k, _len3, _ref2;
       if (this.tainted) {
         console.error(_t("You may only call normalize() once on a BrowserRange!"));
         return false;
@@ -353,26 +353,34 @@
         if (node.nodeType === 1) {
           it = node.childNodes[offset];
           node = it || node.childNodes[offset - 1];
-          if (node.nodeType === 1 && !node.firstChild) {
-            it = null;
-            node = node.previousSibling;
+          isImg = node.nodeType === 1 && node.tagName.toLowerCase() === "img";
+          if (isImg) {
+            offset = 0;
+          } else {
+            if (node.nodeType === 1 && !node.firstChild && !isImg) {
+              it = null;
+              node = node.previousSibling;
+            }
+            while (node.nodeType !== 3) {
+              node = node.firstChild;
+            }
+            offset = it ? 0 : node.nodeValue.length;
           }
-          while (node.nodeType !== 3) {
-            node = node.firstChild;
-          }
-          offset = it ? 0 : node.nodeValue.length;
         }
         r[p] = node;
         r[p + 'Offset'] = offset;
+        r[p + 'Img'] = isImg;
       }
       nr.start = r.startOffset > 0 ? r.start.splitText(r.startOffset) : r.start;
-      if (r.start === r.end) {
+      if (!r.startImg && r.start === r.end) {
         if ((r.endOffset - r.startOffset) < nr.start.nodeValue.length) {
           nr.start.splitText(r.endOffset - r.startOffset);
         }
         nr.end = nr.start;
       } else {
-        if (r.endOffset < r.end.nodeValue.length) r.end.splitText(r.endOffset);
+        if (!r.endImg && r.endOffset < r.end.nodeValue.length) {
+          r.end.splitText(r.endOffset);
+        }
         nr.end = r.end;
       }
       nr.commonAncestor = this.commonAncestorContainer;
@@ -428,7 +436,7 @@
     NormalizedRange.prototype.serialize = function(root, ignoreSelector) {
       var end, serialization, start;
       serialization = function(node, isEnd) {
-        var n, nodes, offset, origParent, textNodes, xpath, _k, _len3;
+        var isImg, n, nodes, offset, origParent, textNodes, xpath, _k, _len3;
         if (ignoreSelector) {
           origParent = $(node).parents(":not(" + ignoreSelector + ")").eq(0);
         } else {
@@ -442,7 +450,8 @@
           n = nodes[_k];
           offset += n.nodeValue.length;
         }
-        if (isEnd) {
+        isImg = node.nodeType === 1 && node.tagName.toLowerCase() === "img";
+        if (isEnd && !isImg) {
           return [xpath, offset + node.nodeValue.length];
         } else {
           return [xpath, offset];
@@ -479,7 +488,7 @@
       return $.makeArray(textNodes.slice(start, end + 1 || 9e9));
     };
 
-    NormalizedRange.prototype.toRange = function() {
+    NormalizedRange.prototype.toRealRange = function() {
       var range;
       range = document.createRange();
       range.setStartBefore(this.start);
@@ -770,9 +779,9 @@
       return sr.normalize(this.wrapper[0]);
     };
 
-    Annotator.prototype.getXPathRangeSelectorFromRange = function(range) {
+    Annotator.prototype.getXPathRangeSelectorFromMagicRange = function(magicRange) {
       var selector, sr;
-      sr = range.serialize(this.wrapper[0]);
+      sr = magicRange.serialize(this.wrapper[0]);
       return selector = {
         source: this.getHref(),
         type: "xpath range",
@@ -783,12 +792,12 @@
       };
     };
 
-    Annotator.prototype.getContextQuoteSelectorFromRange = function(range) {
+    Annotator.prototype.getContextQuoteSelectorFromMagicRange = function(magicRange) {
       var endOffset, prefix, quote, selector, startOffset, suffix, _ref2;
-      startOffset = (this.domMapper.getInfoForNode(range.start)).start;
-      endOffset = (this.domMapper.getInfoForNode(range.end)).end;
-      quote = this.domMapper.getContentForRange(startOffset, endOffset);
-      _ref2 = this.domMapper.getContextForRange(startOffset, endOffset), prefix = _ref2[0], suffix = _ref2[1];
+      startOffset = (this.domMapper.getInfoForNode(magicRange.start)).start;
+      endOffset = (this.domMapper.getInfoForNode(magicRange.end)).end;
+      quote = this.domMapper.getContentForCharRange(startOffset, endOffset);
+      _ref2 = this.domMapper.getContextForCharRange(startOffset, endOffset), prefix = _ref2[0], suffix = _ref2[1];
       return selector = {
         source: this.getHref(),
         type: "context+quote",
@@ -798,10 +807,10 @@
       };
     };
 
-    Annotator.prototype.getPositionSelectorFromRange = function(range) {
+    Annotator.prototype.getPositionSelectorFromMagicRange = function(magicRange) {
       var endOffset, selector, startOffset;
-      startOffset = (this.domMapper.getInfoForNode(range.start)).start;
-      endOffset = (this.domMapper.getInfoForNode(range.end)).end;
+      startOffset = (this.domMapper.getInfoForNode(magicRange.start)).start;
+      endOffset = (this.domMapper.getInfoForNode(magicRange.end)).end;
       return selector = {
         source: this.getHref(),
         type: "position",
@@ -817,7 +826,7 @@
     };
 
     Annotator.prototype.getSelectedTargets = function() {
-      var browserRange, i, normedRange, r, rangesToIgnore, selection, t, targets, _k, _len3,
+      var browserRange, i, normedRange, rangesToIgnore, realRange, selection, t, targets, _k, _len3,
         _this = this;
       selection = util.getGlobal().getSelection();
       targets = [];
@@ -827,13 +836,13 @@
           var _ref2, _results;
           _results = [];
           for (i = 0, _ref2 = selection.rangeCount; 0 <= _ref2 ? i < _ref2 : i > _ref2; 0 <= _ref2 ? i++ : i--) {
-            r = selection.getRangeAt(i);
-            browserRange = new Range.BrowserRange(r);
+            realRange = selection.getRangeAt(i);
+            browserRange = new Range.BrowserRange(realRange);
             normedRange = browserRange.normalize().limit(this.wrapper[0]);
             if (normedRange === null) rangesToIgnore.push(r);
             _results.push(t = {
               id: "",
-              selector: [this.getXPathRangeSelectorFromRange(normedRange), this.getContextQuoteSelectorFromRange(normedRange), this.getPositionSelectorFromRange(normedRange)]
+              selector: [this.getXPathRangeSelectorFromMagicRange(normedRange), this.getContextQuoteSelectorFromMagicRange(normedRange), this.getPositionSelectorFromMagicRange(normedRange)]
             });
           }
           return _results;
@@ -841,17 +850,17 @@
         selection.removeAllRanges();
       }
       for (_k = 0, _len3 = rangesToIgnore.length; _k < _len3; _k++) {
-        r = rangesToIgnore[_k];
-        selection.addRange(r);
+        realRange = rangesToIgnore[_k];
+        selection.addRange(realRange);
       }
       return $.grep(targets, function(target) {
-        var mySelector, range;
+        var magicRange, mySelector;
         mySelector = _this.findSelector(target.selector, "xpath range");
         if (mySelector != null) {
-          range = _this.getNormalizedRangeFromXPathRangeSelector(mySelector);
+          magicRange = _this.getNormalizedRangeFromXPathRangeSelector(mySelector);
         }
-        if (range) selection.addRange(range.toRange());
-        return range;
+        if (magicRange != null) selection.addRange(magicRange.toRealRange());
+        return magicRange;
       });
     };
 
@@ -872,18 +881,18 @@
     };
 
     Annotator.prototype.findAnchorFromXPathRangeSelector = function(target) {
-      var currentQuote, endInfo, endOffset, nRange, savedQuote, selector, startInfo, startOffset;
+      var currentQuote, endInfo, endOffset, normalizedRange, savedQuote, selector, startInfo, startOffset;
       selector = this.findSelector(target.selector, "xpath range");
       if (selector == null) return null;
       try {
-        nRange = this.getNormalizedRangeFromXPathRangeSelector(selector);
+        normalizedRange = this.getNormalizedRangeFromXPathRangeSelector(selector);
         savedQuote = this.getQuoteForTarget(target);
         if (savedQuote != null) {
-          startInfo = this.domMapper.getInfoForNode(nRange.start);
+          startInfo = this.domMapper.getInfoForNode(normalizedRange.start);
           startOffset = startInfo.start;
-          endInfo = this.domMapper.getInfoForNode(nRange.end);
+          endInfo = this.domMapper.getInfoForNode(normalizedRange.end);
           endOffset = endInfo.end;
-          currentQuote = this.domMapper.getContentForRange(startOffset, endOffset);
+          currentQuote = this.domMapper.getContentForCharRange(startOffset, endOffset);
           if (currentQuote !== savedQuote) {
             console.log("Could not apply XPath selector to current document, because the quote has changed. (Saved quote is '" + savedQuote + "', current quote is '" + currentQuote + "'.)");
             return null;
@@ -893,7 +902,7 @@
         } else {
 
         }
-        return nRange;
+        return normalizedRange;
       } catch (exception) {
         if (exception instanceof Range.RangeError) {
           console.log("Could not apply XPath selector to current document. Structure must have changed.");
@@ -911,7 +920,7 @@
       savedQuote = this.getQuoteForTarget(target);
       if (savedQuote != null) {
         savedQuote = this.getQuoteForTarget(target);
-        currentQuote = this.domMapper.getContentForRange(selector.start, selector.end);
+        currentQuote = this.domMapper.getContentForCharRange(selector.start, selector.end);
         if (currentQuote !== savedQuote) {
           console.log("Could not apply position selector to current document, because the quote has changed. (Saved quote is '" + savedQuote + "', current quote is '" + currentQuote + "'.)");
           return null;
@@ -921,8 +930,8 @@
       } else {
 
       }
-      mappings = this.domMapper.getMappingsForRange(selector.start, selector.end);
-      browserRange = new Range.BrowserRange(mappings.range);
+      mappings = this.domMapper.getMappingsForCharRange(selector.start, selector.end);
+      browserRange = new Range.BrowserRange(mappings.realRange);
       return browserRange.normalize();
     };
 
@@ -941,7 +950,7 @@
       if (!match.exact) {
         console.log("Using fuzzy matching, found '" + match.found + "', instead of '" + quote + "'.");
       }
-      browserRange = new Range.BrowserRange(match.range);
+      browserRange = new Range.BrowserRange(match.realRange);
       return browserRange.normalize();
     };
 

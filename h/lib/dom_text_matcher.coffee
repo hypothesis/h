@@ -169,7 +169,7 @@ class window.DomTextMatcher
     for match in textMatches
       do (match) =>
         analysis = @analyzeMatch pattern, match
-        mappings = @mapper.getMappingsForRange match.start, match.end
+        mappings = @mapper.getMappingsForCharRange match.start, match.end
         newMatch = $.extend {}, match, analysis, mappings
         matches.push newMatch
         null

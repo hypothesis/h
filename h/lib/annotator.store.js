@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-a12bec5
+** Annotator 1.2.5-dev-f6372c3
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-04 18:10:13Z
+** Built at: 2013-03-08 17:56:18Z
 */
 
 (function() {
@@ -88,6 +88,7 @@
         _this = this;
       if (__indexOf.call(this.annotations, annotation) >= 0) {
         quote = annotation.quote;
+        delete annotation.quote;
         return this._apiRequest('update', annotation, (function(data) {
           annotation.quote = quote;
           return _this.updateAnnotation(annotation, data);

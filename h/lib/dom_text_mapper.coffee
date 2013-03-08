@@ -91,13 +91,13 @@ class window.DomTextMapper
     startTime = @timestamp()
     @saveSelection()
     @path = {}
-    @collectPathsForNode @pathStartNode
+    @traverseSubTree @pathStartNode
     t1 = @timestamp()
     console.log "Phase I (Path traversal) took " + (t1 - startTime) + " ms."
 
     path = @getPathTo @pathStartNode
     node = @path[path].node
-    @collectStrings node, path, null, 0, 0
+    @collectPositions node, path, null, 0, 0
     @restoreSelection()
     @lastScanned = @timestamp()
     @corpus = @path[path].content
@@ -111,6 +111,7 @@ class window.DomTextMapper
   # Select the given path (for visual identification), and optionally scroll to it
   selectPath: (path, scroll = false) ->
     info = @path[path]
+    unless info? then throw new Error "I have no info about a node at " + path
     node = info?.node
     node or= @lookUpNode info.path
     @selectNode node, scroll
@@ -144,20 +145,23 @@ class window.DomTextMapper
         delete @path[p]        
         
 #      console.log "Done. Collecting new path info..."
-      @collectPathsForNode node
+      @traverseSubTree node
 
 #      console.log "Done. Updating mappings..."
 
       if pathInfo.node is @pathStartNode
         console.log "Ended up rescanning the whole doc."
-        @collectStrings node, path, null, 0, 0
+        @collectPositions node, path, null, 0, 0
       else
         parentPath = @parentPath path
         parentPathInfo = @path[parentPath]
         unless parentPathInfo?
           throw new Error "While performing update on node " + path + ", no path info found for parent path: " + parentPath
-        oldIndex = @path[path].start - parentPathInfo.start
-        @collectStrings node, path, parentPathInfo.content, parentPathInfo.start, oldIndex
+        oldIndex = if node is node.parentNode.firstChild
+          0
+        else
+          @path[@getPathTo node.previousSibling].end - parentPathInfo.start
+        @collectPositions node, path, parentPathInfo.content, parentPathInfo.start, oldIndex
         
 #      console.log "Data update took " + (@timestamp() - startTime) + " ms."
 
@@ -188,13 +192,13 @@ class window.DomTextMapper
   # Return info for a given node in the DOM
   getInfoForNode: (node) -> @getInfoForPath @getPathTo node
 
-  # Get the matching DOM elements for a given set of text ranges
-  # (Calles getMappingsForRange for each element in the givenl ist)
-  getMappingsForRanges: (ranges) ->
-#    console.log "Ranges:"
-#    console.log ranges
-    (for range in ranges
-      mapping = @getMappingsForRange range.start, range.end
+  # Get the matching DOM elements for a given set of charRanges
+  # (Calles getMappingsForCharRange for each element in the givenl ist)
+  getMappingsForCharRanges: (charRanges) ->
+#    console.log "charRanges:"
+#    console.log charRanges
+    (for charRange in charRanges
+      mapping = @getMappingsForCharRange charRange.start, charRange.end
     )
 
   # Return the rendered value of a part of the dom.
@@ -211,15 +215,15 @@ class window.DomTextMapper
 
   getDocLength: -> @getLengthForPath()
 
-  # Return a given range of the rendered value of a part of the dom.
+  # Return a given charRange of the rendered value of a part of the dom.
   # If path is not given, the default path is used.
-  getContentForRange: (start, end, path = null) ->
+  getContentForCharRange: (start, end, path = null) ->
     text = @getContentForPath(path).substr start, end - start
     text.trim()
 
-  # Get the context that encompasses the given text range
+  # Get the context that encompasses the given charRange
   # in the rendered text of the document
-  getContextForRange: (start, end, path = null) ->
+  getContextForCharRange: (start, end, path = null) ->
     content = @getContentForPath path
     prefixStart = Math.max 0, start - CONTEXT_LEN
     prefixLen = start - prefixStart
@@ -227,63 +231,75 @@ class window.DomTextMapper
     suffix = content.substr end, prefixLen
     [prefix.trim(), suffix.trim()]
         
-  # Get the matching DOM elements for a given text range
+  # Get the matching DOM elements for a given charRange
   # 
   # If the "path" argument is supplied, scan is called automatically.
   # (Except if the supplied path is the same as the last scanned path.)
-  getMappingsForRange: (start, end) ->
+  getMappingsForCharRange: (start, end) ->
     unless (start? and end?) then throw new Error "start and end is required!"    
-#    console.log "Collecting matches for [" + start + ":" + end + "]"
+#    console.log "Collecting nodes for [" + start + ":" + end + "]"
     @scan()
 
-    # Collect the matching mappings
+    # Collect the matching path infos
 #    console.log "Collecting mappings"
-    matches = []
-    for p, mapping of @path when mapping.atomic and @regions_overlap mapping.start, mapping.end, start, end
-      do (mapping) =>
-#        console.log "Checking " + mapping.path
-#        console.log mapping
-        match =
-          element: mapping
-        full_match = start <= mapping.start and mapping.end <= end
-        if full_match 
-          match.full = true
-          match.wanted = mapping.content
-        else
-         if start <= mapping.start
-            match.end = end - mapping.start
-            match.wanted = mapping.content.substr 0, match.end                
-          else if mapping.end <= end
-            match.start = start - mapping.start
-            match.wanted = mapping.content.substr match.start        
-          else
-            match.start = start - mapping.start
-            match.end = end - mapping.start
-            match.wanted = mapping.content.substr match.start, match.end - match.start
-        
-        @computeSourcePositions match
-        match.yields = mapping.node.data.substr match.startCorrected, match.endCorrected - match.startCorrected
-        matches.push match
-#        console.log "Done with " + mapping.path
+    mappings = []
+    for p, info of @path when info.atomic and @regions_overlap info.start, info.end, start, end
+      do (info) =>
+#        console.log "Checking " + info.path
+#        console.log info
+        mapping =
+          element: info
 
-    if matches.length is 0
-#      console.log "Wanted: [" + start + ":" + end + "], found: "
-#      f = ((start: mapping.start, end: mapping.end) for p, mapping of @mappings when mapping.atomic)
-#      console.log f
-#      console.log "[" + mapping.start + ":" + mapping.end + "]" for p, mapping of @mappings when mapping.atomic
-      throw new Error "No matches found for [" + start + ":" + end + "]!"
+        full = start <= info.start and info.end <= end
+        if full
+          mapping.full = true
+          mapping.wanted = info.content
+          mapping.startCorrected = 0
+          mapping.endCorrected = 0
+        else
+          if info.node.nodeType is Node.TEXT_NODE        
+            if start <= info.start
+              mapping.end = end - info.start
+              mapping.wanted = info.content.substr 0, mapping.end                
+            else if info.end <= end
+              mapping.start = start - info.start
+              mapping.wanted = info.content.substr mapping.start        
+            else
+              mapping.start = start - info.start
+              mapping.end = end - info.start
+              mapping.wanted = info.content.substr mapping.start, mapping.end - mapping.start
+     
+            @computeSourcePositions mapping
+            mapping.yields = info.node.data.substr mapping.startCorrected, mapping.endCorrected - mapping.startCorrected
+          else if (info.node.nodeType is Node.ELEMENT_NODE) and
+              (info.node.tagName.toLowerCase() is "img")
+            console.log "Can not select a sub-string from the title of an image. Selecting all."
+            mapping.full = true
+            mapping.wanted = info.content
+          else
+            console.log "Warning: no idea how to handle partial mappings for node type " + info.node.nodeType
+            if info.node.tagName? then console.log "Tag: " + info.node.tagName
+            console.log "Selecting all."
+            mapping.full = true
+            mapping.wanted = info.content
+
+        mappings.push mapping
+#        console.log "Done with " + info.path
+
+    if mappings.length is 0
+      throw new Error "No mappings found for [" + start + ":" + end + "]!"
 
         
     # Create a DOM range object
 #    console.log "Building range..."
     r = @rootWin.document.createRange()
-    startMatch = matches[0]
-#    console.log "StartMatch is: "
-#    console.log startMatch
-    startNode = startMatch.element.node
-    startPath = startMatch.element.path
-    startOffset = startMatch.startCorrected
-    if startMatch.full
+    startMapping = mappings[0]
+#    console.log "StartMapping is: "
+#    console.log startMapping
+    startNode = startMapping.element.node
+    startPath = startMapping.element.path
+    startOffset = startMapping.startCorrected
+    if startMapping.full
 #      console.log "Calling range.setStartBefore <" + startPath + ">..."
 #      console.log startNode
       r.setStartBefore startNode
@@ -294,13 +310,13 @@ class window.DomTextMapper
       r.setStart startNode, startOffset
       startInfo = startPath + ":" + startOffset
 
-    endMatch = matches[matches.length - 1]
-#    console.log "endMatch is: "
-#    console.log endMatch
-    endNode = endMatch.element.node
-    endPath = endMatch.element.path
-    endOffset = endMatch.endCorrected
-    if endMatch.full
+    endMapping = mappings[mappings.length - 1]
+#    console.log "endMapping is: "
+#    console.log endMapping
+    endNode = endMapping.element.node
+    endPath = endMapping.element.path
+    endOffset = endMapping.endCorrected
+    if endMapping.full
 #      console.log "Calling range.setEndAfter <" + endPath + ">..."
 #      console.log endNode
       r.setEndAfter endNode
@@ -315,8 +331,8 @@ class window.DomTextMapper
 #    console.log r
 
     result = {
-      nodes: matches
-      range: r
+      mappings: mappings
+      realRange: r
       rangeInfo:
         startPath: startPath
         startOffset: startOffset
@@ -334,6 +350,7 @@ class window.DomTextMapper
   timestamp: -> new Date().getTime()
 
   stringStartsWith: (string, prefix) -> prefix is string.substr 0, prefix.length
+  stringEndsWith: (string, suffix) -> suffix is string.substr string.length - suffix.length
 
   parentPath: (path) -> path.substr 0, path.lastIndexOf "/"
 
@@ -366,8 +383,8 @@ class window.DomTextMapper
     xpath = xpath.replace /\/$/, ''
     xpath
 
-  # This method is called recursively, to collect all the paths in a given sub-tree of the DOM.
-  collectPathsForNode: (node, invisible = false, verbose = false) ->
+  # This method is called recursively, to traverse a given sub-tree of the DOM.
+  traverseSubTree: (node, invisible = false, verbose = false) ->
     # Step one: get rendered node content, and store path info, if there is valuable content
     path = @getPathTo node
     cont = @getNodeContent node, false
@@ -390,7 +407,7 @@ class window.DomTextMapper
     # A: I seem to remember that the answer is yes, but I don't remember why.
     if node.hasChildNodes()
       for child in node.childNodes
-        @collectPathsForNode child, invisible, verbose
+        @traverseSubTree child, invisible, verbose
     null
 
   getBody: -> (@rootWin.document.getElementsByTagName "body")[0]
@@ -404,16 +421,16 @@ class window.DomTextMapper
 
   # save the original selection
   saveSelection: ->
-    if @oldRanges?
+    if @savedSelection?
       console.log "Selection saved at:"
       console.log @selectionSaved
       throw new Error "Selection already saved!"
     sel = @rootWin.getSelection()        
 #    console.log "Saving selection: " + sel.rangeCount + " ranges."
-    @oldRanges = (sel.getRangeAt i) for i in [0 ... sel.rangeCount]
+    @savedSelection = (sel.getRangeAt i) for i in [0 ... sel.rangeCount]
     switch sel.rangeCount
-      when 0 then @oldRanges ?= []
-      when 1 then @oldRanges = [ @oldRanges ]
+      when 0 then @savedSelection ?= []
+      when 1 then @savedSelection = [ @savedSelection ]
     try
       throw new Error "Selection was saved here"
     catch exception
@@ -421,12 +438,12 @@ class window.DomTextMapper
 
   # restore selection
   restoreSelection: ->
-#    console.log "Restoring selection: " + @oldRanges.length + " ranges."
-    unless @oldRanges? then throw new Error "No selection to restore."
+#    console.log "Restoring selection: " + @savedSelection.length + " ranges."
+    unless @savedSelection? then throw new Error "No selection to restore."
     sel = @rootWin.getSelection()
     sel.removeAllRanges()
-    sel.addRange range for range in @oldRanges
-    delete @oldRanges
+    sel.addRange range for range in @savedSelection
+    delete @savedSelection
 
   # Select the given node (for visual identification), and optionally scroll to it
   selectNode: (node, scroll = false) ->  
@@ -436,7 +453,7 @@ class window.DomTextMapper
     sel.removeAllRanges()
 
     # create our range, and select it
-    range = @rootWin.document.createRange()
+    realRange = @rootWin.document.createRange()
 
     # There is some weird, bogus behaviour in Chrome,
     # triggered by whitespaces between the table tag and it's children.
@@ -458,9 +475,9 @@ class window.DomTextMapper
       # (Sometimes it selects nothing, sometimes it selects the whole table.)
       # So we select directly the children instead.
       children = node.childNodes
-      range.setStartBefore children[0]
-      range.setEndAfter children[children.length - 1]
-      sel.addRange range
+      realRange.setStartBefore children[0]
+      realRange.setEndAfter children[children.length - 1]
+      sel.addRange realRange
     else
       if USE_TABLE_TEXT_WORKAROUND and node.nodeType is Node.TEXT_NODE and node.parentNode.tagName.toLowerCase() is "table"
         # This is a text element that should not even be here.
@@ -469,9 +486,9 @@ class window.DomTextMapper
       else
         # Normal element, should be selected
         try
-          range.setStartBefore node
-          range.setEndAfter node
-          sel.addRange range
+          realRange.setStartBefore node
+          realRange.setEndAfter node
+          sel.addRange realRange
         catch exception
           # This might be caused by the fact that FF can't select a
           # TextNode containing only whitespace.
@@ -517,10 +534,10 @@ class window.DomTextMapper
     displayText = match.element.content
 #    console.log "displayText is '" + displayText + "'"
 
-    # The selected range in displayText.
+    # The selected charRange in displayText.
     displayStart = if match.start? then match.start else 0
     displayEnd = if match.end? then match.end else displayText.length
-#    console.log "Display range is: " + displayStart + "-" + displayEnd
+#    console.log "Display charRange is: " + displayStart + "-" + displayEnd
 
     if displayEnd is 0
       # Handle empty text nodes  
@@ -544,7 +561,7 @@ class window.DomTextMapper
       sourceIndex++
     match.startCorrected = sourceStart
     match.endCorrected = sourceEnd
-#    console.log "computeSourcePosition done. Corrected range is: " + match.startCorrected + "-" + match.endCorrected
+#    console.log "computeSourcePosition done. Corrected charRange is: " + match.startCorrected + "-" + match.endCorrected
     null
 
   # Internal function used to read out the text content of a given node, as render by the browser.
@@ -567,7 +584,7 @@ class window.DomTextMapper
   # Returns:
   #    the first character offset position in the content of this node's parent node
   #    that is not accounted for by this node
-  collectStrings: (node, path, parentContent = null, parentIndex = 0, index = 0) ->
+  collectPositions: (node, path, parentContent = null, parentIndex = 0, index = 0) ->
 #    console.log "Scanning path " + path    
 #    content = @getNodeContent node, false
 
@@ -606,7 +623,7 @@ class window.DomTextMapper
         newCount = if oldCount? then oldCount + 1 else 1
         typeCount[nodeName] = newCount
         childPath = path + "/" + nodeName + (if newCount > 1 then "[" + newCount + "]" else "")
-        pos=@collectStrings child, childPath, content, parentIndex + startIndex, pos
+        pos=@collectPositions child, childPath, content, parentIndex + startIndex, pos
         i++
 
     endIndex
