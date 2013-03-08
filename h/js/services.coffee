@@ -57,12 +57,13 @@ class Hypothesis extends Annotator
         thread.message = null
         if thread.parent then threading.pruneEmpties thread.parent
         @provider.deleteAnnotation annotation
+     
         search = $location.search()
-        if search.id and not annotation.thread
-          delete search.id
+        if search.id and not annotation.thread then delete search.id
         delete search.action
-        if $location.path() is '/editor'
-          $location.path('/viewer').replace()
+        if $location.path() is '/editor' or search.switchback?
+          delete search.switchback
+          $location.search(search).path('/viewer').replace()
           
     # Thread the annotations after loading
     this.subscribe 'annotationsLoaded', (annotations) =>

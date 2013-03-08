@@ -305,10 +305,14 @@ class Annotation
         $location.path('/editor').search(search)
       else
         conf = confirm "Are you sure you want to delete this annotation?"
-        if conf  
-          $scope.$modelValue.highlights = []
-          annotator.deleteAnnotation $scope.$modelValue	
-          #annotator.provider.deleteAnnotation $scope.$modelValue	
+        if conf
+          #With this we do not change the location.path() to '/editor' 
+          #but we need to inform the event handler that we need to switch back to viewer
+          #in this case too.
+          search = $location.search()
+          search.switchback = true
+          $location.search(search) 
+          publish 'annotationDeleted', $scope.$modelValue
 
     $scope.ownAnnotation = (user) ->
       if annotator.plugins.Permissions.user? and 
