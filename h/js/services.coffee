@@ -61,8 +61,8 @@ class Hypothesis extends Annotator
         search = $location.search()
         if search.id and not annotation.thread then delete search.id
         delete search.action
-        if $location.path() is '/editor' or search.switchback?
-          delete search.switchback
+        if $location.path() is '/editor' or search.removed?
+          delete search.removed
           $location.search(search).path('/viewer').replace()
           
     # Thread the annotations after loading

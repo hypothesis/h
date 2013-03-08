@@ -310,9 +310,10 @@ class Annotation
           #but we need to inform the event handler that we need to switch back to viewer
           #in this case too.
           search = $location.search()
-          search.switchback = true
+          search.removed = $scope.$modelValue.id
           $location.search(search) 
           publish 'annotationDeleted', $scope.$modelValue
+          publish 'hostUpdated'
 
     $scope.ownAnnotation = (user) ->
       if annotator.plugins.Permissions.user? and 
@@ -467,6 +468,7 @@ class Viewer
     refresh()
 
   refresh: ($scope, $routeParams, threading, heatmap) =>
+    unless $scope.annotations? then $scope.annotations = {}  	
     if $routeParams.id?
       $scope.detail = true
       $scope.thread = threading.getContainer $routeParams.id
