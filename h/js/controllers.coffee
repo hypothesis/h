@@ -226,7 +226,6 @@ class Annotation
         $scope.editText = $scope.$modelValue.text
         $scope.preface = ($filter 'converter') "**You are about to edit this annotation:**\n"
 
-    #delete $routeParams.action
     $scope.cancel = ->      
       if $scope.action is 'redact'
         $scope.$modelValue.user = $scope.origUser
@@ -381,8 +380,6 @@ class Editor
   ) ->
     save = ->
       $scope.$apply ->
-        #search = $location.search() or {}
-        #delete search.action
         $location.path('/viewer').replace()
         annotator.provider.onEditorSubmit()
         annotator.provider.onEditorHide()
@@ -390,7 +387,6 @@ class Editor
     cancel = ->
       $scope.$apply ->
         search = $location.search() or {}
-        #delete search.action
         delete search.id
         $location.path('/viewer').search(search).replace()
         annotator.provider.onEditorHide()
@@ -404,7 +400,6 @@ class Editor
         annotator.subscribe 'annotationUpdated', save
 
     $scope.$on '$destroy', ->
-      #delete $routeParams.action
       if $scope.action is 'edit' or $scope.action is 'redact'
         annotator.unsubscribe 'annotationUpdated', save
       else 
