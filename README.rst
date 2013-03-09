@@ -9,20 +9,6 @@ application which enables rich annotation of web content. The project acts as
 a community aggregator for annotations and identity provider for annotators. It
 also serves to deploy an annotation agent designed for modern web browsers.
 
-The project builds heavily on components developed for the `Annotator Project`_
-and is structured to encourage upstream contribution where possible. However,
-work is required to make Annotator more extensible in order to facilitate
-contribution.
-
-Additionally, work is underway to support the data model described by the
-`Open Annotation Core`_ specification document.
-
-See the `project wiki`_ for the roadmap and additional information and
-join us in `#hypothes.is`_ on freenode_ for discussion.
-
-Those wishing to contribute to the project should also `subscribe`_ to the
-development mailing list and read about `contributing`_.
-
 Installation
 ------------
 
@@ -44,7 +30,19 @@ reason.
 Development
 -----------
 
-See `#hypothes.is`_.
+The project builds heavily on components developed for the `Annotator Project`_
+and is structured to encourage upstream contribution where possible. However,
+work is required to make Annotator more extensible in order to facilitate
+contribution.
+
+Additionally, work is underway to support the data model described by the
+`Open Annotation Core`_ specification document.
+
+See the `project wiki`_ for the roadmap and additional information and
+join us in `#hypothes.is`_ on freenode_ for discussion.
+
+Those wishing to contribute to the project should also `subscribe`_ to the
+development mailing list and read about `contributing`_.
 
 License
 -------
