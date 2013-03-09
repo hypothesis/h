@@ -4,15 +4,24 @@ Hypothes.is
 About
 -----
 
-Hypothes.is brings community peer review to The Internet. It is a web site
-and a browser application which enable rich annotation of web content. The
-web site acts as both a community and authentication end point as well as a
-deployment host for the browser application.
+Hypothes.is brings community peer review to The Internet. It is a web
+application which enables rich annotation of web content. The project acts as
+a community aggregator for annotations and identity provider for annotators. It
+also serves to deploy an annotation agent designed for modern web browsers.
 
-The browser application is based substantially on work by the `Open Knowledge
-Foundation`_ on the `Annotator Project`_.
+The project builds heavily on components developed for the `Annotator Project`_
+and is structured to encourage upstream contribution where possible. However,
+work is required to make Annotator more extensible in order to facilitate
+contribution.
 
-Please join us in `#hypothes.is`_ on freenode_.
+Additionally, work is underway to support the data model described by the
+`Open Annotation Core`_ specification document.
+
+See the `project wiki`_ for the roadmap and additional information and
+join us in `#hypothes.is`_ on freenode_ for discussion.
+
+Those wishing to contribute to the project should also `subscribe`_ to the
+development mailing list and read about `contributing`_.
 
 Installation
 ------------
@@ -45,8 +54,12 @@ to as the "Simplified BSD License" or the "FreeBSD License". Some third-party
 components are included. They are subject to their own licenses. All of the
 license information can be found in the included LICENSE file.
 
+.. _Open Annotation Core: http://openannotation.org/spec/core/
+.. _project wiki: https://github.com/hypothesis/h/wiki
 .. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
 .. _freenode: http://freenode.net/
+.. _subscribe: mailto:dev+subscribe@list.hypothes.is
+.. _contributing: CONTRIBUTING.rst
 .. _Annotator project: http://okfnlabs.org/annotator/
 .. _Open Knowledge Foundation: http://okfn.org/
 .. _2-Clause BSD License: http://www.opensource.org/licenses/BSD-2-Clause
