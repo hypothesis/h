@@ -216,7 +216,6 @@ class Annotation
     ]
 
     if $scope.action is 'redact'
-      $scope.preface = ($filter 'converter') "**You are about to delete this annotation:**\n"
       $scope.origText = $scope.$modelValue.text
       $scope.origUser = $scope.$modelValue.user
       $scope.$modelValue.text = ""
@@ -224,7 +223,6 @@ class Annotation
     else 
       if $scope.action is 'edit' and $scope.$modelValue?
         $scope.editText = $scope.$modelValue.text
-        $scope.preface = ($filter 'converter') "**You are about to edit this annotation:**\n"
 
     $scope.cancel = ->      
       if $scope.action is 'redact'
@@ -463,7 +461,6 @@ class Viewer
     refresh()
 
   refresh: ($scope, $routeParams, threading, heatmap) =>
-    unless $scope.annotations? then $scope.annotations = {}  	
     if $routeParams.id?
       $scope.detail = true
       $scope.thread = threading.getContainer $routeParams.id

@@ -536,6 +536,10 @@ blockquote {
     @include tertiarytext;
     float: right;
   }
+  
+  .preface {
+    font-weight: bold
+  }
 }
 
 

@@ -45,9 +45,11 @@
     </ul>
   </div>
 
-  <div class="body" data-ng-show="action == 'redact'" data-ng-bind-html="preface"/>
-  <div class="body" data-ng-show="action == 'redact'" data-ng-bind-html="origText | makeQuoteText"/>
-  <div class="body" data-ng-show="action == 'edit'" data-ng-bind-html="preface"/>
+  <ng-switch on="action">
+    <div class="body preface" data-ng-switch-when="redact" >You are about to delete this annotation:</div>
+    <div class="body preface" data-ng-switch-when="edit" >You are about to edit this annotation:</div>
+  </ng-switch>
+  <div class="body" data-ng-show="action=='redact'" data-ng-bind-html="origText | makeQuoteText"/>
   <ng-switch on="action">
     <textarea data-ng-model="model.$viewValue.text"
  	        data-ng-switch-when="redact"
