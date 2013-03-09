@@ -144,7 +144,9 @@ class Hypothesis extends Annotator
                 # The id is no longer temporary and should be serialized
                 # on future Store requests.
                 Object.defineProperty annotation, 'id',
+                  configurable: true
                   enumerable: true
+                  writable: true
 
                 # If the annotation is loaded in a view, switch the view
                 # to reference the new id.
