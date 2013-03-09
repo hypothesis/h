@@ -290,7 +290,7 @@ blockquote {
 }
 
 .dropdown-toggle {
-  @include fonticon("\002f", right, 0em);
+  @include fonticon("\002f", right, 0);
   background-color: white;
   cursor: pointer;
   &:active {
@@ -303,7 +303,6 @@ blockquote {
 
 .dropdown-menu {
   @include rotateX(90deg);
-  // @include smallshadow;
   background: $white;
   border: solid 1px $grayLighter;
   left: 0;
@@ -356,7 +355,7 @@ blockquote {
 
   // Aligns the dropdown menu to right
   &.pull-right {
-    right: 0px;
+    right: 0;
     left: auto;
     text-align: right;
   }
@@ -450,7 +449,7 @@ blockquote {
     padding: .5em 1em;
     padding-top: .25em;
     margin-right: -.5em;
-    margin-bottom: 0px;
+    margin-bottom: 0;
     position: relative;
     text-decoration: none;
     @include tabbox;
@@ -675,11 +674,11 @@ blockquote {
 
   &:active {
     @include smallshadow(2px, 1px, .1);
-    bottom: 0px;
+    bottom: 0;
   }
 
   // Things not shown in the summary view
-  .annotator-controls, .magicontrols .show, .buttonbar, {
+  .annotator-controls, .magicontrols .show, .buttonbar {
     display: none;
   }
 }
