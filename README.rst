@@ -6,7 +6,7 @@ About
 
 Hypothes.is brings community peer review to The Internet. It is a web
 application which enables rich annotation of web content. The project acts as
-a community aggregator for annotations and identity provider[*] for annotators.
+a community aggregator for annotations and identity provider[*]_ for annotators.
 It also serves embed code for an annotation agent designed with modern web
 browsers in mind.
 
