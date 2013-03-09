@@ -6,9 +6,9 @@ About
 
 Hypothes.is brings community peer review to The Internet. It is a web
 application which enables rich annotation of web content. The project acts as
-a community aggregator for annotations and identity provider[*]_ for annotators.
-It also serves embed code for an annotation agent designed with modern web
-browsers in mind.
+a community aggregator for annotations and identity provider [*]_ for
+annotators. It also serves embed code for an annotation agent designed with
+modern web browsers in mind.
 
 Installation
 ------------
@@ -53,6 +53,7 @@ to as the "Simplified BSD License" or the "FreeBSD License". Some third-party
 components are included. They are subject to their own licenses. All of the
 license information can be found in the included LICENSE file.
 
+.. [*] Community and identity features are not finished. Get involved and help!
 .. _Open Annotation Core: http://openannotation.org/spec/core/
 .. _project wiki: https://github.com/hypothesis/h/wiki
 .. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
@@ -62,5 +63,3 @@ license information can be found in the included LICENSE file.
 .. _Annotator project: http://okfnlabs.org/annotator/
 .. _Open Knowledge Foundation: http://okfn.org/
 .. _2-Clause BSD License: http://www.opensource.org/licenses/BSD-2-Clause
-.. [*] Community and identity features are not finished. Help us out by getting
-involved.
