@@ -40,11 +40,6 @@ userName = (user) ->
   if user is '' then return 'Annotation deleted.'	
   (user?.match /^acct:([^@]+)/)?[1]
 
-notDeletedUser = (user) ->
-  if user?
-    return user != ''
-  false 
-  
 redactionReason = (text) ->
   if not text? or text is '' then return '(no reason given)'
   'Reason:'
@@ -53,6 +48,5 @@ angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
-  .filter('notDeletedUser', -> notDeletedUser)
   .filter('redactionReason', -> redactionReason)
   

@@ -14,7 +14,7 @@
   <div class="fave-icon show" title="Favorite"
        data-ng-click="favorite()" />
   <div class="show reply-icon" title="Reply"
-       data-ng-show="model.$viewValue.user | notDeletedUser"
+       data-ng-show="!$modelValue.redacted"
        data-ng-click="reply()" />
   <div class="show share-icon" title="Share"
        data-ng-click="share()" />
