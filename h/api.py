@@ -46,6 +46,7 @@ def includeme(config):
 
     """
 
+    store.UPDATE_FILTER_FIELDS = ('updated', 'consumer')
     app = Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
 

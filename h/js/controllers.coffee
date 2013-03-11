@@ -235,7 +235,6 @@ class Annotation
       $scope.model.$setViewValue $scope.model.$viewValue
       if $scope.action is 'redact'
         $scope.$modelValue.redacted = true
-        $scope.$modelValue.created = new Date()
 
       $scope.editing = false
       drafts.remove $scope.$modelValue

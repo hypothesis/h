@@ -19,7 +19,7 @@ annotation = ['$filter', ($filter) ->
       # Format the annotation for display
       controller.$formatters.push (value) ->
         return unless angular.isObject value
-        created: value.created
+        updated: value.updated
         body: ($filter 'converter') (value.text or '')
         text: value.text
         user: value.user
