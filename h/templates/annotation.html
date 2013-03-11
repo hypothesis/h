@@ -52,13 +52,13 @@
   <div class="body" data-ng-show="action=='redact'" data-ng-bind-html="origText | makeQuoteText"/>
   <ng-switch on="action">
     <textarea data-ng-model="model.$viewValue.text"
- 	        data-ng-switch-when="redact"
+ 	       data-ng-switch-when="redact"
            class="body"
            name="text"
            placeholder="Please explain why you're deleting this annotation"
            required="" />
     <textarea data-ng-model="model.$viewValue.text"
- 	        data-ng-switch-default
+ 	       data-ng-switch-default
            class="body"
            name="text"
            required="" />
@@ -68,9 +68,13 @@
        target="_blank">Markdown</a> is supported.
   </div>
 </ng-form>
+<div class="body preface"
+     data-ng-show="$modelValue.redacted && !editing" 
+     data-ng-bind-html="model.$viewValue.body | redactionReason"
+     />
 <div data-ng-bind-html="model.$viewValue.body"
      data-ng-hide="editing"
-     class="body" />
+     class="body"/>
 
 <!-- Bottom controls -->
 <div class="buttonbar">

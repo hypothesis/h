@@ -241,11 +241,6 @@ class Annotation
         $scope.$modelValue.redacted = true
         $scope.$modelValue.created = new Date()
 
-        text =  if $scope.origText != $scope.$modelValue.text then $scope.$modelValue.text else ''
-        uses_emphasis = if not $scope.previewText? then false else $scope.previewText.text.indexOf("*") != -1
-        reason = if uses_emphasis then text else ("*" + text + "*")
-        $scope.$modelValue.text = if reason is "**" then "**(No reason given.)**" else "**Reason**: " + reason
-
       $scope.editing = false
       drafts.remove $scope.$modelValue
       if $scope.action is 'create'
