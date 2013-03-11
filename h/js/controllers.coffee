@@ -219,7 +219,7 @@ class Annotation
       $scope.origText = $scope.$modelValue.text
       $scope.origUser = $scope.$modelValue.user
       $scope.$modelValue.text = ""
-      $scope.$modelValue.user = "acct:Delete annotation:@" + $scope.$modelValue.user.split(/(?:acct:)|@/)[2]
+      delete $scope.$modelValue.user
     else 
       if $scope.action is 'edit' and $scope.$modelValue?
         $scope.editText = $scope.$modelValue.text
@@ -237,7 +237,8 @@ class Annotation
     $scope.save = ->
       $scope.model.$setViewValue $scope.model.$viewValue
       if $scope.action is 'redact'
-        $scope.$modelValue.user = "acct:Annotation deleted.@" + $scope.$modelValue.user.split(/(?:acct:)|@/)[2]
+        $scope.$modelValue.user = ""
+        $scope.$modelValue.redacted = true
         $scope.$modelValue.created = new Date()
 
         text =  if $scope.origText != $scope.$modelValue.text then $scope.$modelValue.text else ''
@@ -313,7 +314,7 @@ class Annotation
           publish 'hostUpdated'
 
     $scope.authorize = (action) =>
-      if $scope.$modelValue? and annotator.plugins.Permissions.user?
+      if $scope.$modelValue? and annotator.plugins.Permissions.user? and not $scope.$modelValue.redacted?
         return annotator.plugins.Permissions.authorize action, $scope.$modelValue, annotator.plugins.Permissions.user
       false
       
