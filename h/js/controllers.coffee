@@ -220,9 +220,6 @@ class Annotation
       $scope.origUser = $scope.$modelValue.user
       $scope.$modelValue.text = ""
       delete $scope.$modelValue.user
-    else 
-      if $scope.action is 'edit' and $scope.$modelValue?
-        $scope.editText = $scope.$modelValue.text
 
     $scope.cancel = ->      
       if $scope.action is 'redact'

@@ -45,12 +45,6 @@ notDeletedUser = (user) ->
     return user != ''
   false 
   
-makeQuoteText = (text) ->
-  uses_emphasis = if not text? then false else text.indexOf("*") != -1
-  quotedText = if uses_emphasis then text else "*" + text + "*"
-  quotedText = (new Converter()).makeHtml quotedText
-  #quotedText	  
- 
 redactionReason = (text) ->
   if not text? or text is '' then return '(no reason given)'
   'Reason:'
@@ -60,6 +54,5 @@ angular.module('h.filters', [])
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
   .filter('notDeletedUser', -> notDeletedUser)
-  .filter('makeQuoteText', -> makeQuoteText)
   .filter('redactionReason', -> redactionReason)
   
