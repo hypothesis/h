@@ -36,8 +36,6 @@ fuzzyTime = (date) ->
 
 
 userName = (user) ->
-  unless user? then return 'Delete annotation'
-  if user is '' then return 'Annotation deleted.'	
   (user?.match /^acct:([^@]+)/)?[1]
 
 redactionReason = (text) ->

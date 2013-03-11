@@ -219,7 +219,7 @@ class Annotation
       $scope.origText = $scope.$modelValue.text
       $scope.origUser = $scope.$modelValue.user
       $scope.$modelValue.text = ""
-      delete $scope.$modelValue.user
+      $scope.$modelValue.user = ""
 
     $scope.cancel = ->      
       if $scope.action is 'redact'
@@ -234,7 +234,6 @@ class Annotation
     $scope.save = ->
       $scope.model.$setViewValue $scope.model.$viewValue
       if $scope.action is 'redact'
-        $scope.$modelValue.user = ""
         $scope.$modelValue.redacted = true
         $scope.$modelValue.created = new Date()
 

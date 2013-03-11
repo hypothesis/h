@@ -28,7 +28,13 @@
   </div>
 </div>
 
-<h3 data-ng-bind="model.$viewValue.user | userName" class="upper-left" />
+<ng-switch on="model.$viewValue.user">
+  <h3 data-ng-switch-when="" class="upper-left">
+      <span data-ng-show="editing">Delete annotation</span>
+      <span data-ng-hide="editing">Annotation deleted.</span>
+  </h3>
+  <h3 data-ng-switch-default data-ng-bind="model.$viewValue.user | userName" class="upper-left" />
+</ng-switch>
 <ng-form data-ng-show="editing" name="form">
 
   <div class="dropdown privacy">
