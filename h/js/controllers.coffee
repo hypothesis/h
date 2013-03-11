@@ -306,7 +306,8 @@ class Annotation
           publish 'hostUpdated'
 
     $scope.authorize = (action) =>
-      if $scope.$modelValue? and annotator.plugins.Permissions.user? and not $scope.$modelValue.redacted?
+      if $scope.$modelValue? and annotator.plugins.Permissions.user? and 
+         not $scope.$modelValue.redacted?
         return annotator.plugins.Permissions.authorize action, $scope.$modelValue, annotator.plugins.Permissions.user
       false
       
