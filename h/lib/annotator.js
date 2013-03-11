@@ -6,7 +6,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-11 15:30:29Z
+** Built at: 2013-03-11 16:46:48Z
 */
 
 (function() {
@@ -868,6 +868,10 @@
       });
     };
 
+    Annotator.prototype.cleanSpecialQuotes = function() {
+      return this.specialQuotes = {};
+    };
+
     Annotator.prototype.createAnnotation = function() {
       var annotation;
       annotation = {};
@@ -943,7 +947,7 @@
     };
 
     Annotator.prototype.findAnchorWithFuzzyMatching = function(target) {
-      var browserRange, len, match, posSelector, quote, quoteSelector, result, start;
+      var browserRange, len, match, normalizedRange, posSelector, quote, quoteHTML, quoteSelector, result, start;
       quoteSelector = this.findSelector(target.selector, "context+quote");
       quote = quoteSelector != null ? quoteSelector.exact : void 0;
       if (quote == null) return null;
@@ -954,23 +958,24 @@
       result = this.domMatcher.searchFuzzy(quote, start, false, len);
       if (result.matches.length !== 1) return null;
       match = result.matches[0];
-      if (!match.exact) {
-        console.log("Using fuzzy matching, found '" + match.found + "', instead of '" + quote + "'.");
-      }
+      quoteHTML = !match.exact ? match.hiddenData.diff : void 0;
       browserRange = new Range.BrowserRange(match.realRange);
-      return browserRange.normalize();
+      normalizedRange = browserRange.normalize();
+      return [normalizedRange, quoteHTML];
     };
 
     Annotator.prototype.findAnchor = function(target) {
-      var anchor;
+      var anchor, quoteHTML, _ref2;
       anchor = this.findAnchorFromXPathRangeSelector(target);
       anchor || (anchor = this.findAnchorFromPositionSelector(target));
-      anchor || (anchor = this.findAnchorWithFuzzyMatching(target));
-      return anchor;
+      if (anchor == null) {
+        _ref2 = this.findAnchorWithFuzzyMatching(target), anchor = _ref2[0], quoteHTML = _ref2[1];
+      }
+      return [anchor, quoteHTML];
     };
 
     Annotator.prototype.setupAnnotation = function(annotation) {
-      var normed, normedRanges, r, root, t, _k, _l, _len3, _len4, _ref2;
+      var normed, normedRanges, quoteHTML, r, root, t, _k, _l, _len3, _len4, _ref2, _ref3;
       root = this.wrapper[0];
       annotation.target || (annotation.target = this.selectedTargets);
       if (!(annotation.target instanceof Array)) {
@@ -981,7 +986,11 @@
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
         t = _ref2[_k];
         try {
-          r = this.findAnchor(t);
+          _ref3 = this.findAnchor(t), r = _ref3[0], quoteHTML = _ref3[1];
+          if (quoteHTML != null) {
+            t.quoteHTML = quoteHTML;
+            this.specialQuotes[annotation.id] = quoteHTML;
+          }
           if (r != null) {
             normedRanges.push(r);
           } else {

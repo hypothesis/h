@@ -115,6 +115,9 @@ class Annotator.Host extends Annotator
             else if not $(this).hasClass('annotator-hl-temporary')
               $(this).removeClass('annotator-hl-active')
 
+        getSpecialQuotes: =>
+          @specialQuotes
+
         getHref: =>
           uri = decodeURIComponent document.location.href
           if document.location.hash
@@ -146,16 +149,13 @@ class Annotator.Host extends Annotator
         scrollTop: (y) =>
           $('html, body').stop().animate {scrollTop: y}, 600
 
+        prepareForLoad: =>
+          this.cleanSpecialQuotes()
+          this.scanDocument "Preparing for the loading of annotations"
+
         scanDocument: (reason = "something happened") =>
-          try      
-            console.log "Analyzing host frame, because " + reason + "..."
-            r = @domMatcher.scan()
-            scanTime = r.time
-            console.log "Traversal+scan took " + scanTime + " ms."
-          catch e
-            console.log e.message
-            console.log e.stack
- 
+          this.scanDocument reason
+        
       remote:
         publish: {}
         addPlugin: {}
@@ -165,6 +165,17 @@ class Annotator.Host extends Annotator
         back: {}
         update: {}
 
+
+  scanDocument: (reason = "something happened") =>
+    try      
+      console.log "Analyzing host frame, because " + reason + "..."
+      r = @domMatcher.scan()
+      scanTime = r.time
+      console.log "Traversal+scan took " + scanTime + " ms."
+    catch e
+      console.log e.message
+      console.log e.stack
+        
   _setupWrapper: ->
     @wrapper = @element
     .on 'mouseup', =>

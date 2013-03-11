@@ -56,7 +56,7 @@ class Hypothesis extends Annotator
     # Before annotations are loaded, scan the document
     this.subscribe 'loadingAnnotations', =>        
       $rootScope.$apply =>
-        @provider.scanDocument "annotations are going to be loaded"
+        @provider.prepareForLoad()
 
     # Update the thread when an annotation changes
     this.subscribe 'annotationUpdated', (annotation) =>
@@ -78,6 +78,12 @@ class Hypothesis extends Annotator
                 hl.data = thread.message?.annotation
                 hl
               offset: offset
+
+    this.subscribe 'annotationsLoaded', (annotations) =>
+      @provider.getSpecialQuotes (quotes) ->
+        for a in annotations
+          a.quoteHTML = quotes[a.id]
+          a.quoteHTML ?= a.quote
 
   _setupXDM: ->
     $scope = @element.scope()
@@ -211,10 +217,12 @@ class Hypothesis extends Annotator
         hideFrame: {}
         dragFrame: {}
         getHighlights: {}
+        getSpecialQuotes: {}
         setActiveHighlights: {}
         getHref: {}
         getMaxBottom: {}
         scrollTop: {}
+        prepareForLoad: {}        
         scanDocument: {}
 
   _setupWrapper: ->

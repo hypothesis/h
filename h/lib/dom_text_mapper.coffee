@@ -254,6 +254,7 @@ class window.DomTextMapper
         if full
           mapping.full = true
           mapping.wanted = info.content
+          mapping.yields = info.content
           mapping.startCorrected = 0
           mapping.endCorrected = 0
         else

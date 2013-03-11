@@ -20,7 +20,7 @@
       class="annotator-outer annotator-viewer collapsed">
     <!-- Excerpt -->
     <div class="paper excerpt">
-      <blockquote data-ng-bind="thread.message.annotation.quote" />
+      <blockquote data-ng-bind-html-unsafe="thread.message.annotation.quoteHTML" />
     </div>
     <!-- Thread view -->
     <div data-recursive="" class="paper thread">
