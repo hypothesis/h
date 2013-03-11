@@ -42,7 +42,7 @@ userName = (user) ->
 
 notDeletedUser = (user) ->
   if user?
-    return user.split(/(?:acct:)|@/)[1] != 'Annotation deleted.'
+    return user != ''
   false 
   
 makeQuoteText = (text) ->
