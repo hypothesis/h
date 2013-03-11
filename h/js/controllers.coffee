@@ -211,8 +211,8 @@ class Annotation
 
     $scope.action = if $routeParams.action? then $routeParams.action else 'create'
     $scope.privacyLevels = [
-     {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
-     {name: 'Private', permissions: { 'read': [] } }
+     {name: 'Public', permissions:  { 'read': ['group:__world__'], 'update': [$scope.$modelValue?.user], 'delete': [$scope.$modelValue?.user] } },
+     {name: 'Private', permissions: { 'read': [$scope.$modelValue?.user],  'update': [$scope.$modelValue?.user], 'delete': [$scope.$modelValue?.user] } }
     ]
 
     if $scope.action is 'redact'
@@ -244,7 +244,7 @@ class Annotation
         uses_emphasis = if not $scope.previewText? then false else $scope.previewText.text.indexOf("*") != -1
         reason = if uses_emphasis then text else ("*" + text + "*")
         $scope.$modelValue.text = if reason is "**" then "**(No reason given.)**" else "**Reason**: " + reason
-          
+
       $scope.editing = false
       drafts.remove $scope.$modelValue
       if $scope.action is 'create'
@@ -312,11 +312,9 @@ class Annotation
           publish 'annotationDeleted', $scope.$modelValue
           publish 'hostUpdated'
 
-    $scope.ownAnnotation = (user) ->
-      if annotator.plugins.Permissions.user? and 
-          user == annotator.plugins.Permissions.user and 
-          user.split(/(?:acct:)|@/)[1] != 'Annotation deleted.'
-        return true
+    $scope.authorize = (action) =>
+      if $scope.$modelValue? and annotator.plugins.Permissions.user?
+        return annotator.plugins.Permissions.authorize action, $scope.$modelValue, annotator.plugins.Permissions.user
       false
       
     $scope.getPrivacyLevel = (permissions) ->

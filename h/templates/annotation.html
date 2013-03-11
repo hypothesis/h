@@ -21,8 +21,8 @@
   <div class="show dropdown" title="More Actions">
     <div class="dropdown-toggle down-icon" role="button" />
     <ul class="dropdown-menu pull-right" role="menu">
-      <li data-ng-show="ownAnnotation(model.$viewValue.user)" data-ng-click="edit()">Edit</li>
-      <li data-ng-show="ownAnnotation(model.$viewValue.user)" data-ng-click="delete()">Delete</li>
+      <li data-ng-show="authorize('update')" data-ng-click="edit()">Edit</li>
+      <li data-ng-show="authorize('delete')" data-ng-click="delete()">Delete</li>
       <li data-ng-click="flag()">Flag</li>
     </ul>
   </div>
