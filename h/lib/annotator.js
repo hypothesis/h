@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-f6372c3
+** Annotator 1.2.5-dev-8e06225
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-08 18:04:18Z
+** Built at: 2013-03-11 15:30:29Z
 */
 
 (function() {
@@ -822,7 +822,11 @@
     Annotator.prototype.getQuoteForTarget = function(target) {
       var mySelector;
       mySelector = this.findSelector(target.selector, "context+quote");
-      return mySelector != null ? mySelector.exact : void 0;
+      if (mySelector != null) {
+        return this.normalizeString(mySelector.exact);
+      } else {
+        return null;
+      }
     };
 
     Annotator.prototype.getSelectedTargets = function() {
@@ -871,6 +875,10 @@
       return annotation;
     };
 
+    Annotator.prototype.normalizeString = function(string) {
+      return string.replace(/\s{2,}/g, " ");
+    };
+
     Annotator.prototype.findSelector = function(selectors, type) {
       var selector, _k, _len3;
       for (_k = 0, _len3 = selectors.length; _k < _len3; _k++) {
@@ -892,7 +900,7 @@
           startOffset = startInfo.start;
           endInfo = this.domMapper.getInfoForNode(normalizedRange.end);
           endOffset = endInfo.end;
-          currentQuote = this.domMapper.getContentForCharRange(startOffset, endOffset);
+          currentQuote = this.normalizeString(this.domMapper.getContentForCharRange(startOffset, endOffset));
           if (currentQuote !== savedQuote) {
             console.log("Could not apply XPath selector to current document, because the quote has changed. (Saved quote is '" + savedQuote + "', current quote is '" + currentQuote + "'.)");
             return null;
@@ -919,8 +927,7 @@
       if (selector == null) return null;
       savedQuote = this.getQuoteForTarget(target);
       if (savedQuote != null) {
-        savedQuote = this.getQuoteForTarget(target);
-        currentQuote = this.domMapper.getContentForCharRange(selector.start, selector.end);
+        currentQuote = this.normalizeString(this.domMapper.getContentForCharRange(selector.start, selector.end));
         if (currentQuote !== savedQuote) {
           console.log("Could not apply position selector to current document, because the quote has changed. (Saved quote is '" + savedQuote + "', current quote is '" + currentQuote + "'.)");
           return null;
