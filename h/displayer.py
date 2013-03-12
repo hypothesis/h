@@ -13,8 +13,10 @@ def jsonify(obj, *args, **kwargs):
 
 @displayer.route('/<id>')
 def display_annotation(id):
-  #return 'Howdy annotation ' + id + '!'
   resp = g.annotation_class.fetch(id)
   if not resp : 
     abort(404)
-  return jsonify(resp)
+  if request.headers['content_type'].lower() == 'application/json' :
+    return jsonify(resp)
+  else :
+    return 'Howdy annotation ' + id + '!'
