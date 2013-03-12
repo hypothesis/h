@@ -211,8 +211,20 @@ class Annotation
 
     $scope.action = if $routeParams.action? then $routeParams.action else 'create'
     $scope.privacyLevels = [
-     {name: 'Public', permissions:  { 'read': ['group:__world__'], 'update': [$scope.$modelValue?.user], 'delete': [$scope.$modelValue?.user] } },
-     {name: 'Private', permissions: { 'read': [$scope.$modelValue?.user],  'update': [$scope.$modelValue?.user], 'delete': [$scope.$modelValue?.user] } }
+      {
+      name: 'Public' 
+      permissions:  
+       read: ['group:__world__'] 
+       update: [$scope.$modelValue?.user] 
+       delete: [$scope.$modelValue?.user] 
+      },
+      {
+      name: 'Private'
+      permissions: 
+       read: [$scope.$modelValue?.user] 
+       update: [$scope.$modelValue?.user] 
+       delete: [$scope.$modelValue?.user]
+      }
     ]
 
     if $scope.action is 'redact'
