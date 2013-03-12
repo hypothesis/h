@@ -38,13 +38,9 @@ fuzzyTime = (date) ->
 userName = (user) ->
   (user?.match /^acct:([^@]+)/)?[1]
 
-redactionReason = (text) ->
-  if not text? or text is '' then return '(no reason given)'
-  'Reason:'
 
 angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
-  .filter('redactionReason', -> redactionReason)
   

@@ -74,10 +74,12 @@
        target="_blank">Markdown</a> is supported.
   </div>
 </ng-form>
-<div class="body preface"
-     data-ng-show="$modelValue.redacted && !editing" 
-     data-ng-bind-html="model.$viewValue.body | redactionReason"
-     />
+  <div data-ng-show="$modelValue.redacted && !editing">
+    <ng-switch on="model.$viewValue.body.length">
+      <div class="body preface" data-ng-switch-when="0">(no reason given)</div>
+      <div class="body preface" data-ng-switch-default>Reason:</div>
+    </ng-switch>
+</div>
 <div data-ng-bind-html="model.$viewValue.body"
      data-ng-hide="editing"
      class="body"/>
