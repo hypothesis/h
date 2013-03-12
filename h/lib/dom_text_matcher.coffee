@@ -110,15 +110,15 @@ class window.DomTextMatcher
   #    with the prepareSearch() method
   # 
   # For the details about the returned data structure, see the documentation of the search() method.
-  searchFuzzy: (pattern, pos, caseSensitive = false, matchDistance = 1000, matchThreshold = 0.5, path = null) ->
+  searchFuzzy: (pattern, pos, caseSensitive = false, path = null, options = {}) ->
     unless @dmp?
       unless window.DTM_DMPMatcher?
         throw new Error "DTM_DMPMatcher is not available. Have you loaded the text match engines?"
       @dmp = new window.DTM_DMPMatcher
-    @dmp.setMatchDistance matchDistance
-    @dmp.setMatchThreshold matchThreshold
+    @dmp.setMatchDistance options.matchDistance ? 1000
+    @dmp.setMatchThreshold options.matchThreshold ? 0.5
     @dmp.setCaseSensitive caseSensitive
-    @search @dmp, pattern, pos, path
+    @search @dmp, pattern, pos, path, options
 
   # ===== Private methods (never call from outside the module) =======
 
@@ -142,7 +142,7 @@ class window.DomTextMatcher
   # Nodes is the list of matching nodes, with details about the matches.
   # 
   # If no match is found, null is returned.  # 
-  search: (matcher, pattern, pos, path = null) ->
+  search: (matcher, pattern, pos, path = null, options = {}) ->
     # Prepare and check the pattern 
     unless pattern? then throw new Error "Can't search for null pattern!"
     pattern = pattern.trim()
@@ -157,7 +157,7 @@ class window.DomTextMatcher
     unless @mapper.corpus? then throw new Error "Not prepared to search! (call PrepareSearch, or pass me a path)"
 
     # Do the text search
-    textMatches = matcher.search @mapper.corpus, pattern, pos
+    textMatches = matcher.search @mapper.corpus, pattern, pos, options
     t2 = @timestamp()
 
     # Collect the mappings

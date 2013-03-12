@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-8e06225
+** Annotator 1.2.5-dev-b0ea535
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-11 16:46:48Z
+** Built at: 2013-03-12 15:24:50Z
 */
 
 (function() {
@@ -947,18 +947,22 @@
     };
 
     Annotator.prototype.findAnchorWithFuzzyMatching = function(target) {
-      var browserRange, len, match, normalizedRange, posSelector, quote, quoteHTML, quoteSelector, result, start;
+      var browserRange, len, match, normalizedRange, options, posSelector, quote, quoteHTML, quoteSelector, result, start;
       quoteSelector = this.findSelector(target.selector, "context+quote");
       quote = quoteSelector != null ? quoteSelector.exact : void 0;
-      if (quote == null) return null;
+      if (quote == null) return [null, null];
       posSelector = this.findSelector(target.selector, "position");
       start = posSelector != null ? posSelector.start : void 0;
       len = this.domMapper.getDocLength();
       start || (start = len / 2);
-      result = this.domMatcher.searchFuzzy(quote, start, false, len);
-      if (result.matches.length !== 1) return null;
+      options = {
+        matchDistance: len,
+        withDiff: true
+      };
+      result = this.domMatcher.searchFuzzy(quote, start, false, null, options);
+      if (result.matches.length !== 1) return [null, null];
       match = result.matches[0];
-      quoteHTML = !match.exact ? match.hiddenData.diff : void 0;
+      quoteHTML = !match.exact ? match.diffHTML : void 0;
       browserRange = new Range.BrowserRange(match.realRange);
       normalizedRange = browserRange.normalize();
       return [normalizedRange, quoteHTML];
