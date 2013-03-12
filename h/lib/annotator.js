@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-b0ea535
+** Annotator 1.2.5-dev-8feec9a
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-12 15:24:50Z
+** Built at: 2013-03-12 17:38:08Z
 */
 
 (function() {
@@ -666,13 +666,22 @@
       this.getHref = __bind(this.getHref, this);      Annotator.__super__.constructor.apply(this, arguments);
       this.plugins = {};
       if (!Annotator.supported()) return this;
-      this.domMapper = new DomTextMapper();
-      this.domMatcher = new DomTextMatcher(this.domMapper);
       if (!this.options.readOnly) this._setupDocumentEvents();
       this._setupWrapper()._setupViewer()._setupEditor();
       this._setupDynamicStyle();
       this.adder = $(this.html.adder).appendTo(this.wrapper).hide();
     }
+
+    Annotator.prototype._setupMatching = function() {
+      this.domMapper = new DomTextMapper();
+      this.domMatcher = new DomTextMatcher(this.domMapper);
+      if (typeof DTM_DMPMatcher !== "undefined" && DTM_DMPMatcher !== null) {
+        this.fuzzyMatcher = new DTM_DMPMatcher();
+        return this.fuzzyMatcher.setCaseSensitive(false);
+      } else {
+        return console.log("Could not init fuzzy matcher. Expect problems.");
+      }
+    };
 
     Annotator.prototype._setupWrapper = function() {
       this.wrapper = $(this.html.wrapper);
@@ -946,6 +955,54 @@
       return browserRange.normalize();
     };
 
+    Annotator.prototype.findAnchorWithTwoPhaseFuzzyMatching = function(target) {
+      var browserRange, comparison, currentQuote, errorLevel, expectedPrefixStart, expectedSuffixStart, len, mappings, normalizedRange, posSelector, prefix, prefixEnd, prefixResult, quote, quoteLength, quoteSelector, remainingText, savedQuote, suffix, suffixResult, suffixStart;
+      quoteSelector = this.findSelector(target.selector, "context+quote");
+      prefix = quoteSelector != null ? quoteSelector.prefix : void 0;
+      suffix = quoteSelector != null ? quoteSelector.suffix : void 0;
+      quote = quoteSelector != null ? quoteSelector.exact : void 0;
+      if (!((prefix != null) && (suffix != null))) return [null, null];
+      posSelector = this.findSelector(target.selector, "position");
+      expectedPrefixStart = posSelector != null ? posSelector.start : void 0;
+      len = this.domMapper.getDocLength();
+      if (expectedPrefixStart == null) expectedPrefixStart = len / 2;
+      this.fuzzyMatcher.setMatchThreshold = 0.5;
+      this.fuzzyMatcher.setMatchDistance = len;
+      prefixResult = this.fuzzyMatcher.search(this.domMapper.corpus, prefix, expectedPrefixStart);
+      if (!prefixResult.length) return [null, null];
+      prefixEnd = prefixResult[0].end;
+      quoteLength = quote != null ? quote.length : void 0;
+      if (posSelector != null) {
+        quoteLength || (quoteLength = posSelector.end - posSelector.start);
+      }
+      quoteLength || (quoteLength = 64);
+      remainingText = this.domMapper.corpus.substr(prefixEnd);
+      expectedSuffixStart = quoteLength;
+      suffixResult = this.fuzzyMatcher.search(remainingText, suffix, expectedSuffixStart);
+      if (!suffixResult.length) return [null, null];
+      suffixStart = prefixEnd + suffixResult[0].start;
+      mappings = this.domMapper.getMappingsForCharRange(prefixEnd, suffixStart);
+      browserRange = new Range.BrowserRange(mappings.realRange);
+      normalizedRange = browserRange.normalize();
+      if (quote != null) {
+        savedQuote = this.normalizeString(quote);
+        currentQuote = this.normalizeString(this.domMapper.getContentForCharRange(prefixEnd, suffixStart));
+        if (currentQuote !== savedQuote) {
+          comparison = this.fuzzyMatcher.compare(savedQuote, currentQuote);
+          errorLevel = comparison.lev / savedQuote.length;
+          if (errorLevel < 0.5) {
+            return [normalizedRange, comparison.diffHTML];
+          } else {
+            return [null, null];
+          }
+        } else {
+          return [normalizedRange, null];
+        }
+      } else {
+        return [normalizedRange, null];
+      }
+    };
+
     Annotator.prototype.findAnchorWithFuzzyMatching = function(target) {
       var browserRange, len, match, normalizedRange, options, posSelector, quote, quoteHTML, quoteSelector, result, start;
       quoteSelector = this.findSelector(target.selector, "context+quote");
@@ -969,11 +1026,14 @@
     };
 
     Annotator.prototype.findAnchor = function(target) {
-      var anchor, quoteHTML, _ref2;
+      var anchor, quoteHTML, _ref2, _ref3;
       anchor = this.findAnchorFromXPathRangeSelector(target);
       anchor || (anchor = this.findAnchorFromPositionSelector(target));
       if (anchor == null) {
-        _ref2 = this.findAnchorWithFuzzyMatching(target), anchor = _ref2[0], quoteHTML = _ref2[1];
+        _ref2 = this.findAnchorWithTwoPhaseFuzzyMatching(target), anchor = _ref2[0], quoteHTML = _ref2[1];
+      }
+      if (anchor == null) {
+        _ref3 = this.findAnchorWithFuzzyMatching(target), anchor = _ref3[0], quoteHTML = _ref3[1];
       }
       return [anchor, quoteHTML];
     };

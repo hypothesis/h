@@ -73,15 +73,10 @@ underscore = Uglify('h:lib/underscore.js', output='lib/underscore.min.js')
 
 domTextFamily = Bundle(
     Coffee('h:lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
-    Coffee('h:lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),    
-)
-
-domTextFamilyFull = Bundle(
-    domTextFamily,
+    Coffee('h:lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
     Coffee('h:lib/text_match_engines.coffee', output='js/text_match_engines.js'),
-    Uglify('h:lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js')
+    Uglify('h:lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js')    
 )
-
 
 # Base and common SCSS
 base = ['h:css/base.scss']
@@ -99,7 +94,6 @@ app = Bundle(
     annotator_auth,
     annotator_permissions,
     annotator_store,
-    domTextFamily,
     d3,
     easyXDM,
     jwz,
@@ -147,7 +141,7 @@ inject = Bundle(
     easyXDM,
     jquery,
     annotator,
-    domTextFamilyFull,
+    domTextFamily,
     Uglify(
         Coffee('h:js/inject/host.coffee', output='js/host.js'),
         output='js/hypothesis-host.min.js'

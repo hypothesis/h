@@ -158,6 +158,16 @@ class window.DTM_DMPMatcher
 
     [result]
 
+  # Compare two string slices, get Levenhstein and visual diff
+  compare: (text1, text2) ->
+    result = {}
+    result.diff = @dmp.diff_main text1, text2
+    result.lev = @dmp.diff_levenshtein result.diff
+    @dmp.diff_cleanupSemantic result.diff
+    result.diffHTML = @dmp.diff_prettyHtml result.diff
+    result
+
+
   # ============= Private part ==========================================
   # You don't need to call the functions below this point manually
 

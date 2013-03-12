@@ -182,6 +182,7 @@ class Annotator.Host extends Annotator
       if not @ignoreMouseup
         setTimeout =>
           @consumer.back() unless @selectedRanges?.length
+    this._setupMatching()
     @domMatcher.setRootNode @wrapper[0]        
     this
 
