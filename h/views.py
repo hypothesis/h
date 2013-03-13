@@ -5,10 +5,13 @@ __all__ = [
     'ForgotPasswordController',
     'RegisterController',
 ]
-
 from pyramid.traversal import find_resource
+import json
 
-from pyramid.view import view_config
+import logging
+log = logging.getLogger('view')
+#TODO: Access annotation class normally
+from annotator.annotation import Annotation
 
 from horus.views import (
     AuthController,
@@ -21,6 +24,23 @@ from horus.views import (
 @view_config(layout='site', renderer='templates/home.pt', route_name='index')
 def home(request):
     return find_resource(request.context, '/app').embed
+
+@view_config(route_name='displayer',
+             renderer='h:templates/displayer.pt')
+def displayer(request):
+    uid = request.matchdict['uid']
+    annotation = Annotation.fetch(uid)
+    if not annotation : 
+        raise httpexceptions.HTTPNotFound()
+
+    for header, value in request.headers.items():
+        log.info(header + " : " + value)
+    if 'Content-Type' in request.headers and request.headers['Content-Type'].lower() == 'application/json' :
+        res = json.dumps(annotation, indent=None if request.is_xhr else 2)
+        return Response(res, content_type = 'application/json')
+    else :
+        return {}
+
 
 
 def includeme(config):

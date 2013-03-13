@@ -8,7 +8,6 @@ from pyramid.view import view_config
 from pyramid.wsgi import wsgiapp2
 
 from h import messages, models
-from h import displayer
 
 @view_config(context='h.resources.APIFactory', request_method='POST',
              name='access_token', permission='access_token', renderer='string')
@@ -48,7 +47,6 @@ def includeme(config):
 
     app = Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
-    app.register_blueprint(displayer.displayer, url_prefix = '/a')
 
     # Set up the models
     settings = config.get_settings()
@@ -68,7 +66,6 @@ def includeme(config):
     app.config['AUTHZ_ON'] = True
 
     def before_request():
-        g.annotation_class = Annotation
         g.auth = auth.Authenticator(models.Consumer.get_by_key)
         g.authorize = authorize
 
