@@ -15,7 +15,7 @@ Before installing elastisearch_, you need some JRE, for example:
 
 To quickest way to install elastisearch is to simply install elasticsearchdeb_.
 
-After installing the above, create the virtualenv, as described in the README.rst
+After installing the above, create the virtualenv, as described in the INSTALL.rst
 
 (Run the commands from the directory where you've cloned the repository.)
 
