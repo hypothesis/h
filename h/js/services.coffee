@@ -80,10 +80,11 @@ class Hypothesis extends Annotator
               offset: offset
 
     this.subscribe 'annotationsLoaded', (annotations) =>
-      @provider.getSpecialQuotes (quotes) ->
+      @provider.getChangedQuotes (changedQuotes) =>
         for a in annotations
-          a.quoteHTML = quotes[a.id]
-          a.quoteHTML ?= a.quote
+          quote = changedQuotes[a.id]
+          a.quote = quote?.text ? this.getQuoteForTarget a.target[0]
+          a.quoteHTML = quote?.diffHTML ? this.getHtmlQuote a.quote
 
   _setupXDM: ->
     $scope = @element.scope()
@@ -217,7 +218,7 @@ class Hypothesis extends Annotator
         hideFrame: {}
         dragFrame: {}
         getHighlights: {}
-        getSpecialQuotes: {}
+        getChangedQuotes: {}
         setActiveHighlights: {}
         getHref: {}
         getMaxBottom: {}
@@ -276,6 +277,9 @@ class Hypothesis extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
 
+  # (Optionally) put some HTML formatting around a quote
+  getHtmlQuote: (quote) -> quote
+
   createAnnotation: ->
     annotation = super
 
@@ -322,7 +326,6 @@ class Hypothesis extends Annotator
       @provider.setupAnnotation
         id: annotation.id
         target: annotation.target
-      annotation.quote = this.getQuoteForTarget annotation.target[0]
 
   showViewer: (annotations=[]) =>
     @element.injector().invoke [

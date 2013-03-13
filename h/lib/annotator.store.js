@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-f6372c3
+** Annotator 1.2.5-dev-859d4e3
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-08 17:56:18Z
+** Built at: 2013-03-13 14:59:29Z
 */
 
 (function() {
@@ -65,14 +65,17 @@
     };
 
     Store.prototype.annotationCreated = function(annotation) {
-      var quote,
+      var quote, quoteHTML,
         _this = this;
       if (__indexOf.call(this.annotations, annotation) < 0) {
         this.registerAnnotation(annotation);
         quote = annotation.quote;
+        quoteHTML = annotation.quoteHTML;
         delete annotation.quote;
+        delete annotation.quoteHTML;
         return this._apiRequest('create', annotation, function(data) {
           annotation.quote = quote;
+          annotation.quoteHTML = quoteHTML;
           if (!(data.id != null)) {
             console.warn(Annotator._t("Warning: No ID returned from server for annotation "), annotation);
           }
@@ -84,13 +87,16 @@
     };
 
     Store.prototype.annotationUpdated = function(annotation) {
-      var quote,
+      var quote, quoteHTML,
         _this = this;
       if (__indexOf.call(this.annotations, annotation) >= 0) {
         quote = annotation.quote;
+        quoteHTML = annotation.quoteHTML;
         delete annotation.quote;
+        delete annotation.quoteHTML;
         return this._apiRequest('update', annotation, (function(data) {
           annotation.quote = quote;
+          annotation.quoteHTML = quoteHTML;
           return _this.updateAnnotation(annotation, data);
         }));
       }

@@ -115,8 +115,8 @@ class Annotator.Host extends Annotator
             else if not $(this).hasClass('annotator-hl-temporary')
               $(this).removeClass('annotator-hl-active')
 
-        getSpecialQuotes: =>
-          @specialQuotes
+        getChangedQuotes: =>
+          @changedQuotes
 
         getHref: =>
           uri = decodeURIComponent document.location.href
@@ -150,7 +150,7 @@ class Annotator.Host extends Annotator
           $('html, body').stop().animate {scrollTop: y}, 600
 
         prepareForLoad: =>
-          this.cleanSpecialQuotes()
+          this.cleanChangedQuotes()
           this.scanDocument "Preparing for the loading of annotations"
 
         scanDocument: (reason = "something happened") =>
@@ -258,7 +258,6 @@ class Annotator.Host extends Annotator
 
   setupAnnotation: (annotation) ->
     annotation = super
-    annotation.quote = this.getQuoteForTarget annotation.target[0]
 
     # Highlights are jQuery collections which have a circular references to the
     # annotation via data stored with `.data()`. Therefore, reconfigure the
@@ -273,6 +272,8 @@ class Annotator.Host extends Annotator
       @consumer.createAnnotation (id) =>
         if id?
           annotation.id = id
+          annotation.quote or= this.getQuoteForTarget annotation.target[0]
+          annotation.quoteHTML or= annotation.quote
           @consumer.showEditor annotation
         else
           this.deleteAnnotation annotation

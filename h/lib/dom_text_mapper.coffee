@@ -93,7 +93,7 @@ class window.DomTextMapper
     @path = {}
     @traverseSubTree @pathStartNode
     t1 = @timestamp()
-    console.log "Phase I (Path traversal) took " + (t1 - startTime) + " ms."
+#    console.log "Phase I (Path traversal) took " + (t1 - startTime) + " ms."
 
     path = @getPathTo @pathStartNode
     node = @path[path].node
@@ -104,7 +104,7 @@ class window.DomTextMapper
 #    console.log "Corpus is: " + @corpus
 
     t2 = @timestamp()    
-    console.log "Phase II (offset calculation) took " + (t2 - t1) + " ms."
+#    console.log "Phase II (offset calculation) took " + (t2 - t1) + " ms."
 
     @path
  
