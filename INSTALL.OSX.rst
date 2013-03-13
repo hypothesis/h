@@ -39,6 +39,6 @@ To launch it manually without launchctl::
 
     $ elasticsearch -f -D es.config=/usr/local/opt/elasticsearch/config/elasticsearch.yml
 
-After installing the above, create the virtualenv, as described in the README.rst
+After installing the above, create the virtualenv, as described in the INSTALL.rst
 
 (Run the commands from the directory where you've cloned the repository.)
