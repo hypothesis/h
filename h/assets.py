@@ -28,6 +28,9 @@ annotator_auth = Uglify(
     'h:lib/annotator.auth.js',
     output='lib/annotator.auth.min.js'
 )
+annotator_bridge = Uglify(
+    Coffee('h:js/plugin/bridge.coffee', output='js/plugin/bridge.js')
+)
 annotator_permissions = Uglify(
     'h:lib/annotator.permissions.js',
     output='lib/annotator.permissions.min.js'
@@ -63,7 +66,7 @@ deform = Bundle(
     jquery,
     Uglify('deform:static/scripts/deform.js', output='lib/deform.min.js'),
 )
-easyXDM = Uglify('h:lib/easyXDM.js', output='lib/easyXDM.min.js')
+jschannel = Uglify('h:lib/jschannel.js', output='h:lib/jschannel.min.js')
 jwz = Uglify('h:lib/jwz.js', output='lib/jwz.min.js')
 pagedown = Uglify(
     'h:lib/Markdown.Converter.js',
@@ -86,10 +89,11 @@ app = Bundle(
     angular_sanitize,
     annotator,
     annotator_auth,
+    annotator_bridge,
     annotator_permissions,
     annotator_store,
     d3,
-    easyXDM,
+    jschannel,
     jwz,
     pagedown,
     raf,
@@ -127,13 +131,15 @@ app = Bundle(
 site = SCSS('h:css/site.scss', depends=(base + common), output='css/site.css')
 
 
-# The inject is a easyXDM consumer which loads the annotator in an iframe
-# and sets up a JSON-RPC channel for cross-domain communication between the
-# iframe and the host window.
+# The inject is a script which loads the annotator in an iframe
+# and sets up an RPC channel for cross-domain communication between the
+# the frame and its parent window. It then makes cretain annotator methods
+# available via the bridge plugin.
 inject = Bundle(
-    easyXDM,
     jquery,
+    jschannel,
     annotator,
+    annotator_bridge,
     Uglify(
         Coffee('h:js/inject/host.coffee', output='js/host.js'),
         output='js/hypothesis-host.min.js'

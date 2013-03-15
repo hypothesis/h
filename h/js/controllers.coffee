@@ -54,17 +54,20 @@ class App
         # Creates highlights corresponding bucket when mouse is hovered
         .on 'mousemove', (bucket) =>
           unless $location.path() == '/viewer' and $location.search()?.id?
-            provider.setActiveHighlights heatmap.buckets[bucket]?.map (a) =>
-              a.id
+            provider.notify
+              method: 'setActiveHighlights'
+              params: heatmap.buckets[bucket]?.map (a) => a.id
 
         # Gets rid of them after
         .on 'mouseout', =>
           if $location.path() == '/viewer'
             unless $location.search()?.id?
               bucket = heatmap.buckets[$location.search()?.bucket]
-              provider.setActiveHighlights bucket?.map (a) => a.id
+              provider.notify
+                method: 'setActiveHighlights'
+                params: bucket?.map (a) => a.id
           else
-            provider.setActiveHighlights null
+            provider.notify method: 'setActiveHighlights'
 
         # Does one of a few things when a tab is clicked depending on type
         .on 'click', (bucket) =>
@@ -76,7 +79,7 @@ class App
             next = highlights.reduce (next, hl) ->
               if next < hl.offset.top < threshold then hl.offset.top else next
             , threshold - height
-            provider.scrollTop next - pad
+            provider.notify method: 'scrollTop', params: next - pad
 
           # If it's the lower tab, scroll to next bucket below
           else if heatmap.isLower bucket
@@ -84,7 +87,7 @@ class App
             next = highlights.reduce (next, hl) ->
               if threshold < hl.offset.top < next then hl.offset.top else next
             , offset + height
-            provider.scrollTop next - pad
+            provider.notify method: 'scrollTop', params: next - pad
 
           # If it's neither of the above, load the bucket into the viewer
           else
@@ -309,15 +312,15 @@ class Editor
     save = ->
       $scope.$apply ->
         $location.path('/viewer').replace()
-        annotator.provider.onEditorSubmit()
-        annotator.provider.onEditorHide()
+        annotator.provider.notify method: 'onEditorSubmit'
+        annotator.provider.notify method: 'onEditorHide'
 
     cancel = ->
       $scope.$apply ->
         search = $location.search() or {}
         delete search.id
         $location.path('/viewer').search(search).replace()
-        annotator.provider.onEditorHide()
+        annotator.provider.notify method: 'onEditorHide'
 
     annotator.subscribe 'annotationCreated', save
     annotator.subscribe 'annotationDeleted', cancel
@@ -370,7 +373,7 @@ class Viewer
         highlights = [annotation.id]
       else
         highlights = []
-      provider.setActiveHighlights highlights
+      provider.notify method: 'setActiveHighlights', params: highlights
 
     $scope.$on '$destroy', ->
       if listening then plugins.Heatmap.unsubscribe 'updated', refresh

@@ -18,6 +18,10 @@ This product also includes the following third-party components:
 
    Copyright (c) 2012, Michael Bostock
 
+ * jschannel (https://github.com/mozilla/jschannel)
+
+   Copyright (C) 2010, Lloyd Hilaiel
+
  * yepnope.js (http://yepnopejs.com/)
 
    By Alex Sexton and Ralph Holzmann

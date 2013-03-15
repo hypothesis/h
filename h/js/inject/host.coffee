@@ -34,63 +34,62 @@ class Annotator.Host extends Annotator
     @app = @options.app
     delete @options.app
 
+    # Create the iframe
+    @frame = $('<iframe></iframe>')
+    .css(visibility: 'hidden')
+    .attr('src', "#{@app}#/?xdm=#{encodeURIComponent(window.location.origin)}")
+    .appendTo(@wrapper)
+    .addClass('annotator-frame annotator-outer annotator-collapsed')
+    .bind 'load', => this._setupXDM()
+
     # Load plugins
     for own name, opts of @options
       if not @plugins[name]
         this.addPlugin(name, opts)
 
-    # Grab this for exporting the iframe from easyXDM
-    annotator = this
+  _setupXDM: ->
+    # Set up the bridge plugin, which bridges the main annotation methods
+    # between the host page and the panel widget.
+    this.addPlugin 'Bridge',
+      origin: @frame[0].contentWindow.location.origin
+      window: @frame[0].contentWindow
+      formatter: (annotation) =>
+        formatted = {}
+        for k, v of annotation when k in ['quote', 'ranges']
+          formatted[k] = v
+        formatted
+      parser: (annotation) =>
+        parsed = {}
+        for k, v of annotation when k in ['id', 'quote', 'ranges']
+          parsed[k] = v
+        parsed
 
-    # Establish cross-domain communication
-    @consumer = new easyXDM.Rpc
-      channel: 'annotator'
-      container: @wrapper[0]
-      local: options.local
-      onReady: () ->
-        # easyXDM updates this configuration object which provides access
-        # to the `props` attribute to find the value of the iframe's src
-        # attribute to find the iframe created by easyXDM.
-        frame = $(this.container).find('[src^="'+@props.src+'"]')
-          .css('visibility', 'visible')
-        # Export the iframe element via the private `annotator` variable,
-        # which references the `Annotator.Host` object.
-        annotator.frame = frame
-      swf: options.swf
-      props:
-        className: 'annotator-frame annotator-outer annotator-collapsed'
-        style:
-          visibility: 'hidden'
-      remote: @app
-    ,
-      local:
-        publish: (args..., k, fk) => this.publish args...
-        setupAnnotation: => this.setupAnnotation arguments...
+    # Build a channel for the panel UI
+    @panel = Channel.build
+      origin: @frame[0].contentWindow.location.origin
+      scope: 'annotator:panel'
+      window: @frame[0].contentWindow
+      onReady: =>
+        @frame.css('visibility', 'visible')
 
-        deleteAnnotation: (annotation) =>
-          toDelete = []
-          @wrapper.find('.annotator-hl')
-          .each ->
-            data = $(this).data('annotation')
-            if data.id == annotation.id and data not in toDelete
-              toDelete.push data
-          this.deleteAnnotation d for d in toDelete
+        @panel
 
-        loadAnnotations: => this.loadAnnotations arguments...
-        onEditorHide: this.onEditorHide
-        onEditorSubmit: this.onEditorSubmit
+        .bind('onEditorHide', this.onEditorHide)
+        .bind('onEditorSubmit', this.onEditorSubmit)
 
-        showFrame: =>
+        .bind('showFrame', =>
           @frame.css 'margin-left': "#{-1 * @frame.width()}px"
           @frame.removeClass 'annotator-no-transition'
           @frame.removeClass 'annotator-collapsed'
+        )
 
-        hideFrame: =>
+        .bind('hideFrame', =>
           @frame.css 'margin-left': ''
           @frame.removeClass 'annotator-no-transition'
           @frame.addClass 'annotator-collapsed'
+        )
 
-        dragFrame: (screenX) =>
+        .bind('dragFrame', (ctx, screenX) =>
           if screenX > 0
             if @drag.last?
               @drag.delta += screenX - @drag.last
@@ -98,24 +97,27 @@ class Annotator.Host extends Annotator
           unless @drag.tick
             @drag.tick = true
             window.requestAnimationFrame this._dragRefresh
+        )
 
-        getHighlights: =>
+        .bind('getHighlights', =>
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
             height: $(this).outerHeight(true)
-            data: $(this).data('annotation')
+            data: $(this).data('annotation').id
           .get()
           offset: $(window).scrollTop()
+        )
 
-        setActiveHighlights: (ids=[]) =>
+        .bind('setActiveHighlights', (ctx, ids=[]) =>
           @wrapper.find('.annotator-hl')
           .each ->
             if $(this).data('annotation').id in ids
               $(this).addClass('annotator-hl-active')
             else if not $(this).hasClass('annotator-hl-temporary')
               $(this).removeClass('annotator-hl-active')
+        )
 
-        getHref: =>
+        .bind('getHref', =>
           uri = decodeURIComponent document.location.href
           if document.location.hash
             uri = uri.slice 0, (-1 * location.hash.length)
@@ -124,8 +126,9 @@ class Annotator.Host extends Annotator
           $('link[rel^="canonical"]').each ->
             uri = decodeURIComponent this.href
           return uri
+        )
 
-        getMaxBottom: =>
+        .bind('getMaxBottom', =>
           sel = '*' + (":not(.annotator-#{x})" for x in [
             'adder', 'outer', 'notice', 'filter', 'frame'
           ]).join('')
@@ -144,25 +147,18 @@ class Annotator.Host extends Annotator
             else
               0
           Math.max.apply(Math, all)
+        )
 
-        scrollTop: (y) =>
+        .bind('scrollTop', (ctx, y) =>
           $('html, body').stop().animate {scrollTop: y}, 600
-
-      remote:
-        publish: {}
-        addPlugin: {}
-        createAnnotation: {}
-        showEditor: {}
-        showViewer: {}
-        back: {}
-        update: {}
+        )
 
   _setupWrapper: ->
     @wrapper = @element
     .on 'mouseup', =>
       if not @ignoreMouseup
         setTimeout =>
-          @consumer.back() unless @selectedRanges?.length
+          unless @selectedRanges?.length then @panel?.notify method: 'back'
     this
 
   _setupDocumentEvents: ->
@@ -191,7 +187,7 @@ class Annotator.Host extends Annotator
               height: $(window).height()
               position: 'absolute'
               top: $(window).scrollTop()
-          @consumer.update()
+          @panel?.notify method: 'publish', params: 'hostUpdated'
     document.addEventListener 'touchmove', update
     document.addEventListener 'touchstart', =>
       touch = true
@@ -235,32 +231,13 @@ class Annotator.Host extends Annotator
       'margin-left': "#{m}px"
       width: "#{w}px"
 
-  setupAnnotation: (annotation) ->
-    annotation = super
-
-    # Highlights are jQuery collections which have a circular references to the
-    # annotation via data stored with `.data()`. Therefore, reconfigure the
-    # property to hide them from serialization.
-    Object.defineProperty annotation, 'highlights',
-      enumerable: false
-
-    annotation
-
   showEditor: (annotation) =>
-    if not annotation.id?
-      @consumer.createAnnotation (id) =>
-        if id?
-          annotation.id = id
-          @consumer.showEditor annotation
-        else
-          this.deleteAnnotation annotation
-          @ignoreMouseup = false
-    else
-      @consumer.showEditor annotation
+    @plugins.Bridge.showEditor annotation
+    this
 
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
     # viewer but preserve the manipulation of the attribute `mouseIsDown` which
-    # is needed for preventing the sidebar from closing while annotating.
+    # is needed for preventing the panel from closing while annotating.
     unless event and this.isAnnotator(event.target)
       @mouseIsDown = true
