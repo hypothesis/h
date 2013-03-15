@@ -24,13 +24,11 @@ class App
     dynamicBucket = true
 
     heatmap.element.bind 'click', =>
-      $scope.$apply ->
-        return unless drafts.discard()
-        $location.search('id', null).replace()
-        dynamicBucket = true
-        annotator.showViewer()
-        annotator.show()
-        heatmap.publish 'updated'
+      return unless drafts.discard()
+      $location.search('id', null).replace()
+      dynamicBucket = true
+      annotator.showViewer()
+      heatmap.publish 'updated'
 
     heatmap.subscribe 'updated', =>
       elem = d3.select(heatmap.element[0])
@@ -41,8 +39,8 @@ class App
 
       {highlights, offset} = elem.datum()
 
-      if dynamicBucket and $location.path() == '/viewer'
-        unless $location.search()?.detail
+      if dynamicBucket and $location.path() == '/viewer' and annotator.visible
+        unless $location.search()?.id
           bottom = offset + heatmap.element.height()
           annotations = highlights.reduce (acc, hl) =>
             if hl.offset.top >= offset and hl.offset.top <= bottom
@@ -90,12 +88,10 @@ class App
 
           # If it's neither of the above, load the bucket into the viewer
           else
+            return unless drafts.discard()
             dynamicBucket = false
-            $scope.$apply ->
-              return unless drafts.discard()
-              $location.search('id', null)
-              annotator.showViewer heatmap.buckets[bucket]
-            annotator.show()
+            $location.search('id', null)
+            annotator.showViewer heatmap.buckets[bucket]
 
     $scope.submit = (form) ->
       return unless form.$valid
@@ -349,6 +345,7 @@ class Viewer
 
     listening = false
     refresh = =>
+      return unless annotator.visible
       this.refresh $scope, $routeParams, threading, plugins.Heatmap
       if listening
         if $scope.detail

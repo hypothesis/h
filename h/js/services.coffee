@@ -12,6 +12,9 @@ class Hypothesis extends Annotator
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
 
+  # Internal state
+  visible: false      # *  Whether the sidebar is visible
+
   # Here as a noop just to make the Permissions plugin happy
   # XXX: Change me when Annotator stops assuming things about viewers
   viewer:
@@ -72,40 +75,49 @@ class Hypothesis extends Annotator
     heatmap = @plugins.Heatmap
     for event in ['hostUpdated', 'annotationsLoaded']
       this.subscribe event, =>
-        @provider.getHighlights ({highlights, offset}) ->
-          $rootScope.$apply ->
+        @provider.call
+          method: 'getHighlights'
+          success: ({highlights, offset}) ->
             heatmap.updateHeatmap
               highlights: highlights.map (hl) ->
-                thread = (threading.getContainer hl.data.id)
+                thread = (threading.getContainer hl.data)
                 hl.data = thread.message?.annotation
                 hl
               offset: offset
 
   _setupXDM: ->
-    $scope = @element.scope()
     $location = @element.injector().get '$location'
+    $rootScope = @element.injector().get '$rootScope'
+    $window = @element.injector().get '$window'
     threading = @element.injector().get 'threading'
 
-    @provider = new easyXDM.Rpc
-      swf: @options.swf
-      onReady: =>
-        # Get the location of the annotated document
-        @provider.getHref (href) =>
-          this.addPlugin 'Store',
-            annotationData:
-              uri: href
-            loadFromSearch:
-              limit: 1000
-              uri: href
-            prefix: '/api/current'
+    this.addPlugin 'Bridge',
+      origin: $location.search().xdm
+      window: $window.parent
+      formatter: (annotation) =>
+        formatted = {}
+        for k, v of annotation when k in ['id', 'quote', 'ranges']
+          formatted[k] = v
+        formatted
+      parser: (annotation) =>
+        parsed = {}
+        for k, v of annotation when k in ['quote', 'ranges']
+          parsed[k] = v
+        parsed
 
+    @provider = Channel.build
+      origin: $location.search().xdm
+      scope: 'annotator:panel'
+      window: $window.parent
+      onReady: =>
+        patch_update = (store) =>
           # When the store plugin finishes a request, update the annotation
           # using a monkey-patched update function which updates the threading
           # if the annotation has a newly-assigned id and ensures that the id
           # is enumerable.
-          this.plugins.Store.updateAnnotation = (annotation, data) =>
-            {deleteAnnotation, loadAnnotations} = @provider
-            $scope.$apply ->
+          store.updateAnnotation = (annotation, data) =>
+            bridge = @plugins.Bridge
+            $rootScope.$apply ->
               if annotation.id != data.id
                 # Remove the old annotation from the threading
                 thread = (threading.getContainer annotation.id)
@@ -132,14 +144,9 @@ class Hypothesis extends Annotator
                 # deletion event that gets published in the provider is not
                 # cross-published back here in the consumer and therefore
                 # the Store does not delete the annotation.
-                # XXX Maybe add provider function for updating id
-                deleteAnnotation
-                  id: annotation.id
-                loadAnnotations [
-                  id: data.id
-                  ranges: data.ranges
-                  quote: data.quote
-                ]
+                if annotation.ranges?.length
+                  bridge.deleteAnnotation annotation
+                  bridge.setupAnnotation data
 
                 # The id is no longer temporary and should be serialized
                 # on future Store requests.
@@ -158,7 +165,21 @@ class Hypothesis extends Annotator
               # Update the annotation with the new data
               annotation = angular.extend annotation, data
 
+            # Reflect the newest information in the heatmap
             this.publish 'hostUpdated'
+
+        # Get the location of the annotated document
+        @provider.call
+          method: 'getHref'
+          success: (href) =>
+            this.addPlugin 'Store',
+              annotationData:
+                uri: href
+              loadFromSearch:
+                limit: 1000
+                uri: href
+              prefix: '/api/current'
+            patch_update this.plugins.Store
 
         # Dodge toolbars [DISABLE]
         #@provider.getMaxBottom (max) =>
@@ -168,57 +189,20 @@ class Hypothesis extends Annotator
         #  @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
 
         this.publish 'hostUpdated'
-    ,
-      local:
-        publish: (args..., k, fk) => this.publish args...
-        addPlugin: => this.addPlugin arguments...
-        createAnnotation: =>
-          if @plugins.Permissions.user?
-            annotation = this.createAnnotation()
-            thread = (threading.getContainer annotation.id)
-            thread.message =
-              annotation: annotation
-              id: annotation.id
-              references: []
-            annotation.id
-          else
-            $scope.$apply => $scope.$broadcast 'showAuth'
-            this.show()
-            null
-        showEditor: (annotation) =>
-          thread = (threading.getContainer annotation.id)
-          if thread.message?.annotation
-            angular.extend thread.message.annotation, annotation
-          else
-            thread.message =
-              annotation: annotation
-              id: annotation.id
-              references: annotation.thread?.split('/')
-          $scope.$apply => this.showEditor thread.message.annotation
-          this.show()
-        showViewer: (annotations) =>
-          annotations = for a in annotations
-            thread = (threading.getContainer a.id)
-            thread.message?.annotation or a
-          $scope.$apply => this.showViewer annotations
-          this.show()
-        back: => $scope.$apply => $scope.$broadcast 'back'
-        update: => this.publish 'hostUpdated'
-      remote:
-        publish: {}
-        setupAnnotation: {}
-        deleteAnnotation: {}
-        loadAnnotations: {}
-        onEditorHide: {}
-        onEditorSubmit: {}
-        showFrame: {}
-        hideFrame: {}
-        dragFrame: {}
-        getHighlights: {}
-        setActiveHighlights: {}
-        getHref: {}
-        getMaxBottom: {}
-        scrollTop: {}
+
+    @provider
+
+    .bind('publish', (ctx, args...) => this.publish args...)
+
+    .bind('back', =>
+      # This guy does stuff when you "back out" of the interface.
+      # (Currently triggered by a click on the source page.)
+      return unless drafts.discard()
+      if $location.path() == '/viewer' and $location.search()?.id?
+        $rootScope.$apply => $location.search('id', null).replace()
+      else
+        this.hide()
+    )
 
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
@@ -271,79 +255,66 @@ class Hypothesis extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
 
-  createAnnotation: ->
-    annotation = super
-
-    # Assign temporary ids to newly created annotations. It is temporary
-    # by virtue of not being serialized (non-enumerable) and clobbered
-    # later, after saving. Use a base64 encoding the JSON representation.
-    Object.defineProperty annotation, 'id',
-      configurable: true
-      enumerable: false
-      writable: true
-      value: window.btoa (JSON.stringify annotation + Math.random())
-
-    annotation
-
-  # Public: Initialises an annotation either from an object representation or
-  # an annotation created with Annotator#createAnnotation(). It finds the
-  # selected range and higlights the selection in the DOM.
-  #
-  # annotation - An annotation Object to initialise.
-  # fireEvents - Will fire the 'annotationCreated' event if true.
-  #
-  # Examples
-  #
-  #   # Create a brand new annotation from the currently selected text.
-  #   annotation = annotator.createAnnotation()
-  #   annotation = annotator.setupAnnotation(annotation)
-  #   # annotation has now been assigned the currently selected range
-  #   # and a highlight appended to the DOM.
-  #
-  #   # Add an existing annotation that has been stored elsewere to the DOM.
-  #   annotation = getStoredAnnotationWithSerializedRanges()
-  #   annotation = annotator.setupAnnotation(annotation)
-  #
-  # Returns the initialised annotation.
   setupAnnotation: (annotation) ->
     # Delagate to Annotator implementation after we give it a valid array of
     # ranges. This is needed until Annotator stops assuming ranges need to be
     # added.
-    if annotation.thread
+    unless annotation.ranges?
       annotation.ranges = []
+
+    # Assign a temporary id if necessary
+    unless annotation.id?
+      Object.defineProperty annotation, 'id',
+        configurable: true
+        enumerable: false
+        writable: true
+        value: window.btoa Math.random()
+
+    # Thread it
+    threading = @element.injector().get 'threading'
+    thread = (threading.getContainer annotation.id)
+    if thread.message?.annotation
+      angular.extend thread.message.annotation, annotation
     else
-      @provider.setupAnnotation
+      thread.message =
+        annotation: annotation
         id: annotation.id
-        ranges: annotation.ranges
+        references: annotation.thread?.split('/')
 
   showViewer: (annotations=[]) =>
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) ->
         $rootScope.annotations = annotations
-        $location.path('/viewer')
-        .replace()
+        $location.path('/viewer').replace()
+        $rootScope.$digest()
     ]
+    this.show()
 
   showEditor: (annotation) =>
     @element.injector().invoke [
-      '$location',
-      ($location) ->
+      '$location', '$rootScope',
+      ($location, $rootScope) ->
         $location.path('/editor')
         .search
           id: annotation.id
         .replace()
+        $rootScope.$digest()
     ]
+    this.show()
+    this
 
   show: =>
-    @provider.showFrame()
+    @visible = true
+    @provider.notify method: 'showFrame'
     @element.find('#toolbar').addClass('shown')
       .find('.tri').attr('draggable', true)
 
   hide: =>
     @lastWidth = window.innerWidth
-    @provider.setActiveHighlights []
-    @provider.hideFrame()
+    @visible = false
+    @provider.notify method: 'setActiveHighlights'
+    @provider.notify method: 'hideFrame'
     @element.find('#toolbar').removeClass('shown')
       .find('.tri').attr('draggable', false)
 
