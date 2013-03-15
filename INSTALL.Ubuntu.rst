@@ -1,9 +1,19 @@
-Installing Hypothes.is on Ubuntu Server 12.04.1 LTS
+Installing Hypothes.is on Ubuntu Server 12.04.2 LTS
 ######################
 
 To install the dependencies, run these commands::
 
-    $ sudo apt-get install python-{dev,pip,virtualenv} ruby-compass coffeescript npm git libpq-dev
+    $ sudo apt-get install python-{dev,pip,virtualenv} ruby-compass git libpq-dev
+
+You will need the latest Node:
+
+    sudo add-apt-repository ppa:chris-lea/node.js
+    sudo apt-get update
+    sudo apt-get install nodejs
+
+And the latest version of CoffeeScript:
+
+    sudo npm install --global coffee-script
 
 This will install almost anything you need for development.
 The only thing you need to install manually is elasticsearch_,
