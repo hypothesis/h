@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-859d4e3
+** Annotator 1.2.5-dev-9358e82
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-13 14:54:15Z
+** Built at: 2013-03-15 23:09:29Z
 */
 
 (function() {
@@ -922,7 +922,9 @@
         } else {
 
         }
-        return normalizedRange;
+        return {
+          range: normalizedRange
+        };
       } catch (exception) {
         if (exception instanceof Range.RangeError) {
           return null;
@@ -933,7 +935,7 @@
     };
 
     Annotator.prototype.findAnchorFromPositionSelector = function(target) {
-      var browserRange, currentQuote, mappings, savedQuote, selector;
+      var browserRange, currentQuote, mappings, normalizedRange, savedQuote, selector;
       selector = this.findSelector(target.selector, "position");
       if (selector == null) return null;
       savedQuote = this.getQuoteForTarget(target);
@@ -949,94 +951,79 @@
       }
       mappings = this.domMapper.getMappingsForCharRange(selector.start, selector.end);
       browserRange = new Range.BrowserRange(mappings.realRange);
-      return browserRange.normalize();
+      normalizedRange = browserRange.normalize();
+      return {
+        range: normalizedRange
+      };
     };
 
     Annotator.prototype.findAnchorWithTwoPhaseFuzzyMatching = function(target) {
-      var browserRange, comparison, currentQuote, errorLevel, expectedPrefixStart, expectedSuffixStart, len, mappings, normalizedRange, posSelector, prefix, prefixEnd, prefixResult, quote, quoteLength, quoteSelector, remainingText, savedQuote, suffix, suffixResult, suffixStart;
+      var anchor, browserRange, expectedEnd, expectedStart, match, normalizedRange, options, posSelector, prefix, quote, quoteSelector, result, suffix;
       quoteSelector = this.findSelector(target.selector, "context+quote");
       prefix = quoteSelector != null ? quoteSelector.prefix : void 0;
       suffix = quoteSelector != null ? quoteSelector.suffix : void 0;
       quote = quoteSelector != null ? quoteSelector.exact : void 0;
-      if (!((prefix != null) && (suffix != null))) return [null, null, null];
+      if (!((prefix != null) && (suffix != null))) return null;
       posSelector = this.findSelector(target.selector, "position");
-      expectedPrefixStart = posSelector != null ? posSelector.start : void 0;
-      len = this.domMapper.getDocLength();
-      if (expectedPrefixStart == null) expectedPrefixStart = len / 2;
-      this.fuzzyMatcher.setMatchThreshold = 0.5;
-      this.fuzzyMatcher.setMatchDistance = len;
-      prefixResult = this.fuzzyMatcher.search(this.domMapper.corpus, prefix, expectedPrefixStart);
-      if (!prefixResult.length) return [null, null, null];
-      prefixEnd = prefixResult[0].end;
-      quoteLength = quote != null ? quote.length : void 0;
-      if (posSelector != null) {
-        quoteLength || (quoteLength = posSelector.end - posSelector.start);
-      }
-      quoteLength || (quoteLength = 64);
-      remainingText = this.domMapper.corpus.substr(prefixEnd);
-      expectedSuffixStart = quoteLength;
-      suffixResult = this.fuzzyMatcher.search(remainingText, suffix, expectedSuffixStart);
-      if (!suffixResult.length) return [null, null, null];
-      suffixStart = prefixEnd + suffixResult[0].start;
-      mappings = this.domMapper.getMappingsForCharRange(prefixEnd, suffixStart);
-      browserRange = new Range.BrowserRange(mappings.realRange);
+      expectedStart = posSelector != null ? posSelector.start : void 0;
+      expectedEnd = posSelector != null ? posSelector.end : void 0;
+      options = {
+        contextMatchDistance: this.domMapper.getDocLength() * 2,
+        contextMatchThreshold: 0.5,
+        patternMatchThreshold: 0.5
+      };
+      result = this.domMatcher.searchFuzzyWithContext(prefix, suffix, quote, expectedStart, expectedEnd, false, null, options);
+      if (!result.matches.length) return null;
+      match = result.matches[0];
+      browserRange = new Range.BrowserRange(match.realRange);
       normalizedRange = browserRange.normalize();
-      if (quote != null) {
-        savedQuote = this.normalizeString(quote);
-        currentQuote = this.normalizeString(this.domMapper.getContentForCharRange(prefixEnd, suffixStart));
-        if (currentQuote !== savedQuote) {
-          comparison = this.fuzzyMatcher.compare(savedQuote, currentQuote);
-          errorLevel = comparison.lev / savedQuote.length;
-          if (errorLevel < 0.5) {
-            return [normalizedRange, currentQuote, comparison.diffHTML];
-          } else {
-            return [null, null, null];
-          }
-        } else {
-          return [normalizedRange, null, null];
-        }
-      } else {
-        return [normalizedRange, null, null];
-      }
+      anchor = {
+        range: normalizedRange,
+        quote: !match.exact ? match.found : void 0,
+        quoteHTML: !match.exact ? match.comparison.diffHTML : void 0
+      };
+      return anchor;
     };
 
     Annotator.prototype.findAnchorWithFuzzyMatching = function(target) {
-      var browserRange, len, match, normalizedRange, options, posSelector, quote, quoteHTML, quoteSelector, result, start;
+      var anchor, browserRange, expectedStart, len, match, normalizedRange, options, posSelector, quote, quoteSelector, result;
       quoteSelector = this.findSelector(target.selector, "context+quote");
       quote = quoteSelector != null ? quoteSelector.exact : void 0;
-      if (quote == null) return [null, null, null];
+      if (quote == null) return null;
       posSelector = this.findSelector(target.selector, "position");
-      start = posSelector != null ? posSelector.start : void 0;
+      expectedStart = posSelector != null ? posSelector.start : void 0;
       len = this.domMapper.getDocLength();
-      start || (start = len / 2);
+      if (expectedStart == null) expectedStart = len / 2;
       options = {
         matchDistance: len,
-        withDiff: true
+        withFuzzyComparison: true
       };
-      result = this.domMatcher.searchFuzzy(quote, start, false, null, options);
-      if (result.matches.length !== 1) return [null, null, null];
+      result = this.domMatcher.searchFuzzy(quote, expectedStart, false, null, options);
+      if (!result.matches.length) return null;
       match = result.matches[0];
-      quoteHTML = !match.exact ? match.diffHTML : void 0;
       browserRange = new Range.BrowserRange(match.realRange);
       normalizedRange = browserRange.normalize();
-      return [normalizedRange, match.found, quoteHTML];
+      anchor = {
+        range: normalizedRange,
+        quote: !match.exact ? match.found : void 0,
+        quoteHTML: !match.exact ? match.comparison.diffHTML : void 0
+      };
+      return anchor;
     };
 
     Annotator.prototype.findAnchor = function(target) {
-      var anchor, quote, quoteHTML, _ref2, _ref3;
+      var anchor;
       anchor = this.findAnchorFromXPathRangeSelector(target);
-      anchor || (anchor = this.findAnchorFromPositionSelector(target));
+      if (anchor == null) anchor = this.findAnchorFromPositionSelector(target);
       if (anchor == null) {
-        _ref2 = this.findAnchorWithTwoPhaseFuzzyMatching(target), anchor = _ref2[0], quote = _ref2[1], quoteHTML = _ref2[2];
+        anchor = this.findAnchorWithTwoPhaseFuzzyMatching(target);
       }
-      if (anchor == null) {
-        _ref3 = this.findAnchorWithFuzzyMatching(target), anchor = _ref3[0], quote = _ref3[1], quoteHTML = _ref3[2];
-      }
-      return [anchor, quote, quoteHTML];
+      if (anchor == null) anchor = this.findAnchorWithFuzzyMatching(target);
+      return anchor;
     };
 
     Annotator.prototype.setupAnnotation = function(annotation) {
-      var normed, normedRanges, quote, quoteHTML, r, root, t, _k, _l, _len3, _len4, _ref2, _ref3;
+      var anchor, normed, normedRanges, root, t, _k, _l, _len3, _len4, _ref2;
       root = this.wrapper[0];
       annotation.target || (annotation.target = this.selectedTargets);
       if (!(annotation.target instanceof Array)) {
@@ -1047,17 +1034,17 @@
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
         t = _ref2[_k];
         try {
-          _ref3 = this.findAnchor(t), r = _ref3[0], quote = _ref3[1], quoteHTML = _ref3[2];
-          if (quote != null) {
-            t.quote = quote;
-            t.quoteHTML = quoteHTML;
+          anchor = this.findAnchor(t);
+          if ((anchor != null ? anchor.quote : void 0) != null) {
+            t.quote = anchor.quote;
+            t.quoteHTML = anchor.quoteHTML;
             this.changedQuotes[annotation.id] = {
-              text: quote,
-              diffHTML: quoteHTML
+              text: anchor.quote,
+              diffHTML: anchor.quoteHTML
             };
           }
-          if (r != null) {
-            normedRanges.push(r);
+          if ((anchor != null ? anchor.range : void 0) != null) {
+            normedRanges.push(anchor.range);
           } else {
             console.log("Could not find anchor for annotation target '" + t.id + "' (for annotation '" + annotation.id + "').");
             this.publish('findAnchorFail', [annotation, t]);

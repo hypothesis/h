@@ -160,9 +160,12 @@ class window.DTM_DMPMatcher
 
   # Compare two string slices, get Levenhstein and visual diff
   compare: (text1, text2) ->
+    unless (text1? and text2?)
+      throw new Error "Can not compare non-existing strings!"
     result = {}
     result.diff = @dmp.diff_main text1, text2
     result.lev = @dmp.diff_levenshtein result.diff
+    result.errorLevel = result.lev / text1.length
     @dmp.diff_cleanupSemantic result.diff
     result.diffHTML = @dmp.diff_prettyHtml result.diff
     result
