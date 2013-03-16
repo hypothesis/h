@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-9358e82
+** Annotator 1.2.5-dev-2bc87f7
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-15 23:09:29Z
+** Built at: 2013-03-16 13:15:46Z
 */
 
 (function() {
@@ -675,12 +675,7 @@
     Annotator.prototype._setupMatching = function() {
       this.domMapper = new DomTextMapper();
       this.domMatcher = new DomTextMatcher(this.domMapper);
-      if (typeof DTM_DMPMatcher !== "undefined" && DTM_DMPMatcher !== null) {
-        this.fuzzyMatcher = new DTM_DMPMatcher();
-        return this.fuzzyMatcher.setCaseSensitive(false);
-      } else {
-        return console.log("Could not init fuzzy matcher. Expect problems.");
-      }
+      return this;
     };
 
     Annotator.prototype._setupWrapper = function() {
@@ -902,7 +897,7 @@
     };
 
     Annotator.prototype.findAnchorFromXPathRangeSelector = function(target) {
-      var currentQuote, endInfo, endOffset, normalizedRange, savedQuote, selector, startInfo, startOffset;
+      var content, currentQuote, endInfo, endOffset, normalizedRange, savedQuote, selector, startInfo, startOffset;
       selector = this.findSelector(target.selector, "xpath range");
       if (selector == null) return null;
       try {
@@ -913,7 +908,8 @@
           startOffset = startInfo.start;
           endInfo = this.domMapper.getInfoForNode(normalizedRange.end);
           endOffset = endInfo.end;
-          currentQuote = this.normalizeString(this.domMapper.getContentForCharRange(startOffset, endOffset));
+          content = this.domMapper.getContentForCharRange(startOffset, endOffset);
+          currentQuote = this.normalizeString(content);
           if (currentQuote !== savedQuote) {
             return null;
           } else {
@@ -935,12 +931,13 @@
     };
 
     Annotator.prototype.findAnchorFromPositionSelector = function(target) {
-      var browserRange, currentQuote, mappings, normalizedRange, savedQuote, selector;
+      var browserRange, content, currentQuote, mappings, normalizedRange, savedQuote, selector;
       selector = this.findSelector(target.selector, "position");
       if (selector == null) return null;
       savedQuote = this.getQuoteForTarget(target);
       if (savedQuote != null) {
-        currentQuote = this.normalizeString(this.domMapper.getContentForCharRange(selector.start, selector.end));
+        content = this.domMapper.getContentForCharRange(selector.start, selector.end);
+        currentQuote = this.normalizeString(content);
         if (currentQuote !== savedQuote) {
           return null;
         } else {
