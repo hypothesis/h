@@ -142,15 +142,8 @@ class App
         plugins.Permissions.setUser(null)
         delete plugins.Auth
       if annotator.plugins.Store?
-        for annotation in annotator.dumpAnnotations()
-          provider.deleteAnnotation annotation
-          thread = (threading.getContainer annotation.id)
-          if thread.parent
-            thread.message = null
-            threading.pruneEmpties thread.parent
-          else
-            delete threading.idTable[annotation.id]
-        annotator.plugins.Store.loadAnnotations()
+        annotator.plugins.Store.annotations = []
+        annotator.plugins.Store.pluginInit()
 
     $scope.$watch 'visible', (newValue) ->
       if newValue then annotator.show() else annotator.hide()
