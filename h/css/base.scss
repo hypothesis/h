@@ -188,7 +188,7 @@ $em: 14 / 1em !default;
 
 
 //FONTICON////////////////////////////////
-@mixin fonticon($char, $iconside, $offset: 0) {
+@mixin fonticon($char, $iconside, $offset: .2em) {
   text-decoration: none;
   cursor: pointer;
   color: $gray;
@@ -199,7 +199,6 @@ $em: 14 / 1em !default;
   @if $iconside == left {
     &:before {
       content: $char;
-      vertical-align: -.1em;
       font-family: 'icomoon';
       font-style: normal;
       margin-right: $offset;
@@ -216,7 +215,6 @@ $em: 14 / 1em !default;
     }
     &:after {
       content: $char;
-      vertical-align: -.1em;
       font-family: 'icomoon';
       font-style: normal;
       margin-left: $offset;
