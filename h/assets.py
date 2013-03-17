@@ -39,6 +39,9 @@ annotator_store = Uglify(
     'h:lib/annotator.store.js',
     output='lib/annotator.store.min.js'
 )
+annotator_threading = Uglify(
+    Coffee('h:js/plugin/threading.coffee', output='js/plugin/threading.js')
+)
 
 # Angular
 angular = Uglify('h:lib/angular.js', output='lib/angular.min.js')
@@ -92,6 +95,7 @@ app = Bundle(
     annotator_bridge,
     annotator_permissions,
     annotator_store,
+    annotator_threading,
     d3,
     jschannel,
     jwz,

@@ -11,6 +11,7 @@ class Hypothesis extends Annotator
       showEditPermissionsCheckbox: false,
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
+    Threading: {}
 
   # Internal state
   visible: false      # *  Whether the sidebar is visible
@@ -20,14 +21,8 @@ class Hypothesis extends Annotator
   viewer:
     addField: (-> )
 
-  this.$inject = [
-    '$document', '$location', '$rootScope',
-    'threading'
-  ]
-  constructor: (
-    $document, $location, $rootScope,
-    threading
-  ) ->
+  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts']
+  constructor: ($document, $location, $rootScope, $route, drafts) ->
     super ($document.find 'body')
 
     # Load plugins
@@ -42,38 +37,12 @@ class Hypothesis extends Annotator
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       permissions = @plugins.Permissions
       annotation.user = permissions.options.userId(permissions.user)
-      Object.defineProperty annotation, 'draft',
-        configurable: true
-        enumerable: false
-        writable: true
-        value: true
-
-    # Update threads when annotations are deleted
-    this.subscribe 'annotationDeleted', (annotation) =>
-      $rootScope.$apply ->
-        thread = threading.getContainer annotation.id
-        thread.message = null
-        if thread.parent then threading.pruneEmpties thread.parent
-
-    # Thread the annotations after loading
-    this.subscribe 'annotationsLoaded', (annotations) =>
-      $rootScope.$apply ->
-        threading.thread annotations.map (a) ->
-          annotation: a
-          id: a.id
-          references: a.thread?.split '/'
-
-    # Update the thread when an annotation changes
-    this.subscribe 'annotationUpdated', (annotation) =>
-      $rootScope.$apply ->
-        (threading.getContainer annotation.id).message =
-          annotation: annotation
-          id: annotation.id
-          references: annotation.thread?.split '/'
+      drafts.add annotation
 
     # Update the heatmap when the host is updated or annotations are loaded
     bridge = @plugins.Bridge
     heatmap = @plugins.Heatmap
+    threading = @threading
     for event in ['hostUpdated', 'annotationsLoaded']
       this.subscribe event, =>
         @provider.call
@@ -90,7 +59,7 @@ class Hypothesis extends Annotator
     $location = @element.injector().get '$location'
     $rootScope = @element.injector().get '$rootScope'
     $window = @element.injector().get '$window'
-    threading = @element.injector().get 'threading'
+    drafts = @element.injector().get 'drafts'
 
     this.addPlugin 'Bridge',
       origin: $location.search().xdm
@@ -117,56 +86,34 @@ class Hypothesis extends Annotator
           # if the annotation has a newly-assigned id and ensures that the id
           # is enumerable.
           store.updateAnnotation = (annotation, data) =>
-            bridge = @plugins.Bridge
-            $rootScope.$apply ->
-              if annotation.id != data.id
-                # Remove the old annotation from the threading
-                thread = (threading.getContainer annotation.id)
-                if thread.parent
-                  thread.message = null
-                  threading.pruneEmpties thread.parent
-                else
-                  delete threading.idTable[annotation.id]
+            if annotation.id? and annotation.id != data.id
+              # Update the id table for the threading
+              thread = @threading.getContainer annotation.id
+              thread.message.id = data.id
+              @threading.idTable[data.id] = thread
+              delete @threading.idTable[annotation.id]
 
-                # Create the new thread
-                thread = (threading.getContainer data.id)
-                references = data.thread?.split('/') or []
-                thread.message =
-                  annotation: annotation
-                  id: data.id
-                  references: references
+              # The id is no longer temporary and should be serialized
+              # on future Store requests.
+              Object.defineProperty annotation, 'id',
+                configurable: true
+                enumerable: true
+                writable: true
 
-                if not thread.parent? and thread.message.references.length
-                  threading.getContainer(references[references.length-1])
-                  .addChild thread
+              # If the annotation is loaded in a view, switch the view
+              # to reference the new id.
+              search = $location.search()
+              if search? and search.id == annotation.id
+                search.id = data.id
+                $location.search(search).replace()
 
-                # Remove the old annotation from the host.
-                # XXX in iframe mode it's safe to make these calls because the
-                # deletion event that gets published in the provider is not
-                # cross-published back here in the consumer and therefore
-                # the Store does not delete the annotation.
-                if annotation.ranges?.length
-                  bridge.deleteAnnotation annotation
-                  bridge.setupAnnotation data
+            # Update the annotation with the new data
+            annotation = angular.extend annotation, data
 
-                # The id is no longer temporary and should be serialized
-                # on future Store requests.
-                Object.defineProperty annotation, 'id',
-                  configurable: true
-                  enumerable: true
-                  writable: true
+            # Give angular a chance to react
+            $rootScope.$digest()
 
-                # If the annotation is loaded in a view, switch the view
-                # to reference the new id.
-                search = $location.search()
-                if search? and search.id == annotation.id
-                  search.id = data.id
-                  $location.search(search).replace()
-
-              # Update the annotation with the new data
-              annotation = angular.extend annotation, data
-
-            # Reflect the newest information in the heatmap
+            # Update the heatmap
             this.publish 'hostUpdated'
 
         # Get the location of the annotated document
@@ -262,25 +209,8 @@ class Hypothesis extends Annotator
     unless annotation.ranges?
       annotation.highlights = []
       annotation.ranges = []
-
-    # Assign a temporary id if necessary
-    unless annotation.id?
-      Object.defineProperty annotation, 'id',
-        configurable: true
-        enumerable: false
-        writable: true
-        value: window.btoa Math.random()
-
-    # Thread it
-    threading = @element.injector().get 'threading'
-    thread = (threading.getContainer annotation.id)
-    if thread.message?.annotation
-      angular.extend thread.message.annotation, annotation
-    else
-      thread.message =
-        annotation: annotation
-        id: annotation.id
-        references: annotation.thread?.split('/')
+    @plugins.Threading.thread annotation
+    annotation
 
   showViewer: (annotations=[]) =>
     @element.injector().invoke [
@@ -294,13 +224,17 @@ class Hypothesis extends Annotator
 
   showEditor: (annotation) =>
     @element.injector().invoke [
-      '$location', '$rootScope',
-      ($location, $rootScope) ->
-        $location.path('/editor')
-        .search
-          id: annotation.id
-        .replace()
+      '$location', '$rootScope', '$route'
+      ($location, $rootScope, $route) ->
+        # Set the path
+        $location.path('/editor').search('id', null).replace()
+
+        # Digest the change
         $rootScope.$digest()
+
+        # Push the annotation into the editor scope
+        if $route.current.controller is 'EditorController'
+          $route.current.locals.$scope.$apply (s) -> s.annotation = annotation
     ]
     this.show()
     this
@@ -391,4 +325,3 @@ angular.module('h.services', [])
   .provider('drafts', DraftProvider)
   .provider('flash', FlashProvider)
   .service('annotator', Hypothesis)
-  .value('threading', mail.messageThread())

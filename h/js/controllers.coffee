@@ -13,11 +13,11 @@ class App
 
   this.$inject = [
     '$compile', '$element', '$http', '$location', '$scope', '$timeout',
-    'annotator', 'drafts', 'flash', 'threading'
+    'annotator', 'drafts', 'flash'
   ]
   constructor: (
     $compile, $element, $http, $location, $scope, $timeout
-    annotator, drafts, flash, threading
+    annotator, drafts, flash
   ) ->
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
@@ -183,11 +183,11 @@ class App
 class Annotation
   this.$inject = [
     '$element', '$location', '$scope', '$rootScope', '$timeout',
-    'annotator', 'drafts', 'threading'
+    'annotator', 'drafts'
   ]
   constructor: (
     $element, $location, $scope, $rootScope, $timeout
-    annotator, drafts, threading
+    annotator, drafts
   ) ->
     publish_ = (args...) ->
       # Publish after a timeout to escape this digest
@@ -198,6 +198,8 @@ class Annotation
      {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
      {name: 'Private', permissions: { 'read': [] } }
     ]
+
+    threading = annotator.threading
 
     $scope.cancel = ->
       $scope.editing = false
@@ -220,22 +222,13 @@ class Annotation
         return
 
       references =
-        if $scope.$modelValue.thread
-          [$scope.$modelValue.thread, $scope.$modelValue.id]
+        if $scope.thread.message.references
+          [$scope.thread.message.references, $scope.thread.message.id]
         else
-          [$scope.$modelValue.id]
+          [$scope.thread.message.id]
 
       reply = angular.extend annotator.createAnnotation(),
         thread: references.join '/'
-
-      replyThread = angular.extend (threading.getContainer reply.id),
-        message:
-          annotation: reply
-          id: reply.id
-          references: references
-
-      (threading.getContainer $scope.$modelValue.id).addChild replyThread
-      drafts.add reply
 
     $scope.getPrivacyLevel = (permissions) ->
       for level in $scope.privacyLevels
@@ -265,6 +258,8 @@ class Annotation
       name: 'Custom'
       value: permissions
 
+      annotator.setupAnnotation reply
+
     $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
     $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
 
@@ -287,14 +282,8 @@ class Annotation
       0
 
 class Editor
-  this.$inject = [
-    '$location', '$routeParams', '$scope',
-    'annotator', 'drafts', 'threading'
-  ]
-  constructor: (
-    $location, $routeParams, $scope,
-    annotator, drafts, threading
-  ) ->
+  this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
+  constructor: ($location, $routeParams, $scope, annotator) ->
     save = ->
       $scope.$apply ->
         $location.path('/viewer').replace()
@@ -315,27 +304,22 @@ class Editor
       annotator.unsubscribe 'annotationCreated', save
       annotator.unsubscribe 'annotationDeleted', cancel
 
-    thread = (threading.getContainer $routeParams.id)
-    annotation = thread.message?.annotation
-    $scope.annotation = annotation
-    drafts.add annotation
-
 
 class Viewer
   this.$inject = [
     '$location', '$routeParams', '$scope',
-    'annotator', 'threading'
+    'annotator'
   ]
   constructor: (
     $location, $routeParams, $scope,
-    annotator, threading
+    annotator
   ) ->
     {plugins, provider} = annotator
 
     listening = false
     refresh = =>
       return unless annotator.visible
-      this.refresh $scope, $routeParams, threading, plugins.Heatmap
+      this.refresh $scope, $routeParams, annotator
       if listening
         if $scope.detail
           plugins.Heatmap.unsubscribe 'updated', refresh
@@ -368,10 +352,10 @@ class Viewer
 
     refresh()
 
-  refresh: ($scope, $routeParams, threading, heatmap) =>
+  refresh: ($scope, $routeParams, annotator) =>
     if $routeParams.id?
       $scope.detail = true
-      $scope.thread = threading.getContainer $routeParams.id
+      $scope.thread = annotator.threading.getContainer $routeParams.id
       $scope.focus $scope.thread.message.annotation
     else
       $scope.detail = false
