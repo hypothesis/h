@@ -51,7 +51,7 @@ class Annotator.Host extends Annotator
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
     this.addPlugin 'Bridge',
-      origin: @frame[0].contentWindow.location.origin
+      origin: '*'
       window: @frame[0].contentWindow
       formatter: (annotation) =>
         formatted = {}
@@ -66,7 +66,7 @@ class Annotator.Host extends Annotator
 
     # Build a channel for the panel UI
     @panel = Channel.build
-      origin: @frame[0].contentWindow.location.origin
+      origin: '*'
       scope: 'annotator:panel'
       window: @frame[0].contentWindow
       onReady: =>
