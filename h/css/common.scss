@@ -540,6 +540,7 @@ blockquote {
 //THREADING////////////////////////////////
 //Threaded discussion specific
 .thread {
+  margin-top: 1em;
   position: relative;
 
   & > ul {
@@ -565,14 +566,13 @@ blockquote {
     height: $threadexp-width;
     width: $threadexp-width;
     position: absolute;
-    top: .8em;
+    top: $threadexp-width / 2;
     left: -($threadexp-width / 2);
     outline: 1px dotted #aaa;
     @include icon("minus_1.png");
   }
 
   .annotation {
-    padding-top: .35em;
     &.squished {
       padding-left: 0;
     }
