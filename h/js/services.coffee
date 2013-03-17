@@ -50,14 +50,7 @@ class Hypothesis extends Annotator
     # Update threads when annotations are deleted
     this.subscribe 'annotationDeleted', (annotation) =>
       $rootScope.$apply =>
-        if annotation?.redacted?
-          this.plugins.Store.registerAnnotation annotation
-          
-          (threading.getContainer annotation.id).message =
-            annotation: annotation
-            id: annotation.id
-            references: annotation.thread?.split '/'
-        else            
+        unless annotation?.redacted?
           thread = threading.getContainer annotation.id
           thread.message = null
           if thread.parent then threading.pruneEmpties thread.parent
