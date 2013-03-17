@@ -221,6 +221,7 @@ class Hypothesis extends Annotator
         $rootScope.$digest()
     ]
     this.show()
+    this
 
   showEditor: (annotation) =>
     @element.injector().invoke [
