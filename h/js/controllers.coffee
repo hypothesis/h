@@ -250,10 +250,13 @@ class Annotation
 
       $scope.editing = false
       drafts.remove $scope.$modelValue
-      if $scope.action is 'create'
-        publish 'annotationCreated', $scope.$modelValue
-      else
-        publish 'annotationUpdated', $scope.$modelValue
+      switch $scope.action
+        when 'create'
+          publish 'annotationCreated', $scope.$modelValue
+        when 'redact'
+          publish 'annotationDeleted', $scope.$modelValue        	
+        else
+          publish 'annotationUpdated', $scope.$modelValue
 
     $scope.reply = ->
       unless annotator.plugins.Auth? and annotator.plugins.Auth.haveValidToken()

@@ -50,13 +50,16 @@ class Hypothesis extends Annotator
     # Update threads when annotations are deleted
     this.subscribe 'annotationDeleted', (annotation) =>
       $rootScope.$apply =>
-        thread = threading.getContainer annotation.id
-        thread.message = null
-        if thread.parent then threading.pruneEmpties thread.parent
-        @provider.deleteAnnotation annotation
+        unless annotation?.redacted?            
+          thread = threading.getContainer annotation.id
+          thread.message = null
+          if thread.parent then threading.pruneEmpties thread.parent
+          @provider.deleteAnnotation annotation
      
         search = $location.search()
-        if search.id and not annotation.thread then delete search.id
+        if search.id and not annotation.thread and
+           not annotation?.redacted? 
+          delete search.id
         delete search.action
         if $location.path() is '/editor' or search.removed?
           delete search.removed
