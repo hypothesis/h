@@ -181,44 +181,27 @@ class App
 
 
 class Annotation
-  this.$inject = [
-    '$element', '$location', '$scope', '$rootScope', '$timeout',
-    'annotator', 'drafts'
-  ]
-  constructor: (
-    $element, $location, $scope, $rootScope, $timeout
-    annotator, drafts
-  ) ->
-    publish_ = (args...) ->
-      # Publish after a timeout to escape this digest
-      # Annotator event callbacks don't expect a digest to be active
-      $timeout (-> annotator.publish args...), 0, false
-
-    $scope.privacyLevels = [
-     {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
-     {name: 'Private', permissions: { 'read': [] } }
-    ]
-
+  this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts']
+  constructor: ($element, $location, $scope, annotator, drafts) ->
     threading = annotator.threading
 
     $scope.cancel = ->
       $scope.editing = false
-      drafts.remove $scope.$modelValue
+      drafts.remove $scope.model.$modelValue
       if $scope.unsaved
-        publish_ 'annotationDeleted', $scope.$modelValue
+        annotator.deleteAnnotation $scope.model.$modelValue
 
     $scope.save = ->
       $scope.editing = false
-      $scope.model.$setViewValue $scope.model.$viewValue
-      drafts.remove $scope.$modelValue
+      drafts.remove $scope.model.$modelValue
       if $scope.unsaved
-        publish_ 'annotationCreated', $scope.$modelValue
+        annotator.publish 'annotationCreated', $scope.model.$modelValue
       else
-        publish_ 'annotationUpdated', $scope.$modelValue
+        annotator.updateAnnotation  $scope.model.$modelValue
 
     $scope.reply = ->
       unless annotator.plugins.Auth? and annotator.plugins.Auth.haveValidToken()
-        $rootScope.$broadcast 'showAuth', true
+        $scope.$emit 'showAuth', true
         return
 
       references =
@@ -230,34 +213,6 @@ class Annotation
       reply = angular.extend annotator.createAnnotation(),
         thread: references.join '/'
 
-    $scope.getPrivacyLevel = (permissions) ->
-      for level in $scope.privacyLevels
-        roleSet = {}
-
-        # Construct a set (using a key->exist? mapping) of roles for each verb
-        for verb of permissions
-          roleSet[verb] = {}
-          for role in permissions[verb]
-            roleSet[verb][role] = true
-
-        # Check that no (verb, role) is missing from the role set
-        mismatch = false
-        for verb of level.permissions
-          for role in level.permissions[verb]
-            if roleSet[verb]?[role]?
-              delete roleSet[verb][role]
-            else
-              mismatch = true
-              break
-
-          # Check that no extra (verb, role) is missing from the privacy level
-          mismatch ||= Object.keys(roleSet[verb]).length
-          if mismatch then break else return level
-
-      # Unrecognized privacy level
-      name: 'Custom'
-      value: permissions
-
       annotator.setupAnnotation reply
 
     $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
@@ -266,36 +221,28 @@ class Annotation
     $scope.$watch 'editing', (newValue) ->
       if newValue then $timeout -> $element.find('textarea').focus()
 
-    # Check if this is a brand new annotation
-    if drafts.contains $scope.$modelValue
-      $scope.editing = true
-      $scope.unsaved = true
+    $scope.$watch 'model.$modelValue', (annotation) ->
+      if annotation?
+        $scope.thread = threading.getContainer annotation.id
 
-    $scope.directChildren = ->
-      if $scope.$modelValue? and threading.getContainer($scope.$modelValue.id).children?
-        return threading.getContainer($scope.$modelValue.id).children.length
-      0
+        # Check if this is a brand new annotation
+        if drafts.contains annotation
+          $scope.editing = true
 
-    $scope.allChildren = ->
-      if $scope.$modelValue? and threading.getContainer($scope.$modelValue.id).flattenChildren()?
-        return threading.getContainer($scope.$modelValue.id).flattenChildren().length
-      0
+    # Change when edit / delete is merged
+    $scope.unsaved = true
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
   constructor: ($location, $routeParams, $scope, annotator) ->
     save = ->
-      $scope.$apply ->
-        $location.path('/viewer').replace()
-        annotator.provider.notify method: 'onEditorSubmit'
-        annotator.provider.notify method: 'onEditorHide'
+      $location.path('/viewer').search('id', $scope.annotation.id).replace()
+      annotator.provider.notify method: 'onEditorSubmit'
+      annotator.provider.notify method: 'onEditorHide'
 
     cancel = ->
-      $scope.$apply ->
-        search = $location.search() or {}
-        delete search.id
-        $location.path('/viewer').search(search).replace()
-        annotator.provider.notify method: 'onEditorHide'
+      $location.path('/viewer').search('id', null).replace()
+      annotator.provider.notify method: 'onEditorHide'
 
     annotator.subscribe 'annotationCreated', save
     annotator.subscribe 'annotationDeleted', cancel

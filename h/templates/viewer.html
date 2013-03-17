@@ -9,7 +9,7 @@
           data-ng-mouseleave="focus()"
           data-ng-repeat="annotation in annotations"
           class="paper summary">
-        <div data-ng-model="annotation" class="annotation" />
+        <div data-ng-model="$parent.annotation" class="annotation" />
       </li>
     </ul>
   </li>
@@ -25,16 +25,9 @@
     <!-- Thread view -->
     <div data-recursive="" class="paper thread">
       <!-- Annotation -->
-      <div data-ng-model="thread.message.annotation"
-           class="detail annotation" />
-
-      <!-- Reply count -->
-      <span data-ng-show="thread.children.length"
-            data-ng-pluralize=""
-            count="thread.flattenChildren().length"
-            when="{one: '1 reply', other: '{} replies'}"
-            class="reply-count" />
-
+      <div class="detail annotation"
+           name="annotation"
+           ng-model="$parent.thread.message.annotation" />
       <!-- Replies -->
       <ul>
         <li data-ng-class="collapsed && 'collapsed' || ''"
@@ -44,9 +37,6 @@
           <a data-ng-click="collapsed = !collapsed" class="threadexp" />
         </li>
       </ul>
-    </div>
-    <div data-ng-show="annotation.quote" class="paper excerpt">
-      <blockquote data-ng-bind="annotation.quote" />
     </div>
   </li>
 

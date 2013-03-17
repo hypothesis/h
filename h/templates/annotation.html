@@ -1,72 +1,69 @@
-<!-- Top controls -->
-<div data-ng-hide="editing" class="magicontrols">
-  <!-- Reply count -->
-  <span data-ng-show="directChildren()"
-        data-ng-pluralize=""
-        count="allChildren()"
-        when="{one: '1 reply', other: '{} replies'}"
-        class="reply-count" />
-  <span data-ng-bind="model.$viewValue.created | fuzzyTime | date:'mediumDate'"
-        class="time" />
+<form name="form">
 
-  <div class="vis-icon" title="Visibility"
-       data-ng-show="model.$viewValue.privacy.name != 'Public'" />
-  <div class="fave-icon show" title="Favorite"
-       data-ng-click="favorite()" />
-  <div class="show reply-icon" title="Reply"
-       data-ng-click="reply()" />
-  <div class="show share-icon" title="Share"
-       data-ng-click="share()" />
-  <div class="show dropdown" title="More Actions">
-    <div class="dropdown-toggle down-icon" role="button" />
-    <ul class="dropdown-menu pull-right" role="menu">
-      <li data-ng-click="edit()">Edit</li>
-      <li data-ng-click="delete()">Delete</li>
-      <li data-ng-click="flag()">Flag</li>
-    </ul>
-  </div>
-</div>
+  <!-- Privacy -->
+  <div class="vis-icon pull-left"
+       data-ng-show="form.privacy.$viewValue.name != 'Public'" />
 
-<h3 data-ng-bind="model.$viewValue.user | userName" class="upper-left" />
-<ng-form data-ng-show="editing" name="form">
-
-  <div class="dropdown privacy">
-    <a name="privacy"
-       role="button"
-       class="dropdown-toggle"
-       data-ng-model="model.$viewValue.privacy"
-       data-toggle="dropdown"
-       >{{model.$viewValue.privacy.name}}</a>
-    <ul class="dropdown-menu pull-right" role="menu">
-      <li data-ng-repeat="p in privacyLevels">
-        <a href="" data-ng-click="form.privacy.$setViewValue(p)">{{p.name}}</a>
-      </li>
-    </ul>
+  <!-- Timestamp -->
+  <div class="pull-right small">
+    {{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}
   </div>
 
-  <textarea data-ng-model="model.$viewValue.text"
+  <h5 class="user">{{model.$viewValue.user | userName}}</h5>
+
+  <privacy data-ng-model="$parent.model.$modelValue.permissions"
+           data-ng-show="editing"
+           class="dropdown privacy"
+           name="privacy" />
+
+  <markdown data-ng-model="$parent.model.$modelValue.text"
+            data-ng-readonly="!$parent.editing"
             class="body"
             name="text"
             required="" />
-  <div class="tip">
-    <a href="https://en.wikipedia.org/wiki/Markdown"
-       target="_blank">Markdown</a> is supported.
-  </div>
-</ng-form>
-<div data-ng-bind-html="model.$viewValue.body"
-     data-ng-hide="editing"
-     class="body" />
 
-<!-- Bottom controls -->
-<div class="buttonbar">
-  <div data-ng-show="editing" class="annotator-controls">
-    <button data-ng-click="save()" class="btn check-icon">Save</button>
-    <a data-ng-click="cancel()" class="x-icon">Cancel</a>
+  <!-- Editor controls -->
+  <div class="buttonbar">
+    <div data-ng-show="editing" class="annotator-controls">
+      <button data-ng-click="save()"
+              data-ng-disabled="!model.$valid"
+              class="btn check-icon">Save</button>
+      <a data-ng-click="cancel()" class="x-icon">Cancel</a>
+    </div>
   </div>
-</div>
 
-<!-- Editing preview -->
-<div data-ng-show="previewText" class="preview">
-  <h4>Preview</h4>
-  <div data-ng-bind-html="previewText" class="body" />
-</div>
+  <!-- Editing preview -->
+  <div data-ng-show="previewText" class="preview">
+    <h4>Preview</h4>
+    <div data-ng-bind-html="previewText" class="body" />
+  </div>
+
+  <!-- Bottom control strip -->
+  <div ng-hide="editing" class="magicontrols">
+    <!-- Left-floated controls -->
+    <span class="pull-left reply-count"
+          data-ng-pluralize=""
+          count="thread.flattenChildren().length"
+          when="{one: '1 reply', other: '{} replies'}" />
+    <span class="pull-left reply-icon show"
+          title="Reply"
+          data-ng-click="reply()">Reply</span>
+
+    <!-- Right-floated thread controls -->
+    <div class="dropdown pull-right show" title="More Actions">
+      <span class="dropdown-toggle down-icon"
+            role="button"
+            title="More actions" />
+      <ul class="dropdown-menu pull-right" role="menu">
+        <li data-ng-click="edit()">Edit</li>
+        <li data-ng-click="delete()">Delete</li>
+        <li data-ng-click="flag()">Flag</li>
+      </ul>
+    </div>
+    <span class="share-icon pull-right show" title="Share"
+          data-ng-click="share()" />
+    <span class="fave-icon pull-right show" title="Favorite"
+          data-ng-click="favorite()" />
+  </div>
+
+</form>
