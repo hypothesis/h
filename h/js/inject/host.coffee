@@ -1,15 +1,5 @@
 $ = Annotator.$
 
-util =
-  debounce: (fn, delay=200) =>
-      timer = null
-      (args...) =>
-        if timer then clearTimeout(timer)
-        setTimeout =>
-          timer = null
-          fn args...
-        , delay
-
 class Annotator.Host extends Annotator
   # Events to be bound on Annotator#element.
   events:
@@ -18,9 +8,6 @@ class Annotator.Host extends Annotator
 
   # Plugin configuration
   options: {}
-
-  # timer used to throttle event frequency
-  updateTimer: null
 
   # Drag state variables
   drag:
