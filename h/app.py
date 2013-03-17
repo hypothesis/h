@@ -135,6 +135,5 @@ class AppController(views.BaseController):
         request.session.new_csrf_token()
         return {}
 
-
 def includeme(config):
     config.scan(__name__)

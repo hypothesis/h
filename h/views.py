@@ -33,8 +33,6 @@ def displayer(request):
     if not annotation : 
         raise httpexceptions.HTTPNotFound()
 
-    for header, value in request.headers.items():
-        log.info(header + " : " + value)
     if 'Content-Type' in request.headers and request.headers['Content-Type'].lower() == 'application/json' :
         res = json.dumps(annotation, indent=None if request.is_xhr else 2)
         return Response(res, content_type = 'application/json')
