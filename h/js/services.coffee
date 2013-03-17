@@ -50,7 +50,14 @@ class Hypothesis extends Annotator
     # Update threads when annotations are deleted
     this.subscribe 'annotationDeleted', (annotation) =>
       $rootScope.$apply =>
-        unless annotation?.redacted?            
+        if annotation?.redacted?
+          this.plugins.Store.registerAnnotation annotation
+          
+          (threading.getContainer annotation.id).message =
+            annotation: annotation
+            id: annotation.id
+            references: annotation.thread?.split '/'
+        else            
           thread = threading.getContainer annotation.id
           thread.message = null
           if thread.parent then threading.pruneEmpties thread.parent
@@ -61,7 +68,7 @@ class Hypothesis extends Annotator
            not annotation?.redacted? 
           delete search.id
         delete search.action
-        if $location.path() is '/editor' or search.removed?
+        if $location.path() is '/editor' or search.removed? or annotation.redacted
           delete search.removed
           $location.search(search).path('/viewer').replace()
           
@@ -167,10 +174,24 @@ class Hypothesis extends Annotator
                   search.id = data.id
                   $location.search(search).replace()
 
+              if annotation.redacted?
+                 $location.path('/viewer').replace()
+              	
+
               # Update the annotation with the new data
               annotation = angular.extend annotation, data
 
             this.publish 'hostUpdated'
+
+          # For redaction we expect the server side to return the annotation data
+          this.plugins.Store.annotationDeleted = (annotation) =>
+            if annotation in this.plugins.Store.annotations
+              if annotation.redacted?
+                this.plugins.Store._apiRequest 'destroy', annotation, ((data) => 
+                     this.plugins.Store.updateAnnotation(annotation, data))
+              else            	
+                this.plugins.Store._apiRequest 'destroy', annotation, (() => 
+                	this.plugins.Store.unregisterAnnotation(annotation))
 
         # Dodge toolbars [DISABLE]
         #@provider.getMaxBottom (max) =>
