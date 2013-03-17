@@ -53,12 +53,11 @@ h2 {
 }
 
 h3 {
-  font-size: 1em;
-  margin: 0;
+  font-size: 1.4em;
 }
 
 h4 {
-  font-size: 1.25em;
+  font-size: 1.15em;
   margin: 0 0 .1em;
 }
 
@@ -101,8 +100,8 @@ button, input[type=submit], .btn {
   display: inline-block
 }
 
-.tertiarytext {
-  @include tertiarytext;
+.small {
+  font-size: .8em;
 }
 
 .icon-hidden {
@@ -532,7 +531,7 @@ blockquote {
   }
 
   .tip {
-    @include tertiarytext;
+    @extend .small;
     float: right;
   }
 }
@@ -570,10 +569,6 @@ blockquote {
     left: -($threadexp-width / 2);
     outline: 1px dotted #aaa;
     @include icon("minus_1.png");
-  }
-
-  .reply-count {
-    @include tertiarytext;
   }
 
   .annotation {
@@ -627,7 +622,7 @@ blockquote {
       margin .1s ease-in-out .25s,
       opacity .1s ease-in-out .25s
     );
-    @include tertiarytext;
+    @extend .small;
     float: left;
     margin-left: 1em;
   }

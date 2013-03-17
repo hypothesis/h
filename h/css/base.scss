@@ -187,24 +187,6 @@ $em: 14 / 1em !default;
 }
 
 
-
-//ANNOTATOR TEXT STYLES////////////////////////////////
-@mixin primarytext {
-  font-weight: bold;
-  font-size: 1.3em;
-}
-
-@mixin secondarytext {
-  font-size: 1.1em;
-  font-weight: bold;
-}
-
-@mixin tertiarytext {
-  font-size: .8em;
-}
-
-
-
 //FONTICON////////////////////////////////
 @mixin fonticon($char, $iconside, $offset: 0) {
   text-decoration: none;
