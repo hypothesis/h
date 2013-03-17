@@ -72,6 +72,7 @@ class Hypothesis extends Annotator
           references: annotation.thread?.split '/'
 
     # Update the heatmap when the host is updated or annotations are loaded
+    bridge = @plugins.Bridge
     heatmap = @plugins.Heatmap
     for event in ['hostUpdated', 'annotationsLoaded']
       this.subscribe event, =>
@@ -79,10 +80,10 @@ class Hypothesis extends Annotator
           method: 'getHighlights'
           success: ({highlights, offset}) ->
             heatmap.updateHeatmap
-              highlights: highlights.map (hl) ->
-                thread = (threading.getContainer hl.data)
-                hl.data = thread.message?.annotation
-                hl
+              highlights:
+                for hl in highlights when hl.data
+                  annotation = bridge.cache[hl.data]
+                  angular.extend hl, data: annotation
               offset: offset
 
   _setupXDM: ->
@@ -96,7 +97,7 @@ class Hypothesis extends Annotator
       window: $window.parent
       formatter: (annotation) =>
         formatted = {}
-        for k, v of annotation when k in ['id', 'quote', 'ranges']
+        for k, v of annotation when k in ['quote', 'ranges']
           formatted[k] = v
         formatted
       parser: (annotation) =>
@@ -256,10 +257,10 @@ class Hypothesis extends Annotator
   _setupEditor: -> this
 
   setupAnnotation: (annotation) ->
-    # Delagate to Annotator implementation after we give it a valid array of
-    # ranges. This is needed until Annotator stops assuming ranges need to be
-    # added.
+    # This is needed until Annotator stops assuming ranges and highlights
+    # are always added.
     unless annotation.ranges?
+      annotation.highlights = []
       annotation.ranges = []
 
     # Assign a temporary id if necessary

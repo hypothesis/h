@@ -56,17 +56,11 @@ class App
           unless $location.path() == '/viewer' and $location.search()?.id?
             provider.notify
               method: 'setActiveHighlights'
-              params: heatmap.buckets[bucket]?.map (a) => a.id
+              params: heatmap.buckets[bucket]?.map (a) => a.$$tag
 
         # Gets rid of them after
         .on 'mouseout', =>
-          if $location.path() == '/viewer'
-            unless $location.search()?.id?
-              bucket = heatmap.buckets[$location.search()?.bucket]
-              provider.notify
-                method: 'setActiveHighlights'
-                params: bucket?.map (a) => a.id
-          else
+          if $location.path() == '/viewer' and not $location.search()?.id?
             provider.notify method: 'setActiveHighlights'
 
         # Does one of a few things when a tab is clicked depending on type
@@ -147,7 +141,6 @@ class App
       else
         plugins.Permissions.setUser(null)
         delete plugins.Auth
-      provider.setActiveHighlights []
       if annotator.plugins.Store?
         for annotation in annotator.dumpAnnotations()
           provider.deleteAnnotation annotation
@@ -364,13 +357,13 @@ class Viewer
       search.id = annotation.id
       $location.search(search).replace()
 
-    $scope.focus = (annotation=$scope.annotations) ->
+    $scope.focus = (annotation) ->
       if $routeParams.id?
-        highlights = [$routeParams.id]
+        highlights = [$scope.thread.message.annotation.$$tag]
       else if angular.isArray annotation
-        highlights = (a.id for a in annotation when a?)
+        highlights = (a.$$tag for a in annotation when a?)
       else if angular.isObject annotation
-        highlights = [annotation.id]
+        highlights = [annotation.$$tag]
       else
         highlights = []
       provider.notify method: 'setActiveHighlights', params: highlights
@@ -389,7 +382,7 @@ class Viewer
       $scope.focus $scope.thread.message.annotation
     else
       $scope.detail = false
-      $scope.focus $scope.annotations
+      $scope.focus []
 
 
 angular.module('h.controllers', [])

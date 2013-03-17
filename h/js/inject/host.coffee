@@ -60,7 +60,7 @@ class Annotator.Host extends Annotator
         formatted
       parser: (annotation) =>
         parsed = {}
-        for k, v of annotation when k in ['id', 'quote', 'ranges']
+        for k, v of annotation when k in ['quote', 'ranges']
           parsed[k] = v
         parsed
 
@@ -103,15 +103,15 @@ class Annotator.Host extends Annotator
           highlights: $(@wrapper).find('.annotator-hl').map ->
             offset: $(this).offset()
             height: $(this).outerHeight(true)
-            data: $(this).data('annotation').id
+            data: $(this).data('annotation').$$tag
           .get()
           offset: $(window).scrollTop()
         )
 
-        .bind('setActiveHighlights', (ctx, ids=[]) =>
+        .bind('setActiveHighlights', (ctx, tags=[]) =>
           @wrapper.find('.annotator-hl')
           .each ->
-            if $(this).data('annotation').id in ids
+            if $(this).data('annotation').$$tag in tags
               $(this).addClass('annotator-hl-active')
             else if not $(this).hasClass('annotator-hl-temporary')
               $(this).removeClass('annotator-hl-active')
