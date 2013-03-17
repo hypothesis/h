@@ -1,9 +1,10 @@
-# node style callback helpers
-success = (cb) -> (result) -> cb? null, result
-error = (cb) -> (error, reason) -> cb? {error: error, reason: reason}
-
-
 class Annotator.Plugin.Bridge extends Annotator.Plugin
+  # These events maintain the awareness of annotations between the two
+  # communicating annotators.
+  events:
+    'beforeAnnotationCreated': 'beforeAnnotationCreated'
+    'annotationDeleted': 'annotationDeleted'
+    'annotationsLoaded': 'annotationsLoaded'
 
   # Plugin configuration
   options:
@@ -37,16 +38,6 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     @options.onReady = this.onReady
     @channel = Channel.build @options
 
-    # Set up annotations on the other side of the bridge when necessary
-    @annotator.subscribe 'beforeAnnotationCreated', (annotation) =>
-      this.setupAnnotation annotation
-    @annotator.subscribe 'annotationsLoaded', (annotations) =>
-      this.setupAnnotation a for a in annotations
-
-    # Prevent the cache from leaking annotation references
-    @annotator.subscribe 'annotationDeleted', (annotation) =>
-      if annotation.$$tag? then delete @cache[annotation.$$tag]
-
   # Assign a non-enumerable tag to objects which cross the bridge.
   # This tag is used to identify the objects between message.
   _tag: (msg, tag) ->
@@ -75,12 +66,27 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     tag: annotation.$$tag
     msg: msg
 
+  beforeAnnotationCreated: (annotation) =>
+    unless annotation.$$tag?
+      tag = this.createAnnotation()
+      this._tag annotation, tag
+
+  annotationDeleted: (annotation) =>
+    return unless @cache[annotation.$$tag?]
+    delete @cache[annotation.$$tag]
+    this.deleteAnnotation annotation
+
+  annotationsLoaded: (annotations) =>
+    this.setupAnnotation a for a in annotations
+
   onReady: =>
     @channel
 
     ## Remote method call bindings
-    .bind('createAnnotation', (txn) =>
-      this._format @annotator.createAnnotation()
+    .bind('createAnnotation', (txn, tag) =>
+      annotation = this._tag {}, tag
+      @annotator.publish 'beforeAnnotationCreated', annotation
+      this._format annotation
     )
 
     .bind('setupAnnotation', (txn, annotation) =>
@@ -91,11 +97,12 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       this._format (@annotator.updateAnnotation (this._parse annotation))
     )
 
-    ## Notifications
-    .bind('deleteAnnotation', (ctx, annotation) =>
-      @annotator.deleteAnnotation (this._parse annotation)
+    .bind('deleteAnnotation', (txn, annotation) =>
+      delete @cache[annotation.tag]
+      this._format (@annotator.deleteAnnotation (this._parse annotation))
     )
 
+    ## Notifications
     .bind('showEditor', (ctx, annotation) =>
       @annotator.showEditor (this._parse annotation)
     )
@@ -105,29 +112,34 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     )
 
   createAnnotation: (cb) ->
+    tag = window.btoa Math.random()
     @channel.call
       method: 'createAnnotation'
-      success: success cb
-      error: error cb
+      params: tag
+      success: (annotation) => cb? null, this._parse annotation
+      error: cb
+    tag
 
   setupAnnotation: (annotation, cb) ->
     @channel.call
       method: 'setupAnnotation'
       params: this._format annotation
-      success: success cb
-      error: error cb
+      success: (annotation) => cb? null, this._parse annotation
+      error: cb
 
   updateAnnotation: (annotation, cb) ->
     @channel.call
       method: 'updateAnnotation'
       params: this._format annotation
-      success: success cb
-      error: error cb
+      success: (annotation) => cb? null, this._parse annotation
+      error: cb
 
   deleteAnnotation: (annotation, cb) ->
     @channel.notify
       method: 'deleteAnnotation'
       params: this._format annotation
+      success: (annotation) => cb? null, this._parse annotation
+      error: cb
 
   showEditor: (annotation) ->
     @channel.notify
