@@ -22,9 +22,15 @@ class Annotator.Host extends Annotator
     delete @options.app
 
     # Create the iframe
+    if document.baseURI and window.PDFView?
+      # XXX: Hack around PDF.js resource: origin. Bug in jschannel?
+      hostOrigin = '*'
+    else
+      hostOrigin = window.location.origin
+
     @frame = $('<iframe></iframe>')
     .css(visibility: 'hidden')
-    .attr('src', "#{@app}#/?xdm=#{encodeURIComponent(window.location.origin)}")
+    .attr('src', "#{@app}#/?xdm=#{encodeURIComponent(hostOrigin)}")
     .appendTo(@wrapper)
     .addClass('annotator-frame annotator-outer annotator-collapsed')
     .bind 'load', => this._setupXDM()
