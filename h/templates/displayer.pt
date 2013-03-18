@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--<html ng-app="threadedAnnos" class="ng-scope" metal:use-macro="main_template"> -->
+<html ng-app="threadedAnnos" class="ng-scope" metal:use-macro="main_template">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    	<meta charset="utf-8">
+	    <!-- Always force latest IE rendering engine (even in intranet) &amp; Chrome Frame -->
+	    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+	    <script src="lib/jquery/jquery-1.8.3.min.js" type="text/javascript"></script>
+	    <script src="lib/angular/angular.js" type="text/javascript"></script><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak{display:none;}ng\:form{display:block;}</style>
+	    
+	    <!-- Allows for coffeescript compiling on the fly.                                    -->
+	    <!-- Not recommended for production use. See http://coffeescript.org/#scripts.        -->
+	    <script src="lib/coffeescript/coffee-script.js"></script>
+	
+    	<link href="css/displayer.css" rel="stylesheet" type="text/css">
+	
+	    <title>Display annotation</title>
+  	</head>
+  	<style type="text/css"></style>
+<!--  <body ng-controller="AnnoListCtrl" class="ng-scope" metal:fill-slot="body"> -->
+  <body ng-controller="AnnoListCtrl" class="ng-scope" metal:fill-slot="body">
+  HAHÓ!
+    <div id="main" role="main">
+      <script id="annotations-template.html" type="text/ng-template">
+        <div class='sidepanel'>
+          <div class='avablock'>
+            <img class='ava' src='images/{{annotation.avatar}}' />
+          </div>
+        </div>
+        <div class='papercontainer'>
+          <div class='metadata'>
+            <a>{{annotation.username}}</a>
+            annotated:
+          </div>
+          <div class='control'>
+            <a class='goto'>
+              To Source
+            </a>
+          </div>
+          <div class='noiseknockout'>
+            <div class='page'>
+              <div class='domain'>
+                <img class="favicon" ng-src="http://{{annotation.domain}}/favicon.ico"/><a href="{{annotation.domain}}">{{annotation.domain}}</a> | <a href="{{annotation.link}}">{{annotation.page|truncate:80}}</a>
+              </div>
+            </div>
+            <div class='floatainer'>
+              <div class='hyp-excerpt hyp-paper' ng-click='showHide=!showHide'>
+                <blockquote>
+                  {{annotation.excerpt}}
+                </blockquote>
+              </div>
+            </div>
+            <div class='floatainer'>
+              <div class='hyp-annotation hyp-paper hyp-detail'>
+                <div style='padding-bottom: .5em;'>
+                  <div class='topbar'>
+                    <div class='hyp-user'>{{annotation.username}}</div>
+                    <div class='hyp-time'>{{annotation.time}}</div>
+                  </div>
+                  <div class='hyp-content'>{{annotation.text}}</div>
+                  <div class='hyp-thread'>
+                    <!-- {{annotation.children.length}} replies -->
+                    <ul class='annotator-listing' ng-show='showHide'>
+                      <li class='hyp-annotation hyp-detail' ng-include="'replies-template.html'" ng-repeat='reply in annotation.children'></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </script>
+      <script id="replies-template.html" type="text/ng-template">
+        <a class='hyp-threadexp' href='#collapse'></a>
+        <div class='topbar'>
+          <div class='hyp-user'>{{reply.username}}</div>
+          <div class='hyp-time'>{{reply.time}}</div>
+        </div>
+        <div class='hyp-content'>{{reply.text}}</div>
+        <div class='hyp-thread'>
+          <!-- {{reply.children.length}} replies -->
+          <ul class='annotator-listing'>
+            <li class='hyp-annotation hyp-detail' ng-include="'replies-template.html'" ng-repeat='reply in reply.children'></li>
+          </ul>
+        </div>
+      </script>
+      <div class="nav">
+        <div class="inner">
+          <div class="barbutton left title">
+            <span>hypothes<span class="red">.</span>is</span>
+          </div>
+          <div class="barbutton right">
+            <span>get extension</span>
+          </div>
+          <div class="barbutton right">
+            <span>sign up</span>
+          </div>
+        </div>
+      </div>
+      <div id="stream">
+        <div class="hyp-paper tile">
+          You have followed a link to an annotation. If you had the hypothes.is extension installed, the experience would be better. <a href="">Install it here</a>.  Or read <a href="">more about why</a>.
+        </div>
+        <ul class="annotator-listing annotator-widget">
+          <!-- ngRepeat: annotation in annotations --><li class="tile ng-scope" ng-include="&#39;annotations-template.html&#39;" ng-repeat="annotation in annotations"><span class="ng-scope">
+        </span><div class="sidepanel ng-scope">
+          <div class="avablock">
+            <img class="ava" src="./Standalone_files/avatar_2.jpg">
+          </div>
+        </div><span class="ng-scope">
+        </span><div class="papercontainer ng-scope">
+          <div class="metadata">
+            <a href="" class="ng-binding">${user}</a>
+            annotated:
+          </div>
+          <div class="control">
+            <a class="goto" href="">
+              To Source
+            </a>
+          </div>
+          <div class="noiseknockout">
+            <div class="page">
+              <div class="domain">
+                <img class="favicon" ng-src="${favicon_link}" src="${favicon_link}"><a href="${domain}" class="ng-binding">${domain_title}</a> | <a href="${uri}" class="ng-binding">${title}</a>
+              </div>
+            </div>
+            <div class="floatainer">
+              <div class="hyp-excerpt hyp-paper" ng-click="showHide=!showHide">
+                <blockquote class="ng-binding">
+                  ${quote}
+                </blockquote>
+              </div>
+            </div>
+            <div class="floatainer">
+              <div class="hyp-annotation hyp-paper hyp-detail">
+                <div style="padding-bottom: .5em;">
+                  <div class="topbar">
+                    <div class="hyp-user ng-binding">${user}</div>
+                    <div class="hyp-time ng-binding">${updated}</div>
+                  </div>
+                  <div class="hyp-content ng-binding">${text}</div>
+                  <div class="hyp-thread">
+                    <!-- {{annotation.children.length}} replies -->
+                    <ul class="annotator-listing" ng-show="showHide" style="display: none;">
+                      <!-- ngRepeat: reply in annotation.children --><li class="hyp-annotation hyp-detail ng-scope" ng-include="&#39;replies-template.html&#39;" ng-repeat="reply in annotation.children"><span class="ng-scope">
+        </span><a class="hyp-threadexp ng-scope" href="http://jtremback.github.com/standalone/build-a8213d8/index.html#collapse"></a><span class="ng-scope">
+        </span><div class="topbar ng-scope">
+          <div class="hyp-user ng-binding">Speciality</div>
+          <div class="hyp-time ng-binding">about 1 hour ago</div>
+        </div><span class="ng-scope">
+        </span><div class="hyp-content ng-scope ng-binding">I don't know what's going on with your books, but I just checked my 1987 edition and it states exactly that</div><span class="ng-scope">
+        </span><div class="hyp-thread ng-scope">
+          <!-- {{reply.children.length}} replies -->
+          <ul class="annotator-listing">
+            <!-- ngRepeat: reply in reply.children --><li class="hyp-annotation hyp-detail ng-scope" ng-include="&#39;replies-template.html&#39;" ng-repeat="reply in reply.children"><span class="ng-scope">
+        </span><a class="hyp-threadexp ng-scope" href="http://jtremback.github.com/standalone/build-a8213d8/index.html#collapse"></a><span class="ng-scope">
+        </span><div class="topbar ng-scope">
+          <div class="hyp-user ng-binding">topfroglivin420</div>
+          <div class="hyp-time ng-binding">57 minutes ago</div>
+        </div><span class="ng-scope">
+        </span><div class="hyp-content ng-scope ng-binding">We need to get to the bottom of this.</div><span class="ng-scope">
+        </span><div class="hyp-thread ng-scope">
+          <!-- {{reply.children.length}} replies -->
+          <ul class="annotator-listing">
+            <!-- ngRepeat: reply in reply.children -->
+          </ul>
+        </div><span class="ng-scope">
+      </span></li><li class="hyp-annotation hyp-detail ng-scope" ng-include="&#39;replies-template.html&#39;" ng-repeat="reply in reply.children"><span class="ng-scope">
+        </span><a class="hyp-threadexp ng-scope" href="http://jtremback.github.com/standalone/build-a8213d8/index.html#collapse"></a><span class="ng-scope">
+        </span><div class="topbar ng-scope">
+          <div class="hyp-user ng-binding">Bozo</div>
+          <div class="hyp-time ng-binding">30 minutes ago</div>
+        </div><span class="ng-scope">
+        </span><div class="hyp-content ng-scope ng-binding">Weird discrepancy.</div><span class="ng-scope">
+        </span><div class="hyp-thread ng-scope">
+          <!-- {{reply.children.length}} replies -->
+          <ul class="annotator-listing">
+            <!-- ngRepeat: reply in reply.children -->
+          </ul>
+        </div><span class="ng-scope">
+      </span></li>
+          </ul>
+        </div><span class="ng-scope">
+      </span></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><span class="ng-scope">
+      </span></li>
+        </ul>
+      </div>
+    </div>
+  
+
+</body></html>

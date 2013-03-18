@@ -44,6 +44,12 @@ class AppLayout(BaseLayout):
 class SiteLayout(BaseLayout):
     requirements = (('site', None),)
 
+@layout_config(context='h.resources.RootFactory',
+               template='h:templates/base.pt',
+               name='lay_displayer')
+class DisplayerLayout(BaseLayout):
+    requirements = (('display', None),)
+
 
 def includeme(config):
     config.include('pyramid_layout')
