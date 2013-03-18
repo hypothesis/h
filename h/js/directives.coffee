@@ -20,7 +20,7 @@ annotation = ['$filter', ($filter) ->
 ]
 
 
-markdown = ['$filter', ($filter) ->
+markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   link: (scope, elem, attrs, controller) ->
     return unless controller?
 
@@ -36,8 +36,10 @@ markdown = ['$filter', ($filter) ->
     # Publish the controller
     scope.model = controller
 
+    # Auto-focus the input box
     scope.$watch 'readonly', (newValue) ->
-      if newValue then elem.find('textarea').focus()
+      unless newValue then $timeout -> elem.find('textarea').focus()
+
   require: '?ngModel'
   restrict: 'E'
   scope:

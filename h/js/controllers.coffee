@@ -218,9 +218,6 @@ class Annotation
     $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
     $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
 
-    $scope.$watch 'editing', (newValue) ->
-      if newValue then $timeout -> $element.find('textarea').focus()
-
     $scope.$watch 'model.$modelValue', (annotation) ->
       if annotation?
         $scope.thread = threading.getContainer annotation.id
