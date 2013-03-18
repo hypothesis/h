@@ -75,7 +75,6 @@ pagedown = Uglify(
     'h:lib/Markdown.Converter.js',
     output='lib//Markdown.Converter.min.js'
 )
-underscore = Uglify('h:lib/underscore.js', output='lib/underscore.min.js')
 
 domTextFamily = Bundle(
     Coffee('h:lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
@@ -107,7 +106,6 @@ app = Bundle(
     jwz,
     pagedown,
     raf,
-    underscore,
     Uglify(
         *[
             Coffee('h:/js/%s.coffee' % name,
