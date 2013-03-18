@@ -18,9 +18,7 @@
 	    <title>Display annotation</title>
   	</head>
   	<style type="text/css"></style>
-<!--  <body ng-controller="AnnoListCtrl" class="ng-scope" metal:fill-slot="body"> -->
-  <body ng-controller="AnnoListCtrl" class="ng-scope" metal:fill-slot="body">
-  HAHÓ!
+  <body metal:fill-slot="body">
     <div id="main" role="main">
       <script id="annotations-template.html" type="text/ng-template">
         <div class='sidepanel'>
