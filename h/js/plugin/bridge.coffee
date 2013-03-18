@@ -47,6 +47,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       super
 
   pluginInit: ->
+    console.log "Initializing bridge plugin. Connecting to #{@options.origin}"
     @options.onReady = this.onReady
     @channel = Channel.build @options
 
