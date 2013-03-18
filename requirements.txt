@@ -11,7 +11,7 @@ Pygments==1.5
 SQLAlchemy==0.7.8
 WebOb==1.2.2
 Werkzeug==0.8.3
--e git+https://github.com/hypothesis/annotator-store.git@668e468fb975273874c2bf695394d392a7ca2304#egg=annotator-dev
+-e git+https://github.com/hypothesis/annotator-store.git@3f75706d9fb248959b218bfc1741a33d5dccb160#egg=annotator-dev
 anykeystore==0.2
 argparse==1.2.1
 certifi==0.0.8
