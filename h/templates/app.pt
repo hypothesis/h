@@ -12,7 +12,8 @@
       <!-- Persona -->
       <div data-ng-show="sheet.collapsed"
            class="tinyman">
-        <a data-ng-click="sheet.collapsed = false;
+        <a href=""
+           data-ng-click="sheet.collapsed = false;
                           sheet.tab = 'login';"
            data-ng-hide="persona">Sign in</a>
         <form id="persona"

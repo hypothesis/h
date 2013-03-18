@@ -183,8 +183,8 @@ button, input[type=submit], .btn {
 
 //CLOSER////////////////////////////////
 .close {
+  @extend .x-icon;
   float: right;
-  @include icon("delete_1.png");
   width: 1em;
   height: 1em;
   opacity: .2;

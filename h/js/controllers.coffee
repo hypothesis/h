@@ -142,6 +142,7 @@ class App
         plugins.Permissions.setUser(null)
         delete plugins.Auth
       if annotator.plugins.Store?
+        $element.injector().get('$rootScope').annotations = []
         annotator.plugins.Store.annotations = []
         annotator.plugins.Store.pluginInit()
 
