@@ -116,30 +116,38 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     @channel.call
       method: 'createAnnotation'
       params: tag
-      success: (annotation) => cb? null, this._parse annotation
-      error: cb
+      success: (annotation) =>
+        annotation = this._parse annotation
+        cb? null, annotation
+      error: (error, reason) => cb? {error, reason}
     tag
 
   setupAnnotation: (annotation, cb) ->
     @channel.call
       method: 'setupAnnotation'
       params: this._format annotation
-      success: (annotation) => cb? null, this._parse annotation
-      error: cb
+      success: (annotation) =>
+        annotation = this._parse annotation
+        cb? null, annotation
+      error: (error, reason) => cb? {error, reason}
 
   updateAnnotation: (annotation, cb) ->
     @channel.call
       method: 'updateAnnotation'
       params: this._format annotation
-      success: (annotation) => cb? null, this._parse annotation
-      error: cb
+      success: (annotation) =>
+        annotation = this._parse annotation
+        cb? null, annotation
+      error: (error, reason) => cb? {error, reason}
 
   deleteAnnotation: (annotation, cb) ->
     @channel.notify
       method: 'deleteAnnotation'
       params: this._format annotation
-      success: (annotation) => cb? null, this._parse annotation
-      error: cb
+      success: (annotation) =>
+        annotation = this._parse annotation
+        cb? null, annotation
+      error: (error, reason) => cb? {error, reason}
 
   showEditor: (annotation) ->
     @channel.notify
