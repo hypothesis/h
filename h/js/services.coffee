@@ -38,6 +38,11 @@ class Hypothesis extends Annotator
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
       permissions = @plugins.Permissions
       annotation.user = permissions.options.userId(permissions.user)
+      # Annotator assumes a valid array of targets and highlights.
+      unless annotation.target?
+        annotation.target = []
+      unless annotation.highlights?
+        annotation.highlights = []
       drafts.add annotation
 
     # Update the heatmap when the host is updated or annotations are loaded
@@ -215,11 +220,6 @@ class Hypothesis extends Annotator
   getHtmlQuote: (quote) -> quote
 
   setupAnnotation: (annotation) ->
-    # Delagate to Annotator implementation after we give it a valid array of
-    # targets. This is needed until Annotator stops assuming targets need to be
-    unless annotation.target?
-      annotation.highlights = []
-      annotation.target = []
     @plugins.Threading.thread annotation
     annotation
 
