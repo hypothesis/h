@@ -29,6 +29,8 @@ class Annotator.Host extends Annotator
       hostOrigin = '*'
     else
       hostOrigin = window.location.origin
+      # XXX: Hack for missing window.location.origin in FF
+      hostOrigin ?= window.location.protocol + "//" + window.location.host
 
     @frame = $('<iframe></iframe>')
     .css(visibility: 'hidden')
