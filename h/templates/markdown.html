@@ -1,0 +1,8 @@
+<textarea ng-change="model.$setViewValue(model.$viewValue)"
+          ng-hide="readonly"
+          ng-model="model.$viewValue"
+          ng-required="required" />
+<span ng-hide="readonly"
+      class="tip"><a href="https://en.wikipedia.org/wiki/Markdown"
+                     target="_blank">Markdown</a> is supported.</span>
+<div ng-bind-html="model.$viewValue" ng-show="readonly" />

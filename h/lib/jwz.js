@@ -269,7 +269,7 @@
         pruneEmpties: pruneEmpties,
         groupBySubject: groupBySubject,
         thread: thread,
-        idTable: idTable
+        get idTable() { return idTable }
       }
     }();
   }

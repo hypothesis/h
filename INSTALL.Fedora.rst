@@ -31,7 +31,7 @@ Before you start the elasticsearch daemon:
      #JAVA_OPTS="$JAVA_OPTS -Xss128k"
 
 After installing the above, create the virtualenv,
-as described in the README.rst
+as described in the INSTALL.rst
 
 (Run the commands from the directory where you've cloned the repository.)
 

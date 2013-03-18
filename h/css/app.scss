@@ -38,6 +38,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   padding: 1em;
+  padding-bottom: 3.5em;  // 1em + 2.5em of wrapper top padding
   position: absolute;
   height: 100%;
   left: 0;
@@ -225,7 +226,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     position: relative;
     text-align: right;
     top: -3.5em;
-    a { @include tertiarytext; }
+    a { @extend .small; }
   }
 
   input:not([type="submit"]) { width: 100%; }

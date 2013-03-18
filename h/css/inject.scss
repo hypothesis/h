@@ -99,6 +99,7 @@
 
 //IFRAME////////////////////////////////
 .annotator-frame {
+  @include reset-box-model;
   height: 100%;
   position: fixed;
   top: 0;

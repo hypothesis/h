@@ -1,0 +1,12 @@
+<div class="dropdown">
+  <a name="privacy"
+     role="button"
+     class="dropdown-toggle"
+     data-ng-model="model.$viewValue"
+     data-toggle="dropdown">{{model.$viewValue.name}}</a>
+  <ul class="dropdown-menu" role="menu">
+    <li data-ng-repeat="p in levels">
+      <a href="" data-ng-click="model.$setViewValue(p)">{{p.name}}</a>
+    </li>
+  </ul>
+</div>

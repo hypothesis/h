@@ -53,12 +53,11 @@ h2 {
 }
 
 h3 {
-  font-size: 1em;
-  margin: 0;
+  font-size: 1.4em;
 }
 
 h4 {
-  font-size: 1.25em;
+  font-size: 1.15em;
   margin: 0 0 .1em;
 }
 
@@ -101,8 +100,8 @@ button, input[type=submit], .btn {
   display: inline-block
 }
 
-.tertiarytext {
-  @include tertiarytext;
+.small {
+  font-size: .8em;
 }
 
 .icon-hidden {
@@ -495,31 +494,27 @@ blockquote {
 .annotation {
   position: relative;
 
-  div.body {
-    @include force-wrap;
-    clear: both;
-    p:first-child {
-      margin-top: 0;
+  .user {
+    font-weight: 800;
+  }
+
+  .body {
+    div {
+      @include force-wrap;
+      clear: both;
+      margin: .25em 0 .5em;
+      p:first-child {
+        margin-top: 0;
+      }
+      p:last-child {
+        margin-bottom: 0;
+      }
     }
-    p:last-child {
-      margin-bottom: 0;
+
+    textarea {
+      min-height: 8em;
+      width: 100%;
     }
-  }
-
-  .upper-left {
-    font-weight: bold;
-    text-decoration: underline;
-    margin-bottom: .25em;
-    float: left;
-  }
-
-  textarea.body {
-    min-height: 8em;
-    width: 100%;
-  }
-
-  .privacy {
-    float: right;
   }
 
   .buttonbar {
@@ -532,7 +527,7 @@ blockquote {
   }
 
   .tip {
-    @include tertiarytext;
+    @extend .small;
     float: right;
   }
 }
@@ -541,6 +536,7 @@ blockquote {
 //THREADING////////////////////////////////
 //Threaded discussion specific
 .thread {
+  margin-top: 1em;
   position: relative;
 
   & > ul {
@@ -566,18 +562,13 @@ blockquote {
     height: $threadexp-width;
     width: $threadexp-width;
     position: absolute;
-    top: .8em;
+    top: $threadexp-width / 2;
     left: -($threadexp-width / 2);
     outline: 1px dotted #aaa;
     @include icon("minus_1.png");
   }
 
-  .reply-count {
-    @include tertiarytext;
-  }
-
   .annotation {
-    padding-top: .35em;
     &.squished {
       padding-left: 0;
     }
@@ -594,6 +585,10 @@ blockquote {
         font-style: italic;
         margin-top: 0;
         margin-bottom: 0;
+      }
+
+      .reply-icon {
+        display: none;
       }
 
       .user {
@@ -617,45 +612,26 @@ blockquote {
 
 //MAGICONTROLS////////////////////////////////
 .magicontrols {
+  @include pie-clearfix;
   background-color: $bodyBackground;
-  float: right;
 
-  & > * {
-    @include transition(
-      opacity 0.1s ease-in-out .25s,
-      font-size .1s ease-in-out .25s,
-      margin .1s ease-in-out .25s,
-      opacity .1s ease-in-out .25s
-    );
-    @include tertiarytext;
-    float: left;
+  & > .pull-left {
+    margin-right: 1em;
+  }
+
+  & > .pull-right {
     margin-left: 1em;
   }
 
   .show {
-    font-size: 0;
+    @include transition(
+      opacity 0 ease-in-out .15s
+    );
     opacity: 0;
-  }
 
-  .detail:hover & {
-    & > * {
-      font-size: 1em;
-    }
-
-    .show {
+    :hover > & {
       opacity: 1;
     }
-
-    .time {
-      opacity: 0;
-      text-size: 0;
-    }
-  }
-}
-
-.reply-count {
-  .detail .magicontrols & {
-    display: none;
   }
 }
 
@@ -678,7 +654,9 @@ blockquote {
   }
 
   // Things not shown in the summary view
-  .annotator-controls, .magicontrols .show, .buttonbar {
-    display: none;
+  .magicontrols {
+    .reply-icon, .pull-right {
+      display: none;
+    }
   }
 }

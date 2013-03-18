@@ -1,50 +1,100 @@
 annotation = ['$filter', ($filter) ->
-  compile: (tElement, tAttrs, transclude) ->
-    # Adjust the ngModel directive to use the isolate scope binding.
-    # The expression will be bound in the isolate as '$modelValue'.
-    if tAttrs.ngModel
-      tAttrs.$set '$modelValue', tAttrs.ngModel, false
-      tAttrs.$set 'ngModel', '$modelValue', false
+  link: (scope, elem, attrs, controller) ->
+    return unless controller?
 
-    post: (scope, iElement, iAttrs, controller) ->
-      return unless controller
+    # Bind shift+enter to save
+    elem.bind
+      keydown: (e) ->
+        if e.keyCode == 13 && e.shiftKey
+          e.preventDefault()
+          scope.save()
 
-      # Bind shift+enter to save
-      iElement.find('textarea').bind
-        keydown: (e) ->
-          if e.keyCode == 13 && e.shiftKey
-            e.preventDefault()
-            scope.save()
-
-      # Format the annotation for display
-      controller.$formatters.push (value) ->
-        return unless angular.isObject value
-        created: value.created
-        body: ($filter 'converter') (value.text or '')
-        text: value.text
-        user: value.user
-        privacy: scope.getPrivacyLevel value.permissions
-
-      controller.$parsers.push (value) ->
-        return unless angular.isObject value
-        if controller.$pristine
-          controller.$modelValue
-        else
-          angular.extend controller.$modelValue,
-            text: value.text
-            permissions: value.privacy.permissions
-
-
-      # Publish the controller
-      scope.model = controller
+    # Publish the controller
+    scope.model = controller
   controller: 'AnnotationController'
   priority: 100  # Must run before ngModel
   require: '?ngModel'
   restrict: 'C'
-  scope:
-    $modelValue: '='
+  scope: {}
   templateUrl: 'annotation.html'
 ]
+
+
+markdown = ['$filter', '$timeout', ($filter, $timeout) ->
+  link: (scope, elem, attrs, controller) ->
+    return unless controller?
+
+    # Format the annotation for display
+    controller.$formatters.push (value) ->
+      if scope.readonly
+        value
+      else if value
+        ($filter 'converter') value
+      else
+        ''
+
+    # Publish the controller
+    scope.model = controller
+
+    # Auto-focus the input box
+    scope.$watch 'readonly', (newValue) ->
+      unless newValue then $timeout -> elem.find('textarea').focus()
+
+  require: '?ngModel'
+  restrict: 'E'
+  scope:
+    readonly: '@'
+    required: '@'
+  templateUrl: 'markdown.html'
+]
+
+
+privacy = ->
+  levels = [
+    {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
+    {name: 'Private', permissions: { 'read': [] } }
+  ]
+
+  getLevel = (permissions) ->
+    return unless permissions?
+
+    for level in levels
+      roleSet = {}
+
+      # Construct a set (using a key->exist? mapping) of roles for each verb
+      for verb of permissions
+        roleSet[verb] = {}
+        for role in permissions[verb]
+          roleSet[verb][role] = true
+
+      # Check that no (verb, role) is missing from the role set
+      mismatch = false
+      for verb of level.permissions
+        for role in level.permissions[verb]
+          if roleSet[verb]?[role]?
+            delete roleSet[verb][role]
+          else
+            mismatch = true
+            break
+
+        # Check that no extra (verb, role) is missing from the privacy level
+        mismatch ||= Object.keys(roleSet[verb]).length
+        if mismatch then break else return level
+
+    # Unrecognized privacy level
+    name: 'Custom'
+    value: permissions
+
+  link: (scope, elem, attrs, controller) ->
+    return unless controller?
+    controller.$formatters.push getLevel
+    controller.$parsers.push (privacy) -> privacy?.permissions
+    scope.model = controller
+    scope.levels = levels
+  require: '?ngModel'
+  restrict: 'E'
+  scope: true
+  templateUrl: 'privacy.html'
 
 
 recursive = ['$compile', '$timeout', ($compile, $timeout) ->
@@ -144,6 +194,8 @@ thread = ->
 
 angular.module('h.directives', ['ngSanitize'])
   .directive('annotation', annotation)
+  .directive('markdown', markdown)
+  .directive('privacy', privacy)
   .directive('recursive', recursive)
   .directive('resettable', resettable)
   .directive('tabReveal', tabReveal)

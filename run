@@ -27,6 +27,10 @@ if __name__ == '__main__':
         with open(activate) as f:
             code = compile(f.read(), activate, 'exec')
             exec(code, {}, dict(__file__=activate))
+        # Importing pkg_resources here seems to fix issues with namespace
+        # packages from the system-wide python polluting our environment
+        # on Debian and Debian-derived (Ubuntu) distributions.
+        import pkg_resources
 
     # If the distribution has not been set up for development, do so.
     if not environ.get('PYTHONSETUP'):
