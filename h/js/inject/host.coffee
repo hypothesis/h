@@ -210,6 +210,9 @@ class Annotator.Host extends Annotator
         window.requestAnimationFrame this._dragRefresh
     $(window).on 'resize scroll', update
     $(document.body).on 'resize scroll', '*', update
+    if window.PDFView?
+      # XXX: PDF.js hack
+      $(PDFView.container).on 'scroll', update
     super
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
