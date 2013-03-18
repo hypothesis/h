@@ -15,6 +15,7 @@ class Hypothesis extends Annotator
 
   # Internal state
   visible: false      # *  Whether the sidebar is visible
+  dragging: false     # * To enable dragging only when we really want to
 
   # Here as a noop just to make the Permissions plugin happy
   # XXX: Change me when Annotator stops assuming things about viewers
@@ -191,13 +192,17 @@ class Hypothesis extends Annotator
     handle.addEventListener 'dragstart', (event) =>
       event.dataTransfer.setData 'text/plain', ''
       event.dataTransfer.setDragImage el, 0, 0
-      @provider.dragFrame event.screenX
+      @dragging = true
+      @provider.notify method: 'setDrag', params: true      
+      @provider.notify method: 'dragFrame', params: event.screenX
     handle.addEventListener 'dragend', (event) =>
-      @provider.dragFrame event.screenX
+      @dragging = false
+      @provider.notify method: 'setDrag', params: false      
+      @provider.notify method: 'dragFrame', params: event.screenX
     @element[0].addEventListener 'dragover', (event) =>
-      @provider.dragFrame event.screenX
+      if @dragging then @provider.notify method: 'dragFrame', params: event.screenX
     @element[0].addEventListener 'dragleave', (event) =>
-      @provider.dragFrame event.screenX
+      if @dragging then @provider.notify method: 'dragFrame', params: event.screenX
 
     this
 
