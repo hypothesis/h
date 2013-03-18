@@ -34,6 +34,18 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
   # association of annotations received in arguments to window-local copies.
   cache: {}
 
+  constructor: (elem, options) ->
+    if options.window?
+      # Pull the option out and restore it after the super constructor is
+      # called. Unfortunately, Delegator uses a jQuery function which
+      # inspects this too closely and causes security errors.
+      window = options.window
+      delete options.window
+      super elem, options
+      @options.window = window
+    else
+      super
+
   pluginInit: ->
     @options.onReady = this.onReady
     @channel = Channel.build @options
