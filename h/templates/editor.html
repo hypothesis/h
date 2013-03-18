@@ -1,7 +1,12 @@
 <ul class="sliding-panels">
   <li class="annotator-outer annotator-editor">
-    <div class="paper excerpt">
-      <blockquote data-ng-bind="annotation.quote" />
+    <div class="paper excerpt"
+         ng-repeat="target in annotation.target">
+      <blockquote ng-bind="target.quote" ng-hide="diff" />
+      <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
+      <div class="small pull-right" ng-show="target.diffHTML">
+        <input type="checkbox" ng-model="diff">Show differences</input>
+      </div>
     </div>
     <div data-ng-model="$parent.annotation" class="paper annotation" />
   </li>

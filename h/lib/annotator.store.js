@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-c4fcdfe
+** Annotator 1.2.5-dev-859d4e3
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-01-29 11:20:27Z
+** Built at: 2013-03-13 14:59:29Z
 */
 
 (function() {
@@ -65,10 +65,17 @@
     };
 
     Store.prototype.annotationCreated = function(annotation) {
-      var _this = this;
+      var quote, quoteHTML,
+        _this = this;
       if (__indexOf.call(this.annotations, annotation) < 0) {
         this.registerAnnotation(annotation);
+        quote = annotation.quote;
+        quoteHTML = annotation.quoteHTML;
+        delete annotation.quote;
+        delete annotation.quoteHTML;
         return this._apiRequest('create', annotation, function(data) {
+          annotation.quote = quote;
+          annotation.quoteHTML = quoteHTML;
           if (!(data.id != null)) {
             console.warn(Annotator._t("Warning: No ID returned from server for annotation "), annotation);
           }
@@ -80,9 +87,16 @@
     };
 
     Store.prototype.annotationUpdated = function(annotation) {
-      var _this = this;
+      var quote, quoteHTML,
+        _this = this;
       if (__indexOf.call(this.annotations, annotation) >= 0) {
+        quote = annotation.quote;
+        quoteHTML = annotation.quoteHTML;
+        delete annotation.quote;
+        delete annotation.quoteHTML;
         return this._apiRequest('update', annotation, (function(data) {
+          annotation.quote = quote;
+          annotation.quoteHTML = quoteHTML;
           return _this.updateAnnotation(annotation, data);
         }));
       }
@@ -180,7 +194,7 @@
     Store.prototype._urlFor = function(action, id) {
       var replaceWith, url;
       replaceWith = id != null ? '/' + id : '';
-      url = this.options.prefix != null ? this.options.prefix : '';
+      url = this.options.prefix || '/';
       url += this.options.urls[action];
       url = url.replace(/\/:id/, replaceWith);
       return url;

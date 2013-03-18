@@ -77,6 +77,12 @@ pagedown = Uglify(
 )
 underscore = Uglify('h:lib/underscore.js', output='lib/underscore.min.js')
 
+domTextFamily = Bundle(
+    Coffee('h:lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
+    Coffee('h:lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
+    Coffee('h:lib/text_match_engines.coffee', output='js/text_match_engines.js'),
+    Uglify('h:lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js')
+)
 
 # Base and common SCSS
 base = ['h:css/base.scss']
@@ -144,6 +150,7 @@ inject = Bundle(
     jschannel,
     annotator,
     annotator_bridge,
+    domTextFamily,
     Uglify(
         Coffee('h:js/inject/host.coffee', output='js/host.js'),
         output='js/hypothesis-host.min.js'

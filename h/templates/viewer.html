@@ -18,9 +18,14 @@
   <li data-ng-class="!detail && 'collapsed' || ''"
       data-ng-init="detail = false"
       class="annotator-outer annotator-viewer collapsed">
-    <!-- Excerpt -->
-    <div class="paper excerpt">
-      <blockquote data-ng-bind="thread.message.annotation.quote" />
+    <!-- Excerpts -->
+    <div class="paper excerpt"
+         ng-repeat="target in thread.message.annotation.target">
+      <blockquote ng-bind="target.quote" ng-hide="diff" />
+      <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
+      <div class="small pull-right" ng-show="target.diffHTML">
+        <input type="checkbox" ng-model="diff">Show differences</input>
+      </div>
     </div>
     <!-- Thread view -->
     <div data-recursive="" class="paper thread">

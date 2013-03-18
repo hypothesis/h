@@ -61,17 +61,20 @@ class Hypothesis extends Annotator
     $window = @element.injector().get '$window'
     drafts = @element.injector().get 'drafts'
 
+    # Set up the bridge plugin, which bridges the main annotation methods
+    # between the host page and the panel widget.
+    whitelist = ['diffHTML', 'quote', 'ranges', 'target']
     this.addPlugin 'Bridge',
       origin: $location.search().xdm
       window: $window.parent
       formatter: (annotation) =>
         formatted = {}
-        for k, v of annotation when k in ['quote', 'ranges']
+        for k, v of annotation when k in whitelist
           formatted[k] = v
         formatted
       parser: (annotation) =>
         parsed = {}
-        for k, v of annotation when k in ['quote', 'ranges']
+        for k, v of annotation when k in whitelist
           parsed[k] = v
         parsed
 
@@ -203,12 +206,15 @@ class Hypothesis extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
 
+  # (Optionally) put some HTML formatting around a quote
+  getHtmlQuote: (quote) -> quote
+
   setupAnnotation: (annotation) ->
-    # This is needed until Annotator stops assuming ranges and highlights
-    # are always added.
-    unless annotation.ranges?
+    # Delagate to Annotator implementation after we give it a valid array of
+    # targets. This is needed until Annotator stops assuming targets need to be
+    unless annotation.target?
       annotation.highlights = []
-      annotation.ranges = []
+      annotation.target = []
     @plugins.Threading.thread annotation
     annotation
 

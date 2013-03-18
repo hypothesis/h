@@ -34,20 +34,24 @@ class Annotator.Host extends Annotator
       if not @plugins[name]
         this.addPlugin(name, opts)
 
+    # Scan the document text with the DOM Text libraries
+    this.scanDocument "Annotator initialized"
+
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
+    whitelist = ['diffHTML', 'quote', 'ranges', 'target']
     this.addPlugin 'Bridge',
       origin: '*'
       window: @frame[0].contentWindow
       formatter: (annotation) =>
         formatted = {}
-        for k, v of annotation when k in ['quote', 'ranges']
+        for k, v of annotation when k in whitelist
           formatted[k] = v
         formatted
       parser: (annotation) =>
         parsed = {}
-        for k, v of annotation when k in ['quote', 'ranges']
+        for k, v of annotation when k in whitelist
           parsed[k] = v
         parsed
 
@@ -104,16 +108,7 @@ class Annotator.Host extends Annotator
               $(this).removeClass('annotator-hl-active')
         )
 
-        .bind('getHref', =>
-          uri = decodeURIComponent document.location.href
-          if document.location.hash
-            uri = uri.slice 0, (-1 * location.hash.length)
-          $('meta[property^="og:url"]').each ->
-            uri = decodeURIComponent this.content
-          $('link[rel^="canonical"]').each ->
-            uri = decodeURIComponent this.href
-          return uri
-        )
+        .bind('getHref', => this.getHref())
 
         .bind('getMaxBottom', =>
           sel = '*' + (":not(.annotator-#{x})" for x in [
@@ -140,12 +135,24 @@ class Annotator.Host extends Annotator
           $('html, body').stop().animate {scrollTop: y}, 600
         )
 
+  scanDocument: (reason = "something happened") =>
+    try
+      console.log "Analyzing host frame, because " + reason + "..."
+      r = @domMatcher.scan()
+      scanTime = r.time
+      console.log "Traversal+scan took " + scanTime + " ms."
+    catch e
+      console.log e.message
+      console.log e.stack
+
   _setupWrapper: ->
     @wrapper = @element
     .on 'mouseup', =>
       if not @ignoreMouseup
         setTimeout =>
           unless @selectedRanges?.length then @panel?.notify method: 'back'
+    this._setupMatching()
+    @domMatcher.setRootNode @wrapper[0]
     this
 
   _setupDocumentEvents: ->
