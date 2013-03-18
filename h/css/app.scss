@@ -38,7 +38,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   padding: 1em;
-  padding-bottom: 3.5em;  // 1em + 2.5em of wrapper top padding
+  padding-top: 3.5em;
   position: absolute;
   height: 100%;
   left: 0;
@@ -67,7 +67,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   background: url('../images/noise_1.png');
   height: 100%;
   margin-left: $heatmap-width + 17px;
-  padding-top: 2.5em;
   position: relative;
 }
 
