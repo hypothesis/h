@@ -14,6 +14,8 @@ class Annotator.Host extends Annotator
     delta: 0
     last: null
     tick: false
+    #Do we enable dragging
+    canDrag: false
 
   constructor: (element, options) ->
     super
@@ -141,6 +143,10 @@ class Annotator.Host extends Annotator
           $('html, body').stop().animate {scrollTop: y}, 600
         )
 
+        .bind('setDrag', (ctx, drag) =>
+          @canDrag = drag
+        )
+
   scanDocument: (reason = "something happened") =>
     try
       console.log "Analyzing host frame, because " + reason + "..."
@@ -190,6 +196,7 @@ class Annotator.Host extends Annotator
           @panel?.notify method: 'publish', params: 'hostUpdated'
     document.addEventListener 'touchmove', update
     document.addEventListener 'touchstart', =>
+      unless @canDrag then return
       touch = true
       @frame?.css
         display: 'none'
@@ -202,6 +209,7 @@ class Annotator.Host extends Annotator
         @drag.tick = true
         window.requestAnimationFrame this._dragRefresh
     document.addEventListener 'dragleave', (event) =>
+      unless @canDrag then return
       if @drag.last?
         @drag.delta += event.screenX - @drag.last
       @drag.last = event.screenX
