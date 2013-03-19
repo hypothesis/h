@@ -212,7 +212,7 @@ class Annotation
 
       references =
         if $scope.thread.message.references
-          [$scope.thread.message.references, $scope.thread.message.id]
+          [$scope.thread.message.references..., $scope.thread.message.id]
         else
           [$scope.thread.message.id]
 
