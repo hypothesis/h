@@ -176,7 +176,7 @@ class Hypothesis extends Annotator
 
     console.log "Looking for synonym URLs for '" + href + "'..."
     results = []
-    if stringStartsWith href, "http://elife.elifesciences.org/content/2"
+    if stringStartsWith href, "http://elife.elifesciences.org/content"
       if stringEndsWith href, ".full-text.pdf"
         results.push href.substr 0, href.length - ".full-text.pdf".length
       else
