@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-e9328a5
+** Annotator 1.2.6-dev-94be061
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-18 09:36:53Z
+** Built at: 2013-03-19 03:19:26Z
 */
 
 (function() {
@@ -1071,6 +1071,7 @@
       _ref2 = annotation.highlights;
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
         h = _ref2[_k];
+        if (!(h.parentNode != null)) continue;
         child = h.childNodes[0];
         $(h).replaceWith(h.childNodes);
         window.DomTextMapper.changed(child.parentNode, "removed hilite (annotation deleted)");
@@ -1256,17 +1257,8 @@
         return _this.publish('annotationCreated', [annotation]);
       };
       cancel = function() {
-        var child, h, _k, _len3, _ref2, _results;
         cleanup();
-        _ref2 = annotation.highlights;
-        _results = [];
-        for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
-          h = _ref2[_k];
-          child = h.childNodes[0];
-          $(h).replaceWith(h.childNodes);
-          _results.push(window.DomTextMapper.changed(child.parentNode, "removed hilite, edit cancelled"));
-        }
-        return _results;
+        return _this.deleteAnnotation(annotation);
       };
       cleanup = function() {
         _this.unsubscribe('annotationEditorHidden', cancel);
