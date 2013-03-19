@@ -60,7 +60,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     @cache[tag] = msg
     msg
 
-  # Call the configured parser and tag the result
+  # Parse an annotation from a RPC with the configured parser
   _parse: ({tag, msg}) ->
     local = @cache[tag]
     remote = @options.parser msg
@@ -72,7 +72,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
 
     this._tag merged, tag
 
-  # Tag the object and format it with the configured formatter
+  # Format an annotation for RPC with the configured formatter
   _format: (annotation) ->
     this._tag annotation
     msg = @options.formatter annotation
