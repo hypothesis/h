@@ -38,7 +38,9 @@
             data-ng-repeat="thread in thread.children"
             data-ng-transclude=""
             class="thread">
-          <a data-ng-click="collapsed = !collapsed" class="threadexp" />
+          <a href="" class="threadexp"
+             title="{{collapsed && 'Expand' || 'Collapse'}}""
+             ng-click="collapsed = !collapsed" />
         </li>
       </ul>
     </div>
