@@ -24,9 +24,14 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   link: (scope, elem, attrs, controller) ->
     return unless controller?
 
-    controller.render = ->
-      return unless scope.readonly and controller.$viewValue
-      scope.rendered = ($filter 'converter') controller.$viewValue
+    # Format the annotation for display
+    controller.$formatters.push (value) ->
+      if scope.readonly
+        value
+      else if value
+        ($filter 'converter') value
+      else
+        ''
 
     # Publish the controller
     scope.model = controller
@@ -34,7 +39,6 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
     # Auto-focus the input box
     scope.$watch 'readonly', (newValue) ->
       unless newValue then $timeout -> elem.find('textarea').focus()
-      controller.render()
 
   require: '?ngModel'
   restrict: 'E'
