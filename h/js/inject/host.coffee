@@ -204,6 +204,7 @@ class Annotator.Host extends Annotator
         display: 'none'
       do update
     document.addEventListener 'dragover', (event) =>
+      unless @canDrag then return
       if @drag.last?
         @drag.delta += event.screenX - @drag.last
       @drag.last = event.screenX
