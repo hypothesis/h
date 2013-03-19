@@ -140,10 +140,9 @@ class Hypothesis extends Annotator
             console.log "Loaded annotions for '" + href + "'."
             for href in this.getSynonymURLs href
               console.log "Also loading annotations for: " + href
-              # TODO: These two lines are untested! Probably won't work properly.
               this.plugins.Store._apiRequest 'search', uri: href, (data) =>
                 console.log "Found " + data.total + " annotations here.."
-                this.loadAnnotations data.rows
+                this.plugins.Store._onLoadAnnotationsFromSearch data
 
         # Dodge toolbars [DISABLE]
         #@provider.getMaxBottom (max) =>
