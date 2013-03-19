@@ -33,7 +33,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .sliding-panels > li {
   @include smallshadow(-2px);
   @include transition(transform .4s);
-  @include translateZ(0);
+  @include translateX(100%);
   background: url('../images/noise_1.png');
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
@@ -41,20 +41,17 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   padding-top: 3.5em;
   position: absolute;
   height: 100%;
-  left: 0;
+  left: 1em;
   right: 0;
   
   &:first-child {
     @include box-shadow(none);
-    left: 0em !important;
+    @include translateX(0);
+    left: 0em;
   }
 
-  &:last-child {
-    left: 1em;
-  }
-
-  &.collapsed {
-    @include translateX(100%);
+  &.show {
+    @include translateX(0);
   }
 
   &.squished {

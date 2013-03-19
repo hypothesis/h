@@ -61,6 +61,9 @@ class Hypothesis extends Annotator
                   angular.extend hl, data: annotation
               offset: offset
 
+    # Reload the route after annotations are loaded
+    this.subscribe 'annotationsLoaded', -> $route.reload()
+
   _setupXDM: ->
     $location = @element.injector().get '$location'
     $rootScope = @element.injector().get '$rootScope'

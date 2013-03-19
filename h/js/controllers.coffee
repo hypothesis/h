@@ -40,15 +40,14 @@ class App
       {highlights, offset} = elem.datum()
 
       if dynamicBucket and $location.path() == '/viewer' and annotator.visible
-        unless $location.search()?.id
-          bottom = offset + heatmap.element.height()
-          annotations = highlights.reduce (acc, hl) =>
-            if hl.offset.top >= offset and hl.offset.top <= bottom
-              if hl.data not in acc
-                acc.push hl.data
-            acc
-          , []
-          annotator.showViewer annotations
+        bottom = offset + heatmap.element.height()
+        annotations = highlights.reduce (acc, hl) =>
+          if hl.offset.top >= offset and hl.offset.top <= bottom
+            if hl.data not in acc
+              acc.push hl.data
+          acc
+        , []
+        annotator.showViewer annotations
 
       elem.selectAll('.heatmap-pointer')
         # Creates highlights corresponding bucket when mouse is hovered
@@ -141,6 +140,7 @@ class App
       else
         plugins.Permissions.setUser(null)
         delete plugins.Auth
+
       if annotator.plugins.Store?
         $scope.$root.annotations = []
         annotator.threading.thread []
@@ -148,6 +148,7 @@ class App
         annotator.plugins.Store.annotations = []
         annotator.deleteAnnotation a for a in annotations
         annotator.plugins.Store.pluginInit()
+        dynamicBucket = true
 
     $scope.$watch 'visible', (newValue) ->
       if newValue then annotator.show() else annotator.hide()
@@ -164,9 +165,8 @@ class App
         collapsed: !show
         tab: 'login'
 
-    $scope.$on '$reset', =>
-      $location.path('/viewer').search({}).replace()
-      angular.extend $scope, @scope
+
+    $scope.$on '$reset', => angular.extend $scope, @scope
 
     # Fetch the initial model from the server
     $http.get '',
@@ -285,7 +285,7 @@ class Viewer
       $location.search(search).replace()
 
     $scope.focus = (annotation) ->
-      if $routeParams.id?
+      if $scope.thread
         highlights = [$scope.thread.message.annotation.$$tag]
       else if angular.isArray annotation
         highlights = (a.$$tag for a in annotation when a?)
@@ -303,12 +303,13 @@ class Viewer
     refresh()
 
   refresh: ($scope, $routeParams, annotator) =>
-    if $routeParams.id?
+    if $routeParams.id? and annotator.threading.idTable[$routeParams.id]?
       $scope.detail = true
       $scope.thread = annotator.threading.getContainer $routeParams.id
       $scope.focus $scope.thread.message.annotation
     else
       $scope.detail = false
+      $scope.thread = null
       $scope.focus []
 
 
