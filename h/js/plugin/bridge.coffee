@@ -80,14 +80,14 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     msg: msg
 
   beforeAnnotationCreated: (annotation) =>
-    unless annotation.$$tag?
-      tag = this.createAnnotation()
-      this._tag annotation, tag
+    return if annotation.$$tag?
+    this.beforeCreateAnnotation annotation
 
   annotationDeleted: (annotation) =>
-    return unless @cache[annotation.$$tag?]
-    delete @cache[annotation.$$tag]
-    this.deleteAnnotation annotation
+    return unless annotation.$$tag? and @cache[annotation.$$tag]
+    this.deleteAnnotation annotation, (err) =>
+      if err then @annotator.setupAnnotation annotation
+      else delete @cache[annotation.$$tag]
 
   annotationsLoaded: (annotations) =>
     this.setupAnnotation a for a in annotations
@@ -96,8 +96,8 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     @channel
 
     ## Remote method call bindings
-    .bind('createAnnotation', (txn, tag) =>
-      annotation = this._tag {}, tag
+    .bind('beforeCreateAnnotation', (txn, annotation) =>
+      annotation = this._parse annotation
       @annotator.publish 'beforeAnnotationCreated', annotation
       this._format annotation
     )
@@ -111,8 +111,12 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     )
 
     .bind('deleteAnnotation', (txn, annotation) =>
-      delete @cache[annotation.tag]
-      this._format (@annotator.deleteAnnotation (this._parse annotation))
+      annotation = this._parse annotation
+      delete @cache[annotation.$$tag]
+      annotation = @annotator.deleteAnnotation annotation
+      result = this._format annotation
+      delete @cache[annotation.$$tag]
+      result
     )
 
     ## Notifications
@@ -121,19 +125,18 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     )
 
     .bind('showViewer', (ctx, annotations) =>
-      @annotator.showEditor (this._parse a for a in annotations)
+      @annotator.showViewer (this._parse a for a in annotations)
     )
 
-  createAnnotation: (cb) ->
-    tag = window.btoa Math.random()
+  beforeCreateAnnotation: (annotation, cb) ->
     @channel.call
-      method: 'createAnnotation'
-      params: tag
+      method: 'beforeCreateAnnotation'
+      params: this._format annotation
       success: (annotation) =>
         annotation = this._parse annotation
         cb? null, annotation
       error: (error, reason) => cb? {error, reason}
-    tag
+    annotation
 
   setupAnnotation: (annotation, cb) ->
     @channel.call
@@ -156,7 +159,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     annotation
 
   deleteAnnotation: (annotation, cb) ->
-    @channel.notify
+    @channel.call
       method: 'deleteAnnotation'
       params: this._format annotation
       success: (annotation) =>
