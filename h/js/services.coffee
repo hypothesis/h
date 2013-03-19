@@ -137,6 +137,12 @@ class Hypothesis extends Annotator
                 uri: href
               prefix: '/api/current'
             patch_update this.plugins.Store
+            console.log "Loaded annotions for '" + href + "'."
+            for href in this.getSynonymURLs href
+              console.log "Also loading annotations for: " + href
+              this.plugins.Store._apiRequest 'search', uri: href, (data) =>
+                console.log "Found " + data.total + " annotations here.."
+                this.plugins.Store._onLoadAnnotationsFromSearch data
 
         # Dodge toolbars [DISABLE]
         #@provider.getMaxBottom (max) =>
@@ -160,6 +166,28 @@ class Hypothesis extends Annotator
       else
         this.hide()
     )
+
+  getSynonymURLs: (href) ->
+    stringStartsWith = (string, prefix) ->
+      prefix is string.substr 0, prefix.length
+
+    stringEndsWith = (string, suffix) ->
+      suffix is string.substr string.length - suffix.length
+
+    console.log "Looking for synonym URLs for '" + href + "'..."
+    results = []
+    if stringStartsWith href, "http://elife.elifesciences.org/content/2"
+      if stringEndsWith href, ".full-text.pdf"
+        results.push href.substr 0, href.length - ".full-text.pdf".length
+      else
+        results.push href + ".full-text.pdf"
+    else if stringStartsWith href, "https://peerj.com/articles/"
+      if stringEndsWith href, ".pdf"
+        results.push (href.substr 0, href.length - 4) + "/"
+      else
+        results.push (href.substr 0, href.length - 1) + ".pdf"
+        
+    return results
 
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
