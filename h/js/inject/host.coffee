@@ -33,7 +33,7 @@ class Annotator.Host extends Annotator
       hostOrigin ?= window.location.protocol + "//" + window.location.host
 
     @frame = $('<iframe></iframe>')
-    .css(visibility: 'hidden')
+    .css(display: 'none')
     .attr('src', "#{@app}#/?xdm=#{encodeURIComponent(hostOrigin)}")
     .appendTo(@wrapper)
     .addClass('annotator-frame annotator-outer annotator-collapsed')
@@ -71,7 +71,7 @@ class Annotator.Host extends Annotator
       scope: 'annotator:panel'
       window: @frame[0].contentWindow
       onReady: =>
-        @frame.css('visibility', 'visible')
+        @frame.css('display', '')
 
         @panel
 
