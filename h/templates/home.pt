@@ -51,7 +51,7 @@
                        , s=d.createElement('script');
                      s.setAttribute('src', '${request.route_url('embed')}');
                      d.body.appendChild(s)
-                   })();">Contribute</a></li>
+                   })();">Annotate</a></li>
       </ol>
     </div>
   </body>
