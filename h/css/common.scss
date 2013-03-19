@@ -587,7 +587,7 @@ blockquote {
   //These are all the changes needed to collapse thread objects.
   .collapsed {
     & > .annotation {
-      .body {
+      .body * {
         overflow: hidden;
         text-overflow: ellipsis;
         -o-text-overflow: ellipsis;
