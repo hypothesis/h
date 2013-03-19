@@ -174,17 +174,18 @@ class Hypothesis extends Annotator
       # typically cited for determining when scrolling has reached bottom:
       #   (scrollHeight - scrollTop == clientHeight)
       $current = $(event.target)
-      while (
-        ($current.css('overflow') in ['visible', '']) or
-        ($current[0].scrollHeight == $current[0].clientHeight)
-      )
-        $current = $current.parent()
-        if not $current[0]? then return event.preventDefault()
+      while $current.css('overflow') in ['hidden', 'visible']
+        $parent = $current.parent()
+        # Break out on document nodes
+        if $parent.get(0).nodeType == 9
+          event.preventDefault()
+          return
+        $current = $parent
       scrollTop = $current[0].scrollTop
       scrollEnd = $current[0].scrollHeight - $current[0].clientHeight
       if delta > 0 and scrollTop == 0
         event.preventDefault()
-      else if delta < 0 and scrollEnd - scrollTop <= 1
+      else if delta < 0 and scrollEnd - scrollTop <= 5
         event.preventDefault()
     this
 
