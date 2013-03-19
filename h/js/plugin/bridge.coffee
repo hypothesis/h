@@ -143,6 +143,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
         annotation = this._parse annotation
         cb? null, annotation
       error: (error, reason) => cb? {error, reason}
+    annotation
 
   updateAnnotation: (annotation, cb) ->
     @channel.call
@@ -152,6 +153,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
         annotation = this._parse annotation
         cb? null, annotation
       error: (error, reason) => cb? {error, reason}
+    annotation
 
   deleteAnnotation: (annotation, cb) ->
     @channel.notify
@@ -161,13 +163,16 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
         annotation = this._parse annotation
         cb? null, annotation
       error: (error, reason) => cb? {error, reason}
+    annotation
 
   showEditor: (annotation) ->
     @channel.notify
       method: 'showEditor'
       params: this._format annotation
+    this
 
   showViewer: (annotations) ->
     @channel.notify
       method: 'showViewer'
       params: (this._format a for a in annotations)
+    this

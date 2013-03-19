@@ -244,9 +244,8 @@ class Annotator.Host extends Annotator
       'margin-left': "#{m}px"
       width: "#{w}px"
 
-  showEditor: (annotation) =>
-    @plugins.Bridge.showEditor annotation
-    this
+  showViewer: (annotation) => @plugins.Bridge.showViewer annotation
+  showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
