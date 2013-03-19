@@ -142,8 +142,11 @@ class App
         plugins.Permissions.setUser(null)
         delete plugins.Auth
       if annotator.plugins.Store?
-        $element.injector().get('$rootScope').annotations = []
+        $scope.$root.annotations = []
+        annotator.threading.thread []
+        annotations = annotator.plugins.Store.annotations
         annotator.plugins.Store.annotations = []
+        annotator.deleteAnnotation a for a in annotations
         annotator.plugins.Store.pluginInit()
 
     $scope.$watch 'visible', (newValue) ->
@@ -161,7 +164,9 @@ class App
         collapsed: !show
         tab: 'login'
 
-    $scope.$on '$reset', => angular.extend $scope, @scope
+    $scope.$on '$reset', =>
+      $location.path('/viewer').search({}).replace()
+      angular.extend $scope, @scope
 
     # Fetch the initial model from the server
     $http.get '',
