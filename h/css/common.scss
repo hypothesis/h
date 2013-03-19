@@ -492,6 +492,7 @@ blockquote {
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
+  margin-bottom: 1em;
   position: relative;
 
   .user {
@@ -536,7 +537,6 @@ blockquote {
 //THREADING////////////////////////////////
 //Threaded discussion specific
 .thread {
-  margin-top: 1em;
   position: relative;
 
   & > ul {
