@@ -36,6 +36,11 @@ def authorize(annotation, action, user=None):
         return authz.authorize(annotation, action, user)
 
 
+@view_config(renderer='string', request_method='GET', route_name='token')
+def token(context, request):
+    return context.token
+
+
 def includeme(config):
     """Include the annotator-store API backend.
 
@@ -72,10 +77,15 @@ def includeme(config):
 
     app.before_request(before_request)
 
-    # Configure the API view -- version 1 is just an annotator.store proxy
-    config.add_view(wsgiapp2(app), context='h.resources.APIFactory', name='v1')
-    config.add_view(wsgiapp2(app), context='h.resources.APIFactory',
-                    name='current')
+    # Configure the API views -- version 1 is just an annotator.store proxy
+    api_v1 = wsgiapp2(app)
+
+    config.add_route('token', '/api/token')
+    config.add_route('api-v1', '/api/v1/*subpath')
+    config.add_route('api', '/api/*subpath')
+
+    config.add_view(api_v1, route_name='api')
+    config.add_view(api_v1, route_name='api-v1')
 
     # And pick up the token view
     config.scan(__name__)

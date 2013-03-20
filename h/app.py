@@ -192,14 +192,6 @@ class AppController(views.BaseController):
         result.update(status='okay')
         return result
 
-    @view_config(name='token', renderer='string')
-    def token(self):
-        token = self.request.context.token
-        if not token:
-            raise exception_response(403, detail=messages.NOT_LOGGED_IN)
-        else:
-            return token
-
     @view_config(renderer='json', xhr=True)
     def __call__(self):
         request = self.request
@@ -213,15 +205,14 @@ class AppController(views.BaseController):
             name: getattr(request.context, name)
             for name in ['persona', 'personas', 'token']
         }
-        model.update(tokenUrl=request.resource_url(request.context, 'token'))
+        model.update(tokenUrl=request.route_url('token'))
         return dict(flash=flash, model=model)
 
     @view_config(renderer='h:templates/app.pt')
     def __html__(self):
         request = self.request
         request.session.new_csrf_token()
-        token_url = request.resource_url(request.root, 'api', 'access_token')
-        return {'token_url': token_url}
+        return {}
 
 
 def includeme(config):

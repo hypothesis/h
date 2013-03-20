@@ -138,7 +138,7 @@ class Hypothesis extends Annotator
               loadFromSearch:
                 limit: 1000
                 uri: href
-              prefix: '/api/current'
+              prefix: '/api'
             patch_update this.plugins.Store
             console.log "Loaded annotions for '" + href + "'."
             for href in this.getSynonymURLs href
