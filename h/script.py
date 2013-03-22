@@ -32,7 +32,7 @@ def assets(args, console):
         for bundle in asset_env:
             bundle.urls()
 
-    bootstrap(args[0], build)
+    bootstrap(args[0], config_fn=build)
 
 
 @command

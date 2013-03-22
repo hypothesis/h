@@ -18,16 +18,16 @@ def includeme(config):
     config.include('h.views')
 
 
-def bootstrap(cfname, config_fn=None):
+def bootstrap(cfname, request=None, options=None, config_fn=None):
     """Bootstrap the application with the given paste configuration file
 
     An optional function argument may be supplied. This function will be
     invoked with the bootstrapping environment.
     """
-    from pyramid import paster
+    from pyramid.paster import bootstrap, setup_logging
 
-    paster.setup_logging(cfname)
-    env = paster.bootstrap(cfname)
+    setup_logging(cfname)
+    env = bootstrap(cfname, request=request, options=options)
 
     try:
         if config_fn:
