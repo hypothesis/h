@@ -73,7 +73,7 @@ jschannel = Uglify('h:lib/jschannel.js', output='h:lib/jschannel.min.js')
 jwz = Uglify('h:lib/jwz.js', output='lib/jwz.min.js')
 pagedown = Uglify(
     'h:lib/Markdown.Converter.js',
-    output='lib//Markdown.Converter.min.js'
+    output='lib/Markdown.Converter.min.js'
 )
 
 domTextFamily = Bundle(
