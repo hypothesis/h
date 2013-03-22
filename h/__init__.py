@@ -68,4 +68,5 @@ def create_app(settings):
 
 
 def main(global_config, **settings):
+    settings.update(global_config)
     return create_app(settings)
