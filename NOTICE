@@ -18,6 +18,10 @@ This product also includes the following third-party components:
 
    Copyright (c) 2012, Michael Bostock
 
+ * jQuery (http://jquery.com/)
+
+   Copyright 2013 jQuery Foundation and other contributors
+
  * jschannel (https://github.com/mozilla/jschannel)
 
    Copyright (C) 2010, Lloyd Hilaiel
