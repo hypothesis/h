@@ -5,13 +5,21 @@
 yepnope([
   {
     test: window.annotator,
-    nope: Array.prototype.concat.call(${inject}),
+    nope: ${inject},
     complete: function () {
-      window.annotator = new Annotator.Host(document.body, {
-        /* @@ reflect routes with crossroads.js?? */
-        app: ${app},
-      });
-      window.Annotator.noConflict().$.noConflict(true);
+      var app = ${app}
+        , bootstrap = [
+          'window.annotator = new Annotator.Host(document.body, {',
+          '  /* @@ reflect routes with crossroads.js?? */',
+          '  app: "' + app + '"',
+          '});',
+          'window.Annotator.noConflict().$.noConflict(true);'
+        ].join('\n')
+        , script = document.createElement('script')
+        , first = document.getElementsByTagName('script')[0]
+        ;
+      script.text = bootstrap;
+      first.parentNode.insertBefore(script, first);
     }
   },
   {

@@ -18,7 +18,7 @@ var ACTION_STATES = {
 
 function inject(tab) {
   chrome.tabs.executeScript(null, {
-    file: 'js/inject.js'
+    file: 'js/embed.js'
   })
 }
 

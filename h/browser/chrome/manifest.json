@@ -1,6 +1,6 @@
 {
   "name": "Hypothes.is",
-  "version": "0.1",
+  "version": "${version}",
   "manifest_version": 2,
 
   "description": "The Internet, peer reviewed.",
@@ -18,12 +18,26 @@
     "<all_urls>",
 
     "clipboardWrite",
-    "tabs"
+    "tabs",
+    "webRequest",
+    "webRequestBlocking"
   ],
+  "content_security_policy":
+    "script-src 'self' https://ajax.googleapis.com; object-src 'self'",
 
   "background": {
-    "persistent": false,
+    "persistent": true,
     "scripts": ["js/background.js"]
   },
-  "page_action": {}
+  "page_action": {},
+  "web_accessible_resources": [
+    "app.html",
+    "css/inject.css",
+    "images/pen_1.png",
+    "js/inject.min.js",
+    "lib/annotator.min.js",
+    "lib/jquery-1.8.3.min.js",
+    "lib/jschannel.min.js",
+    "lib/polyfills/raf.js"
+  ]
 }
