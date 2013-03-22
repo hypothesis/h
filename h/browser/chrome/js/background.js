@@ -83,7 +83,7 @@ function onTabRemoved(tab) {
 
 
 function onTabUpdated(tabId, info) {
-  var currentState = state(tabId)
+  var currentState = state(tabId) || 'sleeping'
 
   setPageAction(tabId, currentState)
 
