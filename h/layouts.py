@@ -3,6 +3,8 @@ from pyramid_layout.layout import layout_config
 
 @layout_config(template='h:templates/base.pt')
 class BaseLayout(object):
+    csp = None
+    inline_webfont = True
     requirements = ()
 
     def __init__(self, context, request):
