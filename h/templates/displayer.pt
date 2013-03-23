@@ -13,70 +13,7 @@
   	</head>
   	<style type="text/css"></style>
   <body metal:fill-slot="body">
-    <div id="main" role="main">
-      <script id="annotations-template.html" type="text/ng-template">
-        <div class='sidepanel'>
-          <div class='avablock'>
-            <img class='ava' src='images/{{annotation.avatar}}' />
-          </div>
-        </div>
-        <div class='papercontainer'>
-          <div class='metadata'>
-            <a>{{readable_user}}</a>
-            annotated:
-          </div>
-          <div class='control'>
-            <a class='goto'>
-              To Source
-            </a>
-          </div>
-          <div class='noiseknockout'>
-            <div class='page'>
-              <div class='domain'>
-                <img class="favicon" ng-src="http://{{annotation.domain}}/favicon.ico"/><a href="{{annotation.domain}}">{{annotation.domain}}</a> | <a href="{{annotation.link}}">{{annotation.page|truncate:80}}</a>
-              </div>
-            </div>
-            <div class='floatainer'>
-              <div class='hyp-excerpt hyp-paper' ng-click='showHide=!showHide'>
-                <blockquote>
-                  {{annotation.excerpt}}
-                </blockquote>
-              </div>
-            </div>
-            <div class='floatainer'>
-              <div class='hyp-annotation hyp-paper hyp-detail'>
-                <div style='padding-bottom: .5em;'>
-                  <div class='topbar'>
-                    <div class='hyp-user'>{{readable_user}}</div>
-                    <div class='hyp-time'>{{annotation.time}}</div>
-                  </div>
-                  <div class='hyp-content'>{{annotation.text}}</div>
-                  <div class='hyp-thread'>
-                    <!-- {{annotation.children.length}} replies -->
-                    <ul class='annotator-listing' ng-show='showHide'>
-                      <li class='hyp-annotation hyp-detail' ng-include="'replies-template.html'" ng-repeat='reply in annotation.children'></li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </script>
-      <script id="replies-template.html" type="text/ng-template">
-        <a class='hyp-threadexp' href='#collapse'></a>
-        <div class='topbar'>
-          <div class='hyp-user'>{{reply.username}}</div>
-          <div class='hyp-time'>{{reply.time}}</div>
-        </div>
-        <div class='hyp-content'>{{reply.text}}</div>
-        <div class='hyp-thread'>
-          <!-- {{reply.children.length}} replies -->
-          <ul class='annotator-listing'>
-            <li class='hyp-annotation hyp-detail' ng-include="'replies-template.html'" ng-repeat='reply in reply.children'></li>
-          </ul>
-        </div>
-      </script>
+      
       <div class="nav">
         <div class="inner">
           <div class="barbutton left title">
@@ -90,6 +27,8 @@
           </div>
         </div>
       </div>
+      
+      
       <div id="stream">
         <div class="hyp-paper tile">
           You have followed a link to an annotation. If you had the hypothes.is extension installed, the experience would be better. <a href="">Install it here</a>.  Or read <a href="">more about why</a>.
@@ -98,10 +37,10 @@
           <!-- ngRepeat: annotation in annotations --><li class="tile ng-scope" ng-include="&#39;annotations-template.html&#39;" ng-repeat="annotation in annotations"><span class="ng-scope">
         </span><div class="sidepanel ng-scope">
           <div class="avablock">
-            <img class="ava" src="./Standalone_files/avatar_2.jpg">
+            <img class="ava" src="${request.static_url('h:images/hypothelogo_square.png')}">
           </div>
-        </div><span class="ng-scope">
-        </span><div class="papercontainer ng-scope">
+          
+        </div><div class="papercontainer ng-scope">
           <div class="metadata">
             <a href="">${readable_user}</a>
             annotated:
@@ -111,12 +50,14 @@
               To Source
             </a>
           </div>
+
           <div class="noiseknockout">
             <div class="page">
               <div class="domain">
                 <img class="favicon" ng-src="${favicon_link}" src="${favicon_link}"><a href="${domain}">${domain_title}</a> | <a href="${annotation.uri}">${title}</a>
               </div>
             </div>
+
             <div class="floatainer">
               <div class="hyp-excerpt hyp-paper" ng-click="showHide=!showHide">
                 <blockquote>
@@ -124,6 +65,7 @@
                 </blockquote>
               </div>
             </div>
+
             <div class="floatainer">
               <div class="hyp-annotation hyp-paper hyp-detail">
                 <div style="padding-bottom: .5em;">
@@ -132,10 +74,20 @@
                     <div class="hyp-time">${fuzzy_date}</div>
                   </div>
                   <div class="hyp-content">${annotation.text}</div>
+                  
+				  <!-- Replies -->
                   <div class="hyp-thread">
-                    <!-- {{annotation.children.length}} replies -->
-                    <ul class="annotator-listing" ng-show="showHide" style="display: none;">
+                    <ul class="annotator-listing">
+						<span tal:repeat="reply replies">
+							<li class="hyp-annotation hyp-detail" >${reply}
+						</span>
+
+                  <div class="hyp-thread">
+                    <!-- {{annotation.children.length}} replies 
+                    -->
+                    <ul class="annotator-listing" ng-show="showHide">
                       <!-- ngRepeat: reply in annotation.children --><li class="hyp-annotation hyp-detail ng-scope" ng-include="&#39;replies-template.html&#39;" ng-repeat="reply in annotation.children"><span class="ng-scope">
+
         </span><a class="hyp-threadexp ng-scope" href="http://jtremback.github.com/standalone/build-a8213d8/index.html#collapse"></a><span class="ng-scope">
         </span><div class="topbar ng-scope">
           <div class="hyp">Speciality</div>
@@ -178,7 +130,6 @@
         </div></li>
         </ul>
       </div>
-    </div>
   
 
 </body></html>

@@ -8,14 +8,16 @@ from dateutil.parser import parse
 from datetime import datetime
 from dateutil.tz import tzutc
 from math import floor
+from itertools import chain
 
 import logging
 log = logging.getLogger(__name__)
 
 
 class DisplayerTemplate(object):
-    def __init__(self, annotation):
+    def __init__(self, annotation, replies = []):
         self._annotation = annotation
+        self._replies = replies
        
     def _url_values(self):
         #Getting the title of the uri.
@@ -27,9 +29,7 @@ class DisplayerTemplate(object):
         
         #Favicon
         favlink = soup.find("link", rel="shortcut icon")
-        log.info(str(favlink))
         icon_link = favlink['href'] if favlink and favlink['href'] else ''
-        log.info(str(icon_link))
         
         #Getting the domain from the uri, and the same url magic for the domain title
         parsed_uri = urlparse(self._annotation['uri'])
@@ -47,15 +47,8 @@ class DisplayerTemplate(object):
 
     def _fuzzyTime(self, date):        
         if not date: return ''
-        log.info(date)
-        converted = parse(date)
-        log.info(converted)
-        log.info(str(datetime.utcnow().replace(tzinfo=tzutc())))
-                 
+        converted = parse(date)                 
         delta = round((datetime.utcnow().replace(tzinfo=tzutc()) - converted).total_seconds())
-        #delta = round((converted - datetime(1970, 1, 1, tzinfo=tzutc())).total_seconds())
-        #delta = round((time.time - converted) / 1000)
-        log.info(delta)
 
         minute = 60
         hour = minute * 60
@@ -70,22 +63,79 @@ class DisplayerTemplate(object):
         elif (floor(delta / hour) == 1): fuzzy = '1 hour ago'
         elif (delta < day): fuzzy = str(floor(delta / hour)) + ' hours ago'
         elif (delta < day * 2): fuzzy = 'yesterday'
-        elif (delta < month): fuzzy = str(round(delta / day)) + ' days ago'
+        elif (delta < month): fuzzy = str(int(round(delta / day))) + ' days ago'
         else: fuzzy = str(converted)
         
-        log.info(fuzzy)
         return fuzzy
          
     def _userName(self, user):
-        log.info(user)
         if not user: return ''
         if user == '': return 'Annotation deleted.'
         else:
             return user.split(':')[1].split('@')[0]
-         
+
+    def _flattened(self, part):
+        outlist = []
+        for item in part :
+            outlist.append(item)
+            outlist.extend(self._flattened(item['children']))
+        return sorted(outlist, key=lambda reply : reply['created'], reverse=True) 
+    
+    def _thread_replies(self):
+        idTable = {}
+        maxlevel = 1
+        reply_threaded = []
+        replies = sorted(self._replies, key=lambda reply : reply['created'])
+
+        for reply in replies :
+            log.info(reply['text'])
+            log.info(reply['created'])
+            log.info(reply['updated'])
+            log.info('+++++')
+            level = 1
+            pointer = reply_threaded
+            for thread in reply['thread'].split('/')[1:] :
+                pointer = pointer[idTable[thread]]['children']
+                level = level + 1
+
+            #Add the new one.
+            idTable[reply['id']] = len(pointer)
+            pointer.append({
+                'id'            : reply['id'],
+                'created'       : reply['created'],
+                'text'          : reply['text'],
+                'fuzzy_date'    : self._fuzzyTime(reply['updated']),
+                'readable_user' : self._userName(reply['user']),
+                'level'         : level,
+                'children'      : []
+            })
+
+        #"Flatten" it
+        repl = self._flattened(reply_threaded)
+
+        log.info('----------------------------------')
+        log.info(reply_threaded)
+        log.info('----------------------------------')
+        log.info(repl)
+        
+        #Remove 'children'
+        for reply in repl:
+            del reply['children']
+            del reply['created']
+        log.info('----------------------------------')
+        log.info(repl)
+        
+        return repl
+
+    
     def generate_dict(self):
         d = {'annotation'    : self._annotation}
         d.update(self._url_values())
         d['fuzzy_date'] = self._fuzzyTime(self._annotation['updated'])
         d['readable_user'] = self._userName(self._annotation['user'])
+        d['replies'] = self._thread_replies()
+        for key, value in d.items() :
+            log.info(key + ': ' + str(value))
         return d
+
+
