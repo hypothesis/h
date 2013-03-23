@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <!--<html ng-app="threadedAnnos" class="ng-scope" metal:use-macro="main_template"> -->
-<html ng-app="threadedAnnos" class="ng-scope" metal:use-macro="main_template">
+<html metal:use-macro="main_template">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     	<meta charset="utf-8">
@@ -77,10 +77,17 @@
                   
 				  <!-- Replies -->
                   <div class="hyp-thread">
-                    <ul class="annotator-listing">
-						<span tal:repeat="reply replies">
-							<li class="hyp-annotation hyp-detail" >${reply}
-						</span>
+                    <ul class="annotator-listing" metal:define-macro="item" 
+                    	tal:repeat="reply replies">
+     					<span tal:define="global is_list isinstance(reply, list);
+                       		content is_list and 'list:' or reply"						
+           					tal:replace="content"/>
+
+					     <ul tal:condition="is_list"
+					         tal:define="replies reply">
+					       <li metal:use-macro="view.global_macros['item']"/>
+					     </ul>
+					</ul>
 
                   <div class="hyp-thread">
                     <!-- {{annotation.children.length}} replies 

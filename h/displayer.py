@@ -61,7 +61,7 @@ class DisplayerTemplate(object):
         elif (delta < 2 * minute): fuzzy = 'a minute ago'
         elif (delta < hour): fuzzy = str(floor(delta / minute)) + ' minutes ago'
         elif (floor(delta / hour) == 1): fuzzy = '1 hour ago'
-        elif (delta < day): fuzzy = str(floor(delta / hour)) + ' hours ago'
+        elif (delta < day): fuzzy = str(int(floor(delta / hour))) + ' hours ago'
         elif (delta < day * 2): fuzzy = 'yesterday'
         elif (delta < month): fuzzy = str(int(round(delta / day))) + ' days ago'
         else: fuzzy = str(converted)
@@ -74,57 +74,40 @@ class DisplayerTemplate(object):
         else:
             return user.split(':')[1].split('@')[0]
 
-    def _flattened(self, part):
+    def _nestlist(self, part, childTable):
         outlist = []
-        for item in part :
-            outlist.append(item)
-            outlist.extend(self._flattened(item['children']))
-        return sorted(outlist, key=lambda reply : reply['created'], reverse=True) 
+        part = sorted(part, key=lambda reply : reply['created'], reverse=True)
+        for reply in part :
+            children = self._nestlist(childTable[reply['id']], childTable)
+            del reply['created']
+            outlist.append(reply)
+            if len(children) > 0 : outlist.append(children)
+        return outlist 
     
     def _thread_replies(self):
-        idTable = {}
+        childTable = {}
         maxlevel = 1
         reply_threaded = []
         replies = sorted(self._replies, key=lambda reply : reply['created'])
 
         for reply in replies :
-            log.info(reply['text'])
-            log.info(reply['created'])
-            log.info(reply['updated'])
-            log.info('+++++')
             level = 1
             pointer = reply_threaded
             for thread in reply['thread'].split('/')[1:] :
-                pointer = pointer[idTable[thread]]['children']
-                level = level + 1
+                pointer = childTable[thread]
 
             #Add the new one.
-            idTable[reply['id']] = len(pointer)
+            childTable[reply['id']] = []
             pointer.append({
                 'id'            : reply['id'],
                 'created'       : reply['created'],
                 'text'          : reply['text'],
                 'fuzzy_date'    : self._fuzzyTime(reply['updated']),
                 'readable_user' : self._userName(reply['user']),
-                'level'         : level,
-                'children'      : []
             })
 
-        #"Flatten" it
-        repl = self._flattened(reply_threaded)
-
-        log.info('----------------------------------')
-        log.info(reply_threaded)
-        log.info('----------------------------------')
-        log.info(repl)
-        
-        #Remove 'children'
-        for reply in repl:
-            del reply['children']
-            del reply['created']
-        log.info('----------------------------------')
-        log.info(repl)
-        
+        #Create nested list form
+        repl = self._nestlist(reply_threaded, childTable)        
         return repl
 
     
