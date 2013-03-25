@@ -15,9 +15,10 @@ log = logging.getLogger(__name__)
 
 
 class DisplayerTemplate(object):
-    def __init__(self, annotation, replies = []):
+    def __init__(self, annotation, replies = [], original = None):
         self._annotation = annotation
         self._replies = replies
+        self._original = original
        
     def _url_values(self):
         #Getting the title of the uri.
@@ -113,9 +114,12 @@ class DisplayerTemplate(object):
     
     def generate_dict(self):
         d = {'annotation'    : self._annotation}
+        
+        d['quote'] = self._original['quote'] if self._original else self._annotation['quote']
         d.update(self._url_values())
         d['fuzzy_date'] = self._fuzzyTime(self._annotation['updated'])
         d['readable_user'] = self._userName(self._annotation['user'])
+        log.info(self._thread_replies())
         d['replies'] = self._thread_replies()
         for key, value in d.items() :
             log.info(key + ': ' + str(value))

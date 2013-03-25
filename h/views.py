@@ -38,8 +38,12 @@ def displayer(request):
         res = json.dumps(annotation, indent=None if request.is_xhr else 2)
         return Response(res, content_type = 'application/json')
     else :
+        #Load original quote for replies
+        if annotation['thread'] :
+            original = Annotation.fetch(annotation['thread'].split('/')[0])
+        else: original = None
         replies = Annotation.search_full(thread = annotation['id'])
-        return Displayer(annotation, replies).generate_dict()        
+        return Displayer(annotation, replies, original).generate_dict()        
 
 
 def includeme(config):

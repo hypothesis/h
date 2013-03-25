@@ -1,5 +1,4 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<!--<html ng-app="threadedAnnos" class="ng-scope" metal:use-macro="main_template"> -->
 <html metal:use-macro="main_template">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -34,13 +33,13 @@
           You have followed a link to an annotation. If you had the hypothes.is extension installed, the experience would be better. <a href="">Install it here</a>.  Or read <a href="">more about why</a>.
         </div>
         <ul class="annotator-listing annotator-widget">
-          <!-- ngRepeat: annotation in annotations --><li class="tile ng-scope" ng-include="&#39;annotations-template.html&#39;" ng-repeat="annotation in annotations"><span class="ng-scope">
-        </span><div class="sidepanel ng-scope">
+          <li class="tile"> 
+          <div class="sidepanel">
           <div class="avablock">
             <img class="ava" src="${request.static_url('h:images/hypothelogo_square.png')}">
           </div>
           
-        </div><div class="papercontainer ng-scope">
+        </div><div class="papercontainer">
           <div class="metadata">
             <a href="">${readable_user}</a>
             annotated:
@@ -54,14 +53,14 @@
           <div class="noiseknockout">
             <div class="page">
               <div class="domain">
-                <img class="favicon" ng-src="${favicon_link}" src="${favicon_link}"><a href="${domain}">${domain_title}</a> | <a href="${annotation.uri}">${title}</a>
+                <img class="favicon" src="${favicon_link}"><a href="${domain}">${domain_title}</a> | <a href="${annotation.uri}">${title}</a>
               </div>
             </div>
 
             <div class="floatainer">
               <div class="hyp-excerpt hyp-paper" ng-click="showHide=!showHide">
                 <blockquote>
-                  ${annotation.quote}
+                  ${quote}
                 </blockquote>
               </div>
             </div>

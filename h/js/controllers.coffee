@@ -268,11 +268,24 @@ class Annotation
       if id?
         $scope.thread = threading.getContainer id
 
+    $scope.$watch 'shared', (newValue) ->
+      if newValue and newValue is true
+        $timeout -> $element.find('input').focus()
+        $timeout -> $element.find('input').select()
+        
         # Check if this is a brand new annotation
         annotation = $scope.thread.message?.annotation
         if annotation? and drafts.contains annotation
           $scope.editing = true
 
+
+    $scope.shared = false
+    $scope.share = ->
+      $scope.shared = not $scope.shared
+      if $scope.shared and not $scope.shared_link
+        $scope.shared_link = window.location.host + '/a/' + $scope.$modelValue.id
+        
+      console.log $scope.shared
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']

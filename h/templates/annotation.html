@@ -52,13 +52,21 @@
       <div ng-switch-default>Reason:</div>
     </ng-switch>
   </div>
-
+  
   <!-- Body -->
   <markdown ng-model="$parent.model.$modelValue.text"
             ng-readonly="!$parent.editing"
             class="body"
             name="text"
             required="" />
+
+<div class="share-dialog" data-ng-show="shared && !editing">
+    <div class="icon-input">
+      <input type="text" value="{{shared_link}}"/>
+      <div class="clipboard-icon"></div>
+    </div>
+</div>
+
 
   <!-- Bottom controls -->
   <div class="buttonbar" ng-show="editing">
