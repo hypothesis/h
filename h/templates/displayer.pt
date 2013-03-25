@@ -12,7 +12,7 @@
 	    <title>Display annotation</title>
   	</head>
   	<style type="text/css"></style>
-  <body metal:fill-slot="body">
+	<body metal:fill-slot="body">
       
       <div class="nav">
         <div class="inner">
@@ -77,59 +77,33 @@
                   
 				  <!-- Replies -->
                   <div class="hyp-thread">
-                    <ul class="annotator-listing" metal:define-macro="item" 
-                    	tal:repeat="reply replies">
-     					<span tal:define="global is_list isinstance(reply, list);
-                       		content is_list and 'list:' or reply"						
-           					tal:replace="content"/>
-
-					     <ul tal:condition="is_list"
-					         tal:define="replies reply">
-					       <li metal:use-macro="view.global_macros['item']"/>
-					     </ul>
+                    <ul class="annotator-listing">
+                    	<li class="hyp-annotation hyp-detail">
+                  		<span metal:define-macro="item"
+                  			tal:repeat="reply replies">
+	     					<span tal:define="global is_list isinstance(reply, list)"/>
+							<span tal:condition="not is_list">
+						    		<a class="hyp-threadexp" href=""></a>
+									<div class="topbar">
+	          							<div class="hyp-user">${reply.readable_user}</div>
+	          							<div class="hyp-time">${reply.fuzzy_date}</div>
+	        						</div>
+	        						<div class="hyp-content">${reply.text}</div>
+							</span>
+						     <div tal:condition="is_list"
+						     	tal:define="replies reply" class="hyp-thread">
+						     	<ul class="annotator-listing">
+                    				<li class="hyp-annotation hyp-detail">
+						     			<span metal:use-macro="displayer.macros['item']"/>
+						     		</li>
+						     	</ul>
+						     </div>
+						 </span>
+						</li>
+						
 					</ul>
-
-                  <div class="hyp-thread">
-                    <!-- {{annotation.children.length}} replies 
-                    -->
-                    <ul class="annotator-listing" ng-show="showHide">
-                      <!-- ngRepeat: reply in annotation.children --><li class="hyp-annotation hyp-detail ng-scope" ng-include="&#39;replies-template.html&#39;" ng-repeat="reply in annotation.children"><span class="ng-scope">
-
-        </span><a class="hyp-threadexp ng-scope" href="http://jtremback.github.com/standalone/build-a8213d8/index.html#collapse"></a><span class="ng-scope">
-        </span><div class="topbar ng-scope">
-          <div class="hyp">Speciality</div>
-          <div class="hyp-time">about 1 hour ago</div>
-        </div><div class="hyp-content">I don't know what's going on with your books, but I just checked my 1987 edition and it states exactly that</div>
-        <div class="hyp-thread">
-          <!-- {{reply.children.length}} replies -->
-          <ul class="annotator-listing">
-            <!-- ngRepeat: reply in reply.children --><li class="hyp-annotation hyp-detail ng-scope" ng-include="&#39;replies-template.html&#39;" ng-repeat="reply in reply.children">
-            <a class="hyp-threadexp ng-scope" href="http://jtremback.github.com/standalone/build-a8213d8/index.html#collapse"></a><div class="topbar">
-          <div class="hyp-user">topfroglivin420</div>
-          <div class="hyp-time">57 minutes ago</div>
-        </div>
-        <div class="hyp-content">We need to get to the bottom of this.</div>
-        <div class="hyp-thread">
-          <!-- {{reply.children.length}} replies -->
-          <ul class="annotator-listing">
-          </ul>
-        </div></li><li class="hyp-annotation hyp-detail">
-        <a class="hyp-threadexp" href="http://jtremback.github.com/standalone/build-a8213d8/index.html#collapse"></a>
-        <div class="topbar">
-          <div class="hyp-user">Bozo</div>
-          <div class="hyp-time">30 minutes ago</div>
-        </div>
-        <div class="hyp-content">Weird discrepancy.</div>
-        <div class="hyp-thread">
-          <!-- {{reply.children.length}} replies -->
-          <ul class="annotator-listing">
-            <!-- ngRepeat: reply in reply.children -->
-          </ul>
-        </div>/li>
-          </ul>
-        </div></li>
-                    </ul>
-                  </div>
+				  </div>
+				  
                 </div>
               </div>
             </div>
