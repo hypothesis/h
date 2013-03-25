@@ -39,7 +39,7 @@ def displayer(request):
         return Response(res, content_type = 'application/json')
     else :
         #Load original quote for replies
-        if annotation['thread'] :
+        if 'thread' in annotation :
             original = Annotation.fetch(annotation['thread'].split('/')[0])
         else: original = None
         replies = Annotation.search_full(thread = annotation['id'])

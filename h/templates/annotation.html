@@ -60,13 +60,6 @@
             name="text"
             required="" />
 
-<div class="share-dialog" data-ng-show="shared && !editing">
-    <div class="icon-input">
-      <input type="text" value="{{shared_link}}"/>
-      <div class="clipboard-icon"></div>
-    </div>
-</div>
-
 
   <!-- Bottom controls -->
   <div class="buttonbar" ng-show="editing">
@@ -119,6 +112,13 @@
             ng-hide="authorize('delete')"
             ng-click="flag()">Flag…</li>
       </ul>
+    </div>
+  </div>
+
+  <div class="share-dialog" data-ng-show="shared && !editing">
+    <div class="icon-input">
+      <input type="text" value="{{shared_link}}" readonly/>
+      <div class="clipboard-icon"></div>
     </div>
   </div>
 </form>

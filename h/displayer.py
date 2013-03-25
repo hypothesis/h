@@ -58,9 +58,9 @@ class DisplayerTemplate(object):
         month = day * 30
 
         if (delta < 30): fuzzy = 'moments ago'
-        elif (delta < minute): fuzzy = str(delta) + ' seconds ago'
+        elif (delta < minute): fuzzy = str(int(delta)) + ' seconds ago'
         elif (delta < 2 * minute): fuzzy = 'a minute ago'
-        elif (delta < hour): fuzzy = str(floor(delta / minute)) + ' minutes ago'
+        elif (delta < hour): fuzzy = str(int(floor(delta / minute))) + ' minutes ago'
         elif (floor(delta / hour) == 1): fuzzy = '1 hour ago'
         elif (delta < day): fuzzy = str(int(floor(delta / hour))) + ' hours ago'
         elif (delta < day * 2): fuzzy = 'yesterday'
@@ -111,11 +111,19 @@ class DisplayerTemplate(object):
         repl = self._nestlist(reply_threaded, childTable)        
         return repl
 
+    def _quote(self, annotation):
+        if not 'target' in annotation: return ''
+        quote = ''
+        for target in annotation['target']:
+            for selector in target['selector']:
+                if selector['type'] == 'TextQuoteSelector' :
+                    quote = quote + selector['exact'] + ' '
+        
+        return quote
     
     def generate_dict(self):
         d = {'annotation'    : self._annotation}
-        
-        d['quote'] = self._original['quote'] if self._original else self._annotation['quote']
+        d['quote'] = self._quote(self._original) if self._original else self._quote(self._annotation)
         d.update(self._url_values())
         d['fuzzy_date'] = self._fuzzyTime(self._annotation['updated'])
         d['readable_user'] = self._userName(self._annotation['user'])
