@@ -1,4 +1,5 @@
 Beaker==1.6.4
+BeautifulSoup==3.2.1
 Chameleon==2.9.2
 Flask==0.9
 Markdown==2.1.1
@@ -43,6 +44,7 @@ pyramid-tm==0.4
 -e git+https://github.com/tilgovi/pyramid_webassets.git@cbe7befcc0ed9eb688104eade1a2a7e86be3c1db#egg=pyramid_webassets-dev
 pystache==0.5.2
 pytest==2.2.4
+python-dateutil==2.1
 python-openid==2.2.5
 repoze.lru==0.6
 repoze.sendmail==3.2
