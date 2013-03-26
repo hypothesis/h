@@ -21,20 +21,26 @@ annotation = ['$filter', ($filter) ->
 
 
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
-  link: (scope, elem, attrs, controller) ->
-    return unless controller?
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
 
-    controller.render = ->
-      return unless scope.readonly and controller.$viewValue
-      scope.rendered = ($filter 'converter') controller.$viewValue
+    input = elem.find('textarea')
+    output = elem.find('div')
 
-    # Publish the controller
-    scope.model = controller
+    # Re-render the markdown when the view needs updating.
+    ctrl.$render = ->
+      scope.rendered = ($filter 'converter') (ctrl.$viewValue or '')
 
-    # Auto-focus the input box
+    # React to the changes to the text area
+    input.bind 'blur change keyup', ->
+      value = input.attr('value') or ''
+      ctrl.$setViewValue value
+      scope.$digest()
+
+    # Auto-focus the input box when the widget becomes editable.
+    # Re-render when it becomes uneditable.
     scope.$watch 'readonly', (newValue) ->
-      unless newValue then $timeout -> elem.find('textarea').focus()
-      controller.render()
+      if newValue then ctrl.$render() else $timeout -> input.focus()
 
   require: '?ngModel'
   restrict: 'E'
