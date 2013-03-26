@@ -7,6 +7,7 @@ __all__ = [
 ]
 from pyramid.traversal import find_resource
 from h.displayer import DisplayerTemplate as Displayer
+from h import models
 
 from annotator.annotation import Annotation
 
@@ -28,9 +29,15 @@ def home(request):
 @view_config(route_name='displayer',
              renderer='h:templates/displayer.pt',
              layout='lay_displayer')
-def displayer(request):
-    uid = request.matchdict['uid']
-    annotation = Annotation.fetch(uid)
+def displayer(context, request):
+    #Obtain user to authorize from context token.
+    if context.token:
+        request.headers['x-annotator-auth-token'] = context.token
+        user = auth.Authenticator(models.Consumer.get_by_key).request_user(request)
+    else: user = None
+        
+    uid = request.matchdict['uid'] 
+    annotation = Annotation.fetch_auth(user, uid)
     if not annotation : 
         raise httpexceptions.HTTPNotFound()
 
@@ -40,9 +47,9 @@ def displayer(request):
     else :
         #Load original quote for replies
         if 'thread' in annotation :
-            original = Annotation.fetch(annotation['thread'].split('/')[0])
+            original = Annotation.fetch_auth(user, annotation['thread'].split('/')[0])
         else: original = None
-        replies = Annotation.search_full(thread = annotation['id'])
+        replies = Annotation.search_auth(user, thread = annotation['id'])
         return Displayer(annotation, replies, original).generate_dict()        
 
 
