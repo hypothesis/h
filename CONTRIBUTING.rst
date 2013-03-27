@@ -12,8 +12,8 @@ When writing commit messages, please bear the following in mind:
 * http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 * https://github.com/blog/831-issues-2-0-the-next-generation
 
-In particular, please use the GitHub syntax for closing issues with
-commits.
+Please minimize issue gardening by using the GitHub syntax for closing
+issues with commit messages.
 
 Code Style
 ----------
