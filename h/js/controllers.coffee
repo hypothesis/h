@@ -285,9 +285,7 @@ class Viewer
       $location.search(search).replace()
 
     $scope.focus = (annotation) ->
-      if $scope.thread
-        highlights = [$scope.thread.message.annotation.$$tag]
-      else if angular.isArray annotation
+      if angular.isArray annotation
         highlights = (a.$$tag for a in annotation when a?)
       else if angular.isObject annotation
         highlights = [annotation.$$tag]
@@ -306,7 +304,7 @@ class Viewer
     if $routeParams.id? and annotator.threading.idTable[$routeParams.id]?
       $scope.detail = true
       $scope.thread = annotator.threading.getContainer $routeParams.id
-      $scope.focus $scope.thread.message.annotation
+      $scope.focus $scope.thread.message?.annotation
     else
       $scope.detail = false
       $scope.thread = null
