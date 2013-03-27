@@ -40,9 +40,11 @@ A completed form can either be sent by electronic mail to
 license@hypothes.is or via conventional mail at the address below. If
 you have any questions, please contact us.
 
-Hypothes.is Project
-2261 Market St #632
-SF, CA 94114
+::
+
+    Hypothes.is Project
+    2261 Market St #632
+    SF, CA 94114
 
 Code Style
 ----------
