@@ -36,7 +36,7 @@ There is a version for individuals
 If you are making contributions on behalf of your employer we require
 you to submit a signed version of the appropriate form
 [`HTML <http://hypothes.is/contribute/entity-cla>`_ or
-`PDF [http://hypothes.is/docs/Hypothes.is%20Project-Entity.pdf>`_].
+`PDF <http://hypothes.is/docs/Hypothes.is%20Project-Entity.pdf>`_].
 
 A completed form can either be sent by electronic mail to
 license@hypothes.is or via conventional mail at the address below. If
