@@ -13,16 +13,7 @@ setup(
     packages=find_packages(),
 
     install_requires=[
-        'annotator>=0.9.1',
-        'clik==0.3.1',
-        'deform_bootstrap>=0.2.1',
-        'horus>=0.9.8',
-        'pyramid>=1.4',
-        'pyramid_tm>=0.4',
-        'pyramid_webassets>=0.7',
         'setuptools>=0.6c11',
-        'velruse>=1.0',
-        'webassets>=0.8',
     ],
 
     author='Hypothes.is Project & contributors',
