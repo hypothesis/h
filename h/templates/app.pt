@@ -67,15 +67,17 @@
                  data-ng-model="username" data-ng-minlength="3"
                  required autocapitalize="false" />
           <span ng-show="login.username.$error.required"
+                slow-validate="username"
                 >Please enter your username.</span>
           <span ng-show="register.username.$error.minlength"
+                slow-validate="username"
                 >Usernames are at least 3 characters.</span>
 
           <input type="password" name="password" value="" placeholder="Password"
                  data-ng-model="password"
                  required autocapitalize="false" autocorrect="false" />
-
           <span data-ng-show="login.password.$error.required"
+                slow-validate="password"
                 >Please enter your password.</span>
 
           <input type="submit" name="login" value="Sign in"
@@ -96,27 +98,35 @@
                  data-ng-minlength="3" data-ng-maxlength="15"
                  data-ng-pattern="/^[A-Za-z0-9._]+$/" />
           <span data-ng-show="register.username.$error.required"
+                slow-validate="username"
                 >Please choose a username.</span>
           <span data-ng-show="register.username.$error.minlength"
+                slow-validate="username"
                 >Usernames must be at least 3 characters.</span>
           <span data-ng-show="register.username.$error.maxlength"
+                slow-validate="username"
                 >Usernames must be 15 characters at most.</span>
           <span data-ng-show="register.username.$error.pattern"
+                slow-validate="username"
                 >Only letters, numbers, underscore and dot are allowed. </span>
 
           <input type="email" name="email" value="" placeholder="Email"
                  data-ng-model="email" required autocapitalize="false" />
           <span data-ng-show="register.email.$error.email"
+                slow-validate="email"
                 >Is this an email address?</span>
           <span data-ng-show="register.email.$error.required"
+                slow-validate="email"
                 >Please enter your email.</span>
 
           <input type="password" name="password" value="" placeholder="Password"
                  required autocapitalize="false" autocorrect="false"
                  data-ng-minlength="2" data-ng-model="password" />
           <span data-ng-show="register.password.$error.required"
+                slow-validate="password"
                 >Please enter a password.</span>
           <span data-ng-show="register.password.$error.minlength"
+                slow-validate="password"
                 >Passwords must be at least 2 characters.</span>
 
           <input type="submit" name="sign_up" value="Sign up"
@@ -135,8 +145,10 @@
           <input type="email" name="email" value="" placeholder="Email"
                  required autocapitalize="false" data-ng-model="email" />
           <span data-ng-show="forgot.email.$error.email"
+                slow-validate="email"
                 >Is this an email address?</span>
           <span data-ng-show="forgot.email.$error.required"
+                slow-validate="email"
                 >Please enter your email.</span>
 
           <input type="submit" name="forgot" value="Send recovery email"
@@ -156,15 +168,17 @@
                  required autocorrect="false" autocapitalize="false"
                  data-ng-model="code" />
           <span ng-show="activate.code.$error.required"
+                slow-validate="code"
                 >Please enter your validation code.</span>
 
           <input type="password" name="password" value="" placeholder="Password"
                  required autocapitalize="false" autocorrect="false"
                  data-ng-minlength="2" data-ng-model="password" />
-
           <span data-ng-show="activate.password.$error.required"
+                slow-validate="password"
                 >Please choose a password.</span>
           <span data-ng-show="activate.password.$error.minlength"
+                slow-validate="password"
                 >Passwords must be at least 2 characters.</span>
 
           <input type="submit" name="activate" value="Sign in"
