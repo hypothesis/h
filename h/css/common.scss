@@ -146,13 +146,13 @@ button, input[type=submit], .btn {
   @include smallshadow;
   @include single-transition(opacity, .2s);
   border: solid 1px;
+  bottom: 18%;
   left: 50%;
   margin-left: -15%;
   opacity: 0;
   pointer-events: none;
   position: fixed;
   text-align: center;
-  top: .25em;
   width: 30%;
   z-index: 2000;
 
