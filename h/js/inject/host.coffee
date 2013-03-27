@@ -101,7 +101,10 @@ class Annotator.Host extends Annotator
         )
 
         .bind('getHighlights', =>
-          highlights: $(@wrapper).find('.annotator-hl').map ->
+          highlights: $(@wrapper).find('.annotator-hl')
+          .filter ->
+            this.offsetWidth > 0 || this.offsetHeight > 0
+          .map ->
             offset: $(this).offset()
             height: $(this).outerHeight(true)
             data: $(this).data('annotation').$$tag
