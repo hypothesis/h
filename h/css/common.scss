@@ -639,23 +639,31 @@ blockquote {
 .magicontrols {
   @include pie-clearfix;
   background-color: $bodyBackground;
+  overflow: hidden;
 
-  & > .pull-left {
-    margin-right: 1em;
+  & > * {
+    display: inline-block;
+    padding-right: .3em;
   }
 
-  & > .pull-right {
-    margin-left: 1em;
+  &.pull-right > * {
+    @extends .pull-right;
+    padding-left: .3em;
+    padding-right: 0;
   }
 
-  .show {
-    @include transition(
-      opacity 0 ease-in-out .15s
-    );
+  &.show, .show {
+    @include transition(max-height, opacity);
+    @include transition-delay(.15s);
+    @include transition-duration(1.05s);
+    max-height: 0;
     opacity: 0;
 
     :hover > & {
+      @include transition-delay(.3);
+      @include transition-duration(.3s);
       opacity: 1;
+      max-height: 10em;
     }
   }
 }
@@ -681,6 +689,10 @@ blockquote {
   // Things not shown in the summary view
   .magicontrols {
     .reply-icon, .pull-right {
+      display: none;
+    }
+
+    &.pull-right {
       display: none;
     }
   }
