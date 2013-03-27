@@ -15,6 +15,37 @@ When writing commit messages, please bear the following in mind:
 Please minimize issue gardening by using the GitHub syntax for closing
 issues with commit messages.
 
+If you plan to be an active contributor please join our mailing list
+to coordinate development effort. This coordination helps us avoid
+duplicating efforts and raises the level of collaboration. For small
+fixes, feel free to open a pull request without any prior discussion.
+
+Licensing
+---------
+Before submitting significant contributions, we ask that sign one of
+our Contributor License Agreements. This practice ensures that the
+rights of contributors to their contributions are preserved and
+protects the ongoing availability of the project and a commitment to
+make it available for anyone to use with as few restrictions as
+possible.
+
+There is a version for individuals
+[`HTML <http://hypothes.is/contribute/individual-cla>`_ or
+`PDF <http://hypothes.is/docs/Hypothes.is%20Project-Individual.pdf>`_].
+
+If you are making contributions on behalf of your employer we require
+you to submit a signed version of the appropriate form
+[`HTML <http://hypothes.is/contribute/entity-cla>`_ or
+`PDF [http://hypothes.is/docs/Hypothes.is%20Project-Entity.pdf>`_].
+
+A completed form can either be sent by electronic mail to
+license@hypothes.is or via conventional mail at the address below. If
+you have any questions, please contact us.
+
+Hypothes.is Project
+2261 Market St #632
+SF, CA 94114
+
 Code Style
 ----------
 Notes on code style follow for the different languages used in the
