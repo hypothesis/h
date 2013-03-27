@@ -71,7 +71,7 @@ class App
             threshold = offset + heatmap.index[0]
             next = highlights.reduce (next, hl) ->
               if next < hl.offset.top < threshold then hl.offset.top else next
-            , threshold - height
+            , 0
             provider.notify method: 'scrollTop', params: next - pad
 
           # If it's the lower tab, scroll to next bucket below
@@ -79,7 +79,7 @@ class App
             threshold = offset + heatmap.index[0] + pad
             next = highlights.reduce (next, hl) ->
               if threshold < hl.offset.top < next then hl.offset.top else next
-            , offset + height
+            , Number.MAX_VALUE
             provider.notify method: 'scrollTop', params: next - pad
 
           # If it's neither of the above, load the bucket into the viewer
