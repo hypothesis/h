@@ -31,10 +31,8 @@ possible.
 
 There is a version for individuals
 [`HTML <http://hypothes.is/contribute/individual-cla>`_ or
-`PDF <http://hypothes.is/docs/Hypothes.is%20Project-Individual.pdf>`_].
-
-If you are making contributions on behalf of your employer we require
-you to submit a signed version of the appropriate form
+`PDF <http://hypothes.is/docs/Hypothes.is%20Project-Individual.pdf>`_]
+and a version for those making contributions on behalf of an employer
 [`HTML <http://hypothes.is/contribute/entity-cla>`_ or
 `PDF <http://hypothes.is/docs/Hypothes.is%20Project-Entity.pdf>`_].
 
