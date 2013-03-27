@@ -75,18 +75,17 @@ No::
     else
         return theOtherThing
 
-Committer Policy
+Committing Policy
 -----------------
 Committers are those with push access to the `main repository`. These
-people should feel free to commit trivial changes in good faith. It is
+people should feel free to commit small changes in good faith. It is
 expected that these people should read upstream commits made by others
-when they feel qualified to review the material and bring any
-objections or questions to the mailing list. In general, these commits
-should be uncontroversial.
+when they feel qualified to review the material and comment with any
+objections, questions or suggestions. In general, these commits should
+be uncontroversial and do not require up front code review.
 
-Non-trivial changes, and changes being submitted by non-committers,
-should follow the branching and merging strategy outlined in the next
-section.
+Larger changes, and changes being submitted by non-committers, should
+follow the branching and merging strategy outlined in the next section.
 
 Branching and Pull Requests
 ---------------------------
@@ -108,6 +107,13 @@ mainline development.
 
 Please try hard to keep extraneous commits out of pull requests so
 that it is easy to see the intent of the patch!
+
+Please do not merge on feature branches. Feature branches should merge
+into upstream branches, but never contain merge commits in the other
+direction. Consider using '--rebase' when pulling if you must keep
+a long-running branch up to date. It is better to start a new branch
+and, if applicable, a new pull request when performing this action on
+branches you have published.
 
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
 .. _Google Python Style Guide: https://google-styleguide.googlecode.com/svn/trunk/pyguide.html
