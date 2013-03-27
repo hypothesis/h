@@ -513,7 +513,7 @@ blockquote {
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
-  margin-bottom: 1em;
+  @include pie-clearfix;
   position: relative;
 
   .user {
@@ -570,7 +570,11 @@ blockquote {
 
     & > * {
       border-left: 1px dotted $grayLight;
+      padding-bottom: 1em;
       position: relative;
+
+      &:first-child { margin-top: 1em; }
+      &:last-child { padding-bottom: 0em; }
     }
   }
 
