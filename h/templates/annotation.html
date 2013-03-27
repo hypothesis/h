@@ -1,15 +1,18 @@
 <form name="form">
 
-  <!-- Privacy -->
-  <div class="vis-icon pull-left"
-       data-ng-show="form.privacy.$viewValue.name != 'Public'" />
-
   <!-- Timestamp -->
   <div class="pull-right small">
     {{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}
   </div>
 
-  <h5 class="user">{{model.$viewValue.user | userName}}</h5>
+  <h5 class="user">
+    {{model.$viewValue.user | userName}}
+
+    <!-- Privacy -->
+    <span class="vis-icon small"
+          ng-show="form.privacy.$viewValue.name != 'Public'" />
+  </h5>
+
 
   <privacy data-ng-model="$parent.model.$modelValue.permissions"
            data-ng-show="editing"
