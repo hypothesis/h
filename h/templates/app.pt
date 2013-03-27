@@ -69,7 +69,7 @@
           <span ng-show="login.username.$error.required"
                 slow-validate="username"
                 >Please enter your username.</span>
-          <span ng-show="register.username.$error.minlength"
+          <span ng-show="login.username.$error.minlength"
                 slow-validate="username"
                 >Usernames are at least 3 characters.</span>
 
