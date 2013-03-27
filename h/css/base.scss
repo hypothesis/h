@@ -188,8 +188,9 @@ $em: 14 / 1em !default;
 
 
 //FONTICON////////////////////////////////
-@mixin fonticon($char, $iconside, $offset: .2em) {
+@mixin fonticon($char, $iconside, $offset: 0) {
   text-decoration: none;
+  line-height: 1;
   cursor: pointer;
   color: $gray;
   &:hover {
@@ -198,7 +199,7 @@ $em: 14 / 1em !default;
   }
   @if $iconside == left {
     &:before {
-      content: $char;
+      content: $char + '\a0';
       font-family: 'icomoon';
       font-style: normal;
       margin-right: $offset;
@@ -214,7 +215,7 @@ $em: 14 / 1em !default;
       content: "";
     }
     &:after {
-      content: $char;
+      content: '\a0' + $char;
       font-family: 'icomoon';
       font-style: normal;
       margin-left: $offset;
