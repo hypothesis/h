@@ -216,7 +216,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   footer {
-    @include single-transition(opacity, 1s, ease-in-out, 1s);
     float: right;
     left: -1em;
     position: relative;

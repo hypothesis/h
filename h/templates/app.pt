@@ -176,11 +176,11 @@
         <footer data-ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
           <ul>
             <li>
-              <a data-ng-click="sheet.tab = 'forgot'">Password help?</a>
+              <a href="" ng-click="sheet.tab = 'forgot'">Password help?</a>
             </li>
             <li>
-              <a data-ng-click="sheet.tab = 'activate'"
-                 >Have you already reserved a username with us?</a>
+              <a href="" ng-click="sheet.tab = 'activate'"
+                 >I have an activation code.</a>
             </li>
           </ul>
         </footer>
