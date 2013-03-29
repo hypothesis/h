@@ -31,6 +31,9 @@ class DisplayerTemplate(object):
         #Getting the domain from the uri, and the same url magic for the domain title
         parsed_uri = urlparse(self._annotation['uri'])
         domain = '{}://{}/'.format( parsed_uri[ 0 ], parsed_uri[ 1 ] )
+        domain_stripped = parsed_uri[1] 
+        if parsed_uri[1].lower().startswith('www.'):
+            domain_stripped = domain_stripped[4:]
         req2 = urllib2.Request(domain, headers = hdrs)
         soup2 = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req2))
         domain_title = soup2.title.string if soup2.title else domain
@@ -48,10 +51,11 @@ class DisplayerTemplate(object):
             icon_link = ''
         
         return {
-            'title'         : title,
-            'domain'        : domain,
-            'domain_title'  : domain_title,
-            'favicon_link'  : icon_link            
+            'title'             : title,
+            'domain'            : domain,
+            'domain_title'      : domain_title,
+            'domain_stripped'   : domain_stripped,
+            'favicon_link'      : icon_link            
         }
 
     def _fuzzyTime(self, date):        
