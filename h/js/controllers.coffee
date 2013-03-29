@@ -200,7 +200,6 @@ class Annotation
         when 'create'
           annotator.deleteAnnotation $scope.model.$modelValue
         else
-          $scope.model.$modelValue.user = $scope.origUser
           $scope.model.$modelValue.text = $scope.origText
           $scope.action = 'create'
 
@@ -236,6 +235,7 @@ class Annotation
     $scope.edit = ->
       $scope.action = 'edit'
       $scope.editing = true
+      $scope.origText = $scope.model.$modelValue.text
       
     $scope.delete = ->
       annotation = $scope.thread.message.annotation
@@ -250,6 +250,8 @@ class Annotation
       else
         $scope.action = 'delete'
         $scope.editing = true
+        $scope.origText = $scope.model.$modelValue.text
+        $scope.model.$modelValue.text = ''
 
     $scope.authorize = (action) ->
       if $scope.model.$modelValue? and annotator.plugins?.Permissions?
@@ -259,12 +261,6 @@ class Annotation
 
     $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
     $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
-
-    $scope.$watch 'editing', (editing) ->
-      if editing and $scope.model.$modelValue?
-        # Store the original version of mutable properties
-        $scope.origText = $scope.model.$modelValue.text
-        $scope.origUser = $scope.model.$modelValue.user
 
     $scope.$watch 'model.$modelValue.id', (id) ->
       if id?

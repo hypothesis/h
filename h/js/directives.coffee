@@ -29,6 +29,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
+      input.attr('value', ctrl.$viewValue or '')
       scope.rendered = ($filter 'converter') (ctrl.$viewValue or '')
 
     # React to the changes to the text area
@@ -39,12 +40,9 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 
     # Auto-focus the input box when the widget becomes editable.
     # Re-render when it becomes uneditable.
-    scope.$watch 'readonly', (newValue) ->
-      if newValue
-        ctrl.$render()
-      else
-        input.attr('value', ctrl.$viewValue)
-        $timeout -> input.focus()
+    scope.$watch 'readonly', (readonly) ->
+      ctrl.$render()
+      unless readonly then $timeout -> input.focus()
 
   require: '?ngModel'
   restrict: 'E'
