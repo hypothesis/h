@@ -40,7 +40,11 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
     # Auto-focus the input box when the widget becomes editable.
     # Re-render when it becomes uneditable.
     scope.$watch 'readonly', (newValue) ->
-      if newValue then ctrl.$render() else $timeout -> input.focus()
+      if newValue
+        ctrl.$render()
+      else
+        input.attr('value', ctrl.$viewValue)
+        $timeout -> input.focus()
 
   require: '?ngModel'
   restrict: 'E'
