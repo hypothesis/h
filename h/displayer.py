@@ -27,17 +27,25 @@ class DisplayerTemplate(object):
         req = urllib2.Request(self._annotation['uri'], headers = hdrs)
         soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req))
         title = soup.title.string if soup.title else self._annotation['uri']
-        
-        #Favicon
-        favlink = soup.find("link", rel="shortcut icon")
-        icon_link = favlink['href'] if favlink and favlink['href'] else ''
-        
+
         #Getting the domain from the uri, and the same url magic for the domain title
         parsed_uri = urlparse(self._annotation['uri'])
         domain = '{}://{}/'.format( parsed_uri[ 0 ], parsed_uri[ 1 ] )
         req2 = urllib2.Request(domain, headers = hdrs)
         soup2 = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req2))
         domain_title = soup2.title.string if soup2.title else domain
+        
+        #Favicon
+        favlink = soup.find("link", rel="shortcut icon")
+        #Check for local/global link.
+        if favlink:
+            href = favlink['href']
+            if href.startswith('//') or href.startswith('http'):
+                icon_link = href
+            else:
+                icon_link = domain + href 
+        else:
+            icon_link = ''
         
         return {
             'title'         : title,

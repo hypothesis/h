@@ -509,7 +509,10 @@ span.errorMsg {
 
 /* line 291, common.scss */
 .hyp-content {
-  white-space: pre-wrap; }
+  white-space: pre-wrap; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;  }
 
 /* line 294, common.scss */
 .hyp-paper {
@@ -530,7 +533,7 @@ span.errorMsg {
   margin: 0 -1em -1em -0.5em;
   padding-left: 0.5em; }
   /* line 307, common.scss */
-  .hyp-thread > .annotator-listing {
+  .hyp-thread .annotator-listing {
     border-left: 1px dotted #969696;
     margin-left: 0.4em; }
     /* line 311, common.scss */
