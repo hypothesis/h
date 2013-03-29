@@ -27,6 +27,22 @@ def access_token(request):
     raise NotImplementedError('OAuth provider not implemented yet.')
 
 
+def anonymize_delete(annotation):
+    if annotation.get('deleted', False):
+        user = annotation.get('user', '')
+        if user:
+            annotation['user'] = ''
+
+        permissions = annotation.get('permissions', {})
+        for action in permissions.keys():
+            filtered = [
+                role
+                for role in annotation['permissions'][action]
+                if role != user
+            ]
+            annotation['permissions'][action] = filtered
+
+
 def authorize(annotation, action, user=None):
     action_field = annotation.get('permissions', {}).get(action, [])
 
@@ -74,6 +90,7 @@ def includeme(config):
     def before_request():
         g.auth = auth.Authenticator(models.Consumer.get_by_key)
         g.authorize = authorize
+        g.before_annotation_update = anonymize_delete
 
     app.before_request(before_request)
 

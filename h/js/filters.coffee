@@ -43,3 +43,4 @@ angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
+  

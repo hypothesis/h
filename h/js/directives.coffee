@@ -52,45 +52,36 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 
 
 privacy = ->
-  levels = [
-    {name: 'Public', permissions:  { 'read': ['group:__world__'] } },
-    {name: 'Private', permissions: { 'read': [] } }
-  ]
-
-  getLevel = (permissions) ->
-    return unless permissions?
-
-    for level in levels
-      roleSet = {}
-
-      # Construct a set (using a key->exist? mapping) of roles for each verb
-      for verb of permissions
-        roleSet[verb] = {}
-        for role in permissions[verb]
-          roleSet[verb][role] = true
-
-      # Check that no (verb, role) is missing from the role set
-      mismatch = false
-      for verb of level.permissions
-        for role in level.permissions[verb]
-          if roleSet[verb]?[role]?
-            delete roleSet[verb][role]
-          else
-            mismatch = true
-            break
-
-        # Check that no extra (verb, role) is missing from the privacy level
-        mismatch ||= Object.keys(roleSet[verb]).length
-        if mismatch then break else return level
-
-    # Unrecognized privacy level
-    name: 'Custom'
-    value: permissions
+  levels = ['Public', 'Private']
 
   link: (scope, elem, attrs, controller) ->
     return unless controller?
-    controller.$formatters.push getLevel
-    controller.$parsers.push (privacy) -> privacy?.permissions
+
+    controller.$formatters.push (permissions) ->
+      return unless permissions?
+
+      if 'group:__world__' in (permissions.read or [])
+        'Public'
+      else
+        'Private'
+
+    controller.$parsers.push (privacy) ->
+      return unless privacy?
+
+      permissions = controller.$modelValue
+      if privacy is 'Public'
+        if permissions.read
+          unless 'group:__world__' in permissions.read
+            permissions.read.push 'group:__world__'
+        else
+          permissions.read = ['group:__world__']
+      else
+        read = permissions.read or []
+        read = (role for role in read when role is not 'group:__world__')
+        permissions.read = read
+
+      permissions
+
     scope.model = controller
     scope.levels = levels
   require: '?ngModel'

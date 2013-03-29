@@ -3,10 +3,10 @@
      role="button"
      class="dropdown-toggle"
      data-ng-model="model.$viewValue"
-     data-toggle="dropdown">{{model.$viewValue.name}}</a>
+     data-toggle="dropdown">{{model.$viewValue}}</a>
   <ul class="dropdown-menu" role="menu">
     <li data-ng-repeat="p in levels">
-      <a href="" data-ng-click="model.$setViewValue(p)">{{p.name}}</a>
+      <a href="" data-ng-click="model.$setViewValue(p)">{{p}}</a>
     </li>
   </ul>
 </div>

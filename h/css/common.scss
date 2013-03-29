@@ -552,6 +552,14 @@ blockquote {
     @extend .small;
     float: right;
   }
+  
+  .preface {
+    font-weight: bold
+  }
+  
+  .quote {
+    font-style: italic
+  }
 }
 
 

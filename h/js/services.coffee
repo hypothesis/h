@@ -271,8 +271,11 @@ class Hypothesis extends Annotator
       '$location', '$rootScope', '$route'
       ($location, $rootScope, $route) ->
         # Set the path
-        $location.path('/editor').search('id', null).replace()
-
+        search =
+          id: annotation.id
+          action: 'create'
+        $location.path('/editor').search(search)
+ 
         # Digest the change
         $rootScope.$digest()
 

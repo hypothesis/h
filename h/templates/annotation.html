@@ -7,8 +7,8 @@
             role="button"
             title="More actions" />
       <ul class="dropdown-menu" role="menu">
-        <li data-ng-click="edit()">Edit</li>
-        <li data-ng-click="delete()">Delete</li>
+        <li data-ng-show="authorize('update')" data-ng-click="edit()">Edit</li>
+        <li data-ng-show="authorize('delete')" data-ng-click="delete()">Delete</li>
         <li data-ng-click="flag()">Flag</li>
       </ul>
     </div>
@@ -18,35 +18,72 @@
           data-ng-click="favorite()" />
   </div>
 
+  <!-- User heading -->
   <h5 class="user">
     {{model.$viewValue.user | userName}}
-
-    <!-- Privacy -->
+    <span ng-show="editing && model.$viewValue.deleted"
+          >Delete annotation</span>
+    <span ng-show="!editing && model.$viewValue.deleted"
+          >Annotation deleted.</span>
     <span class="vis-icon small"
-          ng-show="form.privacy.$viewValue.name != 'Public'" />
+          ng-show="form.privacy.$viewValue != 'Public'" />
   </h5>
+
+  <!-- Preface -->
+  <ng-switch on="editing && action">
+    <div class="body preface" data-ng-switch-when="delete"
+         >You are about to delete this annotation.</div>
+    <div class="body preface" data-ng-switch-when="edit"
+         >You are about to edit this annotation.</div>
+  </ng-switch>
+
+  <!-- Privacy -->
+  <privacy data-ng-model="$parent.model.$modelValue.permissions"
+           data-ng-show="editing && action != 'delete'"
+           class="dropdown privacy"
+           name="privacy" />
+
   <!-- Timestamp -->
   <h6>
     {{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}
   </h6>
 
-  <privacy data-ng-model="$parent.model.$modelValue.permissions"
-           data-ng-show="editing"
-           class="dropdown privacy"
-           name="privacy" />
+  <!-- Original text -->
+  <markdown class="body quote"
+            ng-readonly="true"
+            ng-bind="origText"
+            ng-show="editing && action == 'delete'" />
 
+  <!-- Prompt -->
+  <!-- TODO: replace with placeholder on markdown elements? -->
+  <div data-ng-show="model.$viewValue.deleted && !editing">
+    <ng-switch on="model.$viewValue.text.length">
+      <div class="body preface" data-ng-switch-when="0">(no reason given)</div>
+      <div class="body preface" data-ng-switch-default>Reason:</div>
+    </ng-switch>
+  </div>
+
+  <!-- Body -->
   <markdown data-ng-model="$parent.model.$modelValue.text"
             data-ng-readonly="!$parent.editing"
             class="body"
             name="text"
             required="" />
 
-  <!-- Editor controls -->
+  <!-- Bottom controls -->
   <div class="buttonbar">
     <div data-ng-show="editing" class="annotator-controls">
-      <button data-ng-click="save()"
-              data-ng-disabled="!model.$valid"
-              class="btn check-icon">Save</button>
+      <ng-switch on="action">
+        <button ng-switch-when="edit"
+                ng-click="save()"
+                class="btn check-icon">Edit</button>
+        <button ng-switch-when="delete"
+                ng-click="save()"
+                class="btn check-icon">Delete</button>
+        <button ng-switch-default
+                ng-click="save()"
+                class="btn check-icon">Save</button>
+      </ng-switch>
       <a data-ng-click="cancel()" class="x-icon">Cancel</a>
     </div>
   </div>
