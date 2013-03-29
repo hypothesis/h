@@ -83,7 +83,13 @@ class Hypothesis extends Annotator
     bridge = @plugins.Bridge
     heatmap = @plugins.Heatmap
     threading = @threading
-    for event in ['hostUpdated', 'annotationsLoaded']
+    updateOn = [
+      'hostUpdated'
+      'annotationsLoaded'
+      'annotationCreated'
+      'annotationDeleted'
+    ]
+    for event in updateOn
       this.subscribe event, =>
         @provider.call
           method: 'getHighlights'
@@ -159,9 +165,6 @@ class Hypothesis extends Annotator
             # Give angular a chance to react
             $rootScope.$digest()
 
-            # Update the heatmap
-            this.publish 'hostUpdated'
-
         # Get the location of the annotated document
         @provider.call
           method: 'getHref'
@@ -187,8 +190,6 @@ class Hypothesis extends Annotator
         #  @element.find('#toolbar').css("top", "#{max}px")
         #  @element.find('#gutter').css("margin-top", "#{max}px")
         #  @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
-
-        this.publish 'hostUpdated'
 
     @provider
 
