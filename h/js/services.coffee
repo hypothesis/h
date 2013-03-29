@@ -8,6 +8,31 @@ class Hypothesis extends Annotator
     Permissions:
       permissions:
         read: ['group:__world__']
+      userAuthorize: (action, annotation, user) ->
+        if annotation.permissions
+          tokens = annotation.permissions[action] || []
+
+          if tokens.length == 0
+            # Empty or missing tokens array: only admin can perform action.
+            return false
+
+          for token in tokens
+            if this.userId(user) == token
+              return true
+            if token == 'group:__world__'
+              return true
+            if token == 'group:__authenticated__' and this.user?
+              return true
+
+          # No tokens matched: action should not be performed.
+          return false
+
+        # Coarse-grained authorization
+        else if annotation.user
+          return user and this.userId(user) == this.userId(annotation.user)
+
+        # No authorization info on annotation: free-for-all!
+        true
       showEditPermissionsCheckbox: false,
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
@@ -34,16 +59,25 @@ class Hypothesis extends Annotator
     # Set up XDM connection
     this._setupXDM()
 
-    # Add user info to new annotations
+    # Add some info to new annotations
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
-      permissions = @plugins.Permissions
-      annotation.user = permissions.options.userId(permissions.user)
       # Annotator assumes a valid array of targets and highlights.
       unless annotation.target?
         annotation.target = []
       unless annotation.highlights?
         annotation.highlights = []
+
+      # Register it with the draft service
       drafts.add annotation
+
+    # Set default owner permissions on all annotations
+    for event in ['beforeAnnotationCreated', 'beforeAnnotationUpdated']
+      this.subscribe event, (annotation) =>
+        permissions = @plugins.Permissions
+        if permissions.user?
+          userId = permissions.options.userId(permissions.user)
+          for action, roles of annotation.permissions
+            unless userId in roles then roles.push userId
 
     # Update the heatmap when the host is updated or annotations are loaded
     bridge = @plugins.Bridge
