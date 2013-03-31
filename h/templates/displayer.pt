@@ -2,114 +2,119 @@
 <html metal:use-macro="main_template">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    	<meta charset="utf-8">
-	    <!-- Always force latest IE rendering engine (even in intranet) &amp; Chrome Frame -->
-	    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
-        <style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak{display:none;}ng\:form{display:block;}</style>
+		<meta charset="utf-8">
+		<!-- Always force latest IE rendering engine (even in intranet) &amp; Chrome Frame -->
+		<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+		<style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak{display:none;}ng\:form{display:block;}</style>
 
-    	<link href="css/displayer.css" rel="stylesheet" type="text/css">	
-	    <title>Display annotation</title>
-  	</head>
-  	<style type="text/css"></style>
+		<link href="css/displayer.css" rel="stylesheet" type="text/css">	
+		<title>Display annotation</title>
+	</head>
+	<style type="text/css"></style>
+
 	<body metal:fill-slot="body">
       
-      <div class="nav">
-        <div class="inner">
-          <div class="barbutton left title">
-            <span>hypothes<span class="red">.</span>is</span>
-          </div>
-          <div class="barbutton right">
-            <span>get extension</span>
-          </div>
-          <div class="barbutton right">
-            <span>sign up</span>
-          </div>
-        </div>
-      </div>
-      
-      
-      <div id="stream">
-      	<div class="hyp-paper tile">
-        	You have followed a link to an annotation. For a better experience, install the <a href="">extension</a>.
-        </div>
-        <ul class="annotator-listing annotator-widget">
-        	<li class="tile"> 
-          		<!--<div class="sidepanel">
-          			<div class="avablock">
-            			<img class="ava" src="${request.static_url('h:images/hypothelogo_square.png')}">
-      				</div>          
-        		</div>-->
-        		<div class="papercontainer">
-          			<div class="metadata">
-            			<a href="">${readable_user}</a>
-            			annotated:
-          			</div>
-          		<div class="control">
-            		<a class="goto" href="">
-              		To Source
-            		</a>
-          		</div>
+		<div class="nav">
+			<div class="inner">
+				<div class="barbutton left title">
+					<span>hypothes<span class="red">.</span>is</span>
+				</div>
+				<div class="barbutton right">
+					<span>get extension</span>
+				</div>
+				<div class="barbutton right">
+					<span>sign up</span>
+				</div>
+			</div>
+		</div>
 
-          <div class="noiseknockout">
-            <div class="page">
-              <div class="domain">
-                <img class="favicon" src="${favicon_link}"> <a href="${annotation.uri}">${title}</a> | <a href="${domain}">${domain_stripped}</a>
-              </div>
-            </div>
-
-            <div class="floatainer">
-              <div class="hyp-excerpt hyp-paper" ng-click="showHide=!showHide">
-                <blockquote>
-                  ${quote}
-                </blockquote>
-              </div>
-            </div>
-
-            <div class="floatainer">
-              <div class="hyp-annotation hyp-paper hyp-detail">
-                <div style="padding-bottom: .5em;">
-                  <div class="topbar">
-                    <div class="hyp-user">${readable_user}</div>
-                    <div class="hyp-time">${fuzzy_date}</div>
-                  </div>
-                  <div class="hyp-content">${annotation.text}</div>
-
-                  <div class="hyp-thread" data-ng-controller="DisplayerCtrl"
-                  	tal:condition="len(replies)">
-                    <ul class="annotator-listing">
-                    	<li class="hyp-annotation hyp-detail">
-                  		<span metal:define-macro="item"
-                  			tal:repeat="reply replies">
-	     					<span tal:define="global is_list isinstance(reply, list)"/>
-							<span tal:condition="not is_list">
-						    		<a class="hyp-threadexp" href=""></a>
-									<div class="topbar">
-	          							<div class="hyp-user">${reply.readable_user}</div>
-	          							<div class="hyp-time">${reply.fuzzy_date}</div>
-	        						</div>
-	        						<div class="hyp-content">${reply.text}</div>
-							</span>
-						     <div tal:condition="is_list"
-						     	tal:define="replies reply" class="hyp-thread">
-						     	<ul class="annotator-listing">
-                    				<li class="hyp-annotation hyp-detail">
-						     			<span metal:use-macro="displayer.macros['item']"/>
-						     		</li>
-						     	</ul>
-						     </div>
-						 </span>
-						</li>
-
-					</ul>
-				  </div>
-				  
-                </div>
-              </div>
-            </div>
-          </div>
-        </div></li>
-        </ul>
-      </div>
-  
-
-</body></html>
+		<div id="stream">
+			<div class="hyp-paper tile">
+				You have followed a link to an annotation. For a better experience, install the 
+				<a href="">extension</a>.
+			</div>
+	
+			<ul class="annotator-listing annotator-widget">
+				<li class="tile"> 
+					<!-- Avatar section, we don't use it right now -->	
+					<!--<div class="sidepanel">
+						<div class="avablock">
+							<img class="ava" src="${request.static_url('h:images/hypothelogo_square.png')}">
+						</div>          
+					</div>-->
+	
+					<div class="papercontainer">
+						<div class="metadata">
+							<a href="">${readable_user}</a>
+							annotated:
+						</div>
+						<div class="control">
+							<a class="goto" href="">
+								To Source
+							</a>
+						</div>
+	
+						<div class="noiseknockout">
+							<div class="page">
+								<div class="domain">
+									<img class="favicon" src="${favicon_link}"/> 
+									<a href="${annotation.uri}">${title}</a> 
+									| 
+									<a href="${domain}">${domain_stripped}</a>
+								</div>
+							</div>
+	
+							<div class="floatainer">
+								<div class="hyp-excerpt hyp-paper" ng-click="showHide=!showHide">
+									<blockquote>${quote}</blockquote>
+								</div>
+							</div>
+	
+							<div class="floatainer" data-ng-app="h.displayer">
+								<div class="hyp-annotation hyp-paper hyp-detail">
+									<div style="padding-bottom: .5em;">
+										<div class="topbar">
+											<div class="hyp-user">${readable_user}</div>
+											<div class="hyp-time">${fuzzy_date}</div>
+										</div>
+										<div class="hyp-content">${annotation.text}</div>
+	
+										<!-- Replies -->                          
+										<div class="hyp-thread" data-ng-controller="DisplayerCtrl"
+											tal:condition="len(replies)">
+											<ul class="annotator-listing">
+												<li class="hyp-annotation hyp-detail">
+													<span metal:define-macro="item"
+														tal:repeat="reply replies">
+														<span tal:define="global is_list isinstance(reply, list)"/>
+														<span tal:condition="not is_list">
+															<a href="" class="hyp-threadexp"
+																ng-click="toggleCollapse($event)"></a>	
+															<div class="topbar">
+																<div class="hyp-user">${reply.readable_user}</div>
+																<div class="hyp-time">${reply.fuzzy_date}</div>
+															</div>
+															<div class="hyp-content">${reply.text}</div>
+														</span>
+														<div tal:condition="is_list"
+															tal:define="replies reply" class="hyp-thread">
+															<ul class="annotator-listing">
+																<li class="hyp-annotation hyp-detail">
+																	<span metal:use-macro="displayer.macros['item']"/>
+																</li>
+															</ul>
+														</div>
+													</span>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</body>
+</html>
