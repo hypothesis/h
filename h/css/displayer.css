@@ -832,7 +832,7 @@ body {
       opacity: 1 !important; }
     /* line 106, site.css.scss */
     #stream .tile .papercontainer {
-      margin-left: 5em;
+      margin-left: 0.5em;
       float: left; }
     /* line 110, site.css.scss */
     #stream .tile .hyp-paper {
@@ -935,3 +935,29 @@ body {
     /* line 187, site.css.scss */
     .nav .title > span {
       font-size: 2em; }
+
+.smalldisplacer {
+	display: none;
+	float: left;}
+
+
+@media(max-width:600px)
+{
+	.floatainer {
+	  float: left;
+	  width: 100%; }
+
+	.smalldisplacer {
+		display: block;
+		width: 100%;
+		float: left;
+		height: 1em;}
+		
+	.barbutton.right {
+		display: none;}
+
+    #stream .tile .hyp-excerpt {
+      margin-right: 0em;
+      margin-bottom: 0; }
+
+}

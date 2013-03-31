@@ -69,7 +69,9 @@
 									<blockquote>${quote}</blockquote>
 								</div>
 							</div>
-	
+
+							<div class="smalldisplacer"></div>
+
 							<div class="floatainer" data-ng-app="h.displayer">
 								<div class="hyp-annotation hyp-paper hyp-detail">
 									<div style="padding-bottom: .5em;">
