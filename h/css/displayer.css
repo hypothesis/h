@@ -751,6 +751,7 @@ body {
         font-weight: bold; }
     /* line 42, site.css.scss */
     #stream .tile .domain .favicon {
+      margin-left:  .5em;
       margin-right: .5em; }
     /* line 46, site.css.scss */
     #stream .tile .control {

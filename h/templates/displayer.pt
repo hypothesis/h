@@ -57,7 +57,8 @@
 						<div class="noiseknockout" data-ng-app="h.displayer">
 							<div class="page">
 								<div class="domain">
-									<img class="favicon" src="${favicon_link}"/> 
+									<img class="favicon" tal:condition="len(favicon_link)" 
+										src="${favicon_link}"/> 
 									<a href="${annotation.uri}">${title}</a> 
 									| 
 									<a href="${domain}">${domain_stripped}</a>
