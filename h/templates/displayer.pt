@@ -54,7 +54,7 @@
 							</a>
 						</div>
 	
-						<div class="noiseknockout">
+						<div class="noiseknockout" data-ng-app="h.displayer">
 							<div class="page">
 								<div class="domain">
 									<img class="favicon" src="${favicon_link}"/> 
@@ -72,7 +72,7 @@
 
 							<div class="smalldisplacer"></div>
 
-							<div class="floatainer" data-ng-app="h.displayer">
+							<div class="floatainer">
 								<div class="hyp-annotation hyp-paper hyp-detail">
 									<div style="padding-bottom: .5em;">
 										<div class="topbar">
@@ -83,7 +83,8 @@
 	
 										<!-- Replies -->                          
 										<div class="hyp-thread" data-ng-controller="DisplayerCtrl"
-											tal:condition="len(replies)">
+											tal:condition="len(replies)"
+											data-ng-hide="showHide">
 											<ul class="annotator-listing">
 												<li class="hyp-annotation hyp-detail">
 													<span metal:define-macro="item"
