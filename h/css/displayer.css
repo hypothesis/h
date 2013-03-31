@@ -794,8 +794,7 @@ body {
         background-position: right;
         padding-left: 0;
         padding-right: 1.3em;
-        float: right;
-        background-image: url("../images/goto_2.png"); }
+        float: right;}
       /* line 71, site.css.scss */
       #stream .tile .control .flag {
         background-image: url("../images/flag_4.png"); }
