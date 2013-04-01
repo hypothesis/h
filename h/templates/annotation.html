@@ -1,7 +1,10 @@
 <form name="form">
-
   <!-- Right-floated thread controls -->
   <div class="magicontrols pull-right show" ng-hide="editing">
+    <span class="fave-icon" title="Favorite"
+          data-ng-click="favorite()" />
+    <span class="share-icon" title="Share"
+          data-ng-click="share()" />
     <div class="dropdown" title="More Actions">
       <span class="dropdown-toggle down-icon"
             role="button"
@@ -12,10 +15,6 @@
         <li data-ng-click="flag()">Flag</li>
       </ul>
     </div>
-    <span class="share-icon" title="Share"
-          data-ng-click="share()" />
-    <span class="fave-icon" title="Favorite"
-          data-ng-click="favorite()" />
   </div>
 
   <!-- User heading -->
