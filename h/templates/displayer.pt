@@ -28,12 +28,7 @@
 			</div>
 		</div>
 
-		<div id="stream">
-			<div class="hyp-paper tile">
-				You have followed a link to an annotation. For a better experience, install the 
-				<a href="">extension</a>.
-			</div>
-	
+		<div id="stream">	
 			<ul class="annotator-listing annotator-widget">
 				<li class="tile"> 
 					<!-- Avatar section, we don't use it right now -->	
@@ -119,6 +114,12 @@
 					</div>
 				</li>
 			</ul>
+			<div class="hyp-paper">
+				You have followed a link to an annotation. For a better experience, install the 
+				<a href="">extension</a>.
+			</div>
+							
+							
 		</div>
 	</body>
 </html>

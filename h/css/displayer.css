@@ -739,9 +739,9 @@ body {
   background: rgba(255, 255, 255, 0.7); }
   /* line 29, site.css.scss */
   #stream .tile {
-    position: relative;
+	position: relative;
     margin: 1em;
-    display: inline-block; }
+    display: block; }
     /* line 33, site.css.scss */
     #stream .tile .page {
       display: block;
@@ -832,7 +832,7 @@ body {
       opacity: 1 !important; }
     /* line 106, site.css.scss */
     #stream .tile .papercontainer {
-      margin-left: 0.5em;
+      width: 100%;	
       float: left; }
     /* line 110, site.css.scss */
     #stream .tile .hyp-paper {
@@ -959,5 +959,9 @@ body {
     #stream .tile .hyp-excerpt {
       margin-right: 0em;
       margin-bottom: 0; }
+      
+    #stream {
+      width: 100%;	
+}
 
 }
