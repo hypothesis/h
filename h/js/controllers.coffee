@@ -212,6 +212,8 @@ class Annotation
           annotator.publish 'annotationCreated', $scope.model.$modelValue
         when 'delete'
           $scope.model.$modelValue.deleted = true
+          unless $scope.model.$modelValue.text? 
+            $scope.model.$modelValue.text = ''
           annotator.updateAnnotation $scope.model.$modelValue
         else
           annotator.updateAnnotation $scope.model.$modelValue
