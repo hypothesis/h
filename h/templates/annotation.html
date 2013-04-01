@@ -29,9 +29,12 @@
            class="dropdown privacy pull-right"
            name="privacy" />
 
-  <!-- Deletion notice -->
-  <span ng-show="!editing && model.$viewValue.deleted"
-        >Annotation deleted.</span>
+  <div class="share-dialog" data-ng-show="!editing">
+    <div class="icon-input">
+      <input class="share-text" type="text" value="{{shared_link}}" readonly/>
+    </div>
+  </div>
+
 
   <!-- Preface -->
   <header ng-switch="editing && action">
@@ -112,13 +115,6 @@
             ng-hide="authorize('delete')"
             ng-click="flag()">Flag…</li>
       </ul>
-    </div>
-  </div>
-
-  <div class="share-dialog" data-ng-show="shared && !editing">
-    <div class="icon-input">
-      <input type="text" value="{{shared_link}}" readonly/>
-      <div class="clipboard-icon"></div>
     </div>
   </div>
 </form>

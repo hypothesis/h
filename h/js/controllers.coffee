@@ -278,10 +278,10 @@ class Annotation
         if annotation? and drafts.contains annotation
           $scope.editing = true
 
-
     $scope.shared = false
     $scope.share = ->
       $scope.shared = not $scope.shared
+      $element.find('.share-dialog').slideToggle()
       if $scope.shared and not $scope.shared_link
         $scope.shared_link = window.location.host + '/a/' + $scope.model.$modelValue.id
         

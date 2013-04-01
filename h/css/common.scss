@@ -667,9 +667,12 @@ blockquote {
 }
 
 .share-dialog {
-   display: block;
+   display: none;
   .icon-input {
     position: relative;
+    .share-text {
+      width: 100%;
+    }
   }
 }
 
