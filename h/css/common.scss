@@ -39,31 +39,33 @@ html {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: $sansFontFamily;
-  margin: 0 0 .4em;
-  padding: 0 0 .1em;
+  font-weight: bolder;
   color: $gray;
 }
 
 h1 {
-  font-size: 2.5em;
+  font-size: 2em;
+  margin: .67em 0;
 }
 
 h2 {
-  font-size: 2em;
+  font-size: 1.5em;
+  margin: .75em 0;
 }
 
 h3 {
-  font-size: 1.4em;
+  font-size: 1.17em;
+  margin: .83em 0;
 }
 
-h4 {
-  font-size: 1.15em;
-  margin: 0 0 .1em;
+h5 {
+  font-size: .83em;
+  margin: 1.5em 0;
 }
 
-h5, h6 {
-  font-size: 1em;
-  margin: 0 0 .1em;
+h6 {
+  font-size: .75em;
+  margin: 1.67em 0;
 }
 
 input, textarea {
@@ -517,7 +519,12 @@ blockquote {
   position: relative;
 
   .user {
-    font-weight: 800;
+    text-decoration: underline;
+  }
+
+  .time {
+    @extend .small;
+    margin-left: 1em;
   }
 
   .body {

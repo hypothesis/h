@@ -19,15 +19,19 @@
   </div>
 
   <!-- User heading -->
-  <h5 class="user">
-    {{model.$viewValue.user | userName}}
-    <span ng-show="editing && model.$viewValue.deleted"
-          >Delete annotation</span>
-    <span ng-show="!editing && model.$viewValue.deleted"
-          >Annotation deleted.</span>
-    <span class="vis-icon small"
-          ng-show="form.privacy.$viewValue != 'Public'" />
-  </h5>
+  <strong class="user">{{model.$viewValue.user | userName}}</strong>
+
+  <span ng-show="editing && model.$viewValue.deleted"
+        >Delete annotation</span>
+  <span ng-show="!editing && model.$viewValue.deleted"
+        >Annotation deleted.</span>
+  <span class="vis-icon small"
+        ng-show="form.privacy.$viewValue != 'Public'" />
+
+  <!-- Timestamp -->
+  <span class="time">
+    {{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}
+  </span>
 
   <!-- Preface -->
   <ng-switch on="editing && action">
@@ -42,11 +46,6 @@
            data-ng-show="editing && action != 'delete'"
            class="dropdown privacy"
            name="privacy" />
-
-  <!-- Timestamp -->
-  <h6>
-    {{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}
-  </h6>
 
   <!-- Original text -->
   <markdown class="body quote"
