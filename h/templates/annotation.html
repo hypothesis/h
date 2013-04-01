@@ -56,8 +56,8 @@
   <!-- TODO: replace with placeholder on markdown elements? -->
   <div data-ng-show="model.$viewValue.deleted && !editing">
     <ng-switch on="model.$viewValue.text.length">
-      <div class="body preface" data-ng-switch-when="0">(no reason given)</div>
-      <div class="body preface" data-ng-switch-default>Reason:</div>
+      <div data-ng-switch-when="0">(no reason given)</div>
+      <div data-ng-switch-default>Reason:</div>
     </ng-switch>
   </div>
 
