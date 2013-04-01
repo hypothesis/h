@@ -69,8 +69,8 @@
             required="" />
 
   <!-- Bottom controls -->
-  <div class="buttonbar">
-    <div data-ng-show="editing" class="annotator-controls">
+  <div class="buttonbar" ng-show="editing">
+    <div class="annotator-controls">
       <ng-switch on="action">
         <button ng-switch-when="edit"
                 ng-click="save()"
