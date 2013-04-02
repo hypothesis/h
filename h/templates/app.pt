@@ -57,7 +57,7 @@
         <span class="close"
               role="button"
               title="Close"
-              data-ng-click="sheet.collapsed = true" />
+              data-ng-click="sheet.collapsed = true"></span>
 
         <!-- Login -->
         <form data-title="Sign in"
