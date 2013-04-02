@@ -386,6 +386,7 @@ blockquote {
 
 .open {
   & > .dropdown-menu {
+    @include smallshadow;
     @include rotateX(0);
     opacity: 1;
     pointer-events: auto;
