@@ -95,6 +95,23 @@
     <!-- <span class="fave-icon" title="Favorite"
           data-ng-click="favorite()" /> -->
     <a class="share-icon show" href="" title="Share" ng-click="share()">Share</a>
-  </div>
 
+    <!-- More actions -->
+    <div class="dropdown show">
+      <a href="" class="down-icon dropdown-toggle"
+         role="button"
+         title="More actions">More</a>
+      <ul class="dropdown-menu" role="menu">
+        <li class="reply-icon"
+            ng-click="reply()">Reply</li>
+        <li class="clipboard-icon"
+            ng-show="authorize('update')" ng-click="edit()">Edit</li>
+        <li class="x-icon"
+            ng-show="authorize('delete')"
+            ng-click="delete()">Delete…</li>
+        <li class="flag-icon"
+            ng-click="flag()">Flag…</li>
+      </ul>
+    </div>
+  </div>
 </form>
