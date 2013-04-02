@@ -193,7 +193,6 @@ $em: 14 / 1em !default;
   line-height: 1;
   cursor: pointer;
   &:hover {
-    color: black;
     opacity: 1;
   }
   @if $iconside == left {
