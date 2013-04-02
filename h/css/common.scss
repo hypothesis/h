@@ -641,14 +641,14 @@ blockquote {
 .magicontrols {
   & > * {
     display: inline-block;
-    padding-right: 1em;
+    padding-right: .8em;
   }
 
   &.pull-right {
     text-align: right;
 
     & > * {
-      padding-left: 1em;
+      padding-left: .8em;
       padding-right: 0;
     }
   }
