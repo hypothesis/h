@@ -22,8 +22,8 @@
   </div>
 
   <!-- Privacy -->
-  <privacy data-ng-model="$parent.model.$modelValue.permissions"
-           data-ng-show="editing && action != 'delete'"
+  <privacy ng-model="$parent.model.$modelValue.permissions"
+           ng-show="editing && action != 'delete'"
            class="dropdown privacy pull-right"
            name="privacy" />
 
@@ -47,16 +47,16 @@
 
   <!-- Prompt -->
   <!-- TODO: replace with placeholder on markdown elements? -->
-  <div data-ng-show="model.$viewValue.deleted && !editing">
+  <div ng-show="model.$viewValue.deleted && !editing">
     <ng-switch on="model.$viewValue.text.length">
-      <div data-ng-switch-when="0">(no reason given)</div>
-      <div data-ng-switch-default>Reason:</div>
+      <div ng-switch-when="0">(no reason given)</div>
+      <div ng-switch-default>Reason:</div>
     </ng-switch>
   </div>
 
   <!-- Body -->
-  <markdown data-ng-model="$parent.model.$modelValue.text"
-            data-ng-readonly="!$parent.editing"
+  <markdown ng-model="$parent.model.$modelValue.text"
+            ng-readonly="!$parent.editing"
             class="body"
             name="text"
             required="" />
@@ -80,9 +80,9 @@
   </div>
 
   <!-- Editing preview -->
-  <div data-ng-show="previewText" class="preview">
+  <div ng-show="previewText" class="preview">
     <h4>Preview</h4>
-    <div data-ng-bind-html="previewText" class="body" />
+    <div ng-bind-html="previewText" class="body" />
   </div>
 
   <!-- Bottom control strip -->
@@ -94,7 +94,7 @@
           when="{one: '1 reply', other: '{} replies'}" />
     <a class="reply-icon show" href="" title="Reply" ng-click="reply()">Reply</a>
     <!-- <span class="fave-icon" title="Favorite"
-          data-ng-click="favorite()" /> -->
+          ng-click="favorite()" /> -->
     <a class="share-icon show" href="" title="Share" ng-click="share()">Share</a>
 
     <!-- More actions -->

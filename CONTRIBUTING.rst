@@ -106,6 +106,21 @@ No::
     else
         return theOtherThing
 
+AngularJS
+^^^^^^^^^
+Bare attribute names are used unless the directive is not namespaced.
+
+Yes::
+
+    <a href="" ng-click="foo()">Click me!</a>
+    <span data-custom-directive="bar">Data Attribute Used Here</span>
+    <span my-custom-directive="bar">Custom directive has "my" prefix</span>
+
+No::
+
+    <a href="" data-ng-click="foo()">Click me!</a>
+    <span custom-directive="bar">Bad: No Data Attribute Used Here</span>
+
 Committing Policy
 -----------------
 Committers are those with push access to the `main repository`. These

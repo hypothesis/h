@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
-  <body data-ng-app="h"
-        data-ng-controller="AppController"
+  <body ng-app="h"
+        ng-controller="AppController"
         class="ng-cloak"
         metal:fill-slot="body">
 
     <!-- Toolbar -->
     <div id="toolbar" class="form-inline">
-      <div data-ng-click="visible = !visible" class="tri"></div>
+      <div ng-click="visible = !visible" class="tri"></div>
 
       <!-- Persona -->
-      <div data-ng-show="sheet.collapsed"
+      <div ng-show="sheet.collapsed"
            class="tinyman">
         <a href=""
-           data-ng-click="sheet.collapsed = false;
+           ng-click="sheet.collapsed = false;
                           sheet.tab = 'login';"
-           data-ng-hide="persona">Sign in</a>
+           ng-hide="persona">Sign in</a>
         <form id="persona"
               action=""
               method="POST"
@@ -23,7 +23,7 @@
               accept-charset="utf-8">
           <input name="__formid__" type="hidden" value="persona" />
           <div class="dropdown"
-               data-ng-show="persona">
+               ng-show="persona">
             <span role="button"
                   class="dropdown-toggle"
                   data-toggle="dropdown"
@@ -31,12 +31,12 @@
                                              >/{{persona.provider}}</span></span>
             <ul class="dropdown-menu pull-right"
                 role="menu">
-              <li data-ng-repeat="option in personas">
-                <a data-ng-click="persona = personas[$index]"
+              <li ng-repeat="option in personas">
+                <a ng-click="persona = personas[$index]"
                    >{{option.username}}/{{option.provider}}</a>
               </li>
               <li>
-                <a data-ng-click="persona = null">Sign out</a>
+                <a ng-click="persona = null">Sign out</a>
               </li>
             </ul>
           </div>
@@ -45,11 +45,11 @@
       <!-- / Persona -->
 
       <!-- Account and Authentication -->
-      <div data-ng-class="sheet.collapsed && 'collapsed'"
-           data-ng-init="sheet.collapsed = true;
+      <div ng-class="sheet.collapsed && 'collapsed'"
+           ng-init="sheet.collapsed = true;
                          sheet.tab = 'login';"
-           data-ng-model="sheet.tab"
-           data-ng-submit="submit(this[sheet.tab])"
+           ng-model="sheet.tab"
+           ng-submit="submit(this[sheet.tab])"
            data-resettable="true"
            data-tab-reveal="['forgot','activate']"
            class="form-vertical sheet tabbable collapsed">
@@ -57,7 +57,7 @@
         <span class="close"
               role="button"
               title="Close"
-              data-ng-click="sheet.collapsed = true"></span>
+              ng-click="sheet.collapsed = true"></span>
 
         <!-- Login -->
         <form data-title="Sign in"
@@ -67,7 +67,7 @@
               novalidate>
 
           <input type="text" name="username" value="" placeholder="Username"
-                 data-ng-model="username" data-ng-minlength="3"
+                 ng-model="username" ng-minlength="3"
                  required autocapitalize="false" />
           <span ng-show="login.username.$error.required"
                 slow-validate="username"
@@ -77,14 +77,14 @@
                 >Usernames are at least 3 characters.</span>
 
           <input type="password" name="password" value="" placeholder="Password"
-                 data-ng-model="password"
+                 ng-model="password"
                  required autocapitalize="false" autocorrect="false" />
-          <span data-ng-show="login.password.$error.required"
+          <span ng-show="login.password.$error.required"
                 slow-validate="password"
                 >Please enter your password.</span>
 
           <input type="submit" name="login" value="Sign in"
-                 data-ng-disabled="!login.$valid" />
+                 ng-disabled="!login.$valid" />
 
         </form>
         <!-- / Login -->
@@ -97,43 +97,43 @@
               novalidate>
 
           <input type="text" name="username" value="" placeholder="Username"
-                 required autocapitalize="false" data-ng-model="username"
-                 data-ng-minlength="3" data-ng-maxlength="15"
-                 data-ng-pattern="/^[A-Za-z0-9._]+$/" />
-          <span data-ng-show="register.username.$error.required"
+                 required autocapitalize="false" ng-model="username"
+                 ng-minlength="3" ng-maxlength="15"
+                 ng-pattern="/^[A-Za-z0-9._]+$/" />
+          <span ng-show="register.username.$error.required"
                 slow-validate="username"
                 >Please choose a username.</span>
-          <span data-ng-show="register.username.$error.minlength"
+          <span ng-show="register.username.$error.minlength"
                 slow-validate="username"
                 >Usernames must be at least 3 characters.</span>
-          <span data-ng-show="register.username.$error.maxlength"
+          <span ng-show="register.username.$error.maxlength"
                 slow-validate="username"
                 >Usernames must be 15 characters at most.</span>
-          <span data-ng-show="register.username.$error.pattern"
+          <span ng-show="register.username.$error.pattern"
                 slow-validate="username"
                 >Only letters, numbers, underscore and dot are allowed. </span>
 
           <input type="email" name="email" value="" placeholder="Email"
-                 data-ng-model="email" required autocapitalize="false" />
-          <span data-ng-show="register.email.$error.email"
+                 ng-model="email" required autocapitalize="false" />
+          <span ng-show="register.email.$error.email"
                 slow-validate="email"
                 >Is this an email address?</span>
-          <span data-ng-show="register.email.$error.required"
+          <span ng-show="register.email.$error.required"
                 slow-validate="email"
                 >Please enter your email.</span>
 
           <input type="password" name="password" value="" placeholder="Password"
                  required autocapitalize="false" autocorrect="false"
-                 data-ng-minlength="2" data-ng-model="password" />
-          <span data-ng-show="register.password.$error.required"
+                 ng-minlength="2" ng-model="password" />
+          <span ng-show="register.password.$error.required"
                 slow-validate="password"
                 >Please enter a password.</span>
-          <span data-ng-show="register.password.$error.minlength"
+          <span ng-show="register.password.$error.minlength"
                 slow-validate="password"
                 >Passwords must be at least 2 characters.</span>
 
           <input type="submit" name="sign_up" value="Sign up"
-                 data-ng-disabled="!register.$valid" />
+                 ng-disabled="!register.$valid" />
 
         </form>
         <!-- / Register -->
@@ -146,16 +146,16 @@
               novalidate>
 
           <input type="email" name="email" value="" placeholder="Email"
-                 required autocapitalize="false" data-ng-model="email" />
-          <span data-ng-show="forgot.email.$error.email"
+                 required autocapitalize="false" ng-model="email" />
+          <span ng-show="forgot.email.$error.email"
                 slow-validate="email"
                 >Is this an email address?</span>
-          <span data-ng-show="forgot.email.$error.required"
+          <span ng-show="forgot.email.$error.required"
                 slow-validate="email"
                 >Please enter your email.</span>
 
           <input type="submit" name="forgot" value="Send recovery email"
-                 data-ng-disabled="!forgot.$valid" />
+                 ng-disabled="!forgot.$valid" />
 
         </form>
         <!-- / Forgot -->
@@ -169,28 +169,28 @@
 
           <input type="text" name="code" value="" placeholder="Activation Code"
                  required autocorrect="false" autocapitalize="false"
-                 data-ng-model="code" />
+                 ng-model="code" />
           <span ng-show="activate.code.$error.required"
                 slow-validate="code"
                 >Please enter your validation code.</span>
 
           <input type="password" name="password" value="" placeholder="Password"
                  required autocapitalize="false" autocorrect="false"
-                 data-ng-minlength="2" data-ng-model="password" />
-          <span data-ng-show="activate.password.$error.required"
+                 ng-minlength="2" ng-model="password" />
+          <span ng-show="activate.password.$error.required"
                 slow-validate="password"
                 >Please choose a password.</span>
-          <span data-ng-show="activate.password.$error.minlength"
+          <span ng-show="activate.password.$error.minlength"
                 slow-validate="password"
                 >Passwords must be at least 2 characters.</span>
 
           <input type="submit" name="activate" value="Sign in"
-                 data-ng-disabled="!activate.$valid" />
+                 ng-disabled="!activate.$valid" />
 
         </form>
         <!-- / Activate -->
 
-        <footer data-ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
+        <footer ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
           <ul>
             <li>
               <a href="" ng-click="sheet.tab = 'forgot'">Password help?</a>
@@ -210,7 +210,7 @@
 
     <!-- Content -->
     <div id="wrapper">
-      <div data-ng-view=""></div>
+      <div ng-view=""></div>
     </div>
     <!-- / Content -->
 

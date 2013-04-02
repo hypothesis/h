@@ -4,12 +4,12 @@
   <li ng-class="detail && 'squished' || ''"
       class="annotator-outer annotator-viewer">
     <ul>
-      <li data-ng-click="showDetail(annotation)"
-          data-ng-mouseenter="focus(annotation)"
-          data-ng-mouseleave="focus()"
-          data-ng-repeat="annotation in annotations"
+      <li ng-click="showDetail(annotation)"
+          ng-mouseenter="focus(annotation)"
+          ng-mouseleave="focus()"
+          ng-repeat="annotation in annotations"
           class="paper summary">
-        <div data-ng-model="$parent.annotation" class="annotation" />
+        <div ng-model="$parent.annotation" class="annotation" />
       </li>
     </ul>
   </li>
@@ -34,9 +34,9 @@
            ng-model="$parent.thread.message.annotation" />
       <!-- Replies -->
       <ul>
-        <li data-ng-class="collapsed && 'collapsed' || ''"
-            data-ng-repeat="thread in thread.children"
-            data-ng-transclude=""
+        <li ng-class="collapsed && 'collapsed' || ''"
+            ng-repeat="thread in thread.children"
+            ng-transclude=""
             class="thread">
           <a href="" class="threadexp"
              title="{{collapsed && 'Expand' || 'Collapse'}}""
