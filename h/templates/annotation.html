@@ -15,6 +15,7 @@
             ng-show="authorize('delete')"
             ng-click="delete()">Delete…</li>
         <li class="flag-icon"
+            ng-hide="authorize('delete')"
             ng-click="flag()">Flag…</li>
       </ul>
     </div>
@@ -110,6 +111,7 @@
             ng-show="authorize('delete')"
             ng-click="delete()">Delete…</li>
         <li class="flag-icon"
+            ng-hide="authorize('delete')"
             ng-click="flag()">Flag…</li>
       </ul>
     </div>
