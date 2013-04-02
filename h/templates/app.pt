@@ -24,11 +24,11 @@
           <input name="__formid__" type="hidden" value="persona" />
           <div class="dropdown"
                data-ng-show="persona">
-            <a role="button"
-               class="dropdown-toggle"
-               data-toggle="dropdown"
-               >{{persona.username}}<span class="provider"
-                                          >/{{persona.provider}}</span></a>
+            <span role="button"
+                  class="dropdown-toggle"
+                  data-toggle="dropdown"
+                  >{{persona.username}}<span class="provider"
+                                             >/{{persona.provider}}</span></span>
             <ul class="dropdown-menu pull-right"
                 role="menu">
               <li data-ng-repeat="option in personas">
