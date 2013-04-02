@@ -207,6 +207,11 @@ $em: 14 / 1em !default;
     &:after {
       content: "";
     }
+    &:empty {
+      &:before {
+        content: $char;
+      }
+    }
   }
   @if $iconside == right {
     &:before {
@@ -219,6 +224,11 @@ $em: 14 / 1em !default;
       margin-left: $offset;
       speak: none;
       font-weight: normal;
+    }
+    &:empty {
+      &:after {
+        content: $char;
+      }
     }
   }
 }

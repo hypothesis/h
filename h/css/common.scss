@@ -423,11 +423,11 @@ blockquote {
 }
 
 .check-icon {
-  @include fonticon("\35", left, .3em);
+  @include fonticon("\35", left);
 }
 
 .x-icon {
-  @include fonticon("\36", left, .3em);
+  @include fonticon("\36", left);
 }
 
 .vis-icon {
