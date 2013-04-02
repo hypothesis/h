@@ -1,10 +1,11 @@
 <form name="form">
-  <div class="magicontrols small pull-right" ng-hide="editing">
+  <div class="magicontrols pull-right" ng-hide="editing">
     <!-- Timestamp -->
-    <span>{{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}</span>
+    <span class="small"
+          >{{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}</span>
 
     <!-- More actions -->
-    <div class="dropdown">
+    <div class="dropdown small">
       <span class="dropdown-toggle" role="button" title="More actions"></span>
       <ul class="dropdown-menu pull-right" role="menu">
         <li class="reply-icon"
