@@ -580,8 +580,7 @@ blockquote {
       border-left: 1px dotted $grayLight;
       position: relative;
 
-      &:first-child { margin-top: 1em; }
-      &:last-child { padding-bottom: 0em; }
+      &:first-child { margin-top: .5em; }
     }
   }
 
