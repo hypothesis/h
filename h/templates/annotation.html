@@ -26,10 +26,12 @@
 
   <!-- Preface -->
   <ng-switch on="editing && action">
-    <div class="body preface" data-ng-switch-when="delete"
-         >You are about to delete this annotation.</div>
-    <div class="body preface" data-ng-switch-when="edit"
-         >You are about to edit this annotation.</div>
+    <strong ng-switch-when="delete"
+            >You are about to delete this annotation.</strong>
+    <strong ng-switch-when="edit"
+            >You are about to edit this annotation.</strong>
+    <strong class="user" ng-switch-default
+            >{{model.$viewValue.user | userName}}</strong>
   </ng-switch>
 
   <!-- Privacy -->
