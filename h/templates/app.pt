@@ -54,7 +54,10 @@
            data-tab-reveal="['forgot','activate']"
            class="form-vertical sheet tabbable collapsed">
 
-        <a data-ng-click="sheet.collapsed = true" class="close"></a>
+        <span class="close"
+              role="button"
+              title="Close"
+              data-ng-click="sheet.collapsed = true" />
 
         <!-- Login -->
         <form data-title="Sign in"
