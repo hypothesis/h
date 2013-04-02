@@ -5,8 +5,8 @@
 
 //ADDER////////////////////////////////
 .annotator-adder {
-  $border: #333;
-  $hoverborder: #000;
+  $border: $gray;
+  $hoverborder: $grayDark;
   @include box-sizing(border-box);
   @include sweetbutton;
   height: 40px;
