@@ -639,6 +639,8 @@ blockquote {
 
 //MAGICONTROLS////////////////////////////////
 .magicontrols {
+  background-color: $bodyBackground;
+
   & > * {
     display: inline-block;
     padding-right: .8em;
@@ -686,6 +688,12 @@ blockquote {
 
   // Things not shown in the summary view
   .magicontrols {
-    display: none;
+    .share-icon, .reply-icon, .pull-right {
+      display: none;
+    }
+
+    &.pull-right {
+      display: none;
+    }
   }
 }
