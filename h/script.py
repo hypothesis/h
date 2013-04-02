@@ -45,6 +45,7 @@ def extension(args, console):
         console.error('You must supply a paste configuration file.')
         return 2
 
+    from codecs import open
     from os import makedirs
     from os.path import abspath, dirname, exists, join, relpath
     from shutil import copyfile, copytree, rmtree
@@ -92,7 +93,8 @@ def extension(args, console):
             }
         )
 
-        with open(join(asset_env.directory, 'app.html'), 'w') as f:
+        app_html_file = join(asset_env.directory, 'app.html')
+        with open(app_html_file, 'w', 'utf-8-sig') as f:
             f.write(app_page)
 
     def chrome(env):
@@ -118,7 +120,8 @@ def extension(args, console):
             request=env['request'],
         )
 
-        with open(join(asset_env.directory, 'js/embed.js'), 'w') as f:
+        embed_js_file = join(asset_env.directory, 'js/embed.js')
+        with open(embed_js_file, 'w', 'utf-8-sig') as f:
             f.write(embed)
 
         # Chrome is strict about the format of the version string
@@ -128,7 +131,8 @@ def extension(args, console):
         manifest_renderer = PageTextTemplateFile(manifest_file)
         manifest = manifest_renderer(version=ext_version)
 
-        with open(join(asset_env.directory, 'manifest.json'), 'w') as f:
+        manifest_json_file = join(asset_env.directory, 'manifest.json')
+        with open(manifest_json_file, 'w', 'utf-8-sig') as f:
             f.write(manifest)
 
         # Due to Content Security Policy, the web font script cannot be inline.
