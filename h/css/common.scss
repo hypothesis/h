@@ -655,17 +655,14 @@ blockquote {
   }
 
   & > .show {
-    @include transition(max-height, opacity);
+    @include transition(opacity);
     @include transition-delay(.15s);
     @include transition-duration(1.05s);
-    max-height: 0;
     opacity: 0;
 
     :hover > & {
-      @include transition-delay(.3);
-      @include transition-duration(.3s);
+      @include transition-duration(.15s);
       opacity: 1;
-      max-height: 10em;
     }
   }
 }
