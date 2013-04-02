@@ -305,10 +305,6 @@ blockquote {
   @include fonticon("\002f", right, 0);
   cursor: pointer;
 
-  .open > & {
-    @include fonticon("\e007", right, 0);
-  }
-
   &:active {
     outline: 0;
   }

@@ -197,7 +197,7 @@ $em: 14 / 1em !default;
   }
   @if $iconside == left {
     &:before {
-      content: $char + '\a0';
+      content: $char + '\a0' !important;
       font-family: 'icomoon';
       font-style: normal;
       margin-right: $offset;
@@ -205,20 +205,20 @@ $em: 14 / 1em !default;
       font-weight: normal;
     }
     &:after {
-      content: "";
+      content: "" !important;
     }
     &:empty {
       &:before {
-        content: $char;
+        content: $char !important;
       }
     }
   }
   @if $iconside == right {
     &:before {
-      content: "";
+      content: "" !important;
     }
     &:after {
-      content: '\a0' + $char;
+      content: '\a0' + $char !important;
       font-family: 'icomoon';
       font-style: normal;
       margin-left: $offset;
@@ -227,7 +227,7 @@ $em: 14 / 1em !default;
     }
     &:empty {
       &:after {
-        content: $char;
+        content: $char !important;
       }
     }
   }
