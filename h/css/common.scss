@@ -522,11 +522,6 @@ blockquote {
     text-decoration: underline;
   }
 
-  .time {
-    @extend .small;
-    margin-left: 1em;
-  }
-
   .body {
     div {
       @include force-wrap;
@@ -558,10 +553,6 @@ blockquote {
   .tip {
     @extend .small;
     float: right;
-  }
-  
-  .preface {
-    font-weight: bold
   }
   
   .quote {
@@ -624,10 +615,6 @@ blockquote {
         font-style: italic;
         margin-top: 0;
         margin-bottom: 0;
-      }
-
-      .reply-icon {
-        display: none;
       }
 
       .user {
@@ -702,7 +689,7 @@ blockquote {
 
   // Things not shown in the summary view
   .magicontrols {
-    .reply-icon, .pull-right {
+    .share-icon, .reply-icon, .pull-right {
       display: none;
     }
 

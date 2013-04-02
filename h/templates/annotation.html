@@ -17,8 +17,10 @@
     </div>
   </div>
 
-  <!-- User heading -->
-  <strong class="user">{{model.$viewValue.user | userName}}</strong>
+  <!-- Timestamp -->
+  <span class="time small pull-right">
+    {{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}
+  </span>
 
   <span ng-show="editing && model.$viewValue.deleted"
         >Delete annotation</span>
@@ -26,11 +28,6 @@
         >Annotation deleted.</span>
   <span class="vis-icon small"
         ng-show="form.privacy.$viewValue != 'Public'" />
-
-  <!-- Timestamp -->
-  <span class="time">
-    {{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}
-  </span>
 
   <!-- Preface -->
   <ng-switch on="editing && action">
