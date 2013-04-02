@@ -19,8 +19,11 @@
     {{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}
   </span>
 
+  <!-- Deletion notice -->
   <span ng-show="!editing && model.$viewValue.deleted"
         >Annotation deleted.</span>
+
+  <!-- Privacy icon -->
   <span class="vis-icon small"
         ng-show="form.privacy.$viewValue != 'Public'" />
 
