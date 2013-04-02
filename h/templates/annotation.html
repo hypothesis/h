@@ -19,8 +19,6 @@
     {{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}
   </span>
 
-  <span ng-show="editing && model.$viewValue.deleted"
-        >Delete annotation</span>
   <span ng-show="!editing && model.$viewValue.deleted"
         >Annotation deleted.</span>
   <span class="vis-icon small"
