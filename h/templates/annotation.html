@@ -21,6 +21,11 @@
     </div>
   </div>
 
+  <!-- Privacy -->
+  <privacy data-ng-model="$parent.model.$modelValue.permissions"
+           data-ng-show="editing && action != 'delete'"
+           class="dropdown privacy pull-right"
+           name="privacy" />
 
   <!-- Deletion notice -->
   <span ng-show="!editing && model.$viewValue.deleted"
@@ -39,12 +44,6 @@
     <strong class="user" ng-switch-default
             >{{model.$viewValue.user | userName}}</strong>
   </header>
-
-  <!-- Privacy -->
-  <privacy data-ng-model="$parent.model.$modelValue.permissions"
-           data-ng-show="editing && action != 'delete'"
-           class="dropdown privacy pull-right"
-           name="privacy" />
 
   <!-- Prompt -->
   <!-- TODO: replace with placeholder on markdown elements? -->
