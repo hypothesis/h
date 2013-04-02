@@ -1,20 +1,17 @@
 <form name="form">
+
   <!-- Right-floated thread controls -->
-  <div class="magicontrols pull-right show" ng-hide="editing">
-    <!-- <span class="fave-icon" title="Favorite"
-          data-ng-click="favorite()" /> -->
-    <span class="share-icon" title="Share"
-          data-ng-click="share()" />
-    <div class="dropdown" title="More Actions">
-      <span class="dropdown-toggle down-icon"
-            role="button"
-            title="More actions" />
-      <ul class="dropdown-menu" role="menu">
-        <li data-ng-show="authorize('update')" data-ng-click="edit()">Edit</li>
-        <li data-ng-show="authorize('delete')" data-ng-click="delete()">Delete</li>
-        <li data-ng-click="flag()">Flag</li>
-      </ul>
-    </div>
+  <div class="magicontrols dropdown pull-right"
+       title="More Actions"
+       ng-show="!editing">
+    <span class="dropdown-toggle down-icon"
+          role="button"
+          title="More actions" />
+    <ul class="dropdown-menu pull-right" role="menu">
+      <li data-ng-show="authorize('update')" data-ng-click="edit()">Edit</li>
+      <li data-ng-show="authorize('delete')" data-ng-click="delete()">Delete</li>
+      <li data-ng-click="flag()">Flag</li>
+    </ul>
   </div>
 
   <!-- Timestamp -->
@@ -90,15 +87,16 @@
   </div>
 
   <!-- Bottom control strip -->
-  <div class="magicontrols pull-left"
-       ng-click="reply()"
-       ng-class="{show: thread.children.length == 0}"
-       ng-hide="editing" >
+  <div class="magicontrols small" ng-hide="editing">
     <span class="reply-count"
           ng-pluralize=""
           ng-show="thread.children.length"
           count="thread.flattenChildren().length"
           when="{one: '1 reply', other: '{} replies'}" />
-    <span class="reply-icon show" title="Reply">Reply</span>
+    <a class="reply-icon show" href="" title="Reply" ng-click="reply()">Reply</a>
+    <!-- <span class="fave-icon" title="Favorite"
+          data-ng-click="favorite()" /> -->
+    <a class="share-icon show" href="" title="Share" ng-click="share()">Share</a>
   </div>
+
 </form>
