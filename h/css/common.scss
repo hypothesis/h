@@ -303,13 +303,14 @@ blockquote {
 
 .dropdown-toggle {
   @include fonticon("\002f", right, 0);
-  background-color: white;
   cursor: pointer;
+
+  .open > & {
+    @include fonticon("\e007", right, 0);
+  }
+
   &:active {
     outline: 0;
-  }
-  &:hover {
-    color: black;
   }
 }
 
