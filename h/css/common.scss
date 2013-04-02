@@ -639,21 +639,23 @@ blockquote {
 
 //MAGICONTROLS////////////////////////////////
 .magicontrols {
-  @include pie-clearfix;
   background-color: $bodyBackground;
 
   & > * {
     display: inline-block;
-    padding-right: .3em;
+    padding-right: 1em;
   }
 
-  &.pull-right > * {
-    @extends .pull-right;
-    padding-left: .3em;
-    padding-right: 0;
+  &.pull-right {
+    text-align: right;
+
+    & > * {
+      padding-left: 1em;
+      padding-right: 0;
+    }
   }
 
-  &.show, .show {
+  & > .show {
     @include transition(max-height, opacity);
     @include transition-delay(.15s);
     @include transition-duration(1.05s);
