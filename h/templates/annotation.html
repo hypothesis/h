@@ -1,4 +1,8 @@
 <form name="form">
+  <div class="magicontrols small pull-right">
+    <!-- Timestamp -->
+    <span ng-hide="editing"
+          >{{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}</span>
 
     <!-- More actions -->
     <div class="dropdown" ng-hide="editing">
@@ -17,10 +21,6 @@
     </div>
   </div>
 
-  <!-- Timestamp -->
-  <span class="time small pull-right">
-    {{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}
-  </span>
 
   <!-- Deletion notice -->
   <span ng-show="!editing && model.$viewValue.deleted"
