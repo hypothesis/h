@@ -685,13 +685,7 @@ blockquote {
   }
 
   // Things not shown in the summary view
-  .magicontrols {
-    .share-icon, .reply-icon, .pull-right {
-      display: none;
-    }
-
-    &.pull-right {
-      display: none;
-    }
+  .magicontrols .show {
+    display: none;
   }
 }
