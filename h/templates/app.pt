@@ -31,13 +31,10 @@
                                              >/{{persona.provider}}</span></span>
             <ul class="dropdown-menu pull-right"
                 role="menu">
-              <li ng-repeat="option in personas">
-                <a ng-click="persona = personas[$index]"
-                   >{{option.username}}/{{option.provider}}</a>
-              </li>
-              <li>
-                <a ng-click="persona = null">Sign out</a>
-              </li>
+              <li ng-repeat="option in personas"
+                  ng-click="persona = personas[$index]"
+                  >{{option.username}}/{{option.provider}}</li>
+              <li ng-click="persona = null">Sign out</li>
             </ul>
           </div>
         </form>
