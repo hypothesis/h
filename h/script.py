@@ -47,19 +47,18 @@ def extension(args, console):
 
     from codecs import open
     from os import makedirs
-    from os.path import abspath, dirname, exists, join, relpath
+    from os.path import abspath, exists, join
     from shutil import copyfile, copytree, rmtree
+    from urlparse import urljoin
 
     from chameleon.zpt.template import PageTextTemplateFile
     from pyramid.path import AssetResolver
     from pyramid.renderers import get_renderer, render
     from pyramid_webassets import IWebAssetsEnvironment
-    from webassets.bundle import get_all_bundle_files
 
-    from h import bootstrap, layouts, __version__
+    from h import bootstrap, layouts
 
     resolve = AssetResolver().resolve
-    package_dir = resolve('h:').abspath()
 
     def make_relative(env, url):
         host_url = env['request'].host_url
@@ -99,17 +98,33 @@ def extension(args, console):
 
     def chrome(env):
         asset_env = env['registry'].queryUtility(IWebAssetsEnvironment)
+        settings = env['registry'].settings
+        develop = settings.get('extension.develop', False)
 
         def getUrl(url):
+            if develop:
+                return '"%s"' % url
+
             rel = make_relative(env, url)
             if rel != url:
                 return "chrome.extension.getURL('%s')" % rel
+
             return url
+
+        if develop:
+            # Load the app from the development server.
+            env['request'].host = 'localhost:5000'
+            base = env['request'].host_url
+            app_url = getUrl(urljoin(base, 'app'))
+        else:
+            # Load the app from the extension bundle.
+            app(env)  # Build the app html
+            app_url = "chrome.extension.getURL('app.html')"
 
         embed = render(
             'h:templates/embed.txt',
             {
-                'app': "chrome.extension.getURL('app.html')",
+                'app': app_url,
                 'inject': '[%s]' % ', '.join([
                     getUrl(url)
                     for url in asset_env['inject'].urls()
@@ -139,9 +154,6 @@ def extension(args, console):
         webfont = resolve('h:templates/webfont.js').abspath()
         copyfile(webfont, './build/chrome/webfont.js')
 
-        # Build the app html
-        app(env)
-
     if not exists('./build'):
         makedirs('./build')
 
@@ -151,8 +163,6 @@ def extension(args, console):
         args[0],
         options={
             'webassets.base_dir': abspath('./build/chrome'),
-            'webassets.base_url': '',
-            'webassets.debug': 'False',
         },
         config_fn=chrome,
     )
