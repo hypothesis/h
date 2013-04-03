@@ -1,30 +1,15 @@
 __all__ = ['BaseController']
 
-import json
+from pyramid.traversal import find_resource
 
-from pyramid.renderers import render
 from pyramid.view import view_config
 
 from horus.views import BaseController
 
 
-@view_config(http_cache=(0, {'must-revalidate': True}),
-             renderer='templates/embed.txt', route_name='embed')
-def embed(request, standalone=True):
-    if standalone:
-        request.response.content_type = 'application/javascript'
-        request.response.charset = 'UTF-8'
-    return {
-        pkg: json.dumps(request.webassets_env[pkg].urls())
-        for pkg in ['inject', 'jquery', 'raf']
-    }
-
-
 @view_config(layout='site', renderer='templates/home.pt', route_name='index')
 def home(request):
-    return {
-        'embed': render('templates/embed.txt', embed(request, False), request)
-    }
+    return find_resource(request.context, '/app').embed
 
 
 def includeme(config):

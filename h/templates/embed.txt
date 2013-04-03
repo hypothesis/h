@@ -15,7 +15,7 @@ yepnope([
       // Load the annotator
       window.Annotator._instance = new Annotator.Host(document.body, {
         /* @@ reflect routes with crossroads.js?? */
-        app: '${request.resource_url(context['app'])}',
+        app: ${app},
       })
     }
   },

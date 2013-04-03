@@ -10,8 +10,6 @@ from pyramid.wsgi import wsgiapp2
 from h import messages, models
 
 
-@view_config(context='h.resources.APIFactory', request_method='POST',
-             name='access_token', permission='access_token', renderer='string')
 def access_token(request):
     """OAuth2 access token provider"""
     for name in [

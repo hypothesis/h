@@ -8,7 +8,6 @@ from horus.views import (
 )
 
 from pyramid.decorator import reify
-from pyramid.httpexceptions import exception_response
 from pyramid.view import view_config, view_defaults
 
 from h import exceptions, interfaces, messages, views
@@ -87,7 +86,7 @@ class AppController(views.BaseController):
 
         request.user = user
 
-        result = self()
+        result = request.context.__json__()
         result.update(status='okay')
         return result
 
@@ -121,7 +120,7 @@ class AppController(views.BaseController):
             self.db.flush()  # to get the id
             request.user = user
 
-        result = self()
+        result = request.context.__json__()
         result.update(status='okay')
         return result
 
@@ -160,7 +159,7 @@ class AppController(views.BaseController):
                     'error': e.error.asdict(),
                 }
 
-        result = self()
+        result = request.context.__json__()
         result.update(status='okay')
         return result
 
@@ -179,34 +178,32 @@ class AppController(views.BaseController):
                     'reason': messages.INVALID_FORM,
                     'error': error.asdict(),
                 }
-        result = self()
+        result = request.context.__json__()
         result.update(status='okay')
         return result
 
     @view_config(name='logout')
     def logout(self):
-        self.auth_controller.logout()
-        self.request.user = None
+        request = self.request
 
-        result = self()
+        self.auth_controller.logout()
+        request.user = None
+
+        result = request.context.__json__()
         result.update(status='okay')
         return result
+
+    @view_config(name='embed.js', renderer='templates/embed.txt')
+    def embed(self):
+        request = self.request
+        request.response.content_type = 'application/javascript'
+        request.response.charset = 'UTF-8'
+        return request.context.embed
 
     @view_config(renderer='json', xhr=True)
     def __call__(self):
         request = self.request
-        session = request.session
-        flash = {
-            name[3:]: session.pop_flash(name[3:])
-            for name in session.keys()
-            if name.startswith('_f_')
-        }
-        model = {
-            name: getattr(request.context, name)
-            for name in ['persona', 'personas', 'token']
-        }
-        model.update(tokenUrl=request.route_url('token'))
-        return dict(flash=flash, model=model)
+        return request.context
 
     @view_config(renderer='h:templates/app.pt')
     def __html__(self):

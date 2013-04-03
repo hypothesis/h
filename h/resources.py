@@ -1,3 +1,5 @@
+import json
+
 from horus import resources
 
 from pyramid.decorator import reify
@@ -14,6 +16,64 @@ class BaseResource(resources.BaseFactory):
 
     __name__ = None
     __parent__ = None
+
+
+class InnerResource(BaseResource):
+    """Helper Resource class for constructing traversal contexts
+
+    Classes which inherit from this should contain attributes which are either
+    class constructors for classes whose instances provide the
+    :class:`pyramid.interfaces.ILocation` interface else attributes which are,
+    themselves, instances of such a class. Such attributes are treated as
+    valid traversal children of the Resource whose path component is the name
+    of the attribute.
+    """
+
+    def __getitem__(self, name):
+        """
+        Any class attribute which is an instance providing
+        :class:`pyramid.interfaces.ILocation` will be returned as is.
+
+        Attributes which are constructors for implementing classes will
+        be replaced with a constructed instance by reifying the newly
+        constructed resource in place of the attribute.
+
+        Assignment to the sub-resources `__name__` and `__parent__` properties
+        is handled automatically.
+        """
+
+        factory_or_resource = getattr(self, name, None)
+
+        if factory_or_resource:
+            if ILocation.implementedBy(factory_or_resource):
+                inst = factory_or_resource(self.request)
+                inst.__name__ = name
+                inst.__parent__ = self
+                setattr(self, name, inst)
+                return inst
+
+            if ILocation.providedBy(factory_or_resource):
+                return factory_or_resource
+
+        raise KeyError(name)
+
+
+class RootFactory(InnerResource, resources.RootFactory):
+    pass
+
+
+class AppFactory(BaseResource):
+    def __init__(self, request):
+        super(AppFactory, self).__init__(request)
+
+    @property
+    def embed(self):
+        env = {
+            pkg: json.dumps(self.request.webassets_env[pkg].urls())
+            for pkg in ['inject', 'jquery', 'raf']
+        }
+        env['app'] = "'%s'" % self.request.resource_url(self)
+        return env
 
     @reify
     def persona(self):
@@ -58,70 +118,25 @@ class BaseResource(resources.BaseFactory):
 
         return api.auth.encode_token(message, self.consumer.secret)
 
-
-class InnerResource(BaseResource):
-    """Helper Resource class for declarative, traversal-based routing
-
-    Classes which inherit from this should contain attributes which are either
-    class constructors for classes whose instances provide the
-    :class:`pyramid.interfaces.ILocation` interface else attributes which are,
-    themselves, instances of such a class. Such attributes are treated as
-    valid traversal children of the Resource whose path component is the name
-    of the attribute.
-    """
-
-    def __getitem__(self, name):
-        """
-        Any class attribute which is an instance providing
-        :class:`pyramid.interfaces.ILocation` will be returned as is.
-
-        Attributes which are constructors for implementing classes will
-        be replaced with a constructed instance by reifying the newly
-        constructed resource in place of the attribute.
-
-        Assignment to the sub-resources `__name__` and `__parent__` properties
-        is handled automatically.
-        """
-
-        factory_or_resource = getattr(self, name, None)
-
-        if factory_or_resource:
-            if ILocation.implementedBy(factory_or_resource):
-                inst = factory_or_resource(self.request)
-                inst.__name__ = name
-                inst.__parent__ = self
-                setattr(self, name, inst)
-                return inst
-
-            if ILocation.providedBy(factory_or_resource):
-                return factory_or_resource
-
-        raise KeyError(name)
-
-
-class RootFactory(InnerResource, resources.RootFactory):
-    pass
-
-
-class APIFactory(InnerResource):
-    def __init__(self, request):
-        super(APIFactory, self).__init__(request)
-
-        if not 'x-annotator-auth-token' in request.headers:
-            token = request.params.get('access_token', self.token)
-            request.headers['x-annotator-auth-token'] = token
-
-
-class AppFactory(BaseResource):
-    def __init__(self, request):
-        super(AppFactory, self).__init__(request)
+    def __json__(self, request=None):
+        request = request or self.request
+        session = request.session
+        flash = {
+            name[3:]: session.pop_flash(name[3:])
+            for name in session.keys()
+            if name.startswith('_f_')
+        }
+        model = {
+            name: getattr(self, name)
+            for name in ['persona', 'personas', 'token']
+        }
+        model.update(tokenUrl=request.route_url('token'))
+        return dict(flash=flash, model=model)
 
 
 def includeme(config):
     config.include('horus.routes')
 
-    RootFactory.api = APIFactory
     RootFactory.app = AppFactory
 
-    config.add_route('embed', '/embed.js')
     config.add_route('index', '/', factory='h.resources.RootFactory')

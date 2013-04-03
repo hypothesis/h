@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
   <head>
-    <script type="text/javascript"
-            metal:fill-slot="embed"
-            tal:content="structure embed" />
+    <script type="text/javascript" metal:fill-slot="embed">
+      <metal:main use-macro="load: embed.txt" />
+    </script>
   </head>
   <body metal:fill-slot="body">
     <a href="https://github.com/hypothesis/h"
@@ -49,7 +49,10 @@
              href="javascript:(function(){
                      var d=document
                        , s=d.createElement('script');
-                     s.setAttribute('src', '${request.route_url('embed')}');
+                     s.setAttribute(
+                       'src',
+                       '${request.resource_url(context, 'app', 'embed.js')}'
+                     );
                      d.body.appendChild(s)
                    })();">Annotate</a></li>
       </ol>
