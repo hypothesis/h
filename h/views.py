@@ -20,7 +20,7 @@ def embed(request, standalone=True):
     }
 
 
-@view_config(renderer='templates/home.pt', route_name='index')
+@view_config(layout='site', renderer='templates/home.pt', route_name='index')
 def home(request):
     return {
         'embed': render('templates/embed.txt', embed(request, False), request)

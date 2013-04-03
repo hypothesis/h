@@ -15,7 +15,7 @@ from h import exceptions, interfaces, messages, views
 from h.messages import _
 
 
-@view_defaults(context='h.resources.AppFactory', renderer='json')
+@view_defaults(context='h.resources.AppFactory', layout='app', renderer='json')
 class AppController(views.BaseController):
     @reify
     def auth_controller(self):

@@ -36,14 +36,12 @@ class BaseLayout(object):
         return self.get_widget_resources()['js']
 
 
-@layout_config(context='h.resources.AppFactory',
-               template='h:templates/base.pt')
+@layout_config(name='app', template='h:templates/base.pt')
 class AppLayout(BaseLayout):
     requirements = (('app', None),)
 
 
-@layout_config(context='h.resources.RootFactory',
-               template='h:templates/base.pt')
+@layout_config(name='site', template='h:templates/base.pt')
 class SiteLayout(BaseLayout):
     requirements = (('site', None),)
 
