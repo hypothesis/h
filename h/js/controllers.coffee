@@ -116,7 +116,8 @@ class App
 
     $scope.$watch 'persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
-        $http.post 'logout', '',
+        # TODO: better knowledge of routes
+        $http.post '/app/logout', '',
           withCredentials: true
         .success (data) =>
           $scope.$broadcast '$reset'
