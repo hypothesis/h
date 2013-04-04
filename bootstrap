@@ -18,6 +18,9 @@ The offending virtual environment is '$VIRTUAL_ENV'.
 	fi
 fi
 
+echo "Updating pip..."
+./bin/pip install -U pip
+
 echo "Checking dependencies..."
 diff -q requirements.txt .installed.txt 2> /dev/null || {
 	echo "Installing dependencies..."
