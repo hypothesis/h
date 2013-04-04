@@ -531,7 +531,8 @@ span.errorMsg {
 /* line 303, common.scss */
 .hyp-thread {
   margin: 0 -1em -1em -0.5em;
-  padding-left: 0.5em; }
+  padding-left: 0.5em;
+  display: inline;}
   /* line 307, common.scss */
   .hyp-thread .annotator-listing {
     border-left: 1px dotted #969696;
@@ -893,8 +894,8 @@ body {
     width: 70%;
     margin-left: auto;
     margin-right: auto;
-    border-left: 1px solid lightgrey;
-    border-right: 1px solid lightgrey; }
+    /*border-left: 1px solid lightgrey;
+    border-right: 1px solid lightgrey;*/ }
     /* line 38, ../../../../../.rvm/gems/ruby-1.9.3-p194/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/utilities/general/_clearfix.scss */
     .nav .inner:after {
       content: "";
@@ -906,8 +907,8 @@ body {
     padding-left: 1em;
     padding-right: 1em;
     padding-top: .85em;
-    border-left: 1px solid lightgrey;
-    border-right: 1px solid lightgrey;
+    /*border-left: 1px solid lightgrey;
+    border-right: 1px solid lightgrey;*/
     height: 3em;
     display: inline-block;
     cursor: pointer; }
@@ -934,12 +935,21 @@ body {
     padding-top: .7em; }
     /* line 187, site.css.scss */
     .nav .title > span {
-      font-size: 2em; }
+      font-size: 1.7em; }
 
 .smalldisplacer {
 	display: none;
 	float: left;}
 
+
+.pull-right {
+  float: right;
+  text-align: right;
+}
+
+.magiccontrols > * {
+	display: inline-block;
+}
 
 @media(max-width:600px)
 {
@@ -954,14 +964,19 @@ body {
 		height: 1em;}
 		
 	.barbutton.right {
-		display: none;}
+		width: 100%;
+		text-align: right;}
 
     #stream .tile .hyp-excerpt {
       margin-right: 0em;
       margin-bottom: 0; }
       
     #stream {
-      width: 100%;	
+      width: 100%;
+      padding-top: 6em;
 }
 
+  .nav .inner {
+    width: 100%;
+  }
 }
