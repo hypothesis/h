@@ -69,7 +69,7 @@ deform = Bundle(
     jquery,
     Uglify('deform:static/scripts/deform.js', output='lib/deform.min.js'),
 )
-jschannel = Uglify('h:lib/jschannel.js', output='h:lib/jschannel.min.js')
+jschannel = Uglify('h:lib/jschannel.js', output='lib/jschannel.min.js')
 jwz = Uglify('h:lib/jwz.js', output='lib/jwz.min.js')
 pagedown = Uglify(
     'h:lib/Markdown.Converter.js',
