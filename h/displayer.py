@@ -102,20 +102,9 @@ class DisplayerTemplate(object):
         maxlevel = 1
         reply_threaded = []
         replies = sorted(self._replies, key=lambda reply : reply['created'])
-        log.info('------------------')
         for reply in replies :
-            log.info('created: '  + str(reply['created']))
-            log.info('id: ' + str(reply['id'])) 
-            log.info('thread: ' + str(reply['thread'])) 
-            log.info('text: ' + str(reply['text'])) 
-            log.info('------------------')
-        log.info('------------------')
-        for reply in replies :
-            level = 1
             pointer = reply_threaded
             for thread in reply['thread'].split('/')[1:] :
-                log.info(thread)
-                log.info(pointer)
                 pointer = childTable[thread]
 
             #Add the new one.

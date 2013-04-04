@@ -45,13 +45,15 @@ def displayer(context, request):
         res = json.dumps(annotation, indent=None if request.is_xhr else 2)
         return Response(res, content_type = 'application/json')
     else :
-        #Load original quote for replies
-        if 'thread' in annotation :
-            original = Annotation.fetch_auth(user, annotation['thread'].split('/')[0])
-        else: original = None
-        replies = Annotation.search_auth(user, thread = annotation['id'])
-        return Displayer(annotation, replies, original).generate_dict()        
-
+        try:
+            #Load original quote for replies
+            if 'thread' in annotation :
+                original = Annotation.fetch_auth(user, annotation['thread'].split('/')[0])
+            else: original = None
+            replies = Annotation.search_auth(user, thread = annotation['id'])
+            return Displayer(annotation, replies, original).generate_dict()        
+        except:
+            raise httpexceptions.HTTPInternalServerError()
 
 def includeme(config):
     config.add_view(
