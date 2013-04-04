@@ -273,17 +273,17 @@ class Annotation
         $timeout -> $element.find('input').focus()
         $timeout -> $element.find('input').select()
         
+        $scope.shared_link = window.location.protocol + '//' + 
+          window.location.host + '/a/' + $scope.model.$modelValue.id
+        $scope.shared = false
         # Check if this is a brand new annotation
         annotation = $scope.thread.message?.annotation
         if annotation? and drafts.contains annotation
           $scope.editing = true
 
-    $scope.shared = false
     $scope.share = ->
       $scope.shared = not $scope.shared
       $element.find('.share-dialog').slideToggle()
-      if $scope.shared
-        $scope.shared_link = window.location.host + '/a/' + $scope.model.$modelValue.id
         
       console.log $scope.shared
 

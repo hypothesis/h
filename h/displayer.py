@@ -82,8 +82,7 @@ class DisplayerTemplate(object):
         return fuzzy
          
     def _userName(self, user):
-        if not user: return ''
-        if user == '': return 'Annotation deleted.'
+        if not user or user == '': return 'Annotation deleted.'
         else:
             return user.split(':')[1].split('@')[0]
 
