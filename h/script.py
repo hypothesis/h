@@ -105,7 +105,7 @@ def extension(args, console):
 
             rel = make_relative(env, url)
             if rel != url:
-                return "chrome.extension.getURL('%s')" % rel
+                return "chrome.extension.getURL('public/%s')" % rel
 
             return url
 
@@ -117,7 +117,7 @@ def extension(args, console):
         else:
             # Load the app from the extension bundle.
             app(env)  # Build the app html
-            app_url = "chrome.extension.getURL('app.html')"
+            app_url = "chrome.extension.getURL('public/app.html')"
 
         embed = render(
             'h:templates/embed.txt',
@@ -140,11 +140,11 @@ def extension(args, console):
         # Chrome is strict about the format of the version string
         ext_version = '.'.join(version.replace('-', '.').split('.')[:4])
 
-        manifest_file = join(asset_env.directory, 'manifest.json')
+        manifest_file = resolve('h:browser/chrome/manifest.json').abspath()
         manifest_renderer = PageTextTemplateFile(manifest_file)
         manifest = manifest_renderer(version=ext_version)
 
-        manifest_json_file = join(asset_env.directory, 'manifest.json')
+        manifest_json_file = join('./build/chrome', 'manifest.json')
         with open(manifest_json_file, 'w', 'utf-8-sig') as f:
             f.write(manifest)
 
@@ -152,15 +152,19 @@ def extension(args, console):
         webfont = resolve('h:templates/webfont.js').abspath()
         copyfile(webfont, './build/chrome/webfont.js')
 
-    if not exists('./build'):
-        makedirs('./build')
+    # Make sure the common build dir exists
+    if not exists('./build'): makedirs('./build')
 
-    rmtree('./build/chrome')
+    # Build the chrome extension
+    if exists('./build/chrome'): rmtree('./build/chrome')
     copytree(resolve('h:browser/chrome').abspath(), './build/chrome')
+    copytree(resolve('h:images').abspath(), './build/chrome/public/images')
+    copytree(resolve('h:lib').abspath(), './build/chrome/public/lib')
+
     bootstrap(
         args[0],
         options={
-            'webassets.base_dir': abspath('./build/chrome'),
+            'webassets.base_dir': abspath('./build/chrome/public'),
         },
         config_fn=chrome,
     )
