@@ -197,7 +197,10 @@ class window.DomTextMatcher
         analysis.exact or # "Found text matches exactly to pattern"
         (analysis.comparison.errorLevel <= matchThreshold) # still acceptable
       mappings = @mapper.getMappingsForCharRange prefixEnd, suffixStart
-      match = $.extend {}, charRange, analysis, mappings
+      match = {}
+      for obj in [charRange, analysis, mappings]
+        for k, v of obj
+          match[k] = v
       return matches: [match]
 
 #    console.log "Rejecting the match, because error level is too high. (" +
@@ -253,7 +256,10 @@ class window.DomTextMatcher
         analysis = @analyzeMatch pattern, textMatch, fuzzyComparison
         mappings = @mapper.getMappingsForCharRange textMatch.start,
             textMatch.end
-        match = $.extend {}, textMatch, analysis, mappings
+        match = {}
+        for obj in [charRange, analysis, mappings]
+          for k, v of obj
+            match[k] = v
         matches.push match
         null
     t3 = @timestamp()
