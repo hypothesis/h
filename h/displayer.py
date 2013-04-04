@@ -102,7 +102,9 @@ class DisplayerTemplate(object):
         maxlevel = 1
         reply_threaded = []
         replies = sorted(self._replies, key=lambda reply : reply['created'])
-
+        log.info('------------------')
+        log.info(replies)
+        log.info('------------------')
         for reply in replies :
             level = 1
             pointer = reply_threaded
