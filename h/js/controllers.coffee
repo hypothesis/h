@@ -103,13 +103,13 @@ class App
         if data.model? then angular.extend $scope, data.model
         if data.flash? then flash q, msgs for q, msgs of data.flash
         if data.status is 'failure' then flash 'error', data.reason
+        if data.status is 'okay' then $scope.sheet.collapsed = true
 
     $scope.$watch 'personas', (newValue, oldValue) =>
       if newValue?.length
         annotator.element.find('#persona')
           .off('change').on('change', -> $(this).submit())
           .off('click')
-        $scope.sheet.collapsed = true
       else
         $scope.persona = null
         $scope.token = null
