@@ -11,11 +11,6 @@
            alt="Fork me on GitHub"
            src="https://s3.amazonaws.com/github/ribbons/forkme_left_white_ffffff.png"
            style="position: absolute; top: 0; left: 0; border: 0;" /></a>
-    <div id="flash-msg">
-      <span tal:content="message"
-            tal:omit-tag=""
-            tal:repeat="message request.session.pop_flash()" />
-    </div>
     <div id="toolbar">
     </div>
     <div id="home" class="content">
