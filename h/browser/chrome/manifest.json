@@ -5,9 +5,9 @@
 
   "description": "The Internet, peer reviewed.",
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
   },
 
   "homepage_url": "https://hypothes.is/",
@@ -31,13 +31,6 @@
   },
   "page_action": {},
   "web_accessible_resources": [
-    "app.html",
-    "css/inject.css",
-    "images/pen_1.png",
-    "js/inject.min.js",
-    "lib/annotator.min.js",
-    "lib/jquery-1.8.3.min.js",
-    "lib/jschannel.min.js",
-    "lib/polyfills/raf.js"
+    "public/*"
   ]
 }

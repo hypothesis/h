@@ -1,15 +1,15 @@
 var ACTION_STATES = {
   active: {
     icons: {
-      19: "icons/active_19.png",
-      38: "icons/active_38.png"
+      19: "images/active_19.png",
+      38: "images/active_38.png"
     },
     title: "Disable annotation"
   },
   sleeping: {
     icons: {
-      19: "icons/sleeping_19.png",
-      38: "icons/sleeping_38.png"
+      19: "images/sleeping_19.png",
+      38: "images/sleeping_38.png"
     },
     title: "Enable annotation"
   }
@@ -18,7 +18,7 @@ var ACTION_STATES = {
 
 function inject(tab) {
   chrome.tabs.executeScript(null, {
-    file: 'js/embed.js'
+    file: 'public/js/embed.js'
   })
 }
 
