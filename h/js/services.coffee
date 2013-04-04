@@ -216,8 +216,15 @@ class Hypothesis extends Annotator
     results = []
     if stringStartsWith href, "http://elife.elifesciences.org/content"
       if stringEndsWith href, ".full-text.pdf"
-        results.push href.substr 0, href.length - ".full-text.pdf".length
+        root = href.substr 0, href.length - ".full-text.pdf".length
+        results.push root
+        results.push root + ".full.pdf"
+      else if stringEndsWith href, ".full.pdf"
+        root = href.substr 0, href.length - ".full.pdf".length
+        results.push root
+        results.push root + ".full-text.pdf"        
       else
+        results.push href + ".full.pdf"
         results.push href + ".full-text.pdf"
     else if stringStartsWith href, "https://peerj.com/articles/"
       if stringEndsWith href, ".pdf"
