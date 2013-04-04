@@ -53,7 +53,6 @@ def create_app(settings):
         settings=settings,
         authentication_policy=authn_policy,
         authorization_policy=authz_policy,
-        root_factory='h.resources.RootFactory'
     )
 
     favicon = AssetResolver().resolve('h:favicon.ico')
@@ -63,7 +62,19 @@ def create_app(settings):
         route_name='favicon'
     )
 
+    # Include the base configuration for horus integration
+    config.include('h.forms')
+    config.include('h.models')
+    config.include('h.schemas')
+    config.commit()
+
+    # Include horus
+    config.include('horus')
+    config.commit()
+
+    # Include the rest of the application
     config.include(includeme)
+
     return config.make_wsgi_app()
 
 

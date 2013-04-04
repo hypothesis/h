@@ -367,6 +367,7 @@ class DraftProvider
 
 class FlashProvider
   queues:
+    '': []
     info: []
     error: []
     success: []
@@ -384,7 +385,9 @@ class FlashProvider
     @timeout = null
     for q, msgs of @queues
       if msgs.length
-        notice = Annotator.showNotification msgs.shift(), q
+        msg = msgs.shift()
+        unless q then [q, msg] = msg
+        notice = Annotator.showNotification msg, q
         @timeout = this._wait =>
           # work around Annotator.Notification not removing classes
           for _, klass of notice.options.classes

@@ -1,194 +1,71 @@
 import colander
 import deform
 
-from pyramid.decorator import reify
+from bag.web.pyramid.flash_msg import FlashMessage
+
 from pyramid.view import view_config, view_defaults
 
-from h import exceptions, interfaces, messages, views
+from h import interfaces, messages, views
 from h.messages import _
 
 
 @view_defaults(context='h.resources.AppFactory', layout='app', renderer='json')
 class AppController(views.BaseController):
-    @reify
-    def auth_controller(self):
-        return views.AuthController(self.request)
-
-    @reify
-    def forgot_controller(self):
-        return views.ForgotPasswordController(self.request)
-
-    @reify
-    def register_controller(self):
-        return views.RegisterController(self.request)
-
-    @reify
-    def login_form(self):
-        return self.auth_controller.form
-
-    @reify
-    def register_form(self):
-        return self.register_controller.form
-
-    @reify
-    def forgot_form(self):
-        request = self.request
-        schema = request.registry.getUtility(interfaces.IForgotPasswordSchema)
-        schema = schema().bind(request=self.request)
-        form = request.registry.getUtility(interfaces.IForgotPasswordForm)
-        form = form(schema)
-        return form
-
-    @reify
-    def reset_form(self):
-        request = self.request
-        schema = request.registry.getUtility(interfaces.IResetPasswordSchema)
-        schema = schema().bind(requeppst=self.request)
-        form = request.registry.getUtility(interfaces.IResetPasswordForm)
-        form = form(schema)
-        return form
-
-    @reify
-    def activate_form(self):
-        request = self.request
-        schema = request.registry.getUtility(interfaces.IActivateSchema)
-        schema = schema().bind(request=self.request)
-        form = request.registry.getUtility(interfaces.IActivateForm)
-        form = form(schema)
-        return form
-
     @view_config(request_method='POST', request_param='__formid__=login')
     def login(self):
-        request = self.request
-        form = self.login_form
-
-        try:
-            appstruct = form.validate(request.POST.items())
-        except deform.ValidationFailure as e:
-            return {
-                'status': 'failure',
-                'reason': messages.INVALID_FORM,
-                'error': e.error.asdict(),
-            }
-
-        try:
-            user = self.auth_controller.check_credentials(
-                appstruct['username'],
-                appstruct['password'],
-            )
-        except exceptions.AuthenticationFailure as e:
-            return {
-                'status': 'failure',
-                'reason': str(e),
-            }
-
-        request.user = user
-
-        result = request.context.__json__()
-        result.update(status='okay')
-        return result
+        result = views.AuthController(self.request).login()
+        return self.respond(result)
 
     @view_config(request_method='POST', request_param='__formid__=register')
     def register(self):
-        request = self.request
-        form = self.register_form
-
-        try:
-            appstruct = form.validate(request.POST.items())
-        except deform.ValidationFailure as e:
-            return {
-                'status': 'failure',
-                'reason': messages.INVALID_FORM,
-                'error': e.error.asdict(),
-            }
-
-        try:
-            user = self.register_controller.create_user(
-                appstruct['email'],
-                appstruct['username'],
-                appstruct['password'],
-            )
-        except exceptions.RegistrationFailure as e:
-            return {
-                'status': 'failure',
-                'reason': str(e)
-            }
-
-        if request.registry.settings.get('horus.autologin', False):
-            self.db.flush()  # to get the id
-            request.user = user
-
-        result = request.context.__json__()
-        result.update(status='okay')
-        return result
+        result = views.RegisterController(self.request).register()
+        return self.respond(result)
 
     @view_config(request_method='POST', request_param='__formid__=activate')
     def activate(self):
         request = self.request
-        form = self.activate_form
+        schema = request.registry.getUtility(interfaces.IActivateSchema)
+        schema = schema().bind(request=self.request)
+        form = request.registry.getUtility(interfaces.IActivateForm)(schema)
 
         appstruct = None
+        result = None
         try:
             appstruct = form.validate(request.POST.items())
         except deform.ValidationFailure as e:
-            return {
-                'status': 'failure',
-                'reason': messages.INVALID_FORM,
-                'error': e.error.asdict(),
-            }
+            result = dict(form=e.render(), errors=e.error.children)
         else:
             code = appstruct['code']
             activation = self.Activation.get_by_code(request, code)
+            user = None
             if activation:
                 user = self.User.get_by_activation(request, activation)
 
-                if user:
-                    user.set_password(appstruct['Password'])
-                    self.db.add(user)
-                    self.db.delete(activation)
+            request.user = user
+            if user:
+                user.password = appstruct['password']
+                self.db.add(user)
+                self.db.delete(activation)
+                FlashMessage(request, self.Str.authenticated, kind='success')
             else:
                 form.error = colander.Invalid(
                     form.schema,
                     _('This activation code is not valid.')
                 )
-                return {
-                    'status': 'failure',
-                    'reason': messages.INVALID_FORM,
-                    'error': e.error.asdict(),
-                }
+                result = dict(form=form.render(), errors=[form.error])
 
-        result = request.context.__json__()
-        result.update(status='okay')
-        return result
+        return self.respond(result)
 
     @view_config(request_method='POST', request_param='__formid__=forgot')
     def forgot(self):
-        request = self.request
-        form = self.forgot_form
-
-        result = self.forgot_controller.forgot_password()
-        if isinstance(result, dict):
-            if 'errors' in result:
-                error = colander.Invalid(form.schema, messages.INVALID_FORM)
-                return {
-                    'status': 'failure',
-                    'reason': messages.INVALID_FORM,
-                    'error': error.asdict(),
-                }
-        result = request.context.__json__()
-        result.update(status='okay')
-        return result
+        result = views.ForgotPasswordController(self.request).forgot_password()
+        return self.respond(result)
 
     @view_config(name='logout')
     def logout(self):
-        request = self.request
-
-        self.auth_controller.logout()
-        request.user = None
-
-        result = request.context.__json__()
-        result.update(status='okay')
-        return result
+        result = views.AuthController(self.request).logout()
+        self.request.user = None
+        return self.respond(result)
 
     @view_config(name='embed.js', renderer='templates/embed.txt')
     def embed(self):
@@ -197,10 +74,52 @@ class AppController(views.BaseController):
         request.response.charset = 'UTF-8'
         return request.context.embed
 
+    def success(self):
+        result = self()
+        result.update(status='okay')
+        return result
+
+    def failure(self, reason):
+        result = self()
+        result.update(status='failure', reason=reason)
+        return result
+
+    def respond(self, result):
+        errors = isinstance(result, dict) and result.pop('errors', []) or []
+        if len(errors):
+            for e in errors:
+                if isinstance(e, colander.Invalid):
+                    msgs = e.messages()
+                else:
+                    msgs = [str(e)]
+                for m in msgs: FlashMessage(self.request, m, kind='error')
+            return self.failure(messages.INVALID_FORM)
+        else:
+            return self.success()
+
+    def pop_flash(self):
+        session = self.request.session
+
+        result = {
+            name[3:]: [msg for msg in session.pop_flash(name[3:])]
+            for name in session.keys()
+            if name.startswith('_f_')
+        }
+
+        # Deal with bag.web.pyramid.flash_msg style mesages
+        for msg in result.pop('', []):
+            q = getattr(msg, 'kind', '')
+            msg = getattr(msg, 'plain', msg)
+            result.setdefault(q, []).append(msg)
+
+        return result
+
     @view_config(renderer='json', xhr=True)
     def __call__(self):
-        request = self.request
-        return request.context
+        return {
+            'flash': self.pop_flash(),
+            'model': self.request.context,
+        }
 
     @view_config(renderer='h:templates/app.pt')
     def __html__(self):

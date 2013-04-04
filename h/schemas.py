@@ -3,7 +3,9 @@ import deform
 
 from horus.schemas import (
     CSRFSchema,
-    ForgotPasswordSchema
+    ForgotPasswordSchema,
+    unique_email,
+    unique_username,
 )
 
 from h import interfaces
@@ -24,11 +26,15 @@ class RegisterSchema(CSRFSchema):
         validator=colander.All(
             colander.Length(min=3, max=15),
             colander.Regex('(?i)^[A-Z0-9._]+$'),
-        )
+            unique_username,
+        ),
     )
     email = colander.SchemaNode(
         colander.String(),
-        validator=colander.Email()
+        validator=colander.All(
+            colander.Email(),
+            unique_email,
+        ),
     )
     password = colander.SchemaNode(
         colander.String(),

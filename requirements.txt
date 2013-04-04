@@ -17,12 +17,12 @@ argparse==1.2.1
 certifi==0.0.8
 chardet==1.0.1
 clik==0.3.1
-colander==0.9.8
+colander==1.0a2
 cryptacular==1.4.1
 deform==0.9.5
 deform-bootstrap==0.2.2
 hem==0.3.2
--e git+https://github.com/eventray/horus.git@0cd44871d20d10038e77080c894ea1a10298ecac#egg=horus-dev
+-e git+https://github.com/eventray/horus.git@1e12d98f8cfda1e44dc415a6e7676a0fffafe8d3#egg=horus-dev
 httplib2==0.7.4
 iso8601==0.1.4
 mock==0.8.0

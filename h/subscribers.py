@@ -1,5 +1,8 @@
 from pyramid.events import subscriber, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
+from pyramid.settings import asbool
+
+from h import events
 
 
 @subscriber(BeforeRender)
@@ -18,6 +21,17 @@ def csrf_token_header(event):
             except KeyError:
                 # Not a form content type
                 request.GET['csrf_token'] = csrf_token
+
+
+@subscriber(events.NewRegistrationEvent)
+@subscriber(events.RegistrationActivatedEvent)
+def registration(event):
+    request = event.request
+    settings = request.registry.settings
+    autologin = asbool(settings.get('horus.autologin', False))
+
+    if isinstance(event, events.RegistrationActivatedEvent) or autologin:
+        request.user = event.user
 
 
 def includeme(config):

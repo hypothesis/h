@@ -2,7 +2,6 @@ import json
 
 from horus import resources
 
-from pyramid.decorator import reify
 from pyramid.interfaces import ILocation
 
 from zope.interface import implementer
@@ -75,7 +74,7 @@ class AppFactory(BaseResource):
         env['app'] = "'%s'" % self.request.resource_url(self)
         return env
 
-    @reify
+    @property
     def persona(self):
         request = self.request
 
@@ -88,7 +87,7 @@ class AppFactory(BaseResource):
 
         return None
 
-    @reify
+    @property
     def personas(self):
         request = self.request
 
@@ -98,7 +97,7 @@ class AppFactory(BaseResource):
 
         return []
 
-    @reify
+    @property
     def consumer(self):
         settings = self.request.registry.settings
         key = settings['api.key']
@@ -106,7 +105,7 @@ class AppFactory(BaseResource):
         assert(consumer)
         return consumer
 
-    @reify
+    @property
     def token(self):
         message = {
             'consumerKey': str(self.consumer.key),
@@ -118,25 +117,18 @@ class AppFactory(BaseResource):
 
         return api.auth.encode_token(message, self.consumer.secret)
 
+    @property
+    def token_url(self):
+        return self.request.route_url('token')
+
     def __json__(self, request=None):
-        request = request or self.request
-        session = request.session
-        flash = {
-            name[3:]: session.pop_flash(name[3:])
-            for name in session.keys()
-            if name.startswith('_f_')
-        }
-        model = {
+        return {
             name: getattr(self, name)
-            for name in ['persona', 'personas', 'token']
+            for name in ['persona', 'personas', 'token', 'token_url']
         }
-        model.update(tokenUrl=request.route_url('token'))
-        return dict(flash=flash, model=model)
 
 
 def includeme(config):
-    config.include('horus.routes')
-
+    config.set_root_factory(RootFactory)
+    config.add_route('index', '/')
     RootFactory.app = AppFactory
-
-    config.add_route('index', '/', factory='h.resources.RootFactory')
