@@ -183,6 +183,8 @@ class WebassetsResourceRegistry(object):
 def includeme(config):
     config.include('pyramid_webassets')
 
+    asset_env = config.get_webassets_env()
+    config.add_static_view(asset_env.url, asset_env.directory)
     config.add_static_view('css', 'h:css')
     config.add_static_view('js', 'h:js')
     config.add_static_view('lib', 'h:lib')

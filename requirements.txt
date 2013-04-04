@@ -40,7 +40,7 @@ pyramid-deform==0.2a5
 pyramid-layout==0.6
 pyramid-mailer==0.9
 pyramid-tm==0.4
--e git+https://github.com/sontek/pyramid_webassets.git@7ee74fa419fddc357c03d64a05b2e896dabad781#egg=pyramid_webassets-dev
+-e git+https://github.com/tilgovi/pyramid_webassets.git@22d68031eadc417c88796b63bf72e87deb8abd6b#egg=pyramid_webassets-dev
 pystache==0.5.2
 pytest==2.2.4
 python-openid==2.2.5
