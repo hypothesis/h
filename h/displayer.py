@@ -103,7 +103,12 @@ class DisplayerTemplate(object):
         reply_threaded = []
         replies = sorted(self._replies, key=lambda reply : reply['created'])
         log.info('------------------')
-        log.info(replies)
+        for reply in replies :
+            log.info('created: '  + str(reply['created']))
+            log.info('id: ' + str(reply['id'])) 
+            log.info('thread: ' + str(reply['thread'])) 
+            log.info('text: ' + str(reply['text'])) 
+            log.info('------------------')
         log.info('------------------')
         for reply in replies :
             level = 1
