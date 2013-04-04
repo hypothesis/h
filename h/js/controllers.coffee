@@ -28,7 +28,6 @@ class App
       $location.search('id', null).replace()
       dynamicBucket = true
       annotator.showViewer()
-      heatmap.publish 'updated'
 
     heatmap.subscribe 'updated', =>
       elem = d3.select(heatmap.element[0])
