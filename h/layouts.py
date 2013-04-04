@@ -1,4 +1,3 @@
-from deform import Field
 from pyramid_layout.layout import layout_config
 
 
@@ -25,7 +24,7 @@ class BaseLayout(object):
 
     def get_widget_resources(self):
         requirements = self.get_widget_requirements()
-        return Field.default_resource_registry(requirements)
+        return self.request.registry.resources(requirements)
 
     @property
     def css_links(self):
