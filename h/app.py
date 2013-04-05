@@ -70,8 +70,16 @@ class AppController(views.BaseController):
     @view_config(name='embed.js', renderer='templates/embed.txt')
     def embed(self):
         request = self.request
+
+        # Unless we're debugging, serve the embed with a 10 minute cache
+        # to reduce server load since this is potentially fetched frequently.
+        if not request.registry.settings.get('pyramid.reload_templates'):
+            request.response.cache_control.max_age = 600
+
+        # Don't leave them guessing
         request.response.content_type = 'application/javascript'
         request.response.charset = 'UTF-8'
+
         return request.context.embed
 
     def success(self):
