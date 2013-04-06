@@ -15,77 +15,78 @@ def Coffee(*names, **kw):
 
 
 def SCSS(*names, **kw):
-    kw.setdefault('filters', 'cleancss,compass,cssrewrite')
+    kw.setdefault('filters', 'compass,cssrewrite,cleancss')
     return Bundle(*names, **kw)
+
 
 #
 # Included dependencies
 #
 
 # Annotator
-annotator = Uglify('h:lib/annotator.js', output='lib/annotator.min.js')
+annotator = Uglify('lib/annotator.js', output='lib/annotator.min.js')
 annotator_auth = Uglify(
-    'h:lib/annotator.auth.js',
+    'lib/annotator.auth.js',
     output='lib/annotator.auth.min.js'
 )
 annotator_bridge = Uglify(
-    Coffee('h:js/plugin/bridge.coffee', output='js/plugin/bridge.js')
+    Coffee('js/plugin/bridge.coffee', output='js/plugin/bridge.js')
 )
 annotator_permissions = Uglify(
-    'h:lib/annotator.permissions.js',
+    'lib/annotator.permissions.js',
     output='lib/annotator.permissions.min.js'
 )
 annotator_store = Uglify(
-    'h:lib/annotator.store.js',
+    'lib/annotator.store.js',
     output='lib/annotator.store.min.js'
 )
 annotator_threading = Uglify(
-    Coffee('h:js/plugin/threading.coffee', output='js/plugin/threading.js')
+    Coffee('js/plugin/threading.coffee', output='js/plugin/threading.js')
 )
 
 # Angular
-angular = Uglify('h:lib/angular.js', output='lib/angular.min.js')
+angular = Uglify('lib/angular.js', output='lib/angular.min.js')
 angular_bootstrap = Uglify(
-    'h:lib/angular-bootstrap.js',
+    'lib/angular-bootstrap.js',
     output='lib/angular-bootstrap.min.js'
 )
 angular_sanitize = Uglify(
-    'h:lib/angular-sanitize.js',
+    'lib/angular-sanitize.js',
     output='lib/angular-sanitize.min.js'
 )
 
 # jQuery
-jquery = Uglify('h:lib/jquery-1.8.3.js', output='lib/jquery-1.8.3.min.js')
+jquery = Uglify('lib/jquery-1.8.3.js', output='lib/jquery-1.8.3.min.js')
 jquery_mousewheel = Uglify(
-    'h:lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
+    'lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
 )
 
 # Polyfills
-raf = Uglify('h:lib/polyfills/raf.js', output='lib/polyfills/raf.js.min')
+raf = Uglify('lib/polyfills/raf.js', output='lib/polyfills/raf.js.min')
 
 # Others
-d3 = Uglify('h:lib/d3.js', output='lib/d3.min.js')
+d3 = Uglify('lib/d3.js', output='lib/d3.min.js')
 deform = Bundle(
     jquery,
     Uglify('deform:static/scripts/deform.js', output='lib/deform.min.js'),
 )
-jschannel = Uglify('h:lib/jschannel.js', output='lib/jschannel.min.js')
-jwz = Uglify('h:lib/jwz.js', output='lib/jwz.min.js')
+jschannel = Uglify('lib/jschannel.js', output='lib/jschannel.min.js')
+jwz = Uglify('lib/jwz.js', output='lib/jwz.min.js')
 pagedown = Uglify(
-    'h:lib/Markdown.Converter.js',
+    'lib/Markdown.Converter.js',
     output='lib/Markdown.Converter.min.js'
 )
 
 domTextFamily = Bundle(
-    Coffee('h:lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
-    Coffee('h:lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
-    Coffee('h:lib/text_match_engines.coffee', output='js/text_match_engines.js'),
-    Uglify('h:lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js')
+    Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
+    Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
+    Coffee('lib/text_match_engines.coffee', output='js/text_match_engines.js'),
+    Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js')
 )
 
 # Base and common SCSS
-base = ['h:css/base.scss']
-common = ['h:css/base.scss', 'h:css/common.scss']
+base = ['css/base.scss']
+common = ['css/base.scss', 'css/common.scss']
 
 
 # Main resource bundles
@@ -108,7 +109,7 @@ app = Bundle(
     raf,
     Uglify(
         *[
-            Coffee('h:/js/%s.coffee' % name,
+            Coffee('js/%s.coffee' % name,
                    output='js/%s.js' % name)
             for name in
             (
@@ -123,7 +124,7 @@ app = Bundle(
     ),
     Uglify(
         *[
-            Coffee('h:/js/plugin/%s.coffee' % name,
+            Coffee('js/plugin/%s.coffee' % name,
                    output='js/plugin/%s.js' % name)
             for name in
             (
@@ -132,11 +133,11 @@ app = Bundle(
         ],
         output='js/hypothesis.plugins.min.js'
     ),
-    SCSS('h:css/app.scss', depends=(base + common), output='css/app.css'),
+    SCSS('css/app.scss', depends=(base + common), output='css/app.css'),
 )
 
 
-site = SCSS('h:css/site.scss', depends=(base + common), output='css/site.css')
+site = SCSS('css/site.scss', depends=(base + common), output='css/site.css')
 
 
 # The inject is a script which loads the annotator in an iframe
@@ -150,10 +151,10 @@ inject = Bundle(
     annotator_bridge,
     domTextFamily,
     Uglify(
-        Coffee('h:js/inject/host.coffee', output='js/host.js'),
+        Coffee('js/inject/host.coffee', output='js/host.js'),
         output='js/hypothesis-host.min.js'
     ),
-    SCSS('h:css/inject.scss', depends=base, output='css/inject.css'),
+    SCSS('css/inject.scss', depends=base, output='css/inject.css'),
 )
 
 
@@ -185,10 +186,6 @@ def includeme(config):
 
     asset_env = config.get_webassets_env()
     config.add_static_view(asset_env.url, asset_env.directory)
-    config.add_static_view('css', 'h:css')
-    config.add_static_view('js', 'h:js')
-    config.add_static_view('lib', 'h:lib')
-    config.add_static_view('images', 'h:images')
 
     loader = PythonLoader(config.registry.settings.get('h.assets', __name__))
     bundles = loader.load_bundles()

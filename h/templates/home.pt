@@ -16,7 +16,7 @@
     <div id="home" class="content">
       <header>
         <img height="150px" width="150px"
-             src="${request.static_url('h:images/hypothelogo_square.png')}" />
+             src="${webassets(request, 'images/hypothelogo_square.png')[0]}" />
         <hgroup>
           <h1>Hypothes<span class="red">.</span>is</h1>
           <h2>The&#160;Internet, peer&#160;reviewed.</h2>
