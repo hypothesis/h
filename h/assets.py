@@ -186,7 +186,7 @@ def includeme(config):
 
     env = config.get_webassets_env()
     kw = {}
-    if env.url_expire:
+    if env.url_expire is not False:
         # Cache for one year (so-called "far future" Expires)
         kw['cache_max_age'] = 31536000
     config.add_static_view(env.url, env.directory, **kw)
