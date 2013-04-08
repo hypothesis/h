@@ -62,6 +62,9 @@ def create_app(settings):
         route_name='favicon'
     )
 
+    config.add_route('ok', '/ruok')
+    config.add_view(lambda request: 'imok', renderer='string', route_name='ok')
+
     # Include the base configuration for horus integration
     config.include('h.forms')
     config.include('h.models')
