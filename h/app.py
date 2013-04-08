@@ -122,7 +122,7 @@ class AppController(views.BaseController):
 
         return result
 
-    @view_config(renderer='json', xhr=True)
+    @view_config(http_cache=0, name='state', renderer='json', xhr=True)
     def __call__(self):
         return {
             'flash': self.pop_flash(),

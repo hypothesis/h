@@ -169,7 +169,7 @@ class App
     $scope.$on '$reset', => angular.extend $scope, @scope
 
     # Fetch the initial model from the server
-    $http.get '',
+    $http.get 'state',
       withCredentials: true
     .success (data) =>
       if data.model? then angular.extend $scope, data.model
