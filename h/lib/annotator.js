@@ -6,7 +6,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-19 03:37:56Z
+** Built at: 2013-04-09 22:10:46Z
 */
 
 (function() {
@@ -963,7 +963,7 @@
       };
       result = this.domMatcher.searchFuzzyWithContext(prefix, suffix, quote, expectedStart, expectedEnd, false, null, options);
       if (!result.matches.length) {
-        console.log("Fuzzy matching did not return any results. Giving up.");
+        console.log("Fuzzy matching did not return any results. Giving up on two-phase strategy.");
         return null;
       }
       match = result.matches[0];
@@ -994,7 +994,7 @@
       };
       result = this.domMatcher.searchFuzzy(quote, expectedStart, false, null, options);
       if (!result.matches.length) {
-        console.log("Fuzzy matching did not return any results. Giving up.");
+        console.log("Fuzzy matching did not return any results. Giving up on one-phase strategy.");
         return null;
       }
       match = result.matches[0];

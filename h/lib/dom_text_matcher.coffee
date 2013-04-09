@@ -197,6 +197,8 @@ class window.DomTextMatcher
         analysis.exact or # "Found text matches exactly to pattern"
         (analysis.comparison.errorLevel <= matchThreshold) # still acceptable
       mappings = @mapper.getMappingsForCharRange prefixEnd, suffixStart
+
+      # Collect the results
       match = {}
       for obj in [charRange, analysis, mappings]
         for k, v of obj
@@ -248,18 +250,22 @@ class window.DomTextMatcher
     textMatches = matcher.search @mapper.corpus, pattern, pos, options
     t2 = @timestamp()
 
-    # Collect the mappings
-
     matches = []
     for textMatch in textMatches
       do (textMatch) =>
+        # See how good a match we have        
         analysis = @analyzeMatch pattern, textMatch, fuzzyComparison
+        
+        # Collect the mappings        
         mappings = @mapper.getMappingsForCharRange textMatch.start,
             textMatch.end
+
+        # Collect the results
         match = {}
-        for obj in [charRange, analysis, mappings]
+        for obj in [textMatch, analysis, mappings]
           for k, v of obj
             match[k] = v
+        
         matches.push match
         null
     t3 = @timestamp()
