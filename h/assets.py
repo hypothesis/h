@@ -65,6 +65,9 @@ annotator_auth = Uglify(
 annotator_bridge = Uglify(
     Coffee('js/plugin/bridge.coffee', output='js/plugin/bridge.js')
 )
+annotator_discovery = Uglify(
+    Coffee('h:js/plugin/discovery.coffee', output='js/plugin/discovery.js')
+)
 annotator_permissions = Uglify(
     'lib/annotator.permissions.js',
     output='lib/annotator.permissions.min.js'
@@ -131,6 +134,7 @@ app = Bundle(
     angular_sanitize,
     annotator,
     annotator_auth,
+    annotator_discovery,
     annotator_bridge,
     annotator_permissions,
     annotator_store,
@@ -161,6 +165,7 @@ app = Bundle(
                    output='js/plugin/%s.js' % name)
             for name in
             (
+                'discovery',
                 'heatmap',
             )
         ],

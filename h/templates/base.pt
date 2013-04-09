@@ -33,7 +33,7 @@
         s.parentNode.insertBefore(wf, s);
       })();
     </script>
-    <tal:block metal:define-slot="embed" />
+    <tal:block metal:define-slot="head" />
   </head>
   <body metal:define-slot="body">
   </body>
