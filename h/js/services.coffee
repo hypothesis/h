@@ -1,9 +1,10 @@
 class Hypothesis extends Annotator
-  # Events - overridden for good measure. Unused in the angular Annotator.
-  events: {}
+  events:
+    serviceDiscovery: 'serviceDiscovery'
 
   # Plugin configuration
   options:
+    Discovery: {}
     Heatmap: {}
     Permissions:
       permissions:
@@ -169,13 +170,13 @@ class Hypothesis extends Annotator
         @provider.call
           method: 'getHref'
           success: (href) =>
-            this.addPlugin 'Store',
+            options = angular.extend {}, (@options.Store or {}),
               annotationData:
                 uri: href
               loadFromSearch:
                 limit: 1000
                 uri: href
-              prefix: '/api'
+            this.addPlugin 'Store', options
             patch_update this.plugins.Store
             console.log "Loaded annotions for '" + href + "'."
             for href in this.getSynonymURLs href
@@ -341,6 +342,8 @@ class Hypothesis extends Annotator
     @provider.notify method: 'hideFrame'
     @element.find('#toolbar').removeClass('shown')
       .find('.tri').attr('draggable', false)
+
+  serviceDiscovery: (options) => angular.extend @options, Store: options
 
 
 class DraftProvider
