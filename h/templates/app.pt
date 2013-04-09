@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
+  <head metal:fill-slot="head" tal:omit-tag="">
+    <link rel="service"
+          type="application/annotatorsvc+json"
+          href="${request.route_url('api', subpath='')}" />
+  </head>
   <body ng-app="h"
         ng-controller="AppController"
         class="ng-cloak"
