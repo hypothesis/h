@@ -14,7 +14,7 @@
     <script type="text/javascript"
             tal:attributes="src src"
             tal:repeat="src layout.js_links | []" ></script>
-    <script type="text/javascript">
+    <script type="text/javascript" defer="defer">
       WebFontConfig = {
         google: {
           families: [
