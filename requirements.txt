@@ -15,6 +15,7 @@ Werkzeug==0.8.3
 -e git+https://github.com/hypothesis/annotator-store.git@20c941b62e2a97b4cb0ab169b5d399adf636f3d2#egg=annotator-dev
 anykeystore==0.2
 argparse==1.2.1
+-e git+https://code.google.com/r/sontek-bag.git@a853e431bd4d2a3df4789437f1910504dee1d7a9#egg=bag-dev
 certifi==0.0.8
 chardet==1.0.1
 clik==0.3.1
