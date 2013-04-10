@@ -18,7 +18,7 @@ def includeme(config):
 
         [app:h]
         api.key: api.key: 00000000-0000-0000-0000-000000000000
-        api.url: https://example.com/api/
+        api.url: https://example.com/api
 
     """
 
