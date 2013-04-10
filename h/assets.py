@@ -73,7 +73,7 @@ annotator_bridge = Uglify(
     Coffee('js/plugin/bridge.coffee', output='js/plugin/bridge.js')
 )
 annotator_discovery = Uglify(
-    Coffee('h:js/plugin/discovery.coffee', output='js/plugin/discovery.js')
+    Coffee('js/plugin/discovery.coffee', output='js/plugin/discovery.js')
 )
 annotator_permissions = Uglify(
     'lib/annotator.permissions.js',
