@@ -226,9 +226,10 @@ class Annotation(BaseResource, dict):
 
     def _nestlist(self, part, childTable):
         outlist = []
+        if part is None: return outlist
         part = sorted(part, key=lambda reply: reply['created'], reverse=True)
         for reply in part:
-            children = self._nestlist(childTable[reply['id']], childTable)
+            children = self._nestlist(childTable.get(reply['id']), childTable)
             del reply['created']
             reply['number_of_replies'] = len(children)
             outlist.append(reply)
@@ -262,9 +263,6 @@ class Annotation(BaseResource, dict):
         replies = sorted(replies, key=lambda reply: reply['created'])
 
         for reply in replies:
-            # Add a new container for this.
-            childTable.setdefault(reply['id'], [])
-
             # Add this to its parent.
             parent = reply['thread'].split('/')[-1]
             pointer = childTable.setdefault(parent, [])
@@ -277,7 +275,7 @@ class Annotation(BaseResource, dict):
             })
 
         # Create nested list form
-        repl = self._nestlist(childTable[self['id']], childTable)
+        repl = self._nestlist(childTable.get(self['id']), childTable)
         return repl
 
 
