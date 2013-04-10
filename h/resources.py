@@ -16,7 +16,7 @@ from zope.interface import implementer
 
 import BeautifulSoup
 
-from h import api, models
+from h import interfaces
 
 
 import logging
@@ -75,9 +75,13 @@ class RootFactory(InnerResource, resources.RootFactory):
     pass
 
 
-class AppFactory(BaseResource):
+class AppFactory(BaseResource, dict):
     def __init__(self, request):
         super(AppFactory, self).__init__(request)
+        self.update(
+            persona=self.persona,
+            personas=self.personas,
+        )
 
     @property
     def embed(self):
@@ -111,34 +115,10 @@ class AppFactory(BaseResource):
 
         return []
 
-    @property
-    def consumer(self):
-        settings = self.request.registry.settings
-        key = settings['api.key']
-        consumer = models.Consumer.get_by_key(key)
-        assert(consumer)
-        return consumer
-
-    @property
-    def token(self):
-        message = {
-            'consumerKey': str(self.consumer.key),
-            'ttl': self.consumer.ttl,
-        }
-
-        if self.persona:
-            message['userId'] = 'acct:%(username)s@%(provider)s' % self.persona
-
-        return api.auth.encode_token(message, self.consumer.secret)
-
-    @property
-    def token_url(self):
-        return self.request.route_url('token')
-
     def __json__(self, request=None):
         return {
             name: getattr(self, name)
-            for name in ['persona', 'personas', 'token', 'token_url']
+            for name in ['persona', 'personas']
         }
 
 
@@ -254,12 +234,17 @@ class Annotation(BaseResource, dict):
 
     @property
     def replies(self):
+        request = self.request
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)()
+
         childTable = {}
         if 'thread' in self:
             thread = '/'.join([self['thread'], self['id']])
         else:
             thread = self['id']
-        replies = self.request.store.search(thread=thread)
+
+        replies = store.search(thread=thread)
         replies = sorted(replies, key=lambda reply: reply['created'])
 
         for reply in replies:
@@ -282,10 +267,13 @@ class Annotation(BaseResource, dict):
 class AnnotationFactory(BaseResource):
     def __getitem__(self, key):
         request = self.request
-        data = request.store.read(key)
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)()
+
         annotation = Annotation(request)
         annotation.__parent__ = self
-        annotation.update(data)
+        annotation.update(store.read(key))
+
         return annotation
 
 

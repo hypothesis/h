@@ -4,14 +4,15 @@ from annotator.annotation import Annotation
 from flask import Flask, g
 
 from pyramid.request import Request
+from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
-from h import models
+from h import interfaces, models
 
 
 class Store(object):
-    def __init__(self, request):
-        self.request = request
+    def __init__(self):
+        self.request = get_current_request()
 
     def create(self):
         raise NotImplementedError()
@@ -91,5 +92,5 @@ def includeme(config):
 
     config.add_view(api_v1, route_name='api')
 
-    # Add the store utility class to the registry
-    config.set_request_property(Store, 'store', reify=True)
+    if not config.registry.queryUtility(interfaces.IStoreClass):
+        config.registry.registerUtility(Store, interfaces.IStoreClass)

@@ -142,6 +142,9 @@ def includeme(config):
     if not registry.queryUtility(interfaces.IUserClass):
         registry.registerUtility(User, interfaces.IUserClass)
 
+    if not registry.queryUtility(interfaces.IConsumerClass):
+        registry.registerUtility(Consumer, interfaces.IConsumerClass)
+
     if not registry.queryUtility(interfaces.IActivationClass):
         registry.registerUtility(Activation, interfaces.IActivationClass)
 

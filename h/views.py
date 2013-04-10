@@ -9,8 +9,6 @@ __all__ = [
 from pyramid.view import view_config, view_defaults
 from pyramid.traversal import find_resource
 
-import logging
-
 from horus.views import (
     AuthController,
     BaseController,
@@ -18,8 +16,18 @@ from horus.views import (
     RegisterController
 )
 
+from h import interfaces
 
+import logging
 log = logging.getLogger(__name__)
+
+
+class BaseController(BaseController):
+    def __init__(self, request):
+        super(BaseController, self).__init__(request)
+        getUtility = request.registry.getUtility
+        self.Consumer = getUtility(interfaces.IConsumerClass)
+        self.Store = getUtility(interfaces.IStoreClass)
 
 
 @view_config(layout='site', renderer='templates/home.pt', route_name='index')

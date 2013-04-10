@@ -5,10 +5,30 @@ import urlparse
 from annotator import auth
 from pyramid.view import view_config
 
+from h import views
+
 
 @view_config(renderer='string', request_method='GET', route_name='token')
-def token(context, request):
-    return context.token
+class TokenController(views.BaseController):
+    def __call__(self):
+        request = self.request
+
+        consumer = self.Consumer.get_by_key(self.settings['api.key'])
+        assert(consumer)
+
+        message = {
+            'consumerKey': str(consumer.key),
+            'ttl': consumer.ttl,
+        }
+
+        if request.user:
+            parts = {
+                'username': request.user.username,
+                'provider': request.host
+            }
+            message['userId'] = 'acct:%(username)s@%(provider)s' % parts
+
+        return auth.encode_token(message, consumer.secret)
 
 
 def includeme(config):

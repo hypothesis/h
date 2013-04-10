@@ -5,7 +5,7 @@ from bag.web.pyramid.flash_msg import FlashMessage
 
 from pyramid.view import view_config, view_defaults
 
-from h import interfaces, messages, views
+from h import api, interfaces, messages, views
 from h.messages import _
 
 
@@ -124,9 +124,15 @@ class AppController(views.BaseController):
 
     @view_config(http_cache=0, name='state', renderer='json', xhr=True)
     def __call__(self):
+        model = {
+            'token': api.TokenController(self.request)(),
+            'token_url': self.request.route_url('token'),
+        }
+        model.update(self.request.context)
+
         return {
             'flash': self.pop_flash(),
-            'model': self.request.context,
+            'model': model,
         }
 
     @view_config(renderer='h:templates/app.pt')
