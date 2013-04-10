@@ -56,7 +56,7 @@ def SCSS(*names, **kw):
 
 
 def CSS(*names, **kw):
-    kw.setdefault('filters', 'cleancss,cssrewrite')
+    kw.setdefault('filters', 'cssrewrite,cssversion,cleancss')
     return Bundle(*names, **kw)
 
 #
