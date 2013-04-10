@@ -268,6 +268,11 @@ class Annotation
       if id?
         $scope.thread = threading.getContainer id
 
+        # Check if this is a brand new annotation
+        annotation = $scope.thread.message?.annotation
+        if annotation? and drafts.contains annotation
+          $scope.editing = true
+
     $scope.$watch 'shared', (newValue) ->
       if newValue and newValue is true
         $timeout -> $element.find('input').focus()
@@ -276,10 +281,6 @@ class Annotation
         $scope.shared_link = window.location.protocol + '//' + 
           window.location.host + '/a/' + $scope.model.$modelValue.id
         $scope.shared = false
-        # Check if this is a brand new annotation
-        annotation = $scope.thread.message?.annotation
-        if annotation? and drafts.contains annotation
-          $scope.editing = true
 
     $scope.share = ->
       $scope.shared = not $scope.shared
