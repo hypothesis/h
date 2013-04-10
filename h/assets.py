@@ -202,8 +202,8 @@ inject = Bundle(
     annotator_bridge,
     domTextFamily,
     Uglify(
-        Coffee('js/inject/host.coffee', output='js/host.js'),
-        output='js/hypothesis-host.min.js'
+        Coffee('js/host.coffee', output='js/host.js'),
+        output='js/host.min.js'
     ),
     SCSS('css/inject.scss', depends=base, output='css/inject.css'),
 )
