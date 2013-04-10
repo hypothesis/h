@@ -10,7 +10,7 @@ from webassets.filter.cssrewrite.base import CSSUrlRewriter
 from webassets.loaders import PythonLoader
 
 import logging
-log = logging.getLogger('assets')
+log = logging.getLogger(__name__)
 
 
 class CSSVersion(CSSUrlRewriter):
