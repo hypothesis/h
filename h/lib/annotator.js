@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-383514e
+** Annotator 1.2.6-dev-d9ed1c1
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-04-09 22:10:46Z
+** Built at: 2013-04-10 07:08:00Z
 */
 
 (function() {
@@ -922,7 +922,7 @@
 
     Annotator.prototype.findAnchorFromPositionSelector = function(target) {
       var browserRange, content, currentQuote, mappings, normalizedRange, savedQuote, selector;
-      selector = this.findSelector(target.selector, "TextPosition");
+      selector = this.findSelector(target.selector, "TextPositionSelector");
       if (selector == null) return null;
       savedQuote = this.getQuoteForTarget(target);
       if (savedQuote != null) {
