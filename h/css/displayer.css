@@ -546,6 +546,7 @@ span.errorMsg {
   height: 0.8em;
   width: 0.8em;
   position: absolute;
+  /*top: .4em;*/
   left: -0.4em;
   outline: 1px dotted #aaa;
   background-image: url("../images/minus_1.png");
@@ -598,7 +599,8 @@ span.errorMsg {
 
 /* line 388, common.scss */
 .hyp-content {
-  margin-bottom: 0.5em; }
+  /*margin-bottom: 0.5em; }*/
+}
 
 /* line 391, common.scss */
 .bottombar {
@@ -629,37 +631,42 @@ span.errorMsg {
   -o-transition: "box-shadow,z-index" 0.5s ease;
   transition: "box-shadow,z-index" 0.5s ease; }
   /* line 402, common.scss */
-  .hyp-detail > .topbar > .annotator-controls {
+.hyp-detail > .topbar > .annotator-controls {
     position: absolute;
     right: 0;
     z-index: 1; }
   /* line 408, common.scss */
-  .hyp-detail > .topbar > .annotator-controls {
+ .hyp-detail > .topbar > .annotator-controls {
     -webkit-transition: opacity 0.25s ease-in-out;
     -moz-transition: opacity 0.25s ease-in-out;
     -o-transition: opacity 0.25s ease-in-out;
     transition: opacity 0.25s ease-in-out;
     opacity: 0; }
   /* line 413, common.scss */
-  .hyp-detail.hyp-hover {
+.hyp-detail.hyp-hover {
     -webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
     -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
     box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
     z-index: 10; }
     /* line 416, common.scss */
-    .hyp-detail.hyp-hover > .topbar > .annotator-controls {
+.hyp-detail.hyp-hover > .topbar > .annotator-controls {
       opacity: 1; }
   /* line 423, common.scss */
-  .hyp-detail.hyp-collapsed .hyp-content {
+.hyp-detail .hyp-collapsed .hyp-content {
     overflow: hidden;
     text-overflow: ellipsis;
     -o-text-overflow: ellipsis;
     white-space: nowrap;
     font-style: italic;
-    margin-top: 0; }
+    margin-top: 0;
+    margin-bottom: 0; }
   /* line 431, common.scss */
-  .hyp-detail.hyp-collapsed > .hyp-thread {
-    overflow: hidden; }
+.hyp-detail .hyp-collapsed .hyp-thread {
+    overflow: hidden;
+    display: none; }
+
+.hyp-collapsed .hyp-threadexp {
+    background-image: url("../images/plus_1.png");}
 
 /* line 437, common.scss */
 .hyp-paper > .hyp-threadexp {
@@ -850,7 +857,9 @@ body {
       margin-bottom: 0;
       padding-left: 1em; }
     /* line 123, site.css.scss */
-    #stream .tile .hyp-excerpt {
+    #stream .tile .hyp-inner {
+      padding-right: 0em; }
+	#stream .tile .hyp-excerpt {
       margin-right: 1em;
       margin-bottom: 0; }
 
@@ -940,6 +949,9 @@ body {
 	display: none;
 	float: left;}
 
+.small {
+	font-size: .8em;
+}
 
 .pull-right {
   float: right;
