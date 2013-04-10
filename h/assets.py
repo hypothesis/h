@@ -185,7 +185,7 @@ display = Bundle(
     angular,
     jquery,
     Coffee('js/displayer.coffee', output='js/displayer.js'),
-    CSS('css/displayer.css'),
+    CSS('css/displayer.css', output='js/displayer.min.css'),
 )
 
 site = SCSS('css/site.scss', depends=(base + common), output='css/site.css')
