@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-383514e
+** Annotator 1.2.6-dev-939cdee
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-04-09 22:05:51Z
+** Built at: 2013-04-10 07:38:36Z
 */
 
 (function() {
@@ -120,7 +120,7 @@
 
     Store.prototype._onLoadAnnotations = function(data) {
       if (data == null) data = [];
-      this.annotations = data;
+      this.annotations = this.annotations.concat(data);
       return this.annotator.loadAnnotations(data.slice());
     };
 
