@@ -122,7 +122,7 @@ class AppController(views.BaseController):
 
         return result
 
-    @view_config(http_cache=0, name='state', renderer='json', xhr=True)
+    @view_config(http_cache=0, name='state', renderer='json')
     def __call__(self):
         model = {
             'token': api.TokenController(self.request)(),
