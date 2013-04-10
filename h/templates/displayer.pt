@@ -40,7 +40,7 @@
               <span tal:condition="readable_user != 'Annotation deleted.'"> annotated:</span>
             </div>
             <div class="control">
-              <a class="goto" href="">
+              <a class="goto" href="${annotation.uri}">
                 To Source
               </a>
             </div>
