@@ -12,6 +12,7 @@ from webassets.loaders import PythonLoader
 import logging
 log = logging.getLogger('assets')
 
+
 class CSSVersion(CSSUrlRewriter):
     """Source filter to resolves relative urls in CSS files using the resolver.
 
