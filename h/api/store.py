@@ -3,9 +3,34 @@ from annotator.annotation import Annotation
 
 from flask import Flask, g
 
+from pyramid.request import Request
 from pyramid.wsgi import wsgiapp2
 
 from h import models
+
+
+class Store(object):
+    def __init__(self, request):
+        self.request = request
+
+    def create(self):
+        raise NotImplementedError()
+
+    def read(self, key):
+        url = self.request.route_url('api', subpath='annotations/%s' % key)
+        subreq = Request.blank(url)
+        return self.request.invoke_subrequest(subreq).json
+
+    def update(self, key, data):
+        raise NotImplementedError()
+
+    def delete(self, key):
+        raise NotImplementedError()
+
+    def search(self, **query):
+        url = self.request.route_url('api', subpath='search', _query=query)
+        subreq = Request.blank(url)
+        return self.request.invoke_subrequest(subreq).json['rows']
 
 
 def anonymize_deletes(annotation):
@@ -65,3 +90,6 @@ def includeme(config):
     api_v1 = wsgiapp2(app)
 
     config.add_view(api_v1, route_name='api')
+
+    # Add the store utility class to the registry
+    config.set_request_property(Store, 'store', reify=True)

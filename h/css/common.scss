@@ -666,7 +666,23 @@ blockquote {
   }
 }
 
+.share-dialog {
+   display: none;
+  .icon-input {
+    position: relative;
+    .share-text {
+      width: 100%;
+    }
+  }
+}
 
+.clipboard-icon {
+  text-decoration: none;
+  cursor: pointer;
+  color: black;
+  opacity: .5;
+  display: inline;
+}
 //SUMMARY////////////////////////////////
 //This is specific to the summary view.
 .summary {

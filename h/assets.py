@@ -9,6 +9,9 @@ from webassets.filter import register_filter
 from webassets.filter.cssrewrite.base import CSSUrlRewriter
 from webassets.loaders import PythonLoader
 
+import logging
+log = logging.getLogger('assets')
+
 
 class CSSVersion(CSSUrlRewriter):
     """Source filter to resolves relative urls in CSS files using the resolver.
@@ -51,6 +54,10 @@ def SCSS(*names, **kw):
     kw.setdefault('filters', 'compass,cssrewrite,cssversion,cleancss')
     return Bundle(*names, **kw)
 
+
+def CSS(*names, **kw):
+    kw.setdefault('filters', 'cssrewrite,cssversion,cleancss')
+    return Bundle(*names, **kw)
 
 #
 # Included dependencies
@@ -174,6 +181,12 @@ app = Bundle(
     SCSS('css/app.scss', depends=(base + common), output='css/app.css'),
 )
 
+display = Bundle(
+    angular,
+    jquery,
+    Coffee('js/displayer.coffee', output='js/displayer.js'),
+    CSS('css/displayer.css'),
+)
 
 site = SCSS('css/site.scss', depends=(base + common), output='css/site.css')
 
@@ -205,6 +218,7 @@ class WebassetsResourceRegistry(object):
 
         urls = []
         for name in zip(*requirements)[0]:
+            log.info('name: ' + str(name))
             if name in self.env:
                 bundle = self.env[name]
                 urls.extend(bundle.urls())
@@ -232,6 +246,7 @@ def includeme(config):
     loader = PythonLoader(config.registry.settings.get('h.assets', __name__))
     bundles = loader.load_bundles()
     for name in bundles:
+        log.info('name: ' + str(name))
         config.add_webasset(name, bundles[name])
 
     from deform.field import Field

@@ -1,4 +1,12 @@
 import json
+import urllib2
+
+from datetime import datetime
+from math import floor
+from urlparse import urlparse
+
+from dateutil.parser import parse
+from dateutil.tz import tzutc
 
 from horus import resources
 
@@ -6,7 +14,13 @@ from pyramid.interfaces import ILocation
 
 from zope.interface import implementer
 
+import BeautifulSoup
+
 from h import api, models
+
+
+import logging
+log = logging.getLogger(__name__)
 
 
 @implementer(ILocation)
@@ -128,7 +142,157 @@ class AppFactory(BaseResource):
         }
 
 
+class Annotation(BaseResource, dict):
+    def _url_values(self):
+        # Getting the title of the uri.
+        # hdrs magic is needed because urllib2 is forbidden to use with default
+        # settings.
+        agent = \
+            "Mozilla/5.0 (X11; U; Linux i686) " \
+            "Gecko/20071127 Firefox/2.0.0.11"
+        headers = {'User-Agent': agent}
+        req = urllib2.Request(self['uri'], headers=headers)
+        soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req))
+        title = soup.title.string if soup.title else self['uri']
+
+        # Getting the domain from the uri, and the same url magic for the
+        # domain title.
+        parsed_uri = urlparse(self['uri'])
+        domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
+        domain_stripped = parsed_uri[1]
+        if parsed_uri[1].lower().startswith('www.'):
+            domain_stripped = domain_stripped[4:]
+        req2 = urllib2.Request(domain, headers=headers)
+        soup2 = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req2))
+        domain_title = soup2.title.string if soup2.title else domain
+
+        # Favicon
+        favlink = soup.find("link", rel="shortcut icon")
+        # Check for local/global link.
+        if favlink:
+            href = favlink['href']
+            if href.startswith('//') or href.startswith('http'):
+                icon_link = href
+            else:
+                icon_link = domain + href
+        else:
+            icon_link = ''
+
+        return {
+            'title': title,
+            'domain': domain,
+            'domain_title': domain_title,
+            'domain_stripped': domain_stripped,
+            'favicon_link': icon_link
+        }
+
+    def _fuzzyTime(self, date):
+        if not date: return ''
+        converted = parse(date)
+        delta = datetime.utcnow().replace(tzinfo=tzutc()) - converted
+        delta = round(delta.total_seconds())
+
+        minute = 60
+        hour = minute * 60
+        day = hour * 24
+        week = day * 7
+        month = day * 30
+
+        if (delta < 30):
+            fuzzy = 'moments ago'
+        elif (delta < minute):
+            fuzzy = str(int(delta)) + ' seconds ago'
+        elif (delta < 2 * minute):
+            fuzzy = 'a minute ago'
+        elif (delta < hour):
+            fuzzy = str(int(floor(delta / minute))) + ' minutes ago'
+        elif (floor(delta / hour) == 1):
+            fuzzy = '1 hour ago'
+        elif (delta < day):
+            fuzzy = str(int(floor(delta / hour))) + ' hours ago'
+        elif (delta < day * 2):
+            fuzzy = 'yesterday'
+        elif (delta < month):
+            fuzzy = str(int(round(delta / day))) + ' days ago'
+        else:
+            fuzzy = str(converted)
+
+        return fuzzy
+
+    def _userName(self, user):
+        if not user or user == '': return 'Annotation deleted.'
+        else:
+            return user.split(':')[1].split('@')[0]
+
+    def _nestlist(self, part, childTable):
+        outlist = []
+        part = sorted(part, key=lambda reply: reply['created'], reverse=True)
+        for reply in part:
+            children = self._nestlist(childTable[reply['id']], childTable)
+            del reply['created']
+            reply['number_of_replies'] = len(children)
+            outlist.append(reply)
+            if len(children) > 0: outlist.append(children)
+        return outlist
+
+    @property
+    def quote(self):
+        if not 'target' in self: return ''
+        quote = ''
+        for target in self['target']:
+            for selector in target['selector']:
+                if selector['type'] == 'TextQuoteSelector':
+                    quote = quote + selector['exact'] + ' '
+
+        return quote
+
+    @property
+    def references(self):
+        thread = self.get('thread')
+        return thread.split('/') if thread else []
+
+    @property
+    def replies(self):
+        childTable = {}
+        if 'thread' in self:
+            thread = '/'.join([self['thread'], self['id']])
+        else:
+            thread = self['id']
+        replies = self.request.store.search(thread=thread)
+        replies = sorted(replies, key=lambda reply: reply['created'])
+
+        for reply in replies:
+            # Add a new container for this.
+            childTable.setdefault(reply['id'], [])
+
+            # Add this to its parent.
+            parent = reply['thread'].split('/')[-1]
+            pointer = childTable.setdefault(parent, [])
+            pointer.append({
+                'id': reply['id'],
+                'created': reply['created'],
+                'text': reply['text'],
+                'fuzzy_date': self._fuzzyTime(reply['updated']),
+                'readable_user': self._userName(reply['user']),
+            })
+
+        # Create nested list form
+        repl = self._nestlist(childTable[self['id']], childTable)
+        return repl
+
+
+class AnnotationFactory(BaseResource):
+    def __getitem__(self, key):
+        request = self.request
+        data = request.store.read(key)
+        annotation = Annotation(request)
+        annotation.__parent__ = self
+        annotation.update(data)
+        return annotation
+
+
 def includeme(config):
     config.set_root_factory(RootFactory)
     config.add_route('index', '/')
     RootFactory.app = AppFactory
+    RootFactory.a = AnnotationFactory
