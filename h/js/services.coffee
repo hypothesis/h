@@ -312,7 +312,12 @@ class Hypothesis extends Annotator
   showEditor: (annotation) =>
     @element.injector().invoke [
       '$location', '$rootScope', '$route'
-      ($location, $rootScope, $route) ->
+      ($location, $rootScope, $route) =>
+        unless this.plugins.Auth? and this.plugins.Auth.haveValidToken()
+          $route.current.locals.$scope.$apply ->
+            $route.current.locals.$scope.$emit 'showAuth', true
+          return
+
         # Set the path
         search =
           id: annotation.id
