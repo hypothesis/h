@@ -79,7 +79,7 @@ privacy = ->
           permissions.read = ['group:__world__']
       else
         read = permissions.read or []
-        read = (role for role in read when role is not 'group:__world__')
+        read = (role for role in read when role isnt 'group:__world__')
         permissions.read = read
 
       permissions
