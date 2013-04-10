@@ -5,14 +5,11 @@ __all__ = [
     'ForgotPasswordController',
     'RegisterController',
 ]
-from pyramid.traversal import find_resource
-from h.displayer import DisplayerTemplate as Displayer
-from h import models
 
-from annotator.annotation import Annotation
+from pyramid.view import view_config, view_defaults
+from pyramid.traversal import find_resource
 
 import logging
-log = logging.getLogger(__name__)
 
 from horus.views import (
     AuthController,
@@ -22,39 +19,52 @@ from horus.views import (
 )
 
 
+log = logging.getLogger(__name__)
+
+
 @view_config(layout='site', renderer='templates/home.pt', route_name='index')
 def home(request):
     return find_resource(request.context, '/app').embed
 
-@view_config(route_name='displayer',
-             renderer='h:templates/displayer.pt',
-             layout='lay_displayer')
-def displayer(context, request):
-    #Obtain user to authorize from context token.
-    if context.token:
-        request.headers['x-annotator-auth-token'] = context.token
-        user = auth.Authenticator(models.Consumer.get_by_key).request_user(request)
-    else: user = None
-        
-    uid = request.matchdict['uid'] 
-    annotation = Annotation.fetch_auth(user, uid)
-    if not annotation : 
-        raise httpexceptions.HTTPNotFound()
 
-    if 'Content-Type' in request.headers and request.headers['Content-Type'].lower() == 'application/json' :
-        res = json.dumps(annotation, indent=None if request.is_xhr else 2)
-        return Response(res, content_type = 'application/json')
-    else :
-        try:
-            #Load original quote for replies
-            if 'thread' in annotation :
-                original = Annotation.fetch_auth(user, annotation['thread'].split('/')[0])
-            else: original = None
-            replies = Annotation.search_auth(user, thread = annotation['id'])
-            return Displayer(annotation, replies, original).generate_dict()        
-        except e:
-            log.info(str(e))
-            raise httpexceptions.HTTPInternalServerError()
+@view_defaults(context='h.resources.Annotation', layout='lay_displayer')
+class Annotation(BaseController):
+    @view_config(accept='text/html', renderer='templates/displayer.pt')
+    def __html__(self):
+        request = self.request
+        annotation = request.context
+
+        d = {'annotation': annotation}
+        if annotation.references:
+            thread_root = annotation.references[0]
+            root_annotation = annotation.__parent__[thread_root]
+            d['quote'] = root_annotation.quote
+        else:
+            d['quote'] = annotation.quote
+        d.update(annotation._url_values())
+        d['fuzzy_date'] = annotation._fuzzyTime(annotation['updated'])
+        d['readable_user'] = annotation._userName(annotation['user'])
+        d['replies'] = annotation.replies
+
+        #Count nested reply numbers
+        replies = 0
+        for reply in annotation.replies:
+            if not isinstance(reply, list):
+                replies = replies + reply['number_of_replies'] + 1
+        d['number_of_replies'] = replies
+
+        for key, value in d.items():
+            log.debug(key + ': ' + str(value))
+
+        return d
+
+    @view_config(accept='application/json', renderer='json')
+    def __call__(self):
+        request = self.request
+        request.response.content_type = 'application/json'
+        request.response.charset = 'UTF-8'
+        return request.context
+
 
 def includeme(config):
     config.add_view(

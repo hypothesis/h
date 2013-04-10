@@ -546,7 +546,6 @@ span.errorMsg {
   height: 0.8em;
   width: 0.8em;
   position: absolute;
-  top: .4em;
   left: -0.4em;
   outline: 1px dotted #aaa;
   background-image: url("../images/minus_1.png");

@@ -44,9 +44,8 @@ class AppLayout(BaseLayout):
 class SiteLayout(BaseLayout):
     requirements = (('site', None),)
 
-@layout_config(context='h.resources.RootFactory',
-               template='h:templates/base.pt',
-               name='lay_displayer')
+
+@layout_config(name='lay_displayer', template='h:templates/base.pt')
 class DisplayerLayout(BaseLayout):
     requirements = (('display', None),)
 

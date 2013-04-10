@@ -29,12 +29,9 @@
            class="dropdown privacy pull-right"
            name="privacy" />
 
-  <div class="share-dialog" data-ng-show="!editing">
-    <div class="icon-input">
-      <input class="share-text" type="text" value="{{shared_link}}" readonly/>
-    </div>
-  </div>
-
+  <!-- Deletion notice -->
+  <span ng-show="!editing && model.$viewValue.deleted"
+        >Annotation deleted.</span>
 
   <!-- Preface -->
   <header ng-switch="editing && action">
@@ -47,7 +44,6 @@
     </strong>
   </header>
 
-      <input class="share-text" type="text" ng-model="shared_link" readonly/>
   <!-- Prompt -->
   <!-- TODO: replace with placeholder on markdown elements? -->
   <div ng-show="model.$viewValue.deleted && !editing">
@@ -63,7 +59,6 @@
             class="body"
             name="text"
             required="" />
-
 
   <!-- Bottom controls -->
   <div class="buttonbar" ng-show="editing">
@@ -83,10 +78,21 @@
     </div>
   </div>
 
+  <div data-ng-bind-html="model.$viewValue.body"
+       data-ng-hide="editing"
+       class="body" />
+
   <!-- Editing preview -->
   <div ng-show="previewText" class="preview">
     <h4>Preview</h4>
     <div ng-bind-html="previewText" class="body" />
+  </div>
+
+  <!-- Share dialog -->
+  <div class="share-dialog" data-ng-show="!editing">
+    <div class="icon-input">
+      <input class="share-text" type="text" ng-model="shared_link" readonly/>
+    </div>
   </div>
 
   <!-- Bottom control strip -->

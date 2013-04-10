@@ -184,7 +184,8 @@ app = Bundle(
 display = Bundle(
     angular,
     jquery,
-    CSS('h:css/displayer.css', output='css/displayer.css')
+    Coffee('js/displayer.coffee', output='js/displayer.js'),
+    CSS('css/displayer.css'),
 )
 
 site = SCSS('css/site.scss', depends=(base + common), output='css/site.css')
