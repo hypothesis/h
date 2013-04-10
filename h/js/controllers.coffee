@@ -277,15 +277,15 @@ class Annotation
       if newValue and newValue is true
         $timeout -> $element.find('input').focus()
         $timeout -> $element.find('input').select()
-        
-        $scope.shared_link = window.location.protocol + '//' + 
+
+        $scope.shared_link = window.location.protocol + '//' +
           window.location.host + '/a/' + $scope.model.$modelValue.id
         $scope.shared = false
 
     $scope.share = ->
       $scope.shared = not $scope.shared
       $element.find('.share-dialog').slideToggle()
-        
+
       console.log $scope.shared
 
 class Editor
