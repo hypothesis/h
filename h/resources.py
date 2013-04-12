@@ -1,4 +1,8 @@
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 import urllib2
 
 from datetime import datetime
