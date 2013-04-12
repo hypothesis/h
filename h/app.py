@@ -124,11 +124,14 @@ class AppController(views.BaseController):
 
     @view_config(http_cache=0, name='state', renderer='json')
     def __call__(self):
+        request = self.request
+
         model = {
-            'token': api.TokenController(self.request)(),
-            'token_url': self.request.route_url('token'),
+            'token': api.TokenController(request)(),
+            'token_url': request.route_url('token'),
+            'persona': request.context.persona,
+            'personas': request.context.personas,
         }
-        model.update(self.request.context)
 
         return {
             'flash': self.pop_flash(),

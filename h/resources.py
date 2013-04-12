@@ -79,13 +79,9 @@ class RootFactory(InnerResource, resources.RootFactory):
     pass
 
 
-class AppFactory(BaseResource, dict):
+class AppFactory(BaseResource):
     def __init__(self, request):
         super(AppFactory, self).__init__(request)
-        self.update(
-            persona=self.persona,
-            personas=self.personas,
-        )
 
     @property
     def embed(self):
