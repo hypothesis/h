@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-d45a366
+** Annotator 1.2.6-dev-b660660
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-04-12 00:11:28Z
+** Built at: 2013-04-12 17:10:44Z
 */
 
 
@@ -281,6 +281,13 @@
     if (r.commonAncestorContainer != null) {
       return new Range.BrowserRange(r);
     } else if (typeof r.start === "string") {
+      return new Range.SerializedRange({
+        startContainer: r.start,
+        startOffset: r.startOffset,
+        endContainer: r.end,
+        endOffset: r.endOffset
+      });
+    } else if (typeof r.startContainer === "string") {
       return new Range.SerializedRange(r);
     } else if (r.start && typeof r.start === "object") {
       return new Range.NormalizedRange(r);
@@ -361,7 +368,7 @@
     }
 
     BrowserRange.prototype.normalize = function(root) {
-      var it, node, nr, offset, p, r, _k, _len2, _ref1;
+      var isImg, it, node, nr, offset, p, r, _k, _len2, _ref1;
 
       if (this.tainted) {
         console.error(_t("You may only call normalize() once on a BrowserRange!"));
@@ -379,26 +386,32 @@
         if (node.nodeType === 1) {
           it = node.childNodes[offset];
           node = it || node.childNodes[offset - 1];
-          if (node.nodeType === 1 && !node.firstChild) {
-            it = null;
-            node = node.previousSibling;
+          isImg = node.nodeType === 1 && node.tagName.toLowerCase() === "img";
+          if (isImg) {
+            offset = 0;
+          } else {
+            if (node.nodeType === 1 && !node.firstChild && !isImg) {
+              it = null;
+              node = node.previousSibling;
+            }
+            while (node.nodeType !== 3) {
+              node = node.firstChild;
+            }
+            offset = it ? 0 : node.nodeValue.length;
           }
-          while (node.nodeType !== 3) {
-            node = node.firstChild;
-          }
-          offset = it ? 0 : node.nodeValue.length;
         }
         r[p] = node;
         r[p + 'Offset'] = offset;
+        r[p + 'Img'] = isImg;
       }
       nr.start = r.startOffset > 0 ? r.start.splitText(r.startOffset) : r.start;
-      if (r.start === r.end) {
+      if (r.start === r.end && !r.startImg) {
         if ((r.endOffset - r.startOffset) < nr.start.nodeValue.length) {
           nr.start.splitText(r.endOffset - r.startOffset);
         }
         nr.end = nr.start;
       } else {
-        if (r.endOffset < r.end.nodeValue.length) {
+        if (r.endOffset < r.end.nodeValue.length && !r.endImg) {
           r.end.splitText(r.endOffset);
         }
         nr.end = r.end;
@@ -406,6 +419,9 @@
       nr.commonAncestor = this.commonAncestorContainer;
       while (nr.commonAncestor.nodeType !== 1) {
         nr.commonAncestor = nr.commonAncestor.parentNode;
+      }
+      if (window.DomTextMapper != null) {
+        window.DomTextMapper.changed(nr.commonAncestor, "range normalization");
       }
       return new Range.NormalizedRange(nr);
     };
@@ -456,7 +472,7 @@
       var end, serialization, start;
 
       serialization = function(node, isEnd) {
-        var n, nodes, offset, origParent, textNodes, xpath, _k, _len2;
+        var isImg, n, nodes, offset, origParent, textNodes, xpath, _k, _len2;
 
         if (ignoreSelector) {
           origParent = $(node).parents(":not(" + ignoreSelector + ")").eq(0);
@@ -471,7 +487,8 @@
           n = nodes[_k];
           offset += n.nodeValue.length;
         }
-        if (isEnd) {
+        isImg = node.nodeType === 1 && node.tagName.toLowerCase() === "img";
+        if (isEnd && !isImg) {
           return [xpath, offset + node.nodeValue.length];
         } else {
           return [xpath, offset];
@@ -480,8 +497,8 @@
       start = serialization(this.start);
       end = serialization(this.end, true);
       return new Range.SerializedRange({
-        start: start[0],
-        end: end[0],
+        startContainer: start[0],
+        endContainer: end[0],
         startOffset: start[1],
         endOffset: end[1]
       });
@@ -526,27 +543,28 @@
 
   Range.SerializedRange = (function() {
     function SerializedRange(obj) {
-      this.start = obj.start;
+      this.startContainer = obj.startContainer;
       this.startOffset = obj.startOffset;
-      this.end = obj.end;
+      this.endContainer = obj.endContainer;
       this.endOffset = obj.endOffset;
     }
 
     SerializedRange.prototype.normalize = function(root) {
-      var contains, e, length, node, p, range, tn, _k, _l, _len2, _len3, _ref1, _ref2;
+      var contains, e, length, node, p, range, tn, xpath, _k, _l, _len2, _len3, _ref1, _ref2;
 
       range = {};
       _ref1 = ['start', 'end'];
       for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
         p = _ref1[_k];
+        xpath = this[p + 'Container'];
         try {
-          node = Range.nodeFromXPath(this[p], root);
+          node = Range.nodeFromXPath(xpath, root);
         } catch (_error) {
           e = _error;
-          throw new Range.RangeError(p, ("Error while finding " + p + " node: " + this[p] + ": ") + e, e);
+          throw new Range.RangeError(p, ("Error while finding " + p + " node: " + xpath + ": ") + e, e);
         }
         if (!node) {
-          throw new Range.RangeError(p, "Couldn't find " + p + " node: " + this[p]);
+          throw new Range.RangeError(p, "Couldn't find " + p + " node: " + xpath);
         }
         length = 0;
         _ref2 = $(node).textNodes();
@@ -584,9 +602,9 @@
 
     SerializedRange.prototype.toObject = function() {
       return {
-        start: this.start,
+        startContainer: this.startContainer,
         startOffset: this.startOffset,
-        end: this.end,
+        endContainer: this.endContainer,
         endOffset: this.endOffset
       };
     };
@@ -669,7 +687,7 @@
 
     Annotator.prototype.viewer = null;
 
-    Annotator.prototype.selectedRanges = null;
+    Annotator.prototype.selectedTargets = null;
 
     Annotator.prototype.mouseIsDown = false;
 
@@ -690,7 +708,8 @@
       this.showViewer = __bind(this.showViewer, this);
       this.onEditorSubmit = __bind(this.onEditorSubmit, this);
       this.onEditorHide = __bind(this.onEditorHide, this);
-      this.showEditor = __bind(this.showEditor, this);      Annotator.__super__.constructor.apply(this, arguments);
+      this.showEditor = __bind(this.showEditor, this);
+      this.getHref = __bind(this.getHref, this);      Annotator.__super__.constructor.apply(this, arguments);
       this.plugins = {};
       if (!Annotator.supported()) {
         return this;
@@ -702,6 +721,12 @@
       this._setupDynamicStyle();
       this.adder = $(this.html.adder).appendTo(this.wrapper).hide();
     }
+
+    Annotator.prototype._setupMatching = function() {
+      this.domMapper = new DomTextMapper();
+      this.domMatcher = new DomTextMatcher(this.domMapper);
+      return this;
+    };
 
     Annotator.prototype._setupWrapper = function() {
       this.wrapper = $(this.html.wrapper);
@@ -781,25 +806,97 @@
       return this;
     };
 
-    Annotator.prototype.getSelectedRanges = function() {
-      var browserRange, i, normedRange, r, ranges, rangesToIgnore, selection, _k, _len2;
+    Annotator.prototype.getHref = function() {
+      var uri;
+
+      uri = decodeURIComponent(document.location.href);
+      if (document.location.hash) {
+        uri = uri.slice(0, -1 * location.hash.length);
+      }
+      $('meta[property^="og:url"]').each(function() {
+        return uri = decodeURIComponent(this.content);
+      });
+      $('link[rel^="canonical"]').each(function() {
+        return uri = decodeURIComponent(this.href);
+      });
+      return uri;
+    };
+
+    Annotator.prototype.getRangeSelector = function(range) {
+      var selector, sr;
+
+      sr = range.serialize(this.wrapper[0]);
+      return selector = {
+        type: "RangeSelector",
+        startContainer: sr.startContainer,
+        startOffset: sr.startOffset,
+        endContainer: sr.endContainer,
+        endOffset: sr.endOffset
+      };
+    };
+
+    Annotator.prototype.getTextQuoteSelector = function(range) {
+      var endOffset, prefix, quote, selector, startOffset, suffix, _ref1;
+
+      startOffset = (this.domMapper.getInfoForNode(range.start)).start;
+      endOffset = (this.domMapper.getInfoForNode(range.end)).end;
+      quote = this.domMapper.getContentForCharRange(startOffset, endOffset);
+      _ref1 = this.domMapper.getContextForCharRange(startOffset, endOffset), prefix = _ref1[0], suffix = _ref1[1];
+      return selector = {
+        type: "TextQuoteSelector",
+        exact: quote,
+        prefix: prefix,
+        suffix: suffix
+      };
+    };
+
+    Annotator.prototype.getTextPositionSelector = function(range) {
+      var endOffset, selector, startOffset;
+
+      startOffset = (this.domMapper.getInfoForNode(range.start)).start;
+      endOffset = (this.domMapper.getInfoForNode(range.end)).end;
+      return selector = {
+        type: "TextPositionSelector",
+        start: startOffset,
+        end: endOffset
+      };
+    };
+
+    Annotator.prototype.getQuoteForTarget = function(target) {
+      var selector;
+
+      selector = this.findSelector(target.selector, "TextQuoteSelector");
+      if (selector != null) {
+        return this.normalizeString(selector.exact);
+      } else {
+        return null;
+      }
+    };
+
+    Annotator.prototype.getSelectedTargets = function() {
+      var browserRange, i, normedRange, r, rangesToIgnore, realRange, selection, source, targets, _k, _len2,
+        _this = this;
 
       selection = util.getGlobal().getSelection();
-      ranges = [];
+      source = this.getHref();
+      targets = [];
       rangesToIgnore = [];
       if (!selection.isCollapsed) {
-        ranges = (function() {
+        targets = (function() {
           var _k, _ref1, _results;
 
           _results = [];
           for (i = _k = 0, _ref1 = selection.rangeCount; 0 <= _ref1 ? _k < _ref1 : _k > _ref1; i = 0 <= _ref1 ? ++_k : --_k) {
-            r = selection.getRangeAt(i);
-            browserRange = new Range.BrowserRange(r);
+            realRange = selection.getRangeAt(i);
+            browserRange = new Range.BrowserRange(realRange);
             normedRange = browserRange.normalize().limit(this.wrapper[0]);
             if (normedRange === null) {
               rangesToIgnore.push(r);
             }
-            _results.push(normedRange);
+            _results.push({
+              selector: [this.getRangeSelector(normedRange), this.getTextQuoteSelector(normedRange), this.getTextPositionSelector(normedRange)],
+              source: source
+            });
           }
           return _results;
         }).call(this);
@@ -809,11 +906,17 @@
         r = rangesToIgnore[_k];
         selection.addRange(r);
       }
-      return $.grep(ranges, function(range) {
-        if (range) {
-          selection.addRange(range.toRange());
+      return $.grep(targets, function(target) {
+        var range, selector;
+
+        selector = _this.findSelector(target.selector, "RangeSelector");
+        if (selector != null) {
+          range = (Range.sniff(selector)).normalize(_this.wrapper[0]);
+          if (range != null) {
+            selection.addRange(range.toRange());
+            return true;
+          }
         }
-        return range;
       });
     };
 
@@ -825,36 +928,219 @@
       return annotation;
     };
 
-    Annotator.prototype.setupAnnotation = function(annotation) {
-      var e, normed, normedRanges, r, root, _k, _l, _len2, _len3, _ref1;
+    Annotator.prototype.normalizeString = function(string) {
+      return string.replace(/\s{2,}/g, " ");
+    };
 
-      root = this.wrapper[0];
-      annotation.ranges || (annotation.ranges = this.selectedRanges);
-      normedRanges = [];
-      _ref1 = annotation.ranges;
-      for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-        r = _ref1[_k];
-        try {
-          normedRanges.push(Range.sniff(r).normalize(root));
-        } catch (_error) {
-          e = _error;
-          if (e instanceof Range.RangeError) {
-            this.publish('rangeNormalizeFail', [annotation, r, e]);
-          } else {
-            throw e;
-          }
+    Annotator.prototype.findSelector = function(selectors, type) {
+      var selector, _k, _len2;
+
+      for (_k = 0, _len2 = selectors.length; _k < _len2; _k++) {
+        selector = selectors[_k];
+        if (selector.type === type) {
+          return selector;
         }
       }
-      annotation.quote = [];
-      annotation.ranges = [];
+      return null;
+    };
+
+    Annotator.prototype.findAnchorFromRangeSelector = function(target) {
+      var content, currentQuote, endInfo, endOffset, exception, normalizedRange, savedQuote, selector, startInfo, startOffset;
+
+      selector = this.findSelector(target.selector, "RangeSelector");
+      if (selector == null) {
+        return null;
+      }
+      try {
+        normalizedRange = Range.sniff(selector).normalize(this.wrapper[0]);
+        savedQuote = this.getQuoteForTarget(target);
+        if (savedQuote != null) {
+          startInfo = this.domMapper.getInfoForNode(normalizedRange.start);
+          startOffset = startInfo.start;
+          endInfo = this.domMapper.getInfoForNode(normalizedRange.end);
+          endOffset = endInfo.end;
+          content = this.domMapper.getContentForCharRange(startOffset, endOffset);
+          currentQuote = this.normalizeString(content);
+          if (currentQuote !== savedQuote) {
+            console.log("Could not apply XPath selector to current document             because the quote has changed. (Saved quote is '" + savedQuote + "'.             Current quote is '" + currentQuote + "'.)");
+            return null;
+          } else {
+            console.log("Saved quote matches.");
+          }
+        } else {
+          console.log("No saved quote, nothing to compare. Assume that it's OK.");
+        }
+        return {
+          range: normalizedRange,
+          quote: savedQuote
+        };
+      } catch (_error) {
+        exception = _error;
+        if (exception instanceof Range.RangeError) {
+          console.log("Could not apply XPath selector to current document. \          The document structure may have changed.");
+          return null;
+        } else {
+          throw exception;
+        }
+      }
+    };
+
+    Annotator.prototype.findAnchorFromPositionSelector = function(target) {
+      var browserRange, content, currentQuote, mappings, normalizedRange, savedQuote, selector;
+
+      selector = this.findSelector(target.selector, "TextPositionSelector");
+      if (selector == null) {
+        return null;
+      }
+      savedQuote = this.getQuoteForTarget(target);
+      if (savedQuote != null) {
+        content = this.domMapper.getContentForCharRange(selector.start, selector.end);
+        currentQuote = this.normalizeString(content);
+        if (currentQuote !== savedQuote) {
+          console.log("Could not apply position selector to current document           because the quote has changed. (Saved quote is '" + savedQuote + "'.           Current quote is '" + currentQuote + "'.)");
+          return null;
+        } else {
+          console.log("Saved quote matches.");
+        }
+      } else {
+        console.log("No saved quote, nothing to compare. Assume that it's okay.");
+      }
+      mappings = this.domMapper.getMappingsForCharRange(selector.start, selector.end);
+      browserRange = new Range.BrowserRange(mappings.realRange);
+      normalizedRange = browserRange.normalize(this.wrapper[0]);
+      return {
+        range: normalizedRange,
+        quote: savedQuote
+      };
+    };
+
+    Annotator.prototype.findAnchorWithTwoPhaseFuzzyMatching = function(target) {
+      var anchor, browserRange, expectedEnd, expectedStart, match, normalizedRange, options, posSelector, prefix, quote, quoteSelector, result, suffix;
+
+      quoteSelector = this.findSelector(target.selector, "TextQuoteSelector");
+      prefix = quoteSelector != null ? quoteSelector.prefix : void 0;
+      suffix = quoteSelector != null ? quoteSelector.suffix : void 0;
+      quote = quoteSelector != null ? quoteSelector.exact : void 0;
+      if (!((prefix != null) && (suffix != null))) {
+        return null;
+      }
+      posSelector = this.findSelector(target.selector, "TextPositionSelector");
+      expectedStart = posSelector != null ? posSelector.start : void 0;
+      expectedEnd = posSelector != null ? posSelector.end : void 0;
+      options = {
+        contextMatchDistance: this.domMapper.getDocLength() * 2,
+        contextMatchThreshold: 0.5,
+        patternMatchThreshold: 0.5
+      };
+      result = this.domMatcher.searchFuzzyWithContext(prefix, suffix, quote, expectedStart, expectedEnd, false, null, options);
+      if (!result.matches.length) {
+        console.log("Fuzzy matching did not return any results. Giving up on two-phase strategy.");
+        return null;
+      }
+      match = result.matches[0];
+      console.log("Fuzzy found match:");
+      console.log(match);
+      browserRange = new Range.BrowserRange(match.realRange);
+      normalizedRange = browserRange.normalize(this.wrapper[0]);
+      anchor = {
+        range: normalizedRange,
+        quote: !match.exact ? match.found : void 0,
+        diffHTML: !match.exact ? match.comparison.diffHTML : void 0
+      };
+      return anchor;
+    };
+
+    Annotator.prototype.findAnchorWithFuzzyMatching = function(target) {
+      var anchor, browserRange, expectedStart, len, match, normalizedRange, options, posSelector, quote, quoteSelector, result;
+
+      quoteSelector = this.findSelector(target.selector, "TextQuoteSelector");
+      quote = quoteSelector != null ? quoteSelector.exact : void 0;
+      if (quote == null) {
+        return null;
+      }
+      posSelector = this.findSelector(target.selector, "TextPositionSelector");
+      expectedStart = posSelector != null ? posSelector.start : void 0;
+      len = this.domMapper.getDocLength();
+      if (expectedStart == null) {
+        expectedStart = len / 2;
+      }
+      options = {
+        matchDistance: len,
+        withFuzzyComparison: true
+      };
+      result = this.domMatcher.searchFuzzy(quote, expectedStart, false, null, options);
+      if (!result.matches.length) {
+        console.log("Fuzzy matching did not return any results. Giving up on one-phase strategy.");
+        return null;
+      }
+      match = result.matches[0];
+      console.log("Fuzzy found match:");
+      console.log(match);
+      browserRange = new Range.BrowserRange(match.realRange);
+      normalizedRange = browserRange.normalize(this.wrapper[0]);
+      anchor = {
+        range: normalizedRange,
+        quote: !match.exact ? match.found : void 0,
+        diffHTML: !match.exact ? match.comparison.diffHTML : void 0
+      };
+      return anchor;
+    };
+
+    Annotator.prototype.findAnchor = function(target) {
+      var anchor;
+
+      console.log("Trying to find anchor for target: ");
+      console.log(target);
+      anchor = this.findAnchorFromRangeSelector(target);
+      if (anchor == null) {
+        anchor = this.findAnchorFromPositionSelector(target);
+      }
+      if (anchor == null) {
+        anchor = this.findAnchorWithTwoPhaseFuzzyMatching(target);
+      }
+      if (anchor == null) {
+        anchor = this.findAnchorWithFuzzyMatching(target);
+      }
+      return anchor;
+    };
+
+    Annotator.prototype.setupAnnotation = function(annotation) {
+      var anchor, exception, normed, normedRanges, root, t, _k, _l, _len2, _len3, _ref1;
+
+      root = this.wrapper[0];
+      annotation.target || (annotation.target = this.selectedTargets);
+      if (!(annotation.target instanceof Array)) {
+        annotation.target = [annotation.target];
+      }
+      normedRanges = [];
+      _ref1 = annotation.target;
+      for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+        t = _ref1[_k];
+        try {
+          anchor = this.findAnchor(t);
+          if ((anchor != null ? anchor.quote : void 0) != null) {
+            t.quote = anchor.quote;
+            t.diffHTML = anchor.diffHTML;
+          }
+          if ((anchor != null ? anchor.range : void 0) != null) {
+            normedRanges.push(anchor.range);
+          } else {
+            console.log("Could not find anchor for annotation target '" + t.id + "' (for annotation '" + annotation.id + "').");
+          }
+        } catch (_error) {
+          exception = _error;
+          if (exception.stack != null) {
+            console.log(exception.stack);
+          }
+          console.log(exception.message);
+          console.log(exception);
+        }
+      }
       annotation.highlights = [];
       for (_l = 0, _len3 = normedRanges.length; _l < _len3; _l++) {
         normed = normedRanges[_l];
-        annotation.quote.push($.trim(normed.text()));
-        annotation.ranges.push(normed.serialize(this.wrapper[0], '.annotator-hl'));
         $.merge(annotation.highlights, this.highlightRange(normed));
       }
-      annotation.quote = annotation.quote.join(' / ');
       $(annotation.highlights).data('annotation', annotation);
       return annotation;
     };
@@ -877,6 +1163,7 @@
           }
           child = h.childNodes[0];
           $(h).replaceWith(h.childNodes);
+          window.DomTextMapper.changed(child.parentNode, "removed hilite (annotation deleted)");
         }
       }
       this.publish('annotationDeleted', [annotation]);
@@ -925,7 +1212,7 @@
     };
 
     Annotator.prototype.highlightRange = function(normedRange, cssClass) {
-      var hl, node, white, _k, _len2, _ref1, _results;
+      var hl, node, r, white, _k, _len2, _ref1, _results;
 
       if (cssClass == null) {
         cssClass = 'annotator-hl';
@@ -936,9 +1223,12 @@
       _results = [];
       for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
         node = _ref1[_k];
-        if (!white.test(node.nodeValue)) {
-          _results.push($(node).wrapAll(hl).parent().show()[0]);
+        if (!(!white.test(node.nodeValue))) {
+          continue;
         }
+        r = $(node).wrapAll(hl).parent().show()[0];
+        window.DomTextMapper.changed(node, "created hilite");
+        _results.push(r);
       }
       return _results;
     };
@@ -1018,16 +1308,18 @@
     };
 
     Annotator.prototype.checkForEndSelection = function(event) {
-      var container, range, _k, _len2, _ref1;
+      var container, range, selector, target, _k, _len2, _ref1;
 
       this.mouseIsDown = false;
       if (this.ignoreMouseup) {
         return;
       }
-      this.selectedRanges = this.getSelectedRanges();
-      _ref1 = this.selectedRanges;
+      this.selectedTargets = this.getSelectedTargets();
+      _ref1 = this.selectedTargets;
       for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-        range = _ref1[_k];
+        target = _ref1[_k];
+        selector = this.findSelector(target.selector, "RangeSelector");
+        range = (Range.sniff(selector)).normalize(this.wrapper[0]);
         container = range.commonAncestor;
         if ($(container).hasClass('annotator-hl')) {
           container = $(container).parents('[class^=annotator-hl]')[0];
@@ -1036,7 +1328,7 @@
           return;
         }
       }
-      if (event && this.selectedRanges.length) {
+      if (event && this.selectedTargets.length) {
         return this.adder.css(util.mousePosition(event, this.wrapper[0])).show();
       } else {
         return this.adder.hide();
@@ -1076,7 +1368,8 @@
       }
       position = this.adder.position();
       this.adder.hide();
-      annotation = this.setupAnnotation(this.createAnnotation());
+      annotation = this.createAnnotation();
+      annotation = this.setupAnnotation(annotation);
       $(annotation.highlights).addClass('annotator-hl-temporary');
       save = function() {
         cleanup();
