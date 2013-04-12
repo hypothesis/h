@@ -330,7 +330,6 @@ class Hypothesis extends Annotator
       # Give angular a chance to react
       $rootScope.$digest()
 
-
   serviceDiscovery: (options) =>
     $location = @element.injector().get '$location'
     $rootScope = @element.injector().get '$rootScope'
@@ -355,6 +354,7 @@ class Hypothesis extends Annotator
           this.plugins.Store._apiRequest 'search', uri: href, (data) =>
             console.log "Found " + data.total + " annotations here.."
             this.plugins.Store._onLoadAnnotationsFromSearch data
+
 
 class DraftProvider
   drafts: []
