@@ -1,5 +1,6 @@
 .*
 !.gitignore
+!.webassets-cache
 
 /*.db
 /*.egg-info
