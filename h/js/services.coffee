@@ -132,7 +132,58 @@ class Hypothesis extends Annotator
       origin: $location.search().xdm
       scope: 'annotator:panel'
       window: $window.parent
-      onReady: => console.log "Sidepanel: channel is ready"
+      onReady: =>
+        patch_update = (store) =>
+          # When the store plugin finishes a request, update the annotation
+          # using a monkey-patched update function which updates the threading
+          # if the annotation has a newly-assigned id and ensures that the id
+          # is enumerable.
+          store.updateAnnotation = (annotation, data) =>
+            if annotation.id? and annotation.id != data.id
+              # Update the id table for the threading
+              thread = @threading.getContainer annotation.id
+              thread.message.id = data.id
+              @threading.idTable[data.id] = thread
+              delete @threading.idTable[annotation.id]
+
+              # The id is no longer temporary and should be serialized
+              # on future Store requests.
+              Object.defineProperty annotation, 'id',
+                configurable: true
+                enumerable: true
+                writable: true
+
+              # If the annotation is loaded in a view, switch the view
+              # to reference the new id.
+              search = $location.search()
+              if search? and search.id == annotation.id
+                search.id = data.id
+                $location.search(search).replace()
+
+            # Update the annotation with the new data
+            annotation = angular.extend annotation, data
+
+            # Give angular a chance to react
+            $rootScope.$digest()
+
+        # Get the location of the annotated document
+        @provider.call
+          method: 'getHref'
+          success: (href) =>
+            options = angular.extend {}, (@options.Store or {}),
+              annotationData:
+                uri: href
+              loadFromSearch:
+                limit: 1000
+                uri: href
+            this.addPlugin 'Store', options
+            patch_update this.plugins.Store
+            console.log "Loaded annotions for '" + href + "'."
+            for href in this.getSynonymURLs href
+              console.log "Also loading annotations for: " + href
+              this.plugins.Store._apiRequest 'search', uri: href, (data) =>
+                console.log "Found " + data.total + " annotations here.."
+                this.plugins.Store._onLoadAnnotationsFromSearch data
 
         # Dodge toolbars [DISABLE]
         #@provider.getMaxBottom (max) =>
@@ -297,61 +348,8 @@ class Hypothesis extends Annotator
     @element.find('#toolbar').removeClass('shown')
       .find('.tri').attr('draggable', false)
 
-  patch_update: (store) =>
-    # When the store plugin finishes a request, update the annotation
-    # using a monkey-patched update function which updates the threading
-    # if the annotation has a newly-assigned id and ensures that the id
-    # is enumerable.
-    store.updateAnnotation = (annotation, data) =>
-      if annotation.id? and annotation.id != data.id
-        # Update the id table for the threading
-        thread = @threading.getContainer annotation.id
-        thread.message.id = data.id
-        @threading.idTable[data.id] = thread
-        delete @threading.idTable[annotation.id]
+  serviceDiscovery: (options) => angular.extend @options, Store: options
 
-        # The id is no longer temporary and should be serialized
-        # on future Store requests.
-        Object.defineProperty annotation, 'id',
-          configurable: true
-          enumerable: true
-          writable: true
-
-        # If the annotation is loaded in a view, switch the view
-        # to reference the new id.
-        search = $location.search()
-        if search? and search.id == annotation.id
-          search.id = data.id
-          $location.search(search).replace()
-
-      # Update the annotation with the new data
-      annotation = angular.extend annotation, data
-
-      # Give angular a chance to react
-      $rootScope.$digest()
-
-
-  serviceDiscovery: (options) =>
-    angular.extend @options, Store: options
-
-    # Get the location of the annotated document
-    @provider.call
-      method: 'getHref'
-      success: (href) =>
-        options = angular.extend {}, (@options.Store or {}),
-          annotationData:
-            uri: href
-          loadFromSearch:
-            limit: 1000
-            uri: href
-        this.addPlugin 'Store', options
-        this.patch_update this.plugins.Store
-        console.log "Loaded annotions for '" + href + "'."
-        for href in this.getSynonymURLs href
-          console.log "Also loading annotations for: " + href
-          this.plugins.Store._apiRequest 'search', uri: href, (data) =>
-            console.log "Found " + data.total + " annotations here.."
-            this.plugins.Store._onLoadAnnotationsFromSearch data
 
 class DraftProvider
   drafts: []

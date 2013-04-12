@@ -272,7 +272,10 @@ class AnnotationFactory(BaseResource):
 
         annotation = Annotation(request)
         annotation.__parent__ = self
-        annotation.update(store.read(key))
+        try:
+          annotation.update(store.read(key))
+        except:
+          pass
 
         return annotation
 
