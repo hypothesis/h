@@ -1,45 +1,31 @@
 /*
-** Annotator 1.2.6-dev-b660660
+** Annotator 1.2.6-dev-383514e
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-04-12 17:10:52Z
+** Built at: 2013-04-09 22:06:02Z
 */
-
 
 (function() {
   var base64Decode, base64UrlDecode, createDateFromISO8601, parseToken,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   createDateFromISO8601 = function(string) {
     var d, date, offset, regexp, time, _ref;
-
     regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" + "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?" + "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?";
     d = string.match(new RegExp(regexp));
     offset = 0;
     date = new Date(d[1], 0, 1);
-    if (d[3]) {
-      date.setMonth(d[3] - 1);
-    }
-    if (d[5]) {
-      date.setDate(d[5]);
-    }
-    if (d[7]) {
-      date.setHours(d[7]);
-    }
-    if (d[8]) {
-      date.setMinutes(d[8]);
-    }
-    if (d[10]) {
-      date.setSeconds(d[10]);
-    }
-    if (d[12]) {
-      date.setMilliseconds(Number("0." + d[12]) * 1000);
-    }
+    if (d[3]) date.setMonth(d[3] - 1);
+    if (d[5]) date.setDate(d[5]);
+    if (d[7]) date.setHours(d[7]);
+    if (d[8]) date.setMinutes(d[8]);
+    if (d[10]) date.setSeconds(d[10]);
+    if (d[12]) date.setMilliseconds(Number("0." + d[12]) * 1000);
     if (d[14]) {
       offset = (Number(d[16]) * 60) + Number(d[17]);
       offset *= (_ref = d[15] === '-') != null ? _ref : {
@@ -54,7 +40,6 @@
 
   base64Decode = function(data) {
     var ac, b64, bits, dec, h1, h2, h3, h4, i, o1, o2, o3, tmp_arr;
-
     if (typeof atob !== "undefined" && atob !== null) {
       return atob(data);
     } else {
@@ -63,9 +48,7 @@
       ac = 0;
       dec = "";
       tmp_arr = [];
-      if (!data) {
-        return data;
-      }
+      if (!data) return data;
       data += '';
       while (i < data.length) {
         h1 = b64.indexOf(data.charAt(i++));
@@ -89,11 +72,10 @@
   };
 
   base64UrlDecode = function(data) {
-    var i, m, _i, _ref;
-
+    var i, m, _ref;
     m = data.length % 4;
     if (m !== 0) {
-      for (i = _i = 0, _ref = 4 - m; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      for (i = 0, _ref = 4 - m; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
         data += '=';
       }
     }
@@ -104,12 +86,12 @@
 
   parseToken = function(token) {
     var head, payload, sig, _ref;
-
     _ref = token.split('.'), head = _ref[0], payload = _ref[1], sig = _ref[2];
     return JSON.parse(base64UrlDecode(payload));
   };
 
   Annotator.Plugin.Auth = (function(_super) {
+
     __extends(Auth, _super);
 
     Auth.prototype.options = {
@@ -130,7 +112,6 @@
 
     Auth.prototype.requestToken = function() {
       var _this = this;
-
       this.requestInProgress = true;
       return $.ajax({
         url: this.options.tokenUrl,
@@ -142,7 +123,6 @@
         return _this.setToken(data);
       }).fail(function(xhr, status, err) {
         var msg;
-
         msg = Annotator._t("Couldn't get auth token:");
         console.error("" + msg + " " + err, xhr);
         return Annotator.showNotification("" + msg + " " + xhr.responseText, Annotator.Notification.ERROR);
@@ -154,7 +134,6 @@
     Auth.prototype.setToken = function(token) {
       var _results,
         _this = this;
-
       this.token = token;
       this._unsafeToken = parseToken(token);
       if (this.haveValidToken()) {
@@ -182,14 +161,12 @@
 
     Auth.prototype.haveValidToken = function() {
       var allFields;
-
       allFields = this._unsafeToken && this._unsafeToken.issuedAt && this._unsafeToken.ttl && this._unsafeToken.consumerKey;
       return allFields && this.timeToExpiry() > 0;
     };
 
     Auth.prototype.timeToExpiry = function() {
       var expiry, issue, now, timeToExpiry;
-
       now = new Date().getTime() / 1000;
       issue = createDateFromISO8601(this._unsafeToken.issuedAt).getTime() / 1000;
       expiry = issue + this._unsafeToken.ttl;
@@ -203,7 +180,6 @@
 
     Auth.prototype.updateHeaders = function() {
       var current;
-
       current = this.element.data('annotator:headers');
       return this.element.data('annotator:headers', $.extend(current, {
         'x-annotator-auth-token': this.token
@@ -211,16 +187,12 @@
     };
 
     Auth.prototype.withToken = function(callback) {
-      if (callback == null) {
-        return;
-      }
+      if (!(callback != null)) return;
       if (this.haveValidToken()) {
         return callback(this._unsafeToken);
       } else {
         this.waitingForToken.push(callback);
-        if (!this.requestInProgress) {
-          return this.requestToken();
-        }
+        if (!this.requestInProgress) return this.requestToken();
       }
     };
 
