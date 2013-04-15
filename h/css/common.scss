@@ -312,24 +312,14 @@ blockquote {
 .dropdown-menu {
   @include rotateX(90deg);
   background: $white;
-  left: 0;
-  top: 2em;
   border: solid .1em $grayLighter;
+  margin-top: .625em;
+  top: 100%;
   float: left;
   opacity: 0;
   pointer-events: none;
   position: absolute;
   z-index: 2;
-  //Adds transparent element to top of menu to stop parent losing hover.
-  &:before {
-    content: "";
-    background-color: transparent;
-    position: absolute;
-    width: 100%;
-    height: .8em;
-    top: -.8em;
-    left: 0;
-  }
 
   li {
     cursor: pointer;
@@ -372,11 +362,43 @@ blockquote {
     color: inherit;
   }
 
+  // These psuedo-elements add the speech bubble tail / triangle.
+  &:before {
+    content: '';
+    border-color: transparent transparent $grayLighter transparent;
+    border-style: solid;
+    border-width: 0 .5em .625em .5em;
+    position: absolute;
+    height: 0;
+    width: 0;
+    top: -.625em;
+    left: .5em;
+  }
+
+  &:after {
+    content: '';
+    border-color: transparent transparent $white transparent;
+    border-style: solid;
+    border-width: 0 .5em .625em .5em;
+    position: absolute;
+    height: 0;
+    width: 0;
+    top: -.525em;
+    left: .5em;
+    z-index: 3;
+  }
+
   // Aligns the dropdown menu to right
   &.pull-right {
     right: 0;
     left: auto;
     text-align: right;
+
+    // Align the tail
+    &:before, &:after {
+      left: auto;
+      right: .5em;
+    }
   }
 }
 
