@@ -302,6 +302,7 @@ blockquote {
 .dropdown-toggle {
   @include fonticon("\002f", right, 0);
   cursor: pointer;
+  padding: .5em;
 
   &:active {
     outline: 0;
