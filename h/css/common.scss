@@ -363,28 +363,27 @@ blockquote {
   }
 
   // These psuedo-elements add the speech bubble tail / triangle.
-  &:before {
-    content: '';
-    border-color: transparent transparent $grayLighter transparent;
+  &:before, &:after {
+    @include rotateZ(360deg);
+    border-color: transparent;
     border-style: solid;
-    border-width: 0 .5em .625em .5em;
+    content: '';
     position: absolute;
+    left: .35em;
     height: 0;
     width: 0;
-    top: -.625em;
-    left: .5em;
+  }
+
+  &:before {
+    border-bottom-color: $grayLighter;
+    border-width: 0 .5em .625em .5em;
+    top: -.675em;
   }
 
   &:after {
-    content: '';
-    border-color: transparent transparent $white transparent;
-    border-style: solid;
+    border-bottom-color: $white;
     border-width: 0 .5em .625em .5em;
-    position: absolute;
-    height: 0;
-    width: 0;
     top: -.525em;
-    left: .5em;
     z-index: 3;
   }
 
@@ -397,7 +396,7 @@ blockquote {
     // Align the tail
     &:before, &:after {
       left: auto;
-      right: .5em;
+      right: .35em;
     }
   }
 }
