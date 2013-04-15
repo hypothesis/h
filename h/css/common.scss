@@ -544,9 +544,10 @@ blockquote {
 
   .body {
     div {
-      @include force-wrap;
       clear: both;
       margin: .25em 0;
+      #{elements-of-type(inline)}, #{headings()}, p, li {
+        @include force-wrap;
       }
     }
 
