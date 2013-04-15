@@ -548,6 +548,18 @@ blockquote {
       #{elements-of-type(inline)}, #{headings()}, p, li {
         @include force-wrap;
       }
+
+      ol, ul {
+        padding-left: 1.25em;
+      }
+
+      ol {
+        list-style-type: decimal;
+      }
+
+      ul {
+        list-style-type: disc;
+      }
     }
 
     textarea {
