@@ -1,7 +1,8 @@
 @import 'compass';
 @import 'compass/css3/transform';
 @import 'compass/css3/user-interface';
-@import "compass/reset/utilities";
+@import 'compass/layout/stretching';
+@import 'compass/reset/utilities';
 
 $baseFontSize: 14;
 
@@ -71,9 +72,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //HEATMAP STUFF////////////////////////////////
 .annotator-heatmap {
-  height: 100%;
-  position: fixed;
-  top: 0;
+  @include stretch-y;
  
   svg {
     background: hsla(0, 0, 0, .1);
