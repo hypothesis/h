@@ -273,23 +273,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   &.shown {
     .tri {
       @include fonticon("\e010", left);
-      color: rgba( 200, 200, 200, 0.3);
-      text-shadow:
-        1px .8px 1.5px #fff,
-        0 0 0 #000;
-      position: absolute;
-      z-index: 1;
-      top: .3em;
-      left: .3em;
-      line-height: $baseLineHeight * .9;
-      font-size: $baseLineHeight * .9;
       cursor: ew-resize;
-      &:before {
-        vertical-align: 0;
-      }
-      &:hover {
-        color: rgba( 235, 235, 230, 0.1);
-      }
     }
   }
 }
