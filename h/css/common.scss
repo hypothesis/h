@@ -601,10 +601,6 @@ blockquote {
     padding-left: $thread-padding;
     margin-left: -$thread-padding;
 
-    &:hover {
-      overflow: visible;
-    }
-
     & > * {
       border-left: 1px dotted $grayLight;
       position: relative;
@@ -690,7 +686,7 @@ blockquote {
     @include transition-duration(1.05s);
     opacity: 0;
 
-    :hover > & {
+    &.open, :hover > & {
       @include transition-duration(.15s);
       opacity: 1;
     }
