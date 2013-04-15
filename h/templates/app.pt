@@ -12,7 +12,7 @@
 
     <!-- Toolbar -->
     <div id="toolbar" class="form-inline">
-      <div ng-click="visible = !visible" class="tri"></div>
+      <div ng-click="frame.visible = !frame.visible" class="tri"></div>
 
       <!-- Persona -->
       <div ng-show="sheet.collapsed"

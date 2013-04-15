@@ -1,5 +1,7 @@
 class App
   scope:
+    frame:
+      visible: false
     username: null
     email: null
     password: null
@@ -39,7 +41,8 @@ class App
 
       {highlights, offset} = elem.datum()
 
-      if dynamicBucket and $location.path() == '/viewer' and annotator.visible
+      visible = $scope.frame.visible
+      if dynamicBucket and visible and $location.path() == '/viewer'
         bottom = offset + heatmap.element.height()
         annotations = highlights.reduce (acc, hl) =>
           if hl.offset.top >= offset and hl.offset.top <= bottom
@@ -151,7 +154,7 @@ class App
         annotator.plugins.Store.pluginInit()
         dynamicBucket = true
 
-    $scope.$watch 'visible', (newValue) ->
+    $scope.$watch 'frame.visible', (newValue) ->
       if newValue then annotator.show() else annotator.hide()
 
     $scope.$on 'back', ->
@@ -159,7 +162,7 @@ class App
       if $location.path() == '/viewer' and $location.search()?.id?
         $location.search('id', null).replace()
       else
-        $scope.visible = false
+        annotator.hide()
 
     $scope.$on 'showAuth', (event, show=true) ->
       angular.extend $scope.sheet,
@@ -331,7 +334,7 @@ class Viewer
 
     listening = false
     refresh = =>
-      return unless annotator.visible
+      return unless $scope.frame.visible
       this.refresh $scope, $routeParams, annotator
       if listening
         if $scope.detail

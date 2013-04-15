@@ -40,7 +40,6 @@ class Hypothesis extends Annotator
     Threading: {}
 
   # Internal state
-  visible: false      # *  Whether the sidebar is visible
   dragging: false     # * To enable dragging only when we really want to
 
   # Here as a noop just to make the Permissions plugin happy
@@ -284,14 +283,14 @@ class Hypothesis extends Annotator
     this
 
   show: =>
-    @visible = true
+    @element.scope().frame.visible = true
     @provider.notify method: 'showFrame'
     @element.find('#toolbar').addClass('shown')
       .find('.tri').attr('draggable', true)
 
   hide: =>
     @lastWidth = window.innerWidth
-    @visible = false
+    @element.scope().frame.visible = false
     @provider.notify method: 'setActiveHighlights'
     @provider.notify method: 'hideFrame'
     @element.find('#toolbar').removeClass('shown')
