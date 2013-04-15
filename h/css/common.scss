@@ -21,13 +21,12 @@ body {
 }
 
 p {
-  margin: 0 0 2em 0;
   -webkit-hyphens: auto;
      -moz-hyphens: auto;
           hyphens: auto;
 
-  &:last-child {
-    margin-bottom: 0;
+  & + p {
+    margin: 2em 0 0;
   }
 }
 
@@ -312,9 +311,9 @@ blockquote {
 .dropdown-menu {
   @include rotateX(90deg);
   background: $white;
-  border: solid 1px $grayLighter;
   left: 0;
   top: 2em;
+  border: solid .1em $grayLighter;
   float: left;
   opacity: 0;
   pointer-events: none;
@@ -332,13 +331,12 @@ blockquote {
   }
 
   li {
+    cursor: pointer;
     line-height: 1;
     text-align: left;
-    margin: .4em .5em 0;
-    padding-bottom: .5em;
-    border-bottom: dotted 1px $grayLighter;
+    padding: .5em;
     white-space: nowrap;
-    cursor: pointer;
+
     &:hover {
       color: black;
     }
@@ -362,8 +360,9 @@ blockquote {
         cursor: default;
       }
     }
-    &:last-child {
-      border-bottom: 0;
+
+    & + li {
+      border-top: dotted 1px $grayLighter;
     }
   }
 
@@ -525,11 +524,6 @@ blockquote {
       @include force-wrap;
       clear: both;
       margin: .25em 0;
-      p:first-child {
-        margin-top: 0;
-      }
-      p:last-child {
-        margin-bottom: 0;
       }
     }
 
@@ -580,7 +574,9 @@ blockquote {
       border-left: 1px dotted $grayLight;
       position: relative;
 
-      &:first-child { margin-top: .5em; }
+      &:first-child {
+        margin-top: .5em;
+      }
     }
   }
 
