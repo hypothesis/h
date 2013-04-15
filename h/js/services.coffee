@@ -151,7 +151,7 @@ class Hypothesis extends Annotator
       if $location.path() == '/viewer' and $location.search()?.id?
         $rootScope.$apply => $location.search('id', null).replace()
       else
-        this.hide()
+        $rootScope.$apply => this.hide()
     )
 
   getSynonymURLs: (href) ->
@@ -284,17 +284,9 @@ class Hypothesis extends Annotator
 
   show: =>
     @element.scope().frame.visible = true
-    @provider.notify method: 'showFrame'
-    @element.find('#toolbar').addClass('shown')
-      .find('.tri').attr('draggable', true)
 
   hide: =>
-    @lastWidth = window.innerWidth
     @element.scope().frame.visible = false
-    @provider.notify method: 'setActiveHighlights'
-    @provider.notify method: 'hideFrame'
-    @element.find('#toolbar').removeClass('shown')
-      .find('.tri').attr('draggable', false)
 
   patch_update: (store) =>
     # When the store plugin finishes a request, update the annotation

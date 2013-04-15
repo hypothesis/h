@@ -31,6 +31,7 @@ class App
       dynamicBucket = true
       annotator.showViewer()
       heatmap.publish 'updated'
+      $scope.$digest()
 
     heatmap.subscribe 'updated', =>
       elem = d3.select(heatmap.element[0])
@@ -91,6 +92,7 @@ class App
             dynamicBucket = false
             $location.search('id', null)
             annotator.showViewer heatmap.buckets[bucket]
+            $scope.$digest()
 
     $scope.submit = (form) ->
       return unless form.$valid
@@ -155,7 +157,15 @@ class App
         dynamicBucket = true
 
     $scope.$watch 'frame.visible', (newValue) ->
-      if newValue then annotator.show() else annotator.hide()
+      if newValue
+        annotator.show()
+        annotator.provider.notify method: 'showFrame'
+        $element.find('#toolbar').find('.tri').attr('draggable', true)
+      else
+        annotator.hide()
+        annotator.provider.notify method: 'setActiveHighlights'
+        annotator.provider.notify method: 'hideFrame'
+        $element.find('#toolbar').find('.tri').attr('draggable', false)
 
     $scope.$on 'back', ->
       return unless drafts.discard()

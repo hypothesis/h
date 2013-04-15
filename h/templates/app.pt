@@ -11,8 +11,8 @@
         metal:fill-slot="body">
 
     <!-- Toolbar -->
-    <div id="toolbar" class="form-inline">
-      <div ng-click="frame.visible = !frame.visible" class="tri"></div>
+    <div id="toolbar" class="form-inline" ng-class="frame.visible && 'shown'">
+      <div class="tri" ng-click="frame.visible = !frame.visible"></div>
 
       <!-- Persona -->
       <div ng-show="sheet.collapsed"
