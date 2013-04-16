@@ -121,7 +121,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       for i in [0..@index.length-2]
         # ignore buckets followed by an empty bucket
         # prevents erroneous deletion of isolated buckets
-        if @buckets[i+1].length and (w = @index[i+1] - @index[i]) < min
+        if @buckets[i].length and not @buckets[i+1].length
+          continue
+        if (w = @index[i+1] - @index[i]) < min
           small = i
           min = w
           break if min == 0 # short-circuit optimization
