@@ -601,6 +601,10 @@ blockquote {
     padding-left: $thread-padding;
     margin-left: -$thread-padding;
 
+    &:hover {
+      overflow: visible;
+    }
+
     & > * {
       border-left: 1px dotted $grayLight;
       position: relative;
