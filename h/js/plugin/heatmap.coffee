@@ -217,12 +217,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     .html (d) =>
       total = @buckets[d].reduce (total, a) ->
-        subtotal =
-          if a.thread.children.length
-            a.thread.flattenChildren().length
-          else
-            0
-        total + subtotal + 1
+        subtotal = (a.thread.flattenChildren()?.length or 0) + 1
+        total + subtotal
       , 0
       "<div class='label'>#{total}</div><div class='svg'></div>"
 
