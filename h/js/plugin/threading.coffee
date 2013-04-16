@@ -27,14 +27,16 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
     thread.message = annotation
 
     # Attach the thread to its parent, if any.
-    references = annotation.thread?.split('/')
-    if references?.length
-      annotation.references = references
-      prev = references[references.length-1]
+    if annotation.references?.length
+      prev = annotation.references[annotation.references.length-1]
       @annotator.threading.getContainer(prev).addChild thread
 
     # Expose the thread to the annotation
-    annotation.thread = thread
+    Object.defineProperty annotation, 'thread',
+        configurable: true
+        enumerable: false
+        writable: true
+        value: thread
 
     # Update the id table
     @annotator.threading.idTable[annotation.id] = thread

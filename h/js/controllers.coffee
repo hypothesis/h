@@ -244,7 +244,7 @@ class Annotation
           [$scope.thread.message.id]
 
       reply = angular.extend annotator.createAnnotation(),
-        thread: references.join '/'
+        references: references
 
       annotator.setupAnnotation reply
 
