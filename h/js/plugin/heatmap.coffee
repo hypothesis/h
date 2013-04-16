@@ -112,16 +112,15 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     # Remove redundant points and merge close buckets until done
     while @buckets.length > 2
-
       # Find the two closest points
-      # TODO: dynamic programming
       small = 0
       threshold = min = 60
       for i in [0..@index.length-2]
-        # ignore buckets followed by an empty bucket
-        # prevents erroneous deletion of isolated buckets
+        # Don't merge empty with non-empty buckets
         if @buckets[i].length and not @buckets[i+1].length
           continue
+
+        # Maintain the index of the smallest delta
         if (w = @index[i+1] - @index[i]) < min
           small = i
           min = w
