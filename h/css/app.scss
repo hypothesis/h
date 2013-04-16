@@ -33,6 +33,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 .sliding-panels > li {
   @include smallshadow(-2px);
+  @include stretch-y;
   @include transition(transform .4s);
   @include translateX(100%);
   background: url('../images/noise_1.png');
@@ -40,8 +41,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   -webkit-overflow-scrolling: touch;
   padding: 1em;
   padding-top: 3.5em;
-  position: absolute;
-  height: 100%;
   left: 1em;
   right: 0;
   
@@ -75,12 +74,10 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include stretch-y;
  
   svg {
+    @include stretch-y;
     background: hsla(0, 0, 0, .1);
     border: solid thin rgba($grayLighter, .4);
     left: 17px;
-    height: 100%;
-    position: absolute;
-    top: 0;
     width: $heatmap-width;
   }
 }
