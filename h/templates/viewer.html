@@ -19,7 +19,7 @@
       class="annotator-outer annotator-viewer">
     <!-- Excerpts -->
     <div class="paper excerpt"
-         ng-repeat="target in thread.message.annotation.target">
+         ng-repeat="target in thread.message.target">
       <blockquote ng-bind="target.quote" ng-hide="diff" />
       <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
       <div class="small pull-right" ng-show="target.diffHTML">
@@ -31,7 +31,7 @@
       <!-- Annotation -->
       <div class="detail annotation"
            name="annotation"
-           ng-model="$parent.thread.message.annotation" />
+           ng-model="$parent.thread.message" />
       <!-- Replies -->
       <ul>
         <li ng-class="collapsed && 'collapsed' || ''"

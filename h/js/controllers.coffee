@@ -254,7 +254,7 @@ class Annotation
       $scope.origText = $scope.model.$modelValue.text
       
     $scope.delete = ->
-      annotation = $scope.thread.message.annotation
+      annotation = $scope.thread.message
       replies = $scope.thread.children?.length or 0
 
       # We can delete the annotation if it hasn't got any replies or it is

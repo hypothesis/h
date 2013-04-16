@@ -297,7 +297,7 @@ class Hypothesis extends Annotator
       if annotation.id? and annotation.id != data.id
         # Update the id table for the threading
         thread = @threading.getContainer annotation.id
-        thread.message.id = data.id
+        thread.id = data.id
         @threading.idTable[data.id] = thread
         delete @threading.idTable[annotation.id]
 

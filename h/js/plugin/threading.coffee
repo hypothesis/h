@@ -24,14 +24,12 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
 
     # Get or create a thread to contain the annotation
     thread = (@annotator.threading.getContainer annotation.id)
-    thread.message =
-      annotation: annotation
-      id: annotation.id
-      references: annotation.thread?.split('/')
+    thread.message = annotation
 
     # Attach the thread to its parent, if any.
-    references = thread.message?.references
+    references = annotation.thread?.split('/')
     if references?.length
+      annotation.references = references
       prev = references[references.length-1]
       @annotator.threading.getContainer(prev).addChild thread
 
@@ -47,10 +45,7 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
     if thread.parent? then @annotator.threading.pruneEmpties thread.parent
 
   annotationsLoaded: (annotations) =>
-    @annotator.threading.thread annotations.map (a) ->
-      annotation: a
-      id: a.id
-      references: a.thread?.split '/'
+    @annotator.threading.thread annotations
 
   beforeAnnotationCreated: (annotation) =>
     this.thread annotation
