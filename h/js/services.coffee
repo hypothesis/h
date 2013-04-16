@@ -288,7 +288,10 @@ class Hypothesis extends Annotator
   hide: =>
     @element.scope().frame.visible = false
 
-  patch_update: (store) =>
+  patch_store: (store) =>
+    $location = @element.injector().get '$location'
+    $rootScope = @element.injector().get '$rootScope'
+
     # When the store plugin finishes a request, update the annotation
     # using a monkey-patched update function which updates the threading
     # if the annotation has a newly-assigned id and ensures that the id
@@ -338,7 +341,7 @@ class Hypothesis extends Annotator
             limit: 1000
             uri: href
         this.addPlugin 'Store', options
-        this.patch_update this.plugins.Store
+        this.patch_store this.plugins.Store
         console.log "Loaded annotions for '" + href + "'."
         for href in this.getSynonymURLs href
           console.log "Also loading annotations for: " + href
