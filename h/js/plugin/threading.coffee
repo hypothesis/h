@@ -33,6 +33,9 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
       prev = references[references.length-1]
       @annotator.threading.getContainer(prev).addChild thread
 
+    # Expose the thread to the annotation
+    annotation.thread = thread
+
     # Update the id table
     @annotator.threading.idTable[annotation.id] = thread
 
@@ -41,6 +44,7 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
   annotationDeleted: (annotation) =>
     thread = (@annotator.threading.getContainer annotation.id)
     delete @annotator.threading.idTable[annotation.id]
+    delete annotation.thread  # Break cyclic reference
     thread.message = null
     if thread.parent? then @annotator.threading.pruneEmpties thread.parent
 
