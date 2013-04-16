@@ -283,7 +283,7 @@ class Annotation
         $scope.thread = threading.getContainer id
 
         # Check if this is a brand new annotation
-        annotation = $scope.thread.message?.annotation
+        annotation = $scope.thread.message
         if annotation? and drafts.contains annotation
           $scope.editing = true
 
@@ -300,7 +300,6 @@ class Annotation
       $scope.shared = not $scope.shared
       $element.find('.share-dialog').slideToggle()
 
-      console.log $scope.shared
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
@@ -380,7 +379,7 @@ class Viewer
     if $routeParams.id? and annotator.threading.idTable[$routeParams.id]?
       $scope.detail = true
       $scope.thread = annotator.threading.getContainer $routeParams.id
-      $scope.focus $scope.thread.message?.annotation
+      $scope.focus $scope.thread.message?
     else
       $scope.detail = false
       $scope.thread = null

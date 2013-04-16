@@ -247,6 +247,7 @@ class Hypothesis extends Annotator
     annotation
 
   showViewer: (annotations=[]) =>
+    this.show()
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) ->
@@ -254,10 +255,10 @@ class Hypothesis extends Annotator
         $location.path('/viewer').replace()
         $rootScope.$digest()
     ]
-    this.show()
     this
 
   showEditor: (annotation) =>
+    this.show()
     @element.injector().invoke [
       '$location', '$rootScope', '$route'
       ($location, $rootScope, $route) =>
@@ -279,7 +280,6 @@ class Hypothesis extends Annotator
         if $route.current.controller is 'EditorController'
           $route.current.locals.$scope.$apply (s) -> s.annotation = annotation
     ]
-    this.show()
     this
 
   show: =>
