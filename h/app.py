@@ -101,7 +101,8 @@ class AppController(views.BaseController):
                 else:
                     msgs = [str(e)]
                 for m in msgs: FlashMessage(self.request, m, kind='error')
-            return self.failure(messages.INVALID_FORM)
+            return self.failure(_('Your submission is invalid. '
+                                  'Please try again.'))
         else:
             return self.success()
 
