@@ -12,7 +12,7 @@ def access_token(request):
         'state'
     ]:
         if name not in request.params:
-            msg = _('Missing parameter "${name}".').format({'name': name})
+            msg = _('Missing parameter "${name}".', mapping={'name': name})
             raise HTTPBadRequest(msg)
 
     raise NotImplementedError('OAuth provider not implemented yet.')
