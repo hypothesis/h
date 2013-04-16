@@ -246,7 +246,8 @@ class Annotation
       reply = angular.extend annotator.createAnnotation(),
         references: references
 
-      annotator.setupAnnotation reply
+      # XXX: This is ugly -- it's the one place we refer to the plugin directly
+      annotator.plugins.Threading.thread reply
 
     $scope.edit = ->
       $scope.action = 'edit'

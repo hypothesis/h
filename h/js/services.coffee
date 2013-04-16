@@ -242,9 +242,8 @@ class Hypothesis extends Annotator
   # (Optionally) put some HTML formatting around a quote
   getHtmlQuote: (quote) -> quote
 
-  setupAnnotation: (annotation) ->
-    @plugins.Threading.thread annotation
-    annotation
+  # Do nothing in the app frame, let the host handle it.
+  setupAnnotation: (annotation) -> annotation
 
   showViewer: (annotations=[]) =>
     this.show()

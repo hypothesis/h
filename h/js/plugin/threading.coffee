@@ -14,14 +14,6 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
     @annotator.threading = mail.messageThread()
 
   thread: (annotation) ->
-    # Assign a temporary id if necessary. Threading relies on the id.
-    unless annotation.id?
-      Object.defineProperty annotation, 'id',
-        configurable: true
-        enumerable: false
-        writable: true
-        value: window.btoa Math.random()
-
     # Get or create a thread to contain the annotation
     thread = (@annotator.threading.getContainer annotation.id)
     thread.message = annotation
@@ -52,6 +44,13 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
 
   annotationsLoaded: (annotations) =>
     @annotator.threading.thread annotations
+    this.thread a for a in annotations
 
   beforeAnnotationCreated: (annotation) =>
+    # Assign temporary id. Threading relies on the id.
+    Object.defineProperty annotation, 'id',
+      configurable: true
+      enumerable: false
+      writable: true
+      value: window.btoa Math.random()
     this.thread annotation
