@@ -1,6 +1,6 @@
 from pyramid.httpexceptions import HTTPBadRequest
 
-from h import messages
+from h.models import _
 
 
 def access_token(request):
@@ -12,7 +12,7 @@ def access_token(request):
         'state'
     ]:
         if name not in request.params:
-            msg = '%s "%s".' % (messages.MISSING_PARAMETER, name)
+            msg = _('Missing parameter "${name}".').format({'name': name})
             raise HTTPBadRequest(msg)
 
     raise NotImplementedError('OAuth provider not implemented yet.')
