@@ -5,7 +5,7 @@ from bag.web.pyramid.flash_msg import FlashMessage
 
 from pyramid.view import view_config, view_defaults
 
-from h import api, interfaces, messages, views
+from h import api, interfaces, views
 from h.models import _
 
 
