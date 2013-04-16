@@ -77,8 +77,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       return []
 
     # Accumulate the overlapping annotations into buckets
-    {@buckets, @index, max} = points.sort(this._collate)
-      .reduce ({annotations, buckets, index, max}, [x, d, a], i, points) =>
+    {@buckets, @index} = points.sort(this._collate)
+      .reduce ({annotations, buckets, index}, [x, d, a], i, points) =>
 
         # remove all instances of this annotation from the accumulator
         annotations = annotations.reduce (acc, value) ->
@@ -100,18 +100,16 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           annotations.push a
           buckets.push annotations
           index.push x
-          max = Math.max(max, annotations.length)
         else
           # if this is a -1 control point, exclude the current annotation
           buckets.push annotations
           index.push x
 
-        {annotations, buckets, index, max}
+        {annotations, buckets, index}
       ,
       annotations: []
       buckets: []
       index: []
-      max: 0
 
     # Remove redundant points and merge close buckets until done
     while @buckets.length > 2
@@ -154,26 +152,36 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       (@BUCKET_THRESHOLD_PAD + @BUCKET_SIZE)
     @index.push $(window).height() - @BUCKET_SIZE, $(window).height()
 
+    # Calculate the total count for each bucket (including replies) and the
+    # maximum count.
+    max = 0
+    for b in @buckets
+      total = b.reduce (total, a) ->
+        subtotal = (a.thread?.flattenChildren()?.length or 0) + 1
+        total + subtotal
+      , 0
+      max = Math.max max, total
+      b.total = total
+
     # Set up the stop interpolations for data binding
-    stopData = $.map(@buckets, (annotations, i) =>
+    stopData = $.map @buckets, (bucket, i) =>
       x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
       offsets = [@index[i], x2]
-      if annotations.length
-        start = @buckets[i-1]?.length and ((@buckets[i-1].length + @buckets[i].length) / 2) or 1e-6
-        end = @buckets[i+1]?.length and ((@buckets[i+1].length + @buckets[i].length) / 2) or 1e-6
+      if bucket.total
+        start = @buckets[i-1]?.total and ((@buckets[i-1].total + bucket.total) / 2) or 1e-6
+        end = @buckets[i+1]?.total and ((@buckets[i+1].total + bucket.total) / 2) or 1e-6
         curve = d3.scale.pow().exponent(.1)
           .domain([0, .5, 1])
           .range([
             [offsets[0], i, 0, start]
-            [d3.mean(offsets), i, .5, annotations.length]
+            [d3.mean(offsets), i, .5, bucket.total]
             [offsets[1], i, 1, end]
           ])
           .interpolate(d3.interpolateArray)
-        curve(v).slice() for v in d3.range(0, 1, .05)
+        curve(v) for v in d3.range(0, 1, .05)
       else
         [ [offsets[0], i, 0, 1e-6]
           [offsets[1], i, 1, 1e-6] ]
-    )
 
     # Update the data bindings
     element = d3.select(@element[0]).datum(data)
@@ -216,11 +224,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       "#{(@index[d] + @index[d+1]) / 2}px"
 
     .html (d) =>
-      total = @buckets[d].reduce (total, a) ->
-        subtotal = (a.thread.flattenChildren()?.length or 0) + 1
-        total + subtotal
-      , 0
-      "<div class='label'>#{total}</div><div class='svg'></div>"
+      "<div class='label'>#{@buckets[d].total}</div><div class='svg'></div>"
 
     .classed('upper', @isUpper)
     .classed('lower', @isLower)
