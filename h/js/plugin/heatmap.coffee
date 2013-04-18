@@ -59,7 +59,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     below = []
 
     # Construct control points for the heatmap highlights
-    points = $.map highlights, (hl, i) =>
+    points = highlights.reduce (points, hl, i) =>
       x = hl.offset.top - wrapper.offset().top - offset
       h = hl.height
       d = hl.data
@@ -69,81 +69,73 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       else if x + h >= $(window).height() - @BUCKET_SIZE
         if d not in below then below.push d
       else
-        return [
-          [x, 1, d]
-          [x + h, -1, d]
-        ]
-      return []
+        points.push [x, 1, d]
+        points.push [x + h, -1, d]
+      points
+    , []
 
-    # Accumulate the overlapping annotations into buckets
-    {@buckets, @index} = points.sort(this._collate)
-      .reduce ({annotations, buckets, index}, [x, d, a], i, points) =>
-
-        # remove all instances of this annotation from the accumulator
-        annotations = annotations.reduce (acc, value) ->
-          {values, arrays} = acc
-          if value is a
-            arrays.push values
-            acc.values = []
-          else
-            values.push value
-          acc
-        ,
-          values: []
-          arrays: []
-        annotations = d3.merge annotations.arrays
-
-        if d > 0
-          # if this is a +1 control point, (re-)include the current annotation
-          # by removing and then adding, duplicates are easily avoided
-          annotations.push a
-          buckets.push annotations
-          index.push x
+    # Accumulate the overlapping annotations into buckets.
+    # The algorithm goes like this:
+    # - Collate the points by sorting on position then delta (+1 or -1)
+    # - Reduce over the sorted points
+    #   - For +1 points, add the annotation at this point to an array of
+    #     "carried" annotations. If it already exists, increase the
+    #     corresponding value in an array of counts which maintains the
+    #     number of points that include this annotation.
+    #   - For -1 points, decrement the value for the annotation at this point
+    #     in the carried array of counts. If the count is now zero, remove the
+    #     annotation from the carried array of annotations.
+    #   - If this point is the first, last, sufficiently far from the previous,
+    #     or there are no more carried annotations, add a bucket marker at this
+    #     point.
+    #   - Otherwise, if the last bucket was not isolated (the one before it
+    #     has at least one annotation) then remove it and ensure that its
+    #     annotations and the carried annotations are merged into the previous
+    #     bucket.
+    {@buckets, @index} = points
+    .sort(this._collate)
+    .reduce ({buckets, index, carry}, [x, d, a], i, points) =>
+      if d > 0                                            # Add annotation
+        if (j = carry.annotations.indexOf a) < 0
+          carry.annotations.unshift a
+          carry.counts.unshift 1
         else
-          # if this is a -1 control point, exclude the current annotation
-          buckets.push annotations
-          index.push x
+          carry.counts[j]++
+      else                                                # Remove annotation
+        j = carry.annotations.indexOf a                   # XXX: assert(i >= 0)
+        if --carry.counts[j] is 0
+          carry.annotations.splice j, 1
+          carry.counts.splice j, 1
 
-        {annotations, buckets, index}
-      ,
-      annotations: []
+      if (
+        (index.length is 0 or i is points.length - 1) or  # First or last?
+        carry.annotations.length is 0 or                  # A zero marker?
+        x - index[index.length-1] > 180                   # A large gap?
+      )                                                   # Mark a new bucket.
+        buckets.push carry.annotations.slice()
+        index.push x
+      else
+        # Merge the previous bucket, making sure its predecessor contains
+        # all the carried annotations and the annotations in the previous
+        # bucket.
+        if buckets[buckets.length-2]?.length
+          last = buckets[buckets.length-2]
+          toMerge = buckets.pop()
+          index.pop()
+        else
+          last = buckets[buckets.length-1]
+          toMerge = []
+        last.push a0 for a0 in carry.annotations when a0 not in last
+        last.push a0 for a0 in toMerge when a0 not in last
+
+      {buckets, index, carry}
+    ,
       buckets: []
       index: []
-
-    # Remove redundant points and merge close buckets until done
-    while @buckets.length > 2
-      # Find the two closest points
-      small = 0
-      threshold = min = 60
-      for i in [0..@index.length-2]
-        # Don't merge empty with non-empty buckets
-        if @buckets[i].length and not @buckets[i+1].length
-          continue
-
-        # Maintain the index of the smallest delta
-        if (w = @index[i+1] - @index[i]) < min
-          small = i
-          min = w
-          break if min == 0 # short-circuit optimization
-
-      # Merge them if they are close enough
-      if min < threshold
-        # Prefer merging the successor bucket backward but not if it's last
-        # since the gradient must always return to 0 at the end
-        if @buckets[small+2]?
-          from = small + 1
-          to = small
-
-          for b in @buckets[from]
-            @buckets[to].push b if b not in @buckets[to]
-        else
-          from = small
-
-        # Drop the merged bucket and index
-        @buckets.splice(from, 1)
-        @index.splice(from, 1)
-      else
-        break
+      carry:
+        annotations: []
+        counts: []
+        latest: 0
 
     # Add the scroll buckets
     @buckets.unshift above, []
