@@ -138,9 +138,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         latest: 0
 
     # Add the scroll buckets
-    @buckets.unshift above, []
+    @buckets.unshift [], above, []
     @buckets.push below, []
-    @index.unshift @BUCKET_THRESHOLD_PAD,
+    @index.unshift 0, @BUCKET_THRESHOLD_PAD,
       (@BUCKET_THRESHOLD_PAD + @BUCKET_SIZE)
     @index.push $(window).height() - @BUCKET_SIZE, $(window).height()
 
@@ -226,5 +226,5 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     this.publish('updated')
 
-  isUpper: (i) => i == 0
+  isUpper: (i) => i == 1
   isLower: (i) => i == @index.length - 2
