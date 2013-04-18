@@ -77,11 +77,7 @@ def includeme(config):
         app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
     es.init_app(app)
     with app.test_request_context():
-        try:
-            Annotation.create_all()
-        except:
-            Annotation.update_settings()
-            Annotation.create_all()
+        Annotation.create_all()
 
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True
