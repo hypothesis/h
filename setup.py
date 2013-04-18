@@ -20,6 +20,7 @@ setup(
         'pyramid>=1.4',
         'pyramid_tm>=0.4',
         'pyramid_webassets>=0.7',
+        'python-dateutil==2.1',
         'setuptools>=0.6c11',
         'velruse>=1.0',
         'webassets>=0.8',
