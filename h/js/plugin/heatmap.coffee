@@ -44,7 +44,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   _colorize: (v) ->
     c = d3.scale.pow().exponent(2)
     .domain([0, 1])
-    .range(['powderblue', 'darkblue'])
+    .range(['#f7fbff', '#08306b'])
     .interpolate(d3.interpolateHcl)
     c(v).toString()
 
