@@ -8,7 +8,6 @@
   $border: $gray;
   $hoverborder: $grayDark;
   @include box-sizing(border-box);
-  @include sweetbutton;
   height: 40px;
   margin-left: -20px;
   margin-top: -50px;
@@ -37,7 +36,7 @@
   }
 
   button {
-    background-color: transparent;
+    @include sweetbutton;
     background-image: url("../images/pen_1.png") !important;
     background-size: 65%;
     background-position: center;
