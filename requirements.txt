@@ -39,6 +39,8 @@ python-openid==2.2.5
 repoze.lru==0.6
 repoze.sendmail==4.0b2
 requests==0.11.2
+sockjs-tornado==1.0.0
+tornado==3.0.1
 transaction==1.4.1
 translationstring==1.1
 urllib3==1.5

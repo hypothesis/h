@@ -7,7 +7,7 @@ from pyramid.request import Request
 from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
-from h import interfaces, models
+from h import interfaces, models, streamer
 
 
 class Store(object):
@@ -63,6 +63,9 @@ def before_request():
     g.auth = auth.Authenticator(models.Consumer.get_by_key)
     g.authorize = authorize
     g.before_annotation_update = anonymize_deletes
+    g.after_annotation_create = streamer.after_save
+    g.after_annotation_update = streamer.after_update
+    g.after_annotation_delete = streamer.after_delete
 
 
 def includeme(config):

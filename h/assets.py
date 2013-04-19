@@ -123,6 +123,8 @@ pagedown = Uglify(
     output='lib/Markdown.Converter.min.js'
 )
 
+sockjs = Uglify('h:lib/sockjs-0.3.4.js', output='lib/sockjs-client.min.js')
+
 domTextFamily = Uglify(
     Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
     Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
@@ -180,6 +182,16 @@ display = Bundle(
     Coffee('js/displayer.coffee', output='js/displayer.js'),
     CSS('css/displayer.css', output='js/displayer.min.css'),
 )
+
+streamer = Bundle(
+    sockjs,
+    angular,
+    pagedown,
+    Coffee('js/filters.coffee', output='js/filters.js'),
+    Coffee('js/streamer.coffee', output='js/streamer.js'),
+    CSS('css/displayer.css', output='js/displayer.min.css')
+)
+
 
 site = SCSS('css/site.scss', depends=(base + common), output='css/site.min.css')
 

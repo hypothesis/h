@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html metal:use-macro="main_template" >
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <!-- Always force latest IE rendering engine (even in intranet) &amp; Chrome Frame -->
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <title>Test Streamer</title>
+    <link href="css/displayer.css" rel="stylesheet" type="text/css">  
+  </head>
+  <style type="text/css"></style>
+
+  <body metal:fill-slot="body" ng-app="h.streamer">
+    <script type="text/javascript">var port = ${port};</script>
+    <span ng-controller="StreamerCtrl">
+    <div class="nav">
+      <div class="inner">
+        <div class="barbutton left title">
+          <span>hypothes<span class="red">.</span>is</span>
+        </div>
+        <div class="barbutton left">
+          <span ng-show="streaming">Streaming :)</span>
+          <span ng-hide="streaming" ng-click="start_streaming()">Not streaming <span class="red">:(</span> Click here to start streaming!</span>
+        </div>
+        <div class="barbutton right">
+          <span>sign up</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="stream">  
+      <ul class="annotator-listing annotator-widget">
+          <div class="papercontainer">
+            <div class="metadata">
+          <div>
+            <li ng-repeat="annotation in annotations">
+                <div class="hyp-annotation hyp-paper hyp-detail">
+                  <div style="padding-bottom: .5em;">                
+                    <div class="topbar">
+                      <div>
+                        <span class="hyp-user">{{annotation['user'] | userName}}</span>
+                        <span ng-switch="annotation['action']">
+                          <span ng-switch-when="save">&nbsp;has created an annotation</span>
+                          <span ng-switch-when="update">&nbsp;has updated an annotation</span>
+                          <span ng-switch-when="delete">&nbsp;has deleted an annotation</span>
+                        </span> 
+                        <div class="hyp-time">{{annotation['created'] | fuzzyTime}}</div>
+                      </div>
+                    </div>
+		  <div class="noiseknockout">
+                    <div class="hyp-excerpt hyp-paper stream-floatainer margin-right">
+                      <blockquote>{{annotation['quote']}}</blockquote>
+                    </div>
+                    <div class="smalldisplacer"></div>
+                    <div class="hyp-excerpt hyp-paper stream-floatainer">
+                      <div>{{annotation['text']}}</div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+            </li>
+          </div>
+          </div>
+          </div>
+      </ul>
+    </div>
+   </span>
+  </body>
+</html>

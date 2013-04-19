@@ -6,7 +6,7 @@ from annotator import auth
 from pyramid.view import view_config
 
 from h import views
-
+from h import streamer
 
 @view_config(renderer='string', request_method='GET', route_name='token')
 class TokenController(views.BaseController):
@@ -41,6 +41,11 @@ def includeme(config):
         api.url: https://example.com/api
 
     """
+
+    settings = config.get_settings()
+    #configure streamer
+    if 'streamer.port' in settings:
+        streamer.init_streamer(settings['streamer.port'])
 
     api_url = config.registry.settings.get('api.url', '/api')
 

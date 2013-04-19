@@ -285,3 +285,4 @@ def includeme(config):
     config.add_route('index', '/')
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
+    config.add_route('streamer', '/stream/')

@@ -18,6 +18,7 @@ from horus.views import (
 )
 
 from h import interfaces
+from h import streamer as streamer_template
 
 import logging
 log = logging.getLogger(__name__)
@@ -77,6 +78,11 @@ class Annotation(BaseController):
         request.response.charset = 'UTF-8'
         return request.context
 
+@view_config(route_name='streamer',
+             renderer='h:templates/streamer.pt',
+             layout='lay_streamer')
+def streamer(request):
+    return streamer_template.add_port()
 
 def includeme(config):
     config.add_view(

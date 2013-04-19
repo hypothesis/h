@@ -329,6 +329,11 @@ span.errorMsg {
   .btn-link:hover {
     color: #bd1c2b; }
 
+/* line 121, common.scss */
+.btn-twitter {
+  background: url("../images/sign-in-with-twitter-l.png");
+  display: inline-block; }
+
 /* line 126, common.scss */
 .red {
   color: #bd1c2b; }
@@ -401,6 +406,12 @@ span.errorMsg {
     /* line 203, common.scss */
     .annotator-controls a.hyp-flag {
       background-image: url("../images/flag_1.png"); }
+    /* line 207, common.scss */
+    .annotator-controls a.annotator-save {
+      background-image: url("../images/submit_1.png"); }
+    /* line 211, common.scss */
+    .annotator-controls a.annotator-cancel {
+      background-image: url("../images/delete_1.png"); }
 
 /* line 220, common.scss */
 .a-tabs {
@@ -776,6 +787,9 @@ body {
       /* line 60, site.css.scss */
       #stream .tile .control:hover {
         opacity: .8; }
+      /* line 63, site.css.scss */
+      #stream .tile .control .fave {
+        background-image: url("../images/fave_2.png"); }
       /* line 66, site.css.scss */
       #stream .tile .control .goto {
         text-decoration: none;
@@ -789,6 +803,9 @@ body {
         padding-left: 0;
         padding-right: 1.3em;
         float: right;}
+      /* line 71, site.css.scss */
+      #stream .tile .control .flag {
+        background-image: url("../images/flag_4.png"); }
     /* line 75, site.css.scss */
     #stream .tile .sidepanel {
       position: absolute;
@@ -871,6 +888,10 @@ body {
   float: left;
   width: 50%; }
 
+.stream-floatainer {
+  float: left;
+  width: 49%; }
+
 /* line 145, site.css.scss */
 .nav {
   position: fixed;
@@ -943,6 +964,10 @@ body {
 
 .magiccontrols > * {
 	display: inline-block;
+}
+
+.margin-right {
+  margin-right: 1em;
 }
 
 @media(max-width:600px)
