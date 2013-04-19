@@ -65,6 +65,12 @@ class Annotator.Host extends Annotator
           parsed[k] = v
         parsed
 
+    # Build a channel for the publish API
+    @api = Channel.build
+      origin: '*'
+      scope: 'annotator:api'
+      window: @frame[0].contentWindow
+
     # Build a channel for the panel UI
     @panel = Channel.build
       origin: '*'
@@ -257,3 +263,8 @@ class Annotator.Host extends Annotator
     # is needed for preventing the panel from closing while annotating.
     unless event and this.isAnnotator(event.target)
       @mouseIsDown = true
+
+  addToken: (token) =>
+    @api.notify
+      method: 'addToken'
+      params: token

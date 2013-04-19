@@ -127,6 +127,16 @@ class Hypothesis extends Annotator
           parsed[k] = v
         parsed
 
+    @api = Channel.build
+      origin: $location.search().xdm
+      scope: 'annotator:api'
+      window: $window.parent
+
+    .bind('addToken', (ctx, token) =>
+      @element.scope().token = token
+      @element.scope().$digest()
+    )
+
     @provider = Channel.build
       origin: $location.search().xdm
       scope: 'annotator:panel'
