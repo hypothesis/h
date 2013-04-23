@@ -971,6 +971,9 @@ body {
   margin-right: 1em;
 }
 
+.pull-left {
+	float: left;
+}
 
 @media(max-width:600px)
 {

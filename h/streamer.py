@@ -21,6 +21,9 @@ class StreamerConnection(SockJSConnection):
         payload = json.loads(msg)
         if 'users' in payload:
             payload['users'] = [x.strip() for x in payload['users']]
+        if 'actions' in payload:
+            payload['actions'] = {x: bool(y) for x, y in payload['actions'].items()}
+        
         #Add new filter
         self.filter = payload
       except:
@@ -50,16 +53,27 @@ def add_port():
 def after_action(annotation, action):
     if not authz.authorize(annotation, 'read'): return
     for connection in StreamerConnection.connections:
-        filter = connection.filter
-        if len(filter) > 0:
-           if 'users' in filter:
-               user = annotation['user'].split(':')[1].split('@')[0]
-               if user in filter['users'] :
-                 connection.send([annotation, action])
-        else:
-          #No filter, just send everything
-    	  connection.send([annotation, action])
+        try:
+          filter = connection.filter
+          if len(filter) > 0:
+            user_filter = True
+            if 'users' in filter:
+              user = annotation['user'].split(':')[1].split('@')[0]
+              user_filter = user in filter['users']
 
+            action_filter =  True
+            if 'actions' in filter:
+              action_filter =  filter['actions'][action]
+
+            if user_filter and action_filter:
+              connection.send([annotation, action])                 
+          else:
+            #No filter, just send everything
+            connection.send([annotation, action])
+        except:
+           log.info(traceback.format_exc())
+           log.info('Filter error!')  
+               
 def after_save(annotation):
     after_action(annotation, 'create')    
 

@@ -33,8 +33,25 @@
         <div class="papercontainer">
           <div class="metadata">
             <div class="hyp-annotation hyp-paper hyp-detail">
-              Username: 
-              <input class="user-name" maxlength=60 type="text" ng-model="username"/>
+              <span class="pull-left">
+                Username: 
+                <input class="user-name" maxlength=60 type="text" ng-model="username"/>
+              </span>
+              <span class="pull-left">
+                <div>
+                  <input type="checkbox" data-col="1" ng-model="action_create"/>
+                  Create
+                </div>
+                <div>
+                  <input type="checkbox" data-col="1" ng-model="action_update"/>
+                  Update:
+                </div>
+                <div>
+                  <input type="checkbox" data-col="1" ng-model="action_delete"/>
+                  Delete:
+                </div>
+              </span>
+              
               <span class="pull-right">
                 <button ng-click="start_streaming()" class="btn check-icon">Click here to start streaming!</button>
               </span>

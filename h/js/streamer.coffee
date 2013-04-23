@@ -14,6 +14,9 @@ angular.module('h.streamer',['h.filters'])
   ($scope, $element) ->
     $scope.streaming = false
     $scope.annotations = []    
+    $scope.action_create = true
+    $scope.action_update = true
+    $scope.action_delete = true
 
     $scope.start_streaming = ->
       if $scope.streaming
@@ -22,9 +25,14 @@ angular.module('h.streamer',['h.filters'])
                
       $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + port + '/streamer')    
       $scope.sock.onopen = ->
-      	filter = {}
-      	if $scope.username?.length > 1
-      	  filter.users = $scope.username.split ','
+        filter = {}
+        if $scope.username?.length > 1
+          filter.users = $scope.username.split ','
+        filter.actions = {
+          create : $scope.action_create,
+          update : $scope.action_update,
+          delete : $scope.action_delete 
+        }
         $scope.sock.send JSON.stringify filter
         $scope.$apply =>
           $scope.streaming = true
