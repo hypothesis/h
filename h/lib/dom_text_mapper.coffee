@@ -3,6 +3,7 @@ class window.DomTextMapper
   USE_THEAD_TBODY_WORKAROUND = true
   USE_TABLE_TEXT_WORKAROUND = true
   USE_OL_WORKAROUND = true
+  USE_LINK_WORKAROUND = true
   USE_CAPTION_WORKAROUND = true
   USE_EMPTY_TEXT_WORKAROUND = true
   CONTEXT_LEN = 32
@@ -488,6 +489,7 @@ class window.DomTextMapper
         ((USE_THEAD_TBODY_WORKAROUND and node.tagName.toLowerCase() in
           ["thead", "tbody"]) or
         (USE_OL_WORKAROUND and node.tagName.toLowerCase() is "ol") or
+        (USE_LINK_WORKAROUND and node.tagName.toLowerCase() is "a") or        
         (USE_CAPTION_WORKAROUND and node.tagName.toLowerCase() is "caption"))
       # This is a thead or a tbody, and selection those is problematic,
       # because if the WebKit bug.

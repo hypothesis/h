@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-939cdee
+** Annotator 1.2.6-dev-6f0e53a
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-04-12 22:18:50Z
+** Built at: 2013-04-23 14:26:00Z
 */
 
 (function() {
@@ -343,7 +343,7 @@
     }
 
     BrowserRange.prototype.normalize = function(root) {
-      var isImg, it, node, nr, offset, p, r, _k, _len3, _ref2, _ref3;
+      var isImg, it, node, nr, offset, p, r, _k, _len3, _ref2;
       if (this.tainted) {
         console.error(_t("You may only call normalize() once on a BrowserRange!"));
         return false;
@@ -385,7 +385,7 @@
         }
         nr.end = nr.start;
       } else {
-        if ((0 < (_ref3 = r.endOffset) && _ref3 < r.end.nodeValue.length) && !r.endImg) {
+        if (r.endOffset < r.end.nodeValue.length && !r.endImg) {
           r.end.splitText(r.endOffset);
         }
         nr.end = r.end;
@@ -1043,7 +1043,7 @@
           if ((anchor != null ? anchor.range : void 0) != null) {
             normedRanges.push(anchor.range);
           } else {
-            console.log("Could not find anchor for annotation target '" + t.id + "' (for annotation '" + annotation.id + "').");
+            console.log("Could not find anchor target for annotation '" + annotation.id + "'.");
           }
         } catch (exception) {
           if (exception.stack != null) console.log(exception.stack);

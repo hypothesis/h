@@ -112,7 +112,7 @@ class Hypothesis extends Annotator
 
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'quote', 'ranges', 'target']
+    whitelist = ['diffHTML', 'quote', 'ranges', 'target', 'id']
     this.addPlugin 'Bridge',
       origin: $location.search().xdm
       window: $window.parent
