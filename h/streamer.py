@@ -1,6 +1,7 @@
 import json
 import logging
 import threading
+import traceback
 
 from tornado import web, ioloop
 from sockjs.tornado import SockJSRouter, SockJSConnection
@@ -12,14 +13,22 @@ class StreamerConnection(SockJSConnection):
     connections = set()
 
     def on_open(self, info):
-	self.connections.add(self)
+      self.filter = {}
+      self.connections.add(self)
 
     def on_message(self, msg):
-	pass
-        #Json configuration will come here later
+      try:
+        payload = json.loads(msg)
+        if 'users' in payload:
+            payload['users'] = [x.strip() for x in payload['users']]
+        #Add new filter
+        self.filter = payload
+      except:
+        log.info(traceback.format_exc())
+        log.info('Failed to parse filter:' + str(msg))  
 
     def on_close(self):
-	self.connections.remove(self)
+	  self.connections.remove(self)
 
 def _init_streamer(port):
     StreamerRouter = SockJSRouter(StreamerConnection, '/streamer')
@@ -40,11 +49,19 @@ def add_port():
 
 def after_action(annotation, action):
     if not authz.authorize(annotation, 'read'): return
-    for connection in StreamerConnection.connections :
-    	connection.send([annotation, action])
+    for connection in StreamerConnection.connections:
+        filter = connection.filter
+        if len(filter) > 0:
+           if 'users' in filter:
+               user = annotation['user'].split(':')[1].split('@')[0]
+               if user in filter['users'] :
+                 connection.send([annotation, action])
+        else:
+          #No filter, just send everything
+    	  connection.send([annotation, action])
 
 def after_save(annotation):
-    after_action(annotation, 'save')    
+    after_action(annotation, 'create')    
 
 def after_update(annotation):
     after_action(annotation, 'update')    

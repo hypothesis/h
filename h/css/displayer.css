@@ -147,7 +147,8 @@ body {
 
 /* line 19, common.scss */
 input {
-  width: 100%; }
+  /*width: 100%;*/ 
+}
 
 /* line 20, common.scss */
 img {
@@ -969,6 +970,7 @@ body {
 .margin-right {
   margin-right: 1em;
 }
+
 
 @media(max-width:600px)
 {

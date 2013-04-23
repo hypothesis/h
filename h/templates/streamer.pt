@@ -20,34 +20,50 @@
         </div>
         <div class="barbutton left">
           <span ng-show="streaming">Streaming :)</span>
-          <span ng-hide="streaming" ng-click="start_streaming()">Not streaming <span class="red">:(</span> Click here to start streaming!</span>
+          <span ng-hide="streaming">Not streaming <span class="red">:(</span></span>
         </div>
         <div class="barbutton right">
           <span>sign up</span>
         </div>
       </div>
     </div>
-
+    
     <div id="stream">  
       <ul class="annotator-listing annotator-widget">
-          <div class="papercontainer">
-            <div class="metadata">
-          <div>
-            <li ng-repeat="annotation in annotations">
+        <div class="papercontainer">
+          <div class="metadata">
+            <div class="hyp-annotation hyp-paper hyp-detail">
+              Username: 
+              <input class="user-name" maxlength=60 type="text" ng-model="username"/>
+              <span class="pull-right">
+                <button ng-click="start_streaming()" class="btn check-icon">Click here to start streaming!</button>
+              </span>
+            </div>
+            <div>
+            </div>
+          </div>
+        </div>
+      </ul>
+
+      <ul class="annotator-listing annotator-widget">
+        <div class="papercontainer">
+          <div class="metadata">
+            <div>
+              <li ng-repeat="annotation in annotations">
                 <div class="hyp-annotation hyp-paper hyp-detail">
                   <div style="padding-bottom: .5em;">                
                     <div class="topbar">
                       <div>
                         <span class="hyp-user">{{annotation['user'] | userName}}</span>
                         <span ng-switch="annotation['action']">
-                          <span ng-switch-when="save">&nbsp;has created an annotation</span>
+                          <span ng-switch-when="create">&nbsp;has created an annotation</span>
                           <span ng-switch-when="update">&nbsp;has updated an annotation</span>
                           <span ng-switch-when="delete">&nbsp;has deleted an annotation</span>
                         </span> 
                         <div class="hyp-time">{{annotation['created'] | fuzzyTime}}</div>
                       </div>
                     </div>
-		  <div class="noiseknockout">
+		          <div class="noiseknockout">
                     <div class="hyp-excerpt hyp-paper stream-floatainer margin-right">
                       <blockquote>{{annotation['quote']}}</blockquote>
                     </div>
