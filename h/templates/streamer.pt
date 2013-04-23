@@ -51,6 +51,10 @@
                   Delete:
                 </div>
               </span>
+              <span class="pull-left">
+                Keywords: 
+                <input class="search-kw" maxlength=60 type="text" ng-model="keywords"/>
+              </span>
               
               <span class="pull-right">
                 <button ng-click="start_streaming()" class="btn check-icon">Click here to start streaming!</button>
