@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-6f0e53a
+** Annotator 1.2.6-dev-0522355
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-04-23 14:26:00Z
+** Built at: 2013-04-23 15:06:28Z
 */
 
 (function() {
@@ -989,7 +989,7 @@
       len = this.domMapper.getDocLength();
       if (expectedStart == null) expectedStart = len / 2;
       options = {
-        matchDistance: len,
+        matchDistance: len * 2,
         withFuzzyComparison: true
       };
       result = this.domMatcher.searchFuzzy(quote, expectedStart, false, null, options);
