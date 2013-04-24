@@ -35,6 +35,8 @@ angular.module('h.streamer',['h.filters'])
         }
         if $scope.keywords?.length > 0
           filter.keywords = $scope.keywords.split ','
+        if $scope.threads?.length > 0
+          filter.threads = $scope.threads.split ','
         $scope.sock.send JSON.stringify filter
         $scope.$apply =>
           $scope.streaming = true

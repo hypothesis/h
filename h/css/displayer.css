@@ -975,6 +975,33 @@ body {
 	float: left;
 }
 
+.filter-inline {
+	display: inline-block;
+	width: 100%;
+}
+
+.filter-element {
+	/*margin: 0.5em;*/
+}
+
+.filter-title {
+      font-size: 1.7em;
+      text-align: center;
+      margin-bottom: 0.25em; 	
+}
+
+.filter-block {
+	width: 20%;
+}
+
+.filter-input {
+	width: 95%;
+}
+
+.filter-checkboxes {
+	margin-top: 0.5em;
+}
+
 @media(max-width:600px)
 {
 	.floatainer {

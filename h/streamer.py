@@ -25,6 +25,8 @@ class StreamerConnection(SockJSConnection):
             payload['actions'] = {x: bool(y) for x, y in payload['actions'].items()}
         if 'keywords' in payload:
             payload['keywords'] = [x.strip() for x in payload['keywords']]
+        if 'threads' in payload:
+            payload['threads'] = [x.strip() for x in payload['threads']]
         
         #Add new filter
         self.filter = payload
@@ -74,8 +76,15 @@ def after_action(annotation, action):
                   if annotation['text'].find(keyword) >= 0:
                     keyword_filter = True
                     break
-                
-            if user_filter and action_filter and keyword_filter:
+            
+            thread_filter = True
+            if 'threads' in filter:
+                keyword_filter = False
+                intersect = [filter(lambda x: x in filter['threads'], sublist) for sublist in annotation['references']]
+                if annotation['id'] in filter['threads'] or len(intersect) > 0:
+                  thread_filter = True
+                                  
+            if user_filter and action_filter and keyword_filter and thread_filter:
               connection.send([annotation, action])                 
           else:
             #No filter, just send everything

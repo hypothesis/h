@@ -32,33 +32,50 @@
       <ul class="annotator-listing annotator-widget">
         <div class="papercontainer">
           <div class="metadata">
-            <div class="hyp-annotation hyp-paper hyp-detail">
-              <span class="pull-left">
-                Username: 
-                <input class="user-name" maxlength=60 type="text" ng-model="username"/>
-              </span>
-              <span class="pull-left">
-                <div>
-                  <input type="checkbox" data-col="1" ng-model="action_create"/>
-                  Create
-                </div>
-                <div>
-                  <input type="checkbox" data-col="1" ng-model="action_update"/>
-                  Update:
-                </div>
-                <div>
-                  <input type="checkbox" data-col="1" ng-model="action_delete"/>
-                  Delete:
-                </div>
-              </span>
-              <span class="pull-left">
-                Keywords: 
-                <input class="search-kw" maxlength=60 type="text" ng-model="keywords"/>
-              </span>
-              
-              <span class="pull-right">
-                <button ng-click="start_streaming()" class="btn check-icon">Click here to start streaming!</button>
-              </span>
+            <div class="hyp-annotation hyp-paper hyp-detail filter-inline">
+              <div class="filter-title">
+                Filters
+              </div>
+              <div>
+                <span class="pull-left filter-element filter-block">
+                  <div>Usernames</div> 
+                  <div><input class="filter-input" type="text" ng-model="username" placeholder="any"/></div>
+                </span>
+
+                <span class="pull-left filter-element filter-block">
+                  <div>Threads</div> 
+                  <div><input class="filter-input" type="text" ng-model="threads" placeholder="any"/></div>
+                </span>
+
+                <span class="pull-left filter-element filter-block">
+                  <div>Keywords</div> 
+                  <div><input class="filter-input" type="text" ng-model="keywords" placeholder="any"/></div>
+                </span>
+
+                <span class="pull-left filter-element filter-block">
+                  <div>
+                     Action
+                  </div>
+                  <div class="filter-checkboxes">
+                    <span>
+                      <input type="checkbox" data-col="1" ng-model="action_create"/>
+                      Create
+                    </span>
+                    <span>
+                      <input type="checkbox" data-col="1" ng-model="action_update"/>
+                      Update
+                    </span>
+                    <span>
+                      <input type="checkbox" data-col="1" ng-model="action_delete"/>
+                      Delete
+                    </span>
+                  </div>
+                </span>
+             
+                <span class="pull-right filter-element filter-block">
+                  <button ng-click="start_streaming()" class="btn check-icon">Click here to start streaming!</button>
+                </span>
+              </div>
             </div>
             <div>
             </div>
