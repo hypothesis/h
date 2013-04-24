@@ -51,7 +51,7 @@ class DisplayerLayout(BaseLayout):
 
 
 @layout_config(name='lay_streamer', template='h:templates/base.pt')
-class DisplayerLayout(BaseLayout):
+class StreamerLayout(BaseLayout):
     requirements = (('streamer', None),)
 
 def includeme(config):
