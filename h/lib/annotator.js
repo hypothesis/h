@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-0522355
+** Annotator 1.2.6-dev-e666b05
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-04-23 15:06:28Z
+** Built at: 2013-04-24 10:16:24Z
 */
 
 (function() {
@@ -102,11 +102,12 @@
   $.fn.xpath = function(relativeRoot) {
     var jq;
     jq = this.map(function() {
-      var elem, idx, path;
+      var elem, idx, path, tagName;
       path = '';
       elem = this;
       while (elem && elem.nodeType === 1 && elem !== relativeRoot) {
-        idx = $(elem.parentNode).children(elem.tagName).index(elem) + 1;
+        tagName = elem.tagName.replace(":", "\\:");
+        idx = $(elem.parentNode).children(tagName).index(elem) + 1;
         idx = "[" + idx + "]";
         path = "/" + elem.tagName.toLowerCase() + idx + path;
         elem = elem.parentNode;
@@ -1206,7 +1207,14 @@
       var container, range, selector, target, _k, _len3, _ref2;
       this.mouseIsDown = false;
       if (this.ignoreMouseup) return;
-      this.selectedTargets = this.getSelectedTargets();
+      try {
+        this.selectedTargets = this.getSelectedTargets();
+      } catch (exception) {
+        console.log("Error while checking selection:");
+        console.log(exception.stack);
+        alert("There is something very strange about the current selection. Sorry, but I can not annotate this.");
+        return;
+      }
       _ref2 = this.selectedTargets;
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
         target = _ref2[_k];
