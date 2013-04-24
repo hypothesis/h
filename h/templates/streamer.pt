@@ -38,23 +38,23 @@
               </div>
               <div>
                 <span class="pull-left filter-element filter-block">
-                  <div>Usernames</div> 
+                  <div>Username(s)</div> 
                   <div><input class="filter-input" type="text" ng-model="username" placeholder="any"/></div>
                 </span>
 
                 <span class="pull-left filter-element filter-block">
-                  <div>Threads</div> 
+                  <div>Thread(s)</div> 
                   <div><input class="filter-input" type="text" ng-model="threads" placeholder="any"/></div>
                 </span>
 
                 <span class="pull-left filter-element filter-block">
-                  <div>Keywords</div> 
+                  <div>Keyword(s)</div> 
                   <div><input class="filter-input" type="text" ng-model="keywords" placeholder="any"/></div>
                 </span>
 
                 <span class="pull-left filter-element filter-block">
                   <div>
-                     Action
+                     Action(s)
                   </div>
                   <div class="filter-checkboxes">
                     <span>
@@ -73,7 +73,8 @@
                 </span>
              
                 <span class="pull-right filter-element filter-block">
-                  <button ng-click="start_streaming()" class="btn check-icon">Click here to start streaming!</button>
+                  <span ng-show="streaming"><button ng-click="start_streaming()" class="btn check-icon">Change filter parameters</button></span>
+                  <span ng-hide="streaming"><button ng-click="start_streaming()" class="btn check-icon">Start streaming</button></span>
                 </span>
               </div>
             </div>

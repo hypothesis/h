@@ -20,13 +20,13 @@ class StreamerConnection(SockJSConnection):
       try:
         payload = json.loads(msg)
         if 'users' in payload:
-            payload['users'] = [x.strip() for x in payload['users']]
+            payload['users'] = set([x.strip() for x in payload['users']])
         if 'actions' in payload:
             payload['actions'] = {x: bool(y) for x, y in payload['actions'].items()}
         if 'keywords' in payload:
-            payload['keywords'] = [x.strip() for x in payload['keywords']]
+            payload['keywords'] = set([x.strip() for x in payload['keywords']])
         if 'threads' in payload:
-            payload['threads'] = [x.strip() for x in payload['threads']]
+            payload['threads'] = set([x.strip() for x in payload['threads']])
         
         #Add new filter
         self.filter = payload
@@ -56,6 +56,7 @@ def add_port():
 
 def after_action(annotation, action):
     if not authz.authorize(annotation, 'read'): return
+    
     for connection in StreamerConnection.connections:
         try:
           filter = connection.filter
@@ -79,11 +80,11 @@ def after_action(annotation, action):
             
             thread_filter = True
             if 'threads' in filter:
-                keyword_filter = False
-                intersect = [filter(lambda x: x in filter['threads'], sublist) for sublist in annotation['references']]
+                threads_filter = False
+                intersect = list(filter['threads'] & set(annotation['references']))
                 if annotation['id'] in filter['threads'] or len(intersect) > 0:
                   thread_filter = True
-                                  
+                         
             if user_filter and action_filter and keyword_filter and thread_filter:
               connection.send([annotation, action])                 
           else:
