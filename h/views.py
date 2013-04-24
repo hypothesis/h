@@ -66,8 +66,8 @@ class Annotation(BaseController):
                 replies = replies + reply['number_of_replies'] + 1
         d['number_of_replies'] = replies
 
-        for key, value in d.items():
-            log.debug(key + ': ' + str(value))
+        #for key, value in d.items():
+        #    log.debug(key + ': ' + str(value))
 
         return d
 

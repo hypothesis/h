@@ -7,7 +7,7 @@ import urllib2
 
 from datetime import datetime
 from math import floor
-from urlparse import urlparse
+from urlparse import urlparse, urlunparse
 
 from dateutil.parser import parse
 from dateutil.tz import tzutc
@@ -19,6 +19,7 @@ from pyramid.interfaces import ILocation
 from zope.interface import implementer
 
 import BeautifulSoup
+import re
 
 from h import interfaces
 
@@ -123,6 +124,16 @@ class AppFactory(BaseResource):
 
 
 class Annotation(BaseResource, dict):
+    def urlEncodeNonAscii(self, b):
+        return re.sub('[\x80-\xFF]', lambda c: '%%%02x' % ord(c.group(0)), b)
+
+    def iriToUri(self, iri):
+        parts= urlparse(iri)
+        return urlunparse(
+            part.encode('idna') if parti==1 else self.urlEncodeNonAscii(part.encode('utf-8'))
+            for parti, part in enumerate(parts)
+        )
+    
     def _url_values(self):
         # Getting the title of the uri.
         # hdrs magic is needed because urllib2 is forbidden to use with default
@@ -131,7 +142,8 @@ class Annotation(BaseResource, dict):
             "Mozilla/5.0 (X11; U; Linux i686) " \
             "Gecko/20071127 Firefox/2.0.0.11"
         headers = {'User-Agent': agent}
-        req = urllib2.Request(self['uri'], headers=headers)
+        req = urllib2.Request(self.iriToUri(self['uri']), headers=headers)
+        result = urllib2.urlopen(req)
         soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req))
         title = soup.title.string if soup.title else self['uri']
 
