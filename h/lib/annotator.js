@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-e666b05
+** Annotator 1.2.6-dev-68379aa
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-04-24 10:16:24Z
+** Built at: 2013-04-25 14:33:49Z
 */
 
 (function() {
@@ -344,7 +344,7 @@
     }
 
     BrowserRange.prototype.normalize = function(root) {
-      var isImg, it, node, nr, offset, p, r, _k, _len3, _ref2;
+      var changed, isImg, it, node, nr, offset, p, r, _k, _len3, _ref2;
       if (this.tainted) {
         console.error(_t("You may only call normalize() once on a BrowserRange!"));
         return false;
@@ -379,23 +379,39 @@
         r[p + 'Offset'] = offset;
         r[p + 'Img'] = isImg;
       }
-      nr.start = r.startOffset > 0 ? r.start.splitText(r.startOffset) : r.start;
+      changed = false;
+      if (r.startOffset > 0) {
+        if (r.start.data.length > r.startOffset) {
+          nr.start = r.start.splitText(r.startOffset);
+          changed = true;
+        } else {
+          nr.start = r.start.nextSibling;
+        }
+      } else {
+        nr.start = r.start;
+      }
       if (r.start === r.end && !r.startImg) {
         if ((r.endOffset - r.startOffset) < nr.start.nodeValue.length) {
           nr.start.splitText(r.endOffset - r.startOffset);
+          changed = true;
+        } else {
+
         }
         nr.end = nr.start;
       } else {
         if (r.endOffset < r.end.nodeValue.length && !r.endImg) {
           r.end.splitText(r.endOffset);
+          changed = true;
+        } else {
+
         }
         nr.end = r.end;
       }
       nr.commonAncestor = this.commonAncestorContainer;
-      while (nr.commonAncestor.nodeType !== 1) {
+      while (nr.commonAncestor.nodeType !== Node.ELEMENT_NODE) {
         nr.commonAncestor = nr.commonAncestor.parentNode;
       }
-      if (window.DomTextMapper != null) {
+      if ((window.DomTextMapper != null) && changed) {
         window.DomTextMapper.changed(nr.commonAncestor, "range normalization");
       }
       return new Range.NormalizedRange(nr);
@@ -458,7 +474,7 @@
           n = nodes[_k];
           offset += n.nodeValue.length;
         }
-        isImg = node.nodeType === 1 && node.tagName.toLowerCase() === "img";
+        isImg = node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === "img";
         if (isEnd && !isImg) {
           return [xpath, offset + node.nodeValue.length];
         } else {
@@ -518,7 +534,7 @@
     }
 
     SerializedRange.prototype.normalize = function(root) {
-      var contains, length, node, p, range, tn, xpath, _k, _l, _len3, _len4, _ref2, _ref3;
+      var contains, length, node, p, range, targetOffset, tn, xpath, _k, _l, _len3, _len4, _ref2, _ref3;
       range = {};
       _ref2 = ['start', 'end'];
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
@@ -533,10 +549,11 @@
           throw new Range.RangeError(p, "Couldn't find " + p + " node: " + xpath);
         }
         length = 0;
+        targetOffset = this[p + 'Offset'] + (p === "start" ? 1 : 0);
         _ref3 = $(node).textNodes();
         for (_l = 0, _len4 = _ref3.length; _l < _len4; _l++) {
           tn = _ref3[_l];
-          if (length + tn.nodeValue.length >= this[p + 'Offset']) {
+          if (length + tn.nodeValue.length >= targetOffset) {
             range[p + 'Container'] = tn;
             range[p + 'Offset'] = this[p + 'Offset'] - length;
             break;
