@@ -1,35 +1,50 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 if test -z "$VIRTUAL_ENV"; then
 	if test ! -e bin/activate; then
-		echo "Creating virtualenv..."
-		virtualenv --no-site-packages --distribute .
-	fi
-else
-	if test ! "$VIRTUAL_ENV" -ef "."; then
-                echo "
-You appear to have a python virtual environment activated. This
-script is not designed to work unless this directory (or no
-directory) is an active python virtual environment.
+		echo "
+This script can create an isolated environment for installing python
+software libraries needed for development. This setup is recommended.
 
-The offending virtual environment is '$VIRTUAL_ENV'.
+If you are not familiar with using virtualenv [1] to manage a python
+development environment you may wish to take a few minutes to read a
+bit about it.
+
+If you are comfortable managing it yourself, e.g. through a tool
+like virtualenv-wrapper [2], you may decline to create one now.
+
+[1] http://www.virtualenv.org/
+[2] http://virtualenvwrapper.readthedocs.org/
 "
-		exit 1
+		while true; do
+			read -p "Create a virtualenv now (recommended)? " yn
+			case $yn in
+				[Yy]* )
+					echo "Creating virtualenv...";
+					virtualenv --no-site-packages --distribute .;
+					source bin/activate;
+					break;;
+				[Nn]* ) break;;
+				* ) echo "Please answer yes or no.";;
+			esac
+		done
+	else
+		source bin/activate
 	fi
 fi
 
-echo "Updating pip..."
-./bin/pip install -U pip
+echo "Ensuring an up-to-date pip..."
+pip install -U pip
 
 echo "Checking dependencies..."
 diff -q requirements.txt .installed.txt 2> /dev/null || {
 	echo "Installing dependencies..."
-	./bin/pip install -r requirements.txt
+	pip install -r requirements.txt
 	cp requirements.txt .installed.txt
 }
 
 echo -n "Setting up development links..."
-./bin/python setup.py develop
+python setup.py develop
 
 echo -n "Checking for Compass..."
 command -v compass || echo "...not found!"
