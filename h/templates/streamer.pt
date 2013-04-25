@@ -108,6 +108,16 @@
                       </div>
                     </div>
 		          <div class="noiseknockout">
+
+              <div class="page">
+                <div class="domain">
+                  <img class="favicon" ng-model="annotation['favicon']"/> 
+                  <a href="{{annotation['uri']}}">{{annotation['title']}}</a> 
+                  | 
+                  <a href="{{annotation['domain']}}">{{annotation['domain_stripped']}}</a>
+                </div>
+              </div>
+
                     <div class="hyp-excerpt hyp-paper stream-floatainer margin-right">
                       <blockquote>{{annotation['quote']}}</blockquote>
                     </div>

@@ -2,6 +2,11 @@ import json
 import logging
 import threading
 import traceback
+
+import urllib2
+from urlparse import urlparse, urlunparse
+import BeautifulSoup
+import re
 import Queue
 
 from tornado import web, ioloop
@@ -119,8 +124,10 @@ def add_port():
 
 
 def process_filters():
+    url_analyzer = UrlAnalyzer()
     while True:
-        (annotation, action) = q.get()
+        (annotation, action) = q.get(True)
+        annotation.update(url_analyzer._url_values(annotation['uri']))
         after_action(annotation, action)
         q.task_done()
 

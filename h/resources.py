@@ -3,11 +3,9 @@ try:
 except ImportError:
     import json
 
-import urllib2
 
 from datetime import datetime
 from math import floor
-from urlparse import urlparse, urlunparse
 
 from dateutil.parser import parse
 from dateutil.tz import tzutc
@@ -17,9 +15,6 @@ from horus import resources
 from pyramid.interfaces import ILocation
 
 from zope.interface import implementer
-
-import BeautifulSoup
-import re
 
 from h import interfaces
 from h import streamer as streamer_template
