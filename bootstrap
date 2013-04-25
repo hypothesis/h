@@ -33,6 +33,10 @@ like virtualenv-wrapper [2], you may decline to create one now.
 	fi
 fi
 
+if test -z "$PIP_DOWNLOAD_CACHE"; then
+	export PIP_DOWNLOAD_CACHE=$PWD/.pip-cache
+fi
+
 echo "Ensuring an up-to-date pip..."
 pip install -U pip
 
