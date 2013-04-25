@@ -49,8 +49,12 @@ angular.module('h.streamer',['h.filters'])
           action = msg.data[1]
           annotation['action'] = action
           annotation['quote'] = get_quote annotation
-          $scope.annotations.push annotation
-          window.scrollTo 0, document.body.scrollHeight
+          $scope.annotations.splice 0,0,annotation
+          #window.scrollTo 0, document.body.scrollHeight
+          
+    $scope.stop_streaming = ->
+      $scope.sock.close
+      $scope.streaming = false    	
   )
 
 

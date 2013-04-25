@@ -154,7 +154,7 @@ class Annotation(BaseResource, dict):
         domain_stripped = parsed_uri[1]
         if parsed_uri[1].lower().startswith('www.'):
             domain_stripped = domain_stripped[4:]
-        req2 = urllib2.Request(domain, headers=headers)
+        req2 = urllib2.Request(self.iriToUri(domain), headers=headers)
         soup2 = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req2))
         domain_title = soup2.title.string if soup2.title else domain
 

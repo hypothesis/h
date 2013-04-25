@@ -73,8 +73,13 @@
                 </span>
              
                 <span class="pull-right filter-element filter-block">
-                  <span ng-show="streaming"><button ng-click="start_streaming()" class="btn check-icon">Change filter parameters</button></span>
-                  <span ng-hide="streaming"><button ng-click="start_streaming()" class="btn check-icon">Start streaming</button></span>
+                  <div>
+                    <span ng-show="streaming"><button ng-click="start_streaming()" class="btn check-icon">Change filter parameters</button></span>
+                    <span ng-hide="streaming"><button ng-click="start_streaming()" class="btn check-icon">Start streaming</button></span>
+                  </div>
+                  <div class="filter-checkboxes">
+                    <span ng-show="streaming"><button ng-click="stop_streaming()" class="btn check-icon">Stop streaming</button></span>
+                  </div>
                 </span>
               </div>
             </div>
