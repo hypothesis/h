@@ -66,9 +66,6 @@ class Annotation(BaseController):
                 replies = replies + reply['number_of_replies'] + 1
         d['number_of_replies'] = replies
 
-        #for key, value in d.items():
-        #    log.debug(key + ': ' + str(value))
-
         return d
 
     @view_config(accept='application/json', renderer='json')
@@ -78,11 +75,19 @@ class Annotation(BaseController):
         request.response.charset = 'UTF-8'
         return request.context
 
-@view_config(route_name='streamer',
-             renderer='h:templates/streamer.pt',
-             layout='lay_streamer')
-def streamer(request):
-    return streamer_template.add_port()
+@view_defaults(context='h.resources.Streamer', layout='lay_streamer')
+class Streamer(BaseController):
+    @view_config(accept='text/html', renderer='templates/streamer.pt')
+    def __html__(self):
+        streamer = self.request.context
+        return streamer
+
+    @view_config(accept='application/json', renderer='json')
+    def __call__(self):
+        request = self.request
+        request.response.content_type = 'application/json'
+        request.response.charset = 'UTF-8'
+        return request.context
 
 def includeme(config):
     config.add_view(

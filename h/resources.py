@@ -22,6 +22,8 @@ import BeautifulSoup
 import re
 
 from h import interfaces
+from h import streamer as streamer_template
+from h.streamer import UrlAnalyzer
 
 
 import logging
@@ -122,62 +124,7 @@ class AppFactory(BaseResource):
             for name in ['persona', 'personas']
         }
 
-
-class Annotation(BaseResource, dict):
-    def urlEncodeNonAscii(self, b):
-        return re.sub('[\x80-\xFF]', lambda c: '%%%02x' % ord(c.group(0)), b)
-
-    def iriToUri(self, iri):
-        parts= urlparse(iri)
-        return urlunparse(
-            part.encode('idna') if parti==1 else self.urlEncodeNonAscii(part.encode('utf-8'))
-            for parti, part in enumerate(parts)
-        )
-    
-    def _url_values(self):
-        # Getting the title of the uri.
-        # hdrs magic is needed because urllib2 is forbidden to use with default
-        # settings.
-        agent = \
-            "Mozilla/5.0 (X11; U; Linux i686) " \
-            "Gecko/20071127 Firefox/2.0.0.11"
-        headers = {'User-Agent': agent}
-        req = urllib2.Request(self.iriToUri(self['uri']), headers=headers)
-        result = urllib2.urlopen(req)
-        soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req))
-        title = soup.title.string if soup.title else self['uri']
-
-        # Getting the domain from the uri, and the same url magic for the
-        # domain title.
-        parsed_uri = urlparse(self['uri'])
-        domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
-        domain_stripped = parsed_uri[1]
-        if parsed_uri[1].lower().startswith('www.'):
-            domain_stripped = domain_stripped[4:]
-        req2 = urllib2.Request(self.iriToUri(domain), headers=headers)
-        soup2 = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req2))
-        domain_title = soup2.title.string if soup2.title else domain
-
-        # Favicon
-        favlink = soup.find("link", rel="shortcut icon")
-        # Check for local/global link.
-        if favlink:
-            href = favlink['href']
-            if href.startswith('//') or href.startswith('http'):
-                icon_link = href
-            else:
-                icon_link = domain + href
-        else:
-            icon_link = ''
-
-        return {
-            'title': title,
-            'domain': domain,
-            'domain_title': domain_title,
-            'domain_stripped': domain_stripped,
-            'favicon_link': icon_link
-        }
-
+class Annotation(BaseResource, UrlAnalyzer):
     def _fuzzyTime(self, date):
         if not date: return ''
         converted = parse(date)
@@ -275,6 +222,8 @@ class Annotation(BaseResource, dict):
         repl = self._nestlist(childTable.get(self['id']), childTable)
         return repl
 
+class Streamer(BaseResource, dict):
+    pass
 
 class AnnotationFactory(BaseResource):
     def __getitem__(self, key):
@@ -291,10 +240,16 @@ class AnnotationFactory(BaseResource):
 
         return annotation
 
+class StreamerFactory(BaseResource):
+    def __getitem__(self, key):
+        streamer = Streamer(self.request)
+        streamer.__parent__ = self
+        streamer.update(streamer_template.add_port())
+        return streamer
 
 def includeme(config):
     config.set_root_factory(RootFactory)
     config.add_route('index', '/')
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
-    config.add_route('streamer', '/stream/')
+    RootFactory.stream = StreamerFactory

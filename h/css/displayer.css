@@ -1029,7 +1029,7 @@ body {
 }
 
 
-@media(max-width:214spx)
+@media(max-width:214px)
 {
     #stream {
       padding-top: 6em;}
