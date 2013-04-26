@@ -11,8 +11,16 @@ from h import interfaces, models
 
 
 class Store(object):
-    def __init__(self):
-        self.request = get_current_request()
+    def __init__(self, request):
+        self.request = request
+
+    @property
+    def base_url(self):
+        """The base URL of the store.
+
+        This is the URL of the service document.
+        """
+        return self.request.route_url('api', subpath='')
 
     def create(self):
         raise NotImplementedError()
