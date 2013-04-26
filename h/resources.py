@@ -239,17 +239,13 @@ class Annotation(BaseResource, dict):
         store = registry.queryUtility(interfaces.IStoreClass)()
 
         childTable = {}
-        if 'thread' in self:
-            thread = '/'.join([self['thread'], self['id']])
-        else:
-            thread = self['id']
 
-        replies = store.search(thread=thread)
+        replies = store.search(references=self['id'])
         replies = sorted(replies, key=lambda reply: reply['created'])
 
         for reply in replies:
             # Add this to its parent.
-            parent = reply['thread'].split('/')[-1]
+            parent = reply['references'][-1]
             pointer = childTable.setdefault(parent, [])
             pointer.append({
                 'id': reply['id'],

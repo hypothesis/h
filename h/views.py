@@ -47,8 +47,8 @@ class Annotation(BaseController):
           raise httpexceptions.HTTPNotFound()
 
         d = {'annotation': annotation}
-        if annotation.references:
-            thread_root = annotation.references[0]
+        if 'references' in annotation:
+            thread_root = annotation['references'][0]
             root_annotation = annotation.__parent__[thread_root]
             d['quote'] = root_annotation.quote
         else:
