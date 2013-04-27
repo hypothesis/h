@@ -17,6 +17,12 @@ section {
 
 ol {
   list-style-type: decimal;
+  padding-left: 3em;
+  margin-left: -1.5em;
+
+  li + li {
+    margin-top: 1em;
+  }
 }
 
 .auth {
