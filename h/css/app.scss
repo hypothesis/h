@@ -38,7 +38,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   @include translateX(100%);
   background: url('../images/noise_1.png');
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 1em;
   padding-top: 3.5em;
