@@ -159,13 +159,16 @@ class App
     $scope.$watch 'frame.visible', (newValue) ->
       if newValue
         annotator.show()
-        annotator.provider.notify method: 'showFrame'
-        $element.find('#toolbar').find('.tri').attr('draggable', true)
+        annotator.provider?.notify method: 'showFrame'
+        $element.find('.topbar').find('.tri').attr('draggable', true)
       else
         annotator.hide()
         annotator.provider.notify method: 'setActiveHighlights'
         annotator.provider.notify method: 'hideFrame'
-        $element.find('#toolbar').find('.tri').attr('draggable', false)
+        $element.find('.topbar').find('.tri').attr('draggable', false)
+
+    $scope.$watch 'sheet.collapsed', (newValue) ->
+      $scope.sheet.tab = if newValue then null else 'login'
 
     $scope.$on 'back', ->
       return unless drafts.discard()

@@ -68,6 +68,45 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   position: relative;
 }
 
+.topbar {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  left: 7px;
+  top: .5em;
+
+  .inner {
+    margin: 0 .5em 0 3.1em;
+  }
+
+
+  .tri {
+    @include fonticon("\e00b", left);
+    color: rgba( 200, 200, 200, .3);
+    text-shadow:
+      1px .8px 1.5px $white,
+      0 0 0 #000;
+    position: absolute;
+    z-index: 1;
+    top: .3em;
+    left: .3em;
+    line-height: $baseLineHeight * .9;
+    font-size: $baseLineHeight * .9;
+    &:before {
+      vertical-align: 0;
+    }
+    &:hover {
+      color: rgba( 235, 235, 230, .1);
+    }
+  }
+
+  &.shown {
+    .tri {
+      @include fonticon("\e010", left);
+      cursor: ew-resize;
+    }
+  }
+}
+
 
 
 //HEATMAP STUFF////////////////////////////////
@@ -226,56 +265,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   input:not([type="submit"]) { width: 100%; }
 }
 
-
-
-//TOOL BAR////////////////////////////////
-#toolbar {
-  @include smallshadow;
-  background: $bodyBackground;
-  border: .1em solid $grayLighter;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-  left: 7px;
-  min-height: 2.2em;
-  position: absolute;
-  right: -.1em;
-  text-align: right;
-  top: .5em;
-  z-index: 5;
-
-  .tinyman {
-    border-left: 1px solid $grayLighter;
-    display: inline-block;
-    margin: .3em;
-  }
-
-  .tri {
-    @include fonticon("\e00b", left);
-    color: rgba( 200, 200, 200, 0.3);
-    text-shadow:
-      1px .8px 1.5px #fff,
-      0 0 0 #000;
-    position: absolute;
-    z-index: 1;
-    top: .3em;
-    left: .3em;
-    line-height: $baseLineHeight * .9;
-    font-size: $baseLineHeight * .9;
-    &:before {
-      vertical-align: 0;
-    }
-    &:hover {
-      color: rgba( 235, 235, 230, 0.1);
-    }
-  }
-
-  &.shown {
-    .tri {
-      @include fonticon("\e010", left);
-      cursor: ew-resize;
-    }
-  }
-}
 
 .tinyman {
   padding: 0 .5em;

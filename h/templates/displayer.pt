@@ -13,7 +13,7 @@
   <style type="text/css"></style>
 
   <body metal:fill-slot="body">
-    <div class="nav">
+    <div class="topbar">
       <div class="inner">
         <div class="barbutton left title">
           <span>hypothes<span class="red">.</span>is</span>

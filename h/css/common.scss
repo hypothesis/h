@@ -506,16 +506,19 @@ blockquote {
   }
 }
 
-.tab-pane {
-  background: $bodyBackground;
-  border: solid thin $grayLighter;
-  display: none;
-  margin-top: -1px;  // Pull up and under tabs
+.tab-content {
+  @include border-radius(.1em);
+  background: $white;
+  border: solid .1em $grayLighter;
+  margin-top: -.1em;
   padding: 1em;
   position: relative;
 
-  &.active {
-    display: inherit !important;
+  .tab-pane {
+    display: none;
+    &.active {
+      display: inherit !important;
+    }
   }
 }
 
@@ -529,6 +532,44 @@ blockquote {
   @include smallshadow;
   background: #fff;
   padding: 1em;
+}
+
+
+//TOOL BAR////////////////////////////////
+.topbar {
+  @include smallshadow;
+  background: $white;
+  border: .1em solid $grayLighter;
+  height: 2.1em;
+  position: fixed;
+  left: -.1em;
+  right: -.1em;
+  top: .5em;
+  z-index: 5;
+
+  .barbutton {
+    &:hover {
+      @include box-shadow(inset 0 1px 3px hsla(0, 0%, 0%, .1));
+    }
+
+    &:active {
+      @include box-shadow(inset 0 2px 3px hsla(0, 0%, 0%, .1));
+    }
+  }
+
+  .inner {
+    max-width: grid(12);
+    margin: 0 auto;
+    & > * {
+      padding: .3em;
+    }
+  }
+
+  .tinyman {
+    border-left: 1px solid $grayLighter;
+    display: inline-block;
+    font-family: $sansFontFamily;
+  }
 }
 
 

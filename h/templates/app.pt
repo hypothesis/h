@@ -15,13 +15,12 @@
         metal:fill-slot="body">
 
     <!-- Toolbar -->
-    <div id="toolbar" class="form-inline" ng-class="frame.visible && 'shown'">
+    <div class="topbar" class="form-inline" ng-class="frame.visible && 'shown'">
+
       <div class="tri" ng-click="frame.visible = !frame.visible"></div>
 
-      <!-- Persona -->
-      <div ng-show="sheet.collapsed"
-           class="tinyman">
-        <a href=""
+      <div class="inner">
+        <a class="pull-right tinyman" href=""
            ng-click="sheet.collapsed = false;
                           sheet.tab = 'login';"
            ng-hide="persona">Sign in</a>
