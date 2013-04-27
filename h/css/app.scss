@@ -48,7 +48,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   &:first-child {
     @include box-shadow(none);
     @include translateX(0);
-    left: 0em;
+    left: 0;
   }
 
   &.show {
@@ -92,7 +92,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   margin-top: -1em; // TODO: Less janking v-align
   // color: rgb(238, 238, 238);
   color: #666;
-  left: 0px;
+  left: 0;
   position: absolute;
   height: 20.1px;
   width: 40.1px;
