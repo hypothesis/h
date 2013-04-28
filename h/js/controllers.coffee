@@ -8,7 +8,7 @@ class App
     code: null
     sheet:
       collapsed: true
-      tab: 'login'
+      tab: null
     personas: []
     persona: null
     token: null
@@ -162,6 +162,7 @@ class App
         annotator.provider?.notify method: 'showFrame'
         $element.find('.topbar').find('.tri').attr('draggable', true)
       else
+        $scope.sheet.collapsed = true
         annotator.hide()
         annotator.provider.notify method: 'setActiveHighlights'
         annotator.provider.notify method: 'hideFrame'
@@ -169,6 +170,17 @@ class App
 
     $scope.$watch 'sheet.collapsed', (newValue) ->
       $scope.sheet.tab = if newValue then null else 'login'
+
+    $scope.$watch 'sheet.tab', (tab) ->
+      $timeout =>
+        $element
+        .find('form')
+        .filter(-> this.name is tab)
+        .find('input')
+        .filter(-> this.type isnt 'hidden')
+        .first()
+        .focus()
+      , 10
 
     $scope.$on 'back', ->
       return unless drafts.discard()
