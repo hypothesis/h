@@ -3,20 +3,24 @@
 @import "reset";
 @import 'base';
 
+$white: hsl(0, 0, 99%);
 $sansFontFamily: "Source Sans Pro", $sansFontFamily;
 $serifFontFamily: "Merriweather", $serifFontFamily;
+$headingsColor: $textColor;
 
 
 //ELEMENT STYLES////////////////////////////////
 a {
   color: $linkColor;
   &:hover { color: $linkColorHover; }
+  text-decoration: none;
 }
 
 body {
   background-color: $bodyBackground;
   color: $textColor;
   font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
   line-height: 1.4;
 }
 
@@ -39,7 +43,7 @@ html {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: $sansFontFamily;
-  color: $gray;
+  color: $headingsColor;
 }
 
 h1 {
@@ -261,7 +265,7 @@ button, input[type=submit], .btn {
 
 blockquote {
   color: $gray;
-  font-family: "Merriweather";
+  font-family: $serifFontFamily;
   font-size: 1em;
   margin-bottom: 1em;
   padding: 0 1em;
@@ -359,7 +363,6 @@ blockquote {
   }
 
   a {
-    text-decoration: none;
     color: inherit;
   }
 
@@ -377,14 +380,14 @@ blockquote {
 
   &:before {
     border-bottom-color: $grayLighter;
-    border-width: 0 .5em .625em .5em;
-    top: -.675em;
+    border-width: 0 .5em .5em .5em;
+    top: -.5em;
   }
 
   &:after {
     border-bottom-color: $white;
-    border-width: 0 .5em .625em .5em;
-    top: -.525em;
+    border-width: 0 .5em .5em .5em;
+    top: -.45em;
     z-index: 3;
   }
 
@@ -482,27 +485,40 @@ blockquote {
 //TABS////////////////////////////////
 .nav-tabs {
   @include pie-clearfix;
-  margin: 0 .5em;
+  margin: 0 .2em;
 
-  & > li > a {
-    cursor: pointer;
-    float: left;
-    line-height: 1;
-    padding: .5em 1em;
-    padding-top: .25em;
-    margin-right: -.5em;
-    margin-bottom: 0;
-    position: relative;
-    text-decoration: none;
-    @include tabbox;
+  a {
+    font-family: $sansFontFamily;
+    color: $grayDark;
   }
 
-  & > .active > a {
-    @include box-shadow(none);
-    color: #333;
-    font-weight: bold;
-    background: hsla(0, 0%, 100%, 1);
-    z-index: 90;
+  & > li {
+    @include box-shadow(inset 2px -10px 13px -8px hsla(0, 0%, 0%, .1));
+    background: darken($white, 2%);
+    border-top-right-radius: 2em 5em;
+    border-top-left-radius: 2em 5em;
+    border: .1em solid $grayLighter;
+    border-bottom: none;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 1;
+    margin-right: -.5em;
+    padding: .25em 1em .5em;
+    position: relative;
+
+    &:hover {
+      background: $white;
+    }
+
+    &.active, &:active {
+      @include box-shadow(none);
+      background: $white;
+      color: #333;
+    }
+
+    &.active {
+      z-index: 1;
+    }
   }
 }
 
@@ -523,6 +539,11 @@ blockquote {
 }
 
 
+//NOISE///////////
+//Provides the noise background
+.noise {
+  background: url("../images/noise_1.png");
+}
 
 
 //PAPER////////////////////////////////
@@ -530,7 +551,7 @@ blockquote {
 .paper {
   @include border-radius(.2em);
   @include smallshadow;
-  background: #fff;
+  background: $white;
   padding: 1em;
 }
 
@@ -573,10 +594,31 @@ blockquote {
 }
 
 
+//MAIN CONTENT///////
+.content {
+  margin: 0 auto;
+  padding: 1em;
+  padding-top: 3.5em;
+
+  .domain .favicon {
+    margin: 0 .5em;
+  }
+
+  .page {
+    margin-bottom: 1em;
+
+    a {
+      font-weight: bold;
+    }
+  }
+}
+
+
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
   @include pie-clearfix;
+  font-family: $sansFontFamily;
   position: relative;
 
   .user {
@@ -770,4 +812,57 @@ blockquote {
   .magicontrols .show {
     display: none;
   }
+}
+
+
+
+/*
+    Mobile layout
+    240-479 px
+    Zoomed out below 320 px
+*/
+
+@media screen and (min-width: 15em) {
+  .content { padding: 3em 1em; }
+}
+
+/*
+    Wide mobile layout
+    480-767 px
+    Zoomed in above 480 px
+*/
+
+@media screen and (min-width: 30em) {
+}
+
+/*
+    Tablet layout
+    600-911 px
+    Zoomed in above 600 px
+*/
+
+@media screen and (min-width: 37.5em) {
+  .content { padding: 6em; }
+}
+
+/*
+    Widescreen layout
+    912-1887 px
+    Zoomed in above 912 px
+*/
+
+@media screen and (min-width: 57em) {
+  .content {
+    max-width: grid(12);
+    margin: auto;
+  }
+}
+
+/*
+    Huge-screen layout
+    1888-2520 px
+    Zoomed in above 1920 px
+*/
+
+@media screen and (min-width: 118em) {
 }

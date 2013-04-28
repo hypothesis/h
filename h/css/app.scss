@@ -13,7 +13,6 @@ $baseFontSize: 14px;
 //ELEMENT STYLES////////////////////////////////
 body {
   background-color: transparent;
-  font-family: $sansFontFamily;
   height: 100%;
   position: fixed;
   width: 100%;
@@ -30,21 +29,19 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 
-
 .sliding-panels > li {
+  @extend .content;
+  @extend .noise;
   @include smallshadow(-2px);
   @include stretch-y;
   @include transition(transform .4s);
   @include translateX(100%);
-  background: url('../images/noise_1.png');
   height: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 1em;
-  padding-top: 3.5em;
   left: 1em;
   right: 0;
-  
+
   &:first-child {
     @include box-shadow(none);
     @include translateX(0);
@@ -62,7 +59,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //SIDEBAR LAYOUT////////////////////////////////
 #wrapper {
-  background: url('../images/noise_1.png');
+  @extend .noise;
   height: 100%;
   margin-left: $heatmap-width + 17px;
   position: relative;
@@ -151,9 +148,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
   .label {
     font-weight: bold;
+    font-family: $sansFontFamily;
     font-size: 13.1px;
-    position: absolute;
-    text-decoration: none;
     left: 10px;
     right: 2px;
     position: absolute;
@@ -240,6 +236,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   footer {
+    font-family: $sansFontFamily;
     text-align: right;
     a { @extend .small; }
   }
