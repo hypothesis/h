@@ -236,7 +236,7 @@ class Annotation(BaseResource, dict):
     def replies(self):
         request = self.request
         registry = request.registry
-        store = registry.queryUtility(interfaces.IStoreClass)()
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
 
         childTable = {}
 
@@ -264,7 +264,7 @@ class AnnotationFactory(BaseResource):
     def __getitem__(self, key):
         request = self.request
         registry = request.registry
-        store = registry.queryUtility(interfaces.IStoreClass)()
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
 
         annotation = Annotation(request)
         annotation.__parent__ = self
