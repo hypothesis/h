@@ -144,7 +144,6 @@ class Annotation(BaseResource, dict):
         if parsed_uri[1].lower().startswith('www.'):
             domain_stripped = domain_stripped[4:]
         req2 = urllib2.Request(domain, headers=headers)
-        soup2 = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req2))
 
         # Favicon
         favlink = soup.find("link", rel="shortcut icon")
@@ -267,9 +266,9 @@ class AnnotationFactory(BaseResource):
         annotation = Annotation(request)
         annotation.__parent__ = self
         try:
-          annotation.update(store.read(key))
+            annotation.update(store.read(key))
         except:
-          pass
+            pass
 
         return annotation
 
