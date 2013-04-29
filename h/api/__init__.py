@@ -50,11 +50,10 @@ def includeme(config):
             return (elements, kw)
         config.add_route('api', '', pregenerator=set_app_url, static=True)
     else:
-        pattern = '/'.join([api_url.strip('/'), '*subpath'])
-        config.add_route('api', pattern)
-
-    config.include('h.api.store')
-
-    # And pick up the token view
-    config.add_route('token', '/token')
-    config.scan(__name__)
+        api_path = api_url.strip('/')
+        api_pattern = '/'.join([api_path, '*subpath'])
+        token_pattern = '/'.join([api_path, 'token'])
+        config.add_route('token', token_pattern)
+        config.add_route('api', api_pattern)
+        config.include('h.api.store')
+        config.scan(__name__)
