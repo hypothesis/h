@@ -14,6 +14,7 @@ from dateutil.tz import tzutc
 
 from horus import resources
 
+from pyramid.decorator import reify
 from pyramid.interfaces import ILocation
 
 from zope.interface import implementer
@@ -144,7 +145,6 @@ class Annotation(BaseResource, dict):
             domain_stripped = domain_stripped[4:]
         req2 = urllib2.Request(domain, headers=headers)
         soup2 = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req2))
-        domain_title = soup2.title.string if soup2.title else domain
 
         # Favicon
         favlink = soup.find("link", rel="shortcut icon")
@@ -160,9 +160,8 @@ class Annotation(BaseResource, dict):
 
         return {
             'title': title,
-            'domain': domain,
-            'domain_title': domain_title,
-            'domain_stripped': domain_stripped,
+            'source': domain,
+            'source_stripped': domain_stripped,
             'favicon_link': icon_link
         }
 
@@ -204,16 +203,22 @@ class Annotation(BaseResource, dict):
         else:
             return user.split(':')[1].split('@')[0]
 
-    def _nestlist(self, part, childTable):
+    def _nestlist(self, annotations, childTable):
         outlist = []
-        if part is None: return outlist
-        part = sorted(part, key=lambda reply: reply['created'], reverse=True)
-        for reply in part:
-            children = self._nestlist(childTable.get(reply['id']), childTable)
-            del reply['created']
-            reply['number_of_replies'] = len(children)
-            outlist.append(reply)
-            if len(children) > 0: outlist.append(children)
+        if annotations is None: return outlist
+
+        annotations = sorted(
+            annotations,
+            key=lambda reply: reply['created'],
+            reverse=True
+        )
+
+        for a in annotations:
+            children = self._nestlist(childTable.get(a['id']), childTable)
+            a['reply_count'] = \
+                sum(c['reply_count'] for c in children) + len(children)
+            a['replies'] = children
+            outlist.append(a)
         return outlist
 
     @property
@@ -227,37 +232,30 @@ class Annotation(BaseResource, dict):
 
         return quote
 
-    @property
-    def references(self):
-        thread = self.get('thread')
-        return thread.split('/') if thread else []
-
-    @property
-    def replies(self):
+    @reify
+    def referrers(self):
         request = self.request
         registry = request.registry
         store = registry.queryUtility(interfaces.IStoreClass)(request)
+        return store.search(references=self['id'])
 
+    @reify
+    def replies(self):
         childTable = {}
 
-        replies = store.search(references=self['id'])
-        replies = sorted(replies, key=lambda reply: reply['created'])
-
-        for reply in replies:
-            # Add this to its parent.
-            parent = reply['references'][-1]
-            pointer = childTable.setdefault(parent, [])
-            pointer.append({
-                'id': reply['id'],
-                'created': reply['created'],
-                'text': reply['text'],
-                'fuzzy_date': self._fuzzyTime(reply['updated']),
-                'readable_user': self._userName(reply['user']),
+        for reply in self.referrers:
+            reply.update({
+                'date': self._fuzzyTime(reply['created']),
+                'user': self._userName(reply['user']),
             })
 
+            # Add this to its parent.
+            parent = reply.get('references', [])[-1]
+            pointer = childTable.setdefault(parent, [])
+            pointer.append(reply)
+
         # Create nested list form
-        repl = self._nestlist(childTable.get(self['id']), childTable)
-        return repl
+        return self._nestlist(childTable.get(self['id']), childTable)
 
 
 class AnnotationFactory(BaseResource):
