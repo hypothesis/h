@@ -17,7 +17,6 @@ from pyramid.interfaces import ILocation
 from zope.interface import implementer
 
 from h import interfaces
-from h import streamer as streamer_template
 from h.streamer import UrlAnalyzer
 
 
@@ -235,16 +234,9 @@ class AnnotationFactory(BaseResource):
 
         return annotation
 
-class StreamerFactory(BaseResource):
-    def __getitem__(self, key):
-        streamer = Streamer(self.request)
-        streamer.__parent__ = self
-        streamer.update(streamer_template.add_port())
-        return streamer
-
 def includeme(config):
     config.set_root_factory(RootFactory)
     config.add_route('index', '/')
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
-    RootFactory.stream = StreamerFactory
+    RootFactory.stream = Streamer

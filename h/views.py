@@ -80,6 +80,7 @@ class Streamer(BaseController):
     @view_config(accept='text/html', renderer='templates/streamer.pt')
     def __html__(self):
         streamer = self.request.context
+        streamer.update(streamer_template.add_port())
         return streamer
 
     @view_config(accept='application/json', renderer='json')
