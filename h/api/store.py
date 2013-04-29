@@ -4,7 +4,6 @@ from annotator.annotation import Annotation
 from flask import Flask, g
 
 from pyramid.request import Request
-from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
 from h import interfaces, models
