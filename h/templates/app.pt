@@ -59,13 +59,16 @@
         </div>
       </div>
       <!-- / Account and Authentication -->
+
     </div>
     <!-- / Toolbar -->
 
-
     <!-- Content -->
     <div id="wrapper">
+
+      <!-- Angular view -->
       <div ng-view=""></div>
+
     </div>
     <!-- / Content -->
 

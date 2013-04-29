@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
-  <head metal:fill-slot="head" tal:omit-tag="">
+  <head metal:fill-slot="head" tal:omit-tag>
     <script type="text/javascript" defer="defer">
       <metal:main use-macro="load: embed.txt" />
     </script>
