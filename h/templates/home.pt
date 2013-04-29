@@ -4,6 +4,7 @@
     <script type="text/javascript" defer="defer">
       <metal:main use-macro="load: embed.txt" />
     </script>
+    <title>Hypothesis</title>
   </head>
   <body metal:fill-slot="body">
     <a href="https://github.com/hypothesis/h"
