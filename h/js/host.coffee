@@ -205,12 +205,14 @@ class Annotator.Host extends Annotator
               position: 'absolute'
               top: $(window).scrollTop()
           @panel?.notify method: 'publish', params: 'hostUpdated'
+
     document.addEventListener 'touchmove', update
     document.addEventListener 'touchstart', =>
       touch = true
       @frame?.css
         display: 'none'
       do update
+
     document.addEventListener 'dragover', (event) =>
       unless @drag.enabled then return
       if @drag.last?
@@ -219,11 +221,14 @@ class Annotator.Host extends Annotator
       unless @drag.tick
         @drag.tick = true
         window.requestAnimationFrame this._dragRefresh
+
     $(window).on 'resize scroll', update
     $(document.body).on 'resize scroll', '*', update
+
     if window.PDFView?
       # XXX: PDF.js hack
       $(PDFView.container).on 'scroll', update
+
     super
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.

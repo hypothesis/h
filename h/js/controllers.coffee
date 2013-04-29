@@ -194,7 +194,6 @@ class App
         collapsed: !show
         tab: 'login'
 
-
     $scope.$on '$reset', => angular.extend $scope, @scope
 
     # Fetch the initial model from the server
