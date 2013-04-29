@@ -143,7 +143,6 @@ class Annotation(BaseResource, dict):
         domain_stripped = parsed_uri[1]
         if parsed_uri[1].lower().startswith('www.'):
             domain_stripped = domain_stripped[4:]
-        req2 = urllib2.Request(domain, headers=headers)
 
         # Favicon
         favlink = soup.find("link", rel="shortcut icon")
