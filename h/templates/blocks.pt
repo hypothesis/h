@@ -2,7 +2,7 @@
 <html lang='en'>
   <head><title>Macro Blocks</title></head>
   <body>
-    <tal:block metal:define-macro="auth">
+    <metal:main define-macro="auth">
       <tal:block i18n:translate="" content="structure form" />
       <form tal:define="providers request.registry.velruse_providers | {}"
             tal:repeat="provider providers.values()"
@@ -10,7 +10,7 @@
             target="hPopout">
         <button class="${provider.name} login">${provider.name}</button>
       </form>
-    </tal:block>
+    </metal:main>
 
     <metal:main define-macro="auth-tabs">
       <!-- Login -->
