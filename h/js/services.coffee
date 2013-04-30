@@ -37,6 +37,7 @@ class Hypothesis extends Annotator
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
     Threading: {}
+    Document: {}
 
   # Internal state
   visible: false      # *  Whether the sidebar is visible
@@ -178,6 +179,7 @@ class Hypothesis extends Annotator
               prefix: '/api'
             patch_update this.plugins.Store
             console.log "Loaded annotions for '" + href + "'."
+            debugger
             for href in this.getSynonymURLs href
               console.log "Also loading annotations for: " + href
               this.plugins.Store._apiRequest 'search', uri: href, (data) =>
