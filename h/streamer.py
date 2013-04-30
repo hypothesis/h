@@ -1,5 +1,4 @@
 import json
-import logging
 import threading
 import traceback
 
@@ -11,8 +10,12 @@ import Queue
 
 from tornado import web, ioloop
 from sockjs.tornado import SockJSRouter, SockJSConnection
+from jsonschema import validate
+import jsonpointer
+
 from annotator import authz
 
+import logging
 log = logging.getLogger(__name__)
 
 class UrlAnalyzer(dict):
@@ -71,6 +74,72 @@ class UrlAnalyzer(dict):
             'favicon_link': icon_link
         }
 
+filter_schema = {
+    "type" : "object",
+    "properties" : {
+        "name" : {"type" : "string", "optional" : True},
+        "match_policy" : {
+            "type" : "string", 
+            "enum" : ["include_any","include_all","exclude_any","exclude_all"]
+        },
+        "clauses" : {
+            "type" : "array",
+            "items": {
+                "field" : { "type" : "string", "format": "json-pointer"},
+                "operator" : {
+                    "type" : "string",
+                    "enum" : ["equals","matches","lt","le","gt","ge","one_of"]
+                },
+                "value" : "object"
+            }
+        }
+    },
+    "required" : ["match_policy","clauses"]
+}
+
+class FilterHandler(object):
+    def __init__(self, filter_json):
+        self.filter = filter_json
+
+    #operators
+    def equals(self, a, b): return a == b
+    def matches(self, a, b): return a in b
+    def lt(self, a, b): return a < b
+    def le(self, a, b): return a <= b
+    def gt(self, a, b): return a > b
+    def ge(self, a, b): return a >= b
+    def one_of(self, a, b): return a in b
+        
+    def evaluate_clause(self, clause, target):
+        field_value = resolve_pointer(target, clause['field'], None)
+        if field_value is None:
+            return False
+        else: return getattr(self, clause['operator'])(field_value, clause['value'])
+    
+    #match_policies
+    def include_any(self, target):
+        for clause in self.filter['clauses']:
+            if self.evaluate_clause(clause, target): return True
+        return False
+
+    def include_all(self, target):
+        for clause in self.filter['clauses']:
+            if not self.evaluate_clause(clause, target): return False
+        return True
+
+    def exclude_all(self, target):
+        for clause in self.filter['clauses']:
+            if not self.evaluate_clause(clause, target): return True
+        return False
+
+    def exclude_any(self, target):
+        for clause in self.filter['clauses']:
+            if self.evaluate_clause(clause, target): return False
+        return True
+
+    def match(self, target):
+        return getattr(self, self.filter['match_policy'])(target)
+
 class StreamerConnection(SockJSConnection):
     connections = set()
 
@@ -79,25 +148,18 @@ class StreamerConnection(SockJSConnection):
       self.connections.add(self)
 
     def on_message(self, msg):
-      try:
+      try:          
         payload = json.loads(msg)
-        if 'users' in payload:
-            payload['users'] = set([x.strip() for x in payload['users'] if len(x.strip()) > 0])
-        if 'actions' in payload:
-            payload['actions'] = {x: bool(y) for x, y in payload['actions'].items()}
-        if 'keywords' in payload:
-            payload['keywords'] = set([x.strip() for x in payload['keywords'] if len(x.strip()) > 0])
-        if 'threads' in payload:
-            payload['threads'] = set([x.strip() for x in payload['threads'] if len(x.strip()) > 0])
-        
-        #Add new filter
-        self.filter = payload
+        #Let's try to validate the schema
+        validate(payload, filter_schema)                
+        self.filter = FilterHandler(payload)
       except:
         log.info(traceback.format_exc())
-        log.info('Failed to parse filter:' + str(msg))  
+        log.info('Failed to parse filter:' + str(msg))
+        self.close()
 
     def on_close(self):
-        log.info('close')
+        log.info('closing ' + str(self))
         self.connections.remove(self)
 
 def _init_streamer(port):
@@ -128,6 +190,7 @@ def process_filters():
     while True:
         (annotation, action) = q.get(True)
         annotation.update(url_analyzer._url_values(annotation['uri']))
+        annotation.update({'action' : action})
         after_action(annotation, action)
         q.task_done()
 
@@ -136,37 +199,8 @@ def after_action(annotation, action):
     
     for connection in StreamerConnection.connections:
         try:
-          filter = connection.filter
-          if len(filter) > 0:
-            user_filter = True
-            if 'users' in filter:
-              user = annotation['user'].split(':')[1].split('@')[0]
-              user_filter = user in filter['users']
-
-            action_filter =  True
-            if 'actions' in filter:
-              action_filter =  filter['actions'][action]
-
-            keyword_filter = True
-            if 'keywords' in filter:
-                keyword_filter = False
-                for keyword in filter['keywords']:
-                  if annotation['text'].find(keyword) >= 0:
-                    keyword_filter = True
-                    break
-            
-            thread_filter = True
-            if 'threads' in filter:
-                threads_filter = False
-                intersect = list(filter['threads'] & set(annotation['references']))
-                if annotation['id'] in filter['threads'] or len(intersect) > 0:
-                  thread_filter = True
-                         
-            if user_filter and action_filter and keyword_filter and thread_filter:
-              connection.send([annotation, action])                 
-          else:
-            #No filter, just send everything
-            connection.send([annotation, action])
+          if connection.filter.match(annotation) : 
+            connection.send([annotation, action])                 
         except:
            log.info(traceback.format_exc())
            log.info('Filter error!')  
