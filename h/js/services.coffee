@@ -374,6 +374,11 @@ class Hypothesis extends Annotator
       console.log "Also loading annotations for: " + href
       this.plugins.Store.loadAnnotationsFromSearch uri: href
 
+    # get metadata for the annotated document
+    @provider.call
+      method: 'getDocumentMetadata'
+      success: (metadata) =>
+        this.plugins.Document.metadata = metadata
 
 class DraftProvider
   drafts: []

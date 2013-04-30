@@ -64,6 +64,8 @@ class Annotator.Host extends Annotator
           parsed[k] = v
         parsed
 
+    this.addPlugin 'Document'
+
     # Build a channel for the publish API
     @api = Channel.build
       origin: '*'
@@ -160,6 +162,10 @@ class Annotator.Host extends Annotator
 
         .bind('adderClick', =>
           @onAdderClick @event
+        )
+
+        .bind('getDocumentMetadata', =>
+          return @plugins.Document.getDocumentMetadata()
         )
 
   scanDocument: (reason = "something happened") =>
