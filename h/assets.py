@@ -203,6 +203,7 @@ inject = Bundle(
     jschannel,
     annotator,
     annotator_bridge,
+    annotator_document,
     domTextFamily,
     Uglify(
         Coffee('js/host.coffee', output='js/host.js'),

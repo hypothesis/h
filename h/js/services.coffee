@@ -359,6 +359,11 @@ class Hypothesis extends Annotator
             console.log "Found " + data.total + " annotations here.."
             this.plugins.Store._onLoadAnnotationsFromSearch data
 
+    # get metadata for the annotated document
+    @provider.call
+      method: 'getDocumentMetadata'
+      success: (metadata) =>
+        this.plugins.Document.metadata = metadata
 
 class DraftProvider
   drafts: []
