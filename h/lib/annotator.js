@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-383514e
+** Annotator 1.2.6-dev-68379aa
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-19 03:37:56Z
+** Built at: 2013-04-25 14:33:49Z
 */
 
 (function() {
@@ -102,11 +102,12 @@
   $.fn.xpath = function(relativeRoot) {
     var jq;
     jq = this.map(function() {
-      var elem, idx, path;
+      var elem, idx, path, tagName;
       path = '';
       elem = this;
       while (elem && elem.nodeType === 1 && elem !== relativeRoot) {
-        idx = $(elem.parentNode).children(elem.tagName).index(elem) + 1;
+        tagName = elem.tagName.replace(":", "\\:");
+        idx = $(elem.parentNode).children(tagName).index(elem) + 1;
         idx = "[" + idx + "]";
         path = "/" + elem.tagName.toLowerCase() + idx + path;
         elem = elem.parentNode;
@@ -343,7 +344,7 @@
     }
 
     BrowserRange.prototype.normalize = function(root) {
-      var isImg, it, node, nr, offset, p, r, _k, _len3, _ref2;
+      var changed, isImg, it, node, nr, offset, p, r, _k, _len3, _ref2;
       if (this.tainted) {
         console.error(_t("You may only call normalize() once on a BrowserRange!"));
         return false;
@@ -357,18 +358,18 @@
         p = _ref2[_k];
         node = this[p + 'Container'];
         offset = this[p + 'Offset'];
-        if (node.nodeType === 1) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
           it = node.childNodes[offset];
           node = it || node.childNodes[offset - 1];
-          isImg = node.nodeType === 1 && node.tagName.toLowerCase() === "img";
+          isImg = node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === "img";
           if (isImg) {
             offset = 0;
           } else {
-            if (node.nodeType === 1 && !node.firstChild && !isImg) {
+            while (node.nodeType === Node.ELEMENT_NODE && !node.firstChild && !isImg) {
               it = null;
               node = node.previousSibling;
             }
-            while (node.nodeType !== 3) {
+            while (node.nodeType !== Node.TEXT_NODE) {
               node = node.firstChild;
             }
             offset = it ? 0 : node.nodeValue.length;
@@ -378,23 +379,39 @@
         r[p + 'Offset'] = offset;
         r[p + 'Img'] = isImg;
       }
-      nr.start = r.startOffset > 0 ? r.start.splitText(r.startOffset) : r.start;
+      changed = false;
+      if (r.startOffset > 0) {
+        if (r.start.data.length > r.startOffset) {
+          nr.start = r.start.splitText(r.startOffset);
+          changed = true;
+        } else {
+          nr.start = r.start.nextSibling;
+        }
+      } else {
+        nr.start = r.start;
+      }
       if (r.start === r.end && !r.startImg) {
         if ((r.endOffset - r.startOffset) < nr.start.nodeValue.length) {
           nr.start.splitText(r.endOffset - r.startOffset);
+          changed = true;
+        } else {
+
         }
         nr.end = nr.start;
       } else {
         if (r.endOffset < r.end.nodeValue.length && !r.endImg) {
           r.end.splitText(r.endOffset);
+          changed = true;
+        } else {
+
         }
         nr.end = r.end;
       }
       nr.commonAncestor = this.commonAncestorContainer;
-      while (nr.commonAncestor.nodeType !== 1) {
+      while (nr.commonAncestor.nodeType !== Node.ELEMENT_NODE) {
         nr.commonAncestor = nr.commonAncestor.parentNode;
       }
-      if (window.DomTextMapper != null) {
+      if ((window.DomTextMapper != null) && changed) {
         window.DomTextMapper.changed(nr.commonAncestor, "range normalization");
       }
       return new Range.NormalizedRange(nr);
@@ -457,7 +474,7 @@
           n = nodes[_k];
           offset += n.nodeValue.length;
         }
-        isImg = node.nodeType === 1 && node.tagName.toLowerCase() === "img";
+        isImg = node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === "img";
         if (isEnd && !isImg) {
           return [xpath, offset + node.nodeValue.length];
         } else {
@@ -517,7 +534,7 @@
     }
 
     SerializedRange.prototype.normalize = function(root) {
-      var contains, length, node, p, range, tn, xpath, _k, _l, _len3, _len4, _ref2, _ref3;
+      var contains, length, node, p, range, targetOffset, tn, xpath, _k, _l, _len3, _len4, _ref2, _ref3;
       range = {};
       _ref2 = ['start', 'end'];
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
@@ -532,10 +549,11 @@
           throw new Range.RangeError(p, "Couldn't find " + p + " node: " + xpath);
         }
         length = 0;
+        targetOffset = this[p + 'Offset'] + (p === "start" ? 1 : 0);
         _ref3 = $(node).textNodes();
         for (_l = 0, _len4 = _ref3.length; _l < _len4; _l++) {
           tn = _ref3[_l];
-          if (length + tn.nodeValue.length >= this[p + 'Offset']) {
+          if (length + tn.nodeValue.length >= targetOffset) {
             range[p + 'Container'] = tn;
             range[p + 'Offset'] = this[p + 'Offset'] - length;
             break;
@@ -922,7 +940,7 @@
 
     Annotator.prototype.findAnchorFromPositionSelector = function(target) {
       var browserRange, content, currentQuote, mappings, normalizedRange, savedQuote, selector;
-      selector = this.findSelector(target.selector, "TextPosition");
+      selector = this.findSelector(target.selector, "TextPositionSelector");
       if (selector == null) return null;
       savedQuote = this.getQuoteForTarget(target);
       if (savedQuote != null) {
@@ -963,7 +981,7 @@
       };
       result = this.domMatcher.searchFuzzyWithContext(prefix, suffix, quote, expectedStart, expectedEnd, false, null, options);
       if (!result.matches.length) {
-        console.log("Fuzzy matching did not return any results. Giving up.");
+        console.log("Fuzzy matching did not return any results. Giving up on two-phase strategy.");
         return null;
       }
       match = result.matches[0];
@@ -989,12 +1007,12 @@
       len = this.domMapper.getDocLength();
       if (expectedStart == null) expectedStart = len / 2;
       options = {
-        matchDistance: len,
+        matchDistance: len * 2,
         withFuzzyComparison: true
       };
       result = this.domMatcher.searchFuzzy(quote, expectedStart, false, null, options);
       if (!result.matches.length) {
-        console.log("Fuzzy matching did not return any results. Giving up.");
+        console.log("Fuzzy matching did not return any results. Giving up on one-phase strategy.");
         return null;
       }
       match = result.matches[0];
@@ -1043,7 +1061,7 @@
           if ((anchor != null ? anchor.range : void 0) != null) {
             normedRanges.push(anchor.range);
           } else {
-            console.log("Could not find anchor for annotation target '" + t.id + "' (for annotation '" + annotation.id + "').");
+            console.log("Could not find anchor target for annotation '" + annotation.id + "'.");
           }
         } catch (exception) {
           if (exception.stack != null) console.log(exception.stack);
@@ -1206,7 +1224,14 @@
       var container, range, selector, target, _k, _len3, _ref2;
       this.mouseIsDown = false;
       if (this.ignoreMouseup) return;
-      this.selectedTargets = this.getSelectedTargets();
+      try {
+        this.selectedTargets = this.getSelectedTargets();
+      } catch (exception) {
+        console.log("Error while checking selection:");
+        console.log(exception.stack);
+        alert("There is something very strange about the current selection. Sorry, but I can not annotate this.");
+        return;
+      }
       _ref2 = this.selectedTargets;
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
         target = _ref2[_k];

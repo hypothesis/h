@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.5-dev-859d4e3
+** Annotator 1.2.6-dev-939cdee
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-03-13 14:59:29Z
+** Built at: 2013-04-12 22:07:29Z
 */
 
 (function() {
@@ -26,10 +26,10 @@
     };
 
     Store.prototype.options = {
-      prefix: '/store',
-      autoFetch: true,
       annotationData: {},
+      emulateHTTP: false,
       loadFromSearch: false,
+      prefix: '/store',
       urls: {
         create: '/annotations',
         read: '/annotations/:id',
@@ -65,17 +65,10 @@
     };
 
     Store.prototype.annotationCreated = function(annotation) {
-      var quote, quoteHTML,
-        _this = this;
+      var _this = this;
       if (__indexOf.call(this.annotations, annotation) < 0) {
         this.registerAnnotation(annotation);
-        quote = annotation.quote;
-        quoteHTML = annotation.quoteHTML;
-        delete annotation.quote;
-        delete annotation.quoteHTML;
         return this._apiRequest('create', annotation, function(data) {
-          annotation.quote = quote;
-          annotation.quoteHTML = quoteHTML;
           if (!(data.id != null)) {
             console.warn(Annotator._t("Warning: No ID returned from server for annotation "), annotation);
           }
@@ -87,16 +80,9 @@
     };
 
     Store.prototype.annotationUpdated = function(annotation) {
-      var quote, quoteHTML,
-        _this = this;
+      var _this = this;
       if (__indexOf.call(this.annotations, annotation) >= 0) {
-        quote = annotation.quote;
-        quoteHTML = annotation.quoteHTML;
-        delete annotation.quote;
-        delete annotation.quoteHTML;
         return this._apiRequest('update', annotation, (function(data) {
-          annotation.quote = quote;
-          annotation.quoteHTML = quoteHTML;
           return _this.updateAnnotation(annotation, data);
         }));
       }
@@ -134,7 +120,7 @@
 
     Store.prototype._onLoadAnnotations = function(data) {
       if (data == null) data = [];
-      this.annotations = data;
+      this.annotations = this.annotations.concat(data);
       return this.annotator.loadAnnotations(data.slice());
     };
 
@@ -170,33 +156,48 @@
     };
 
     Store.prototype._apiRequestOptions = function(action, obj, onSuccess) {
-      var opts;
+      var data, method, opts;
+      method = this._methodFor(action);
       opts = {
-        type: this._methodFor(action),
+        type: method,
         headers: this.element.data('annotator:headers'),
         dataType: "json",
         success: onSuccess || function() {},
         error: this._onError
       };
+      if (this.options.emulateHTTP && (method === 'PUT' || method === 'DELETE')) {
+        opts.headers = $.extend(opts.headers, {
+          'X-HTTP-Method-Override': method
+        });
+        opts.type = 'POST';
+      }
       if (action === "search") {
         opts = $.extend(opts, {
           data: obj
         });
-      } else {
-        opts = $.extend(opts, {
-          data: obj && this._dataFor(obj),
-          contentType: "application/json; charset=utf-8"
-        });
+        return opts;
       }
+      data = obj && this._dataFor(obj);
+      if (this.options.emulateJSON) {
+        opts.data = {
+          json: data
+        };
+        if (this.options.emulateHTTP) opts.data._method = method;
+        return opts;
+      }
+      opts = $.extend(opts, {
+        data: data,
+        contentType: "application/json; charset=utf-8"
+      });
       return opts;
     };
 
     Store.prototype._urlFor = function(action, id) {
-      var replaceWith, url;
-      replaceWith = id != null ? '/' + id : '';
-      url = this.options.prefix || '/';
+      var url;
+      url = this.options.prefix != null ? this.options.prefix : '';
       url += this.options.urls[action];
-      url = url.replace(/\/:id/, replaceWith);
+      url = url.replace(/\/:id/, id != null ? '/' + id : '');
+      url = url.replace(/:id/, id != null ? id : '');
       return url;
     };
 

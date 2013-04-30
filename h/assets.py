@@ -1,7 +1,46 @@
+from os import path
+from urlparse import urlparse
+
 import re
 
+
 from webassets import Bundle
+from webassets.filter import register_filter
+from webassets.filter.cssrewrite import urlpath
+from webassets.filter.cssrewrite.base import CSSUrlRewriter
 from webassets.loaders import PythonLoader
+
+import logging
+log = logging.getLogger(__name__)
+
+
+class CSSVersion(CSSUrlRewriter):
+    """Source filter to resolve urls in CSS files using the asset resolver.
+
+    The 'cssrewrite' filter supplied with webassets will rewrite relative
+    URLs in the CSS so that they are relative to the output path of the
+    file so that paths are correct after merging CSS files from different
+    sources. This filter is designed to run after that in order to resolve
+    these URLs using the configured resolver so that the assets include
+    version information even when referenced from the CSS.
+    """
+
+    name = 'cssversion'
+    max_debug_level = 'merge'
+
+    def replace_url(self, url):
+        parsed = urlparse(url)
+        if parsed.scheme:
+            return url
+        else:
+            dirname = path.dirname(self.output_path)
+            filepath = path.join(dirname, parsed.path)
+            filepath = path.normpath(path.abspath(filepath))
+            resolved = self.env.resolver.resolve_source_to_url(filepath, url)
+            relative = urlpath.relpath(self.output_url, resolved)
+            return relative
+
+register_filter(CSSVersion)
 
 
 def Uglify(*names, **kw):
@@ -15,9 +54,13 @@ def Coffee(*names, **kw):
 
 
 def SCSS(*names, **kw):
-    kw.setdefault('filters', 'compass,cssrewrite,cleancss')
+    kw.setdefault('filters', 'compass,cssrewrite,cssversion,cleancss')
     return Bundle(*names, **kw)
 
+
+def CSS(*names, **kw):
+    kw.setdefault('filters', 'cssrewrite,cssversion,cleancss')
+    return Bundle(*names, **kw)
 
 #
 # Included dependencies
@@ -31,6 +74,12 @@ annotator_auth = Uglify(
 )
 annotator_bridge = Uglify(
     Coffee('js/plugin/bridge.coffee', output='js/plugin/bridge.js')
+)
+annotator_discovery = Uglify(
+    Coffee('js/plugin/discovery.coffee', output='js/plugin/discovery.js')
+)
+annotator_heatmap = Uglify(
+    Coffee('js/plugin/heatmap.coffee', output='js/plugin/heatmap.js')
 )
 annotator_permissions = Uglify(
     'lib/annotator.permissions.js',
@@ -80,11 +129,12 @@ pagedown = Uglify(
     output='lib/Markdown.Converter.min.js'
 )
 
-domTextFamily = Bundle(
+domTextFamily = Uglify(
     Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
     Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
     Coffee('lib/text_match_engines.coffee', output='js/text_match_engines.js'),
-    Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js')
+    Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js'),
+    output='lib/dom_text.min.js'
 )
 
 # Base and common SCSS
@@ -102,6 +152,8 @@ app = Bundle(
     annotator,
     annotator_auth,
     annotator_bridge,
+    annotator_discovery,
+    annotator_heatmap,
     annotator_permissions,
     annotator_store,
     annotator_threading,
@@ -124,24 +176,22 @@ app = Bundle(
                 'services',
             )
         ],
-        output='js/hypothesis.min.js'
+        output='js/app.min.js'
     ),
-    Uglify(
-        *[
-            Coffee('js/plugin/%s.coffee' % name,
-                   output='js/plugin/%s.js' % name)
-            for name in
-            (
-                'heatmap',
-            )
-        ],
-        output='js/hypothesis.plugins.min.js'
-    ),
-    SCSS('css/app.scss', depends=(base + common), output='css/app.css'),
+    SCSS('css/app.scss', depends=(base + common), output='css/app.min.css'),
 )
 
+display = Bundle(
+    angular,
+    jquery,
+    Coffee('js/displayer.coffee', output='js/displayer.js'),
+    CSS('css/displayer.css', output='js/displayer.min.css'),
+)
 
-site = SCSS('css/site.scss', depends=(base + common), output='css/site.css')
+site = Bundle(
+    app,
+    SCSS('css/site.scss', depends=(base + common), output='css/site.min.css'),
+)
 
 
 # The inject is a script which loads the annotator in an iframe
@@ -155,8 +205,8 @@ inject = Bundle(
     annotator_bridge,
     domTextFamily,
     Uglify(
-        Coffee('js/inject/host.coffee', output='js/host.js'),
-        output='js/hypothesis-host.min.js'
+        Coffee('js/host.coffee', output='js/host.js'),
+        output='js/host.min.js'
     ),
     SCSS('css/inject.scss', depends=base, output='css/inject.css'),
 )
@@ -171,6 +221,7 @@ class WebassetsResourceRegistry(object):
 
         urls = []
         for name in zip(*requirements)[0]:
+            log.info('name: ' + str(name))
             if name in self.env:
                 bundle = self.env[name]
                 urls.extend(bundle.urls())
@@ -190,7 +241,7 @@ def includeme(config):
 
     env = config.get_webassets_env()
     kw = {}
-    if env.url_expire:
+    if env.url_expire is not False:
         # Cache for one year (so-called "far future" Expires)
         kw['cache_max_age'] = 31536000
     config.add_static_view(env.url, env.directory, **kw)
@@ -198,6 +249,7 @@ def includeme(config):
     loader = PythonLoader(config.registry.settings.get('h.assets', __name__))
     bundles = loader.load_bundles()
     for name in bundles:
+        log.info('name: ' + str(name))
         config.add_webasset(name, bundles[name])
 
     from deform.field import Field

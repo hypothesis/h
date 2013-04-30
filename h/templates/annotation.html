@@ -52,7 +52,7 @@
       <div ng-switch-default>Reason:</div>
     </ng-switch>
   </div>
-
+  
   <!-- Body -->
   <markdown ng-model="$parent.model.$modelValue.text"
             ng-readonly="!$parent.editing"
@@ -78,10 +78,21 @@
     </div>
   </div>
 
+  <div data-ng-bind-html="model.$viewValue.body"
+       data-ng-hide="editing"
+       class="body" />
+
   <!-- Editing preview -->
   <div ng-show="previewText" class="preview">
     <h4>Preview</h4>
     <div ng-bind-html="previewText" class="body" />
+  </div>
+
+  <!-- Share dialog -->
+  <div class="share-dialog" data-ng-show="!editing">
+    <div class="icon-input">
+      <input class="share-text" type="text" ng-model="shared_link" readonly/>
+    </div>
   </div>
 
   <!-- Bottom control strip -->

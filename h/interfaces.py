@@ -35,6 +35,14 @@ from horus.interfaces import (
 )
 
 
+class IConsumerClass(Interface):
+    pass
+
+
+class IStoreClass(Interface):
+    pass
+
+
 class IActivateForm(Interface):
     pass
 

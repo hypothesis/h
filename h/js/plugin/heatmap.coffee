@@ -31,7 +31,27 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   constructor: (element, options) ->
     super $(@html), options
+    this._rebaseUrls()
     @element.appendTo element
+
+  _rebaseUrls: ->
+    # We can't rely on browsers to implement the xml:base property correctly.
+    # Therefore, we must rebase the fragment references we use in the SVG for
+    # the heatmap in case the page contains a <base> tag which might otherwise
+    # break these references.
+
+    location = window.location
+    base = "#{location.protocol}//#{location.host}#{location.pathname}"
+
+    rect = @element.find('rect')
+    fill = rect.attr('fill')
+    filter = rect.attr('filter')
+
+    fill = fill.replace(/(#\w+)/, "#{base}$1")
+    filter = filter.replace(/(#\w+)/, "#{base}$1")
+
+    rect.attr('fill', fill)
+    rect.attr('filter', filter)
 
   _collate: (a, b) =>
     for i in [0..a.length-1]
@@ -43,11 +63,10 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   _colorize: (v) ->
     c = d3.scale.pow().exponent(2)
-      .range([0, 10])
-    l = d3.scale.pow().exponent(.5)
-      .domain([0, 1])
-      .range([100, 50])
-    d3.hcl(270, c(v), l(v)).toString()
+    .domain([0, 1])
+    .range(['#f7fbff', '#08306b'])
+    .interpolate(d3.interpolateHcl)
+    c(v).toString()
 
   updateHeatmap: (data) =>
     return unless d3?
@@ -60,7 +79,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     below = []
 
     # Construct control points for the heatmap highlights
-    points = $.map highlights, (hl, i) =>
+    points = highlights.reduce (points, hl, i) =>
       x = hl.offset.top - wrapper.offset().top - offset
       h = hl.height
       d = hl.data
@@ -70,110 +89,111 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       else if x + h >= $(window).height() - @BUCKET_SIZE
         if d not in below then below.push d
       else
-        return [
-          [x, 1, d]
-          [x + h, -1, d]
-        ]
-      return []
+        points.push [x, 1, d]
+        points.push [x + h, -1, d]
+      points
+    , []
 
-    # Accumulate the overlapping annotations into buckets
-    {@buckets, @index, max} = points.sort(this._collate)
-      .reduce ({annotations, buckets, index, max}, [x, d, a], i, points) =>
-
-        # remove all instances of this annotation from the accumulator
-        annotations = annotations.reduce (acc, value) ->
-          {values, arrays} = acc
-          if value is a
-            arrays.push values
-            acc.values = []
-          else
-            values.push value
-          acc
-        ,
-          values: []
-          arrays: []
-        annotations = d3.merge annotations.arrays
-
-        if d > 0
-          # if this is a +1 control point, (re-)include the current annotation
-          # by removing and then adding, duplicates are easily avoided
-          annotations.push a
-          buckets.push annotations
-          index.push x
-          max = Math.max(max, annotations.length)
+    # Accumulate the overlapping annotations into buckets.
+    # The algorithm goes like this:
+    # - Collate the points by sorting on position then delta (+1 or -1)
+    # - Reduce over the sorted points
+    #   - For +1 points, add the annotation at this point to an array of
+    #     "carried" annotations. If it already exists, increase the
+    #     corresponding value in an array of counts which maintains the
+    #     number of points that include this annotation.
+    #   - For -1 points, decrement the value for the annotation at this point
+    #     in the carried array of counts. If the count is now zero, remove the
+    #     annotation from the carried array of annotations.
+    #   - If this point is the first, last, sufficiently far from the previous,
+    #     or there are no more carried annotations, add a bucket marker at this
+    #     point.
+    #   - Otherwise, if the last bucket was not isolated (the one before it
+    #     has at least one annotation) then remove it and ensure that its
+    #     annotations and the carried annotations are merged into the previous
+    #     bucket.
+    {@buckets, @index} = points
+    .sort(this._collate)
+    .reduce ({buckets, index, carry}, [x, d, a], i, points) =>
+      if d > 0                                            # Add annotation
+        if (j = carry.annotations.indexOf a) < 0
+          carry.annotations.unshift a
+          carry.counts.unshift 1
         else
-          # if this is a -1 control point, exclude the current annotation
-          buckets.push annotations
-          index.push x
+          carry.counts[j]++
+      else                                                # Remove annotation
+        j = carry.annotations.indexOf a                   # XXX: assert(i >= 0)
+        if --carry.counts[j] is 0
+          carry.annotations.splice j, 1
+          carry.counts.splice j, 1
 
-        {annotations, buckets, index, max}
-      ,
-      annotations: []
+      if (
+        (index.length is 0 or i is points.length - 1) or  # First or last?
+        carry.annotations.length is 0 or                  # A zero marker?
+        x - index[index.length-1] > 180                   # A large gap?
+      )                                                   # Mark a new bucket.
+        buckets.push carry.annotations.slice()
+        index.push x
+      else
+        # Merge the previous bucket, making sure its predecessor contains
+        # all the carried annotations and the annotations in the previous
+        # bucket.
+        if buckets[buckets.length-2]?.length
+          last = buckets[buckets.length-2]
+          toMerge = buckets.pop()
+          index.pop()
+        else
+          last = buckets[buckets.length-1]
+          toMerge = []
+        last.push a0 for a0 in carry.annotations when a0 not in last
+        last.push a0 for a0 in toMerge when a0 not in last
+
+      {buckets, index, carry}
+    ,
       buckets: []
       index: []
-      max: 0
-
-    # Remove redundant points and merge close buckets until done
-    while @buckets.length > 2
-
-      # Find the two closest points
-      # TODO: dynamic programming
-      small = 0
-      threshold = min = 60
-      for i in [0..@index.length-2]
-        # ignore buckets followed by an empty bucket
-        # prevents erroneous deletion of isolated buckets
-        if @buckets[i+1].length and (w = @index[i+1] - @index[i]) < min
-          small = i
-          min = w
-          break if min == 0 # short-circuit optimization
-
-      # Merge them if they are close enough
-      if min < threshold
-        # Prefer merging the successor bucket backward but not if it's last
-        # since the gradient must always return to 0 at the end
-        if @buckets[small+2]?
-          from = small + 1
-          to = small
-
-          for b in @buckets[from]
-            @buckets[to].push b if b not in @buckets[to]
-        else
-          from = small
-
-        # Drop the merged bucket and index
-        @buckets.splice(from, 1)
-        @index.splice(from, 1)
-      else
-        break
+      carry:
+        annotations: []
+        counts: []
+        latest: 0
 
     # Add the scroll buckets
-    @buckets.unshift above, []
+    @buckets.unshift [], above, []
     @buckets.push below, []
-    @index.unshift @BUCKET_THRESHOLD_PAD,
+    @index.unshift 0, @BUCKET_THRESHOLD_PAD,
       (@BUCKET_THRESHOLD_PAD + @BUCKET_SIZE)
     @index.push $(window).height() - @BUCKET_SIZE, $(window).height()
 
+    # Calculate the total count for each bucket (including replies) and the
+    # maximum count.
+    max = 0
+    for b in @buckets
+      total = b.reduce (total, a) ->
+        subtotal = (a.thread?.flattenChildren()?.length or 0) + 1
+        total + subtotal
+      , 0
+      max = Math.max max, total
+      b.total = total
+
     # Set up the stop interpolations for data binding
-    stopData = $.map(@buckets, (annotations, i) =>
+    stopData = $.map @buckets, (bucket, i) =>
       x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
       offsets = [@index[i], x2]
-      if annotations.length
-        start = @buckets[i-1]?.length and ((@buckets[i-1].length + @buckets[i].length) / 2) or 1e-6
-        end = @buckets[i+1]?.length and ((@buckets[i+1].length + @buckets[i].length) / 2) or 1e-6
+      if bucket.total
+        start = @buckets[i-1]?.total and ((@buckets[i-1].total + bucket.total) / 2) or 1e-6
+        end = @buckets[i+1]?.total and ((@buckets[i+1].total + bucket.total) / 2) or 1e-6
         curve = d3.scale.pow().exponent(.1)
           .domain([0, .5, 1])
           .range([
             [offsets[0], i, 0, start]
-            [d3.mean(offsets), i, .5, annotations.length]
+            [d3.mean(offsets), i, .5, bucket.total]
             [offsets[1], i, 1, end]
           ])
           .interpolate(d3.interpolateArray)
-        curve(v).slice() for v in d3.range(0, 1, .05)
+        curve(v) for v in d3.range(0, 1, .05)
       else
         [ [offsets[0], i, 0, 1e-6]
           [offsets[1], i, 1, 1e-6] ]
-    )
 
     # Update the data bindings
     element = d3.select(@element[0]).datum(data)
@@ -216,7 +236,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       "#{(@index[d] + @index[d+1]) / 2}px"
 
     .html (d) =>
-      "<div class='label'>#{@buckets[d].length}</div><div class='svg'></div>"
+      "<div class='label'>#{@buckets[d].total}</div><div class='svg'></div>"
 
     .classed('upper', @isUpper)
     .classed('lower', @isLower)
@@ -226,5 +246,5 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     this.publish('updated')
 
-  isUpper: (i) => i == 0
+  isUpper: (i) => i == 1
   isLower: (i) => i == @index.length - 2

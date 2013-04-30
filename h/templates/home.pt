@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
-  <head>
-    <script type="text/javascript" metal:fill-slot="embed">
+  <head metal:fill-slot="head" tal:omit-tag>
+    <script type="text/javascript" defer="defer">
       <metal:main use-macro="load: embed.txt" />
     </script>
+    <title>Hypothesis</title>
   </head>
   <body metal:fill-slot="body">
     <a href="https://github.com/hypothesis/h"
@@ -11,9 +12,7 @@
            alt="Fork me on GitHub"
            src="https://s3.amazonaws.com/github/ribbons/forkme_left_white_ffffff.png"
            style="position: absolute; top: 0; left: 0; border: 0;" /></a>
-    <div id="toolbar">
-    </div>
-    <div id="home" class="content">
+    <div id="home" class="content paper">
       <header>
         <img height="150px" width="150px"
              src="${webassets(request, 'images/hypothelogo_square.png')[0]}" />

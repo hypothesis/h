@@ -1,9 +1,10 @@
 @import 'compass';
 @import 'compass/css3/transform';
 @import 'compass/css3/user-interface';
-@import "compass/reset/utilities";
+@import 'compass/layout/stretching';
+@import 'compass/reset/utilities';
 
-$baseFontSize: 14;
+$baseFontSize: 14px;
 
 @import 'common';
 
@@ -12,7 +13,6 @@ $baseFontSize: 14;
 //ELEMENT STYLES////////////////////////////////
 body {
   background-color: transparent;
-  font-family: $sansFontFamily;
   height: 100%;
   position: fixed;
   width: 100%;
@@ -29,25 +29,23 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 
-
 .sliding-panels > li {
+  @extend .content;
+  @extend .noise;
   @include smallshadow(-2px);
+  @include stretch-y;
   @include transition(transform .4s);
   @include translateX(100%);
-  background: url('../images/noise_1.png');
-  overflow-y: scroll;
-  -webkit-overflow-scrolling: touch;
-  padding: 1em;
-  padding-top: 3.5em;
-  position: absolute;
   height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   left: 1em;
   right: 0;
-  
+
   &:first-child {
     @include box-shadow(none);
     @include translateX(0);
-    left: 0em;
+    left: 0;
   }
 
   &.show {
@@ -61,27 +59,64 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //SIDEBAR LAYOUT////////////////////////////////
 #wrapper {
-  background: url('../images/noise_1.png');
+  @extend .noise;
   height: 100%;
   margin-left: $heatmap-width + 17px;
   position: relative;
+}
+
+.topbar {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  left: 7px;
+  top: .5em;
+
+  .inner {
+    margin: 0 .5em 0 3.1em;
+  }
+
+
+  .tri {
+    @include fonticon("\e00b", left);
+    color: rgba( 200, 200, 200, .3);
+    text-shadow:
+      1px .8px 1.5px $white,
+      0 0 0 #000;
+    position: absolute;
+    z-index: 1;
+    top: .3em;
+    left: .3em;
+    line-height: $baseLineHeight * .9;
+    font-size: $baseLineHeight * .9;
+    &:before {
+      vertical-align: 0;
+    }
+    &:hover {
+      color: rgba( 235, 235, 230, .1);
+    }
+  }
+
+  &.shown {
+    .tri {
+      @include fonticon("\e010", left);
+      cursor: ew-resize;
+    }
+  }
 }
 
 
 
 //HEATMAP STUFF////////////////////////////////
 .annotator-heatmap {
+  @include stretch-y;
   height: 100%;
-  position: fixed;
-  top: 0;
  
   svg {
+    @include stretch-y;
     background: hsla(0, 0, 0, .1);
-    border: solid thin rgba($grayLighter, .4);
-    left: 17px;
+    border-left: solid thin rgba($grayLighter, .4);
     height: 100%;
-    position: absolute;
-    top: 0;
+    left: 17px;
     width: $heatmap-width;
   }
 }
@@ -93,7 +128,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   margin-top: -1em; // TODO: Less janking v-align
   // color: rgb(238, 238, 238);
   color: #666;
-  left: 0px;
+  left: 0;
   position: absolute;
   height: 20.1px;
   width: 40.1px;
@@ -113,9 +148,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
   .label {
     font-weight: bold;
+    font-family: $sansFontFamily;
     font-size: 13.1px;
-    position: absolute;
-    text-decoration: none;
     left: 10px;
     right: 2px;
     position: absolute;
@@ -177,15 +211,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //SHEET////////////////////////////////
 //This comes down from under the toolbar
 .sheet {
-  @include transition(
-    max-height .8s ease-in-out,
-    opacity .4s ease-in-out
-  );
   max-height: 30em;
-  opacity: 1;
-
+  overflow: hidden;
   position: absolute;
-  text-align: left;
+  top: 100%;
+  width: 100%;
 
   left: .3em;
   right: 0;
@@ -197,102 +227,23 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     top: .25em;
   }
 
-  &.collapsed {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-
-    footer {
-      opacity: 0;
-    }
-  }
-
   .nav-tabs {
     padding-left: 1.3em;
   }
 
-  .tab-pane {
-    @include box-shadow(5px 5px 3px hsla(0, 0%, 0%, .1));
+  &.collapsed {
+    max-height: 0;
   }
 
   footer {
-    float: right;
-    left: -1em;
-    position: relative;
+    font-family: $sansFontFamily;
     text-align: right;
-    top: -3.5em;
     a { @extend .small; }
   }
 
   input:not([type="submit"]) { width: 100%; }
 }
 
-
-
-//TOOL BAR////////////////////////////////
-#toolbar {
-  @include smallshadow;
-  background: $bodyBackground;
-  border: .1em solid $grayLighter;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-  left: 7px;
-  min-height: 2.2em;
-  position: absolute;
-  right: -.1em;
-  text-align: right;
-  top: .5em;
-  z-index: 5;
-
-  .tinyman {
-    border-left: 1px solid $grayLighter;
-    display: inline-block;
-    margin: .3em;
-  }
-
-  .tri {
-    @include fonticon("\e00b", left);
-    color: rgba( 200, 200, 200, 0.3);
-    text-shadow:
-      1px .8px 1.5px #fff,
-      0 0 0 #000;
-    position: absolute;
-    z-index: 1;
-    top: .3em;
-    left: .3em;
-    line-height: $baseLineHeight * .9;
-    font-size: $baseLineHeight * .9;
-    &:before {
-      vertical-align: 0;
-    }
-    &:hover {
-      color: rgba( 235, 235, 230, 0.1);
-    }
-  }
-
-  &.shown {
-    .tri {
-      @include fonticon("\e010", left);
-      color: rgba( 200, 200, 200, 0.3);
-      text-shadow:
-        1px .8px 1.5px #fff,
-        0 0 0 #000;
-      position: absolute;
-      z-index: 1;
-      top: .3em;
-      left: .3em;
-      line-height: $baseLineHeight * .9;
-      font-size: $baseLineHeight * .9;
-      cursor: ew-resize;
-      &:before {
-        vertical-align: 0;
-      }
-      &:hover {
-        color: rgba( 235, 235, 230, 0.1);
-      }
-    }
-  }
-}
 
 .tinyman {
   padding: 0 .5em;

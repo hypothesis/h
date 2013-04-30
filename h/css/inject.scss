@@ -8,7 +8,6 @@
   $border: $gray;
   $hoverborder: $grayDark;
   @include box-sizing(border-box);
-  @include sweetbutton;
   height: 40px;
   margin-left: -20px;
   margin-top: -50px;
@@ -37,7 +36,7 @@
   }
 
   button {
-    background-color: transparent;
+    @include sweetbutton;
     background-image: url("../images/pen_1.png") !important;
     background-size: 65%;
     background-position: center;
@@ -48,6 +47,7 @@
     opacity: .8;
     text-indent: -999em;
     width: 100%;
+    margin: 0;
 
     &::-moz-focus-inner {
       border: 0;
@@ -76,18 +76,18 @@
 }
 
 .annotator-hl-active, .annotator-hl-temporary {
-  background: #c9d7f1;
+  background: $highlightColor;
   color: black;
   &::-moz-selection {
-    background: #c9d7f1;
+    background: $highlightColor;
     color: black;
   }
   &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
-    background: #c9d7f1;
+    background: $highlightColor;
     color: black;
   }
   &::selection, &::selection:window-inactive {
-    background: #c9d7f1;
+    background: $highlightColor;
     color: black;
   }
 }

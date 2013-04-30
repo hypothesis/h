@@ -1,8 +1,7 @@
 <ul class="sliding-panels">
 
   <!-- Summaries -->
-  <li ng-class="detail && 'squished' || ''"
-      class="annotator-outer annotator-viewer">
+  <li ng-class="detail && 'squished' || ''" ng-show="annotations">
     <ul>
       <li ng-click="showDetail(annotation)"
           ng-mouseenter="focus(annotation)"
@@ -15,11 +14,10 @@
   </li>
 
   <!-- Details -->
-  <li ng-class="detail && thread.message && 'show' || ''"
-      class="annotator-outer annotator-viewer">
+  <li ng-class="detail && thread.message && 'show' || ''">
     <!-- Excerpts -->
     <div class="paper excerpt"
-         ng-repeat="target in thread.message.annotation.target">
+         ng-repeat="target in thread.message.target">
       <blockquote ng-bind="target.quote" ng-hide="diff" />
       <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
       <div class="small pull-right" ng-show="target.diffHTML">
@@ -31,7 +29,7 @@
       <!-- Annotation -->
       <div class="detail annotation"
            name="annotation"
-           ng-model="$parent.thread.message.annotation" />
+           ng-model="$parent.thread.message" />
       <!-- Replies -->
       <ul>
         <li ng-class="collapsed && 'collapsed' || ''"
@@ -39,7 +37,7 @@
             ng-transclude=""
             class="thread">
           <a href="" class="threadexp"
-             title="{{collapsed && 'Expand' || 'Collapse'}}""
+             title="{{collapsed && 'Expand' || 'Collapse'}}"
              ng-click="collapsed = !collapsed" />
         </li>
       </ul>

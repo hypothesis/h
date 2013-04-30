@@ -8,6 +8,7 @@ from h import events
 @subscriber(BeforeRender)
 def add_render_view_global(event):
     event['blocks'] = get_renderer('templates/blocks.pt').implementation()
+    event['displayer'] = get_renderer('templates/displayer.pt').implementation()
 
 
 @subscriber(NewRequest)

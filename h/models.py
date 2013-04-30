@@ -18,6 +18,9 @@ import transaction
 
 from pyramid_basemodel import Base, Session
 
+from pyramid.i18n import TranslationStringFactory
+_ = TranslationStringFactory(__package__)
+
 from sqlalchemy import func, or_
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
@@ -141,6 +144,9 @@ def includeme(config):
 
     if not registry.queryUtility(interfaces.IUserClass):
         registry.registerUtility(User, interfaces.IUserClass)
+
+    if not registry.queryUtility(interfaces.IConsumerClass):
+        registry.registerUtility(Consumer, interfaces.IConsumerClass)
 
     if not registry.queryUtility(interfaces.IActivationClass):
         registry.registerUtility(Activation, interfaces.IActivationClass)

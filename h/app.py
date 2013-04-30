@@ -5,8 +5,8 @@ from bag.web.pyramid.flash_msg import FlashMessage
 
 from pyramid.view import view_config, view_defaults
 
-from h import interfaces, messages, views
-from h.messages import _
+from h import api, interfaces, views
+from h.models import _
 
 
 @view_defaults(context='h.resources.AppFactory', layout='app', renderer='json')
@@ -101,7 +101,8 @@ class AppController(views.BaseController):
                 else:
                     msgs = [str(e)]
                 for m in msgs: FlashMessage(self.request, m, kind='error')
-            return self.failure(messages.INVALID_FORM)
+            return self.failure(_('Your submission is invalid. '
+                                  'Please try again.'))
         else:
             return self.success()
 
@@ -122,18 +123,29 @@ class AppController(views.BaseController):
 
         return result
 
-    @view_config(renderer='json', xhr=True)
+    @view_config(http_cache=0, name='state', renderer='json')
     def __call__(self):
+        request = self.request
+
+        model = {
+            'token': api.TokenController(request)(),
+            'token_url': request.route_url('token'),
+            'persona': request.context.persona,
+            'personas': request.context.personas,
+        }
+
         return {
             'flash': self.pop_flash(),
-            'model': self.request.context,
+            'model': model,
         }
 
     @view_config(renderer='h:templates/app.pt')
     def __html__(self):
         request = self.request
         request.session.new_csrf_token()
-        return {}
+        return {
+            'service_url': self.Store(request).base_url,
+        }
 
 
 def includeme(config):

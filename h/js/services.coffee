@@ -1,9 +1,10 @@
 class Hypothesis extends Annotator
-  # Events - overridden for good measure. Unused in the angular Annotator.
-  events: {}
+  events:
+    serviceDiscovery: 'serviceDiscovery'
 
   # Plugin configuration
   options:
+    Discovery: {}
     Heatmap: {}
     Permissions:
       permissions:
@@ -40,7 +41,6 @@ class Hypothesis extends Annotator
     Document: {}
 
   # Internal state
-  visible: false      # *  Whether the sidebar is visible
   dragging: false     # * To enable dragging only when we really want to
 
   # Here as a noop just to make the Permissions plugin happy
@@ -113,7 +113,7 @@ class Hypothesis extends Annotator
 
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'quote', 'ranges', 'target']
+    whitelist = ['diffHTML', 'quote', 'ranges', 'target', 'id']
     this.addPlugin 'Bridge',
       origin: $location.search().xdm
       window: $window.parent
@@ -128,68 +128,26 @@ class Hypothesis extends Annotator
           parsed[k] = v
         parsed
 
+    @api = Channel.build
+      origin: $location.search().xdm
+      scope: 'annotator:api'
+      window: $window.parent
+
+    .bind('addToken', (ctx, token) =>
+      @element.scope().token = token
+      @element.scope().$digest()
+    )
+
     @provider = Channel.build
       origin: $location.search().xdm
       scope: 'annotator:panel'
       window: $window.parent
-      onReady: =>
-        patch_update = (store) =>
-          # When the store plugin finishes a request, update the annotation
-          # using a monkey-patched update function which updates the threading
-          # if the annotation has a newly-assigned id and ensures that the id
-          # is enumerable.
-          store.updateAnnotation = (annotation, data) =>
-            if annotation.id? and annotation.id != data.id
-              # Update the id table for the threading
-              thread = @threading.getContainer annotation.id
-              thread.message.id = data.id
-              @threading.idTable[data.id] = thread
-              delete @threading.idTable[annotation.id]
-
-              # The id is no longer temporary and should be serialized
-              # on future Store requests.
-              Object.defineProperty annotation, 'id',
-                configurable: true
-                enumerable: true
-                writable: true
-
-              # If the annotation is loaded in a view, switch the view
-              # to reference the new id.
-              search = $location.search()
-              if search? and search.id == annotation.id
-                search.id = data.id
-                $location.search(search).replace()
-
-            # Update the annotation with the new data
-            annotation = angular.extend annotation, data
-
-            # Give angular a chance to react
-            $rootScope.$digest()
-
-        # Get the location of the annotated document
-        @provider.call
-          method: 'getHref'
-          success: (href) =>
-            this.addPlugin 'Store',
-              annotationData:
-                uri: href
-              loadFromSearch:
-                limit: 1000
-                uri: href
-              prefix: '/api'
-            patch_update this.plugins.Store
-            console.log "Loaded annotions for '" + href + "'."
-            debugger
-            for href in this.getSynonymURLs href
-              console.log "Also loading annotations for: " + href
-              this.plugins.Store._apiRequest 'search', uri: href, (data) =>
-                console.log "Found " + data.total + " annotations here.."
-                this.plugins.Store._onLoadAnnotationsFromSearch data
+      onReady: => console.log "Sidepanel: channel is ready"
 
         # Dodge toolbars [DISABLE]
         #@provider.getMaxBottom (max) =>
         #  @element.css('margin-top', "#{max}px")
-        #  @element.find('#toolbar').css("top", "#{max}px")
+        #  @element.find('.topbar').css("top", "#{max}px")
         #  @element.find('#gutter').css("margin-top", "#{max}px")
         #  @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
 
@@ -204,7 +162,7 @@ class Hypothesis extends Annotator
       if $location.path() == '/viewer' and $location.search()?.id?
         $rootScope.$apply => $location.search('id', null).replace()
       else
-        this.hide()
+        $rootScope.$apply => this.hide()
     )
 
   getSynonymURLs: (href) ->
@@ -269,7 +227,7 @@ class Hypothesis extends Annotator
     el.width = el.height = 1
     @element.append el
 
-    handle = @element.find('#toolbar .tri')[0]
+    handle = @element.find('.topbar .tri')[0]
     handle.addEventListener 'dragstart', (event) =>
       event.dataTransfer.setData 'text/plain', ''
       event.dataTransfer.setDragImage el, 0, 0
@@ -295,11 +253,11 @@ class Hypothesis extends Annotator
   # (Optionally) put some HTML formatting around a quote
   getHtmlQuote: (quote) -> quote
 
-  setupAnnotation: (annotation) ->
-    @plugins.Threading.thread annotation
-    annotation
+  # Do nothing in the app frame, let the host handle it.
+  setupAnnotation: (annotation) -> annotation
 
   showViewer: (annotations=[]) =>
+    this.show()
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) ->
@@ -307,13 +265,18 @@ class Hypothesis extends Annotator
         $location.path('/viewer').replace()
         $rootScope.$digest()
     ]
-    this.show()
     this
 
   showEditor: (annotation) =>
+    this.show()
     @element.injector().invoke [
       '$location', '$rootScope', '$route'
-      ($location, $rootScope, $route) ->
+      ($location, $rootScope, $route) =>
+        unless this.plugins.Auth? and this.plugins.Auth.haveValidToken()
+          $route.current.locals.$scope.$apply ->
+            $route.current.locals.$scope.$emit 'showAuth', true
+          return
+
         # Set the path
         search =
           id: annotation.id
@@ -327,22 +290,74 @@ class Hypothesis extends Annotator
         if $route.current.controller is 'EditorController'
           $route.current.locals.$scope.$apply (s) -> s.annotation = annotation
     ]
-    this.show()
     this
 
   show: =>
-    @visible = true
-    @provider.notify method: 'showFrame'
-    @element.find('#toolbar').addClass('shown')
-      .find('.tri').attr('draggable', true)
+    @element.scope().frame.visible = true
 
   hide: =>
-    @lastWidth = window.innerWidth
-    @visible = false
-    @provider.notify method: 'setActiveHighlights'
-    @provider.notify method: 'hideFrame'
-    @element.find('#toolbar').removeClass('shown')
-      .find('.tri').attr('draggable', false)
+    @element.scope().frame.visible = false
+
+  patch_store: (store) =>
+    $location = @element.injector().get '$location'
+    $rootScope = @element.injector().get '$rootScope'
+
+    # When the store plugin finishes a request, update the annotation
+    # using a monkey-patched update function which updates the threading
+    # if the annotation has a newly-assigned id and ensures that the id
+    # is enumerable.
+    store.updateAnnotation = (annotation, data) =>
+      if annotation.id? and annotation.id != data.id
+        # Update the id table for the threading
+        thread = @threading.getContainer annotation.id
+        thread.id = data.id
+        @threading.idTable[data.id] = thread
+        delete @threading.idTable[annotation.id]
+
+        # The id is no longer temporary and should be serialized
+        # on future Store requests.
+        Object.defineProperty annotation, 'id',
+          configurable: true
+          enumerable: true
+          writable: true
+
+        # If the annotation is loaded in a view, switch the view
+        # to reference the new id.
+        search = $location.search()
+        if search? and search.id == annotation.id
+          search.id = data.id
+          $location.search(search).replace()
+
+      # Update the annotation with the new data
+      annotation = angular.extend annotation, data
+
+      # Give angular a chance to react
+      $rootScope.$digest()
+
+  serviceDiscovery: (options) =>
+    $location = @element.injector().get '$location'
+    $rootScope = @element.injector().get '$rootScope'
+
+    angular.extend @options, Store: options
+
+    # Get the location of the annotated document
+    @provider.call
+      method: 'getHref'
+      success: (href) =>
+        options = angular.extend {}, (@options.Store or {}),
+          annotationData:
+            uri: href
+          loadFromSearch:
+            limit: 1000
+            uri: href
+        this.addPlugin 'Store', options
+        this.patch_store this.plugins.Store
+        console.log "Loaded annotions for '" + href + "'."
+        for href in this.getSynonymURLs href
+          console.log "Also loading annotations for: " + href
+          this.plugins.Store._apiRequest 'search', uri: href, (data) =>
+            console.log "Found " + data.total + " annotations here.."
+            this.plugins.Store._onLoadAnnotationsFromSearch data
 
 
 class DraftProvider

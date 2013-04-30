@@ -1,45 +1,49 @@
-@import "compass/typography/text/force-wrap";
+@import 'compass/typography/text/force-wrap';
 
-@import "reset";
+@import 'reset';
 @import 'base';
 
+$white: hsl(0, 0, 99%);
 $sansFontFamily: "Source Sans Pro", $sansFontFamily;
 $serifFontFamily: "Merriweather", $serifFontFamily;
+$headingsColor: $textColor;
 
 
 //ELEMENT STYLES////////////////////////////////
 a {
   color: $linkColor;
   &:hover { color: $linkColorHover; }
+  text-decoration: none;
 }
 
 body {
   background-color: $bodyBackground;
   color: $textColor;
   font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
   line-height: 1.4;
 }
 
 p {
-  margin: 0 0 2em 0;
   -webkit-hyphens: auto;
      -moz-hyphens: auto;
           hyphens: auto;
 
-  &:last-child {
-    margin-bottom: 0;
+  & + p {
+    margin: 2em 0 0;
   }
 }
 
 em { font-style: italic; }
 
 html {
-  font-size: $baseFontSize / 16 * 1em;
+  font-size: $baseFontSize / 16px * 1em;
+  line-height: $baseLineHeight / 16px * 1em;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: $sansFontFamily;
-  color: $gray;
+  color: $headingsColor;
 }
 
 h1 {
@@ -261,7 +265,7 @@ button, input[type=submit], .btn {
 
 blockquote {
   color: $gray;
-  font-family: "Merriweather";
+  font-family: $serifFontFamily;
   font-size: 1em;
   margin-bottom: 1em;
   padding: 0 1em;
@@ -303,6 +307,7 @@ blockquote {
 .dropdown-toggle {
   @include fonticon("\002f", right, 0);
   cursor: pointer;
+  padding: .5em;
 
   &:active {
     outline: 0;
@@ -312,33 +317,22 @@ blockquote {
 .dropdown-menu {
   @include rotateX(90deg);
   background: $white;
-  border: solid 1px $grayLighter;
-  left: 0;
-  top: 2em;
+  border: solid .1em $grayLighter;
+  margin-top: .625em;
+  top: 100%;
   float: left;
   opacity: 0;
   pointer-events: none;
   position: absolute;
   z-index: 2;
-  //Adds transparent element to top of menu to stop parent losing hover.
-  &:before {
-    content: "";
-    background-color: transparent;
-    position: absolute;
-    width: 100%;
-    height: .8em;
-    top: -.8em;
-    left: 0;
-  }
 
   li {
+    cursor: pointer;
     line-height: 1;
     text-align: left;
-    margin: .4em .5em 0;
-    padding-bottom: .5em;
-    border-bottom: dotted 1px $grayLighter;
+    padding: .5em;
     white-space: nowrap;
-    cursor: pointer;
+
     &:hover {
       color: black;
     }
@@ -362,14 +356,39 @@ blockquote {
         cursor: default;
       }
     }
-    &:last-child {
-      border-bottom: 0;
+
+    & + li {
+      border-top: dotted 1px $grayLighter;
     }
   }
 
   a {
-    text-decoration: none;
     color: inherit;
+  }
+
+  // These psuedo-elements add the speech bubble tail / triangle.
+  &:before, &:after {
+    @include rotateZ(360deg);
+    border-color: transparent;
+    border-style: solid;
+    content: '';
+    position: absolute;
+    left: .35em;
+    height: 0;
+    width: 0;
+  }
+
+  &:before {
+    border-bottom-color: $grayLighter;
+    border-width: 0 .5em .5em .5em;
+    top: -.5em;
+  }
+
+  &:after {
+    border-bottom-color: $white;
+    border-width: 0 .5em .5em .5em;
+    top: -.45em;
+    z-index: 3;
   }
 
   // Aligns the dropdown menu to right
@@ -377,6 +396,12 @@ blockquote {
     right: 0;
     left: auto;
     text-align: right;
+
+    // Align the tail
+    &:before, &:after {
+      left: auto;
+      right: .35em;
+    }
   }
 }
 
@@ -460,44 +485,65 @@ blockquote {
 //TABS////////////////////////////////
 .nav-tabs {
   @include pie-clearfix;
-  margin: 0 .5em;
+  margin: 0 .2em;
 
-  & > li > a {
-    cursor: pointer;
-    float: left;
-    line-height: 1;
-    padding: .5em 1em;
-    padding-top: .25em;
-    margin-right: -.5em;
-    margin-bottom: 0;
-    position: relative;
-    text-decoration: none;
-    @include tabbox;
+  a {
+    font-family: $sansFontFamily;
+    color: $grayDark;
   }
 
-  & > .active > a {
-    @include box-shadow(none);
-    color: #333;
-    font-weight: bold;
-    background: hsla(0, 0%, 100%, 1);
-    z-index: 90;
+  & > li {
+    @include box-shadow(inset 2px -10px 13px -8px hsla(0, 0%, 0%, .1));
+    background: darken($white, 2%);
+    border-top-right-radius: 2em 5em;
+    border-top-left-radius: 2em 5em;
+    border: .1em solid $grayLighter;
+    border-bottom: none;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 1;
+    margin-right: -.5em;
+    padding: .25em 1em .5em;
+    position: relative;
+
+    &:hover {
+      background: $white;
+    }
+
+    &.active, &:active {
+      @include box-shadow(none);
+      background: $white;
+      color: #333;
+    }
+
+    &.active {
+      z-index: 1;
+    }
   }
 }
 
-.tab-pane {
-  background: $bodyBackground;
-  border: solid thin $grayLighter;
-  display: none;
-  margin-top: -1px;  // Pull up and under tabs
+.tab-content {
+  @include border-radius(.1em);
+  background: $white;
+  border: solid .1em $grayLighter;
+  margin-top: -.1em;
   padding: 1em;
   position: relative;
 
-  &.active {
-    display: inherit !important;
+  .tab-pane {
+    display: none;
+    &.active {
+      display: inherit !important;
+    }
   }
 }
 
 
+//NOISE///////////
+//Provides the noise background
+.noise {
+  background: url("../images/noise_1.png");
+}
 
 
 //PAPER////////////////////////////////
@@ -505,8 +551,66 @@ blockquote {
 .paper {
   @include border-radius(.2em);
   @include smallshadow;
-  background: #fff;
+  background: $white;
   padding: 1em;
+}
+
+
+//TOOL BAR////////////////////////////////
+.topbar {
+  @include smallshadow;
+  background: $white;
+  border: .1em solid $grayLighter;
+  height: 2.1em;
+  position: fixed;
+  left: -.1em;
+  right: -.1em;
+  top: .5em;
+  z-index: 5;
+
+  .barbutton {
+    &:hover {
+      @include box-shadow(inset 0 1px 3px hsla(0, 0%, 0%, .1));
+    }
+
+    &:active {
+      @include box-shadow(inset 0 2px 3px hsla(0, 0%, 0%, .1));
+    }
+  }
+
+  .inner {
+    max-width: grid(12);
+    margin: 0 auto;
+    & > * {
+      padding: .3em;
+    }
+  }
+
+  .tinyman {
+    border-left: 1px solid $grayLighter;
+    display: inline-block;
+    font-family: $sansFontFamily;
+  }
+}
+
+
+//MAIN CONTENT///////
+.content {
+  margin: 0 auto;
+  padding: 1em;
+  padding-top: 3.5em;
+
+  .domain .favicon {
+    margin: 0 .5em;
+  }
+
+  .page {
+    margin-bottom: 1em;
+
+    a {
+      font-weight: bold;
+    }
+  }
 }
 
 
@@ -514,6 +618,7 @@ blockquote {
 //This is for everything that is formatted as an annotation.
 .annotation {
   @include pie-clearfix;
+  font-family: $sansFontFamily;
   position: relative;
 
   .user {
@@ -522,14 +627,22 @@ blockquote {
 
   .body {
     div {
-      @include force-wrap;
       clear: both;
       margin: .25em 0;
-      p:first-child {
-        margin-top: 0;
+      #{elements-of-type(inline)}, #{headings()}, p, li {
+        @include force-wrap;
       }
-      p:last-child {
-        margin-bottom: 0;
+
+      ol, ul {
+        padding-left: 1.25em;
+      }
+
+      ol {
+        list-style-type: decimal;
+      }
+
+      ul {
+        list-style-type: disc;
       }
     }
 
@@ -580,7 +693,9 @@ blockquote {
       border-left: 1px dotted $grayLight;
       position: relative;
 
-      &:first-child { margin-top: .5em; }
+      &:first-child {
+        margin-top: .5em;
+      }
     }
   }
 
@@ -659,13 +774,22 @@ blockquote {
     @include transition-duration(1.05s);
     opacity: 0;
 
-    :hover > & {
+    &.open, :hover > & {
       @include transition-duration(.15s);
       opacity: 1;
     }
   }
 }
 
+.share-dialog {
+   display: none;
+  .icon-input {
+    position: relative;
+    .share-text {
+      width: 100%;
+    }
+  }
+}
 
 //SUMMARY////////////////////////////////
 //This is specific to the summary view.
@@ -688,4 +812,57 @@ blockquote {
   .magicontrols .show {
     display: none;
   }
+}
+
+
+
+/*
+    Mobile layout
+    240-479 px
+    Zoomed out below 320 px
+*/
+
+@media screen and (min-width: 15em) {
+  .content { padding: 3em 1em; }
+}
+
+/*
+    Wide mobile layout
+    480-767 px
+    Zoomed in above 480 px
+*/
+
+@media screen and (min-width: 30em) {
+}
+
+/*
+    Tablet layout
+    600-911 px
+    Zoomed in above 600 px
+*/
+
+@media screen and (min-width: 37.5em) {
+  .content { padding: 6em; }
+}
+
+/*
+    Widescreen layout
+    912-1887 px
+    Zoomed in above 912 px
+*/
+
+@media screen and (min-width: 57em) {
+  .content {
+    max-width: grid(12);
+    margin: auto;
+  }
+}
+
+/*
+    Huge-screen layout
+    1888-2520 px
+    Zoomed in above 1920 px
+*/
+
+@media screen and (min-width: 118em) {
 }

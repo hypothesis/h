@@ -1,213 +1,73 @@
 <!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
+  <head metal:fill-slot="head" tal:omit-tag="">
+    <base target="_top"
+          tal:attributes="href base_url | request.resource_url(context)" />
+    <link rel="service"
+          type="application/annotatorsvc+json"
+          tal:attributes="href service_url"
+          tal:condition="service_url | nothing" />
+  </head>
   <body ng-app="h"
         ng-controller="AppController"
         class="ng-cloak"
         metal:fill-slot="body">
 
     <!-- Toolbar -->
-    <div id="toolbar" class="form-inline">
-      <div ng-click="visible = !visible" class="tri"></div>
+    <div class="topbar" class="form-inline" ng-class="frame.visible && 'shown'">
 
-      <!-- Persona -->
-      <div ng-show="sheet.collapsed"
-           class="tinyman">
-        <a href=""
+      <div class="tri" ng-click="frame.visible = !frame.visible"></div>
+
+      <div class="inner">
+        <a class="pull-right tinyman" href=""
            ng-click="sheet.collapsed = false;
-                          sheet.tab = 'login';"
-           ng-hide="persona">Sign in</a>
-        <form id="persona"
-              action=""
-              method="POST"
-              enctype="multipart/form-data"
-              accept-charset="utf-8">
-          <input name="__formid__" type="hidden" value="persona" />
-          <div class="dropdown"
-               ng-show="persona">
-            <span role="button"
-                  class="dropdown-toggle"
-                  data-toggle="dropdown"
-                  >{{persona.username}}<span class="provider"
-                                             >/{{persona.provider}}</span></span>
-            <ul class="dropdown-menu pull-right"
-                role="menu">
-              <li ng-repeat="option in personas"
-                  ng-click="persona = personas[$index]"
-                  >{{option.username}}/{{option.provider}}</li>
-              <li ng-click="persona = null">Sign out</li>
-            </ul>
-          </div>
-        </form>
+                     sheet.tab = 'login';"
+           ng-hide="persona || !sheet.collapsed">Sign in</a>
+        <div class="pull-right tinyman" ng-show="persona">
+          <metal:main use-macro="blocks['tinyman']" />
+        </div>
       </div>
-      <!-- / Persona -->
 
       <!-- Account and Authentication -->
-      <div ng-class="sheet.collapsed && 'collapsed'"
-           ng-init="sheet.collapsed = true;
-                         sheet.tab = 'login';"
-           ng-model="sheet.tab"
-           ng-submit="submit(this[sheet.tab])"
-           data-resettable="true"
-           data-tab-reveal="['forgot','activate']"
-           class="form-vertical sheet tabbable collapsed">
+      <div class="sheet collapsed"
+           ng-class="sheet.collapsed && 'collapsed'"
+           ng-init="sheet.collapsed = true">
 
         <span class="close"
               role="button"
               title="Close"
               ng-click="sheet.collapsed = true"></span>
 
-        <!-- Login -->
-        <form data-title="Sign in"
-              data-value="login"
-              class="tab-pane"
-              name="login"
-              novalidate>
-
-          <input type="text" name="username" value="" placeholder="Username"
-                 ng-model="username" ng-minlength="3"
-                 required autocapitalize="false" />
-          <span ng-show="login.username.$error.required"
-                slow-validate="username"
-                >Please enter your username.</span>
-          <span ng-show="login.username.$error.minlength"
-                slow-validate="username"
-                >Usernames are at least 3 characters.</span>
-
-          <input type="password" name="password" value="" placeholder="Password"
-                 ng-model="password"
-                 required autocapitalize="false" autocorrect="false" />
-          <span ng-show="login.password.$error.required"
-                slow-validate="password"
-                >Please enter your password.</span>
-
-          <input type="submit" name="login" value="Sign in"
-                 ng-disabled="!login.$valid" />
-
-        </form>
-        <!-- / Login -->
-
-        <!-- Register -->
-        <form data-title="Create an account"
-              data-value="register"
-              class="tab-pane"
-              name="register"
-              novalidate>
-
-          <input type="text" name="username" value="" placeholder="Username"
-                 required autocapitalize="false" ng-model="username"
-                 ng-minlength="3" ng-maxlength="15"
-                 ng-pattern="/^[A-Za-z0-9._]+$/" />
-          <span ng-show="register.username.$error.required"
-                slow-validate="username"
-                >Please choose a username.</span>
-          <span ng-show="register.username.$error.minlength"
-                slow-validate="username"
-                >Usernames must be at least 3 characters.</span>
-          <span ng-show="register.username.$error.maxlength"
-                slow-validate="username"
-                >Usernames must be 15 characters at most.</span>
-          <span ng-show="register.username.$error.pattern"
-                slow-validate="username"
-                >Only letters, numbers, underscore and dot are allowed. </span>
-
-          <input type="email" name="email" value="" placeholder="Email"
-                 ng-model="email" required autocapitalize="false" />
-          <span ng-show="register.email.$error.email"
-                slow-validate="email"
-                >Is this an email address?</span>
-          <span ng-show="register.email.$error.required"
-                slow-validate="email"
-                >Please enter your email.</span>
-
-          <input type="password" name="password" value="" placeholder="Password"
-                 required autocapitalize="false" autocorrect="false"
-                 ng-minlength="2" ng-model="password" />
-          <span ng-show="register.password.$error.required"
-                slow-validate="password"
-                >Please enter a password.</span>
-          <span ng-show="register.password.$error.minlength"
-                slow-validate="password"
-                >Passwords must be at least 2 characters.</span>
-
-          <input type="submit" name="sign_up" value="Sign up"
-                 ng-disabled="!register.$valid" />
-
-        </form>
-        <!-- / Register -->
-
-        <!-- Forgot -->
-        <form data-title="Forgot your password?"
-              data-value="forgot"
-              class="tab-pane"
-              name="forgot"
-              novalidate>
-
-          <input type="email" name="email" value="" placeholder="Email"
-                 required autocapitalize="false" ng-model="email" />
-          <span ng-show="forgot.email.$error.email"
-                slow-validate="email"
-                >Is this an email address?</span>
-          <span ng-show="forgot.email.$error.required"
-                slow-validate="email"
-                >Please enter your email.</span>
-
-          <input type="submit" name="forgot" value="Send recovery email"
-                 ng-disabled="!forgot.$valid" />
-
-        </form>
-        <!-- / Forgot -->
-
-        <!-- Activate -->
-        <form data-title="Set your password"
-              data-value="activate"
-              class="tab-pane"
-              name="activate"
-              novalidate>
-
-          <input type="text" name="code" value="" placeholder="Activation Code"
-                 required autocorrect="false" autocapitalize="false"
-                 ng-model="code" />
-          <span ng-show="activate.code.$error.required"
-                slow-validate="code"
-                >Please enter your validation code.</span>
-
-          <input type="password" name="password" value="" placeholder="Password"
-                 required autocapitalize="false" autocorrect="false"
-                 ng-minlength="2" ng-model="password" />
-          <span ng-show="activate.password.$error.required"
-                slow-validate="password"
-                >Please choose a password.</span>
-          <span ng-show="activate.password.$error.minlength"
-                slow-validate="password"
-                >Passwords must be at least 2 characters.</span>
-
-          <input type="submit" name="activate" value="Sign in"
-                 ng-disabled="!activate.$valid" />
-
-        </form>
-        <!-- / Activate -->
-
-        <footer ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
-          <ul>
-            <li>
-              <a href="" ng-click="sheet.tab = 'forgot'">Password help?</a>
-            </li>
-            <li>
-              <a href="" ng-click="sheet.tab = 'activate'"
-                 >I have an activation code.</a>
-            </li>
-          </ul>
-        </footer>
-
+        <div ng-submit="submit(this[sheet.tab])"
+             data-resettable="true"
+             data-tab-reveal="['forgot','activate']"
+             ng-model="sheet.tab"
+             class="form-vertical tabbable">
+          <metal:main use-macro="blocks['auth-tabs']" />
+          <footer ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
+            <ul>
+              <li>
+                <a href="" ng-click="sheet.tab = 'forgot'">Password help?</a>
+              </li>
+              <li>
+                <a href="" ng-click="sheet.tab = 'activate'"
+                   >I have an activation code.</a>
+              </li>
+            </ul>
+          </footer>
+        </div>
       </div>
       <!-- / Account and Authentication -->
+
     </div>
     <!-- / Toolbar -->
 
-
     <!-- Content -->
     <div id="wrapper">
+
+      <!-- Angular view -->
       <div ng-view=""></div>
+
     </div>
     <!-- / Content -->
 

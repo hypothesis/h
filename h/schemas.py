@@ -9,7 +9,7 @@ from horus.schemas import (
 )
 
 from h import interfaces
-from h.messages import _
+from h.models import _
 
 
 class LoginSchema(CSRFSchema):

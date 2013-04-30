@@ -1,12 +1,14 @@
 class App
   scope:
+    frame:
+      visible: false
     username: null
     email: null
     password: null
     code: null
     sheet:
       collapsed: true
-      tab: 'login'
+      tab: null
     personas: []
     persona: null
     token: null
@@ -28,6 +30,8 @@ class App
       $location.search('id', null).replace()
       dynamicBucket = true
       annotator.showViewer()
+      heatmap.publish 'updated'
+      $scope.$digest()
 
     heatmap.subscribe 'updated', =>
       elem = d3.select(heatmap.element[0])
@@ -38,7 +42,8 @@ class App
 
       {highlights, offset} = elem.datum()
 
-      if dynamicBucket and $location.path() == '/viewer' and annotator.visible
+      visible = $scope.frame.visible
+      if dynamicBucket and visible and $location.path() == '/viewer'
         bottom = offset + heatmap.element.height()
         annotations = highlights.reduce (acc, hl) =>
           if hl.offset.top >= offset and hl.offset.top <= bottom
@@ -87,6 +92,7 @@ class App
             dynamicBucket = false
             $location.search('id', null)
             annotator.showViewer heatmap.buckets[bucket]
+            $scope.$digest()
 
     $scope.submit = (form) ->
       return unless form.$valid
@@ -117,7 +123,7 @@ class App
     $scope.$watch 'persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
         # TODO: better knowledge of routes
-        $http.post '/app/logout', '',
+        $http.post 'logout', '',
           withCredentials: true
         .success (data) =>
           $scope.$broadcast '$reset'
@@ -150,26 +156,48 @@ class App
         annotator.plugins.Store.pluginInit()
         dynamicBucket = true
 
-    $scope.$watch 'visible', (newValue) ->
-      if newValue then annotator.show() else annotator.hide()
+    $scope.$watch 'frame.visible', (newValue) ->
+      if newValue
+        annotator.show()
+        annotator.provider?.notify method: 'showFrame'
+        $element.find('.topbar').find('.tri').attr('draggable', true)
+      else
+        $scope.sheet.collapsed = true
+        annotator.hide()
+        annotator.provider.notify method: 'setActiveHighlights'
+        annotator.provider.notify method: 'hideFrame'
+        $element.find('.topbar').find('.tri').attr('draggable', false)
+
+    $scope.$watch 'sheet.collapsed', (newValue) ->
+      $scope.sheet.tab = if newValue then null else 'login'
+
+    $scope.$watch 'sheet.tab', (tab) ->
+      $timeout =>
+        $element
+        .find('form')
+        .filter(-> this.name is tab)
+        .find('input')
+        .filter(-> this.type isnt 'hidden')
+        .first()
+        .focus()
+      , 10
 
     $scope.$on 'back', ->
       return unless drafts.discard()
       if $location.path() == '/viewer' and $location.search()?.id?
         $location.search('id', null).replace()
       else
-        $scope.visible = false
+        annotator.hide()
 
     $scope.$on 'showAuth', (event, show=true) ->
       angular.extend $scope.sheet,
         collapsed: !show
         tab: 'login'
 
-
     $scope.$on '$reset', => angular.extend $scope, @scope
 
     # Fetch the initial model from the server
-    $http.get '',
+    $http.get 'state',
       withCredentials: true
     .success (data) =>
       if data.model? then angular.extend $scope, data.model
@@ -187,8 +215,8 @@ class App
 
 
 class Annotation
-  this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts']
-  constructor: ($element, $location, $scope, annotator, drafts) ->
+  this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
+  constructor: ($element, $location, $scope, annotator, drafts, $timeout) ->
     threading = annotator.threading
     $scope.action = 'create'
 
@@ -230,9 +258,10 @@ class Annotation
           [$scope.thread.message.id]
 
       reply = angular.extend annotator.createAnnotation(),
-        thread: references.join '/'
+        references: references
 
-      annotator.setupAnnotation reply
+      # XXX: This is ugly -- it's the one place we refer to the plugin directly
+      annotator.plugins.Threading.thread reply
 
     $scope.edit = ->
       $scope.action = 'edit'
@@ -240,7 +269,7 @@ class Annotation
       $scope.origText = $scope.model.$modelValue.text
       
     $scope.delete = ->
-      annotation = $scope.thread.message.annotation
+      annotation = $scope.thread.message
       replies = $scope.thread.children?.length or 0
 
       # We can delete the annotation if it hasn't got any replies or it is
@@ -269,9 +298,22 @@ class Annotation
         $scope.thread = threading.getContainer id
 
         # Check if this is a brand new annotation
-        annotation = $scope.thread.message?.annotation
+        annotation = $scope.thread.message
         if annotation? and drafts.contains annotation
           $scope.editing = true
+
+    $scope.$watch 'shared', (newValue) ->
+      if newValue and newValue is true
+        $timeout -> $element.find('input').focus()
+        $timeout -> $element.find('input').select()
+
+        $scope.shared_link = window.location.protocol + '//' +
+          window.location.host + '/a/' + $scope.model.$modelValue.id
+        $scope.shared = false
+
+    $scope.share = ->
+      $scope.shared = not $scope.shared
+      $element.find('.share-dialog').slideToggle()
 
 
 class Editor
@@ -316,7 +358,7 @@ class Viewer
 
     listening = false
     refresh = =>
-      return unless annotator.visible
+      return unless $scope.frame.visible
       this.refresh $scope, $routeParams, annotator
       if listening
         if $scope.detail
@@ -352,7 +394,7 @@ class Viewer
     if $routeParams.id? and annotator.threading.idTable[$routeParams.id]?
       $scope.detail = true
       $scope.thread = annotator.threading.getContainer $routeParams.id
-      $scope.focus $scope.thread.message?.annotation
+      $scope.focus $scope.thread.message?
     else
       $scope.detail = false
       $scope.thread = null

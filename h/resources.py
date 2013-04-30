@@ -1,4 +1,16 @@
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
+import urllib2
+
+from datetime import datetime
+from math import floor
+from urlparse import urlparse
+
+from dateutil.parser import parse
+from dateutil.tz import tzutc
 
 from horus import resources
 
@@ -6,7 +18,13 @@ from pyramid.interfaces import ILocation
 
 from zope.interface import implementer
 
-from h import api, models
+import BeautifulSoup
+
+from h import interfaces
+
+
+import logging
+log = logging.getLogger(__name__)
 
 
 @implementer(ILocation)
@@ -97,38 +115,169 @@ class AppFactory(BaseResource):
 
         return []
 
-    @property
-    def consumer(self):
-        settings = self.request.registry.settings
-        key = settings['api.key']
-        consumer = models.Consumer.get_by_key(key)
-        assert(consumer)
-        return consumer
-
-    @property
-    def token(self):
-        message = {
-            'consumerKey': str(self.consumer.key),
-            'ttl': self.consumer.ttl,
-        }
-
-        if self.persona:
-            message['userId'] = 'acct:%(username)s@%(provider)s' % self.persona
-
-        return api.auth.encode_token(message, self.consumer.secret)
-
-    @property
-    def token_url(self):
-        return self.request.route_url('token')
-
     def __json__(self, request=None):
         return {
             name: getattr(self, name)
-            for name in ['persona', 'personas', 'token', 'token_url']
+            for name in ['persona', 'personas']
         }
+
+
+class Annotation(BaseResource, dict):
+    def _url_values(self):
+        # Getting the title of the uri.
+        # hdrs magic is needed because urllib2 is forbidden to use with default
+        # settings.
+        agent = \
+            "Mozilla/5.0 (X11; U; Linux i686) " \
+            "Gecko/20071127 Firefox/2.0.0.11"
+        headers = {'User-Agent': agent}
+        req = urllib2.Request(self['uri'], headers=headers)
+        soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req))
+        title = soup.title.string if soup.title else self['uri']
+
+        # Getting the domain from the uri, and the same url magic for the
+        # domain title.
+        parsed_uri = urlparse(self['uri'])
+        domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
+        domain_stripped = parsed_uri[1]
+        if parsed_uri[1].lower().startswith('www.'):
+            domain_stripped = domain_stripped[4:]
+        req2 = urllib2.Request(domain, headers=headers)
+        soup2 = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req2))
+        domain_title = soup2.title.string if soup2.title else domain
+
+        # Favicon
+        favlink = soup.find("link", rel="shortcut icon")
+        # Check for local/global link.
+        if favlink:
+            href = favlink['href']
+            if href.startswith('//') or href.startswith('http'):
+                icon_link = href
+            else:
+                icon_link = domain + href
+        else:
+            icon_link = ''
+
+        return {
+            'title': title,
+            'domain': domain,
+            'domain_title': domain_title,
+            'domain_stripped': domain_stripped,
+            'favicon_link': icon_link
+        }
+
+    def _fuzzyTime(self, date):
+        if not date: return ''
+        converted = parse(date)
+        delta = datetime.utcnow().replace(tzinfo=tzutc()) - converted
+        delta = round(delta.total_seconds())
+
+        minute = 60
+        hour = minute * 60
+        day = hour * 24
+        week = day * 7
+        month = day * 30
+
+        if (delta < 30):
+            fuzzy = 'moments ago'
+        elif (delta < minute):
+            fuzzy = str(int(delta)) + ' seconds ago'
+        elif (delta < 2 * minute):
+            fuzzy = 'a minute ago'
+        elif (delta < hour):
+            fuzzy = str(int(floor(delta / minute))) + ' minutes ago'
+        elif (floor(delta / hour) == 1):
+            fuzzy = '1 hour ago'
+        elif (delta < day):
+            fuzzy = str(int(floor(delta / hour))) + ' hours ago'
+        elif (delta < day * 2):
+            fuzzy = 'yesterday'
+        elif (delta < month):
+            fuzzy = str(int(round(delta / day))) + ' days ago'
+        else:
+            fuzzy = str(converted)
+
+        return fuzzy
+
+    def _userName(self, user):
+        if not user or user == '': return 'Annotation deleted.'
+        else:
+            return user.split(':')[1].split('@')[0]
+
+    def _nestlist(self, part, childTable):
+        outlist = []
+        if part is None: return outlist
+        part = sorted(part, key=lambda reply: reply['created'], reverse=True)
+        for reply in part:
+            children = self._nestlist(childTable.get(reply['id']), childTable)
+            del reply['created']
+            reply['number_of_replies'] = len(children)
+            outlist.append(reply)
+            if len(children) > 0: outlist.append(children)
+        return outlist
+
+    @property
+    def quote(self):
+        if not 'target' in self: return ''
+        quote = ''
+        for target in self['target']:
+            for selector in target['selector']:
+                if selector['type'] == 'TextQuoteSelector':
+                    quote = quote + selector['exact'] + ' '
+
+        return quote
+
+    @property
+    def references(self):
+        thread = self.get('thread')
+        return thread.split('/') if thread else []
+
+    @property
+    def replies(self):
+        request = self.request
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+
+        childTable = {}
+
+        replies = store.search(references=self['id'])
+        replies = sorted(replies, key=lambda reply: reply['created'])
+
+        for reply in replies:
+            # Add this to its parent.
+            parent = reply['references'][-1]
+            pointer = childTable.setdefault(parent, [])
+            pointer.append({
+                'id': reply['id'],
+                'created': reply['created'],
+                'text': reply['text'],
+                'fuzzy_date': self._fuzzyTime(reply['updated']),
+                'readable_user': self._userName(reply['user']),
+            })
+
+        # Create nested list form
+        repl = self._nestlist(childTable.get(self['id']), childTable)
+        return repl
+
+
+class AnnotationFactory(BaseResource):
+    def __getitem__(self, key):
+        request = self.request
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+
+        annotation = Annotation(request)
+        annotation.__parent__ = self
+        try:
+          annotation.update(store.read(key))
+        except:
+          pass
+
+        return annotation
 
 
 def includeme(config):
     config.set_root_factory(RootFactory)
     config.add_route('index', '/')
     RootFactory.app = AppFactory
+    RootFactory.a = AnnotationFactory

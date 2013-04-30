@@ -14,26 +14,21 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
     @annotator.threading = mail.messageThread()
 
   thread: (annotation) ->
-    # Assign a temporary id if necessary. Threading relies on the id.
-    unless annotation.id?
-      Object.defineProperty annotation, 'id',
+    # Get or create a thread to contain the annotation
+    thread = (@annotator.threading.getContainer annotation.id)
+    thread.message = annotation
+
+    # Attach the thread to its parent, if any.
+    if annotation.references?.length
+      prev = annotation.references[annotation.references.length-1]
+      @annotator.threading.getContainer(prev).addChild thread
+
+    # Expose the thread to the annotation
+    Object.defineProperty annotation, 'thread',
         configurable: true
         enumerable: false
         writable: true
-        value: window.btoa Math.random()
-
-    # Get or create a thread to contain the annotation
-    thread = (@annotator.threading.getContainer annotation.id)
-    thread.message =
-      annotation: annotation
-      id: annotation.id
-      references: annotation.thread?.split('/')
-
-    # Attach the thread to its parent, if any.
-    references = thread.message?.references
-    if references?.length
-      prev = references[references.length-1]
-      @annotator.threading.getContainer(prev).addChild thread
+        value: thread
 
     # Update the id table
     @annotator.threading.idTable[annotation.id] = thread
@@ -43,14 +38,19 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
   annotationDeleted: (annotation) =>
     thread = (@annotator.threading.getContainer annotation.id)
     delete @annotator.threading.idTable[annotation.id]
+    delete annotation.thread  # Break cyclic reference
     thread.message = null
     if thread.parent? then @annotator.threading.pruneEmpties thread.parent
 
   annotationsLoaded: (annotations) =>
-    @annotator.threading.thread annotations.map (a) ->
-      annotation: a
-      id: a.id
-      references: a.thread?.split '/'
+    @annotator.threading.thread annotations
+    this.thread a for a in annotations
 
   beforeAnnotationCreated: (annotation) =>
+    # Assign temporary id. Threading relies on the id.
+    Object.defineProperty annotation, 'id',
+      configurable: true
+      enumerable: false
+      writable: true
+      value: window.btoa Math.random()
     this.thread annotation
