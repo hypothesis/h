@@ -39,6 +39,7 @@ class Hypothesis extends Annotator
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
     Threading: {}
+    Document: {}
 
   # Internal state
   dragging: false     # * To enable dragging only when we really want to
