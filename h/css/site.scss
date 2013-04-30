@@ -1,11 +1,11 @@
-@import "compass";
-@import "compass/css3";
-@import "compass/css3/images";
-@import "compass/utilities/color";
+@import 'compass';
+@import 'compass/css3';
+@import 'compass/css3/images';
+@import 'compass/utilities/color';
 
 $baseFontSize: 18px;
 
-@import "common";
+@import 'common';
 
 body {
   @extend .noise;

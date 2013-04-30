@@ -181,7 +181,10 @@ display = Bundle(
     CSS('css/displayer.css', output='js/displayer.min.css'),
 )
 
-site = SCSS('css/site.scss', depends=(base + common), output='css/site.min.css')
+site = Bundle(
+    app,
+    SCSS('css/site.scss', depends=(base + common), output='css/site.min.css'),
+)
 
 
 # The inject is a script which loads the annotator in an iframe
