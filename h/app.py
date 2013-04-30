@@ -144,8 +144,7 @@ class AppController(views.BaseController):
         request = self.request
         request.session.new_csrf_token()
         return {
-            'base_url': request.resource_url(request.context),
-            'service_url': self.Store(request).base_url
+            'service_url': self.Store(request).base_url,
         }
 
 

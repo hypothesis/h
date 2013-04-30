@@ -2,12 +2,11 @@
 <html lang="en" metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag="">
     <base target="_top"
-          tal:attributes="href base_url"
-          tal:condition="base_url" />
+          tal:attributes="href base_url | request.resource_url(context)" />
     <link rel="service"
           type="application/annotatorsvc+json"
           tal:attributes="href service_url"
-          tal:condition="service_url" />
+          tal:condition="service_url | nothing" />
   </head>
   <body ng-app="h"
         ng-controller="AppController"
