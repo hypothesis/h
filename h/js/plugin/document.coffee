@@ -4,9 +4,15 @@ class Annotator.Plugin.Document extends Annotator.Plugin
     'beforeAnnotationCreated': 'beforeAnnotationCreated'
 
   pluginInit: ->
-    console.log "initializing Document plugin!"
+    @metadata = null
 
   beforeAnnotationCreated: (annotation) =>
-    debugger
-    alert "creating annotation #{annotation}"
+    if not @metadata
+      @metadata = this.getDocumentMetadata()
+    annotation.document = @metadata
 
+  getDocumentMetadata: =>
+    $ = jQuery
+    @metadata =
+      title: $("head title").text()
+    return @metadata
