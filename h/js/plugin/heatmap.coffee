@@ -31,7 +31,27 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   constructor: (element, options) ->
     super $(@html), options
+    this._rebaseUrls()
     @element.appendTo element
+
+  _rebaseUrls: ->
+    # We can't rely on browsers to implement the xml:base property correctly.
+    # Therefore, we must rebase the fragment references we use in the SVG for
+    # the heatmap in case the page contains a <base> tag which might otherwise
+    # break these references.
+
+    location = window.location
+    base = "#{location.protocol}//#{location.host}#{location.pathname}"
+
+    rect = @element.find('rect')
+    fill = rect.attr('fill')
+    filter = rect.attr('filter')
+
+    fill = fill.replace(/(#\w+)/, "#{base}$1")
+    filter = filter.replace(/(#\w+)/, "#{base}$1")
+
+    rect.attr('fill', fill)
+    rect.attr('filter', filter)
 
   _collate: (a, b) =>
     for i in [0..a.length-1]
