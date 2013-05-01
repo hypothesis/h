@@ -4,15 +4,24 @@ from annotator.annotation import Annotation
 from flask import Flask, g
 
 from pyramid.request import Request
-from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
 from h import interfaces, models, streamer
 
+import logging
+log = logging.getLogger(__name__)
 
 class Store(object):
-    def __init__(self):
-        self.request = get_current_request()
+    def __init__(self, request):
+        self.request = request
+
+    @property
+    def base_url(self):
+        """The base URL of the store.
+
+        This is the URL of the service document.
+        """
+        return self.request.route_url('api', subpath='')
 
     def create(self):
         raise NotImplementedError()
@@ -71,9 +80,8 @@ def before_request():
 def includeme(config):
     app = Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
-
-    # Set up the models
     settings = config.get_settings()
+    
     if 'es.host' in settings:
         app.config['ELASTICSEARCH_HOST'] = settings['es.host']
     if 'es.index' in settings:

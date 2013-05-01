@@ -143,7 +143,10 @@ class AppController(views.BaseController):
     def __html__(self):
         request = self.request
         request.session.new_csrf_token()
-        return {}
+        return {
+            'base_url': request.resource_url(request.context),
+            'service_url': self.Store(request).base_url
+        }
 
 
 def includeme(config):

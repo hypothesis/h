@@ -189,7 +189,7 @@ streamer = Bundle(
     pagedown,
     Coffee('js/filters.coffee', output='js/filters.js'),
     Coffee('js/streamer.coffee', output='js/streamer.js'),
-    CSS('css/displayer.css', output='js/displayer.min.css')
+    SCSS('css/site.scss', depends=(base + common), output='css/site.min.css')
 )
 
 

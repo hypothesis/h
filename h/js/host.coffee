@@ -12,10 +12,9 @@ class Annotator.Host extends Annotator
   # Drag state variables
   drag:
     delta: 0
+    enabled: false
     last: null
     tick: false
-    #Do we enable dragging
-    canDrag: false
 
   constructor: (element, options) ->
     super
@@ -50,7 +49,7 @@ class Annotator.Host extends Annotator
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'quote', 'ranges', 'target']
+    whitelist = ['diffHTML', 'quote', 'ranges', 'target', 'id']
     this.addPlugin 'Bridge',
       origin: '*'
       window: @frame[0].contentWindow
@@ -155,7 +154,8 @@ class Annotator.Host extends Annotator
         )
 
         .bind('setDrag', (ctx, drag) =>
-          @canDrag = drag
+          @drag.enabled = drag
+          @drag.last = null
         )
 
   scanDocument: (reason = "something happened") =>
@@ -205,34 +205,30 @@ class Annotator.Host extends Annotator
               position: 'absolute'
               top: $(window).scrollTop()
           @panel?.notify method: 'publish', params: 'hostUpdated'
+
     document.addEventListener 'touchmove', update
     document.addEventListener 'touchstart', =>
-      unless @canDrag then return
       touch = true
       @frame?.css
         display: 'none'
       do update
+
     document.addEventListener 'dragover', (event) =>
-      unless @canDrag then return
+      unless @drag.enabled then return
       if @drag.last?
         @drag.delta += event.screenX - @drag.last
       @drag.last = event.screenX
       unless @drag.tick
         @drag.tick = true
         window.requestAnimationFrame this._dragRefresh
-    document.addEventListener 'dragleave', (event) =>
-      unless @canDrag then return
-      if @drag.last?
-        @drag.delta += event.screenX - @drag.last
-      @drag.last = event.screenX
-      unless @drag.tick
-        @drag.tick = true
-        window.requestAnimationFrame this._dragRefresh
+
     $(window).on 'resize scroll', update
     $(document.body).on 'resize scroll', '*', update
+
     if window.PDFView?
       # XXX: PDF.js hack
       $(PDFView.container).on 'scroll', update
+
     super
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.

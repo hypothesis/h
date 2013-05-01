@@ -1,10 +1,8 @@
 class window.DomTextMapper
 
-  USE_THEAD_TBODY_WORKAROUND = true
   USE_TABLE_TEXT_WORKAROUND = true
-  USE_OL_WORKAROUND = true
-  USE_CAPTION_WORKAROUND = true
   USE_EMPTY_TEXT_WORKAROUND = true
+  SELECT_CHILDREN_INSTEAD = ["thead", "tbody", "ol", "a", "caption", "p"]
   CONTEXT_LEN = 32
 
   @instances: []
@@ -485,13 +483,10 @@ class window.DomTextMapper
     # do various other things. See bellow.
 
     if node.nodeType is Node.ELEMENT_NODE and node.hasChildNodes() and
-        ((USE_THEAD_TBODY_WORKAROUND and node.tagName.toLowerCase() in
-          ["thead", "tbody"]) or
-        (USE_OL_WORKAROUND and node.tagName.toLowerCase() is "ol") or
-        (USE_CAPTION_WORKAROUND and node.tagName.toLowerCase() is "caption"))
-      # This is a thead or a tbody, and selection those is problematic,
+        node.tagName.toLowerCase() in SELECT_CHILDREN_INSTEAD
+      # This is an element where direct selection sometimes fails,
       # because if the WebKit bug.
-      # (Sometimes it selects nothing, sometimes it selects the whole table.)
+      # (Sometimes it selects nothing, sometimes it selects something wrong.)
       # So we select directly the children instead.
       children = node.childNodes
       realRange.setStartBefore children[0]

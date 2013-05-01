@@ -8,7 +8,8 @@ import BeautifulSoup
 import re
 import Queue
 
-from tornado import web, ioloop
+from tornado import web, ioloop, httpserver
+import ssl
 from sockjs.tornado import SockJSRouter, SockJSConnection
 from jsonschema import validate
 import jsonpointer
@@ -28,7 +29,7 @@ class UrlAnalyzer(dict):
             part.encode('idna') if parti==1 else self.urlEncodeNonAscii(part.encode('utf-8'))
             for parti, part in enumerate(parts)
         )
-    
+
     def _url_values(self, uri = None):
         if not uri: uri = self['uri']
         # Getting the title of the uri.
@@ -50,9 +51,6 @@ class UrlAnalyzer(dict):
         domain_stripped = parsed_uri[1]
         if parsed_uri[1].lower().startswith('www.'):
             domain_stripped = domain_stripped[4:]
-        req2 = urllib2.Request(self.iriToUri(domain), headers=headers)
-        soup2 = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req2))
-        domain_title = soup2.title.string if soup2.title else domain
 
         # Favicon
         favlink = soup.find("link", rel="shortcut icon")
@@ -68,9 +66,8 @@ class UrlAnalyzer(dict):
 
         return {
             'title': title,
-            'domain': domain,
-            'domain_title': domain_title,
-            'domain_stripped': domain_stripped,
+            'source': domain,
+            'source_stripped': domain_stripped,
             'favicon_link': icon_link
         }
 
@@ -162,19 +159,26 @@ class StreamerConnection(SockJSConnection):
         log.info('closing ' + str(self))
         self.connections.remove(self)
 
-def _init_streamer(port):
+def _init_streamer(port, ssl_pem = None):
     StreamerRouter = SockJSRouter(StreamerConnection, '/streamer')
-
     app = web.Application(StreamerRouter.urls)
-    app.listen(port) 
+    if not ssl_pem:
+        app.listen(port)
+    else:  
+        http_server = httpserver.HTTPServer(app,     
+            ssl_options=dict(
+                certfile=ssl_pem,
+                keyfile=ssl_pem))
+        http_server.listen(port)
+    
     ioloop.IOLoop.instance().start()
 
 q = Queue.Queue()
 
-def init_streamer(port = 5001):
+def init_streamer(port = 5001, ssl_pem = None):
     global _port
     _port = int(port)
-    t = threading.Thread(target=_init_streamer, args=(port,))
+    t = threading.Thread(target=_init_streamer, args=(port, ssl_pem))
     t2 = threading.Thread(target=process_filters)
     t.daemon = True
     t2.daemon = True

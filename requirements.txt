@@ -3,6 +3,8 @@ BeautifulSoup==3.2.1
 Chameleon==2.11
 Flask==0.9
 Mako==0.8.0
+Paste==1.7.5.1
+PasteDeploy==1.5.0
 PyJWT==0.1.4
 SQLAlchemy==0.8.0
 WebOb==1.2.3
@@ -19,6 +21,8 @@ deform-bootstrap==0.2.2
 hem==0.3.2
 -e git+https://github.com/eventray/horus.git@7ff2854e20a714de0da6b6d7d63f58b3c746adf6#egg=horus-dev
 iso8601==0.1.4
+jsonpointer==1.0
+jsonschema==1.3.0
 oauth2==1.5.211
 pbkdf2==1.3
 peppercorn==0.4

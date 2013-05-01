@@ -13,26 +13,26 @@
   <body metal:fill-slot="body" ng-app="h.streamer">
     <script type="text/javascript">var port = ${port};</script>
     <span ng-controller="StreamerCtrl">
-    <div class="nav">
+    <div class="topbar">
       <div class="inner">
-        <div class="barbutton left title">
-          <span>hypothes<span class="red">.</span>is</span>
+        <div class="barbutton pull-left">
+          <h4>hypothes<span class="red">.</span>is</h4>
         </div>
-        <div class="barbutton left">
-          <span ng-show="streaming">Streaming :)</span>
-          <span ng-hide="streaming">Not streaming <span class="red">:(</span></span>
+        <div class="barbutton pull-left">
+          <h4 ng-show="streaming">Streaming :)</h4>
+          <h4 ng-hide="streaming">Not streaming <span class="red">:(</span></h4>
         </div>
-        <div class="barbutton right">
+        <div class="barbutton pull-right">
           <span>sign up</span>
         </div>
       </div>
     </div>
     
-    <div id="stream">  
+    <div class="content paper">  
       <ul class="annotator-listing annotator-widget">
         <div class="papercontainer">
           <div class="metadata">
-            <div class="hyp-annotation hyp-paper hyp-detail filter-inline">
+            <div class="annotation paper detail filter-inline">
               <div class="filter-title">
                 Filters
               </div>

@@ -4,33 +4,19 @@ from os import environ
 from os.path import abspath, dirname, exists, join
 import sys
 
-VIRTUAL_ENV_WARNING = """
-Please be sure to deactivate the python virtual environment and run this script
-again.
 
-The offending virtual environment is '%s'.
-"""
-
-if __name__ == '__main__':
-    # Make sure a virtual environment is not active.
-    if 'VIRTUAL_ENV' in environ:
-        print VIRTUAL_ENV_WARNING % environ['VIRTUAL_ENV']
-        exit(1)
-
+def activate():
     # Activate the virtual environment if it is present.
-    # While this may seem to contradict the check above, the python activation
-    # does a better job than the shell script at prioritizing the virtual site
-    # packages. Activating with the shell script can lead to issues with
-    # system-wide modules in namespace packages (such as zope.interface).
     activate = abspath(join(dirname(__file__), 'bin', 'activate_this.py'))
     if exists(activate):
         with open(activate) as f:
             code = compile(f.read(), activate, 'exec')
             exec(code, {}, dict(__file__=activate))
-        # Importing pkg_resources here seems to fix issues with namespace
-        # packages from the system-wide python polluting our environment
-        # on Debian and Debian-derived (Ubuntu) distributions.
-        import pkg_resources
+
+
+if __name__ == '__main__':
+    if 'VIRTUAL_ENV' not in environ:
+        activate()
 
     # If the distribution has not been set up for development, do so.
     if not environ.get('PYTHONSETUP'):

@@ -112,7 +112,7 @@ class Hypothesis extends Annotator
 
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'quote', 'ranges', 'target']
+    whitelist = ['diffHTML', 'quote', 'ranges', 'target', 'id']
     this.addPlugin 'Bridge',
       origin: $location.search().xdm
       window: $window.parent
@@ -146,7 +146,7 @@ class Hypothesis extends Annotator
         # Dodge toolbars [DISABLE]
         #@provider.getMaxBottom (max) =>
         #  @element.css('margin-top', "#{max}px")
-        #  @element.find('#toolbar').css("top", "#{max}px")
+        #  @element.find('.topbar').css("top", "#{max}px")
         #  @element.find('#gutter').css("margin-top", "#{max}px")
         #  @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
 
@@ -226,7 +226,7 @@ class Hypothesis extends Annotator
     el.width = el.height = 1
     @element.append el
 
-    handle = @element.find('#toolbar .tri')[0]
+    handle = @element.find('.topbar .tri')[0]
     handle.addEventListener 'dragstart', (event) =>
       event.dataTransfer.setData 'text/plain', ''
       event.dataTransfer.setDragImage el, 0, 0

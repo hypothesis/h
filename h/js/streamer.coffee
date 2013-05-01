@@ -23,6 +23,7 @@ angular.module('h.streamer',['h.filters'])
         $scope.sock.close
         $scope.streaming = false
                
+      #$scope.sock = new SockJS('http://' + window.location.hostname + ':' + port + '/streamer')    
       $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + port + '/streamer')    
       $scope.sock.onopen = ->
         filter = {}
