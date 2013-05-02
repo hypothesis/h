@@ -27,7 +27,32 @@
         </div>
       </div>
     </div>
-    
+
+    <div class="content paper">  
+      <div class="knockout noise">
+        <div class="paper excerpt">
+          <div>
+            <input type="radio" ng-model="matchPolicy" name="match_policy" value="include_all" >include_all</input>
+            <input type="radio" ng-model="matchPolicy" name="match_policy" value="include_any" >include_any</input>
+            <input type="radio" ng-model="matchPolicy" name="match_policy" value="exclude_all" >exclude_all</input>
+            <input type="radio" ng-model="matchPolicy" name="match_policy" value="exclude_any" >exclude_any</input>
+          </div>
+          <div class>
+            <input type="checkbox" data-col="1" ng-model="action_create">Create</input>
+            <input type="checkbox" data-col="1" ng-model="action_edit">Edit</input>
+            <input type="checkbox" data-col="1" ng-model="action_delete">Delete</input>
+          </div>
+          <div><input type="text" ng-model="clauses" placeholder="any"/></div>
+          <div>
+            <button ng-click="parse_clauses()" class="btn check-icon">Check filters</button>
+            <button ng-click="generate_json()" class="btn check-icon">Generate request</button>
+            <button ng-click="start_streaming()" class="btn check-icon">Start streaming</button>
+          </div>
+        </div>
+      </div>
+    </div>   
+     
+    <!--
     <div class="content paper">  
       <ul class="annotator-listing annotator-widget">
         <div class="papercontainer">
@@ -88,6 +113,7 @@
           </div>
         </div>
       </ul>
+	  -->
 
       <ul class="annotator-listing annotator-widget">
         <div class="papercontainer">
@@ -133,7 +159,6 @@
           </div>
           </div>
       </ul>
-    </div>
    </span>
   </body>
 </html>

@@ -79,6 +79,11 @@ filter_schema = {
             "type" : "string", 
             "enum" : ["include_any","include_all","exclude_any","exclude_all"]
         },
+        "actions" : {
+            "create" : { "type" : "boolean", "default" :  True},
+            "edit" : { "type" : "boolean", "default" :  True},
+            "delete" : { "type" : "boolean", "default" :  True},
+        },
         "clauses" : {
             "type" : "array",
             "items": {
@@ -91,7 +96,7 @@ filter_schema = {
             }
         }
     },
-    "required" : ["match_policy","clauses"]
+    "required" : ["match_policy","clauses","actions"]
 }
 
 class FilterHandler(object):
