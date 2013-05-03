@@ -160,8 +160,11 @@ class Annotator.Host extends Annotator
           @drag.last = null
         )
 
-        .bind('getDocumentMetadata', =>
-          return @plugins.Document.getDocumentMetadata()
+        .bind('getDocumentInfo', =>
+          return {
+            uri: @plugins.Document.uri()
+            metadata: @plugins.Document.metadata
+          }
         )
 
   scanDocument: (reason = "something happened") =>
