@@ -126,13 +126,8 @@ pagedown = Uglify(
     output='lib/Markdown.Converter.min.js'
 )
 
-domTextFamily = Uglify(
-    Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
-    Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
-    Coffee('lib/text_match_engines.coffee', output='js/text_match_engines.js'),
-    Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js'),
-    output='lib/dom_text.min.js'
-)
+diffMatchPatch = Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js')
+
 
 # Base and common SCSS
 base = ['css/base.scss']
@@ -197,9 +192,9 @@ site = Bundle(
 inject = Bundle(
     jquery,
     jschannel,
+    diffMatchPatch,    
     annotator,
     annotator_bridge,
-    domTextFamily,
     Uglify(
         Coffee('js/host.coffee', output='js/host.js'),
         output='js/host.min.js'

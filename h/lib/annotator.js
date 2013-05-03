@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-68379aa
+** Annotator 1.2.6-dev-0335f49
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-04-25 14:33:49Z
+** Built at: 2013-05-03 15:20:29Z
 */
 
 (function() {
@@ -15,6 +15,1049 @@
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  window.DomTextMapper = (function() {
+    var CONTEXT_LEN, USE_CAPTION_WORKAROUND, USE_EMPTY_TEXT_WORKAROUND, USE_OL_WORKAROUND, USE_TABLE_TEXT_WORKAROUND, USE_THEAD_TBODY_WORKAROUND, WHITESPACE;
+
+    USE_THEAD_TBODY_WORKAROUND = true;
+
+    USE_TABLE_TEXT_WORKAROUND = true;
+
+    USE_OL_WORKAROUND = true;
+
+    USE_CAPTION_WORKAROUND = true;
+
+    USE_EMPTY_TEXT_WORKAROUND = true;
+
+    CONTEXT_LEN = 32;
+
+    DomTextMapper.instances = [];
+
+    DomTextMapper.changed = function(node, reason) {
+      var instance, _i, _len, _ref;
+      if (reason == null) reason = "no reason";
+      if (this.instances.length === 0) return;
+      _ref = this.instances;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        instance = _ref[_i];
+        instance.performUpdateOnNode(node);
+      }
+      return null;
+    };
+
+    function DomTextMapper() {
+      this.setRealRoot();
+      window.DomTextMapper.instances.push(this);
+    }
+
+    DomTextMapper.prototype.setRootNode = function(rootNode) {
+      this.rootWin = window;
+      return this.pathStartNode = this.rootNode = rootNode;
+    };
+
+    DomTextMapper.prototype.setRootId = function(rootId) {
+      return this.setRootNode(document.getElementById(rootId));
+    };
+
+    DomTextMapper.prototype.setRootIframe = function(iframeId) {
+      var iframe;
+      iframe = window.document.getElementById(iframeId);
+      if (iframe == null) throw new Error("Can't find iframe with specified ID!");
+      this.rootWin = iframe.contentWindow;
+      if (this.rootWin == null) {
+        throw new Error("Can't access contents of the spefified iframe!");
+      }
+      this.rootNode = this.rootWin.document;
+      return this.pathStartNode = this.getBody();
+    };
+
+    DomTextMapper.prototype.getDefaultPath = function() {
+      return this.getPathTo(this.pathStartNode);
+    };
+
+    DomTextMapper.prototype.setRealRoot = function() {
+      this.rootWin = window;
+      this.rootNode = document;
+      return this.pathStartNode = this.getBody();
+    };
+
+    DomTextMapper.prototype.documentChanged = function() {
+      return this.lastDOMChange = this.timestamp();
+    };
+
+    DomTextMapper.prototype.scan = function() {
+      var node, path, startTime, t1, t2;
+      if (this.domStableSince(this.lastScanned)) return this.path;
+      startTime = this.timestamp();
+      this.saveSelection();
+      this.path = {};
+      this.traverseSubTree(this.pathStartNode, this.getDefaultPath());
+      t1 = this.timestamp();
+      path = this.getPathTo(this.pathStartNode);
+      node = this.path[path].node;
+      this.collectPositions(node, path, null, 0, 0);
+      this.restoreSelection();
+      this.lastScanned = this.timestamp();
+      this.corpus = this.path[path].content;
+      t2 = this.timestamp();
+      return this.path;
+    };
+
+    DomTextMapper.prototype.selectPath = function(path, scroll) {
+      var info, node;
+      if (scroll == null) scroll = false;
+      info = this.path[path];
+      if (info == null) throw new Error("I have no info about a node at " + path);
+      node = info != null ? info.node : void 0;
+      node || (node = this.lookUpNode(info.path));
+      return this.selectNode(node, scroll);
+    };
+
+    DomTextMapper.prototype.performUpdateOnNode = function(node, escalating) {
+      var data, oldIndex, p, parentNode, parentPath, parentPathInfo, path, pathInfo, pathsToDrop, prefix, startTime, _i, _len, _ref;
+      if (escalating == null) escalating = false;
+      if (node == null) throw new Error("Called performUpdate with a null node!");
+      if (this.path == null) return;
+      startTime = this.timestamp();
+      if (!escalating) this.saveSelection();
+      path = this.getPathTo(node);
+      pathInfo = this.path[path];
+      if (pathInfo == null) {
+        this.performUpdateOnNode(node.parentNode, true);
+        if (!escalating) this.restoreSelection();
+        return;
+      }
+      if (pathInfo.node === node && pathInfo.content === this.getNodeContent(node, false)) {
+        prefix = path + "/";
+        pathsToDrop = p;
+        pathsToDrop = [];
+        _ref = this.path;
+        for (p in _ref) {
+          data = _ref[p];
+          if (this.stringStartsWith(p, prefix)) pathsToDrop.push(p);
+        }
+        for (_i = 0, _len = pathsToDrop.length; _i < _len; _i++) {
+          p = pathsToDrop[_i];
+          delete this.path[p];
+        }
+        this.traverseSubTree(node, path);
+        if (pathInfo.node === this.pathStartNode) {
+          console.log("Ended up rescanning the whole doc.");
+          this.collectPositions(node, path, null, 0, 0);
+        } else {
+          parentPath = this.parentPath(path);
+          parentPathInfo = this.path[parentPath];
+          if (parentPathInfo == null) {
+            throw new Error("While performing update on node " + path + ", no path info found for parent path: " + parentPath);
+          }
+          oldIndex = node === node.parentNode.firstChild ? 0 : this.path[this.getPathTo(node.previousSibling)].end - parentPathInfo.start;
+          this.collectPositions(node, path, parentPathInfo.content, parentPathInfo.start, oldIndex);
+        }
+      } else {
+        if (pathInfo.node !== this.pathStartNode) {
+          parentNode = node.parentNode != null ? node.parentNode : (parentPath = this.parentPath(path), this.lookUpNode(parentPath));
+          this.performUpdateOnNode(parentNode, true);
+        } else {
+          throw new Error("Can not keep up with the changes, since even the node configured as path start node was replaced.");
+        }
+      }
+      if (!escalating) return this.restoreSelection();
+    };
+
+    DomTextMapper.prototype.getInfoForPath = function(path) {
+      var result;
+      if (this.path == null) {
+        throw new Error("Can't get info before running a scan() !");
+      }
+      result = this.path[path];
+      if (result == null) {
+        throw new Error("Found no info for path '" + path + "'!");
+      }
+      return result;
+    };
+
+    DomTextMapper.prototype.getInfoForNode = function(node) {
+      if (node == null) {
+        throw new Error("Called getInfoForNode(node) with null node!");
+      }
+      return this.getInfoForPath(this.getPathTo(node));
+    };
+
+    DomTextMapper.prototype.getMappingsForCharRanges = function(charRanges) {
+      var charRange, mapping, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = charRanges.length; _i < _len; _i++) {
+        charRange = charRanges[_i];
+        _results.push(mapping = this.getMappingsForCharRange(charRange.start, charRange.end));
+      }
+      return _results;
+    };
+
+    DomTextMapper.prototype.getContentForPath = function(path) {
+      if (path == null) path = null;
+      if (path == null) path = this.getDefaultPath();
+      return this.path[path].content;
+    };
+
+    DomTextMapper.prototype.getLengthForPath = function(path) {
+      if (path == null) path = null;
+      if (path == null) path = this.getDefaultPath();
+      return this.path[path].length;
+    };
+
+    DomTextMapper.prototype.getDocLength = function() {
+      return this.getLengthForPath();
+    };
+
+    DomTextMapper.prototype.getContentForCharRange = function(start, end, path) {
+      var text;
+      if (path == null) path = null;
+      text = this.getContentForPath(path).substr(start, end - start);
+      return text.trim();
+    };
+
+    DomTextMapper.prototype.getContextForCharRange = function(start, end, path) {
+      var content, prefix, prefixLen, prefixStart, suffix;
+      if (path == null) path = null;
+      content = this.getContentForPath(path);
+      prefixStart = Math.max(0, start - CONTEXT_LEN);
+      prefixLen = start - prefixStart;
+      prefix = content.substr(prefixStart, prefixLen);
+      suffix = content.substr(end, prefixLen);
+      return [prefix.trim(), suffix.trim()];
+    };
+
+    DomTextMapper.prototype.getMappingsForCharRange = function(start, end) {
+      var endInfo, endMapping, endNode, endOffset, endPath, info, mappings, p, r, result, startInfo, startMapping, startNode, startOffset, startPath, _ref,
+        _this = this;
+      if (!((start != null) && (end != null))) {
+        throw new Error("start and end is required!");
+      }
+      this.scan();
+      mappings = [];
+      _ref = this.path;
+      for (p in _ref) {
+        info = _ref[p];
+        if (info.atomic && this.regions_overlap(info.start, info.end, start, end)) {
+          (function(info) {
+            var full, mapping;
+            mapping = {
+              element: info
+            };
+            full = start <= info.start && info.end <= end;
+            if (full) {
+              mapping.full = true;
+              mapping.wanted = info.content;
+              mapping.yields = info.content;
+              mapping.startCorrected = 0;
+              mapping.endCorrected = 0;
+            } else {
+              if (info.node.nodeType === Node.TEXT_NODE) {
+                if (start <= info.start) {
+                  mapping.end = end - info.start;
+                  mapping.wanted = info.content.substr(0, mapping.end);
+                } else if (info.end <= end) {
+                  mapping.start = start - info.start;
+                  mapping.wanted = info.content.substr(mapping.start);
+                } else {
+                  mapping.start = start - info.start;
+                  mapping.end = end - info.start;
+                  mapping.wanted = info.content.substr(mapping.start, mapping.end - mapping.start);
+                }
+                _this.computeSourcePositions(mapping);
+                mapping.yields = info.node.data.substr(mapping.startCorrected, mapping.endCorrected - mapping.startCorrected);
+              } else if ((info.node.nodeType === Node.ELEMENT_NODE) && (info.node.tagName.toLowerCase() === "img")) {
+                console.log("Can not select a sub-string from the title of an image. Selecting all.");
+                mapping.full = true;
+                mapping.wanted = info.content;
+              } else {
+                console.log("Warning: no idea how to handle partial mappings for node type " + info.node.nodeType);
+                if (info.node.tagName != null) {
+                  console.log("Tag: " + info.node.tagName);
+                }
+                console.log("Selecting all.");
+                mapping.full = true;
+                mapping.wanted = info.content;
+              }
+            }
+            return mappings.push(mapping);
+          })(info);
+        }
+      }
+      if (mappings.length === 0) {
+        throw new Error("No mappings found for [" + start + ":" + end + "]!");
+      }
+      r = this.rootWin.document.createRange();
+      startMapping = mappings[0];
+      startNode = startMapping.element.node;
+      startPath = startMapping.element.path;
+      startOffset = startMapping.startCorrected;
+      if (startMapping.full) {
+        r.setStartBefore(startNode);
+        startInfo = startPath;
+      } else {
+        r.setStart(startNode, startOffset);
+        startInfo = startPath + ":" + startOffset;
+      }
+      endMapping = mappings[mappings.length - 1];
+      endNode = endMapping.element.node;
+      endPath = endMapping.element.path;
+      endOffset = endMapping.endCorrected;
+      if (endMapping.full) {
+        r.setEndAfter(endNode);
+        endInfo = endPath;
+      } else {
+        r.setEnd(endNode, endOffset);
+        endInfo = endPath + ":" + endOffset;
+      }
+      result = {
+        mappings: mappings,
+        realRange: r,
+        rangeInfo: {
+          startPath: startPath,
+          startOffset: startOffset,
+          startInfo: startInfo,
+          endPath: endPath,
+          endOffset: endOffset,
+          endInfo: endInfo
+        },
+        safeParent: r.commonAncestorContainer
+      };
+      return result;
+    };
+
+    DomTextMapper.prototype.timestamp = function() {
+      return new Date().getTime();
+    };
+
+    DomTextMapper.prototype.stringStartsWith = function(string, prefix) {
+      return prefix === string.substr(0, prefix.length);
+    };
+
+    DomTextMapper.prototype.stringEndsWith = function(string, suffix) {
+      return suffix === string.substr(string.length - suffix.length);
+    };
+
+    DomTextMapper.prototype.parentPath = function(path) {
+      return path.substr(0, path.lastIndexOf("/"));
+    };
+
+    DomTextMapper.prototype.domChangedSince = function(timestamp) {
+      if ((this.lastDOMChange != null) && (timestamp != null)) {
+        return this.lastDOMChange > timestamp;
+      } else {
+        return true;
+      }
+    };
+
+    DomTextMapper.prototype.domStableSince = function(timestamp) {
+      return !this.domChangedSince(timestamp);
+    };
+
+    DomTextMapper.prototype.getProperNodeName = function(node) {
+      var nodeName;
+      nodeName = node.nodeName;
+      switch (nodeName) {
+        case "#text":
+          return "text()";
+        case "#comment":
+          return "comment()";
+        case "#cdata-section":
+          return "cdata-section()";
+        default:
+          return nodeName;
+      }
+    };
+
+    DomTextMapper.prototype.getNodePosition = function(node) {
+      var pos, tmp;
+      pos = 0;
+      tmp = node;
+      while (tmp) {
+        if (tmp.nodeName === node.nodeName) pos++;
+        tmp = tmp.previousSibling;
+      }
+      return pos;
+    };
+
+    DomTextMapper.prototype.getPathSegment = function(node) {
+      var name, pos;
+      name = this.getProperNodeName(node);
+      pos = this.getNodePosition(node);
+      return name + (pos > 1 ? "[" + pos + "]" : "");
+    };
+
+    DomTextMapper.prototype.getPathTo = function(node) {
+      var xpath;
+      xpath = '';
+      while (node !== this.rootNode) {
+        if (node == null) {
+          throw new Error("Called getPathTo on a node which was not a descendant of @rootNode. " + this.rootNode);
+        }
+        xpath = (this.getPathSegment(node)) + '/' + xpath;
+        node = node.parentNode;
+      }
+      xpath = (this.rootNode.ownerDocument != null ? './' : '/') + xpath;
+      xpath = xpath.replace(/\/$/, '');
+      return xpath;
+    };
+
+    DomTextMapper.prototype.traverseSubTree = function(node, path, invisible, verbose) {
+      var child, cont, subpath, _i, _len, _ref;
+      if (invisible == null) invisible = false;
+      if (verbose == null) verbose = false;
+      this.underTraverse = path;
+      cont = this.getNodeContent(node, false);
+      this.path[path] = {
+        path: path,
+        content: cont,
+        length: cont.length,
+        node: node
+      };
+      if (cont.length) {
+        if (verbose) console.log("Collected info about path " + path);
+        if (invisible) {
+          console.log("Something seems to be wrong. I see visible content @ " + path + ", while some of the ancestor nodes reported empty contents. Probably a new selection API bug....");
+        }
+      } else {
+        if (verbose) console.log("Found no content at path " + path);
+        invisible = true;
+      }
+      if (node.hasChildNodes()) {
+        _ref = node.childNodes;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          child = _ref[_i];
+          subpath = path + '/' + (this.getPathSegment(child));
+          this.traverseSubTree(child, subpath, invisible, verbose);
+        }
+      }
+      return null;
+    };
+
+    DomTextMapper.prototype.getBody = function() {
+      return (this.rootWin.document.getElementsByTagName("body"))[0];
+    };
+
+    DomTextMapper.prototype.regions_overlap = function(start1, end1, start2, end2) {
+      return start1 < end2 && start2 < end1;
+    };
+
+    DomTextMapper.prototype.lookUpNode = function(path) {
+      var doc, node, results, _ref;
+      doc = (_ref = this.rootNode.ownerDocument) != null ? _ref : this.rootNode;
+      results = doc.evaluate(path, this.rootNode, null, 0, null);
+      return node = results.iterateNext();
+    };
+
+    DomTextMapper.prototype.saveSelection = function() {
+      var i, sel, _ref;
+      if (this.savedSelection != null) {
+        console.log("Selection saved at:");
+        console.log(this.selectionSaved);
+        throw new Error("Selection already saved!");
+      }
+      sel = this.rootWin.getSelection();
+      for (i = 0, _ref = sel.rangeCount; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
+        this.savedSelection = sel.getRangeAt(i);
+      }
+      switch (sel.rangeCount) {
+        case 0:
+          if (this.savedSelection == null) this.savedSelection = [];
+          break;
+        case 1:
+          this.savedSelection = [this.savedSelection];
+      }
+      try {
+        throw new Error("Selection was saved here");
+      } catch (exception) {
+        return this.selectionSaved = exception.stack;
+      }
+    };
+
+    DomTextMapper.prototype.restoreSelection = function() {
+      var range, sel, _i, _len, _ref;
+      if (this.savedSelection == null) throw new Error("No selection to restore.");
+      sel = this.rootWin.getSelection();
+      sel.removeAllRanges();
+      _ref = this.savedSelection;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        range = _ref[_i];
+        sel.addRange(range);
+      }
+      return delete this.savedSelection;
+    };
+
+    DomTextMapper.prototype.selectNode = function(node, scroll) {
+      var children, realRange, sel, sn, _ref;
+      if (scroll == null) scroll = false;
+      if (node == null) throw new Error("Called selectNode with null node!");
+      sel = this.rootWin.getSelection();
+      sel.removeAllRanges();
+      realRange = this.rootWin.document.createRange();
+      if (node.nodeType === Node.ELEMENT_NODE && node.hasChildNodes() && ((USE_THEAD_TBODY_WORKAROUND && ((_ref = node.tagName.toLowerCase()) === "thead" || _ref === "tbody")) || (USE_OL_WORKAROUND && node.tagName.toLowerCase() === "ol") || (USE_CAPTION_WORKAROUND && node.tagName.toLowerCase() === "caption"))) {
+        children = node.childNodes;
+        realRange.setStartBefore(children[0]);
+        realRange.setEndAfter(children[children.length - 1]);
+        sel.addRange(realRange);
+      } else {
+        if (USE_TABLE_TEXT_WORKAROUND && node.nodeType === Node.TEXT_NODE && node.parentNode.tagName.toLowerCase() === "table") {} else {
+          try {
+            realRange.setStartBefore(node);
+            realRange.setEndAfter(node);
+            sel.addRange(realRange);
+          } catch (exception) {
+            if (!(USE_EMPTY_TEXT_WORKAROUND && this.isWhitespace(node))) {
+              console.log("Warning: failed to scan element @ " + this.underTraverse);
+              console.log("Content is: " + node.innerHTML);
+              console.log("We won't be able to properly anchor to any text inside this element.");
+            }
+          }
+        }
+      }
+      if (scroll) {
+        sn = node;
+        while ((sn != null) && !(sn.scrollIntoViewIfNeeded != null)) {
+          sn = sn.parentNode;
+        }
+        if (sn != null) {
+          sn.scrollIntoViewIfNeeded();
+        } else {
+          console.log("Failed to scroll to element. (Browser does not support scrollIntoViewIfNeeded?)");
+        }
+      }
+      return sel;
+    };
+
+    DomTextMapper.prototype.readSelectionText = function(sel) {
+      sel || (sel = this.rootWin.getSelection());
+      return sel.toString().trim().replace(/\n/g, " ").replace(/\s{2,}/g, " ");
+    };
+
+    DomTextMapper.prototype.getNodeSelectionText = function(node, shouldRestoreSelection) {
+      var sel, text;
+      if (shouldRestoreSelection == null) shouldRestoreSelection = true;
+      if (shouldRestoreSelection) this.saveSelection();
+      sel = this.selectNode(node);
+      text = this.readSelectionText(sel);
+      if (shouldRestoreSelection) this.restoreSelection();
+      return text;
+    };
+
+    DomTextMapper.prototype.computeSourcePositions = function(match) {
+      var dc, displayEnd, displayIndex, displayStart, displayText, sc, sourceEnd, sourceIndex, sourceStart, sourceText;
+      sourceText = match.element.node.data.replace(/\n/g, " ");
+      displayText = match.element.content;
+      displayStart = match.start != null ? match.start : 0;
+      displayEnd = match.end != null ? match.end : displayText.length;
+      if (displayEnd === 0) {
+        match.startCorrected = 0;
+        match.endCorrected = 0;
+        return;
+      }
+      sourceIndex = 0;
+      displayIndex = 0;
+      while (!((sourceStart != null) && (sourceEnd != null))) {
+        sc = sourceText[sourceIndex];
+        dc = displayText[displayIndex];
+        if (sc === dc) {
+          if (displayIndex === displayStart) sourceStart = sourceIndex;
+          displayIndex++;
+          if (displayIndex === displayEnd) sourceEnd = sourceIndex + 1;
+        }
+        sourceIndex++;
+      }
+      match.startCorrected = sourceStart;
+      match.endCorrected = sourceEnd;
+      return null;
+    };
+
+    DomTextMapper.prototype.getNodeContent = function(node, shouldRestoreSelection) {
+      if (shouldRestoreSelection == null) shouldRestoreSelection = true;
+      return this.getNodeSelectionText(node, shouldRestoreSelection);
+    };
+
+    DomTextMapper.prototype.collectPositions = function(node, path, parentContent, parentIndex, index) {
+      var atomic, child, childPath, children, content, endIndex, i, newCount, nodeName, oldCount, pathInfo, pos, startIndex, typeCount;
+      if (parentContent == null) parentContent = null;
+      if (parentIndex == null) parentIndex = 0;
+      if (index == null) index = 0;
+      pathInfo = this.path[path];
+      content = pathInfo != null ? pathInfo.content : void 0;
+      if (!(content != null) || content === "") {
+        pathInfo.start = parentIndex + index;
+        pathInfo.end = parentIndex + index;
+        pathInfo.atomic = false;
+        return index;
+      }
+      startIndex = parentContent != null ? parentContent.indexOf(content, index) : index;
+      if (startIndex === -1) return index;
+      endIndex = startIndex + content.length;
+      atomic = !node.hasChildNodes();
+      pathInfo.start = parentIndex + startIndex;
+      pathInfo.end = parentIndex + endIndex;
+      pathInfo.atomic = atomic;
+      if (!atomic) {
+        children = node.childNodes;
+        i = 0;
+        pos = 0;
+        typeCount = Object();
+        while (i < children.length) {
+          child = children[i];
+          nodeName = this.getProperNodeName(child);
+          oldCount = typeCount[nodeName];
+          newCount = oldCount != null ? oldCount + 1 : 1;
+          typeCount[nodeName] = newCount;
+          childPath = path + "/" + nodeName + (newCount > 1 ? "[" + newCount + "]" : "");
+          pos = this.collectPositions(child, childPath, content, parentIndex + startIndex, pos);
+          i++;
+        }
+      }
+      return endIndex;
+    };
+
+    WHITESPACE = /^\s*$/;
+
+    DomTextMapper.prototype.isWhitespace = function(node) {
+      var child, mightBeEmpty, result;
+      result = (function() {
+        var _i, _len, _ref;
+        switch (node.nodeType) {
+          case Node.TEXT_NODE:
+            return WHITESPACE.test(node.data);
+          case Node.ELEMENT_NODE:
+            mightBeEmpty = true;
+            _ref = node.childNodes;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              child = _ref[_i];
+              mightBeEmpty = mightBeEmpty && this.isWhitespace(child);
+            }
+            return mightBeEmpty;
+          default:
+            return false;
+        }
+      }).call(this);
+      return result;
+    };
+
+    return DomTextMapper;
+
+  })();
+
+  window.DTM_ExactMatcher = (function() {
+
+    function DTM_ExactMatcher() {
+      this.distinct = true;
+      this.caseSensitive = false;
+    }
+
+    DTM_ExactMatcher.prototype.setDistinct = function(value) {
+      return this.distinct = value;
+    };
+
+    DTM_ExactMatcher.prototype.setCaseSensitive = function(value) {
+      return this.caseSensitive = value;
+    };
+
+    DTM_ExactMatcher.prototype.search = function(text, pattern) {
+      var i, index, pLen, results,
+        _this = this;
+      pLen = pattern.length;
+      results = [];
+      index = 0;
+      if (!this.caseSensitive) {
+        text = text.toLowerCase();
+        pattern = pattern.toLowerCase();
+      }
+      while ((i = text.indexOf(pattern)) > -1) {
+        (function() {
+          results.push({
+            start: index + i,
+            end: index + i + pLen
+          });
+          if (_this.distinct) {
+            text = text.substr(i + pLen);
+            return index += i + pLen;
+          } else {
+            text = text.substr(i + 1);
+            return index += i + 1;
+          }
+        })();
+      }
+      return results;
+    };
+
+    return DTM_ExactMatcher;
+
+  })();
+
+  window.DTM_RegexMatcher = (function() {
+
+    function DTM_RegexMatcher() {
+      this.caseSensitive = false;
+    }
+
+    DTM_RegexMatcher.prototype.setCaseSensitive = function(value) {
+      return this.caseSensitive = value;
+    };
+
+    DTM_RegexMatcher.prototype.search = function(text, pattern) {
+      var m, re, _results;
+      re = new RegExp(pattern, this.caseSensitive ? "g" : "gi");
+      _results = [];
+      while (m = re.exec(text)) {
+        _results.push({
+          start: m.index,
+          end: m.index + m[0].length
+        });
+      }
+      return _results;
+    };
+
+    return DTM_RegexMatcher;
+
+  })();
+
+  window.DTM_DMPMatcher = (function() {
+
+    function DTM_DMPMatcher() {
+      this.dmp = new diff_match_patch;
+      this.dmp.Diff_Timeout = 0;
+      this.caseSensitive = false;
+    }
+
+    DTM_DMPMatcher.prototype._reverse = function(text) {
+      return text.split("").reverse().join("");
+    };
+
+    DTM_DMPMatcher.prototype.getMaxPatternLength = function() {
+      return this.dmp.Match_MaxBits;
+    };
+
+    DTM_DMPMatcher.prototype.setMatchDistance = function(distance) {
+      return this.dmp.Match_Distance = distance;
+    };
+
+    DTM_DMPMatcher.prototype.getMatchDistance = function() {
+      return this.dmp.Match_Distance;
+    };
+
+    DTM_DMPMatcher.prototype.setMatchThreshold = function(threshold) {
+      return this.dmp.Match_Threshold = threshold;
+    };
+
+    DTM_DMPMatcher.prototype.getMatchThreshold = function() {
+      return this.dmp.Match_Threshold;
+    };
+
+    DTM_DMPMatcher.prototype.getCaseSensitive = function() {
+      return caseSensitive;
+    };
+
+    DTM_DMPMatcher.prototype.setCaseSensitive = function(value) {
+      return this.caseSensitive = value;
+    };
+
+    DTM_DMPMatcher.prototype.search = function(text, pattern, expectedStartLoc, options) {
+      var endIndex, endLen, endLoc, endPos, endSlice, found, matchLen, maxLen, pLen, result, startIndex, startLen, startPos, startSlice;
+      if (expectedStartLoc == null) expectedStartLoc = 0;
+      if (options == null) options = {};
+      if (expectedStartLoc < 0) {
+        throw new Error("Can't search at negative indices!");
+      }
+      if (!this.caseSensitive) {
+        text = text.toLowerCase();
+        pattern = pattern.toLowerCase();
+      }
+      pLen = pattern.length;
+      maxLen = this.getMaxPatternLength();
+      if (pLen <= maxLen) {
+        result = this.searchForSlice(text, pattern, expectedStartLoc);
+      } else {
+        startSlice = pattern.substr(0, maxLen);
+        startPos = this.searchForSlice(text, startSlice, expectedStartLoc);
+        if (startPos != null) {
+          startLen = startPos.end - startPos.start;
+          endSlice = pattern.substr(pLen - maxLen, maxLen);
+          endLoc = startPos.start + pLen - maxLen;
+          endPos = this.searchForSlice(text, endSlice, endLoc);
+          if (endPos != null) {
+            endLen = endPos.end - endPos.start;
+            matchLen = endPos.end - startPos.start;
+            startIndex = startPos.start;
+            endIndex = endPos.end;
+            if ((pLen * 0.5 <= matchLen && matchLen <= pLen * 1.5)) {
+              result = {
+                start: startIndex,
+                end: endPos.end
+              };
+            }
+          }
+        }
+      }
+      if (result == null) return [];
+      if (options.withLevenhstein || options.withDiff) {
+        found = text.substr(result.start, result.end - result.start);
+        result.diff = this.dmp.diff_main(pattern, found);
+        if (options.withLevenshstein) {
+          result.lev = this.dmp.diff_levenshtein(result.diff);
+        }
+        if (options.withDiff) {
+          this.dmp.diff_cleanupSemantic(result.diff);
+          result.diffHTML = this.dmp.diff_prettyHtml(result.diff);
+        }
+      }
+      return [result];
+    };
+
+    DTM_DMPMatcher.prototype.compare = function(text1, text2) {
+      var result;
+      if (!((text1 != null) && (text2 != null))) {
+        throw new Error("Can not compare non-existing strings!");
+      }
+      result = {};
+      result.diff = this.dmp.diff_main(text1, text2);
+      result.lev = this.dmp.diff_levenshtein(result.diff);
+      result.errorLevel = result.lev / text1.length;
+      this.dmp.diff_cleanupSemantic(result.diff);
+      result.diffHTML = this.dmp.diff_prettyHtml(result.diff);
+      return result;
+    };
+
+    DTM_DMPMatcher.prototype.searchForSlice = function(text, slice, expectedStartLoc) {
+      var dneIndex, endIndex, expectedDneLoc, expectedEndLoc, nrettap, r1, r2, result, startIndex, txet;
+      r1 = this.dmp.match_main(text, slice, expectedStartLoc);
+      startIndex = r1.index;
+      if (startIndex === -1) return null;
+      txet = this._reverse(text);
+      nrettap = this._reverse(slice);
+      expectedEndLoc = startIndex + slice.length;
+      expectedDneLoc = text.length - expectedEndLoc;
+      r2 = this.dmp.match_main(txet, nrettap, expectedDneLoc);
+      dneIndex = r2.index;
+      endIndex = text.length - dneIndex;
+      return result = {
+        start: startIndex,
+        end: endIndex
+      };
+    };
+
+    return DTM_DMPMatcher;
+
+  })();
+
+  window.DomTextMatcher = (function() {
+
+    DomTextMatcher.prototype.setRootNode = function(rootNode) {
+      return this.mapper.setRootNode(rootNode);
+    };
+
+    DomTextMatcher.prototype.setRootId = function(rootId) {
+      return this.mapper.setRootId(rootId);
+    };
+
+    DomTextMatcher.prototype.setRootIframe = function(iframeId) {
+      return this.mapper.setRootIframe(iframeId);
+    };
+
+    DomTextMatcher.prototype.setRealRoot = function() {
+      return this.mapper.setRealRoot();
+    };
+
+    DomTextMatcher.prototype.documentChanged = function() {
+      return this.mapper.documentChanged();
+    };
+
+    DomTextMatcher.prototype.scan = function() {
+      var data, t0, t1;
+      t0 = this.timestamp();
+      data = this.mapper.scan();
+      t1 = this.timestamp();
+      return {
+        time: t1 - t0,
+        data: data
+      };
+    };
+
+    DomTextMatcher.prototype.getDefaultPath = function() {
+      return this.mapper.getDefaultPath();
+    };
+
+    DomTextMatcher.prototype.searchExact = function(pattern, distinct, caseSensitive, path) {
+      if (distinct == null) distinct = true;
+      if (caseSensitive == null) caseSensitive = false;
+      if (path == null) path = null;
+      if (!this.pm) this.pm = new window.DTM_ExactMatcher;
+      this.pm.setDistinct(distinct);
+      this.pm.setCaseSensitive(caseSensitive);
+      return this.search(this.pm, pattern, null, path);
+    };
+
+    DomTextMatcher.prototype.searchRegex = function(pattern, caseSensitive, path) {
+      if (caseSensitive == null) caseSensitive = false;
+      if (path == null) path = null;
+      if (!this.rm) this.rm = new window.DTM_RegexMatcher;
+      this.rm.setCaseSensitive(caseSensitive);
+      return this.search(this.rm, pattern, null, path);
+    };
+
+    DomTextMatcher.prototype.searchFuzzy = function(pattern, pos, caseSensitive, path, options) {
+      var _ref, _ref2;
+      if (caseSensitive == null) caseSensitive = false;
+      if (path == null) path = null;
+      if (options == null) options = {};
+      this.ensureDMP();
+      this.dmp.setMatchDistance((_ref = options.matchDistance) != null ? _ref : 1000);
+      this.dmp.setMatchThreshold((_ref2 = options.matchThreshold) != null ? _ref2 : 0.5);
+      this.dmp.setCaseSensitive(caseSensitive);
+      return this.search(this.dmp, pattern, pos, path, options);
+    };
+
+    DomTextMatcher.prototype.normalizeString = function(string) {
+      return string.replace(/\s{2,}/g, " ");
+    };
+
+    DomTextMatcher.prototype.searchFuzzyWithContext = function(prefix, suffix, pattern, expectedStart, expectedEnd, caseSensitive, path, options) {
+      var analysis, charRange, expectedPrefixStart, expectedSuffixStart, k, len, mappings, match, matchThreshold, obj, patternLength, prefixEnd, prefixResult, remainingText, suffixResult, suffixStart, v, _i, _len, _ref, _ref2, _ref3, _ref4;
+      if (expectedStart == null) expectedStart = null;
+      if (expectedEnd == null) expectedEnd = null;
+      if (caseSensitive == null) caseSensitive = false;
+      if (path == null) path = null;
+      if (options == null) options = {};
+      this.ensureDMP();
+      if (!((prefix != null) && (suffix != null))) {
+        throw new Error("Can not do a context-based fuzzy search with missing context!");
+      }
+      len = this.mapper.getDocLength();
+      expectedPrefixStart = expectedStart != null ? expectedStart - prefix.length : len / 2;
+      this.dmp.setMatchDistance((_ref = options.contextMatchDistance) != null ? _ref : len * 2);
+      this.dmp.setMatchThreshold((_ref2 = options.contextMatchThreshold) != null ? _ref2 : 0.5);
+      prefixResult = this.dmp.search(this.mapper.corpus, prefix, expectedPrefixStart);
+      if (!prefixResult.length) {
+        return {
+          matches: []
+        };
+      }
+      prefixEnd = prefixResult[0].end;
+      patternLength = pattern != null ? pattern.length : (expectedStart != null) && (expectedEnd != null) ? expectedEnd - expectedStart : 64;
+      remainingText = this.mapper.corpus.substr(prefixEnd);
+      expectedSuffixStart = patternLength;
+      suffixResult = this.dmp.search(remainingText, suffix, expectedSuffixStart);
+      if (!suffixResult.length) {
+        return {
+          matches: []
+        };
+      }
+      suffixStart = prefixEnd + suffixResult[0].start;
+      charRange = {
+        start: prefixEnd,
+        end: suffixStart
+      };
+      matchThreshold = (_ref3 = options.patternMatchThreshold) != null ? _ref3 : 0.5;
+      analysis = this.analyzeMatch(pattern, charRange, true);
+      if ((!(pattern != null)) || analysis.exact || (analysis.comparison.errorLevel <= matchThreshold)) {
+        mappings = this.mapper.getMappingsForCharRange(prefixEnd, suffixStart);
+        match = {};
+        _ref4 = [charRange, analysis, mappings];
+        for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+          obj = _ref4[_i];
+          for (k in obj) {
+            v = obj[k];
+            match[k] = v;
+          }
+        }
+        return {
+          matches: [match]
+        };
+      }
+      return {
+        matches: []
+      };
+    };
+
+    function DomTextMatcher(domTextMapper) {
+      this.mapper = domTextMapper;
+    }
+
+    DomTextMatcher.prototype.search = function(matcher, pattern, pos, path, options) {
+      var fuzzyComparison, matches, result, t0, t1, t2, t3, textMatch, textMatches, _fn, _i, _len, _ref,
+        _this = this;
+      if (path == null) path = null;
+      if (options == null) options = {};
+      if (pattern == null) throw new Error("Can't search for null pattern!");
+      pattern = pattern.trim();
+      if (pattern == null) throw new Error("Can't search an for empty pattern!");
+      fuzzyComparison = (_ref = options.withFuzzyComparison) != null ? _ref : false;
+      t0 = this.timestamp();
+      if (path != null) this.scan();
+      t1 = this.timestamp();
+      textMatches = matcher.search(this.mapper.corpus, pattern, pos, options);
+      t2 = this.timestamp();
+      matches = [];
+      _fn = function(textMatch) {
+        var analysis, k, mappings, match, obj, v, _j, _len2, _ref2;
+        analysis = _this.analyzeMatch(pattern, textMatch, fuzzyComparison);
+        mappings = _this.mapper.getMappingsForCharRange(textMatch.start, textMatch.end);
+        match = {};
+        _ref2 = [textMatch, analysis, mappings];
+        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+          obj = _ref2[_j];
+          for (k in obj) {
+            v = obj[k];
+            match[k] = v;
+          }
+        }
+        matches.push(match);
+        return null;
+      };
+      for (_i = 0, _len = textMatches.length; _i < _len; _i++) {
+        textMatch = textMatches[_i];
+        _fn(textMatch);
+      }
+      t3 = this.timestamp();
+      result = {
+        matches: matches,
+        time: {
+          phase0_domMapping: t1 - t0,
+          phase1_textMatching: t2 - t1,
+          phase2_matchMapping: t3 - t2,
+          total: t3 - t0
+        }
+      };
+      return result;
+    };
+
+    DomTextMatcher.prototype.timestamp = function() {
+      return new Date().getTime();
+    };
+
+    DomTextMatcher.prototype.analyzeMatch = function(pattern, charRange, useFuzzy) {
+      var expected, found, result;
+      if (useFuzzy == null) useFuzzy = false;
+      expected = this.normalizeString(pattern);
+      found = this.normalizeString(this.mapper.getContentForCharRange(charRange.start, charRange.end));
+      result = {
+        found: found,
+        exact: found === expected
+      };
+      if (!result.exact && useFuzzy) {
+        this.ensureDMP();
+        result.comparison = this.dmp.compare(expected, found);
+      }
+      return result;
+    };
+
+    DomTextMatcher.prototype.ensureDMP = function() {
+      if (this.dmp == null) {
+        if (window.DTM_DMPMatcher == null) {
+          throw new Error("DTM_DMPMatcher is not available. Have you loaded the text match engines?");
+        }
+        return this.dmp = new window.DTM_DMPMatcher;
+      }
+    };
+
+    return DomTextMatcher;
+
+  })();
 
   gettext = null;
 
@@ -102,12 +1145,11 @@
   $.fn.xpath = function(relativeRoot) {
     var jq;
     jq = this.map(function() {
-      var elem, idx, path, tagName;
+      var elem, idx, path;
       path = '';
       elem = this;
       while (elem && elem.nodeType === 1 && elem !== relativeRoot) {
-        tagName = elem.tagName.replace(":", "\\:");
-        idx = $(elem.parentNode).children(tagName).index(elem) + 1;
+        idx = $(elem.parentNode).children(elem.tagName).index(elem) + 1;
         idx = "[" + idx + "]";
         path = "/" + elem.tagName.toLowerCase() + idx + path;
         elem = elem.parentNode;
@@ -344,7 +1386,7 @@
     }
 
     BrowserRange.prototype.normalize = function(root) {
-      var changed, isImg, it, node, nr, offset, p, r, _k, _len3, _ref2;
+      var isImg, it, node, nr, offset, p, r, _k, _len3, _ref2;
       if (this.tainted) {
         console.error(_t("You may only call normalize() once on a BrowserRange!"));
         return false;
@@ -379,39 +1421,23 @@
         r[p + 'Offset'] = offset;
         r[p + 'Img'] = isImg;
       }
-      changed = false;
-      if (r.startOffset > 0) {
-        if (r.start.data.length > r.startOffset) {
-          nr.start = r.start.splitText(r.startOffset);
-          changed = true;
-        } else {
-          nr.start = r.start.nextSibling;
-        }
-      } else {
-        nr.start = r.start;
-      }
+      nr.start = r.startOffset > 0 ? r.start.splitText(r.startOffset) : r.start;
       if (r.start === r.end && !r.startImg) {
         if ((r.endOffset - r.startOffset) < nr.start.nodeValue.length) {
           nr.start.splitText(r.endOffset - r.startOffset);
-          changed = true;
-        } else {
-
         }
         nr.end = nr.start;
       } else {
         if (r.endOffset < r.end.nodeValue.length && !r.endImg) {
           r.end.splitText(r.endOffset);
-          changed = true;
-        } else {
-
         }
         nr.end = r.end;
       }
       nr.commonAncestor = this.commonAncestorContainer;
-      while (nr.commonAncestor.nodeType !== Node.ELEMENT_NODE) {
+      while (nr.commonAncestor.nodeType !== 1) {
         nr.commonAncestor = nr.commonAncestor.parentNode;
       }
-      if ((window.DomTextMapper != null) && changed) {
+      if (window.DomTextMapper != null) {
         window.DomTextMapper.changed(nr.commonAncestor, "range normalization");
       }
       return new Range.NormalizedRange(nr);
@@ -474,7 +1500,7 @@
           n = nodes[_k];
           offset += n.nodeValue.length;
         }
-        isImg = node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === "img";
+        isImg = node.nodeType === 1 && node.tagName.toLowerCase() === "img";
         if (isEnd && !isImg) {
           return [xpath, offset + node.nodeValue.length];
         } else {
@@ -534,7 +1560,7 @@
     }
 
     SerializedRange.prototype.normalize = function(root) {
-      var contains, length, node, p, range, targetOffset, tn, xpath, _k, _l, _len3, _len4, _ref2, _ref3;
+      var contains, length, node, p, range, tn, xpath, _k, _l, _len3, _len4, _ref2, _ref3;
       range = {};
       _ref2 = ['start', 'end'];
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
@@ -549,11 +1575,10 @@
           throw new Range.RangeError(p, "Couldn't find " + p + " node: " + xpath);
         }
         length = 0;
-        targetOffset = this[p + 'Offset'] + (p === "start" ? 1 : 0);
         _ref3 = $(node).textNodes();
         for (_l = 0, _len4 = _ref3.length; _l < _len4; _l++) {
           tn = _ref3[_l];
-          if (length + tn.nodeValue.length >= targetOffset) {
+          if (length + tn.nodeValue.length >= this[p + 'Offset']) {
             range[p + 'Container'] = tn;
             range[p + 'Offset'] = this[p + 'Offset'] - length;
             break;
@@ -693,8 +1718,10 @@
       this.plugins = {};
       if (!Annotator.supported()) return this;
       if (!this.options.readOnly) this._setupDocumentEvents();
+      if (!this.options.noMatching) this._setupMatching();
       this._setupWrapper()._setupViewer()._setupEditor();
       this._setupDynamicStyle();
+      if (!(this.options.noScan || this.options.noMatching)) this._scan();
       this.adder = $(this.html.adder).appendTo(this.wrapper).hide();
     }
 
@@ -704,11 +1731,16 @@
       return this;
     };
 
+    Annotator.prototype._scan = function() {
+      return this.domMatcher.scan();
+    };
+
     Annotator.prototype._setupWrapper = function() {
       this.wrapper = $(this.html.wrapper);
       this.element.find('script').remove();
       this.element.wrapInner(this.wrapper);
       this.wrapper = this.element.find('.annotator-wrapper');
+      this.domMapper.setRootNode(this.wrapper[0]);
       return this;
     };
 
@@ -805,9 +1837,20 @@
     };
 
     Annotator.prototype.getTextQuoteSelector = function(range) {
-      var endOffset, prefix, quote, selector, startOffset, suffix, _ref2;
-      startOffset = (this.domMapper.getInfoForNode(range.start)).start;
-      endOffset = (this.domMapper.getInfoForNode(range.end)).end;
+      var endOffset, prefix, quote, rangeEnd, rangeStart, selector, startOffset, suffix, _ref2;
+      if (range == null) {
+        throw new Error("Called getTextQuoteSelector(range) with null range!");
+      }
+      rangeStart = range.start;
+      if (rangeStart == null) {
+        throw new Error("Called getTextQuoteSelector(range) on a range with no valid start.");
+      }
+      startOffset = (this.domMapper.getInfoForNode(rangeStart)).start;
+      rangeEnd = range.end;
+      if (rangeEnd == null) {
+        throw new Error("Called getTextQuoteSelector(range) on a range with no valid end.");
+      }
+      endOffset = (this.domMapper.getInfoForNode(rangeEnd)).end;
       quote = this.domMapper.getContentForCharRange(startOffset, endOffset);
       _ref2 = this.domMapper.getContextForCharRange(startOffset, endOffset), prefix = _ref2[0], suffix = _ref2[1];
       return selector = {
@@ -842,6 +1885,12 @@
     Annotator.prototype.getSelectedTargets = function() {
       var browserRange, i, normedRange, r, rangesToIgnore, realRange, selection, source, targets, _k, _len3,
         _this = this;
+      if (this.domMapper == null) {
+        throw new Error("Can not execute getSelectedTargets() before _setupMatching()!");
+      }
+      if (!this.wrapper) {
+        throw new Error("Can not execute getSelectedTargets() before @wrapper is configured!");
+      }
       selection = util.getGlobal().getSelection();
       source = this.getHref();
       targets = [];
@@ -1007,7 +2056,7 @@
       len = this.domMapper.getDocLength();
       if (expectedStart == null) expectedStart = len / 2;
       options = {
-        matchDistance: len * 2,
+        matchDistance: len,
         withFuzzyComparison: true
       };
       result = this.domMatcher.searchFuzzy(quote, expectedStart, false, null, options);
@@ -1030,6 +2079,9 @@
 
     Annotator.prototype.findAnchor = function(target) {
       var anchor;
+      if (target == null) {
+        throw new Error("Trying to find anchor for null target!");
+      }
       console.log("Trying to find anchor for target: ");
       console.log(target);
       anchor = this.findAnchorFromRangeSelector(target);
@@ -1045,6 +2097,9 @@
       var anchor, normed, normedRanges, root, t, _k, _l, _len3, _len4, _ref2;
       root = this.wrapper[0];
       annotation.target || (annotation.target = this.selectedTargets);
+      if (annotation.target == null) {
+        throw new Error("Can not run setupAnnotation(), since @selectedTargets is null!");
+      }
       if (!(annotation.target instanceof Array)) {
         annotation.target = [annotation.target];
       }
@@ -1061,7 +2116,7 @@
           if ((anchor != null ? anchor.range : void 0) != null) {
             normedRanges.push(anchor.range);
           } else {
-            console.log("Could not find anchor target for annotation '" + annotation.id + "'.");
+            console.log("Could not find anchor for annotation target '" + t.id + "' (for annotation '" + annotation.id + "').");
           }
         } catch (exception) {
           if (exception.stack != null) console.log(exception.stack);
@@ -1224,14 +2279,7 @@
       var container, range, selector, target, _k, _len3, _ref2;
       this.mouseIsDown = false;
       if (this.ignoreMouseup) return;
-      try {
-        this.selectedTargets = this.getSelectedTargets();
-      } catch (exception) {
-        console.log("Error while checking selection:");
-        console.log(exception.stack);
-        alert("There is something very strange about the current selection. Sorry, but I can not annotate this.");
-        return;
-      }
+      this.selectedTargets = this.getSelectedTargets();
       _ref2 = this.selectedTargets;
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
         target = _ref2[_k];

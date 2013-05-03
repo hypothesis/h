@@ -49,7 +49,7 @@ class Hypothesis extends Annotator
 
   this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts']
   constructor: ($document, $location, $rootScope, $route, drafts) ->
-    super ($document.find 'body')
+    super ($document.find 'body'), noMatching: true
 
     # Load plugins
     for own name, opts of @options
