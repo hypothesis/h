@@ -26,7 +26,7 @@ angular.module('h.streamer',['h.filters'])
   .controller('StreamerCtrl',
   ($scope, $element) ->
     $scope.streaming = false
-    $scope.matchPolicy = 'include_all'
+    $scope.matchPolicy = 'exclude_any'
     $scope.annotations = []    
     $scope.action_create = true
     $scope.action_edit = true
@@ -48,6 +48,7 @@ angular.module('h.streamer',['h.filters'])
           $scope.streaming = false
       $scope.sock.onmessage = (msg) =>
         $scope.$apply =>
+          console.log msg
           annotation = msg.data[0]
           action = msg.data[1]
           annotation['action'] = action

@@ -830,10 +830,16 @@ blockquote {
   margin:0;
 }
 
+
+.center_button {
+  text-align: center;
+}
+
 .button_controls {
   margin-left: 1em;
   margin-right: 1em;
   margin-bottom: 0.5em;
+  margin-top: 0.5em;
 }
 
 .side-bar-right {
@@ -853,10 +859,10 @@ blockquote {
 }
 
 @mixin sidebar_animation {
-  -webkit-transition: 1.5s linear all;
-  -moz-transition: 1.5s linear all;
-  -o-transition: 1.5s linear all;
-  transition: 1.5s linear all;
+  -webkit-transition: 1s linear all;
+  -moz-transition: 1s linear all;
+  -o-transition: 1s linear all;
+  transition: 1s linear all;
   overflow-y:hidden;
 }
 
@@ -916,6 +922,19 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   overflow-y:hidden;
 }
 
+.searchbar {
+  margin-top: 8em;
+}
+
+.searchinput {
+  width: 100%;
+}
+
+.small-padding {
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
 
 /*
     Mobile layout
@@ -943,7 +962,12 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 */
 
 @media screen and (min-width: 37.5em) {
-  .content { padding: 6em; }
+  .content { 
+    padding-left: 6em; 
+    padding-right: 6em; 
+    padding-top: 3.5em; 
+    padding-bottom: 0.5em; 
+  }
 }
 
 /*

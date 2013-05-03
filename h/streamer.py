@@ -103,6 +103,10 @@ class FilterHandler(object):
     def __init__(self, filter_json):
         self.filter = filter_json
 
+    def _userName(self, user):
+        if not user or user == '': return 'Annotation deleted.'
+        else: return user.split(':')[1].split('@')[0]
+
     #operators
     def equals(self, a, b): return a == b
     def matches(self, a, b): return a in b
@@ -114,6 +118,8 @@ class FilterHandler(object):
         
     def evaluate_clause(self, clause, target):
         field_value = resolve_pointer(target, clause['field'], None)
+        if clause['field'] == 'user':
+            field_value = self._userName(field_value)
         if field_value is None:
             return False
         else: return getattr(self, clause['operator'])(field_value, clause['value'])
