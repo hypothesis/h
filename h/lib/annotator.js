@@ -1,33 +1,30 @@
 /*
-** Annotator 1.2.6-dev-0335f49
+** Annotator 1.2.6-dev-4f5b2f1
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-05-03 15:20:29Z
+** Built at: 2013-05-03 17:01:04Z
 */
 
 (function() {
   var $, Annotator, Delegator, LinkParser, Range, fn, functions, g, gettext, util, _Annotator, _gettext, _i, _j, _len, _len2, _ref, _ref2, _t,
+    __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __slice = Array.prototype.slice,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   window.DomTextMapper = (function() {
-    var CONTEXT_LEN, USE_CAPTION_WORKAROUND, USE_EMPTY_TEXT_WORKAROUND, USE_OL_WORKAROUND, USE_TABLE_TEXT_WORKAROUND, USE_THEAD_TBODY_WORKAROUND, WHITESPACE;
-
-    USE_THEAD_TBODY_WORKAROUND = true;
+    var CONTEXT_LEN, SELECT_CHILDREN_INSTEAD, USE_EMPTY_TEXT_WORKAROUND, USE_TABLE_TEXT_WORKAROUND, WHITESPACE;
 
     USE_TABLE_TEXT_WORKAROUND = true;
 
-    USE_OL_WORKAROUND = true;
-
-    USE_CAPTION_WORKAROUND = true;
-
     USE_EMPTY_TEXT_WORKAROUND = true;
+
+    SELECT_CHILDREN_INSTEAD = ["thead", "tbody", "ol", "a", "caption", "p"];
 
     CONTEXT_LEN = 32;
 
@@ -494,7 +491,7 @@
       sel = this.rootWin.getSelection();
       sel.removeAllRanges();
       realRange = this.rootWin.document.createRange();
-      if (node.nodeType === Node.ELEMENT_NODE && node.hasChildNodes() && ((USE_THEAD_TBODY_WORKAROUND && ((_ref = node.tagName.toLowerCase()) === "thead" || _ref === "tbody")) || (USE_OL_WORKAROUND && node.tagName.toLowerCase() === "ol") || (USE_CAPTION_WORKAROUND && node.tagName.toLowerCase() === "caption"))) {
+      if (node.nodeType === Node.ELEMENT_NODE && node.hasChildNodes() && (_ref = node.tagName.toLowerCase(), __indexOf.call(SELECT_CHILDREN_INSTEAD, _ref) >= 0)) {
         children = node.childNodes;
         realRange.setStartBefore(children[0]);
         realRange.setEndAfter(children[children.length - 1]);
@@ -2104,17 +2101,17 @@
         annotation.target = [annotation.target];
       }
       normedRanges = [];
+      annotation.quote = [];
       _ref2 = annotation.target;
       for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
         t = _ref2[_k];
         try {
           anchor = this.findAnchor(t);
-          if ((anchor != null ? anchor.quote : void 0) != null) {
-            t.quote = anchor.quote;
-            t.diffHTML = anchor.diffHTML;
-          }
+          t.quote = anchor.quote;
+          t.diffHTML = anchor.diffHTML;
           if ((anchor != null ? anchor.range : void 0) != null) {
             normedRanges.push(anchor.range);
+            annotation.quote.push(t.quote);
           } else {
             console.log("Could not find anchor for annotation target '" + t.id + "' (for annotation '" + annotation.id + "').");
           }
@@ -2124,11 +2121,14 @@
           console.log(exception);
         }
       }
+      annotation.ranges = [];
       annotation.highlights = [];
       for (_l = 0, _len4 = normedRanges.length; _l < _len4; _l++) {
         normed = normedRanges[_l];
+        annotation.ranges.push(normed.serialize(this.wrapper[0], '.annotator-hl'));
         $.merge(annotation.highlights, this.highlightRange(normed));
       }
+      annotation.quote = annotation.quote.join(' / ');
       $(annotation.highlights).data('annotation', annotation);
       return annotation;
     };

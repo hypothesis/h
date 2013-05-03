@@ -249,9 +249,6 @@ class Hypothesis extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
 
-  # (Optionally) put some HTML formatting around a quote
-  getHtmlQuote: (quote) -> quote
-
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) -> annotation
 
