@@ -836,7 +836,7 @@ blockquote {
   margin-bottom: 0.5em;
 }
 
-.side-bar {
+.side-bar-right {
     width: 15em;
     height: 100%;
     position: absolute;
@@ -844,36 +844,71 @@ blockquote {
     right: 0px;
 }
 
+.side-bar-left {
+    width: 30em;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
 @mixin sidebar_animation {
   -webkit-transition: 1.5s linear all;
   -moz-transition: 1.5s linear all;
   -o-transition: 1.5s linear all;
   transition: 1.5s linear all;
-  overflow-x:hidden;
   overflow-y:hidden;
 }
 
-.sidebar_anim_show-setup {
+.sidebar_anim_show_left-setup {
   @include sidebar_animation;
   opacity: 0;
   width: 0em;
 }
 
-.sidebar_anim_show-setup.sidebar_anim_show-start {
+.sidebar_anim_show_left-setup.sidebar_anim_show_left-start {
+  opacity: 1;
+  width: 30em;
+}
+
+.sidebar_anim_show_right-setup {
+  @include sidebar_animation;
+  opacity: 0;
+  width: 0em;
+}
+
+.sidebar_anim_show_right-setup.sidebar_anim_show_right-start {
   opacity: 1;
   width: 15em;
 }
-
-.sidebar_anim_hide-setup {
+.sidebar_anim_hide_right-setup {
   @include sidebar_animation;
   opacity: 1;
   width: 15em;
 }
 
-.sidebar_anim_hide-setup.sidebar_anim_hide-start {
+.sidebar_anim_hide_right-setup.sidebar_anim_hide_right-start {
   opacity: 0;
   width: 0em;
 }
+
+.sidebar_anim_hide_left-setup {
+  @include sidebar_animation;
+  opacity: 1;
+  width: 30em;
+}
+
+.sidebar_anim_hide_left-setup.sidebar_anim_hide_left-start {
+  opacity: 0;
+  width: 0em;
+}
+
+pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+.string { color: green; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: red; }
 
 .sidebar-content {
   padding-top: 4em;

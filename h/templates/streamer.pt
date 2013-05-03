@@ -28,6 +28,7 @@
       </div>
     </div>
 
+
     <div class="main-content">
 
       <div class="content paper">  
@@ -38,10 +39,16 @@
                 Available Filters
               </h4>
             </div>
-            <span class="pull-right">
-              <button ng-show="!sidebar" ng-click="sidebar=!sidebar">Show help</button>
-              <button ng-show="sidebar" ng-click="sidebar=!sidebar">Hide help</button>
-            </span>
+            <div class="pull-right">
+              <div class="button_controls">
+                <button ng-hide="sidebar" ng-click="sidebar=!sidebar">Show help</button>
+                <button ng-show="sidebar" ng-click="sidebar=!sidebar">Hide help</button>
+              </div>
+              <div class="button_controls">
+                <button ng-hide="sidebar_json" ng-click="show_sidebar_json()" class="btn">Show json</button>
+                <button ng-show="sidebar_json" ng-click="sidebar_json=!sidebar_json" class="btn">Hide json</button>
+              </div>
+            </div>
             <div class="pull-left button_controls">
               <h4>
                 Match strategy                
@@ -66,38 +73,12 @@
             </div>
             <div>
               <button ng-click="parse_clauses()" class="btn check-icon">Check filters</button>
-              <button ng-click="generate_json()" class="btn check-icon">Generate request</button>
               <button ng-click="start_streaming()" class="btn check-icon">Start streaming</button>
             </div>
           </div>
         </div>
       </div>   
      
-    <!--
-    <div class="content paper">  
-      <ul class="annotator-listing annotator-widget">
-        <div class="papercontainer">
-          <div class="metadata">
-            <div class="annotation paper detail filter-inline">
-             
-                <span class="pull-right filter-element filter-block">
-                  <div>
-                    <span ng-show="streaming"><button ng-click="start_streaming()" class="btn check-icon">Change filter parameters</button></span>
-                    <span ng-hide="streaming"><button ng-click="start_streaming()" class="btn check-icon">Start streaming</button></span>
-                  </div>
-                  <div class="filter-checkboxes">
-                    <span ng-show="streaming"><button ng-click="stop_streaming()" class="btn check-icon">Stop streaming</button></span>
-                  </div>
-                </span>
-              </div>
-            </div>
-            <div>
-            </div>
-          </div>
-        </div>
-      </ul>
-	  -->
-
         <ul class="annotator-listing annotator-widget">
           <div class="papercontainer">
             <div class="metadata">
@@ -142,8 +123,18 @@
             </div>
         </ul>
      </div>
-     <div class="side-bar" ng-show="sidebar" ng-animate="{show: 'sidebar_anim_show', hide: 'sidebar_anim_hide'}">
-      <div class="sidebar-content paper">
+
+     <div class="side-bar-left" ng-show="sidebar_json" ng-animate="{show: 'sidebar_anim_show_left', hide: 'sidebar_anim_hide_left'}">
+       <div class="sidebar-content paper">
+         <h4>Generated filter json
+         <pre ng-bind-html-unsafe="json_content"/>
+         </h4>
+         <button ng-click="sidebar_json=!sidebar_json" class="btn">Close sidebar</button>
+       </div>
+     </div>
+
+     <div class="side-bar-right" ng-show="sidebar" ng-animate="{show: 'sidebar_anim_show_right', hide: 'sidebar_anim_hide_right'}">
+       <div class="sidebar-content paper">
         <h4>
           Little help for the search options syntax. 
         </h4>  
@@ -171,6 +162,7 @@
           </li>
         </h4>  
       </div>
+
      </div>
    </div>
   </body>

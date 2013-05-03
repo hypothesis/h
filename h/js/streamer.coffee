@@ -8,6 +8,19 @@ get_quote = (annotation) ->
 
   quote
 
+syntaxHighlight = (json) ->
+  json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) -> 
+    cls = 'number'
+    if /^"/.test(match) 
+      if /:$/.test(match) then cls = 'key'
+      else cls = 'string'
+    else 
+      if /true|false/.test(match) then cls = 'boolean'
+      else 
+        if /null/.test(match) then cls = 'null'
+    return '<span class="' + cls + '">' + match + '</span>'
+  )
   
 angular.module('h.streamer',['h.filters'])
   .controller('StreamerCtrl',
@@ -18,6 +31,7 @@ angular.module('h.streamer',['h.filters'])
     $scope.action_create = true
     $scope.action_edit = true
     $scope.action_delete = true
+    $scope.sidebar_json = false
 
     $scope.start_streaming = ->
       if $scope.streaming
@@ -95,6 +109,11 @@ angular.module('h.streamer',['h.filters'])
       console.log structure
       console.log bads
       structure
+
+    $scope.show_sidebar_json = ->
+      json = syntaxHighlight $scope.generate_json()
+      $scope.json_content = json
+      $scope.sidebar_json = true 
      
     $scope.generate_json = ->
       clauses = $scope.parse_clauses()
@@ -109,7 +128,7 @@ angular.module('h.streamer',['h.filters'])
           'delete' : $scope.action_delete
         }
       }
-      JSON.stringify struct
+      JSON.stringify struct, undefined, 2 
   )
 
 
