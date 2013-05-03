@@ -168,6 +168,13 @@ class Annotator.Host extends Annotator
           return @plugins.Document.getDocumentMetadata()
         )
 
+        .bind('getDocumentInfo', =>
+          return {
+            uri: @plugins.Document.uri()
+            metadata: @plugins.Document.metadata
+          }
+        )
+
   scanDocument: (reason = "something happened") =>
     try
       console.log "Analyzing host frame, because " + reason + "..."

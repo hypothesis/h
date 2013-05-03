@@ -352,14 +352,18 @@ class Hypothesis extends Annotator
 
     # Get the location of the annotated document
     @provider.call
-      method: 'getHref'
-      success: (href) =>
+      method: 'getDocumentInfo'
+      success: (info) =>
+        href = info.uri
+        @plugins.Document.metadata = info.metadata
+
         options = angular.extend {}, (@options.Store or {}),
           annotationData:
             uri: href
           loadFromSearch:
             limit: 1000
             uri: href
+<<<<<<< HEAD
         this.addStore(options)
 
   addStore: (options) ->
@@ -370,15 +374,9 @@ class Hypothesis extends Annotator
     return unless href?
 
     console.log "Loaded annotions for '" + href + "'."
-    for href in this.getSynonymURLs href
-      console.log "Also loading annotations for: " + href
-      this.plugins.Store.loadAnnotationsFromSearch uri: href
-
-    # get metadata for the annotated document
-    @provider.call
-      method: 'getDocumentMetadata'
-      success: (metadata) =>
-        this.plugins.Document.metadata = metadata
+    for uri in @plugins.Document.uris()
+      console.log "Also loading annotations for: " + uri
+      this.plugins.Store.loadAnnotationsFromSearch uri: uri
 
 class DraftProvider
   drafts: []
