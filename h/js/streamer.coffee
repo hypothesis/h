@@ -45,7 +45,7 @@ angular.module('h.streamer',['h.filters'])
       $scope.sock.close
       $scope.streaming = false
       
-    $scope.filter_fields = ['thread', 'text', 'action', 'user']
+    $scope.filter_fields = ['thread', 'text', 'user']
     $scope.operators = ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#']
     $scope.operator_mapping = {
       '=': 'equals', '>': 'gt', '<': 'lt', '=>' : 'ge', '<=' : 'ge',
@@ -88,7 +88,7 @@ angular.module('h.streamer',['h.filters'])
           continue 
 
         structure.push {
-          'field'   : field ,
+          'field'   : '/' + field ,
           'operator': oper ,
           'value'   : value
         }

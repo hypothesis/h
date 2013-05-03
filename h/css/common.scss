@@ -824,6 +824,62 @@ blockquote {
   }
 }
 
+//STREAMER////////////////////////////////
+//This is specific to the streamer page
+.main-content {
+  margin:0;
+}
+
+.button_controls {
+  margin-left: 1em;
+  margin-right: 1em;
+  margin-bottom: 0.5em;
+}
+
+.side-bar {
+    width: 15em;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+
+@mixin sidebar_animation {
+  -webkit-transition: 1.5s linear all;
+  -moz-transition: 1.5s linear all;
+  -o-transition: 1.5s linear all;
+  transition: 1.5s linear all;
+  overflow-x:hidden;
+  overflow-y:hidden;
+}
+
+.sidebar_anim_show-setup {
+  @include sidebar_animation;
+  opacity: 0;
+  width: 0em;
+}
+
+.sidebar_anim_show-setup.sidebar_anim_show-start {
+  opacity: 1;
+  width: 15em;
+}
+
+.sidebar_anim_hide-setup {
+  @include sidebar_animation;
+  opacity: 1;
+  width: 15em;
+}
+
+.sidebar_anim_hide-setup.sidebar_anim_hide-start {
+  opacity: 0;
+  width: 0em;
+}
+
+.sidebar-content {
+  padding-top: 4em;
+  overflow-x:hidden;
+  overflow-y:hidden;
+}
 
 
 /*

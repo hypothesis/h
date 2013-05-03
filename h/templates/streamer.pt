@@ -12,7 +12,7 @@
 
   <body metal:fill-slot="body" ng-app="h.streamer">
     <script type="text/javascript">var port = ${port};</script>
-    <span ng-controller="StreamerCtrl">
+    <div ng-controller="StreamerCtrl">
     <div class="topbar">
       <div class="inner">
         <div class="barbutton pull-left">
@@ -28,29 +28,50 @@
       </div>
     </div>
 
-    <div class="content paper">  
-      <div class="knockout noise">
-        <div class="paper excerpt">
-          <div>
-            <input type="radio" ng-model="matchPolicy" name="match_policy" value="include_all" >include_all</input>
-            <input type="radio" ng-model="matchPolicy" name="match_policy" value="include_any" >include_any</input>
-            <input type="radio" ng-model="matchPolicy" name="match_policy" value="exclude_all" >exclude_all</input>
-            <input type="radio" ng-model="matchPolicy" name="match_policy" value="exclude_any" >exclude_any</input>
-          </div>
-          <div class>
-            <input type="checkbox" data-col="1" ng-model="action_create">Create</input>
-            <input type="checkbox" data-col="1" ng-model="action_edit">Edit</input>
-            <input type="checkbox" data-col="1" ng-model="action_delete">Delete</input>
-          </div>
-          <div><input type="text" ng-model="clauses" placeholder="any"/></div>
-          <div>
-            <button ng-click="parse_clauses()" class="btn check-icon">Check filters</button>
-            <button ng-click="generate_json()" class="btn check-icon">Generate request</button>
-            <button ng-click="start_streaming()" class="btn check-icon">Start streaming</button>
+    <div class="main-content">
+
+      <div class="content paper">  
+        <div class="knockout noise">
+          <div class="paper excerpt">
+            <div class="pull-left">
+              <h4>
+                Available Filters
+              </h4>
+            </div>
+            <span class="pull-right">
+              <button ng-show="!sidebar" ng-click="sidebar=!sidebar">Show help</button>
+              <button ng-show="sidebar" ng-click="sidebar=!sidebar">Hide help</button>
+            </span>
+            <div class="pull-left button_controls">
+              <h4>
+                Match strategy                
+                <div><input type="radio" ng-model="matchPolicy" name="match_policy" value="include_all" >include_all</input></div>
+                <div><input type="radio" ng-model="matchPolicy" name="match_policy" value="include_any" >include_any</input></div>
+                <div><input type="radio" ng-model="matchPolicy" name="match_policy" value="exclude_all" >exclude_all</input></div>
+                <div><input type="radio" ng-model="matchPolicy" name="match_policy" value="exclude_any" >exclude_any</input></div>
+              <h4>
+            </div>
+            <div class>
+              <h4>
+                Annotation actions 
+                <div><input type="checkbox" data-col="1" ng-model="action_create">Create</input><div>
+                <div><input type="checkbox" data-col="1" ng-model="action_edit">Edit</input><div>
+                <div><input type="checkbox" data-col="1" ng-model="action_delete">Delete</input><div>
+              </h4>
+            </div>
+            <div>
+              <h4>Search options: 
+              <input type="text" ng-model="clauses" placeholder="any"/>
+              </h4>
+            </div>
+            <div>
+              <button ng-click="parse_clauses()" class="btn check-icon">Check filters</button>
+              <button ng-click="generate_json()" class="btn check-icon">Generate request</button>
+              <button ng-click="start_streaming()" class="btn check-icon">Start streaming</button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>   
+      </div>   
      
     <!--
     <div class="content paper">  
@@ -58,44 +79,6 @@
         <div class="papercontainer">
           <div class="metadata">
             <div class="annotation paper detail filter-inline">
-              <div class="filter-title">
-                Filters
-              </div>
-              <div>
-                <span class="pull-left filter-element filter-block">
-                  <div>Username(s)</div> 
-                  <div><input class="filter-input" type="text" ng-model="username" placeholder="any"/></div>
-                </span>
-
-                <span class="pull-left filter-element filter-block">
-                  <div>Thread(s)</div> 
-                  <div><input class="filter-input" type="text" ng-model="threads" placeholder="any"/></div>
-                </span>
-
-                <span class="pull-left filter-element filter-block">
-                  <div>Keyword(s)</div> 
-                  <div><input class="filter-input" type="text" ng-model="keywords" placeholder="any"/></div>
-                </span>
-
-                <span class="pull-left filter-element filter-block">
-                  <div>
-                     Action(s)
-                  </div>
-                  <div class="filter-checkboxes">
-                    <span>
-                      <input type="checkbox" data-col="1" ng-model="action_create"/>
-                      Create
-                    </span>
-                    <span>
-                      <input type="checkbox" data-col="1" ng-model="action_update"/>
-                      Update
-                    </span>
-                    <span>
-                      <input type="checkbox" data-col="1" ng-model="action_delete"/>
-                      Delete
-                    </span>
-                  </div>
-                </span>
              
                 <span class="pull-right filter-element filter-block">
                   <div>
@@ -115,50 +98,80 @@
       </ul>
 	  -->
 
-      <ul class="annotator-listing annotator-widget">
-        <div class="papercontainer">
-          <div class="metadata">
-            <div>
-              <li ng-repeat="annotation in annotations">
-                <div class="hyp-annotation hyp-paper hyp-detail">
-                  <div style="padding-bottom: .5em;">                
-                    <div class="topbar">
-                      <div>
-                        <span class="hyp-user">{{annotation['user'] | userName}}</span>
-                        <span ng-switch="annotation['action']">
-                          <span ng-switch-when="create">&nbsp;has created an annotation</span>
-                          <span ng-switch-when="update">&nbsp;has updated an annotation</span>
-                          <span ng-switch-when="delete">&nbsp;has deleted an annotation</span>
-                        </span> 
-                        <div class="hyp-time">{{annotation['created'] | fuzzyTime}}</div>
+        <ul class="annotator-listing annotator-widget">
+          <div class="papercontainer">
+            <div class="metadata">
+              <div>
+                <li ng-repeat="annotation in annotations">
+                  <div class="hyp-annotation hyp-paper hyp-detail">
+                    <div style="padding-bottom: .5em;">                
+                      <div class="topbar">
+                        <div>
+                          <span class="hyp-user">{{annotation['user'] | userName}}</span>
+                          <span ng-switch="annotation['action']">
+                            <span ng-switch-when="create">&nbsp;has created an annotation</span>
+                            <span ng-switch-when="update">&nbsp;has updated an annotation</span>
+                            <span ng-switch-when="delete">&nbsp;has deleted an annotation</span>
+                          </span> 
+                          <div class="hyp-time">{{annotation['created'] | fuzzyTime}}</div>
+                        </div>
                       </div>
-                    </div>
-		          <div class="noiseknockout">
-
-              <div class="page">
-                <div class="domain">
-                  <img class="favicon" ng-model="annotation['favicon']"/> 
-                  <a href="{{annotation['uri']}}">{{annotation['title']}}</a> 
-                  | 
-                  <a href="{{annotation['domain']}}">{{annotation['domain_stripped']}}</a>
+		            <div class="noiseknockout">
+                <div class="page">
+                  <div class="domain">
+                    <img class="favicon" ng-model="annotation['favicon']"/> 
+                    <a href="{{annotation['uri']}}">{{annotation['title']}}</a> 
+                    | 
+                    <a href="{{annotation['domain']}}">{{annotation['domain_stripped']}}</a>
+                  </div>
                 </div>
-              </div>
 
-                    <div class="hyp-excerpt hyp-paper stream-floatainer margin-right">
-                      <blockquote>{{annotation['quote']}}</blockquote>
-                    </div>
-                    <div class="smalldisplacer"></div>
-                    <div class="hyp-excerpt hyp-paper stream-floatainer">
-                      <div>{{annotation['text']}}</div>
+                      <div class="hyp-excerpt hyp-paper stream-floatainer margin-right">
+                        <blockquote>{{annotation['quote']}}</blockquote>
+                      </div>
+                      <div class="smalldisplacer"></div>
+                      <div class="hyp-excerpt hyp-paper stream-floatainer">
+                        <div>{{annotation['text']}}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                </div>
-            </li>
-          </div>
-          </div>
-          </div>
-      </ul>
-   </span>
+              </li>
+            </div>
+            </div>
+            </div>
+        </ul>
+     </div>
+     <div class="side-bar" ng-show="sidebar" ng-animate="{show: 'sidebar_anim_show', hide: 'sidebar_anim_hide'}">
+      <div class="sidebar-content paper">
+        <h4>
+          Little help for the search options syntax. 
+        </h4>  
+        <h4>
+          This is still experimental and our goal is to form it as natural as possible.
+        </h4>
+        <h4>  
+          <li>
+            Currently you can type search clauses, separated by space characters.
+          </li>  
+          <li>
+            A search clause has the following structure: <strong>(field):(operator)(value)</strong> (i.e. <strong>user:=johndoe</strong> )
+          </li>  
+          <li>
+            The fields can be one of the followings: <strong>['thread', 'text', 'user']</strong>
+          </li>
+          <li>
+            Operators: <strong>['=', '>', '<', '=>', '<=', '[', '#']</strong>
+          </li>  
+          <li>
+            Where '[' means a comma separated list. I.e. <strong>user:[johndoe,janedoe</strong> means the user is either johndoe or janedoe
+          </li>  
+          <li>
+            '#' means matching (or substring). i.e <strong>text:#car</strong> means every annotation which has the 'car' character string in it's body.   
+          </li>
+        </h4>  
+      </div>
+     </div>
+   </div>
   </body>
 </html>
