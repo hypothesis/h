@@ -12,7 +12,7 @@ from tornado import web, ioloop, httpserver
 import ssl
 from sockjs.tornado import SockJSRouter, SockJSConnection
 from jsonschema import validate
-import jsonpointer
+from jsonpointer import resolve_pointer
 
 from annotator import authz
 
@@ -109,7 +109,7 @@ class FilterHandler(object):
 
     #operators
     def equals(self, a, b): return a == b
-    def matches(self, a, b): return a in b
+    def matches(self, a, b):return a.find(b) > -1
     def lt(self, a, b): return a < b
     def le(self, a, b): return a <= b
     def gt(self, a, b): return a > b
@@ -118,7 +118,7 @@ class FilterHandler(object):
         
     def evaluate_clause(self, clause, target):
         field_value = resolve_pointer(target, clause['field'], None)
-        if clause['field'] == 'user':
+        if clause['field'] == '/user':
             field_value = self._userName(field_value)
         if field_value is None:
             return False

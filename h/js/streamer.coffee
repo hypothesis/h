@@ -38,6 +38,7 @@ angular.module('h.streamer',['h.filters'])
         $scope.sock.close
         $scope.streaming = false
                
+      $scope.json_content = syntaxHighlight $scope.generate_json()
       $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + port + '/streamer')    
       $scope.sock.onopen = ->
         $scope.sock.send $scope.generate_json()
@@ -107,13 +108,10 @@ angular.module('h.streamer',['h.filters'])
           'operator': oper ,
           'value'   : value
         }
-      console.log structure
-      console.log bads
       structure
 
     $scope.show_sidebar_json = ->
-      json = syntaxHighlight $scope.generate_json()
-      $scope.json_content = json
+      $scope.json_content = syntaxHighlight $scope.generate_json()
       $scope.sidebar_json = true 
      
     $scope.generate_json = ->
