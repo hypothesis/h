@@ -22,7 +22,7 @@ syntaxHighlight = (json) ->
     return '<span class="' + cls + '">' + match + '</span>'
   )
   
-angular.module('h.streamer',['h.filters'])
+angular.module('h.streamer',['h.filters','bootstrap'])
   .controller('StreamerCtrl',
   ($scope, $element) ->
     $scope.streaming = false

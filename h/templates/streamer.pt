@@ -47,23 +47,27 @@
                   <button ng-show="sidebar_json" ng-click="sidebar_json=!sidebar_json" class="btn">Hide json</button>
                 </div>
               </div>
-              <div class="pull-left button_controls">
-                <h4>
-                  Match strategy                
-                  <div><input type="radio" ng-model="matchPolicy" name="match_policy" value="include_all" >include_all</input></div>
-                  <div><input type="radio" ng-model="matchPolicy" name="match_policy" value="include_any" >include_any</input></div>
-                  <div><input type="radio" ng-model="matchPolicy" name="match_policy" value="exclude_all" >exclude_all</input></div>
-                  <div><input type="radio" ng-model="matchPolicy" name="match_policy" value="exclude_any" >exclude_any</input></div>
-                <h4>
+              <!-- Match Strategy -->  
+              <div class="dropdown show">
+                  <a href="" class="down-icon dropdown-toggle" role="button" title="Match Strategy">{{matchPolicy}}</a>
+                  <ul class="dropdown-menu" role="menu">                
+                    <li ng-click="matchPolicy = 'include_all'">include_all</li>
+                    <li ng-click="matchPolicy = 'include_any'">include_any</li>
+                    <li ng-click="matchPolicy = 'exclude_all'">exclude_all</li>
+                    <li ng-click="matchPolicy = 'exclude_any'">exclude_any</li>
+                  </ul>
               </div>
-              <div class="pull-left button_controls">
-                <h4>
-                  Annotation actions 
-                  <div><input type="checkbox" data-col="1" ng-model="action_create">Create</input><div>
-                  <div><input type="checkbox" data-col="1" ng-model="action_edit">Edit</input><div>
-                  <div><input type="checkbox" data-col="1" ng-model="action_delete">Delete</input><div>
-                </h4>
+              
+              <!-- Annotation actions -->  
+              <div class="dropdown show">
+                  <a href="" class="down-icon dropdown-toggle" role="button" title="Annotation actions">Actions</a>
+                  <ul class="dropdown-menu" role="menu">                
+                    <li ng-click="action_create = !action_create"><input type="checkbox" data-col="1" ng-model="action_create">Create</input><li>
+                    <li ng-click="action_edit = !action_edit"><input type="checkbox" data-col="1" ng-model="action_edit">Edit</input><li>
+                    <li ng-click="action_delete = !action_delete"><input type="checkbox" data-col="1" ng-model="action_delete">Delete</input><li>
+                  </ul>
               </div>
+              
               <div class="pull-left button_controls">
                 <h4>
                   Past

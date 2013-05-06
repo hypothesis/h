@@ -183,17 +183,17 @@ display = Bundle(
     CSS('css/displayer.css', output='js/displayer.min.css'),
 )
 
+site = SCSS('css/site.scss', depends=(base + common), output='css/site.min.css')
+
 streamer = Bundle(
-    sockjs,
     angular,
+    angular_bootstrap,
+    sockjs,
     pagedown,
     Coffee('js/filters.coffee', output='js/filters.js'),
     Coffee('js/streamer.coffee', output='js/streamer.js'),
-    SCSS('css/site.scss', depends=(base + common), output='css/site.min.css')
+    site
 )
-
-
-site = SCSS('css/site.scss', depends=(base + common), output='css/site.min.css')
 
 
 # The inject is a script which loads the annotator in an iframe
