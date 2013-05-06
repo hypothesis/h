@@ -680,7 +680,7 @@ blockquote {
   & > ul {
     @include single-transition(max-height, .4s, cubic-bezier(1, 0, 1, 0));
     max-height: 65536px;
-    overflow: hidden;
+    #overflow: hidden;
 
     padding-left: $thread-padding;
     margin-left: -$thread-padding;
