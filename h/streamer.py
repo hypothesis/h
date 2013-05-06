@@ -14,7 +14,11 @@ from sockjs.tornado import SockJSRouter, SockJSConnection
 from jsonschema import validate
 from jsonpointer import resolve_pointer
 
+from dateutil.tz import tzutc
+from datetime import datetime
+
 from annotator import authz
+from annotator.annotation import Annotation
 
 import logging
 log = logging.getLogger(__name__)
@@ -149,8 +153,8 @@ class FilterHandler(object):
             if self.evaluate_clause(clause, target): return False
         return True
 
-    def match(self, target, action):
-        if self.filter['actions']:
+    def match(self, target, action = None):
+        if not action or self.filter['actions'][action]:
             if len(self.filter['clauses']) > 0:
                 return getattr(self, self.filter['match_policy'])(target)
             else: return True
@@ -172,8 +176,15 @@ class StreamerConnection(SockJSConnection):
         
         #If past is given, send the annotations back.
         if "past_data" in payload and payload['past_data']['load_past'] :
-            pass
-            
+            now = datetime.utcnow().replace(tzinfo=tzutc())
+            log.info(now)
+            past = now - datetime.timedelta(seconds = 60 * payload['past_data']['go_back'])
+            log.info(past)
+            annotations = Annotations.search(created = { 'gte' : past})
+            log.info(annotations)
+            for annotation in annotations : 
+                if self.filter.match(annotation):
+                    self.send([annotation, action])
       except:
         log.info(traceback.format_exc())
         log.info('Failed to parse filter:' + str(msg))
