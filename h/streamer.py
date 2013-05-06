@@ -94,6 +94,10 @@ filter_schema = {
                 },
                 "value" : "object"
             }
+        },
+        "past_data" : {
+            "load_past" : { "type" : "boolean", "default": False},
+            "go_back" : { "type" : "minutes", "default" : 5}
         }
     },
     "required" : ["match_policy","clauses","actions"]
@@ -145,8 +149,12 @@ class FilterHandler(object):
             if self.evaluate_clause(clause, target): return False
         return True
 
-    def match(self, target):
-        return getattr(self, self.filter['match_policy'])(target)
+    def match(self, target, action):
+        if self.filter['actions']:
+            if len(self.filter['clauses']) > 0:
+                return getattr(self, self.filter['match_policy'])(target)
+            else: return True
+        else: return False
 
 class StreamerConnection(SockJSConnection):
     connections = set()
@@ -161,6 +169,11 @@ class StreamerConnection(SockJSConnection):
         #Let's try to validate the schema
         validate(payload, filter_schema)                
         self.filter = FilterHandler(payload)
+        
+        #If past is given, send the annotations back.
+        if "past_data" in payload and payload['past_data']['load_past'] :
+            pass
+            
       except:
         log.info(traceback.format_exc())
         log.info('Failed to parse filter:' + str(msg))
@@ -205,7 +218,6 @@ def process_filters():
     while True:
         (annotation, action) = q.get(True)
         annotation.update(url_analyzer._url_values(annotation['uri']))
-        annotation.update({'action' : action})
         after_action(annotation, action)
         q.task_done()
 
@@ -214,7 +226,7 @@ def after_action(annotation, action):
     
     for connection in StreamerConnection.connections:
         try:
-          if connection.filter.match(annotation) : 
+          if connection.filter.match(annotation, action) : 
             connection.send([annotation, action])                 
         except:
            log.info(traceback.format_exc())
