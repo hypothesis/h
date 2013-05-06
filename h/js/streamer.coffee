@@ -32,6 +32,8 @@ angular.module('h.streamer',['h.filters'])
     $scope.action_edit = true
     $scope.action_delete = true
     $scope.sidebar_json = false
+    $scope.go_back = 5
+    $scope.load_past = false
 
     $scope.start_streaming = ->
       if $scope.streaming
@@ -125,7 +127,12 @@ angular.module('h.streamer',['h.filters'])
           'create' : $scope.action_create,
           'edit'   : $scope.action_edit,
           'delete' : $scope.action_delete
+        },
+        'past_data' : {
+          'load_past' : $scope.load_past,
+          'go_back' : $scope.go_back
         }
+        
       }
       JSON.stringify struct, undefined, 2 
   )

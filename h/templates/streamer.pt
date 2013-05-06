@@ -64,6 +64,14 @@
                   <div><input type="checkbox" data-col="1" ng-model="action_delete">Delete</input><div>
                 </h4>
               </div>
+              <div class="pull-left button_controls">
+                <h4>
+                  Past
+                  <div><input type="checkbox" data-col="1" ng-model="load_past">Load past</input><div>
+                  Go back 
+                  <div><input type="number" ng-model="go_back" step="1" min="1" max="60" value="5"/> min(s)<div>
+                </h4>
+              </div>
             </div>
             <div class="searchbar">
               <h4>
@@ -127,6 +135,7 @@
          <pre ng-bind-html-unsafe="json_content"/>
          </h4>
          <div class="center_button">
+           <button ng-click="show_sidebar_json()" class="btn">Refresh</button>
            <button ng-click="sidebar_json=!sidebar_json" class="btn">Close sidebar</button>
          </div>
        </div>
