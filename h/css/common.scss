@@ -847,6 +847,11 @@ blockquote {
 }
 
 
+.filter-body {
+ overflow: visible;
+ padding-bottom: 2.5em;
+}
+
 .side-bar-right {
     width: 15em;
     height: 100%;
@@ -932,7 +937,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 }
 
 .searchinput {
-  width: 100%;
+  width: 80%;
 }
 
 .small-padding {

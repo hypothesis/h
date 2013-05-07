@@ -19,11 +19,11 @@
           <h4>hypothes<span class="red">.</span>is</h4>
         </div>
         <div class="barbutton pull-left">
-          <h4 ng-show="streaming">Streaming :)</h4>
-          <h4 ng-hide="streaming">Not streaming <span class="red">:(</span></h4>
+          <h4 ng-show="streaming" class="small">Streaming :)</h4>
+          <h4 ng-hide="streaming" class="small">Not streaming <span class="red">:(</span></h4>
         </div>
         <div class="barbutton pull-right">
-          <span>sign up</span>
+          <h4>sign up</h4>
         </div>
       </div>
     </div>
@@ -32,62 +32,60 @@
     <div class="main-content">
       <div class="small-padding content paper">  
         <div class="knockout noise">
-          <div class="paper excerpt">
+          <div class="paper excerpt filter-body">
+
+            <!-- Searchbar -->
             <div>
-              <div class="pull-left">
-                <h4>Available Filters</h4>
-              </div>
-              <div class="pull-right">
-                <div class="button_controls">
-                  <button ng-hide="sidebar" ng-click="sidebar=!sidebar">Show help</button>
-                  <button ng-show="sidebar" ng-click="sidebar=!sidebar">Hide help</button>
-                </div>
-                <div class="button_controls">
-                  <button ng-hide="sidebar_json" ng-click="show_sidebar_json()" class="btn">Show json</button>
-                  <button ng-show="sidebar_json" ng-click="sidebar_json=!sidebar_json" class="btn">Hide json</button>
-                </div>
-              </div>
-              <!-- Match Strategy -->  
-              <div class="dropdown show">
-                  <a href="" class="down-icon dropdown-toggle" role="button" title="Match Strategy">{{matchPolicy}}</a>
-                  <ul class="dropdown-menu" role="menu">                
-                    <li ng-click="matchPolicy = 'include_all'">include_all</li>
-                    <li ng-click="matchPolicy = 'include_any'">include_any</li>
-                    <li ng-click="matchPolicy = 'exclude_all'">exclude_all</li>
-                    <li ng-click="matchPolicy = 'exclude_any'">exclude_any</li>
-                  </ul>
-              </div>
-              
-              <!-- Annotation actions -->  
-              <div class="dropdown show">
-                  <a href="" class="down-icon dropdown-toggle" role="button" title="Annotation actions">Actions</a>
-                  <ul class="dropdown-menu" role="menu">                
-                    <li ng-click="action_create = !action_create"><input type="checkbox" data-col="1" ng-model="action_create">Create</input><li>
-                    <li ng-click="action_edit = !action_edit"><input type="checkbox" data-col="1" ng-model="action_edit">Edit</input><li>
-                    <li ng-click="action_delete = !action_delete"><input type="checkbox" data-col="1" ng-model="action_delete">Delete</input><li>
-                  </ul>
-              </div>
-              
-              <div class="pull-left button_controls">
-                <h4>
-                  Past
-                  <div><input type="checkbox" data-col="1" ng-model="load_past">Load past</input><div>
-                  Go back 
-                  <div><input type="number" ng-model="go_back" step="1" min="1" max="60" value="5"/> min(s)<div>
-                </h4>
-              </div>
-            </div>
-            <div class="searchbar">
-              <h4>
-                Search options
-                <input class="searchinput" type="text" ng-model="clauses" placeholder="any"/>
+              <h4>                
+                <input class="searchinput" type="text" ng-model="clauses" placeholder="search options"/>
+                <button ng-hide="streaming" ng-click="start_streaming()" class="btn check-icon pull-right">Stream</button>
+                <button ng-show="streaming" ng-click="stop_streaming()" class="btn check-icon pull-right">Stop</button>
               </h4>
             </div>
-            <div class="center_button button_controls ">
-              <button ng-hide="streaming" ng-click="start_streaming()" class="btn check-icon">Start streaming</button>
-              <button ng-show="streaming" ng-click="stop_streaming()" class="btn check-icon">Stop streaming</button>
-            </div>
+
+            <div class="button_controls">
+              <!-- Match Strategy -->  
+              <div class="dropdown show pull-left">
+                <a href="" class="down-icon dropdown-toggle small" role="button" title="Match Strategy">Strategy:&nbsp;{{matchPolicy}}</a>
+                <ul class="dropdown-menu" role="menu">                
+                  <li ng-click="matchPolicy = 'include_all'" class="small">include_all</li>
+                  <li ng-click="matchPolicy = 'include_any'" class="small">include_any</li>
+                  <li ng-click="matchPolicy = 'exclude_all'" class="small">exclude_all</li>
+                  <li ng-click="matchPolicy = 'exclude_any'" class="small">exclude_any</li>
+                </ul>
+              </div>
+
+             <!-- Annotation actions -->  
+             <div class="dropdown show pull-left">
+              <a href="" class="down-icon dropdown-toggle small" role="button" title="Annotation actions">Actions</a>
+              <ul class="dropdown-menu" role="menu">                
+                <li ng-click="action_create = !action_create" class="small"><input type="checkbox" data-col="1" ng-model="action_create" class="small">Create</input><li>
+                <li ng-click="action_edit = !action_edit" class="small"><input type="checkbox" data-col="1" ng-model="action_edit" class="small">Edit</input><li>
+                <li ng-click="action_delete = !action_delete" class="small"><input type="checkbox" data-col="1" ng-model="action_delete" class="small">Delete</input><li>
+              </ul>
+             </div>
+
+            <!-- Past -->
+            <div class="dropdown show pull-left">
+               <a href="" class="down-icon dropdown-toggle small" role="button" title="Past">Past</a>
+              <ul class="dropdown-menu" role="menu">                
+                <li ng-click="load_past = !load_past" class="small"><input type="checkbox" data-col="1" ng-model="load_past">Load past</input></li>
+                <li class="small">Go back <input type="number" ng-model="go_back" step="1" min="1" max="60" value="5"/> min(s)<li>
+              </ul>
           </div>
+
+          <!-- Sidebar links -->
+          <div class="pull-right">
+            <div>
+              <a href="" ng-hide="sidebar" ng-click="sidebar=!sidebar" class="small">Show help</a>
+              <a href="" ng-show="sidebar" ng-click="sidebar=!sidebar" class="small">Hide help</a>
+              <a href="" ng-hide="sidebar_json" ng-click="show_sidebar_json()" class="small">Show json</a>
+              <a href="" ng-show="sidebar_json" ng-click="sidebar_json=!sidebar_json" class="small">Hide json</a>
+            </div>
+          </div>  
+           </div>
+        </div>
+
         </div>
       </div>   
      
