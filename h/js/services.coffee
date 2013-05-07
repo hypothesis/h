@@ -49,7 +49,7 @@ class Hypothesis extends Annotator
 
   this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts']
   constructor: ($document, $location, $rootScope, $route, drafts) ->
-    super ($document.find 'body')
+    super ($document.find 'body'), noMatching: true
 
     # Load plugins
     for own name, opts of @options
@@ -248,9 +248,6 @@ class Hypothesis extends Annotator
   _setupDynamicStyle: -> this
   _setupViewer: -> this
   _setupEditor: -> this
-
-  # (Optionally) put some HTML formatting around a quote
-  getHtmlQuote: (quote) -> quote
 
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) -> annotation

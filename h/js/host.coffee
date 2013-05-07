@@ -17,7 +17,9 @@ class Annotator.Host extends Annotator
     tick: false
 
   constructor: (element, options) ->
+    options.noScan = true
     super
+    delete @options.noScan
 
     @app = @options.app
     delete @options.app
@@ -174,7 +176,6 @@ class Annotator.Host extends Annotator
       if not @ignoreMouseup
         setTimeout =>
           unless @selectedRanges?.length then @panel?.notify method: 'back'
-    this._setupMatching()
     @domMatcher.setRootNode @wrapper[0]
     this
 
