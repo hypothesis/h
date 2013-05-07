@@ -742,6 +742,7 @@ blockquote {
     & > ul {
       @include single-transition(max-height, .4s, cubic-bezier(0, 1, 0, 1));
       max-height: 0;
+      display: none;
     }
 
     & > .threadexp {
