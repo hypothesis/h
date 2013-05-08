@@ -560,8 +560,8 @@ blockquote {
 //Provides the white background upon which items sit
 .paper {
   @include border-radius(.2em);
-  @include smallshadow;
   background: $white;
+  border-bottom: solid .1em $grayLighter;
   padding: 1em;
 }
 
