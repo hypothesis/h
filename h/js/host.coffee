@@ -163,7 +163,7 @@ class Annotator.Host extends Annotator
   scanDocument: (reason = "something happened") =>
     try
       console.log "Analyzing host frame, because " + reason + "..."
-      r = @domMatcher.scan()
+      r = this._scan()
       scanTime = r.time
       console.log "Traversal+scan took " + scanTime + " ms."
     catch e
