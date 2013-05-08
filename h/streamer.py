@@ -2,8 +2,9 @@ import json
 import threading
 import traceback
 
-import urllib2
+import requests
 from urlparse import urlparse, urlunparse
+
 import BeautifulSoup
 import re
 import Queue
@@ -15,10 +16,10 @@ from jsonschema import validate
 from jsonpointer import resolve_pointer
 
 from dateutil.tz import tzutc
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from annotator import authz
-from annotator.annotation import Annotation
+from annotator import elasticsearch
 
 import logging
 log = logging.getLogger(__name__)
@@ -37,15 +38,8 @@ class UrlAnalyzer(dict):
     def _url_values(self, uri = None):
         if not uri: uri = self['uri']
         # Getting the title of the uri.
-        # hdrs magic is needed because urllib2 is forbidden to use with default
-        # settings.
-        agent = \
-            "Mozilla/5.0 (X11; U; Linux i686) " \
-            "Gecko/20071127 Firefox/2.0.0.11"
-        headers = {'User-Agent': agent}
-        req = urllib2.Request(self.iriToUri(uri), headers=headers)
-        result = urllib2.urlopen(req)
-        soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req))
+        r = requests.get(self.iriToUri(uri), verify=False)
+        soup = BeautifulSoup.BeautifulSoup(r.content)
         title = soup.title.string if soup.title else uri
 
         # Getting the domain from the uri, and the same url magic for the
@@ -178,13 +172,16 @@ class StreamerConnection(SockJSConnection):
         if "past_data" in payload and payload['past_data']['load_past'] :
             now = datetime.utcnow().replace(tzinfo=tzutc())
             log.info(now)
-            past = now - datetime.timedelta(seconds = 60 * payload['past_data']['go_back'])
+            past = now - timedelta(seconds = 60 * payload['past_data']['go_back'])
             log.info(past)
-            annotations = Annotations.search(created = { 'gte' : past})
-            log.info(annotations)
-            for annotation in annotations : 
-                if self.filter.match(annotation):
-                    self.send([annotation, action])
+            #es = elasticsearch.ElasticSearch()
+            #Annotation = elasticsearch.make_model(es)
+            #annotations = Annotation.search(created = { 'gte' : past})
+            #annotations = s.search(created = { 'gte' : past})
+            #log.info(annotations)
+            #for annotation in annotations : 
+            #    if self.filter.match(annotation):
+            #        self.send([annotation, action])
       except:
         log.info(traceback.format_exc())
         log.info('Failed to parse filter:' + str(msg))

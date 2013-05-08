@@ -50,7 +50,7 @@ class Annotation(BaseController):
         d['annotation']['reply_count'] = len(context.referrers)
 
         if context.get('references', []):
-            root = context.__parent__[context.references[0]]
+            root = context.__parent__[context['references'][0]]
             d['quote'] = root.quote
         else:
             d['quote'] = context.quote
