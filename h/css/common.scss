@@ -546,6 +546,16 @@ blockquote {
 }
 
 
+//KNOCKOUT///////////
+//Provides a knockout background
+.knockout {
+  @include border-radius(.5em);
+  @include pie-clearfix;
+  @include box-shadow(inset 1px 1px 3px hsla(0, 0%, 0%, .1));
+  padding: 1em;
+}
+
+
 //PAPER////////////////////////////////
 //Provides the white background upon which items sit
 .paper {
