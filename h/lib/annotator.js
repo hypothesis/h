@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-68379aa
+** Annotator 1.2.6-dev-f037466
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-04-25 14:33:49Z
+** Built at: 2013-05-07 15:03:20Z
 */
 
 (function() {
@@ -99,7 +99,7 @@
     });
   };
 
-  $.fn.xpath = function(relativeRoot) {
+  $.fn.xpath1 = function(relativeRoot) {
     var jq;
     jq = this.map(function() {
       var elem, idx, path, tagName;
@@ -115,6 +115,104 @@
       return path;
     });
     return jq.get();
+  };
+
+  $.getProperNodeName = function(node) {
+    var nodeName;
+    nodeName = node.nodeName.toLowerCase();
+    switch (nodeName) {
+      case "#text":
+        return "text()";
+      case "#comment":
+        return "comment()";
+      case "#cdata-section":
+        return "cdata-section()";
+      default:
+        return nodeName;
+    }
+  };
+
+  $.fn.xpath2 = function(relativeRoot) {
+    var getNodePosition, getPathSegment, getPathTo, jq, rootNode;
+    getNodePosition = function(node) {
+      var pos, tmp;
+      pos = 0;
+      tmp = node;
+      while (tmp) {
+        if (tmp.nodeName === node.nodeName) pos++;
+        tmp = tmp.previousSibling;
+      }
+      return pos;
+    };
+    getPathSegment = function(node) {
+      var name, pos;
+      name = $.getProperNodeName(node);
+      pos = getNodePosition(node);
+      return name + (pos > 1 ? "[" + pos + "]" : "");
+    };
+    rootNode = relativeRoot;
+    getPathTo = function(node) {
+      var xpath;
+      xpath = '';
+      while (node !== rootNode) {
+        if (node == null) {
+          throw new Error("Called getPathTo on a node which was not a descendant of @rootNode. " + rootNode);
+        }
+        xpath = (getPathSegment(node)) + '/' + xpath;
+        node = node.parentNode;
+      }
+      xpath = '/' + xpath;
+      xpath = xpath.replace(/\/$/, '');
+      return xpath;
+    };
+    jq = this.map(function() {
+      var path;
+      path = getPathTo(this);
+      return path;
+    });
+    return jq.get();
+  };
+
+  $.fn.xpath = function(relativeRoot) {
+    var result;
+    try {
+      result = this.xpath1(relativeRoot);
+    } catch (exception) {
+      console.log("jQuery-based XPath construction failed! Falling back to manual.");
+      result = this.xpath2(relativeRoot);
+    }
+    return result;
+  };
+
+  $.findChild = function(node, type, index) {
+    var child, children, found, name, _i, _len;
+    if (!node.hasChildNodes()) {
+      throw new Error("XPath error: node has no children!");
+    }
+    children = node.childNodes;
+    found = 0;
+    for (_i = 0, _len = children.length; _i < _len; _i++) {
+      child = children[_i];
+      name = $.getProperNodeName(child);
+      if (name === type) {
+        found += 1;
+        if (found === index) return child;
+      }
+    }
+    throw new Error("XPath error: wanted child not found.");
+  };
+
+  $.dummyXPathEvaluate = function(xp, root) {
+    var idx, name, node, step, steps, _i, _len, _ref2;
+    steps = xp.substring(1).split("/");
+    node = root;
+    for (_i = 0, _len = steps.length; _i < _len; _i++) {
+      step = steps[_i];
+      _ref2 = step.split("["), name = _ref2[0], idx = _ref2[1];
+      idx = idx != null ? parseInt((idx != null ? idx.split("]") : void 0)[0]) : 1;
+      node = $.findChild(node, name.toLowerCase(), idx);
+    }
+    return node;
   };
 
   $.escape = function(html) {
@@ -282,7 +380,16 @@
     if (root == null) root = document;
     evaluateXPath = function(xp, nsResolver) {
       if (nsResolver == null) nsResolver = null;
-      return document.evaluate('.' + xp, root, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      try {
+        return document.evaluate('.' + xp, root, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      } catch (exception) {
+        if ((exception != null ? exception.code : void 0) === 52) {
+          console.log("XPath evaluation failed with code 52. Trying manual...");
+          return $.dummyXPathEvaluate(xp, root);
+        } else {
+          throw exception;
+        }
+      }
     };
     if (!$.isXMLDoc(document.documentElement)) {
       return evaluateXPath(xpath);
@@ -1228,6 +1335,7 @@
         this.selectedTargets = this.getSelectedTargets();
       } catch (exception) {
         console.log("Error while checking selection:");
+        console.log(exception);
         console.log(exception.stack);
         alert("There is something very strange about the current selection. Sorry, but I can not annotate this.");
         return;
