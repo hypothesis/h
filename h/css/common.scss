@@ -687,16 +687,8 @@ blockquote {
   position: relative;
 
   & > ul {
-    @include single-transition(max-height, .4s, cubic-bezier(1, 0, 1, 0));
-    max-height: 65536px;
-    #overflow: hidden;
-
     padding-left: $thread-padding;
     margin-left: -$thread-padding;
-
-    &:hover {
-      overflow: visible;
-    }
 
     & > * {
       border-left: 1px dotted $grayLight;
@@ -731,6 +723,13 @@ blockquote {
 
   //These are all the changes needed to collapse thread objects.
   .collapsed {
+    display: block !important;
+
+    & > ul {
+      max-height: 0;
+      overflow: hidden;
+    }
+
     & > .annotation {
       .body * {
         overflow: hidden;
@@ -748,15 +747,38 @@ blockquote {
       }
     }
 
-    & > ul {
-      @include single-transition(max-height, .4s, cubic-bezier(0, 1, 0, 1));
-      max-height: 0;
-      display: none;
-    }
-
     & > .threadexp {
       background-image: url("../images/plus_1.png");
     }
+  }
+
+  &.collapse-hide-setup, &.collapse-show-setup {
+    @include transition-duration(.4s);
+
+    & > ul {
+      @include transition-duration(.4s);
+      @include transition-property(max-height);
+    }
+  }
+
+  &.collapse-hide-setup > ul {
+    @include transition-timing-function(cubic-bezier(0, 1, 0, 1));
+    max-height: 65536px;
+    overflow: hidden;
+  }
+
+  &.collapse-hide-start > ul {
+    max-height: 0;
+  }
+
+  &.collapse-show-setup > ul {
+    @include transition-timing-function(cubic-bezier(1, 0, 1, 0));
+    max-height: 0;
+    overflow: hidden;
+  }
+
+  &.collapse-show-start > ul {
+    max-height: 65536px;
   }
 }
 

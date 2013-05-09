@@ -31,11 +31,13 @@
            name="annotation"
            ng-model="$parent.thread.message" />
       <!-- Replies -->
-      <ul>
-        <li ng-class="collapsed && 'collapsed' || ''"
+      <ul >
+        <li class="thread"
+            ng-animate="{hide: 'collapse-hide', show: 'collapse-show'}"
+            ng-hide="collapsed"
+            ng-class="collapsed && 'collapsed' || ''"
             ng-repeat="thread in thread.children"
-            ng-transclude=""
-            class="thread">
+            ng-transclude>
           <a href="" class="threadexp"
              title="{{collapsed && 'Expand' || 'Collapse'}}"
              ng-click="collapsed = !collapsed" />
