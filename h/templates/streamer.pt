@@ -11,7 +11,6 @@
   <style type="text/css"></style>
 
   <body metal:fill-slot="body" ng-app="h.streamer">
-    <script type="text/javascript">var port = ${port};</script>
     <div ng-controller="StreamerCtrl">
     <div class="topbar">
       <div class="inner">

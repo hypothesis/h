@@ -18,6 +18,7 @@ colander==1.0a2
 cryptacular==1.4.1
 deform==0.9.5
 deform-bootstrap==0.2.2
+gevent-websocket==0.3.6
 hem==0.3.2
 -e git+https://github.com/eventray/horus.git@7ff2854e20a714de0da6b6d7d63f58b3c746adf6#egg=horus-dev
 iso8601==0.1.4
@@ -34,6 +35,7 @@ pyramid-beaker==0.7
 pyramid-deform==0.2a5
 pyramid-layout==0.6
 pyramid-mailer==0.9
+pyramid-sockjs==0.3.9
 pyramid-tm==0.7
 -e git+https://github.com/tilgovi/pyramid_webassets.git@cbe7befcc0ed9eb688104eade1a2a7e86be3c1db#egg=pyramid_webassets-dev
 pystache==0.5.3
@@ -43,7 +45,6 @@ python-openid==2.2.5
 repoze.lru==0.6
 repoze.sendmail==4.0b2
 requests==0.11.2
-sockjs-tornado==1.0.0
 tornado==3.0.1
 transaction==1.4.1
 translationstring==1.1

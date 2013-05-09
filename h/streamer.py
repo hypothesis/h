@@ -9,9 +9,7 @@ import BeautifulSoup
 import re
 import Queue
 
-from tornado import web, ioloop, httpserver
-import ssl
-from sockjs.tornado import SockJSRouter, SockJSConnection
+from pyramid_sockjs.session import Session
 from jsonschema import validate
 from jsonpointer import resolve_pointer
 
@@ -19,7 +17,6 @@ from dateutil.tz import tzutc
 from datetime import datetime, timedelta
 
 from annotator import authz
-from annotator import elasticsearch
 
 import logging
 log = logging.getLogger(__name__)
@@ -154,15 +151,15 @@ class FilterHandler(object):
             else: return True
         else: return False
 
-class StreamerConnection(SockJSConnection):
+class StreamerSession(Session):
     connections = set()
 
-    def on_open(self, info):
+    def on_open(self):
       self.filter = {}
       self.connections.add(self)
 
     def on_message(self, msg):
-      try:          
+      try:
         payload = json.loads(msg)
         #Let's try to validate the schema
         validate(payload, filter_schema)                
@@ -191,35 +188,12 @@ class StreamerConnection(SockJSConnection):
         log.info('closing ' + str(self))
         self.connections.remove(self)
 
-def _init_streamer(port, ssl_pem = None):
-    StreamerRouter = SockJSRouter(StreamerConnection, '/streamer')
-    app = web.Application(StreamerRouter.urls)
-    if not ssl_pem:
-        app.listen(port)
-    else:  
-        http_server = httpserver.HTTPServer(app,     
-            ssl_options=dict(
-                certfile=ssl_pem,
-                keyfile=ssl_pem))
-        http_server.listen(port)
-    
-    ioloop.IOLoop.instance().start()
-
 q = Queue.Queue()
 
-def init_streamer(port = 5001, ssl_pem = None):
-    global _port
-    _port = int(port)
-    t = threading.Thread(target=_init_streamer, args=(port, ssl_pem))
-    t2 = threading.Thread(target=process_filters)
+def init_streamer():
+    t = threading.Thread(target=process_filters)
     t.daemon = True
-    t2.daemon = True
     t.start()
-    t2.start()
-
-def add_port():
-    return { 'port' : _port }
-
 
 def process_filters():
     url_analyzer = UrlAnalyzer()
@@ -231,15 +205,15 @@ def process_filters():
 
 def after_action(annotation, action):
     if not authz.authorize(annotation, 'read'): return
-    
-    for connection in StreamerConnection.connections:
+
+    for connection in StreamerSession.connections:
         try:
-          if connection.filter.match(annotation, action) : 
+          if connection.filter.match(annotation, action):
             connection.send([annotation, action])                 
         except:
            log.info(traceback.format_exc())
            log.info('Filter error!')  
-               
+
 def after_save(annotation):
     q.put((annotation, 'create'))
 
@@ -249,3 +223,5 @@ def after_update(annotation):
 def after_delete(annotation):
     q.put((annotation, 'delete'))
 
+def includeme(config):
+    pass

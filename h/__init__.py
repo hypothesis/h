@@ -2,6 +2,7 @@ from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
 
+from h.streamer import StreamerSession
 
 def includeme(config):
     config.include('h.api')
@@ -16,6 +17,7 @@ def includeme(config):
     config.include('h.schemas')
     config.include('h.subscribers')
     config.include('h.views')
+    config.include('h.streamer')
 
 
 def bootstrap(cfname, config_fn=None):
@@ -73,6 +75,11 @@ def create_app(settings):
 
     # Include horus
     config.include('horus')
+    config.commit()
+
+    # Include sockjs
+    config.include('pyramid_sockjs')
+    config.add_sockjs_route(prefix='__streamer__', session=StreamerSession)
     config.commit()
 
     # Include the rest of the application

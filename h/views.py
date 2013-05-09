@@ -8,7 +8,6 @@ __all__ = [
 
 from pyramid.view import view_config, view_defaults
 from pyramid.traversal import find_resource
-from pyramid import httpexceptions
 
 from horus.views import (
     AuthController,
@@ -18,7 +17,6 @@ from horus.views import (
 )
 
 from h import interfaces
-from h import streamer as streamer_template
 
 import logging
 log = logging.getLogger(__name__)
@@ -71,9 +69,7 @@ class Annotation(BaseController):
 class Streamer(BaseController):
     @view_config(accept='text/html', renderer='templates/streamer.pt')
     def __html__(self):
-        streamer = self.request.context
-        streamer.update(streamer_template.add_port())
-        return streamer
+        return self.request.context
 
     @view_config(accept='application/json', renderer='json')
     def __call__(self):

@@ -24,7 +24,7 @@ syntaxHighlight = (json) ->
   
 angular.module('h.streamer',['h.filters','bootstrap'])
   .controller('StreamerCtrl',
-  ($scope, $element) ->
+  ($scope) ->
     $scope.streaming = false
     $scope.matchPolicy = 'exclude_any'
     $scope.annotations = []    
@@ -41,7 +41,8 @@ angular.module('h.streamer',['h.filters','bootstrap'])
         $scope.streaming = false
                
       $scope.json_content = syntaxHighlight $scope.generate_json()
-      $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + port + '/streamer')    
+      transports = ['xhr-streaming', 'iframe-eventsource', 'iframe-htmlfile', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling']
+      $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__', transports)
       $scope.sock.onopen = ->
         $scope.sock.send $scope.generate_json()
         $scope.$apply =>
@@ -57,8 +58,7 @@ angular.module('h.streamer',['h.filters','bootstrap'])
           annotation['action'] = action
           annotation['quote'] = get_quote annotation
           $scope.annotations.splice 0,0,annotation
-          #window.scrollTo 0, document.body.scrollHeight
-          
+
     $scope.stop_streaming = ->
       $scope.sock.close
       $scope.streaming = false

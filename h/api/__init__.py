@@ -46,11 +46,8 @@ def includeme(config):
 
     """
 
-    settings = config.get_settings()
-
     #configure streamer
-    if 'streamer.port' in settings:
-        streamer.init_streamer(settings['streamer.port'], settings['ssl_pem'])
+    streamer.init_streamer()
 
     api_url = config.registry.settings.get('api.url', '/api')
 
