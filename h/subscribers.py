@@ -16,6 +16,7 @@ def csrf_token_header(event):
     request = event.request
     if request.method == 'POST':
         csrf_token = request.headers.get('X-XSRF-TOKEN')
+        csrf_token = csrf_token or request.cookies.get('XSRF-TOKEN')
         if csrf_token:
             try:
                 request.POST['csrf_token'] = csrf_token
