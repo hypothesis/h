@@ -132,21 +132,21 @@ class Annotation(BaseResource, UrlAnalyzer):
         week = day * 7
         month = day * 30
 
-        if (delta < 30):
+        if delta < 30:
             fuzzy = 'moments ago'
-        elif (delta < minute):
+        elif delta < minute:
             fuzzy = str(int(delta)) + ' seconds ago'
-        elif (delta < 2 * minute):
+        elif delta < 2 * minute:
             fuzzy = 'a minute ago'
-        elif (delta < hour):
+        elif delta < hour:
             fuzzy = str(int(floor(delta / minute))) + ' minutes ago'
-        elif (floor(delta / hour) == 1):
+        elif floor(delta / hour) == 1:
             fuzzy = '1 hour ago'
-        elif (delta < day):
+        elif delta < day:
             fuzzy = str(int(floor(delta / hour))) + ' hours ago'
-        elif (delta < day * 2):
+        elif delta < day * 2:
             fuzzy = 'yesterday'
-        elif (delta < month):
+        elif delta < month:
             fuzzy = str(int(round(delta / day))) + ' days ago'
         else:
             fuzzy = str(converted)
@@ -212,8 +212,10 @@ class Annotation(BaseResource, UrlAnalyzer):
         # Create nested list form
         return self._nestlist(childTable.get(self['id']), childTable)
 
+
 class Streamer(BaseResource, dict):
     pass
+
 
 class AnnotationFactory(BaseResource):
     def __getitem__(self, key):
@@ -229,6 +231,7 @@ class AnnotationFactory(BaseResource):
             pass
 
         return annotation
+
 
 def includeme(config):
     config.set_root_factory(RootFactory)

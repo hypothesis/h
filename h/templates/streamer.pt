@@ -96,6 +96,7 @@
                 <div class="page">
                   <strong>{{annotation['user'] | userName}}</strong>
                   <span ng-switch="annotation['action']">
+                    <span ng-switch-when="past">&nbsp;'s annotation</span>
                     <span ng-switch-when="create">&nbsp;has created an annotation</span>
                     <span ng-switch-when="update">&nbsp;has updated an annotation</span>
                     <span ng-switch-when="delete">&nbsp;has deleted an annotation</span>
