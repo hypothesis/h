@@ -73,18 +73,14 @@
 //HIGHLIGHTS////////////////////////////////
 .annotator-hl-active, .annotator-hl-temporary {
   background: $highlightColor;
-  color: black;
   &::-moz-selection {
     background: $highlightColor;
-    color: black;
   }
   &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
     background: $highlightColor;
-    color: black;
   }
   &::selection, &::selection:window-inactive {
     background: $highlightColor;
-    color: black;
   }
 }
 
