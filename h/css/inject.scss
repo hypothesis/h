@@ -71,10 +71,6 @@
 
 
 //HIGHLIGHTS////////////////////////////////
-.annotator-hl {
-  @include single-transition('background-color,color', .03s, linear, .1s);
-}
-
 .annotator-hl-active, .annotator-hl-temporary {
   background: $highlightColor;
   color: black;
