@@ -1,3 +1,4 @@
+
 __all__ = [
     'BaseController',
 
@@ -42,6 +43,8 @@ class Annotation(BaseController):
     def __html__(self):
         request = self.request
         context = request.context
+        if len(context) == 0:
+            raise httpexceptions.HTTPNotFound()
 
         d = context._url_values()
         d['annotation'] = context
