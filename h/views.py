@@ -1,4 +1,3 @@
-
 __all__ = [
     'BaseController',
 
@@ -44,7 +43,11 @@ class Annotation(BaseController):
         request = self.request
         context = request.context
         if len(context) == 0:
-            raise httpexceptions.HTTPNotFound(body_template="Either no annotation exists with this identifier, or you don't have the permissions required for viewing it.")
+            raise httpexceptions.HTTPNotFound(
+                body_template=
+                "Either no annotation exists with this identifier, or you "
+                "don't have the permissions required for viewing it."
+            )
 
         d = context._url_values()
         d['annotation'] = context
