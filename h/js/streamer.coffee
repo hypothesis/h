@@ -63,7 +63,7 @@ angular.module('h.streamer',['h.filters','bootstrap'])
       $scope.sock.close
       $scope.streaming = false
       
-    $scope.filter_fields = ['thread', 'text', 'user']
+    $scope.filter_fields = ['thread', 'text', 'user','uri']
     $scope.operators = ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#']
     $scope.operator_mapping = {
       '=': 'equals', '>': 'gt', '<': 'lt', '=>' : 'ge', '<=' : 'ge',
@@ -79,9 +79,9 @@ angular.module('h.streamer',['h.filters','bootstrap'])
         #Here comes the long and boring validation checking
         clause = clause.trim()
         if clause.length < 1 then continue
-        
-        parts = clause.split ':'
-        unless parts.length is 2
+
+        parts = clause.split /:(.+)/
+        unless parts.length > 1
           bads.push [clause, 'Filter clause is not well separated']
           continue 
         
