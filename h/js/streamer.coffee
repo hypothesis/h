@@ -21,7 +21,7 @@ syntaxHighlight = (json) ->
         if /null/.test(match) then cls = 'null'
     return '<span class="' + cls + '">' + match + '</span>'
   )
-  
+
 angular.module('h.streamer',['h.filters','bootstrap'])
   .controller('StreamerCtrl',
   ($scope) ->
@@ -33,7 +33,9 @@ angular.module('h.streamer',['h.filters','bootstrap'])
     $scope.action_delete = true
     $scope.sidebar_json = false
     $scope.go_back = 5
-    $scope.load_past = false
+    $scope.hits = 100
+    $scope.past_list = ['none', 'time', 'hits']
+    $scope.load_past = 2
 
     $scope.start_streaming = ->
       if $scope.streaming
@@ -120,6 +122,10 @@ angular.module('h.streamer',['h.filters','bootstrap'])
       clauses = $scope.parse_clauses()
       unless clauses
       	clauses = []
+      past = { 'load_past': $scope.past_list[$scope.load_past]}
+      if $scope.load_past is 1 then past['go_back'] = $scope.go_back
+      if $scope.load_past is 2 then past['hits'] = $scope.hits
+
       struct = {
         'match_policy' : $scope.matchPolicy,
         'clauses' : clauses,
@@ -128,11 +134,7 @@ angular.module('h.streamer',['h.filters','bootstrap'])
           'edit'   : $scope.action_edit,
           'delete' : $scope.action_delete
         },
-        'past_data' : {
-          'load_past' : $scope.load_past,
-          'go_back' : $scope.go_back
-        }
-        
+        'past_data': past
       }
       JSON.stringify struct, undefined, 2 
   )

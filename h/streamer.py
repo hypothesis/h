@@ -93,8 +93,12 @@ filter_schema = {
             }
         },
         "past_data": {
-            "load_past": {"type": "boolean", "default": False},
-            "go_back": {"type": "minutes", "default": 5}
+            "load_past": {
+                "type": "string",
+                "enum": ["time", "hits", "none"]
+            },
+            "go_back": {"type": "minutes", "default": 5},
+            "hits": {"type": "number", "default": 100}
         }
     },
     "required": ["match_policy", "clauses", "actions"]
@@ -170,24 +174,32 @@ class StreamerSession(Session):
             self.filter = FilterHandler(payload)
 
             #If past is given, send the annotations back.
-            if "past_data" in payload and payload['past_data']['load_past']:
-                now = datetime.utcnow().replace(tzinfo=tzutc())
-                log.info(now)
-                past = now - timedelta(seconds=60 * payload['past_data']['go_back'])
-                log.info(past)
-
+            if "past_data" in payload and payload["past_data"] != "none":
                 request = self.request
                 registry = request.registry
                 store = registry.queryUtility(interfaces.IStoreClass)(request)
-                #annotations = store.search(created={'gte': past})
                 annotations = store.search()
-                #log.info(annotations)
                 url_analyzer = UrlAnalyzer()
-                for annotation in annotations:
-                    created = parse(annotation['created'])
-                    if created >= past and self.filter.match(annotation):
-                        annotation.update(url_analyzer._url_values(annotation['uri']))
-                        self.send([annotation, 'past'])
+
+                if payload["past_data"]["load_past"] == "time":
+                    now = datetime.utcnow().replace(tzinfo=tzutc())
+                    past = now - timedelta(seconds=60 * payload['past_data']['go_back'])
+                    for annotation in annotations:
+                        created = parse(annotation['created'])
+                        if created >= past and self.filter.match(annotation):
+                            annotation.update(url_analyzer._url_values(annotation['uri']))
+                            self.send([annotation, 'past'])
+
+                elif payload["past_data"]["load_past"] == "hits":
+                    sent_hits = 0
+                    for annotation in annotations:
+                        if self.filter.match(annotation):
+                            annotation.update(url_analyzer._url_values(annotation['uri']))
+                            self.send([annotation, 'past'])
+                            sent_hits += 1
+                        if sent_hits >= payload["past_data"]["hits"]:
+                            break
+
         except:
             log.info(traceback.format_exc())
             log.info('Failed to parse filter:' + str(msg))
