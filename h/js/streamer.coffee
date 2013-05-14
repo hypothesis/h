@@ -22,12 +22,13 @@ syntaxHighlight = (json) ->
     return '<span class="' + cls + '">' + match + '</span>'
   )
 
-angular.module('h.streamer',['h.filters','bootstrap'])
-  .controller('StreamerCtrl',
-  ($scope) ->
+class Streamer
+  this.$inject = ['$scope']
+
+  constructor: ($scope) ->
     $scope.streaming = false
     $scope.matchPolicy = 'exclude_any'
-    $scope.annotations = []    
+    $scope.annotations = []
     $scope.action_create = true
     $scope.action_edit = true
     $scope.action_delete = true
@@ -37,11 +38,24 @@ angular.module('h.streamer',['h.filters','bootstrap'])
     $scope.past_list = ['none', 'time', 'hits']
     $scope.load_past = 2
 
+    $scope.filter_fields = ['thread', 'text', 'user','uri']
+    $scope.operators = ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#']
+    $scope.operator_mapping =
+      '=': 'equals'
+      '>': 'gt'
+      '<': 'lt'
+      '=>' : 'ge'
+      '<=' : 'ge'
+      '=<': 'le'
+      '<=' : 'le'
+      '[' : 'one_of'
+      '#' : 'matches'
+
     $scope.start_streaming = ->
       if $scope.streaming
         $scope.sock.close
         $scope.streaming = false
-               
+
       $scope.json_content = syntaxHighlight $scope.generate_json()
       transports = ['xhr-streaming', 'iframe-eventsource', 'iframe-htmlfile', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling']
       $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__', transports)
@@ -64,13 +78,7 @@ angular.module('h.streamer',['h.filters','bootstrap'])
     $scope.stop_streaming = ->
       $scope.sock.close
       $scope.streaming = false
-      
-    $scope.filter_fields = ['thread', 'text', 'user','uri']
-    $scope.operators = ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#']
-    $scope.operator_mapping = {
-      '=': 'equals', '>': 'gt', '<': 'lt', '=>' : 'ge', '<=' : 'ge',
-      '=<': 'le', '<=' : 'le', '[' : 'one_of', '#' : 'matches'  
-    }  
+
     $scope.parse_clauses = ->
       bads = []
       structure = []
@@ -85,12 +93,12 @@ angular.module('h.streamer',['h.filters','bootstrap'])
         parts = clause.split /:(.+)/
         unless parts.length > 1
           bads.push [clause, 'Filter clause is not well separated']
-          continue 
-        
+          continue
+
         unless parts[0] in $scope.filter_fields
           bads.push [clause, 'Unknown filter field']
-          continue 
-        
+          continue
+
         field = parts[0]
         operator_found = false
         for operator in $scope.operators
@@ -105,7 +113,7 @@ angular.module('h.streamer',['h.filters','bootstrap'])
 
         unless operator_found
           bads.push [clause, 'Unknown operator']
-          continue 
+          continue
 
         structure.push {
           'field'   : '/' + field ,
@@ -116,8 +124,8 @@ angular.module('h.streamer',['h.filters','bootstrap'])
 
     $scope.show_sidebar_json = ->
       $scope.json_content = syntaxHighlight $scope.generate_json()
-      $scope.sidebar_json = true 
-     
+      $scope.sidebar_json = true
+
     $scope.generate_json = ->
       clauses = $scope.parse_clauses()
       unless clauses
@@ -136,7 +144,10 @@ angular.module('h.streamer',['h.filters','bootstrap'])
         },
         'past_data': past
       }
-      JSON.stringify struct, undefined, 2 
-  )
+      JSON.stringify struct, undefined, 2
+
+
+angular.module('h.streamer',['h.filters','bootstrap'])
+  .controller('StreamerCtrl', Streamer)
 
 

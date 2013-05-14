@@ -195,6 +195,8 @@ class StreamerSession(Session):
                     for annotation in annotations:
                         if self.filter.match(annotation):
                             annotation.update(url_analyzer._url_values(annotation['uri']))
+                            log.info('Annotation created')
+                            log.info(annotation['created'])
                             self.send([annotation, 'past'])
                             sent_hits += 1
                         if sent_hits >= payload["past_data"]["hits"]:
