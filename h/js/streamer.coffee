@@ -69,11 +69,13 @@ class Streamer
       $scope.sock.onmessage = (msg) =>
         $scope.$apply =>
           console.log msg
-          annotation = msg.data[0]
+          data = msg.data[0]
+          if not data instanceof Array then data = [data]
           action = msg.data[1]
-          annotation['action'] = action
-          annotation['quote'] = get_quote annotation
-          $scope.annotations.splice 0,0,annotation
+          for annotation in data
+            annotation['action'] = action
+            annotation['quote'] = get_quote annotation
+            $scope.annotations.splice 0,0,annotation
 
     $scope.stop_streaming = ->
       $scope.sock.close

@@ -179,8 +179,9 @@ class StreamerSession(Session):
                 registry = request.registry
                 store = registry.queryUtility(interfaces.IStoreClass)(request)
                 annotations = store.search()
-                url_analyzer = UrlAnalyzer()
 
+                url_analyzer = UrlAnalyzer()
+                to_send = []
                 if payload["past_data"]["load_past"] == "time":
                     now = datetime.utcnow().replace(tzinfo=tzutc())
                     past = now - timedelta(seconds=60 * payload['past_data']['go_back'])
@@ -188,20 +189,20 @@ class StreamerSession(Session):
                         created = parse(annotation['created'])
                         if created >= past and self.filter.match(annotation):
                             annotation.update(url_analyzer._url_values(annotation['uri']))
-                            self.send([annotation, 'past'])
-
+                            to_send = [annotation] + to_send
                 elif payload["past_data"]["load_past"] == "hits":
                     sent_hits = 0
                     for annotation in annotations:
                         if self.filter.match(annotation):
                             annotation.update(url_analyzer._url_values(annotation['uri']))
-                            log.info('Annotation created')
-                            log.info(annotation['created'])
-                            self.send([annotation, 'past'])
+                            to_send = [annotation] + to_send
                             sent_hits += 1
                         if sent_hits >= payload["past_data"]["hits"]:
                             break
 
+                #Finally send filtered annotations
+                if len(to_send) > 0:
+                    self.send([to_send, 'past'])
         except:
             log.info(traceback.format_exc())
             log.info('Failed to parse filter:' + str(msg))
