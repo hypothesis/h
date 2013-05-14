@@ -37,11 +37,17 @@ class UrlAnalyzer(dict):
     def _url_values(self, uri = None):
         if not uri: uri = self['uri']
         # Getting the title of the uri.
-        log.info('uri')
-        log.info(uri)
-        r = requests.get(self.iriToUri(uri), verify=False)
-        soup = BeautifulSoup.BeautifulSoup(r.content)
-        title = soup.title.string if soup.title else uri
+        try:
+            r = requests.get(self.iriToUri(uri), verify=False)
+            soup = BeautifulSoup.BeautifulSoup(r.content)
+            title = soup.title.string if soup.title else uri
+
+            # Favicon
+            favlink = soup.find("link", rel="shortcut icon")
+        except:
+            log.info('Error opening url')
+            log.info(traceback.format_exc())
+            title = uri
 
         # Getting the domain from the uri, and the same url magic for the
         # domain title.
@@ -51,8 +57,6 @@ class UrlAnalyzer(dict):
         if parsed_uri[1].lower().startswith('www.'):
             domain_stripped = domain_stripped[4:]
 
-        # Favicon
-        favlink = soup.find("link", rel="shortcut icon")
         # Check for local/global link.
         if favlink:
             href = favlink['href']
