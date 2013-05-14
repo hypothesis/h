@@ -48,6 +48,7 @@ class UrlAnalyzer(dict):
             log.info('Error opening url')
             log.info(traceback.format_exc())
             title = uri
+            favlink = None
 
         # Getting the domain from the uri, and the same url magic for the
         # domain title.
