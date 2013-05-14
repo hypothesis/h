@@ -37,6 +37,8 @@ class UrlAnalyzer(dict):
     def _url_values(self, uri = None):
         if not uri: uri = self['uri']
         # Getting the title of the uri.
+        log.info('uri')
+        log.info(uri)
         r = requests.get(self.iriToUri(uri), verify=False)
         soup = BeautifulSoup.BeautifulSoup(r.content)
         title = soup.title.string if soup.title else uri
