@@ -89,6 +89,9 @@ def extension(args, console):
                     'inline_webfont': False,
                 },
                 'main_template': base_template,
+                'request': request,
+                'base_url': urljoin(request.host_url, '/app/'),
+                'service_url': urljoin(request.host_url, '/api/'),
             }
         )
 

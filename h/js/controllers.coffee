@@ -14,6 +14,15 @@ class App
     $element, $http, $location, $scope, $timeout
     annotator, authentication, drafts, flash
   ) ->
+    # Get the base URL from the base tag or the app location
+    baseUrl = angular.element('head base')[0]?.href
+    baseUrl ?= ($location.absUrl().replace $location.url(), '')
+
+    # Strip an empty hash and end in exactly one slash
+    baseUrl = baseUrl.replace /#$/, ''
+    baseUrl = baseUrl.replace /\/*$/, '/'
+    $scope.baseUrl = baseUrl
+
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
     dynamicBucket = true
@@ -332,8 +341,14 @@ class Annotation
         $timeout -> $element.find('input').focus()
         $timeout -> $element.find('input').select()
 
-        $scope.shared_link = window.location.protocol + '//' +
-          window.location.host + '/a/' + $scope.model.$modelValue.id
+        # XXX: This should be done some other way since we should not assume
+        # the annotation share URL is in any particular path relation to the
+        # app base URL. It's time to start reflecting routes, I think. I'm
+        # just not sure how best to do that with pyramid traversal since there
+        # is not a pre-determined route map. One possibility would be to
+        # unify everything so that it's relative to the app URL.
+        prefix = $scope.$parent.baseUrl.replace /\/\w+\/$/, ''
+        $scope.shared_link = prefix + '/a/' + $scope.model.$modelValue.id
         $scope.shared = false
 
     $scope.toggle = ->
