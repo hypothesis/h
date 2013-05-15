@@ -150,11 +150,26 @@ class App
       if annotator.plugins.Store?
         $scope.$root.annotations = []
         annotator.threading.thread []
-        annotations = annotator.plugins.Store.annotations
+
+        Store = annotator.plugins.Store
+        annotations = Store.annotations
         annotator.plugins.Store.annotations = []
         annotator.deleteAnnotation a for a in annotations
-        annotator.plugins.Store.pluginInit()
-        dynamicBucket = true
+
+        # XXX: Hacky hacky stuff to ensure that any search requests in-flight
+        # at this time have no effect when they resolve and that future events
+        # have no effect on this Store. Unfortunately, it's not possible to
+        # unregister all the events or properly unload the Store because the
+        # registration loses the closure. The approach here is perhaps
+        # cleaner than fishing them out of the jQuery private data.
+        # * Overwrite the Store's handle to the annotator, giving it one
+        #   with a noop `loadAnnotations` method.
+        Store.annotator = loadAnnotations: angular.noop
+        # * Make all api requests into a noop.
+        Store._apiRequest = angular.noop
+        # * Remove the plugin and re-add it to the annotator.
+        delete annotator.plugins.Store
+        annotator.addStore Store.options
 
     $scope.$watch 'frame.visible', (newValue) ->
       if newValue
