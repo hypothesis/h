@@ -26,17 +26,22 @@ class Streamer
   this.$inject = ['$scope']
 
   constructor: ($scope) ->
-    $scope.streaming = false
-    $scope.matchPolicy = 'exclude_any'
-    $scope.annotations = []
-    $scope.action_create = true
-    $scope.action_edit = true
-    $scope.action_delete = true
     $scope.sidebar_json = false
-    $scope.go_back = 5
-    $scope.hits = 100
+
+    $scope.streaming = false
+    $scope.annotations = []
+
+    $scope.matchPolicy = 'exclude_any'
+    $scope.action =
+      'create': true
+      'edit': true
+      'delete': true
+
     $scope.past_list = ['none', 'time', 'hits']
-    $scope.load_past = 2
+    $scope.past =
+      load_past: 2
+      go_back: 5
+      hits: 100
 
     $scope.filter_fields = ['thread', 'text', 'user','uri']
     $scope.operators = ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#']
@@ -119,11 +124,11 @@ class Streamer
           bads.push [clause, 'Unknown operator']
           continue
 
-        structure.push {
-          'field'   : '/' + field ,
-          'operator': oper ,
+        structure.push
+          'field'   : '/' + field
+          'operator': oper
           'value'   : value
-        }
+
       structure
 
     $scope.show_sidebar_json = ->
@@ -134,20 +139,17 @@ class Streamer
       clauses = $scope.parse_clauses()
       unless clauses
       	clauses = []
-      past = { 'load_past': $scope.past_list[$scope.load_past]}
-      if $scope.load_past is 1 then past['go_back'] = $scope.go_back
-      if $scope.load_past is 2 then past['hits'] = $scope.hits
+      load = $scope.past['load_past']
+      past = { 'load_past': $scope.past_list[load]}
+      if load is 1 then past['go_back'] = $scope.past['go_back']
+      if load is 2 then past['hits'] = $scope.past['hits']
 
-      struct = {
-        'match_policy' : $scope.matchPolicy,
-        'clauses' : clauses,
-        'actions' : {
-          'create' : $scope.action_create,
-          'edit'   : $scope.action_edit,
-          'delete' : $scope.action_delete
-        },
+      struct =
+        'match_policy' : $scope.matchPolicy
+        'clauses' : clauses
+        'actions' : $scope.action
         'past_data': past
-      }
+
       JSON.stringify struct, undefined, 2
 
 

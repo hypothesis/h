@@ -58,9 +58,9 @@
              <div class="dropdown show pull-left">
               <a href="" class="down-icon dropdown-toggle small" role="button" title="Annotation actions">Actions</a>
               <ul class="dropdown-menu" role="menu">                
-                <li ng-click="action_create = !action_create" class="small"><input type="checkbox" data-col="1" ng-model="action_create" class="small">Create</input><li>
-                <li ng-click="action_edit = !action_edit" class="small"><input type="checkbox" data-col="1" ng-model="action_edit" class="small">Edit</input><li>
-                <li ng-click="action_delete = !action_delete" class="small"><input type="checkbox" data-col="1" ng-model="action_delete" class="small">Delete</input><li>
+                <li ng-click="action['create'] = !action['create']" class="small"><input type="checkbox" data-col="1" ng-model="action['create']" class="small">Create</input><li>
+                <li ng-click="action['edit'] = !action['edit']" class="small"><input type="checkbox" data-col="1" ng-model="action['edit']" class="small">Edit</input><li>
+                <li ng-click="action['delete'] = !action['delete']" class="small"><input type="checkbox" data-col="1" ng-model="action['delete']" class="small">Delete</input><li>
               </ul>
              </div>
 
@@ -68,9 +68,9 @@
             <div class="dropdown show pull-left">
                <a href="" class="down-icon dropdown-toggle small" role="button" title="Past">Past</a>
               <ul class="dropdown-menu" role="menu">                
-                <li ng-click="load_past = (load_past+1)%3" class="small">Load {{past_list[load_past]}}</li>
-                <li class="small" ng-hide="load_past != 1">Go back <input type="number" ng-model="go_back" step="1" min="1" max="60" value="5"/> min(s)<li>
-                <li class="small" ng-hide="load_past != 2">Load <input type="number" ng-model="hits" step="10" min="1" max="500" value="20"/> hits<li>
+                <li ng-click="past['load_past'] = (past['load_past']+1)%3" class="small">Load {{past_list[past['load_past']]}}</li>
+                <li class="small" ng-hide="past['load_past'] != 1">Go back <input type="number" ng-model="past['go_back']" step="1" min="1" max="60" value="5"/> min(s)<li>
+                <li class="small" ng-hide="past['load_past'] != 2">Load <input type="number" ng-model="past['hits']" step="10" min="1" max="500" value="20"/> hits<li>
               </ul>
           </div>
 
