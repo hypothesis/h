@@ -59,18 +59,20 @@ class Streamer
       $scope.json_content = syntaxHighlight $scope.generate_json()
       transports = ['xhr-streaming', 'iframe-eventsource', 'iframe-htmlfile', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling']
       $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__', transports)
+
       $scope.sock.onopen = ->
         $scope.sock.send $scope.generate_json()
         $scope.$apply =>
           $scope.streaming = true
+
       $scope.sock.onclose = ->
         $scope.$apply =>
           $scope.streaming = false
+
       $scope.sock.onmessage = (msg) =>
         $scope.$apply =>
-          console.log msg
           data = msg.data[0]
-          if not data instanceof Array then data = [data]
+          unless data instanceof Array then data = [data]
           action = msg.data[1]
           for annotation in data
             annotation['action'] = action
