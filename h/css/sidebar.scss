@@ -110,7 +110,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .annotator-heatmap {
   @include stretch-y;
   height: 100%;
- 
+
   svg {
     @include stretch-y;
     background: hsla(0, 0, 0, .1);
@@ -174,7 +174,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       left: 7px;
     }
   }
-  
+
   &.upper {
     .svg {
       background-image: url("../images/up_tab.svg");
