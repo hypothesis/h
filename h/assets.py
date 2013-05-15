@@ -174,7 +174,6 @@ app = Bundle(
         ],
         output='js/app.min.js'
     ),
-    SCSS('css/app.scss', depends=(base + common), output='css/app.min.css'),
 )
 
 display = Bundle(
@@ -183,6 +182,9 @@ display = Bundle(
     Coffee('js/displayer.coffee', output='js/displayer.js'),
     CSS('css/displayer.css', output='js/displayer.min.css'),
 )
+
+sidebar = SCSS('css/sidebar.scss', depends=(base + common),
+               output='css/sidebar.min.css')
 
 site = Bundle(
     app,
