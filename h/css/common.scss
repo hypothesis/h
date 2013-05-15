@@ -587,12 +587,8 @@ blockquote {
     }
   }
 
-  .inner {
-    max-width: grid(12);
-    margin: 0 auto;
-    & > * {
-      padding: .3em;
-    }
+  .inner > * {
+    padding: .3em;
   }
 
   .tinyman {
@@ -844,57 +840,4 @@ blockquote {
   .magicontrols .show {
     display: none;
   }
-}
-
-
-
-/*
-    Mobile layout
-    240-479 px
-    Zoomed out below 320 px
-*/
-
-@media screen and (min-width: 15em) {
-  .content { padding: 3em 1em; }
-}
-
-/*
-    Wide mobile layout
-    480-767 px
-    Zoomed in above 480 px
-*/
-
-@media screen and (min-width: 30em) {
-}
-
-/*
-    Tablet layout
-    600-911 px
-    Zoomed in above 600 px
-*/
-
-@media screen and (min-width: 37.5em) {
-  .content { padding: 6em; }
-}
-
-/*
-    Widescreen layout
-    912-1887 px
-    Zoomed in above 912 px
-*/
-
-@media screen and (min-width: 57em) {
-  .content {
-    max-width: grid(12);
-    margin: auto;
-  }
-}
-
-/*
-    Huge-screen layout
-    1888-2520 px
-    Zoomed in above 1920 px
-*/
-
-@media screen and (min-width: 118em) {
 }
