@@ -143,7 +143,7 @@ class AppController(views.BaseController):
             'model': model,
         }
 
-    @view_config(renderer='h:templates/app.pt')
+    @view_config(layout='sidebar', renderer='h:templates/app.pt')
     def __html__(self):
         request = self.request
         request.session.new_csrf_token()
