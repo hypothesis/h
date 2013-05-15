@@ -30,6 +30,7 @@ class Streamer
 
     $scope.streaming = false
     $scope.annotations = []
+    $scope.bads = []
 
     $scope.matchPolicy = 'exclude_any'
     $scope.action =
@@ -58,10 +59,13 @@ class Streamer
 
     $scope.start_streaming = ->
       if $scope.streaming
-        $scope.sock.close
+        $scope.sock.close()
         $scope.streaming = false
 
       $scope.json_content = syntaxHighlight $scope.generate_json()
+      unless $scope.bads.length is 0
+        return
+
       transports = ['xhr-streaming', 'iframe-eventsource', 'iframe-htmlfile', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling']
       $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__', transports)
 
@@ -85,11 +89,11 @@ class Streamer
             $scope.annotations.splice 0,0,annotation
 
     $scope.stop_streaming = ->
-      $scope.sock.close
+      $scope.sock.close()
       $scope.streaming = false
 
     $scope.parse_clauses = ->
-      bads = []
+      $scope.bads = []
       structure = []
       unless $scope.clauses
         return
@@ -101,11 +105,11 @@ class Streamer
 
         parts = clause.split /:(.+)/
         unless parts.length > 1
-          bads.push [clause, 'Filter clause is not well separated']
+          $scope.bads.push [clause, 'Filter clause is not well separated']
           continue
 
         unless parts[0] in $scope.filter_fields
-          bads.push [clause, 'Unknown filter field']
+          $scope.bads.push [clause, 'Unknown filter field']
           continue
 
         field = parts[0]
@@ -121,14 +125,13 @@ class Streamer
             break
 
         unless operator_found
-          bads.push [clause, 'Unknown operator']
+          $scope.bads.push [clause, 'Unknown operator']
           continue
 
         structure.push
           'field'   : '/' + field
           'operator': oper
           'value'   : value
-
       structure
 
     $scope.show_sidebar_json = ->

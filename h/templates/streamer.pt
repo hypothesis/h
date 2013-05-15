@@ -40,6 +40,9 @@
                 <button ng-hide="streaming" ng-click="start_streaming()" class="btn check-icon pull-right">Stream</button>
                 <button ng-show="streaming" ng-click="stop_streaming()" class="btn check-icon pull-right">Stop</button>
               </h4>
+              <ul class="searchbar-error small" ng-show="bads.length>0" ng-repeat="bad in bads">
+                  <li>Error: '{{bad[0]}}' : {{bad[1]}}</li>
+              </ul>
             </div>
 
             <div class="button_controls">
