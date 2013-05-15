@@ -349,14 +349,19 @@ class Hypothesis extends Annotator
           loadFromSearch:
             limit: 1000
             uri: href
-        this.addPlugin 'Store', options
-        this.patch_store this.plugins.Store
-        console.log "Loaded annotions for '" + href + "'."
-        for href in this.getSynonymURLs href
-          console.log "Also loading annotations for: " + href
-          this.plugins.Store._apiRequest 'search', uri: href, (data) =>
-            console.log "Found " + data.total + " annotations here.."
-            this.plugins.Store._onLoadAnnotationsFromSearch data
+        this.addStore(options)
+
+  addStore: (options) ->
+    this.addPlugin 'Store', options
+    this.patch_store this.plugins.Store
+
+    href = options.loadFromSearch?.uri
+    return unless href?
+
+    console.log "Loaded annotions for '" + href + "'."
+    for href in this.getSynonymURLs href
+      console.log "Also loading annotations for: " + href
+      this.plugins.Store.loadAnnotationsFromSearch uri: href
 
 
 class DraftProvider
