@@ -79,16 +79,6 @@ $score-height: $score-width;
 $heatmap-width: 22px;
 $input-border-radius: 2px;
 
-// Grid
-$gridColumns: 12 !default;
-$gridColumnWidth: 48 !default;
-$gridGutterWidth: 24 !default;
-$em: 14 / 1em !default;
-
-@function grid($cols:1) {
-  @return (($cols * $gridColumnWidth) + (($cols - 1) * $gridGutterWidth)) / $em;
-}
-
 /* Shadow mixins */
 @mixin smallshadow($a: 2px, $b: 2px, $c: .1) {
   @include box-shadow($a $b 3px hsla(0, 0%, 0%, $c));

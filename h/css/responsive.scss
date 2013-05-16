@@ -1,0 +1,27 @@
+$break-small: 479px !default;
+$break-large: 911px !default;;
+
+@mixin respond-to($media) {
+  @if type-of($media) == string {
+    @if $media == handhelds {
+      @media only screen and (max-width: $break-small) { @content; }
+    }
+    @else if $media == wide-handhelds {
+      @media only screen and (min-width: $break-small + 1) and (max-width: $break-large - 1) { @content; }
+    }
+    @else if $media == tablets {
+      @media only screen and (min-width: $break-large) { @content; }
+    }
+  }
+  @else if type-of($media) == list {
+    @if index($media, handhelds) != false {
+      @media only screen and (max-width: $break-small) { @content; }
+    }
+    @if index($media, wide-handhelds) != false {
+      @media only screen and (min-width: $break-small + 1) and (max-width: $break-large - 1) { @content; }
+    }
+    @if index($media, tablets) != false {
+      @media only screen and (min-width: $break-large) { @content; }
+    }
+  }
+}

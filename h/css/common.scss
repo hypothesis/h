@@ -2,6 +2,9 @@
 
 @import 'reset';
 @import 'base';
+@import 'responsive';
+@import 'yui_grid';
+
 
 $sansFontFamily: "Source Sans Pro", $sansFontFamily;
 $serifFontFamily: "Merriweather", $serifFontFamily;
@@ -38,6 +41,20 @@ em { font-style: italic; }
 html {
   font-size: $baseFontSize / 16px * 1em;
   line-height: $baseLineHeight / 16px * 1em;
+
+  @include yui_grid();
+
+  @include respond-to(handhelds) {
+    @include yui_grid('h-');
+  }
+
+  @include respond-to(wide-handhelds) {
+    @include yui_grid('wh-');
+  }
+
+  @include respond-to(tablets) {
+    @include yui_grid('t-');
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
