@@ -22,47 +22,116 @@ syntaxHighlight = (json) ->
     return '<span class="' + cls + '">' + match + '</span>'
   )
 
+
+class ClauseParser
+  this.filter_fields = ['thread', 'text', 'user','uri']
+  this.operators = ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#']
+  this.operator_mapping =
+    '=': 'equals'
+    '>': 'gt'
+    '<': 'lt'
+    '=>' : 'ge'
+    '<=' : 'ge'
+    '=<': 'le'
+    '<=' : 'le'
+    '[' : 'one_of'
+    '#' : 'matches'
+
+  this.parse_clauses = (clauses) ->
+    bads = []
+    structure = []
+    unless clauses
+      return
+    clauses = clauses.split ' '
+    for clause in clauses
+      #Here comes the long and boring validation checking
+      clause = clause.trim()
+      if clause.length < 1 then continue
+
+      parts = clause.split /:(.+)/
+      unless parts.length > 1
+        bads.push [clause, 'Filter clause is not well separated']
+        continue
+
+      unless parts[0] in @filter_fields
+        bads.push [clause, 'Unknown filter field']
+        continue
+
+      field = parts[0]
+      operator_found = false
+      for operator in @operators
+        if (parts[1].indexOf operator) is 0
+          oper = @operator_mapping[operator]
+          if operator is '['
+            value = parts[1][operator.length..].split ','
+          else
+            value = parts[1][operator.length..]
+          operator_found = true
+          break
+
+      unless operator_found
+        bads.push [clause, 'Unknown operator']
+        continue
+
+      structure.push
+        'field'   : '/' + field
+        'operator': oper
+        'value'   : value
+    [structure, bads]
+
+
+
 class Streamer
   this.$inject = ['$scope']
+  this.parser = ClauseParser
 
   constructor: ($scope) ->
-    $scope.sidebar_json = false
-
     $scope.streaming = false
     $scope.annotations = []
     $scope.bads = []
 
-    $scope.matchPolicy = 'exclude_any'
-    $scope.action =
-      'create': true
-      'edit': true
-      'delete': true
+    #Json structure we will watch and update
+    $scope.filter =
+      match_policy :  'include_any'
+      clauses : []
+      actions :
+        create: true
+        edit: true
+        delete: true
+      past_data:
+        load_past: 'hits'
+        go_back: 5
+        hits: 100
 
-    $scope.past_list = ['none', 'time', 'hits']
-    $scope.past =
-      load_past: 2
-      go_back: 5
-      hits: 100
+    $scope.toggle_past = ->
+      switch $scope.filter.past_data.load_past
+        when 'none' then $scope.filter.past_data.load_past = 'time'
+        when 'time' then $scope.filter.past_data.load_past = 'hits'
+        when 'hits' then $scope.filter.past_data.load_past = 'none'
 
-    $scope.filter_fields = ['thread', 'text', 'user','uri']
-    $scope.operators = ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#']
-    $scope.operator_mapping =
-      '=': 'equals'
-      '>': 'gt'
-      '<': 'lt'
-      '=>' : 'ge'
-      '<=' : 'ge'
-      '=<': 'le'
-      '<=' : 'le'
-      '[' : 'one_of'
-      '#' : 'matches'
+    $scope.$watch 'filter', (newValue, oldValue) =>
+      json = JSON.stringify $scope.filter, undefined, 2
+      $scope.json_content = syntaxHighlight json
+    ,true
+
+    $scope.clause_change = ->
+      if $scope.clauses.slice(-1) is ' ' or $scope.clauses.length is 0
+        res = Streamer.parser.parse_clauses($scope.clauses)
+        if res?
+          $scope.filter.clauses = res[0]
+          $scope.bads = res[1]
+        else
+          $scope.filter.clauses = []
+          $scope.bads = []
 
     $scope.start_streaming = ->
       if $scope.streaming
         $scope.sock.close()
         $scope.streaming = false
 
-      $scope.json_content = syntaxHighlight $scope.generate_json()
+      res = @parser.parse_clauses($scope.clauses)
+      $scope.filter.clauses = res[0]
+      $scope.bads = res[1]
       unless $scope.bads.length is 0
         return
 
@@ -70,7 +139,7 @@ class Streamer
       $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__', transports)
 
       $scope.sock.onopen = ->
-        $scope.sock.send $scope.generate_json()
+        $scope.sock.send $scope.filter
         $scope.$apply =>
           $scope.streaming = true
 
@@ -91,70 +160,6 @@ class Streamer
     $scope.stop_streaming = ->
       $scope.sock.close()
       $scope.streaming = false
-
-    $scope.parse_clauses = ->
-      $scope.bads = []
-      structure = []
-      unless $scope.clauses
-        return
-      clauses = $scope.clauses.split ' '
-      for clause in clauses
-        #Here comes the long and boring validation checking
-        clause = clause.trim()
-        if clause.length < 1 then continue
-
-        parts = clause.split /:(.+)/
-        unless parts.length > 1
-          $scope.bads.push [clause, 'Filter clause is not well separated']
-          continue
-
-        unless parts[0] in $scope.filter_fields
-          $scope.bads.push [clause, 'Unknown filter field']
-          continue
-
-        field = parts[0]
-        operator_found = false
-        for operator in $scope.operators
-          if (parts[1].indexOf operator) is 0
-            oper = $scope.operator_mapping[operator]
-            if operator is '['
-              value = parts[1][operator.length..].split ','
-            else
-              value = parts[1][operator.length..]
-            operator_found = true
-            break
-
-        unless operator_found
-          $scope.bads.push [clause, 'Unknown operator']
-          continue
-
-        structure.push
-          'field'   : '/' + field
-          'operator': oper
-          'value'   : value
-      structure
-
-    $scope.show_sidebar_json = ->
-      $scope.json_content = syntaxHighlight $scope.generate_json()
-      $scope.sidebar_json = true
-
-    $scope.generate_json = ->
-      clauses = $scope.parse_clauses()
-      unless clauses
-      	clauses = []
-      load = $scope.past['load_past']
-      past = { 'load_past': $scope.past_list[load]}
-      if load is 1 then past['go_back'] = $scope.past['go_back']
-      if load is 2 then past['hits'] = $scope.past['hits']
-
-      struct =
-        'match_policy' : $scope.matchPolicy
-        'clauses' : clauses
-        'actions' : $scope.action
-        'past_data': past
-
-      JSON.stringify struct, undefined, 2
-
 
 angular.module('h.streamer',['h.filters','bootstrap'])
   .controller('StreamerCtrl', Streamer)

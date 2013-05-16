@@ -920,11 +920,17 @@ blockquote {
 }
 
 .searchbar-border {
-  height: 2em;
+  height: auto;
+  padding-bottom: 2em;
 }
 
 .searchbar-error {
   color: red;
+}
+
+.menu-width {
+  width: 20em;
+  white-space: pre-line;
 }
 
 pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }

@@ -36,28 +36,28 @@
             <!-- Searchbar -->
             <div class="searchbar-border">
               <h4>
+                <ul class="searchbar-error small" ng-show="bads.length>0" ng-repeat="bad in bads">
+                  <li>Error: '{{bad[0]}}' : {{bad[1]}}</li>
+                </ul>
                 <div class="pull-left searchinput">
-                  <input type="text" class="searchfield" ng-model="clauses" placeholder="search options"/>
+                  <input type="text" class="searchfield" ng-model="clauses" ng-trim="false" ng-change="clause_change()" placeholder="search options"/>
                 </div>
                 <div class="pull-right searchbutton">
                   <button ng-hide="streaming" ng-click="start_streaming()" class="btn check-icon">Stream</button>
                   <button ng-show="streaming" ng-click="stop_streaming()" class="btn check-icon">Stop</button>
                 </div>
               </h4>
-              <ul class="searchbar-error small" ng-show="bads.length>0" ng-repeat="bad in bads">
-                  <li>Error: '{{bad[0]}}' : {{bad[1]}}</li>
-              </ul>
             </div>
 
             <div class="button_controls">
               <!-- Match Strategy -->  
               <div class="dropdown show pull-left">
-                <a href="" class="down-icon dropdown-toggle small" role="button" title="Match Strategy">Strategy:&nbsp;{{matchPolicy}}</a>
+                <a href="" class="down-icon dropdown-toggle small" role="button" title="Match Strategy">Strategy:&nbsp;{{filter.match_policy}}</a>
                 <ul class="dropdown-menu" role="menu">                
-                  <li ng-click="matchPolicy = 'include_all'" class="small">include_all</li>
-                  <li ng-click="matchPolicy = 'include_any'" class="small">include_any</li>
-                  <li ng-click="matchPolicy = 'exclude_all'" class="small">exclude_all</li>
-                  <li ng-click="matchPolicy = 'exclude_any'" class="small">exclude_any</li>
+                  <li ng-click="filter.match_policy = 'include_all'" class="small">include_all</li>
+                  <li ng-click="filter.match_policy = 'include_any'" class="small">include_any</li>
+                  <li ng-click="filter.match_policy = 'exclude_all'" class="small">exclude_all</li>
+                  <li ng-click="filter.match_policy = 'exclude_any'" class="small">exclude_any</li>
                 </ul>
               </div>
 
@@ -65,9 +65,9 @@
              <div class="dropdown show pull-left">
               <a href="" class="down-icon dropdown-toggle small" role="button" title="Annotation actions">Actions</a>
               <ul class="dropdown-menu" role="menu">                
-                <li ng-click="action['create'] = !action['create']" class="small"><input type="checkbox" data-col="1" ng-model="action['create']" class="small">Create</input><li>
-                <li ng-click="action['edit'] = !action['edit']" class="small"><input type="checkbox" data-col="1" ng-model="action['edit']" class="small">Edit</input><li>
-                <li ng-click="action['delete'] = !action['delete']" class="small"><input type="checkbox" data-col="1" ng-model="action['delete']" class="small">Delete</input><li>
+                <li ng-click="filter.actions.create = !filter.actions.create" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.create" class="small">Create</input><li>
+                <li ng-click="filter.actions.edit = !filter.actions.edit" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.edit" class="small">Edit</input><li>
+                <li ng-click="filter.actions.delete = !filter.actions.delete" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.delete" class="small">Delete</input><li>
               </ul>
              </div>
 
@@ -75,27 +75,52 @@
             <div class="dropdown show pull-left">
                <a href="" class="down-icon dropdown-toggle small" role="button" title="Past">Past</a>
               <ul class="dropdown-menu" role="menu">                
-                <li ng-click="past['load_past'] = (past['load_past']+1)%3" class="small">Load {{past_list[past['load_past']]}}</li>
-                <li class="small" ng-hide="past['load_past'] != 1">Go back <input type="number" ng-model="past['go_back']" step="1" min="1" max="60" value="5"/> min(s)<li>
-                <li class="small" ng-hide="past['load_past'] != 2">Load <input type="number" ng-model="past['hits']" step="10" min="1" max="500" value="20"/> hits<li>
+                <li ng-click="toggle_past()" class="small">Load {{filter.past_data.load_past}}</li>
+                <li class="small" ng-hide="filter.past_data.load_past != 'time'">Go back <input type="number" ng-model="filter.past_data.go_back" step="1" min="1" max="60" value="5"/> min(s)<li>
+                <li class="small" ng-hide="filter.past_data.load_past != 'hits'">Load <input type="number" ng-model="filter.past_data.hits" step="10" min="1" max="500" value="20"/> hits<li>
               </ul>
           </div>
 
           <!-- Sidebar links -->
           <div class="pull-right">
             <div>
-              <a href="" ng-hide="sidebar" ng-click="sidebar=!sidebar" class="small">Show help</a>
-              <a href="" ng-show="sidebar" ng-click="sidebar=!sidebar" class="small">Hide help</a>
-              <a href="" ng-hide="sidebar_json" ng-click="show_sidebar_json()" class="small">Show json</a>
-              <a href="" ng-show="sidebar_json" ng-click="sidebar_json=!sidebar_json" class="small">Hide json</a>
+              <div class="dropdown show pull-right">
+               <a href="" class="dropdown-toggle small" role="button" title="Help">Show help</a>
+               <ul class="dropdown-menu menu-width" role="menu">
+                 <li>
+                   <h4>
+                     <pre>
+                       Little help for the search options syntax.
+                       This is still experimental and our goal is to form it as natural as possible.
+                       Currently you can type search clauses, separated by space characters.
+                       A search clause has the following structure: <strong>(field):(operator)(value)</strong> (i.e. <strong>user:=johndoe</strong> )
+                       The fields can be one of the followings: <strong>['thread', 'text', 'user']</strong>
+                       Operators: <strong>['=', '>', '<', '=>', '<=', '[', '#']</strong>
+                       Where '[' means a comma separated list. I.e. <strong>user:[johndoe,janedoe</strong> means the user is either johndoe or janedoe
+                      '#' means matching (or substring). i.e <strong>text:#car</strong> means every annotation which has the 'car' character string in it's body.
+                     </pre>
+                   </h4>
+                 </li>
+               </ul>
+              </div>
+
+              <div class="dropdown show pull-right">
+               <a href="" class="dropdown-toggle small" role="button" title="Json">Show json</a>
+               <ul class="dropdown-menu menu-width" role="menu">
+                 <li>
+                   <h4>Generated filter json
+                     <pre ng-bind-html-unsafe="json_content"/>
+                   </h4>
+                 </li>
+               </ul>
+              </div>
             </div>
           </div>  
-           </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        </div>
-      </div>   
-     
       <ul class="small-padding content paper">
         <div class="knockout noise">
           <div class="metadata">
@@ -139,49 +164,7 @@
       </ul>
      </div>
 
-     <div class="side-bar-left" ng-show="sidebar_json" ng-animate="{show: 'sidebar_anim_show_left', hide: 'sidebar_anim_hide_left'}">
-       <div class="sidebar-content paper">
-         <h4>Generated filter json
-         <pre ng-bind-html-unsafe="json_content"/>
-         </h4>
-         <div class="center_button">
-           <button ng-click="show_sidebar_json()" class="btn">Refresh</button>
-           <button ng-click="sidebar_json=!sidebar_json" class="btn">Close sidebar</button>
-         </div>
-       </div>
-     </div>
 
-     <div class="side-bar-right" ng-show="sidebar" ng-animate="{show: 'sidebar_anim_show_right', hide: 'sidebar_anim_hide_right'}">
-       <div class="sidebar-content paper">
-        <h4>
-          Little help for the search options syntax. 
-        </h4>  
-        <h4>
-          This is still experimental and our goal is to form it as natural as possible.
-        </h4>
-        <h4>  
-          <li>
-            Currently you can type search clauses, separated by space characters.
-          </li>  
-          <li>
-            A search clause has the following structure: <strong>(field):(operator)(value)</strong> (i.e. <strong>user:=johndoe</strong> )
-          </li>  
-          <li>
-            The fields can be one of the followings: <strong>['thread', 'text', 'user']</strong>
-          </li>
-          <li>
-            Operators: <strong>['=', '>', '<', '=>', '<=', '[', '#']</strong>
-          </li>  
-          <li>
-            Where '[' means a comma separated list. I.e. <strong>user:[johndoe,janedoe</strong> means the user is either johndoe or janedoe
-          </li>  
-          <li>
-            '#' means matching (or substring). i.e <strong>text:#car</strong> means every annotation which has the 'car' character string in it's body.   
-          </li>
-        </h4>  
-      </div>
-
-     </div>
    </div>
   </body>
 </html>
