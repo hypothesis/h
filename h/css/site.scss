@@ -67,7 +67,7 @@ ol {
   }
 
   @include respond-to(tablets) {
-    padding: 6em;
+    padding: 4em;
     margin: auto;
     max-width: $break-large;
   }
