@@ -249,7 +249,7 @@ class Annotation
     $scope.save = ->
       $scope.editing = false
 
-      annotation = $scope.model.modelValue
+      annotation = $scope.model.$modelValue
       drafts.remove annotation
 
       switch $scope.action
