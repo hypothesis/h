@@ -558,9 +558,10 @@ blockquote {
 //PAPER////////////////////////////////
 //Provides the white background upon which items sit
 .paper {
-  @include border-radius(.2em);
+  @include border-radius(2px);
+  @include smallshadow(0, 2px);
   background: $white;
-  border-bottom: solid .1em $grayLighter;
+  border: solid 1px $grayLighter;
   padding: 1em;
 }
 
@@ -569,11 +570,11 @@ blockquote {
 .topbar {
   @include smallshadow;
   background: $white;
-  border: .1em solid $grayLighter;
-  height: 2.1em;
+  border: solid 1px $grayLighter;
+  height: 2em;
   position: fixed;
-  left: -.1em;
-  right: -.1em;
+  left: -1px;
+  right: -1px;
   top: .5em;
   z-index: 5;
 
