@@ -849,7 +849,7 @@ blockquote {
 
 .filter-body {
  overflow: visible;
- padding-bottom: 2.5em;
+ padding-bottom: 1.5em;
 }
 
 .side-bar-right {
@@ -919,6 +919,10 @@ blockquote {
   width: 0em;
 }
 
+.searchbar-border {
+  height: 2em;
+}
+
 .searchbar-error {
   color: red;
 }
@@ -936,12 +940,21 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   overflow-y:hidden;
 }
 
+
 .searchbar {
   margin-top: 8em;
 }
 
 .searchinput {
-  width: 80%;
+  width: 79%;
+}
+
+.searchbutton {
+  width: 19%
+}
+
+.searchfield {
+  width: 100%
 }
 
 .small-padding {

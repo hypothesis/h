@@ -22,7 +22,7 @@
           <h4 ng-hide="streaming" class="small">Not streaming <span class="red">:(</span></h4>
         </div>
         <div class="barbutton pull-right">
-          <h4>sign up</h4>
+          <h4>sign in</h4>
         </div>
       </div>
     </div>
@@ -34,11 +34,15 @@
           <div class="paper excerpt filter-body">
 
             <!-- Searchbar -->
-            <div>
-              <h4>                
-                <input class="searchinput" type="text" ng-model="clauses" placeholder="search options"/>
-                <button ng-hide="streaming" ng-click="start_streaming()" class="btn check-icon pull-right">Stream</button>
-                <button ng-show="streaming" ng-click="stop_streaming()" class="btn check-icon pull-right">Stop</button>
+            <div class="searchbar-border">
+              <h4>
+                <div class="pull-left searchinput">
+                  <input type="text" class="searchfield" ng-model="clauses" placeholder="search options"/>
+                </div>
+                <div class="pull-right searchbutton">
+                  <button ng-hide="streaming" ng-click="start_streaming()" class="btn check-icon">Stream</button>
+                  <button ng-show="streaming" ng-click="stop_streaming()" class="btn check-icon">Stop</button>
+                </div>
               </h4>
               <ul class="searchbar-error small" ng-show="bads.length>0" ng-repeat="bad in bads">
                   <li>Error: '{{bad[0]}}' : {{bad[1]}}</li>
