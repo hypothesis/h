@@ -269,22 +269,22 @@ blockquote {
   margin-bottom: 1em;
   padding: 0 1em;
 
-  &:before {
-    color: rgba(150, 150, 150, .5);
-    content: "\23";
+  &:before, &:after {
+    color: $grayLighter;
     font-family: "icomoon";
-    font-size: 6em;
     position: absolute;
+  }
+
+  &:before {
+    content: "\23";
+    font-size: 6em;
     top: -.2em;
     left: -.15em;
   }
 
   &:after {
-    color: rgba(150, 150, 150, .5);
     content: "\24";
-    font-family: "icomoon";
     font-size: 5em;
-    position: absolute;
     right: -.15em;
     bottom: -.1em;
   }
