@@ -29,6 +29,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 
+.excerpt {
+  margin-bottom: 1em;
+}
+
+
 .sliding-panels > li {
   @extend .content;
   @extend .noise;
@@ -53,7 +58,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   &.squished {
-    padding-left: .5em;
+    padding-left: -.5em;
   }
 }
 

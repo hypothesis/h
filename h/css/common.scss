@@ -267,7 +267,6 @@ button, input[type=submit], .btn {
 //EXCERPT////////////////////////////////
 .excerpt {
   position: relative;
-  margin-bottom: 1em;
   blockquote {
     margin-bottom: 0;
   }
@@ -857,5 +856,16 @@ blockquote {
   // Things not shown in the summary view
   .magicontrols .show {
     display: none;
+  }
+}
+
+
+//A grid of cards
+.card-grid {
+  position: relative;
+  margin: 0 -1em;
+  & > * {
+    padding: 1em;
+    margin: -1em 0;
   }
 }

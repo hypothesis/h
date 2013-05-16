@@ -14,8 +14,8 @@
       </div>
     </div>
 
-    <div class="content paper">
-      <div class="knockout noise">
+    <div class="content paper yui3-g">
+      <div class="knockout noise yui3-u-1">
         <div ng-view=""></div>
         <strong><a class="pull-right"
                    href="${annotation['uri']}">To Source</a></strong>
@@ -33,45 +33,51 @@
           </div>
         </div>
 
-        <div class="paper excerpt">
-          <blockquote>${quote}</blockquote>
-        </div>
-
-        <div class="paper thread">
-          <metal:main define-macro="thread">
-            <div class="annotation detail">
-              <div class="magicontrols pull-right">
-                <span class="small">${annotation['date']}</span>
-              </div>
-
-              <strong>
-                <span class="user">${annotation['user']}</span>
-              </strong>
-
-              <div class="body">${annotation['text']}</div>
-
-              <div class="magicontrols small">
-                <span class="reply-count"
-                      tal:condition="annotation['reply_count'] == 1"
-                      >1 reply</span>
-                <span class="reply-count"
-                      tal:condition="annotation['reply_count'] > 1"
-                      >${annotation['reply_count']} replies</span>
-              </div>
+        <div class="card-grid yui3-g">
+          <div class="yui3-u-1 t-yui3-u-1-2">
+            <div class="paper excerpt">
+              <blockquote>${quote}</blockquote>
             </div>
+          </div>
 
-            <!-- Replies -->
-            <ul>
-              <li class="thread"
-                  tal:repeat="annotation annotation['replies']">
-                <a href="" class="threadexp"></a>
-                <metal:main use-macro="displayer.macros['thread']" />
-              </li>
-            </ul>
-          </metal:main>
+          <div class="yui3-u-1 t-yui3-u-1-2">
+            <div class="paper thread">
+              <metal:main define-macro="thread">
+                <div class="annotation detail">
+                  <div class="magicontrols pull-right">
+                    <span class="small">${annotation['date']}</span>
+                  </div>
+
+                  <strong>
+                    <span class="user">${annotation['user']}</span>
+                  </strong>
+
+                  <div class="body">${annotation['text']}</div>
+
+                  <div class="magicontrols small">
+                    <span class="reply-count"
+                          tal:condition="annotation['reply_count'] == 1"
+                          >1 reply</span>
+                    <span class="reply-count"
+                          tal:condition="annotation['reply_count'] > 1"
+                          >${annotation['reply_count']} replies</span>
+                  </div>
+                </div>
+
+                <!-- Replies -->
+                <ul>
+                  <li class="thread"
+                      tal:repeat="annotation annotation['replies']">
+                    <a href="" class="threadexp"></a>
+                    <metal:main use-macro="displayer.macros['thread']" />
+                  </li>
+                </ul>
+              </metal:main>
+            </div>
+          </div>
         </div>
       </div>
-      <div>
+      <div class="yui3-u-1">
         You have followed a link to an annotation. For a better experience,
         install the <a href="">extension</a>.
       </div>
