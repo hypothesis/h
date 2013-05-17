@@ -127,6 +127,10 @@ class AppController(views.BaseController):
     def __call__(self):
         request = self.request
 
+        # Ensure we have a token in case this is the first request.
+        # I feel this is a little bit hacky.
+        request.session.get_csrf_token()
+
         model = {
             'token': api.TokenController(request)(),
             'token_url': request.route_url('token'),
@@ -139,7 +143,7 @@ class AppController(views.BaseController):
             'model': model,
         }
 
-    @view_config(renderer='h:templates/app.pt')
+    @view_config(layout='sidebar', renderer='h:templates/app.pt')
     def __html__(self):
         request = self.request
         request.session.new_csrf_token()

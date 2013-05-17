@@ -2,8 +2,10 @@
 
 @import 'reset';
 @import 'base';
+@import 'responsive';
+@import 'yui_grid';
 
-$white: hsl(0, 0, 99%);
+
 $sansFontFamily: "Source Sans Pro", $sansFontFamily;
 $serifFontFamily: "Merriweather", $serifFontFamily;
 $headingsColor: $textColor;
@@ -39,6 +41,20 @@ em { font-style: italic; }
 html {
   font-size: $baseFontSize / 16px * 1em;
   line-height: $baseLineHeight / 16px * 1em;
+
+  @include yui_grid();
+
+  @include respond-to(handhelds) {
+    @include yui_grid('h-');
+  }
+
+  @include respond-to(wide-handhelds) {
+    @include yui_grid('wh-');
+  }
+
+  @include respond-to(tablets) {
+    @include yui_grid('t-');
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -251,7 +267,6 @@ button, input[type=submit], .btn {
 //EXCERPT////////////////////////////////
 .excerpt {
   position: relative;
-  margin-bottom: 1em;
   blockquote {
     margin-bottom: 0;
   }
@@ -270,22 +285,22 @@ blockquote {
   margin-bottom: 1em;
   padding: 0 1em;
 
-  &:before {
-    color: rgba(150, 150, 150, .5);
-    content: "\23";
+  &:before, &:after {
+    color: $grayLighter;
     font-family: "icomoon";
-    font-size: 6em;
     position: absolute;
+  }
+
+  &:before {
+    content: "\23";
+    font-size: 6em;
     top: -.2em;
     left: -.15em;
   }
 
   &:after {
-    color: rgba(150, 150, 150, .5);
     content: "\24";
-    font-family: "icomoon";
     font-size: 5em;
-    position: absolute;
     right: -.15em;
     bottom: -.1em;
   }
@@ -546,12 +561,23 @@ blockquote {
 }
 
 
+//KNOCKOUT///////////
+//Provides a knockout background
+.knockout {
+  @include border-radius(.5em);
+  @include pie-clearfix;
+  @include box-shadow(inset 1px 1px 3px hsla(0, 0%, 0%, .1));
+  padding: 1em;
+}
+
+
 //PAPER////////////////////////////////
 //Provides the white background upon which items sit
 .paper {
-  @include border-radius(.2em);
-  @include smallshadow;
+  @include border-radius(2px);
+  @include smallshadow(0, 2px);
   background: $white;
+  border: solid 1px $grayLighter;
   padding: 1em;
 }
 
@@ -560,11 +586,11 @@ blockquote {
 .topbar {
   @include smallshadow;
   background: $white;
-  border: .1em solid $grayLighter;
-  height: 2.1em;
+  border: solid 1px $grayLighter;
+  height: 2em;
   position: fixed;
-  left: -.1em;
-  right: -.1em;
+  left: -1px;
+  right: -1px;
   top: .5em;
   z-index: 5;
 
@@ -578,12 +604,8 @@ blockquote {
     }
   }
 
-  .inner {
-    max-width: grid(12);
-    margin: 0 auto;
-    & > * {
-      padding: .3em;
-    }
+  .inner > * {
+    padding: .3em;
   }
 
   .tinyman {
@@ -678,16 +700,8 @@ blockquote {
   position: relative;
 
   & > ul {
-    @include single-transition(max-height, .4s, cubic-bezier(1, 0, 1, 0));
-    max-height: 65536px;
-    #overflow: hidden;
-
     padding-left: $thread-padding;
     margin-left: -$thread-padding;
-
-    &:hover {
-      overflow: visible;
-    }
 
     & > * {
       border-left: 1px dotted $grayLight;
@@ -722,6 +736,13 @@ blockquote {
 
   //These are all the changes needed to collapse thread objects.
   .collapsed {
+    display: block !important;
+
+    & > ul {
+      max-height: 0;
+      overflow: hidden;
+    }
+
     & > .annotation {
       .body * {
         overflow: hidden;
@@ -739,14 +760,38 @@ blockquote {
       }
     }
 
-    & > ul {
-      @include single-transition(max-height, .4s, cubic-bezier(0, 1, 0, 1));
-      max-height: 0;
-    }
-
     & > .threadexp {
       background-image: url("../images/plus_1.png");
     }
+  }
+
+  &.collapse-hide-setup, &.collapse-show-setup {
+    @include transition-duration(.4s);
+
+    & > ul {
+      @include transition-duration(.4s);
+      @include transition-property(max-height);
+    }
+  }
+
+  &.collapse-hide-setup > ul {
+    @include transition-timing-function(cubic-bezier(0, 1, 0, 1));
+    max-height: 65536px;
+    overflow: hidden;
+  }
+
+  &.collapse-hide-start > ul {
+    max-height: 0;
+  }
+
+  &.collapse-show-setup > ul {
+    @include transition-timing-function(cubic-bezier(1, 0, 1, 0));
+    max-height: 0;
+    overflow: hidden;
+  }
+
+  &.collapse-show-start > ul {
+    max-height: 65536px;
   }
 }
 
@@ -815,54 +860,12 @@ blockquote {
 }
 
 
-
-/*
-    Mobile layout
-    240-479 px
-    Zoomed out below 320 px
-*/
-
-@media screen and (min-width: 15em) {
-  .content { padding: 3em 1em; }
-}
-
-/*
-    Wide mobile layout
-    480-767 px
-    Zoomed in above 480 px
-*/
-
-@media screen and (min-width: 30em) {
-}
-
-/*
-    Tablet layout
-    600-911 px
-    Zoomed in above 600 px
-*/
-
-@media screen and (min-width: 37.5em) {
-  .content { padding: 6em; }
-}
-
-/*
-    Widescreen layout
-    912-1887 px
-    Zoomed in above 912 px
-*/
-
-@media screen and (min-width: 57em) {
-  .content {
-    max-width: grid(12);
-    margin: auto;
+//A grid of cards
+.card-grid {
+  position: relative;
+  margin: 0 -1em;
+  & > * {
+    padding: 1em;
+    margin: -1em 0;
   }
-}
-
-/*
-    Huge-screen layout
-    1888-2520 px
-    Zoomed in above 1920 px
-*/
-
-@media screen and (min-width: 118em) {
 }

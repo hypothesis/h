@@ -137,9 +137,9 @@ domTextFamily = Uglify(
     output='lib/dom_text.min.js'
 )
 
-# Base and common SCSS
-base = ['css/base.scss']
-common = ['css/base.scss', 'css/common.scss']
+# SCSS
+css_base = ['css/base.scss']
+css_common = ['css/common.scss', 'css/responsive.scss', 'css/yui_grid.scss']
 
 
 # Main resource bundles
@@ -178,7 +178,6 @@ app = Bundle(
         ],
         output='js/app.min.js'
     ),
-    SCSS('css/app.scss', depends=(base + common), output='css/app.min.css'),
 )
 
 display = Bundle(
@@ -188,9 +187,13 @@ display = Bundle(
     CSS('css/displayer.css', output='js/displayer.min.css'),
 )
 
+sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),
+               output='css/sidebar.min.css')
+
 site = Bundle(
     app,
-    SCSS('css/site.scss', depends=(base + common), output='css/site.min.css'),
+    SCSS('css/site.scss', depends=(css_base + css_common),
+         output='css/site.min.css'),
 )
 
 
@@ -209,7 +212,7 @@ inject = Bundle(
         Coffee('js/host.coffee', output='js/host.js'),
         output='js/host.min.js'
     ),
-    SCSS('css/inject.scss', depends=base, output='css/inject.css'),
+    SCSS('css/inject.scss', depends=css_base, output='css/inject.css'),
 )
 
 

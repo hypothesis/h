@@ -12,6 +12,24 @@ body {
   font-family: $serifFontFamily;
 }
 
+header {
+  @include respond-to(handhelds) {
+    text-align: center;
+  }
+
+  @include respond-to(wide-handhelds tablets) {
+    @include pie-clearfix;
+    text-align: left;
+    img { float: left; }
+  }
+
+  margin-bottom: 2em;
+
+  hgroup h1 {
+    margin-bottom: 0 !important;
+  }
+}
+
 section {
   margin: 2em 0;
 }
@@ -43,78 +61,21 @@ ol {
   border: 1px dashed $gray;
 }
 
-#toolbar {
-  font-size: .9em;
-  position: absolute;
-  text-align: center;
-  width: 100%;
+.content {
+  @include respond-to(handhelds) {
+    padding: 3em 1em;
+  }
 
-  & > div {
-    margin: .5em 0;
-    width: 100%;
+  @include respond-to(tablets) {
+    padding: 4em;
+    margin: auto;
+    max-width: $break-large;
   }
 }
 
-hgroup {
-  h1 {
-    margin-bottom: 0 !important;
+.topbar .inner {
+  @include respond-to(tablets) {
+    max-width: $break-large;
+    margin: 0 auto;
   }
-}
-
-/*
-    Mobile layout
-    240-479 px
-    Zoomed out below 320 px
-*/
-
-@media screen and (min-width: 15em) {
-  .auth { width: 100%; }
-
-  header {
-    margin-bottom: 2em;
-    text-align: center;
-  }
-}
-
-/*
-    Wide mobile layout
-    480-767 px
-    Zoomed in above 480 px
-*/
-
-@media screen and (min-width: 30em) {
-  .auth { width: grid(4); }
-
-  header {
-    @include pie-clearfix;
-    text-align: left;
-    img { float: left; }
-  }
-}
-
-/*
-    Tablet layout
-    600-911 px
-    Zoomed in above 600 px
-*/
-
-@media screen and (min-width: 37.5em) {
-}
-
-/*
-    Widescreen layout
-    912-1887 px
-    Zoomed in above 912 px
-*/
-
-@media screen and (min-width: 57em) {
-}
-
-/*
-    Huge-screen layout
-    1888-2520 px
-    Zoomed in above 1920 px
-*/
-
-@media screen and (min-width: 118em) {
 }

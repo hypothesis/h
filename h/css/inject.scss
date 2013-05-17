@@ -71,24 +71,16 @@
 
 
 //HIGHLIGHTS////////////////////////////////
-.annotator-hl {
-  @include single-transition('background-color,color', .03s, linear, .1s);
-}
-
 .annotator-hl-active, .annotator-hl-temporary {
   background: $highlightColor;
-  color: black;
   &::-moz-selection {
     background: $highlightColor;
-    color: black;
   }
   &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
     background: $highlightColor;
-    color: black;
   }
   &::selection, &::selection:window-inactive {
     background: $highlightColor;
-    color: black;
   }
 }
 

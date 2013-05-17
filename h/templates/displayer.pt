@@ -1,138 +1,86 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html metal:use-macro="main_template" >
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <!-- Always force latest IE rendering engine (even in intranet) &amp; Chrome Frame -->
-    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
-    <style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak{display:none;}ng\:form{display:block;}</style>
-
-    <link href="css/displayer.css" rel="stylesheet" type="text/css">  
-    <title>Display annotation</title>
+<!DOCTYPE html>
+<html metal:use-macro="main_template">
+  <head metal:fill-slot="head" tal:omit-tag>
+    <title>Hypothes.is</title>
   </head>
   <style type="text/css"></style>
 
   <body metal:fill-slot="body">
     <div class="topbar">
       <div class="inner">
-        <div class="barbutton left title">
-          <span>hypothes<span class="red">.</span>is</span>
-        </div>
-        <div class="barbutton right">
-          <span>sign up</span>
-        </div>
+        <a class="barbutton pull-left" href="/"
+           ><h4>hypothes<span class="red">.</span>is</h4></a>
+        <a href="" class="barbutton pull-right">Sign in</a>
       </div>
     </div>
 
-    <div id="stream">  
-      <ul class="annotator-listing annotator-widget">
-        <li class="tile"> 
-          <!-- Avatar section, we don't use it right now -->  
-          <!--<div class="sidepanel">
-            <div class="avablock">
-              <img class="ava" src="">
-            </div>          
-          </div>-->
-  
-          <div class="papercontainer">
-            <div class="metadata">
-              <a href="">${readable_user}</a>
-              <span tal:condition="readable_user != 'Annotation deleted.'"> annotated:</span>
-            </div>
-            <div class="control">
-              <a class="goto" href="${annotation.uri}">
-                To Source
-              </a>
-            </div>
-  
-            <div class="noiseknockout" data-ng-app="h.displayer">
-              <div class="page">
-                <div class="domain">
-                  <img class="favicon" tal:condition="len(favicon_link)" 
-                    src="${favicon_link}"/> 
-                  <a href="${annotation.uri}">${title}</a> 
-                  | 
-                  <a href="${domain}">${domain_stripped}</a>
-                </div>
-              </div>
-  
-              <div class="floatainer">
-                <div class="hyp-excerpt hyp-paper" ng-click="showHide=!showHide">
-                  <blockquote>${quote}</blockquote>
-                </div>
-              </div>
+    <div class="content paper yui3-g">
+      <div class="knockout noise yui3-u-1">
+        <div ng-view=""></div>
+        <strong><a class="pull-right"
+                   href="${annotation['uri']}">To Source</a></strong>
 
-              <div class="smalldisplacer"></div>
+        <div class="page">
+          <strong tal:condition="annotation['user']">
+            <a href="">${annotation['user']}</a> annotated:
+          </strong>
+          <div class="domain">
+            <img class="favicon" tal:condition="len(favicon_link)"
+                 src="${favicon_link}"/>
+            <a href="${annotation['uri']}">${title}</a>
+            |
+            <a href="${source}">${source_stripped}</a>
+          </div>
+        </div>
 
-              <div class="floatainer">
-                <div class="hyp-annotation hyp-paper hyp-detail">
-                  <div style="padding-bottom: .5em;">
-                    <div class="topbar">
-                      <div class="hyp-user">${readable_user}</div>
-                      <div class="hyp-time">${fuzzy_date}</div>
-                    </div>
-                    <div>${annotation.text}</div>
-                    <div class="magiccontrols small">
-                      <span tal:condition="number_of_replies == 1">1 reply</span>
-                      <span tal:condition="number_of_replies > 1">${number_of_replies} replies</span>
-                    </div>
-  
-                    <!-- Replies -->                          
-                    <div data-ng-controller="DisplayerCtrl"
-                      tal:condition="len(replies)"
-                      data-ng-hide="showHide">
-                      <span class="hyp-thread">
-                        <ul class="annotator-listing">
-                          <li class="hyp-inner hyp-annotation hyp-detail">
-                            <span tal:define="global counter 1"/>
-                            <span metal:define-macro="item"
-                              tal:repeat="reply replies">
-                              <span tal:define="global is_list isinstance(reply, list)"/>
-                              <span tal:condition="not is_list">
-                                <a href="" class="hyp-threadexp"
-                                  ng-click="toggleCollapse($event, ${reply.number_of_replies}, ${counter})"></a>
-                                <div>  
-                                  <div class="topbar">
-                                    <div class="hyp-user">${reply.readable_user}</div>
-                                    <!--<div class="hyp-time">${reply.fuzzy_date}</div>-->
-                                    <div class="magiccontrols pull-right small">
-                                    	<span>${reply.fuzzy_date}</span>
-                                    </div>
-                                  </div>
-                                  <div class="hyp-content">${reply.text}</div>
-                                  <span class="magiccontrols small">
-                                    <span tal:condition="reply.number_of_replies == 1">1 reply</span>
-                                    <span tal:condition="reply.number_of_replies > 1">${reply.number_of_replies} replies</span>
-                                  </span>
-                                </div>
-                              </span>
-                              <span tal:condition="is_list"
-                                tal:define="replies reply" class="hyp-thread">
-                                <span tal:define="global counter counter+1"/>
-                                <ul class="annotator-listing thread_${counter}">
-                                  <li class="hyp-annotation hyp-detail">
-                                    <span metal:use-macro="displayer.macros['item']"/>
-                                  </li>
-                                </ul>
-                              </span>
-                            </span>
-                          </li>
-                        </ul>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <div class="card-grid yui3-g">
+          <div class="yui3-u-1 t-yui3-u-1-2">
+            <div class="paper excerpt">
+              <blockquote>${quote}</blockquote>
             </div>
           </div>
-        </li>
-      </ul>
-      <div class="hyp-paper">
-        You have followed a link to an annotation. For a better experience, install the 
-        <a href="">extension</a>.
+
+          <div class="yui3-u-1 t-yui3-u-1-2">
+            <div class="paper thread">
+              <metal:main define-macro="thread">
+                <div class="annotation detail">
+                  <div class="magicontrols pull-right">
+                    <span class="small">${annotation['date']}</span>
+                  </div>
+
+                  <strong>
+                    <span class="user">${annotation['user']}</span>
+                  </strong>
+
+                  <div class="body">${annotation['text']}</div>
+
+                  <div class="magicontrols small">
+                    <span class="reply-count"
+                          tal:condition="annotation['reply_count'] == 1"
+                          >1 reply</span>
+                    <span class="reply-count"
+                          tal:condition="annotation['reply_count'] > 1"
+                          >${annotation['reply_count']} replies</span>
+                  </div>
+                </div>
+
+                <!-- Replies -->
+                <ul>
+                  <li class="thread"
+                      tal:repeat="annotation annotation['replies']">
+                    <a href="" class="threadexp"></a>
+                    <metal:main use-macro="displayer.macros['thread']" />
+                  </li>
+                </ul>
+              </metal:main>
+            </div>
+          </div>
+        </div>
       </div>
-              
-              
+      <div class="yui3-u-1">
+        You have followed a link to an annotation. For a better experience,
+        install the <a href="">extension</a>.
+      </div>
     </div>
   </body>
 </html>

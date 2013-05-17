@@ -29,6 +29,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 
+.excerpt {
+  margin-bottom: 1em;
+}
+
+
 .sliding-panels > li {
   @extend .content;
   @extend .noise;
@@ -53,7 +58,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   &.squished {
-    padding-left: .5em;
+    padding-left: -.5em;
   }
 }
 
@@ -110,11 +115,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .annotator-heatmap {
   @include stretch-y;
   height: 100%;
- 
+
   svg {
     @include stretch-y;
     background: hsla(0, 0, 0, .1);
-    border-left: solid thin rgba($grayLighter, .4);
+    border-left: solid 1px $grayLighter;
     height: 100%;
     left: 17px;
     width: $heatmap-width;
@@ -174,7 +179,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       left: 7px;
     }
   }
-  
+
   &.upper {
     .svg {
       background-image: url("../images/up_tab.svg");
@@ -211,15 +216,16 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //SHEET////////////////////////////////
 //This comes down from under the toolbar
 .sheet {
+  @include smallshadow;
   max-height: 30em;
   overflow: hidden;
   position: absolute;
   top: 100%;
   width: 100%;
 
-  left: .3em;
+  left: 4px;
   right: 0;
-  top: .3em;
+  top: 2px;
 
   .close {
     position: absolute;
