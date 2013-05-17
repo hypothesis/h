@@ -38,6 +38,7 @@ class Hypothesis extends Annotator
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
     Threading: {}
+    Document: {}
 
   # Internal state
   dragging: false     # * To enable dragging only when we really want to
@@ -341,8 +342,11 @@ class Hypothesis extends Annotator
 
     # Get the location of the annotated document
     @provider.call
-      method: 'getHref'
-      success: (href) =>
+      method: 'getDocumentInfo'
+      success: (info) =>
+        href = info.uri
+        @plugins.Document.metadata = info.metadata
+
         options = angular.extend {}, (@options.Store or {}),
           annotationData:
             uri: href
@@ -355,14 +359,15 @@ class Hypothesis extends Annotator
     this.addPlugin 'Store', options
     this.patch_store this.plugins.Store
 
-    href = options.loadFromSearch?.uri
-    return unless href?
+    uri = options.loadFromSearch?.uri
+    return unless uri?
 
-    console.log "Loaded annotions for '" + href + "'."
-    for href in this.getSynonymURLs href
-      console.log "Also loading annotations for: " + href
-      this.plugins.Store.loadAnnotationsFromSearch uri: href
-
+    console.log "Loaded annotions for '" + uri + "'."
+    for relatedUri in @plugins.Document.uris()
+      if uri == relatedUri
+        continue
+      console.log "Also loading annotations for: " + relatedUri
+      this.plugins.Store.loadAnnotationsFromSearch uri: relatedUri
 
 class DraftProvider
   drafts: []

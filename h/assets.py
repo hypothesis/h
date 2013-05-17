@@ -92,6 +92,9 @@ annotator_store = Uglify(
 annotator_threading = Uglify(
     Coffee('js/plugin/threading.coffee', output='js/plugin/threading.js')
 )
+annotator_document = Uglify(
+    Coffee('js/plugin/document.coffee', output='js/plugin/coffee.js')
+)
 
 # Angular
 angular = Uglify('lib/angular.js', output='lib/angular.min.js')
@@ -154,6 +157,7 @@ app = Bundle(
     annotator_permissions,
     annotator_store,
     annotator_threading,
+    annotator_document,
     d3,
     jschannel,
     jwz,
@@ -202,6 +206,7 @@ inject = Bundle(
     jschannel,
     annotator,
     annotator_bridge,
+    annotator_document,
     domTextFamily,
     Uglify(
         Coffee('js/host.coffee', output='js/host.js'),
