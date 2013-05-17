@@ -11,6 +11,7 @@
   <style type="text/css"></style>
 
   <body metal:fill-slot="body" ng-app="h.streamer">
+    <div ng-view></div>
     <div ng-controller="StreamerCtrl">
     <div class="topbar">
       <div class="inner">
@@ -26,7 +27,6 @@
         </div>
       </div>
     </div>
-
 
     <div class="main-content">
       <div class="small-padding content paper">  
