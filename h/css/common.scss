@@ -332,8 +332,8 @@ blockquote {
 .dropdown-menu {
   @include rotateX(90deg);
   background: $white;
-  border: solid .1em $grayLighter;
-  margin-top: .625em;
+  border: solid 1px $grayLighter;
+  margin-top: .8em;
   top: 100%;
   float: left;
   opacity: 0;
@@ -383,26 +383,27 @@ blockquote {
 
   // These psuedo-elements add the speech bubble tail / triangle.
   &:before, &:after {
-    @include rotateZ(360deg);
-    border-color: transparent;
+    // http://www.red-team-design.com/css-diagonal-borders-still-not-rendering-properly-on-firefox
+    @include scale(.9999);
+    border-color: rgba(0, 0, 0, 0);
+
     border-style: solid;
+    border-width: 0 7px 6px 7px;
     content: '';
     position: absolute;
-    left: .35em;
     height: 0;
+    left: 5px;
     width: 0;
   }
 
   &:before {
     border-bottom-color: $grayLighter;
-    border-width: 0 .5em .5em .5em;
-    top: -.5em;
+    top: -7px;
   }
 
   &:after {
     border-bottom-color: $white;
-    border-width: 0 .5em .5em .5em;
-    top: -.45em;
+    top: -6px;
     z-index: 3;
   }
 
@@ -415,7 +416,7 @@ blockquote {
     // Align the tail
     &:before, &:after {
       left: auto;
-      right: .35em;
+      right: 5px;
     }
   }
 }
