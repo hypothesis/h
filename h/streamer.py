@@ -102,10 +102,11 @@ filter_schema = {
         "past_data": {
             "load_past": {
                 "type": "string",
-                "enum": ["time", "hits", "none"]
+                "enum": ["time", "hits", "replies", "none"]
             },
             "go_back": {"type": "minutes", "default": 5},
-            "hits": {"type": "number", "default": 100}
+            "hits": {"type": "number", "default": 100},
+            "id_for_reply" : {"type" : "string", "optional": True}
         }
     },
     "required": ["match_policy", "clauses", "actions"]
@@ -187,7 +188,10 @@ class StreamerSession(Session):
                 request = self.request
                 registry = request.registry
                 store = registry.queryUtility(interfaces.IStoreClass)(request)
-                annotations = store.search()
+                if payload["past_data"]["load_past"] == "replies":
+                    annotations = store.search(references=payload["past_data"]['id_for_reply'])
+                else:
+                    annotations = store.search()
 
                 url_analyzer = UrlAnalyzer()
                 to_send = []
@@ -208,6 +212,12 @@ class StreamerSession(Session):
                             sent_hits += 1
                         if sent_hits >= payload["past_data"]["hits"]:
                             break
+                elif payload["past_data"]["load_past"] == "replies":
+                    sent_hits = 0
+                    for annotation in annotations:
+                        annotation.update(url_analyzer._url_values(annotation['uri']))
+                        to_send = [annotation] + to_send
+                        sent_hits += 1
 
                 #Finally send filtered annotations
                 if len(to_send) > 0:

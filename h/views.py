@@ -46,7 +46,7 @@ class Annotation(BaseController):
         d['annotation'] = context
         #d['annotation']['replies'] = context.replies
         #d['annotation']['reply_count'] = len(context.referrers)
-        d['annotation']['reply_count'] = 0
+        #d['annotation']['reply_count'] = 0
 
         if context.get('references', []):
             root = context.__parent__[context['references'][0]]
@@ -54,8 +54,9 @@ class Annotation(BaseController):
         else:
             d['quote'] = context.quote
 
-        context['date'] = context._fuzzyTime(context['created'])
-        context['user'] = context._userName(context['user'])
+        #context['date'] = context._fuzzyTime(context['created'])
+        context['date'] = context['updated']
+        #context['user'] = context._userName(context['user'])
 
         return d
 

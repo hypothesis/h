@@ -14,7 +14,11 @@
       </div>
     </div>
 
-    <div class="content paper" ng-controller="DisplayerCtrl">
+    <div class="content paper" ng-controller="DisplayerCtrl"
+         ng-init="annotation.text='${annotation['text']}';
+                  annotation.date='${annotation['date']}';
+                  annotation.user='${annotation['user']}';
+                  annotation.quote='${quote}'">
       <div class="knockout noise">
         <div ng-view=""></div>
         <strong><a class="pull-right"
@@ -22,7 +26,7 @@
 
         <div class="page">
           <strong tal:condition="annotation['user']">
-            <a href="">${annotation['user']}</a> annotated:
+            <a href="">{{annotation.user | userName}}</a> annotated:
           </strong>
           <div class="domain">
             <img class="favicon" tal:condition="len(favicon_link)"
@@ -34,21 +38,20 @@
         </div>
 
         <div class="paper excerpt">
-          <blockquote>${quote}</blockquote>
+          <blockquote>{{annotation.quote}}</blockquote>
         </div>
 
         <div class="paper thread">
 
             <div class="annotation detail ng-isolate-scope">
               <div class="magicontrols pull-right">
-                <span class="small">${annotation['date']}</span>
+                <span class="small">{{annotation.date | fuzzyTime}}</span>
               </div>
 
               <strong>
-                <span class="user">${annotation['user']}</span>
+                <span class="user">{{annotation.user | userName}}</span>
               </strong>
-
-              <div class="body"><p>${annotation['text']}</p></div>
+              <div class="body"><span ng-bind-html-unsafe="annotation.text | converter"/></div>
 
               <div class="magicontrols small">
                   <span class="reply-count"
@@ -74,7 +77,7 @@
                   <span class="user">{{reply.user | userName}}</span>
                 </strong>
 
-                <div class="body"><p>{{reply.text}}</p></div>
+                <div class="body"><span ng-bind-html-unsafe="reply.text | converter"/></div>
 
                 <div class="magicontrols small">
                   <span class="reply-count"

@@ -27,9 +27,8 @@ class Displayer
         edit: true
         delete: true
       past_data:
-        load_past: 'hits'
-        go_back: 5
-        hits: 100
+        load_past: 'replies'
+        id_for_reply: $scope.id
 
     console.log $scope.filter
     $scope.open = ->
@@ -83,18 +82,6 @@ class Displayer
 
 
     $scope.open()
-    #$scope.toggleCollapse = (event, replynumber, thread) ->
-      #Plus/minus sign and italics
-    #  elem = (angular.element event.srcElement).parent()
-    #  if elem.hasClass 'hyp-collapsed'
-    #    elem.removeClass 'hyp-collapsed'
-    #    expand = true
-    #  else elem.addClass 'hyp-collapsed'
 
-      #Now for the replies
-    #  if replynumber
-    #    toggle_elem = $element.find('.thread_' + (thread+1)).parent().parent()
-    #    if expand? then toggle_elem.removeAttr 'style'
-    #    else toggle_elem.css 'display', 'none'
 angular.module('h.displayer',['h.filters','bootstrap'])
   .controller('DisplayerCtrl', Displayer)
