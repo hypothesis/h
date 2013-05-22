@@ -176,14 +176,18 @@ app = Bundle(
     SCSS('css/app.scss', depends=(base + common), output='css/app.min.css'),
 )
 
-display = Bundle(
-    angular,
-    jquery,
-    Coffee('js/displayer.coffee', output='js/displayer.js'),
-    CSS('css/displayer.css', output='js/displayer.min.css'),
-)
-
 site = SCSS('css/site.scss', depends=(base + common), output='css/site.min.css')
+
+display = Bundle(
+    jquery,
+    angular,
+    angular_bootstrap,
+    sockjs,
+    pagedown,
+    Coffee('js/displayer.coffee', output='js/displayer.js'),
+    Coffee('js/filters.coffee', output='js/filters.js'),
+    site
+)
 
 streamer = Bundle(
     angular,

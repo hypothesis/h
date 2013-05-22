@@ -5,7 +5,7 @@
   </head>
   <style type="text/css"></style>
 
-  <body metal:fill-slot="body">
+  <body metal:fill-slot="body" internalid="${annotation['id']}" ng-app="h.displayer">
     <div class="topbar">
       <div class="inner">
         <a class="barbutton pull-left" href="/"
@@ -14,7 +14,7 @@
       </div>
     </div>
 
-    <div class="content paper">
+    <div class="content paper" ng-controller="DisplayerCtrl">
       <div class="knockout noise">
         <div ng-view=""></div>
         <strong><a class="pull-right"
@@ -38,7 +38,7 @@
         </div>
 
         <div class="paper thread">
-          <metal:main define-macro="thread">
+
             <div class="annotation detail">
               <div class="magicontrols pull-right">
                 <span class="small">${annotation['date']}</span>
@@ -51,24 +51,50 @@
               <div class="body">${annotation['text']}</div>
 
               <div class="magicontrols small">
-                <span class="reply-count"
-                      tal:condition="annotation['reply_count'] == 1"
-                      >1 reply</span>
-                <span class="reply-count"
-                      tal:condition="annotation['reply_count'] > 1"
-                      >${annotation['reply_count']} replies</span>
+                  <span class="reply-count"
+                     ng-pluralize=""
+                     ng-show="reply_count"
+                     count="reply_count"
+                     when="{one: '1 reply', other: '{} replies'}" />
               </div>
             </div>
 
-            <!-- Replies -->
+            <script type="text/ng-template"  id="annotation_renderer.html">
+              <div class="annotation detail">
+
+                <div class="magicontrols pull-right">
+                  <span class="small">{{reply.updated | fuzzyTime}}</span>
+                </div>
+
+                <strong>
+                  <span class="user">{{reply.user | userName}}</span>
+                </strong>
+
+                <div class="body">{{reply.text}}</div>
+
+                <div class="magicontrols small">
+                  <span class="reply-count"
+                     ng-pluralize=""
+                     ng-show="reply.reply_count"
+                     count="reply.reply_count"
+                     when="{one: '1 reply', other: '{} replies'}" />
+                </div>
+              </div>
+
+              <ul>
+                <li class="thread" ng-repeat="reply in reply.replies" ng-include="'annotation_renderer.html'"></li>
+                <a href="" class="threadexp"
+                  title="{{collapsed && 'Expand' || 'Collapse'}}"
+                  ng-click="collapsed = !collapsed" />
+              </ul>
+
+            </script>
+
+            <!-- Thread view -->
             <ul>
-              <li class="thread"
-                  tal:repeat="annotation annotation['replies']">
-                <a href="" class="threadexp"></a>
-                <metal:main use-macro="displayer.macros['thread']" />
-              </li>
+                <li ng-repeat="reply in replies" ng-include="'annotation_renderer.html'" class="thread"></li>
             </ul>
-          </metal:main>
+
         </div>
       </div>
       <div>

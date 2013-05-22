@@ -24,7 +24,7 @@ syntaxHighlight = (json) ->
 
 
 class ClauseParser
-  filter_fields : ['thread', 'text', 'user','uri']
+  filter_fields : ['references', 'text', 'user','uri', 'id']
   operators: ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#']
   operator_mapping:
     '=': 'equals'

@@ -94,7 +94,7 @@ filter_schema = {
                 "field": {"type": "string", "format": "json-pointer"},
                 "operator": {
                     "type": "string",
-                    "enum": ["equals", "matches", "lt", "le", "gt", "ge", "one_of"]
+                    "enum": ["equals", "matches", "lt", "le", "gt", "ge", "one_of","first_of"]
                 },
                 "value": "object"
             }
@@ -128,7 +128,8 @@ class FilterHandler(object):
     def gt(self, a, b): return a > b
     def ge(self, a, b): return a >= b
     def one_of(self, a, b): return a in b
-        
+    def first_of(self, a, b): return a[0] == b
+
     def evaluate_clause(self, clause, target):
         field_value = resolve_pointer(target, clause['field'], None)
         if clause['field'] == '/user':
@@ -175,6 +176,7 @@ class StreamerSession(Session):
 
     def on_message(self, msg):
         try:
+            log.info(msg)
             payload = json.loads(msg)
             #Let's try to validate the schema
             validate(payload, filter_schema)

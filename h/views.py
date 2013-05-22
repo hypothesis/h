@@ -35,7 +35,7 @@ def home(request):
     return find_resource(request.context, '/app').embed
 
 
-@view_defaults(context='h.resources.Annotation', layout='site')
+@view_defaults(context='h.resources.Annotation', layout='lay_displayer')
 class Annotation(BaseController):
     @view_config(accept='text/html', renderer='templates/displayer.pt')
     def __html__(self):
@@ -44,8 +44,9 @@ class Annotation(BaseController):
 
         d = context._url_values()
         d['annotation'] = context
-        d['annotation']['replies'] = context.replies
-        d['annotation']['reply_count'] = len(context.referrers)
+        #d['annotation']['replies'] = context.replies
+        #d['annotation']['reply_count'] = len(context.referrers)
+        d['annotation']['reply_count'] = 0
 
         if context.get('references', []):
             root = context.__parent__[context['references'][0]]
