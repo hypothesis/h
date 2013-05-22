@@ -39,7 +39,7 @@
 
         <div class="paper thread">
 
-            <div class="annotation detail">
+            <div class="annotation detail ng-isolate-scope">
               <div class="magicontrols pull-right">
                 <span class="small">${annotation['date']}</span>
               </div>
@@ -48,7 +48,7 @@
                 <span class="user">${annotation['user']}</span>
               </strong>
 
-              <div class="body">${annotation['text']}</div>
+              <div class="body"><p>${annotation['text']}</p></div>
 
               <div class="magicontrols small">
                   <span class="reply-count"
@@ -60,6 +60,10 @@
             </div>
 
             <script type="text/ng-template"  id="annotation_renderer.html">
+              <a href="" class="threadexp"
+                 title="{{$parent.collapsed && 'Expand' || 'Collapse'}}"
+                 ng-click="$parent.collapsed = !$parent.collapsed" />
+
               <div class="annotation detail">
 
                 <div class="magicontrols pull-right">
@@ -70,7 +74,7 @@
                   <span class="user">{{reply.user | userName}}</span>
                 </strong>
 
-                <div class="body">{{reply.text}}</div>
+                <div class="body"><p>{{reply.text}}</p></div>
 
                 <div class="magicontrols small">
                   <span class="reply-count"
@@ -81,18 +85,20 @@
                 </div>
               </div>
 
-              <ul>
-                <li class="thread" ng-repeat="reply in reply.replies" ng-include="'annotation_renderer.html'"></li>
-                <a href="" class="threadexp"
-                  title="{{collapsed && 'Expand' || 'Collapse'}}"
-                  ng-click="collapsed = !collapsed" />
-              </ul>
-
+                <ul>
+                  <li ng-repeat="reply in reply.replies" class="thread"
+                      ng-include="'annotation_renderer.html'"
+                      ng-class="collapsed && 'collapsed' || ''">
+                  </li>
+                </ul>
             </script>
 
             <!-- Thread view -->
             <ul>
-                <li ng-repeat="reply in replies" ng-include="'annotation_renderer.html'" class="thread"></li>
+                <li ng-repeat="reply in replies"
+                    ng-include="'annotation_renderer.html'"
+                    class="thread"
+                    ng-class="collapsed && 'collapsed' || ''"></li>
             </ul>
 
         </div>
