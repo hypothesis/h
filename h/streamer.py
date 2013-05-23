@@ -266,7 +266,7 @@ def after_save(annotation):
 
 
 def after_update(annotation):
-    q.put((annotation, 'update'))
+    q.put((annotation, 'edit'))
 
 
 def after_delete(annotation):

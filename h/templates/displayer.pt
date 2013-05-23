@@ -18,7 +18,9 @@
          ng-init="annotation.text='${annotation['text']}';
                   annotation.date='${annotation['date']}';
                   annotation.user='${annotation['user']}';
-                  annotation.quote='${quote}'">
+                  annotation.quote='${quote}';
+                  annotation.id = '${annotation['id']}';
+                  annotation.uri = '${annotation['uri']}'">
       <div class="knockout noise">
         <div ng-view=""></div>
         <strong><a class="pull-right"
@@ -56,8 +58,8 @@
               <div class="magicontrols small">
                   <span class="reply-count"
                      ng-pluralize=""
-                     ng-show="reply_count"
-                     count="reply_count"
+                     ng-show="annotation.reply_count"
+                     count="annotation.reply_count"
                      when="{one: '1 reply', other: '{} replies'}" />
               </div>
             </div>
@@ -74,10 +76,14 @@
                 </div>
 
                 <strong>
-                  <span class="user">{{reply.user | userName}}</span>
+                  <span ng-show="reply.deleted" class="user">Annotation deleted</span>
+                  <span ng-hide="reply.deleted" class="user">{{reply.user | userName}}</span>
                 </strong>
 
-                <div class="body"><span ng-bind-html-unsafe="reply.text | converter"/></div>
+                <div class="body">
+                    <span ng-show="reply.deleted">Reason:</span>
+                    <span ng-bind-html-unsafe="reply.text | converter"/>
+                </div>
 
                 <div class="magicontrols small">
                   <span class="reply-count"
@@ -98,7 +104,7 @@
 
             <!-- Thread view -->
             <ul>
-                <li ng-repeat="reply in replies"
+                <li ng-repeat="reply in annotation.replies"
                     ng-include="'annotation_renderer.html'"
                     class="thread"
                     ng-class="collapsed && 'collapsed' || ''"></li>

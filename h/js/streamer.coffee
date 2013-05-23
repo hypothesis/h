@@ -92,7 +92,6 @@ class Streamer
     $scope.bads = []
 
     @parser = new ClauseParser()
-    document.test = @parser
 
     #Json structure we will watch and update
     $scope.filter =

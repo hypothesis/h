@@ -10,17 +10,21 @@ get_quote = (annotation) ->
 
 class Displayer
   this.$inject = ['$scope','$element','$timeout']
+  idTable : {}
 
   constructor: ($scope, $element, $timeout) ->
-    $scope.replies = []
-    $scope.reply_count = 0
-    $scope.id = document.body.attributes.internalid.value
+    $scope.annotation = {}
+    $scope.annotations = [$scope.annotation]
+    $scope.annotation.replies = []
+    $scope.annotation.reply_count = 0
+    $scope.annotation.id = document.body.attributes.internalid.value
+    @idTable[$scope.annotation.id] = $scope.annotation
     $scope.filter =
       match_policy :  'include_all'
       clauses : [
         field: "/references"
         operator: "first_of"
-        value: $scope.id
+        value: $scope.annotation.id
         ]
       actions :
         create: true
@@ -28,10 +32,22 @@ class Displayer
         delete: true
       past_data:
         load_past: 'replies'
-        id_for_reply: $scope.id
+        id_for_reply: $scope.annotation.id
+
 
     console.log $scope.filter
-    $scope.open = ->
+
+    $scope.change_annotation_content = (id, new_annotation) =>
+      to_change = @idTable[id]
+      replies = to_change.replies
+      reply_count = to_change.reply_count
+      for k, v of to_change
+        delete to_change.k
+      angular.extend to_change, new_annotation
+      to_change.replies = replies
+      to_change.reply_count = reply_count
+
+    $scope.open = =>
       transports = ['xhr-streaming', 'iframe-eventsource', 'iframe-htmlfile', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling']
       $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__', transports)
 
@@ -47,22 +63,27 @@ class Displayer
         $scope.$apply =>
           data = msg.data[0]
           unless data instanceof Array then data = [data]
+          #sort annotations by creation date
+          data.sort (a, b) ->
+            if a.created > b.created then return 1
+            if a.created > b.created then return -1
+            0
+
+          console.log data
           action = msg.data[1]
           for annotation in data
             annotation.quote = get_quote annotation
             switch action
               when 'create', 'past'
-                $scope.reply_count += 1
-                #Find the thread for the reply
-                replies = $scope.replies
-                list = replies
+                #Ignore duplicates caused by server restarting
+                if annotation.id in @idTable
+                  break
+
+                #Update the reply counter for all referenced annotation
                 for reference in annotation.references
-                    for reply in replies
-                      if reply.id is reference
-                        list = reply
-                        reply.reply_count += 1
-                        replies = reply.replies
-                        break
+                  @idTable[reference].reply_count += 1
+
+                replies = @idTable[annotation.references[annotation.references.length-1]].replies
 
                 #Find the place to insert annotation
                 pos = 0
@@ -72,14 +93,30 @@ class Displayer
                   pos += 1
                 annotation.replies = []
                 annotation.reply_count = 0
+                @idTable[annotation.id] = annotation
                 replies.splice pos, 0, annotation
 
               when 'edit'
-                console.log 'edit'
-              when 'delete'
-                console.log 'delete'
-          console.log $scope.replies
+                $scope.change_annotation_content annotation.id, annotation
 
+              when 'delete'
+                if 'deleted' in annotation
+                  #Redaction
+                  $scope.change_annotation_content annotation.id, annotation
+                else
+                  #Real delete
+                  unless @idTable[annotation.id]?
+                    break
+
+                  #Update the reply counter for all referenced annotation
+                  for reference in annotation.references
+                    @idTable[reference].reply_count -= 1
+                  replies = @idTable[annotation.references[annotation.references.length-1]].replies
+
+                  #Find the place to insert annotation
+                  pos = replies.indexOf @idTable[annotation.id]
+                  replies.splice pos, 1
+                  delete @idTable[annotation.id]
 
     $scope.open()
 
