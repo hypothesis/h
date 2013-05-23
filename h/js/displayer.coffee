@@ -38,9 +38,6 @@ class Displayer
         load_past: 'replies'
         id_for_reply: $scope.annotation.id
 
-
-    console.log $scope.filter
-
     $scope.change_annotation_content = (id, new_annotation) =>
       to_change = @idTable[id]
       replies = to_change.replies
@@ -82,8 +79,8 @@ class Displayer
                 if annotation.id in @idTable
                   break
 
-                #Update the reply counter for all referenced annotation
-                for reference in annotation.references
+                for i in [$scope.annotation.ref_length..annotation.references.length-1]
+                  reference = annotation.references[i]
                   @idTable[reference].reply_count += 1
 
                 replies = @idTable[annotation.references[annotation.references.length-1]].replies
@@ -112,8 +109,10 @@ class Displayer
                     break
 
                   #Update the reply counter for all referenced annotation
-                  for reference in annotation.references
+                  for i in [$scope.annotation.ref_length..annotation.references.length-1]
+                    reference = annotation.references[i]
                     @idTable[reference].reply_count -= 1
+
                   replies = @idTable[annotation.references[annotation.references.length-1]].replies
 
                   #Find the place to insert annotation

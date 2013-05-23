@@ -20,7 +20,9 @@
                   annotation.user='${annotation['user']}';
                   annotation.quote='${quote}';
                   annotation.id = '${annotation['id']}';
-                  annotation.uri = '${annotation['uri']}'">
+                  annotation.uri = '${annotation['uri']}';
+                  annotation.ref_length = '${len(annotation['references'])}';
+                  annotation.deleted = '${annotation['deleted']}'">
       <div class="knockout noise">
         <div ng-view=""></div>
         <strong><a class="pull-right"
@@ -51,9 +53,13 @@
               </div>
 
               <strong>
+                <span ng-show="annotation.deleted" class="user">Annotation deleted</span>
                 <span class="user">{{annotation.user | userName}}</span>
               </strong>
-              <div class="body"><span ng-bind-html-unsafe="annotation.text | converter"/></div>
+              <div class="body">
+                <span ng-show="annotation.deleted">Reason:</span>
+                <span ng-bind-html-unsafe="annotation.text | converter"/>
+              </div>
 
               <div class="magicontrols small">
                   <span class="reply-count"
@@ -84,7 +90,6 @@
                     <span ng-show="reply.deleted">Reason:</span>
                     <span ng-bind-html-unsafe="reply.text | converter"/>
                 </div>
-
                 <div class="magicontrols small">
                   <span class="reply-count"
                      ng-pluralize=""

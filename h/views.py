@@ -41,7 +41,6 @@ class Annotation(BaseController):
     def __html__(self):
         request = self.request
         context = request.context
-
         d = context._url_values()
         d['annotation'] = context
         #d['annotation']['replies'] = context.replies
@@ -53,6 +52,10 @@ class Annotation(BaseController):
             d['quote'] = root.quote
         else:
             d['quote'] = context.quote
+            context['references'] = []
+
+        if not 'deleted' in context:
+            context['deleted'] = False
 
         #context['date'] = context._fuzzyTime(context['created'])
         context['date'] = context['updated']
