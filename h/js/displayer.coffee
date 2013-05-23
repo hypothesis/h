@@ -20,11 +20,15 @@ class Displayer
     $scope.annotation.id = document.body.attributes.internalid.value
     @idTable[$scope.annotation.id] = $scope.annotation
     $scope.filter =
-      match_policy :  'include_all'
+      match_policy :  'include_any'
       clauses : [
-        field: "/references"
-        operator: "first_of"
-        value: $scope.annotation.id
+          field: "/references"
+          operator: "first_of"
+          value: $scope.annotation.id
+        ,
+          field: "/id"
+          operator: "equals"
+          value: $scope.annotation.id
         ]
       actions :
         create: true
@@ -69,7 +73,6 @@ class Displayer
             if a.created > b.created then return -1
             0
 
-          console.log data
           action = msg.data[1]
           for annotation in data
             annotation.quote = get_quote annotation
