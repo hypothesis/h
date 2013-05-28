@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-6014b60
+** Annotator 1.2.6-dev-d2ea449
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-05-17 21:40:10Z
+** Built at: 2013-05-24 21:47:58Z
 */
 
 
@@ -25,7 +25,7 @@
 
       path = '';
       elem = this;
-      while (elem && elem.nodeType === 1 && elem !== relativeRoot) {
+      while ((elem != null ? elem.nodeType : void 0) === Node.ELEMENT_NODE && elem !== relativeRoot) {
         tagName = elem.tagName.replace(":", "\\:");
         idx = $(elem.parentNode).children(tagName).index(elem) + 1;
         idx = "[" + idx + "]";
@@ -193,9 +193,9 @@
     getTextNodes = function(node) {
       var nodes;
 
-      if (node && node.nodeType !== 3) {
+      if (node && node.nodeType !== Node.TEXT_NODE) {
         nodes = [];
-        if (node.nodeType !== 8) {
+        if (node.nodeType !== Node.COMMENT_NODE) {
           node = node.lastChild;
           while (node) {
             nodes.push(getTextNodes(node));
@@ -470,9 +470,10 @@
   Range.RangeError = (function(_super) {
     __extends(RangeError, _super);
 
-    function RangeError(type, message, parent) {
-      this.type = type;
+    function RangeError(message, range, type, parent) {
       this.message = message;
+      this.range = range;
+      this.type = type;
       this.parent = parent != null ? parent : null;
       RangeError.__super__.constructor.call(this, this.message);
     }
@@ -556,7 +557,7 @@
         nr.end = r.end;
       }
       nr.commonAncestor = this.commonAncestorContainer;
-      while (nr.commonAncestor.nodeType !== 1) {
+      while (nr.commonAncestor.nodeType !== Node.ELEMENT_NODE) {
         nr.commonAncestor = nr.commonAncestor.parentNode;
       }
       if ((window.DomTextMapper != null) && changed) {
@@ -700,10 +701,10 @@
           node = Range.nodeFromXPath(xpath, root);
         } catch (_error) {
           e = _error;
-          throw new Range.RangeError(p, ("Error while finding " + p + " node: " + xpath + ": ") + e, e);
+          throw new Range.RangeError("Error while finding " + p + " node: " + xpath + ": " + e, range, p, e);
         }
         if (!node) {
-          throw new Range.RangeError(p, "Couldn't find " + p + " node: " + xpath);
+          throw new Range.RangeError("Couldn't find " + p + " node: " + xpath, range, p);
         }
         length = 0;
         targetOffset = this[p + 'Offset'] + (p === "start" ? 1 : 0);
@@ -827,7 +828,7 @@
 
     Annotator.prototype.viewer = null;
 
-    Annotator.prototype.selectedTargets = null;
+    Annotator.prototype.selectedRanges = null;
 
     Annotator.prototype.mouseIsDown = false;
 
@@ -857,15 +858,27 @@
       if (!this.options.readOnly) {
         this._setupDocumentEvents();
       }
-      this._setupWrapper()._setupViewer()._setupEditor();
+      this._setupWrapper();
+      if (!this.options.noMatching) {
+        this._setupMatching();
+      }
+      this._setupViewer()._setupEditor();
       this._setupDynamicStyle();
+      if (!(this.options.noScan || this.options.noMatching)) {
+        this._scan();
+      }
       this.adder = $(this.html.adder).appendTo(this.wrapper).hide();
     }
 
     Annotator.prototype._setupMatching = function() {
       this.domMapper = new DomTextMapper();
       this.domMatcher = new DomTextMatcher(this.domMapper);
+      this.domMapper.setRootNode(this.wrapper[0]);
       return this;
+    };
+
+    Annotator.prototype._scan = function() {
+      return this.domMatcher.scan();
     };
 
     Annotator.prototype._setupWrapper = function() {
@@ -976,10 +989,21 @@
     };
 
     Annotator.prototype.getTextQuoteSelector = function(range) {
-      var endOffset, prefix, quote, selector, startOffset, suffix, _ref1;
+      var endOffset, prefix, quote, rangeEnd, rangeStart, selector, startOffset, suffix, _ref1;
 
-      startOffset = (this.domMapper.getInfoForNode(range.start)).start;
-      endOffset = (this.domMapper.getInfoForNode(range.end)).end;
+      if (range == null) {
+        throw new Error("Called getTextQuoteSelector(range) with null range!");
+      }
+      rangeStart = range.start;
+      if (rangeStart == null) {
+        throw new Error("Called getTextQuoteSelector(range) on a range with no valid start.");
+      }
+      startOffset = (this.domMapper.getInfoForNode(rangeStart)).start;
+      rangeEnd = range.end;
+      if (rangeEnd == null) {
+        throw new Error("Called getTextQuoteSelector(range) on a range with no valid end.");
+      }
+      endOffset = (this.domMapper.getInfoForNode(rangeEnd)).end;
       quote = this.domMapper.getContentForCharRange(startOffset, endOffset);
       _ref1 = this.domMapper.getContextForCharRange(startOffset, endOffset), prefix = _ref1[0], suffix = _ref1[1];
       return selector = {
@@ -1013,13 +1037,35 @@
       }
     };
 
-    Annotator.prototype.getSelectedTargets = function() {
-      var browserRange, i, normedRange, r, rangesToIgnore, realRange, selection, source, targets, _k, _len2,
-        _this = this;
+    Annotator.prototype.getSelectedRanges = function() {
+      var range, target, _k, _len2, _ref1, _results;
 
+      _ref1 = this.getSelectedTargets();
+      _results = [];
+      for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+        target = _ref1[_k];
+        range = this.findSelector(target.selector, "RangeSelector");
+        if (range == null) {
+          continue;
+        }
+        _results.push(Range.sniff(range).normalize(this.wrapper[0]));
+      }
+      return _results;
+    };
+
+    Annotator.prototype.getSelectedTargets = function() {
+      var browserRange, i, normedRange, r, ranges, rangesToIgnore, realRange, selection, source, targets, _k, _len2;
+
+      if (this.domMapper == null) {
+        throw new Error("Can not execute getSelectedTargets() before _setupMatching()!");
+      }
+      if (!this.wrapper) {
+        throw new Error("Can not execute getSelectedTargets() before @wrapper is configured!");
+      }
       selection = util.getGlobal().getSelection();
       source = this.getHref();
       targets = [];
+      ranges = [];
       rangesToIgnore = [];
       if (!selection.isCollapsed) {
         targets = (function() {
@@ -1030,13 +1076,16 @@
             realRange = selection.getRangeAt(i);
             browserRange = new Range.BrowserRange(realRange);
             normedRange = browserRange.normalize().limit(this.wrapper[0]);
-            if (normedRange === null) {
-              rangesToIgnore.push(r);
+            if (normedRange != null) {
+              ranges.push(normedRange);
+              _results.push({
+                selector: [this.getRangeSelector(normedRange), this.getTextQuoteSelector(normedRange), this.getTextPositionSelector(normedRange)],
+                source: source
+              });
+            } else {
+              rangesToIgnore.push(realRange);
+              continue;
             }
-            _results.push({
-              selector: [this.getRangeSelector(normedRange), this.getTextQuoteSelector(normedRange), this.getTextPositionSelector(normedRange)],
-              source: source
-            });
           }
           return _results;
         }).call(this);
@@ -1046,18 +1095,13 @@
         r = rangesToIgnore[_k];
         selection.addRange(r);
       }
-      return $.grep(targets, function(target) {
-        var range, selector;
-
-        selector = _this.findSelector(target.selector, "RangeSelector");
-        if (selector != null) {
-          range = (Range.sniff(selector)).normalize(_this.wrapper[0]);
-          if (range != null) {
-            selection.addRange(range.toRange());
-            return true;
-          }
+      $.grep(ranges, function(range) {
+        if (range) {
+          selection.addRange(range.toRange());
         }
+        return range;
       });
+      return targets;
     };
 
     Annotator.prototype.createAnnotation = function() {
@@ -1085,44 +1129,34 @@
     };
 
     Annotator.prototype.findAnchorFromRangeSelector = function(target) {
-      var content, currentQuote, endInfo, endOffset, exception, normalizedRange, savedQuote, selector, startInfo, startOffset;
+      var content, currentQuote, endInfo, endOffset, normalizedRange, savedQuote, selector, startInfo, startOffset;
 
       selector = this.findSelector(target.selector, "RangeSelector");
       if (selector == null) {
         return null;
       }
-      try {
-        normalizedRange = Range.sniff(selector).normalize(this.wrapper[0]);
-        savedQuote = this.getQuoteForTarget(target);
-        if (savedQuote != null) {
-          startInfo = this.domMapper.getInfoForNode(normalizedRange.start);
-          startOffset = startInfo.start;
-          endInfo = this.domMapper.getInfoForNode(normalizedRange.end);
-          endOffset = endInfo.end;
-          content = this.domMapper.getContentForCharRange(startOffset, endOffset);
-          currentQuote = this.normalizeString(content);
-          if (currentQuote !== savedQuote) {
-            console.log("Could not apply XPath selector to current document             because the quote has changed. (Saved quote is '" + savedQuote + "'.             Current quote is '" + currentQuote + "'.)");
-            return null;
-          } else {
-            console.log("Saved quote matches.");
-          }
-        } else {
-          console.log("No saved quote, nothing to compare. Assume that it's OK.");
-        }
-        return {
-          range: normalizedRange,
-          quote: savedQuote
-        };
-      } catch (_error) {
-        exception = _error;
-        if (exception instanceof Range.RangeError) {
-          console.log("Could not apply XPath selector to current document. \          The document structure may have changed.");
+      normalizedRange = Range.sniff(selector).normalize(this.wrapper[0]);
+      savedQuote = this.getQuoteForTarget(target);
+      if (savedQuote != null) {
+        startInfo = this.domMapper.getInfoForNode(normalizedRange.start);
+        startOffset = startInfo.start;
+        endInfo = this.domMapper.getInfoForNode(normalizedRange.end);
+        endOffset = endInfo.end;
+        content = this.domMapper.getContentForCharRange(startOffset, endOffset);
+        currentQuote = this.normalizeString(content);
+        if (currentQuote !== savedQuote) {
+          console.log("Could not apply XPath selector to current document           because the quote has changed. (Saved quote is '" + savedQuote + "'.           Current quote is '" + currentQuote + "'.)");
           return null;
         } else {
-          throw exception;
+          console.log("Saved quote matches.");
         }
+      } else {
+        console.log("No saved quote, nothing to compare. Assume that it's OK.");
       }
+      return {
+        range: normalizedRange,
+        quote: savedQuote
+      };
     };
 
     Annotator.prototype.findAnchorFromPositionSelector = function(target) {
@@ -1227,43 +1261,77 @@
     };
 
     Annotator.prototype.findAnchor = function(target) {
-      var anchor;
+      var anchor, error, strategies, _k, _len2;
 
+      if (target == null) {
+        throw new Error("Trying to find anchor for null target!");
+      }
       console.log("Trying to find anchor for target: ");
       console.log(target);
-      anchor = this.findAnchorFromRangeSelector(target);
-      if (anchor == null) {
-        anchor = this.findAnchorFromPositionSelector(target);
+      strategies = [this.findAnchorFromRangeSelector, this.findAnchorFromPositionSelector, this.findAnchorWithTwoPhaseFuzzyMatching, this.findAnchorWithFuzzyMatching];
+      error = null;
+      anchor = null;
+      for (_k = 0, _len2 = strategies.length; _k < _len2; _k++) {
+        fn = strategies[_k];
+        try {
+          if (anchor == null) {
+            anchor = fn.call(this, target);
+          }
+        } catch (_error) {
+          error = _error;
+          if (!(error instanceof Range.RangeError)) {
+            throw error;
+          }
+        }
       }
-      if (anchor == null) {
-        anchor = this.findAnchorWithTwoPhaseFuzzyMatching(target);
-      }
-      if (anchor == null) {
-        anchor = this.findAnchorWithFuzzyMatching(target);
-      }
-      return anchor;
+      return {
+        error: error,
+        anchor: anchor
+      };
     };
 
     Annotator.prototype.setupAnnotation = function(annotation) {
-      var anchor, exception, normed, normedRanges, root, t, _k, _l, _len2, _len3, _ref1;
+      var anchor, error, exception, normed, normedRanges, r, ranges, root, t, _k, _l, _len2, _len3, _ref1, _ref2;
 
       root = this.wrapper[0];
-      annotation.target || (annotation.target = this.selectedTargets);
+      ranges = annotation.ranges || this.selectedRanges || [];
+      if (!(ranges instanceof Array)) {
+        ranges = [ranges];
+      }
+      annotation.target || (annotation.target = {
+        selector: (function() {
+          var _k, _len2, _results;
+
+          _results = [];
+          for (_k = 0, _len2 = ranges.length; _k < _len2; _k++) {
+            r = ranges[_k];
+            _results.push(this.getRangeSelector(Range.sniff(r)));
+          }
+          return _results;
+        }).call(this),
+        source: this.getHref()
+      });
+      if (annotation.target == null) {
+        throw new Error("Can not run setupAnnotation(). No target or selection available.");
+      }
       if (!(annotation.target instanceof Array)) {
         annotation.target = [annotation.target];
       }
       normedRanges = [];
+      annotation.quote = [];
       _ref1 = annotation.target;
       for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
         t = _ref1[_k];
         try {
-          anchor = this.findAnchor(t);
-          if ((anchor != null ? anchor.quote : void 0) != null) {
-            t.quote = anchor.quote;
-            t.diffHTML = anchor.diffHTML;
+          _ref2 = this.findAnchor(t), anchor = _ref2.anchor, error = _ref2.error;
+          if (error instanceof Range.RangeError) {
+            this.publish('rangeNormalizeFail', [annotation, error.range, error]);
           }
-          if ((anchor != null ? anchor.range : void 0) != null) {
+          if (anchor != null) {
+            t.quote = anchor.quote || $.trim(anchor.range.text());
+            t.diffHTML = anchor.diffHTML;
             normedRanges.push(anchor.range);
+            annotation.quote.push(t.quote);
           } else {
             console.log("Could not find anchor target for annotation '" + annotation.id + "'.");
           }
@@ -1276,11 +1344,14 @@
           console.log(exception);
         }
       }
+      annotation.ranges = [];
       annotation.highlights = [];
       for (_l = 0, _len3 = normedRanges.length; _l < _len3; _l++) {
         normed = normedRanges[_l];
+        annotation.ranges.push(normed.serialize(this.wrapper[0], '.annotator-hl'));
         $.merge(annotation.highlights, this.highlightRange(normed));
       }
+      annotation.quote = annotation.quote.join(' / ');
       $(annotation.highlights).data('annotation', annotation);
       return annotation;
     };
@@ -1449,26 +1520,16 @@
     };
 
     Annotator.prototype.checkForEndSelection = function(event) {
-      var container, exception, range, selector, target, _k, _len2, _ref1;
+      var container, range, _k, _len2, _ref1;
 
       this.mouseIsDown = false;
       if (this.ignoreMouseup) {
         return;
       }
-      try {
-        this.selectedTargets = this.getSelectedTargets();
-      } catch (_error) {
-        exception = _error;
-        console.log("Error while checking selection:");
-        console.log(exception.stack);
-        alert("There is something very strange about the current selection. Sorry, but I can not annotate this.");
-        return;
-      }
-      _ref1 = this.selectedTargets;
+      this.selectedRanges = this.getSelectedRanges();
+      _ref1 = this.selectedRanges;
       for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-        target = _ref1[_k];
-        selector = this.findSelector(target.selector, "RangeSelector");
-        range = (Range.sniff(selector)).normalize(this.wrapper[0]);
+        range = _ref1[_k];
         container = range.commonAncestor;
         if ($(container).hasClass('annotator-hl')) {
           container = $(container).parents(':not([class^=annotator-hl])')[0];
@@ -1477,7 +1538,7 @@
           return;
         }
       }
-      if (event && this.selectedTargets.length) {
+      if (event && this.selectedRanges.length) {
         return this.adder.css(util.mousePosition(event, this.wrapper[0])).show();
       } else {
         return this.adder.hide();
@@ -1591,6 +1652,23 @@
 
   if (g.JSON == null) {
     $.getScript('http://assets.annotateit.org/vendor/json2.min.js');
+  }
+
+  if (g.Node == null) {
+    g.Node = {
+      ELEMENT_NODE: 1,
+      ATTRIBUTE_NODE: 2,
+      TEXT_NODE: 3,
+      CDATA_SECTION_NODE: 4,
+      ENTITY_REFERENCE_NODE: 5,
+      ENTITY_NODE: 6,
+      PROCESSING_INSTRUCTION_NODE: 7,
+      COMMENT_NODE: 8,
+      DOCUMENT_NODE: 9,
+      DOCUMENT_TYPE_NODE: 10,
+      DOCUMENT_FRAGMENT_NODE: 11,
+      NOTATION_NODE: 12
+    };
   }
 
   Annotator.$ = $;

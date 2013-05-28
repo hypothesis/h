@@ -198,11 +198,11 @@ site = Bundle(
 # the frame and its parent window. It then makes cretain annotator methods
 # available via the bridge plugin.
 inject = Bundle(
+    domTextFamily,
     jquery,
     jschannel,
     annotator,
     annotator_bridge,
-    domTextFamily,
     Uglify(
         Coffee('js/host.coffee', output='js/host.js'),
         output='js/host.min.js'

@@ -11,7 +11,7 @@ class window.DomTextMapper
     if @instances.length is 0 then return
 #    dm = @instances[0]
 #    console.log "Node @ " + (dm.getPathTo node) + " has changed: " + reason
-    for instance in @instances
+    for instance in @instances when instance.rootNode.contains(node)
       instance.performUpdateOnNode node
     null
 
@@ -42,7 +42,7 @@ class window.DomTextMapper
       throw new Error "Can't find iframe with specified ID!"
     @rootWin = iframe.contentWindow
     unless @rootWin?
-      throw new Error "Can't access contents of the spefified iframe!"
+      throw new Error "Can't access contents of the specified iframe!"
     @rootNode = @rootWin.document
     @pathStartNode = @getBody()
 
@@ -85,6 +85,10 @@ class window.DomTextMapper
     if @domStableSince @lastScanned
       # We have a valid paths structure!
 #      console.log "We have a valid DOM structure cache."
+      return @path
+
+    unless @pathStartNode.ownerDocument.body.contains @pathStartNode
+      # We cannot map nodes that are not attached.
       return @path
 
 #    console.log "No valid cache, will have to do a scan."
@@ -195,7 +199,10 @@ class window.DomTextMapper
     result
 
   # Return info for a given node in the DOM
-  getInfoForNode: (node) -> @getInfoForPath @getPathTo node
+  getInfoForNode: (node) ->
+    unless node?
+      throw new Error "Called getInfoForNode(node) with null node!"
+    @getInfoForPath @getPathTo node
 
   # Get the matching DOM elements for a given set of charRanges
   # (Calles getMappingsForCharRange for each element in the givenl ist)
@@ -384,6 +391,8 @@ class window.DomTextMapper
   getPathTo: (node) ->
     xpath = '';
     while node != @rootNode
+      unless node?
+        throw new Error "Called getPathTo on a node which was not a descendant of @rootNode. " + @rootNode
       xpath = (@getPathSegment node) + '/' + xpath
       node = node.parentNode
     xpath = (if @rootNode.ownerDocument? then './' else '/') + xpath
@@ -612,8 +621,7 @@ class window.DomTextMapper
   # Returns:
   #    the first character offset position in the content of this node's
   #    parent node that is not accounted for by this node
-  collectPositions: (node, path, parentContent = null,
-      parentIndex = 0, index = 0) ->
+  collectPositions: (node, path, parentContent = null, parentIndex = 0, index = 0) ->
 #    console.log "Scanning path " + path    
 #    content = @getNodeContent node, false
 

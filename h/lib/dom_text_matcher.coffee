@@ -110,8 +110,7 @@ class window.DomTextMatcher
   # 
   # For the details about the returned data structure,
   # see the documentation of the search() method.
-  searchFuzzy: (pattern, pos,
-      caseSensitive = false, path = null, options = {}) ->
+  searchFuzzy: (pattern, pos, caseSensitive = false, path = null, options = {}) ->
     @ensureDMP()
     @dmp.setMatchDistance options.matchDistance ? 1000
     @dmp.setMatchThreshold options.matchThreshold ? 0.5
@@ -122,9 +121,7 @@ class window.DomTextMatcher
   # Used to even out some browser differences.  
   normalizeString: (string) -> string.replace /\s{2,}/g, " "
 
-  searchFuzzyWithContext: (prefix, suffix, pattern,
-      expectedStart = null, expectedEnd = null, caseSensitive = false,
-      path = null, options = {}) ->
+  searchFuzzyWithContext: (prefix, suffix, pattern, expectedStart = null, expectedEnd = null, caseSensitive = false, path = null, options = {}) ->
     @ensureDMP()
 
     # No context, to joy

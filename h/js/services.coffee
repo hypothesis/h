@@ -4,6 +4,7 @@ class Hypothesis extends Annotator
 
   # Plugin configuration
   options:
+    noMatching: true
     Discovery: {}
     Heatmap: {}
     Permissions:
