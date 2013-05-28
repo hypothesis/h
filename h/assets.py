@@ -89,11 +89,12 @@ annotator_store = Uglify(
     'lib/annotator.store.js',
     output='lib/annotator.store.min.js'
 )
+annotator_document = Uglify(
+    'lib/annotator.document.js',
+    output='lib/annotator.document.min.js'
+)
 annotator_threading = Uglify(
     Coffee('js/plugin/threading.coffee', output='js/plugin/threading.js')
-)
-annotator_document = Uglify(
-    Coffee('js/plugin/document.coffee', output='js/plugin/coffee.js')
 )
 
 # Angular
