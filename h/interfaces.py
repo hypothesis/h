@@ -32,6 +32,8 @@ from horus.interfaces import (
     IForgotPasswordSchema,
     IResetPasswordSchema,
     IProfileSchema,
+
+    IUIStrings,
 )
 
 
