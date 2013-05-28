@@ -325,7 +325,6 @@ class Hypothesis extends Annotator
           loadFromSearch:
             limit: 1000
             uri: href
-<<<<<<< HEAD
         this.addStore(options)
 
   addStore: (options) ->
