@@ -166,35 +166,6 @@ class Hypothesis extends Annotator
         $rootScope.$apply => this.hide()
     )
 
-  getSynonymURLs: (href) ->
-    stringStartsWith = (string, prefix) ->
-      prefix is string.substr 0, prefix.length
-
-    stringEndsWith = (string, suffix) ->
-      suffix is string.substr string.length - suffix.length
-
-    console.log "Looking for synonym URLs for '" + href + "'..."
-    results = []
-    if stringStartsWith href, "http://elife.elifesciences.org/content"
-      if stringEndsWith href, ".full-text.pdf"
-        root = href.substr 0, href.length - ".full-text.pdf".length
-        results.push root
-        results.push root + ".full.pdf"
-      else if stringEndsWith href, ".full.pdf"
-        root = href.substr 0, href.length - ".full.pdf".length
-        results.push root
-        results.push root + ".full-text.pdf"        
-      else
-        results.push href + ".full.pdf"
-        results.push href + ".full-text.pdf"
-    else if stringStartsWith href, "https://peerj.com/articles/"
-      if stringEndsWith href, ".pdf"
-        results.push (href.substr 0, href.length - 4) + "/"
-      else
-        results.push (href.substr 0, href.length - 1) + ".pdf"
-        
-    return results
-
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
     .on 'mousewheel', (event, delta) ->
