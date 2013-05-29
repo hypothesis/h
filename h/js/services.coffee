@@ -39,6 +39,7 @@ class Hypothesis extends Annotator
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
     Threading: {}
+    Document: {}
 
   # Internal state
   dragging: false     # * To enable dragging only when we really want to
@@ -164,35 +165,6 @@ class Hypothesis extends Annotator
       else
         $rootScope.$apply => this.hide()
     )
-
-  getSynonymURLs: (href) ->
-    stringStartsWith = (string, prefix) ->
-      prefix is string.substr 0, prefix.length
-
-    stringEndsWith = (string, suffix) ->
-      suffix is string.substr string.length - suffix.length
-
-    console.log "Looking for synonym URLs for '" + href + "'..."
-    results = []
-    if stringStartsWith href, "http://elife.elifesciences.org/content"
-      if stringEndsWith href, ".full-text.pdf"
-        root = href.substr 0, href.length - ".full-text.pdf".length
-        results.push root
-        results.push root + ".full.pdf"
-      else if stringEndsWith href, ".full.pdf"
-        root = href.substr 0, href.length - ".full.pdf".length
-        results.push root
-        results.push root + ".full-text.pdf"        
-      else
-        results.push href + ".full.pdf"
-        results.push href + ".full-text.pdf"
-    else if stringStartsWith href, "https://peerj.com/articles/"
-      if stringEndsWith href, ".pdf"
-        results.push (href.substr 0, href.length - 4) + "/"
-      else
-        results.push (href.substr 0, href.length - 1) + ".pdf"
-        
-    return results
 
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
@@ -342,8 +314,11 @@ class Hypothesis extends Annotator
 
     # Get the location of the annotated document
     @provider.call
-      method: 'getHref'
-      success: (href) =>
+      method: 'getDocumentInfo'
+      success: (info) =>
+        href = info.uri
+        @plugins.Document.metadata = info.metadata
+
         options = angular.extend {}, (@options.Store or {}),
           annotationData:
             uri: href
@@ -360,10 +335,9 @@ class Hypothesis extends Annotator
     return unless href?
 
     console.log "Loaded annotions for '" + href + "'."
-    for href in this.getSynonymURLs href
-      console.log "Also loading annotations for: " + href
-      this.plugins.Store.loadAnnotationsFromSearch uri: href
-
+    for uri in @plugins.Document.uris()
+      console.log "Also loading annotations for: " + uri
+      this.plugins.Store.loadAnnotationsFromSearch uri: uri
 
 class DraftProvider
   drafts: []
