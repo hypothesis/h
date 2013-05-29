@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-d2ea449
+** Annotator 1.2.6-dev-3342e40
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-05-24 21:47:58Z
+** Built at: 2013-05-28 21:55:30Z
 */
 
 
@@ -1038,54 +1038,24 @@
     };
 
     Annotator.prototype.getSelectedRanges = function() {
-      var range, target, _k, _len2, _ref1, _results;
+      var browserRange, i, normedRange, r, ranges, rangesToIgnore, selection, _k, _len2;
 
-      _ref1 = this.getSelectedTargets();
-      _results = [];
-      for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-        target = _ref1[_k];
-        range = this.findSelector(target.selector, "RangeSelector");
-        if (range == null) {
-          continue;
-        }
-        _results.push(Range.sniff(range).normalize(this.wrapper[0]));
-      }
-      return _results;
-    };
-
-    Annotator.prototype.getSelectedTargets = function() {
-      var browserRange, i, normedRange, r, ranges, rangesToIgnore, realRange, selection, source, targets, _k, _len2;
-
-      if (this.domMapper == null) {
-        throw new Error("Can not execute getSelectedTargets() before _setupMatching()!");
-      }
-      if (!this.wrapper) {
-        throw new Error("Can not execute getSelectedTargets() before @wrapper is configured!");
-      }
       selection = util.getGlobal().getSelection();
-      source = this.getHref();
-      targets = [];
       ranges = [];
       rangesToIgnore = [];
       if (!selection.isCollapsed) {
-        targets = (function() {
+        ranges = (function() {
           var _k, _ref1, _results;
 
           _results = [];
           for (i = _k = 0, _ref1 = selection.rangeCount; 0 <= _ref1 ? _k < _ref1 : _k > _ref1; i = 0 <= _ref1 ? ++_k : --_k) {
-            realRange = selection.getRangeAt(i);
-            browserRange = new Range.BrowserRange(realRange);
+            r = selection.getRangeAt(i);
+            browserRange = new Range.BrowserRange(r);
             normedRange = browserRange.normalize().limit(this.wrapper[0]);
-            if (normedRange != null) {
-              ranges.push(normedRange);
-              _results.push({
-                selector: [this.getRangeSelector(normedRange), this.getTextQuoteSelector(normedRange), this.getTextPositionSelector(normedRange)],
-                source: source
-              });
-            } else {
-              rangesToIgnore.push(realRange);
-              continue;
+            if (normedRange === null) {
+              rangesToIgnore.push(r);
             }
+            _results.push(normedRange);
           }
           return _results;
         }).call(this);
@@ -1095,13 +1065,19 @@
         r = rangesToIgnore[_k];
         selection.addRange(r);
       }
-      $.grep(ranges, function(range) {
+      return $.grep(ranges, function(range) {
         if (range) {
           selection.addRange(range.toRange());
         }
         return range;
       });
-      return targets;
+    };
+
+    Annotator.prototype.getTargetFromRange = function(range) {
+      return {
+        source: this.getHref(),
+        selector: [this.getRangeSelector(range), this.getTextQuoteSelector(range), this.getTextPositionSelector(range)]
+      };
     };
 
     Annotator.prototype.createAnnotation = function() {
@@ -1295,27 +1271,21 @@
 
       root = this.wrapper[0];
       ranges = annotation.ranges || this.selectedRanges || [];
-      if (!(ranges instanceof Array)) {
-        ranges = [ranges];
+      if (annotation.ranges != null) {
+        delete annotation.ranges;
       }
-      annotation.target || (annotation.target = {
-        selector: (function() {
-          var _k, _len2, _results;
+      annotation.target || (annotation.target = (function() {
+        var _k, _len2, _results;
 
-          _results = [];
-          for (_k = 0, _len2 = ranges.length; _k < _len2; _k++) {
-            r = ranges[_k];
-            _results.push(this.getRangeSelector(Range.sniff(r)));
-          }
-          return _results;
-        }).call(this),
-        source: this.getHref()
-      });
+        _results = [];
+        for (_k = 0, _len2 = ranges.length; _k < _len2; _k++) {
+          r = ranges[_k];
+          _results.push(this.getTargetFromRange(r));
+        }
+        return _results;
+      }).call(this));
       if (annotation.target == null) {
         throw new Error("Can not run setupAnnotation(). No target or selection available.");
-      }
-      if (!(annotation.target instanceof Array)) {
-        annotation.target = [annotation.target];
       }
       normedRanges = [];
       annotation.quote = [];

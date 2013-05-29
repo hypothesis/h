@@ -36,7 +36,7 @@ pyramid-tm==0.7
 -e git+https://github.com/tilgovi/pyramid_webassets.git@cbe7befcc0ed9eb688104eade1a2a7e86be3c1db#egg=pyramid_webassets-dev
 pystache==0.5.3
 pytest==2.2.4
-python-dateutil==1.5
+python-dateutil==2.1
 python-openid==2.2.5
 repoze.lru==0.6
 repoze.sendmail==4.0b2
