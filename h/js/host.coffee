@@ -160,6 +160,10 @@ class Annotator.Host extends Annotator
           @drag.last = null
         )
 
+        .bind('adderClick', =>
+          @onAdderClick @event
+        )
+
         .bind('getDocumentInfo', =>
           return {
             uri: @plugins.Document.uri()
@@ -273,3 +277,8 @@ class Annotator.Host extends Annotator
     @api.notify
       method: 'addToken'
       params: token
+
+  #Save the event for restarting edit
+  onAdderClick: (event) =>
+    @event = event
+    super
