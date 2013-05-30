@@ -158,6 +158,10 @@ class Annotator.Host extends Annotator
           @drag.last = null
         )
 
+        .bind('adderClick', =>
+          @onAdderClick @event
+        )
+
   scanDocument: (reason = "something happened") =>
     try
       console.log "Analyzing host frame, because " + reason + "..."
@@ -264,3 +268,8 @@ class Annotator.Host extends Annotator
     @api.notify
       method: 'addToken'
       params: token
+
+  #Save the event for restarting edit
+  onAdderClick: (event) =>
+    @event = event
+    super

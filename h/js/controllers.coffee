@@ -171,6 +171,11 @@ class App
         delete annotator.plugins.Store
         annotator.addStore Store.options
 
+      if newValue? and annotator.ongoing_edit
+        $timeout =>
+          annotator.clickAdder()
+        , 500
+
     $scope.$watch 'frame.visible', (newValue) ->
       if newValue
         annotator.show()
