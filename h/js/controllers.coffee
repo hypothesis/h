@@ -329,10 +329,12 @@ class Annotation
           window.location.host + '/a/' + $scope.model.$modelValue.id
         $scope.shared = false
 
-    $scope.share = ->
-      $scope.shared = not $scope.shared
+    $scope.toggle = ->
       $element.find('.share-dialog').slideToggle()
 
+    $scope.share = ->
+      $scope.shared = not $scope.shared
+      $scope.toggle()
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
