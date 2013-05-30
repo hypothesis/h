@@ -48,7 +48,7 @@ fi
 
 
 if test -z "$PIP_DOWNLOAD_CACHE"; then
-	export PIP_DOWNLOAD_CACHE=$PWD/.pip-cache
+	export PIP_DOWNLOAD_CACHE=$HOME/.pip
 fi
 
 echo "Ensuring an up-to-date pip..."
