@@ -43,6 +43,7 @@ class Hypothesis extends Annotator
 
   # Internal state
   dragging: false     # * To enable dragging only when we really want to
+  ongoing_edit: false # * Is there an interrupted edit by login
 
   # Here as a noop just to make the Permissions plugin happy
   # XXX: Change me when Annotator stops assuming things about viewers
@@ -239,6 +240,10 @@ class Hypothesis extends Annotator
     ]
     this
 
+  clickAdder: =>
+    @provider.notify
+      method: 'adderClick'
+
   showEditor: (annotation) =>
     this.show()
     @element.injector().invoke [
@@ -247,6 +252,8 @@ class Hypothesis extends Annotator
         unless this.plugins.Auth? and this.plugins.Auth.haveValidToken()
           $route.current.locals.$scope.$apply ->
             $route.current.locals.$scope.$emit 'showAuth', true
+          @provider.notify method: 'onEditorHide'
+          @ongoing_edit = true
           return
 
         # Set the path
@@ -254,9 +261,11 @@ class Hypothesis extends Annotator
           id: annotation.id
           action: 'create'
         $location.path('/editor').search(search)
- 
+
         # Digest the change
         $rootScope.$digest()
+
+        @ongoing_edit = false
 
         # Push the annotation into the editor scope
         if $route.current.controller is 'EditorController'
