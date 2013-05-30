@@ -52,12 +52,12 @@ if test -z "$PIP_DOWNLOAD_CACHE"; then
 fi
 
 echo "Ensuring an up-to-date pip..."
-pip install -U pip
+pip install -qU pip
 
 echo "Checking dependencies..."
 diff -q requirements.txt .installed.txt 2> /dev/null || {
 	echo "Installing dependencies..."
-	pip install -r requirements.txt
+	pip install -qr requirements.txt
 	cp requirements.txt .installed.txt
 }
 
