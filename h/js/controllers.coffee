@@ -297,9 +297,14 @@ class Annotation
 
       # We can delete the annotation if it hasn't got any replies or it is
       # private. Otherwise, we ask for a redaction message.
-      if replies == 0 or $scope.form.privacy.$viewValue == 'Private'
+      if replies == 0 or $scope.form.privacy.$viewValue is 'Private'
         # If we're deleting it without asking for a message, confirm first.
         if confirm "Are you sure you want to delete this annotation?"
+          if $scope.form.privacy.$viewValue is 'Private'
+            #Cascade delete its children
+            for reply in replies
+              annotator.deleteAnnotation reply
+
           annotator.deleteAnnotation annotation
       else
         $scope.action = 'delete'
