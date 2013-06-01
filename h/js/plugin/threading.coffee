@@ -21,10 +21,7 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
     # Attach the thread to its parent, if any.
     if annotation.references?.length
       prev = annotation.references[annotation.references.length-1]
-      if annotation.created?
-        @annotator.threading.getContainer(prev).addChild thread
-      else
-        @annotator.threading.getContainer(prev).addChildToPos thread, 0
+      @annotator.threading.getContainer(prev).addChild thread
 
     # Expose the thread to the annotation
     Object.defineProperty annotation, 'thread',

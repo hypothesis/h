@@ -73,12 +73,6 @@
         return top;
       }
 
-      function addChildToPos(child, pos) {
-        if(child.parent) child.parent.removeChild(child);
-        this.children.splice(pos,0,child);
-        child.parent = this;
-      }
-
       function addChild(child) {
         if(child.parent) child.parent.removeChild(child);
         this.children.push(child);
@@ -110,7 +104,6 @@
         getSpecificChild: getSpecificChild,
         threadParent: threadParent,
         addChild: addChild,
-        addChildToPos: addChildToPos,
         removeChild: removeChild,
         hasDescendant: hasDescendant
       }
