@@ -8,7 +8,6 @@ __all__ = [
 
 from pyramid.view import view_config, view_defaults
 from pyramid.traversal import find_resource
-from pyramid import httpexceptions
 
 from horus.views import (
     AuthController,
@@ -51,20 +50,23 @@ class Annotation(BaseController):
 
         d = context._url_values()
         d['annotation'] = context
-        d['annotation']['replies'] = context.replies
-        d['annotation']['reply_count'] = len(context.referrers)
+        #d['annotation']['replies'] = context.replies
+        #d['annotation']['reply_count'] = len(context.referrers)
+        #d['annotation']['reply_count'] = 0
 
         if context.get('references', []):
             root = context.__parent__[context['references'][0]]
             d['quote'] = root.quote
         else:
             d['quote'] = context.quote
+            context['references'] = []
 
-        context['date'] = context._fuzzyTime(context['created'])
-        context['user'] = context._userName(context['user'])
+        if not 'deleted' in context:
+            context['deleted'] = False
 
-        for key, value in d.items():
-            log.debug(key + ': ' + str(value))
+        #context['date'] = context._fuzzyTime(context['created'])
+        context['date'] = context['updated']
+        #context['user'] = context._userName(context['user'])
 
         return d
 
@@ -75,6 +77,18 @@ class Annotation(BaseController):
         request.response.charset = 'UTF-8'
         return request.context
 
+@view_defaults(context='h.resources.Streamer', layout='lay_streamer')
+class Streamer(BaseController):
+    @view_config(accept='text/html', renderer='templates/streamer.pt')
+    def __html__(self):
+        return self.request.context
+
+    @view_config(accept='application/json', renderer='json')
+    def __call__(self):
+        request = self.request
+        request.response.content_type = 'application/json'
+        request.response.charset = 'UTF-8'
+        return request.context
 
 def includeme(config):
     config.add_view(

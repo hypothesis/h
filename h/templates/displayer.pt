@@ -5,7 +5,7 @@
   </head>
   <style type="text/css"></style>
 
-  <body metal:fill-slot="body">
+  <body metal:fill-slot="body" internalid="${annotation['id']}" ng-app="h.displayer">
     <div class="topbar">
       <div class="inner">
         <a class="barbutton pull-left" href="/"
@@ -14,7 +14,16 @@
       </div>
     </div>
 
-    <div class="content paper yui3-g">
+    <div class="content paper yui3-g"
+         ng-controller="DisplayerCtrl"
+         ng-init="annotation.text='${annotation['text']}';
+                  annotation.date='${annotation['date']}';
+                  annotation.user='${annotation['user']}';
+                  annotation.quote='${quote}';
+                  annotation.id = '${annotation['id']}';
+                  annotation.uri = '${annotation['uri']}';
+                  annotation.ref_length = '${len(annotation['references'])}';
+                  annotation.deleted = '${annotation['deleted']}'">
       <div class="knockout noise yui3-u-1">
         <div ng-view=""></div>
         <strong><a class="pull-right"
@@ -22,7 +31,7 @@
 
         <div class="page">
           <strong tal:condition="annotation['user']">
-            <a href="">${annotation['user']}</a> annotated:
+            <a href="">{{annotation.user | userName}}</a> annotated:
           </strong>
           <div class="domain">
             <img class="favicon" tal:condition="len(favicon_link)"
@@ -75,6 +84,81 @@
               </metal:main>
             </div>
           </div>
+
+        <div class="paper excerpt">
+          <blockquote>{{annotation.quote}}</blockquote>
+        </div>
+
+        <div class="paper thread">
+
+            <div class="annotation detail ng-isolate-scope">
+              <div class="magicontrols pull-right">
+                <span class="small">{{annotation.date | fuzzyTime}}</span>
+              </div>
+
+              <strong>
+                <span ng-show="annotation.deleted" class="user">Annotation deleted</span>
+                <span class="user">{{annotation.user | userName}}</span>
+              </strong>
+              <div class="body">
+                <span ng-show="annotation.deleted">Reason:</span>
+                <span ng-bind-html-unsafe="annotation.text | converter"/>
+              </div>
+
+              <div class="magicontrols small">
+                  <span class="reply-count"
+                     ng-pluralize=""
+                     ng-show="annotation.reply_count"
+                     count="annotation.reply_count"
+                     when="{one: '1 reply', other: '{} replies'}" />
+              </div>
+            </div>
+
+            <script type="text/ng-template"  id="annotation_renderer.html">
+              <a href="" class="threadexp"
+                 title="{{$parent.collapsed && 'Expand' || 'Collapse'}}"
+                 ng-click="$parent.collapsed = !$parent.collapsed" />
+
+              <div class="annotation detail">
+
+                <div class="magicontrols pull-right">
+                  <span class="small">{{reply.updated | fuzzyTime}}</span>
+                </div>
+
+                <strong>
+                  <span ng-show="reply.deleted" class="user">Annotation deleted</span>
+                  <span ng-hide="reply.deleted" class="user">{{reply.user | userName}}</span>
+                </strong>
+
+                <div class="body">
+                    <span ng-show="reply.deleted">Reason:</span>
+                    <span ng-bind-html-unsafe="reply.text | converter"/>
+                </div>
+                <div class="magicontrols small">
+                  <span class="reply-count"
+                     ng-pluralize=""
+                     ng-show="reply.reply_count"
+                     count="reply.reply_count"
+                     when="{one: '1 reply', other: '{} replies'}" />
+                </div>
+              </div>
+
+                <ul>
+                  <li ng-repeat="reply in reply.replies" class="thread"
+                      ng-include="'annotation_renderer.html'"
+                      ng-class="collapsed && 'collapsed' || ''">
+                  </li>
+                </ul>
+            </script>
+
+            <!-- Thread view -->
+            <ul>
+                <li ng-repeat="reply in annotation.replies"
+                    ng-include="'annotation_renderer.html'"
+                    class="thread"
+                    ng-class="collapsed && 'collapsed' || ''"></li>
+            </ul>
+
         </div>
       </div>
       <div class="yui3-u-1">

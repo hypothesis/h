@@ -7,8 +7,10 @@ from flask import Flask, g
 from pyramid.request import Request
 from pyramid.wsgi import wsgiapp2
 
-from h import interfaces, models
+from h import interfaces, models, streamer
 
+import logging
+log = logging.getLogger(__name__)
 
 class Store(object):
     def __init__(self, request):
@@ -71,14 +73,16 @@ def before_request():
     g.auth = auth.Authenticator(models.Consumer.get_by_key)
     g.authorize = authorize
     g.before_annotation_update = anonymize_deletes
+    g.after_annotation_create = streamer.after_save
+    g.after_annotation_update = streamer.after_update
+    g.after_annotation_delete = streamer.after_delete
 
 
 def includeme(config):
     app = Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
-
-    # Set up the models
     settings = config.get_settings()
+    
     if 'es.host' in settings:
         app.config['ELASTICSEARCH_HOST'] = settings['es.host']
     if 'es.index' in settings:

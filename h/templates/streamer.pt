@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html metal:use-macro="main_template" >
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <!-- Always force latest IE rendering engine (even in intranet) &amp; Chrome Frame -->
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <title>Test Streamer</title>
+    <link href="css/displayer.css" rel="stylesheet" type="text/css">  
+  </head>
+  <style type="text/css"></style>
+
+  <body metal:fill-slot="body" ng-app="h.streamer">
+    <div ng-view></div>
+    <div ng-controller="StreamerCtrl">
+    <div class="topbar">
+      <div class="inner">
+        <div class="barbutton pull-left">
+          <h4>hypothes<span class="red">.</span>is</h4>
+        </div>
+        <div class="barbutton pull-left">
+          <h4 ng-show="streaming" class="small">Streaming :)</h4>
+          <h4 ng-hide="streaming" class="small">Not streaming <span class="red">:(</span></h4>
+        </div>
+        <div class="barbutton pull-right">
+          <h4>sign in</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="small-padding content paper">  
+        <div class="knockout noise">
+          <div class="paper excerpt filter-body">
+
+            <!-- Searchbar -->
+            <div class="searchbar-border">
+              <h4>
+                <ul class="searchbar-error small" ng-show="bads.length>0" ng-repeat="bad in bads">
+                  <li>Error: '{{bad[0]}}' : {{bad[1]}}</li>
+                </ul>
+                <div class="pull-left searchinput">
+                  <input type="text" class="searchfield" ng-model="clauses" ng-trim="false" ng-change="clause_change()" placeholder="search options"/>
+                </div>
+                <div class="pull-right searchbutton">
+                  <button ng-hide="streaming" ng-click="start_streaming()" class="btn check-icon">Stream</button>
+                  <button ng-show="streaming" ng-click="stop_streaming()" class="btn check-icon">Stop</button>
+                </div>
+              </h4>
+            </div>
+
+            <div class="button_controls">
+              <!-- Match Strategy -->  
+              <div class="dropdown show pull-left">
+                <a href="" class="down-icon dropdown-toggle small" role="button" title="Match Strategy">Strategy:&nbsp;{{filter.match_policy}}</a>
+                <ul class="dropdown-menu" role="menu">                
+                  <li ng-click="filter.match_policy = 'include_all'" class="small">include_all</li>
+                  <li ng-click="filter.match_policy = 'include_any'" class="small">include_any</li>
+                  <li ng-click="filter.match_policy = 'exclude_all'" class="small">exclude_all</li>
+                  <li ng-click="filter.match_policy = 'exclude_any'" class="small">exclude_any</li>
+                </ul>
+              </div>
+
+             <!-- Annotation actions -->  
+             <div class="dropdown show pull-left">
+              <a href="" class="down-icon dropdown-toggle small" role="button" title="Annotation actions">Actions</a>
+              <ul class="dropdown-menu" role="menu">                
+                <li ng-click="filter.actions.create = !filter.actions.create" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.create" class="small">Create</input><li>
+                <li ng-click="filter.actions.edit = !filter.actions.edit" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.edit" class="small">Edit</input><li>
+                <li ng-click="filter.actions.delete = !filter.actions.delete" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.delete" class="small">Delete</input><li>
+              </ul>
+             </div>
+
+            <!-- Past -->
+            <div class="dropdown show pull-left">
+               <a href="" class="down-icon dropdown-toggle small" role="button" title="Past">Past</a>
+              <ul class="dropdown-menu" role="menu">                
+                <li ng-click="toggle_past()" class="small">Load {{filter.past_data.load_past}}</li>
+                <li class="small" ng-hide="filter.past_data.load_past != 'time'">Go back <input type="number" ng-model="filter.past_data.go_back" step="1" min="1" max="60" value="5"/> min(s)<li>
+                <li class="small" ng-hide="filter.past_data.load_past != 'hits'">Load <input type="number" ng-model="filter.past_data.hits" step="10" min="1" max="500" value="20"/> hits<li>
+              </ul>
+          </div>
+
+          <!-- Sidebar links -->
+          <div class="pull-right">
+            <div>
+              <div class="dropdown show pull-right">
+               <a href="" class="dropdown-toggle small" role="button" title="Help">Show help</a>
+               <ul class="dropdown-menu menu-width" role="menu">
+                 <li>
+                   <h4>
+                     <pre>
+                       Little help for the search options syntax.
+                       This is still experimental and our goal is to form it as natural as possible.
+                       Currently you can type search clauses, separated by space characters.
+                       A search clause has the following structure: <strong>(field):(operator)(value)</strong> (i.e. <strong>user:=johndoe</strong> )
+                       The fields can be one of the followings: <strong>['thread', 'text', 'user']</strong>
+                       Operators: <strong>['=', '>', '<', '=>', '<=', '[', '#']</strong>
+                       Where '[' means a comma separated list. I.e. <strong>user:[johndoe,janedoe</strong> means the user is either johndoe or janedoe
+                      '#' means matching (or substring). i.e <strong>text:#car</strong> means every annotation which has the 'car' character string in it's body.
+                     </pre>
+                   </h4>
+                 </li>
+               </ul>
+              </div>
+
+              <div class="dropdown show pull-right">
+               <a href="" class="dropdown-toggle small" role="button" title="Json">Show json</a>
+               <ul class="dropdown-menu menu-width" role="menu">
+                 <li>
+                   <h4>Generated filter json
+                     <pre ng-bind-html-unsafe="json_content"/>
+                   </h4>
+                 </li>
+               </ul>
+              </div>
+            </div>
+          </div>  
+        </div>
+      </div>
+    </div>
+  </div>
+
+      <ul class="small-padding content paper">
+        <div class="knockout noise">
+          <div class="metadata">
+            <div>
+              <li class="stream-list" ng-repeat="annotation in annotations">
+                <div class="page">
+                  <strong>{{annotation['user'] | userName}}</strong>
+                  <span ng-switch="annotation['action']">
+                    <span ng-switch-when="past">&nbsp;'s annotation</span>
+                    <span ng-switch-when="create">&nbsp;has created an annotation</span>
+                    <span ng-switch-when="update">&nbsp;has updated an annotation</span>
+                    <span ng-switch-when="delete">&nbsp;has deleted an annotation</span>
+                  </span> 
+                  <div class="domain">
+                    <img class="favicon" ng-model="annotation['favicon']"/>
+                    <a href="{{annotation['uri']}}">{{annotation['title']}}</a> 
+                    | 
+                    <a href="{{annotation['source']}}">{{annotation['source_stripped']}}</a>
+                  </div>
+                </div>
+
+                <div class="paper excerpt">
+                  <blockquote>{{annotation['quote']}}</blockquote>
+                </div>
+
+                <div class="paper thread">
+                  <div class="annotation detail">
+                    <div class="magicontrols pull-right">
+                      <span class="small">{{annotation['updated'] | fuzzyTime}}</span>
+                    </div>
+                    <strong>
+                      <span class="user">{{annotation['user'] | userName}}</span>
+                    </strong>
+                    <div class="body">{{annotation['text']}}</div>
+                  </div>
+                </div>
+              </li>
+            </div>
+          </div>
+        </div>
+      </ul>
+     </div>
+
+
+   </div>
+  </body>
+</html>

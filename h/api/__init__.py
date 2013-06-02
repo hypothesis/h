@@ -6,6 +6,10 @@ from annotator import auth
 from pyramid.view import view_config
 
 from h import views
+from h import streamer
+
+import logging
+log = logging.getLogger(__name__)
 
 
 @view_config(renderer='string', request_method='GET', route_name='token')
@@ -41,6 +45,9 @@ def includeme(config):
         api.url: https://example.com/api
 
     """
+
+    #configure streamer
+    streamer.init_streamer()
 
     api_url = config.registry.settings.get('api.url', '/api')
 

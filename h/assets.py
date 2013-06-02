@@ -130,6 +130,8 @@ pagedown = Uglify(
     output='lib/Markdown.Converter.min.js'
 )
 
+sockjs = Uglify('h:lib/sockjs-0.3.4.js', output='lib/sockjs-client.min.js')
+
 domTextFamily = Uglify(
     Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
     Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
@@ -181,11 +183,21 @@ app = Bundle(
     ),
 )
 
+site = SCSS(
+    'css/site.scss',
+    depends=(css_base + css_common),
+    output='css/site.min.css',
+)
+
 display = Bundle(
-    angular,
     jquery,
+    angular,
+    angular_bootstrap,
+    sockjs,
+    pagedown,
     Coffee('js/displayer.coffee', output='js/displayer.js'),
-    CSS('css/displayer.css', output='js/displayer.min.css'),
+    Coffee('js/filters.coffee', output='js/filters.js'),
+    site
 )
 
 sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),
@@ -195,6 +207,16 @@ site = Bundle(
     app,
     SCSS('css/site.scss', depends=(css_base + css_common),
          output='css/site.min.css'),
+)
+
+streamer = Bundle(
+    angular,
+    angular_bootstrap,
+    sockjs,
+    pagedown,
+    Coffee('js/filters.coffee', output='js/filters.js'),
+    Coffee('js/streamer.coffee', output='js/streamer.js'),
+    site
 )
 
 

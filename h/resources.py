@@ -3,11 +3,9 @@ try:
 except ImportError:
     import json
 
-import urllib2
 
 from datetime import datetime
 from math import floor
-from urlparse import urlparse
 
 from dateutil.parser import parse
 from dateutil.tz import tzutc
@@ -19,9 +17,8 @@ from pyramid.interfaces import ILocation
 
 from zope.interface import implementer
 
-import BeautifulSoup
-
 from h import interfaces
+from h.streamer import UrlAnalyzer
 
 
 import logging
@@ -122,47 +119,7 @@ class AppFactory(BaseResource):
             for name in ['persona', 'personas']
         }
 
-
-class Annotation(BaseResource, dict):
-    def _url_values(self):
-        # Getting the title of the uri.
-        # hdrs magic is needed because urllib2 is forbidden to use with default
-        # settings.
-        agent = \
-            "Mozilla/5.0 (X11; U; Linux i686) " \
-            "Gecko/20071127 Firefox/2.0.0.11"
-        headers = {'User-Agent': agent}
-        req = urllib2.Request(self['uri'], headers=headers)
-        soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req))
-        title = soup.title.string if soup.title else self['uri']
-
-        # Getting the domain from the uri, and the same url magic for the
-        # domain title.
-        parsed_uri = urlparse(self['uri'])
-        domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
-        domain_stripped = parsed_uri[1]
-        if parsed_uri[1].lower().startswith('www.'):
-            domain_stripped = domain_stripped[4:]
-
-        # Favicon
-        favlink = soup.find("link", rel="shortcut icon")
-        # Check for local/global link.
-        if favlink:
-            href = favlink['href']
-            if href.startswith('//') or href.startswith('http'):
-                icon_link = href
-            else:
-                icon_link = domain + href
-        else:
-            icon_link = ''
-
-        return {
-            'title': title,
-            'source': domain,
-            'source_stripped': domain_stripped,
-            'favicon_link': icon_link
-        }
-
+class Annotation(BaseResource, UrlAnalyzer):
     def _fuzzyTime(self, date):
         if not date: return ''
         converted = parse(date)
@@ -175,21 +132,21 @@ class Annotation(BaseResource, dict):
         week = day * 7
         month = day * 30
 
-        if (delta < 30):
+        if delta < 30:
             fuzzy = 'moments ago'
-        elif (delta < minute):
+        elif delta < minute:
             fuzzy = str(int(delta)) + ' seconds ago'
-        elif (delta < 2 * minute):
+        elif delta < 2 * minute:
             fuzzy = 'a minute ago'
-        elif (delta < hour):
+        elif delta < hour:
             fuzzy = str(int(floor(delta / minute))) + ' minutes ago'
-        elif (floor(delta / hour) == 1):
+        elif floor(delta / hour) == 1:
             fuzzy = '1 hour ago'
-        elif (delta < day):
+        elif delta < day:
             fuzzy = str(int(floor(delta / hour))) + ' hours ago'
-        elif (delta < day * 2):
+        elif delta < day * 2:
             fuzzy = 'yesterday'
-        elif (delta < month):
+        elif delta < month:
             fuzzy = str(int(round(delta / day))) + ' days ago'
         else:
             fuzzy = str(converted)
@@ -256,6 +213,10 @@ class Annotation(BaseResource, dict):
         return self._nestlist(childTable.get(self['id']), childTable)
 
 
+class Streamer(BaseResource, dict):
+    pass
+
+
 class AnnotationFactory(BaseResource):
     def __getitem__(self, key):
         request = self.request
@@ -277,3 +238,4 @@ def includeme(config):
     config.add_route('index', '/')
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
+    RootFactory.stream = Streamer
