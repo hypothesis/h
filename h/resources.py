@@ -166,8 +166,8 @@ class Annotation(BaseResource, dict):
     def _fuzzyTime(self, date):
         if not date: return ''
         converted = parse(date)
-        delta = datetime.utcnow().replace(tzinfo=tzutc()) - converted
-        delta = round(delta.total_seconds())
+        time_delta = datetime.utcnow().replace(tzinfo=tzutc()) - converted
+        delta = round(time_delta.total_seconds())
 
         minute = 60
         hour = minute * 60
@@ -192,7 +192,9 @@ class Annotation(BaseResource, dict):
         elif (delta < month):
             fuzzy = str(int(round(delta / day))) + ' days ago'
         else:
-            fuzzy = str(converted)
+            when = datetime.now() - time_delta
+            time = when.strftime('%X')
+            fuzzy = when.strftime('%c').replace(time, '').strip()
 
         return fuzzy
 
