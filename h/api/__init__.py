@@ -46,9 +46,6 @@ def includeme(config):
 
     """
 
-    #configure streamer
-    streamer.init_streamer()
-
     api_url = config.registry.settings.get('api.url', '/api')
 
     if urlparse.urlparse(api_url).scheme:

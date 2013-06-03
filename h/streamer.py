@@ -1,5 +1,4 @@
 import json
-import threading
 import traceback
 
 import requests
@@ -7,7 +6,6 @@ from urlparse import urlparse, urlunparse
 
 import BeautifulSoup
 import re
-import Queue
 
 from pyramid_sockjs.session import Session
 from jsonschema import validate
@@ -231,23 +229,6 @@ class StreamerSession(Session):
         log.info('closing ' + str(self))
         self.connections.remove(self)
 
-q = Queue.Queue()
-
-
-def init_streamer():
-    t = threading.Thread(target=process_filters)
-    t.daemon = True
-    t.start()
-
-
-def process_filters():
-    url_analyzer = UrlAnalyzer()
-    while True:
-        (annotation, action) = q.get(True)
-        annotation.update(url_analyzer._url_values(annotation['uri']))
-        after_action(annotation, action)
-        q.task_done()
-
 
 def after_action(annotation, action):
     if not authz.authorize(annotation, 'read'): return
@@ -262,15 +243,15 @@ def after_action(annotation, action):
 
 
 def after_save(annotation):
-    q.put((annotation, 'create'))
+    after_action(annotation, 'create')
 
 
 def after_update(annotation):
-    q.put((annotation, 'edit'))
+    after_action(annotation, 'edit')
 
 
 def after_delete(annotation):
-    q.put((annotation, 'delete'))
+    after_action(annotation, 'delete')
 
 
 def includeme(config): pass
