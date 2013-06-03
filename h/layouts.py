@@ -50,15 +50,6 @@ class SiteLayout(BaseLayout):
     requirements = (('site', None),)
 
 
-@layout_config(name='lay_displayer', template='h:templates/base.pt')
-class DisplayerLayout(BaseLayout):
-    requirements = (('display', None),)
-
-
-@layout_config(name='lay_streamer', template='h:templates/base.pt')
-class StreamerLayout(BaseLayout):
-    requirements = (('streamer', None),)
-
 def includeme(config):
     config.include('pyramid_layout')
     config.scan(__name__)

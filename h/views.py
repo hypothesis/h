@@ -77,7 +77,7 @@ class Annotation(BaseController):
         request.response.charset = 'UTF-8'
         return request.context
 
-@view_defaults(context='h.resources.Streamer', layout='lay_streamer')
+@view_defaults(context='h.resources.Streamer', layout='site')
 class Streamer(BaseController):
     @view_config(accept='text/html', renderer='templates/streamer.pt')
     def __html__(self):

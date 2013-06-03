@@ -166,6 +166,7 @@ app = Bundle(
     jwz,
     pagedown,
     raf,
+    sockjs,
     Uglify(
         *[
             Coffee('js/%s.coffee' % name,
@@ -176,7 +177,9 @@ app = Bundle(
                 'controllers',
                 'filters',
                 'directives',
+                'displayer',
                 'services',
+                'streamer',
             )
         ],
         output='js/app.min.js'
@@ -189,17 +192,6 @@ site = SCSS(
     output='css/site.min.css',
 )
 
-display = Bundle(
-    jquery,
-    angular,
-    angular_bootstrap,
-    sockjs,
-    pagedown,
-    Coffee('js/displayer.coffee', output='js/displayer.js'),
-    Coffee('js/filters.coffee', output='js/filters.js'),
-    site
-)
-
 sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),
                output='css/sidebar.min.css')
 
@@ -207,16 +199,6 @@ site = Bundle(
     app,
     SCSS('css/site.scss', depends=(css_base + css_common),
          output='css/site.min.css'),
-)
-
-streamer = Bundle(
-    angular,
-    angular_bootstrap,
-    sockjs,
-    pagedown,
-    Coffee('js/filters.coffee', output='js/filters.js'),
-    Coffee('js/streamer.coffee', output='js/streamer.js'),
-    site
 )
 
 
