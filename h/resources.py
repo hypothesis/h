@@ -122,8 +122,8 @@ class Annotation(BaseResource, UrlAnalyzer):
     def _fuzzyTime(self, date):
         if not date: return ''
         converted = parse(date)
-        delta = datetime.utcnow().replace(tzinfo=tzutc()) - converted
-        delta = round(delta.total_seconds())
+        time_delta = datetime.utcnow().replace(tzinfo=tzutc()) - converted
+        delta = round(time_delta.total_seconds())
 
         minute = 60
         hour = minute * 60
