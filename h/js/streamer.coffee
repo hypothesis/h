@@ -82,10 +82,10 @@ class ClauseParser
 
 
 class Streamer
-  this.$inject = ['$location', '$scope']
   strategies: ['include_any', 'include_all', 'exclude_any', 'exclude_all']
   past_modes: ['none','hits','time']
 
+  this.$inject = ['$location', '$scope']
   constructor: ($location, $scope) ->
     $scope.streaming = false
     $scope.annotations = []
