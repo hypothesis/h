@@ -181,7 +181,7 @@ class Streamer
       $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__', transports)
 
       $scope.sock.onopen = ->
-        $scope.sock.send $scope.filter
+        $scope.sock.send (JSON.stringify $scope.filter)
         $scope.$apply =>
           $scope.streaming = true
 
