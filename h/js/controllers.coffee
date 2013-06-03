@@ -290,7 +290,7 @@ class Annotation
       $scope.action = 'edit'
       $scope.editing = true
       $scope.origText = $scope.model.$modelValue.text
-      
+
     $scope.delete = ->
       annotation = $scope.thread.message
       replies = $scope.thread.children?.length or 0
@@ -300,10 +300,12 @@ class Annotation
       if replies == 0 or $scope.form.privacy.$viewValue is 'Private'
         # If we're deleting it without asking for a message, confirm first.
         if confirm "Are you sure you want to delete this annotation?"
-          if $scope.form.privacy.$viewValue is 'Private'
+          if $scope.form.privacy.$viewValue is 'Private' and replies
             #Cascade delete its children
-            for reply in replies
-              annotator.deleteAnnotation reply
+            for reply in $scope.thread.flattenChildren()
+              if annotator.plugins?.Permissions? and
+              annotator.plugins.Permissions.authorize 'delete', reply
+                annotator.deleteAnnotation reply
 
           annotator.deleteAnnotation annotation
       else
