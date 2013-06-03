@@ -2,7 +2,6 @@ from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
 
-from h.streamer import StreamerSession
 
 def includeme(config):
     config.include('h.api')
@@ -75,11 +74,6 @@ def create_app(settings):
 
     # Include horus
     config.include('horus')
-    config.commit()
-
-    # Include sockjs
-    config.include('pyramid_sockjs')
-    config.add_sockjs_route(prefix='__streamer__', session=StreamerSession)
     config.commit()
 
     # Include the rest of the application

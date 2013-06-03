@@ -254,4 +254,7 @@ def after_delete(annotation):
     after_action(annotation, 'delete')
 
 
-def includeme(config): pass
+def includeme(config):
+    config.include('pyramid_sockjs')
+    config.add_sockjs_route(prefix='__streamer__', session=StreamerSession)
+    config.commit()
