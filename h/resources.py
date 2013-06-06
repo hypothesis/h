@@ -5,6 +5,7 @@ except ImportError:
 
 from datetime import datetime
 from math import floor
+import requests
 
 from dateutil.parser import parse
 from dateutil.tz import tzutc
