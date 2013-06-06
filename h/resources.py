@@ -3,11 +3,12 @@ try:
 except ImportError:
     import json
 
-import urllib2
-
+from urlparse import urlparse, urlunparse
 from datetime import datetime
 from math import floor
-from urlparse import urlparse
+import traceback
+import requests
+import re
 
 from dateutil.parser import parse
 from dateutil.tz import tzutc
@@ -124,28 +125,40 @@ class AppFactory(BaseResource):
 
 
 class Annotation(BaseResource, dict):
-    def _url_values(self):
+    def urlEncodeNonAscii(self, b):
+        return re.sub('[\x80-\xFF]', lambda c: '%%%02x' % ord(c.group(0)), b)
+
+    def iriToUri(self, iri):
+        parts= urlparse(iri)
+        return urlunparse(
+            part.encode('idna') if parti==1 else self.urlEncodeNonAscii(part.encode('utf-8'))
+            for parti, part in enumerate(parts)
+        )
+
+    def _url_values(self, uri = None):
+        if not uri: uri = self['uri']
         # Getting the title of the uri.
-        # hdrs magic is needed because urllib2 is forbidden to use with default
-        # settings.
-        agent = \
-            "Mozilla/5.0 (X11; U; Linux i686) " \
-            "Gecko/20071127 Firefox/2.0.0.11"
-        headers = {'User-Agent': agent}
-        req = urllib2.Request(self['uri'], headers=headers)
-        soup = BeautifulSoup.BeautifulSoup(urllib2.urlopen(req))
-        title = soup.title.string if soup.title else self['uri']
+        try:
+            r = requests.get(self.iriToUri(uri), verify=False)
+            soup = BeautifulSoup.BeautifulSoup(r.content)
+            title = soup.title.string if soup.title else uri
+
+            # Favicon
+            favlink = soup.find("link", rel="shortcut icon")
+        except:
+            log.info('Error opening url')
+            log.info(traceback.format_exc())
+            title = uri
+            favlink = None
 
         # Getting the domain from the uri, and the same url magic for the
         # domain title.
-        parsed_uri = urlparse(self['uri'])
+        parsed_uri = urlparse(uri)
         domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
         domain_stripped = parsed_uri[1]
         if parsed_uri[1].lower().startswith('www.'):
             domain_stripped = domain_stripped[4:]
 
-        # Favicon
-        favlink = soup.find("link", rel="shortcut icon")
         # Check for local/global link.
         if favlink:
             href = favlink['href']
