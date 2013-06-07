@@ -34,8 +34,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 
     # React to the changes to the text area
     input.bind 'blur change keyup', ->
-      value = input.attr('value') or ''
-      ctrl.$setViewValue value
+      ctrl.$setViewValue input[0].value
       scope.$digest()
 
     # Auto-focus the input box when the widget becomes editable.
