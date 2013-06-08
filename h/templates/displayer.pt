@@ -2,6 +2,10 @@
 <html metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag>
     <title>Hypothes.is</title>
+    <script type="text/javascript">
+        document.initial_replies = ${annotation['referrers']};
+    </script>
+
   </head>
   <style type="text/css"></style>
 

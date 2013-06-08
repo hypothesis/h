@@ -18,6 +18,7 @@ from horus.views import (
 
 from h import interfaces
 
+import json
 import logging
 log = logging.getLogger(__name__)
 
@@ -50,7 +51,9 @@ class Annotation(BaseController):
 
         d = context._url_values()
         d['annotation'] = context
-        #d['annotation']['replies'] = context.replies
+        #d['annotation']['replies'] = json.dumps(context.replies)
+        d['annotation']['referrers'] = json.dumps(context.referrers)
+
         #d['annotation']['reply_count'] = len(context.referrers)
         #d['annotation']['reply_count'] = 0
 

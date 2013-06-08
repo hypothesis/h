@@ -222,7 +222,7 @@ class StreamerSession(Session):
                 elif payload["past_data"]["load_past"] == "replies":
                     sent_hits = 0
                     for annotation in annotations:
-                        annotation.update(url_analyzer._url_values(annotation['uri']))
+                        #annotation.update(url_analyzer._url_values(annotation['uri']))
                         to_send = [annotation] + to_send
                         sent_hits += 1
 

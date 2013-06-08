@@ -199,10 +199,10 @@ class Annotation(BaseResource, UrlAnalyzer):
         childTable = {}
 
         for reply in self.referrers:
-            reply.update({
-                'date': self._fuzzyTime(reply['created']),
-                'user': self._userName(reply['user']),
-            })
+            #reply.update({
+            #    'date': self._fuzzyTime(reply['created']),
+            #    'user': self._userName(reply['user']),
+            #})
 
             # Add this to its parent.
             parent = reply.get('references', [])[-1]
