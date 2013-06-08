@@ -59,10 +59,19 @@ class UrlAnalyzer(dict):
         # Check for local/global link.
         if favlink:
             href = favlink['href']
-            if href.startswith('//') or href.startswith('http'):
+            if href.startswith('http'):
                 icon_link = href
+            elif href.startswith('//'):
+                icon_link= parsed_uri[0] + "://" + href[2:]
             else:
                 icon_link = domain + href
+            #Check if the icon_link url really exists
+            try:
+                r2 = requests.head(icon_link)
+                if r2.status_code != 200:
+                    icon_link = ''
+            except:
+                log.info(traceback.format_exc())
         else:
             icon_link = ''
 
