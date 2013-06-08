@@ -348,6 +348,24 @@ class Hypothesis extends Annotator
       console.log "Also loading annotations for: " + uri
       this.plugins.Store.loadAnnotationsFromSearch uri: uri
 
+class Auth
+  this.$inject = ['$resource']
+  constructor:($resource) ->
+    actions =
+      load:
+        method: 'GET'
+        withCredentials: true
+
+    for action in ['login', 'logout', 'register', 'forgot', 'activate']
+      actions[action] =
+        method: 'POST'
+        params:
+          '__formid__': action
+        withCredentials: true
+
+    @model = $resource('', {}, actions).load()
+
+
 class DraftProvider
   drafts: []
 
@@ -418,7 +436,8 @@ class FlashProvider
       this._process() unless @timeout?
 
 
-angular.module('h.services', [])
+angular.module('h.services', ['ngResource'])
   .provider('drafts', DraftProvider)
   .provider('flash', FlashProvider)
   .service('annotator', Hypothesis)
+  .service('auth', Auth)
