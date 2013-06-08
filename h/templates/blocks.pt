@@ -21,7 +21,7 @@
             novalidate>
 
         <input type="text" name="username" value="" placeholder="Username"
-               ng-model="username" ng-minlength="3"
+               ng-model="model.username" ng-minlength="3"
                required autocapitalize="false" />
         <span ng-show="login.username.$error.required"
               slow-validate="username"
@@ -31,7 +31,7 @@
               >Usernames are at least 3 characters.</span>
 
         <input type="password" name="password" value="" placeholder="Password"
-               ng-model="password"
+               ng-model="model.password"
                required autocapitalize="false" autocorrect="false" />
         <span ng-show="login.password.$error.required"
               slow-validate="password"
@@ -51,7 +51,7 @@
             novalidate>
 
         <input type="text" name="username" value="" placeholder="Username"
-               required autocapitalize="false" ng-model="username"
+               required autocapitalize="false" ng-model="model.username"
                ng-minlength="3" ng-maxlength="15"
                ng-pattern="/^[A-Za-z0-9._]+$/" />
         <span ng-show="register.username.$error.required"
@@ -68,7 +68,7 @@
               >Only letters, numbers, underscore and dot are allowed. </span>
 
         <input type="email" name="email" value="" placeholder="Email"
-               ng-model="email" required autocapitalize="false" />
+               ng-model="model.email" required autocapitalize="false" />
         <span ng-show="register.email.$error.email"
               slow-validate="email"
               >Is this an email address?</span>
@@ -78,7 +78,7 @@
 
         <input type="password" name="password" value="" placeholder="Password"
                required autocapitalize="false" autocorrect="false"
-               ng-minlength="2" ng-model="password" />
+               ng-minlength="2" ng-model="model.password" />
         <span ng-show="register.password.$error.required"
               slow-validate="password"
               >Please enter a password.</span>
@@ -100,7 +100,7 @@
             novalidate>
 
         <input type="email" name="email" value="" placeholder="Email"
-               required autocapitalize="false" ng-model="email" />
+               required autocapitalize="false" ng-model="model.email" />
         <span ng-show="forgot.email.$error.email"
               slow-validate="email"
               >Is this an email address?</span>
@@ -123,14 +123,14 @@
 
         <input type="text" name="code" value="" placeholder="Activation Code"
                required autocorrect="false" autocapitalize="false"
-               ng-model="code" />
+               ng-model="model.code" />
         <span ng-show="activate.code.$error.required"
               slow-validate="code"
               >Please enter your validation code.</span>
 
         <input type="password" name="password" value="" placeholder="Password"
                required autocapitalize="false" autocorrect="false"
-               ng-minlength="2" ng-model="password" />
+               ng-minlength="2" ng-model="model.password" />
         <span ng-show="activate.password.$error.required"
               slow-validate="password"
               >Please choose a password.</span>
@@ -143,31 +143,6 @@
 
       </form>
       <!-- / Activate -->
-    </metal:main>
-
-    <metal:main define-macro="tinyman">
-      <form id="persona"
-            action=""
-            method="POST"
-            enctype="multipart/form-data"
-            accept-charset="utf-8">
-        <input name="__formid__" type="hidden" value="persona" />
-        <div class="dropdown"
-             ng-show="persona">
-          <span role="button"
-                class="dropdown-toggle"
-                data-toggle="dropdown"
-                >{{persona.username}}<span class="provider"
-                                           >/{{persona.provider}}</span></span>
-          <ul class="dropdown-menu pull-right"
-              role="menu">
-            <li ng-repeat="option in personas"
-                ng-click="persona = personas[$index]"
-                >{{option.username}}/{{option.provider}}</li>
-            <li ng-click="persona = null">Sign out</li>
-          </ul>
-        </div>
-      </form>
     </metal:main>
   </body>
 </html>

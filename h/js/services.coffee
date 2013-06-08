@@ -348,22 +348,22 @@ class Hypothesis extends Annotator
       console.log "Also loading annotations for: " + uri
       this.plugins.Store.loadAnnotationsFromSearch uri: uri
 
-class Auth
-  this.$inject = ['$resource']
-  constructor:($resource) ->
-    actions =
+
+class AuthenticationProvider
+  constructor: ->
+    @actions =
       load:
         method: 'GET'
         withCredentials: true
 
     for action in ['login', 'logout', 'register', 'forgot', 'activate']
-      actions[action] =
+      @actions[action] =
         method: 'POST'
         params:
           '__formid__': action
         withCredentials: true
 
-    @model = $resource('', {}, actions).load()
+  $get: ['$resource', ($resource) -> $resource('', {}, @actions).load()]
 
 
 class DraftProvider
@@ -404,12 +404,33 @@ class FlashProvider
   notice: null
   timeout: null
 
-  constructor: ->
+  this.$inject = ['$httpProvider']
+  constructor: ($httpProvider) ->
     # Configure notification classes
     angular.extend Annotator.Notification,
       INFO: 'info'
       ERROR: 'error'
       SUCCESS: 'success'
+
+    # Configure the response interceptor
+    $httpProvider.responseInterceptors.push ['$q', ($q) =>
+      (promise) =>
+        promise.then (response) =>
+          data = response.data
+          format = response.headers 'content-type'
+          if format?.match /^application\/json/
+            if data.flash?
+              this._flash q, msgs for q, msgs of data.flash
+
+            if data.status is 'failure'
+              this._flash 'error', data.reason
+              $q.reject(data.reason)
+            else if data.status is 'okay'
+              response.data = data.model
+              response
+          else
+            response
+    ]
 
   _process: ->
     @timeout = null
@@ -437,7 +458,7 @@ class FlashProvider
 
 
 angular.module('h.services', ['ngResource'])
+  .provider('authentication', AuthenticationProvider)
   .provider('drafts', DraftProvider)
   .provider('flash', FlashProvider)
   .service('annotator', Hypothesis)
-  .service('auth', Auth)

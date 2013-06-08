@@ -607,12 +607,12 @@ blockquote {
 
   .inner > * {
     padding: .3em;
-  }
 
-  .tinyman {
-    border-left: 1px solid $grayLighter;
-    display: inline-block;
-    font-family: $sansFontFamily;
+    &.pull-right {
+      border-left: 1px solid $grayLighter;
+      display: inline-block;
+      font-family: $sansFontFamily;
+    }
   }
 }
 

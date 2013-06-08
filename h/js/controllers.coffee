@@ -2,24 +2,17 @@ class App
   scope:
     frame:
       visible: false
-    username: null
-    email: null
-    password: null
-    code: null
     sheet:
       collapsed: true
       tab: null
-    personas: []
-    persona: null
-    token: null
 
   this.$inject = [
     '$compile', '$element', '$http', '$location', '$scope', '$timeout',
-    'annotator', 'drafts', 'flash'
+    'annotator', 'authentication', 'drafts', 'flash'
   ]
   constructor: (
     $compile, $element, $http, $location, $scope, $timeout
-    annotator, drafts, flash
+    annotator, authentication, drafts, flash
   ) ->
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
@@ -111,26 +104,33 @@ class App
         if data.status is 'failure' then flash 'error', data.reason
         if data.status is 'okay' then $scope.sheet.collapsed = true
 
-    $scope.$watch 'personas', (newValue, oldValue) =>
-      if newValue?.length
-        annotator.element.find('#persona')
-          .off('change').on('change', -> $(this).submit())
-          .off('click')
-      else
-        $scope.persona = null
-        $scope.token = null
+    $scope.$watch 'sheet.collapsed', (newValue) ->
+      $scope.sheet.tab = if newValue then null else 'login'
 
-    $scope.$watch 'persona', (newValue, oldValue) =>
+    $scope.$watch 'sheet.tab', (tab) ->
+      $timeout =>
+        $element
+        .find('form')
+        .filter(-> this.name is tab)
+        .find('input')
+        .filter(-> this.type isnt 'hidden')
+        .first()
+        .focus()
+      , 10
+
+    $scope.$watch 'auth.personas', (newValue, oldValue) =>
+      unless newValue?.length
+        authentication.persona = null
+        authentication.token = null
+
+    $scope.$watch 'auth.persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
         # TODO: better knowledge of routes
-        $http.post 'logout', '',
-          withCredentials: true
-        .success (data) =>
-          $scope.$broadcast '$reset'
-          if data.model? then angular.extend($scope, data.model)
-          if data.flash? then flash q, msgs for q, msgs of data.flash
+        authentication.$logout => $scope.$broadcast '$reset'
+      else if newValue?
+        $scope.sheet.collapsed = true
 
-    $scope.$watch 'token', (newValue, oldValue) =>
+    $scope.$watch 'auth.token', (newValue, oldValue) =>
       if plugins.Auth?
         plugins.Auth.token = newValue
         plugins.Auth.updateHeaders()
@@ -214,14 +214,7 @@ class App
         collapsed: !show
         tab: 'login'
 
-    $scope.$on '$reset', => angular.extend $scope, @scope
-
-    # Fetch the initial model from the server
-    $http.get 'state',
-      withCredentials: true
-    .success (data) =>
-      if data.model? then angular.extend $scope, data.model
-      if data.flash? then flash q, msgs for q, msgs of data.flash
+    $scope.$on '$reset', => angular.extend $scope, @scope, auth: authentication
 
     $scope.$broadcast '$reset'
 
@@ -439,7 +432,7 @@ class Viewer
       $scope.focus []
 
 
-angular.module('h.controllers', [])
+angular.module('h.controllers', ['bootstrap'])
   .controller('AppController', App)
   .controller('AnnotationController', Annotation)
   .controller('EditorController', Editor)
