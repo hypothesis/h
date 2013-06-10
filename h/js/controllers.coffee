@@ -420,6 +420,12 @@ class Viewer
 
     $scope.$on '$routeUpdate', refresh
 
+    $scope.sortThread = (thread) ->
+      if thread?.message?.updated
+        return new Date(thread.message.updated)
+      else
+        return new Date()
+
     refresh()
 
   refresh: ($scope, $routeParams, annotator) =>
