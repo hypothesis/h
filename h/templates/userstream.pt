@@ -24,10 +24,16 @@
           <li ng-repeat="annotation in annotations"
               repeat-anim array="annotations"
               class="annotation-header-border">
-            <div class="excerpt paper annotation-header-width">
+            <div class="excerpt">
               <div class="yui3-u-1 t-yui3-u-1-2 small">
-                <div class="pull-left">{{annotation.quote | shortify}}</div>
-                <span class="pull-left" ng-bind-html-unsafe="annotation.text | shortify | converter"/>
+                <div class="pull-left paper annotation-header-width"
+                     ng-show="annotation.favicon_link">
+                   <img class="favicon annotation-header-favicon" src="{{annotation.favicon_link}}"/>
+                </div>
+                <div class="pull-left paper annotation-header-width">{{annotation.quote | shortify}}</div>
+                <div class="pull-left paper annotation-header-width">
+                  <span ng-bind-html-unsafe="annotation.text | shortify | converter"/>
+                </div>
               </div>
             </div>
           </li>
