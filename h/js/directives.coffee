@@ -282,12 +282,12 @@ repeatAnim = ->
       if item._anim is 'fade'
         itemElm
           .css({ opacity: 0 })
-          .animate({ opacity: 1 }, 2500)
+          .animate({ opacity: 1 }, 1500)
       else
         if item._anim is 'slide'
           itemElm
-            .css({ 'margin-left': $('body').width() })
-            .animate({ 'margin-left': '0px' }, 2500)
+            .css({ 'margin-left': itemElm.width() })
+            .animate({ 'margin-left': '0px' }, 1500)
 
 angular.module('h.directives', ['ngSanitize'])
   .directive('annotation', annotation)
