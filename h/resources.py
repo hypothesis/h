@@ -5,7 +5,6 @@ except ImportError:
 
 from datetime import datetime
 from math import floor
-import requests
 
 from dateutil.parser import parse
 from dateutil.tz import tzutc
@@ -19,7 +18,7 @@ from zope.interface import implementer
 
 from h import interfaces
 from h.streamer import UrlAnalyzer
-
+from h.models import get_session
 
 import logging
 log = logging.getLogger(__name__)
@@ -234,6 +233,25 @@ class AnnotationFactory(BaseResource):
 
         return annotation
 
+class UserStream(BaseResource, dict):
+    pass
+
+class UserStreamFactory(BaseResource):
+    def __getitem__(self, key):
+        #Check if user exists
+        request = self.request
+        registry = request.registry
+        User = registry.getUtility(interfaces.IUserClass)
+        user_count = get_session(request).query(User).filter(User.username.ilike(key)).count()
+
+        user_stream = UserStream(request)
+        user_stream.update({
+            'user': key,
+            'user_count': user_count
+        })
+
+        return user_stream
+
 
 def includeme(config):
     config.set_root_factory(RootFactory)
@@ -241,3 +259,4 @@ def includeme(config):
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
     RootFactory.stream = Streamer
+    RootFactory.u = UserStreamFactory
