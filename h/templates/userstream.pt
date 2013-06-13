@@ -21,7 +21,9 @@
       <div class="knockout noise yui3-u-1">
 
         <ul>
-          <li ng-repeat="annotation in annotations" class="annotation-header-border">
+          <li ng-repeat="annotation in annotations"
+              repeat-anim array="annotations"
+              class="annotation-header-border">
             <div class="excerpt paper annotation-header-width">
               <div class="yui3-u-1 t-yui3-u-1-2 small">
                 <div class="pull-left">{{annotation.quote | shortify}}</div>

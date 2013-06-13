@@ -30,8 +30,9 @@ class UserStream
 
     $scope.manage_new_data = (data, action) =>
       for annotation in data
-        annotation['action'] = action
-        annotation['quote'] = get_quote annotation
+        annotation.action = action
+        annotation.quote = get_quote annotation
+        annotation._anim = 'slide'
         $scope.annotations.splice 0,0,annotation
 
     $scope.open = =>
@@ -44,5 +45,5 @@ class UserStream
     $scope.open()
 
 
-angular.module('h.userstream',['h.filters','bootstrap'])
+angular.module('h.userstream',['h.filters','h.directives','bootstrap'])
   .controller('UserStreamCtrl', UserStream)
