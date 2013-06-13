@@ -9,15 +9,17 @@ get_quote = (annotation) ->
   quote
 
 class UserStream
-  this.$inject = ['$scope','$element']
-  constructor: ($scope, $element) ->
+  this.$inject = ['$scope','$timeout']
+  constructor: ($scope, $timeout) ->
+    $scope.annotations = []
+    $scope.username = document.body.attributes.internalid.value
     $scope.filter =
       match_policy :  'include_any'
       clauses : [
           field: "/user"
-          operator: "matches"
-          value: 'acct:' + $scope.username + '@'
-        ]
+          operator: "equals"
+          value: $scope.username
+      ]
       actions :
         create: true
         edit: true
@@ -27,10 +29,6 @@ class UserStream
         hits: 100
 
     $scope.manage_new_data = (data, action) =>
-      console.log 'New data'
-      console.log data
-      console.log action
-
       for annotation in data
         annotation['action'] = action
         annotation['quote'] = get_quote annotation

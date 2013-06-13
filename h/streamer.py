@@ -33,6 +33,48 @@ class UrlAnalyzer(dict):
             for parti, part in enumerate(parts)
         )
 
+    @classmethod
+    def url_values_from_document(cls, annotation):
+        log.info(annotation)
+        title = annotation['uri']
+        icon_link = ""
+
+        parsed_uri = urlparse(annotation['uri'])
+        domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
+        domain_stripped = parsed_uri[1]
+        if parsed_uri[1].lower().startswith('www.'):
+            domain_stripped = domain_stripped[4:]
+
+        if 'document' in annotation:
+            if 'title' in annotation['document']:
+                title = annotation['document']['title']
+
+            if 'favicon' in annotation['document']:
+                icon_link = annotation['document']['favicon']
+
+            if icon_link:
+                if icon_link.startswith('http'):
+                    pass
+                elif icon_link.startswith('//'):
+                    icon_link= parsed_uri[0] + "://" + icon_link[2:]
+                else:
+                    icon_link = domain + icon_link
+
+                try:
+                    r2 = requests.head(icon_link)
+                    if r2.status_code != 200:
+                        icon_link = ''
+                except:
+                    log.info(traceback.format_exc())
+
+        return {
+            'title': title,
+            'source': domain,
+            'source_stripped': domain_stripped,
+            'favicon_link': icon_link
+        }
+
+
     def _url_values(self, uri = None):
         if not uri: uri = self['uri']
         # Getting the title of the uri.
@@ -185,7 +227,6 @@ class StreamerSession(Session):
 
     def on_message(self, msg):
         try:
-            log.info(msg)
             payload = json.loads(msg)
             #Let's try to validate the schema
             validate(payload, filter_schema)
@@ -201,7 +242,7 @@ class StreamerSession(Session):
                 else:
                     annotations = store.search()
 
-                url_analyzer = UrlAnalyzer()
+                #url_analyzer = UrlAnalyzer()
                 to_send = []
                 if payload["past_data"]["load_past"] == "time":
                     now = datetime.utcnow().replace(tzinfo=tzutc())
@@ -209,13 +250,13 @@ class StreamerSession(Session):
                     for annotation in annotations:
                         created = parse(annotation['created'])
                         if created >= past and self.filter.match(annotation):
-                            annotation.update(url_analyzer._url_values(annotation['uri']))
+                            annotation.update(UrlAnalyzer.url_values_from_document(annotation))
                             to_send = [annotation] + to_send
                 elif payload["past_data"]["load_past"] == "hits":
                     sent_hits = 0
                     for annotation in annotations:
                         if self.filter.match(annotation):
-                            annotation.update(url_analyzer._url_values(annotation['uri']))
+                            annotation.update(UrlAnalyzer.url_values_from_document(annotation))
                             to_send = [annotation] + to_send
                             sent_hits += 1
                         if sent_hits >= payload["past_data"]["hits"]:

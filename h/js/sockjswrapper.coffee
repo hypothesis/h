@@ -1,9 +1,9 @@
-class SockJSWrapper
+class window.SockJSWrapper
   transports: ['xhr-streaming', 'iframe-eventsource', 'iframe-htmlfile', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling']
   path: window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__'
 
   constructor: ($scope, filter, fn_open, fn_message, fn_close) ->
-    sock = new SockJS(path, transports)
+    sock = new SockJS(@path, @transports)
 
     sock.onopen = ->
       sock.send JSON.stringify filter

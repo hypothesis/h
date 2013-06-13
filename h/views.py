@@ -99,13 +99,7 @@ class UserStream(BaseController):
                 body_template=
                 "No such user exists."
             )
-
-        log.info('-----------------------------------------------------------------')
-        log.info(context)
-        log.info('-----------------------------------------------------------------')
-
         return context
-
 
 
 def includeme(config):

@@ -6,7 +6,7 @@
   </head>
   <style type="text/css"></style>
 
-  <body metal:fill-slot="body" ng-app="h.userstream">
+  <body metal:fill-slot="body" internalid="${user}" ng-app="h.userstream">
     <div class="topbar">
       <div class="inner">
         <a class="barbutton pull-left" href="/"
@@ -16,8 +16,7 @@
     </div>
 
     <div class="content paper yui3-g"
-         ng-controller="UserStreamCtrl"
-         ng-init="username='${user}'">
+         ng-controller="UserStreamCtrl">
 
       <div class="yui3-u-1">
         User stream page. For a better experience,
