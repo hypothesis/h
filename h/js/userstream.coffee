@@ -1,6 +1,6 @@
 get_quote = (annotation) ->
   if not 'target' in annotation then return ''
-  quote = '(This is a reply annotation)'
+  quote = '(Reply annotation)'
   for target in annotation['target']
     for selector in target['selector']
         if selector['type'] is 'TextQuoteSelector'

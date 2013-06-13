@@ -38,9 +38,14 @@ fuzzyTime = (date) ->
 userName = (user) ->
   (user?.match /^acct:([^@]+)/)?[1]
 
+shortify = (text) ->
+  if text.length > 20
+    text = text.substring 0,20
+    text = text + '...'
+  text
 
 angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
-  
+  .filter('shortify', -> shortify)

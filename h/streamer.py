@@ -23,15 +23,39 @@ import logging
 log = logging.getLogger(__name__)
 
 class UrlAnalyzer(dict):
-    def urlEncodeNonAscii(self, b):
+    @classmethod
+    def urlEncodeNonAscii(cls, b):
         return re.sub('[\x80-\xFF]', lambda c: '%%%02x' % ord(c.group(0)), b)
 
-    def iriToUri(self, iri):
+    @classmethod
+    def iriToUri(cls, iri):
         parts= urlparse(iri)
         return urlunparse(
-            part.encode('idna') if parti==1 else self.urlEncodeNonAscii(part.encode('utf-8'))
+            part.encode('idna') if parti==1 else cls.urlEncodeNonAscii(part.encode('utf-8'))
             for parti, part in enumerate(parts)
         )
+
+    @classmethod
+    def check_favicon(cls, icon_link, parsed_uri, domain):
+        if icon_link:
+            if icon_link.startswith('http'):
+                icon_link = icon_link
+            elif icon_link.startswith('//'):
+                icon_link= parsed_uri[0] + "://" + icon_link[2:]
+            else:
+                icon_link = domain + icon_link
+            #Check if the icon_link url really exists
+            try:
+                r2 = requests.head(icon_link)
+                if r2.status_code != 200:
+                    icon_link = ''
+            except:
+                log.info(traceback.format_exc())
+        else:
+            icon_link = ''
+
+        return icon_link
+
 
     @classmethod
     def url_values_from_document(cls, annotation):
@@ -52,21 +76,7 @@ class UrlAnalyzer(dict):
             if 'favicon' in annotation['document']:
                 icon_link = annotation['document']['favicon']
 
-            if icon_link:
-                if icon_link.startswith('http'):
-                    pass
-                elif icon_link.startswith('//'):
-                    icon_link= parsed_uri[0] + "://" + icon_link[2:]
-                else:
-                    icon_link = domain + icon_link
-
-                try:
-                    r2 = requests.head(icon_link)
-                    if r2.status_code != 200:
-                        icon_link = ''
-                except:
-                    log.info(traceback.format_exc())
-
+            icon_link = cls.check_favicon(icon_link, parsed_uri, domain)
         return {
             'title': title,
             'source': domain,
@@ -101,22 +111,9 @@ class UrlAnalyzer(dict):
 
         # Check for local/global link.
         if favlink:
-            href = favlink['href']
-            if href.startswith('http'):
-                icon_link = href
-            elif href.startswith('//'):
-                icon_link= parsed_uri[0] + "://" + href[2:]
-            else:
-                icon_link = domain + href
-            #Check if the icon_link url really exists
-            try:
-                r2 = requests.head(icon_link)
-                if r2.status_code != 200:
-                    icon_link = ''
-            except:
-                log.info(traceback.format_exc())
+          icon_link = self.check_favicon(favlink['href'], parsed_uri, domain)
         else:
-            icon_link = ''
+          icon_link = ""
 
         return {
             'title': title,

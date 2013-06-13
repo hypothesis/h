@@ -18,6 +18,20 @@
     <div class="content paper yui3-g"
          ng-controller="UserStreamCtrl">
 
+      <div class="knockout noise yui3-u-1">
+
+        <ul>
+          <li ng-repeat="annotation in annotations" class="annotation-header-border">
+            <div class="excerpt paper annotation-header-width">
+              <div class="yui3-u-1 t-yui3-u-1-2 small">
+                <div class="pull-left">{{annotation.quote | shortify}}</div>
+                <span class="pull-left" ng-bind-html-unsafe="annotation.text | shortify | converter"/>
+              </div>
+            </div>
+          </li>
+        </ul>
+     </div>
+
       <div class="yui3-u-1">
         User stream page. For a better experience,
         install the <a href="">extension</a>.
