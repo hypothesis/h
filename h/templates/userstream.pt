@@ -24,7 +24,9 @@
           <li ng-repeat="annotation in annotations"
               repeat-anim array="annotations"
               class="annotation-header-border">
-            <div class="excerpt">
+            <div class="excerpt"
+                 ng-hide="view"
+                 ng-click="view=!view">
               <div class="small">
                 <div class="pull-right paper annotation-header-width">
                   {{ annotation.updated | fuzzyTime }}
@@ -43,8 +45,42 @@
                       <span ng-bind-html-unsafe="annotation.text | converter"/>
                     </div>
                 </div>
-
               </div>
+            </div>
+
+            <div class="excerpt"
+                 ng-show="view"
+                 ng-click="view=!view">
+              <div class="domain">
+                <img class="favicon" ng-show="annotation.favicon_link"
+                     ng-src="{{annotation.favicon_link}}"/>
+                <a href="{{annotation.uri}}">{{annotation.title}}</a>
+                |
+                <a href="{{annotation.source}}">{{annotation.source_stripped}}</a>
+              </div>
+              <div class="card-grid yui3-g">
+                <div class="yui3-u-1 t-yui3-u-1-2">
+                  <div class="paper excerpt">
+                    <blockquote>{{annotation.quote}}</blockquote>
+                  </div>
+                </div>
+                <div class="yui3-u-1 t-yui3-u-1-2">
+                  <div class="paper thread">
+                    <div class="detail">
+                      <div class="magicontrols pull-right">
+                       <span class="small">{{annotation.updated | fuzzyTime}}</span>
+                      </div>
+                     <strong>
+                      <span class="user">{{annotation.user | userName}}</span>
+                     </strong>
+                     <div class="body">
+                      <span ng-bind-html-unsafe="annotation.text | converter"/>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
             </div>
           </li>
         </ul>
