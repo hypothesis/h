@@ -32,7 +32,7 @@ class UserStream
       for annotation in data
         annotation.action = action
         annotation.quote = get_quote annotation
-        annotation._anim = 'slide'
+        annotation._anim = 'fade'
         $scope.annotations.splice 0,0,annotation
 
     $scope.open = =>
