@@ -37,6 +37,7 @@ minification needs. These are not required when running the project in a
 development configuration.
 
 .. _pyramid: http://www.pylonsproject.org/
+.. _WSGI: http://www.wsgi.org/
 .. _gunicorn: http://gunicorn.org/
 .. _uWSGI: http://projects.unbit.it/uwsgi/
 .. _elasticsearch: http://www.elasticsearch.org/
