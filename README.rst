@@ -13,7 +13,7 @@ modern web browsers in mind.
 Installation
 ------------
 
-See INSTALL.rst for installation instructions.
+See `<INSTALL.rst>`_ for installation instructions.
 
 Running
 -------
@@ -51,7 +51,7 @@ License
 Hypothes.is is released under the `2-Clause BSD License`_, sometimes referred
 to as the "Simplified BSD License" or the "FreeBSD License". Some third-party
 components are included. They are subject to their own licenses. All of the
-license information can be found in the included LICENSE file.
+license information can be found in the included `<LICENSE>`_ file.
 
 .. [*] Community and identity features are not finished. Get involved and help!
 .. _Open Annotation Core: http://openannotation.org/spec/core/
