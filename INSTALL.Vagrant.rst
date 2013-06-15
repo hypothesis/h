@@ -15,7 +15,7 @@ Use your package manager of choice, e.g.::
 or download from http://vagrantup.com.
 
 
-Bookstrapping the VM
+Bootstrapping the VM
 --------------------
 
 From the home directory of the h project (this directory) ::
