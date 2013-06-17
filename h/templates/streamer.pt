@@ -71,8 +71,8 @@
                <a href="" class="down-icon dropdown-toggle small" role="button" title="Past">Past</a>
               <ul class="dropdown-menu" role="menu">                
                 <li ng-click="toggle_past()" class="small">Load {{filter.past_data.load_past}}</li>
-                <li class="small" ng-hide="filter.past_data.load_past != 'time'">Go back <input type="number" ng-model="filter.past_data.go_back" step="1" min="1" max="60" value="5"/> min(s)<li>
-                <li class="small" ng-hide="filter.past_data.load_past != 'hits'">Load <input type="number" ng-model="filter.past_data.hits" step="10" min="1" max="500" value="20"/> hits<li>
+                <li class="small" ng-hide="filter.past_data.load_past != 'time'">Go back <input type="number" ng-model="time" step="1" min="1" max="60" value="5"/> min(s)<li>
+                <li class="small" ng-hide="filter.past_data.load_past != 'hits'">Load <input type="number" ng-model="hits" step="10" min="1" max="500" value="20"/> hits<li>
               </ul>
           </div>
 

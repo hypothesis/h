@@ -31,21 +31,13 @@ class Streamer
     $scope.streaming = false
     $scope.annotations = []
     $scope.bads = []
+    $scope.time = 5
+    $scope.hits = 100
 
     @parser = new ClauseParser()
-
-    #Json structure we will watch and update
-    $scope.filter =
-      match_policy :  'include_any'
-      clauses : []
-      actions :
-        create: true
-        edit: true
-        delete: true
-      past_data:
-        load_past: 'hits'
-        go_back: 5
-        hits: 100
+    @sfilter = new StreamerFilter()
+    @sfilter.setPastDataHits(100)
+    $scope.filter = @sfilter.filter
 
     #parse for route params
     params = $location.search()
@@ -54,43 +46,40 @@ class Streamer
 
     if params.action_create
        if (typeof params.action_create) is 'boolean'
-         $scope.filter.actions.create = params.action_create
+         @sfilter.setActionCreate(params.action_create)
        else
-         $scope.filter.actions.create = params.action_create is 'true'
+         @sfilter.setActionCreate(params.action_create is 'true')
     if params.action_edit
        if (typeof params.action_edit) is 'boolean'
-         $scope.filter.actions.edit = params.action_edit
+         @sfilter.setActionEdit(params.action_edit)
        else
-         $scope.filter.actions.edit = params.action_edit is 'true'
+         @sfilter.setActionEdit(params.action_edit is 'true')
     if params.action_delete
        if (typeof params.action_delete) is 'boolean'
-         $scope.filter.actions.delete = params.action_delete
+         @sfilter.setActionDelete(params.action_delete)
        else
-         $scope.filter.actions.delete = params.action_delete is 'true'
+         @sfilter.setActionDelete(params.action_delete is 'true')
 
     if params.load_past in @past_modes
-      $scope.filter.past_data.load_past = params.load_past
-    if params.hits? and parseInt(params.hits) is not NaN
-      $scope.filter.past_data.hits = parseInt(params.hits)
-    if params.go_back? and parseInt(params.go_back) is not NaN
-      $scope.filter.past_data.go_back = parseInt(params.go_back)
+      if params.hits? and parseInt(params.hits) is not NaN
+        @sfilter.setPastDataHits(parseInt(params.hits))
+      if params.go_back? and parseInt(params.go_back) is not NaN
+        @sfilter.setPastDataTime(parseInt(params.go_back))
 
     if params.clauses
       test_clauses = params.clauses.replace ",", " "
-      res = @parser.parse_clauses test_clauses
-      if res[1]?.length is 0
-        $scope.filter.clauses = res[0]
-        $scope.clauses = test_clauses
+      @sfilter.setClausesParse(test_clauses)
+      $scope.clauses = test_clauses
     else
-      $scope.clauses = ""
+      $scope.clauses = ''
 
     console.log $scope.filter
 
     $scope.toggle_past = ->
       switch $scope.filter.past_data.load_past
-        when 'none' then $scope.filter.past_data.load_past = 'time'
-        when 'time' then $scope.filter.past_data.load_past = 'hits'
-        when 'hits' then $scope.filter.past_data.load_past = 'none'
+        when 'none' then @sfilter.setPastDataTime($scope.time)
+        when 'time' then @sfilter.setPastDataHits($scope.hits)
+        when 'hits' then @sfilter.setPastDataNone()
 
     $scope.$watch 'filter', (newValue, oldValue) =>
       json = JSON.stringify $scope.filter, undefined, 2
@@ -118,28 +107,21 @@ class Streamer
         $scope.bads = res[1]
       unless $scope.bads.length is 0
         return
+      $scope.open()
 
-      transports = ['xhr-streaming', 'iframe-eventsource', 'iframe-htmlfile', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling']
-      $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__', transports)
+    $scope.open = =>
+      $scope.sock = new SockJSWrapper $scope, $scope.filter
+      , =>
+        $scope.streaming = true
+      , $scope.manage_new_data
+      ,=>
+        $scope.streaming = false
 
-      $scope.sock.onopen = ->
-        $scope.sock.send (JSON.stringify $scope.filter)
-        $scope.$apply =>
-          $scope.streaming = true
-
-      $scope.sock.onclose = ->
-        $scope.$apply =>
-          $scope.streaming = false
-
-      $scope.sock.onmessage = (msg) =>
-        $scope.$apply =>
-          data = msg.data[0]
-          unless data instanceof Array then data = [data]
-          action = msg.data[1]
-          for annotation in data
-            annotation['action'] = action
-            annotation['quote'] = get_quote annotation
-            $scope.annotations.splice 0,0,annotation
+    $scope.manage_new_data = (data, action) =>
+      for annotation in data
+        annotation.action = action
+        annotation.quote = get_quote annotation
+        $scope.annotations.splice 0,0,annotation
 
       #Update the parameters
       $location.search

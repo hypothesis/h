@@ -156,15 +156,17 @@ class window.StreamerFilter
       value: value
     this
 
-  setClausesParse: (clauses_to_parse) ->
+  setClausesParse: (clauses_to_parse, error_checking = false) ->
     res = @parser.parse_clauses clauses_to_parse
-    @filter.clauses = res[0]
+    if res? and (not error_checking) or (error_checking and res[1]?.length is 0)
+      @filter.clauses = res[0]
     this
 
-  addClausesParse: (clauses_to_parse) ->
+  addClausesParse: (clauses_to_parse, error_checking = false) ->
     res = @parser.parse_clauses clauses_to_parse
-    for clause in res[0]
-      @filter.clauses.push clause
+    if res? and (not error_checking) or (error_checking and res[1]?.length is 0)
+      for clause in res[0]
+        @filter.clauses.push clause
     this
 
   resetFilter: ->
