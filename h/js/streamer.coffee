@@ -22,65 +22,6 @@ syntaxHighlight = (json) ->
     return '<span class="' + cls + '">' + match + '</span>'
   )
 
-
-class ClauseParser
-  filter_fields : ['references', 'text', 'user','uri', 'id']
-  operators: ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#']
-  operator_mapping:
-    '=': 'equals'
-    '>': 'gt'
-    '<': 'lt'
-    '=>' : 'ge'
-    '<=' : 'ge'
-    '=<': 'le'
-    '<=' : 'le'
-    '[' : 'one_of'
-    '#' : 'matches'
-
-  parse_clauses: (clauses) ->
-    bads = []
-    structure = []
-    unless clauses
-      return
-    clauses = clauses.split ' '
-    for clause in clauses
-      #Here comes the long and boring validation checking
-      clause = clause.trim()
-      if clause.length < 1 then continue
-
-      parts = clause.split /:(.+)/
-      unless parts.length > 1
-        bads.push [clause, 'Filter clause is not well separated']
-        continue
-
-      unless parts[0] in @filter_fields
-        bads.push [clause, 'Unknown filter field']
-        continue
-
-      field = parts[0]
-      operator_found = false
-      for operator in @operators
-        if (parts[1].indexOf operator) is 0
-          oper = @operator_mapping[operator]
-          if operator is '['
-            value = parts[1][operator.length..].split ','
-          else
-            value = parts[1][operator.length..]
-          operator_found = true
-          break
-
-      unless operator_found
-        bads.push [clause, 'Unknown operator']
-        continue
-
-      structure.push
-        'field'   : '/' + field
-        'operator': oper
-        'value'   : value
-    [structure, bads]
-
-
-
 class Streamer
   strategies: ['include_any', 'include_all', 'exclude_any', 'exclude_all']
   past_modes: ['none','hits','time']
