@@ -51,11 +51,7 @@ class Annotation(BaseController):
 
         d = context._url_values()
         d['annotation'] = context
-        #d['annotation']['replies'] = json.dumps(context.replies)
         d['annotation']['referrers'] = json.dumps(context.referrers)
-
-        #d['annotation']['reply_count'] = len(context.referrers)
-        #d['annotation']['reply_count'] = 0
 
         if context.get('references', []):
             root = context.__parent__[context['references'][0]]
@@ -67,9 +63,7 @@ class Annotation(BaseController):
         if not 'deleted' in context:
             context['deleted'] = False
 
-        #context['date'] = context._fuzzyTime(context['created'])
         context['date'] = context['updated']
-        #context['user'] = context._userName(context['user'])
 
         return d
 
