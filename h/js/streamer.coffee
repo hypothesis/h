@@ -140,7 +140,8 @@ class Streamer
       if res[1]?.length is 0
         $scope.filter.clauses = res[0]
         $scope.clauses = test_clauses
-
+    else
+      $scope.clauses = ""
 
     console.log $scope.filter
 
