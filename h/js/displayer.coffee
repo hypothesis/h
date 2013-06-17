@@ -36,7 +36,6 @@ class Displayer
         delete: true
       past_data:
         load_past: "none"
-        #id_for_reply: $scope.annotation.id
 
     $scope.change_annotation_content = (id, new_annotation) =>
       to_change = @idTable[id]
