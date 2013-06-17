@@ -20,22 +20,12 @@ class Displayer
     $scope.annotation.id = document.body.attributes.internalid.value
     @idTable[$scope.annotation.id] = $scope.annotation
     $scope.filter =
-      match_policy :  'include_any'
-      clauses : [
-          field: "/references"
-          operator: "first_of"
-          value: $scope.annotation.id
-        ,
-          field: "/id"
-          operator: "equals"
-          value: $scope.annotation.id
-        ]
-      actions :
-        create: true
-        edit: true
-        delete: true
-      past_data:
-        load_past: "none"
+      new StreamerFilter()
+        .setPastDataNone()
+        .setMatchPolicyIncludeAny()
+        .addClausesParse('references:^' + $scope.annotation.id)
+        .addClausesParse('id:=' + $scope.annotation.id)
+        .getFilter()
 
     $scope.change_annotation_content = (id, new_annotation) =>
       to_change = @idTable[id]

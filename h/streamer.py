@@ -141,7 +141,7 @@ filter_schema = {
                 "field": {"type": "string", "format": "json-pointer"},
                 "operator": {
                     "type": "string",
-                    "enum": ["equals", "matches", "lt", "le", "gt", "ge", "one_of","first_of"]
+                    "enum": ["equals", "matches", "lt", "le", "gt", "ge", "one_of", "first_of"]
                 },
                 "value": "object"
             }
@@ -153,7 +153,7 @@ filter_schema = {
             },
             "go_back": {"type": "minutes", "default": 5},
             "hits": {"type": "number", "default": 100},
-            "id_for_reply" : {"type" : "string", "optional": True}
+            "id_for_reply": {"type" : "string", "optional": True}
         }
     },
     "required": ["match_policy", "clauses", "actions"]

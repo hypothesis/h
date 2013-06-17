@@ -9,24 +9,17 @@ get_quote = (annotation) ->
   quote
 
 class UserStream
+
   this.$inject = ['$scope','$timeout']
   constructor: ($scope, $timeout) ->
     $scope.annotations = []
     $scope.username = document.body.attributes.internalid.value
     $scope.filter =
-      match_policy :  'include_any'
-      clauses : [
-          field: "/user"
-          operator: "equals"
-          value: $scope.username
-      ]
-      actions :
-        create: true
-        edit: true
-        delete: true
-      past_data:
-        load_past: "hits"
-        hits: 100
+      new StreamerFilter()
+        .setPastDataHits(100)
+        .setMatchPolicyIncludeAny()
+        .setClausesParse('user:=' + $scope.username)
+        .getFilter()
 
     $scope.manage_new_data = (data, action) =>
       for annotation in data
