@@ -6,6 +6,7 @@ __all__ = [
     'RegisterController',
 ]
 
+from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 from pyramid.traversal import find_resource
 
