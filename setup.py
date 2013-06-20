@@ -58,5 +58,7 @@ setup(
         ],
     },
 
-    cmdclass=versioneer.get_cmdclass()
+    cmdclass=versioneer.get_cmdclass(),
+    
+    test_suite='test'
 )
