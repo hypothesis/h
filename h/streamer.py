@@ -7,6 +7,7 @@ from urlparse import urlparse, urlunparse
 import BeautifulSoup
 import re
 
+from pyramid.events import subscriber
 from pyramid_sockjs.session import Session
 from jsonschema import validate
 from jsonpointer import resolve_pointer
@@ -16,7 +17,7 @@ from dateutil.parser import parse
 from datetime import datetime, timedelta
 
 from annotator import authz
-from h import interfaces
+from h import events, interfaces
 
 import logging
 log = logging.getLogger(__name__)
@@ -145,7 +146,7 @@ class FilterHandler(object):
         if field_value is None:
             return False
         else: return getattr(self, clause['operator'])(field_value, clause['value'])
-    
+
     #match_policies
     def include_any(self, target):
         for clause in self.filter['clauses']:
@@ -239,8 +240,14 @@ class StreamerSession(Session):
         self.connections.remove(self)
 
 
-def after_action(annotation, action):
-    if not authz.authorize(annotation, 'read'): return
+@subscriber(events.AnnotatorStoreEvent)
+def after_action(event):
+    action = event.action
+    annotation = event.annotation
+
+    if action != 'create':
+        if not authz.authorize(annotation, action):
+            return
 
     for connection in StreamerSession.connections:
         try:
@@ -251,19 +258,7 @@ def after_action(annotation, action):
             log.info('Filter error!')
 
 
-def after_save(annotation):
-    after_action(annotation, 'create')
-
-
-def after_update(annotation):
-    after_action(annotation, 'edit')
-
-
-def after_delete(annotation):
-    after_action(annotation, 'delete')
-
-
 def includeme(config):
     config.include('pyramid_sockjs')
     config.add_sockjs_route(prefix='__streamer__', session=StreamerSession)
-    config.commit()
+    config.scan(__name__)
