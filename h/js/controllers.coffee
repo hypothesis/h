@@ -415,16 +415,16 @@ class Viewer
         highlights = []
       provider.notify method: 'setActiveHighlights', params: highlights
 
-    $scope.$on '$destroy', ->
-      if listening then plugins.Heatmap.unsubscribe 'updated', refresh
-
-    $scope.$on '$routeUpdate', refresh
-
     $scope.sortThread = (thread) ->
       if thread?.message?.updated
         return new Date(thread.message.updated)
       else
         return new Date()
+
+    $scope.$on '$destroy', ->
+      if listening then plugins.Heatmap.unsubscribe 'updated', refresh
+
+    $scope.$on '$routeUpdate', refresh
 
     refresh()
 
