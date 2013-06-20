@@ -153,11 +153,81 @@ filter_schema = {
             },
             "go_back": {"type": "minutes", "default": 5},
             "hits": {"type": "number", "default": 100},
-            "id_for_reply": {"type" : "string", "optional": True}
+            "id_for_reply": {"type": "string", "optional": True}
         }
     },
     "required": ["match_policy", "clauses", "actions"]
 }
+
+
+class FilterToElasticFilter(object):
+    def __init__(self, filter_json):
+        self.filter = filter_json
+        self.query = {
+            "query": {
+                "bool": {
+                    "minimum_number_should_match": 1}}}
+        clauses = self.convert_clauses(self.filter['clauses'])
+        #apply match policy
+        getattr(self, self.filter['match_policy'])(self.query['query']['bool'], clauses)
+
+        if self.filter['past_data']['load_past'] == 'time':
+            now = datetime.utcnow().replace(tzinfo=tzutc())
+            past = now - timedelta(seconds=60 * self.filter['past_data']['go_back'])
+            converted = past.strftime("%Y-%m-%dT%H:%M:%S")
+            self.query['filter'] = {"range": {"created": {"gte": converted}}}
+        elif self.filter['past_data']['load_past'] == 'hits':
+            self.query['filter'] = {"limit": {"value": self.filter['past_data']['hits']}}
+
+    def equals(self, field, value):
+        return {"term": {field: value}}
+
+    def one_of(self, field, value):
+        return {"term": {field: value}}
+
+    def first_of(self, field, value):
+        #TODO: proper implementation
+        return {"term": {field: value}}
+
+    def matches(self, field, value):
+        return {"text": {field: value}}
+
+    def lt(self, field, value):
+        return {"range": {field: {"lt": value}}}
+
+    def le(self, field, value):
+        return {"range": {field: {"lte": value}}}
+
+    def gt(self, field, value):
+        return {"range": {field: {"gt": value}}}
+
+    def ge(self, field, value):
+        return {"range": {field: {"gte": value}}}
+
+    def convert_clauses(self, clauses):
+        new_clauses = []
+        for clause in clauses:
+            new_clause = getattr(self, clause['operator'])(clause['field'], clause['value'])
+            new_clauses.append(new_clause)
+        return new_clauses
+
+    def _policy(self, operator, target, clauses):
+        target[operator] = []
+        for clause in clauses:
+            target[operator].append(clause)
+
+    def include_any(self, target, clauses):
+        self._policy('should', target, clauses)
+
+    def include_all(self, target, clauses):
+        self._policy('must', target, clauses)
+
+    def exclude_any(self, target, clauses):
+        self._policy('must_not', target, clauses)
+
+    def exclude_any(self, target, clauses):
+        target['must_not'] = {"bool": {}}
+        self._policy('must', target['must_not']['bool'], clauses)
 
 
 class FilterHandler(object):
@@ -231,6 +301,7 @@ class StreamerSession(Session):
 
             #If past is given, send the annotations back.
             if "past_data" in payload and payload["past_data"] != "none":
+                query = FilterToElasticFilter(payload)
                 request = self.request
                 registry = request.registry
                 store = registry.queryUtility(interfaces.IStoreClass)(request)
@@ -238,7 +309,12 @@ class StreamerSession(Session):
                     annotations = store.search(references=payload["past_data"]['id_for_reply'])
                 else:
                     annotations = store.search()
-
+                log.info('----------------------------------------')
+                log.info(query.query)
+                log.info('----------------------------------------')
+                test = store.search_raw(json.dumps(query.query))
+                log.info(str(test))
+                log.info('----------------------------------------')
                 to_send = []
                 if payload["past_data"]["load_past"] == "time":
                     now = datetime.utcnow().replace(tzinfo=tzutc())
