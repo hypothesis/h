@@ -3,15 +3,15 @@ class window.SockJSWrapper
   path: window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__'
 
   constructor: ($scope, filter, fn_open, fn_message, fn_close) ->
-    sock = new SockJS(@path, @transports)
+    @sock = new SockJS(@path, @transports)
 
-    sock.onopen = ->
-      sock.send JSON.stringify filter
+    @sock.onopen = =>
+      @sock.send JSON.stringify filter
       if fn_open? then fn_open()
 
-    sock.onclose = fn_close
+    @sock.onclose = fn_close
 
-    sock.onmessage = (msg) =>
+    @sock.onmessage = (msg) =>
       console.log 'Got something'
       console.log msg
       data = msg.data[0]
@@ -20,4 +20,8 @@ class window.SockJSWrapper
       if fn_message?
         $scope.$apply =>
           fn_message data, action
+
+
+  close: ->
+    @sock.close()
 

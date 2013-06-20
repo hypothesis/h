@@ -99,12 +99,6 @@ class window.StreamerFilter
       go_back: time
     this
 
-  setPastDataReplies: (id_for_reply) ->
-    @filter.past_data =
-      load_past: 'replies'
-      id_for_reply: id_for_reply
-    this
-
   setMatchPolicy: (policy) ->
     @filter.match_policy = policy
     this

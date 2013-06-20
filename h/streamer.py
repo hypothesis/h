@@ -149,11 +149,10 @@ filter_schema = {
         "past_data": {
             "load_past": {
                 "type": "string",
-                "enum": ["time", "hits", "replies", "none"]
+                "enum": ["time", "hits", "none"]
             },
             "go_back": {"type": "minutes", "default": 5},
             "hits": {"type": "number", "default": 100},
-            "id_for_reply": {"type": "string", "optional": True}
         }
     },
     "required": ["match_policy", "clauses", "actions"]
@@ -167,9 +166,13 @@ class FilterToElasticFilter(object):
             "query": {
                 "bool": {
                     "minimum_number_should_match": 1}}}
-        clauses = self.convert_clauses(self.filter['clauses'])
-        #apply match policy
-        getattr(self, self.filter['match_policy'])(self.query['query']['bool'], clauses)
+
+        if len(self.filter['clauses']):
+            clauses = self.convert_clauses(self.filter['clauses'])
+            #apply match policy
+            getattr(self, self.filter['match_policy'])(self.query['query']['bool'], clauses)
+        else:
+            self.query['query'] = {"match_all": {}}
 
         if self.filter['past_data']['load_past'] == 'time':
             now = datetime.utcnow().replace(tzinfo=tzutc())
@@ -207,7 +210,8 @@ class FilterToElasticFilter(object):
     def convert_clauses(self, clauses):
         new_clauses = []
         for clause in clauses:
-            new_clause = getattr(self, clause['operator'])(clause['field'], clause['value'])
+            field = clause['field'][1:].replace('/', '.')
+            new_clause = getattr(self, clause['operator'])(field, clause['value'])
             new_clauses.append(new_clause)
         return new_clauses
 
@@ -305,43 +309,54 @@ class StreamerSession(Session):
                 request = self.request
                 registry = request.registry
                 store = registry.queryUtility(interfaces.IStoreClass)(request)
-                if payload["past_data"]["load_past"] == "replies":
-                    annotations = store.search(references=payload["past_data"]['id_for_reply'])
-                else:
-                    annotations = store.search()
+                #if payload["past_data"]["load_past"] == "replies":
+                #    annotations = store.search(references=payload["past_data"]['id_for_reply'])
+                #else:
+                #    annotations = store.search()
                 log.info('----------------------------------------')
                 log.info(query.query)
                 log.info('----------------------------------------')
-                test = store.search_raw(json.dumps(query.query))
-                log.info(str(test))
+                annotations = store.search_raw(json.dumps(query.query))
+                #log.info(str(test))
+                #log.info('----------------------------------------')
+
                 log.info('----------------------------------------')
-                to_send = []
-                if payload["past_data"]["load_past"] == "time":
-                    now = datetime.utcnow().replace(tzinfo=tzutc())
-                    past = now - timedelta(seconds=60 * payload['past_data']['go_back'])
-                    for annotation in annotations:
-                        created = parse(annotation['created'])
-                        if created >= past and self.filter.match(annotation):
-                            annotation.update(UrlAnalyzer.url_values_from_document(annotation))
-                            to_send = [annotation] + to_send
-                elif payload["past_data"]["load_past"] == "hits":
-                    sent_hits = 0
-                    for annotation in annotations:
-                        if self.filter.match(annotation):
-                            annotation.update(UrlAnalyzer.url_values_from_document(annotation))
-                            to_send = [annotation] + to_send
-                            sent_hits += 1
-                        if sent_hits >= payload["past_data"]["hits"]:
-                            break
-                elif payload["past_data"]["load_past"] == "replies":
-                    sent_hits = 0
-                    for annotation in annotations:
-                        to_send = [annotation] + to_send
-                        sent_hits += 1
+                log.info(type(annotations))
+                log.info(len(annotations))
+                log.info('----------------------------------------')
+
+
+                for annotation in annotations:
+                    annotation.update(UrlAnalyzer.url_values_from_document(annotation))
+
+
+                #if payload["past_data"]["load_past"] == "time":
+                #    now = datetime.utcnow().replace(tzinfo=tzutc())
+                #    past = now - timedelta(seconds=60 * payload['past_data']['go_back'])
+                #    for annotation in annotations:
+                #        created = parse(annotation['created'])
+                #        if created >= past and self.filter.match(annotation):
+                #            annotation.update(UrlAnalyzer.url_values_from_document(annotation))
+                #            to_send = [annotation] + to_send
+                #elif payload["past_data"]["load_past"] == "hits":
+                #    sent_hits = 0
+                #    for annotation in annotations:
+                #        if self.filter.match(annotation):
+                #            annotation.update(UrlAnalyzer.url_values_from_document(annotation))
+                #            to_send = [annotation] + to_send
+                #            sent_hits += 1
+                #        if sent_hits >= payload["past_data"]["hits"]:
+                #            break
+                #elif payload["past_data"]["load_past"] == "replies":
+                #    sent_hits = 0
+                #    for annotation in annotations:
+                #        to_send = [annotation] + to_send
+                #        sent_hits += 1
 
                 #Finally send filtered annotations
-                if len(to_send) > 0:
-                    self.send([to_send, 'past'])
+                if len(annotations) > 0:
+                    log.info('sending')
+                    self.send([annotations, 'past'])
         except:
             log.info(traceback.format_exc())
             log.info('Failed to parse filter:' + str(msg))
