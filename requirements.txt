@@ -19,6 +19,7 @@ deform==0.9.5
 deform-bootstrap==0.2.2
 https://github.com/surfly/gevent/archive/1.0rc2.tar.gz
 gevent-websocket==0.3.6
+gunicorn==0.17.2
 hem==0.3.2
 -e git+https://github.com/eventray/horus.git@2ce62c802ef5237be1c6b1a91dbf115ec284a619#egg=horus-dev
 iso8601==0.1.4
