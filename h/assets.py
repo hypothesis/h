@@ -2,6 +2,11 @@ from os import path
 from urlparse import urlparse
 
 import re
+import sys
+
+if 'gevent' in sys.modules:
+    import gevent.subprocess
+    sys.modules['subprocess'] = gevent.subprocess
 
 
 from webassets import Bundle
