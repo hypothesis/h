@@ -1,6 +1,7 @@
 Beaker==1.6.4
 BeautifulSoup==3.2.1
 Chameleon==2.11
+Cython==0.19.1
 Flask==0.9
 Mako==0.8.0
 Paste==1.7.5.1
