@@ -17,9 +17,14 @@ colander==1.0a2
 cryptacular==1.4.1
 deform==0.9.5
 deform-bootstrap==0.2.2
+https://github.com/surfly/gevent/archive/1.0rc2.tar.gz
+gevent-websocket==0.3.6
+gunicorn==0.17.2
 hem==0.3.2
 -e git+https://github.com/eventray/horus.git@2ce62c802ef5237be1c6b1a91dbf115ec284a619#egg=horus-dev
 iso8601==0.1.4
+jsonpointer==1.0
+jsonschema==1.3.0
 oauth2==1.5.211
 pbkdf2==1.3
 peppercorn==0.4
@@ -32,6 +37,7 @@ pyramid-beaker==0.7
 pyramid-deform==0.2a5
 pyramid-layout==0.6
 pyramid-mailer==0.9
+pyramid-sockjs==0.3.9
 pyramid-tm==0.7
 -e git+https://github.com/tilgovi/pyramid_webassets.git@cbe7befcc0ed9eb688104eade1a2a7e86be3c1db#egg=pyramid_webassets-dev
 pystache==0.5.3
@@ -41,6 +47,7 @@ python-openid==2.2.5
 repoze.lru==0.6
 repoze.sendmail==4.0b2
 requests==0.11.2
+simplejson==2.6.2
 transaction==1.4.1
 translationstring==1.1
 urllib3==1.5

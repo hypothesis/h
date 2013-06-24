@@ -26,6 +26,10 @@ This product also includes the following third-party components:
 
    Copyright (C) 2010, Lloyd Hilaiel
 
+ * sockjs (https://github.com/sockjs)
+
+   Copyright (c) 2011-2012 VMware, Inc.
+
  * yepnope.js (http://yepnopejs.com/)
 
    By Alex Sexton and Ralph Holzmann

@@ -3,12 +3,8 @@ try:
 except ImportError:
     import json
 
-from urlparse import urlparse, urlunparse
 from datetime import datetime
 from math import floor
-import traceback
-import requests
-import re
 
 from dateutil.parser import parse
 from dateutil.tz import tzutc
@@ -20,9 +16,8 @@ from pyramid.interfaces import ILocation
 
 from zope.interface import implementer
 
-import BeautifulSoup
-
 from h import interfaces
+from h.streamer import UrlAnalyzer
 
 
 import logging
@@ -123,64 +118,12 @@ class AppFactory(BaseResource):
             for name in ['persona', 'personas']
         }
 
-
-class Annotation(BaseResource, dict):
-    def urlEncodeNonAscii(self, b):
-        return re.sub('[\x80-\xFF]', lambda c: '%%%02x' % ord(c.group(0)), b)
-
-    def iriToUri(self, iri):
-        parts= urlparse(iri)
-        return urlunparse(
-            part.encode('idna') if parti==1 else self.urlEncodeNonAscii(part.encode('utf-8'))
-            for parti, part in enumerate(parts)
-        )
-
-    def _url_values(self, uri = None):
-        if not uri: uri = self['uri']
-        # Getting the title of the uri.
-        try:
-            r = requests.get(self.iriToUri(uri), verify=False)
-            soup = BeautifulSoup.BeautifulSoup(r.content)
-            title = soup.title.string if soup.title else uri
-
-            # Favicon
-            favlink = soup.find("link", rel="shortcut icon")
-        except:
-            log.info('Error opening url')
-            log.info(traceback.format_exc())
-            title = uri
-            favlink = None
-
-        # Getting the domain from the uri, and the same url magic for the
-        # domain title.
-        parsed_uri = urlparse(uri)
-        domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
-        domain_stripped = parsed_uri[1]
-        if parsed_uri[1].lower().startswith('www.'):
-            domain_stripped = domain_stripped[4:]
-
-        # Check for local/global link.
-        if favlink:
-            href = favlink['href']
-            if href.startswith('//') or href.startswith('http'):
-                icon_link = href
-            else:
-                icon_link = domain + href
-        else:
-            icon_link = ''
-
-        return {
-            'title': title,
-            'source': domain,
-            'source_stripped': domain_stripped,
-            'favicon_link': icon_link
-        }
-
+class Annotation(BaseResource, UrlAnalyzer):
     def _fuzzyTime(self, date):
         if not date: return ''
         converted = parse(date)
-        time_delta = datetime.utcnow().replace(tzinfo=tzutc()) - converted
-        delta = round(time_delta.total_seconds())
+        delta = datetime.utcnow().replace(tzinfo=tzutc()) - converted
+        delta = round(delta.total_seconds())
 
         minute = 60
         hour = minute * 60
@@ -188,21 +131,21 @@ class Annotation(BaseResource, dict):
         week = day * 7
         month = day * 30
 
-        if (delta < 30):
+        if delta < 30:
             fuzzy = 'moments ago'
-        elif (delta < minute):
+        elif delta < minute:
             fuzzy = str(int(delta)) + ' seconds ago'
-        elif (delta < 2 * minute):
+        elif delta < 2 * minute:
             fuzzy = 'a minute ago'
-        elif (delta < hour):
+        elif delta < hour:
             fuzzy = str(int(floor(delta / minute))) + ' minutes ago'
-        elif (floor(delta / hour) == 1):
+        elif floor(delta / hour) == 1:
             fuzzy = '1 hour ago'
-        elif (delta < day):
+        elif delta < day:
             fuzzy = str(int(floor(delta / hour))) + ' hours ago'
-        elif (delta < day * 2):
+        elif delta < day * 2:
             fuzzy = 'yesterday'
-        elif (delta < month):
+        elif delta < month:
             fuzzy = str(int(round(delta / day))) + ' days ago'
         else:
             when = datetime.now() - time_delta
@@ -257,10 +200,10 @@ class Annotation(BaseResource, dict):
         childTable = {}
 
         for reply in self.referrers:
-            reply.update({
-                'date': self._fuzzyTime(reply['created']),
-                'user': self._userName(reply['user']),
-            })
+            #reply.update({
+            #    'date': self._fuzzyTime(reply['created']),
+            #    'user': self._userName(reply['user']),
+            #})
 
             # Add this to its parent.
             parent = reply.get('references', [])[-1]
@@ -269,6 +212,10 @@ class Annotation(BaseResource, dict):
 
         # Create nested list form
         return self._nestlist(childTable.get(self['id']), childTable)
+
+
+class Streamer(BaseResource, dict):
+    pass
 
 
 class AnnotationFactory(BaseResource):
@@ -292,3 +239,4 @@ def includeme(config):
     config.add_route('index', '/')
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
+    RootFactory.stream = Streamer

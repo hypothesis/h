@@ -1,13 +1,24 @@
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
+import re
+
 from annotator import auth, authz, store, es
 from annotator.annotation import Annotation
 from annotator.document import Document
 
-from flask import Flask, g
+from flask import Flask, g, request
 
 from pyramid.request import Request
+from pyramid.threadlocal import get_current_registry
 from pyramid.wsgi import wsgiapp2
 
-from h import interfaces, models
+from h import events, interfaces, models
+
+import logging
+log = logging.getLogger(__name__)
 
 
 class Store(object):
@@ -73,12 +84,23 @@ def before_request():
     g.before_annotation_update = anonymize_deletes
 
 
+def after_request(response):
+    if 200 <= response.status_code < 300:
+        match = re.match(r'^store\.(\w+)_annotation$', request.endpoint)
+        if match:
+            action = match.group(1)
+            annotation = json.loads(response.data)
+            event = events.AnnotatorStoreEvent(annotation, action)
+            get_current_registry().notify(event)
+
+    return response
+
+
 def includeme(config):
     app = Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
-
-    # Set up the models
     settings = config.get_settings()
+
     if 'es.host' in settings:
         app.config['ELASTICSEARCH_HOST'] = settings['es.host']
     if 'es.index' in settings:
@@ -91,6 +113,7 @@ def includeme(config):
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True
     app.before_request(before_request)
+    app.after_request(after_request)
 
     # Configure the API views -- version 1 is just an annotator.store proxy
     api_v1 = wsgiapp2(app)
