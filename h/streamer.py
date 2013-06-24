@@ -177,16 +177,12 @@ class FilterToElasticFilter(object):
         self._policy('must', target['must_not']['bool'], clauses)
 
 
-def first_of(self, a, b): return a[0] == b
+def first_of(a, b): return a[0] == b
 
 
 class FilterHandler(object):
     def __init__(self, filter_json):
         self.filter = filter_json
-
-    def _userName(self, user):
-        if not user or user == '': return 'Annotation deleted.'
-        else: return user.split(':')[1].split('@')[0]
 
     #operators
     operators = {"equals": eq, "matches": contains,"lt": lt, "le": le, "gt": gt,
@@ -195,8 +191,6 @@ class FilterHandler(object):
 
     def evaluate_clause(self, clause, target):
         field_value = resolve_pointer(target, clause['field'], None)
-        if clause['field'] == '/user':
-            field_value = self._userName(field_value)
         if field_value is None:
             return False
         else: return self.operators[clause['operator']](field_value, clause['value'])

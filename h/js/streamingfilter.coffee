@@ -43,6 +43,8 @@ class window.ClauseParser
           else
             value = parts[1][operator.length..]
           operator_found = true
+          if field is 'user'
+            value = 'acct:' + value + '@' + window.location.hostname + ':' + window.location.port
           break
 
       unless operator_found
