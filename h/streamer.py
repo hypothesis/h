@@ -2,10 +2,8 @@ import json
 import traceback
 
 import requests
-from urlparse import urlparse, urlunparse
-
-import BeautifulSoup
-import re
+from urlparse import urlparse
+from operator import *
 
 from pyramid.events import subscriber
 from pyramid_sockjs.session import Session
@@ -13,7 +11,6 @@ from jsonschema import validate
 from jsonpointer import resolve_pointer
 
 from dateutil.tz import tzutc
-from dateutil.parser import parse
 from datetime import datetime, timedelta
 
 from annotator import authz
@@ -180,6 +177,9 @@ class FilterToElasticFilter(object):
         self._policy('must', target['must_not']['bool'], clauses)
 
 
+def first_of(self, a, b): return a[0] == b
+
+
 class FilterHandler(object):
     def __init__(self, filter_json):
         self.filter = filter_json
@@ -189,14 +189,9 @@ class FilterHandler(object):
         else: return user.split(':')[1].split('@')[0]
 
     #operators
-    def equals(self, a, b): return a == b
-    def matches(self, a, b): return a.find(b) > -1
-    def lt(self, a, b): return a < b
-    def le(self, a, b): return a <= b
-    def gt(self, a, b): return a > b
-    def ge(self, a, b): return a >= b
-    def one_of(self, a, b): return a in b
-    def first_of(self, a, b): return a[0] == b
+    operators = {"equals": eq, "matches": contains,"lt": lt, "le": le, "gt": gt,
+        "ge": ge, "one_of": contains, "first_of": first_of
+    }
 
     def evaluate_clause(self, clause, target):
         field_value = resolve_pointer(target, clause['field'], None)
@@ -204,7 +199,7 @@ class FilterHandler(object):
             field_value = self._userName(field_value)
         if field_value is None:
             return False
-        else: return getattr(self, clause['operator'])(field_value, clause['value'])
+        else: return self.operators[clause['operator']](field_value, clause['value'])
 
     #match_policies
     def include_any(self, target):
@@ -245,63 +240,24 @@ class StreamerSession(Session):
     def on_message(self, msg):
         try:
             payload = json.loads(msg)
+
             #Let's try to validate the schema
             validate(payload, filter_schema)
             self.filter = FilterHandler(payload)
 
             #If past is given, send the annotations back.
-            if "past_data" in payload and payload["past_data"] != "none":
+            if "past_data" in payload and payload["past_data"]["load_past"] != "none":
                 query = FilterToElasticFilter(payload)
                 request = self.request
                 registry = request.registry
                 store = registry.queryUtility(interfaces.IStoreClass)(request)
-                #if payload["past_data"]["load_past"] == "replies":
-                #    annotations = store.search(references=payload["past_data"]['id_for_reply'])
-                #else:
-                #    annotations = store.search()
-                log.info('----------------------------------------')
-                log.info(query.query)
-                log.info('----------------------------------------')
                 annotations = store.search_raw(json.dumps(query.query))
-                #log.info(str(test))
-                #log.info('----------------------------------------')
-
-                log.info('----------------------------------------')
-                log.info(type(annotations))
-                log.info(len(annotations))
-                log.info('----------------------------------------')
-
 
                 for annotation in annotations:
                     annotation.update(url_values_from_document(annotation))
-
-
-                #if payload["past_data"]["load_past"] == "time":
-                #    now = datetime.utcnow().replace(tzinfo=tzutc())
-                #    past = now - timedelta(seconds=60 * payload['past_data']['go_back'])
-                #    for annotation in annotations:
-                #        created = parse(annotation['created'])
-                #        if created >= past and self.filter.match(annotation):
-                #            annotation.update(UrlAnalyzer.url_values_from_document(annotation))
-                #            to_send = [annotation] + to_send
-                #elif payload["past_data"]["load_past"] == "hits":
-                #    sent_hits = 0
-                #    for annotation in annotations:
-                #        if self.filter.match(annotation):
-                #            annotation.update(UrlAnalyzer.url_values_from_document(annotation))
-                #            to_send = [annotation] + to_send
-                #            sent_hits += 1
-                #        if sent_hits >= payload["past_data"]["hits"]:
-                #            break
-                #elif payload["past_data"]["load_past"] == "replies":
-                #    sent_hits = 0
-                #    for annotation in annotations:
-                #        to_send = [annotation] + to_send
-                #        sent_hits += 1
-
                 #Finally send filtered annotations
+
                 if len(annotations) > 0:
-                    log.info('sending')
                     self.send([annotations, 'past'])
         except:
             log.info(traceback.format_exc())
