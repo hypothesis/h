@@ -22,105 +22,51 @@ from h import events, interfaces
 import logging
 log = logging.getLogger(__name__)
 
-class UrlAnalyzer(dict):
-    @classmethod
-    def urlEncodeNonAscii(cls, b):
-        return re.sub('[\x80-\xFF]', lambda c: '%%%02x' % ord(c.group(0)), b)
 
-    @classmethod
-    def iriToUri(cls, iri):
-        parts= urlparse(iri)
-        return urlunparse(
-            part.encode('idna') if parti==1 else cls.urlEncodeNonAscii(part.encode('utf-8'))
-            for parti, part in enumerate(parts)
-        )
-
-    @classmethod
-    def check_favicon(cls, icon_link, parsed_uri, domain):
-        if icon_link:
-            if icon_link.startswith('http'):
-                icon_link = icon_link
-            elif icon_link.startswith('//'):
-                icon_link= parsed_uri[0] + "://" + icon_link[2:]
-            else:
-                icon_link = domain + icon_link
-            #Check if the icon_link url really exists
-            try:
-                r2 = requests.head(icon_link)
-                if r2.status_code != 200:
-                    icon_link = ''
-            except:
-                log.info(traceback.format_exc())
+def check_favicon(icon_link, parsed_uri, domain):
+    if icon_link:
+        if icon_link.startswith('http'):
+            icon_link = icon_link
+        elif icon_link.startswith('//'):
+            icon_link= parsed_uri[0] + "://" + icon_link[2:]
         else:
-            icon_link = ''
-
-        return icon_link
-
-
-    @classmethod
-    def url_values_from_document(cls, annotation):
-        log.info(annotation)
-        title = annotation['uri']
-        icon_link = ""
-
-        parsed_uri = urlparse(annotation['uri'])
-        domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
-        domain_stripped = parsed_uri[1]
-        if parsed_uri[1].lower().startswith('www.'):
-            domain_stripped = domain_stripped[4:]
-
-        if 'document' in annotation:
-            if 'title' in annotation['document']:
-                title = annotation['document']['title']
-
-            if 'favicon' in annotation['document']:
-                icon_link = annotation['document']['favicon']
-
-            icon_link = cls.check_favicon(icon_link, parsed_uri, domain)
-        return {
-            'title': title,
-            'source': domain,
-            'source_stripped': domain_stripped,
-            'favicon_link': icon_link
-        }
-
-
-    def _url_values(self, uri = None):
-        if not uri: uri = self['uri']
-        # Getting the title of the uri.
+            icon_link = domain + icon_link
+        #Check if the icon_link url really exists
         try:
-            r = requests.get(self.iriToUri(uri), verify=False)
-            soup = BeautifulSoup.BeautifulSoup(r.content)
-            title = soup.title.string if soup.title else uri
-
-            # Favicon
-            favlink = soup.find("link", rel="shortcut icon")
+            r2 = requests.head(icon_link)
+            if r2.status_code != 200:
+                icon_link = ''
         except:
-            log.info('Error opening url')
             log.info(traceback.format_exc())
-            title = uri
-            favlink = None
+    else:
+        icon_link = ''
 
-        # Getting the domain from the uri, and the same url magic for the
-        # domain title.
-        parsed_uri = urlparse(uri)
-        domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
-        domain_stripped = parsed_uri[1]
-        if parsed_uri[1].lower().startswith('www.'):
-            domain_stripped = domain_stripped[4:]
+    return icon_link
 
-        # Check for local/global link.
-        if favlink:
-          icon_link = self.check_favicon(favlink['href'], parsed_uri, domain)
-        else:
-          icon_link = ""
+def url_values_from_document(annotation):
+    title = annotation['uri']
+    icon_link = ""
 
-        return {
-            'title': title,
-            'source': domain,
-            'source_stripped': domain_stripped,
-            'favicon_link': icon_link
-        }
+    parsed_uri = urlparse(annotation['uri'])
+    domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
+    domain_stripped = parsed_uri[1]
+    if parsed_uri[1].lower().startswith('www.'):
+        domain_stripped = domain_stripped[4:]
+
+    if 'document' in annotation:
+        if 'title' in annotation['document']:
+            title = annotation['document']['title']
+
+        if 'favicon' in annotation['document']:
+            icon_link = annotation['document']['favicon']
+
+        icon_link = check_favicon(icon_link, parsed_uri, domain)
+    return {
+        'title': title,
+        'source': domain,
+        'source_stripped': domain_stripped,
+        'favicon_link': icon_link
+    }
 
 filter_schema = {
     "type": "object",
@@ -327,7 +273,7 @@ class StreamerSession(Session):
 
 
                 for annotation in annotations:
-                    annotation.update(UrlAnalyzer.url_values_from_document(annotation))
+                    annotation.update(url_values_from_document(annotation))
 
 
                 #if payload["past_data"]["load_past"] == "time":
@@ -379,7 +325,7 @@ def after_action(event):
     for connection in StreamerSession.connections:
         try:
             if connection.filter.match(annotation, action):
-                annotation.update(UrlAnalyzer.url_values_from_document(annotation))
+                annotation.update(url_values_from_document(annotation))
                 connection.send([annotation, action])
         except:
             log.info(traceback.format_exc())

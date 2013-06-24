@@ -15,13 +15,9 @@ from pyramid.request import Request
 from pyramid.threadlocal import get_current_registry
 from pyramid.wsgi import wsgiapp2
 
-#from h import events, interfaces, models
-from h import interfaces, models, streamer
-from cStringIO import StringIO
+from h import events, interfaces, models
 
 import logging
-import json
-
 log = logging.getLogger(__name__)
 
 

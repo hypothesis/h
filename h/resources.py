@@ -3,12 +3,6 @@ try:
 except ImportError:
     import json
 
-from datetime import datetime
-from math import floor
-
-from dateutil.parser import parse
-from dateutil.tz import tzutc
-
 from horus import resources
 
 from pyramid.decorator import reify
@@ -17,7 +11,6 @@ from pyramid.interfaces import ILocation
 from zope.interface import implementer
 
 from h import interfaces
-from h.streamer import UrlAnalyzer
 from h.models import get_session
 
 import logging
@@ -118,47 +111,7 @@ class AppFactory(BaseResource):
             for name in ['persona', 'personas']
         }
 
-class Annotation(BaseResource, UrlAnalyzer):
-    def _fuzzyTime(self, date):
-        if not date: return ''
-        converted = parse(date)
-        time_delta = datetime.utcnow().replace(tzinfo=tzutc()) - converted
-        delta = round(time_delta.total_seconds())
-
-        minute = 60
-        hour = minute * 60
-        day = hour * 24
-        week = day * 7
-        month = day * 30
-
-        if delta < 30:
-            fuzzy = 'moments ago'
-        elif delta < minute:
-            fuzzy = str(int(delta)) + ' seconds ago'
-        elif delta < 2 * minute:
-            fuzzy = 'a minute ago'
-        elif delta < hour:
-            fuzzy = str(int(floor(delta / minute))) + ' minutes ago'
-        elif floor(delta / hour) == 1:
-            fuzzy = '1 hour ago'
-        elif delta < day:
-            fuzzy = str(int(floor(delta / hour))) + ' hours ago'
-        elif delta < day * 2:
-            fuzzy = 'yesterday'
-        elif delta < month:
-            fuzzy = str(int(round(delta / day))) + ' days ago'
-        else:
-            when = datetime.now() - time_delta
-            time = when.strftime('%X')
-            fuzzy = when.strftime('%c').replace(time, '').strip()
-
-        return fuzzy
-
-    def _userName(self, user):
-        if not user or user == '': return 'Annotation deleted.'
-        else:
-            return user.split(':')[1].split('@')[0]
-
+class Annotation(BaseResource, dict):
     def _nestlist(self, annotations, childTable):
         outlist = []
         if annotations is None: return outlist
@@ -200,11 +153,6 @@ class Annotation(BaseResource, UrlAnalyzer):
         childTable = {}
 
         for reply in self.referrers:
-            #reply.update({
-            #    'date': self._fuzzyTime(reply['created']),
-            #    'user': self._userName(reply['user']),
-            #})
-
             # Add this to its parent.
             parent = reply.get('references', [])[-1]
             pointer = childTable.setdefault(parent, [])

@@ -19,6 +19,7 @@ from horus.views import (
 )
 
 from h import interfaces
+from h.streamer import url_values_from_document
 
 import json
 import logging
@@ -51,7 +52,7 @@ class Annotation(BaseController):
                 "don't have the permissions required for viewing it."
             )
 
-        d = context._url_values()
+        d = url_values_from_document(context)
         d['annotation'] = context
         d['annotation']['referrers'] = json.dumps(context.referrers)
 
