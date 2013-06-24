@@ -3,7 +3,7 @@ Installing Hypothes.is on Ubuntu Server 12.04.2 LTS
 
 To install the dependencies, run these commands::
 
-    sudo apt-get install python-{dev,pip,virtualenv} ruby-compass git libpq-dev
+    sudo apt-get install python-{dev,pip,virtualenv} ruby-compass git libpq-dev make
 
 You will need the latest Node::
 
