@@ -93,6 +93,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     left: .3em;
     line-height: $baseLineHeight * .9;
     font-size: $baseLineHeight * .9;
+    cursor: w-resize;
     &:before {
       vertical-align: 0;
     }
