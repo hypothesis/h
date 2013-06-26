@@ -753,9 +753,10 @@ blockquote {
         text-overflow: ellipsis;
         -o-text-overflow: ellipsis;
         white-space: nowrap;
-        font-style: italic;
         margin-top: 0;
         margin-bottom: 0;
+        font-size: 0.95em;
+        opacity: 0.8;
       }
 
       .user {
