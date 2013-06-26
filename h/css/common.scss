@@ -166,6 +166,7 @@ button, input[type=submit], .btn {
   @include border-radius(.5em);
   @include smallshadow;
   @include single-transition(opacity, .2s);
+  font-family: $sansFontFamily;
   border: solid 1px;
   bottom: 18%;
   left: 50%;
@@ -245,6 +246,7 @@ button, input[type=submit], .btn {
 
 .slow-validate {
   display: block;
+  font-family: $sansFontFamily;
   max-height: 0;
   overflow: hidden;
 
