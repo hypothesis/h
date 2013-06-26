@@ -819,8 +819,7 @@ blockquote {
 
   & > .show {
     @include transition(opacity);
-    @include transition-delay(.15s);
-    @include transition-duration(1.05s);
+    @include transition-duration(.15s);
     opacity: 0;
 
     &.open, :hover > & {
