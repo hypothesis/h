@@ -1,5 +1,21 @@
 language: python
 python:
- - "2.7"
-install: "pip install -r requirements.txt --use-mirrors"
-script: python -m pytest test.py
+- '2.7'
+install: pip install -r requirements.txt --use-mirrors
+services:
+  - elasticsearch
+before_script:
+  - curl https://gist.github.com/santiycr/5139565/raw/sauce_connect_setup.sh | bash
+script: 
+  - run
+  - make test
+env:
+  global:
+  - secure: |-
+      lg9CixLocycmmp2kI1sTzpu9/JpMBUbekHOsYibedtahAM3iTT1DWCmytEhK
+      Cy9alfYBueGP04HjO1R1BJEGKhchurnaHNq1xBZgN0KImxhFjb2ny5OP89uv
+      qzoevrERLqLDgF8XHuCSWsF251Wzx0eSnZ5N89ooP6I+ys9zW6k=
+  - secure: |-
+      u9Zc5m9X/fZBf2R1i2l3D/k89Q0hVh+NZ5Wjw9fr6RpoyuPZjFCLTgcdnVYz
+      r6MlXe7A4PzoIS1XbUE87XV5/yG4LbH8JknaNWygcNMXxCSXaURySgTM+eMG
+      AqLXWyCtqrWvmJq7VnuT1OAKKpybTFjgR0QDEo/LSDgPZP82HEc=
