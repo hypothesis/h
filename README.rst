@@ -24,7 +24,7 @@ the ``run`` command::
 
     $ ./run
 
-This command will run the server on port 5000 (`https://0.0.0.0:5000`),
+This command will start the server on port 5000 (https://0.0.0.0:5000),
 reload the application whenever changes are made to the source code, and
 restart it should it crash for some reason.
 
