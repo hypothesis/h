@@ -3,7 +3,7 @@ import traceback
 
 import requests
 from urlparse import urlparse
-from operator import *
+import operator
 
 from pyramid.events import subscriber
 from pyramid_sockjs.session import Session
@@ -178,6 +178,7 @@ class FilterToElasticFilter(object):
 
 
 def first_of(a, b): return a[0] == b
+setattr(operator, 'first_of', first_of)
 
 
 class FilterHandler(object):
@@ -185,15 +186,15 @@ class FilterHandler(object):
         self.filter = filter_json
 
     #operators
-    operators = {"equals": eq, "matches": contains,"lt": lt, "le": le, "gt": gt,
-        "ge": ge, "one_of": contains, "first_of": first_of
+    operators = {"equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
+        "ge": 'ge', "one_of": 'contains', "first_of": 'first_of'
     }
 
     def evaluate_clause(self, clause, target):
         field_value = resolve_pointer(target, clause['field'], None)
         if field_value is None:
             return False
-        else: return self.operators[clause['operator']](field_value, clause['value'])
+        else: return getattr(operator, self.operators[clause['operator']])(field_value, clause['value'])
 
     #match_policies
     def include_any(self, target):
