@@ -727,7 +727,7 @@ blockquote {
     position: absolute;
     top: $threadexp-width / 2;
     left: -($threadexp-width / 2);
-    outline: 1px dotted #aaa;
+    outline: 1px solid #aaa;
     @include icon("minus_1.png");
   }
 
