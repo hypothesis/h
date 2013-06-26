@@ -163,9 +163,10 @@ button, input[type=submit], .btn {
 
 //FLASH/TOAST/ALERTS///////////////////////////////
 .toast, .annotator-notice {
-  @include border-radius(.5em);
+  @include border-radius(0.1em);
   @include smallshadow;
   @include single-transition(opacity, .2s);
+  padding: 0.3em;
   font-family: $sansFontFamily;
   border: solid 1px;
   bottom: 18%;
