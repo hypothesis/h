@@ -770,15 +770,6 @@ blockquote {
     }
   }
 
-  &.collapse-hide-setup, &.collapse-show-setup {
-    @include transition-duration(.4s);
-
-    & > ul {
-      @include transition-duration(.4s);
-      @include transition-property(max-height);
-    }
-  }
-
   &.collapse-hide-setup > ul {
     @include transition-timing-function(cubic-bezier(0, 1, 0, 1));
     max-height: 65536px;
