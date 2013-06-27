@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 import unittest, time, re
 
-from utils import SeleniumTestCase, Annotator
+from . import SeleniumTestCase, Annotator
 
 class Login(SeleniumTestCase):
    
