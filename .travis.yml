@@ -1,16 +1,17 @@
-language: python, node_js
+language: 
+  - python
 python:
   - "2.7"
-node_js:
-  - "0.11"
 install: 
-  - sudo pip install -r requirements.txt
+  - sudo add-apt-repository ppa:chris-lea/node.js
+  - sudo apt-get update
+  - sudo apt-get install nodejs ruby-compass
   - sudo npm install -g coffee-script 
+  - sudo pip install -r requirements.txt 
 services:
   - elasticsearch
 before_script:
   - curl https://gist.github.com/santiycr/5139565/raw/sauce_connect_setup.sh | bash
-  - echo "started sauce connect"
 script: 
   - ./run development.ini --daemon
   - make test
