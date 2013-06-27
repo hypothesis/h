@@ -17,7 +17,7 @@ class SeleniumTestCase(TestCase):
             caps['platform'] = "Linux"
             caps['build'] = env['TRAVIS_BUILD_NUMBER']
             caps['tags'] = [env['TRAVIS_PYTHON_VERSION'], 'CI']
-            caps['tunnel-identifier'] = os.environ['TRAVIS_JOB_NUMBER']
+            caps['tunnel-identifier'] = env['TRAVIS_JOB_NUMBER']
 
             hub_url = 'http://%s:%s@localhost:4445' % (username, key)
             self.driver = webdriver.Remote(desired_capabilities=caps, command_executor=hub_url)
