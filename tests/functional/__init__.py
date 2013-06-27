@@ -1,3 +1,8 @@
+"""
+Support for doing Selenium functional tests locally and remotely using 
+SauceLabs.
+"""
+
 from os import environ as env
 from unittest import TestCase
 from selenium import webdriver
