@@ -20,3 +20,5 @@ env:
       u9Zc5m9X/fZBf2R1i2l3D/k89Q0hVh+NZ5Wjw9fr6RpoyuPZjFCLTgcdnVYz
       r6MlXe7A4PzoIS1XbUE87XV5/yG4LbH8JknaNWygcNMXxCSXaURySgTM+eMG
       AqLXWyCtqrWvmJq7VnuT1OAKKpybTFjgR0QDEo/LSDgPZP82HEc=
+after_failure:
+  - cat pyramid.log  
