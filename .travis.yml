@@ -1,7 +1,11 @@
-language: python
+language: python, node_js
 python:
-- '2.7'
-install: pip install -r requirements.txt
+  - "2.7"
+node_js:
+  - "0.11"
+install: 
+  - pip install -r requirements.txt
+  - npm install -g coffee-script 
 services:
   - elasticsearch
 before_script:
