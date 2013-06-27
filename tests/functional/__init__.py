@@ -10,6 +10,8 @@ class SeleniumTestCase(TestCase):
             key = env['SAUCE_ACCESS_KEY']
             caps = webdriver.DesiredCapabilities.FIREFOX
             caps['platform'] = "Linux"
+            caps['build'] = env['TRAVIS_BUILD_NUMBER']
+            caps['tags'] = [env['TRAVIS_PYTHON_VERSION'], 'CI']
             hub_url = 'http://%s:%s@localhost:4445' % (username, key)
             self.driver = webdriver.Remote(desired_capabilities=caps, command_executor=hub_url)
             self.sauce_url = "https://saucelabs.com/jobs/%s" % self.driver.session_id
