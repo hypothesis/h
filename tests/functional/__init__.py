@@ -19,7 +19,7 @@ class SeleniumTestCase(TestCase):
             caps['tags'] = [env['TRAVIS_PYTHON_VERSION'], 'CI']
             caps['tunnel-identifier'] = env['TRAVIS_JOB_NUMBER']
 
-            hub_url = 'http://%s:%s@localhost:4445' % (username, key)
+            hub_url = 'http://%s:%s@localhost:4445/wd/hub' % (username, key)
             self.driver = webdriver.Remote(desired_capabilities=caps, command_executor=hub_url)
             self.sauce_url = "https://saucelabs.com/jobs/%s" % self.driver.session_id
         else:
