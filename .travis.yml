@@ -3,9 +3,9 @@ language:
 python:
   - "2.7"
 install: 
-  - sudo add-apt-repository ppa:chris-lea/node.js
-  - sudo apt-get update
-  - sudo apt-get install nodejs ruby-compass
+  - sudo add-apt-repository --yes ppa:chris-lea/node.js
+  - sudo apt-get update --yes
+  - sudo apt-get install --yes nodejs ruby-compass
   - sudo npm install -g coffee-script 
   - sudo pip install -r requirements.txt 
 services:
