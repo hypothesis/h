@@ -4,8 +4,8 @@ python:
 node_js:
   - "0.11"
 install: 
-  - pip install -r requirements.txt
-  - npm install -g coffee-script 
+  - sudo pip install -r requirements.txt
+  - sudo npm install -g coffee-script 
 services:
   - elasticsearch
 before_script:
