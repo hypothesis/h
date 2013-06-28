@@ -22,9 +22,9 @@ follows::
 
 The command will set up the development environment and check for development
 dependencies. Warnings will be issued for missing dependencies. When this
-script runs successfully, the environment should be prepared. It is good 
-practice to run this script whenever the source code changes, such as after 
-pulling new commits from upstream, or checking out a new branch, which may 
+script runs successfully, the environment should be prepared. It is good
+practice to run this script whenever the source code changes, such as after
+pulling new commits from upstream, or checking out a new branch, which may
 have changed (for example: updated) requirements.
 
 For building the static assets, requirements currently include CoffeeScript_

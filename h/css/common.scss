@@ -163,9 +163,11 @@ button, input[type=submit], .btn {
 
 //FLASH/TOAST/ALERTS///////////////////////////////
 .toast, .annotator-notice {
-  @include border-radius(.5em);
+  @include border-radius(0.1em);
   @include smallshadow;
   @include single-transition(opacity, .2s);
+  padding: 0.3em;
+  font-family: $sansFontFamily;
   border: solid 1px;
   bottom: 18%;
   left: 50%;
@@ -245,6 +247,7 @@ button, input[type=submit], .btn {
 
 .slow-validate {
   display: block;
+  font-family: $sansFontFamily;
   max-height: 0;
   overflow: hidden;
 
@@ -645,7 +648,8 @@ blockquote {
   position: relative;
 
   .user {
-    text-decoration: underline;
+    font-weight: bold;
+    font-size: 1.1em;
   }
 
   .body {
@@ -725,7 +729,7 @@ blockquote {
     position: absolute;
     top: $threadexp-width / 2;
     left: -($threadexp-width / 2);
-    outline: 1px dotted #aaa;
+    outline: 1px solid #aaa;
     @include icon("minus_1.png");
   }
 
@@ -750,9 +754,10 @@ blockquote {
         text-overflow: ellipsis;
         -o-text-overflow: ellipsis;
         white-space: nowrap;
-        font-style: italic;
         margin-top: 0;
         margin-bottom: 0;
+        font-size: 0.95em;
+        opacity: 0.8;
       }
 
       .user {
@@ -763,15 +768,6 @@ blockquote {
 
     & > .threadexp {
       background-image: url("../images/plus_1.png");
-    }
-  }
-
-  &.collapse-hide-setup, &.collapse-show-setup {
-    @include transition-duration(.4s);
-
-    & > ul {
-      @include transition-duration(.4s);
-      @include transition-property(max-height);
     }
   }
 
@@ -816,8 +812,7 @@ blockquote {
 
   & > .show {
     @include transition(opacity);
-    @include transition-delay(.15s);
-    @include transition-duration(1.05s);
+    @include transition-duration(.15s);
     opacity: 0;
 
     &.open, :hover > & {
