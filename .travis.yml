@@ -7,7 +7,7 @@ install:
   - sudo apt-get update --yes
   - sudo apt-get install --yes nodejs ruby-compass
   - sudo npm install -g coffee-script 
-  - sudo pip install -r requirements.txt 
+  - pip install -r requirements.txt 
 services:
   - elasticsearch
 before_script:
