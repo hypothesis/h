@@ -26,16 +26,15 @@ class Streamer
   strategies: ['include_any', 'include_all', 'exclude_any', 'exclude_all']
   past_modes: ['none','hits','time']
 
-  this.$inject = ['$location', '$scope']
-  constructor: ($location, $scope) ->
+  this.$inject = ['$location', '$scope', 'streamfilter', 'clauseparser']
+  constructor: ($location, $scope, streamfilter, clauseparser) ->
     $scope.streaming = false
     $scope.annotations = []
     $scope.bads = []
     $scope.time = 5
     $scope.hits = 100
 
-    @parser = new ClauseParser()
-    @sfilter = new StreamerFilter()
+    @sfilter = streamfilter
     @sfilter.setPastDataHits(100)
     $scope.filter = @sfilter.filter
 
@@ -88,7 +87,7 @@ class Streamer
 
     $scope.clause_change = =>
       if $scope.clauses.slice(-1) is ' ' or $scope.clauses.length is 0
-        res = @parser.parse_clauses($scope.clauses)
+        res = clauseparser.parse_clauses($scope.clauses)
         if res?
           $scope.filter.clauses = res[0]
           $scope.bads = res[1]
@@ -101,7 +100,7 @@ class Streamer
         $scope.sock.close()
         $scope.streaming = false
 
-      res = @parser.parse_clauses($scope.clauses)
+      res = clauseparser.parse_clauses($scope.clauses)
       if res
         $scope.filter.clauses = res[0]
         $scope.bads = res[1]
@@ -138,7 +137,7 @@ class Streamer
       $scope.sock.close()
       $scope.streaming = false
 
-angular.module('h.streamer',['h.filters','bootstrap'])
+angular.module('h.streamer',['h.streamfilter','h.filters','bootstrap'])
   .controller('StreamerCtrl', Streamer)
 
 

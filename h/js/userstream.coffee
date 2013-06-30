@@ -10,12 +10,12 @@ get_quote = (annotation) ->
 
 class UserStream
 
-  this.$inject = ['$scope','$timeout']
-  constructor: ($scope, $timeout) ->
+  this.$inject = ['$scope','$timeout','streamfilter']
+  constructor: ($scope, $timeout, streamfilter) ->
     $scope.annotations = []
     $scope.username = document.body.attributes.internalid.value
     $scope.filter =
-      new StreamerFilter()
+      streamfilter
         .setPastDataHits(100)
         .setMatchPolicyIncludeAny()
         .setClausesParse('user:=' + $scope.username)
@@ -38,5 +38,5 @@ class UserStream
     $scope.open()
 
 
-angular.module('h.userstream',['h.filters','h.directives','bootstrap'])
+angular.module('h.userstream',['h.streamfilter', 'h.filters','h.directives','bootstrap'])
   .controller('UserStreamCtrl', UserStream)

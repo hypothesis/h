@@ -1,4 +1,4 @@
-class window.ClauseParser
+class ClauseParser
   filter_fields : ['references', 'text', 'user','uri', 'id']
   operators: ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#', '^']
   operator_mapping:
@@ -58,7 +58,7 @@ class window.ClauseParser
     [structure, bads]
 
 
-class window.StreamerFilter
+class StreamFilter
   strategies: ['include_any', 'include_all', 'exclude_any', 'exclude_all']
   past_modes: ['none','hits','time']
 
@@ -173,3 +173,8 @@ class window.StreamerFilter
     @setPastDataNone()
     @noClauses()
     this
+
+
+angular.module('h.streamfilter',['bootstrap'])
+  .service('clauseparser', ClauseParser)
+  .service('streamfilter', StreamFilter)

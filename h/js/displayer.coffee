@@ -9,10 +9,10 @@ get_quote = (annotation) ->
   quote
 
 class Displayer
-  this.$inject = ['$scope','$element','$timeout']
+  this.$inject = ['$scope','$element','$timeout','streamfilter']
   idTable : {}
 
-  constructor: ($scope, $element, $timeout) ->
+  constructor: ($scope, $element, $timeout, streamfilter) ->
     $scope.annotation = {}
     $scope.annotations = [$scope.annotation]
     $scope.annotation.replies = []
@@ -20,7 +20,7 @@ class Displayer
     $scope.annotation.id = document.body.attributes.internalid.value
     @idTable[$scope.annotation.id] = $scope.annotation
     $scope.filter =
-      new StreamerFilter()
+      streamfilter
         .setPastDataNone()
         .setMatchPolicyIncludeAny()
         .addClausesParse('references:^' + $scope.annotation.id)
@@ -106,5 +106,5 @@ class Displayer
       document.initial_replies = ''
     $scope.open()
 
-angular.module('h.displayer',['h.filters','bootstrap'])
+angular.module('h.displayer',['h.streamfilter','h.filters','bootstrap'])
   .controller('DisplayerCtrl', Displayer)

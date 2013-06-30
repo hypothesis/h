@@ -191,7 +191,7 @@ app = Bundle(
                 'services',
                 'streamer',
                 'sockjswrapper',
-                'streamingfilter',
+                'streamfilter',
                 'userstream',
             )
         ],
