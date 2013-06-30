@@ -9,9 +9,11 @@ get_quote = (annotation) ->
   quote
 
 class Displayer
-  this.$inject = ['$scope','$element','$timeout','streamfilter']
+  path: window.location.protocol + '//' + window.location.hostname + ':' +
+    window.location.port + '/__streamer__'
   idTable : {}
 
+  this.$inject = ['$scope','$element','$timeout','streamfilter']
   constructor: ($scope, $element, $timeout, streamfilter) ->
     $scope.annotation = {}
     $scope.annotations = [$scope.annotation]
@@ -37,13 +39,24 @@ class Displayer
       to_change.replies = replies
       to_change.reply_count = reply_count
 
-
     $scope.open = =>
-      $scope.sock = new SockJSWrapper $scope, $scope.filter
-      , null
-      , $scope.manage_new_data
-      ,=>
+      $scope.sock = new SockJS @path
+
+      $scope.sock.onopen = =>
+        $scope.sock.send JSON.stringify $scope.filter
+
+      $scope.sock.onclose = =>
         $timeout $scope.open, 5000
+
+      $scope.sock.onmessage = (msg) =>
+        console.log 'Got something'
+        console.log msg
+        data = msg.data[0]
+        action = msg.data[1]
+        unless data instanceof Array then data = [data]
+
+        $scope.$apply =>
+          $scope.manage_new_data data, action
 
     $scope.manage_new_data = (data, action) =>
       #sort annotations by creation date

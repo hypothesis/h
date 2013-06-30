@@ -190,7 +190,6 @@ app = Bundle(
                 'displayer',
                 'services',
                 'streamer',
-                'sockjswrapper',
                 'streamfilter',
                 'userstream',
             )

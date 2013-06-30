@@ -23,6 +23,8 @@ syntaxHighlight = (json) ->
   )
 
 class Streamer
+  path: window.location.protocol + '//' + window.location.hostname + ':' +
+    window.location.port + '/__streamer__'
   strategies: ['include_any', 'include_all', 'exclude_any', 'exclude_all']
   past_modes: ['none','hits','time']
 
@@ -109,12 +111,24 @@ class Streamer
       $scope.open()
 
     $scope.open = =>
-      $scope.sock = new SockJSWrapper $scope, $scope.filter
-      , =>
+      $scope.sock = new SockJS @path
+
+      $scope.sock.onopen = =>
+        $scope.sock.send JSON.stringify $scope.filter
         $scope.streaming = true
-      , $scope.manage_new_data
-      ,=>
+
+      $scope.sock.onclose = =>
         $scope.streaming = false
+
+      $scope.sock.onmessage = (msg) =>
+        console.log 'Got something'
+        console.log msg
+        data = msg.data[0]
+        action = msg.data[1]
+        unless data instanceof Array then data = [data]
+
+        $scope.$apply =>
+          $scope.manage_new_data data, action
 
     $scope.manage_new_data = (data, action) =>
       for annotation in data

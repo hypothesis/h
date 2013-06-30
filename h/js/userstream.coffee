@@ -9,6 +9,8 @@ get_quote = (annotation) ->
   quote
 
 class UserStream
+  path: window.location.protocol + '//' + window.location.hostname + ':' +
+    window.location.port + '/__streamer__'
 
   this.$inject = ['$scope','$timeout','streamfilter']
   constructor: ($scope, $timeout, streamfilter) ->
@@ -29,11 +31,23 @@ class UserStream
         $scope.annotations.splice 0,0,annotation
 
     $scope.open = =>
-      $scope.sock = new SockJSWrapper $scope, $scope.filter
-      , null
-      , $scope.manage_new_data
-      ,=>
+      $scope.sock = new SockJS(@path)
+
+      $scope.sock.onopen = =>
+        $scope.sock.send JSON.stringify $scope.filter
+
+      $scope.sock.onclose = =>
         $timeout $scope.open, 5000
+
+      $scope.sock.onmessage = (msg) =>
+        console.log 'Got something'
+        console.log msg
+        data = msg.data[0]
+        action = msg.data[1]
+        unless data instanceof Array then data = [data]
+
+        $scope.$apply =>
+          $scope.manage_new_data data, action
 
     $scope.open()
 
