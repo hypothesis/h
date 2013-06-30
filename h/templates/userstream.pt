@@ -38,10 +38,9 @@
                             ng-src="{{annotation.favicon_link}}"/>
                     </div>
                     <div class="pull-left paper annotation-header-width">
-                      {{annotation.quote | shortify}}
+                      {{annotation.quote | elide:20}}
                     </div>
                     <div class="paper annotation-header-width">
-                      <!--<span ng-bind-html-unsafe="annotation.text | shortify | converter"/> -->
                       <span ng-bind-html-unsafe="annotation.text | converter"/>
                     </div>
                 </div>
