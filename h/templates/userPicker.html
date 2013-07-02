@@ -1,0 +1,19 @@
+<form action=""
+      method="POST"
+      enctype="multipart/form-data"
+      accept-charset="utf-8">
+  <div class="dropdown" ng-show="model">
+    <span role="button"
+          class="dropdown-toggle"
+          data-toggle="dropdown"
+          >{{model.username}}<span class="provider"
+                                   >/{{model.provider}}</span></span>
+    <ul class="dropdown-menu pull-right"
+        role="menu">
+      <li ng-repeat="option in options"
+          ng-click="model = options[$index]"
+          >{{option.username}}/{{option.provider}}</li>
+      <li ng-click="model = null">Sign out</li>
+    </ul>
+  </div>
+</form>

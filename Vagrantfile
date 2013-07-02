@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 #
-# This vagrant file will create a Ubuntu LTS VM with the H package and dependencies installed and the server
+# This vagrant file will create a Ubuntu LTS VM with the h package and dependencies installed and the server
 # started and bridged to localhost:8080.
 #
 # Relevant commands (performed from this directory):

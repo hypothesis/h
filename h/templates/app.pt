@@ -18,13 +18,16 @@
 
       <div class="tri" ng-click="frame.visible = !frame.visible"></div>
 
-      <div class="inner">
-        <a class="pull-right tinyman" href=""
+      <div class="inner" ng-switch="auth.persona">
+        <a class="pull-right" href=""
            ng-click="sheet.collapsed = false;
                      sheet.tab = 'login';"
-           ng-hide="persona || !sheet.collapsed">Sign in</a>
-        <div class="pull-right tinyman" ng-show="persona">
-          <metal:main use-macro="blocks['tinyman']" />
+           ng-switch-when="null"
+           ng-show="sheet.collapsed">Sign in</a>
+        <div class="pull-right user-picker"
+             ng-switch-default
+             data-user-picker-model="auth.persona"
+             data-user-picker-options="auth.personas">
         </div>
       </div>
 
@@ -38,12 +41,14 @@
               title="Close"
               ng-click="sheet.collapsed = true"></span>
 
-        <div ng-submit="submit(this[sheet.tab])"
-             data-resettable="true"
+        <div data-resettable="true"
              data-tab-reveal="['forgot','activate']"
              ng-model="sheet.tab"
              class="form-vertical tabbable">
-          <metal:main use-macro="blocks['auth-tabs']" />
+          <div data-authentication="auth"
+               ng-submit="submit(this[$parent.sheet.tab])">
+            <metal:main use-macro="blocks['auth-tabs']" />
+          </div>
           <footer ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
             <ul>
               <li>
@@ -84,6 +89,9 @@
     </script>
     <script type="text/ng-template" id="privacy.html">
       <metal:main use-macro="load: privacy.html" />
+    </script>
+    <script type="text/ng-template" id="userPicker.html">
+      <metal:main use-macro="load: userPicker.html" />
     </script>
     <script type="text/ng-template" id="viewer.html">
       <metal:main use-macro="load: viewer.html" />

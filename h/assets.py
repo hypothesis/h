@@ -108,6 +108,10 @@ angular_bootstrap = Uglify(
     'lib/angular-bootstrap.js',
     output='lib/angular-bootstrap.min.js'
 )
+angular_resource = Uglify(
+    'lib/angular-resource.js',
+    output='lib/angular-resource.min.js'
+)
 angular_sanitize = Uglify(
     'lib/angular-sanitize.js',
     output='lib/angular-sanitize.min.js'
@@ -156,6 +160,7 @@ app = Bundle(
     jquery_mousewheel,
     angular,
     angular_bootstrap,
+    angular_resource,
     angular_sanitize,
     annotator,
     annotator_auth,

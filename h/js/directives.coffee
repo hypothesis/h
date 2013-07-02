@@ -20,6 +20,34 @@ annotation = ['$filter', ($filter) ->
 ]
 
 
+authentication = ->
+  base =
+    username: null
+    email: null
+    password: null
+    code: null
+
+  link: (scope, elem, attr, ctrl) ->
+    angular.extend scope, base
+  controller: [
+    '$scope', 'authentication',
+    ($scope,   authentication) ->
+      $scope.$on '$reset', => angular.extend $scope, base
+
+      $scope.submit = (form) ->
+        return unless form.$valid
+
+        params = {}
+        for name, control of form when control.$modelValue?
+          params[name] = control.$modelValue
+
+        method = "$#{form.$name}"
+        authentication[method] params
+  ]
+  scope:
+    model: '=authentication'
+
+
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
@@ -213,6 +241,15 @@ thread = ->
   restrict: 'C'
   scope: true
 
+
+userPicker = ->
+  restrict: 'ACE'
+  scope:
+    model: '=userPickerModel'
+    options: '=userPickerOptions'
+  templateUrl: 'userPicker.html'
+
+
 #Directive will be removed once the angularjs official version will have this directive
 ngBlur = ['$parse', ($parse) ->
   (scope, element, attr) ->
@@ -225,6 +262,7 @@ ngBlur = ['$parse', ($parse) ->
 
 angular.module('h.directives', ['ngSanitize'])
   .directive('annotation', annotation)
+  .directive('authentication', authentication)
   .directive('markdown', markdown)
   .directive('privacy', privacy)
   .directive('recursive', recursive)
@@ -232,5 +270,6 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('slowValidate', slowValidate)
   .directive('tabReveal', tabReveal)
   .directive('thread', thread)
+  .directive('userPicker', userPicker)
   .directive('ngBlur', ngBlur)
 
