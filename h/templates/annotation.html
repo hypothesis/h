@@ -66,7 +66,7 @@
       <ng-switch on="action">
         <button ng-switch-when="edit"
                 ng-click="save()"
-                class="btn check-icon">Edit</button>
+                class="btn check-icon">Save</button>
         <button ng-switch-when="delete"
                 ng-click="save()"
                 class="btn check-icon">Delete</button>
@@ -91,7 +91,7 @@
   <!-- Share dialog -->
   <div class="share-dialog" data-ng-show="!editing">
     <div class="icon-input">
-      <input class="share-text" ng-blur="toggle()" type="text" ng-model="shared_link" readonly/>
+      <input class="share-text" type="text" ng-model="shared_link" readonly/>
     </div>
   </div>
 
