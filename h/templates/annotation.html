@@ -5,7 +5,7 @@
           >{{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}</span>
 
     <!-- More actions -->
-    <div class="dropdown small show">
+<!--     <div class="dropdown small show">
       <span class="dropdown-toggle" role="button" title="More actions"></span>
       <ul class="dropdown-menu pull-right" role="menu">
         <li class="reply-icon"
@@ -20,7 +20,7 @@
             ng-hide="authorize('delete')"
             ng-click="flag()">Flag…</li>
       </ul>
-    </div>
+    </div> -->
   </div>
 
   <!-- Privacy -->
@@ -106,9 +106,11 @@
     <!-- <span class="fave-icon" title="Favorite"
           ng-click="favorite()" /> -->
     <a class="share-icon show" href="" title="Share" ng-click="share()">Share</a>
-
-    <!-- More actions -->
-    <div class="dropdown show">
+    <a class="clipboard-icon show" href="" title="Edit" ng-show="authorize('update')" ng-click="edit()">Edit</a>
+    <a class="x-icon show" href="" title="Delete" ng-show="authorize('delete')" ng-click="delete()">Delete</a>
+    <a class="flag-icon show" href="" title="flag" ng-hide="authorize('delete')" ng-click="flag()">Flag</a>
+        <!-- More actions -->
+<!--     <div class="dropdown show">
       <a href="" class="down-icon dropdown-toggle"
          role="button"
          title="More actions">More</a>
@@ -121,7 +123,6 @@
         <li class="flag-icon"
             ng-hide="authorize('delete')"
             ng-click="flag()">Flag…</li>
-      </ul>
-    </div>
+      </ul> </div>-->
   </div>
 </form>
