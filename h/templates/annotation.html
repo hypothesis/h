@@ -3,7 +3,8 @@
     <!-- Timestamp -->
     <span class="small"
           >{{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}</span>
-
+ <span class="fave-icon show" title="Favorite"
+          ng-click="favorite()" />
     <!-- More actions -->
 <!--     <div class="dropdown small show">
       <span class="dropdown-toggle" role="button" title="More actions"></span>
@@ -59,7 +60,6 @@
             class="body"
             name="text"
             required="" />
-
   <!-- Bottom controls -->
   <div class="buttonbar" ng-show="editing">
     <div class="annotator-controls">
