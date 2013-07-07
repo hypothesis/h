@@ -1,13 +1,32 @@
 """
 Support for doing Selenium functional tests locally and remotely using 
-SauceLabs.
+SauceLabs. You should be able to write tests with Selenium IDE, export
+them as Python WebDriver scripts, and then modify them to extend 
+SeleniumTestCase (included below) so that a test user is created. 
+
+If your test involves clicking around in the Annotator iframe you will
+need to use the Annotator context manager to switch to the iframe, since
+Selenium IDE doesn't currently handle this. See tests/functional/test_login.py
+for an example.
 """
 
 from os import environ as env
 from unittest import TestCase
 from selenium import webdriver
 
+from paste.deploy.loadwsgi import appconfig
+from sqlalchemy import engine_from_config
+from sqlalchemy.orm import sessionmaker
+from h.models import Base, User
+
+settings = appconfig('config:test.ini', relative_to='.')
+
 class SeleniumTestCase(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.engine = engine_from_config(settings)
+        cls.Session = sessionmaker(autoflush=False, autocommit=True)
 
     def setUp(self):
         if env.has_key('SAUCE_USERNAME') and env.has_key('SAUCE_ACCESS_KEY'):
@@ -29,9 +48,25 @@ class SeleniumTestCase(TestCase):
         self.verificationErrors = []
         self.accept_next_alert = True
 
+        # setup database with a test user
+        self.connection = self.engine.connect()
+        self.session = self.Session(bind=self.connection)
+
+        Base.metadata.bind = self.connection
+        Base.metadata.create_all(self.engine)
+
+        u = User(username=u'test', password=u'test', email=u'test@example.org')
+        self.session.add(u)
+        self.session.flush()
+
     def tearDown(self):
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
+
+        u = self.session.query(User).filter(User.username == 'test').first()
+        self.session.delete(u)
+        self.session.close()
+
 
 class Annotator():
     """
