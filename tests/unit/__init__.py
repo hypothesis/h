@@ -26,7 +26,7 @@ class AppTestCase(TestCase):
         Base.metadata.create_all(self.engine)
 
     def tearDown(self):
-        print dir(Base.metadata)
+        # empty out the database
         for table in reversed(Base.metadata.sorted_tables):
-            print self.connection.execute(table.delete())
+            self.connection.execute(table.delete())
         self.session.close()
