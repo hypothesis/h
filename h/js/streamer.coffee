@@ -22,89 +22,23 @@ syntaxHighlight = (json) ->
     return '<span class="' + cls + '">' + match + '</span>'
   )
 
-
-class ClauseParser
-  filter_fields : ['references', 'text', 'user','uri', 'id']
-  operators: ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#']
-  operator_mapping:
-    '=': 'equals'
-    '>': 'gt'
-    '<': 'lt'
-    '=>' : 'ge'
-    '<=' : 'ge'
-    '=<': 'le'
-    '<=' : 'le'
-    '[' : 'one_of'
-    '#' : 'matches'
-
-  parse_clauses: (clauses) ->
-    bads = []
-    structure = []
-    unless clauses
-      return
-    clauses = clauses.split ' '
-    for clause in clauses
-      #Here comes the long and boring validation checking
-      clause = clause.trim()
-      if clause.length < 1 then continue
-
-      parts = clause.split /:(.+)/
-      unless parts.length > 1
-        bads.push [clause, 'Filter clause is not well separated']
-        continue
-
-      unless parts[0] in @filter_fields
-        bads.push [clause, 'Unknown filter field']
-        continue
-
-      field = parts[0]
-      operator_found = false
-      for operator in @operators
-        if (parts[1].indexOf operator) is 0
-          oper = @operator_mapping[operator]
-          if operator is '['
-            value = parts[1][operator.length..].split ','
-          else
-            value = parts[1][operator.length..]
-          operator_found = true
-          break
-
-      unless operator_found
-        bads.push [clause, 'Unknown operator']
-        continue
-
-      structure.push
-        'field'   : '/' + field
-        'operator': oper
-        'value'   : value
-    [structure, bads]
-
-
-
 class Streamer
+  path: window.location.protocol + '//' + window.location.hostname + ':' +
+    window.location.port + '/__streamer__'
   strategies: ['include_any', 'include_all', 'exclude_any', 'exclude_all']
   past_modes: ['none','hits','time']
 
-  this.$inject = ['$location', '$scope']
-  constructor: ($location, $scope) ->
+  this.$inject = ['$location', '$scope', 'streamfilter', 'clauseparser']
+  constructor: ($location, $scope, streamfilter, clauseparser) ->
     $scope.streaming = false
     $scope.annotations = []
     $scope.bads = []
+    $scope.time = 5
+    $scope.hits = 100
 
-    @parser = new ClauseParser()
-
-    #Json structure we will watch and update
-    $scope.filter =
-      match_policy :  'include_any'
-      clauses : []
-      actions :
-        create: true
-        edit: true
-        delete: true
-      past_data:
-        load_past: 'hits'
-        go_back: 5
-        hits: 100
+    @sfilter = streamfilter
+    @sfilter.setPastDataHits(100)
+    $scope.filter = @sfilter.filter
 
     #parse for route params
     params = $location.search()
@@ -113,43 +47,40 @@ class Streamer
 
     if params.action_create
        if (typeof params.action_create) is 'boolean'
-         $scope.filter.actions.create = params.action_create
+         @sfilter.setActionCreate(params.action_create)
        else
-         $scope.filter.actions.create = params.action_create is 'true'
+         @sfilter.setActionCreate(params.action_create is 'true')
     if params.action_edit
        if (typeof params.action_edit) is 'boolean'
-         $scope.filter.actions.edit = params.action_edit
+         @sfilter.setActionEdit(params.action_edit)
        else
-         $scope.filter.actions.edit = params.action_edit is 'true'
+         @sfilter.setActionEdit(params.action_edit is 'true')
     if params.action_delete
        if (typeof params.action_delete) is 'boolean'
-         $scope.filter.actions.delete = params.action_delete
+         @sfilter.setActionDelete(params.action_delete)
        else
-         $scope.filter.actions.delete = params.action_delete is 'true'
+         @sfilter.setActionDelete(params.action_delete is 'true')
 
     if params.load_past in @past_modes
-      $scope.filter.past_data.load_past = params.load_past
-    if params.hits? and parseInt(params.hits) is not NaN
-      $scope.filter.past_data.hits = parseInt(params.hits)
-    if params.go_back? and parseInt(params.go_back) is not NaN
-      $scope.filter.past_data.go_back = parseInt(params.go_back)
+      if params.hits? and parseInt(params.hits) is not NaN
+        @sfilter.setPastDataHits(parseInt(params.hits))
+      if params.go_back? and parseInt(params.go_back) is not NaN
+        @sfilter.setPastDataTime(parseInt(params.go_back))
 
     if params.clauses
       test_clauses = params.clauses.replace ",", " "
-      res = @parser.parse_clauses test_clauses
-      if res[1]?.length is 0
-        $scope.filter.clauses = res[0]
-        $scope.clauses = test_clauses
+      @sfilter.setClausesParse(test_clauses)
+      $scope.clauses = test_clauses
     else
-      $scope.clauses = ""
+      $scope.clauses = ''
 
     console.log $scope.filter
 
     $scope.toggle_past = ->
       switch $scope.filter.past_data.load_past
-        when 'none' then $scope.filter.past_data.load_past = 'time'
-        when 'time' then $scope.filter.past_data.load_past = 'hits'
-        when 'hits' then $scope.filter.past_data.load_past = 'none'
+        when 'none' then @sfilter.setPastDataTime($scope.time)
+        when 'time' then @sfilter.setPastDataHits($scope.hits)
+        when 'hits' then @sfilter.setPastDataNone()
 
     $scope.$watch 'filter', (newValue, oldValue) =>
       json = JSON.stringify $scope.filter, undefined, 2
@@ -158,7 +89,7 @@ class Streamer
 
     $scope.clause_change = =>
       if $scope.clauses.slice(-1) is ' ' or $scope.clauses.length is 0
-        res = @parser.parse_clauses($scope.clauses)
+        res = clauseparser.parse_clauses($scope.clauses)
         if res?
           $scope.filter.clauses = res[0]
           $scope.bads = res[1]
@@ -171,34 +102,39 @@ class Streamer
         $scope.sock.close()
         $scope.streaming = false
 
-      res = @parser.parse_clauses($scope.clauses)
+      res = clauseparser.parse_clauses($scope.clauses)
       if res
         $scope.filter.clauses = res[0]
         $scope.bads = res[1]
       unless $scope.bads.length is 0
         return
+      $scope.open()
 
-      transports = ['xhr-streaming', 'iframe-eventsource', 'iframe-htmlfile', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling']
-      $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__', transports)
+    $scope.open = =>
+      $scope.sock = new SockJS @path
 
-      $scope.sock.onopen = ->
-        $scope.sock.send (JSON.stringify $scope.filter)
-        $scope.$apply =>
-          $scope.streaming = true
+      $scope.sock.onopen = =>
+        $scope.sock.send JSON.stringify $scope.filter
+        $scope.streaming = true
 
-      $scope.sock.onclose = ->
-        $scope.$apply =>
-          $scope.streaming = false
+      $scope.sock.onclose = =>
+        $scope.streaming = false
 
       $scope.sock.onmessage = (msg) =>
+        console.log 'Got something'
+        console.log msg
+        data = msg.data[0]
+        action = msg.data[1]
+        unless data instanceof Array then data = [data]
+
         $scope.$apply =>
-          data = msg.data[0]
-          unless data instanceof Array then data = [data]
-          action = msg.data[1]
-          for annotation in data
-            annotation['action'] = action
-            annotation['quote'] = get_quote annotation
-            $scope.annotations.splice 0,0,annotation
+          $scope.manage_new_data data, action
+
+    $scope.manage_new_data = (data, action) =>
+      for annotation in data
+        annotation.action = action
+        annotation.quote = get_quote annotation
+        $scope.annotations.splice 0,0,annotation
 
       #Update the parameters
       $location.search
@@ -215,7 +151,7 @@ class Streamer
       $scope.sock.close()
       $scope.streaming = false
 
-angular.module('h.streamer',['h.filters','bootstrap'])
+angular.module('h.streamer',['h.streamfilter','h.filters','bootstrap'])
   .controller('StreamerCtrl', Streamer)
 
 

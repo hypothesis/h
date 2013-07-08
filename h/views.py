@@ -9,6 +9,7 @@ __all__ = [
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 from pyramid.traversal import find_resource
+from pyramid import httpexceptions
 
 from horus.views import (
     AuthController,
@@ -18,6 +19,7 @@ from horus.views import (
 )
 
 from h import interfaces
+from h.streamer import url_values_from_document
 
 import json
 import logging
@@ -50,7 +52,7 @@ class Annotation(BaseController):
                 "don't have the permissions required for viewing it."
             )
 
-        d = context._url_values()
+        d = url_values_from_document(context)
         d['annotation'] = context
         d['annotation']['referrers'] = json.dumps(context.referrers)
 
@@ -75,6 +77,7 @@ class Annotation(BaseController):
         request.response.charset = 'UTF-8'
         return request.context
 
+
 @view_defaults(context='h.resources.Streamer', layout='site')
 class Streamer(BaseController):
     @view_config(accept='text/html', renderer='templates/streamer.pt')
@@ -87,6 +90,14 @@ class Streamer(BaseController):
         request.response.content_type = 'application/json'
         request.response.charset = 'UTF-8'
         return request.context
+
+
+@view_defaults(context='h.resources.UserStream', layout='site')
+class UserStream(BaseController):
+    @view_config(accept='text/html', renderer='templates/userstream.pt')
+    def __html__(self):
+        return self.request.context
+
 
 def includeme(config):
     config.add_view(
