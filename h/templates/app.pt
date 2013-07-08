@@ -50,7 +50,7 @@
                 <a href="" ng-click="sheet.tab = 'forgot'">Password help?</a>
               </li>
               <li>
-                <a href="" ng-click="sheet.tab = 'activate'"
+                <a href="" ng-click="sheet.tab = 'claim'"
                    >I have an activation code.</a>
               </li>
             </ul>
