@@ -33,6 +33,7 @@ class SeleniumTestCase(TestCase):
             username = env['SAUCE_USERNAME']
             key = env['SAUCE_ACCESS_KEY']
             caps = webdriver.DesiredCapabilities.FIREFOX
+            caps['name'] = str(self)
             caps['platform'] = "Linux"
             caps['build'] = env['TRAVIS_BUILD_NUMBER']
             caps['tags'] = [env['TRAVIS_PYTHON_VERSION'], 'CI']
