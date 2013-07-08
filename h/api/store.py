@@ -52,6 +52,18 @@ class Store(object):
         subreq = Request.blank(url)
         return self.request.invoke_subrequest(subreq).json['rows']
 
+    def search_raw(self, query):
+        url = self.request.route_url('api', subpath='search_raw')
+        subreq = Request.blank(url, method='POST')
+        subreq.json = query
+        result = self.request.invoke_subrequest(subreq)
+        payload = json.loads(result.body)
+
+        hits = []
+        for res in payload['hits']['hits']:
+            hits.append(res["_source"])
+        return hits
+
 
 def anonymize_deletes(annotation):
     if annotation.get('deleted', False):
