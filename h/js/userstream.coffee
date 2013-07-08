@@ -12,10 +12,10 @@ class UserStream
   path: window.location.protocol + '//' + window.location.hostname + ':' +
     window.location.port + '/__streamer__'
 
-  this.$inject = ['$scope','$timeout','streamfilter']
-  constructor: ($scope, $timeout, streamfilter) ->
+  this.$inject = ['$location','$scope','$timeout','streamfilter']
+  constructor: ($location, $scope, $timeout, streamfilter) ->
     $scope.annotations = []
-    $scope.username = document.body.attributes.internalid.value
+    $scope.username = $location.absUrl().split('/').pop()
     $scope.filter =
       streamfilter
         .setPastDataHits(100)

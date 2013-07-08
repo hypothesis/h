@@ -181,8 +181,10 @@ class AnnotationFactory(BaseResource):
 
         return annotation
 
+
 class UserStream(BaseResource, dict):
     pass
+
 
 class UserStreamFactory(BaseResource):
     def __getitem__(self, key):
@@ -190,15 +192,9 @@ class UserStreamFactory(BaseResource):
         request = self.request
         registry = request.registry
         User = registry.getUtility(interfaces.IUserClass)
-        user_count = get_session(request).query(User).filter(User.username.ilike(key)).count()
-
-        user_stream = UserStream(request)
-        user_stream.update({
-            'user': key,
-            'user_count': user_count
-        })
-
-        return user_stream
+        user = User.get_by_username(request, key)
+        if user is not None:
+            return UserStream(request)
 
 
 def includeme(config):

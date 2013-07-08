@@ -6,7 +6,7 @@
   </head>
   <style type="text/css"></style>
 
-  <body metal:fill-slot="body" internalid="${user}" ng-app="h.userstream">
+  <body metal:fill-slot="body" ng-app="h.userstream">
     <div class="topbar">
       <div class="inner">
         <a class="barbutton pull-left" href="/"

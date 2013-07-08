@@ -77,6 +77,7 @@ class Annotation(BaseController):
         request.response.charset = 'UTF-8'
         return request.context
 
+
 @view_defaults(context='h.resources.Streamer', layout='site')
 class Streamer(BaseController):
     @view_config(accept='text/html', renderer='templates/streamer.pt')
@@ -90,18 +91,12 @@ class Streamer(BaseController):
         request.response.charset = 'UTF-8'
         return request.context
 
+
 @view_defaults(context='h.resources.UserStream', layout='site')
 class UserStream(BaseController):
     @view_config(accept='text/html', renderer='templates/userstream.pt')
     def __html__(self):
-        request = self.request
-        context = request.context
-        if context['user_count'] == 0:
-            raise httpexceptions.HTTPNotFound(
-                body_template=
-                "No such user exists."
-            )
-        return context
+        return self.request.context
 
 
 def includeme(config):
