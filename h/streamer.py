@@ -246,7 +246,7 @@ class StreamerSession(Session):
                 request = self.request
                 registry = request.registry
                 store = registry.queryUtility(interfaces.IStoreClass)(request)
-                annotations = store.search_raw(json.dumps(query.query))
+                annotations = store.search_raw(query.query)
 
                 for annotation in annotations:
                     annotation.update(url_values_from_document(annotation))
