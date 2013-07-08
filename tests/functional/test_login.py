@@ -10,7 +10,7 @@ class Login(SeleniumTestCase):
    
     def test_login(self):
         driver = self.driver
-        driver.get("https://localhost:5000/")
+        driver.get("https://localhost:4000/")
 
         with Annotator(driver):
             driver.find_element_by_css_selector("div.tri").click()
