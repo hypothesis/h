@@ -101,10 +101,10 @@ def after_request(response):
         match = re.match(r'^store\.(\w+)_annotation$', request.endpoint)
         if match:
             action = match.group(1)
-            annotation = json.loads(response.data)
-            event = events.AnnotatorStoreEvent(annotation, action)
-            get_current_registry().notify(event)
-
+            if action != 'delete':
+                annotation = json.loads(response.data)
+                event = events.AnnotatorStoreEvent(annotation, action)
+                get_current_registry().notify(event)
     return response
 
 
