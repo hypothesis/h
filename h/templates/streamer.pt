@@ -24,7 +24,7 @@
     </div>
 
     <div class="main-content">
-      <div class="small-padding content paper">  
+      <div class="small-padding content paper">
         <div class="knockout noise">
           <div class="paper excerpt filter-body">
 
@@ -45,10 +45,10 @@
             </div>
 
             <div class="button_controls">
-              <!-- Match Strategy -->  
+              <!-- Match Strategy -->
               <div class="dropdown show pull-left">
                 <a href="" class="down-icon dropdown-toggle small" role="button" title="Match Strategy">Strategy:&nbsp;{{filter.match_policy}}</a>
-                <ul class="dropdown-menu" role="menu">                
+                <ul class="dropdown-menu" role="menu">
                   <li ng-click="filter.match_policy = 'include_all'" class="small">include_all</li>
                   <li ng-click="filter.match_policy = 'include_any'" class="small">include_any</li>
                   <li ng-click="filter.match_policy = 'exclude_all'" class="small">exclude_all</li>
@@ -56,70 +56,66 @@
                 </ul>
               </div>
 
-             <!-- Annotation actions -->  
-             <div class="dropdown show pull-left">
-              <a href="" class="down-icon dropdown-toggle small" role="button" title="Annotation actions">Actions</a>
-              <ul class="dropdown-menu" role="menu">                
-                <li ng-click="filter.actions.create = !filter.actions.create" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.create" class="small">Create</input><li>
-                <li ng-click="filter.actions.edit = !filter.actions.edit" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.edit" class="small">Edit</input><li>
-                <li ng-click="filter.actions.delete = !filter.actions.delete" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.delete" class="small">Delete</input><li>
-              </ul>
-             </div>
-
-            <!-- Past -->
-            <div class="dropdown show pull-left">
-               <a href="" class="down-icon dropdown-toggle small" role="button" title="Past">Past</a>
-              <ul class="dropdown-menu" role="menu">                
-                <li ng-click="toggle_past()" class="small">Load {{filter.past_data.load_past}}</li>
-                <li class="small" ng-hide="filter.past_data.load_past != 'time'">Go back <input type="number" ng-model="time" step="1" min="1" max="60" value="5"/> min(s)<li>
-                <li class="small" ng-hide="filter.past_data.load_past != 'hits'">Load <input type="number" ng-model="hits" step="10" min="1" max="500" value="20"/> hits<li>
-              </ul>
-          </div>
-
-          <!-- Sidebar links -->
-          <div class="pull-right">
-            <div>
-              <div class="dropdown show pull-right">
-               <a href="" class="dropdown-toggle small" role="button" title="Help">Show help</a>
-               <ul class="dropdown-menu menu-width" role="menu">
-                 <li>
-                   <h4>
-                     <pre>
-                       Little help for the search options syntax.
-                       This is still experimental and our goal is to form it as natural as possible.
-                       Currently you can type search clauses, separated by space characters.
-                       A search clause has the following structure: <strong>(field):(operator)(value)</strong> (i.e. <strong>user:=johndoe</strong> )
-                       The fields can be one of the followings: <strong>['thread', 'text', 'user']</strong>
-                       Operators: <strong>['=', '>', '<', '=>', '<=', '[', '#']</strong>
-                       Where '[' means a comma separated list. I.e. <strong>user:[johndoe,janedoe</strong> means the user is either johndoe or janedoe
-                      '#' means matching (or substring). i.e <strong>text:#car</strong> means every annotation which has the 'car' character string in it's body.
-                     </pre>
-                   </h4>
-                 </li>
-               </ul>
+              <!-- Annotation actions -->
+              <div class="dropdown show pull-left">
+                <a href="" class="down-icon dropdown-toggle small" role="button" title="Annotation actions">Actions</a>
+                <ul class="dropdown-menu" role="menu">
+                  <li ng-click="filter.actions.create = !filter.actions.create" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.create" class="small">Create</input><li>
+                  <li ng-click="filter.actions.edit = !filter.actions.edit" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.edit" class="small">Edit</input><li>
+                  <li ng-click="filter.actions.delete = !filter.actions.delete" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.delete" class="small">Delete</input><li>
+                </ul>
               </div>
 
-              <div class="dropdown show pull-right">
-               <a href="" class="dropdown-toggle small" role="button" title="Json">Show json</a>
-               <ul class="dropdown-menu menu-width" role="menu">
-                 <li>
-                   <h4>Generated filter json
-                     <pre ng-bind-html-unsafe="json_content"/>
-                   </h4>
-                 </li>
-               </ul>
+              <!-- Past -->
+              <div class="dropdown show pull-left">
+                <a href="" class="down-icon dropdown-toggle small" role="button" title="Past">Past</a>
+                <ul class="dropdown-menu" role="menu">
+                  <li ng-click="toggle_past()" class="small">Load {{filter.past_data.load_past}}</li>
+                  <li class="small" ng-hide="filter.past_data.load_past != 'time'">Go back <input type="number" ng-model="time" step="1" min="1" max="60" value="5"/> min(s)<li>
+                  <li class="small" ng-hide="filter.past_data.load_past != 'hits'">Load <input type="number" ng-model="hits" step="10" min="1" max="500" value="20"/> hits<li>
+                </ul>
+              </div>
+
+              <!-- Sidebar links -->
+              <div class="pull-right">
+                <div>
+                  <div class="dropdown show pull-right">
+                    <a href="" class="dropdown-toggle small" role="button" title="Help">Show help</a>
+                    <ul class="dropdown-menu menu-width" role="menu">
+                      <li>
+                        <h4>
+                          <pre>
+                            Little help for the search options syntax.
+                            This is still experimental and our goal is to form it as natural as possible.
+                            Currently you can type search clauses, separated by space characters.
+                            A search clause has the following structure: <strong>(field):(operator)(value)</strong> (i.e. <strong>user:=johndoe</strong> )
+                            The fields can be one of the followings: <strong>['thread', 'text', 'user']</strong>
+                            Operators: <strong>['=', '>', '<', '=>', '<=', '[', '#']</strong>
+                                                                           Where '[' means a comma separated list. I.e. <strong>user:[johndoe,janedoe</strong> means the user is either johndoe or janedoe
+                                                                           '#' means matching (or substring). i.e <strong>text:#car</strong> means every annotation which has the 'car' character string in it's body.
+                                                                           </pre>
+                        </h4>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div class="dropdown show pull-right">
+                    <a href="" class="dropdown-toggle small" role="button" title="Json">Show json</a>
+                    <ul class="dropdown-menu menu-width" role="menu">
+                      <li>
+                        <h4>Generated filter json
+                          <pre ng-bind-html-unsafe="json_content"/>
+                        </h4>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>  
-        </div>
-      </div>
-    </div>
-  </div>
+          </div>
 
-      <ul class="small-padding content paper">
-        <div class="knockout noise">
           <div class="metadata">
-            <div>
+            <ul>
               <li class="stream-list" ng-repeat="annotation in annotations">
                 <div class="page">
                   <strong>{{annotation['user'] | userName}}</strong>
@@ -128,11 +124,11 @@
                     <span ng-switch-when="create">&nbsp;has created an annotation</span>
                     <span ng-switch-when="update">&nbsp;has updated an annotation</span>
                     <span ng-switch-when="delete">&nbsp;has deleted an annotation</span>
-                  </span> 
+                  </span>
                   <div class="domain">
                     <img class="favicon" ng-model="annotation['favicon']"/>
-                    <a href="{{annotation['uri']}}">{{annotation['title']}}</a> 
-                    | 
+                    <a href="{{annotation['uri']}}">{{annotation['title']}}</a>
+                    |
                     <a href="{{annotation['source']}}">{{annotation['source_stripped']}}</a>
                   </div>
                 </div>
@@ -153,13 +149,11 @@
                   </div>
                 </div>
               </li>
-            </div>
+            </ul>
           </div>
         </div>
-      </ul>
-     </div>
-
-
+      </div>
+    </div>
    </div>
   </body>
 </html>
