@@ -92,6 +92,55 @@
       </form>
       <!-- / Register -->
 
+      <!--Claim a username-->
+      <form data-title="Claim a username"
+            data-value="claim"
+            class="tab-pane"
+            name="claim"
+            novalidate>
+
+              To activate your reserved username, please enter the email address you reserved your username with.
+        <!--Get Validation Code-->      
+        <input type="email" name="email" value="" placeholder="Email"
+               required autocapitalize="false" ng-model="email" />
+        <span ng-show="forgot.email.$error.email"
+              slow-validate="email"
+              >Is this an email address?</span>
+        <span ng-show="forgot.email.$error.required"
+              slow-validate="email"
+              >Please enter your email.</span>
+
+        <input type="submit" name="forgot" value="Send recovery email"
+               ng-disabled="!forgot.$valid" />
+               
+               <br/>
+               Find the validation code in the confirmation email you recieved. Enter it below, along with the password you would like to use for your account.
+
+
+      <!--Activate-->
+      <input type="text" name="code" value="" placeholder="Activation Code"
+               required autocorrect="false" autocapitalize="false"
+               ng-model="code" />
+        <span ng-show="activate.code.$error.required"
+              slow-validate="code"
+              >Please enter your validation code.</span>
+
+        <input type="password" name="password" value="" placeholder="Password"
+               required autocapitalize="false" autocorrect="false"
+               ng-minlength="2" ng-model="password" />
+        <span ng-show="activate.password.$error.required"
+              slow-validate="password"
+              >Please choose a password.</span>
+        <span ng-show="activate.password.$error.minlength"
+              slow-validate="password"
+              >Passwords must be at least 2 characters.</span>
+
+        <input type="submit" name="activate" value="Sign in"
+               ng-disabled="!activate.$valid" />
+
+      </form>
+      <!--/Claim a username-->
+
       <!-- Forgot -->
       <form data-title="Forgot your password?"
             data-value="forgot"
@@ -114,35 +163,6 @@
       </form>
       <!-- / Forgot -->
 
-      <!-- Activate -->
-      <form data-title="Set your password"
-            data-value="activate"
-            class="tab-pane"
-            name="activate"
-            novalidate>
-
-        <input type="text" name="code" value="" placeholder="Activation Code"
-               required autocorrect="false" autocapitalize="false"
-               ng-model="code" />
-        <span ng-show="activate.code.$error.required"
-              slow-validate="code"
-              >Please enter your validation code.</span>
-
-        <input type="password" name="password" value="" placeholder="Password"
-               required autocapitalize="false" autocorrect="false"
-               ng-minlength="2" ng-model="password" />
-        <span ng-show="activate.password.$error.required"
-              slow-validate="password"
-              >Please choose a password.</span>
-        <span ng-show="activate.password.$error.minlength"
-              slow-validate="password"
-              >Passwords must be at least 2 characters.</span>
-
-        <input type="submit" name="activate" value="Sign in"
-               ng-disabled="!activate.$valid" />
-
-      </form>
-      <!-- / Activate -->
     </metal:main>
 
     <metal:main define-macro="tinyman">
