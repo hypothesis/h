@@ -111,14 +111,20 @@
               >Please enter your email.</span>
 
         <input type="submit" name="forgot" value="Send recovery email"
-               ng-disabled="!forgot.$valid" />
+               ng-disabled="!forgot.$valid" ng-click="sheet.tab = 'activate'"/>
                
-               <br/>
-               Find the validation code in the confirmation email you recieved. Enter it below, along with the password you would like to use for your account.
-
-
+        </form>
+               
       <!--Activate-->
-      <input type="text" name="code" value="" placeholder="Activation Code"
+     <form data-title="Activate"
+            data-value="activate"
+            class="tab-pane"
+            name="activate"
+            novalidate>
+
+           Find the validation code in the confirmation email you recieved. Enter it below, along with the password you would like to use for your account.
+
+        <input type="text" name="code" value="" placeholder="Activation Code"
                required autocorrect="false" autocapitalize="false"
                ng-model="code" />
         <span ng-show="activate.code.$error.required"
