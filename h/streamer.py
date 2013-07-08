@@ -269,18 +269,21 @@ def after_action(event):
     action = event.action
     annotation = event.annotation
 
-    if action != 'create':
-        if not authz.authorize(annotation, action):
-            return
+    annotation.update(url_values_from_document(annotation))
 
     for connection in StreamerSession.connections:
+        if not authz.authorize(annotation, 'read', connection.request.user):
+            continue
+
+        if not connection.filter.match(annotation, action):
+            continue
+
         try:
-            if connection.filter.match(annotation, action):
-                annotation.update(url_values_from_document(annotation))
-                connection.send([annotation, action])
+            connection.send([annotation, action])
         except:
             log.info(traceback.format_exc())
             log.info('Filter error!')
+            connection.close()
 
 
 def includeme(config):
