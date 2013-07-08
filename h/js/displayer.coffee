@@ -9,10 +9,12 @@ get_quote = (annotation) ->
   quote
 
 class Displayer
-  this.$inject = ['$scope','$element','$timeout']
+  path: window.location.protocol + '//' + window.location.hostname + ':' +
+    window.location.port + '/__streamer__'
   idTable : {}
 
-  constructor: ($scope, $element, $timeout) ->
+  this.$inject = ['$scope','$element','$timeout','streamfilter']
+  constructor: ($scope, $element, $timeout, streamfilter) ->
     $scope.annotation = {}
     $scope.annotations = [$scope.annotation]
     $scope.annotation.replies = []
@@ -20,22 +22,12 @@ class Displayer
     $scope.annotation.id = document.body.attributes.internalid.value
     @idTable[$scope.annotation.id] = $scope.annotation
     $scope.filter =
-      match_policy :  'include_any'
-      clauses : [
-          field: "/references"
-          operator: "first_of"
-          value: $scope.annotation.id
-        ,
-          field: "/id"
-          operator: "equals"
-          value: $scope.annotation.id
-        ]
-      actions :
-        create: true
-        edit: true
-        delete: true
-      past_data:
-        load_past: "none"
+      streamfilter
+        .setPastDataNone()
+        .setMatchPolicyIncludeAny()
+        .addClausesParse('references:^' + $scope.annotation.id)
+        .addClausesParse('id:=' + $scope.annotation.id)
+        .getFilter()
 
     $scope.change_annotation_content = (id, new_annotation) =>
       to_change = @idTable[id]
@@ -48,13 +40,12 @@ class Displayer
       to_change.reply_count = reply_count
 
     $scope.open = =>
-      transports = ['xhr-streaming', 'iframe-eventsource', 'iframe-htmlfile', 'xhr-polling', 'iframe-xhr-polling', 'jsonp-polling']
-      $scope.sock = new SockJS(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/__streamer__', transports)
+      $scope.sock = new SockJS @path
 
-      $scope.sock.onopen = ->
+      $scope.sock.onopen = =>
         $scope.sock.send JSON.stringify $scope.filter
 
-      $scope.sock.onclose = ->
+      $scope.sock.onclose = =>
         $timeout $scope.open, 5000
 
       $scope.sock.onmessage = (msg) =>
@@ -63,6 +54,7 @@ class Displayer
         data = msg.data[0]
         action = msg.data[1]
         unless data instanceof Array then data = [data]
+
         $scope.$apply =>
           $scope.manage_new_data data, action
 
@@ -127,5 +119,5 @@ class Displayer
       document.initial_replies = ''
     $scope.open()
 
-angular.module('h.displayer',['h.filters','bootstrap'])
+angular.module('h.displayer',['h.streamfilter','h.filters','bootstrap'])
   .controller('DisplayerCtrl', Displayer)
