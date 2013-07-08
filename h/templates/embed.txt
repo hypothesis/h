@@ -10,8 +10,9 @@ yepnope([
       window.annotator = new Annotator.Host(document.body, {
         /* @@ reflect routes with crossroads.js?? */
         app: ${app},
+        // sidebarParent: window.parent.contentDocument.body,
       });
-      window.Annotator.noConflict().$.noConflict(true);
+      window.Annotator.noConflict();
     }
   },
   {

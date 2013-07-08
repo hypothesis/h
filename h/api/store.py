@@ -1,6 +1,5 @@
 from annotator import auth, authz, store, es
 from annotator.annotation import Annotation
-from annotator.document import Document
 
 from flask import Flask, g
 
@@ -86,7 +85,6 @@ def includeme(config):
     es.init_app(app)
     with app.test_request_context():
         Annotation.create_all()
-        Document.create_all()
 
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True

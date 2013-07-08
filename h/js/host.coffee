@@ -20,7 +20,9 @@ class Annotator.Host extends Annotator
     super
 
     @app = @options.app
+    @sidebarlocation = @options.sidebarlocation
     delete @options.app
+    delete @options.sidebarlocation
 
     # Create the iframe
     if document.baseURI and window.PDFView?
@@ -63,8 +65,6 @@ class Annotator.Host extends Annotator
         for k, v of annotation when k in whitelist
           parsed[k] = v
         parsed
-
-    this.addPlugin 'Document'
 
     # Build a channel for the publish API
     @api = Channel.build
@@ -158,17 +158,6 @@ class Annotator.Host extends Annotator
         .bind('setDrag', (ctx, drag) =>
           @drag.enabled = drag
           @drag.last = null
-        )
-
-        .bind('adderClick', =>
-          @onAdderClick @event
-        )
-
-        .bind('getDocumentInfo', =>
-          return {
-            uri: @plugins.Document.uri()
-            metadata: @plugins.Document.metadata
-          }
         )
 
   scanDocument: (reason = "something happened") =>
@@ -277,8 +266,3 @@ class Annotator.Host extends Annotator
     @api.notify
       method: 'addToken'
       params: token
-
-  #Save the event for restarting edit
-  onAdderClick: (event) =>
-    @event = event
-    super

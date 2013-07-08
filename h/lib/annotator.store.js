@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-3342e40
+** Annotator 1.2.6-dev-8daf38c
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-05-28 21:55:35Z
+** Built at: 2013-05-17 21:32:33Z
 */
 
 
@@ -124,29 +124,11 @@
     };
 
     Store.prototype._onLoadAnnotations = function(data) {
-      var a, annotation, annotationMap, newData, _i, _j, _len, _len1, _ref;
-
       if (data == null) {
         data = [];
       }
-      annotationMap = {};
-      _ref = this.annotations;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        a = _ref[_i];
-        annotationMap[a.id] = a;
-      }
-      newData = [];
-      for (_j = 0, _len1 = data.length; _j < _len1; _j++) {
-        a = data[_j];
-        if (annotationMap[a.id]) {
-          annotation = annotationMap[a.id];
-          this.updateAnnotation(annotation, a);
-        } else {
-          newData.push(a);
-        }
-      }
-      this.annotations = this.annotations.concat(newData);
-      return this.annotator.loadAnnotations(newData.slice());
+      this.annotations = this.annotations.concat(data);
+      return this.annotator.loadAnnotations(data.slice());
     };
 
     Store.prototype.loadAnnotationsFromSearch = function(searchOptions) {

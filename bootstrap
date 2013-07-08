@@ -1,13 +1,8 @@
 #!/bin/bash -e
 
-function create_virtualenv() {
-	echo "Creating virtualenv...";
-	virtualenv --no-site-packages --distribute .;
-	source bin/activate;
-}
-
-function maybe_create_virtualenv() {
-	echo "
+if test -z "$VIRTUAL_ENV"; then
+	if test ! -e bin/activate; then
+		echo "
 This script can create an isolated environment for installing python
 software libraries needed for development. This setup is recommended.
 
@@ -21,43 +16,34 @@ like virtualenv-wrapper [2], you may decline to create one now.
 [1] http://www.virtualenv.org/
 [2] http://virtualenvwrapper.readthedocs.org/
 "
-
-	if [ -t 0 ]; then
 		while true; do
 			read -p "Create a virtualenv now (recommended)? " yn
 			case $yn in
 				[Yy]* )
-					create_virtualenv
+					echo "Creating virtualenv...";
+					virtualenv --python=python2.7 --no-site-packages .;
+					source bin/activate;
 					break;;
 				[Nn]* ) break;;
 				* ) echo "Please answer yes or no.";;
 			esac
 		done
 	else
-		create_virtualenv
-	fi
-}
-
-if test -z "$VIRTUAL_ENV"; then
-	if test ! -e bin/activate; then
-		maybe_create_virtualenv
-	else
 		source bin/activate
 	fi
 fi
 
-
 if test -z "$PIP_DOWNLOAD_CACHE"; then
-	export PIP_DOWNLOAD_CACHE=$HOME/.pip
+	export PIP_DOWNLOAD_CACHE=$PWD/.pip-cache
 fi
 
 echo "Ensuring an up-to-date pip..."
-pip install -qU pip
+pip install -U pip
 
 echo "Checking dependencies..."
 diff -q requirements.txt .installed.txt 2> /dev/null || {
-	echo "Installing dependencies (this may take a few minutes)..."
-	pip install -qr requirements.txt
+	echo "Installing dependencies..."
+	pip install -r requirements.txt
 	cp requirements.txt .installed.txt
 }
 

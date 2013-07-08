@@ -214,15 +214,6 @@ thread = ->
   restrict: 'C'
   scope: true
 
-#Directive will be removed once the angularjs official version will have this directive
-ngBlur = ['$parse', ($parse) ->
-  (scope, element, attr) ->
-    fn = $parse attr['ngBlur']
-    element.bind 'blur', (event) ->
-      scope.$apply ->
-        fn scope,
-          $event: event
-]
 
 angular.module('h.directives', ['ngSanitize'])
   .directive('annotation', annotation)
@@ -233,5 +224,3 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('slowValidate', slowValidate)
   .directive('tabReveal', tabReveal)
   .directive('thread', thread)
-  .directive('ngBlur', ngBlur)
-
