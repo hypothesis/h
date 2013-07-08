@@ -15,7 +15,6 @@ functional_test:
 	echo "starting test h instance" 
 	$(python) run test.ini --daemon --pid-file=test.pid
 	$(python) -m pytest tests/functional
-	$(python) bin/pserve --stop-daemon --pid-file=test.pid
 
 unit_test: 
 	rm -f test.db
