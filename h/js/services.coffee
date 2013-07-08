@@ -52,6 +52,7 @@ class Hypothesis extends Annotator
 
   this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts']
   constructor: ($document, $location, $rootScope, $route, drafts) ->
+    Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
     # Load plugins

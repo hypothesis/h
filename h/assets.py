@@ -71,6 +71,9 @@ def CSS(*names, **kw):
 # Included dependencies
 #
 
+# Gettext
+gettext = Uglify('lib/gettext.js', output='lib/gettext.min.js')
+
 # Annotator
 annotator = Uglify('lib/annotator.js', output='lib/annotator.min.js')
 annotator_auth = Uglify(
@@ -100,6 +103,10 @@ annotator_document = Uglify(
 )
 annotator_threading = Uglify(
     Coffee('js/plugin/threading.coffee', output='js/plugin/threading.js')
+)
+annotator_i18n = Uglify(
+    'locale/data.js',
+    output='locale/data.min.js'
 )
 
 # Angular
@@ -162,6 +169,8 @@ app = Bundle(
     angular_bootstrap,
     angular_resource,
     angular_sanitize,
+    gettext,
+    annotator_i18n,
     annotator,
     annotator_auth,
     annotator_bridge,
@@ -222,6 +231,8 @@ inject = Bundle(
     domTextFamily,
     jquery,
     jschannel,
+    gettext,
+    annotator_i18n,
     annotator,
     annotator_bridge,
     annotator_document,

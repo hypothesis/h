@@ -17,6 +17,7 @@ class Annotator.Host extends Annotator
     tick: false
 
   constructor: (element, options) ->
+    Gettext.prototype.parse_locale_data annotator_locale_data    
     super
 
     @app = @options.app
