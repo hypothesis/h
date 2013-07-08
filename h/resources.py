@@ -173,6 +173,7 @@ class AnnotationFactory(BaseResource):
         store = registry.queryUtility(interfaces.IStoreClass)(request)
 
         annotation = Annotation(request)
+        annotation.__name__ = key
         annotation.__parent__ = self
         try:
             annotation.update(store.read(key))
