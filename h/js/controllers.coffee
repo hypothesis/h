@@ -324,7 +324,8 @@ class Annotation
     $scope.toggle = ->
       $element.find('.share-dialog').slideToggle()
 
-    $scope.share = ->
+    $scope.share = ($event) ->
+      $event.stopPropagation()
       $scope.shared = not $scope.shared
       $scope.toggle()
 
