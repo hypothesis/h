@@ -99,8 +99,8 @@
             name="claim"
             novalidate>
 
-              <p style='font-family: "Source Sans Pro","Helvetica'>To activate your reserved username, please enter the email address you used.</p>      
-        
+              <p style='font-family: "Source Sans Pro","Helvetica'>To activate your reserved username, please enter the email address you used.</p>
+        <!--Get Validation Code-->      
         <input type="email" name="email" value="" placeholder="Email"
                required autocapitalize="false" ng-model="model.email" />
         <span ng-show="forgot.email.$error.email"
@@ -113,8 +113,7 @@
         <input type="submit" name="forgot" value="Send recovery email"
                ng-disabled="!forgot.$valid" ng-click="sheet.tab = 'activate'"/>
                
-        </form>
-        <!-- / Claim a username-->
+      </form>
                
       <!--Activate-->
      <form data-title="Activate"
@@ -146,7 +145,7 @@
                ng-disabled="!activate.$valid" />
 
       </form>
-      <!-- / Activate-->
+      <!--/Claim a username-->
 
       <!-- Forgot -->
       <form data-title="Forgot"
