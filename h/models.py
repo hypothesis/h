@@ -28,6 +28,9 @@ from sqlalchemy.types import Integer, TypeDecorator, CHAR
 
 from h import interfaces, lib
 
+from mannord import UserMixin as ModerationUserMixin
+from mannord import ItemMixin, ActionMixin
+import mannord
 
 class GUID(TypeDecorator):
     """Platform-independent GUID type.
@@ -103,7 +106,30 @@ class Group(GroupMixin, Base):
     pass
 
 
-class User(UserMixin, Base):
+class ModerationAction(ActionMixin, Base):
+    pass
+
+
+class AnnotationModerated(ItemMixin, Base):
+    action_class = ModerationAction
+
+    @classmethod
+    def flag_as_spam(cls, request, username):
+        user = User.get_by_username(request, username)
+        session = get_session(request)
+        result = mannord.flag_as_spam(cls, user, datetime.utcnow(), session,
+                                                           cls.action_class)
+        session.commit()
+        return {'result': result}
+
+    @classmethod
+    def undo_flag_as_spam(cls, request, username):
+        user = User.get_by_username(request, username)
+        session = get_session(request)
+        result = mannord.undo_flag_as_spam(cls, user, session, cls.action_class)
+
+
+class User(UserMixin, ModerationUserMixin, Base):
     @classmethod
     def get_by_username(cls, request, username):
         session = get_session(request)

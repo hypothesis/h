@@ -16,6 +16,8 @@ from h.models import get_session
 import logging
 log = logging.getLogger(__name__)
 
+from models import AnnotationModerated
+
 
 @implementer(ILocation)
 class BaseResource(resources.BaseFactory):
@@ -198,6 +200,39 @@ class UserStreamFactory(BaseResource):
             return UserStream(request)
 
 
+class AnnotationModeratedResource(Annotation):
+    pass
+
+
+class ModerationActionResource(BaseResource, dict):
+    def __getitem__(self, key):
+        # key is annotation id.
+        # Creating AnnotationModeratedResource
+        request = self.request
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        annot_moder_res = AnnotationModeratedResource(request)
+        annot_moder_res.__parent__ = self
+        try:
+            annot_moder_res.update(store.read(key))
+            # Adding AnnotationModerated object
+            annot_moder = AnnotationModerated.get_add_item(key, user_email,
+                                                           session)
+            annot_moder_res.annot_moder = annot_moder
+        except:
+            pass
+        return  annot_moder_res
+
+
+class ModerationActionFactory(BaseResource):
+    def __getitem__(self, key):
+        # key is moderation action type.
+        request = self.request
+        moder_act_res = ModerationActionResource(request)
+        moder_act_res.update({'action_type' : key})
+        return moder_act_res
+
+
 def includeme(config):
     config.set_root_factory(RootFactory)
     config.add_route('index', '/')
@@ -205,3 +240,4 @@ def includeme(config):
     RootFactory.a = AnnotationFactory
     RootFactory.stream = Streamer
     RootFactory.u = UserStreamFactory
+    RootFactory.act = ModerationActionFactory
