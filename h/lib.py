@@ -5,7 +5,7 @@ from pyramid.security import forget, remember, unauthenticated_userid
 from h import interfaces
 
 
-class WeakMemoizedProperty(property):
+class MemoizedProperty(property):
     """A property which memoizes the result of its getter
 
     Use this property when re-computing the value on each access is
@@ -68,7 +68,7 @@ def set_user(request, user):
     setattr(request, '_user_modified', headers)
 
 
-user_property = WeakMemoizedProperty(
+user_property = MemoizedProperty(
     get_user,
     set_user,
     None,  # cannot be deleted

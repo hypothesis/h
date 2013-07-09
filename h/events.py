@@ -11,3 +11,9 @@ from horus.events import (
     PasswordResetEvent,
     ProfileUpdatedEvent,
 )
+
+
+class AnnotatorStoreEvent(object):
+    def __init__(self, annotation, action):
+        self.annotation = annotation
+        self.action = action

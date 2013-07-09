@@ -16,6 +16,7 @@ def includeme(config):
     config.include('h.schemas')
     config.include('h.subscribers')
     config.include('h.views')
+    config.include('h.streamer')
 
 
 def bootstrap(cfname, config_fn=None):

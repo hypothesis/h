@@ -2,6 +2,11 @@ from os import path
 from urlparse import urlparse
 
 import re
+import sys
+
+if 'gevent' in sys.modules:
+    import gevent.subprocess
+    sys.modules['subprocess'] = gevent.subprocess
 
 
 from webassets import Bundle
@@ -99,6 +104,10 @@ angular_bootstrap = Uglify(
     'lib/angular-bootstrap.js',
     output='lib/angular-bootstrap.min.js'
 )
+angular_resource = Uglify(
+    'lib/angular-resource.js',
+    output='lib/angular-resource.min.js'
+)
 angular_sanitize = Uglify(
     'lib/angular-sanitize.js',
     output='lib/angular-sanitize.min.js'
@@ -126,6 +135,8 @@ pagedown = Uglify(
     output='lib/Markdown.Converter.min.js'
 )
 
+sockjs = Uglify('h:lib/sockjs-0.3.4.js', output='lib/sockjs-client.min.js')
+
 domTextFamily = Uglify(
     Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
     Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
@@ -145,6 +156,7 @@ app = Bundle(
     jquery_mousewheel,
     angular,
     angular_bootstrap,
+    angular_resource,
     angular_sanitize,
     annotator,
     annotator_auth,
@@ -159,6 +171,7 @@ app = Bundle(
     jwz,
     pagedown,
     raf,
+    sockjs,
     Uglify(
         *[
             Coffee('js/%s.coffee' % name,
@@ -169,18 +182,21 @@ app = Bundle(
                 'controllers',
                 'filters',
                 'directives',
+                'displayer',
                 'services',
+                'streamer',
+                'streamfilter',
+                'userstream',
             )
         ],
         output='js/app.min.js'
     ),
 )
 
-display = Bundle(
-    angular,
-    jquery,
-    Coffee('js/displayer.coffee', output='js/displayer.js'),
-    CSS('css/displayer.css', output='js/displayer.min.css'),
+site = SCSS(
+    'css/site.scss',
+    depends=(css_base + css_common),
+    output='css/site.min.css',
 )
 
 sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),

@@ -6,11 +6,11 @@ Install Homebrew::
     $ ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
 
 Install python::
-    
+
     $ brew install python
 
 Install virtualenv::
-    
+
     $ pip install virtualenv
 
 Install Node and other required tools::
@@ -29,12 +29,12 @@ Add the tools' path to the $PATH variable::
 Install Elasticsearch::
 
     $ brew install elasticsearch
-    
+
 To have Elasticsearch run automatically at login::
 
     $ ln -sfv /usr/local/opt/elasticsearch/*.plist ~/Library/LaunchAgents
     $ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.elasticsearch.plist
-    
+
 To launch it manually without launchctl::
 
     $ elasticsearch -f -D es.config=/usr/local/opt/elasticsearch/config/elasticsearch.yml

@@ -20,6 +20,34 @@ annotation = ['$filter', ($filter) ->
 ]
 
 
+authentication = ->
+  base =
+    username: null
+    email: null
+    password: null
+    code: null
+
+  link: (scope, elem, attr, ctrl) ->
+    angular.extend scope, base
+  controller: [
+    '$scope', 'authentication',
+    ($scope,   authentication) ->
+      $scope.$on '$reset', => angular.extend $scope, base
+
+      $scope.submit = (form) ->
+        return unless form.$valid
+
+        params = {}
+        for name, control of form when control.$modelValue?
+          params[name] = control.$modelValue
+
+        method = "$#{form.$name}"
+        authentication[method] params
+  ]
+  scope:
+    model: '=authentication'
+
+
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
@@ -34,8 +62,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 
     # React to the changes to the text area
     input.bind 'blur change keyup', ->
-      value = input.attr('value') or ''
-      ctrl.$setViewValue value
+      ctrl.$setViewValue input[0].value
       scope.$digest()
 
     # Auto-focus the input box when the widget becomes editable.
@@ -214,9 +241,60 @@ thread = ->
   restrict: 'C'
   scope: true
 
+<<<<<<< HEAD
+=======
+
+userPicker = ->
+  restrict: 'ACE'
+  scope:
+    model: '=userPickerModel'
+    options: '=userPickerOptions'
+  templateUrl: 'userPicker.html'
+
+
+#Directive will be removed once the angularjs official version will have this directive
+ngBlur = ['$parse', ($parse) ->
+  (scope, element, attr) ->
+    fn = $parse attr['ngBlur']
+    element.bind 'blur', (event) ->
+      scope.$apply ->
+        fn scope,
+          $event: event
+]
+>>>>>>> ad6858f88786ad140b2fd32de3a7cebce32aaaed
+
+repeatAnim = ->
+  restrict: 'A'
+  scope:
+    array: '='
+  template: '<div ng-init="runAnimOnLast()"><div ng-transclude></div></div>'
+  transclude: true
+
+  controller: ($scope, $element, $attrs) ->
+    $scope.runAnimOnLast = ->
+      #Run anim on the item's element
+      #(which will be last child of directive element)
+      item=$scope.array[0]
+      itemElm = jQuery($element)
+        .children()
+        .first()
+        .children()
+
+      unless item._anim?
+        return
+      if item._anim is 'fade'
+        itemElm
+          .css({ opacity: 0 })
+          .animate({ opacity: 1 }, 1500)
+      else
+        if item._anim is 'slide'
+          itemElm
+            .css({ 'margin-left': itemElm.width() })
+            .animate({ 'margin-left': '0px' }, 1500)
 
 angular.module('h.directives', ['ngSanitize'])
   .directive('annotation', annotation)
+  .directive('authentication', authentication)
   .directive('markdown', markdown)
   .directive('privacy', privacy)
   .directive('recursive', recursive)
@@ -224,3 +302,10 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('slowValidate', slowValidate)
   .directive('tabReveal', tabReveal)
   .directive('thread', thread)
+<<<<<<< HEAD
+=======
+  .directive('userPicker', userPicker)
+  .directive('ngBlur', ngBlur)
+  .directive('repeatAnim', repeatAnim)
+
+>>>>>>> ad6858f88786ad140b2fd32de3a7cebce32aaaed

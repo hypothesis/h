@@ -163,9 +163,11 @@ button, input[type=submit], .btn {
 
 //FLASH/TOAST/ALERTS///////////////////////////////
 .toast, .annotator-notice {
-  @include border-radius(.5em);
+  @include border-radius(0.1em);
   @include smallshadow;
   @include single-transition(opacity, .2s);
+  padding: 0.3em;
+  font-family: $sansFontFamily;
   border: solid 1px;
   bottom: 18%;
   left: 50%;
@@ -245,6 +247,7 @@ button, input[type=submit], .btn {
 
 .slow-validate {
   display: block;
+  font-family: $sansFontFamily;
   max-height: 0;
   overflow: hidden;
 
@@ -607,12 +610,12 @@ blockquote {
 
   .inner > * {
     padding: .3em;
-  }
 
-  .tinyman {
-    border-left: 1px solid $grayLighter;
-    display: inline-block;
-    font-family: $sansFontFamily;
+    &.pull-right {
+      border-left: 1px solid $grayLighter;
+      display: inline-block;
+      font-family: $sansFontFamily;
+    }
   }
 }
 
@@ -645,7 +648,8 @@ blockquote {
   position: relative;
 
   .user {
-    text-decoration: underline;
+    font-weight: bold;
+    font-size: 1.1em;
   }
 
   .body {
@@ -725,7 +729,7 @@ blockquote {
     position: absolute;
     top: $threadexp-width / 2;
     left: -($threadexp-width / 2);
-    outline: 1px dotted #aaa;
+    outline: 1px solid #aaa;
     @include icon("minus_1.png");
   }
 
@@ -750,9 +754,10 @@ blockquote {
         text-overflow: ellipsis;
         -o-text-overflow: ellipsis;
         white-space: nowrap;
-        font-style: italic;
         margin-top: 0;
         margin-bottom: 0;
+        font-size: 0.95em;
+        opacity: 0.8;
       }
 
       .user {
@@ -763,15 +768,6 @@ blockquote {
 
     & > .threadexp {
       background-image: url("../images/plus_1.png");
-    }
-  }
-
-  &.collapse-hide-setup, &.collapse-show-setup {
-    @include transition-duration(.4s);
-
-    & > ul {
-      @include transition-duration(.4s);
-      @include transition-property(max-height);
     }
   }
 
@@ -816,8 +812,7 @@ blockquote {
 
   & > .show {
     @include transition(opacity);
-    @include transition-delay(.15s);
-    @include transition-duration(1.05s);
+    @include transition-duration(.15s);
     opacity: 0;
 
     &.open, :hover > & {
@@ -860,6 +855,163 @@ blockquote {
   }
 }
 
+//STREAMER////////////////////////////////
+//This is specific to the streamer page
+.main-content {
+  margin:0;
+}
+
+
+.center_button {
+  text-align: center;
+}
+
+.button_controls {
+  margin-left: 1em;
+  margin-right: 1em;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+
+.stream-list {
+  margin-bottom: 1.5em; 
+}
+
+
+.filter-body {
+ overflow: visible;
+ padding-bottom: 1.5em;
+}
+
+.side-bar-right {
+    width: 15em;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+
+.side-bar-left {
+    width: 30em;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+@mixin sidebar_animation {
+  -webkit-transition: 1s linear all;
+  -moz-transition: 1s linear all;
+  -o-transition: 1s linear all;
+  transition: 1s linear all;
+  overflow-y:hidden;
+}
+
+.sidebar_anim_show_left-setup {
+  @include sidebar_animation;
+  opacity: 0;
+  width: 0em;
+}
+
+.sidebar_anim_show_left-setup.sidebar_anim_show_left-start {
+  opacity: 1;
+  width: 30em;
+}
+
+.sidebar_anim_show_right-setup {
+  @include sidebar_animation;
+  opacity: 0;
+  width: 0em;
+}
+
+.sidebar_anim_show_right-setup.sidebar_anim_show_right-start {
+  opacity: 1;
+  width: 15em;
+}
+.sidebar_anim_hide_right-setup {
+  @include sidebar_animation;
+  opacity: 1;
+  width: 15em;
+}
+
+.sidebar_anim_hide_right-setup.sidebar_anim_hide_right-start {
+  opacity: 0;
+  width: 0em;
+}
+
+.sidebar_anim_hide_left-setup {
+  @include sidebar_animation;
+  opacity: 1;
+  width: 30em;
+}
+
+.sidebar_anim_hide_left-setup.sidebar_anim_hide_left-start {
+  opacity: 0;
+  width: 0em;
+}
+
+.searchbar-border {
+  height: auto;
+  padding-bottom: 2em;
+}
+
+.searchbar-error {
+  color: red;
+}
+
+.menu-width {
+  width: 20em;
+  white-space: pre-line;
+}
+
+pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+.string { color: green; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: red; }
+
+.sidebar-content {
+  padding-top: 4em;
+  overflow-x:hidden;
+  overflow-y:hidden;
+}
+
+.annotation-header-border {
+  padding: 0.5em;
+  overflow: hidden;
+}
+
+.annotation-header-width {
+  padding: 0.2em;
+  overflow: hidden;
+}
+
+.annotation-header-favicon {
+  width: 1em;
+  vertical-align: middle;
+}
+
+.searchbar {
+  margin-top: 8em;
+}
+
+.searchinput {
+  width: 79%;
+}
+
+.searchbutton {
+  width: 19%
+}
+
+.searchfield {
+  width: 100%
+}
+
+.small-padding {
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
 
 //A grid of cards
 .card-grid {

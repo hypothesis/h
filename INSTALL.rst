@@ -22,9 +22,9 @@ follows::
 
 The command will set up the development environment and check for development
 dependencies. Warnings will be issued for missing dependencies. When this
-script runs successfully, the environment should be prepared. It is good 
-practice to run this script whenever the source code changes, such as after 
-pulling new commits from upstream, or checking out a new branch, which may 
+script runs successfully, the environment should be prepared. It is good
+practice to run this script whenever the source code changes, such as after
+pulling new commits from upstream, or checking out a new branch, which may
 have changed (for example: updated) requirements.
 
 For building the static assets, requirements currently include CoffeeScript_
@@ -37,6 +37,7 @@ minification needs. These are not required when running the project in a
 development configuration.
 
 .. _pyramid: http://www.pylonsproject.org/
+.. _WSGI: http://www.wsgi.org/
 .. _gunicorn: http://gunicorn.org/
 .. _uWSGI: http://projects.unbit.it/uwsgi/
 .. _elasticsearch: http://www.elasticsearch.org/

@@ -9,8 +9,23 @@ from h import api, interfaces, views
 from h.models import _
 
 
-@view_defaults(context='h.resources.AppFactory', layout='app', renderer='json')
+@view_defaults(
+    accept='application/json',
+    context='h.resources.AppFactory',
+    layout='app',
+    renderer='json'
+)
 class AppController(views.BaseController):
+    def __init__(self, request):
+        super(AppController, self).__init__(request)
+
+        if request.method == 'POST':
+            data = request.json_body
+            data.update(request.params)
+            request.content_type = 'application/x-www-form-urlencoded'
+            request.POST.clear()
+            request.POST.update(data)
+
     @view_config(request_method='POST', request_param='__formid__=login')
     def login(self):
         result = views.AuthController(self.request).login()
@@ -61,7 +76,7 @@ class AppController(views.BaseController):
         result = views.ForgotPasswordController(self.request).forgot_password()
         return self.respond(result)
 
-    @view_config(name='logout')
+    @view_config(request_method='POST', request_param='__formid__=logout')
     def logout(self):
         result = views.AuthController(self.request).logout()
         self.request.user = None
@@ -123,7 +138,6 @@ class AppController(views.BaseController):
 
         return result
 
-    @view_config(http_cache=0, name='state', renderer='json')
     def __call__(self):
         request = self.request
 
@@ -143,7 +157,15 @@ class AppController(views.BaseController):
             'model': model,
         }
 
-    @view_config(layout='sidebar', renderer='h:templates/app.pt')
+    @view_config(http_cache=0)
+    def __json__(self):
+        return self.success()
+
+    @view_config(
+        accept='text/html',
+        layout='sidebar',
+        renderer='h:templates/app.pt'
+    )
     def __html__(self):
         request = self.request
         request.session.new_csrf_token()

@@ -13,7 +13,7 @@ modern web browsers in mind.
 Installation
 ------------
 
-See INSTALL.rst for installation instructions.
+See `<INSTALL.rst>`_ for installation instructions.
 
 Running
 -------
@@ -24,9 +24,9 @@ the ``run`` command::
 
     $ ./run
 
-This command will run the server, reloading the application whenever changes
-are made to the source code, and restarting it should it crash for some
-reason.
+This command will start the server on port 5000 (https://0.0.0.0:5000),
+reload the application whenever changes are made to the source code, and
+restart it should it crash for some reason.
 
 Development
 -----------
@@ -51,7 +51,7 @@ License
 Hypothes.is is released under the `2-Clause BSD License`_, sometimes referred
 to as the "Simplified BSD License" or the "FreeBSD License". Some third-party
 components are included. They are subject to their own licenses. All of the
-license information can be found in the included LICENSE file.
+license information can be found in the included `<LICENSE>`_ file.
 
 .. [*] Community and identity features are not finished. Get involved and help!
 .. _Open Annotation Core: http://openannotation.org/spec/core/
