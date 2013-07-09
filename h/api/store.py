@@ -188,9 +188,9 @@ def includeme(config):
                 kw.setdefault('_app_url', api_url)
                 return (elements, kw)
             api_config['pregenerator'] = set_app_url
-            config.add_route('api', '', **api_config)
+            config.add_route('api', '/*subpath', **api_config)
         else:
-            config.add_route('api', api_url + '/', **api_config)
+            config.add_route('api', api_url + '/*subpath', **api_config)
 
     if not config.registry.queryUtility(interfaces.IStoreClass):
         config.registry.registerUtility(Store, interfaces.IStoreClass)
