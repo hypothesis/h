@@ -379,8 +379,8 @@ class Viewer
       provider.notify method: 'setActiveHighlights', params: highlights
 
     $scope.replies = (annotation) ->
-      thread = threading.idTable[annotation.id]
-      (r.message for r in thread.children)
+      thread = threading.getContainer annotation.id
+      (r.message for r in (thread.children or []))
 
     $scope.toggleDetail = ($event) ->
       # XXX: Super hacky nonsense here that should probably be handled
