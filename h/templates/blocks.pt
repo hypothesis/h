@@ -116,7 +116,7 @@
       </form>
                
       <!--Activate-->
-     <form data-title="Activate"
+      <form data-title="Activate"
             data-value="activate"
             class="tab-pane"
             name="activate"
