@@ -149,22 +149,27 @@ def includeme(config):
     app.after_request(after_request)
 
     # Configure the API routes
-    api_endpoint = config.registry.settings.get('api.endpoint', '/api')
+    api_config = {}
+    api_endpoint = config.registry.settings.get('api.endpoint', None)
+    api_url = config.registry.settings.get('api.url', api_endpoint)
 
-    if urlparse.urlparse(api_endpoint).scheme:
-        def set_app_url(request, elements, kw):
-            kw.setdefault('_app_url', api_endpoint)
-            return (elements, kw)
-        config.add_route('api', '', pregenerator=set_app_url, static=True)
-    else:
+    if api_endpoint is not None:
         api_path = api_endpoint.strip('/')
         api_pattern = '/'.join([api_path, '*subpath'])
-        config.add_route('api', api_pattern)
 
-    # Configure the API views -- version 1 is just an annotator.store proxy
-    api_v1 = wsgiapp2(app)
+        # Configure the API views -- version 1 is just an annotator.store proxy
+        api_v1 = wsgiapp2(app)
 
-    config.add_view(api_v1, route_name='api')
+        config.add_route('api_real', api_pattern)
+        config.add_view(api_v1, route_name='api_real')
+
+    if api_url is not None:
+        if urlparse.urlparse(api_url).scheme:
+            def set_app_url(request, elements, kw):
+                kw.setdefault('_app_url', api_url)
+                return (elements, kw)
+            api_config['pregenerator'] = set_app_url
+        config.add_route('api', '', static=True, **api_config)
 
     if not config.registry.queryUtility(interfaces.IStoreClass):
         config.registry.registerUtility(Store, interfaces.IStoreClass)
