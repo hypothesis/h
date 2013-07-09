@@ -92,7 +92,7 @@
       </form>
       <!-- / Register -->
 
-      <!--Claim a username-->
+      <!-- Claim a username -->
       <form data-title="Claim a username"
             data-value="claim"
             class="tab-pane"
@@ -112,10 +112,11 @@
 
         <input type="submit" name="forgot" value="Send recovery email"
                ng-disabled="!forgot.$valid" ng-click="sheet.tab = 'activate'"/>
-               
+
       </form>
-               
-      <!--Activate-->
+      <!-- / Claim a username -->
+
+      <!-- Activate -->
       <form data-title="Activate"
             data-value="activate"
             class="tab-pane"
