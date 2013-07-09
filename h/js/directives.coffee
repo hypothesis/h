@@ -241,6 +241,8 @@ thread = ->
   restrict: 'C'
   scope: true
 
+<<<<<<< HEAD
+=======
 
 userPicker = ->
   restrict: 'ACE'
@@ -259,6 +261,7 @@ ngBlur = ['$parse', ($parse) ->
         fn scope,
           $event: event
 ]
+>>>>>>> ad6858f88786ad140b2fd32de3a7cebce32aaaed
 
 repeatAnim = ->
   restrict: 'A'
@@ -299,7 +302,10 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('slowValidate', slowValidate)
   .directive('tabReveal', tabReveal)
   .directive('thread', thread)
+<<<<<<< HEAD
+=======
   .directive('userPicker', userPicker)
   .directive('ngBlur', ngBlur)
   .directive('repeatAnim', repeatAnim)
 
+>>>>>>> ad6858f88786ad140b2fd32de3a7cebce32aaaed

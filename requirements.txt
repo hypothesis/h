@@ -10,8 +10,9 @@ PyJWT==0.1.4
 SQLAlchemy==0.8.0
 WebOb==1.2.3
 Werkzeug==0.8.3
--e git+https://github.com/hypothesis/annotator-store.git@c474428d7527ce07381af82ae0a49ab0817cb193#egg=annotator-dev
+-e git+https://github.com/hypothesis/annotator-store.git@94abd24e9c2488015567307b113682b8bea89a5d#egg=annotator-dev
 anykeystore==0.2
+-e git+https://code.google.com/r/sontek-bag.git@a853e431bd4d2a3df4789437f1910504dee1d7a9#egg=bag-dev
 certifi==0.0.8
 clik==0.3.1
 colander==1.0a2
@@ -22,7 +23,7 @@ https://github.com/surfly/gevent/archive/1.0rc2.tar.gz
 gevent-websocket==0.3.6
 gunicorn==0.17.2
 hem==0.3.2
--e git+https://github.com/eventray/horus.git@2ce62c802ef5237be1c6b1a91dbf115ec284a619#egg=horus-dev
+-e git+https://github.com/eventray/horus.git@7ff2854e20a714de0da6b6d7d63f58b3c746adf6#egg=horus-dev
 iso8601==0.1.4
 jsonpointer==1.0
 jsonschema==1.3.0
@@ -30,7 +31,6 @@ oauth2==1.5.211
 pbkdf2==1.3
 peppercorn==0.4
 py==1.4.13
-pyOpenSSL==0.13
 pyes==0.19.1
 pyramid==1.4
 pyramid-basemodel==0.1.3
@@ -56,5 +56,4 @@ velruse==1.0.3
 venusian==1.0a8
 webassets==0.8
 zope.deprecation==4.0.2
-zope.interface==4.0.5
 zope.sqlalchemy==0.7.2

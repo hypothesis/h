@@ -171,11 +171,6 @@ class App
         delete annotator.plugins.Store
         annotator.addStore Store.options
 
-      if newValue? and annotator.ongoing_edit
-        $timeout =>
-          annotator.clickAdder()
-        , 500
-
     $scope.$watch 'frame.visible', (newValue) ->
       if newValue
         annotator.show()
@@ -283,23 +278,16 @@ class Annotation
       $scope.action = 'edit'
       $scope.editing = true
       $scope.origText = $scope.model.$modelValue.text
-
+      
     $scope.delete = ->
       annotation = $scope.thread.message
       replies = $scope.thread.children?.length or 0
 
       # We can delete the annotation if it hasn't got any replies or it is
       # private. Otherwise, we ask for a redaction message.
-      if replies == 0 or $scope.form.privacy.$viewValue is 'Private'
+      if replies == 0 or $scope.form.privacy.$viewValue == 'Private'
         # If we're deleting it without asking for a message, confirm first.
         if confirm "Are you sure you want to delete this annotation?"
-          if $scope.form.privacy.$viewValue is 'Private' and replies
-            #Cascade delete its children
-            for reply in $scope.thread.flattenChildren()
-              if annotator.plugins?.Permissions? and
-              annotator.plugins.Permissions.authorize 'delete', reply
-                annotator.deleteAnnotation reply
-
           annotator.deleteAnnotation annotation
       else
         $scope.action = 'delete'
@@ -334,12 +322,10 @@ class Annotation
           window.location.host + '/a/' + $scope.model.$modelValue.id
         $scope.shared = false
 
-    $scope.toggle = ->
-      $element.find('.share-dialog').slideToggle()
-
     $scope.share = ->
       $scope.shared = not $scope.shared
-      $scope.toggle()
+      $element.find('.share-dialog').slideToggle()
+
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']

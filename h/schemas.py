@@ -5,19 +5,11 @@ from horus.schemas import (
     CSRFSchema,
     ForgotPasswordSchema,
     unique_email,
+    unique_username,
 )
 
 from h import interfaces
-from h.models import _, get_session
-
-
-def unique_username(node, value):
-    '''Colander validator that ensures the username does not exist.'''
-    req = node.bindings['request']
-    User = req.registry.getUtility(interfaces.IUserClass)
-    if get_session(req).query(User).filter(User.username.ilike(value)).count():
-        Str = req.registry.getUtility(interfaces.IUIStrings)
-        raise colander.Invalid(node, Str.registration_username_exists)
+from h.models import _
 
 
 class LoginSchema(CSRFSchema):

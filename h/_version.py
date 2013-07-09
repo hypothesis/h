@@ -10,8 +10,8 @@ IN_LONG_VERSION_PY = True
 # versioneer-0.7+ (https://github.com/warner/python-versioneer)
 
 # these strings will be replaced by git during git-archive
-git_refnames = "$Format:%d$"
-git_full = "$Format:%H$"
+git_refnames = " (HEAD, develop)"
+git_full = "765a211a4a0c5bd54743660b240fd3782d526dde"
 
 
 import subprocess

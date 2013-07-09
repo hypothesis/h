@@ -94,10 +94,6 @@ annotator_store = Uglify(
     'lib/annotator.store.js',
     output='lib/annotator.store.min.js'
 )
-annotator_document = Uglify(
-    'lib/annotator.document.js',
-    output='lib/annotator.document.min.js'
-)
 annotator_threading = Uglify(
     Coffee('js/plugin/threading.coffee', output='js/plugin/threading.js')
 )
@@ -170,7 +166,6 @@ app = Bundle(
     annotator_permissions,
     annotator_store,
     annotator_threading,
-    annotator_document,
     d3,
     jschannel,
     jwz,
@@ -219,12 +214,11 @@ site = Bundle(
 # the frame and its parent window. It then makes cretain annotator methods
 # available via the bridge plugin.
 inject = Bundle(
-    domTextFamily,
     jquery,
     jschannel,
     annotator,
     annotator_bridge,
-    annotator_document,
+    domTextFamily,
     Uglify(
         Coffee('js/host.coffee', output='js/host.js'),
         output='js/host.min.js'
