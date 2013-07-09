@@ -101,6 +101,9 @@ def before_request():
 
 
 def after_request(response):
+    if flask.request.method == 'OPTIONS':
+        return response
+
     if 200 <= response.status_code < 300:
         match = re.match(r'^store\.(\w+)_annotation$', flask.request.endpoint)
         if match:
