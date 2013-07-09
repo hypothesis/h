@@ -4,6 +4,7 @@ except ImportError:
     import json
 
 import re
+import urlparse
 
 import flask
 
@@ -24,14 +25,6 @@ log = logging.getLogger(__name__)
 class Store(object):
     def __init__(self, request):
         self.request = request
-
-    @property
-    def base_url(self):
-        """The base URL of the store.
-
-        This is the URL of the service document.
-        """
-        return self.request.route_url('api', subpath='')
 
     def create(self):
         raise NotImplementedError()
@@ -66,7 +59,7 @@ class Store(object):
 
     def _invoke_subrequest(self, subreq):
         request = self.request
-        token = api.TokenController(request)()
+        token = api.token.TokenController(request)()
         subreq.headers['X-Annotator-Auth-Token'] = token
         return request.invoke_subrequest(subreq)
 
@@ -115,6 +108,23 @@ def after_request(response):
 
 
 def includeme(config):
+    """Include the annotator-store API backend via http or route embedding.
+
+    Example INI file:
+    .. code-block:: ini
+        [app:h]
+        api.key: 00000000-0000-0000-0000-000000000000
+        api.endpoint: https://example.com/api
+
+    or use a relative path for the endpoint to embed the annotation store
+    directly in the application.
+    .. code-block:: ini
+        [app:h]
+        api.endpoint: /api
+
+    The default is to embed the store as a route bound to "/api".
+    """
+
     app = flask.Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
     settings = config.get_settings()
@@ -132,6 +142,19 @@ def includeme(config):
     app.config['AUTHZ_ON'] = True
     app.before_request(before_request)
     app.after_request(after_request)
+
+    # Configure the API routes
+    api_endpoint = config.registry.settings.get('api.endpoint', '/api')
+
+    if urlparse.urlparse(api_endpoint).scheme:
+        def set_app_url(request, elements, kw):
+            kw.setdefault('_app_url', api_endpoint)
+            return (elements, kw)
+        config.add_route('api', '', pregenerator=set_app_url, static=True)
+    else:
+        api_path = api_endpoint.strip('/')
+        api_pattern = '/'.join([api_path, '*subpath'])
+        config.add_route('api', api_pattern)
 
     # Configure the API views -- version 1 is just an annotator.store proxy
     api_v1 = wsgiapp2(app)
