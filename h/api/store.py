@@ -167,7 +167,7 @@ def includeme(config):
     app.after_request(after_request)
 
     # Configure the API routes
-    api_config = {}
+    api_config = {'static': True}
     api_endpoint = config.registry.settings.get('api.endpoint', None)
     api_url = config.registry.settings.get('api.url', api_endpoint)
 
@@ -182,12 +182,15 @@ def includeme(config):
         config.add_view(api_v1, route_name='api_real')
 
     if api_url is not None:
+        api_url = api_url.strip('/')
         if urlparse.urlparse(api_url).scheme:
             def set_app_url(request, elements, kw):
                 kw.setdefault('_app_url', api_url)
                 return (elements, kw)
             api_config['pregenerator'] = set_app_url
-        config.add_route('api', '', static=True, **api_config)
+            config.add_route('api', '', **api_config)
+        else:
+            config.add_route('api', api_url + '/', **api_config)
 
     if not config.registry.queryUtility(interfaces.IStoreClass):
         config.registry.registerUtility(Store, interfaces.IStoreClass)
