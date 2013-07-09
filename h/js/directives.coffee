@@ -46,7 +46,8 @@ authentication = ->
           params[name] = control.$modelValue
 
         method = "$#{form.$name}"
-        authentication[method] params
+        authentication[method] params, ->
+          $scope.$emit 'success', form.$name
   ]
   scope:
     model: '=authentication'

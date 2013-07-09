@@ -87,23 +87,6 @@ class App
             annotator.showViewer heatmap.buckets[bucket]
             $scope.$digest()
 
-    $scope.submit = (form) ->
-      return unless form.$valid
-      params = for name, control of form when control.$modelValue?
-        [name, control.$modelValue]
-      params.push ['__formid__', form.$name]
-      data = (((p.map encodeURIComponent).join '=') for p in params).join '&'
-
-      $http.post '', data,
-        headers:
-          'Content-Type': 'application/x-www-form-urlencoded'
-        withCredentials: true
-      .success (data) =>
-        if data.model? then angular.extend $scope, data.model
-        if data.flash? then flash q, msgs for q, msgs of data.flash
-        if data.status is 'failure' then flash 'error', data.reason
-        if data.status is 'okay' then $scope.sheet.collapsed = true
-
     $scope.$watch 'sheet.collapsed', (newValue) ->
       $scope.sheet.tab = if newValue then null else 'login'
 
@@ -215,6 +198,10 @@ class App
         tab: 'login'
 
     $scope.$on '$reset', => angular.extend $scope, @scope, auth: authentication
+
+    $scope.$on 'success', (event, action) ->
+      if action == 'claim'
+        $scope.sheet.tab = 'activate'
 
     $scope.$broadcast '$reset'
 

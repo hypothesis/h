@@ -110,8 +110,8 @@
               slow-validate="email"
               >Please enter your email.</span>
 
-        <input type="submit" name="forgot" value="Send recovery email"
-               ng-disabled="!forgot.$valid" ng-click="sheet.tab = 'activate'"/>
+        <input type="submit" name="forgot" value="Send activation"
+               ng-disabled="!claim.$valid" />
 
       </form>
       <!-- / Claim a username -->

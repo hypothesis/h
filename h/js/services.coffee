@@ -360,6 +360,8 @@ class AuthenticationProvider
           '__formid__': action
         withCredentials: true
 
+    @actions['claim'] = @actions['forgot']
+
   $get: ['$resource', ($resource) -> $resource('', {}, @actions).load()]
 
 
