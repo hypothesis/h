@@ -297,15 +297,15 @@ blockquote {
   &:before {
     content: "\23";
     font-size: 6em;
-    top: -.2em;
-    left: -.15em;
+    top: -.36em;
+    left: -.31em;
   }
 
   &:after {
     content: "\24";
     font-size: 5em;
-    right: -.15em;
-    bottom: -.1em;
+    right: -.31em;
+    bottom: -.27em;
   }
 }
 
@@ -835,7 +835,6 @@ blockquote {
 //SUMMARY////////////////////////////////
 //This is specific to the summary view.
 .summary {
-  margin-bottom: 1em;
   position: relative;
   cursor: pointer;
 
@@ -847,11 +846,6 @@ blockquote {
   &:active {
     @include smallshadow(2px, 1px, .1);
     bottom: 0;
-  }
-
-  // Things not shown in the summary view
-  .magicontrols .show {
-    display: none;
   }
 }
 
