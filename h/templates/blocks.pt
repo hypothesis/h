@@ -99,7 +99,7 @@
             name="claim"
             novalidate>
 
-              <p>To activate your reserved username, please enter the email address you reserved your username with.</p>
+              <p style='font-family: "Source Sans Pro","Helvetica'>To activate your reserved username, please enter the email address you used.</p>
         <!--Get Validation Code-->      
         <input type="email" name="email" value="" placeholder="Email"
                required autocapitalize="false" ng-model="email" />
@@ -122,7 +122,7 @@
             name="activate"
             novalidate>
 
-           <p>Find the validation code in the confirmation email you recieved. Enter it below, along with the password you would like to use for your account.</p>
+           <p style='font-family: "Source Sans Pro","Helvetica'>Find the validation code in the confirmation email you recieved. Enter it below, along with the password you would like to use for your account.</p>
 
         <input type="text" name="code" value="" placeholder="Activation Code"
                required autocorrect="false" autocapitalize="false"
@@ -154,7 +154,7 @@
             name="forgot"
             novalidate>
 
-        <p>Forgotten password? Enter your email below to send a recovery email.</p>
+        <p style='font-family: "Source Sans Pro","Helvetica'>Forgotten password? Enter your email below to send a recovery email.</p>
 
         <input type="email" name="email" value="" placeholder="Email"
                required autocapitalize="false" ng-model="email" />
