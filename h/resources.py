@@ -173,17 +173,15 @@ class AnnotationFactory(BaseResource):
         request = self.request
         registry = request.registry
         store = registry.queryUtility(interfaces.IStoreClass)(request)
+        data = store.read(key)
 
         annotation = Annotation(request)
         annotation.__name__ = key
         annotation.__parent__ = self
-        try:
-            annotation.update(store.read(key))
-        except:
-            pass
+
+        annotation.update(data)
 
         return annotation
-
 
 class UserStream(BaseResource, dict):
     pass

@@ -146,7 +146,7 @@ class AppController(views.BaseController):
         request.session.get_csrf_token()
 
         model = {
-            'token': api.TokenController(request)(),
+            'token': self.Token,
             'token_url': request.route_url('token'),
             'persona': request.context.persona,
             'personas': request.context.personas,
@@ -170,7 +170,8 @@ class AppController(views.BaseController):
         request = self.request
         request.session.new_csrf_token()
         return {
-            'service_url': self.Store(request).base_url,
+            'service_url': request.route_url('api', subpath=''),
+            'token_url': request.route_url('token'),
         }
 
 

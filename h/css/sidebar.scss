@@ -218,6 +218,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 //This comes down from under the toolbar
 .sheet {
   @include smallshadow;
+  font-family: $sansFontFamily;
   max-height: 30em;
   overflow: hidden;
   position: absolute;
@@ -240,6 +241,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
   &.collapsed {
     max-height: 0;
+  }
+
+  footer {
+    text-align: right;
+    a { @extend .small; }
   }
 
   footer {

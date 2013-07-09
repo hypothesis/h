@@ -1,4 +1,4 @@
-annotation = ['$filter', ($filter) ->
+annotation = ['$filter', 'annotator', ($filter, annotator) ->
   link: (scope, elem, attrs, controller) ->
     return unless controller?
 
@@ -8,6 +8,10 @@ annotation = ['$filter', ($filter) ->
         if e.keyCode == 13 && e.shiftKey
           e.preventDefault()
           scope.save()
+
+    # Watch for changes
+    scope.$watch 'model.$modelValue.id', (id) ->
+      scope.thread = annotator.threading.idTable[id]
 
     # Publish the controller
     scope.model = controller
@@ -42,7 +46,8 @@ authentication = ->
           params[name] = control.$modelValue
 
         method = "$#{form.$name}"
-        authentication[method] params
+        authentication[method] params, ->
+          $scope.$emit 'success', form.$name
   ]
   scope:
     model: '=authentication'

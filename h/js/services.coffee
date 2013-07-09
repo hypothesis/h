@@ -161,10 +161,7 @@ class Hypothesis extends Annotator
       # This guy does stuff when you "back out" of the interface.
       # (Currently triggered by a click on the source page.)
       return unless drafts.discard()
-      if $location.path() == '/viewer' and $location.search()?.id?
-        $rootScope.$apply => $location.search('id', null).replace()
-      else
-        $rootScope.$apply => this.hide()
+      $rootScope.$apply => this.hide()
     )
 
   _setupWrapper: ->
@@ -362,6 +359,8 @@ class AuthenticationProvider
         params:
           '__formid__': action
         withCredentials: true
+
+    @actions['claim'] = @actions['forgot']
 
   $get: ['$resource', ($resource) -> $resource('', {}, @actions).load()]
 
