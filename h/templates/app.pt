@@ -49,17 +49,6 @@
                ng-submit="submit(this[$parent.sheet.tab])">
             <metal:main use-macro="blocks['auth-tabs']" />
           </div>
-          <footer ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
-            <ul>
-              <li>
-                <a href="" ng-click="sheet.tab = 'forgot'">Password help?</a>
-              </li>
-              <li>
-                <a href="" ng-click="sheet.tab = 'activate'"
-                   >I have an activation code.</a>
-              </li>
-            </ul>
-          </footer>
         </div>
       </div>
       <!-- / Account and Authentication -->
