@@ -114,7 +114,7 @@
                ng-disabled="!forgot.$valid" ng-click="sheet.tab = 'activate'"/>
                
         </form>
-        <!--/Claim a username-->
+        <!-- / Claim a username-->
                
       <!--Activate-->
      <form data-title="Activate"
@@ -146,7 +146,7 @@
                ng-disabled="!activate.$valid" />
 
       </form>
-      <!--/Activate-->
+      <!-- / Activate-->
 
       <!-- Forgot -->
       <form data-title="Forgot"
