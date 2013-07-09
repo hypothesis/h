@@ -73,7 +73,7 @@ class App
 
           # If it's the lower tab, scroll to next bucket below
           else if heatmap.isLower bucket
-            threshold = offset + heatmap.index[0] + pad
+            threshold = offset + heatmap.index[0] + height - pad
             next = highlights.reduce (next, hl) ->
               if threshold < hl.offset.top < next then hl.offset.top else next
             , Number.MAX_VALUE
