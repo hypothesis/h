@@ -12,6 +12,7 @@ from annotator import auth, authz, store, es
 from annotator.annotation import Annotation
 from annotator.document import Document
 
+from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
 from pyramid.threadlocal import get_current_registry
 from pyramid.wsgi import wsgiapp2
@@ -61,8 +62,12 @@ class Store(object):
         request = self.request
         token = api.token.TokenController(request)()
         subreq.headers['X-Annotator-Auth-Token'] = token
-        return request.invoke_subrequest(subreq)
+        result = request.invoke_subrequest(subreq)
 
+        if result.status_int > 400:
+            raise exception_response(result.status_int)
+
+        return result
 
 def anonymize_deletes(annotation):
     if annotation.get('deleted', False):
