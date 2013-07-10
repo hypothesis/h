@@ -42,9 +42,9 @@ def home(request):
     return find_resource(request.context, '/app').embed
 
 
-@view_defaults(context='h.resources.AnnotationModeratedResource', layout='site')
-def Moderation(BaseController):
-    # todo(michael): Current view_config is temporary for testing purposes.
+@view_defaults(context='h.resources.ModeratedAnnotation', layout='site')
+class Moderation(BaseController):
+    #todo(michael): next view configuration is for temporary purposes only.
     @view_config(accept='text/html', renderer='templates/displayer.pt')
     def perform_action(self):
         request = self.request
@@ -55,13 +55,6 @@ def Moderation(BaseController):
                 "Either no annotation exists with this identifier, or you "
                 "don't have the permissions required for viewing it."
             )
-        # Performing action
-        if context.get('action_type') == ACTION_FLAG_SPAM:
-            log.info("!!!!!!!!!!!!!!! inside perform action, flag_spam !!!!!")
-            q['quote'] = "inside perform action"
-        else:
-            q['quote'] = "outside perform action"
-            raise Exception("Action type is not recognized!")
 
 
         # todo(mchael): code below is to fill displayer.pt
@@ -69,12 +62,12 @@ def Moderation(BaseController):
         d['annotation'] = context
         d['annotation']['referrers'] = json.dumps(context.referrers)
 
-        #if context.get('references', []):
-        #    root = context.__parent__[context['references'][0]]
-        #    d['quote'] = root.quote
-        #else:
-        #    d['quote'] = context.quote
-        #    context['references'] = []
+        if context.get('references', []):
+            root = context.__parent__[context['references'][0]]
+            d['quote'] = root.quote
+        else:
+            d['quote'] = context.quote
+            context['references'] = []
 
         if not 'deleted' in context:
             context['deleted'] = False
@@ -82,7 +75,6 @@ def Moderation(BaseController):
         context['date'] = context['updated']
 
         return d
-
 
 
 @view_defaults(context='h.resources.Annotation', layout='site')

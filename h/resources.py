@@ -198,27 +198,33 @@ class UserStreamFactory(BaseResource):
             return UserStream(request)
 
 
-class AnnotationModeratedResource(Annotation):
+class ModeratedAnnotation(Annotation):
     pass
 
 
 class ModerationActionResource(BaseResource, dict):
     def __getitem__(self, key):
         # key is annotation id.
-        # Creating AnnotationModeratedResource
+        # Creating ModeratedAnnotation
         request = self.request
         registry = request.registry
         store = registry.queryUtility(interfaces.IStoreClass)(request)
-        annot_moder_res = AnnotationModeratedResource(request)
+        data = store.read(key)
+
+        annot_moder_res = ModeratedAnnotation(request)
+        annot_moder_res.__name__ = key
         annot_moder_res.__parent__ = self
-        try:
-            annot_moder_res.update(store.read(key))
-            # Adding AnnotationModerated object
-            annot_moder = AnnotationModerated.get_add_item(key, user_email,
-                                                           session)
-            annot_moder_res.annot_moder = annot_moder
-        except:
-            pass
+
+        annot_moder_res.update(data)
+
+        # Adding AnnotationModerated object
+        # todo(michael): there is a problem with user id. what is it?
+        author_email = annot_moder_res.get("user")[5:]
+        log.info("author email is %s" % author_email)
+        session = get_session(self.request)
+        annot_moder = AnnotationModerated.get_add_item(key, author_email, session)
+        # todo(michale): move it to the class itself.
+        annot_moder_res.annot_moder = annot_moder
         return  annot_moder_res
 
 
@@ -227,7 +233,8 @@ class ModerationActionFactory(BaseResource):
         # key is moderation action type.
         request = self.request
         moder_act_res = ModerationActionResource(request)
-        moder_act_res.update({'action_type' : key})
+        moder_act_res.__name__ = key
+        moder_act_res.__parent__ = self
         return moder_act_res
 
 
