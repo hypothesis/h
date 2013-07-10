@@ -16,7 +16,7 @@ from h.models import get_session
 import logging
 log = logging.getLogger(__name__)
 
-from models import AnnotationModerated
+from models import ModeratedAnnotation
 
 
 @implementer(ILocation)
@@ -198,11 +198,19 @@ class UserStreamFactory(BaseResource):
             return UserStream(request)
 
 
-class ModeratedAnnotation(Annotation):
-    pass
+class ModeratedAnnotationResource(Annotation):
+    def acquire_annotataion_moderation(self, annot_id, user_id):
+        session = get_session(self.request)
+        annot_moder = ModeratedAnnotation.get_add_item(annot_id, user_id, session)
+        self.annot_moder = annot_moder
 
 
 class ModerationActionResource(BaseResource, dict):
+
+    @classmethod
+    def _get_username(cls, user):
+        return user[5:user.find('@')]
+
     def __getitem__(self, key):
         # key is annotation id.
         # Creating ModeratedAnnotation
@@ -211,20 +219,19 @@ class ModerationActionResource(BaseResource, dict):
         store = registry.queryUtility(interfaces.IStoreClass)(request)
         data = store.read(key)
 
-        annot_moder_res = ModeratedAnnotation(request)
+        annot_moder_res = ModeratedAnnotationResource(request)
         annot_moder_res.__name__ = key
         annot_moder_res.__parent__ = self
 
         annot_moder_res.update(data)
+        username = self._get_username(annot_moder_res.get('user'))
+        User = registry.getUtility(interfaces.IUserClass)
+        user = User.get_by_username(request, username)
+        if user:
+            annot_moder_res.acquire_annotataion_moderation(key, user.id)
+        else:
+            raise Exception("User does not exist! What to do?")
 
-        # Adding AnnotationModerated object
-        # todo(michael): there is a problem with user id. what is it?
-        author_email = annot_moder_res.get("user")[5:]
-        log.info("author email is %s" % author_email)
-        session = get_session(self.request)
-        annot_moder = AnnotationModerated.get_add_item(key, author_email, session)
-        # todo(michale): move it to the class itself.
-        annot_moder_res.annot_moder = annot_moder
         return  annot_moder_res
 
 
@@ -235,6 +242,7 @@ class ModerationActionFactory(BaseResource):
         moder_act_res = ModerationActionResource(request)
         moder_act_res.__name__ = key
         moder_act_res.__parent__ = self
+        moder_act_res.update({'action_type':key})
         return moder_act_res
 
 

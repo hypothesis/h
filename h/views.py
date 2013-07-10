@@ -26,6 +26,7 @@ import logging
 log = logging.getLogger(__name__)
 
 ACTION_FLAG_SPAM = 'flag_spam'
+ACTION_UNDO_FLAG_SPAM = 'undo_flag_spam'
 
 
 class BaseController(BaseController):
@@ -42,7 +43,7 @@ def home(request):
     return find_resource(request.context, '/app').embed
 
 
-@view_defaults(context='h.resources.ModeratedAnnotation', layout='site')
+@view_defaults(context='h.resources.ModeratedAnnotationResource', layout='site')
 class Moderation(BaseController):
     #todo(michael): next view configuration is for temporary purposes only.
     @view_config(accept='text/html', renderer='templates/displayer.pt')
@@ -55,9 +56,19 @@ class Moderation(BaseController):
                 "Either no annotation exists with this identifier, or you "
                 "don't have the permissions required for viewing it."
             )
-
-
-        # todo(mchael): code below is to fill displayer.pt
+        if request.user:
+            action_type = context.__parent__.get('action_type')
+            if action_type == ACTION_FLAG_SPAM:
+                context.annot_moder.flag_as_spam(request, request.user.username)
+            elif action_type == ACTION_UNDO_FLAG_SPAM:
+                context.annot_moder.undo_flag_as_spam(request,
+                                                          request.user.username)
+            else:
+                # todo(michael): substitut plain exception with ...
+                raise Exception("Moderation Action is not recognized.")
+        else:
+            raise Exception("You are not authorised to moderate this annotation.")
+        # todo(mchael): the code below is just to fill displayer.pt
         d = url_values_from_document(context)
         d['annotation'] = context
         d['annotation']['referrers'] = json.dumps(context.referrers)
