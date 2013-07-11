@@ -44,14 +44,9 @@ elide = (text, split_length) ->
     text = text + '\u2026'
   text
 
-descapeSingleQuote = (text) ->
-  if text
-    text = text.replace /&#39;/g, "'"
-  text
 
 angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
   .filter('elide', -> elide)
-  .filter('descSingleQuote', -> descapeSingleQuote)
