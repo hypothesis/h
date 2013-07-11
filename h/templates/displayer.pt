@@ -42,7 +42,7 @@
         <div class="card-grid yui3-g">
           <div class="yui3-u-1 t-yui3-u-1-2">
             <div class="paper excerpt">
-              <blockquote>{{annotation.quote | descSingleQuote}}</blockquote>
+              <blockquote>{{annotation.quote}}</blockquote>
             </div>
           </div>
 
