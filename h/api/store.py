@@ -4,6 +4,7 @@ except ImportError:
     import json
 
 import re
+import urlparse
 
 import flask
 
@@ -11,6 +12,7 @@ from annotator import auth, authz, store, es
 from annotator.annotation import Annotation
 from annotator.document import Document
 
+from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
 from pyramid.threadlocal import get_current_registry
 from pyramid.wsgi import wsgiapp2
@@ -24,14 +26,6 @@ log = logging.getLogger(__name__)
 class Store(object):
     def __init__(self, request):
         self.request = request
-
-    @property
-    def base_url(self):
-        """The base URL of the store.
-
-        This is the URL of the service document.
-        """
-        return self.request.route_url('api', subpath='')
 
     def create(self):
         raise NotImplementedError()
@@ -66,10 +60,14 @@ class Store(object):
 
     def _invoke_subrequest(self, subreq):
         request = self.request
-        token = api.TokenController(request)()
+        token = api.token.TokenController(request)()
         subreq.headers['X-Annotator-Auth-Token'] = token
-        return request.invoke_subrequest(subreq)
+        result = request.invoke_subrequest(subreq)
 
+        if result.status_int > 400:
+            raise exception_response(result.status_int)
+
+        return result
 
 def anonymize_deletes(annotation):
     if annotation.get('deleted', False):
@@ -103,6 +101,9 @@ def before_request():
 
 
 def after_request(response):
+    if flask.request.method == 'OPTIONS':
+        return response
+
     if 200 <= response.status_code < 300:
         match = re.match(r'^store\.(\w+)_annotation$', flask.request.endpoint)
         if match:
@@ -114,9 +115,41 @@ def after_request(response):
     return response
 
 
+def reverse_proxy(app):
+    def handler(environ, start_response):
+        script_name = environ.get('HTTP_X_SCRIPT_NAME', None)
+
+        if script_name:
+            environ['SCRIPT_NAME'] = script_name
+            path_info = environ['PATH_INFO']
+            if path_info.startswith(script_name):
+                environ['PATH_INFO'] = path_info[len(script_name):]
+
+        return app(environ, start_response)
+    return handler
+
+
 def includeme(config):
+    """Include the annotator-store API backend via http or route embedding.
+
+    Example INI file:
+    .. code-block:: ini
+        [app:h]
+        api.key: 00000000-0000-0000-0000-000000000000
+        api.endpoint: https://example.com/api
+
+    or use a relative path for the endpoint to embed the annotation store
+    directly in the application.
+    .. code-block:: ini
+        [app:h]
+        api.endpoint: /api
+
+    The default is to embed the store as a route bound to "/api".
+    """
+
     app = flask.Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
+    app.wsgi_app = reverse_proxy(app.wsgi_app)
     settings = config.get_settings()
 
     if 'es.host' in settings:
@@ -133,10 +166,31 @@ def includeme(config):
     app.before_request(before_request)
     app.after_request(after_request)
 
-    # Configure the API views -- version 1 is just an annotator.store proxy
-    api_v1 = wsgiapp2(app)
+    # Configure the API routes
+    api_config = {'static': True}
+    api_endpoint = config.registry.settings.get('api.endpoint', None)
+    api_url = config.registry.settings.get('api.url', api_endpoint)
 
-    config.add_view(api_v1, route_name='api')
+    if api_endpoint is not None:
+        api_path = api_endpoint.strip('/')
+        api_pattern = '/'.join([api_path, '*subpath'])
+
+        # Configure the API views -- version 1 is just an annotator.store proxy
+        api_v1 = wsgiapp2(app)
+
+        config.add_route('api_real', api_pattern)
+        config.add_view(api_v1, route_name='api_real')
+
+    if api_url is not None:
+        api_url = api_url.strip('/')
+        if urlparse.urlparse(api_url).scheme:
+            def set_app_url(request, elements, kw):
+                kw.setdefault('_app_url', api_url)
+                return (elements, kw)
+            api_config['pregenerator'] = set_app_url
+            config.add_route('api', '/*subpath', **api_config)
+        else:
+            config.add_route('api', api_url + '/*subpath', **api_config)
 
     if not config.registry.queryUtility(interfaces.IStoreClass):
         config.registry.registerUtility(Store, interfaces.IStoreClass)

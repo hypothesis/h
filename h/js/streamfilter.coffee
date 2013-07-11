@@ -6,7 +6,7 @@ class ClauseParser
     '>': 'gt'
     '<': 'lt'
     '=>' : 'ge'
-    '<=' : 'ge'
+    '>=' : 'ge'
     '=<': 'le'
     '<=' : 'le'
     '[' : 'one_of'

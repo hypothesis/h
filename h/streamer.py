@@ -218,7 +218,7 @@ class FilterHandler(object):
         return True
 
     def match(self, target, action=None):
-        if not action or action == 'past' or self.filter['actions'][action]:
+        if not action or action == 'past' or action in self.filter['actions']:
             if len(self.filter['clauses']) > 0:
                 return getattr(self, self.filter['match_policy'])(target)
             else: return True

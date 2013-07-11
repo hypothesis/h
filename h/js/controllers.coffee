@@ -73,7 +73,7 @@ class App
 
           # If it's the lower tab, scroll to next bucket below
           else if heatmap.isLower bucket
-            threshold = offset + heatmap.index[0] + pad
+            threshold = offset + heatmap.index[0] + height - pad
             next = highlights.reduce (next, hl) ->
               if threshold < hl.offset.top < next then hl.offset.top else next
             , Number.MAX_VALUE
@@ -86,23 +86,6 @@ class App
             $location.search('id', null)
             annotator.showViewer heatmap.buckets[bucket]
             $scope.$digest()
-
-    $scope.submit = (form) ->
-      return unless form.$valid
-      params = for name, control of form when control.$modelValue?
-        [name, control.$modelValue]
-      params.push ['__formid__', form.$name]
-      data = (((p.map encodeURIComponent).join '=') for p in params).join '&'
-
-      $http.post '', data,
-        headers:
-          'Content-Type': 'application/x-www-form-urlencoded'
-        withCredentials: true
-      .success (data) =>
-        if data.model? then angular.extend $scope, data.model
-        if data.flash? then flash q, msgs for q, msgs of data.flash
-        if data.status is 'failure' then flash 'error', data.reason
-        if data.status is 'okay' then $scope.sheet.collapsed = true
 
     $scope.$watch 'sheet.collapsed', (newValue) ->
       $scope.sheet.tab = if newValue then null else 'login'
@@ -215,6 +198,10 @@ class App
         tab: 'login'
 
     $scope.$on '$reset', => angular.extend $scope, @scope, auth: authentication
+
+    $scope.$on 'success', (event, action) ->
+      if action == 'claim'
+        $scope.sheet.tab = 'activate'
 
     $scope.$broadcast '$reset'
 
@@ -337,7 +324,8 @@ class Annotation
     $scope.toggle = ->
       $element.find('.share-dialog').slideToggle()
 
-    $scope.share = ->
+    $scope.share = ($event) ->
+      $event.stopPropagation()
       $scope.shared = not $scope.shared
       $scope.toggle()
 
@@ -379,25 +367,7 @@ class Viewer
     $location, $routeParams, $scope,
     annotator
   ) ->
-    {plugins, provider} = annotator
-
-    listening = false
-    refresh = =>
-      return unless $scope.frame.visible
-      this.refresh $scope, $routeParams, annotator
-      if listening
-        if $scope.detail
-          plugins.Heatmap.unsubscribe 'updated', refresh
-          listening = false
-      else
-        unless $scope.detail
-          plugins.Heatmap.subscribe 'updated', refresh
-          listening = true
-
-    $scope.showDetail = (annotation) ->
-      search = $location.search() or {}
-      search.id = annotation.id
-      $location.search(search).replace()
+    {provider, threading} = annotator
 
     $scope.focus = (annotation) ->
       if angular.isArray annotation
@@ -408,28 +378,30 @@ class Viewer
         highlights = []
       provider.notify method: 'setActiveHighlights', params: highlights
 
+    $scope.replies = (annotation) ->
+      thread = threading.getContainer annotation.id
+      (r.message for r in (thread.children or []))
+
+    $scope.toggleDetail = ($event) ->
+      # XXX: Super hacky nonsense here that should probably be handled
+      # by stopping the propagation or something. Also, the silly traversal
+      # of scope has got to stop.
+      $target = angular.element $event.target
+      if (
+        $event.target.tagName in ['A', 'BUTTON', 'INPUT', 'TEXTAREA'] or
+        $target.attr('ng-click') or
+        $target.attr('role') == 'button'
+      )
+        $target.scope()?.$parent?.$$prevSibling?.collapsed = false
+        @detail = true
+      else
+        @detail = !@detail
+
     $scope.sortThread = (thread) ->
       if thread?.message?.updated
         return new Date(thread.message.updated)
       else
         return new Date()
-
-    $scope.$on '$destroy', ->
-      if listening then plugins.Heatmap.unsubscribe 'updated', refresh
-
-    $scope.$on '$routeUpdate', refresh
-
-    refresh()
-
-  refresh: ($scope, $routeParams, annotator) =>
-    if $routeParams.id? and annotator.threading.idTable[$routeParams.id]?
-      $scope.detail = true
-      $scope.thread = annotator.threading.getContainer $routeParams.id
-      $scope.focus $scope.thread.message?
-    else
-      $scope.detail = false
-      $scope.thread = null
-      $scope.focus []
 
 
 angular.module('h.controllers', ['bootstrap'])

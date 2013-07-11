@@ -1,49 +1,44 @@
 <ul class="sliding-panels">
-
-  <!-- Summaries -->
-  <li ng-class="detail && 'squished' || ''" ng-show="annotations">
+  <li>
     <ul>
-      <li ng-click="showDetail(annotation)"
+      <li ng-class="detail && 'detail' || 'summary'"
+          ng-click="toggleDetail($event)"
           ng-mouseenter="focus(annotation)"
           ng-mouseleave="focus()"
           ng-repeat="annotation in annotations"
-          class="paper summary">
-        <div ng-model="$parent.annotation" class="annotation" />
+          class="paper stream-list">
+
+        <!-- Excerpts -->
+        <div class="excerpt"
+             ng-repeat="target in annotation.target"
+             ng-show="detail">
+          <blockquote ng-bind="target.quote" ng-hide="diff" />
+          <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
+          <div class="small pull-right" ng-show="target.diffHTML">
+            <input type="checkbox" ng-model="diff">Show differences</input>
+          </div>
+        </div>
+
+        <!-- Thread view -->
+        <div data-recursive="" class="thread">
+          <!-- Annotation -->
+          <div class="detail annotation"
+               name="annotation"
+               ng-model="$parent.annotation" />
+          <!-- Replies -->
+          <ul>
+            <li class="thread"
+                ng-hide="collapsed || !detail"
+                ng-class="collapsed && 'collapsed' || ''"
+                ng-repeat="annotation in replies(annotation) | orderBy:sortThread:true"
+                ng-transclude>
+              <a href="" class="threadexp"
+                 title="{{collapsed && 'Expand' || 'Collapse'}}"
+                 ng-click="collapsed = !collapsed" />
+            </li>
+          </ul>
+        </div>
       </li>
     </ul>
   </li>
-
-  <!-- Details -->
-  <li ng-class="detail && thread.message && 'show' || ''">
-    <!-- Excerpts -->
-    <div class="paper excerpt"
-         ng-repeat="target in thread.message.target">
-      <blockquote ng-bind="target.quote" ng-hide="diff" />
-      <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
-      <div class="small pull-right" ng-show="target.diffHTML">
-        <input type="checkbox" ng-model="diff">Show differences</input>
-      </div>
-    </div>
-    <!-- Thread view -->
-    <div data-recursive="" class="paper thread">
-      <!-- Annotation -->
-      <div class="detail annotation"
-           name="annotation"
-           ng-model="$parent.thread.message" />
-      <!-- Replies -->
-      <ul >
-        <li class="thread"
-            ng-animate="{hide: 'collapse-hide', show: 'collapse-show'}"
-            ng-hide="collapsed"
-            ng-class="collapsed && 'collapsed' || ''"
-            ng-repeat="thread in thread.children | orderBy:sortThread:true"
-            ng-transclude>
-          <a href="" class="threadexp"
-             title="{{collapsed && 'Expand' || 'Collapse'}}"
-             ng-click="collapsed = !collapsed" />
-        </li>
-      </ul>
-    </div>
-  </li>
-
 </ul>
