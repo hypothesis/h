@@ -362,7 +362,11 @@ class AuthenticationProvider
 
     @actions['claim'] = @actions['forgot']
 
-  $get: ['$resource', ($resource) -> $resource('', {}, @actions).load()]
+  $get: [
+    '$document', '$resource',
+    ($document,   $resource) ->
+      baseUrl = $document[0].baseURI.replace(/:(\d+)/, '\\:$1')
+      $resource(baseUrl, {}, @actions).load()]
 
 
 class DraftProvider
