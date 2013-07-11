@@ -64,6 +64,9 @@ class Annotation(BaseController):
             d['quote'] = context.quote
             context['references'] = []
 
+        d['quote'] = d['quote'].replace("'", "&#39;")
+        d['text_init'] = context['text'].replace("'", "&#39;")
+
         if not 'deleted' in context:
             context['deleted'] = False
 
