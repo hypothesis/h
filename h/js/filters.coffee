@@ -1,6 +1,8 @@
 class Converter extends Markdown.Converter
   constructor: ->
     super
+    this.hooks.chain "preConversion", (text) ->
+      if text then text else ""
     this.hooks.chain "postConversion", (text) ->
       text.replace /<a href=/g, "<a target=\"_blank\" href="
 
