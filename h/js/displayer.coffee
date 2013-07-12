@@ -114,9 +114,6 @@ class Displayer
               replies.splice pos, 1
               delete @idTable[annotation.id]
 
-    $scope.get_quote_classes = =>
-      'yui3-u-1' + if ($scope.annotation.text or $scope.annotation.replies.length) then ' t-yui3-u-1-2' else ''
-
     if $scope.annotation.referrers?
       $scope.manage_new_data $scope.annotation.referrers, 'past'
 

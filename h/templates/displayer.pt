@@ -40,7 +40,7 @@
         </div>
 
         <div class="card-grid yui3-g">
-          <div ng-class="get_quote_classes()">
+          <div class="yui3-u-1" ng-class="(annotation.text || annotation.replies.length) && 't-yui3-u-1-2' || '' ">
             <div class="paper excerpt">
               <blockquote>{{annotation.quote}}</blockquote>
             </div>
