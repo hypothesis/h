@@ -82,6 +82,10 @@ class Hypothesis extends Annotator
           for action, roles of annotation.permissions
             unless userId in roles then roles.push userId
 
+    # Add new annotations to the view when they are created
+    this.subscribe 'annotationCreated', (a) =>
+      $rootScope.annotations.unshift a
+
     # Remove annotations from the application when they are deleted
     this.subscribe 'annotationDeleted', (a) =>
       $rootScope.annotations = $rootScope.annotations.filter (b) -> b isnt a
