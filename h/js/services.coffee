@@ -82,6 +82,10 @@ class Hypothesis extends Annotator
           for action, roles of annotation.permissions
             unless userId in roles then roles.push userId
 
+    # Remove annotations from the application when they are deleted
+    this.subscribe 'annotationDeleted', (a) =>
+      $rootScope.annotations = $rootScope.annotations.filter (b) -> b isnt a
+
     # Update the heatmap when the host is updated or annotations are loaded
     bridge = @plugins.Bridge
     heatmap = @plugins.Heatmap
