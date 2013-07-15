@@ -58,8 +58,8 @@ class Annotation(BaseController):
         d['annotation']['referrers'] = context.referrers
 
         if context.get('references', []):
-            root = context.__parent__[context['references'][0]]
-            d['quote'] = root.quote
+            parent = context.__parent__[context['references'][-1]]
+            d['quote'] = parent['text']
         else:
             d['quote'] = context.quote
             context['references'] = []
