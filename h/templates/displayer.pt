@@ -29,7 +29,8 @@
 
         <div class="page">
           <strong>
-            <a ng-href="">{{annotation.user | userName}}</a> annotated:
+            <a ng-href="">{{annotation.user | userName}}</a>
+            {{annotation.text && "annotated" || "highlighted"}}:
           </strong>
           <div class="domain">
             <img class="favicon" ng-src="{{root.favicon_link}}"/>
