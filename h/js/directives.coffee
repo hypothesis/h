@@ -40,13 +40,7 @@ authentication = ->
 
       $scope.submit = (form) ->
         return unless form.$valid
-
-        params = {}
-        for name, control of form when control.$modelValue?
-          params[name] = control.$modelValue
-
-        method = "$#{form.$name}"
-        authentication[method] params, ->
+        authentication["$#{form.$name}"] ->
           $scope.$emit 'success', form.$name
   ]
   scope:
