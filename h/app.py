@@ -20,11 +20,15 @@ class AppController(views.BaseController):
         super(AppController, self).__init__(request)
 
         if request.method == 'POST':
-            data = request.json_body
-            data.update(request.params)
-            request.content_type = 'application/x-www-form-urlencoded'
-            request.POST.clear()
-            request.POST.update(data)
+            try:
+                data = request.json_body
+                data.update(request.params)
+            except ValueError:
+                pass  # Request from legacy client or non-js browser.
+            else:
+                request.content_type = 'application/x-www-form-urlencoded'
+                request.POST.clear()
+                request.POST.update(data)
 
     @view_config(request_method='POST', request_param='__formid__=login')
     def login(self):
