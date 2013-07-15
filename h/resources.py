@@ -16,6 +16,8 @@ from h.models import get_session
 import logging
 log = logging.getLogger(__name__)
 
+from models import ModeratedAnnotation
+
 
 @implementer(ILocation)
 class BaseResource(resources.BaseFactory):
@@ -196,6 +198,54 @@ class UserStreamFactory(BaseResource):
             return UserStream(request)
 
 
+class ModeratedAnnotationResource(Annotation):
+    def acquire_annotataion_moderation(self, annot_id, user_id):
+        session = get_session(self.request)
+        annot_moder = ModeratedAnnotation.get_add_item(annot_id, user_id, session)
+        self.annot_moder = annot_moder
+
+
+class ModerationActionResource(BaseResource, dict):
+
+    @classmethod
+    def _get_username(cls, user):
+        return user[5:user.find('@')]
+
+    def __getitem__(self, key):
+        # key is annotation id.
+        # Creating ModeratedAnnotation
+        request = self.request
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        data = store.read(key)
+
+        annot_moder_res = ModeratedAnnotationResource(request)
+        annot_moder_res.__name__ = key
+        annot_moder_res.__parent__ = self
+
+        annot_moder_res.update(data)
+        username = self._get_username(annot_moder_res.get('user'))
+        User = registry.getUtility(interfaces.IUserClass)
+        user = User.get_by_username(request, username)
+        if user:
+            annot_moder_res.acquire_annotataion_moderation(key, user.id)
+        else:
+            raise Exception("User does not exist! What to do?")
+
+        return  annot_moder_res
+
+
+class ModerationActionFactory(BaseResource):
+    def __getitem__(self, key):
+        # key is moderation action type.
+        request = self.request
+        moder_act_res = ModerationActionResource(request)
+        moder_act_res.__name__ = key
+        moder_act_res.__parent__ = self
+        moder_act_res.update({'action_type':key})
+        return moder_act_res
+
+
 def includeme(config):
     config.set_root_factory(RootFactory)
     config.add_route('index', '/')
@@ -203,3 +253,4 @@ def includeme(config):
     RootFactory.a = AnnotationFactory
     RootFactory.stream = Streamer
     RootFactory.u = UserStreamFactory
+    RootFactory.act = ModerationActionFactory

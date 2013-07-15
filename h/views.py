@@ -25,6 +25,9 @@ import json
 import logging
 log = logging.getLogger(__name__)
 
+ACTION_FLAG_SPAM = 'flag_spam'
+ACTION_UNDO_FLAG_SPAM = 'undo_flag_spam'
+
 
 class BaseController(BaseController):
     def __init__(self, request):
@@ -38,6 +41,51 @@ class BaseController(BaseController):
 @view_config(layout='site', renderer='templates/home.pt', route_name='index')
 def home(request):
     return find_resource(request.context, '/app').embed
+
+
+@view_defaults(context='h.resources.ModeratedAnnotationResource', layout='site')
+class Moderation(BaseController):
+    #todo(michael): next view configuration is for temporary purposes only.
+    @view_config(accept='text/html', renderer='templates/displayer.pt')
+    def perform_action(self):
+        request = self.request
+        context = request.context
+        if len(context) == 0:
+            raise httpexceptions.HTTPNotFound(
+                body_template=
+                "Either no annotation exists with this identifier, or you "
+                "don't have the permissions required for viewing it."
+            )
+        if request.user:
+            action_type = context.__parent__.get('action_type')
+            if action_type == ACTION_FLAG_SPAM:
+                context.annot_moder.flag_as_spam(request, request.user.username)
+            elif action_type == ACTION_UNDO_FLAG_SPAM:
+                context.annot_moder.undo_flag_as_spam(request,
+                                                          request.user.username)
+            else:
+                # todo(michael): substitut plain exception with ...
+                raise Exception("Moderation Action is not recognized.")
+        else:
+            raise Exception("You are not authorised to moderate this annotation.")
+        # todo(mchael): the code below is just to fill displayer.pt
+        d = url_values_from_document(context)
+        d['annotation'] = context
+        d['annotation']['referrers'] = json.dumps(context.referrers)
+
+        if context.get('references', []):
+            root = context.__parent__[context['references'][0]]
+            d['quote'] = root.quote
+        else:
+            d['quote'] = context.quote
+            context['references'] = []
+
+        if not 'deleted' in context:
+            context['deleted'] = False
+
+        context['date'] = context['updated']
+
+        return d
 
 
 @view_defaults(context='h.resources.Annotation', layout='site')
