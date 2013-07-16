@@ -83,7 +83,7 @@ class App
           else
             return unless drafts.discard()
             dynamicBucket = false
-            $location.search('id', null)
+            $location.search({'id' : null })
             annotator.showViewer heatmap.buckets[bucket]
             $scope.$digest()
 
@@ -408,8 +408,41 @@ class Viewer
         return new Date()
 
 
+class Search
+  this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
+  constructor: ($location, $routeParams, $scope, annotator) ->
+    console.log 'SearchController'
+
+    refresh = =>
+      $scope.search_filter = $routeParams.matched
+      $scope.thread = null
+      heatmap = annotator.plugins.Heatmap
+      threads = []
+      for bucket in heatmap.buckets
+        for annotation in bucket
+          thread = annotator.threading.getContainer annotation.id
+          #Cut out annotation branches which has no search results
+          children = thread.flattenChildren()
+          hit_in_children = false
+          if children?
+            for child in children
+              if child.id in $scope.search_filter
+                hit_in_children = true
+                break
+
+          unless annotation.id in $scope.search_filter or hit_in_children
+            continue
+          if $routeParams.whole_document or annotation in $scope.annotations
+            threads.push thread
+      $scope.threads = threads
+      #Replace this with threading call
+
+    refresh()
+
+
 angular.module('h.controllers', ['bootstrap'])
   .controller('AppController', App)
   .controller('AnnotationController', Annotation)
   .controller('EditorController', Editor)
   .controller('ViewerController', Viewer)
+  .controller('SearchController', Search)

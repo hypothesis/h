@@ -50,8 +50,8 @@ class Hypothesis extends Annotator
   viewer:
     addField: (-> )
 
-  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts']
-  constructor: ($document, $location, $rootScope, $route, drafts) ->
+  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts', '$filter']
+  constructor: ($document, $location, $rootScope, $route, drafts, $filter) ->
     super ($document.find 'body')
 
     # Load plugins
@@ -118,6 +118,90 @@ class Hypothesis extends Annotator
 
     # Reload the route after annotations are loaded
     this.subscribe 'annotationsLoaded', -> $route.reload()
+
+    @user_filter = $filter('userName')
+    @visualSearch = VS.init
+      container: $('.visual_search')
+      query: ''
+      callbacks:
+        search: (query, searchCollection) =>
+          matched = []
+          whole_document = true
+          for searchItem in searchCollection.models
+            if searchItem.attributes.category is 'area' and
+            searchItem.attributes.value is 'sidebar'
+              whole_document = false
+          if whole_document
+            annotations = @plugins.Store.annotations
+          else
+            annotations = $rootScope.annotations
+
+          for annotation in annotations
+            matches = true
+            for searchItem in searchCollection.models
+              category = searchItem.attributes.category
+              value = searchItem.attributes.value
+              switch category
+                when 'user'
+                  userName = @user_filter annotation.user
+                  unless userName.toLowerCase() is value.toLowerCase()
+                    matches = false
+                    break
+                when 'text'
+                  unless annotation.text.toLowerCase().indexOf(value.toLowerCase()) > -1
+                    matches = false
+                    break
+                when 'time'
+                    delta = Math.round((+new Date - new Date(annotation.updated)) / 1000)
+                    switch value
+                      when '5 minutes'
+                        unless delta <= 60*5
+                          matches = false
+                      when '1 hour'
+                        unless delta <= 60*60
+                          matches = false
+                      when '1 day'
+                        unless delta <= 60*60*24
+                          matches = false
+                      when '1 week'
+                        unless delta <= 60*60*24*7
+                          matches = false
+                      when '1 month'
+                        unless delta <= 60*60*24*31
+                          matches = false
+                      when '1 year'
+                        unless delta <= 60*60*24*366
+                          matches = false
+                when 'group'
+                    priv_public = 'group:__world__' in (annotation.permissions.read or [])
+                    switch value
+                      when 'Public'
+                        unless priv_public
+                          matches = false
+                      when 'Private'
+                        if priv_public
+                          matches = false
+
+            if matches
+              matched.push annotation.id
+
+          #$rootScope.search_filter = matched
+
+          # Set the path
+          search =
+            whole_document : whole_document
+            matched : matched
+          $location.path('/page_search').search(search)
+          $rootScope.$digest()
+
+        facetMatches: (callback) ->
+          callback ['text','area', 'group', 'tag','time','user'], {preserveOrder: true}
+        valueMatches: (facet, searchTerm, callback) ->
+          switch facet
+            when 'group' then callback ['Public', 'Private']
+            when 'area' then callback ['sidebar', 'document']
+            when 'time'
+              callback ['5 minutes', '1 hour', '1 day', '1 week', '1 month', '1 year']
 
   _setupXDM: ->
     $location = @element.injector().get '$location'
@@ -471,8 +555,7 @@ class FlashProvider
       @queues[queue] = @queues[queue]?.concat messages
       this._process() unless @timeout?
 
-
-angular.module('h.services', ['ngResource'])
+angular.module('h.services', ['ngResource','h.filters'])
   .provider('authentication', AuthenticationProvider)
   .provider('drafts', DraftProvider)
   .provider('flash', FlashProvider)
