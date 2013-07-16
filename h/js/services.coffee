@@ -50,8 +50,8 @@ class Hypothesis extends Annotator
   viewer:
     addField: (-> )
 
-  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts']
-  constructor: ($document, $location, $rootScope, $route, drafts) ->
+  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts', '$filter']
+  constructor: ($document, $location, $rootScope, $route, drafts, $filter) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
@@ -119,6 +119,90 @@ class Hypothesis extends Annotator
 
     # Reload the route after annotations are loaded
     this.subscribe 'annotationsLoaded', -> $route.reload()
+
+    @user_filter = $filter('userName')
+    @visualSearch = VS.init
+      container: $('.visual_search')
+      query: ''
+      callbacks:
+        search: (query, searchCollection) =>
+          matched = []
+          whole_document = true
+          for searchItem in searchCollection.models
+            if searchItem.attributes.category is 'area' and
+            searchItem.attributes.value is 'sidebar'
+              whole_document = false
+          if whole_document
+            annotations = @plugins.Store.annotations
+          else
+            annotations = $rootScope.annotations
+
+          for annotation in annotations
+            matches = true
+            for searchItem in searchCollection.models
+              category = searchItem.attributes.category
+              value = searchItem.attributes.value
+              switch category
+                when 'user'
+                  userName = @user_filter annotation.user
+                  unless userName.toLowerCase() is value.toLowerCase()
+                    matches = false
+                    break
+                when 'text'
+                  unless annotation.text.toLowerCase().indexOf(value.toLowerCase()) > -1
+                    matches = false
+                    break
+                when 'time'
+                    delta = Math.round((+new Date - new Date(annotation.updated)) / 1000)
+                    switch value
+                      when '5 minutes'
+                        unless delta <= 60*5
+                          matches = false
+                      when '1 hour'
+                        unless delta <= 60*60
+                          matches = false
+                      when '1 day'
+                        unless delta <= 60*60*24
+                          matches = false
+                      when '1 week'
+                        unless delta <= 60*60*24*7
+                          matches = false
+                      when '1 month'
+                        unless delta <= 60*60*24*31
+                          matches = false
+                      when '1 year'
+                        unless delta <= 60*60*24*366
+                          matches = false
+                when 'group'
+                    priv_public = 'group:__world__' in (annotation.permissions.read or [])
+                    switch value
+                      when 'Public'
+                        unless priv_public
+                          matches = false
+                      when 'Private'
+                        if priv_public
+                          matches = false
+
+            if matches
+              matched.push annotation.id
+
+          #$rootScope.search_filter = matched
+
+          # Set the path
+          search =
+            whole_document : whole_document
+            matched : matched
+          $location.path('/page_search').search(search)
+          $rootScope.$digest()
+
+        facetMatches: (callback) ->
+          callback ['text','area', 'group', 'tag','time','user'], {preserveOrder: true}
+        valueMatches: (facet, searchTerm, callback) ->
+          switch facet
+            when 'group' then callback ['Public', 'Private']
+            when 'area' then callback ['sidebar', 'document']
+            when 'time'
+              callback ['5 minutes', '1 hour', '1 day', '1 week', '1 month', '1 year']
 
   _setupXDM: ->
     $location = @element.injector().get '$location'
@@ -416,7 +500,68 @@ class DraftProvider
       false
 
 
-angular.module('h.services', ['ngResource'])
+class FlashProvider
+  queues:
+    '': []
+    info: []
+    error: []
+    success: []
+  notice: null
+  timeout: null
+
+  this.$inject = ['$httpProvider']
+  constructor: ($httpProvider) ->
+    # Configure notification classes
+    angular.extend Annotator.Notification,
+      INFO: 'info'
+      ERROR: 'error'
+      SUCCESS: 'success'
+
+    # Configure the response interceptor
+    $httpProvider.responseInterceptors.push ['$q', ($q) =>
+      (promise) =>
+        promise.then (response) =>
+          data = response.data
+          format = response.headers 'content-type'
+          if format?.match /^application\/json/
+            if data.flash?
+              this._flash q, msgs for q, msgs of data.flash
+
+            if data.status is 'failure'
+              this._flash 'error', data.reason
+              $q.reject(data.reason)
+            else if data.status is 'okay'
+              response.data = data.model
+              response
+          else
+            response
+    ]
+
+  _process: ->
+    @timeout = null
+    for q, msgs of @queues
+      if msgs.length
+        msg = msgs.shift()
+        unless q then [q, msg] = msg
+        notice = Annotator.showNotification msg, q
+        @timeout = this._wait =>
+          # work around Annotator.Notification not removing classes
+          for _, klass of notice.options.classes
+            notice.element.removeClass klass
+          this._process()
+        break
+
+  $get: ['$timeout', 'annotator', ($timeout, annotator) ->
+    this._wait = (cb) -> $timeout cb, 5000
+    angular.bind this, this._flash
+  ]
+
+  _flash: (queue, messages) ->
+    if @queues[queue]?
+      @queues[queue] = @queues[queue]?.concat messages
+      this._process() unless @timeout?
+
+angular.module('h.services', ['ngResource','h.filters'])
   .provider('authentication', AuthenticationProvider)
   .provider('drafts', DraftProvider)
   .service('annotator', Hypothesis)
