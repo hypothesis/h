@@ -52,6 +52,8 @@
       <div ng-switch-default>Reason:</div>
     </ng-switch>
   </div>
+
+  <div ng-hide="model.$viewValue.text || editing">(Quote highlighted)</div>
   
   <!-- Body -->
   <markdown ng-model="$parent.model.$modelValue.text"
