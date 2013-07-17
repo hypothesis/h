@@ -198,8 +198,9 @@ class Hypothesis extends Annotator
           $location.path('/page_search').search(search)
           $rootScope.$digest()
 
-        facetMatches: (callback) ->
-          callback ['text','area', 'group', 'tag','time','user'], {preserveOrder: true}
+        facetMatches: (callback) =>
+          if @show_search
+            return callback ['text','area', 'group', 'tag','time','user'], {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
             when 'group' then callback ['Public', 'Private']
@@ -207,8 +208,8 @@ class Hypothesis extends Annotator
             when 'time'
               callback ['5 minutes', '1 hour', '1 day', '1 week', '1 month', '1 year']
         clearSearch: (original) =>
-          original()
           @show_search = false
+          original()
           $rootScope.$digest()
 
   _setupXDM: ->
