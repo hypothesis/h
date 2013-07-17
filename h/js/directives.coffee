@@ -61,6 +61,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 
     # React to the changes to the text area
     input.bind 'blur change keyup', ->
+      attr.required = scope.realRequired
       ctrl.$setViewValue input[0].value
       scope.$digest()
 
@@ -69,6 +70,10 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
     scope.$watch 'readonly', (readonly) ->
       ctrl.$render()
       unless readonly then $timeout -> input.focus()
+
+    # We save the required field, since it magically changes later on.
+    # No idea why this happens; until we find out, this is a workaround.
+    scope.realRequired = scope.required
 
   require: '?ngModel'
   restrict: 'E'
