@@ -232,6 +232,12 @@ class App
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
 
+    $scope.showSearchBar = =>
+      annotator.show_search = true
+
+    $scope.isSearchShown = =>
+      annotator.show_search
+
 class Annotation
   this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
   constructor: ($element, $location, $scope, annotator, drafts, $timeout) ->
