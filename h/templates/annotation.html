@@ -69,12 +69,15 @@
       <ng-switch on="action">
         <button ng-switch-when="edit"
                 ng-click="save()"
+                ng-disabled="!form.$valid"
                 class="btn check-icon">Save</button>
         <button ng-switch-when="delete"
                 ng-click="save()"
+                ng-disabled="!form.$valid"
                 class="btn check-icon">Delete</button>
         <button ng-switch-default
                 ng-click="save()"
+                ng-disabled="!form.$valid"
                 class="btn check-icon">Save</button>
       </ng-switch>
       <span role="button" ng-click="cancel()" class="x-icon">Cancel</span>
