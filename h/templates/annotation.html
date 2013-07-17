@@ -53,7 +53,9 @@
     </ng-switch>
   </div>
 
-  <div ng-hide="model.$viewValue.text || editing">(Quote highlighted)</div>
+  <div ng-hide="model.$viewValue.text || editing || model.$viewValue.deleted">
+    (Quote highlighted)
+  </div>
   
   <!-- Body -->
   <markdown ng-model="$parent.model.$modelValue.text"
@@ -93,7 +95,12 @@
   <!-- Share dialog -->
   <div class="share-dialog" data-ng-show="!editing">
     <div class="icon-input">
-      <input class="share-text" ng-blur="toggle()" type="text" ng-model="shared_link" readonly/>
+      <div class="go-icon">
+	<a class="launch-icon show" href="{{shared_link}}" target="_blank"></a>
+      </div>
+      <div class="share-div">
+        <input class="share-text" type="text" ng-model="shared_link" readonly ng-blur="toggle()" />
+      </div>
     </div>
   </div>
 
