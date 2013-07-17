@@ -44,6 +44,7 @@ class Hypothesis extends Annotator
   # Internal state
   dragging: false     # * To enable dragging only when we really want to
   ongoing_edit: false # * Is there an interrupted edit by login
+  show_search: false  # * Toggle showing the visualsearchbar
 
   # Here as a noop just to make the Permissions plugin happy
   # XXX: Change me when Annotator stops assuming things about viewers
@@ -125,6 +126,9 @@ class Hypothesis extends Annotator
       query: ''
       callbacks:
         search: (query, searchCollection) =>
+          unless query
+            return
+
           matched = []
           whole_document = true
           for searchItem in searchCollection.models
@@ -202,6 +206,10 @@ class Hypothesis extends Annotator
             when 'area' then callback ['sidebar', 'document']
             when 'time'
               callback ['5 minutes', '1 hour', '1 day', '1 week', '1 month', '1 year']
+        clearSearch: (original) =>
+          original()
+          @show_search = false
+          $rootScope.$digest()
 
   _setupXDM: ->
     $location = @element.injector().get '$location'

@@ -213,6 +213,11 @@ class App
         $i.triggerHandler('input')
     , 200  # We hope this is long enough
 
+    $scope.showSearchBar = =>
+      annotator.show_search = true
+
+    $scope.isSearchShown = =>
+      annotator.show_search
 
 class Annotation
   this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
