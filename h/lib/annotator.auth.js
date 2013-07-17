@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-3342e40
+** Annotator 1.2.6-dev-1a8c061
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-05-28 21:55:33Z
+** Built at: 2013-07-17 12:09:24Z
 */
 
 
@@ -17,7 +17,6 @@
 
   createDateFromISO8601 = function(string) {
     var d, date, offset, regexp, time, _ref;
-
     regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" + "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?" + "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?";
     d = string.match(new RegExp(regexp));
     offset = 0;
@@ -54,7 +53,6 @@
 
   base64Decode = function(data) {
     var ac, b64, bits, dec, h1, h2, h3, h4, i, o1, o2, o3, tmp_arr;
-
     if (typeof atob !== "undefined" && atob !== null) {
       return atob(data);
     } else {
@@ -90,7 +88,6 @@
 
   base64UrlDecode = function(data) {
     var i, m, _i, _ref;
-
     m = data.length % 4;
     if (m !== 0) {
       for (i = _i = 0, _ref = 4 - m; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -104,7 +101,6 @@
 
   parseToken = function(token) {
     var head, payload, sig, _ref;
-
     _ref = token.split('.'), head = _ref[0], payload = _ref[1], sig = _ref[2];
     return JSON.parse(base64UrlDecode(payload));
   };
@@ -130,7 +126,6 @@
 
     Auth.prototype.requestToken = function() {
       var _this = this;
-
       this.requestInProgress = true;
       return $.ajax({
         url: this.options.tokenUrl,
@@ -142,7 +137,6 @@
         return _this.setToken(data);
       }).fail(function(xhr, status, err) {
         var msg;
-
         msg = Annotator._t("Couldn't get auth token:");
         console.error("" + msg + " " + err, xhr);
         return Annotator.showNotification("" + msg + " " + xhr.responseText, Annotator.Notification.ERROR);
@@ -154,7 +148,6 @@
     Auth.prototype.setToken = function(token) {
       var _results,
         _this = this;
-
       this.token = token;
       this._unsafeToken = parseToken(token);
       if (this.haveValidToken()) {
@@ -182,7 +175,6 @@
 
     Auth.prototype.haveValidToken = function() {
       var allFields;
-
       allFields = this._unsafeToken && this._unsafeToken.issuedAt && this._unsafeToken.ttl && this._unsafeToken.consumerKey;
       if (allFields && this.timeToExpiry() > 0) {
         return true;
@@ -193,7 +185,6 @@
 
     Auth.prototype.timeToExpiry = function() {
       var expiry, issue, now, timeToExpiry;
-
       now = new Date().getTime() / 1000;
       issue = createDateFromISO8601(this._unsafeToken.issuedAt).getTime() / 1000;
       expiry = issue + this._unsafeToken.ttl;
@@ -207,7 +198,6 @@
 
     Auth.prototype.updateHeaders = function() {
       var current;
-
       current = this.element.data('annotator:headers');
       return this.element.data('annotator:headers', $.extend(current, {
         'x-annotator-auth-token': this.token

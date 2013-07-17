@@ -1,17 +1,17 @@
 /*
-** Annotator 1.2.6-dev-3342e40
+** Annotator 1.2.6-dev-1a8c061
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-05-28 21:55:30Z
+** Built at: 2013-07-17 12:09:22Z
 */
 
 
 (function() {
-  var $, Annotator, Delegator, LinkParser, Range, findChild, fn, functions, g, getNodeName, getNodePosition, gettext, simpleXPathJQuery, simpleXPathPure, util, _Annotator, _gettext, _i, _j, _len, _len1, _ref, _ref1, _t,
+  var $, Annotator, Delegator, LinkParser, Range, Util, findChild, fn, functions, g, getNodeName, getNodePosition, gettext, simpleXPathJQuery, simpleXPathPure, util, _Annotator, _gettext, _i, _j, _len, _len1, _ref, _ref1, _t,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -19,10 +19,8 @@
 
   simpleXPathJQuery = function(relativeRoot) {
     var jq;
-
     jq = this.map(function() {
       var elem, idx, path, tagName;
-
       path = '';
       elem = this;
       while ((elem != null ? elem.nodeType : void 0) === Node.ELEMENT_NODE && elem !== relativeRoot) {
@@ -39,10 +37,8 @@
 
   simpleXPathPure = function(relativeRoot) {
     var getPathSegment, getPathTo, jq, rootNode;
-
     getPathSegment = function(node) {
       var name, pos;
-
       name = getNodeName(node);
       pos = getNodePosition(node);
       return "" + name + "[" + pos + "]";
@@ -50,7 +46,6 @@
     rootNode = relativeRoot;
     getPathTo = function(node) {
       var xpath;
-
       xpath = '';
       while (node !== rootNode) {
         if (node == null) {
@@ -65,7 +60,6 @@
     };
     jq = this.map(function() {
       var path;
-
       path = getPathTo(this);
       return path;
     });
@@ -74,7 +68,6 @@
 
   findChild = function(node, type, index) {
     var child, children, found, name, _i, _len;
-
     if (!node.hasChildNodes()) {
       throw new Error("XPath error: node has no children!");
     }
@@ -95,7 +88,6 @@
 
   getNodeName = function(node) {
     var nodeName;
-
     nodeName = node.nodeName.toLowerCase();
     switch (nodeName) {
       case "#text":
@@ -111,7 +103,6 @@
 
   getNodePosition = function(node) {
     var pos, tmp;
-
     pos = 0;
     tmp = node;
     while (tmp) {
@@ -150,14 +141,14 @@
     console.error(_t("Annotator requires a JSON implementation: have you included lib/vendor/json2.js?"));
   }
 
-  $ = jQuery.sub();
+  $ = jQuery;
 
-  $.flatten = function(array) {
+  Util = {};
+
+  Util.flatten = function(array) {
     var flatten;
-
     flatten = function(ary) {
       var el, flat, _i, _len;
-
       flat = [];
       for (_i = 0, _len = ary.length; _i < _len; _i++) {
         el = ary[_i];
@@ -168,31 +159,10 @@
     return flatten(array);
   };
 
-  $.plugin = function(name, object) {
-    return jQuery.fn[name] = function(options) {
-      var args;
-
-      args = Array.prototype.slice.call(arguments, 1);
-      return this.each(function() {
-        var instance;
-
-        instance = $.data(this, name);
-        if (instance) {
-          return options && instance[options].apply(instance, args);
-        } else {
-          instance = new object(this, options);
-          return $.data(this, name, instance);
-        }
-      });
-    };
-  };
-
-  $.fn.textNodes = function() {
+  Util.getTextNodes = function(jq) {
     var getTextNodes;
-
     getTextNodes = function(node) {
       var nodes;
-
       if (node && node.nodeType !== Node.TEXT_NODE) {
         nodes = [];
         if (node.nodeType !== Node.COMMENT_NODE) {
@@ -207,27 +177,25 @@
         return node;
       }
     };
-    return this.map(function() {
-      return $.flatten(getTextNodes(this));
+    return jq.map(function() {
+      return Util.flatten(getTextNodes(this));
     });
   };
 
-  $.fn.xpath = function(relativeRoot) {
+  Util.xpathFromNode = function(el, relativeRoot) {
     var exception, result;
-
     try {
-      result = simpleXPathJQuery.call(this, relativeRoot);
+      result = simpleXPathJQuery.call(el, relativeRoot);
     } catch (_error) {
       exception = _error;
       console.log("jQuery-based XPath construction failed! Falling back to manual.");
-      result = simpleXPathPure.call(this, relativeRoot);
+      result = simpleXPathPure.call(el, relativeRoot);
     }
     return result;
   };
 
-  $.xpath = function(xp, root) {
+  Util.nodeFromXPath = function(xp, root) {
     var idx, name, node, step, steps, _i, _len, _ref1;
-
     steps = xp.substring(1).split("/");
     node = root;
     for (_i = 0, _len = steps.length; _i < _len; _i++) {
@@ -239,18 +207,9 @@
     return node;
   };
 
-  $.escape = function(html) {
+  Util.escape = function(html) {
     return html.replace(/&(?!\w+;)/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   };
-
-  $.fn.escape = function(html) {
-    if (arguments.length) {
-      return this.html($.escape(html));
-    }
-    return this.html();
-  };
-
-  $.fn.reverse = []._reverse || [].reverse;
 
   functions = ["log", "debug", "info", "warn", "exception", "assert", "dir", "dirxml", "trace", "group", "groupEnd", "groupCollapsed", "time", "timeEnd", "profile", "profileEnd", "count", "clear", "table", "error", "notifyFirebug", "firebug", "userObjects"];
 
@@ -279,13 +238,11 @@
     }
     this.console['error'] = function() {
       var args;
-
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       return alert("ERROR: " + (args.join(', ')));
     };
     this.console['warn'] = function() {
       var args;
-
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       return alert("WARNING: " + (args.join(', ')));
     };
@@ -307,7 +264,6 @@
 
     Delegator.prototype.addEvents = function() {
       var event, functionName, sel, selector, _k, _ref1, _ref2, _results;
-
       _ref1 = this.events;
       _results = [];
       for (sel in _ref1) {
@@ -321,7 +277,6 @@
     Delegator.prototype.addEvent = function(bindTo, event, functionName) {
       var closure, isBlankSelector,
         _this = this;
-
       closure = function() {
         return _this[functionName].apply(_this, arguments);
       };
@@ -353,7 +308,6 @@
 
     Delegator.prototype.subscribe = function(event, callback) {
       var closure;
-
       closure = function() {
         return callback.apply(this, [].slice.call(arguments, 1));
       };
@@ -373,10 +327,8 @@
 
   Delegator.natives = (function() {
     var key, specials, val;
-
     specials = (function() {
       var _ref1, _results;
-
       _ref1 = jQuery.event.special;
       _results = [];
       for (key in _ref1) {
@@ -413,13 +365,11 @@
 
   Range.nodeFromXPath = function(xpath, root) {
     var customResolver, evaluateXPath, namespace, node, segment;
-
     if (root == null) {
       root = document;
     }
     evaluateXPath = function(xp, nsResolver) {
       var exception;
-
       if (nsResolver == null) {
         nsResolver = null;
       }
@@ -429,7 +379,7 @@
         exception = _error;
         console.log("XPath evaluation failed.");
         console.log("Trying fallback...");
-        return $.xpath(xp, root);
+        return Util.nodeFromXPath(xp, root);
       }
     };
     if (!$.isXMLDoc(document.documentElement)) {
@@ -440,7 +390,6 @@
       if (!node) {
         xpath = ((function() {
           var _k, _len2, _ref1, _results;
-
           _ref1 = xpath.split('/');
           _results = [];
           for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
@@ -493,7 +442,6 @@
 
     BrowserRange.prototype.normalize = function(root) {
       var changed, isImg, it, node, nr, offset, p, r, _k, _len2, _ref1;
-
       if (this.tainted) {
         console.error(_t("You may only call normalize() once on a BrowserRange!"));
         return false;
@@ -587,7 +535,6 @@
 
     NormalizedRange.prototype.limit = function(bounds) {
       var nodes, parent, startParents, _k, _len2, _ref1;
-
       nodes = $.grep(this.textNodes(), function(node) {
         return node.parentNode === bounds || $.contains(bounds, node.parentNode);
       });
@@ -610,17 +557,15 @@
 
     NormalizedRange.prototype.serialize = function(root, ignoreSelector) {
       var end, serialization, start;
-
       serialization = function(node, isEnd) {
         var isImg, n, nodes, offset, origParent, textNodes, xpath, _k, _len2;
-
         if (ignoreSelector) {
           origParent = $(node).parents(":not(" + ignoreSelector + ")").eq(0);
         } else {
           origParent = $(node).parent();
         }
-        xpath = origParent.xpath(root)[0];
-        textNodes = origParent.textNodes();
+        xpath = Util.xpathFromNode(origParent, root)[0];
+        textNodes = Util.getTextNodes(origParent);
         nodes = textNodes.slice(0, textNodes.index(node));
         offset = 0;
         for (_k = 0, _len2 = nodes.length; _k < _len2; _k++) {
@@ -646,10 +591,8 @@
 
     NormalizedRange.prototype.text = function() {
       var node;
-
       return ((function() {
         var _k, _len2, _ref1, _results;
-
         _ref1 = this.textNodes();
         _results = [];
         for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
@@ -662,15 +605,13 @@
 
     NormalizedRange.prototype.textNodes = function() {
       var end, start, textNodes, _ref1;
-
-      textNodes = $(this.commonAncestor).textNodes();
+      textNodes = Util.getTextNodes($(this.commonAncestor));
       _ref1 = [textNodes.index(this.start), textNodes.index(this.end)], start = _ref1[0], end = _ref1[1];
       return $.makeArray(textNodes.slice(start, +end + 1 || 9e9));
     };
 
     NormalizedRange.prototype.toRange = function() {
       var range;
-
       range = document.createRange();
       range.setStartBefore(this.start);
       range.setEndAfter(this.end);
@@ -691,7 +632,6 @@
 
     SerializedRange.prototype.normalize = function(root) {
       var contains, e, length, node, p, range, targetOffset, tn, xpath, _k, _l, _len2, _len3, _ref1, _ref2;
-
       range = {};
       _ref1 = ['start', 'end'];
       for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
@@ -708,7 +648,7 @@
         }
         length = 0;
         targetOffset = this[p + 'Offset'] + (p === "start" ? 1 : 0);
-        _ref2 = $(node).textNodes();
+        _ref2 = Util.getTextNodes($(node));
         for (_l = 0, _len3 = _ref2.length; _l < _len3; _l++) {
           tn = _ref2[_l];
           if (length + tn.nodeValue.length >= targetOffset) {
@@ -757,7 +697,6 @@
   util = {
     uuid: (function() {
       var counter;
-
       counter = 0;
       return function() {
         return counter++;
@@ -770,10 +709,8 @@
     },
     maxZIndex: function($elements) {
       var all, el;
-
       all = (function() {
         var _k, _len2, _results;
-
         _results = [];
         for (_k = 0, _len2 = $elements.length; _k < _len2; _k++) {
           el = $elements[_k];
@@ -789,7 +726,6 @@
     },
     mousePosition: function(e, offsetEl) {
       var offset;
-
       offset = $(offsetEl).position();
       return {
         top: e.pageY - offset.top,
@@ -850,7 +786,8 @@
       this.onEditorSubmit = __bind(this.onEditorSubmit, this);
       this.onEditorHide = __bind(this.onEditorHide, this);
       this.showEditor = __bind(this.showEditor, this);
-      this.getHref = __bind(this.getHref, this);      Annotator.__super__.constructor.apply(this, arguments);
+      this.getHref = __bind(this.getHref, this);
+      Annotator.__super__.constructor.apply(this, arguments);
       this.plugins = {};
       if (!Annotator.supported()) {
         return this;
@@ -891,14 +828,13 @@
 
     Annotator.prototype._setupViewer = function() {
       var _this = this;
-
       this.viewer = new Annotator.Viewer({
         readOnly: this.options.readOnly
       });
       this.viewer.hide().on("edit", this.onEditAnnotation).on("delete", this.onDeleteAnnotation).addField({
         load: function(field, annotation) {
           if (annotation.text) {
-            $(field).escape(annotation.text);
+            $(field).html(Util.escape(annotation.text));
           } else {
             $(field).html("<i>" + (_t('No Comment')) + "</i>");
           }
@@ -937,14 +873,12 @@
 
     Annotator.prototype._setupDynamicStyle = function() {
       var max, sel, style, x;
-
       style = $('#annotator-dynamic-style');
       if (!style.length) {
         style = $('<style id="annotator-dynamic-style"></style>').appendTo(document.head);
       }
       sel = '*' + ((function() {
         var _k, _len2, _ref1, _results;
-
         _ref1 = ['adder', 'outer', 'notice', 'filter'];
         _results = [];
         for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
@@ -961,7 +895,6 @@
 
     Annotator.prototype.getHref = function() {
       var uri;
-
       uri = decodeURIComponent(document.location.href);
       if (document.location.hash) {
         uri = uri.slice(0, -1 * location.hash.length);
@@ -977,7 +910,6 @@
 
     Annotator.prototype.getRangeSelector = function(range) {
       var selector, sr;
-
       sr = range.serialize(this.wrapper[0]);
       return selector = {
         type: "RangeSelector",
@@ -990,7 +922,6 @@
 
     Annotator.prototype.getTextQuoteSelector = function(range) {
       var endOffset, prefix, quote, rangeEnd, rangeStart, selector, startOffset, suffix, _ref1;
-
       if (range == null) {
         throw new Error("Called getTextQuoteSelector(range) with null range!");
       }
@@ -1016,7 +947,6 @@
 
     Annotator.prototype.getTextPositionSelector = function(range) {
       var endOffset, selector, startOffset;
-
       startOffset = (this.domMapper.getInfoForNode(range.start)).start;
       endOffset = (this.domMapper.getInfoForNode(range.end)).end;
       return selector = {
@@ -1028,7 +958,6 @@
 
     Annotator.prototype.getQuoteForTarget = function(target) {
       var selector;
-
       selector = this.findSelector(target.selector, "TextQuoteSelector");
       if (selector != null) {
         return this.normalizeString(selector.exact);
@@ -1039,14 +968,12 @@
 
     Annotator.prototype.getSelectedRanges = function() {
       var browserRange, i, normedRange, r, ranges, rangesToIgnore, selection, _k, _len2;
-
       selection = util.getGlobal().getSelection();
       ranges = [];
       rangesToIgnore = [];
       if (!selection.isCollapsed) {
         ranges = (function() {
           var _k, _ref1, _results;
-
           _results = [];
           for (i = _k = 0, _ref1 = selection.rangeCount; 0 <= _ref1 ? _k < _ref1 : _k > _ref1; i = 0 <= _ref1 ? ++_k : --_k) {
             r = selection.getRangeAt(i);
@@ -1082,7 +1009,6 @@
 
     Annotator.prototype.createAnnotation = function() {
       var annotation;
-
       annotation = {};
       this.publish('beforeAnnotationCreated', [annotation]);
       return annotation;
@@ -1094,7 +1020,6 @@
 
     Annotator.prototype.findSelector = function(selectors, type) {
       var selector, _k, _len2;
-
       for (_k = 0, _len2 = selectors.length; _k < _len2; _k++) {
         selector = selectors[_k];
         if (selector.type === type) {
@@ -1106,7 +1031,6 @@
 
     Annotator.prototype.findAnchorFromRangeSelector = function(target) {
       var content, currentQuote, endInfo, endOffset, normalizedRange, savedQuote, selector, startInfo, startOffset;
-
       selector = this.findSelector(target.selector, "RangeSelector");
       if (selector == null) {
         return null;
@@ -1137,7 +1061,6 @@
 
     Annotator.prototype.findAnchorFromPositionSelector = function(target) {
       var browserRange, content, currentQuote, mappings, normalizedRange, savedQuote, selector;
-
       selector = this.findSelector(target.selector, "TextPositionSelector");
       if (selector == null) {
         return null;
@@ -1166,7 +1089,6 @@
 
     Annotator.prototype.findAnchorWithTwoPhaseFuzzyMatching = function(target) {
       var anchor, browserRange, expectedEnd, expectedStart, match, normalizedRange, options, posSelector, prefix, quote, quoteSelector, result, suffix;
-
       quoteSelector = this.findSelector(target.selector, "TextQuoteSelector");
       prefix = quoteSelector != null ? quoteSelector.prefix : void 0;
       suffix = quoteSelector != null ? quoteSelector.suffix : void 0;
@@ -1202,7 +1124,6 @@
 
     Annotator.prototype.findAnchorWithFuzzyMatching = function(target) {
       var anchor, browserRange, expectedStart, len, match, normalizedRange, options, posSelector, quote, quoteSelector, result;
-
       quoteSelector = this.findSelector(target.selector, "TextQuoteSelector");
       quote = quoteSelector != null ? quoteSelector.exact : void 0;
       if (quote == null) {
@@ -1238,7 +1159,6 @@
 
     Annotator.prototype.findAnchor = function(target) {
       var anchor, error, strategies, _k, _len2;
-
       if (target == null) {
         throw new Error("Trying to find anchor for null target!");
       }
@@ -1268,7 +1188,6 @@
 
     Annotator.prototype.setupAnnotation = function(annotation) {
       var anchor, error, exception, normed, normedRanges, r, ranges, root, t, _k, _l, _len2, _len3, _ref1, _ref2;
-
       root = this.wrapper[0];
       ranges = annotation.ranges || this.selectedRanges || [];
       if (annotation.ranges != null) {
@@ -1276,7 +1195,6 @@
       }
       annotation.target || (annotation.target = (function() {
         var _k, _len2, _results;
-
         _results = [];
         for (_k = 0, _len2 = ranges.length; _k < _len2; _k++) {
           r = ranges[_k];
@@ -1334,7 +1252,6 @@
 
     Annotator.prototype.deleteAnnotation = function(annotation) {
       var child, h, _k, _len2, _ref1;
-
       if (annotation.highlights != null) {
         _ref1 = annotation.highlights;
         for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
@@ -1354,13 +1271,11 @@
     Annotator.prototype.loadAnnotations = function(annotations) {
       var clone, loader,
         _this = this;
-
       if (annotations == null) {
         annotations = [];
       }
       loader = function(annList) {
         var n, now, _k, _len2;
-
         if (annList == null) {
           annList = [];
         }
@@ -1395,7 +1310,6 @@
 
     Annotator.prototype.highlightRange = function(normedRange, cssClass) {
       var hl, node, r, white, _k, _len2, _ref1, _results;
-
       if (cssClass == null) {
         cssClass = 'annotator-hl';
       }
@@ -1417,7 +1331,6 @@
 
     Annotator.prototype.highlightRanges = function(normedRanges, cssClass) {
       var highlights, r, _k, _len2;
-
       if (cssClass == null) {
         cssClass = 'annotator-hl';
       }
@@ -1431,7 +1344,6 @@
 
     Annotator.prototype.addPlugin = function(name, options) {
       var klass, _base;
-
       if (this.plugins[name]) {
         console.error(_t("You cannot have more than one instance of any plugin."));
       } else {
@@ -1491,7 +1403,6 @@
 
     Annotator.prototype.checkForEndSelection = function(event) {
       var container, range, _k, _len2, _ref1;
-
       this.mouseIsDown = false;
       if (this.ignoreMouseup) {
         return;
@@ -1521,7 +1432,6 @@
 
     Annotator.prototype.onHighlightMouseover = function(event) {
       var annotations;
-
       this.clearViewerHideTimer();
       if (this.mouseIsDown || this.viewer.isShown()) {
         return false;
@@ -1542,7 +1452,6 @@
     Annotator.prototype.onAdderClick = function(event) {
       var annotation, cancel, cleanup, position, save,
         _this = this;
-
       if (event != null) {
         event.preventDefault();
       }
@@ -1572,7 +1481,6 @@
     Annotator.prototype.onEditAnnotation = function(annotation) {
       var cleanup, offset, update,
         _this = this;
-
       offset = this.viewer.element.position();
       update = function() {
         cleanup();
@@ -1647,6 +1555,8 @@
 
   Annotator.Range = Range;
 
+  Annotator.Util = Util;
+
   Annotator._t = _t;
 
   Annotator.supported = function() {
@@ -1660,7 +1570,20 @@
     return this;
   };
 
-  $.plugin('annotator', Annotator);
+  $.fn.annotator = function(options) {
+    var args;
+    args = Array.prototype.slice.call(arguments, 1);
+    return this.each(function() {
+      var instance;
+      instance = $.data(this, 'annotator');
+      if (instance) {
+        return options && instance[options].apply(instance, args);
+      } else {
+        instance = new Annotator(this, options);
+        return $.data(this, 'annotator', instance);
+      }
+    });
+  };
 
   this.Annotator = Annotator;
 
@@ -1682,7 +1605,6 @@
 
     Widget.prototype.checkOrientation = function() {
       var current, offset, viewport, widget, window;
-
       this.resetOrientation();
       window = $(util.getGlobal());
       widget = this.element.children(":first");
@@ -1757,7 +1679,8 @@
       this.submit = __bind(this.submit, this);
       this.load = __bind(this.load, this);
       this.hide = __bind(this.hide, this);
-      this.show = __bind(this.show, this);      Editor.__super__.constructor.call(this, $(this.html)[0], options);
+      this.show = __bind(this.show, this);
+      Editor.__super__.constructor.call(this, $(this.html)[0], options);
       this.fields = [];
       this.annotation = {};
     }
@@ -1780,7 +1703,6 @@
 
     Editor.prototype.load = function(annotation) {
       var field, _k, _len2, _ref2;
-
       this.annotation = annotation;
       this.publish('load', [this.annotation]);
       _ref2 = this.fields;
@@ -1793,7 +1715,6 @@
 
     Editor.prototype.submit = function(event) {
       var field, _k, _len2, _ref2;
-
       util.preventEventDefault(event);
       _ref2 = this.fields;
       for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
@@ -1806,7 +1727,6 @@
 
     Editor.prototype.addField = function(options) {
       var element, field, input;
-
       field = $.extend({
         id: 'annotator-field-' + util.uuid(),
         type: 'input',
@@ -1824,6 +1744,9 @@
         case 'input':
         case 'checkbox':
           input = $('<input />');
+          break;
+        case 'select':
+          input = $('<select />');
       }
       element.append(input);
       input.attr({
@@ -1845,7 +1768,6 @@
 
     Editor.prototype.checkOrientation = function() {
       var controls, list;
-
       Editor.__super__.checkOrientation.apply(this, arguments);
       list = this.element.find('ul');
       controls = this.element.find('.annotator-controls');
@@ -1872,7 +1794,6 @@
     Editor.prototype.setupDraggables = function() {
       var classes, controls, cornerItem, editor, mousedown, onMousedown, onMousemove, onMouseup, resize, textarea, throttle,
         _this = this;
-
       this.element.find('.annotator-resize').remove();
       if (this.element.hasClass(this.classes.invert.y)) {
         cornerItem = this.element.find('.annotator-item:last');
@@ -1910,7 +1831,6 @@
       };
       onMousemove = function(event) {
         var diff, directionX, directionY, height, width;
-
         if (mousedown && throttle === false) {
           diff = {
             top: event.pageY - mousedown.top,
@@ -1978,7 +1898,8 @@
       this.onEditClick = __bind(this.onEditClick, this);
       this.load = __bind(this.load, this);
       this.hide = __bind(this.hide, this);
-      this.show = __bind(this.show, this);      Viewer.__super__.constructor.call(this, $(this.html.element)[0], options);
+      this.show = __bind(this.show, this);
+      Viewer.__super__.constructor.call(this, $(this.html.element)[0], options);
       this.item = $(this.html.item)[0];
       this.fields = [];
       this.annotations = [];
@@ -1987,7 +1908,6 @@
     Viewer.prototype.show = function(event) {
       var controls,
         _this = this;
-
       util.preventEventDefault(event);
       controls = this.element.find('.annotator-controls').addClass(this.classes.showControls);
       setTimeout((function() {
@@ -2009,7 +1929,6 @@
 
     Viewer.prototype.load = function(annotations) {
       var annotation, controller, controls, del, edit, element, field, item, link, links, list, _k, _l, _len2, _len3, _ref2, _ref3;
-
       this.annotations = annotations || [];
       list = this.element.find('ul:first').empty();
       _ref2 = this.annotations;
@@ -2060,7 +1979,6 @@
 
     Viewer.prototype.addField = function(options) {
       var field;
-
       field = $.extend({
         load: function() {}
       }, options);
@@ -2080,7 +1998,6 @@
 
     Viewer.prototype.onButtonClick = function(event, type) {
       var item;
-
       item = $(event.target).parents('.annotator-annotation');
       return this.publish(type, [item.data('annotation')]);
     };
@@ -2096,7 +2013,6 @@
 
     LinkParser.prototype.get = function(rel, cond) {
       var d, k, keys, match, v, _k, _len2, _ref2, _results;
-
       if (cond == null) {
         cond = {};
       }
@@ -2105,7 +2021,6 @@
       });
       keys = (function() {
         var _results;
-
         _results = [];
         for (k in cond) {
           if (!__hasProp.call(cond, k)) continue;
@@ -2155,14 +2070,15 @@
 
     function Notification(options) {
       this.hide = __bind(this.hide, this);
-      this.show = __bind(this.show, this);      Notification.__super__.constructor.call(this, $(this.options.html).appendTo(document.body)[0], options);
+      this.show = __bind(this.show, this);
+      Notification.__super__.constructor.call(this, $(this.options.html).appendTo(document.body)[0], options);
     }
 
     Notification.prototype.show = function(message, status) {
       if (status == null) {
         status = Annotator.Notification.INFO;
       }
-      $(this.element).addClass(this.options.classes.show).addClass(this.options.classes[status]).escape(message || "");
+      $(this.element).addClass(this.options.classes.show).addClass(this.options.classes[status]).html(Util.escape(message || ""));
       setTimeout(this.hide, 5000);
       return this;
     };
@@ -2184,7 +2100,6 @@
 
   $(function() {
     var notification;
-
     notification = new Annotator.Notification;
     Annotator.showNotification = notification.show;
     return Annotator.hideNotification = notification.hide;
