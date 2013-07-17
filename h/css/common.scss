@@ -1288,6 +1288,8 @@ h3.stream {
   float:left;
   color:#808080;
   font:13px/17px Helvetica,Arial;
+  -moz-box-sizing:content-box;
+  -webkit-box-sizing:content-box;
   box-sizing: content-box;
 }
 
