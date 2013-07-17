@@ -1,38 +1,40 @@
 <ul class="sliding-panels">
   <!-- Search -->
   <li>
-    <div ng-repeat="thread in threads"
-      class="summary">
-      <!-- Thread view -->
-      <div data-recursive="" class="paper thread">
-        <!-- Annotation -->
-        <div ng-init="open= $parent.search_filter.indexOf($parent.thread.message.id)!=-1"></div>
-        <div
+    <ul>
+      <li ng-repeat="thread in threads"
+        class="stream-list summary">
+        <!-- Thread view -->
+        <div data-recursive="" class="paper thread">
+          <!-- Annotation -->
+          <div ng-init="open= $parent.search_filter.indexOf($parent.thread.message.id)!=-1"></div>
+          <div
              ng-animate="{hide: 'collapse-hide', show: 'collapse-show'}"
              ng-class="!open && 'collapsed-container' || ''">
-          <div class="detail annotation thread"
-               name="annotation"
-               ng-model="$parent.thread.message"/>
+            <div class="detail annotation thread"
+                 name="annotation"
+                 ng-model="$parent.thread.message"/>
+          </div>
+
+          <a href=""
+             ng-class="!open && 'search-collapsed' || ''"
+             class="threadexp"
+             title="{{open && 'Expand' || 'Collapse'}}"
+             ng-click="open = !open"
+           />
+
+          <!-- Replies -->
+          <ul >
+            <li class="thread"
+                ng-animate="{hide: 'collapse-hide', show: 'collapse-show'}"
+                ng-hide="collapsed"
+                ng-class="collapsed && 'collapsed' || ''"
+                ng-repeat="thread in thread.children | orderBy:sortThread:true"
+                ng-transclude>
+            </li>
+          </ul>
         </div>
-
-        <a href=""
-           ng-class="!open && 'search-collapsed' || ''"
-           class="threadexp"
-           title="{{open && 'Expand' || 'Collapse'}}"
-           ng-click="open = !open"
-         />
-
-        <!-- Replies -->
-        <ul >
-          <li class="thread"
-            ng-animate="{hide: 'collapse-hide', show: 'collapse-show'}"
-            ng-hide="collapsed"
-            ng-class="collapsed && 'collapsed' || ''"
-            ng-repeat="thread in thread.children | orderBy:sortThread:true"
-            ng-transclude>
-          </li>
-        </ul>
-      </div>
-    </div>
+      </li>
+    </ul>
   </li>
 </ul>
