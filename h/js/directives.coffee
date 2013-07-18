@@ -54,6 +54,10 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
     input = elem.find('textarea')
     output = elem.find('div')
 
+    # Parse the 'notip' attribute as a boolean attr.
+    # (If it exists, then it means it's true.)
+    scope.notip = attr.notip?
+ 
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
       input.val (ctrl.$viewValue or '')
