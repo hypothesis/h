@@ -432,8 +432,6 @@ class Search
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
 
     refresh = =>
-      console.log 'routeParams'
-      console.log $routeParams
       $scope.text_regexp = new RegExp($routeParams.in_body_text,"ig")
       $scope.search_filter = $routeParams.matched
       $scope.thread = null
