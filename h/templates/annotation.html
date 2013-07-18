@@ -61,7 +61,10 @@
   <markdown ng-model="$parent.model.$modelValue.text"
             ng-readonly="!$parent.editing"
             class="body"
+            notip=""
             name="text" />
+
+  <span ng-hide="!editing" class="tip"><a href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown</a> is supported.</span>
 
   <!-- Bottom controls -->
   <div class="buttonbar" ng-show="editing">
