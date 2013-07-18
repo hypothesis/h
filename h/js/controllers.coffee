@@ -421,7 +421,6 @@ class Search
     refresh = =>
       $scope.text_regexp = new RegExp($routeParams.in_body_text,"ig")
       $scope.search_filter = $routeParams.matched
-      $scope.thread = null
       heatmap = annotator.plugins.Heatmap
       threads = []
       for bucket in heatmap.buckets
@@ -434,6 +433,7 @@ class Search
           if children?
             for child in children
               child.highlightText = child.text
+              child._open = $scope.search_filter.indexOf(child.id)!=-1
               if child.id in $scope.search_filter
                 hit_in_children = true
                 if $routeParams.in_body_text and
@@ -444,6 +444,7 @@ class Search
             continue
           if $routeParams.whole_document or annotation in $scope.annotations
             annotation.highlightText = annotation.text
+            annotation._open = $scope.search_filter.indexOf(annotation.id)!=-1
             if $routeParams.in_body_text and
             annotation.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
               #Add highlight
