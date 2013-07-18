@@ -440,6 +440,7 @@ class Search
       for bucket in heatmap.buckets
         for annotation in bucket
           thread = annotator.threading.getContainer annotation.id
+
           #Cut out annotation branches which has no search results
           children = thread.flattenChildren()
           hit_in_children = false
@@ -450,14 +451,14 @@ class Search
                 if $routeParams.in_body_text and
                 child.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
                   #Add highlight
-                  child.text = child.text.replace $scope.text_regexp, $scope.highlighter
+                  child.highlightText = child.text.replace $scope.text_regexp, $scope.highlighter
           unless annotation.id in $scope.search_filter or hit_in_children
             continue
           if $routeParams.whole_document or annotation in $scope.annotations
             if $routeParams.in_body_text and
             annotation.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
               #Add highlight
-              annotation.text = annotation.text.replace $scope.text_regexp, $scope.highlighter
+              annotation.highlightText = annotation.text.replace $scope.text_regexp, $scope.highlighter
             threads.push thread
       $scope.threads = threads
       #Replace this with threading call
