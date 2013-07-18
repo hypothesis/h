@@ -9,12 +9,20 @@ endif
 test: functional_test unit_test
 
 functional_test: 
-	echo "python=${python}"
+	# stop the test daemon if it is running
 	if [ -f "test.pid" ] ; then $(python) bin/pserve --stop-daemon --pid-file=test.pid; fi
+
+	# start with clean test db
 	rm -f test.db
-	echo "starting test h instance" 
+
+	# start the test instance of h
 	$(python) run test.ini --daemon --pid-file=test.pid
-	$(python) -m pytest tests/functional
+
+	# run the functional tests
+	$(python) -m pytest tests/functional/
+
+	# stop h
+	$(python) bin/pserve --stop-daemon --pid-file=test.pid
 
 unit_test: 
 	rm -f test.db

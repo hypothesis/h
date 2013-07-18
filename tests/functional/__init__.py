@@ -10,18 +10,24 @@ Selenium IDE doesn't currently handle this. See tests/functional/test_login.py
 for an example.
 """
 
-from os import environ as env
-from unittest import TestCase
-from selenium import webdriver
+import os
+import json
+import unittest
 
+import pyes
+
+from selenium import webdriver
 from paste.deploy.loadwsgi import appconfig
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
+
 from h.models import Base, User
+from annotator.annotation import Annotation
+from annotator.document import Document
 
 settings = appconfig('config:test.ini', relative_to='.')
 
-class SeleniumTestCase(TestCase):
+class SeleniumTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -29,6 +35,9 @@ class SeleniumTestCase(TestCase):
         cls.Session = sessionmaker(autoflush=False, autocommit=True)
 
     def setUp(self):
+        self.base_url = "https://localhost:4000"
+        env = os.environ
+
         if env.has_key('SAUCE_USERNAME') and env.has_key('SAUCE_ACCESS_KEY'):
             username = env['SAUCE_USERNAME']
             key = env['SAUCE_ACCESS_KEY']
@@ -49,25 +58,26 @@ class SeleniumTestCase(TestCase):
         self.verificationErrors = []
         self.accept_next_alert = True
 
-        # setup database with a test user
+        # set up a database connection
         self.connection = self.engine.connect()
         self.session = self.Session(bind=self.connection)
-
         Base.metadata.bind = self.connection
         Base.metadata.create_all(self.engine)
 
-        u = User(username=u'test', password=u'test', email=u'test@example.org')
-        self.session.add(u)
-        self.session.flush()
+        self._wipe_elastic_search()
 
     def tearDown(self):
         self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
 
-        u = self.session.query(User).filter(User.username == 'test').first()
-        self.session.delete(u)
-        self.session.close()
+        # clean out users so subsequent tests can register without collisions
+        for user in self.session.query(User).all():
+            self.session.delete(user)
 
+    def _wipe_elastic_search(self):
+        # TODO: ideally we should be able to use annotator.elasticsearch here
+        es_index = settings['es.index'] 
+        es_host = settings['es.host']
+        # XXX: delete annotations and documents
 
 class Annotator():
     """
@@ -84,5 +94,3 @@ class Annotator():
 
     def __exit__(self, type, value, traceback):
         self.driver.switch_to_default_content()
-
-
