@@ -15,18 +15,9 @@ def activate():
 
 
 if __name__ == '__main__':
+    # Ensure the virtual environment is really active.
     if 'VIRTUAL_ENV' not in environ:
         activate()
-
-    # If the distribution has not been set up for development, do so.
-    if not environ.get('PYTHONSETUP'):
-        # Use an environment variable to signal not to do this on reload
-        environ['PYTHONSETUP'] = 'True'
-        try:
-            start_args = list(sys.argv)
-            run_setup('setup.py', ['develop'])
-        finally:
-            sys.argv = start_args
 
     # Start the application
     from h.script import start
