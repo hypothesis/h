@@ -3,13 +3,13 @@
   <head metal:fill-slot="head" tal:omit-tag>
     <title>Hypothes.is</title>
     <script type="text/javascript">
-        document.initial_replies = ${annotation['referrers']};
+        document.init_annotation = ${annotation};
     </script>
 
   </head>
   <style type="text/css"></style>
 
-  <body metal:fill-slot="body" internalid="${annotation['id']}" ng-app="h.displayer">
+  <body metal:fill-slot="body" ng-app="h.displayer">
     <div class="topbar">
       <div class="inner">
         <a class="barbutton pull-left" href="/"
@@ -19,52 +19,44 @@
     </div>
 
     <div class="content paper yui3-g"
-         ng-controller="DisplayerCtrl"
-         ng-init="annotation.text='${annotation['text']}';
-                  annotation.date='${annotation['date']}';
-                  annotation.user='${annotation['user']}';
-                  annotation.quote='${quote}';
-                  annotation.id = '${annotation['id']}';
-                  annotation.uri = '${annotation['uri']}';
-                  annotation.ref_length = '${len(annotation['references'])}';
-                  annotation.deleted = '${annotation['deleted']}'">
+         ng-controller="DisplayerCtrl">
       <div class="knockout noise yui3-u-1">
         <div ng-view=""></div>
         <strong>
             <a class="pull-right"
-               href="{{annotation.uri}}">To Source</a>
+               ng-href="{{annotation.uri}}">To Source</a>
         </strong>
 
         <div class="page">
-          <strong tal:condition="annotation['user']">
-            <a href="">{{annotation.user | userName}}</a> annotated:
+          <strong>
+            <a ng-href="">{{annotation.user | userName}}</a>
+            {{annotation.text && "annotated" || "highlighted"}}:
           </strong>
           <div class="domain">
-            <img class="favicon" tal:condition="len(favicon_link)"
-                 src="${favicon_link}"/>
-            <a href="${annotation['uri']}">${title}</a>
+            <img class="favicon" ng-src="{{root.favicon_link}}"/>
+            <a ng-href="{{annotation.uri}}">{{root.title}}</a>
             |
-            <a href="${source}">${source_stripped}</a>
+            <a ng-href="{{root.source}}">{{root.source_stripped}}</a>
           </div>
         </div>
 
         <div class="card-grid yui3-g">
-          <div class="yui3-u-1 t-yui3-u-1-2">
+          <div class="yui3-u-1" ng-class="(annotation.text || annotation.replies.length) && 't-yui3-u-1-2' || '' ">
             <div class="paper excerpt">
-              <blockquote>{{annotation.quote}}</blockquote>
+              <blockquote>{{root.quote}}</blockquote>
             </div>
           </div>
 
-          <div class="yui3-u-1 t-yui3-u-1-2">
+          <div class="yui3-u-1 t-yui3-u-1-2" ng-show="annotation.text || annotation.replies">
             <div class="paper thread">
               <div class="annotation detail">
                 <div class="magicontrols pull-right">
-                  <span class="small">{{annotation.date | fuzzyTime}}</span>
+                  <span ng-show="annotation.text" class="small">{{annotation.date | fuzzyTime}}</span>
                 </div>
 
                 <strong>
                   <span ng-show="annotation.deleted" class="user">Annotation deleted</span>
-                  <span class="user">{{annotation.user | userName}}</span>
+                  <span ng-show="annotation.deleted || annotation.text" class="user">{{annotation.user | userName}}</span>
                 </strong>
 
                 <div class="body">

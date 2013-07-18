@@ -15,11 +15,11 @@ class Displayer
 
   this.$inject = ['$scope','$element','$timeout','streamfilter']
   constructor: ($scope, $element, $timeout, streamfilter) ->
-    $scope.annotation = {}
+    $scope.root = document.init_annotation
+    $scope.annotation = $scope.root.annotation
     $scope.annotations = [$scope.annotation]
     $scope.annotation.replies = []
     $scope.annotation.reply_count = 0
-    $scope.annotation.id = document.body.attributes.internalid.value
     @idTable[$scope.annotation.id] = $scope.annotation
     $scope.filter =
       streamfilter
@@ -114,9 +114,10 @@ class Displayer
               replies.splice pos, 1
               delete @idTable[annotation.id]
 
-    if document.initial_replies?
-      $scope.manage_new_data document.initial_replies, 'past'
-      document.initial_replies = ''
+    if $scope.annotation.referrers?
+      $scope.manage_new_data $scope.annotation.referrers, 'past'
+
+    document.init_annotation = null
     $scope.open()
 
 angular.module('h.displayer',['h.streamfilter','h.filters','bootstrap'])

@@ -158,7 +158,7 @@
         <p>Forgotten password? Enter your email below to send a recovery email.</p>
 
         <input type="email" name="email" value="" placeholder="Email"
-               required autocapitalize="false" ng-model="email" />
+               required autocapitalize="false" ng-model="model.email" />
         <span ng-show="forgot.email.$error.email"
               slow-validate="email"
               >Is this an email address?</span>

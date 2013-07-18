@@ -1,6 +1,8 @@
 class Converter extends Markdown.Converter
   constructor: ->
     super
+    this.hooks.chain "preConversion", (text) ->
+      if text then text else ""
     this.hooks.chain "postConversion", (text) ->
       text.replace /<a href=/g, "<a target=\"_blank\" href="
 
@@ -43,6 +45,7 @@ elide = (text, split_length) ->
     text = text.substring 0,split_length
     text = text + '\u2026'
   text
+
 
 angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)

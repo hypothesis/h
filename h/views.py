@@ -55,11 +55,11 @@ class Annotation(BaseController):
 
         d = url_values_from_document(context)
         d['annotation'] = context
-        d['annotation']['referrers'] = json.dumps(context.referrers)
+        d['annotation']['referrers'] = context.referrers
 
         if context.get('references', []):
-            root = context.__parent__[context['references'][0]]
-            d['quote'] = root.quote
+            parent = context.__parent__[context['references'][-1]]
+            d['quote'] = parent['text']
         else:
             d['quote'] = context.quote
             context['references'] = []
@@ -69,7 +69,7 @@ class Annotation(BaseController):
 
         context['date'] = context['updated']
 
-        return d
+        return {'annotation': json.dumps(d)}
 
     @view_config(accept='application/json', renderer='json')
     def __call__(self):

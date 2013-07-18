@@ -52,13 +52,16 @@
       <div ng-switch-default>Reason:</div>
     </ng-switch>
   </div>
+
+  <div ng-hide="model.$viewValue.text || editing || model.$viewValue.deleted">
+    (Quote highlighted)
+  </div>
   
   <!-- Body -->
   <markdown ng-model="$parent.model.$modelValue.text"
             ng-readonly="!$parent.editing"
             class="body"
-            name="text"
-            required="" />
+            name="text" />
 
   <!-- Bottom controls -->
   <div class="buttonbar" ng-show="editing">
@@ -66,12 +69,15 @@
       <ng-switch on="action">
         <button ng-switch-when="edit"
                 ng-click="save()"
+                ng-disabled="!form.$valid"
                 class="btn check-icon">Save</button>
         <button ng-switch-when="delete"
                 ng-click="save()"
+                ng-disabled="!form.$valid"
                 class="btn check-icon">Delete</button>
         <button ng-switch-default
                 ng-click="save()"
+                ng-disabled="!form.$valid"
                 class="btn check-icon">Save</button>
       </ng-switch>
       <span role="button" ng-click="cancel()" class="x-icon">Cancel</span>
@@ -91,7 +97,12 @@
   <!-- Share dialog -->
   <div class="share-dialog" data-ng-show="!editing">
     <div class="icon-input">
-      <input class="share-text" ng-blur="toggle()" type="text" ng-model="shared_link" readonly/>
+      <div class="go-icon">
+	<a class="launch-icon show" href="{{shared_link}}" target="_blank"></a>
+      </div>
+      <div class="share-div">
+        <input class="share-text" type="text" ng-model="shared_link" readonly ng-blur="toggle()" />
+      </div>
     </div>
   </div>
 
