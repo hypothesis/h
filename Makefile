@@ -6,11 +6,17 @@ else
     python = `which python`
 endif
 
+ifdef TRAVIS
+    pserve = "pserve"
+else
+    pserve = "bin/pserve"
+endif
+
 test: functional_test unit_test
 
 functional_test: 
 	# stop the test daemon if it is running
-	if [ -f "test.pid" ] ; then $(python) bin/pserve --stop-daemon --pid-file=test.pid; fi
+	if [ -f "test.pid" ] ; then $(python) $(pserve) --stop-daemon --pid-file=test.pid; fi
 
 	# start with clean test db
 	rm -f test.db
@@ -22,7 +28,7 @@ functional_test:
 	$(python) -m pytest tests/functional/
 
 	# stop h
-	$(python) bin/pserve --stop-daemon --pid-file=test.pid
+	$(python) $(pserve) --stop-daemon --pid-file=test.pid
 
 unit_test: 
 	rm -f test.db
