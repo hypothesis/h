@@ -446,8 +446,8 @@ class Search
           hit_in_children = false
           if children?
             for child in children
+              child.highlightText = child.text
               if child.id in $scope.search_filter
-                child.highlightText = child.text
                 hit_in_children = true
                 if $routeParams.in_body_text and
                 child.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
