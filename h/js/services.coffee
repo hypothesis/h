@@ -132,10 +132,15 @@ class Hypothesis extends Annotator
 
           matched = []
           whole_document = true
+          in_body_text = ''
           for searchItem in searchCollection.models
             if searchItem.attributes.category is 'area' and
             searchItem.attributes.value is 'sidebar'
               whole_document = false
+
+            if searchItem.attributes.category is 'text'
+              in_body_text = searchItem.attributes.value.toLowerCase()
+
           if whole_document
             annotations = @plugins.Store.annotations
           else
@@ -190,12 +195,11 @@ class Hypothesis extends Annotator
             if matches
               matched.push annotation.id
 
-          #$rootScope.search_filter = matched
-
           # Set the path
           search =
             whole_document : whole_document
             matched : matched
+            in_body_text: in_body_text
           $location.path('/page_search').search(search)
           $rootScope.$digest()
 

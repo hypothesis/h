@@ -322,3 +322,22 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     display: inline;
   }
 }
+
+
+//SEARCH HIGHLIGHTS////////////////////////////////
+.search-hl-active {
+  background: $highlightColor;
+  box-shadow:3px 3px 4px -1px #999999;
+  &::-moz-selection {
+    background: $highlightColor;
+    box-shadow:3px 3px 4px #999999;
+  }
+  &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
+    background: $highlightColor;
+    box-shadow:3px 3px 4px #999999;
+  }
+  &::selection, &::selection:window-inactive {
+    background: $highlightColor;
+    box-shadow:3px 3px 4px #999999;
+  }
+}

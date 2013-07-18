@@ -429,9 +429,12 @@ class Viewer
 class Search
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
   constructor: ($location, $routeParams, $scope, annotator) ->
-    console.log 'SearchController'
+    $scope.highlighter = '<span class="search-hl-active">$&</span>'
 
     refresh = =>
+      console.log 'routeParams'
+      console.log $routeParams
+      $scope.text_regexp = new RegExp($routeParams.in_body_text,"ig")
       $scope.search_filter = $routeParams.matched
       $scope.thread = null
       heatmap = annotator.plugins.Heatmap
@@ -446,11 +449,17 @@ class Search
             for child in children
               if child.id in $scope.search_filter
                 hit_in_children = true
-                break
-
+                if $routeParams.in_body_text and
+                child.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
+                  #Add highlight
+                  child.text = child.text.replace $scope.text_regexp, $scope.highlighter
           unless annotation.id in $scope.search_filter or hit_in_children
             continue
           if $routeParams.whole_document or annotation in $scope.annotations
+            if $routeParams.in_body_text and
+            annotation.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
+              #Add highlight
+              annotation.text = annotation.text.replace $scope.text_regexp, $scope.highlighter
             threads.push thread
       $scope.threads = threads
       #Replace this with threading call
