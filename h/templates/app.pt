@@ -36,13 +36,11 @@
         <div ng-hide="isSearchShown()"
              class="visual_container"
              ng-click="showSearchBar()">
-            <div id="search" class="magnify-glass">
-                <div class="VS-search">
-                  <div class="VS-search-box-wrapper VS-search-box">
-                    <div class="VS-icon VS-icon-search"></div>
-                  </div>
-                </div>
-            </div>
+
+           <div id="search" class="magnify-glass VS-search">
+             <div class="VS-icon VS-icon-search"></div>
+           </div>
+
         </div>
       </div>
 
