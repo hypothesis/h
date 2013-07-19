@@ -1,0 +1,4 @@
+<input ng-hide="readonly" placeholder="{{placeholder}}" />
+<div ng-show="readonly && rendered_words" class="display">
+  <span class="word" ng-repeat="word in rendered_words">{{word}}</span>
+</div>
