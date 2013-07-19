@@ -292,6 +292,40 @@ repeatAnim = ->
             .css({ 'margin-left': itemElm.width() })
             .animate({ 'margin-left': '0px' }, 1500)
 
+# Directive to edit/display a word list. Used for tags.
+wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
+
+    input = elem.find('input')
+
+    # Re-render the word list when the view needs updating.
+    ctrl.$render = ->
+      # Push value to input box   
+      input.attr 'value', (ctrl.$viewValue or []).join " "
+
+      # Push value to rendered HTML
+      scope.rendered_words = ctrl.$viewValue or []
+      # console.log "Rendered words:"
+      # console.log scope.rendered_words
+
+    # React to the changes to the input box
+    input.bind 'blur change keyup', ->
+      # TODO: filter for invalid chars, deduplicate
+      new_words = input[0].value.trim().toLowerCase().split " "
+      # console.log "Got new words: "
+      # console.log new_words
+      ctrl.$setViewValue new_words
+      scope.$digest()
+
+  require: '?ngModel'
+  restrict: 'E'
+  scope:
+    readonly: '@'
+    placeholder: '@'
+  templateUrl: 'wordlist.html'
+]
+
 angular.module('h.directives', ['ngSanitize'])
   .directive('annotation', annotation)
   .directive('authentication', authentication)
@@ -305,4 +339,5 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('userPicker', userPicker)
   .directive('ngBlur', ngBlur)
   .directive('repeatAnim', repeatAnim)
+  .directive('wordlist', wordlist)
 

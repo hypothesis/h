@@ -1027,3 +1027,20 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     margin: -1em 0;
   }
 }
+
+// Tags for the annotations
+.tags {
+  input {
+    width: 100%;
+  }
+  .display {
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+    overflow: hidden;
+  }
+  .word {
+    background-color: lightgray;
+    padding: 0.25em;
+    margin: 0.25em;
+  }
+}
