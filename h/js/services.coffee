@@ -205,7 +205,7 @@ class Hypothesis extends Annotator
 
         facetMatches: (callback) =>
           if @show_search
-            return callback ['text','area', 'group', 'tag','time','user'], {preserveOrder: true}
+            return callback ['text','area', 'group','time','user'], {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
             when 'group' then callback ['Public', 'Private']
