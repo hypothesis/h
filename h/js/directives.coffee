@@ -313,10 +313,15 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
     input.bind 'blur change keyup', ->
       # TODO: filter for invalid chars, deduplicate
       new_words = input[0].value.trim().toLowerCase().split " "
+      if new_words[0] is "" then new_words = []
       # console.log "Got new words: "
       # console.log new_words
       ctrl.$setViewValue new_words
       scope.$digest()
+
+    # Re-render when it becomes uneditable.
+    scope.$watch 'readonly', (readonly) ->
+      ctrl.$render()
 
   require: '?ngModel'
   restrict: 'E'
