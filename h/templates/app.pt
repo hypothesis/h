@@ -32,6 +32,7 @@
       <div class="search-container">
         <div class="tri" ng-click="frame.visible = !frame.visible"></div>
         <div ng-show="isSearchShown()"
+             ng-animate="{show: 'fadeIn', hide:'fadeOut'}"
              class="visual_search visual_container"></div>
         <div ng-hide="isSearchShown()"
              class="visual_container"
