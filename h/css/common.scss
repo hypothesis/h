@@ -1184,3 +1184,23 @@ h3.stream {
   height:12px;
   background-image:url(../images/embed/icons/search_glyph_dark.png)
 }
+
+.fadeIn-setup,.fadeOut-setup {
+  -webkit-transition: 1s linear opacity;
+  -moz-transition: 1s linear opacity;
+  -o-transition: 1s linear opacity;
+  transition: 1s linear opacity;
+}
+
+.fadeIn-setup{
+  opacity:0;
+}
+.fadeOut-setup{
+  opacity:1;
+}
+.fadeIn-setup.fadeIn-start {
+  opacity: 1;
+}
+.fadeOut-setup.fadeOut-start{
+    opacity:0;
+}
