@@ -123,6 +123,19 @@ jquery_mousewheel = Uglify(
     'lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
 )
 
+jquery_ui = Bundle(
+    Uglify('h:lib/jquery.ui.core.js', output='lib/jquery.ui.core.min.js'),
+    Uglify('h:lib/jquery.ui.widget.js', output='lib/jquery.ui.widget.min.js'),
+    Uglify('h:lib/jquery.ui.position.js', output='lib/jquery.ui.position.min.js'),
+    Uglify('h:lib/jquery.ui.autocomplete.js', output='lib/jquery.ui.autocomplete.min.js')
+)
+
+jquery_ui_effects = Bundle(
+    Uglify('h:lib/jquery.ui.effect.js', output='lib/jquery.ui.effect.min.js'),
+    Uglify('h:lib/jquery.ui.effect-blind.js', output='lib/jquery.ui.effect-blind.min.js'),
+    Uglify('h:lib/jquery.ui.effect-highlight.js', output='lib/jquery.ui.effect-highlight.min.js')
+)
+
 # Polyfills
 raf = Uglify('lib/polyfills/raf.js', output='lib/polyfills/raf.js.min')
 
@@ -177,6 +190,8 @@ app = Bundle(
     pagedown,
     raf,
     sockjs,
+    jquery_ui,
+    jquery_ui_effects,
     Uglify(
         *[
             Coffee('js/%s.coffee' % name,
