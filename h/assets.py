@@ -141,7 +141,7 @@ jquery_ui_effects = Bundle(
 # Tag-it
 tagit = Bundle(
     Uglify('h:lib/tag-it.js', output='lib/tag-it.min.js'),
-    CSS('h:lib/tagit.ui-zendesk.css'),
+    CSS('h:lib/jquery-ui-smoothness.css'),
     CSS('h:lib/jquery.tagit.css')    
 )
 
