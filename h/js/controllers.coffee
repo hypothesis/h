@@ -433,7 +433,16 @@ class Search
           if children?
             for child in children
               child.highlightText = child.text
-              child._open = $scope.search_filter.indexOf(child.id)!=-1
+              direct_match = $scope.search_filter.indexOf(child.id)!=-1
+              sibling_match = false
+              childthread = annotator.threading.getContainer child.id
+              childchilds = childthread.flattenChildren()
+              if childchilds?
+                for childchild in childchilds
+                  if $scope.search_filter.indexOf(childchild.id)!=-1
+                    sibling_match = true
+                    break
+              child._open = direct_match or sibling_match
               if child.id in $scope.search_filter
                 hit_in_children = true
                 if $routeParams.in_body_text and
@@ -444,7 +453,8 @@ class Search
             continue
           if $routeParams.whole_document or annotation in $scope.annotations
             annotation.highlightText = annotation.text
-            annotation._open = $scope.search_filter.indexOf(annotation.id)!=-1
+            #direct_match = $scope.search_filter.indexOf(annotation.id)!=-1
+            annotation._open = true
             if $routeParams.in_body_text and
             annotation.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
               #Add highlight

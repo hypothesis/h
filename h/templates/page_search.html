@@ -7,27 +7,23 @@
         <!-- Thread view -->
         <div data-recursive="" class="paper thread">
           <!-- Annotation -->
-          <div ng-animate="{hide: 'collapse-hide', show: 'collapse-show'}"
-               ng-class="!$parent.thread.message._open && 'collapsed-container' || ''">
             <div class="detail annotation thread"
                  name="annotation"
                  ng-model="$parent.thread.message"
                  mode="search"/>
-          </div>
-
-          <a href=""
-             ng-class="!$parent.thread.message._open && 'search-collapsed' || ''"
-             class="threadexp"
-             title="{{$parent.thread.message._open && 'Expand' || 'Collapse'}}"
-             ng-click="$parent.thread.message._open = !$parent.thread.message._open"
-           />
 
           <!-- Replies -->
-          <ul >
+          <ul>
             <li class="thread"
-                ng-animate="{hide: 'collapse-hide', show: 'collapse-show'}"
+                ng-hide="!thread.message._open"
+                ng-class="!thread.message._open && 'collapsed' || ''"
                 ng-repeat="thread in thread.children | orderBy:sortThread:true"
                 ng-transclude>
+               <a href=""
+                  class="threadexp"
+                  title="{{thread.message._open && 'Expand' || 'Collapse'}}"
+                  ng-click="thread.message._open = !thread.message._open"
+               />
             </li>
           </ul>
         </div>
