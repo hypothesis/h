@@ -1097,7 +1097,7 @@ h3.tagstream, h3.userstream {
 //Imported their css here
 
 .collapsed-container {
-  height: 0.9em;
+  height: 1em;
   visibility: hidden;
 }
 
@@ -1114,7 +1114,6 @@ h3.tagstream, h3.userstream {
 .visual_search {
   .VS-search .VS-search-box {
     height:1em;
-    //border: 1px solid rgb(204, 204, 204);
     border: 0;
     min-height: 24px;
     margin-top: 2px;
