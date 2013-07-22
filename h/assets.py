@@ -169,7 +169,8 @@ visualsearch = Bundle(
     Uglify('h:lib/underscore-1.4.3.js', output='lib/underscore.min.js'),
     Uglify('h:lib/backbone-0.9.10.js', output='lib/backbone.min.js'),
     jquery_ui,
-    Uglify('h:lib/visualsearch.js', output='lib/visualsearch.min.js')
+    Uglify('h:lib/visualsearch.js', output='lib/visualsearch.min.js'),
+    CSS('h:lib/visualsearch.css')
 )
 
 domTextFamily = Uglify(
