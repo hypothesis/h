@@ -1138,7 +1138,7 @@ h3.stream {
 //Imported their css here
 
 .collapsed-container {
-  height: 1em;
+  height: 0.9em;
   visibility: hidden;
 }
 
@@ -1155,7 +1155,10 @@ h3.stream {
 .visual_search {
   .VS-search .VS-search-box {
     height:1em;
-    border: 1px solid rgb(204, 204, 204);
+    //border: 1px solid rgb(204, 204, 204);
+    border: 0;
+    min-height: 24px;
+    margin-top: 2px;
   }
 
   .VS-search input,.VS-search .VS-input-width-tester {
