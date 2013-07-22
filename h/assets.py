@@ -123,6 +123,7 @@ jquery_mousewheel = Uglify(
     'lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
 )
 
+# jQuery UI
 jquery_ui = Bundle(
     Uglify('h:lib/jquery.ui.core.js', output='lib/jquery.ui.core.min.js'),
     Uglify('h:lib/jquery.ui.widget.js', output='lib/jquery.ui.widget.min.js'),
@@ -134,6 +135,13 @@ jquery_ui_effects = Bundle(
     Uglify('h:lib/jquery.ui.effect.js', output='lib/jquery.ui.effect.min.js'),
     Uglify('h:lib/jquery.ui.effect-blind.js', output='lib/jquery.ui.effect-blind.min.js'),
     Uglify('h:lib/jquery.ui.effect-highlight.js', output='lib/jquery.ui.effect-highlight.min.js')
+)
+
+# Tag-it
+tagit = Bundle(
+    Uglify('h:lib/tag-it.js', output='lib/tag-it.min.js'),
+    CSS('h:lib/tagit.ui-zendesk.css'),
+    CSS('h:lib/jquery.tagit.css')    
 )
 
 # Polyfills
@@ -192,6 +200,7 @@ app = Bundle(
     sockjs,
     jquery_ui,
     jquery_ui_effects,
+    tagit,
     Uglify(
         *[
             Coffee('js/%s.coffee' % name,
