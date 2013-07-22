@@ -1030,8 +1030,8 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
 // Tags for the annotations
 .tags {
-  input {
-    width: 100%;
+  .plain_input {
+    display: none;
   }
   .display {
     margin-top: 0.5em;

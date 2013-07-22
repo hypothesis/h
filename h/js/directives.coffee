@@ -301,27 +301,31 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
 
     # Re-render the word list when the view needs updating.
     ctrl.$render = ->
-      # Push value to input box   
-      input.attr 'value', (ctrl.$viewValue or []).join " "
+      # Push value to input box
+      input.attr 'value', (ctrl.$viewValue or []).join ","
 
       # Push value to rendered HTML
       scope.rendered_words = ctrl.$viewValue or []
-      # console.log "Rendered words:"
-      # console.log scope.rendered_words
 
-    # React to the changes to the input box
-    input.bind 'blur change keyup', ->
-      # TODO: filter for invalid chars, deduplicate
-      new_words = input[0].value.trim().toLowerCase().split " "
-      if new_words[0] is "" then new_words = []
-      # console.log "Got new words: "
-      # console.log new_words
-      ctrl.$setViewValue new_words
-      scope.$digest()
+    # React to the changes in the tag editor
+    scope.tagsChanged = -> ctrl.$setViewValue input.val().split ","
 
     # Re-render when it becomes uneditable.
     scope.$watch 'readonly', (readonly) ->
-      ctrl.$render()
+      unless (readonly or scope.hasEditor)
+        # We are starting to edit, but we don't have a widget yet.
+        console.log "initing tag-it"
+        input.attr 'value', (ctrl.$viewValue or []).join ","        
+        input.tagit
+          caseSensitive: false
+#          placeholderText: scope.placeholder
+          afterTagAdded: scope.tagsChanged
+          afterTagRemoved: scope.tagsChanged
+          autocomplete:
+            source: []
+        
+        scope.hasEditor = true
+        ctrl.$render()
 
   require: '?ngModel'
   restrict: 'E'
