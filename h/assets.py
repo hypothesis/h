@@ -212,6 +212,7 @@ app = Bundle(
                 'controllers',
                 'filters',
                 'directives',
+                'app_directives',
                 'displayer',
                 'services',
                 'streamer',
