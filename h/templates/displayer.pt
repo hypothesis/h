@@ -99,6 +99,7 @@
                               readonly="true" 
                               name="reply.tags"
                               class="displayer_reply_tags"
+                              ng-show="$parent.reply.tags"
                     />          
                   </div>
                   <div class="magicontrols small">
