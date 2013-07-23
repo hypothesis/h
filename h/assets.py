@@ -198,12 +198,6 @@ app = Bundle(
     ),
 )
 
-site = SCSS(
-    'css/site.scss',
-    depends=(css_base + css_common),
-    output='css/site.min.css',
-)
-
 sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),
                output='css/sidebar.min.css')
 
