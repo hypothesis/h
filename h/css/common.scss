@@ -1119,3 +1119,13 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     padding: 0.1em 0.3em;
   }
 }
+
+// Special rules for tags on user stream page
+// (To be applied on top of the rules for the displayer page
+.userstream_tags .displayer_tags {
+  // Actual tag labels
+  ul.tagit li.tagit-choice-read-only {
+    font-size: 0.8em;
+    padding: 0.2em 0.4em;
+  }
+}
