@@ -129,7 +129,8 @@ jquery_ui = Bundle(
     Uglify('h:lib/jquery.ui.widget.js', output='lib/jquery.ui.widget.min.js'),
     Uglify('h:lib/jquery.ui.position.js', output='lib/jquery.ui.position.min.js'),
     Uglify('h:lib/jquery.ui.menu.js', output='lib/jquery.ui.menu.min.js'),    
-    Uglify('h:lib/jquery.ui.autocomplete.js', output='lib/jquery.ui.autocomplete.min.js')
+    Uglify('h:lib/jquery.ui.autocomplete.js', output='lib/jquery.ui.autocomplete.min.js'),
+    CSS('h:lib/jquery-ui-smoothness.css'),
 )
 
 jquery_ui_effects = Bundle(
@@ -141,7 +142,6 @@ jquery_ui_effects = Bundle(
 # Tag-it
 tagit = Bundle(
     Uglify('h:lib/tag-it.js', output='lib/tag-it.min.js'),
-    CSS('h:lib/jquery-ui-smoothness.css'),
     CSS('h:lib/jquery.tagit.css')    
 )
 
