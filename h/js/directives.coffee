@@ -322,7 +322,7 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
       else
         unless scope.editor?
           # Create editor widget
-          input.attr 'value', (ctrl.$viewValue or []).join ","        
+          input.attr 'value', (ctrl.$viewValue or []).join ","
           input.tagit
             caseSensitive: false
             placeholderText: scope.placeholder
@@ -330,12 +330,13 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
             afterTagAdded: (evt, ui) ->
               if ui.duringInitialization then return
               newTab = ui.tagLabel
-              newTabLow = newTab.toLowerCase()
-              if newTab is newTabLow
+              #Create a canonized form
+              canonized = newTab.toLowerCase().replace /[^a-z0-9\-\s]/g, ''
+              if newTab is canonized
                 scope.tagsChanged()
               else
                 scope.editor.removeTagByLabel newTab, false
-                scope.editor.createTag newTabLow
+                scope.editor.createTag canonized
                 
             afterTagRemoved: scope.tagsChanged
             autocomplete:
