@@ -1056,4 +1056,20 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     font-size: 100%;
   }
 
+  // Add some small space around tag displayer
+  .wl_displayer {
+    margin-top: 0.2em;
+    margin-bottom: 0.5em;
+  }
+
+  // We don't need that much padding
+  ul.tagit li.ui-corner-all {
+    padding: 0.1em 0.3em;
+  }
+
+  // .. except for the x-mark when editing.
+  .wl_editor ul.tagit li.ui-corner-all {
+    padding-right: 1.2em;
+  }
+
 }
