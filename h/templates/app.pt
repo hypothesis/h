@@ -16,7 +16,7 @@
     <!-- Toolbar -->
     <div class="topbar" class="form-inline" ng-class="frame.visible && 'shown'">
 
-      <div class="tri" ng-click="frame.visible = !frame.visible"></div>
+      <div class="tri" ng-click="frame.visible = !frame.visible" ng-mouseenter="myVar='controlbar'" ng-mouseleave="myVar='hiddencontrolbar'" ng-init="myVar='hiddencontrolbar'"></div>
 
       <div class="inner" ng-switch="auth.persona">
         <a class="pull-right" href=""

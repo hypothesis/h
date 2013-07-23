@@ -479,6 +479,21 @@ blockquote {
   @include fonticon("\2a", left);
 }
 
+//Controlbar Icons
+.alwaysonhighlights-icon {
+  @include fonticon("\e012", left);
+  color: rgb(211, 211, 211);
+}
+
+.hightlighter-icon {
+  @include fonticon("\e013", left);
+  color: rgb(211, 211, 211);
+}
+
+.comment-icon {
+  @include fonticon("\e011", left);
+  color: rgb(211, 211, 211);
+}
 
 
 //VISIBILITY
