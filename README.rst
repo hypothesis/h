@@ -43,7 +43,13 @@ See the `project wiki`_ for the roadmap and additional information and
 join us in `#hypothes.is`_ on freenode_ for discussion.
 
 Those wishing to contribute to the project should also `subscribe`_ to the
-development mailing list and read about `contributing`_.
+development mailing list and read about `contributing`_. Then consider getting
+started on one of the issues that are ready for work by clicking on the badge
+below. Issues tagged with the label 'cake' are ideal for new contributors.
+
+.. image:: http://badge.waffle.io/hypothesis/h.png
+   :target: http://waffle.io/hypothesis/h
+   :alt: Stories in Ready
 
 License
 -------
