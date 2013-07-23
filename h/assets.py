@@ -217,6 +217,7 @@ app = Bundle(
                 'streamer',
                 'streamfilter',
                 'userstream',
+                'tagstream',                
             )
         ],
         output='js/app.min.js'
