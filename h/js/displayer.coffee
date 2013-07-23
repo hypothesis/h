@@ -120,5 +120,5 @@ class Displayer
     document.init_annotation = null
     $scope.open()
 
-angular.module('h.displayer',['h.streamfilter','h.filters','bootstrap'])
+angular.module('h.displayer',['h.streamfilter','h.filters','h.directives','bootstrap'])
   .controller('DisplayerCtrl', Displayer)

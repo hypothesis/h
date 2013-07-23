@@ -1,29 +1,3 @@
-annotation = ['$filter', 'annotator', ($filter, annotator) ->
-  link: (scope, elem, attrs, controller) ->
-    return unless controller?
-
-    # Bind shift+enter to save
-    elem.bind
-      keydown: (e) ->
-        if e.keyCode == 13 && e.shiftKey
-          e.preventDefault()
-          scope.save()
-
-    # Watch for changes
-    scope.$watch 'model.$modelValue.id', (id) ->
-      scope.thread = annotator.threading.idTable[id]
-
-    # Publish the controller
-    scope.model = controller
-  controller: 'AnnotationController'
-  priority: 100  # Must run before ngModel
-  require: '?ngModel'
-  restrict: 'C'
-  scope: {}
-  templateUrl: 'annotation.html'
-]
-
-
 authentication = ->
   base =
     username: null
@@ -363,11 +337,10 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
   scope:
     readonly: '@'
     placeholder: '@'
-  templateUrl: 'wordlist.html'
+  templateUrl: '/assets/templates/wordlist.html'
 ]
 
 angular.module('h.directives', ['ngSanitize'])
-  .directive('annotation', annotation)
   .directive('authentication', authentication)
   .directive('markdown', markdown)
   .directive('privacy', privacy)
