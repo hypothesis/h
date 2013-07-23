@@ -46,7 +46,7 @@ Those wishing to contribute to the project should also `subscribe`_ to the
 development mailing list and read about `contributing`_.
 
 .. image:: http://badge.waffle.io/peterhudec/authomatic.png
-   :target: http://waffle.io/peterhudec/authomatic
+   :target: http://waffle.io/hypothesis/h
    :alt: Stories in Ready
 
 License
