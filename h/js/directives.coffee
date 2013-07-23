@@ -301,8 +301,27 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
 
     # Re-render the word list when the view needs updating.
     ctrl.$render = ->
-      # Push value to input box
-      input.attr 'value', (ctrl.$viewValue or []).join ","
+      # Update the editor widget
+  
+      if scope.editor?
+        # Check whether the current content of the editor
+        # is in sync with the actual model value        
+        current = scope.editor.assignedTags()
+        wanted = ctrl.$viewValue or []
+        if (current + '') is (wanted + '')
+          # We are good to go, nothing to do
+        else      
+          # Editor widget's content is different.
+          # (Probably because of a cancelled edit.)
+          # Copy the tags to the tag editor
+          scope.editor.removeAll()
+          for tag in wanted
+            scope.editor.createTag tag
+      else
+        # We don't have an editor yet, so we can simply push value
+        # to input box; the editor will fetch it from there
+        input.attr 'value', (ctrl.$viewValue or []).join ","        
+ 
 
       # Push value to rendered HTML
       scope.rendered_words = ctrl.$viewValue or []
@@ -312,9 +331,8 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
 
     # Re-render when it becomes uneditable.
     scope.$watch 'readonly', (readonly) ->
-      unless (readonly or scope.hasEditor)
+      unless (readonly or scope.editor?)
         # We are starting to edit, but we don't have a widget yet.
-        console.log "initing tag-it"
         input.attr 'value', (ctrl.$viewValue or []).join ","        
         input.tagit
           caseSensitive: false
@@ -325,8 +343,8 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
           autocomplete:
             source: []
         
-        scope.hasEditor = true
-        ctrl.$render()
+        scope.editor = input.data "uiTagit"
+      ctrl.$render()
 
   require: '?ngModel'
   restrict: 'E'
