@@ -45,7 +45,7 @@ join us in `#hypothes.is`_ on freenode_ for discussion.
 Those wishing to contribute to the project should also `subscribe`_ to the
 development mailing list and read about `contributing`_.
 
-.. image:: http://badge.waffle.io/peterhudec/authomatic.png
+.. image:: http://badge.waffle.io/hypothesis/h.png
    :target: http://waffle.io/hypothesis/h
    :alt: Stories in Ready
 
