@@ -1050,4 +1050,10 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     padding: 0;
   }
 
+  // Use our usual fonts for the tag labels and input
+  .ui-widget, .tagit-label, .tagit-new input {
+    font: inherit;
+    font-size: 100%;
+  }
+
 }
