@@ -1,5 +1,5 @@
 class ClauseParser
-  filter_fields : ['references', 'text', 'user','uri', 'id']
+  filter_fields : ['references', 'text', 'user','uri', 'id', 'tags']
   operators: ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#', '^']
   operator_mapping:
     '=': 'equals'
@@ -154,6 +154,9 @@ class StreamFilter
 
   setClausesParse: (clauses_to_parse, error_checking = false) ->
     res = @parser.parse_clauses clauses_to_parse
+    if res[1].length
+      console.log "Errors while parsing clause:"
+      console.log res[1]
     if res? and (not error_checking) or (error_checking and res[1]?.length is 0)
       @filter.clauses = res[0]
     this
