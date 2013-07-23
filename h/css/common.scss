@@ -1071,5 +1071,51 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   .wl_editor ul.tagit li.ui-corner-all {
     padding-right: 1.2em;
   }
+}
 
+// Tags for the displayer page
+.displayer_tags {
+  // We don't want no new input here
+  .tagit-new {
+    display: none;
+  }
+
+  // Main widget needs no border or bg
+  .tagit {
+    border: none;
+    background: none;
+    margin-top: 1.0em;
+  }
+
+  // Actual tag labels
+  ul.tagit li.tagit-choice-read-only {
+    background: white;
+    letter-spacing: normal;
+    word-spacing: normal;
+  }
+
+}
+
+// Tags in replies for the displayer page
+.displayer_reply_tags {
+  // We don't want no new input here
+  .tagit-new {
+    display: none;
+  }
+
+  // Main widget needs no border or bg
+  .tagit {
+    border: none;
+  }
+
+  // Use our usual fonts for the tag labels
+  .ui-widget, .tagit-label, {
+    font: inherit;
+    font-size: 100%;
+  }
+
+  // We don't need that much padding
+  ul.tagit li.ui-corner-all {
+    padding: 0.1em 0.3em;
+  }
 }
