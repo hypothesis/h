@@ -476,6 +476,10 @@
                 duringInitialization: duringInitialization
             });
 
+            // Now that we already have a tag,
+            // remove the placeholder from the input field
+            this.tagInput.attr("placeholder", "");
+
             if (this.options.showAutocompleteOnFocus && !duringInitialization) {
                 setTimeout(function () { that._showAutocomplete(); }, 0);
             }
@@ -516,6 +520,12 @@
             } else {
                 tag.remove();
                 this._trigger('afterTagRemoved', null, {tag: tag, tagLabel: this.tagLabel(tag)});
+            }
+
+            // If no tags are left,
+            // re-add the placeholder text to the tag input field
+            if (!this.assignedTags().length && this.options.placeholderText) {
+                this.tagInput.attr('placeholder', this.options.placeholderText);
             }
 
         },

@@ -318,7 +318,7 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
         input.attr 'value', (ctrl.$viewValue or []).join ","        
         input.tagit
           caseSensitive: false
-#          placeholderText: scope.placeholder
+          placeholderText: scope.placeholder
           afterTagAdded: scope.tagsChanged
           afterTagRemoved: scope.tagsChanged
           autocomplete:
