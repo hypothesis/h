@@ -1073,6 +1073,15 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   }
 }
 
+// Only show one line of tags in bucket view
+.summary .tags {
+  color: green;
+  .wl_displayer ul {
+    height: 2.0em;
+    overflow: hidden;
+  }
+}
+
 // Tags for the displayer page
 .displayer_tags {
   // We don't want no new input here
