@@ -297,16 +297,15 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
-    input = elem.find('input')
+    input = elem.find('.wl_editor input')
+    output = elem.find('.wl_displayer input')
 
-    # Re-render the word list when the view needs updating.
-    ctrl.$render = ->
-      # Update the editor widget
-  
-      if scope.editor?
+    # Updates a tag-it widget with the requested viewValue
+    update_widget = (widget, field) ->
+      if widget?
         # Check whether the current content of the editor
         # is in sync with the actual model value        
-        current = scope.editor.assignedTags()
+        current = widget.assignedTags()
         wanted = ctrl.$viewValue or []
         if (current + '') is (wanted + '')
           # We are good to go, nothing to do
@@ -314,36 +313,49 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
           # Editor widget's content is different.
           # (Probably because of a cancelled edit.)
           # Copy the tags to the tag editor
-          scope.editor.removeAll()
+          widget.removeAll()
           for tag in wanted
-            scope.editor.createTag tag
+            widget.createTag tag
       else
-        # We don't have an editor yet, so we can simply push value
-        # to input box; the editor will fetch it from there
-        input.attr 'value', (ctrl.$viewValue or []).join ","        
- 
+        # We don't have the widget, so we can simply push value
+        # to input box; the widget will fetch it from there
+        field.attr 'value', (ctrl.$viewValue or []).join ","
+        
 
-      # Push value to rendered HTML
-      scope.rendered_words = ctrl.$viewValue or []
+    # Re-render the word list when the view needs updating.
+    ctrl.$render = ->
+      # Update the editor widget
+      update_widget scope.editor, input
+
+      # update the displayer widget
+      update_widget scope.displayer, output
 
     # React to the changes in the tag editor
     scope.tagsChanged = -> ctrl.$setViewValue input.val().split ","
 
     # Re-render when it becomes uneditable.
     scope.$watch 'readonly', (readonly) ->
-      unless (readonly or scope.editor?)
-        # We are starting to edit, but we don't have a widget yet.
-        input.attr 'value', (ctrl.$viewValue or []).join ","        
-        input.tagit
-          caseSensitive: false
-          placeholderText: scope.placeholder
-          keepPlaceholder: true
-          afterTagAdded: scope.tagsChanged
-          afterTagRemoved: scope.tagsChanged
-          autocomplete:
-            source: []
+      if readonly
+        unless scope.displayer?
+          # Create displayer widget
+          output.attr 'value', (ctrl.$viewValue or []).join ","        
+          output.tagit
+            readOnly: true
+          scope.displayer = output.data "uiTagit"
+      else
+        unless scope.editor?
+          # Create editor widget
+          input.attr 'value', (ctrl.$viewValue or []).join ","        
+          input.tagit
+            caseSensitive: false
+            placeholderText: scope.placeholder
+            keepPlaceholder: true
+            afterTagAdded: scope.tagsChanged
+            afterTagRemoved: scope.tagsChanged
+            autocomplete:
+              source: []
+          scope.editor = input.data "uiTagit"
         
-        scope.editor = input.data "uiTagit"
       ctrl.$render()
 
   require: '?ngModel'

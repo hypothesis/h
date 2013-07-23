@@ -1030,27 +1030,24 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
 // Tags for the annotations
 .tags {
-  .wl_editor ul {
+
+  // Add a border to the new tag entry field
+  .wl_editor .tagit-new input[type=text] {
+    border: 1px solid gray;
+    padding: 0.2em;
+  }
+
+  // We don't want no new input in read only mode
+  .wl_displayer .tagit-new {
+    display: none;
+  }
+
+  // Remove border and padding from the tag editor widget.
+  // Since both the tags and the new tag entry field have their own borders,
+  // this was redundant.
+  .wl_editor ul, .wl_displayer ul {
     border: none;
     padding: 0;
   }
 
-  .plain_input {
-    display: none;
-  }
-  .display {
-    margin-top: 0.5em;
-    margin-bottom: 1em;
-    overflow: hidden;
-  }
-  .word {
-    background-color: lightgray;
-    padding: 0.25em;
-    margin: 0.25em;
-  }
-  .tagit-new input[type=text] {
-    border: 1px solid gray;
-    padding: 0.2em;
-  }
-  
 }
