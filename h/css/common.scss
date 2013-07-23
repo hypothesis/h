@@ -1030,6 +1030,11 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
 // Tags for the annotations
 .tags {
+  .wl_editor ul {
+    border: none;
+    padding: 0;
+  }
+
   .plain_input {
     display: none;
   }
@@ -1043,4 +1048,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     padding: 0.25em;
     margin: 0.25em;
   }
+  .tagit-new input[type=text] {
+    border: 1px solid gray;
+    padding: 0.2em;
+  }
+  
 }

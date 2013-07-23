@@ -319,6 +319,7 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
         input.tagit
           caseSensitive: false
           placeholderText: scope.placeholder
+          keepPlaceholder: true
           afterTagAdded: scope.tagsChanged
           afterTagRemoved: scope.tagsChanged
           autocomplete:
