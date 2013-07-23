@@ -229,6 +229,7 @@ class Annotation
           annotator.deleteAnnotation $scope.model.$modelValue
         else
           $scope.model.$modelValue.text = $scope.origText
+          $scope.model.$modelValue.tags = $scope.origTags
           $scope.action = 'create'
 
     $scope.save = ->
@@ -270,6 +271,7 @@ class Annotation
       $scope.action = 'edit'
       $scope.editing = true
       $scope.origText = $scope.model.$modelValue.text
+      $scope.origTags = $scope.model.$modelValue.tags
 
     $scope.delete = ->
       annotation = $scope.thread.message
@@ -292,7 +294,9 @@ class Annotation
         $scope.action = 'delete'
         $scope.editing = true
         $scope.origText = $scope.model.$modelValue.text
+        $scope.origTags = $scope.model.$modelValue.tags
         $scope.model.$modelValue.text = ''
+        $scope.model.$modelValue.tags = ''
 
     $scope.authorize = (action) ->
       if $scope.model.$modelValue? and annotator.plugins?.Permissions?
