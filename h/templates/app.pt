@@ -31,6 +31,16 @@
         </div>
       </div>
 
+      <!-- Controlbar -->
+      <div ng-mouseenter="myVar='controlbar'" ng-class="myVar">
+        <ul>
+          <li class="controlbarmenubutton"><a class="alwaysonhighlights-icon" href=""></a></li>
+          <li class="controlbarmenubutton"><a class="hightlighter-icon" href=""></a></li>
+          <li class="controlbarmenubutton"><a class="comment-icon" href=""></a></li>
+        </ul>
+      </div>
+      
+
       <!-- Account and Authentication -->
       <div class="sheet collapsed"
            ng-class="sheet.collapsed && 'collapsed'"
