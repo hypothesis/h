@@ -341,6 +341,9 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
           output.attr 'value', (ctrl.$viewValue or []).join ","        
           output.tagit
             readOnly: true
+            onTagClicked: (evt, ui) ->
+              tag = ui.tagLabel
+              window.open "/t/" + tag
           scope.displayer = output.data "uiTagit"
       else
         unless scope.editor?
