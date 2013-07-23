@@ -18,6 +18,7 @@
     <div class="content paper yui3-g"
          ng-controller="UserStreamCtrl">
 
+      <h3 class="tagstream">Annotations by user <b>'{{username}}'</b></h3>
       <div class="knockout noise yui3-u-1"
            ng-show="annotations.length">
         <ul>

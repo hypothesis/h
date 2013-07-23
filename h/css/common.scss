@@ -1130,7 +1130,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   }
 }
 
-h3.tagstream h3.userstream {
+h3.tagstream, h3.userstream {
   letter-spacing: normal;
   word-spacing: normal;
   margin-top: 0;
