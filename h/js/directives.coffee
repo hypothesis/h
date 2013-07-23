@@ -327,7 +327,16 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
             caseSensitive: false
             placeholderText: scope.placeholder
             keepPlaceholder: true
-            afterTagAdded: scope.tagsChanged
+            afterTagAdded: (evt, ui) ->
+              if ui.duringInitialization then return
+              newTab = ui.tagLabel
+              newTabLow = newTab.toLowerCase()
+              if newTab is newTabLow
+                scope.tagsChanged()
+              else
+                scope.editor.removeTagByLabel newTab, false
+                scope.editor.createTag newTabLow
+                
             afterTagRemoved: scope.tagsChanged
             autocomplete:
               source: []
