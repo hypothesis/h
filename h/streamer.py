@@ -75,7 +75,7 @@ filter_schema = {
         },
         "actions": {
             "create": {"type": "boolean", "default":  True},
-            "edit": {"type": "boolean", "default":  True},
+            "update": {"type": "boolean", "default":  True},
             "delete": {"type": "boolean", "default":  True},
         },
         "clauses": {

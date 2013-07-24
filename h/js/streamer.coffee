@@ -50,11 +50,11 @@ class Streamer
          @sfilter.setActionCreate(params.action_create)
        else
          @sfilter.setActionCreate(params.action_create is 'true')
-    if params.action_edit
-       if (typeof params.action_edit) is 'boolean'
-         @sfilter.setActionEdit(params.action_edit)
+    if params.action_update
+       if (typeof params.action_update) is 'boolean'
+         @sfilter.setActionUpdate(params.action_update)
        else
-         @sfilter.setActionEdit(params.action_edit is 'true')
+         @sfilter.setActionUpdate(params.action_update is 'true')
     if params.action_delete
        if (typeof params.action_delete) is 'boolean'
          @sfilter.setActionDelete(params.action_delete)
@@ -140,7 +140,7 @@ class Streamer
       $location.search
         'match_policy': $scope.filter.match_policy
         'action_create': $scope.filter.actions.create
-        'action_edit': $scope.filter.actions.edit
+        'action_update': $scope.filter.actions.update
         'action_delete': $scope.filter.actions.delete
         'load_past': $scope.filter.past_data.load_past
         'go_back': $scope.filter.past_data.go_back
