@@ -96,8 +96,5 @@
     <script type="text/ng-template" id="viewer.html">
       <metal:main use-macro="load: viewer.html" />
     </script>
-    <script type="text/ng-template" id="wordlist.html">
-      <metal:main use-macro="load: wordlist.html" />
-    </script>
   </body>
 </html>
