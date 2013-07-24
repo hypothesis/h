@@ -263,7 +263,7 @@ repeatAnim = ->
             .animate({ 'margin-left': '0px' }, 1500)
 
 # Directive to edit/display a word list. Used for tags.
-wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
+wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
@@ -314,7 +314,7 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
             readOnly: true
             onTagClicked: (evt, ui) ->
               tag = ui.tagLabel
-              window.open "/t/" + tag
+              $window.open "/t/" + tag
           widgets.displayer = output.data "uiTagit"
       else
         unless widgets.editor?
