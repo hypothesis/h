@@ -18,7 +18,7 @@
     <div class="content paper yui3-g"
          ng-controller="TagStreamCtrl">
 
-      <h3 class="tagstream">Annotations with tag <b>'{{tag | descapeURI}}'</b></h3>
+      <h3 class="tagstream">Annotations with tag <b>'{{tagLabel}}'</b></h3>
       <div class="knockout noise yui3-u-1"
            ng-show="annotations.length">
         <ul>

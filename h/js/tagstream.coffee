@@ -16,6 +16,7 @@ class TagStream
   constructor: ($location, $scope, $timeout, streamfilter) ->
     $scope.annotations = []
     $scope.tag = $location.absUrl().split('/').pop()
+    $scope.tagLabel = decodeURIComponent $scope.tag
     $scope.filter =
       streamfilter
         .setPastDataHits(100)
