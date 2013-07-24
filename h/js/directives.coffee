@@ -271,45 +271,32 @@ wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
     output = elem.find('.wl-displayer input')
 
     # Updates a tag-it widget with the requested viewValue
-    update_widget = (widget, field) ->
-      if widget?
-        # Check whether the current content of the editor
-        # is in sync with the actual model value        
-        current = widget.assignedTags()
-        wanted = ctrl.$viewValue or []
-        if (current + '') is (wanted + '')
-          # We are good to go, nothing to do
-        else      
-          # Editor widget's content is different.
-          # (Probably because of a cancelled edit.)
-          # Copy the tags to the tag editor
-          widget.removeAll()
-          for tag in wanted
-            widget.createTag tag
-      else
-        # We don't have the widget, so we can simply push value
-        # to input box; the widget will fetch it from there
-        field.attr 'value', (ctrl.$viewValue or []).join ","
+    update_widget = (widget) ->
+      # Check whether the current content of the editor
+      # is in sync with the actual model value        
+      current = widget.assignedTags()
+      wanted = ctrl.$viewValue or []
+      if (current + '') is (wanted + '')
+        # We are good to go, nothing to do
+      else      
+        # Editor widget's content is different.
+        # (Probably because of a cancelled edit.)
+        # Copy the tags to the tag editor
+        widget.removeAll()
+        for tag in wanted
+          widget.createTag tag
 
     widgets = {}            
 
     # Re-render the word list when the view needs updating.
     ctrl.$render = ->
-      # Update the editor widget
-      update_widget widgets.editor, input
-
-      # update the displayer widget
-      update_widget widgets.displayer, output
-
-    # React to the changes in the tag editor
-    tagsChanged = -> ctrl.$setViewValue input.val().split ","
-
-    # Re-render when it becomes uneditable.
-    scope.$watch 'readonly', (readonly) ->
-      if readonly
-        unless widgets.displayer?
+      if scope.readonly
+        if widgets.displayer?
+          # update the displayer widget
+          update_widget widgets.displayer
+        else
           # Create displayer widget
-          output.attr 'value', (ctrl.$viewValue or []).join ","        
+          output.attr 'value', (ctrl.$viewValue or []).join ","
           output.tagit
             readOnly: true
             onTagClicked: (evt, ui) ->
@@ -317,9 +304,11 @@ wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
               $window.open "/t/" + tag
           widgets.displayer = output.data "uiTagit"
       else
-        unless widgets.editor?
+        if widgets.editor?
+          # Update the editor widget
+          update_widget widgets.editor
+        else
           # Create editor widget
-          console.log "Creating editor"
           input.attr 'value', (ctrl.$viewValue or []).join ","
           input.tagit
             caseSensitive: false
@@ -340,8 +329,12 @@ wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
             autocomplete:
               source: []
           widgets.editor = input.data "uiTagit"
-        
-      ctrl.$render()
+
+    # React to the changes in the tag editor
+    tagsChanged = -> ctrl.$setViewValue input.val().split ","
+
+    # Re-render when it becomes editable / uneditable.
+    scope.$watch 'readonly', (readonly) -> ctrl.$render()
 
   require: '?ngModel'
   restrict: 'E'
