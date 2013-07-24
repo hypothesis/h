@@ -61,7 +61,7 @@
                 <a href="" class="down-icon dropdown-toggle small" role="button" title="Annotation actions">Actions</a>
                 <ul class="dropdown-menu" role="menu">
                   <li ng-click="filter.actions.create = !filter.actions.create" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.create" class="small">Create</input><li>
-                  <li ng-click="filter.actions.edit = !filter.actions.edit" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.edit" class="small">Edit</input><li>
+                  <li ng-click="filter.actions.update = !filter.actions.update" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.update" class="small">Update</input><li>
                   <li ng-click="filter.actions.delete = !filter.actions.delete" class="small"><input type="checkbox" data-col="1" ng-model="filter.actions.delete" class="small">Delete</input><li>
                 </ul>
               </div>

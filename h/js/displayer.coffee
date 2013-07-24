@@ -90,7 +90,7 @@ class Displayer
             @idTable[annotation.id] = annotation
             replies.splice pos, 0, annotation
 
-          when 'edit'
+          when 'update'
             $scope.change_annotation_content annotation.id, annotation
 
           when 'delete'
