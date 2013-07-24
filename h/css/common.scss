@@ -624,13 +624,12 @@ blockquote {
   @include smallshadow;
   background: $white;
   border: solid 1px $grayLighter;
-  height: 2em;
+  height: 2.25em;
   position: fixed;
   left: -1px;
   right: -1px;
   top: .5em;
   z-index: 5;
-  height: auto;
 
   .barbutton {
     &:hover {
@@ -1153,12 +1152,12 @@ h3.stream {
   overflow: hidden;
 }
 
-.visual_search {
+.visual-search {
   .VS-search .VS-search-box {
-    height:1em;
     border: 0;
-    min-height: 24px;
-    margin-top: 2px;
+    min-height: 22px;
+    margin-top: 1px;
+    margin-bottom: 1px;
   }
 
   .VS-search input,.VS-search .VS-input-width-tester {
@@ -1169,13 +1168,13 @@ h3.stream {
   }
 }
 
-.visual_container {
+.visual-container {
   margin-left: 3em;
 }
 
 .magnify-glass {
   width: 2.25em;
-  min-height: 28px;
+  min-height: 22px;
 }
 
 .magnify-glass .VS-icon {
