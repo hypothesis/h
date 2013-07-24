@@ -122,9 +122,14 @@ class Hypothesis extends Annotator
     this.subscribe 'annotationsLoaded', -> $route.reload()
 
     @user_filter = $filter('userName')
+    search_query = ''
+    params = $location.search()
+    if params.search_query
+      search_query = params.search_query
+
     @visualSearch = VS.init
       container: $('.visual-search')
-      query: ''
+      query: search_query
       callbacks:
         search: (query, searchCollection) =>
           unless query
@@ -200,6 +205,7 @@ class Hypothesis extends Annotator
             whole_document : whole_document
             matched : matched
             in_body_text: in_body_text
+            search_query: query
           $location.path('/page_search').search(search)
           $rootScope.$digest()
 
