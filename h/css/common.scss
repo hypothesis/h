@@ -1034,7 +1034,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   // Add a border to the new tag entry field
   .wl_editor .tagit-new input[type=text] {
     border: 1px solid gray;
-    padding: 0.2em;
+    padding: .2em;
   }
 
   // We don't want no new input in read only mode
@@ -1058,13 +1058,13 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
   // Add some small space around tag displayer
   .wl_displayer {
-    margin-top: 0.2em;
-    margin-bottom: 0.5em;
+    margin-top: .2em;
+    margin-bottom: .5em;
   }
 
   // We don't need that much padding
   ul.tagit li.ui-corner-all {
-    padding: 0.1em 0.3em;
+    padding: .1em .3em;
   }
 
   // .. except for the x-mark when editing.
@@ -1124,7 +1124,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
   // We don't need that much padding
   ul.tagit li.ui-corner-all {
-    padding: 0.1em 0.3em;
+    padding: .1em .3em;
   }
 }
 
@@ -1133,8 +1133,8 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 .userstream_tags .displayer_tags {
   // Actual tag labels
   ul.tagit li.tagit-choice-read-only {
-    font-size: 0.8em;
-    padding: 0.2em 0.4em;
+    font-size: .8em;
+    padding: .2em .4em;
   }
 }
 
