@@ -108,10 +108,12 @@ def after_request(response):
         match = re.match(r'^store\.(\w+)_annotation$', flask.request.endpoint)
         if match:
             action = match.group(1)
-            if action != 'delete':
+            if action == 'delete':
+                annotation = json.loads(flask.request.data)
+            else:
                 annotation = json.loads(response.data)
-                event = events.AnnotatorStoreEvent(annotation, action)
-                get_current_registry().notify(event)
+            event = events.AnnotatorStoreEvent(annotation, action)
+            get_current_registry().notify(event)
     return response
 
 
