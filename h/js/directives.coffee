@@ -332,13 +332,13 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
             afterTagAdded: (evt, ui) ->
               if ui.duringInitialization then return
               newTab = ui.tagLabel
-              #Create a canonized form
-              canonized = newTab.toLowerCase().replace /[^a-z0-9\-\s]/g, ''
-              if newTab is canonized
+              # Create a normalized form
+              normalized = newTab.toLowerCase().replace /[^a-z0-9\-\s]/g, ''
+              if newTab is normalized
                 tagsChanged()
               else
                 widgets.editor.removeTagByLabel newTab, false
-                scope.editor.createTag canonized
+                widgets.editor.createTag normalized
                 
             afterTagRemoved: tagsChanged
             autocomplete:
