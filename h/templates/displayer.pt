@@ -98,7 +98,7 @@
                     <wordlist ng-model="$parent.reply.tags"
                               readonly="true" 
                               name="reply.tags"
-                              class="displayer_reply_tags"
+                              class="displayer-reply-tags"
                     />          
                   </div>
                   <div class="magicontrols small">
@@ -132,7 +132,7 @@
         <wordlist ng-model="$parent.annotation.tags"
                   readonly="true" 
                   name="annotator.tags"
-                  class="displayer_tags"
+                  class="displayer-tags"
         />          
       </div>
 

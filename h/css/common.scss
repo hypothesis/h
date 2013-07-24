@@ -1032,20 +1032,20 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 .tags {
 
   // Add a border to the new tag entry field
-  .wl_editor .tagit-new input[type=text] {
+  .wl-editor .tagit-new input[type=text] {
     border: 1px solid gray;
     padding: .2em;
   }
 
   // We don't want no new input in read only mode
-  .wl_displayer .tagit-new {
+  .wl-displayer .tagit-new {
     display: none;
   }
 
   // Remove border and padding from the tag editor widget.
   // Since both the tags and the new tag entry field have their own borders,
   // this was redundant.
-  .wl_editor ul, .wl_displayer ul {
+  .wl-editor ul, .wl-displayer ul {
     border: none;
     padding: 0;
   }
@@ -1057,7 +1057,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   }
 
   // Add some small space around tag displayer
-  .wl_displayer {
+  .wl-displayer {
     margin-top: .2em;
     margin-bottom: .5em;
   }
@@ -1068,21 +1068,21 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   }
 
   // .. except for the x-mark when editing.
-  .wl_editor ul.tagit li.ui-corner-all {
+  .wl-editor ul.tagit li.ui-corner-all {
     padding-right: 1.2em;
   }
 }
 
 // Only show one line of tags in bucket view
 .summary .tags {
-  .wl_displayer ul {
+  .wl-displayer ul {
     height: 2.0em;
     overflow: hidden;
   }
 }
 
 // Tags for the displayer page
-.displayer_tags {
+.displayer-tags {
   // We don't want no new input here
   .tagit-new {
     display: none;
@@ -1105,7 +1105,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 }
 
 // Tags in replies for the displayer page
-.displayer_reply_tags {
+.displayer-reply-tags {
   // We don't want no new input here
   .tagit-new {
     display: none;
@@ -1130,7 +1130,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
 // Special rules for tags on user stream page
 // (To be applied on top of the rules for the displayer page
-.userstream_tags .displayer_tags {
+.userstream-tags .displayer-tags {
   // Actual tag labels
   ul.tagit li.tagit-choice-read-only {
     font-size: .8em;
