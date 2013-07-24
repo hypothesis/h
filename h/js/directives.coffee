@@ -267,8 +267,8 @@ wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
-    input = elem.find('.wl_editor input')
-    output = elem.find('.wl_displayer input')
+    input = elem.find('.wl-editor input')
+    output = elem.find('.wl-displayer input')
 
     # Updates a tag-it widget with the requested viewValue
     update_widget = (widget, field) ->
