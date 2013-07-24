@@ -294,23 +294,24 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
         # We don't have the widget, so we can simply push value
         # to input box; the widget will fetch it from there
         field.attr 'value', (ctrl.$viewValue or []).join ","
-        
+
+    widgets = {}            
 
     # Re-render the word list when the view needs updating.
     ctrl.$render = ->
       # Update the editor widget
-      update_widget scope.editor, input
+      update_widget widgets.editor, input
 
       # update the displayer widget
-      update_widget scope.displayer, output
+      update_widget widgets.displayer, output
 
     # React to the changes in the tag editor
-    scope.tagsChanged = -> ctrl.$setViewValue input.val().split ","
+    tagsChanged = -> ctrl.$setViewValue input.val().split ","
 
     # Re-render when it becomes uneditable.
     scope.$watch 'readonly', (readonly) ->
       if readonly
-        unless scope.displayer?
+        unless widgets.displayer?
           # Create displayer widget
           output.attr 'value', (ctrl.$viewValue or []).join ","        
           output.tagit
@@ -318,10 +319,11 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
             onTagClicked: (evt, ui) ->
               tag = ui.tagLabel
               window.open "/t/" + tag
-          scope.displayer = output.data "uiTagit"
+          widgets.displayer = output.data "uiTagit"
       else
-        unless scope.editor?
+        unless widgets.editor?
           # Create editor widget
+          console.log "Creating editor"
           input.attr 'value', (ctrl.$viewValue or []).join ","
           input.tagit
             caseSensitive: false
@@ -333,15 +335,15 @@ wordlist = ['$filter', '$timeout', ($filter, $timeout) ->
               #Create a canonized form
               canonized = newTab.toLowerCase().replace /[^a-z0-9\-\s]/g, ''
               if newTab is canonized
-                scope.tagsChanged()
+                tagsChanged()
               else
-                scope.editor.removeTagByLabel newTab, false
+                widgets.editor.removeTagByLabel newTab, false
                 scope.editor.createTag canonized
                 
-            afterTagRemoved: scope.tagsChanged
+            afterTagRemoved: tagsChanged
             autocomplete:
               source: []
-          scope.editor = input.data "uiTagit"
+          widgets.editor = input.data "uiTagit"
         
       ctrl.$render()
 
