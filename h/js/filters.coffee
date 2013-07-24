@@ -46,6 +46,7 @@ elide = (text, split_length) ->
     text = text + '\u2026'
   text
 
+
 angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
