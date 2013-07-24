@@ -46,12 +46,8 @@ elide = (text, split_length) ->
     text = text + '\u2026'
   text
 
-descapeUri = (text) ->
-  text.replace /%20/gi, " "
-
 angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
   .filter('elide', -> elide)
-  .filter('descapeURI', -> descapeUri)
