@@ -341,7 +341,7 @@ wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
   scope:
     readonly: '@'
     placeholder: '@'
-  templateUrl: '/assets/templates/wordlist.html'
+  template: '<div ng-hide="readonly" class="wl-editor"><input /></div><div ng-show="readonly" class="wl-displayer"><input /></div>'
 ]
 
 angular.module('h.directives', ['ngSanitize'])
