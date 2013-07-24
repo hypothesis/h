@@ -118,7 +118,7 @@ angular_sanitize = Uglify(
 )
 
 # jQuery
-jquery = Uglify('lib/jquery-1.8.3.js', output='lib/jquery-1.8.3.min.js')
+jquery = Uglify('lib/jquery-1.10.2.js', output='lib/jquery-1.10.2.min.js')
 jquery_mousewheel = Uglify(
     'lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
 )
