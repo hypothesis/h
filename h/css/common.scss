@@ -915,6 +915,14 @@ blockquote {
   margin-bottom: .75em; 
 }
 
+.no-overflow {
+  overflow: hidden;
+}
+
+.strech {
+  width: 100%;
+  white-space: nowrap;
+}
 
 .filter-body {
  overflow: visible;
