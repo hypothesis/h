@@ -1,11 +1,12 @@
 get_quote = (annotation) ->
+  if annotation.quote? then return annotation.quote
   if not 'target' in annotation then return ''
+
   quote = '(Reply annotation)'
   for target in annotation['target']
     for selector in target['selector']
         if selector['type'] is 'TextQuoteSelector'
             quote = selector['exact'] + ' '
-
   quote
 
 class Stream
