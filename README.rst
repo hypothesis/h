@@ -28,6 +28,14 @@ This command will start the server on port 5000 (https://0.0.0.0:5000),
 reload the application whenever changes are made to the source code, and
 restart it should it crash for some reason.
 
+.. note::
+    Using the bookmarklet or otherwise embedding the application may not
+    be possible on sites accessed via HTTPS due to browser policy restricting
+    the inclusion of non-SSL content. If you wish to test the development server
+    with these sites uncomment the line beginning with "certfile" in the
+    development server configuration file, "development.ini". This will cause
+    the server to use a self-signed certificate included for testing.
+
 Development
 -----------
 
