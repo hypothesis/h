@@ -139,11 +139,6 @@ jquery_ui_effects = Bundle(
     Uglify('h:lib/jquery.ui.effect-highlight.js', output='lib/jquery.ui.effect-highlight.min.js')
 )
 
-# Tag-it
-tagit = Bundle(
-    Uglify('h:lib/tag-it.js', output='lib/tag-it.min.js'),
-)
-
 # Polyfills
 raf = Uglify('lib/polyfills/raf.js', output='lib/polyfills/raf.js.min')
 
@@ -159,8 +154,8 @@ pagedown = Uglify(
     'lib/Markdown.Converter.js',
     output='lib/Markdown.Converter.min.js'
 )
-
 sockjs = Uglify('h:lib/sockjs-0.3.4.js', output='lib/sockjs-client.min.js')
+tagit = Uglify('h:lib/tag-it.js', output='lib/tag-it.min.js')
 
 domTextFamily = Uglify(
     Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
