@@ -290,13 +290,16 @@ wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
 
     # Re-render the word list when the view needs updating.
     ctrl.$render = ->
+      words = (ctrl.$viewValue or [])
+      if words[0] is "" then words = []
+      scope.words = words
       if scope.readonly
         if widgets.displayer?
           # update the displayer widget
           update_widget widgets.displayer
         else
           # Create displayer widget
-          output.attr 'value', (ctrl.$viewValue or []).join ","
+          output.attr 'value', words.join ","
           output.tagit
             readOnly: true
             onTagClicked: (evt, ui) ->
@@ -309,7 +312,7 @@ wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
           update_widget widgets.editor
         else
           # Create editor widget
-          input.attr 'value', (ctrl.$viewValue or []).join ","
+          input.attr 'value', words.join ","
           input.tagit
             caseSensitive: false
             placeholderText: scope.placeholder
@@ -341,7 +344,7 @@ wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
   scope:
     readonly: '@'
     placeholder: '@'
-  template: '<div ng-hide="readonly" class="wl-editor"><input /></div><div ng-show="readonly" class="wl-displayer"><input /></div>'
+  template: '<div ng-hide="readonly" class="wl-editor"><input /></div><div ng-show="readonly && words" class="wl-displayer"><input /></div>'
 ]
 
 angular.module('h.directives', ['ngSanitize'])
