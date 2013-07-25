@@ -47,10 +47,10 @@ window.onload = function() {
       		'icon-settings' : '&#xe00f;',
       		'icon-wrench' : '&#xe020;',
       		'icon-commentflip' : '&#xe010;',
-            'icon-hyp-logo4' : '&#xe014;'
-			'icon-plus' : '&#xe011;',
-			'icon-menu' : '&#xe012;',
-			'icon-pen-alt-fill' : '&#xe013;'
+           	'icon-hyp-logo4' : '&#xe014;',
+            	'icon-plus' : '&#xe011;',
+		'icon-menu' : '&#xe012;',
+		'icon-pen-alt-fill' : '&#xe013;'
 		},
 		els = document.getElementsByTagName('*'),
 		i, attr, html, c, el;
