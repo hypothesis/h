@@ -56,12 +56,12 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
-      input.attr('value', ctrl.$viewValue or '')
+      input.val (ctrl.$viewValue or '')
       scope.rendered = ($filter 'converter') (ctrl.$viewValue or '')
 
     # React to the changes to the text area
     input.bind 'blur change keyup', ->
-      ctrl.$setViewValue input[0].value
+      ctrl.$setViewValue input.val()
       scope.$digest()
 
     # Auto-focus the input box when the widget becomes editable.
