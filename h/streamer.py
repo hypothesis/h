@@ -250,8 +250,11 @@ class StreamerSession(Session):
 
                 for annotation in annotations:
                     annotation.update(url_values_from_document(annotation))
+                    if 'references' in annotation:
+                        parent = store.read(annotation['references'][-1])
+                        if 'text' in parent:
+                            annotation['quote'] = parent['text']
                 #Finally send filtered annotations
-
                 if len(annotations) > 0:
                     self.send([annotations, 'past'])
         except:
@@ -271,7 +274,16 @@ def after_action(event):
 
     annotation.update(url_values_from_document(annotation))
 
+    first_connection = True
     for connection in StreamerSession.connections:
+        if first_connection:
+            first_connection = False
+            registry = connection.request.registry
+            store = registry.queryUtility(interfaces.IStoreClass)(connection.request)
+            if 'references' in annotation:
+                parent = store.read(annotation['references'][-1])
+                if 'text' in parent:
+                    annotation['quote'] = parent['text']
         if not authz.authorize(annotation, 'read', connection.request.user):
             continue
 
