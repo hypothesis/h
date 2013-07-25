@@ -70,7 +70,7 @@
                      ng-show="annotation.reply_count"
                      count="annotation.reply_count"
                      when="{one: '1 reply', other: '{} replies'}" />
-                 </div>
+                </div>
               </div>
 
               <script type="text/ng-template"  id="annotation_renderer.html">
@@ -118,13 +118,13 @@
                 </ul>
               </script>
 
-                <!-- Thread view -->
-                <ul>
-                    <li ng-repeat="reply in annotation.replies"
-                        ng-include="'annotation_renderer.html'"
-                        class="thread"
-                        ng-class="collapsed && 'collapsed' || ''"></li>
-                </ul>
+              <!-- Thread view -->
+              <ul>
+                <li ng-repeat="reply in annotation.replies"
+                    ng-include="'annotation_renderer.html'"
+                    class="thread"
+                    ng-class="collapsed && 'collapsed' || ''"></li>
+              </ul>
             </div>
           </div>
 

@@ -68,13 +68,14 @@
                   <div class="paper thread">
                     <div class="detail">
                       <div class="magicontrols pull-right">
-                       <span class="small">{{annotation.updated | fuzzyTime}}</span>
+                        <span class="small">{{annotation.updated | fuzzyTime}}</span>
                       </div>
-                     <strong>
-                      <span class="user">{{annotation.user | userName}}</span>
-                     </strong>
-                     <div class="body">
-                      <span ng-bind-html-unsafe="annotation.text | converter"/>
+                      <strong>
+                        <span class="user">{{annotation.user | userName}}</span>
+                      </strong>
+                      <div class="body">
+                        <span ng-bind-html-unsafe="annotation.text | converter"/>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -90,7 +91,7 @@
             </div>
           </li>
         </ul>
-     </div>
+      </div>
 
       <div class="yui3-u-1">
         Tag stream page. For a better experience,
