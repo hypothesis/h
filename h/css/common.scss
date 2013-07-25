@@ -866,9 +866,10 @@ blockquote {
   margin:0;
 }
 
-
-.center_button {
-  text-align: center;
+.knockout {
+  .center {
+    text-align: center;
+  }
 }
 
 .button_controls {

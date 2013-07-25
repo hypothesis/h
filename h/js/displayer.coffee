@@ -20,6 +20,9 @@ class Displayer
     $scope.annotations = [$scope.annotation]
     $scope.annotation.replies = []
     $scope.annotation.reply_count = 0
+    $scope.annotation.ref_length =
+      if $scope.annotation.references? then $scope.annotation.references.length else 0
+    $scope.full_deleted = false
     @idTable[$scope.annotation.id] = $scope.annotation
     $scope.filter =
       streamfilter
@@ -62,7 +65,7 @@ class Displayer
       #sort annotations by creation date
       data.sort (a, b) ->
         if a.created > b.created then return 1
-        if a.created > b.created then return -1
+        if a.created < b.created then return -1
         0
 
       for annotation in data
@@ -102,17 +105,21 @@ class Displayer
               unless @idTable[annotation.id]?
                 break
 
-              #Update the reply counter for all referenced annotation
-              for i in [$scope.annotation.ref_length..annotation.references.length-1]
-                reference = annotation.references[i]
-                @idTable[reference].reply_count -= 1
+              if $scope.annotation.id is annotation.id
+                $scope.full_deleted = true
+              else
+                #Reply delete
+                #Update the reply counter for all referenced annotation
+                for i in [$scope.annotation.ref_length..annotation.references.length-1]
+                  reference = annotation.references[i]
+                  @idTable[reference].reply_count -= 1
 
-              replies = @idTable[annotation.references[annotation.references.length-1]].replies
+                replies = @idTable[annotation.references[annotation.references.length-1]].replies
 
-              #Find the place to insert annotation
-              pos = replies.indexOf @idTable[annotation.id]
-              replies.splice pos, 1
-              delete @idTable[annotation.id]
+                #Find the place to insert annotation
+                pos = replies.indexOf @idTable[annotation.id]
+                replies.splice pos, 1
+                delete @idTable[annotation.id]
 
     if $scope.annotation.referrers?
       $scope.manage_new_data $scope.annotation.referrers, 'past'
