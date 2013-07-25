@@ -945,6 +945,13 @@ blockquote {
     left: 0px;
 }
 
+.card-grid {
+  .full-quote {
+    margin: 0;
+    padding-left: 2em;
+    padding-right: 1.75em;
+  }
+}
 @mixin sidebar_animation {
   -webkit-transition: 1s linear all;
   -moz-transition: 1s linear all;
