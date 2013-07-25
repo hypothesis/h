@@ -1,20 +1,24 @@
-Installing Hypothes.is
+Installing
 ######################
 
-Hypothes.is currently requires several tools to build and run from scratch.
+Dependencies:
+* Python v2.7+ (No Python 3 support yet -- want to help?)
+* _CoffeeScript v1.6+
+* _Sass v3.2+
+* _Compass v0.12+
+* _ElasticSearch v0.19+
 
 See the platform specific INSTALL.<platform>.rst files for more information
 about how to install the dependencies on any specific platform.
 
-In the future, releases will include built versions of static assets for
-integrators wanting to produce custom embeddings of the project on their
-own sites and the project welcomes packaging efforts to make including
-the Hypothes.is service in any framework easy.
+In the future, releases will include built versions of static assets which
+will eliminate the need for those who wish to integrate with their own
+Python web services but do not need to modify the front-end sources.
 
 The project code itself is a pyramid_ application which can be integrated
 into any WSGI_ compatible framework and run on any WSGI web server (such
-as gunicorn_ or uWSGI_). Until the project is ready for an alpha release,
-it may not be installable from the Python Package Index. Instead, the
+as gunicorn_ or uWSGI_). Until the project is ready for general testing
+it will not be installable from the Python Package Index. Instead, the
 application should be built in a virtual environment which can be set up as
 follows::
 
@@ -40,7 +44,7 @@ development configuration.
 .. _WSGI: http://www.wsgi.org/
 .. _gunicorn: http://gunicorn.org/
 .. _uWSGI: http://projects.unbit.it/uwsgi/
-.. _elasticsearch: http://www.elasticsearch.org/
+.. _ElasticSearch: http://www.elasticsearch.org/
 .. _CoffeeScript: http://coffeescript.org/
 .. _Sass: http://sass-lang.com/
 .. _Compass: http://compass-style.org/
