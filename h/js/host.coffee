@@ -187,8 +187,6 @@ class Annotator.Host extends Annotator
       if not @ignoreMouseup
         setTimeout =>
           unless @selectedRanges?.length then @panel?.notify method: 'back'
-    this._setupMatching()
-    @domMatcher.setRootNode @wrapper[0]
     this
 
   _setupDocumentEvents: ->
