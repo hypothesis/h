@@ -93,6 +93,14 @@
                     <span ng-show="reply.deleted">Reason:</span>
                     <span ng-bind-html-unsafe="reply.text | converter"/>
                   </div>
+
+                  <div>
+                    <wordlist ng-model="$parent.reply.tags"
+                              readonly="true" 
+                              name="reply.tags"
+                              class="displayer-reply-tags"
+                    />          
+                  </div>
                   <div class="magicontrols small">
                     <span class="reply-count"
                        ng-pluralize=""
@@ -119,6 +127,14 @@
                 </ul>
             </div>
           </div>
+
+      <div>
+        <wordlist ng-model="$parent.annotation.tags"
+                  readonly="true" 
+                  name="annotator.tags"
+                  class="displayer-tags"
+        />          
+      </div>
 
       <div class="yui3-u-1">
         You have followed a link to an annotation. For a better experience,

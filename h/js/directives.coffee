@@ -1,29 +1,3 @@
-annotation = ['$filter', 'annotator', ($filter, annotator) ->
-  link: (scope, elem, attrs, controller) ->
-    return unless controller?
-
-    # Bind shift+enter to save
-    elem.bind
-      keydown: (e) ->
-        if e.keyCode == 13 && e.shiftKey
-          e.preventDefault()
-          scope.save()
-
-    # Watch for changes
-    scope.$watch 'model.$modelValue.id', (id) ->
-      scope.thread = annotator.threading.idTable[id]
-
-    # Publish the controller
-    scope.model = controller
-  controller: 'AnnotationController'
-  priority: 100  # Must run before ngModel
-  require: '?ngModel'
-  restrict: 'C'
-  scope: {}
-  templateUrl: 'annotation.html'
-]
-
-
 authentication = ->
   base =
     username: null
@@ -288,8 +262,92 @@ repeatAnim = ->
             .css({ 'margin-left': itemElm.width() })
             .animate({ 'margin-left': '0px' }, 1500)
 
+# Directive to edit/display a word list. Used for tags.
+wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
+
+    input = elem.find('.wl-editor input')
+    output = elem.find('.wl-displayer input')
+
+    # Updates a tag-it widget with the requested viewValue
+    update_widget = (widget) ->
+      # Check whether the current content of the editor
+      # is in sync with the actual model value        
+      current = widget.assignedTags()
+      wanted = ctrl.$viewValue or []
+      if (current + '') is (wanted + '')
+        # We are good to go, nothing to do
+      else      
+        # Editor widget's content is different.
+        # (Probably because of a cancelled edit.)
+        # Copy the tags to the tag editor
+        widget.removeAll()
+        for tag in wanted
+          widget.createTag tag
+
+    widgets = {}            
+
+    # Re-render the word list when the view needs updating.
+    ctrl.$render = ->
+      words = (ctrl.$viewValue or [])
+      if words[0] is "" then words = []
+      scope.words = words
+      if scope.readonly
+        if widgets.displayer?
+          # update the displayer widget
+          update_widget widgets.displayer
+        else
+          # Create displayer widget
+          output.val (words.join ",")
+          output.tagit
+            readOnly: true
+            onTagClicked: (evt, ui) ->
+              tag = ui.tagLabel
+              $window.open "/t/" + tag
+          widgets.displayer = output.data "uiTagit"
+      else
+        if widgets.editor?
+          # Update the editor widget
+          update_widget widgets.editor
+        else
+          # Create editor widget
+          input.val (words.join ",")
+          input.tagit
+            caseSensitive: false
+            placeholderText: scope.placeholder
+            keepPlaceholder: true
+            afterTagAdded: (evt, ui) ->
+              if ui.duringInitialization then return
+              newTab = ui.tagLabel
+              # Create a normalized form
+              normalized = newTab.toLowerCase().replace /[^a-z0-9\-\s]/g, ''
+              if newTab is normalized
+                tagsChanged()
+              else
+                widgets.editor.removeTagByLabel newTab, false
+                widgets.editor.createTag normalized
+                
+            afterTagRemoved: tagsChanged
+            autocomplete:
+              source: []
+          widgets.editor = input.data "uiTagit"
+
+    # React to the changes in the tag editor
+    tagsChanged = -> ctrl.$setViewValue input.val().split ","
+
+    # Re-render when it becomes editable / uneditable.
+    scope.$watch 'readonly', (readonly) -> ctrl.$render()
+
+  require: '?ngModel'
+  restrict: 'E'
+  scope:
+    readonly: '@'
+    placeholder: '@'
+  template: '<div ng-hide="readonly" class="wl-editor"><input /></div><div ng-show="readonly && words" class="wl-displayer"><input /></div>'
+]
+
 angular.module('h.directives', ['ngSanitize'])
-  .directive('annotation', annotation)
   .directive('authentication', authentication)
   .directive('markdown', markdown)
   .directive('privacy', privacy)
@@ -301,4 +359,5 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('userPicker', userPicker)
   .directive('ngBlur', ngBlur)
   .directive('repeatAnim', repeatAnim)
+  .directive('wordlist', wordlist)
 

@@ -1027,3 +1027,119 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     margin: -1em 0;
   }
 }
+
+// Tags for the annotations
+.tags {
+
+  // Add a border to the new tag entry field
+  .wl-editor .tagit-new input[type=text] {
+    border: 1px solid gray;
+    padding: .2em;
+  }
+
+  // We don't want no new input in read only mode
+  .wl-displayer .tagit-new {
+    display: none;
+  }
+
+  // Remove border and padding from the tag editor widget.
+  // Since both the tags and the new tag entry field have their own borders,
+  // this was redundant.
+  .wl-editor ul, .wl-displayer ul {
+    border: none;
+    padding: 0;
+  }
+
+  // Use our usual fonts for the tag labels and input
+  .ui-widget, .tagit-label, .tagit-new input {
+    font: inherit;
+    font-size: 100%;
+  }
+
+  // Add some small space around tag displayer
+  .wl-displayer {
+    margin-top: .2em;
+    margin-bottom: .5em;
+  }
+
+  // We don't need that much padding
+  ul.tagit li.ui-corner-all {
+    padding: .1em .3em;
+  }
+
+  // .. except for the x-mark when editing.
+  .wl-editor ul.tagit li.ui-corner-all {
+    padding-right: 1.2em;
+  }
+}
+
+// Only show one line of tags in bucket view
+.summary .tags {
+  .wl-displayer ul {
+    height: 2.0em;
+    overflow: hidden;
+  }
+}
+
+// Tags for the displayer page
+.displayer-tags {
+  // We don't want no new input here
+  .tagit-new {
+    display: none;
+  }
+
+  // Main widget needs no border or bg
+  .tagit {
+    border: none;
+    background: none;
+    margin-top: 1.0em;
+  }
+
+  // Actual tag labels
+  ul.tagit li.tagit-choice-read-only {
+    background: white;
+    letter-spacing: normal;
+    word-spacing: normal;
+  }
+
+}
+
+// Tags in replies for the displayer page
+.displayer-reply-tags {
+  // We don't want no new input here
+  .tagit-new {
+    display: none;
+  }
+
+  // Main widget needs no border or bg
+  .tagit {
+    border: none;
+  }
+
+  // Use our usual fonts for the tag labels
+  .ui-widget, .tagit-label, {
+    font: inherit;
+    font-size: 100%;
+  }
+
+  // We don't need that much padding
+  ul.tagit li.ui-corner-all {
+    padding: .1em .3em;
+  }
+}
+
+// Special rules for tags on user stream page
+// (To be applied on top of the rules for the displayer page
+.userstream-tags .displayer-tags {
+  // Actual tag labels
+  ul.tagit li.tagit-choice-read-only {
+    font-size: .8em;
+    padding: .2em .4em;
+  }
+}
+
+h3.tagstream, h3.userstream {
+  letter-spacing: normal;
+  word-spacing: normal;
+  margin-top: 0;
+}

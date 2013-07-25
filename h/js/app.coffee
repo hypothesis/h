@@ -2,6 +2,7 @@ imports = [
   'bootstrap'
   'h.controllers'
   'h.directives'
+  'h.app_directives'
   'h.displayer'
   'h.filters'
   'h.services'

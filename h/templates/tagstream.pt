@@ -6,7 +6,7 @@
   </head>
   <style type="text/css"></style>
 
-  <body metal:fill-slot="body" ng-app="h.userstream">
+  <body metal:fill-slot="body" ng-app="h.tagstream">
     <div class="topbar">
       <div class="inner">
         <a class="barbutton pull-left" href="/"
@@ -16,9 +16,9 @@
     </div>
 
     <div class="content paper yui3-g"
-         ng-controller="UserStreamCtrl">
+         ng-controller="TagStreamCtrl">
 
-      <h3 class="tagstream">Annotations by user <b>'{{username}}'</b></h3>
+      <h3 class="tagstream">Annotations with tag <b>'{{tagLabel}}'</b></h3>
       <div class="knockout noise yui3-u-1"
            ng-show="annotations.length">
         <ul>
@@ -86,15 +86,14 @@
                           readonly="true" 
                           name="reply.tags"
                           class="displayer-tags"
-                />          
-              </div>
+                />
             </div>
           </li>
         </ul>
      </div>
 
       <div class="yui3-u-1">
-        User stream page. For a better experience,
+        Tag stream page. For a better experience,
         install the <a href="">extension</a>.
       </div>
     </div>
