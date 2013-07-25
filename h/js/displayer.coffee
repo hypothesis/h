@@ -105,7 +105,7 @@ class Displayer
               unless @idTable[annotation.id]?
                 break
 
-              if $scope.annotation.id = annotation.id
+              if $scope.annotation.id is annotation.id
                 $scope.full_deleted = true
               else
                 #Reply delete
