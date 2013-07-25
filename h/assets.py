@@ -142,7 +142,6 @@ jquery_ui_effects = Bundle(
 # Tag-it
 tagit = Bundle(
     Uglify('h:lib/tag-it.js', output='lib/tag-it.min.js'),
-    CSS('h:lib/jquery.tagit.css')    
 )
 
 # Polyfills

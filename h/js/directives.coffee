@@ -263,88 +263,44 @@ repeatAnim = ->
             .animate({ 'margin-left': '0px' }, 1500)
 
 # Directive to edit/display a word list. Used for tags.
-wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
+tags = ['$window', ($window) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
-    input = elem.find('.wl-editor input')
-    output = elem.find('.wl-displayer input')
+    elem.tagit
+      caseSensitive: false
+      placeholderText: attr.placeholder
+      keepPlaceholder: true
+      preprocessTag: (val) ->
+        val.toLowerCase().replace /[^a-z0-9\-\_\s]/g, ''
+      afterTagAdded: (evt, ui) ->
+        ctrl.$setViewValue elem.tagit 'assignedTags'
+      afterTagRemoved: (evt, ui) ->
+        ctrl.$setViewValue elem.tagit 'assignedTags'
+      autocomplete:
+        source: []
+      onTagClicked: (evt, ui) ->
+        tag = ui.tagLabel
+        $window.open "/t/" + tag
 
-    # Updates a tag-it widget with the requested viewValue
-    update_widget = (widget) ->
-      # Check whether the current content of the editor
-      # is in sync with the actual model value        
-      current = widget.assignedTags()
-      wanted = ctrl.$viewValue or []
-      if (current + '') is (wanted + '')
-        # We are good to go, nothing to do
-      else      
-        # Editor widget's content is different.
-        # (Probably because of a cancelled edit.)
-        # Copy the tags to the tag editor
-        widget.removeAll()
-        for tag in wanted
-          widget.createTag tag
+    ctrl.$formatters.push (tags=[]) ->
+      assigned = elem.tagit 'assignedTags'
+      for t in assigned when t not in tags
+        elem.tagit 'removeTagByLabel', t
+      for t in tags when t not in assigned
+        elem.tagit 'createTag', t
 
-    widgets = {}            
-
-    # Re-render the word list when the view needs updating.
-    ctrl.$render = ->
-      words = (ctrl.$viewValue or [])
-      if words[0] is "" then words = []
-      scope.words = words
-      if scope.readonly
-        if widgets.displayer?
-          # update the displayer widget
-          update_widget widgets.displayer
-        else
-          # Create displayer widget
-          output.val (words.join ",")
-          output.tagit
-            readOnly: true
-            onTagClicked: (evt, ui) ->
-              tag = ui.tagLabel
-              $window.open "/t/" + tag
-          widgets.displayer = output.data "uiTagit"
+    attr.$observe 'readonly', (readonly) ->
+      tagInput = elem.find('input').last()
+      if readonly
+        tagInput.attr('disabled', true)
+        tagInput.removeAttr('placeholder')
       else
-        if widgets.editor?
-          # Update the editor widget
-          update_widget widgets.editor
-        else
-          # Create editor widget
-          input.val (words.join ",")
-          input.tagit
-            caseSensitive: false
-            placeholderText: scope.placeholder
-            keepPlaceholder: true
-            afterTagAdded: (evt, ui) ->
-              if ui.duringInitialization then return
-              newTab = ui.tagLabel
-              # Create a normalized form
-              normalized = newTab.toLowerCase().replace /[^a-z0-9\-\s]/g, ''
-              if newTab is normalized
-                tagsChanged()
-              else
-                widgets.editor.removeTagByLabel newTab, false
-                widgets.editor.createTag normalized
-                
-            afterTagRemoved: tagsChanged
-            autocomplete:
-              source: []
-          widgets.editor = input.data "uiTagit"
-
-    # React to the changes in the tag editor
-    tagsChanged = -> ctrl.$setViewValue input.val().split ","
-
-    # Re-render when it becomes editable / uneditable.
-    scope.$watch 'readonly', (readonly) -> ctrl.$render()
+        tagInput.removeAttr('disabled')
+        tagInput.attr('placeholder', attr['placeholder'])
 
   require: '?ngModel'
-  restrict: 'E'
-  scope:
-    readonly: '@'
-    placeholder: '@'
-  template: '<div ng-hide="readonly" class="wl-editor"><input /></div><div ng-show="readonly && words" class="wl-displayer"><input /></div>'
+  restrict: 'C'
 ]
 
 angular.module('h.directives', ['ngSanitize'])
@@ -355,9 +311,9 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('resettable', resettable)
   .directive('slowValidate', slowValidate)
   .directive('tabReveal', tabReveal)
+  .directive('tags', tags)
   .directive('thread', thread)
   .directive('userPicker', userPicker)
   .directive('ngBlur', ngBlur)
   .directive('repeatAnim', repeatAnim)
-  .directive('wordlist', wordlist)
 

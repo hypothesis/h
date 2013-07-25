@@ -1030,55 +1030,47 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
 // Tags for the annotations
 .tags {
+  @include pie-clearfix;
+  @include reset-box-model;
+  @include reset-font;
+  background: none;
+  clear: both;
+  margin-top: .2em;
+  margin-bottom: .5em;
 
-  // Add a border to the new tag entry field
-  .wl-editor .tagit-new input[type=text] {
-    border: 1px solid gray;
-    padding: .2em;
+  .tagit-close {
+    cursor: pointer;
+    position: absolute;
+    right: .1em;
+    top: 50%;
+    margin-top: -8px;
+    line-height: 17px;
   }
 
-  // We don't want no new input in read only mode
-  .wl-displayer .tagit-new {
-    display: none;
+  .text-icon { display: none; }
+
+  input { float: left; }
+
+  li {
+    display: block;
+    float: left;
+    margin: .1em;
+    padding: .1em 1.2em .1em .3em;
+    position: relative;
+
+    & + li { margin-left: .1em; }
   }
 
-  // Remove border and padding from the tag editor widget.
-  // Since both the tags and the new tag entry field have their own borders,
-  // this was redundant.
-  .wl-editor ul, .wl-displayer ul {
-    border: none;
-    padding: 0;
-  }
-
-  // Use our usual fonts for the tag labels and input
-  .ui-widget, .tagit-label, .tagit-new input {
-    font: inherit;
-    font-size: 100%;
-  }
-
-  // Add some small space around tag displayer
-  .wl-displayer {
-    margin-top: .2em;
-    margin-bottom: .5em;
-  }
-
-  // We don't need that much padding
-  ul.tagit li.ui-corner-all {
-    padding: .1em .3em;
-  }
-
-  // .. except for the x-mark when editing.
-  .wl-editor ul.tagit li.ui-corner-all {
-    padding-right: 1.2em;
+  &[readonly] {
+    input, .tagit-close { display: none; }
+    li { padding-right: .3em; }
   }
 }
 
 // Only show one line of tags in bucket view
 .summary .tags {
-  .wl-displayer ul {
-    height: 2.0em;
-    overflow: hidden;
-  }
+  height: 2.0em;
+  overflow: hidden;
 }
 
 // Tags for the displayer page
@@ -1102,30 +1094,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     word-spacing: normal;
   }
 
-}
-
-// Tags in replies for the displayer page
-.displayer-reply-tags {
-  // We don't want no new input here
-  .tagit-new {
-    display: none;
-  }
-
-  // Main widget needs no border or bg
-  .tagit {
-    border: none;
-  }
-
-  // Use our usual fonts for the tag labels
-  .ui-widget, .tagit-label, {
-    font: inherit;
-    font-size: 100%;
-  }
-
-  // We don't need that much padding
-  ul.tagit li.ui-corner-all {
-    padding: .1em .3em;
-  }
 }
 
 // Special rules for tags on user stream page

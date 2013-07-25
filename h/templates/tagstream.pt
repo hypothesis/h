@@ -79,15 +79,14 @@
                     </div>
                   </div>
                 </div>
+                <div class="yui3-u-1">
+                  <ul ng-model="annotation.tags"
+                      ng-readonly="true"
+                      name="reply.tags"
+                      class="tags"
+                      />
+                </div>
               </div>
-
-
-	      <div class="userstream-tags">
-                <wordlist ng-model="$parent.annotation.tags"
-                          readonly="true" 
-                          name="reply.tags"
-                          class="displayer-tags"
-                />
             </div>
           </li>
         </ul>
