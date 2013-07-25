@@ -299,7 +299,7 @@ wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
           update_widget widgets.displayer
         else
           # Create displayer widget
-          output.attr 'value', words.join ","
+          output.val (words.join ",")
           output.tagit
             readOnly: true
             onTagClicked: (evt, ui) ->
@@ -312,7 +312,7 @@ wordlist = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
           update_widget widgets.editor
         else
           # Create editor widget
-          input.attr 'value', words.join ","
+          input.val (words.join ",")
           input.tagit
             caseSensitive: false
             placeholderText: scope.placeholder
