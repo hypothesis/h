@@ -1073,39 +1073,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   overflow: hidden;
 }
 
-// Tags for the displayer page
-.displayer-tags {
-  // We don't want no new input here
-  .tagit-new {
-    display: none;
-  }
-
-  // Main widget needs no border or bg
-  .tagit {
-    border: none;
-    background: none;
-    margin-top: 1.0em;
-  }
-
-  // Actual tag labels
-  ul.tagit li.tagit-choice-read-only {
-    background: white;
-    letter-spacing: normal;
-    word-spacing: normal;
-  }
-
-}
-
-// Special rules for tags on user stream page
-// (To be applied on top of the rules for the displayer page
-.userstream-tags .displayer-tags {
-  // Actual tag labels
-  ul.tagit li.tagit-choice-read-only {
-    font-size: .8em;
-    padding: .2em .4em;
-  }
-}
-
 h3.tagstream, h3.userstream {
   letter-spacing: normal;
   word-spacing: normal;
