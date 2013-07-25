@@ -20,7 +20,14 @@
 
     <div class="content paper yui3-g"
          ng-controller="DisplayerCtrl">
-      <div class="knockout noise yui3-u-1">
+      <div class="knockout noise yui3-u-1"
+           ng-show="full_deleted">
+          <div class="paper excerpt center">
+              <strong>This annotation has been deleted!</strong>
+          </div>
+      </div>
+      <div class="knockout noise yui3-u-1"
+           ng-hide="full_deleted">
         <div ng-view=""></div>
         <strong>
             <a class="pull-right"
