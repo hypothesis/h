@@ -3,6 +3,7 @@ try:
 except ImportError:
     import json
 
+import socket
 import re
 import urlparse
 
@@ -159,9 +160,12 @@ def includeme(config):
     if 'es.index' in settings:
         app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
     es.init_app(app)
-    with app.test_request_context():
-        Annotation.create_all()
-        Document.create_all()
+    try:
+        with app.test_request_context():
+            Annotation.create_all()
+            Document.create_all()
+    except socket.error:
+        raise Exception("Can not access ElasticSearch at " + app.config["ELASTICSEARCH_HOST"] + "! Are you sure it's running?")
 
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True
