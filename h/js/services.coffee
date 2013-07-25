@@ -87,7 +87,8 @@ class Hypothesis extends Annotator
 
     # Add new annotations to the view when they are created
     this.subscribe 'annotationCreated', (a) =>
-      $rootScope.annotations.unshift a
+      unless a.references?
+        $rootScope.annotations.unshift a
 
     # Remove annotations from the application when they are deleted
     this.subscribe 'annotationDeleted', (a) =>
