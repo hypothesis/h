@@ -81,7 +81,7 @@
               </div>
 
 
-	      <div class="userstream-tags" ng-show="annotation.tags">
+	      <div class="userstream-tags">
                 <wordlist ng-model="$parent.annotation.tags"
                           readonly="true" 
                           name="reply.tags"
