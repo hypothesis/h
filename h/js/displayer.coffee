@@ -20,6 +20,8 @@ class Displayer
     $scope.annotations = [$scope.annotation]
     $scope.annotation.replies = []
     $scope.annotation.reply_count = 0
+    $scope.annotation.ref_length =
+      if $scope.annotation.references? then $scope.annotation.references.length else 0
     @idTable[$scope.annotation.id] = $scope.annotation
     $scope.filter =
       streamfilter
@@ -62,7 +64,7 @@ class Displayer
       #sort annotations by creation date
       data.sort (a, b) ->
         if a.created > b.created then return 1
-        if a.created > b.created then return -1
+        if a.created < b.created then return -1
         0
 
       for annotation in data
