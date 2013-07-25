@@ -27,144 +27,139 @@ Instead of a list of all class selectors,
 you can use the generic selector below, but it's slower:
 [class*="icon-"] {
 */
-.icon-untitled, .icon-untitled-2, .icon-untitled-3, .icon-untitled-4, .icon-untitled-5, .icon-untitled-6, .icon-untitled-7, .icon-untitled-8, .icon-untitled-9, .icon-untitled-10, .icon-untitled-11, .icon-untitled-12, .icon-untitled-13, .icon-untitled-14, .icon-untitled-15, .icon-untitled-16, .icon-untitled-17, .icon-untitled-18, .icon-untitled-19, .icon-untitled-20, .icon-untitled-21, .icon-untitled-22, .icon-untitled-23, .icon-untitled-24, .icon-untitled-25, .icon-untitled-26, .icon-untitled-27, .icon-untitled-28, .icon-untitled-29, .icon-untitled-30, .icon-untitled-31, .icon-untitled-32, .icon-untitled-33, .icon-untitled-34, .icon-untitled-35, .icon-untitled-36, .icon-untitled-37, .icon-untitled-38, .icon-untitled-39, .icon-untitled-40, .icon-untitled-41, .icon-untitled-42, .icon-untitled-43, .icon-plus, .icon-menu, .icon-pen-alt-fill {
+.icon-cog:before, .icon-untitled:before, .icon-untitled-2:before, .icon-export_icon:before, .icon-clipboard_copy_icon:before, .icon-pen_1:before, .icon-flag:before, .icon-delete_icon:before, .icon-heart_empty_icon:before, .icon-heart_icon:before, .icon-triangle:before, .icon-copy:before, .icon-eye:before, .icon-x:before, .icon-cancel:before, .icon-checkmark_icon:before, .icon-checkmark:before, .icon-checkmark-2:before, .icon-clock:before, .icon-export:before, .icon-checkbox_unchecked_icon:before, .icon-checkbox_checked_icon:before, .icon-triangle-2:before, .icon-unlocked:before, .icon-locked:before, .icon-views:before, .icon-browser:before, .icon-ddbutton_filled:before, .icon-ddbutton_empty:before, .icon-reply:before, .icon-star_fav_icon:before, .icon-star_fav_empty_icon:before, .icon-triright:before, .icon-trileft:before, .icon-comment:before, .icon-comment2:before, .icon-comment2-2:before, .icon-comment2-3:before, .icon-settings:before, .icon-wrench:before, .icon-commentflip:before, .icon-hyp-logo4:before, .icon-plus:before, .icon-menu:before, .icon-pen-alt-fill:before {
 	font-family: 'icomoon';
 	speak: none;
 	font-style: normal;
 	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
 }
-.icon-untitled:before {
+.icon-cog:before {
 	content: "\22";
 }
-.icon-untitled-2:before {
+.icon-untitled:before {
 	content: "\23";
 }
-.icon-untitled-3:before {
+.icon-untitled-2:before {
 	content: "\24";
 }
-.icon-untitled-4:before {
+.icon-export_icon:before {
 	content: "\25";
 }
-.icon-untitled-5:before {
+.icon-clipboard_copy_icon:before {
 	content: "\26";
 }
-.icon-untitled-6:before {
+.icon-pen_1:before {
 	content: "\27";
 }
-.icon-untitled-7:before {
+.icon-flag:before {
 	content: "\28";
 }
-.icon-untitled-8:before {
+.icon-delete_icon:before {
 	content: "\29";
 }
-.icon-untitled-9:before {
+.icon-heart_empty_icon:before {
 	content: "\2b";
 }
-.icon-untitled-10:before {
+.icon-heart_icon:before {
 	content: "\2c";
 }
-.icon-untitled-11:before {
+.icon-triangle:before {
 	content: "\2f";
 }
-.icon-untitled-12:before {
+.icon-copy:before {
 	content: "\33";
 }
-.icon-untitled-13:before {
+.icon-eye:before {
 	content: "\34";
 }
-.icon-untitled-14:before {
+.icon-x:before {
 	content: "\36";
 }
-.icon-untitled-15:before {
+.icon-cancel:before {
 	content: "\38";
 }
-.icon-untitled-16:before {
+.icon-checkmark_icon:before {
 	content: "\39";
 }
-.icon-untitled-17:before {
+.icon-checkmark:before {
 	content: "\3a";
 }
-.icon-untitled-18:before {
+.icon-checkmark-2:before {
 	content: "\35";
 }
-.icon-untitled-19:before {
+.icon-clock:before {
 	content: "\37";
 }
-.icon-untitled-20:before {
+.icon-export:before {
 	content: "\2a";
 }
-.icon-untitled-21:before {
+.icon-checkbox_unchecked_icon:before {
 	content: "\3e";
 }
-.icon-untitled-22:before {
+.icon-checkbox_checked_icon:before {
 	content: "\3f";
 }
-.icon-untitled-23:before {
+.icon-triangle-2:before {
 	content: "\3c";
 }
-.icon-untitled-24:before {
+.icon-unlocked:before {
 	content: "\e000";
 }
-.icon-untitled-25:before {
+.icon-locked:before {
 	content: "\e001";
 }
-.icon-untitled-26:before {
+.icon-views:before {
 	content: "\e002";
 }
-.icon-untitled-27:before {
+.icon-browser:before {
 	content: "\e003";
 }
-.icon-untitled-28:before {
+.icon-ddbutton_filled:before {
 	content: "\e007";
 }
-.icon-untitled-29:before {
+.icon-ddbutton_empty:before {
 	content: "\e008";
 }
-.icon-untitled-30:before {
+.icon-reply:before {
 	content: "\e004";
 }
-.icon-untitled-31:before {
+.icon-star_fav_icon:before {
 	content: "\e005";
 }
-.icon-untitled-32:before {
+.icon-star_fav_empty_icon:before {
 	content: "\e006";
 }
-.icon-untitled-33:before {
+.icon-triright:before {
 	content: "\e009";
 }
-.icon-untitled-34:before {
+.icon-trileft:before {
 	content: "\e00a";
 }
-.icon-untitled-35:before {
+.icon-comment:before {
 	content: "\e00b";
 }
-.icon-untitled-36:before {
+.icon-comment2:before {
 	content: "\e00c";
 }
-.icon-untitled-37:before {
+.icon-comment2-2:before {
 	content: "\e00e";
 }
-.icon-untitled-38:before {
+.icon-comment2-3:before {
 	content: "\e00d";
 }
-.icon-untitled-39:before {
+.icon-settings:before {
 	content: "\e00f";
 }
-.icon-untitled-40:before {
+.icon-wrench:before {
 	content: "\e020";
 }
-.icon-untitled-41:before {
+.icon-commentflip:before {
 	content: "\e010";
 }
-.icon-untitled-42:before {
+.icon-hyp-logo4:before {
 	content: "\e014";
-}
-.icon-untitled-43:before {
-	content: "\f000";
 }
 .icon-plus:before {
 	content: "\e011";
