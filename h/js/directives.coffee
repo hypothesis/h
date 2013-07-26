@@ -1,29 +1,3 @@
-annotation = ['$filter', 'annotator', ($filter, annotator) ->
-  link: (scope, elem, attrs, controller) ->
-    return unless controller?
-
-    # Bind shift+enter to save
-    elem.bind
-      keydown: (e) ->
-        if e.keyCode == 13 && e.shiftKey
-          e.preventDefault()
-          scope.save()
-
-    # Watch for changes
-    scope.$watch 'model.$modelValue.id', (id) ->
-      scope.thread = annotator.threading.idTable[id]
-
-    # Publish the controller
-    scope.model = controller
-  controller: 'AnnotationController'
-  priority: 100  # Must run before ngModel
-  require: '?ngModel'
-  restrict: 'C'
-  scope: {}
-  templateUrl: 'annotation.html'
-]
-
-
 authentication = ->
   base =
     username: null
@@ -288,8 +262,51 @@ repeatAnim = ->
             .css({ 'margin-left': itemElm.width() })
             .animate({ 'margin-left': '0px' }, 1500)
 
+# Directive to edit/display a tag list.
+tags = ['$window', ($window) ->
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
+
+    elem.tagit
+      caseSensitive: false
+      placeholderText: attr.placeholder
+      keepPlaceholder: true
+      preprocessTag: (val) ->
+        val.toLowerCase().replace /[^a-z0-9\-\_\s]/g, ''
+      afterTagAdded: (evt, ui) ->
+        ctrl.$setViewValue elem.tagit 'assignedTags'
+      afterTagRemoved: (evt, ui) ->
+        ctrl.$setViewValue elem.tagit 'assignedTags'
+      autocomplete:
+        source: []
+      onTagClicked: (evt, ui) ->
+        tag = ui.tagLabel
+        $window.open "/t/" + tag
+
+    ctrl.$formatters.push (tags=[]) ->
+      assigned = elem.tagit 'assignedTags'
+      for t in assigned when t not in tags
+        elem.tagit 'removeTagByLabel', t
+      for t in tags when t not in assigned
+        elem.tagit 'createTag', t
+
+    attr.$observe 'readonly', (readonly) ->
+      tagInput = elem.find('input').last()
+      assigned = elem.tagit 'assignedTags'
+      if readonly
+        tagInput.attr('disabled', true)
+        tagInput.removeAttr('placeholder')
+        elem.hide() unless assigned.length
+      else
+        tagInput.removeAttr('disabled')
+        tagInput.attr('placeholder', attr['placeholder'])
+        elem.show()
+
+  require: '?ngModel'
+  restrict: 'C'
+]
+
 angular.module('h.directives', ['ngSanitize'])
-  .directive('annotation', annotation)
   .directive('authentication', authentication)
   .directive('markdown', markdown)
   .directive('privacy', privacy)
@@ -297,6 +314,7 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('resettable', resettable)
   .directive('slowValidate', slowValidate)
   .directive('tabReveal', tabReveal)
+  .directive('tags', tags)
   .directive('thread', thread)
   .directive('userPicker', userPicker)
   .directive('ngBlur', ngBlur)
