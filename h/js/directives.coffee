@@ -262,7 +262,7 @@ repeatAnim = ->
             .css({ 'margin-left': itemElm.width() })
             .animate({ 'margin-left': '0px' }, 1500)
 
-# Directive to edit/display a word list. Used for tags.
+# Directive to edit/display a tag list.
 tags = ['$window', ($window) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
@@ -292,12 +292,15 @@ tags = ['$window', ($window) ->
 
     attr.$observe 'readonly', (readonly) ->
       tagInput = elem.find('input').last()
+      assigned = elem.tagit 'assignedTags'
       if readonly
         tagInput.attr('disabled', true)
         tagInput.removeAttr('placeholder')
+        elem.hide() unless assigned.length
       else
         tagInput.removeAttr('disabled')
         tagInput.attr('placeholder', attr['placeholder'])
+        elem.show()
 
   require: '?ngModel'
   restrict: 'C'
