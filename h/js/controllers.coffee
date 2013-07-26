@@ -83,7 +83,7 @@ class App
           else
             return unless drafts.discard()
             dynamicBucket = false
-            $location.search('id', null)
+            $location.search({'id' : null })
             annotator.showViewer heatmap.buckets[bucket]
             $scope.$digest()
 
@@ -213,6 +213,11 @@ class App
         $i.triggerHandler('input')
     , 200  # We hope this is long enough
 
+    $scope.showSearchBar = =>
+      annotator.show_search = true
+
+    $scope.isSearchShown = =>
+      annotator.show_search
 
 class Annotation
   this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
@@ -408,8 +413,64 @@ class Viewer
         return new Date()
 
 
+class Search
+  this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
+  constructor: ($location, $routeParams, $scope, annotator) ->
+    $scope.highlighter = '<span class="search-hl-active">$&</span>'
+
+    refresh = =>
+      $scope.text_regexp = new RegExp($routeParams.in_body_text,"ig")
+      $scope.search_filter = $routeParams.matched
+      heatmap = annotator.plugins.Heatmap
+      threads = []
+      for bucket in heatmap.buckets
+        for annotation in bucket
+          thread = annotator.threading.getContainer annotation.id
+
+          #Cut out annotation branches which has no search results
+          children = thread.flattenChildren()
+          hit_in_children = false
+          if children?
+            for child in children
+              child.highlightText = child.text
+              direct_match = $scope.search_filter.indexOf(child.id)!=-1
+              sibling_match = false
+              childthread = annotator.threading.getContainer child.id
+              childchilds = childthread.flattenChildren()
+              if childchilds?
+                for childchild in childchilds
+                  if $scope.search_filter.indexOf(childchild.id)!=-1
+                    sibling_match = true
+                    break
+              child._open = direct_match or sibling_match
+              if child.id in $scope.search_filter
+                hit_in_children = true
+                if $routeParams.in_body_text and
+                child.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
+                  #Add highlight
+                  child.highlightText = child.text.replace $scope.text_regexp, $scope.highlighter
+          unless annotation.id in $scope.search_filter or hit_in_children
+            continue
+          if $routeParams.whole_document or annotation in $scope.annotations
+            annotation.highlightText = annotation.text
+            #direct_match = $scope.search_filter.indexOf(annotation.id)!=-1
+            annotation._open = true
+            if $routeParams.in_body_text and
+            annotation.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
+              #Add highlight
+              annotation.highlightText = annotation.text.replace $scope.text_regexp, $scope.highlighter
+            threads.push thread
+      $scope.threads = threads
+      #Replace this with threading call
+
+    $scope.$on '$routeUpdate', refresh
+
+    refresh()
+
+
 angular.module('h.controllers', ['bootstrap'])
   .controller('AppController', App)
   .controller('AnnotationController', Annotation)
   .controller('EditorController', Editor)
   .controller('ViewerController', Viewer)
+  .controller('SearchController', Search)

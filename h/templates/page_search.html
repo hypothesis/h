@@ -1,0 +1,33 @@
+<ul class="sliding-panels">
+  <!-- Search -->
+  <li>
+    <ul>
+      <li ng-repeat="thread in threads"
+        class="stream-list summary">
+        <!-- Thread view -->
+        <div data-recursive="" class="paper thread">
+          <!-- Annotation -->
+            <div class="detail annotation thread"
+                 name="annotation"
+                 ng-model="$parent.thread.message"
+                 mode="search"/>
+
+          <!-- Replies -->
+          <ul>
+            <li class="thread"
+                ng-hide="!thread.message._open"
+                ng-class="!thread.message._open && 'collapsed' || ''"
+                ng-repeat="thread in thread.children | orderBy:sortThread:true"
+                ng-transclude>
+               <a href=""
+                  class="threadexp"
+                  title="{{thread.message._open && 'Expand' || 'Collapse'}}"
+                  ng-click="thread.message._open = !thread.message._open"
+               />
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+</ul>

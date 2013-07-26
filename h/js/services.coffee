@@ -44,14 +44,15 @@ class Hypothesis extends Annotator
   # Internal state
   dragging: false     # * To enable dragging only when we really want to
   ongoing_edit: false # * Is there an interrupted edit by login
+  show_search: false  # * Toggle showing the visualsearchbar
 
   # Here as a noop just to make the Permissions plugin happy
   # XXX: Change me when Annotator stops assuming things about viewers
   viewer:
     addField: (-> )
 
-  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts']
-  constructor: ($document, $location, $rootScope, $route, drafts) ->
+  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts', '$filter']
+  constructor: ($document, $location, $rootScope, $route, drafts, $filter) ->
     super ($document.find 'body')
 
     # Load plugins
@@ -118,6 +119,116 @@ class Hypothesis extends Annotator
 
     # Reload the route after annotations are loaded
     this.subscribe 'annotationsLoaded', -> $route.reload()
+
+    @user_filter = $filter('userName')
+    search_query = ''
+    unless typeof(localStorage) is 'undefined'
+      search_query = localStorage.getItem("hyp_page_search_query")
+      console.log 'Loading back search query: ' + search_query
+
+    @visualSearch = VS.init
+      container: $('.visual-search')
+      query: search_query
+      callbacks:
+        search: (query, searchCollection) =>
+          unless query
+            return
+
+          matched = []
+          whole_document = true
+          in_body_text = ''
+          for searchItem in searchCollection.models
+            if searchItem.attributes.category is 'area' and
+            searchItem.attributes.value is 'sidebar'
+              whole_document = false
+
+            if searchItem.attributes.category is 'text'
+              in_body_text = searchItem.attributes.value.toLowerCase()
+
+          if whole_document
+            annotations = @plugins.Store.annotations
+          else
+            annotations = $rootScope.annotations
+
+          for annotation in annotations
+            matches = true
+            for searchItem in searchCollection.models
+              category = searchItem.attributes.category
+              value = searchItem.attributes.value
+              switch category
+                when 'user'
+                  userName = @user_filter annotation.user
+                  unless userName.toLowerCase() is value.toLowerCase()
+                    matches = false
+                    break
+                when 'text'
+                  unless annotation.text? and annotation.text.toLowerCase().indexOf(value.toLowerCase()) > -1
+                    matches = false
+                    break
+                when 'time'
+                    delta = Math.round((+new Date - new Date(annotation.updated)) / 1000)
+                    switch value
+                      when '5 minutes'
+                        unless delta <= 60*5
+                          matches = false
+                      when '1 hour'
+                        unless delta <= 60*60
+                          matches = false
+                      when '1 day'
+                        unless delta <= 60*60*24
+                          matches = false
+                      when '1 week'
+                        unless delta <= 60*60*24*7
+                          matches = false
+                      when '1 month'
+                        unless delta <= 60*60*24*31
+                          matches = false
+                      when '1 year'
+                        unless delta <= 60*60*24*366
+                          matches = false
+                when 'group'
+                    priv_public = 'group:__world__' in (annotation.permissions.read or [])
+                    switch value
+                      when 'Public'
+                        unless priv_public
+                          matches = false
+                      when 'Private'
+                        if priv_public
+                          matches = false
+
+            if matches
+              matched.push annotation.id
+
+          #Save query to localStorage
+          unless typeof(localStorage) is 'undefined'
+            try
+              localStorage.setItem "hyp_page_search_query", query
+            catch error
+              console.warn 'Cannot save query to localStorage!'
+              if error is QUOTA_EXCEEDED_ERR
+                console.warn 'localStorage quota exceeded!'
+
+          # Set the path
+          search =
+            whole_document : whole_document
+            matched : matched
+            in_body_text: in_body_text
+          $location.path('/page_search').search(search)
+          $rootScope.$digest()
+
+        facetMatches: (callback) =>
+          if @show_search
+            return callback ['text','area', 'group','time','user'], {preserveOrder: true}
+        valueMatches: (facet, searchTerm, callback) ->
+          switch facet
+            when 'group' then callback ['Public', 'Private']
+            when 'area' then callback ['sidebar', 'document']
+            when 'time'
+              callback ['5 minutes', '1 hour', '1 day', '1 week', '1 month', '1 year']
+        clearSearch: (original) =>
+          @show_search = false
+          original()
+          $rootScope.$digest()
 
   _setupXDM: ->
     $location = @element.injector().get '$location'
@@ -471,8 +582,7 @@ class FlashProvider
       @queues[queue] = @queues[queue]?.concat messages
       this._process() unless @timeout?
 
-
-angular.module('h.services', ['ngResource'])
+angular.module('h.services', ['ngResource','h.filters'])
   .provider('authentication', AuthenticationProvider)
   .provider('drafts', DraftProvider)
   .provider('flash', FlashProvider)

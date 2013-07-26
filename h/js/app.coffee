@@ -17,6 +17,10 @@ configure = ($routeProvider) ->
     controller: 'ViewerController'
     reloadOnSearch: false
     templateUrl: 'viewer.html'
+  $routeProvider.when '/page_search',
+    controller: 'SearchController'
+    reloadOnSearch: false
+    templateUrl: 'page_search.html'
   $routeProvider.otherwise
     redirectTo: '/viewer'
 configure.$inject = ['$routeProvider']
