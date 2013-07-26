@@ -56,6 +56,8 @@ class Store(object):
 
         hits = []
         for res in payload['hits']['hits']:
+            #Add id
+            res["_source"]["id"] = res["_id"]
             hits.append(res["_source"])
         return hits
 

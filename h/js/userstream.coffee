@@ -19,7 +19,7 @@ class UserStream
     $scope.username = $location.absUrl().split('/').pop()
     $scope.filter =
       streamfilter
-        .setPastDataHits(100)
+        .setPastDataHits(150)
         .setMatchPolicyIncludeAny()
         .setClausesParse('user:=' + $scope.username)
         .getFilter()
@@ -28,8 +28,29 @@ class UserStream
       for annotation in data
         annotation.action = action
         annotation.quote = get_quote annotation
+        annotation._share_link = window.location.protocol +
+        '//' + window.location.hostname + ':' + window.location.port + "/a/" + annotation.id
         annotation._anim = 'fade'
-        $scope.annotations.splice 0,0,annotation
+        switch action
+          when 'create', 'past'
+            unless annotation in $scope.annotations
+              $scope.annotations.splice 0,0,annotation
+          when 'update'
+            index = 0
+            for ann in $scope.annotations
+              if ann.id is annotation.id
+                #Remove the original
+                $scope.annotations.splice index,1
+                #Put back the edited
+                $scope.annotations.splice 0,0,annotation
+                break
+              index +=1
+          when 'delete'
+            for ann in $scope.annotations
+              if ann.id is annotation.id
+                $scope.annotations.splice index,1
+                break
+              index +=1
 
     $scope.open = =>
       $scope.sock = new SockJS(@path)

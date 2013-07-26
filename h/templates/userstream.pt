@@ -30,6 +30,9 @@
                  ng-click="view=!view">
               <div class="small">
                 <div class="pull-right paper annotation-header-width">
+                  <a class="launch-icon show" ng-href="{{annotation._share_link}}" target="_blank"></a>
+                </div>
+                <div class="pull-right paper annotation-header-width">
                   {{ annotation.updated | fuzzyTime }}
                 </div>
                 <div class="no-overflow">
