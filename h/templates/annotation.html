@@ -63,6 +63,17 @@
             class="body"
             name="text" />
 
+  <!-- Tip about Markdown -->
+  <span ng-hide="!editing" class="tip"><a href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown</a> is supported.</span>
+
+  <!-- Tags -->
+  <ul ng-readonly="!editing"
+      ng-model="model.$modelValue.tags"
+      name="tags"
+      class="tags"
+      placeholder="Add tags"
+  />
+
   <!-- Bottom controls -->
   <div class="buttonbar" ng-show="editing">
     <div class="annotator-controls">

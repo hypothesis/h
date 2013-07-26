@@ -195,6 +195,15 @@ class UserStreamFactory(BaseResource):
         if user is not None:
             return UserStream(request)
 
+class TagStream(BaseResource, dict):
+    pass
+
+
+class TagStreamFactory(BaseResource):
+    def __getitem__(self, key):
+        request = self.request        
+        return TagStream(request)        
+
 
 def includeme(config):
     config.set_root_factory(RootFactory)
@@ -203,3 +212,4 @@ def includeme(config):
     RootFactory.a = AnnotationFactory
     RootFactory.stream = Streamer
     RootFactory.u = UserStreamFactory
+    RootFactory.t = TagStreamFactory    
