@@ -110,7 +110,43 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 }
 
+//CONTROLBAR STUFF////////////////////////////////
+.controlbar {
+    position: absolute;
+    overflow: hidden;
+    width: 40px;
+    height: 100px;
+    z-index: 1;
+    left: 1px;
+    top: 1.8em;
+    -moz-transition:height .25s, -moz-transform .25s;
+    -webkit-transition:height .25s, -webkit-transform .25s;
+    -o-transition:height .25s, -o-transform .25s;
+    transition:height .25s, transform .25s;
+    
+}
 
+.hiddencontrolbar {
+    @extend .controlbar;
+    height: 0px;
+}
+
+.controlbarbutton {
+    position: relative;
+    left: 1px;
+    width: 25px;
+    height: 25px;
+    padding: 5px;
+    margin-top: 5px;
+    box-shadow: 1px 1px 1px 1px;
+    color: gray;
+    background-color: white;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+
+}
 
 //HEATMAP STUFF////////////////////////////////
 .annotator-heatmap {
