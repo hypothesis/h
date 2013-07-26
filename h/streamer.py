@@ -123,7 +123,7 @@ class FilterToElasticFilter(object):
             converted = past.strftime("%Y-%m-%dT%H:%M:%S")
             self.query['filter'] = {"range": {"created": {"gte": converted}}}
         elif self.filter['past_data']['load_past'] == 'hits':
-            self.query['filter'] = {"limit": {"value": self.filter['past_data']['hits']}}
+            self.query['size'] = self.filter['past_data']['hits']
 
     def equals(self, field, value):
         return {"term": {field: value}}
