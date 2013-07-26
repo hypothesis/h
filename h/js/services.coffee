@@ -123,9 +123,9 @@ class Hypothesis extends Annotator
 
     @user_filter = $filter('userName')
     search_query = ''
-    params = $location.search()
-    if params.search_query
-      search_query = params.search_query
+    unless typeof(localStorage) is 'undefined'
+      search_query = localStorage.getItem("hyp_page_search_query")
+      console.log 'Loading back search query: ' + search_query
 
     @visualSearch = VS.init
       container: $('.visual-search')
@@ -200,12 +200,20 @@ class Hypothesis extends Annotator
             if matches
               matched.push annotation.id
 
+          #Save query to localStorage
+          unless typeof(localStorage) is 'undefined'
+            try
+              localStorage.setItem "hyp_page_search_query", query
+            catch error
+              console.warn 'Cannot save query to localStorage!'
+              if error is QUOTA_EXCEEDED_ERR
+                console.warn 'localStorage quota exceeded!'
+
           # Set the path
           search =
             whole_document : whole_document
             matched : matched
             in_body_text: in_body_text
-            search_query: query
           $location.path('/page_search').search(search)
           $rootScope.$digest()
 
