@@ -34,25 +34,7 @@
         <li>Highlight any piece of text to leave an annotation of your own (try
           annotating these instructions).</li>
         <li>Use this bookmarklet to annotate any page on the Web:
-          <a class="btn bookmarklet"
-             href="javascript:(function(){
-                   var documentSSL = 'https:' == document.location.protocol;
-                   var embedURL = '${request.resource_url(context, 'app', 'embed.js')}';
-                   var embedSSL = embedURL.substr(0,5) == 'https';
-                   if (documentSSL && !embedSSL) {
-                     if (confirm('Sorry, but this instance of Hypothes.is is hosted on a HTTP domain, so you can\'t use it on pages in HTTPS domains - like this one. Do you want to visit our readme to learn more about this limitation?')) {
-                       open('https://github.com/hypothesis/h/blob/develop/README.rst#running');
-                     }
-                   } else {
-                     var d=document
-                       , s=d.createElement('script');
-                     s.setAttribute(
-                       'src',
-                       embedURL
-                     );
-                     d.body.appendChild(s)
-                   }
-                   })();">Annotate</a></li>
+          <metal:main use-macro="load: bookmarklet.pt" /></li>
       </ol>
     </div>
   </body>
