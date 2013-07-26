@@ -135,7 +135,7 @@
             </div>
           </div>
 
-          <div class="yui3-u-1 gray-tags">
+          <div class="yui3-u-1">
             <ul ng-model="annotation.tags"
                 ng-readonly="true"
                 name="annotator.tags"

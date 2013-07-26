@@ -1079,7 +1079,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   }
 
   &[readonly] {
-    input, .tagit-close { display: none; }
+    .tagit-new, .tagit-close { display: none; }
     li { padding-right: .3em; }
   }
 }
@@ -1090,13 +1090,25 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   overflow: hidden;
 }
 
-// Specific rules for tags on the displayer page
-.gray-tags .tags {
-  // Make tags white (on gray bg)
-  li { background: white; }
-
-  // Don't show the stub of the editor
-  li.tagit-new { display: none; }
+// Background colors for tags, depending on environment
+body {
+  // By default, body bg is gray, so we go white
+  .tags li { background: white; }
+  .paper { // If we use a paper, then it's white, so we go gray
+    .tags li { background: #e6e6e6; }
+    .noise {
+      .tags li { background: white; }
+      .paper {
+        .tags li { background: #e6e6e6; }
+        .noise {
+          .tags li { background: white; }
+          .paper {
+            .tags li { background: #e6e6e6; }
+          }
+        }
+      }
+    }
+  }
 }
 
 h3.tagstream, h3.userstream {
