@@ -19,7 +19,8 @@ annotation = ['$filter', 'annotator', ($filter, annotator) ->
   priority: 100  # Must run before ngModel
   require: '?ngModel'
   restrict: 'C'
-  scope: {}
+  scope:
+    mode: '@'
   templateUrl: 'annotation.html'
 ]
 

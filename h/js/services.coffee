@@ -163,7 +163,7 @@ class Hypothesis extends Annotator
                     matches = false
                     break
                 when 'text'
-                  unless annotation.text.toLowerCase().indexOf(value.toLowerCase()) > -1
+                  unless annotation.text? and annotation.text.toLowerCase().indexOf(value.toLowerCase()) > -1
                     matches = false
                     break
                 when 'time'
