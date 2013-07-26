@@ -70,6 +70,7 @@ class Store(object):
 
         return result
 
+
 def anonymize_deletes(annotation):
     if annotation.get('deleted', False):
         user = annotation.get('user', '')
@@ -165,7 +166,10 @@ def includeme(config):
             Annotation.create_all()
             Document.create_all()
     except socket.error:
-        raise Exception("Can not access ElasticSearch at " + app.config["ELASTICSEARCH_HOST"] + "! Are you sure it's running?")
+        raise Exception(
+            "Can not access ElasticSearch at %s! Are you sure it's running?" %
+            (app.config["ELASTICSEARCH_HOST"],)
+        )
 
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True
