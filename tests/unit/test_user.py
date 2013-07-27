@@ -9,10 +9,10 @@ class UserTest(AppTestCase):
         """make sure user passwords are stored encrypted
         """
         u1 = User(username=u'test', password=u'test', email=u'test@example.org')
-        self.assertNotEqual(u1.password, 'test')
-        self.session.add(u1)
-        self.session.flush()
-        self.assertNotEqual(u1.password, 'test')
+        assert u1.password != 'test'
+        self.db.add(u1)
+        self.db.flush()
+        assert u1.password != 'test'
 
 
 

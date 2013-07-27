@@ -35,7 +35,7 @@ class SeleniumTestCase(unittest.TestCase):
         cls.Session = sessionmaker(autoflush=False, autocommit=True)
 
     def setUp(self):
-        self.base_url = "https://localhost:4000"
+        self.base_url = "http://localhost:4000"
         env = os.environ
 
         if env.has_key('SAUCE_USERNAME') and env.has_key('SAUCE_ACCESS_KEY'):

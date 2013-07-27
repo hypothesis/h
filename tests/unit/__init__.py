@@ -24,7 +24,7 @@ class AppTestCase(TestCase):
 
     def setUp(self):
         self.connection = self.engine.connect()
-        self.session = self.Session(bind=self.connection)
+        self.db = self.Session(bind=self.connection)
         Base.metadata.bind = self.connection
         Base.metadata.create_all(self.engine)
 
@@ -32,7 +32,7 @@ class AppTestCase(TestCase):
         # empty out the database
         for table in reversed(Base.metadata.sorted_tables):
             self.connection.execute(table.delete())
-        self.session.close()
+        self.db.close()
 
         # TODO: clean out ES index for each test
         #from annotator import annotation, document, es
