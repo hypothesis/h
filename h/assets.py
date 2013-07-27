@@ -123,6 +123,22 @@ jquery_mousewheel = Uglify(
     'lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
 )
 
+# jQuery UI
+jquery_ui = Bundle(
+    Uglify('h:lib/jquery.ui.core.js', output='lib/jquery.ui.core.min.js'),
+    Uglify('h:lib/jquery.ui.widget.js', output='lib/jquery.ui.widget.min.js'),
+    Uglify('h:lib/jquery.ui.position.js', output='lib/jquery.ui.position.min.js'),
+    Uglify('h:lib/jquery.ui.menu.js', output='lib/jquery.ui.menu.min.js'),
+    Uglify('h:lib/jquery.ui.autocomplete.js', output='lib/jquery.ui.autocomplete.min.js'),
+    CSS('h:lib/jquery-ui-smoothness.css'),
+)
+
+jquery_ui_effects = Bundle(
+    Uglify('h:lib/jquery.ui.effect.js', output='lib/jquery.ui.effect.min.js'),
+    Uglify('h:lib/jquery.ui.effect-blind.js', output='lib/jquery.ui.effect-blind.min.js'),
+    Uglify('h:lib/jquery.ui.effect-highlight.js', output='lib/jquery.ui.effect-highlight.min.js')
+)
+
 # Polyfills
 raf = Uglify('lib/polyfills/raf.js', output='lib/polyfills/raf.js.min')
 
@@ -138,8 +154,8 @@ pagedown = Uglify(
     'lib/Markdown.Converter.js',
     output='lib/Markdown.Converter.min.js'
 )
-
 sockjs = Uglify('h:lib/sockjs-0.3.4.js', output='lib/sockjs-client.min.js')
+tagit = Uglify('h:lib/tag-it.js', output='lib/tag-it.min.js')
 
 domTextFamily = Uglify(
     Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
@@ -177,6 +193,9 @@ app = Bundle(
     pagedown,
     raf,
     sockjs,
+    jquery_ui,
+    jquery_ui_effects,
+    tagit,
     Uglify(
         *[
             Coffee('js/%s.coffee' % name,
@@ -187,11 +206,13 @@ app = Bundle(
                 'controllers',
                 'filters',
                 'directives',
+                'app_directives',
                 'displayer',
                 'services',
                 'streamer',
                 'streamfilter',
                 'userstream',
+                'tagstream',
             )
         ],
         output='js/app.min.js'

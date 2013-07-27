@@ -15,6 +15,8 @@
 	content: attr(data-icon);
 	speak: none;
 	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
 }
@@ -23,9 +25,9 @@
 /*
 Instead of a list of all class selectors,
 you can use the generic selector below, but it's slower:
-[class*="icon-"]:before {
+[class*="icon-"] {
 */
-.icon-cog:before, .icon-untitled:before, .icon-untitled-2:before, .icon-export_icon:before, .icon-clipboard_copy_icon:before, .icon-pen_1:before, .icon-flag:before, .icon-delete_icon:before, .icon-heart_empty_icon:before, .icon-heart_icon:before, .icon-triangle:before, .icon-copy:before, .icon-eye:before, .icon-x:before, .icon-cancel:before, .icon-checkmark_icon:before, .icon-checkmark:before, .icon-checkmark-2:before, .icon-clock:before, .icon-export:before, .icon-checkbox_unchecked_icon:before, .icon-checkbox_checked_icon:before, .icon-triangle-2:before, .icon-unlocked:before, .icon-locked:before, .icon-views:before, .icon-browser:before, .icon-ddbutton_filled:before, .icon-ddbutton_empty:before, .icon-reply:before, .icon-star_fav_icon:before, .icon-star_fav_empty_icon:before, .icon-triright:before, .icon-trileft:before, .icon-comment:before, .icon-comment2:before, .icon-comment2-2:before, .icon-comment2-3:before, .icon-settings:before, .icon-wrench:before, .icon-commentflip:before, .icon-hyp-logo4:before {
+.icon-cog:before, .icon-untitled:before, .icon-untitled-2:before, .icon-export_icon:before, .icon-clipboard_copy_icon:before, .icon-pen_1:before, .icon-flag:before, .icon-delete_icon:before, .icon-heart_empty_icon:before, .icon-heart_icon:before, .icon-triangle:before, .icon-copy:before, .icon-eye:before, .icon-x:before, .icon-cancel:before, .icon-checkmark_icon:before, .icon-checkmark:before, .icon-checkmark-2:before, .icon-clock:before, .icon-export:before, .icon-checkbox_unchecked_icon:before, .icon-checkbox_checked_icon:before, .icon-triangle-2:before, .icon-unlocked:before, .icon-locked:before, .icon-views:before, .icon-browser:before, .icon-ddbutton_filled:before, .icon-ddbutton_empty:before, .icon-reply:before, .icon-star_fav_icon:before, .icon-star_fav_empty_icon:before, .icon-triright:before, .icon-trileft:before, .icon-comment:before, .icon-comment2:before, .icon-comment2-2:before, .icon-comment2-3:before, .icon-settings:before, .icon-wrench:before, .icon-commentflip:before, .icon-hyp-logo4:before, .icon-plus:before, .icon-menu:before, .icon-pen-alt-fill:before {
 	font-family: 'icomoon';
 	speak: none;
 	font-style: normal;
@@ -158,4 +160,13 @@ you can use the generic selector below, but it's slower:
 }
 .icon-hyp-logo4:before {
 	content: "\e014";
+}
+.icon-plus:before {
+	content: "\e011";
+}
+.icon-menu:before {
+	content: "\e012";
+}
+.icon-pen-alt-fill:before {
+	content: "\e013";
 }

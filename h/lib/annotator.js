@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-1a8c061
+** Annotator 1.2.6-dev-794ee6a
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-07-17 12:09:22Z
+** Built at: 2013-07-25 10:23:18Z
 */
 
 
@@ -1048,7 +1048,7 @@
           console.log("Could not apply XPath selector to current document           because the quote has changed. (Saved quote is '" + savedQuote + "'.           Current quote is '" + currentQuote + "'.)");
           return null;
         } else {
-          console.log("Saved quote matches.");
+
         }
       } else {
         console.log("No saved quote, nothing to compare. Assume that it's OK.");
@@ -1073,7 +1073,7 @@
           console.log("Could not apply position selector to current document           because the quote has changed. (Saved quote is '" + savedQuote + "'.           Current quote is '" + currentQuote + "'.)");
           return null;
         } else {
-          console.log("Saved quote matches.");
+
         }
       } else {
         console.log("No saved quote, nothing to compare. Assume that it's okay.");
@@ -1162,8 +1162,6 @@
       if (target == null) {
         throw new Error("Trying to find anchor for null target!");
       }
-      console.log("Trying to find anchor for target: ");
-      console.log(target);
       strategies = [this.findAnchorFromRangeSelector, this.findAnchorFromPositionSelector, this.findAnchorWithTwoPhaseFuzzyMatching, this.findAnchorWithFuzzyMatching];
       error = null;
       anchor = null;

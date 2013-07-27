@@ -3,6 +3,7 @@ try:
 except ImportError:
     import json
 
+import socket
 import re
 import urlparse
 
@@ -68,6 +69,7 @@ class Store(object):
             raise exception_response(result.status_int)
 
         return result
+
 
 def anonymize_deletes(annotation):
     if annotation.get('deleted', False):
@@ -159,9 +161,15 @@ def includeme(config):
     if 'es.index' in settings:
         app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
     es.init_app(app)
-    with app.test_request_context():
-        Annotation.create_all()
-        Document.create_all()
+    try:
+        with app.test_request_context():
+            Annotation.create_all()
+            Document.create_all()
+    except socket.error:
+        raise Exception(
+            "Can not access ElasticSearch at %s! Are you sure it's running?" %
+            (app.config["ELASTICSEARCH_HOST"],)
+        )
 
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True

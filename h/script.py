@@ -43,13 +43,12 @@ def start(args):
     configuration found in `deveopment.ini` and a hot code reloader enabled.
     """
     if not len(args):  # Default to dev mode
+        from pyramid.scripts import pserve
+        pserve.ensure_port_cleanup([('0.0.0.0', 5000)])
         args.append('development.ini')
         args.append('--reload')
 
-    from pyramid.scripts.pserve import ensure_port_cleanup, main
-
-    ensure_port_cleanup([('0.0.0.0', 5000)])
-    main(['hypothesis'] + args)
+    pserve.main(['hypothesis'] + args)
 
 
 main = command.main

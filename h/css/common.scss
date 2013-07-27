@@ -479,6 +479,21 @@ blockquote {
   @include fonticon("\2a", left);
 }
 
+//Controlbar Icons
+.alwaysonhighlights-icon {
+  @include fonticon("\e012", left);
+  color: rgb(211, 211, 211);
+}
+
+.hightlighter-icon {
+  @include fonticon("\e013", left);
+  color: rgb(211, 211, 211);
+}
+
+.comment-icon {
+  @include fonticon("\e011", left);
+  color: rgb(211, 211, 211);
+}
 
 
 //VISIBILITY
@@ -866,9 +881,10 @@ blockquote {
   margin:0;
 }
 
-
-.center_button {
-  text-align: center;
+.knockout {
+  .center {
+    text-align: center;
+  }
 }
 
 .button_controls {
@@ -1026,4 +1042,65 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     padding: 1em;
     margin: -1em 0;
   }
+}
+
+// Tags for the annotations
+.tags {
+  @include pie-clearfix;
+  @include reset-box-model;
+  @include reset-font;
+  background: none;
+  clear: both;
+  margin-top: .2em;
+  margin-bottom: .5em;
+
+  .tagit-close {
+    cursor: pointer;
+    position: absolute;
+    right: .1em;
+    top: 50%;
+    margin-top: -8px;
+    line-height: 17px;
+  }
+
+  .text-icon { display: none; }
+
+  input { float: left; }
+
+  li {
+    cursor: pointer;
+    display: block;
+    float: left;
+    margin: .1em;
+    padding: .1em 1.2em .1em .3em;
+    position: relative;
+
+    & + li { margin-left: .1em; }
+  }
+
+  &[readonly] {
+    input, .tagit-close { display: none; }
+    li { padding-right: .3em; }
+  }
+}
+
+// Only show one line of tags in bucket view
+.summary .tags {
+  height: 2.0em;
+  overflow: hidden;
+}
+
+// Specific rules for tags on the displayer page
+.gray-tags .tags {
+  // Make tags white (on gray bg)
+  li { background: white; }
+
+  // Don't show the stub of the editor
+  li.tagit-new { display: none; }
+}
+
+h3.tagstream, h3.userstream {
+  letter-spacing: normal;
+  word-spacing: normal;
+  margin-top: 0;
 }

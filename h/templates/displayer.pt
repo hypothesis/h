@@ -20,7 +20,14 @@
 
     <div class="content paper yui3-g"
          ng-controller="DisplayerCtrl">
-      <div class="knockout noise yui3-u-1">
+      <div class="knockout noise yui3-u-1"
+           ng-show="full_deleted">
+          <div class="paper excerpt center">
+              <strong>This annotation has been deleted!</strong>
+          </div>
+      </div>
+      <div class="knockout noise yui3-u-1"
+           ng-hide="full_deleted">
         <div ng-view=""></div>
         <strong>
             <a class="pull-right"
@@ -70,7 +77,7 @@
                      ng-show="annotation.reply_count"
                      count="annotation.reply_count"
                      when="{one: '1 reply', other: '{} replies'}" />
-                 </div>
+                </div>
               </div>
 
               <script type="text/ng-template"  id="annotation_renderer.html">
@@ -93,6 +100,14 @@
                     <span ng-show="reply.deleted">Reason:</span>
                     <span ng-bind-html-unsafe="reply.text | converter"/>
                   </div>
+
+                  <div>
+                    <ul ng-model="reply.tags"
+                        ng-readonly="true"
+                        name="reply.tags"
+                        class="tags"
+                    />
+                  </div>
                   <div class="magicontrols small">
                     <span class="reply-count"
                        ng-pluralize=""
@@ -110,16 +125,25 @@
                 </ul>
               </script>
 
-                <!-- Thread view -->
-                <ul>
-                    <li ng-repeat="reply in annotation.replies"
-                        ng-include="'annotation_renderer.html'"
-                        class="thread"
-                        ng-class="collapsed && 'collapsed' || ''"></li>
-                </ul>
+              <!-- Thread view -->
+              <ul>
+                <li ng-repeat="reply in annotation.replies"
+                    ng-include="'annotation_renderer.html'"
+                    class="thread"
+                    ng-class="collapsed && 'collapsed' || ''"></li>
+              </ul>
             </div>
           </div>
 
+          <div class="yui3-u-1 gray-tags">
+            <ul ng-model="annotation.tags"
+                ng-readonly="true"
+                name="annotator.tags"
+                class="tags"
+                />
+          </div>
+        </div>
+      </div>
       <div class="yui3-u-1">
         You have followed a link to an annotation. For a better experience,
         install the <a href="">extension</a>.

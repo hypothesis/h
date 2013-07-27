@@ -34,16 +34,7 @@
         <li>Highlight any piece of text to leave an annotation of your own (try
           annotating these instructions).</li>
         <li>Use this bookmarklet to annotate any page on the Web:
-          <a class="btn bookmarklet"
-             href="javascript:(function(){
-                     var d=document
-                       , s=d.createElement('script');
-                     s.setAttribute(
-                       'src',
-                       '${request.resource_url(context, 'app', 'embed.js')}'
-                     );
-                     d.body.appendChild(s)
-                   })();">Annotate</a></li>
+          <metal:main use-macro="load: bookmarklet.pt" /></li>
       </ol>
     </div>
   </body>

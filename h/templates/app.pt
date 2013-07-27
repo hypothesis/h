@@ -16,7 +16,12 @@
     <!-- Toolbar -->
     <div class="topbar" class="form-inline" ng-class="frame.visible && 'shown'">
 
-      <div class="tri" ng-click="frame.visible = !frame.visible"></div>
+      <div class="tri"
+           ng-click="frame.visible = !frame.visible"
+           ng-init="cbStyle='hiddencontrolbar'"
+           ng-mouseenter="cbStyle='controlbar'"
+           ng-mouseleave="cbStyle='hiddencontrolbar'"
+           ></div>
 
       <div class="inner" ng-switch="auth.persona">
         <a class="pull-right" href=""
@@ -30,6 +35,16 @@
              data-user-picker-options="auth.personas">
         </div>
       </div>
+
+      <!-- Controlbar -->
+      <div ng-mouseenter="cbStyle='controlbar'" ng-class="cbStyle">
+        <ul>
+          <li class="controlbarbutton"><a class="alwaysonhighlights-icon" href=""></a></li>
+          <li class="controlbarbutton"><a class="hightlighter-icon" href=""></a></li>
+          <li class="controlbarbutton"><a class="comment-icon" href=""></a></li>
+        </ul>
+      </div>
+      
 
       <!-- Account and Authentication -->
       <div class="sheet collapsed"
