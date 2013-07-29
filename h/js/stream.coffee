@@ -43,7 +43,7 @@ class Stream
         switch action
           when 'create', 'past'
             unless annotation in $scope.annotations
-              $scope.annotations.splice 0,0,annotation
+              $scope.annotations.unshift annotation
           when 'update'
             index = 0
             for ann in $scope.annotations
@@ -51,7 +51,7 @@ class Stream
                 #Remove the original
                 $scope.annotations.splice index,1
                 #Put back the edited
-                $scope.annotations.splice 0,0,annotation
+                $scope.annotations.unshift annotation
                 break
               index +=1
           when 'delete'
