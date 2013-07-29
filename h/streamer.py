@@ -270,15 +270,15 @@ def after_action(event):
 
     manager = request.get_sockjs_manager()
     for session in manager.active_sessions():
-        if not authz.authorize(annotation, 'read', session.request.user):
-            continue
-
         registry = session.request.registry
         store = registry.queryUtility(interfaces.IStoreClass)(session.request)
         if 'references' in annotation:
             parent = store.read(annotation['references'][-1])
             if 'text' in parent:
                 annotation['quote'] = parent['text']
+
+        if not authz.authorize(annotation, 'read', session.request.user):
+            continue
 
         if not session.filter.match(annotation, action):
             continue
