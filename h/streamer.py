@@ -28,7 +28,7 @@ def check_favicon(icon_link, parsed_uri, domain):
             icon_link= parsed_uri[0] + "://" + icon_link[2:]
         else:
             icon_link = domain + icon_link
-        #Check if the icon_link url really exists
+        # Check if the icon_link url really exists
         try:
             r2 = requests.head(icon_link)
             if r2.status_code != 200:
@@ -112,7 +112,7 @@ class FilterToElasticFilter(object):
 
         if len(self.filter['clauses']):
             clauses = self.convert_clauses(self.filter['clauses'])
-            #apply match policy
+            # apply match policy
             getattr(self, self.filter['match_policy'])(self.query['query']['bool'], clauses)
         else:
             self.query['query'] = {"match_all": {}}
@@ -185,7 +185,7 @@ class FilterHandler(object):
     def __init__(self, filter_json):
         self.filter = filter_json
 
-    #operators
+    # operators
     operators = {"equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
         "ge": 'ge', "one_of": 'contains', "first_of": 'first_of'
     }
@@ -196,7 +196,7 @@ class FilterHandler(object):
             return False
         else: return getattr(operator, self.operators[clause['operator']])(field_value, clause['value'])
 
-    #match_policies
+    # match_policies
     def include_any(self, target):
         for clause in self.filter['clauses']:
             if self.evaluate_clause(clause, target): return True
