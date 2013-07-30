@@ -64,20 +64,43 @@ class SeleniumTestCase(unittest.TestCase):
         Base.metadata.bind = self.connection
         Base.metadata.create_all(self.engine)
 
-        self._wipe_elastic_search()
+        self._wipe()
 
     def tearDown(self):
         self.driver.quit()
+        self._wipe()
 
-        # clean out users so subsequent tests can register without collisions
-        for user in self.session.query(User).all():
-            self.session.delete(user)
+    def _wipe(self):
+        self._wipe_users()
+        self._wipe_elasticsearch()
 
-    def _wipe_elastic_search(self):
+    def _wipe_elasticsearch(self):
         # TODO: ideally we should be able to use annotator.elasticsearch here
         es_index = settings['es.index'] 
         es_host = settings['es.host']
         # XXX: delete annotations and documents
+
+    def _wipe_users(self):
+        for user in self.session.query(User).all():
+            self.session.delete(user)
+        self.session.flush()
+
+    def login(self):
+        "registers as test/test@example.org/test"
+        driver = self.driver
+        driver.get(self.base_url + "/")
+        with Annotator(driver):
+            driver.find_element_by_css_selector("div.tri").click()
+            driver.find_element_by_link_text("Sign in").click()
+            driver.find_element_by_link_text("Create an account").click()
+            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"username\"]").clear()
+            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"username\"]").send_keys("test")
+            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"email\"]").clear()
+            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"email\"]").send_keys("test@example.org")
+            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"password\"]").clear()
+            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"password\"]").send_keys("test")
+            driver.find_element_by_name("sign_up").click()
+            driver.find_element_by_css_selector("div.tri").click()
 
 class Annotator():
     """

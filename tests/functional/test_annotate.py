@@ -1,0 +1,37 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import NoSuchElementException
+import unittest, time, re
+
+from . import SeleniumTestCase, Annotator
+
+class TestAnnotation(SeleniumTestCase):
+    
+    def test_annotation(self):
+        driver = self.driver
+        driver.get(self.base_url + "/")
+        self.login()
+        script = """
+            var p = $("p")[0];
+            var range = document.createRange();
+            range.selectNodeContents(p);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            $(document).mouseup(p);
+            """
+        driver.execute_script(script)
+        """
+        p = driver.find_element_by_css_selector("p")
+        action = webdriver.ActionChains(driver)
+        action.move_to_element_with_offset(p, 20, 0)
+        action.click_and_hold()
+        action.move_to_element_with_offset(p, 120, 0)
+        action.release()
+        action.perform()
+        """
+        time.sleep(10)
+
+if __name__ == "__main__":
+    unittest.main()
