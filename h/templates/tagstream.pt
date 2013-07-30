@@ -76,15 +76,13 @@
                       <div class="body">
                         <span ng-bind-html-unsafe="annotation.text | converter"/>
                       </div>
+                      <ul ng-model="annotation.tags"
+                          ng-readonly="true"
+                          name="reply.tags"
+                          class="tags"
+                      />
                     </div>
                   </div>
-                </div>
-                <div class="yui3-u-1 gray-tags">
-                  <ul ng-model="annotation.tags"
-                      ng-readonly="true"
-                      name="reply.tags"
-                      class="tags"
-                      />
                 </div>
               </div>
             </div>

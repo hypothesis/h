@@ -1092,15 +1092,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   overflow: hidden;
 }
 
-// Specific rules for tags on the displayer page
-.gray-tags .tags {
-  // Make tags white (on gray bg)
-  li { background: white; }
-
-  // Don't show the stub of the editor
-  li.tagit-new { display: none; }
-}
-
 h3.tagstream, h3.userstream {
   letter-spacing: normal;
   word-spacing: normal;
