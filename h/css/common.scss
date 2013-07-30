@@ -1077,10 +1077,12 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
     & + li { margin-left: .1em; }
   }
+  li.tagit-choice { margin-top: .33em; }
 
   &[readonly] {
-    input, .tagit-close { display: none; }
+    .tagit-new, .tagit-close { display: none; }
     li { padding-right: .3em; }
+    li.tagit-choice { margin-top: .1em; }
   }
 }
 
