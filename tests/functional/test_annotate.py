@@ -22,16 +22,7 @@ class TestAnnotation(SeleniumTestCase):
             $(document).mouseup(p);
             """
         driver.execute_script(script)
-        """
-        p = driver.find_element_by_css_selector("p")
-        action = webdriver.ActionChains(driver)
-        action.move_to_element_with_offset(p, 20, 0)
-        action.click_and_hold()
-        action.move_to_element_with_offset(p, 120, 0)
-        action.release()
-        action.perform()
-        """
-        time.sleep(10)
+        # TODO: persist the annotation and check that it is there
 
 if __name__ == "__main__":
     unittest.main()
