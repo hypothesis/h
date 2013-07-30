@@ -289,6 +289,7 @@ tags = ['$window', ($window) ->
         elem.tagit 'removeTagByLabel', t
       for t in tags when t not in assigned
         elem.tagit 'createTag', t
+      if assigned.length or not attr.readOnly then elem.show() else elem.hide()
 
     attr.$observe 'readonly', (readonly) ->
       tagInput = elem.find('input').last()
@@ -296,7 +297,7 @@ tags = ['$window', ($window) ->
       if readonly
         tagInput.attr('disabled', true)
         tagInput.removeAttr('placeholder')
-        elem.hide() unless assigned.length
+        if assigned.length then elem.show() else elem.hide()
       else
         tagInput.removeAttr('disabled')
         tagInput.attr('placeholder', attr['placeholder'])
