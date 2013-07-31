@@ -585,6 +585,7 @@ class Search
       while pos >= 0
         prev_id = rendered[pos]
         if $scope.ann_info.shown[prev_id]
+          $scope.ann_info.more_bottom[prev_id] = false
           break
         $scope.ann_info.more_bottom[prev_id] = false
         $scope.ann_info.more_top[prev_id] = false
@@ -602,6 +603,7 @@ class Search
       while pos < rendered.length
         next_id = rendered[pos]
         if $scope.ann_info.shown[next_id]
+          $scope.ann_info.more_top[next_id] = false
           break
         $scope.ann_info.more_bottom[next_id] = false
         $scope.ann_info.more_top[next_id] = false
