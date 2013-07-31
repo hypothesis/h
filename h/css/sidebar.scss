@@ -145,20 +145,11 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     border-bottom-left-radius: 2px;
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
-
-}
-
-.controlbarbutton:active {
-    position:relative;
-    top:1px;
-    color: gray;
-    border-right: 1px 1px 1px 1px;
-    border-color: gray;
-    box-shadow: 1px 1px 1px 0px;
-    border-top-left-radius: 2px;
-    border-bottom-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
+  
+    &:active {
+      top:1px;
+      box-shadow: 1px 1px 1px 0px;
+  }
 }
 
 //HEATMAP STUFF////////////////////////////////
