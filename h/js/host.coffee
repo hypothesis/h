@@ -129,10 +129,11 @@ class Annotator.Host extends Annotator
               $(this).removeClass('annotator-hl-active')
         )
 
-        .bind('setAlwaysOnHighlights', (ctx, value) =>
-          console.log "Setting always-on highlights to " + value
+        .bind('setHighlightingMode', (ctx, value) =>
+          console.log "Setting highlighting mode " + value
           body = $('body')
           markerClass = 'annotator-highlights-always-on'
+          this.highlightingMode = value
           if value
             body.addClass markerClass
           else
@@ -283,6 +284,12 @@ class Annotator.Host extends Annotator
     # is needed for preventing the panel from closing while annotating.
     unless event and this.isAnnotator(event.target)
       @mouseIsDown = true
+
+  onSuccessfulSelection: =>
+    if this.highlightingMode
+      window.alert "Should create highlight."
+    else
+      super()
 
   addToken: (token) =>
     @api.notify

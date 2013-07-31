@@ -221,7 +221,7 @@ class App
     $scope.toggleHighlightingMode = ->
       $scope.highlightingMode = not $scope.highlightingMode
       provider.notify
-        method: 'setAlwaysOnHighlights'
+        method: 'setHighlightingMode'
         params: $scope.highlightingMode
 
     $scope.createUnattachedAnnotation = ->

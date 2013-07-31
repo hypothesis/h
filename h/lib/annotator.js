@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-794ee6a
+** Annotator 1.2.6-dev-d7290d3
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-07-25 10:23:18Z
+** Built at: 2013-07-31 14:21:22Z
 */
 
 
@@ -778,6 +778,8 @@
       this.onAdderClick = __bind(this.onAdderClick, this);
       this.onAdderMousedown = __bind(this.onAdderMousedown, this);
       this.onHighlightMouseover = __bind(this.onHighlightMouseover, this);
+      this.onFailedSelection = __bind(this.onFailedSelection, this);
+      this.onSuccessfulSelection = __bind(this.onSuccessfulSelection, this);
       this.checkForEndSelection = __bind(this.checkForEndSelection, this);
       this.checkForStartSelection = __bind(this.checkForStartSelection, this);
       this.clearViewerHideTimer = __bind(this.clearViewerHideTimer, this);
@@ -1418,10 +1420,18 @@
         }
       }
       if (event && this.selectedRanges.length) {
-        return this.adder.css(util.mousePosition(event, this.wrapper[0])).show();
+        return this.onSuccessfulSelection();
       } else {
-        return this.adder.hide();
+        return this.onFailedSelection();
       }
+    };
+
+    Annotator.prototype.onSuccessfulSelection = function() {
+      return this.adder.css(util.mousePosition(event, this.wrapper[0])).show();
+    };
+
+    Annotator.prototype.onFailedSelection = function() {
+      return this.adder.hide();
     };
 
     Annotator.prototype.isAnnotator = function(element) {
