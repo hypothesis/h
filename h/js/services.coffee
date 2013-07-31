@@ -144,6 +144,7 @@ class Hypothesis extends Annotator
 
             if searchItem.attributes.category is 'text'
               in_body_text = searchItem.attributes.value.toLowerCase()
+              text_tokens = searchItem.attributes.value.split ' '
             if searchItem.attributes.category is 'tag'
               tag_search = searchItem.attributes.value.toLowerCase()
 
@@ -164,9 +165,15 @@ class Hypothesis extends Annotator
                     matches = false
                     break
                 when 'text'
-                  unless annotation.text? and annotation.text.toLowerCase().indexOf(value.toLowerCase()) > -1
+                  unless annotation.text?
                     matches = false
                     break
+
+                  for token in text_tokens
+                    unless annotation.text.toLowerCase().indexOf(token.toLowerCase()) > -1
+                      matches = false
+                      break
+
                 when 'tag'
                   unless annotation.tags?
                     matches = false
