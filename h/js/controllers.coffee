@@ -554,11 +554,49 @@ class Search
 
     $scope.$on '$routeUpdate', refresh
 
+    $scope.getThreadId = (id) ->
+      thread = annotator.threading.getContainer id
+      threadid = id
+      if thread.message.references?
+        threadid = thread.message.references[0]
+      threadid
+
     $scope.clickMoreTop = (id) ->
       console.log 'clickMoreTop'
+      threadid = $scope.getThreadId id
+      pos = $scope.render_pos[id]
+      rendered = $scope.render_order[threadid]
+      $scope.ann_info.more_bottom[id] = false
+      $scope.ann_info.more_top[id] = false
+
+      pos -= 1
+      while pos >= 0
+        prev_id = rendered[pos]
+        if $scope.ann_info.shown[prev_id]
+          break
+        $scope.ann_info.more_bottom[prev_id] = false
+        $scope.ann_info.more_top[prev_id] = false
+        $scope.ann_info.shown[prev_id] = true
+        pos -= 1
+
 
     $scope.clickMoreBottom = (id) ->
-      console.log 'clickMoreBottom'
+      threadid = $scope.getThreadId id
+      pos = $scope.render_pos[id]
+      rendered = $scope.render_order[threadid]
+      $scope.ann_info.more_bottom[id] = false
+      $scope.ann_info.more_top[id] = false
+
+      pos += 1
+      while pos < rendered.length
+        next_id = rendered[pos]
+        if $scope.ann_info.shown[next_id]
+          break
+        $scope.ann_info.more_bottom[next_id] = false
+        $scope.ann_info.more_top[next_id] = false
+        $scope.ann_info.shown[next_id] = true
+        pos += 1
+
 
     $scope.sortThread = (thread) ->
       if thread?.message?.updated
