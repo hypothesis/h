@@ -427,57 +427,157 @@ class Viewer
 
 
 class Search
-  this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
-  constructor: ($location, $routeParams, $scope, annotator) ->
+  this.$inject = ['$filter', '$location', '$routeParams', '$scope', 'annotator']
+  constructor: ($filter, $location, $routeParams, $scope, annotator) ->
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
+    $scope.filter_orderBy = $filter('orderBy')
+    $scope.render_order = {}
+    $scope.render_pos = {}
+    $scope.ann_info =
+      shown : {}
+      more_top : {}
+      more_bottom : {}
+
+
+    buildRenderOrder = (threadid, threads) =>
+      unless threads?.length
+        return
+
+      sorted = $scope.filter_orderBy threads, $scope.sortThread, true
+      for thread in sorted
+        console.log 'thread'
+        console.log thread
+
+        $scope.render_pos[thread.message.id] = $scope.render_order[threadid].length
+        $scope.render_order[threadid].push thread.message.id
+        buildRenderOrder(threadid, thread.children)
+
+    setMoreTop = (threadid, annotation) =>
+      unless annotation.id in $scope.search_filter
+        return false
+
+      result = false
+      pos = $scope.render_pos[annotation.id]
+      if pos > 0
+        prev = $scope.render_order[threadid][pos-1]
+        unless prev in $scope.search_filter
+          result = true
+      result
+
+    setMoreBottom = (threadid, annotation) =>
+      unless annotation.id in $scope.search_filter
+        return false
+
+      result = false
+      pos = $scope.render_pos[annotation.id]
+
+      if pos < $scope.render_order[threadid].length-1
+        next = $scope.render_order[threadid][pos+1]
+        unless next in $scope.search_filter
+          result = true
+      result
 
     refresh = =>
-      $scope.text_regexp = new RegExp($routeParams.in_body_text,"ig")
       $scope.search_filter = $routeParams.matched
       heatmap = annotator.plugins.Heatmap
+
+      # Create the regexps for highlighting the matches inside the annotations' bodies
+      $scope.text_tokens = $routeParams.in_body_text.split ' '
+      $scope.text_regexp = []
+      for token in $scope.text_tokens
+        regexp = new RegExp(token,"ig")
+        $scope.text_regexp.push regexp
+
       threads = []
-      text_tokens = $routeParams.in_body_text.split ' '
+      $scope.render_order = {}
+      # Choose the root annotations to work with
       for bucket in heatmap.buckets
         for annotation in bucket
+          # The annotation itself is a hit.
           thread = annotator.threading.getContainer annotation.id
 
-          #Cut out annotation branches which has no search results
+          if annotation.id in $scope.search_filter
+            threads.push thread
+            console.log 'main found'
+            $scope.render_order[annotation.id] = []
+            buildRenderOrder(annotation.id, [thread])
+            continue
+
+          # Maybe it has a child we were looking for
           children = thread.flattenChildren()
-          hit_in_children = false
+          has_search_result = false
           if children?
             for child in children
-              child.highlightText = child.text
-              direct_match = $scope.search_filter.indexOf(child.id)!=-1
-              sibling_match = false
-              childthread = annotator.threading.getContainer child.id
-              childchilds = childthread.flattenChildren()
-              if childchilds?
-                for childchild in childchilds
-                  if $scope.search_filter.indexOf(childchild.id)!=-1
-                    sibling_match = true
-                    break
-              child._open = direct_match or sibling_match
               if child.id in $scope.search_filter
-                hit_in_children = true
-                if $routeParams.in_body_text and
-                child.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
-                  #Add highlight
-                  child.highlightText = child.text.replace $scope.text_regexp, $scope.highlighter
-          unless annotation.id in $scope.search_filter or hit_in_children
-            continue
-          if $routeParams.whole_document or annotation in $scope.annotations
-            annotation.highlightText = annotation.text
-            #direct_match = $scope.search_filter.indexOf(annotation.id)!=-1
-            annotation._open = true
-            if $routeParams.in_body_text and
-            annotation.text.toLowerCase().indexOf($routeParams.in_body_text) > -1
-              #Add highlight
-              annotation.highlightText = annotation.text.replace $scope.text_regexp, $scope.highlighter
+                has_search_result = true
+                break
+
+          if has_search_result
             threads.push thread
+            console.log 'has_search_result'
+            $scope.render_order[annotation.id] = []
+            buildRenderOrder(annotation.id, [thread])
+
+      # Re-construct exact order the annotation threads will be shown
+
+      # Fill search related data before display
+      # - add highlights
+      # - populate the top/bottom show more links
+      # - decide that by default the annotation is shown or hidden
+      for thread in threads
+        thread.message.highlightText = thread.message.text
+        if thread.message.id in $scope.search_filter
+          $scope.ann_info.shown[thread.message.id] = true
+          for regexp in $scope.text_regexp
+            thread.message.highlightText = thread.message.highlightText.replace regexp, $scope.highlighter
+        else
+          $scope.ann_info.shown[thread.message.id] = false
+
+        $scope.ann_info.more_top[thread.message.id] = setMoreTop(thread.message.id, thread.message)
+        $scope.ann_info.more_bottom[thread.message.id] = setMoreBottom(thread.message.id, thread.message)
+
+        children = thread.flattenChildren()
+        if children?
+          for child in children
+            child.highlightText = child.text
+            if child.id in $scope.search_filter
+              $scope.ann_info.shown[child.id] = true
+              for regexp in $scope.text_regexp
+                child.highlightText = child.highlightText.replace regexp, $scope.highlighter
+            else
+              $scope.ann_info.shown[child.id] = false
+
+            $scope.ann_info.more_top[child.id] = setMoreTop(thread.message.id, child)
+            $scope.ann_info.more_bottom[child.id] = setMoreBottom(thread.message.id, child)
+
+      console.log 'search filter'
+      console.log $scope.search_filter
+
+      console.log 'render_order'
+      console.log $scope.render_order
+
+      console.log 'render_pos'
+      console.log $scope.render_pos
+
+      console.log 'info'
+      console.log $scope.ann_info
+
       $scope.threads = threads
       #Replace this with threading call
 
     $scope.$on '$routeUpdate', refresh
+
+    $scope.clickMoreTop = (id) ->
+      console.log 'clickMoreTop'
+
+    $scope.clickMoreBottom = (id) ->
+      console.log 'clickMoreBottom'
+
+    $scope.sortThread = (thread) ->
+      if thread?.message?.updated
+        return new Date(thread.message.updated)
+      else
+        return new Date()
 
     refresh()
 
