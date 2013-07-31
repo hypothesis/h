@@ -129,6 +129,16 @@ class Annotator.Host extends Annotator
               $(this).removeClass('annotator-hl-active')
         )
 
+        .bind('setAlwaysOnHighlights', (ctx, value) =>
+          console.log "Setting always-on highlights to " + value
+          body = $('body')
+          markerClass = 'annotator-highlights-always-on'
+          if value
+            body.addClass markerClass
+          else
+            body.removeClass markerClass
+        )
+
         .bind('getHref', => this.getHref())
 
         .bind('getMaxBottom', =>

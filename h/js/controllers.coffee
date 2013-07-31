@@ -216,8 +216,13 @@ class App
     $scope.toggleAlwaysOnHighlights = ->
       console.log "Should toggle always-on highlights"
 
+    $scope.highlightingMode = false
+
     $scope.toggleHighlightingMode = ->
-      console.log "Should toggle highlighting mode"
+      $scope.highlightingMode = not $scope.highlightingMode
+      provider.notify
+        method: 'setAlwaysOnHighlights'
+        params: $scope.highlightingMode
 
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
