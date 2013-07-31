@@ -51,8 +51,8 @@ class Hypothesis extends Annotator
   viewer:
     addField: (-> )
 
-  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts', '$filter']
-  constructor: ($document, $location, $rootScope, $route, drafts, $filter) ->
+  this.$inject = ['$document', '$filter', '$location', '$rootScope', '$route', 'drafts']
+  constructor: ($document, $filter, $location, $rootScope, $route, drafts) ->
     super ($document.find 'body')
 
     # Load plugins
