@@ -436,6 +436,7 @@ class Search
       $scope.search_filter = $routeParams.matched
       heatmap = annotator.plugins.Heatmap
       threads = []
+      text_tokens = $routeParams.in_body_text.split ' '
       for bucket in heatmap.buckets
         for annotation in bucket
           thread = annotator.threading.getContainer annotation.id
