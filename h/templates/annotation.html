@@ -41,6 +41,8 @@
       <span class="user">{{model.$viewValue.user | userName}}</span>
       <span class="small vis-icon"
             ng-show="form.privacy.$viewValue != 'Public'"></span>
+      <span class="small highlight-icon"
+            ng-hide="model.$viewValue.text || editing || model.$viewValue.deleted || model.$viewValue.tags.length"></span>
     </strong>
   </header>
 
@@ -53,10 +55,6 @@
     </ng-switch>
   </div>
 
-  <div ng-hide="model.$viewValue.text || editing || model.$viewValue.deleted">
-    (highlight)
-  </div>
-  
   <!-- Body -->
   <div ng-hide="mode!='search'">
     <markdown ng-model="$parent.model.$modelValue.highlightText"

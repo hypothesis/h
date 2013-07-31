@@ -71,8 +71,21 @@ class Hypothesis extends Annotator
       unless annotation.highlights?
         annotation.highlights = []
 
-      # Register it with the draft service
-      drafts.add annotation
+      # Register it with the draft service, except when it's an injection
+      unless annotation.inject
+        drafts.add annotation
+      else
+        # This is an injection. Delete the marker.
+        delete annotation.inject
+
+        # Set permissions for private
+        permissions = @plugins.Permissions
+        userId = permissions.options.userId permissions.user
+        annotation.permissions =
+          read: [userId]
+          admin: [userId]
+          update: [userId]
+          delete: [userId]
 
     # Set default owner permissions on all annotations
     for event in ['beforeAnnotationCreated', 'beforeAnnotationUpdated']
