@@ -145,6 +145,8 @@ class Hypothesis extends Annotator
 
             if searchItem.attributes.category is 'text'
               in_body_text = searchItem.attributes.value.toLowerCase()
+            if searchItem.attributes.category is 'tag'
+              tag_search = searchItem.attributes.value.toLowerCase()
 
           if whole_document
             annotations = @plugins.Store.annotations
@@ -166,6 +168,19 @@ class Hypothesis extends Annotator
                   unless annotation.text? and annotation.text.toLowerCase().indexOf(value.toLowerCase()) > -1
                     matches = false
                     break
+                when 'tag'
+                  unless annotation.tags?
+                    matches = false
+                    break
+
+                  found = false
+                  for tag in annotation.tags
+                    if tag_search is tag.toLowerCase()
+                      found = true
+                      break
+                  unless found
+                    matches = false
+                  break
                 when 'time'
                     delta = Math.round((+new Date - new Date(annotation.updated)) / 1000)
                     switch value
@@ -219,7 +234,7 @@ class Hypothesis extends Annotator
 
         facetMatches: (callback) =>
           if @show_search
-            return callback ['text','area', 'group','time','user'], {preserveOrder: true}
+            return callback ['text','tag','area', 'group','time','user'], {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
             when 'group' then callback ['Public', 'Private']
