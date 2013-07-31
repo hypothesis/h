@@ -579,7 +579,6 @@ class Search
       threadid = $scope.getThreadId id
       pos = $scope.render_pos[id]
       rendered = $scope.render_order[threadid]
-      $scope.ann_info.more_bottom[id] = false
       $scope.ann_info.more_top[id] = false
 
       pos -= 1
@@ -598,7 +597,6 @@ class Search
       pos = $scope.render_pos[id]
       rendered = $scope.render_order[threadid]
       $scope.ann_info.more_bottom[id] = false
-      $scope.ann_info.more_top[id] = false
 
       pos += 1
       while pos < rendered.length
