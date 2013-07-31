@@ -89,6 +89,10 @@
   }
 }
 
+.annotator-highlights-always-on .annotator-hl {
+  background: $highlightModeColor;
+}
+
 .annotator-notice {
   display: none;
 }
