@@ -71,8 +71,9 @@ class Hypothesis extends Annotator
       unless annotation.highlights?
         annotation.highlights = []
 
-      # Register it with the draft service
-      drafts.add annotation
+      # Register it with the draft service, except when it's marked as old
+      drafts.add annotation unless annotation.old
+      delete annotation.old
 
     # Set default owner permissions on all annotations
     for event in ['beforeAnnotationCreated', 'beforeAnnotationUpdated']

@@ -47,6 +47,14 @@ class Annotator.Host extends Annotator
     # Scan the document text with the DOM Text libraries
     this.scanDocument "Annotator initialized"
 
+  setAlwaysOnHighlights: (value) ->
+    body = $('body')
+    markerClass = 'annotator-highlights-always-on'        
+    if value
+      body.addClass markerClass
+    else
+      body.removeClass markerClass        
+
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
@@ -130,14 +138,8 @@ class Annotator.Host extends Annotator
         )
 
         .bind('setHighlightingMode', (ctx, value) =>
-          console.log "Setting highlighting mode " + value
-          body = $('body')
-          markerClass = 'annotator-highlights-always-on'
           this.highlightingMode = value
-          if value
-            body.addClass markerClass
-          else
-            body.removeClass markerClass
+          this.setAlwaysOnHighlights value
         )
 
         .bind('getHref', => this.getHref())
@@ -287,7 +289,24 @@ class Annotator.Host extends Annotator
 
   onSuccessfulSelection: =>
     if this.highlightingMode
-      window.alert "Should create highlight."
+
+      # Create the annotation right away
+
+      # Don't use the default method to create an annotation,
+      # because we don't want to publish the beforeAnnotationCreated event
+      # just yet.
+      # 
+      # annotation = this.createAnnotation()
+      #
+      # Create an empty annotation manually instead
+      annotation = {}
+
+      annotation = this.setupAnnotation annotation
+      $(annotation.highlights).addClass 'annotator-hl'
+
+      # Tell the sidebar about the new annotation
+      @plugins.Bridge.injectAnnotation annotation
+
     else
       super()
 
