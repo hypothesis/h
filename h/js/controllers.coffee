@@ -8,10 +8,10 @@ class App
 
   this.$inject = [
     '$compile', '$element', '$http', '$location', '$scope', '$timeout',
-    'annotator', 'authentication', 'drafts', 'flash'
+    '$window', 'annotator', 'authentication', 'drafts', 'flash'
   ]
   constructor: (
-    $compile, $element, $http, $location, $scope, $timeout
+    $compile, $element, $http, $location, $scope, $timeout, $window,
     annotator, authentication, drafts, flash
   ) ->
     {plugins, provider} = annotator
@@ -105,6 +105,10 @@ class App
       unless newValue?.length
         authentication.persona = null
         authentication.token = null
+
+        # Leave Highlighting mode when logging out
+        if $scope.highlightingMode
+          $scope.toggleHighlightingMode()
 
     $scope.$watch 'auth.persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
@@ -219,6 +223,11 @@ class App
     $scope.highlightingMode = false
 
     $scope.toggleHighlightingMode = ->
+      # Check login state first
+      unless plugins.Auth? and plugins.Auth.haveValidToken()
+        $window.alert "You must be logged in to use the Highlighting Mode!"
+        return
+        
       $scope.highlightingMode = not $scope.highlightingMode
       provider.notify
         method: 'setHighlightingMode'
