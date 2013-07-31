@@ -30,6 +30,7 @@
                   class="threadexp"
                   title="{{collapsed && 'Expand' || 'Collapse'}}"
                   ng-click="collapsed = !collapsed"
+                  ng-show="ann_info.shown[thread.message.id]"
                />
             </li>
           </ul>
