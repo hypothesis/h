@@ -39,9 +39,27 @@
       <!-- Controlbar -->
       <div ng-mouseenter="cbStyle='controlbar'" ng-class="cbStyle">
         <ul>
-          <li class="controlbarbutton"><a class="alwaysonhighlights-icon" href=""></a></li>
-          <li class="controlbarbutton"><a class="hightlighter-icon" href=""></a></li>
-          <li class="controlbarbutton"><a class="comment-icon" href=""></a></li>
+          <li class="controlbarbutton">
+            <a title="Toggle always-on highlights"
+               class="alwaysonhighlights-icon" 
+               ng-click="toggleAlwaysOnHighlights()"
+               href="">
+            </a>
+          </li>
+          <li class="controlbarbutton">
+            <a title="Toggle highlighting mode"
+               class="hightlighter-icon" 
+               ng-click="toggleHighlightingMode()"
+               href="">
+            </a>
+          </li>
+          <li class="controlbarbutton">
+            <a title="Create unattached annotation"
+               class="comment-icon"
+               ng-click="createUnattachedAnnotation()"
+               href="">
+            </a>
+          </li>
         </ul>
       </div>
       

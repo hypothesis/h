@@ -213,6 +213,14 @@ class App
         $i.triggerHandler('input')
     , 200  # We hope this is long enough
 
+    $scope.toggleAlwaysOnHighlights = ->
+      console.log "Should toggle always-on highlights"
+
+    $scope.toggleHighlightingMode = ->
+      console.log "Should toggle highlighting mode"
+
+    $scope.createUnattachedAnnotation = ->
+      console.log "Should create unattached annotation"
 
 class Annotation
   this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
