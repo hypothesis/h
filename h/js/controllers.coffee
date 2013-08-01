@@ -424,6 +424,8 @@ class Search
       shown : {}
       more_top : {}
       more_bottom : {}
+      more_top_num : {}
+      more_bottom_num: {}
 
 
     buildRenderOrder = (threadid, threads) =>
@@ -432,9 +434,6 @@ class Search
 
       sorted = $scope.filter_orderBy threads, $scope.sortThread, true
       for thread in sorted
-        console.log 'thread'
-        console.log thread
-
         $scope.render_pos[thread.message.id] = $scope.render_order[threadid].length
         $scope.render_order[threadid].push thread.message.id
         buildRenderOrder(threadid, thread.children)
@@ -485,7 +484,6 @@ class Search
 
           if annotation.id in $scope.search_filter
             threads.push thread
-            console.log 'main found'
             $scope.render_order[annotation.id] = []
             buildRenderOrder(annotation.id, [thread])
             continue
@@ -501,7 +499,6 @@ class Search
 
           if has_search_result
             threads.push thread
-            console.log 'has_search_result'
             $scope.render_order[annotation.id] = []
             buildRenderOrder(annotation.id, [thread])
 
@@ -537,20 +534,22 @@ class Search
             $scope.ann_info.more_top[child.id] = setMoreTop(thread.message.id, child)
             $scope.ann_info.more_bottom[child.id] = setMoreBottom(thread.message.id, child)
 
-      console.log 'search filter'
-      console.log $scope.search_filter
+      # Calculate the number of hidden annotations for <x> more labels
+      for threadid, order of $scope.render_order
+        hidden = 0
+        last_shown = null
+        for id in order
+          if id in $scope.search_filter
+            if last_shown? then $scope.ann_info.more_bottom_num[last_shown] = hidden
+            $scope.ann_info.more_top_num[id] = hidden
+            last_shown = id
+            hidden = 0
+          else
+            hidden += 1
+        if last_shown? then $scope.ann_info.more_bottom_num[last_shown] = hidden
 
-      console.log 'render_order'
-      console.log $scope.render_order
-
-      console.log 'render_pos'
-      console.log $scope.render_pos
-
-      console.log 'info'
-      console.log $scope.ann_info
 
       $scope.threads = threads
-      #Replace this with threading call
 
     $scope.$on '$routeUpdate', refresh
 
@@ -562,7 +561,6 @@ class Search
       threadid
 
     $scope.clickMoreTop = (id) ->
-      console.log 'clickMoreTop'
       threadid = $scope.getThreadId id
       pos = $scope.render_pos[id]
       rendered = $scope.render_order[threadid]
