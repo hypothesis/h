@@ -28,7 +28,7 @@ def check_favicon(icon_link, parsed_uri, domain):
             icon_link= parsed_uri[0] + "://" + icon_link[2:]
         else:
             icon_link = domain + icon_link
-        #Check if the icon_link url really exists
+        # Check if the icon_link url really exists
         try:
             r2 = requests.head(icon_link)
             if r2.status_code != 200:
@@ -112,7 +112,7 @@ class FilterToElasticFilter(object):
 
         if len(self.filter['clauses']):
             clauses = self.convert_clauses(self.filter['clauses'])
-            #apply match policy
+            # apply match policy
             getattr(self, self.filter['match_policy'])(self.query['query']['bool'], clauses)
         else:
             self.query['query'] = {"match_all": {}}
@@ -123,7 +123,7 @@ class FilterToElasticFilter(object):
             converted = past.strftime("%Y-%m-%dT%H:%M:%S")
             self.query['filter'] = {"range": {"created": {"gte": converted}}}
         elif self.filter['past_data']['load_past'] == 'hits':
-            self.query['filter'] = {"limit": {"value": self.filter['past_data']['hits']}}
+            self.query['size'] = self.filter['past_data']['hits']
 
     def equals(self, field, value):
         return {"term": {field: value}}
@@ -185,7 +185,7 @@ class FilterHandler(object):
     def __init__(self, filter_json):
         self.filter = filter_json
 
-    #operators
+    # operators
     operators = {"equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
         "ge": 'ge', "one_of": 'contains', "first_of": 'first_of'
     }
@@ -196,7 +196,7 @@ class FilterHandler(object):
             return False
         else: return getattr(operator, self.operators[clause['operator']])(field_value, clause['value'])
 
-    #match_policies
+    # match_policies
     def include_any(self, target):
         for clause in self.filter['clauses']:
             if self.evaluate_clause(clause, target): return True
@@ -236,11 +236,11 @@ class StreamerSession(Session):
         try:
             payload = json.loads(msg)
 
-            #Let's try to validate the schema
+            # Let's try to validate the schema
             validate(payload, filter_schema)
             self.filter = FilterHandler(payload)
 
-            #If past is given, send the annotations back.
+            # If past is given, send the annotations back.
             if "past_data" in payload and payload["past_data"]["load_past"] != "none":
                 query = FilterToElasticFilter(payload)
                 request = self.request
@@ -250,8 +250,11 @@ class StreamerSession(Session):
 
                 for annotation in annotations:
                     annotation.update(url_values_from_document(annotation))
+                    if 'references' in annotation:
+                        parent = store.read(annotation['references'][-1])
+                        if 'text' in parent:
+                            annotation['quote'] = parent['text']
                 #Finally send filtered annotations
-
                 if len(annotations) > 0:
                     self.send([annotations, 'past'])
         except:
@@ -272,6 +275,12 @@ def after_action(event):
     annotation.update(url_values_from_document(annotation))
 
     for connection in StreamerSession.connections:
+        registry = connection.request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(connection.request)
+        if 'references' in annotation:
+            parent = store.read(annotation['references'][-1])
+            if 'text' in parent:
+                annotation['quote'] = parent['text']
         if not authz.authorize(annotation, 'read', connection.request.user):
             continue
 
