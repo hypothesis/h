@@ -9,7 +9,9 @@
           <!-- Annotation -->
             <a href=""
                ng-show="ann_info.more_top[thread.message.id]"
-               ng-click="clickMoreTop(thread.message.id)">more top...</a>
+               ng-click="clickMoreTop(thread.message.id)">
+                {{ann_info.more_top_num[thread.message.id]}} more
+            </a>
             <span ng-show="ann_info.shown[thread.message.id]">
             <div class="detail annotation"
                  name="annotation"
@@ -18,7 +20,9 @@
             </span>
             <a href=""
                ng-show="ann_info.more_bottom[thread.message.id]"
-               ng-click="clickMoreBottom(thread.message.id)">more bottom...</a>
+               ng-click="clickMoreBottom(thread.message.id)">
+               {{ann_info.more_bottom_num[thread.message.id]}} more
+            </a>
           <!-- Replies -->
           <ul>
             <li class="thread"
