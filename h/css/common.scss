@@ -1077,10 +1077,12 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
     & + li { margin-left: .1em; }
   }
+  li.tagit-choice { margin-top: .33em; }
 
   &[readonly] {
-    input, .tagit-close { display: none; }
+    .tagit-new, .tagit-close { display: none; }
     li { padding-right: .3em; }
+    li.tagit-choice { margin-top: .1em; }
   }
 }
 
@@ -1088,15 +1090,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 .summary .tags {
   height: 2.0em;
   overflow: hidden;
-}
-
-// Specific rules for tags on the displayer page
-.gray-tags .tags {
-  // Make tags white (on gray bg)
-  li { background: white; }
-
-  // Don't show the stub of the editor
-  li.tagit-new { display: none; }
 }
 
 h3.tagstream, h3.userstream {

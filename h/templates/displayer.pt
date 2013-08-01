@@ -48,28 +48,34 @@
         </div>
 
         <div class="card-grid yui3-g">
-          <div class="yui3-u-1" ng-class="(annotation.text || annotation.replies.length) && 't-yui3-u-1-2' || '' ">
+          <div class="yui3-u-1" ng-class="(annotation.text || annotation.replies.length || annotation.tags.length) && 't-yui3-u-1-2' || '' ">
             <div class="paper excerpt">
               <blockquote>{{root.quote}}</blockquote>
             </div>
           </div>
 
-          <div class="yui3-u-1 t-yui3-u-1-2" ng-show="annotation.text || annotation.replies">
+          <div class="yui3-u-1 t-yui3-u-1-2" ng-show="annotation.text || annotation.replies.length || annotation.tags.length">
             <div class="paper thread">
               <div class="annotation detail">
                 <div class="magicontrols pull-right">
-                  <span ng-show="annotation.text" class="small">{{annotation.date | fuzzyTime}}</span>
+                  <span ng-show="annotation.text || annotation.tags.length" class="small">{{annotation.date | fuzzyTime}}</span>
                 </div>
 
                 <strong>
                   <span ng-show="annotation.deleted" class="user">Annotation deleted</span>
-                  <span ng-show="annotation.deleted || annotation.text" class="user">{{annotation.user | userName}}</span>
+                  <span ng-show="annotation.deleted || annotation.text || annotation.tags.length" class="user">{{annotation.user | userName}}</span>
                 </strong>
 
                 <div class="body">
                   <span ng-show="annotation.deleted">Reason:</span>
                   <span ng-bind-html-unsafe="annotation.text | converter"/>
                 </div>
+
+                <ul ng-model="annotation.tags"
+                    ng-readonly="true"
+                    name="annotator.tags"
+                    class="tags"
+                />
 
                 <div class="magicontrols small">
                   <span class="reply-count"
@@ -133,14 +139,6 @@
                     ng-class="collapsed && 'collapsed' || ''"></li>
               </ul>
             </div>
-          </div>
-
-          <div class="yui3-u-1 gray-tags">
-            <ul ng-model="annotation.tags"
-                ng-readonly="true"
-                name="annotator.tags"
-                class="tags"
-                />
           </div>
         </div>
       </div>
