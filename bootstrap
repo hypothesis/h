@@ -67,6 +67,16 @@ command -v compass || echo "...not found!"
 echo -n "Checking for CoffeeScript..."
 command -v coffee || echo "...not found!"
 
+
+echo -n "Checking for CleanCSS..."
+command -v cleancss || {
+	echo "...not found!"
+	echo
+	echo "CleanCSS was not found. You MUST run in debug mode."
+	echo "The development configuration does this."
+	echo
+}
+
 echo -n "Checking for UglifyJS..."
 command -v uglifyjs || {
 	echo "...not found!"
