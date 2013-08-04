@@ -93,15 +93,9 @@ class Streamer(BaseController):
         return request.context
 
 
-@view_defaults(context='h.resources.UserStream', layout='site')
+@view_defaults(context='h.resources.Stream', layout='site')
 class UserStream(BaseController):
-    @view_config(accept='text/html', renderer='templates/userstream.pt')
-    def __html__(self):
-        return self.request.context
-
-@view_defaults(context='h.resources.TagStream', layout='site')
-class TagStream(BaseController):
-    @view_config(accept='text/html', renderer='templates/tagstream.pt')
+    @view_config(accept='text/html', renderer='templates/stream.pt')
     def __html__(self):
         return self.request.context
 

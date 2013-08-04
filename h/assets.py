@@ -211,8 +211,7 @@ app = Bundle(
                 'services',
                 'streamer',
                 'streamfilter',
-                'userstream',
-                'tagstream',
+                'stream',
             )
         ],
         output='js/app.min.js'
