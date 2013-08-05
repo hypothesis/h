@@ -5,6 +5,7 @@ class Annotator.Host extends Annotator
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
+    ".annotator-hl click": "onHighlightClick"
 
   # Plugin configuration
   options: {}
@@ -138,7 +139,7 @@ class Annotator.Host extends Annotator
         )
 
         .bind('setHighlightingMode', (ctx, value) =>
-          this.highlightingMode = value
+          @highlightingMode = value
           this.setAlwaysOnHighlights value
         )
 
@@ -198,7 +199,7 @@ class Annotator.Host extends Annotator
   _setupWrapper: ->
     @wrapper = @element
     .on 'mouseup', =>
-      if not @ignoreMouseup
+      unless @ignoreMouseup or @highlightingMode
         setTimeout =>
           unless @selectedRanges?.length then @panel?.notify method: 'back'
     this._setupMatching()
@@ -277,7 +278,7 @@ class Annotator.Host extends Annotator
       'margin-left': "#{m}px"
       width: "#{w}px"
 
-  showViewer: (annotation) => @plugins.Bridge.showViewer annotation
+  showViewer: (annotations) => @plugins.Bridge.showViewer annotations
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
   checkForStartSelection: (event) =>
@@ -288,7 +289,7 @@ class Annotator.Host extends Annotator
       @mouseIsDown = true
 
   onSuccessfulSelection: =>
-    if this.highlightingMode
+    if @highlightingMode
 
       # Create the annotation right away
 
@@ -309,6 +310,18 @@ class Annotator.Host extends Annotator
 
     else
       super()
+
+  onHighlightClick: (event) =>
+    return unless @highlightingMode
+
+    # Collect relevant annotations
+    annotations = $(event.target)
+      .parents('.annotator-hl')
+      .andSelf()
+      .map -> return $(this).data("annotation")
+
+    # Tell sidebar to show the viewer for these annotations
+    this.showViewer annotations
 
   addToken: (token) =>
     @api.notify
