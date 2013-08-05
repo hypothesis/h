@@ -200,7 +200,7 @@ class Annotator.Host extends Annotator
   _setupWrapper: ->
     @wrapper = @element
     .on 'mouseup', =>
-      unless @ignoreMouseup
+      unless @ignoreMouseup or @noBack
         setTimeout =>
           unless @selectedRanges?.length then @panel?.notify method: 'back'
     this._setupMatching()
@@ -326,16 +326,16 @@ class Annotator.Host extends Annotator
     else
       super()
 
-  # When clicking on a highlight, set @ignoreMouseup to true
-  # to prevent the sidebar from closing
+  # When clicking on a highlight in highlighting mode,
+  # set @noBack to true to prevent the sidebar from closing
   onHighlightMousedown: (event) =>
-    @ignoreMouseup = true
+    if @highlightingMode then @noBack = true    
 
   onHighlightClick: (event) =>
     return unless @highlightingMode
 
     # We have already prevented closing the sidebar, now reset this flag
-    @ignoreMouseup = false
+    @noBack = false
 
     # Collect relevant annotations
     annotations = $(event.target)
