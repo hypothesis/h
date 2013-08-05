@@ -5,6 +5,7 @@ class Annotator.Host extends Annotator
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
+    ".annotator-hl mousedown": "onHighlightMousedown"
     ".annotator-hl click": "onHighlightClick"
 
   # Plugin configuration
@@ -199,7 +200,7 @@ class Annotator.Host extends Annotator
   _setupWrapper: ->
     @wrapper = @element
     .on 'mouseup', =>
-      unless @ignoreMouseup or @highlightingMode
+      unless @ignoreMouseup
         setTimeout =>
           unless @selectedRanges?.length then @panel?.notify method: 'back'
     this._setupMatching()
@@ -311,8 +312,16 @@ class Annotator.Host extends Annotator
     else
       super()
 
+  # When clicking on a highlight, set @ignoreMouseup to true
+  # to prevent the sidebar from closing
+  onHighlightMousedown: (event) =>
+    @ignoreMouseup = true
+
   onHighlightClick: (event) =>
     return unless @highlightingMode
+
+    # We have already prevented closing the sidebar, now reset this flag
+    @ignoreMouseup = false
 
     # Collect relevant annotations
     annotations = $(event.target)
