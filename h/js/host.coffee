@@ -289,8 +289,22 @@ class Annotator.Host extends Annotator
     unless event and this.isAnnotator(event.target)
       @mouseIsDown = true
 
+  confirmSelection: ->
+    return true unless @selectedRanges.length is 1
+
+    target = this.getTargetFromRange @selectedRanges[0]
+    selector = this.findSelector target.selector, "TextQuoteSelector"
+    length = selector.exact.length
+
+    if length > 2 then return true
+
+    return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
+
   onSuccessfulSelection: =>
     if @highlightingMode
+
+      # Do we really want to make this selection?
+      return unless this.confirmSelection()
 
       # Create the annotation right away
 
