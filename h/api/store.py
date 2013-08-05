@@ -32,7 +32,7 @@ class Store(object):
         raise NotImplementedError()
 
     def read(self, key):
-        url = self.request.route_url('api', subpath='annotations/%s' % key)
+        url = self.request.route_url('api_real', subpath='annotations/%s' % key)
         subreq = Request.blank(url)
         return self._invoke_subrequest(subreq).json
 
@@ -43,12 +43,12 @@ class Store(object):
         raise NotImplementedError()
 
     def search(self, **query):
-        url = self.request.route_url('api', subpath='search', _query=query)
+        url = self.request.route_url('api_real', subpath='search', _query=query)
         subreq = Request.blank(url)
         return self._invoke_subrequest(subreq).json['rows']
 
     def search_raw(self, query):
-        url = self.request.route_url('api', subpath='search_raw')
+        url = self.request.route_url('api_real', subpath='search_raw')
         subreq = Request.blank(url, method='POST')
         subreq.json = query
         result = self._invoke_subrequest(subreq)
