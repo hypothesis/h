@@ -55,7 +55,6 @@ window.onload = function() {
 			'icon-comments' : '&#xe011;',
 			'icon-plus' : '&#xe012;',
 			'icon-plus-sign' : '&#xf0fe;',
-			'icon-comment2-4' : '&#xe013;',
 			'icon-eye' : '&#xe016;',
 			'icon-magic' : '&#xf0d0;',
 			'icon-eye-2' : '&#xe017;',
@@ -65,7 +64,9 @@ window.onload = function() {
 			'icon-highlighter-nolines' : '&#xe01a;',
 			'icon-highlighter-01' : '&#xe019;',
 			'icon-highlighter-blacktip' : '&#xe01c;',
-			'icon-highlighter' : '&#xe01d;'
+			'icon-highlighter' : '&#xe01d;',
+			'icon-comment2-4' : '&#xe013;',
+			'icon-comment2-5' : '&#xe01e;'
 		},
 		els = document.getElementsByTagName('*'),
 		i, attr, html, c, el;

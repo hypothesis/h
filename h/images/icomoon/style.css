@@ -27,7 +27,7 @@ Instead of a list of all class selectors,
 you can use the generic selector below, but it's slower:
 [class*="icon-"] {
 */
-.icon-cog, .icon-untitled, .icon-untitled-2, .icon-export_icon, .icon-clipboard_copy_icon, .icon-pen_1, .icon-flag, .icon-delete_icon, .icon-heart_empty_icon, .icon-heart_icon, .icon-window, .icon-window-2, .icon-triangle, .icon-copy, .icon-x, .icon-cancel, .icon-checkmark_icon, .icon-checkmark, .icon-cog-2, .icon-checkmark-2, .icon-clock, .icon-export, .icon-checkbox_unchecked_icon, .icon-checkbox_checked_icon, .icon-triangle-2, .icon-unlocked, .icon-locked, .icon-views, .icon-browser, .icon-ddbutton_filled, .icon-ddbutton_empty, .icon-reply, .icon-star_fav_icon, .icon-star_fav_empty_icon, .icon-triright, .icon-trileft, .icon-comment, .icon-comment2, .icon-comment2-2, .icon-comment2-3, .icon-settings, .icon-wrench, .icon-commentflip, .icon-hyp-logo4, .icon-eye-close, .icon-eye-open, .icon-comments, .icon-plus, .icon-plus-sign, .icon-comment2-4, .icon-eye, .icon-magic, .icon-eye-2, .icon-download, .icon-eye-3, .icon-eye-4, .icon-highlighter-nolines, .icon-highlighter-01, .icon-highlighter-blacktip, .icon-highlighter {
+.icon-cog, .icon-untitled, .icon-untitled-2, .icon-export_icon, .icon-clipboard_copy_icon, .icon-pen_1, .icon-flag, .icon-delete_icon, .icon-heart_empty_icon, .icon-heart_icon, .icon-window, .icon-window-2, .icon-triangle, .icon-copy, .icon-x, .icon-cancel, .icon-checkmark_icon, .icon-checkmark, .icon-cog-2, .icon-checkmark-2, .icon-clock, .icon-export, .icon-checkbox_unchecked_icon, .icon-checkbox_checked_icon, .icon-triangle-2, .icon-unlocked, .icon-locked, .icon-views, .icon-browser, .icon-ddbutton_filled, .icon-ddbutton_empty, .icon-reply, .icon-star_fav_icon, .icon-star_fav_empty_icon, .icon-triright, .icon-trileft, .icon-comment, .icon-comment2, .icon-comment2-2, .icon-comment2-3, .icon-settings, .icon-wrench, .icon-commentflip, .icon-hyp-logo4, .icon-eye-close, .icon-eye-open, .icon-comments, .icon-plus, .icon-plus-sign, .icon-eye, .icon-magic, .icon-eye-2, .icon-download, .icon-eye-3, .icon-eye-4, .icon-highlighter-nolines, .icon-highlighter-01, .icon-highlighter-blacktip, .icon-highlighter, .icon-comment2-4, .icon-comment2-5 {
 	font-family: 'icomoon';
 	speak: none;
 	font-style: normal;
@@ -184,9 +184,6 @@ you can use the generic selector below, but it's slower:
 .icon-plus-sign:before {
 	content: "\f0fe";
 }
-.icon-comment2-4:before {
-	content: "\e013";
-}
 .icon-eye:before {
 	content: "\e016";
 }
@@ -216,4 +213,10 @@ you can use the generic selector below, but it's slower:
 }
 .icon-highlighter:before {
 	content: "\e01d";
+}
+.icon-comment2-4:before {
+	content: "\e013";
+}
+.icon-comment2-5:before {
+	content: "\e01e";
 }
