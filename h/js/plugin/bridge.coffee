@@ -134,7 +134,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       # This is a special marker flag, which indicated that
       # this annotation is not new, and therefore should not be pushed
       # among the drafts
-      a.old = true
+      a.inject = true
       @annotator.publish 'beforeAnnotationCreated', a
       @annotator.publish 'annotationCreated', a
     )
