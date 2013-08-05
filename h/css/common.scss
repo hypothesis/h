@@ -481,18 +481,33 @@ blockquote {
 
 //Controlbar Icons
 .alwaysonhighlights-icon {
-  @include fonticon("\e012", left);
+  @include fonticon("\e01b", left);
   color: rgb(211, 211, 211);
+  font-size: 18px;
+  bottom: 1px;
+  right: 3px;
+  position: absolute;
+  // text-shadow: -0.1em -0.1em #999;
 }
 
 .hightlighter-icon {
-  @include fonticon("\e013", left);
+  @include fonticon("\e01a", left);
   color: rgb(211, 211, 211);
+  font-size: 18px;
+  bottom: 1px;
+  right: 3px;
+  position: absolute;
+  // text-shadow: -0.1em -0.1em #999;
 }
 
 .comment-icon {
-  @include fonticon("\e011", left);
+  @include fonticon("\e013", left);
   color: rgb(211, 211, 211);
+  font-size: 18px;
+  bottom: 1px;
+  right: 3px;
+  position: absolute;
+  // text-shadow: -0.1em -0.1em #999;
 }
 
 

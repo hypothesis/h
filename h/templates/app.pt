@@ -37,11 +37,19 @@
       </div>
 
       <!-- Controlbar -->
-      <div ng-mouseenter="cbStyle='controlbar'" ng-class="cbStyle">
+      <div ng-mouseenter="cbStyle='controlbar'" 
+           ng-mouseleave="cbStyle='hiddencontrolbar'" 
+           ng-class="cbStyle">
         <ul>
-          <li class="controlbarbutton"><a title="Show Annotations" class="alwaysonhighlights-icon" href=""></a></li>
-          <li class="controlbarbutton"><a title="Highlight Tool" class="hightlighter-icon" href=""></a></li>
-          <li class="controlbarbutton"><a title="New Comment" class="comment-icon" href=""></a></li>
+          <li class="controlbarbutton">
+            <a title="Show Annotations" class="alwaysonhighlights-icon" href=""></a>
+          </li>
+          <li class="controlbarbutton">
+            <a title="Highlight Tool" class="hightlighter-icon" href=""></a>
+          </li>
+          <li class="controlbarbutton">
+            <a title="New Comment" class="comment-icon" href=""></a>
+          </li>
         </ul>
       </div>
       
