@@ -52,7 +52,7 @@
                   class="threadexp"
                   title="{{collapsed && 'Expand' || 'Collapse'}}"
                   ng-click="collapsed = !collapsed"
-                  ng-show="ann_info.shown[thread.message.id]"
+                  ng-show="ann_info.shown[thread.message.id] && !ann_info.more_top[thread.message.id]"
                />
             </li>
           </ul>
