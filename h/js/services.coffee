@@ -51,8 +51,8 @@ class Hypothesis extends Annotator
   viewer:
     addField: (-> )
 
-  this.$inject = ['$document', '$filter', '$location', '$rootScope', '$route', 'drafts']
-  constructor: ($document, $filter, $location, $rootScope, $route, drafts) ->
+  this.$inject = ['$document', '$filter', '$location', '$rootScope', '$route', '$timeout', 'drafts']
+  constructor: ($document, $filter, $location, $rootScope, $route, $timeout, drafts) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
@@ -257,8 +257,20 @@ class Hypothesis extends Annotator
         clearSearch: (original) =>
           @show_search = false
           original()
+          unless typeof(localStorage) is 'undefined'
+            try
+              localStorage.setItem "hyp_page_search_query", ""
+            catch error
+              console.warn 'Cannot save query to localStorage!'
+              if error is DOMException.QUOTA_EXCEEDED_ERR
+                console.warn 'localStorage quota exceeded!'
           $location.path('/viewer')
           $rootScope.$digest()
+
+    if search_query.length > 0
+      $timeout =>
+        @visualSearch.searchBox.searchEvent('')
+      , 1500
 
   _setupXDM: ->
     $location = @element.injector().get '$location'
