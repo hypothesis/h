@@ -227,7 +227,7 @@ class Hypothesis extends Annotator
               localStorage.setItem "hyp_page_search_query", query
             catch error
               console.warn 'Cannot save query to localStorage!'
-              if error is QUOTA_EXCEEDED_ERR
+              if error is DOMException.QUOTA_EXCEEDED_ERR
                 console.warn 'localStorage quota exceeded!'
 
           # Set the path
@@ -250,6 +250,7 @@ class Hypothesis extends Annotator
         clearSearch: (original) =>
           @show_search = false
           original()
+          $location.path('/viewer')
           $rootScope.$digest()
 
   _setupXDM: ->
