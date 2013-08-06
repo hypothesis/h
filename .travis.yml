@@ -17,8 +17,8 @@ script:
 - make test
 env:
   global:
-  - secure: iOqIzaawOalSidKGRstfhiaZ9HykF+EEriG2cq6a/UGS65pguYyCogtkjFODG1cWlRh2cAICxeM6WOw4TWL9SFyb8sjfx6k2nAFOFuF3efNwuVaPkSS5zZfGAdLJmnGNivm0EdUBB17gl+P8QkiI1oQvYH2dsmF/VlhpHyGuoNk=
-  - secure: ZDyDsRzO7Y6I4XI2WWVsVVXPxBX+T+3oVM/fKCxPzEhaRvc56Q4oT583Xg8RfPlpgaQ1Y11a2O4ZYlwjM0/6hUqF0M/TL6bIqUETK/EMF6xma46dVMSd8ZJ22RUYZvPQhNWMIEWZvZRe0liepomDgJKiM4l7PyN1TEubqgPTa1k=
+  - secure: CxSlFvGjmPyADg/dEXsYHUIiIaPJs9qMhrsZRIuQ1/wPmF621Hk1b770GbLDzLLFR9XOgMWFTGwMKaFwV+5/cgJ5SG1ev05JEBopViQzlVv7prHUIjrHdblIFoMVDZwoLZ92ikFJx5fTSuULbkUw3ExZlfstsGS3Gd24taBK4MU=
+  - secure: khwqXk33z11QLOLZ9oY2v1Xyt7JXCcSINCnI2fVKuaMhxOZgIDNFsi/Kn8QPG+rlqRP+1+q6/HubTqDuX+/6+VTR1vKj0OUFa4R3Z8Czhuwb8i/6iEdTQSsuZ3hDQjkpH825U2gwJZgz9p1IOSzkEKF7wwwrZOx61RcBTPY6u3w=
 after_failure:
 - cat pyramid.log
 addons:
