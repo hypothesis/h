@@ -6,7 +6,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-08-06 13:08:53Z
+** Built at: 2013-08-06 14:03:23Z
 */
 
 
@@ -778,8 +778,6 @@
       this.onAdderClick = __bind(this.onAdderClick, this);
       this.onAdderMousedown = __bind(this.onAdderMousedown, this);
       this.onHighlightMouseover = __bind(this.onHighlightMouseover, this);
-      this.onFailedSelection = __bind(this.onFailedSelection, this);
-      this.onSuccessfulSelection = __bind(this.onSuccessfulSelection, this);
       this.checkForEndSelection = __bind(this.checkForEndSelection, this);
       this.checkForStartSelection = __bind(this.checkForStartSelection, this);
       this.clearViewerHideTimer = __bind(this.clearViewerHideTimer, this);
@@ -1427,7 +1425,6 @@
     };
 
     Annotator.prototype.onSuccessfulSelection = function(event) {
-      console.log("Showing adder");
       return this.adder.css(util.mousePosition(event, this.wrapper[0])).show();
     };
 
