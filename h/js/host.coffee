@@ -331,8 +331,10 @@ class Annotator.Host extends Annotator
   onHighlightMousedown: (event) =>
     if @highlightingMode then @noBack = true    
 
+  # When clicking on a highlight in highlighting mode,
+  # tell the sidebar to bring up the viewer for the relevant annotations
   onHighlightClick: (event) =>
-    return unless @highlightingMode
+    return unless @highlightingMode and @noBack
 
     # We have already prevented closing the sidebar, now reset this flag
     @noBack = false

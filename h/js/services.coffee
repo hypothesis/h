@@ -253,6 +253,9 @@ class Hypothesis extends Annotator
   setupAnnotation: (annotation) -> annotation
 
   showViewer: (annotations=[]) =>
+    console.log "Showing:"
+    for a in annotations
+      console.log a
     this.show()
     @element.injector().invoke [
       '$location', '$rootScope',
