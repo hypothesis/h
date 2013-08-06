@@ -9,12 +9,14 @@
           <!-- Annotation -->
             <!--"Load more replies" label for the top -->
             <a href=""
+               class="load-more"
                ng-show="ann_info.more_top[thread.message.id] && ann_info.more_top_num[thread.message.id] <2"
                ng-click="clickMoreTop(thread.message.id)">
                 load 1 more reply
             </a>
 
             <a href=""
+               class="load-more"
                ng-show="ann_info.more_top[thread.message.id] && ann_info.more_top_num[thread.message.id] >1"
                ng-click="clickMoreTop(thread.message.id)">
                 load {{ann_info.more_top_num[thread.message.id]}} more replies
@@ -30,12 +32,14 @@
 
             <!--"Load more replies" label for the bottom -->
             <a href=""
+               class="load-more"
                ng-show="ann_info.more_bottom[thread.message.id] && ann_info.more_bottom_num[thread.message.id]<2"
                ng-click="clickMoreBottom(thread.message.id)">
                load 1 more reply
             </a>
 
             <a href=""
+               class="load-more"
                ng-show="ann_info.more_bottom[thread.message.id] && ann_info.more_bottom_num[thread.message.id] >1"
                ng-click="clickMoreBottom(thread.message.id)">
                load {{ann_info.more_bottom_num[thread.message.id]}} more replies
