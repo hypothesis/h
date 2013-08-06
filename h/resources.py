@@ -181,7 +181,7 @@ class AnnotationFactory(BaseResource):
 
         return annotation
 
-class UserStream(BaseResource, dict):
+class Stream(BaseResource, dict):
     pass
 
 
@@ -193,16 +193,12 @@ class UserStreamFactory(BaseResource):
         User = registry.getUtility(interfaces.IUserClass)
         user = User.get_by_username(request, key)
         if user is not None:
-            return UserStream(request)
-
-class TagStream(BaseResource, dict):
-    pass
-
+            return Stream(request)
 
 class TagStreamFactory(BaseResource):
     def __getitem__(self, key):
         request = self.request        
-        return TagStream(request)        
+        return Stream(request)        
 
 
 def includeme(config):

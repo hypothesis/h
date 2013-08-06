@@ -8,20 +8,28 @@ get_quote = (annotation) ->
 
   quote
 
-class TagStream
+class Stream
   path: window.location.protocol + '//' + window.location.hostname + ':' +
     window.location.port + '/__streamer__'
 
   this.$inject = ['$location','$scope','$timeout','streamfilter']
   constructor: ($location, $scope, $timeout, streamfilter) ->
     $scope.annotations = []
-    $scope.tag = $location.absUrl().split('/').pop()
-    $scope.tagLabel = decodeURIComponent $scope.tag
+    urlParts = $location.absUrl().split('/')
+    $scope.filterValue = urlParts.pop()
+    filterType = urlParts.pop()
+    if filterType == "t"
+      $scope.filterDescription = "Annotations with tag '#{ $scope.filterValue }'"
+      filterClause = 'tags:#' + $scope.filterValue
+    else
+      $scope.filterDescription = "Annotations by user '#{ $scope.filterValue }'"
+      filterClause = 'user:=' + $scope.filterValue
+    
     $scope.filter =
       streamfilter
         .setPastDataHits(100)
         .setMatchPolicyIncludeAny()
-        .setClausesParse('tags:#' + $scope.tag)
+        .setClausesParse(filterClause)
         .getFilter()
 
     $scope.manage_new_data = (data, action) =>
@@ -53,5 +61,5 @@ class TagStream
     $scope.open()
 
 
-angular.module('h.tagstream',['h.streamfilter', 'h.filters','h.directives','bootstrap'])
-  .controller('TagStreamCtrl', TagStream)
+angular.module('h.stream',['h.streamfilter', 'h.filters','h.directives','bootstrap'])
+  .controller('StreamCtrl', Stream)
