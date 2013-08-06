@@ -1172,6 +1172,15 @@ h3.stream {
   }
 }
 
+.thread {
+  .load-more {
+    @include pie-clearfix;
+    font-family: $sansFontFamily;
+    font-weight:bold;
+    font-size: 11px;
+  }
+}
+
 .visual-container {
   margin-left: 3em;
 }
