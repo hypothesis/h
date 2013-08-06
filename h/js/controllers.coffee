@@ -237,8 +237,8 @@ class App
       console.log "Should create unattached annotation"
 
 class Annotation
-  this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
-  constructor: ($element, $location, $scope, annotator, drafts, $timeout) ->
+  this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout', '$window']
+  constructor: ($element, $location, $scope, annotator, drafts, $timeout, $window) ->
     threading = annotator.threading
     $scope.action = 'create'
 
@@ -255,9 +255,17 @@ class Annotation
           $scope.action = 'create'
 
     $scope.save = ->
-      $scope.editing = false
+      annotation = $scope.model.$modelValue        
+      console.log "Should validate annotation."
 
-      annotation = $scope.model.$modelValue
+      # Forbid the publishing of annotations
+      # without a body (text or tags)
+      if $scope.form.privacy.$viewValue is "Public" and
+          not annotation.text and not annotation.tags.length
+        $window.alert "You can not make this annotation public without adding some text, or at least a tag."
+        return
+
+      $scope.editing = false
       drafts.remove annotation
 
       switch $scope.action
