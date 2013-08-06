@@ -37,61 +37,66 @@ def assets(args, console):
     bootstrap(args[0], config_fn=build)
 
 
-@command(usage='CONFIG_FILE')
+@command(usage='CONFIG_FILE APP_URL [STATIC_URL]')
 def extension(args, console):
-    """Build the browser extensions."""
+    """Build the browser extensions.
+
+    Accepts one (optional) argument which is the base URL of an h server."""
 
     if len(args) == 0:
         console.error('You must supply a paste configuration file.')
+        return 2
+
+    if len(args) < 2:
+        console.error('You must supply a url to the hosted backend.')
         return 2
 
     from codecs import open
     from os import makedirs
     from os.path import abspath, exists, join
     from shutil import copyfile, copytree, rmtree
-    from urlparse import urljoin
+    from urlparse import urljoin, urlparse, urlunparse
 
     from chameleon.zpt.template import PageTextTemplateFile
     from pyramid.path import AssetResolver
     from pyramid.renderers import get_renderer, render
+    from pyramid.settings import asbool
     from pyramid_webassets import IWebAssetsEnvironment
 
     from h import bootstrap, layouts
 
     resolve = AssetResolver().resolve
 
-    def make_relative(env, url):
-        host_url = env['request'].host_url
-        if url.startswith(host_url):
-            return url[len(host_url) + 1:].strip('/')
+    def make_relative(request, url):
+        assets_url = request.webassets_env.url
+        if url.startswith(assets_url):
+            return url[len(assets_url):].strip('/')
         return url
 
-    def app(env):
+    def app(env, base_url=None):
         asset_env = env['registry'].queryUtility(IWebAssetsEnvironment)
         request = env['request']
         context = request.context
 
         base_template = get_renderer('h:templates/base.pt').implementation()
-        app_layout = layouts.AppLayout(context, request)
+
+        api_url = request.registry.settings.get('api.url', None)
+        api_url = api_url or urljoin(request.host_url, '/api')
+
+        app_layout = layouts.SidebarLayout(context, request)
         app_page = render(
             'h:templates/app.pt',
             {
+                'base_url': base_url,
                 'layout': {
-                    'css_links': [
-                        make_relative(env, href)
-                        for href in app_layout.css_links
-                    ],
-                    'js_links': [
-                        make_relative(env, src)
-                        for src in app_layout.js_links
-                    ],
+                    'css_links': app_layout.css_links,
+                    'js_links': app_layout.js_links,
                     'csp': '',
                     'inline_webfont': False,
                 },
                 'main_template': base_template,
                 'request': request,
-                'base_url': urljoin(request.host_url, '/app/'),
-                'service_url': urljoin(request.host_url, '/api/'),
+                'service_url': api_url,
             }
         )
 
@@ -100,34 +105,55 @@ def extension(args, console):
             f.write(app_page)
 
     def chrome(env):
-        asset_env = env['registry'].queryUtility(IWebAssetsEnvironment)
-        settings = env['registry'].settings
-        develop = settings.get('extension.develop', False)
+        registry = env['registry']
+        request = env['request']
+        asset_env = registry.queryUtility(IWebAssetsEnvironment)
+        settings = registry.settings
+        develop = asbool(settings.get('webassets.debug', False))
+
+        # Root the request at the app url
+        app_url = urlparse(args[1])
+        request.host = app_url.netloc
+        request.scheme = app_url.scheme
+        app_url = urlunparse(app_url)
+
+        # Fully-qualify the static asset url
+        asset_url = urlparse(asset_env.url)
+        if not asset_url.netloc:
+            asset_url = (
+                request.scheme,
+                request.host,
+                asset_url.path,
+                asset_url.params,
+                asset_url.query,
+                asset_url.fragment,
+            )
+        asset_url = urlunparse(asset_url)
+
+        # Configure the load path and output url
+        asset_env.append_path(resolve('h:').abspath(), asset_url)
+        asset_env.url = asset_url
 
         def getUrl(url):
-            if develop:
-                return '"%s"' % url
-
-            rel = make_relative(env, url)
-            if rel != url:
-                return "chrome.extension.getURL('public/%s')" % rel
-
-            return url
+            if not develop:
+                rel = make_relative(request, url)
+                if rel != url:
+                    return "chrome.extension.getURL('public/%s')" % rel
+            return '"%s"' % url
 
         if develop:
             # Load the app from the development server.
-            env['request'].host = 'localhost:5000'
-            base = env['request'].host_url
-            app_url = getUrl(urljoin(base, 'app'))
+            app_expr = "'%s'"  % app_url
         else:
             # Load the app from the extension bundle.
-            app(env)  # Build the app html
-            app_url = "chrome.extension.getURL('public/app.html')"
+            app_expr = "chrome.extension.getURL('public/app.html')"
+            # Build the app html
+            app(env, base_url=app_url)
 
         embed = render(
             'h:templates/embed.txt',
             {
-                'app': app_url,
+                'app': app_expr,
                 'inject': '[%s]' % ', '.join([
                     getUrl(url)
                     for url in asset_env['inject'].urls()
@@ -135,7 +161,7 @@ def extension(args, console):
                 'jquery': getUrl(asset_env['jquery'].urls()[0]),
                 'raf': getUrl(asset_env['raf'].urls()[0]),
             },
-            request=env['request'],
+            request=request,
         )
 
         embed_js_file = join(asset_env.directory, 'js/embed.js')
@@ -147,7 +173,7 @@ def extension(args, console):
 
         manifest_file = resolve('h:browser/chrome/manifest.json').abspath()
         manifest_renderer = PageTextTemplateFile(manifest_file)
-        manifest = manifest_renderer(version=ext_version)
+        manifest = manifest_renderer(src=asset_url, version=ext_version)
 
         manifest_json_file = join('./build/chrome', 'manifest.json')
         with open(manifest_json_file, 'w', 'utf-8-sig') as f:
@@ -155,7 +181,7 @@ def extension(args, console):
 
         # Due to Content Security Policy, the web font script cannot be inline.
         webfont = resolve('h:templates/webfont.js').abspath()
-        copyfile(webfont, './build/chrome/webfont.js')
+        copyfile(webfont, join(asset_env.directory, 'webfont.js'))
 
     # Make sure the common build dir exists
     if not exists('./build'): makedirs('./build')
@@ -166,13 +192,15 @@ def extension(args, console):
     copytree(resolve('h:images').abspath(), './build/chrome/public/images')
     copytree(resolve('h:lib').abspath(), './build/chrome/public/lib')
 
-    bootstrap(
-        args[0],
-        options={
-            'webassets.base_dir': abspath('./build/chrome/public'),
-        },
-        config_fn=chrome,
-    )
+    settings = {'webassets.base_dir': abspath('./build/chrome/public')}
+
+    # Override static asset route generation with the STATIC_URL argument
+    if len(args) > 2:
+        settings.update({
+            'webassets.base_url': args[2],
+        })
+
+    bootstrap(args[0], options=settings, config_fn=chrome)
 
 
 @command

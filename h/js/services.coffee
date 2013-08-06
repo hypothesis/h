@@ -379,6 +379,11 @@ class AuthenticationProvider
     '$document', '$resource',
     ($document,   $resource) ->
       baseUrl = $document[0].baseURI.replace(/:(\d+)/, '\\:$1')
+
+      # Strip an empty hash and end in exactly one slash
+      baseUrl = baseUrl.replace /#$/, ''
+      baseUrl = baseUrl.replace /\/*$/, '/'
+
       $resource(baseUrl, {}, @actions).load()]
 
 
