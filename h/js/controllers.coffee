@@ -163,6 +163,11 @@ class App
           annotator.clickAdder()
         , 500
 
+      if newValue? and $scope.ongoingHighlightSwitch
+        $timeout =>
+          $scope.toggleHighlightingMode()
+        , 500
+
     $scope.$watch 'frame.visible', (newValue) ->
       if newValue
         annotator.show()
@@ -225,9 +230,14 @@ class App
     $scope.toggleHighlightingMode = ->
       # Check login state first
       unless plugins.Auth? and plugins.Auth.haveValidToken()
-        $window.alert "You must be logged in to use the Highlighting Mode!"
+        # If we are not logged in, start the auth process
+        $scope.ongoingHighlightSwitch = true
+        annotator.show()
+        $scope.sheet.collapsed = false
+        $scope.sheet.tab = 'login'
         return
-        
+
+      delete $scope.ongoingHighlightSwitch
       $scope.highlightingMode = not $scope.highlightingMode
       provider.notify
         method: 'setHighlightingMode'
@@ -256,7 +266,6 @@ class Annotation
 
     $scope.save = ->
       annotation = $scope.model.$modelValue        
-      console.log "Should validate annotation."
 
       # Forbid the publishing of annotations
       # without a body (text or tags)
