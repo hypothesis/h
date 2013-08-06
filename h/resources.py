@@ -197,8 +197,8 @@ class UserStreamFactory(BaseResource):
 
 class TagStreamFactory(BaseResource):
     def __getitem__(self, key):
-        request = self.request        
-        return Stream(request)        
+        request = self.request
+        return Stream(request)
 
 
 def includeme(config):
@@ -208,4 +208,4 @@ def includeme(config):
     RootFactory.a = AnnotationFactory
     RootFactory.stream = Streamer
     RootFactory.u = UserStreamFactory
-    RootFactory.t = TagStreamFactory    
+    RootFactory.t = TagStreamFactory
