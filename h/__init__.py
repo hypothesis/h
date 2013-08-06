@@ -85,3 +85,24 @@ def create_app(settings):
 def main(global_config, **settings):
     settings.update(global_config)
     return create_app(settings)
+
+
+def server(app, gcfg=None, host="127.0.0.1", port=None, *args, **kwargs):
+    from gunicorn.config import get_default_config_file
+    from gunicorn.app.pasterapp import PasterServerApplication
+
+    cfgfname = kwargs.pop('config', get_default_config_file())
+
+    server = PasterServerApplication(
+        app,
+        gcfg=gcfg,
+        host=host,
+        port=port,
+        *args,
+        **kwargs
+    )
+
+    if cfgfname:
+        server.load_config_from_file(cfgfname)
+
+    server.run()
