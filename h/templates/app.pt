@@ -42,7 +42,8 @@
         <ul>
           <li class="controlbarbutton">
             <a title="Show Annotations"
-               class="alwaysonhighlights-icon" 
+               class="alwaysonhighlights-icon"
+               ng-class="alwaysOnMode && 'pushed'"
                ng-click="toggleAlwaysOnHighlights()"
                href="">
             </a>

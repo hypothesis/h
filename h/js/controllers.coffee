@@ -223,7 +223,10 @@ class App
     , 200  # We hope this is long enough
 
     $scope.toggleAlwaysOnHighlights = ->
-      console.log "Should toggle always-on highlights"
+      $scope.alwaysOnMode = not $scope.alwaysOnMode
+      provider.notify
+        method: 'setAlwaysOnMode'
+        params: $scope.alwaysOnMode
 
     $scope.highlightingMode = false
 
