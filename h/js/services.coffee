@@ -138,7 +138,7 @@ class Hypothesis extends Annotator
           whole_document = true
           in_body_text = ''
           for searchItem in searchCollection.models
-            if searchItem.attributes.category is 'area' and
+            if searchItem.attributes.category is 'scope' and
             searchItem.attributes.value is 'sidebar'
               whole_document = false
 
@@ -246,7 +246,7 @@ class Hypothesis extends Annotator
 
         facetMatches: (callback) =>
           if @show_search
-            return callback ['text','tag','area', 'group','time','user'], {preserveOrder: true}
+            return callback ['text','tag','scope', 'group','time','user'], {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
             when 'group' then callback ['Public', 'Private']
