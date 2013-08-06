@@ -27,11 +27,13 @@ Instead of a list of all class selectors,
 you can use the generic selector below, but it's slower:
 [class*="icon-"] {
 */
-.icon-cog:before, .icon-untitled:before, .icon-untitled-2:before, .icon-export_icon:before, .icon-clipboard_copy_icon:before, .icon-pen_1:before, .icon-flag:before, .icon-delete_icon:before, .icon-heart_empty_icon:before, .icon-heart_icon:before, .icon-triangle:before, .icon-copy:before, .icon-eye:before, .icon-x:before, .icon-cancel:before, .icon-checkmark_icon:before, .icon-checkmark:before, .icon-checkmark-2:before, .icon-clock:before, .icon-export:before, .icon-checkbox_unchecked_icon:before, .icon-checkbox_checked_icon:before, .icon-triangle-2:before, .icon-unlocked:before, .icon-locked:before, .icon-views:before, .icon-browser:before, .icon-ddbutton_filled:before, .icon-ddbutton_empty:before, .icon-reply:before, .icon-star_fav_icon:before, .icon-star_fav_empty_icon:before, .icon-triright:before, .icon-trileft:before, .icon-comment:before, .icon-comment2:before, .icon-comment2-2:before, .icon-comment2-3:before, .icon-settings:before, .icon-wrench:before, .icon-commentflip:before, .icon-hyp-logo4:before, .icon-plus:before, .icon-menu:before, .icon-pen-alt-fill:before {
+.icon-cog, .icon-untitled, .icon-untitled-2, .icon-export_icon, .icon-clipboard_copy_icon, .icon-pen_1, .icon-flag, .icon-delete_icon, .icon-heart_empty_icon, .icon-heart_icon, .icon-window, .icon-window-2, .icon-triangle, .icon-copy, .icon-x, .icon-cancel, .icon-checkmark_icon, .icon-checkmark, .icon-cog-2, .icon-checkmark-2, .icon-clock, .icon-export, .icon-checkbox_unchecked_icon, .icon-checkbox_checked_icon, .icon-triangle-2, .icon-unlocked, .icon-locked, .icon-views, .icon-browser, .icon-ddbutton_filled, .icon-ddbutton_empty, .icon-reply, .icon-star_fav_icon, .icon-star_fav_empty_icon, .icon-triright, .icon-trileft, .icon-comment, .icon-comment2, .icon-comment2-2, .icon-comment2-3, .icon-settings, .icon-wrench, .icon-commentflip, .icon-hyp-logo4, .icon-eye-close, .icon-eye-open, .icon-comments, .icon-plus, .icon-plus-sign, .icon-eye, .icon-magic, .icon-eye-2, .icon-download, .icon-eye-3, .icon-eye-4, .icon-highlighter-nolines, .icon-highlighter-01, .icon-highlighter-blacktip, .icon-highlighter, .icon-comment2-4, .icon-comment2-5 {
 	font-family: 'icomoon';
 	speak: none;
 	font-style: normal;
 	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
 	line-height: 1;
 	-webkit-font-smoothing: antialiased;
 }
@@ -65,14 +67,17 @@ you can use the generic selector below, but it's slower:
 .icon-heart_icon:before {
 	content: "\2c";
 }
+.icon-window:before {
+	content: "\2d";
+}
+.icon-window-2:before {
+	content: "\2e";
+}
 .icon-triangle:before {
 	content: "\2f";
 }
 .icon-copy:before {
 	content: "\33";
-}
-.icon-eye:before {
-	content: "\34";
 }
 .icon-x:before {
 	content: "\36";
@@ -85,6 +90,9 @@ you can use the generic selector below, but it's slower:
 }
 .icon-checkmark:before {
 	content: "\3a";
+}
+.icon-cog-2:before {
+	content: "\3d";
 }
 .icon-checkmark-2:before {
 	content: "\35";
@@ -161,12 +169,54 @@ you can use the generic selector below, but it's slower:
 .icon-hyp-logo4:before {
 	content: "\e014";
 }
-.icon-plus:before {
+.icon-eye-close:before {
+	content: "\f070";
+}
+.icon-eye-open:before {
+	content: "\f06e";
+}
+.icon-comments:before {
 	content: "\e011";
 }
-.icon-menu:before {
+.icon-plus:before {
 	content: "\e012";
 }
-.icon-pen-alt-fill:before {
+.icon-plus-sign:before {
+	content: "\f0fe";
+}
+.icon-eye:before {
+	content: "\e016";
+}
+.icon-magic:before {
+	content: "\f0d0";
+}
+.icon-eye-2:before {
+	content: "\e017";
+}
+.icon-download:before {
+	content: "\e018";
+}
+.icon-eye-3:before {
+	content: "\e01b";
+}
+.icon-eye-4:before {
+	content: "\e015";
+}
+.icon-highlighter-nolines:before {
+	content: "\e01a";
+}
+.icon-highlighter-01:before {
+	content: "\e019";
+}
+.icon-highlighter-blacktip:before {
+	content: "\e01c";
+}
+.icon-highlighter:before {
+	content: "\e01d";
+}
+.icon-comment2-4:before {
 	content: "\e013";
+}
+.icon-comment2-5:before {
+	content: "\e01e";
 }

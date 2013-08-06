@@ -37,7 +37,9 @@
       </div>
 
       <!-- Controlbar -->
-      <div ng-mouseenter="cbStyle='controlbar'" ng-class="cbStyle">
+      <div ng-mouseenter="cbStyle='controlbar'"
+           ng-mouseleave="cbStyle='hiddencontrolbar'"
+           ng-class="cbStyle">
         <ul>
           <li class="controlbarbutton">
             <a title="Toggle always-on highlights"
