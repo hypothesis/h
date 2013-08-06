@@ -1197,7 +1197,8 @@ h3.stream {
 .magnify-glass .VS-icon-search:hover {
   width:12px;
   height:12px;
-  background-image:url(../images/embed/icons/search_glyph_dark.png)
+  background-image:url(../images/embed/icons/search_glyph_dark.png);
+  cursor: pointer;
 }
 
 .fadeIn-setup,.fadeOut-setup {
