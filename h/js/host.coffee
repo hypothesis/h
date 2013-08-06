@@ -300,7 +300,7 @@ class Annotator.Host extends Annotator
 
     return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
 
-  onSuccessfulSelection: =>
+  onSuccessfulSelection: (event) ->
     if @highlightingMode
 
       # Do we really want to make this selection?
@@ -324,7 +324,7 @@ class Annotator.Host extends Annotator
       @plugins.Bridge.injectAnnotation annotation
 
     else
-      super()
+      super event
 
   # When clicking on a highlight in highlighting mode,
   # set @noBack to true to prevent the sidebar from closing
