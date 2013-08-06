@@ -21,6 +21,7 @@ annotation = ['$filter', 'annotator', ($filter, annotator) ->
   restrict: 'C'
   scope:
     mode: '@'
+    replies: '@'
   templateUrl: 'annotation.html'
 ]
 

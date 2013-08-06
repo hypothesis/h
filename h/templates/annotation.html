@@ -129,7 +129,7 @@
   <div class="magicontrols small" ng-hide="editing">
     <span class="reply-count"
           ng-pluralize=""
-          ng-show="thread.children.length"
+          ng-show="thread.children.length && replies!='false'"
           count="thread.flattenChildren().length"
           when="{one: '1 reply', other: '{} replies'}" />
     <a class="reply-icon show" href="" title="Reply" ng-click="reply()">Reply</a>
