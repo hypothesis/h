@@ -18,6 +18,6 @@ script:
 env:
   global:
   - secure: iOqIzaawOalSidKGRstfhiaZ9HykF+EEriG2cq6a/UGS65pguYyCogtkjFODG1cWlRh2cAICxeM6WOw4TWL9SFyb8sjfx6k2nAFOFuF3efNwuVaPkSS5zZfGAdLJmnGNivm0EdUBB17gl+P8QkiI1oQvYH2dsmF/VlhpHyGuoNk=
-  - secure: Aw2SFoqCnLc5sfRxiD5nEzmPHomPWTzlnPG525fQxKUhigpvjcqI9C6elxgb7DnIQzQ9+WBjh0wdzuUYpLP/AnWk/vheKnx2+vj4ZuD4TxOG9hSog8mqpNcrpSuTgXf2S+bt5RH4l73TlhCU/3GEhEo5I0JWanHzvCefUrtRu14=
+  - secure: ZDyDsRzO7Y6I4XI2WWVsVVXPxBX+T+3oVM/fKCxPzEhaRvc56Q4oT583Xg8RfPlpgaQ1Y11a2O4ZYlwjM0/6hUqF0M/TL6bIqUETK/EMF6xma46dVMSd8ZJ22RUYZvPQhNWMIEWZvZRe0liepomDgJKiM4l7PyN1TEubqgPTa1k=
 after_failure:
 - cat pyramid.log
