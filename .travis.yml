@@ -1,29 +1,23 @@
-language: 
-  - python
+language:
+- python
 python:
-  - "2.7"
-install: 
-  - sudo add-apt-repository --yes ppa:chris-lea/node.js
-  - sudo apt-get update --yes
-  - sudo apt-get install --yes nodejs
-  - sudo npm install -g coffee-script 
-  - pip install -r requirements.txt 
-  - gem install compass
+- '2.7'
+install:
+- sudo add-apt-repository --yes ppa:chris-lea/node.js
+- sudo apt-get update --yes
+- sudo apt-get install --yes nodejs
+- sudo npm install -g coffee-script
+- pip install -r requirements.txt
+- gem install compass
 services:
-  - elasticsearch
+- elasticsearch
 before_script:
-  - curl https://gist.github.com/santiycr/5139565/raw/sauce_connect_setup.sh | bash
-script: 
-  - make test
+- curl https://gist.github.com/santiycr/5139565/raw/sauce_connect_setup.sh | bash
+script:
+- make test
 env:
   global:
-  - secure: |-
-      lg9CixLocycmmp2kI1sTzpu9/JpMBUbekHOsYibedtahAM3iTT1DWCmytEhK
-      Cy9alfYBueGP04HjO1R1BJEGKhchurnaHNq1xBZgN0KImxhFjb2ny5OP89uv
-      qzoevrERLqLDgF8XHuCSWsF251Wzx0eSnZ5N89ooP6I+ys9zW6k=
-  - secure: |-
-      u9Zc5m9X/fZBf2R1i2l3D/k89Q0hVh+NZ5Wjw9fr6RpoyuPZjFCLTgcdnVYz
-      r6MlXe7A4PzoIS1XbUE87XV5/yG4LbH8JknaNWygcNMXxCSXaURySgTM+eMG
-      AqLXWyCtqrWvmJq7VnuT1OAKKpybTFjgR0QDEo/LSDgPZP82HEc=
+  - secure: iOqIzaawOalSidKGRstfhiaZ9HykF+EEriG2cq6a/UGS65pguYyCogtkjFODG1cWlRh2cAICxeM6WOw4TWL9SFyb8sjfx6k2nAFOFuF3efNwuVaPkSS5zZfGAdLJmnGNivm0EdUBB17gl+P8QkiI1oQvYH2dsmF/VlhpHyGuoNk=
+  - secure: Aw2SFoqCnLc5sfRxiD5nEzmPHomPWTzlnPG525fQxKUhigpvjcqI9C6elxgb7DnIQzQ9+WBjh0wdzuUYpLP/AnWk/vheKnx2+vj4ZuD4TxOG9hSog8mqpNcrpSuTgXf2S+bt5RH4l73TlhCU/3GEhEo5I0JWanHzvCefUrtRu14=
 after_failure:
-  - cat pyramid.log  
+- cat pyramid.log
