@@ -41,14 +41,14 @@
            ng-class="cbStyle">
         <ul>
           <li class="controlbarbutton">
-            <a title="Toggle always-on highlights"
+            <a title="Show Annotations"
                class="alwaysonhighlights-icon" 
                ng-click="toggleAlwaysOnHighlights()"
                href="">
             </a>
           </li>
           <li class="controlbarbutton">
-            <a title="Toggle highlighting mode"
+            <a title="Highlighting Mode"
                class="highlighter-icon" 
                ng-class="highlightingMode && 'pushed'"
                ng-click="toggleHighlightingMode()"
@@ -56,7 +56,7 @@
             </a>
           </li>
           <li class="controlbarbutton">
-            <a title="Create unattached annotation"
+            <a title="New Comment"
                class="comment-icon"
                ng-click="createUnattachedAnnotation()"
                href="">
