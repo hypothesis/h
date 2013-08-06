@@ -21,3 +21,8 @@ env:
   - secure: ZDyDsRzO7Y6I4XI2WWVsVVXPxBX+T+3oVM/fKCxPzEhaRvc56Q4oT583Xg8RfPlpgaQ1Y11a2O4ZYlwjM0/6hUqF0M/TL6bIqUETK/EMF6xma46dVMSd8ZJ22RUYZvPQhNWMIEWZvZRe0liepomDgJKiM4l7PyN1TEubqgPTa1k=
 after_failure:
 - cat pyramid.log
+addons:
+  sauce_connect:
+    username: tilgovi
+    access_key:
+      secure: LSlwjLHFH3oqH8c9vamD9wPJIE6jpEyL2ovASDTxz6LcPKL4GmT9Vnl60QhC+V9hKHXzJ+vSyA0T1dkTpyr0fq3GIksL3rqHvbVNqHbD8YSxlZIs/6I3gTFmkPz5mK8VdYoA0uSBRFIr/BBBERS8TNqAN3vqv0xFVVIpnedbfIk=
