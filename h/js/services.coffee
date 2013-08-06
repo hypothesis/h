@@ -190,11 +190,17 @@ class Hypothesis extends Annotator
                 when 'time'
                     delta = Math.round((+new Date - new Date(annotation.updated)) / 1000)
                     switch value
-                      when '5 minutes'
+                      when '5 min'
                         unless delta <= 60*5
+                          matches = false
+                      when '30 min'
+                        unless delta <= 60*30
                           matches = false
                       when '1 hour'
                         unless delta <= 60*60
+                          matches = false
+                      when '12 hours'
+                        unless delta <= 60*60*12
                           matches = false
                       when '1 day'
                         unless delta <= 60*60*24
@@ -246,7 +252,7 @@ class Hypothesis extends Annotator
             when 'group' then callback ['Public', 'Private']
             when 'area' then callback ['sidebar', 'document']
             when 'time'
-              callback ['5 minutes', '1 hour', '1 day', '1 week', '1 month', '1 year']
+              callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
         clearSearch: (original) =>
           @show_search = false
           original()
