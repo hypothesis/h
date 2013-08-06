@@ -14,6 +14,7 @@ from horus.events import (
 
 
 class AnnotatorStoreEvent(object):
-    def __init__(self, annotation, action):
+    def __init__(self, request, annotation, action):
+        self.request = request
         self.annotation = annotation
         self.action = action

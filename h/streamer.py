@@ -226,21 +226,18 @@ class FilterHandler(object):
 
 
 class StreamerSession(Session):
-    connections = set()
-
     def on_open(self):
         self.filter = {}
-        self.connections.add(self)
 
     def on_message(self, msg):
         try:
             payload = json.loads(msg)
 
-            #Let's try to validate the schema
+            # Let's try to validate the schema
             validate(payload, filter_schema)
             self.filter = FilterHandler(payload)
 
-            #If past is given, send the annotations back.
+            # If past is given, send the annotations back.
             if "past_data" in payload and payload["past_data"]["load_past"] != "none":
                 query = FilterToElasticFilter(payload)
                 request = self.request
@@ -259,31 +256,24 @@ class StreamerSession(Session):
             log.info('Failed to parse filter:' + str(msg))
             self.close()
 
-    def on_close(self):
-        log.info('closing ' + str(self))
-        self.connections.remove(self)
-
 
 @subscriber(events.AnnotatorStoreEvent)
 def after_action(event):
+    request = event.request
     action = event.action
     annotation = event.annotation
 
     annotation.update(url_values_from_document(annotation))
 
-    for connection in StreamerSession.connections:
-        if not authz.authorize(annotation, 'read', connection.request.user):
+    manager = request.get_sockjs_manager()
+    for session in manager.active_sessions():
+        if not authz.authorize(annotation, 'read', session.request.user):
             continue
 
-        if not connection.filter.match(annotation, action):
+        if not session.filter.match(annotation, action):
             continue
 
-        try:
-            connection.send([annotation, action])
-        except:
-            log.info(traceback.format_exc())
-            log.info('Filter error!')
-            connection.close()
+        session.send([annotation, action])
 
 
 def includeme(config):

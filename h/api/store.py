@@ -15,7 +15,7 @@ from annotator.document import Document
 
 from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
-from pyramid.threadlocal import get_current_registry
+from pyramid.threadlocal import get_current_registry, get_current_request
 from pyramid.wsgi import wsgiapp2
 
 from h import api, events, interfaces, models
@@ -109,13 +109,17 @@ def after_request(response):
     if 200 <= response.status_code < 300:
         match = re.match(r'^store\.(\w+)_annotation$', flask.request.endpoint)
         if match:
+            request = get_current_request()
+            registry = get_current_registry()
+
             action = match.group(1)
             if action == 'delete':
                 annotation = json.loads(flask.request.data)
             else:
                 annotation = json.loads(response.data)
-            event = events.AnnotatorStoreEvent(annotation, action)
-            get_current_registry().notify(event)
+
+            event = events.AnnotatorStoreEvent(request, annotation, action)
+            registry.notify(event)
     return response
 
 
