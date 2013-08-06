@@ -1125,6 +1125,10 @@ h3.tagstream, h3.userstream {
     -webkit-box-sizing:content-box;
     box-sizing: content-box;
   }
+
+  .VS-search .search_input input {
+    width: 4px;
+  }
 }
 
 .visual-container {
