@@ -94,7 +94,7 @@ class Streamer(BaseController):
 
 
 @view_defaults(context='h.resources.Stream', layout='site')
-class UserStream(BaseController):
+class Stream(BaseController):
     @view_config(accept='text/html', renderer='templates/stream.pt')
     def __html__(self):
         return self.request.context
