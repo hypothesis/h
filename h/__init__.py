@@ -86,6 +86,8 @@ def main(global_config, **settings):
 
 
 def server(app, gcfg=None, host="127.0.0.1", port=None, *args, **kwargs):
+    # Workaround for gunicorn #540
+    # Remove after updating gunicorn > 17.5
     from gunicorn.config import get_default_config_file
     from gunicorn.app.pasterapp import PasterServerApplication
 
