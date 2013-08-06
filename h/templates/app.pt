@@ -49,7 +49,7 @@
           </li>
           <li class="controlbarbutton">
             <a title="Toggle highlighting mode"
-               class="hightlighter-icon" 
+               class="highlighter-icon" 
                ng-class="highlightingMode && 'pushed'"
                ng-click="toggleHighlightingMode()"
                href="">
