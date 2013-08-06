@@ -4,16 +4,24 @@ del get_versions
 
 
 def includeme(config):
+    # Include the base configuration for horus integration
+    config.include('h.forms')
+    config.include('h.models')
+    config.include('h.schemas')
+    config.commit()
+
+    # Include horus
+    config.include('horus')
+    config.commit()
+
+    # Include the rest of the application
     config.include('h.api')
     config.include('h.app')
     config.include('h.assets')
-    config.include('h.forms')
     config.include('h.layouts')
-    config.include('h.models')
     config.include('h.panels')
     config.include('h.resources')
     config.include('h.session')
-    config.include('h.schemas')
     config.include('h.subscribers')
     config.include('h.views')
     config.include('h.streamer')
@@ -66,17 +74,7 @@ def create_app(settings):
     config.add_route('ok', '/ruok')
     config.add_view(lambda request: 'imok', renderer='string', route_name='ok')
 
-    # Include the base configuration for horus integration
-    config.include('h.forms')
-    config.include('h.models')
-    config.include('h.schemas')
-    config.commit()
-
-    # Include horus
-    config.include('horus')
-    config.commit()
-
-    # Include the rest of the application
+    # Include all the pyramid subcomponents
     config.include(includeme)
 
     return config.make_wsgi_app()
