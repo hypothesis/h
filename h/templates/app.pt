@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en" metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag="">
     <base target="_top"
