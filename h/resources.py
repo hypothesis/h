@@ -90,7 +90,7 @@ class AppFactory(BaseResource):
         if request.user:
             return {
                 'username': request.user.username,
-                'provider': request.host,
+                'provider': request.server_name,
             }
 
         return None
