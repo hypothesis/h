@@ -174,7 +174,7 @@
 
             this.tagList
                 .addClass('tagit')
-                .addClass('ui-widget ui-widget-content ui-corner-all')
+                .addClass('ui-widget ui-widget-content')
                 // Create the input field.
                 .append($('<li class="tagit-new"></li>').append(this.tagInput))
                 .click(function(e) {
@@ -422,7 +422,7 @@
 
             // Create tag.
             var tag = $('<li></li>')
-                .addClass('tagit-choice ui-widget-content ui-state-default ui-corner-all')
+                .addClass('tagit-choice ui-widget-content ui-state-default')
                 .addClass(additionalClass)
                 .append(label);
 
