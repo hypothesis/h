@@ -247,8 +247,8 @@ class StreamerSession(Session):
 
                 for annotation in annotations:
                     annotation.update(url_values_from_document(annotation))
-                #Finally send filtered annotations
 
+                # Finally send filtered annotations
                 if len(annotations) > 0:
                     self.send([annotations, 'past'])
         except:
