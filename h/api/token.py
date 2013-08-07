@@ -23,7 +23,7 @@ class TokenController(views.BaseController):
         if request.user:
             parts = {
                 'username': request.user.username,
-                'provider': request.host
+                'provider': request.server_name
             }
             message['userId'] = 'acct:%(username)s@%(provider)s' % parts
 
