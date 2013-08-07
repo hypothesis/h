@@ -58,6 +58,12 @@ below. Issues tagged with the label 'cake' are ideal for new contributors.
 .. image:: http://badge.waffle.io/hypothesis/h.png
    :target: http://waffle.io/hypothesis/h
    :alt: Stories in Ready
+   :align: left
+   :height: 18px
+.. image:: https://travis-ci.org/hypothesis/h.png?branch=search-tool-6
+   :target: https://travis-ci.org/hypothesis/h
+   :alt: Build Status
+   :height: 18px
 
 License
 -------
