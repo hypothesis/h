@@ -7,6 +7,7 @@ from horus import resources
 
 from pyramid.decorator import reify
 from pyramid.interfaces import ILocation
+from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
 
 from zope.interface import implementer
 
@@ -112,6 +113,39 @@ class AppFactory(BaseResource):
         }
 
 class Annotation(BaseResource, dict):
+    @property
+    def __acl__(self):
+        acl = []
+        # Convert annotator-store roles to pyramid principals
+        for action, roles in self.get('permissions', {}).items():
+            for role in roles:
+                if role.startswith('group:'):
+                    if role == 'group:__world__':
+                        principal = Everyone
+                    elif role == 'group:__authenticated__':
+                        principal = Authenticated
+                    elif role == 'group:__consumer__':
+                        raise NotImplementedError("API consumer groups")
+                    else:
+                        principal = role
+                elif role.startswith('acct:'):
+                    principal = role
+                else:
+                    raise ValueError(
+                        "Unrecognized role '%s' in annotation '%s'" %
+                        (role, self.get('id'))
+                    )
+
+                # Append the converted rule tuple to the ACL
+                rule = (Allow, principal, action)
+                acl.append(rule)
+
+        if acl:
+            return acl
+        else:
+            # If there is no acl, it's an admin party!
+            return [(Allow, Everyone, ALL_PERMISSIONS)]
+
     def _nestlist(self, annotations, childTable):
         outlist = []
         if annotations is None: return outlist
