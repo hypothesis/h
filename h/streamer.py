@@ -281,7 +281,7 @@ class StreamerSession(Session):
             self.close()
 
 
-@subscriber(events.AnnotatorStoreEvent)
+@subscriber(events.AnnotationEvent)
 def after_action(event):
     try:
         request = event.request

@@ -15,7 +15,8 @@ from annotator.document import Document
 
 from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
-from pyramid.threadlocal import get_current_registry, get_current_request
+from pyramid.security import has_permission
+from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
 from h import api, events, interfaces, models
@@ -74,6 +75,20 @@ class Store(object):
         return result
 
 
+def wrap_annotation(annotation):
+    """Wraps a dict as an instance of the registered Annotation model class.
+
+    Arguments:
+    - `annotation`: a dictionary-like object containing the model data
+    """
+
+    request = get_current_request()
+    cls = request.registry.queryUtility(interfaces.IAnnotationClass)
+    result = cls(request)
+    result.update(annotation)
+    return result
+
+
 def anonymize_deletes(annotation):
     if annotation.get('deleted', False):
         user = annotation.get('user', '')
@@ -113,16 +128,17 @@ def after_request(response):
         match = re.match(r'^store\.(\w+)_annotation$', flask.request.endpoint)
         if match:
             request = get_current_request()
-            registry = get_current_registry()
 
             action = match.group(1)
             if action == 'delete':
-                annotation = json.loads(flask.request.data)
+                data = json.loads(flask.request.data)
             else:
-                annotation = json.loads(response.data)
+                data = json.loads(response.data)
 
-            event = events.AnnotatorStoreEvent(request, annotation, action)
-            registry.notify(event)
+            annotation = wrap_annotation(data)
+            event = events.AnnotationEvent(request, annotation, action)
+
+            request.registry.notify(event)
     return response
 
 
