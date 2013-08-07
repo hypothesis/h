@@ -1109,13 +1109,13 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     padding: .01em 1.3em .01em .3em;
     position: relative;
     font-size: 12px;
-    opacity:0.6;
+    opacity:0.7;
 
     &:hover { opacity: 1; }
 
     & + li { margin-left: .1em; }
   }
-  // li.tagit-choice { margin-top: .33em; }
+  li.tagit-choice { margin-top: .33em; }
 
   &[readonly] {
     .tagit-new, .tagit-close { display: none; }
