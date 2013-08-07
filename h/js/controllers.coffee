@@ -11,7 +11,7 @@ class App
     'annotator', 'authentication', 'drafts', 'flash'
   ]
   constructor: (
-    $compile, $element, $http, $location, $scope, $timeout,
+    $compile, $element, $http, $location, $scope, $timeout
     annotator, authentication, drafts, flash
   ) ->
     {plugins, provider} = annotator
