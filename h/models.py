@@ -132,6 +132,17 @@ class UserGroup(UserGroupMixin, Base):
     pass
 
 
+def groupfinder(userid, request):
+    user = request.user
+    groups = None
+    if user:
+        groups = []
+        for group in user.groups:
+            groups.append('group:%s' % group.name)
+        groups.append('acct:%s@%s' % (user.username, request.server_name))
+    return groups
+
+
 def includeme(config):
     registry = config.registry
     config.include('pyramid_basemodel')

@@ -48,12 +48,13 @@ def bootstrap(cfname, request=None, options=None, config_fn=None):
 
 
 def create_app(settings):
-    from horus import groupfinder
     from pyramid.config import Configurator
     from pyramid.authentication import SessionAuthenticationPolicy
     from pyramid.authorization import ACLAuthorizationPolicy
     from pyramid.path import AssetResolver
     from pyramid.response import FileResponse
+
+    from h.models import groupfinder
 
     authn_policy = SessionAuthenticationPolicy(callback=groupfinder)
     authz_policy = ACLAuthorizationPolicy()
