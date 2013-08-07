@@ -1084,7 +1084,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   background: none;
   clear: both;
   margin-top: .2em;
-  margin-bottom: .2em;
+  // margin-bottom: .2em;
 
   .tagit-close {
     cursor: pointer;
@@ -1105,7 +1105,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     cursor: pointer;
     display: block;
     float: left;
-    margin: .1em;
+    margin: .6em .2em;
     padding: .01em 1.3em .01em .3em;
     position: relative;
     font-size: 12px;
@@ -1115,7 +1115,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
     & + li { margin-left: .1em; }
   }
-  li.tagit-choice { margin-top: .33em; }
+  // li.tagit-choice { margin-top: .33em; }
 
   &[readonly] {
     .tagit-new, .tagit-close { display: none; }
