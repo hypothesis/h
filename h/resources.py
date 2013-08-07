@@ -209,3 +209,6 @@ def includeme(config):
     RootFactory.stream = Streamer
     RootFactory.u = UserStreamFactory
     RootFactory.t = TagStreamFactory
+
+    if not config.registry.queryUtility(interfaces.IAnnotationClass):
+        config.registry.registerUtility(Annotation, interfaces.IAnnotationClass)
