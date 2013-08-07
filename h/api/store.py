@@ -9,7 +9,7 @@ import urlparse
 
 import flask
 
-from annotator import auth, authz, store, es
+from annotator import auth, store, es
 from annotator.annotation import Annotation
 from annotator.document import Document
 
@@ -106,12 +106,13 @@ def anonymize_deletes(annotation):
 
 
 def authorize(annotation, action, user=None):
-    action_field = annotation.get('permissions', {}).get(action, [])
+    request = get_current_request()
+    annotation = wrap_annotation(annotation)
 
-    if not action_field:
-        return True
-    else:
-        return authz.authorize(annotation, action, user)
+    result = has_permission(action, annotation, request)
+    if not result:
+        print result
+    return result
 
 
 def before_request():
