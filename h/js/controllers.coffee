@@ -8,10 +8,10 @@ class App
 
   this.$inject = [
     '$compile', '$element', '$http', '$location', '$scope', '$timeout',
-    '$window', 'annotator', 'authentication', 'drafts', 'flash'
+    'annotator', 'authentication', 'drafts', 'flash'
   ]
   constructor: (
-    $compile, $element, $http, $location, $scope, $timeout, $window,
+    $compile, $element, $http, $location, $scope, $timeout,
     annotator, authentication, drafts, flash
   ) ->
     {plugins, provider} = annotator
