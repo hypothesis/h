@@ -61,6 +61,7 @@ class Store(object):
 
     def _invoke_subrequest(self, subreq):
         request = self.request
+        # XXX: This should be available more easily somewhere, like the session.
         token = api.token.TokenController(request)()
         subreq.headers['X-Annotator-Auth-Token'] = token
         result = request.invoke_subrequest(subreq)
