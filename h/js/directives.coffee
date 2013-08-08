@@ -271,8 +271,6 @@ tags = ['$window', ($window) ->
       caseSensitive: false
       placeholderText: attr.placeholder
       keepPlaceholder: true
-      propagateTagClicks: false
-      propagateRemoveClicks: false
       preprocessTag: (val) ->
         val.toLowerCase().replace /[^a-z0-9\-\_\s]/g, ''
       afterTagAdded: (evt, ui) ->

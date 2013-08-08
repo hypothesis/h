@@ -81,12 +81,6 @@
             // Whether to animate tag removals or not.
             animate: true,
 
-            // Whether to propagete the click events when removing tags
-            propagateRemoveClicks: true,
-
-            // Whether to propagete the click events on tabs
-            propagateTagClicks: true,
-
             // Optionally set a tabindex attribute on the input that gets
             // created for tag-it.
             tabIndex: null,
@@ -186,11 +180,6 @@
                 .click(function(e) {
                     var target = $(e.target);
                     if (target.hasClass('tagit-label')) {
-                        // Don't propagate this even, unless configured to
-                        if (!that.options.propagateTagClicks) {
-                          e.stopPropagation()
-                        }
-                        
                         var tag = target.closest('.tagit-choice');
                         if (!tag.hasClass('removed')) {
                             that._trigger('onTagClicked', e, {tag: tag, tagLabel: that.tagLabel(tag)});
@@ -450,11 +439,6 @@
                     .click(function(e) {
                         // Removes a tag when the little 'x' is clicked.
                         that.removeTag(tag);
-
-                        // Don't propagate this even, unless configured to
-                        if (!that.options.propagateRemoveClicks) {
-                          e.stopPropagation()
-                        }
                     });
                 tag.append(removeTag);
             }
