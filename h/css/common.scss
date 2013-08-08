@@ -772,8 +772,12 @@ blockquote {
   }
 
   //These are all the changes needed to collapse thread objects.
-  .collapsed {
+  &.collapsed {
     display: block !important;
+
+    .thread {
+      display: none;
+    }
 
     & > ul {
       max-height: 0;

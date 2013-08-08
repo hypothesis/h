@@ -208,11 +208,29 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
-thread = ->
-  link: (scope, iElement, iAttrs, controller) ->
-    scope.collapsed = false
+thread = ['$timeout', ($timeout) ->
+  link: (scope, elem, attr, ctrl) ->
+    childrenEditing = {}
+
+    scope.toggleCollapsed = (event) ->
+      event.stopPropagation()
+      $timeout ->
+        return unless Object.keys(childrenEditing).length is 0
+        scope.collapsed = !scope.collapsed
+      , 10
+
+    scope.$on 'toggleEditing', (event) ->
+      {$id, editing} = event.targetScope
+      if editing
+        scope.collapsed = false
+        unless childrenEditing[$id]
+          event.targetScope.$on '$destroy', ->
+            $timeout (-> delete childrenEditing[$id]), 100
+          childrenEditing[$id] = true
+      else
+        delete childrenEditing[$id]
   restrict: 'C'
-  scope: true
+]
 
 
 userPicker = ->

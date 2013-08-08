@@ -227,6 +227,7 @@ class Annotation
   constructor: ($element, $location, $scope, annotator, drafts, $timeout) ->
     threading = annotator.threading
     $scope.action = 'create'
+    $scope.editing = false
 
     $scope.cancel = ->
       $scope.editing = false
@@ -315,6 +316,8 @@ class Annotation
     $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
     $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
 
+    $scope.$watch 'editing', -> $scope.$emit 'toggleEditing'
+
     $scope.$watch 'model.$modelValue.id', (id) ->
       if id?
         $scope.thread = threading.getContainer id
@@ -393,21 +396,6 @@ class Viewer
     $scope.replies = (annotation) ->
       thread = threading.getContainer annotation.id
       (r.message for r in (thread.children or []))
-
-    $scope.toggleDetail = ($event) ->
-      # XXX: Super hacky nonsense here that should probably be handled
-      # by stopping the propagation or something. Also, the silly traversal
-      # of scope has got to stop.
-      $target = angular.element $event.target
-      if (
-        $event.target.tagName in ['A', 'BUTTON', 'INPUT', 'TEXTAREA'] or
-        $target.attr('ng-click') or
-        $target.attr('role') == 'button'
-      )
-        $target.scope()?.$parent?.$$prevSibling?.collapsed = false
-        @detail = true
-      else
-        @detail = !@detail
 
     $scope.sortThread = (thread) ->
       if thread?.message?.updated
