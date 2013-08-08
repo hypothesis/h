@@ -29,18 +29,27 @@
                  ng-click="view=!view">
               <div class="small">
                 <div class="pull-right paper annotation-header-width">
+                  <a class="launch-icon show" ng-href="{{annotation._share_link}}" target="_blank"></a>
+                </div>
+                <div class="pull-right paper annotation-header-width">
                   {{ annotation.updated | fuzzyTime }}
                 </div>
-                <div>
+                <div class="no-overflow">
                     <div class="pull-left paper annotation-header-width"
                          ng-show="annotation.favicon_link">
                        <img class="favicon annotation-header-favicon"
                             ng-src="{{annotation.favicon_link}}"/>
                     </div>
-                    <div class="pull-left paper annotation-header-width">
+                    <div class="pull-left paper annotation-header-width"
+                         ng-show="annotation.text.length">
                       {{annotation.quote | elide:20}}
                     </div>
-                    <div class="paper annotation-header-width">
+                    <div class="pull-left paper annotation-header-width strech"
+                         ng-hide="annotation.text.length">
+                      {{annotation.quote}}
+                    </div>
+                    <div class="paper annotation-header-width"
+                         ng-show="annotation.text.length">
                       <span ng-bind-html-unsafe="annotation.text | converter"/>
                     </div>
                 </div>
@@ -58,12 +67,18 @@
                 <a href="{{annotation.source}}">{{annotation.source_stripped}}</a>
               </div>
               <div class="card-grid yui3-g">
-                <div class="yui3-u-1 t-yui3-u-1-2">
+                <div class="yui3-u-1 full-quote"
+                     ng-class="annotation.text && 't-yui3-u-1-2' || '' ">
                   <div class="paper excerpt">
+                    <div class="magicontrols pull-right"
+                         ng-hide="annotation.text">
+                     <span class="small">{{annotation.updated | fuzzyTime}}</span>
+                    </div>
                     <blockquote>{{annotation.quote}}</blockquote>
                   </div>
                 </div>
-                <div class="yui3-u-1 t-yui3-u-1-2">
+                <div class="yui3-u-1 t-yui3-u-1-2"
+                     ng-show="annotation.text">
                   <div class="paper thread">
                     <div class="detail">
                       <div class="magicontrols pull-right">
