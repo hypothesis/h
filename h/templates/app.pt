@@ -36,6 +36,12 @@
         </div>
       </div>
 
+      <!-- Updater draft -->
+      <div class="pull-right">
+          <div ng-show="has_update"
+               ng-click="reloadAnnotations()">Update page</div>
+      </div>
+
       <!-- Controlbar -->
       <div ng-mouseenter="cbStyle='controlbar'"
            ng-mouseleave="cbStyle='hiddencontrolbar'"
