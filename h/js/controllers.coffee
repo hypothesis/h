@@ -387,6 +387,11 @@ class App
         delete annotator.plugins.Store
         annotator.addStore Store.options
 
+        href = annotator.plugins.Store.options.loadFromSearch.uri
+        for uri in annotator.plugins.Document.uris()
+          unless uri is href
+            annotator.plugins.Store.loadAnnotationsFromSearch uri: uri
+
         $scope.has_update = false
 
     $scope.initUpdater = ->
@@ -420,28 +425,29 @@ class App
         data = msg.data[0]
         action = msg.data[1]
         unless data instanceof Array then data = [data]
-        for annotation in data
-          check = annotator.threading.getContainer annotation.id
-          if check?.message?
-            if action is 'create'
-              continue # We have created this
-            if action is 'update'
-              if check.message.pdated is annotation.updated then continue
+        $scope.$apply =>
+          for annotation in data
+            check = annotator.threading.getContainer annotation.id
+            if check?.message?
+              if action is 'create'
+                continue # We have created this
+              if action is 'update'
+                if check.message.pdated is annotation.updated then continue
+                else
+                  $scope.has_update = true
+                  break
+              if action is 'delete'
+                # We haven't deleted this yet
+                $scope.has_update = true
+                break
+            else
+              if action is 'delete'
+                continue # Probably our own delete or doesn't concern us
               else
                 $scope.has_update = true
                 break
-            if action is 'delete'
-              # We haven't deleted this yet
-              $scope.has_update = true
-              break
-          else
-            if action is 'delete'
-              continue # Probably our own delete or doesn't concern us
-            else
-              $scope.has_update = true
-              break
 
-          $scope.$digest()
+          #$scope.$digest()
 
     $timeout =>
       $scope.initUpdater()
