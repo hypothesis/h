@@ -48,9 +48,9 @@ class Stream
             index = 0
             for ann in $scope.annotations
               if ann.id is annotation.id
-                #Remove the original
+                # Remove the original
                 $scope.annotations.splice index,1
-                #Put back the edited
+                # Put back the edited
                 $scope.annotations.unshift annotation
                 break
               index +=1
