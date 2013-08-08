@@ -298,6 +298,7 @@ tags = ['$window', ($window) ->
       autocomplete:
         source: []
       onTagClicked: (evt, ui) ->
+        evt.stopPropagation()
         tag = ui.tagLabel
         $window.open "/t/" + tag
 
