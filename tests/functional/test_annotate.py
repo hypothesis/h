@@ -7,7 +7,7 @@ import unittest, time, re
 from . import SeleniumTestCase, Annotator
 
 class TestAnnotation(SeleniumTestCase):
-    
+
     def test_annotation(self):
         driver = self.driver
         driver.get(self.base_url + "/")
