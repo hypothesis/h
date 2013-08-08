@@ -228,7 +228,7 @@ thread = ['$timeout', ($timeout) ->
             $timeout (-> delete childrenEditing[$id]), 100
           childrenEditing[$id] = true
       else
-        delete childrenEditing[$id]
+        $timeout (-> delete childrenEditing[$id]), 100
   restrict: 'C'
 ]
 
