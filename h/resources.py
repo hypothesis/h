@@ -203,6 +203,7 @@ class TagStreamFactory(BaseResource):
 
 def includeme(config):
     config.set_root_factory(RootFactory)
+    config.add_route('index', '/', static=True)
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
     RootFactory.stream = Streamer
