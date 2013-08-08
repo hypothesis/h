@@ -124,20 +124,6 @@ def after_request(response):
     return response
 
 
-def reverse_proxy(app):
-    def handler(environ, start_response):
-        script_name = environ.get('HTTP_X_SCRIPT_NAME', None)
-
-        if script_name:
-            environ['SCRIPT_NAME'] = script_name
-            path_info = environ['PATH_INFO']
-            if path_info.startswith(script_name):
-                environ['PATH_INFO'] = path_info[len(script_name):]
-
-        return app(environ, start_response)
-    return handler
-
-
 def includeme(config):
     """Include the annotator-store API backend via http or route embedding.
 
@@ -158,7 +144,6 @@ def includeme(config):
 
     app = flask.Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
-    app.wsgi_app = reverse_proxy(app.wsgi_app)
     settings = config.get_settings()
 
     if 'es.host' in settings:
