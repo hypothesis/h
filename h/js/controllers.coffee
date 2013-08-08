@@ -328,7 +328,7 @@ class Annotation
           $scope.editing = true
 
     $scope.$watch 'shared', (newValue) ->
-      if newValue and newValue is true
+      if newValue? is true
         $timeout -> $element.find('input').focus()
         $timeout -> $element.find('input').select()
 
