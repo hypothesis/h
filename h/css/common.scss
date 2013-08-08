@@ -734,6 +734,7 @@ blockquote {
 //THREADING////////////////////////////////
 //Threaded discussion specific
 .thread {
+  cursor: pointer;
   position: relative;
 
   & > ul {
@@ -879,7 +880,6 @@ blockquote {
 //This is specific to the summary view.
 .summary {
   position: relative;
-  cursor: pointer;
 
   &:hover {
     @include smallshadow(2px, 3px, .1);
