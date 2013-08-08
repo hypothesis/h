@@ -355,8 +355,10 @@ class Hypothesis extends Annotator
 
     console.log "Loaded annotions for '" + href + "'."
     for uri in @plugins.Document.uris()
-      console.log "Also loading annotations for: " + uri
-      this.plugins.Store.loadAnnotationsFromSearch uri: uri
+      # Do not load annotations from the href twice
+      unless uri is href
+        console.log "Also loading annotations for: " + uri
+        this.plugins.Store.loadAnnotationsFromSearch uri: uri
 
 
 class AuthenticationProvider
