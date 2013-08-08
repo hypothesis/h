@@ -35,7 +35,11 @@ class BaseController(BaseController):
         self.Token = getUtility(interfaces.ITokenClass)
 
 
-@view_config(layout='site', renderer='templates/home.pt', route_name='index')
+@view_config(
+    context='h.resources.RootFactory',
+    layout='site',
+    renderer='templates/home.pt',
+)
 def home(request):
     return find_resource(request.context, '/app').embed
 

@@ -172,7 +172,7 @@ def includeme(config):
     api_url = config.registry.settings.get('api.url', api_endpoint)
 
     if api_endpoint is not None:
-        api_path = api_endpoint.strip('/')
+        api_path = api_endpoint.rstrip('/')
         api_pattern = '/'.join([api_path, '*subpath'])
 
         # Configure the API views -- version 1 is just an annotator.store proxy
@@ -180,6 +180,7 @@ def includeme(config):
 
         config.add_route('api_real', api_pattern)
         config.add_view(api_v1, route_name='api_real')
+        config.add_view(api_v1, name='api_virtual')
 
     if api_url is not None:
         api_url = api_url.strip('/')
