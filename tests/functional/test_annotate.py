@@ -29,6 +29,7 @@ class TestAnnotation(SeleniumTestCase):
         # go away and come back
         driver.get("http://google.com")
         driver.get(self.base_url + "/")
+        time.sleep(3)
 
         # make sure the heatmap shows our annotation
         with Annotator(driver):
