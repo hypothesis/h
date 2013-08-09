@@ -4,6 +4,7 @@ imports = [
   'h.directives'
   'h.app_directives'
   'h.displayer'
+  'h.flash'
   'h.filters'
   'h.services'
 ]
