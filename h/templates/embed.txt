@@ -16,7 +16,7 @@ yepnope([
   },
   {
     test: window.requestAnimationFrame,
-    nope: ${raf},
+    nope: ${raf}
   }
 ])
 /*]]>{/literal}*/
