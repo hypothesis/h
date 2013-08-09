@@ -65,6 +65,20 @@ below. Issues tagged with the label 'cake' are ideal for new contributors.
    :alt: Build Status
    :height: 18px
 
+Chrome Extension
+^^^^^^^^^^^^^^^^
+To build the Chrome extension, follow the installation instructions. Then,
+run the following command at the prompt::
+
+    $ ./bin/hypothesis extension development.ini http://localhost:5000/app
+
+If you are managing your virtual environment yourself, the script may not be
+located in the ``bin`` directory, but should be available in your path when the
+virtual environment is activated.
+
+The third argument is the base URL for the application. An optional, fourth
+argument may be passed to override the URL prefix used for static assets.
+
 License
 -------
 
