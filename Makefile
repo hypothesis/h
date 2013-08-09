@@ -29,5 +29,5 @@ unit_test:
 
 elasticsearch:
 	@echo "elasticsearch running?"
-	@es=`wget --quiet --output-document - http://localhost:9200 | grep '"status" : 200'`
-	if [ -n ${es} ] ; then echo "elasticsearch running" ; else echo "please start elasticsearch"; exit 1; fi
+	$(eval es := $(shell wget --quiet --output-document - http://localhost:9200))
+	if [ -n '${es}' ] ; then echo "elasticsearch running" ; else echo "please start elasticsearch"; exit 1; fi
