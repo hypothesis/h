@@ -30,4 +30,4 @@ unit_test:
 elasticsearch:
 	@echo "elasticsearch running?"
 	$(eval es := $(shell wget --quiet --output-document - http://localhost:9200))
-	if [ -n '${es}' ] ; then echo "elasticsearch running" ; else echo "please start elasticsearch"; exit 1; fi
+	@if [ -n '${es}' ] ; then echo "elasticsearch running" ; else echo "please start elasticsearch"; exit 1; fi
