@@ -60,7 +60,7 @@ below. Issues tagged with the label 'cake' are ideal for new contributors.
    :alt: Stories in Ready
    :align: left
    :height: 18px
-.. image:: https://travis-ci.org/hypothesis/h.png?branch=search-tool-6
+.. image:: https://travis-ci.org/hypothesis/h.png?branch=develop
    :target: https://travis-ci.org/hypothesis/h
    :alt: Build Status
    :height: 18px
