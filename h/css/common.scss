@@ -1098,7 +1098,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   .text-icon { display: none; }
 
   input { 
-    float: left; 
+    float: left;
+    position: relative;
+    bottom: 7px; 
   }
 
   li {
