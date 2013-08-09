@@ -93,7 +93,7 @@ def server(app, gcfg=None, host="127.0.0.1", port=None, *args, **kwargs):
 
     cfgfname = kwargs.pop('config', get_default_config_file())
 
-    server = PasterServerApplication(
+    paste_server = PasterServerApplication(
         app,
         gcfg=gcfg,
         host=host,
@@ -103,6 +103,6 @@ def server(app, gcfg=None, host="127.0.0.1", port=None, *args, **kwargs):
     )
 
     if cfgfname:
-        server.load_config_from_file(cfgfname)
+        paste_server.load_config_from_file(cfgfname)
 
-    server.run()
+    paste_server.run()
