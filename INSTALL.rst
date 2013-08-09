@@ -2,11 +2,12 @@ Installing
 ######################
 
 Dependencies:
+
 * Python v2.7+ (No Python 3 support yet -- want to help?)
-* _CoffeeScript v1.6+
-* _Sass v3.2+
-* _Compass v0.12+
-* _ElasticSearch v0.19+
+* CoffeeScript_ v1.6+
+* Sass_ v3.2+
+* Compass_ v0.12+
+* ElasticSearch_ v0.19+
 
 See the platform specific INSTALL.<platform>.rst files for more information
 about how to install the dependencies on any specific platform.
