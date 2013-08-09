@@ -7,11 +7,11 @@ class App
       tab: null
 
   this.$inject = [
-    '$compile', '$element', '$http', '$location', '$scope', '$timeout',
+    '$element', '$http', '$location', '$scope', '$timeout',
     'annotator', 'authentication', 'drafts', 'flash'
   ]
   constructor: (
-    $compile, $element, $http, $location, $scope, $timeout
+    $element, $http, $location, $scope, $timeout
     annotator, authentication, drafts, flash
   ) ->
     {plugins, provider} = annotator
