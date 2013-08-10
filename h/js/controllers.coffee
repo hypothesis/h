@@ -28,6 +28,7 @@ class App
 
     heatmap.subscribe 'updated', =>
       elem = d3.select(heatmap.element[0])
+      return unless elem?.datum()
       data = {highlights, offset} = elem.datum()
       tabs = elem.selectAll('div').data data
       height = $(window).outerHeight(true)
