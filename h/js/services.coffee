@@ -44,7 +44,6 @@ class Hypothesis extends Annotator
   # Internal state
   dragging: false     # * To enable dragging only when we really want to
   ongoing_edit: false # * Is there an interrupted edit by login
-  show_search: false  # * Toggle showing the visualsearchbar
 
   # Here as a noop just to make the Permissions plugin happy
   # XXX: Change me when Annotator stops assuming things about viewers
