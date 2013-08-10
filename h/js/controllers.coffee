@@ -7,11 +7,11 @@ class App
       tab: null
 
   this.$inject = [
-    '$element', '$http', '$location', '$scope', '$timeout',
+    '$compile', '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
     'annotator', 'authentication', 'drafts', 'flash'
   ]
   constructor: (
-    $element, $http, $location, $scope, $timeout
+    $compile, $element, $filter, $http, $location, $rootScope, $scope, $timeout
     annotator, authentication, drafts, flash
   ) ->
     # Get the base URL from the base tag or the app location
@@ -232,11 +232,157 @@ class App
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
 
-    $scope.showSearchBar = =>
-      annotator.show_search = true
+    # Searchbar initialization
+    @user_filter = $filter('userName')
+    search_query = ''
+    unless typeof(localStorage) is 'undefined'
+      search_query = localStorage.getItem("hyp_page_search_query")
+      console.log 'Loading back search query: ' + search_query
 
-    $scope.isSearchShown = =>
-      annotator.show_search
+    @visualSearch = VS.init
+      container: $element.find('.visual-search')
+      query: search_query
+      callbacks:
+        search: (query, searchCollection) =>
+          unless query
+            return
+
+          matched = []
+          whole_document = true
+          in_body_text = ''
+          for searchItem in searchCollection.models
+            if searchItem.attributes.category is 'scope' and
+            searchItem.attributes.value is 'sidebar'
+              whole_document = false
+
+            if searchItem.attributes.category is 'text'
+              in_body_text = searchItem.attributes.value.toLowerCase()
+              text_tokens = searchItem.attributes.value.split ' '
+            if searchItem.attributes.category is 'tag'
+              tag_search = searchItem.attributes.value.toLowerCase()
+
+          if whole_document
+            annotations = annotator.plugins.Store.annotations
+          else
+            annotations = $rootScope.annotations
+
+          for annotation in annotations
+            matches = true
+            for searchItem in searchCollection.models
+              category = searchItem.attributes.category
+              value = searchItem.attributes.value
+              switch category
+                when 'user'
+                  userName = @user_filter annotation.user
+                  unless userName.toLowerCase() is value.toLowerCase()
+                    matches = false
+                    break
+                when 'text'
+                  unless annotation.text?
+                    matches = false
+                    break
+
+                  for token in text_tokens
+                    unless annotation.text.toLowerCase().indexOf(token.toLowerCase()) > -1
+                      matches = false
+                      break
+
+                when 'tag'
+                  unless annotation.tags?
+                    matches = false
+                    break
+
+                  found = false
+                  for tag in annotation.tags
+                    if tag_search is tag.toLowerCase()
+                      found = true
+                      break
+                  unless found
+                    matches = false
+                  break
+                when 'time'
+                    delta = Math.round((+new Date - new Date(annotation.updated)) / 1000)
+                    switch value
+                      when '5 min'
+                        unless delta <= 60*5
+                          matches = false
+                      when '30 min'
+                        unless delta <= 60*30
+                          matches = false
+                      when '1 hour'
+                        unless delta <= 60*60
+                          matches = false
+                      when '12 hours'
+                        unless delta <= 60*60*12
+                          matches = false
+                      when '1 day'
+                        unless delta <= 60*60*24
+                          matches = false
+                      when '1 week'
+                        unless delta <= 60*60*24*7
+                          matches = false
+                      when '1 month'
+                        unless delta <= 60*60*24*31
+                          matches = false
+                      when '1 year'
+                        unless delta <= 60*60*24*366
+                          matches = false
+                when 'group'
+                    priv_public = 'group:__world__' in (annotation.permissions.read or [])
+                    switch value
+                      when 'Public'
+                        unless priv_public
+                          matches = false
+                      when 'Private'
+                        if priv_public
+                          matches = false
+
+            if matches
+              matched.push annotation.id
+
+          # Save query to localStorage
+          unless typeof(localStorage) is 'undefined'
+            try
+              localStorage.setItem "hyp_page_search_query", query
+            catch error
+              console.warn 'Cannot save query to localStorage!'
+              if error is DOMException.QUOTA_EXCEEDED_ERR
+                console.warn 'localStorage quota exceeded!'
+
+          # Set the path
+          search =
+            whole_document : whole_document
+            matched : matched
+            in_body_text: in_body_text
+          $location.path('/page_search').search(search)
+          $rootScope.$digest()
+
+        facetMatches: (callback) =>
+          if $scope.show_search
+            return callback ['text','tag','scope', 'group','time','user'], {preserveOrder: true}
+        valueMatches: (facet, searchTerm, callback) ->
+          switch facet
+            when 'group' then callback ['Public', 'Private']
+            when 'area' then callback ['sidebar', 'document']
+            when 'time'
+              callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
+        clearSearch: (original) =>
+          $scope.show_search = false
+          original()
+          unless typeof(localStorage) is 'undefined'
+            try
+              localStorage.setItem "hyp_page_search_query", ""
+            catch error
+              console.warn 'Cannot save query to localStorage!'
+              if error is DOMException.QUOTA_EXCEEDED_ERR
+                console.warn 'localStorage quota exceeded!'
+          $location.path('/viewer')
+          $rootScope.$digest()
+
+    if search_query.length > 0
+      $timeout =>
+        @visualSearch.searchBox.searchEvent('')
+      , 1500
 
 class Annotation
   this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
