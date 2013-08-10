@@ -7,11 +7,11 @@ class App
       tab: null
 
   this.$inject = [
-    '$compile', '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
+    '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
     'annotator', 'authentication', 'drafts', 'flash'
   ]
   constructor: (
-    $compile, $element, $filter, $http, $location, $rootScope, $scope, $timeout
+    $element, $filter, $http, $location, $rootScope, $scope, $timeout
     annotator, authentication, drafts, flash
   ) ->
     # Get the base URL from the base tag or the app location

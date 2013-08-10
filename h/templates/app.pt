@@ -67,17 +67,15 @@
 
       <!-- Searchbar -->
       <div class="search-container">
-        <div class="tri" ng-click="frame.visible = !frame.visible"></div>
         <div ng-show="show_search"
              ng-animate="{show: 'fadeIn', hide:'fadeOut'}"
              class="visual-search visual-container"></div>
-        <div ng-hide="isSearchShown()"
+        <div ng-hide="show_search"
              class="visual-container"
              ng-click="show_search=true">
            <div id="search" class="magnify-glass VS-search">
              <div class="VS-icon VS-icon-search"></div>
            </div>
-
         </div>
       </div>
 

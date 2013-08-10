@@ -51,8 +51,8 @@ class Hypothesis extends Annotator
   viewer:
     addField: (-> )
 
-  this.$inject = ['$document', '$location', '$rootScope', '$route', '$timeout', 'drafts']
-  constructor: ($document, $location, $rootScope, $route, $timeout, drafts) ->
+  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts']
+  constructor: ($document, $location, $rootScope, $route, drafts) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
@@ -415,68 +415,6 @@ class DraftProvider
       true
     else
       false
-
-
-class FlashProvider
-  queues:
-    '': []
-    info: []
-    error: []
-    success: []
-  notice: null
-  timeout: null
-
-  this.$inject = ['$httpProvider']
-  constructor: ($httpProvider) ->
-    # Configure notification classes
-    angular.extend Annotator.Notification,
-      INFO: 'info'
-      ERROR: 'error'
-      SUCCESS: 'success'
-
-    # Configure the response interceptor
-    $httpProvider.responseInterceptors.push ['$q', ($q) =>
-      (promise) =>
-        promise.then (response) =>
-          data = response.data
-          format = response.headers 'content-type'
-          if format?.match /^application\/json/
-            if data.flash?
-              this._flash q, msgs for q, msgs of data.flash
-
-            if data.status is 'failure'
-              this._flash 'error', data.reason
-              $q.reject(data.reason)
-            else if data.status is 'okay'
-              response.data = data.model
-              response
-          else
-            response
-    ]
-
-  _process: ->
-    @timeout = null
-    for q, msgs of @queues
-      if msgs.length
-        msg = msgs.shift()
-        unless q then [q, msg] = msg
-        notice = Annotator.showNotification msg, q
-        @timeout = this._wait =>
-          # work around Annotator.Notification not removing classes
-          for _, klass of notice.options.classes
-            notice.element.removeClass klass
-          this._process()
-        break
-
-  $get: ['$timeout', 'annotator', ($timeout, annotator) ->
-    this._wait = (cb) -> $timeout cb, 5000
-    angular.bind this, this._flash
-  ]
-
-  _flash: (queue, messages) ->
-    if @queues[queue]?
-      @queues[queue] = @queues[queue]?.concat messages
-      this._process() unless @timeout?
 
 angular.module('h.services', ['ngResource','h.filters'])
   .provider('authentication', AuthenticationProvider)
