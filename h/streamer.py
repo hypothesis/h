@@ -186,7 +186,8 @@ class FilterHandler(object):
         self.filter = filter_json
 
     # operators
-    operators = {"equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
+    operators = {
+        "equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
         "ge": 'ge', "one_of": 'contains', "first_of": 'first_of'
     }
 
@@ -194,7 +195,12 @@ class FilterHandler(object):
         field_value = resolve_pointer(target, clause['field'], None)
         if field_value is None:
             return False
-        else: return getattr(operator, self.operators[clause['operator']])(field_value, clause['value'])
+        else:
+            # Reversed operator order for contains (b in a)
+            if clause['operator'] == 'one_of' or clause['operator'] == 'matches':
+                return getattr(operator, self.operators[clause['operator']])(clause['value'], field_value)
+            else:
+                return getattr(operator, self.operators[clause['operator']])(field_value, clause['value'])
 
     # match_policies
     def include_any(self, target):
@@ -262,29 +268,32 @@ class StreamerSession(Session):
 
 @subscriber(events.AnnotatorStoreEvent)
 def after_action(event):
-    request = event.request
-    action = event.action
-    annotation = event.annotation
+    try:
+        request = event.request
+        action = event.action
+        annotation = event.annotation
 
-    annotation.update(url_values_from_document(annotation))
+        annotation.update(url_values_from_document(annotation))
 
-    manager = request.get_sockjs_manager()
-    for session in manager.active_sessions():
-        registry = session.request.registry
-        store = registry.queryUtility(interfaces.IStoreClass)(session.request)
-        if 'references' in annotation:
-            parent = store.read(annotation['references'][-1])
-            if 'text' in parent:
-                annotation['quote'] = parent['text']
+        manager = request.get_sockjs_manager()
+        for session in manager.active_sessions():
+            registry = session.request.registry
+            store = registry.queryUtility(interfaces.IStoreClass)(session.request)
+            if 'references' in annotation:
+                parent = store.read(annotation['references'][-1])
+                if 'text' in parent:
+                    annotation['quote'] = parent['text']
 
-        if not authz.authorize(annotation, 'read', session.request.user):
-            continue
+            if not authz.authorize(annotation, 'read', session.request.user):
+                continue
 
-        if not session.filter.match(annotation, action):
-            continue
+            if not session.filter.match(annotation, action):
+                continue
 
-        session.send([annotation, action])
-
+            session.send([annotation, action])
+    except:
+        log.info(traceback.format_exc())
+        log.info('Failed to parse filter:' + str(event))
 
 def includeme(config):
     config.include('pyramid_sockjs')
