@@ -196,8 +196,23 @@ class FilterHandler(object):
         if field_value is None:
             return False
         else:
+            reversed = False
+            # Determining operator order
+            # Normal order: field_value, clause['value'] (i.e. condition created > 2000.01.01)
+            # Here clause['value'] = '2001.01.01'. The field_value is target['created']
+            # So the natural order is: ge(field_value, clause['value']
+
+            # But!
             # Reversed operator order for contains (b in a)
             if clause['operator'] == 'one_of' or clause['operator'] == 'matches':
+                reversed = True
+                # But not in every case. (i.e. tags matches 'b')
+                # Here field_value is a list, because an annotation can have many tags
+                # And clause['value'] is 'b'
+                if type(field_value) is list:
+                    reversed = False
+
+            if reversed:
                 return getattr(operator, self.operators[clause['operator']])(clause['value'], field_value)
             else:
                 return getattr(operator, self.operators[clause['operator']])(field_value, clause['value'])
