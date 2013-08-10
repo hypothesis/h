@@ -1,6 +1,7 @@
 __all__ = [
     'IUserClass',
     'IActivationClass',
+    'IAnnotationClass',
 
     'ILoginForm',
     'IRegisterForm',
@@ -35,6 +36,10 @@ from horus.interfaces import (
 
     IUIStrings,
 )
+
+
+class IAnnotationClass(Interface):
+    pass
 
 
 class IConsumerClass(Interface):
