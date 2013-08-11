@@ -116,6 +116,10 @@ class App
         authentication.persona = null
         authentication.token = null
 
+        # Leave Highlighting mode when logging out
+        if $scope.highlightingMode
+          $scope.toggleHighlightingMode()
+
     $scope.$watch 'auth.persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
         # TODO: better knowledge of routes
@@ -167,6 +171,11 @@ class App
       if newValue? and annotator.ongoing_edit
         $timeout =>
           annotator.clickAdder()
+        , 500
+
+      if newValue? and $scope.ongoingHighlightSwitch
+        $timeout =>
+          $scope.toggleHighlightingMode()
         , 500
 
     $scope.$watch 'frame.visible', (newValue) ->
@@ -224,17 +233,35 @@ class App
     , 200  # We hope this is long enough
 
     $scope.toggleAlwaysOnHighlights = ->
-      console.log "Should toggle always-on highlights"
+      $scope.alwaysOnMode = not $scope.alwaysOnMode
+      provider.notify
+        method: 'setAlwaysOnMode'
+        params: $scope.alwaysOnMode
+
+    $scope.highlightingMode = false
 
     $scope.toggleHighlightingMode = ->
-      console.log "Should toggle highlighting mode"
+      # Check login state first
+      unless plugins.Auth? and plugins.Auth.haveValidToken()
+        # If we are not logged in, start the auth process
+        $scope.ongoingHighlightSwitch = true
+        annotator.show()
+        $scope.sheet.collapsed = false
+        $scope.sheet.tab = 'login'
+        return
+
+      delete $scope.ongoingHighlightSwitch
+      $scope.highlightingMode = not $scope.highlightingMode
+      provider.notify
+        method: 'setHighlightingMode'
+        params: $scope.highlightingMode
 
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
 
 class Annotation
-  this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
-  constructor: ($element, $location, $scope, annotator, drafts, $timeout) ->
+  this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout', '$window']
+  constructor: ($element, $location, $scope, annotator, drafts, $timeout, $window) ->
     threading = annotator.threading
     $scope.action = 'create'
     $scope.editing = false
@@ -252,9 +279,16 @@ class Annotation
           $scope.action = 'create'
 
     $scope.save = ->
-      $scope.editing = false
+      annotation = $scope.model.$modelValue        
 
-      annotation = $scope.model.$modelValue
+      # Forbid the publishing of annotations
+      # without a body (text or tags)
+      if $scope.form.privacy.$viewValue is "Public" and
+          not annotation.text and not annotation.tags?.length
+        $window.alert "You can not make this annotation public without adding some text, or at least a tag."
+        return
+
+      $scope.editing = false
       drafts.remove annotation
 
       switch $scope.action

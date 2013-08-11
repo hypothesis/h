@@ -128,6 +128,17 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       @annotator.showViewer (this._parse a for a in annotations)
     )
 
+    .bind('injectAnnotation', (ctx, annotation) =>
+      a = this._parse annotation
+
+      # This is a special marker flag, which indicated that
+      # this annotation is not new, and therefore should not be pushed
+      # among the drafts
+      a.inject = true
+      @annotator.publish 'beforeAnnotationCreated', a
+      @annotator.publish 'annotationCreated', a
+    )
+
   beforeCreateAnnotation: (annotation, cb) ->
     @channel.call
       method: 'beforeCreateAnnotation'
@@ -178,4 +189,10 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     @channel.notify
       method: 'showViewer'
       params: (this._format a for a in annotations)
+    this
+
+  injectAnnotation: (annotation) ->
+    @channel.notify
+      method: 'injectAnnotation'
+      params: this._format annotation
     this

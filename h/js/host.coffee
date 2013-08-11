@@ -5,6 +5,8 @@ class Annotator.Host extends Annotator
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
+    ".annotator-hl mousedown": "onHighlightMousedown"
+    ".annotator-hl click": "onHighlightClick"
 
   # Plugin configuration
   options: {}
@@ -46,6 +48,14 @@ class Annotator.Host extends Annotator
 
     # Scan the document text with the DOM Text libraries
     this.scanDocument "Annotator initialized"
+
+  setPersistentHighlights: ->
+    body = $('body')
+    markerClass = 'annotator-highlights-always-on'        
+    if @alwaysOnMode or @highlightingMode
+      body.addClass markerClass
+    else
+      body.removeClass markerClass        
 
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
@@ -129,6 +139,16 @@ class Annotator.Host extends Annotator
               $(this).removeClass('annotator-hl-active')
         )
 
+        .bind('setAlwaysOnMode', (ctx, value) =>
+          @alwaysOnMode = value
+          this.setPersistentHighlights()
+        )
+
+        .bind('setHighlightingMode', (ctx, value) =>
+          @highlightingMode = value
+          this.setPersistentHighlights()
+        )
+
         .bind('getHref', => this.getHref())
 
         .bind('getMaxBottom', =>
@@ -185,7 +205,7 @@ class Annotator.Host extends Annotator
   _setupWrapper: ->
     @wrapper = @element
     .on 'mouseup', =>
-      if not @ignoreMouseup
+      unless @ignoreMouseup or @noBack
         setTimeout =>
           unless @selectedRanges?.length then @panel?.notify method: 'back'
     this._setupMatching()
@@ -264,7 +284,7 @@ class Annotator.Host extends Annotator
       'margin-left': "#{m}px"
       width: "#{w}px"
 
-  showViewer: (annotation) => @plugins.Bridge.showViewer annotation
+  showViewer: (annotations) => @plugins.Bridge.showViewer annotations
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
   checkForStartSelection: (event) =>
@@ -273,6 +293,65 @@ class Annotator.Host extends Annotator
     # is needed for preventing the panel from closing while annotating.
     unless event and this.isAnnotator(event.target)
       @mouseIsDown = true
+
+  confirmSelection: ->
+    return true unless @selectedRanges.length is 1
+
+    target = this.getTargetFromRange @selectedRanges[0]
+    selector = this.findSelector target.selector, "TextQuoteSelector"
+    length = selector.exact.length
+
+    if length > 2 then return true
+
+    return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
+
+  onSuccessfulSelection: (event) ->
+    if @highlightingMode
+
+      # Do we really want to make this selection?
+      return unless this.confirmSelection()
+
+      # Create the annotation right away
+
+      # Don't use the default method to create an annotation,
+      # because we don't want to publish the beforeAnnotationCreated event
+      # just yet.
+      # 
+      # annotation = this.createAnnotation()
+      #
+      # Create an empty annotation manually instead
+      annotation = {}
+
+      annotation = this.setupAnnotation annotation
+      $(annotation.highlights).addClass 'annotator-hl'
+
+      # Tell the sidebar about the new annotation
+      @plugins.Bridge.injectAnnotation annotation
+
+    else
+      super event
+
+  # When clicking on a highlight in highlighting mode,
+  # set @noBack to true to prevent the sidebar from closing
+  onHighlightMousedown: (event) =>
+    if @highlightingMode or @alwaysOnMode then @noBack = true
+
+  # When clicking on a highlight in highlighting mode,
+  # tell the sidebar to bring up the viewer for the relevant annotations
+  onHighlightClick: (event) =>
+    return unless @highlightingMode or @alwaysOnMode and @noBack
+
+    # We have already prevented closing the sidebar, now reset this flag
+    @noBack = false
+
+    # Collect relevant annotations
+    annotations = $(event.target)
+      .parents('.annotator-hl')
+      .andSelf()
+      .map -> return $(this).data("annotation")
+
+    # Tell sidebar to show the viewer for these annotations
+    this.showViewer annotations
 
   addToken: (token) =>
     @api.notify
