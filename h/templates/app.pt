@@ -43,14 +43,14 @@
         <ul>
           <li class="controlbarbutton">
             <a title="Toggle always-on highlights"
-               class="alwaysonhighlights-icon" 
+               class="alwaysonhighlights-icon"
                ng-click="toggleAlwaysOnHighlights()"
                href="">
             </a>
           </li>
           <li class="controlbarbutton">
             <a title="Toggle highlighting mode"
-               class="hightlighter-icon" 
+               class="hightlighter-icon"
                ng-click="toggleHighlightingMode()"
                href="">
             </a>
@@ -64,7 +64,20 @@
           </li>
         </ul>
       </div>
-      
+
+      <!-- Searchbar -->
+      <div class="search-container">
+        <div ng-show="show_search"
+             ng-animate="{show: 'fadeIn', hide:'fadeOut'}"
+             class="visual-search visual-container"></div>
+        <div ng-hide="show_search"
+             class="visual-container"
+             ng-click="show_search=true">
+           <div id="search" class="magnify-glass VS-search">
+             <div class="VS-icon VS-icon-search"></div>
+           </div>
+        </div>
+      </div>
 
       <!-- Account and Authentication -->
       <div class="sheet collapsed"
@@ -130,6 +143,9 @@
     </script>
     <script type="text/ng-template" id="viewer.html">
       <metal:main use-macro="load: viewer.html" />
+    </script>
+    <script type="text/ng-template" id="page_search.html">
+      <metal:main use-macro="load: page_search.html" />
     </script>
   </body>
 </html>

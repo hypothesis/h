@@ -7,11 +7,11 @@ class App
       tab: null
 
   this.$inject = [
-    '$element', '$http', '$location', '$scope', '$timeout',
+    '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
     'annotator', 'authentication', 'drafts', 'flash'
   ]
   constructor: (
-    $element, $http, $location, $scope, $timeout
+    $element, $filter, $http, $location, $rootScope, $scope, $timeout
     annotator, authentication, drafts, flash
   ) ->
     # Get the base URL from the base tag or the app location
@@ -93,7 +93,7 @@ class App
           else
             return unless drafts.discard()
             dynamicBucket = false
-            $location.search('id', null)
+            $location.search({'id' : null })
             annotator.showViewer heatmap.buckets[bucket]
             $scope.$digest()
 
@@ -231,6 +231,158 @@ class App
 
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
+
+    # Searchbar initialization
+    @user_filter = $filter('userName')
+    search_query = ''
+    unless typeof(localStorage) is 'undefined'
+      search_query = localStorage.getItem("hyp_page_search_query")
+      console.log 'Loading back search query: ' + search_query
+
+    @visualSearch = VS.init
+      container: $element.find('.visual-search')
+      query: search_query
+      callbacks:
+        search: (query, searchCollection) =>
+          unless query
+            return
+
+          matched = []
+          whole_document = true
+          in_body_text = ''
+          for searchItem in searchCollection.models
+            if searchItem.attributes.category is 'scope' and
+            searchItem.attributes.value is 'sidebar'
+              whole_document = false
+
+            if searchItem.attributes.category is 'text'
+              in_body_text = searchItem.attributes.value.toLowerCase()
+              text_tokens = searchItem.attributes.value.split ' '
+            if searchItem.attributes.category is 'tag'
+              tag_search = searchItem.attributes.value.toLowerCase()
+
+          if whole_document
+            annotations = annotator.plugins.Store.annotations
+          else
+            annotations = $rootScope.annotations
+
+          for annotation in annotations
+            matches = true
+            for searchItem in searchCollection.models
+              category = searchItem.attributes.category
+              value = searchItem.attributes.value
+              switch category
+                when 'user'
+                  userName = @user_filter annotation.user
+                  unless userName.toLowerCase() is value.toLowerCase()
+                    matches = false
+                    break
+                when 'text'
+                  unless annotation.text?
+                    matches = false
+                    break
+
+                  for token in text_tokens
+                    unless annotation.text.toLowerCase().indexOf(token.toLowerCase()) > -1
+                      matches = false
+                      break
+
+                when 'tag'
+                  unless annotation.tags?
+                    matches = false
+                    break
+
+                  found = false
+                  for tag in annotation.tags
+                    if tag_search is tag.toLowerCase()
+                      found = true
+                      break
+                  unless found
+                    matches = false
+                  break
+                when 'time'
+                    delta = Math.round((+new Date - new Date(annotation.updated)) / 1000)
+                    switch value
+                      when '5 min'
+                        unless delta <= 60*5
+                          matches = false
+                      when '30 min'
+                        unless delta <= 60*30
+                          matches = false
+                      when '1 hour'
+                        unless delta <= 60*60
+                          matches = false
+                      when '12 hours'
+                        unless delta <= 60*60*12
+                          matches = false
+                      when '1 day'
+                        unless delta <= 60*60*24
+                          matches = false
+                      when '1 week'
+                        unless delta <= 60*60*24*7
+                          matches = false
+                      when '1 month'
+                        unless delta <= 60*60*24*31
+                          matches = false
+                      when '1 year'
+                        unless delta <= 60*60*24*366
+                          matches = false
+                when 'group'
+                    priv_public = 'group:__world__' in (annotation.permissions.read or [])
+                    switch value
+                      when 'Public'
+                        unless priv_public
+                          matches = false
+                      when 'Private'
+                        if priv_public
+                          matches = false
+
+            if matches
+              matched.push annotation.id
+
+          # Save query to localStorage
+          unless typeof(localStorage) is 'undefined'
+            try
+              localStorage.setItem "hyp_page_search_query", query
+            catch error
+              console.warn 'Cannot save query to localStorage!'
+              if error is DOMException.QUOTA_EXCEEDED_ERR
+                console.warn 'localStorage quota exceeded!'
+
+          # Set the path
+          search =
+            whole_document : whole_document
+            matched : matched
+            in_body_text: in_body_text
+          $location.path('/page_search').search(search)
+          $rootScope.$digest()
+
+        facetMatches: (callback) =>
+          if $scope.show_search
+            return callback ['text','tag','scope', 'group','time','user'], {preserveOrder: true}
+        valueMatches: (facet, searchTerm, callback) ->
+          switch facet
+            when 'group' then callback ['Public', 'Private']
+            when 'area' then callback ['sidebar', 'document']
+            when 'time'
+              callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
+        clearSearch: (original) =>
+          $scope.show_search = false
+          original()
+          unless typeof(localStorage) is 'undefined'
+            try
+              localStorage.setItem "hyp_page_search_query", ""
+            catch error
+              console.warn 'Cannot save query to localStorage!'
+              if error is DOMException.QUOTA_EXCEEDED_ERR
+                console.warn 'localStorage quota exceeded!'
+          $location.path('/viewer')
+          $rootScope.$digest()
+
+    if search_query.length > 0
+      $timeout =>
+        @visualSearch.searchBox.searchEvent('')
+      , 1500
 
 class Annotation
   this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
@@ -420,8 +572,201 @@ class Viewer
         return new Date()
 
 
+class Search
+  this.$inject = ['$filter', '$location', '$routeParams', '$scope', 'annotator']
+  constructor: ($filter, $location, $routeParams, $scope, annotator) ->
+    $scope.highlighter = '<span class="search-hl-active">$&</span>'
+    $scope.filter_orderBy = $filter('orderBy')
+    $scope.render_order = {}
+    $scope.render_pos = {}
+    $scope.ann_info =
+      shown : {}
+      more_top : {}
+      more_bottom : {}
+      more_top_num : {}
+      more_bottom_num: {}
+
+
+    buildRenderOrder = (threadid, threads) =>
+      unless threads?.length
+        return
+
+      sorted = $scope.filter_orderBy threads, $scope.sortThread, true
+      for thread in sorted
+        $scope.render_pos[thread.message.id] = $scope.render_order[threadid].length
+        $scope.render_order[threadid].push thread.message.id
+        buildRenderOrder(threadid, thread.children)
+
+    setMoreTop = (threadid, annotation) =>
+      unless annotation.id in $scope.search_filter
+        return false
+
+      result = false
+      pos = $scope.render_pos[annotation.id]
+      if pos > 0
+        prev = $scope.render_order[threadid][pos-1]
+        unless prev in $scope.search_filter
+          result = true
+      result
+
+    setMoreBottom = (threadid, annotation) =>
+      unless annotation.id in $scope.search_filter
+        return false
+
+      result = false
+      pos = $scope.render_pos[annotation.id]
+
+      if pos < $scope.render_order[threadid].length-1
+        next = $scope.render_order[threadid][pos+1]
+        unless next in $scope.search_filter
+          result = true
+      result
+
+    refresh = =>
+      $scope.search_filter = $routeParams.matched
+      heatmap = annotator.plugins.Heatmap
+
+      # Create the regexps for highlighting the matches inside the annotations' bodies
+      $scope.text_tokens = $routeParams.in_body_text.split ' '
+      $scope.text_regexp = []
+      for token in $scope.text_tokens
+        regexp = new RegExp(token,"ig")
+        $scope.text_regexp.push regexp
+
+      threads = []
+      $scope.render_order = {}
+      # Choose the root annotations to work with
+      for bucket in heatmap.buckets
+        for annotation in bucket
+          # The annotation itself is a hit.
+          thread = annotator.threading.getContainer annotation.id
+
+          if annotation.id in $scope.search_filter
+            threads.push thread
+            $scope.render_order[annotation.id] = []
+            buildRenderOrder(annotation.id, [thread])
+            continue
+
+          # Maybe it has a child we were looking for
+          children = thread.flattenChildren()
+          has_search_result = false
+          if children?
+            for child in children
+              if child.id in $scope.search_filter
+                has_search_result = true
+                break
+
+          if has_search_result
+            threads.push thread
+            $scope.render_order[annotation.id] = []
+            buildRenderOrder(annotation.id, [thread])
+
+      # Re-construct exact order the annotation threads will be shown
+
+      # Fill search related data before display
+      # - add highlights
+      # - populate the top/bottom show more links
+      # - decide that by default the annotation is shown or hidden
+      for thread in threads
+        thread.message.highlightText = thread.message.text
+        if thread.message.id in $scope.search_filter
+          $scope.ann_info.shown[thread.message.id] = true
+          for regexp in $scope.text_regexp
+            thread.message.highlightText = thread.message.highlightText.replace regexp, $scope.highlighter
+        else
+          $scope.ann_info.shown[thread.message.id] = false
+
+        $scope.ann_info.more_top[thread.message.id] = setMoreTop(thread.message.id, thread.message)
+        $scope.ann_info.more_bottom[thread.message.id] = setMoreBottom(thread.message.id, thread.message)
+
+        children = thread.flattenChildren()
+        if children?
+          for child in children
+            child.highlightText = child.text
+            if child.id in $scope.search_filter
+              $scope.ann_info.shown[child.id] = true
+              for regexp in $scope.text_regexp
+                child.highlightText = child.highlightText.replace regexp, $scope.highlighter
+            else
+              $scope.ann_info.shown[child.id] = false
+
+            $scope.ann_info.more_top[child.id] = setMoreTop(thread.message.id, child)
+            $scope.ann_info.more_bottom[child.id] = setMoreBottom(thread.message.id, child)
+
+      # Calculate the number of hidden annotations for <x> more labels
+      for threadid, order of $scope.render_order
+        hidden = 0
+        last_shown = null
+        for id in order
+          if id in $scope.search_filter
+            if last_shown? then $scope.ann_info.more_bottom_num[last_shown] = hidden
+            $scope.ann_info.more_top_num[id] = hidden
+            last_shown = id
+            hidden = 0
+          else
+            hidden += 1
+        if last_shown? then $scope.ann_info.more_bottom_num[last_shown] = hidden
+
+
+      $scope.threads = threads
+
+    $scope.$on '$routeUpdate', refresh
+
+    $scope.getThreadId = (id) ->
+      thread = annotator.threading.getContainer id
+      threadid = id
+      if thread.message.references?
+        threadid = thread.message.references[0]
+      threadid
+
+    $scope.clickMoreTop = (id) ->
+      threadid = $scope.getThreadId id
+      pos = $scope.render_pos[id]
+      rendered = $scope.render_order[threadid]
+      $scope.ann_info.more_top[id] = false
+
+      pos -= 1
+      while pos >= 0
+        prev_id = rendered[pos]
+        if $scope.ann_info.shown[prev_id]
+          $scope.ann_info.more_bottom[prev_id] = false
+          break
+        $scope.ann_info.more_bottom[prev_id] = false
+        $scope.ann_info.more_top[prev_id] = false
+        $scope.ann_info.shown[prev_id] = true
+        pos -= 1
+
+
+    $scope.clickMoreBottom = (id) ->
+      threadid = $scope.getThreadId id
+      pos = $scope.render_pos[id]
+      rendered = $scope.render_order[threadid]
+      $scope.ann_info.more_bottom[id] = false
+
+      pos += 1
+      while pos < rendered.length
+        next_id = rendered[pos]
+        if $scope.ann_info.shown[next_id]
+          $scope.ann_info.more_top[next_id] = false
+          break
+        $scope.ann_info.more_bottom[next_id] = false
+        $scope.ann_info.more_top[next_id] = false
+        $scope.ann_info.shown[next_id] = true
+        pos += 1
+
+
+    $scope.sortThread = (thread) ->
+      if thread?.message?.updated
+        return new Date(thread.message.updated)
+      else
+        return new Date()
+
+    refresh()
+
+
 angular.module('h.controllers', ['bootstrap'])
   .controller('AppController', App)
   .controller('AnnotationController', Annotation)
   .controller('EditorController', Editor)
   .controller('ViewerController', Viewer)
+  .controller('SearchController', Search)
