@@ -1,40 +1,45 @@
 <ul class="sliding-panels">
   <li>
     <ul>
-      <li ng-class="detail && 'detail' || 'summary'"
-          ng-click="toggleDetail($event)"
-          ng-mouseenter="focus(annotation)"
+      <li ng-mouseenter="focus(annotation)"
           ng-mouseleave="focus()"
           ng-repeat="annotation in annotations"
-          class="paper stream-list">
-
-        <!-- Excerpts -->
-        <div class="excerpt"
-             ng-repeat="target in annotation.target"
-             ng-show="detail">
-          <blockquote ng-bind="target.quote" ng-hide="diff" />
-          <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
-          <div class="small pull-right" ng-show="target.diffHTML">
-            <input type="checkbox" ng-model="diff">Show differences</input>
-          </div>
-        </div>
+          class="stream-list">
 
         <!-- Thread view -->
-        <div data-recursive="" class="thread">
+        <div class="paper thread"
+             data-recursive=""
+             ng-class="collapsed && 'collapsed summary' || ''"
+             ng-click="toggleCollapsed($event)"
+             ng-init="collapsed = true"
+             >
+          <!-- Excerpts -->
+          <div class="excerpt"
+               ng-repeat="target in annotation.target"
+               ng-hide="collapsed">
+            <blockquote ng-bind="target.quote" ng-hide="diff" />
+            <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
+            <div class="small pull-right" ng-show="target.diffHTML">
+              <input type="checkbox" ng-model="diff">Show differences</input>
+            </div>
+          </div>
+
           <!-- Annotation -->
-          <div class="detail annotation"
+          <div class="annotation"
                name="annotation"
                ng-model="$parent.annotation" />
+
           <!-- Replies -->
           <ul>
             <li class="thread"
-                ng-hide="collapsed || !detail"
                 ng-class="collapsed && 'collapsed' || ''"
+                ng-click="toggleCollapsed($event)"
                 ng-repeat="annotation in replies(annotation) | orderBy:sortThread:true"
                 ng-transclude>
               <a href="" class="threadexp"
                  title="{{collapsed && 'Expand' || 'Collapse'}}"
-                 ng-click="collapsed = !collapsed" />
+                 ng-click="toggleCollapsed($event)"
+                 />
             </li>
           </ul>
         </div>

@@ -7,13 +7,22 @@ class App
       tab: null
 
   this.$inject = [
-    '$compile', '$element', '$http', '$location', '$scope', '$timeout',
+    '$element', '$http', '$location', '$scope', '$timeout',
     'annotator', 'authentication', 'drafts', 'flash'
   ]
   constructor: (
-    $compile, $element, $http, $location, $scope, $timeout
+    $element, $http, $location, $scope, $timeout
     annotator, authentication, drafts, flash
   ) ->
+    # Get the base URL from the base tag or the app location
+    baseUrl = angular.element('head base')[0]?.href
+    baseUrl ?= ($location.absUrl().replace $location.url(), '')
+
+    # Strip an empty hash and end in exactly one slash
+    baseUrl = baseUrl.replace /#$/, ''
+    baseUrl = baseUrl.replace /\/*$/, '/'
+    $scope.baseUrl = baseUrl
+
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
     dynamicBucket = true
@@ -28,6 +37,7 @@ class App
 
     heatmap.subscribe 'updated', =>
       elem = d3.select(heatmap.element[0])
+      return unless elem?.datum()
       data = {highlights, offset} = elem.datum()
       tabs = elem.selectAll('div').data data
       height = $(window).outerHeight(true)
@@ -134,29 +144,7 @@ class App
         plugins.Permissions.setUser(null)
         delete plugins.Auth
 
-      if annotator.plugins.Store?
-        $scope.$root.annotations = []
-        annotator.threading.thread []
-
-        Store = annotator.plugins.Store
-        annotations = Store.annotations
-        annotator.plugins.Store.annotations = []
-        annotator.deleteAnnotation a for a in annotations
-
-        # XXX: Hacky hacky stuff to ensure that any search requests in-flight
-        # at this time have no effect when they resolve and that future events
-        # have no effect on this Store. Unfortunately, it's not possible to
-        # unregister all the events or properly unload the Store because the
-        # registration loses the closure. The approach here is perhaps
-        # cleaner than fishing them out of the jQuery private data.
-        # * Overwrite the Store's handle to the annotator, giving it one
-        #   with a noop `loadAnnotations` method.
-        Store.annotator = loadAnnotations: angular.noop
-        # * Make all api requests into a noop.
-        Store._apiRequest = angular.noop
-        # * Remove the plugin and re-add it to the annotator.
-        delete annotator.plugins.Store
-        annotator.addStore Store.options
+      $scope.reloadAnnotations()
 
       if newValue? and annotator.ongoing_edit
         $timeout =>
@@ -167,6 +155,11 @@ class App
         $timeout =>
           $scope.toggleHighlightingMode()
         , 500
+
+    $scope.$watch 'socialView.name', (newValue, oldValue) ->
+      return if newValue is oldValue
+      console.log "Social View changed to '" + newValue + "'. Reloading annotations."
+      $scope.reloadAnnotations()
 
     $scope.$watch 'frame.visible', (newValue) ->
       if newValue
@@ -206,7 +199,9 @@ class App
         collapsed: !show
         tab: 'login'
 
-    $scope.$on '$reset', => angular.extend $scope, @scope, auth: authentication
+    $scope.$on '$reset', => angular.extend $scope, @scope,
+      auth: authentication
+      socialView: annotator.socialView
 
     $scope.$on 'success', (event, action) ->
       if action == 'claim'
@@ -249,11 +244,44 @@ class App
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
 
+    $scope.reloadAnnotations = ->
+      if annotator.plugins.Store?
+        $scope.$root.annotations = []
+        annotator.threading.thread []
+
+        Store = annotator.plugins.Store
+        annotations = Store.annotations
+        annotator.plugins.Store.annotations = []
+        annotator.deleteAnnotation a for a in annotations
+
+        # XXX: Hacky hacky stuff to ensure that any search requests in-flight
+        # at this time have no effect when they resolve and that future events
+        # have no effect on this Store. Unfortunately, it's not possible to
+        # unregister all the events or properly unload the Store because the
+        # registration loses the closure. The approach here is perhaps
+        # cleaner than fishing them out of the jQuery private data.
+        # * Overwrite the Store's handle to the annotator, giving it one
+        #   with a noop `loadAnnotations` method.
+        Store.annotator = loadAnnotations: angular.noop
+        # * Make all api requests into a noop.
+        Store._apiRequest = angular.noop
+        # * Remove the plugin and re-add it to the annotator.
+        delete annotator.plugins.Store
+        annotator.considerSocialView Store.options
+        annotator.addStore Store.options
+
+        href = annotator.plugins.Store.options.loadFromSearch.uri
+        for uri in annotator.plugins.Document.uris()
+          unless uri is href # Do not load the href again
+            console.log "Also loading annotations for: " + uri
+            annotator.plugins.Store.loadAnnotationsFromSearch uri: uri
+
 class Annotation
   this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout', '$window']
   constructor: ($element, $location, $scope, annotator, drafts, $timeout, $window) ->
     threading = annotator.threading
     $scope.action = 'create'
+    $scope.editing = false
 
     $scope.cancel = ->
       $scope.editing = false
@@ -349,6 +377,8 @@ class Annotation
     $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
     $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
 
+    $scope.$watch 'editing', -> $scope.$emit 'toggleEditing'
+
     $scope.$watch 'model.$modelValue.id', (id) ->
       if id?
         $scope.thread = threading.getContainer id
@@ -359,12 +389,18 @@ class Annotation
           $scope.editing = true
 
     $scope.$watch 'shared', (newValue) ->
-      if newValue and newValue is true
+      if newValue? is true
         $timeout -> $element.find('input').focus()
         $timeout -> $element.find('input').select()
 
-        $scope.shared_link = window.location.protocol + '//' +
-          window.location.host + '/a/' + $scope.model.$modelValue.id
+        # XXX: This should be done some other way since we should not assume
+        # the annotation share URL is in any particular path relation to the
+        # app base URL. It's time to start reflecting routes, I think. I'm
+        # just not sure how best to do that with pyramid traversal since there
+        # is not a pre-determined route map. One possibility would be to
+        # unify everything so that it's relative to the app URL.
+        prefix = $scope.$parent.baseUrl.replace /\/\w+\/$/, ''
+        $scope.shared_link = prefix + '/a/' + $scope.model.$modelValue.id
         $scope.shared = false
 
     $scope.toggle = ->
@@ -427,21 +463,6 @@ class Viewer
     $scope.replies = (annotation) ->
       thread = threading.getContainer annotation.id
       (r.message for r in (thread.children or []))
-
-    $scope.toggleDetail = ($event) ->
-      # XXX: Super hacky nonsense here that should probably be handled
-      # by stopping the propagation or something. Also, the silly traversal
-      # of scope has got to stop.
-      $target = angular.element $event.target
-      if (
-        $event.target.tagName in ['A', 'BUTTON', 'INPUT', 'TEXTAREA'] or
-        $target.attr('ng-click') or
-        $target.attr('role') == 'button'
-      )
-        $target.scope()?.$parent?.$$prevSibling?.collapsed = false
-        @detail = true
-      else
-        @detail = !@detail
 
     $scope.sortThread = (thread) ->
       if thread?.message?.updated

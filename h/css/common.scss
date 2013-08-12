@@ -738,6 +738,7 @@ blockquote {
 //THREADING////////////////////////////////
 //Threaded discussion specific
 .thread {
+  cursor: pointer;
   position: relative;
 
   & > ul {
@@ -776,8 +777,12 @@ blockquote {
   }
 
   //These are all the changes needed to collapse thread objects.
-  .collapsed {
+  &.collapsed {
     display: block !important;
+
+    .thread {
+      display: none;
+    }
 
     & > ul {
       max-height: 0;
@@ -879,7 +884,6 @@ blockquote {
 //This is specific to the summary view.
 .summary {
   position: relative;
-  cursor: pointer;
 
   &:hover {
     @include smallshadow(2px, 3px, .1);
@@ -915,6 +919,14 @@ blockquote {
   margin-bottom: .75em; 
 }
 
+.no-overflow {
+  overflow: hidden;
+}
+
+.strech {
+  width: 100%;
+  white-space: nowrap;
+}
 
 .filter-body {
  overflow: visible;
@@ -937,6 +949,13 @@ blockquote {
     left: 0px;
 }
 
+.card-grid {
+  .full-quote {
+    margin: 0;
+    padding-left: 2em;
+    padding-right: 1.75em;
+  }
+}
 @mixin sidebar_animation {
   -webkit-transition: 1s linear all;
   -moz-transition: 1s linear all;

@@ -10,7 +10,8 @@
   <body ng-app="h"
         ng-controller="AppController"
         class="ng-cloak"
-        metal:fill-slot="body">
+        metal:fill-slot="body"
+        tal:attributes="ng-csp layout.csp">
 
     <!-- Toolbar -->
     <div class="topbar" class="form-inline" ng-class="frame.visible && 'shown'">

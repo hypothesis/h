@@ -9,13 +9,14 @@ import urlparse
 
 import flask
 
-from annotator import auth, authz, store, es
+from annotator import auth, store, es
 from annotator.annotation import Annotation
 from annotator.document import Document
 
 from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
-from pyramid.threadlocal import get_current_registry, get_current_request
+from pyramid.security import has_permission
+from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
 from h import api, events, interfaces, models
@@ -56,11 +57,14 @@ class Store(object):
 
         hits = []
         for res in payload['hits']['hits']:
+            # Add id
+            res["_source"]["id"] = res["_id"]
             hits.append(res["_source"])
         return hits
 
     def _invoke_subrequest(self, subreq):
         request = self.request
+        # XXX: This should be available more easily somewhere, like the session.
         token = api.token.TokenController(request)()
         subreq.headers['X-Annotator-Auth-Token'] = token
         result = request.invoke_subrequest(subreq)
@@ -69,6 +73,20 @@ class Store(object):
             raise exception_response(result.status_int)
 
         return result
+
+
+def wrap_annotation(annotation):
+    """Wraps a dict as an instance of the registered Annotation model class.
+
+    Arguments:
+    - `annotation`: a dictionary-like object containing the model data
+    """
+
+    request = get_current_request()
+    cls = request.registry.queryUtility(interfaces.IAnnotationClass)
+    result = cls(request)
+    result.update(annotation)
+    return result
 
 
 def anonymize_deletes(annotation):
@@ -88,12 +106,13 @@ def anonymize_deletes(annotation):
 
 
 def authorize(annotation, action, user=None):
-    action_field = annotation.get('permissions', {}).get(action, [])
+    request = get_current_request()
+    annotation = wrap_annotation(annotation)
 
-    if not action_field:
-        return True
-    else:
-        return authz.authorize(annotation, action, user)
+    result = has_permission(action, annotation, request)
+    if not result:
+        print result
+    return result
 
 
 def before_request():
@@ -110,31 +129,18 @@ def after_request(response):
         match = re.match(r'^store\.(\w+)_annotation$', flask.request.endpoint)
         if match:
             request = get_current_request()
-            registry = get_current_registry()
 
             action = match.group(1)
             if action == 'delete':
-                annotation = json.loads(flask.request.data)
+                data = json.loads(flask.request.data)
             else:
-                annotation = json.loads(response.data)
+                data = json.loads(response.data)
 
-            event = events.AnnotatorStoreEvent(request, annotation, action)
-            registry.notify(event)
+            annotation = wrap_annotation(data)
+            event = events.AnnotationEvent(request, annotation, action)
+
+            request.registry.notify(event)
     return response
-
-
-def reverse_proxy(app):
-    def handler(environ, start_response):
-        script_name = environ.get('HTTP_X_SCRIPT_NAME', None)
-
-        if script_name:
-            environ['SCRIPT_NAME'] = script_name
-            path_info = environ['PATH_INFO']
-            if path_info.startswith(script_name):
-                environ['PATH_INFO'] = path_info[len(script_name):]
-
-        return app(environ, start_response)
-    return handler
 
 
 def includeme(config):
@@ -157,7 +163,6 @@ def includeme(config):
 
     app = flask.Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
-    app.wsgi_app = reverse_proxy(app.wsgi_app)
     settings = config.get_settings()
 
     if 'es.host' in settings:
@@ -186,7 +191,7 @@ def includeme(config):
     api_url = config.registry.settings.get('api.url', api_endpoint)
 
     if api_endpoint is not None:
-        api_path = api_endpoint.strip('/')
+        api_path = api_endpoint.rstrip('/')
         api_pattern = '/'.join([api_path, '*subpath'])
 
         # Configure the API views -- version 1 is just an annotator.store proxy
@@ -194,6 +199,7 @@ def includeme(config):
 
         config.add_route('api_real', api_pattern)
         config.add_view(api_v1, route_name='api_real')
+        config.add_view(api_v1, name='api_virtual')
 
     if api_url is not None:
         api_url = api_url.strip('/')

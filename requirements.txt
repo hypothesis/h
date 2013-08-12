@@ -41,7 +41,7 @@ pyramid-layout==0.6
 pyramid-mailer==0.9
 pyramid-sockjs==0.3.9
 pyramid-tm==0.7
--e git+https://github.com/tilgovi/pyramid_webassets.git@cbe7befcc0ed9eb688104eade1a2a7e86be3c1db#egg=pyramid_webassets-dev
+-e git+https://github.com/tilgovi/pyramid_webassets.git@c7ee383d7ea3f4793f16c09291e13a5cd281893d#egg=pyramid_webassets-dev
 pystache==0.5.3
 pytest==2.2.4
 python-dateutil==2.1

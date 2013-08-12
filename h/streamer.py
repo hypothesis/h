@@ -6,6 +6,8 @@ from urlparse import urlparse
 import operator
 
 from pyramid.events import subscriber
+from pyramid.security import has_permission
+
 from pyramid_sockjs.session import Session
 from jsonschema import validate
 from jsonpointer import resolve_pointer
@@ -13,7 +15,6 @@ from jsonpointer import resolve_pointer
 from dateutil.tz import tzutc
 from datetime import datetime, timedelta
 
-from annotator import authz
 from h import events, interfaces
 
 import logging
@@ -28,7 +29,7 @@ def check_favicon(icon_link, parsed_uri, domain):
             icon_link= parsed_uri[0] + "://" + icon_link[2:]
         else:
             icon_link = domain + icon_link
-        #Check if the icon_link url really exists
+        # Check if the icon_link url really exists
         try:
             r2 = requests.head(icon_link)
             if r2.status_code != 200:
@@ -112,7 +113,7 @@ class FilterToElasticFilter(object):
 
         if len(self.filter['clauses']):
             clauses = self.convert_clauses(self.filter['clauses'])
-            #apply match policy
+            # apply match policy
             getattr(self, self.filter['match_policy'])(self.query['query']['bool'], clauses)
         else:
             self.query['query'] = {"match_all": {}}
@@ -123,7 +124,7 @@ class FilterToElasticFilter(object):
             converted = past.strftime("%Y-%m-%dT%H:%M:%S")
             self.query['filter'] = {"range": {"created": {"gte": converted}}}
         elif self.filter['past_data']['load_past'] == 'hits':
-            self.query['filter'] = {"limit": {"value": self.filter['past_data']['hits']}}
+            self.query['size'] = self.filter['past_data']['hits']
 
     def equals(self, field, value):
         return {"term": {field: value}}
@@ -185,8 +186,9 @@ class FilterHandler(object):
     def __init__(self, filter_json):
         self.filter = filter_json
 
-    #operators
-    operators = {"equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
+    # operators
+    operators = {
+        "equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
         "ge": 'ge', "one_of": 'contains', "first_of": 'first_of'
     }
 
@@ -194,9 +196,29 @@ class FilterHandler(object):
         field_value = resolve_pointer(target, clause['field'], None)
         if field_value is None:
             return False
-        else: return getattr(operator, self.operators[clause['operator']])(field_value, clause['value'])
+        else:
+            reversed = False
+            # Determining operator order
+            # Normal order: field_value, clause['value'] (i.e. condition created > 2000.01.01)
+            # Here clause['value'] = '2001.01.01'. The field_value is target['created']
+            # So the natural order is: ge(field_value, clause['value']
 
-    #match_policies
+            # But!
+            # Reversed operator order for contains (b in a)
+            if clause['operator'] == 'one_of' or clause['operator'] == 'matches':
+                reversed = True
+                # But not in every case. (i.e. tags matches 'b')
+                # Here field_value is a list, because an annotation can have many tags
+                # And clause['value'] is 'b'
+                if type(field_value) is list:
+                    reversed = False
+
+            if reversed:
+                return getattr(operator, self.operators[clause['operator']])(clause['value'], field_value)
+            else:
+                return getattr(operator, self.operators[clause['operator']])(field_value, clause['value'])
+
+    # match_policies
     def include_any(self, target):
         for clause in self.filter['clauses']:
             if self.evaluate_clause(clause, target): return True
@@ -247,8 +269,11 @@ class StreamerSession(Session):
 
                 for annotation in annotations:
                     annotation.update(url_values_from_document(annotation))
-                #Finally send filtered annotations
-
+                    if 'references' in annotation:
+                        parent = store.read(annotation['references'][-1])
+                        if 'text' in parent:
+                            annotation['quote'] = parent['text']
+                # Finally send filtered annotations
                 if len(annotations) > 0:
                     self.send([annotations, 'past'])
         except:
@@ -257,24 +282,35 @@ class StreamerSession(Session):
             self.close()
 
 
-@subscriber(events.AnnotatorStoreEvent)
+@subscriber(events.AnnotationEvent)
 def after_action(event):
-    request = event.request
-    action = event.action
-    annotation = event.annotation
+    try:
+        request = event.request
+        action = event.action
+        annotation = event.annotation
 
-    annotation.update(url_values_from_document(annotation))
+        annotation.update(url_values_from_document(annotation))
 
-    manager = request.get_sockjs_manager()
-    for session in manager.active_sessions():
-        if not authz.authorize(annotation, 'read', session.request.user):
-            continue
+        manager = request.get_sockjs_manager()
+        for session in manager.active_sessions():
+            if not has_permission('read', annotation, session.request):
+                continue
 
-        if not session.filter.match(annotation, action):
-            continue
+            registry = session.request.registry
+            store = registry.queryUtility(interfaces.IStoreClass)(session.request)
+            if 'references' in annotation:
+                parent = store.read(annotation['references'][-1])
+                if 'text' in parent:
+                    annotation['quote'] = parent['text']
 
-        session.send([annotation, action])
 
+            if not session.filter.match(annotation, action):
+                continue
+
+            session.send([annotation, action])
+    except:
+        log.info(traceback.format_exc())
+        log.info('Failed to parse filter:' + str(event))
 
 def includeme(config):
     config.include('pyramid_sockjs')

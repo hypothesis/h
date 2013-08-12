@@ -53,7 +53,7 @@ def get_user(request):
 
 def set_user(request, user):
     # Must extract the id here since pyramid_tm will cause the database
-    # session to be invalid by the time this runs.
+    # session to be invalid by the time the response callback fires.
     if user is not None:
         headers = remember(request, user.id)
     else:

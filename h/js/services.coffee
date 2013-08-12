@@ -50,8 +50,8 @@ class Hypothesis extends Annotator
   viewer:
     addField: (-> )
 
-  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts']
-  constructor: ($document, $location, $rootScope, $route, drafts) ->
+  this.$inject = ['$document', '$location', '$rootScope', '$route', 'authentication', 'drafts']
+  constructor: ($document, $location, $rootScope, $route, authentication, drafts) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
@@ -132,6 +132,10 @@ class Hypothesis extends Annotator
 
     # Reload the route after annotations are loaded
     this.subscribe 'annotationsLoaded', -> $route.reload()
+
+    @auth = authentication
+    @socialView =
+      name: "none" # "single-player"
 
   _setupXDM: ->
     $location = @element.injector().get '$location'
@@ -338,6 +342,22 @@ class Hypothesis extends Annotator
       # Give angular a chance to react
       $rootScope.$digest()
 
+  considerSocialView: (options) ->
+    switch @socialView.name
+      when "none"
+        # Sweet, nothing to do, just clean up previous filters
+        console.log "Not applying any Social View filters."
+        delete options.loadFromSearch.user
+      when "single-player"
+        if (p = @auth.persona)?
+          console.log "Social View filter: single player mode."
+          options.loadFromSearch.user = "acct:" + p.username + "@" + p.provider
+        else
+          console.log "Social View: single-player mode, but ignoring it, since not logged in."
+          delete options.loadFromSearch.user
+      else
+        console.warn "Unsupported Social View: '" + @socialView.name + "'!"
+
   serviceDiscovery: (options) =>
     $location = @element.injector().get '$location'
     $rootScope = @element.injector().get '$rootScope'
@@ -357,6 +377,7 @@ class Hypothesis extends Annotator
           loadFromSearch:
             limit: 1000
             uri: href
+        this.considerSocialView options
         this.addStore(options)
 
   addStore: (options) ->
@@ -368,9 +389,9 @@ class Hypothesis extends Annotator
 
     console.log "Loaded annotions for '" + href + "'."
     for uri in @plugins.Document.uris()
-      console.log "Also loading annotations for: " + uri
-      this.plugins.Store.loadAnnotationsFromSearch uri: uri
-
+      unless uri is href # Do not load the href again
+        console.log "Also loading annotations for: " + uri
+        this.plugins.Store.loadAnnotationsFromSearch uri: uri
 
 class AuthenticationProvider
   constructor: ->
@@ -392,6 +413,11 @@ class AuthenticationProvider
     '$document', '$resource',
     ($document,   $resource) ->
       baseUrl = $document[0].baseURI.replace(/:(\d+)/, '\\:$1')
+
+      # Strip an empty hash and end in exactly one slash
+      baseUrl = baseUrl.replace /#$/, ''
+      baseUrl = baseUrl.replace /\/*$/, '/'
+
       $resource(baseUrl, {}, @actions).load()]
 
 
@@ -424,70 +450,7 @@ class DraftProvider
       false
 
 
-class FlashProvider
-  queues:
-    '': []
-    info: []
-    error: []
-    success: []
-  notice: null
-  timeout: null
-
-  this.$inject = ['$httpProvider']
-  constructor: ($httpProvider) ->
-    # Configure notification classes
-    angular.extend Annotator.Notification,
-      INFO: 'info'
-      ERROR: 'error'
-      SUCCESS: 'success'
-
-    # Configure the response interceptor
-    $httpProvider.responseInterceptors.push ['$q', ($q) =>
-      (promise) =>
-        promise.then (response) =>
-          data = response.data
-          format = response.headers 'content-type'
-          if format?.match /^application\/json/
-            if data.flash?
-              this._flash q, msgs for q, msgs of data.flash
-
-            if data.status is 'failure'
-              this._flash 'error', data.reason
-              $q.reject(data.reason)
-            else if data.status is 'okay'
-              response.data = data.model
-              response
-          else
-            response
-    ]
-
-  _process: ->
-    @timeout = null
-    for q, msgs of @queues
-      if msgs.length
-        msg = msgs.shift()
-        unless q then [q, msg] = msg
-        notice = Annotator.showNotification msg, q
-        @timeout = this._wait =>
-          # work around Annotator.Notification not removing classes
-          for _, klass of notice.options.classes
-            notice.element.removeClass klass
-          this._process()
-        break
-
-  $get: ['$timeout', 'annotator', ($timeout, annotator) ->
-    this._wait = (cb) -> $timeout cb, 5000
-    angular.bind this, this._flash
-  ]
-
-  _flash: (queue, messages) ->
-    if @queues[queue]?
-      @queues[queue] = @queues[queue]?.concat messages
-      this._process() unless @timeout?
-
-
 angular.module('h.services', ['ngResource'])
   .provider('authentication', AuthenticationProvider)
   .provider('drafts', DraftProvider)
-  .provider('flash', FlashProvider)
   .service('annotator', Hypothesis)

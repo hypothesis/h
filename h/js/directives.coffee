@@ -208,11 +208,29 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
-thread = ->
-  link: (scope, iElement, iAttrs, controller) ->
-    scope.collapsed = false
+thread = ['$timeout', ($timeout) ->
+  link: (scope, elem, attr, ctrl) ->
+    childrenEditing = {}
+
+    scope.toggleCollapsed = (event) ->
+      event.stopPropagation()
+      $timeout ->
+        return unless Object.keys(childrenEditing).length is 0
+        scope.collapsed = !scope.collapsed
+      , 10
+
+    scope.$on 'toggleEditing', (event) ->
+      {$id, editing} = event.targetScope
+      if editing
+        scope.collapsed = false
+        unless childrenEditing[$id]
+          event.targetScope.$on '$destroy', ->
+            $timeout (-> delete childrenEditing[$id]), 100
+          childrenEditing[$id] = true
+      else
+        $timeout (-> delete childrenEditing[$id]), 100
   restrict: 'C'
-  scope: true
+]
 
 
 userPicker = ->
@@ -271,8 +289,6 @@ tags = ['$window', ($window) ->
       caseSensitive: false
       placeholderText: attr.placeholder
       keepPlaceholder: true
-      propagateTagClicks: false
-      propagateRemoveClicks: false
       preprocessTag: (val) ->
         val.toLowerCase().replace /[^a-z0-9\-\_\s]/g, ''
       afterTagAdded: (evt, ui) ->
@@ -282,6 +298,7 @@ tags = ['$window', ($window) ->
       autocomplete:
         source: []
       onTagClicked: (evt, ui) ->
+        evt.stopPropagation()
         tag = ui.tagLabel
         $window.open "/t/" + tag
 

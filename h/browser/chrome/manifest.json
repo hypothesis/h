@@ -1,0 +1,38 @@
+{
+  "name": "Hypothes.is",
+  "version": "${version}",
+  "manifest_version": 2,
+
+  "description": "The Internet, peer reviewed.",
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+
+  "homepage_url": "https://hypothes.is/",
+  "incognito": "split",
+
+  "offline_enabled": false,
+  "permissions": [
+    "<all_urls>",
+
+    "clipboardWrite",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking"
+  ],
+  "content_security_policy":
+    "script-src 'self' ${src} https://ajax.googleapis.com; object-src 'self'",
+
+  "background": {
+    "persistent": true,
+    "scripts": ["js/background.js"]
+  },
+  "page_action": {
+    "placeholder": "work around http://crbug.com/86449"
+  },
+  "web_accessible_resources": [
+    "public/*"
+  ]
+}

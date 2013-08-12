@@ -214,6 +214,7 @@ app = Bundle(
                 'app',
                 'controllers',
                 'filters',
+                'flash',
                 'directives',
                 'app_directives',
                 'displayer',

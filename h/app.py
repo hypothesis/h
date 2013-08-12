@@ -5,7 +5,7 @@ from horus.lib import FlashMessage
 
 from pyramid.view import view_config, view_defaults
 
-from h import api, interfaces, views
+from h import interfaces, views
 from h.models import _
 
 

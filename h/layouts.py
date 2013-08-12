@@ -3,6 +3,7 @@ from pyramid_layout.layout import layout_config
 
 @layout_config(template='h:templates/base.pt')
 class BaseLayout(object):
+    inline_webfont = True
     requirements = ()
 
     def __init__(self, context, request):
@@ -38,6 +39,7 @@ class BaseLayout(object):
 @layout_config(name='app', template='h:templates/base.pt')
 class AppLayout(BaseLayout):
     requirements = (('app', None),)
+    csp = None
 
 
 @layout_config(name='sidebar', template='h:templates/base.pt')

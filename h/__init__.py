@@ -27,7 +27,7 @@ def includeme(config):
     config.include('h.streamer')
 
 
-def bootstrap(cfname, config_fn=None):
+def bootstrap(cfname, request=None, options=None, config_fn=None):
     """Bootstrap the application with the given paste configuration file
 
     An optional function argument may be supplied. This function will be
@@ -36,7 +36,7 @@ def bootstrap(cfname, config_fn=None):
     from pyramid import paster
 
     paster.setup_logging(cfname)
-    env = paster.bootstrap(cfname)
+    env = paster.bootstrap(cfname, request=request, options=options)
 
     try:
         if config_fn:
@@ -48,12 +48,13 @@ def bootstrap(cfname, config_fn=None):
 
 
 def create_app(settings):
-    from horus import groupfinder
     from pyramid.config import Configurator
     from pyramid.authentication import SessionAuthenticationPolicy
     from pyramid.authorization import ACLAuthorizationPolicy
     from pyramid.path import AssetResolver
     from pyramid.response import FileResponse
+
+    from h.models import groupfinder
 
     authn_policy = SessionAuthenticationPolicy(callback=groupfinder)
     authz_policy = ACLAuthorizationPolicy()
@@ -93,7 +94,7 @@ def server(app, gcfg=None, host="127.0.0.1", port=None, *args, **kwargs):
 
     cfgfname = kwargs.pop('config', get_default_config_file())
 
-    server = PasterServerApplication(
+    paste_server = PasterServerApplication(
         app,
         gcfg=gcfg,
         host=host,
@@ -103,6 +104,6 @@ def server(app, gcfg=None, host="127.0.0.1", port=None, *args, **kwargs):
     )
 
     if cfgfname:
-        server.load_config_from_file(cfgfname)
+        paste_server.load_config_from_file(cfgfname)
 
-    server.run()
+    paste_server.run()
