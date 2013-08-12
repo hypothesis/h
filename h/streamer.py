@@ -214,6 +214,10 @@ class FilterHandler(object):
                     reversed = False
 
             if reversed:
+                return getattr(operator, self.operators[clause['operator']])(clause['value'], field_value)
+            else:
+                return getattr(operator, self.operators[clause['operator']])(field_value, clause['value'])
+
     # match_policies
     def include_any(self, target):
         for clause in self.filter['clauses']:
