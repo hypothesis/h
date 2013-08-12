@@ -23,6 +23,15 @@
            ng-mouseleave="cbStyle='hiddencontrolbar'"
            ></div>
 
+      <div class="notification-counter"
+           ng-show="new_updates>0 && new_updates<10">
+          +{{ new_updates }}
+      </div>
+      <div class="notification-counter"
+           ng-show="new_updates>9">
+          >9
+      </div>
+
       <div class="inner" ng-switch="auth.persona">
         <a class="pull-right" href=""
            ng-click="sheet.collapsed = false;
@@ -42,21 +51,23 @@
            ng-class="cbStyle">
         <ul>
           <li class="controlbarbutton">
-            <a title="Toggle always-on highlights"
+            <a title="Show Annotations"
                class="alwaysonhighlights-icon"
+               ng-class="alwaysOnMode && 'pushed'"
                ng-click="toggleAlwaysOnHighlights()"
                href="">
             </a>
           </li>
           <li class="controlbarbutton">
-            <a title="Toggle highlighting mode"
-               class="hightlighter-icon"
+            <a title="Highlighting Mode"
+               class="highlighter-icon" 
+               ng-class="highlightingMode && 'pushed'"
                ng-click="toggleHighlightingMode()"
                href="">
             </a>
           </li>
           <li class="controlbarbutton">
-            <a title="Create unattached annotation"
+            <a title="New Comment"
                class="comment-icon"
                ng-click="createUnattachedAnnotation()"
                href="">
@@ -118,10 +129,32 @@
     <!-- Content -->
     <div id="wrapper">
 
+
       <!-- Angular view -->
       <div ng-view=""></div>
 
+
+  </div>
+
+    <!-- Bottombar -->
+    <div class="bottombar" ng-class="frame.visible && 'shown'"
+         ng-show="notifications.length">
+      <ul class="sliding-panels">
+        <li class="stream-list notif-list"
+            ng-repeat="notif in notifications">
+           <div class="paper thread top-padding">
+             <div class="notification bottom-padding"
+                  name="notification"
+                  ng-model="$parent.notif">
+             </div>
+           </div>
+        </li>
+      </ul>
     </div>
+
+
+
+
     <!-- / Content -->
 
 
@@ -146,6 +179,9 @@
     </script>
     <script type="text/ng-template" id="page_search.html">
       <metal:main use-macro="load: page_search.html" />
+    </script>
+    <script type="text/ng-template" id="notification.html">
+      <metal:main use-macro="load: notification.html" />
     </script>
   </body>
 </html>

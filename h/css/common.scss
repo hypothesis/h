@@ -475,6 +475,10 @@ blockquote {
   @include fonticon("\e001", left);
 }
 
+.highlight-icon {
+  @include fonticon("\e01a", left);
+}
+
 .launch-icon {
   @include fonticon("\2a", left);
 }
@@ -490,7 +494,7 @@ blockquote {
   // text-shadow: -0.1em -0.1em #999;
 }
 
-.hightlighter-icon {
+.highlighter-icon {
   @include fonticon("\e01a", left);
   color: rgb(211, 211, 211);
   font-size: 18px;
@@ -650,6 +654,7 @@ blockquote {
     }
   }
 }
+
 
 
 //MAIN CONTENT///////
