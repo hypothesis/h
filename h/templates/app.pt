@@ -23,8 +23,13 @@
            ng-mouseleave="cbStyle='hiddencontrolbar'"
            ></div>
 
-      <div class="notification-counter">
-        {{ notifications.length }}
+      <div class="notification-counter"
+           ng-show="new_updates>0 && new_updates<10">
+          +{{ new_updates }}
+      </div>
+      <div class="notification-counter"
+           ng-show="new_updates>9">
+          >9
       </div>
 
       <div class="inner" ng-switch="auth.persona">

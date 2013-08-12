@@ -240,7 +240,7 @@ class App
           unless uri is href
             annotator.plugins.Store.loadAnnotationsFromSearch uri: uri
 
-        $scope.has_update = false
+        $scope.new_updates = 0
 
     # Notifications
     $scope.notifications = []
@@ -256,25 +256,29 @@ class App
 
     $scope.addUpdateNotification = ->
       # Do not add an update notification twice
-      unless $scope.has_update
+      unless $scope.new_updates > 0
         notification =
           type: 'update'
-          text: 'Reload to see new annotations'
+          text: 'Click to load ' + $scope.new_updates + ' changes.'
           callback: =>
             $scope.reloadAnnotations()
             $scope.removeNotificationUpdate()
           close: $scope.removeNotificationUpdate
 
         $scope.notifications.unshift notification
-        $scope.has_update = true
 
         $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
         $timeout ->
           $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
         ,500
 
+    $scope.$watch 'new_updates', (updates) ->
+      for notif in $scope.notifications
+        if notif.type is 'update'
+          notif.text = 'Click to load ' + updates + ' changes.'
+
     $scope.initUpdater = ->
-      $scope.has_update = false
+      $scope.new_updates = 0
       path = window.location.protocol + '//' + window.location.hostname + ':' +
       window.location.port + '/__streamer__'
 
@@ -314,16 +318,19 @@ class App
                 if check.message.updated is annotation.updated then continue
                 else
                   $scope.addUpdateNotification()
+                  $scope.new_updates +=1
                   break
               if action is 'delete'
                 # We haven't deleted this yet
                 $scope.addUpdateNotification()
+                $scope.new_updates +=1
                 break
             else
               if action is 'delete'
                 continue # Probably our own delete or doesn't concern us
               else
                 $scope.addUpdateNotification()
+                $scope.new_updates +=1
                 break
 
     $timeout =>
