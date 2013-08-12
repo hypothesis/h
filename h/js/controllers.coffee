@@ -394,6 +394,32 @@ class App
 
         $scope.has_update = false
 
+    # Notifications
+    $scope.notifications = []
+
+    $scope.removeNotificationUpdate = ->
+      index = -1
+      for notif in $scope.notifications
+        if notif.type is 'update'
+          index = $scope.notifications.indexOf notif
+          break
+
+      if index > -1 then $scope.notifications.splice index,1
+
+    $scope.addUpdateNotification = ->
+      # Do not add an update notification twice
+      unless $scope.has_update
+        notification =
+          type: 'update'
+          text: 'Reload to seen new annotations'
+          callback: =>
+            $scope.reloadAnnotations()
+            $scope.removeNotificationUpdate()
+          close: $scope.removeNotificationUpdate
+
+        $scope.notifications.unshift notification
+        $scope.has_update = true
+
     $scope.initUpdater = ->
       $scope.has_update = false
       path = window.location.protocol + '//' + window.location.hostname + ':' +
@@ -432,22 +458,20 @@ class App
               if action is 'create'
                 continue # We have created this
               if action is 'update'
-                if check.message.pdated is annotation.updated then continue
+                if check.message.updated is annotation.updated then continue
                 else
-                  $scope.has_update = true
+                  $scope.addUpdateNotification()
                   break
               if action is 'delete'
                 # We haven't deleted this yet
-                $scope.has_update = true
+                $scope.addUpdateNotification()
                 break
             else
               if action is 'delete'
                 continue # Probably our own delete or doesn't concern us
               else
-                $scope.has_update = true
+                $scope.addUpdateNotification()
                 break
-
-          #$scope.$digest()
 
     $timeout =>
       $scope.initUpdater()
@@ -641,7 +665,6 @@ class Viewer
         return new Date()
 
 
-<<<<<<< HEAD
 class Search
   this.$inject = ['$filter', '$location', '$routeParams', '$scope', 'annotator']
   constructor: ($filter, $location, $routeParams, $scope, annotator) ->
@@ -834,12 +857,17 @@ class Search
     refresh()
 
 
-angular.module('h.controllers', ['bootstrap'])
-=======
+class Notification
+  this.inject = ['$scope']
+  constructor: (
+    $scope
+  ) ->
+
+
 angular.module('h.controllers', ['bootstrap', 'h.streamfilter'])
->>>>>>> Initial solution
   .controller('AppController', App)
   .controller('AnnotationController', Annotation)
   .controller('EditorController', Editor)
   .controller('ViewerController', Viewer)
   .controller('SearchController', Search)
+  .controller('NotificationController', Notification)

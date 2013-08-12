@@ -130,6 +130,18 @@
     </div>
     <!-- / Content -->
 
+    <!-- Bottombar -->
+    <div class="bottombar" class="form-inline" ng-class="frame.visible && 'shown'">
+        <ul>
+           <li class="stream-list"
+                ng-repeat="notif in notifications">
+               <div class="notification"
+                    name="notification"
+                    ng-model="$parent.notif">
+               </div>
+           </li>
+        </ul>
+    </div>
 
     <!-- Templates -->
     <script type="text/ng-template" id="annotation.html">
@@ -152,6 +164,8 @@
     </script>
     <script type="text/ng-template" id="page_search.html">
       <metal:main use-macro="load: page_search.html" />
+    <script type="text/ng-template" id="notification.html">
+      <metal:main use-macro="load: notification.html" />
     </script>
   </body>
 </html>
