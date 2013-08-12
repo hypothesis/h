@@ -465,6 +465,11 @@ class App
         $scope.notifications.unshift notification
         $scope.has_update = true
 
+        $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
+        $timeout ->
+          $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
+        ,500
+
     $scope.initUpdater = ->
       $scope.has_update = false
       path = window.location.protocol + '//' + window.location.hostname + ':' +

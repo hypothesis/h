@@ -108,6 +108,15 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       cursor: ew-resize;
     }
   }
+
+  .notification-counter {
+    position: absolute;
+    margin-left: 1em;
+    float: left;
+    margin-top: 0.37em;
+    z-index: 2;
+    font-size: 12px;
+  }
 }
 
 .bottombar {
