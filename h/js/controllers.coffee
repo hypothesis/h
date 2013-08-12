@@ -147,6 +147,11 @@ class App
           annotator.clickAdder()
         , 500
 
+    $scope.$watch 'socialView.name', (newValue, oldValue) ->
+      return if newValue is oldValue
+      console.log "Social View changed to '" + newValue + "'. Reloading annotations."
+      $scope.reloadAnnotations()
+
     $scope.$watch 'frame.visible', (newValue) ->
       if newValue
         annotator.show()
@@ -185,7 +190,9 @@ class App
         collapsed: !show
         tab: 'login'
 
-    $scope.$on '$reset', => angular.extend $scope, @scope, auth: authentication
+    $scope.$on '$reset', => angular.extend $scope, @scope,
+      auth: authentication
+      socialView: annotator.socialView
 
     $scope.$on 'success', (event, action) ->
       if action == 'claim'
@@ -210,7 +217,7 @@ class App
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
 
-    $scope.reloadAnnotations = =>
+    $scope.reloadAnnotations = ->
       if annotator.plugins.Store?
         $scope.$root.annotations = []
         annotator.threading.thread []
@@ -233,11 +240,13 @@ class App
         Store._apiRequest = angular.noop
         # * Remove the plugin and re-add it to the annotator.
         delete annotator.plugins.Store
+        annotator.considerSocialView Store.options
         annotator.addStore Store.options
 
         href = annotator.plugins.Store.options.loadFromSearch.uri
         for uri in annotator.plugins.Document.uris()
-          unless uri is href
+          unless uri is href # Do not load the href again
+            console.log "Also loading annotations for: " + uri
             annotator.plugins.Store.loadAnnotationsFromSearch uri: uri
 
 class Annotation

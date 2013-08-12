@@ -50,8 +50,8 @@ class Hypothesis extends Annotator
   viewer:
     addField: (-> )
 
-  this.$inject = ['$document', '$location', '$rootScope', '$route', 'drafts']
-  constructor: ($document, $location, $rootScope, $route, drafts) ->
+  this.$inject = ['$document', '$location', '$rootScope', '$route', 'authentication', 'drafts']
+  constructor: ($document, $location, $rootScope, $route, authentication, drafts) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
@@ -119,6 +119,10 @@ class Hypothesis extends Annotator
 
     # Reload the route after annotations are loaded
     this.subscribe 'annotationsLoaded', -> $route.reload()
+
+    @auth = authentication
+    @socialView =
+      name: "none" # "single-player"
 
   _setupXDM: ->
     $location = @element.injector().get '$location'
@@ -325,6 +329,22 @@ class Hypothesis extends Annotator
       # Give angular a chance to react
       $rootScope.$digest()
 
+  considerSocialView: (options) ->
+    switch @socialView.name
+      when "none"
+        # Sweet, nothing to do, just clean up previous filters
+        console.log "Not applying any Social View filters."
+        delete options.loadFromSearch.user
+      when "single-player"
+        if (p = @auth.persona)?
+          console.log "Social View filter: single player mode."
+          options.loadFromSearch.user = "acct:" + p.username + "@" + p.provider
+        else
+          console.log "Social View: single-player mode, but ignoring it, since not logged in."
+          delete options.loadFromSearch.user
+      else
+        console.warn "Unsupported Social View: '" + @socialView.name + "'!"
+
   serviceDiscovery: (options) =>
     $location = @element.injector().get '$location'
     $rootScope = @element.injector().get '$rootScope'
@@ -344,6 +364,7 @@ class Hypothesis extends Annotator
           loadFromSearch:
             limit: 1000
             uri: href
+        this.considerSocialView options
         this.addStore(options)
 
   addStore: (options) ->
