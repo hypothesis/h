@@ -246,7 +246,6 @@ class App
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
 
-<<<<<<< HEAD
     # Searchbar initialization
     @user_filter = $filter('userName')
     search_query = ''
