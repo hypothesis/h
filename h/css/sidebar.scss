@@ -110,8 +110,9 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   .notification-counter {
+    font-family: $sansFontFamily;
     position: absolute;
-    margin-left: 1em;
+    margin-left: .8em;
     float: left;
     margin-top: 0.37em;
     z-index: 2;
@@ -123,7 +124,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   position: fixed;
   bottom: 0px;
   left: 39px; //17 + $heatmap_width
-  height: 5em;
+  height: 3.7em;
   width: 100%;
 
   .notif-list {
@@ -136,6 +137,10 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
   .bottom-padding {
     padding-bottom: .5em;
+  }
+
+  .notif-text {
+    font-family: $sansFontFamily;
   }
 }
 
