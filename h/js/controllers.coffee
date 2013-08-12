@@ -140,29 +140,7 @@ class App
         plugins.Permissions.setUser(null)
         delete plugins.Auth
 
-      if annotator.plugins.Store?
-        $scope.$root.annotations = []
-        annotator.threading.thread []
-
-        Store = annotator.plugins.Store
-        annotations = Store.annotations
-        annotator.plugins.Store.annotations = []
-        annotator.deleteAnnotation a for a in annotations
-
-        # XXX: Hacky hacky stuff to ensure that any search requests in-flight
-        # at this time have no effect when they resolve and that future events
-        # have no effect on this Store. Unfortunately, it's not possible to
-        # unregister all the events or properly unload the Store because the
-        # registration loses the closure. The approach here is perhaps
-        # cleaner than fishing them out of the jQuery private data.
-        # * Overwrite the Store's handle to the annotator, giving it one
-        #   with a noop `loadAnnotations` method.
-        Store.annotator = loadAnnotations: angular.noop
-        # * Make all api requests into a noop.
-        Store._apiRequest = angular.noop
-        # * Remove the plugin and re-add it to the annotator.
-        delete annotator.plugins.Store
-        annotator.addStore Store.options
+      $scope.reloadAnnotations()
 
       if newValue? and annotator.ongoing_edit
         $timeout =>
@@ -231,6 +209,36 @@ class App
 
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
+
+    $scope.reloadAnnotations = =>
+      if annotator.plugins.Store?
+        $scope.$root.annotations = []
+        annotator.threading.thread []
+
+        Store = annotator.plugins.Store
+        annotations = Store.annotations
+        annotator.plugins.Store.annotations = []
+        annotator.deleteAnnotation a for a in annotations
+
+        # XXX: Hacky hacky stuff to ensure that any search requests in-flight
+        # at this time have no effect when they resolve and that future events
+        # have no effect on this Store. Unfortunately, it's not possible to
+        # unregister all the events or properly unload the Store because the
+        # registration loses the closure. The approach here is perhaps
+        # cleaner than fishing them out of the jQuery private data.
+        # * Overwrite the Store's handle to the annotator, giving it one
+        #   with a noop `loadAnnotations` method.
+        Store.annotator = loadAnnotations: angular.noop
+        # * Make all api requests into a noop.
+        Store._apiRequest = angular.noop
+        # * Remove the plugin and re-add it to the annotator.
+        delete annotator.plugins.Store
+        annotator.addStore Store.options
+
+        href = annotator.plugins.Store.options.loadFromSearch.uri
+        for uri in annotator.plugins.Document.uris()
+          unless uri is href
+            annotator.plugins.Store.loadAnnotationsFromSearch uri: uri
 
 class Annotation
   this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
