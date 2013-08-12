@@ -210,7 +210,7 @@ class App
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
 
-    $scope.reloadAnnotations = =>
+    $scope.reloadAnnotations = ->
       if annotator.plugins.Store?
         $scope.$root.annotations = []
         annotator.threading.thread []
