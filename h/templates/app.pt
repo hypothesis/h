@@ -126,24 +126,34 @@
     <!-- Content -->
     <div id="wrapper">
 
+
       <!-- Angular view -->
       <div ng-view=""></div>
 
-    </div>
-    <!-- / Content -->
+
+  </div>
 
     <!-- Bottombar -->
-    <div class="bottombar" class="form-inline" ng-class="frame.visible && 'shown'">
-        <ul>
-           <li class="stream-list"
-                ng-repeat="notif in notifications">
-               <div class="notification"
-                    name="notification"
-                    ng-model="$parent.notif">
-               </div>
-           </li>
-        </ul>
+    <div class="bottombar" ng-class="frame.visible && 'shown'"
+         ng-show="notifications.length">
+      <ul class="sliding-panels">
+        <li class="stream-list notif-list"
+            ng-repeat="notif in notifications">
+           <div class="paper thread top-padding">
+             <div class="notification bottom-padding"
+                  name="notification"
+                  ng-model="$parent.notif">
+             </div>
+           </div>
+        </li>
+      </ul>
     </div>
+
+
+
+
+    <!-- / Content -->
+
 
     <!-- Templates -->
     <script type="text/ng-template" id="annotation.html">

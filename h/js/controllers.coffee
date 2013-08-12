@@ -456,7 +456,7 @@ class App
       unless $scope.has_update
         notification =
           type: 'update'
-          text: 'Reload to seen new annotations'
+          text: 'Reload to see new annotations'
           callback: =>
             $scope.reloadAnnotations()
             $scope.removeNotificationUpdate()
