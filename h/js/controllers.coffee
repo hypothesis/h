@@ -116,6 +116,10 @@ class App
         authentication.persona = null
         authentication.token = null
 
+        # Leave Highlighting mode when logging out
+        if $scope.highlightingMode
+          $scope.toggleHighlightingMode()
+
     $scope.$watch 'auth.persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
         # TODO: better knowledge of routes
@@ -140,34 +144,22 @@ class App
         plugins.Permissions.setUser(null)
         delete plugins.Auth
 
-      if annotator.plugins.Store?
-        $scope.$root.annotations = []
-        annotator.threading.thread []
-
-        Store = annotator.plugins.Store
-        annotations = Store.annotations
-        annotator.plugins.Store.annotations = []
-        annotator.deleteAnnotation a for a in annotations
-
-        # XXX: Hacky hacky stuff to ensure that any search requests in-flight
-        # at this time have no effect when they resolve and that future events
-        # have no effect on this Store. Unfortunately, it's not possible to
-        # unregister all the events or properly unload the Store because the
-        # registration loses the closure. The approach here is perhaps
-        # cleaner than fishing them out of the jQuery private data.
-        # * Overwrite the Store's handle to the annotator, giving it one
-        #   with a noop `loadAnnotations` method.
-        Store.annotator = loadAnnotations: angular.noop
-        # * Make all api requests into a noop.
-        Store._apiRequest = angular.noop
-        # * Remove the plugin and re-add it to the annotator.
-        delete annotator.plugins.Store
-        annotator.addStore Store.options
+      $scope.reloadAnnotations()
 
       if newValue? and annotator.ongoing_edit
         $timeout =>
           annotator.clickAdder()
         , 500
+
+      if newValue? and $scope.ongoingHighlightSwitch
+        $timeout =>
+          $scope.toggleHighlightingMode()
+        , 500
+
+    $scope.$watch 'socialView.name', (newValue, oldValue) ->
+      return if newValue is oldValue
+      console.log "Social View changed to '" + newValue + "'. Reloading annotations."
+      $scope.reloadAnnotations()
 
     $scope.$watch 'frame.visible', (newValue) ->
       if newValue
@@ -207,7 +199,9 @@ class App
         collapsed: !show
         tab: 'login'
 
-    $scope.$on '$reset', => angular.extend $scope, @scope, auth: authentication
+    $scope.$on '$reset', => angular.extend $scope, @scope,
+      auth: authentication
+      socialView: annotator.socialView
 
     $scope.$on 'success', (event, action) ->
       if action == 'claim'
@@ -224,10 +218,30 @@ class App
     , 200  # We hope this is long enough
 
     $scope.toggleAlwaysOnHighlights = ->
-      console.log "Should toggle always-on highlights"
+      $scope.alwaysOnMode = not $scope.alwaysOnMode
+      provider.notify
+        method: 'setAlwaysOnMode'
+        params: $scope.alwaysOnMode
+
+    $scope.highlightingMode = false
 
     $scope.toggleHighlightingMode = ->
-      console.log "Should toggle highlighting mode"
+      # Check login state first
+      unless plugins.Auth? and plugins.Auth.haveValidToken()
+        # If we are not logged in, start the auth process
+        $scope.ongoingHighlightSwitch = true
+        annotator.show()
+        $scope.sheet.collapsed = false
+        $scope.sheet.tab = 'login'
+        return
+
+      delete $scope.ongoingHighlightSwitch
+      $scope.highlightingMode = not $scope.highlightingMode
+      annotator.socialView.name =
+        if $scope.highlightingMode then "single-player" else "none"
+      provider.notify
+        method: 'setHighlightingMode'
+        params: $scope.highlightingMode
 
     $scope.createUnattachedAnnotation = ->
       console.log "Should create unattached annotation"
@@ -384,9 +398,41 @@ class App
         @visualSearch.searchBox.searchEvent('')
       , 1500
 
+    $scope.reloadAnnotations = ->
+      if annotator.plugins.Store?
+        $scope.$root.annotations = []
+        annotator.threading.thread []
+
+        Store = annotator.plugins.Store
+        annotations = Store.annotations
+        annotator.plugins.Store.annotations = []
+        annotator.deleteAnnotation a for a in annotations
+
+        # XXX: Hacky hacky stuff to ensure that any search requests in-flight
+        # at this time have no effect when they resolve and that future events
+        # have no effect on this Store. Unfortunately, it's not possible to
+        # unregister all the events or properly unload the Store because the
+        # registration loses the closure. The approach here is perhaps
+        # cleaner than fishing them out of the jQuery private data.
+        # * Overwrite the Store's handle to the annotator, giving it one
+        #   with a noop `loadAnnotations` method.
+        Store.annotator = loadAnnotations: angular.noop
+        # * Make all api requests into a noop.
+        Store._apiRequest = angular.noop
+        # * Remove the plugin and re-add it to the annotator.
+        delete annotator.plugins.Store
+        annotator.considerSocialView Store.options
+        annotator.addStore Store.options
+
+        href = annotator.plugins.Store.options.loadFromSearch.uri
+        for uri in annotator.plugins.Document.uris()
+          unless uri is href # Do not load the href again
+            console.log "Also loading annotations for: " + uri
+            annotator.plugins.Store.loadAnnotationsFromSearch uri: uri
+
 class Annotation
-  this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout']
-  constructor: ($element, $location, $scope, annotator, drafts, $timeout) ->
+  this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout', '$window']
+  constructor: ($element, $location, $scope, annotator, drafts, $timeout, $window) ->
     threading = annotator.threading
     $scope.action = 'create'
     $scope.editing = false
@@ -404,9 +450,16 @@ class Annotation
           $scope.action = 'create'
 
     $scope.save = ->
-      $scope.editing = false
+      annotation = $scope.model.$modelValue        
 
-      annotation = $scope.model.$modelValue
+      # Forbid the publishing of annotations
+      # without a body (text or tags)
+      if $scope.form.privacy.$viewValue is "Public" and
+          not annotation.text and not annotation.tags?.length
+        $window.alert "You can not make this annotation public without adding some text, or at least a tag."
+        return
+
+      $scope.editing = false
       drafts.remove annotation
 
       switch $scope.action

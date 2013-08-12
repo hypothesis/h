@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-794ee6a
+** Annotator 1.2.6-dev-706391a
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-07-25 10:23:18Z
+** Built at: 2013-08-06 14:03:23Z
 */
 
 
@@ -1418,10 +1418,18 @@
         }
       }
       if (event && this.selectedRanges.length) {
-        return this.adder.css(util.mousePosition(event, this.wrapper[0])).show();
+        return this.onSuccessfulSelection(event);
       } else {
-        return this.adder.hide();
+        return this.onFailedSelection(event);
       }
+    };
+
+    Annotator.prototype.onSuccessfulSelection = function(event) {
+      return this.adder.css(util.mousePosition(event, this.wrapper[0])).show();
+    };
+
+    Annotator.prototype.onFailedSelection = function(event) {
+      return this.adder.hide();
     };
 
     Annotator.prototype.isAnnotator = function(element) {
