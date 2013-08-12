@@ -430,12 +430,6 @@ class App
           unless uri is href # Do not load the href again
             console.log "Also loading annotations for: " + uri
             annotator.plugins.Store.loadAnnotationsFromSearch uri: uri
-        annotator.addStore Store.options
-
-        href = annotator.plugins.Store.options.loadFromSearch.uri
-        for uri in annotator.plugins.Document.uris()
-          unless uri is href
-            annotator.plugins.Store.loadAnnotationsFromSearch uri: uri
 
         $scope.new_updates = 0
 
@@ -510,6 +504,10 @@ class App
         unless data instanceof Array then data = [data]
         $scope.$apply =>
           for annotation in data
+            if $scope.socialView.name is 'single-player'
+              unless annotation.user is $scope.auth.persona
+                continue
+
             check = annotator.threading.getContainer annotation.id
             if check?.message?
               if action is 'create'
