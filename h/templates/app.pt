@@ -29,7 +29,7 @@
       </div>
       <div class="notification-counter"
            ng-show="new_updates>9">
-          >9
+          &gt;9
       </div>
 
       <div class="inner" ng-switch="auth.persona">
