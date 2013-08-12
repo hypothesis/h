@@ -112,10 +112,22 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 .bottombar {
   position: fixed;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-  left: 7px;
-  bottom: .5em;
+  bottom: 0px;
+  left: 39px; //17 + $heatmap_width
+  height: 5em;
+  width: 100%;
+
+  .notif-list {
+    margin-right: 3.85em;
+    padding-top: .5em;
+  }
+
+  .top-padding {
+    padding-top: .5em;
+  }
+  .bottom-padding {
+    padding-bottom: .5em;
+  }
 }
 
 //CONTROLBAR STUFF////////////////////////////////
