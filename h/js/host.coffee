@@ -19,7 +19,7 @@ class Annotator.Host extends Annotator
     tick: false
 
   constructor: (element, options) ->
-    Gettext.prototype.parse_locale_data annotator_locale_data    
+    Gettext.prototype.parse_locale_data annotator_locale_data
     super
 
     @app = @options.app
@@ -51,11 +51,11 @@ class Annotator.Host extends Annotator
 
   setPersistentHighlights: ->
     body = $('body')
-    markerClass = 'annotator-highlights-always-on'        
+    markerClass = 'annotator-highlights-always-on'
     if @alwaysOnMode or @highlightingMode
       body.addClass markerClass
     else
-      body.removeClass markerClass        
+      body.removeClass markerClass
 
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
@@ -316,7 +316,7 @@ class Annotator.Host extends Annotator
       # Don't use the default method to create an annotation,
       # because we don't want to publish the beforeAnnotationCreated event
       # just yet.
-      # 
+      #
       # annotation = this.createAnnotation()
       #
       # Create an empty annotation manually instead

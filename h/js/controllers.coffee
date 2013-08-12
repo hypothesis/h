@@ -469,7 +469,7 @@ class App
       $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
       $timeout ->
         $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
-      ,500
+      , 500
 
     $scope.$watch 'show_search', (value, old) ->
       if value and not old
@@ -562,7 +562,7 @@ class Annotation
           $scope.action = 'create'
 
     $scope.save = ->
-      annotation = $scope.model.$modelValue        
+      annotation = $scope.model.$modelValue
 
       # Forbid the publishing of annotations
       # without a body (text or tags)
@@ -693,14 +693,14 @@ class Editor
     if $scope.action is 'create'
       annotator.subscribe 'annotationCreated', save
       annotator.subscribe 'annotationDeleted', cancel
-    else 
+    else
       if $scope.action is 'edit' or $scope.action is 'redact'
         annotator.subscribe 'annotationUpdated', save
 
     $scope.$on '$destroy', ->
       if $scope.action is 'edit' or $scope.action is 'redact'
         annotator.unsubscribe 'annotationUpdated', save
-      else 
+      else
         if $scope.action is 'create'
           annotator.unsubscribe 'annotationCreated', save
           annotator.unsubscribe 'annotationDeleted', cancel

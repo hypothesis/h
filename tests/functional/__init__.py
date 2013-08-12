@@ -1,17 +1,17 @@
 """
-Support for doing Selenium functional tests locally and remotely using 
+Support for doing Selenium functional tests locally and remotely using
 SauceLabs. You should be able to write tests with Selenium IDE, export
-them as Python WebDriver scripts, and then modify them to extend 
-SeleniumTestCase (included below) so that you can easily login as 
+them as Python WebDriver scripts, and then modify them to extend
+SeleniumTestCase (included below) so that you can easily login as
 a test user.
 
 If your test involves clicking around in the Annotator iframe you will
 need to use the Annotator context manager to switch to the iframe, since
 Selenium IDE doesn't currently handle this. See tests/functional/test_login.py
-for an example. 
+for an example.
 
-SeleniumTestCase also provides a method to select some text in the page for 
-annotation, since it seemed impossible to achieve with the Selenium webdriver 
+SeleniumTestCase also provides a method to select some text in the page for
+annotation, since it seemed impossible to achieve with the Selenium webdriver
 API.
 """
 
@@ -81,7 +81,7 @@ class SeleniumTestCase(unittest.TestCase):
 
     def _wipe_elasticsearch(self):
         # TODO: ideally we should be able to use annotator.elasticsearch here
-        es_index = settings['es.index'] 
+        es_index = settings['es.index']
         es_host = settings['es.host']
         # XXX: delete annotations and documents
         import requests
@@ -111,16 +111,16 @@ class SeleniumTestCase(unittest.TestCase):
             driver.find_element_by_css_selector("div.tri").click()
 
     def highlight(self, css_selector):
-        """A hack to select some text on the page, and trigger the 
+        """A hack to select some text on the page, and trigger the
         annotator. Ideally this should be achievable with an action chain
         """
         script = """
-            var p = $("p")[0]; 
-            var range = document.createRange(); 
-            range.selectNodeContents(p); 
-            var sel = window.getSelection(); 
-            sel.removeAllRanges(); 
-            sel.addRange(range); 
+            var p = $("p")[0];
+            var range = document.createRange();
+            range.selectNodeContents(p);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
             var offset = $(p).offset();
             $(".annotator-adder").css({top: offset.top, left: offset.left});
             window.annotator.checkForEndSelection("foobar");
@@ -129,7 +129,7 @@ class SeleniumTestCase(unittest.TestCase):
 
 class Annotator():
     """
-    a ContextManager for easily focusing the Selenium driver on the 
+    a ContextManager for easily focusing the Selenium driver on the
     Annotator iframe.
     """
 

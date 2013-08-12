@@ -25,11 +25,11 @@
 
       <div class="notification-counter"
            ng-show="new_updates>0 && new_updates<10">
-          +{{ new_updates }}
+        +{{ new_updates }}
       </div>
       <div class="notification-counter"
            ng-show="new_updates>9">
-          &gt;9
+        &gt;9
       </div>
 
       <div class="inner" ng-switch="auth.persona">
@@ -60,7 +60,7 @@
           </li>
           <li class="controlbarbutton">
             <a title="Highlighting Mode"
-               class="highlighter-icon" 
+               class="highlighter-icon"
                ng-class="highlightingMode && 'pushed'"
                ng-click="toggleHighlightingMode()"
                href="">
@@ -127,13 +127,9 @@
 
     <!-- Content -->
     <div id="wrapper">
-
-
       <!-- Angular view -->
       <div ng-view=""></div>
-
-
-  </div>
+    </div>
 
     <!-- Bottombar -->
     <div class="bottombar" ng-class="frame.visible && 'shown'"
@@ -150,12 +146,7 @@
         </li>
       </ul>
     </div>
-
-
-
-
     <!-- / Content -->
-
 
     <!-- Templates -->
     <script type="text/ng-template" id="annotation.html">
