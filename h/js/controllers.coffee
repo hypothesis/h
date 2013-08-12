@@ -362,7 +362,7 @@ class App
         @visualSearch.searchBox.searchEvent('')
       , 1500
 
-    $scope.reloadAnnotations = =>
+    $scope.reloadAnnotations = ->
       if annotator.plugins.Store?
         $scope.$root.annotations = []
         annotator.threading.thread []
