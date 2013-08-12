@@ -250,7 +250,7 @@ class App
     @user_filter = $filter('userName')
     search_query = ''
     unless typeof(localStorage) is 'undefined'
-      search_query = localStorage.getItem("hyp_page_search_query")
+      search_query = localStorage.getItem("hyp_page_search_query") or ""
       console.log 'Loading back search query: ' + search_query
 
     @visualSearch = VS.init
