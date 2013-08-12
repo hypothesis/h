@@ -23,6 +23,10 @@
            ng-mouseleave="cbStyle='hiddencontrolbar'"
            ></div>
 
+      <div class="notification-counter">
+        {{ notifications.length }}
+      </div>
+
       <div class="inner" ng-switch="auth.persona">
         <a class="pull-right" href=""
            ng-click="sheet.collapsed = false;
@@ -34,12 +38,6 @@
              data-user-picker-model="auth.persona"
              data-user-picker-options="auth.personas">
         </div>
-      </div>
-
-      <!-- Updater draft -->
-      <div class="pull-right">
-          <strong ng-show="has_update"
-               ng-click="reloadAnnotations()">Update page</strong>
       </div>
 
       <!-- Controlbar -->

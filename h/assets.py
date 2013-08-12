@@ -143,7 +143,8 @@ jquery_ui = Bundle(
 jquery_ui_effects = Bundle(
     Uglify('h:lib/jquery.ui.effect.js', output='lib/jquery.ui.effect.min.js'),
     Uglify('h:lib/jquery.ui.effect-blind.js', output='lib/jquery.ui.effect-blind.min.js'),
-    Uglify('h:lib/jquery.ui.effect-highlight.js', output='lib/jquery.ui.effect-highlight.min.js')
+    Uglify('h:lib/jquery.ui.effect-highlight.js', output='lib/jquery.ui.effect-highlight.min.js'),
+    Uglify('h:lib/jquery.ui.effect-forecolor-highlight.js', output='lib/jquery.ui.effect-forecolor-highlight.min.js')
 )
 
 # Polyfills
