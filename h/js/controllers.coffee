@@ -409,9 +409,11 @@ class App
     $scope.addUpdateNotification = ->
       # Do not add an update notification twice
       unless $scope.new_updates > 0
+        if $scope.new_updates < 2 then text = 'change.'
+        else text = 'changes.'
         notification =
           type: 'update'
-          text: 'Click to load ' + $scope.new_updates + ' changes.'
+          text: 'Click to load ' + $scope.new_updates + ' ' + text
           callback: =>
             $scope.reloadAnnotations()
             $scope.removeNotificationUpdate()
@@ -419,15 +421,16 @@ class App
 
         $scope.notifications.unshift notification
 
-        $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
-        $timeout ->
-          $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
-        ,500
-
     $scope.$watch 'new_updates', (updates) ->
       for notif in $scope.notifications
         if notif.type is 'update'
-          notif.text = 'Click to load ' + updates + ' changes.'
+          if $scope.new_updates < 2 then text = 'change.'
+          else text = 'changes.'
+          notif.text = 'Click to load ' + updates + ' ' + text
+      $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
+      $timeout ->
+        $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
+      ,500
 
     $scope.initUpdater = ->
       $scope.new_updates = 0
