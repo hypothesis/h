@@ -237,6 +237,8 @@ class App
 
       delete $scope.ongoingHighlightSwitch
       $scope.highlightingMode = not $scope.highlightingMode
+      annotator.socialView.name =
+        if $scope.highlightingMode then "single-player" else "none"
       provider.notify
         method: 'setHighlightingMode'
         params: $scope.highlightingMode
