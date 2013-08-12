@@ -1171,6 +1171,18 @@ h3.stream {
   height: 24px;
 }
 
+.VS-search .VS-icon-search {
+  position: absolute;
+  left: 9px;
+  top: 7px;
+}
+
+.VS-search .VS-icon-cancel {
+  position: absolute;
+  right: 9px;
+  top: 7px;
+}
+
 .visual-search {
   .VS-search .VS-search-box {
     border: 0;
