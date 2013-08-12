@@ -655,6 +655,37 @@ blockquote {
   }
 }
 
+.bottombar {
+  @include smallshadow;
+  background: $white;
+  border: solid 1px $grayLighter;
+  height: 2em;
+  position: fixed;
+  left: -1px;
+  right: -1px;
+  bottom: .5em;
+  z-index: 5;
+
+  .barbutton {
+    &:hover {
+      @include box-shadow(inset 0 1px 3px hsla(0, 0%, 0%, .1));
+    }
+
+    &:active {
+      @include box-shadow(inset 0 2px 3px hsla(0, 0%, 0%, .1));
+    }
+  }
+
+  .inner > * {
+    padding: .3em;
+
+    &.pull-right {
+      display: inline-block;
+      font-family: $sansFontFamily;
+    }
+  }
+}
+
 
 //MAIN CONTENT///////
 .content {

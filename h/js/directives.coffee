@@ -326,6 +326,20 @@ tags = ['$window', ($window) ->
   restrict: 'C'
 ]
 
+notification = ['$filter', ($filter) ->
+  link: (scope, elem, attrs, controller) ->
+    return unless controller?
+
+    # Publish the controller
+    scope.model = controller
+  controller: 'NotificationController'
+  priority: 100  # Must run before ngModel
+  require: '?ngModel'
+  restrict: 'C'
+  scope: {}
+  templateUrl: 'notification.html'
+]
+
 angular.module('h.directives', ['ngSanitize'])
   .directive('authentication', authentication)
   .directive('markdown', markdown)
@@ -339,4 +353,5 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('userPicker', userPicker)
   .directive('ngBlur', ngBlur)
   .directive('repeatAnim', repeatAnim)
+  .directive('notification', notification)
 
