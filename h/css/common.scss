@@ -624,7 +624,7 @@ blockquote {
   @include smallshadow;
   background: $white;
   border: solid 1px $grayLighter;
-  height: 2em;
+  height: 2.25em;
   position: fixed;
   left: -1px;
   right: -1px;
@@ -770,6 +770,10 @@ blockquote {
     &.squished {
       padding-left: 0;
     }
+  }
+
+  .search-collapsed {
+    background-image: url("../images/plus_1.png");
   }
 
   //These are all the changes needed to collapse thread objects.
@@ -1128,4 +1132,91 @@ h3.stream {
   letter-spacing: normal;
   word-spacing: normal;
   margin-top: 0;
+}
+
+//Visual Search////////////////////////////////
+//Imported their css here
+
+.collapsed-container {
+  height: 1em;
+  visibility: hidden;
+}
+
+.small-inner {
+  margin:0px 0.5em 0px 1em;
+}
+
+.search-container {
+  width: auto;
+  float: none;
+  overflow: hidden;
+}
+
+.visual-search {
+  .VS-search .VS-search-box {
+    border: 0;
+    min-height: 22px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+  }
+
+  .VS-search input,.VS-search .VS-input-width-tester {
+    border: none;
+    -moz-box-sizing:content-box;
+    -webkit-box-sizing:content-box;
+    box-sizing: content-box;
+  }
+
+  .VS-search .search_input input {
+    width: 4px;
+  }
+}
+
+.thread {
+  .load-more {
+    @include pie-clearfix;
+    font-family: $sansFontFamily;
+    font-weight:bold;
+    font-size: 11px;
+  }
+}
+
+.visual-container {
+  margin-left: 3em;
+}
+
+.magnify-glass {
+  width: 2.25em;
+  min-height: 22px;
+}
+
+.magnify-glass .VS-icon {
+  margin-left: 3.5em;
+}
+
+.magnify-glass .VS-icon-search:hover {
+  width:12px;
+  height:12px;
+  background-image:url(../images/embed/icons/search_glyph_dark.png);
+  cursor: pointer;
+}
+
+.fadeIn-setup,.fadeOut-setup {
+  -webkit-transition: 1s linear opacity;
+  -moz-transition: 1s linear opacity;
+  -o-transition: 1s linear opacity;
+  transition: 1s linear opacity;
+}
+
+.fadeIn-setup{
+  opacity:0;
+}
+.fadeOut-setup{
+  opacity:1;
+}
+.fadeIn-setup.fadeIn-start {
+  opacity: 1;
+}
+.fadeOut-setup.fadeOut-start{
+    opacity:0;
 }

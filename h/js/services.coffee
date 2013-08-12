@@ -415,8 +415,7 @@ class DraftProvider
     else
       false
 
-
-angular.module('h.services', ['ngResource'])
+angular.module('h.services', ['ngResource','h.filters'])
   .provider('authentication', AuthenticationProvider)
   .provider('drafts', DraftProvider)
   .service('annotator', Hypothesis)

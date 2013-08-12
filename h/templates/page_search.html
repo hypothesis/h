@@ -1,0 +1,67 @@
+<ul class="sliding-panels">
+  <!-- Search -->
+  <li>
+    <ul>
+      <li ng-repeat="thread in threads"
+        class="stream-list summary">
+        <!-- Thread view -->
+        <div data-recursive="" class="paper thread">
+          <!-- Annotation -->
+            <!--"Load more replies" label for the top -->
+            <a href=""
+               class="load-more"
+               ng-show="ann_info.more_top[thread.message.id] && ann_info.more_top_num[thread.message.id] <2"
+               ng-click="clickMoreTop(thread.message.id)">
+                load 1 more reply
+            </a>
+
+            <a href=""
+               class="load-more"
+               ng-show="ann_info.more_top[thread.message.id] && ann_info.more_top_num[thread.message.id] >1"
+               ng-click="clickMoreTop(thread.message.id)">
+                load {{ann_info.more_top_num[thread.message.id]}} more replies
+            </a>
+
+
+            <div class="detail annotation"
+                 name="annotation"
+                 ng-model="$parent.thread.message"
+                 mode="search"
+                 replies="{{!ann_info.more_bottom[thread.message.id]}}"
+                 ng-show="$parent.ann_info.shown[thread.message.id]"/>
+
+            <!--"Load more replies" label for the bottom -->
+            <a href=""
+               class="load-more"
+               ng-show="ann_info.more_bottom[thread.message.id] && ann_info.more_bottom_num[thread.message.id]<2"
+               ng-click="clickMoreBottom(thread.message.id)">
+               load 1 more reply
+            </a>
+
+            <a href=""
+               class="load-more"
+               ng-show="ann_info.more_bottom[thread.message.id] && ann_info.more_bottom_num[thread.message.id] >1"
+               ng-click="clickMoreBottom(thread.message.id)">
+               load {{ann_info.more_bottom_num[thread.message.id]}} more replies
+            </a>
+
+          <!-- Replies -->
+          <ul>
+            <li class="thread"
+                ng-hide="collapsed"
+                ng-class="collapsed && 'collapsed' || ''"
+                ng-repeat="thread in thread.children | orderBy:sortThread:true"
+                ng-transclude>
+               <a href=""
+                  class="threadexp"
+                  title="{{collapsed && 'Expand' || 'Collapse'}}"
+                  ng-click="collapsed = !collapsed"
+                  ng-show="ann_info.shown[thread.message.id] && !ann_info.more_top[thread.message.id]"
+               />
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+</ul>

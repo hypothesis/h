@@ -58,10 +58,18 @@
   </div>
   
   <!-- Body -->
-  <markdown ng-model="$parent.model.$modelValue.text"
-            ng-readonly="!$parent.editing"
-            class="body"
-            name="text" />
+  <div ng-hide="mode!='search'">
+    <markdown ng-model="$parent.model.$modelValue.highlightText"
+              ng-readonly="!$parent.editing"
+              class="body"
+              name="text" />
+  </div>
+  <div ng-show="mode!='search'">
+    <markdown ng-model="$parent.model.$modelValue.text"
+              ng-readonly="!$parent.editing"
+              class="body"
+              name="text" />
+  </div>
 
   <!-- Tip about Markdown -->
   <span ng-hide="!editing" class="tip"><a href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown</a> is supported.</span>
@@ -121,7 +129,7 @@
   <div class="magicontrols small" ng-hide="editing">
     <span class="reply-count"
           ng-pluralize=""
-          ng-show="thread.children.length"
+          ng-show="thread.children.length && replies!='false'"
           count="thread.flattenChildren().length"
           when="{one: '1 reply', other: '{} replies'}" />
     <a class="reply-icon show" href="" title="Reply" ng-click="reply()">Reply</a>
