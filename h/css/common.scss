@@ -628,7 +628,7 @@ blockquote {
   @include smallshadow;
   background: $white;
   border: solid 1px $grayLighter;
-  height: 2.25em;
+  height: 2em;
   position: fixed;
   left: -1px;
   right: -1px;
@@ -1166,6 +1166,11 @@ h3.stream {
   overflow: hidden;
 }
 
+.VS-search .VS-search-box {
+  min-height: 20px;
+  height: 24px;
+}
+
 .visual-search {
   .VS-search .VS-search-box {
     border: 0;
@@ -1216,10 +1221,10 @@ h3.stream {
 }
 
 .fadeIn-setup,.fadeOut-setup {
-  -webkit-transition: 1s linear opacity;
-  -moz-transition: 1s linear opacity;
-  -o-transition: 1s linear opacity;
-  transition: 1s linear opacity;
+  -webkit-transition: .25s linear opacity;
+  -moz-transition: .25s linear opacity;
+  -o-transition: .25s linear opacity;
+  transition: .25s linear opacity;
 }
 
 .fadeIn-setup{
