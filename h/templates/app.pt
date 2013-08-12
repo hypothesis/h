@@ -79,7 +79,6 @@
       <!-- Searchbar -->
       <div class="search-container">
         <div ng-show="show_search"
-             ng-animate="{show: 'fadeIn', hide:'fadeOut'}"
              class="visual-search visual-container"></div>
         <div ng-hide="show_search"
              class="visual-container"

@@ -471,6 +471,13 @@ class App
         $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
       ,500
 
+    $scope.$watch 'show_search', (value, old) ->
+      if value and not old
+        $timeout ->
+          $element.find('.visual-search').find('input').last().focus()
+        , 10
+
+
     $scope.initUpdater = ->
       $scope.new_updates = 0
       path = window.location.protocol + '//' + window.location.hostname + ':' +
