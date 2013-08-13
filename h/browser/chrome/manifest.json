@@ -23,7 +23,7 @@
     "webRequestBlocking"
   ],
   "content_security_policy":
-    "script-src 'self' ${src} https://ajax.googleapis.com; object-src 'self'",
+    "script-src 'self' 'unsafe-eval' ${src} https://ajax.googleapis.com; object-src 'self'",
 
   "background": {
     "persistent": true,
