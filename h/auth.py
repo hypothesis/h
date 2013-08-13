@@ -1,5 +1,7 @@
-from annotator.auth import decode_token
+from annotator.auth import Authenticator
 from pyramid.authentication import SessionAuthenticationPolicy
+
+from h import models
 
 
 class HybridAuthenticationPolicy(SessionAuthenticationPolicy):
@@ -7,10 +9,13 @@ class HybridAuthenticationPolicy(SessionAuthenticationPolicy):
         base = super(HybridAuthenticationPolicy, self)
         effective_principals = base.effective_principals(request)
 
-        if 'x-annotator-auth-token' in request.headers:
-            token = request.headers['x-annotator-auth-token']
-            userid = decode_token(token).get('userId')
-            if userid:
-                effective_principals.append(userid)
+        # We don't even need to translate the request even though the store
+        # uses flask since both webob and werkzeug use a dict-like object for
+        # `request.headers`.
+        authenticator = Authenticator(models.Consumer.get_by_key)
+        user = authenticator.request_user(request)
+
+        if user is not None:
+            effective_principals.append(user)
 
         return effective_principals
