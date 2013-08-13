@@ -98,7 +98,6 @@ class SeleniumTestCase(unittest.TestCase):
     def login(self):
         "registers as test/test@example.org/test"
         driver = self.driver
-        driver.get(self.base_url + "/")
         with Annotator(driver):
             driver.find_element_by_css_selector("div.tri").click()
             driver.find_element_by_link_text("Sign in").click()
