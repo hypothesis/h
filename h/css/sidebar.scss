@@ -102,13 +102,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     }
   }
 
-  &.shown {
-    .tri {
-      @include fonticon("\e010", left);
-      cursor: ew-resize;
-    }
-  }
-
   .notification-counter {
     font-family: $sansFontFamily;
     position: absolute;
@@ -117,6 +110,18 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     margin-top: 0.37em;
     z-index: 2;
     font-size: 12px;
+    cursor: w-resize;
+  }
+
+  &.shown {
+    .tri {
+      @include fonticon("\e010", left);
+      cursor: ew-resize;
+    }
+
+    .notification-counter {
+      cursor: ew-resize;
+    }
   }
 }
 
