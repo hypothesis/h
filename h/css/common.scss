@@ -1151,11 +1151,21 @@ h3.stream {
 }
 
 //Visual Search////////////////////////////////
-//Imported their css here
+//Override their css here
 
 .collapsed-container {
   height: 1em;
   visibility: hidden;
+}
+
+.VS-search .search_facet {
+  float: left;
+  margin: 0;
+  padding: 0 0 0 14px;
+  position: relative;
+  border: 1px solid transparent;
+  height: 20px;
+  margin: 3px -8px 4px 0;
 }
 
 .small-inner {
