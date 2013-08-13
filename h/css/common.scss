@@ -1119,8 +1119,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     margin: .6em .2em;
     padding: .01em 1.3em .01em .3em;
     position: relative;
+    right: 2px;
     font-size: 12px;
-    opacity:0.7;
+    opacity:0.8;
 
 
     &:hover { opacity: 1; }
@@ -1181,6 +1182,13 @@ h3.stream {
   position: absolute;
   right: 9px;
   top: 7px;
+}
+
+.VS-search .VS-search-inner {
+  position: relative;
+  margin: 0 20px 0 22px;
+  overflow: hidden;
+  display: block;
 }
 
 .visual-search {
