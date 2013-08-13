@@ -96,20 +96,63 @@ class SeleniumTestCase(unittest.TestCase):
         self.session.flush()
 
     def login(self):
+        "signs in as test/test@example.org/test"
+        driver = self.driver
+        with Annotator(driver):
+            # Find the signin link and click it
+            signin = driver.find_element_by_link_text("Sign in")
+            signin.click()
+
+            # Find the authentication form sheet
+            auth = driver.find_element_by_class_name('sheet')
+
+            # Switch to the registration tab
+            auth.find_element_by_link_text("Sign in").click()
+
+            # Get the registration pane
+            form = auth.find_element_by_name('login')
+
+            username = form.find_element_by_name('username')
+            username.clear()
+            username.send_keys("test")
+
+            password = form.find_element_by_name('password')
+            password.clear()
+            password.send_keys("test")
+
+            form.submit()
+
+    def register(self):
         "registers as test/test@example.org/test"
         driver = self.driver
         with Annotator(driver):
-            driver.find_element_by_css_selector("div.tri").click()
-            driver.find_element_by_link_text("Sign in").click()
-            driver.find_element_by_link_text("Create an account").click()
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"username\"]").clear()
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"username\"]").send_keys("test")
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"email\"]").clear()
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"email\"]").send_keys("test@example.org")
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"password\"]").clear()
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"password\"]").send_keys("test")
-            driver.find_element_by_name("sign_up").click()
-            driver.find_element_by_css_selector("div.tri").click()
+            # Find the signin link and click it
+            signin = driver.find_element_by_link_text("Sign in")
+            signin.click()
+
+            # Find the authentication form sheet
+            auth = driver.find_element_by_class_name('sheet')
+
+            # Switch to the registration tab
+            auth.find_element_by_link_text("Create an account").click()
+
+            # Get the registration pane
+            form = auth.find_element_by_name('register')
+
+            username = form.find_element_by_name('username')
+            username.clear()
+            username.send_keys("test")
+
+            email = form.find_element_by_name('email')
+            email.clear()
+            email.send_keys("test@example.org")
+
+            password = form.find_element_by_name('password')
+            password.clear()
+            password.send_keys("test")
+
+            form.submit()
+
 
     def highlight(self, css_selector):
         """A hack to select some text on the page, and trigger the
@@ -139,7 +182,10 @@ class Annotator():
 
     def __enter__(self):
         frame = self.driver.find_element_by_class_name('annotator-frame')
+        collapsed = 'annotator-collapsed' in frame.get_attribute('class')
         self.driver.switch_to_frame(frame)
+        if collapsed:
+            self.driver.find_element_by_css_selector("div.tri").click()
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, typ, value, traceback):
         self.driver.switch_to_default_content()

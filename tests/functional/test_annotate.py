@@ -12,8 +12,7 @@ class TestAnnotation(SeleniumTestCase):
         driver = self.driver
         driver.get(self.base_url + "/")
 
-        # wait a few seconds for the server to warm up & login
-        self.login()
+        self.register()
 
         # highlight the first paragraph and click the pen to annotate it
         self.highlight("p")
@@ -27,8 +26,7 @@ class TestAnnotation(SeleniumTestCase):
             annotation.find_element_by_css_selector("button").click()
 
         # go away and come back
-        driver.get("http://google.com")
-        driver.get(self.base_url + "/")
+        driver.refresh()
 
         # make sure the heatmap shows our annotation
         with Annotator(driver):

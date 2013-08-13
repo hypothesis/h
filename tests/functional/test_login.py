@@ -12,32 +12,21 @@ class TestLogin(SeleniumTestCase):
         driver = self.driver
         driver.get(self.base_url + "/")
 
+        self.register()
+
         with Annotator(driver):
-            driver.find_element_by_css_selector("div.tri").click()
-            driver.find_element_by_link_text("Sign in").click()
-            driver.find_element_by_link_text("Create an account").click()
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"username\"]").clear()
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"username\"]").send_keys("test")
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"email\"]").clear()
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"email\"]").send_keys("test@example.org")
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"password\"]").clear()
-            driver.find_element_by_css_selector("form[name=\"register\"] > input[name=\"password\"]").send_keys("test")
-            driver.find_element_by_name("sign_up").click()
+            # Log out
+            picker = driver.find_element_by_class_name('user-picker')
+            dropdown = picker.find_element_by_class_name('dropdown-toggle')
+            dropdown.click()
+            dropdown.find_element_by_xpath("//li[2]").click()
 
-            time.sleep(2)
+        self.login()
 
-            driver.find_element_by_css_selector("span.dropdown-toggle").click()
-            driver.find_element_by_xpath("//li[2]").click()
-            driver.find_element_by_link_text("Sign in").click()
-            driver.find_element_by_name("username").clear()
-            driver.find_element_by_name("username").send_keys("test")
-            driver.find_element_by_name("password").clear()
-            driver.find_element_by_name("password").send_keys("test")
-            driver.find_element_by_css_selector("input[name=\"login\"]").click()
-
-            # wait for the login to take effect via ajax
-            time.sleep(5)
-            self.assertEqual(driver.find_element_by_css_selector("span.dropdown-toggle").text, "test")
+        with Annotator(driver):
+            picker = driver.find_element_by_class_name('user-picker')
+            dropdown = picker.find_element_by_class_name('dropdown-toggle')
+            self.assertEqual(dropdown.text, "test")
 
 if __name__ == "__main__":
     unittest.main()
