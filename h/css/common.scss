@@ -880,6 +880,7 @@ blockquote {
       margin-left: 1.5em;
       .share-text {
         width: 100%;
+        margin-bottom: 4px;
       }
     }
   }
@@ -1188,7 +1189,7 @@ h3.stream {
   position: relative;
   margin: 0 20px 0 22px;
   overflow: hidden;
-  display: block;
+  display: block; 
 }
 
 .visual-search {
