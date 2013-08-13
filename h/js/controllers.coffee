@@ -466,6 +466,8 @@ class App
           if $scope.new_updates < 2 then text = 'change.'
           else text = 'changes.'
           notif.text = 'Click to load ' + updates + ' ' + text
+
+      return unless updates
       $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
       $timeout ->
         $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
