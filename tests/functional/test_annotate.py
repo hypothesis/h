@@ -22,9 +22,10 @@ class TestAnnotation(SeleniumTestCase):
 
         # switch over to the annotator pane and click to save
         with Annotator(driver):
-            note = driver.find_element_by_css_selector("textarea")
-            note.send_keys("test annotation")
-            driver.find_element_by_css_selector("button").click()
+            annotation = driver.find_element_by_class_name('annotation')
+            body = driver.switch_to_active_element()
+            body.send_keys("test annotation")
+            annotation.find_element_by_css_selector("button").click()
 
         # go away and come back
         driver.get("http://google.com")
