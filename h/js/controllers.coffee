@@ -514,11 +514,14 @@ class App
       $scope.updater.onmessage = (msg) =>
         data = msg.data[0]
         action = msg.data[1]
+
+        p = $scope.auth.persona
+        user = "acct:" + p.username + "@" + p.provider
         unless data instanceof Array then data = [data]
         $scope.$apply =>
           for annotation in data
             if $scope.socialView.name is 'single-player'
-              unless annotation.user is $scope.auth.persona
+              unless annotation.user is user
                 continue
 
             check = annotator.threading.getContainer annotation.id
