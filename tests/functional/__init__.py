@@ -60,6 +60,8 @@ class SeleniumTestCase(unittest.TestCase):
             self.driver = webdriver.Firefox()
             self.driver.implicitly_wait(30)
 
+        self.driver.maximize_window()
+
         self.verificationErrors = []
         self.accept_next_alert = True
 
