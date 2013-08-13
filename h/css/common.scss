@@ -1093,7 +1093,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   background: none;
   clear: both;
   margin-top: .2em;
-  margin-bottom: .5em;
+  // margin-bottom: .2em;
 
   .tagit-close {
     cursor: pointer;
@@ -1106,15 +1106,23 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
   .text-icon { display: none; }
 
-  input { float: left; }
+  input { 
+    float: left;
+    position: relative;
+    bottom: 7px; 
+  }
 
   li {
     cursor: pointer;
     display: block;
     float: left;
-    margin: .1em;
-    padding: .1em 1.2em .1em .3em;
+    margin: .6em .2em;
+    padding: .01em 1.3em .01em .3em;
     position: relative;
+    font-size: 12px;
+    opacity:0.7;
+
+    &:hover { opacity: 1; }
 
     & + li { margin-left: .1em; }
   }
