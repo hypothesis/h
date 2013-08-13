@@ -482,7 +482,7 @@ class App
 
     $scope.initUpdater = ->
       $scope.new_updates = 0
-      path = "#{$scope.baseUrl}/__streamer__"
+      path = "#{$scope.baseUrl}__streamer__"
 
       # Collect all uris we should watch
       href = annotator.plugins.Store.options.loadFromSearch.uri
