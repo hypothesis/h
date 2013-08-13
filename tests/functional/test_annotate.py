@@ -13,7 +13,6 @@ class TestAnnotation(SeleniumTestCase):
         driver.get(self.base_url + "/")
 
         # wait a few seconds for the server to warm up & login
-        time.sleep(3)
         self.login()
 
         # highlight the first paragraph and click the pen to annotate it
@@ -30,7 +29,6 @@ class TestAnnotation(SeleniumTestCase):
         # go away and come back
         driver.get("http://google.com")
         driver.get(self.base_url + "/")
-        time.sleep(3)
 
         # make sure the heatmap shows our annotation
         with Annotator(driver):

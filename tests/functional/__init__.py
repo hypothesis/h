@@ -138,7 +138,7 @@ class Annotator():
         self.driver = driver
 
     def __enter__(self):
-        frame = self.driver.find_elements_by_tag_name('iframe')[0]
+        frame = self.driver.find_element_by_class_name('annotator-frame')
         self.driver.switch_to_frame(frame)
 
     def __exit__(self, type, value, traceback):
