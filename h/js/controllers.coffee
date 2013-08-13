@@ -482,7 +482,12 @@ class App
 
     $scope.initUpdater = ->
       $scope.new_updates = 0
-      path = "#{$scope.baseUrl}__streamer__"
+      # Quick hack until we unify all the routes.
+      # We need to eliminate the distinction between the app and the site
+      # because it's not useful. The site is the app, stupid!
+      # Then everything will be relative to the same base.
+      path = $scope.baseUrl.replace(/\/\w+\/$/, '/')
+      path = "#{path}__streamer__"
 
       # Collect all uris we should watch
       href = annotator.plugins.Store.options.loadFromSearch.uri
