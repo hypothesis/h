@@ -16,6 +16,6 @@ class HybridAuthenticationPolicy(SessionAuthenticationPolicy):
         user = authenticator.request_user(request)
 
         if user is not None:
-            effective_principals.append(user)
+            effective_principals.append(user.id)
 
         return effective_principals
