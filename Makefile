@@ -1,6 +1,10 @@
 SHELL := bash
 PATH := bin:${PATH}
 
+clean:
+	find h/js -iname '*.js' | xargs rm
+	find h/css -iname '*.css' | xargs rm
+
 test: elasticsearch functional_test unit_test
 
 functional_test: 
