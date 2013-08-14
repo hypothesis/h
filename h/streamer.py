@@ -1,19 +1,25 @@
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
+import operator
 import traceback
 
-import requests
+from datetime import datetime, timedelta
 from urlparse import urlparse
-import operator
+
+import requests
+
+from dateutil.tz import tzutc
+
+from jsonpointer import resolve_pointer
+from jsonschema import validate
 
 from pyramid.events import subscriber
 from pyramid.security import has_permission
 
 from pyramid_sockjs.session import Session
-from jsonschema import validate
-from jsonpointer import resolve_pointer
-
-from dateutil.tz import tzutc
-from datetime import datetime, timedelta
 
 from h import events, interfaces
 

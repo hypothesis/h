@@ -3,8 +3,6 @@ from uuid import uuid1, uuid4, UUID
 
 from annotator.auth import DEFAULT_TTL
 
-from hem.interfaces import IDBSession
-
 from horus.models import (
     get_session,
     BaseModel,
@@ -150,8 +148,8 @@ def includeme(config):
 
     config.set_request_property(lib.user_property, 'user')
 
-    if not registry.queryUtility(IDBSession):
-        registry.registerUtility(Session, IDBSession)
+    if not registry.queryUtility(interfaces.IDBSession):
+        registry.registerUtility(Session, interfaces.IDBSession)
 
     if not registry.queryUtility(interfaces.IUserClass):
         registry.registerUtility(User, interfaces.IUserClass)

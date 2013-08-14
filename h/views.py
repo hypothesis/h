@@ -6,10 +6,14 @@ __all__ = [
     'RegisterController',
 ]
 
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 from pyramid.traversal import find_resource
-from pyramid import httpexceptions
 
 from horus.views import (
     AuthController,
@@ -21,7 +25,6 @@ from horus.views import (
 from h import interfaces
 from h.streamer import url_values_from_document
 
-import json
 import logging
 log = logging.getLogger(__name__)
 

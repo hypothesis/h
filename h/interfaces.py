@@ -1,4 +1,7 @@
 __all__ = [
+    'IDBSession',
+    'IUIStrings',
+
     'IUserClass',
     'IActivationClass',
     'IAnnotationClass',
@@ -17,6 +20,8 @@ __all__ = [
 ]
 
 from zope.interface import Interface
+
+from hem.interfaces import IDBSession
 
 from horus.interfaces import (
     IUserClass,
