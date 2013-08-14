@@ -146,6 +146,7 @@ class Annotator.Host extends Annotator
 
         .bind('setHighlightingMode', (ctx, value) =>
           @highlightingMode = value
+          if @highlightingMode then @adder.hide()
           this.setPersistentHighlights()
         )
 
