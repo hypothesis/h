@@ -3,10 +3,26 @@
   <li>
     <ul>
       <li ng-repeat="thread in threads"
-        class="stream-list summary">
+          ng-mouseenter="focus(thread.message)"
+          ng-mouseleave="focus()"
+          class="stream-list summary">
         <!-- Thread view -->
-        <div data-recursive="" class="paper thread">
+        <div data-recursive="" class="paper thread"
+             ng-click="toggleCollapsed($event)"
+             ng-init="collapsed = ann.info.show_quote[thread.message.id]">
           <!-- Annotation -->
+
+            <!-- Excerpts -->
+            <div class="excerpt"
+                 ng-repeat="target in thread.message.target"
+                 ng-hide="collapsed">
+              <blockquote ng-bind-html-unsafe="target.highlightQuote" ng-hide="diff" />
+              <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
+              <div class="small pull-right" ng-show="target.diffHTML">
+                <input type="checkbox" ng-model="diff">Show differences</input>
+              </div>
+            </div>
+
             <!--"Load more replies" label for the top -->
             <a href=""
                class="load-more"
