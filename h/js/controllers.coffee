@@ -603,6 +603,9 @@ class Annotation
         $window.alert "You can not make this annotation public without adding some text, or at least a tag."
         return
 
+      if $scope.action is 'edit'
+        $scope.rebuildHighlightText()
+
       $scope.editing = false
       drafts.remove annotation
 
@@ -708,6 +711,13 @@ class Annotation
       $event.stopPropagation()
       $scope.shared = not $scope.shared
       $scope.toggle()
+
+    $scope.rebuildHighlightText = ->
+      $scope.model.$modelValue.highlightText = $scope.model.$modelValue.text
+      for regexp in annotator.text_regexp
+        $scope.model.$modelValue.highlightText =
+          $scope.model.$modelValue.highlightText.replace regexp, annotator.highlighter
+
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
@@ -843,6 +853,9 @@ class Search
       for token in $scope.text_tokens
         regexp = new RegExp(token,"ig")
         $scope.text_regexp.push regexp
+      # Saving the regexps and higlighter to the annotator for highlighttext regeneration
+      annotator.text_regexp = $scope.text_regexp
+      annotator.highlighter = $scope.highlighter
 
       threads = []
       $scope.render_order = {}
