@@ -305,24 +305,31 @@ def after_action(event):
 
         manager = request.get_sockjs_manager()
         for session in manager.active_sessions():
-            if not has_permission('read', annotation, session.request):
-                continue
+            try:
+                if not has_permission('read', annotation, session.request):
+                    continue
 
-            registry = session.request.registry
-            store = registry.queryUtility(interfaces.IStoreClass)(session.request)
-            if 'references' in annotation:
-                parent = store.read(annotation['references'][-1])
-                if 'text' in parent:
-                    annotation['quote'] = parent['text']
+                registry = session.request.registry
+                store = registry.queryUtility(interfaces.IStoreClass)(session.request)
+                if 'references' in annotation:
+                    parent = store.read(annotation['references'][-1])
+                    if 'text' in parent:
+                        annotation['quote'] = parent['text']
 
 
-            if not session.filter.match(annotation, action):
-                continue
+                if not session.filter.match(annotation, action):
+                    continue
 
-            session.send([annotation, action])
+                session.send([annotation, action])
+            except:
+                log.info(traceback.format_exc())
+                log.info('An error occured during the match checking or the annotation sending phase. ')
+                log.info(str(annotation))
+                log.info(str(session.filter))
     except:
         log.info(traceback.format_exc())
-        log.info('Failed to parse filter:' + str(event))
+        log.info('Unexpected error occurred in after_action(): ' + str(event))
+
 
 def includeme(config):
     config.include('pyramid_sockjs')
