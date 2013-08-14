@@ -763,6 +763,8 @@ class Viewer
 class Search
   this.$inject = ['$filter', '$location', '$routeParams', '$scope', 'annotator']
   constructor: ($filter, $location, $routeParams, $scope, annotator) ->
+    {provider, threading} = annotator
+
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
     $scope.filter_orderBy = $filter('orderBy')
     $scope.render_order = {}
@@ -810,6 +812,15 @@ class Search
         unless next in $scope.search_filter
           result = true
       result
+
+    $scope.focus = (annotation) ->
+      if angular.isArray annotation
+        highlights = (a.$$tag for a in annotation when a?)
+      else if angular.isObject annotation
+        highlights = [annotation.$$tag]
+      else
+        highlights = []
+      provider.notify method: 'setActiveHighlights', params: highlights
 
     refresh = =>
       $scope.search_filter = $routeParams.matched

@@ -3,7 +3,9 @@
   <li>
     <ul>
       <li ng-repeat="thread in threads"
-        class="stream-list summary">
+          ng-mouseenter="focus(thread.message)"
+          ng-mouseleave="focus()"
+          class="stream-list summary">
         <!-- Thread view -->
         <div data-recursive="" class="paper thread"
              ng-click="toggleCollapsed($event)"
