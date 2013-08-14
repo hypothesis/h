@@ -7,7 +7,7 @@
         <!-- Thread view -->
         <div data-recursive="" class="paper thread"
              ng-click="toggleCollapsed($event)"
-             ng-init="collapsed = true">
+             ng-init="collapsed = ann.info.show_quote[thread.message.id]">
           <!-- Annotation -->
 
             <!-- Excerpts -->

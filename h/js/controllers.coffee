@@ -274,6 +274,8 @@ class App
               text_tokens = searchItem.attributes.value.split ' '
             if searchItem.attributes.category is 'tag'
               tag_search = searchItem.attributes.value.toLowerCase()
+            if searchItem.attributes.category is 'quote'
+              quote_search = searchItem.attributes.value.toLowerCase()
 
           if whole_document
             annotations = annotator.plugins.Store.annotations
@@ -295,17 +297,28 @@ class App
                   unless annotation.text?
                     matches = false
                     break
-
                   for token in text_tokens
                     unless annotation.text.toLowerCase().indexOf(token.toLowerCase()) > -1
                       matches = false
                       break
-
+                when 'quote'
+                  # Reply annotations does not have a quote in this aspect
+                  if annotation.references?
+                      matches = false
+                      break
+                  else
+                    found = false
+                    for target in annotation.target
+                      if target.quote? and target.quote.toLowerCase().indexOf(quote_search) > -1
+                        found = true
+                        break
+                    unless found
+                      matches = false
+                      break
                 when 'tag'
                   unless annotation.tags?
                     matches = false
                     break
-
                   found = false
                   for tag in annotation.tags
                     if tag_search is tag.toLowerCase()
@@ -368,12 +381,13 @@ class App
             whole_document : whole_document
             matched : matched
             in_body_text: in_body_text
+            quote: quote_search
           $location.path('/page_search').search(search)
           $rootScope.$digest()
 
         facetMatches: (callback) =>
           if $scope.show_search
-            return callback ['text','tag','scope', 'group','time','user'], {preserveOrder: true}
+            return callback ['text','tag', 'quote', 'scope', 'group','time','user'], {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
             when 'group' then callback ['Public', 'Private']
@@ -755,6 +769,7 @@ class Search
     $scope.render_pos = {}
     $scope.ann_info =
       shown : {}
+      show_quote: {}
       more_top : {}
       more_bottom : {}
       more_top_num : {}
@@ -803,6 +818,7 @@ class Search
       # Create the regexps for highlighting the matches inside the annotations' bodies
       $scope.text_tokens = $routeParams.in_body_text.split ' '
       $scope.text_regexp = []
+      $scope.quote = $routeParams.quote
       for token in $scope.text_tokens
         regexp = new RegExp(token,"ig")
         $scope.text_regexp.push regexp
@@ -841,6 +857,7 @@ class Search
       # - add highlights
       # - populate the top/bottom show more links
       # - decide that by default the annotation is shown or hidden
+      # - Open detail mode for quote hits
       for thread in threads
         thread.message.highlightText = thread.message.text
         if thread.message.id in $scope.search_filter
@@ -852,6 +869,12 @@ class Search
 
         $scope.ann_info.more_top[thread.message.id] = setMoreTop(thread.message.id, thread.message)
         $scope.ann_info.more_bottom[thread.message.id] = setMoreBottom(thread.message.id, thread.message)
+
+        if $scope.quote?.length > 0
+          $scope.ann_info.show_quote[thread.message.id] = true
+        else
+          $scope.ann_info.show_quote[thread.message.id] = false
+
 
         children = thread.flattenChildren()
         if children?
@@ -866,6 +889,9 @@ class Search
 
             $scope.ann_info.more_top[child.id] = setMoreTop(thread.message.id, child)
             $scope.ann_info.more_bottom[child.id] = setMoreBottom(thread.message.id, child)
+
+            $scope.ann_info.show_quote[child.id] = false
+
 
       # Calculate the number of hidden annotations for <x> more labels
       for threadid, order of $scope.render_order
