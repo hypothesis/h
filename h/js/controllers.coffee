@@ -118,7 +118,12 @@ class App
 
         # Leave Highlighting mode when logging out
         if $scope.highlightingMode
+          # Because of logging out, we must leave Highlighting Mode.
           $scope.toggleHighlightingMode()
+          # No need to reload annotations after login, since the Social View
+          # change (caused by leaving Highlighting Mode) will trigger
+          # a reload anyway.
+          $scope.skipAuthChangeReload = true
 
     $scope.$watch 'auth.persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
@@ -144,7 +149,8 @@ class App
         plugins.Permissions.setUser(null)
         delete plugins.Auth
 
-      $scope.reloadAnnotations()
+      $scope.reloadAnnotations() unless $scope.skipAuthChangeReload
+      delete $scope.skipAuthChangeReload
 
       if newValue? and annotator.ongoing_edit
         $timeout =>
@@ -230,6 +236,9 @@ class App
       unless plugins.Auth? and plugins.Auth.haveValidToken()
         # If we are not logged in, start the auth process
         $scope.ongoingHighlightSwitch = true
+        # No need to reload annotations upon login, since Social View change
+        # will trigger a reload anyway.
+        $scope.skipAuthChangeReload = true
         annotator.show()
         $scope.sheet.collapsed = false
         $scope.sheet.tab = 'login'
