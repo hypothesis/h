@@ -603,8 +603,7 @@ class Annotation
         $window.alert "You can not make this annotation public without adding some text, or at least a tag."
         return
 
-      if $scope.action is 'edit'
-        $scope.rebuildHighlightText()
+      $scope.rebuildHighlightText()
 
       $scope.editing = false
       drafts.remove annotation
