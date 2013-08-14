@@ -819,6 +819,7 @@ class Search
       $scope.text_tokens = $routeParams.in_body_text.split ' '
       $scope.text_regexp = []
       $scope.quote = $routeParams.quote
+      $scope.quote_regexp = new RegExp($scope.quote ,"ig")
       for token in $scope.text_tokens
         regexp = new RegExp(token,"ig")
         $scope.text_regexp.push regexp
@@ -872,6 +873,8 @@ class Search
 
         if $scope.quote?.length > 0
           $scope.ann_info.show_quote[thread.message.id] = true
+          for target in thread.message.target
+            target.highlightQuote = target.quote.replace $scope.quote_regexp, $scope.highlighter
         else
           $scope.ann_info.show_quote[thread.message.id] = false
 
