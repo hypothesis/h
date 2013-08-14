@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from urlparse import urlparse
 
 import requests
+import transaction
 
 from dateutil.tz import tzutc
 
@@ -256,8 +257,10 @@ class FilterHandler(object):
 class StreamerSession(Session):
     def on_open(self):
         self.filter = {}
+        transaction.commit()  # Release the database transaction
 
     def on_message(self, msg):
+        transaction.begin()
         try:
             payload = json.loads(msg)
 
@@ -285,7 +288,10 @@ class StreamerSession(Session):
         except:
             log.info(traceback.format_exc())
             log.info('Failed to parse filter:' + str(msg))
+            transaction.abort()
             self.close()
+        else:
+            transaction.commit()
 
 
 @subscriber(events.AnnotationEvent)
