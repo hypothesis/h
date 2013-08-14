@@ -56,6 +56,17 @@ function setPageAction(tabId, value) {
 }
 
 
+function onInstalled() {
+  chrome.tabs.query({}, function (tabs) {
+    for (var i in tabs) {
+      var tabId = tabs[i].id
+        , tabState = state(tabId) || 'sleeping'
+      setPageAction(tabId, tabState)
+    }
+  })
+}
+
+
 function onPageAction(tab) {
   var newState
 
@@ -92,6 +103,7 @@ function onTabUpdated(tabId, info) {
   }
 }
 
+chrome.runtime.onInstalled.addListener(onInstalled)
 chrome.pageAction.onClicked.addListener(onPageAction)
 chrome.tabs.onCreated.addListener(onTabCreated)
 chrome.tabs.onRemoved.addListener(onTabRemoved)
