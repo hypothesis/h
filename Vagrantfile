@@ -25,7 +25,7 @@ $elversion="elasticsearch-0.20.6"
 
 $script = <<SCRIPT
   apt-get update -qq
-  apt-get -y install python-{dev,pip,virtualenv,software-properties} git libpq-dev openjdk-7-jre
+  apt-get -y install build-essential python-{dev,pip,virtualenv,software-properties} git libpq-dev openjdk-7-jre
   add-apt-repository ppa:chris-lea/node.js
   apt-get update -qq
   apt-get -y install nodejs
