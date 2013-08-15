@@ -896,8 +896,9 @@ class Search
         thread.message.highlightText = thread.message.text
         if thread.message.id in $scope.search_filter
           $scope.ann_info.shown[thread.message.id] = true
-          for regexp in $scope.text_regexp
-            thread.message.highlightText = thread.message.highlightText.replace regexp, $scope.highlighter
+          if thread.message.text?
+            for regexp in $scope.text_regexp
+              thread.message.highlightText = thread.message.highlightText.replace regexp, $scope.highlighter
         else
           $scope.ann_info.shown[thread.message.id] = false
 
