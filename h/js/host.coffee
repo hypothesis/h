@@ -329,6 +329,8 @@ class Annotator.Host extends Annotator
       # Tell the sidebar about the new annotation
       @plugins.Bridge.injectAnnotation annotation
 
+      # Switch view to show the new annotation
+      this.showViewer [ annotation ]
     else
       super event
 
