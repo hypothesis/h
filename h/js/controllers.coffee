@@ -910,6 +910,8 @@ class Search
           for target in thread.message.target
             target.highlightQuote = target.quote.replace $scope.quote_regexp, $scope.highlighter
         else
+          for target in thread.message.target
+            target.highlightQuote = target.quote
           $scope.ann_info.show_quote[thread.message.id] = false
 
 
