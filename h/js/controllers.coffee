@@ -712,10 +712,11 @@ class Annotation
       $scope.toggle()
 
     $scope.rebuildHighlightText = ->
-      $scope.model.$modelValue.highlightText = $scope.model.$modelValue.text
-      for regexp in annotator.text_regexp
-        $scope.model.$modelValue.highlightText =
-          $scope.model.$modelValue.highlightText.replace regexp, annotator.highlighter
+      if annotator.text_regexp?
+        $scope.model.$modelValue.highlightText = $scope.model.$modelValue.text
+        for regexp in annotator.text_regexp
+          $scope.model.$modelValue.highlightText =
+            $scope.model.$modelValue.highlightText.replace regexp, annotator.highlighter
 
 
 class Editor
