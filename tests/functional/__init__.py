@@ -17,6 +17,7 @@ API.
 
 import os
 import json
+import time
 import unittest
 
 import pyes
@@ -191,6 +192,7 @@ class Annotator():
         self.driver.switch_to_frame(frame)
         if collapsed:
             self.driver.find_element_by_css_selector("div.tri").click()
+            time.sleep(0.5)
 
     def __exit__(self, typ, value, traceback):
         self.driver.switch_to_default_content()
