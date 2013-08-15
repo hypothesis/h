@@ -119,6 +119,14 @@ class SeleniumTestCase(unittest.TestCase):
 
             form.submit()
 
+    def logout(self):
+        driver = self.driver
+        with Annotator(driver):
+            picker = driver.find_element_by_class_name('user-picker')
+            dropdown = picker.find_element_by_class_name('dropdown-toggle')
+            dropdown.click()
+            dropdown.find_element_by_xpath("//li[position()=last()]").click()
+
     def register(self):
         "registers as test/test@example.org/test"
         driver = self.driver

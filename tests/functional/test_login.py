@@ -13,14 +13,7 @@ class TestLogin(SeleniumTestCase):
         driver.get(self.base_url + "/")
 
         self.register()
-
-        with Annotator(driver):
-            # Log out
-            picker = driver.find_element_by_class_name('user-picker')
-            dropdown = picker.find_element_by_class_name('dropdown-toggle')
-            dropdown.click()
-            dropdown.find_element_by_xpath("//li[2]").click()
-
+        self.logout()
         self.login()
 
         # Assert logged in with the right username
