@@ -16,7 +16,6 @@ def includeme(config):
 
     # Include the rest of the application
     config.include('h.api')
-    config.include('h.app')
     config.include('h.assets')
     config.include('h.layouts')
     config.include('h.panels')
