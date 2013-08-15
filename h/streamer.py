@@ -276,15 +276,22 @@ class StreamerSession(Session):
                 store = registry.queryUtility(interfaces.IStoreClass)(request)
                 annotations = store.search_raw(query.query)
 
+                send_annotations = []
                 for annotation in annotations:
-                    annotation.update(url_values_from_document(annotation))
-                    if 'references' in annotation:
-                        parent = store.read(annotation['references'][-1])
-                        if 'text' in parent:
-                            annotation['quote'] = parent['text']
+                    try:
+                        annotation.update(url_values_from_document(annotation))
+                        if 'references' in annotation:
+                            parent = store.read(annotation['references'][-1])
+                            if 'text' in parent:
+                                annotation['quote'] = parent['text']
+                        send_annotations.append(annotation)
+                    except:
+                        log.info(traceback.format_exc())
+                        log.info("Error while updating the annotation's properties:" + str(annotation))
+
                 # Finally send filtered annotations
                 if len(annotations) > 0:
-                    self.send([annotations, 'past'])
+                    self.send([send_annotations, 'past'])
         except:
             log.info(traceback.format_exc())
             log.info('Failed to parse filter:' + str(msg))
