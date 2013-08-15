@@ -106,6 +106,7 @@ class Stream(BaseController):
     def __html__(self):
         return self.request.context
 
+
 def includeme(config):
     config.add_view(
         'horus.views.AuthController',
