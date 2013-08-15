@@ -106,10 +106,7 @@ class SeleniumTestCase(unittest.TestCase):
             # Find the authentication form sheet
             auth = driver.find_element_by_class_name('sheet')
 
-            # Switch to the registration tab
-            auth.find_element_by_link_text("Sign in").click()
-
-            # Get the registration pane
+            # Find the login pane
             form = auth.find_element_by_name('login')
 
             username = form.find_element_by_name('username')

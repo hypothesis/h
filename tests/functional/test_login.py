@@ -23,6 +23,7 @@ class TestLogin(SeleniumTestCase):
 
         self.login()
 
+        # Assert logged in with the right username
         with Annotator(driver):
             picker = driver.find_element_by_class_name('user-picker')
             dropdown = picker.find_element_by_class_name('dropdown-toggle')
