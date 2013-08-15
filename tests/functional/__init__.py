@@ -183,10 +183,17 @@ class Annotator():
     Annotator iframe.
     """
 
+    g_state = dict()
+
     def __init__(self, driver):
         self.driver = driver
 
     def __enter__(self):
+        # Do nothing if nested
+        count = self.g_state.setdefault(self.driver, 0)
+        self.g_state[self.driver] = count + 1
+        if count > 0: return
+
         frame = self.driver.find_element_by_class_name('annotator-frame')
         collapsed = 'annotator-collapsed' in frame.get_attribute('class')
         self.driver.switch_to_frame(frame)
@@ -195,4 +202,7 @@ class Annotator():
             time.sleep(0.5)
 
     def __exit__(self, typ, value, traceback):
-        self.driver.switch_to_default_content()
+        count = self.g_state[self.driver]
+        if count == 1:
+            del self.g_state[self.driver]
+            self.driver.switch_to_default_content()
