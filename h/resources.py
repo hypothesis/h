@@ -229,6 +229,7 @@ class UserStreamFactory(BaseResource):
         if user is not None:
             return Stream(request)
 
+
 class TagStreamFactory(BaseResource):
     def __getitem__(self, key):
         request = self.request
