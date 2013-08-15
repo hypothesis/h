@@ -20,7 +20,13 @@ class TestLogin(SeleniumTestCase):
         with Annotator(driver):
             picker = driver.find_element_by_class_name('user-picker')
             dropdown = picker.find_element_by_class_name('dropdown-toggle')
-            self.assertEqual(dropdown.text, "test")
+            # Some bugs were fixed in selenium 2.35 + FF23 combo
+            # Unfortunately, that means we need test both options
+            try:
+                self.assertEqual(dropdown.text, "test")
+            except AssertionError:
+                self.assertEqual(dropdown.text, "test/localhost")
+
 
 if __name__ == "__main__":
     unittest.main()
