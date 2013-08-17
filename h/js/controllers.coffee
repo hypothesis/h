@@ -648,6 +648,7 @@ class Annotation
       $scope.editing = true
       $scope.origText = $scope.model.$modelValue.text
       $scope.origTags = $scope.model.$modelValue.tags
+      drafts.add $scope.model.$modelValue
 
     $scope.delete = ->
       annotation = $scope.thread.message
