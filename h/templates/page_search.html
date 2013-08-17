@@ -9,13 +9,13 @@
         <!-- Thread view -->
         <div data-recursive="" class="paper thread"
              ng-click="toggleCollapsed($event)"
-             ng-init="collapsed = ann.info.show_quote[thread.message.id]">
+             ng-init="collapsed = ann_info.show_quote[thread.message.id]">
           <!-- Annotation -->
 
             <!-- Excerpts -->
             <div class="excerpt"
                  ng-repeat="target in thread.message.target"
-                 ng-hide="collapsed">
+                 ng-show="collapsed">
               <blockquote ng-bind-html-unsafe="target.highlightQuote" ng-hide="diff" />
               <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
               <div class="small pull-right" ng-show="target.diffHTML">
@@ -44,7 +44,7 @@
                  ng-model="$parent.thread.message"
                  mode="search"
                  replies="{{!ann_info.more_bottom[thread.message.id]}}"
-                 ng-show="$parent.ann_info.shown[thread.message.id]"/>
+                 ng-show="$parent.ann_info.shown[thread.message.id] == null || $parent.ann_info.shown[thread.message.id]"/>
 
             <!--"Load more replies" label for the bottom -->
             <a href=""
