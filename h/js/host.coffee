@@ -19,6 +19,9 @@ class Annotator.Host extends Annotator
     tick: false
 
   constructor: (element, options) ->
+    # Add a character to the end for anchoring the comments
+    $("<div>.</div>").addClass("annotator-comment-anchor").appendTo element
+
     Gettext.prototype.parse_locale_data annotator_locale_data
     super
 
@@ -148,6 +151,24 @@ class Annotator.Host extends Annotator
           @highlightingMode = value
           if @highlightingMode then @adder.hide()
           this.setPersistentHighlights()
+        )
+
+        .bind('addComment', (ctx) =>
+          console.log "Host: should add comment."
+
+          sel = @selectedRanges   # Save the selection
+          # TODO: should also save the state of the adder button, too.
+
+          @selectedRanges = []    # Nuke the selection
+          # TODO: actually, it should not be []; it should contained
+          # the last character of @wrapper, somehow market for being
+          # left out from the quote, and also should not be saved
+
+          this.onAdderClick()     # Open editor (with 0 targets)
+          setTimeout (=>          # At some point, later
+            @selectedRanges = sel # restore the selection
+            # TODO: should also call @adder.show() if was previously shown
+          ), 200
         )
 
         .bind('getHref', => this.getHref())
@@ -333,6 +354,36 @@ class Annotator.Host extends Annotator
       this.showViewer [ annotation ]
     else
       super event
+
+  createFakeCommentRange: ->
+    posSelector =
+      type: "TextPositionSelector"
+      start: @domMapper.corpus.length - 1
+      end: @domMapper.corpus.length
+
+    anchor = this.findAnchorFromPositionSelector selector: [posSelector]
+
+    anchor.range
+
+  # Override for setupAnnotation
+  setupAnnotation: (annotation) ->
+    # Set up annotation as usual     
+    annotation = super(annotation)
+
+    # Does it have proper highlights?
+    unless annotation.highlights?.length
+      # No highlights means that this is a comment,
+      # or re-attachment has failed.
+
+      # Get a fake range at the end of the document, and highlight it
+      range = this.createFakeCommentRange()
+      hl = this.highlightRange range
+
+      # Register this highlight for the annotation, and vica versa
+      annotation.highlights.push hl
+      $(hl).data('annotation', annotation)
+
+    annotation
 
   # When clicking on a highlight in highlighting mode,
   # set @noBack to true to prevent the sidebar from closing
