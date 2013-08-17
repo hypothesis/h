@@ -39,13 +39,11 @@
     <!-- User -->
     <strong ng-switch-default>
       <span class="user">{{model.$viewValue.user | userName}}      
-      <span class="small vis-icon"
-            ng-show="form.privacy.$viewValue != 'Public'"></span>
-      <span class="small highlight-icon"
-            ng-hide="model.$viewValue.text || editing || model.$viewValue.deleted || model.$viewValue.tags.length"></span>
+        <span class="small vis-icon"
+              ng-show="form.privacy.$viewValue != 'Public'"></span>
+        <span class="small highlight-icon"
+              ng-hide="model.$viewValue.text || editing || model.$viewValue.deleted || model.$viewValue.tags.length"></span>
       </span>
-
-
     </strong>
   </header>
 
