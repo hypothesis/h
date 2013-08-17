@@ -154,15 +154,13 @@ class Annotator.Host extends Annotator
         )
 
         .bind('addComment', (ctx) =>
-          console.log "Host: should add comment."
-
           sel = @selectedRanges   # Save the selection
           # TODO: should also save the state of the adder button, too.
 
-          @selectedRanges = []    # Nuke the selection
-          # TODO: actually, it should not be []; it should contained
-          # the last character of @wrapper, somehow market for being
-          # left out from the quote, and also should not be saved
+          # Nuke the selection, since we won't be using that.
+          # We will attach this to the end of the document.
+          # Our override for setupAnnotation will add that highlight.
+          @selectedRanges = []    
 
           this.onAdderClick()     # Open editor (with 0 targets)
           setTimeout (=>          # At some point, later
