@@ -63,7 +63,7 @@ class Annotator.Host extends Annotator
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'quote', 'ranges', 'target', 'id']
+    whitelist = ['diffHTML', 'quote', 'ranges', 'target', 'id', 'references']
     this.addPlugin 'Bridge',
       origin: '*'
       window: @frame[0].contentWindow
@@ -367,9 +367,8 @@ class Annotator.Host extends Annotator
   setupAnnotation: (annotation) ->
     # Set up annotation as usual     
     annotation = super(annotation)
-
     # Does it have proper highlights?
-    unless annotation.highlights?.length
+    unless annotation.highlights?.length or annotation.references?.length
       # No highlights means that this is a comment,
       # or re-attachment has failed.
 
