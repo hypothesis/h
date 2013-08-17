@@ -400,7 +400,7 @@ class App
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
             when 'group' then callback ['Public', 'Private']
-            when 'area' then callback ['sidebar', 'document']
+            when 'scope' then callback ['sidebar', 'document']
             when 'time'
               callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
         clearSearch: (original) =>
