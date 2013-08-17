@@ -356,6 +356,9 @@ class Annotator.Host extends Annotator
     # Tell sidebar to show the viewer for these annotations
     this.showViewer annotations
 
+    # Make sure the sidebar is open
+    @panel?.notify method: 'open'
+
   addToken: (token) =>
     @api.notify
       method: 'addToken'
