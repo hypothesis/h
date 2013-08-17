@@ -1129,7 +1129,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
     & + li { margin-left: .1em; }
   }
-  // li.tagit-choice { margin-top: .33em; }
+  li.tagit-choice { margin-top: .33em; }
 
   &[readonly] {
     .tagit-new, .tagit-close { display: none; }
