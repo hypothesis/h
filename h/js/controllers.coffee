@@ -32,6 +32,7 @@ class App
       $location.search('id', null).replace()
       dynamicBucket = true
       annotator.showViewer()
+      annotator.show()
       heatmap.publish 'updated'
       $scope.$digest()
 
@@ -95,6 +96,7 @@ class App
             dynamicBucket = false
             $location.search({'id' : null })
             annotator.showViewer heatmap.buckets[bucket]
+            annotator.show()
             $scope.$digest()
 
     $scope.$watch 'sheet.collapsed', (newValue) ->
