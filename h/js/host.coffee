@@ -368,9 +368,9 @@ class Annotator.Host extends Annotator
     # Set up annotation as usual     
     annotation = super(annotation)
     # Does it have proper highlights?
-    unless annotation.highlights?.length or annotation.references?.length
-      # No highlights means that this is a comment,
-      # or re-attachment has failed.
+    unless annotation.highlights?.length or annotation.references?.length or annotation.target?.length
+      # No highlights and no references means that this is a comment,
+      # or re-attachment has failed, but we'll skip orphaned annotations.
 
       # Get a fake range at the end of the document, and highlight it
       range = this.createFakeCommentRange()
