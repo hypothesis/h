@@ -256,7 +256,7 @@ class App
         params: $scope.highlightingMode
 
     $scope.createUnattachedAnnotation = ->
-      console.log "Should create unattached annotation"
+      provider.notify method: 'addComment'
 
     # Searchbar initialization
     @user_filter = $filter('userName')

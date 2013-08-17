@@ -479,6 +479,10 @@ blockquote {
   @include fonticon("\e01a", left);
 }
 
+.comment-icon {
+  @include fonticon("\e01e", left);
+}
+
 .launch-icon {
   @include fonticon("\2a", left);
 }
@@ -504,7 +508,7 @@ blockquote {
   // text-shadow: -0.1em -0.1em #999;
 }
 
-.comment-icon {
+.commenter-icon {
   @include fonticon("\e01e", left);
   color: rgb(211, 211, 211);
   font-size: 18px;
