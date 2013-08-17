@@ -380,7 +380,7 @@ class Annotator.Host extends Annotator
       hl = this.highlightRange range
 
       # Register this highlight for the annotation, and vica versa
-      annotation.highlights.push hl
+      $.merge annotation.highlights, hl
       $(hl).data('annotation', annotation)
 
     annotation
