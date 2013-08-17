@@ -41,11 +41,11 @@
                             ng-src="{{annotation.favicon_link}}"/>
                     </div>
                     <div class="pull-left paper annotation-header-width"
-                         ng-show="annotation.text.length">
+                         ng-show="annotation.text.length && annotation.quote.length">
                       {{annotation.quote | elide:20}}
                     </div>
                     <div class="pull-left paper annotation-header-width strech"
-                         ng-hide="annotation.text.length">
+                         ng-hide="annotation.text.length || !annotation.quote.length">
                       {{annotation.quote}}
                     </div>
                     <div class="paper annotation-header-width"
