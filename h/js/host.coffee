@@ -155,7 +155,7 @@ class Annotator.Host extends Annotator
 
         .bind('addComment', (ctx) =>
           sel = @selectedRanges   # Save the selection
-          # TODO: should also save the state of the adder button, too.
+          adderShown = @adder.is ":visible" # Save the state of adder icon
 
           # Nuke the selection, since we won't be using that.
           # We will attach this to the end of the document.
@@ -165,7 +165,7 @@ class Annotator.Host extends Annotator
           this.onAdderClick()     # Open editor (with 0 targets)
           setTimeout (=>          # At some point, later
             @selectedRanges = sel # restore the selection
-            # TODO: should also call @adder.show() if was previously shown
+            if adderShown then @adder.show() # restore the state of addder icon
           ), 200
         )
 
