@@ -19,9 +19,6 @@ class Annotator.Host extends Annotator
     tick: false
 
   constructor: (element, options) ->
-    # Add a character to the end for anchoring the comments
-    $("<div>.</div>").addClass("annotator-comment-anchor").appendTo element
-
     Gettext.prototype.parse_locale_data annotator_locale_data
     super
 

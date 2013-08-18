@@ -101,14 +101,6 @@
   display: none;
 }
 
-// Style for the extra character used to anchor comments to.
-.annotator-comment-anchor {
-  opacity: 0;
-  position: relative;
-  top: -3em;
-}
-
-
 //IFRAME////////////////////////////////
 .annotator-frame {
   @include reset-box-model;
