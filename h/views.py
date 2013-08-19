@@ -76,7 +76,7 @@ class AnnotationController(BaseController):
 
         return {'annotation': json.dumps(d)}
 
-    @view_config(accept='application/json', renderer='json')
+    @view_config(renderer='json')
     def __call__(self):
         request = self.request
         request.response.content_type = 'application/json'
@@ -85,7 +85,6 @@ class AnnotationController(BaseController):
 
 
 @view_defaults(
-    accept='application/json',
     context='h.resources.AppFactory',
     layout='app',
     renderer='json'
@@ -259,7 +258,7 @@ class Streamer(BaseController):
     def __html__(self):
         return self.request.context
 
-    @view_config(accept='application/json', renderer='json')
+    @view_config(renderer='json')
     def __call__(self):
         request = self.request
         request.response.content_type = 'application/json'
