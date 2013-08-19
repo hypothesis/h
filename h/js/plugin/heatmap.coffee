@@ -2,6 +2,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # prototype constants
   BUCKET_THRESHOLD_PAD: 40
   BUCKET_SIZE: 50
+  BOTTOM_CORRECTION: 14
 
 
   # heatmap svg skeleton
@@ -166,15 +167,24 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     # Add the scroll buckets
     @buckets.unshift [], above, []
+    @buckets.push below
     # Add comment bucket
-    @buckets.push comments
-    @buckets.push below, []
+    @buckets.push comments, []
 
+    # Scroll up
     @index.unshift 0, @BUCKET_THRESHOLD_PAD,
       (@BUCKET_THRESHOLD_PAD + @BUCKET_SIZE)
-    # For comment bucket
+    # Scroll down
     @index.push $(window).height() - @BUCKET_SIZE
-    @index.push $(window).height() - @BUCKET_SIZE, $(window).height()
+    # If there are items in the comment bucket then it has be in the bottom
+    # and possible lower bucket has to be slightly above it
+    # if there are no comments, than the lower bucket has to travel lower to the page
+    if comments.length
+      @index.push $(window).height() - @BUCKET_SIZE + @BOTTOM_CORRECTION*2
+      @index.push $(window).height() + @BUCKET_SIZE - @BOTTOM_CORRECTION*3
+    else
+      @index.push $(window).height() + @BOTTOM_CORRECTION
+      @index.push $(window).height() + @BOTTOM_CORRECTION
 
     # Calculate the total count for each bucket (including replies) and the
     # maximum count.
@@ -252,11 +262,13 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     .classed('upper', @isUpper)
     .classed('lower', @isLower)
+    .classed('commenter', @isComment)
 
     .style 'display', (d) =>
       if (@buckets[d].length is 0) then 'none' else ''
 
     this.publish('updated')
 
-  isUpper: (i) => i == 1
-  isLower: (i) => i == @index.length - 2
+  isUpper:   (i) => i == 1
+  isLower:   (i) => i == @index.length - 3
+  isComment: (i) => i == @index.length - 2
