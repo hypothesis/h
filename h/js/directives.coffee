@@ -373,4 +373,3 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('repeatAnim', repeatAnim)
   .directive('notification', notification)
 
-
