@@ -77,7 +77,7 @@ class AppFactory(BaseResource):
     def embed(self):
         env = {
             pkg: json.dumps(self.request.webassets_env[pkg].urls())
-            for pkg in ['inject', 'jquery', 'raf']
+            for pkg in ['host', 'jquery', 'raf']
         }
         env['app'] = "'%s'" % self.request.resource_url(self)
         return env

@@ -252,11 +252,14 @@ site = Bundle(
 )
 
 
-# The inject is a script which loads the annotator in an iframe
-# and sets up an RPC channel for cross-domain communication between the
-# the frame and its parent window. It then makes cretain annotator methods
-# available via the bridge plugin.
-inject = Bundle(
+# The injects are bundles intended to be loaded into pages for bootstrapping
+# the application. They set up RPC channels for cross-domain communication
+# between frames participating in annotation by using the annotator bridge
+# plugin.
+
+# The guest inject provides headless participation, making the frame responsive
+# to annotator events. It provides DomText and highlighter capabilities.
+guest = Bundle(
     domTextFamily,
     jquery,
     jschannel,
@@ -266,10 +269,29 @@ inject = Bundle(
     annotator_bridge,
     annotator_document,
     Uglify(
+        Coffee('js/guest.coffee', output='js/guest.js'),
+        output='js/guest.min.js'
+    ),
+    SCSS('css/inject.scss', depends=css_base, output='css/inject.css'),
+)
+
+# The host inject embeds the guest code with an additional controller in charge
+# of managing application widgets, such as collapsing and showing the sidebar.
+host = Bundle(
+    guest,
+    Uglify(
         Coffee('js/host.coffee', output='js/host.js'),
         output='js/host.min.js'
     ),
-    SCSS('css/inject.scss', depends=css_base, output='css/inject.css'),
+)
+
+sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),
+               output='css/sidebar.min.css')
+
+site = Bundle(
+    app,
+    SCSS('css/site.scss', depends=(css_base + css_common),
+         output='css/site.min.css'),
 )
 
 

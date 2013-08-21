@@ -5,7 +5,7 @@
 yepnope([
   {
     test: typeof(window.annotator) !== 'undefined',
-    nope: ${inject},
+    nope: ${host},
     complete: function () {
       window.annotator = null;
       var app = ${app}
