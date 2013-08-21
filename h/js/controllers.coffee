@@ -253,7 +253,7 @@ class App
         params: $scope.highlightingMode
 
     $scope.createUnattachedAnnotation = ->
-      console.log "Should create unattached annotation"
+      provider.notify method: 'addComment'
 
     # Searchbar initialization
     @user_filter = $filter('userName')
@@ -596,6 +596,12 @@ class Annotation
     $scope.save = ->
       annotation = $scope.model.$modelValue
 
+      # Forbid saving comments without a body (text or tags)
+      if not annotation.highlights?.length and not annotation.text and
+      not annotation.tags?.length and not annotation.references?.length
+        $window.alert "You can not add a comment without adding some text, or at least a tag."
+        return
+
       # Forbid the publishing of annotations
       # without a body (text or tags)
       if $scope.form.privacy.$viewValue is "Public" and
@@ -642,6 +648,7 @@ class Annotation
       $scope.editing = true
       $scope.origText = $scope.model.$modelValue.text
       $scope.origTags = $scope.model.$modelValue.tags
+      drafts.add $scope.model.$modelValue
 
     $scope.delete = ->
       annotation = $scope.thread.message

@@ -60,7 +60,7 @@ class Annotator.Host extends Annotator
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'quote', 'ranges', 'target', 'id']
+    whitelist = ['diffHTML', 'quote', 'ranges', 'target', 'id', 'references']
     this.addPlugin 'Bridge',
       origin: '*'
       window: @frame[0].contentWindow
@@ -148,6 +148,22 @@ class Annotator.Host extends Annotator
           @highlightingMode = value
           if @highlightingMode then @adder.hide()
           this.setPersistentHighlights()
+        )
+
+        .bind('addComment', (ctx) =>
+          sel = @selectedRanges   # Save the selection
+          adderShown = @adder.is ":visible" # Save the state of adder icon
+
+          # Nuke the selection, since we won't be using that.
+          # We will attach this to the end of the document.
+          # Our override for setupAnnotation will add that highlight.
+          @selectedRanges = []    
+
+          this.onAdderClick()     # Open editor (with 0 targets)
+          setTimeout (=>          # At some point, later
+            @selectedRanges = sel # restore the selection
+            if adderShown then @adder.show() # restore the state of addder icon
+          ), 200
         )
 
         .bind('getHref', => this.getHref())
@@ -333,6 +349,35 @@ class Annotator.Host extends Annotator
       this.showViewer [ annotation ]
     else
       super event
+
+  createFakeCommentRange: ->
+    posSelector =
+      type: "TextPositionSelector"
+      start: @domMapper.corpus.length - 1
+      end: @domMapper.corpus.length
+
+    anchor = this.findAnchorFromPositionSelector selector: [posSelector]
+
+    anchor.range
+
+  # Override for setupAnnotation
+  setupAnnotation: (annotation) ->
+    # Set up annotation as usual     
+    annotation = super(annotation)
+    # Does it have proper highlights?
+    unless annotation.highlights?.length or annotation.references?.length or annotation.target?.length
+      # No highlights and no references means that this is a comment,
+      # or re-attachment has failed, but we'll skip orphaned annotations.
+
+      # Get a fake range at the end of the document, and highlight it
+      range = this.createFakeCommentRange()
+      hl = this.highlightRange range
+
+      # Register this highlight for the annotation, and vica versa
+      $.merge annotation.highlights, hl
+      $(hl).data('annotation', annotation)
+
+    annotation
 
   # When clicking on a highlight in highlighting mode,
   # set @noBack to true to prevent the sidebar from closing

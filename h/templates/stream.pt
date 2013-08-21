@@ -41,11 +41,11 @@
                             ng-src="{{annotation.favicon_link}}"/>
                     </div>
                     <div class="pull-left paper annotation-header-width"
-                         ng-show="annotation.text.length">
+                         ng-show="annotation.text.length && annotation.quote.length">
                       {{annotation.quote | elide:20}}
                     </div>
                     <div class="pull-left paper annotation-header-width strech"
-                         ng-hide="annotation.text.length">
+                         ng-hide="annotation.text.length || !annotation.quote.length">
                       {{annotation.quote}}
                     </div>
                     <div class="paper annotation-header-width"
@@ -68,7 +68,8 @@
               </div>
               <div class="card-grid yui3-g">
                 <div class="yui3-u-1 full-quote"
-                     ng-class="annotation.text && 't-yui3-u-1-2' || '' ">
+                     ng-class="annotation.text && 't-yui3-u-1-2' || '' "
+                     ng-show="annotation.quote.length">
                   <div class="paper excerpt">
                     <div class="magicontrols pull-right"
                          ng-hide="annotation.text">
@@ -77,7 +78,8 @@
                     <blockquote>{{annotation.quote}}</blockquote>
                   </div>
                 </div>
-                <div class="yui3-u-1 t-yui3-u-1-2"
+                <div class="yui3-u-1"
+                     ng-class="(annotation.quote.length) && 't-yui3-u-1-2' || ''"
                      ng-show="annotation.text">
                   <div class="paper thread">
                     <div class="detail">
