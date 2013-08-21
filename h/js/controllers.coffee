@@ -580,8 +580,6 @@ class App
 class Annotation
   this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout', '$window']
   constructor: ($element, $location, $scope, annotator, drafts, $timeout, $window) ->
-    $scope.baseUrl = $scope.$parent.baseUrl
-
     threading = annotator.threading
     $scope.action = 'create'
     $scope.editing = false
