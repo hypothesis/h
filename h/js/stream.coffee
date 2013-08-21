@@ -21,7 +21,7 @@ class Stream
     filterType = urlParts.pop()
     if filterType == "t"
       $scope.filterDescription = "Annotations with tag '#{ $scope.filterValue }'"
-      filterClause = 'tags:#' + $scope.filterValue
+      filterClause = 'tags:i#' + $scope.filterValue
     else
       $scope.filterDescription = "Annotations by user '#{ $scope.filterValue }'"
       filterClause = 'user:=' + $scope.filterValue
