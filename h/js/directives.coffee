@@ -340,6 +340,23 @@ notification = ['$filter', ($filter) ->
   templateUrl: 'notification.html'
 ]
 
+username = ['$filter', '$window', ($filter, $window) ->
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
+
+    ctrl.$render = ->
+      scope.uname = ($filter 'userName') ctrl.$viewValue
+
+    scope.uclick = (event) ->
+      event.stopPropagation()
+      $window.open "/u/" + scope.uname
+
+  require: '?ngModel'
+  restrict: 'E'
+  template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
+]
+
+
 angular.module('h.directives', ['ngSanitize'])
   .directive('authentication', authentication)
   .directive('markdown', markdown)
@@ -350,6 +367,7 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('tabReveal', tabReveal)
   .directive('tags', tags)
   .directive('thread', thread)
+  .directive('username', username)
   .directive('userPicker', userPicker)
   .directive('ngBlur', ngBlur)
   .directive('repeatAnim', repeatAnim)

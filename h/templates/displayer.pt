@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <div class="content paper yui3-g"
+    <div class="content paper yui3-g annotation-displayer"
          ng-controller="DisplayerCtrl">
       <div class="knockout noise yui3-u-1"
            ng-show="full_deleted">
@@ -35,8 +35,8 @@
 
         <div class="page">
           <strong>
-            <a ng-href="">{{annotation.user | userName}}</a>
-            {{annotation.text && "annotated" || "highlighted"}}:
+            <username ng-model="annotation.user"></username>
+            <span>{{annotation.text && "annotated" || "highlighted"}}:</span>
           </strong>
           <div class="domain">
             <img class="favicon" ng-src="{{root.favicon_link}}"/>
@@ -62,7 +62,7 @@
 
                 <strong>
                   <span ng-show="annotation.deleted" class="user">Annotation deleted</span>
-                  <span ng-show="annotation.deleted || annotation.text || annotation.tags.length" class="user">{{annotation.user | userName}}</span>
+                  <username ng-show="annotation.deleted || annotation.text || annotation.tags.length" ng-model="annotation.user"></username>
                 </strong>
 
                 <div class="body">
@@ -98,7 +98,7 @@
 
                   <strong>
                     <span ng-show="reply.deleted" class="user">Annotation deleted</span>
-                    <span ng-hide="reply.deleted" class="user">{{reply.user | userName}}</span>
+                    <username ng-hide="reply.deleted" ng-model="reply.user"></username>
                   </strong>
 
                   <div class="body">
