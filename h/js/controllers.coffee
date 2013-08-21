@@ -232,6 +232,9 @@ class App
     $scope.highlightingMode = false
 
     $scope.toggleHighlightingMode = ->
+      # Check for drafts
+      return unless drafts.discard()
+
       # Check login state first
       unless plugins.Auth? and plugins.Auth.haveValidToken()
         # If we are not logged in, start the auth process
@@ -642,6 +645,7 @@ class Annotation
       $scope.editing = true
       $scope.origText = $scope.model.$modelValue.text
       $scope.origTags = $scope.model.$modelValue.tags
+      drafts.add $scope.model.$modelValue
 
     $scope.delete = ->
       annotation = $scope.thread.message
