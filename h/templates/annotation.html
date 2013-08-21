@@ -37,13 +37,12 @@
   <header ng-switch="editing && action">
     <strong ng-switch-when="delete">You may provide an explanation here.</strong>
     <!-- User -->
-    <strong ng-switch-default>
-      <span class="user">{{model.$viewValue.user | userName}}      
-        <span class="small vis-icon"
-              ng-show="form.privacy.$viewValue != 'Public'"></span>
-        <span class="small highlight-icon"
-              ng-hide="model.$viewValue.text || editing || model.$viewValue.deleted || model.$viewValue.tags.length"></span>
-      </span>
+    <strong ng-switch-default class="indicators">
+      <username ng-model="model.$modelValue.user"></username>
+      <span class="small vis-icon"
+            ng-show="form.privacy.$viewValue != 'Public'"></span>
+      <span class="small highlight-icon"
+            ng-hide="model.$viewValue.text || editing || model.$viewValue.deleted || model.$viewValue.tags.length"></span>
     </strong>
   </header>
 
