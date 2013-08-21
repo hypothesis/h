@@ -215,6 +215,17 @@ class App
 
     $scope.$broadcast '$reset'
 
+    $scope.$on '$routeChangeStart', (current, next) =>
+      if next.$$route?.controller is 'ViewerController'
+        # Got back from search page
+        $scope.show_search = false
+
+        @visualSearch.searchBox.disableFacets();
+        @visualSearch.searchBox.value('');
+        @visualSearch.searchBox.flags.allSelected = false;
+
+        $scope.clearSearchLocalStorage()
+
     # Update scope with auto-filled form field values
     $timeout ->
       for i in $element.find('input') when i.value
@@ -259,6 +270,24 @@ class App
       console.log "Should create unattached annotation"
 
     # Searchbar initialization
+    $scope.clearSearchLocalStorage = ->
+      unless typeof(localStorage) is 'undefined'
+        try
+          localStorage.setItem "hyp_page_search_query", ""
+        catch error
+          console.warn 'Cannot save query to localStorage!'
+          if error is DOMException.QUOTA_EXCEEDED_ERR
+            console.warn 'localStorage quota exceeded!'
+
+    $scope.saveSearchLocalStorage = (query) ->
+      unless typeof(localStorage) is 'undefined'
+        try
+          localStorage.setItem "hyp_page_search_query", query
+        catch error
+          console.warn 'Cannot save query to localStorage!'
+          if error is DOMException.QUOTA_EXCEEDED_ERR
+            console.warn 'localStorage quota exceeded!'
+
     @user_filter = $filter('userName')
     search_query = ''
     unless typeof(localStorage) is 'undefined'
@@ -380,13 +409,7 @@ class App
               matched.push annotation.id
 
           # Save query to localStorage
-          unless typeof(localStorage) is 'undefined'
-            try
-              localStorage.setItem "hyp_page_search_query", query
-            catch error
-              console.warn 'Cannot save query to localStorage!'
-              if error is DOMException.QUOTA_EXCEEDED_ERR
-                console.warn 'localStorage quota exceeded!'
+          $scope.saveSearchLocalStorage query
 
           # Set the path
           search =
@@ -409,13 +432,7 @@ class App
         clearSearch: (original) =>
           $scope.show_search = false
           original()
-          unless typeof(localStorage) is 'undefined'
-            try
-              localStorage.setItem "hyp_page_search_query", ""
-            catch error
-              console.warn 'Cannot save query to localStorage!'
-              if error is DOMException.QUOTA_EXCEEDED_ERR
-                console.warn 'localStorage quota exceeded!'
+          $scope.clearSearchLocalStorage()
           $location.path('/viewer')
           $rootScope.$digest()
 
