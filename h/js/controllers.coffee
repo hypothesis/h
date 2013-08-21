@@ -256,6 +256,7 @@ class App
         params: $scope.highlightingMode
 
     $scope.createUnattachedAnnotation = ->
+      return unless drafts.discard() # Invoke draft support
       provider.notify method: 'addComment'
 
     # Searchbar initialization
