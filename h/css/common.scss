@@ -628,7 +628,7 @@ blockquote {
   @include smallshadow;
   background: $white;
   border: solid 1px $grayLighter;
-  height: 2.25em;
+  height: 2em;
   position: fixed;
   left: -1px;
   right: -1px;
@@ -880,6 +880,7 @@ blockquote {
       margin-left: 1.5em;
       .share-text {
         width: 100%;
+        margin-bottom: 4px;
       }
     }
   }
@@ -1093,6 +1094,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   background: none;
   clear: both;
   margin-top: .2em;
+  margin-bottom: .2em;
 
   .tagit-close {
     cursor: pointer;
@@ -1118,8 +1120,10 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     margin: .6em .2em;
     padding: .01em 1.3em .01em .3em;
     position: relative;
+    right: 2px;
     font-size: 12px;
-    opacity:0.7;
+    opacity:0.8;
+
 
     &:hover { opacity: 1; }
 
@@ -1147,11 +1151,21 @@ h3.stream {
 }
 
 //Visual Search////////////////////////////////
-//Imported their css here
+//Override their css here
 
 .collapsed-container {
   height: 1em;
   visibility: hidden;
+}
+
+.VS-search .search_facet {
+  float: left;
+  margin: 0;
+  padding: 0 0 0 14px;
+  position: relative;
+  border: 1px solid transparent;
+  height: 20px;
+  margin: 3px -8px 4px 0;
 }
 
 .small-inner {
@@ -1162,6 +1176,30 @@ h3.stream {
   width: auto;
   float: none;
   overflow: hidden;
+}
+
+.VS-search .VS-search-box {
+  min-height: 20px;
+  height: 24px;
+}
+
+.VS-search .VS-icon-search {
+  position: absolute;
+  left: 9px;
+  top: 7px;
+}
+
+.VS-search .VS-icon-cancel {
+  position: absolute;
+  right: 9px;
+  top: 7px;
+}
+
+.VS-search .VS-search-inner {
+  position: relative;
+  margin: 0 20px 0 22px;
+  overflow: hidden;
+  display: block; 
 }
 
 .visual-search {
@@ -1214,10 +1252,10 @@ h3.stream {
 }
 
 .fadeIn-setup,.fadeOut-setup {
-  -webkit-transition: 1s linear opacity;
-  -moz-transition: 1s linear opacity;
-  -o-transition: 1s linear opacity;
-  transition: 1s linear opacity;
+  -webkit-transition: .25s linear opacity;
+  -moz-transition: .25s linear opacity;
+  -o-transition: .25s linear opacity;
+  transition: .25s linear opacity;
 }
 
 .fadeIn-setup{
