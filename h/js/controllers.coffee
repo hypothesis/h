@@ -145,22 +145,22 @@ class App
         else
           plugins.Auth.setToken(newValue)
         plugins.Auth.withToken plugins.Permissions._setAuthFromToken
+
+        if annotator.ongoing_edit
+          $timeout =>
+            annotator.clickAdder()
+          , 500
+
+        if $scope.ongoingHighlightSwitch
+          $timeout =>
+            $scope.toggleHighlightingMode()
+          , 500
       else
         plugins.Permissions.setUser(null)
         delete plugins.Auth
 
       $scope.reloadAnnotations() unless $scope.skipAuthChangeReload
       delete $scope.skipAuthChangeReload
-
-      if newValue? and annotator.ongoing_edit
-        $timeout =>
-          annotator.clickAdder()
-        , 500
-
-      if newValue? and $scope.ongoingHighlightSwitch
-        $timeout =>
-          $scope.toggleHighlightingMode()
-        , 500
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
