@@ -687,6 +687,10 @@ blockquote {
   .user {
     font-weight: bold;
     font-size: 1.1em;
+    &:hover {
+      color: $linkColorHover;
+      cursor: pointer;
+    }
   }
 
   .body {
@@ -735,6 +739,15 @@ blockquote {
   }
 }
 
+// Temporary hack until sidebar and displayer are unified
+.annotation-displayer {
+  .user {
+    &:hover {
+      color: $linkColorHover;
+      cursor: pointer;
+    }
+  }
+}
 
 //THREADING////////////////////////////////
 //Threaded discussion specific
@@ -806,7 +819,7 @@ blockquote {
         opacity: 0.8;
       }
 
-      .user {
+      .indicators {
         display: run-in;
         margin-right: .25em;
       }

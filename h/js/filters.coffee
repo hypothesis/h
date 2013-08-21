@@ -40,11 +40,6 @@ fuzzyTime = (date) ->
 userName = (user) ->
   (user?.match /^acct:([^@]+)/)?[1]
 
-userLink = (user, url) ->
-  name = (user?.match /^acct:([^@]+)/)?[1]
-  prefix = url.replace /\/\w+\/$/, ''
-  prefix + '/u/' + name
-
 elide = (text, split_length) ->
   if text.length > split_length
     text = text.substring 0,split_length
@@ -56,5 +51,4 @@ angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
   .filter('userName', -> userName)
-  .filter('userLink', -> userLink)
   .filter('elide', -> elide)

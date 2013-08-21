@@ -37,8 +37,8 @@
   <header ng-switch="editing && action">
     <strong ng-switch-when="delete">You may provide an explanation here.</strong>
     <!-- User -->
-    <strong ng-switch-default>
-      <span class="user"><a href="{{model.$viewValue.user | userLink:baseUrl}}" target="_blank">{{model.$viewValue.user | userName}}</a></span>
+    <strong ng-switch-default class="indicators">
+      <username ng-model="model.$modelValue.user"></username>
       <span class="small vis-icon"
             ng-show="form.privacy.$viewValue != 'Public'"></span>
       <span class="small highlight-icon"

@@ -23,7 +23,7 @@
         <ul>
           <li ng-repeat="annotation in annotations"
               repeat-anim array="annotations"
-              class="annotation-header-border">
+              class="annotation-header-border annotation-displayer">
             <div class="excerpt"
                  ng-hide="view"
                  ng-click="view=!view">
@@ -85,7 +85,7 @@
                         <span class="small">{{annotation.updated | fuzzyTime}}</span>
                       </div>
                       <strong>
-                        <span class="user">{{annotation.user | userName}}</span>
+                        <username ng-model="annotation.user"></username>
                       </strong>
                       <div class="body">
                         <span ng-bind-html-unsafe="annotation.text | converter"/>
