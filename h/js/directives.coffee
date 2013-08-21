@@ -290,7 +290,7 @@ tags = ['$window', ($window) ->
       placeholderText: attr.placeholder
       keepPlaceholder: true
       preprocessTag: (val) ->
-        val.toLowerCase().replace /[^a-z0-9\-\_\s]/g, ''
+        val.replace /[^a-zA-Z0-9\-\_\s]/g, ''
       afterTagAdded: (evt, ui) ->
         ctrl.$setViewValue elem.tagit 'assignedTags'
       afterTagRemoved: (evt, ui) ->
