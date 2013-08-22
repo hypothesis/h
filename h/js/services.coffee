@@ -260,7 +260,7 @@ class Hypothesis extends Annotator
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) -> annotation
 
-  showViewer: (annotations=[]) =>
+  updateViewer: (annotations=[]) =>
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) ->
@@ -269,6 +269,10 @@ class Hypothesis extends Annotator
         $rootScope.$digest()
     ]
     this
+
+  showViewer: (annotations=[]) =>
+    this.show()
+    this.updateViewer annotations
 
   clickAdder: =>
     @provider.notify

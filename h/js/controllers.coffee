@@ -32,7 +32,6 @@ class App
       $location.search('id', null).replace()
       dynamicBucket = true
       annotator.showViewer()
-      annotator.show()
       heatmap.publish 'updated'
       $scope.$digest()
 
@@ -55,7 +54,7 @@ class App
               acc.push hl.data
           acc
         , []
-        annotator.showViewer annotations
+        annotator.updateViewer annotations
 
       elem.selectAll('.heatmap-pointer')
         # Creates highlights corresponding bucket when mouse is hovered
@@ -96,7 +95,6 @@ class App
             dynamicBucket = false
             $location.search({'id' : null })
             annotator.showViewer heatmap.buckets[bucket]
-            annotator.show()
             $scope.$digest()
 
     $scope.$watch 'sheet.collapsed', (newValue) ->

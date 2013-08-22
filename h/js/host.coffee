@@ -294,6 +294,7 @@ class Annotator.Host extends Annotator
       width: "#{w}px"
 
   showViewer: (annotations) => @plugins.Bridge.showViewer annotations
+  updateViewer: (annotations) => @plugins.Bridge.updateViewer annotations
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
   checkForStartSelection: (event) =>
@@ -338,7 +339,7 @@ class Annotator.Host extends Annotator
       @plugins.Bridge.injectAnnotation annotation
 
       # Switch view to show the new annotation
-      this.showViewer [ annotation ]
+      this.updateViewer [ annotation ]
     else
       super event
 
@@ -363,9 +364,6 @@ class Annotator.Host extends Annotator
 
     # Tell sidebar to show the viewer for these annotations
     this.showViewer annotations
-
-    # Make sure the sidebar is open
-    this.showFrame()
 
   addToken: (token) =>
     @api.notify
