@@ -12,6 +12,7 @@ class ClauseParser
     '[' : 'one_of'
     '#' : 'matches'
     '^' : 'first_of'
+  insensitive_operator : 'i'
 
   parse_clauses: (clauses) ->
     bads = []
@@ -34,14 +35,22 @@ class ClauseParser
         continue
 
       field = parts[0]
+
+      if parts[1][0] is @insensitive_operator
+        sensitive = false
+        rest = parts[1][1..]
+      else
+        sensitive = true
+        rest = parts[1]
+
       operator_found = false
       for operator in @operators
-        if (parts[1].indexOf operator) is 0
+        if (rest.indexOf operator) is 0
           oper = @operator_mapping[operator]
           if operator is '['
-            value = parts[1][operator.length..].split ','
+            value = rest[operator.length..].split ','
           else
-            value = parts[1][operator.length..]
+            value = rest[operator.length..]
           operator_found = true
           if field is 'user'
             value = 'acct:' + value + '@' + window.location.hostname
@@ -55,6 +64,7 @@ class ClauseParser
         'field'   : '/' + field
         'operator': oper
         'value'   : value
+        'case_sensitive': sensitive
     [structure, bads]
 
 
@@ -145,11 +155,12 @@ class StreamFilter
     @filter.clauses.push clause
     this
 
-  addClause: (field, operator, value) ->
+  addClause: (field, operator, value, case_sensitive = false) ->
     @filter.clauses.push
       field: field
       operator: operator
       value: value
+      case_sensitive: case_sensitive
     this
 
   setClausesParse: (clauses_to_parse, error_checking = false) ->
