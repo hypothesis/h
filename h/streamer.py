@@ -94,7 +94,8 @@ filter_schema = {
                     "type": "string",
                     "enum": ["equals", "matches", "lt", "le", "gt", "ge", "one_of", "first_of"]
                 },
-                "value": "object"
+                "value": "object",
+                "case_sensitive": {"type": "boolean", "default": True}
             }
         },
         "past_data": {
@@ -204,6 +205,19 @@ class FilterHandler(object):
         if field_value is None:
             return False
         else:
+            if not clause['case_sensitive']:
+                if type(clause['value']) is list:
+                    cval = [x.lower() for x in clause['value']]
+                else:
+                    cval = clause['value'].lower()
+                if type(field_value) is list:
+                    fval = [x.lower() for x in field_value]
+                else:
+                    fval = field_value.lower()
+            else:
+                cval = clause['value']
+                fval = field_value
+
             reversed = False
             # Determining operator order
             # Normal order: field_value, clause['value'] (i.e. condition created > 2000.01.01)
@@ -221,9 +235,9 @@ class FilterHandler(object):
                     reversed = False
 
             if reversed:
-                return getattr(operator, self.operators[clause['operator']])(clause['value'], field_value)
+                return getattr(operator, self.operators[clause['operator']])(cval, fval)
             else:
-                return getattr(operator, self.operators[clause['operator']])(field_value, clause['value'])
+                return getattr(operator, self.operators[clause['operator']])(fval, cval)
 
     # match_policies
     def include_any(self, target):
