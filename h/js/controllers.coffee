@@ -220,6 +220,9 @@ class App
         # Got back from search page
         $scope.show_search = false
 
+        # We have to call all these internal methods
+        # of VS, because the public API does not have
+        # a method for clearing search.
         @visualSearch.searchBox.disableFacets();
         @visualSearch.searchBox.value('');
         @visualSearch.searchBox.flags.allSelected = false;
@@ -430,10 +433,12 @@ class App
             when 'time'
               callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
         clearSearch: (original) =>
-          $scope.show_search = false
+          # Execute clearSearch's internal method for resetting search
           original()
-          $scope.clearSearchLocalStorage()
+
+          # Go to viewer
           $location.path('/viewer')
+
           $rootScope.$digest()
 
     if search_query.length > 0
