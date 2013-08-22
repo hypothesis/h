@@ -526,7 +526,7 @@ class App
         streamfilter
           .setPastDataNone()
           .setMatchPolicyIncludeAny()
-          .setClausesParse('uri:i[' + uris)
+          .setClausesParse('uri:[' + uris)
           .getFilter()
 
       $scope.updater = new SockJS(path)
