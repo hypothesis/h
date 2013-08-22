@@ -24,7 +24,7 @@ class Stream
       filterClause = 'tags:i#' + $scope.filterValue
     else
       $scope.filterDescription = "Annotations by user '#{ $scope.filterValue }'"
-      filterClause = 'user:=' + $scope.filterValue
+      filterClause = 'user:i=' + $scope.filterValue
     
     $scope.filter =
       streamfilter
