@@ -5,7 +5,7 @@
     </script>
     <title>Hypothesis</title>
   </head>
-  <body metal:fill-slot="body">
+  <body metal:fill-slot="body" class="dark-noise">
     <div id="home" class="content paper">
       <header>
         <img height="150px" width="150px"
