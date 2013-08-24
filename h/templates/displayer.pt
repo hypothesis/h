@@ -47,13 +47,17 @@
         </div>
 
         <div class="card-grid yui3-g">
-          <div class="yui3-u-1" ng-class="(annotation.text || annotation.replies.length || annotation.tags.length) && 't-yui3-u-1-2' || '' ">
+          <div class="yui3-u-1"
+               ng-class="(annotation.text || annotation.replies.length || annotation.tags.length) && 't-yui3-u-1-2' || '' "
+               ng-show="root.quote.length">
             <div class="paper excerpt">
               <blockquote>{{root.quote}}</blockquote>
             </div>
           </div>
 
-          <div class="yui3-u-1 t-yui3-u-1-2" ng-show="annotation.text || annotation.replies.length || annotation.tags.length">
+          <div class="yui3-u-1"
+               ng-class="(root.quote.length) && 't-yui3-u-1-2' || ''"
+               ng-show="annotation.text || annotation.replies.length || annotation.tags.length">
             <div class="paper thread">
               <div class="annotation detail">
                 <div class="magicontrols pull-right">
