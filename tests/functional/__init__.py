@@ -196,7 +196,7 @@ class Annotator():
 
         frame = self.driver.find_element_by_class_name('annotator-frame')
         collapsed = 'annotator-collapsed' in frame.get_attribute('class')
-        self.driver.switch_to_frame(frame)
+        self.driver.switch_to_frame(frame.find_element_by_tag_name('iframe'))
         if collapsed:
             self.driver.find_element_by_css_selector("div.tri").click()
             time.sleep(0.5)

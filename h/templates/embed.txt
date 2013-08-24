@@ -5,16 +5,13 @@
 yepnope([
   {
     test: typeof(window.annotator) !== 'undefined',
-    nope: ${host},
+    nope: ${inject},
     complete: function () {
       window.annotator = null;
-      var app = ${app}
-        , bootstrap = [
+      var bootstrap = [
           'if (!window.annotator) {',
-          '  window.annotator = new Annotator.Host(document.body, {',
-          '    /* @@ reflect routes with crossroads.js?? */',
-          '    app: "' + app + '"',
-          '  });',
+          '  klass = ${role} === "host" ? Annotator.Host : Annotator.Guest;',
+          '  annotator = new klass(document.body, ${options});',
           '  window.Annotator.noConflict().$.noConflict(true);',
           '}'
         ].join('\n')

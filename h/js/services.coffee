@@ -1,12 +1,14 @@
 class Hypothesis extends Annotator
   events:
-    serviceDiscovery: 'serviceDiscovery'
+    'annotationCreated': 'updateAncestors'
+    'annotationUpdated': 'updateAncestors'
+    'annotationDeleted': 'updateAncestors'
+    'serviceDiscovery': 'serviceDiscovery'
 
   # Plugin configuration
   options:
     noMatching: true
     Discovery: {}
-    Heatmap: {}
     Permissions:
       permissions:
         read: ['group:__world__']
@@ -83,13 +85,20 @@ class Hypothesis extends Annotator
 
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'diffCaseOnly', 'quote', 'ranges', 'target', 'id', 'uri']
+    whitelist = [
+      'diffHTML', 'inject', 'quote', 'ranges', 'target', 'id', 'references',
+      'uri', 'diffCaseOnly'
+    ]
     this.addPlugin 'Bridge',
       gateway: true
       formatter: (annotation) =>
         formatted = {}
         for k, v of annotation when k in whitelist
           formatted[k] = v
+        if annotation.thread? and annotation.thread?.children.length
+          formatted.reply_count = annotation.thread.flattenChildren().length
+        else
+          formatted.reply_count = 0
         formatted
       parser: (annotation) =>
         parsed = {}
@@ -167,30 +176,6 @@ class Hypothesis extends Annotator
     # Remove annotations from the application when they are deleted
     this.subscribe 'annotationDeleted', (a) =>
       $rootScope.annotations = $rootScope.annotations.filter (b) -> b isnt a
-
-    # Update the heatmap when the host is updated or annotations are loaded
-    bridge = @plugins.Bridge
-    heatmap = @plugins.Heatmap
-    threading = @threading
-    updateOn = [
-      'hostUpdated'
-      'annotationsLoaded'
-      'annotationCreated'
-      'annotationDeleted'
-    ]
-    for event in updateOn
-      this.subscribe event, =>
-        console.log "XXX: ignoring annotator event"
-        return
-        @provider.call
-          method: 'getHighlights'
-          success: ({highlights, offset}) ->
-            heatmap.updateHeatmap
-              highlights:
-                for hl in highlights when hl.data
-                  annotation = bridge.cache[hl.data]
-                  angular.extend hl, data: annotation
-              offset: offset
 
     # Reload the route after annotations are loaded
     this.subscribe 'annotationsLoaded', -> $route.reload()
@@ -294,7 +279,9 @@ class Hypothesis extends Annotator
   getHtmlQuote: (quote) -> quote
 
   # Do nothing in the app frame, let the host handle it.
-  setupAnnotation: (annotation) -> annotation
+  setupAnnotation: (annotation) ->
+    annotation.highlights = []
+    annotation
 
   sortAnnotations: (a, b) ->
     a_upd = if a.updated? then new Date(a.updated) else new Date()
@@ -436,6 +423,15 @@ class Hypothesis extends Annotator
           delete query.user
       else
         console.warn "Unsupported Social View: '" + @socialView.name + "'!"
+
+  # Bubbles updates through the thread so that guests see accurate
+  # reply counts.
+  updateAncestors: (annotation) =>
+    for ref in (annotation.references?.slice().reverse() or [])
+      rel = (@threading.getContainer ref).message
+      if rel?
+        @element.injector().get('$timeout') (=> this.updateAnnotation rel), 10
+        break  # Only the nearest existing ancestor, the rest is by induction.
 
   serviceDiscovery: (options) =>
     @options.Store ?= {}

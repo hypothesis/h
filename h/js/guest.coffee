@@ -13,12 +13,20 @@ class Annotator.Guest extends Annotator
     Document: {}
 
   constructor: (element, options) ->
+    Gettext.prototype.parse_locale_data annotator_locale_data
+
     super
 
-    # Load plugins
-    for own name, opts of @options
-      if not @plugins[name]
-        this.addPlugin(name, opts)
+    @frame = $('<div></div>')
+    .appendTo(@wrapper)
+    .addClass('annotator-frame annotator-outer annotator-collapsed')
+
+    unless @options.light
+      @toolbar = new Annotator.Toolbar()
+      @toolbar.element.appendTo(@frame)
+
+    delete @options.app
+    delete @options.light
 
     this.addPlugin 'Bridge',
       formatter: (annotation) =>
@@ -36,6 +44,11 @@ class Annotator.Guest extends Annotator
           onReady: =>
             console.log "Guest functions are ready for #{origin}"
 
+    # Load plugins
+    for own name, opts of @options
+      if not @plugins[name]
+        this.addPlugin(name, opts)
+
     # Scan the document text with the DOM Text libraries
     this.scanDocument "Annotator initialized"
 
@@ -47,20 +60,6 @@ class Annotator.Guest extends Annotator
     .bind('onEditorHide', this.onEditorHide)
     .bind('onEditorSubmit', this.onEditorSubmit)
 
-    .bind('getHighlights', =>
-      console.log "XXX: Returning early from getHighlights"
-      return
-      highlights: $(@wrapper).find('.annotator-hl')
-      .filter ->
-        this.offsetWidth > 0 || this.offsetHeight > 0
-      .map ->
-        offset: $(this).offset()
-        height: $(this).outerHeight(true)
-        data: $(this).data('annotation').$$tag
-      .get()
-      offset: $(window).scrollTop()
-    )
-
     .bind('setActiveHighlights', (ctx, tags=[]) =>
       @wrapper.find('.annotator-hl')
       .each ->
@@ -68,17 +67,6 @@ class Annotator.Guest extends Annotator
           $(this).addClass('annotator-hl-active')
         else if not $(this).hasClass('annotator-hl-temporary')
           $(this).removeClass('annotator-hl-active')
-    )
-
-    .bind('setAlwaysOnMode', (ctx, value) =>
-      @alwaysOnMode = value
-      this.setPersistentHighlights()
-    )
-
-    .bind('setHighlightingMode', (ctx, value) =>
-      @highlightingMode = value
-      if @highlightingMode then @adder.hide()
-      this.setPersistentHighlights()
     )
 
     .bind('adderClick', =>
@@ -104,72 +92,22 @@ class Annotator.Guest extends Annotator
 
   _setupWrapper: ->
     @wrapper = @element
-    .on 'mouseup', =>
+    .on 'click', =>
       if not @ignoreMouseup
         setTimeout =>
-          unless @selectedRanges?.length then @panel?.notify method: 'back'
+          unless @selectedRanges?.length
+            @panel?.notify method: 'back'
     this._setupMatching()
     @domMatcher.setRootNode @wrapper[0]
     this
-
-  _setupDocumentEvents: ->
-    tick = false
-    timeout = null
-    touch = false
-    update = =>
-      if touch
-        # Defer updates on mobile until after touch events are over
-        if timeout then cancelTimeout timeout
-        timeout = setTimeout =>
-          timeout = null
-          do updateFrame
-        , 400
-      else
-        do updateFrame
-    updateFrame = =>
-      unless tick
-        tick = true
-        requestAnimationFrame =>
-          tick = false
-          if touch
-            # CSS "position: fixed" is hell of broken on most mobile devices
-            @frame?.css
-              display: ''
-              height: $(window).height()
-              position: 'absolute'
-              top: $(window).scrollTop()
-          @panel?.notify method: 'publish', params: 'hostUpdated'
-
-    $(window).on 'resize scroll', update
-    $(document.body).on 'resize scroll', '*', update
-
-    if window.PDFView?
-      # XXX: PDF.js hack
-      $(PDFView.container).on 'scroll', update
-
-    super
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
   _setupViewer: -> this
   _setupEditor: -> this
 
-  _dragRefresh: =>
-    d = @drag.delta
-    @drag.delta = 0
-    @drag.tick = false
-
-    m = parseInt (getComputedStyle @frame[0]).marginLeft
-    w = -1 * m
-    m += d
-    w -= d
-
-    @frame.addClass 'annotator-no-transition'
-    @frame.css
-      'margin-left': "#{m}px"
-      width: "#{w}px"
-
   showViewer: (annotation) => @plugins.Bridge.showViewer annotation
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
+  updateViewer: (annotations) => @plugins.Bridge.updateViewer annotations
 
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
@@ -177,6 +115,7 @@ class Annotator.Guest extends Annotator
     # is needed for preventing the panel from closing while annotating.
     unless event and this.isAnnotator(event.target)
       @mouseIsDown = true
+
   confirmSelection: ->
     return true unless @selectedRanges.length is 1
 
@@ -203,16 +142,14 @@ class Annotator.Guest extends Annotator
       # annotation = this.createAnnotation()
       #
       # Create an empty annotation manually instead
-      annotation = {}
+      annotation = {inject: true}
 
       annotation = this.setupAnnotation annotation
       $(annotation.highlights).addClass 'annotator-hl'
 
-      # Tell the sidebar about the new annotation
-      @plugins.Bridge.injectAnnotation annotation
-
-      # Switch view to show the new annotation
-      this.showViewer [ annotation ]
+      # Notify listeners
+      this.publish 'beforeAnnotationCreated', annotation
+      this.publish 'annotationCreated', annotation
     else
       super event
 
@@ -238,13 +175,58 @@ class Annotator.Guest extends Annotator
     # Tell sidebar to show the viewer for these annotations
     this.showViewer annotations
 
-  setPersistentHighlights: ->
+  setPersistentHighlights: (state) ->
     body = $('body')
     markerClass = 'annotator-highlights-always-on'
     if @alwaysOnMode or @highlightingMode
       body.addClass markerClass
     else
       body.removeClass markerClass
+
+  addComment: ->
+    sel = @selectedRanges   # Save the selection
+    # Nuke the selection, since we won't be using that.
+    # We will attach this to the end of the document.
+    # Our override for setupAnnotation will add that highlight.
+    @selectedRanges = []
+    this.onAdderClick()     # Open editor (with 0 targets)
+    @selectedRanges = sel # restore the selection
+
+  createFakeCommentRange: ->
+    posSelector =
+      type: "TextPositionSelector"
+      start: @domMapper.corpus.length - 1
+      end: @domMapper.corpus.length
+
+    anchor = this.findAnchorFromPositionSelector selector: [posSelector]
+    anchor.range
+
+  # Override for setupAnnotation
+  setupAnnotation: (annotation) ->
+    # Set up annotation as usual
+    annotation = super(annotation)
+    # Does it have proper highlights?
+    unless annotation.highlights?.length or annotation.references?.length or annotation.target?.length
+      # No highlights and no references means that this is a comment,
+      # or re-attachment has failed, but we'll skip orphaned annotations.
+
+      # Get a fake range at the end of the document, and highlight it
+      range = this.createFakeCommentRange()
+      hl = this.highlightRange range
+
+      # Register this highlight for the annotation, and vica versa
+      $.merge annotation.highlights, hl
+      $(hl).data('annotation', annotation)
+
+    annotation
+
+  # Open the sidebar
+  showFrame: ->
+    @panel?.notify method: 'open'
+
+  # Close the sidebar
+  hideFrame: ->
+    @panel?.notify method: 'back'
 
   addToken: (token) =>
     @api.notify

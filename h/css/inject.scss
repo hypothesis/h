@@ -1,4 +1,6 @@
 @import 'base';
+@import 'compass/css3/user-interface';
+@import 'compass/layout/stretching';
 @import 'compass/reset/utilities';
 
 
@@ -64,6 +66,137 @@
 }
 
 
+//HEATMAP STUFF////////////////////////////////
+.annotator-heatmap {
+  font-size: $baseFontSize;
+  line-height: $baseLineHeight;
+  margin-top: 2px;
+  position: absolute;
+  z-index: 2;
+  overflow: hidden;
+
+  height: 100%;
+  width: $heatmap-width + 17px;
+
+  top: 2em;
+  left: 0;
+
+  & > * {
+    margin-top: -2em;
+  }
+
+  svg {
+    @include stretch-y;
+    background: hsla(0, 0, 0, .1);
+    border-left: solid 1px $grayLighter;
+    height: 100%;
+    left: 17px;
+    width: $heatmap-width;
+  }
+}
+
+.heatmap-pointer {
+  @include user-select(none);
+  @include transition-property(left);
+  @include transition-duration(.2s);
+  font-size: $baseFontSize;
+  line-height: $baseLineHeight;
+  margin-top: -3em; // TODO: Less janking v-align
+  // color: rgb(238, 238, 238);
+  color: #666;
+  left: 0;
+  position: absolute;
+  height: 20.1px;
+  width: 40.1px;
+  vertical-align: middle;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  text-align: center;
+  cursor: pointer;
+
+  .svg {
+    width: 100%;
+    height: 100%;
+    background-image: url("../images/side_tab.svg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+
+  .label {
+    font-weight: bold;
+    font-family: $sansFontFamily;
+    font-size: 13.1px;
+    left: 5px;
+    right: 2px;
+    position: absolute;
+    bottom: 1px;
+  }
+
+  &:hover {
+    left: 2px;
+  }
+
+  &.lower, &.upper {
+    @include single-transition(margin-top, .2s);
+    left: 7px;
+    width: 33.1px;
+    height: 26.1px;
+    .label {
+      left: 0;
+      right: 0;
+    }
+
+    &:hover {
+      left: 7px;
+    }
+  }
+
+  &.upper {
+    .svg {
+      background-image: url("../images/up_tab.svg");
+    }
+    .label {
+      bottom: 1px;
+    }
+    &:hover {
+      margin-top: -3.2em;
+    }
+  }
+
+  &.lower {
+    .svg {
+      background-image: url("../images/down_tab.svg");
+    }
+    .label {
+      top: 1px;
+    }
+    &:hover {
+      margin-top: -2.8em;
+    }
+  }
+  &.flip {
+    @include rotateY(180deg);
+    .label {
+      @include rotateY(180deg);
+    }
+  }
+  &.commenter {
+    @include single-transition(margin-top, .2s);
+    left: 3px;
+    width: 37px;
+
+    .svg {
+      background-image: url("../images/comment_tab.svg");
+    }
+    .label {
+      bottom: 1px;
+    }
+    &:hover {
+      margin-top: -3.2em;
+    }
+  }
+}
+
 
 //HIGHLIGHTS////////////////////////////////
 .annotator-highlights-always-on .annotator-hl,
@@ -96,7 +229,8 @@
   display: none;
 }
 
-//IFRAME////////////////////////////////
+
+// Sidebar
 .annotator-frame {
   @include reset-box-model;
   height: 100%;
@@ -109,11 +243,114 @@
   &.annotator-collapsed {
     margin-left: -$heatmap-width - 17px;
   }
+
+  & > iframe {
+    @include reset-box-model;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+  }
+
 }
 
 .annotator-no-transition {
   @include transition(none !important);
 }
+
+
+//CONTROLBAR STUFF////////////////////////////////
+.annotator-toolbar {
+  @include single-transition(height, .25s, ease, .25s);
+  font-size: $baseFontSize;
+  line-height: $baseLineHeight;
+  position: absolute;
+  overflow: hidden;
+  width: 40px;
+  height: 100px;
+  z-index: 1;
+  left: 7px;
+  top: 2em;
+  z-index: 3;
+
+  a, a:hover, a:active, a:visited {
+    color: $grayLighter;
+    text-decoration: none;
+  }
+
+  ul, li {
+    @include box-sizing(border-box);
+    @include reset-box-model;
+    @include reset-list-style;
+    font-size: $baseFontSize;
+    line-height: $baseLineHeight;
+  }
+}
+
+.annotator-toolbar.annotator-hide {
+  height: 0px;
+
+  &:hover {
+    height: 100px;
+  }
+}
+
+.annotator-toolbar li {
+  position: relative;
+  left: 1px;
+  width: 25px;
+  height: 25px;
+  padding: 5px;
+  margin-top: 5px;
+  box-shadow: 1px 1px 1px 1px;
+  background-color: white;
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+
+  &:active {
+    top:1px;
+    box-shadow: 1px 1px 1px 0px;
+  }
+
+  a.pushed {
+    color: $hypothered;
+  }
+}
+
+
+// Toolbar Icons
+.alwaysonhighlights-icon {
+  @include fonticon("\e01b", left);
+  color: rgb(211, 211, 211);
+  font-size: 18px;
+  bottom: 1px;
+  left: 3px;
+  position: absolute;
+  // text-shadow: -0.1em -0.1em #999;
+}
+
+.highlighter-icon {
+  @include fonticon("\e01a", left);
+  color: rgb(211, 211, 211);
+  font-size: 18px;
+  bottom: 1px;
+  left: 3px;
+  position: absolute;
+  // text-shadow: -0.1em -0.1em #999;
+}
+
+.commenter-icon {
+  @include fonticon("\e01e", left);
+  color: rgb(211, 211, 211);
+  font-size: 18px;
+  bottom: 1px;
+  left: 3px;
+  position: absolute;
+  // text-shadow: -0.1em -0.1em #999;
+}
+
+
 
 
 /*

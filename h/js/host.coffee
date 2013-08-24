@@ -9,13 +9,6 @@ class Annotator.Host extends Annotator.Guest
     tick: false
 
   constructor: (element, options) ->
-    Gettext.prototype.parse_locale_data annotator_locale_data
-
-    @app = options.app
-    delete options.app
-
-    super
-
     # Create the iframe
     if document.baseURI and window.PDFView?
       # XXX: Hack around PDF.js resource: origin. Bug in jschannel?
@@ -25,12 +18,18 @@ class Annotator.Host extends Annotator.Guest
       # XXX: Hack for missing window.location.origin in FF
       hostOrigin ?= window.location.protocol + "//" + window.location.host
 
-    @frame = $('<iframe></iframe>')
-    .css(display: 'none')
-    .attr('src', "#{@app}#/?xdm=#{encodeURIComponent(hostOrigin)}")
-    .appendTo(@wrapper)
-    .addClass('annotator-frame annotator-outer annotator-collapsed')
-    .bind 'load', => @frame.css('display', '')
+    app = $('<iframe></iframe>')
+    .attr('src', "#{options.app}#/?xdm=#{encodeURIComponent(hostOrigin)}")
+
+    super
+
+    app.appendTo(@frame)
+
+    if @toolbar
+      @toolbar.hide()
+      app
+      .on('mouseenter', => @toolbar.show())
+      .on('mouseleave', => @toolbar.hide())
 
   _setupXDM: (options) ->
     channel = super
@@ -63,22 +62,6 @@ class Annotator.Host extends Annotator.Guest
         window.requestAnimationFrame this._dragRefresh
     )
 
-    .bind('addComment', (ctx) =>
-      sel = @selectedRanges   # Save the selection
-      adderShown = @adder.is ":visible" # Save the state of adder icon
-
-      # Nuke the selection, since we won't be using that.
-      # We will attach this to the end of the document.
-      # Our override for setupAnnotation will add that highlight.
-      @selectedRanges = []    
-
-      this.onAdderClick()     # Open editor (with 0 targets)
-      setTimeout (=>          # At some point, later
-        @selectedRanges = sel # restore the selection
-        if adderShown then @adder.show() # restore the state of addder icon
-      ), 200
-    )
-
     .bind('getMaxBottom', =>
       sel = '*' + (":not(.annotator-#{x})" for x in [
         'adder', 'outer', 'notice', 'filter', 'frame'
@@ -98,10 +81,6 @@ class Annotator.Host extends Annotator.Guest
         else
           0
       Math.max.apply(Math, all)
-    )
-
-    .bind('scrollTop', (ctx, y) =>
-      $('html, body').stop().animate {scrollTop: y}, 600
     )
 
     .bind('setDrag', (ctx, drag) =>

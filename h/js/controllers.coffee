@@ -24,86 +24,6 @@ class App
     $scope.baseUrl = baseUrl
 
     {plugins, host, providers} = annotator
-    heatmap = annotator.plugins.Heatmap
-    $scope.dynamicBucket = true
-
-    heatmap.element.bind 'click', =>
-      return unless drafts.discard()
-      $location.search('id', null).replace()
-      $scope.dynamicBucket = true
-      annotator.showViewer()
-      heatmap.publish 'updated'
-      $scope.$digest()
-
-    heatmap.subscribe 'updated', =>
-      elem = d3.select(heatmap.element[0])
-      return unless elem?.datum()
-      data = {highlights, offset} = elem.datum()
-      tabs = elem.selectAll('div').data data
-      height = $(window).outerHeight(true)
-      pad = height * .2
-
-      {highlights, offset} = elem.datum()
-
-      visible = $scope.frame.visible
-      if $scope.dynamicBucket and visible and $location.path() == '/viewer'
-        bottom = offset + heatmap.element.height()
-        annotations = highlights.reduce (acc, hl) =>
-          if hl.offset.top >= offset and hl.offset.top <= bottom
-            if hl.data not in acc
-              acc.push hl.data
-          acc
-        , []
-        annotator.updateViewer annotations
-
-      elem.selectAll('.heatmap-pointer')
-        # Creates highlights corresponding bucket when mouse is hovered
-        .on 'mouseover', (bucket) =>
-          unless $location.path() == '/viewer' and $location.search()?.id?
-            for p in providers
-              p.channel.notify
-                method: 'setActiveHighlights'
-                params: heatmap.buckets[bucket]?.map (a) => a.$$tag
-
-        # Gets rid of them after
-        .on 'mouseout', =>
-          if $location.path() == '/viewer' and not $location.search()?.id?
-            for p in providers
-              p.channel.notify
-                method: 'setActiveHighlights'
-
-        # Does one of a few things when a tab is clicked depending on type
-        .on 'click', (bucket) =>
-          d3.event.stopPropagation()
-
-          # If it's the upper tab, switch to dynamic bucket mode,
-          # and scroll to next bucket above
-          if heatmap.isUpper bucket
-            $scope.dynamicBucket = true
-            threshold = offset + heatmap.index[0]
-            next = highlights.reduce (next, hl) ->
-              if next < hl.offset.top < threshold then hl.offset.top else next
-            , 0
-            console.log "XXX: not scrollTop"
-            #provider.notify method: 'scrollTop', params: next - pad
-
-          # If it's the lower tab, switch do dynamic bucket mode,
-          # and scroll to next bucket below
-          else if heatmap.isLower bucket
-            $scope.dynamicBucket = true
-            threshold = offset + heatmap.index[0] + height - pad
-            next = highlights.reduce (next, hl) ->
-              if threshold < hl.offset.top < next then hl.offset.top else next
-            , Number.MAX_VALUE
-            console.log "XXX: not scrollTop"
-            #provider.notify method: 'scrollTop', params: next - pad
-
-          # If it's neither of the above, load the bucket into the viewer
-          else
-            return unless drafts.discard()
-            $scope.dynamicBucket = false
-            $location.search({'id' : null })
-            annotator.showViewer heatmap.buckets[bucket]
 
     $scope.$watch 'sheet.collapsed', (newValue) ->
       $scope.sheet.tab = if newValue then null else 'login'
@@ -872,7 +792,6 @@ class Search
 
     refresh = =>
       $scope.search_filter = $routeParams.matched
-      heatmap = annotator.plugins.Heatmap
 
       # Create the regexps for highlighting the matches inside the annotations' bodies
       $scope.text_tokens = $routeParams.in_body_text.split ' '
@@ -889,30 +808,29 @@ class Search
       threads = []
       $scope.render_order = {}
       # Choose the root annotations to work with
-      for bucket in heatmap.buckets
-        for annotation in bucket
-          # The annotation itself is a hit.
-          thread = annotation.thread
+      for annotation in $scope.annotations
+        # The annotation itself is a hit.
+        thread = annotation.thread
 
-          if annotation.id in $scope.search_filter
-            threads.push thread
-            $scope.render_order[annotation.id] = []
-            buildRenderOrder(annotation.id, [thread])
-            continue
+        if annotation.id in $scope.search_filter
+          threads.push thread
+          $scope.render_order[annotation.id] = []
+          buildRenderOrder(annotation.id, [thread])
+          continue
 
-          # Maybe it has a child we were looking for
-          children = thread.flattenChildren()
-          has_search_result = false
-          if children?
-            for child in children
-              if child.id in $scope.search_filter
-                has_search_result = true
-                break
+        # Maybe it has a child we were looking for
+        children = thread.flattenChildren()
+        has_search_result = false
+        if children?
+          for child in children
+            if child.id in $scope.search_filter
+              has_search_result = true
+              break
 
-          if has_search_result
-            threads.push thread
-            $scope.render_order[annotation.id] = []
-            buildRenderOrder(annotation.id, [thread])
+        if has_search_result
+          threads.push thread
+          $scope.render_order[annotation.id] = []
+          buildRenderOrder(annotation.id, [thread])
 
       # Re-construct exact order the annotation threads will be shown
 

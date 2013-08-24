@@ -49,6 +49,9 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
   # Connected bridge links
   links: null
 
+  # Annotations currently being updated -- used to avoid event callback loops
+  updating: null
+
   constructor: (elem, options) ->
     if options.window?
       # Pull the option out and restore it after the super constructor is
@@ -63,6 +66,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
 
     @cache = {}
     @links = []
+    @updating = {}
 
   pluginInit: ->
     $(window).on 'message', this._onMessage

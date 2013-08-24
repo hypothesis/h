@@ -29,15 +29,15 @@ class TestAnnotation(SeleniumTestCase):
         driver.refresh()
 
         # make sure the heatmap shows our annotation
-        with Annotator(driver):
-            # the middle heatmap label should have a "1" in it
-            labels = driver.find_elements_by_css_selector(".heatmap-pointer")
-            assert len(labels) == 3
-            assert labels[1].text == "1"
+        # the middle heatmap label should have a "1" in it
+        labels = driver.find_elements_by_css_selector(".heatmap-pointer")
+        assert len(labels) == 3
+        assert labels[1].text == "1"
 
-            # if we click the heatmap we should see our annotation appear
-            # make sure the username and text of the annotation are stored
-            labels[1].click()
+        # if we click the heatmap we should see our annotation appear
+        # make sure the username and text of the annotation are stored
+        labels[1].click()
+        with Annotator(driver):
             a = driver.find_elements_by_css_selector(".annotation")
             assert len(a) == 1
             assert a[0].find_element_by_css_selector(".user").text == "test"

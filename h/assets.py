@@ -129,6 +129,9 @@ jquery = Uglify('lib/jquery-1.10.2.js', output='lib/jquery-1.10.2.min.js')
 jquery_mousewheel = Uglify(
     'lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
 )
+jquery_scrollintoview = Uglify(
+    'lib/jquery.scrollintoview.js', output='lib/jquery.scrollintoview.min.js'
+)
 
 # jQuery UI
 jquery_ui = Bundle(
@@ -203,12 +206,10 @@ app = Bundle(
     annotator_auth,
     annotator_bridge,
     annotator_discovery,
-    annotator_heatmap,
     annotator_permissions,
     annotator_store,
     annotator_threading,
     annotator_document,
-    d3,
     jschannel,
     jwz,
     pagedown,
@@ -252,37 +253,29 @@ site = Bundle(
 )
 
 
-# The injects are bundles intended to be loaded into pages for bootstrapping
-# the application. They set up RPC channels for cross-domain communication
+# The inject bundle is intended to be loaded into pages for bootstrapping
+# the application. It sets up RPC channels for cross-domain communication
 # between frames participating in annotation by using the annotator bridge
 # plugin.
-
-# The guest inject provides headless participation, making the frame responsive
-# to annotator events. It provides DomText and highlighter capabilities.
-guest = Bundle(
+inject = Bundle(
+    d3,
     domTextFamily,
     jquery,
+    jquery_scrollintoview,
     jschannel,
     gettext,
     annotator_i18n,
     annotator,
     annotator_bridge,
     annotator_document,
+    annotator_heatmap,
     Uglify(
         Coffee('js/guest.coffee', output='js/guest.js'),
-        output='js/guest.min.js'
+        Coffee('js/host.coffee', output='js/host.js'),
+        Coffee('js/toolbar.coffee', output='js/toolbar.js'),
+        output='js/inject.min.js'
     ),
     SCSS('css/inject.scss', depends=css_base, output='css/inject.css'),
-)
-
-# The host inject embeds the guest code with an additional controller in charge
-# of managing application widgets, such as collapsing and showing the sidebar.
-host = Bundle(
-    guest,
-    Uglify(
-        Coffee('js/host.coffee', output='js/host.js'),
-        output='js/host.min.js'
-    ),
 )
 
 sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),

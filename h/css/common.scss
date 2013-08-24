@@ -510,34 +510,6 @@ blockquote {
   }
 }
 
-//Controlbar Icons
-.alwaysonhighlights-icon {
-  @include fonticon("\e01b", left);
-  color: rgb(211, 211, 211);
-  font-size: 18px;
-  bottom: 1px;
-  left: 3px;
-  position: absolute;
-}
-
-.highlighter-icon {
-  @include fonticon("\e01a", left);
-  color: rgb(211, 211, 211);
-  font-size: 18px;
-  bottom: 1px;
-  left: 3px;
-  position: absolute;
-}
-
-.commenter-icon {
-  @include fonticon("\e01e", left);
-  color: rgb(211, 211, 211);
-  font-size: 18px;
-  bottom: 1px;
-  left: 3px;
-  position: absolute;
-}
-
 //VISIBILITY
 .visibility {
   .dropdown-toggle {
