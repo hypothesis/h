@@ -149,7 +149,7 @@ jquery_ui_effects = Bundle(
 )
 
 # Polyfills
-raf = Uglify('lib/polyfills/raf.js', output='lib/polyfills/raf.js.min')
+raf = Uglify('lib/polyfills/raf.js', output='lib/polyfills/raf.min.js')
 
 # Others
 d3 = Uglify('lib/d3.js', output='lib/d3.min.js')
