@@ -194,6 +194,10 @@ class Hypothesis extends Annotator
       $rootScope.$apply => this.hide()
     )
 
+    .bind('open', =>
+      # Pop out the sidebar
+      $rootScope.$apply => this.show())
+
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
     .on 'mousewheel', (event, delta) ->
@@ -256,8 +260,7 @@ class Hypothesis extends Annotator
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) -> annotation
 
-  showViewer: (annotations=[]) =>
-    this.show()
+  updateViewer: (annotations=[]) =>
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) ->
@@ -266,6 +269,10 @@ class Hypothesis extends Annotator
         $rootScope.$digest()
     ]
     this
+
+  showViewer: (annotations=[]) =>
+    this.show()
+    this.updateViewer annotations
 
   clickAdder: =>
     @provider.notify

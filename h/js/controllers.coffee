@@ -54,7 +54,7 @@ class App
               acc.push hl.data
           acc
         , []
-        annotator.showViewer annotations
+        annotator.updateViewer annotations
 
       elem.selectAll('.heatmap-pointer')
         # Creates highlights corresponding bucket when mouse is hovered

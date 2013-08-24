@@ -128,6 +128,10 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       @annotator.showViewer (this._parse a for a in annotations)
     )
 
+    .bind('updateViewer', (ctx, annotations) =>
+      @annotator.updateViewer (this._parse a for a in annotations)
+    )
+
     .bind('injectAnnotation', (ctx, annotation) =>
       a = this._parse annotation
 
@@ -188,6 +192,12 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
   showViewer: (annotations) ->
     @channel.notify
       method: 'showViewer'
+      params: (this._format a for a in annotations)
+    this
+
+  updateViewer: (annotations) ->
+    @channel.notify
+      method: 'updateViewer'
       params: (this._format a for a in annotations)
     this
 

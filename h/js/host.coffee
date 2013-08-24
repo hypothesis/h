@@ -57,6 +57,14 @@ class Annotator.Host extends Annotator
     else
       body.removeClass markerClass
 
+  # Open the sidebar
+  showFrame: ->
+    @panel?.notify method: 'open'
+
+  # Close the sidebar
+  hideFrame: ->
+    @panel?.notify method: 'back'
+
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
@@ -208,7 +216,7 @@ class Annotator.Host extends Annotator
     .on 'mouseup', =>
       unless @ignoreMouseup or @noBack
         setTimeout =>
-          unless @selectedRanges?.length then @panel?.notify method: 'back'
+          unless @selectedRanges?.length then this.hideFrame()
     this._setupMatching()
     @domMatcher.setRootNode @wrapper[0]
     this
@@ -286,6 +294,7 @@ class Annotator.Host extends Annotator
       width: "#{w}px"
 
   showViewer: (annotations) => @plugins.Bridge.showViewer annotations
+  updateViewer: (annotations) => @plugins.Bridge.updateViewer annotations
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
   checkForStartSelection: (event) =>
@@ -330,7 +339,7 @@ class Annotator.Host extends Annotator
       @plugins.Bridge.injectAnnotation annotation
 
       # Switch view to show the new annotation
-      this.showViewer [ annotation ]
+      this.updateViewer [ annotation ]
     else
       super event
 
