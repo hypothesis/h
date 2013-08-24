@@ -3,13 +3,13 @@
 @import 'compass/css3/images';
 @import 'compass/utilities/color';
 
-$baseFontSize: 18px;
+$baseFontSize: 16px;
 
 @import 'common';
 
 body {
   @extend .noise;
-  font-family: $serifFontFamily;
+  font-family: $sansFontFamily;
 }
 
 header {
