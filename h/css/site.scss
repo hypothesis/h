@@ -75,7 +75,8 @@ ol {
 
 .topbar .inner {
   @include respond-to(tablets) {
-    max-width: $break-large;
+    padding-left: 3.6em;
     margin: 0 auto;
+    max-width: $break-large;
   }
 }
