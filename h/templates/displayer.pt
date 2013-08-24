@@ -13,19 +13,19 @@
       <div class="inner">
         <a class="barbutton pull-left" href="/"
            ><h4>hypothes<span class="red">.</span>is</h4></a>
-        <a href="" class="barbutton pull-right">Sign in</a>
+        <!-- <a href="" class="barbutton pull-right">Sign in</a> -->
       </div>
     </div>
 
-    <div class="content paper yui3-g annotation-displayer"
+    <div class="content yui3-g annotation-displayer"
          ng-controller="DisplayerCtrl">
-      <div class="knockout noise yui3-u-1"
+      <div class="noise yui3-u-1"
            ng-show="full_deleted">
           <div class="paper excerpt center">
               <strong>This annotation has been deleted!</strong>
           </div>
       </div>
-      <div class="knockout noise yui3-u-1"
+      <div class="noise yui3-u-1"
            ng-hide="full_deleted">
         <div ng-view=""></div>
         <strong>
@@ -146,8 +146,9 @@
         </div>
       </div>
       <div class="yui3-u-1">
-        You have followed a link to an annotation. For a better experience,
-        install the <a href="">extension</a>.
+        <br/>
+        <p>You have followed a link to an annotation. For a better experience,
+        install the <a href="">extension</a>.</p>
       </div>
     </div>
   </body>
