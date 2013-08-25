@@ -108,6 +108,7 @@ class Annotator.Host extends Annotator
           @frame.css 'margin-left': "#{-1 * @frame.width()}px"
           @frame.removeClass 'annotator-no-transition'
           @frame.removeClass 'annotator-collapsed'
+          @panel?.notify method: 'publish', params: 'hostUpdated'
         )
 
         .bind('hideFrame', =>
