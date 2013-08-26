@@ -741,6 +741,7 @@ class Annotation
 
     $scope.share = ($event) ->
       $event.stopPropagation()
+      return if $element.find('.share-dialog').is ":visible"
       $scope.shared = not $scope.shared
       $scope.toggle()
 
