@@ -93,7 +93,7 @@ class Annotator.Guest extends Annotator
   _setupWrapper: ->
     @wrapper = @element
     .on 'click', =>
-      if not @ignoreMouseup
+      unless @ignoreMouseup or @noBack
         setTimeout =>
           unless @selectedRanges?.length
             @panel?.notify method: 'back'
@@ -163,9 +163,6 @@ class Annotator.Guest extends Annotator
   onHighlightClick: (event) =>
     return unless @highlightingMode or @alwaysOnMode and @noBack
 
-    # We have already prevented closing the sidebar, now reset this flag
-    @noBack = false
-
     # Collect relevant annotations
     annotations = $(event.target)
       .parents('.annotator-hl')
@@ -174,6 +171,9 @@ class Annotator.Guest extends Annotator
 
     # Tell sidebar to show the viewer for these annotations
     this.showViewer annotations
+
+    # We have already prevented closing the sidebar, now reset this flag
+    @noBack = false
 
   setPersistentHighlights: (state) ->
     body = $('body')
