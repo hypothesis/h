@@ -215,19 +215,31 @@ class App
 
     $scope.$broadcast '$reset'
 
-    $scope.$on '$routeChangeStart', (current, next) =>
-      if next.$$route?.controller is 'ViewerController'
-        # Got back from search page
-        $scope.show_search = false
+    # Clean up the searchbar
+    $scope.leaveSearch = =>
+      # Got back from search page
+      $scope.show_search = false
 
-        # We have to call all these internal methods
-        # of VS, because the public API does not have
-        # a method for clearing search.
-        @visualSearch.searchBox.disableFacets();
-        @visualSearch.searchBox.value('');
-        @visualSearch.searchBox.flags.allSelected = false;
+      # We have to call all these internal methods
+      # of VS, because the public API does not have
+      # a method for clearing search.
+      @visualSearch.searchBox.disableFacets();
+      @visualSearch.searchBox.value('');
+      @visualSearch.searchBox.flags.allSelected = false;
 
-        $scope.clearSearchLocalStorage()
+      $scope.clearSearchLocalStorage()
+
+    $scope.$on '$routeChangeStart', (current, next) ->
+      return unless next.$$route?
+
+      # Will we be in search mode after this change?
+      willSearch = next.$$route?.controller is "SearchController"
+
+      if $scope.inSearch and not willSearch
+        # We were in search mode, but we are leaving it now.
+        $scope.leaveSearch()
+
+      $scope.inSearch = willSearch
 
     # Update scope with auto-filled form field values
     $timeout ->
@@ -436,6 +448,13 @@ class App
         clearSearch: (original) =>
           # Execute clearSearch's internal method for resetting search
           original()
+
+          # If we are in a search view, then the act of leaving it
+          # will trigger the route change watch, which will call
+          # leaveSearch(). However, if we have not yet started searching,
+          # (only opened the searcbar), no route change will happen,
+          # so we will have to trigger the cleanup manually.
+          $scope.leaveSearch() unless $scope.inSearch
 
           # Go to viewer
           $location.path('/viewer')
