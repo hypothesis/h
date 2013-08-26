@@ -638,7 +638,8 @@ class Annotation
           $scope.model.$modelValue.tags = $scope.origTags
           $scope.action = 'create'
 
-    $scope.save = ->
+    $scope.save = ($event) ->
+      $event.stopPropagation()
       annotation = $scope.model.$modelValue
 
       # Forbid saving comments without a body (text or tags)
