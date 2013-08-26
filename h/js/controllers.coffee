@@ -378,7 +378,7 @@ class App
                     break
                   found = false
                   for tag in annotation.tags
-                    if tag_search is tag.toLowerCase()
+                    if tag.toLowerCase().indexOf(tag_search) > -1
                       found = true
                       break
                   unless found
