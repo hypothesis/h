@@ -227,8 +227,6 @@ class App
       @visualSearch.searchBox.value('');
       @visualSearch.searchBox.flags.allSelected = false;
 
-      $scope.clearSearchLocalStorage()
-
     $scope.$on '$routeChangeStart', (current, next) ->
       return unless next.$$route?
 
@@ -285,30 +283,8 @@ class App
       return unless drafts.discard() # Invoke draft support
       provider.notify method: 'addComment'
 
-    # Searchbar initialization
-    $scope.clearSearchLocalStorage = ->
-      unless typeof(localStorage) is 'undefined'
-        try
-          localStorage.setItem "hyp_page_search_query", ""
-        catch error
-          console.warn 'Cannot save query to localStorage!'
-          if error is DOMException.QUOTA_EXCEEDED_ERR
-            console.warn 'localStorage quota exceeded!'
-
-    $scope.saveSearchLocalStorage = (query) ->
-      unless typeof(localStorage) is 'undefined'
-        try
-          localStorage.setItem "hyp_page_search_query", query
-        catch error
-          console.warn 'Cannot save query to localStorage!'
-          if error is DOMException.QUOTA_EXCEEDED_ERR
-            console.warn 'localStorage quota exceeded!'
-
     @user_filter = $filter('userName')
     search_query = ''
-    unless typeof(localStorage) is 'undefined'
-      search_query = localStorage.getItem("hyp_page_search_query") or ""
-      console.log 'Loading back search query: ' + search_query
 
     @visualSearch = VS.init
       container: $element.find('.visual-search')
@@ -423,9 +399,6 @@ class App
 
             if matches
               matched.push annotation.id
-
-          # Save query to localStorage
-          $scope.saveSearchLocalStorage query
 
           # Set the path
           search =
