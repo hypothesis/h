@@ -988,7 +988,8 @@ class Search
         threadid = thread.message.references[0]
       threadid
 
-    $scope.clickMoreTop = (id) ->
+    $scope.clickMoreTop = (id, $event) ->
+      $event.stopPropagation()
       threadid = $scope.getThreadId id
       pos = $scope.render_pos[id]
       rendered = $scope.render_order[threadid]
@@ -1006,7 +1007,8 @@ class Search
         pos -= 1
 
 
-    $scope.clickMoreBottom = (id) ->
+    $scope.clickMoreBottom = (id, $event) ->
+      $event.stopPropagation()
       threadid = $scope.getThreadId id
       pos = $scope.render_pos[id]
       rendered = $scope.render_order[threadid]
