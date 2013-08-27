@@ -198,6 +198,14 @@ class Hypothesis extends Annotator
       # Pop out the sidebar
       $rootScope.$apply => this.show())
 
+    .bind('showViewer', (ctx, ids) =>
+      this.showViewer ((@threading.getContainer id).message for id in ids)
+    )
+
+    .bind('updateViewer', (ctx, ids) =>
+      this.updateViewer ((@threading.getContainer id).message for id in ids)
+    )
+
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
     .on 'mousewheel', (event, delta) ->

@@ -309,8 +309,12 @@ class Annotator.Host extends Annotator
       'margin-left': "#{m}px"
       width: "#{w}px"
 
-  showViewer: (annotations) => @plugins.Bridge.showViewer annotations
-  updateViewer: (annotations) => @plugins.Bridge.updateViewer annotations
+  showViewer: (annotations) =>
+    @panel?.notify method: "showViewer", params: (a.id for a in annotations)
+
+  updateViewer: (annotations) =>
+    @panel?.notify method: "updateViewer", params: (a.id for a in annotations)
+
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
   checkForStartSelection: (event) =>
