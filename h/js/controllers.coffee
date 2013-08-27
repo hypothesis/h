@@ -292,6 +292,9 @@ class App
       callbacks:
         search: (query, searchCollection) =>
           unless query
+            if $scope.inSearch
+              $location.path('/viewer')
+              $rootScope.$digest()
             return
 
           matched = []
