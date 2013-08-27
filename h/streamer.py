@@ -276,11 +276,13 @@ class StreamerSession(Session):
     def on_message(self, msg):
         transaction.begin()
         try:
-            payload = json.loads(msg)
+            struct = json.loads(msg)
+            payload = struct['filter']
 
             # Let's try to validate the schema
             validate(payload, filter_schema)
             self.filter = FilterHandler(payload)
+            self.clientID = struct['clientID'] if 'clientID' in struct else ''
 
             # If past is given, send the annotations back.
             if "past_data" in payload and payload["past_data"]["load_past"] != "none":
@@ -305,7 +307,15 @@ class StreamerSession(Session):
 
                 # Finally send filtered annotations
                 if len(annotations) > 0:
-                    self.send([send_annotations, 'past'])
+                    packet = {
+                        'payload': send_annotations,
+                        'type': 'annotation-notification',
+                        'options': {
+                            'action': 'past',
+                            'clientID': self.clientID
+                        }
+                    }
+                    self.send(packet)
         except:
             log.info(traceback.format_exc())
             log.info('Failed to parse filter:' + str(msg))
@@ -314,12 +324,14 @@ class StreamerSession(Session):
         else:
             transaction.commit()
 
-
 @subscriber(events.AnnotationEvent)
 def after_action(event):
     try:
         request = event.request
         action = event.action
+        if action == 'read':
+            return
+
         annotation = event.annotation
 
         annotation.update(url_values_from_document(annotation))
@@ -337,11 +349,19 @@ def after_action(event):
                     if 'text' in parent:
                         annotation['quote'] = parent['text']
 
-
                 if not session.filter.match(annotation, action):
                     continue
 
-                session.send([annotation, action])
+                client_id = request.headers['X-Client-Id'] if 'X-Client-Id' in request.headers else ''
+                packet = {
+                    'payload': [annotation],
+                    'type': 'annotation-notification',
+                    'options': {
+                        'action': action,
+                        'clientID': client_id
+                    }
+                }
+                session.send(packet)
             except:
                 log.info(traceback.format_exc())
                 log.info('An error occured during the match checking or the annotation sending phase. ')

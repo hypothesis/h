@@ -25,7 +25,10 @@ class Stream
     else
       $scope.filterDescription = "Annotations by user '#{ $scope.filterValue }'"
       filterClause = 'user:i=' + $scope.filterValue
-    
+
+    # Generate client ID
+    @clientID = UUIDjs.create().toString()
+
     $scope.filter =
       streamfilter
         .setPastDataHits(150)
@@ -65,7 +68,10 @@ class Stream
       $scope.sock = new SockJS(@path)
 
       $scope.sock.onopen = =>
-        $scope.sock.send JSON.stringify $scope.filter
+        sockmsg =
+          filter: $scope.filter
+          clientID: @clientID
+        $scope.sock.send JSON.stringify sockmsg
 
       $scope.sock.onclose = =>
         $timeout $scope.open, 5000
@@ -73,8 +79,10 @@ class Stream
       $scope.sock.onmessage = (msg) =>
         console.log 'Got something'
         console.log msg
-        data = msg.data[0]
-        action = msg.data[1]
+        unless msg.data.type? and msg.data.type is 'annotation-notification'
+          return
+        data = msg.data.payload
+        action = msg.data.options.action
         unless data instanceof Array then data = [data]
 
         $scope.$apply =>

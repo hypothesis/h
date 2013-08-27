@@ -550,46 +550,40 @@ class App
       $scope.updater = new SockJS(path)
 
       $scope.updater.onopen = =>
-        $scope.updater.send JSON.stringify filter
+        sockmsg =
+          filter: filter
+          clientID: annotator.clientID
+        console.log sockmsg
+        $scope.updater.send JSON.stringify sockmsg
 
       $scope.updater.onclose = =>
         $timeout $scope.initUpdater, 60000
 
       $scope.updater.onmessage = (msg) =>
-        data = msg.data[0]
-        action = msg.data[1]
+        console.log msg
+        unless msg.data.type? and msg.data.type is 'annotation-notification'
+          return
+        data = msg.data.payload
+        action = msg.data.options.action
+        clientID = msg.data.options.clientID
+
+        if clientID is annotator.clientID
+          return
+
+        unless data instanceof Array then data = [data]
 
         p = $scope.auth.persona
         user = "acct:" + p.username + "@" + p.provider
         unless data instanceof Array then data = [data]
         $scope.$apply =>
-          for annotation in data
-            if $scope.socialView.name is 'single-player'
-              unless annotation.user is user
-                continue
-
-            check = annotator.threading.getContainer annotation.id
-            if check?.message?
-              if action is 'create'
-                continue # We have created this
-              if action is 'update'
-                if check.message.updated is annotation.updated then continue
-                else
-                  $scope.addUpdateNotification()
-                  $scope.new_updates +=1
-                  break
-              if action is 'delete'
-                # We haven't deleted this yet
+          if $scope.socialView.name is 'single-player'
+            if annotation.user is user
+              $scope.addUpdateNotification()
+              $scope.new_updates +=1
+          else
+            if data.length > 0
                 $scope.addUpdateNotification()
                 $scope.new_updates +=1
-                break
-            else
-              if action is 'delete'
-                continue # Probably our own delete or doesn't concern us
-              else
-                $scope.addUpdateNotification()
-                $scope.new_updates +=1
-                break
 
     $timeout =>
       $scope.initUpdater()
