@@ -186,12 +186,12 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       @index.push $(window).height() + @BOTTOM_CORRECTION
       @index.push $(window).height() + @BOTTOM_CORRECTION
 
-    # Calculate the total count for each bucket (including replies) and the
+    # Calculate the total count for each bucket (without replies) and the
     # maximum count.
     max = 0
     for b in @buckets
       total = b.reduce (total, a) ->
-        subtotal = (a.thread?.flattenChildren()?.length or 0) + 1
+        subtotal = 1
         total + subtotal
       , 0
       max = Math.max max, total
