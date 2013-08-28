@@ -365,7 +365,7 @@ fuzzytime = ['$filter', ($filter) ->
 
   require: '?ngModel'
   restrict: 'E'
-  template: '<span class="small">{{ftime}}</span>'
+  template: '<span class="small">{{ftime | date:mediumDate}}</span>'
 ]
 
 
