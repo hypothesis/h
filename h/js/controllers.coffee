@@ -95,7 +95,6 @@ class App
             dynamicBucket = false
             $location.search({'id' : null })
             annotator.showViewer heatmap.buckets[bucket]
-            $scope.$digest()
 
     $scope.$watch 'sheet.collapsed', (newValue) ->
       $scope.sheet.tab = if newValue then null else 'login'
