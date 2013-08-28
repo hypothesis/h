@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-706391a
+** Annotator 1.2.6-dev-5fafbdf
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-08-06 14:03:23Z
+** Built at: 2013-08-28 00:28:44Z
 */
 
 
@@ -1117,7 +1117,8 @@
       anchor = {
         range: normalizedRange,
         quote: !match.exact ? match.found : void 0,
-        diffHTML: !match.exact ? match.comparison.diffHTML : void 0
+        diffHTML: !match.exact ? match.comparison.diffHTML : void 0,
+        diffCaseOnly: !match.exact ? match.exactExceptCase : void 0
       };
       return anchor;
     };
@@ -1152,7 +1153,8 @@
       anchor = {
         range: normalizedRange,
         quote: !match.exact ? match.found : void 0,
-        diffHTML: !match.exact ? match.comparison.diffHTML : void 0
+        diffHTML: !match.exact ? match.comparison.diffHTML : void 0,
+        diffCaseOnly: !match.exact ? match.exactExceptCase : void 0
       };
       return anchor;
     };
@@ -1216,6 +1218,7 @@
           if (anchor != null) {
             t.quote = anchor.quote || $.trim(anchor.range.text());
             t.diffHTML = anchor.diffHTML;
+            t.diffCaseOnly = anchor.diffCaseOnly;
             normedRanges.push(anchor.range);
             annotation.quote.push(t.quote);
           } else {

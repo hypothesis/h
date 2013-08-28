@@ -68,7 +68,7 @@ class Annotator.Host extends Annotator
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'quote', 'ranges', 'target', 'id', 'references']
+    whitelist = ['diffHTML', 'diffCaseOnly', 'quote', 'ranges', 'target', 'id', 'references']
     this.addPlugin 'Bridge',
       origin: '*'
       window: @frame[0].contentWindow

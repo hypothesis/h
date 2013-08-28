@@ -286,6 +286,11 @@ class window.DomTextMatcher
       found: found
       exact: found is expected
 
+    # If the match is not exact, check whether the changes are
+    # only case differences
+    unless result.exact then result.exactExceptCase =
+      expected.toLowerCase() is found.toLowerCase()
+
     # if we are interested in fuzzy comparison, calculate that, too
     if not result.exact and useFuzzy
       @ensureDMP()
