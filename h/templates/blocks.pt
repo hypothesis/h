@@ -132,7 +132,7 @@
               slow-validate="code"
               >Please enter your validation code.</span>
 
-        <input type="password" name="password" value="" placeholder="Password"
+        <input type="password" name="password" value="" placeholder="New Password"
                required autocapitalize="false" autocorrect="false"
                ng-minlength="2" ng-model="model.password" />
         <span ng-show="activate.password.$error.required"
