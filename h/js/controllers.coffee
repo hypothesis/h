@@ -573,7 +573,7 @@ class App
         unless data instanceof Array then data = [data]
 
         p = $scope.auth.persona
-        user = "acct:" + p.username + "@" + p.provider
+        user = if p? then "acct:" + p.username + "@" + p.provider else ''
         unless data instanceof Array then data = [data]
         $scope.$apply =>
           if $scope.socialView.name is 'single-player'
