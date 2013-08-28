@@ -1,12 +1,12 @@
 /*
-** Annotator 1.2.6-dev-5fafbdf
+** Annotator 1.2.6-dev-f85315e
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-08-28 00:28:44Z
+** Built at: 2013-08-28 02:11:19Z
 */
 
 
@@ -1102,7 +1102,8 @@
       options = {
         contextMatchDistance: this.domMapper.getDocLength() * 2,
         contextMatchThreshold: 0.5,
-        patternMatchThreshold: 0.5
+        patternMatchThreshold: 0.5,
+        flexContext: true
       };
       result = this.domMatcher.searchFuzzyWithContext(prefix, suffix, quote, expectedStart, expectedEnd, false, null, options);
       if (!result.matches.length) {
@@ -1110,7 +1111,7 @@
         return null;
       }
       match = result.matches[0];
-      console.log("Fuzzy found match:");
+      console.log("2-phase fuzzy found match:");
       console.log(match);
       browserRange = new Range.BrowserRange(match.realRange);
       normalizedRange = browserRange.normalize(this.wrapper[0]);
@@ -1146,7 +1147,7 @@
         return null;
       }
       match = result.matches[0];
-      console.log("Fuzzy found match:");
+      console.log("1-phase fuzzy found match:");
       console.log(match);
       browserRange = new Range.BrowserRange(match.realRange);
       normalizedRange = browserRange.normalize(this.wrapper[0]);

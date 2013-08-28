@@ -146,7 +146,8 @@ class window.DomTextMatcher
     # If the prefix is not found, give up
     unless prefixResult.length then return matches: []
 
-    # This is where the prefix ends
+    # This is where the prefix was found
+    prefixStart = prefixResult[0].start
     prefixEnd = prefixResult[0].end
 
     # Let's find out where do we expect to find the suffix!
@@ -176,9 +177,11 @@ class window.DomTextMatcher
     # If the suffix is not found, give up
     unless suffixResult.length then return matches: []
 
-    # This is where the suffix starts
+    # This is where the suffix was found
     suffixStart = prefixEnd + suffixResult[0].start
+    suffixEnd = prefixEnd + suffixResult[0].end
 
+    # This if the range between the prefix and the suffix
     charRange =
       start: prefixEnd
       end: suffixStart
@@ -189,11 +192,58 @@ class window.DomTextMatcher
     # See how good a match we have
     analysis = @analyzeMatch pattern, charRange, true
 
+    # Should we try to find a better match by moving the
+    # initial match around a little bit, even if this has
+    # a negative impact on the similarity of the context?
+    if pattern? and options.flexContext and not analysis.exact
+      # Do we have and exact match for the quote around here?
+
+      if not @pm then @pm = new window.DTM_ExactMatcher
+      @pm.setDistinct false
+      @pm.setCaseSensitive false
+
+      flexMatches = @pm.search @mapper.corpus[prefixStart..suffixEnd], pattern
+      delete candidate
+      bestError = 2
+
+      for flexMatch in flexMatches
+
+        # Calculate the range that matched the quote
+        flexRange =
+          start: prefixStart + flexMatch.start
+          end: prefixStart + flexMatch.end
+
+        # Check how the prefix would fare
+        prefixRange = start: prefixStart, end: flexRange.start
+        a1 = @analyzeMatch prefix, prefixRange, true
+        prefixError = if a1.exact then 0 else a1.comparison.errorLevel
+
+        # Check how the suffix would fare
+        suffixRange = start: flexRange.end, end: suffixEnd
+        a2 = @analyzeMatch suffix, suffixRange, true
+        suffixError = if a2.exact then 0 else a2.comparison.errorLevel
+
+        # Did we at least one match?
+        if a1.exact or a2.exact
+          # Yes, we did. Calculate the total error
+          totalError = prefixError + suffixError
+
+          # Is this better than our best bet?
+          if totalError < bestError
+            # This is our best candidate so far. Store it.
+            candidate = flexRange
+            bestError = totalError
+
+      if candidate?
+        console.log "flexContext adjustment: we found a better candidate!"
+        charRange = candidate
+        analysis = @analyzeMatch pattern, charRange, true
+
     # Do we have to compare what we found to a pattern?
     if (not pattern?) or # "No pattern, nothing to compare. Assume it's OK."
         analysis.exact or # "Found text matches exactly to pattern"
         (analysis.comparison.errorLevel <= matchThreshold) # still acceptable
-      mappings = @mapper.getMappingsForCharRange prefixEnd, suffixStart
+      mappings = @mapper.getMappingsForCharRange charRange.start, charRange.end
 
       # Collect the results
       match = {}
