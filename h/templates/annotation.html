@@ -1,8 +1,7 @@
 <form name="form">
   <div class="magicontrols pull-right" ng-hide="editing">
     <!-- Timestamp -->
-    <span class="small"
-          >{{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}</span>
+    <fuzzytime ng-model="model.$viewValue.updated"></fuzzytime>
 
     <!-- More actions -->
     <div class="dropdown small show">
