@@ -356,7 +356,7 @@ username = ['$filter', '$window', ($filter, $window) ->
   template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
 ]
 
-fuzzytime = ['$filter', '$window', ($filter, $window) ->
+fuzzytime = ['$filter', ($filter) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
