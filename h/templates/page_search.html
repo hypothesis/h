@@ -18,7 +18,7 @@
                  ng-show="collapsed">
               <blockquote ng-bind-html-unsafe="target.highlightQuote" ng-hide="diff" />
               <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
-              <div class="small pull-right" ng-show="target.diffHTML">
+              <div class="small pull-right" ng-show="target.diffHTML" ng-init="diff=target.diffHTML.length>0">
                 <input type="checkbox" ng-model="diff">Show differences</input>
               </div>
             </div>
