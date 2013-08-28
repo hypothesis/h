@@ -145,7 +145,7 @@ class Hypothesis extends Annotator
 
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'diffCaseOnly', 'quote', 'ranges', 'target', 'id', 'references']
+    whitelist = ['diffHTML', 'diffCaseOnly', 'quote', 'ranges', 'target', 'references']
     this.addPlugin 'Bridge',
       origin: $location.search().xdm
       window: $window.parent
@@ -198,12 +198,12 @@ class Hypothesis extends Annotator
       # Pop out the sidebar
       $rootScope.$apply => this.show())
 
-    .bind('showViewer', (ctx, ids) =>
-      this.showViewer ((@threading.getContainer id).message for id in ids)
+    .bind('showViewer', (ctx, tags=[]) =>
+      this.showViewer (@plugins.Bridge.cache[tag] for tag in tags)
     )
 
-    .bind('updateViewer', (ctx, ids) =>
-      this.updateViewer ((@threading.getContainer id).message for id in ids)
+    .bind('updateViewer', (ctx, tags=[]) =>
+      this.updateViewer (@plugins.Bridge.cache[tag] for tag in tags)
     )
 
   _setupWrapper: ->

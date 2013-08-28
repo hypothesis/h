@@ -68,7 +68,7 @@ class Annotator.Host extends Annotator
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'diffCaseOnly', 'quote', 'ranges', 'target', 'id', 'references']
+    whitelist = ['diffHTML', 'diffCaseOnly', 'quote', 'ranges', 'target', 'references']
     this.addPlugin 'Bridge',
       origin: '*'
       window: @frame[0].contentWindow
@@ -310,10 +310,10 @@ class Annotator.Host extends Annotator
       width: "#{w}px"
 
   showViewer: (annotations) =>
-    @panel?.notify method: "showViewer", params: (a.id for a in annotations)
+    @panel?.notify method: "showViewer", params: (a.$$tag for a in annotations)
 
   updateViewer: (annotations) =>
-    @panel?.notify method: "updateViewer", params: (a.id for a in annotations)
+    @panel?.notify method: "updateViewer", params: (a.$$tag for a in annotations)
 
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
