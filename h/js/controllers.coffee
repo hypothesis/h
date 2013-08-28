@@ -58,7 +58,7 @@ class App
 
       elem.selectAll('.heatmap-pointer')
         # Creates highlights corresponding bucket when mouse is hovered
-        .on 'mousemove', (bucket) =>
+        .on 'mouseover', (bucket) =>
           unless $location.path() == '/viewer' and $location.search()?.id?
             provider.notify
               method: 'setActiveHighlights'
