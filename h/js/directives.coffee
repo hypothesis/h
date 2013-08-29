@@ -356,12 +356,17 @@ username = ['$filter', '$window', ($filter, $window) ->
   template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
 ]
 
-fuzzytime = ['$filter', ($filter) ->
+fuzzytime = ['$filter', '$window', ($filter, $window) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
     ctrl.$render = ->
       scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
+
+    $window.setInterval =>
+      scope.$apply =>
+        scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
+    , 5000
 
   require: '?ngModel'
   restrict: 'E'
