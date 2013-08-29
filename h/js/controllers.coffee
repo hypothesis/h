@@ -696,12 +696,6 @@ class Annotation
         $scope.model.$modelValue.text = ''
         $scope.model.$modelValue.tags = ''
 
-    $scope.authorize = (action) ->
-      if $scope.model.$modelValue? and annotator.plugins?.Permissions?
-        annotator.plugins.Permissions.authorize action, $scope.model.$modelValue
-      else
-        true
-
     $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
     $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
 
