@@ -27,7 +27,9 @@ class Stream
       filterClause = 'user:i=' + $scope.filterValue
 
     # Generate client ID
-    @clientID = UUIDjs.create().toString()
+    buffer = new Array(16)
+    uuid.v4 null, buffer, 0
+    @clientID = uuid.unparse buffer
 
     $scope.filter =
       streamfilter

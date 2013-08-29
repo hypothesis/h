@@ -16,7 +16,9 @@ class Displayer
   this.$inject = ['$scope','$element','$timeout','streamfilter']
   constructor: ($scope, $element, $timeout, streamfilter) ->
     # Generate client ID
-    @clientID = UUIDjs.create().toString()
+    buffer = new Array(16)
+    uuid.v4 null, buffer, 0
+    @clientID = uuid.unparse buffer
 
     $scope.root = document.init_annotation
     $scope.annotation = $scope.root.annotation

@@ -56,7 +56,9 @@ class Hypothesis extends Annotator
     super ($document.find 'body')
 
     # Generate client ID
-    @clientID = UUIDjs.create().toString()
+    buffer = new Array(16)
+    uuid.v4 null, buffer, 0
+    @clientID = uuid.unparse buffer
     $.ajaxSetup headers: "x-client-id": @clientID
 
     # Load plugins
