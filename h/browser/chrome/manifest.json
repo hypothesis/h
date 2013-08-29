@@ -18,6 +18,7 @@
     "<all_urls>",
 
     "clipboardWrite",
+    "contentSettings",
     "tabs",
     "webRequest",
     "webRequestBlocking"
