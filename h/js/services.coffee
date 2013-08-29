@@ -134,6 +134,7 @@ class Hypothesis extends Annotator
     this.subscribe 'annotationsLoaded', -> $route.reload()
 
     check_versions = (host_release) ->
+      console.log "Host release is "
       v1 = hypothesis_release
       v2 = host_release
 #      v3 = hypothesis_server_release ? "(missing)"
@@ -147,11 +148,12 @@ class Hypothesis extends Annotator
 #        console.log "Server-side code release is " + v3
         console.log "============================================"
 
-        $window.alert "Unfortunately, your browser has somehow loaded incomatible versions of the different pieces of our code. This should not happen, but if it does, it should be a very temporary situation. You could try to manually upgrade your extension. If that does not help, please check back later (30 minutes should be enough). Please excuse us for the inconvenience."
+        if $window.confirm "Unfortunately, your browser has somehow loaded incompatible versions of the different pieces of our code. This should not happen, but if it does, it should be a very temporary situation. You could try to manually update your extension. If that does not help, please check back later (30 minutes should be enough). Please excuse us for the inconvenience.\n\nWould like to see instructions describing how to manually update your extensions?"
+          $window.open "http://www.howtogeek.com/64525/how-to-manually-force-google-chrome-to-update-extensions/"       
 
     @provider.call
       method: 'checkRelease'
-      timeout: 1000
+      timeout: 5000
       error: -> check_versions "(missing)"
       success: check_versions
 
