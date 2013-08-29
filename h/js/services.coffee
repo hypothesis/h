@@ -147,7 +147,7 @@ class Hypothesis extends Annotator
 #        console.log "Server-side code release is " + v3
         console.log "============================================"
 
-        $window.alert "Unfortunately, your browser has somehow loaded incomatible versions of the different pieces of our code. This should not happen, but if it does, it should be a very temporary situation. Please excuse us for the inconvenience, and check back later."
+        $window.alert "Unfortunately, your browser has somehow loaded incomatible versions of the different pieces of our code. This should not happen, but if it does, it should be a very temporary situation. You could try to manually upgrade your extension. If that does not help, please check back later (30 minutes should be enough). Please excuse us for the inconvenience."
 
     @provider.call
       method: 'checkRelease'
