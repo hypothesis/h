@@ -101,6 +101,8 @@ class Annotator.Host extends Annotator
 
         @panel
 
+        .bind('checkRelease', -> hypothesis_release)
+
         .bind('onEditorHide', this.onEditorHide)
         .bind('onEditorSubmit', this.onEditorSubmit)
 

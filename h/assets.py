@@ -222,6 +222,7 @@ app = Bundle(
                    output='js/%s.js' % name)
             for name in
             (
+                'release_tag',
                 'app',
                 'controllers',
                 'filters',
@@ -263,6 +264,7 @@ inject = Bundle(
     annotator_bridge,
     annotator_document,
     Uglify(
+        Coffee('js/release_tag.coffee', output='js/release_tag.js'),
         Coffee('js/host.coffee', output='js/host.js'),
         output='js/host.min.js'
     ),
