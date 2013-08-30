@@ -2,7 +2,7 @@ WebFontConfig = {
   google: {
     families: [
       'Merriweather',
-      'Source+Sans+Pro:400,600:latin'
+      'Source+Sans+Pro:400,600:latin,latin-ext'
     ]
   }
 };
