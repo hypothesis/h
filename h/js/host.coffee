@@ -65,6 +65,10 @@ class Annotator.Host extends Annotator
   hideFrame: ->
     @panel?.notify method: 'back'
 
+  # Set dynamic bucket mode on the sidebar
+  setDynamicBucketMode: (value) ->
+    @panel?.notify method: 'setDynamicBucketMode', params: value
+
   _setupXDM: ->
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
@@ -415,6 +419,9 @@ class Annotator.Host extends Annotator
 
     # Tell sidebar to show the viewer for these annotations
     this.showViewer annotations
+
+    # Switch off dynamic bucket mode
+    this.setDynamicBucketMode false
 
   addToken: (token) =>
     @api.notify

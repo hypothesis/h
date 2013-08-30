@@ -218,6 +218,10 @@ class Hypothesis extends Annotator
       $rootScope.$apply => this.hide()
     )
 
+    .bind('setDynamicBucketMode', (ctx, value) => $rootScope.$apply =>
+       this.setDynamicBucketMode value
+    )
+
     .bind('open', =>
       # Pop out the sidebar
       $rootScope.$apply => this.show())
@@ -344,6 +348,9 @@ class Hypothesis extends Annotator
 
   hide: =>
     @element.scope().frame.visible = false
+
+  setDynamicBucketMode: (value) =>
+    @element.scope().dynamicBucket = value
 
   patch_store: (store) =>
     $location = @element.injector().get '$location'

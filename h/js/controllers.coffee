@@ -25,12 +25,12 @@ class App
 
     {plugins, provider} = annotator
     heatmap = annotator.plugins.Heatmap
-    dynamicBucket = true
+    $scope.dynamicBucket = true
 
     heatmap.element.bind 'click', =>
       return unless drafts.discard()
       $location.search('id', null).replace()
-      dynamicBucket = true
+      $scope.dynamicBucket = true
       annotator.showViewer()
       heatmap.publish 'updated'
       $scope.$digest()
@@ -46,7 +46,7 @@ class App
       {highlights, offset} = elem.datum()
 
       visible = $scope.frame.visible
-      if dynamicBucket and visible and $location.path() == '/viewer'
+      if $scope.dynamicBucket and visible and $location.path() == '/viewer'
         bottom = offset + heatmap.element.height()
         annotations = highlights.reduce (acc, hl) =>
           if hl.offset.top >= offset and hl.offset.top <= bottom
@@ -92,7 +92,7 @@ class App
           # If it's neither of the above, load the bucket into the viewer
           else
             return unless drafts.discard()
-            dynamicBucket = false
+            $scope.dynamicBucket = false
             $location.search({'id' : null })
             annotator.showViewer heatmap.buckets[bucket]
             $scope.$digest()
