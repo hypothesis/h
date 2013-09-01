@@ -134,7 +134,6 @@ class Hypothesis extends Annotator
     this.subscribe 'annotationsLoaded', -> $route.reload()
 
     check_versions = (host_release) ->
-      console.log "Host release is "
       v1 = hypothesis_release
       v2 = host_release
 #      v3 = hypothesis_server_release ? "(missing)"
