@@ -152,7 +152,7 @@ class Hypothesis extends Annotator
 
     @provider.call
       method: 'checkRelease'
-      timeout: 5000
+      timeout: 10000
       error: -> check_versions "(missing)"
       success: check_versions
 
