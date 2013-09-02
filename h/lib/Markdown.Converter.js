@@ -67,7 +67,11 @@ else
             if (original === identity)
                 this[hookname] = func;
             else
-                this[hookname] = function (x) { return func(original(x)); }
+                this[hookname] = function (text) {
+                    var args = Array.prototype.slice.call(arguments, 0);
+                    args[0] = original.apply(null, args);
+                    return func.apply(null, args);
+                };
         },
         set: function (hookname, func) {
             if (!this[hookname])
@@ -103,9 +107,28 @@ else
 
     Markdown.Converter = function () {
         var pluginHooks = this.hooks = new HookCollection();
-        pluginHooks.addNoop("plainLinkText");  // given a URL that was encountered by itself (without markup), should return the link text that's to be given to this link
-        pluginHooks.addNoop("preConversion");  // called with the orignal text as given to makeHtml. The result of this plugin hook is the actual markdown source that will be cooked
-        pluginHooks.addNoop("postConversion"); // called with the final cooked HTML code. The result of this plugin hook is the actual output of makeHtml
+        
+        // given a URL that was encountered by itself (without markup), should return the link text that's to be given to this link
+        pluginHooks.addNoop("plainLinkText");
+        
+        // called with the orignal text as given to makeHtml. The result of this plugin hook is the actual markdown source that will be cooked
+        pluginHooks.addNoop("preConversion");
+        
+        // called with the text once all normalizations have been completed (tabs to spaces, line endings, etc.), but before any conversions have
+        pluginHooks.addNoop("postNormalization");
+        
+        // Called with the text before / after creating block elements like code blocks and lists. Note that this is called recursively
+        // with inner content, e.g. it's called with the full text, and then only with the content of a blockquote. The inner
+        // call will receive outdented text.
+        pluginHooks.addNoop("preBlockGamut");
+        pluginHooks.addNoop("postBlockGamut");
+        
+        // called with the text of a single block element before / after the span-level conversions (bold, code spans, etc.) have been made
+        pluginHooks.addNoop("preSpanGamut");
+        pluginHooks.addNoop("postSpanGamut");
+        
+        // called with the final cooked HTML code. The result of this plugin hook is the actual output of makeHtml
+        pluginHooks.addNoop("postConversion");
 
         //
         // Private state of the converter instance:
@@ -168,6 +191,8 @@ else
             // match consecutive blank lines with /\n+/ instead of something
             // contorted like /[ \t]*\n+/ .
             text = text.replace(/^[ \t]+$/mg, "");
+            
+            text = pluginHooks.postNormalization(text);
 
             // Turn block-level HTML blocks into hash entries
             text = _HashHTMLBlocks(text);
@@ -378,12 +403,17 @@ else
 
             return blockText;
         }
+        
+        var blockGamutHookCallback = function (t) { return _RunBlockGamut(t); }
 
         function _RunBlockGamut(text, doNotUnhash) {
             //
             // These are all the transformations that form block-level
             // tags like paragraphs, headers, and list items.
             //
+            
+            text = pluginHooks.preBlockGamut(text, blockGamutHookCallback);
+            
             text = _DoHeaders(text);
 
             // Do Horizontal Rules:
@@ -395,6 +425,8 @@ else
             text = _DoLists(text);
             text = _DoCodeBlocks(text);
             text = _DoBlockQuotes(text);
+            
+            text = pluginHooks.postBlockGamut(text, blockGamutHookCallback);
 
             // We already ran _HashHTMLBlocks() before, in Markdown(), but that
             // was to escape raw HTML in the original Markdown source. This time,
@@ -412,6 +444,8 @@ else
             // tags like paragraphs, headers, and list items.
             //
 
+            text = pluginHooks.preSpanGamut(text);
+            
             text = _DoCodeSpans(text);
             text = _EscapeSpecialCharsWithinTagAttributes(text);
             text = _EncodeBackslashEscapes(text);
@@ -433,6 +467,8 @@ else
 
             // Do hard breaks:
             text = text.replace(/  +\n/g, " <br>\n");
+            
+            text = pluginHooks.postSpanGamut(text);
 
             return text;
         }
@@ -754,7 +790,7 @@ else
             return text;
         }
 
-        function _DoLists(text) {
+        function _DoLists(text, isInsideParagraphlessListItem) {
             //
             // Form HTML ordered (numbered) and unordered (bulleted) lists.
             //
@@ -794,7 +830,7 @@ else
                     var list = m1;
                     var list_type = (m2.search(/[*+-]/g) > -1) ? "ul" : "ol";
 
-                    var result = _ProcessListItems(list, list_type);
+                    var result = _ProcessListItems(list, list_type, isInsideParagraphlessListItem);
 
                     // Trim any trailing whitespace, to put the closing `</$list_type>`
                     // up on the preceding line, to get it past the current stupid
@@ -825,7 +861,7 @@ else
 
         var _listItemMarkers = { ol: "\\d+[.]", ul: "[*+-]" };
 
-        function _ProcessListItems(list_str, list_type) {
+        function _ProcessListItems(list_str, list_type, isInsideParagraphlessListItem) {
             //
             //  Process the contents of a single ordered or unordered list, splitting it
             //  into individual list items.
@@ -901,9 +937,10 @@ else
                     }
                     else {
                         // Recursion for sub-lists:
-                        item = _DoLists(_Outdent(item));
+                        item = _DoLists(_Outdent(item), /* isInsideParagraphlessListItem= */ true);
                         item = item.replace(/\n$/, ""); // chomp(item)
-                        item = _RunSpanGamut(item);
+                        if (!isInsideParagraphlessListItem) // only the outer-most item should run this, otherwise it's run multiple times for the inner ones
+                            item = _RunSpanGamut(item);
                     }
                     last_item_had_a_double_newline = ends_with_double_newline;
                     return "<li>" + item + "</li>\n";
@@ -938,7 +975,7 @@ else
             // attacklab: sentinel workarounds for lack of \A and \Z, safari\khtml bug
             text += "~0";
 
-            text = text.replace(/(?:\n\n|^)((?:(?:[ ]{4}|\t).*\n+)+)(\n*[ ]{0,3}[^ \t\n]|(?=~0))/g,
+            text = text.replace(/(?:\n\n|^\n?)((?:(?:[ ]{4}|\t).*\n+)+)(\n*[ ]{0,3}[^ \t\n]|(?=~0))/g,
                 function (wholeMatch, m1, m2) {
                     var codeblock = m1;
                     var nextChar = m2;
@@ -1169,7 +1206,7 @@ else
             text = text.replace(/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/g, "&amp;");
 
             // Encode naked <'s
-            text = text.replace(/<(?![a-z\/?\$!])/gi, "&lt;");
+            text = text.replace(/<(?![a-z\/?!]|~D)/gi, "&lt;");
 
             return text;
         }
@@ -1195,14 +1232,57 @@ else
             return text;
         }
 
+        var charInsideUrl = "[-A-Z0-9+&@#/%?=~_|[\\]()!:,.;]",
+            charEndingUrl = "[-A-Z0-9+&@#/%=~_|[\\])]",
+            autoLinkRegex = new RegExp("(=\"|<)?\\b(https?|ftp)(://" + charInsideUrl + "*" + charEndingUrl + ")(?=$|\\W)", "gi"),
+            endCharRegex = new RegExp(charEndingUrl, "i");
+
+        function handleTrailingParens(wholeMatch, lookbehind, protocol, link) {
+            if (lookbehind)
+                return wholeMatch;
+            if (link.charAt(link.length - 1) !== ")")
+                return "<" + protocol + link + ">";
+            var parens = link.match(/[()]/g);
+            var level = 0;
+            for (var i = 0; i < parens.length; i++) {
+                if (parens[i] === "(") {
+                    if (level <= 0)
+                        level = 1;
+                    else
+                        level++;
+                }
+                else {
+                    level--;
+                }
+            }
+            var tail = "";
+            if (level < 0) {
+                var re = new RegExp("\\){1," + (-level) + "}$");
+                link = link.replace(re, function (trailingParens) {
+                    tail = trailingParens;
+                    return "";
+                });
+            }
+            if (tail) {
+                var lastChar = link.charAt(link.length - 1);
+                if (!endCharRegex.test(lastChar)) {
+                    tail = lastChar + tail;
+                    link = link.substr(0, link.length - 1);
+                }
+            }
+            return "<" + protocol + link + ">" + tail;
+        }
+        
         function _DoAutoLinks(text) {
 
             // note that at this point, all other URL in the text are already hyperlinked as <a href=""></a>
             // *except* for the <http://www.foo.com> case
 
             // automatically add < and > around unadorned raw hyperlinks
-            // must be preceded by space/BOF and followed by non-word/EOF character    
-            text = text.replace(/(^|\s)(https?|ftp)(:\/\/[-A-Z0-9+&@#\/%?=~_|\[\]\(\)!:,\.;]*[-A-Z0-9+&@#\/%=~_|\[\]])($|\W)/gi, "$1<$2$3>$4");
+            // must be preceded by a non-word character (and not by =" or <) and followed by non-word/EOF character
+            // simulating the lookbehind in a consuming way is okay here, since a URL can neither and with a " nor
+            // with a <, so there is no risk of overlapping matches.
+            text = text.replace(autoLinkRegex, handleTrailingParens);
 
             //  autolink anything like <http://example.com>
             
