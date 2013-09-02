@@ -263,7 +263,10 @@ class Hypothesis extends Annotator
   updateViewer: (annotations=[]) =>
     @element.injector().invoke [
       '$location', '$rootScope',
-      ($location, $rootScope) ->
+      ($location, $rootScope) =>
+        for annotation in annotations
+          thread = @threading.getContainer annotation.id
+          annotation.reply_list = (r.message for r in (thread.children or []))
         $rootScope.annotations = annotations
         $location.path('/viewer').replace()
         $rootScope.$digest()

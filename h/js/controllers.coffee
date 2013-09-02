@@ -638,6 +638,7 @@ class Annotation
       switch $scope.action
         when 'create'
           annotator.publish 'annotationCreated', annotation
+          $scope.$emit 'updateReplies'
         when 'delete'
           root = $scope.$root.annotations
           root = (a for a in root when a isnt root)
@@ -663,6 +664,7 @@ class Annotation
 
       # XXX: This is ugly -- it's the one place we refer to the plugin directly
       annotator.plugins.Threading.thread reply
+      $scope.$emit 'updateReplies'
 
     $scope.edit = ->
       $scope.action = 'edit'
@@ -688,6 +690,7 @@ class Annotation
                 annotator.deleteAnnotation reply
 
           annotator.deleteAnnotation annotation
+          $scope.$emit 'updateReplies'
       else
         $scope.action = 'delete'
         $scope.editing = true
@@ -741,6 +744,9 @@ class Annotation
           $scope.model.$modelValue.highlightText =
             $scope.model.$modelValue.highlightText.replace regexp, annotator.highlighter
 
+    $scope.$on 'updateReplies', ->
+      thread = threading.getContainer $scope.model.$modelValue.id
+      $scope.model.$modelValue.reply_list = (r.message for r in (thread.children or []))
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
@@ -773,11 +779,11 @@ class Editor
 
 class Viewer
   this.$inject = [
-    '$location', '$routeParams', '$scope',
+    '$location', '$rootScope', '$routeParams', '$scope',
     'annotator'
   ]
   constructor: (
-    $location, $routeParams, $scope,
+    $location, $rootScope, $routeParams, $scope,
     annotator
   ) ->
     {provider, threading} = annotator
@@ -800,6 +806,11 @@ class Viewer
         return new Date(thread.message.updated)
       else
         return new Date()
+
+    $scope.$on 'updateReplies', ->
+      for annotation in $rootScope.annotations
+        thread = threading.getContainer annotation.id
+        annotation.reply_list = (r.message for r in (thread.children or []))
 
 
 class Search
@@ -1024,6 +1035,11 @@ class Search
         return new Date(thread.message.updated)
       else
         return new Date()
+
+    $scope.$on 'updateReplies', ->
+      for annotation in $scope.threads
+        thread = threading.getContainer annotation.id
+        annotation.reply_list = (r.message for r in (thread.children or []))
 
     refresh()
 
