@@ -190,12 +190,24 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     # maximum count.
     max = 0
     for b in @buckets
-      total = b.reduce (total, a) ->
-        subtotal = 1
-        total + subtotal
+      info = b.reduce (info, a) ->
+        subtotal = (a.thread?.flattenChildren()?.length or 0)
+        return {
+          top: (info.top or 0) + 1
+          replies: (info.replies or 0) + subtotal
+          total : (info.total or 0) + subtotal + 1
+        }
       , 0
-      max = Math.max max, total
-      b.total = total
+      max = Math.max max, info.total
+      b.total = info.total
+      b.top = info.top
+      b.replies = info.replies
+
+      # Set up displayed number in a tab.
+      # Format: <top>+<replies> if this string is no longer than 4 characters
+      # Otherwise display: <ŧotal>
+      temp = b.top + '+' + b.replies
+      b.display =  if temp.length < 5 then temp else b.total
 
     # Set up the stop interpolations for data binding
     stopData = $.map @buckets, (bucket, i) =>
@@ -258,7 +270,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       "#{(@index[d] + @index[d+1]) / 2}px"
 
     .html (d) =>
-      "<div class='label'>#{@buckets[d].total}</div><div class='svg'></div>"
+      "<div class='label'>#{@buckets[d].display}</div><div class='svg'></div>"
 
     .classed('upper', @isUpper)
     .classed('lower', @isLower)
