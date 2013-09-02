@@ -207,7 +207,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       # Format: <top>+<replies> if this string is no longer than 4 characters
       # Otherwise display: <ŧotal>
       temp = b.top + '+' + b.replies
-      b.display =  if temp.length < 5 then temp else b.total
+      b.display =  if temp.length < 5 and b.replies > 0 then temp else b.total
 
     # Set up the stop interpolations for data binding
     stopData = $.map @buckets, (bucket, i) =>
