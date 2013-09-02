@@ -260,13 +260,18 @@ class Hypothesis extends Annotator
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) -> annotation
 
+  buildReplyList: (annotations=[]) =>
+    for annotation in annotations
+      thread = @threading.getContainer annotation.id
+      children = (r.message for r in (thread.children or []))
+      annotation.reply_list = children
+      @buildReplyList children
+
   updateViewer: (annotations=[]) =>
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) =>
-        for annotation in annotations
-          thread = @threading.getContainer annotation.id
-          annotation.reply_list = (r.message for r in (thread.children or []))
+        @buildReplyList annotations
         $rootScope.annotations = annotations
         $location.path('/viewer').replace()
         $rootScope.$digest()
