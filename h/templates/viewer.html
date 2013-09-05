@@ -34,7 +34,7 @@
             <li class="thread"
                 ng-class="collapsed && 'collapsed' || ''"
                 ng-click="toggleCollapsed($event)"
-                ng-repeat="annotation in annotation.reply_list | orderBy:sortThread:true"
+                ng-repeat="annotation in annotation.reply_list"
                 ng-transclude>
               <a href="" class="threadexp"
                  title="{{collapsed && 'Expand' || 'Collapse'}}"

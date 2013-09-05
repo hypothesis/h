@@ -744,9 +744,19 @@ class Annotation
           $scope.model.$modelValue.highlightText =
             $scope.model.$modelValue.highlightText.replace regexp, annotator.highlighter
 
+    sortAnnotations: (a, b) ->
+      a_upd = if a.updated? then new Date(a.updated) else new Date()
+      b_upd = if b.updated? then new Date(b.updated) else new Date()
+      a_upd.getTime() - b_upd.getTime()
+
     $scope.$on 'updateReplies', ->
+      unless $scope.model.$modelValue.references?.length
+        return
+
       thread = threading.getContainer $scope.model.$modelValue.id
-      $scope.model.$modelValue.reply_list = (r.message for r in (thread.children or []))
+      reply_list = (r.message for r in (thread.children or []))
+      $scope.model.$modelValue.reply_list = reply_list.sort(@sortAnnotations).reverse()
+
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
@@ -801,16 +811,17 @@ class Viewer
       thread = threading.getContainer annotation.id
       (r.message for r in (thread.children or []))
 
-    $scope.sortThread = (thread) ->
-      if thread?.message?.updated
-        return new Date(thread.message.updated)
-      else
-        return new Date()
+    sortAnnotations: (a, b) ->
+      a_upd = if a.updated? then new Date(a.updated) else new Date()
+      b_upd = if b.updated? then new Date(b.updated) else new Date()
+      a_upd.getTime() - b_upd.getTime()
 
     $scope.$on 'updateReplies', ->
+      console.log 'top updateReplies'
       for annotation in $rootScope.annotations
         thread = threading.getContainer annotation.id
-        annotation.reply_list = (r.message for r in (thread.children or []))
+        reply_list = (r.message for r in (thread.children or []))
+        annotation.reply_list = reply_list.sort(@sortAnnotations).reverse()
 
 
 class Search
@@ -1029,17 +1040,16 @@ class Search
         $scope.ann_info.shown[next_id] = true
         pos += 1
 
-
-    $scope.sortThread = (thread) ->
-      if thread?.message?.updated
-        return new Date(thread.message.updated)
-      else
-        return new Date()
+    sortAnnotations: (a, b) ->
+      a_upd = if a.updated? then new Date(a.updated) else new Date()
+      b_upd = if b.updated? then new Date(b.updated) else new Date()
+      a_upd.getTime() - b_upd.getTime()
 
     $scope.$on 'updateReplies', ->
       for annotation in $scope.threads
         thread = threading.getContainer annotation.id
-        annotation.reply_list = (r.message for r in (thread.children or []))
+        reply_list = (r.message for r in (thread.children or []))
+        annotation.reply_list = reply_list.sort(@sortAnnotations).reverse()
 
     refresh()
 
