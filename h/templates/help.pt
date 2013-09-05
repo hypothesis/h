@@ -27,7 +27,7 @@
 		<h2>Using the Chrome Extension:</h2> 
 			<p>If you’re using the extension, first click the annotation icon in your address bar.  Hypothesis will turn on and enable the sidebar on the document you are currently viewing. Note: after installing the extension you may have to refresh this page before annotation icon will appear.</p>
 			<img height="150px" width="150px"
-       		  src="${webassets(request, 'images/helpdocumentation/enableAnnotation.png')[0]}" />
+       		  src="${webassets(request, 'images/helpdocumentation/enableannotation.png')[0]}" />
 	
 		<h2>Using the Bookmarklet:</h2> 
 			<p>Navigate to the page you want to annotate. Clicking the Bookmarklet will load Hypothes.is and enable the sidebar on the document you are currently viewing.</p>
@@ -35,14 +35,14 @@
 		<h2>Opening the sidebar:</h2> 
 			<p>To open the sidebar, simply click on the small tab at the upper right. To close it, click on it again or click anywhere on the page outside of the sidebar.</p>
 			<img height="150px" width="150px"
-        	 src="${webassets(request, 'images/helpdocumentation/openSidebar.png')[0]}" />
+        	 src="${webassets(request, 'images/helpdocumentation/opensidebar.png')[0]}" />
 	
 		<h2>Creating an account:</h2>
 			<p>Click “sign In” and then on the “Create an account” tab to create an account! When you receive the confirmation email, click the link inside.  You are now ready to annotate.</p>
 			<img height="150px" width="150px"
-	         src="${webassets(request, 'images/helpdocumentation/signIn.jpg')[0]}" />
+	         src="${webassets(request, 'images/helpdocumentation/signin.jpg')[0]}" />
 	        <img height="150px" width="150px"
-	         src="${webassets(request, 'images/helpdocumentation/createAnAccount.jpg')[0]}" />
+	         src="${webassets(request, 'images/helpdocumentation/createanaccount.jpg')[0]}" />
 			
 		<h2>Claiming a username:</h2>
 			<p>Have you already reserved a username? Use the “Claim your username” tab instead.</p>
@@ -66,7 +66,7 @@
 		<h2>The Heatmap:</h2> 
 			<p>The heatmap shows you where annotations are on the page. Click on a tab to open the sidebar and view the annotations. Click on an annotation to see its detail view.</p>
 	     	<img height="150px" width="150px"
-	         src="${webassets(request, 'images/helpdocumentation/heatMap.png')[0]}" />
+	         src="${webassets(request, 'images/helpdocumentation/heatmap.png')[0]}" />
 			
 		<h2>Navigation:</h2>
 			<p>Click on the up tab and down tab to navigate to the next and previous annotations on the page.</p>
@@ -76,7 +76,7 @@
 		<h2>Search/Filters</h2>
 			<p>To use the search bar click on the magnifying glass.</p>
 			<img height="" width=""
-             src="${webassets(request, 'images/helpdocumentation/Magnify.jpg')[0]}" />
+             src="${webassets(request, 'images/helpdocumentation/magnify.jpg')[0]}" />
 			<p>The search bar will appear.</p>
 			<img height="auto" width="450"
              src="${webassets(request, 'images/helpdocumentation/searchmenu.jpg')[0]}" />
@@ -91,7 +91,7 @@
 		<h2>Creating an annotation</h2>
 			<p>To create an annotation select the text you want and click on the pen icon.</p>
 			<img height="auto" width="450"
-	         src="${webassets(request, 'images/helpdocumentation/Selection.jpg')[0]}" />
+	         src="${webassets(request, 'images/helpdocumentation/selection.jpg')[0]}" />
 			
 			<p>The side bar will open and you’ll be able to add text and tags. It should be noted that markdown is supported, and you can use this to attach links and pictures to your annotations. You can learn more about markdown <a href="http://en.wikipedia.org/wiki/Markdown">here</a>. 
 			<img height="auto" width="450"
@@ -101,7 +101,7 @@
 		<h2>Private vs Public Annotations</h2>
 			<p>Annotations can currently be set to be either public or private. Private annotations are visible only to you. You can change this setting this when you create or edit an annotation.</p>
 			<img height="" width=""
-	         src="${webassets(request, 'images/helpdocumentation/Visibility.jpg')[0]}" />
+	         src="${webassets(request, 'images/helpdocumentation/visibility.jpg')[0]}" />
 			
 		<h2>Editing an annotation</h2>
 			<p>To edit an annotation, simply hover over the annotation card and select the edit button.</p>
@@ -120,14 +120,14 @@
 		<h2>Accessing the control bar:</h2>
 			<p>Roll over and hover on the speech bubble in the tool tab.  A set of controls will drop down.  They are each turned off by default.</p>
 			<img height="" width=""
-             src="${webassets(request, 'images/helpdocumentation/accessControlBar.jpg')[0]}" />
+             src="${webassets(request, 'images/helpdocumentation/accesscontrolbar.jpg')[0]}" />
 		
 		<h2>Show annotations</h2>
 			<p>Clicking on the eye in controlbar menu renders all annotations and highlights visible in the page. Clicking on any highlight in the text, shows the annotation under the cursor at that spot.</p>
 		
 		<h2>The highlight tool</h2>
 			<img height="" width=""
-             src="${webassets(request, 'images/helpdocumentation/HighlightingMode.jpg')[0]}" />
+             src="${webassets(request, 'images/helpdocumentation/highlightingmode.jpg')[0]}" />
 			<p>To use the highlight tool, simply select it from the controlbar menu. To highlight something simply select text to create a new highlight (it’s that easy). Highlights default to private annotations, so they are only visible if you share the link to them.</p>
 			<p>If you click on a highlight it will show you the corresponding card in the sidebar. Likewise, hovering over an annotation card in the side bar will reveal the corresponding highlight in the document.</p>
 			<img height="" width=""
