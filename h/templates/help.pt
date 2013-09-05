@@ -56,7 +56,7 @@
              src="${webassets(request, 'images/helpdocumentation/password2.jpg')[0]}" />
 			<p>Enter the activation code and the new password for your account. Click sign in, and your password will be reset.</p>
 			<img height="203px;" width="420px;"
-             src="${webassets(request, 'images/helpdocumentation/Password3.jpg')[0]}" />
+             src="${webassets(request, 'images/helpdocumentation/password3.jpg')[0]}" />
 		
 		<h2>Submitting Feedback</h2>
 			<p>Feel free to use our <a href="http://hypothes.is/contact/">contact form!</a></p>
