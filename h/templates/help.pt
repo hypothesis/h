@@ -66,7 +66,7 @@
 		<h2>The Heatmap:</h2> 
 			<p>The heatmap shows you where annotations are on the page. Click on a tab to open the sidebar and view the annotations. Click on an annotation to see its detail view.</p>
 	     	<img height="150px" width="150px"
-	             src="${webassets(request, 'images/helpdocumentation/heatMap.png')[0]}" />
+	         src="${webassets(request, 'images/helpdocumentation/heatMap.png')[0]}" />
 			
 		<h2>Navigation:</h2>
 			<p>Click on the up tab and down tab to navigate to the next and previous annotations on the page.</p>
@@ -91,17 +91,17 @@
 		<h2>Creating an annotation</h2>
 			<p>To create an annotation select the text you want and click on the pen icon.</p>
 			<img height="auto" width="450"
-	             src="${webassets(request, 'images/helpdocumentation/Selection.jpg')[0]}" />
+	         src="${webassets(request, 'images/helpdocumentation/Selection.jpg')[0]}" />
 			
 			<p>The side bar will open and you’ll be able to add text and tags. It should be noted that markdown is supported, and you can use this to attach links and pictures to your annotations. You can learn more about markdown <a href="http://en.wikipedia.org/wiki/Markdown">here</a>. 
 			<img height="auto" width="450"
-	             src="${webassets(request, 'images/helpdocumentation/annotating.jpg')[0]}" />
+	         src="${webassets(request, 'images/helpdocumentation/annotating.jpg')[0]}" />
 	
 			
 		<h2>Private vs Public Annotations</h2>
 			<p>Annotations can currently be set to be either public or private. Private annotations are visible only to you. You can change this setting this when you create or edit an annotation.</p>
 			<img height="" width=""
-	             src="${webassets(request, 'images/helpdocumentation/Visibility.jpg')[0]}" />
+	         src="${webassets(request, 'images/helpdocumentation/Visibility.jpg')[0]}" />
 			
 		<h2>Editing an annotation</h2>
 			<p>To edit an annotation, simply hover over the annotation card and select the edit button.</p>
