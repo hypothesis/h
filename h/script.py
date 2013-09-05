@@ -92,7 +92,9 @@ def extension(args, console):
     from os import makedirs
     from os.path import abspath, exists, join
     from shutil import copyfile, copytree, rmtree
-    from urlparse import urljoin, urlparse, urlunparse
+    from urlparse import (
+        urljoin, urlparse, urlunparse, uses_netloc, uses_relative,
+    )
 
     from chameleon.zpt.template import PageTextTemplateFile
     from pyramid.path import AssetResolver
@@ -236,6 +238,10 @@ def extension(args, console):
         settings.update({
             'webassets.base_url': args[2],
         })
+
+    # Make sure urlparse understands chrome-extension:// URLs
+    uses_netloc.append('chrome-extension')
+    uses_relative.append('chrome-extension')
 
     bootstrap(args[0], options=settings, config_fn=chrome)
 
