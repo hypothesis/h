@@ -55,6 +55,12 @@ class Hypothesis extends Annotator
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
+    # Generate client ID
+    buffer = new Array(16)
+    uuid.v4 null, buffer, 0
+    @clientID = uuid.unparse buffer
+    $.ajaxSetup headers: "x-client-id": @clientID
+
     # Load plugins
     for own name, opts of @options
       if not @plugins[name] and name of Annotator.Plugin
