@@ -15,6 +15,11 @@ class Displayer
 
   this.$inject = ['$scope','$element','$timeout','streamfilter']
   constructor: ($scope, $element, $timeout, streamfilter) ->
+    # Generate client ID
+    buffer = new Array(16)
+    uuid.v4 null, buffer, 0
+    @clientID = uuid.unparse buffer
+
     $scope.root = document.init_annotation
     $scope.annotation = $scope.root.annotation
     $scope.annotations = [$scope.annotation]
@@ -46,7 +51,10 @@ class Displayer
       $scope.sock = new SockJS @path
 
       $scope.sock.onopen = =>
-        $scope.sock.send JSON.stringify $scope.filter
+        sockmsg =
+          filter: $scope.filter
+          clientID: @clientID
+        $scope.sock.send JSON.stringify sockmsg
 
       $scope.sock.onclose = =>
         $timeout $scope.open, 5000
@@ -54,8 +62,10 @@ class Displayer
       $scope.sock.onmessage = (msg) =>
         console.log 'Got something'
         console.log msg
-        data = msg.data[0]
-        action = msg.data[1]
+        unless msg.data.type? and msg.data.type is 'annotation-notification'
+          return
+        data = msg.data.payload
+        action = msg.data.options.action
         unless data instanceof Array then data = [data]
 
         $scope.$apply =>

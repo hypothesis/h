@@ -174,6 +174,8 @@ visualsearch = Bundle(
     CSS('h:lib/visualsearch.css', output='lib/visualsearch.min.css'),
 )
 
+uuid = Uglify('lib/uuid.js', output='lib/uuid.min.js')
+
 domTextFamily = Uglify(
     Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
     Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
@@ -216,6 +218,7 @@ app = Bundle(
     jquery_ui_effects,
     tagit,
     visualsearch,
+    uuid,
     Uglify(
         *[
             Coffee('js/%s.coffee' % name,
