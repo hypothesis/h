@@ -1,8 +1,7 @@
 <form name="form">
   <div class="magicontrols pull-right" ng-hide="editing">
     <!-- Timestamp -->
-    <span class="small"
-          >{{model.$viewValue.updated | fuzzyTime | date:'mediumDate'}}</span>
+    <fuzzytime ng-model="model.$viewValue.updated"></fuzzytime>
 
     <!-- More actions -->
     <div class="dropdown small show">
@@ -11,13 +10,13 @@
         <li class="reply-icon"
             ng-click="reply()">Reply</li>
         <li class="clipboard-icon"
-            ng-show="authorize('update')"
+            ng-show="auth.update"
             ng-click="edit()">Edit</li>
         <li class="x-icon"
-            ng-show="authorize('delete')"
+            ng-show="auth.delete"
             ng-click="delete()">Delete…</li>
         <li class="flag-icon"
-            ng-hide="authorize('delete')"
+            ng-hide="auth.delete"
             ng-click="flag()">Flag…</li>
       </ul>
     </div>
@@ -136,9 +135,9 @@
     <!-- <span class="fave-icon" title="Favorite"
           ng-click="favorite()" /> -->
     <a class="share-icon show" href="" title="Share" ng-click="share($event)">Share</a>
-    <a class="clipboard-icon show" href="" title="Edit" ng-show="authorize('update')" ng-click="edit()">Edit</a>
-    <a class="x-icon show" href="" title="Delete" ng-show="authorize('delete')" ng-click="delete()">Delete</a>
-    <a class="flag-icon show" href="" title="flag" ng-hide="authorize('delete')" ng-click="flag()">Flag</a>
+    <a class="clipboard-icon show" href="" title="Edit" ng-show="auth.update" ng-click="edit()">Edit</a>
+    <a class="x-icon show" href="" title="Delete" ng-show="auth.delete" ng-click="delete()">Delete</a>
+    <a class="flag-icon show" href="" title="flag" ng-hide="auth.delete" ng-click="flag()">Flag</a>
 
   </div>
 </form>

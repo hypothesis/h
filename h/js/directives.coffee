@@ -356,9 +356,33 @@ username = ['$filter', '$window', ($filter, $window) ->
   template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
 ]
 
+fuzzytime = ['$filter', '$window', ($filter, $window) ->
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
+
+    ctrl.$render = ->
+      scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
+
+    timefunct = ->
+      $window.setInterval =>
+        scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
+        scope.$digest()
+      , 5000
+
+    scope.timer = timefunct()
+
+    scope.$on '$destroy', ->
+      $window.clearInterval scope.timer
+
+  require: '?ngModel'
+  restrict: 'E'
+  template: '<span class="small">{{ftime | date:mediumDate}}</span>'
+]
+
 
 angular.module('h.directives', ['ngSanitize'])
   .directive('authentication', authentication)
+  .directive('fuzzytime', fuzzytime)
   .directive('markdown', markdown)
   .directive('privacy', privacy)
   .directive('recursive', recursive)

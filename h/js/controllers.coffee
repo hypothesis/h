@@ -95,7 +95,6 @@ class App
             $scope.dynamicBucket = false
             $location.search({'id' : null })
             annotator.showViewer heatmap.buckets[bucket]
-            $scope.$digest()
 
     $scope.$watch 'sheet.collapsed', (newValue) ->
       $scope.sheet.tab = if newValue then null else 'login'
@@ -633,6 +632,7 @@ class Annotation
       switch $scope.action
         when 'create'
           annotator.publish 'annotationCreated', annotation
+          $scope.$emit 'updateReplies'
         when 'delete'
           root = $scope.$root.annotations
           root = (a for a in root when a isnt root)
@@ -658,6 +658,7 @@ class Annotation
 
       # XXX: This is ugly -- it's the one place we refer to the plugin directly
       annotator.plugins.Threading.thread reply
+      $scope.$emit 'updateReplies'
 
     $scope.edit = ->
       $scope.action = 'edit'
@@ -683,6 +684,7 @@ class Annotation
                 annotator.deleteAnnotation reply
 
           annotator.deleteAnnotation annotation
+          $scope.$emit 'updateReplies'
       else
         $scope.action = 'delete'
         $scope.editing = true
@@ -690,12 +692,6 @@ class Annotation
         $scope.origTags = $scope.model.$modelValue.tags
         $scope.model.$modelValue.text = ''
         $scope.model.$modelValue.tags = ''
-
-    $scope.authorize = (action) ->
-      if $scope.model.$modelValue? and annotator.plugins?.Permissions?
-        annotator.plugins.Permissions.authorize action, $scope.model.$modelValue
-      else
-        true
 
     $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
     $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
@@ -742,6 +738,14 @@ class Annotation
           $scope.model.$modelValue.highlightText =
             $scope.model.$modelValue.highlightText.replace regexp, annotator.highlighter
 
+    $scope.$on 'updateReplies', ->
+      unless $scope.model.$modelValue.references?.length
+        return
+
+      thread = threading.getContainer $scope.model.$modelValue.id
+      reply_list = (r.message for r in (thread.children or []))
+      $scope.model.$modelValue.reply_list = reply_list.sort(annotator.sortAnnotations).reverse()
+
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
@@ -774,11 +778,11 @@ class Editor
 
 class Viewer
   this.$inject = [
-    '$location', '$routeParams', '$scope',
+    '$location', '$rootScope', '$routeParams', '$scope',
     'annotator'
   ]
   constructor: (
-    $location, $routeParams, $scope,
+    $location, $rootScope, $routeParams, $scope,
     annotator
   ) ->
     {provider, threading} = annotator
@@ -796,11 +800,17 @@ class Viewer
       thread = threading.getContainer annotation.id
       (r.message for r in (thread.children or []))
 
-    $scope.sortThread = (thread) ->
-      if thread?.message?.updated
-        return new Date(thread.message.updated)
-      else
-        return new Date()
+    sortAnnotations: (a, b) ->
+      a_upd = if a.updated? then new Date(a.updated) else new Date()
+      b_upd = if b.updated? then new Date(b.updated) else new Date()
+      a_upd.getTime() - b_upd.getTime()
+
+    $scope.$on 'updateReplies', ->
+      console.log 'top updateReplies'
+      for annotation in $rootScope.annotations
+        thread = threading.getContainer annotation.id
+        reply_list = (r.message for r in (thread.children or []))
+        annotation.reply_list = reply_list.sort(@sortAnnotations).reverse()
 
 
 class Search
@@ -1019,12 +1029,11 @@ class Search
         $scope.ann_info.shown[next_id] = true
         pos += 1
 
-
-    $scope.sortThread = (thread) ->
-      if thread?.message?.updated
-        return new Date(thread.message.updated)
-      else
-        return new Date()
+    $scope.$on 'updateReplies', ->
+      for annotation in $scope.threads
+        thread = threading.getContainer annotation.id
+        reply_list = (r.message for r in (thread.children or []))
+        annotation.reply_list = reply_list.sort(annotator.sortAnnotations).reverse()
 
     refresh()
 
