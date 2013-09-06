@@ -744,18 +744,13 @@ class Annotation
           $scope.model.$modelValue.highlightText =
             $scope.model.$modelValue.highlightText.replace regexp, annotator.highlighter
 
-    sortAnnotations: (a, b) ->
-      a_upd = if a.updated? then new Date(a.updated) else new Date()
-      b_upd = if b.updated? then new Date(b.updated) else new Date()
-      a_upd.getTime() - b_upd.getTime()
-
     $scope.$on 'updateReplies', ->
       unless $scope.model.$modelValue.references?.length
         return
 
       thread = threading.getContainer $scope.model.$modelValue.id
       reply_list = (r.message for r in (thread.children or []))
-      $scope.model.$modelValue.reply_list = reply_list.sort(@sortAnnotations).reverse()
+      $scope.model.$modelValue.reply_list = reply_list.sort(annotator.sortAnnotations).reverse()
 
 
 class Editor
@@ -1040,16 +1035,11 @@ class Search
         $scope.ann_info.shown[next_id] = true
         pos += 1
 
-    sortAnnotations: (a, b) ->
-      a_upd = if a.updated? then new Date(a.updated) else new Date()
-      b_upd = if b.updated? then new Date(b.updated) else new Date()
-      a_upd.getTime() - b_upd.getTime()
-
     $scope.$on 'updateReplies', ->
       for annotation in $scope.threads
         thread = threading.getContainer annotation.id
         reply_list = (r.message for r in (thread.children or []))
-        annotation.reply_list = reply_list.sort(@sortAnnotations).reverse()
+        annotation.reply_list = reply_list.sort(annotator.sortAnnotations).reverse()
 
     refresh()
 
