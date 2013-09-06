@@ -50,8 +50,8 @@ class Hypothesis extends Annotator
   viewer:
     addField: (-> )
 
-  this.$inject = ['$document', '$location', '$rootScope', '$route', '$window', 'authentication', 'drafts']
-  constructor: ($document, $location, $rootScope, $route, $window, authentication, drafts) ->
+  this.$inject = ['$document', '$location', '$rootScope', '$route', 'authentication', 'drafts']
+  constructor: ($document, $location, $rootScope, $route, authentication, drafts) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
@@ -138,29 +138,6 @@ class Hypothesis extends Annotator
 
     # Reload the route after annotations are loaded
     this.subscribe 'annotationsLoaded', -> $route.reload()
-
-    check_versions = (host_release) ->
-      v1 = hypothesis_release
-      v2 = host_release
-#      v3 = hypothesis_server_release ? "(missing)"
-      if v1 is v2 #and v1 is v3
-        console.log "You are running release: " + v1
-        console.log "Code versions are consistent. We are good to go."
-      else
-        console.log "============================================"
-        console.log "Sidebar code release is " + v1
-        console.log "Host document code release is " + v2
-#        console.log "Server-side code release is " + v3
-        console.log "============================================"
-
-        if $window.confirm "Unfortunately, your browser has somehow loaded incompatible versions of the different pieces of our code. This should not happen, but if it does, it should be a very temporary situation. You could try to manually update your extension. If that does not help, please check back later (30 minutes should be enough). Please excuse us for the inconvenience.\n\nWould like to see instructions describing how to manually update your extensions?"
-          $window.open "http://www.howtogeek.com/64525/how-to-manually-force-google-chrome-to-update-extensions/"       
-
-    @provider.call
-      method: 'checkRelease'
-      timeout: 10000
-      error: -> check_versions "(missing)"
-      success: check_versions
 
     @auth = authentication
     @socialView =

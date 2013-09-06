@@ -36,43 +36,6 @@ def assets(args, console):
 
     bootstrap(args[0], config_fn=build)
 
-@command
-def tag(args, console):
-    """ Tag the release """
-    import time
-    import random
-    import os
-
-    # Get a timestamp
-    timestamp = time.asctime()
-
-
-    dirH = os.path.dirname(__file__)
-
-    # Get a random name for the release
-    nameFileName = os.path.join(dirH, "lib", "names.txt")
-    names = []
-    for line in open(nameFileName):
-        names.append(line[:-1])
-    random.seed()
-    index = random.randint(0, len(names)-1)
-    name = names[index]
-    names = []
-
-    # Build the tag
-    tag = timestamp + " (" + name + ")"
-    console.error("Tagging release as '" + tag + "'.")
-
-    # Write the release tag files on clientside and serverside
-    clientTagFileName = os.path.join(dirH, "js", "release_tag.coffee")
-    with open (clientTagFileName, "w") as tagfile:
-        tagfile.write("window.hypothesis_release='" + tag + "'\n")
-
-#  TODO: solve server-side version info
-#    serverTagFileName = os.path.join(dirH, "release_tag.py")
-#    with open (serverTagFileName, "w") as tagfile:
-#        tagfile.write("hypothesis_release='" + tag + "'\n")
-
 
 @command(usage='CONFIG_FILE APP_URL [STATIC_URL]')
 def extension(args, console):
