@@ -363,10 +363,16 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
     ctrl.$render = ->
       scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
 
-    $window.setInterval =>
-      scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
-      scope.$digest()
-    , 5000
+    timefunct = ->
+      $window.setInterval =>
+        scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
+        scope.$digest()
+      , 5000
+
+    scope.timer = timefunct()
+
+    scope.$on '$destroy', ->
+      $window.clearInterval scope.timer
 
   require: '?ngModel'
   restrict: 'E'
