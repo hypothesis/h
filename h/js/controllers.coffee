@@ -73,16 +73,20 @@ class App
         .on 'click', (bucket) =>
           d3.event.stopPropagation()
 
-          # If it's the upper tab, scroll to next bucket above
+          # If it's the upper tab, switch to dynamic bucket mode,
+          # and scroll to next bucket above
           if heatmap.isUpper bucket
+            $scope.dynamicBucket = true
             threshold = offset + heatmap.index[0]
             next = highlights.reduce (next, hl) ->
               if next < hl.offset.top < threshold then hl.offset.top else next
             , 0
             provider.notify method: 'scrollTop', params: next - pad
 
-          # If it's the lower tab, scroll to next bucket below
+          # If it's the lower tab, switch do dynamic bucket mode,
+          # and scroll to next bucket below
           else if heatmap.isLower bucket
+            $scope.dynamicBucket = true
             threshold = offset + heatmap.index[0] + height - pad
             next = highlights.reduce (next, hl) ->
               if threshold < hl.offset.top < next then hl.offset.top else next
