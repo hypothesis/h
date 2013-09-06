@@ -278,10 +278,24 @@ class Hypothesis extends Annotator
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) -> annotation
 
+  sortAnnotations: (a, b) ->
+    a_upd = if a.updated? then new Date(a.updated) else new Date()
+    b_upd = if b.updated? then new Date(b.updated) else new Date()
+    a_upd.getTime() - b_upd.getTime()
+
+  buildReplyList: (annotations=[]) =>
+    $filter = @element.injector().get '$filter'
+    for annotation in annotations
+      thread = @threading.getContainer annotation.id
+      children = (r.message for r in (thread.children or []))
+      annotation.reply_list = children.sort(@sortAnnotations).reverse()
+      @buildReplyList children
+
   updateViewer: (annotations=[]) =>
     @element.injector().invoke [
       '$location', '$rootScope',
-      ($location, $rootScope) ->
+      ($location, $rootScope) =>
+        @buildReplyList annotations
         $rootScope.annotations = annotations
         $location.path('/viewer').replace()
         $rootScope.$digest()
