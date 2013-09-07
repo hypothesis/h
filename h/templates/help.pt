@@ -7,19 +7,11 @@
   </head>
   <body metal:fill-slot="body" class="dark-noise">
     <div id="home" class="content paper">
-      <header>
-        <img height="150px" width="150px"
-             src="${webassets(request, 'images/hypothelogo_square.png')[0]}" />
-        <hgroup>
-          <h1>Hypothes<span class="red">.</span>is</h1>
-          <h2>The&#160;Internet, peer&#160;reviewed.</h2>
-        </hgroup>
-      </header>
       <h1>Help</h1>
-	    <p>Welcome to the help page! This page contains general information about using the application. If it does not answer your questions please post on the <a href="https://groups.google.com/forum/#!forum/hypothesis-forum">forum</a>, reach us on freenode IRC <a href="http://webchat.freenode.net/?channels=hypothes.is">#hypothes.is</a>, join the <a href="mailto:dev+subscribe@list.hypothes.is">dev-list</a>, raise an issue on our <a href="https://github.com/hypothesis/h">GitHub page</a>, or simply <a href="http://hypothes.is/contact/">contact us</a>. Additionally, feel free to annotate this page so that we can improve the documentation.</p>
+	    <p>This page contains general information about using the application. If it does not answer your questions please post on the <a href="https://groups.google.com/forum/#!forum/hypothesis-forum">forum</a> or simply <a href="http://hypothes.is/contact/">contact us</a>. Additionally, feel free to annotate this page so that we can improve the documentation.</p>
 	      
 	    <p>For general information about the project, please visit the <a href="http://hypothes.is">home page</a> where you can reserve a username, sign up for our newsletter, or learn how to get involved in working to improve Hypothesis.</p>
-
+	    
 	  <br/>
 
 	  <h1>Getting Started:</h1>
@@ -38,7 +30,7 @@
         	 src="${webassets(request, 'images/helpdocumentation/opensidebar.png')[0]}" />
 	
 		<h2>Creating an account:</h2>
-			<p>Click “sign In” and then on the “Create an account” tab to create an account! When you receive the confirmation email, click the link inside.  You are now ready to annotate.</p>
+			<p>Click “sign In” and then on the “Create an account” tab to create an account. When you receive the confirmation email, click the link inside.  You are now ready to annotate.</p>
 			<img height="150px" width="150px"
 	         src="${webassets(request, 'images/helpdocumentation/signin.jpg')[0]}" />
 	        <img height="150px" width="150px"
@@ -59,7 +51,7 @@
              src="${webassets(request, 'images/helpdocumentation/password3.jpg')[0]}" />
 		
 		<h2>Submitting Feedback</h2>
-			<p>Feel free to use our <a href="http://hypothes.is/contact/">contact form!</a></p>
+			<p>Feel free to use our <a href="http://hypothes.is/contact/">contact form.</a></p>
 	
 	  <h1>Viewing annotations:</h1>
 
@@ -82,7 +74,7 @@
              src="${webassets(request, 'images/helpdocumentation/searchmenu.jpg')[0]}" />
 		
 		<h2>[Feature Pending] Flagging for spam:</h2>
-			<p>We want to maintain a high standard for annotation. If you find something you believe is spam or inappropriate, please flag it! You can do this by hovering over the annotation and selecting “flag.” </p>
+			<p>We want to maintain a high standard for annotation. If you find something you believe is spam or inappropriate, please flag it. You can do this by hovering over the annotation and selecting “flag.” </p>
 			<img height="" width=""
              src="${webassets(request, 'images/helpdocumentation/flag.jpg')[0]}" />
 
