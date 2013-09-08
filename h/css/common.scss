@@ -325,7 +325,6 @@ blockquote {
 .dropdown-toggle {
   @include fonticon("\002f", right, 0);
   cursor: pointer;
-  padding: .5em;
 
   &:active {
     outline: 0;
@@ -485,6 +484,19 @@ blockquote {
 
 .launch-icon {
   @include fonticon("\2a", left);
+}
+
+.cancel-icon {
+  position: relative;
+  top: 2px;
+  width: 11px; height: 11px;
+  background-position: center 0;
+  background-repeat: no-repeat;
+  background-image: url(../images/embed/icons/cancel_search.png?1311104738);
+  cursor: pointer;
+  &:hover {
+    background-position: center -11px;
+  }
 }
 
 //Controlbar Icons
@@ -671,6 +683,10 @@ blockquote {
   padding: 1em;
   padding-top: 3.5em;
 
+  .domain {
+    margin: 0.2em 0 0.3em;
+  }
+
   .domain .favicon {
     margin: 0 .5em;
   }
@@ -698,6 +714,7 @@ blockquote {
     &:hover {
       color: $linkColorHover;
       cursor: pointer;
+      text-decoration: underline;
     }
   }
 
@@ -753,6 +770,7 @@ blockquote {
     &:hover {
       color: $linkColorHover;
       cursor: pointer;
+      text-decoration: underline;
     }
   }
 }
@@ -869,9 +887,9 @@ blockquote {
 
   &.pull-right {
     text-align: right;
+    clear: both;
 
     & > * {
-      padding-left: .8em;
       padding-right: 0;
     }
   }
