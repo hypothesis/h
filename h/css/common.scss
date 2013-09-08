@@ -161,6 +161,13 @@ button, input[type=submit], .btn {
 }
 
 
+//Notifications///////////////////////////////
+
+.notifications {
+  padding: 1em 1em 1em 1em;
+
+}
+
 //FLASH/TOAST/ALERTS///////////////////////////////
 .toast, .annotator-notice {
   @include border-radius(0.1em);

@@ -135,7 +135,7 @@
     <!-- Bottombar -->
     <div class="bottombar" ng-class="frame.visible && 'shown'"
          ng-show="notifications.length">
-      <ul class="sliding-panels">
+      <ul class="notifications">
         <li class="stream-list notif-list"
             ng-repeat="notif in notifications">
            <div class="paper thread top-padding">
