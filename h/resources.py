@@ -210,6 +210,8 @@ class Annotation(BaseResource, dict):
 class Streamer(BaseResource, dict):
     pass
 
+class StreamSearch(BaseResource, dict):
+    pass
 
 class AnnotationFactory(BaseResource):
     def __getitem__(self, key):
@@ -253,6 +255,7 @@ def includeme(config):
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
     RootFactory.stream = Streamer
+    RootFactory.streamsearch = StreamSearch
     RootFactory.u = UserStreamFactory
     RootFactory.t = TagStreamFactory
 

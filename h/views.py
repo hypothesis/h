@@ -276,6 +276,12 @@ class Stream(BaseController):
     def __html__(self):
         return self.request.context
 
+@view_defaults(context='h.resources.StreamSearch', layout='site')
+class StreamSearch(BaseController):
+    @view_config(accept='text/html', renderer='templates/streamsearch.pt')
+    def __html__(self):
+        return self.request.context
+
 
 def includeme(config):
     config.add_view(

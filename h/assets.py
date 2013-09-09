@@ -238,8 +238,9 @@ app = Bundle(
                 'displayer',
                 'services',
                 'streamer',
-                'streamfilter',
                 'stream',
+                'streamfilter',
+                'streamsearch',
             )
         ],
         output='js/app.min.js'
