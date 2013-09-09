@@ -269,8 +269,9 @@ class FilterHandler(object):
 
 
 class StreamerSession(Session):
+    filter = None
+
     def on_open(self):
-        self.filter = {}
         transaction.commit()  # Release the database transaction
 
     def on_message(self, msg):
@@ -349,7 +350,8 @@ def after_action(event):
                     if 'text' in parent:
                         annotation['quote'] = parent['text']
 
-                if not session.filter.match(annotation, action):
+                flt = session.filter
+                if not (flt and flt.match(annotation, action)):
                     continue
 
                 client_id = request.headers['X-Client-Id'] if 'X-Client-Id' in request.headers else ''
