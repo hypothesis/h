@@ -262,6 +262,7 @@ class FilterHandler(object):
 
 
 class StreamerSession(Session):
+    clientID = None
     filter = None
 
     def on_open(self):
@@ -271,12 +272,16 @@ class StreamerSession(Session):
         transaction.begin()
         try:
             struct = json.loads(msg)
-            payload = struct['filter']
+
+            if 'clientID' in struct:
+                self.clientID = struct['clientID']
+                payload = struct['filter']
+            else:
+                payload = struct
 
             # Let's try to validate the schema
             validate(payload, filter_schema)
             self.filter = FilterHandler(payload)
-            self.clientID = struct['clientID'] if 'clientID' in struct else ''
 
             # If past is given, send the annotations back.
             if "past_data" in payload and payload["past_data"]["load_past"] != "none":
@@ -301,14 +306,19 @@ class StreamerSession(Session):
 
                 # Finally send filtered annotations
                 if len(annotations) > 0:
-                    packet = {
-                        'payload': send_annotations,
-                        'type': 'annotation-notification',
-                        'options': {
-                            'action': 'past',
-                            'clientID': self.clientID
+                    if self.clientID is None:
+                        # Backwards-compatibility code
+                        packet = [send_annotations, 'past']
+                    else:
+                        packet = {
+                            'payload': send_annotations,
+                            'type': 'annotation-notification',
+                            'options': {
+                                'action': 'past',
+                                'clientID': self.clientID,
+                            },
                         }
-                    }
+
                     self.send(packet)
         except:
             log.info(traceback.format_exc())
@@ -347,15 +357,19 @@ def after_action(event):
                 if not (flt and flt.match(annotation, action)):
                     continue
 
-                client_id = request.headers['X-Client-Id'] if 'X-Client-Id' in request.headers else ''
-                packet = {
-                    'payload': [annotation],
-                    'type': 'annotation-notification',
-                    'options': {
-                        'action': action,
-                        'clientID': client_id
+                if session.clientID is None:
+                    # Backwards-compatibility code
+                    packet = [annotation, action]
+                else:
+                    packet = {
+                        'payload': [annotation],
+                        'type': 'annotation-notification',
+                        'options': {
+                            'action': action,
+                            'clientID': request.headers.get('X-Client-Id'),
+                        },
                     }
-                }
+
                 session.send(packet)
             except:
                 log.info(traceback.format_exc())
