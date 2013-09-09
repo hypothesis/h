@@ -36,13 +36,6 @@ def check_favicon(icon_link, parsed_uri, domain):
             icon_link= parsed_uri[0] + "://" + icon_link[2:]
         else:
             icon_link = domain + icon_link
-        # Check if the icon_link url really exists
-        try:
-            r2 = requests.head(icon_link)
-            if r2.status_code != 200:
-                icon_link = ''
-        except:
-            log.info(traceback.format_exc())
     else:
         icon_link = ''
 

@@ -39,7 +39,9 @@
             <span>{{annotation.text && "annotated" || "highlighted"}}:</span>
           </strong>
           <div class="domain">
-            <img class="favicon" ng-src="{{root.favicon_link}}"/>
+            <img class="favicon" ng-src="{{root.favicon_link}}"
+                 onerror="this.style.display='none'"
+                 ng-show="root.favicon_link.length"/>
             <a ng-href="{{annotation.uri}}">{{root.title}}</a>
             |
             <a ng-href="{{root.source}}">{{root.source_stripped}}</a>
