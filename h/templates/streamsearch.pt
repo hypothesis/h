@@ -6,28 +6,27 @@
   <style type="text/css"></style>
 
   <body metal:fill-slot="body" ng-app="h.streamsearch">
-    <div class="topbar">
-      <div class="inner">
-        <a class="pull-left" href="/"
-           ><h4>hypothes<span class="red">.</span>is</h4></a>
-      </div>
-    </div>
+    <span ng-controller="StreamSearchController">
+      <div class="topbar">
+        <div class="inner right-border">
+          <a class="pull-left" href="/"
+             ><h4>hypothes<span class="red">.</span>is</h4></a>
 
-    <div class="content yui3-g"
-         ng-controller="StreamSearchController">
-
-      <!-- Searchbar -->
-      <div class="search-container yui3-u-1">
-        <div class="visual-search visual-container"></div>
+          <!-- Searchbar -->
+          <div class="search-container yui3-u-1 search-upper">
+            <div class="visual-search visual-container"></div>
+          </div>
+        </div>
       </div>
 
+      <div class="content yui3-g">
+        <!-- Streamdata -->
+        <script type="text/ng-template" id="streamviewer.html">
+          <metal:main use-macro="load: streamviewer.html" />
+        </script>
+        <streamviewer/>
+      </div>
 
-      <!-- Streamdata -->
-      <script type="text/ng-template" id="streamviewer.html">
-        <metal:main use-macro="load: streamviewer.html" />
-      </script>
-      <streamviewer/>
-
-    </div>
+    </span>
   </body>
 </html>
