@@ -90,11 +90,11 @@ class StreamSearch
             when 'time'
               callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
         clearSearch: (original) =>
-          console.log 'clearSearch triggered'
-
           # Execute clearSearch's internal method for resetting search
           original()
-          $location.search {}
+          $scope.$apply -     >
+            $scope.annotations = []
+            $location.search {}
 
     $scope.initStream = (filter) ->
       if $scope.sock? then $scope.sock.close()
