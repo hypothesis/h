@@ -9,7 +9,105 @@ get_quote = (annotation) ->
             quote = selector['exact'] + ' '
   quote
 
+# This class will process the results of search and generate the correct filter
+# It expects the following dict format as rules
+# { facet_name : {
+#      formatter: to format the value (optional)
+#      exact_match: true|false (default: true)
+#      case_sensitive: true|false (default: false)
+#      and_or: and|or for multiple values should it threat them as 'or' or 'and' (def: or)
+# }
+# The models is the direct output from visualsearch
+# The limit is the default limit
+class SearchHelper
+  populateFilter: (filter, models, rules, limit = 50) ->
+    # First cluster the different facets into categories
+    categories = {}
+    for searchItem in models
+      category = searchItem.attributes.category
+      value = searchItem.attributes.value
+      if category is 'limit' then limit = value
+      else
+        if category is 'text'
+          # Visualsearch sickly automatically cluster the text field
+          # (and only the text filed) into a space separated string
+          catlist = []
+          catlist.push val for val in value.split ' '
+          categories[category] = catlist
+        else
+          if category in categories then categories[category].push value
+          else categories[category] = [value]
+
+    filter.setPastDataHits(limit)
+
+    # Now for the categories
+    for category, values of categories
+      unless rules[category]? then continue
+      unless values.length then continue
+      rule = rules[category]
+
+      # Now generate the clause with the help of the rule
+      exact_match = if rule.exact_match? then rule.exact_match else true
+      case_sensitive = if rule.case_sensitive? then rule.case_sensitive else false
+      cs_part = if case_sensitive then '' else 'i'
+      and_or = if rule.and_or? then rule.and_or else 'or'
+
+      if values.length is 1
+        oper_part = if exact_match then '=' else '#'
+        value_part = if rule.formatter then rule.formatter values[0] else values[0]
+        filter.addClausesParse category+':' + cs_part + oper_part + value_part
+      else
+        if and_or is 'or'
+          val_list = ''
+          first = true
+          for val in values
+            unless first then val_list += ',' else first = false
+            value_part = if rule.formatter then rule.formatter val else val
+            value_list += value_part
+          oper_part = if exact_match then '[' else '{'
+          filter.addClausesParse category+':' + cs_part + oper_part + value_part
+        else
+          oper_part = if exact_match then '=' else '#'
+          for val in values
+            value_part = if rule.formatter then rule.formatter val else val
+            filter.addClausesParse category+':' + cs_part + oper_part + value_part
+
+    filter.getFilter()
+
 class StreamSearch
+  rules:
+    user:
+      exact_match: true
+      case_sensitive: false
+      and_or: 'or'
+    text:
+      exact_match: false
+      case_sensitive: false
+      and_or: 'and'
+    tags:
+      exact_match: false
+      case_sensitive: false
+      and_or: 'or'
+    quote:
+      exact_match: false
+      case_sensitive: false
+      and_or: 'and'
+    uri:
+      formatter: (uri) ->
+        uri = uri.toLowerCase()
+        if url.match(/http:\/\//) then url = url.substring(7)
+        if url.match(/https:\/\//) then url = url.substring(8)
+        if url.match(/^www\./) then url = url.substring(4)
+        uri
+      exact_match: false
+      case_sensitive: false
+      and_or: 'or'
+    #TODO: work on time, custom operator, proper format
+    #time:
+    #  exact_match: false
+    #  case_sensitive: true
+    #  and_or: 'and'
+
   this.inject = ['$element', '$location', '$scope', '$timeout', 'streamfilter']
   constructor: (
     $element, $location, $scope, $timeout, streamfilter
@@ -40,50 +138,21 @@ class StreamSearch
           unless searchCollection.models.length > 0
             return
 
-          # Past data limit
-          limit = 50
-
-          # First cluster the different facets into categories
-          categories = {}
-          for searchItem in searchCollection.models
-            category = searchItem.attributes.category
-            value = searchItem.attributes.value
-            if category is 'limit' then limit = value
-            else
-              if category is 'text'
-                # Visualsearch sickly automatically cluster the text field
-                # (and only the text filed) into a space separated string
-                catlist = []
-                for val in value.split ' '
-                  catlist.push val
-                categories[category] = catlist
-              else
-                if category in categories then categories[category].push value
-                else categories[category] = [value]
-
           # Assemble the filter json
           filter =
             streamfilter
-              .setPastDataHits(limit)
               .setMatchPolicyIncludeAll()
               .noClauses()
 
-          console.log categories
-
-          for category, value of categories
-            if value.length is 1
-              filter.addClausesParse(category + ':i=' + value)
-            else
-              filter.addClausesParse(category + ':i[' + value)
-
-          $scope.initStream filter.getFilter()
+          filter = new SearchHelper().populateFilter filter, searchCollection.models, @rules
+          $scope.initStream filter
 
           # Update the parameters
           $location.search
             'query' : query
 
         facetMatches: (callback) =>
-          return callback ['text','tag', 'quote','time','user', 'limit'], {preserveOrder: true}
+          return callback ['text','tags', 'uri', 'quote','time','user', 'limit'], {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
             when 'limit' then callback [0, 10, 25, 50, 100, 250, 1000]

@@ -1,6 +1,6 @@
 class ClauseParser
-  filter_fields : ['references', 'text', 'user','uri', 'id', 'tags']
-  operators: ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#', '^']
+  filter_fields : ['references', 'text', 'user', 'uri', 'id', 'tags', 'created', 'updated']
+  operators: ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#', '^', '{']
   operator_mapping:
     '=': 'equals'
     '>': 'gt'
@@ -12,6 +12,7 @@ class ClauseParser
     '[' : 'one_of'
     '#' : 'matches'
     '^' : 'first_of'
+    '{' : 'match_of' # one_of but not exact search
   insensitive_operator : 'i'
 
   parse_clauses: (clauses) ->

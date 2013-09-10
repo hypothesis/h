@@ -136,6 +136,10 @@ class FilterToElasticFilter(object):
         #TODO: proper implementation
         return {"term": {field: value}}
 
+    def match_of(self, field, value):
+        #TODO: proper implementation
+        return {"term": {field: value}}
+
     def matches(self, field, value):
         return {"text": {field: value}}
 
@@ -182,6 +186,14 @@ def first_of(a, b): return a[0] == b
 setattr(operator, 'first_of', first_of)
 
 
+def match_of(a, b):
+    for subb in b:
+        if subb in a:
+            return True
+    return False
+setattr(operator, 'match_of', match_of)
+
+
 class FilterHandler(object):
     def __init__(self, filter_json):
         self.filter = filter_json
@@ -189,7 +201,7 @@ class FilterHandler(object):
     # operators
     operators = {
         "equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
-        "ge": 'ge', "one_of": 'contains', "first_of": 'first_of'
+        "ge": 'ge', "one_of": 'contains', "first_of": 'first_of', "match_of": 'match_of'
     }
 
     def evaluate_clause(self, clause, target):
