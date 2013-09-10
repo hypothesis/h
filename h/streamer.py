@@ -9,7 +9,6 @@ import traceback
 from datetime import datetime, timedelta
 from urlparse import urlparse
 
-import requests
 import transaction
 
 from dateutil.tz import tzutc
