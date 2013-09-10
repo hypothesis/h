@@ -18,6 +18,10 @@
          ng-controller="StreamCtrl">
 
       <h3 class="stream">{{filterDescription}}</h3>
+      <script type="text/ng-template" id="markdown.html">
+        <metal:main use-macro="load: markdown.html" />
+      </script>
+
       <script type="text/ng-template" id="streamviewer.html">
         <metal:main use-macro="load: streamviewer.html" />
       </script>

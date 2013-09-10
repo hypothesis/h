@@ -41,7 +41,7 @@ class StreamSearch
             return
 
           # Past data limit
-          limit = 100
+          limit = 50
 
           # First cluster the different facets into categories
           categories = {}
@@ -86,13 +86,13 @@ class StreamSearch
           return callback ['text','tag', 'quote','time','user', 'limit'], {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
-            when 'limit' then callback [0, 10, 25, 100, 250, 1000]
+            when 'limit' then callback [0, 10, 25, 50, 100, 250, 1000]
             when 'time'
               callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
         clearSearch: (original) =>
           # Execute clearSearch's internal method for resetting search
           original()
-          $scope.$apply -     >
+          $scope.$apply ->
             $scope.annotations = []
             $location.search {}
 

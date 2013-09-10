@@ -45,7 +45,10 @@
                         <username ng-model="annotation.user"></username>
                       </strong>
                       <div class="body">
-                        <span ng-bind-html-unsafe="annotation.text | converter"/>
+                        <!--<span ng-bind-html-unsafe="annotation.text | converter"/>-->
+                        <markdown ng-model="$parent.annotation.text"
+                                  ng-readonly="true"
+                                  class="body"/>
                       </div>
                       <ul ng-model="annotation.tags"
                           ng-readonly="true"
