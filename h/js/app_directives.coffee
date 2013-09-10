@@ -6,8 +6,7 @@ annotation = ['$filter', 'annotator', ($filter, annotator) ->
     elem.bind
       keydown: (e) ->
         if e.keyCode == 13 && e.shiftKey
-          e.preventDefault()
-          scope.save()
+          scope.save(e)
 
     # Watch for changes
     scope.$watch 'model.$modelValue.id', (id) ->
