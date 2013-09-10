@@ -115,7 +115,7 @@
 
           <div class="metadata">
             <ul>
-              <li class="stream-list" ng-repeat="annotation in annotations">
+              <li class="stream-list" ng-repeat="annotation in annotations track by annotation.id">
                 <div class="page">
                   <strong>{{annotation['user'] | userName}}</strong>
                   <span ng-switch="annotation['action']">

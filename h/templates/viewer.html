@@ -3,7 +3,7 @@
     <ul>
       <li ng-mouseenter="focus(annotation)"
           ng-mouseleave="focus()"
-          ng-repeat="annotation in annotations"
+          ng-repeat="annotation in annotations track by annotation.id"
           class="stream-list">
 
         <!-- Thread view -->

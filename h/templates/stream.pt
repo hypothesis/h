@@ -21,7 +21,7 @@
       <div class="noise yui3-u-1"
            ng-show="annotations.length">
         <ul>
-          <li ng-repeat="annotation in annotations"
+          <li ng-repeat="annotation in annotations track by annotation.id"
               repeat-anim array="annotations"
               class="paper thread stream-list">
             <div class="excerpt"
