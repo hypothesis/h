@@ -21,7 +21,9 @@
 
       <div class="content yui3-g">
         <h3 class="stream"
-            ng-hide="annotations.length">Please begin your search by adding terms above</h3>
+            ng-show="!empty && !annotations.length">Please begin your search by adding terms above</h3>
+        <h3 class="stream"
+            ng-show="empty && !annotations.length">No search result in the past data but future results can arrive</h3>
         <!-- Streamdata -->
         <script type="text/ng-template" id="markdown.html">
           <metal:main use-macro="load: markdown.html" />

@@ -132,6 +132,7 @@ class StreamSearch
   ) ->
     $scope.path = window.location.protocol + '//' + window.location.hostname + ':' +
       window.location.port + '/__streamer__'
+    $scope.empty = false
 
     # Generate client ID
     buffer = new Array(16)
@@ -181,6 +182,7 @@ class StreamSearch
           original()
           $scope.$apply ->
             $scope.annotations = []
+            $scope.empty = false
             $location.search {}
 
     $scope.initStream = (filter) ->
@@ -206,8 +208,14 @@ class StreamSearch
         action = msg.data.options.action
         unless data instanceof Array then data = [data]
 
-        $scope.$apply =>
-          $scope.manage_new_data data, action
+        if data.length
+          $scope.$apply =>
+            $scope.empty = false
+            $scope.manage_new_data data, action
+        else
+          unless $scope.annotations.length
+            $scope.$apply =>
+              $scope.empty = true
 
     $scope.manage_new_data = (data, action) =>
       for annotation in data

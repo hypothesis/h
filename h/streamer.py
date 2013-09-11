@@ -316,21 +316,20 @@ class StreamerSession(Session):
                         log.info("Error while updating the annotation's properties:" + str(annotation))
 
                 # Finally send filtered annotations
-                if len(annotations) > 0:
-                    if self.clientID is None:
-                        # Backwards-compatibility code
-                        packet = [send_annotations, 'past']
-                    else:
-                        packet = {
-                            'payload': send_annotations,
-                            'type': 'annotation-notification',
-                            'options': {
-                                'action': 'past',
-                                'clientID': self.clientID,
-                            },
+                # Can send zero to indicate that no past data is matched
+                if self.clientID is None:
+                    # Backwards-compatibility code
+                    packet = [send_annotations, 'past']
+                else:
+                    packet = {
+                        'payload': send_annotations,
+                        'type': 'annotation-notification',
+                        'options': {
+                            'action': 'past',
+                            'clientID': self.clientID
                         }
-
-                    self.send(packet)
+                    }
+                self.send(packet)
         except:
             log.info(traceback.format_exc())
             log.info('Failed to parse filter:' + str(msg))
