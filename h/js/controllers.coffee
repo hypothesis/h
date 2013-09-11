@@ -466,6 +466,8 @@ class App
         Store.annotator = loadAnnotations: angular.noop
         # * Make all api requests into a noop.
         Store._apiRequest = angular.noop
+        # * Make the update function into a noop.
+        Store.updateAnnotation = angular.noop
         # * Remove the plugin and re-add it to the annotator.
         delete annotator.plugins.Store
 
