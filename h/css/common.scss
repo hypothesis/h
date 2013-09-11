@@ -164,7 +164,11 @@ button, input[type=submit], .btn {
 //Notifications///////////////////////////////
 
 .notifications {
-  padding: 1em 1em 1em 1em;
+  padding: 1em 0em 1em 1em;
+
+  .paper {
+    border: 1px solid #75b8f3;
+  }
 
 }
 
@@ -293,7 +297,7 @@ blockquote {
   font-family: $serifFontFamily;
   font-size: 1em;
   margin-bottom: 1em;
-  padding: 0 1em;
+  padding: 0 0.8em;
 
   &:before, &:after {
     color: $grayLighter;
