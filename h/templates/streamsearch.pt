@@ -20,6 +20,8 @@
       </div>
 
       <div class="content yui3-g">
+        <h3 class="stream"
+            ng-hide="annotations.length">Please begin your search by adding terms above</h3>
         <!-- Streamdata -->
         <script type="text/ng-template" id="markdown.html">
           <metal:main use-macro="load: markdown.html" />
@@ -30,7 +32,6 @@
         </script>
         <streamviewer/>
       </div>
-
     </span>
   </body>
 </html>
