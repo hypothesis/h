@@ -33,10 +33,6 @@ class Annotator.Host extends Annotator.Guest
 
   _setupXDM: (options) ->
     channel = super
-  # Set dynamic bucket mode on the sidebar
-  setDynamicBucketMode: (value) ->
-    @panel?.notify method: 'setDynamicBucketMode', params: value
-
 
     channel
 
@@ -115,45 +111,6 @@ class Annotator.Host extends Annotator.Guest
       'margin-left': "#{m}px"
       width: "#{w}px"
 
-  showViewer: (annotations) =>
-    @panel?.notify method: "showViewer", params: (a.id for a in annotations)
-
-  updateViewer: (annotations) =>
-    @panel?.notify method: "updateViewer", params: (a.id for a in annotations) 
-
-  showEditor: (annotation) => @plugins.Bridge.showEditor annotation
-
-  createFakeCommentRange: ->
-    posSelector =
-      type: "TextPositionSelector"
-      start: @domMapper.corpus.length - 1
-      end: @domMapper.corpus.length
-
-    anchor = this.findAnchorFromPositionSelector selector: [posSelector]
-
-    anchor.range
-
-  # Override for setupAnnotation
-  setupAnnotation: (annotation) ->
-    # Set up annotation as usual     
-    annotation = super(annotation)
-    # Does it have proper highlights?
-    unless annotation.highlights?.length or annotation.references?.length or annotation.target?.length
-      # No highlights and no references means that this is a comment,
-      # or re-attachment has failed, but we'll skip orphaned annotations.
-
-      # Get a fake range at the end of the document, and highlight it
-      range = this.createFakeCommentRange()
-      hl = this.highlightRange range
-
-      # Register this highlight for the annotation, and vica versa
-      $.merge annotation.highlights, hl
-      $(hl).data('annotation', annotation)
-
-    annotation
-
-    # Switch off dynamic bucket mode
-    this.setDynamicBucketMode false
 
   addToken: (token) =>
     @api.notify

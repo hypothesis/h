@@ -60,7 +60,12 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       'annotationsLoaded'
     ]
     for event in events
-      @annotator.subscribe event, this._update
+      if event is 'annotationCreated'
+        @annotator.subscribe event, =>
+          @dynamicBucket = false
+          this._update()
+      else
+        @annotator.subscribe event, this._update
 
     @element.on 'click', (event) =>
       event.stopPropagation()
@@ -229,7 +234,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     max = 0
     for b in @buckets
       info = b.reduce (info, a) ->
-        subtotal = (a.thread?.flattenChildren()?.length or 0)
+        subtotal = a.reply_count or 0
         return {
           top: info.top + 1
           replies: (info.replies or 0) + subtotal
