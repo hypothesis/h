@@ -96,7 +96,6 @@
 }
 
 .heatmap-pointer {
-  @include user-select(none);
   @include transition-property(left);
   @include transition-duration(.2s);
   font-size: $baseFontSize;
@@ -233,6 +232,7 @@
 // Sidebar
 .annotator-frame {
   @include reset-box-model;
+  @include user-select(none);
   height: 100%;
   position: fixed;
   top: 0;
