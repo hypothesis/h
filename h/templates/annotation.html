@@ -98,7 +98,7 @@
                 ng-disabled="!form.$valid"
                 class="btn check-icon">Save</button>
       </ng-switch>
-      <span role="button" ng-click="cancel()" class="x-icon">Cancel</span>
+      <span role="button" ng-click="cancel($event)" class="x-icon">Cancel</span>
     </div>
   </div>
 
@@ -131,13 +131,13 @@
           ng-show="thread.children.length && replies!='false'"
           count="thread.flattenChildren().length"
           when="{one: '1 reply', other: '{} replies'}" />
-    <a class="reply-icon show" href="" title="Reply" ng-click="reply()">Reply</a>
+    <a class="reply-icon show" href="" title="Reply" ng-click="reply($event)">Reply</a>
     <!-- <span class="fave-icon" title="Favorite"
           ng-click="favorite()" /> -->
     <a class="share-icon show" href="" title="Share" ng-click="share($event)">Share</a>
-    <a class="clipboard-icon show" href="" title="Edit" ng-show="auth.update" ng-click="edit()">Edit</a>
-    <a class="x-icon show" href="" title="Delete" ng-show="auth.delete" ng-click="delete()">Delete</a>
-    <a class="flag-icon show" href="" title="flag" ng-hide="auth.delete" ng-click="flag()">Flag</a>
+    <a class="clipboard-icon show" href="" title="Edit" ng-show="auth.update" ng-click="edit($event)">Edit</a>
+    <a class="x-icon show" href="" title="Delete" ng-show="auth.delete" ng-click="delete($event)">Delete</a>
+    <a class="flag-icon show" href="" title="flag" ng-hide="auth.delete" ng-click="flag($event)">Flag</a>
 
   </div>
 </form>

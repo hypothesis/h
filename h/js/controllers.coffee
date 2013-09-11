@@ -601,7 +601,8 @@ class Annotation
     $scope.action = 'create'
     $scope.editing = false
 
-    $scope.cancel = ->
+    $scope.cancel = ($event) ->
+      $event?.stopPropagation()
       $scope.editing = false
       drafts.remove $scope.model.$modelValue
 
@@ -614,7 +615,7 @@ class Annotation
           $scope.action = 'create'
 
     $scope.save = ($event) ->
-      $event.stopPropagation()
+      $event?.stopPropagation()
       annotation = $scope.model.$modelValue
 
       # Forbid saving comments without a body (text or tags)
@@ -647,7 +648,8 @@ class Annotation
         else
           annotator.updateAnnotation annotation
 
-    $scope.reply = ->
+    $scope.reply = ($event) ->
+      $event?.stopPropagation()
       unless annotator.plugins.Auth? and annotator.plugins.Auth.haveValidToken()
         $scope.$emit 'showAuth', true
         return
@@ -663,15 +665,17 @@ class Annotation
 
       annotator.publish 'beforeAnnotationCreated', [reply]
 
-    $scope.edit = ->
+    $scope.edit = ($event) ->
+      $event?.stopPropagation()
       $scope.action = 'edit'
       $scope.editing = true
       $scope.origText = $scope.model.$modelValue.text
       $scope.origTags = $scope.model.$modelValue.tags
       drafts.add $scope.model.$modelValue
 
-    $scope.delete = ->
-      annotation = $scope.thread.message
+    $scope.delete = ($event) ->
+      $event?.stopPropagation()
+      annotation = $scope.model.$modelValue
       replies = $scope.thread.children?.length or 0
 
       # We can delete the annotation if it hasn't got any replies or it is
@@ -979,7 +983,7 @@ class Search
       threadid
 
     $scope.clickMoreTop = (id, $event) ->
-      $event.stopPropagation()
+      $event?.stopPropagation()
       threadid = $scope.getThreadId id
       pos = $scope.render_pos[id]
       rendered = $scope.render_order[threadid]
@@ -998,7 +1002,7 @@ class Search
 
 
     $scope.clickMoreBottom = (id, $event) ->
-      $event.stopPropagation()
+      $event?.stopPropagation()
       threadid = $scope.getThreadId id
       pos = $scope.render_pos[id]
       rendered = $scope.render_order[threadid]
