@@ -36,11 +36,11 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
     thread
 
   annotationDeleted: (annotation) =>
-    thread = (@annotator.threading.getContainer annotation.id)
+    parent = annotation.thread.parent
+    annotation.thread.message = null  # Break cyclic reference
     delete @annotator.threading.idTable[annotation.id]
-    delete annotation.thread  # Break cyclic reference
-    thread.message = null
-    if thread.parent? then @annotator.threading.pruneEmpties thread.parent
+    delete annotation.thread
+    if parent? then @annotator.threading.pruneEmpties parent
 
   annotationsLoaded: (annotations) =>
     @annotator.threading.thread annotations
