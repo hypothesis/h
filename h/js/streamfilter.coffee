@@ -1,14 +1,14 @@
 class ClauseParser
   filter_fields : ['references', 'text', 'user', 'uri', 'id', 'tags', 'created', 'updated']
-  operators: ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#', '^', '{']
+  operators: ['=','=>', '>=', '<=', '=<', '>', '<', '[', '#', '^', '{']
   operator_mapping:
     '=': 'equals'
     '>': 'gt'
     '<': 'lt'
-    '=>' : 'ge'
-    '>=' : 'ge'
+    '=>': 'ge'
+    '>=': 'ge'
     '=<': 'le'
-    '<=' : 'le'
+    '<=': 'le'
     '[' : 'one_of'
     '#' : 'matches'
     '^' : 'first_of'
