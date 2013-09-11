@@ -16,6 +16,7 @@ get_quote = (annotation) ->
 #      exact_match: true|false (default: true)
 #      case_sensitive: true|false (default: false)
 #      and_or: and|or for multiple values should it threat them as 'or' or 'and' (def: or)
+#      operator: if given it'll use this operator regardless of other circumstances
 # }
 # The models is the direct output from visualsearch
 # The limit is the default limit
@@ -49,13 +50,14 @@ class SearchHelper
       # Now generate the clause with the help of the rule
       exact_match = if rule.exact_match? then rule.exact_match else true
       case_sensitive = if rule.case_sensitive? then rule.case_sensitive else false
-      cs_part = if case_sensitive then '' else 'i'
       and_or = if rule.and_or? then rule.and_or else 'or'
 
       if values.length is 1
-        oper_part = if exact_match then '=' else '#'
+        oper_part =
+          if rule.operator? then rule.operator
+          else if exact_match then 'equals' else 'matches'
         value_part = if rule.formatter then rule.formatter values[0] else values[0]
-        filter.addClausesParse category+':' + cs_part + oper_part + value_part
+        filter.addClause '/'+category, oper_part, value_part, case_sensitive
       else
         if and_or is 'or'
           val_list = ''
@@ -64,13 +66,17 @@ class SearchHelper
             unless first then val_list += ',' else first = false
             value_part = if rule.formatter then rule.formatter val else val
             value_list += value_part
-          oper_part = if exact_match then '[' else '{'
-          filter.addClausesParse category+':' + cs_part + oper_part + value_part
+          oper_part =
+            if rule.operator? then rule.operator
+            else if exact_match then 'one_of' else 'match_of'
+          filter.addClause '/'+category, oper_part, value_part, case_sensitive
         else
-          oper_part = if exact_match then '=' else '#'
+          oper_part =
+            if rule.operator? then rule.operator
+            else if exact_match then 'equals' else 'matches'
           for val in values
             value_part = if rule.formatter then rule.formatter val else val
-            filter.addClausesParse category+':' + cs_part + oper_part + value_part
+            filter.addClause '/'+category, oper_part, value_part, case_sensitive
 
     filter.getFilter()
 
@@ -102,11 +108,23 @@ class StreamSearch
       exact_match: false
       case_sensitive: false
       and_or: 'or'
-    #TODO: work on time, custom operator, proper format
-    #time:
-    #  exact_match: false
-    #  case_sensitive: true
-    #  and_or: 'and'
+    created:
+      formatter: (past) ->
+        seconds =
+          switch past
+            when '5 min' then 5*60
+            when '30 min' then 30*60
+            when '1 hour' then 60*60
+            when '12 hours' then 12*60*60
+            when '1 day' then 24*60*60
+            when '1 week' then 7*24*60*60
+            when '1 month' then 30*24*60*60
+            when '1 year' then 365*24*60*60
+        new Date(new Date().valueOf() - seconds*1000)
+      exact_match: false
+      case_sensitive: true
+      and_or: 'and'
+      operator: 'ge'
 
   this.inject = ['$element', '$location', '$scope', '$timeout', 'streamfilter']
   constructor: (
@@ -152,11 +170,11 @@ class StreamSearch
             'query' : query
 
         facetMatches: (callback) =>
-          return callback ['text','tags', 'uri', 'quote','time','user', 'limit'], {preserveOrder: true}
+          return callback ['text','tags', 'uri', 'quote','created','user','limit'], {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
             when 'limit' then callback [0, 10, 25, 50, 100, 250, 1000]
-            when 'time'
+            when 'created'
               callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
         clearSearch: (original) =>
           # Execute clearSearch's internal method for resetting search
