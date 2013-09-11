@@ -64,14 +64,14 @@
           <!-- Replies -->
           <ul>
             <li class="thread"
-                ng-hide="collapsed"
                 ng-class="collapsed && 'collapsed' || ''"
+                ng-click="toggleCollapsed($event)"
                 ng-repeat="thread in thread.children"
                 ng-transclude>
                <a href=""
                   class="threadexp"
                   title="{{collapsed && 'Expand' || 'Collapse'}}"
-                  ng-click="collapsed = !collapsed"
+                  ng-click="toggleCollapsed($event)"
                   ng-show="ann_info.shown[thread.message.id] && !ann_info.more_top[thread.message.id]"
                />
             </li>
