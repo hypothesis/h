@@ -153,10 +153,6 @@ class StreamSearch
       query: search_query
       callbacks:
         search: (query, searchCollection) =>
-          # Do not search when no facet is given
-          unless searchCollection.models.length > 0
-            return
-
           # Assemble the filter json
           filter =
             streamfilter
@@ -262,10 +258,9 @@ class StreamSearch
               index +=1
 
     $scope.annotations = []
-    if search_query.length > 0
-      $timeout =>
-        @search.searchBox.app.options.callbacks.search @search.searchBox.value(), @search.searchBox.app.searchQuery
-      ,500
+    $timeout =>
+      @search.searchBox.app.options.callbacks.search @search.searchBox.value(), @search.searchBox.app.searchQuery
+    ,500
 
 angular.module('h.streamsearch',['h.streamfilter','h.filters','h.directives','bootstrap'])
   .controller('StreamSearchController', StreamSearch)
