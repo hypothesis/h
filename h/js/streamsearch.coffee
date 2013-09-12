@@ -83,6 +83,8 @@ class SearchHelper
 class StreamSearch
   rules:
     user:
+      formatter: (user) ->
+        'acct:' + user + '@' + window.location.hostname
       exact_match: true
       case_sensitive: false
       and_or: 'or'
@@ -151,8 +153,6 @@ class StreamSearch
       query: search_query
       callbacks:
         search: (query, searchCollection) =>
-          console.log 'search'
-
           # Do not search when no facet is given
           unless searchCollection.models.length > 0
             return
@@ -171,10 +171,28 @@ class StreamSearch
             'query' : query
 
         facetMatches: (callback) =>
-          return callback ['text','tags', 'uri', 'quote','created','user','limit'], {preserveOrder: true}
+          basicList = ['text','tags', 'uri', 'quote','user']
+          # Created and limit should be singleton.
+          add_limit = true
+          add_created = true
+          for facet in @search.searchQuery.facets()
+            if facet.hasOwnProperty 'limit' then add_limit = false
+            if facet.hasOwnProperty 'created' then add_created = false
+
+          if add_limit and add_created then list = ['text','tags', 'uri', 'quote','created','user','limit']
+          else
+            if add_limit then list = ['text','tags', 'uri', 'quote','user', 'limit']
+            else
+              if add_created then list = ['text','tags', 'uri', 'quote','created','user']
+              else list = ['text','tags', 'uri', 'quote','user']
+
+          return callback list, {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
+          console.log 'valMatches'
+          console.log facet
           switch facet
-            when 'limit' then callback [0, 10, 25, 50, 100, 250, 1000]
+            when 'limit'
+              callback ['0', '10', '25', '50', '100', '250', '1000']
             when 'created'
               callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
         clearSearch: (original) =>
