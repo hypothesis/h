@@ -141,6 +141,11 @@ class StreamSearch
     uuid.v4 null, buffer, 0
     @clientID = uuid.unparse buffer
 
+    $scope.sortAnnotations = (a, b) ->
+      a_upd = if a.updated? then new Date(a.updated) else new Date()
+      b_upd = if b.updated? then new Date(b.updated) else new Date()
+      a_upd.getTime() - b_upd.getTime()
+
     # Read search params
     search_query = ''
     params = $location.search()
@@ -222,6 +227,7 @@ class StreamSearch
         if data.length
           $scope.$apply =>
             $scope.empty = false
+            data = data.sort($scope.sortAnnotations)
             $scope.manage_new_data data, action
         else
           unless $scope.annotations.length
