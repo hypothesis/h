@@ -171,7 +171,6 @@ class StreamSearch
             'query' : query
 
         facetMatches: (callback) =>
-          basicList = ['text','tags', 'uri', 'quote','user']
           # Created and limit should be singleton.
           add_limit = true
           add_created = true
@@ -188,8 +187,6 @@ class StreamSearch
 
           return callback list, {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
-          console.log 'valMatches'
-          console.log facet
           switch facet
             when 'limit'
               callback ['0', '10', '25', '50', '100', '250', '1000']
