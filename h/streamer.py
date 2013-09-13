@@ -230,13 +230,14 @@ class FilterHandler(object):
 
             # But!
             # Reversed operator order for contains (b in a)
-            if clause['operator'] == 'one_of' or clause['operator'] == 'matches':
-                reversed = True
-                # But not in every case. (i.e. tags matches 'b')
-                # Here field_value is a list, because an annotation can have many tags
-                # And clause['value'] is 'b'
-                if type(field_value) is list:
-                    reversed = False
+            if type(cval) is list or type(fval) is list:
+                if clause['operator'] == 'one_of' or clause['operator'] == 'matches':
+                    reversed = True
+                    # But not in every case. (i.e. tags matches 'b')
+                    # Here field_value is a list, because an annotation can have many tags
+                    # And clause['value'] is 'b'
+                    if type(field_value) is list:
+                        reversed = False
 
             if reversed:
                 return getattr(operator, self.operators[clause['operator']])(cval, fval)
