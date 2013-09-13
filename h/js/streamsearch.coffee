@@ -28,6 +28,7 @@ class SearchHelper
     for searchItem in models
       category = searchItem.attributes.category
       value = searchItem.attributes.value
+
       if category is 'limit' then limit = value
       else
         if category is 'text'
@@ -37,7 +38,7 @@ class SearchHelper
           catlist.push val for val in value.split ' '
           categories[category] = catlist
         else
-          if category in categories then categories[category].push value
+          if category of categories then categories[category].push value
           else categories[category] = [value]
 
     filter.setPastDataHits(limit)
@@ -80,9 +81,11 @@ class SearchHelper
             value_part = if rule.formatter then rule.formatter val else val
             filter.addClause mapped_field, oper_part, value_part, case_sensitive
 
-    filter.getFilter()
+    categories['limit'] = [limit]
+    [filter.getFilter(), categories]
 
 class StreamSearch
+  facets: ['text','tags', 'uri', 'quote','created','user','limit']
   rules:
     user:
       formatter: (user) ->
@@ -157,8 +160,12 @@ class StreamSearch
     # Read search params
     search_query = ''
     params = $location.search()
-    if params.query?
-      search_query = params.query
+    for param, values of params
+      # Ignore non facet parameters
+      if param in @facets
+        unless values instanceof Array then values = [values]
+        for value in values
+          search_query += param + ': "' + value + '" '
 
     # Initialize Visual search
     @search = VS.init
@@ -172,13 +179,12 @@ class StreamSearch
               .setMatchPolicyIncludeAll()
               .noClauses()
 
-          filter = new SearchHelper().populateFilter filter, searchCollection.models, @rules
-          console.log filter
+          [filter, $scope.categories] =
+            new SearchHelper().populateFilter filter, searchCollection.models, @rules
           $scope.initStream filter
 
           # Update the parameters
-          $location.search
-            'query' : query
+          $location.search $scope.categories
 
         facetMatches: (callback) =>
           # Created and limit should be singleton.
