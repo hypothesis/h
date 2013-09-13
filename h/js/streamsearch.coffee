@@ -13,6 +13,7 @@ get_quote = (annotation) ->
 # It expects the following dict format as rules
 # { facet_name : {
 #      formatter: to format the value (optional)
+#      path: json path mapping to the annotation field
 #      exact_match: true|false (default: true)
 #      case_sensitive: true|false (default: false)
 #      and_or: and|or for multiple values should it threat them as 'or' or 'and' (def: or)
@@ -51,13 +52,14 @@ class SearchHelper
       exact_match = if rule.exact_match? then rule.exact_match else true
       case_sensitive = if rule.case_sensitive? then rule.case_sensitive else false
       and_or = if rule.and_or? then rule.and_or else 'or'
+      mapped_field = if rule.path? then rule.path else '/'+category
 
       if values.length is 1
         oper_part =
           if rule.operator? then rule.operator
           else if exact_match then 'equals' else 'matches'
         value_part = if rule.formatter then rule.formatter values[0] else values[0]
-        filter.addClause '/'+category, oper_part, value_part, case_sensitive
+        filter.addClause mapped_field, oper_part, value_part, case_sensitive
       else
         if and_or is 'or'
           val_list = ''
@@ -65,18 +67,18 @@ class SearchHelper
           for val in values
             unless first then val_list += ',' else first = false
             value_part = if rule.formatter then rule.formatter val else val
-            value_list += value_part
+            val_list += value_part
           oper_part =
             if rule.operator? then rule.operator
             else if exact_match then 'one_of' else 'match_of'
-          filter.addClause '/'+category, oper_part, value_part, case_sensitive
+          filter.addClause mapped_field, oper_part, val_list, case_sensitive
         else
           oper_part =
             if rule.operator? then rule.operator
             else if exact_match then 'equals' else 'matches'
           for val in values
             value_part = if rule.formatter then rule.formatter val else val
-            filter.addClause '/'+category, oper_part, value_part, case_sensitive
+            filter.addClause mapped_field, oper_part, value_part, case_sensitive
 
     filter.getFilter()
 
@@ -85,28 +87,33 @@ class StreamSearch
     user:
       formatter: (user) ->
         'acct:' + user + '@' + window.location.hostname
+      path: '/user'
       exact_match: true
       case_sensitive: false
       and_or: 'or'
     text:
+      path: '/text'
       exact_match: false
       case_sensitive: false
       and_or: 'and'
     tags:
+      path: '/tags'
       exact_match: false
       case_sensitive: false
       and_or: 'or'
     quote:
+      path: "/quote"
       exact_match: false
       case_sensitive: false
       and_or: 'and'
     uri:
       formatter: (uri) ->
         uri = uri.toLowerCase()
-        if url.match(/http:\/\//) then url = url.substring(7)
-        if url.match(/https:\/\//) then url = url.substring(8)
-        if url.match(/^www\./) then url = url.substring(4)
+        if uri.match(/http:\/\//) then uri = uri.substring(7)
+        if uri.match(/https:\/\//) then uri = uri.substring(8)
+        if uri.match(/^www\./) then uri = uri.substring(4)
         uri
+      path: '/uri'
       exact_match: false
       case_sensitive: false
       and_or: 'or'
@@ -123,6 +130,7 @@ class StreamSearch
             when '1 month' then 30*24*60*60
             when '1 year' then 365*24*60*60
         new Date(new Date().valueOf() - seconds*1000)
+      path: '/created'
       exact_match: false
       case_sensitive: true
       and_or: 'and'
@@ -165,6 +173,7 @@ class StreamSearch
               .noClauses()
 
           filter = new SearchHelper().populateFilter filter, searchCollection.models, @rules
+          console.log filter
           $scope.initStream filter
 
           # Update the parameters
