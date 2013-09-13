@@ -43,7 +43,6 @@ class Hypothesis extends Annotator
     Threading: {}
 
   # Internal state
-  dragging: false     # * To enable dragging only when we really want to
   ongoing_edit: false # * Is there an interrupted edit by login
 
   providers: null
@@ -246,27 +245,11 @@ class Hypothesis extends Annotator
     this
 
   _setupDocumentEvents: ->
-    el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
-    el.width = el.height = 1
-    @element.append el
-
-    handle = @element.find('.topbar .tri')[0]
-    handle.addEventListener 'dragstart', (event) =>
-      event.dataTransfer.setData 'text/plain', ''
-      event.dataTransfer.setDragImage el, 0, 0
-      @dragging = true
-      @host.notify method: 'setDrag', params: true
-      @host.notify method: 'dragFrame', params: event.screenX
-    handle.addEventListener 'dragend', (event) =>
-      @dragging = false
-      @host.notify method: 'setDrag', params: false
-      @host.notify method: 'dragFrame', params: event.screenX
-    @element[0].addEventListener 'dragover', (event) =>
-      if @dragging then @host.notify method: 'dragFrame', params: event.screenX
-    @element[0].addEventListener 'dragleave', (event) =>
-      if @dragging then @host.notify method: 'dragFrame', params: event.screenX
-
-    this
+    document.addEventListener 'dragover', (event) =>
+      for p in @providers
+        p.channel.notify
+          method: 'dragFrame'
+          params: event.screenX
 
   # Override things not used in the angular version.
   _setupDynamicStyle: -> this

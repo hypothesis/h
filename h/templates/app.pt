@@ -15,14 +15,6 @@
 
     <!-- Toolbar -->
     <div class="topbar" class="form-inline" ng-class="frame.visible && 'shown'">
-
-      <div class="tri"
-           ng-click="frame.visible = !frame.visible"
-           ng-init="cbStyle='hiddencontrolbar'"
-           ng-mouseenter="cbStyle='controlbar'"
-           ng-mouseleave="cbStyle='hiddencontrolbar'"
-           ></div>
-
       <div class="notification-counter"
            ng-click="frame.visible = !frame.visible"
            ng-show="new_updates>0 && new_updates<10">

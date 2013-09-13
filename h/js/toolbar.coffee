@@ -5,6 +5,17 @@ class Annotator.Toolbar extends Annotator.Widget
 
   options:
     items: [
+      "title": "Toggle Sidebar"
+      "class": "tri-icon"
+      "click": (event) ->
+        event.preventDefault()
+        event.stopPropagation()
+        collapsed = window.annotator.frame.hasClass('annotator-collapsed')
+        if collapsed
+          window.annotator.showFrame()
+        else
+          window.annotator.hideFrame()
+    ,
       "title": "Show Annotations"
       "class": "alwaysonhighlights-icon"
       "click": (event) ->

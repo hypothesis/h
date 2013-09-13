@@ -591,17 +591,6 @@ blockquote {
 }
 
 
-//NOISE///////////
-//Provides the noise background
-.noise {
-  background: url("../images/noise_1.png");
-}
-
-.dark-noise {
-  background: url("../images/dark_noise_1.png");
-}
-
-
 //KNOCKOUT///////////
 //Provides a knockout background
 .knockout {
@@ -625,13 +614,14 @@ blockquote {
 
 //TOOL BAR////////////////////////////////
 .topbar {
-  @include smallshadow;
+  @include smallshadow(0);
   background: $white;
   border: solid 1px $grayLighter;
+  border-style: solid none;
   height: 2em;
   position: fixed;
-  left: -1px;
-  right: -1px;
+  left: 0;
+  right: 0;
   top: .5em;
   z-index: 5;
 
@@ -1249,17 +1239,9 @@ h3.stream {
   }
 }
 
-.visual-container {
-  margin-left: 3em;
-}
-
 .magnify-glass {
   width: 2.25em;
   min-height: 22px;
-}
-
-.magnify-glass .VS-icon {
-  margin-left: 3.5em;
 }
 
 .magnify-glass .VS-icon-search:hover {

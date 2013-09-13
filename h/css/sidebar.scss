@@ -35,7 +35,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 .sliding-panels > li {
   @extend .content;
-  @extend .noise;
   @include smallshadow(-2px);
   @include stretch-y;
   @include transition(transform .4s);
@@ -63,42 +62,15 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //SIDEBAR LAYOUT////////////////////////////////
 #wrapper {
-  @extend .noise;
   height: 100%;
-  margin-left: $heatmap-width + 17px;
   position: relative;
 }
 
 .topbar {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-  left: 7px;
   top: .5em;
 
   .inner {
-    margin: 0 .5em 0 3.1em;
-  }
-
-
-  .tri {
-    @include fonticon("\e00b", left);
-    color: rgba( 200, 200, 200, .3);
-    text-shadow:
-      1px .8px 1.5px $white,
-      0 0 0 #000;
-    position: absolute;
-    z-index: 1;
-    top: .3em;
-    left: .3em;
-    line-height: $baseLineHeight * .9;
-    font-size: $baseLineHeight * .9;
-    cursor: w-resize;
-    &:before {
-      vertical-align: 0;
-    }
-    &:hover {
-      color: rgba( 235, 235, 230, .1);
-    }
+    margin: 0 .5em 0 .5em;
   }
 
   .notification-counter {
@@ -113,11 +85,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   &.shown {
-    .tri {
-      @include fonticon("\e010", left);
-      cursor: ew-resize;
-    }
-
     .notification-counter {
       cursor: ew-resize;
     }
@@ -127,12 +94,12 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .bottombar {
   position: fixed;
   bottom: 0px;
-  left: 39px; //17 + $heatmap_width
+  left: 0;
   height: 3.7em;
   width: 100%;
 
   .notif-list {
-    margin-right: 3.85em;
+    margin-right: 1em;
     box-shadow: 1px 1px 9px #b5d4ff;
   }
 
@@ -159,7 +126,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   max-height: 30em;
   overflow: hidden;
   position: absolute;
-  left: $heatmap-width + 8px;
+  left: 0;
   right: 0;
   top: 2px;
 
@@ -167,10 +134,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     position: absolute;
     right: 1em;
     top: .25em;
-  }
-
-  .nav-tabs {
-    padding-left: 1em;
   }
 
   &.collapsed {

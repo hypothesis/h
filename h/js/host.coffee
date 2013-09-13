@@ -19,6 +19,7 @@ class Annotator.Host extends Annotator.Guest
       hostOrigin ?= window.location.protocol + "//" + window.location.host
 
     app = $('<iframe></iframe>')
+    .attr('seamless', '')
     .attr('src', "#{options.app}#/?xdm=#{encodeURIComponent(hostOrigin)}")
 
     super
@@ -31,13 +32,17 @@ class Annotator.Host extends Annotator.Guest
       .on('mouseenter', => @toolbar.show())
       .on('mouseleave', => @toolbar.hide())
 
+    if @plugins.Heatmap?
+      this._setupDragEvents()
+
   _setupXDM: (options) ->
     channel = super
 
     channel
 
     .bind('showFrame', =>
-      @frame.css 'margin-left': "#{-1 * @frame.width()}px"
+      unless @drag.enabled
+        @frame.css 'margin-left': "#{-1 * @frame.width()}px"
       @frame.removeClass 'annotator-no-transition'
       @frame.removeClass 'annotator-collapsed'
     )
@@ -48,15 +53,7 @@ class Annotator.Host extends Annotator.Guest
       @frame.addClass 'annotator-collapsed'
     )
 
-    .bind('dragFrame', (ctx, screenX) =>
-      if screenX > 0
-        if @drag.last?
-          @drag.delta += screenX - @drag.last
-        @drag.last = screenX
-      unless @drag.tick
-        @drag.tick = true
-        window.requestAnimationFrame this._dragRefresh
-    )
+    .bind('dragFrame', (ctx, screenX) => this._dragUpdate screenX)
 
     .bind('getMaxBottom', =>
       sel = '*' + (":not(.annotator-#{x})" for x in [
@@ -79,22 +76,42 @@ class Annotator.Host extends Annotator.Guest
       Math.max.apply(Math, all)
     )
 
-    .bind('setDrag', (ctx, drag) =>
-      @drag.enabled = drag
-      @drag.last = null
-    )
+  _setupDragEvents: ->
+    el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
+    el.width = el.height = 1
+    @element.append el
 
-  _setupDocumentEvents: ->
-    document.addEventListener 'dragover', (event) =>
-      unless @drag.enabled then return
-      if @drag.last?
-        @drag.delta += event.screenX - @drag.last
+    handle = @plugins.Heatmap.element[0]
+    handle.draggable = true
+
+    handle.addEventListener 'dragstart', (event) =>
+      event.dataTransfer.dropEffect = 'none'
+      event.dataTransfer.effectAllowed = 'none'
+      event.dataTransfer.setData 'text/plain', ''
+      event.dataTransfer.setDragImage el, 0, 0
+      @drag.enabled = true
       @drag.last = event.screenX
-      unless @drag.tick
-        @drag.tick = true
-        window.requestAnimationFrame this._dragRefresh
 
-    super
+      m = parseInt (getComputedStyle @frame[0]).marginLeft
+      @frame.css
+        'margin-left': "#{m}px"
+      this.showFrame()
+
+    handle.addEventListener 'dragend', (event) =>
+      @drag.enabled = false
+      @drag.last = null
+
+    document.addEventListener 'dragover', (event) =>
+      this._dragUpdate event.screenX
+
+  _dragUpdate: (screenX) =>
+    unless @drag.enabled then return
+    if @drag.last?
+      @drag.delta += screenX - @drag.last
+    @drag.last = screenX
+    unless @drag.tick
+      @drag.tick = true
+      window.requestAnimationFrame this._dragRefresh
 
   _dragRefresh: =>
     d = @drag.delta

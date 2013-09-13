@@ -3,7 +3,7 @@
 @import 'compass/layout/stretching';
 @import 'compass/reset/utilities';
 
-
+$baseFontSize: 14px;
 
 //ADDER////////////////////////////////
 .annotator-adder {
@@ -68,22 +68,14 @@
 
 //HEATMAP STUFF////////////////////////////////
 .annotator-heatmap {
-  font-size: $baseFontSize;
-  line-height: $baseLineHeight;
-  margin-top: 2px;
+  cursor: ew-resize;
   position: absolute;
-  z-index: 2;
   overflow: hidden;
 
   height: 100%;
   width: $heatmap-width + 17px;
 
-  top: 2em;
-  left: 0;
-
-  & > * {
-    margin-top: -2em;
-  }
+  left: -($heatmap-width + 17px);
 
   svg {
     @include stretch-y;
@@ -98,9 +90,7 @@
 .heatmap-pointer {
   @include transition-property(left);
   @include transition-duration(.2s);
-  font-size: $baseFontSize;
-  line-height: $baseLineHeight;
-  margin-top: -3em; // TODO: Less janking v-align
+  margin-top: -1em; // TODO: Less janking v-align
   // color: rgb(238, 238, 238);
   color: #666;
   left: 0;
@@ -158,7 +148,7 @@
       bottom: 1px;
     }
     &:hover {
-      margin-top: -3.2em;
+      margin-top: -1.2em;
     }
   }
 
@@ -170,7 +160,7 @@
       top: 1px;
     }
     &:hover {
-      margin-top: -2.8em;
+      margin-top: -.8em;
     }
   }
   &.flip {
@@ -191,7 +181,7 @@
       bottom: 1px;
     }
     &:hover {
-      margin-top: -3.2em;
+      margin-top: -1.2em;
     }
   }
 }
@@ -233,6 +223,9 @@
 .annotator-frame {
   @include reset-box-model;
   @include user-select(none);
+  @extend .noise;
+  font-size: $baseFontSize / 16px * 1em;
+  line-height: $baseLineHeight / 16px * 1em;
   height: 100%;
   position: fixed;
   top: 0;
@@ -241,14 +234,15 @@
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
   &.annotator-collapsed {
-    margin-left: -$heatmap-width - 17px;
+    margin-left: 0;
   }
 
   & > iframe {
     @include reset-box-model;
     height: 100%;
     width: 100%;
-    position: absolute;
+    z-index: 3;
+    position: relative;
   }
 
 }
@@ -265,52 +259,73 @@
   line-height: $baseLineHeight;
   position: absolute;
   overflow: hidden;
-  width: 40px;
-  height: 100px;
-  z-index: 1;
-  left: 7px;
-  top: 2em;
-  z-index: 3;
+  height: 200px;
+  left: -($heatmap-width + 17px - 7px);
+  top: .5em;
+  width: 2.5em;
+  z-index: 2;
 
   a, a:hover, a:active, a:visited {
     color: $grayLighter;
     text-decoration: none;
+
+    &.tri-icon {
+      color: rgba(200, 200, 200, .3);
+      text-shadow:
+      1px .8px 1.5px $white,
+      0 0 0 #000;
+
+      &:hover {
+        color: rgba(235, 235, 230, .1);
+      }
+    }
   }
 
   ul, li {
     @include box-sizing(border-box);
     @include reset-box-model;
     @include reset-list-style;
-    font-size: $baseFontSize;
-    line-height: $baseLineHeight;
   }
 }
 
 .annotator-toolbar.annotator-hide {
-  height: 0px;
+  height: 2.2em;
 
   &:hover {
-    height: 100px;
+    height: 200px;
   }
 }
 
 .annotator-toolbar li {
+  @include border-radius(4px);
+  @include smallshadow(0);
+  background: $white;
+  border: solid 1px $grayLighter;
   position: relative;
-  left: 1px;
-  width: 25px;
-  height: 25px;
-  padding: 5px;
-  margin-top: 5px;
-  box-shadow: 1px 1px 1px 1px;
-  background-color: white;
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
+  left: 2px;
+  height: 2em;
+  width: 2em;
 
-  &:active {
-    top:1px;
-    box-shadow: 1px 1px 1px 0px;
+  &:first-child {
+    @include border-radius(4px 0 0 4px);
+    border-right-style: none;
+    left: 0;
+    width: 2.3em;
+  }
+
+  & + li {
+    margin-top: 5px;
+  }
+
+  a {
+    font-size: $baseFontSize * 1.3;
+    line-height: $baseLineHeight * 1.3;
+
+    font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+
+    position: absolute;
+    left: .2em;
   }
 
   a.pushed {
@@ -322,32 +337,18 @@
 // Toolbar Icons
 .alwaysonhighlights-icon {
   @include fonticon("\e01b", left);
-  color: rgb(211, 211, 211);
-  font-size: 18px;
-  bottom: 1px;
-  left: 3px;
-  position: absolute;
-  // text-shadow: -0.1em -0.1em #999;
 }
 
 .highlighter-icon {
   @include fonticon("\e01a", left);
-  color: rgb(211, 211, 211);
-  font-size: 18px;
-  bottom: 1px;
-  left: 3px;
-  position: absolute;
-  // text-shadow: -0.1em -0.1em #999;
 }
 
 .commenter-icon {
   @include fonticon("\e01e", left);
-  color: rgb(211, 211, 211);
-  font-size: 18px;
-  bottom: 1px;
-  left: 3px;
-  position: absolute;
-  // text-shadow: -0.1em -0.1em #999;
+}
+
+.tri-icon {
+  @include fonticon("\e00b", left);
 }
 
 
@@ -361,8 +362,8 @@
 
 @media screen and (min-width: 15em) {
   .annotator-frame {
-    width: 99%;
-    margin-left: -99%;
+    width: 90%;
+    margin-left: -90%;
   }
 }
 
@@ -388,8 +389,8 @@
 @media screen and (min-width: 37.5em) {
   .annotator-frame {
     @include single-transition(margin-left, .4s);
-    width: 428px + $heatmap-width + 17px;
-    margin-left: -428px - $heatmap-width - 17px;
+    width: 428px;// + $heatmap-width + 17px;
+    margin-left: -428px;// - $heatmap-width - 17px;
   }
 }
 
