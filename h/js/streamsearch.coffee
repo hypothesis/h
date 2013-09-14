@@ -81,7 +81,7 @@ class SearchHelper
             value_part = if rule.formatter then rule.formatter val else val
             filter.addClause mapped_field, oper_part, value_part, case_sensitive
 
-    categories['limit'] = [limit]
+    if limit != 50 then categories['limit'] = [limit]
     [filter.getFilter(), categories]
 
 class StreamSearch
