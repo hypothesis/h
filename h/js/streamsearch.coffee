@@ -256,6 +256,8 @@ class StreamSearch
         '//' + window.location.hostname + ':' + window.location.port + "/a/" + annotation.id
         annotation._anim = 'fade'
 
+        if annotation in $scope.annotations then continue
+
         switch action
           when 'create', 'past'
             unless annotation in $scope.annotations
@@ -276,7 +278,8 @@ class StreamSearch
                 $scope.annotations.splice index,1
                 break
               index +=1
-      $scope.annotations = $scope.annotations.sort($scope.sortAnnotations)
+
+      $scope.annotations = $scope.annotations.sort($scope.sortAnnotations).reverse()
 
     $scope.loadMore = (number) =>
       console.log 'loadMore'

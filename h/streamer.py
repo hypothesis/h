@@ -107,6 +107,9 @@ class FilterToElasticFilter(object):
     def __init__(self, filter_json):
         self.filter = filter_json
         self.query = {
+            "sort": [
+                {"updated": {"order": "desc"}}
+            ],
             "query": {
                 "bool": {
                     "minimum_number_should_match": 1}}}
