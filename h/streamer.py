@@ -141,7 +141,7 @@ class FilterToElasticFilter(object):
         return {"term": {field: value}}
 
     def matches(self, field, value):
-        return {"text": {field: value}}
+        return {"term": {field: value}}
 
     def lt(self, field, value):
         return {"range": {field: {"lt": value}}}
@@ -159,7 +159,14 @@ class FilterToElasticFilter(object):
         new_clauses = []
         for clause in clauses:
             field = clause['field'][1:].replace('/', '.')
-            new_clause = getattr(self, clause['operator'])(field, clause['value'])
+            if not clause['case_sensitive']:
+                if type(clause['value']) is list:
+                    value = [x.lower() for x in clause['value']]
+                else:
+                    value = clause['value'].lower()
+            else:
+                value = clause['value']
+            new_clause = getattr(self, clause['operator'])(field, value)
             new_clauses.append(new_clause)
         return new_clauses
 
@@ -300,6 +307,7 @@ class StreamerSession(Session):
                 query = FilterToElasticFilter(payload)
                 request = self.request
                 registry = request.registry
+                log.info(query.query)
                 store = registry.queryUtility(interfaces.IStoreClass)(request)
                 annotations = store.search_raw(query.query)
 
