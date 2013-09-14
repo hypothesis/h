@@ -287,58 +287,69 @@ class StreamerSession(Session):
     def on_open(self):
         transaction.commit()  # Release the database transaction
 
+    def send_annotations(self):
+        request = self.request
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        annotations = store.search_raw(self.query.query)
+        self.received = len(annotations)
+        send_annotations = []
+        for annotation in annotations:
+            try:
+                annotation.update(url_values_from_document(annotation))
+                if 'references' in annotation:
+                    parent = store.read(annotation['references'][-1])
+                    if 'text' in parent:
+                        annotation['quote'] = parent['text']
+                send_annotations.append(annotation)
+            except:
+                log.info(traceback.format_exc())
+                log.info("Error while updating the annotation's properties:" + str(annotation))
+
+        # Finally send filtered annotations
+        # Can send zero to indicate that no past data is matched
+        if self.clientID is None:
+            # Backwards-compatibility code
+            packet = [send_annotations, 'past']
+        else:
+            packet = {
+                'payload': send_annotations,
+                'type': 'annotation-notification',
+                'options': {
+                    'action': 'past',
+                    'clientID': self.clientID
+                }
+            }
+        self.send(packet)
+
     def on_message(self, msg):
         transaction.begin()
         try:
             struct = json.loads(msg)
+            self.clientID = struct['clientID'] if 'clientID' in struct else ''
+            type = struct['messageType'] if 'messageType' in struct else 'filter'
 
-            if 'clientID' in struct:
-                self.clientID = struct['clientID']
+            if type == 'filter':
                 payload = struct['filter']
-            else:
-                payload = struct
+                self.offsetFrom = 0
 
-            # Let's try to validate the schema
-            validate(payload, filter_schema)
-            self.filter = FilterHandler(payload)
+                # Let's try to validate the schema
+                validate(payload, filter_schema)
+                self.filter = FilterHandler(payload)
 
-            # If past is given, send the annotations back.
-            if "past_data" in payload and payload["past_data"]["load_past"] != "none":
-                query = FilterToElasticFilter(payload)
-                request = self.request
-                registry = request.registry
-                log.info(query.query)
-                store = registry.queryUtility(interfaces.IStoreClass)(request)
-                annotations = store.search_raw(query.query)
-
-                send_annotations = []
-                for annotation in annotations:
-                    try:
-                        annotation.update(url_values_from_document(annotation))
-                        if 'references' in annotation:
-                            parent = store.read(annotation['references'][-1])
-                            if 'text' in parent:
-                                annotation['quote'] = parent['text']
-                        send_annotations.append(annotation)
-                    except:
-                        log.info(traceback.format_exc())
-                        log.info("Error while updating the annotation's properties:" + str(annotation))
-
-                # Finally send filtered annotations
-                # Can send zero to indicate that no past data is matched
-                if self.clientID is None:
-                    # Backwards-compatibility code
-                    packet = [send_annotations, 'past']
-                else:
-                    packet = {
-                        'payload': send_annotations,
-                        'type': 'annotation-notification',
-                        'options': {
-                            'action': 'past',
-                            'clientID': self.clientID
-                        }
-                    }
-                self.send(packet)
+                # If past is given, send the annotations back.
+                if "past_data" in payload and payload["past_data"]["load_past"] != "none":
+                    self.query = FilterToElasticFilter(payload)
+                    if 'size' in self.query.query:
+                        self.offsetFrom = int(self.query.query['size'])
+                    self.send_annotations()
+            elif type == 'more_hits':
+                more_hits = int(struct['moreHits']) if 'moreHits' in struct else 50
+                if 'size' in self.query.query:
+                    self.query.query['from'] = self.offsetFrom
+                    self.query.query['size'] = more_hits
+                    self.send_annotations()
+                    self.offsetFrom += self.received
         except:
             log.info(traceback.format_exc())
             log.info('Failed to parse filter:' + str(msg))

@@ -242,7 +242,6 @@ class StreamSearch
         if data.length
           $scope.$apply =>
             $scope.empty = false
-            data = data.sort($scope.sortAnnotations)
             $scope.manage_new_data data, action
         else
           unless $scope.annotations.length
@@ -277,6 +276,18 @@ class StreamSearch
                 $scope.annotations.splice index,1
                 break
               index +=1
+      $scope.annotations = $scope.annotations.sort($scope.sortAnnotations)
+
+    $scope.loadMore = (number) =>
+      console.log 'loadMore'
+      unless $scope.sock? then return
+      sockmsg =
+        messageType: 'more_hits'
+        clientID: @clientID
+        moreHits: number
+
+      $scope.sock.send JSON.stringify sockmsg
+
 
     $scope.annotations = []
     $timeout =>

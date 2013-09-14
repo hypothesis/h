@@ -5,8 +5,10 @@
   </head>
   <style type="text/css"></style>
 
-  <body metal:fill-slot="body" ng-app="h.streamsearch">
-    <span ng-controller="StreamSearchController">
+  <body metal:fill-slot="body" ng-app="h.streamsearch"
+        ng-controller="StreamSearchController"
+        whenscrolled="loadMore(1)">
+    <span>
       <div class="topbar">
         <div class="inner right-border">
           <a class="pull-left" href="/"
