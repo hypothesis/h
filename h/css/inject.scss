@@ -115,6 +115,7 @@ $baseFontSize: 14px;
     font-weight: bold;
     font-family: $sansFontFamily;
     font-size: 13.1px;
+    line-height: 17.5px;
     left: 5px;
     right: 2px;
     position: absolute;
@@ -235,6 +236,10 @@ $baseFontSize: 14px;
 
   &.annotator-collapsed {
     margin-left: 0;
+  }
+
+  * {
+    font-size: 100%;
   }
 
   & > iframe {
