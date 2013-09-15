@@ -12,6 +12,10 @@ class Annotator.Guest extends Annotator
   options:
     Document: {}
 
+  # Internal state
+  tool: 'comment'
+  visibleHighlights: false
+
   constructor: (element, options) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
 
@@ -80,6 +84,12 @@ class Annotator.Guest extends Annotator
       }
     )
 
+    .bind('setTool', (ctx, name) => this.setTool name)
+
+    .bind('setVisibleHighlights', (ctx, state) =>
+      this.setVisibleHighlights state
+    )
+
   scanDocument: (reason = "something happened") =>
     try
       console.log "Analyzing host frame, because " + reason + "..."
@@ -132,7 +142,7 @@ class Annotator.Guest extends Annotator
     return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
 
   onSuccessfulSelection: (event) ->
-    if @highlightingMode
+    if @tool is 'highlight'
 
       # Do we really want to make this selection?
       return unless this.confirmSelection()
@@ -160,12 +170,12 @@ class Annotator.Guest extends Annotator
   # When clicking on a highlight in highlighting mode,
   # set @noBack to true to prevent the sidebar from closing
   onHighlightMousedown: (event) =>
-    if @highlightingMode or @alwaysOnMode then @noBack = true
+    if (@tool is 'highlight') or @visibleHighlights then @noBack = true
 
   # When clicking on a highlight in highlighting mode,
   # tell the sidebar to bring up the viewer for the relevant annotations
   onHighlightClick: (event) =>
-    return unless @highlightingMode or @alwaysOnMode and @noBack
+    return unless (@tool is 'highlight') or @visibleHighlights and @noBack
 
     # Collect relevant annotations
     annotations = $(event.target)
@@ -179,13 +189,30 @@ class Annotator.Guest extends Annotator
     # We have already prevented closing the sidebar, now reset this flag
     @noBack = false
 
-  setPersistentHighlights: (state) ->
-    body = $('body')
+  setTool: (name) ->
+    @tool = name
+    @panel?.notify
+      method: 'setTool'
+      params: name
+
+    switch name
+      when 'comment'
+        this.setVisibleHighlights this.visibleHighlights, true
+      when 'highlight'
+        this.setVisibleHighlights true, true
+
+  setVisibleHighlights: (state=true, temporary=false) ->
+    unless temporary
+      @visibleHighlights = state
+      @panel?.notify
+        method: 'setVisibleHighlights'
+        params: state
+
     markerClass = 'annotator-highlights-always-on'
-    if @alwaysOnMode or @highlightingMode
-      body.addClass markerClass
+    if state or (@tool is 'highlight')
+      @element.addClass markerClass
     else
-      body.removeClass markerClass
+      @element.removeClass markerClass
 
   addComment: ->
     sel = @selectedRanges   # Save the selection

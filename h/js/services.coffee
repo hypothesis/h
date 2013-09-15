@@ -48,6 +48,9 @@ class Hypothesis extends Annotator
   providers: null
   host: null
 
+  tool: 'comment'
+  visibleHighlights: false
+
   # Here as a noop just to make the Permissions plugin happy
   # XXX: Change me when Annotator stops assuming things about viewers
   viewer:
@@ -126,6 +129,14 @@ class Hypothesis extends Annotator
             for href of entityUris
               entities.push href
             this.plugins.Store?.loadAnnotations()
+
+        channel.notify
+          method: 'setTool'
+          params: this.tool
+
+        channel.notify
+          method: 'setVisibleHighlights'
+          params: this.visibleHighlights
 
         @providers.push
           channel: channel
@@ -214,6 +225,12 @@ class Hypothesis extends Annotator
 
     .bind('updateViewer', (ctx, ids=[]) =>
       this.updateViewer ((@threading.getContainer id).message for id in ids)
+    )
+
+    .bind('setTool', (ctx, name) => this.setTool name)
+
+    .bind('setVisibleHighlights', (ctx, state) =>
+      this.setVisibleHighlights state
     )
 
   _setupWrapper: ->
@@ -422,6 +439,21 @@ class Hypothesis extends Annotator
     angular.extend @options.Store, options
     this.addPlugin 'Store', @options.Store
 
+  setTool: (name) =>
+    return if name is @tool
+    @tool = name
+    for p in @providers
+      p.channel.notify
+        method: 'setTool'
+        params: name
+
+  setVisibleHighlights: (state) =>
+    return if state is @visibleHighlights
+    @visibleHighlights = state
+    for p in @providers
+      p.channel.notify
+        method: 'setVisibleHighlights'
+        params: state
 
 class AuthenticationProvider
   constructor: ->

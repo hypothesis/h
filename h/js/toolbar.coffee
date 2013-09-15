@@ -21,9 +21,8 @@ class Annotator.Toolbar extends Annotator.Widget
       "click": (event) ->
         event.preventDefault()
         event.stopPropagation()
-        state = not window.annotator.alwaysOnMode
-        window.annotator.alwaysOnMode = state
-        window.annotator.setPersistentHighlights()
+        state = not window.annotator.visibleHighlights
+        window.annotator.setVisibleHighlights state
         if state
           $(event.target).addClass('pushed')
         else
@@ -34,9 +33,9 @@ class Annotator.Toolbar extends Annotator.Widget
       "click": (event) ->
         event.preventDefault()
         event.stopPropagation()
-        state = not window.annotator.highlightingMode
-        window.annotator.highlightingMode = state
-        window.annotator.setPersistentHighlights()
+        state = not (window.annotator.tool is 'highlight')
+        tool = if state then 'highlight' else 'comment'
+        window.annotator.setTool tool
         if state
           $(event.target).addClass('pushed')
         else
