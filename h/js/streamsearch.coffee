@@ -264,14 +264,20 @@ class StreamSearch
               $scope.annotations.unshift annotation
           when 'update'
             index = 0
+            found = false
             for ann in $scope.annotations
               if ann.id is annotation.id
                 # Remove the original
                 $scope.annotations.splice index,1
                 # Put back the edited
                 $scope.annotations.unshift annotation
+                found = true
                 break
               index +=1
+            # Sometimes editing an annotation makes it appear in the list
+            # If it wasn't part of it before. (i.e. adding a new tag)
+            unless found
+              $scope.annotations.unshift annotation
           when 'delete'
             for ann in $scope.annotations
               if ann.id is annotation.id
