@@ -29,7 +29,7 @@ class SearchHelper
       category = searchItem.attributes.category
       value = searchItem.attributes.value
 
-      if category is 'limit' then limit = value
+      if category is 'results' then limit = value
       else
         if category is 'text'
           # Visualsearch sickly automatically cluster the text field
@@ -81,11 +81,11 @@ class SearchHelper
             value_part = if rule.formatter then rule.formatter val else val
             filter.addClause mapped_field, oper_part, value_part, case_sensitive
 
-    if limit != 50 then categories['limit'] = [limit]
+    if limit != 50 then categories['results'] = [limit]
     [filter.getFilter(), categories]
 
 class StreamSearch
-  facets: ['text','tags', 'uri', 'quote','created','user','limit']
+  facets: ['text','tags', 'uri', 'quote','since','user','results']
   rules:
     user:
       formatter: (user) ->
@@ -120,7 +120,7 @@ class StreamSearch
       exact_match: false
       case_sensitive: false
       and_or: 'or'
-    created:
+    since:
       formatter: (past) ->
         seconds =
           switch past
@@ -191,22 +191,22 @@ class StreamSearch
           add_limit = true
           add_created = true
           for facet in @search.searchQuery.facets()
-            if facet.hasOwnProperty 'limit' then add_limit = false
-            if facet.hasOwnProperty 'created' then add_created = false
+            if facet.hasOwnProperty 'results' then add_limit = false
+            if facet.hasOwnProperty 'since' then add_created = false
 
-          if add_limit and add_created then list = ['text','tags', 'uri', 'quote','created','user','limit']
+          if add_limit and add_created then list = ['text','tags', 'uri', 'quote','since','user','results']
           else
-            if add_limit then list = ['text','tags', 'uri', 'quote','user', 'limit']
+            if add_limit then list = ['text','tags', 'uri', 'quote','user', 'results']
             else
-              if add_created then list = ['text','tags', 'uri', 'quote','created','user']
+              if add_created then list = ['text','tags', 'uri', 'quote','since','user']
               else list = ['text','tags', 'uri', 'quote','user']
 
           return callback list, {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
-            when 'limit'
+            when 'results'
               callback ['0', '10', '25', '50', '100', '250', '1000']
-            when 'created'
+            when 'since'
               callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
         clearSearch: (original) =>
           # Execute clearSearch's internal method for resetting search
