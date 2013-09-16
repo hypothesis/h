@@ -207,9 +207,6 @@ class Annotation(BaseResource, dict):
         return self._nestlist(childTable.get(self['id']), childTable)
 
 
-class Streamer(BaseResource, dict):
-    pass
-
 class StreamSearch(BaseResource, dict):
     pass
 
@@ -254,8 +251,7 @@ def includeme(config):
     config.add_route('index', '/', static=True)
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
-    RootFactory.stream = Streamer
-    RootFactory.streamsearch = StreamSearch
+    RootFactory.stream = StreamSearch
     RootFactory.u = UserStreamFactory
     RootFactory.t = TagStreamFactory
 

@@ -255,21 +255,6 @@ class AppController(BaseController):
             'token_url': request.route_url('token'),
         }
 
-
-@view_defaults(context='h.resources.Streamer', layout='site')
-class Streamer(BaseController):
-    @view_config(accept='text/html', renderer='templates/streamer.pt')
-    def __html__(self):
-        return self.request.context
-
-    @view_config(accept='application/json', renderer='json')
-    def __call__(self):
-        request = self.request
-        request.response.content_type = 'application/json'
-        request.response.charset = 'UTF-8'
-        return request.context
-
-
 @view_defaults(context='h.resources.Stream', layout='site')
 class Stream(BaseController):
     @view_config(accept='text/html', renderer='templates/stream.pt')
