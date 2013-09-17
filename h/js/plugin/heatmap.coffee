@@ -193,11 +193,14 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       info = b.reduce (info, a) ->
         subtotal = (a.thread?.flattenChildren()?.length or 0)
         return {
-          top: (info.top or 0) + 1
+          top: info.top + 1
           replies: (info.replies or 0) + subtotal
           total : (info.total or 0) + subtotal + 1
         }
-      , 0
+      ,
+        top: 0
+        replies: 0
+        total: 0
       max = Math.max max, info.total
       b.total = info.total
       b.top = info.top
