@@ -123,6 +123,11 @@ def before_request():
 
 def after_request(response):
     if flask.request.method == 'OPTIONS':
+        in_value = response.headers.get('Access-Control-Allow-Headers', '')
+        allowed = [h.strip() for h in in_value.split(',')]
+        allowed.append('X-Client-ID')
+        out_value = ', '.join(allowed)
+        response.headers['Access-Control-Allow-Headers'] = out_value
         return response
 
     if 200 <= response.status_code < 300:
