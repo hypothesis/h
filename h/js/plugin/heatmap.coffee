@@ -325,6 +325,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
       # Does one of a few things when a tab is clicked depending on type
       .on 'click', (bucket) =>
+        d3.event.stopPropagation()
         highlights = wrapper.find('.annotator-hl')
         pad = defaultView.innerHeight * .2
 
