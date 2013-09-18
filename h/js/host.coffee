@@ -34,6 +34,11 @@ class Annotator.Host extends Annotator.Guest
 
     if @plugins.Heatmap?
       this._setupDragEvents()
+      @plugins.Heatmap.element.on 'click', (event) =>
+        if @frame.hasClass 'annotator-collapsed'
+          this.showFrame()
+        else
+          this.hideFrame()
 
   _setupXDM: (options) ->
     channel = super

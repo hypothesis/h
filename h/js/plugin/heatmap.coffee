@@ -71,7 +71,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       event.stopPropagation()
       this._fillDynamicBucket()
       @dynamicBucket = true
-      @annotator.showFrame()
 
     $(window).on 'resize scroll', this._update
     $(document.body).on 'resize scroll', '*', this._update
