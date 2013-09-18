@@ -582,11 +582,11 @@ class App
           if $scope.socialView.name is 'single-player'
             if annotation.user is user
               $scope.addUpdateNotification()
-              $scope.new_updates +=1
+              $scope.new_updates += 1
           else
             if data.length > 0
                 $scope.addUpdateNotification()
-                $scope.new_updates +=1
+                $scope.new_updates += 1
 
     $timeout =>
       $scope.initUpdater()
