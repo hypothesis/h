@@ -174,10 +174,10 @@ button, input[type=submit], .btn {
 
 //FLASH/TOAST/ALERTS///////////////////////////////
 .toast, .annotator-notice {
-  @include border-radius(0.1em);
+  @include border-radius(.1em);
   @include smallshadow;
   @include single-transition(opacity, .2s);
-  padding: 0.3em;
+  padding: .3em;
   font-family: $sansFontFamily;
   border: solid 1px;
   bottom: 18%;
@@ -297,7 +297,7 @@ blockquote {
   font-family: $serifFontFamily;
   font-size: 1em;
   margin-bottom: 1em;
-  padding: 0 0.8em;
+  padding: 0 .8em;
 
   &:before, &:after {
     color: $grayLighter;
@@ -518,7 +518,6 @@ blockquote {
   bottom: 1px;
   left: 3px;
   position: absolute;
-  // text-shadow: -0.1em -0.1em #999;
 }
 
 .highlighter-icon {
@@ -528,7 +527,6 @@ blockquote {
   bottom: 1px;
   left: 3px;
   position: absolute;
-  // text-shadow: -0.1em -0.1em #999;
 }
 
 .commenter-icon {
@@ -538,7 +536,6 @@ blockquote {
   bottom: 1px;
   left: 3px;
   position: absolute;
-  // text-shadow: -0.1em -0.1em #999;
 }
 
 //VISIBILITY
@@ -695,7 +692,7 @@ blockquote {
   padding-top: 3.5em;
 
   .domain {
-    margin: 0.2em 0 0.3em;
+    margin: .2em 0 .3em;
   }
 
   .domain .favicon {
@@ -852,7 +849,7 @@ blockquote {
         white-space: nowrap;
         margin-top: 0;
         margin-bottom: 0;
-        font-size: 0.95em;
+        font-size: .95em;
       }
 
       .indicators {
@@ -923,7 +920,7 @@ blockquote {
     position: relative;
     .go-icon {
       position: absolute;
-      top: 0.33em;
+      top: .33em;
     }
     .share-div {
       margin-left: 1.5em;
@@ -966,8 +963,8 @@ blockquote {
 .button_controls {
   margin-left: 1em;
   margin-right: 1em;
-  margin-bottom: 0.5em;
-  margin-top: 0.5em;
+  margin-bottom: .5em;
+  margin-top: .5em;
 }
 
 .stream-list {
@@ -1090,12 +1087,12 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 }
 
 .annotation-header-border {
-  padding: 0.5em;
+  padding: .5em;
   overflow: hidden;
 }
 
 .annotation-header-width {
-  padding: 0.2em;
+  padding: .2em;
   overflow: hidden;
 }
 
@@ -1171,7 +1168,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     position: relative;
     right: 2px;
     font-size: 12px;
-    opacity:0.8;
+    opacity:.8;
 
 
     &:hover { opacity: 1; }
@@ -1218,7 +1215,7 @@ h3.stream {
 }
 
 .small-inner {
-  margin:0px 0.5em 0px 1em;
+  margin:0px .5em 0px 1em;
 }
 
 .search-container {

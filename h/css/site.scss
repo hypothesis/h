@@ -76,7 +76,7 @@ ol {
 .topbar {
   position: relative;
   .inner {
-    padding-left: 0.6em;
+    padding-left: .6em;
     margin: 0 auto;
     max-width: $break-large;
     @include respond-to(tablets) {
@@ -84,13 +84,8 @@ ol {
       margin: 0 auto;
       max-width: $break-large;
     }
-    // @include respond-to(wide-handhelds tablets) {
-    //   padding-left: 3.6em;
-    //   margin: 0 auto;
-    //   max-width: $break-large;
-    // }
     @include respond-to(handhelds) {
-      padding: 0 0.6em;
+      padding: 0 .6em;
       margin: 0 auto;
       max-width: $break-large;
     }
