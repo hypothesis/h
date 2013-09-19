@@ -97,14 +97,15 @@ class App
       $scope.reloadAnnotations()
 
     $scope.$watch 'frame.visible', (newValue, oldValue) ->
+      routeName = $location.path().replace /^\//, ''
       if newValue
         annotator.show()
-        annotator.host.notify method: 'showFrame'
+        annotator.host.notify method: 'showFrame', params: routeName
         $element.find('.topbar').find('.tri').attr('draggable', true)
       else if oldValue
         $scope.sheet.collapsed = true
         annotator.hide()
-        annotator.host.notify method: 'hideFrame'
+        annotator.host.notify method: 'hideFrame', params: routeName
         for p in annotator.providers
           p.channel.notify method: 'setActiveHighlights'
         $element.find('.topbar').find('.tri').attr('draggable', false)
