@@ -73,10 +73,31 @@ ol {
   }
 }
 
-.topbar .inner {
-  @include respond-to(tablets) {
-    padding-left: 3.6em;
+.topbar {
+  position: relative;
+  .inner {
+    padding-left: .6em;
     margin: 0 auto;
     max-width: $break-large;
+    @include respond-to(tablets) {
+      padding-left: 3.6em;
+      margin: 0 auto;
+      max-width: $break-large;
+    }
+    @include respond-to(handhelds) {
+      padding: 0 .6em;
+      margin: 0 auto;
+      max-width: $break-large;
+    }
   }
 }
+
+.user {
+    font-weight: bold;
+    font-size: 1.1em;
+    &:hover {
+      color: $linkColorHover;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  }

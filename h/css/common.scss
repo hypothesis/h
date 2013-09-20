@@ -161,12 +161,23 @@ button, input[type=submit], .btn {
 }
 
 
+//Notifications///////////////////////////////
+
+.notifications {
+  padding: 1em 0em 1em 1em;
+
+  .paper {
+    border: 1px solid #75b8f3;
+  }
+
+}
+
 //FLASH/TOAST/ALERTS///////////////////////////////
 .toast, .annotator-notice {
-  @include border-radius(0.1em);
+  @include border-radius(.1em);
   @include smallshadow;
   @include single-transition(opacity, .2s);
-  padding: 0.3em;
+  padding: .3em;
   font-family: $sansFontFamily;
   border: solid 1px;
   bottom: 18%;
@@ -286,7 +297,7 @@ blockquote {
   font-family: $serifFontFamily;
   font-size: 1em;
   margin-bottom: 1em;
-  padding: 0 1em;
+  padding: 0 .8em;
 
   &:before, &:after {
     color: $grayLighter;
@@ -325,7 +336,6 @@ blockquote {
 .dropdown-toggle {
   @include fonticon("\002f", right, 0);
   cursor: pointer;
-  padding: .5em;
 
   &:active {
     outline: 0;
@@ -487,6 +497,19 @@ blockquote {
   @include fonticon("\2a", left);
 }
 
+.cancel-icon {
+  position: relative;
+  top: 2px;
+  width: 11px; height: 11px;
+  background-position: center 0;
+  background-repeat: no-repeat;
+  background-image: url(../images/embed/icons/cancel_search.png?1311104738);
+  cursor: pointer;
+  &:hover {
+    background-position: center -11px;
+  }
+}
+
 //Controlbar Icons
 .alwaysonhighlights-icon {
   @include fonticon("\e01b", left);
@@ -495,7 +518,6 @@ blockquote {
   bottom: 1px;
   left: 3px;
   position: absolute;
-  // text-shadow: -0.1em -0.1em #999;
 }
 
 .highlighter-icon {
@@ -505,7 +527,6 @@ blockquote {
   bottom: 1px;
   left: 3px;
   position: absolute;
-  // text-shadow: -0.1em -0.1em #999;
 }
 
 .commenter-icon {
@@ -515,7 +536,6 @@ blockquote {
   bottom: 1px;
   left: 3px;
   position: absolute;
-  // text-shadow: -0.1em -0.1em #999;
 }
 
 //VISIBILITY
@@ -671,6 +691,10 @@ blockquote {
   padding: 1em;
   padding-top: 3.5em;
 
+  .domain {
+    margin: .2em 0 .3em;
+  }
+
   .domain .favicon {
     margin: 0 .5em;
   }
@@ -698,6 +722,7 @@ blockquote {
     &:hover {
       color: $linkColorHover;
       cursor: pointer;
+      text-decoration: underline;
     }
   }
 
@@ -753,6 +778,7 @@ blockquote {
     &:hover {
       color: $linkColorHover;
       cursor: pointer;
+      text-decoration: underline;
     }
   }
 }
@@ -823,8 +849,7 @@ blockquote {
         white-space: nowrap;
         margin-top: 0;
         margin-bottom: 0;
-        font-size: 0.95em;
-        opacity: 0.8;
+        font-size: .95em;
       }
 
       .indicators {
@@ -870,9 +895,9 @@ blockquote {
 
   &.pull-right {
     text-align: right;
+    clear: both;
 
     & > * {
-      padding-left: .8em;
       padding-right: 0;
     }
   }
@@ -895,7 +920,7 @@ blockquote {
     position: relative;
     .go-icon {
       position: absolute;
-      top: 0.33em;
+      top: .33em;
     }
     .share-div {
       margin-left: 1.5em;
@@ -938,8 +963,8 @@ blockquote {
 .button_controls {
   margin-left: 1em;
   margin-right: 1em;
-  margin-bottom: 0.5em;
-  margin-top: 0.5em;
+  margin-bottom: .5em;
+  margin-top: .5em;
 }
 
 .stream-list {
@@ -1062,12 +1087,12 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 }
 
 .annotation-header-border {
-  padding: 0.5em;
+  padding: .5em;
   overflow: hidden;
 }
 
 .annotation-header-width {
-  padding: 0.2em;
+  padding: .2em;
   overflow: hidden;
 }
 
@@ -1143,7 +1168,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     position: relative;
     right: 2px;
     font-size: 12px;
-    opacity:0.8;
+    opacity:.8;
 
 
     &:hover { opacity: 1; }
@@ -1190,7 +1215,7 @@ h3.stream {
 }
 
 .small-inner {
-  margin:0px 0.5em 0px 1em;
+  margin:0px .5em 0px 1em;
 }
 
 .search-container {

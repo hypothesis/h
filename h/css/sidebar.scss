@@ -105,7 +105,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   .notification-counter {
     font-family: $sansFontFamily;
     position: absolute;
-    margin-left: .8em;
+    margin-left: .75em;
     float: left;
     margin-top: 0.37em;
     z-index: 2;
@@ -134,7 +134,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
   .notif-list {
     margin-right: 3.85em;
-    padding-top: .5em;
+    box-shadow: 1px 1px 9px #b5d4ff;
   }
 
   .top-padding {
@@ -146,6 +146,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
   .notif-text {
     font-family: $sansFontFamily;
+    position: relative;
+    bottom: 2px;
   }
 }
 

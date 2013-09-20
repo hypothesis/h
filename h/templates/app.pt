@@ -130,22 +130,22 @@
     <div id="wrapper">
       <!-- Angular view -->
       <div ng-view=""></div>
-    </div>
-
-    <!-- Bottombar -->
-    <div class="bottombar" ng-class="frame.visible && 'shown'"
-         ng-show="notifications.length">
-      <ul class="sliding-panels">
-        <li class="stream-list notif-list"
-            ng-repeat="notif in notifications">
-           <div class="paper thread top-padding">
-             <div class="notification bottom-padding"
-                  name="notification"
-                  ng-model="$parent.notif">
+      
+      <!-- Bottombar -->
+      <div class="bottombar" ng-class="frame.visible && 'shown'"
+           ng-show="notifications.length">
+        <ul class="notifications">
+          <li class="stream-list notif-list"
+              ng-repeat="notif in notifications">
+             <div class="paper thread top-padding">
+               <div class="notification bottom-padding"
+                    name="notification"
+                    ng-model="$parent.notif">
+               </div>
              </div>
-           </div>
-        </li>
-      </ul>
+          </li>
+        </ul>
+      </div>
     </div>
     <!-- / Content -->
 

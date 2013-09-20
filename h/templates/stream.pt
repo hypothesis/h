@@ -29,7 +29,7 @@
                  ng-click="view=!view">
               <div>
                 <div>
-                  <div ng-show="annotation.text.length">
+                  <div ng-show="annotation.quote.length">
                       <blockquote>{{annotation.quote | elide:140}}</blockquote>
                   </div>
                   <div class="small domain thread">
@@ -53,7 +53,6 @@
               </div>
             </div>
               <div>
-                <br/>
                 <div class="small">
                   <div class="thread">
                     <div class="detail">
