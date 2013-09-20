@@ -25,19 +25,22 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         </div>
         """
 
+  # Plugin configuration
+  options:
+    # gapSize parameter is used by the clustering algorithm
+    # If an annotation is farther then this gapSize from the next bucket
+    # then that annotation will not be merged into the bucket
+    gapSize: 60
+
   # buckets of annotations that overlap
   buckets: []
 
   # index for fast hit detection in the buckets
   index: []
 
-  # gapSize parameter is used by the clustering algorithm
-  # If an annotation is farther then this gapSize from the current bucket
-  # then that annotation will not be merged into the current bucket (probably will get an own bucket)
   constructor: (element, options) ->
     super $(@html), options
     this._rebaseUrls()
-    unless @options.gapSize then @options.gapSize = 60
     @element.appendTo element
 
   _rebaseUrls: ->
