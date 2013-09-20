@@ -31,9 +31,13 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # index for fast hit detection in the buckets
   index: []
 
+  # gapSize parameter is used by the clustering algorithm
+  # If an annotation is farther then this gapSize from the current bucket
+  # then that annotation will not be merged into the current bucket (probably will get an own bucket)
   constructor: (element, options) ->
     super $(@html), options
     this._rebaseUrls()
+    unless @options.gapSize then @options.gapSize = 60
     @element.appendTo element
 
   _rebaseUrls: ->
@@ -138,7 +142,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       if (
         (index.length is 0 or i is points.length - 1) or  # First or last?
         carry.annotations.length is 0 or                  # A zero marker?
-        x - index[index.length-1] > 180                   # A large gap?
+        x - index[index.length-1] > @options.gapSize      # A large gap?
       )                                                   # Mark a new bucket.
         buckets.push carry.annotations.slice()
         index.push x
