@@ -13,7 +13,6 @@
       <div class="inner">
         <a class="barbutton pull-left" href="/"
            ><h4>hypothes<span class="red">.</span>is</h4></a>
-        <!-- <a href="" class="barbutton pull-right">Sign in</a> -->
       </div>
     </div>
 
@@ -28,12 +27,12 @@
       <div class="noise yui3-u-1"
            ng-hide="full_deleted">
         <div ng-view=""></div>
-        <strong>
+<!--         <strong>
             <a class="pull-right"
                ng-href="{{annotation.uri}}">To Source</a>
-        </strong>
+        </strong> -->
 
-        <div class="page">
+<!--         <div class="page">
           <strong>
             <username ng-model="annotation.user"></username>
             <span>{{annotation.text && "annotated" || "highlighted"}}:</span>
@@ -46,21 +45,24 @@
             |
             <a ng-href="{{root.source}}">{{root.source_stripped}}</a>
           </div>
-        </div>
+        </div> -->
 
-        <div class="card-grid yui3-g">
+        <div class="paper yui3-g thread steam-list">
           <div class="yui3-u-1"
-               ng-class="(annotation.text || annotation.replies.length || annotation.tags.length) && 't-yui3-u-1-2' || '' "
+               ng-class="(annotation.text || annotation.replies.length || annotation.tags.length) && '' || '' "
                ng-show="root.quote.length">
-            <div class="paper excerpt">
+            <div class="excerpt">
               <blockquote>{{root.quote}}</blockquote>
             </div>
-          </div>
-
+              <div class="domain thread">
+                    <a href="{{root.source}}">{{root.source_stripped}}</a>
+                    |
+                    <a href="{{root.uri}}">{{root.title}}</a>
+                  </div>
           <div class="yui3-u-1"
-               ng-class="(root.quote.length) && 't-yui3-u-1-2' || ''"
+               ng-class="(root.quote.length) && '' || ''"
                ng-show="annotation.text || annotation.replies.length || annotation.tags.length">
-            <div class="paper thread">
+            <div class="thread">
               <div class="annotation detail">
                 <div class="magicontrols pull-right">
                   <span ng-show="annotation.text || annotation.tags.length" class="small">{{annotation.date | fuzzyTime}}</span>
@@ -145,6 +147,7 @@
               </ul>
             </div>
           </div>
+        </div>
         </div>
       </div>
       <div class="yui3-u-1">
