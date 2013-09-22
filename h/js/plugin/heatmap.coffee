@@ -380,7 +380,17 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     .html (d) =>
       "<div class='label'>#{@buckets[d].display}</div><div class='svg'></div>"
 
-    .classed('upper', @isUpper)
+    # Moves upper tab up or down depending on if stickybuttons are enabled.
+    if parent.window.annotator.alwaysOnMode and parent.window.annotator.highlightingMode
+      tabs.classed('upper sticky2', @isUpper)
+    else if parent.window.annotator.alwaysOnMode or parent.window.annotator.highlightingMode
+      tabs.classed('upper sticky1', @isUpper)
+    else
+      tabs.classed('sticky1', false)
+      tabs.classed('sticky2', false)
+      tabs.classed('upper', @isUpper)
+
+    tabs  
     .classed('lower', @isLower)
     .classed('commenter', @isComment)
 
