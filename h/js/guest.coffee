@@ -25,12 +25,7 @@ class Annotator.Guest extends Annotator
     .appendTo(@wrapper)
     .addClass('annotator-frame annotator-outer annotator-collapsed')
 
-    unless @options.light
-      @toolbar = new Annotator.Toolbar()
-      @toolbar.element.appendTo(@frame)
-
     delete @options.app
-    delete @options.light
 
     this.addPlugin 'Bridge',
       formatter: (annotation) =>

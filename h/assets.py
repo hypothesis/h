@@ -89,6 +89,9 @@ annotator_discovery = Uglify(
 annotator_heatmap = Uglify(
     Coffee('js/plugin/heatmap.coffee', output='js/plugin/heatmap.js')
 )
+annotator_toolbar = Uglify(
+    Coffee('js/plugin/toolbar.coffee', output='js/plugin/toolbar.js')
+)
 annotator_permissions = Uglify(
     'lib/annotator.permissions.js',
     output='lib/annotator.permissions.min.js'
@@ -269,10 +272,10 @@ inject = Bundle(
     annotator_bridge,
     annotator_document,
     annotator_heatmap,
+    annotator_toolbar,
     Uglify(
         Coffee('js/guest.coffee', output='js/guest.js'),
         Coffee('js/host.coffee', output='js/host.js'),
-        Coffee('js/toolbar.coffee', output='js/toolbar.js'),
         output='js/inject.min.js'
     ),
     SCSS('css/inject.scss', depends=css_base, output='css/inject.css'),

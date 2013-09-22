@@ -1,6 +1,7 @@
 $ = Annotator.$
 
-class Annotator.Toolbar extends Annotator.Widget
+class Annotator.Plugin.Toolbar extends Annotator.Plugin
+
   html: '<div class="annotator-toolbar"></div>'
 
   options:
@@ -49,8 +50,13 @@ class Annotator.Toolbar extends Annotator.Widget
         window.annotator.addComment()
     ]
 
-  constructor: (options) ->
-    super $(@html)[0], options
+  pluginInit: ->
+    @annotator.toolbar = @toolbar = $(@html)
+    if @options.container?
+      $(@options.container).append @toolbar
+    else
+      $(@element).append @toolbar
+
     @buttons = @options.items.reduce  (buttons, item) =>
       button = $('<a></a>')
       .attr('href', '')
@@ -60,15 +66,5 @@ class Annotator.Toolbar extends Annotator.Widget
       .data('state', false)
       buttons.add button
     , $()
-    @element
-    .append(@buttons)
-    .wrapInner('<ul></ul>')
+    @toolbar.append(@buttons).wrapInner('<ul></ul>')
     @buttons.wrap('<li></li>')
-
-  show: ->
-    @element.removeClass @classes.hide
-    this
-
-  hide: ->
-    @element.addClass @classes.hide
-    this

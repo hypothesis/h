@@ -81,11 +81,13 @@ class AppFactory(BaseResource):
         }
         options = {
             'app': self.request.resource_url(self),
-            'light': self.request.GET.get('light') != None,
         }
         if not self.request.GET.get('light', False):
             options.update({
                 'Heatmap': {
+                    'container': '.annotator-frame',
+                },
+                'Toolbar': {
                     'container': '.annotator-frame',
                 },
             })
