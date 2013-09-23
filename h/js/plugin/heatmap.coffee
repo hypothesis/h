@@ -384,6 +384,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     if parent.window.annotator.alwaysOnMode and parent.window.annotator.highlightingMode
       tabs.classed('upper sticky2', @isUpper)
     else if parent.window.annotator.alwaysOnMode or parent.window.annotator.highlightingMode
+      tabs.classed('sticky2', false)
       tabs.classed('upper sticky1', @isUpper)
     else
       tabs.classed('sticky1', false)

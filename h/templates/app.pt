@@ -60,7 +60,8 @@
       </div>
 
       <!-- Sticky Buttons -->
-        <div class="stickybuttons"
+        <div class="stickybuttons1"
+             ng-class="alwaysOnMode && highlightingMode && 'stickybuttons2'"
              ng-show="alwaysOnMode || highlightingMode"
              ng-init="sticky = 'sticky1'">
         <ul>

@@ -146,14 +146,19 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 }
 
-.stickybuttons {
+.stickybuttons1 {
   position: absolute;
   overflow: hidden;
   width: 40px;
-  height: 65px;
+  height: 35px;
   z-index: -1000;
   top: 26px;
   left: 1px;
+}
+
+.stickybuttons2 {
+  @extend.stickybuttons1;
+  height: 65px;
 }
 
 .stickybutton {
@@ -240,7 +245,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       margin-top: -1.2em;
     }
     &.sticky1 {
-      margin-top: 1.8em;
+      margin-top: 1em;
     }
     &.sticky2 {
       margin-top: 2.8em;
