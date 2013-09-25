@@ -357,6 +357,16 @@ $baseFontSize: 14px;
 }
 
 
+// Toolbar notification counter
+.annotator-notification-counter {
+  font-family: $sansFontFamily;
+  pointer-events: none;
+  position: absolute;
+  margin-left: .7em;
+  margin-top: .25em;
+  z-index: 2;
+  font-size: $baseFontSize * .86;
+}
 
 
 /*

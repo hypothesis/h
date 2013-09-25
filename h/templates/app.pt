@@ -15,16 +15,6 @@
 
     <!-- Toolbar -->
     <div class="topbar" class="form-inline" ng-class="frame.visible && 'shown'">
-      <div class="notification-counter"
-           ng-click="frame.visible = !frame.visible"
-           ng-show="new_updates>0 && new_updates<10">
-        +{{ new_updates }}
-      </div>
-      <div class="notification-counter"
-           ng-show="new_updates>9">
-        &gt;9
-      </div>
-
       <div class="inner" ng-switch="auth.persona">
         <a class="pull-right" href=""
            ng-click="sheet.collapsed = false;

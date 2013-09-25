@@ -93,6 +93,10 @@ class Annotator.Host extends Annotator.Guest
       Math.max.apply(Math, all)
     )
 
+    .bind('updateNotificationCounter', (ctx, count) =>
+      this.publish 'updateNotificationCounter', count
+    )
+
   _setupDragEvents: ->
     el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
     el.width = el.height = 1

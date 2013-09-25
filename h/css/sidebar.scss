@@ -72,23 +72,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   .inner {
     margin: 0 .5em 0 .5em;
   }
-
-  .notification-counter {
-    font-family: $sansFontFamily;
-    position: absolute;
-    margin-left: .75em;
-    float: left;
-    margin-top: 0.37em;
-    z-index: 2;
-    font-size: 12px;
-    cursor: w-resize;
-  }
-
-  &.shown {
-    .notification-counter {
-      cursor: ew-resize;
-    }
-  }
 }
 
 .bottombar {

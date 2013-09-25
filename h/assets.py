@@ -265,6 +265,8 @@ inject = Bundle(
     domTextFamily,
     jquery,
     jquery_scrollintoview,
+    jquery_ui,
+    jquery_ui_effects,
     jschannel,
     gettext,
     annotator_i18n,

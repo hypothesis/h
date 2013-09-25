@@ -1,8 +1,12 @@
 $ = Annotator.$
 
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
+  events:
+    'updateNotificationCounter': 'onUpdateNotificationCounter'
 
-  html: '<div class="annotator-toolbar"></div>'
+  html:
+    element: '<div class="annotator-toolbar"></div>'
+    notification: '<div class="annotator-notification-counter"></div>"'
 
   options:
     items: [
@@ -51,11 +55,14 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     ]
 
   pluginInit: ->
-    @annotator.toolbar = @toolbar = $(@html)
+    @annotator.toolbar = @toolbar = $(@html.element)
     if @options.container?
       $(@options.container).append @toolbar
     else
       $(@element).append @toolbar
+
+    @notificationCounter = $(@html.notification)
+    @toolbar.append(@notificationCounter)
 
     @buttons = @options.items.reduce  (buttons, item) =>
       button = $('<a></a>')
@@ -66,5 +73,23 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
       .data('state', false)
       buttons.add button
     , $()
-    @toolbar.append(@buttons).wrapInner('<ul></ul>')
+
+    list = $('<ul></ul>')
+    @buttons.appendTo(list)
     @buttons.wrap('<li></li>')
+    @toolbar.append(list)
+
+  onUpdateNotificationCounter: (count) ->
+    element = $(@buttons[0])
+    element.toggle('fg_highlight', {color: 'lightblue'})
+    setTimeout ->
+      element.toggle('fg_highlight', {color: 'lightblue'})
+    , 500
+
+    switch
+      when count > 9
+        @notificationCounter.text('>9')
+      when 0 < count < 9
+        @notificationCounter.text("+#{count}")
+      else
+        @notificationCounter.text('')

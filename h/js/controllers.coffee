@@ -436,11 +436,10 @@ class App
           else text = 'changes.'
           notif.text = 'Click to load ' + updates + ' ' + text
 
-      return unless updates
-      $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
-      $timeout ->
-        $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
-      , 500
+      for p in annotator.providers
+        p.channel.notify
+          method: 'updateNotificationCounter'
+          params: updates
 
     $scope.$watch 'show_search', (value, old) ->
       if value and not old
