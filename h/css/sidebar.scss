@@ -253,6 +253,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   &.lower {
+    margin-top: -2em;
     .svg {
       background-image: url("../images/down_tab.svg");
     }
@@ -260,7 +261,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       top: 1px;
     }
     &:hover {
-      margin-top: -.8em;
+      margin-top: -2.4em;
     }
   }
   &.flip {
@@ -273,7 +274,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     @include single-transition(margin-top, .2s);
     left: 3px;
     width: 37px;
-
+    margin-top: -1.2em;
     .svg {
       background-image: url("../images/comment_tab.svg");
     }
@@ -281,7 +282,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
       bottom: 1px;
     }
     &:hover {
-      margin-top: -1.2em;
+      margin-top: -1.4em;
     }
   }
 }
