@@ -145,10 +145,9 @@ def groupfinder(userid, request):
 
 def includeme(config):
     registry = config.registry
-    ModeratedAnnotation, ModerationAction, Computation = mannord.create_classes(Base)
+    mannord.bootstrap(Base)
     config.include('pyramid_basemodel')
     config.include('pyramid_tm')
-    mannord.remember_classes(ModeratedAnnotation, ModerationAction, Computation)
 
     config.set_request_property(lib.user_property, 'user')
 
