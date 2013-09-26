@@ -89,6 +89,9 @@ annotator_discovery = Uglify(
 annotator_heatmap = Uglify(
     Coffee('js/plugin/heatmap.coffee', output='js/plugin/heatmap.js')
 )
+annotator_toolbar = Uglify(
+    Coffee('js/plugin/toolbar.coffee', output='js/plugin/toolbar.js')
+)
 annotator_permissions = Uglify(
     'lib/annotator.permissions.js',
     output='lib/annotator.permissions.min.js'
@@ -128,6 +131,9 @@ angular_sanitize = Uglify(
 jquery = Uglify('lib/jquery-1.10.2.js', output='lib/jquery-1.10.2.min.js')
 jquery_mousewheel = Uglify(
     'lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
+)
+jquery_scrollintoview = Uglify(
+    'lib/jquery.scrollintoview.js', output='lib/jquery.scrollintoview.min.js'
 )
 
 # jQuery UI
@@ -203,12 +209,10 @@ app = Bundle(
     annotator_auth,
     annotator_bridge,
     annotator_discovery,
-    annotator_heatmap,
     annotator_permissions,
     annotator_store,
     annotator_threading,
     annotator_document,
-    d3,
     jschannel,
     jwz,
     pagedown,
@@ -252,24 +256,40 @@ site = Bundle(
 )
 
 
-# The inject is a script which loads the annotator in an iframe
-# and sets up an RPC channel for cross-domain communication between the
-# the frame and its parent window. It then makes cretain annotator methods
-# available via the bridge plugin.
+# The inject bundle is intended to be loaded into pages for bootstrapping
+# the application. It sets up RPC channels for cross-domain communication
+# between frames participating in annotation by using the annotator bridge
+# plugin.
 inject = Bundle(
+    d3,
     domTextFamily,
     jquery,
+    jquery_scrollintoview,
+    jquery_ui,
+    jquery_ui_effects,
     jschannel,
     gettext,
     annotator_i18n,
     annotator,
     annotator_bridge,
     annotator_document,
+    annotator_heatmap,
+    annotator_toolbar,
     Uglify(
+        Coffee('js/guest.coffee', output='js/guest.js'),
         Coffee('js/host.coffee', output='js/host.js'),
-        output='js/host.min.js'
+        output='js/inject.min.js'
     ),
     SCSS('css/inject.scss', depends=css_base, output='css/inject.css'),
+)
+
+sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),
+               output='css/sidebar.min.css')
+
+site = Bundle(
+    app,
+    SCSS('css/site.scss', depends=(css_base + css_common),
+         output='css/site.min.css'),
 )
 
 

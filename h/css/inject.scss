@@ -1,7 +1,9 @@
 @import 'base';
+@import 'compass/css3/user-interface';
+@import 'compass/layout/stretching';
 @import 'compass/reset/utilities';
 
-
+$baseFontSize: 14px;
 
 //ADDER////////////////////////////////
 .annotator-adder {
@@ -64,6 +66,127 @@
 }
 
 
+//HEATMAP STUFF////////////////////////////////
+.annotator-heatmap {
+  cursor: ew-resize;
+  position: absolute;
+  overflow: hidden;
+
+  height: 100%;
+  width: $heatmap-width + 17px;
+
+  left: -($heatmap-width + 17px);
+
+  svg {
+    @include stretch-y;
+    background: hsla(0, 0, 0, .1);
+    border-left: solid 1px $grayLighter;
+    height: 100%;
+    left: 17px;
+    width: $heatmap-width;
+  }
+}
+
+.heatmap-pointer {
+  @include transition-property(left);
+  @include transition-duration(.2s);
+  margin-top: -1em; // TODO: Less janking v-align
+  // color: rgb(238, 238, 238);
+  color: #666;
+  left: 0;
+  position: absolute;
+  height: 20.1px;
+  width: 40.1px;
+  vertical-align: middle;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  text-align: center;
+  cursor: pointer;
+
+  .svg {
+    width: 100%;
+    height: 100%;
+    background-image: url("../images/side_tab.svg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+
+  .label {
+    font-weight: bold;
+    font-family: $sansFontFamily;
+    font-size: 13.1px;
+    line-height: 17.5px;
+    left: 5px;
+    right: 2px;
+    position: absolute;
+    bottom: 1px;
+  }
+
+  &:hover {
+    left: 2px;
+  }
+
+  &.lower, &.upper {
+    @include single-transition(margin-top, .2s);
+    left: 7px;
+    width: 33.1px;
+    height: 26.1px;
+    .label {
+      left: 0;
+      right: 0;
+    }
+
+    &:hover {
+      left: 7px;
+    }
+  }
+
+  &.upper {
+    .svg {
+      background-image: url("../images/up_tab.svg");
+    }
+    .label {
+      bottom: 1px;
+    }
+    &:hover {
+      margin-top: -1.2em;
+    }
+  }
+
+  &.lower {
+    .svg {
+      background-image: url("../images/down_tab.svg");
+    }
+    .label {
+      top: 1px;
+    }
+    &:hover {
+      margin-top: -.8em;
+    }
+  }
+  &.flip {
+    @include rotateY(180deg);
+    .label {
+      @include rotateY(180deg);
+    }
+  }
+  &.commenter {
+    @include single-transition(margin-top, .2s);
+    left: 3px;
+    width: 37px;
+
+    .svg {
+      background-image: url("../images/comment_tab.svg");
+    }
+    .label {
+      bottom: 1px;
+    }
+    &:hover {
+      margin-top: -1.2em;
+    }
+  }
+}
+
 
 //HIGHLIGHTS////////////////////////////////
 .annotator-highlights-always-on .annotator-hl,
@@ -96,9 +219,14 @@
   display: none;
 }
 
-//IFRAME////////////////////////////////
+
+// Sidebar
 .annotator-frame {
   @include reset-box-model;
+  @include user-select(none);
+  @extend .noise;
+  font-size: $baseFontSize / 16px * 1em;
+  line-height: $baseLineHeight / 16px * 1em;
   height: 100%;
   position: fixed;
   top: 0;
@@ -107,12 +235,137 @@
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
   &.annotator-collapsed {
-    margin-left: -$heatmap-width - 17px;
+    margin-left: 0;
   }
+
+  * {
+    font-size: 100%;
+  }
+
+  & > iframe {
+    @include reset-box-model;
+    height: 100%;
+    width: 100%;
+    z-index: 3;
+    position: relative;
+  }
+
 }
 
 .annotator-no-transition {
   @include transition(none !important);
+}
+
+
+//CONTROLBAR STUFF////////////////////////////////
+.annotator-toolbar {
+  @include single-transition(height, .25s, ease, .25s);
+  font-size: $baseFontSize;
+  line-height: $baseLineHeight;
+  position: absolute;
+  overflow: hidden;
+  height: 200px;
+  left: -($heatmap-width + 17px - 7px);
+  top: .5em;
+  width: 2.5em;
+  z-index: 2;
+
+  a, a:hover, a:active, a:visited {
+    color: $grayLighter;
+    text-decoration: none;
+
+    &.tri-icon {
+      color: rgba(200, 200, 200, .3);
+      text-shadow:
+      1px .8px 1.5px $white,
+      0 0 0 #000;
+
+      &:hover {
+        color: rgba(235, 235, 230, .1);
+      }
+    }
+  }
+
+  ul, li {
+    @include box-sizing(border-box);
+    @include reset-box-model;
+    @include reset-list-style;
+  }
+}
+
+.annotator-toolbar.annotator-hide {
+  height: 2.2em;
+
+  &:hover {
+    height: 200px;
+  }
+}
+
+.annotator-toolbar li {
+  @include border-radius(4px);
+  @include smallshadow(0);
+  background: $white;
+  border: solid 1px $grayLighter;
+  position: relative;
+  left: 2px;
+  height: 2em;
+  width: 2em;
+
+  &:first-child {
+    @include border-radius(4px 0 0 4px);
+    border-right-style: none;
+    left: 0;
+    width: 2.3em;
+  }
+
+  & + li {
+    margin-top: 5px;
+  }
+
+  a {
+    font-size: $baseFontSize * 1.3;
+    line-height: $baseLineHeight * 1.3;
+
+    font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+
+    position: absolute;
+    left: .2em;
+  }
+
+  a.pushed {
+    color: $hypothered;
+  }
+}
+
+
+// Toolbar Icons
+.alwaysonhighlights-icon {
+  @include fonticon("\e01b", left);
+}
+
+.highlighter-icon {
+  @include fonticon("\e01a", left);
+}
+
+.commenter-icon {
+  @include fonticon("\e01e", left);
+}
+
+.tri-icon {
+  @include fonticon("\e00b", left);
+}
+
+
+// Toolbar notification counter
+.annotator-notification-counter {
+  font-family: $sansFontFamily;
+  pointer-events: none;
+  position: absolute;
+  margin-left: .7em;
+  margin-top: .25em;
+  z-index: 2;
+  font-size: $baseFontSize * .86;
 }
 
 
@@ -124,8 +377,8 @@
 
 @media screen and (min-width: 15em) {
   .annotator-frame {
-    width: 99%;
-    margin-left: -99%;
+    width: 90%;
+    margin-left: -90%;
   }
 }
 
@@ -151,8 +404,8 @@
 @media screen and (min-width: 37.5em) {
   .annotator-frame {
     @include single-transition(margin-left, .4s);
-    width: 428px + $heatmap-width + 17px;
-    margin-left: -428px - $heatmap-width - 17px;
+    width: 428px;// + $heatmap-width + 17px;
+    margin-left: -428px;// - $heatmap-width - 17px;
   }
 }
 

@@ -732,8 +732,11 @@
       return Math.max.apply(Math, all);
     },
     mousePosition: function(e, offsetEl) {
-      var offset;
-      offset = $(offsetEl).position();
+      var offset, _ref1;
+      if ((_ref1 = $(offsetEl).css('position')) !== 'absolute' && _ref1 !== 'fixed' && _ref1 !== 'relative') {
+        offsetEl = $(offsetEl).offsetParent()[0];
+      }
+      offset = $(offsetEl).offset();
       return {
         top: e.pageY - offset.top,
         left: e.pageX - offset.left

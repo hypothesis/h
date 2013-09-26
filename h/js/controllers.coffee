@@ -23,82 +23,7 @@ class App
     baseUrl = baseUrl.replace /\/*$/, '/'
     $scope.baseUrl = baseUrl
 
-    {plugins, provider} = annotator
-    heatmap = annotator.plugins.Heatmap
-    $scope.dynamicBucket = true
-
-    heatmap.element.bind 'click', =>
-      return unless drafts.discard()
-      $location.search('id', null).replace()
-      $scope.dynamicBucket = true
-      annotator.showViewer()
-      heatmap.publish 'updated'
-      $scope.$digest()
-
-    heatmap.subscribe 'updated', =>
-      elem = d3.select(heatmap.element[0])
-      return unless elem?.datum()
-      data = {highlights, offset} = elem.datum()
-      tabs = elem.selectAll('div').data data
-      height = $(window).outerHeight(true)
-      pad = height * .2
-
-      {highlights, offset} = elem.datum()
-
-      visible = $scope.frame.visible
-      if $scope.dynamicBucket and visible and $location.path() == '/viewer'
-        bottom = offset + heatmap.element.height()
-        annotations = highlights.reduce (acc, hl) =>
-          if hl.offset.top >= offset and hl.offset.top <= bottom
-            if hl.data not in acc
-              acc.push hl.data
-          acc
-        , []
-        annotator.updateViewer annotations
-
-      elem.selectAll('.heatmap-pointer')
-        # Creates highlights corresponding bucket when mouse is hovered
-        .on 'mouseover', (bucket) =>
-          unless $location.path() == '/viewer' and $location.search()?.id?
-            provider.notify
-              method: 'setActiveHighlights'
-              params: heatmap.buckets[bucket]?.map (a) => a.$$tag
-
-        # Gets rid of them after
-        .on 'mouseout', =>
-          if $location.path() == '/viewer' and not $location.search()?.id?
-            provider.notify method: 'setActiveHighlights'
-
-        # Does one of a few things when a tab is clicked depending on type
-        .on 'click', (bucket) =>
-          d3.event.stopPropagation()
-
-          # If it's the upper tab, switch to dynamic bucket mode,
-          # and scroll to next bucket above
-          if heatmap.isUpper bucket
-            $scope.dynamicBucket = true
-            threshold = offset + heatmap.index[0]
-            next = highlights.reduce (next, hl) ->
-              if next < hl.offset.top < threshold then hl.offset.top else next
-            , 0
-            provider.notify method: 'scrollTop', params: next - pad
-
-          # If it's the lower tab, switch do dynamic bucket mode,
-          # and scroll to next bucket below
-          else if heatmap.isLower bucket
-            $scope.dynamicBucket = true
-            threshold = offset + heatmap.index[0] + height - pad
-            next = highlights.reduce (next, hl) ->
-              if threshold < hl.offset.top < next then hl.offset.top else next
-            , Number.MAX_VALUE
-            provider.notify method: 'scrollTop', params: next - pad
-
-          # If it's neither of the above, load the bucket into the viewer
-          else
-            return unless drafts.discard()
-            $scope.dynamicBucket = false
-            $location.search({'id' : null })
-            annotator.showViewer heatmap.buckets[bucket]
+    {plugins, host, providers} = annotator
 
     $scope.$watch 'sheet.collapsed', (newValue) ->
       $scope.sheet.tab = if newValue then null else 'login'
@@ -162,24 +87,27 @@ class App
         plugins.Permissions.setUser(null)
         delete plugins.Auth
 
-      $scope.reloadAnnotations() unless $scope.skipAuthChangeReload
-      delete $scope.skipAuthChangeReload
+      if newValue isnt oldValue
+        $scope.reloadAnnotations() unless $scope.skipAuthChangeReload
+        delete $scope.skipAuthChangeReload
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
       console.log "Social View changed to '" + newValue + "'. Reloading annotations."
       $scope.reloadAnnotations()
 
-    $scope.$watch 'frame.visible', (newValue) ->
+    $scope.$watch 'frame.visible', (newValue, oldValue) ->
+      routeName = $location.path().replace /^\//, ''
       if newValue
         annotator.show()
-        annotator.provider?.notify method: 'showFrame'
+        annotator.host.notify method: 'showFrame', params: routeName
         $element.find('.topbar').find('.tri').attr('draggable', true)
-      else
+      else if oldValue
         $scope.sheet.collapsed = true
         annotator.hide()
-        annotator.provider.notify method: 'setActiveHighlights'
-        annotator.provider.notify method: 'hideFrame'
+        annotator.host.notify method: 'hideFrame', params: routeName
+        for p in annotator.providers
+          p.channel.notify method: 'setActiveHighlights'
         $element.find('.topbar').find('.tri').attr('draggable', false)
 
     $scope.$watch 'sheet.collapsed', (newValue) ->
@@ -252,9 +180,10 @@ class App
 
     $scope.toggleAlwaysOnHighlights = ->
       $scope.alwaysOnMode = not $scope.alwaysOnMode
-      provider.notify
-        method: 'setAlwaysOnMode'
-        params: $scope.alwaysOnMode
+      for p in providers
+        p.channel.notify
+          method: 'setAlwaysOnMode'
+          params: $scope.alwaysOnMode
 
     $scope.highlightingMode = false
 
@@ -278,9 +207,10 @@ class App
       $scope.highlightingMode = not $scope.highlightingMode
       annotator.socialView.name =
         if $scope.highlightingMode then "single-player" else "none"
-      provider.notify
-        method: 'setHighlightingMode'
-        params: $scope.highlightingMode
+      for p in providers
+        p.channel.notify
+          method: 'setHighlightingMode'
+          params: $scope.highlightingMode
 
     $scope.createUnattachedAnnotation = ->
       return unless drafts.discard() # Invoke draft support
@@ -446,41 +376,31 @@ class App
       , 1500
 
     $scope.reloadAnnotations = ->
-      if annotator.plugins.Store?
-        $scope.$root.annotations = []
-        annotator.threading.thread []
+      $scope.new_updates = 0
+      $scope.$root.annotations = []
+      annotator.threading.thread []
 
-        Store = annotator.plugins.Store
-        annotations = Store.annotations
-        annotator.plugins.Store.annotations = []
-        annotator.deleteAnnotation a for a in annotations
+      Store = annotator.plugins.Store
+      annotations = Store.annotations
+      annotator.plugins.Store.annotations = []
+      annotator.deleteAnnotation a for a in annotations
 
-        # XXX: Hacky hacky stuff to ensure that any search requests in-flight
-        # at this time have no effect when they resolve and that future events
-        # have no effect on this Store. Unfortunately, it's not possible to
-        # unregister all the events or properly unload the Store because the
-        # registration loses the closure. The approach here is perhaps
-        # cleaner than fishing them out of the jQuery private data.
-        # * Overwrite the Store's handle to the annotator, giving it one
-        #   with a noop `loadAnnotations` method.
-        Store.annotator = loadAnnotations: angular.noop
-        # * Make all api requests into a noop.
-        Store._apiRequest = angular.noop
-        # * Make the update function into a noop.
-        Store.updateAnnotation = angular.noop
-        # * Remove the plugin and re-add it to the annotator.
-        delete annotator.plugins.Store
-
-        annotator.considerSocialView Store.options
-        annotator.addStore Store.options
-
-        href = annotator.plugins.Store.options.loadFromSearch.uri
-        for uri in annotator.plugins.Document.uris()
-          unless uri is href # Do not load the href again
-            console.log "Also loading annotations for: " + uri
-            annotator.plugins.Store.loadAnnotationsFromSearch uri: uri
-
-        $scope.new_updates = 0
+      # XXX: Hacky hacky stuff to ensure that any search requests in-flight
+      # at this time have no effect when they resolve and that future events
+      # have no effect on this Store. Unfortunately, it's not possible to
+      # unregister all the events or properly unload the Store because the
+      # registration loses the closure. The approach here is perhaps
+      # cleaner than fishing them out of the jQuery private data.
+      # * Overwrite the Store's handle to the annotator, giving it one
+      #   with a noop `loadAnnotations` method.
+      Store.annotator = loadAnnotations: angular.noop
+      # * Make all api requests into a noop.
+      Store._apiRequest = angular.noop
+      # * Make the update function into a noop.
+      Store.updateAnnotation = angular.noop
+      # * Remove the plugin and re-add it to the annotator.
+      delete annotator.plugins.Store
+      annotator.addPlugin 'Store', annotator.options.Store
 
     # Notifications
     $scope.notifications = []
@@ -516,11 +436,10 @@ class App
           else text = 'changes.'
           notif.text = 'Click to load ' + updates + ' ' + text
 
-      return unless updates
-      $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
-      $timeout ->
-        $element.find('.tri').toggle('fg_highlight',{color:'lightblue'})
-      , 500
+      for p in annotator.providers
+        p.channel.notify
+          method: 'updateNotificationCounter'
+          params: updates
 
     $scope.$watch 'show_search', (value, old) ->
       if value and not old
@@ -539,11 +458,7 @@ class App
       path = "#{path}__streamer__"
 
       # Collect all uris we should watch
-      href = annotator.plugins.Store.options.loadFromSearch.uri
-      uris = href + '' # For copy
-      for uri in annotator.plugins.Document.uris()
-        unless uri is href
-          uris += "," + uri
+      uris = (e for e of annotator.plugins.Store.entities).join ','
 
       filter =
         streamfilter
@@ -662,6 +577,7 @@ class Annotation
 
       reply =
         references: references
+        uri: $scope.thread.message.uri
 
       annotator.publish 'beforeAnnotationCreated', [reply]
 
@@ -756,14 +672,17 @@ class Annotation
 class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
   constructor: ($location, $routeParams, $scope, annotator) ->
+    {providers} = annotator
     save = ->
       $location.path('/viewer').search('id', $scope.annotation.id).replace()
-      annotator.provider.notify method: 'onEditorSubmit'
-      annotator.provider.notify method: 'onEditorHide'
+      for p in providers
+        p.channel.notify method: 'onEditorSubmit'
+        p.channel.notify method: 'onEditorHide'
 
     cancel = ->
       $location.path('/viewer').search('id', null).replace()
-      annotator.provider.notify method: 'onEditorHide'
+      for p in providers
+        p.channel.notify method: 'onEditorHide'
 
     $scope.action = if $routeParams.action? then $routeParams.action else 'create'
     if $scope.action is 'create'
@@ -791,7 +710,7 @@ class Viewer
     $location, $rootScope, $routeParams, $scope,
     annotator
   ) ->
-    {provider, threading} = annotator
+    {providers, threading} = annotator
 
     $scope.focus = (annotation) ->
       if angular.isArray annotation
@@ -800,13 +719,16 @@ class Viewer
         highlights = [annotation.$$tag]
       else
         highlights = []
-      provider.notify method: 'setActiveHighlights', params: highlights
+      for p in providers
+        p.channel.notify
+          method: 'setActiveHighlights'
+          params: highlights
 
 
 class Search
   this.$inject = ['$filter', '$location', '$routeParams', '$scope', 'annotator']
   constructor: ($filter, $location, $routeParams, $scope, annotator) ->
-    {provider, threading} = annotator
+    {providers, threading} = annotator
 
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
     $scope.filter_orderBy = $filter('orderBy')
@@ -863,11 +785,13 @@ class Search
         highlights = [annotation.$$tag]
       else
         highlights = []
-      provider.notify method: 'setActiveHighlights', params: highlights
+      for p in providers
+        p.channel.notify
+          method: 'setActiveHighlights'
+          params: highlights
 
     refresh = =>
       $scope.search_filter = $routeParams.matched
-      heatmap = annotator.plugins.Heatmap
 
       # Create the regexps for highlighting the matches inside the annotations' bodies
       $scope.text_tokens = $routeParams.in_body_text.split ' '
@@ -884,30 +808,29 @@ class Search
       threads = []
       $scope.render_order = {}
       # Choose the root annotations to work with
-      for bucket in heatmap.buckets
-        for annotation in bucket
-          # The annotation itself is a hit.
-          thread = annotation.thread
+      for annotation in $scope.annotations
+        # The annotation itself is a hit.
+        thread = annotation.thread
 
-          if annotation.id in $scope.search_filter
-            threads.push thread
-            $scope.render_order[annotation.id] = []
-            buildRenderOrder(annotation.id, [thread])
-            continue
+        if annotation.id in $scope.search_filter
+          threads.push thread
+          $scope.render_order[annotation.id] = []
+          buildRenderOrder(annotation.id, [thread])
+          continue
 
-          # Maybe it has a child we were looking for
-          children = thread.flattenChildren()
-          has_search_result = false
-          if children?
-            for child in children
-              if child.id in $scope.search_filter
-                has_search_result = true
-                break
+        # Maybe it has a child we were looking for
+        children = thread.flattenChildren()
+        has_search_result = false
+        if children?
+          for child in children
+            if child.id in $scope.search_filter
+              has_search_result = true
+              break
 
-          if has_search_result
-            threads.push thread
-            $scope.render_order[annotation.id] = []
-            buildRenderOrder(annotation.id, [thread])
+        if has_search_result
+          threads.push thread
+          $scope.render_order[annotation.id] = []
+          buildRenderOrder(annotation.id, [thread])
 
       # Re-construct exact order the annotation threads will be shown
 
