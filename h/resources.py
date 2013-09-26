@@ -79,7 +79,20 @@ class AppFactory(BaseResource):
             pkg: json.dumps(self.request.webassets_env[pkg].urls())
             for pkg in ['inject', 'jquery', 'raf']
         }
-        env['app'] = "'%s'" % self.request.resource_url(self)
+        options = {
+            'app': self.request.resource_url(self),
+        }
+        if not self.request.GET.get('light', False):
+            options.update({
+                'Heatmap': {
+                    'container': '.annotator-frame',
+                },
+                'Toolbar': {
+                    'container': '.annotator-frame',
+                },
+            })
+        env['options'] = json.dumps(options)
+        env['role'] = json.dumps(self.request.GET.get('role', 'host'))
         return env
 
     @property

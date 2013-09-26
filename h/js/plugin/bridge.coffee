@@ -1,8 +1,12 @@
+$ = Annotator.$
+
 class Annotator.Plugin.Bridge extends Annotator.Plugin
   # These events maintain the awareness of annotations between the two
   # communicating annotators.
   events:
     'beforeAnnotationCreated': 'beforeAnnotationCreated'
+    'annotationCreated': 'annotationCreated'
+    'annotationUpdated': 'annotationUpdated'
     'annotationDeleted': 'annotationDeleted'
     'annotationsLoaded': 'annotationsLoaded'
 
@@ -14,6 +18,14 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
 
     # Scope identifier to distinguish this channel from any others
     scope: 'annotator:bridge'
+
+    # When this is true, this bridge will act as a gateway and, similar to DHCP,
+    # offer to connect to bridges in other frames it discovers.
+    gateway: false
+
+    # A callback to invoke when a connection is established. The function is
+    # passed two arguments, the source window and origin of the other frame.
+    onConnect: -> true
 
     # Formats an annotation for sending across the bridge
     formatter: (annotation) -> annotation
@@ -32,7 +44,13 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
 
   # Cache of annotations which have crossed the bridge for fast, encapsulated
   # association of annotations received in arguments to window-local copies.
-  cache: {}
+  cache: null
+
+  # Connected bridge links
+  links: null
+
+  # Annotations currently being updated -- used to avoid event callback loops
+  updating: null
 
   constructor: (elem, options) ->
     if options.window?
@@ -46,10 +64,13 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     else
       super
 
+    @cache = {}
+    @links = []
+    @updating = {}
+
   pluginInit: ->
-    console.log "Initializing bridge plugin. Connecting to #{@options.origin}"
-    @options.onReady = this.onReady
-    @channel = Channel.build @options
+    $(window).on 'message', this._onMessage
+    this._beacon()
 
   # Assign a non-enumerable tag to objects which cross the bridge.
   # This tag is used to identify the objects between message.
@@ -79,110 +100,211 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     tag: annotation.$$tag
     msg: msg
 
-  beforeAnnotationCreated: (annotation) =>
-    return if annotation.$$tag?
-    this.beforeCreateAnnotation annotation
-
-  annotationDeleted: (annotation) =>
-    return unless annotation.$$tag? and @cache[annotation.$$tag]
-    this.deleteAnnotation annotation, (err) =>
-      if err then @annotator.setupAnnotation annotation
-      else delete @cache[annotation.$$tag]
-
-  annotationsLoaded: (annotations) =>
-    this.setupAnnotation a for a in annotations
-
-  onReady: =>
-    @channel
+  # Construct a channel to another frame
+  _build: (options) ->
+    console.log "Bridge plugin connecting to #{options.origin}"
+    channel = Channel.build(options)
 
     ## Remote method call bindings
-    .bind('beforeCreateAnnotation', (txn, annotation) =>
-      annotation = this._parse annotation
-      @annotator.publish 'beforeAnnotationCreated', annotation
-      this._format annotation
-    )
-
     .bind('setupAnnotation', (txn, annotation) =>
       this._format (@annotator.setupAnnotation (this._parse annotation))
     )
 
+    .bind('beforeCreateAnnotation', (txn, annotation) =>
+      annotation = this._parse annotation
+      delete @cache[annotation.$$tag]
+      @annotator.publish 'beforeAnnotationCreated', annotation
+      @cache[annotation.$$tag] = annotation
+      this._format annotation
+    )
+
+    .bind('createAnnotation', (txn, annotation) =>
+      annotation = this._parse annotation
+      delete @cache[annotation.$$tag]
+      @annotator.publish 'annotationCreated', annotation
+      @cache[annotation.$$tag] = annotation
+      this._format annotation
+    )
+
     .bind('updateAnnotation', (txn, annotation) =>
-      this._format (@annotator.updateAnnotation (this._parse annotation))
+      annotation = this._parse annotation
+      delete @cache[annotation.$$tag]
+      annotation = @annotator.updateAnnotation annotation
+      @cache[annotation.$$tag] = annotation
+      this._format annotation
     )
 
     .bind('deleteAnnotation', (txn, annotation) =>
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
       annotation = @annotator.deleteAnnotation annotation
-      result = this._format annotation
+      res = this._format annotation
       delete @cache[annotation.$$tag]
-      result
+      res
     )
 
     ## Notifications
+    .bind('loadAnnotations', (txn, annotations) =>
+      annotations = (this._parse a for a in annotations when not @cache[a.tag])
+      @annotator.loadAnnotations annotations
+    )
+
     .bind('showEditor', (ctx, annotation) =>
       @annotator.showEditor (this._parse annotation)
     )
 
-    .bind('injectAnnotation', (ctx, annotation) =>
-      a = this._parse annotation
+  # Send out a beacon to let other frames know to connect to us
+  _beacon: ->
+    queue = [window.top]
+    while queue.length
+      parent = queue.shift()
+      if parent isnt window
+        console.log window.location.toString(), 'sending beacon...'
+        parent.postMessage '__annotator_dhcp_discovery', @options.origin
+      for child in parent.frames
+        queue.push child
 
-      # This is a special marker flag, which indicated that
-      # this annotation is not new, and therefore should not be pushed
-      # among the drafts
-      a.inject = true
-      @annotator.publish 'beforeAnnotationCreated', a
-      @annotator.publish 'annotationCreated', a
-    )
+  # Make a method call on all links
+  _call: (options) ->
+    _makeDestroyFn = (c) =>
+      (error, reason) =>
+        c.destroy()
+        @links = (l for l in @links when l.channel isnt c)
+
+    deferreds = @links.map (l) ->
+      d = $.Deferred().fail (_makeDestroyFn l.channel)
+      options = $.extend {}, options,
+        success: (result) -> d.resolve result
+        error: (error, reason) ->
+          if error isnt 'timeout_error'
+            d.reject error, reason
+          else
+            d.resolve null
+        timeout: 1000
+      l.channel.call options
+      d.promise()
+
+    $.when(deferreds...)
+    .then (results...) =>
+      annotation = {}
+      for r in results when r isnt null
+        $.extend annotation, (this._parse r)
+      options.callback? null, annotation
+    .fail (failure) =>
+      options.callback? failure
+
+  # Publish a notification to all links
+  _notify: (options) ->
+    for l in @links
+      l.channel.notify options
+
+  _onMessage: (e) =>
+    {source, origin, data} = e.originalEvent
+    match = data.match /^__annotator_dhcp_(discovery|ack|offer)(:\d+)?$/
+    return unless match
+
+    if match[1] is 'discovery'
+      if @options.gateway
+        scope = ':' + ('' + Math.random()).replace(/\D/g, '')
+        source.postMessage '__annotator_dhcp_offer' + scope, origin
+      else
+        source.postMessage '__annotator_dhcp_ack', origin
+        return
+    else if match[1] is 'ack'
+      if @options.gateway
+        scope = ':' + ('' + Math.random()).replace(/\D/g, '')
+        source.postMessage '__annotator_dhcp_offer' + scope, origin
+      else
+        return
+    else if match[1] is 'offer'
+      if @options.gateway
+        return
+      else
+        scope = match[2]
+
+    scope = @options.scope + scope
+    options = $.extend {}, @options,
+      window: source
+      origin: origin
+      scope: scope
+      onReady: =>
+        options.onConnect.call @annotator, source, origin, scope
+        channel.notify
+          method: 'loadAnnotations'
+          params: (this._format a for t, a of @cache)
+
+    channel = this._build options
+
+    @links.push
+      channel: channel
+      window: source
+
+  beforeAnnotationCreated: (annotation) =>
+    return if annotation.$$tag?
+    this.beforeCreateAnnotation annotation
+    this
+
+  annotationCreated: (annotation) =>
+    return unless annotation.$$tag? and @cache[annotation.$$tag]
+    this.createAnnotation annotation
+    this
+
+  annotationUpdated: (annotation) =>
+    return unless annotation.$$tag? and @cache[annotation.$$tag]
+    this.updateAnnotation annotation
+    this
+
+  annotationDeleted: (annotation) =>
+    return unless annotation.$$tag? and @cache[annotation.$$tag]
+    this.deleteAnnotation annotation, (err) =>
+      if err then @annotator.setupAnnotation annotation
+      else delete @cache[annotation.$$tag]
+    this
+
+  annotationsLoaded: (annotations) =>
+    this._notify
+      method: 'loadAnnotations'
+      params: (this._format a for a in annotations when not a.$$tag?)
+    this
 
   beforeCreateAnnotation: (annotation, cb) ->
-    @channel.call
+    this._call
       method: 'beforeCreateAnnotation'
       params: this._format annotation
-      success: (annotation) =>
-        annotation = this._parse annotation
-        cb? null, annotation
-      error: (error, reason) => cb? {error, reason}
+      callback: cb
     annotation
 
   setupAnnotation: (annotation, cb) ->
-    @channel.call
+    this._call
       method: 'setupAnnotation'
       params: this._format annotation
-      success: (annotation) =>
-        annotation = this._parse annotation
-        cb? null, annotation
-      error: (error, reason) => cb? {error, reason}
+      callback: cb
+    annotation
+
+  createAnnotation: (annotation, cb) ->
+    this._call
+      method: 'createAnnotation'
+      params: this._format annotation
+      callback: cb
     annotation
 
   updateAnnotation: (annotation, cb) ->
-    @channel.call
+    this._call
       method: 'updateAnnotation'
       params: this._format annotation
-      success: (annotation) =>
-        annotation = this._parse annotation
-        cb? null, annotation
-      error: (error, reason) => cb? {error, reason}
+      callback: cb
     annotation
 
   deleteAnnotation: (annotation, cb) ->
-    @channel.call
+    this._call
       method: 'deleteAnnotation'
       params: this._format annotation
-      success: (annotation) =>
-        annotation = this._parse annotation
-        cb? null, annotation
-      error: (error, reason) => cb? {error, reason}
+      callback: cb
     annotation
 
   showEditor: (annotation) ->
-    @channel.notify
+    this._notify
       method: 'showEditor'
       params: this._format annotation
     this
 
-  injectAnnotation: (annotation) ->
-    @channel.notify
-      method: 'injectAnnotation'
-      params: this._format annotation
-    this
