@@ -566,7 +566,7 @@ class Annotation
     $scope.reply = ($event) ->
       $event?.stopPropagation()
       unless annotator.plugins.Auth? and annotator.plugins.Auth.haveValidToken()
-        $scope.$emit 'showAuth', true
+        $window.alert "In order to reply, you need to sign in."
         return
 
       references =
