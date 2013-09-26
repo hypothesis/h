@@ -155,7 +155,16 @@ def extension(args, console):
         embed = render(
             'h:templates/embed.txt',
             {
-                'app': app_expr,
+                'options': {
+                    'app': app_expr,
+                    'Heatmap': {
+                        'container': '.annotator-frame',
+                    },
+                    'Toolbar': {
+                        'container': '.annotator-frame',
+                    },
+                },
+                'role': 'host',
                 'inject': '[%s]' % ', '.join([
                     getUrl(url)
                     for url in asset_env['inject'].urls()
