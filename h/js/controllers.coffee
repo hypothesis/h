@@ -822,9 +822,8 @@ class Search
       threads = []
       $scope.render_order = {}
       # Choose the root annotations to work with
-      for annotation in $scope.annotations
-        # The annotation itself is a hit.
-        thread = annotation.thread
+      for id, thread of annotator.threading.idTable when thread.message?
+        annotation = thread.message
 
         if annotation.id in $scope.search_filter
           threads.push thread
