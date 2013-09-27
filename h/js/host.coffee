@@ -28,7 +28,7 @@ class Annotator.Host extends Annotator.Guest
 
     if @toolbar?
       @toolbar.addClass 'annotator-hide'
-      app
+      @toolbar
       .on('mouseenter', => @toolbar.removeClass 'annotator-hide')
       .on('mouseleave', => @toolbar.addClass 'annotator-hide')
 
