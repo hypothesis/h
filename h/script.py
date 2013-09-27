@@ -1,3 +1,8 @@
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 import clik
 
 from pyramid.scripts import pserve
@@ -145,7 +150,7 @@ def extension(args, console):
 
         if develop:
             # Load the app from the development server.
-            app_expr = "'%s'"  % app_url
+            app_expr = json.dumps(app_url)
         else:
             # Load the app from the extension bundle.
             app_expr = "chrome.extension.getURL('public/app.html')"
@@ -155,16 +160,16 @@ def extension(args, console):
         embed = render(
             'h:templates/embed.txt',
             {
-                'options': {
-                    'app': app_expr,
+                'app': app_expr,
+                'options': json.dumps({
                     'Heatmap': {
-                        'container': '.annotator-frame',
+                        "container": '.annotator-frame',
                     },
                     'Toolbar': {
                         'container': '.annotator-frame',
                     },
-                },
-                'role': 'host',
+                }),
+                'role': json.dumps('host'),
                 'inject': '[%s]' % ', '.join([
                     getUrl(url)
                     for url in asset_env['inject'].urls()

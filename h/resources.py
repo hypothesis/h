@@ -79,9 +79,7 @@ class AppFactory(BaseResource):
             pkg: json.dumps(self.request.webassets_env[pkg].urls())
             for pkg in ['inject', 'jquery', 'raf']
         }
-        options = {
-            'app': self.request.resource_url(self),
-        }
+        options = {}
         if not self.request.GET.get('light', False):
             options.update({
                 'Heatmap': {
@@ -91,6 +89,7 @@ class AppFactory(BaseResource):
                     'container': '.annotator-frame',
                 },
             })
+        env['app'] = json.dumps(self.request.resource_url(self))
         env['options'] = json.dumps(options)
         env['role'] = json.dumps(self.request.GET.get('role', 'host'))
         return env

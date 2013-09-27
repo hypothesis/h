@@ -10,8 +10,11 @@ yepnope([
       window.annotator = null;
       var bootstrap = [
           'if (!window.annotator) {',
+          '  var klass, options;',
           '  klass = ${role} === "host" ? Annotator.Host : Annotator.Guest;',
-          '  annotator = new klass(document.body, ${options});',
+          '  options = ${options};',
+          '  options["app"] = ${app};',
+          '  annotator = new klass(document.body, options);',
           '  window.Annotator.noConflict().$.noConflict(true);',
           '}'
         ].join('\n')
