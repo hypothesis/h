@@ -8,12 +8,13 @@ yepnope([
     nope: ${inject},
     complete: function () {
       window.annotator = null;
-      var bootstrap = [
+      var app = ${app}
+        , bootstrap = [
           'if (!window.annotator) {',
           '  var klass, options;',
           '  klass = ${role} === "host" ? Annotator.Host : Annotator.Guest;',
           '  options = ${options};',
-          '  options["app"] = ${app};',
+          '  options["app"] = "' + app + '";',
           '  annotator = new klass(document.body, options);',
           '  window.Annotator.noConflict().$.noConflict(true);',
           '}'

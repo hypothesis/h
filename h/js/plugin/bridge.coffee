@@ -233,6 +233,10 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
           method: 'loadAnnotations'
           params: (this._format a for t, a of @cache)
 
+    # Unfortunately, jschannel chokes on chrome-extension: origins
+    if options.origin.match /^chrome-extension:\/\//
+      options.origin = '*'
+
     channel = this._build options
 
     @links.push

@@ -36,6 +36,10 @@ class Annotator.Guest extends Annotator
           formatted[k] = v
         formatted
       onConnect: (source, origin, scope) =>
+        # Unfortunately, jschannel chokes on chrome-extension: origins
+        if origin.match /^chrome-extension:\/\//
+          origin = '*'
+
         @panel = this._setupXDM
           window: source
           origin: origin
