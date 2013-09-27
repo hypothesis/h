@@ -300,14 +300,21 @@ class Hypothesis extends Annotator
       ($location, $rootScope) =>
         @buildReplyList annotations
         $rootScope.annotations = annotations
-        $location.path('/viewer').replace()
         $rootScope.$digest()
     ]
     this
 
   showViewer: (annotations=[]) =>
     this.show()
-    this.updateViewer annotations
+    @element.injector().invoke [
+      '$location', '$rootScope',
+      ($location, $rootScope) =>
+        @buildReplyList annotations
+        $rootScope.annotations = annotations
+        $location.path('/viewer').replace()
+        $rootScope.$digest()
+    ]
+    this
 
   clickAdder: =>
     for p in @providers
