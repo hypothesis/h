@@ -102,10 +102,7 @@ class Annotator.Host extends Annotator.Guest
     el.width = el.height = 1
     @element.append el
 
-    handle = @plugins.Heatmap.element[0]
-    handle.draggable = true
-
-    handle.addEventListener 'dragstart', (event) =>
+    dragStart = (event) =>
       event.dataTransfer.dropEffect = 'none'
       event.dataTransfer.effectAllowed = 'none'
       event.dataTransfer.setData 'text/plain', ''
@@ -118,9 +115,14 @@ class Annotator.Host extends Annotator.Guest
         'margin-left': "#{m}px"
       this.showFrame()
 
-    handle.addEventListener 'dragend', (event) =>
+    dragEnd = (event) =>
       @drag.enabled = false
       @drag.last = null
+
+    for handle in [@plugins.Heatmap.element[0], @plugins.Toolbar.buttons[0]]
+      handle.draggable = true
+      handle.addEventListener 'dragstart', dragStart
+      handle.addEventListener 'dragend', dragEnd
 
     document.addEventListener 'dragover', (event) =>
       this._dragUpdate event.screenX
