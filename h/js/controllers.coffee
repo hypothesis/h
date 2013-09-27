@@ -724,6 +724,11 @@ class Viewer
           method: 'setActiveHighlights'
           params: highlights
 
+    $scope.openDetails = (annotation) ->
+      for p in providers
+        p.channel.notify
+          method: 'scrollTo'
+          params: annotation.$$tag
 
 class Search
   this.$inject = ['$filter', '$location', '$routeParams', '$scope', 'annotator']

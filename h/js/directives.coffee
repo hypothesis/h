@@ -217,6 +217,7 @@ thread = ['$timeout', ($timeout) ->
       $timeout ->
         return unless Object.keys(childrenEditing).length is 0
         scope.collapsed = !scope.collapsed
+        scope.openDetails scope.annotation unless scope.collapsed
       , 10
 
     scope.$on 'toggleEditing', (event) ->

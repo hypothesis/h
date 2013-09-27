@@ -68,6 +68,13 @@ class Annotator.Guest extends Annotator
           $(this).removeClass('annotator-hl-active')
     )
 
+    .bind('scrollTo', (ctx, tag) =>
+      @wrapper.find('.annotator-hl')
+      .each ->
+        if $(this).data('annotation').$$tag is tag
+          $(this).scrollintoview()
+    )
+
     .bind('adderClick', =>
       @onAdderClick @event
     )
