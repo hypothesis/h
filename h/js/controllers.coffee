@@ -795,6 +795,15 @@ class Search
           method: 'setActiveHighlights'
           params: highlights
 
+    $scope.openDetails = (annotation) ->
+      # Temporary workaround, until search result annotation card
+      # scopes get their 'annotation' fields, too.
+      return unless annotation 
+      for p in providers
+        p.channel.notify
+          method: 'scrollTo'
+          params: annotation.$$tag        
+
     refresh = =>
       $scope.search_filter = $routeParams.matched
 
