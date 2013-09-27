@@ -251,7 +251,7 @@ class AppController(BaseController):
         request = self.request
         request.session.new_csrf_token()
         return {
-            'service_url': request.route_url('api', subpath=''),
+            'service_url': request.route_url('api', subpath='/'),
             'token_url': request.route_url('token'),
         }
 

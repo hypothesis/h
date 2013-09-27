@@ -88,7 +88,7 @@ def extension(args, console):
         base_template = get_renderer('h:templates/base.pt').implementation()
 
         api_url = request.registry.settings.get('api.url', None)
-        api_url = api_url or urljoin(request.host_url, '/api')
+        api_url = api_url or urljoin(request.host_url, '/api/')
 
         app_layout = layouts.SidebarLayout(context, request)
         app_page = render(
