@@ -300,7 +300,6 @@ class Hypothesis extends Annotator
       ($location, $rootScope) =>
         @buildReplyList annotations
         $rootScope.annotations = annotations
-        $location.path('/viewer').replace()
         $rootScope.$digest()
     ]
     this
