@@ -211,9 +211,16 @@ tabReveal = ['$parse', ($parse) ->
 thread = ['$timeout', ($timeout) ->
   link: (scope, elem, attr, ctrl) ->
     childrenEditing = {}
+    sel = window.getSelection()
+
+    scope.toggleCollapsedDown = (event) ->
+      event.stopPropagation()
+      scope.oldSelection = sel.toString()
 
     scope.toggleCollapsed = (event) ->
       event.stopPropagation()
+      # If we have selected something, then don't bother
+      return unless sel.toString() is scope.oldSelection
       $timeout ->
         return unless Object.keys(childrenEditing).length is 0
         scope.collapsed = !scope.collapsed

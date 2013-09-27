@@ -10,6 +10,8 @@
         <div class="paper thread"
              data-recursive=""
              ng-class="collapsed && 'collapsed summary' || ''"
+             ng-mousedown="toggleCollapsedDown($event)"
+             ng-mouseup="toggleCollapsedUp($event)"
              ng-click="toggleCollapsed($event)"
              ng-init="collapsed = true"
              >
