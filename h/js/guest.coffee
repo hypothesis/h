@@ -63,6 +63,11 @@ class Annotator.Guest extends Annotator
     .bind('onEditorHide', this.onEditorHide)
     .bind('onEditorSubmit', this.onEditorSubmit)
 
+    .bind('setDynamicBucketMode', (ctx, value) =>
+      this.plugins.Heatmap.dynamicBucket = value
+      if value then this.plugins.Heatmap._update()
+    )
+
     .bind('setActiveHighlights', (ctx, tags=[]) =>
       @wrapper.find('.annotator-hl')
       .each ->

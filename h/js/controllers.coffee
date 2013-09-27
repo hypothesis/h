@@ -157,6 +157,11 @@ class App
       @visualSearch.searchBox.disableFacets();
       @visualSearch.searchBox.value('');
       @visualSearch.searchBox.flags.allSelected = false;
+      # Set host/guests into dynamic bucket mode
+      for p in annotator.providers
+        p.channel.notify
+          method: 'setDynamicBucketMode'
+          params: true
 
     $scope.$on '$routeChangeStart', (current, next) ->
       return unless next.$$route?
@@ -343,6 +348,14 @@ class App
             in_body_text: in_body_text
             quote: quote_search
           $location.path('/page_search').search(search)
+
+          unless $scope.inSearch # If we are entering search right now
+            # Turn dynamic bucket mode off for host/guests
+            for p in annotator.providers
+              p.channel.notify
+                method: 'setDynamicBucketMode'
+                params: false
+
           $rootScope.$digest()
 
         facetMatches: (callback) =>
