@@ -64,8 +64,9 @@ class Annotator.Guest extends Annotator
     .bind('onEditorSubmit', this.onEditorSubmit)
 
     .bind('setDynamicBucketMode', (ctx, value) =>
-      this.plugins.Heatmap.dynamicBucket = value
-      if value then this.plugins.Heatmap._update()
+      return unless @plugins.Heatmap
+      @plugins.Heatmap.dynamicBucket = value
+      if value then @plugins.Heatmap._update()
     )
 
     .bind('setActiveHighlights', (ctx, tags=[]) =>
