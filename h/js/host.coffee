@@ -37,8 +37,6 @@ class Annotator.Host extends Annotator.Guest
       @plugins.Heatmap.element.on 'click', (event) =>
         if @frame.hasClass 'annotator-collapsed'
           this.showFrame()
-        else
-          this.hideFrame()
 
   _setupXDM: (options) ->
     channel = super
