@@ -19,7 +19,9 @@ class Annotator.Guest extends Annotator
   constructor: (element, options) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
 
+    options.noScan = true
     super
+    delete @options.noScan
 
     @frame = $('<div></div>')
     .appendTo(@wrapper)
@@ -105,7 +107,7 @@ class Annotator.Guest extends Annotator
   scanDocument: (reason = "something happened") =>
     try
       console.log "Analyzing host frame, because " + reason + "..."
-      r = @domMatcher.scan()
+      r = this._scan()
       scanTime = r.time
       console.log "Traversal+scan took " + scanTime + " ms."
     catch e
