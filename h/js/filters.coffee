@@ -16,6 +16,7 @@ fuzzyTime = (date) ->
   day = hour * 24
   week = day * 7
   month = day * 30
+  year = day * 365
 
   if (delta < 30)
     fuzzy = 'moments ago'
@@ -33,9 +34,11 @@ fuzzyTime = (date) ->
     fuzzy = 'yesterday'
    else if (delta < month)
     fuzzy = Math.round(delta / day) + ' days ago'
+   else if (delta < year)
+    fuzzy = Math.round(delta / month) + ' months ago'
    else
-    fuzzy = new Date(date)
-
+    fuzzy = Math.round(delta / year) + ' years ago'
+  fuzzy
 
 userName = (user) ->
   (user?.match /^acct:([^@]+)/)?[1]
