@@ -54,13 +54,14 @@ class SearchHelper
       case_sensitive = if rule.case_sensitive? then rule.case_sensitive else false
       and_or = if rule.and_or? then rule.and_or else 'or'
       mapped_field = if rule.path? then rule.path else '/'+category
+      es_query_string = if rule.es_query_string? then rule.es_query_string else false
 
       if values.length is 1
         oper_part =
           if rule.operator? then rule.operator
           else if exact_match then 'equals' else 'matches'
         value_part = if rule.formatter then rule.formatter values[0] else values[0]
-        filter.addClause mapped_field, oper_part, value_part, case_sensitive
+        filter.addClause mapped_field, oper_part, value_part, case_sensitive, es_query_string
       else
         if and_or is 'or'
           val_list = ''
@@ -72,14 +73,14 @@ class SearchHelper
           oper_part =
             if rule.operator? then rule.operator
             else if exact_match then 'one_of' else 'match_of'
-          filter.addClause mapped_field, oper_part, val_list, case_sensitive
+          filter.addClause mapped_field, oper_part, val_list, case_sensitive, es_query_string
         else
           oper_part =
             if rule.operator? then rule.operator
             else if exact_match then 'equals' else 'matches'
           for val in values
             value_part = if rule.formatter then rule.formatter val else val
-            filter.addClause mapped_field, oper_part, value_part, case_sensitive
+            filter.addClause mapped_field, oper_part, value_part, case_sensitive, es_query_string
 
     if limit != 50 then categories['results'] = [limit]
     [filter.getFilter(), categories]
@@ -119,6 +120,7 @@ class StreamSearch
       path: '/uri'
       exact_match: false
       case_sensitive: false
+      es_query_string: true
       and_or: 'or'
     since:
       formatter: (past) ->

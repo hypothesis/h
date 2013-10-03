@@ -11,7 +11,7 @@ PyJWT==0.1.4
 SQLAlchemy==0.8.0
 WebOb==1.2.3
 Werkzeug==0.8.3
--e git+https://github.com/hypothesis/annotator-store.git@b8f062024fa9201f5e7cb36fb96d276c067f886e#egg=annotator-dev
+-e git+https://github.com/hypothesis/annotator-store.git@fc13e3ce2fb3f6145b1f1463be79f7cb5d9c7648#egg=annotator-dev
 anykeystore==0.2
 certifi==0.0.8
 clik==0.3.1

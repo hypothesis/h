@@ -156,12 +156,13 @@ class StreamFilter
     @filter.clauses.push clause
     this
 
-  addClause: (field, operator, value, case_sensitive = false) ->
+  addClause: (field, operator, value, case_sensitive = false, es_query_string = false) ->
     @filter.clauses.push
       field: field
       operator: operator
       value: value
       case_sensitive: case_sensitive
+      es_query_string: es_query_string
     this
 
   setClausesParse: (clauses_to_parse, error_checking = false) ->

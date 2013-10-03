@@ -22,6 +22,7 @@ from pyramid.security import has_permission
 from pyramid_sockjs.session import Session
 
 from h import events, interfaces
+import re
 
 import logging
 log = logging.getLogger(__name__)
@@ -87,7 +88,8 @@ filter_schema = {
                     "enum": ["equals", "matches", "lt", "le", "gt", "ge", "one_of", "first_of"]
                 },
                 "value": "object",
-                "case_sensitive": {"type": "boolean", "default": True}
+                "case_sensitive": {"type": "boolean", "default": True},
+                "es_query_string": {"type": "boolean", "default": False}
             }
         },
         "past_data": {
@@ -129,33 +131,41 @@ class FilterToElasticFilter(object):
         elif self.filter['past_data']['load_past'] == 'hits':
             self.query['size'] = self.filter['past_data']['hits']
 
-    def equals(self, field, value):
+    @staticmethod
+    def equals(field, value):
         return {"term": {field: value}}
 
-    def one_of(self, field, value):
+    @staticmethod
+    def one_of(field, value):
         return {"term": {field: value}}
 
-    def first_of(self, field, value):
+    @staticmethod
+    def first_of(field, value):
+        return {"term": {field: value}}
+
+    @staticmethod
+    def match_of(field, value):
         #TODO: proper implementation
         return {"term": {field: value}}
 
-    def match_of(self, field, value):
-        #TODO: proper implementation
+    @staticmethod
+    def matches(field, value):
         return {"term": {field: value}}
 
-    def matches(self, field, value):
-        return {"term": {field: value}}
-
-    def lt(self, field, value):
+    @staticmethod
+    def lt(field, value):
         return {"range": {field: {"lt": value}}}
 
-    def le(self, field, value):
+    @staticmethod
+    def le(field, value):
         return {"range": {field: {"lte": value}}}
 
-    def gt(self, field, value):
+    @staticmethod
+    def gt(field, value):
         return {"range": {field: {"gt": value}}}
 
-    def ge(self, field, value):
+    @staticmethod
+    def ge(field, value):
         return {"range": {field: {"gte": value}}}
 
     def convert_clauses(self, clauses):
@@ -169,14 +179,25 @@ class FilterToElasticFilter(object):
                     value = clause['value'].lower()
             else:
                 value = clause['value']
-            new_clause = getattr(self, clause['operator'])(field, value)
+            if clause["es_query_string"]:
+                # Generate query_string query
+                escaped_value = re.escape(value)
+                new_clause = {
+                    "query_string": {
+                        "query": "*" + escaped_value + "*",
+                        "fields": [field]
+                    }
+                }
+            else:
+                new_clause = getattr(self, clause['operator'])(field, value)
             new_clauses.append(new_clause)
         return new_clauses
 
-    def _policy(self, operator, target, clauses):
-        target[operator] = []
+    @staticmethod
+    def _policy(oper, target, clauses):
+        target[oper] = []
         for clause in clauses:
-            target[operator].append(clause)
+            target[oper].append(clause)
 
     def include_any(self, target, clauses):
         self._policy('should', target, clauses)
