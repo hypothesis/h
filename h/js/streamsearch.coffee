@@ -17,6 +17,7 @@ get_quote = (annotation) ->
 #      exact_match: true|false (default: true)
 #      case_sensitive: true|false (default: false)
 #      and_or: and|or for multiple values should it threat them as 'or' or 'and' (def: or)
+#      es_query_string: should the streaming backend use query_string es query for this facet
 #      operator: if given it'll use this operator regardless of other circumstances
 # }
 # The models is the direct output from visualsearch
@@ -281,6 +282,7 @@ class StreamSearch
             unless found
               $scope.annotations.unshift annotation
           when 'delete'
+            index = 0
             for ann in $scope.annotations
               if ann.id is annotation.id
                 $scope.annotations.splice index,1
