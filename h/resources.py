@@ -4,6 +4,8 @@ except ImportError:
     import json
 
 from horus import resources
+from horus.models import get_session
+
 
 from pyramid.decorator import reify
 from pyramid.interfaces import ILocation
@@ -15,6 +17,8 @@ from h import interfaces
 
 import logging
 log = logging.getLogger(__name__)
+
+import mannord
 
 
 @implementer(ILocation)
@@ -194,6 +198,10 @@ class Annotation(BaseResource, dict):
         # Create nested list form
         return self._nestlist(childTable.get(self['id']), childTable)
 
+    @classmethod
+    def _get_username(cls, user_str):
+        return user_str[5:user_str.find('@')] 
+
 
 class Streamer(BaseResource, dict):
     pass
@@ -211,6 +219,26 @@ class AnnotationFactory(BaseResource):
         annotation.__parent__ = self
 
         annotation.update(data)
+        # Obtains moderation info
+        # TODO(michael): - how do infer whether the annotation is action or not?
+        #                - also how to get the annotation's parent?
+        session = get_session(request)
+        page_url = annotation.get("uri")
+        username = Annotation._get_username(annotation.get('user'))
+        UserClass = registry.getUtility(interfaces.IUserClass)
+        author = UserClass.get_by_username(request, username)
+        #debug
+        #log.info("ATTENTION")
+        #log.info(annotation.get("uri"))
+        #log.info(author.id)
+        #log.info(type(session))
+        #log.info(session)
+
+        annotation.moderation_info = mannord.get_add_item(page_url, key,
+                                                            author, session)
+
+        #def get_add_item(page_url, item_id, user, session, parent_id=None,
+        #         action_type=None, spam_detect_algo=su.ALGO_DIRICHLET):
 
         return annotation
 

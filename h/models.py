@@ -103,7 +103,7 @@ class Group(GroupMixin, Base):
     pass
 
 
-class User(UserMixin, Base):
+class User(UserMixin, mannord.UserMixin, Base):
     @classmethod
     def get_by_username(cls, request, username):
         session = get_session(request)
