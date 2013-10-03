@@ -145,6 +145,9 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
 
     ## Notifications
     .bind('loadAnnotations', (txn, annotations) =>
+      # First, parse the existing ones, for any updates
+      this._parse a for a in annotations when @cache[a.tag]
+      # Then collect the new ones
       annotations = (this._parse a for a in annotations when not @cache[a.tag])
       @annotator.loadAnnotations annotations
     )
@@ -268,7 +271,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
   annotationsLoaded: (annotations) =>
     this._notify
       method: 'loadAnnotations'
-      params: (this._format a for a in annotations when not a.$$tag?)
+      params: (this._format a for a in annotations)
     this
 
   beforeCreateAnnotation: (annotation, cb) ->
