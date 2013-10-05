@@ -57,6 +57,17 @@ class Annotator.Guest extends Annotator
     # Scan the document text with the DOM Text libraries
     this.scanDocument "Annotator initialized"
 
+    # Create an array for holding the comments
+    @comments = []
+
+    # Watch for deleted comments
+    this.subscribe 'annotationDeleted', (annotation) =>
+      if this.isComment annotation
+        i = @comments.indexOf annotation
+        if i isnt -1
+          @comments[i..i] = []
+          @plugins.Heatmap._update()
+
   _setupXDM: (options) ->
     channel = Channel.build options
 
@@ -237,32 +248,15 @@ class Annotator.Guest extends Annotator
     this.onAdderClick()     # Open editor (with 0 targets)
     @selectedRanges = sel # restore the selection
 
-  createFakeCommentRange: ->
-    posSelector =
-      type: "TextPositionSelector"
-      start: @domMapper.corpus.length - 1
-      end: @domMapper.corpus.length
+  # Is this annotation a comment?
+  isComment: (annotation) ->
+    # No targets and no references means that this is a comment.    
+    not (annotation.inject or annotation.references?.length or annotation.target?.length)
 
-    anchor = this.findAnchorFromPositionSelector selector: [posSelector]
-    anchor.range
-
-  # Override for setupAnnotation
+  # Override for setupAnnotation, to handle comments
   setupAnnotation: (annotation) ->
-    # Set up annotation as usual
-    annotation = super(annotation)
-    # Does it have proper highlights?
-    unless annotation.highlights?.length or annotation.references?.length or annotation.target?.length
-      # No highlights and no references means that this is a comment,
-      # or re-attachment has failed, but we'll skip orphaned annotations.
-
-      # Get a fake range at the end of the document, and highlight it
-      range = this.createFakeCommentRange()
-      hl = this.highlightRange range
-
-      # Register this highlight for the annotation, and vica versa
-      $.merge annotation.highlights, hl
-      $(hl).data('annotation', annotation)
-
+    annotation = super # Set up annotation as usual
+    if this.isComment annotation then @comments.push annotation
     annotation
 
   # Open the sidebar

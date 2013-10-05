@@ -462,6 +462,11 @@ class Hypothesis extends Annotator
         method: 'setVisibleHighlights'
         params: state
 
+  # Is this annotation a comment?
+  isComment: (annotation) ->
+    # No targets and no references means that this is a comment
+    not (annotation.references?.length or annotation.target?.length)
+
 class AuthenticationProvider
   constructor: ->
     @actions =

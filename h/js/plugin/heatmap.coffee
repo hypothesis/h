@@ -121,7 +121,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     # Keep track of buckets of annotations above and below the viewport
     above = []
     below = []
-    comments = []
+    comments = @annotator.comments.slice()
 
     # Construct control points for the heatmap highlights
     points = highlights.toArray().reduce (points, hl, i) =>
@@ -129,18 +129,13 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       x = $(hl).offset().top - wrapper.offset().top - defaultView.pageYOffset
       h = $(hl).outerHeight(true)
 
-      # XXX: Hacky stuff before unattached annotations V2
-      # Detect comments and push them into a separate bucket
-      if not d.target?.length and not d.references?.length
-        if d not in comments then comments.push d
+      if x <= @BUCKET_SIZE + @BUCKET_THRESHOLD_PAD
+        if d not in above then above.push d
+      else if x + h >= $(window).height() - @BUCKET_SIZE
+        if d not in below then below.push d
       else
-        if x <= @BUCKET_SIZE + @BUCKET_THRESHOLD_PAD
-          if d not in above then above.push d
-        else if x + h >= $(window).height() - @BUCKET_SIZE
-          if d not in below then below.push d
-        else
-          points.push [x, 1, d]
-          points.push [x + h, -1, d]
+        points.push [x, 1, d]
+        points.push [x + h, -1, d]
       points
     , []
 
@@ -401,12 +396,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       if $(hl).offset().top >= top and $(hl).offset().top <= bottom
         if $(hl).data('annotation') not in acc
           acc.push $(hl).data('annotation')
-      else
-        annotation = $(hl).data('annotation')
-        if not (annotation.target?.length or annotation.references?.length)
-          acc.push annotation
       acc
     , []
+    $.merge visible, @annotator.comments
     @annotator.updateViewer visible
 
   isUpper:   (i) => i == 1

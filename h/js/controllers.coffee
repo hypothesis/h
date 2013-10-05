@@ -547,8 +547,8 @@ class Annotation
       annotation = $scope.model.$modelValue
 
       # Forbid saving comments without a body (text or tags)
-      if not annotation.highlights?.length and not annotation.text and
-      not annotation.tags?.length and not annotation.references?.length
+      if annotator.isComment(annotation) and not annotation.text and
+      not annotation.tags?.length
         $window.alert "You can not add a comment without adding some text, or at least a tag."
         return
 
