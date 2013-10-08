@@ -25,20 +25,6 @@ class App
 
     {plugins, host, providers} = annotator
 
-    $scope.$watch 'sheet.collapsed', (newValue) ->
-      $scope.sheet.tab = if newValue then null else 'login'
-
-    $scope.$watch 'sheet.tab', (tab) ->
-      $timeout =>
-        $element
-        .find('form')
-        .filter(-> this.name is tab)
-        .find('input')
-        .filter(-> this.type isnt 'hidden')
-        .first()
-        .focus()
-      , 10
-
     $scope.$watch 'auth.personas', (newValue, oldValue) =>
       unless newValue?.length
         authentication.persona = null
