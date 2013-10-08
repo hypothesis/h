@@ -208,7 +208,7 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
-thread = ['$timeout', ($timeout) ->
+thread = ->
   link: (scope, elem, attr, ctrl) ->
     childrenEditing = {}
     sel = window.getSelection()
@@ -221,11 +221,9 @@ thread = ['$timeout', ($timeout) ->
       event.stopPropagation()
       # If we have selected something, then don't bother
       return unless sel.toString() is scope.oldSelection
-      $timeout ->
-        return unless Object.keys(childrenEditing).length is 0
-        scope.collapsed = !scope.collapsed
-        scope.openDetails scope.annotation unless scope.collapsed
-      , 10
+      return unless Object.keys(childrenEditing).length is 0
+      scope.collapsed = !scope.collapsed
+      scope.openDetails scope.annotation unless scope.collapsed
 
     scope.$on 'toggleEditing', (event) ->
       {$id, editing} = event.targetScope
@@ -233,12 +231,11 @@ thread = ['$timeout', ($timeout) ->
         scope.collapsed = false
         unless childrenEditing[$id]
           event.targetScope.$on '$destroy', ->
-            $timeout (-> delete childrenEditing[$id]), 100
+            delete childrenEditing[$id]
           childrenEditing[$id] = true
       else
-        $timeout (-> delete childrenEditing[$id]), 100
+        delete childrenEditing[$id]
   restrict: 'C'
-]
 
 
 userPicker = ->
