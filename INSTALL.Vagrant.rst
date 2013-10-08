@@ -8,9 +8,11 @@ a VirtualBox Ubuntu VM with Hypothes.is and all its dependencies on it.
 Install Vagrant
 ---------------
 
-Use your package manager of choice, e.g.::
+Use your package manager of choice, e.g.:
 
-    $ sudo apt-get vagrant
+.. code-block:: bash
+
+    sudo apt-get vagrant
 
 or download from http://vagrantup.com.
 
@@ -18,12 +20,14 @@ or download from http://vagrantup.com.
 Bootstrapping the VM
 --------------------
 
-From the home directory of the h project (this directory) ::
+From the home directory of the h project (this directory) :
 
-    $ vagrant up
-    $ vagrant ssh
-    $ cd /h
-    $ ifconfig # note the eth0 inet addr value
+.. code-block:: bash
+
+    vagrant up
+    vagrant ssh
+    cd /h
+    ifconfig # note the eth0 inet addr value
 
 Next edit the ``development.ini`` file and change ``host: localhost`` (around line 109)
 to the IP address you found via ``ifconfig``.
@@ -65,10 +69,12 @@ Notes for Windows Development
 -----------------------------
 
 If you are working with a Windows host, you want the shared directory to use Unix line endings.
-Do that by configuring this git repository as follows::
+Do that by configuring this git repository as follows:
+ 
+.. code-block:: bash
 
-    $ git config core.eol lf
-    $ git config core.autocrlf input
+    git config core.eol lf
+    git config core.autocrlf input
 
 You will probably also need to ``git reset --hard`` to re-extract all files with approproate line endings.
 Do this *before* proceeding with bootstrapping.
