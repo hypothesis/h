@@ -321,17 +321,17 @@ def includeme(config):
     config.include('pyramid_webassets')
 
     env = config.get_webassets_env()
-    kw = {}
     if env.url_expire is not False:
         # Cache for one year (so-called "far future" Expires)
-        kw['cache_max_age'] = 31536000
-    config.add_static_view(env.url, env.directory, **kw)
+        config.add_static_view(env.url, env.directory, cache_max_age=31536000)
+    else:
+        config.add_static_view(env.url, env.directory)
 
     loader = PythonLoader(config.registry.settings.get('h.assets', __name__))
     bundles = loader.load_bundles()
-    for name in bundles:
-        log.info('name: ' + str(name))
-        config.add_webasset(name, bundles[name])
+    for bundle_name in bundles:
+        log.info('name: ' + str(bundle_name))
+        config.add_webasset(bundle_name, bundles[bundle_name])
 
     from deform.field import Field
     resource_registry = WebassetsResourceRegistry(config.get_webassets_env())
