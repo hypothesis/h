@@ -406,7 +406,9 @@ class App
 
         $scope.notifications.unshift notification
 
-    $scope.$watch 'new_updates', (updates) ->
+    $scope.$watch 'new_updates', (updates, oldUpdates) ->
+      return unless updates or oldUpdates
+
       for notif in $scope.notifications
         if notif.type is 'update'
           if $scope.new_updates < 2 then text = 'change.'
