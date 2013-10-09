@@ -89,14 +89,12 @@ class App
       if newValue
         annotator.show()
         annotator.host.notify method: 'showFrame', params: routeName
-        $element.find('.topbar').find('.tri').attr('draggable', true)
       else if oldValue
         $scope.sheet.collapsed = true
         annotator.hide()
         annotator.host.notify method: 'hideFrame', params: routeName
         for p in annotator.providers
           p.channel.notify method: 'setActiveHighlights'
-        $element.find('.topbar').find('.tri').attr('draggable', false)
 
     $scope.$watch 'sheet.collapsed', (hidden) ->
       unless hidden then $scope.sheet.tab = 'login'
@@ -186,17 +184,6 @@ class App
         $i.triggerHandler('change')
         $i.triggerHandler('input')
     , 200  # We hope this is long enough
-
-    $scope.toggleAlwaysOnHighlights = ->
-      $scope.alwaysOnMode = not $scope.alwaysOnMode
-      for p in providers
-        p.channel.notify
-          method: 'setAlwaysOnMode'
-          params: $scope.alwaysOnMode
-
-    $scope.createUnattachedAnnotation = ->
-      return unless annotator.discardDrafts()
-      provider.notify method: 'addComment'
 
     @user_filter = $filter('userName')
     search_query = ''
