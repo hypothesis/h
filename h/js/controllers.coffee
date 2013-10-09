@@ -31,9 +31,9 @@ class App
         authentication.token = null
 
         # Leave Highlighting mode when logging out
-        if $scope.highlightingMode
+        if annotator.tool is 'highlight'
           # Because of logging out, we must leave Highlighting Mode.
-          $scope.toggleHighlightingMode()
+          annotator.setTool 'comment'
           # No need to reload annotations after login, since the Social View
           # change (caused by leaving Highlighting Mode) will trigger
           # a reload anyway.
@@ -67,7 +67,7 @@ class App
 
         if $scope.ongoingHighlightSwitch
           $timeout =>
-            $scope.toggleHighlightingMode()
+            annotator.setTool 'highlight'
           , 500
       else
         plugins.Permissions.setUser(null)
@@ -175,33 +175,6 @@ class App
         p.channel.notify
           method: 'setAlwaysOnMode'
           params: $scope.alwaysOnMode
-
-    $scope.highlightingMode = false
-
-    $scope.toggleHighlightingMode = ->
-      # Check for drafts
-      return unless annotator.discardDrafts()
-
-      # Check login state first
-      unless plugins.Auth? and plugins.Auth.haveValidToken()
-        # If we are not logged in, start the auth process
-        $scope.ongoingHighlightSwitch = true
-        # No need to reload annotations upon login, since Social View change
-        # will trigger a reload anyway.
-        $scope.skipAuthChangeReload = true
-        annotator.show()
-        $scope.sheet.collapsed = false
-        $scope.sheet.tab = 'login'
-        return
-
-      delete $scope.ongoingHighlightSwitch
-      $scope.highlightingMode = not $scope.highlightingMode
-      annotator.socialView.name =
-        if $scope.highlightingMode then "single-player" else "none"
-      for p in providers
-        p.channel.notify
-          method: 'setHighlightingMode'
-          params: $scope.highlightingMode
 
     $scope.createUnattachedAnnotation = ->
       return unless annotator.discardDrafts()

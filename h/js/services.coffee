@@ -449,8 +449,25 @@ class Hypothesis extends Annotator
   setTool: (name) =>
     return if name is @tool
 
-    if tool is 'highlight'
+    scope = @element.scope()
+    if name is 'highlight'
       return unless this.discardDrafts()
+
+      # Check login state first
+      unless @plugins.Auth? and @plugins.Auth.haveValidToken()
+        # If we are not logged in, start the auth process
+        scope.ongoingHighlightSwitch = true
+        # No need to reload annotations upon login, since Social View change
+        # will trigger a reload anyway.
+        scope.skipAuthChangeReload = true
+        scope.sheet.collapsed = false
+        scope.sheet.tab = 'login'
+        this.show()
+        return
+
+      this.socialView.name = 'single-player'
+    else
+      this.socialView.name = 'none'
 
     @tool = name
     this.publish 'setTool', name
