@@ -8,6 +8,7 @@ if 'gevent' in sys.modules:
     import gevent.subprocess
     sys.modules['subprocess'] = gevent.subprocess
 
+import pyramid
 
 from webassets import Bundle
 from webassets.filter import register_filter
@@ -317,15 +318,47 @@ class WebassetsResourceRegistry(object):
         return result
 
 
+class AssetRequest(object):
+    def __init__(self, val, config):
+        self.env = config.get_webassets_env()
+        self.val = val
+
+    def text(self):
+        return 'asset_request = %s' % (self.val,)
+
+    phash = text
+
+    def __call__(self, event):
+        request = event.request
+        if request.matched_route is None:
+            return False
+        else:
+            return request.matched_route.pattern.startswith(self.env.url)
+
+
+def asset_response_subscriber(event):
+    event.response.headers['Access-Control-Allow-Origin'] = '*'
+
+
 def includeme(config):
     config.include('pyramid_webassets')
 
     env = config.get_webassets_env()
+
+    # Configure the static views
     if env.url_expire is not False:
         # Cache for one year (so-called "far future" Expires)
         config.add_static_view(env.url, env.directory, cache_max_age=31536000)
     else:
         config.add_static_view(env.url, env.directory)
+
+    # Set up a predicate and subscriber to set CORS headers on asset responses
+    config.add_subscriber_predicate('asset_request', AssetRequest)
+    config.add_subscriber(
+        asset_response_subscriber,
+        pyramid.events.NewResponse,
+        asset_request=True
+    )
 
     loader = PythonLoader(config.registry.settings.get('h.assets', __name__))
     bundles = loader.load_bundles()
