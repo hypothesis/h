@@ -58,17 +58,15 @@ class App
             token: newValue
         else
           plugins.Auth.setToken(newValue)
-        plugins.Auth.withToken plugins.Permissions._setAuthFromToken
+        plugins.Auth.withToken (token) =>
+          plugins.Permissions._setAuthFromToken token
 
-        if annotator.ongoing_edit
-          $timeout =>
-            annotator.clickAdder()
-          , 500
+          if annotator.ongoing_edit
+              annotator.clickAdder()
 
-        if $scope.ongoingHighlightSwitch
-          $timeout =>
+          if $scope.ongoingHighlightSwitch
+            $scope.ongoingHighlightSwitch = false
             annotator.setTool 'highlight'
-          , 500
       else
         plugins.Permissions.setUser(null)
         delete plugins.Auth
@@ -586,9 +584,6 @@ class Annotation
         $scope.origTags = $scope.model.$modelValue.tags
         $scope.model.$modelValue.text = ''
         $scope.model.$modelValue.tags = ''
-
-    $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
-    $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
 
     $scope.$watch 'editing', -> $scope.$emit 'toggleEditing'
 

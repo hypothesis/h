@@ -187,9 +187,6 @@ class Hypothesis extends Annotator
     this.subscribe 'annotationDeleted', (a) =>
       $rootScope.annotations = $rootScope.annotations.filter (b) -> b isnt a
 
-    # Reload the route after annotations are loaded
-    this.subscribe 'annotationsLoaded', -> $route.reload()
-
   _setupXDM: (options) ->
     $rootScope = @element.injector().get '$rootScope'
 
