@@ -448,13 +448,12 @@ class Hypothesis extends Annotator
 
   setTool: (name) =>
     return if name is @tool
+    return unless this.discardDrafts()
 
-    scope = @element.scope()
     if name is 'highlight'
-      return unless this.discardDrafts()
-
       # Check login state first
       unless @plugins.Auth? and @plugins.Auth.haveValidToken()
+        scope = @element.scope()
         # If we are not logged in, start the auth process
         scope.ongoingHighlightSwitch = true
         # No need to reload annotations upon login, since Social View change
