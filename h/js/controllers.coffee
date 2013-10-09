@@ -5,6 +5,7 @@ class App
     sheet:
       collapsed: true
       tab: null
+    ongoingHighlightSwitch: false
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
@@ -97,10 +98,12 @@ class App
           p.channel.notify method: 'setActiveHighlights'
         $element.find('.topbar').find('.tri').attr('draggable', false)
 
-    $scope.$watch 'sheet.collapsed', (newValue) ->
-      $scope.sheet.tab = if newValue then null else 'login'
+    $scope.$watch 'sheet.collapsed', (hidden) ->
+      unless hidden then $scope.sheet.tab = 'login'
 
     $scope.$watch 'sheet.tab', (tab) ->
+      return unless tab
+
       $timeout =>
         $element
         .find('form')
@@ -110,6 +113,16 @@ class App
         .first()
         .focus()
       , 10
+
+      reset = $timeout (-> $scope.$broadcast '$reset'), 60000
+      unwatch = $scope.$watch 'sheet.tab', (newTab) ->
+        $timeout.cancel reset
+        if newTab
+          reset = $timeout (-> $scope.$broadcast '$reset'), 60000
+        else
+          $scope.ongoingHighlightSwitch = false
+          annotator.ongoing_edit = null
+          unwatch()
 
     $scope.$on 'back', ->
       return unless annotator.discardDrafts()
@@ -123,9 +136,13 @@ class App
         collapsed: !show
         tab: 'login'
 
-    $scope.$on '$reset', => angular.extend $scope, @scope,
-      auth: authentication
-      socialView: annotator.socialView
+    $scope.$on '$reset', =>
+      annotator.ongoing_edit = null
+      base = angular.copy @scope
+      angular.extend $scope, base,
+        auth: authentication
+        frame: $scope.frame or @scope.frame
+        socialView: annotator.socialView
 
     $scope.$on 'success', (event, action) ->
       if action == 'claim'
