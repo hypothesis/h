@@ -43,7 +43,7 @@ class Hypothesis extends Annotator
     Threading: {}
 
   # Internal state
-  ongoing_edit: false # * Is there an interrupted edit by login
+  ongoing_edit: null # * An annotation draft in limbo before login
 
   providers: null
   host: null
@@ -151,12 +151,8 @@ class Hypothesis extends Annotator
         annotation.highlights = []
 
       # Register it with the draft service, except when it's an injection
-      unless annotation.inject
-        drafts.add annotation, => this.deleteAnnotation annotation
-      else
-        # This is an injection. Delete the marker.
-        delete annotation.inject
-
+       # This is an injection. Delete the marker.
+      if annotation.inject
         # Set permissions for private
         permissions = @plugins.Permissions
         userId = permissions.options.userId permissions.user
@@ -322,14 +318,14 @@ class Hypothesis extends Annotator
   showEditor: (annotation) =>
     this.show()
     @element.injector().invoke [
-      '$location', '$rootScope', '$route'
-      ($location, $rootScope, $route) =>
+      '$location', '$rootScope', '$route', 'drafts'
+      ($location, $rootScope, $route, drafts) =>
         unless this.plugins.Auth? and this.plugins.Auth.haveValidToken()
           $route.current.locals.$scope.$apply ->
             $route.current.locals.$scope.$emit 'showAuth', true
           for p in @providers
             p.channel.notify method: 'onEditorHide'
-          @ongoing_edit = true
+          @ongoing_edit = annotation
           return
 
         # Set the path
@@ -338,14 +334,12 @@ class Hypothesis extends Annotator
           action: 'create'
         $location.path('/editor').search(search)
 
+        # Store the draft
+        drafts.add annotation
+
         # Digest the change
+        $rootScope.annotation = annotation
         $rootScope.$digest()
-
-        @ongoing_edit = false
-
-        # Push the annotation into the editor scope
-        if $route.current.controller is 'EditorController'
-          $route.current.locals.$scope.$apply (s) -> s.annotation = annotation
     ]
     this
 
