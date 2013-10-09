@@ -8,11 +8,11 @@ class App
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
-    'annotator', 'authentication', 'drafts', 'flash', 'streamfilter'
+    'annotator', 'authentication', 'flash', 'streamfilter'
   ]
   constructor: (
     $element, $filter, $http, $location, $rootScope, $scope, $timeout
-    annotator, authentication, drafts, flash, streamfilter
+    annotator, authentication, flash, streamfilter
   ) ->
     # Get the base URL from the base tag or the app location
     baseUrl = angular.element('head base')[0]?.href
@@ -31,9 +31,9 @@ class App
         authentication.token = null
 
         # Leave Highlighting mode when logging out
-        if $scope.highlightingMode
+        if annotator.tool is 'highlight'
           # Because of logging out, we must leave Highlighting Mode.
-          $scope.toggleHighlightingMode()
+          annotator.setTool 'comment'
           # No need to reload annotations after login, since the Social View
           # change (caused by leaving Highlighting Mode) will trigger
           # a reload anyway.
@@ -41,8 +41,11 @@ class App
 
     $scope.$watch 'auth.persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
-        # TODO: better knowledge of routes
-        authentication.$logout => $scope.$broadcast '$reset'
+        if annotator.discardDrafts()
+          # TODO: better knowledge of routes
+          authentication.$logout => $scope.$broadcast '$reset'
+        else
+          $scope.auth.persona = oldValue
       else if newValue?
         $scope.sheet.collapsed = true
 
@@ -58,17 +61,15 @@ class App
             token: newValue
         else
           plugins.Auth.setToken(newValue)
-        plugins.Auth.withToken plugins.Permissions._setAuthFromToken
+        plugins.Auth.withToken (token) =>
+          plugins.Permissions._setAuthFromToken token
 
-        if annotator.ongoing_edit
-          $timeout =>
-            annotator.clickAdder()
-          , 500
+          if annotator.ongoing_edit
+              annotator.clickAdder()
 
-        if $scope.ongoingHighlightSwitch
-          $timeout =>
-            $scope.toggleHighlightingMode()
-          , 500
+          if $scope.ongoingHighlightSwitch
+            $scope.ongoingHighlightSwitch = false
+            annotator.setTool 'highlight'
       else
         plugins.Permissions.setUser(null)
         delete plugins.Auth
@@ -111,7 +112,7 @@ class App
       , 10
 
     $scope.$on 'back', ->
-      return unless drafts.discard()
+      return unless annotator.discardDrafts()
       if $location.path() == '/viewer' and $location.search()?.id?
         $location.search('id', null).replace()
       else
@@ -176,35 +177,8 @@ class App
           method: 'setAlwaysOnMode'
           params: $scope.alwaysOnMode
 
-    $scope.highlightingMode = false
-
-    $scope.toggleHighlightingMode = ->
-      # Check for drafts
-      return unless drafts.discard()
-
-      # Check login state first
-      unless plugins.Auth? and plugins.Auth.haveValidToken()
-        # If we are not logged in, start the auth process
-        $scope.ongoingHighlightSwitch = true
-        # No need to reload annotations upon login, since Social View change
-        # will trigger a reload anyway.
-        $scope.skipAuthChangeReload = true
-        annotator.show()
-        $scope.sheet.collapsed = false
-        $scope.sheet.tab = 'login'
-        return
-
-      delete $scope.ongoingHighlightSwitch
-      $scope.highlightingMode = not $scope.highlightingMode
-      annotator.socialView.name =
-        if $scope.highlightingMode then "single-player" else "none"
-      for p in providers
-        p.channel.notify
-          method: 'setHighlightingMode'
-          params: $scope.highlightingMode
-
     $scope.createUnattachedAnnotation = ->
-      return unless drafts.discard() # Invoke draft support
+      return unless annotator.discardDrafts()
       provider.notify method: 'addComment'
 
     @user_filter = $filter('userName')
@@ -586,7 +560,7 @@ class Annotation
       $scope.editing = true
       $scope.origText = $scope.model.$modelValue.text
       $scope.origTags = $scope.model.$modelValue.tags
-      drafts.add $scope.model.$modelValue
+      drafts.add $scope.model.$modelValue, -> $scope.cancel()
 
     $scope.delete = ($event) ->
       $event?.stopPropagation()
@@ -613,9 +587,6 @@ class Annotation
         $scope.origTags = $scope.model.$modelValue.tags
         $scope.model.$modelValue.text = ''
         $scope.model.$modelValue.tags = ''
-
-    $scope.$on '$routeChangeStart', -> $scope.cancel() if $scope.editing
-    $scope.$on '$routeUpdate', -> $scope.cancel() if $scope.editing
 
     $scope.$watch 'editing', -> $scope.$emit 'toggleEditing'
 

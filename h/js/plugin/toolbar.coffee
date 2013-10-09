@@ -3,6 +3,8 @@ $ = Annotator.$
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
   events:
     'updateNotificationCounter': 'onUpdateNotificationCounter'
+    'setTool': 'onSetTool'
+    'setVisibleHighlights': 'onSetVisibleHighlights'
 
   html:
     element: '<div class="annotator-toolbar"></div>'
@@ -28,10 +30,6 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         event.stopPropagation()
         state = not window.annotator.visibleHighlights
         window.annotator.setVisibleHighlights state
-        if state
-          $(event.target).addClass('pushed')
-        else
-          $(event.target).removeClass('pushed')
     ,
       "title": "Highlighting Mode"
       "class": "highlighter-icon"
@@ -41,10 +39,6 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         state = not (window.annotator.tool is 'highlight')
         tool = if state then 'highlight' else 'comment'
         window.annotator.setTool tool
-        if state
-          $(event.target).addClass('pushed')
-        else
-          $(event.target).removeClass('pushed')
     ,
       "title": "New Comment"
       "class": "commenter-icon"
@@ -93,3 +87,15 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         @notificationCounter.text("+#{count}")
       else
         @notificationCounter.text('')
+
+  onSetTool: (name) ->
+    if name is 'highlight'
+      $(@buttons[2]).addClass('pushed')
+    else
+      $(@buttons[2]).removeClass('pushed')
+
+  onSetVisibleHighlights: (state) ->
+    if state
+      $(@buttons[1]).addClass('pushed')
+    else
+      $(@buttons[1]).removeClass('pushed')
