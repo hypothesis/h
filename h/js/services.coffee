@@ -450,6 +450,7 @@ class Hypothesis extends Annotator
   setTool: (name) =>
     return if name is @tool
     @tool = name
+    this.publish 'setTool', name
     for p in @providers
       p.channel.notify
         method: 'setTool'
@@ -458,6 +459,7 @@ class Hypothesis extends Annotator
   setVisibleHighlights: (state) =>
     return if state is @visibleHighlights
     @visibleHighlights = state
+    this.publish 'setVisibleHighlights', state
     for p in @providers
       p.channel.notify
         method: 'setVisibleHighlights'
