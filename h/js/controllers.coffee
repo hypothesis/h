@@ -8,11 +8,11 @@ class App
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
-    'annotator', 'authentication', 'drafts', 'flash', 'streamfilter'
+    'annotator', 'authentication', 'flash', 'streamfilter'
   ]
   constructor: (
     $element, $filter, $http, $location, $rootScope, $scope, $timeout
-    annotator, authentication, drafts, flash, streamfilter
+    annotator, authentication, flash, streamfilter
   ) ->
     # Get the base URL from the base tag or the app location
     baseUrl = angular.element('head base')[0]?.href
@@ -111,7 +111,7 @@ class App
       , 10
 
     $scope.$on 'back', ->
-      return unless drafts.discard()
+      return unless annotator.discardDrafts()
       if $location.path() == '/viewer' and $location.search()?.id?
         $location.search('id', null).replace()
       else
@@ -180,7 +180,7 @@ class App
 
     $scope.toggleHighlightingMode = ->
       # Check for drafts
-      return unless drafts.discard()
+      return unless annotator.discardDrafts()
 
       # Check login state first
       unless plugins.Auth? and plugins.Auth.haveValidToken()
@@ -204,7 +204,7 @@ class App
           params: $scope.highlightingMode
 
     $scope.createUnattachedAnnotation = ->
-      return unless drafts.discard() # Invoke draft support
+      return unless annotator.discardDrafts()
       provider.notify method: 'addComment'
 
     @user_filter = $filter('userName')
@@ -586,7 +586,7 @@ class Annotation
       $scope.editing = true
       $scope.origText = $scope.model.$modelValue.text
       $scope.origTags = $scope.model.$modelValue.tags
-      drafts.add $scope.model.$modelValue
+      drafts.add $scope.model.$modelValue, -> $scope.cancel()
 
     $scope.delete = ($event) ->
       $event?.stopPropagation()

@@ -152,7 +152,7 @@ class Hypothesis extends Annotator
 
       # Register it with the draft service, except when it's an injection
       unless annotation.inject
-        drafts.add annotation
+        drafts.add annotation, => this.deleteAnnotation annotation
       else
         # This is an injection. Delete the marker.
         delete annotation.inject
@@ -192,7 +192,6 @@ class Hypothesis extends Annotator
 
   _setupXDM: (options) ->
     $rootScope = @element.injector().get '$rootScope'
-    drafts = @element.injector().get 'drafts'
 
     provider = Channel.build options
         # Dodge toolbars [DISABLE]
@@ -207,10 +206,9 @@ class Hypothesis extends Annotator
     .bind('publish', (ctx, args...) => this.publish args...)
 
     .bind('back', =>
-      # This guy does stuff when you "back out" of the interface.
-      # (Currently triggered by a click on the source page.)
+      # Navigate "back" out of the interface.
       $rootScope.$apply =>
-        return unless drafts.discard()
+        return unless this.discardDrafts()
         this.hide()
     )
 
@@ -227,10 +225,12 @@ class Hypothesis extends Annotator
       this.updateViewer ((@threading.getContainer id).message for id in ids)
     )
 
-    .bind('setTool', (ctx, name) => this.setTool name)
+    .bind('setTool', (ctx, name) =>
+      $rootScope.$apply => this.setTool name
+    )
 
     .bind('setVisibleHighlights', (ctx, state) =>
-      this.setVisibleHighlights state
+      $rootScope.$apply => this.setVisibleHighlights state
     )
 
   _setupWrapper: ->
@@ -470,6 +470,11 @@ class Hypothesis extends Annotator
     # No targets and no references means that this is a comment
     not (annotation.references?.length or annotation.target?.length)
 
+
+  # Discard all drafts, deleting unsaved annotations from the annotator
+  discardDrafts: ->
+    return @element.injector().get('drafts').discard()
+
 class AuthenticationProvider
   constructor: ->
     @actions =
@@ -499,29 +504,44 @@ class AuthenticationProvider
 
 
 class DraftProvider
-  drafts: []
+  drafts: null
+
+  constructor: ->
+    this.drafts = []
 
   $get: -> this
-  add: (draft) -> @drafts.push draft unless this.contains draft
-  remove: (draft) -> @drafts = (d for d in @drafts when d isnt draft)
-  contains: (draft) -> (@drafts.indexOf draft) != -1
+
+  add: (draft, cb) -> @drafts.push {draft, cb}
+
+  remove: (draft) ->
+    remove = []
+    for d, i in @drafts
+      remove.push i if d.draft is draft
+    while remove.length
+      @drafts.splice(remove.pop(), 1)
+
+  contains: (draft) ->
+    for d in @drafts
+      if d.draft is draft then return true
+    return false
 
   discard: ->
-    count = (d for d in @drafts when d.text?.length).length
     text =
-      switch count
+      switch @drafts.length
         when 0 then null
         when 1
           """You have an unsaved reply.
 
           Do you really want to discard this draft?"""
         else
-          """You have #{count} unsaved replies.
+          """You have #{@drafts.length} unsaved replies.
 
           Do you really want to discard these drafts?"""
 
-    if count == 0 or confirm text
+    if @drafts.length is 0 or confirm text
+      discarded = @drafts.slice()
       @drafts = []
+      d.cb?() for d in discarded
       true
     else
       false
