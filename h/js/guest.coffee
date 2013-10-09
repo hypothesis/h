@@ -109,10 +109,14 @@ class Annotator.Guest extends Annotator
       }
     )
 
-    .bind('setTool', (ctx, name) => this.setTool name)
+    .bind('setTool', (ctx, name) =>
+      this.setTool name
+      this.publish 'setTool', name
+    )
 
     .bind('setVisibleHighlights', (ctx, state) =>
       this.setVisibleHighlights state
+      this.publish 'setVisibleHighlights', state
     )
 
   scanDocument: (reason = "something happened") =>
