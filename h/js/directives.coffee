@@ -10,7 +10,7 @@ authentication = ->
   controller: [
     '$scope', 'authentication',
     ($scope,   authentication) ->
-      $scope.$on '$reset', => angular.extend $scope, base
+      $scope.$on '$reset', => angular.extend $scope.model, base
 
       $scope.submit = (form) ->
         return unless form.$valid
