@@ -7,6 +7,8 @@ class Annotator.Guest extends Annotator
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-hl mousedown": "onHighlightMousedown"
     ".annotator-hl click": "onHighlightClick"
+    "setTool": "onSetTool"
+    "setVisibleHighlights": "onSetVisibleHighlights"
 
   # Plugin configuration
   options:
@@ -115,7 +117,7 @@ class Annotator.Guest extends Annotator
     )
 
     .bind('setVisibleHighlights', (ctx, state) =>
-      this.setVisibleHighlights state
+      this.setVisibleHighlights state, false
       this.publish 'setVisibleHighlights', state
     )
 
@@ -224,24 +226,17 @@ class Annotator.Guest extends Annotator
       method: 'setTool'
       params: name
 
-    switch name
-      when 'comment'
-        this.setVisibleHighlights this.visibleHighlights, true
-      when 'highlight'
-        this.setVisibleHighlights true, true
-
-  setVisibleHighlights: (state=true, temporary=false) ->
-    unless temporary
-      @visibleHighlights = state
+  setVisibleHighlights: (state=true, notify=true) ->
+    if notify
       @panel?.notify
         method: 'setVisibleHighlights'
         params: state
-
-    markerClass = 'annotator-highlights-always-on'
-    if state or (@tool is 'highlight')
-      @element.addClass markerClass
     else
-      @element.removeClass markerClass
+      markerClass = 'annotator-highlights-always-on'
+      if state or this.tool is 'highlight'
+        @element.addClass markerClass
+      else
+        @element.removeClass markerClass
 
   addComment: ->
     sel = @selectedRanges   # Save the selection
@@ -318,3 +313,14 @@ class Annotator.Guest extends Annotator
 
     # Display the editor.
     this.showEditor(annotation, position)
+
+  onSetTool: (name) ->
+    switch name
+      when 'comment'
+        this.setVisibleHighlights this.visibleHighlights, false
+      when 'highlight'
+        this.setVisibleHighlights true, false
+
+  onSetVisibleHighlights: (state) =>
+    this.visibleHighlights = state
+    this.setVisibleHighlights state, false
