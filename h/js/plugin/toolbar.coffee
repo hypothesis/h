@@ -83,7 +83,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     switch
       when count > 9
         @notificationCounter.text('>9')
-      when 0 < count < 9
+      when 0 < count <= 9
         @notificationCounter.text("+#{count}")
       else
         @notificationCounter.text('')
