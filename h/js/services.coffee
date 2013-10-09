@@ -449,6 +449,10 @@ class Hypothesis extends Annotator
 
   setTool: (name) =>
     return if name is @tool
+
+    if tool is 'highlight'
+      return unless this.discardDrafts()
+
     @tool = name
     this.publish 'setTool', name
     for p in @providers
