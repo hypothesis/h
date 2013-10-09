@@ -41,8 +41,11 @@ class App
 
     $scope.$watch 'auth.persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
-        # TODO: better knowledge of routes
-        authentication.$logout => $scope.$broadcast '$reset'
+        if annotator.discardDrafts()
+          # TODO: better knowledge of routes
+          authentication.$logout => $scope.$broadcast '$reset'
+        else
+          $scope.auth.persona = oldValue
       else if newValue?
         $scope.sheet.collapsed = true
 
