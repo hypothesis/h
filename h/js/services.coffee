@@ -359,7 +359,7 @@ class Hypothesis extends Annotator
     # They will be loaded manually as entities are registered by participating
     # frames.
     Store.prototype.loadAnnotations = ->
-      query = {}
+      query = limit: 1000
       @annotator.considerSocialView.call @annotator, query
 
       this.entities ?= {}
