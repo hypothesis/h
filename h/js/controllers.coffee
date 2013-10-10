@@ -476,9 +476,11 @@ class App
         unless data instanceof Array then data = [data]
         $scope.$apply =>
           if $scope.socialView.name is 'single-player'
-            if annotation.user is user
-              $scope.addUpdateNotification()
-              $scope.new_updates += 1
+            for d in data
+              if d.user is user
+                $scope.addUpdateNotification()
+                $scope.new_updates += 1
+                break
           else
             if data.length > 0
                 $scope.addUpdateNotification()
