@@ -275,6 +275,10 @@ $baseFontSize: 14px;
     color: $grayLighter;
     text-decoration: none;
 
+    &:before {
+      color: inherit;
+    }
+
     &.tri-icon {
       color: rgba(200, 200, 200, .3);
       text-shadow:
