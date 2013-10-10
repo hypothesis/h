@@ -85,6 +85,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     # the heatmap in case the page contains a <base> tag which might otherwise
     # break these references.
 
+    return unless document.getElementsByTagName('base').length
+
     location = window.location
     base = "#{location.protocol}//#{location.host}#{location.pathname}"
 
