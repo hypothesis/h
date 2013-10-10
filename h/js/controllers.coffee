@@ -559,6 +559,7 @@ class Annotation
         uri: $scope.thread.message.uri
 
       annotator.publish 'beforeAnnotationCreated', [reply]
+      drafts.add reply
 
     $scope.edit = ($event) ->
       $event?.stopPropagation()
