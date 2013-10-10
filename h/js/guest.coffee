@@ -15,6 +15,7 @@ class Annotator.Guest extends Annotator
     Document: {}
 
   # Internal state
+  comments: null
   tool: 'comment'
   visibleHighlights: false
 
@@ -24,6 +25,9 @@ class Annotator.Guest extends Annotator
     options.noScan = true
     super
     delete @options.noScan
+
+    # Create an array for holding the comments
+    @comments = []
 
     @frame = $('<div></div>')
     .appendTo(@wrapper)
@@ -58,9 +62,6 @@ class Annotator.Guest extends Annotator
 
     # Scan the document text with the DOM Text libraries
     this.scanDocument "Annotator initialized"
-
-    # Create an array for holding the comments
-    @comments = []
 
     # Watch for deleted comments
     this.subscribe 'annotationDeleted', (annotation) =>
