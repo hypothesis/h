@@ -42,6 +42,10 @@ class Annotator.Guest extends Annotator
           formatted['uri'] = @plugins.Document.uri()
         for k, v of annotation when k isnt 'highlights'
           formatted[k] = v
+        # Work around issue in jschannel where a repeated object is considered
+        # recursive, even if it is not its own ancestor.
+        if formatted.document?.title
+          formatted.document.title = formatted.document.title.slice()
         formatted
       onConnect: (source, origin, scope) =>
         # Unfortunately, jschannel chokes on chrome-extension: origins
