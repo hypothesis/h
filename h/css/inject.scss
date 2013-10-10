@@ -338,7 +338,7 @@ $baseFontSize: 14px;
     left: .2em;
   }
 
-  a.pushed {
+  a.pushed, a:hover.pushed {
     color: $hypothered;
   }
 }
