@@ -112,6 +112,7 @@ $baseFontSize: 14px;
   }
 
   .label {
+    background: none;
     font-weight: bold;
     font-family: $sansFontFamily;
     font-size: 13.1px;
@@ -270,7 +271,7 @@ $baseFontSize: 14px;
   width: 2.5em;
   z-index: 2;
 
-  a, a:hover, a:active, a:visited {
+  a, a:hover, a:active, a:visited, a:link, a:link:hover {
     color: $grayLighter;
     text-decoration: none;
 

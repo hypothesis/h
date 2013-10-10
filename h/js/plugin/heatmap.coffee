@@ -45,7 +45,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   constructor: (element, options) ->
     super $(@html), options
-    # this._rebaseUrls() -- not clear this is a great idea
 
     if @options.container?
       $(@options.container).append @element
@@ -54,6 +53,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   pluginInit: ->
     return unless d3?
+    this._maybeRebaseUrls()
 
     events = [
       'annotationCreated', 'annotationUpdated', 'annotationDeleted',
@@ -79,7 +79,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       # XXX: PDF.js hack
       $(PDFView.container).on 'scroll', this._update
 
-  _rebaseUrls: ->
+  _maybeRebaseUrls: ->
     # We can't rely on browsers to implement the xml:base property correctly.
     # Therefore, we must rebase the fragment references we use in the SVG for
     # the heatmap in case the page contains a <base> tag which might otherwise
