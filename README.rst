@@ -13,7 +13,8 @@ modern web browsers in mind.
 Installation
 ------------
 
-See `<INSTALL.rst>`_ for installation instructions.
+See `<INSTALL.rst>`_ for installation instructions. Platform specific
+instructions can be found in the install documents as well.
 
 Running
 -------
