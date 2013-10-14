@@ -90,14 +90,12 @@ $baseFontSize: 14px;
 .heatmap-pointer {
   @include transition-property(left);
   @include transition-duration(.2s);
-  margin-top: -1em; // TODO: Less janking v-align
-  // color: rgb(238, 238, 238);
   color: #666;
   left: 0;
   position: absolute;
-  height: 20.1px;
-  width: 40.1px;
-  vertical-align: middle;
+  height: 20px;
+  width: 40px;
+  margin-top: -10px;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
   text-align: center;
   cursor: pointer;
@@ -115,7 +113,7 @@ $baseFontSize: 14px;
     background: none;
     font-weight: bold;
     font-family: $sansFontFamily;
-    font-size: 13.1px;
+    font-size: 13px;
     line-height: 17.5px;
     left: 5px;
     right: 2px;
@@ -226,8 +224,8 @@ $baseFontSize: 14px;
   @include reset-box-model;
   @include user-select(none);
   @extend .noise;
-  font-size: $baseFontSize / 16px * 1em;
-  line-height: $baseLineHeight / 16px * 1em;
+  font-size: $baseFontSize;
+  line-height: $baseLineHeight;
   height: 100%;
   position: fixed;
   top: 0;
@@ -261,8 +259,6 @@ $baseFontSize: 14px;
 //CONTROLBAR STUFF////////////////////////////////
 .annotator-toolbar {
   @include single-transition(height, .25s, ease, .25s);
-  font-size: $baseFontSize;
-  line-height: $baseLineHeight;
   position: absolute;
   overflow: hidden;
   height: 200px;
