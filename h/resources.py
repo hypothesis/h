@@ -4,8 +4,6 @@ except ImportError:
     import json
 
 from horus import resources
-from horus.models import get_session
-
 
 from pyramid.decorator import reify
 from pyramid.interfaces import ILocation
@@ -14,6 +12,7 @@ from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
 from zope.interface import implementer
 
 from h import interfaces
+from h.models import get_session
 
 import logging
 log = logging.getLogger(__name__)
