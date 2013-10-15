@@ -101,50 +101,50 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 //CONTROLBAR STUFF////////////////////////////////
-.controlbar {
-  position: absolute;
-  overflow: hidden;
-  width: 40px;
-  height: 100px;
-  z-index: 1;
-  left: 1px;
-  top: 100%;
-  -moz-transition:height .25s, -moz-transform .25s;
-  -webkit-transition:height .25s, -webkit-transform .25s;
-  -o-transition:height .25s, -o-transform .25s;
-  transition:height .25s, transform .25s;
+// .controlbar {
+//   position: absolute;
+//   overflow: hidden;
+//   width: 40px;
+//   height: 100px;
+//   z-index: 1;
+//   left: 1px;
+//   top: 100%;
+//   -moz-transition:height .25s, -moz-transform .25s;
+//   -webkit-transition:height .25s, -webkit-transform .25s;
+//   -o-transition:height .25s, -o-transform .25s;
+//   transition:height .25s, transform .25s;
     
-}
+// }
 
-.hiddencontrolbar {
-  @extend .controlbar;
-  height: 0px;
-}
+// .hiddencontrolbar {
+//   @extend .controlbar;
+//   height: 0px;
+// }
 
-.controlbarbutton {
-  position: relative;
-  left: 1px;
-  width: 25px;
-  height: 25px;
-  padding: 5px;
-  margin-top: 5px;
-  box-shadow: 1px 1px 1px 1px;
-  color: gray;
-  background-color: white;
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
+// .controlbarbutton {
+//   position: relative;
+//   left: 1px;
+//   width: 25px;
+//   height: 25px;
+//   padding: 5px;
+//   margin-top: 5px;
+//   box-shadow: 1px 1px 1px 1px;
+//   color: gray;
+//   background-color: white;
+//   border-top-left-radius: 2px;
+//   border-bottom-left-radius: 2px;
+//   border-top-right-radius: 2px;
+//   border-bottom-right-radius: 2px;
   
-  &:active {
-    top:1px;
-    box-shadow: 1px 1px 1px 0px;
-  }
+//   &:active {
+//     top:1px;
+//     box-shadow: 1px 1px 1px 0px;
+//   }
 
-  a.pushed {
-    color: $hypothered;
-  }
-}
+//   a.pushed {
+//     color: $hypothered;
+//   }
+// }
 
 .stickybuttons1 {
   position: absolute;
@@ -161,131 +161,132 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   height: 65px;
 }
 
-.stickybutton {
-  @extend .controlbarbutton;
-}
+// .stickybutton {
+//   @extend .controlbarbutton;
+// }
 
 //HEATMAP STUFF////////////////////////////////
-.annotator-heatmap {
-  @include stretch-y;
-  height: 100%;
+// DELETE THIS!
+// .annotator-heatmap {
+//   @include stretch-y;
+//   height: 100%;
 
-  svg {
-    @include stretch-y;
-    background: hsla(0, 0, 0, .1);
-    border-left: solid 1px $grayLighter;
-    height: 100%;
-    left: 17px;
-    width: $heatmap-width;
-  }
-}
+//   svg {
+//     @include stretch-y;
+//     background: hsla(0, 0, 0, .1);
+//     border-left: solid 1px $grayLighter;
+//     height: 100%;
+//     left: 17px;
+//     width: $heatmap-width;
+//   }
+// }
 
-.heatmap-pointer {
-  @include user-select(none);
-  @include transition-property(left);
-  @include transition-duration(.2s);
-  margin-top: -1em; // TODO: Less janking v-align
-  // color: rgb(238, 238, 238);
-  color: #666;
-  left: 0;
-  position: absolute;
-  height: 20.1px;
-  width: 40.1px;
-  vertical-align: middle;
-  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-  text-align: center;
-  cursor: pointer;
+// .heatmap-pointer {
+//   // @include user-select(none);
+//   @include transition-property(left);
+//   @include transition-duration(.2s);
+//   margin-top: -1em; // TODO: Less janking v-align
+//   // color: rgb(238, 238, 238);
+//   color: #666;
+//   left: 0;
+//   position: absolute;
+//   height: 20.1px;
+//   width: 40.1px;
+//   vertical-align: middle;
+//   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+//   text-align: center;
+//   cursor: pointer;
 
-  .svg {
-    width: 100%;
-    height: 100%;
-    background-image: url("../images/side_tab.svg");
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-  }
+//   .svg {
+//     width: 100%;
+//     height: 100%;
+//     background-image: url("../images/side_tab.svg");
+//     background-position: center center;
+//     background-repeat: no-repeat;
+//     background-size: 100% 100%;
+//   }
 
-  .label {
-    font-weight: bold;
-    font-family: $sansFontFamily;
-    font-size: 13.1px;
-    left: 5px;
-    right: 2px;
-    position: absolute;
-    bottom: 1px;
-  }
+//   .label {
+//     font-weight: bold;
+//     font-family: $sansFontFamily;
+//     font-size: 13.1px;
+//     left: 5px;
+//     right: 2px;
+//     position: absolute;
+//     bottom: 1px;
+//   }
 
-  &:hover {
-    left: 2px;
-  }
+//   &:hover {
+//     left: 2px;
+//   }
 
-  &.lower, &.upper {
-    @include single-transition(margin-top, .2s);
-    left: 7px;
-    width: 33.1px;
-    height: 26.1px;
-    .label {
-      left: 0;
-      right: 0;
-    }
+//   &.lower, &.upper {
+//     @include single-transition(margin-top, .2s);
+//     left: 7px;
+//     width: 33.1px;
+//     height: 26.1px;
+//     .label {
+//       left: 0;
+//       right: 0;
+//     }
 
-    &:hover {
-      left: 7px;
-    }
-  }
+//     &:hover {
+//       left: 7px;
+//     }
+//   }
 
-  &.upper {
-    .svg {
-      background-image: url("../images/up_tab.svg");
-    }
-    .label {
-      bottom: 1px;
-    }
-    &:hover {
-      margin-top: -1.2em;
-    }
-    &.sticky1 {
-      margin-top: 1em;
-    }
-    &.sticky2 {
-      margin-top: 2.8em;
-    }
-  }
+//   &.upper {
+//     .svg {
+//       background-image: url("../images/up_tab.svg");
+//     }
+//     .label {
+//       bottom: 1px;
+//     }
+//     &:hover {
+//       margin-top: -1.2em;
+//     }
+  //   &.sticky1 {
+  //     margin-top: 1em;
+  //   }
+  //   &.sticky2 {
+  //     margin-top: 2.8em;
+  //   }
+  // }
 
-  &.lower {
-    margin-top: -2em;
-    .svg {
-      background-image: url("../images/down_tab.svg");
-    }
-    .label {
-      top: 1px;
-    }
-    &:hover {
-      margin-top: -2.4em;
-    }
-  }
-  &.flip {
-    @include rotateY(180deg);
-    .label {
-      @include rotateY(180deg);
-    }
-  }
-  &.commenter {
-    @include single-transition(margin-top, .2s);
-    left: 3px;
-    width: 37px;
-    margin-top: -1.2em;
-    .svg {
-      background-image: url("../images/comment_tab.svg");
-    }
-    .label {
-      bottom: 1px;
-    }
-    &:hover {
-      margin-top: -1.4em;
-    }
-  }
-}
+//   &.lower {
+//     margin-top: -2em;
+//     .svg {
+//       background-image: url("../images/down_tab.svg");
+//     }
+//     .label {
+//       top: 1px;
+//     }
+//     &:hover {
+//       margin-top: -2.4em;
+//     }
+//   }
+//   &.flip {
+//     @include rotateY(180deg);
+//     .label {
+//       @include rotateY(180deg);
+//     }
+//   }
+//   &.commenter {
+//     @include single-transition(margin-top, .2s);
+//     left: 3px;
+//     width: 37px;
+//     margin-top: -1.2em;
+//     .svg {
+//       background-image: url("../images/comment_tab.svg");
+//     }
+//     .label {
+//       bottom: 1px;
+//     }
+//     &:hover {
+//       margin-top: -1.4em;
+//     }
+//   }
+// }
 
 //SHEET////////////////////////////////
 //This comes down from under the toolbar
