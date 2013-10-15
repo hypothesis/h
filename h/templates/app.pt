@@ -28,37 +28,6 @@
         </div>
       </div>
 
-      <!-- Controlbar -->
-      <div ng-mouseenter="cbStyle='controlbar'"
-           ng-mouseleave="cbStyle='hiddencontrolbar'"
-           ng-class="cbStyle">
-        <ul>
-          <li class="controlbarbutton">
-            <a title="Show Annotations"
-               class="alwaysonhighlights-icon"
-               ng-class="alwaysOnMode && 'pushed'"
-               ng-click="toggleAlwaysOnHighlights()"
-               href="">
-            </a>
-          </li>
-          <li class="controlbarbutton">
-            <a title="Highlighting Mode"
-               class="highlighter-icon"
-               ng-class="highlightingMode && 'pushed'"
-               ng-click="toggleHighlightingMode()"
-               href="">
-            </a>
-          </li>
-          <li class="controlbarbutton">
-            <a title="New Comment"
-               class="commenter-icon"
-               ng-click="createUnattachedAnnotation()"
-               href="">
-            </a>
-          </li>
-        </ul>
-      </div>
-
       <!-- Sticky Buttons -->
         <div class="stickybuttons1"
              ng-class="alwaysOnMode && highlightingMode && 'stickybuttons2'"
