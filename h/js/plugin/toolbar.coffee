@@ -2,14 +2,15 @@ $ = Annotator.$
 
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
   events:
+    '.annotator-toolbar li:first-child mouseenter': 'show'
+    '.annotator-toolbar mouseleave': 'hide'
     'updateNotificationCounter': 'onUpdateNotificationCounter'
     'setTool': 'onSetTool'
     'setVisibleHighlights': 'onSetVisibleHighlights'
 
   html:
-    element: '<div class="annotator-toolbar"></div>'
+    element: '<div class="annotator-toolbar annotator-hide"></div>'
     notification: '<div class="annotator-notification-counter"></div>'
-    stickybuttons: '<div class="stickybuttons"></div>'
 
   options:
     items: [
@@ -31,19 +32,6 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         event.stopPropagation()
         state = not window.annotator.visibleHighlights
         window.annotator.setVisibleHighlights state
-        if state
-          $(event.target).addClass('pushed')
-          $(".stickybuttons").show()
-          $(".stickybuttons").removeClass('stickybuttons2')
-          if window.annotator.tool is 'highlight'
-            $(".stickybuttons").addClass('stickybuttons2')
-          $("#sticky1").parent().show()
-        else
-          $(event.target).removeClass('pushed')
-          $("#sticky1").parent().hide()
-          if not (window.annotator.tool is 'highlight')
-            $(".stickybuttons").hide()
-        window.annotator.plugins.Heatmap._update()
     ,
       "title": "Highlighting Mode"
       "class": "highlighter-icon"
@@ -53,19 +41,6 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         state = not (window.annotator.tool is 'highlight')
         tool = if state then 'highlight' else 'comment'
         window.annotator.setTool tool
-        $(".stickybuttons").removeClass('stickybuttons2')
-        if state
-          $(event.target).addClass('pushed')
-          $(".stickybuttons").show()
-          if window.annotator.visibleHighlights
-            $(".stickybuttons").addClass('stickybuttons2')
-          $("#sticky2").parent().show()
-        else
-          $(event.target).removeClass('pushed')
-          $("#sticky2").parent().hide()
-          if not window.annotator.visibleHighlights
-            $(".stickybuttons").hide()
-        window.annotator.plugins.Heatmap._update()
     ,
       "title": "New Comment"
       "class": "commenter-icon"
@@ -74,40 +49,6 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         event.stopPropagation()
         window.annotator.addComment()
     ]
-
-    stickyoptions:
-      items: [
-        "title": "Show Annotations"
-        "class": "alwaysonhighlights-icon"
-        "id"   : "sticky1"
-        "click": (event) ->
-          event.preventDefault()
-          event.stopPropagation()
-          $(event.target).parent().hide()
-          state = not window.annotator.visibleHighlights
-          window.annotator.setVisibleHighlights state
-          $(".stickybuttons").removeClass('stickybuttons2')
-          $(".alwaysonhighlights-icon").removeClass('pushed')
-          if not (window.annotator.tool is 'highlight')
-            $(".stickybuttons").hide()
-          window.annotator.plugins.Heatmap._update()
-      ,
-        "title": "Highlighting Mode"
-        "class": "highlighter-icon"
-        "id"   : "sticky2"
-        "click": (event) ->
-          event.preventDefault()
-          event.stopPropagation()
-          $(event.target).parent().hide()
-          state = not (window.annotator.tool is 'highlight')
-          tool = if state then 'highlight' else 'comment'
-          window.annotator.setTool tool
-          $(".stickybuttons").removeClass('stickybuttons2')
-          $(".highlighter-icon").removeClass('pushed')
-          if not window.annotator.visibleHighlights
-            $(".stickybuttons").hide()
-          window.annotator.plugins.Heatmap._update()
-      ]
 
   pluginInit: ->
     @annotator.toolbar = @toolbar = $(@html.element)
@@ -120,45 +61,22 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     @toolbar.append(@notificationCounter)
 
     @buttons = @options.items.reduce  (buttons, item) =>
-      button = $('<a></a>')
+      anchor = $('<a></a>')
       .attr('href', '')
       .attr('title', item.title)
       .on('click', item.click)
       .addClass(item.class)
-      .data('state', false)
+      button = $('<li></li>').append(anchor)
       buttons.add button
     , $()
 
     list = $('<ul></ul>')
     @buttons.appendTo(list)
-    @buttons.wrap('<li></li>')
     @toolbar.append(list)
 
-    # STICKY BUTTONS
-    @sticky = $(@html.stickybuttons)
-    if @options.container?
-      $(@options.container).append @sticky
-    else
-      $(@element).append(@sticky)
-  
-    @stickybuttons = @options.stickyoptions.items.reduce  (buttons, item) =>
-      stickybutton = $('<a></a>')
-      .attr('href', '')
-      .attr('title', item.title)
-      .attr('id', item.id)
-      .on('click', item.click)
-      .addClass(item.class)
-      .data('state', false)
-      buttons.add stickybutton
-    , $()
+  show: -> this.toolbar.removeClass('annotator-hide')
 
-    list = $('<ul></ul>')
-    @stickybuttons.appendTo(list)
-    @stickybuttons.wrap('<li></li>')
-    @sticky.append(list)
-    $(".stickybuttons").hide()
-    $("#sticky1").parent().hide()
-    $("#sticky2").parent().hide()
+  hide: -> this.toolbar.addClass('annotator-hide')
 
   onUpdateNotificationCounter: (count) ->
     element = $(@buttons[0])
@@ -180,9 +98,22 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
       $(@buttons[2]).addClass('pushed')
     else
       $(@buttons[2]).removeClass('pushed')
+    this._updateStickyButtons()
 
   onSetVisibleHighlights: (state) ->
     if state
       $(@buttons[1]).addClass('pushed')
     else
       $(@buttons[1]).removeClass('pushed')
+    this._updateStickyButtons()
+
+  _updateStickyButtons: ->
+    count = $(@buttons).filter(-> $(this).hasClass('pushed')).length
+    if count
+      height = (count + 1) * 32  # +1 -- top button is always visible
+      this.toolbar.css("min-height", "#{height}px")
+    else
+      height = 32
+      this.toolbar.css("min-height", "")
+    this.annotator.plugins.Heatmap?.BUCKET_THRESHOLD_PAD = height - 5
+    this.annotator.plugins.Heatmap?._update();

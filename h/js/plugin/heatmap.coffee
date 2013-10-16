@@ -233,8 +233,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         subtotal = a.reply_count or 0
         return {
           top: info.top + 1
-          replies: (info.replies or 0) + subtotal
-          total : (info.total or 0) + subtotal + 1
+          replies: info.replies + subtotal
+          total : info.total + subtotal + 1
         }
       ,
         top: 0
@@ -256,8 +256,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
       offsets = [@index[i], x2]
       if bucket.total
-        start = @buckets[i-1]?.total and ((@buckets[i-1].total + bucket.total) / 2) or 1e-6
-        end = @buckets[i+1]?.total and ((@buckets[i+1].total + bucket.total) / 2) or 1e-6
+        start = @buckets[i-1]?.total and ((@buckets[i-1].total + bucket.total) / 2) or 0
+        end = @buckets[i+1]?.total and ((@buckets[i+1].total + bucket.total) / 2) or 0
         curve = d3.scale.pow().exponent(.1)
           .domain([0, .5, 1])
           .range([
@@ -380,18 +380,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     .html (d) =>
       "<div class='label'>#{@buckets[d].display}</div><div class='svg'></div>"
 
-    # Moves upper tab up or down depending on if stickybuttons are enabled.
-    if parent.window.annotator.visibleHighlights and parent.window.annotator.tool is 'highlight'
-      tabs.classed('upper sticky2', @isUpper)
-    else if parent.window.annotator.visibleHighlights or parent.window.annotator.tool is 'highlight'
-      tabs.classed('sticky2', false)
-      tabs.classed('upper sticky1', @isUpper)
-    else
-      tabs.classed('sticky1', false)
-      tabs.classed('sticky2', false)
-      tabs.classed('upper', @isUpper)
-
-    tabs  
+    .classed('upper', @isUpper) 
     .classed('lower', @isLower)
     .classed('commenter', @isComment)
 
