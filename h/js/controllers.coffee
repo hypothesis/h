@@ -185,44 +185,6 @@ class App
         $i.triggerHandler('input')
     , 200  # We hope this is long enough
 
-    $scope.toggleAlwaysOnHighlights = ->
-      $scope.alwaysOnMode = not $scope.alwaysOnMode
-      for p in providers
-        p.channel.notify
-          method: 'setAlwaysOnMode'
-          params: $scope.alwaysOnMode
-
-    $scope.highlightingMode = false
-
-    $scope.toggleHighlightingMode = ->
-      # Check for drafts
-      return unless drafts.discard()
-
-      # Check login state first
-      unless plugins.Auth? and plugins.Auth.haveValidToken()
-        # If we are not logged in, start the auth process
-        $scope.ongoingHighlightSwitch = true
-        # No need to reload annotations upon login, since Social View change
-        # will trigger a reload anyway.
-        $scope.skipAuthChangeReload = true
-        annotator.show()
-        $scope.sheet.collapsed = false
-        $scope.sheet.tab = 'login'
-        return
-
-      delete $scope.ongoingHighlightSwitch
-      $scope.highlightingMode = not $scope.highlightingMode
-      annotator.socialView.name =
-        if $scope.highlightingMode then "single-player" else "none"
-      for p in providers
-        p.channel.notify
-          method: 'setHighlightingMode'
-          params: $scope.highlightingMode
-
-    $scope.createUnattachedAnnotation = ->
-      return unless drafts.discard() # Invoke draft support
-      provider.notify method: 'addComment'
-
     @user_filter = $filter('userName')
     search_query = ''
 
@@ -989,3 +951,4 @@ angular.module('h.controllers', ['bootstrap', 'h.streamfilter'])
   .controller('ViewerController', Viewer)
   .controller('SearchController', Search)
   .controller('NotificationController', Notification)
+  

@@ -406,3 +406,4 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   isUpper:   (i) => i == 1
   isLower:   (i) => i == @index.length - 3
   isComment: (i) => i == @index.length - 2
+  
