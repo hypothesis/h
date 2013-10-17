@@ -951,3 +951,4 @@ angular.module('h.controllers', ['bootstrap', 'h.streamfilter'])
   .controller('ViewerController', Viewer)
   .controller('SearchController', Search)
   .controller('NotificationController', Notification)
+  
