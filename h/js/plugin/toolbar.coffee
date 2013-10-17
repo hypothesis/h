@@ -2,13 +2,15 @@ $ = Annotator.$
 
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
   events:
+    '.annotator-toolbar li:first-child mouseenter': 'show'
+    '.annotator-toolbar mouseleave': 'hide'
     'updateNotificationCounter': 'onUpdateNotificationCounter'
     'setTool': 'onSetTool'
     'setVisibleHighlights': 'onSetVisibleHighlights'
 
   html:
-    element: '<div class="annotator-toolbar"></div>'
-    notification: '<div class="annotator-notification-counter"></div>"'
+    element: '<div class="annotator-toolbar annotator-hide"></div>'
+    notification: '<div class="annotator-notification-counter"></div>'
 
   options:
     items: [
@@ -59,19 +61,22 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     @toolbar.append(@notificationCounter)
 
     @buttons = @options.items.reduce  (buttons, item) =>
-      button = $('<a></a>')
+      anchor = $('<a></a>')
       .attr('href', '')
       .attr('title', item.title)
       .on('click', item.click)
       .addClass(item.class)
-      .data('state', false)
+      button = $('<li></li>').append(anchor)
       buttons.add button
     , $()
 
     list = $('<ul></ul>')
     @buttons.appendTo(list)
-    @buttons.wrap('<li></li>')
     @toolbar.append(list)
+
+  show: -> this.toolbar.removeClass('annotator-hide')
+
+  hide: -> this.toolbar.addClass('annotator-hide')
 
   onUpdateNotificationCounter: (count) ->
     element = $(@buttons[0])
@@ -93,9 +98,22 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
       $(@buttons[2]).addClass('pushed')
     else
       $(@buttons[2]).removeClass('pushed')
+    this._updateStickyButtons()
 
   onSetVisibleHighlights: (state) ->
     if state
       $(@buttons[1]).addClass('pushed')
     else
       $(@buttons[1]).removeClass('pushed')
+    this._updateStickyButtons()
+
+  _updateStickyButtons: ->
+    count = $(@buttons).filter(-> $(this).hasClass('pushed')).length
+    if count
+      height = (count + 1) * 32  # +1 -- top button is always visible
+      this.toolbar.css("min-height", "#{height}px")
+    else
+      height = 32
+      this.toolbar.css("min-height", "")
+    this.annotator.plugins.Heatmap?.BUCKET_THRESHOLD_PAD = height - 5
+    this.annotator.plugins.Heatmap?._update();

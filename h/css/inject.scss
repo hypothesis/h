@@ -258,7 +258,10 @@ $baseFontSize: 14px;
 
 //CONTROLBAR STUFF////////////////////////////////
 .annotator-toolbar {
-  @include single-transition(height, .25s, ease, .25s);
+  @include transition(
+    height .25s,
+    min-height .25s
+  );
   position: absolute;
   overflow: hidden;
   height: 200px;
@@ -267,8 +270,72 @@ $baseFontSize: 14px;
   width: 2.5em;
   z-index: 2;
 
+  ul, li {
+    @include box-sizing(border-box);
+    @include reset-box-model;
+    @include reset-list-style;
+  }
+
+  li {
+    border-width: 1px;
+    max-height: 35px;
+    margin-bottom: 5px;
+  }
+}
+
+.annotator-toolbar.annotator-hide {
+  @include transition-delay(.25s);
+  height: 2.2em;
+
+  li {
+    @include transition-delay(.2s, 0, 0);
+    //@include transition-duration(0 .25s);
+    border-width: 0;
+    max-height: 0;
+    margin-bottom: 0;
+
+    &:first-child, &.pushed {
+      margin-bottom: 5px;
+      border-width: 1px;
+      max-height: 35px;
+    }
+  }
+}
+
+.annotator-toolbar li {
+  @include border-radius(4px);
+  @include smallshadow(0);
+  @include transition(
+    border-width .05s,
+    margin-bottom .25s,
+    max-height .25s
+  );
+  background: $white;
+  border: solid 1px $grayLighter;
+  overflow: hidden;
+  position: relative;
+  left: 2px;
+  height: 2em;
+  width: 2em;
+
+  &:first-child {
+    @include border-radius(4px 0 0 4px);
+    border-right-style: none;
+    left: 0;
+    width: 2.3em;
+  }
+
   a, a:hover, a:active, a:visited, a:link, a:link:hover {
+    font-size: $baseFontSize * 1.3;
+    line-height: $baseLineHeight * 1.3;
+
+    font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+
+    position: absolute;
+    left: .2em;
     color: $grayLighter;
+
     text-decoration: none;
 
     &:before {
@@ -287,58 +354,13 @@ $baseFontSize: 14px;
     }
   }
 
-  ul, li {
-    @include box-sizing(border-box);
-    @include reset-box-model;
-    @include reset-list-style;
+  &.pushed, &:hover.pushed {
+    max-height: 35px;
+    a {
+      color: $hypothered;
+    }
   }
 }
-
-.annotator-toolbar.annotator-hide {
-  height: 2.2em;
-
-  &:hover {
-    height: 200px;
-  }
-}
-
-.annotator-toolbar li {
-  @include border-radius(4px);
-  @include smallshadow(0);
-  background: $white;
-  border: solid 1px $grayLighter;
-  position: relative;
-  left: 2px;
-  height: 2em;
-  width: 2em;
-
-  &:first-child {
-    @include border-radius(4px 0 0 4px);
-    border-right-style: none;
-    left: 0;
-    width: 2.3em;
-  }
-
-  & + li {
-    margin-top: 5px;
-  }
-
-  a {
-    font-size: $baseFontSize * 1.3;
-    line-height: $baseLineHeight * 1.3;
-
-    font-smoothing: antialiased;
-    -webkit-font-smoothing: antialiased;
-
-    position: absolute;
-    left: .2em;
-  }
-
-  a.pushed, a:hover.pushed {
-    color: $hypothered;
-  }
-}
-
 
 // Toolbar Icons
 .alwaysonhighlights-icon {
