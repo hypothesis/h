@@ -117,3 +117,4 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
       this.toolbar.css("min-height", "")
     this.annotator.plugins.Heatmap?.BUCKET_THRESHOLD_PAD = height - 5
     this.annotator.plugins.Heatmap?._update();
+    
