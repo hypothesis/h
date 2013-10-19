@@ -142,4 +142,3 @@ class Annotator.Host extends Annotator.Guest
     @frame.css
       'margin-left': "#{m}px"
       width: "#{w}px"
-      
