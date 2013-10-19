@@ -26,12 +26,6 @@ class Annotator.Host extends Annotator.Guest
 
     app.appendTo(@frame)
 
-    if @toolbar?
-      @toolbar.addClass 'annotator-hide'
-      @toolbar
-      .on('mouseenter', => @toolbar.removeClass 'annotator-hide')
-      .on('mouseleave', => @toolbar.addClass 'annotator-hide')
-
     if @plugins.Heatmap?
       this._setupDragEvents()
       @plugins.Heatmap.element.on 'click', (event) =>
@@ -148,3 +142,4 @@ class Annotator.Host extends Annotator.Guest
     @frame.css
       'margin-left': "#{m}px"
       width: "#{w}px"
+      
