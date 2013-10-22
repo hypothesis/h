@@ -60,6 +60,7 @@ def url_values_from_document(annotation):
         icon_link = check_favicon(icon_link, parsed_uri, domain)
     return {
         'title': title,
+        'uri': annotation['uri'],
         'source': domain,
         'source_stripped': domain_stripped,
         'favicon_link': icon_link
