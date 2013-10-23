@@ -11,7 +11,7 @@ imports = [
 ]
 
 
-configure = ($routeProvider) ->
+configure = ($routeProvider, $sceDelegateProvider) ->
   $routeProvider.when '/editor',
     controller: 'EditorController'
     templateUrl: 'editor.html'
@@ -25,7 +25,16 @@ configure = ($routeProvider) ->
     templateUrl: 'page_search.html'
   $routeProvider.otherwise
     redirectTo: '/viewer'
-configure.$inject = ['$routeProvider']
+
+  if window.location.href.match /^chrome-extension:\/\//
+    # XXX: This hack is awful. It shouldn't be necessary.
+    # Angular should have the default 'self' work on extension pages.
+    $sceDelegateProvider.resourceUrlWhitelist [
+      'self'
+      '.*'
+    ]
+
+configure.$inject = ['$routeProvider', '$sceDelegateProvider']
 
 
 angular.module('h', imports, configure)
