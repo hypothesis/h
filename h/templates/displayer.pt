@@ -9,6 +9,11 @@
   <style type="text/css"></style>
 
   <body metal:fill-slot="body" ng-app="h.displayer">
+    <!-- Markdown -->
+    <script type="text/ng-template" id="markdown.html">
+      <metal:main use-macro="load: markdown.html" />
+    </script>
+
     <div class="topbar">
       <div class="inner">
         <a class="barbutton pull-left" href="/"
@@ -75,7 +80,10 @@
 
                 <div class="body">
                   <span ng-show="annotation.deleted">Reason:</span>
-                  <span ng-bind-html-unsafe="annotation.text | converter"/>
+                  <markdown ng-model="$parent.annotation.text"
+                            ng-readonly="true"
+                            name="text" />
+
                 </div>
 
                 <ul ng-model="annotation.tags"
@@ -111,7 +119,9 @@
 
                   <div class="body">
                     <span ng-show="reply.deleted">Reason:</span>
-                    <span ng-bind-html-unsafe="reply.text | converter"/>
+                    <markdown ng-model="$parent.reply.text"
+                              ng-readonly="true"
+                              name="text" />
                   </div>
 
                   <div>
