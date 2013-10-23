@@ -102,6 +102,11 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
 
   # Construct a channel to another frame
   _build: (options) ->
+    # jschannel chokes on FF and Chrome extension origins.
+    if (options.origin.match /^chrome-extension:\/\//) or
+        (options.origin.match /^resource:\/\//)
+      options.origin = '*'
+
     console.log "Bridge plugin connecting to #{options.origin}"
     channel = Channel.build(options)
 
@@ -235,10 +240,6 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
         channel.notify
           method: 'loadAnnotations'
           params: (this._format a for t, a of @cache)
-
-    # Unfortunately, jschannel chokes on chrome-extension: origins
-    if options.origin.match /^chrome-extension:\/\//
-      options.origin = '*'
 
     channel = this._build options
 

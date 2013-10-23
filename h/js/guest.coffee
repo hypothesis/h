@@ -48,10 +48,6 @@ class Annotator.Guest extends Annotator
           formatted.document.title = formatted.document.title.slice()
         formatted
       onConnect: (source, origin, scope) =>
-        # Unfortunately, jschannel chokes on chrome-extension: origins
-        if origin.match /^chrome-extension:\/\//
-          origin = '*'
-
         @panel = this._setupXDM
           window: source
           origin: origin
@@ -76,6 +72,11 @@ class Annotator.Guest extends Annotator
           @plugins.Heatmap._update()
 
   _setupXDM: (options) ->
+    # jschannel chokes FF and Chrome extension origins.
+    if (options.origin.match /^chrome-extension:\/\//) or
+        (options.origin.match /^resource:\/\//)
+      options.origin = '*'
+
     channel = Channel.build options
 
     channel
