@@ -1,17 +1,18 @@
 class ClauseParser
-  filter_fields : ['references', 'text', 'user','uri', 'id', 'tags']
-  operators: ['=', '>', '<', '=>', '>=', '<=', '=<', '[', '#', '^']
+  filter_fields : ['references', 'text', 'user', 'uri', 'id', 'tags', 'created', 'updated']
+  operators: ['=','=>', '>=', '<=', '=<', '>', '<', '[', '#', '^', '{']
   operator_mapping:
     '=': 'equals'
     '>': 'gt'
     '<': 'lt'
-    '=>' : 'ge'
-    '>=' : 'ge'
+    '=>': 'ge'
+    '>=': 'ge'
     '=<': 'le'
-    '<=' : 'le'
+    '<=': 'le'
     '[' : 'one_of'
     '#' : 'matches'
     '^' : 'first_of'
+    '{' : 'match_of' # one_of but not exact search
   insensitive_operator : 'i'
 
   parse_clauses: (clauses) ->
@@ -155,12 +156,13 @@ class StreamFilter
     @filter.clauses.push clause
     this
 
-  addClause: (field, operator, value, case_sensitive = false) ->
+  addClause: (field, operator, value, case_sensitive = false, es_query_string = false) ->
     @filter.clauses.push
       field: field
       operator: operator
       value: value
       case_sensitive: case_sensitive
+      es_query_string: es_query_string
     this
 
   setClausesParse: (clauses_to_parse, error_checking = false) ->

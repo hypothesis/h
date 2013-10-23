@@ -39,25 +39,28 @@ class FlashProvider
   ]
 
 
+flashInterceptor = ['$q', 'flash', ($q, flash) ->
+  response: (response) ->
+    data = response.data
+    format = response.headers 'content-type'
+    if format?.match /^application\/json/
+      if data.flash?
+        flash q, msgs for q, msgs of data.flash
+
+      if data.status is 'failure'
+        flash 'error', data.reason
+        $q.reject(data.reason)
+      else if data.status is 'okay'
+        response.data = data.model
+        response
+    else
+      response
+]
+
+
 angular.module('h.flash', ['ngResource'])
 .provider('flash', FlashProvider)
+.factory('flashInterceptor', flashInterceptor)
 .config(['$httpProvider', ($httpProvider) ->
-  $httpProvider.responseInterceptors.push ['$q', 'flash', ($q, flash) ->
-    (promise) ->
-      promise.then (response) ->
-        data = response.data
-        format = response.headers 'content-type'
-        if format?.match /^application\/json/
-          if data.flash?
-            flash q, msgs for q, msgs of data.flash
-
-          if data.status is 'failure'
-            flash 'error', data.reason
-            $q.reject(data.reason)
-          else if data.status is 'okay'
-            response.data = data.model
-            response
-        else
-          response
-  ]
+  $httpProvider.interceptors.push 'flashInterceptor'
 ])

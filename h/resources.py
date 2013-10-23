@@ -207,9 +207,8 @@ class Annotation(BaseResource, dict):
         return self._nestlist(childTable.get(self['id']), childTable)
 
 
-class Streamer(BaseResource, dict):
+class StreamSearch(BaseResource, dict):
     pass
-
 
 class AnnotationFactory(BaseResource):
     def __getitem__(self, key):
@@ -237,6 +236,8 @@ class UserStreamFactory(BaseResource):
         registry = request.registry
         User = registry.getUtility(interfaces.IUserClass)
         user = User.get_by_username(request, key)
+        request.stream_type = 'user'
+        request.stream_key = key
         if user is not None:
             return Stream(request)
 
@@ -244,6 +245,8 @@ class UserStreamFactory(BaseResource):
 class TagStreamFactory(BaseResource):
     def __getitem__(self, key):
         request = self.request
+        request.stream_type = 'tag'
+        request.stream_key = key
         return Stream(request)
 
 
@@ -252,7 +255,7 @@ def includeme(config):
     config.add_route('index', '/', static=True)
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
-    RootFactory.stream = Streamer
+    RootFactory.stream = StreamSearch
     RootFactory.u = UserStreamFactory
     RootFactory.t = TagStreamFactory
 

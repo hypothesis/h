@@ -184,6 +184,11 @@ def includeme(config):
             "Can not access ElasticSearch at %s! Are you sure it's running?" %
             (app.config["ELASTICSEARCH_HOST"],)
         )
+    except:
+        with app.test_request_context():
+            Annotation.update_settings()
+            Annotation.create_all()
+            Document.create_all()
 
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True

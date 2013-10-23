@@ -384,6 +384,26 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
   template: '<span class="small">{{ftime | date:mediumDate}}</span>'
 ]
 
+streamviewer = [ ->
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
+
+  require: '?ngModel'
+  restrict: 'E'
+  templateUrl: 'streamviewer.html'
+]
+
+whenscrolled = ['$window', ($window) ->
+  link: (scope, elem, attr) ->
+    $window = angular.element($window)
+    $window.on 'scroll', ->
+      windowBottom = $window.height() + $window.scrollTop()
+      elementBottom = elem.offset().top + elem.height()
+      remaining = elementBottom - windowBottom
+      shouldScroll = remaining <= $window.height() * 0
+      if shouldScroll
+        scope.$apply attr.whenscrolled
+]
 
 angular.module('h.directives', ['ngSanitize'])
   .directive('authentication', authentication)
@@ -401,4 +421,5 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('ngBlur', ngBlur)
   .directive('repeatAnim', repeatAnim)
   .directive('notification', notification)
-
+  .directive('streamviewer', streamviewer)
+  .directive('whenscrolled', whenscrolled)
