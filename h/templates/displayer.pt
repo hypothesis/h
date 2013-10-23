@@ -57,7 +57,12 @@
                ng-class="(annotation.text || annotation.replies.length || annotation.tags.length) && '' || '' "
                ng-show="root.quote.length">
             <div class="excerpt">
-              <blockquote>{{root.quote}}</blockquote>
+              <blockquote ng-show="root.quoteSource == 'document'">{{root.quote}}</blockquote>
+              <blockquote ng-hide="root.quoteSource == 'document'">
+                <markdown ng-model="$parent.root.quote"
+                          ng-readonly="true"
+                          name="quote" />
+	      </blockquote>
             </div>
             <div class="domain thread">
                     <a href="{{root.source}}">{{root.source_stripped}}</a>

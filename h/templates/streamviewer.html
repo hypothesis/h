@@ -10,7 +10,14 @@
               <div>
                 <div>
                   <div ng-show="annotation.text.length">
-                      <blockquote>{{annotation.quote | elide:140}}</blockquote>
+                      <blockquote ng-show="annotation.quoteSource=='document'">
+			{{annotation.quote | elide:140}}
+		      </blockquote>
+                      <blockquote ng-hide="annotation.quoteSource=='document'">
+                        <markdown ng-model="$parent.annotation.quote"
+                                  ng-readonly="true"
+                                  name="quote" />
+		      </blockquote>
                   </div>
                   <div class="small domain thread">
                     <a href="{{annotation.source}}">{{annotation.source_stripped}}</a>
@@ -24,7 +31,14 @@
                  ng-show="view"
                  ng-click="view=!view">
               <div ng-show="annotation.quote.length">
-                <blockquote>{{annotation.quote}}</blockquote>
+                <blockquote ng-show="annotation.quoteSource=='document'">
+                  {{annotation.quote}}
+                </blockquote>
+                <blockquote ng-hide="annotation.quoteSource=='document'">
+                  <markdown ng-model="$parent.annotation.quote"
+                            ng-readonly="true"
+                            name="quote" />
+                </blockquote>
               </div>
               <div class="small domain thread">
                 <a href="{{annotation.source}}">{{annotation.source_stripped}}</a>

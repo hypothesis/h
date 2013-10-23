@@ -68,8 +68,11 @@ class AnnotationController(BaseController):
 
         if context.get('references', []):
             parent = context.__parent__[context['references'][-1]]
+            d['quoteSource'] = 'annotation'
+            d['quoteUser'] = parent['user']
             d['quote'] = parent['text']
         else:
+            d['quoteSource'] = 'document'
             d['quote'] = context.quote
             context['references'] = []
 
