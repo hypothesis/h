@@ -123,6 +123,12 @@ angular_resource = Uglify(
     'lib/angular-resource.js',
     output='lib/angular-resource.min.js'
 )
+
+angular_route = Uglify(
+    'lib/angular-route.js',
+    output='lib/angular-route.min.js'
+)
+
 angular_sanitize = Uglify(
     'lib/angular-sanitize.js',
     output='lib/angular-sanitize.min.js'
@@ -203,6 +209,7 @@ app = Bundle(
     angular,
     angular_bootstrap,
     angular_resource,
+    angular_route,
     angular_sanitize,
     gettext,
     annotator_i18n,
@@ -238,9 +245,8 @@ app = Bundle(
                 'app_directives',
                 'displayer',
                 'services',
-                'streamer',
                 'streamfilter',
-                'stream',
+                'streamsearch',
             )
         ],
         output='js/app.min.js'

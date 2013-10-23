@@ -642,6 +642,15 @@ blockquote {
       display: inline-block;
       font-family: $sansFontFamily;
     }
+
+    &.search-upper {
+      padding: 0em;
+      padding-top: .15em;
+    }
+  }
+
+  .right-border {
+    padding-right: 3.7em;
   }
 }
 
