@@ -813,6 +813,10 @@ blockquote {
     }
 
     & > .annotation {
+      .body {
+        font-size: .95em;
+      }
+
       .body * {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -820,7 +824,6 @@ blockquote {
         white-space: nowrap;
         margin-top: 0;
         margin-bottom: 0;
-        font-size: .95em;
       }
 
       .indicators {
