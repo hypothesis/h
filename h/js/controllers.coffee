@@ -452,14 +452,14 @@ class App
         sockmsg =
           filter: filter
           clientID: annotator.clientID
-        console.log sockmsg
+        #console.log sockmsg
         $scope.updater.send JSON.stringify sockmsg
 
       $scope.updater.onclose = =>
         $timeout $scope.initUpdater, 60000
 
       $scope.updater.onmessage = (msg) =>
-        console.log msg
+        #console.log msg
         unless msg.data.type? and msg.data.type is 'annotation-notification'
           return
         data = msg.data.payload
