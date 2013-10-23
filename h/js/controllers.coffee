@@ -652,6 +652,7 @@ class Editor
   this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
   constructor: ($location, $routeParams, $scope, annotator) ->
     {providers} = annotator
+
     save = ->
       $location.path('/viewer').search('id', $scope.annotation.id).replace()
       for p in providers
@@ -678,6 +679,10 @@ class Editor
         if $scope.action is 'create'
           annotator.unsubscribe 'annotationCreated', save
           annotator.unsubscribe 'annotationDeleted', cancel
+
+    $scope.annotation = annotator.ongoing_edit
+
+    annotator.ongoing_edit = null
 
 
 class Viewer

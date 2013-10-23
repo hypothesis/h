@@ -320,12 +320,13 @@ class Hypothesis extends Annotator
     @element.injector().invoke [
       '$location', '$rootScope', '$route', 'drafts'
       ($location, $rootScope, $route, drafts) =>
+        @ongoing_edit = annotation
+
         unless this.plugins.Auth? and this.plugins.Auth.haveValidToken()
           $route.current.locals.$scope.$apply ->
             $route.current.locals.$scope.$emit 'showAuth', true
           for p in @providers
             p.channel.notify method: 'onEditorHide'
-          @ongoing_edit = annotation
           return
 
         # Set the path
@@ -338,7 +339,6 @@ class Hypothesis extends Annotator
         drafts.add annotation
 
         # Digest the change
-        $rootScope.annotation = annotation
         $rootScope.$digest()
     ]
     this
