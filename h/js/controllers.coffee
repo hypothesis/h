@@ -804,15 +804,35 @@ class Search
       annotator.highlighter = $scope.highlighter
 
       threads = []
+      roots = {}
       $scope.render_order = {}
       # Choose the root annotations to work with
       for id, thread of annotator.threading.idTable when thread.message?
         annotation = thread.message
+        annotation_root = if annotation.references? then annotation.references[0] else annotation.id
+        # Already handled thread
+        if roots[annotation_root]? then continue
 
         if annotation.id in $scope.search_filter
-          threads.push thread
-          $scope.render_order[annotation.id] = []
-          buildRenderOrder(annotation.id, [thread])
+          # Maybe we have an upper level match too
+          top_match = null
+          if annotation.references?
+            for reference in annotation.references
+              if reference in $scope.search_filter
+                top_thread = annotator.threading.getContainer reference
+                top_match = top_thread.message
+                break
+
+          if top_match
+            threads.push top_match
+            $scope.render_order[top_match.id] = []
+            buildRenderOrder(top_match.id, [top_thread])
+          else
+            # We do not have upper match
+            threads.push thread
+            $scope.render_order[annotation.id] = []
+            buildRenderOrder(annotation.id, [thread])
+          roots[annotation_root] = true
           continue
 
         # Maybe it has a child we were looking for
@@ -828,6 +848,7 @@ class Search
           threads.push thread
           $scope.render_order[annotation.id] = []
           buildRenderOrder(annotation.id, [thread])
+          roots[annotation_root] = true
 
       # Re-construct exact order the annotation threads will be shown
 
