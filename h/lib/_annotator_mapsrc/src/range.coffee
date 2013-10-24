@@ -102,7 +102,7 @@ Range.nodeFromXPath = (xpath, root=document) ->
     node
 
 class Range.RangeError extends Error
-  constructor: (@message, @range, @type, @parent=null) ->
+  constructor: (@type, @message, @parent=null) ->
     super(@message)
 
 # Public: Creates a wrapper around a range object obtained from a DOMSelection.
@@ -140,75 +140,70 @@ class Range.BrowserRange
       @tainted = true
 
     r = {}
+
+    # Look at the start
+    if @startContainer.nodeType is Node.ELEMENT_NODE
+      # We are dealing with element nodes
+      r.start = Util.getFirstTextNodeNotBefore @startContainer.childNodes[@startOffset]
+      r.startOffset = 0
+    else
+      # We are dealing with simple text nodes
+      r.start = @startContainer
+      r.startOffset = @startOffset
+
+    # Look at the end
+    if @endContainer.nodeType is Node.ELEMENT_NODE
+      # Get specified node.
+      node = @endContainer.childNodes[@endOffset]
+
+      if node? # Does that node exist?
+        # Look for a text node either at the immediate beginning of node
+        n = node
+        while n? and (n.nodeType isnt Node.TEXT_NODE)
+          n = n.firstChild
+        if n? # Did we find a text node at the start of this element?
+          r.end = n
+          r.endOffset = 0
+
+      unless r.end?
+        # We need to find a text node in the previous node.
+        node = @endContainer.childNodes[@endOffset - 1]
+        r.end = Util.getLastTextNodeUpTo node
+        r.endOffset = r.end.nodeValue.length
+
+    else # We are dealing with simple text nodes
+      r.end = @endContainer
+      r.endOffset = @endOffset
+
+    # We have collected the initial data.
+
+    # Now let's start to slice & dice the text elements!
     nr = {}
-
-    for p in ['start', 'end']
-      node = this[p + 'Container']
-      offset = this[p + 'Offset']
-#      console.log p + " node: " + node + "; offset: " + offset
-
-      if node.nodeType is Node.ELEMENT_NODE
-        # Get specified node.
-        it = node.childNodes[offset]
-        # If it doesn't exist, that means we need the end of the
-        # previous one.
-        node = it or node.childNodes[offset - 1]
-
-        # Is this an IMG?
-        isImg = node.nodeType is Node.ELEMENT_NODE and node.tagName.toLowerCase() is "img"
-        if isImg
-          # This is an img. Don't do anything.
-          offset = 0
-        else
-          # if node doesn't have any children, it's a <br> or <hr> or
-          # other self-closing tag, and we actually want the textNode
-          # that ends just before it
-          while node.nodeType is Node.ELEMENT_NODE and not node.firstChild and not isImg
-            it = null # null out ref to node so offset is correctly calculated below.
-            node = node.previousSibling
-
-          # Try to find a text child
-          while (node.nodeType isnt Node.TEXT_NODE)
-            node = node.firstChild
-
-          offset = if it then 0 else node.nodeValue.length
-
-      r[p] = node
-      r[p + 'Offset'] = offset
-      r[p + 'Img'] = isImg
-
-
     changed = false
 
     if r.startOffset > 0
-      if r.start.data.length > r.startOffset
-        nr.start = r.start.splitText r.startOffset
-#        console.log "Had to split element at start, at offset " + r.startOffset
+      # Do we really have to cut?
+      if r.start.nodeValue.length > r.startOffset
+        # Yes. Cut.
+        nr.start = r.start.splitText(r.startOffset)
         changed = true
       else
+        # Avoid splitting off zero-length pieces.
         nr.start = r.start.nextSibling
-#        console.log "No split neaded at start, already cut."
     else
       nr.start = r.start
-#      console.log "No split needed at start, offset is 0."
 
-    if r.start is r.end and not r.startImg
-      if (r.endOffset - r.startOffset) < nr.start.nodeValue.length
+    # is the whole selection inside one text element ?
+    if r.start is r.end
+      if nr.start.nodeValue.length > (r.endOffset - r.startOffset)
         nr.start.splitText(r.endOffset - r.startOffset)
-#        console.log "But had to split element at end at offset " +
-#            (r.endOffset - r.startOffset)
         changed = true
-      else
-#        console.log "End is clean, too."
       nr.end = nr.start
-    else
-      if r.endOffset < r.end.nodeValue.length and not r.endImg
-        r.end.splitText r.endOffset
-#        console.log "Besides start, had to split element at end at offset" +
-#            r.endOffset
+    else # no, the end of the selection is in a separate text element
+      # does the end need to be cut?
+      if r.end.nodeValue.length > r.endOffset
+        r.end.splitText(r.endOffset)
         changed = true
-      else
-#        console.log "End is clean."
       nr.end = r.end
 
     # Make sure the common ancestor is an element node.
@@ -310,9 +305,7 @@ class Range.NormalizedRange
       for n in nodes
         offset += n.nodeValue.length
 
-      isImg = node.nodeType is 1 and node.tagName.toLowerCase() is "img"
-
-      if isEnd and not isImg then [xpath, offset + node.nodeValue.length] else [xpath, offset]
+      if isEnd then [xpath, offset + node.nodeValue.length] else [xpath, offset]
 
     start = serialization(@start)
     end   = serialization(@end, true)
@@ -394,35 +387,35 @@ class Range.SerializedRange
       try
         node = Range.nodeFromXPath(xpath, root)
       catch e
-        throw new Range.RangeError(
-          "Error while finding #{p} node: #{xpath}: #{e}", range, p, e
-        )
+        throw new Range.RangeError(p, "Error while finding #{p} node: #{xpath}: #{e}", e)
 
       if not node
-        throw new Range.RangeError("Couldn't find #{p} node: #{xpath}", range, p)
+        throw new Range.RangeError(p, "Couldn't find #{p} node: #{xpath}")
 
       # Unfortunately, we *can't* guarantee only one textNode per
       # elementNode, so we have to walk along the element's textNodes until
       # the combined length of the textNodes to that point exceeds or
       # matches the value of the offset.
       length = 0
-      targetOffset = this[p + 'Offset'] + (if p is "start" then 1 else 0)
+      targetOffset = this[p + 'Offset']
+
+      # Range excludes its endpoint because it describes the boundary position.
+      # Target the string index of the last character inside the range.
+      if p is 'end' then targetOffset--
+
       for tn in Util.getTextNodes($(node))
-        if (length + tn.nodeValue.length >= targetOffset)
+        if (length + tn.nodeValue.length > targetOffset)
           range[p + 'Container'] = tn
           range[p + 'Offset'] = this[p + 'Offset'] - length
           break
         else
-#          console.log "Going on, because this ends at " +
-#               (length + tn.nodeValue.length) + ", and we are looking for " +
-#               targetOffset
           length += tn.nodeValue.length
 
       # If we fall off the end of the for loop without having set
       # 'startOffset'/'endOffset', the element has shorter content than when
       # we annotated, so throw an error:
       if not range[p + 'Offset']?
-        throw new Range.RangeError("#{p}offset", "Couldn't find offset #{this[p + 'Offset']} in element #{this[p]}")
+        throw new Range.RangeError(p, "#{p}offset", "Couldn't find offset #{this[p + 'Offset']} in element #{this[p]}")
 
     # Here's an elegant next step...
     #

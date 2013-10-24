@@ -59,6 +59,44 @@ Util.getTextNodes = (jq) ->
 
   jq.map -> Util.flatten(getTextNodes(this))
 
+# Public: determine the last text node inside or before the given node
+Util.getLastTextNodeUpTo = (n) ->
+  switch n.nodeType
+    when Node.TEXT_NODE
+      return n # We have found our text node.
+    when Node.ELEMENT_NODE
+      # This is an element, we need to dig in
+      if n.lastChild? # Does it have children at all?
+        result = Util.getLastTextNodeUpTo n.lastChild
+        if result? then return result
+    else
+      # Not a text node, and not an element node.
+  # Could not find a text node in current node, go backwards
+  n = n.previousSibling
+  if n?
+    Util.getLastTextNodeUpTo n
+  else
+    null
+
+# Public: determine the first text node in or after the given jQuery node.
+Util.getFirstTextNodeNotBefore = (n) ->
+  switch n.nodeType
+    when Node.TEXT_NODE
+      return n # We have found our text node.
+    when Node.ELEMENT_NODE
+      # This is an element, we need to dig in
+      if n.firstChild? # Does it have children at all?
+        result = Util.getFirstTextNodeNotBefore n.firstChild
+        if result? then return result
+    else
+      # Not a text or an element node.
+  # Could not find a text node in current node, go forward
+  n = n.nextSibling
+  if n?
+    Util.getFirstTextNodeNotBefore n
+  else
+    null
+
 Util.xpathFromNode = (el, relativeRoot) ->
   try
     result = simpleXPathJQuery.call el, relativeRoot
