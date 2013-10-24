@@ -7,7 +7,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-10-24 02:16:49Z
+** Built at: 2013-10-24 12:22:31Z
 */
 
 
@@ -861,20 +861,19 @@
     }
 
     Annotator.prototype._setupMatching = function() {
-      var s, strategies, _k, _len2, _ref1,
+      var s, strategies, _k, _len2,
         _this = this;
       if (this.domMapper != null) {
         return;
       }
+      this.twoPhaseAnchoring = true;
       strategies = [
         {
           name: "PDF.js",
-          mapper: PDFTextMapper,
-          matcher: PDFTextMatcher
+          mapper: PDFTextMapper
         }, {
           name: "DOM generic",
           mapper: DomTextMapper,
-          matcher: DomTextMatcher,
           init: function() {
             console.log("initing strategy");
             return _this.domMapper.setRootNode(_this.wrapper[0]);
@@ -887,20 +886,19 @@
           this.strategy = s;
           console.log("Selected document access strategy: " + s.name);
           this.domMapper = new s.mapper();
-          this.domMatcher = new s.matcher(this.domMapper);
-          this.twoPhaseAnchoring = (_ref1 = this.domMapper.requiresTwoPhaseAnchoring) != null ? _ref1 : false;
-          if (this.twoPhaseAnchoring) {
-            this.anchors = {};
-            addEventListener("docPageMapped", function(evt) {
-              return _this._physicallyAnchorPage(evt.pageIndex);
-            });
-            addEventListener("docPageUnmapped", function(evt) {
-              return _this._physicallyUnAnchorPage(evt.pageIndex);
-            });
-          }
+          this.anchors = {};
+          addEventListener("docPageMapped", function(evt) {
+            return _this._physicallyAnchorPage(evt.pageIndex);
+          });
+          addEventListener("docPageUnmapped", function(evt) {
+            return _this._physicallyUnAnchorPage(evt.pageIndex);
+          });
           if (typeof s.init === "function") {
             s.init();
           }
+          this.textFinder = new DomTextMatcher(function() {
+            return _this.domMapper.getCorpus();
+          });
           return this;
         }
       }
@@ -1027,7 +1025,7 @@
         throw new Error("Called getTextQuoteSelector(range) on a range with no valid end.");
       }
       endOffset = (this.domMapper.getInfoForNode(rangeEnd)).end;
-      quote = this.domMapper.getContentForCharRange(startOffset, endOffset);
+      quote = this.domMapper.getCorpus().slice(startOffset, +(endOffset - 1) + 1 || 9e9).trim();
       _ref1 = this.domMapper.getContextForCharRange(startOffset, endOffset), prefix = _ref1[0], suffix = _ref1[1];
       return selector = {
         type: "TextQuoteSelector",
@@ -1098,9 +1096,6 @@
         source: this.getHref(),
         selector: [this.getRangeSelector(range), this.getTextQuoteSelector(range), this.getTextPositionSelector(range)]
       };
-      if (this.twoPhaseAnchoring) {
-        target.selector.shift();
-      }
       return target;
     };
 
@@ -1127,7 +1122,7 @@
     };
 
     Annotator.prototype.findAnchorFromRangeSelector = function(target) {
-      var content, currentQuote, endInfo, endOffset, normalizedRange, savedQuote, selector, startInfo, startOffset;
+      var content, currentQuote, endInfo, endOffset, error, normalizedRange, savedQuote, selector, startInfo, startOffset;
       selector = this.findSelector(target.selector, "RangeSelector");
       if (selector == null) {
         return null;
@@ -1135,16 +1130,20 @@
       if (this.twoPhaseAnchoring) {
         return null;
       }
-      normalizedRange = Range.sniff(selector).normalize(this.wrapper[0]);
+      try {
+        normalizedRange = Range.sniff(selector).normalize(this.wrapper[0]);
+      } catch (_error) {
+        error = _error;
+        return null;
+      }
       startInfo = this.domMapper.getInfoForNode(normalizedRange.start);
       startOffset = startInfo.start;
       endInfo = this.domMapper.getInfoForNode(normalizedRange.end);
       endOffset = endInfo.end;
-      content = this.domMapper.getContentForCharRange(startOffset, endOffset);
+      content = this.domMapper.getCorpus().slice(startOffset, +(endOffset - 1) + 1 || 9e9).trim();
       currentQuote = this.normalizeString(content);
       savedQuote = this.getQuoteForTarget(target);
       if ((savedQuote != null) && currentQuote !== savedQuote) {
-        console.log("Could not apply XPath selector to current document, " + ("because the quote has changed. (Saved quote is '" + savedQuote + "'.") + (" Current quote is '" + currentQuote + "'.)"));
         return null;
       }
       return {
@@ -1154,57 +1153,29 @@
     };
 
     Annotator.prototype.findAnchorFromPositionSelector = function(target) {
-      var browserRanges, content, currentQuote, mappings, normalizedRanges, r, s, savedQuote, selector;
+      var content, currentQuote, savedQuote, selector;
       selector = this.findSelector(target.selector, "TextPositionSelector");
       if (selector == null) {
         return null;
       }
-      content = this.domMapper.getContentForCharRange(selector.start, selector.end);
+      content = this.domMapper.getCorpus().slice(selector.start, +(selector.end - 1) + 1 || 9e9).trim();
       currentQuote = this.normalizeString(content);
       savedQuote = this.getQuoteForTarget(target);
       if ((savedQuote != null) && currentQuote !== savedQuote) {
-        console.log("Could not apply position selector" + (" [" + selector.start + ":" + selector.end + "] to current document,") + " because the quote has changed. " + ("(Saved quote is '" + savedQuote + "'.") + (" Current quote is '" + currentQuote + "'.)"));
         return null;
       }
-      if (this.twoPhaseAnchoring) {
-        return {
-          type: "text",
-          startPage: this.domMapper.getPageIndexForPos(selector.start),
-          endPage: this.domMapper.getPageIndexForPos(selector.end),
-          start: selector.start,
-          end: selector.end,
-          quote: currentQuote
-        };
-      } else {
-        mappings = this.domMapper.getMappingsForCharRange(selector.start, selector.end);
-        browserRanges = (function() {
-          var _k, _len2, _ref1, _results;
-          _ref1 = mappings.sections;
-          _results = [];
-          for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-            s = _ref1[_k];
-            _results.push(new Range.BrowserRange(s.realRange));
-          }
-          return _results;
-        })();
-        normalizedRanges = (function() {
-          var _k, _len2, _results;
-          _results = [];
-          for (_k = 0, _len2 = browserRanges.length; _k < _len2; _k++) {
-            r = browserRanges[_k];
-            _results.push(r.normalize(this.wrapper[0]));
-          }
-          return _results;
-        }).call(this);
-        return {
-          ranges: normalizedRanges,
-          quote: currentQuote
-        };
-      }
+      return {
+        type: "text",
+        startPage: this.domMapper.getPageIndexForPos(selector.start),
+        endPage: this.domMapper.getPageIndexForPos(selector.end),
+        start: selector.start,
+        end: selector.end,
+        quote: currentQuote
+      };
     };
 
     Annotator.prototype.findAnchorWithTwoPhaseFuzzyMatching = function(target) {
-      var browserRanges, expectedEnd, expectedStart, match, normalizedRanges, options, posSelector, prefix, quote, quoteSelector, r, result, s, suffix;
+      var expectedEnd, expectedStart, match, options, posSelector, prefix, quote, quoteSelector, result, suffix;
       quoteSelector = this.findSelector(target.selector, "TextQuoteSelector");
       prefix = quoteSelector != null ? quoteSelector.prefix : void 0;
       suffix = quoteSelector != null ? quoteSelector.suffix : void 0;
@@ -1221,55 +1192,27 @@
         patternMatchThreshold: 0.5,
         flexContext: true
       };
-      result = this.domMatcher.searchFuzzyWithContext(prefix, suffix, quote, expectedStart, expectedEnd, false, options);
+      result = this.textFinder.searchFuzzyWithContext(prefix, suffix, quote, expectedStart, expectedEnd, false, options);
       if (!result.matches.length) {
         console.log("Fuzzy matching did not return any results. Giving up on two-phase strategy.");
         return null;
       }
       match = result.matches[0];
       console.log("2-phase fuzzy found match at: [" + match.start + ":" + match.end + "]: '" + match.found + "' (exact: " + match.exact + ")");
-      if (this.twoPhaseAnchoring) {
-        return {
-          type: "text",
-          start: match.start,
-          end: match.end,
-          startPage: this.domMapper.getPageIndexForPos(match.start),
-          endPage: this.domMapper.getPageIndexForPos(match.end),
-          quote: match.found,
-          diffHTML: !match.exact ? match.comparison.diffHTML : void 0,
-          diffCaseOnly: !match.exact ? match.exactExceptCase : void 0
-        };
-      } else {
-        browserRanges = (function() {
-          var _k, _len2, _ref1, _results;
-          _ref1 = match.sections;
-          _results = [];
-          for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-            s = _ref1[_k];
-            _results.push(new Range.BrowserRange(s.realRange));
-          }
-          return _results;
-        })();
-        normalizedRanges = (function() {
-          var _k, _len2, _results;
-          _results = [];
-          for (_k = 0, _len2 = browserRanges.length; _k < _len2; _k++) {
-            r = browserRanges[_k];
-            _results.push(r.normalize(this.wrapper[0]));
-          }
-          return _results;
-        }).call(this);
-        return {
-          ranges: normalizedRanges,
-          quote: !match.exact ? match.found : void 0,
-          diffHTML: !match.exact ? match.comparison.diffHTML : void 0,
-          diffCaseOnly: !match.exact ? match.exactExceptCase : void 0
-        };
-      }
+      return {
+        type: "text",
+        start: match.start,
+        end: match.end,
+        startPage: this.domMapper.getPageIndexForPos(match.start),
+        endPage: this.domMapper.getPageIndexForPos(match.end),
+        quote: match.found,
+        diffHTML: !match.exact ? match.comparison.diffHTML : void 0,
+        diffCaseOnly: !match.exact ? match.exactExceptCase : void 0
+      };
     };
 
     Annotator.prototype.findAnchorWithFuzzyMatching = function(target) {
-      var browserRanges, expectedStart, len, match, normalizedRanges, options, posSelector, quote, quoteSelector, r, result, s;
+      var expectedStart, len, match, options, posSelector, quote, quoteSelector, result;
       quoteSelector = this.findSelector(target.selector, "TextQuoteSelector");
       quote = quoteSelector != null ? quoteSelector.exact : void 0;
       if (quote == null) {
@@ -1285,51 +1228,23 @@
         matchDistance: len * 2,
         withFuzzyComparison: true
       };
-      result = this.domMatcher.searchFuzzy(quote, expectedStart, false, options);
+      result = this.textFinder.searchFuzzy(quote, expectedStart, false, options);
       if (!result.matches.length) {
         console.log("Fuzzy matching did not return any results. Giving up on one-phase strategy.");
         return null;
       }
       match = result.matches[0];
       console.log("1-phase fuzzy found match at: [" + match.start + ":" + match.end + "]: '" + match.found + "' (exact: " + match.exact + ")");
-      if (this.twoPhaseAnchoring) {
-        return {
-          type: "text",
-          start: match.start,
-          end: match.end,
-          startPage: this.domMapper.getPageIndexForPos(match.start),
-          endPage: this.domMapper.getPageIndexForPos(match.end),
-          quote: match.found,
-          diffHTML: !match.exact ? match.comparison.diffHTML : void 0,
-          diffCaseOnly: !match.exact ? match.exactExceptCase : void 0
-        };
-      } else {
-        browserRanges = (function() {
-          var _k, _len2, _ref1, _results;
-          _ref1 = match.sections;
-          _results = [];
-          for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-            s = _ref1[_k];
-            _results.push(new Range.BrowserRange(s.realRange));
-          }
-          return _results;
-        })();
-        normalizedRanges = (function() {
-          var _k, _len2, _results;
-          _results = [];
-          for (_k = 0, _len2 = browserRanges.length; _k < _len2; _k++) {
-            r = browserRanges[_k];
-            _results.push(r.normalize(this.wrapper[0]));
-          }
-          return _results;
-        }).call(this);
-        return {
-          ranges: normalizedRanges,
-          quote: match.found,
-          diffHTML: !match.exact ? match.comparison.diffHTML : void 0,
-          diffCaseOnly: !match.exact ? match.exactExceptCase : void 0
-        };
-      }
+      return {
+        type: "text",
+        start: match.start,
+        end: match.end,
+        startPage: this.domMapper.getPageIndexForPos(match.start),
+        endPage: this.domMapper.getPageIndexForPos(match.end),
+        quote: match.found,
+        diffHTML: !match.exact ? match.comparison.diffHTML : void 0,
+        diffCaseOnly: !match.exact ? match.exactExceptCase : void 0
+      };
     };
 
     Annotator.prototype.findAnchor = function(target) {

@@ -112,18 +112,17 @@ class Annotator extends Delegator
   # Initializes the components used for analyzing the DOM
   _setupMatching: ->
     if @domMapper? then return
+    @twoPhaseAnchoring = true
 
     strategies = [
       # Strategy to handle PDF documents rendered by PDF.js
       name: "PDF.js"
       mapper: PDFTextMapper
-      matcher: PDFTextMatcher
     ,
       # Default strategy for simple HTML documents.
       # Also the generic fallback.
       name: "DOM generic"
       mapper: DomTextMapper
-      matcher: DomTextMatcher,
       init:  =>
         console.log "initing strategy"
         @domMapper.setRootNode @wrapper[0]
@@ -135,15 +134,13 @@ class Annotator extends Delegator
         @strategy = s
         console.log "Selected document access strategy: " + s.name
         @domMapper = new s.mapper()
-        @domMatcher = new s.matcher @domMapper
-        @twoPhaseAnchoring = @domMapper.requiresTwoPhaseAnchoring ? false
-        if @twoPhaseAnchoring
-          @anchors = {}
-          addEventListener "docPageMapped", (evt) =>
-            @_physicallyAnchorPage evt.pageIndex
-          addEventListener "docPageUnmapped", (evt) =>
-            @_physicallyUnAnchorPage evt.pageIndex
+        @anchors = {}
+        addEventListener "docPageMapped", (evt) =>
+          @_physicallyAnchorPage evt.pageIndex
+        addEventListener "docPageUnmapped", (evt) =>
+          @_physicallyUnAnchorPage evt.pageIndex
         s.init?()
+        @textFinder = new DomTextMatcher => @domMapper.getCorpus()
         return this
 
   # Perform a scan of the DOM. Required for finding anchors.
@@ -279,7 +276,7 @@ class Annotator extends Delegator
     unless rangeEnd?
       throw new Error "Called getTextQuoteSelector(range) on a range with no valid end."
     endOffset = (@domMapper.getInfoForNode rangeEnd).end
-    quote = @domMapper.getContentForCharRange startOffset, endOffset
+    quote = @domMapper.getCorpus()[startOffset .. endOffset-1].trim()
     [prefix, suffix] = @domMapper.getContextForCharRange startOffset, endOffset
     selector =
       type: "TextQuoteSelector"
@@ -361,8 +358,6 @@ class Annotator extends Delegator
         this.getTextQuoteSelector range
         this.getTextPositionSelector range
       ]
-    # For virtual anchoring, the range selector is useless, so drop it
-    if @twoPhaseAnchoring then target.selector.shift()
     target
 
   # Public: Creates and returns a new annotation object. Publishes the
@@ -403,20 +398,25 @@ class Annotator extends Delegator
     return null if @twoPhaseAnchoring
 
     # Try to apply the saved XPath
-    normalizedRange = Range.sniff(selector).normalize @wrapper[0]
+    try
+      normalizedRange = Range.sniff(selector).normalize @wrapper[0]
+    catch error
+      #console.log "Could not apply XPath selector to current document, " +
+      #  "because the structure has changed."
+      return null
     startInfo = @domMapper.getInfoForNode normalizedRange.start
     startOffset = startInfo.start
     endInfo = @domMapper.getInfoForNode normalizedRange.end
     endOffset = endInfo.end
-    content = @domMapper.getContentForCharRange startOffset, endOffset
+    content = @domMapper.getCorpus()[startOffset .. endOffset-1].trim()
     currentQuote = this.normalizeString content
 
     # Look up the saved quote
     savedQuote = this.getQuoteForTarget target
     if savedQuote? and currentQuote isnt savedQuote
-      console.log "Could not apply XPath selector to current document, " +
-        "because the quote has changed. (Saved quote is '#{savedQuote}'." +
-        " Current quote is '#{currentQuote}'.)"
+      #console.log "Could not apply XPath selector to current document, " +
+      #  "because the quote has changed. (Saved quote is '#{savedQuote}'." +
+      #  " Current quote is '#{currentQuote}'.)"
       return null
     ranges: [normalizedRange]
     quote: currentQuote
@@ -426,34 +426,26 @@ class Annotator extends Delegator
   findAnchorFromPositionSelector: (target) ->
     selector = this.findSelector target.selector, "TextPositionSelector"
     unless selector? then return null
-    content = @domMapper.getContentForCharRange selector.start, selector.end
+    content = @domMapper.getCorpus()[selector.start .. selector.end-1].trim()
     currentQuote = this.normalizeString content
     savedQuote = this.getQuoteForTarget target
     if savedQuote? and currentQuote isnt savedQuote
       # We have a saved quote, let's compare it to current content
-      console.log "Could not apply position selector" +
-        " [#{selector.start}:#{selector.end}] to current document," +
-        " because the quote has changed. " +
-        "(Saved quote is '#{savedQuote}'." +
-        " Current quote is '#{currentQuote}'.)"
+      #console.log "Could not apply position selector" +
+      #  " [#{selector.start}:#{selector.end}] to current document," +
+      #  " because the quote has changed. " +
+      #  "(Saved quote is '#{savedQuote}'." +
+      #  " Current quote is '#{currentQuote}'.)"
       return null
 
     # OK, we have everything.
-    if @twoPhaseAnchoring
-      # Compile the data required to store this virtual anchor
-      type: "text"
-      startPage: @domMapper.getPageIndexForPos selector.start
-      endPage: @domMapper.getPageIndexForPos selector.end
-      start: selector.start
-      end: selector.end
-      quote: currentQuote
-    else
-      # Create a range from this.
-      mappings = @domMapper.getMappingsForCharRange selector.start, selector.end
-      browserRanges = ((new Range.BrowserRange s.realRange) for s in mappings.sections)
-      normalizedRanges = (r.normalize(@wrapper[0]) for r in browserRanges)
-      ranges: normalizedRanges
-      quote: currentQuote
+    # Compile the data required to store this virtual anchor
+    type: "text"
+    startPage: @domMapper.getPageIndexForPos selector.start
+    endPage: @domMapper.getPageIndexForPos selector.end
+    start: selector.start
+    end: selector.end
+    quote: currentQuote
 
   findAnchorWithTwoPhaseFuzzyMatching: (target) ->
     # Fetch the quote and the context
@@ -475,7 +467,7 @@ class Annotator extends Delegator
       contextMatchThreshold: 0.5
       patternMatchThreshold: 0.5
       flexContext: true
-    result = @domMatcher.searchFuzzyWithContext prefix, suffix, quote,
+    result = @textFinder.searchFuzzyWithContext prefix, suffix, quote,
       expectedStart, expectedEnd, false, options
 
     # If we did not got a result, give up
@@ -489,26 +481,15 @@ class Annotator extends Delegator
       match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
 
     # OK, we have everything
-    if @twoPhaseAnchoring
-      # Compile the data required to store this virtual anchor
-      type: "text"
-      start: match.start
-      end: match.end
-      startPage: @domMapper.getPageIndexForPos match.start
-      endPage: @domMapper.getPageIndexForPos match.end
-      quote: match.found
-      diffHTML: unless match.exact then match.comparison.diffHTML
-      diffCaseOnly: unless match.exact then match.exactExceptCase
-    else
-      # convert it to a Range
-      browserRanges = ((new Range.BrowserRange s.realRange) for s in match.sections)
-      normalizedRanges = (r.normalize(@wrapper[0]) for r in browserRanges)
-
-      # return the anchor
-      ranges: normalizedRanges
-      quote: unless match.exact then match.found
-      diffHTML: unless match.exact then match.comparison.diffHTML
-      diffCaseOnly: unless match.exact then match.exactExceptCase
+    # Compile the data required to store this virtual anchor
+    type: "text"
+    start: match.start
+    end: match.end
+    startPage: @domMapper.getPageIndexForPos match.start
+    endPage: @domMapper.getPageIndexForPos match.end
+    quote: match.found
+    diffHTML: unless match.exact then match.comparison.diffHTML
+    diffCaseOnly: unless match.exact then match.exactExceptCase
 
   findAnchorWithFuzzyMatching: (target) ->
     # Fetch the quote
@@ -532,7 +513,7 @@ class Annotator extends Delegator
     options =
       matchDistance: len * 2
       withFuzzyComparison: true
-    result = @domMatcher.searchFuzzy quote, expectedStart, false, options
+    result = @textFinder.searchFuzzy quote, expectedStart, false, options
 
     # If we did not got a result, give up
     unless result.matches.length
@@ -545,25 +526,15 @@ class Annotator extends Delegator
       match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
 
     # OK, we have everything
-    if @twoPhaseAnchoring
-      # Compile the data required to store this virtual anchor
-      type: "text"
-      start: match.start
-      end: match.end
-      startPage: @domMapper.getPageIndexForPos match.start
-      endPage: @domMapper.getPageIndexForPos match.end
-      quote: match.found
-      diffHTML: unless match.exact then match.comparison.diffHTML
-      diffCaseOnly: unless match.exact then match.exactExceptCase
-    else
-      # convert it to a Range
-      browserRanges = ((new Range.BrowserRange s.realRange) for s in match.sections)
-      normalizedRanges = (r.normalize(@wrapper[0]) for r in browserRanges)
-      # return the anchor
-      ranges: normalizedRanges
-      quote: match.found
-      diffHTML: unless match.exact then match.comparison.diffHTML
-      diffCaseOnly: unless match.exact then match.exactExceptCase
+    # Compile the data required to store this virtual anchor
+    type: "text"
+    start: match.start
+    end: match.end
+    startPage: @domMapper.getPageIndexForPos match.start
+    endPage: @domMapper.getPageIndexForPos match.end
+    quote: match.found
+    diffHTML: unless match.exact then match.comparison.diffHTML
+    diffCaseOnly: unless match.exact then match.exactExceptCase
 
   # Try to find the right anchoring point for a given target
   #

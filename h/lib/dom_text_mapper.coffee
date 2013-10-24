@@ -240,24 +240,16 @@ class window.DomTextMapper
     path ?= @getDefaultPath()
     @path[path].length
 
-  getDocLength: -> @getLengthForPath()
+  getDocLength: -> @_corpus.length
 
   getCorpus: -> @_corpus
 
-  # Return a given charRange of the rendered value of a part of the dom.
-  # If path is not given, the default path is used.
-  getContentForCharRange: (start, end, path = null) ->
-    text = @getContentForPath(path).substr start, end - start
-    text.trim()
-
   # Get the context that encompasses the given charRange
   # in the rendered text of the document
-  getContextForCharRange: (start, end, path = null) ->
-    content = @getContentForPath path
+  getContextForCharRange: (start, end) ->
     prefixStart = Math.max 0, start - CONTEXT_LEN
-    prefixLen = start - prefixStart
-    prefix = content.substr prefixStart, prefixLen
-    suffix = content.substr end, prefixLen
+    prefix = @_corpus[prefixStart .. start - 1]
+    suffix = @_corpus[end .. end + CONTEXT_LEN - 1]
     [prefix.trim(), suffix.trim()]
         
   # Get the matching DOM elements for a given charRange
@@ -376,10 +368,10 @@ class window.DomTextMapper
   timestamp: -> new Date().getTime()
 
   stringStartsWith: (string, prefix) ->
-    prefix is string.substr 0, prefix.length
+    string[ 0 .. prefix.length - 1 ] is prefix
 
   stringEndsWith: (string, suffix) ->
-    suffix is string.substr string.length - suffix.length
+    string[ string.length - suffix.length .. string.length ] is suffix
 
   parentPath: (path) -> path.substr 0, path.lastIndexOf "/"
 
@@ -733,3 +725,9 @@ class window.DomTextMapper
       ok
 
     null
+
+  # Fake two-phase / pagination support, used for HTML documents
+  getPageIndex: -> 0
+  getPageCount: -> 1
+  getPageIndexForPos: -> 0
+  isPageMapped: -> true
