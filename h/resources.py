@@ -231,15 +231,10 @@ class Stream(BaseResource, dict):
 
 class UserStreamFactory(BaseResource):
     def __getitem__(self, key):
-        #Check if user exists
         request = self.request
-        registry = request.registry
-        User = registry.getUtility(interfaces.IUserClass)
-        user = User.get_by_username(request, key)
         request.stream_type = 'user'
         request.stream_key = key
-        if user is not None:
-            return Stream(request)
+        return Stream(request)
 
 
 class TagStreamFactory(BaseResource):
