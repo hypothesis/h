@@ -153,7 +153,7 @@ class Annotator.Guest extends Annotator
             @panel?.notify method: 'back'
     this._setupMatching()
     if @strategy.name is "DOM generic"
-       @domMatcher.setRootNode @wrapper[0]
+       @domMapper.setRootNode @wrapper[0]
     this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.

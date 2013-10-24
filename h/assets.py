@@ -191,11 +191,9 @@ uuid = Uglify('lib/uuid.js', output='lib/uuid.min.js')
 
 domTextFamily = Uglify(
     Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
-    Coffee('lib/matcher_core.coffee', output='js/matcher_core.js'),
     Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
     Coffee('lib/page_text_mapper_core.coffee', output='js/page_text_mapper_core.js'),
     Coffee('lib/pdf_text_mapper.coffee', output='js/pdf_text_mapper.js'),
-    Coffee('lib/pdf_text_matcher.coffee', output='js/pdf_text_matcher.js'),
     Coffee('lib/text_match_engines.coffee', output='js/text_match_engines.js'),
     Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js'),
     output='lib/dom_text.min.js'
