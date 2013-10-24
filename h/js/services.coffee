@@ -173,6 +173,7 @@ class Hypothesis extends Annotator
 
     # Track the visible annotations in the root scope
     $rootScope.annotations = []
+    $rootScope.search_annotations = []
 
     # Add new annotations to the view when they are created
     this.subscribe 'annotationCreated', (a) =>
@@ -182,6 +183,7 @@ class Hypothesis extends Annotator
     # Remove annotations from the application when they are deleted
     this.subscribe 'annotationDeleted', (a) =>
       $rootScope.annotations = $rootScope.annotations.filter (b) -> b isnt a
+      $rootScope.search_annotations = $rootScope.search_annotations.filter (b) -> b.message?
 
   _setupXDM: (options) ->
     $rootScope = @element.injector().get '$rootScope'

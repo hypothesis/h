@@ -715,8 +715,8 @@ class Viewer
           params: annotation.$$tag
 
 class Search
-  this.$inject = ['$filter', '$location', '$routeParams', '$scope', 'annotator']
-  constructor: ($filter, $location, $routeParams, $scope, annotator) ->
+  this.$inject = ['$filter', '$location', '$rootScope', '$routeParams', '$scope', 'annotator']
+  constructor: ($filter, $location, $rootScope, $routeParams, $scope, annotator) ->
     {providers, threading} = annotator
 
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
@@ -824,7 +824,7 @@ class Search
                 break
 
           if top_match
-            threads.push top_match
+            threads.push top_thread
             $scope.render_order[top_match.id] = []
             buildRenderOrder(top_match.id, [top_thread])
           else
@@ -911,7 +911,7 @@ class Search
             hidden += 1
         if last_shown? then $scope.ann_info.more_bottom_num[last_shown] = hidden
 
-
+      $rootScope.search_annotations = threads
       $scope.threads = threads
 
     $scope.$on '$routeUpdate', refresh
