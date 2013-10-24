@@ -156,6 +156,11 @@ class Annotator extends Delegator
 
   # Initializes the available physical anchoring strategies
   _setupPhysicalAnchoringStrategies: ->
+    @physicalAnchoringStrategies = [
+      # Simple strategy for anchoring annotations to text ranges
+      name: "Text range"
+      code: this._physicallyAnchorToTextRange
+    ]
 
   # Perform a scan of the DOM. Required for finding anchors.
   _scan: ->
@@ -457,7 +462,7 @@ class Annotator extends Delegator
 
     # OK, we have everything.
     # Compile the data required to store this virtual anchor
-    type: "text"
+    type: "text range"
     startPage: @domMapper.getPageIndexForPos selector.start
     endPage: @domMapper.getPageIndexForPos selector.end
     start: selector.start
@@ -1013,12 +1018,24 @@ class Annotator extends Delegator
   _physicallyAnchor: (anchor) ->
     return if anchor.allRendered # If we have everything, go home
 
-    # TODO: add proper strategies support here.
-    this._physicallyAnchorText anchor
+    for s in @physicalAnchoringStrategies
+      status = s.code.call this, anchor
+#      console.log "Trying to apply Phyisical anchoring strategy '" + s.name + "' ..."
+      if status
+#        console.log "Successfully anchored the annotation to the document."
+        return
+      else
+#        console.log "Failure: strategy '" + s.name + "' could not handle this virtual anchor:"
+#        console.log anchor.virtual
+    console.log "Could not find any physical anchoring strategy that could handle this virtual anchor:"
+    console.log anchor.virtual
 
-  _physicallyAnchorText: (anchor) ->
+  _physicallyAnchorToTextRange: (anchor) ->
     vAnchor = anchor.virtual
     pAnchor = anchor.physical
+
+    # This strategy is only for "text range" - type virtual anchors.
+    return unless vAnchor.type is "text range"
 
     # Collect the pages that are already rendered
     renderedPages = [vAnchor.startPage .. vAnchor.endPage].filter (index) =>

@@ -45,17 +45,17 @@ class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
 
     # If we did not got a result, give up
     unless result.matches.length
-      console.log "Fuzzy matching did not return any results. Giving up on two-phase strategy."
+ #     console.log "Fuzzy matching did not return any results. Giving up on two-phase strategy."
       return null
 
     # here is our result
     match = result.matches[0]
-    console.log "2-phase fuzzy found match at: [" + match.start + ":" +
-      match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
+#    console.log "2-phase fuzzy found match at: [" + match.start + ":" +
+#      match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
 
     # OK, we have everything
     # Compile the data required to store this virtual anchor
-    type: "text"
+    type: "text range"
     start: match.start
     end: match.end
     startPage: @annotator.domMapper.getPageIndexForPos match.start
@@ -90,17 +90,17 @@ class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
 
     # If we did not got a result, give up
     unless result.matches.length
-      console.log "Fuzzy matching did not return any results. Giving up on one-phase strategy."
+#      console.log "Fuzzy matching did not return any results. Giving up on one-phase strategy."
       return null
 
     # here is our result
     match = result.matches[0]
-    console.log "1-phase fuzzy found match at: [" + match.start + ":" +
-      match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
+#    console.log "1-phase fuzzy found match at: [" + match.start + ":" +
+#      match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
 
     # OK, we have everything
     # Compile the data required to store this virtual anchor
-    type: "text"
+    type: "text range"
     start: match.start
     end: match.end
     startPage: @annotator.domMapper.getPageIndexForPos match.start
