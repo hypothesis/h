@@ -1502,7 +1502,14 @@ diff_match_patch.prototype.match_bitap_ = function(text, pattern, loc) {
     var start = Math.max(1, loc - bin_mid + 1);
     var finish = Math.min(loc + bin_mid, text.length) + pattern.length;
 
-    var rd = Array(finish + 2);
+    try {
+      var rd = Array(finish + 2);
+    } catch (ex) {
+      // This is probably caused by a Chrome bug, fixed in v30
+      // See https://code.google.com/p/v8/issues/detail?id=2790
+      window.alert("Please update to Chrome 30 or better.");
+      throw new Error("Failed to create array for " + (finish + 2) + " elements!");
+    }
     rd[finish + 1] = (1 << d) - 1;
     for (var j = finish; j >= start; j--) {
       // The alphabet (s) is a sparse hash, so the following line generates
