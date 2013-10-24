@@ -35,6 +35,7 @@ configure = [
         'self'
         '.*'
       ]
+]
 
 
 angular.module('h', imports, configure)
