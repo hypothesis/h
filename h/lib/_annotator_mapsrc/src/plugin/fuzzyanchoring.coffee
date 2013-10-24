@@ -55,7 +55,7 @@ class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
 
     # OK, we have everything
     # Compile the data required to store this virtual anchor
-    type: "text range"
+    type: "text position"
     start: match.start
     end: match.end
     startPage: @annotator.domMapper.getPageIndexForPos match.start
@@ -100,7 +100,7 @@ class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
 
     # OK, we have everything
     # Compile the data required to store this virtual anchor
-    type: "text range"
+    type: "text position"
     start: match.start
     end: match.end
     startPage: @annotator.domMapper.getPageIndexForPos match.start

@@ -157,9 +157,9 @@ class Annotator extends Delegator
   # Initializes the available physical anchoring strategies
   _setupPhysicalAnchoringStrategies: ->
     @physicalAnchoringStrategies = [
-      # Simple strategy for anchoring annotations to text ranges
-      name: "Text range"
-      code: this._physicallyAnchorToTextRange
+      # Simple strategy for anchoring annotations to text positions
+      name: "Text position"
+      code: this._physicallyAnchorToTextPosition
     ]
 
   # Perform a scan of the DOM. Required for finding anchors.
@@ -416,9 +416,6 @@ class Annotator extends Delegator
     selector = this.findSelector target.selector, "RangeSelector"
     return null unless selector?
 
-    # Can't do virtual anchoring with a RangeSelector.
-    return null # TODO
-
     # Try to apply the saved XPath
     try
       normalizedRange = Range.sniff(selector).normalize @wrapper[0]
@@ -440,7 +437,13 @@ class Annotator extends Delegator
       #  "because the quote has changed. (Saved quote is '#{savedQuote}'." +
       #  " Current quote is '#{currentQuote}'.)"
       return null
-    ranges: [normalizedRange]
+
+    # Create a "text poision"-type virtual anchor from this range
+    type: "text position"
+    startPage: 0
+    start: (@domMapper.getInfoForNode normalizedRange.start).start
+    endPage: 0
+    end: (@domMapper.getInfoForNode normalizedRange.end).end
     quote: currentQuote
 
   # Try to determine the anchor position for a target
@@ -462,7 +465,7 @@ class Annotator extends Delegator
 
     # OK, we have everything.
     # Compile the data required to store this virtual anchor
-    type: "text range"
+    type: "text position"
     startPage: @domMapper.getPageIndexForPos selector.start
     endPage: @domMapper.getPageIndexForPos selector.end
     start: selector.start
@@ -1030,12 +1033,12 @@ class Annotator extends Delegator
     console.log "Could not find any physical anchoring strategy that could handle this virtual anchor:"
     console.log anchor.virtual
 
-  _physicallyAnchorToTextRange: (anchor) ->
+  _physicallyAnchorToTextPosition: (anchor) ->
     vAnchor = anchor.virtual
     pAnchor = anchor.physical
 
-    # This strategy is only for "text range" - type virtual anchors.
-    return unless vAnchor.type is "text range"
+    # This strategy is only for "text position" - type virtual anchors.
+    return unless vAnchor.type is "text position"
 
     # Collect the pages that are already rendered
     renderedPages = [vAnchor.startPage .. vAnchor.endPage].filter (index) =>
@@ -1066,6 +1069,7 @@ class Annotator extends Delegator
 
       # Add the newly mapped page to the physical anchor
       pAnchor[page] =
+        type: "range"
         range: serializedRange
         highlights: highlights
 
