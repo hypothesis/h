@@ -112,7 +112,6 @@ class Annotator extends Delegator
   # Initializes the components used for analyzing the DOM
   _setupMatching: ->
     if @domMapper? then return
-    @twoPhaseAnchoring = true
 
     strategies = [
       # Strategy to handle PDF documents rendered by PDF.js
@@ -395,7 +394,7 @@ class Annotator extends Delegator
     return null unless selector?
 
     # Can't do virtual anchoring with a RangeSelector.
-    return null if @twoPhaseAnchoring
+    return null # TODO
 
     # Try to apply the saved XPath
     try
@@ -624,36 +623,32 @@ class Annotator extends Delegator
         if error instanceof Range.RangeError
           this.publish('rangeNormalizeFail', [annotation, error.range, error])
         if anchor?
-          t.quote = anchor.quote
+          annotation.quote.push t.quote = anchor.quote
+          delete anchor.quote
           t.diffHTML = anchor.diffHTML
+          delete anchor.diffHTML
           t.diffCaseOnly = anchor.diffCaseOnly
-          annotation.quote.push t.quote
-          if @twoPhaseAnchoring
-            delete anchor.quote
-            delete anchor.diffHTML
-            delete anchor.diffCaseOnly
+          delete anchor.diffCaseOnly
 
-            vAnchor = anchor
-            # Create a new anchor object, starting with a virtual anchor
-            anchor =
-              annotation: annotation
-              target: t
-              virtual: anchor
-              physical: {}
+          vAnchor = anchor
+          # Create a new anchor object, starting with a virtual anchor
+          anchor =
+            annotation: annotation
+            target: t
+            virtual: anchor
+            physical: {}
 
-            # Store this anchor for the annotation
-            annotation.anchors.push anchor
+          # Store this anchor for the annotation
+          annotation.anchors.push anchor
 
-            # Store the anchor for all involved pages
-            for pageIndex in [vAnchor.startPage .. vAnchor.endPage]
-              @anchors[pageIndex] ?= []
-              @anchors[pageIndex].push anchor
+          # Store the anchor for all involved pages
+          for pageIndex in [vAnchor.startPage .. vAnchor.endPage]
+            @anchors[pageIndex] ?= []
+            @anchors[pageIndex].push anchor
 
-            # Schedule the physical anchoring
-            setTimeout => this._physicallyAnchor anchor
+          # Schedule the physical anchoring
+          setTimeout => this._physicallyAnchor anchor
 
-          else
-            $.merge normedRanges, anchor.ranges
         else
           console.log "Could not find anchor target for annotation '" +
               annotation.id + "'."

@@ -150,17 +150,15 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     above = []
     below = []
 
-    # Are we using virtual anchoring?
-    if @annotator.twoPhaseAnchoring
-      # Get the page numbers
-      mapper = @annotator.domMapper
-      firstPage = 0
-      currentPage = mapper.getPageIndex()
-      lastPage = mapper.getPageCount() - 1
+    # Get the page numbers
+    mapper = @annotator.domMapper
+    firstPage = 0
+    currentPage = mapper.getPageIndex()
+    lastPage = mapper.getPageCount() - 1
 
-      # Collect the pending virtual anchors from above and below
-      $.merge above, this._collectPendingVirtualAnnotations 0, currentPage-1
-      $.merge below, this._collectPendingVirtualAnnotations currentPage+1, lastPage
+    # Collect the pending virtual anchors from above and below
+    $.merge above, this._collectPendingVirtualAnnotations 0, currentPage-1
+    $.merge below, this._collectPendingVirtualAnnotations currentPage+1, lastPage
 
     comments = @annotator.comments.slice()
 
@@ -363,22 +361,22 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         d3.event.stopPropagation()
         pad = defaultView.innerHeight * .2
 
-        # If it's the upper tab, scroll to next bucket above (direct version)
-        if (@isUpper bucket) and not @annotator.twoPhaseAnchoring
-          threshold = defaultView.pageYOffset
-          highlights = wrapper.find('.annotator-hl')
-          {next} = highlights.toArray().reduce (acc, hl) ->
-            {pos, next} = acc
-            if pos < $(hl).offset().top < threshold
-              pos: $(hl).offset().top
-              next: $(hl)
-            else
-              acc
-          , {pos: 0, next: null}
-          this._scrollUpTo next, true
-
+#        # If it's the upper tab, scroll to next bucket above (direct version)
+#        if (@isUpper bucket) and not @annotator.twoPhaseAnchoring
+#          threshold = defaultView.pageYOffset
+#          highlights = wrapper.find('.annotator-hl')
+#          {next} = highlights.toArray().reduce (acc, hl) ->
+#            {pos, next} = acc
+#            if pos < $(hl).offset().top < threshold
+#              pos: $(hl).offset().top
+#              next: $(hl)
+#            else
+#              acc
+#          , {pos: 0, next: null}
+#          this._scrollUpTo next, true
+#
         # If it's the upper tab, scroll to next bucket above (virtual version)
-        else if (@isUpper bucket) and @annotator.twoPhaseAnchoring
+        if (@isUpper bucket) #and @annotator.twoPhaseAnchoring
           # Find the next annotation, based on character position
           {next} = @buckets[bucket].reduce (acc, ann) ->
             {start, next} = acc
@@ -399,22 +397,22 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
               page: startPage
             @annotator.domMapper.setPageIndex startPage
 
-        # If it's the lower tab, scroll to next bucket below (direct version)
-        else if (@isLower bucket) and not @annotator.twoPhaseAnchoring
-          threshold = defaultView.pageYOffset + defaultView.innerHeight - pad
-          highlights = wrapper.find('.annotator-hl')
-          {next} = highlights.toArray().reduce (acc, hl) ->
-            {pos, next} = acc
-            if threshold < $(hl).offset().top < pos
-              pos: $(hl).offset().top
-              next: $(hl)
-            else
-              acc
-          , {pos: Number.MAX_VALUE, next: null}
-          this._scrollDownTo next
+#        # If it's the lower tab, scroll to next bucket below (direct version)
+#        else if (@isLower bucket) and not @annotator.twoPhaseAnchoring
+#          threshold = defaultView.pageYOffset + defaultView.innerHeight - pad
+#          highlights = wrapper.find('.annotator-hl')
+#          {next} = highlights.toArray().reduce (acc, hl) ->
+#            {pos, next} = acc
+#            if threshold < $(hl).offset().top < pos
+#              pos: $(hl).offset().top
+#              next: $(hl)
+#            else
+#              acc
+#          , {pos: Number.MAX_VALUE, next: null}
+#          this._scrollDownTo next
 
         # If it's the lower tab, scroll to next bucket below (virtual version)
-        else if (@isLower bucket) and @annotator.twoPhaseAnchoring
+        else if (@isLower bucket) # and @annotator.twoPhaseAnchoring
           # Find the next annotation, based on character position
           {next} = @buckets[bucket].reduce (acc, ann) ->
             {start, next} = acc
