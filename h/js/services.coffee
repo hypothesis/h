@@ -65,6 +65,7 @@ class Hypothesis extends Annotator
      authentication,   drafts
   ) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
+    @role = "sidebar"
     super ($document.find 'body')
 
     # Generate client ID

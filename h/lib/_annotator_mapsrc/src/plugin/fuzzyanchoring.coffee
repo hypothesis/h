@@ -2,8 +2,6 @@
 class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
 
   pluginInit: ->
-    console.log "Initiated fuzzy anchoring plugin/"
-
     # Initialize the text matcher library
     @textFinder = new DomTextMatcher => @annotator.domMapper.getCorpus()
 

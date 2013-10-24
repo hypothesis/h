@@ -99,7 +99,7 @@ class Annotator extends Delegator
     return this unless Annotator.supported()
     this._setupDocumentEvents() unless @options.readOnly
     this._setupWrapper()
-    this._setupMatching() unless @options.noMatching
+    this._setupDocumentAccessStrategies() unless @options.noMatching
     this._setupVirtualAnchoringStrategies()
     this._setupPhysicalAnchoringStrategies()
     this._setupViewer()._setupEditor()
@@ -111,28 +111,25 @@ class Annotator extends Delegator
     # Create adder
     this.adder = $(this.html.adder).appendTo(@wrapper).hide()
 
-  # Initializes the components used for analyzing the document
-  _setupMatching: ->
-    if @domMapper? then return
-
-    strategies = [
-      # Strategy to handle PDF documents rendered by PDF.js
-      name: "PDF.js"
-      mapper: PDFTextMapper
-    ,
+  # Initializes the available document access strategies
+  _setupDocumentAccessStrategies: ->
+    @documentAccessStrategies = [
       # Default strategy for simple HTML documents.
       # Also the generic fallback.
       name: "DOM generic"
       mapper: DomTextMapper
-      init:  =>
-        console.log "initing strategy"
-        @domMapper.setRootNode @wrapper[0]
+      init: => @domMapper.setRootNode @wrapper[0]
     ]
 
+  # Initializes the components used for analyzing the document
+  _setupMapper: ->
+    if @domMapper? then return
+
     # Go over the available strategies
-    for s in strategies
-      if s.mapper.applicable() # Can we use this strategy for this document?
-        @strategy = s
+    for s in @documentAccessStrategies
+      # Can we use this strategy for this document?
+      if s.mapper.applicable()
+        @documentAccessStrategy = s
         console.log "Selected document access strategy: " + s.name
         @domMapper = new s.mapper()
         @anchors = {}
@@ -162,6 +159,9 @@ class Annotator extends Delegator
 
   # Perform a scan of the DOM. Required for finding anchors.
   _scan: ->
+    unless @domMapper     # If we haven't yet created a document mapper,
+      this._setupMapper() # do so now.
+
     @pendingScan = @domMapper.scan()
 
   # Wraps the children of @element in a @wrapper div. NOTE: This method will also

@@ -13,6 +13,7 @@ class Annotator.Guest extends Annotator
   # Plugin configuration
   options:
     FuzzyAnchoring: {}
+    PDF: {}
     Document: {}
 
   # Internal state
@@ -23,13 +24,14 @@ class Annotator.Guest extends Annotator
   constructor: (element, options) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
 
+    @role = "guest"
+
     options.noScan = true
     super
     delete @options.noScan
 
     # Create an array for holding the comments
     @comments = []
-    @role = "guest"
 
     @frame = $('<div></div>')
     .appendTo(@wrapper)
@@ -152,9 +154,6 @@ class Annotator.Guest extends Annotator
         setTimeout =>
           unless @selectedRanges?.length
             @panel?.notify method: 'back'
-    this._setupMatching()
-    if @strategy.name is "DOM generic"
-       @domMapper.setRootNode @wrapper[0]
     this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
