@@ -76,7 +76,9 @@ def CSS(*names, **kw):
 gettext = Uglify('lib/gettext.js', output='lib/gettext.min.js')
 
 # Annotator
-annotator = Uglify('lib/annotator.js', output='lib/annotator.min.js')
+annotator = Uglify(
+    'lib/annotator.js', output='lib/annotator.min.js'
+)
 annotator_auth = Uglify(
     'lib/annotator.auth.js',
     output='lib/annotator.auth.min.js'
@@ -104,6 +106,13 @@ annotator_store = Uglify(
 annotator_document = Uglify(
     'lib/annotator.document.js',
     output='lib/annotator.document.min.js'
+)
+annotator_fuzzy = Uglify(
+    Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js'),
+    Coffee('lib/text_match_engines.coffee', output='js/text_match_engines.js'),
+    Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),    
+    'lib/annotator.fuzzyanchoring.js',
+    output='lib/annotator.fuzzyanchoring.min.js'
 )
 annotator_threading = Uglify(
     Coffee('js/plugin/threading.coffee', output='js/plugin/threading.js')
@@ -191,11 +200,8 @@ uuid = Uglify('lib/uuid.js', output='lib/uuid.min.js')
 
 domTextFamily = Uglify(
     Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
-    Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
     Coffee('lib/page_text_mapper_core.coffee', output='js/page_text_mapper_core.js'),
     Coffee('lib/pdf_text_mapper.coffee', output='js/pdf_text_mapper.js'),
-    Coffee('lib/text_match_engines.coffee', output='js/text_match_engines.js'),
-    Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js'),
     output='lib/dom_text.min.js'
 )
 
@@ -283,6 +289,7 @@ inject = Bundle(
     annotator_bridge,
     annotator_document,
     annotator_heatmap,
+    annotator_fuzzy,
     annotator_toolbar,
     Uglify(
         Coffee('js/guest.coffee', output='js/guest.js'),

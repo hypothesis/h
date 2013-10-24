@@ -100,6 +100,8 @@ class Annotator extends Delegator
     this._setupDocumentEvents() unless @options.readOnly
     this._setupWrapper()
     this._setupMatching() unless @options.noMatching
+    this._setupVirtualAnchoringStrategies()
+    this._setupPhysicalAnchoringStrategies()
     this._setupViewer()._setupEditor()
     this._setupDynamicStyle()
 
@@ -109,7 +111,7 @@ class Annotator extends Delegator
     # Create adder
     this.adder = $(this.html.adder).appendTo(@wrapper).hide()
 
-  # Initializes the components used for analyzing the DOM
+  # Initializes the components used for analyzing the document
   _setupMatching: ->
     if @domMapper? then return
 
@@ -139,8 +141,24 @@ class Annotator extends Delegator
         addEventListener "docPageUnmapped", (evt) =>
           @_physicallyUnAnchorPage evt.pageIndex
         s.init?()
-        @textFinder = new DomTextMatcher => @domMapper.getCorpus()
         return this
+
+  # Initializes the available virtual anchoring strategies
+  _setupVirtualAnchoringStrategies: ->
+    @virtualAnchoringStrategies = [
+      # Simple strategy based on DOM Range
+      name: "range"
+      code: this.findAnchorFromRangeSelector
+    ,
+      # Position-based strategy. (The quote is verified.)
+      # This can handle document structure changes,
+      # but not the content changes.
+      name: "position"
+      code: this.findAnchorFromPositionSelector
+    ]
+
+  # Initializes the available physical anchoring strategies
+  _setupPhysicalAnchoringStrategies: ->
 
   # Perform a scan of the DOM. Required for finding anchors.
   _scan: ->
@@ -446,95 +464,6 @@ class Annotator extends Delegator
     end: selector.end
     quote: currentQuote
 
-  findAnchorWithTwoPhaseFuzzyMatching: (target) ->
-    # Fetch the quote and the context
-    quoteSelector = this.findSelector target.selector, "TextQuoteSelector"
-    prefix = quoteSelector?.prefix
-    suffix = quoteSelector?.suffix
-    quote = quoteSelector?.exact
-
-    # No context, to joy
-    unless (prefix? and suffix?) then return null
-
-    # Fetch the expected start and end positions
-    posSelector = this.findSelector target.selector, "TextPositionSelector"
-    expectedStart = posSelector?.start
-    expectedEnd = posSelector?.end
-
-    options =
-      contextMatchDistance: @domMapper.getDocLength() * 2
-      contextMatchThreshold: 0.5
-      patternMatchThreshold: 0.5
-      flexContext: true
-    result = @textFinder.searchFuzzyWithContext prefix, suffix, quote,
-      expectedStart, expectedEnd, false, options
-
-    # If we did not got a result, give up
-    unless result.matches.length
-      console.log "Fuzzy matching did not return any results. Giving up on two-phase strategy."
-      return null
-
-    # here is our result
-    match = result.matches[0]
-    console.log "2-phase fuzzy found match at: [" + match.start + ":" +
-      match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
-
-    # OK, we have everything
-    # Compile the data required to store this virtual anchor
-    type: "text"
-    start: match.start
-    end: match.end
-    startPage: @domMapper.getPageIndexForPos match.start
-    endPage: @domMapper.getPageIndexForPos match.end
-    quote: match.found
-    diffHTML: unless match.exact then match.comparison.diffHTML
-    diffCaseOnly: unless match.exact then match.exactExceptCase
-
-  findAnchorWithFuzzyMatching: (target) ->
-    # Fetch the quote
-    quoteSelector = this.findSelector target.selector, "TextQuoteSelector"
-    quote = quoteSelector?.exact
-
-    # No quote, no joy
-    unless quote? then return null
-
-    # Get a starting position for the search
-    posSelector = this.findSelector target.selector, "TextPositionSelector"
-    expectedStart = posSelector?.start
-
-    # Get full document length
-    len = this.domMapper.getDocLength()
-
-    # If we don't have the position saved, start at the middle of the doc
-    expectedStart ?= len / 2
-
-    # Do the fuzzy search
-    options =
-      matchDistance: len * 2
-      withFuzzyComparison: true
-    result = @textFinder.searchFuzzy quote, expectedStart, false, options
-
-    # If we did not got a result, give up
-    unless result.matches.length
-      console.log "Fuzzy matching did not return any results. Giving up on one-phase strategy."
-      return null
-
-    # here is our result
-    match = result.matches[0]
-    console.log "1-phase fuzzy found match at: [" + match.start + ":" +
-      match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
-
-    # OK, we have everything
-    # Compile the data required to store this virtual anchor
-    type: "text"
-    start: match.start
-    end: match.end
-    startPage: @domMapper.getPageIndexForPos match.start
-    endPage: @domMapper.getPageIndexForPos match.end
-    quote: match.found
-    diffHTML: unless match.exact then match.comparison.diffHTML
-    diffCaseOnly: unless match.exact then match.exactExceptCase
-
   # Try to find the right anchoring point for a given target
   #
   # Returns a normalized range if succeeded, null otherwise
@@ -544,33 +473,9 @@ class Annotator extends Delegator
 #    console.log "Trying to find anchor for target: "
 #    console.log target
 
-    strategies = [
-      # Simple strategy based on DOM Range
-      name: "range"
-      code: this.findAnchorFromRangeSelector
-    ,
-      # Position-based strategy. (The quote is verified.)
-      # This can handle document structure changes,
-      # but not the content changes.
-      name: "position"
-      code: this.findAnchorFromPositionSelector
-    ,
-      # Two-phased fuzzy text matching strategy. (Using context and quote.)
-      # This can handle document structure changes,
-      # and also content changes.
-      name: "two-phase fuzzy"
-      code: this.findAnchorWithTwoPhaseFuzzyMatching
-    ,
-      # Naive fuzzy text matching strategy. (Using only the quote.)
-      # This can handle document structure changes,
-      # and also content changes.
-      name: "one-phase fuzzy"
-      code: this.findAnchorWithFuzzyMatching
-    ]
-
     error = null
     anchor = null
-    for s in strategies
+    for s in @virtualAnchoringStrategies
       try
         unless anchor
           a = s.code.call this, target

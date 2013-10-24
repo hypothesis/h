@@ -12,6 +12,7 @@ class Annotator.Guest extends Annotator
 
   # Plugin configuration
   options:
+    FuzzyAnchoring: {}
     Document: {}
 
   # Internal state

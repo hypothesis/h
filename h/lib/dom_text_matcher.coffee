@@ -234,7 +234,7 @@ class window.DomTextMatcher
         
         # Collect the results
         match = {}
-        for obj in [textMatch, analysis, mappings]
+        for obj in [textMatch, analysis]
           for k, v of obj
             match[k] = v
         
