@@ -538,7 +538,6 @@ class Annotator extends Delegator
     unless annotation.target?
       throw new Error "Can not run setupAnnotation(). No target or selection available."
 
-    normedRanges     = []
     annotation.quote = []
     annotation.anchors = []
 
@@ -586,15 +585,8 @@ class Annotator extends Delegator
     annotation.ranges     = []
     annotation.highlights = []
 
-    for normed in normedRanges
-      annotation.ranges.push normed.serialize(@wrapper[0], '.annotator-hl')
-      $.merge annotation.highlights, this.highlightRange(normed)
-
     # Join all the quotes into one string.
     annotation.quote = annotation.quote.join(' / ')
-
-    # Save the annotation data on each highlighter element.
-    $(annotation.highlights).data('annotation', annotation)
 
     annotation
 
@@ -1118,14 +1110,14 @@ class Annotator extends Delegator
     return unless data? # No physical anchor for this page
 
     for s in @physicalUnAnchoringStrategies
-      console.log "Trying to apply phyisical un-anchoring strategy '" + s.name + "' ..."        
+#      console.log "Trying to apply phyisical un-anchoring strategy '" + s.name + "' ..."        
       status = s.code.call this, anchor, data, pageIndex
       if status
-        console.log "Successfully physically un-anchored the annotation to the document."
+#        console.log "Successfully physically un-anchored the annotation to the document."
         return
-      else
-        console.log "Failure: strategy '" + s.name + "' could not remove this physical anchor (from page "+pageIndex+"):"
-        console.log data
+#      else
+#        console.log "Failure: strategy '" + s.name + "' could not remove this physical anchor (from page "+pageIndex+"):"
+#        console.log data
 
     console.log "Could not find any physical un-anchoring strategy that could handle this physical anchor:"
     console.log data

@@ -7,7 +7,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-10-25 00:42:47Z
+** Built at: 2013-10-25 01:51:17Z
 */
 
 
@@ -1241,7 +1241,7 @@
     };
 
     Annotator.prototype.setupAnnotation = function(annotation) {
-      var anchor, error, exception, normed, normedRanges, pageIndex, r, ranges, t, vAnchor, _base, _k, _l, _len2, _len3, _m, _ref1, _ref2, _ref3, _ref4,
+      var anchor, error, exception, pageIndex, r, ranges, t, vAnchor, _base, _k, _l, _len2, _ref1, _ref2, _ref3, _ref4,
         _this = this;
       ranges = annotation.ranges || this.selectedRanges || [];
       if (annotation.ranges != null) {
@@ -1259,7 +1259,6 @@
       if (annotation.target == null) {
         throw new Error("Can not run setupAnnotation(). No target or selection available.");
       }
-      normedRanges = [];
       annotation.quote = [];
       annotation.anchors = [];
       _ref1 = annotation.target;
@@ -1308,13 +1307,7 @@
       }
       annotation.ranges = [];
       annotation.highlights = [];
-      for (_m = 0, _len3 = normedRanges.length; _m < _len3; _m++) {
-        normed = normedRanges[_m];
-        annotation.ranges.push(normed.serialize(this.wrapper[0], '.annotator-hl'));
-        $.merge(annotation.highlights, this.highlightRange(normed));
-      }
       annotation.quote = annotation.quote.join(' / ');
-      $(annotation.highlights).data('annotation', annotation);
       return annotation;
     };
 
@@ -1710,14 +1703,9 @@
       _ref1 = this.physicalUnAnchoringStrategies;
       for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
         s = _ref1[_k];
-        console.log("Trying to apply phyisical un-anchoring strategy '" + s.name + "' ...");
         status = s.code.call(this, anchor, data, pageIndex);
         if (status) {
-          console.log("Successfully physically un-anchored the annotation to the document.");
           return;
-        } else {
-          console.log("Failure: strategy '" + s.name + "' could not remove this physical anchor (from page " + pageIndex + "):");
-          console.log(data);
         }
       }
       console.log("Could not find any physical un-anchoring strategy that could handle this physical anchor:");
