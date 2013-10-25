@@ -38,7 +38,7 @@ class window.PageTextMapperCore
     if @requiresSmartStringPadding
       info.domMapper.setExpectedContent info.content
     info.domMapper.scan()
-    renderedContent = info.domMapper.path["."].content
+    renderedContent = info.domMapper.getCorpus()
     if renderedContent isnt info.content
       console.log "Oops. Mismatch between rendered and extracted text!"
       console.log "Rendered: " + renderedContent
@@ -78,6 +78,7 @@ class window.PageTextMapperCore
     # Correct the chatacter offsets with that of the page
     info.start += pageData.start
     info.end += pageData.start
+    info.pageIndex = pageData.index
     info
 
   # Return some data about a given character range

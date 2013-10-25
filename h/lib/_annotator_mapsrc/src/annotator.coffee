@@ -102,6 +102,7 @@ class Annotator extends Delegator
     this._setupDocumentAccessStrategies() unless @options.noMatching
     this._setupVirtualAnchoringStrategies()
     this._setupPhysicalAnchoringStrategies()
+    this._setupPhysicalUnAnchoringStrategies()
     this._setupViewer()._setupEditor()
     this._setupDynamicStyle()
 
@@ -160,6 +161,14 @@ class Annotator extends Delegator
       # Simple strategy for anchoring annotations to text positions
       name: "Text position"
       code: this._physicallyAnchorToTextPosition
+    ]
+
+  # Initializes the available physical un-anchoring strategies
+  _setupPhysicalUnAnchoringStrategies: ->
+    @physicalUnAnchoringStrategies = [
+      # Simple strategy for un-anchoring annotations from ranges
+      name: "Range"
+      code: this._physicallyUnAnchorFromRange
     ]
 
   # Perform a scan of the DOM. Required for finding anchors.
@@ -438,12 +447,15 @@ class Annotator extends Delegator
       #  " Current quote is '#{currentQuote}'.)"
       return null
 
+    startInfo = @domMapper.getInfoForNode normalizedRange.start
+    endInfo = @domMapper.getInfoForNode normalizedRange.end
+
     # Create a "text poision"-type virtual anchor from this range
     type: "text position"
-    startPage: 0
-    start: (@domMapper.getInfoForNode normalizedRange.start).start
-    endPage: 0
-    end: (@domMapper.getInfoForNode normalizedRange.end).end
+    startPage: startInfo.pageIndex ? 0
+    start: startInfo.start
+    endPage: endInfo.pageIndex ? 0
+    end: endInfo.end
     quote: currentQuote
 
   # Try to determine the anchor position for a target
@@ -617,14 +629,9 @@ class Annotator extends Delegator
   deleteAnnotation: (annotation) ->
     if annotation.anchors?    
       for a in annotation.anchors
+        for page, data of a.physical
+          this._physicallyUnAnchor a, page
         this._removeAnchor a
-
-    if annotation.highlights?
-      for h in annotation.highlights when h.parentNode?
-        child = h.childNodes[0]
-        $(h).replaceWith(h.childNodes)
-        window.DomTextMapper.changed child.parentNode,
-          "removed hilite (annotation deleted)"
 
     this.publish('annotationDeleted', [annotation])
     annotation
@@ -1021,6 +1028,18 @@ class Annotator extends Delegator
   _physicallyAnchor: (anchor) ->
     return if anchor.allRendered # If we have everything, go home
 
+    vAnchor = anchor.virtual
+    pAnchor = anchor.physical
+
+    # Collect the pages that are already rendered
+    renderedPages = [vAnchor.startPage .. vAnchor.endPage].filter (index) =>
+      @domMapper.isPageMapped index
+
+    # Collect the pages that are already rendered, but not yet anchored
+    pagesTodo = renderedPages.filter (index) -> not pAnchor[index]?
+
+    return unless pagesTodo.length # Return if nothing to do
+
     for s in @physicalAnchoringStrategies
       status = s.code.call this, anchor
 #      console.log "Trying to apply Phyisical anchoring strategy '" + s.name + "' ..."
@@ -1028,10 +1047,11 @@ class Annotator extends Delegator
 #        console.log "Successfully anchored the annotation to the document."
         return
       else
-#        console.log "Failure: strategy '" + s.name + "' could not handle this virtual anchor:"
-#        console.log anchor.virtual
+        console.log "Failure: strategy '" + s.name + "' could not handle this virtual anchor:"
+        console.log anchor.virtual
     console.log "Could not find any physical anchoring strategy that could handle this virtual anchor:"
     console.log anchor.virtual
+    console.trace()
 
   _physicallyAnchorToTextPosition: (anchor) ->
     vAnchor = anchor.virtual
@@ -1092,9 +1112,29 @@ class Annotator extends Delegator
       this._physicallyAnchor anchor
 
   # Remove a given physical anchor from a given page
-  _physicallyUnAnchor: (anchor, index) ->
+  _physicallyUnAnchor: (anchor, pageIndex) ->
+    data = anchor.physical[pageIndex]
+
+    return unless data? # No physical anchor for this page
+
+    for s in @physicalUnAnchoringStrategies
+      console.log "Trying to apply phyisical un-anchoring strategy '" + s.name + "' ..."        
+      status = s.code.call this, anchor, data, pageIndex
+      if status
+        console.log "Successfully physically un-anchored the annotation to the document."
+        return
+      else
+        console.log "Failure: strategy '" + s.name + "' could not remove this physical anchor (from page "+pageIndex+"):"
+        console.log data
+
+    console.log "Could not find any physical un-anchoring strategy that could handle this physical anchor:"
+    console.log data
+
+  _physicallyUnAnchorFromRange: (anchor, data, pageIndex) ->
+    # This strategy is for "range"-type physical anchors
+    return unless data.type is "range"
+
     ann = anchor.annotation
-    data = anchor.physical[index]
 
     # remove the range added by this anchor
     i = ann.ranges.indexOf data.range
@@ -1102,10 +1142,17 @@ class Annotator extends Delegator
 
     # remove the highlights added by this anchor
     for hl in data.highlights
+      # Is this highlight actually the part of the document?
+      if hl.parentNode? and @domMapper.isPageMapped pageIndex
+        # We should restore original state
+        child = hl.childNodes[0]
+        $(hl).replaceWith hl.childNodes
+        window.DomTextMapper.changed child.parentNode,
+          "removed hilite (annotation deleted)"
       i = ann.highlights.indexOf hl
       ann.highlights[i..i] = []
 
-    delete anchor.physical[index]
+    delete anchor.physical[pageIndex]
 
     # Mark this anchor as not fully rendered
     anchor.allRendered = false
