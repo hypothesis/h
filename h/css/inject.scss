@@ -110,7 +110,10 @@ $baseFontSize: 14px;
   }
 
   .label {
+    @include reset-box-model;
+    @include reset-font;
     background: none;
+    color: $textColor;
     font-weight: bold;
     font-family: $sansFontFamily;
     font-size: 11px;
