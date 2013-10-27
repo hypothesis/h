@@ -22,10 +22,13 @@ from pyramid.security import has_permission
 from pyramid_sockjs.session import Session
 
 from h import events, interfaces
+from h.lib import get_session
 import re
 
 import logging
 log = logging.getLogger(__name__)
+
+import mannord
 
 
 def check_favicon(icon_link, parsed_uri, domain):
@@ -382,6 +385,67 @@ class StreamerSession(Session):
             self.close()
         else:
             transaction.commit()
+
+
+@subscriber(events.AnnotationEvent)
+def after_moderation_action(event):
+    """ The function triggers mannords' moderation functions.
+    """
+    # Some notes about mannord.
+    # Every time we want to fetch an object with annotation's moderation
+    # information we need to provide detailed information about it
+    # (not just annotaion id) so that mannord can create annotation record if
+    # it does not exist.
+    try:
+        request = event.request
+        action = event.action
+        if action == 'read':
+            return
+
+        annotation = event.annotation
+        session = get_session(request)
+
+        if request.user is None:
+            return
+
+        if 'spam' in annotation.get('tags', []):
+            # The annotation was flagged as spam.
+
+            # Obtains information about the annotation.
+            # Key of parent annotation.
+            # Question(michael): how to obtain id of an annotation that is a
+            # parent for the annotation? Is it correct right now?
+            references = annotation.get('references')
+            parent_id = None if len(references) == 0 else references[-1]
+            # Action type. An annotation can be upvote or downvote on its
+            # parent. If this is the case, then action_type is whether
+            # mannord.ACTION_UPVOTE or mannord.ACTION_DOWNVOTE.
+            # Question(michael): how to understand whether the annotation
+            # is upvote or not?
+            action_type = None
+            # Obtains information about the author of the annotation.
+            author_name = annotaion.get('user')
+            author_name = author_name[5:author_name.find('@')]
+            UserClass = registry.getUtility(interfaces.IUserClass)
+            author = UserClass.get_by_username(request, author_name)
+
+            # Moderated annotation is a mannord' representation of the annotaion
+            annotation_moder = mannord.get_add_item(annotation.get('uri'),
+                                   annotation.get('id'), author, session,
+                                   parent_id=parent_id, action_type=action_type)
+
+            # Checks whether annotation has spam flag or not. If not then
+            # we want to send an email to the author.
+            if annotation_moder.spam_flag_counter == 0:
+                # The annotaion is being marked as a spam first time!
+                pass
+
+            # Flag the anntaiton as spam.
+            mannord.raise_flag_spam(annotation_moder, request.user, session)
+    except:
+        log.info(traceback.format_exc())
+        log.info('Unexpected error occurred in after_moderation_action(): ' + str(event))
+
 
 @subscriber(events.AnnotationEvent)
 def after_action(event):
