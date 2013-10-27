@@ -23,11 +23,11 @@ Install Node and other required tools:
 
 .. code-block:: bash
 
-    sudo gem install compass
+    gem install compass
     brew install node
-    sudo npm -g install uglify-js
-    sudo npm -g install handlebars
-    sudo npm -g install coffee-script
+    npm -g install uglify-js
+    npm -g install handlebars
+    npm -g install coffee-script
 
 Add the tools' path to the $PATH variable:
 
