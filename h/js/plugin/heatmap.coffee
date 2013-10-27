@@ -400,7 +400,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           acc.push $(hl).data('annotation')
       acc
     , []
-    $.merge visible, @annotator.comments
+#    $.merge visible, @annotator.comments
     @annotator.updateViewer visible
 
   isUpper:   (i) => i == 1
