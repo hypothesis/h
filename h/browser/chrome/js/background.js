@@ -79,6 +79,11 @@ function onInstalled() {
 }
 
 
+function onUpdateAvailable() {
+  chrome.runtime.reload()
+}
+
+
 function onPageAction(tab) {
   var newState
 
@@ -116,6 +121,7 @@ function onTabUpdated(tabId, info) {
 }
 
 chrome.runtime.onInstalled.addListener(onInstalled)
+chrome.runtime.onUpdateAvailable.addListener(onUpdateAvailable)
 chrome.pageAction.onClicked.addListener(onPageAction)
 chrome.tabs.onCreated.addListener(onTabCreated)
 chrome.tabs.onRemoved.addListener(onTabRemoved)

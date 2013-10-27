@@ -8,6 +8,7 @@ clean:
 test: elasticsearch functional_test unit_test
 
 functional_test: 
+ifneq ($(TRAVIS_SECURE_ENV_VARS),false)
 	@echo "running functional tests"
 
 	# stop the test daemon if it is running
@@ -24,6 +25,7 @@ functional_test:
 
 	# stop h
 	pserve --stop-daemon --pid-file=test.pid
+endif
 
 unit_test: 
 	@echo "running unit tests"

@@ -1,43 +1,59 @@
 Installing Hypothes.is on OS X ML
 ######################
 
-Install Homebrew::
+Install Homebrew:
 
-    $ ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+.. code-block:: bash
 
-Install python::
+    ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
 
-    $ brew install python
+Install python:
 
-Install virtualenv::
+.. code-block:: bash
 
-    $ pip install virtualenv
+    brew install python
 
-Install Node and other required tools::
+Install virtualenv:
 
-    $ sudo gem install compass
-    $ brew install node
-    $ sudo npm -g install uglify-js
-    $ sudo npm -g install handlebars
-    $ sudo npm -g install coffee-script
+.. code-block:: bash
 
-Add the tools' path to the $PATH variable::
+    pip install virtualenv
 
-    $ echo "export PATH=/usr/local/share/python:$PATH" >> ~/.profile
-    $ echo "export PATH=/usr/local/share/npm/bin:$PATH" >> ~/.profile
+Install Node and other required tools:
 
-Install Elasticsearch::
+.. code-block:: bash
 
-    $ brew install elasticsearch
+    sudo gem install compass
+    brew install node
+    sudo npm -g install uglify-js
+    sudo npm -g install handlebars
+    sudo npm -g install coffee-script
 
-To have Elasticsearch run automatically at login::
+Add the tools' path to the $PATH variable:
 
-    $ ln -sfv /usr/local/opt/elasticsearch/*.plist ~/Library/LaunchAgents
-    $ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.elasticsearch.plist
+.. code-block:: bash
 
-To launch it manually without launchctl::
+    echo "export PATH=/usr/local/share/python:$PATH" >> ~/.profile
+    echo "export PATH=/usr/local/share/npm/bin:$PATH" >> ~/.profile
 
-    $ elasticsearch -f -D es.config=/usr/local/opt/elasticsearch/config/elasticsearch.yml
+Install Elasticsearch:
+
+.. code-block:: bash
+
+    brew install elasticsearch
+
+To have Elasticsearch run automatically at login:
+
+.. code-block:: bash
+
+    ln -sfv /usr/local/opt/elasticsearch/*.plist ~/Library/LaunchAgents
+    launchctl load ~/Library/LaunchAgents/homebrew.mxcl.elasticsearch.plist
+
+To launch it manually without launchctl:
+
+.. code-block:: bash
+
+    elasticsearch -f -D es.config=/usr/local/opt/elasticsearch/config/elasticsearch.yml
 
 After installing the above, create the virtualenv, as described in the INSTALL.rst
 

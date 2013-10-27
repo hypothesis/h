@@ -19,7 +19,10 @@ util =
     Math.max.apply(Math, all)
 
   mousePosition: (e, offsetEl) ->
-    offset = $(offsetEl).position()
+    # If the offset element is not a positioning root use its offset parent
+    unless $(offsetEl).css('position') in ['absolute', 'fixed', 'relative']
+      offsetEl = $(offsetEl).offsetParent()[0]
+    offset = $(offsetEl).offset()
     {
       top:  e.pageY - offset.top,
       left: e.pageX - offset.left
@@ -400,9 +403,11 @@ class Annotator extends Delegator
       content = @domMapper.getContentForCharRange selector.start, selector.end
       currentQuote = this.normalizeString content
       if currentQuote isnt savedQuote
-        console.log "Could not apply position selector to current document \
-          because the quote has changed. (Saved quote is '#{savedQuote}'. \
-          Current quote is '#{currentQuote}'.)"
+        console.log "Could not apply position selector" +
+          " [#{selector.start}:#{selector.end}] to current document," +
+          " because the quote has changed." +
+          "(Saved quote is '#{savedQuote}'." +
+          " Current quote is '#{currentQuote}'.)"
         return null
       else
 #        console.log "Saved quote matches."

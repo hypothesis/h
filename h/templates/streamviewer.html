@@ -1,23 +1,3 @@
-<html metal:use-macro="main_template">
-  <head metal:fill-slot="head">
-    <title>Hypothes.is</title>
-
-  </head>
-  <style type="text/css"></style>
-
-  <body metal:fill-slot="body" ng-app="h.stream">
-    <div class="topbar">
-      <div class="inner">
-        <a class="pull-left" href="/"
-           ><h4>hypothes<span class="red">.</span>is</h4></a>
-        <!-- <a href="" class="barbutton pull-right">Sign in</a> -->
-      </div>
-    </div>
-
-    <div class="content yui3-g"
-         ng-controller="StreamCtrl">
-
-      <h3 class="stream">{{filterDescription}}</h3>
       <div class="noise yui3-u-1"
            ng-show="annotations.length">
         <ul>
@@ -29,8 +9,15 @@
                  ng-click="view=!view">
               <div>
                 <div>
-                  <div ng-show="annotation.quote.length">
-                      <blockquote>{{annotation.quote | elide:140}}</blockquote>
+                  <div ng-show="annotation.text.length">
+                      <blockquote ng-show="annotation.quoteSource=='document'">
+			{{annotation.quote | elide:140}}
+		      </blockquote>
+                      <blockquote ng-hide="annotation.quoteSource=='document'">
+                        <markdown ng-model="$parent.annotation.quote"
+                                  ng-readonly="true"
+                                  name="quote" />
+		      </blockquote>
                   </div>
                   <div class="small domain thread">
                     <a href="{{annotation.source}}">{{annotation.source_stripped}}</a>
@@ -43,8 +30,15 @@
             <div class="excerpt"
                  ng-show="view"
                  ng-click="view=!view">
-              <div ng-show="annotation.text.length">
-                <blockquote>{{annotation.quote}}</blockquote>
+              <div ng-show="annotation.quote.length">
+                <blockquote ng-show="annotation.quoteSource=='document'">
+                  {{annotation.quote}}
+                </blockquote>
+                <blockquote ng-hide="annotation.quoteSource=='document'">
+                  <markdown ng-model="$parent.annotation.quote"
+                            ng-readonly="true"
+                            name="quote" />
+                </blockquote>
               </div>
               <div class="small domain thread">
                 <a href="{{annotation.source}}">{{annotation.source_stripped}}</a>
@@ -53,9 +47,10 @@
               </div>
             </div>
               <div>
+                <br/>
                 <div class="small">
                   <div class="thread">
-                    <div class="detail">
+                    <div class="annotation detail">
                       <div class="magicontrols pull-right">
                         <span class="small">{{annotation.updated | fuzzyTime}}</span>
                         <a class="launch-icon show" ng-href="{{annotation._share_link}}" target="_blank"></a>
@@ -64,7 +59,10 @@
                         <username ng-model="annotation.user"></username>
                       </strong>
                       <div class="body">
-                        <span ng-bind-html-unsafe="annotation.text | converter"/>
+                        <!--<span ng-bind-html-unsafe="annotation.text | converter"/>-->
+                        <markdown ng-model="$parent.annotation.text"
+                                  ng-readonly="true"
+                                  class="body"/>
                       </div>
                       <ul ng-model="annotation.tags"
                           ng-readonly="true"
@@ -77,6 +75,3 @@
           </li>
         </ul>
       </div>
-    </div>
-  </body>
-</html>

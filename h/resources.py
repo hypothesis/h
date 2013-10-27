@@ -82,7 +82,19 @@ class AppFactory(BaseResource):
             pkg: json.dumps(self.request.webassets_env[pkg].urls())
             for pkg in ['inject', 'jquery', 'raf']
         }
-        env['app'] = "'%s'" % self.request.resource_url(self)
+        options = {}
+        if not self.request.GET.get('light', False):
+            options.update({
+                'Heatmap': {
+                    'container': '.annotator-frame',
+                },
+                'Toolbar': {
+                    'container': '.annotator-frame',
+                },
+            })
+        env['app'] = json.dumps(self.request.resource_url(self))
+        env['options'] = json.dumps(options)
+        env['role'] = json.dumps(self.request.GET.get('role', 'host'))
         return env
 
     @property
@@ -202,9 +214,8 @@ class Annotation(BaseResource, dict):
         return user_str[5:user_str.find('@')] 
 
 
-class Streamer(BaseResource, dict):
+class StreamSearch(BaseResource, dict):
     pass
-
 
 class AnnotationFactory(BaseResource):
     def __getitem__(self, key):
@@ -247,18 +258,17 @@ class Stream(BaseResource, dict):
 
 class UserStreamFactory(BaseResource):
     def __getitem__(self, key):
-        #Check if user exists
         request = self.request
-        registry = request.registry
-        User = registry.getUtility(interfaces.IUserClass)
-        user = User.get_by_username(request, key)
-        if user is not None:
-            return Stream(request)
+        request.stream_type = 'user'
+        request.stream_key = key
+        return Stream(request)
 
 
 class TagStreamFactory(BaseResource):
     def __getitem__(self, key):
         request = self.request
+        request.stream_type = 'tag'
+        request.stream_key = key
         return Stream(request)
 
 
@@ -267,7 +277,7 @@ def includeme(config):
     config.add_route('index', '/', static=True)
     RootFactory.app = AppFactory
     RootFactory.a = AnnotationFactory
-    RootFactory.stream = Streamer
+    RootFactory.stream = StreamSearch
     RootFactory.u = UserStreamFactory
     RootFactory.t = TagStreamFactory
 

@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 import unittest, time, re
 
@@ -29,15 +30,18 @@ class TestAnnotation(SeleniumTestCase):
         driver.refresh()
 
         # make sure the heatmap shows our annotation
-        with Annotator(driver):
-            # the middle heatmap label should have a "1" in it
-            labels = driver.find_elements_by_css_selector(".heatmap-pointer")
-            assert len(labels) == 3
-            assert labels[1].text == "1"
+        # the middle heatmap label should have a "1" in it
+        labels = lambda d: d.find_elements_by_css_selector(".heatmap-pointer")
+        w = WebDriverWait(self.driver, 5)
+        w.until(lambda d: len(labels(d)) == 3)
 
-            # if we click the heatmap we should see our annotation appear
-            # make sure the username and text of the annotation are stored
-            labels[1].click()
+        a_label = labels(driver)[1]
+        assert a_label.text == "1"
+
+        # if we click the heatmap we should see our annotation appear
+        # make sure the username and text of the annotation are stored
+        a_label.click()
+        with Annotator(driver):
             a = driver.find_elements_by_css_selector(".annotation")
             assert len(a) == 1
             assert a[0].find_element_by_css_selector(".user").text == "test"

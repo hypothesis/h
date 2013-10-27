@@ -10,9 +10,15 @@
         <div class="paper thread"
              data-recursive=""
              ng-class="collapsed && 'collapsed summary' || ''"
+             ng-mousedown="toggleCollapsedDown($event)"
              ng-click="toggleCollapsed($event)"
              ng-init="collapsed = true"
              >
+          <a href="" class="threadexp"
+             title="{{collapsed && 'Expand' || 'Collapse'}}"
+             ng-show="$parent.annotation"
+             />
+
           <!-- Excerpts -->
           <div class="excerpt"
                ng-repeat="target in annotation.target"
@@ -35,12 +41,8 @@
                 ng-class="collapsed && 'collapsed' || ''"
                 ng-click="toggleCollapsed($event)"
                 ng-repeat="annotation in annotation.reply_list"
-                ng-transclude>
-              <a href="" class="threadexp"
-                 title="{{collapsed && 'Expand' || 'Collapse'}}"
-                 ng-click="toggleCollapsed($event)"
-                 />
-            </li>
+                ng-transclude
+                />
           </ul>
         </div>
       </li>

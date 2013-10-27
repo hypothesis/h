@@ -1,3 +1,8 @@
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 import clik
 
 from pyramid.scripts import pserve
@@ -83,7 +88,7 @@ def extension(args, console):
         base_template = get_renderer('h:templates/base.pt').implementation()
 
         api_url = request.registry.settings.get('api.url', None)
-        api_url = api_url or urljoin(request.host_url, '/api')
+        api_url = api_url or urljoin(request.host_url, '/api/')
 
         app_layout = layouts.SidebarLayout(context, request)
         app_page = render(
@@ -145,7 +150,7 @@ def extension(args, console):
 
         if develop:
             # Load the app from the development server.
-            app_expr = "'%s'"  % app_url
+            app_expr = json.dumps(app_url)
         else:
             # Load the app from the extension bundle.
             app_expr = "chrome.extension.getURL('public/app.html')"
@@ -156,6 +161,15 @@ def extension(args, console):
             'h:templates/embed.txt',
             {
                 'app': app_expr,
+                'options': json.dumps({
+                    'Heatmap': {
+                        "container": '.annotator-frame',
+                    },
+                    'Toolbar': {
+                        'container': '.annotator-frame',
+                    },
+                }),
+                'role': json.dumps('host'),
                 'inject': '[%s]' % ', '.join([
                     getUrl(url)
                     for url in asset_env['inject'].urls()

@@ -10,7 +10,7 @@ authentication = ->
   controller: [
     '$scope', 'authentication',
     ($scope,   authentication) ->
-      $scope.$on '$reset', => angular.extend $scope, base
+      $scope.$on '$reset', => angular.extend $scope.model, base
 
       $scope.submit = (form) ->
         return unless form.$valid
@@ -208,16 +208,22 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
-thread = ['$timeout', ($timeout) ->
+thread = ->
   link: (scope, elem, attr, ctrl) ->
     childrenEditing = {}
+    sel = window.getSelection()
+
+    scope.toggleCollapsedDown = (event) ->
+      event.stopPropagation()
+      scope.oldSelection = sel.toString()
 
     scope.toggleCollapsed = (event) ->
       event.stopPropagation()
-      $timeout ->
-        return unless Object.keys(childrenEditing).length is 0
-        scope.collapsed = !scope.collapsed
-      , 10
+      # If we have selected something, then don't bother
+      return unless sel.toString() is scope.oldSelection
+      return unless Object.keys(childrenEditing).length is 0
+      scope.collapsed = !scope.collapsed
+      scope.openDetails scope.annotation unless scope.collapsed
 
     scope.$on 'toggleEditing', (event) ->
       {$id, editing} = event.targetScope
@@ -225,12 +231,11 @@ thread = ['$timeout', ($timeout) ->
         scope.collapsed = false
         unless childrenEditing[$id]
           event.targetScope.$on '$destroy', ->
-            $timeout (-> delete childrenEditing[$id]), 100
+            delete childrenEditing[$id]
           childrenEditing[$id] = true
       else
-        $timeout (-> delete childrenEditing[$id]), 100
+        delete childrenEditing[$id]
   restrict: 'C'
-]
 
 
 userPicker = ->
@@ -379,6 +384,26 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
   template: '<span class="small">{{ftime | date:mediumDate}}</span>'
 ]
 
+streamviewer = [ ->
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
+
+  require: '?ngModel'
+  restrict: 'E'
+  templateUrl: 'streamviewer.html'
+]
+
+whenscrolled = ['$window', ($window) ->
+  link: (scope, elem, attr) ->
+    $window = angular.element($window)
+    $window.on 'scroll', ->
+      windowBottom = $window.height() + $window.scrollTop()
+      elementBottom = elem.offset().top + elem.height()
+      remaining = elementBottom - windowBottom
+      shouldScroll = remaining <= $window.height() * 0
+      if shouldScroll
+        scope.$apply attr.whenscrolled
+]
 
 angular.module('h.directives', ['ngSanitize'])
   .directive('authentication', authentication)
@@ -396,4 +421,5 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('ngBlur', ngBlur)
   .directive('repeatAnim', repeatAnim)
   .directive('notification', notification)
-
+  .directive('streamviewer', streamviewer)
+  .directive('whenscrolled', whenscrolled)

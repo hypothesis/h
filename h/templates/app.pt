@@ -15,24 +15,6 @@
 
     <!-- Toolbar -->
     <div class="topbar" class="form-inline" ng-class="frame.visible && 'shown'">
-
-      <div class="tri"
-           ng-click="frame.visible = !frame.visible"
-           ng-init="cbStyle='hiddencontrolbar'"
-           ng-mouseenter="cbStyle='controlbar'"
-           ng-mouseleave="cbStyle='hiddencontrolbar'"
-           ></div>
-
-      <div class="notification-counter"
-           ng-click="frame.visible = !frame.visible"
-           ng-show="new_updates>0 && new_updates<10">
-        +{{ new_updates }}
-      </div>
-      <div class="notification-counter"
-           ng-show="new_updates>9">
-        &gt;9
-      </div>
-
       <div class="inner" ng-switch="auth.persona">
         <a class="pull-right" href=""
            ng-click="sheet.collapsed = false;
@@ -44,37 +26,6 @@
              data-user-picker-model="auth.persona"
              data-user-picker-options="auth.personas">
         </div>
-      </div>
-
-      <!-- Controlbar -->
-      <div ng-mouseenter="cbStyle='controlbar'"
-           ng-mouseleave="cbStyle='hiddencontrolbar'"
-           ng-class="cbStyle">
-        <ul>
-          <li class="controlbarbutton">
-            <a title="Show Annotations"
-               class="alwaysonhighlights-icon"
-               ng-class="alwaysOnMode && 'pushed'"
-               ng-click="toggleAlwaysOnHighlights()"
-               href="">
-            </a>
-          </li>
-          <li class="controlbarbutton">
-            <a title="Highlighting Mode"
-               class="highlighter-icon"
-               ng-class="highlightingMode && 'pushed'"
-               ng-click="toggleHighlightingMode()"
-               href="">
-            </a>
-          </li>
-          <li class="controlbarbutton">
-            <a title="New Comment"
-               class="commenter-icon"
-               ng-click="createUnattachedAnnotation()"
-               href="">
-            </a>
-          </li>
-        </ul>
       </div>
 
       <!-- Searchbar -->

@@ -1,12 +1,14 @@
 class Hypothesis extends Annotator
   events:
-    serviceDiscovery: 'serviceDiscovery'
+    'annotationCreated': 'updateAncestors'
+    'annotationUpdated': 'updateAncestors'
+    'annotationDeleted': 'updateAncestors'
+    'serviceDiscovery': 'serviceDiscovery'
 
   # Plugin configuration
   options:
     noMatching: true
     Discovery: {}
-    Heatmap: {}
     Permissions:
       permissions:
         read: ['group:__world__']
@@ -39,19 +41,29 @@ class Hypothesis extends Annotator
       showViewPermissionsCheckbox: false,
       userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
     Threading: {}
-    Document: {}
 
   # Internal state
-  dragging: false     # * To enable dragging only when we really want to
-  ongoing_edit: false # * Is there an interrupted edit by login
+  ongoing_edit: null # * An annotation draft in limbo before login
+
+  providers: null
+  host: null
+
+  tool: 'comment'
+  visibleHighlights: false
 
   # Here as a noop just to make the Permissions plugin happy
   # XXX: Change me when Annotator stops assuming things about viewers
   viewer:
     addField: (-> )
 
-  this.$inject = ['$document', '$location', '$rootScope', '$route', 'authentication', 'drafts']
-  constructor: ($document, $location, $rootScope, $route, authentication, drafts) ->
+  this.$inject = [
+    '$document', '$location', '$rootScope', '$route', '$window',
+    'authentication', 'drafts'
+  ]
+  constructor: (
+     $document,   $location,   $rootScope,   $route,   $window,
+     authentication,   drafts
+  ) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
@@ -61,13 +73,74 @@ class Hypothesis extends Annotator
     @clientID = uuid.unparse buffer
     $.ajaxSetup headers: "x-client-id": @clientID
 
+    @auth = authentication
+    @providers = []
+    @socialView =
+      name: "none" # "single-player"
+
+    this.patch_store()
+
     # Load plugins
     for own name, opts of @options
       if not @plugins[name] and name of Annotator.Plugin
         this.addPlugin(name, opts)
 
-    # Set up XDM connection
-    this._setupXDM()
+    # Set up the bridge plugin, which bridges the main annotation methods
+    # between the host page and the panel widget.
+    whitelist = [
+      'diffHTML', 'inject', 'quote', 'ranges', 'target', 'id', 'references',
+      'uri', 'diffCaseOnly'
+    ]
+    this.addPlugin 'Bridge',
+      gateway: true
+      formatter: (annotation) =>
+        formatted = {}
+        for k, v of annotation when k in whitelist
+          formatted[k] = v
+        if annotation.thread? and annotation.thread?.children.length
+          formatted.reply_count = annotation.thread.flattenChildren().length
+        else
+          formatted.reply_count = 0
+        formatted
+      parser: (annotation) =>
+        parsed = {}
+        for k, v of annotation when k in whitelist
+          parsed[k] = v
+        parsed
+      onConnect: (source, origin, scope) =>
+        options =
+          window: source
+          origin: origin
+          scope: "#{scope}:provider"
+          onReady: =>
+            console.log "Provider functions are ready for #{origin}"
+            if source is @element.injector().get('$window').parent
+              @host = channel
+        entities = []
+        channel = this._setupXDM options
+
+        channel.call
+          method: 'getDocumentInfo'
+          success: (info) =>
+            entityUris = {}
+            entityUris[info.uri] = true
+            for link in info.metadata.link
+              entityUris[link.href] = true if link.href
+            for href of entityUris
+              entities.push href
+            this.plugins.Store?.loadAnnotations()
+
+        channel.notify
+          method: 'setTool'
+          params: this.tool
+
+        channel.notify
+          method: 'setVisibleHighlights'
+          params: this.visibleHighlights
+
+        @providers.push
+          channel: channel
+          entities: entities
 
     # Add some info to new annotations
     this.subscribe 'beforeAnnotationCreated', (annotation) =>
@@ -78,12 +151,8 @@ class Hypothesis extends Annotator
         annotation.highlights = []
 
       # Register it with the draft service, except when it's an injection
-      unless annotation.inject
-        drafts.add annotation
-      else
-        # This is an injection. Delete the marker.
-        delete annotation.inject
-
+       # This is an injection. Delete the marker.
+      if annotation.inject
         # Set permissions for private
         permissions = @plugins.Permissions
         userId = permissions.options.userId permissions.user
@@ -104,6 +173,7 @@ class Hypothesis extends Annotator
 
     # Track the visible annotations in the root scope
     $rootScope.annotations = []
+    $rootScope.search_annotations = []
 
     # Add new annotations to the view when they are created
     this.subscribe 'annotationCreated', (a) =>
@@ -113,75 +183,17 @@ class Hypothesis extends Annotator
     # Remove annotations from the application when they are deleted
     this.subscribe 'annotationDeleted', (a) =>
       $rootScope.annotations = $rootScope.annotations.filter (b) -> b isnt a
+      $rootScope.search_annotations = $rootScope.search_annotations.filter (b) -> b.message?
 
-    # Update the heatmap when the host is updated or annotations are loaded
-    bridge = @plugins.Bridge
-    heatmap = @plugins.Heatmap
-    threading = @threading
-    updateOn = [
-      'hostUpdated'
-      'annotationsLoaded'
-      'annotationCreated'
-      'annotationDeleted'
-    ]
-    for event in updateOn
-      this.subscribe event, =>
-        @provider.call
-          method: 'getHighlights'
-          success: ({highlights, offset}) ->
-            heatmap.updateHeatmap
-              highlights:
-                for hl in highlights when hl.data
-                  annotation = bridge.cache[hl.data]
-                  angular.extend hl, data: annotation
-              offset: offset
-
-    # Reload the route after annotations are loaded
-    this.subscribe 'annotationsLoaded', -> $route.reload()
-
-    @auth = authentication
-    @socialView =
-      name: "none" # "single-player"
-
-  _setupXDM: ->
-    $location = @element.injector().get '$location'
+  _setupXDM: (options) ->
     $rootScope = @element.injector().get '$rootScope'
-    $window = @element.injector().get '$window'
-    drafts = @element.injector().get 'drafts'
 
-    # Set up the bridge plugin, which bridges the main annotation methods
-    # between the host page and the panel widget.
-    whitelist = ['diffHTML', 'diffCaseOnly', 'quote', 'ranges', 'target', 'references']
-    this.addPlugin 'Bridge',
-      origin: $location.search().xdm
-      window: $window.parent
-      formatter: (annotation) =>
-        formatted = {}
-        for k, v of annotation when k in whitelist
-          formatted[k] = v
-        formatted
-      parser: (annotation) =>
-        parsed = {}
-        for k, v of annotation when k in whitelist
-          parsed[k] = v
-        parsed
+    # jschannel chokes FF and Chrome extension origins.
+    if (options.origin.match /^chrome-extension:\/\//) or
+        (options.origin.match /^resource:\/\//)
+      options.origin = '*'
 
-    @api = Channel.build
-      origin: $location.search().xdm
-      scope: 'annotator:api'
-      window: $window.parent
-
-    .bind('addToken', (ctx, token) =>
-      @element.scope().token = token
-      @element.scope().$digest()
-    )
-
-    @provider = Channel.build
-      origin: $location.search().xdm
-      scope: 'annotator:panel'
-      window: $window.parent
-      onReady: => console.log "Sidepanel: channel is ready"
-
+    provider = Channel.build options
         # Dodge toolbars [DISABLE]
         #@provider.getMaxBottom (max) =>
         #  @element.css('margin-top', "#{max}px")
@@ -189,31 +201,36 @@ class Hypothesis extends Annotator
         #  @element.find('#gutter').css("margin-top", "#{max}px")
         #  @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
 
-    @provider
+    provider
 
     .bind('publish', (ctx, args...) => this.publish args...)
 
     .bind('back', =>
-      # This guy does stuff when you "back out" of the interface.
-      # (Currently triggered by a click on the source page.)
-      return unless drafts.discard()
-      $rootScope.$apply => this.hide()
-    )
-
-    .bind('setDynamicBucketMode', (ctx, value) => $rootScope.$apply =>
-       this.setDynamicBucketMode value
+      # Navigate "back" out of the interface.
+      $rootScope.$apply =>
+        return unless this.discardDrafts()
+        this.hide()
     )
 
     .bind('open', =>
       # Pop out the sidebar
-      $rootScope.$apply => this.show())
-
-    .bind('showViewer', (ctx, tags=[]) =>
-      this.showViewer (@plugins.Bridge.cache[tag] for tag in tags)
+      $rootScope.$apply => this.show()
     )
 
-    .bind('updateViewer', (ctx, tags=[]) =>
-      this.updateViewer (@plugins.Bridge.cache[tag] for tag in tags)
+    .bind('showViewer', (ctx, ids=[]) =>
+      this.showViewer ((@threading.getContainer id).message for id in ids)
+    )
+
+    .bind('updateViewer', (ctx, ids=[]) =>
+      this.updateViewer ((@threading.getContainer id).message for id in ids)
+    )
+
+    .bind('setTool', (ctx, name) =>
+      $rootScope.$apply => this.setTool name
+    )
+
+    .bind('setVisibleHighlights', (ctx, state) =>
+      $rootScope.$apply => this.setVisibleHighlights state
     )
 
   _setupWrapper: ->
@@ -245,27 +262,11 @@ class Hypothesis extends Annotator
     this
 
   _setupDocumentEvents: ->
-    el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
-    el.width = el.height = 1
-    @element.append el
-
-    handle = @element.find('.topbar .tri')[0]
-    handle.addEventListener 'dragstart', (event) =>
-      event.dataTransfer.setData 'text/plain', ''
-      event.dataTransfer.setDragImage el, 0, 0
-      @dragging = true
-      @provider.notify method: 'setDrag', params: true      
-      @provider.notify method: 'dragFrame', params: event.screenX
-    handle.addEventListener 'dragend', (event) =>
-      @dragging = false
-      @provider.notify method: 'setDrag', params: false      
-      @provider.notify method: 'dragFrame', params: event.screenX
-    @element[0].addEventListener 'dragover', (event) =>
-      if @dragging then @provider.notify method: 'dragFrame', params: event.screenX
-    @element[0].addEventListener 'dragleave', (event) =>
-      if @dragging then @provider.notify method: 'dragFrame', params: event.screenX
-
-    this
+    document.addEventListener 'dragover', (event) =>
+      for p in @providers
+        p.channel.notify
+          method: 'dragFrame'
+          params: event.screenX
 
   # Override things not used in the angular version.
   _setupDynamicStyle: -> this
@@ -276,7 +277,9 @@ class Hypothesis extends Annotator
   getHtmlQuote: (quote) -> quote
 
   # Do nothing in the app frame, let the host handle it.
-  setupAnnotation: (annotation) -> annotation
+  setupAnnotation: (annotation) ->
+    annotation.highlights = []
+    annotation
 
   sortAnnotations: (a, b) ->
     a_upd = if a.updated? then new Date(a.updated) else new Date()
@@ -286,12 +289,24 @@ class Hypothesis extends Annotator
   buildReplyList: (annotations=[]) =>
     $filter = @element.injector().get '$filter'
     for annotation in annotations
-      thread = @threading.getContainer annotation.id
-      children = (r.message for r in (thread.children or []))
-      annotation.reply_list = children.sort(@sortAnnotations).reverse()
-      @buildReplyList children
+      if annotation?
+        thread = @threading.getContainer annotation.id
+        children = (r.message for r in (thread.children or []))
+        annotation.reply_list = children.sort(@sortAnnotations).reverse()
+        @buildReplyList children
 
   updateViewer: (annotations=[]) =>
+    @element.injector().invoke [
+      '$location', '$rootScope',
+      ($location, $rootScope) =>
+        @buildReplyList annotations
+        $rootScope.annotations = annotations
+        $rootScope.$digest()
+    ]
+    this
+
+  showViewer: (annotations=[]) =>
+    this.show()
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) =>
@@ -302,24 +317,23 @@ class Hypothesis extends Annotator
     ]
     this
 
-  showViewer: (annotations=[]) =>
-    this.show()
-    this.updateViewer annotations
-
   clickAdder: =>
-    @provider.notify
-      method: 'adderClick'
+    for p in @providers
+      p.channel.notify
+        method: 'adderClick'
 
   showEditor: (annotation) =>
     this.show()
     @element.injector().invoke [
-      '$location', '$rootScope', '$route'
-      ($location, $rootScope, $route) =>
+      '$location', '$rootScope', '$route', 'drafts'
+      ($location, $rootScope, $route, drafts) =>
+        @ongoing_edit = annotation
+
         unless this.plugins.Auth? and this.plugins.Auth.haveValidToken()
           $route.current.locals.$scope.$apply ->
             $route.current.locals.$scope.$emit 'showAuth', true
-          @provider.notify method: 'onEditorHide'
-          @ongoing_edit = true
+          for p in @providers
+            p.channel.notify method: 'onEditorHide'
           return
 
         # Set the path
@@ -328,14 +342,11 @@ class Hypothesis extends Annotator
           action: 'create'
         $location.path('/editor').search(search)
 
+        # Store the draft
+        drafts.add annotation
+
         # Digest the change
         $rootScope.$digest()
-
-        @ongoing_edit = false
-
-        # Push the annotation into the editor scope
-        if $route.current.controller is 'EditorController'
-          $route.current.locals.$scope.$apply (s) -> s.annotation = annotation
     ]
     this
 
@@ -345,18 +356,35 @@ class Hypothesis extends Annotator
   hide: =>
     @element.scope().frame.visible = false
 
-  setDynamicBucketMode: (value) =>
-    @element.scope().dynamicBucket = value
-
-  patch_store: (store) =>
+  patch_store: ->
     $location = @element.injector().get '$location'
     $rootScope = @element.injector().get '$rootScope'
+
+    Store = Annotator.Plugin.Store
+
+    # When the Store plugin is first instantiated, don't load annotations.
+    # They will be loaded manually as entities are registered by participating
+    # frames.
+    Store.prototype.loadAnnotations = ->
+      query = limit: 1000
+      @annotator.considerSocialView.call @annotator, query
+
+      this.entities ?= {}
+      for p in @annotator.providers
+        for uri in p.entities
+          unless this.entities[uri]?
+            console.log "Loading annotations for: " + uri
+            this.entities[uri] = true
+            this.loadAnnotationsFromSearch (angular.extend query, uri: uri)
 
     # When the store plugin finishes a request, update the annotation
     # using a monkey-patched update function which updates the threading
     # if the annotation has a newly-assigned id and ensures that the id
     # is enumerable.
-    store.updateAnnotation = (annotation, data) =>
+    Store.prototype.updateAnnotation = (annotation, data) =>
+      unless Object.keys(data).length
+        return
+
       if annotation.id? and annotation.id != data.id
         # Update the id table for the threading
         thread = @threading.getContainer annotation.id
@@ -380,62 +408,90 @@ class Hypothesis extends Annotator
 
       # Update the annotation with the new data
       annotation = angular.extend annotation, data
+      @plugins.Bridge?.updateAnnotation annotation
 
       # Give angular a chance to react
       $rootScope.$digest()
 
-  considerSocialView: (options) ->
+  considerSocialView: (query) ->
     switch @socialView.name
       when "none"
         # Sweet, nothing to do, just clean up previous filters
         console.log "Not applying any Social View filters."
-        delete options.loadFromSearch.user
+        delete query.user
       when "single-player"
         if (p = @auth.persona)?
           console.log "Social View filter: single player mode."
-          options.loadFromSearch.user = "acct:" + p.username + "@" + p.provider
+          query.user = "acct:" + p.username + "@" + p.provider
         else
           console.log "Social View: single-player mode, but ignoring it, since not logged in."
-          delete options.loadFromSearch.user
+          delete query.user
       else
         console.warn "Unsupported Social View: '" + @socialView.name + "'!"
 
+  # Bubbles updates through the thread so that guests see accurate
+  # reply counts.
+  updateAncestors: (annotation) =>
+    for ref in (annotation.references?.slice().reverse() or [])
+      rel = (@threading.getContainer ref).message
+      if rel?
+        $timeout = @element.injector().get('$timeout')
+        $timeout (=> @plugins.Bridge.updateAnnotation rel), 10
+        this.updateAncestors(rel)
+        break  # Only the nearest existing ancestor, the rest is by induction.
+
   serviceDiscovery: (options) =>
-    $location = @element.injector().get '$location'
-    $rootScope = @element.injector().get '$rootScope'
+    @options.Store ?= {}
+    angular.extend @options.Store, options
+    this.addPlugin 'Store', @options.Store
 
-    angular.extend @options, Store: options
+  setTool: (name) =>
+    return if name is @tool
+    return unless this.discardDrafts()
 
-    # Get the location of the annotated document
-    @provider.call
-      method: 'getDocumentInfo'
-      success: (info) =>
-        href = info.uri
-        @plugins.Document.metadata = info.metadata
+    if name is 'highlight'
+      # Check login state first
+      unless @plugins.Auth? and @plugins.Auth.haveValidToken()
+        scope = @element.scope()
+        # If we are not logged in, start the auth process
+        scope.ongoingHighlightSwitch = true
+        # No need to reload annotations upon login, since Social View change
+        # will trigger a reload anyway.
+        scope.skipAuthChangeReload = true
+        scope.sheet.collapsed = false
+        scope.sheet.tab = 'login'
+        this.show()
+        return
 
-        options = angular.extend {}, (@options.Store or {}),
-          annotationData:
-            uri: href
-          loadFromSearch:
-            limit: 1000
-            uri: href
-        this.considerSocialView options
-        this.addStore(options)
+      this.socialView.name = 'single-player'
+    else
+      this.socialView.name = 'none'
 
-  addStore: (options) ->
-    this.addPlugin 'Store', options
-    this.patch_store this.plugins.Store
+    @tool = name
+    this.publish 'setTool', name
+    for p in @providers
+      p.channel.notify
+        method: 'setTool'
+        params: name
 
-    href = options.loadFromSearch?.uri
-    return unless href?
+  setVisibleHighlights: (state) =>
+    return if state is @visibleHighlights
+    @visibleHighlights = state
+    this.publish 'setVisibleHighlights', state
+    for p in @providers
+      p.channel.notify
+        method: 'setVisibleHighlights'
+        params: state
 
-    console.log "Loaded annotions for '" + href + "'."
-    for uri in @plugins.Document.uris()
-      # Do not load annotations from the href twice
-      unless uri is href
-        console.log "Also loading annotations for: " + uri
-        this.plugins.Store.loadAnnotationsFromSearch uri: uri
+  # Is this annotation a comment?
+  isComment: (annotation) ->
+    # No targets and no references means that this is a comment
+    not (annotation.references?.length or annotation.target?.length)
 
+
+  # Discard all drafts, deleting unsaved annotations from the annotator
+  discardDrafts: ->
+    return @element.injector().get('drafts').discard()
 
 class AuthenticationProvider
   constructor: ->
@@ -466,29 +522,44 @@ class AuthenticationProvider
 
 
 class DraftProvider
-  drafts: []
+  drafts: null
+
+  constructor: ->
+    this.drafts = []
 
   $get: -> this
-  add: (draft) -> @drafts.push draft unless this.contains draft
-  remove: (draft) -> @drafts = (d for d in @drafts when d isnt draft)
-  contains: (draft) -> (@drafts.indexOf draft) != -1
+
+  add: (draft, cb) -> @drafts.push {draft, cb}
+
+  remove: (draft) ->
+    remove = []
+    for d, i in @drafts
+      remove.push i if d.draft is draft
+    while remove.length
+      @drafts.splice(remove.pop(), 1)
+
+  contains: (draft) ->
+    for d in @drafts
+      if d.draft is draft then return true
+    return false
 
   discard: ->
-    count = (d for d in @drafts when d.text?.length).length
     text =
-      switch count
+      switch @drafts.length
         when 0 then null
         when 1
           """You have an unsaved reply.
 
           Do you really want to discard this draft?"""
         else
-          """You have #{count} unsaved replies.
+          """You have #{@drafts.length} unsaved replies.
 
           Do you really want to discard these drafts?"""
 
-    if count == 0 or confirm text
+    if @drafts.length is 0 or confirm text
+      discarded = @drafts.slice()
       @drafts = []
+      d.cb?() for d in discarded
       true
     else
       false

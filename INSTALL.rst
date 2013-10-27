@@ -21,9 +21,11 @@ into any WSGI_ compatible framework and run on any WSGI web server (such
 as gunicorn_ or uWSGI_). Until the project is ready for general testing
 it will not be installable from the Python Package Index. Instead, the
 application should be built in a virtual environment which can be set up as
-follows::
+follows:
 
-    $ ./bootstrap
+.. code-block:: bash
+
+    ./bootstrap
 
 The command will set up the development environment and check for development
 dependencies. Warnings will be issued for missing dependencies. When this

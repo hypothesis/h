@@ -33,9 +33,12 @@ class Annotator.Plugin.Document extends Annotator.Plugin
 
     # first look for some common metadata types
     # TODO: look for microdata/rdfa?
-    this._getScholar()
+    this._getHighwire()
     this._getDublinCore()
-    this._getOpenGraph()
+    this._getFacebook()
+    this._getEprints()
+    this._getPrism()
+    this._getTwitter()
     this._getFavicon()
 
     # extract out/normalize some things
@@ -44,47 +47,50 @@ class Annotator.Plugin.Document extends Annotator.Plugin
 
     return @metadata
 
-  _getScholar: =>
-    @metadata.scholar = {}
-    for meta in $("meta")
-      name = $(meta).prop("name")
-      content = $(meta).prop("content")
-      if name.match(/^citation_/)
-        if @metadata.scholar[name]
-          @metadata.scholar[name].push(content)
-        else
-          @metadata.scholar[name] = [content]
+  _getHighwire: =>
+    return @metadata.highwire = this._getMetaTags("citation", "name", "_")
+
+  _getFacebook: =>
+    return @metadata.facebook = this._getMetaTags("og", "property", ":")
+
+  _getTwitter: =>
+    return @metadata.twitter = this._getMetaTags("twitter", "name", ":")
 
   _getDublinCore: =>
-    @metadata.dc = {}
-    for meta in $("meta")
-      name = $(meta).prop("name")
-      content = $(meta).prop("content")
-      nameParts = name.split(".")
-      if nameParts.length == 2 and nameParts[0].toLowerCase() == "dc"
-        n = nameParts[1]
-        if @metadata.dc[n]
-          @metadata.dc[n].push(content)
-        else
-          @metadata.dc[n] = [content]
+    return @metadata.dc = this._getMetaTags("dc", "name", ".")
 
-  _getOpenGraph: =>
-    @metadata.og = {}
+  _getPrism: =>
+    return @metadata.prism = this._getMetaTags("prism", "name", ".")
+
+  _getEprints: =>
+    return @metadata.eprints = this._getMetaTags("eprints", "name", ".")
+
+  _getMetaTags: (prefix, attribute, delimiter) =>
+    tags = {}
     for meta in $("meta")
-      property = $(meta).attr("property")
+      name = $(meta).attr(attribute)
       content = $(meta).prop("content")
-      if property
-        match = property.match(/^og:(.+)$/)
+      if name
+        match = name.match(RegExp("^#{prefix}#{delimiter}(.+)$", "i"))
         if match
           n = match[1]
-          if @metadata.og[n]
-            @metadata.og[n].push(content)
+          if tags[n]
+            tags[n].push(content)
           else
-            @metadata.og[n] = [content]
+            tags[n] = [content]
+    return tags
 
   _getTitle: =>
-    if @metadata.scholar.citation_title
-      @metadata.title = @metadata.scholar.citation_title[0]
+    if @metadata.highwire.title
+      @metadata.title = @metadata.highwire.title[0]
+    else if @metadata.eprints.title
+      @metadata.title = @metadata.eprints.title
+    else if @metadata.prism.title
+      @metadata.title = @metadata.prism.title
+    else if @metadata.facebook.title
+      @metadata.title = @metadata.facebook.title
+    else if @metadata.twitter.title
+      @metadata.title = @metadata.twitter.title
     else if @metadata.dc.title
       @metadata.title = @metadata.dc.title
     else
@@ -104,9 +110,9 @@ class Annotator.Plugin.Document extends Annotator.Plugin
         @metadata.link.push(href: href, rel: rel, type: type)
 
     # look for links in scholar metadata
-    for name, values of @metadata.scholar
+    for name, values of @metadata.highwire
 
-      if name == "citation_pdf_url"
+      if name == "pdf_url"
         for url in values
           @metadata.link.push
             href: this._absoluteUrl(url)
@@ -116,7 +122,7 @@ class Annotator.Plugin.Document extends Annotator.Plugin
       # convenient place to look them up later, and somewhat sane since 
       # they don't have a type
     
-      if name == "citation_doi"
+      if name == "doi"
         for doi in values
           if doi[0..3] != "doi:"
             doi = "doi:" + doi
@@ -137,7 +143,7 @@ class Annotator.Plugin.Document extends Annotator.Plugin
   # hack to get a absolute url from a possibly relative one
   
   _absoluteUrl: (url) ->
-    img = $("<img src='#{ url }'>")
+    img = $("<img src='#{ url }'></img>")
     url = img.prop('src')
     img.prop('src', null)
     return url

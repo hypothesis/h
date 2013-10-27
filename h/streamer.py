@@ -22,6 +22,7 @@ from pyramid.security import has_permission
 from pyramid_sockjs.session import Session
 
 from h import events, interfaces
+import re
 
 import logging
 log = logging.getLogger(__name__)
@@ -60,6 +61,7 @@ def url_values_from_document(annotation):
         icon_link = check_favicon(icon_link, parsed_uri, domain)
     return {
         'title': title,
+        'uri': annotation['uri'],
         'source': domain,
         'source_stripped': domain_stripped,
         'favicon_link': icon_link
@@ -87,7 +89,8 @@ filter_schema = {
                     "enum": ["equals", "matches", "lt", "le", "gt", "ge", "one_of", "first_of"]
                 },
                 "value": "object",
-                "case_sensitive": {"type": "boolean", "default": True}
+                "case_sensitive": {"type": "boolean", "default": True},
+                "es_query_string": {"type": "boolean", "default": False}
             }
         },
         "past_data": {
@@ -107,6 +110,9 @@ class FilterToElasticFilter(object):
     def __init__(self, filter_json):
         self.filter = filter_json
         self.query = {
+            "sort": [
+                {"updated": {"order": "desc"}}
+            ],
             "query": {
                 "bool": {
                     "minimum_number_should_match": 1}}}
@@ -126,43 +132,73 @@ class FilterToElasticFilter(object):
         elif self.filter['past_data']['load_past'] == 'hits':
             self.query['size'] = self.filter['past_data']['hits']
 
-    def equals(self, field, value):
+    @staticmethod
+    def equals(field, value):
         return {"term": {field: value}}
 
-    def one_of(self, field, value):
+    @staticmethod
+    def one_of(field, value):
         return {"term": {field: value}}
 
-    def first_of(self, field, value):
+    @staticmethod
+    def first_of(field, value):
+        return {"term": {field: value}}
+
+    @staticmethod
+    def match_of(field, value):
         #TODO: proper implementation
         return {"term": {field: value}}
 
-    def matches(self, field, value):
-        return {"text": {field: value}}
+    @staticmethod
+    def matches(field, value):
+        return {"term": {field: value}}
 
-    def lt(self, field, value):
+    @staticmethod
+    def lt(field, value):
         return {"range": {field: {"lt": value}}}
 
-    def le(self, field, value):
+    @staticmethod
+    def le(field, value):
         return {"range": {field: {"lte": value}}}
 
-    def gt(self, field, value):
+    @staticmethod
+    def gt(field, value):
         return {"range": {field: {"gt": value}}}
 
-    def ge(self, field, value):
+    @staticmethod
+    def ge(field, value):
         return {"range": {field: {"gte": value}}}
 
     def convert_clauses(self, clauses):
         new_clauses = []
         for clause in clauses:
             field = clause['field'][1:].replace('/', '.')
-            new_clause = getattr(self, clause['operator'])(field, clause['value'])
+            if not clause['case_sensitive']:
+                if type(clause['value']) is list:
+                    value = [x.lower() for x in clause['value']]
+                else:
+                    value = clause['value'].lower()
+            else:
+                value = clause['value']
+            if clause["es_query_string"]:
+                # Generate query_string query
+                escaped_value = re.escape(value)
+                new_clause = {
+                    "query_string": {
+                        "query": "*" + escaped_value + "*",
+                        "fields": [field]
+                    }
+                }
+            else:
+                new_clause = getattr(self, clause['operator'])(field, value)
             new_clauses.append(new_clause)
         return new_clauses
 
-    def _policy(self, operator, target, clauses):
-        target[operator] = []
+    @staticmethod
+    def _policy(oper, target, clauses):
+        target[oper] = []
         for clause in clauses:
-            target[operator].append(clause)
+            target[oper].append(clause)
 
     def include_any(self, target, clauses):
         self._policy('should', target, clauses)
@@ -182,6 +218,14 @@ def first_of(a, b): return a[0] == b
 setattr(operator, 'first_of', first_of)
 
 
+def match_of(a, b):
+    for subb in b:
+        if subb in a:
+            return True
+    return False
+setattr(operator, 'match_of', match_of)
+
+
 class FilterHandler(object):
     def __init__(self, filter_json):
         self.filter = filter_json
@@ -189,7 +233,7 @@ class FilterHandler(object):
     # operators
     operators = {
         "equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
-        "ge": 'ge', "one_of": 'contains', "first_of": 'first_of'
+        "ge": 'ge', "one_of": 'contains', "first_of": 'first_of', "match_of": 'match_of'
     }
 
     def evaluate_clause(self, clause, target):
@@ -218,13 +262,14 @@ class FilterHandler(object):
 
             # But!
             # Reversed operator order for contains (b in a)
-            if clause['operator'] == 'one_of' or clause['operator'] == 'matches':
-                reversed = True
-                # But not in every case. (i.e. tags matches 'b')
-                # Here field_value is a list, because an annotation can have many tags
-                # And clause['value'] is 'b'
-                if type(field_value) is list:
-                    reversed = False
+            if type(cval) is list or type(fval) is list:
+                if clause['operator'] == 'one_of' or clause['operator'] == 'matches':
+                    reversed = True
+                    # But not in every case. (i.e. tags matches 'b')
+                    # Here field_value is a list, because an annotation can have many tags
+                    # And clause['value'] is 'b'
+                    if type(field_value) is list:
+                        reversed = False
 
             if reversed:
                 return getattr(operator, self.operators[clause['operator']])(cval, fval)
@@ -267,58 +312,69 @@ class StreamerSession(Session):
     def on_open(self):
         transaction.commit()  # Release the database transaction
 
+    def send_annotations(self):
+        request = self.request
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        annotations = store.search_raw(self.query.query)
+        self.received = len(annotations)
+        send_annotations = []
+        for annotation in annotations:
+            try:
+                annotation.update(url_values_from_document(annotation))
+                if 'references' in annotation:
+                    parent = store.read(annotation['references'][-1])
+                    if 'text' in parent:
+                        annotation['quote'] = parent['text']
+                send_annotations.append(annotation)
+            except:
+                log.info(traceback.format_exc())
+                log.info("Error while updating the annotation's properties:" + str(annotation))
+
+        # Finally send filtered annotations
+        # Can send zero to indicate that no past data is matched
+        if self.clientID is None:
+            # Backwards-compatibility code
+            packet = [send_annotations, 'past']
+        else:
+            packet = {
+                'payload': send_annotations,
+                'type': 'annotation-notification',
+                'options': {
+                    'action': 'past',
+                    'clientID': self.clientID
+                }
+            }
+        self.send(packet)
+
     def on_message(self, msg):
         transaction.begin()
         try:
             struct = json.loads(msg)
+            self.clientID = struct['clientID'] if 'clientID' in struct else ''
+            type = struct['messageType'] if 'messageType' in struct else 'filter'
 
-            if 'clientID' in struct:
-                self.clientID = struct['clientID']
+            if type == 'filter':
                 payload = struct['filter']
-            else:
-                payload = struct
+                self.offsetFrom = 0
 
-            # Let's try to validate the schema
-            validate(payload, filter_schema)
-            self.filter = FilterHandler(payload)
+                # Let's try to validate the schema
+                validate(payload, filter_schema)
+                self.filter = FilterHandler(payload)
 
-            # If past is given, send the annotations back.
-            if "past_data" in payload and payload["past_data"]["load_past"] != "none":
-                query = FilterToElasticFilter(payload)
-                request = self.request
-                registry = request.registry
-                store = registry.queryUtility(interfaces.IStoreClass)(request)
-                annotations = store.search_raw(query.query)
-
-                send_annotations = []
-                for annotation in annotations:
-                    try:
-                        annotation.update(url_values_from_document(annotation))
-                        if 'references' in annotation:
-                            parent = store.read(annotation['references'][-1])
-                            if 'text' in parent:
-                                annotation['quote'] = parent['text']
-                        send_annotations.append(annotation)
-                    except:
-                        log.info(traceback.format_exc())
-                        log.info("Error while updating the annotation's properties:" + str(annotation))
-
-                # Finally send filtered annotations
-                if len(annotations) > 0:
-                    if self.clientID is None:
-                        # Backwards-compatibility code
-                        packet = [send_annotations, 'past']
-                    else:
-                        packet = {
-                            'payload': send_annotations,
-                            'type': 'annotation-notification',
-                            'options': {
-                                'action': 'past',
-                                'clientID': self.clientID,
-                            },
-                        }
-
-                    self.send(packet)
+                # If past is given, send the annotations back.
+                if "past_data" in payload and payload["past_data"]["load_past"] != "none":
+                    self.query = FilterToElasticFilter(payload)
+                    if 'size' in self.query.query:
+                        self.offsetFrom = int(self.query.query['size'])
+                    self.send_annotations()
+            elif type == 'more_hits':
+                more_hits = int(struct['moreHits']) if 'moreHits' in struct else 50
+                if 'size' in self.query.query:
+                    self.query.query['from'] = self.offsetFrom
+                    self.query.query['size'] = more_hits
+                    self.send_annotations()
+                    self.offsetFrom += self.received
         except:
             log.info(traceback.format_exc())
             log.info('Failed to parse filter:' + str(msg))

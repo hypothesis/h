@@ -510,34 +510,6 @@ blockquote {
   }
 }
 
-//Controlbar Icons
-.alwaysonhighlights-icon {
-  @include fonticon("\e01b", left);
-  color: rgb(211, 211, 211);
-  font-size: 18px;
-  bottom: 1px;
-  left: 3px;
-  position: absolute;
-}
-
-.highlighter-icon {
-  @include fonticon("\e01a", left);
-  color: rgb(211, 211, 211);
-  font-size: 18px;
-  bottom: 1px;
-  left: 3px;
-  position: absolute;
-}
-
-.commenter-icon {
-  @include fonticon("\e01e", left);
-  color: rgb(211, 211, 211);
-  font-size: 18px;
-  bottom: 1px;
-  left: 3px;
-  position: absolute;
-}
-
 //VISIBILITY
 .visibility {
   .dropdown-toggle {
@@ -619,17 +591,6 @@ blockquote {
 }
 
 
-//NOISE///////////
-//Provides the noise background
-.noise {
-  background: url("../images/noise_1.png");
-}
-
-.dark-noise {
-  background: url("../images/dark_noise_1.png");
-}
-
-
 //KNOCKOUT///////////
 //Provides a knockout background
 .knockout {
@@ -653,13 +614,14 @@ blockquote {
 
 //TOOL BAR////////////////////////////////
 .topbar {
-  @include smallshadow;
+  @include smallshadow(0);
   background: $white;
   border: solid 1px $grayLighter;
+  border-style: solid none;
   height: 2em;
   position: fixed;
-  left: -1px;
-  right: -1px;
+  left: 0;
+  right: 0;
   top: .5em;
   z-index: 5;
 
@@ -680,6 +642,15 @@ blockquote {
       display: inline-block;
       font-family: $sansFontFamily;
     }
+
+    &.search-upper {
+      padding: 0em;
+      padding-top: .15em;
+    }
+  }
+
+  .right-border {
+    padding-right: 3.7em;
   }
 }
 
@@ -842,6 +813,10 @@ blockquote {
     }
 
     & > .annotation {
+      .body {
+        font-size: .95em;
+      }
+
       .body * {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -849,7 +824,6 @@ blockquote {
         white-space: nowrap;
         margin-top: 0;
         margin-bottom: 0;
-        font-size: .95em;
       }
 
       .indicators {
@@ -1277,17 +1251,9 @@ h3.stream {
   }
 }
 
-.visual-container {
-  margin-left: 3em;
-}
-
 .magnify-glass {
   width: 2.25em;
   min-height: 22px;
-}
-
-.magnify-glass .VS-icon {
-  margin-left: 3.5em;
 }
 
 .magnify-glass .VS-icon-search:hover {

@@ -8,6 +8,7 @@ if 'gevent' in sys.modules:
     import gevent.subprocess
     sys.modules['subprocess'] = gevent.subprocess
 
+import pyramid
 
 from webassets import Bundle
 from webassets.filter import register_filter
@@ -89,6 +90,9 @@ annotator_discovery = Uglify(
 annotator_heatmap = Uglify(
     Coffee('js/plugin/heatmap.coffee', output='js/plugin/heatmap.js')
 )
+annotator_toolbar = Uglify(
+    Coffee('js/plugin/toolbar.coffee', output='js/plugin/toolbar.js')
+)
 annotator_permissions = Uglify(
     'lib/annotator.permissions.js',
     output='lib/annotator.permissions.min.js'
@@ -119,6 +123,12 @@ angular_resource = Uglify(
     'lib/angular-resource.js',
     output='lib/angular-resource.min.js'
 )
+
+angular_route = Uglify(
+    'lib/angular-route.js',
+    output='lib/angular-route.min.js'
+)
+
 angular_sanitize = Uglify(
     'lib/angular-sanitize.js',
     output='lib/angular-sanitize.min.js'
@@ -128,6 +138,9 @@ angular_sanitize = Uglify(
 jquery = Uglify('lib/jquery-1.10.2.js', output='lib/jquery-1.10.2.min.js')
 jquery_mousewheel = Uglify(
     'lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
+)
+jquery_scrollintoview = Uglify(
+    'lib/jquery.scrollintoview.js', output='lib/jquery.scrollintoview.min.js'
 )
 
 # jQuery UI
@@ -196,6 +209,7 @@ app = Bundle(
     angular,
     angular_bootstrap,
     angular_resource,
+    angular_route,
     angular_sanitize,
     gettext,
     annotator_i18n,
@@ -203,12 +217,10 @@ app = Bundle(
     annotator_auth,
     annotator_bridge,
     annotator_discovery,
-    annotator_heatmap,
     annotator_permissions,
     annotator_store,
     annotator_threading,
     annotator_document,
-    d3,
     jschannel,
     jwz,
     pagedown,
@@ -233,9 +245,8 @@ app = Bundle(
                 'app_directives',
                 'displayer',
                 'services',
-                'streamer',
                 'streamfilter',
-                'stream',
+                'streamsearch',
             )
         ],
         output='js/app.min.js'
@@ -252,24 +263,40 @@ site = Bundle(
 )
 
 
-# The inject is a script which loads the annotator in an iframe
-# and sets up an RPC channel for cross-domain communication between the
-# the frame and its parent window. It then makes cretain annotator methods
-# available via the bridge plugin.
+# The inject bundle is intended to be loaded into pages for bootstrapping
+# the application. It sets up RPC channels for cross-domain communication
+# between frames participating in annotation by using the annotator bridge
+# plugin.
 inject = Bundle(
+    d3,
     domTextFamily,
     jquery,
+    jquery_scrollintoview,
+    jquery_ui,
+    jquery_ui_effects,
     jschannel,
     gettext,
     annotator_i18n,
     annotator,
     annotator_bridge,
     annotator_document,
+    annotator_heatmap,
+    annotator_toolbar,
     Uglify(
+        Coffee('js/guest.coffee', output='js/guest.js'),
         Coffee('js/host.coffee', output='js/host.js'),
-        output='js/host.min.js'
+        output='js/inject.min.js'
     ),
     SCSS('css/inject.scss', depends=css_base, output='css/inject.css'),
+)
+
+sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),
+               output='css/sidebar.min.css')
+
+site = Bundle(
+    app,
+    SCSS('css/site.scss', depends=(css_base + css_common),
+         output='css/site.min.css'),
 )
 
 
@@ -297,21 +324,53 @@ class WebassetsResourceRegistry(object):
         return result
 
 
+class AssetRequest(object):
+    def __init__(self, val, config):
+        self.env = config.get_webassets_env()
+        self.val = val
+
+    def text(self):
+        return 'asset_request = %s' % (self.val,)
+
+    phash = text
+
+    def __call__(self, event):
+        request = event.request
+        if request.matched_route is None:
+            return False
+        else:
+            return request.matched_route.pattern.startswith(self.env.url)
+
+
+def asset_response_subscriber(event):
+    event.response.headers['Access-Control-Allow-Origin'] = '*'
+
+
 def includeme(config):
     config.include('pyramid_webassets')
 
     env = config.get_webassets_env()
-    kw = {}
+
+    # Configure the static views
     if env.url_expire is not False:
         # Cache for one year (so-called "far future" Expires)
-        kw['cache_max_age'] = 31536000
-    config.add_static_view(env.url, env.directory, **kw)
+        config.add_static_view(env.url, env.directory, cache_max_age=31536000)
+    else:
+        config.add_static_view(env.url, env.directory)
+
+    # Set up a predicate and subscriber to set CORS headers on asset responses
+    config.add_subscriber_predicate('asset_request', AssetRequest)
+    config.add_subscriber(
+        asset_response_subscriber,
+        pyramid.events.NewResponse,
+        asset_request=True
+    )
 
     loader = PythonLoader(config.registry.settings.get('h.assets', __name__))
     bundles = loader.load_bundles()
-    for name in bundles:
-        log.info('name: ' + str(name))
-        config.add_webasset(name, bundles[name])
+    for bundle_name in bundles:
+        log.info('name: ' + str(bundle_name))
+        config.add_webasset(bundle_name, bundles[bundle_name])
 
     from deform.field import Field
     resource_registry = WebassetsResourceRegistry(config.get_webassets_env())
