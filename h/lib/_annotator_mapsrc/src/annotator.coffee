@@ -476,6 +476,10 @@ class Annotator extends Delegator
     # No quote, no joy
     unless quote? then return null
 
+    # For too short quotes, this strategy is bound to return false positives.
+    # See https://github.com/hypothesis/h/issues/853 for details.
+    return unless quote.length >= 32
+
     # Get a starting position for the search
     posSelector = this.findSelector target.selector, "TextPositionSelector"
     expectedStart = posSelector?.start
