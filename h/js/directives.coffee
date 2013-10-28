@@ -245,17 +245,6 @@ userPicker = ->
     options: '=userPickerOptions'
   templateUrl: 'userPicker.html'
 
-
-#Directive will be removed once the angularjs official version will have this directive
-ngBlur = ['$parse', ($parse) ->
-  (scope, element, attr) ->
-    fn = $parse attr['ngBlur']
-    element.bind 'blur', (event) ->
-      scope.$apply ->
-        fn scope,
-          $event: event
-]
-
 repeatAnim = ->
   restrict: 'A'
   scope:
@@ -418,7 +407,6 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('thread', thread)
   .directive('username', username)
   .directive('userPicker', userPicker)
-  .directive('ngBlur', ngBlur)
   .directive('repeatAnim', repeatAnim)
   .directive('notification', notification)
   .directive('streamviewer', streamviewer)
