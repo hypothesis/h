@@ -386,6 +386,31 @@ class StreamerSession(Session):
         else:
             transaction.commit()
 
+def get_moderated_annotation(request, annotation, session):
+    """ Method retruns a moderated annotation - object that represents
+    an annotation in mannord."""
+    # Obtains a key of parent annotation.
+    # Question(michael): how to obtain id of an annotation that is a
+    # parent for the annotation? Is it correct right now?
+    references = annotation.get('references')
+    parent_id = None if len(references) == 0 else references[-1]
+    # Action type. An annotation can be upvote or downvote on its
+    # parent. If this is the case, then action_type is whether
+    # mannord.ACTION_UPVOTE or mannord.ACTION_DOWNVOTE.
+    # Question(michael): how to understand whether the annotation
+    # is upvote or not?
+    action_type = None
+    # Obtains information about the author of the annotation.
+    author_name = annotaion.get('user')
+    author_name = author_name[5:author_name.find('@')]
+    UserClass = registry.getUtility(interfaces.IUserClass)
+    author = UserClass.get_by_username(request, author_name)
+
+    # Moderated annotation is a mannord' representation of the annotaion
+    annotation_moder = mannord.get_add_item(annotation.get('uri'),
+                           annotation.get('id'), author, session,
+                           parent_id=parent_id, action_type=action_type)
+    return annotation_moder
 
 @subscriber(events.AnnotationEvent)
 def after_moderation_action(event):
@@ -408,40 +433,38 @@ def after_moderation_action(event):
         if request.user is None:
             return
 
-        if 'spam' in annotation.get('tags', []):
+        tags = annotation.get('tags', [])
+        if 'spam' in tags:
             # The annotation was flagged as spam.
-
-            # Obtains information about the annotation.
-            # Key of parent annotation.
-            # Question(michael): how to obtain id of an annotation that is a
-            # parent for the annotation? Is it correct right now?
-            references = annotation.get('references')
-            parent_id = None if len(references) == 0 else references[-1]
-            # Action type. An annotation can be upvote or downvote on its
-            # parent. If this is the case, then action_type is whether
-            # mannord.ACTION_UPVOTE or mannord.ACTION_DOWNVOTE.
-            # Question(michael): how to understand whether the annotation
-            # is upvote or not?
-            action_type = None
-            # Obtains information about the author of the annotation.
-            author_name = annotaion.get('user')
-            author_name = author_name[5:author_name.find('@')]
-            UserClass = registry.getUtility(interfaces.IUserClass)
-            author = UserClass.get_by_username(request, author_name)
-
-            # Moderated annotation is a mannord' representation of the annotaion
-            annotation_moder = mannord.get_add_item(annotation.get('uri'),
-                                   annotation.get('id'), author, session,
-                                   parent_id=parent_id, action_type=action_type)
-
-            # Checks whether annotation has spam flag or not. If not then
-            # we want to send an email to the author.
+            annotation_moder = get_moderated_annotation(request, annotation, session)
             if annotation_moder.spam_flag_counter == 0:
                 # The annotaion is being marked as a spam first time!
+                # NOTE: this is a place to trigger an email sending to author
                 pass
-
             # Flag the anntaiton as spam.
-            mannord.raise_flag_spam(annotation_moder, request.user, session)
+            mannord.raise_spam_flag(annotation_moder, request.user, session)
+        elif 'ham' in tags:
+            # The annotation was flagged as not spam.
+            annotation_moder = get_moderated_annotation(request, annotation, session)
+            mannord.raise_ham_flag(annotation_moder, request.user, session)
+        elif 'upvote' in tags:
+            annotation_moder = get_moderated_annotation(request, annotation, session)
+            mannord.upvote(annotation_moder, request.user, session)
+        elif 'downvote' in tags:
+            annotation_moder = get_moderated_annotation(request, annotation, session)
+            mannord.downvote(annotation_moder, request.user, session)
+        elif 'undo_upvote' in tags:
+            annotation_moder = get_moderated_annotation(request, annotation, session)
+            mannord.undo_upvote(annotation_moder, request.user, session)
+        elif 'undo_downote' in tags:
+            annotation_moder = get_moderated_annotation(request, annotation, session)
+            mannord.undo_downvote(annotation_moder, request.user, session)
+        elif 'delete_by_author' in tags:
+            # Deletes the annotation, so that the author does not get repuatiton
+            # damage.
+            annotation_moder = get_moderated_annotation(request, annotation, session)
+            mannord.delete_spam_item_by_author(annotation_moder, session)
+
     except:
         log.info(traceback.format_exc())
         log.info('Unexpected error occurred in after_moderation_action(): ' + str(event))
