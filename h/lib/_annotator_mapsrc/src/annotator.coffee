@@ -101,8 +101,6 @@ class Annotator extends Delegator
     this._setupWrapper()
     this._setupDocumentAccessStrategies() unless @options.noMatching
     this._setupVirtualAnchoringStrategies()
-    this._setupPhysicalAnchoringStrategies()
-    this._setupPhysicalUnAnchoringStrategies()
     this._setupViewer()._setupEditor()
     this._setupDynamicStyle()
 
@@ -121,6 +119,8 @@ class Annotator extends Delegator
       mapper: DomTextMapper
       init: => @domMapper.setRootNode @wrapper[0]
     ]
+
+    this
 
   # Initializes the components used for analyzing the document
   _setupMapper: ->
@@ -155,21 +155,7 @@ class Annotator extends Delegator
       code: this.findAnchorFromPositionSelector
     ]
 
-  # Initializes the available physical anchoring strategies
-  _setupPhysicalAnchoringStrategies: ->
-    @physicalAnchoringStrategies = [
-      # Simple strategy for anchoring annotations to text positions
-      name: "Text position"
-      code: this._physicallyAnchorToTextPosition
-    ]
-
-  # Initializes the available physical un-anchoring strategies
-  _setupPhysicalUnAnchoringStrategies: ->
-    @physicalUnAnchoringStrategies = [
-      # Simple strategy for un-anchoring annotations from ranges
-      name: "Range"
-      code: this._physicallyUnAnchorFromRange
-    ]
+    this
 
   # Perform a scan of the DOM. Required for finding anchors.
   _scan: ->
@@ -382,14 +368,12 @@ class Annotator extends Delegator
   #
   # Returns an Object containing a `source` property and a `selector` Array.
   getTargetFromRange: (range) ->
-    target =
-      source: this.getHref()
-      selector: [
-        this.getRangeSelector range
-        this.getTextQuoteSelector range
-        this.getTextPositionSelector range
-      ]
-    target
+    source: this.getHref()
+    selector: [
+      this.getRangeSelector range
+      this.getTextQuoteSelector range
+      this.getTextPositionSelector range
+    ]
 
   # Public: Creates and returns a new annotation object. Publishes the
   # 'beforeAnnotationCreated' event to allow the new annotation to be modified.
@@ -423,7 +407,7 @@ class Annotator extends Delegator
   # using the saved Range selector. The quote is verified.
   findAnchorFromRangeSelector: (target) ->
     selector = this.findSelector target.selector, "RangeSelector"
-    return null unless selector?
+    unless selector? then return null
 
     # Try to apply the saved XPath
     try
@@ -451,7 +435,6 @@ class Annotator extends Delegator
     endInfo = @domMapper.getInfoForNode normalizedRange.end
 
     # Create a "text poision"-type virtual anchor from this range
-    type: "text position"
     startPage: startInfo.pageIndex ? 0
     start: startInfo.start
     endPage: endInfo.pageIndex ? 0
@@ -477,7 +460,6 @@ class Annotator extends Delegator
 
     # OK, we have everything.
     # Compile the data required to store this virtual anchor
-    type: "text position"
     startPage: @domMapper.getPageIndexForPos selector.start
     endPage: @domMapper.getPageIndexForPos selector.end
     start: selector.start
@@ -1032,35 +1014,6 @@ class Annotator extends Delegator
 
     return unless pagesTodo.length # Return if nothing to do
 
-    for s in @physicalAnchoringStrategies
-      status = s.code.call this, anchor
-#      console.log "Trying to apply Phyisical anchoring strategy '" + s.name + "' ..."
-      if status
-#        console.log "Successfully anchored the annotation to the document."
-        return
-      else
-        console.log "Failure: strategy '" + s.name + "' could not handle this virtual anchor:"
-        console.log anchor.virtual
-    console.log "Could not find any physical anchoring strategy that could handle this virtual anchor:"
-    console.log anchor.virtual
-    console.trace()
-
-  _physicallyAnchorToTextPosition: (anchor) ->
-    vAnchor = anchor.virtual
-    pAnchor = anchor.physical
-
-    # This strategy is only for "text position" - type virtual anchors.
-    return unless vAnchor.type is "text position"
-
-    # Collect the pages that are already rendered
-    renderedPages = [vAnchor.startPage .. vAnchor.endPage].filter (index) =>
-      @domMapper.isPageMapped index
-
-    # Collect the pages that are already rendered, but not yet anchored
-    pagesTodo = renderedPages.filter (index) -> not pAnchor[index]?
-
-    return unless pagesTodo.length # Return if nothing to do
-
     # First calculate the ranges
     mappings = @domMapper.getMappingsForCharRange vAnchor.start, vAnchor.end, pagesTodo
 
@@ -1081,7 +1034,6 @@ class Annotator extends Delegator
 
       # Add the newly mapped page to the physical anchor
       pAnchor[page] =
-        type: "range"
         range: serializedRange
         highlights: highlights
 
@@ -1108,23 +1060,6 @@ class Annotator extends Delegator
     data = anchor.physical[pageIndex]
 
     return unless data? # No physical anchor for this page
-
-    for s in @physicalUnAnchoringStrategies
-#      console.log "Trying to apply phyisical un-anchoring strategy '" + s.name + "' ..."        
-      status = s.code.call this, anchor, data, pageIndex
-      if status
-#        console.log "Successfully physically un-anchored the annotation to the document."
-        return
-#      else
-#        console.log "Failure: strategy '" + s.name + "' could not remove this physical anchor (from page "+pageIndex+"):"
-#        console.log data
-
-    console.log "Could not find any physical un-anchoring strategy that could handle this physical anchor:"
-    console.log data
-
-  _physicallyUnAnchorFromRange: (anchor, data, pageIndex) ->
-    # This strategy is for "range"-type physical anchors
-    return unless data.type is "range"
 
     ann = anchor.annotation
 
