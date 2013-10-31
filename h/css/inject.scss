@@ -156,6 +156,7 @@ $baseFontSize: 14px;
   }
 
   &.lower {
+    margin-top: -1.2em;
     .svg {
       background-image: url("../images/down_tab.svg");
     }
@@ -163,7 +164,7 @@ $baseFontSize: 14px;
       top: 1px;
     }
     &:hover {
-      margin-top: -.8em;
+      margin-top: -1.6em;
     }
   }
   &.flip {
@@ -176,6 +177,7 @@ $baseFontSize: 14px;
     @include single-transition(margin-top, .2s);
     left: 3px;
     width: 37px;
+    margin-top: -1.2em;
 
     .svg {
       background-image: url("../images/comment_tab.svg");
