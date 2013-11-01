@@ -303,7 +303,7 @@ class Annotator.Guest extends Annotator
     # Show a temporary highlight so the user can see what they selected
     # Also extract the quotation and serialize the ranges
     annotation = this.setupAnnotation(this.createAnnotation())
-    setTimeout -> $(annotation.highlights).addClass('annotator-hl-temporary')
+    $(annotation.highlights).addClass('annotator-hl-temporary')
 
     # Subscribe to the editor events
 

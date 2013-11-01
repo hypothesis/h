@@ -522,6 +522,8 @@ class Annotator extends Delegator
 
     annotation.quote = []
     annotation.anchors = []
+    annotation.ranges = []
+    annotation.highlights = []
 
     for t in annotation.target
       try
@@ -552,8 +554,8 @@ class Annotator extends Delegator
             @anchors[pageIndex] ?= []
             @anchors[pageIndex].push anchor
 
-          # Schedule the physical anchoring
-          setTimeout => this._physicallyAnchor anchor
+          # Realizing the anchor
+          this._physicallyAnchor anchor
 
         else
           console.log "Could not find anchor target for annotation '" +
@@ -562,10 +564,6 @@ class Annotator extends Delegator
         if exception.stack? then console.log exception.stack
         console.log exception.message
         console.log exception
-
-
-    annotation.ranges     = []
-    annotation.highlights = []
 
     # Join all the quotes into one string.
     annotation.quote = annotation.quote.join(' / ')
@@ -921,7 +919,7 @@ class Annotator extends Delegator
     annotation = this.setupAnnotation(annotation)
 
     # Show a temporary highlight so the user can see what they selected
-    setTimeout -> $(annotation.highlights).addClass('annotator-hl-temporary')
+    $(annotation.highlights).addClass('annotator-hl-temporary')
 
     # Make the highlights permanent if the annotation is saved
     save = =>

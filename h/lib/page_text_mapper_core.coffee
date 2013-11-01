@@ -40,7 +40,8 @@ class window.PageTextMapperCore
     info.domMapper.scan()
     renderedContent = info.domMapper.getCorpus()
     if renderedContent isnt info.content
-      console.log "Oops. Mismatch between rendered and extracted text!"
+      console.log "Oops. Mismatch between rendered and extracted text, while mapping page #" + info.index + "!"
+      console.trace()
       console.log "Rendered: " + renderedContent
       console.log "Extracted: " + info.content
 
