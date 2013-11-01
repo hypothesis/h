@@ -213,7 +213,7 @@ class Range.BrowserRange
 
     if window.DomTextMapper? and changed
 #      console.log "Ranged normalization changed the DOM, updating d-t-m"
-      window.DomTextMapper.changed nr.commonAncestor, "range normalization"
+      window.DomTextMapper.changed nr.commonAncestor, "range normalization", nr
 
     new Range.NormalizedRange(nr)
 

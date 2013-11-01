@@ -268,6 +268,8 @@
                 else if (null !== (oMatch = cfg.origin.match(/^https?:\/\/(?:[-a-zA-Z0-9_\.])+(?::\d+)?/))) {
                     cfg.origin = oMatch[0].toLowerCase();
                     validOrigin = true;
+                } else if (cfg.origin == "resource://pdf.js") {
+                    validOrigin = true
                 }
             }
 
