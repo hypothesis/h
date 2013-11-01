@@ -28,9 +28,12 @@ yepnope([
         ].join('\n')
         , script = document.createElement('script')
         , first = document.getElementsByTagName('script')[0]
+        , isGecko = ("MozAppearance" in document.documentElement.style)
+        , isGeckoLTE18 = isGecko && !! document.createRange().compareNode
+        , insBeforeObj = isGeckoLTE18 ? document.documentElement : first ? first.parentNode : document.documentElement.firstChild
         ;
       script.text = bootstrap;
-      first.parentNode.insertBefore(script, first);
+      insBeforeObj.insertBefore(script, first);
     }
   },
   {
