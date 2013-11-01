@@ -24,8 +24,6 @@ class Annotator.Guest extends Annotator
   constructor: (element, options) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
 
-    @role = "guest"
-
     options.noScan = true
     super
     delete @options.noScan
@@ -345,11 +343,7 @@ class Annotator.Guest extends Annotator
   # Uncomment the traces below to investigate this further.
   deleteAnnotation: (annotation) ->
     if annotation.deleted
-#      console.log "Not deleting annotation the second time."
-#      console.trace()
       return
     else
-#      console.log "Deleting an annotation in " + @role + "."
-#      console.trace()
       annotation.deleted = true
     super
