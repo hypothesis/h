@@ -28,6 +28,7 @@ import re
 import logging
 log = logging.getLogger(__name__)
 
+from resources import Annotation
 import mannord
 
 
@@ -386,31 +387,51 @@ class StreamerSession(Session):
         else:
             transaction.commit()
 
-def get_moderated_annotation(request, annotation, session):
+
+def get_annotation_resource(annot_id, request):
+    """ Obtain annotation resource by annotation id."""
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        data = store.read(annot_id)
+
+        annotation = Annotation(request)
+        annotation.update(data)
+        return annotation
+
+
+def get_moderated_annotation(request, moderating_annotation, session,
+                             action_type=None):
     """ Method retruns a moderated annotation - object that represents
-    an annotation in mannord."""
-    # Obtains a key of parent annotation.
-    # Question(michael): how to obtain id of an annotation that is a
-    # parent for the annotation? Is it correct right now?
-    references = annotation.get('references')
-    parent_id = None if len(references) == 0 else references[-1]
-    # Action type. An annotation can be upvote or downvote on its
-    # parent. If this is the case, then action_type is whether
-    # mannord.ACTION_UPVOTE or mannord.ACTION_DOWNVOTE.
-    # Question(michael): how to understand whether the annotation
-    # is upvote or not?
-    action_type = None
-    # Obtains information about the author of the annotation.
-    author_name = annotaion.get('user')
+    an annotation in mannord.
+    Argumetns:
+        - request is a request object
+        - moderating_annot is a resource annotation object that is a
+        moderation action.
+        - action can be mannord.ACTION_UPVOTE, mannord.ACTION_DOWNVOTE, or None
+    """
+    # Obtains a key of moderated annotation.
+    references = moderating_annotation.get('references', [])
+    if len(references) == 0:
+        return None
+    moderated_annot_id = references[-1]
+    # Moderated annotation resource.
+    moderated_annot_res = get_annotation_resource(moderated_annot_id, request)
+    # Author of the moderated annotation.
+    author_name = moderated_annot_res.get('user')
     author_name = author_name[5:author_name.find('@')]
     UserClass = registry.getUtility(interfaces.IUserClass)
     author = UserClass.get_by_username(request, author_name)
 
-    # Moderated annotation is a mannord' representation of the annotaion
-    annotation_moder = mannord.get_add_item(annotation.get('uri'),
-                           annotation.get('id'), author, session,
+    # Parent id of moderated annotation.
+    references = moderated_annot_res.get('references', [])
+    parent_id = None if len(references) == 0 else references[-1]
+
+    # Moderated annotation as a mannord' representation of the annotaion.
+    moderated_annot = mannord.get_add_item(moderated_annot_res.get('uri'),
+                           moderated_annot_res.get('id'), author, session,
                            parent_id=parent_id, action_type=action_type)
-    return annotation_moder
+    return moderated_annot
+
 
 @subscriber(events.AnnotationEvent)
 def after_moderation_action(event):
@@ -434,9 +455,15 @@ def after_moderation_action(event):
             return
 
         tags = annotation.get('tags', [])
+        # NOTE: to optimize db queries we can call get_moderated_annotation
+        # function inside each case of if ..elif statement. I moved it up to
+        # reduce code size.
+        annotation_moder = get_moderated_annotation(request, annotation, session)
+        if annotation_moder is None:
+            log.info('WARNING: Unable to fetch moderated annotation!')
+            return
         if 'spam' in tags:
             # The annotation was flagged as spam.
-            annotation_moder = get_moderated_annotation(request, annotation, session)
             if annotation_moder.spam_flag_counter == 0:
                 # The annotaion is being marked as a spam first time!
                 # NOTE: this is a place to trigger an email sending to author
@@ -445,26 +472,25 @@ def after_moderation_action(event):
             mannord.raise_spam_flag(annotation_moder, request.user, session)
         elif 'ham' in tags:
             # The annotation was flagged as not spam.
-            annotation_moder = get_moderated_annotation(request, annotation, session)
             mannord.raise_ham_flag(annotation_moder, request.user, session)
         elif 'upvote' in tags:
-            annotation_moder = get_moderated_annotation(request, annotation, session)
-            mannord.upvote(annotation_moder, request.user, session)
+            if annotation.deleted:
+                # Undo upvote
+                mannord.undo_upvote(annotation_moder, request.user, session)
+            else:
+            # Upvote
+                mannord.upvote(annotation_moder, request.user, session)
         elif 'downvote' in tags:
-            annotation_moder = get_moderated_annotation(request, annotation, session)
-            mannord.downvote(annotation_moder, request.user, session)
-        elif 'undo_upvote' in tags:
-            annotation_moder = get_moderated_annotation(request, annotation, session)
-            mannord.undo_upvote(annotation_moder, request.user, session)
-        elif 'undo_downote' in tags:
-            annotation_moder = get_moderated_annotation(request, annotation, session)
-            mannord.undo_downvote(annotation_moder, request.user, session)
+            if annotation.deleted:
+                # Undo downvote
+                mannord.undo_downvote(annotation_moder, request.user, session)
+            else:
+                # Downvote
+                mannord.downvote(annotation_moder, request.user, session)
         elif 'delete_by_author' in tags:
             # Deletes the annotation, so that the author does not get repuatiton
             # damage.
-            annotation_moder = get_moderated_annotation(request, annotation, session)
             mannord.delete_spam_item_by_author(annotation_moder, session)
-
     except:
         log.info(traceback.format_exc())
         log.info('Unexpected error occurred in after_moderation_action(): ' + str(event))

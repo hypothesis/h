@@ -47,10 +47,6 @@ class BaseController(horus.views.BaseController):
 def home(request):
     return find_resource(request.context, '/app').embed
 
-@view_config(route_name='help', layout='site', renderer='templates/help.pt')
-def my_view(request):
-    return find_resource(request.context, '/app').embed
-
 
 @view_config(context='h.resources.Annotation', route_name='upvote')
 def upvote(request):
