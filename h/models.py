@@ -26,6 +26,8 @@ from sqlalchemy.types import Integer, TypeDecorator, CHAR
 
 from h import interfaces, lib
 
+import mannord
+
 
 class GUID(TypeDecorator):
     """Platform-independent GUID type.
@@ -101,7 +103,7 @@ class Group(GroupMixin, Base):
     pass
 
 
-class User(UserMixin, Base):
+class User(UserMixin, mannord.UserMixin, Base):
     @classmethod
     def get_by_username(cls, request, username):
         session = get_session(request)
@@ -143,6 +145,7 @@ def groupfinder(userid, request):
 
 def includeme(config):
     registry = config.registry
+    mannord.bootstrap(Base)
     config.include('pyramid_basemodel')
     config.include('pyramid_tm')
 

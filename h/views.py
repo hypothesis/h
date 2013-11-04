@@ -24,6 +24,8 @@ from h import interfaces
 from h.models import _
 from h.streamer import url_values_from_document
 
+import mannord
+
 import logging
 log = logging.getLogger(__name__)
 
@@ -45,9 +47,12 @@ class BaseController(horus.views.BaseController):
 def home(request):
     return find_resource(request.context, '/app').embed
 
-@view_config(route_name='help', layout='site', renderer='templates/help.pt')
-def my_view(request):
-    return find_resource(request.context, '/app').embed
+
+@view_config(context='h.resources.Annotation', route_name='upvote')
+def upvote(request):
+    log.info("Attention")
+    log.info("INSIDE UPVOTE")
+
 
 @view_defaults(context='h.resources.Annotation', layout='site')
 class AnnotationController(BaseController):
@@ -326,5 +331,6 @@ def includeme(config):
         renderer='h:templates/auth.pt',
         route_name='profile'
     )
+
 
     config.scan(__name__)
