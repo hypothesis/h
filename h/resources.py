@@ -12,9 +12,12 @@ from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
 from zope.interface import implementer
 
 from h import interfaces
+from h.models import get_session
 
 import logging
 log = logging.getLogger(__name__)
+
+import mannord
 
 
 @implementer(ILocation)
