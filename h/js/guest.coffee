@@ -361,7 +361,8 @@ class Annotator.Guest extends Annotator
     @panel?.notify method: "login", params:
       username: username
       password: password
-    @_pendingLogin = window.Annotator.$.Deferred()
+    @_pendingLogin = @__proto__.constructor.$.Deferred()
+
 
   # Public API to trigger a logout
   logout: (username, password) ->
