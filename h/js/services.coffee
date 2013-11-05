@@ -233,6 +233,22 @@ class Hypothesis extends Annotator
       $rootScope.$apply => this.setVisibleHighlights state
     )
 
+    .bind('login', (ctx, params) =>
+      @auth.$login(params).then =>
+        for p in @providers
+          p.channel.notify
+            method: 'loginSucceeded'
+      , (data) =>
+        for p in @providers
+          p.channel.notify
+            method: 'loginFailed'
+            params: data
+    )
+
+    .bind('logout', =>
+      @auth.$logout()
+    )
+
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
     .on 'mousewheel', (event, delta) ->

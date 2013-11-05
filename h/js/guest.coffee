@@ -127,6 +127,16 @@ class Annotator.Guest extends Annotator
       this.publish 'setVisibleHighlights', state
     )
 
+    .bind('loginSucceeded', =>
+      @_pendingLogin?.resolve()
+      delete @_pendingLogin
+    )
+
+    .bind('loginFailed', (ctx, data) =>
+      @_pendingLogin?.reject data
+      delete @_pendingLogin
+    )
+
   scanDocument: (reason = "something happened") =>
     try
       console.log "Analyzing host frame, because " + reason + "..."
@@ -345,3 +355,14 @@ class Annotator.Guest extends Annotator
 #      console.trace()
       annotation.deleted = true
     super
+
+  # Public API to trigger a login
+  login: (username, password) ->
+    @panel?.notify method: "login", params:
+      username: username
+      password: password
+    @_pendingLogin = Annotator.$.Deferred()
+
+  # Public API to trigger a logout
+  logout: (username, password) ->
+    @panel?.notify method: "logout"
