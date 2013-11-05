@@ -373,14 +373,33 @@ class Annotator.Guest extends Annotator
     super
 
   # Public API to trigger a login
-  login: (username, password) ->
-    @panel?.notify method: "login", params:
-      username: username
-      password: password
+  loginWithUsernameAndPassword: (username, password) ->
     @_pendingLogin = @constructor.$.Deferred()
-
+    if @panel?
+      @panel.notify method: "login", params:
+        username: username
+        password: password
+    else
+      @panel.reject "Panel connection is not yet available."
+    @pendingLogin
 
   # Public API to trigger a logout
-  logout: (username, password) ->
-    @panel?.notify method: "logout"
+  logout: ->
     @_pendingLogout = @constructor.$.Deferred()
+    if @panel?
+      @panel.notify method: "logout"
+    else
+      @pendingLogout.reject "Panel connection is not yet available."
+    @pendingLogout
+
+  # Public API to get login status
+  getLoginStatus: ->
+    result = @constructor.$.Deferred()
+    if @panel?
+      @panel.call
+       method: "getLoginStatus"
+       success: (data) -> result.resolve data
+       error: (problem) -> result.reject problem
+    else
+      result.reject "Panel connection is not yet available."
+    result

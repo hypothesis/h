@@ -245,6 +245,10 @@ class Hypothesis extends Annotator
       @auth.$logout()
     )
 
+    .bind('getLoginStatus', =>
+      @auth.persona
+    )
+
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
     .on 'mousewheel', (event, delta) ->

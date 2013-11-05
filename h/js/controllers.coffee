@@ -51,7 +51,7 @@ class App
           for p in providers
             p.channel.notify
               method: 'onLogin'
-              params: newValue[0].username
+              params: newValue[0]
 
     $scope.$watch 'auth.persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
