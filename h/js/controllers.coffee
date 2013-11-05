@@ -31,10 +31,11 @@ class App
         authentication.persona = null
         authentication.token = null
 
-        # Tell the providers that we have logged out
-        setTimeout ->
-          for p in providers
-            p.channel.notify method: 'onLogout'
+        if oldValue?
+          # Tell the providers that we have logged out
+            setTimeout ->
+            for p in providers
+              p.channel.notify method: 'onLogout'
 
         # Leave Highlighting mode when logging out
         if annotator.tool is 'highlight'
