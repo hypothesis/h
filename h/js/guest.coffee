@@ -137,6 +137,11 @@ class Annotator.Guest extends Annotator
       delete @_pendingLogin
     )
 
+    .bind('logoutSucceeded', =>
+      @_pendingLogout?.resolve()
+      delete @_pendingLogout
+    )
+
   scanDocument: (reason = "something happened") =>
     try
       console.log "Analyzing host frame, because " + reason + "..."
@@ -367,3 +372,4 @@ class Annotator.Guest extends Annotator
   # Public API to trigger a logout
   logout: (username, password) ->
     @panel?.notify method: "logout"
+    @_pendingLogout = @constructor.$.Deferred()

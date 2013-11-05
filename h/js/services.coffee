@@ -246,7 +246,10 @@ class Hypothesis extends Annotator
     )
 
     .bind('logout', =>
-      @auth.$logout()
+      @auth.$logout().then =>
+        for p in @providers
+          p.channel.notify
+            method: 'logoutSucceeded'
     )
 
   _setupWrapper: ->
