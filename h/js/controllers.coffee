@@ -34,8 +34,9 @@ class App
         if oldValue?
           # Tell the providers that we have logged out
             setTimeout ->
-            for p in providers
-              p.channel.notify method: 'onLogout'
+              # TODO: call this after the annotation reloading has finished
+              for p in providers
+                p.channel.notify method: 'onLogout'
 
         # Leave Highlighting mode when logging out
         if annotator.tool is 'highlight'

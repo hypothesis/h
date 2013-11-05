@@ -381,7 +381,7 @@ class Annotator.Guest extends Annotator
         password: password
     else
       @panel.reject "Panel connection is not yet available."
-    @pendingLogin
+    @_pendingLogin
 
   # Public API to trigger a logout
   logout: ->
@@ -390,7 +390,7 @@ class Annotator.Guest extends Annotator
       @panel.notify method: "logout"
     else
       @pendingLogout.reject "Panel connection is not yet available."
-    @pendingLogout
+    @_pendingLogout
 
   # Public API to get login status
   getLoginStatus: ->
