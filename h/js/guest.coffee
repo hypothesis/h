@@ -127,19 +127,30 @@ class Annotator.Guest extends Annotator
       this.publish 'setVisibleHighlights', state
     )
 
-    .bind('loginSucceeded', =>
-      @_pendingLogin?.resolve()
-      delete @_pendingLogin
+    .bind('onLogin', (ctx, user) =>
+      if @_pendingLogin?
+        @_pendingLogin?.resolve()
+        delete @_pendingLogin
+      else
+        event = document.createEvent "UIEvents"
+        event.initUIEvent "annotatorLogin", false, false, window, 0
+        event.user = user
+        window.dispatchEvent event
     )
 
-    .bind('loginFailed', (ctx, data) =>
+    .bind('onLoginFailed', (ctx, data) =>
       @_pendingLogin?.reject data
       delete @_pendingLogin
     )
 
-    .bind('logoutSucceeded', =>
-      @_pendingLogout?.resolve()
-      delete @_pendingLogout
+    .bind('onLogout', =>
+      if @_pendingLogout?
+        @_pendingLogout.resolve()
+        delete @_pendingLogout
+      else
+        event = document.createEvent "UIEvents"
+        event.initUIEvent "annotatorLogout", false, false, window, 0
+        window.dispatchEvent event
     )
 
   scanDocument: (reason = "something happened") =>

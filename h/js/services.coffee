@@ -234,22 +234,15 @@ class Hypothesis extends Annotator
     )
 
     .bind('login', (ctx, params) =>
-      @auth.$login(params).then =>
+      @auth.$login(params).catch (data) =>
         for p in @providers
           p.channel.notify
-            method: 'loginSucceeded'
-      , (data) =>
-        for p in @providers
-          p.channel.notify
-            method: 'loginFailed'
+            method: 'onLoginFailed'
             params: data
     )
 
     .bind('logout', =>
-      @auth.$logout().then =>
-        for p in @providers
-          p.channel.notify
-            method: 'logoutSucceeded'
+      @auth.$logout()
     )
 
   _setupWrapper: ->
