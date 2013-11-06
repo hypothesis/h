@@ -1,6 +1,15 @@
 class Annotator.Plugin.CodeAuth extends Annotator.Plugin
+
+  # These actions will be axposed on @annotator
+  actions: [
+    'loginWithUsernameAndPassword'
+    'logout'
+    'getLoginStatus'
+    'registerUser'
+  ]
+
   pluginInit: ->
-    for i in ['loginWithUsernameAndPassword', 'logout', 'getLoginStatus']
+    for i in @actions
       @annotator[i] = this[i]
             
     addEventListener "annotatorReady", => @annotator.panel
@@ -30,6 +39,22 @@ class Annotator.Plugin.CodeAuth extends Annotator.Plugin
           window.dispatchEvent event
       )
 
+      .bind('onRegisterFailed', (ctx, data) =>
+        @_pendingRegister?.reject data
+        delete @_pendingRegister
+      )
+
+      .bind('onRegister', (ctx, user) =>
+        if @_pendingRegister?
+          @_pendingRegister?.resolve user
+          delete @_pendingRegister
+        else
+          event = document.createEvent "UIEvents"
+          event.initUIEvent "annotatorRegister", false, false, window, 0
+          event.user = user
+          window.dispatchEvent event
+      )
+
   # Public API to trigger a login
   loginWithUsernameAndPassword: (username, password) =>
     @_pendingLogin = @annotator.constructor.$.Deferred()
@@ -55,9 +80,22 @@ class Annotator.Plugin.CodeAuth extends Annotator.Plugin
     result = @annotator.constructor.$.Deferred()
     if @annotator.panel?
       @annotator.panel.call
-       method: "getLoginStatus"
-       success: (data) -> result.resolve data
-       error: (problem) -> result.reject problem
+        method: "getLoginStatus"
+        success: (data) ->
+          result.resolve data
+        error: (problem) -> result.reject problem
     else
       result.reject "Panel connection is not yet available."
     result
+
+  # Public API to register a user
+  registerUser: (username, email, password) =>
+    @_pendingRegister = @annotator.constructor.$.Deferred()
+    if @annotator.panel?
+      @annotator.panel.notify method: "registerUser", params:
+        username: username
+        email: email
+        password: password
+    else
+      @pendingRegister.reject "Panel connection is not yet available."
+    @_pendingRegister

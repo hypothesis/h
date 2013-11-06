@@ -249,6 +249,19 @@ class Hypothesis extends Annotator
       @auth.persona
     )
 
+    .bind('registerUser', (ctx, params) =>
+      @auth.$register params, (data) =>
+        for p in @providers
+          p.channel.notify
+            method: 'onRegister'
+            params: data.persona
+      , (data) =>
+        for p in @providers
+          p.channel.notify
+            method: 'onRegisterFailed'
+            params: data
+    )
+
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
     .on 'mousewheel', (event, delta) ->
