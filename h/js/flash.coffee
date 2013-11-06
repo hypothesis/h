@@ -20,15 +20,35 @@ class FlashProvider
       if msgs.length
         msg = msgs.shift()
         unless q then [q, msg] = msg
-        notice = Annotator.showNotification msg, q
-        @timeout = this._wait =>
-          # work around Annotator.Notification not removing classes
-          for _, klass of notice.options.classes
-            notice.element.removeClass klass
-          this._process()
+        console.log "Showing flash:", msg, q
+        if annotator.isOpen()
+          notice = Annotator.showNotification msg, q
+          @timeout = this._wait =>
+            # work around Annotator.Notification not removing classes
+            for _, klass of notice.options.classes
+              notice.element.removeClass klass
+            this._process()
+        else
+          annotator.host.notify
+            method: "showNotification"
+            params:
+              message: msg
+              type: q
+          @timeout = this._wait =>
+            annotator.host.notify
+              method: "removeNotification"
+            this._process()
         break
 
   _flash: (queue, messages) ->
+    # Workaround for horus returning the same error for
+    # both the username and the password field, and thus
+    # flashing the same error message twice
+    if messages.length is 2 and
+      messages[0] is "Invalid username or password." and
+      messages[1] is messages[0]
+        messages.pop()
+
     if @queues[queue]?
       @queues[queue] = @queues[queue]?.concat messages
       this._process() unless @timeout?

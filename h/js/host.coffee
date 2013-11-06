@@ -89,6 +89,17 @@ class Annotator.Host extends Annotator.Guest
       this.publish 'updateNotificationCounter', count
     )
 
+    .bind('showNotification', (ctx, n) ->
+      @_pendingNotice = Annotator.showNotification n.message, n.type
+    )
+
+    .bind('removeNotification', ->
+      # work around Annotator.Notification not removing classes
+      for _, klass of @_pendingNotice.options.classes
+        @_pendingNotice.element.removeClass klass
+      delete @_pendingNotice
+    )
+
   _setupDragEvents: ->
     el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
     el.width = el.height = 1
