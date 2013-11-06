@@ -20,7 +20,6 @@ class FlashProvider
       if msgs.length
         msg = msgs.shift()
         unless q then [q, msg] = msg
-        console.log "Showing flash:", msg, q
         if annotator.isOpen()
           notice = Annotator.showNotification msg, q
           @timeout = this._wait =>
