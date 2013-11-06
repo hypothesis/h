@@ -177,6 +177,20 @@ class FilterToElasticFilter(object):
             if not clause['case_sensitive']:
                 if type(clause['value']) is list:
                     value = [x.lower() for x in clause['value']]
+                    # XXX: Hack for username, to be able to search for case insensitive
+                    # without changing the ES index (currently: not analyzed)
+                    if field == 'user':
+                        res = []
+                        for val in value:
+                            username = re.search("^acct:([^@]+)", val).group(1)
+                            host = re.search("[^@]+$", val).group(0)
+                            userobj = models.User.get_by_username(self.request, username)
+                            if userobj:
+                                newvalue = 'acct:' + userobj.username + '@' + host
+                            else:
+                                newvalue = val
+                            res.append(newvalue)
+                        value = res
                 else:
                     value = clause['value'].lower()
                     # XXX: Hack for username, to be able to search for case insensitive
