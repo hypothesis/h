@@ -185,7 +185,8 @@ class FilterToElasticFilter(object):
                         username = re.search("^acct:([^@]+)", value).group(1)
                         host = re.search("[^@]+$", value).group(0)
                         userobj = models.User.get_by_username(self.request, username)
-                        value = 'acct:' + userobj.username + '@' + host
+                        if userobj:
+                            value = 'acct:' + userobj.username + '@' + host
             else:
                 value = clause['value']
             if clause["es_query_string"]:
