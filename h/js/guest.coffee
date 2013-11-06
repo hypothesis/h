@@ -54,9 +54,11 @@ class Annotator.Guest extends Annotator
           scope: "#{scope}:provider"
           onReady: =>
             console.log "Guest functions are ready for #{origin}"
-            event = document.createEvent "UIEvents"
-            event.initUIEvent "annotatorReady", false, false, window, 0
-            window.dispatchEvent event
+            setTimeout ->    
+              event = document.createEvent "UIEvents"
+              event.initUIEvent "annotatorReady", false, false, window
+              window.dispatchEvent event
+            , 1000
 
     # Load plugins
     for own name, opts of @options
