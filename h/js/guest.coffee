@@ -13,6 +13,8 @@ class Annotator.Guest extends Annotator
   # Plugin configuration
   options:
     Document: {}
+    # Use this with caution! Consider security implications!
+    # CodeAuth: {}
 
   # Internal state
   comments: null
@@ -130,32 +132,6 @@ class Annotator.Guest extends Annotator
     .bind('setVisibleHighlights', (ctx, state) =>
       this.setVisibleHighlights state, false
       this.publish 'setVisibleHighlights', state
-    )
-
-    .bind('onLogin', (ctx, user) =>
-      if @_pendingLogin?
-        @_pendingLogin?.resolve()
-        delete @_pendingLogin
-      else
-        event = document.createEvent "UIEvents"
-        event.initUIEvent "annotatorLogin", false, false, window, 0
-        event.user = user
-        window.dispatchEvent event
-    )
-
-    .bind('onLoginFailed', (ctx, data) =>
-      @_pendingLogin?.reject data
-      delete @_pendingLogin
-    )
-
-    .bind('onLogout', =>
-      if @_pendingLogout?
-        @_pendingLogout.resolve()
-        delete @_pendingLogout
-      else
-        event = document.createEvent "UIEvents"
-        event.initUIEvent "annotatorLogout", false, false, window, 0
-        window.dispatchEvent event
     )
 
   scanDocument: (reason = "something happened") =>
@@ -376,35 +352,3 @@ class Annotator.Guest extends Annotator
 #      console.trace()
       annotation.deleted = true
     super
-
-  # Public API to trigger a login
-  loginWithUsernameAndPassword: (username, password) ->
-    @_pendingLogin = @constructor.$.Deferred()
-    if @panel?
-      @panel.notify method: "login", params:
-        username: username
-        password: password
-    else
-      @panel.reject "Panel connection is not yet available."
-    @_pendingLogin
-
-  # Public API to trigger a logout
-  logout: ->
-    @_pendingLogout = @constructor.$.Deferred()
-    if @panel?
-      @panel.notify method: "logout"
-    else
-      @pendingLogout.reject "Panel connection is not yet available."
-    @_pendingLogout
-
-  # Public API to get login status
-  getLoginStatus: ->
-    result = @constructor.$.Deferred()
-    if @panel?
-      @panel.call
-       method: "getLoginStatus"
-       success: (data) -> result.resolve data
-       error: (problem) -> result.reject problem
-    else
-      result.reject "Panel connection is not yet available."
-    result
