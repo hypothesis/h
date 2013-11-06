@@ -89,8 +89,8 @@ class Annotator.Host extends Annotator.Guest
       this.publish 'updateNotificationCounter', count
     )
 
-    .bind('showNotification', (ctx, n) ->
-      @_pendingNotice = Annotator.showNotification n.message, n.type
+    .bind('showNotification', (ctx, n) =>
+      @_pendingNotice = @constructor.showNotification n.message, n.type
     )
 
     .bind('removeNotification', ->
