@@ -327,6 +327,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
         # If it's the upper tab, scroll to next bucket above
         if @isUpper bucket
+          @dynamicBucket = true
           threshold = defaultView.pageYOffset
           {next} = highlights.toArray().reduce (acc, hl) ->
             {pos, next} = acc
@@ -347,6 +348,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
         # If it's the lower tab, scroll to next bucket below
         else if @isLower bucket
+          @dynamicBucket = true
           threshold = defaultView.pageYOffset + defaultView.innerHeight - pad
           {next} = highlights.toArray().reduce (acc, hl) ->
             {pos, next} = acc
