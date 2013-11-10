@@ -66,7 +66,9 @@ class App
           plugins.Permissions._setAuthFromToken token
 
           if annotator.ongoing_edit
+            $timeout ->
               annotator.clickAdder()
+            , 1000
 
           if $scope.ongoingHighlightSwitch
             $scope.ongoingHighlightSwitch = false
