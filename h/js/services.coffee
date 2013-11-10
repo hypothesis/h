@@ -307,6 +307,7 @@ class Hypothesis extends Annotator
     this
 
   showViewer: (annotations=[]) =>
+    annotations = annotations.filter (a) -> a?
     this.show()
     @element.injector().invoke [
       '$location', '$rootScope',
