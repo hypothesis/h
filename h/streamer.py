@@ -21,7 +21,7 @@ from pyramid.security import has_permission
 
 from pyramid_sockjs.session import Session
 
-from h import events, interfaces
+from h import events, interfaces, models
 import re
 
 import logging
@@ -107,7 +107,8 @@ filter_schema = {
 
 
 class FilterToElasticFilter(object):
-    def __init__(self, filter_json):
+    def __init__(self, filter_json, request):
+        self.request = request
         self.filter = filter_json
         self.query = {
             "sort": [
@@ -176,8 +177,30 @@ class FilterToElasticFilter(object):
             if not clause['case_sensitive']:
                 if type(clause['value']) is list:
                     value = [x.lower() for x in clause['value']]
+                    # XXX: Hack for username, to be able to search for case insensitive
+                    # without changing the ES index (currently: not analyzed)
+                    if field == 'user':
+                        res = []
+                        for val in value:
+                            username = re.search("^acct:([^@]+)", val).group(1)
+                            host = re.search("[^@]+$", val).group(0)
+                            userobj = models.User.get_by_username(self.request, username)
+                            if userobj:
+                                newvalue = 'acct:' + userobj.username + '@' + host
+                            else:
+                                newvalue = val
+                            res.append(newvalue)
+                        value = res
                 else:
                     value = clause['value'].lower()
+                    # XXX: Hack for username, to be able to search for case insensitive
+                    # without changing the ES index (currently: not analyzed)
+                    if field == 'user':
+                        username = re.search("^acct:([^@]+)", value).group(1)
+                        host = re.search("[^@]+$", value).group(0)
+                        userobj = models.User.get_by_username(self.request, username)
+                        if userobj:
+                            value = 'acct:' + userobj.username + '@' + host
             else:
                 value = clause['value']
             if clause["es_query_string"]:
@@ -364,7 +387,7 @@ class StreamerSession(Session):
 
                 # If past is given, send the annotations back.
                 if "past_data" in payload and payload["past_data"]["load_past"] != "none":
-                    self.query = FilterToElasticFilter(payload)
+                    self.query = FilterToElasticFilter(payload, self.request)
                     if 'size' in self.query.query:
                         self.offsetFrom = int(self.query.query['size'])
                     self.send_annotations()
