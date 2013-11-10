@@ -296,6 +296,7 @@ class Hypothesis extends Annotator
         @buildReplyList children
 
   updateViewer: (annotations=[]) =>
+    annotations = annotations.filter (a) -> a?
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) =>
