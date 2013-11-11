@@ -1,8 +1,10 @@
 class window.DomTextMapper
 
+  @applicable: -> true
+
   USE_TABLE_TEXT_WORKAROUND = true
   USE_EMPTY_TEXT_WORKAROUND = true
-  SELECT_CHILDREN_INSTEAD = ["thead", "tbody", "ol", "a", "caption", "p", "span", "div", "h1", "h2", "h3", "h4", "h5", "h6", "li"]
+  SELECT_CHILDREN_INSTEAD = ["thead", "tbody", "ol", "a", "caption", "p", "span", "div", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "li", "form"]
   CONTEXT_LEN = 32
 
   @instances: []
@@ -85,11 +87,12 @@ class window.DomTextMapper
     if @domStableSince @lastScanned
       # We have a valid paths structure!
 #      console.log "We have a valid DOM structure cache."
-      return @path
+      return
 
     unless @pathStartNode.ownerDocument.body.contains @pathStartNode
       # We cannot map nodes that are not attached.
-      return @path
+#      console.log "This is not attached to dom. Exiting."
+      return
 
 #    console.log "No valid cache, will have to do a scan."
     startTime = @timestamp()
@@ -110,7 +113,7 @@ class window.DomTextMapper
     t2 = @timestamp()    
 #    console.log "Phase II (offset calculation) took " + (t2 - t1) + " ms."
 
-    @path
+    null
  
   # Select the given path (for visual identification),
   # and optionally scroll to it
@@ -417,7 +420,7 @@ class window.DomTextMapper
         console.log "Something seems to be wrong. I see visible content @ " +
             path + ", while some of the ancestor nodes reported empty contents.
  Probably a new selection API bug...."
-        
+        console.log "Anyway, text is '" + cont + "'."        
     else
       if verbose then console.log "Found no content at path " + path
       invisible = true
@@ -546,6 +549,7 @@ class window.DomTextMapper
 
     sel = @selectNode node
     text = @readSelectionText sel
+    if @postProcess? then text = @postProcess text
 
     if shouldRestoreSelection then @restoreSelection()
     text
