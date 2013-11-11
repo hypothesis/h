@@ -13,6 +13,8 @@ class Annotator.Guest extends Annotator
   # Plugin configuration
   options:
     Document: {}
+    # Use this with caution! Consider security implications!
+    #CodeAuth: {}
 
   # Internal state
   comments: null
@@ -25,6 +27,10 @@ class Annotator.Guest extends Annotator
     options.noScan = true
     super
     delete @options.noScan
+
+    # Save this reference to the Annotator class, so it's available
+    # later, even if someone has deleted the original reference
+    @Annotator = Annotator
 
     # Create an array for holding the comments
     @comments = []
@@ -54,6 +60,11 @@ class Annotator.Guest extends Annotator
           scope: "#{scope}:provider"
           onReady: =>
             console.log "Guest functions are ready for #{origin}"
+            setTimeout ->    
+              event = document.createEvent "UIEvents"
+              event.initUIEvent "annotatorReady", false, false, window
+              window.dispatchEvent event
+            , 1000
 
     # Load plugins
     for own name, opts of @options
