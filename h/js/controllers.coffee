@@ -355,6 +355,7 @@ class App
       , 1500
 
     $scope.reloadAnnotations = ->
+      return unless annotator.plugins.Store
       $scope.new_updates = 0
       $scope.$root.annotations = []
       annotator.threading.thread []
