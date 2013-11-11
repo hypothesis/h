@@ -208,7 +208,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
 
   _onMessage: (e) =>
     {source, origin, data} = e.originalEvent
-    match = data.match /^__annotator_dhcp_(discovery|ack|offer)(:\d+)?$/
+    match = data.match? /^__annotator_dhcp_(discovery|ack|offer)(:\d+)?$/
     return unless match
 
     if match[1] is 'discovery'
