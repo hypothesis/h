@@ -391,51 +391,6 @@ $baseFontSize: 14px;
   font-size: $baseFontSize * .86;
 }
 
-//FLASH/TOAST/ALERTS///////////////////////////////
-.annotator-notice {
-  @include border-radius(.1em);
-  @include smallshadow;
-  @include single-transition(opacity, .2s);
-  padding: .3em;
-  font-family: $sansFontFamily;
-  border: solid 1px;
-  bottom: 18%;
-  left: 50%;
-  margin-left: -15%;
-  opacity: 0;
-  pointer-events: none;
-  position: fixed;
-  text-align: center;
-  width: 30%;
-  z-index: 2000;
-
-  &.show, &.annotator-notice-show {
-    opacity: .8;
-    pointer-events: initial;
-  }
-}
-
-.annotator-notice-info {
-  color: #3a87ad;
-  background-color: #d9edf7;
-  border-color: #98BED1;
-}
-
-.annotator-notice-success {
-  color: #468847;
-  background-color: #dff0d8;
-  border-color: #8DC98E;
-}
-
-.annotator-notice-error {
-  color: #b94a48;
-  background-color: #f2dede;
-  border-color: #F5A1A0;
-}
-
-
-
-
 /*
   Mobile layout
   240-479 px
