@@ -34,7 +34,7 @@ class Annotator.Host extends Annotator.Guest
 
     # Save this reference to the Annotator class, so it's available
     # later, even if someone has deleted the original reference
-    @A = Annotator
+    @Annotator = Annotator
 
   _setupXDM: (options) ->
     channel = super
@@ -94,7 +94,7 @@ class Annotator.Host extends Annotator.Guest
     )
 
     .bind('showNotification', (ctx, n) =>
-      @_pendingNotice = @A.showNotification n.message, n.type
+      @_pendingNotice = @Annotator.showNotification n.message, n.type
     )
 
     .bind('removeNotification', =>
