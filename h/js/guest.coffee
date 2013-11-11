@@ -14,7 +14,7 @@ class Annotator.Guest extends Annotator
   options:
     Document: {}
     # Use this with caution! Consider security implications!
-    # CodeAuth: {}
+    #CodeAuth: {}
 
   # Internal state
   comments: null

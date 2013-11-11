@@ -284,7 +284,7 @@ inject = Bundle(
     annotator_bridge,
     annotator_document,
     # Use this with caution! Consider security implications!
-    # annotator_codeauth,
+    #annotator_codeauth,
     annotator_heatmap,
     annotator_toolbar,
     Uglify(
