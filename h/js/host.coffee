@@ -36,6 +36,12 @@ class Annotator.Host extends Annotator.Guest
     # later, even if someone has deleted the original reference
     @Annotator = Annotator
 
+    # Configure notification classes
+    Annotator.$.extend Annotator.Notification,
+      INFO: 'info'
+      ERROR: 'error'
+      SUCCESS: 'success'
+
   _setupXDM: (options) ->
     channel = super
 
