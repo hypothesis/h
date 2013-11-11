@@ -57,7 +57,7 @@ class Annotator.Plugin.CodeAuth extends Annotator.Plugin
 
   # Public API to trigger a login
   loginWithUsernameAndPassword: (username, password) =>
-    @_pendingLogin = @annotator.constructor.$.Deferred()
+    @_pendingLogin = @annotator.Annotator.$.Deferred()
     if @annotator.panel?
       @annotator.panel.notify method: "login", params:
         username: username
@@ -68,7 +68,7 @@ class Annotator.Plugin.CodeAuth extends Annotator.Plugin
 
   # Public API to trigger a logout
   logout: =>
-    @_pendingLogout = @annotator.constructor.$.Deferred()
+    @_pendingLogout = @annotator.Annotator.$.Deferred()
     if @annotator.panel?
       @annotator.panel.notify method: "logout"
     else
@@ -77,7 +77,7 @@ class Annotator.Plugin.CodeAuth extends Annotator.Plugin
 
   # Public API to get login status
   getLoginStatus: =>
-    result = @annotator.constructor.$.Deferred()
+    result = @annotator.Annotator.$.Deferred()
     if @annotator.panel?
       @annotator.panel.call
         method: "getLoginStatus"
@@ -90,7 +90,7 @@ class Annotator.Plugin.CodeAuth extends Annotator.Plugin
 
   # Public API to register a user
   registerUser: (username, email, password) =>
-    @_pendingRegister = @annotator.constructor.$.Deferred()
+    @_pendingRegister = @annotator.Annotator.$.Deferred()
     if @annotator.panel?
       @annotator.panel.notify method: "registerUser", params:
         username: username

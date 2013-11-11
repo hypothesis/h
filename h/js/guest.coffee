@@ -28,6 +28,10 @@ class Annotator.Guest extends Annotator
     super
     delete @options.noScan
 
+    # Save this reference to the Annotator class, so it's available
+    # later, even if someone has deleted the original reference
+    @Annotator = Annotator
+
     # Create an array for holding the comments
     @comments = []
 
