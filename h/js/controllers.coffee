@@ -9,11 +9,11 @@ class App
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
-    'annotator', 'authentication', 'flash', 'streamfilter'
+    'annotator', 'authentication', 'streamfilter'
   ]
   constructor: (
     $element, $filter, $http, $location, $rootScope, $scope, $timeout
-    annotator, authentication, flash, streamfilter
+    annotator, authentication, streamfilter
   ) ->
     # Get the base URL from the base tag or the app location
     baseUrl = angular.element('head base')[0]?.href

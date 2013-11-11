@@ -67,6 +67,8 @@ class Hypothesis extends Annotator
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
+    window.annotator = this
+
     # Generate client ID
     buffer = new Array(16)
     uuid.v4 null, buffer, 0
@@ -357,6 +359,9 @@ class Hypothesis extends Annotator
 
   hide: =>
     @element.scope().frame.visible = false
+
+  isOpen: =>
+    @element.scope().frame.visible
 
   patch_store: ->
     $location = @element.injector().get '$location'

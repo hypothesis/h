@@ -32,6 +32,16 @@ class Annotator.Host extends Annotator.Guest
         if @frame.hasClass 'annotator-collapsed'
           this.showFrame()
 
+    # Save this reference to the Annotator class, so it's available
+    # later, even if someone has deleted the original reference
+    @Annotator = Annotator
+
+    # Configure notification classes
+    Annotator.$.extend Annotator.Notification,
+      INFO: 'info'
+      ERROR: 'error'
+      SUCCESS: 'success'
+
   _setupXDM: (options) ->
     channel = super
 
@@ -87,6 +97,18 @@ class Annotator.Host extends Annotator.Guest
 
     .bind('updateNotificationCounter', (ctx, count) =>
       this.publish 'updateNotificationCounter', count
+    )
+
+    .bind('showNotification', (ctx, n) =>
+      @_pendingNotice = @Annotator.showNotification n.message, n.type
+    )
+
+    .bind('removeNotification', =>
+      # work around Annotator.Notification not removing classes
+      return unless @_pendingNotice?
+      for _, klass of @_pendingNotice.options.classes
+        @_pendingNotice.element.removeClass klass
+      delete @_pendingNotice
     )
 
   _setupDragEvents: ->
