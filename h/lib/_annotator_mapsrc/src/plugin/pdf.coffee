@@ -64,6 +64,8 @@ class window.PDFTextMapper extends window.PageTextMapperCore
       documentChanged: ->
       timestamp: ->
 
+    $(PDFView.container).on 'scroll', => @_onScroll()
+
   _extractionPattern: /[ ]+/g
   _parseExtractedText: (text) => text.replace @_extractionPattern, " "
 

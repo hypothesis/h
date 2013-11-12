@@ -105,12 +105,16 @@ annotator_document = Uglify(
     'lib/annotator.document.js',
     output='lib/annotator.document.min.js'
 )
-annotator_fuzzy = Uglify(
+annotator_text = Uglify(
+    'lib/annotator.textanchors.js',
+    output='lib/annotator.textanchors.min.js'
+)
+annotator_fuzzytext = Uglify(
     Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js'),
     Coffee('lib/text_match_engines.coffee', output='js/text_match_engines.js'),
     Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
-    'lib/annotator.fuzzyanchoring.js',
-    output='lib/annotator.fuzzyanchoring.min.js'
+    'lib/annotator.fuzzytextanchors.js',
+    output='lib/annotator.fuzzytextanchors.min.js'
 )
 annotator_pdf = Uglify(
     'lib/annotator.pdf.js',
@@ -290,7 +294,8 @@ inject = Bundle(
     annotator_bridge,
     annotator_document,
     annotator_heatmap,
-    annotator_fuzzy,
+    annotator_text,
+    annotator_fuzzytext,
     annotator_pdf,
     annotator_toolbar,
     Uglify(
