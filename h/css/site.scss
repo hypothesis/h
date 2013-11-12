@@ -10,6 +10,7 @@ $baseFontSize: 16px;
 body {
   @extend .noise;
   font-family: $sansFontFamily;
+  word-wrap: break-word;
 }
 
 header {
@@ -84,7 +85,7 @@ ol {
       margin: 0 auto;
       max-width: $break-large;
     }
-    @include respond-to(handhelds) {
+    @include respond-to(wide-handhelds handhelds) {
       padding: 0 .6em;
       margin: 0 auto;
       max-width: $break-large;
