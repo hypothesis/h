@@ -57,9 +57,9 @@ def extension(args, console):
         return 2
 
     from codecs import open
-    from os import makedirs
-    from os.path import abspath, exists, join
-    from shutil import copyfile, copytree, rmtree
+    from os import listdir, makedirs
+    from os.path import abspath, exists, isdir, join
+    from shutil import copy, copyfile, copytree, rmtree
     from urlparse import (
         urljoin, urlparse, urlunparse, uses_netloc, uses_relative,
     )
@@ -205,6 +205,14 @@ def extension(args, console):
     # Build the chrome extension
     if exists('./build/chrome'): rmtree('./build/chrome')
     copytree(resolve('h:browser/chrome').abspath(), './build/chrome')
+
+    for f in listdir(resolve("h:browser/chrome_pdfjs").abspath()):
+      nfn = join(resolve("h:browser/chrome_pdfjs").abspath(), f)
+      if isdir(nfn):
+        copytree(nfn, join('./build/chrome/',f))
+      else:
+        copy(nfn, './build/chrome/')
+
     copytree(resolve('h:images').abspath(), './build/chrome/public/images')
     copytree(resolve('h:lib').abspath(), './build/chrome/public/lib')
 
