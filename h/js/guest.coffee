@@ -5,10 +5,11 @@ class Annotator.Guest extends Annotator
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
-    ".annotator-hl mousedown": "onHighlightMousedown"
-    ".annotator-hl click": "onHighlightClick"
     "setTool": "onSetTool"
     "setVisibleHighlights": "onSetVisibleHighlights"
+
+  onAnchorMouseover: -> #console.log "Overridden mouse over"
+  onAnchorMouseout: -> #console.log "Overridden mouse out"
 
   # Plugin configuration
   options:
@@ -42,7 +43,7 @@ class Annotator.Guest extends Annotator
         formatted = {}
         if annotation.document?
           formatted['uri'] = @plugins.Document.uri()
-        for k, v of annotation when k not in ['highlights', 'anchors']
+        for k, v of annotation when k isnt 'anchors'
           formatted[k] = v
         # Work around issue in jschannel where a repeated object is considered
         # recursive, even if it is not its own ancestor.
@@ -66,14 +67,6 @@ class Annotator.Guest extends Annotator
     for own name, opts of @options
       if not @plugins[name]
         this.addPlugin(name, opts)
-
-    this.subscribe "annotationPhysicallyAnchored", (anchor) =>
-      if anchor.annotation.id? # Is this a finished annotation ?
-        @plugins.Heatmap._update()
-
-    this.subscribe "annotationPhysicallyUnAnchored", (anchor) =>
-      if anchor.annotation.id? # Is this a finished annotation ?
-        @plugins.Heatmap._update()
 
     # Scan the document text with the DOM Text libraries
     this.scanDocument "Annotator initialized"
@@ -106,19 +99,19 @@ class Annotator.Guest extends Annotator
     )
 
     .bind('setActiveHighlights', (ctx, tags=[]) =>
-      @wrapper.find('.annotator-hl')
-      .each ->
-        if $(this).data('annotation').$$tag in tags
-          $(this).addClass('annotator-hl-active')
-        else if not $(this).hasClass('annotator-hl-temporary')
-          $(this).removeClass('annotator-hl-active')
+      for hl in @getHighlights()
+        if hl.annotation.$$tag in tags
+          hl.setActive true
+        else
+          unless hl.isTemporary()
+            hl.setActive false
     )
 
     .bind('scrollTo', (ctx, tag) =>
-      @wrapper.find('.annotator-hl')
-      .each ->
-        if $(this).data('annotation').$$tag is tag
-          $(this).scrollintoview()
+      for hl in @getHighlights()
+        if hl.annotation.$$tag is tag
+          hl.scrollTo()
+          return
     )
 
     .bind('adderClick', =>
@@ -207,7 +200,6 @@ class Annotator.Guest extends Annotator
       annotation = {inject: true}
 
       annotation = this.setupAnnotation annotation
-      $(annotation.highlights).addClass 'annotator-hl'
 
       # Notify listeners
       this.publish 'beforeAnnotationCreated', annotation
@@ -217,19 +209,13 @@ class Annotator.Guest extends Annotator
 
   # When clicking on a highlight in highlighting mode,
   # set @noBack to true to prevent the sidebar from closing
-  onHighlightMousedown: (event) =>
+  onAnchorMousedown: (annotations) =>
     if (@tool is 'highlight') or @visibleHighlights then @noBack = true
 
   # When clicking on a highlight in highlighting mode,
   # tell the sidebar to bring up the viewer for the relevant annotations
-  onHighlightClick: (event) =>
+  onAnchorClick: (annotations) =>
     return unless (@tool is 'highlight') or @visibleHighlights and @noBack
-
-    # Collect relevant annotations
-    annotations = $(event.target)
-      .parents('.annotator-hl')
-      .addBack()
-      .map -> return $(this).data("annotation")
 
     # Tell sidebar to show the viewer for these annotations
     this.showViewer annotations
@@ -306,14 +292,15 @@ class Annotator.Guest extends Annotator
     # Show a temporary highlight so the user can see what they selected
     # Also extract the quotation and serialize the ranges
     annotation = this.setupAnnotation(this.createAnnotation())
-    $(annotation.highlights).addClass('annotator-hl-temporary')
+
+    hl.setTemporary(true) for hl in @getHighlights([annotation])
 
     # Subscribe to the editor events
 
     # Make the highlights permanent if the annotation is saved
     save = =>
       do cleanup
-      $(annotation.highlights).removeClass('annotator-hl-temporary')
+      hl.setTemporary false for hl in @getHighlights [annotation]
 
     # Remove the highlights if the edit is cancelled
     cancel = =>

@@ -83,7 +83,11 @@ class Delegator
   #
   # Returns itself.
   addEvent: (bindTo, event, functionName) ->
-    closure = => this[functionName].apply(this, arguments)
+    f = if typeof functionName is 'string'
+      this[functionName]
+    else
+      functionName
+    closure = => f.apply(this, arguments)
 
     isBlankSelector = typeof bindTo is 'string' and bindTo.replace(/\s+/g, '') is ''
 

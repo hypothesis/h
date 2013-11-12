@@ -75,9 +75,36 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     $(window).on 'resize scroll', this._update
     $(document.body).on 'resize scroll', '*', this._update
 
-    if window.PDFView?
-      # XXX: PDF.js hack
-      $(PDFView.container).on 'scroll', this._update
+    # Event handler to finish scrolling when we have to
+    # wait for anchors to be realized
+    @annotator.subscribe "anchorRealized", (anchor) =>
+      if anchor.annotation.id? # Is this a finished annotation ?
+        @_update()
+
+      if @pendingScroll? and anchor in @pendingScroll.anchors
+        # One of the wanted anchors has been realized
+        unless --@pendingScroll.count
+          # All anchors have been realized
+          page = @pendingScroll.page
+          dir = if @pendingScroll.direction is "up" then +1 else -1
+          {next} = @pendingScroll.anchors.reduce (acc, anchor) ->
+            {start, next} = acc
+            hl = anchor.highlight[page]
+            if not next? or hl.getTop()*dir > start*dir
+              start: hl.getTop()
+              next: hl
+            else
+              acc
+          , {}
+
+          next.paddedScrollDownTo()
+          delete @pendingScroll
+
+    @annotator.subscribe "anchorVirtualized", (anchor) =>
+      if anchor.annotation.id? # Is this a finished annotation ?
+        @_update()
+
+    addEventListener "docPageScrolling", => @_update()
 
   _maybeRebaseUrls: ->
     # We can't rely on browsers to implement the xml:base property correctly.
@@ -115,35 +142,81 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     .interpolate(d3.interpolateHcl)
     c(v).toString()
 
-  _collectPendingVirtualAnnotations: (startIndex, endIndex) ->
+  _collectVirtualAnnotations: (startIndex, endIndex) ->
     results = []
     for index in [startIndex .. endIndex]
       anchors = @annotator.anchors[index]
       if anchors?
-        $.merge results, (anchor.annotation for anchor in anchors when not anchor.allRendered)
+        $.merge results, (anchor.annotation for anchor in anchors when not anchor.fullyRealized)
     results
 
-  _scrollTo: (where, up) ->
-    wrapper = @annotator.wrapper
-    defaultView = wrapper[0].ownerDocument.defaultView
-    pad = defaultView.innerHeight * .2
-    where?.scrollintoview
-      complete: ->
-        if this.parentNode is this.ownerDocument
-          scrollable = $(this.ownerDocument.body)
+  # Find the first/last annotation from the list, based on page number,
+  # and Y offset, if already known, and jump to it.
+  # If the Y offsets are not yet known, just jump the page,
+  # wait for the highlights to be realized, and finish the selection then.
+  _jumpMinMax: (annotations, direction) ->
+    unless direction in ["up", "down"]
+      throw "Direction is mandatory!"
+    dir = if direction is "up" then +1 else -1
+    {next} = annotations.reduce (acc, ann) ->
+      {start, next} = acc
+      anchor = ann.anchors[0]
+      if not next? or start.page*dir < anchor.startPage*dir
+        # This one is obviously better
+        #console.log "Found anchor on better page."
+        start:
+          page: anchor.startPage
+          top: anchor.highlight[anchor.startPage]?.getTop()
+        next: [anchor]
+      else if start.page is anchor.startPage
+        # This is on the same page, might be better
+        hl = anchor.highlight[start.page]
+        if hl?
+          # We have a real highlight, let's compare coordinates
+          if start.top*dir < hl.getTop()*dir
+            #console.log "Found anchor on same page, better pos."
+            # OK, this one is better
+            start:
+              page: start.page
+              top: hl.getTop()
+            next: [anchor]
+          else
+            # No, let's keep the old one instead
+            #console.log "Found anchor on same page, worse pos. (Known: ", start.top, "; found: ", hl.getTop(), ")"
+            acc
         else
-          scrollable = $(this)
-        top = scrollable.scrollTop()
-        correction = pad * (if up then -1 else +1)
-        scrollable.stop().animate {scrollTop: top + correction}, 300
+          # The page is not yet rendered, can't decide yet.
+          # Let's just store this one, too
+          #console.log "Found anchor on same page, unknown pos."
+          start: page: start.page
+          next: $.merge next, [anchor]
+      else
+        # No, we have clearly seen better alternatives
+        acc
+    , {}
+    #console.log "Next is", next
 
-  _scrollUpTo: (where) -> this._scrollTo where, true
+    # Get an anchor from the page we want to go to
+    anchor = next[0]
+    startPage = anchor.startPage
 
-  _scrollDownTo: (where) -> this._scrollTo where, false
+    # Is this rendered?
+    if @annotator.domMapper.isPageMapped startPage
+      # If it was rendered, then we only have one result. Go there.
+      hl = anchor.highlight[startPage]
+      hl.paddedScrollTo direction
+    else
+      # Not rendered yet. Go to the page, and see what happens.
+      @pendingScroll =
+        anchors: next
+        count: next.length
+        page: startPage
+        direction: direction
+      @annotator.domMapper.setPageIndex startPage
 
   _update: =>
     wrapper = @annotator.wrapper
-    highlights = wrapper.find('.annotator-hl')
+    highlights = @annotator.getHighlights()
     defaultView = wrapper[0].ownerDocument.defaultView
 
     # Keep track of buckets of annotations above and below the viewport
@@ -156,17 +229,17 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     currentPage = mapper.getPageIndex()
     lastPage = mapper.getPageCount() - 1
 
-    # Collect the pending virtual anchors from above and below
-    $.merge above, this._collectPendingVirtualAnnotations 0, currentPage-1
-    $.merge below, this._collectPendingVirtualAnnotations currentPage+1, lastPage
+    # Collect the virtual anchors from above and below
+    $.merge above, this._collectVirtualAnnotations 0, currentPage-1
+    $.merge below, this._collectVirtualAnnotations currentPage+1, lastPage
 
     comments = @annotator.comments.slice()
 
-    # Construct control points for the heatmap highlights
-    points = highlights.toArray().reduce (points, hl, i) =>
-      d = $(hl).data('annotation')
-      x = $(hl).offset().top - wrapper.offset().top - defaultView.pageYOffset
-      h = $(hl).outerHeight(true)
+    # Construct control points for the heatmap
+    points = highlights.reduce (points, hl, i) =>
+      d = hl.annotation
+      x = hl.getTop() - wrapper.offset().top - defaultView.pageYOffset
+      h = hl.getHeight()
 
       if x <= @BUCKET_SIZE + @BUCKET_THRESHOLD_PAD
         if d not in above then above.push d
@@ -309,7 +382,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           [offsets[1], i, 1, 1e-6] ]
 
     # Update the data bindings
-    element = d3.select(@element[0]).datum(highlights)
+    element = d3.select(@element[0])
 
     # Update gradient stops
     opacity = d3.scale.pow().domain([0, max]).range([.1, .6]).exponent(2)
@@ -344,71 +417,32 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
       # Creates highlights corresponding bucket when mouse is hovered
       .on 'mousemove', (bucket) =>
-        highlights = wrapper.find('.annotator-hl')
-        highlights.toArray().forEach (hl) =>
-          if $(hl).data('annotation') in @buckets[bucket]
-            $(hl).addClass('annotator-hl-active')
-          else if not $(hl).hasClass('annotator-hl-temporary')
-            $(hl).removeClass('annotator-hl-active')
+        for hl in @annotator.getHighlights()
+          if hl.annotation in @buckets[bucket]
+            hl.setActive true
+          else
+            unless hl.isTemporary()
+              hl.setActive false
 
       # Gets rid of them after
       .on 'mouseout', =>
-        highlights = wrapper.find('.annotator-hl')
-        highlights.removeClass('annotator-hl-active')
+        for hl in @annotator.getHighlights()
+          unless hl.isTemporary()
+            hl.setActive false
 
       # Does one of a few things when a tab is clicked depending on type
       .on 'click', (bucket) =>
         d3.event.stopPropagation()
         pad = defaultView.innerHeight * .2
 
-        # If it's the upper tab, scroll to next bucket above (virtual version)
+        # If it's the upper tab, scroll to next anchor above
         if (@isUpper bucket)
           @dynamicBucket = true
-          # Find the next annotation, based on character position
-          {next} = @buckets[bucket].reduce (acc, ann) ->
-            {start, next} = acc
-            if start < ann.anchors[0].virtual.start
-              start: ann.anchors[0].virtual.start
-              next: ann
-            else
-              acc
-          , {start: 0, next: null}
-          anchor = next.anchors[0] # This is where we want to go
-          startPage = anchor.virtual.startPage
-          if anchor.physical[startPage]? # Is this rendered?
-            hl = anchor.physical[startPage].highlights
-            this._scrollUpTo $(hl)
-          else # Not rendered yet
-            @pendingScroll =
-              anchor: anchor
-              page: startPage
-            @annotator.domMapper.setPageIndex startPage
-
-        # If it's the lower tab, scroll to next bucket below (virtual version)
+          @_jumpMinMax @buckets[bucket], "up"
+        # If it's the lower tab, scroll to next anchor below
         else if (@isLower bucket)
           @dynamicBucket = true
-          # Find the next annotation, based on character position
-          {next} = @buckets[bucket].reduce (acc, ann) ->
-            {start, next} = acc
-            if ann.anchors[0].virtual.start < start
-              start: ann.anchors[0].virtual.start
-              next: ann
-            else
-              acc
-          , {start: @annotator.domMapper.getCorpus().length, next: null}
-          anchor = next.anchors[0] # This is where we want to go
-          startPage = anchor.virtual.startPage
-          if anchor.physical[startPage]? # Is this rendered?
-            hl = anchor.physical[startPage].highlights
-            this._scrollDownTo $(hl)
-          else # Not rendered yet
-            # Pass this value to our listener
-            @pendingScroll =
-              anchor: anchor
-              page: startPage
-            @annotator.domMapper.setPageIndex startPage
-
-        # If it's neither of the above, load the bucket into the viewer
+          @_jumpMinMax @buckets[bucket], "down"
         else
           d3.event.stopPropagation()
           @dynamicBucket = false
@@ -433,22 +467,14 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     if @dynamicBucket
       this._fillDynamicBucket()
 
-    # Event handler to finish scrolling when we have to wait for rendering
-    @annotator.subscribe "annotationPhysicallyAnchored", (anchor) =>
-      if @pendingScroll? and anchor is @pendingScroll.anchor
-        # The wanted annotation has been anchored.
-        hl = anchor.physical[@pendingScroll.page].highlights
-        this._scrollDownTo $(hl)
-        delete @pendingScroll
-
   _fillDynamicBucket: =>
     top = window.pageYOffset
     bottom = top + $(window).innerHeight()
-    highlights = @annotator.wrapper.find('.annotator-hl')
-    visible = highlights.toArray().reduce (acc, hl) =>
-      if $(hl).offset().top >= top and $(hl).offset().top <= bottom
-        if $(hl).data('annotation') not in acc
-          acc.push $(hl).data('annotation')
+    anchors = @annotator.getHighlights()
+    visible = anchors.reduce (acc, hl) =>
+      if top <= hl.getTop() <= bottom
+        if hl.annotation not in acc
+          acc.push hl.annotation
       acc
     , []
 #    $.merge visible, @annotator.comments

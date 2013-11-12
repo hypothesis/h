@@ -44,8 +44,6 @@ class Annotator extends Delegator
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
-    ".annotator-hl mouseover":           "onHighlightMouseover"
-    ".annotator-hl mouseout":            "startViewerHideTimer"
 
   html:
     adder:   '<div class="annotator-adder"><button>' + _t('Annotate') + '</button></div>'
@@ -101,7 +99,7 @@ class Annotator extends Delegator
     this._setupWrapper()
     unless @options.noMatching
       this._setupDocumentAccessStrategies()
-      this._setupVirtualAnchoringStrategies()
+      this._setupAnchoringStrategies()
     this._setupViewer()._setupEditor()
     this._setupDynamicStyle()
 
@@ -136,24 +134,24 @@ class Annotator extends Delegator
         @domMapper = new s.mapper()
         @anchors = {}
         addEventListener "docPageMapped", (evt) =>
-          @_physicallyAnchorPage evt.pageIndex
+          @_realizePage evt.pageIndex
         addEventListener "docPageUnmapped", (evt) =>
-          @_physicallyUnAnchorPage evt.pageIndex
+          @_virtualizePage evt.pageIndex
         s.init?()
         return this
 
-  # Initializes the available virtual anchoring strategies
-  _setupVirtualAnchoringStrategies: ->
-    @virtualAnchoringStrategies = [
+  # Initializes the available anchoring strategies
+  _setupAnchoringStrategies: ->
+    @anchoringStrategies = [
       # Simple strategy based on DOM Range
       name: "range"
-      code: this.createVirtualAnchorFromRangeSelector
+      code: this.createAnchorFromRangeSelector
     ,
       # Position-based strategy. (The quote is verified.)
       # This can handle document structure changes,
       # but not the content changes.
       name: "position"
-      code: this.createVirtualAnchorFromPositionSelector
+      code: this.createAnchorFromPositionSelector
     ]
 
     this
@@ -406,7 +404,7 @@ class Annotator extends Delegator
 
   # Try to determine the anchor position for a target
   # using the saved Range selector. The quote is verified.
-  createVirtualAnchorFromRangeSelector: (target) ->
+  createAnchorFromRangeSelector: (annotation, target) ->
     selector = this.findSelector target.selector, "RangeSelector"
     unless selector? then return null
 
@@ -432,16 +430,15 @@ class Annotator extends Delegator
       #  " Current quote is '#{currentQuote}'.)"
       return null
 
-    # Create a "text poision"-type virtual anchor from this range
-    startPage: startInfo.pageIndex ? 0
-    start: startInfo.start
-    endPage: endInfo.pageIndex ? 0
-    end: endInfo.end
-    quote: currentQuote
+    # Create a TextRangeAnchor from this range
+    new TextRangeAnchor this, annotation, target,
+      startInfo.start, endInfo.end,
+      (startInfo.pageIndex ? 0), (endInfo.pageIndex ? 0),
+      currentQuote
 
   # Try to determine the anchor position for a target
   # using the saved position selector. The quote is verified.
-  createVirtualAnchorFromPositionSelector: (target) ->
+  createAnchorFromPositionSelector: (annotation, target) ->
     selector = this.findSelector target.selector, "TextPositionSelector"
     unless selector? then return null
     content = @domMapper.getCorpus()[selector.start .. selector.end-1].trim()
@@ -456,18 +453,17 @@ class Annotator extends Delegator
       #  " Current quote is '#{currentQuote}'.)"
       return null
 
-    # OK, we have everything.
-    # Compile the data required to store this virtual anchor
-    startPage: @domMapper.getPageIndexForPos selector.start
-    endPage: @domMapper.getPageIndexForPos selector.end
-    start: selector.start
-    end: selector.end
-    quote: currentQuote
+    # Create a TextRangeAnchor from this data
+    new TextRangeAnchor this, annotation, target,
+      selector.start, selector.end,
+      (@domMapper.getPageIndexForPos selector.start),
+      (@domMapper.getPageIndexForPos selector.end),
+      currentQuote
 
   # Try to find the right anchoring point for a given target
   #
-  # Returns a normalized range if succeeded, null otherwise
-  createVirtualAnchor: (target) ->
+  # Returns an Anchor object if succeeded, null otherwise
+  createAnchor: (annotation, target) ->
     unless target?
       throw new Error "Trying to find anchor for null target!"
 #    console.log "Trying to find anchor for target: "
@@ -475,14 +471,14 @@ class Annotator extends Delegator
 
     error = null
     anchor = null
-    for s in @virtualAnchoringStrategies
+    for s in @anchoringStrategies
       try
-        a = s.code.call this, target
+        a = s.code.call this, annotation, target
         if a
-#          console.log "Strategy '" + s.name + "' yielded a virtual anchor."
+#          console.log "Strategy '" + s.name + "' yielded an anchor."
           return result: a
 #        else
-#          console.log "Strategy '" + s.name + "' did NOT yield a virtual anchor."
+#          console.log "Strategy '" + s.name + "' did NOT yield an anchor."
       catch error
 #        console.log "Strategy '" + s.name + "' has thrown an error."
         if error instanceof Range.RangeError
@@ -524,39 +520,29 @@ class Annotator extends Delegator
     annotation.quote = []
     annotation.anchors = []
     annotation.ranges = []
-    annotation.highlights = []
 
     for t in annotation.target
       try
-        result = this.createVirtualAnchor t
-        vAnchor = result.result
+        # Create a vritual anchor for this target
+        result = this.createAnchor annotation, t
+        anchor = result.result
         if result.error? instanceof Range.RangeError
           this.publish 'rangeNormalizeFail', [annotation, result.error.range, result.error]
-        if vAnchor?
-          annotation.quote.push t.quote = vAnchor.quote
-          delete vAnchor.quote
-          t.diffHTML = vAnchor.diffHTML
-          delete vAnchor.diffHTML
-          t.diffCaseOnly = vAnchor.diffCaseOnly
-          delete vAnchor.diffCaseOnly
-
-          # Create a new anchor object, starting with a virtual anchor
-          anchor =
-            annotation: annotation
-            target: t
-            virtual: vAnchor
-            physical: {}
+        if anchor?
+          annotation.quote.push t.quote = anchor.quote
+          t.diffHTML = anchor.diffHTML
+          t.diffCaseOnly = anchor.diffCaseOnly
 
           # Store this anchor for the annotation
           annotation.anchors.push anchor
 
           # Store the anchor for all involved pages
-          for pageIndex in [vAnchor.startPage .. vAnchor.endPage]
+          for pageIndex in [anchor.startPage .. anchor.endPage]
             @anchors[pageIndex] ?= []
             @anchors[pageIndex].push anchor
 
           # Realizing the anchor
-          this._physicallyAnchor anchor
+          anchor.realize()
 
         else
           console.log "Could not find anchor target for annotation '" +
@@ -602,9 +588,7 @@ class Annotator extends Delegator
   deleteAnnotation: (annotation) ->
     if annotation.anchors?    
       for a in annotation.anchors
-        for page, data of a.physical
-          this._physicallyUnAnchor a, page
-        this._removeAnchor a
+        a.remove()
 
     this.publish('annotationDeleted', [annotation])
     annotation
@@ -657,41 +641,6 @@ class Annotator extends Delegator
     else
       console.warn(_t("Can't dump annotations without Store plugin."))
       return false
-
-  # Public: Wraps the DOM Nodes within the provided range with a highlight
-  # element of the specified class and returns the highlight Elements.
-  #
-  # normedRange - A NormalizedRange to be highlighted.
-  # cssClass - A CSS class to use for the highlight (default: 'annotator-hl')
-  #
-  # Returns an array of highlight Elements.
-  highlightRange: (normedRange, cssClass='annotator-hl') ->
-    white = /^\s*$/
-
-    hl = $("<span class='#{cssClass}'></span>")
-
-    # Ignore text nodes that contain only whitespace characters. This prevents
-    # spans being injected between elements that can only contain a restricted
-    # subset of nodes such as table rows and lists. This does mean that there
-    # may be the odd abandoned whitespace node in a paragraph that is skipped
-    # but better than breaking table layouts.
-
-    for node in normedRange.textNodes() when not white.test node.nodeValue
-      r = $(node).wrapAll(hl).parent().show()[0]
-      window.DomTextMapper.changed node, "created hilite"
-      r
-
-  # Public: highlight a list of ranges
-  #
-  # normedRanges - An array of NormalizedRanges to be highlighted.
-  # cssClass - A CSS class to use for the highlight (default: 'annotator-hl')
-  #
-  # Returns an array of highlight Elements.
-  highlightRanges: (normedRanges, cssClass='annotator-hl') ->
-    highlights = []
-    for r in normedRanges
-      $.merge highlights, this.highlightRange(r, cssClass)
-    highlights
 
   # Public: Registers a plugin with the Annotator. A plugin can only be
   # registered once. The plugin will be instantiated in the following order.
@@ -833,8 +782,9 @@ class Annotator extends Delegator
 
     for range in @selectedRanges
       container = range.commonAncestor
-      if $(container).hasClass('annotator-hl')
-        container = $(container).parents(':not([class^=annotator-hl])')[0]
+      # TODO: what is selection ends inside a different type of highlight?
+      if TextHighlight.isInstance container
+        container = TextHighlight.getIndependentParent container
       return if this.isAnnotator(container)
 
     if event and @selectedRanges.length
@@ -868,27 +818,6 @@ class Annotator extends Delegator
   isAnnotator: (element) ->
     !!$(element).parents().andSelf().filter('[class^=annotator-]').not(@wrapper).length
 
-  # Annotator#element callback. Displays viewer with all annotations
-  # associated with highlight Elements under the cursor.
-  #
-  # event - A mouseover Event object.
-  #
-  # Returns nothing.
-  onHighlightMouseover: (event) =>
-    # Cancel any pending hiding of the viewer.
-    this.clearViewerHideTimer()
-
-    # Don't do anything if we're making a selection or
-    # already displaying the viewer
-    return false if @mouseIsDown or @viewer.isShown()
-
-    annotations = $(event.target)
-      .parents('.annotator-hl')
-      .andSelf()
-      .map -> return $(this).data("annotation")
-
-    this.showViewer($.makeArray(annotations), util.mousePosition(event, @wrapper[0]))
-
   # Annotator#element callback. Sets @ignoreMouseup to true to prevent
   # the annotation selection events firing when the adder is clicked.
   #
@@ -920,12 +849,16 @@ class Annotator extends Delegator
     annotation = this.setupAnnotation(annotation)
 
     # Show a temporary highlight so the user can see what they selected
-    $(annotation.highlights).addClass('annotator-hl-temporary')
+    for anchor in annotation.anchors
+      for page, hl of anchor.highlight
+        hl.setTemporary true
 
     # Make the highlights permanent if the annotation is saved
     save = =>
       do cleanup
-      $(annotation.highlights).removeClass('annotator-hl-temporary')
+      for anchor in annotation.anchors
+        for page, hl of anchor.highlight
+          hl.setTemporary false
       # Fire annotationCreated events so that plugins can react to them
       this.publish('annotationCreated', [annotation])
 
@@ -986,111 +919,57 @@ class Annotator extends Delegator
     # Delete highlight elements.
     this.deleteAnnotation annotation
 
-  # Virtual/Physical anchoring
+  # Collect all the highlights (optionally for a given set of annotations)
+  getHighlights: (annotations) ->
+    results = []
+    if annotations?
+      # Collect only the given set of annotations
+      for annotation in annotations
+        for anchor in annotation.anchors
+          for page, hl of anchor.highlight
+            results.push hl
+    else
+      # Collect from everywhere
+      for page, anchors of @anchors
+        $.merge results, (anchor.highlight[page] for anchor in anchors when anchor.highlight[page]?)
+    results
 
-  # Remove an anchor from all involved pages
-  _removeAnchor: (anchor) ->
-    # Go over all the pages    
-    for index in [anchor.virtual.startPage .. anchor.virtual.endPage]
-      # Remove the anchor from the list
-      i = @anchors[index].indexOf anchor
-      @anchors[index][i..i] = []
-      # Kill the list if it's empty
-      delete @anchors[index] unless @anchors[index].length
+  # Realize anchors on a given pages
+  _realizePage: (index) ->
+    # If the page is not mapped, give up
+    return unless @domMapper.isPageMapped index
 
-  _physicallyAnchor: (anchor) ->
-    return if anchor.allRendered # If we have everything, go home
-
-    vAnchor = anchor.virtual
-    pAnchor = anchor.physical
-
-    # Collect the pages that are already rendered
-    renderedPages = [vAnchor.startPage .. vAnchor.endPage].filter (index) =>
-      @domMapper.isPageMapped index
-
-    # Collect the pages that are already rendered, but not yet anchored
-    pagesTodo = renderedPages.filter (index) -> not pAnchor[index]?
-
-    return unless pagesTodo.length # Return if nothing to do
-
-    # First calculate the ranges
-    mappings = @domMapper.getMappingsForCharRange vAnchor.start, vAnchor.end, pagesTodo
-
-    for page, section of mappings.sections
-      browserRange = new Range.BrowserRange section.realRange
-      range = browserRange.normalize @wrapper[0]
-
-      # Get the serialized range
-      serializedRange = range.serialize @wrapper[0], '.annotator-hl'
-
-      # Add the range to the annotation
-      anchor.annotation.ranges.push serializedRange
-
-      # Create a highlights, and link them with the annotation
-      highlights = this.highlightRange range
-      $(highlights).data('annotation', anchor.annotation)
-      $.merge anchor.annotation.highlights, highlights
-
-      # Add the newly mapped page to the physical anchor
-      pAnchor[page] =
-        range: serializedRange
-        highlights: highlights
-
-    anchor.allRendered = renderedPages.length is vAnchor.endPage - vAnchor.startPage + 1
-
-    # Announce the anchoring
-    this.publish 'annotationPhysicallyAnchored', anchor
-
-  # Physically anchor targets to a given pages
-  _physicallyAnchorPage: (index) ->
-
-    # Fetch the anchors related to this page
-    anchors = @anchors[index]
-
-    # If there are no anchors, or the page is not mapped, give up
-    return unless anchors? and @domMapper.isPageMapped index
-
-    # Go over all anchors
-    for anchor in anchors
-      this._physicallyAnchor anchor
-
-  # Remove a given physical anchor from a given page
-  _physicallyUnAnchor: (anchor, pageIndex) ->
-    data = anchor.physical[pageIndex]
-
-    return unless data? # No physical anchor for this page
-
-    ann = anchor.annotation
-
-    # remove the range added by this anchor
-    i = ann.ranges.indexOf data.range
-    ann.ranges[i..i] = []
-
-    # remove the highlights added by this anchor
-    for hl in data.highlights
-      # Is this highlight actually the part of the document?
-      if hl.parentNode? and @domMapper.isPageMapped pageIndex
-        # We should restore original state
-        child = hl.childNodes[0]
-        $(hl).replaceWith hl.childNodes
-        window.DomTextMapper.changed child.parentNode,
-          "removed hilite (annotation deleted)"
-      i = ann.highlights.indexOf hl
-      ann.highlights[i..i] = []
-
-    delete anchor.physical[pageIndex]
-
-    # Mark this anchor as not fully rendered
-    anchor.allRendered = false
-
-    # Publish un-anchoring event
-    this.publish 'annotationPhysicallyUnAnchored', anchor
-
-  # Remove physical anchors from a given page
-  _physicallyUnAnchorPage: (index) ->
-    # Go over all virtual anchors related to this page
+    # Go over all anchors related to this page
     for anchor in @anchors[index] ? []
-      this._physicallyUnAnchor anchor, index
+      anchor.realize()
+
+  # Virtualize anchors on a given page
+  _virtualizePage: (index) ->
+    # Go over all anchors related to this page
+    for anchor in @anchors[index] ? []
+      anchor.virtualize index
+
+  onAnchorMouseover: (annotations) ->
+    #console.log "Mouse over annotations:", annotations
+
+    # Cancel any pending hiding of the viewer.
+    this.clearViewerHideTimer()
+
+    # Don't do anything if we're making a selection or
+    # already displaying the viewer
+    return false if @mouseIsDown or @viewer.isShown()
+
+    this.showViewer(annotations, util.mousePosition(event, @wrapper[0]))
+
+  onAnchorMouseout: (annotations) ->
+    #console.log "Mouse out on annotations:", annotations
+    this.startViewerHideTimer()
+
+  onAnchorMousedown: (annotations) ->
+    #console.log "Mouse down on annotations:", annotations
+
+  onAnchorClick: (annotations) ->
+    #console.log "Click on annotations:", annotations
 
 # Create namespace for Annotator plugins
 class Annotator.Plugin extends Delegator
@@ -1134,6 +1013,10 @@ Annotator.$ = $
 Annotator.Delegator = Delegator
 Annotator.Range = Range
 Annotator.Util = Util
+
+Annotator.Highlight = Highlight
+Annotator.Anchor = Anchor
+Annotator.TextRangeAnchor = TextRangeAnchor
 
 # Bind gettext helper so plugins can use localisation.
 Annotator._t = _t
