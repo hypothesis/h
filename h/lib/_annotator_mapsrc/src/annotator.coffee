@@ -99,8 +99,9 @@ class Annotator extends Delegator
     return this unless Annotator.supported()
     this._setupDocumentEvents() unless @options.readOnly
     this._setupWrapper()
-    this._setupDocumentAccessStrategies() unless @options.noMatching
-    this._setupVirtualAnchoringStrategies()
+    unless @options.noMatching
+      this._setupDocumentAccessStrategies()
+      this._setupVirtualAnchoringStrategies()
     this._setupViewer()._setupEditor()
     this._setupDynamicStyle()
 
@@ -146,13 +147,13 @@ class Annotator extends Delegator
     @virtualAnchoringStrategies = [
       # Simple strategy based on DOM Range
       name: "range"
-      code: this.findAnchorFromRangeSelector
+      code: this.createVirtualAnchorFromRangeSelector
     ,
       # Position-based strategy. (The quote is verified.)
       # This can handle document structure changes,
       # but not the content changes.
       name: "position"
-      code: this.findAnchorFromPositionSelector
+      code: this.createVirtualAnchorFromPositionSelector
     ]
 
     this
@@ -405,7 +406,7 @@ class Annotator extends Delegator
 
   # Try to determine the anchor position for a target
   # using the saved Range selector. The quote is verified.
-  findAnchorFromRangeSelector: (target) ->
+  createVirtualAnchorFromRangeSelector: (target) ->
     selector = this.findSelector target.selector, "RangeSelector"
     unless selector? then return null
 
@@ -431,9 +432,6 @@ class Annotator extends Delegator
       #  " Current quote is '#{currentQuote}'.)"
       return null
 
-    startInfo = @domMapper.getInfoForNode normalizedRange.start
-    endInfo = @domMapper.getInfoForNode normalizedRange.end
-
     # Create a "text poision"-type virtual anchor from this range
     startPage: startInfo.pageIndex ? 0
     start: startInfo.start
@@ -443,7 +441,7 @@ class Annotator extends Delegator
 
   # Try to determine the anchor position for a target
   # using the saved position selector. The quote is verified.
-  findAnchorFromPositionSelector: (target) ->
+  createVirtualAnchorFromPositionSelector: (target) ->
     selector = this.findSelector target.selector, "TextPositionSelector"
     unless selector? then return null
     content = @domMapper.getCorpus()[selector.start .. selector.end-1].trim()
@@ -469,7 +467,7 @@ class Annotator extends Delegator
   # Try to find the right anchoring point for a given target
   #
   # Returns a normalized range if succeeded, null otherwise
-  findAnchor: (target) ->
+  createVirtualAnchor: (target) ->
     unless target?
       throw new Error "Trying to find anchor for null target!"
 #    console.log "Trying to find anchor for target: "
@@ -479,15 +477,18 @@ class Annotator extends Delegator
     anchor = null
     for s in @virtualAnchoringStrategies
       try
-        unless anchor
-          a = s.code.call this, target
-          if a
-            #console.log "Strategy '" + s.name + "' yielded an anchor."
-            anchor = a
+        a = s.code.call this, target
+        if a
+#          console.log "Strategy '" + s.name + "' yielded a virtual anchor."
+          return result: a
+#        else
+#          console.log "Strategy '" + s.name + "' did NOT yield a virtual anchor."
       catch error
-        unless error instanceof Range.RangeError
+#        console.log "Strategy '" + s.name + "' has thrown an error."
+        if error instanceof Range.RangeError
+          return error: error
+        else
           throw error
-    {error, anchor}
 
   # Public: Initialises an annotation either from an object representation or
   # an annotation created with Annotator#createAnnotation(). It finds the
@@ -527,23 +528,23 @@ class Annotator extends Delegator
 
     for t in annotation.target
       try
-        {anchor, error} = this.findAnchor t
-        if error instanceof Range.RangeError
-          this.publish('rangeNormalizeFail', [annotation, error.range, error])
-        if anchor?
-          annotation.quote.push t.quote = anchor.quote
-          delete anchor.quote
-          t.diffHTML = anchor.diffHTML
-          delete anchor.diffHTML
-          t.diffCaseOnly = anchor.diffCaseOnly
-          delete anchor.diffCaseOnly
+        result = this.createVirtualAnchor t
+        vAnchor = result.result
+        if result.error? instanceof Range.RangeError
+          this.publish 'rangeNormalizeFail', [annotation, result.error.range, result.error]
+        if vAnchor?
+          annotation.quote.push t.quote = vAnchor.quote
+          delete vAnchor.quote
+          t.diffHTML = vAnchor.diffHTML
+          delete vAnchor.diffHTML
+          t.diffCaseOnly = vAnchor.diffCaseOnly
+          delete vAnchor.diffCaseOnly
 
-          vAnchor = anchor
           # Create a new anchor object, starting with a virtual anchor
           anchor =
             annotation: annotation
             target: t
-            virtual: anchor
+            virtual: vAnchor
             physical: {}
 
           # Store this anchor for the annotation

@@ -32,7 +32,6 @@ class window.PageTextMapperCore
   _mapPage: (info) ->
     info.node = @getRootNodeForPage info.index        
     info.domMapper = new DomTextMapper("d-t-m for page #" + info.index)
-    info.domMatcher = new DomTextMatcher info.domMapper
     info.domMapper.setRootNode info.node
     info.domMapper.documentChanged()
     if @requiresSmartStringPadding
@@ -55,11 +54,10 @@ class window.PageTextMapperCore
   # Update the mappings for a given page
   _updateMap: (info) ->
     #console.log "Updating mappings for page #" + info.index
-    info.domMatcher.scan()
+    info.domMapper.scan()
 
   # Delete the mappings for a given page
   _unmapPage: (info) ->
-    delete info.domMatcher
     delete info.domMapper
 
     # Announce the unavailable page
@@ -112,12 +110,6 @@ class window.PageTextMapperCore
     sections: sections
 
   getCorpus: -> @_corpus
-
-  getDocLength: -> @_corpus.length
-
-  getContentForCharRange: (start, end) ->
-    text = @_corpus.substr start, end - start
-    text.trim()
 
   getContextForCharRange: (start, end) ->
     prefixStart = Math.max 0, start - @CONTEXT_LEN

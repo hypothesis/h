@@ -11,16 +11,16 @@ class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
       # This can handle document structure changes,
       # and also content changes.
       name: "two-phase fuzzy"
-      code: this.findAnchorWithTwoPhaseFuzzyMatching
+      code: this.createVirtualAnchorWithTwoPhaseFuzzyMatching
 
     @annotator.virtualAnchoringStrategies.push
       # Naive fuzzy text matching strategy. (Using only the quote.)
       # This can handle document structure changes,
       # and also content changes.
       name: "one-phase fuzzy"
-      code: this.findAnchorWithFuzzyMatching
+      code: this.createVirtualAnchorWithFuzzyMatching
 
-  findAnchorWithTwoPhaseFuzzyMatching: (target) =>
+  createVirtualAnchorWithTwoPhaseFuzzyMatching: (target) =>
     # Fetch the quote and the context
     quoteSelector = @annotator.findSelector target.selector, "TextQuoteSelector"
     prefix = quoteSelector?.prefix
@@ -36,7 +36,7 @@ class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
     expectedEnd = posSelector?.end
 
     options =
-      contextMatchDistance: @annotator.domMapper.getDocLength() * 2
+      contextMatchDistance: @annotator.domMapper.getCorpus().length * 2
       contextMatchThreshold: 0.5
       patternMatchThreshold: 0.5
       flexContext: true
@@ -63,7 +63,7 @@ class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
     diffHTML: unless match.exact then match.comparison.diffHTML
     diffCaseOnly: unless match.exact then match.exactExceptCase
 
-  findAnchorWithFuzzyMatching: (target) =>
+  createVirtualAnchorWithFuzzyMatching: (target) =>
     # Fetch the quote
     quoteSelector = @annotator.findSelector target.selector, "TextQuoteSelector"
     quote = quoteSelector?.exact
@@ -80,7 +80,7 @@ class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
     expectedStart = posSelector?.start
 
     # Get full document length
-    len = @annotator.domMapper.getDocLength()
+    len = @annotator.domMapper.getCorpus().length
 
     # If we don't have the position saved, start at the middle of the doc
     expectedStart ?= len / 2
