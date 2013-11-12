@@ -360,23 +360,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       .on 'click', (bucket) =>
         d3.event.stopPropagation()
         pad = defaultView.innerHeight * .2
-#        # If it's the upper tab, scroll to next bucket above (direct version)
-#        if (@isUpper bucket) and not @annotator.twoPhaseAnchoring
-#          @dynamicBucket = true
-#          threshold = defaultView.pageYOffset
-#          highlights = wrapper.find('.annotator-hl')
-#          {next} = highlights.toArray().reduce (acc, hl) ->
-#            {pos, next} = acc
-#            if pos < $(hl).offset().top < threshold
-#              pos: $(hl).offset().top
-#              next: $(hl)
-#            else
-#              acc
-#          , {pos: 0, next: null}
-#          this._scrollUpTo next, true
-#
+
         # If it's the upper tab, scroll to next bucket above (virtual version)
-        if (@isUpper bucket) #and @annotator.twoPhaseAnchoring
+        if (@isUpper bucket)
           @dynamicBucket = true
           # Find the next annotation, based on character position
           {next} = @buckets[bucket].reduce (acc, ann) ->
@@ -398,23 +384,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
               page: startPage
             @annotator.domMapper.setPageIndex startPage
 
-#        # If it's the lower tab, scroll to next bucket below (direct version)
-#        else if (@isLower bucket) and not @annotator.twoPhaseAnchoring
-#          @dynamicBucket = true 
-#          threshold = defaultView.pageYOffset + defaultView.innerHeight - pad
-#          highlights = wrapper.find('.annotator-hl')
-#          {next} = highlights.toArray().reduce (acc, hl) ->
-#            {pos, next} = acc
-#            if threshold < $(hl).offset().top < pos
-#              pos: $(hl).offset().top
-#              next: $(hl)
-#            else
-#              acc
-#          , {pos: Number.MAX_VALUE, next: null}
-#          this._scrollDownTo next
-
         # If it's the lower tab, scroll to next bucket below (virtual version)
-        else if (@isLower bucket) # and @annotator.twoPhaseAnchoring
+        else if (@isLower bucket)
           @dynamicBucket = true
           # Find the next annotation, based on character position
           {next} = @buckets[bucket].reduce (acc, ann) ->
@@ -424,7 +395,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
               next: ann
             else
               acc
-          , {start: @annotator.domMapper.getDocLength(), next: null}
+          , {start: @annotator.domMapper.getCorpus().length, next: null}
           anchor = next.anchors[0] # This is where we want to go
           startPage = anchor.virtual.startPage
           if anchor.physical[startPage]? # Is this rendered?
