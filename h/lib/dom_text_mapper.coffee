@@ -98,15 +98,6 @@ class window.DomTextMapper
   #   length: the length of the next content
   scan: ->
     if @domStableSince @lastScanned
-<<<<<<< HEAD
-      # We have a valid paths structure!
-#      console.log "We have a valid DOM structure cache."
-      return
-
-    unless @pathStartNode.ownerDocument.body.contains @pathStartNode
-      # We cannot map nodes that are not attached.
-#      console.log "This is not attached to dom. Exiting."
-=======
 #      @log "We have a valid DOM structure cache."
       return
     else
@@ -117,7 +108,6 @@ class window.DomTextMapper
     unless @pathStartNode.ownerDocument.body.contains @pathStartNode
       # We cannot map nodes that are not attached.
 #      @log "This is not attached to dom. Exiting."
->>>>>>> Updated libraries for PDF support
       return
 
 #    @log "No valid cache, will have to do a scan."
@@ -443,11 +433,7 @@ class window.DomTextMapper
         @log "Something seems to be wrong. I see visible content @ " +
             path + ", while some of the ancestor nodes reported empty contents.
  Probably a new selection API bug...."
-<<<<<<< HEAD
-        console.log "Anyway, text is '" + cont + "'."        
-=======
         @log "Anyway, text is '" + cont + "'."        
->>>>>>> Updated libraries for PDF support
     else
       if verbose then @log "Found no content at path " + path
       invisible = true
@@ -576,7 +562,6 @@ class window.DomTextMapper
 
     sel = @selectNode node
     text = @readSelectionText sel
-    if @postProcess? then text = @postProcess text
 
     if shouldRestoreSelection then @restoreSelection()
     text
