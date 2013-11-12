@@ -30,6 +30,11 @@ class window.PDFTextMapper extends window.PageTextMapperCore
   setEvents: ->
     # Detect page rendering
     addEventListener "pagerender", (evt) =>
+
+      # If we have not yet finished the initial scanning, then we are
+      # not interested.
+      return unless @pageInfo?
+
       index = evt.detail.pageNumber - 1
       @_onPageRendered index
 
