@@ -32,6 +32,10 @@ class Annotator.Host extends Annotator.Guest
         if @frame.hasClass 'annotator-collapsed'
           this.showFrame()
 
+    # Save this reference to the Annotator class, so it's available
+    # later, even if someone has deleted the original reference
+    @Annotator = Annotator
+
     # Configure notification classes
     Annotator.$.extend Annotator.Notification,
       INFO: 'info'

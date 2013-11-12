@@ -87,9 +87,6 @@ annotator_bridge = Uglify(
 annotator_discovery = Uglify(
     Coffee('js/plugin/discovery.coffee', output='js/plugin/discovery.js')
 )
-annotator_codeauth = Uglify(
-    Coffee('js/plugin/codeauth.coffee', output='js/plugin/codeauth.js')
-)
 annotator_heatmap = Uglify(
     Coffee('js/plugin/heatmap.coffee', output='js/plugin/heatmap.js')
 )
@@ -283,8 +280,6 @@ inject = Bundle(
     annotator,
     annotator_bridge,
     annotator_document,
-    # Use this with caution! Consider security implications!
-    #annotator_codeauth,
     annotator_heatmap,
     annotator_toolbar,
     Uglify(

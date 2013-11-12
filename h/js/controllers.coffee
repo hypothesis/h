@@ -31,13 +31,6 @@ class App
         authentication.persona = null
         authentication.token = null
 
-        if oldValue?
-          # Tell the providers that we have logged out
-          setTimeout ->
-            # TODO: call this after the annotation reloading has finished
-            for p in providers
-              p.channel.notify method: 'onLogout'
-
         # Leave Highlighting mode when logging out
         if annotator.tool is 'highlight'
           # Because of logging out, we must leave Highlighting Mode.
@@ -46,14 +39,6 @@ class App
           # change (caused by leaving Highlighting Mode) will trigger
           # a reload anyway.
           $scope.skipAuthChangeReload = true
-      else
-        if oldValue?
-          # Tell the providers that we have logged in
-          setTimeout ->
-            for p in providers
-              p.channel.notify
-                method: 'onLogin'
-                params: newValue[0]
 
     $scope.$watch 'auth.persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
