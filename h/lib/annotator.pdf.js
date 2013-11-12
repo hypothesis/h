@@ -7,7 +7,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-11-12 02:02:48Z
+** Built at: 2013-11-12 11:17:26Z
 */
 
 
@@ -107,24 +107,26 @@
         _this = this;
       console.log("Scanning document for text...");
       pendingScan = new PDFJS.Promise();
-      PDFFindController.extractText();
-      PDFJS.Promise.all(PDFFindController.extractTextPromises).then(function() {
-        var page;
-        _this.pageInfo = (function() {
-          var _i, _len, _ref, _results;
-          _ref = PDFFindController.pageContents;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            page = _ref[_i];
-            _results.push({
-              content: this._parseExtractedText(page)
-            });
-          }
-          return _results;
-        }).call(_this);
-        _this._onHavePageContents();
-        pendingScan.resolve();
-        return _this._onAfterScan();
+      PDFView.getPage(1).then(function() {
+        PDFFindController.extractText();
+        return PDFJS.Promise.all(PDFFindController.extractTextPromises).then(function() {
+          var page;
+          _this.pageInfo = (function() {
+            var _i, _len, _ref, _results;
+            _ref = PDFFindController.pageContents;
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              page = _ref[_i];
+              _results.push({
+                content: this._parseExtractedText(page)
+              });
+            }
+            return _results;
+          }).call(_this);
+          _this._onHavePageContents();
+          pendingScan.resolve();
+          return _this._onAfterScan();
+        });
       });
       return pendingScan;
     };

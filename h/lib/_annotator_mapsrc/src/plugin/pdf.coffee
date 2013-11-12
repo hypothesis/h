@@ -69,24 +69,27 @@ class window.PDFTextMapper extends window.PageTextMapperCore
     # Create a promise
     pendingScan = new PDFJS.Promise()
 
-    # Tell the Find Controller to go digging
-    PDFFindController.extractText()
+    # Wait for the document to load
+    PDFView.getPage(1).then =>
 
-    # When all the text has been extracted
-    PDFJS.Promise.all(PDFFindController.extractTextPromises).then =>
-      # PDF.js text extraction has finished.
+      # Tell the Find Controller to go digging
+      PDFFindController.extractText()
 
-      # Post-process the extracted text
-      @pageInfo = ({ content: @_parseExtractedText page } for page in PDFFindController.pageContents)
+      # When all the text has been extracted
+      PDFJS.Promise.all(PDFFindController.extractTextPromises).then =>
+        # PDF.js text extraction has finished.
 
-      # Do some besic calculations with the content
-      @_onHavePageContents()
+        # Post-process the extracted text
+        @pageInfo = ({ content: @_parseExtractedText page } for page in PDFFindController.pageContents)
 
-      # OK, we are ready to rock.
-      pendingScan.resolve()
+        # Do some besic calculations with the content
+        @_onHavePageContents()
 
-      # Do whatever we need to do after scanning
-      @_onAfterScan()
+        # OK, we are ready to rock.
+        pendingScan.resolve()
+
+        # Do whatever we need to do after scanning
+        @_onAfterScan()
 
     # Return the promise
     pendingScan
