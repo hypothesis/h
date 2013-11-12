@@ -1,0 +1,17 @@
+angular*.min.js
+annotator*.min.js
+jquery*min.js
+d3.min.js
+dom_text.min.js
+gettext.min.js
+tag-it.min.js
+underscode.min.js
+uuid.min.js
+backbone.min.js
+jschannel.min.js
+jwz.min.js
+underscore.min.js
+visualsearch.min.*
+Markdown.Converter.min.js
+jquery-ui-smoothness.min.css
+sockjs-client.min.js
