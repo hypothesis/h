@@ -99,7 +99,9 @@ class Annotator extends Delegator
     return this unless Annotator.supported()
     this._setupDocumentEvents() unless @options.readOnly
     this._setupWrapper()
-    this._setupMatching() unless @options.noMatching
+    unless @options.noMatching
+      this._setupDocumentAccessStrategies()
+      this._setupVirtualAnchoringStrategies()
     this._setupViewer()._setupEditor()
     this._setupDynamicStyle()
 
@@ -109,19 +111,60 @@ class Annotator extends Delegator
     # Create adder
     this.adder = $(this.html.adder).appendTo(@wrapper).hide()
 
-  # Initializes the components used for analyzing the DOM
-  _setupMatching: ->
-        
-    @domMapper = new DomTextMapper()
-    @domMatcher = new DomTextMatcher @domMapper
-    @domMapper.setRootNode @wrapper[0]
+  # Initializes the available document access strategies
+  _setupDocumentAccessStrategies: ->
+    @documentAccessStrategies = [
+      # Default strategy for simple HTML documents.
+      # Also the generic fallback.
+      name: "DOM generic"
+      mapper: DomTextMapper
+      init: => @domMapper.setRootNode @wrapper[0]
+    ]
+
+    this
+
+  # Initializes the components used for analyzing the document
+  _setupMapper: ->
+    if @domMapper? then return
+
+    # Go over the available strategies
+    for s in @documentAccessStrategies
+      # Can we use this strategy for this document?
+      if s.mapper.applicable()
+        @documentAccessStrategy = s
+        console.log "Selected document access strategy: " + s.name
+        @domMapper = new s.mapper()
+        @anchors = {}
+        addEventListener "docPageMapped", (evt) =>
+          @_physicallyAnchorPage evt.pageIndex
+        addEventListener "docPageUnmapped", (evt) =>
+          @_physicallyUnAnchorPage evt.pageIndex
+        s.init?()
+        return this
+
+  # Initializes the available virtual anchoring strategies
+  _setupVirtualAnchoringStrategies: ->
+    @virtualAnchoringStrategies = [
+      # Simple strategy based on DOM Range
+      name: "range"
+      code: this.createVirtualAnchorFromRangeSelector
+    ,
+      # Position-based strategy. (The quote is verified.)
+      # This can handle document structure changes,
+      # but not the content changes.
+      name: "position"
+      code: this.createVirtualAnchorFromPositionSelector
+    ]
 
     this
 
   # Perform a scan of the DOM. Required for finding anchors.
   _scan: ->
-    @domMatcher.scan()   
- 
+    unless @domMapper     # If we haven't yet created a document mapper,
+      this._setupMapper() # do so now.
+
+    @pendingScan = @domMapper.scan()
+
   # Wraps the children of @element in a @wrapper div. NOTE: This method will also
   # remove any script elements inside @element to prevent them re-executing.
   #
@@ -251,8 +294,7 @@ class Annotator extends Delegator
     unless rangeEnd?
       throw new Error "Called getTextQuoteSelector(range) on a range with no valid end."
     endOffset = (@domMapper.getInfoForNode rangeEnd).end
-
-    quote = @domMapper.getContentForCharRange startOffset, endOffset
+    quote = @domMapper.getCorpus()[startOffset .. endOffset-1].trim()
     [prefix, suffix] = @domMapper.getContextForCharRange startOffset, endOffset
     selector =
       type: "TextQuoteSelector"
@@ -364,199 +406,89 @@ class Annotator extends Delegator
 
   # Try to determine the anchor position for a target
   # using the saved Range selector. The quote is verified.
-  findAnchorFromRangeSelector: (target) ->
+  createVirtualAnchorFromRangeSelector: (target) ->
     selector = this.findSelector target.selector, "RangeSelector"
     unless selector? then return null
 
     # Try to apply the saved XPath
-    normalizedRange = Range.sniff(selector).normalize @wrapper[0]
+    try
+      normalizedRange = Range.sniff(selector).normalize @wrapper[0]
+    catch error
+      #console.log "Could not apply XPath selector to current document, " +
+      #  "because the structure has changed."
+      return null
+    startInfo = @domMapper.getInfoForNode normalizedRange.start
+    startOffset = startInfo.start
+    endInfo = @domMapper.getInfoForNode normalizedRange.end
+    endOffset = endInfo.end
+    content = @domMapper.getCorpus()[startOffset .. endOffset-1].trim()
+    currentQuote = this.normalizeString content
+
     # Look up the saved quote
     savedQuote = this.getQuoteForTarget target
-    if savedQuote?
-      # We have a saved quote, let's compare it to current content
-      startInfo = @domMapper.getInfoForNode normalizedRange.start
-      startOffset = startInfo.start
-      endInfo = @domMapper.getInfoForNode normalizedRange.end
-      endOffset = endInfo.end
-      content = @domMapper.getContentForCharRange startOffset, endOffset
-      currentQuote = this.normalizeString content
-      if currentQuote isnt savedQuote
-        console.log "Could not apply XPath selector to current document \
-          because the quote has changed. (Saved quote is '#{savedQuote}'. \
-          Current quote is '#{currentQuote}'.)"
-        return null
-      else
-#        console.log "Saved quote matches."
-    else
-      console.log "No saved quote, nothing to compare. Assume that it's OK."
-    range: normalizedRange
-    quote: savedQuote
+    if savedQuote? and currentQuote isnt savedQuote
+      #console.log "Could not apply XPath selector to current document, " +
+      #  "because the quote has changed. (Saved quote is '#{savedQuote}'." +
+      #  " Current quote is '#{currentQuote}'.)"
+      return null
+
+    # Create a "text poision"-type virtual anchor from this range
+    startPage: startInfo.pageIndex ? 0
+    start: startInfo.start
+    endPage: endInfo.pageIndex ? 0
+    end: endInfo.end
+    quote: currentQuote
 
   # Try to determine the anchor position for a target
   # using the saved position selector. The quote is verified.
-  findAnchorFromPositionSelector: (target) ->
+  createVirtualAnchorFromPositionSelector: (target) ->
     selector = this.findSelector target.selector, "TextPositionSelector"
     unless selector? then return null
+    content = @domMapper.getCorpus()[selector.start .. selector.end-1].trim()
+    currentQuote = this.normalizeString content
     savedQuote = this.getQuoteForTarget target
-    if savedQuote?
+    if savedQuote? and currentQuote isnt savedQuote
       # We have a saved quote, let's compare it to current content
-      content = @domMapper.getContentForCharRange selector.start, selector.end
-      currentQuote = this.normalizeString content
-      if currentQuote isnt savedQuote
-        console.log "Could not apply position selector" +
-          " [#{selector.start}:#{selector.end}] to current document," +
-          " because the quote has changed." +
-          "(Saved quote is '#{savedQuote}'." +
-          " Current quote is '#{currentQuote}'.)"
-        return null
-      else
-#        console.log "Saved quote matches."
-    else
-      console.log "No saved quote, nothing to compare. Assume that it's okay."
-
-    # OK, we have everything. Create a range from this.
-    mappings = this.domMapper.getMappingsForCharRange selector.start,
-        selector.end
-    browserRange = new Range.BrowserRange mappings.realRange
-    normalizedRange = browserRange.normalize @wrapper[0]
-    range: normalizedRange
-    quote: savedQuote
-
-  findAnchorWithTwoPhaseFuzzyMatching: (target) ->
-    # Fetch the quote and the context
-    quoteSelector = this.findSelector target.selector, "TextQuoteSelector"
-    prefix = quoteSelector?.prefix
-    suffix = quoteSelector?.suffix
-    quote = quoteSelector?.exact
-
-    # No context, to joy
-    unless (prefix? and suffix?) then return null
-
-    # Fetch the expected start and end positions
-    posSelector = this.findSelector target.selector, "TextPositionSelector"
-    expectedStart = posSelector?.start
-    expectedEnd = posSelector?.end
-
-    options =
-      contextMatchDistance: @domMapper.getDocLength() * 2
-      contextMatchThreshold: 0.5
-      patternMatchThreshold: 0.5
-      flexContext: true
-    result = @domMatcher.searchFuzzyWithContext prefix, suffix, quote,
-      expectedStart, expectedEnd, false, null, options
-
-    # If we did not got a result, give up
-    unless result.matches.length
-      console.log "Fuzzy matching did not return any results. Giving up on two-phase strategy."
+      #console.log "Could not apply position selector" +
+      #  " [#{selector.start}:#{selector.end}] to current document," +
+      #  " because the quote has changed. " +
+      #  "(Saved quote is '#{savedQuote}'." +
+      #  " Current quote is '#{currentQuote}'.)"
       return null
 
-    # here is our result
-    match = result.matches[0]
-    console.log "2-phase fuzzy found match:"
-    console.log match
-
-    # convert it to a Range
-    browserRange = new Range.BrowserRange match.realRange
-    normalizedRange = browserRange.normalize @wrapper[0]
-
-    # return the anchor
-    anchor =
-      range: normalizedRange
-      quote: unless match.exact then match.found
-      diffHTML: unless match.exact then match.comparison.diffHTML
-      diffCaseOnly: unless match.exact then match.exactExceptCase
-
-    anchor
-
-  findAnchorWithFuzzyMatching: (target) ->
-    # Fetch the quote
-    quoteSelector = this.findSelector target.selector, "TextQuoteSelector"
-    quote = quoteSelector?.exact
-
-    # No quote, no joy
-    unless quote? then return null
-
-    # For too short quotes, this strategy is bound to return false positives.
-    # See https://github.com/hypothesis/h/issues/853 for details.
-    return unless quote.length >= 32
-
-    # Get a starting position for the search
-    posSelector = this.findSelector target.selector, "TextPositionSelector"
-    expectedStart = posSelector?.start
-
-    # Get full document length
-    len = this.domMapper.getDocLength()
-
-    # If we don't have the position saved, start at the middle of the doc
-    expectedStart ?= len / 2
-
-    # Do the fuzzy search
-    options =
-      matchDistance: len * 2
-      withFuzzyComparison: true
-    result = @domMatcher.searchFuzzy quote, expectedStart, false, null, options
-
-    # If we did not got a result, give up
-    unless result.matches.length
-      console.log "Fuzzy matching did not return any results. Giving up on one-phase strategy."
-      return null
-
-    # here is our result
-    match = result.matches[0]
-    console.log "1-phase fuzzy found match:"
-    console.log match
-
-    # convert it to a Range
-    browserRange = new Range.BrowserRange match.realRange
-    normalizedRange = browserRange.normalize @wrapper[0]
-
-    # return the anchor
-    anchor =
-      range: normalizedRange
-      quote: unless match.exact then match.found
-      diffHTML: unless match.exact then match.comparison.diffHTML
-      diffCaseOnly: unless match.exact then match.exactExceptCase
-
-    anchor
+    # OK, we have everything.
+    # Compile the data required to store this virtual anchor
+    startPage: @domMapper.getPageIndexForPos selector.start
+    endPage: @domMapper.getPageIndexForPos selector.end
+    start: selector.start
+    end: selector.end
+    quote: currentQuote
 
   # Try to find the right anchoring point for a given target
   #
   # Returns a normalized range if succeeded, null otherwise
-  findAnchor: (target) ->
+  createVirtualAnchor: (target) ->
     unless target?
       throw new Error "Trying to find anchor for null target!"
 #    console.log "Trying to find anchor for target: "
 #    console.log target
 
-    strategies = [
-      # Simple strategy based on DOM Range
-      this.findAnchorFromRangeSelector
-
-      # Position-based strategy. (The quote is verified.)
-      # This can handle document structure changes,
-      # but not the content changes.
-      this.findAnchorFromPositionSelector
-
-      # Two-phased fuzzy text matching strategy. (Using context and quote.)
-      # This can handle document structure changes,
-      # and also content changes.
-      this.findAnchorWithTwoPhaseFuzzyMatching
-
-      # Naive fuzzy text matching strategy. (Using only the quote.)
-      # This can handle document structure changes,
-      # and also content changes.
-      this.findAnchorWithFuzzyMatching
-    ]
-
     error = null
     anchor = null
-    for fn in strategies
+    for s in @virtualAnchoringStrategies
       try
-        anchor ?= fn.call this, target
+        a = s.code.call this, target
+        if a
+#          console.log "Strategy '" + s.name + "' yielded a virtual anchor."
+          return result: a
+#        else
+#          console.log "Strategy '" + s.name + "' did NOT yield a virtual anchor."
       catch error
-        unless error instanceof Range.RangeError
+#        console.log "Strategy '" + s.name + "' has thrown an error."
+        if error instanceof Range.RangeError
+          return error: error
+        else
           throw error
-    {error, anchor}
 
   # Public: Initialises an annotation either from an object representation or
   # an annotation created with Annotator#createAnnotation(). It finds the
@@ -579,7 +511,6 @@ class Annotator extends Delegator
   #
   # Returns the initialised annotation.
   setupAnnotation: (annotation) ->
-    root = @wrapper[0]
     ranges = annotation.ranges or @selectedRanges or []
 
     # Upgrade format from v1.2.6 and earlier
@@ -590,20 +521,43 @@ class Annotator extends Delegator
     unless annotation.target?
       throw new Error "Can not run setupAnnotation(). No target or selection available."
 
-    normedRanges     = []
     annotation.quote = []
+    annotation.anchors = []
+    annotation.ranges = []
+    annotation.highlights = []
 
     for t in annotation.target
       try
-        {anchor, error} = this.findAnchor t
-        if error instanceof Range.RangeError
-          this.publish('rangeNormalizeFail', [annotation, error.range, error])
-        if anchor?
-          t.quote = anchor.quote or $.trim(anchor.range.text())
-          t.diffHTML = anchor.diffHTML
-          t.diffCaseOnly = anchor.diffCaseOnly
-          normedRanges.push anchor.range
-          annotation.quote.push t.quote
+        result = this.createVirtualAnchor t
+        vAnchor = result.result
+        if result.error? instanceof Range.RangeError
+          this.publish 'rangeNormalizeFail', [annotation, result.error.range, result.error]
+        if vAnchor?
+          annotation.quote.push t.quote = vAnchor.quote
+          delete vAnchor.quote
+          t.diffHTML = vAnchor.diffHTML
+          delete vAnchor.diffHTML
+          t.diffCaseOnly = vAnchor.diffCaseOnly
+          delete vAnchor.diffCaseOnly
+
+          # Create a new anchor object, starting with a virtual anchor
+          anchor =
+            annotation: annotation
+            target: t
+            virtual: vAnchor
+            physical: {}
+
+          # Store this anchor for the annotation
+          annotation.anchors.push anchor
+
+          # Store the anchor for all involved pages
+          for pageIndex in [vAnchor.startPage .. vAnchor.endPage]
+            @anchors[pageIndex] ?= []
+            @anchors[pageIndex].push anchor
+
+          # Realizing the anchor
+          this._physicallyAnchor anchor
+
         else
           console.log "Could not find anchor target for annotation '" +
               annotation.id + "'."
@@ -612,19 +566,8 @@ class Annotator extends Delegator
         console.log exception.message
         console.log exception
 
-
-    annotation.ranges     = []
-    annotation.highlights = []
-
-    for normed in normedRanges
-      annotation.ranges.push normed.serialize(@wrapper[0], '.annotator-hl')
-      $.merge annotation.highlights, this.highlightRange(normed)
-
     # Join all the quotes into one string.
     annotation.quote = annotation.quote.join(' / ')
-
-    # Save the annotation data on each highlighter element.
-    $(annotation.highlights).data('annotation', annotation)
 
     annotation
 
@@ -657,12 +600,11 @@ class Annotator extends Delegator
   #
   # Returns deleted annotation.
   deleteAnnotation: (annotation) ->
-    if annotation.highlights?
-      for h in annotation.highlights when h.parentNode?
-        child = h.childNodes[0]
-        $(h).replaceWith(h.childNodes)
-        window.DomTextMapper.changed child.parentNode,
-          "removed hilite (annotation deleted)"
+    if annotation.anchors?    
+      for a in annotation.anchors
+        for page, data of a.physical
+          this._physicallyUnAnchor a, page
+        this._removeAnchor a
 
     this.publish('annotationDeleted', [annotation])
     annotation
@@ -693,7 +635,17 @@ class Annotator extends Delegator
         this.publish 'annotationsLoaded', [clone]
 
     clone = annotations.slice()
-    loader(annotations) if annotations.length
+
+    if annotations.length # Do we have to do something?
+      if @pendingScan?    # Is there a pending scan?
+        # Schedule the parsing the annotations for
+        # when scan has finished
+        @pendingScan.then =>
+          #console.log "Document scan finished. Can start anchoring."
+          setTimeout => loader annotations
+      else # no pending scan
+        # We can start parsing them right away
+        loader annotations
     this
 
   # Public: Calls the Store#dumpAnnotations() method.
@@ -1033,6 +985,112 @@ class Annotator extends Delegator
 
     # Delete highlight elements.
     this.deleteAnnotation annotation
+
+  # Virtual/Physical anchoring
+
+  # Remove an anchor from all involved pages
+  _removeAnchor: (anchor) ->
+    # Go over all the pages    
+    for index in [anchor.virtual.startPage .. anchor.virtual.endPage]
+      # Remove the anchor from the list
+      i = @anchors[index].indexOf anchor
+      @anchors[index][i..i] = []
+      # Kill the list if it's empty
+      delete @anchors[index] unless @anchors[index].length
+
+  _physicallyAnchor: (anchor) ->
+    return if anchor.allRendered # If we have everything, go home
+
+    vAnchor = anchor.virtual
+    pAnchor = anchor.physical
+
+    # Collect the pages that are already rendered
+    renderedPages = [vAnchor.startPage .. vAnchor.endPage].filter (index) =>
+      @domMapper.isPageMapped index
+
+    # Collect the pages that are already rendered, but not yet anchored
+    pagesTodo = renderedPages.filter (index) -> not pAnchor[index]?
+
+    return unless pagesTodo.length # Return if nothing to do
+
+    # First calculate the ranges
+    mappings = @domMapper.getMappingsForCharRange vAnchor.start, vAnchor.end, pagesTodo
+
+    for page, section of mappings.sections
+      browserRange = new Range.BrowserRange section.realRange
+      range = browserRange.normalize @wrapper[0]
+
+      # Get the serialized range
+      serializedRange = range.serialize @wrapper[0], '.annotator-hl'
+
+      # Add the range to the annotation
+      anchor.annotation.ranges.push serializedRange
+
+      # Create a highlights, and link them with the annotation
+      highlights = this.highlightRange range
+      $(highlights).data('annotation', anchor.annotation)
+      $.merge anchor.annotation.highlights, highlights
+
+      # Add the newly mapped page to the physical anchor
+      pAnchor[page] =
+        range: serializedRange
+        highlights: highlights
+
+    anchor.allRendered = renderedPages.length is vAnchor.endPage - vAnchor.startPage + 1
+
+    # Announce the anchoring
+    this.publish 'annotationPhysicallyAnchored', anchor
+
+  # Physically anchor targets to a given pages
+  _physicallyAnchorPage: (index) ->
+
+    # Fetch the anchors related to this page
+    anchors = @anchors[index]
+
+    # If there are no anchors, or the page is not mapped, give up
+    return unless anchors? and @domMapper.isPageMapped index
+
+    # Go over all anchors
+    for anchor in anchors
+      this._physicallyAnchor anchor
+
+  # Remove a given physical anchor from a given page
+  _physicallyUnAnchor: (anchor, pageIndex) ->
+    data = anchor.physical[pageIndex]
+
+    return unless data? # No physical anchor for this page
+
+    ann = anchor.annotation
+
+    # remove the range added by this anchor
+    i = ann.ranges.indexOf data.range
+    ann.ranges[i..i] = []
+
+    # remove the highlights added by this anchor
+    for hl in data.highlights
+      # Is this highlight actually the part of the document?
+      if hl.parentNode? and @domMapper.isPageMapped pageIndex
+        # We should restore original state
+        child = hl.childNodes[0]
+        $(hl).replaceWith hl.childNodes
+        window.DomTextMapper.changed child.parentNode,
+          "removed hilite (annotation deleted)"
+      i = ann.highlights.indexOf hl
+      ann.highlights[i..i] = []
+
+    delete anchor.physical[pageIndex]
+
+    # Mark this anchor as not fully rendered
+    anchor.allRendered = false
+
+    # Publish un-anchoring event
+    this.publish 'annotationPhysicallyUnAnchored', anchor
+
+  # Remove physical anchors from a given page
+  _physicallyUnAnchorPage: (index) ->
+    # Go over all virtual anchors related to this page
+    for anchor in @anchors[index] ? []
+      this._physicallyUnAnchor anchor, index
 
 # Create namespace for Annotator plugins
 class Annotator.Plugin extends Delegator

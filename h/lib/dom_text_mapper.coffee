@@ -9,17 +9,27 @@ class window.DomTextMapper
 
   @instances: []
 
-  @changed: (node, reason = "no reason") ->
+  @changed: (node, reason = "no reason", data = {}) ->
     if @instances.length is 0 then return
-#    dm = @instances[0]
-#    console.log "Node @ " + (dm.getPathTo node) + " has changed: " + reason
+#    console.log "==== Node"
+#    console.log node
+#    console.log "has changed: " + reason
+#    console.log data
     for instance in @instances when instance.rootNode.contains(node)
-      instance.performUpdateOnNode node
+#      console.log "Telling instance '" + instance.id + "'."
+      instance.documentChanged()
+      instance.performUpdateOnNode node, false, data
+      instance.lastScanned = instance.timestamp()
     null
 
-  constructor: ->
+  constructor: (@id)->
     @setRealRoot()
-    window.DomTextMapper.instances.push this
+    instances = window.DomTextMapper.instances
+    instances.push this
+    @id ?= "d-t-m #" + instances.length
+
+  log: (msg) ->
+    console.log @id + ": " + msg
 
   # ===== Public methods =======
 
@@ -69,7 +79,10 @@ class window.DomTextMapper
   # anythime, and therefore will not assume any stability.
   documentChanged: ->
     @lastDOMChange = @timestamp()
-#    console.log "Registered document change."
+#    @log "Registered document change."
+
+  setExpectedContent: (content) ->
+    @expectedContent = content
 
   # Scan the document
   #
@@ -85,6 +98,7 @@ class window.DomTextMapper
   #   length: the length of the next content
   scan: ->
     if @domStableSince @lastScanned
+<<<<<<< HEAD
       # We have a valid paths structure!
 #      console.log "We have a valid DOM structure cache."
       return
@@ -92,26 +106,38 @@ class window.DomTextMapper
     unless @pathStartNode.ownerDocument.body.contains @pathStartNode
       # We cannot map nodes that are not attached.
 #      console.log "This is not attached to dom. Exiting."
+=======
+#      @log "We have a valid DOM structure cache."
+      return
+    else
+#      @log "Last scan time:  " + @lastScanned
+#      @log "Last DOM change: " + @lastDOMChange
+#      @log "No valid DOM structure scan available, doing scan."
+
+    unless @pathStartNode.ownerDocument.body.contains @pathStartNode
+      # We cannot map nodes that are not attached.
+#      @log "This is not attached to dom. Exiting."
+>>>>>>> Updated libraries for PDF support
       return
 
-#    console.log "No valid cache, will have to do a scan."
+#    @log "No valid cache, will have to do a scan."
     startTime = @timestamp()
     @saveSelection()
     @path = {}
     @traverseSubTree @pathStartNode, @getDefaultPath()
     t1 = @timestamp()
-#    console.log "Phase I (Path traversal) took " + (t1 - startTime) + " ms."
+#    @log "Phase I (Path traversal) took " + (t1 - startTime) + " ms."
 
     path = @getPathTo @pathStartNode
     node = @path[path].node
     @collectPositions node, path, null, 0, 0
     @restoreSelection()
     @lastScanned = @timestamp()
-    @corpus = @path[path].content
-#    console.log "Corpus is: " + @corpus
+    @_corpus = @path[path].content
+#    @log "Corpus is: " + @_corpus
 
     t2 = @timestamp()    
-#    console.log "Phase II (offset calculation) took " + (t2 - t1) + " ms."
+#    @log "Phase II (offset calculation) took " + (t2 - t1) + " ms."
 
     null
  
@@ -135,13 +161,13 @@ class window.DomTextMapper
       @performUpdateOnNode node.parentNode, true
       unless escalating then @restoreSelection()        
       return
-#    console.log "Performing update on node @ path " + path
+#    @log "Performing update on node @ path " + path
 
-#    if escalating then console.log "(Escalated)"
-#    console.log "Updating data about " + path + ": "
+#    if escalating then @log "(Escalated)"
+#    @log "Updating data about " + path + ": "
     if pathInfo.node is node and pathInfo.content is @getNodeContent node, false
-#      console.log "Good, the node and the overall content is still the same"
-#      console.log "Dropping obsolete path info for children..."
+#      @log "Good, the node and the overall content is still the same"
+#      @log "Dropping obsolete path info for children..."
       prefix = path + "/"
       pathsToDrop =p
 
@@ -152,13 +178,13 @@ class window.DomTextMapper
       for p in pathsToDrop
         delete @path[p]        
         
-#      console.log "Done. Collecting new path info..."
+#      @log "Done. Collecting new path info..."
       @traverseSubTree node, path
 
-#      console.log "Done. Updating mappings..."
+#      @log "Done. Updating mappings..."
 
       if pathInfo.node is @pathStartNode
-        console.log "Ended up rescanning the whole doc."
+#        @log "Ended up rescanning the whole doc."
         @collectPositions node, path, null, 0, 0
       else
         parentPath = @parentPath path
@@ -173,18 +199,18 @@ class window.DomTextMapper
         @collectPositions node, path, parentPathInfo.content,
             parentPathInfo.start, oldIndex
         
-#      console.log "Data update took " + (@timestamp() - startTime) + " ms."
+#      @log "Data update took " + (@timestamp() - startTime) + " ms."
 
     else
-#      console.log "Hm..node has been replaced, or overall content has changed!"
+#      @log "Hm..node has been replaced, or overall content has changed!"
       if pathInfo.node isnt @pathStartNode
-#        console.log "I guess I must go up one level."
+#        @log "I guess I must go up one level."
         parentNode = if node.parentNode?
-#          console.log "Node has parent, using that."
+#         @log "Node has parent, using that."
           node.parentNode
         else
           parentPath = @parentPath path
-#          console.log "Node has no parent, will look up " + parentPath
+#          @log "Node has no parent, will look up " + parentPath
           @lookUpNode parentPath
         @performUpdateOnNode parentNode, true
       else
@@ -208,13 +234,9 @@ class window.DomTextMapper
     @getInfoForPath @getPathTo node
 
   # Get the matching DOM elements for a given set of charRanges
-  # (Calles getMappingsForCharRange for each element in the givenl ist)
+  # (Calles getMappingsForCharRange for each element in the given ist)
   getMappingsForCharRanges: (charRanges) ->
-#    console.log "charRanges:"
-#    console.log charRanges
-    (for charRange in charRanges
-      mapping = @getMappingsForCharRange charRange.start, charRange.end
-    )
+    (@getMappingsForCharRange charRange.start, charRange.end) for charRange in charRanges
 
   # Return the rendered value of a part of the dom.
   # If path is not given, the default path is used.
@@ -228,22 +250,16 @@ class window.DomTextMapper
     path ?= @getDefaultPath()
     @path[path].length
 
-  getDocLength: -> @getLengthForPath()
+  getDocLength: -> @_corpus.length
 
-  # Return a given charRange of the rendered value of a part of the dom.
-  # If path is not given, the default path is used.
-  getContentForCharRange: (start, end, path = null) ->
-    text = @getContentForPath(path).substr start, end - start
-    text.trim()
+  getCorpus: -> @_corpus
 
   # Get the context that encompasses the given charRange
   # in the rendered text of the document
-  getContextForCharRange: (start, end, path = null) ->
-    content = @getContentForPath path
+  getContextForCharRange: (start, end) ->
     prefixStart = Math.max 0, start - CONTEXT_LEN
-    prefixLen = start - prefixStart
-    prefix = content.substr prefixStart, prefixLen
-    suffix = content.substr end, prefixLen
+    prefix = @_corpus[prefixStart .. start - 1]
+    suffix = @_corpus[end .. end + CONTEXT_LEN - 1]
     [prefix.trim(), suffix.trim()]
         
   # Get the matching DOM elements for a given charRange
@@ -253,17 +269,18 @@ class window.DomTextMapper
   getMappingsForCharRange: (start, end) ->
     unless (start? and end?)
       throw new Error "start and end is required!"
-#    console.log "Collecting nodes for [" + start + ":" + end + "]"
+
+#    @log "Collecting nodes for [" + start + ":" + end + "]"
     @scan()
 
     # Collect the matching path infos
-#    console.log "Collecting mappings"
+    # @log "Collecting mappings"
     mappings = []
     for p, info of @path when info.atomic and
         @regions_overlap info.start, info.end, start, end
       do (info) =>
-#        console.log "Checking " + info.path
-#        console.log info
+#        @log "Checking " + info.path
+#        @log info
         mapping =
           element: info
 
@@ -293,28 +310,30 @@ class window.DomTextMapper
                 mapping.endCorrected - mapping.startCorrected
           else if (info.node.nodeType is Node.ELEMENT_NODE) and
               (info.node.tagName.toLowerCase() is "img")
-            console.log "Can not select a sub-string from the title of an image.
+            @log "Can not select a sub-string from the title of an image.
  Selecting all."
             mapping.full = true
             mapping.wanted = info.content
           else
-            console.log "Warning: no idea how to handle partial mappings
+            @log "Warning: no idea how to handle partial mappings
  for node type " + info.node.nodeType
-            if info.node.tagName? then console.log "Tag: " + info.node.tagName
-            console.log "Selecting all."
+            if info.node.tagName? then @log "Tag: " + info.node.tagName
+            @log "Selecting all."
             mapping.full = true
             mapping.wanted = info.content
 
         mappings.push mapping
-#        console.log "Done with " + info.path
+#        @log "Done with " + info.path
 
     if mappings.length is 0
+      @log "Collecting nodes for [" + start + ":" + end + "]"
+      @log "Should be: '" + @_corpus[ start .. (end-1) ] + "'."
       throw new Error "No mappings found for [" + start + ":" + end + "]!"
 
     mappings = mappings.sort (a, b) -> a.element.start - b.element.start
         
     # Create a DOM range object
-#    console.log "Building range..."
+#    @log "Building range..."
     r = @rootWin.document.createRange()
     startMapping = mappings[0]
     startNode = startMapping.element.node
@@ -350,23 +369,27 @@ class window.DomTextMapper
         endInfo: endInfo
       safeParent: r.commonAncestorContainer
     }
-#    console.log "Done collecting"
-    result
+
+    # Return the result
+    sections: [result]
 
   # ===== Private methods (never call from outside the module) =======
 
   timestamp: -> new Date().getTime()
 
   stringStartsWith: (string, prefix) ->
-    prefix is string.substr 0, prefix.length
+    string[ 0 .. prefix.length - 1 ] is prefix
 
   stringEndsWith: (string, suffix) ->
-    suffix is string.substr string.length - suffix.length
+    string[ string.length - suffix.length .. string.length ] is suffix
 
   parentPath: (path) -> path.substr 0, path.lastIndexOf "/"
 
   domChangedSince: (timestamp) ->
-    if @lastDOMChange? and timestamp? then @lastDOMChange > timestamp else true
+    if @lastDOMChange? and timestamp?
+      @lastDOMChange > timestamp
+    else
+      true
 
   domStableSince: (timestamp) -> not @domChangedSince timestamp
 
@@ -415,14 +438,18 @@ class window.DomTextMapper
       length: cont.length
       node : node
     if cont.length
-      if verbose then console.log "Collected info about path " + path
+      if verbose then @log "Collected info about path " + path
       if invisible
-        console.log "Something seems to be wrong. I see visible content @ " +
+        @log "Something seems to be wrong. I see visible content @ " +
             path + ", while some of the ancestor nodes reported empty contents.
  Probably a new selection API bug...."
+<<<<<<< HEAD
         console.log "Anyway, text is '" + cont + "'."        
+=======
+        @log "Anyway, text is '" + cont + "'."        
+>>>>>>> Updated libraries for PDF support
     else
-      if verbose then console.log "Found no content at path " + path
+      if verbose then @log "Found no content at path " + path
       invisible = true
 
     # Step two: cover all children.
@@ -448,11 +475,11 @@ class window.DomTextMapper
   # save the original selection
   saveSelection: ->
     if @savedSelection?
-      console.log "Selection saved at:"
-      console.log @selectionSaved
+      @log "Selection saved at:"
+      @log @selectionSaved
       throw new Error "Selection already saved!"
     sel = @rootWin.getSelection()        
-#    console.log "Saving selection: " + sel.rangeCount + " ranges."
+#    @log "Saving selection: " + sel.rangeCount + " ranges."
     @savedSelection = (sel.getRangeAt i) for i in [0 ... sel.rangeCount]
     switch sel.rangeCount
       when 0 then @savedSelection ?= []
@@ -464,7 +491,7 @@ class window.DomTextMapper
 
   # restore selection
   restoreSelection: ->
-#    console.log "Restoring selection: " + @savedSelection.length + " ranges."
+#    @log "Restoring selection: " + @savedSelection.length + " ranges."
     unless @savedSelection? then throw new Error "No selection to restore."
     sel = @rootWin.getSelection()
     sel.removeAllRanges()
@@ -523,9 +550,9 @@ class window.DomTextMapper
           # If this is the case, then it's OK.
           unless USE_EMPTY_TEXT_WORKAROUND and @isWhitespace node
             # No, this is not the case. Then this is an error.
-            console.log "Warning: failed to scan element @ " + @underTraverse
-            console.log "Content is: " + node.innerHTML
-            console.log "We won't be able to properly anchor to any text inside this element."
+            @log "Warning: failed to scan element @ " + @underTraverse
+            @log "Content is: " + node.innerHTML
+            @log "We won't be able to properly anchor to any text inside this element."
 #            throw exception
     if scroll
       sn = node
@@ -534,7 +561,7 @@ class window.DomTextMapper
       if sn?
         sn.scrollIntoViewIfNeeded()
       else
-        console.log "Failed to scroll to element. (Browser does not support scrollIntoViewIfNeeded?)"
+        @log "Failed to scroll to element. (Browser does not support scrollIntoViewIfNeeded?)"
     sel
 
   # Read and convert the text of the current selection.
@@ -557,23 +584,23 @@ class window.DomTextMapper
 
   # Convert "display" text indices to "source" text indices.
   computeSourcePositions: (match) ->
-#    console.log "In computeSourcePosition"
-#    console.log match.element.path
-#    console.log match.element.node.data
+#    @log "In computeSourcePosition"
+#    @log match.element.path
+#    @log match.element.node.data
 
     # the HTML source of the text inside a text element.
-#    console.log "Calculating source position at " + match.element.path
+#    @log "Calculating source position at " + match.element.path
     sourceText = match.element.node.data.replace /\n/g, " "
-#    console.log "sourceText is '" + sourceText + "'"
+#    @log "sourceText is '" + sourceText + "'"
 
     # what gets displayed, when the node is processed by the browser.
     displayText = match.element.content
-#    console.log "displayText is '" + displayText + "'"
+#    @log "displayText is '" + displayText + "'"
 
     # The selected charRange in displayText.
     displayStart = if match.start? then match.start else 0
     displayEnd = if match.end? then match.end else displayText.length
-#    console.log "Display charRange is: " + displayStart + "-" + displayEnd
+#    @log "Display charRange is: " + displayStart + "-" + displayEnd
 
     if displayEnd is 0
       # Handle empty text nodes  
@@ -597,7 +624,7 @@ class window.DomTextMapper
       sourceIndex++
     match.startCorrected = sourceStart
     match.endCorrected = sourceEnd
-#    console.log "computeSourcePosition done. Corrected charRange is: " +
+#    @log "computeSourcePosition done. Corrected charRange is: " +
 #      match.startCorrected + "-" + match.endCorrected
     null
 
@@ -605,7 +632,11 @@ class window.DomTextMapper
   # as render by the browser.
   # The current implementation uses the browser selection API to do so.
   getNodeContent: (node, shouldRestoreSelection = true) ->
-    @getNodeSelectionText node, shouldRestoreSelection
+    if node is @pathStartNode and @expectedContent?
+#      @log "Returning fake expectedContent for getNodeContent"
+      @expectedContent
+    else
+      @getNodeSelectionText node, shouldRestoreSelection
 
   # Internal function to collect mapping data from a given DOM element.
   # 
@@ -627,7 +658,7 @@ class window.DomTextMapper
   #    the first character offset position in the content of this node's
   #    parent node that is not accounted for by this node
   collectPositions: (node, path, parentContent = null, parentIndex = 0, index = 0) ->
-#    console.log "Scanning path " + path    
+#    @log "Scanning path " + path
 #    content = @getNodeContent node, false
 
     pathInfo = @path[path]
@@ -645,11 +676,11 @@ class window.DomTextMapper
     else
       index
     if startIndex is -1
-       # content of node is not present in parent's content - probably hidden,
-       # or something similar
-#       console.log "Content of this not is not present in content of parent,
-#         at path " + path
-       return index
+      # content of node is not present in parent's content - probably hidden,
+      # or something similar
+      @log "Content of this not is not present in content of parent, at path " + path
+      @log "(Content: '" + content + "'.)"
+      return index
 
 
     endIndex = startIndex + content.length
@@ -694,3 +725,24 @@ class window.DomTextMapper
         mightBeEmpty
       else false
     result
+
+  # Internal debug method to verify the consistency of mapping info
+  _testMap: ->
+    @log "Verifying map info: was it all properly traversed?"
+    for i,p of @path
+      unless p.atomic? then @log i + " is missing data."
+
+    @log "Verifying map info: do atomic elements match?"
+    for i,p of @path when p.atomic
+      expected = @_corpus[p.start .. (p.end - 1) ]
+      ok = p.content is expected
+      unless ok then @log "Mismatch on " + i + ": content is '" + p.content + "', range in corpus is '" + expected + "'."
+      ok
+
+    null
+
+  # Fake two-phase / pagination support, used for HTML documents
+  getPageIndex: -> 0
+  getPageCount: -> 1
+  getPageIndexForPos: -> 0
+  isPageMapped: -> true

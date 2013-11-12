@@ -12,6 +12,8 @@ class Annotator.Guest extends Annotator
 
   # Plugin configuration
   options:
+    FuzzyAnchoring: {}
+    PDF: {}
     Document: {}
 
   # Internal state
@@ -40,7 +42,7 @@ class Annotator.Guest extends Annotator
         formatted = {}
         if annotation.document?
           formatted['uri'] = @plugins.Document.uri()
-        for k, v of annotation when k isnt 'highlights'
+        for k, v of annotation when k not in ['highlights', 'anchors']
           formatted[k] = v
         # Work around issue in jschannel where a repeated object is considered
         # recursive, even if it is not its own ancestor.
@@ -64,6 +66,14 @@ class Annotator.Guest extends Annotator
     for own name, opts of @options
       if not @plugins[name]
         this.addPlugin(name, opts)
+
+    this.subscribe "annotationPhysicallyAnchored", (anchor) =>
+      if anchor.annotation.id? # Is this a finished annotation ?
+        @plugins.Heatmap._update()
+
+    this.subscribe "annotationPhysicallyUnAnchored", (anchor) =>
+      if anchor.annotation.id? # Is this a finished annotation ?
+        @plugins.Heatmap._update()
 
     # Scan the document text with the DOM Text libraries
     this.scanDocument "Annotator initialized"
@@ -135,9 +145,7 @@ class Annotator.Guest extends Annotator
   scanDocument: (reason = "something happened") =>
     try
       console.log "Analyzing host frame, because " + reason + "..."
-      r = this._scan()
-      scanTime = r.time
-      console.log "Traversal+scan took " + scanTime + " ms."
+      this._scan()
     catch e
       console.log e.message
       console.log e.stack
@@ -149,8 +157,6 @@ class Annotator.Guest extends Annotator
         setTimeout =>
           unless @selectedRanges?.length
             @panel?.notify method: 'back'
-    this._setupMatching()
-    @domMatcher.setRootNode @wrapper[0]
     this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
@@ -342,11 +348,7 @@ class Annotator.Guest extends Annotator
   # Uncomment the traces below to investigate this further.
   deleteAnnotation: (annotation) ->
     if annotation.deleted
-#      console.log "Not deleting annotation the second time."
-#      console.trace()
       return
     else
-#      console.log "Deleting an annotation in " + @role + "."
-#      console.trace()
       annotation.deleted = true
     super
