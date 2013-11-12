@@ -15,11 +15,37 @@ var ACTION_STATES = {
   }
 }
 
+function injecting(tabId, value) {
+  var stateMap = localStorage.getItem('injectState')
+  stateMap = stateMap ? JSON.parse(stateMap) : {}
+
+  if (value === undefined) {
+    return stateMap[tabId]
+  }
+
+  if (value) {
+    stateMap[tabId] = value
+  } else {
+    delete stateMap[tabId]
+  }
+
+  localStorage.setItem('injectState', JSON.stringify(stateMap))
+
+  return value
+}
+
 
 function inject(tab) {
-  chrome.tabs.executeScript(null, {
-    file: 'public/js/embed.js'
-  })
+  // If we are already injecting, don't have to do anything.
+  if (!injecting(tab)) {
+    injecting(tab, true);
+    setTimeout(function(){ // Give it some time before insertation
+      injecting(tab, false);
+      chrome.tabs.executeScript(null, {
+        file: 'public/js/embed.js'
+      })
+    }, 1000);
+  }
 }
 
 
@@ -111,6 +137,11 @@ function onTabRemoved(tab) {
 
 
 function onTabUpdated(tabId, info) {
+  if (info.status == "loading") {
+    // No need to do anything yet. We will get another notification soon.
+    return;
+  }
+
   var currentState = state(tabId) || 'sleeping'
 
   setPageAction(tabId, currentState)
