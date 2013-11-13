@@ -21,19 +21,29 @@
     "contentSettings",
     "tabs",
     "webRequest",
-    "webRequestBlocking"
+    "webRequestBlocking",
+    "webNavigation"
   ],
+  "content_scripts": [{
+      "matches": [
+          "*://*/*.pdf*",
+          "*://*/*.PDF*"
+       ],
+       "css": ["hide-xhtml-error.css"]
+  }],
   "content_security_policy":
     "script-src 'self' 'unsafe-eval' ${src} https://ajax.googleapis.com; object-src 'self'",
 
   "background": {
     "persistent": true,
-    "scripts": ["js/background.js"]
+    "scripts": ["pdfHandler.js", "pdfHandler-local.js", "js/background.js"]
   },
   "page_action": {
     "placeholder": "work around http://crbug.com/86449"
   },
   "web_accessible_resources": [
-    "public/*"
+    "public/*",
+    "content/*",
+    "patch-worker.js"
   ]
 }
