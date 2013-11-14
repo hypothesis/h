@@ -55,7 +55,7 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 
     # OK, we have everything
     # Create a TextRangeAnchor from this data
-    new @annotator.Annotator.TextRangeAnchor @annotator, annotation, target,
+    new @annotator.TextRangeAnchor @annotator, annotation, target,
       match.start, match.end,
       (@annotator.domMapper.getPageIndexForPos match.start),
       (@annotator.domMapper.getPageIndexForPos match.end),
@@ -103,7 +103,7 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 
     # OK, we have everything
     # Create a TextRangeAnchor from this data
-    new @annotator.Annotator.TextRangeAnchor @annotator, annotation, target,
+    new @annotator.TextRangeAnchor @annotator, annotation, target,
       match.start, match.end,
       (@annotator.domMapper.getPageIndexForPos match.start),
       (@annotator.domMapper.getPageIndexForPos match.end),

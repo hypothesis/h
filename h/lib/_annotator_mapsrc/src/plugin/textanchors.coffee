@@ -170,7 +170,7 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
     })
 
     # Export this anchor type
-    Annotator.TextRangeAnchor = TextRangeAnchor
+    @annotator.TextRangeAnchor = TextRangeAnchor
 
     null
 
