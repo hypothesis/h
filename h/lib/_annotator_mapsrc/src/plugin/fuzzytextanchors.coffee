@@ -1,5 +1,5 @@
 # Annotator plugin for fuzzy text matching
-class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
+class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 
   pluginInit: ->
     # Initialize the text matcher library

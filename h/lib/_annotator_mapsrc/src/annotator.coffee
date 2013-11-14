@@ -92,6 +92,7 @@ class Annotator extends Delegator
   constructor: (element, options) ->
     super
     @plugins = {}
+    @anchoringStrategies = []
 
     # Return early if the annotator is not supported.
     return this unless Annotator.supported()
@@ -99,7 +100,6 @@ class Annotator extends Delegator
     this._setupWrapper()
     unless @options.noMatching
       this._setupDocumentAccessStrategies()
-      this._setupAnchoringStrategies()
     this._setupViewer()._setupEditor()
     this._setupDynamicStyle()
 
@@ -139,22 +139,6 @@ class Annotator extends Delegator
           @_virtualizePage evt.pageIndex
         s.init?()
         return this
-
-  # Initializes the available anchoring strategies
-  _setupAnchoringStrategies: ->
-    @anchoringStrategies = [
-      # Simple strategy based on DOM Range
-      name: "range"
-      code: this.createAnchorFromRangeSelector
-    ,
-      # Position-based strategy. (The quote is verified.)
-      # This can handle document structure changes,
-      # but not the content changes.
-      name: "position"
-      code: this.createAnchorFromPositionSelector
-    ]
-
-    this
 
   # Perform a scan of the DOM. Required for finding anchors.
   _scan: ->
@@ -229,7 +213,6 @@ class Annotator extends Delegator
   # Returns itself for chaining.
   _setupDocumentEvents: ->
     $(document).bind({
-      "mouseup":   this.checkForEndSelection
       "mousedown": this.checkForStartSelection
     })
     this
@@ -271,59 +254,6 @@ class Annotator extends Delegator
     $('link[rel^="canonical"]').each -> uri = decodeURIComponent this.href
     return uri
 
-  getQuoteForTarget: (target) ->
-    selector = this.findSelector target.selector, "TextQuoteSelector"
-    if selector?
-      this.normalizeString selector.exact
-    else
-      null
-
-  # Public: Gets the current selection excluding any nodes that fall outside of
-  # the @wrapper. Then returns and Array of NormalizedRange instances.
-  #
-  # Examples
-  #
-  #   # A selection inside @wrapper
-  #   annotation.getSelectedRanges()
-  #   # => Returns [NormalizedRange]
-  #
-  #   # A selection outside of @wrapper
-  #   annotation.getSelectedRanges()
-  #   # => Returns []
-  #
-  # Returns Array of NormalizedRange instances.
-  getSelectedRanges: ->
-    selection = util.getGlobal().getSelection()
-
-    ranges = []
-    rangesToIgnore = []
-    unless selection.isCollapsed
-      ranges = for i in [0...selection.rangeCount]
-        r = selection.getRangeAt(i)
-        browserRange = new Range.BrowserRange(r)
-        normedRange = browserRange.normalize().limit(@wrapper[0])
-
-        # If the new range falls fully outside the wrapper, we
-        # should add it back to the document but not return it from
-        # this method
-        rangesToIgnore.push(r) if normedRange is null
-
-        normedRange
-
-      # BrowserRange#normalize() modifies the DOM structure and deselects the
-      # underlying text as a result. So here we remove the selected ranges and
-      # reapply the new ones.
-      selection.removeAllRanges()
-
-    for r in rangesToIgnore
-      selection.addRange(r)
-
-    # Remove any ranges that fell outside of @wrapper.
-    $.grep ranges, (range) ->
-      # Add the normed range back to the selection if it exists.
-      selection.addRange(range.toRange()) if range
-      range
-
   # Public: Creates and returns a new annotation object. Publishes the
   # 'beforeAnnotationCreated' event to allow the new annotation to be modified.
   #
@@ -352,64 +282,6 @@ class Annotator extends Delegator
       if selector.type is type then return selector
     null
 
-  # Try to determine the anchor position for a target
-  # using the saved Range selector. The quote is verified.
-  createAnchorFromRangeSelector: (annotation, target) ->
-    selector = this.findSelector target.selector, "RangeSelector"
-    unless selector? then return null
-
-    # Try to apply the saved XPath
-    try
-      normalizedRange = Range.sniff(selector).normalize @wrapper[0]
-    catch error
-      #console.log "Could not apply XPath selector to current document, " +
-      #  "because the structure has changed."
-      return null
-    startInfo = @domMapper.getInfoForNode normalizedRange.start
-    startOffset = startInfo.start
-    endInfo = @domMapper.getInfoForNode normalizedRange.end
-    endOffset = endInfo.end
-    content = @domMapper.getCorpus()[startOffset .. endOffset-1].trim()
-    currentQuote = this.normalizeString content
-
-    # Look up the saved quote
-    savedQuote = this.getQuoteForTarget target
-    if savedQuote? and currentQuote isnt savedQuote
-      #console.log "Could not apply XPath selector to current document, " +
-      #  "because the quote has changed. (Saved quote is '#{savedQuote}'." +
-      #  " Current quote is '#{currentQuote}'.)"
-      return null
-
-    # Create a TextRangeAnchor from this range
-    new TextRangeAnchor this, annotation, target,
-      startInfo.start, endInfo.end,
-      (startInfo.pageIndex ? 0), (endInfo.pageIndex ? 0),
-      currentQuote
-
-  # Try to determine the anchor position for a target
-  # using the saved position selector. The quote is verified.
-  createAnchorFromPositionSelector: (annotation, target) ->
-    selector = this.findSelector target.selector, "TextPositionSelector"
-    unless selector? then return null
-    content = @domMapper.getCorpus()[selector.start .. selector.end-1].trim()
-    currentQuote = this.normalizeString content
-    savedQuote = this.getQuoteForTarget target
-    if savedQuote? and currentQuote isnt savedQuote
-      # We have a saved quote, let's compare it to current content
-      #console.log "Could not apply position selector" +
-      #  " [#{selector.start}:#{selector.end}] to current document," +
-      #  " because the quote has changed. " +
-      #  "(Saved quote is '#{savedQuote}'." +
-      #  " Current quote is '#{currentQuote}'.)"
-      return null
-
-    # Create a TextRangeAnchor from this data
-    new TextRangeAnchor this, annotation, target,
-      selector.start, selector.end,
-      (@domMapper.getPageIndexForPos selector.start),
-      (@domMapper.getPageIndexForPos selector.end),
-      currentQuote
-
   # Try to find the right anchoring point for a given target
   #
   # Returns an Anchor object if succeeded, null otherwise
@@ -435,6 +307,8 @@ class Annotator extends Delegator
           return error: error
         else
           throw error
+
+    return error: "No strategies worked."
 
   # Public: Initialises an annotation either from an object representation or
   # an annotation created with Annotator#createAnnotation(). It finds the
@@ -490,8 +364,8 @@ class Annotator extends Delegator
           anchor.realize()
 
         else
-          console.log "Could not find anchor target for annotation '" +
-              annotation.id + "'."
+          console.log "Could not create anchor for annotation '",
+            annotation.id, "'."
       catch exception
         if exception.stack? then console.log exception.stack
         console.log exception.message
@@ -706,38 +580,6 @@ class Annotator extends Delegator
     unless event and this.isAnnotator(event.target)
       this.startViewerHideTimer()
     @mouseIsDown = true
-
-  # Annotator#element callback. Checks to see if a selection has been made
-  # on mouseup and if so displays the Annotator#adder. If @ignoreMouseup is
-  # set will do nothing. Also resets the @mouseIsDown property.
-  #
-  # event - A mouseup Event object.
-  #
-  # Returns nothing.
-  checkForEndSelection: (event) =>
-    @mouseIsDown = false
-
-    # This prevents the note image from jumping away on the mouseup
-    # of a click on icon.
-    if @ignoreMouseup
-      return
-
-    # Get the currently selected ranges.
-    selectedRanges = this.getSelectedRanges()
-
-    for range in selectedRanges
-      container = range.commonAncestor
-      # TODO: what is selection ends inside a different type of highlight?
-      if TextHighlight.isInstance container
-        container = TextHighlight.getIndependentParent container
-      return if this.isAnnotator(container)
-
-    @selectedTargets = (TextRangeAnchor.getTargetFromRange(this, r) for r in selectedRanges)
-
-    if event and selectedRanges.length
-      this.onSuccessfulSelection event
-    else
-      this.onFailedSelection event
 
   onSuccessfulSelection: (event) ->
     @adder
@@ -959,11 +801,11 @@ Annotator.$ = $
 # Export other modules for use in plugins.
 Annotator.Delegator = Delegator
 Annotator.Range = Range
+Annotator.util = util
 Annotator.Util = Util
 
 Annotator.Highlight = Highlight
 Annotator.Anchor = Anchor
-Annotator.TextRangeAnchor = TextRangeAnchor
 
 # Bind gettext helper so plugins can use localisation.
 Annotator._t = _t
