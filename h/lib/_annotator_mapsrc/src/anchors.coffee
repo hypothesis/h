@@ -94,3 +94,52 @@ class TextRangeAnchor extends Anchor
 
     # Create the highligh
     new TextHighlight @annotator, @annotation, page, range
+
+  # Create a RangeSelector around a range
+  @getRangeSelector: (annotator, range) ->
+    sr = range.serialize annotator.wrapper[0]
+
+    type: "RangeSelector"
+    startContainer: sr.startContainer
+    startOffset: sr.startOffset
+    endContainer: sr.endContainer
+    endOffset: sr.endOffset
+
+  # Create a TextQuoteSelector around a range
+  @getTextQuoteSelector: (annotator, range) ->
+    unless range?
+      throw new Error "Called getTextQuoteSelector(range) with null range!"
+
+    rangeStart = range.start
+    unless rangeStart?
+      throw new Error "Called getTextQuoteSelector(range) on a range with no valid start."
+    startOffset = (annotator.domMapper.getInfoForNode rangeStart).start
+    rangeEnd = range.end
+    unless rangeEnd?
+      throw new Error "Called getTextQuoteSelector(range) on a range with no valid end."
+    endOffset = (annotator.domMapper.getInfoForNode rangeEnd).end
+    quote = annotator.domMapper.getCorpus()[startOffset .. endOffset-1].trim()
+    [prefix, suffix] = annotator.domMapper.getContextForCharRange startOffset, endOffset
+
+    type: "TextQuoteSelector"
+    exact: quote
+    prefix: prefix
+    suffix: suffix
+
+  # Create a TextPositionSelector around a range
+  @getTextPositionSelector: (annotator, range) ->
+    startOffset = (annotator.domMapper.getInfoForNode range.start).start
+    endOffset = (annotator.domMapper.getInfoForNode range.end).end
+
+    type: "TextPositionSelector"
+    start: startOffset
+    end: endOffset
+
+  # Create a target, around anormalizedRange
+  @getTargetFromRange: (annotator, range) ->
+    source: annotator.getHref()
+    selector: [
+      TextRangeAnchor.getRangeSelector annotator, range
+      TextRangeAnchor.getTextQuoteSelector annotator, range
+      TextRangeAnchor.getTextPositionSelector annotator, range
+    ]

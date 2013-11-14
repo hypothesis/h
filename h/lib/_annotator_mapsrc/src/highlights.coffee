@@ -147,8 +147,11 @@ class TextHighlight extends Highlight
     @_highlights = @_highlightRange range
 
   # Implementing the required APIs
+
+  # Is this a temporary hl?
   isTemporary: -> @_temporary
 
+  # Mark/unmark this hl as active
   setTemporary: (value) ->
     @_temporary = value
     if value
@@ -156,16 +159,15 @@ class TextHighlight extends Highlight
     else
       $(@_highlights).removeClass('annotator-hl-temporary')
 
+  # Mark/unmark this hl as active
   setActive: (value) ->
     if value
       $(@_highlights).addClass('annotator-hl-active')
     else
       $(@_highlights).removeClass('annotator-hl-active')
 
-  _getDOMElements: -> @_highlights
-
+  # Remove all traces of this hl from the document
   removeFromDocument: ->
-    # remove the highlights added by this anchor
     for hl in @_highlights
       # Is this highlight actually the part of the document?
       if hl.parentNode? and @annotator.domMapper.isPageMapped @pageIndex
@@ -174,3 +176,6 @@ class TextHighlight extends Highlight
         $(hl).replaceWith hl.childNodes
         window.DomTextMapper.changed child.parentNode,
           "removed hilite (annotation deleted)"
+
+  # Get the HTML elements making up the highlight
+  _getDOMElements: -> @_highlights

@@ -271,44 +271,6 @@ class Annotator extends Delegator
     $('link[rel^="canonical"]').each -> uri = decodeURIComponent this.href
     return uri
 
-  getRangeSelector: (range) ->
-    sr = range.serialize @wrapper[0]
-    selector =
-      type: "RangeSelector"
-      startContainer: sr.startContainer
-      startOffset: sr.startOffset
-      endContainer: sr.endContainer
-      endOffset: sr.endOffset
-
-  getTextQuoteSelector: (range) ->
-    unless range?
-      throw new Error "Called getTextQuoteSelector(range) with null range!"
-
-    rangeStart = range.start
-    unless rangeStart?
-      throw new Error "Called getTextQuoteSelector(range) on a range with no valid start."
-    startOffset = (@domMapper.getInfoForNode rangeStart).start
-    rangeEnd = range.end
-    unless rangeEnd?
-      throw new Error "Called getTextQuoteSelector(range) on a range with no valid end."
-    endOffset = (@domMapper.getInfoForNode rangeEnd).end
-    quote = @domMapper.getCorpus()[startOffset .. endOffset-1].trim()
-    [prefix, suffix] = @domMapper.getContextForCharRange startOffset, endOffset
-    selector =
-      type: "TextQuoteSelector"
-      exact: quote
-      prefix: prefix
-      suffix: suffix
-
-  getTextPositionSelector: (range) ->
-    startOffset = (@domMapper.getInfoForNode range.start).start
-    endOffset = (@domMapper.getInfoForNode range.end).end
-
-    selector =
-      type: "TextPositionSelector"
-      start: startOffset
-      end: endOffset
-
   getQuoteForTarget: (target) ->
     selector = this.findSelector target.selector, "TextQuoteSelector"
     if selector?
@@ -361,18 +323,6 @@ class Annotator extends Delegator
       # Add the normed range back to the selection if it exists.
       selection.addRange(range.toRange()) if range
       range
-
-  # Public: Gets the target identified by the given NormalizedRange.
-  #
-  #
-  # Returns an Object containing a `source` property and a `selector` Array.
-  getTargetFromRange: (range) ->
-    source: this.getHref()
-    selector: [
-      this.getRangeSelector range
-      this.getTextQuoteSelector range
-      this.getTextPositionSelector range
-    ]
 
   # Public: Creates and returns a new annotation object. Publishes the
   # 'beforeAnnotationCreated' event to allow the new annotation to be modified.
@@ -507,19 +457,14 @@ class Annotator extends Delegator
   #
   # Returns the initialised annotation.
   setupAnnotation: (annotation) ->
-    ranges = annotation.ranges or @selectedRanges or []
-
-    # Upgrade format from v1.2.6 and earlier
-    if annotation.ranges? then delete annotation.ranges
-
-    annotation.target or= (this.getTargetFromRange(r) for r in ranges)
+    # If this is a new annotation, we might have to add the targets
+    annotation.target ?= @selectedTargets
 
     unless annotation.target?
       throw new Error "Can not run setupAnnotation(). No target or selection available."
 
     annotation.quote = []
     annotation.anchors = []
-    annotation.ranges = []
 
     for t in annotation.target
       try
@@ -778,16 +723,18 @@ class Annotator extends Delegator
       return
 
     # Get the currently selected ranges.
-    @selectedRanges = this.getSelectedRanges()
+    selectedRanges = this.getSelectedRanges()
 
-    for range in @selectedRanges
+    for range in selectedRanges
       container = range.commonAncestor
       # TODO: what is selection ends inside a different type of highlight?
       if TextHighlight.isInstance container
         container = TextHighlight.getIndependentParent container
       return if this.isAnnotator(container)
 
-    if event and @selectedRanges.length
+    @selectedTargets = (TextRangeAnchor.getTargetFromRange(this, r) for r in selectedRanges)
+
+    if event and selectedRanges.length
       this.onSuccessfulSelection event
     else
       this.onFailedSelection event
@@ -836,7 +783,7 @@ class Annotator extends Delegator
   #
   # Returns nothing.
   onAdderClick: (event) =>
-    event?.preventDefault()
+    event?.preventDefault?()
 
     # Hide the adder
     position = @adder.position()
