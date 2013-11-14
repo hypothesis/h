@@ -85,6 +85,7 @@ class TextHighlight extends Annotator.Highlight
 
     # Create a highlights, and link them with the annotation
     @_highlights = @_highlightRange range
+    $(@_highlights).data "annotation", annotation
 
   # Implementing the required APIs
 
