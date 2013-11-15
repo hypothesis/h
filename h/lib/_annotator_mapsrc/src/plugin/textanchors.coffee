@@ -80,7 +80,7 @@ class TextHighlight extends Annotator.Highlight
   constructor: (annotator, annotation, anchor, pageIndex, realRange) ->
     TextHighlight._init annotator
     super annotator, annotation, anchor, pageIndex
-    browserRange = new Annotator.Range.BrowserRange realRange
+    browserRange = new annotator.Annotator.Range.BrowserRange realRange
     range = browserRange.normalize @annotator.wrapper[0]
 
     # Create a highlights, and link them with the annotation
@@ -192,14 +192,14 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
   #
   # Returns Array of NormalizedRange instances.
   _getSelectedRanges: ->
-    selection = Annotator.util.getGlobal().getSelection()
+    selection = @annotator.Annotator.util.getGlobal().getSelection()
 
     ranges = []
     rangesToIgnore = []
     unless selection.isCollapsed
       ranges = for i in [0...selection.rangeCount]
         r = selection.getRangeAt(i)
-        browserRange = new Annotator.Range.BrowserRange(r)
+        browserRange = new @annotator.Annotator.Range.BrowserRange(r)
         normedRange = browserRange.normalize().limit @annotator.wrapper[0]
 
         # If the new range falls fully outside the wrapper, we

@@ -7,7 +7,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-11-15 17:51:43Z
+** Built at: 2013-11-15 22:44:42Z
 */
 
 
@@ -102,7 +102,7 @@
       var browserRange, range;
       TextHighlight._init(annotator);
       TextHighlight.__super__.constructor.call(this, annotator, annotation, anchor, pageIndex);
-      browserRange = new Annotator.Range.BrowserRange(realRange);
+      browserRange = new annotator.Annotator.Range.BrowserRange(realRange);
       range = browserRange.normalize(this.annotator.wrapper[0]);
       this._highlights = this._highlightRange(range);
       $(this._highlights).data("annotation", annotation);
@@ -207,7 +207,7 @@
 
     TextAnchors.prototype._getSelectedRanges = function() {
       var browserRange, i, normedRange, r, ranges, rangesToIgnore, selection, _i, _len;
-      selection = Annotator.util.getGlobal().getSelection();
+      selection = this.annotator.Annotator.util.getGlobal().getSelection();
       ranges = [];
       rangesToIgnore = [];
       if (!selection.isCollapsed) {
@@ -216,7 +216,7 @@
           _results = [];
           for (i = _i = 0, _ref1 = selection.rangeCount; 0 <= _ref1 ? _i < _ref1 : _i > _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
             r = selection.getRangeAt(i);
-            browserRange = new Annotator.Range.BrowserRange(r);
+            browserRange = new this.annotator.Annotator.Range.BrowserRange(r);
             normedRange = browserRange.normalize().limit(this.annotator.wrapper[0]);
             if (normedRange === null) {
               rangesToIgnore.push(r);
