@@ -66,6 +66,12 @@ class window.PageTextMapperCore
     event.pageIndex = info.index
     window.dispatchEvent event
 
+  # Announce scrolling
+  _onScroll: ->
+    event = document.createEvent "UIEvents"
+    event.initUIEvent "docPageScrolling", false, false, window, 0
+    window.dispatchEvent event
+
   # Look up info about a give DOM node, uniting page and node info
   getInfoForNode: (node) ->
     pageData = @getPageForNode node
