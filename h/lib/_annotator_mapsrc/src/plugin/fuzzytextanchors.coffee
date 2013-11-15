@@ -1,26 +1,26 @@
 # Annotator plugin for fuzzy text matching
-class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
+class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 
   pluginInit: ->
     # Initialize the text matcher library
     @textFinder = new DomTextMatcher => @annotator.domMapper.getCorpus()
 
     # Register our fuzzy strategies
-    @annotator.virtualAnchoringStrategies.push
+    @annotator.anchoringStrategies.push
       # Two-phased fuzzy text matching strategy. (Using context and quote.)
       # This can handle document structure changes,
       # and also content changes.
       name: "two-phase fuzzy"
-      code: this.createVirtualAnchorWithTwoPhaseFuzzyMatching
+      code: this.twoPhaseFuzzyMatching
 
-    @annotator.virtualAnchoringStrategies.push
+    @annotator.anchoringStrategies.push
       # Naive fuzzy text matching strategy. (Using only the quote.)
       # This can handle document structure changes,
       # and also content changes.
       name: "one-phase fuzzy"
-      code: this.createVirtualAnchorWithFuzzyMatching
+      code: this.fuzzyMatching
 
-  createVirtualAnchorWithTwoPhaseFuzzyMatching: (target) =>
+  twoPhaseFuzzyMatching: (annotation, target) =>
     # Fetch the quote and the context
     quoteSelector = @annotator.findSelector target.selector, "TextQuoteSelector"
     prefix = quoteSelector?.prefix
@@ -54,16 +54,16 @@ class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
 #      match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
 
     # OK, we have everything
-    # Compile the data required to store this virtual anchor
-    start: match.start
-    end: match.end
-    startPage: @annotator.domMapper.getPageIndexForPos match.start
-    endPage: @annotator.domMapper.getPageIndexForPos match.end
-    quote: match.found
-    diffHTML: unless match.exact then match.comparison.diffHTML
-    diffCaseOnly: unless match.exact then match.exactExceptCase
+    # Create a TextRangeAnchor from this data
+    new @annotator.TextRangeAnchor @annotator, annotation, target,
+      match.start, match.end,
+      (@annotator.domMapper.getPageIndexForPos match.start),
+      (@annotator.domMapper.getPageIndexForPos match.end),
+      match.found,
+      unless match.exact then match.comparison.diffHTML,
+      unless match.exact then match.exactExceptCase
 
-  createVirtualAnchorWithFuzzyMatching: (target) =>
+  fuzzyMatching: (annotation, target) =>
     # Fetch the quote
     quoteSelector = @annotator.findSelector target.selector, "TextQuoteSelector"
     quote = quoteSelector?.exact
@@ -102,12 +102,12 @@ class Annotator.Plugin.FuzzyAnchoring extends Annotator.Plugin
 #      match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
 
     # OK, we have everything
-    # Compile the data required to store this virtual anchor
-    start: match.start
-    end: match.end
-    startPage: @annotator.domMapper.getPageIndexForPos match.start
-    endPage: @annotator.domMapper.getPageIndexForPos match.end
-    quote: match.found
-    diffHTML: unless match.exact then match.comparison.diffHTML
-    diffCaseOnly: unless match.exact then match.exactExceptCase
+    # Create a TextRangeAnchor from this data
+    new @annotator.TextRangeAnchor @annotator, annotation, target,
+      match.start, match.end,
+      (@annotator.domMapper.getPageIndexForPos match.start),
+      (@annotator.domMapper.getPageIndexForPos match.end),
+      match.found,
+      unless match.exact then match.comparison.diffHTML,
+      unless match.exact then match.exactExceptCase
 
