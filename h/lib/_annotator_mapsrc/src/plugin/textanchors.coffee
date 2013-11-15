@@ -249,9 +249,8 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
         container = TextHighlight.getIndependentParent container
       return if @annotator.isAnnotator(container)
 
-    @annotator.selectedTargets = (@getTargetFromRange(r) for r in selectedRanges)
-
-    if event and selectedRanges.length
+    if selectedRanges.length
+      event.targets = (@getTargetFromRange(r) for r in selectedRanges)
       @annotator.onSuccessfulSelection event
     else
       @annotator.onFailedSelection event

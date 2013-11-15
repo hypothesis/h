@@ -581,10 +581,19 @@ class Annotator extends Delegator
       this.startViewerHideTimer()
     @mouseIsDown = true
 
-  onSuccessfulSelection: (event) ->
-    @adder
-      .css(util.mousePosition(event, @wrapper[0]))
-      .show()
+  onSuccessfulSelection: (event, immediate = false) ->
+    # Store the selected targets
+    @selectedTargets = event.targets
+
+    # Do we want immediate annotation?
+    if immediate
+      # Create an annotation
+      @onAdderClick event
+    else
+      # Show the adder button
+      @adder
+        .css(util.mousePosition(event, @wrapper[0]))
+        .show()
 
   onFailedSelection: (event) ->
     @adder.hide()

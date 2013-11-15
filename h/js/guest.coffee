@@ -149,7 +149,7 @@ class Annotator.Guest extends Annotator
     .on 'click', =>
       unless @ignoreMouseup or @noBack
         setTimeout =>
-          unless @selectedRanges?.length
+          unless @selectedTargets?.length
             @panel?.notify method: 'back'
     this
 
@@ -183,7 +183,7 @@ class Annotator.Guest extends Annotator
 
     return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
 
-  onSuccessfulSelection: (event) ->
+  onSuccessfulSelection: (event, immediate) ->
     if @tool is 'highlight'
 
       # Do we really want to make this selection?
@@ -206,7 +206,7 @@ class Annotator.Guest extends Annotator
       this.publish 'beforeAnnotationCreated', annotation
       this.publish 'annotationCreated', annotation
     else
-      super event
+      super
 
   # When clicking on a highlight in highlighting mode,
   # set @noBack to true to prevent the sidebar from closing
