@@ -38,13 +38,17 @@ function injecting(tabId, value) {
 function inject(tab) {
   // If we are already injecting, don't have to do anything.
   if (!injecting(tab)) {
+    console.log(new Date(), "Initiating code injectation for tab", tab);
     injecting(tab, true);
     setTimeout(function(){ // Give it some time before insertation
       injecting(tab, false);
+      console.log(new Date(), "Executing code injectation on tab", tab);
       chrome.tabs.executeScript(null, {
         file: 'public/js/embed.js'
       })
     }, 1000);
+  } else {
+    console.log(new Date(), "Requested code injectation for tab", tab, "but since an injectation is already in progress, not doing anything.");
   }
 }
 
@@ -139,14 +143,18 @@ function onTabRemoved(tab) {
 function onTabUpdated(tabId, info) {
   if (info.status == "loading") {
     // No need to do anything yet. We will get another notification soon.
+    console.log(new Date(), "tab", tabId, "is loading. Not doing anything.");
     return;
   }
 
+  console.log(new Date(), "tab", tabId, "has been updated.");
   var currentState = state(tabId) || 'sleeping'
+  console.log(new Date(), "State of tab", tabId, "is '", currentState, "'.");
 
   setPageAction(tabId, currentState)
 
   if (currentState == 'active' && info.status == 'complete') {
+    console.log (new Date(), "Requesting code injectation for tab", tabId)
     inject(tabId)
   }
 }
