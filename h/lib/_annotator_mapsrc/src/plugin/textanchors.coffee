@@ -9,11 +9,11 @@
 class TextHighlight extends Annotator.Highlight
 
   # Is this element a text highlight physical anchor ?
-  @isInstance: (element) -> $(element).hasClass 'annotator-hl'
+  @isInstance: (element) -> annotator.Annotator.$(element).hasClass 'annotator-hl'
 
   # Find the first parent outside this physical anchor
   @getIndependentParent: (element) ->
-    $(element).parents(':not([class^=annotator-hl])')[0]
+    annotator.Annotator.$(element).parents(':not([class^=annotator-hl])')[0]
 
   # List of annotators we have already set up events for
   @_inited: []
@@ -23,10 +23,10 @@ class TextHighlight extends Annotator.Highlight
     return if annotator in @_inited
 
     getAnnotations = (event) ->
-      annotations = $(event.target)
+      annotations = annotator.Annotator.$(event.target)
         .parents('.annotator-hl')
         .andSelf()
-        .map -> return $(this).data("annotation")
+        .map -> return annotator.Annotator.$(this).data("annotation")
 
     annotator.addEvent ".annotator-hl", "mouseover", (event) =>
       annotator.onAnchorMouseover getAnnotations event
@@ -52,7 +52,7 @@ class TextHighlight extends Annotator.Highlight
   _highlightRange: (normedRange, cssClass='annotator-hl') ->
     white = /^\s*$/
 
-    hl = $("<span class='#{cssClass}'></span>")
+    hl = annotator.Annotator.$("<span class='#{cssClass}'></span>")
 
     # Ignore text nodes that contain only whitespace characters. This prevents
     # spans being injected between elements that can only contain a restricted
@@ -61,7 +61,7 @@ class TextHighlight extends Annotator.Highlight
     # but better than breaking table layouts.
 
     for node in normedRange.textNodes() when not white.test node.nodeValue
-      r = $(node).wrapAll(hl).parent().show()[0]
+      r = annotator.Annotator.$(node).wrapAll(hl).parent().show()[0]
       window.DomTextMapper.changed node, "created hilite"
       r
 
@@ -74,7 +74,7 @@ class TextHighlight extends Annotator.Highlight
   _highlightRanges: (normedRanges, cssClass='annotator-hl') ->
     highlights = []
     for r in normedRanges
-      $.merge highlights, this._highlightRange(r, cssClass)
+      annotator.Annotator.$.merge highlights, this._highlightRange(r, cssClass)
     highlights
 
   constructor: (annotator, annotation, anchor, pageIndex, realRange) ->
@@ -85,7 +85,7 @@ class TextHighlight extends Annotator.Highlight
 
     # Create a highlights, and link them with the annotation
     @_highlights = @_highlightRange range
-    $(@_highlights).data "annotation", annotation
+    annotator.Annotator.$(@_highlights).data "annotation", annotation
 
   # Implementing the required APIs
 
@@ -96,16 +96,16 @@ class TextHighlight extends Annotator.Highlight
   setTemporary: (value) ->
     @_temporary = value
     if value
-      $(@_highlights).addClass('annotator-hl-temporary')
+      annotator.Annotator.$(@_highlights).addClass('annotator-hl-temporary')
     else
-      $(@_highlights).removeClass('annotator-hl-temporary')
+      annotator.Annotator.$(@_highlights).removeClass('annotator-hl-temporary')
 
   # Mark/unmark this hl as active
   setActive: (value) ->
     if value
-      $(@_highlights).addClass('annotator-hl-active')
+      annotator.Annotator.$(@_highlights).addClass('annotator-hl-active')
     else
-      $(@_highlights).removeClass('annotator-hl-active')
+      annotator.Annotator.$(@_highlights).removeClass('annotator-hl-active')
 
   # Remove all traces of this hl from the document
   removeFromDocument: ->
@@ -114,7 +114,7 @@ class TextHighlight extends Annotator.Highlight
       if hl.parentNode? and @annotator.domMapper.isPageMapped @pageIndex
         # We should restore original state
         child = hl.childNodes[0]
-        $(hl).replaceWith hl.childNodes
+        annotator.Annotator.$(hl).replaceWith hl.childNodes
         window.DomTextMapper.changed child.parentNode,
           "removed hilite (annotation deleted)"
 
@@ -218,7 +218,7 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
       selection.addRange(r)
 
     # Remove any ranges that fell outside of @wrapper.
-    $.grep ranges, (range) ->
+    annotator.Annotator.$.grep ranges, (range) ->
       # Add the normed range back to the selection if it exists.
       selection.addRange(range.toRange()) if range
       range
