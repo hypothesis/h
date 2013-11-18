@@ -1,7 +1,9 @@
 # Abstract highlight class
 class Highlight
 
-  constructor: (@annotator, @annotation, @anchor, @pageIndex) ->
+  constructor: (@anchor, @pageIndex) ->
+    @annotator = @anchor.annotator
+    @annotation = @anchor.annotation
 
   # Mark/unmark this hl as temporary (while creating an annotation)
   setTemporary: (value) ->

@@ -173,17 +173,17 @@ class Annotator.Guest extends Annotator
       @mouseIsDown = true
 
   confirmSelection: ->
-    return true unless @selectedRanges.length is 1
+    return true unless @selectedTargets.length is 1
 
-    target = this.getTargetFromRange @selectedRanges[0]
-    selector = this.findSelector target.selector, "TextQuoteSelector"
-    length = selector.exact.length
+    quote = @plugins.TextAnchors.getQuoteForTarget @selectedTargets[0]
 
-    if length > 2 then return true
+    if quote.length > 2 then return true
 
     return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
 
   onSuccessfulSelection: (event, immediate) ->
+    # Store the selected targets
+    @selectedTargets = event.targets
     if @tool is 'highlight'
 
       # Do we really want to make this selection?
@@ -243,13 +243,13 @@ class Annotator.Guest extends Annotator
         @element.removeClass markerClass
 
   addComment: ->
-    sel = @selectedRanges   # Save the selection
+    sel = @selectedTargets   # Save the selection
     # Nuke the selection, since we won't be using that.
     # We will attach this to the end of the document.
     # Our override for setupAnnotation will add that highlight.
-    @selectedRanges = []
+    @selectedTargets = []
     this.onAdderClick()     # Open editor (with 0 targets)
-    @selectedRanges = sel # restore the selection
+    @selectedTargets = sel # restore the selection
 
   # Is this annotation a comment?
   isComment: (annotation) ->
