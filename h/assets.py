@@ -118,10 +118,6 @@ annotator_textanchors = Uglify(
     'lib/annotator.textanchors.js',
     output='lib/annotator.textanchors.min.js'
 )
-annotator_oldtextanchors = Uglify(
-    'lib/annotator.oldtextanchors.js',
-    output='lib/annotator.oldtextanchors.min.js'
-)
 annotator_fuzzytext = Uglify(
     Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js'),
     Coffee('lib/text_match_engines.coffee', output='js/text_match_engines.js'),
@@ -306,7 +302,6 @@ inject = Bundle(
     annotator_textanchors,
     annotator_fuzzytext,
     annotator_pdf,
-#    annotator_oldtextanchors, # For testing purposes only
     annotator_toolbar,
     Uglify(
         Coffee('js/guest.coffee', output='js/guest.js'),
