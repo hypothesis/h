@@ -17,6 +17,10 @@ class Highlight
   setActive: (value) ->
     throw "Operation not implemented."
 
+  # React to changes in the underlying annotation
+  annotationUpdated: ->
+    #console.log "In HL", this, "annotation has been updated."
+
   # Remove all traces of this hl from the document
   removeFromDocument: ->
     throw "Operation not implemented."

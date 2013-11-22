@@ -58,8 +58,8 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 #      match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
 
     # OK, we have everything
-    # Create a TextRangeAnchor from this data
-    new @annotator.TextRangeAnchor @annotator, annotation, target,
+    # Create a TextPositionAnchor from this data
+    new @annotator.TextPositionAnchor @annotator, annotation, target,
       match.start, match.end,
       (@annotator.domMapper.getPageIndexForPos match.start),
       (@annotator.domMapper.getPageIndexForPos match.end),
@@ -106,8 +106,8 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 #      match.end + "]: '" + match.found + "' (exact: " + match.exact + ")"
 
     # OK, we have everything
-    # Create a TextRangeAnchor from this data
-    new @annotator.TextRangeAnchor @annotator, annotation, target,
+    # Create a TextPosutionAnchor from this data
+    new @annotator.TextPositionAnchor @annotator, annotation, target,
       match.start, match.end,
       (@annotator.domMapper.getPageIndexForPos match.start),
       (@annotator.domMapper.getPageIndexForPos match.end),

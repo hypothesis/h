@@ -1,73 +1,47 @@
 # This plugin implements the usual text anchor.
 # Contains
 #  * the the definitions of the corresponding selectors,
+#  * the highlight class,
 #  * the anchor class,
 #  * the basic anchoring strategies
 
-class TextPositionAnchor extends Annotator.Anchor
+class TextRangeAnchor extends Annotator.Anchor
 
   @Annotator = Annotator
 
-  constructor: (annotator, annotation, target,
-      @start, @end, startPage, endPage,
-      quote, diffHTML, diffCaseOnly) ->
+  constructor: (annotator, annotation, target, @range, quote) ->
 
-    super annotator, annotation, target,
-      startPage, endPage,
-      quote, diffHTML, diffCaseOnly
+    super annotator, annotation, target, 0, 0, quote
 
-    unless @start? then throw "start is required!"
-    unless @end? then throw "end is required!"
+    unless @range? then throw "range is required!"
 
-    @Annotator = TextPositionAnchor.Annotator
+    @Annotator = TextRangeAnchor.Annotator
 
   # This is how we create a highlight out of this kind of anchor
-  _createHighlight: (page) ->
-
-    # First calculate the ranges
-    mappings = @annotator.domMapper.getMappingsForCharRange @start, @end, [page]
-
-    # Get the wanted range
-    realRange = mappings.sections[page].realRange
-
-    # Get a BrowserRange
-    browserRange = new @Annotator.Range.BrowserRange realRange
-
-    # Get a NormalizedRange
-    normedRange = browserRange.normalize @annotator.wrapper[0]
+  _createHighlight: ->
 
     # Create the highligh
-    new @Annotator.TextHighlight this, page, normedRange
+    new @Annotator.TextHighlight this, 0, @range
 
-class Annotator.Plugin.TextAnchors extends Annotator.Plugin
+class Annotator.Plugin.OldTextAnchors extends Annotator.Plugin
 
   # Plugin initialization
   pluginInit: ->
-    # We need dom-text-mapper
-    unless @annotator.plugins.DomTextMapper
-      throw "The TextAnchors Annotator plugin requires the DomTextMapper plugin."
     # We need text highlights
     unless @annotator.plugins.TextHighlights
       throw "The TextAnchors Annotator plugin requires the TextHighlights plugin."
-    # Declare our conflict with the OldTextAnchors plugin
-    if @annotator.plugins.OldTextAnchors
+    # Declare our conflict with the TextAnchors plugi
+    if @annotator.plugins.TextAnchors
       throw "The TextAnchors Annotator plugin conflicts with the OldTextAnchors plugin."
 
     @Annotator = Annotator
     @$ = Annotator.$
-        
-    # Register our anchoring strategies
+
+    # Register our anchoring strategy
     @annotator.anchoringStrategies.push
       # Simple strategy based on DOM Range
       name: "range"
       code: @createFromRangeSelector
-
-    @annotator.anchoringStrategies.push
-      # Position-based strategy. (The quote is verified.)
-      # This can handle document structure changes,
-      # but not the content changes.
-      name: "position"
-      code: @createFromPositionSelector
 
     # Register the event handlers required for creating a selection
     $(@annotator.wrapper).bind({
@@ -75,7 +49,10 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
     })
 
     # Export this anchor type
-    @annotator.TextPositionAnchor = TextPositionAnchor
+    @annotator.TextRangeAnchor = TextRangeAnchor
+
+    # Configure quote comparison behavior
+    @verifyQuote = @options.verifyQuote ? true
 
     null
 
@@ -175,30 +152,8 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
     unless range?
       throw new Error "Called getTextQuoteSelector(range) with null range!"
 
-    rangeStart = range.start
-    unless rangeStart?
-      throw new Error "Called getTextQuoteSelector(range) on a range with no valid start."
-    startOffset = (@annotator.domMapper.getInfoForNode rangeStart).start
-    rangeEnd = range.end
-    unless rangeEnd?
-      throw new Error "Called getTextQuoteSelector(range) on a range with no valid end."
-    endOffset = (@annotator.domMapper.getInfoForNode rangeEnd).end
-    quote = @annotator.domMapper.getCorpus()[startOffset .. endOffset-1].trim()
-    [prefix, suffix] = @annotator.domMapper.getContextForCharRange startOffset, endOffset
-
     type: "TextQuoteSelector"
-    exact: quote
-    prefix: prefix
-    suffix: suffix
-
-  # Create a TextPositionSelector around a range
-  _getTextPositionSelector: (range) ->
-    startOffset = (@annotator.domMapper.getInfoForNode range.start).start
-    endOffset = (@annotator.domMapper.getInfoForNode range.end).end
-
-    type: "TextPositionSelector"
-    start: startOffset
-    end: endOffset
+    exact: range.text().trim()
 
   # Create a target around a normalizedRange
   getTargetFromRange: (range) ->
@@ -206,7 +161,6 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
     selector: [
       @_getRangeSelector range
       @_getTextQuoteSelector range
-      @_getTextPositionSelector range
     ]
 
   # Stratiges used for creating these anchors from saved data
@@ -220,56 +174,30 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
       null
 
   # Create and anchor using the saved Range selector. The quote is verified.
-  createFromRangeSelector: (annotation, target) ->
-    selector = @findSelector target.selector, "RangeSelector"
+  createFromRangeSelector: (annotation, target) =>
+    selector = @annotator.findSelector target.selector, "RangeSelector"
     unless selector? then return null
 
     # Try to apply the saved XPath
     try
-      normalizedRange = @Annotator.Range.sniff(selector).normalize @wrapper[0]
+      normedRange = @Annotator.Range.sniff(selector).normalize @annotator.wrapper[0]
     catch error
-      return null
-    startInfo = @domMapper.getInfoForNode normalizedRange.start
-    startOffset = startInfo.start
-    endInfo = @domMapper.getInfoForNode normalizedRange.end
-    endOffset = endInfo.end
-    content = @domMapper.getCorpus()[startOffset .. endOffset-1].trim()
-    currentQuote = @normalizeString content
-
-    # Look up the saved quote
-    savedQuote = @plugins.TextAnchors.getQuoteForTarget target
-    if savedQuote? and currentQuote isnt savedQuote
-      #console.log "Could not apply XPath selector to current document, " +
-      #  "because the quote has changed. (Saved quote is '#{savedQuote}'." +
-      #  " Current quote is '#{currentQuote}'.)"
+#      console.log "Could not apply XPath selector to current document, " +
+#        "because the structure has changed."
       return null
 
-    # Create a TextPositionAnchor from this range
-    new TextPositionAnchor this, annotation, target,
-      startInfo.start, endInfo.end,
-      (startInfo.pageIndex ? 0), (endInfo.pageIndex ? 0),
-      currentQuote
+    # Get the content of this range
+    currentQuote = @annotator.normalizeString normedRange.text().trim()
 
-  # Create an anchor using the saved TextPositionSelector. The quote is verified.
-  createFromPositionSelector: (annotation, target) ->
-    selector = @findSelector target.selector, "TextPositionSelector"
-    unless selector? then return null
-    content = @domMapper.getCorpus()[selector.start .. selector.end-1].trim()
-    currentQuote = @normalizeString content
-    savedQuote = @plugins.TextAnchors.getQuoteForTarget target
-    if savedQuote? and currentQuote isnt savedQuote
-      # We have a saved quote, let's compare it to current content
-      #console.log "Could not apply position selector" +
-      #  " [#{selector.start}:#{selector.end}] to current document," +
-      #  " because the quote has changed. " +
-      #  "(Saved quote is '#{savedQuote}'." +
-      #  " Current quote is '#{currentQuote}'.)"
-      return null
+    if @verifyQuote
+      # Look up the saved quote
+      savedQuote = @getQuoteForTarget target
+      if savedQuote? and currentQuote isnt savedQuote
+#        console.log "Could not apply XPath selector to current document, " +
+#          "because the quote has changed. (Saved quote is '#{savedQuote}'." +
+#          " Current quote is '#{currentQuote}'.)"
+        return null
 
-    # Create a TextPositionAnchor from this data
-    new TextPositionAnchor this, annotation, target,
-      selector.start, selector.end,
-      (@domMapper.getPageIndexForPos selector.start),
-      (@domMapper.getPageIndexForPos selector.end),
-      currentQuote
+    # Create a TextRangeAnchor from this range
+    new TextRangeAnchor @annotator, annotation, target, normedRange, currentQuote
 

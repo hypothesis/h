@@ -105,9 +105,22 @@ annotator_document = Uglify(
     'lib/annotator.document.js',
     output='lib/annotator.document.min.js'
 )
-annotator_text = Uglify(
+annotator_dtm = Uglify(
+    Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
+    'lib/annotator.domtextmapper.js',
+    output='lib/annotator.dtm.min.js'
+)
+annotator_texthl = Uglify(
+    'lib/annotator.texthighlights.js',
+    output='lib/annotator.texthighlights.min.js'
+)
+annotator_textanchors = Uglify(
     'lib/annotator.textanchors.js',
     output='lib/annotator.textanchors.min.js'
+)
+annotator_oldtextanchors = Uglify(
+    'lib/annotator.oldtextanchors.js',
+    output='lib/annotator.oldtextanchors.min.js'
 )
 annotator_fuzzytext = Uglify(
     Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js'),
@@ -117,6 +130,7 @@ annotator_fuzzytext = Uglify(
     output='lib/annotator.fuzzytextanchors.min.js'
 )
 annotator_pdf = Uglify(
+    Coffee('lib/page_text_mapper_core.coffee', output='js/page_text_mapper_core.js'),    
     'lib/annotator.pdf.js',
     output='lib/annotator.pdf.min.js'
 )
@@ -204,12 +218,6 @@ visualsearch = Bundle(
 
 uuid = Uglify('lib/uuid.js', output='lib/uuid.min.js')
 
-domTextFamily = Uglify(
-    Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
-    Coffee('lib/page_text_mapper_core.coffee', output='js/page_text_mapper_core.js'),
-    output='lib/dom_text.min.js'
-)
-
 # SCSS
 css_base = ['css/base.scss']
 css_common = ['css/common.scss', 'css/responsive.scss', 'css/yui_grid.scss']
@@ -282,7 +290,6 @@ site = Bundle(
 # plugin.
 inject = Bundle(
     d3,
-    domTextFamily,
     jquery,
     jquery_scrollintoview,
     jquery_ui,
@@ -294,9 +301,12 @@ inject = Bundle(
     annotator_bridge,
     annotator_document,
     annotator_heatmap,
-    annotator_text,
+    annotator_texthl,
+    annotator_dtm,
+    annotator_textanchors,
     annotator_fuzzytext,
     annotator_pdf,
+#    annotator_oldtextanchors, # For testing purposes only
     annotator_toolbar,
     Uglify(
         Coffee('js/guest.coffee', output='js/guest.js'),
