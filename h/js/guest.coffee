@@ -13,6 +13,8 @@ class Annotator.Guest extends Annotator
 
   # Plugin configuration
   options:
+    TextHighlights: {}
+    DomTextMapper: {}
     TextAnchors: {}
     FuzzyTextAnchors: {}
     PDF: {}

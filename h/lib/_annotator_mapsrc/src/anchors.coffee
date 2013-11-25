@@ -68,3 +68,9 @@ class Anchor
       anchors[i..i] = []
       # Kill the list if it's empty
       delete @annotator.anchors[index] unless anchors.length
+
+  # This is called when the underlying Annotator has been udpated
+  annotationUpdated: ->
+    # Notify the highlights
+    for index in [@startPage .. @endPage]
+      @highlight[index]?.annotationUpdated()
