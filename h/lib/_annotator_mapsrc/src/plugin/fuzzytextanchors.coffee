@@ -89,7 +89,7 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
     len = @annotator.domMapper.getCorpus().length
 
     # If we don't have the position saved, start at the middle of the doc
-    expectedStart ?= len / 2
+    expectedStart ?= Math.floor(len / 2)
 
     # Do the fuzzy search
     options =

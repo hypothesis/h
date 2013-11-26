@@ -106,7 +106,10 @@ class window.DTM_DMPMatcher
 #    console.log "In dtm search. text: '" + text + "', pattern: '" + pattern +
 #       "', expectedStartLoc: " + expectedStartLoc + ", options:"
 #    console.log options
-    if expectedStartLoc < 0 then throw new Error "Can't search at negative indices!"
+    if expectedStartLoc < 0
+      throw new Error "Can't search at negative indices!"
+    if expectedStartLoc isnt Math.floor expectedStartLoc
+      throw new Error "Expected start location must be an integer."
 
     unless @caseSensitive
       text = text.toLowerCase()

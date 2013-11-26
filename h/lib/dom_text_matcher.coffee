@@ -72,7 +72,7 @@ class window.DomTextMatcher
     expectedPrefixStart = if expectedStart?
       expectedStart - prefix.length
     else
-      len / 2
+      Math.floor(len / 2)
 
     # Do the fuzzy search for the prefix
     @dmp.setMatchDistance options.contextMatchDistance ? len * 2
