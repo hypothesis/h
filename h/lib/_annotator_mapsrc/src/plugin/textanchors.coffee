@@ -110,6 +110,9 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
     @annotator.TextPositionAnchor = TextPositionAnchor
     @annotator.TextRangeAnchor = TextRangeAnchor
 
+    # Trigger an annotation if we have a currently valid selection
+    setTimeout (=> @checkForEndSelection({})), 1000
+
     null
 
 
@@ -189,6 +192,18 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
 
     if selectedRanges.length
       event.targets = (@getTargetFromRange(r) for r in selectedRanges)
+
+      # Do we have valid page coordinates inside the event
+      # which has triggered this function?
+      unless event.pageX
+        # No, we don't. Adding fake coordinates
+        node = selectedRanges[0].end
+        while not node.getBoundingClientRect?
+          node = node.parentNode
+        pos = node.getBoundingClientRect()
+        event.pageX = pos.right
+        event.pageY = pos.bottom
+
       @annotator.onSuccessfulSelection event
     else
       @annotator.onFailedSelection event
