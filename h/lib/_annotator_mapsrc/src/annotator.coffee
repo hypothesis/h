@@ -125,7 +125,7 @@ class Annotator extends Delegator
     @documentAccessStrategies = [
       # Default dummy strategy for simple HTML documents.
       # The generic fallback.
-      name: "DOM generic"
+      name: "Dummy"
       mapper: DummyDocumentAccess
     ]
 
