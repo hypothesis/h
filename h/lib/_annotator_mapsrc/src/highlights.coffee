@@ -40,7 +40,7 @@ class Highlight
   getHeight: -> $(@_getDOMElements()).outerHeight true
 
   # Get the bottom Y offset of the highlight. Override for more control.
-  getBottom: -> getTop() + getBottom()
+  getBottom: -> @getTop() + @getBottom()
 
   # Scroll the highlight into view. Override for more control
   scrollTo: -> $(@_getDOMElements()).scrollintoview()
