@@ -68,7 +68,7 @@ class Annotator extends Delegator
 
   viewer: null
 
-  selectedRanges: null
+  selectedTargets: null
 
   mouseIsDown: false
 
@@ -351,6 +351,7 @@ class Annotator extends Delegator
   setupAnnotation: (annotation) ->
     # If this is a new annotation, we might have to add the targets
     annotation.target ?= @selectedTargets
+    @selectedTargets = []
 
     unless annotation.target?
       throw new Error "Can not run setupAnnotation(). No target or selection available."
@@ -600,6 +601,10 @@ class Annotator extends Delegator
     @mouseIsDown = true
 
   onSuccessfulSelection: (event, immediate = false) ->
+    unless event?
+      throw "Called onSuccessfulSelection without an event!"
+    unless event.targets?
+      throw "Called onSuccessulSelection with an event with missing targets!"
     # Store the selected targets
     @selectedTargets = event.targets
 
