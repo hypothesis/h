@@ -32,31 +32,12 @@
       <div class="noise yui3-u-1"
            ng-hide="full_deleted">
         <div ng-view=""></div>
-<!--         <strong>
-            <a class="pull-right"
-               ng-href="{{annotation.uri}}">To Source</a>
-        </strong> -->
-
-<!--         <div class="page">
-          <strong>
-            <username ng-model="annotation.user"></username>
-            <span>{{annotation.text && "annotated" || "highlighted"}}:</span>
-          </strong>
-          <div class="domain">
-            <img class="favicon" ng-src="{{root.favicon_link}}"
-                 onerror="this.style.display='none'"
-                 ng-show="root.favicon_link.length"/>
-            <a ng-href="{{annotation.uri}}">{{root.title}}</a>
-            |
-            <a ng-href="{{root.source}}">{{root.source_stripped}}</a>
-          </div>
-        </div> -->
 
         <div class="paper yui3-g thread steam-list">
           <div class="yui3-u-1"
-               ng-class="(annotation.text || annotation.replies.length || annotation.tags.length) && '' || '' "
-               ng-show="root.quote.length">
-            <div class="excerpt">
+               ng-class="(annotation.text || annotation.replies.length || annotation.tags.length) && '' || '' ">
+            <div class="excerpt"
+                 ng-show="root.quote.length">
               <blockquote ng-show="root.quoteSource == 'document'">{{root.quote}}</blockquote>
               <blockquote ng-hide="root.quoteSource == 'document'">
                 <markdown ng-model="$parent.root.quote"
