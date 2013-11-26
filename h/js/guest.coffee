@@ -152,7 +152,7 @@ class Annotator.Guest extends Annotator
       unless @ignoreMouseup or @noBack
         setTimeout =>
           unless @selectedTargets?.length
-            @panel?.notify method: 'back'
+            @hideFrame()
     this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
@@ -213,7 +213,8 @@ class Annotator.Guest extends Annotator
   # When clicking on a highlight in highlighting mode,
   # set @noBack to true to prevent the sidebar from closing
   onAnchorMousedown: (annotations) =>
-    if (@tool is 'highlight') or @visibleHighlights then @noBack = true
+    if (@tool is 'highlight') or @visibleHighlights
+      @noBack = true
 
   # When clicking on a highlight in highlighting mode,
   # tell the sidebar to bring up the viewer for the relevant annotations
