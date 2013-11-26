@@ -494,8 +494,8 @@ class App
     , 5000
 
 class Annotation
-  this.$inject = ['$element', '$location', '$scope', 'annotator', 'drafts', '$timeout', '$window']
-  constructor: ($element, $location, $scope, annotator, drafts, $timeout, $window) ->
+  this.$inject = ['$element', '$location', '$sce', '$scope', 'annotator', 'drafts', '$timeout', '$window']
+  constructor: ($element, $location, $sce, $scope, annotator, drafts, $timeout, $window) ->
     threading = annotator.threading
     $scope.action = 'create'
     $scope.editing = false
@@ -610,6 +610,15 @@ class Annotation
         # Check if this is a brand new annotation
         if annotation? and drafts.contains annotation
           $scope.editing = true
+
+    $scope.$watch 'model.$modelValue.target', (targets) ->
+      for target in targets
+        if target.diffHTML?
+          target.trustedDiffHTML = $sce.trustAsHtml target.diffHTML
+          target.showDiff = not target.diffCaseOnly
+        else
+          delete target.trustedDiffHTML
+          target.showDiff = false
 
     $scope.$watch 'shared', (newValue) ->
       if newValue? is true
