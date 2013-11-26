@@ -154,7 +154,8 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       this._parse a for a in annotations when @cache[a.tag]
       # Then collect the new ones
       annotations = (this._parse a for a in annotations when not @cache[a.tag])
-      @annotator.loadAnnotations annotations
+      if annotations.length
+        @annotator.loadAnnotations annotations
     )
 
     .bind('showEditor', (ctx, annotation) =>
@@ -240,9 +241,11 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       scope: scope
       onReady: =>
         options.onConnect.call @annotator, source, origin, scope
-        channel.notify
-          method: 'loadAnnotations'
-          params: (this._format a for t, a of @cache)
+        annotations = (this._format a for t, a of @cache)
+        if annotations.length
+          channel.notify
+            method: 'loadAnnotations'
+            params: annotations
 
     channel = this._build options
 
