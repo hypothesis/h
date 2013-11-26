@@ -220,6 +220,7 @@ class Hypothesis extends Annotator
     )
 
     .bind('showViewer', (ctx, ids=[]) =>
+      return unless this.discardDrafts()
       this.showViewer ((@threading.getContainer id).message for id in ids)
     )
 
