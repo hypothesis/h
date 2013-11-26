@@ -85,27 +85,47 @@ class window.PDFTextMapper extends window.PageTextMapperCore
     PDFView.getPage(1).then =>
       console.log "Scanning document for text..."
 
-      # Tell the Find Controller to go digging
-      PDFFindController.extractText()
-
-      # When all the text has been extracted
-      PDFJS.Promise.all(PDFFindController.extractTextPromises).then =>
-        # PDF.js text extraction has finished.
-
-        # Post-process the extracted text
-        @pageInfo = ({ content: @_parseExtractedText page } for page in PDFFindController.pageContents)
-
-        # Do some besic calculations with the content
-        @_onHavePageContents()
-
-        # OK, we are ready to rock.
-        @pendingScan.resolve()
-
-        # Do whatever we need to do after scanning
-        @_onAfterScan()
+      @pageInfo = []
+      @_extractPageText 0
 
     # Return the promise
     @pendingScan
+
+  # Manually extract the text from the PDF document.
+  # This workaround is here to avoid depending PDFFindController's
+  # own text extraction routines, which sometimes fail to add
+  # adequate spacing.
+  _extractPageText: (pageIndex) ->
+    # Get a handle on the page
+    page = PDFFindController.pdfPageSource.pages[pageIndex]
+
+    # Start the collection of page contents
+    page.getTextContent().then (data) =>
+
+      # First, join all the pieces from the bidiTexts
+      rawContent = (text.str for text in data.bidiTexts).join " "
+
+      # Do some post-processing
+      content = @_parseExtractedText rawContent
+
+      # Save the extracted content to our page information registery
+      @pageInfo[pageIndex] = content: content
+
+      if pageIndex is PDFView.pages.length - 1
+        @_finishScan()
+      else
+        @_extractPageText pageIndex + 1
+
+  # This is called when scanning is finished
+  _finishScan: =>
+    # Do some besic calculations with the content
+    @_onHavePageContents()
+
+    # OK, we are ready to rock.
+    @pendingScan.resolve()
+
+    # Do whatever we need to do after scanning
+    @_onAfterScan()
 
 
   # Look up the page for a given DOM node
