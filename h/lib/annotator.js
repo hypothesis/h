@@ -7,7 +7,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2013-11-26 14:54:04Z
+** Built at: 2013-11-27 11:58:58Z
 */
 
 
@@ -872,7 +872,10 @@
       throw "Operation not implemented.";
     };
 
-    Highlight.prototype.setActive = function(value) {
+    Highlight.prototype.setActive = function(value, batch) {
+      if (batch == null) {
+        batch = false;
+      }
       throw "Operation not implemented.";
     };
 
@@ -1083,7 +1086,7 @@
     Annotator.prototype._setupDocumentAccessStrategies = function() {
       this.documentAccessStrategies = [
         {
-          name: "Dummy",
+          name: "DOM generic",
           mapper: DummyDocumentAccess
         }
       ];

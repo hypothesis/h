@@ -14,7 +14,16 @@ class Highlight
     throw "Operation not implemented."
 
   # Mark/unmark this hl as active
-  setActive: (value) ->
+  #
+  # Value specifies whether it should be active or not
+  #
+  # The 'batch' field specifies whether this call is only one of
+  # many subsequent calls, which should be executed together.
+  #
+  # In this case, a "finalizeHighlights" event will be published
+  # when all the flags have been set, and the changes should be
+  # executed.
+  setActive: (value, batch = false) ->
     throw "Operation not implemented."
 
   # React to changes in the underlying annotation
