@@ -730,8 +730,8 @@ class Viewer
           params: annotation.$$tag
 
 class Search
-  this.$inject = ['$filter', '$location', '$rootScope', '$routeParams', '$scope', 'annotator']
-  constructor: ($filter, $location, $rootScope, $routeParams, $scope, annotator) ->
+  this.$inject = ['$filter', '$location', '$rootScope', '$routeParams', '$sce', '$scope', 'annotator']
+  constructor: ($filter, $location, $rootScope, $routeParams, $sce, $scope, annotator) ->
     {providers, threading} = annotator
 
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
@@ -888,7 +888,13 @@ class Search
         if $scope.quote?.length > 0
           $scope.ann_info.show_quote[thread.message.id] = true
           for target in thread.message.target
-            target.highlightQuote = target.quote.replace $scope.quote_regexp, $scope.highlighter
+            target.highlightQuote = $sce.trustAsHtml target.quote.replace $scope.quote_regexp, $scope.highlighter
+            if target.diffHTML?
+              target.trustedDiffHTML = $sce.trustAsHtml target.diffHTML
+              target.showDiff = not target.diffCaseOnly
+            else
+              delete target.trustedDiffHTML
+              target.showDiff = false
         else
           for target in thread.message.target
             target.highlightQuote = target.quote

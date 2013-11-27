@@ -25,7 +25,7 @@
                ng-hide="collapsed">
             <blockquote ng-bind="target.quote" ng-hide="target.showDiff" />
             <blockquote ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
-            <div class="small pull-right" ng-show="target.trustedDiffHTML">
+            <div class="small pull-right" ng-show="target.diffHTML">
               <input type="checkbox" ng-model="target.showDiff" ng-click="$event.stopPropagation()"> Show differences</input>
             </div>
           </div>

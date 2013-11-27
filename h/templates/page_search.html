@@ -15,11 +15,11 @@
             <!-- Excerpts -->
             <div class="excerpt"
                  ng-repeat="target in thread.message.target"
-                 ng-show="collapsed">
-              <blockquote ng-bind-html-unsafe="target.highlightQuote" ng-hide="diff" />
-              <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
-              <div class="small pull-right" ng-show="target.diffHTML" ng-init="diff=target.diffHTML.length>0 && !target.diffCaseOnly">
-                <input type="checkbox" ng-model="diff">Show differences</input>
+                 ng-hide="collapsed">
+              <blockquote ng-bind-html="target.highlightQuote" ng-hide="target.showDiff" />
+              <blockquote ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
+              <div class="small pull-right" ng-show="target.diffHTML">
+                <input type="checkbox" ng-model="target.showDiff"> Show differences</input>
               </div>
             </div>
 
