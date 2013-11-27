@@ -612,6 +612,7 @@ class Annotation
           $scope.editing = true
 
     $scope.$watch 'model.$modelValue.target', (targets) ->
+      return unless targets
       for target in targets
         if target.diffHTML?
           target.trustedDiffHTML = $sce.trustAsHtml target.diffHTML
