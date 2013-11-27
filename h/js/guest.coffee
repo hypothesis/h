@@ -104,10 +104,11 @@ class Annotator.Guest extends Annotator
     .bind('setActiveHighlights', (ctx, tags=[]) =>
       for hl in @getHighlights()
         if hl.annotation.$$tag in tags
-          hl.setActive true
+          hl.setActive true, true
         else
           unless hl.isTemporary()
-            hl.setActive false
+            hl.setActive false, true
+      this.publish "finalizeHighlights"
     )
 
     .bind('scrollTo', (ctx, tag) =>
