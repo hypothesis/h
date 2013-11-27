@@ -201,6 +201,8 @@ class App
               $rootScope.$digest()
             return
 
+          return unless annotator.discardDrafts()
+
           matched = []
           whole_document = true
           in_body_text = ''
