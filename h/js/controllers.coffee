@@ -664,8 +664,8 @@ class Annotation
 
 
 class Editor
-  this.$inject = ['$location', '$routeParams', '$scope', 'annotator']
-  constructor: ($location, $routeParams, $scope, annotator) ->
+  this.$inject = ['$location', '$routeParams', '$sce', '$scope', 'annotator']
+  constructor: ($location, $routeParams, $sce, $scope, annotator) ->
     {providers} = annotator
 
     save = ->
@@ -698,6 +698,16 @@ class Editor
     $scope.annotation = annotator.ongoing_edit
 
     annotator.ongoing_edit = null
+
+    $scope.$watch 'annotation.target', (targets) ->
+      return unless targets
+      for target in targets
+        if target.diffHTML?
+          target.trustedDiffHTML = $sce.trustAsHtml target.diffHTML
+          target.showDiff = not target.diffCaseOnly
+        else
+          delete target.trustedDiffHTML
+          target.showDiff = false
 
 
 class Viewer

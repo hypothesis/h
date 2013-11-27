@@ -2,10 +2,10 @@
   <li class="annotator-outer annotator-editor">
     <div class="paper">
       <div class="excerpt" ng-repeat="target in annotation.target">
-        <blockquote ng-bind="target.quote" ng-hide="diff" />
-        <blockquote ng-bind-html-unsafe="target.diffHTML" ng-show="diff" />
-        <div class="small pull-right" ng-show="target.diffHTML" ng-init="diff=target.diffHTML.length>0 && !target.diffCaseOnly">
-          <input type="checkbox" ng-model="diff" ng-click="$event.stopPropagation()">Show differences</input>
+        <blockquote ng-bind="target.quote" ng-hide="target.showDiff" />
+        <blockquote ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
+        <div class="small pull-right" ng-show="target.diffHTML">
+          <input type="checkbox" ng-model="target.showDiff" ng-click="$event.stopPropagation()"> Show differences</input>
         </div>
       </div>
       <div ng-model="$parent.annotation" class="annotation" />
