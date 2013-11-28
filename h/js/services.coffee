@@ -43,8 +43,6 @@ class Hypothesis extends Annotator
     Threading: {}
 
   # Internal state
-  ongoing_edit: null # * An annotation draft in limbo before login
-
   providers: null
   host: null
 

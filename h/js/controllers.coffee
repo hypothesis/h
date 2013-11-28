@@ -121,7 +121,7 @@ class App
           reset = $timeout (-> $scope.$broadcast '$reset'), 60000
         else
           $scope.ongoingHighlightSwitch = false
-          annotator.ongoing_edit = null
+          delete annotator.ongoing_edit
           unwatch()
 
     $scope.$on 'back', ->
@@ -137,7 +137,7 @@ class App
         tab: 'login'
 
     $scope.$on '$reset', =>
-      annotator.ongoing_edit = null
+      delete annotator.ongoing_edit
       base = angular.copy @scope
       angular.extend $scope, base,
         auth: authentication
@@ -701,7 +701,7 @@ class Editor
 
     $scope.annotation = annotator.ongoing_edit
 
-    annotator.ongoing_edit = null
+    delete annotator.ongoing_edit
 
     $scope.$watch 'annotation.target', (targets) ->
       return unless targets

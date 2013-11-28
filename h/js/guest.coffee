@@ -121,7 +121,10 @@ class Annotator.Guest extends Annotator
     )
 
     .bind('adderClick', =>
-      @onAdderClick @event
+      @selectedTargets = @forcedLoginTargets
+      @onAdderClick @forcedLoginEvent
+      delete @forcedLoginTargets
+      delete @forcedLoginEvent
     )
 
     .bind('getDocumentInfo', =>
@@ -295,8 +298,9 @@ class Annotator.Guest extends Annotator
     """
     event?.preventDefault()
 
-    # Save the event for restarting edit
-    @event = event
+    # Save the event and targets for restarting edit on forced login
+    @forcedLoginEvent = event
+    @forcedLoginTargets = @selectedTargets
 
     # Hide the adder
     @adder.hide()
