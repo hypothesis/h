@@ -4,7 +4,9 @@
       <li ng-mouseenter="focus(annotation)"
           ng-mouseleave="focus()"
           ng-repeat="annotation in annotations track by annotation.id"
-          class="stream-list">
+          class="stream-list"
+          ng-class="annotation.$emphasis && 'card-emphasis'"
+      >
 
         <!-- Thread view -->
         <div class="paper thread"

@@ -8,9 +8,6 @@ class Annotator.Guest extends Annotator
     "setTool": "onSetTool"
     "setVisibleHighlights": "onSetVisibleHighlights"
 
-  onAnchorMouseover: -> #console.log "Overridden mouse over"
-  onAnchorMouseout: -> #console.log "Overridden mouse out"
-
   # Plugin configuration
   options:
     TextHighlights: {}
@@ -174,6 +171,16 @@ class Annotator.Guest extends Annotator
 
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
+  addEmphasis: (annotations) =>
+    @panel?.notify
+      method: "addEmphasis"
+      params: (a.id for a in annotations)
+
+  removeEmphasis: (annotations) =>
+    @panel?.notify
+      method: "removeEmphasis"
+      params: (a.id for a in annotations)
+
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
     # viewer but preserve the manipulation of the attribute `mouseIsDown` which
@@ -225,6 +232,14 @@ class Annotator.Guest extends Annotator
       this.publish 'annotationCreated', annotation
     else
       super
+
+  onAnchorMouseover: (annotations) ->
+    if (@tool is 'highlight') or @visibleHighlights
+      this.addEmphasis annotations
+
+  onAnchorMouseout: (annotations) ->
+    if (@tool is 'highlight') or @visibleHighlights
+      this.removeEmphasis annotations
 
   # When clicking on a highlight in highlighting mode,
   # set @noBack to true to prevent the sidebar from closing

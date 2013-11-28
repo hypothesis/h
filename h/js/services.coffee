@@ -234,6 +234,14 @@ class Hypothesis extends Annotator
       $rootScope.$apply => this.setVisibleHighlights state
     )
 
+    .bind('addEmphasis', (ctx, ids=[]) =>
+      this.addEmphasis ((@threading.getContainer id).message for id in ids)
+    )
+
+    .bind('removeEmphasis', (ctx, ids=[]) =>
+      this.removeEmphasis ((@threading.getContainer id).message for id in ids)
+    )
+
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
     .on 'mousewheel', (event, delta) ->
@@ -324,6 +332,16 @@ class Hypothesis extends Annotator
         $rootScope.$digest()
     ]
     this
+
+  addEmphasis: (annotations=[]) =>
+    for a in annotations
+      a.$emphasis = true
+    @element.injector().get('$rootScope').$digest()
+
+  removeEmphasis: (annotations=[]) =>
+    for a in annotations
+      delete a.$emphasis
+    @element.injector().get('$rootScope').$digest()
 
   clickAdder: =>
     for p in @providers

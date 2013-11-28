@@ -5,9 +5,12 @@
       <li ng-repeat="thread in search_annotations"
           ng-mouseenter="focus(thread.message)"
           ng-mouseleave="focus()"
-          class="stream-list summary">
+          class="stream-list summary"
+          ng-class="thread.message.$emphasis && 'card-emphasis'"
+      >
         <!-- Thread view -->
         <div data-recursive="" class="paper thread"
+             ng-mousedown="toggleCollapsedDown($event)"
              ng-click="toggleCollapsed($event)"
              ng-init="collapsed = ann_info.show_quote[thread.message.id]">
           <!-- Annotation -->
@@ -65,12 +68,14 @@
           <ul>
             <li class="thread"
                 ng-class="collapsed && 'collapsed' || ''"
+                ng-mousedown="toggleCollapsedDown($event)"
                 ng-click="toggleCollapsed($event)"
                 ng-repeat="thread in thread.children"
                 ng-transclude>
                <a href=""
                   class="threadexp"
                   title="{{collapsed && 'Expand' || 'Collapse'}}"
+                  ng-mousedown="toggleCollapsedDown($event)"
                   ng-click="toggleCollapsed($event)"
                   ng-show="ann_info.shown[thread.message.id] && !ann_info.more_top[thread.message.id]"
                />
