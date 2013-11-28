@@ -8,6 +8,7 @@ from horus import resources
 from pyramid.decorator import reify
 from pyramid.interfaces import ILocation
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
+from pyramid import httpexceptions
 
 from zope.interface import implementer
 
@@ -215,7 +216,13 @@ class AnnotationFactory(BaseResource):
         request = self.request
         registry = request.registry
         store = registry.queryUtility(interfaces.IStoreClass)(request)
-        data = store.read(key)
+        data = ''
+
+        try:
+            data = store.read(key)
+        except httpexceptions.HTTPException as e:
+            # We want to add our custom error message for unauthorized errors
+            if e.status_code != 401: raise e
 
         annotation = Annotation(request)
         annotation.__name__ = key
