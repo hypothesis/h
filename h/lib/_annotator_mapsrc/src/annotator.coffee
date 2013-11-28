@@ -157,10 +157,8 @@ class Annotator extends Delegator
     this._chooseAccessPolicy() unless @domMapper
     @pendingScan = @domMapper.scan()
     if @pendingScan?
-      console.log "Waiting for scan to end, then enabling annotating"
       @pendingScan.then => @enableAnnotating()
     else
-      console.log "Scan finished, enabling annotating"
       @enableAnnotating()
 
   # Wraps the children of @element in a @wrapper div. NOTE: This method will also

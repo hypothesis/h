@@ -24,10 +24,14 @@ class TextHighlight extends Annotator.Highlight
     return if annotator in @_inited
 
     getAnnotations = (event) ->
+      # Collect the involved annotations
       annotations = TextHighlight.$(event.target)
         .parents('.annotator-hl')
         .andSelf()
         .map -> return TextHighlight.$(this).data("annotation")
+
+      # Make a proper array out of the list
+      TextHighlight.$.makeArray annotations
 
     annotator.addEvent ".annotator-hl", "mouseover", (event) =>
       annotator.onAnchorMouseover getAnnotations event, @highlightType
