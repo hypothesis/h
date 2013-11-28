@@ -211,9 +211,12 @@ class Range.BrowserRange
     while nr.commonAncestor.nodeType isnt Node.ELEMENT_NODE
       nr.commonAncestor = nr.commonAncestor.parentNode
 
-    if window.DomTextMapper? and changed
-#      console.log "Ranged normalization changed the DOM, updating d-t-m"
-      window.DomTextMapper.changed nr.commonAncestor, "range normalization", nr
+    if changed
+      event = document.createEvent "UIEvents"
+      event.initUIEvent "domChange", true, false, window, 0
+      event.reason = "range normalization"
+      event.data = nr
+      nr.commonAncestor.dispatchEvent event
 
     new Range.NormalizedRange(nr)
 

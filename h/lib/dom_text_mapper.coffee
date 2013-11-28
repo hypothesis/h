@@ -7,38 +7,41 @@ class window.DomTextMapper
   SELECT_CHILDREN_INSTEAD = ["thead", "tbody", "ol", "a", "caption", "p", "span", "div", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "li", "form"]
   CONTEXT_LEN = 32
 
-  @instances: []
-
-  @changed: (node, reason = "no reason", data = {}) ->
-    if @instances.length is 0 then return
-#    console.log "==== Node"
-#    console.log node
-#    console.log "has changed: " + reason
-#    console.log data
-    for instance in @instances when instance.rootNode.contains(node)
-#      console.log "Telling instance '" + instance.id + "'."
-      instance.documentChanged()
-      instance.performUpdateOnNode node, false, data
-      instance.lastScanned = instance.timestamp()
-    null
+  @instances: 0
 
   constructor: (@id)->
     @setRealRoot()
-    instances = window.DomTextMapper.instances
-    instances.push this
-    @id ?= "d-t-m #" + instances.length
+    DomTextMapper.instances += 1
+    @id ?= "d-t-m #" + DomTextMapper.instances
 
-  log: (msg) ->
-    console.log @id + ": " + msg
+  log: (msg...) ->
+    console.log @id, ": ", msg...
 
   # ===== Public methods =======
+
+  # Change handler
+  _onChange: (event) =>
+#    @log "received change event", event
+#    console.log "source", event.srcElement
+#    console.log "reason", event.reason ? "no reason"
+#    console.log "data", event.data
+    @documentChanged()
+    @performUpdateOnNode event.srcElement, false, event.data
+    @lastScanned = @timestamp()
+
+  # Change the root node, and subscribe to the events
+  _changeRootNode: (node) ->
+    @rootNode?.removeEventListener "domChange", @_onChange
+    @rootNode = node
+    @rootNode.addEventListener "domChange", @_onChange
+    node
 
   # Consider only the sub-tree beginning with the given node.
   # 
   # This will be the root node to use for all operations.
   setRootNode: (rootNode) ->
-    @rootWin = window     
-    @pathStartNode = @rootNode = rootNode
+    @rootWin = window
+    @pathStartNode = @_changeRootNode rootNode
 
   # Consider only the sub-tree beginning with the node whose ID was given.
   # 
@@ -55,7 +58,7 @@ class window.DomTextMapper
     @rootWin = iframe.contentWindow
     unless @rootWin?
       throw new Error "Can't access contents of the specified iframe!"
-    @rootNode = @rootWin.document
+    @_changeRootNode @rootWin.document
     @pathStartNode = @getBody()
 
   # Return the default path
@@ -66,8 +69,8 @@ class window.DomTextMapper
   # (This is the default; you only need to call this, if you have configured
   # a different root earlier, and now you want to restore the default setting.)
   setRealRoot: ->
-    @rootWin = window    
-    @rootNode = document
+    @rootWin = window
+    @_changeRootNode document
     @pathStartNode = @getBody() 
 
   # Notify the library that the document has changed.

@@ -67,7 +67,10 @@ class TextHighlight extends Annotator.Highlight
 
     for node in normedRange.textNodes() when not white.test node.nodeValue
       r = @$(node).wrapAll(hl).parent().show()[0]
-      window.DomTextMapper?.changed node, "created hilite"
+      event = document.createEvent "UIEvents"
+      event.initUIEvent "domChange", true, false, window, 0
+      event.reason = "created hilite"
+      node.dispatchEvent event
       r
 
   # Public: highlight a list of ranges
@@ -121,8 +124,11 @@ class TextHighlight extends Annotator.Highlight
         # We should restore original state
         child = hl.childNodes[0]
         @$(hl).replaceWith hl.childNodes
-        window.DomTextMapper?.changed child.parentNode,
-          "removed hilite (annotation deleted)"
+
+        event = document.createEvent "UIEvents"
+        event.initUIEvent "domChange", true, false, window, 0
+        event.reason = "removed hilite (annotation deleted)"
+        child.parentNode.dispatchEvent event
 
   # Get the HTML elements making up the highlight
   _getDOMElements: -> @_highlights
