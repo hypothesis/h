@@ -72,6 +72,8 @@ class Annotator extends Delegator
 
   mouseIsDown: false
 
+  inAdderClick: false
+
   canAnnotate: false
 
   viewerHideTimer: null
@@ -629,11 +631,33 @@ class Annotator extends Delegator
       this.startViewerHideTimer()
     @mouseIsDown = true
 
+  # This method is to be called by the mechanisms responsible for
+  # triggering annotation (and highlight) creation.
+  #
+  # event - any event which has triggered this.
+  #         The following fields are used:
+  #   targets: an array of targets, which should be used to anchor the
+  #            newly created annotation
+  #   pageX and pageY: if the adder button is shown, use there coordinates
+  #
+  # immadiate - should we show the adder button, or should be proceed
+  #             to create the annotation/highlight immediately ?
+  #
+  # returns false if the creation of annotations is forbidden at the moment,
+  # true otherwise.
   onSuccessfulSelection: (event, immediate = false) ->
+    # Check whether we got a proper event
     unless event?
       throw "Called onSuccessfulSelection without an event!"
     unless event.targets?
       throw "Called onSuccessulSelection with an event with missing targets!"
+
+    # Are we allowed to create annotations?
+    unless @canAnnotate
+      #@Annotator.showNotification "You are already editing an annotation!",
+      #  @Annotator.Notification.INFO
+      return false
+
     # Store the selected targets
     @selectedTargets = event.targets
 
@@ -646,6 +670,8 @@ class Annotator extends Delegator
       @adder
         .css(util.mousePosition(event, @wrapper[0]))
         .show()
+
+    true
 
   onFailedSelection: (event) ->
     @adder.hide()
@@ -678,6 +704,7 @@ class Annotator extends Delegator
   onAdderMousedown: (event) =>
     event?.preventDefault()
     this.disableAnnotating()
+    @inAdderClick = true
 
   # Annotator#element callback. Displays the @editor in place of the @adder and
   # loads in a newly created annotation Object. The click event is used as well
@@ -692,6 +719,7 @@ class Annotator extends Delegator
     # Hide the adder
     position = @adder.position()
     @adder.hide()
+    @inAdderClick = false
 
     # Create a new annotation.
     annotation = this.createAnnotation()

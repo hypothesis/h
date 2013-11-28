@@ -169,18 +169,20 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
   # This is called then the mouse is released.
   # Checks to see if a selection has been made on mouseup and if so,
   # calls Annotator's onSuccessfulSelection method.
-  # If annotator.canAnnotate is not set, will do nothing.
   # Also resets the @mouseIsDown property.
   #
-  # event - A mouseup Event object.
+  # event - The event triggered this. Usually it's a mouseup Event,
+  #         but that's not necessary. The coordinates will be used,
+  #         if they are present. If the event (or the coordinates)
+  #         are missing, new coordinates will be generated, based on the
+  #         selected ranges.
   #
   # Returns nothing.
   checkForEndSelection: (event = {}) =>
     @annotator.mouseIsDown = false
 
-    # This prevents the note image from jumping away on the mouseup
-    # of a click on icon.
-    return unless @annotator.canAnnotate
+    # We don't care about the adder button click
+    return if @annotator.inAdderClick
 
     # Get the currently selected ranges.
     selectedRanges = @_getSelectedRanges()

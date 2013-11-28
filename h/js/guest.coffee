@@ -55,6 +55,7 @@ class Annotator.Guest extends Annotator
           formatted.document.title = formatted.document.title.slice()
         formatted
       onConnect: (source, origin, scope) =>
+        this.publish "enableAnnotating", @canAnnotate
         @panel = this._setupXDM
           window: source
           origin: origin
@@ -190,8 +191,14 @@ class Annotator.Guest extends Annotator
     @selectedTargets = event.targets
     if @tool is 'highlight'
 
+      # Are we allowed to create annotations? Return false if we can't.
+      unless @canAnnotate
+        #@Annotator.showNotification "You are already editing an annotation!",
+        #  @Annotator.Notification.INFO
+        return false
+
       # Do we really want to make this selection?
-      return unless this.confirmSelection()
+      return false unless this.confirmSelection()
 
       # Create the annotation right away
 
@@ -293,6 +300,7 @@ class Annotator.Guest extends Annotator
 
     # Hide the adder
     @adder.hide()
+    @inAdderClick = false
     position = @adder.position()
 
     # Show a temporary highlight so the user can see what they selected
