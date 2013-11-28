@@ -111,13 +111,12 @@ class Annotator extends Delegator
     this._setupDocumentEvents() unless @options.readOnly
     this._setupAnchorEvents()
     this._setupWrapper()
-    unless @options.noDocAccess
-      this._setupDocumentAccessStrategies()
+    this._setupDocumentAccessStrategies()
     this._setupViewer()._setupEditor()
     this._setupDynamicStyle()
 
     # Perform initial DOM scan, unless told not to.
-    this._scan() unless (@options.noScan or @options.noDocAccess)
+    this._scan() unless @options.noScan
 
     # Create adder
     this.adder = $(this.html.adder).appendTo(@wrapper).hide()
@@ -489,7 +488,7 @@ class Annotator extends Delegator
 
     if annotations.length # Do we have to do something?
       # Do we have a doc access strategy? If we don't have it yet, scan!
-      @_scan() unless @domMapper or @options.noDocAccess
+      @_scan() unless @domMapper
       if @pendingScan?    # Is there a pending scan?
         # Schedule the parsing the annotations for
         # when scan has finished

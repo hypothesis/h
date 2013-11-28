@@ -274,6 +274,11 @@ class Hypothesis extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
 
+  # Override things not needed, because we don't access the document
+  # with this instance
+  _setupDocumentAccessStrategies: -> this
+  _scan: -> this
+
   # (Optionally) put some HTML formatting around a quote
   getHtmlQuote: (quote) -> quote
 
