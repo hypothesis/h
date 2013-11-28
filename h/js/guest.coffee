@@ -155,10 +155,11 @@ class Annotator.Guest extends Annotator
   _setupWrapper: ->
     @wrapper = @element
     .on 'click', =>
-      if @canAnnotate and not @noBack
+      if @canAnnotate and not @noBack and not @creatingHL
         setTimeout =>
           unless @selectedTargets?.length
             @hideFrame()
+      delete @creatingHL
     this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
@@ -202,6 +203,9 @@ class Annotator.Guest extends Annotator
 
       # Do we really want to make this selection?
       return false unless this.confirmSelection()
+
+      # Add a flag about what's happening
+      @creatingHL = true
 
       # Create the annotation right away
 
