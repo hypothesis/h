@@ -771,9 +771,6 @@ blockquote {
     }
 
     & > .annotation {
-      .body {
-        font-size: .95em;
-      }
 
       .body * {
         overflow: hidden;
@@ -817,6 +814,42 @@ blockquote {
 }
 
 
+//COLLAPSED REPLIES////////////////////////////////
+.reply-count:hover {
+  color: $linkColorHover;
+  text-decoration: none;
+}
+
+.collapsedreply {
+  display: none;
+}
+
+.hidereplies {
+  display: block;
+  li { 
+    display: none;
+  }
+}
+
+.collapsedreplies {
+    @extend .collapsed;
+    display: block !important;
+
+  .collapsedreply{
+      display: inline;
+      font-style: italic;
+      margin-right: 5px;
+      margin-left: 5px;
+  }
+  & > .annotation {
+    .body {
+      display: none;
+    }
+    .magicontrols {
+      display: none;
+    }
+  }
+}
 
 //MAGICONTROLS////////////////////////////////
 .magicontrols {
