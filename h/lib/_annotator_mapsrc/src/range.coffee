@@ -354,6 +354,19 @@ class Range.NormalizedRange
     range.setEndAfter(@end)
     range
 
+  # Utility function to bottom-right the coordinates of this range,
+  # by inserting a test element before it, and taking it's pos.
+  getEndCoords: ->
+    me = $ this.end  # Get the start element
+    probe = $ "<span></span>" # Prepare an element for probing
+    probe.insertAfter me # insert the probe element before the start
+    pos = probe.offset() # get the position
+    probe.remove()  # remove the probe, restoring the original state
+
+    # return the wanted data
+    x: pos.left
+    y: pos.top
+
 # Public: A range suitable for storing in local storage or serializing to JSON.
 class Range.SerializedRange
 

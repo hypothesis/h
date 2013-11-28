@@ -110,8 +110,10 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
     @annotator.TextPositionAnchor = TextPositionAnchor
     @annotator.TextRangeAnchor = TextRangeAnchor
 
-    # Trigger an annotation if we have a currently valid selection
-    setTimeout (=> @checkForEndSelection({})), 1000
+    # React to the enableAnnotation event
+    @annotator.subscribe "enableAnnotating", (value) => if value
+      # If annotation is now enable, check if we have a valid selection
+      setTimeout @checkForEndSelection, 500
 
     null
 
@@ -167,18 +169,18 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
   # This is called then the mouse is released.
   # Checks to see if a selection has been made on mouseup and if so,
   # calls Annotator's onSuccessfulSelection method.
-  # If @ignoreMouseup is set, will do nothing.
+  # If annotator.canAnnotate is not set, will do nothing.
   # Also resets the @mouseIsDown property.
   #
   # event - A mouseup Event object.
   #
   # Returns nothing.
-  checkForEndSelection: (event) =>
+  checkForEndSelection: (event = {}) =>
     @annotator.mouseIsDown = false
 
     # This prevents the note image from jumping away on the mouseup
     # of a click on icon.
-    return if @annotator.ignoreMouseup
+    return unless @annotator.canAnnotate
 
     # Get the currently selected ranges.
     selectedRanges = @_getSelectedRanges()
@@ -197,12 +199,9 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
       # which has triggered this function?
       unless event.pageX
         # No, we don't. Adding fake coordinates
-        node = selectedRanges[0].end
-        while not node.getBoundingClientRect?
-          node = node.parentNode
-        pos = node.getBoundingClientRect()
-        event.pageX = pos.right
-        event.pageY = pos.bottom
+        pos = selectedRanges[0].getEndCoords()
+        event.pageX = pos.x
+        event.pageY = pos.y #- window.scrollY
 
       @annotator.onSuccessfulSelection event
     else

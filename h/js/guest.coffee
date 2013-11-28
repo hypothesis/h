@@ -24,6 +24,7 @@ class Annotator.Guest extends Annotator
   comments: null
   tool: 'comment'
   visibleHighlights: false
+  noBack: false
 
   constructor: (element, options) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
@@ -150,7 +151,7 @@ class Annotator.Guest extends Annotator
   _setupWrapper: ->
     @wrapper = @element
     .on 'click', =>
-      unless @ignoreMouseup or @noBack
+      if @canAnnotate and not @noBack
         setTimeout =>
           unless @selectedTargets?.length
             @hideFrame()

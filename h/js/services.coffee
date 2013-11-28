@@ -7,7 +7,7 @@ class Hypothesis extends Annotator
 
   # Plugin configuration
   options:
-    noMatching: true
+    noDocAccess: true
     Discovery: {}
     Permissions:
       permissions:
@@ -550,6 +550,8 @@ class DraftProvider
     for d in @drafts
       if d.draft is draft then return true
     return false
+
+  isEmpty: -> @drafts.length is 0
 
   discard: ->
     text =

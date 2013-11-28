@@ -9,6 +9,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     'annotationUpdated': 'annotationUpdated'
     'annotationDeleted': 'annotationDeleted'
     'annotationsLoaded': 'annotationsLoaded'
+    'enableAnnotating': 'enableAnnotating'
 
   # Plugin configuration
   options:
@@ -160,6 +161,10 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
 
     .bind('showEditor', (ctx, annotation) =>
       @annotator.showEditor (this._parse annotation)
+    )
+
+    .bind('enableAnnotating', (ctx, state) =>
+      @annotator.enableAnnotating state, false
     )
 
   # Send out a beacon to let other frames know to connect to us
@@ -322,3 +327,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       params: this._format annotation
     this
 
+  enableAnnotating: (state) ->
+    this._notify
+      method: 'enableAnnotating'
+      params: state

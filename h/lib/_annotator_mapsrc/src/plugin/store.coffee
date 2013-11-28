@@ -459,18 +459,21 @@ class Annotator.Plugin.Store extends Annotator.Plugin
   #
   # Returns
   _dataFor: (annotation) ->
-    # Store a reference to the highlights array. We can't serialize
+    # Store a reference to some of the fields. We can't serialize
     # a list of HTMLElement objects.
-    highlights = annotation.highlights
-
-    delete annotation.highlights
+    saved = {}
+    for field in ["highlights", "anchors"]
+      if annotation[field]?
+        saved[field] = annotation[field]
+        delete annotation[field]
 
     # Preload with extra data.
     $.extend(annotation, @options.annotationData)
     data = JSON.stringify(annotation)
 
-    # Restore the highlights array.
-    annotation.highlights = highlights if highlights
+    # Restore the saved fields
+    for k, v of saved
+      annotation[k] = v
 
     data
 
