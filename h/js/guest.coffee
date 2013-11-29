@@ -11,7 +11,8 @@ class Annotator.Guest extends Annotator
   # Plugin configuration
   options:
     TextHighlights: {}
-    DomTextMapper: {}
+    DomTextMapper:
+      mutationFilter: (changes) -> annotator._filterMutations changes
     TextAnchors: {}
     FuzzyTextAnchors: {}
     PDF: {}
@@ -377,3 +378,39 @@ class Annotator.Guest extends Annotator
     else
       annotation.deleted = true
     super
+
+  # Private function to filter out mutation events related to our own
+  # components
+  _filterMutations: (changes) =>
+    ignoreList = $ "div.annotator-notice, div.annotator-frame, div.annotator-adder"
+
+    # Go through added elements
+    changes.added = changes.added.filter (element) ->
+      for container in ignoreList
+        return false if container.contains element
+#      console.log "Added", element
+      return true
+
+    # Go through removed elements
+    removed = changes.removed
+    changes.removed = removed.filter (element) ->
+      parent = element
+      while parent in removed
+        parent = changes.getOldParentNode parent
+      for container in ignoreList
+        return false if container.contains parent
+      console.log "Removed something from ", parent
+      return true
+
+    # Go through attributeChanged elements
+    attributeChanged = {}
+    for attrName, elementList of changes.attributeChanged
+      list = elementList.filter (element) ->
+        for container in ignoreList
+          return false if container.contains element
+        return true
+      if list.length
+        attributeChange[attrName] = list
+    changes.attributeChanged = attributeChanged
+
+    null

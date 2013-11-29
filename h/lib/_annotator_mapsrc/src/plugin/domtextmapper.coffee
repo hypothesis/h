@@ -7,4 +7,6 @@ class Annotator.Plugin.DomTextMapper extends Annotator.Plugin
       # with enhanced text extraction and mapping features.
       name: "DOM-Text-Mapper"
       applicable: -> true
-      get: => new window.DomTextMapper rootNode: @annotator.wrapper[0]
+      get: => new window.DomTextMapper
+        mutationFilter: @options.mutationFilter
+        rootNode: @annotator.wrapper[0]

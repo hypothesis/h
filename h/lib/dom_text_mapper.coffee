@@ -9,10 +9,10 @@ class window.DomTextMapper
 
   @instances: 0
 
-  constructor: (options = {})->
-    @id = options.id ? "d-t-m #" + DomTextMapper.instances
-    if options.rootNode?
-      @setRootNode options.rootNode
+  constructor: (@options = {})->
+    @id = @options.id ? "d-t-m #" + DomTextMapper.instances
+    if @options.rootNode?
+      @setRootNode @options.rootNode
     else
       @setRealRoot()
     DomTextMapper.instances += 1
@@ -34,7 +34,18 @@ class window.DomTextMapper
 
   _onMutation: (summaries) =>
     changes = summaries[0]
-    console.log "** Seen mutations:", changes
+    @options.mutationFilter? changes
+    attributeChangedCount = 0
+    for k, v of changes.attributeChanged
+      attributeChangedCount++
+    return unless changes.added.length or
+      changes.characterDataChanged.length or
+      changes.removed.length or
+      changes.reordered.length or
+      changes.reparented.length or
+      attributeChangedCount
+    @log "** Seen mutations:"
+    console.log changes
 
   # Change the root node, and subscribe to the events
   _changeRootNode: (node) ->
