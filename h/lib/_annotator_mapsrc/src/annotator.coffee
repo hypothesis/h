@@ -127,7 +127,8 @@ class Annotator extends Delegator
       # Default dummy strategy for simple HTML documents.
       # The generic fallback.
       name: "Dummy"
-      mapper: DummyDocumentAccess
+      applicable: -> true
+      get: -> new DummyDocumentAccess()
     ]
 
     this
@@ -139,16 +140,15 @@ class Annotator extends Delegator
     # Go over the available strategies
     for s in @documentAccessStrategies
       # Can we use this strategy for this document?
-      if s.mapper.applicable()
+      if s.applicable()
         @documentAccessStrategy = s
         console.log "Selected document access strategy: " + s.name
-        @domMapper = new s.mapper()
+        @domMapper = s.get()
         @anchors = {}
         addEventListener "docPageMapped", (evt) =>
           @_realizePage evt.pageIndex
         addEventListener "docPageUnmapped", (evt) =>
           @_virtualizePage evt.pageIndex
-        s.init?()
         return this
 
   # Perform a scan of the DOM. Required for finding anchors.

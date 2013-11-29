@@ -5,6 +5,6 @@ class Annotator.Plugin.DomTextMapper extends Annotator.Plugin
     @annotator.documentAccessStrategies.unshift
       # Document access strategy for simple HTML documents,
       # with enhanced text extraction and mapping features.
-      name: "DOM generic"
-      mapper: window.DomTextMapper
-      init: => @annotator.domMapper.setRootNode @annotator.wrapper[0]
+      name: "DOM-Text-Mapper"
+      applicable: -> true
+      get: => new window.DomTextMapper rootNode: @annotator.wrapper[0]

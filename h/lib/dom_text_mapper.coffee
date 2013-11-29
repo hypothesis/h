@@ -9,10 +9,13 @@ class window.DomTextMapper
 
   @instances: 0
 
-  constructor: (@id)->
-    @setRealRoot()
+  constructor: (options = {})->
+    @id = options.id ? "d-t-m #" + DomTextMapper.instances
+    if options.rootNode?
+      @setRootNode options.rootNode
+    else
+      @setRealRoot()
     DomTextMapper.instances += 1
-    @id ?= "d-t-m #" + DomTextMapper.instances
 
   log: (msg...) ->
     console.log @id, ": ", msg...
@@ -29,11 +32,23 @@ class window.DomTextMapper
     @performUpdateOnNode event.srcElement, false, event.data
     @lastScanned = @timestamp()
 
+  _onMutation: (summaries) =>
+    changes = summaries[0]
+    console.log "** Seen mutations:", changes
+
   # Change the root node, and subscribe to the events
   _changeRootNode: (node) ->
+    @observer?.disconnect()
     @rootNode?.removeEventListener "domChange", @_onChange
     @rootNode = node
     @rootNode.addEventListener "domChange", @_onChange
+    @log "Starting to listen"
+    @observer = new MutationSummary
+      callback: @_onMutation
+      rootNode: node
+      queries: [
+        all: true
+      ]
     node
 
   # Consider only the sub-tree beginning with the given node.

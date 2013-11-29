@@ -156,4 +156,5 @@ class Annotator.Plugin.PDF extends Annotator.Plugin
     @annotator.documentAccessStrategies.unshift
       # Strategy to handle PDF documents rendered by PDF.js
       name: "PDF.js"
-      mapper: PDFTextMapper
+      applicable: PDFTextMapper.applicable
+      get: -> new PDFTextMapper()
