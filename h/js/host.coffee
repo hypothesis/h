@@ -22,7 +22,7 @@ class Annotator.Host extends Annotator.Guest
     .attr('seamless', '')
     .attr('src', "#{options.app}#/?xdm=#{encodeURIComponent(hostOrigin)}")
 
-    super
+    super element, options, dontScan: true
 
     app.appendTo(@frame)
 
@@ -31,6 +31,9 @@ class Annotator.Host extends Annotator.Guest
       @plugins.Heatmap.element.on 'click', (event) =>
         if @frame.hasClass 'annotator-collapsed'
           this.showFrame()
+
+    # Scan the document
+    this.scanDocument "Host initialized"
 
     # Save this reference to the Annotator class, so it's available
     # later, even if someone has deleted the original reference
