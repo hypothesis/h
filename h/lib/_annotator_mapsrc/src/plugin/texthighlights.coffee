@@ -53,7 +53,6 @@ class TextHighlight extends Annotator.Highlight
     event.initUIEvent "domChange", true, false, window, 0
     event.reason = reason
     node = @annotator.domMapper.getPageRoot @pageIndex
-    console.log "HL: page root is ", node.tagName
     node.dispatchEvent event
     null
 

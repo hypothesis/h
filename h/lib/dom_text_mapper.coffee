@@ -97,8 +97,8 @@ class window.DomTextMapper
     path = @getPathTo @pathStartNode
     node = @path[path].node
     @collectPositions node, path, null, 0, 0
+    @_corpus = @getNodeContent @path[path].node, false
     @restoreSelection()
-    @_corpus = @path[path].content
 #    @log "Corpus is: " + @_corpus
 
     t2 = @timestamp()    
@@ -116,7 +116,7 @@ class window.DomTextMapper
     node or= @lookUpNode info.path
     @selectNode node, scroll
  
-  performUpdateOnNode: (node, reason, escalating = false) ->
+  performUpdateOnNode: (node, reason = "(no reason)", escalating = false) ->
     unless node? then throw new Error "Called performUpdate with a null node!"
     unless @path? then return #We don't have data yet. Not updating.
     startTime = @timestamp()
@@ -127,12 +127,15 @@ class window.DomTextMapper
       @performUpdateOnNode node.parentNode, "Escalated from " + reason, true
       unless escalating then @restoreSelection()        
       return
-    @log reason, ": performing update on node @ path", path,
-      "(", pathInfo.length, "characters)"
+#    @log reason, ": performing update on node @ path", path,
+#      "(", pathInfo.length, "characters)"
 
 #    if escalating then @log "(Escalated)"
 #    @log "Updating data about " + path + ": "
-    if pathInfo.node is node and pathInfo.content is @getNodeContent node, false
+
+    # Get the current node content
+    newContent = @getNodeContent node, false
+    if pathInfo.node is node and pathInfo.content is newContent
 #      @log "Good, the node and the overall content is still the same"
 #      @log "Dropping obsolete path info for children..."
       prefix = path + "/"
@@ -169,7 +172,11 @@ class window.DomTextMapper
 #      @log "Data update took " + (@timestamp() - startTime) + " ms."
 
     else
-#      @log "Hm..node has been replaced, or overall content has changed!"
+#      if pathInfo.node isnt node
+#        @log "Hm..node has been replaced!"
+#      if pathInfo.content isnt newContent
+#        @log "Hm..overall node content has changed!", newContent
+
       if pathInfo.node isnt @pathStartNode
 #        @log "I guess I must go up one level."
         parentNode = if node.parentNode?
@@ -181,8 +188,10 @@ class window.DomTextMapper
           @lookUpNode parentPath
         @performUpdateOnNode parentNode, "escalated from " + reason, true
       else
-        throw new Error "Can not keep up with the changes,
- since even the node configured as path start node was replaced."
+        # Oops. This was the root node! That means the corpus has changed.
+        @restoreSelection()
+        @_corpusChanged()
+        @saveSelection()
     unless escalating then @restoreSelection()        
 
   # Return info for a given path in the DOM
@@ -397,6 +406,10 @@ class window.DomTextMapper
 
   # This method is called recursively, to traverse a given sub-tree of the DOM.
   traverseSubTree: (node, path, invisible = false, verbose = false) ->
+
+    # Should this node be ignored?
+    return if @_isIgnored node
+
     # Step one: get rendered node content, and store path info,
     # if there is valuable content
     @underTraverse = path
@@ -596,11 +609,14 @@ class window.DomTextMapper
   # as render by the browser.
   # The current implementation uses the browser selection API to do so.
   getNodeContent: (node, shouldRestoreSelection = true) ->
-    if node is @pathStartNode and @expectedContent?
+    if (node is @pathStartNode) and @expectedContent?
 #      @log "Returning fake expectedContent for getNodeContent"
-      @expectedContent
-    else
-      @getNodeSelectionText node, shouldRestoreSelection
+      return @expectedContent
+    content = @getNodeSelectionText node, shouldRestoreSelection
+    if (node is @pathStartNode) and @ignorePos?
+      return content[ 0 .. @ignorePos-1 ]
+
+    content
 
   # Internal function to collect mapping data from a given DOM element.
   # 
@@ -624,6 +640,13 @@ class window.DomTextMapper
   collectPositions: (node, path, parentContent = null, parentIndex = 0, index = 0) ->
 #    @log "Scanning path " + path
 #    content = @getNodeContent node, false
+
+    # Should this node be ignored?
+    if @_isIgnored node
+      pos = parentIndex + index  # Where were we?
+      unless @ignorePos? and @ignorePos < pos # Have we seen better ?
+        @ignorePos = pos
+      return index
 
     pathInfo = @path[path]
     content = pathInfo?.content
@@ -714,25 +737,35 @@ class window.DomTextMapper
 
   # Change tracking ===================
 
+  # Get the list of nodes that should be totally ignored
+  _getIgnoredParts: ->
+   # Do we have to ignore some parts?
+    if @options.getIgnoredParts # Yes, some parts should be ignored.
+      # Do we already have them, and are we allowed to cache?
+      if @_ignoredParts and @options.cacheIgnoredParts # Yes, in cache
+        @_ignoredParts
+      else # No cache (yet?). Get a new list!
+        @_ignoredParts = @options.getIgnoredParts()
+    else # Not ignoring anything; facing reality as it is
+      []
+
+  # Determines whether a node should be ignored
+  _isIgnored: (node) ->
+    for container in @_getIgnoredParts()
+      return true if container.contains node
+    return false
+
   # Filter a change list
   _filterChanges: (changes) ->
-    # If no ignore parts options is set, don't filter        
-    return changes unless @options.getIgnoredParts
-
-    # Do we have to re-fetch the list of parts to ignore?
-    unless @ignoredParts and @options.cacheIgnoredParts
-      @ignoredParts = @options.getIgnoredParts()
 
     # If the list of parts to ignore is empty, don't filter
-    return changes unless @ignoredParts.length
+    return changes if @_getIgnoredParts().length is 0
 
     # OK, start filtering.
 
     # Go through added elements
     changes.added = changes.added.filter (element) =>
-      for container in @ignoredParts
-        return false if container.contains element
-      return true
+      not @_isIgnored element
 
     # Go through removed elements
     removed = changes.removed
@@ -740,33 +773,23 @@ class window.DomTextMapper
       parent = element
       while parent in removed
         parent = changes.getOldParentNode parent
-      for container in @ignoredParts
-        return false if container.contains parent
-      return true
+      not @_isIgnored parent
 
     # Go through attributeChanged elements
     attributeChanged = {}
     for attrName, elementList of changes.attributeChanged ? {}
-      list = elementList.filter (element) =>
-        for container in @ignoredParts
-          return false if container.contains element
-        return true
+      list = elementList.filter (element) => not @_isIgnored element
       if list.length
         attributeChanged[attrName] = list
     changes.attributeChanged = attributeChanged
 
     # Go through the characterDataChanged elements
-    changes.characterDataChanged = changes.characterDataChanged.filter (element) =>
-      for container in @ignoredParts
-        return false if container.contains element
-      return true
+    changes.characterDataChanged = changes.characterDataChanged.filter (element) => not @_isIgnored element
 
     # Go through the reordered elements
     changes.reordered = changes.reordered.filter (element) =>
       parent = element.parentNode
-      for container in @ignoredParts
-        return false if container.contains parent
-      return true
+      not @_isIgnored parent
 
     # Go through the reparented elements
     # TODO
@@ -855,7 +878,7 @@ class window.DomTextMapper
       changes = @_filterChanges changes # Filter the received changes
     unless changes # Did anything remain ?
 #      unless reason is "Observer called"
-#        @log reason, ", but no (real) changes detected"
+#      @log reason, ", but no (real) changes detected"
       return
 
     # Actually react to the changes
@@ -901,3 +924,14 @@ class window.DomTextMapper
         all: true
       ]
     node
+
+  # This handles the situations when the corpus has actually changed.
+  _corpusChanged: ->
+    @log "DETECTED CORPUS CHANGE! Clearing all data."
+    delete @_corpus
+    delete @path
+    delete @ignorePos
+    @scan()
+    event = document.createEvent "UIEvents"
+    event.initUIEvent "corpusChange", true, false, window, 0
+    @rootNode.dispatchEvent event
