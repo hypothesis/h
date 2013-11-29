@@ -708,6 +708,7 @@ class window.DomTextMapper
   # Fake two-phase / pagination support, used for HTML documents
   getPageIndex: -> 0
   getPageCount: -> 1
+  getPageRoot: -> @rootNode
   getPageIndexForPos: -> 0
   isPageMapped: -> true
 

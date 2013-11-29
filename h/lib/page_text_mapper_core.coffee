@@ -11,6 +11,9 @@ class window.PageTextMapperCore
         console.log "Not on page " + info.index
     return -1
 
+  # Return the root node for a given page
+  getPageRoot: (index) -> @getRootNodeForPage index
+
   # A new page was rendered
   _onPageRendered: (index) =>
     #console.log "Allegedly rendered page #" + index

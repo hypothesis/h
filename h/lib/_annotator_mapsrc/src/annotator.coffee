@@ -42,9 +42,11 @@ _Annotator = this.Annotator
 # Fake two-phase / pagination support, used for HTML documents
 class DummyDocumentAccess
 
+  constructor: (@rootNode) ->
   @applicable: -> true
   getPageIndex: -> 0
   getPageCount: -> 1
+  getPageRoot: -> @rootNode
   getPageIndexForPos: -> 0
   isPageMapped: -> true
   scan: ->
@@ -128,7 +130,7 @@ class Annotator extends Delegator
       # The generic fallback.
       name: "Dummy"
       applicable: -> true
-      get: -> new DummyDocumentAccess()
+      get: => new DummyDocumentAccess @wrapper[0]
     ]
 
     this

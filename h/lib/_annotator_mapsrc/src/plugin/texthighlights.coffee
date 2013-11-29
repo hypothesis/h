@@ -47,6 +47,16 @@ class TextHighlight extends Annotator.Highlight
 
     @_inited.push annotator
 
+  # Publish an event about a DOM change by us
+  _publishChange: (reason) ->
+    event = document.createEvent "UIEvents"
+    event.initUIEvent "domChange", true, false, window, 0
+    event.reason = reason
+    node = @annotator.domMapper.getPageRoot @pageIndex
+    console.log "HL: page root is ", node.tagName
+    node.dispatchEvent event
+    null
+
   # Public: Wraps the DOM Nodes within the provided range with a highlight
   # element of the specified class and returns the highlight Elements.
   #
@@ -66,24 +76,7 @@ class TextHighlight extends Annotator.Highlight
     # but better than breaking table layouts.
 
     for node in normedRange.textNodes() when not white.test node.nodeValue
-      r = @$(node).wrapAll(hl).parent().show()[0]
-      event = document.createEvent "UIEvents"
-      event.initUIEvent "domChange", true, false, window, 0
-      event.reason = "created hilite"
-      node.dispatchEvent event
-      r
-
-  # Public: highlight a list of ranges
-  #
-  # normedRanges - An array of NormalizedRanges to be highlighted.
-  # cssClass - A CSS class to use for the highlight (default: 'annotator-hl')
-  #
-  # Returns an array of highlight Elements.
-  _highlightRanges: (normedRanges, cssClass='annotator-hl') ->
-    highlights = []
-    for r in normedRanges
-      @$.merge highlights, this._highlightRange(r, cssClass)
-    highlights
+      @$(node).wrapAll(hl).parent().show()[0]
 
   constructor: (anchor, pageIndex, normedRange) ->
     super anchor, pageIndex
@@ -95,6 +88,9 @@ class TextHighlight extends Annotator.Highlight
     # Create a highlights, and link them with the annotation
     @_highlights = @_highlightRange normedRange
     @$(@_highlights).data "annotation", @annotation
+
+    # Announce the change
+    @_publishChange "created hilite"
 
   # Implementing the required APIs
 
@@ -110,10 +106,7 @@ class TextHighlight extends Annotator.Highlight
       @$(@_highlights).removeClass('annotator-hl-temporary')
 
     # Announce the change (for better performance)
-    event = document.createEvent "UIEvents"
-    event.initUIEvent "domChange", true, false, window, 0
-    event.reason = "hilite setTemporary()"
-    @_highlights[0].dispatchEvent event
+    @_publishChange "hilite setTemporary()"
 
   # Mark/unmark this hl as active
   setActive: (value) ->
@@ -123,10 +116,7 @@ class TextHighlight extends Annotator.Highlight
       @$(@_highlights).removeClass('annotator-hl-active')
 
     # Announce the change (for better performance)
-    event = document.createEvent "UIEvents"
-    event.initUIEvent "domChange", true, false, window, 0
-    event.reason = "hilite setActive()"
-    @_highlights[0].dispatchEvent event
+    @_publishChange "hilite setActive()"
 
   # Remove all traces of this hl from the document
   removeFromDocument: ->
@@ -137,10 +127,7 @@ class TextHighlight extends Annotator.Highlight
         child = hl.childNodes[0]
         @$(hl).replaceWith hl.childNodes
 
-        event = document.createEvent "UIEvents"
-        event.initUIEvent "domChange", true, false, window, 0
-        event.reason = "removed hilite (annotation deleted)"
-        child.parentNode.dispatchEvent event
+    @_publishChange "removed hilite"
 
   # Get the HTML elements making up the highlight
   _getDOMElements: -> @_highlights
