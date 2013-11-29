@@ -34,7 +34,6 @@ class window.PageTextMapperCore
     info.domMapper = new DomTextMapper
       id: "d-t-m for page #" + info.index
       rootNode: info.node
-    info.domMapper.documentChanged()
     if @requiresSmartStringPadding
       info.domMapper.setExpectedContent info.content
     info.domMapper.scan()

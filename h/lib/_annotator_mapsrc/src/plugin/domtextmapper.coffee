@@ -8,5 +8,6 @@ class Annotator.Plugin.DomTextMapper extends Annotator.Plugin
       name: "DOM-Text-Mapper"
       applicable: -> true
       get: => new window.DomTextMapper
-        mutationFilter: @options.mutationFilter
+        getIgnoredParts: @options.getIgnoredParts
+        cacheIgnoredParts: @options.cacheIgnoredParts
         rootNode: @annotator.wrapper[0]

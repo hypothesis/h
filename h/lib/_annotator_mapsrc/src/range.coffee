@@ -162,8 +162,16 @@ class Range.BrowserRange
         while n? and (n.nodeType isnt Node.TEXT_NODE)
           n = n.firstChild
         if n? # Did we find a text node at the start of this element?
-          r.end = n
-          r.endOffset = 0
+          # Check the previous sibling
+          prev = n.previousSibling
+          if prev? and (prev.nodeType is Node.TEXT_NODE)
+            # We have another text righ before us. Use that instead.
+            r.end = prev
+            r.endOffset = prev.nodeValue.length
+          else
+            # No, we need to stick to this node.
+            r.end = n
+            r.endOffset = 0
 
       unless r.end?
         # We need to find a text node in the previous node.
@@ -179,14 +187,12 @@ class Range.BrowserRange
 
     # Now let's start to slice & dice the text elements!
     nr = {}
-    changed = false
 
     if r.startOffset > 0
       # Do we really have to cut?
       if r.start.nodeValue.length > r.startOffset
         # Yes. Cut.
         nr.start = r.start.splitText(r.startOffset)
-        changed = true
       else
         # Avoid splitting off zero-length pieces.
         nr.start = r.start.nextSibling
@@ -197,26 +203,17 @@ class Range.BrowserRange
     if r.start is r.end
       if nr.start.nodeValue.length > (r.endOffset - r.startOffset)
         nr.start.splitText(r.endOffset - r.startOffset)
-        changed = true
       nr.end = nr.start
     else # no, the end of the selection is in a separate text element
       # does the end need to be cut?
       if r.end.nodeValue.length > r.endOffset
         r.end.splitText(r.endOffset)
-        changed = true
       nr.end = r.end
 
     # Make sure the common ancestor is an element node.
     nr.commonAncestor = @commonAncestorContainer
     while nr.commonAncestor.nodeType isnt Node.ELEMENT_NODE
       nr.commonAncestor = nr.commonAncestor.parentNode
-
-    if changed
-      event = document.createEvent "UIEvents"
-      event.initUIEvent "domChange", true, false, window, 0
-      event.reason = "range normalization"
-      event.data = nr
-      nr.commonAncestor.dispatchEvent event
 
     new Range.NormalizedRange(nr)
 

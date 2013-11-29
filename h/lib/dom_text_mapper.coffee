@@ -22,45 +22,6 @@ class window.DomTextMapper
 
   # ===== Public methods =======
 
-  # Change handler
-  _onChange: (event) =>
-#    @log "received change event", event
-#    console.log "source", event.srcElement
-#    console.log "reason", event.reason ? "no reason"
-#    console.log "data", event.data
-    @documentChanged()
-    @performUpdateOnNode event.srcElement, false, event.data
-    @lastScanned = @timestamp()
-
-  _onMutation: (summaries) =>
-    changes = summaries[0]
-    @options.mutationFilter? changes
-    attributeChangedCount = 0
-    for k, v of changes.attributeChanged
-      attributeChangedCount++
-    return unless changes.added.length or
-      changes.characterDataChanged.length or
-      changes.removed.length or
-      changes.reordered.length or
-      changes.reparented.length or
-      attributeChangedCount
-    @log "** Seen mutations:"
-    console.log changes
-
-  # Change the root node, and subscribe to the events
-  _changeRootNode: (node) ->
-    @observer?.disconnect()
-    @rootNode?.removeEventListener "domChange", @_onChange
-    @rootNode = node
-    @rootNode.addEventListener "domChange", @_onChange
-    @observer = new MutationSummary
-      callback: @_onMutation
-      rootNode: node
-      queries: [
-        all: true
-      ]
-    node
-
   # Consider only the sub-tree beginning with the given node.
   # 
   # This will be the root node to use for all operations.
@@ -98,17 +59,6 @@ class window.DomTextMapper
     @_changeRootNode document
     @pathStartNode = @getBody() 
 
-  # Notify the library that the document has changed.
-  # This means that subsequent calls can not safely re-use previously cached
-  # data structures, so some calculations will be necessary again.
-  #
-  # The usage of this feature is not mandatorry; if not receiving change
-  # notifications, the library will just assume that the document can change
-  # anythime, and therefore will not assume any stability.
-  documentChanged: ->
-    @lastDOMChange = @timestamp()
-#    @log "Registered document change."
-
   setExpectedContent: (content) ->
     @expectedContent = content
 
@@ -125,13 +75,11 @@ class window.DomTextMapper
   #   content: the text content of the node, as rendered by the browser
   #   length: the length of the next content
   scan: ->
-    if @domStableSince @lastScanned
-#      @log "We have a valid DOM structure cache."
+    # Have we ever scanned?
+    if @path?
+      # Do an incremental update instead
+      @_syncState "scan()"
       return
-    else
-#      @log "Last scan time:  " + @lastScanned
-#      @log "Last DOM change: " + @lastDOMChange
-#      @log "No valid DOM structure scan available, doing scan."
 
     unless @pathStartNode.ownerDocument.body.contains @pathStartNode
       # We cannot map nodes that are not attached.
@@ -150,7 +98,6 @@ class window.DomTextMapper
     node = @path[path].node
     @collectPositions node, path, null, 0, 0
     @restoreSelection()
-    @lastScanned = @timestamp()
     @_corpus = @path[path].content
 #    @log "Corpus is: " + @_corpus
 
@@ -162,13 +109,14 @@ class window.DomTextMapper
   # Select the given path (for visual identification),
   # and optionally scroll to it
   selectPath: (path, scroll = false) ->
+    @_syncState "selectPath('" + path + "')"
     info = @path[path]
     unless info? then throw new Error "I have no info about a node at " + path
     node = info?.node
     node or= @lookUpNode info.path
     @selectNode node, scroll
  
-  performUpdateOnNode: (node, escalating = false) ->
+  performUpdateOnNode: (node, reason, escalating = false) ->
     unless node? then throw new Error "Called performUpdate with a null node!"
     unless @path? then return #We don't have data yet. Not updating.
     startTime = @timestamp()
@@ -176,10 +124,11 @@ class window.DomTextMapper
     path = @getPathTo node
     pathInfo = @path[path]
     unless pathInfo?
-      @performUpdateOnNode node.parentNode, true
+      @performUpdateOnNode node.parentNode, "Escalated from " + reason, true
       unless escalating then @restoreSelection()        
       return
-#    @log "Performing update on node @ path " + path
+    @log reason, ": performing update on node @ path", path,
+      "(", pathInfo.length, "characters)"
 
 #    if escalating then @log "(Escalated)"
 #    @log "Updating data about " + path + ": "
@@ -230,7 +179,7 @@ class window.DomTextMapper
           parentPath = @parentPath path
 #          @log "Node has no parent, will look up " + parentPath
           @lookUpNode parentPath
-        @performUpdateOnNode parentNode, true
+        @performUpdateOnNode parentNode, "escalated from " + reason, true
       else
         throw new Error "Can not keep up with the changes,
  since even the node configured as path start node was replaced."
@@ -238,6 +187,7 @@ class window.DomTextMapper
 
   # Return info for a given path in the DOM
   getInfoForPath: (path) ->
+    @_syncState "getInfoForPath('" + path + "')"
     unless @path?
       throw new Error "Can't get info before running a scan() !"
     result = @path[path]
@@ -258,23 +208,30 @@ class window.DomTextMapper
 
   # Return the rendered value of a part of the dom.
   # If path is not given, the default path is used.
-  getContentForPath: (path = null) -> 
-    path ?= @getDefaultPath()       
+  getContentForPath: (path = null) ->
+    path ?= @getDefaultPath()
+    @_syncState "getContentForPath('" + path + "')"
     @path[path].content
 
   # Return the length of the rendered value of a part of the dom.
   # If path is not given, the default path is used.
   getLengthForPath: (path = null) ->
     path ?= @getDefaultPath()
+    @_syncState "getLengthForPath('" + path + "')"
     @path[path].length
 
-  getDocLength: -> @_corpus.length
+  getDocLength: ->
+    @_syncState "getDocLength()"
+    @_corpus.length
 
-  getCorpus: -> @_corpus
+  getCorpus: ->
+    @_syncState "getCorpus()"
+    @_corpus
 
   # Get the context that encompasses the given charRange
   # in the rendered text of the document
   getContextForCharRange: (start, end) ->
+    @_syncState "getContextForCharRange(" + start + ", " + end + ")"
     prefixStart = Math.max 0, start - CONTEXT_LEN
     prefix = @_corpus[prefixStart .. start - 1]
     suffix = @_corpus[end .. end + CONTEXT_LEN - 1]
@@ -287,6 +244,8 @@ class window.DomTextMapper
   getMappingsForCharRange: (start, end) ->
     unless (start? and end?)
       throw new Error "start and end is required!"
+
+    @_syncState "getMappingsForCharRange(" + start + ", " + end + ")"
 
 #    @log "Collecting nodes for [" + start + ":" + end + "]"
     @scan()
@@ -402,14 +361,6 @@ class window.DomTextMapper
     string[ string.length - suffix.length .. string.length ] is suffix
 
   parentPath: (path) -> path.substr 0, path.lastIndexOf "/"
-
-  domChangedSince: (timestamp) ->
-    if @lastDOMChange? and timestamp?
-      @lastDOMChange > timestamp
-    else
-      true
-
-  domStableSince: (timestamp) -> not @domChangedSince timestamp
 
   getProperNodeName: (node) ->
     nodeName = node.nodeName
@@ -759,3 +710,193 @@ class window.DomTextMapper
   getPageCount: -> 1
   getPageIndexForPos: -> 0
   isPageMapped: -> true
+
+  # Change tracking ===================
+
+  # Filter a change list
+  _filterChanges: (changes) ->
+    # If no ignore parts options is set, don't filter        
+    return changes unless @options.getIgnoredParts
+
+    # Do we have to re-fetch the list of parts to ignore?
+    unless @ignoredParts and @options.cacheIgnoredParts
+      @ignoredParts = @options.getIgnoredParts()
+
+    # If the list of parts to ignore is empty, don't filter
+    return changes unless @ignoredParts.length
+
+    # OK, start filtering.
+
+    # Go through added elements
+    changes.added = changes.added.filter (element) =>
+      for container in @ignoredParts
+        return false if container.contains element
+      return true
+
+    # Go through removed elements
+    removed = changes.removed
+    changes.removed = removed.filter (element) =>
+      parent = element
+      while parent in removed
+        parent = changes.getOldParentNode parent
+      for container in @ignoredParts
+        return false if container.contains parent
+      return true
+
+    # Go through attributeChanged elements
+    attributeChanged = {}
+    for attrName, elementList of changes.attributeChanged ? {}
+      list = elementList.filter (element) =>
+        for container in @ignoredParts
+          return false if container.contains element
+        return true
+      if list.length
+        attributeChanged[attrName] = list
+    changes.attributeChanged = attributeChanged
+
+    # Go through the characterDataChanged elements
+    changes.characterDataChanged = changes.characterDataChanged.filter (element) =>
+      for container in @ignoredParts
+        return false if container.contains element
+      return true
+
+    # Go through the reordered elements
+    changes.reordered = changes.reordered.filter (element) =>
+      parent = element.parentNode
+      for container in @ignoredParts
+        return false if container.contains parent
+      return true
+
+    # Go through the reparented elements
+    # TODO
+
+    attributeChangedCount = 0
+    for k, v of changes.attributeChanged
+      attributeChangedCount++
+    if changes.added.length or
+        changes.characterDataChanged.length or
+        changes.removed.length or
+        changes.reordered.length or
+        changes.reparented.length or
+        attributeChangedCount
+      return changes
+    else
+      return null
+
+    changes
+
+
+  # Callect all nodes involved in any of the passed changes
+  _getInvolvedNodes: (changes) ->
+    nodes = []
+
+    # Collect changed nodes
+    for n in changes.added
+      nodes.push n unless n in nodes
+
+    # Collect attribute changed nodes
+    for k, list of changes.attributeChanged
+      for n in list
+        oldValue = changes.getOldAttribute n, k
+        newValue = n.getAttribute k
+#        console.log "Attribute change: ", n.tagName, ".", k, ":",
+#          "'" + oldValue + "'",
+#          "->",
+#          "'" +  newValue + "'"
+        nodes.push n unless n in nodes
+
+    # Collect character data changed nodes
+    for n in changes.characterDataChanged
+      nodes.push n unless n in nodes
+
+    # Collect the non-removed parents of removed nodes
+    for n in changes.removed
+      parent = n
+      while (parent in changes.removed) or (parent in changes.reparented)
+        parent = changes.getOldParentNode parent
+      nodes.push parent unless parent in nodes
+
+    # Collect the parents of reordered nodes
+    for n in changes.reordered
+      parent = n.parent
+      nodes.push parent unless parent in nodes
+
+    # Collect the parents of reparented nodes
+    for n in changes.reparented
+      # Get the current parent
+      parent = n.parentNode
+      nodes.push parent unless parent in nodes
+
+      # Get the old parent
+      parent = n
+      while (parent in changes.removed) or (parent in changes.reparented)
+        parent = changes.getOldParentNode parent
+      nodes.push parent unless parent in nodes
+
+    return nodes
+
+
+  # Determine the first common ancestor of the passed nodes
+  _getCommonAncestor: (nodes) ->
+    unless nodes?.length
+      throw "We need a list of nodes."
+
+    root = nodes[0]             # Start with the first node
+    for n in nodes              # Go over all the nodes
+      while not root.contains n # Push root up, until it encompasses
+        root = root.parentNode  # all
+    root
+
+
+  # React to the pasted list of changes
+  _reactToChanges: (reason, changes, data) ->
+    if changes
+      changes = @_filterChanges changes # Filter the received changes
+    unless changes # Did anything remain ?
+#      unless reason is "Observer called"
+#        @log reason, ", but no (real) changes detected"
+      return
+
+    # Actually react to the changes
+#    @log reason #, changes
+
+    # Collect all the interesting nodes
+    changedNodes = @_getInvolvedNodes changes
+
+    # Get the common root of all changed nodes
+    changeRoot = @_getCommonAncestor changedNodes
+
+    # Rescan the involved part
+    @performUpdateOnNode changeRoot, reason, false, data
+
+  # Bring the our data up to date
+  _syncState: (reason = "i am in the mood", data) ->
+
+    # Get the changes from the observer
+    summaries = @observer.takeSummaries()
+
+#    if summaries # react to them
+    @_reactToChanges "SyncState for " + reason, summaries?[0], data
+
+  # Change handler, called when we receive a change notification
+  _onChange: (event) =>
+    @_syncState "change event '" + event.reason + "'", event.data
+
+
+  # Callback for the mutation observer
+  _onMutation: (summaries) => @_reactToChanges "Observer called", summaries[0]
+
+
+  # Change the root node, and subscribe to the events
+  _changeRootNode: (node) ->
+    @observer?.disconnect()
+    @rootNode?.removeEventListener "domChange", @_onChange
+    @rootNode = node
+    @rootNode.addEventListener "domChange", @_onChange
+    @observer = new MutationSummary
+      callback: @_onMutation
+      rootNode: node
+      queries: [
+        all: true
+      ]
+    node

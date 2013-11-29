@@ -109,12 +109,24 @@ class TextHighlight extends Annotator.Highlight
     else
       @$(@_highlights).removeClass('annotator-hl-temporary')
 
+    # Announce the change (for better performance)
+    event = document.createEvent "UIEvents"
+    event.initUIEvent "domChange", true, false, window, 0
+    event.reason = "hilite setTemporary()"
+    @_highlights[0].dispatchEvent event
+
   # Mark/unmark this hl as active
   setActive: (value) ->
     if value
       @$(@_highlights).addClass('annotator-hl-active')
     else
       @$(@_highlights).removeClass('annotator-hl-active')
+
+    # Announce the change (for better performance)
+    event = document.createEvent "UIEvents"
+    event.initUIEvent "domChange", true, false, window, 0
+    event.reason = "hilite setActive()"
+    @_highlights[0].dispatchEvent event
 
   # Remove all traces of this hl from the document
   removeFromDocument: ->
