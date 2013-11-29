@@ -23,7 +23,7 @@ class Annotator.Guest extends Annotator
   visibleHighlights: false
   noBack: false
 
-  constructor: (element, options) ->
+  constructor: (element, options, config = {}) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
 
     options.noScan = true
@@ -70,8 +70,9 @@ class Annotator.Guest extends Annotator
       if not @plugins[name]
         this.addPlugin(name, opts)
 
-    # Scan the document text with the DOM Text libraries
-    this.scanDocument "Annotator initialized"
+    unless config.dontScan
+      # Scan the document text with the DOM Text libraries
+      this.scanDocument "Guest initialized"
 
     # Watch for deleted comments
     this.subscribe 'annotationDeleted', (annotation) =>
