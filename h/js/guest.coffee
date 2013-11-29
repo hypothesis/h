@@ -12,12 +12,12 @@ class Annotator.Guest extends Annotator
   options:
     TextHighlights: {}
     DomTextMapper:
-      getIgnoredParts: -> $.makeArray $ [
-        "div.annotator-notice",
-        "div.annotator-frame"
-        "div.annotator-adder"
-      ].join ", "
-      cacheIgnoredParts: true
+      options:
+        getIgnoredParts: -> $.makeArray $ [
+          "div.annotator-notice",
+          "div.annotator-frame"
+          "div.annotator-adder"
+        ].join ", "
     TextAnchors: {}
     FuzzyTextAnchors: {}
     PDF: {}

@@ -927,7 +927,7 @@ class window.DomTextMapper
 
   # This handles the situations when the corpus has actually changed.
   _corpusChanged: ->
-    @log "DETECTED CORPUS CHANGE! Clearing all data."
+    @log "Detected CORPUS CHANGE! Clearing all data, and doing full rescan."
     delete @_corpus
     delete @path
     delete @ignorePos

@@ -7,7 +7,20 @@ class Annotator.Plugin.DomTextMapper extends Annotator.Plugin
       # with enhanced text extraction and mapping features.
       name: "DOM-Text-Mapper"
       applicable: -> true
-      get: => new window.DomTextMapper
-        getIgnoredParts: @options.getIgnoredParts
-        cacheIgnoredParts: @options.cacheIgnoredParts
-        rootNode: @annotator.wrapper[0]
+      get: =>
+        defaultOptions =
+          rootNode: @annotator.wrapper[0]
+          getIgnoredParts: -> $.makeArray $ [
+            "div.annotator-notice",
+            "div.annotator-outer",
+            "div.annotator-editor",
+            "div.annotator-viewer",
+            "div.annotator-adder"
+          ].join ", "
+          cacheIgnoredParts: true
+        options = $.extend {}, defaultOptions, @options.options
+        mapper = new window.DomTextMapper options
+        options.rootNode.addEventListener "corpusChange", =>
+          console.log "Corpus change in document access strategy."
+
+        mapper
