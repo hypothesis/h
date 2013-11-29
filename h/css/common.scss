@@ -826,8 +826,13 @@ blockquote {
 
 .hidereplies {
   display: block;
+  
   li { 
     display: none;
+
+    &.collapsedreplies {
+      display: none !important;
+    }
   }
 }
 
