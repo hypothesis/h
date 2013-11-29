@@ -42,7 +42,6 @@ class window.DomTextMapper
     @rootNode?.removeEventListener "domChange", @_onChange
     @rootNode = node
     @rootNode.addEventListener "domChange", @_onChange
-    @log "Starting to listen"
     @observer = new MutationSummary
       callback: @_onMutation
       rootNode: node
