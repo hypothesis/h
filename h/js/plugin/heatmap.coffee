@@ -63,9 +63,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       if event is 'annotationCreated'
         @annotator.subscribe event, =>
           @dynamicBucket = false
-          this._update()
+          this._scheduleUpdate()
       else
-        @annotator.subscribe event, this._update
+        @annotator.subscribe event, this._scheduleUpdate
 
     @element.on 'click', (event) =>
       event.stopPropagation()
@@ -88,7 +88,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         # Weird, but for now, let's work around it.
         highlights.anchor
       if anchor.annotation.id? # Is this a finished annotation ?
-        @_update()
+        @_scheduleUpdate()
 
       if @pendingScroll? and anchor in @pendingScroll.anchors
         # One of the wanted anchors has been realized
@@ -111,9 +111,18 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     @annotator.subscribe "highlightRemoved", (highlight) =>
       if highlight.annotation.id? # Is this a finished annotation ?
-        @_update()
+        @_scheduleUpdate()
 
     addEventListener "docPageScrolling", => @_update()
+
+  # Update the heatmap sometimes soon
+  _scheduleUpdate: =>
+    return if @_updatePending
+    @_updatePending = true
+    setTimeout ( =>
+      delete @_updatePending
+      @_update()
+    ), 200
 
   _maybeRebaseUrls: ->
     # We can't rely on browsers to implement the xml:base property correctly.
