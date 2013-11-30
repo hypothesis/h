@@ -440,15 +440,15 @@ blockquote {
 }
 
 .vis-icon {
-  @include fonticon("\e001", left);
+  @include fonticon("\e602", left);
 }
 
 .highlight-icon {
-  @include fonticon("\e01a", left);
+  @include fonticon("\e601", left);
 }
 
 .comment-icon {
-  @include fonticon("\e01e", left);
+  @include fonticon("\e600", left);
 }
 
 .launch-icon {

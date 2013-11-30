@@ -1,76 +1,29 @@
 @font-face {
-	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot');
-	src:url('fonts/icomoon.eot?#iefix') format('embedded-opentype'),
-		url('fonts/icomoon.woff') format('woff'),
-		url('fonts/icomoon.ttf') format('truetype'),
-		url('fonts/icomoon.svg#icomoon') format('svg');
+	font-family: 'h';
+	src:url('fonts/h.eot');
+	src:url('fonts/h.eot?#iefix') format('embedded-opentype'),
+		url('fonts/h.ttf') format('truetype'),
+		url('fonts/h.woff') format('woff'),
+		url('fonts/h.svg#h') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
 
-/* Use the following CSS code if you want to use data attributes for inserting your icons */
-[data-icon]:before {
-	font-family: 'icomoon';
-	content: attr(data-icon);
-	speak: none;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
-	-webkit-font-smoothing: antialiased;
-}
-
-/* Use the following CSS code if you want to have a class per icon */
-/*
-Instead of a list of all class selectors,
-you can use the generic selector below, but it's slower:
-[class*="icon-"] {
-*/
-.icon-cog, .icon-untitled, .icon-untitled-2, .icon-export_icon, .icon-clipboard_copy_icon, .icon-pen_1, .icon-flag, .icon-delete_icon, .icon-heart_empty_icon, .icon-heart_icon, .icon-window, .icon-window-2, .icon-triangle, .icon-copy, .icon-x, .icon-cancel, .icon-checkmark_icon, .icon-checkmark, .icon-cog-2, .icon-checkmark-2, .icon-clock, .icon-export, .icon-checkbox_unchecked_icon, .icon-checkbox_checked_icon, .icon-triangle-2, .icon-unlocked, .icon-locked, .icon-views, .icon-browser, .icon-ddbutton_filled, .icon-ddbutton_empty, .icon-reply, .icon-star_fav_icon, .icon-star_fav_empty_icon, .icon-triright, .icon-trileft, .icon-comment, .icon-comment2, .icon-comment2-2, .icon-comment2-3, .icon-settings, .icon-wrench, .icon-commentflip, .icon-hyp-logo4, .icon-eye-close, .icon-eye-open, .icon-comments, .icon-plus, .icon-plus-sign, .icon-eye, .icon-magic, .icon-eye-2, .icon-download, .icon-eye-3, .icon-eye-4, .icon-highlighter-nolines, .icon-highlighter-01, .icon-highlighter-blacktip, .icon-highlighter, .icon-comment2-4, .icon-comment2-5 {
-	font-family: 'icomoon';
+[class^="icon-"], [class*=" icon-"] {
+	font-family: 'h';
 	speak: none;
 	font-style: normal;
 	font-weight: normal;
 	font-variant: normal;
 	text-transform: none;
 	line-height: 1;
+
+	/* Better Font Rendering =========== */
 	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
-.icon-cog:before {
-	content: "\22";
-}
-.icon-untitled:before {
-	content: "\23";
-}
-.icon-untitled-2:before {
-	content: "\24";
-}
-.icon-export_icon:before {
-	content: "\25";
-}
-.icon-clipboard_copy_icon:before {
-	content: "\26";
-}
-.icon-pen_1:before {
-	content: "\27";
-}
-.icon-flag:before {
-	content: "\28";
-}
-.icon-delete_icon:before {
-	content: "\29";
-}
-.icon-heart_empty_icon:before {
-	content: "\2b";
-}
-.icon-heart_icon:before {
-	content: "\2c";
-}
+
 .icon-window:before {
-	content: "\2d";
-}
-.icon-window-2:before {
 	content: "\2e";
 }
 .icon-triangle:before {
@@ -88,28 +41,10 @@ you can use the generic selector below, but it's slower:
 .icon-checkmark_icon:before {
 	content: "\39";
 }
-.icon-checkmark:before {
-	content: "\3a";
-}
-.icon-cog-2:before {
-	content: "\3d";
-}
-.icon-checkmark-2:before {
-	content: "\35";
-}
-.icon-clock:before {
-	content: "\37";
-}
-.icon-export:before {
-	content: "\2a";
-}
-.icon-checkbox_unchecked_icon:before {
-	content: "\3e";
-}
 .icon-checkbox_checked_icon:before {
 	content: "\3f";
 }
-.icon-triangle-2:before {
+.icon-triangle2:before {
 	content: "\3c";
 }
 .icon-unlocked:before {
@@ -124,24 +59,6 @@ you can use the generic selector below, but it's slower:
 .icon-browser:before {
 	content: "\e003";
 }
-.icon-ddbutton_filled:before {
-	content: "\e007";
-}
-.icon-ddbutton_empty:before {
-	content: "\e008";
-}
-.icon-reply:before {
-	content: "\e004";
-}
-.icon-star_fav_icon:before {
-	content: "\e005";
-}
-.icon-star_fav_empty_icon:before {
-	content: "\e006";
-}
-.icon-triright:before {
-	content: "\e009";
-}
 .icon-trileft:before {
 	content: "\e00a";
 }
@@ -151,32 +68,14 @@ you can use the generic selector below, but it's slower:
 .icon-comment2:before {
 	content: "\e00c";
 }
-.icon-comment2-2:before {
+.icon-comment22:before {
 	content: "\e00e";
 }
-.icon-comment2-3:before {
+.icon-comment23:before {
 	content: "\e00d";
 }
 .icon-settings:before {
 	content: "\e00f";
-}
-.icon-wrench:before {
-	content: "\e020";
-}
-.icon-commentflip:before {
-	content: "\e010";
-}
-.icon-hyp-logo4:before {
-	content: "\e014";
-}
-.icon-eye-close:before {
-	content: "\f070";
-}
-.icon-eye-open:before {
-	content: "\f06e";
-}
-.icon-comments:before {
-	content: "\e011";
 }
 .icon-plus:before {
 	content: "\e012";
@@ -190,33 +89,132 @@ you can use the generic selector below, but it's slower:
 .icon-magic:before {
 	content: "\f0d0";
 }
-.icon-eye-2:before {
+.icon-eye2:before {
 	content: "\e017";
 }
 .icon-download:before {
 	content: "\e018";
 }
-.icon-eye-3:before {
-	content: "\e01b";
+.icon-comment24:before {
+	content: "\e013";
 }
-.icon-eye-4:before {
-	content: "\e015";
+.icon-comment25:before {
+	content: "\e01e";
 }
-.icon-highlighter-nolines:before {
-	content: "\e01a";
+.icon-pen_1:before {
+	content: "\27";
 }
-.icon-highlighter-01:before {
-	content: "\e019";
+.icon-flag:before {
+	content: "\28";
+}
+.icon-delete_icon:before {
+	content: "\29";
+}
+.icon-heart_empty_icon:before {
+	content: "\2b";
+}
+.icon-heart_icon:before {
+	content: "\2c";
+}
+.icon-window2:before {
+	content: "\2d";
+}
+.icon-export:before {
+	content: "\2a";
+}
+.icon-checkbox_unchecked_icon:before {
+	content: "\3e";
+}
+.icon-star_fav_empty_icon:before {
+	content: "\e006";
+}
+.icon-triright:before {
+	content: "\e009";
+}
+.icon-eye-open:before {
+	content: "\f06e";
+}
+.icon-comments:before {
+	content: "\e011";
 }
 .icon-highlighter-blacktip:before {
 	content: "\e01c";
 }
+.icon-highlighter-01:before {
+	content: "\e019";
+}
+.icon-highlighter-nolines:before {
+	content: "\e01a";
+}
+.icon-eye3:before {
+	content: "\e015";
+}
 .icon-highlighter:before {
 	content: "\e01d";
 }
-.icon-comment2-4:before {
-	content: "\e013";
+.icon-eye4:before {
+	content: "\e01b";
 }
-.icon-comment2-5:before {
-	content: "\e01e";
+.icon-wrench:before {
+	content: "\e020";
+}
+.icon-commentflip:before {
+	content: "\e010";
+}
+.icon-hyp-logo4:before {
+	content: "\e014";
+}
+.icon-eye-close:before {
+	content: "\f070";
+}
+.icon-star_fav_icon:before {
+	content: "\e005";
+}
+.icon-reply:before {
+	content: "\e004";
+}
+.icon-ddbutton_empty:before {
+	content: "\e008";
+}
+.icon-ddbutton_filled:before {
+	content: "\e007";
+}
+.icon-checkmark:before {
+	content: "\3a";
+}
+.icon-cog:before {
+	content: "\3d";
+}
+.icon-checkmark2:before {
+	content: "\35";
+}
+.icon-clock:before {
+	content: "\37";
+}
+.icon-clipboard_copy_icon:before {
+	content: "\26";
+}
+.icon-export_icon:before {
+	content: "\25";
+}
+.icon-uni24:before {
+	content: "\24";
+}
+.icon-uni23:before {
+	content: "\23";
+}
+.icon-cog2:before {
+	content: "\22";
+}
+.icon-uniF000:before {
+	content: "\f000";
+}
+.icon-comment:before {
+	content: "\e600";
+}
+.icon-highlighter:before {
+	content: "\e601";
+}
+.icon-visible:before {
+	content: "\e602";
 }
