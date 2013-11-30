@@ -57,8 +57,9 @@ class Anchor
     # Announce the removal of the highlight
     @annotator.publish 'highlightRemoved', highlight
 
-  # Virtualize and remove an anchor from all involved pages
-  remove: ->
+  # Virtualize and remove an anchor from all involved pages,
+  # and optionally remove it from the annotation, too
+  remove: (removeFromAnnotation = false) ->
     # Go over all the pages
     for index in [@startPage .. @endPage]
       @virtualize index
@@ -68,6 +69,13 @@ class Anchor
       anchors[i..i] = []
       # Kill the list if it's empty
       delete @annotator.anchors[index] unless anchors.length
+
+    # Should we remove this anchor from the annotation, too?
+    if removeFromAnnotation
+      anchors = @annotation.anchors
+      # Remove the anchor from the list
+      i = anchors.indexOf this
+      anchors[i..i] = []
 
   # This is called when the underlying Annotator has been udpated
   annotationUpdated: ->

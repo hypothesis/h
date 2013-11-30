@@ -123,6 +123,9 @@ class Annotator extends Delegator
     # Create adder
     this.adder = $(this.html.adder).appendTo(@wrapper).hide()
 
+    # Create bucket for orphan annotations
+    this.orphans = []
+
   # Initializes the available document access strategies
   _setupDocumentAccessStrategies: ->
     @documentAccessStrategies = [
@@ -384,6 +387,15 @@ class Annotator extends Delegator
     unless annotation.target?
       throw new Error "Can not run setupAnnotation(). No target or selection available."
 
+    # Anchor this annotation
+    this.anchorAnnotation annotation
+
+    # Return the final form
+    annotation
+
+  # Creates the necessary anchors for the given annotation
+  anchorAnnotation: (annotation) ->
+
     annotation.quote = []
     annotation.anchors = []
 
@@ -413,6 +425,7 @@ class Annotator extends Delegator
         else
           console.log "Could not create anchor for annotation '",
             annotation.id, "'."
+          this.orphans.push annotation
       catch exception
         if exception.stack? then console.log exception.stack
         console.log exception.message
@@ -452,9 +465,16 @@ class Annotator extends Delegator
   #
   # Returns deleted annotation.
   deleteAnnotation: (annotation) ->
-    if annotation.anchors?    
-      for a in annotation.anchors
-        a.remove()
+    if annotation.anchors?
+      if annotation.anchors.length
+        # There were some anchors.
+        for a in annotation.anchors
+          a.remove()
+      else
+        # No anchors, this was an orphan. Remove from orphan list.
+        i = this.orphans.indexOf annotation
+        if i isnt -1
+          this.orphans[i..i] = []
 
     this.publish('annotationDeleted', [annotation])
     annotation
