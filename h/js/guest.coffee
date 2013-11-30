@@ -18,6 +18,7 @@ class Annotator.Guest extends Annotator
           "div.annotator-frame"
           "div.annotator-adder"
         ].join ", "
+      trackChanges: true
     TextAnchors: {}
     FuzzyTextAnchors: {}
     PDF: {}
