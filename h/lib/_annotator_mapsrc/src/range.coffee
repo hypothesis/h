@@ -162,8 +162,16 @@ class Range.BrowserRange
         while n? and (n.nodeType isnt Node.TEXT_NODE)
           n = n.firstChild
         if n? # Did we find a text node at the start of this element?
-          r.end = n
-          r.endOffset = 0
+          # Check the previous sibling
+          prev = n.previousSibling
+          if prev? and (prev.nodeType is Node.TEXT_NODE)
+            # We have another text righ before us. Use that instead.
+            r.end = prev
+            r.endOffset = prev.nodeValue.length
+          else
+            # No, we need to stick to this node.
+            r.end = n
+            r.endOffset = 0
 
       unless r.end?
         # We need to find a text node in the previous node.
