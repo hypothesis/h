@@ -1,3 +1,39 @@
+class SubTreeCollection
+
+  constructor: ->
+    @roots = []
+
+  # Unite a new node with a pre-existing set of nodex.
+  #
+  # The rules are as follows:
+  #  * If the node is identical to, or a successor of any of the
+  #    the existing nodes, then it's dropped.
+  #  * Otherwise it's added.
+  #  * If the node is an ancestor of any of the existing nodes,
+  #    the those nodes are dropper.
+  add: (node) ->
+
+    # Is this node already contained by any of the existing subtrees?
+    for root in @roots
+      return if root.contains node
+
+    # If we made it to this point, then it means that this is new.
+
+    newRoots = @roots.slice()
+
+    # Go over the collected roots, and see if some of them should be dropped
+    for root in @roots
+      if node.contains root # Is this root obsolete now?
+        i = newRoots.indexOf this  # Drop this root
+        newRoots[i..i] = []
+
+    # Add the new node to the end of the list
+    newRoots.push node
+
+    # Replace the old list with the new one
+    @roots = newRoots
+
+
 class window.DomTextMapper
 
   @applicable: -> true
@@ -74,11 +110,11 @@ class window.DomTextMapper
   #   node: reference to the DOM node
   #   content: the text content of the node, as rendered by the browser
   #   length: the length of the next content
-  scan: ->
+  scan: (reason = "unknown reason") ->
     # Have we ever scanned?
     if @path?
       # Do an incremental update instead
-      @_syncState "scan()"
+      @_syncState reason
       return
 
     unless @pathStartNode.ownerDocument.body.contains @pathStartNode
@@ -86,7 +122,9 @@ class window.DomTextMapper
 #      @log "This is not attached to dom. Exiting."
       return
 
-#    @log "No valid cache, will have to do a scan."
+    @log "Starting scan, because", reason
+    # Forget any recorded changes, we are starting with a clean slate.
+    @observer.takeSummaries()
     startTime = @timestamp()
     @saveSelection()
     @path = {}
@@ -104,12 +142,14 @@ class window.DomTextMapper
     t2 = @timestamp()    
 #    @log "Phase II (offset calculation) took " + (t2 - t1) + " ms."
 
+    @log "Scan took", t2 - startTime, "ms."
+
     null
  
   # Select the given path (for visual identification),
   # and optionally scroll to it
   selectPath: (path, scroll = false) ->
-    @_syncState "selectPath('" + path + "')"
+    @scan "selectPath('" + path + "')"
     info = @path[path]
     unless info? then throw new Error "I have no info about a node at " + path
     node = info?.node
@@ -198,9 +238,7 @@ class window.DomTextMapper
 
   # Return info for a given path in the DOM
   getInfoForPath: (path) ->
-    @_syncState "getInfoForPath('" + path + "')"
-    unless @path?
-      throw new Error "Can't get info before running a scan() !"
+    @scan "getInfoForPath('" + path + "')"
     result = @path[path]
     unless result?
       throw new Error "Found no info for path '" + path + "'!"
@@ -221,28 +259,28 @@ class window.DomTextMapper
   # If path is not given, the default path is used.
   getContentForPath: (path = null) ->
     path ?= @getDefaultPath()
-    @_syncState "getContentForPath('" + path + "')"
+    @scan "getContentForPath('" + path + "')"
     @path[path].content
 
   # Return the length of the rendered value of a part of the dom.
   # If path is not given, the default path is used.
   getLengthForPath: (path = null) ->
     path ?= @getDefaultPath()
-    @_syncState "getLengthForPath('" + path + "')"
+    @cvan "getLengthForPath('" + path + "')"
     @path[path].length
 
   getDocLength: ->
-    @_syncState "getDocLength()"
+    @scan "getDocLength()"
     @_corpus.length
 
   getCorpus: ->
-    @_syncState "getCorpus()"
+    @scan "getCorpus()"
     @_corpus
 
   # Get the context that encompasses the given charRange
   # in the rendered text of the document
   getContextForCharRange: (start, end) ->
-    @_syncState "getContextForCharRange(" + start + ", " + end + ")"
+    @scan "getContextForCharRange(" + start + ", " + end + ")"
     prefixStart = Math.max 0, start - CONTEXT_LEN
     prefix = @_corpus[prefixStart .. start - 1]
     suffix = @_corpus[end .. end + CONTEXT_LEN - 1]
@@ -256,7 +294,7 @@ class window.DomTextMapper
     unless (start? and end?)
       throw new Error "start and end is required!"
 
-    @_syncState "getMappingsForCharRange(" + start + ", " + end + ")"
+    @scan "getMappingsForCharRange(" + start + ", " + end + ")"
 
 #    @log "Collecting nodes for [" + start + ":" + end + "]"
 
@@ -666,8 +704,9 @@ class window.DomTextMapper
     if startIndex is -1
       # content of node is not present in parent's content - probably hidden,
       # or something similar
-      @log "Content of this not is not present in content of parent, at path " + path
-      @log "(Content: '" + content + "'.)"
+      @log "Content of this node is not present in content of parent, at path " + path
+#      @log "(Content: '" + content + "'.)"
+#      console.trace()
       return index
 
 
@@ -810,67 +849,42 @@ class window.DomTextMapper
 
     changes
 
-
   # Callect all nodes involved in any of the passed changes
   _getInvolvedNodes: (changes) ->
-    nodes = []
+    trees = new SubTreeCollection()
 
-    # Collect changed nodes
-    for n in changes.added
-      nodes.push n unless n in nodes
+    # Collect the parents of the added nodes
+    trees.add n.parentNode for n in changes.added
 
     # Collect attribute changed nodes
     for k, list of changes.attributeChanged
-      for n in list
-        oldValue = changes.getOldAttribute n, k
-        newValue = n.getAttribute k
-#        console.log "Attribute change: ", n.tagName, ".", k, ":",
-#          "'" + oldValue + "'",
-#          "->",
-#          "'" +  newValue + "'"
-        nodes.push n unless n in nodes
+      trees.add n for n in list
 
     # Collect character data changed nodes
-    for n in changes.characterDataChanged
-      nodes.push n unless n in nodes
+    trees.add n for n in changes.characterDataChanged
 
     # Collect the non-removed parents of removed nodes
     for n in changes.removed
       parent = n
       while (parent in changes.removed) or (parent in changes.reparented)
         parent = changes.getOldParentNode parent
-      nodes.push parent unless parent in nodes
+      trees.add parent
 
     # Collect the parents of reordered nodes
-    for n in changes.reordered
-      parent = n.parent
-      nodes.push parent unless parent in nodes
+    trees.add n.parentNode for n in changes.reordered
 
     # Collect the parents of reparented nodes
     for n in changes.reparented
       # Get the current parent
-      parent = n.parentNode
-      nodes.push parent unless parent in nodes
+      trees.add n.parentNode
 
       # Get the old parent
       parent = n
       while (parent in changes.removed) or (parent in changes.reparented)
         parent = changes.getOldParentNode parent
-      nodes.push parent unless parent in nodes
+      trees.add parent
 
-    return nodes
-
-
-  # Determine the first common ancestor of the passed nodes
-  _getCommonAncestor: (nodes) ->
-    unless nodes?.length
-      throw "We need a list of nodes."
-
-    root = nodes[0]             # Start with the first node
-    for n in nodes              # Go over all the nodes
-      while not root.contains n # Push root up, until it encompasses
-        root = root.parentNode  # all
-    root
+    return trees.roots
 
 
   # React to the pasted list of changes
@@ -885,14 +899,12 @@ class window.DomTextMapper
     # Actually react to the changes
 #    @log reason, changes
 
-    # Collect all the interesting nodes
+    # Collect the changed sub-trees
     changedNodes = @_getInvolvedNodes changes
 
-    # Get the common root of all changed nodes
-    changeRoot = @_getCommonAncestor changedNodes
-
-    # Rescan the involved part
-    @performUpdateOnNode changeRoot, reason, false, data
+    # Rescan the involved parts
+    for node in changedNodes
+      @performUpdateOnNode node, reason, false, data
 
   # Bring the our data up to date
   _syncState: (reason = "i am in the mood", data) ->
@@ -909,15 +921,15 @@ class window.DomTextMapper
 
 
   # Callback for the mutation observer
-  _onMutation: (summaries) => @_reactToChanges "Observer called", summaries[0]
+  _onMutation: (summaries) =>
+#    @log "DOM mutated!"
+    @_reactToChanges "Observer called", summaries[0]
 
 
   # Change the root node, and subscribe to the events
   _changeRootNode: (node) ->
     @observer?.disconnect()
-    @rootNode?.removeEventListener "domChange", @_onChange
     @rootNode = node
-    @rootNode.addEventListener "domChange", @_onChange
     @observer = new MutationSummary
       callback: @_onMutation
       rootNode: node
@@ -928,11 +940,10 @@ class window.DomTextMapper
 
   # This handles the situations when the corpus has actually changed.
   _corpusChanged: ->
-    @log "Detected CORPUS CHANGE! Clearing all data, and doing full rescan."
     delete @_corpus
     delete @path
     delete @ignorePos
-    @scan()
+    @scan "CORPUS HAS CHANGED"
     event = document.createEvent "UIEvents"
     event.initUIEvent "corpusChange", true, false, window, 0
     @rootNode.dispatchEvent event

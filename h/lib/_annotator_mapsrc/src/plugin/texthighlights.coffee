@@ -47,15 +47,6 @@ class TextHighlight extends Annotator.Highlight
 
     @_inited.push annotator
 
-  # Publish an event about a DOM change by us
-  _publishChange: (reason) ->
-    event = document.createEvent "UIEvents"
-    event.initUIEvent "domChange", true, false, window, 0
-    event.reason = reason
-    node = @annotator.domMapper.getPageRoot @pageIndex
-    node.dispatchEvent event
-    null
-
   # Public: Wraps the DOM Nodes within the provided range with a highlight
   # element of the specified class and returns the highlight Elements.
   #
@@ -88,9 +79,6 @@ class TextHighlight extends Annotator.Highlight
     @_highlights = @_highlightRange normedRange
     @$(@_highlights).data "annotation", @annotation
 
-    # Announce the change
-    @_publishChange "created hilite"
-
   # Implementing the required APIs
 
   # Is this a temporary hl?
@@ -104,18 +92,12 @@ class TextHighlight extends Annotator.Highlight
     else
       @$(@_highlights).removeClass('annotator-hl-temporary')
 
-    # Announce the change (for better performance)
-    @_publishChange "hilite setTemporary()"
-
   # Mark/unmark this hl as active
   setActive: (value) ->
     if value
       @$(@_highlights).addClass('annotator-hl-active')
     else
       @$(@_highlights).removeClass('annotator-hl-active')
-
-    # Announce the change (for better performance)
-    @_publishChange "hilite setActive()"
 
   # Remove all traces of this hl from the document
   removeFromDocument: ->
@@ -125,8 +107,6 @@ class TextHighlight extends Annotator.Highlight
         # We should restore original state
         child = hl.childNodes[0]
         @$(hl).replaceWith hl.childNodes
-
-    @_publishChange "removed hilite"
 
   # Get the HTML elements making up the highlight
   _getDOMElements: -> @_highlights

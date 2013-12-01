@@ -150,8 +150,7 @@ class Annotator.Guest extends Annotator
 
   scanDocument: (reason = "something happened") =>
     try
-      console.log "Analyzing host frame, because " + reason + "..."
-      this._scan()
+      this._scan reason
     catch e
       console.log e.message
       console.log e.stack

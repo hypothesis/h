@@ -118,7 +118,7 @@ class Annotator extends Delegator
     this._setupDynamicStyle()
 
     # Perform initial DOM scan, unless told not to.
-    this._scan() unless @options.noScan
+    this._scan "Created Annotator" unless @options.noScan
 
     # Create adder
     this.adder = $(this.html.adder).appendTo(@wrapper).hide()
@@ -157,10 +157,10 @@ class Annotator extends Delegator
         return this
 
   # Perform a scan of the DOM. Required for finding anchors.
-  _scan: ->
+  _scan: (reason) ->
     # If we haven't yet chosen a document access strategy, do so now.
     this._chooseAccessPolicy() unless @domMapper
-    @pendingScan = @domMapper.scan()
+    @pendingScan = @domMapper.scan reason
     if @pendingScan?
       @pendingScan.then => @enableAnnotating()
     else
