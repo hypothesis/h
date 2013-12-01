@@ -847,6 +847,35 @@ class Annotator extends Delegator
     for anchor in @anchors[index] ? []
       anchor.virtualize index
 
+  # Re-anchor all the annotations
+  _reanchorAnnotations: =>
+    console.log "Reanchoring all annotations."
+
+    # Phase 1: remove all the anchors
+
+    # We will collect all the annotations, starting from the orphan ones
+    annotations = @orphans.slice()
+
+    for page, anchors of @anchors  # Go over all the pages
+      for anchor in anchors.slice() # And all the anchors
+        # Get the annotation
+        annotation = anchor.annotation
+
+        # Add this annotation to our collection
+        annotations.push annotation unless annotation in annotations
+
+        # Remove this anchor from both the pages and the annotation
+        anchor.remove true
+
+    # Phase 2: re-anchor all annotations
+
+    for annotation in annotations # Go over all annotations
+      this.anchorAnnotation annotation # and anchor them
+
+    # Phase 3: send out notifications and updates
+
+    this.publish "annotationsLoaded", [annotations.slice()]
+
   onAnchorMouseover: (annotations, highlightType) ->
     #console.log "Mouse over annotations:", annotations
 
