@@ -78,7 +78,12 @@ class App
         delete plugins.Auth
 
       if newValue isnt oldValue
-        $scope.reloadAnnotations() unless $scope.skipAuthChangeReload
+        unless $scope.skipAuthChangeReload
+          $scope.reloadAnnotations()
+          if $scope.inSearch
+            $timeout ->
+              $rootScope.$broadcast 'ReRenderPageSearch'
+            , 3000
         delete $scope.skipAuthChangeReload
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
@@ -760,7 +765,6 @@ class Search
       more_top_num : {}
       more_bottom_num: {}
 
-
     buildRenderOrder = (threadid, threads) =>
       unless threads?.length
         return
@@ -949,6 +953,7 @@ class Search
       $rootScope.search_annotations = threads
       $scope.threads = threads
 
+    $scope.$on 'ReRenderPageSearch', refresh
     $scope.$on '$routeUpdate', refresh
 
     $scope.getThreadId = (id) ->
