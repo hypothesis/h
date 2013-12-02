@@ -847,40 +847,11 @@ class Search
         if roots[annotation_root]? then continue
 
         if annotation.id in $scope.search_filter
-          # Maybe we have an upper level match too
-          top_match = null
-          if annotation.references?
-            for reference in annotation.references
-              if reference in $scope.search_filter
-                top_thread = annotator.threading.getContainer reference
-                top_match = top_thread.message
-                break
-
-          if top_match
-            threads.push top_thread
-            $scope.render_order[top_match.id] = []
-            buildRenderOrder(top_match.id, [top_thread])
-          else
-            # We do not have upper match
-            threads.push thread
-            $scope.render_order[annotation.id] = []
-            buildRenderOrder(annotation.id, [thread])
-          roots[annotation_root] = true
-          continue
-
-        # Maybe it has a child we were looking for
-        children = thread.flattenChildren()
-        has_search_result = false
-        if children?
-          for child in children
-            if child.id in $scope.search_filter
-              has_search_result = true
-              break
-
-        if has_search_result
-          threads.push thread
-          $scope.render_order[annotation.id] = []
-          buildRenderOrder(annotation.id, [thread])
+          # We have a winner, let's put its root annotation into our list and build the rendering
+          root_thread = annotator.threading.getContainer annotation_root
+          threads.push root_thread
+          $scope.render_order[annotation_root] = []
+          buildRenderOrder(annotation_root, [root_thread])
           roots[annotation_root] = true
 
       # Re-construct exact order the annotation threads will be shown
