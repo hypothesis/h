@@ -13,6 +13,15 @@
              ng-mousedown="toggleCollapsedDown($event)"
              ng-click="toggleCollapsed($event)"
              ng-init="collapsed = ann_info.show_quote[thread.message.id]">
+
+           <a href=""
+              class="threadexp"
+              title="{{collapsed && 'Expand' || 'Collapse'}}"
+              ng-mousedown="toggleCollapsedDown($event)"
+              ng-click="toggleCollapsed($event)"
+              ng-show="ann_info.shown[thread.message.id] && !ann_info.more_top[thread.message.id] && thread.message.references"
+           />
+
           <!-- Annotation -->
 
             <!-- Excerpts -->
@@ -72,13 +81,6 @@
                 ng-click="toggleCollapsed($event)"
                 ng-repeat="thread in thread.children"
                 ng-transclude>
-               <a href=""
-                  class="threadexp"
-                  title="{{collapsed && 'Expand' || 'Collapse'}}"
-                  ng-mousedown="toggleCollapsedDown($event)"
-                  ng-click="toggleCollapsed($event)"
-                  ng-show="ann_info.shown[thread.message.id] && !ann_info.more_top[thread.message.id]"
-               />
             </li>
           </ul>
         </div>
