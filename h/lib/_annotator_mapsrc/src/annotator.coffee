@@ -140,7 +140,8 @@ class Annotator extends Delegator
 
   # Initializes the components used for analyzing the document
   _chooseAccessPolicy: ->
-    if @domMapper? then return
+    # If we have already initialized policy, don't bother.
+    return if @domMapper?
 
     # Go over the available strategies
     for s in @documentAccessStrategies
@@ -667,9 +668,9 @@ class Annotator extends Delegator
   onSuccessfulSelection: (event, immediate = false) ->
     # Check whether we got a proper event
     unless event?
-      throw "Called onSuccessfulSelection without an event!"
+      throw new Error "Called onSuccessfulSelection without an event!"
     unless event.targets?
-      throw "Called onSuccessulSelection with an event with missing targets!"
+      throw new Error "Called onSuccessulSelection with an event with missing targets!"
 
     # Are we allowed to create annotations?
     unless @canAnnotate
