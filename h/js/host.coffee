@@ -32,8 +32,14 @@ class Annotator.Host extends Annotator.Guest
         if @frame.hasClass 'annotator-collapsed'
           this.showFrame()
 
-    # Scan the document
-    this.scanDocument "Host initialized"
+    # Initialize an access policy.
+    # Usually, we don't have to trigger this manually, because the scanning
+    # will do this automatically, but in this case, we want to postpone
+    # the scanning, but we still want to have the access policy immediately.
+    this._chooseAccessPolicy()
+
+    # Scan the document, but wait a sec before that
+    setTimeout (=> this.scanDocument "Host initialized"), 1000
 
     # Save this reference to the Annotator class, so it's available
     # later, even if someone has deleted the original reference
