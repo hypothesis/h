@@ -916,6 +916,16 @@ class window.DomTextMapper
       return true if container.contains node
     return false
 
+  # Determine whether an attribute change has to be taken seriously
+  _isAttributeChangeImportant: (node, attributeName, oldValue, newValue) ->
+    # Do we have an attribute change filter configured?
+    if @options.filterAttributeChanges
+      # Use the filter to decide whether this change is important
+      @options.filterAttributeChanges node, attributeName, oldValue, newValue
+    else
+      # No filter, so we assume it's important
+      true
+
   # Filter a change list
   _filterChanges: (changes) ->
 
@@ -939,7 +949,15 @@ class window.DomTextMapper
     # Go through attributeChanged elements
     attributeChanged = {}
     for attrName, elementList of changes.attributeChanged ? {}
+      # Filter out the ignored elements
       list = elementList.filter (element) => not @_isIgnored element
+
+      # Filter out the ignored attribute changes
+      list = list.filter (element) =>
+        @_isAttributeChangeImportant element, attrName,
+          changes.getOldAttribute(element, attrName),
+          element.getAttribute(attrName)
+
       if list.length
         attributeChanged[attrName] = list
     changes.attributeChanged = attributeChanged
@@ -1031,6 +1049,7 @@ class window.DomTextMapper
       if @_performUpdateOnNode node, reason, false, data
         # If this change involved a root change, set the flag
         corpusChanged = true
+#        @log "Setting the corpus changed flag on changes @", node
 
     # If there was a corpus change, announce it
     if corpusChanged then setTimeout =>
