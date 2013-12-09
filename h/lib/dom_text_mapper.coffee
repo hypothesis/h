@@ -22,11 +22,11 @@ class window.DomTextMapper
   # Change handler
   _onChange: (event) =>
 #    @log "received change event", event
-#    console.log "source", event.srcElement
-#    console.log "reason", event.reason ? "no reason"
-#    console.log "data", event.data
+#    @log "source", event.target
+#    @log "reason", event.reason ? "no reason"
+#    @log "data", event.data
     @documentChanged()
-    @performUpdateOnNode event.srcElement, false, event.data
+    @performUpdateOnNode event.target, false, event.data
     @lastScanned = @timestamp()
 
   # Change the root node, and subscribe to the events
