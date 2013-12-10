@@ -242,12 +242,14 @@ class Hypothesis extends Annotator
       this.removeEmphasis this._getAnnotationsFromIDs ids
     )
 
+   # Look up an annotation from an ID
   _getAnnotationFromID: (id) ->
     annotation = @threading.getContainer(id)?.message
     unless annotation
       throw Error "Could not look up annotation with id ", id
     annotation
 
+  # Look up a list of annotations from a list of IDs
   _getAnnotationsFromIDs: (ids) ->
     this._getAnnotationFromID id for id in ids
 
