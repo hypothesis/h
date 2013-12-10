@@ -175,12 +175,12 @@ class Annotator.Guest extends Annotator
   addEmphasis: (annotations) =>
     @panel?.notify
       method: "addEmphasis"
-      params: (a.id for a in annotations)
+      params: (a.id for a in annotations when a.id)
 
   removeEmphasis: (annotations) =>
     @panel?.notify
       method: "removeEmphasis"
-      params: (a.id for a in annotations)
+      params: (a.id for a in annotations when a.id)
 
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
