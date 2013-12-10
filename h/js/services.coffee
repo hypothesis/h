@@ -219,11 +219,11 @@ class Hypothesis extends Annotator
 
     .bind('showViewer', (ctx, ids=[]) =>
       return unless this.discardDrafts()
-      this.showViewer ((@threading.getContainer id).message for id in ids)
+      this.showViewer this._getAnnotationsFromIDs ids
     )
 
     .bind('updateViewer', (ctx, ids=[]) =>
-      this.updateViewer ((@threading.getContainer id).message for id in ids)
+      this.updateViewer this._getAnnotationsFromIDs ids
     )
 
     .bind('setTool', (ctx, name) =>
@@ -235,12 +235,21 @@ class Hypothesis extends Annotator
     )
 
     .bind('addEmphasis', (ctx, ids=[]) =>
-      this.addEmphasis ((@threading.getContainer id).message for id in ids)
+      this.addEmphasis this._getAnnotationsFromIDs ids
     )
 
     .bind('removeEmphasis', (ctx, ids=[]) =>
-      this.removeEmphasis ((@threading.getContainer id).message for id in ids)
+      this.removeEmphasis this._getAnnotationsFromIDs ids
     )
+
+  _getAnnotationFromID: (id) ->
+    annotation = @threading.getContainer(id)?.message
+    unless annotation
+      throw Error "Could not look up annotation with id ", id
+    annotation
+
+  _getAnnotationsFromIDs: (ids) ->
+    this._getAnnotationFromID id for id in ids
 
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
