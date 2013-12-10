@@ -65,13 +65,14 @@ class TextHighlight extends Annotator.Highlight
     # may be the odd abandoned whitespace node in a paragraph that is skipped
     # but better than breaking table layouts.
 
-    for node in normedRange.textNodes() when not white.test node.nodeValue
-      r = @$(node).wrapAll(hl).parent().show()[0]
+    nodes = @$(normedRange.textNodes()).filter((i) -> not white.test @nodeValue)
+    r = nodes.wrap(hl).parent().show().toArray()
+    for node in nodes
       event = document.createEvent "UIEvents"
       event.initUIEvent "domChange", true, false, window, 0
       event.reason = "created hilite"
       node.dispatchEvent event
-      r
+    r
 
   # Public: highlight a list of ranges
   #
