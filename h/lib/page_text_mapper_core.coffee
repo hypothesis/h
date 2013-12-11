@@ -54,6 +54,7 @@ class window.PageTextMapperCore
   # Update the mappings for a given page
   _updateMap: (info) ->
     #console.log "Updating mappings for page #" + info.index
+    info.domMapper.documentChanged()
     info.domMapper.scan()
 
   # Delete the mappings for a given page
