@@ -70,7 +70,10 @@ class window.DomTextMatcher
 
     # Get a starting position for the prefix search
     expectedPrefixStart = if expectedStart?
-      expectedStart - prefix.length
+      i = expectedStart - prefix.length
+      if i < 0
+        0
+      else i
     else
       Math.floor(len / 2)
 
