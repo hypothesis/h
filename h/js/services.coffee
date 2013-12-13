@@ -340,11 +340,13 @@ class Hypothesis extends Annotator
     this
 
   addEmphasis: (annotations=[]) =>
+    annotations = annotations.filter (a) -> a? # Filter out null annotations
     for a in annotations
       a.$emphasis = true
     @element.injector().get('$rootScope').$digest()
 
   removeEmphasis: (annotations=[]) =>
+    annotations = annotations.filter (a) -> a? # Filter out null annotations
     for a in annotations
       delete a.$emphasis
     @element.injector().get('$rootScope').$digest()
