@@ -255,8 +255,8 @@ class window.DomTextMapper
     if end > @_corpus.length
       throw Error "Range end is after the end of corpus!"
     prefixStart = Math.max 0, start - CONTEXT_LEN
-    prefix = if prefixStart then @_corpus[prefixStart .. start - 1] else ""
-    suffix = @_corpus[end .. end + CONTEXT_LEN - 1]
+    prefix = @_corpus[ prefixStart ... start ]
+    suffix = @_corpus[ end ... end + CONTEXT_LEN ]
     [prefix.trim(), suffix.trim()]
         
   # Get the matching DOM elements for a given charRange
@@ -324,7 +324,7 @@ class window.DomTextMapper
 
     if mappings.length is 0
       @log "Collecting nodes for [" + start + ":" + end + "]"
-      @log "Should be: '" + @_corpus[ start .. (end-1) ] + "'."
+      @log "Should be: '" + @_corpus[ start ... end ] + "'."
       throw new Error "No mappings found for [" + start + ":" + end + "]!"
 
     mappings = mappings.sort (a, b) -> a.element.start - b.element.start
@@ -377,12 +377,12 @@ class window.DomTextMapper
   stringStartsWith: (string, prefix) ->
     unless prefix
       throw Error "Requires a non-empty prefix!"
-    string[ 0 .. prefix.length - 1 ] is prefix
+    string[ 0 ... prefix.length ] is prefix
 
   stringEndsWith: (string, suffix) ->
     unless suffix
       throw Error "Requires a non-empty suffix!"
-    string[ string.length - suffix.length .. string.length ] is suffix
+    string[ string.length - suffix.length ... string.length ] is suffix
 
   parentPath: (path) -> path.substr 0, path.lastIndexOf "/"
 
@@ -477,17 +477,10 @@ class window.DomTextMapper
       throw new Error "Selection already saved!"
     sel = @rootWin.getSelection()        
 #    @log "Saving selection: " + sel.rangeCount + " ranges."
-    @savedSelection = unless sel.rangeCount
-      []
-    else
-      (sel.getRangeAt i) for i in [0 ... sel.rangeCount]
-    switch sel.rangeCount
-      when 0 then @savedSelection ?= []
-      when 1 then @savedSelection = [ @savedSelection ]
-    try
-      throw new Error "Selection was saved here"
-    catch exception
-      @selectionSaved = exception.stack
+
+    @savedSelection = ((sel.getRangeAt i) for i in [0 ... sel.rangeCount])
+
+    @selectionSaved = (new Error "selection was saved here").stack
 
   # restore selection
   restoreSelection: ->
@@ -663,7 +656,7 @@ class window.DomTextMapper
     pathInfo = @path[path]
     content = pathInfo?.content
 
-    if not content? or content is ""
+    unless content
       # node has no content, not interesting
       pathInfo.start = parentIndex + index
       pathInfo.end = parentIndex + index
@@ -733,7 +726,7 @@ class window.DomTextMapper
 
     @log "Verifying map info: do atomic elements match?"
     for i,p of @path when p.atomic
-      expected = @_corpus[p.start .. (p.end - 1) ]
+      expected = @_corpus[ p.start ... p.end ]
       ok = p.content is expected
       unless ok then @log "Mismatch on " + i + ": content is '" + p.content + "', range in corpus is '" + expected + "'."
       ok
