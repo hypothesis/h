@@ -356,6 +356,11 @@ class Annotator.Guest extends Annotator
     # Display the editor.
     this.showEditor(annotation, position)
 
+    # We have to clear the selection.
+    # (Annotator does this automatically by focusing on
+    # one of the input fields in the editor.)
+    @Annotator.util.getGlobal().getSelection().removeAllRanges()
+
   onSetTool: (name) ->
     switch name
       when 'comment'
