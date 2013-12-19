@@ -24,8 +24,6 @@ from h import interfaces
 from h.models import _
 from h.streamer import url_values_from_document
 
-import mannord
-
 import logging
 log = logging.getLogger(__name__)
 
@@ -328,6 +326,5 @@ def includeme(config):
         renderer='h:templates/auth.pt',
         route_name='profile'
     )
-
 
     config.scan(__name__)
