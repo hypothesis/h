@@ -390,58 +390,57 @@ class StreamerSession(Session):
 
 def get_annotation_resource(annot_id, request):
     """ Obtain annotation resource by annotation id."""
-        registry = request.registry
-        store = registry.queryUtility(interfaces.IStoreClass)(request)
-        data = store.read(annot_id)
+    registry = request.registry
+    store = registry.queryUtility(interfaces.IStoreClass)(request)
+    data = store.read(annot_id)
 
-        annotation = Annotation(request)
-        annotation.update(data)
-        return annotation
+    annotation = Annotation(request)
+    annotation.update(data)
+    return annotation
 
 
-def get_moderated_annotation(request, moderating_annotation, session,
-                             action_type=None):
-    """ Method retruns a moderated annotation - object that represents
-    an annotation in mannord.
-    Argumetns:
-        - request is a request object
+def get_mannord_annotation_object(annot_id, request, session):
+    """ The function returns a mannord annotation object with given id.
+    If there is no record for annot_id then the function creates it.
+    """
+    annot_res = get_annotation_resource(annot_id, request)
+    references = annot_res.get('references', [])
+    # Id of parent annotation.
+    parent_id = None if len(references) else references[-1]
+    # Fetches action type
+    action_type = None
+    tags = annot_res.get('tags', [])
+    if 'upvote' in tags:
+        action_type = mannord.ACTION_UPVOTE
+    elif 'downvote' in tags:
+        action_type = mannord.ACTION_DOWNVOTE
+    # Fetches author of the annotation.
+    author = mannord.get_add_user(annot_res.get('user'), session)
+    # Creates an annotation.
+    annot = mannord.get_add_item(annot_res.get('uri'), annot_res.get('id'),
+                                 author, session, parent_id=parent_id,
+                                 action_type=action_type)
+    return annot
+
+
+def get_moderated_annotation(moderating_annotation, request, session):
+    """ Method retruns a moderated annotation (mannord's object).
+    Args:
         - moderating_annot is a resource annotation object that is a
         moderation action.
-        - action can be mannord.ACTION_UPVOTE, mannord.ACTION_DOWNVOTE, or None
     """
     # Obtains a key of moderated annotation.
     references = moderating_annotation.get('references', [])
     if len(references) == 0:
         return None
     moderated_annot_id = references[-1]
-    # Moderated annotation resource.
-    moderated_annot_res = get_annotation_resource(moderated_annot_id, request)
-    # Author of the moderated annotation.
-    author_name = moderated_annot_res.get('user')
-    author_name = author_name[5:author_name.find('@')]
-    UserClass = registry.getUtility(interfaces.IUserClass)
-    author = UserClass.get_by_username(request, author_name)
-
-    # Parent id of moderated annotation.
-    references = moderated_annot_res.get('references', [])
-    parent_id = None if len(references) == 0 else references[-1]
-
-    # Moderated annotation as a mannord' representation of the annotaion.
-    moderated_annot = mannord.get_add_item(moderated_annot_res.get('uri'),
-                           moderated_annot_res.get('id'), author, session,
-                           parent_id=parent_id, action_type=action_type)
-    return moderated_annot
+    return get_mannord_annotation_object(moderated_annot_id, request, session)
 
 
 @subscriber(events.AnnotationEvent)
 def after_moderation_action(event):
     """ The function triggers mannords' moderation functions.
     """
-    # Some notes about mannord.
-    # Every time we want to fetch an object with annotation's moderation
-    # information we need to provide detailed information about it
-    # (not just annotaion id) so that mannord can create annotation record if
-    # it does not exist.
     try:
         request = event.request
         action = event.action
@@ -451,46 +450,59 @@ def after_moderation_action(event):
         annotation = event.annotation
         session = get_session(request)
 
+        # Checkes that moderating user is authenticated.
         if request.user is None:
             return
 
+        # moderating_user is the user who have made moderation action.
+        moderating_user = mannord.get_add_user(annotation['user'])
+
         tags = annotation.get('tags', [])
-        # NOTE: to optimize db queries we can call get_moderated_annotation
-        # function inside each case of if ..elif statement. I moved it up to
-        # reduce code size.
-        annotation_moder = get_moderated_annotation(request, annotation, session)
-        if annotation_moder is None:
-            log.info('WARNING: Unable to fetch moderated annotation!')
+        moderated_annot = None
+        # Checks whether the even is moderation action or not.
+        if ('spam' in tags or 'ham' in tags or 'upvote' in tags or
+             'downvote' in tags or 'delete_by_author' in tags):
+            # The event is moderation action.
+            moderated_annot = get_moderated_annotation(annotation, request, session)
+            # Creates a mannord record about current moderating annotation.
+            _ = get_mannord_annotation_object(annotation.get('id'), request, session)
+            if moderated_annot is None:
+                log.info('WARNING: Unable to fetch moderated annotation!')
+                return
+        else:
+            # The event is not moderation action.
             return
+
+        # Cheks for tags and calls appropriate mannord's moderation functions.
         if 'spam' in tags:
             # The annotation was flagged as spam.
-            if annotation_moder.spam_flag_counter == 0:
+            if moderated_annot.spam_flag_counter == 0:
                 # The annotaion is being marked as a spam first time!
-                # NOTE: this is a place to trigger an email sending to author
+                # NOTE: this is a place to trigger an email sending to the author
                 pass
             # Flag the anntaiton as spam.
-            mannord.raise_spam_flag(annotation_moder, request.user, session)
+            mannord.raise_spam_flag(moderated_annot, moderating_user, session)
         elif 'ham' in tags:
             # The annotation was flagged as not spam.
-            mannord.raise_ham_flag(annotation_moder, request.user, session)
+            mannord.raise_ham_flag(moderated_annot, moderating_user, session)
         elif 'upvote' in tags:
             if annotation.deleted:
                 # Undo upvote
-                mannord.undo_upvote(annotation_moder, request.user, session)
+                mannord.undo_upvote(moderated_annot, moderating_user, session)
             else:
             # Upvote
-                mannord.upvote(annotation_moder, request.user, session)
+                mannord.upvote(moderated_annot, moderating_user, session)
         elif 'downvote' in tags:
             if annotation.deleted:
                 # Undo downvote
-                mannord.undo_downvote(annotation_moder, request.user, session)
+                mannord.undo_downvote(moderated_annot, moderating_user, session)
             else:
                 # Downvote
-                mannord.downvote(annotation_moder, request.user, session)
+                mannord.downvote(moderated_annot, moderating_user, session)
         elif 'delete_by_author' in tags:
             # Deletes the annotation, so that the author does not get repuatiton
             # damage.
-            mannord.delete_spam_item_by_author(annotation_moder, session)
+            mannord.delete_spam_item_by_author(moderated_annot, session)
     except:
         log.info(traceback.format_exc())
         log.info('Unexpected error occurred in after_moderation_action(): ' + str(event))
