@@ -2,7 +2,6 @@
 Beaker==1.6.4
 BeautifulSoup==3.2.1
 Chameleon==2.11
-Cython==0.19.1
 Flask==0.9
 Mako==0.8.0
 Paste==1.7.5.1
@@ -19,7 +18,7 @@ colander==1.0a2
 cryptacular==1.4.1
 deform==0.9.5
 deform-bootstrap==0.2.2
-https://github.com/surfly/gevent/archive/1.0rc2.tar.gz
+gevent==1.0
 gevent-websocket==0.3.6
 gunicorn==18.0
 hem==0.3.2
