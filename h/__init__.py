@@ -4,18 +4,19 @@ del get_versions
 
 
 def includeme(config):
-    # Include the base configuration for horus integration
+    # Include horus framework and prerequisites
     config.include('h.forms')
-    config.include('h.models')
     config.include('h.schemas')
-    config.commit()
-
-    # Include horus
     config.include('horus')
     config.commit()
 
-    # Include the rest of the application
+    # Include authentication, API and models
+    config.include('pyramid_multiauth')
     config.include('h.api')
+    config.include('h.models')
+    config.commit()
+
+    # Include the rest of the application
     config.include('h.assets')
     config.include('h.layouts')
     config.include('h.panels')
@@ -48,21 +49,10 @@ def bootstrap(cfname, request=None, options=None, config_fn=None):
 
 def create_app(settings):
     from pyramid.config import Configurator
-    from pyramid.authorization import ACLAuthorizationPolicy
     from pyramid.path import AssetResolver
     from pyramid.response import FileResponse
 
-    from h.auth import HybridAuthenticationPolicy
-    from h.models import groupfinder
-
-    authn_policy = HybridAuthenticationPolicy(callback=groupfinder)
-    authz_policy = ACLAuthorizationPolicy()
-
-    config = Configurator(
-        settings=settings,
-        authentication_policy=authn_policy,
-        authorization_policy=authz_policy,
-    )
+    config = Configurator(settings=settings)
 
     favicon = AssetResolver().resolve('h:favicon.ico')
     config.add_route('favicon', '/favicon.ico')
