@@ -12,12 +12,12 @@ class TestLogin(SeleniumTestCase):
         driver = self.driver
         driver.get(self.base_url + "/")
 
-        self.register()
-        self.logout()
-        self.login()
-
         # Assert logged in with the right username
         with Annotator(driver):
+            self.register()
+            self.logout()
+            self.login()
+
             picker = driver.find_element_by_class_name('user-picker')
             dropdown = picker.find_element_by_class_name('dropdown-toggle')
             # Some bugs were fixed in selenium 2.35 + FF23 combo

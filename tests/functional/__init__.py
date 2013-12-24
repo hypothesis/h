@@ -165,16 +165,15 @@ class SeleniumTestCase(unittest.TestCase):
         annotator. Ideally this should be achievable with an action chain
         """
         script = """
-            var p = $("p")[0];
+            var p = $("%s")[0];
             var range = document.createRange();
             range.selectNodeContents(p);
             var sel = window.getSelection();
             sel.removeAllRanges();
             sel.addRange(range);
             var offset = $(p).offset();
-            $(".annotator-adder").css({top: offset.top, left: offset.left});
-            window.annotator.checkForEndSelection("foobar");
-            """
+            window.annotator.plugins.TextAnchors.checkForEndSelection();
+            """ % (css_selector,)
         self.driver.execute_script(script)
 
 class Annotator():
@@ -207,3 +206,4 @@ class Annotator():
         if count == 1:
             del self.g_state[self.driver]
             self.driver.switch_to_default_content()
+            self.driver.find_element_by_tag_name('body').click()
