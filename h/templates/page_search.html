@@ -76,7 +76,7 @@
           <!-- Replies -->
           <ul>
             <li class="thread"
-                ng-class="collapsed && 'collapsed' || ''"
+                ng-class="collapsed && 'collapsedreplies' || ''"
                 ng-mousedown="toggleCollapsedDown($event)"
                 ng-click="toggleCollapsed($event)"
                 ng-repeat="thread in thread.children"
