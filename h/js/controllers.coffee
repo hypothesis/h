@@ -366,11 +366,10 @@ class App
       $scope.new_updates = 0
       $scope.$root.annotations = []
       annotator.threading.thread []
+      annotator.threading.idTable = {}
 
       Store = annotator.plugins.Store
-      annotations = Store.annotations
-      annotator.plugins.Store.annotations = []
-      annotator.deleteAnnotation a for a in annotations
+      annotations = Store.annotations.slice()
 
       # XXX: Hacky hacky stuff to ensure that any search requests in-flight
       # at this time have no effect when they resolve and that future events
@@ -383,11 +382,42 @@ class App
       Store.annotator = loadAnnotations: angular.noop
       # * Make all api requests into a noop.
       Store._apiRequest = angular.noop
+      # * Ignore pending searches
+      Store._onLoadAnnotations = angular.noop
       # * Make the update function into a noop.
       Store.updateAnnotation = angular.noop
       # * Remove the plugin and re-add it to the annotator.
       delete annotator.plugins.Store
       annotator.addPlugin 'Store', annotator.options.Store
+
+      # Even though most operations on the old Store are now noops the Annotator
+      # itself may still be setting up previously fetched annotatiosn. We may
+      # delete annotations which are later set up in the DOM again, causing
+      # issues with the viewer and heatmap. As these are loaded, we can delete
+      # them, but the threading plugin will get confused and break threading.
+      # Here, we cleanup these annotations as they are set up by the Annotator,
+      # preserving the existing threading. This is all a bit paranoid, but
+      # important when many annotations are loading as authentication is
+      # changing. It's all so ugly it makes me cry, though. Someone help
+      # restore sanity?
+      cleanup = (loaded) ->
+        $timeout ->  # Give the threading plugin time to thread this annotation
+          deleted = []
+          for l in loaded
+            if l in annotations
+              # If this annotation still exists, we'll need to thread it again
+              # since the delete will mangle the threading data structures.
+              existing = annotator.threading.idTable[l.id]?.message
+              annotator.deleteAnnotation(l)
+              deleted.push l
+              if existing
+                annotator.plugins.Threading.thread existing
+          annotations = (a for a in annotations when a not in deleted)
+          if annotations.length is 0
+            annotator.unsubscribe 'annotationsLoaded', cleanup
+        , 10
+      cleanup (a for a in annotations when a.thread)
+      annotator.subscribe 'annotationsLoaded', cleanup
 
     # Notifications
     $scope.notifications = []
