@@ -38,6 +38,7 @@ pyramid-beaker==0.7
 pyramid-deform==0.2a5
 pyramid-layout==0.6
 pyramid-mailer==0.9
+pyramid-multiauth==0.3.2
 pyramid-sockjs==0.3.9
 pyramid-tm==0.7
 -e git+https://github.com/tilgovi/pyramid_webassets.git@c7ee383d7ea3f4793f16c09291e13a5cd281893d#egg=pyramid_webassets-dev

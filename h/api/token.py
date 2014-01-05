@@ -1,6 +1,8 @@
 import urlparse
 
 from annotator import auth
+from pyramid.authentication import CallbackAuthenticationPolicy
+from pyramid.security import authenticated_userid
 from pyramid.view import view_config, view_defaults
 
 from h import interfaces, views
@@ -20,18 +22,45 @@ class TokenController(views.BaseController):
             'ttl': consumer.ttl,
         }
 
-        if request.user:
-            parts = {
+        userid = authenticated_userid(request)
+
+        if isinstance(userid, basestring):
+            message['userId'] = userid
+        elif request.user:
+            message['userId'] = "acct:%(username)s@%(provider)s" % {
                 'username': request.user.username,
                 'provider': request.server_name
             }
-            message['userId'] = 'acct:%(username)s@%(provider)s' % parts
 
         return auth.encode_token(message, consumer.secret)
 
     @classmethod
     def __json__(cls, request):
         return cls(request)()
+
+
+class AuthTokenAuthenticationPolicy(CallbackAuthenticationPolicy):
+    def callback(self, userid, request):
+        Consumer = request.registry.queryUtility(interfaces.IConsumerClass)
+        user = auth.Authenticator(Consumer.get_by_key).request_user(request)
+        if user:
+            return [user.id]
+        return None
+
+    def unauthenticated_userid(self, request):
+        token = request.headers.get('X-Annotator-Auth-Token')
+        try:
+            unsafe = auth.decode_token(token, verify=False)
+        except auth.TokenInvalid:
+            return None
+        else:
+            return unsafe.get('userId')
+
+    def remember(self, request, principal, *kw):
+        return []
+
+    def forget(self, request):
+        return []
 
 
 def includeme(config):
@@ -56,3 +85,5 @@ def includeme(config):
             TokenController,
             interfaces.ITokenClass
         )
+
+    config.set_authentication_policy(AuthTokenAuthenticationPolicy())
