@@ -67,7 +67,7 @@ class GUID(TypeDecorator):
         return UUID
 
 
-class Consumer(BaseModel, Base):
+class ConsumerMixin(BaseModel):
     """
     API Consumer
 
@@ -82,7 +82,7 @@ class Consumer(BaseModel, Base):
     ttl = Column(Integer, default=DEFAULT_TTL)
 
     def __init__(self, **kwargs):
-        super(Consumer, self).__init__()
+        super(ConsumerMixin, self).__init__()
         self.__dict__.update(kwargs)
 
     def __repr__(self):
@@ -94,6 +94,10 @@ class Consumer(BaseModel, Base):
 
 
 class Activation(ActivationMixin, Base):
+    pass
+
+
+class Consumer(ConsumerMixin, Base):
     pass
 
 
