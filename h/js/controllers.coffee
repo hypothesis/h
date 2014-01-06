@@ -516,15 +516,14 @@ class App
         unless data instanceof Array then data = [data]
         $scope.$apply =>
           if $scope.socialView.name is 'single-player'
-            for d in data
-              if d.user is user
-                $scope.addUpdateNotification()
-                $scope.new_updates += 1
-                break
+            owndata = data.filter (d) -> d.user is user
+            if action is 'create'
+              if annotator.plugins.Store?
+                annotator.plugins.Store._onLoadAnnotations owndata
           else
-            if data.length > 0
-                $scope.addUpdateNotification()
-                $scope.new_updates += 1
+            if action is 'create'
+              if annotator.plugins.Store?
+                annotator.plugins.Store._onLoadAnnotations data
 
     $timeout =>
       $scope.initUpdater()
@@ -687,12 +686,14 @@ class Annotation
 
     $scope.toggle = ->
       $element.find('.share-dialog').slideToggle()
+      return
 
     $scope.share = ($event) ->
       $event.stopPropagation()
       return if $element.find('.share-dialog').is ":visible"
       $scope.shared = not $scope.shared
       $scope.toggle()
+      return
 
     $scope.rebuildHighlightText = ->
       if annotator.text_regexp?

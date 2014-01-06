@@ -140,6 +140,10 @@ annotator_i18n = Uglify(
 
 # Angular
 angular = Uglify('lib/angular.js', output='lib/angular.min.js')
+angular_animate = Uglify(
+    'lib/angular-animate.js',
+    output='lib/angular-animate.min.js'
+)
 angular_bootstrap = Uglify(
     'lib/angular-bootstrap.js',
     output='lib/angular-bootstrap.min.js'
@@ -224,6 +228,7 @@ app = Bundle(
     jquery,
     jquery_mousewheel,
     angular,
+    angular_animate,
     angular_bootstrap,
     angular_resource,
     angular_route,
