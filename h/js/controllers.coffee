@@ -519,27 +519,21 @@ class App
 
         if $scope.socialView.name is 'single-player'
           owndata = data.filter (d) -> d.user is user
-          switch action
-            when 'create'
-              $scope.$apply =>
-                if annotator.plugins.Store?
-                  annotator.plugins.Store._onLoadAnnotations owndata
-            when 'update'
-              if annotator.plugins.Store?
-                annotator.plugins.Store._onLoadAnnotations owndata
-            when 'delete'
-              console.log 'deleted'
+          $scope.applyUpdates action, owndata
         else
-          switch action
-            when 'create'
-              $scope.$apply =>
-                if annotator.plugins.Store?
-                  annotator.plugins.Store._onLoadAnnotations data
-            when 'update'
-              if annotator.plugins.Store?
-                annotator.plugins.Store._onLoadAnnotations data
-            when 'delete'
-              console.log 'deleted'
+          $scope.applyUpdates action, data
+
+    $scope.applyUpdates = (action, data) =>
+      switch action
+        when 'create'
+          $scope.$apply =>
+            if annotator.plugins.Store?
+              annotator.plugins.Store._onLoadAnnotations data
+        when 'update'
+          if annotator.plugins.Store?
+            annotator.plugins.Store._onLoadAnnotations data
+        when 'delete'
+          console.log 'deleted'
 
     $timeout =>
       $scope.initUpdater()
