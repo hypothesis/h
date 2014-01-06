@@ -4,7 +4,7 @@
       <li ng-mouseenter="focus(annotation)"
           ng-mouseleave="focus()"
           ng-repeat="annotation in annotations track by annotation.id"
-          class="stream-list"
+          class="stream-list vl-animate"
           ng-class="annotation.$emphasis && 'card-emphasis'"
       >
 
@@ -39,7 +39,7 @@
 
           <!-- Replies -->
           <ul>
-            <li class="thread"
+            <li class="thread vl-animate"
                 ng-class="collapsed && 'collapsedreplies' || ''"
                 ng-click="toggleCollapsed($event)"
                 ng-repeat="annotation in annotation.reply_list"

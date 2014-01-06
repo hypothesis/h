@@ -107,6 +107,11 @@ angular:
   output: lib/angular.min.js
   contents:
     - h:lib/angular.js
+angular_animate:
+  filters: uglifyjs
+  output: lib/angular-animate.min.js
+  contents:
+    - h:lib/angular-animate.js
 angular_bootstrap:
   filters: uglifyjs
   output: lib/angular-bootstrap.min.js
@@ -240,6 +245,7 @@ app:
     - jquery
     - jquery_mousewheel
     - angular
+    - angular_animate
     - angular_bootstrap
     - angular_resource
     - angular_route
