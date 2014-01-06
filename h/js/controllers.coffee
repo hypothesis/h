@@ -424,15 +424,25 @@ class App
         user = if p? then "acct:" + p.username + "@" + p.provider else ''
         unless data instanceof Array then data = [data]
         $scope.$apply =>
-          if $scope.socialView.name is 'single-player'
-            owndata = data.filter (d) -> d.user is user
-            if action is 'create'
-              if annotator.plugins.Store?
-                annotator.plugins.Store._onLoadAnnotations owndata
-          else
-            if action is 'create'
-              if annotator.plugins.Store?
-                annotator.plugins.Store._onLoadAnnotations data
+          if data.length > 0 then $scope.new_updates += 1
+
+        if $scope.socialView.name is 'single-player'
+          owndata = data.filter (d) -> d.user is user
+          $scope.applyUpdates action, owndata
+        else
+          $scope.applyUpdates action, data
+
+    $scope.applyUpdates = (action, data) =>
+      switch action
+        when 'create'
+          $scope.$apply =>
+            if annotator.plugins.Store?
+              annotator.plugins.Store._onLoadAnnotations data
+        when 'update'
+          if annotator.plugins.Store?
+            annotator.plugins.Store._onLoadAnnotations data
+        when 'delete'
+          console.log 'deleted'
 
     $timeout =>
       $scope.initUpdater()
