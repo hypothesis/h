@@ -3,8 +3,6 @@ try:
 except ImportError:
     import json
 
-from horus import resources
-
 from pyramid.decorator import reify
 from pyramid.interfaces import ILocation
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
@@ -19,11 +17,14 @@ log = logging.getLogger(__name__)
 
 
 @implementer(ILocation)
-class BaseResource(resources.BaseFactory):
+class BaseResource(object):
     """Base Resource class from which all resources are derived"""
 
     __name__ = None
     __parent__ = None
+
+    def __init__(self, request):
+        self.request = request
 
 
 class InnerResource(BaseResource):
@@ -53,26 +54,40 @@ class InnerResource(BaseResource):
         factory_or_resource = getattr(self, name, None)
 
         if factory_or_resource:
-            if ILocation.implementedBy(factory_or_resource):
-                inst = factory_or_resource(self.request)
-                inst.__name__ = name
-                inst.__parent__ = self
-                setattr(self, name, inst)
-                return inst
+            try:
+                if ILocation.implementedBy(factory_or_resource):
+                    inst = factory_or_resource(self.request)
+                    inst.__name__ = name
+                    inst.__parent__ = self
+                    return inst
+            except TypeError:
+                pass
 
-            if ILocation.providedBy(factory_or_resource):
-                return factory_or_resource
+            try:
+                if ILocation.providedBy(factory_or_resource):
+                    return factory_or_resource
+            except TypeError:
+                pass
 
         raise KeyError(name)
 
 
-class RootFactory(InnerResource, resources.RootFactory):
-    pass
+class RootFactory(InnerResource):
+    @property
+    def __acl__(self):
+        defaultlist = [
+            (Allow, 'group:admin', ALL_PERMISSIONS),
+            (Allow, Authenticated, 'view'),
+            (Allow, security.Authorizations, 'account'),
+        ]
+        return defaultlist
 
-
-class AppFactory(BaseResource):
     def __init__(self, request):
-        super(AppFactory, self).__init__(request)
+        super(RootFactory, self).__init__(request)
+
+    @property
+    def app(self):
+        return self
 
     @property
     def embed(self):
@@ -90,7 +105,7 @@ class AppFactory(BaseResource):
                     'container': '.annotator-frame',
                 },
             })
-        env['app'] = json.dumps(self.request.resource_url(self))
+        env['app'] = json.dumps(self.request.resource_url(self, 'app'))
         env['options'] = json.dumps(options)
         env['role'] = json.dumps(self.request.GET.get('role', 'host'))
         return env
@@ -258,8 +273,7 @@ class TagStreamFactory(BaseResource):
 
 def includeme(config):
     config.set_root_factory(RootFactory)
-    config.add_route('index', '/', static=True)
-    RootFactory.app = AppFactory
+    config.add_route('index', '/')
     RootFactory.a = AnnotationFactory
     RootFactory.stream = StreamSearch
     RootFactory.u = UserStreamFactory

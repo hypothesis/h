@@ -17,7 +17,6 @@ from horus.views import (
 
 from pyramid import httpexceptions
 from pyramid.httpexceptions import HTTPFound
-from pyramid.traversal import find_resource
 from pyramid.view import view_config, view_defaults
 
 from h import interfaces
@@ -38,12 +37,12 @@ class BaseController(horus.views.BaseController):
 
 
 @view_config(
-    context='h.resources.RootFactory',
     layout='site',
     renderer='templates/home.pt',
+    route_name='index',
 )
 def home(request):
-    return find_resource(request.context, '/app').embed
+    return request.context.embed
 
 
 @view_config(route_name='help', layout='site', renderer='templates/help.pt')
@@ -95,9 +94,9 @@ class AnnotationController(BaseController):
 
 @view_defaults(
     accept='application/json',
-    context='h.resources.AppFactory',
-    layout='app',
-    renderer='json'
+    context='h.resources.RootFactory',
+    layout='site',
+    renderer='json',
 )
 class AppController(BaseController):
     def __init__(self, request):
