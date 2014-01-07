@@ -55,6 +55,10 @@ html {
   @include respond-to(tablets) {
     @include yui_grid('t-');
   }
+
+  @include respond-to(desktops) {
+    @include yui_grid('d-');
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {

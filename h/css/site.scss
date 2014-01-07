@@ -18,7 +18,7 @@ header {
     text-align: center;
   }
 
-  @include respond-to(wide-handhelds tablets) {
+  @include respond-to(wide-handhelds tablets desktops) {
     @include pie-clearfix;
     text-align: left;
     img { float: left; }
@@ -65,10 +65,10 @@ ol {
 .content {
   padding: 2.5em 1em;
 
-  @include respond-to(tablets) {
+  @include respond-to(tablets desktops) {
     padding: 2.5em 4em 4em 4em;
     margin: auto;
-    max-width: $break-large;
+    max-width: $break-medium;
   }
 }
 
@@ -76,20 +76,20 @@ ol {
   position: fixed;
   .inner {
     margin: 0 auto;
-    max-width: $break-large;
+    max-width: $break-medium;
     padding-left: 3.6em;
     padding-right: 3.6em;
-    @include respond-to(tablets) {
+    @include respond-to(tablets desktops) {
       padding-left: 3.6em;
       padding-right: 3.6em;
       margin: 0 auto;
-      max-width: $break-large;
+      max-width: $break-medium;
     }
     @include respond-to(wide-handhelds handhelds) {
       padding-left: 0.9em;
       padding-right: 0.9em;
       margin: 0 auto;
-      max-width: $break-large;
+      max-width: $break-medium;
     }
   }
 }
