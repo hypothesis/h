@@ -12,8 +12,12 @@ imports = [
 
 
 configure = [
-  '$routeProvider', '$sceDelegateProvider',
-  ($routeProvider,   $sceDelegateProvider) ->
+  '$locationProvider', '$routeProvider', '$sceDelegateProvider',
+  (
+   $locationProvider,   $routeProvider,   $sceDelegateProvider,
+  ) ->
+    $locationProvider.html5Mode(true)
+
     $routeProvider.when '/editor',
       controller: 'EditorController'
       templateUrl: 'editor.html'
