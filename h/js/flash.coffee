@@ -51,7 +51,7 @@ class FlashProvider
 
 
 flashInterceptor = ['$q', 'flash', ($q, flash) ->
-  response: (response) ->
+  _intercept = (response) ->
     data = response.data
     format = response.headers 'content-type'
     if format?.match /^application\/json/
@@ -70,11 +70,15 @@ flashInterceptor = ['$q', 'flash', ($q, flash) ->
       if data.status is 'failure'
         flash 'error', data.reason unless ignoreStatus
         $q.reject(data.reason)
-      else if data.status is 'okay'
+      else if data.status is 'okay' and data.model
         response.data = data.model
+        response
+      else
         response
     else
       response
+  response: _intercept
+  responseError: _intercept
 ]
 
 
