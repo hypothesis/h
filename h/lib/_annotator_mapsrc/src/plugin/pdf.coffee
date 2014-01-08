@@ -58,10 +58,9 @@ class window.PDFTextMapper extends window.PageTextMapperCore
         # Must be a cross-page selection.
         if data.start? and data.end?
           startPage = @getPageForNode data.start
+          @_updateMap @pageInfo[startPage.index]
           endPage = @getPageForNode data.end
-          for index in [ startPage.index .. endPage.index ]
-            #console.log "Should rescan page #" + index
-            @_updateMap @pageInfo[index]
+          @_updateMap @pageInfo[endPage.index]
 
     $(PDFView.container).on 'scroll', => @_onScroll()
 
