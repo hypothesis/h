@@ -440,7 +440,12 @@ class App
           if annotator.plugins.Store?
             annotator.plugins.Store._onLoadAnnotations data
         when 'delete'
-          console.log 'deleted'
+          for annotation in data
+            #ToDo: only do this to existing annotations
+            container = annotator.threading.getContainer annotation.id
+            if container.message
+              container.message._clientdeleteonly = true
+              annotator.deleteAnnotation container.message
 
     $timeout =>
       $scope.initUpdater()
