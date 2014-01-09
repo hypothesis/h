@@ -363,12 +363,17 @@ username = ['$filter', '$window', ($filter, $window) ->
   template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
 ]
 
-fuzzytime = ['$filter', '$window', ($filter, $window) ->
+fuzzytime = ['$document','$filter', '$window', ($document, $filter, $window) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
     ctrl.$render = ->
       scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
+
+      # Generate permalink
+      baseUrl = $document[0].baseURI
+      prefix = baseUrl.replace /\/\w+\/$/, ''
+      scope.permalink = prefix + '/a/' + scope.model.$viewValue.id
 
     timefunct = ->
       $window.setInterval =>
@@ -383,7 +388,7 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
 
   require: '?ngModel'
   restrict: 'E'
-  template: '<span class="small">{{ftime | date:mediumDate}}</span>'
+  template: '<span class="small"><a target="_blank" href="{{permalink}}">{{ftime | date:mediumDate}}</a></span>'
 ]
 
 streamviewer = [ ->
