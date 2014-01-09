@@ -89,7 +89,7 @@ class Hypothesis extends Annotator
     # between the host page and the panel widget.
     whitelist = [
       'diffHTML', 'inject', 'quote', 'ranges', 'target', 'id', 'references',
-      'uri', 'diffCaseOnly'
+      'uri', 'diffCaseOnly', '_updatedAnnotation'
     ]
     this.addPlugin 'Bridge',
       gateway: true
