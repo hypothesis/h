@@ -40,7 +40,10 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     # keys of the remote object into the local copy
     merge: (local, remote) ->
       for k, v of remote
-        local[k] = v
+        if k is "target" and local[k] and local[k].length > v.length
+#          console.log "Ignoring update which would make me loose a target."
+        else
+          local[k] = v
       local
 
   # Cache of annotations which have crossed the bridge for fast, encapsulated
@@ -109,6 +112,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       options.origin = '*'
 
     console.log "Bridge plugin connecting to #{options.origin}"
+#    options.debugOutput = true
     channel = Channel.build(options)
 
     ## Remote method call bindings
