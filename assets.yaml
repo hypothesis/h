@@ -200,6 +200,25 @@ jwz:
   output: lib/jwz.min.js
   contents:
     - h:lib/jwz.js
+momentjs:
+  contents:
+    - filters: uglifyjs
+      output: lib/moment.min.js
+      contents:
+      - h:lib/moment-with-langs.js
+    - filters: uglifyjs
+      output: lib/jstz.min.js
+      contents:
+      - h:lib/jstz.js
+    - filters: uglifyjs
+      output: lib/moment-timezone.min.js
+      contents:
+      - h:lib/moment-timezone.js
+    - filters: uglifyjs
+      output: lib/moment-timezone-data.min.js
+      contents:
+      - h:lib/moment-timezone-data.js
+
 pagedown:
   filters: uglifyjs
   output: lib/Markdown.Converter.min.js
@@ -262,6 +281,7 @@ app:
     - annotator_threading
     - jschannel
     - jwz
+    - momentjs
     - pagedown
     - raf
     - sockjs
