@@ -216,6 +216,13 @@ visualsearch = Bundle(
     CSS('h:lib/visualsearch.css', output='lib/visualsearch.min.css'),
 )
 
+momentjs = Bundle(
+    Uglify('lib/moment-with-langs.js', output='lib/moment.min.js'),
+    Uglify('lib/jstz.js', output='lib/jstz.min.js'),
+    Uglify('lib/moment-timezone.js', output='lib/moment-timezone.min.js'),
+    Uglify('lib/moment-timezone-data.js', output='lib/moment-timezone-data.min.js')
+)
+
 uuid = Uglify('lib/uuid.js', output='lib/uuid.min.js')
 
 # SCSS
@@ -250,6 +257,7 @@ app = Bundle(
     sockjs,
     jquery_ui,
     jquery_ui_effects,
+    momentjs,
     tagit,
     visualsearch,
     uuid,
