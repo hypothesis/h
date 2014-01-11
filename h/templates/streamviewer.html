@@ -49,7 +49,7 @@
             <div class="small">
               <div class="annotation detail">
                 <div class="magicontrols pull-right">
-                  <span class="small">{{annotation.updated | fuzzyTime}}</span>
+                  <fuzzytime ng-model="annotation.updated" annotationid="{{annotation.id}}"></fuzzytime>
                   <a class="launch-icon show" ng-href="{{annotation._share_link}}" target="_blank"></a>
                 </div>
                 <strong>
