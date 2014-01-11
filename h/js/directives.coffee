@@ -370,6 +370,22 @@ fuzzytime = ['$document','$filter', '$window', ($document, $filter, $window) ->
     ctrl.$render = ->
       scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
 
+      # Determining the timezone name
+      timezone = jstz.determine().name()
+      # The browser language
+      userLang = navigator.language || navigator.userLanguage
+
+      # Now to make a localized hint date, set the language
+      momentDate = moment ctrl.$viewValue
+      momentDate.lang(userLang)
+
+      # Try to localize to the browser's timezone
+      try
+        scope.hint = momentDate.tz(timezone).format('LLLL')
+      catch error
+        # For invalid timezone, use the default
+        scope.hint = momentDate.format('LLLL')
+
       # Generate permalink
       id = if attr.annotationid? then attr.annotationid  else scope.model.$viewValue.id
       baseUrl = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port
@@ -390,7 +406,7 @@ fuzzytime = ['$document','$filter', '$window', ($document, $filter, $window) ->
   require: '?ngModel'
   restrict: 'E'
   scope: true
-  template: '<span class="small"><a target="_blank" href="{{permalink}}">{{ftime | date:mediumDate}}</a></span>'
+  template: '<span class="small"><a target="_blank" href="{{permalink}}" title="{{hint}}">{{ftime | date:mediumDate}}</a></span>'
 ]
 
 streamviewer = [ ->
