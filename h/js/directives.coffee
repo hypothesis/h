@@ -367,9 +367,10 @@ fuzzytime = ['$document','$filter', '$window', ($document, $filter, $window) ->
       scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
 
       # Generate permalink
-      baseUrl = $document[0].baseURI
+      id = if attr.annotationid? then attr.annotationid  else scope.model.$viewValue.id
+      baseUrl = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port
       prefix = baseUrl.replace /\/\w+\/$/, ''
-      scope.permalink = prefix + '/a/' + scope.model.$viewValue.id
+      scope.permalink = prefix + '/a/' + id
 
     timefunct = ->
       $window.setInterval =>
@@ -384,6 +385,7 @@ fuzzytime = ['$document','$filter', '$window', ($document, $filter, $window) ->
 
   require: '?ngModel'
   restrict: 'E'
+  scope: true
   template: '<span class="small"><a target="_blank" href="{{permalink}}">{{ftime | date:mediumDate}}</a></span>'
 ]
 
