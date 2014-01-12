@@ -18,12 +18,12 @@ Hypothes.is into their own Python applications.
 Search for annotations annotations
 
 Examples:
-```
+
 https://api.hypothes.is/search?limit=1000&uri=http%3A%2F%2Fepubjs-reader.appspot.com%2F%2Fmoby-dick%2FOPS%2Fchapter_003.xhtml&user=acct:gluejar@hypothes.is
 https://api.hypothes.is/search?limit=1000&user=acct:gluejar@hypothes.is
 https://api.hypothes.is/search?limit=1000&quote=limber
 https://api.hypothes.is/search?limit=1000&text=consider
-```
+
 
 params:
 * limit - number of results to return
@@ -39,9 +39,8 @@ https://api.hypothes.is/annotations/<annotation id>
 method: GET
 get an annotation    
 Examples:
-```
 https://api.hypothes.is/annotations/utalbWjUQZK5ifydnohjmA
-```
+
 method: POST
 create a new annotation (needs authentication)
 params: 
