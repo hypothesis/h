@@ -11,17 +11,20 @@ Hypothes.is into their own Python applications.
    api/resources
 
 
-##API Endpoints:
+## API Endpoints:
 
-###/search
+### /search
 
 Search for annotations annotations
 
 Examples:
 
 https://api.hypothes.is/search?limit=1000&uri=http%3A%2F%2Fepubjs-reader.appspot.com%2F%2Fmoby-dick%2FOPS%2Fchapter_003.xhtml&user=acct:gluejar@hypothes.is
+
 https://api.hypothes.is/search?limit=1000&user=acct:gluejar@hypothes.is
+
 https://api.hypothes.is/search?limit=1000&quote=limber
+
 https://api.hypothes.is/search?limit=1000&text=consider
 
 
@@ -32,33 +35,41 @@ params:
 quote - words that the annotation is quoting. This is very brittle - text is not completely indexed, is punctuation sensitive and appears to index single words only. change your search word to lower case.
 * text - search annotation text. This is very brittle - text is not completely indexed, is punctuation sensitive and appears to index single words only. change your search word to lower case.
 
-###/annotations
+### /annotations
 
 https://api.hypothes.is/annotations/<annotation id>
 
 method: GET
-get an annotation    
+
+get an annotation
+    
 Examples:
+
 https://api.hypothes.is/annotations/utalbWjUQZK5ifydnohjmA
 
 method: POST
+
 create a new annotation (needs authentication)
+
 params: 
+
 refresh - a boolean that forces a refresh
 
 method: PUT
+
 update an existing annotation (needs authentication)
+
 params: 
-refresh - a boolean that forces a refresh
+* refresh - a boolean that forces a refresh
 
 method: PUT
 delete an existing annotation (needs authentication)
 
 
-###/search_raw
+### /search_raw
 Advanced search API - direct access to ElasticSearch. Uses the same API as the ElasticSearch query endpoint.
 
 
-##Missing in API??
-- search for users by email
-- search for annotations by tags
+## Missing in API??
+* search for users by email
+* search for annotations by tags
