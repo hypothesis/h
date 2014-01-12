@@ -5,10 +5,6 @@ Reference material for the public APIs exposed is available in this section. It
 It is targeted at developers interested in integrating functionality from
 Hypothes.is into their own Python applications.
 
-.. toctree::
-   :maxdepth: 1
-
-   api/resources
 
 
 ## API Endpoints:
@@ -73,3 +69,8 @@ Advanced search API - direct access to ElasticSearch. Uses the same API as the E
 ## Missing in API??
 * search for users by email
 * search for annotations by tags
+
+.. toctree::
+   :maxdepth: 1
+
+   api/resources
