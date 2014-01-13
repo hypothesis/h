@@ -379,6 +379,15 @@ fuzzytime = ['$document','$filter', '$window', ($document, $filter, $window) ->
         # For invalid timezone, use the default
         scope.hint = momentDate.format('LLLL')
 
+      toolparams =
+        tooltipClass: 'small'
+        position:
+          collision: 'none'
+          at: "left center"
+
+
+      elem.tooltip(toolparams)
+
       # Generate permalink
       id = if attr.annotationid? then attr.annotationid  else scope.model.$viewValue.id
       baseUrl = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port
