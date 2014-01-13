@@ -360,6 +360,16 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
+    elem
+    .find('a')
+    .bind 'click', (event) ->
+      event.stopPropagation()
+    .tooltip
+      tooltipClass: 'small'
+      position:
+        collision: 'fit'
+        at: "left center"
+
     ctrl.$render = ->
       scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
 
@@ -378,6 +388,15 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
       catch error
         # For invalid timezone, use the default
         scope.hint = momentDate.format('LLLL')
+
+      toolparams =
+        tooltipClass: 'small'
+        position:
+          collision: 'none'
+          at: "left center"
+
+
+      elem.tooltip(toolparams)
 
     timefunct = ->
       $window.setInterval =>
