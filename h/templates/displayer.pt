@@ -40,7 +40,7 @@
                  ng-show="root.quote.length">
               <blockquote ng-show="root.quoteSource == 'document'">{{root.quote}}</blockquote>
               <blockquote ng-hide="root.quoteSource == 'document'">
-                <markdown ng-model="$parent.root.quote"
+                <markdown ng-model="root.quote"
                           ng-readonly="true"
                           name="quote" />
 	      </blockquote>
@@ -66,7 +66,7 @@
 
                   <div class="body">
                     <span ng-show="annotation.deleted">Reason:</span>
-                    <markdown ng-model="$parent.annotation.text"
+                    <markdown ng-model="annotation.text"
                               ng-readonly="true"
                               name="text" />
 
@@ -105,7 +105,7 @@
 
                     <div class="body">
                       <span ng-show="reply.deleted">Reason:</span>
-                      <markdown ng-model="$parent.reply.text"
+                      <markdown ng-model="reply.text"
                                 ng-readonly="true"
                                 name="text" />
                     </div>

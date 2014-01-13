@@ -66,13 +66,13 @@
 
   <!-- Body -->
   <div ng-show="mode=='search' && !editing">
-    <markdown ng-model="$parent.model.$modelValue.highlightText"
+    <markdown ng-model="model.$modelValue.highlightText"
               ng-readonly="!$parent.editing"
               class="body"
               name="text" />
   </div>
   <div ng-hide="mode=='search' && !editing">
-    <markdown ng-model="$parent.model.$modelValue.text"
+    <markdown ng-model="model.$modelValue.text"
               ng-readonly="!$parent.editing"
               class="body"
               name="text" />
