@@ -61,13 +61,13 @@ params:
 method: PUT
 delete an existing annotation (needs authentication)
 
-===========
-/search_raw
-===========
+
+**/search_raw**
+
 Advanced search API - direct access to ElasticSearch. Uses the same API as the ElasticSearch query endpoint.
 
 
-## Missing in API??
+Missing in API??
 * search for users by email
 * search for annotations by tags
 
