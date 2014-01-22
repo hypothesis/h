@@ -5,11 +5,11 @@ Reference material for the public APIs exposed is available in this section. It
 It is targeted at developers interested in integrating functionality from
 Hypothes.is into their own Python applications.
 
+===============
+API Endpoints:
+===============
 
-
-## API Endpoints:
-
-### /search
+**/search**
 
 Search for annotations annotations
 
@@ -31,7 +31,7 @@ params:
 quote - words that the annotation is quoting. This is very brittle - text is not completely indexed, is punctuation sensitive and appears to index single words only. change your search word to lower case.
 * text - search annotation text. This is very brittle - text is not completely indexed, is punctuation sensitive and appears to index single words only. change your search word to lower case.
 
-### /annotations
+**/annotations**
 
 https://api.hypothes.is/annotations/<annotation id>
 
@@ -61,8 +61,9 @@ params:
 method: PUT
 delete an existing annotation (needs authentication)
 
-
-### /search_raw
+===========
+/search_raw
+===========
 Advanced search API - direct access to ElasticSearch. Uses the same API as the ElasticSearch query endpoint.
 
 
