@@ -1,0 +1,6 @@
+<html lang="en">
+    <body>
+        A new annotation has been created:
+        ${text}
+    </body>
+</html>
