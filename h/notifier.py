@@ -5,6 +5,8 @@ from pyramid_mailer.interfaces import IMailer
 from pyramid_mailer.message import Message
 from pyramid_mailer.testing import DummyMailer
 
+from pyramid.renderers import render
+
 from pyramid.events import subscriber
 from h import events
 
@@ -13,14 +15,20 @@ log = logging.getLogger(__name__)
 
 
 class AnnotationDummyMailer(DummyMailer):
+    @property
+    def template(self):
+        return 'h:templates/emails/reply_notification.pt'
+
     def __init__(self):
         super(AnnotationDummyMailer, self).__init__()
 
-    def send_annotation(self, annotation, recipients):
+    def send_annotation(self, request, annotation, recipients):
+        body = render(self.template, {"text": annotation['text']}, request)
+
         message = Message(subject="Re",
                           sender="admin@hypothes.is",
                           recipients=recipients,
-                          body=annotation['text'])
+                          body=body)
         self.send(message)
         log.info('sent: %s' % message.to_message().as_string())
 
@@ -39,7 +47,7 @@ def send_notifications(event):
         mailer = registry.queryUtility(IMailer)
         log.info('------- Mailer -------')
         log.info(mailer)
-        mailer.send_annotation(annotation, ['test@test'])
+        mailer.send_annotation(request, annotation, ['test@test'])
 
     except:
         log.info(traceback.format_exc())
