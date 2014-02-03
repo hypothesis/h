@@ -33,15 +33,26 @@ class AnnotationNotifier(object):
     def send_notification_to_owner(self, annotation, action):
         # Get the e-mail of the owner
         parent = self.store.read(annotation['references'][-1])
+
+        # Do not notify me about my own message
+        if annotation['user'] == parent['user']: return
+
         username = re.search("^acct:([^@]+)", parent['user']).group(1)
         userobj = models.User.get_by_username(self.request, username)
         recipients = [userobj.email]
         self._send_annotation(annotation, recipients)
 
     def _send_annotation(self, annotation, recipients):
-        body = render(self.template, {"text": annotation['text']}, self.request)
+        template_map = {
+            'text': annotation['text'],
+            'replier': re.search("^acct:([^@]+)", annotation['user']).group(1),
+            'reply_link': self.request.application_url + '/a/' + annotation['id'],
+            'annotation_link': self.request.application_url + '/a/' + annotation['references'][-1]
+        }
 
-        message = Message(subject="Re",
+        body = render(self.template, template_map, self.request)
+
+        message = Message(subject="Reply for your annotation [" + annotation['id'] + ']',
                           sender="noreply@hypothes.is",
                           recipients=recipients,
                           body=body)
@@ -76,5 +87,6 @@ def send_notifications(event):
 
 def includeme(config):
     config.scan(__name__)
-    mailer = AnnotationDummyMailer()
-    config.registry.registerUtility(mailer, IMailer)
+
+    #mailer = AnnotationDummyMailer()
+    #config.registry.registerUtility(mailer, IMailer)
