@@ -1,6 +1,10 @@
 <html lang="en">
     <body>
-        A new annotation has been created:
+        <strong>${replier}</strong> has replied:
         ${text}
-    </body>
+
+        ----------------------------------
+        <a href="${reply_link}">View this reply</a>
+        <a href="${annotation_link}">View your annotation</a>
+   </body>
 </html>
