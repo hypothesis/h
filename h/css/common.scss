@@ -435,6 +435,10 @@ blockquote {
   @include fonticon("\35", left);
 }
 
+.plus-icon {
+  @include fonticon("\e012", left);  
+}
+
 .x-icon {
   @include fonticon("\36", left);
 }

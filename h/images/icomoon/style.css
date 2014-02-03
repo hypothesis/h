@@ -2,8 +2,8 @@
 	font-family: 'h';
 	src:url('fonts/h.eot');
 	src:url('fonts/h.eot?#iefix') format('embedded-opentype'),
-		url('fonts/h.ttf') format('truetype'),
 		url('fonts/h.woff') format('woff'),
+		url('fonts/h.ttf') format('truetype'),
 		url('fonts/h.svg#h') format('svg');
 	font-weight: normal;
 	font-style: normal;
@@ -209,12 +209,39 @@
 .icon-uniF000:before {
 	content: "\f000";
 }
-.icon-comment:before {
+.icon-comment3:before {
 	content: "\e600";
 }
-.icon-highlighter:before {
+.icon-highlighter2:before {
 	content: "\e601";
 }
 .icon-visible:before {
 	content: "\e602";
+}
+.icon-icon-comment:before {
+	content: "\e60b";
+}
+.icon-users:before {
+	content: "\e603";
+}
+.icon-user:before {
+	content: "\e604";
+}
+.icon-bullhorn:before {
+	content: "\e605";
+}
+.icon-bubbles:before {
+	content: "\e606";
+}
+.icon-bubbles2:before {
+	content: "\e607";
+}
+.icon-bell:before {
+	content: "\e608";
+}
+.icon-earth:before {
+	content: "\e609";
+}
+.icon-link:before {
+	content: "\e60a";
 }
