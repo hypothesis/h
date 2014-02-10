@@ -172,6 +172,7 @@ class UserQueries(BaseModel, Base):
                 onupdate='CASCADE',
                 ondelete='CASCADE'
             ),
+            nullable=True
         )
 
     @declared_attr
