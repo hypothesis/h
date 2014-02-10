@@ -11,6 +11,7 @@ from pyramid.renderers import render
 from pyramid.events import subscriber
 from h import events, models
 from h.interfaces import IStoreClass
+from h.streamer import FilterHandler
 
 import logging
 log = logging.getLogger(__name__)
@@ -98,13 +99,20 @@ def send_notifications(event):
     try:
         action = event.action
         annotation = event.annotation
-
-        if not filter_notifications(annotation, action):
-            return
-
         request = event.request
         notifier = AnnotationNotifier(request)
-        notifier.send_notification_to_owner(annotation, action)
+
+        userSet = set()
+        queries = models.UserQueries.get_all(request).all()
+        for query in queries:
+            # We've sent a notification about this annotation to this user already
+            if query.type != 'general' and query.user_id in userSet:
+                continue
+
+            if FilterHandler(query.query).match(annotation, action):
+                userSet.add(query.user_id)
+                # Send it to the template renderer, using the stored template type
+                #notifier.send_notification_to_owner(annotation, action)
     except:
         log.info(traceback.format_exc())
         log.info('Unexpected error occurred in send_notifications(): ' + str(event))
