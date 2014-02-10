@@ -17,15 +17,45 @@ import transaction
 from pyramid_basemodel import Base, Session
 
 from pyramid.i18n import TranslationStringFactory
+
 _ = TranslationStringFactory(__package__)
 
 from sqlalchemy import func, or_
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
-from sqlalchemy.types import Integer, TypeDecorator, CHAR
+from sqlalchemy.types import Integer, TypeDecorator, CHAR, VARCHAR
+from sqlalchemy.ext.declarative import declared_attr
+import sqlalchemy as sa
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 from h import interfaces, lib
 
+
+class JSONEncodedDict(TypeDecorator):
+    """Represents an immutable structure as a json-encoded string.
+
+    Usage::
+
+        JSONEncodedDict(255)
+
+    """
+
+    impl = VARCHAR
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            value = json.dumps(value)
+
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            value = json.loads(value)
+        return value
 
 class GUID(TypeDecorator):
     """Platform-independent GUID type.
@@ -128,6 +158,38 @@ class User(UserMixin, Base):
 
 class UserGroup(UserGroupMixin, Base):
     pass
+
+
+class UserQueries(BaseModel, Base):
+    @declared_attr
+    def user_id(self):
+        return sa.Column(
+            sa.Integer,
+            sa.ForeignKey('%s.%s' % (
+                UserMixin.__tablename__,
+                self._idAttribute
+            ),
+                onupdate='CASCADE',
+                ondelete='CASCADE'
+            ),
+        )
+
+    @declared_attr
+    def query(self):
+        return sa.Column(JSONEncodedDict(4096), nullable=False)
+
+    @declared_attr
+    def template(self):
+        return sa.Column(sa.Enum('reply_notification', 'custom_search'), nullable=False, default='custom_search')
+
+    @declared_attr
+    def type(self):
+        return sa.Column(sa.Enum('general', 'user_specific'), nullable=False, default='user_specific')
+
+    @classmethod
+    def get_user_queries(cls, request, userid):
+        session = get_session(request)
+        return session.query(cls).filter(cls.user_id == userid).all()
 
 
 def groupfinder(userid, request):
