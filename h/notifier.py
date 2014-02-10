@@ -42,6 +42,14 @@ class AnnotationNotifier(object):
 
         username = re.search("^acct:([^@]+)", parent['user']).group(1)
         userobj = models.User.get_by_username(self.request, username)
+        if not userobj:
+            log.warn("Warning! User not found! " + str(username))
+            session = models.get_session(self.request)
+            users = session.query(models.User).all()
+            log.info('------------------------------------')
+            log.info(users)
+            log.info('------------------------------------')
+            return
         recipients = [userobj.email]
         template_map = self._create_template_map(annotation, parent)
         self._send_annotation(template_map, parent['id'], recipients)
