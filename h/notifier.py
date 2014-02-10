@@ -38,6 +38,7 @@ class AnnotationNotifier(object):
             grandparent = self.store.read(parent['references'][-1])
             parent['quote'] = grandparent['text']
         # Do not notify me about my own message
+        if not parent['user']: return
         if annotation['user'] == parent['user']: return
 
         username = re.search("^acct:([^@]+)", parent['user']).group(1)
