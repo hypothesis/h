@@ -43,7 +43,7 @@ class SeleniumTestCase(unittest.TestCase):
         self.base_url = "http://localhost:4000"
         env = os.environ
 
-        if env.has_key('SAUCE_USERNAME') and env.has_key('SAUCE_ACCESS_KEY'):
+        if 'SAUCE_USERNAME' in env and 'SAUCE_ACCESS_KEY' in env:
             username = env['SAUCE_USERNAME']
             key = env['SAUCE_ACCESS_KEY']
             caps = webdriver.DesiredCapabilities.FIREFOX
