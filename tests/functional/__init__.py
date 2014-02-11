@@ -16,11 +16,7 @@ API.
 """
 
 import os
-import json
-import time
 import unittest
-
-import pyes
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -31,10 +27,10 @@ from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 
 from h.models import Base, User
-from annotator.annotation import Annotation
-from annotator.document import Document
+
 
 settings = appconfig('config:test.ini', relative_to='.')
+
 
 class SeleniumTestCase(unittest.TestCase):
 
@@ -181,6 +177,7 @@ class SeleniumTestCase(unittest.TestCase):
             window.annotator.plugins.TextAnchors.checkForEndSelection();
             """ % (css_selector,)
         self.driver.execute_script(script)
+
 
 class Annotator():
     """
