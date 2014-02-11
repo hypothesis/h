@@ -24,7 +24,9 @@
       <div class="content yui3-g">
         <h3 class="stream"
             ng-show="!empty && !annotations.length">
-            <img class="loading-icon" src="${webassets(request, 'images/loader.gif')[0]}" />
+            <div class="loading-icon">
+              <img src="${webassets(request, 'images/loader.gif')[0]}" />
+            </div>
         </h3>
         <h3 class="stream"
             ng-show="empty && !annotations.length">No results were found. Listening for new matches...</h3>
