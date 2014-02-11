@@ -3,6 +3,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 import unittest, time, re
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
 
 from . import SeleniumTestCase, Annotator
 
@@ -17,6 +19,10 @@ class TestLogin(SeleniumTestCase):
             self.register()
             self.logout()
             self.login()
+
+            picker = (By.CLASS_NAME, 'user-picker')
+            ec = expected_conditions.visibility_of_element_located(picker)
+            WebDriverWait(self.driver, 10).until(ec)
 
             picker = driver.find_element_by_class_name('user-picker')
             dropdown = picker.find_element_by_class_name('dropdown-toggle')

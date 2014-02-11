@@ -23,6 +23,9 @@ import unittest
 import pyes
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
 from paste.deploy.loadwsgi import appconfig
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
@@ -59,7 +62,6 @@ class SeleniumTestCase(unittest.TestCase):
             self.sauce_url = "https://saucelabs.com/jobs/%s" % self.driver.session_id
         else:
             self.driver = webdriver.Firefox()
-            self.driver.implicitly_wait(30)
 
         self.driver.maximize_window()
 
@@ -123,6 +125,10 @@ class SeleniumTestCase(unittest.TestCase):
     def logout(self):
         driver = self.driver
         with Annotator(driver):
+            picker = (By.CLASS_NAME, 'user-picker')
+            ec = expected_conditions.visibility_of_element_located(picker)
+            WebDriverWait(self.driver, 10).until(ec)
+
             picker = driver.find_element_by_class_name('user-picker')
             dropdown = picker.find_element_by_class_name('dropdown-toggle')
             dropdown.click()
@@ -191,15 +197,23 @@ class Annotator():
         # Do nothing if nested
         count = self.g_state.setdefault(self.driver, 0)
         self.g_state[self.driver] = count + 1
-        if count > 0: return
+        if count > 0:
+            return
 
-        frame = self.driver.find_element_by_class_name('annotator-frame')
-        collapsed = 'annotator-collapsed' in frame.get_attribute('class')
+        container = (By.CLASS_NAME, 'annotator-frame')
+        ec = expected_conditions.visibility_of_element_located(container)
+        WebDriverWait(self.driver, 10).until(ec)
+        container = self.driver.find_element_by_class_name('annotator-frame')
+        collapsed = 'annotator-collapsed' in container.get_attribute('class')
         if collapsed:
             tb = self.driver.find_element_by_class_name("annotator-toolbar")
             tb.find_element_by_css_selector('li > a').click()
-            time.sleep(0.5)
-        self.driver.switch_to_frame(frame.find_element_by_tag_name('iframe'))
+
+        iframe = (By.TAG_NAME, 'iframe')
+        ec = expected_conditions.visibility_of_element_located(iframe)
+        WebDriverWait(self.driver, 10).until(ec)
+        iframe = container.find_element_by_tag_name('iframe')
+        self.driver.switch_to_frame(iframe)
 
     def __exit__(self, typ, value, traceback):
         count = self.g_state[self.driver]
