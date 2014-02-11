@@ -342,7 +342,18 @@ $baseFontSize: 14px;
       color: inherit;
     }
 
-    &.tri-icon, &.alwaysonhighlights-icon, &.highlighter-icon, &.commenter-icon {
+    &.tri-icon {
+      color: rgba(200, 200, 200, .3);
+      text-shadow:
+      1px .8px 1.5px $white,
+      0 0 0 #000;
+
+      &:hover {
+        color: rgba(235, 235, 230, .1);
+      }
+    }
+
+    &.alwaysonhighlights-icon, &.highlighter-icon, &.commenter-icon {
       text-shadow:
       1px .8px 1.5px $white,
       0 0 0 #000;
@@ -356,10 +367,6 @@ $baseFontSize: 14px;
 
   &.pushed {
     max-height: 35px;
-    a {
-      color: $linkColorHover;
-      text-shadow: -1px .8px 1px #000 !important;
-    }
   }
 }
 
