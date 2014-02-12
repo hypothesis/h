@@ -295,7 +295,8 @@ class FilterHandler(object):
     # operators
     operators = {
         "equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
-        "ge": 'ge', "one_of": 'contains', "first_of": 'first_of', "match_of": 'match_of'
+        "ge": 'ge', "one_of": 'contains', "first_of": 'first_of', "match_of": 'match_of',
+        "lene": 'lene', "leng": 'leng', "lenge": 'lenge', "lenl": 'lenl', "lenle": 'lenle'
     }
 
     def evaluate_clause(self, clause, target):
