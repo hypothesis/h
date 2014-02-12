@@ -146,6 +146,9 @@ def send_notifications(event):
 
         queries = models.UserQueries.get_all(request).all()
         for query in queries:
+            # Do not do anything for disabled queries
+            if not query.active: continue
+
             if FilterHandler(query.query).match(annotation, action):
                 # Send it to the template renderer, using the stored template type
                 notifier.send_notification_to_owner(annotation, query.template)
