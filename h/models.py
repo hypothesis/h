@@ -205,7 +205,7 @@ class UserQueries(BaseModel, Base):
         return session.query(cls).filter(cls.user_id == userid and cls.type == 'system').all()
 
 
-def generate_system_reply_query(username):
+def generate_system_reply_query(username, domain):
     return {
         "match_policy": "include_any",
         "clauses": [
@@ -216,9 +216,9 @@ def generate_system_reply_query(username):
                 "case_sensitive": True
             },
             {
-                "field": "/user",
+                "field": "/parent_user",
                 "operator": "equals",
-                "value": username,
+                "value": 'acct:' + username + '@' + domain,
                 "case_sensitive": True
             }
         ],
@@ -232,9 +232,9 @@ def generate_system_reply_query(username):
         }
     }
 
-def create_system_reply_query(user, session):
+def create_system_reply_query(user, domain, session):
     # ToDo: user acct:<username>@<domain> format for users
-    reply_filter = generate_system_reply_query(user.username)
+    reply_filter = generate_system_reply_query(user.username, domain)
     query = UserQueries(user_id=user.id)
     query.query = reply_filter
     query.template = 'reply_notification'
@@ -295,6 +295,8 @@ def includeme(config):
             if len(user_system_queries) < 1:
                 # User do not have the default system queries, let's create them
                 # 1. Query for replies
-                create_system_reply_query(user, session)
+                # ToDo: figure out real domain
+                domain = 'localhost'
+                create_system_reply_query(user, domain, session)
 
     registry.consumer = consumer

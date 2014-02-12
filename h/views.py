@@ -126,7 +126,7 @@ class AppController(BaseController):
         result = self.respond(result)
         if 'status' in result and result['status'] == 'okay':
             user = User.get_by_username(self.request, result['model']['persona']['username'])
-            create_system_reply_query(user, Session())
+            create_system_reply_query(user, self.request.application_url, Session())
         return result
 
     @view_config(request_method='POST', request_param='__formid__=activate')

@@ -10,7 +10,7 @@ from pyramid.renderers import render
 from pyramid.events import subscriber
 from h import events, models
 from h.interfaces import IStoreClass
-from h.streamer import FilterHandler
+from h.streamer import FilterHandler, parent_values
 
 import logging
 log = logging.getLogger(__name__)
@@ -140,9 +140,10 @@ def send_notifications(event):
     log.info('send_notifications')
     try:
         action = event.action
-        annotation = event.annotation
         request = event.request
         notifier = AnnotationNotifier(request)
+        annotation = event.annotation
+        annotation.update(parent_values(annotation, request))
 
         queries = models.UserQueries.get_all(request).all()
         for query in queries:
