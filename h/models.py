@@ -184,8 +184,8 @@ class UserQueries(BaseModel, Base):
         return sa.Column(sa.Enum('reply_notification', 'custom_search'), nullable=False, default='custom_search')
 
     @declared_attr
-    def type(self):
-        return sa.Column(sa.Enum('general', 'user_specific'), nullable=False, default='user_specific')
+    def description(self):
+        return sa.Column(sa.VARCHAR(256), default="")
 
     @classmethod
     def get_user_queries(cls, request, userid):
