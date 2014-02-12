@@ -187,10 +187,50 @@ class UserQueries(BaseModel, Base):
     def description(self):
         return sa.Column(sa.VARCHAR(256), default="")
 
+    @declared_attr
+    def type(self):
+        return sa.Column(sa.Enum('system', 'user'), nullable=False, default='user')
+
+    @declared_attr
+    def active(self):
+        return sa.Column(sa.BOOLEAN, default=True, nullable=False)
+
     @classmethod
     def get_user_queries(cls, request, userid):
         session = get_session(request)
         return session.query(cls).filter(cls.user_id == userid).all()
+
+    @classmethod
+    def get_user_system_queries(cls, session, userid):
+        return session.query(cls).filter(cls.user_id == userid and cls.type == 'system').all()
+
+
+def generate_system_reply_query(username):
+    return {
+        "match_policy": "include_any",
+        "clauses": [
+            {
+                "field": "/references",
+                "operator": "leng",
+                "value": 0,
+                "case_sensitive": True
+            },
+            {
+                "field": "/user",
+                "operator": "equals",
+                "value": username,
+                "case_sensitive": True
+            }
+        ],
+        "actions": {
+            "create": True,
+            "update": False,
+            "delete": False
+        },
+        "past_data": {
+            "load_past": "none"
+        }
+    }
 
 
 def groupfinder(userid, request):
@@ -237,5 +277,20 @@ def includeme(config):
         consumer.ttl = ttl
         session.add(consumer)
         session.flush()
+
+        users = session.query(User).all()
+        for user in users:
+            user_system_queries = UserQueries.get_user_system_queries(session, user.id)
+            if len(user_system_queries) < 1:
+                # User do not have the default system queries, let's create them
+                # 1. Query for replies
+                reply_filter = generate_system_reply_query(user.username)
+                query = UserQueries(user_id=user.id)
+                query.query = reply_filter
+                query.template = 'reply_notification'
+                query.type = 'system'
+                query.description = 'Reply notification'
+                session.add(query)
+                session.flush()
 
     registry.consumer = consumer
