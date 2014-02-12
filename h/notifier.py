@@ -144,15 +144,9 @@ def send_notifications(event):
         request = event.request
         notifier = AnnotationNotifier(request)
 
-        userSet = set()
         queries = models.UserQueries.get_all(request).all()
         for query in queries:
-            # We've sent a notification about this annotation to this user already
-            if query.type != 'general' and query.user_id in userSet:
-                continue
-
             if FilterHandler(query.query).match(annotation, action):
-                userSet.add(query.user_id)
                 # Send it to the template renderer, using the stored template type
                 notifier.send_notification_to_owner(annotation, query.template)
     except:
