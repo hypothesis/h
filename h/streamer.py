@@ -41,6 +41,7 @@ def check_favicon(icon_link, parsed_uri, domain):
 
     return icon_link
 
+
 def url_values_from_document(annotation):
     title = annotation['uri']
     icon_link = ""
@@ -66,6 +67,22 @@ def url_values_from_document(annotation):
         'source_stripped': domain_stripped,
         'favicon_link': icon_link
     }
+
+
+def parent_values(annotation, request):
+    if 'references' in annotation:
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        parent = store.read(annotation['references'][-1])
+        return {
+            'parent_user': parent['user'],
+            'parent_text': parent['text']
+        }
+    else:
+        return {
+            'parent_user': None,
+            'parent_text': None
+        }
 
 filter_schema = {
     "type": "object",
@@ -464,12 +481,9 @@ def after_action(event):
                 if not has_permission('read', annotation, session.request):
                     continue
 
-                registry = session.request.registry
-                store = registry.queryUtility(interfaces.IStoreClass)(session.request)
+                annotation.update(parent_values(annotation, session.request))
                 if 'references' in annotation:
-                    parent = store.read(annotation['references'][-1])
-                    if 'text' in parent:
-                        annotation['quote'] = parent['text']
+                    annotation['quote'] = annotation['parent_text']
 
                 flt = session.filter
                 if not (flt and flt.match(annotation, action)):
