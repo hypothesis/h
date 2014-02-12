@@ -232,6 +232,17 @@ def generate_system_reply_query(username):
         }
     }
 
+def create_system_reply_query(user, session):
+    # ToDo: user acct:<username>@<domain> format for users
+    reply_filter = generate_system_reply_query(user.username)
+    query = UserQueries(user_id=user.id)
+    query.query = reply_filter
+    query.template = 'reply_notification'
+    query.type = 'system'
+    query.description = 'Reply notification'
+    session.add(query)
+    session.flush()
+
 
 def groupfinder(userid, request):
     user = request.user
@@ -284,13 +295,6 @@ def includeme(config):
             if len(user_system_queries) < 1:
                 # User do not have the default system queries, let's create them
                 # 1. Query for replies
-                reply_filter = generate_system_reply_query(user.username)
-                query = UserQueries(user_id=user.id)
-                query.query = reply_filter
-                query.template = 'reply_notification'
-                query.type = 'system'
-                query.description = 'Reply notification'
-                session.add(query)
-                session.flush()
+                create_system_reply_query(user, session)
 
     registry.consumer = consumer
