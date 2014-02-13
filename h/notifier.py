@@ -1,5 +1,6 @@
 import traceback
 import re
+from urlparse import urlparse
 
 from horus.models import get_session
 
@@ -136,7 +137,6 @@ class AnnotationNotifier(object):
 
 @subscriber(events.AnnotationEvent)
 def send_notifications(event):
-    log.info('send_notifications')
     try:
         action = event.action
         request = event.request
@@ -159,7 +159,7 @@ def send_notifications(event):
 
 def generate_system_reply_query(username, domain):
     return {
-        "match_policy": "include_any",
+        "match_policy": "include_all",
         "clauses": [
             {
                 "field": "/references",
@@ -187,7 +187,8 @@ def generate_system_reply_query(username, domain):
 
 def create_system_reply_query(user, domain, session):
     reply_filter = generate_system_reply_query(user.username, domain)
-    query = models.UserSubscriptions(user_id=user.id)
+
+    query = models.UserSubscriptions(username=user.username)
     query.query = reply_filter
     query.template = 'reply_notification'
     query.type = 'system'
@@ -197,7 +198,9 @@ def create_system_reply_query(user, domain, session):
 
 def create_default_subscription(request, user):
     session = get_session(request)
-    create_system_reply_query(user, request.application_url, session)
+    url_struct = urlparse(request.application_url)
+    domain = url_struct.hostname if len(url_struct.hostname) > 0 else url_struct.path
+    create_system_reply_query(user, domain, session)
 
     # Added all subscriptions, write it to DB
     user.subscriptions = True

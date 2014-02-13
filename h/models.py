@@ -166,17 +166,17 @@ class UserGroup(UserGroupMixin, Base):
 
 class UserSubscriptions(BaseModel, Base):
     @declared_attr
-    def user_id(self):
+    def username(self):
         return sa.Column(
-            sa.Integer,
+            sa.Unicode(30),
             sa.ForeignKey('%s.%s' % (
                 UserMixin.__tablename__,
-                self._idAttribute
+                'username'
             ),
                 onupdate='CASCADE',
                 ondelete='CASCADE'
             ),
-            nullable=True
+            nullable=False
         )
 
     @declared_attr
@@ -199,14 +199,6 @@ class UserSubscriptions(BaseModel, Base):
     def active(self):
         return sa.Column(sa.BOOLEAN, default=True, nullable=False)
 
-    @classmethod
-    def get_user_queries(cls, request, userid):
-        session = get_session(request)
-        return session.query(cls).filter(cls.user_id == userid).all()
-
-    @classmethod
-    def get_user_system_queries(cls, session, userid):
-        return session.query(cls).filter(cls.user_id == userid and cls.type == 'system').all()
 
 def groupfinder(userid, request):
     user = request.user
