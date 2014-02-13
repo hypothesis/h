@@ -13,10 +13,6 @@ from pyramid.events import subscriber
 from h import events, models
 from h.interfaces import IStoreClass
 from h.streamer import FilterHandler, parent_values
-from h.events import LoginEvent
-
-from pyramid_basemodel import Session
-import transaction
 
 import logging
 log = logging.getLogger(__name__)
@@ -35,22 +31,22 @@ class ReplyTemplate(object):
     template = 'h:templates/emails/reply_notification.pt'
 
     @staticmethod
-    def _create_template_map(request, reply, parent):
-        parent_user = re.search("^acct:([^@]+)", parent['user']).group(1)
+    def _create_template_map(request, reply):
+        parent_user = re.search("^acct:([^@]+)", reply['parent']['user']).group(1)
         reply_user = re.search("^acct:([^@]+)", reply['user']).group(1)
-        parent_tags = ', '.join(parent['tags']) if 'tags' in parent else '(none)'
-        reply_tags = ', '.join(reply['tags']) if 'tags' in reply else '(none)'
+        parent_tags = '\ntags: ' + ', '.join(reply['parent']['tags']) if 'tags' in reply['parent'] else ''
+        reply_tags = '\ntags: ' + ', '.join(reply['tags']) if 'tags' in reply else ''
 
         return {
             'document_title': reply['title'],
-            'document_path': parent['uri'],
-            'parent_quote': parent['quote'],
-            'parent_text': parent['text'],
+            'document_path': reply['parent']['uri'],
+            'parent_quote': reply['parent']['quote'],
+            'parent_text': reply['parent']['text'],
             'parent_user': parent_user,
             'parent_tags': parent_tags,
-            'parent_timestamp': parent['created'],
-            'parent_user_profile': user_profile_url(request, parent['user']),
-            'parent_path': standalone_url(request, parent['id']),
+            'parent_timestamp': reply['parent']['created'],
+            'parent_user_profile': user_profile_url(request, reply['parent']['user']),
+            'parent_path': standalone_url(request, reply['parent']['id']),
             'reply_quote': reply['quote'],
             'reply_text': reply['text'],
             'reply_user': reply_user,
@@ -61,8 +57,8 @@ class ReplyTemplate(object):
         }
 
     @staticmethod
-    def render(request, reply, parent):
-        return render(ReplyTemplate.template, ReplyTemplate._create_template_map(request, reply, parent), request)
+    def render(request, reply):
+        return render(ReplyTemplate.template, ReplyTemplate._create_template_map(request, reply), request)
 
 
 class CustomSearchTemplate(object):
@@ -99,27 +95,23 @@ class AnnotationNotifier(object):
         self.mailer = self.registry.queryUtility(IMailer)
         self.store = self.registry.queryUtility(IStoreClass)(request)
 
-
     def send_notification_to_owner(self, annotation, template):
         if template == 'reply_notification':
             # Get the e-mail of the owner
-            parent = self.store.read(annotation['references'][-1])
-
-            if not ('quote' in parent):
-                grandparent = self.store.read(parent['references'][-1])
-                parent['quote'] = grandparent['text']
+            if not annotation['parent']['user']: return
             # Do not notify me about my own message
-            if not parent['user']: return
-            if annotation['user'] == parent['user']: return
+            if annotation['user'] == annotation['parent']['user']: return
 
-            username = re.search("^acct:([^@]+)", parent['user']).group(1)
+            username = re.search("^acct:([^@]+)", annotation['parent']['user']).group(1)
             userobj = models.User.get_by_username(self.request, username)
             if not userobj:
                 log.warn("Warning! User not found! " + str(username))
                 return
             recipients = [userobj.email]
-            rendered = ReplyTemplate.render(self.request, annotation, parent)
-            subject = "Reply for your annotation [" + parent['id'] + ']'
+            rendered = ReplyTemplate.render(self.request, annotation)
+            subject = "A reply to you at: " + annotation['title'] + \
+                      "(" + annotation['uri'] + ")"
+
             self._send_annotation(rendered, subject, recipients)
         elif template == 'custom_search':
             username = re.search("^acct:([^@]+)", annotation['user']).group(1)
@@ -129,7 +121,8 @@ class AnnotationNotifier(object):
                 return
             recipients = [userobj.email]
             rendered = ReplyTemplate.render(self.request, annotation)
-            subject = "New annotation for your query [" + annotation['id'] + "]"
+            subject = "New annotation for your query: " + annotation['title'] + \
+                      "(" + annotation['uri'] + ")"
             self._send_annotation(rendered, subject, recipients)
 
     def _send_annotation(self, body, subject, recipients):
@@ -149,7 +142,7 @@ def send_notifications(event):
         request = event.request
         notifier = AnnotationNotifier(request)
         annotation = event.annotation
-        annotation.update(parent_values(annotation, request))
+        annotation['parent'] = parent_values(annotation, request)
 
         queries = models.UserSubscriptions.get_all(request).all()
         for query in queries:
@@ -175,7 +168,7 @@ def generate_system_reply_query(username, domain):
                 "case_sensitive": True
             },
             {
-                "field": "/parent_user",
+                "field": "/parent/user",
                 "operator": "equals",
                 "value": 'acct:' + username + '@' + domain,
                 "case_sensitive": True
@@ -219,8 +212,9 @@ def registration_subscriptions(event):
 
 @subscriber(events.LoginEvent)
 def login_subscriptions(event):
-    if event.user.subscriptions: return
-    create_default_subscription(event.request, event.user)
+    if event.user:
+        if not event.user.subscriptions:
+            create_default_subscription(event.request, event.user)
 
 
 def includeme(config):
