@@ -19,11 +19,11 @@ from pyramid import httpexceptions
 from pyramid.httpexceptions import HTTPFound
 from pyramid.traversal import find_resource
 from pyramid.view import view_config, view_defaults
-from pyramid_basemodel import Session
 
 from h import interfaces
-from h.models import _, create_system_reply_query, User
+from h.models import _
 from h.streamer import url_values_from_document
+from h.events import LoginEvent
 
 import logging
 log = logging.getLogger(__name__)
@@ -118,16 +118,14 @@ class AppController(BaseController):
     @view_config(request_method='POST', request_param='__formid__=login')
     def login(self):
         result = AuthController(self.request).login()
+        event = LoginEvent(self.request, self.request.user)
+        self.request.registry.notify(event)
         return self.respond(result)
 
     @view_config(request_method='POST', request_param='__formid__=register')
     def register(self):
         result = RegisterController(self.request).register()
-        result = self.respond(result)
-        if 'status' in result and result['status'] == 'okay':
-            user = User.get_by_username(self.request, result['model']['persona']['username'])
-            create_system_reply_query(user, self.request.application_url, Session())
-        return result
+        return self.respond(result)
 
     @view_config(request_method='POST', request_param='__formid__=activate')
     def activate(self):

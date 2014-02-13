@@ -132,6 +132,10 @@ class Group(GroupMixin, Base):
 
 
 class User(UserMixin, Base):
+    @declared_attr
+    def subscriptions(self):
+        return sa.Column(sa.BOOLEAN, nullable=False, default=False)
+
     @classmethod
     def get_by_username(cls, request, username):
         session = get_session(request)
@@ -160,7 +164,7 @@ class UserGroup(UserGroupMixin, Base):
     pass
 
 
-class UserQueries(BaseModel, Base):
+class UserSubscriptions(BaseModel, Base):
     @declared_attr
     def user_id(self):
         return sa.Column(
@@ -203,46 +207,6 @@ class UserQueries(BaseModel, Base):
     @classmethod
     def get_user_system_queries(cls, session, userid):
         return session.query(cls).filter(cls.user_id == userid and cls.type == 'system').all()
-
-
-def generate_system_reply_query(username, domain):
-    return {
-        "match_policy": "include_any",
-        "clauses": [
-            {
-                "field": "/references",
-                "operator": "leng",
-                "value": 0,
-                "case_sensitive": True
-            },
-            {
-                "field": "/parent_user",
-                "operator": "equals",
-                "value": 'acct:' + username + '@' + domain,
-                "case_sensitive": True
-            }
-        ],
-        "actions": {
-            "create": True,
-            "update": False,
-            "delete": False
-        },
-        "past_data": {
-            "load_past": "none"
-        }
-    }
-
-def create_system_reply_query(user, domain, session):
-    # ToDo: user acct:<username>@<domain> format for users
-    reply_filter = generate_system_reply_query(user.username, domain)
-    query = UserQueries(user_id=user.id)
-    query.query = reply_filter
-    query.template = 'reply_notification'
-    query.type = 'system'
-    query.description = 'Reply notification'
-    session.add(query)
-    session.flush()
-
 
 def groupfinder(userid, request):
     user = request.user
@@ -288,15 +252,5 @@ def includeme(config):
         consumer.ttl = ttl
         session.add(consumer)
         session.flush()
-
-        users = session.query(User).all()
-        for user in users:
-            user_system_queries = UserQueries.get_user_system_queries(session, user.id)
-            if len(user_system_queries) < 1:
-                # User do not have the default system queries, let's create them
-                # 1. Query for replies
-                # ToDo: figure out real domain
-                domain = 'localhost'
-                create_system_reply_query(user, domain, session)
 
     registry.consumer = consumer

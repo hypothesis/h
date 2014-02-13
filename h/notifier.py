@@ -1,6 +1,8 @@
 import traceback
 import re
 
+from horus.models import get_session
+
 from pyramid_mailer.interfaces import IMailer
 from pyramid_mailer.message import Message
 from pyramid_mailer.testing import DummyMailer
@@ -11,6 +13,10 @@ from pyramid.events import subscriber
 from h import events, models
 from h.interfaces import IStoreClass
 from h.streamer import FilterHandler, parent_values
+from h.events import LoginEvent
+
+from pyramid_basemodel import Session
+import transaction
 
 import logging
 log = logging.getLogger(__name__)
@@ -145,7 +151,7 @@ def send_notifications(event):
         annotation = event.annotation
         annotation.update(parent_values(annotation, request))
 
-        queries = models.UserQueries.get_all(request).all()
+        queries = models.UserSubscriptions.get_all(request).all()
         for query in queries:
             # Do not do anything for disabled queries
             if not query.active: continue
@@ -156,6 +162,65 @@ def send_notifications(event):
     except:
         log.info(traceback.format_exc())
         log.info('Unexpected error occurred in send_notifications(): ' + str(event))
+
+
+def generate_system_reply_query(username, domain):
+    return {
+        "match_policy": "include_any",
+        "clauses": [
+            {
+                "field": "/references",
+                "operator": "leng",
+                "value": 0,
+                "case_sensitive": True
+            },
+            {
+                "field": "/parent_user",
+                "operator": "equals",
+                "value": 'acct:' + username + '@' + domain,
+                "case_sensitive": True
+            }
+        ],
+        "actions": {
+            "create": True,
+            "update": False,
+            "delete": False
+        },
+        "past_data": {
+            "load_past": "none"
+        }
+    }
+
+
+def create_system_reply_query(user, domain, session):
+    reply_filter = generate_system_reply_query(user.username, domain)
+    query = models.UserSubscriptions(user_id=user.id)
+    query.query = reply_filter
+    query.template = 'reply_notification'
+    query.type = 'system'
+    query.description = 'Reply notification'
+    session.add(query)
+
+
+def create_default_subscription(request, user):
+    session = get_session(request)
+    create_system_reply_query(user, request.application_url, session)
+
+    # Added all subscriptions, write it to DB
+    user.subscriptions = True
+    session.add(user)
+    session.flush()
+
+
+@subscriber(events.NewRegistrationEvent)
+def registration_subscriptions(event):
+    create_default_subscription(event.request, event.user)
+
+
+@subscriber(events.LoginEvent)
+def login_subscriptions(event):
+    if event.user.subscriptions: return
+    create_default_subscription(event.request, event.user)
 
 
 def includeme(config):
