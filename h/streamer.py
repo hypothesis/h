@@ -74,15 +74,13 @@ def parent_values(annotation, request):
         registry = request.registry
         store = registry.queryUtility(interfaces.IStoreClass)(request)
         parent = store.read(annotation['references'][-1])
-        return {
-            'parent_user': parent['user'],
-            'parent_text': parent['text']
-        }
+        if not ('quote' in parent):
+            grandparent = store.read(parent['references'][-1])
+            parent['quote'] = grandparent['text']
+
+        return parent
     else:
-        return {
-            'parent_user': None,
-            'parent_text': None
-        }
+        return {}
 
 filter_schema = {
     "type": "object",
@@ -334,7 +332,7 @@ class FilterHandler(object):
                 cval = clause['value']
                 fval = field_value
 
-            reversed = False
+            reversed_order = False
             # Determining operator order
             # Normal order: field_value, clause['value'] (i.e. condition created > 2000.01.01)
             # Here clause['value'] = '2001.01.01'. The field_value is target['created']
@@ -344,14 +342,14 @@ class FilterHandler(object):
             # Reversed operator order for contains (b in a)
             if type(cval) is list or type(fval) is list:
                 if clause['operator'] == 'one_of' or clause['operator'] == 'matches':
-                    reversed = True
+                    reversed_order = True
                     # But not in every case. (i.e. tags matches 'b')
                     # Here field_value is a list, because an annotation can have many tags
                     # And clause['value'] is 'b'
                     if type(field_value) is list:
-                        reversed = False
+                        reversed_order = False
 
-            if reversed:
+            if reversed_order:
                 return getattr(operator, self.operators[clause['operator']])(cval, fval)
             else:
                 return getattr(operator, self.operators[clause['operator']])(fval, cval)
