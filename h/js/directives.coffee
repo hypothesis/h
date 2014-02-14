@@ -225,6 +225,12 @@ thread = ->
       scope.collapsed = !scope.collapsed
       scope.openDetails scope.annotation unless scope.collapsed
 
+    scope.repliesList = (annotation) ->
+      results = []
+      for thread in annotation.thread.children
+        results.push thread.message
+      results
+
     scope.toggleReplies = (event) ->
       event.stopPropagation()
       scope.collapseReplies = !scope.collapseReplies
