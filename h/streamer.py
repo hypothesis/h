@@ -471,7 +471,7 @@ def after_action(event):
 
         annotation = event.annotation
 
-        annotation.update(url_values_from_document(annotation))
+        annotation['parent'] = parent_values(annotation, request)
 
         manager = request.get_sockjs_manager()
         for session in manager.active_sessions():
@@ -481,7 +481,7 @@ def after_action(event):
 
                 annotation.update(parent_values(annotation, session.request))
                 if 'references' in annotation:
-                    annotation['quote'] = annotation['parent_text']
+                    annotation['quote'] = annotation['parent']['text']
 
                 flt = session.filter
                 if not (flt and flt.match(annotation, action)):
