@@ -25,6 +25,7 @@ def includeme(config):
     config.include('h.views')
     config.include('h.streamer')
     config.include('h.notifier')
+    config.include('h.domain_mailer')
 
 
 def bootstrap(cfname, request=None, options=None, config_fn=None):
