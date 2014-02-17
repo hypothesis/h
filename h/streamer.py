@@ -430,7 +430,7 @@ def after_action(event):
             return
 
         annotation = event.annotation
-
+        annotation.update(url_values_from_document(annotation))
         annotation['parent'] = parent_values(annotation, request)
 
         manager = request.get_sockjs_manager()
@@ -439,7 +439,6 @@ def after_action(event):
                 if not has_permission('read', annotation, session.request):
                     continue
 
-                annotation.update(parent_values(annotation, session.request))
                 if 'references' in annotation:
                     annotation['quote'] = annotation['parent']['text']
 
