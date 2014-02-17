@@ -40,6 +40,7 @@ class Annotator.Plugin.Document extends Annotator.Plugin
     this._getPrism()
     this._getTwitter()
     this._getFavicon()
+    this._getDocOwners()
 
     # extract out/normalize some things
     this._getTitle()
@@ -139,9 +140,18 @@ class Annotator.Plugin.Document extends Annotator.Plugin
     for link in $("link")
       if $(link).prop("rel") in ["shortcut icon", "icon"]
         @metadata["favicon"] = this._absoluteUrl(link.href)
-        
+
+  _getDocOwners: =>
+    @metadata.reply_to = []
+
+    for a in $("a")
+      if a.rel is 'reply-to'
+        if a.href.toLowerCase().slice(0,7) is "mailto:"
+          @metadata.reply_to.push a.href[7..]
+        else
+          @metadata.reply_to.push a.href
+
   # hack to get a absolute url from a possibly relative one
-  
   _absoluteUrl: (url) ->
     img = $("<img src='#{ url }'></img>")
     url = img.prop('src')
