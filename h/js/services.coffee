@@ -306,21 +306,11 @@ class Hypothesis extends Annotator
     b_upd = if b.updated? then new Date(b.updated) else new Date()
     a_upd.getTime() - b_upd.getTime()
 
-  buildReplyList: (annotations=[]) =>
-    $filter = @element.injector().get '$filter'
-    for annotation in annotations
-      if annotation?
-        thread = @threading.getContainer annotation.id
-        children = (r.message for r in (thread.children or []))
-        annotation.reply_list = children.sort(@sortAnnotations).reverse()
-        @buildReplyList children
-
   updateViewer: (annotations=[]) =>
     annotations = annotations.filter (a) -> a?
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) =>
-        @buildReplyList annotations
         $rootScope.annotations = annotations
         $rootScope.$digest()
     ]
@@ -332,7 +322,6 @@ class Hypothesis extends Annotator
     @element.injector().invoke [
       '$location', '$rootScope',
       ($location, $rootScope) =>
-        @buildReplyList annotations
         $rootScope.annotations = annotations
         $location.path('/viewer').replace()
         $rootScope.$digest()

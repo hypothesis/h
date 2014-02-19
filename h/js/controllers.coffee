@@ -677,14 +677,6 @@ class Annotation
         $scope.shared_link = prefix + '/a/' + $scope.model.$modelValue.id
         $scope.shared = false
 
-    $scope.$watchCollection 'model.$modelValue.thread.children', (newValue=[]) ->
-      annotation = $scope.model.$modelValue
-      return unless annotation
-
-      replies = (r.message for r in newValue)
-      replies = replies.sort(annotator.sortAnnotations).reverse()
-      annotation.reply_list = replies
-
     $scope.toggle = ->
       $element.find('.share-dialog').slideToggle()
 
