@@ -1,3 +1,4 @@
+import re
 from urlparse import urlparse
 
 from pyramid.events import subscriber
@@ -10,18 +11,21 @@ log = logging.getLogger(__name__)
 
 
 class DocumentOwnerNotificationTemplate(object):
-    template = 'h:templates/emails/custom_search.pt'
+    template = 'h:templates/emails/document_owner_notification.pt'
 
     @staticmethod
     def _create_template_map(request, annotation):
-        tags = ', '.join(annotation['tags']) if 'tags' in annotation else '(none)'
+        tags = '\ntags: ' + ', '.join(annotation['tags']) if 'tags' in annotation else ''
+        user = re.search("^acct:([^@]+)", annotation['user']).group(1)
         return {
             'document_title': annotation['title'],
             'document_path': annotation['uri'],
             'text': annotation['text'],
             'tags': tags,
             'user_profile': user_profile_url(request, annotation['user']),
-            'path': standalone_url(request, annotation['id'])
+            'user': user,
+            'path': standalone_url(request, annotation['id']),
+            'timestamp': annotation['created'],
         }
 
     @staticmethod
