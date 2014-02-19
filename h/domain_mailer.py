@@ -53,13 +53,13 @@ def domain_notification(event):
         if 'document' in annotation and 'reply_to' in annotation['document']:
             url_struct = urlparse(annotation['uri'])
             domain = url_struct.hostname if len(url_struct.hostname) > 0 else url_struct.path
+            if domain[0:4] == 'www.': domain = domain[4:]
             notifier = AnnotationNotifier(event.request)
             for email in annotation['document']['reply_to']:
                 # Domain matching
                 mail_domain = email.split('@')[-1]
                 if mail_domain == domain:
                     # Send notification to owners
-                    log.info('Point of no-re-pass!')
                     notifier.send_notification_to_owner(annotation, {'email': email}, 'document_owner')
 
 
