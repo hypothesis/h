@@ -760,6 +760,9 @@ class Viewer
   ) ->
     {providers, threading} = annotator
 
+    $rootScope.$watchCollection 'annotations', (annotations) ->
+      $scope.threads = (annotation.thread for annotation in annotations or [])
+
     $scope.focus = (annotation) ->
       if angular.isArray annotation
         highlights = (a.$$tag for a in annotation when a?)
