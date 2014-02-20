@@ -25,6 +25,8 @@ addons:
     access_key:
       secure: LSlwjLHFH3oqH8c9vamD9wPJIE6jpEyL2ovASDTxz6LcPKL4GmT9Vnl60QhC+V9hKHXzJ+vSyA0T1dkTpyr0fq3GIksL3rqHvbVNqHbD8YSxlZIs/6I3gTFmkPz5mK8VdYoA0uSBRFIr/BBBERS8TNqAN3vqv0xFVVIpnedbfIk=
 notifications:
-  irc: "chat.freenode.net#hypothes.is"
+  irc:
+    channels:
+       "chat.freenode.net#hypothes.is"
     on_success: "change"
     on_failure: "always"
