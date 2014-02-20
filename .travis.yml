@@ -1,26 +1,24 @@
 language:
-- python
+  - python
 python:
-- '2.7'
+  - '2.7'
 install:
-- sudo add-apt-repository --yes ppa:chris-lea/node.js
-- sudo apt-get update --yes
-- sudo apt-get install --yes nodejs
-- sudo npm install -g coffee-script
-- pip install -r requirements.txt
-- gem install compass
+  - gem update --system
+  - gem install compass
+  - npm install -g coffee-script
+  - pip install -r requirements.txt
 services:
-- elasticsearch
+  - elasticsearch
 before_script:
-- curl https://gist.github.com/santiycr/5139565/raw/sauce_connect_setup.sh | bash
+  - curl https://gist.github.com/santiycr/5139565/raw/sauce_connect_setup.sh | bash
 script:
-- make test
+  - make test
 env:
   global:
   - secure: HsBNLFjPZjTbqoqcneSEOJG0BQdOZYK2JnebYMcoH1hEZ9oE1Fu2nK3qGT4EpTE1Kp6lFwRUJU1IZwm9DYSzzEHDhS2/SNWRaQ/epff82ioe1ArtAw4iuLc2+KM+QjdS36P3SqiKm4JEeolg1NzD5f/LE6oVyhWgLbRT9ah3+w0=
   - secure: U8oXayWpm7qrqqyA6dyzb1HjqOsljB1Og2NcNf6UFQXds6Ff7lnd1LtDN8ZwQgypQhAzhLsKlh9b3uEhhAS0pWZwVLNwz3pwmK8D8Gqc04w5A5A8GVJvVnPUGmw/atouxo5R6kMhzmwlLiiCWYtLehXQNrOg4EUatpV8ojaSCYc=
 after_failure:
-- cat pyramid.log
+  - cat pyramid.log
 addons:
   sauce_connect:
     username: tilgovi
@@ -28,5 +26,5 @@ addons:
       secure: LSlwjLHFH3oqH8c9vamD9wPJIE6jpEyL2ovASDTxz6LcPKL4GmT9Vnl60QhC+V9hKHXzJ+vSyA0T1dkTpyr0fq3GIksL3rqHvbVNqHbD8YSxlZIs/6I3gTFmkPz5mK8VdYoA0uSBRFIr/BBBERS8TNqAN3vqv0xFVVIpnedbfIk=
 notifications:
   irc: "chat.freenode.net#hypothes.is"
-  on_success: "always"
-  on_failure: "always"
+    on_success: "change"
+    on_failure: "always"
