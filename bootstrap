@@ -52,12 +52,12 @@ if test -z "$PIP_DOWNLOAD_CACHE"; then
 fi
 
 echo "Ensuring an up-to-date pip..."
-pip install --use-mirrors -qU pip
+pip install -qU pip
 
 echo "Checking dependencies..."
 diff -q requirements.txt .installed.txt 2> /dev/null || {
 	echo "Installing dependencies (this may take a few minutes)..."
-	pip install --use-mirrors -qr requirements.txt
+	pip install -qr requirements.txt
 	cp requirements.txt .installed.txt
 }
 
