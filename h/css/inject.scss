@@ -314,7 +314,7 @@ $baseFontSize: 14px;
   border: solid 1px $grayLighter;
   overflow: hidden;
   position: relative;
-  left: 2px;
+  // left: 2px;
   height: 2em;
   width: 2em;
 
@@ -334,7 +334,7 @@ $baseFontSize: 14px;
 
     position: absolute;
     left: .2em;
-    color: $grayLighter;
+    color: rgba(200, 200, 200, .3);
 
     text-decoration: none;
 
@@ -352,13 +352,21 @@ $baseFontSize: 14px;
         color: rgba(235, 235, 230, .1);
       }
     }
+
+    &.alwaysonhighlights-icon, &.highlighter-icon, &.commenter-icon {
+      text-shadow:
+      1px .8px 1.5px $white,
+      0 0 0 #000;
+
+      &:hover {
+        color: $linkColorHover;
+        text-shadow: -1px .8px 1px #000;
+      }
+    }
   }
 
-  &.pushed, &:hover.pushed {
+  &.pushed {
     max-height: 35px;
-    a {
-      color: $hypothered;
-    }
   }
 }
 
@@ -372,7 +380,7 @@ $baseFontSize: 14px;
 }
 
 .commenter-icon {
-  @include fonticon("\e600", left);
+  @include fonticon("\e012", left);
 }
 
 .tri-icon {
