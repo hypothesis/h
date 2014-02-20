@@ -45,9 +45,11 @@ class BaseController(horus.views.BaseController):
 def home(request):
     return find_resource(request.context, '/app').embed
 
+
 @view_config(route_name='help', layout='site', renderer='templates/help.pt')
 def my_view(request):
     return find_resource(request.context, '/app').embed
+
 
 @view_defaults(context='h.resources.Annotation', layout='site')
 class AnnotationController(BaseController):
@@ -201,7 +203,8 @@ class AppController(BaseController):
                     msgs = e.messages()
                 else:
                     msgs = [str(e)]
-                for m in msgs: FlashMessage(self.request, m, kind='error')
+                for m in msgs:
+                    FlashMessage(self.request, m, kind='error')
             return self.failure(_('Your submission is invalid. '
                                   'Please try again.'))
         else:
@@ -259,6 +262,7 @@ class AppController(BaseController):
             'token_url': request.route_url('token'),
         }
 
+
 @view_defaults(context='h.resources.Stream', layout='site')
 class Stream(BaseController):
     @view_config(accept='text/html')
@@ -270,6 +274,7 @@ class Stream(BaseController):
             return HTTPFound(location='/stream#?tags=' + request.stream_key)
         else:
             return httpexceptions.HTTPNotFound()
+
 
 @view_defaults(context='h.resources.StreamSearch', layout='site')
 class StreamSearch(BaseController):

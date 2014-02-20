@@ -124,6 +124,7 @@ class AppFactory(BaseResource):
             for name in ['persona', 'personas']
         }
 
+
 class Annotation(BaseResource, dict):
     @property
     def __acl__(self):
@@ -211,6 +212,7 @@ class Annotation(BaseResource, dict):
 class StreamSearch(BaseResource, dict):
     pass
 
+
 class AnnotationFactory(BaseResource):
     def __getitem__(self, key):
         request = self.request
@@ -222,7 +224,8 @@ class AnnotationFactory(BaseResource):
             data = store.read(key)
         except httpexceptions.HTTPException as e:
             # We want to add our custom error message for unauthorized errors
-            if e.status_code != 401: raise e
+            if e.status_code != 401:
+                raise e
 
         annotation = Annotation(request)
         annotation.__name__ = key
@@ -231,6 +234,7 @@ class AnnotationFactory(BaseResource):
         annotation.update(data)
 
         return annotation
+
 
 class Stream(BaseResource, dict):
     pass
