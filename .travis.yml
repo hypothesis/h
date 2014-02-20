@@ -3,6 +3,7 @@ language:
 python:
   - '2.7'
 install:
+  - gem install sass
   - gem install compass
   - npm install -g coffee-script
   - pip install -r requirements.txt
