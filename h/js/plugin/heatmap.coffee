@@ -2,7 +2,7 @@ $ = Annotator.$
 
 class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # prototype constants
-  BUCKET_THRESHOLD_PAD: 25
+  BUCKET_THRESHOLD_PAD: 30
   BUCKET_SIZE: 50
   BOTTOM_CORRECTION: 14
 

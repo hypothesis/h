@@ -363,7 +363,7 @@ blockquote {
     content: '';
     position: absolute;
     height: 0;
-    left: 5px;
+    left: 0;
     width: 0;
   }
 
@@ -387,7 +387,7 @@ blockquote {
     // Align the tail
     &:before, &:after {
       left: auto;
-      right: 5px;
+      right: 0;
     }
   }
 }
@@ -503,7 +503,7 @@ blockquote {
 //TABS////////////////////////////////
 .nav-tabs {
   @include pie-clearfix;
-  margin: 0 .2em;
+  margin: 0;
 
   a {
     font-family: $sansFontFamily;
@@ -513,15 +513,15 @@ blockquote {
   & > li {
     @include box-shadow(inset 2px -10px 13px -8px hsla(0, 0%, 0%, .1));
     background: darken($white, 2%);
-    border-top-right-radius: 2em 5em;
-    border-top-left-radius: 2em 5em;
-    border: .1em solid $grayLighter;
+    border-top-right-radius: 32px 80px;
+    border-top-left-radius: 32px 80px;
+    border: 1px solid $grayLighter;
     border-bottom: none;
     cursor: pointer;
     display: inline-block;
     line-height: 1;
-    margin-right: -.5em;
-    padding: .25em 1em .5em;
+    margin-right: -8px;
+    padding: 4px 16px 8px;
     position: relative;
 
     &:hover {
@@ -541,11 +541,11 @@ blockquote {
 }
 
 .tab-content {
-  @include border-radius(.1em);
+  @include border-radius(1px);
   background: $white;
-  border: solid .1em $grayLighter;
-  margin-top: -.1em;
-  padding: 1em;
+  border: solid 1px $grayLighter;
+  margin-top: -1px;
+  padding: 16px;
   position: relative;
 
   .tab-pane {
@@ -560,10 +560,10 @@ blockquote {
 //KNOCKOUT///////////
 //Provides a knockout background
 .knockout {
-  @include border-radius(.5em);
+  @include border-radius(8px);
   @include pie-clearfix;
   @include box-shadow(inset 1px 1px 3px hsla(0, 0%, 0%, .1));
-  padding: 1em;
+  padding: 16px;
 }
 
 
@@ -584,11 +584,13 @@ blockquote {
   background: $white;
   border: solid 1px $grayLighter;
   border-style: solid none;
-  height: 2em;
+  height: 30px;
+  font-size: 1.3em;
+  line-height: 28px;
   position: fixed;
   left: 0;
   right: 0;
-  top: .5em;
+  top: 8px;
   z-index: 5;
 
   .barbutton {
@@ -602,7 +604,11 @@ blockquote {
   }
 
   .inner > * {
-    padding: .3em;
+    margin-right: 8px;
+
+    &:last-child {
+      margin-right: 0;
+    }
 
     &.pull-right {
       display: inline-block;
@@ -610,13 +616,9 @@ blockquote {
     }
 
     &.search-upper {
-      padding: 0em;
-      padding-top: .15em;
+      padding: 0;
+      padding-top: 1px;
     }
-  }
-
-  .right-border {
-    padding-right: 3.7em;
   }
 }
 
@@ -625,19 +627,19 @@ blockquote {
 //MAIN CONTENT///////
 .content {
   margin: 0 auto;
-  padding: 1em;
-  padding-top: 3.5em;
+  padding: 16px;
+  padding-top: 44px;
 
   .domain {
-    margin: .2em 0 .3em;
+    margin: 3px 0 4px;
   }
 
   .domain .favicon {
-    margin: 0 .5em;
+    margin: 0 8px;
   }
 
   .page {
-    margin-bottom: 1em;
+    margin-bottom: 16px;
 
     a {
       font-weight: bold;

@@ -8,7 +8,6 @@ $baseFontSize: 14px;
 @import 'common';
 
 
-
 //ELEMENT STYLES////////////////////////////////
 body {
   background-color: transparent;
@@ -72,10 +71,8 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 }
 
 .topbar {
-  top: .5em;
-
   .inner {
-    margin: 0 .5em 0 .5em;
+    margin: 0 8px 0 8px;
   }
 }
 
@@ -92,10 +89,10 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   .top-padding {
-    padding-top: .5em;
+    padding-top: 8px;
   }
   .bottom-padding {
-    padding-bottom: .5em;
+    padding-bottom: 8px;
   }
 
   .notif-text {
@@ -111,17 +108,17 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .sheet {
   @include smallshadow;
   font-family: $sansFontFamily;
-  max-height: 30em;
+  max-height: 480px;
   overflow: hidden;
   position: absolute;
   left: 0;
   right: 0;
-  top: 2px;
+  top: 0;
 
   .close {
     position: absolute;
     right: 1em;
-    top: .25em;
+    top: .5em;
   }
 
   &.collapsed {

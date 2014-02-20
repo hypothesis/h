@@ -3,7 +3,7 @@
 @import 'compass/css3/images';
 @import 'compass/utilities/color';
 
-$baseFontSize: 16px;
+$baseFontSize: 18px;
 
 @import 'common';
 
@@ -77,16 +77,14 @@ ol {
 .topbar {
   position: fixed;
   .inner {
-    padding-left: .6em;
     margin: 0 auto;
     max-width: $break-large;
     @include respond-to(tablets) {
-      padding-left: 3.6em;
       margin: 0 auto;
       max-width: $break-large;
     }
     @include respond-to(wide-handhelds handhelds) {
-      padding: 0 .6em;
+      padding: 0 8px;
       margin: 0 auto;
       max-width: $break-large;
     }

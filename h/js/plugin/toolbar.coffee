@@ -110,10 +110,10 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
   _updateStickyButtons: ->
     count = $(@buttons).filter(-> $(this).hasClass('pushed')).length
     if count
-      height = (count + 1) * 32  # +1 -- top button is always visible
+      height = (count + 1) * 35  # +1 -- top button is always visible
       this.toolbar.css("min-height", "#{height}px")
     else
-      height = 32
+      height = 35
       this.toolbar.css("min-height", "")
-    this.annotator.plugins.Heatmap?.BUCKET_THRESHOLD_PAD = height - 9
+    this.annotator.plugins.Heatmap?.BUCKET_THRESHOLD_PAD = height
     this.annotator.plugins.Heatmap?._update();
