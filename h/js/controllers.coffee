@@ -514,17 +514,61 @@ class App
         p = $scope.auth.persona
         user = if p? then "acct:" + p.username + "@" + p.provider else ''
         unless data instanceof Array then data = [data]
-        $scope.$apply =>
-          if $scope.socialView.name is 'single-player'
-            for d in data
-              if d.user is user
-                $scope.addUpdateNotification()
-                $scope.new_updates += 1
-                break
-          else
-            if data.length > 0
-                $scope.addUpdateNotification()
-                $scope.new_updates += 1
+
+        if $scope.socialView.name is 'single-player'
+          owndata = data.filter (d) -> d.user is user
+          $scope.applyUpdates action, owndata
+        else
+          $scope.applyUpdates action, data
+
+    $scope.markAnnotationUpdate = (data) =>
+      for annotation in data
+        # We need to flag the top level
+        if annotation.references?
+          container = annotator.threading.getContainer annotation.references[0]
+          if container?.message?
+            container.message._updatedAnnotation = true
+            # Temporary workarund to force publish changes
+            if annotator.plugins.Store?
+              annotator.plugins.Store._onLoadAnnotations [container.message]
+        else
+          annotation._updatedAnnotation = true
+
+    $scope.applyUpdates = (action, data) =>
+      switch action
+        when 'create'
+          # XXX: Temporary workaround until solving the race condition for annotationsLoaded event
+          # Between threading and bridge plugins
+          for annotation in data
+            annotation._new = true
+            annotator.plugins.Threading.thread annotation
+
+          $scope.markAnnotationUpdate data
+
+          $scope.$apply =>
+            if annotator.plugins.Store?
+              annotator.plugins.Store._onLoadAnnotations data
+        when 'update'
+          $scope.markAnnotationUpdate data
+          annotator.plugins.Store._onLoadAnnotations data
+        when 'delete'
+          $scope.markAnnotationUpdate data
+          for annotation in data
+            container = annotator.threading.getContainer annotation.id
+            if container.message
+              container.message._clientdeleteonly = true
+              annotator.deleteAnnotation container.message
+
+      # Finally blink the changed tabs
+      $timeout =>
+        for p in annotator.providers
+          p.channel.notify
+            method: 'updateHeatmap'
+
+        for p in annotator.providers
+          p.channel.notify
+            method: 'blinkBuckets'
+      , 500
 
     $timeout =>
       $scope.initUpdater()
@@ -687,12 +731,14 @@ class Annotation
 
     $scope.toggle = ->
       $element.find('.share-dialog').slideToggle()
+      return
 
     $scope.share = ($event) ->
       $event.stopPropagation()
       return if $element.find('.share-dialog').is ":visible"
       $scope.shared = not $scope.shared
       $scope.toggle()
+      return
 
     $scope.rebuildHighlightText = ->
       if annotator.text_regexp?
@@ -701,6 +747,8 @@ class Annotation
           $scope.model.$modelValue.highlightText =
             $scope.model.$modelValue.highlightText.replace regexp, annotator.highlighter
 
+    $scope.newReply = (element) ->
+      element._new?
 
 class Editor
   this.$inject = ['$location', '$routeParams', '$sce', '$scope', 'annotator']

@@ -140,6 +140,10 @@ annotator_i18n = Uglify(
 
 # Angular
 angular = Uglify('lib/angular.js', output='lib/angular.min.js')
+angular_animate = Uglify(
+    'lib/angular-animate.js',
+    output='lib/angular-animate.min.js'
+)
 angular_bootstrap = Uglify(
     'lib/angular-bootstrap.js',
     output='lib/angular-bootstrap.min.js'
@@ -173,9 +177,9 @@ jquery_ui = Bundle(
     Uglify('h:lib/jquery.ui.widget.js', output='lib/jquery.ui.widget.min.js'),
     Uglify('h:lib/jquery.ui.autocomplete.js', output='lib/jquery.ui.autocomplete.min.js'),
     Uglify('h:lib/jquery.ui.core.js', output='lib/jquery.ui.core.min.js'),
-    Uglify('h:lib/jquery.ui.widget.js', output='lib/jquery.ui.widget.min.js'),
     Uglify('h:lib/jquery.ui.menu.js', output='lib/jquery.ui.menu.min.js'),
     Uglify('h:lib/jquery.ui.position.js', output='lib/jquery.ui.position.min.js'),
+    Uglify('h:lib/jquery.ui.tooltip.js', output='lib/jquery.ui.tooltip.min.js'),
     CSS('h:lib/jquery-ui-smoothness.css', output='lib/jquery-ui-smoothness.min.css'),
 )
 
@@ -212,6 +216,13 @@ visualsearch = Bundle(
     CSS('h:lib/visualsearch.css', output='lib/visualsearch.min.css'),
 )
 
+momentjs = Bundle(
+    Uglify('lib/moment-with-langs.js', output='lib/moment.min.js'),
+    Uglify('lib/jstz.js', output='lib/jstz.min.js'),
+    Uglify('lib/moment-timezone.js', output='lib/moment-timezone.min.js'),
+    Uglify('lib/moment-timezone-data.js', output='lib/moment-timezone-data.min.js')
+)
+
 uuid = Uglify('lib/uuid.js', output='lib/uuid.min.js')
 
 # SCSS
@@ -224,6 +235,7 @@ app = Bundle(
     jquery,
     jquery_mousewheel,
     angular,
+    angular_animate,
     angular_bootstrap,
     angular_resource,
     angular_route,
@@ -245,6 +257,7 @@ app = Bundle(
     sockjs,
     jquery_ui,
     jquery_ui_effects,
+    momentjs,
     tagit,
     visualsearch,
     uuid,
