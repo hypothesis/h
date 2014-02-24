@@ -859,6 +859,51 @@ blockquote {
   }
 }
 
+//COLLAPSED REPLIES////////////////////////////////
+.reply-count:hover {
+  color: $linkColorHover;
+  text-decoration: none;
+}
+
+.collapsedreply {
+  display: none;
+}
+
+.new-reply {
+  color: $linkColorHover;
+}
+
+.hidereplies {
+  display: block;
+
+  li {
+    display: none;
+
+    &.collapsedreplies {
+      display: none !important;
+    }
+  }
+}
+
+.collapsedreplies {
+    @extend .collapsed;
+    display: block !important;
+
+  .collapsedreply{
+      display: inline;
+      font-style: italic;
+      margin-right: 5px;
+      margin-left: 5px;
+  }
+  & > .annotation {
+    .body {
+      display: none;
+    }
+    .magicontrols {
+      display: none;
+    }
+  }
+}
 
 //MAGICONTROL////////////////////////////////
 .magicontrol {

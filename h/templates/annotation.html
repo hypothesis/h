@@ -128,6 +128,13 @@
      count="thread.flattenChildren().length"
      when="{one: '1 reply', other: '{} replies'}"
      ng-click="toggleCollapsed($event)" />
+  <a class="reply-count small"
+     href=""
+     ng-pluralize=""
+     ng-show="thread.children.length && replies!='false'"
+     count="thread.flattenChildren().filter(newReply).length"
+     when="{one: '1 reply', other: '{} new replies'}"
+     ng-click="toggleCollapsed($event)" />
 
   <!-- Bottom control strip -->
   <a class="small magicontrol reply-icon" href="" title="Reply"

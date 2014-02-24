@@ -421,8 +421,6 @@ class App
         p = $scope.auth.persona
         user = if p? then "acct:" + p.username + "@" + p.provider else ''
         unless data instanceof Array then data = [data]
-        $scope.$apply =>
-          #if data.length > 0 then $scope.new_updates += 1
 
         if $scope.socialView.name is 'single-player'
           owndata = data.filter (d) -> d.user is user
@@ -449,6 +447,7 @@ class App
           # XXX: Temporary workaround until solving the race condition for annotationsLoaded event
           # Between threading and bridge plugins
           for annotation in data
+            annotation._new = true
             annotator.plugins.Threading.thread annotation
 
           $scope.markAnnotationUpdate data
@@ -656,6 +655,8 @@ class Annotation
           $scope.model.highlightText =
             $scope.model.highlightText.replace regexp, annotator.highlighter
 
+    $scope.newReply = (element) ->
+      element._new?
 
 class Editor
   this.$inject = [
