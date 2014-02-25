@@ -1,0 +1,12 @@
+A new annotation has just arrived for your page.
+
+At ${document_title} (1)
+${user} (2) on ${timestamp}
+
+${text}
+${tags}
+${path}
+
+
+(1) ${document_path}
+(2) ${user_profile}
