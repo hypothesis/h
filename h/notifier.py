@@ -6,7 +6,6 @@ from horus.models import get_session
 
 from pyramid_mailer.interfaces import IMailer
 from pyramid_mailer.message import Message
-from pyramid_mailer.testing import DummyMailer
 
 from pyramid.renderers import render
 
@@ -123,11 +122,6 @@ class CustomSearchTemplate(object):
             'rendered': rendered,
             'subject': subject
         }
-
-
-class AnnotationDummyMailer(DummyMailer):
-    def __init__(self):
-        super(AnnotationDummyMailer, self).__init__()
 
 
 class AnnotationNotifier(object):
@@ -248,6 +242,3 @@ def login_subscriptions(event):
 
 def includeme(config):
     config.scan(__name__)
-
-    #mailer = AnnotationDummyMailer()
-    #config.registry.registerUtility(mailer, IMailer)
