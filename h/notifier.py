@@ -28,7 +28,7 @@ def standalone_url(request, id):
 
 
 class ReplyTemplate(object):
-    template = 'h:templates/emails/reply_notification.pt'
+    template = 'h:templates/emails/reply_notification.txt'
 
     @staticmethod
     def _create_template_map(request, reply):
@@ -85,7 +85,7 @@ class ReplyTemplate(object):
 
 
 class CustomSearchTemplate(object):
-    template = 'h:templates/emails/custom_search.pt'
+    template = 'h:templates/emails/custom_search.txt'
 
     @staticmethod
     def _create_template_map(request, annotation):
