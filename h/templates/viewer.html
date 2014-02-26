@@ -1,11 +1,11 @@
 <ul class="sliding-panels">
   <li>
     <ul>
-      <li ng-mouseenter="focus(annotation)"
+      <li ng-mouseenter="focus(thread.message)"
           ng-mouseleave="focus()"
-          ng-repeat="annotation in annotations track by annotation.id"
+          ng-repeat="thread in threads track by thread.message.id"
           class="stream-list"
-          ng-class="annotation.$emphasis && 'card-emphasis'"
+          ng-class="thread.message.$emphasis && 'card-emphasis'"
       >
 
         <!-- Thread view -->
@@ -18,12 +18,12 @@
              >
           <a href="" class="threadexp"
              title="{{collapsed && 'Expand' || 'Collapse'}}"
-             ng-show="$parent.annotation"
+             ng-show="$parent.thread.message"
              />
 
           <!-- Excerpts -->
           <div class="excerpt"
-               ng-repeat="target in annotation.target"
+               ng-repeat="target in thread.message.target"
                ng-hide="collapsed">
             <blockquote ng-bind="target.quote" ng-hide="target.showDiff" />
             <blockquote ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
@@ -35,14 +35,14 @@
           <!-- Annotation -->
           <div class="annotation"
                name="annotation"
-               ng-model="$parent.annotation" />
+               ng-model="$parent.thread.message" />
 
           <!-- Replies -->
           <ul>
             <li class="thread"
                 ng-class="collapsed && 'collapsedreplies' || ''"
                 ng-click="toggleCollapsed($event)"
-                ng-repeat="annotation in annotation.reply_list"
+                ng-repeat="thread in thread.children"
                 ng-transclude
                 />
           </ul>
