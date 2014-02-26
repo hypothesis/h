@@ -1,19 +1,20 @@
 import re
+import logging
+import time
+import threading
+from Queue import Queue
 from urlparse import urlparse
+
 import requests
 import requests_cache
-#import Queue
-from gevent.queue import Queue
 from BeautifulSoup import BeautifulSoup
-import threading
-import time
 
 from pyramid.events import subscriber
 from pyramid.renderers import render
+
 from h import events
 from h.notifier import user_profile_url, standalone_url, AnnotationNotifier
 
-import logging
 log = logging.getLogger(__name__)
 
 
@@ -114,10 +115,13 @@ def domain_notification(event):
         log.info(notifications.qsize())
         log.info('after put')
 
-worker = threading.Thread(target=notification_worker)
-worker.daemon = True
-worker.start()
+
+def create_thread():
+    worker = threading.Thread(target=notification_worker)
+    worker.daemon = True
+    worker.start()
 
 
 def includeme(config):
+    create_thread()
     config.scan(__name__)
