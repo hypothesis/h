@@ -54,12 +54,8 @@ fi
 echo "Ensuring an up-to-date pip..."
 pip install -qU pip
 
-echo "Checking dependencies..."
-diff -q requirements.txt .installed.txt 2> /dev/null || {
-	echo "Installing dependencies (this may take a few minutes)..."
-	pip install -qr requirements.txt
-	cp requirements.txt .installed.txt
-}
+echo "Checking dependencies (may be a few minutes for first run)..."
+pip install -qr requirements.txt
 
 echo -n "Checking for Compass..."
 command -v compass || echo "...not found!"
