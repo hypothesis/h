@@ -182,12 +182,6 @@ def generate_system_reply_query(username, domain):
         "match_policy": "include_all",
         "clauses": [
             {
-                "field": "/references",
-                "operator": "leng",
-                "value": 0,
-                "case_sensitive": True
-            },
-            {
                 "field": "/parent/user",
                 "operator": "equals",
                 "value": 'acct:' + username + '@' + domain,
