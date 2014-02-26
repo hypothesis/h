@@ -110,7 +110,7 @@ class CustomSearchTemplate(object):
         username = re.search("^acct:([^@]+)", annotation['user']).group(1)
         userobj = models.User.get_by_username(request, username)
         if not userobj:
-            log.warn("Warning! User not found! " + str(username))
+            log.warn("User not found! " + str(username))
             return {'status': False}
         recipients = [userobj.email]
         rendered = CustomSearchTemplate.render(request, annotation)
