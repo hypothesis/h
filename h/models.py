@@ -169,10 +169,8 @@ class UserSubscriptions(BaseModel, Base):
     def username(self):
         return sa.Column(
             sa.Unicode(30),
-            sa.ForeignKey('%s.%s' % (
-                UserMixin.__tablename__,
-                'username'
-            ),
+            sa.ForeignKey(
+                '%s.%s' % (UserMixin.__tablename__, 'username'),
                 onupdate='CASCADE',
                 ondelete='CASCADE'
             ),
