@@ -23,7 +23,7 @@
   </div>
 
   <!-- Privacy -->
-  <privacy ng-model="$parent.model.$modelValue.permissions"
+  <privacy ng-model="model.$modelValue.permissions"
            ng-show="editing && action != 'delete'"
            class="dropdown privacy pull-right"
            name="privacy" />
@@ -67,13 +67,13 @@
   <!-- Body -->
   <div ng-show="mode=='search' && !editing">
     <markdown ng-model="model.$modelValue.highlightText"
-              ng-readonly="!$parent.editing"
+              ng-readonly="!editing"
               class="body"
               name="text" />
   </div>
   <div ng-hide="mode=='search' && !editing">
     <markdown ng-model="model.$modelValue.text"
-              ng-readonly="!$parent.editing"
+              ng-readonly="!editing"
               class="body"
               name="text" />
   </div>
