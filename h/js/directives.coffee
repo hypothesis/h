@@ -1,24 +1,17 @@
 authentication = ->
-  base =
-    username: null
-    email: null
-    password: null
-    code: null
-
-  link: (scope, elem, attr, ctrl) ->
-    angular.extend scope, base
   controller: [
     '$scope', 'authentication',
     ($scope,   authentication) ->
       $scope.$on '$reset', => angular.extend $scope.model, base
+
+      $scope.model = authentication
 
       $scope.submit = (form) ->
         return unless form.$valid
         authentication["$#{form.$name}"] ->
           $scope.$emit 'success', form.$name
   ]
-  scope:
-    model: '=authentication'
+  restrict: 'ACE'
 
 
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->

@@ -54,11 +54,9 @@
         <div data-resettable="true"
              data-tab-reveal="['forgot','activate']"
              ng-model="sheet.tab"
-             class="form-vertical tabbable">
-          <div data-authentication="auth"
-               ng-submit="submit(this[$parent.sheet.tab])">
-            <metal:main use-macro="blocks['auth-tabs']" />
-          </div>
+             ng-submit="submit(this[sheet.tab])"
+             class="authentication form-vertical tabbable">
+          <metal:main use-macro="blocks['auth-tabs']" />
           <footer ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
             <ul>
               <li>
