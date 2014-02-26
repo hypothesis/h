@@ -79,7 +79,7 @@
     <div id="wrapper">
       <!-- Angular view -->
       <div ng-view=""></div>
-      
+
       <!-- Bottombar -->
       <div class="bottombar" ng-class="frame.visible && 'shown'"
            ng-show="notifications.length">

@@ -530,6 +530,7 @@ class Hypothesis extends Annotator
   discardDrafts: ->
     return @element.injector().get('drafts').discard()
 
+
 class AuthenticationProvider
   constructor: ->
     @actions =
