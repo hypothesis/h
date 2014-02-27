@@ -5,6 +5,7 @@
 /*.db
 /*.egg-info
 /*.ini
+/*.sqlite
 /bin
 /build
 /dist
