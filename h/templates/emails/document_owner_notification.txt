@@ -1,12 +1,13 @@
-A new annotation has just arrived for your page.
-
-At ${document_title} (1)
-${user} (2) on ${timestamp}
+> ${selection}
 
 ${text}
 ${tags}
-${path}
 
 
-(1) ${document_path}
-(2) ${user_profile}
+From:
+  ${user} 
+  ${user_profile}
+On ${timestamp} at (${path})
+About ${document_path}
+--
+This is an annotation on your document from Hypothes.is / Annotator (URL here)
