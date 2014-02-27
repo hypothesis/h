@@ -121,19 +121,18 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
     top: .5em;
   }
 
+  .tab-content {
+    line-height: 1.4;
+  }
+
   &.collapsed {
     max-height: 0;
   }
 
   footer {
-    text-align: right;
-    a { @extend .small; }
-  }
-
-  footer {
+    @extend .small;
     font-family: $sansFontFamily;
     text-align: right;
-    a { @extend .small; }
   }
 
   input:not([type="submit"]) { width: 100%; }
