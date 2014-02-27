@@ -149,6 +149,10 @@ class AnnotationNotifier(object):
             if notification['status']:
                 self._send_annotation(notification['rendered'], notification['subject'], notification['recipients'])
 
+    def send_rendered_notification(self, notification):
+        if notification['status']:
+            self._send_annotation(notification['rendered'], notification['subject'], notification['recipients'])
+
     def _send_annotation(self, body, subject, recipients):
         message = Message(subject=subject,
                           sender="noreply@hypothes.is",
