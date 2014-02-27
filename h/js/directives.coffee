@@ -77,11 +77,16 @@ privacy = ->
 
       permissions
 
-    scope.model = controller
+    controller.$render = ->
+      scope.level = controller.$viewValue
+
     scope.levels = levels
+    scope.setLevel = (level) ->
+      controller.$setViewValue level
+      controller.$render()
   require: '?ngModel'
   restrict: 'E'
-  scope: true
+  scope: {}
   templateUrl: 'privacy.html'
 
 
@@ -323,16 +328,13 @@ tags = ['$window', ($window) ->
 ]
 
 notification = ['$filter', ($filter) ->
-  link: (scope, elem, attrs, controller) ->
-    return unless controller?
-
-    # Publish the controller
-    scope.model = controller
   controller: 'NotificationController'
-  priority: 100  # Must run before ngModel
   require: '?ngModel'
   restrict: 'C'
-  scope: {}
+  scope:
+    model: '=ngModel'
+    click: '&onClick'
+    close: '&onClose'
   templateUrl: 'notification.html'
 ]
 

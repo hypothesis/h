@@ -1,7 +1,7 @@
 <form name="form">
   <div class="magicontrols pull-right" ng-hide="editing">
     <!-- Timestamp -->
-    <fuzzytime ng-model="model.$viewValue.updated"></fuzzytime>
+    <fuzzytime ng-model="model.updated"></fuzzytime>
 
     <!-- More actions -->
     <div class="dropdown small show">
@@ -23,13 +23,13 @@
   </div>
 
   <!-- Privacy -->
-  <privacy ng-model="model.$modelValue.permissions"
+  <privacy ng-model="model.permissions"
            ng-show="editing && action != 'delete'"
            class="dropdown privacy pull-right"
            name="privacy" />
 
   <!-- Deletion notice -->
-  <span ng-show="!editing && model.$viewValue.deleted"
+  <span ng-show="!editing && model.deleted"
         >Annotation deleted.</span>
 
   <!-- Preface -->
@@ -37,16 +37,16 @@
     <strong ng-switch-when="delete">You may provide an explanation here.</strong>
     <!-- User -->
     <span ng-switch-default class="indicators">
-      <username ng-model="model.$modelValue.user"></username>
+      <username ng-model="model.user"></username>
       <span class="small vis-icon"
             ng-show="form.privacy.$viewValue != 'Public'"></span>
       <span class="small highlight-icon"
-            ng-hide="model.$viewValue.text || editing || model.$viewValue.deleted || model.$viewValue.tags.length"></span>
+            ng-hide="model.text || editing || model.deleted || model.tags.length"></span>
       <span class="small comment-icon"
-            ng-hide="model.$viewValue.target.length || model.$viewValue.references"></span>
-      
+            ng-hide="model.target.length || model.references"></span>
+
       <!-- collapsed replies -->
-      <fuzzytime class="collapsedreply" ng-model="model.$viewValue.updated"></fuzzytime>
+      <fuzzytime class="collapsedreply" ng-model="model.updated"></fuzzytime>
       <span class="reply-count small collapsedreply"
             ng-pluralize=""
             ng-show="thread.children.length && replies!='false'"
@@ -57,8 +57,8 @@
 
   <!-- Prompt -->
   <!-- TODO: replace with placeholder on markdown elements? -->
-  <div ng-show="model.$viewValue.deleted && !editing">
-    <ng-switch on="model.$viewValue.text.length">
+  <div ng-show="model.deleted && !editing">
+    <ng-switch on="model.text.length">
       <div ng-switch-when="0">(no reason given)</div>
       <div ng-switch-default>Reason:</div>
     </ng-switch>
@@ -66,13 +66,13 @@
 
   <!-- Body -->
   <div ng-show="mode=='search' && !editing">
-    <markdown ng-model="model.$modelValue.highlightText"
+    <markdown ng-model="model.highlightText"
               ng-readonly="!editing"
               class="body"
               name="text" />
   </div>
   <div ng-hide="mode=='search' && !editing">
-    <markdown ng-model="model.$modelValue.text"
+    <markdown ng-model="model.text"
               ng-readonly="!editing"
               class="body"
               name="text" />
@@ -83,7 +83,7 @@
 
   <!-- Tags -->
   <ul ng-readonly="!editing"
-      ng-model="model.$modelValue.tags"
+      ng-model="model.tags"
       name="tags"
       class="tags"
       placeholder="Add tags"
@@ -110,7 +110,7 @@
     </div>
   </div>
 
-  <div data-ng-bind-html="model.$viewValue.body"
+  <div data-ng-bind-html="model.body"
        data-ng-hide="editing"
        class="body" />
 
@@ -124,7 +124,7 @@
   <div class="share-dialog" data-ng-show="!editing">
     <div class="icon-input">
       <div class="go-icon">
-	<a class="launch-icon show" href="{{shared_link}}" target="_blank"></a>
+  <a class="launch-icon show" href="{{shared_link}}" target="_blank"></a>
       </div>
       <div class="share-div">
         <input class="share-text" type="text" ng-model="shared_link" readonly ng-blur="toggle()" />
@@ -139,7 +139,7 @@
           ng-show="thread.children.length && replies!='false'"
           count="thread.flattenChildren().length"
           when="{one: '1 reply', other: '{} replies'}"
-          ng-click="$parent.toggleReplies($event)" />
+          ng-click="toggleReplies($event)" />
     <a class="reply-icon show" href="" title="Reply" ng-click="reply($event)">Reply</a>
     <a class="share-icon show" href="" title="Share" ng-click="share($event)">Share</a>
     <a class="clipboard-icon show" href="" title="Edit" ng-show="auth.update" ng-click="edit($event)">Edit</a>

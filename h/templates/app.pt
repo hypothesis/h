@@ -89,7 +89,9 @@
              <div class="paper thread top-padding">
                <div class="notification bottom-padding"
                     name="notification"
-                    ng-model="$parent.notif">
+                    onClose="notif.close"
+                    onClick="notif.callback"
+                    ng-model="notif">
                </div>
              </div>
           </li>
