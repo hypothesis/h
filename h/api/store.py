@@ -3,6 +3,7 @@ try:
 except ImportError:
     import json
 
+import os
 import socket
 import re
 import urlparse
@@ -172,9 +173,16 @@ def includeme(config):
 
     if 'es.host' in settings:
         app.config['ELASTICSEARCH_HOST'] = settings['es.host']
+    elif 'ELASTICSEARCH_PORT' in os.environ:
+        app.config['ELASTICSEARCH_HOST'] = 'http%s' % (
+            os.environ['ELASTICSEARCH_PORT'][3:],
+        )
+
     if 'es.index' in settings:
         app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
+
     es.init_app(app)
+
     try:
         with app.test_request_context():
             Annotation.create_all()
