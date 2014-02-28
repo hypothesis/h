@@ -1,12 +1,19 @@
 authentication = ->
+  base =
+    username: null
+    email: null
+    password: null
+    code: null
+
+  link: (scope, elem, attr, ctrl) ->
+    angular.copy base, scope.model
   controller: [
     '$scope', 'authentication',
     ($scope,   authentication) ->
-      $scope.$on '$reset', => angular.extend $scope.model, base
-
-      $scope.model = authentication
+      $scope.$on '$reset', => angular.copy base, $scope.model
 
       $scope.submit = (form) ->
+        angular.extend authentication, $scope.model
         return unless form.$valid
         authentication["$#{form.$name}"] ->
           $scope.$emit 'success', form.$name
