@@ -10,14 +10,14 @@ class ClauseParser
     '=<': 'le'
     '<=': 'le'
     '[' : 'one_of'
-    '#' : 'matches'
+    '=~' : 'matches'
     '^' : 'first_of'
     '{' : 'match_of' # one_of but not exact search
-    '|=' : 'lene'
-    '|>' : 'leng'
-    '|>=' : 'lenge'
-    '|<' : 'lenl'
-    '|<=' : 'lenle'
+    '#=' : 'lene'
+    '#>' : 'leng'
+    '#>=' : 'lenge'
+    '#<' : 'lenl'
+    '#<=' : 'lenle'
   insensitive_operator : 'i'
 
   parse_clauses: (clauses) ->
