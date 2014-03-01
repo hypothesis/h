@@ -24,6 +24,7 @@ def includeme(config):
     config.include('h.subscribers')
     config.include('h.views')
     config.include('h.streamer')
+    config.include('h.notifier')
 
 
 def bootstrap(cfname, request=None, options=None, config_fn=None):

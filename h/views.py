@@ -23,6 +23,7 @@ from pyramid.view import view_config, view_defaults
 from h import interfaces
 from h.models import _
 from h.streamer import url_values_from_document
+from h.events import LoginEvent
 
 import logging
 log = logging.getLogger(__name__)
@@ -117,6 +118,8 @@ class AppController(BaseController):
     @view_config(request_method='POST', request_param='__formid__=login')
     def login(self):
         result = AuthController(self.request).login()
+        event = LoginEvent(self.request, self.request.user)
+        self.request.registry.notify(event)
         return self.respond(result)
 
     @view_config(request_method='POST', request_param='__formid__=register')

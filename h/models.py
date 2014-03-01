@@ -17,15 +17,45 @@ import transaction
 from pyramid_basemodel import Base, Session
 
 from pyramid.i18n import TranslationStringFactory
+
 _ = TranslationStringFactory(__package__)
 
 from sqlalchemy import func, or_
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
-from sqlalchemy.types import Integer, TypeDecorator, CHAR
+from sqlalchemy.types import Integer, TypeDecorator, CHAR, VARCHAR
+from sqlalchemy.ext.declarative import declared_attr
+import sqlalchemy as sa
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 from h import interfaces, lib
 
+
+class JSONEncodedDict(TypeDecorator):
+    """Represents an immutable structure as a json-encoded string.
+
+    Usage::
+
+        JSONEncodedDict(255)
+
+    """
+
+    impl = VARCHAR
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            value = json.dumps(value)
+
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            value = json.loads(value)
+        return value
 
 class GUID(TypeDecorator):
     """Platform-independent GUID type.
@@ -102,6 +132,10 @@ class Group(GroupMixin, Base):
 
 
 class User(UserMixin, Base):
+    @declared_attr
+    def subscriptions(self):
+        return sa.Column(sa.BOOLEAN, nullable=False, default=False)
+
     @classmethod
     def get_by_username(cls, request, username):
         session = get_session(request)
@@ -128,6 +162,42 @@ class User(UserMixin, Base):
 
 class UserGroup(UserGroupMixin, Base):
     pass
+
+
+class UserSubscriptions(BaseModel, Base):
+    @declared_attr
+    def username(self):
+        return sa.Column(
+            sa.Unicode(30),
+            sa.ForeignKey('%s.%s' % (
+                UserMixin.__tablename__,
+                'username'
+            ),
+                onupdate='CASCADE',
+                ondelete='CASCADE'
+            ),
+            nullable=False
+        )
+
+    @declared_attr
+    def query(self):
+        return sa.Column(JSONEncodedDict(4096), nullable=False)
+
+    @declared_attr
+    def template(self):
+        return sa.Column(sa.Enum('reply_notification', 'custom_search'), nullable=False, default='custom_search')
+
+    @declared_attr
+    def description(self):
+        return sa.Column(sa.VARCHAR(256), default="")
+
+    @declared_attr
+    def type(self):
+        return sa.Column(sa.Enum('system', 'user'), nullable=False, default='user')
+
+    @declared_attr
+    def active(self):
+        return sa.Column(sa.BOOLEAN, default=True, nullable=False)
 
 
 def groupfinder(userid, request):

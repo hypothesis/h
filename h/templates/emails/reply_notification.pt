@@ -1,0 +1,17 @@
+Your annotation has a new reply.
+
+At ${document_title} (1)
+${parent_user} (2) on ${parent_timestamp}
+
+${parent_text}${parent_tags}
+${parent_path}
+
+${reply_user} (3) on ${parent_timestamp} said:
+
+${reply_text}${reply_tags}
+${reply_path}
+
+
+(1) ${document_path}
+(2) ${parent_user_profile}
+(3) ${reply_user_profile}
