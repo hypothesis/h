@@ -287,6 +287,7 @@ repeatAnim = ->
           itemElm
             .css({ 'margin-left': itemElm.width() })
             .animate({ 'margin-left': '0px' }, 1500)
+      return
 
 # Directive to edit/display a tag list.
 tags = ['$window', ($window) ->
