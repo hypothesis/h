@@ -540,20 +540,20 @@ class Annotation
     $scope.cancel = ($event) ->
       $event?.stopPropagation()
       $scope.editing = false
-      drafts.remove $scope.model.$modelValue
+      drafts.remove $scope.model
       annotator.enableAnnotating drafts.isEmpty()
 
       switch $scope.action
         when 'create'
-          annotator.deleteAnnotation $scope.model.$modelValue
+          annotator.deleteAnnotation $scope.model
         else
-          $scope.model.$modelValue.text = $scope.origText
-          $scope.model.$modelValue.tags = $scope.origTags
+          $scope.model.text = $scope.origText
+          $scope.model.tags = $scope.origTags
           $scope.action = 'create'
 
     $scope.save = ($event) ->
       $event?.stopPropagation()
-      annotation = $scope.model.$modelValue
+      annotation = $scope.model
 
       # Forbid saving comments without a body (text or tags)
       if annotator.isComment(annotation) and not annotation.text and
@@ -610,14 +610,13 @@ class Annotation
       $event?.stopPropagation()
       $scope.action = 'edit'
       $scope.editing = true
-      $scope.origText = $scope.model.$modelValue.text
-      $scope.origTags = $scope.model.$modelValue.tags
-      drafts.add $scope.model.$modelValue, -> $scope.cancel()
+      $scope.origText = $scope.model.text
+      $scope.origTags = $scope.model.tags
+      drafts.add $scope.model, -> $scope.cancel()
       annotator.disableAnnotating()
 
     $scope.delete = ($event) ->
       $event?.stopPropagation()
-      annotation = $scope.model.$modelValue
       replies = $scope.thread.children?.length or 0
 
       # We can delete the annotation if it hasn't got any replies or it is
@@ -632,27 +631,26 @@ class Annotation
               annotator.plugins.Permissions.authorize 'delete', reply
                 annotator.deleteAnnotation reply
 
-          annotator.deleteAnnotation annotation
+          annotator.deleteAnnotation $scope.model
       else
         $scope.action = 'delete'
         $scope.editing = true
-        $scope.origText = $scope.model.$modelValue.text
-        $scope.origTags = $scope.model.$modelValue.tags
-        $scope.model.$modelValue.text = ''
-        $scope.model.$modelValue.tags = ''
+        $scope.origText = $scope.model.text
+        $scope.origTags = $scope.model.tags
+        $scope.model.text = ''
+        $scope.model.tags = ''
 
     $scope.$watch 'editing', -> $scope.$emit 'toggleEditing'
 
-    $scope.$watch 'model.$modelValue.id', (id) ->
+    $scope.$watch 'model.id', (id) ->
       if id?
-        annotation = $scope.model.$modelValue
-        $scope.thread = annotation.thread
+        $scope.thread = $scope.model.thread
 
         # Check if this is a brand new annotation
-        if annotation? and drafts.contains annotation
+        if drafts.contains $scope.model
           $scope.editing = true
 
-    $scope.$watch 'model.$modelValue.target', (targets) ->
+    $scope.$watch 'model.target', (targets) ->
       return unless targets
       for target in targets
         if target.diffHTML?
@@ -674,19 +672,19 @@ class Annotation
         # is not a pre-determined route map. One possibility would be to
         # unify everything so that it's relative to the app URL.
         prefix = $scope.$parent.baseUrl.replace /\/\w+\/$/, ''
-        $scope.shared_link = prefix + '/a/' + $scope.model.$modelValue.id
+        $scope.shared_link = prefix + '/a/' + $scope.model.id
         $scope.shared = false
+        return
 
-    $scope.$watchCollection 'model.$modelValue.thread.children', (newValue=[]) ->
-      annotation = $scope.model.$modelValue
-      return unless annotation
-
+    $scope.$watchCollection 'model.thread.children', (newValue=[]) ->
+      return unless $scope.model
       replies = (r.message for r in newValue)
       replies = replies.sort(annotator.sortAnnotations).reverse()
-      annotation.reply_list = replies
+      $scope.model.reply_list = replies
 
     $scope.toggle = ->
       $element.find('.share-dialog').slideToggle()
+      return
 
     $scope.share = ($event) ->
       $event.stopPropagation()
@@ -696,10 +694,10 @@ class Annotation
 
     $scope.rebuildHighlightText = ->
       if annotator.text_regexp?
-        $scope.model.$modelValue.highlightText = $scope.model.$modelValue.text
+        $scope.model.highlightText = $scope.model.text
         for regexp in annotator.text_regexp
-          $scope.model.$modelValue.highlightText =
-            $scope.model.$modelValue.highlightText.replace regexp, annotator.highlighter
+          $scope.model.highlightText =
+            $scope.model.highlightText.replace regexp, annotator.highlighter
 
 
 class Editor
@@ -845,11 +843,11 @@ class Search
     $scope.openDetails = (annotation) ->
       # Temporary workaround, until search result annotation card
       # scopes get their 'annotation' fields, too.
-      return unless annotation 
+      return unless annotation
       for p in providers
         p.channel.notify
           method: 'scrollTo'
-          params: annotation.$$tag        
+          params: annotation.$$tag
 
     refresh = =>
       $scope.search_filter = $routeParams.matched

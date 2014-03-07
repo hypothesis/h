@@ -6,19 +6,19 @@ authentication = ->
     code: null
 
   link: (scope, elem, attr, ctrl) ->
-    angular.extend scope, base
+    angular.copy base, scope.model
   controller: [
     '$scope', 'authentication',
     ($scope,   authentication) ->
-      $scope.$on '$reset', => angular.extend $scope.model, base
+      $scope.$on '$reset', => angular.copy base, $scope.model
 
       $scope.submit = (form) ->
+        angular.extend authentication, $scope.model
         return unless form.$valid
         authentication["$#{form.$name}"] ->
           $scope.$emit 'success', form.$name
   ]
-  scope:
-    model: '=authentication'
+  restrict: 'ACE'
 
 
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
@@ -84,11 +84,16 @@ privacy = ->
 
       permissions
 
-    scope.model = controller
+    controller.$render = ->
+      scope.level = controller.$viewValue
+
     scope.levels = levels
+    scope.setLevel = (level) ->
+      controller.$setViewValue level
+      controller.$render()
   require: '?ngModel'
   restrict: 'E'
-  scope: true
+  scope: {}
   templateUrl: 'privacy.html'
 
 
@@ -282,6 +287,7 @@ repeatAnim = ->
           itemElm
             .css({ 'margin-left': itemElm.width() })
             .animate({ 'margin-left': '0px' }, 1500)
+      return
 
 # Directive to edit/display a tag list.
 tags = ['$window', ($window) ->
@@ -330,16 +336,13 @@ tags = ['$window', ($window) ->
 ]
 
 notification = ['$filter', ($filter) ->
-  link: (scope, elem, attrs, controller) ->
-    return unless controller?
-
-    # Publish the controller
-    scope.model = controller
   controller: 'NotificationController'
-  priority: 100  # Must run before ngModel
   require: '?ngModel'
   restrict: 'C'
-  scope: {}
+  scope:
+    model: '=ngModel'
+    click: '&onClick'
+    close: '&onClose'
   templateUrl: 'notification.html'
 ]
 

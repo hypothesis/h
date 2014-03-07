@@ -9,29 +9,26 @@ annotation = ['$filter', 'annotator', ($filter, annotator) ->
           scope.save(e)
 
     # Watch for changes
-    scope.$watch 'model.$modelValue.id', (id) ->
-      scope.thread = annotator.threading.idTable[id]
+    scope.$watch 'model', (model) ->
+      scope.thread = annotator.threading.idTable[model.id]
 
       scope.auth = {}
       scope.auth.delete =
-        if scope.model.$modelValue? and annotator.plugins?.Permissions?
-          annotator.plugins.Permissions.authorize 'delete', scope.model.$modelValue
+        if model? and annotator.plugins?.Permissions?
+          annotator.plugins.Permissions.authorize 'delete', model
         else
           true
       scope.auth.update =
-        if scope.model.$modelValue? and annotator.plugins?.Permissions?
-          annotator.plugins.Permissions.authorize 'update', scope.model.$modelValue
+        if scope.model? and annotator.plugins?.Permissions?
+          annotator.plugins.Permissions.authorize 'update', model
         else
           true
 
-    # Publish the controller
-    scope.model = controller
-
   controller: 'AnnotationController'
-  priority: 100  # Must run before ngModel
   require: '?ngModel'
   restrict: 'C'
   scope:
+    model: '=ngModel'
     mode: '@'
     replies: '@'
   templateUrl: 'annotation.html'

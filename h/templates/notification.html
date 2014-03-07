@@ -1,7 +1,6 @@
 <div class="pull-right">
-    <div title="Close" class="cancel-icon" ng-click=model.$viewValue.close()></div>
+    <div title="Close" class="cancel-icon" ng-click="close()"></div>
 </div>
-<div ng-click="model.$viewValue.callback()"
-     class="pull-left notif-text">
- {{model.$viewValue.text}}
+<div ng-click="callback()" class="pull-left notif-text">
+ {{model.text}}
 </div>

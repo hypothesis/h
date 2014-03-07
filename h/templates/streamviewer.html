@@ -14,7 +14,7 @@
 			{{annotation.quote | elide:140}}
 		      </blockquote>
                       <blockquote ng-hide="annotation.quoteSource=='document'">
-                        <markdown ng-model="$parent.annotation.quote"
+                        <markdown ng-model="annotation.quote"
                                   ng-readonly="true"
                                   name="quote" />
 		      </blockquote>
@@ -35,7 +35,7 @@
                   {{annotation.quote}}
                 </blockquote>
                 <blockquote ng-hide="annotation.quoteSource=='document'">
-                  <markdown ng-model="$parent.annotation.quote"
+                  <markdown ng-model="annotation.quote"
                             ng-readonly="true"
                             name="quote" />
                 </blockquote>
@@ -59,7 +59,7 @@
                         <username ng-model="annotation.user"></username>
                       </strong>
                       <div class="body">
-                        <markdown ng-model="$parent.annotation.text"
+                        <markdown ng-model="annotation.text"
                                   ng-readonly="true"
                                   class="body"/>
                       </div>
