@@ -674,6 +674,7 @@ class Annotation
         prefix = $scope.$parent.baseUrl.replace /\/\w+\/$/, ''
         $scope.shared_link = prefix + '/a/' + $scope.model.id
         $scope.shared = false
+        return
 
     $scope.$watchCollection 'model.thread.children', (newValue=[]) ->
       return unless $scope.model
@@ -683,6 +684,7 @@ class Annotation
 
     $scope.toggle = ->
       $element.find('.share-dialog').slideToggle()
+      return
 
     $scope.share = ($event) ->
       $event.stopPropagation()
