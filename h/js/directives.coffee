@@ -356,6 +356,7 @@ username = ['$filter', '$window', ($filter, $window) ->
     scope.uclick = (event) ->
       event.stopPropagation()
       $window.open "/u/" + scope.uname
+      return
 
   require: '?ngModel'
   restrict: 'E'
