@@ -272,6 +272,7 @@ app:
           # Right now results in dependency problems
           contents:
             - js/app.coffee
+            - js/helper.coffee
             - js/controllers.coffee
             - js/flash.coffee
             - js/filters.coffee
