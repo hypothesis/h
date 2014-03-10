@@ -145,7 +145,6 @@ class AnnotationNotifier(object):
 
     def _send_annotation(self, body, subject, recipients):
         message = Message(subject=subject,
-                          sender="noreply@hypothes.is",
                           recipients=recipients,
                           body=body)
         self.mailer.send(message)
