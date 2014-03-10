@@ -264,6 +264,7 @@ app = Bundle(
                 'services',
                 'streamfilter',
                 'streamsearch',
+                'helper',
             )
         ],
         output='js/app.min.js'
