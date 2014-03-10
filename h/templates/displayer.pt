@@ -3,6 +3,7 @@
     <title>Hypothes.is</title>
     <script type="text/javascript">
         document.init_annotation = ${annotation};
+        document.init_path = "${request.resource_path(request.context)}";
     </script>
 
   </head>
