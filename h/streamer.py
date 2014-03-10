@@ -86,7 +86,8 @@ filter_schema = {
                 "field": {"type": "string", "format": "json-pointer"},
                 "operator": {
                     "type": "string",
-                    "enum": ["equals", "matches", "lt", "le", "gt", "ge", "one_of", "first_of"]
+                    "enum": ["equals", "matches", "lt", "le", "gt", "ge", "one_of", "first_of",
+                             "match_of", "lene", "leng", "lenge", "lenl", "lenle"]
                 },
                 "value": "object",
                 "case_sensitive": {"type": "boolean", "default": True},
@@ -106,6 +107,14 @@ filter_schema = {
 }
 
 
+len_operators = {
+    "lene": "=",
+    "leng": ">",
+    "lenge": ">=",
+    "lenl": "<",
+    "lenle": "<="
+}
+
 class FilterToElasticFilter(object):
     def __init__(self, filter_json, request):
         self.request = request
@@ -117,6 +126,7 @@ class FilterToElasticFilter(object):
             "query": {
                 "bool": {
                     "minimum_number_should_match": 1}}}
+        self.filter_scripts_to_add = []
 
         if len(self.filter['clauses']):
             clauses = self.convert_clauses(self.filter['clauses'])
@@ -132,6 +142,12 @@ class FilterToElasticFilter(object):
             self.query['filter'] = {"range": {"created": {"gte": converted}}}
         elif self.filter['past_data']['load_past'] == 'hits':
             self.query['size'] = self.filter['past_data']['hits']
+
+        if len(self.filter_scripts_to_add):
+            if not 'filter' in self.query:
+                self.query['filter'] = {}
+            scripts = self.filter_scripts_to_add.join(" AND ")
+            self.query['filter']['script'] = '"script": ' + scripts
 
     @staticmethod
     def equals(field, value):
@@ -212,6 +228,9 @@ class FilterToElasticFilter(object):
                         "fields": [field]
                     }
                 }
+            elif clause['operator'][0:2] == 'len':
+                script = "doc['" + field + "'].values.length " + len_operators[clause['operator']] + " " + clause[value]
+                self.filter_scripts_to_add.append(script)
             else:
                 new_clause = getattr(self, clause['operator'])(field, value)
             new_clauses.append(new_clause)
@@ -249,6 +268,26 @@ def match_of(a, b):
 setattr(operator, 'match_of', match_of)
 
 
+def lene(a, b): return len(a) == b
+setattr(operator, 'lene', lene)
+
+
+def leng(a, b): return len(a) > b
+setattr(operator, 'leng', leng)
+
+
+def lenge(a, b): return len(a) >= b
+setattr(operator, 'lenge', lenge)
+
+
+def lenl(a, b): return len(a) < b
+setattr(operator, 'lenl', lenl)
+
+
+def lenle(a, b): return len(a) <= b
+setattr(operator, 'lenle', lenle)
+
+
 class FilterHandler(object):
     def __init__(self, filter_json):
         self.filter = filter_json
@@ -256,7 +295,8 @@ class FilterHandler(object):
     # operators
     operators = {
         "equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
-        "ge": 'ge', "one_of": 'contains', "first_of": 'first_of', "match_of": 'match_of'
+        "ge": 'ge', "one_of": 'contains', "first_of": 'first_of', "match_of": 'match_of',
+        "lene": 'lene', "leng": 'leng', "lenge": 'lenge', "lenl": 'lenl', "lenle": 'lenle'
     }
 
     def evaluate_clause(self, clause, target):

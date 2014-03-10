@@ -1,6 +1,11 @@
 class ClauseParser
   filter_fields : ['references', 'text', 'user', 'uri', 'id', 'tags', 'created', 'updated']
-  operators: ['=','=>', '>=', '<=', '=<', '>', '<', '[', '#', '^', '{']
+  operators: [
+    '#<=', '#>=', '#<', '#>', '#=',
+    '=>', '>=', '<=', '=<', '>', '<',
+    '[', '=~', '^', '{',
+    '='
+  ]
   operator_mapping:
     '=': 'equals'
     '>': 'gt'
@@ -10,9 +15,14 @@ class ClauseParser
     '=<': 'le'
     '<=': 'le'
     '[' : 'one_of'
-    '#' : 'matches'
+    '=~' : 'matches'
     '^' : 'first_of'
     '{' : 'match_of' # one_of but not exact search
+    '#=' : 'lene'
+    '#>' : 'leng'
+    '#>=' : 'lenge'
+    '#<' : 'lenl'
+    '#<=' : 'lenle'
   insensitive_operator : 'i'
 
   parse_clauses: (clauses) ->
@@ -48,7 +58,7 @@ class ClauseParser
       for operator in @operators
         if (rest.indexOf operator) is 0
           oper = @operator_mapping[operator]
-          if operator is '['
+          if operator is '[' or operator is '{'
             value = rest[operator.length..].split ','
           else
             value = rest[operator.length..]
