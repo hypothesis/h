@@ -142,12 +142,13 @@ class StreamSearch
       and_or: 'and'
       operator: 'ge'
 
-  this.inject = ['$element', '$location', '$scope', '$timeout', 'streamfilter']
+  this.inject = ['$element', '$location', '$scope', '$timeout', 'baseurl','streamfilter']
   constructor: (
-    $element, $location, $scope, $timeout, streamfilter
+    $element, $location, $scope, $timeout, baseurl, streamfilter
   ) ->
-    $scope.path = window.location.protocol + '//' + window.location.hostname + ':' +
-      window.location.port + '/__streamer__'
+    init_path = document.init_path
+    $scope.path = baseurl[..-(init_path.toString().length)] + '__streamer__'
+    delete document.init_path
     $scope.empty = false
 
     # Generate client ID
@@ -307,5 +308,5 @@ class StreamSearch
       @search.searchBox.app.options.callbacks.search @search.searchBox.value(), @search.searchBox.app.searchQuery
     ,500
 
-angular.module('h.streamsearch',['h.streamfilter','h.filters','h.directives','bootstrap'])
+angular.module('h.streamsearch',['h.streamfilter','h.filters','h.directives','h.helper','bootstrap'])
   .controller('StreamSearchController', StreamSearch)
