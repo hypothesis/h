@@ -102,7 +102,7 @@ $baseFontSize: 14px;
   .svg {
     width: 100%;
     height: 100%;
-    background-image: url("../images/side_tab.svg");
+    background-image: url("../images/svg/side_tab.svg");
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 100% 100%;
@@ -146,10 +146,10 @@ $baseFontSize: 14px;
   }
 
   &.upper {
-    margin-top: -18px;
+    margin-top: -26px;
 
     .svg {
-      background-image: url("../images/up_tab.svg");
+      background-image: url("../images/svg/up_tab.svg");
     }
 
     .label {
@@ -165,7 +165,7 @@ $baseFontSize: 14px;
     margin-top: -20px;
 
     .svg {
-      background-image: url("../images/down_tab.svg");
+      background-image: url("../images/svg/down_tab.svg");
     }
 
     .label {
@@ -190,7 +190,7 @@ $baseFontSize: 14px;
     margin-top: -18px;
 
     .svg {
-      background-image: url("../images/comment_tab.svg");
+      background-image: url("../images/svg/comment_tab.svg");
     }
 
     &:hover {
@@ -275,7 +275,6 @@ $baseFontSize: 14px;
   overflow: hidden;
   height: 200px;
   left: -($heatmap-width + 18px - 7px);
-  top: 8px;
   right: 0;
   z-index: 2;
 
