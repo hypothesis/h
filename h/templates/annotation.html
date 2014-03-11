@@ -1,7 +1,7 @@
 <form name="form">
   <div class="magicontrols pull-right" ng-hide="editing">
     <!-- Timestamp -->
-    <fuzzytime ng-model="model.updated"></fuzzytime>
+    <fuzzytime annotationid="{{model.id}}" ng-model="model.updated"></fuzzytime>
 
     <!-- More actions -->
     <div class="dropdown small show">
@@ -46,7 +46,7 @@
             ng-hide="model.target.length || model.references"></span>
 
       <!-- collapsed replies -->
-      <fuzzytime class="collapsedreply" ng-model="model.updated"></fuzzytime>
+      <fuzzytime annotationid="{{model.id}}" class="collapsedreply" ng-model="model.updated"></fuzzytime>
       <span class="reply-count small collapsedreply"
             ng-pluralize=""
             ng-show="thread.children.length && replies!='false'"

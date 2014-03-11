@@ -396,7 +396,7 @@ fuzzytime = ['$document','$filter', '$window', ($document, $filter, $window) ->
       elem.tooltip(toolparams)
 
       # Generate permalink
-      id = if attr.annotationid? then attr.annotationid  else scope.model.$viewValue.id
+      id = attr.annotationid
       baseUrl = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port
       prefix = baseUrl.replace /\/\w+\/$/, ''
       scope.permalink = prefix + '/a/' + id
