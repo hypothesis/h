@@ -294,7 +294,7 @@ $baseFontSize: 14px;
 
 .annotator-toolbar.annotator-hide {
   @include transition-delay(.25s);
-  height: 32px;
+  height: 37px; // 30px height + 2px (top+bottom border) + 5px shadow
 
   li {
     @include transition-delay(.2s, 0, 0);
