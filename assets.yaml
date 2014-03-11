@@ -163,10 +163,10 @@ jquery_ui:
         - h:lib/jquery.ui.core.js
         - h:lib/jquery.ui.position.js
         - h:lib/jquery.ui.widget.js
-        - h:lib/jquery.ui.tooltip.js
         - contents:
             - h:lib/jquery.ui.autocomplete.js
             - h:lib/jquery.ui.menu.js
+            - h:lib/jquery.ui.tooltip.js
         - contents:
             - h:lib/jquery.ui.effect.js
             - h:lib/jquery.ui.effect-blind.js
