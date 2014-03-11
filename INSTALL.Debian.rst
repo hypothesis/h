@@ -8,7 +8,8 @@ To install the dependencies, run these commands:
 
 .. code-block:: bash
 
-    sudo apt-get install python-{dev,pip,virtualenv} ruby-compass coffeescript npm git libpq-dev
+    sudo apt-get install build-essential git libyaml-dev
+    sudo apt-get install python-{dev,pip,virtualenv} ruby-compass coffeescript
 
 This will install almost anything you need for development.
 The only thing you need to install manually is elasticsearch_,

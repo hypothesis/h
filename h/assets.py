@@ -10,11 +10,10 @@ if 'gevent' in sys.modules:
 
 import pyramid
 
-from webassets import Bundle
 from webassets.filter import register_filter
 from webassets.filter.cssrewrite import urlpath
 from webassets.filter.cssrewrite.base import CSSUrlRewriter
-from webassets.loaders import PythonLoader
+from webassets.loaders import YAMLLoader
 
 import logging
 log = logging.getLogger(__name__)
@@ -45,280 +44,6 @@ class CSSVersion(CSSUrlRewriter):
             resolved = self.env.resolver.resolve_source_to_url(filepath, url)
             relative = urlpath.relpath(self.output_url, resolved)
             return relative
-
-register_filter(CSSVersion)
-
-
-def Uglify(*names, **kw):
-    kw.setdefault('filters', 'uglifyjs')
-    return Bundle(*names, **kw)
-
-
-def Coffee(*names, **kw):
-    kw.setdefault('filters', 'coffeescript')
-    return Bundle(*names, **kw)
-
-
-def SCSS(*names, **kw):
-    kw.setdefault('filters', 'compass,cssrewrite,cssversion,cleancss')
-    return Bundle(*names, **kw)
-
-
-def CSS(*names, **kw):
-    kw.setdefault('filters', 'cssrewrite,cssversion,cleancss')
-    return Bundle(*names, **kw)
-
-#
-# Included dependencies
-#
-
-# Gettext
-gettext = Uglify('lib/gettext.js', output='lib/gettext.min.js')
-
-# Annotator
-annotator = Uglify('lib/annotator.js', output='lib/annotator.min.js')
-annotator_auth = Uglify(
-    'lib/annotator.auth.js',
-    output='lib/annotator.auth.min.js'
-)
-annotator_bridge = Uglify(
-    Coffee('js/plugin/bridge.coffee', output='js/plugin/bridge.js')
-)
-annotator_discovery = Uglify(
-    Coffee('js/plugin/discovery.coffee', output='js/plugin/discovery.js')
-)
-annotator_heatmap = Uglify(
-    Coffee('js/plugin/heatmap.coffee', output='js/plugin/heatmap.js')
-)
-annotator_toolbar = Uglify(
-    Coffee('js/plugin/toolbar.coffee', output='js/plugin/toolbar.js')
-)
-annotator_permissions = Uglify(
-    'lib/annotator.permissions.js',
-    output='lib/annotator.permissions.min.js'
-)
-annotator_store = Uglify(
-    'lib/annotator.store.js',
-    output='lib/annotator.store.min.js'
-)
-annotator_document = Uglify(
-    'lib/annotator.document.js',
-    output='lib/annotator.document.min.js'
-)
-annotator_dtm = Uglify(
-    Coffee('lib/dom_text_mapper.coffee', output='js/dom_text_mapper.js'),
-    'lib/annotator.domtextmapper.js',
-    output='lib/annotator.dtm.min.js'
-)
-annotator_texthl = Uglify(
-    'lib/annotator.texthighlights.js',
-    output='lib/annotator.texthighlights.min.js'
-)
-annotator_textanchors = Uglify(
-    'lib/annotator.textanchors.js',
-    output='lib/annotator.textanchors.min.js'
-)
-annotator_fuzzytext = Uglify(
-    Uglify('lib/diff_match_patch_uncompressed.js', output='lib/diff_match_patch.js'),
-    Coffee('lib/text_match_engines.coffee', output='js/text_match_engines.js'),
-    Coffee('lib/dom_text_matcher.coffee', output='js/dom_text_matcher.js'),
-    'lib/annotator.fuzzytextanchors.js',
-    output='lib/annotator.fuzzytextanchors.min.js'
-)
-annotator_pdf = Uglify(
-    Coffee('lib/page_text_mapper_core.coffee', output='js/page_text_mapper_core.js'),    
-    'lib/annotator.pdf.js',
-    output='lib/annotator.pdf.min.js'
-)
-annotator_threading = Uglify(
-    Coffee('js/plugin/threading.coffee', output='js/plugin/threading.js')
-)
-annotator_i18n = Uglify(
-    'locale/data.js',
-    output='locale/data.min.js'
-)
-
-# Angular
-angular = Uglify('lib/angular.js', output='lib/angular.min.js')
-angular_bootstrap = Uglify(
-    'lib/angular-bootstrap.js',
-    output='lib/angular-bootstrap.min.js'
-)
-angular_resource = Uglify(
-    'lib/angular-resource.js',
-    output='lib/angular-resource.min.js'
-)
-
-angular_route = Uglify(
-    'lib/angular-route.js',
-    output='lib/angular-route.min.js'
-)
-
-angular_sanitize = Uglify(
-    'lib/angular-sanitize.js',
-    output='lib/angular-sanitize.min.js'
-)
-
-# jQuery
-jquery = Uglify('lib/jquery-1.10.2.js', output='lib/jquery-1.10.2.min.js')
-jquery_mousewheel = Uglify(
-    'lib/jquery.mousewheel.js', output='lib/jquery.mousewheel.min.js'
-)
-jquery_scrollintoview = Uglify(
-    'lib/jquery.scrollintoview.js', output='lib/jquery.scrollintoview.min.js'
-)
-
-# jQuery UI
-jquery_ui = Bundle(
-    Uglify('h:lib/jquery.ui.widget.js', output='lib/jquery.ui.widget.min.js'),
-    Uglify('h:lib/jquery.ui.autocomplete.js', output='lib/jquery.ui.autocomplete.min.js'),
-    Uglify('h:lib/jquery.ui.core.js', output='lib/jquery.ui.core.min.js'),
-    Uglify('h:lib/jquery.ui.widget.js', output='lib/jquery.ui.widget.min.js'),
-    Uglify('h:lib/jquery.ui.menu.js', output='lib/jquery.ui.menu.min.js'),
-    Uglify('h:lib/jquery.ui.position.js', output='lib/jquery.ui.position.min.js'),
-    CSS('h:lib/jquery-ui-smoothness.css', output='lib/jquery-ui-smoothness.min.css'),
-)
-
-jquery_ui_effects = Bundle(
-    Uglify('h:lib/jquery.ui.effect.js', output='lib/jquery.ui.effect.min.js'),
-    Uglify('h:lib/jquery.ui.effect-blind.js', output='lib/jquery.ui.effect-blind.min.js'),
-    Uglify('h:lib/jquery.ui.effect-highlight.js', output='lib/jquery.ui.effect-highlight.min.js'),
-    Uglify('h:lib/jquery.ui.effect-forecolor-highlight.js', output='lib/jquery.ui.effect-forecolor-highlight.min.js')
-)
-
-# Polyfills
-raf = Uglify('lib/polyfills/raf.js', output='lib/polyfills/raf.min.js')
-
-# Others
-d3 = Uglify('lib/d3.js', output='lib/d3.min.js')
-deform = Bundle(
-    jquery,
-    Uglify('deform:static/scripts/deform.js', output='lib/deform.min.js'),
-)
-jschannel = Uglify('lib/jschannel.js', output='lib/jschannel.min.js')
-jwz = Uglify('lib/jwz.js', output='lib/jwz.min.js')
-pagedown = Uglify(
-    'lib/Markdown.Converter.js',
-    output='lib/Markdown.Converter.min.js'
-)
-sockjs = Uglify('h:lib/sockjs-0.3.4.js', output='lib/sockjs-client.min.js')
-tagit = Uglify('h:lib/tag-it.js', output='lib/tag-it.min.js')
-
-visualsearch = Bundle(
-    Uglify('h:lib/underscore-1.4.3.js', output='lib/underscore.min.js'),
-    Uglify('h:lib/backbone-0.9.10.js', output='lib/backbone.min.js'),
-    jquery_ui,
-    Uglify('h:lib/visualsearch.js', output='lib/visualsearch.min.js'),
-    CSS('h:lib/visualsearch.css', output='lib/visualsearch.min.css'),
-)
-
-uuid = Uglify('lib/uuid.js', output='lib/uuid.min.js')
-
-# SCSS
-css_base = ['css/base.scss']
-css_common = ['css/common.scss', 'css/responsive.scss', 'css/yui_grid.scss']
-
-
-# Main resource bundles
-app = Bundle(
-    jquery,
-    jquery_mousewheel,
-    angular,
-    angular_bootstrap,
-    angular_resource,
-    angular_route,
-    angular_sanitize,
-    gettext,
-    annotator_i18n,
-    annotator,
-    annotator_auth,
-    annotator_bridge,
-    annotator_discovery,
-    annotator_permissions,
-    annotator_store,
-    annotator_threading,
-    annotator_document,
-    jschannel,
-    jwz,
-    pagedown,
-    raf,
-    sockjs,
-    jquery_ui,
-    jquery_ui_effects,
-    tagit,
-    visualsearch,
-    uuid,
-    Uglify(
-        *[
-            Coffee('js/%s.coffee' % name,
-                   output='js/%s.js' % name)
-            for name in
-            (
-                'app',
-                'controllers',
-                'filters',
-                'flash',
-                'directives',
-                'app_directives',
-                'displayer',
-                'services',
-                'streamfilter',
-                'streamsearch',
-            )
-        ],
-        output='js/app.min.js'
-    ),
-)
-
-sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),
-               output='css/sidebar.min.css')
-
-site = Bundle(
-    app,
-    SCSS('css/site.scss', depends=(css_base + css_common),
-         output='css/site.min.css'),
-)
-
-
-# The inject bundle is intended to be loaded into pages for bootstrapping
-# the application. It sets up RPC channels for cross-domain communication
-# between frames participating in annotation by using the annotator bridge
-# plugin.
-inject = Bundle(
-    d3,
-    jquery,
-    jquery_scrollintoview,
-    jquery_ui,
-    jquery_ui_effects,
-    jschannel,
-    gettext,
-    annotator_i18n,
-    annotator,
-    annotator_bridge,
-    annotator_document,
-    annotator_heatmap,
-    annotator_texthl,
-    annotator_dtm,
-    annotator_textanchors,
-    annotator_fuzzytext,
-    annotator_pdf,
-    annotator_toolbar,
-    Uglify(
-        Coffee('js/guest.coffee', output='js/guest.js'),
-        Coffee('js/host.coffee', output='js/host.js'),
-        output='js/inject.min.js'
-    ),
-    SCSS('css/inject.scss', depends=css_base, output='css/inject.css'),
-)
-
-sidebar = SCSS('css/sidebar.scss', depends=(css_base + css_common),
-               output='css/sidebar.min.css')
-
-site = Bundle(
-    app,
-    SCSS('css/site.scss', depends=(css_base + css_common),
-         output='css/site.min.css'),
-)
 
 
 class WebassetsResourceRegistry(object):
@@ -369,6 +94,7 @@ def asset_response_subscriber(event):
 
 def includeme(config):
     config.include('pyramid_webassets')
+    register_filter(CSSVersion)
 
     env = config.get_webassets_env()
 
@@ -387,7 +113,8 @@ def includeme(config):
         asset_request=True
     )
 
-    loader = PythonLoader(config.registry.settings.get('h.assets', __name__))
+    assets_file = config.registry.settings.get('assets', 'assets.yaml')
+    loader = YAMLLoader(assets_file)
     bundles = loader.load_bundles()
     for bundle_name in bundles:
         log.info('name: ' + str(bundle_name))

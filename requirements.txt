@@ -7,6 +7,7 @@ Mako==0.8.0
 Paste==1.7.5.1
 PasteDeploy==1.5.0
 PyJWT==0.1.4
+PyYAML==3.10
 SQLAlchemy==0.8.0
 WebOb==1.2.3
 Werkzeug==0.8.3

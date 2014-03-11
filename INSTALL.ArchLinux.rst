@@ -5,7 +5,7 @@ Install the following packages:
 
 .. code-block:: bash
 
-    python2-pip python2-virtualenv libpqxx gcc git
+    python2-pip python2-virtualenv libyaml gcc git
 
 From the Arch User Repository (AUR), obtain:
 
