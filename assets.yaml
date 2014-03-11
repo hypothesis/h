@@ -107,6 +107,11 @@ angular:
   output: lib/angular.min.js
   contents:
     - h:lib/angular.js
+angular_animate:
+  filters: uglifyjs
+  output: lib/angular-animate.min.js
+  contents:
+    - h:lib/angular-animate.js
 angular_bootstrap:
   filters: uglifyjs
   output: lib/angular-bootstrap.min.js
@@ -161,6 +166,7 @@ jquery_ui:
         - contents:
             - h:lib/jquery.ui.autocomplete.js
             - h:lib/jquery.ui.menu.js
+            - h:lib/jquery.ui.tooltip.js
         - contents:
             - h:lib/jquery.ui.effect.js
             - h:lib/jquery.ui.effect-blind.js
@@ -195,6 +201,24 @@ jwz:
   output: lib/jwz.min.js
   contents:
     - h:lib/jwz.js
+momentjs:
+  contents:
+    - filters: uglifyjs
+      output: lib/moment.min.js
+      contents:
+        - h:lib/moment-with-langs.js
+    - filters: uglifyjs
+      output: lib/jstz.min.js
+      contents:
+        - h:lib/jstz.js
+    - filters: uglifyjs
+      output: lib/moment-timezone.min.js
+      contents:
+        - h:lib/moment-timezone.js
+    - filters: uglifyjs
+      output: lib/moment-timezone-data.min.js
+      contents:
+        - h:lib/moment-timezone-data.js
 pagedown:
   filters: uglifyjs
   output: lib/Markdown.Converter.min.js
@@ -240,6 +264,7 @@ app:
     - jquery
     - jquery_mousewheel
     - angular
+    - angular_animate
     - angular_bootstrap
     - angular_resource
     - angular_route
@@ -256,6 +281,7 @@ app:
     - annotator_threading
     - jschannel
     - jwz
+    - momentjs
     - pagedown
     - raf
     - sockjs

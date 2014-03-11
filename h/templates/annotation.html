@@ -1,7 +1,7 @@
 <form name="form">
   <div class="magicontrols pull-right" ng-hide="editing">
     <!-- Timestamp -->
-    <fuzzytime ng-model="model.updated"></fuzzytime>
+    <fuzzytime annotationid="{{model.id}}" ng-model="model.updated"></fuzzytime>
 
     <!-- More actions -->
     <div class="dropdown small show">
@@ -46,12 +46,17 @@
             ng-hide="model.target.length || model.references"></span>
 
       <!-- collapsed replies -->
-      <fuzzytime class="collapsedreply" ng-model="model.updated"></fuzzytime>
+      <fuzzytime annotationid="{{model.id}}" class="collapsedreply" ng-model="model.updated"></fuzzytime>
       <span class="reply-count small collapsedreply"
             ng-pluralize=""
             ng-show="thread.children.length && replies!='false'"
             count="thread.flattenChildren().length"
             when="{one: '1 reply', other: '{} replies'}" />
+      <span class="reply-count new-reply small collapsedreply"
+            ng-pluralize=""
+            ng-show="thread.children.length && replies!='false'"
+            count="thread.flattenChildren().filter(newReply).length"
+            when="{0: '', one: '1 new reply', other: '{} new replies'}" />
     </span>
   </header>
 
@@ -139,6 +144,12 @@
           ng-show="thread.children.length && replies!='false'"
           count="thread.flattenChildren().length"
           when="{one: '1 reply', other: '{} replies'}"
+          ng-click="toggleReplies($event)" />
+    <span class="reply-count new-reply"
+          ng-pluralize=""
+          ng-show="thread.children.length && replies!='false'"
+          count="thread.flattenChildren().filter(newReply).length"
+          when="{0: '', one: '1 new reply', other: '{} new replies'}"
           ng-click="toggleReplies($event)" />
     <a class="reply-icon show" href="" title="Reply" ng-click="reply($event)">Reply</a>
     <a class="share-icon show" href="" title="Share" ng-click="share($event)">Share</a>
