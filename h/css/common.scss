@@ -459,19 +459,6 @@ blockquote {
   @include fonticon("\2a", left);
 }
 
-.cancel-icon {
-  position: relative;
-  top: 2px;
-  width: 11px; height: 11px;
-  background-position: center 0;
-  background-repeat: no-repeat;
-  background-image: url(../images/embed/icons/cancel_search.png?1311104738);
-  cursor: pointer;
-  &:hover {
-    background-position: center -11px;
-  }
-}
-
 .loading-icon {
   text-align: center
 }
@@ -589,7 +576,6 @@ blockquote {
   position: fixed;
   left: 0;
   right: 0;
-  top: 8px;
   z-index: 5;
 
   .barbutton {
@@ -627,7 +613,7 @@ blockquote {
 .content {
   margin: 0 auto;
   padding: 16px;
-  padding-top: 44px;
+  padding-top: 36px;
 
   .domain {
     margin: 3px 0 4px;
@@ -1247,6 +1233,32 @@ h3.stream {
   }
 }
 
+.VS-search .VS-icon {
+  background-repeat: no-repeat;
+  background-position: center center;
+  vertical-align: middle;
+  width: 16px; height: 16px;
+}
+
+.VS-search .VS-icon-cancel {
+  width: 11px; height: 11px;
+  background-position: center 0;
+  background-image: url(../images/svg/cancel.svg);
+  background-size: contain;
+  cursor: pointer;
+}
+
+.VS-search .VS-icon-cancel:hover {
+  background-image: url(../images/svg/cancel_black.svg);
+}
+
+.VS-search .VS-icon-search {
+  width: 12px; 
+  height: 12px;
+  background-image: url(../images/svg/search.svg);
+  background-size: contain;
+}
+
 .thread {
   .load-more {
     @include pie-clearfix;
@@ -1264,7 +1276,7 @@ h3.stream {
 .magnify-glass .VS-icon-search:hover {
   width:12px;
   height:12px;
-  background-image:url(../images/embed/icons/search_glyph_dark.png);
+  background-image: url(../images/svg/search_dark.svg);
   cursor: pointer;
 }
 

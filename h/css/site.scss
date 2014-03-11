@@ -63,12 +63,10 @@ ol {
 }
 
 .content {
-  @include respond-to(handhelds) {
-    padding: 3em 1em;
-  }
+  padding: 2.5em 1em;
 
   @include respond-to(tablets) {
-    padding: 4em;
+    padding: 2.5em 4em 4em 4em;
     margin: auto;
     max-width: $break-large;
   }
@@ -79,12 +77,17 @@ ol {
   .inner {
     margin: 0 auto;
     max-width: $break-large;
+    padding-left: 3.6em;
+    padding-right: 3.6em;
     @include respond-to(tablets) {
+      padding-left: 3.6em;
+      padding-right: 3.6em;
       margin: 0 auto;
       max-width: $break-large;
     }
     @include respond-to(wide-handhelds handhelds) {
-      padding: 0 8px;
+      padding-left: 0.9em;
+      padding-right: 0.9em;
       margin: 0 auto;
       max-width: $break-large;
     }
