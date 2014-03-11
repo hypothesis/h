@@ -10,7 +10,6 @@ if 'gevent' in sys.modules:
 
 import pyramid
 
-from webassets import Bundle
 from webassets.filter import register_filter
 from webassets.filter.cssrewrite import urlpath
 from webassets.filter.cssrewrite.base import CSSUrlRewriter
