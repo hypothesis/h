@@ -284,6 +284,8 @@ class StreamSearch(BaseController):
 
 
 def includeme(config):
+    config.include('pyramid_chameleon')
+
     config.add_view(
         'horus.views.AuthController',
         attr='login',
