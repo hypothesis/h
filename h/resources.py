@@ -10,7 +10,7 @@ from pyramid import httpexceptions
 
 from zope.interface import implementer
 
-from h import interfaces
+from h import interfaces, security
 
 import logging
 log = logging.getLogger(__name__)
