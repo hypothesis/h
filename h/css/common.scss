@@ -535,7 +535,8 @@ blockquote {
   @include border-radius(1px);
   background: $white;
   border: solid 1px $grayLighter;
-  margin-top: -1px;
+  line-height: 1.4;
+  margin-top: -2px;
   padding: 16px;
   position: relative;
 
