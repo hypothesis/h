@@ -84,26 +84,3 @@ def create_app(settings):
 def main(global_config, **settings):
     settings.update(global_config)
     return create_app(settings)
-
-
-def server(app, gcfg=None, host="127.0.0.1", port=None, *args, **kwargs):
-    # Workaround for gunicorn #540
-    # Remove after updating gunicorn > 17.5
-    from gunicorn.config import get_default_config_file
-    from gunicorn.app.pasterapp import PasterServerApplication
-
-    cfgfname = kwargs.pop('config', get_default_config_file())
-
-    paste_server = PasterServerApplication(
-        app,
-        gcfg=gcfg,
-        host=host,
-        port=port,
-        *args,
-        **kwargs
-    )
-
-    if cfgfname:
-        paste_server.load_config_from_file(cfgfname)
-
-    paste_server.run()

@@ -53,9 +53,6 @@ setup(
         'paste.app_factory': [
             'main=h:main'
         ],
-        'paste.server_runner': [
-            'main=h:server'
-        ],
         'console_scripts': [
             'hypothesis=h.script:main'
         ],
