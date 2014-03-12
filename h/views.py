@@ -95,7 +95,8 @@ class AnnotationController(BaseController):
 @view_defaults(
     accept='application/json',
     context='h.resources.RootFactory',
-    layout='site',
+    layout='app',
+    name='app',
     renderer='json',
 )
 class AppController(BaseController):

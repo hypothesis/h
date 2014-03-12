@@ -86,10 +86,6 @@ class RootFactory(InnerResource):
         super(RootFactory, self).__init__(request)
 
     @property
-    def app(self):
-        return self
-
-    @property
     def embed(self):
         env = {
             pkg: json.dumps(self.request.webassets_env[pkg].urls())
