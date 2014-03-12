@@ -47,7 +47,7 @@ def home(request):
 
 @view_config(route_name='help', layout='site', renderer='templates/help.pt')
 def my_view(request):
-    return find_resource(request.context, '/app').embed
+    return request.root.embed
 
 
 @view_defaults(context='h.resources.Annotation', layout='site')
