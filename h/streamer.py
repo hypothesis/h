@@ -41,6 +41,7 @@ def check_favicon(icon_link, parsed_uri, domain):
 
     return icon_link
 
+
 def url_values_from_document(annotation):
     title = annotation['uri']
     icon_link = ""
@@ -66,6 +67,20 @@ def url_values_from_document(annotation):
         'source_stripped': domain_stripped,
         'favicon_link': icon_link
     }
+
+
+def parent_values(annotation, request):
+    if 'references' in annotation:
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        parent = store.read(annotation['references'][-1])
+        if not ('quote' in parent):
+            grandparent = store.read(parent['references'][-1])
+            parent['quote'] = grandparent['text']
+
+        return parent
+    else:
+        return {}
 
 filter_schema = {
     "type": "object",
@@ -317,7 +332,7 @@ class FilterHandler(object):
                 cval = clause['value']
                 fval = field_value
 
-            reversed = False
+            reversed_order = False
             # Determining operator order
             # Normal order: field_value, clause['value'] (i.e. condition created > 2000.01.01)
             # Here clause['value'] = '2001.01.01'. The field_value is target['created']
@@ -327,14 +342,14 @@ class FilterHandler(object):
             # Reversed operator order for contains (b in a)
             if type(cval) is list or type(fval) is list:
                 if clause['operator'] == 'one_of' or clause['operator'] == 'matches':
-                    reversed = True
+                    reversed_order = True
                     # But not in every case. (i.e. tags matches 'b')
                     # Here field_value is a list, because an annotation can have many tags
                     # And clause['value'] is 'b'
                     if type(field_value) is list:
-                        reversed = False
+                        reversed_order = False
 
-            if reversed:
+            if reversed_order:
                 return getattr(operator, self.operators[clause['operator']])(cval, fval)
             else:
                 return getattr(operator, self.operators[clause['operator']])(fval, cval)
@@ -455,8 +470,8 @@ def after_action(event):
             return
 
         annotation = event.annotation
-
         annotation.update(url_values_from_document(annotation))
+        annotation['parent'] = parent_values(annotation, request)
 
         manager = request.get_sockjs_manager()
         for session in manager.active_sessions():
@@ -464,12 +479,8 @@ def after_action(event):
                 if not has_permission('read', annotation, session.request):
                     continue
 
-                registry = session.request.registry
-                store = registry.queryUtility(interfaces.IStoreClass)(session.request)
                 if 'references' in annotation:
-                    parent = store.read(annotation['references'][-1])
-                    if 'text' in parent:
-                        annotation['quote'] = parent['text']
+                    annotation['quote'] = annotation['parent']['text']
 
                 flt = session.filter
                 if not (flt and flt.match(annotation, action)):
