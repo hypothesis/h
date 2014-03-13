@@ -9,20 +9,15 @@ class App
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
-    'annotator', 'authentication', 'streamfilter'
+    'annotator', 'authentication', 'baseurl', 'streamfilter'
   ]
   constructor: (
     $element, $filter, $http, $location, $rootScope, $scope, $timeout
-    annotator, authentication, streamfilter
+    annotator, authentication, baseurl, streamfilter
   ) ->
-    # Get the base URL from the base tag or the app location
-    baseUrl = angular.element('head base')[0]?.href
-    baseUrl ?= ($location.absUrl().replace $location.url(), '')
-
-    # Strip an empty hash and end in exactly one slash
-    baseUrl = baseUrl.replace /#$/, ''
-    baseUrl = baseUrl.replace /\/*$/, '/'
-    $scope.baseUrl = baseUrl
+    init_path = document.init_path
+    $scope.baseurl = baseurl[..-(init_path.toString().length)] + '__streamer__'
+    delete document.init_path
 
     {plugins, host, providers} = annotator
 
@@ -469,12 +464,6 @@ class App
 
     $scope.initUpdater = ->
       $scope.new_updates = 0
-      # Quick hack until we unify all the routes.
-      # We need to eliminate the distinction between the app and the site
-      # because it's not useful. The site is the app, stupid!
-      # Then everything will be relative to the same base.
-      path = $scope.baseUrl.replace(/\/\w+\/$/, '/')
-      path = "#{path}__streamer__"
 
       # Collect all uris we should watch
       uris = (e for e of annotator.plugins.Store.entities).join ','
@@ -486,7 +475,7 @@ class App
           .setClausesParse('uri:[' + uris)
           .getFilter()
 
-      $scope.updater = new SockJS(path)
+      $scope.updater = new SockJS($scope.baseurl)
 
       $scope.updater.onopen = =>
         sockmsg =

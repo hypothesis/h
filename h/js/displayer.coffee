@@ -9,12 +9,15 @@ get_quote = (annotation) ->
   quote
 
 class Displayer
-  path: window.location.protocol + '//' + window.location.hostname + ':' +
-    window.location.port + '/__streamer__'
   idTable : {}
 
-  this.$inject = ['$scope','$element','$timeout','streamfilter']
-  constructor: ($scope, $element, $timeout, streamfilter) ->
+  this.$inject = ['$scope','$element','$timeout','baseurl', 'streamfilter']
+  constructor: ($scope, $element, $timeout, baseurl, streamfilter) ->
+    # Set streamer url
+    init_path = document.init_path
+    @path = baseurl[..-(init_path.toString().length)] + '__streamer__'
+    delete document.init_path
+
     # Generate client ID
     buffer = new Array(16)
     uuid.v4 null, buffer, 0
@@ -137,5 +140,5 @@ class Displayer
     document.init_annotation = null
     $scope.open()
 
-angular.module('h.displayer',['h.streamfilter','h.filters','h.directives','bootstrap'])
+angular.module('h.displayer',['h.streamfilter','h.filters','h.directives', 'h.helper','bootstrap'])
   .controller('DisplayerCtrl', Displayer)
