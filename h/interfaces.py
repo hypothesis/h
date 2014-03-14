@@ -65,3 +65,7 @@ class IActivateForm(Interface):
 
 class IActivateSchema(Interface):
     pass
+
+
+class IStreamResource(Interface):
+    pass

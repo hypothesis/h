@@ -17,14 +17,15 @@ log = logging.getLogger(__name__)
 
 
 @implementer(ILocation)
-class BaseResource(object):
+class BaseResource(dict):
     """Base Resource class from which all resources are derived"""
 
     __name__ = None
     __parent__ = None
 
-    def __init__(self, request):
+    def __init__(self, request, **kwargs):
         self.request = request
+        self.update(kwargs)
 
 
 class InnerResource(BaseResource):
@@ -72,7 +73,22 @@ class InnerResource(BaseResource):
         raise KeyError(name)
 
 
-class RootFactory(InnerResource):
+@implementer(interfaces.IStreamResource)
+class Stream(BaseResource):
+    pass
+
+
+class UserStreamFactory(BaseResource):
+    def __getitem__(self, key):
+        return Stream(self.request, stream_type='user', stream_key=key)
+
+
+class TagStreamFactory(BaseResource):
+    def __getitem__(self, key):
+        return Stream(self.request, stream_type='tag', stream_key=key)
+
+
+class RootFactory(Stream, InnerResource):
     @property
     def __acl__(self):
         defaultlist = [
@@ -82,8 +98,6 @@ class RootFactory(InnerResource):
         ]
         return defaultlist
 
-    def __init__(self, request):
-        super(RootFactory, self).__init__(request)
 
     @property
     def embed(self):
@@ -220,10 +234,6 @@ class Annotation(BaseResource, dict):
         return self._nestlist(childTable.get(self['id']), childTable)
 
 
-class StreamSearch(BaseResource, dict):
-    pass
-
-
 class AnnotationFactory(BaseResource):
     def __getitem__(self, key):
         request = self.request
@@ -247,31 +257,11 @@ class AnnotationFactory(BaseResource):
         return annotation
 
 
-class Stream(BaseResource, dict):
-    pass
-
-
-class UserStreamFactory(BaseResource):
-    def __getitem__(self, key):
-        request = self.request
-        request.stream_type = 'user'
-        request.stream_key = key
-        return Stream(request)
-
-
-class TagStreamFactory(BaseResource):
-    def __getitem__(self, key):
-        request = self.request
-        request.stream_type = 'tag'
-        request.stream_key = key
-        return Stream(request)
-
-
 def includeme(config):
     config.set_root_factory(RootFactory)
     config.add_route('index', '/')
     RootFactory.a = AnnotationFactory
-    RootFactory.stream = StreamSearch
+    RootFactory.stream = Stream
     RootFactory.u = UserStreamFactory
     RootFactory.t = TagStreamFactory
 

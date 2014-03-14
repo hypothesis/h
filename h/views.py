@@ -266,24 +266,27 @@ class AppController(BaseController):
         }
 
 
-@view_defaults(context='h.resources.Stream', layout='site')
-class Stream(BaseController):
-    @view_config(accept='text/html')
-    def __html__(self):
-        request = self.request
-        if request.stream_type == 'user':
-            return HTTPFound(location='/stream#?user=' + request.stream_key)
-        elif request.stream_type == 'tag':
-            return HTTPFound(location='/stream#?tags=' + request.stream_key)
-        else:
-            return httpexceptions.HTTPNotFound()
 
+@view_config(
+    context='h.interfaces.IStreamResource',
+    layout='site',
+    renderer='templates/streamsearch.pt',
+)
+def stream(context, request):
+    stream_type = context.get('stream_type')
+    stream_key = context.get('stream_key')
+    query = None
 
-@view_defaults(context='h.resources.StreamSearch', layout='site')
-class StreamSearch(BaseController):
-    @view_config(accept='text/html', renderer='templates/streamsearch.pt')
-    def __html__(self):
-        return self.request.context
+    if stream_type == 'user':
+        query = {'user': stream_key}
+    elif stream_type == 'tag':
+        query = {'tags': stream_key}
+
+    if query is not None:
+        location = request.resource_url(context, 'stream', query=query)
+        return HTTPFound(location=location)
+    else:
+        return context
 
 
 def includeme(config):
