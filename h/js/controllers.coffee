@@ -15,8 +15,6 @@ class App
     $element, $filter, $http, $location, $rootScope, $scope, $timeout
     annotator, authentication, baseURI, streamfilter
   ) ->
-    $scope.baseURI = baseURI[..-('/app/'.length)] + '__streamer__'
-
     {plugins, host, providers} = annotator
 
     $scope.$watch 'auth.personas', (newValue, oldValue) =>
@@ -473,7 +471,8 @@ class App
           .setClausesParse('uri:[' + uris)
           .getFilter()
 
-      $scope.updater = new SockJS($scope.baseURI)
+      streamerURI = baseURI.replace /\/\w+\/$/, '/__streamer__'
+      $scope.updater = new SockJS streamerURI
 
       $scope.updater.onopen = =>
         sockmsg =
@@ -518,8 +517,8 @@ class App
     , 5000
 
 class Annotation
-  this.$inject = ['$element', '$location', '$sce', '$scope', 'annotator', 'drafts', '$timeout', '$window']
-  constructor: ($element, $location, $sce, $scope, annotator, drafts, $timeout, $window) ->
+  this.$inject = ['$element', '$location', '$sce', '$scope', 'annotator', 'baseURI', 'drafts', '$timeout', '$window']
+  constructor: ($element, $location, $sce, $scope, annotator, baseURI, drafts, $timeout, $window) ->
     threading = annotator.threading
     $scope.action = 'create'
     $scope.editing = false
@@ -658,7 +657,7 @@ class Annotation
         # just not sure how best to do that with pyramid traversal since there
         # is not a pre-determined route map. One possibility would be to
         # unify everything so that it's relative to the app URL.
-        prefix = $scope.$parent.baseURI.replace /\/\w+\/$/, ''
+        prefix = baseURI.replace /\/\w+\/$/, ''
         $scope.shared_link = prefix + '/a/' + $scope.model.id
         $scope.shared = false
         return
