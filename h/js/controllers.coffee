@@ -15,9 +15,7 @@ class App
     $element, $filter, $http, $location, $rootScope, $scope, $timeout
     annotator, authentication, baseurl, streamfilter
   ) ->
-    init_path = document.init_path
-    $scope.baseurl = baseurl[..-(init_path.toString().length)] + '__streamer__'
-    delete document.init_path
+    $scope.baseurl = baseurl[..-('/app/'.length)] + '__streamer__'
 
     {plugins, host, providers} = annotator
 

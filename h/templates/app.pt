@@ -7,9 +7,6 @@
           type="application/annotatorsvc+json"
           tal:attributes="href service_url"
           tal:condition="service_url | nothing" />
-    <script type="text/javascript">
-        document.init_path = "${request.resource_path(request.context)}";
-    </script>
   </head>
   <body ng-app="h"
         ng-controller="AppController"
