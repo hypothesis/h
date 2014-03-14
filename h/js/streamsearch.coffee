@@ -142,12 +142,12 @@ class StreamSearch
       and_or: 'and'
       operator: 'ge'
 
-  this.inject = ['$element', '$location', '$scope', '$timeout', 'baseurl','streamfilter']
+  this.inject = ['$element', '$location', '$scope', '$timeout', 'baseURI','streamfilter']
   constructor: (
-    $element, $location, $scope, $timeout, baseurl, streamfilter
+    $element, $location, $scope, $timeout, baseURI, streamfilter
   ) ->
     init_path = document.init_path
-    $scope.path = baseurl[..-(init_path.toString().length)] + '__streamer__'
+    $scope.path = baseURI[..-(init_path.toString().length)] + '__streamer__'
     delete document.init_path
     $scope.empty = false
 
@@ -308,5 +308,5 @@ class StreamSearch
       @search.searchBox.app.options.callbacks.search @search.searchBox.value(), @search.searchBox.app.searchQuery
     ,500
 
-angular.module('h.streamsearch',['h.streamfilter','h.filters','h.directives','h.helper','bootstrap'])
+angular.module('h.streamsearch',['h.streamfilter','h.filters','h.directives','h.helpers','bootstrap'])
   .controller('StreamSearchController', StreamSearch)

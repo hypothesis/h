@@ -1,11 +1,11 @@
 imports = [
   'bootstrap'
   'ngRoute'
-  'h.helper'
   'h.controllers'
   'h.directives'
   'h.app_directives'
   'h.displayer'
+  'h.helpers'
   'h.flash'
   'h.filters'
   'h.services'
