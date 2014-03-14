@@ -146,9 +146,6 @@ class StreamSearch
   constructor: (
     $element, $location, $scope, $timeout, baseURI, streamfilter
   ) ->
-    init_path = document.init_path
-    $scope.path = baseURI[..-(init_path.toString().length)] + '__streamer__'
-    delete document.init_path
     $scope.empty = false
 
     # Generate client ID
@@ -223,7 +220,9 @@ class StreamSearch
     $scope.initStream = (filter) ->
       if $scope.sock? then $scope.sock.close()
       $scope.annotations = new Array()
-      $scope.sock = new SockJS($scope.path)
+
+      streamerURI = baseURI.replace /\/\w+(\??[^\/]*)\/$/, '/__streamer__'
+      $scope.sock = new SockJS streamerURI
 
       $scope.sock.onopen = =>
         sockmsg =
@@ -308,5 +307,13 @@ class StreamSearch
       @search.searchBox.app.options.callbacks.search @search.searchBox.value(), @search.searchBox.app.searchQuery
     ,500
 
-angular.module('h.streamsearch',['h.streamfilter','h.filters','h.directives','h.helpers','bootstrap'])
+
+configure = [
+  '$locationProvider'
+  ($locationProvider) ->
+    $locationProvider.html5Mode(true)
+]
+
+
+angular.module('h.streamsearch',['h.streamfilter','h.filters','h.directives','h.helpers','bootstrap'], configure)
   .controller('StreamSearchController', StreamSearch)
