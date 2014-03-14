@@ -517,8 +517,14 @@ class App
     , 5000
 
 class Annotation
-  this.$inject = ['$element', '$location', '$sce', '$scope', 'annotator', 'baseURI', 'drafts', '$timeout', '$window']
-  constructor: ($element, $location, $sce, $scope, annotator, baseURI, drafts, $timeout, $window) ->
+  this.$inject = [
+    '$element', '$location', '$sce', '$scope', '$timeout', '$window',
+    'annotator', 'baseURI', 'drafts'
+  ]
+  constructor: (
+     $element,   $location,   $sce,   $scope,   $timeout,   $window,
+     annotator,   baseURI,   drafts
+  ) ->
     threading = annotator.threading
     $scope.action = 'create'
     $scope.editing = false
@@ -687,8 +693,14 @@ class Annotation
 
 
 class Editor
-  this.$inject = ['$location', '$routeParams', '$sce', '$scope', 'annotator']
-  constructor: ($location, $routeParams, $sce, $scope, annotator) ->
+  this.$inject = [
+    '$location', '$routeParams', '$sce', '$scope',
+    'annotator'
+  ]
+  constructor: (
+     $location,   $routeParams,   $sce,   $scope,
+     annotator
+  ) ->
     {providers} = annotator
 
     save = ->
