@@ -114,8 +114,7 @@ class Hypothesis extends Annotator
           scope: "#{scope}:provider"
           onReady: =>
             console.log "Provider functions are ready for #{origin}"
-            if source is @element.injector().get('$window').parent
-              @host = channel
+            if source is $window.parent then @host = channel
         entities = []
         channel = this._setupXDM options
 
@@ -278,10 +277,9 @@ class Hypothesis extends Annotator
 
   _setupDocumentEvents: ->
     document.addEventListener 'dragover', (event) =>
-      for p in @providers
-        p.channel.notify
-          method: 'dragFrame'
-          params: event.screenX
+      @host?.notify
+        method: 'dragFrame'
+        params: event.screenX
 
   # Override things not used in the angular version.
   _setupDynamicStyle: -> this
