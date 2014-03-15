@@ -1,9 +1,9 @@
       <div class="noise yui3-u-1"
            ng-show="annotations.length">
-        <ul>
+        <ul class="stream-list">
           <li ng-repeat="annotation in annotations track by annotation.id"
               repeat-anim array="annotations"
-              class="paper thread stream-list">
+              class="paper thread">
             <div class="excerpt"
                  ng-hide="view"
                  ng-click="view=!view">
@@ -11,13 +11,13 @@
                 <div>
                   <div ng-show="annotation.text.length">
                       <blockquote ng-show="annotation.quoteSource=='document'">
-			{{annotation.quote | elide:140}}
-		      </blockquote>
+      {{annotation.quote | elide:140}}
+          </blockquote>
                       <blockquote ng-hide="annotation.quoteSource=='document'">
                         <markdown ng-model="annotation.quote"
                                   ng-readonly="true"
                                   name="quote" />
-		      </blockquote>
+          </blockquote>
                   </div>
                   <div class="small domain thread">
                     <a href="{{annotation.source}}">{{annotation.source_stripped}}</a>

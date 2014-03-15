@@ -566,7 +566,6 @@ blockquote {
   @include smallshadow(0, 2px);
   background: $white;
   border: solid 1px $grayLighter;
-  padding: 1em;
 }
 
 
@@ -716,25 +715,23 @@ blockquote {
 //Threaded discussion specific
 .thread {
   cursor: pointer;
+  padding: 1em;
   position: relative;
 
   & > ul {
     padding-left: $thread-padding;
     margin-left: -$thread-padding;
-
-    & > * {
-      border-left: 1px dotted $grayLight;
-      position: relative;
-
-      &:first-child {
-        margin-top: .5em;
-      }
-    }
   }
 
   .thread {
+    border-left: 1px dotted $grayLight;
     height: 100%;
+    padding: 0;
     padding-left: $thread-padding;
+
+    &:first-child {
+      margin-top: .5em;
+    }
   }
 
   .threadexp {
@@ -760,6 +757,10 @@ blockquote {
   //These are all the changes needed to collapse thread objects.
   &.collapsed {
     display: block !important;
+
+    &:hover {
+      background-color: $grayLightest;
+    }
 
     .thread {
       display: none;
@@ -902,22 +903,6 @@ blockquote {
   }
 }
 
-//SUMMARY////////////////////////////////
-//This is specific to the summary view.
-.summary {
-  position: relative;
-
-  &:hover {
-    @include smallshadow(2px, 3px, .1);
-    bottom: 1px;
-  }
-
-  &:active {
-    @include smallshadow(2px, 1px, .1);
-    bottom: 0;
-  }
-}
-
 //STREAMER////////////////////////////////
 //This is specific to the streamer page
 .main-content {
@@ -938,7 +923,13 @@ blockquote {
 }
 
 .stream-list {
-  margin-bottom: .75em;
+  & > * {
+    margin-bottom: .75em;
+  }
+
+  .card-emphasis {
+    @include box-shadow(6px 6px 8px -2px $grayLight);
+  }
 }
 
 .no-overflow {
@@ -1118,46 +1109,29 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     right: .1em;
     top: 50%;
     margin-top: -8px;
-    line-height: 17px;
   }
 
   .text-icon { display: none; }
-
-  input {
-    float: left;
-    position: relative;
-    bottom: 7px;
-  }
 
   li {
     cursor: pointer;
     display: block;
     float: left;
-    margin: .6em .2em;
     padding: .01em 1.3em .01em .3em;
     position: relative;
-    right: 2px;
-    font-size: 12px;
-    opacity:.8;
-
+    opacity: .8;
 
     &:hover { opacity: 1; }
-
-    & + li { margin-left: .1em; }
+    &.tagit-choice { margin-top: .33em; }
+    &.tagit-new { padding: 0; }
+    & + li { margin-left: .4em; }
   }
-  li.tagit-choice { margin-top: .33em; }
 
   &[readonly] {
     .tagit-new, .tagit-close { display: none; }
     li { padding-right: .3em; }
     li.tagit-choice { margin-top: .1em; }
   }
-}
-
-// Only show one line of tags in bucket view
-.summary .tags {
-  height: 2.0em;
-  overflow: hidden;
 }
 
 h3.stream {
