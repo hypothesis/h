@@ -1,49 +1,45 @@
+<!-- Thread view -->
 <ul class="stream-list">
-  <li ng-mouseenter="focus(annotation)"
-      ng-mouseleave="focus()"
-      ng-repeat="annotation in annotations track by annotation.id"
-      ng-class="annotation.$emphasis && 'card-emphasis'"
-      class="paper"
-      >
+  <li
+     ng-class="{'card-emphasis': annotation.$emphasis, 'collapsed': collapsed}"
+     ng-click="toggleCollapsed($event)"
+     ng-init="collapsed = true"
+     ng-mousedown="toggleCollapsedDown($event)"
+     ng-mouseenter="focus(annotation)"
+     ng-mouseleave="focus()"
+     ng-repeat="annotation in annotations track by annotation.id"
+     class="paper thread"
+     data-recursive=""
+     >
+    <a href="" class="threadexp"
+       title="{{collapsed && 'Expand' || 'Collapse'}}"
+       ng-show="$parent.annotation"
+       />
 
-    <!-- Thread view -->
-    <div class="thread"
-         data-recursive=""
-         ng-class="collapsed && 'collapsed' || ''"
-         ng-mousedown="toggleCollapsedDown($event)"
-         ng-click="toggleCollapsed($event)"
-         ng-init="collapsed = true"
-         >
-      <a href="" class="threadexp"
-         title="{{collapsed && 'Expand' || 'Collapse'}}"
-         ng-show="$parent.annotation"
-         />
-
-      <!-- Excerpts -->
-      <div class="excerpt"
-           ng-repeat="target in annotation.target"
-           ng-hide="collapsed">
-        <blockquote ng-bind="target.quote" ng-hide="target.showDiff" />
-        <blockquote ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
-        <div class="small pull-right" ng-show="target.diffHTML">
-          <input type="checkbox" ng-model="target.showDiff" ng-click="$event.stopPropagation()"> Show differences</input>
-        </div>
+    <!-- Excerpts -->
+    <div class="excerpt"
+         ng-repeat="target in annotation.target"
+         ng-hide="collapsed">
+      <blockquote ng-bind="target.quote" ng-hide="target.showDiff" />
+      <blockquote ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
+      <div class="small pull-right" ng-show="target.diffHTML">
+        <input type="checkbox" ng-model="target.showDiff" ng-click="$event.stopPropagation()"> Show differences</input>
       </div>
-
-      <!-- Annotation -->
-      <div class="annotation"
-           name="annotation"
-           ng-model="annotation" />
-
-      <!-- Replies -->
-      <ul>
-        <li class="thread"
-            ng-class="collapsed && 'collapsedreplies' || ''"
-            ng-click="toggleCollapsed($event)"
-            ng-repeat="annotation in annotation.reply_list"
-            ng-transclude
-            />
-      </ul>
     </div>
+
+    <!-- Annotation -->
+    <div class="annotation"
+         name="annotation"
+         ng-model="annotation" />
+
+    <!-- Replies -->
+    <ul>
+      <li class="thread"
+          ng-class="collapsed && 'collapsedreplies' || ''"
+          ng-click="toggleCollapsed($event)"
+          ng-repeat="annotation in annotation.reply_list"
+          ng-transclude
+          />
+    </ul>
   </li>
 </ul>
