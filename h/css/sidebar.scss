@@ -95,7 +95,7 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   }
 
   footer {
-    @extend .small;
+    font-size: .8em;
     font-family: $sansFontFamily;
     text-align: right;
   }
