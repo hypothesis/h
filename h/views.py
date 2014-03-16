@@ -37,21 +37,17 @@ class BaseController(horus.views.BaseController):
         self.Token = getUtility(interfaces.ITokenClass)
 
 
-@view_config(
-    layout='app',
-    renderer='templates/home.pt',
-    route_name='index',
-)
+@view_config(renderer='templates/home.pt', route_name='index')
 def home(request):
     return request.context.embed
 
 
-@view_config(route_name='help', layout='app', renderer='templates/help.pt')
+@view_config(route_name='help', renderer='templates/help.pt')
 def my_view(request):
     return request.root.embed
 
 
-@view_defaults(context='h.resources.Annotation', layout='app')
+@view_defaults(context='h.resources.Annotation')
 class AnnotationController(BaseController):
     @view_config(accept='text/html', renderer='templates/displayer.pt')
     def __html__(self):
@@ -96,7 +92,6 @@ class AnnotationController(BaseController):
 @view_defaults(
     accept='application/json',
     context='h.resources.RootFactory',
-    layout='app',
     name='app',
     renderer='json',
 )
@@ -269,7 +264,6 @@ class AppController(BaseController):
 
 @view_config(
     context='h.interfaces.IStreamResource',
-    layout='app',
     renderer='templates/streamsearch.pt',
 )
 def stream(context, request):
