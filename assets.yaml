@@ -335,6 +335,3 @@ sidebar:
     - h:css/sidebar.scss
   depends:
     - h:css/base.scss
-    - h:css/common.scss
-    - h:css/responsive.scss
-    - h:css/yui_grid.scss

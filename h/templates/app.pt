@@ -77,7 +77,7 @@
     <!-- / Toolbar -->
 
     <!-- Content -->
-    <div id="wrapper">
+    <div id="wrapper" class="content">
       <!-- Angular view -->
       <div ng-view=""></div>
 

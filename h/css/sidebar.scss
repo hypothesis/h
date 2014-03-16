@@ -3,9 +3,7 @@
 @import 'compass/layout/stretching';
 @import 'compass/reset/utilities';
 
-$baseFontSize: 14px;
-
-@import 'common';
+@import 'base';
 
 
 //ELEMENT STYLES////////////////////////////////
@@ -34,7 +32,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 //SIDEBAR LAYOUT////////////////////////////////
 #wrapper {
-  @extend .content;
   height: 100%;
   overflow-y: auto;
   position: relative;

@@ -6,6 +6,8 @@
 @import 'yui_grid';
 
 
+$baseFontSize: 16px;
+$baseLineHeight: 26px;
 $sansFontFamily: "Source Sans Pro", $sansFontFamily;
 $serifFontFamily: "Merriweather", $serifFontFamily;
 $headingsColor: $textColor;
@@ -612,31 +614,6 @@ blockquote {
 }
 
 
-
-//MAIN CONTENT///////
-.content {
-  margin: 0 auto;
-  padding: 16px;
-  padding-top: 36px;
-
-  .domain {
-    margin: 3px 0 4px;
-  }
-
-  .domain .favicon {
-    margin: 0 8px;
-  }
-
-  .page {
-    margin-bottom: 16px;
-
-    a {
-      font-weight: bold;
-    }
-  }
-}
-
-
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
@@ -1226,7 +1203,7 @@ h3.stream {
     @include pie-clearfix;
     font-family: $sansFontFamily;
     font-weight:bold;
-    font-size: 11px;
+    font-size: .8em;
   }
 }
 

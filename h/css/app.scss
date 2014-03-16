@@ -49,10 +49,12 @@ ol {
 }
 
 .content {
-  padding: 2.5em 1em;
+  margin: 0 auto;
+  padding: 36px 1em 1em;
+  padding-top: 36px;
 
   @include respond-to(tablets desktops) {
-    padding: 2.5em 4em 4em 4em;
+    padding: 36px 4em 4em;
     margin: auto;
     max-width: $break-medium;
   }
@@ -72,6 +74,22 @@ ol {
 
     hgroup h1 {
       margin-bottom: 0 !important;
+    }
+  }
+
+  .domain {
+    margin: 3px 0 4px;
+  }
+
+  .domain .favicon {
+    margin: 0 8px;
+  }
+
+  .page {
+    margin-bottom: 16px;
+
+    a {
+      font-weight: bold;
     }
   }
 }
