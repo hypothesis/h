@@ -563,7 +563,7 @@ blockquote {
 //Provides the white background upon which items sit
 .paper {
   @include border-radius(2px);
-  @include smallshadow(0, 2px);
+  @include smallshadow(0, 1px);
   background: $white;
   border: solid 1px $grayLighter;
 }

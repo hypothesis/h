@@ -81,8 +81,8 @@ $heatmap-width: 22px;
 $input-border-radius: 2px;
 
 /* Shadow mixins */
-@mixin smallshadow($a: 2px, $b: 2px, $c: .1) {
-  @include box-shadow($a $b 3px hsla(0, 0%, 0%, $c));
+@mixin smallshadow($a: 0, $b: 1px, $c: .1) {
+  @include box-shadow($a $b 1px hsla(0, 0%, 0%, $c));
 }
 
 @mixin plainform {

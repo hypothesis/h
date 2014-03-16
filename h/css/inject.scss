@@ -313,7 +313,7 @@ $baseFontSize: 14px;
 
 .annotator-toolbar li {
   @include border-radius(4px);
-  @include smallshadow(0);
+  @include smallshadow;
   @include transition(max-height .25s);
   background: $white;
   border: solid 1px $grayLighter;
