@@ -324,6 +324,7 @@ $baseFontSize: 14px;
 
   &:first-child {
     @include border-radius(4px 0 0 4px);
+    @include box-shadow(none);
     border-right-style: none;
     left: 0;
     width: 36px;

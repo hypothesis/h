@@ -565,7 +565,6 @@ blockquote {
 //Provides the white background upon which items sit
 .paper {
   @include border-radius(2px);
-  @include smallshadow(0, 1px);
   background: $white;
   border: solid 1px $grayLighter;
 }
@@ -573,7 +572,6 @@ blockquote {
 
 //TOOL BAR////////////////////////////////
 .topbar {
-  @include smallshadow(0);
   background: $white;
   border: solid 1px $grayLighter;
   border-style: solid none;
