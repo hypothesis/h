@@ -349,8 +349,8 @@ $baseFontSize: 14px;
     &.tri-icon {
       color: rgba(200, 200, 200, .3);
       text-shadow:
-      1px .8px 1.5px $white,
-      0 0 0 #000;
+      0 0 2px $grayLightest,
+      0 0 0 $gray;
 
       &:hover {
         color: rgba(235, 235, 230, .1);
@@ -359,12 +359,11 @@ $baseFontSize: 14px;
 
     &.alwaysonhighlights-icon, &.highlighter-icon, &.commenter-icon {
       text-shadow:
-      1px .8px 1.5px $white,
-      0 0 0 #000;
+      0 0 2px $grayLightest,
+      0 0 0 $gray;
 
       &:hover {
         color: $linkColorHover;
-        text-shadow: -1px .8px 1px #000;
       }
     }
   }
