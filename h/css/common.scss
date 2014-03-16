@@ -738,7 +738,7 @@ blockquote {
           display: none;
         }
 
-        .magicontrols {
+        .magicontrol {
           display: none;
         }
 
@@ -824,23 +824,16 @@ blockquote {
 }
 
 
-//MAGICONTROLS////////////////////////////////
-.magicontrols {
-  display: inline-block;
+//MAGICONTROL////////////////////////////////
+.magicontrol {
+  @include transition(opacity);
+  @include transition-duration(.15s);
+  margin: 0 .4em;
+  opacity: 0;
 
-  & > * {
-    margin: .4em;
-  }
-
-  & > .show {
-    @include transition(opacity);
+  &.open, :hover > & {
     @include transition-duration(.15s);
-    opacity: 0;
-
-    &.open, :hover > & {
-      @include transition-duration(.15s);
-      opacity: 1;
-    }
+    opacity: 1;
   }
 }
 
