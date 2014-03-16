@@ -44,9 +44,9 @@
                 <markdown ng-model="root.quote"
                           ng-readonly="true"
                           name="quote" />
-	      </blockquote>
+              </blockquote>
             </div>
-            <div class="domain thread">
+            <div class="domain">
                     <a href="{{root.source}}">{{root.source_stripped}}</a>
                     |
                     <a href="{{root.uri}}">{{root.title}}</a>
@@ -54,39 +54,38 @@
             <div class="yui3-u-1"
                  ng-class="(root.quote.length) && '' || ''"
                  ng-show="annotation.text || annotation.replies.length || annotation.tags.length">
-              <div class="thread">
-                <div class="annotation detail">
-                  <div class="magicontrols pull-right">
-                    <span ng-show="annotation.text || annotation.tags.length" class="small">{{annotation.date | fuzzyTime}}</span>
-                  </div>
-
-                  <strong>
-                    <span ng-show="annotation.deleted" class="user">Annotation deleted</span>
-                    <username ng-show="annotation.deleted || annotation.text || annotation.tags.length" ng-model="annotation.user"></username>
-                  </strong>
-
-                  <div class="body">
-                    <span ng-show="annotation.deleted">Reason:</span>
-                    <markdown ng-model="annotation.text"
-                              ng-readonly="true"
-                              name="text" />
-
-                  </div>
-
-                  <ul ng-model="annotation.tags"
-                      ng-readonly="true"
-                      name="annotator.tags"
-                      class="tags"
-                  />
-
-                  <div class="magicontrols small">
-                    <span class="reply-count"
-                       ng-pluralize=""
-                       ng-show="annotation.reply_count"
-                       count="annotation.reply_count"
-                       when="{one: '1 reply', other: '{} replies'}" />
-                  </div>
+              <div class="annotation detail">
+                <div class="magicontrols pull-right">
+                  <span ng-show="annotation.text || annotation.tags.length" class="small">{{annotation.date | fuzzyTime}}</span>
                 </div>
+
+                <strong>
+                  <span ng-show="annotation.deleted" class="user">Annotation deleted</span>
+                  <username ng-show="annotation.deleted || annotation.text || annotation.tags.length" ng-model="annotation.user"></username>
+                </strong>
+
+                <div class="body">
+                  <span ng-show="annotation.deleted">Reason:</span>
+                  <markdown ng-model="annotation.text"
+                            ng-readonly="true"
+                            name="text" />
+
+                </div>
+
+                <ul ng-model="annotation.tags"
+                    ng-readonly="true"
+                    name="annotator.tags"
+                    class="tags"
+                    />
+
+                <div class="magicontrols small">
+                  <span class="reply-count"
+                        ng-pluralize=""
+                        ng-show="annotation.reply_count"
+                        count="annotation.reply_count"
+                        when="{one: '1 reply', other: '{} replies'}" />
+                </div>
+              </div>
 
                 <script type="text/ng-template"  id="annotation_renderer.html">
                   <a href="" class="threadexp"
@@ -142,7 +141,6 @@
                       class="thread"
                       ng-class="collapsed && 'collapsed' || ''"></li>
                 </ul>
-              </div>
             </div>
           </div>
         </div>

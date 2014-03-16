@@ -19,7 +19,7 @@
                                   name="quote" />
           </blockquote>
                   </div>
-                  <div class="small domain thread">
+                  <div class="small domain">
                     <a href="{{annotation.source}}">{{annotation.source_stripped}}</a>
                     |
                     <a href="{{annotation.uri}}">{{annotation.title}}</a>
@@ -40,37 +40,33 @@
                             name="quote" />
                 </blockquote>
               </div>
-              <div class="small domain thread">
+              <div class="small domain">
                 <a href="{{annotation.source}}">{{annotation.source_stripped}}</a>
                 |
                 <a href="{{annotation.uri}}">{{annotation.title}}</a>
               </div>
             </div>
-              <div>
-                <br/>
-                <div class="small">
-                  <div class="thread">
-                    <div class="annotation detail">
-                      <div class="magicontrols pull-right">
-                        <span class="small">{{annotation.updated | fuzzyTime}}</span>
-                        <a class="launch-icon show" ng-href="{{annotation._share_link}}" target="_blank"></a>
-                      </div>
-                      <strong>
-                        <username ng-model="annotation.user"></username>
-                      </strong>
-                      <div class="body">
-                        <markdown ng-model="annotation.text"
-                                  ng-readonly="true"
-                                  class="body"/>
-                      </div>
-                      <ul ng-model="annotation.tags"
-                          ng-readonly="true"
-                          name="tags"
-                          class="tags"
-                      />
-                    </div>
+            <div class="small">
+              <div class="annotation detail">
+                <div class="magicontrols pull-right">
+                  <span class="small">{{annotation.updated | fuzzyTime}}</span>
+                  <a class="launch-icon show" ng-href="{{annotation._share_link}}" target="_blank"></a>
                 </div>
+                <strong>
+                  <username ng-model="annotation.user"></username>
+                </strong>
+                <div class="body">
+                  <markdown ng-model="annotation.text"
+                            ng-readonly="true"
+                            class="body"/>
+                </div>
+                <ul ng-model="annotation.tags"
+                    ng-readonly="true"
+                    name="tags"
+                    class="tags"
+                    />
               </div>
+            </div>
           </li>
         </ul>
       </div>
