@@ -231,16 +231,6 @@ thread = ['$window', ($window) ->
       scope.collapsed = !scope.collapsed
       scope.openDetails scope.annotation unless scope.collapsed
 
-    scope.toggleReplies = (event) ->
-      event.stopPropagation()
-      scope.collapseReplies = !scope.collapseReplies
-      # console.log "Works."
-      if scope.collapseReplies
-        elem.addClass 'hidereplies'
-      else
-        elem.removeClass 'hidereplies'
-      unless scope.collapseReplies then scope.collapsed = false
-
     scope.$on 'toggleEditing', (event) ->
       {$id, editing} = event.targetScope
       if editing

@@ -1,9 +1,6 @@
 <form name="form">
+  <!-- More actions -->
   <div class="magicontrols pull-right" ng-hide="editing">
-    <!-- Timestamp -->
-    <fuzzytime ng-model="model.updated"></fuzzytime>
-
-    <!-- More actions -->
     <div class="dropdown small show">
       <span class="dropdown-toggle" role="button" title="More actions"></span>
       <ul class="dropdown-menu pull-right" role="menu">
@@ -22,19 +19,20 @@
     </div>
   </div>
 
-  <!-- Privacy -->
-  <privacy ng-model="model.permissions"
-           ng-show="editing && action != 'delete'"
-           class="dropdown privacy pull-right"
-           name="privacy" />
-
   <!-- Deletion notice -->
   <span ng-show="!editing && model.deleted"
         >Annotation deleted.</span>
 
   <!-- Preface -->
   <header ng-switch="editing && action">
+    <!-- Privacy -->
+    <privacy ng-model="model.permissions"
+             ng-show="editing && action != 'delete'"
+             class="dropdown privacy pull-right"
+             name="privacy" />
+
     <strong ng-switch-when="delete">You may provide an explanation here.</strong>
+
     <!-- User -->
     <span ng-switch-default class="indicators">
       <username ng-model="model.user"></username>
@@ -44,15 +42,10 @@
             ng-hide="model.text || editing || model.deleted || model.tags.length"></span>
       <span class="small comment-icon"
             ng-hide="model.target.length || model.references"></span>
-
-      <!-- collapsed replies -->
-      <fuzzytime class="collapsedreply" ng-model="model.updated"></fuzzytime>
-      <span class="reply-count small collapsedreply"
-            ng-pluralize=""
-            ng-show="thread.children.length && replies!='false'"
-            count="thread.flattenChildren().length"
-            when="{one: '1 reply', other: '{} replies'}" />
     </span>
+
+    <!-- Timestamp -->
+    <fuzzytime class="pull-right" ng-model="model.updated"></fuzzytime>
   </header>
 
   <!-- Prompt -->
@@ -65,16 +58,14 @@
   </div>
 
   <!-- Body -->
-  <div ng-show="mode=='search' && !editing">
+  <div class="body" ng-show="mode=='search' && !editing">
     <markdown ng-model="model.highlightText"
               ng-readonly="!editing"
-              class="body"
               name="text" />
   </div>
-  <div ng-hide="mode=='search' && !editing">
+  <div class="body" ng-hide="mode=='search' && !editing">
     <markdown ng-model="model.text"
               ng-readonly="!editing"
-              class="body"
               name="text" />
   </div>
 
@@ -121,7 +112,7 @@
   </div>
 
   <!-- Share dialog -->
-  <div class="share-dialog" data-ng-show="!editing">
+  <div class="share-dialog" ng-show="!editing">
     <div class="icon-input">
       <div class="go-icon">
   <a class="launch-icon show" href="{{shared_link}}" target="_blank"></a>
@@ -132,19 +123,19 @@
     </div>
   </div>
 
+  <span class="reply-count small"
+        ng-pluralize=""
+        ng-show="thread.children.length && replies!='false'"
+        count="thread.flattenChildren().length"
+        when="{one: '1 reply', other: '{} replies'}"
+        ng-click="toggleCollapsed($event)" />
+
   <!-- Bottom control strip -->
   <div class="magicontrols small" ng-hide="editing">
-    <span class="reply-count"
-          ng-pluralize=""
-          ng-show="thread.children.length && replies!='false'"
-          count="thread.flattenChildren().length"
-          when="{one: '1 reply', other: '{} replies'}"
-          ng-click="toggleReplies($event)" />
     <a class="reply-icon show" href="" title="Reply" ng-click="reply($event)">Reply</a>
     <a class="share-icon show" href="" title="Share" ng-click="share($event)">Share</a>
     <a class="clipboard-icon show" href="" title="Edit" ng-show="auth.update" ng-click="edit($event)">Edit</a>
     <a class="x-icon show" href="" title="Delete" ng-show="auth.delete" ng-click="delete($event)">Delete</a>
     <a class="flag-icon show" href="" title="flag" ng-hide="auth.delete" ng-click="flag($event)">Flag</a>
-
   </div>
 </form>

@@ -34,7 +34,7 @@
     <!-- Replies -->
     <ul>
       <li class="thread"
-          ng-class="collapsed && 'collapsedreplies' || ''"
+          ng-class="{'collapsed': collapsed}"
           ng-click="toggleCollapsed($event)"
           ng-repeat="annotation in annotation.reply_list"
           ng-transclude

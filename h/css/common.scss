@@ -644,6 +644,15 @@ blockquote {
   font-family: $sansFontFamily;
   position: relative;
 
+  fuzzytime {
+    margin: 0 .4em;
+  }
+
+  .reply-count:hover {
+    color: $linkColorHover;
+    text-decoration: none;
+  }
+
   .user {
     font-weight: bold;
     font-size: 1.1em;
@@ -732,6 +741,31 @@ blockquote {
     &:first-child {
       margin-top: .5em;
     }
+
+    &.collapsed {
+      & > .annotation {
+        fuzzytime {
+          float: none;
+          font-style: italic;
+        }
+
+        header {
+          display: inline-block;
+        }
+
+        .body {
+          display: none;
+        }
+
+        .magicontrols {
+          display: none;
+        }
+
+        .reply-count {
+          font-style: italic;
+        }
+      }
+    }
   }
 
   .threadexp {
@@ -754,16 +788,11 @@ blockquote {
     background-image: url("../images/plus_1.png");
   }
 
-  //These are all the changes needed to collapse thread objects.
   &.collapsed {
     display: block !important;
 
     &:hover {
       background-color: $grayLightest;
-    }
-
-    .thread {
-      display: none;
     }
 
     & > ul {
@@ -772,7 +801,6 @@ blockquote {
     }
 
     & > .annotation {
-
       .body * {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -815,62 +843,12 @@ blockquote {
 }
 
 
-//COLLAPSED REPLIES////////////////////////////////
-.reply-count:hover {
-  color: $linkColorHover;
-  text-decoration: none;
-}
-
-.collapsedreply {
-  display: none;
-}
-
-.hidereplies {
-  display: block;
-  
-  li { 
-    display: none;
-
-    &.collapsedreplies {
-      display: none !important;
-    }
-  }
-}
-
-.collapsedreplies {
-    @extend .collapsed;
-    display: block !important;
-
-  .collapsedreply{
-      display: inline;
-      font-style: italic;
-      margin-right: 5px;
-      margin-left: 5px;
-  }
-  & > .annotation {
-    .body {
-      display: none;
-    }
-    .magicontrols {
-      display: none;
-    }
-  }
-}
-
 //MAGICONTROLS////////////////////////////////
 .magicontrols {
+  display: inline-block;
+
   & > * {
-    display: inline-block;
-    padding-right: .8em;
-  }
-
-  &.pull-right {
-    text-align: right;
-    clear: both;
-
-    & > * {
-      padding-right: 0;
-    }
+    margin: .4em;
   }
 
   & > .show {
