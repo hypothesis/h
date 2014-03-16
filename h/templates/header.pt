@@ -1,6 +1,6 @@
 <html lang="en">
   <header>
-    <img height="81px" width="81px"
+    <img height="72px" width="72px"
          src="${webassets(request, 'images/hypothelogo_square.png')[0]}" />
     <hgroup>
       <h1>Hypothes<span class="red">.</span>is</h1>
