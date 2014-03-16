@@ -47,11 +47,6 @@ class SidebarLayout(AppLayout):
     requirements = (('app', None), ('sidebar', None))
 
 
-@layout_config(name='site', template='h:templates/base.pt')
-class SiteLayout(BaseLayout):
-    requirements = (('site', None),)
-
-
 def includeme(config):
     config.include('pyramid_layout')
     config.scan(__name__)

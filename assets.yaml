@@ -282,6 +282,15 @@ app:
             - js/services.coffee
             - js/streamfilter.coffee
             - js/streamsearch.coffee
+    - filters: compass, cssrewrite, cssversion, cleancss
+      output: css/app.min.css
+      contents:
+        - h:css/app.scss
+      depends:
+        - h:css/base.scss
+        - h:css/common.scss
+        - h:css/responsive.scss
+        - h:css/yui_grid.scss
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
 # the application. It sets up RPC channels for cross-domain communication
@@ -329,16 +338,3 @@ sidebar:
     - h:css/common.scss
     - h:css/responsive.scss
     - h:css/yui_grid.scss
-
-site:
-  contents:
-    - app
-    - output: css/site.min.css
-      filters: compass, cssrewrite, cssversion, cleancss
-      contents:
-        - h:css/site.scss
-      depends:
-        - h:css/base.scss
-        - h:css/common.scss
-        - h:css/responsive.scss
-        - h:css/yui_grid.scss

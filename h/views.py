@@ -38,7 +38,7 @@ class BaseController(horus.views.BaseController):
 
 
 @view_config(
-    layout='site',
+    layout='app',
     renderer='templates/home.pt',
     route_name='index',
 )
@@ -46,12 +46,12 @@ def home(request):
     return request.context.embed
 
 
-@view_config(route_name='help', layout='site', renderer='templates/help.pt')
+@view_config(route_name='help', layout='app', renderer='templates/help.pt')
 def my_view(request):
     return request.root.embed
 
 
-@view_defaults(context='h.resources.Annotation', layout='site')
+@view_defaults(context='h.resources.Annotation', layout='app')
 class AnnotationController(BaseController):
     @view_config(accept='text/html', renderer='templates/displayer.pt')
     def __html__(self):
@@ -269,7 +269,7 @@ class AppController(BaseController):
 
 @view_config(
     context='h.interfaces.IStreamResource',
-    layout='site',
+    layout='app',
     renderer='templates/streamsearch.pt',
 )
 def stream(context, request):
