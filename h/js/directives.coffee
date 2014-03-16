@@ -213,20 +213,21 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
-thread = ->
+thread = ['$window', ($window) ->
+  # Helper -- true if selection ends inside the target and is non-empty
+  ignoreClick = (event) ->
+    sel = $window.getSelection()
+    if sel.focusNode?.compareDocumentPosition(event.target) & 8
+      if sel.toString().length
+        return true
+    return false
+
   link: (scope, elem, attr, ctrl) ->
     childrenEditing = {}
-    sel = window.getSelection()
-
-    scope.toggleCollapsedDown = (event) ->
-      event.stopPropagation()
-      scope.oldSelection = sel.toString()
 
     scope.toggleCollapsed = (event) ->
       event.stopPropagation()
-      # If we have selected something, then don't bother
-      return unless sel.toString() is scope.oldSelection
-      return unless Object.keys(childrenEditing).length is 0
+      return if (ignoreClick event) or Object.keys(childrenEditing).length
       scope.collapsed = !scope.collapsed
       scope.openDetails scope.annotation unless scope.collapsed
 
@@ -251,6 +252,8 @@ thread = ->
       else
         delete childrenEditing[$id]
   restrict: 'C'
+]
+
 
 userPicker = ->
   restrict: 'ACE'

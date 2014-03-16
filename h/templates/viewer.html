@@ -4,7 +4,6 @@
      ng-class="{'card-emphasis': annotation.$emphasis, 'collapsed': collapsed}"
      ng-click="toggleCollapsed($event)"
      ng-init="collapsed = true"
-     ng-mousedown="toggleCollapsedDown($event)"
      ng-mouseenter="focus(annotation)"
      ng-mouseleave="focus()"
      ng-repeat="annotation in annotations track by annotation.id"
