@@ -7,6 +7,7 @@
   </head>
   <body metal:fill-slot="body" class="dark-noise">
     <div id="home" class="content paper">
+      <metal:main use-macro="load: header.pt" />
       <h1>Help</h1>
       <p>This page contains general information about using the application. If it does not answer your questions please post on the <a href="https://groups.google.com/forum/#!forum/hypothesis-forum">forum</a> or simply <a href="http://hypothes.is/contact/">contact us</a>. Additionally, feel free to annotate this page so that we can improve the documentation.</p>
 
