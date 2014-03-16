@@ -376,7 +376,7 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
 
   require: '?ngModel'
   restrict: 'E'
-  template: '<span class="small">{{ftime | date:mediumDate}}</span>'
+  template: '{{ftime | date:mediumDate}}'
 ]
 
 streamviewer = [ ->

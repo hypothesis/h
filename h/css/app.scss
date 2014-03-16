@@ -3,9 +3,8 @@
 @import 'compass/css3/images';
 @import 'compass/utilities/color';
 
-$baseFontSize: 18px;
-
 @import 'common';
+
 
 body {
   @extend .noise;
