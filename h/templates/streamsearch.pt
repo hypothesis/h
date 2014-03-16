@@ -9,12 +9,12 @@
         whenscrolled="loadMore(1)">
     <span>
       <div class="topbar">
-        <div class="inner right-border">
+        <div class="inner">
           <a class="pull-left" href="/"
              ><h4>hypothes<span class="red">.</span>is</h4></a>
 
           <!-- Searchbar -->
-          <div class="search-container yui3-u-1 search-upper">
+          <div class="search-container yui3-u-1">
             <div class="visual-search visual-container"></div>
           </div>
         </div>

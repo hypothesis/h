@@ -38,12 +38,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   -webkit-overflow-scrolling: touch;
 }
 
-.topbar {
-  .inner {
-    margin: 0 8px 0 8px;
-  }
-}
-
 .bottombar {
   position: fixed;
   bottom: 0px;
@@ -105,8 +99,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 
 
 .user-picker {
-  padding: 0 .5em;
-
   .avatar {
     border-radius: 2px;
   }
