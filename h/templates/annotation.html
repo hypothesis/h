@@ -123,12 +123,13 @@
     </div>
   </div>
 
-  <span class="reply-count small"
-        ng-pluralize=""
-        ng-show="thread.children.length && replies!='false'"
-        count="thread.flattenChildren().length"
-        when="{one: '1 reply', other: '{} replies'}"
-        ng-click="toggleCollapsed($event)" />
+  <a class="reply-count small"
+     href=""
+     ng-pluralize=""
+     ng-show="thread.children.length && replies!='false'"
+     count="thread.flattenChildren().length"
+     when="{one: '1 reply', other: '{} replies'}"
+     ng-click="toggleCollapsed($event)" />
 
   <!-- Bottom control strip -->
   <div class="magicontrols small" ng-hide="editing">

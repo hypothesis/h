@@ -644,13 +644,17 @@ blockquote {
   font-family: $sansFontFamily;
   position: relative;
 
+  &:hover .reply-count {
+    color: $linkColorHover;
+  }
+
   fuzzytime {
     margin: 0 .4em;
   }
 
-  .reply-count:hover {
-    color: $linkColorHover;
-    text-decoration: none;
+  .reply-count {
+    color: $textColor;
+    &:focus { outline: 0; }
   }
 
   .user {
