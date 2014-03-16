@@ -13,24 +13,6 @@ body {
   word-wrap: break-word;
 }
 
-header {
-  @include respond-to(handhelds) {
-    text-align: center;
-  }
-
-  @include respond-to(wide-handhelds tablets desktops) {
-    @include pie-clearfix;
-    text-align: left;
-    img { float: left; }
-  }
-
-  margin-bottom: 2em;
-
-  hgroup h1 {
-    margin-bottom: 0 !important;
-  }
-}
-
 section {
   margin: 2em 0;
 }
@@ -69,6 +51,24 @@ ol {
     padding: 2.5em 4em 4em 4em;
     margin: auto;
     max-width: $break-medium;
+  }
+
+  & > header {
+    @include respond-to(handhelds) {
+      text-align: center;
+    }
+
+    @include respond-to(wide-handhelds tablets desktops) {
+      @include pie-clearfix;
+      text-align: left;
+      img { float: left; }
+    }
+
+    margin-bottom: 2em;
+
+    hgroup h1 {
+      margin-bottom: 0 !important;
+    }
   }
 }
 
