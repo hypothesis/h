@@ -7,14 +7,7 @@
   </head>
   <body metal:fill-slot="body" class="dark-noise">
     <div id="home" class="content paper">
-      <header>
-        <img height="150px" width="150px"
-             src="${webassets(request, 'images/hypothelogo_square.png')[0]}" />
-        <hgroup>
-          <h1>Hypothes<span class="red">.</span>is</h1>
-          <h2>The&#160;Internet, peer&#160;reviewed.</h2>
-        </hgroup>
-      </header>
+      <metal:main use-macro="load: header.pt" />
       <p>Welcome to Hypothesis. For general information about the project, please
         visit the <a href="http://hypothes.is">home page</a> where you can
         reserve a username, sign up for our newsletter or learn how to get

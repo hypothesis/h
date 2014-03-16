@@ -13,6 +13,10 @@ body {
   word-wrap: break-word;
 }
 
+#{nest("hgroup", "#{headings()}")} {
+  margin: 0;
+}
+
 section {
   margin: 2em 0;
 }
