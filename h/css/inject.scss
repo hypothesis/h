@@ -330,6 +330,10 @@ $baseFontSize: 14px;
     width: 36px;
   }
 
+  &.pushed {
+    @include box-shadow(none);
+  }
+
   a, a:hover, a:active, a:visited, a:link, a:link:hover {
     font-size: 1.3em;
     line-height: 28px;
@@ -343,6 +347,7 @@ $baseFontSize: 14px;
 
     text-decoration: none;
 
+    &:focus { outline: 0; }
 
     &.tri-icon {
       text-shadow:
