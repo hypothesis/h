@@ -22,8 +22,8 @@ deform-bootstrap==0.2.2
 gevent==1.0
 gevent-websocket==0.3.6
 gunicorn==18.0
-hem==0.3.2
--e git+https://github.com/eventray/horus.git@2ce62c802ef5237be1c6b1a91dbf115ec284a619#egg=horus-dev
+hem==0.4.1
+horus==0.9.15
 iso8601==0.1.4
 jsonpointer==1.0
 jsonschema==1.3.0

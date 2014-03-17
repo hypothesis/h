@@ -16,7 +16,7 @@ setup(
         'annotator>=0.9.1',
         'clik==0.3.1',
         'deform_bootstrap>=0.2.1',
-        'horus>=0.9.8',
+        'horus==0.9.15',
         'pyramid>=1.5b1',
         'pyramid_chameleon',
         'pyramid_tm>=0.4',
