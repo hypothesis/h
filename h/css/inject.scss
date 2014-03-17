@@ -343,18 +343,14 @@ $baseFontSize: 14px;
 
     text-decoration: none;
 
-    &:before {
-      color: inherit;
-    }
 
     &.tri-icon {
-      color: rgba(200, 200, 200, .3);
       text-shadow:
       0 0 2px $grayLightest,
       0 0 0 $gray;
 
       &:hover {
-        color: rgba(235, 235, 230, .1);
+        color: fade-out($grayLightest, .9);
       }
     }
 
