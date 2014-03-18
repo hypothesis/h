@@ -13,6 +13,7 @@ setup(
     packages=find_packages(),
 
     install_requires=[
+        'alembic==0.6.3',
         'annotator>=0.9.1',
         'clik==0.3.1',
         'deform_bootstrap>=0.2.1',
