@@ -218,11 +218,11 @@ class Hypothesis extends Annotator
 
     .bind('showViewer', (ctx, ids=[]) =>
       return unless this.discardDrafts()
-      this.showViewer this._getAnnotationsFromIDs ids
+      $rootScope.$apply => this.showViewer this._getAnnotationsFromIDs ids
     )
 
     .bind('updateViewer', (ctx, ids=[]) =>
-      this.updateViewer this._getAnnotationsFromIDs ids
+      $rootScope.$apply => this.updateViewer this._getAnnotationsFromIDs ids
     )
 
     .bind('setTool', (ctx, name) =>
@@ -320,7 +320,6 @@ class Hypothesis extends Annotator
       ($location, $rootScope) =>
         @buildReplyList annotations
         $rootScope.annotations = annotations
-        $rootScope.$digest()
     ]
     this
 
@@ -333,7 +332,6 @@ class Hypothesis extends Annotator
         @buildReplyList annotations
         $rootScope.annotations = annotations
         $location.path('/viewer').replace()
-        $rootScope.$digest()
     ]
     this
 
