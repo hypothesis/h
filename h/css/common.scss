@@ -1234,27 +1234,22 @@ h3.stream {
 // View and Sort tabs ////////////////////
 
 .viewsort {
-  height: 180px;
   width: 100%;
   text-align: center;
-  overflow: hidden;    
-  display: block !important;
   position: absolute;
-  top: -2px;
-  right: 0px;
+  top: 29px;
+  right: 0;
 }
 
-.viewtab, .sorttab {
+.viewsort > .dropdown {
   @include smallshadow(0);
-  border-bottom-right-radius: 2em 5em;
-  border-bottom-left-radius: 2em 5em;
+  border-bottom-right-radius: 24px 72px;
+  border-bottom-left-radius: 24px 72px;
   font-family: $sansFontFamily;
   background: $white;
-  border: solid .1em $grayLighter;
-  padding: 4px 4px 0 4px;
-  margin: -6px 3px 0 3px;
-  width: auto;
+  border: solid 1px $grayLighter;
+  padding: 0 4px;
+  margin: 0 3px;
   display: inline-block;
-  top: 31px;
   z-index: 4;   
 }
