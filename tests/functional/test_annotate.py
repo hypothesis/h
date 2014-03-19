@@ -44,10 +44,15 @@ class TestAnnotation(SeleniumTestCase):
         # make sure the username and text of the annotation are stored
         a_label.click()
         with Annotator(driver):
-            a = driver.find_elements_by_css_selector(".annotation")
-            assert len(a) == 1
-            assert a[0].find_element_by_css_selector(".user").text == "test"
-            assert a[0].find_element_by_css_selector("markdown div p").text == "test annotation"
+            annotation = (By.CLASS_NAME, 'annotation')
+            ec = expected_conditions.visibility_of_element_located(annotation)
+            w = WebDriverWait(driver, 5).until(ec)
+            annotation = driver.find_element_by_class_name('annotation')
+            user = annotation.find_element_by_class_name('user')
+            body = annotation.find_element_by_css_selector('markdown div p')
+            assert user.text == 'test'
+            assert body.text == 'test annotation'
+
 
 if __name__ == "__main__":
     unittest.main()
