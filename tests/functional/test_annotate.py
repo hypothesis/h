@@ -1,11 +1,13 @@
-from selenium import webdriver
+import re
+import time
+import unittest
+
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException
-import unittest, time, re
 
 from . import SeleniumTestCase, Annotator
+
 
 class TestAnnotation(SeleniumTestCase):
 

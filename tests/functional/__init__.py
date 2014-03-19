@@ -161,7 +161,6 @@ class SeleniumTestCase(unittest.TestCase):
 
             form.submit()
 
-
     def highlight(self, css_selector):
         """A hack to select some text on the page, and trigger the
         annotator. Ideally this should be achievable with an action chain
