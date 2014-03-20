@@ -1,6 +1,6 @@
 -e .
 Beaker==1.6.4
-BeautifulSoup==3.2.1
+BeautifulSoup4==4.2.1
 Chameleon==2.11
 Flask==0.9
 Mako==0.8.0
@@ -50,7 +50,7 @@ python-dateutil==2.1
 python-openid==2.2.5
 repoze.lru==0.6
 repoze.sendmail==4.0b2
-requests==0.11.2
+requests==2.2.1
 selenium==2.39.0
 simplejson==2.6.2
 transaction==1.4.1
