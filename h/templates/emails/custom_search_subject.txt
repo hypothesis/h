@@ -1,0 +1,1 @@
+New annotation for your query: ${document_title} (${document_path})

@@ -1,21 +1,18 @@
 import traceback
 import re
 from urlparse import urlparse
+import logging
+log = logging.getLogger(__name__)
 
 from horus.models import get_session
-
 from pyramid_mailer.interfaces import IMailer
 from pyramid_mailer.message import Message
-
 from pyramid.renderers import render
-
 from pyramid.events import subscriber
+
 from h import events, models
 from h.interfaces import IStoreClass
 from h.streamer import FilterHandler, parent_values
-
-import logging
-log = logging.getLogger(__name__)
 
 
 def user_profile_url(request, user):
@@ -27,8 +24,45 @@ def standalone_url(request, id):
     return request.application_url + '/a/' + id
 
 
-class ReplyTemplate(object):
+class NotificationTemplate(object):
+    @classmethod
+    def render(cls, request, annotation):
+        tmap = cls._create_template_map(request, annotation)
+        template = render(cls.template, tmap, request)
+        subject = render(cls.subject, tmap, request)
+        return template, subject
+
+    @staticmethod
+    def _create_template_map(request, annotation):
+        raise NotImplementedError
+
+    # Override this for checking
+    @staticmethod
+    def check_conditions(annotation, data):
+        return True
+
+    @classmethod
+    def generate_notification(cls, request, annotation, data):
+        checks = cls.check_conditions(annotation, data)
+        if not checks:
+            return {'status': False}
+        try:
+            rendered, subject = cls.render(request, annotation)
+            recipients = cls.get_recipients(request, annotation, data)
+        except:
+            log.info(traceback.format_exc())
+            return {'status': False}
+        return {
+            'status': True,
+            'recipients': recipients,
+            'rendered': rendered,
+            'subject': subject
+        }
+
+
+class ReplyTemplate(NotificationTemplate):
     template = 'h:templates/emails/reply_notification.txt'
+    subject = 'h:templates/emails/reply_notification_subject.txt'
 
     @staticmethod
     def _create_template_map(request, reply):
@@ -57,35 +91,27 @@ class ReplyTemplate(object):
         }
 
     @staticmethod
-    def render(request, reply):
-        return render(ReplyTemplate.template, ReplyTemplate._create_template_map(request, reply), request)
-
-    @staticmethod
-    def generate_notification(request, annotation, data):
-        # Get the e-mail of the owner
-        if not annotation['parent']['user']: return {'status': False}
-        # Do not notify me about my own message
-        if annotation['user'] == annotation['parent']['user']: return {'status': False}
-
+    def get_recipients(request, annotation, data):
         username = re.search("^acct:([^@]+)", annotation['parent']['user']).group(1)
         userobj = models.User.get_by_username(request, username)
         if not userobj:
-            log.warn("Warning! User not found! " + str(username))
-            return {'status': False}
-        recipients = [userobj.email]
-        rendered = ReplyTemplate.render(request, annotation)
-        subject = "A reply to you at: " + annotation['title'] + \
-                  "(" + annotation['uri'] + ")"
-        return {
-            'status': True,
-            'recipients': recipients,
-            'rendered': rendered,
-            'subject': subject
-        }
+            log.warn("User not found! " + str(username))
+            raise Exception('User not found')
+        return [userobj.email]
+
+    @staticmethod
+    def check_conditions(annotation, data):
+        # Get the e-mail of the owner
+        if not annotation['parent']['user']: return False
+        # Do not notify me about my own message
+        if annotation['user'] == annotation['parent']['user']: return False
+        # Else okay
+        return True
 
 
-class CustomSearchTemplate(object):
+class CustomSearchTemplate(NotificationTemplate):
     template = 'h:templates/emails/custom_search.txt'
+    subject = 'h:templates/emails/custom_search_subject.txt'
 
     @staticmethod
     def _create_template_map(request, annotation):
@@ -100,28 +126,13 @@ class CustomSearchTemplate(object):
         }
 
     @staticmethod
-    def render(request, annotation):
-        return render(CustomSearchTemplate.template,
-                      CustomSearchTemplate._create_template_map(request, annotation),
-                      request)
-
-    @staticmethod
-    def generate_notification(request, annotation, data):
-        username = re.search("^acct:([^@]+)", annotation['user']).group(1)
+    def get_recipients(request, annotation, data):
+        username = re.search("^acct:([^@]+)", annotation['parent']['user']).group(1)
         userobj = models.User.get_by_username(request, username)
         if not userobj:
             log.warn("User not found! " + str(username))
-            return {'status': False}
-        recipients = [userobj.email]
-        rendered = CustomSearchTemplate.render(request, annotation)
-        subject = "New annotation for your query: " + annotation['title'] + \
-                  "(" + annotation['uri'] + ")"
-        return {
-            'status': True,
-            'recipients': recipients,
-            'rendered': rendered,
-            'subject': subject
-        }
+            raise Exception('User not found')
+        return [userobj.email]
 
 
 class AnnotationNotifier(object):
