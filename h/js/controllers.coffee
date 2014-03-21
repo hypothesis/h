@@ -755,6 +755,17 @@ class Viewer
     annotator
   ) ->
     {providers, threading} = annotator
+    $scope.view = 'Screen'
+    $scope.sort = 'Newest'
+    $scope.views = [
+        {view:'Screen'}
+        {view:'Document'}]
+    $scope.sorts = [
+        {sort:'Newest'}
+        {sort:'Oldest'}
+        {sort:'Location'}]
+    $scope.predicate = 'updated'
+    $scope.reverse = true
 
     $scope.focus = (annotation) ->
       if angular.isArray annotation
@@ -773,6 +784,32 @@ class Viewer
         p.channel.notify
           method: 'scrollTo'
           params: annotation.$$tag
+
+    $scope.applyview = (view) ->
+      $scope.view = view
+      if $scope.view == 'Screen'
+        annotator.updateViewer($rootScope.annotations)
+      
+      if $scope.view == 'Document'
+        annotator.updateViewer(annotator.plugins.Store.annotations)
+        
+      for p in providers
+        p.channel.notify
+          method: 'setDynamicBucketMode'
+          params: $scope.view == 'Screen'
+
+    $scope.applysort = (sort) ->
+      $scope.sort = sort
+      if $scope.sort == 'Newest'
+        $scope.predicate = 'updated'
+        $scope.reverse = true
+      if $scope.sort == 'Oldest'
+        $scope.predicate = 'updated'
+        $scope.reverse = false
+      if $scope.sort == 'Location'
+        $scope.predicate = 'target[0].selector[2].start'
+        $scope.reverse = false
+
 
 class Search
   this.$inject = ['$filter', '$location', '$rootScope', '$routeParams', '$sce', '$scope', 'annotator']

@@ -1230,3 +1230,26 @@ h3.stream {
 .fadeOut-setup.fadeOut-start{
     opacity:0;
 }
+
+// View and Sort tabs ////////////////////
+
+.viewsort {
+  width: 100%;
+  text-align: center;
+  position: absolute;
+  top: 29px;
+  right: 0;
+}
+
+.viewsort > .dropdown {
+  @include smallshadow(0);
+  border-bottom-right-radius: 24px 72px;
+  border-bottom-left-radius: 24px 72px;
+  font-family: $sansFontFamily;
+  background: $white;
+  border: solid 1px $grayLighter;
+  padding: 0 4px;
+  margin: 0 3px;
+  display: inline-block;
+  z-index: 4;   
+}
