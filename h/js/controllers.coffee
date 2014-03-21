@@ -533,7 +533,6 @@ class Annotation
       $event?.stopPropagation()
       $scope.editing = false
       drafts.remove $scope.model
-      annotator.enableAnnotating drafts.isEmpty()
 
       switch $scope.action
         when 'create'
@@ -564,7 +563,6 @@ class Annotation
 
       $scope.editing = false
       drafts.remove annotation
-      annotator.enableAnnotating drafts.isEmpty()
 
       switch $scope.action
         when 'create'
@@ -596,7 +594,6 @@ class Annotation
 
       annotator.publish 'beforeAnnotationCreated', [reply]
       drafts.add reply
-      annotator.disableAnnotating()
 
     $scope.edit = ($event) ->
       $event?.stopPropagation()
@@ -605,7 +602,6 @@ class Annotation
       $scope.origText = $scope.model.text
       $scope.origTags = $scope.model.tags
       drafts.add $scope.model, -> $scope.cancel()
-      annotator.disableAnnotating()
 
     $scope.delete = ($event) ->
       $event?.stopPropagation()
