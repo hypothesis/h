@@ -221,7 +221,7 @@ class StreamSearch
       if $scope.sock? then $scope.sock.close()
       $scope.annotations = new Array()
 
-      streamerURI = baseURI.replace /\/\w+(\??[^\/]*)\/$/, '/__streamer__'
+      streamerURI = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, '/__streamer__'
       $scope.sock = new SockJS streamerURI
 
       $scope.sock.onopen = =>

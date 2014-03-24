@@ -14,9 +14,7 @@ class Displayer
   this.$inject = ['$scope','$element','$timeout','baseURI', 'streamfilter']
   constructor: ($scope, $element, $timeout, baseURI, streamfilter) ->
     # Set streamer url
-    init_path = document.init_path
-    @path = baseURI[..-(init_path.toString().length)] + '__streamer__'
-    delete document.init_path
+    streamerURI = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, '/__streamer__'
 
     # Generate client ID
     buffer = new Array(16)
@@ -51,7 +49,7 @@ class Displayer
       to_change.reply_count = reply_count
 
     $scope.open = =>
-      $scope.sock = new SockJS @path
+      $scope.sock = new SockJS streamerURI
 
       $scope.sock.onopen = =>
         sockmsg =

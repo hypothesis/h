@@ -468,7 +468,7 @@ class App
           .addClause('uri', 'one_of', Object.keys(annotator.plugins.Store.entities))
           .getFilter()
 
-      streamerURI = baseURI.replace /\/\w+(\??[^\/]*)\/$/, '/__streamer__'
+      streamerURI = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, '/__streamer__'
       $scope.updater = new SockJS streamerURI
 
       $scope.updater.onopen = =>
