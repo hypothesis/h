@@ -1,0 +1,13 @@
+> ${selection}
+
+${text}
+${tags}
+
+
+From:
+  ${user}
+  ${user_profile}
+On ${timestamp} at (${path})
+About ${document_path}
+--
+This is an annotation on your document from Hypothes.is / Annotator (URL here)

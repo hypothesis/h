@@ -13,6 +13,7 @@ setup(
     packages=find_packages(),
 
     install_requires=[
+        'BeautifulSoup4>=4.2.1',
         'alembic==0.6.3',
         'annotator>=0.9.1',
         'clik==0.3.1',
@@ -23,6 +24,7 @@ setup(
         'pyramid_tm>=0.4',
         'pyramid_webassets>=0.7',
         'python-dateutil==2.1',
+        'requests>=2.2.1',
         'setuptools>=0.6c11',
         'velruse>=1.0',
         'webassets>=0.8',

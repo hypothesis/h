@@ -1,0 +1,1 @@
+New annotation in your page: ${document_title} (${document_path})
