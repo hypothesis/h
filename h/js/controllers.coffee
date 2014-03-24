@@ -461,14 +461,11 @@ class App
     $scope.initUpdater = ->
       $scope.new_updates = 0
 
-      # Collect all uris we should watch
-      uris = (e for e of annotator.plugins.Store.entities).join ','
-
       filter =
         streamfilter
           .setPastDataNone()
           .setMatchPolicyIncludeAny()
-          .setClausesParse('uri:[' + uris)
+          .addClause('uri', 'one_of', Object.keys(annotator.plugins.Store.entities))
           .getFilter()
 
       streamerURI = baseURI.replace /\/\w+(\??[^\/]*)\/$/, '/__streamer__'
