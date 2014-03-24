@@ -221,6 +221,7 @@ class StreamSearch
       if $scope.sock? then $scope.sock.close()
       $scope.annotations = new Array()
 
+      $scope.prefix = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, ''
       streamerURI = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, '/__streamer__'
       $scope.sock = new SockJS streamerURI
 
@@ -255,9 +256,7 @@ class StreamSearch
       for annotation in data
         annotation.action = action
         annotation.quote = get_quote annotation
-        annotation._share_link = window.location.protocol +
-        '//' + window.location.hostname + ':' + window.location.port + "/a/" + annotation.id
-        annotation._anim = 'fade'
+        annotation._share_link = $scope.prefix + '/a/' + annotation.id
 
         if annotation in $scope.annotations then continue
 
