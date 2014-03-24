@@ -656,7 +656,7 @@ class Annotation
         # just not sure how best to do that with pyramid traversal since there
         # is not a pre-determined route map. One possibility would be to
         # unify everything so that it's relative to the app URL.
-        prefix = baseURI.replace /\/\w+\/$/, ''
+        prefix = baseURI.replace /\/\w+\/?$/, ''
         $scope.shared_link = prefix + '/a/' + $scope.model.id
         $scope.shared = false
         return
