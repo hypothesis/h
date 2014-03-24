@@ -782,10 +782,10 @@ class Viewer
       $scope.view = view
       if $scope.view == 'Screen'
         annotator.updateViewer($rootScope.annotations)
-      
+
       if $scope.view == 'Document'
         annotator.updateViewer(annotator.plugins.Store.annotations)
-        
+
       for p in providers
         p.channel.notify
           method: 'setDynamicBucketMode'
