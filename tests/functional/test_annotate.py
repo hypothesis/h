@@ -27,7 +27,7 @@ class TestAnnotation(SeleniumTestCase):
             annotation.find_element_by_css_selector("button").click()
 
         # go away and come back
-        driver.refresh()
+        driver.get(self.base_url + "/")
 
         # make sure the heatmap shows our annotation
         # the middle heatmap label should have a "1" in it
