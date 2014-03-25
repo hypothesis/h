@@ -1,5 +1,3 @@
-import re
-import time
 import unittest
 
 from selenium.webdriver.common.by import By
