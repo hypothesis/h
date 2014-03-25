@@ -355,13 +355,13 @@ class Hypothesis extends Annotator
   showEditor: (annotation) =>
     this.show()
     @element.injector().invoke [
-      '$location', '$rootScope', '$route', 'drafts'
-      ($location, $rootScope, $route, drafts) =>
+      '$location', '$rootScope', 'drafts'
+      ($location,   $rootScope,   drafts) =>
         @ongoing_edit = annotation
 
         unless this.plugins.Auth? and this.plugins.Auth.haveValidToken()
-          $route.current.locals.$scope.$apply ->
-            $route.current.locals.$scope.$emit 'showAuth', true
+          $rootScope.$apply ->
+            $rootScope.$broadcast 'showAuth', true
           for p in @providers
             p.channel.notify method: 'onEditorHide'
           return
