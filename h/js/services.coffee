@@ -328,7 +328,7 @@ class Hypothesis extends Annotator
     this.show()
     @element.injector().invoke [
       '$location', '$rootScope',
-      ($location, $rootScope) =>
+      ($location,   $rootScope) =>
         @buildReplyList annotations
         $rootScope.annotations = annotations
         $location.path('/viewer').replace()
