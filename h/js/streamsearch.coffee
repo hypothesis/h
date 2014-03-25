@@ -146,6 +146,7 @@ class StreamSearch
   constructor: (
     $element, $location, $scope, $timeout, baseURI, streamfilter
   ) ->
+    prefix = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, ''
     $scope.empty = false
 
     # Generate client ID
@@ -221,9 +222,7 @@ class StreamSearch
       if $scope.sock? then $scope.sock.close()
       $scope.annotations = new Array()
 
-      $scope.prefix = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, ''
-      streamerURI = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, '/__streamer__'
-      $scope.sock = new SockJS streamerURI
+      $scope.sock = new SockJS prefix + '/__streamer__'
 
       $scope.sock.onopen = =>
         sockmsg =
@@ -256,7 +255,7 @@ class StreamSearch
       for annotation in data
         annotation.action = action
         annotation.quote = get_quote annotation
-        annotation._share_link = $scope.prefix + '/a/' + annotation.id
+        annotation._share_link = prefix + '/a/' + annotation.id
 
         if annotation in $scope.annotations then continue
 
