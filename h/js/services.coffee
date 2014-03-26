@@ -592,7 +592,134 @@ class DraftProvider
     else
       false
 
+
+class ViewFilter
+
+  this.$inject = ['$filter']
+  constructor: ($filter) ->
+    @user_filter = $filter('userName')
+
+  # Filters a set of annotations, according to a given query.
+  #
+  # annotations is the input list of annotations (array)
+  # query is the query; it's a map. Supported key values are:
+  #   user: username to search for
+  #   text: text to search for in the body (all the words must be present)
+  #   quote: text to search for in the quote (exact phrease must be present)
+  #   tag: list of tags to search for. (all must be present)
+  #   time: maximum age of annotation. Accepted values:
+  #     '5 min', '30 min', '1 hour', '12 hours',
+  #     '1 day', '1 week', '1 month', '1 year'
+  #
+  # All search is case insensitive.
+  #
+  # Returns the list of matching annotation IDs.
+  filter: (annotations, query) ->
+    results = []
+
+    # Convert these fields to lower case, if they exist
+    for key in ['text', 'quote', 'user']
+      if query[key]?
+        query[key] = query[key].toLowerCase()
+
+    for annotation in annotations
+      matches = true
+      for category, value of query
+        switch category
+          when 'user'
+            userName = @user_filter annotation.user
+            unless userName.toLowerCase() is value
+              matches = false
+              break
+          when 'text'
+            unless annotation.text?
+              matches = false
+              break
+            lowerCaseText = annotation.text.toLowerCase()
+            for token in value.split ' '
+              if lowerCaseText.indexOf(token) is -1
+                matches = false
+                break
+          when 'quote'
+            # Reply annotations does not have a quote in this aspect
+            if annotation.references?
+              matches = false
+              break
+            else
+              found = false
+              for target in annotation.target
+                if target.quote? and target.quote.toLowerCase().indexOf(value) > -1
+                  found = true
+                  break
+              unless found
+                matches = false
+                break
+          when 'tags'
+            # Don't bother if we got an empty list for required tags
+            break unless value.length
+
+            # If this has no tags, this is in instant failure
+            if value.length and not annotation.tags?
+              matches = false
+              break
+
+            # OK, there are some tags, and we need some tags.
+            # Gotta check for each wanted tag
+            for wantedTag in value
+              found = false
+              for existingTag in annotation.tags
+                if existingTag.toLowerCase().indexOf(wantedTag) > -1
+                  found = true
+                  break
+              unless found
+                matches = false
+                console.log "No, tag", wantedTag, "is missing."
+                break
+
+          when 'time'
+              delta = Math.round((+new Date - new Date(annotation.updated)) / 1000)
+              switch value
+                when '5 min'
+                  unless delta <= 60*5
+                    matches = false
+                when '30 min'
+                  unless delta <= 60*30
+                    matches = false
+                when '1 hour'
+                  unless delta <= 60*60
+                    matches = false
+                when '12 hours'
+                  unless delta <= 60*60*12
+                    matches = false
+                when '1 day'
+                  unless delta <= 60*60*24
+                    matches = false
+                when '1 week'
+                  unless delta <= 60*60*24*7
+                    matches = false
+                when '1 month'
+                  unless delta <= 60*60*24*31
+                    matches = false
+                when '1 year'
+                  unless delta <= 60*60*24*366
+                    matches = false
+          when 'group'
+            priv_public = 'group:__world__' in (annotation.permissions.read or [])
+            switch value
+              when 'Public'
+                unless priv_public
+                  matches = false
+              when 'Private'
+                if priv_public
+                   matches = false
+
+      if matches
+        results.push annotation.id
+
+    results
+
 angular.module('h.services', ['ngResource','h.filters'])
   .provider('authentication', AuthenticationProvider)
   .provider('drafts', DraftProvider)
   .service('annotator', Hypothesis)
+  .service('viewFilter', ViewFilter)
