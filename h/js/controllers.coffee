@@ -389,7 +389,7 @@ class App
         streamfilter
           .setPastDataNone()
           .setMatchPolicyIncludeAny()
-          .addClause('uri', 'one_of', Object.keys(annotator.plugins.Store.entities))
+          .addClause('/uri', 'one_of', Object.keys(annotator.plugins.Store.entities))
           .getFilter()
 
       streamerURI = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, '/__streamer__'
