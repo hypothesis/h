@@ -706,7 +706,6 @@ class Viewer
           params: annotation.$$tag
 
     $scope.applyView = (view) ->
-      $rootScope.view = view
       switch view
         when 'Screen'
           # Go over all providers, and switch them to dynamic mode
