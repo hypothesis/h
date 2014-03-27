@@ -184,7 +184,6 @@ class App
         $i.triggerHandler('input')
     , 200  # We hope this is long enough
 
-    @user_filter = $filter('userName')
     search_query = ''
 
     @visualSearch = VS.init
@@ -216,13 +215,9 @@ class App
             category = searchItem.attributes.category
             value = searchItem.attributes.value
 
-            # Stuff we just copy blindly
-            if category in ['user', 'time', 'group']
+            # Stuff we need to collect
+            if category in ['text', 'quote', 'user', 'time', 'group']
               parsedQuery[category] = value
-
-            # Stuff we want to lowercase
-            if category in ['text', 'quote']
-              parsedQuery[category] = value.toLowerCase()
 
             # Tags are specials, because we collect those into an array
             if searchItem.attributes.category is 'tag'
@@ -533,6 +528,7 @@ class Annotation
       $scope.origText = $scope.model.text
       $scope.origTags = $scope.model.tags
       drafts.add $scope.model, -> $scope.cancel()
+      return
 
     $scope.delete = ($event) ->
       $event?.stopPropagation()

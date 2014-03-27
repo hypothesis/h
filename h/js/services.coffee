@@ -597,18 +597,41 @@ class DraftProvider
 
 
 class ViewFilter
-  constructor: ->
 
-  filter: (annotations, q) ->
+  this.$inject = ['$filter']
+  constructor: ($filter) ->
+    @user_filter = $filter('userName')
+
+  # Filters a set of annotations, according to a given query.
+  #
+  # annotations is the input list of annotations (array)
+  # query is the query; it's a map. Supported key values are:
+  #   user: username to search for
+  #   text: text to search for in the body (all the words must be present)
+  #   quote: text to search for in the quote (exact phrease must be present)
+  #   tag: list of tags to search for. (all must be present)
+  #   time: maximum age of annotation. Accepted values:
+  #     '5 min', '30 min', '1 hour', '12 hours',
+  #     '1 day', '1 week', '1 month', '1 year'
+  #
+  # All search is case insensitive.
+  #
+  # Returns the list of matching annotation IDs.
+  filter: (annotations, query) ->
     results = []
+
+    # Convert these fields to lower case, if they exist
+    for key in ['text', 'quote', 'user']
+      if query[key]?
+        query[key] = query[key].toLowerCase()
 
     for annotation in annotations
       matches = true
-      for category, value of q
+      for category, value of query
         switch category
           when 'user'
             userName = @user_filter annotation.user
-            unless userName.toLowerCase() is value.toLowerCase()
+            unless userName.toLowerCase() is value
               matches = false
               break
           when 'text'
@@ -617,7 +640,7 @@ class ViewFilter
               break
             lowerCaseText = annotation.text.toLowerCase()
             for token in value.split ' '
-              if lowerCaseText.indexOf(token.toLowerCase()) is -1
+              if lowerCaseText.indexOf(token) is -1
                 matches = false
                 break
           when 'quote'
@@ -634,7 +657,7 @@ class ViewFilter
               unless found
                 matches = false
                 break
-          when 'tag'
+          when 'tags'
             if value.length and not annotation.tags?
               matches = false
               break
