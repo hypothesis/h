@@ -1,84 +1,77 @@
+<!-- Thread view -->
 <ul class="stream-list">
-  <li ng-repeat="thread in search_annotations"
-      ng-mouseenter="focus(thread.message)"
-      ng-mouseleave="focus()"
-      ng-class="thread.message.$emphasis && 'card-emphasis'"
-      >
-    <!-- Thread view -->
-    <div data-recursive="" class="paper thread"
-         ng-mousedown="toggleCollapsedDown($event)"
-         ng-click="toggleCollapsed($event)"
-         ng-init="collapsed = ann_info.show_quote[thread.message.id]">
+  <li
+     ng-class="thread.message.$emphasis && 'card-emphasis'"
+     ng-click="toggleCollapsed($event)"
+     ng-repeat="thread in search_annotations"
+     ng-mouseenter="focus(thread.message)"
+     ng-mouseleave="focus()"
+     ng-init="collapsed = ann_info.show_quote[thread.message.id]"
+     class="paper thread"
+     data-recursive=""
+     >
+    <a href="" class="threadexp"
+       title="{{collapsed && 'Expand' || 'Collapse'}}"
+       ng-show="ann_info.shown[thread.message.id] && !ann_info.more_top[thread.message.id] && thread.message.references"
+       />
 
-      <a href=""
-         class="threadexp"
-         title="{{collapsed && 'Expand' || 'Collapse'}}"
-         ng-mousedown="toggleCollapsedDown($event)"
-         ng-click="toggleCollapsed($event)"
-         ng-show="ann_info.shown[thread.message.id] && !ann_info.more_top[thread.message.id] && thread.message.references"
-         />
-
-      <!-- Annotation -->
-
-      <!-- Excerpts -->
-      <div class="excerpt"
-           ng-repeat="target in thread.message.target"
-           ng-hide="collapsed">
-        <blockquote ng-bind-html="target.highlightQuote" ng-hide="target.showDiff" />
-        <blockquote ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
-        <div class="small pull-right" ng-show="target.diffHTML">
-          <input type="checkbox" ng-model="target.showDiff"> Show differences</input>
-        </div>
+    <!-- Excerpts -->
+    <div class="excerpt"
+         ng-repeat="target in thread.message.target"
+         ng-hide="collapsed">
+      <blockquote ng-bind-html="target.highlightQuote" ng-hide="target.showDiff" />
+      <blockquote ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
+      <div class="small pull-right" ng-show="target.diffHTML">
+        <input type="checkbox" ng-model="target.showDiff"> Show differences</input>
       </div>
-
-      <!--"Load more replies" label for the top -->
-      <a href=""
-         class="load-more"
-         ng-show="ann_info.more_top[thread.message.id] && ann_info.more_top_num[thread.message.id] <2"
-         ng-click="clickMoreTop(thread.message.id, $event)">
-        load 1 more reply
-      </a>
-
-      <a href=""
-         class="load-more"
-         ng-show="ann_info.more_top[thread.message.id] && ann_info.more_top_num[thread.message.id] >1"
-         ng-click="clickMoreTop(thread.message.id, $event)">
-        load {{ann_info.more_top_num[thread.message.id]}} more replies
-      </a>
-
-
-      <div class="detail annotation"
-           name="annotation"
-           ng-model="thread.message"
-           mode="search"
-           replies="{{!ann_info.more_bottom[thread.message.id]}}"
-           ng-show="$parent.ann_info.shown[thread.message.id] == null || $parent.ann_info.shown[thread.message.id]"/>
-
-      <!--"Load more replies" label for the bottom -->
-      <a href=""
-         class="load-more"
-         ng-show="ann_info.more_bottom[thread.message.id] && ann_info.more_bottom_num[thread.message.id]<2"
-         ng-click="clickMoreBottom(thread.message.id, $event)">
-        load 1 more reply
-      </a>
-
-      <a href=""
-         class="load-more"
-         ng-show="ann_info.more_bottom[thread.message.id] && ann_info.more_bottom_num[thread.message.id] >1"
-         ng-click="clickMoreBottom(thread.message.id, $event)">
-        load {{ann_info.more_bottom_num[thread.message.id]}} more replies
-      </a>
-
-      <!-- Replies -->
-      <ul>
-        <li class="thread"
-            ng-class="collapsed && 'collapsedreplies' || ''"
-            ng-mousedown="toggleCollapsedDown($event)"
-            ng-click="toggleCollapsed($event)"
-            ng-repeat="thread in thread.children"
-            ng-transclude>
-        </li>
-      </ul>
     </div>
+
+    <!--"Load more replies" label for the top -->
+    <a href=""
+       class="load-more"
+       ng-show="ann_info.more_top[thread.message.id] && ann_info.more_top_num[thread.message.id] <2"
+       ng-click="clickMoreTop(thread.message.id, $event)">
+      load 1 more reply
+    </a>
+
+    <a href=""
+       class="load-more"
+       ng-show="ann_info.more_top[thread.message.id] && ann_info.more_top_num[thread.message.id] >1"
+       ng-click="clickMoreTop(thread.message.id, $event)">
+      load {{ann_info.more_top_num[thread.message.id]}} more replies
+    </a>
+
+    <!-- Annotation -->
+    <div class="detail annotation"
+         name="annotation"
+         ng-model="thread.message"
+         mode="search"
+         replies="{{!ann_info.more_bottom[thread.message.id]}}"
+         ng-show="$parent.ann_info.shown[thread.message.id] == null || $parent.ann_info.shown[thread.message.id]"/>
+
+    <!--"Load more replies" label for the bottom -->
+    <a href=""
+       class="load-more"
+       ng-show="ann_info.more_bottom[thread.message.id] && ann_info.more_bottom_num[thread.message.id]<2"
+       ng-click="clickMoreBottom(thread.message.id, $event)">
+      load 1 more reply
+    </a>
+
+    <a href=""
+       class="load-more"
+       ng-show="ann_info.more_bottom[thread.message.id] && ann_info.more_bottom_num[thread.message.id] >1"
+       ng-click="clickMoreBottom(thread.message.id, $event)">
+      load {{ann_info.more_bottom_num[thread.message.id]}} more replies
+    </a>
+
+    <!-- Replies -->
+    <ul>
+      <li class="thread"
+          ng-class="{'collapsed': collapsed}"
+          ng-click="toggleCollapsed($event)"
+          ng-repeat="thread in thread.children"
+          ng-transclude>
+      </li>
+    </ul>
   </li>
 </ul>
