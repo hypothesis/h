@@ -9,11 +9,11 @@ class App
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
-    'annotator', 'authentication', 'baseURI', 'streamfilter'
+    'annotator', 'authentication', 'baseURI', 'streamfilter', 'viewFilter'
   ]
   constructor: (
     $element, $filter, $http, $location, $rootScope, $scope, $timeout
-    annotator, authentication, baseURI, streamfilter
+    annotator, authentication, baseURI, streamfilter, viewFilter
   ) ->
     {plugins, host, providers} = annotator
 
@@ -183,7 +183,6 @@ class App
         $i.triggerHandler('input')
     , 200  # We hope this is long enough
 
-    @user_filter = $filter('userName')
     search_query = ''
 
     @visualSearch = VS.init
@@ -201,116 +200,41 @@ class App
 
           matched = []
           whole_document = true
-          in_body_text = ''
+
+          parsedQuery =
+            text: ''
+            tags: []
+
           for searchItem in searchCollection.models
             if searchItem.attributes.category is 'scope' and
             searchItem.attributes.value is 'sidebar'
               whole_document = false
 
-            if searchItem.attributes.category is 'text'
-              in_body_text = searchItem.attributes.value.toLowerCase()
-              text_tokens = searchItem.attributes.value.split ' '
+            category = searchItem.attributes.category
+            value = searchItem.attributes.value
+
+            # Stuff we need to collect
+            if category in ['text', 'quote', 'user', 'time', 'group']
+              parsedQuery[category] = value
+
+            # Tags are specials, because we collect those into an array
             if searchItem.attributes.category is 'tag'
-              tag_search = searchItem.attributes.value.toLowerCase()
-            if searchItem.attributes.category is 'quote'
-              quote_search = searchItem.attributes.value.toLowerCase()
+              parsedQuery.tags.push value.toLowerCase()
 
           if whole_document
             annotations = annotator.plugins.Store.annotations
           else
             annotations = $rootScope.annotations
 
-          for annotation in annotations
-            matches = true
-            for searchItem in searchCollection.models
-              category = searchItem.attributes.category
-              value = searchItem.attributes.value
-              switch category
-                when 'user'
-                  userName = @user_filter annotation.user
-                  unless userName.toLowerCase() is value.toLowerCase()
-                    matches = false
-                    break
-                when 'text'
-                  unless annotation.text?
-                    matches = false
-                    break
-                  for token in text_tokens
-                    unless annotation.text.toLowerCase().indexOf(token.toLowerCase()) > -1
-                      matches = false
-                      break
-                when 'quote'
-                  # Reply annotations does not have a quote in this aspect
-                  if annotation.references?
-                      matches = false
-                      break
-                  else
-                    found = false
-                    for target in annotation.target
-                      if target.quote? and target.quote.toLowerCase().indexOf(quote_search) > -1
-                        found = true
-                        break
-                    unless found
-                      matches = false
-                      break
-                when 'tag'
-                  unless annotation.tags?
-                    matches = false
-                    break
-                  found = false
-                  for tag in annotation.tags
-                    if tag.toLowerCase().indexOf(tag_search) > -1
-                      found = true
-                      break
-                  unless found
-                    matches = false
-                  break
-                when 'time'
-                    delta = Math.round((+new Date - new Date(annotation.updated)) / 1000)
-                    switch value
-                      when '5 min'
-                        unless delta <= 60*5
-                          matches = false
-                      when '30 min'
-                        unless delta <= 60*30
-                          matches = false
-                      when '1 hour'
-                        unless delta <= 60*60
-                          matches = false
-                      when '12 hours'
-                        unless delta <= 60*60*12
-                          matches = false
-                      when '1 day'
-                        unless delta <= 60*60*24
-                          matches = false
-                      when '1 week'
-                        unless delta <= 60*60*24*7
-                          matches = false
-                      when '1 month'
-                        unless delta <= 60*60*24*31
-                          matches = false
-                      when '1 year'
-                        unless delta <= 60*60*24*366
-                          matches = false
-                when 'group'
-                    priv_public = 'group:__world__' in (annotation.permissions.read or [])
-                    switch value
-                      when 'Public'
-                        unless priv_public
-                          matches = false
-                      when 'Private'
-                        if priv_public
-                          matches = false
-
-            if matches
-              matched.push annotation.id
+          matchingIDs = viewFilter.filter annotations, parsedQuery
 
           # Set the path
+          # TODO: do we really need this data in the location?
           search =
             whole_document : whole_document
-            matched : matched
-            in_body_text: in_body_text
-            quote: quote_search
+            matched : matchingIDs
+            in_body_text: parsedQuery.text
+            quote: parsedQuery.quote
           $location.path('/page_search').search(search)
 
           unless $scope.inSearch # If we are entering search right now
