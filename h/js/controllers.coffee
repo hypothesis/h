@@ -717,9 +717,8 @@ class Viewer
           break
 
         when 'Document'
-          annotator.updateViewer view, annotator.plugins.Store.annotations
           for p in providers
-            p.channel.notify method: 'setDynamicBucketMode', params: false
+            p.channel.notify method: 'showAll'
           break
 
         when 'Comments'

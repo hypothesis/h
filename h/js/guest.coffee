@@ -134,6 +134,22 @@ class Annotator.Guest extends Annotator
 
     .bind('showComments', => @plugins.Heatmap.commentClick())
 
+    .bind('showAll', =>
+      # Switch off dynamic mode on the heatmap
+      if @plugins.Heatmap
+        @plugins.Heatmap.dynamicBucket = false
+
+      # Collect all successfully attached annotations
+      annotations = []
+      for page, anchors of @anchors
+        for anchor in anchors
+          unless anchor.annotatin in annotations
+            annotations.push anchor.annotation
+
+      # Show all the annotations
+      @showViewer "Document", annotations
+    )
+
     .bind('setTool', (ctx, name) =>
       this.setTool name
       this.publish 'setTool', name
