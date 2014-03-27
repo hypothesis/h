@@ -723,21 +723,9 @@ class Viewer
           break
 
         when 'Comments'
-          allComments = []
-          waitingFor = providers.length
-
-          # Go over all providers, and ask for comments
           for p in providers
-            p.channel.notify method: 'setDynamicBucketMode', params: false
-            p.channel.call
-              method: 'getComments'
-              success: (ids) =>
-                annotations = annotator._getAnnotationsFromIDs ids
-                allComments.push a for a in annotations
-                waitingFor--
-                unless waitingFor
-                  # We received comments from everybody
-                  annotator.updateViewer view, allComments
+            p.channel.notify method: 'showComments'
+
         else
           throw new Error "Unknown view requested: " + view
 

@@ -132,7 +132,7 @@ class Annotator.Guest extends Annotator
       }
     )
 
-    .bind('getComments', => a.id for a in @comments)
+    .bind('showComments', => @plugins.Heatmap.commentClick())
 
     .bind('setTool', (ctx, name) =>
       this.setTool name

@@ -463,11 +463,12 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         else if (@isLower bucket)
           @dynamicBucket = true
           @_jumpMinMax @buckets[bucket], "down"
+        else if (@isComment bucket)
+          @commentClick()
         else
           d3.event.stopPropagation()
           @dynamicBucket = false
-          viewName = if @isComment bucket then "Comments" else "Tab"
-          annotator.showViewer viewName, @buckets[bucket]
+          annotator.showViewer "Tab", @buckets[bucket]
 
     tabs.exit().remove()
 
@@ -501,6 +502,13 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 #    $.merge visible, @annotator.comments
     @annotator.updateViewer "Screen", visible
 
+  _getCommentBucket: => @index.length - 2
+
   isUpper:   (i) => i == 1
   isLower:   (i) => i == @index.length - 3
-  isComment: (i) => i == @index.length - 2
+  isComment: (i) => i is @_getCommentBucket()
+
+  # Simulate clicking on the comments tab
+  commentClick: =>
+    @dynamicBucket = false
+    annotator.showViewer "Comments", @buckets[@_getCommentBucket()]
