@@ -95,7 +95,7 @@
                   <div class="annotation detail">
 
                     <div class="magicontrols pull-right">
-                      <fuzzytime ng-model="reply.updated" annotationid="{{reply.id}}"></fuzzytime>
+                      <fuzzytime class="small" ng-model="reply.updated" annotationid="{{reply.id}}"></fuzzytime>
                     </div>
 
                     <strong>
