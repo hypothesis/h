@@ -599,6 +599,7 @@ class Annotation
       $scope.origText = $scope.model.text
       $scope.origTags = $scope.model.tags
       drafts.add $scope.model, -> $scope.cancel()
+      return
 
     $scope.delete = ($event) ->
       $event?.stopPropagation()
