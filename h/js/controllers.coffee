@@ -709,7 +709,9 @@ class Viewer
       $rootScope.view = view
       switch view
         when 'Screen'
-          annotator.updateViewer view, $rootScope.annotations
+          # Go over all providers, and switch them to dynamic mode
+          # They will, in turn, call back updateView
+          # with the right set of annotations
           for p in providers
             p.channel.notify method: 'setDynamicBucketMode', params: true
           break
@@ -726,6 +728,7 @@ class Viewer
 
           # Go over all providers, and ask for comments
           for p in providers
+            p.channel.notify method: 'setDynamicBucketMode', params: false
             p.channel.call
               method: 'getComments'
               success: (ids) =>
@@ -735,10 +738,6 @@ class Viewer
                 unless waitingFor
                   # We received comments from everybody
                   annotator.updateViewer view, allComments
-                  for p in providers
-                    p.channel.notify
-                      method: 'setDynamicBucketMode'
-                      params: false
         else
           throw new Error "Unknown view requested: " + view
 
