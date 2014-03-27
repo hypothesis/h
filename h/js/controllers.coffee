@@ -463,7 +463,10 @@ class App
           for annotation in data
             container = annotator.threading.getContainer annotation.id
             if container.message
-              container.message._clientdeleteonly = true
+              # XXX: This is a temporary workaround until real client-side only
+              # XXX: delete will be introduced
+              index = annotator.plugins.Store.annotations.indexOf container.message
+              annotator.plugins.Store.annotations[index..index] = [] if index > -1
               annotator.deleteAnnotation container.message
 
       # Finally blink the changed tabs
