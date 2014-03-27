@@ -466,7 +466,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         else
           d3.event.stopPropagation()
           @dynamicBucket = false
-          annotator.showViewer @buckets[bucket]
+          viewName = if @isComment bucket then "Comments" else "Tab"
+          annotator.showViewer viewName, @buckets[bucket]
 
     tabs.exit().remove()
 
@@ -498,7 +499,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       acc
     , []
 #    $.merge visible, @annotator.comments
-    @annotator.updateViewer visible
+    @annotator.updateViewer "Screen", visible
 
   isUpper:   (i) => i == 1
   isLower:   (i) => i == @index.length - 3

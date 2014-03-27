@@ -216,13 +216,15 @@ class Hypothesis extends Annotator
       $rootScope.$apply => this.show()
     )
 
-    .bind('showViewer', (ctx, ids=[]) =>
+    .bind('showViewer', (ctx, [viewName, ids]) =>
+      ids ?= []
       return unless this.discardDrafts()
-      $rootScope.$apply => this.showViewer this._getAnnotationsFromIDs ids
+      $rootScope.$apply => this.showViewer viewName, this._getAnnotationsFromIDs ids
     )
 
-    .bind('updateViewer', (ctx, ids=[]) =>
-      $rootScope.$apply => this.updateViewer this._getAnnotationsFromIDs ids
+    .bind('updateViewer', (ctx, [viewName, ids]) =>
+      ids ?= []
+      $rootScope.$apply => this.updateViewer viewName, this._getAnnotationsFromIDs ids
     )
 
     .bind('setTool', (ctx, name) =>
@@ -313,24 +315,25 @@ class Hypothesis extends Annotator
         annotation.reply_list = children.sort(@sortAnnotations).reverse()
         @buildReplyList children
 
-  updateViewer: (annotations=[]) =>
+  updateViewer: (viewName, annotations=[]) =>
     annotations = annotations.filter (a) -> a?
     @element.injector().invoke [
       '$rootScope',
       ($rootScope) =>
         @buildReplyList annotations
         $rootScope.annotations = annotations
+        $rootScope.view = viewName
     ]
     this
 
-  showViewer: (annotations=[]) =>
+  showViewer: (viewName, annotations=[]) =>
     this.show()
     @element.injector().invoke [
       '$location',
       ($location) =>
         $location.path('/viewer').replace()
     ]
-    this.updateViewer annotations
+    this.updateViewer viewName, annotations
 
   addEmphasis: (annotations=[]) =>
     annotations = annotations.filter (a) -> a? # Filter out null annotations

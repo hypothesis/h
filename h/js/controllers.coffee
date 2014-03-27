@@ -673,11 +673,13 @@ class Viewer
     annotator
   ) ->
     {providers, threading} = annotator
-    $scope.view = 'Screen'
+    $rootScope.view = 'Screen'
     $scope.sort = 'Newest'
     $scope.views = [
         {view:'Screen'}
-        {view:'Document'}]
+        {view:'Document'}
+        {view:"Comments"}
+    ]
     $scope.sorts = [
         {sort:'Newest'}
         {sort:'Oldest'}
@@ -703,20 +705,44 @@ class Viewer
           method: 'scrollTo'
           params: annotation.$$tag
 
-    $scope.applyview = (view) ->
-      $scope.view = view
-      if $scope.view == 'Screen'
-        annotator.updateViewer($rootScope.annotations)
+    $scope.applyView = (view) ->
+      $rootScope.view = view
+      switch view
+        when 'Screen'
+          annotator.updateViewer view, $rootScope.annotations
+          for p in providers
+            p.channel.notify method: 'setDynamicBucketMode', params: true
+          break
 
-      if $scope.view == 'Document'
-        annotator.updateViewer(annotator.plugins.Store.annotations)
+        when 'Document'
+          annotator.updateViewer view, annotator.plugins.Store.annotations
+          for p in providers
+            p.channel.notify method: 'setDynamicBucketMode', params: false
+          break
 
-      for p in providers
-        p.channel.notify
-          method: 'setDynamicBucketMode'
-          params: $scope.view == 'Screen'
+        when 'Comments'
+          allComments = []
+          waitingFor = providers.length
 
-    $scope.applysort = (sort) ->
+          # Go over all providers, and ask for comments
+          for p in providers
+            p.channel.call
+              method: 'getComments'
+              success: (ids) =>
+                annotations = annotator._getAnnotationsFromIDs ids
+                allComments.push a for a in annotations
+                waitingFor--
+                unless waitingFor
+                  # We received comments from everybody
+                  annotator.updateViewer view, allComments
+                  for p in providers
+                    p.channel.notify
+                      method: 'setDynamicBucketMode'
+                      params: false
+        else
+          throw new Error "Unknown view requested: " + view
+
+    $scope.applySort = (sort) ->
       $scope.sort = sort
       if $scope.sort == 'Newest'
         $scope.predicate = 'updated'
