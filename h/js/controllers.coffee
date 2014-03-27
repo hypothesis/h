@@ -515,6 +515,7 @@ class Annotation
 
       annotator.publish 'beforeAnnotationCreated', [reply]
       drafts.add reply
+      return
 
     $scope.edit = ($event) ->
       $event?.stopPropagation()
