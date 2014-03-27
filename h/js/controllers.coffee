@@ -15,7 +15,6 @@ class App
     $element, $filter, $http, $location, $rootScope, $scope, $timeout
     annotator, authentication, baseURI, streamfilter, viewFilter
   ) ->
-
     {plugins, host, providers} = annotator
 
     $scope.$watch 'auth.personas', (newValue, oldValue) =>
@@ -202,7 +201,6 @@ class App
           matched = []
           whole_document = true
 
-          console.log "Raw search query is", searchCollection.models
           parsedQuery =
             text: ''
             tags: []
@@ -223,15 +221,12 @@ class App
             if searchItem.attributes.category is 'tag'
               parsedQuery.tags.push value.toLowerCase()
 
-          console.log "Parsed query is", parsedQuery
-
           if whole_document
             annotations = annotator.plugins.Store.annotations
           else
             annotations = $rootScope.annotations
 
           matchingIDs = viewFilter.filter annotations, parsedQuery
-          console.log "Matching annotation IDs are", matchingIDs
 
           # Set the path
           # TODO: do we really need this data in the location?
