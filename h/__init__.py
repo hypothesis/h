@@ -49,6 +49,8 @@ def bootstrap(cfname, request=None, options=None, config_fn=None):
 
 
 def create_app(settings):
+    import os
+
     from pyramid.config import Configurator
     from pyramid.authorization import ACLAuthorizationPolicy
     from pyramid.path import AssetResolver
@@ -56,6 +58,10 @@ def create_app(settings):
 
     from h.auth import HybridAuthenticationPolicy
     from h.models import groupfinder
+
+    if 'MAIL_PORT' in os.environ:
+        settings['mail.host'] = os.environ['MAIL_PORT_25_TCP_ADDR']
+        settings['mail.port'] = os.environ['MAIL_PORT_25_TCP_PORT']
 
     authn_policy = HybridAuthenticationPolicy(callback=groupfinder)
     authz_policy = ACLAuthorizationPolicy()
