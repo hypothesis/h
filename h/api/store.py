@@ -170,12 +170,12 @@ def includeme(config):
     app.register_blueprint(store.store)  # and register the store api.
     settings = config.get_settings()
 
-    if 'es.host' in settings:
-        app.config['ELASTICSEARCH_HOST'] = settings['es.host']
-    elif 'ELASTICSEARCH_PORT' in os.environ:
+    if 'ELASTICSEARCH_PORT' in os.environ:
         app.config['ELASTICSEARCH_HOST'] = 'http%s' % (
             os.environ['ELASTICSEARCH_PORT'][3:],
         )
+    elif 'es.host' in settings:
+        app.config['ELASTICSEARCH_HOST'] = settings['es.host']
 
     if 'es.index' in settings:
         app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
