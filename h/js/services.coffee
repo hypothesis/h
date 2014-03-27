@@ -324,16 +324,8 @@ class Hypothesis extends Annotator
     this
 
   showViewer: (annotations=[]) =>
-    annotations = annotations.filter (a) -> a?
     this.show()
-    @element.injector().invoke [
-      '$location', '$rootScope',
-      ($location,   $rootScope) =>
-        @buildReplyList annotations
-        $rootScope.annotations = annotations
-        $location.path('/viewer').replace()
-    ]
-    this
+    this.updateViewer annotations
 
   addEmphasis: (annotations=[]) =>
     annotations = annotations.filter (a) -> a? # Filter out null annotations
