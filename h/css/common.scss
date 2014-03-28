@@ -167,18 +167,6 @@ button, input[type=submit], .btn {
 }
 
 
-//Notifications///////////////////////////////
-
-.notifications {
-  padding: 1em 0em 1em 1em;
-
-  .paper {
-    border: 1px solid #75b8f3;
-  }
-
-}
-
-
 //CLOSER////////////////////////////////
 .close {
   @extend .x-icon;

@@ -80,24 +80,6 @@
     <div id="wrapper" class="content">
       <!-- Angular view -->
       <div ng-view=""></div>
-
-      <!-- Bottombar -->
-      <div class="bottombar" ng-class="frame.visible && 'shown'"
-           ng-show="notifications.length">
-        <ul class="notifications">
-          <li class="stream-list notif-list"
-              ng-repeat="notif in notifications">
-             <div class="paper thread top-padding">
-               <div class="notification bottom-padding"
-                    name="notification"
-                    onClose="notif.close"
-                    onClick="notif.callback"
-                    ng-model="notif">
-               </div>
-             </div>
-          </li>
-        </ul>
-      </div>
     </div>
     <!-- / Content -->
 

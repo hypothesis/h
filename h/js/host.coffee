@@ -98,10 +98,6 @@ class Annotator.Host extends Annotator.Guest
       Math.max.apply(Math, all)
     )
 
-    .bind('updateNotificationCounter', (ctx, count) =>
-      this.publish 'updateNotificationCounter', count
-    )
-
     .bind('showNotification', (ctx, n) =>
       @_pendingNotice = @Annotator.showNotification n.message, n.type
     )

@@ -39,32 +39,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
   -webkit-overflow-scrolling: touch;
 }
 
-.bottombar {
-  position: fixed;
-  bottom: 0px;
-  left: 0;
-  height: 3.7em;
-  width: 100%;
-
-  .notif-list {
-    margin-right: 1em;
-    box-shadow: 1px 1px 9px #b5d4ff;
-  }
-
-  .top-padding {
-    padding-top: 8px;
-  }
-  .bottom-padding {
-    padding-bottom: 8px;
-  }
-
-  .notif-text {
-    font-family: $sansFontFamily;
-    position: relative;
-    bottom: 2px;
-  }
-}
-
 
 //SHEET////////////////////////////////
 //This comes down from under the toolbar

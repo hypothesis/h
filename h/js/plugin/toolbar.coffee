@@ -4,13 +4,10 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
   events:
     '.annotator-toolbar li:first-child mouseenter': 'show'
     '.annotator-toolbar mouseleave': 'hide'
-    'updateNotificationCounter': 'onUpdateNotificationCounter'
     'setTool': 'onSetTool'
     'setVisibleHighlights': 'onSetVisibleHighlights'
 
-  html:
-    element: '<div class="annotator-toolbar annotator-hide"></div>'
-    notification: '<div class="annotator-notification-counter"></div>'
+  html: '<div class="annotator-toolbar annotator-hide"></div>'
 
   options:
     items: [
@@ -51,14 +48,11 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     ]
 
   pluginInit: ->
-    @annotator.toolbar = @toolbar = $(@html.element)
+    @annotator.toolbar = @toolbar = $(@html)
     if @options.container?
       $(@options.container).append @toolbar
     else
       $(@element).append @toolbar
-
-    @notificationCounter = $(@html.notification)
-    @toolbar.append(@notificationCounter)
 
     @buttons = @options.items.reduce  (buttons, item) =>
       anchor = $('<a></a>')
@@ -77,21 +71,6 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
   show: -> this.toolbar.removeClass('annotator-hide')
 
   hide: -> this.toolbar.addClass('annotator-hide')
-
-  onUpdateNotificationCounter: (count) ->
-    element = $(@buttons[0])
-    element.toggle('fg_highlight', {color: 'lightblue'})
-    setTimeout ->
-      element.toggle('fg_highlight', {color: 'lightblue'})
-    , 500
-
-    switch
-      when count > 9
-        @notificationCounter.text('>9')
-      when 0 < count <= 9
-        @notificationCounter.text("+#{count}")
-      else
-        @notificationCounter.text('')
 
   onSetTool: (name) ->
     if name is 'highlight'

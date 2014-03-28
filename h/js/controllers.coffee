@@ -280,7 +280,6 @@ class App
 
     $scope.reloadAnnotations = ->
       return unless annotator.plugins.Store
-      $scope.new_updates = 0
       $scope.$root.annotations = []
       annotator.threading.thread []
       annotator.threading.idTable = {}
@@ -336,47 +335,6 @@ class App
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup
 
-    # Notifications
-    $scope.notifications = []
-
-    $scope.removeNotificationUpdate = ->
-      index = -1
-      for notif in $scope.notifications
-        if notif.type is 'update'
-          index = $scope.notifications.indexOf notif
-          break
-
-      if index > -1 then $scope.notifications.splice index,1
-
-    $scope.addUpdateNotification = ->
-      # Do not add an update notification twice
-      unless $scope.new_updates > 0
-        if $scope.new_updates < 2 then text = 'change.'
-        else text = 'changes.'
-        notification =
-          type: 'update'
-          text: 'Click to load ' + $scope.new_updates + ' ' + text
-          callback: =>
-            $scope.reloadAnnotations()
-            $scope.removeNotificationUpdate()
-          close: $scope.removeNotificationUpdate
-
-        $scope.notifications.unshift notification
-
-    $scope.$watch 'new_updates', (updates, oldUpdates) ->
-      return unless updates or oldUpdates
-
-      for notif in $scope.notifications
-        if notif.type is 'update'
-          if $scope.new_updates < 2 then text = 'change.'
-          else text = 'changes.'
-          notif.text = 'Click to load ' + updates + ' ' + text
-
-      for p in annotator.providers
-        p.channel.notify
-          method: 'updateNotificationCounter'
-          params: updates
-
     $scope.$watch 'show_search', (value, old) ->
       if value and not old
         $timeout ->
@@ -385,8 +343,6 @@ class App
 
 
     $scope.initUpdater = ->
-      $scope.new_updates = 0
-
       filter =
         streamfilter
           .setPastDataNone()
@@ -423,8 +379,6 @@ class App
         p = $scope.auth.persona
         user = if p? then "acct:" + p.username + "@" + p.provider else ''
         unless data instanceof Array then data = [data]
-        $scope.$apply =>
-          #if data.length > 0 then $scope.new_updates += 1
 
         if $scope.socialView.name is 'single-player'
           owndata = data.filter (d) -> d.user is user

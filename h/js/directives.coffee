@@ -328,16 +328,6 @@ tags = ['$window', ($window) ->
   restrict: 'C'
 ]
 
-notification = ['$filter', ($filter) ->
-  controller: 'NotificationController'
-  require: '?ngModel'
-  restrict: 'C'
-  scope:
-    model: '=ngModel'
-    click: '&onClick'
-    close: '&onClose'
-  templateUrl: 'notification.html'
-]
 
 username = ['$filter', '$window', ($filter, $window) ->
   link: (scope, elem, attr, ctrl) ->
@@ -450,6 +440,5 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('username', username)
   .directive('userPicker', userPicker)
   .directive('repeatAnim', repeatAnim)
-  .directive('notification', notification)
   .directive('streamviewer', streamviewer)
   .directive('whenscrolled', whenscrolled)
