@@ -1,5 +1,6 @@
-import traceback
+import unicodedata
 import re
+import traceback
 from urlparse import urlparse
 import logging
 log = logging.getLogger(__name__)
@@ -155,6 +156,8 @@ class AnnotationNotifier(object):
                 self._send_annotation(notification['rendered'], notification['subject'], notification['recipients'])
 
     def _send_annotation(self, body, subject, recipients):
+        body = body.decode('utf8')
+        subject = subject.decode('utf8')
         message = Message(subject=subject,
                           recipients=recipients,
                           body=body)

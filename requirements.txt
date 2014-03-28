@@ -40,7 +40,7 @@ pyramid-beaker==0.7
 pyramid-chameleon==0.1
 pyramid-deform==0.2a5
 pyramid-layout==0.6
-pyramid-mailer==0.9
+pyramid-mailer==0.13
 pyramid-sockjs==0.3.9
 pyramid-tm==0.7
 -e git+https://github.com/tilgovi/pyramid_webassets.git@c7ee383d7ea3f4793f16c09291e13a5cd281893d#egg=pyramid_webassets-dev
@@ -49,7 +49,7 @@ pytest==2.2.4
 python-dateutil==2.1
 python-openid==2.2.5
 repoze.lru==0.6
-repoze.sendmail==4.0b2
+repoze.sendmail==4.1
 requests==2.2.1
 selenium==2.39.0
 simplejson==2.6.2
