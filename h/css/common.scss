@@ -1172,8 +1172,12 @@ h3.stream {
   cursor: pointer;
 }
 
-.VS-search .VS-icon-cancel:hover {
+.VS-search .VS-icon-cancel:hover { 
+  width: 11px; height: 11px;
+  background-position: center 0;
   background-image: url(../images/svg/cancel_black.svg);
+  background-size: contain;
+  cursor: pointer;
 }
 
 .VS-search .VS-icon-search {
@@ -1207,23 +1211,64 @@ h3.stream {
 
 // View and Sort tabs ////////////////////
 
-.viewsort {
+.container {
+  left: 0;
+  top: 0;
+  position: fixed;
   width: 100%;
-  text-align: center;
-  position: absolute;
-  top: 29px;
-  right: 0;
+  height: 300px;
+  z-index: 2;
+  pointer-events: none;
+
+  .viewsort {
+    @include single-transition(top, .25s);
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    top: 29px;
+    right: 0;
+    pointer-events: all;
+
+    &.hidden {
+      top: 0;
+    }
+  }
+
+  .viewsort > .dropdown {
+    @include smallshadow(0);
+    border-bottom-right-radius: 24px 72px;
+    border-bottom-left-radius: 24px 72px;
+    font-family: $sansFontFamily;
+    background: $white;
+    border: solid 1px $grayLighter;
+    padding: 0 10px;
+    margin: 0 3px;
+    display: inline-block;
+    z-index: 4;
+
+    .dropdown-menu {
+      margin-top: 0;
+
+      li {
+        z-index: 0;
+      }
+
+      &:before, &:after {
+        display: none;
+      }
+  
+      &.hidden {
+        display: none;
+      }
+    }
+  }
 }
 
-.viewsort > .dropdown {
-  @include smallshadow(0);
-  border-bottom-right-radius: 24px 72px;
-  border-bottom-left-radius: 24px 72px;
-  font-family: $sansFontFamily;
-  background: $white;
-  border: solid 1px $grayLighter;
-  padding: 0 4px;
-  margin: 0 3px;
-  display: inline-block;
-  z-index: 4;   
+.hoverfield {
+  height: 30px;
+  width: 80%;
+  position: fixed;
+  top: 0;
+  left: 29px;
+  z-index: 5;
 }

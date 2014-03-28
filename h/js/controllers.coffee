@@ -16,6 +16,9 @@ class App
     annotator, authentication, baseURI, streamfilter, viewFilter
   ) ->
     {plugins, host, providers} = annotator
+    
+    #This must be set so the view sort controller can autohide. 
+    $scope.show_search = false
 
     $scope.$watch 'auth.personas', (newValue, oldValue) =>
       unless newValue?.length
@@ -697,12 +700,28 @@ class Viewer
         {view:'Document'}
         {view:"Comments"}
     ]
+
     $scope.sorts = [
         {sort:'Newest'}
         {sort:'Oldest'}
         {sort:'Location'}]
     $scope.predicate = 'updated'
     $scope.reverse = true
+    $scope.hidden = 'hidden'
+    # $scope.xhover = false
+
+    $scope.$watch 'show_search', (newValue, oldValue) ->
+      if newValue
+        $scope.hidden = ''
+      else
+        $scope.hidden = 'hidden'
+
+    $scope.$watch 'xhover', (newValue, oldValue) ->
+      if newValue == true
+        $scope.hidden = ''
+      if newValue == false
+        if $scope.show_search == false
+          $scope.hidden = 'hidden'
 
     $scope.focus = (annotation) ->
       if angular.isArray annotation
