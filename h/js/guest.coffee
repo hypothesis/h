@@ -143,7 +143,7 @@ class Annotator.Guest extends Annotator
       annotations = []
       for page, anchors of @anchors
         for anchor in anchors
-          unless anchor.annotatin in annotations
+          unless anchor.annotation in annotations
             annotations.push anchor.annotation
 
       # Show all the annotations
