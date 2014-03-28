@@ -563,6 +563,16 @@ class Annotation
         if drafts.contains $scope.model
           $scope.editing = true
 
+
+        # XXX: This should be done some other way since we should not assume
+        # the annotation share URL is in any particular path relation to the
+        # app base URL. It's time to start reflecting routes, I think. I'm
+        # just not sure how best to do that with pyramid traversal since there
+        # is not a pre-determined route map. One possibility would be to
+        # unify everything so that it's relative to the app URL.
+        prefix = baseURI.replace /\/\w+\/?$/, ''
+        $scope.shared_link = prefix + '/a/' + $scope.model.id
+
     $scope.$watch 'model.target', (targets) ->
       return unless targets
       for target in targets
@@ -577,15 +587,6 @@ class Annotation
       if newValue? is true
         $timeout -> $element.find('input').focus()
         $timeout -> $element.find('input').select()
-
-        # XXX: This should be done some other way since we should not assume
-        # the annotation share URL is in any particular path relation to the
-        # app base URL. It's time to start reflecting routes, I think. I'm
-        # just not sure how best to do that with pyramid traversal since there
-        # is not a pre-determined route map. One possibility would be to
-        # unify everything so that it's relative to the app URL.
-        prefix = baseURI.replace /\/\w+\/?$/, ''
-        $scope.shared_link = prefix + '/a/' + $scope.model.id
         $scope.shared = false
         return
 
