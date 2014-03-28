@@ -132,6 +132,24 @@ class Annotator.Guest extends Annotator
       }
     )
 
+    .bind('showComments', => @plugins.Heatmap.commentClick())
+
+    .bind('showAll', =>
+      # Switch off dynamic mode on the heatmap
+      if @plugins.Heatmap
+        @plugins.Heatmap.dynamicBucket = false
+
+      # Collect all successfully attached annotations
+      annotations = []
+      for page, anchors of @anchors
+        for anchor in anchors
+          unless anchor.annotation in annotations
+            annotations.push anchor.annotation
+
+      # Show all the annotations
+      @showViewer "Document", annotations
+    )
+
     .bind('setTool', (ctx, name) =>
       this.setTool name
       this.publish 'setTool', name
@@ -164,11 +182,21 @@ class Annotator.Guest extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
 
-  showViewer: (annotations) =>
-    @panel?.notify method: "showViewer", params: (a.id for a in annotations)
+  showViewer: (viewName, annotations) =>
+    @panel?.notify
+      method: "showViewer"
+      params: [
+        viewName
+        (a.id for a in annotations)
+      ]
 
-  updateViewer: (annotations) =>
-    @panel?.notify method: "updateViewer", params: (a.id for a in annotations)
+  updateViewer: (viewName, annotations) =>
+    @panel?.notify
+      method: "updateViewer"
+      params: [
+        viewName
+        (a.id for a in annotations)
+      ]
 
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
@@ -254,7 +282,7 @@ class Annotator.Guest extends Annotator
     return unless (@tool is 'highlight') or @visibleHighlights and @noBack
 
     # Tell sidebar to show the viewer for these annotations
-    this.showViewer annotations
+    this.showViewer "Selection", annotations
 
     # We have already prevented closing the sidebar, now reset this flag
     @noBack = false

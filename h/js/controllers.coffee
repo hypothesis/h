@@ -674,11 +674,13 @@ class Viewer
     annotator
   ) ->
     {providers, threading} = annotator
-    $scope.view = 'Screen'
+    $rootScope.view = 'Screen'
     $scope.sort = 'Newest'
     $scope.views = [
         {view:'Screen'}
-        {view:'Document'}]
+        {view:'Document'}
+        {view:"Comments"}
+    ]
     $scope.sorts = [
         {sort:'Newest'}
         {sort:'Oldest'}
@@ -704,20 +706,29 @@ class Viewer
           method: 'scrollTo'
           params: annotation.$$tag
 
-    $scope.applyview = (view) ->
-      $scope.view = view
-      if $scope.view == 'Screen'
-        annotator.updateViewer($rootScope.annotations)
+    $scope.applyView = (view) ->
+      switch view
+        when 'Screen'
+          # Go over all providers, and switch them to dynamic mode
+          # They will, in turn, call back updateView
+          # with the right set of annotations
+          for p in providers
+            p.channel.notify method: 'setDynamicBucketMode', params: true
+          break
 
-      if $scope.view == 'Document'
-        annotator.updateViewer(annotator.plugins.Store.annotations)
+        when 'Document'
+          for p in providers
+            p.channel.notify method: 'showAll'
+          break
 
-      for p in providers
-        p.channel.notify
-          method: 'setDynamicBucketMode'
-          params: $scope.view == 'Screen'
+        when 'Comments'
+          for p in providers
+            p.channel.notify method: 'showComments'
 
-    $scope.applysort = (sort) ->
+        else
+          throw new Error "Unknown view requested: " + view
+
+    $scope.applySort = (sort) ->
       $scope.sort = sort
       if $scope.sort == 'Newest'
         $scope.predicate = 'updated'
