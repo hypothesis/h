@@ -62,7 +62,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     for event in events
       if event is 'annotationCreated'
         @annotator.subscribe event, =>
-          @dynamicBucket = false
           this._scheduleUpdate()
       else
         @annotator.subscribe event, this._scheduleUpdate
