@@ -620,12 +620,17 @@ blockquote {
   font-family: $sansFontFamily;
   position: relative;
 
-  &:hover .reply-count {
+  &:hover fuzzytime a, &:hover .reply-count {
     color: $linkColor;
   }
 
   fuzzytime {
     margin: 0 .4em;
+    a {
+      color: $textColor;
+      &:hover { color: $linkColorHover; }
+      &:focus { outline: 0; }
+    }
   }
 
   .reply-count {
