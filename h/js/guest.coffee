@@ -289,6 +289,9 @@ class Annotator.Guest extends Annotator
   onAnchorClick: (annotations) =>
     return unless (@tool is 'highlight') or @visibleHighlights and @noBack
 
+    # Switch off dynamic mode; we are going to "Selection" scope
+    @plugins.Heatmap.dynamicBucket = false
+
     # Tell sidebar to show the viewer for these annotations
     this.showViewer "Selection", annotations
 
