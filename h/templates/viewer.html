@@ -37,7 +37,7 @@
      ng-mouseenter="focus(annotation)"
      ng-mouseleave="focus()"
      ng-repeat="annotation in annotations | orderBy:predicate:reverse track by annotation.id"
-     class="paper thread"
+     class="paper thread stream-list vl-animate"
      data-recursive=""
      >
     <a href="" class="threadexp"
@@ -63,7 +63,7 @@
 
     <!-- Replies -->
     <ul>
-      <li class="thread"
+      <li class="thread vl-animate"
           ng-class="{'collapsed': collapsed}"
           ng-click="toggleCollapsed($event)"
           ng-repeat="annotation in annotation.reply_list"

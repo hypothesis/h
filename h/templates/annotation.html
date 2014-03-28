@@ -43,7 +43,7 @@
     </span>
 
     <!-- Timestamp -->
-    <fuzzytime class="small pull-right" ng-model="model.updated"></fuzzytime>
+    <fuzzytime annotationid="{{model.id}}" class="small pull-right" ng-model="model.updated"></fuzzytime>
   </header>
 
   <!-- Prompt -->
@@ -127,6 +127,13 @@
      ng-show="thread.children.length && replies!='false'"
      count="thread.flattenChildren().length"
      when="{one: '1 reply', other: '{} replies'}"
+     ng-click="toggleCollapsed($event)" />
+  <a class="reply-count small"
+     href=""
+     ng-pluralize=""
+     ng-show="thread.children.length && replies!='false'"
+     count="thread.flattenChildren().filter(newReply).length"
+     when="{one: '1 reply', other: '{} new replies'}"
      ng-click="toggleCollapsed($event)" />
 
   <!-- Bottom control strip -->

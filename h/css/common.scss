@@ -613,6 +613,30 @@ blockquote {
 }
 
 
+//VIEWER LIST ANIMATION////////////////////////////
+.vl-animate.ng-enter,
+.vl-animate.ng-leave,
+.vl-animate.ng-move {
+    @include transition( 500ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all );
+	position: relative;
+	display: block;
+}
+
+.vl-animate.ng-leave.ng-leave-active,
+.vl-animate.ng-enter {
+    @include transform( scaleY(0) );
+	height: 0px;
+	opacity: 0;
+}
+
+.vl-animate.ng-enter.ng-enter-active,
+.vl-animate.ng-leave {
+    @include transform( scaleY(1) );
+	height: 30px;
+	opacity: 1;
+}
+
+
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
@@ -823,6 +847,51 @@ blockquote {
   }
 }
 
+//COLLAPSED REPLIES////////////////////////////////
+.reply-count:hover {
+  color: $linkColorHover;
+  text-decoration: none;
+}
+
+.collapsedreply {
+  display: none;
+}
+
+.new-reply {
+  color: $linkColorHover;
+}
+
+.hidereplies {
+  display: block;
+
+  li {
+    display: none;
+
+    &.collapsedreplies {
+      display: none !important;
+    }
+  }
+}
+
+.collapsedreplies {
+    @extend .collapsed;
+    display: block !important;
+
+  .collapsedreply{
+      display: inline;
+      font-style: italic;
+      margin-right: 5px;
+      margin-left: 5px;
+  }
+  & > .annotation {
+    .body {
+      display: none;
+    }
+    .magicontrols {
+      display: none;
+    }
+  }
+}
 
 //MAGICONTROL////////////////////////////////
 .magicontrol {

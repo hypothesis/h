@@ -56,7 +56,7 @@
                  ng-show="annotation.text || annotation.replies.length || annotation.tags.length">
               <div class="annotation detail">
                 <div class="magicontrols pull-right">
-                  <span ng-show="annotation.text || annotation.tags.length" class="small">{{annotation.date | fuzzyTime}}</span>
+                  <span ng-show="annotation.text || annotation.tags.length" class="small"><fuzzytime ng-model="annotation.date" annotationid="{{annotation.id}}"></fuzzytime></span>
                 </div>
 
                 <strong>
@@ -95,7 +95,7 @@
                   <div class="annotation detail">
 
                     <div class="magicontrols pull-right">
-                      <span class="small">{{reply.updated | fuzzyTime}}</span>
+                      <fuzzytime class="small" ng-model="reply.updated" annotationid="{{reply.id}}"></fuzzytime>
                     </div>
 
                     <strong>

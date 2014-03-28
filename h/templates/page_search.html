@@ -2,6 +2,7 @@
   <li ng-repeat="thread in search_annotations"
       ng-mouseenter="focus(thread.message)"
       ng-mouseleave="focus()"
+      class="stream-list summary vl-animate"
       ng-class="thread.message.$emphasis && 'card-emphasis'"
       >
     <!-- Thread view -->
@@ -71,7 +72,7 @@
 
       <!-- Replies -->
       <ul>
-        <li class="thread"
+        <li class="thread vl-animate"
             ng-class="collapsed && 'collapsedreplies' || ''"
             ng-mousedown="toggleCollapsedDown($event)"
             ng-click="toggleCollapsed($event)"

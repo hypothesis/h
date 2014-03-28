@@ -356,12 +356,43 @@ username = ['$filter', '$window', ($filter, $window) ->
   template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
 ]
 
-fuzzytime = ['$filter', '$window', ($filter, $window) ->
+fuzzytime = ['$document','$filter', '$window', ($document, $filter, $window) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
     ctrl.$render = ->
       scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
+
+      # Determining the timezone name
+      timezone = jstz.determine().name()
+      # The browser language
+      userLang = navigator.language || navigator.userLanguage
+
+      # Now to make a localized hint date, set the language
+      momentDate = moment ctrl.$viewValue
+      momentDate.lang(userLang)
+
+      # Try to localize to the browser's timezone
+      try
+        scope.hint = momentDate.tz(timezone).format('LLLL')
+      catch error
+        # For invalid timezone, use the default
+        scope.hint = momentDate.format('LLLL')
+
+      toolparams =
+        tooltipClass: 'small'
+        position:
+          collision: 'none'
+          at: "left center"
+
+
+      elem.tooltip(toolparams)
+
+      # Generate permalink
+      id = attr.annotationid
+      baseUrl = window.location.protocol + '//' + window.location.hostname + ':' + window.location.port
+      prefix = baseUrl.replace /\/\w+\/$/, ''
+      scope.permalink = prefix + '/a/' + id
 
     timefunct = ->
       $window.setInterval =>
@@ -376,7 +407,8 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
 
   require: '?ngModel'
   restrict: 'E'
-  template: '{{ftime | date:mediumDate}}'
+  scope: true
+  template: '<span><a target="_blank" href="{{permalink}}" title="{{hint}}">{{ftime | date:mediumDate}}</a></span>'
 ]
 
 streamviewer = [ ->

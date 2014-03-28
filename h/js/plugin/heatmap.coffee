@@ -427,6 +427,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       @index.forEach (b, i) =>
         if @buckets[i].length > 0 or @isUpper(i) or @isLower(i)
           buckets.push i
+      @bucketIndices = buckets
       buckets
 
     tabs.enter().append('div')
@@ -488,6 +489,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     if @dynamicBucket
       this._fillDynamicBucket()
 
+    @tabs = tabs
+
   _fillDynamicBucket: =>
     top = window.pageYOffset
     bottom = top + $(window).innerHeight()
@@ -502,6 +505,23 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     @annotator.updateViewer "Screen", visible
 
   _getCommentBucket: => @index.length - 2
+
+  blinkBuckets: =>
+    for tab, index in @tabs[0]
+      bucket = @buckets[@bucketIndices[index]]
+
+      hasUpdate = false
+      for annotation in bucket
+        if annotation._updatedAnnotation?
+          hasUpdate = true
+          delete annotation._updatedAnnotation
+
+      unless hasUpdate then continue
+      element = $(tab)
+      element.toggle('fg_highlight', {color: 'lightblue'})
+      setTimeout ->
+        element.toggle('fg_highlight', {color: 'lightblue'})
+      , 500
 
   isUpper:   (i) => i == 1
   isLower:   (i) => i == @index.length - 3
