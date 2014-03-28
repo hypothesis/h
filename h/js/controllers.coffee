@@ -36,10 +36,12 @@ class App
         if annotator.discardDrafts()
           # TODO: better knowledge of routes
           authentication.$logout => $scope.$broadcast '$reset'
+          $rootScope.applyView "Screen"
         else
           $scope.auth.persona = oldValue
       else if newValue?
         $scope.sheet.collapsed = true
+        $rootScope.applyView "Screen"
 
     $scope.$watch 'auth.token', (newValue, oldValue) =>
       if plugins.Auth?
@@ -706,7 +708,7 @@ class Viewer
           method: 'scrollTo'
           params: annotation.$$tag
 
-    $scope.applyView = (view) ->
+    $rootScope.applyView = (view) ->
       switch view
         when 'Screen'
           # Go over all providers, and switch them to dynamic mode
