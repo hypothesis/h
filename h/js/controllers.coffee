@@ -445,12 +445,14 @@ class App
 
 class Annotation
   this.$inject = [
-    '$element', '$location', '$rootScope', '$sce', '$scope', '$timeout', '$window',
+    '$element', '$location', '$rootScope', '$sce', '$scope', '$timeout',
+    '$window',
     'annotator', 'baseURI', 'drafts'
   ]
   constructor: (
-     $element, $location, $rootScope, $sce, $scope, $timeout, $window,
-     annotator, baseURI, drafts
+     $element,   $location,   $rootScope,   $sce,   $scope,   $timeout,
+     $window,
+     annotator,   baseURI,   drafts
   ) ->
     threading = annotator.threading
     $scope.action = 'create'
