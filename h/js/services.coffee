@@ -524,7 +524,7 @@ class Hypothesis extends Annotator
   # Is this annotation a reply?
   isReply: (annotation) ->
     # The presence of references means that this is a reply
-    annotation.references.length
+    annotation.references?.length
 
   # Discard all drafts, deleting unsaved annotations from the annotator
   discardDrafts: ->
