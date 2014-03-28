@@ -148,6 +148,8 @@ class App
 
     $scope.$broadcast '$reset'
 
+    $rootScope.view = 'Screen'
+
     # Clean up the searchbar
     $scope.leaveSearch = =>
       # Got back from search page
@@ -680,7 +682,6 @@ class Viewer
     annotator
   ) ->
     {providers, threading} = annotator
-    $rootScope.view = 'Screen'
     $scope.sort = 'Newest'
     $scope.views = [
         {view:'Screen'}
