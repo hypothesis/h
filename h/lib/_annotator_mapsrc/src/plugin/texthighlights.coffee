@@ -34,16 +34,16 @@ class TextHighlight extends Annotator.Highlight
       TextHighlight.$.makeArray annotations
 
     annotator.addEvent ".annotator-hl", "mouseover", (event) =>
-      annotator.onAnchorMouseover getAnnotations event, @highlightType
+      annotator.onAnchorMouseover event, getAnnotations event, @highlightType
 
     annotator.addEvent ".annotator-hl", "mouseout", (event) =>
-      annotator.onAnchorMouseout getAnnotations event, @highlightType
+      annotator.onAnchorMouseout event, getAnnotations event, @highlightType
 
     annotator.addEvent ".annotator-hl", "mousedown", (event) =>
-      annotator.onAnchorMousedown getAnnotations event, @highlightType
+      annotator.onAnchorMousedown event, getAnnotations event, @highlightType
 
     annotator.addEvent ".annotator-hl", "click", (event) =>
-      annotator.onAnchorClick getAnnotations event, @highlightType
+      annotator.onAnchorClick event, getAnnotations event, @highlightType
 
     @_inited.push annotator
 
