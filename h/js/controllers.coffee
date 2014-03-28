@@ -498,6 +498,9 @@ class Annotation
           if annotator.isComment(annotation) and
               $rootScope.view isnt "Comments"
             $rootScope.applyView "Comments"
+          if not annotator.isComment(annotation) and
+              $rootScope.view is "Comments"
+            $rootScope.applyView "Screen"
           $timeout (-> annotator.publish 'annotationCreated', annotation),
             1000
         when 'delete'
