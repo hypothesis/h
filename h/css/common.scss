@@ -620,12 +620,17 @@ blockquote {
   font-family: $sansFontFamily;
   position: relative;
 
-  &:hover .reply-count {
+  &:hover fuzzytime a, &:hover .reply-count {
     color: $linkColor;
   }
 
   fuzzytime {
     margin: 0 .4em;
+    a {
+      color: $textColor;
+      &:hover { color: $linkColorHover; }
+      &:focus { outline: 0; }
+    }
   }
 
   .reply-count {
@@ -719,10 +724,6 @@ blockquote {
     padding: 0;
     padding-left: $thread-padding;
 
-    &:first-child {
-      margin-top: .5em;
-    }
-
     &.collapsed {
       & > .annotation {
         fuzzytime {
@@ -801,26 +802,30 @@ blockquote {
       background-image: url("../images/plus_1.png");
     }
   }
+}
 
-  &.collapse-hide-setup > ul {
-    @include transition-timing-function(cubic-bezier(0, 1, 0, 1));
-    max-height: 65536px;
-    overflow: hidden;
-  }
 
-  &.collapse-hide-start > ul {
-    max-height: 0;
-  }
+.thread.ng-enter,
+.thread.ng-leave,
+.thread.ng-move {
+  @include transition-duration(.25s);
+  @include transition-property(max-height);
+  overflow: hidden;
 
-  &.collapse-show-setup > ul {
-    @include transition-timing-function(cubic-bezier(1, 0, 1, 0));
-    max-height: 0;
-    overflow: hidden;
-  }
+  .threadexp { display: none; }
+}
 
-  &.collapse-show-start > ul {
-    max-height: 65536px;
-  }
+.thread.ng-leave.ng-leave-active,
+.thread.ng-enter {
+  @include transition-timing-function(cubic-bezier(0, 1, 0, 1));
+	max-height: 0;
+}
+
+.thread.ng-enter.ng-enter-active,
+.thread.ng-leave {
+  @include transition-duration(.1s);
+  @include transition-timing-function(cubic-bezier(1, 0, 1, 0));
+	max-height: 65536px;
 }
 
 
@@ -1211,25 +1216,6 @@ h3.stream {
   cursor: pointer;
 }
 
-.fadeIn-setup,.fadeOut-setup {
-  -webkit-transition: .25s linear opacity;
-  -moz-transition: .25s linear opacity;
-  -o-transition: .25s linear opacity;
-  transition: .25s linear opacity;
-}
-
-.fadeIn-setup{
-  opacity:0;
-}
-.fadeOut-setup{
-  opacity:1;
-}
-.fadeIn-setup.fadeIn-start {
-  opacity: 1;
-}
-.fadeOut-setup.fadeOut-start{
-    opacity:0;
-}
 
 // View and Sort tabs ////////////////////
 

@@ -160,6 +160,14 @@ class Annotator.Guest extends Annotator
       this.publish 'setVisibleHighlights', state
     )
 
+    .bind('blinkBuckets', =>
+      @plugins.Heatmap.blinkBuckets()
+    )
+
+    .bind('updateHeatmap', =>
+      @plugins.Heatmap._scheduleUpdate()
+    )
+
   scanDocument: (reason = "something happened") =>
     try
       console.log "Analyzing host frame, because " + reason + "..."
