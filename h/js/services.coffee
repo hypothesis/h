@@ -521,6 +521,10 @@ class Hypothesis extends Annotator
     # No targets and no references means that this is a comment
     not (annotation.references?.length or annotation.target?.length)
 
+  # Is this annotation a reply?
+  isReply: (annotation) ->
+    # The presence of references means that this is a reply
+    annotation.references.length
 
   # Discard all drafts, deleting unsaved annotations from the annotator
   discardDrafts: ->

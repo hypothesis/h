@@ -499,7 +499,8 @@ class Annotation
             if $rootScope.view isnt "Comments"
               $rootScope.applyView "Comments"
           else
-            if $rootScope.view in ["Comments", "Selection"]
+            if not annotator.isReply(annotation) and
+                $rootScope.view in ["Comments", "Selection"]
               $rootScope.applyView "Screen"
           $timeout (-> annotator.publish 'annotationCreated', annotation),
             1000
