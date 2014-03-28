@@ -445,12 +445,12 @@ class App
 
 class Annotation
   this.$inject = [
-    '$element', '$location', '$sce', '$scope', '$timeout', '$window',
+    '$element', '$location', '$rootScope', '$sce', '$scope', '$timeout', '$window',
     'annotator', 'baseURI', 'drafts'
   ]
   constructor: (
-     $element,   $location,   $sce,   $scope,   $timeout,   $window,
-     annotator,   baseURI,   drafts
+     $element, $location, $rootScope, $sce, $scope, $timeout, $window,
+     annotator, baseURI, drafts
   ) ->
     threading = annotator.threading
     $scope.action = 'create'
@@ -493,7 +493,10 @@ class Annotation
 
       switch $scope.action
         when 'create'
-          annotator.publish 'annotationCreated', annotation
+          unless $rootScope.view is "Comments"
+            $rootScope.applyView "Comments"
+          $timeout (-> annotator.publish 'annotationCreated', annotation),
+            1000
         when 'delete'
           root = $scope.$root.annotations
           root = (a for a in root when a isnt root)
