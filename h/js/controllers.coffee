@@ -495,7 +495,8 @@ class Annotation
 
       switch $scope.action
         when 'create'
-          unless $rootScope.view is "Comments"
+          if annotator.isComment(annotation) and
+              $rootScope.view isnt "Comments"
             $rootScope.applyView "Comments"
           $timeout (-> annotator.publish 'annotationCreated', annotation),
             1000
