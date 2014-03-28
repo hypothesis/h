@@ -468,7 +468,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         else
           d3.event.stopPropagation()
           @dynamicBucket = false
-          annotator.showViewer "Tab", @buckets[bucket]
+          annotator.showViewer "Selection", @buckets[bucket]
 
     tabs.exit().remove()
 
