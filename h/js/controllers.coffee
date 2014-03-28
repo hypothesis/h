@@ -495,12 +495,12 @@ class Annotation
 
       switch $scope.action
         when 'create'
-          if annotator.isComment(annotation) and
-              $rootScope.view isnt "Comments"
-            $rootScope.applyView "Comments"
-          if not annotator.isComment(annotation) and
-              $rootScope.view is "Comments"
-            $rootScope.applyView "Screen"
+          if annotator.isComment(annotation)
+            if $rootScope.view isnt "Comments"
+              $rootScope.applyView "Comments"
+          else
+            if $rootScope.view in ["Comments", "Selection"]
+              $rootScope.applyView "Screen"
           $timeout (-> annotator.publish 'annotationCreated', annotation),
             1000
         when 'delete'
