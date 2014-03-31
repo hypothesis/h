@@ -275,27 +275,29 @@ class Annotator.Guest extends Annotator
     else
       super
 
-  onAnchorMouseover: (event, annotations) ->
+  onAnchorMouseover: (event) ->
     if (@tool is 'highlight') or @visibleHighlights
-      this.addEmphasis annotations
+      this.addEmphasis event.data.getAnnotations event
 
-  onAnchorMouseout: (event, annotations) ->
+  onAnchorMouseout: (event) ->
     if (@tool is 'highlight') or @visibleHighlights
-      this.removeEmphasis annotations
+      this.removeEmphasis event.data.getAnnotations event
 
   # When clicking on a highlight in highlighting mode,
   # set @noBack to true to prevent the sidebar from closing
-  onAnchorMousedown: (event, annotations) =>
+  onAnchorMousedown: (event) =>
     if (@tool is 'highlight') or @visibleHighlights
       @noBack = true
 
   # When clicking on a highlight in highlighting mode,
   # tell the sidebar to bring up the viewer for the relevant annotations
-  onAnchorClick: (event, annotations) =>
+  onAnchorClick: (event) =>
     return unless (@tool is 'highlight') or @visibleHighlights and @noBack
 
     # Switch off dynamic mode; we are going to "Selection" scope
     @plugins.Heatmap.dynamicBucket = false
+
+    annotations = event.data.getAnnotations event
 
     if event.metaKey or event.ctrlKey
       # Tell sidebar to add these annotations to the sidebar
