@@ -19,39 +19,29 @@ class TextHighlight extends Annotator.Highlight
   # List of annotators we have already set up events for
   @_inited: []
 
+  # Collect the annotations impacted by an event
+  @getAnnotations: (event) ->
+    TextHighlight.$(event.target)
+      .parents('.annotator-hl')
+      .andSelf()
+      .map( -> TextHighlight.$(this).data("annotation"))
+      .toArray()
+
   # Set up events for this annotator
   @_init: (annotator) ->
     return if annotator in @_inited
 
-    getAnnotations = (event) ->
-      # Collect the involved annotations
-      annotations = TextHighlight.$(event.target)
-        .parents('.annotator-hl')
-        .andSelf()
-        .map -> return TextHighlight.$(this).data("annotation")
+    annotator.element.delegate ".annotator-hl", "mouseover", this,
+       (event) => annotator.onAnchorMouseover event
 
-      # Make a proper array out of the list
-      TextHighlight.$.makeArray annotations
+    annotator.element.delegate ".annotator-hl", "mouseout", this,
+       (event) => annotator.onAnchorMouseout event
 
-    annotator.element.delegate ".annotator-hl", "mouseover",
-       type: @highlightType
-       getAnnotations: (event) => getAnnotations event,
-       ((event) => annotator.onAnchorMouseover event)
+    annotator.element.delegate ".annotator-hl", "mousedown", this,
+       (event) => annotator.onAnchorMousedown event
 
-    annotator.element.delegate ".annotator-hl", "mouseout",
-       type: @highlightType
-       getAnnotations: (event) => getAnnotations event,
-       ((event) => annotator.onAnchorMouseout event)
-
-    annotator.element.delegate ".annotator-hl", "mousedown",
-       type: @highlightType
-       getAnnotations: (event) => getAnnotations event,
-       ((event) => annotator.onAnchorMousedown event)
-
-    annotator.element.delegate ".annotator-hl", "click",
-       type: @highlightType
-       getAnnotations: (event) => getAnnotations event,
-       ((event) => annotator.onAnchorClick event)
+    annotator.element.delegate ".annotator-hl", "click", this,
+       (event) => annotator.onAnchorClick event
 
     @_inited.push annotator
 
