@@ -1220,8 +1220,9 @@ h3.stream {
   right: 0;
   z-index: 4;
 
-  &.hidden {
-    display: none;
+  &.ng-hide {
+    top: 0;
+    display:block!important;
   }
 }
 
