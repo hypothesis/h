@@ -1,12 +1,13 @@
 <!-- View Sort Controls -->
-<div class="viewsort">
+<div class="viewsort" ng-show="$parent.show_view_sort" ng-mouseleave="$parent.show_view_sort = false">
   <div class="dropdown">
     <span role="button"
           class="dropdown-toggle"
           data-toggle="dropdown"
           >{{view}}</span>
     <ul class="dropdown-menu"
-        role="menu">
+        role="menu"
+        ng-show="$parent.show_view_sort">
       <li ng-repeat="view in views">
         <a href="" ng-click="applyView(view.view)">{{view.view}}</a>
       </li>
@@ -19,7 +20,8 @@
           data-toggle="dropdown"
           >{{sort}}</span>
     <ul class="dropdown-menu"
-        role="menu">
+        role="menu"
+        ng-show="$parent.show_view_sort">
       <li ng-repeat="sort in sorts">
         <a href="" ng-click="applySort(sort.sort)">{{sort.sort}}</a>
       </li>

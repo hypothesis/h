@@ -685,7 +685,7 @@ class Editor
 class Viewer
   this.$inject = [
     '$location', '$rootScope', '$routeParams', '$scope',
-    'annotator'
+    'annotator', 'viewFilter'
   ]
   constructor: (
     $location, $rootScope, $routeParams, $scope,
@@ -698,6 +698,7 @@ class Viewer
         {view:'Document'}
         {view:"Comments"}
     ]
+
     $scope.sorts = [
         {sort:'Newest'}
         {sort:'Oldest'}
