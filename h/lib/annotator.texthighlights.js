@@ -7,7 +7,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2014-03-29 07:07:50Z
+** Built at: 2014-03-31 08:40:00Z
 */
 
 
@@ -55,17 +55,37 @@
         });
         return TextHighlight.$.makeArray(annotations);
       };
-      annotator.addEvent(".annotator-hl", "mouseover", function(event) {
-        return annotator.onAnchorMouseover(event, getAnnotations(event, _this.highlightType));
+      annotator.addEvent(".annotator-hl", "mouseover", (function(event) {
+        return annotator.onAnchorMouseover(event);
+      }), {
+        type: this.highlightType,
+        getAnnotations: function(event) {
+          return getAnnotations(event);
+        }
       });
-      annotator.addEvent(".annotator-hl", "mouseout", function(event) {
-        return annotator.onAnchorMouseout(event, getAnnotations(event, _this.highlightType));
+      annotator.addEvent(".annotator-hl", "mouseout", (function(event) {
+        return annotator.onAnchorMouseout(event);
+      }), {
+        type: this.highlightType,
+        getAnnotations: function(event) {
+          return getAnnotations(event);
+        }
       });
-      annotator.addEvent(".annotator-hl", "mousedown", function(event) {
-        return annotator.onAnchorMousedown(event, getAnnotations(event, _this.highlightType));
+      annotator.addEvent(".annotator-hl", "mousedown", (function(event) {
+        return annotator.onAnchorMousedown(event);
+      }), {
+        type: this.highlightType,
+        getAnnotations: function(event) {
+          return getAnnotations(event);
+        }
       });
-      annotator.addEvent(".annotator-hl", "click", function(event) {
-        return annotator.onAnchorClick(event, getAnnotations(event, _this.highlightType));
+      annotator.addEvent(".annotator-hl", "click", (function(event) {
+        return annotator.onAnchorClick(event);
+      }), {
+        type: this.highlightType,
+        getAnnotations: function(event) {
+          return getAnnotations(event);
+        }
       });
       return this._inited.push(annotator);
     };

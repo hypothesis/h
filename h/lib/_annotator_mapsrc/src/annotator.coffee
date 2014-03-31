@@ -825,8 +825,8 @@ class Annotator extends Delegator
     for anchor in @anchors[index] ? []
       anchor.virtualize index
 
-  onAnchorMouseover: (event, annotations, highlightType) ->
-    #console.log "Mouse over annotations:", annotations
+  onAnchorMouseover: (event) ->
+    #console.log "Mouse over annotations:", event.data.getAnnotations event
 
     # Cancel any pending hiding of the viewer.
     this.clearViewerHideTimer()
@@ -835,17 +835,18 @@ class Annotator extends Delegator
     # already displaying the viewer
     return false if @mouseIsDown or @viewer.isShown()
 
-    this.showViewer(annotations, util.mousePosition(event, @wrapper[0]))
+    this.showViewer event.data.getAnnotations(event),
+      util.mousePosition(event, @wrapper[0])
 
-  onAnchorMouseout: (event, annotations, highlightType) ->
-    #console.log "Mouse out on annotations:", annotations
+  onAnchorMouseout: (event) ->
+    #console.log "Mouse out on annotations:", event.data.getAnnotations event
     this.startViewerHideTimer()
 
-  onAnchorMousedown: (event, annotations, highlightType) ->
-    #console.log "Mouse down on annotations:", annotations
+  onAnchorMousedown: (event) ->
+    #console.log "Mouse down on annotations:", event.data.getAnnotations event
 
-  onAnchorClick: (event, annotations, highlightType) ->
-    #console.log "Click on annotations:", annotations
+  onAnchorClick: (event) ->
+    #console.log "Click on annotations:", event.data.getAnnotations event
 
 # Create namespace for Annotator plugins
 class Annotator.Plugin extends Delegator
