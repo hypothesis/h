@@ -227,6 +227,10 @@ class Hypothesis extends Annotator
       $rootScope.$apply => this.updateViewer viewName, this._getAnnotationsFromIDs ids
     )
 
+    .bind('toggleViewerSelection', (ctx, ids = []) =>
+      $rootScope.$apply => this.toggleViewerSelection this._getAnnotationsFromIDs ids
+    )
+
     .bind('setTool', (ctx, name) =>
       $rootScope.$apply => this.setTool name
     )
@@ -314,6 +318,31 @@ class Hypothesis extends Annotator
         children = (r.message for r in (thread.children or []))
         annotation.reply_list = children.sort(@sortAnnotations).reverse()
         @buildReplyList children
+
+  toggleViewerSelection: (annotations=[]) =>
+    annotations = annotations.filter (a) -> a?
+    @element.injector().invoke [
+      '$rootScope',
+      ($rootScope) =>
+        if $rootScope.view is "Selection"
+          # We are already in selection mode; just XOR this list
+          # to the current selection
+          @buildReplyList annotations
+          list = $rootScope.annotations
+          for a in annotations
+            index = list.indexOf a
+            if index isnt -1
+              list.splice index, 1
+            else
+              list.push a
+        else
+          # We are not in selection mode,
+          # so we switch to it, and make this list
+          # the new selection
+          $rootScope.view = "Selection"
+          $rootScope.annotations = annotations
+    ]
+    this
 
   updateViewer: (viewName, annotations=[]) =>
     annotations = annotations.filter (a) -> a?

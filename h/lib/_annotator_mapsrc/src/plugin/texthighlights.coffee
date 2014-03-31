@@ -19,31 +19,29 @@ class TextHighlight extends Annotator.Highlight
   # List of annotators we have already set up events for
   @_inited: []
 
+  # Collect the annotations impacted by an event
+  @getAnnotations: (event) ->
+    TextHighlight.$(event.target)
+      .parents('.annotator-hl')
+      .andSelf()
+      .map( -> TextHighlight.$(this).data("annotation"))
+      .toArray()
+
   # Set up events for this annotator
   @_init: (annotator) ->
     return if annotator in @_inited
 
-    getAnnotations = (event) ->
-      # Collect the involved annotations
-      annotations = TextHighlight.$(event.target)
-        .parents('.annotator-hl')
-        .andSelf()
-        .map -> return TextHighlight.$(this).data("annotation")
+    annotator.element.delegate ".annotator-hl", "mouseover", this,
+       (event) => annotator.onAnchorMouseover event
 
-      # Make a proper array out of the list
-      TextHighlight.$.makeArray annotations
+    annotator.element.delegate ".annotator-hl", "mouseout", this,
+       (event) => annotator.onAnchorMouseout event
 
-    annotator.addEvent ".annotator-hl", "mouseover", (event) =>
-      annotator.onAnchorMouseover getAnnotations event, @highlightType
+    annotator.element.delegate ".annotator-hl", "mousedown", this,
+       (event) => annotator.onAnchorMousedown event
 
-    annotator.addEvent ".annotator-hl", "mouseout", (event) =>
-      annotator.onAnchorMouseout getAnnotations event, @highlightType
-
-    annotator.addEvent ".annotator-hl", "mousedown", (event) =>
-      annotator.onAnchorMousedown getAnnotations event, @highlightType
-
-    annotator.addEvent ".annotator-hl", "click", (event) =>
-      annotator.onAnchorClick getAnnotations event, @highlightType
+    annotator.element.delegate ".annotator-hl", "click", this,
+       (event) => annotator.onAnchorClick event
 
     @_inited.push annotator
 
