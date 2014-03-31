@@ -132,8 +132,6 @@ class Annotator.Guest extends Annotator
       }
     )
 
-    .bind('showComments', => @plugins.Heatmap.commentClick())
-
     .bind('showAll', =>
       # Switch off dynamic mode on the heatmap
       if @plugins.Heatmap

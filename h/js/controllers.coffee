@@ -498,12 +498,10 @@ class Annotation
           if annotator.isComment(annotation)
             if $rootScope.view isnt "Comments"
               $rootScope.applyView "Comments"
-          else
-            if not annotator.isReply(annotation) and
-                $rootScope.view in ["Comments", "Selection"]
-              $rootScope.applyView "Screen"
-          $timeout (-> annotator.publish 'annotationCreated', annotation),
-            1000
+          else if not annotator.isReply(annotation) and
+              $rootScope.view in ["Comments", "Selection"]
+            $rootScope.applyView "Screen"
+          annotator.publish 'annotationCreated', annotation
         when 'delete'
           root = $scope.$root.annotations
           root = (a for a in root when a isnt root)
@@ -741,7 +739,11 @@ class Viewer
 
         when 'Comments'
           for p in providers
-            p.channel.notify method: 'showComments'
+            p.channel.notify method: 'setDynamicBucketMode', params: false
+          annotations = annotator.plugins.Store.annotations
+          comments = annotations.filter (a) -> annotator.isComment(a)
+          $rootScope.annotations = comments
+          break
 
         else
           throw new Error "Unknown view requested: " + view
