@@ -1,37 +1,31 @@
 <!-- View Sort Controls -->
-<div class="hoverfield"
-     ng-hide="show_search || !sheet.collapsed" 
-     ng-mouseenter="xhover = true">
-</div>
-<div class ="container">
-  <div class="viewsort" ng-class="hidden" ng-mouseleave="xhover = false">
-    <div class="dropdown">
-      <span role="button"
-            class="dropdown-toggle"
-            data-toggle="dropdown"
-            >{{view}}</span>
-      <ul class="dropdown-menu"
-          role="menu"
-          ng-class="hidden">
-        <li ng-repeat="view in views">
-          <a href="" ng-click="applyview(view.view)">{{view.view}}</a>
-        </li>
-      </ul>
-    </div>
+<div class="viewsort" ng-class="hidden" ng-mouseleave="$parent.show_view_sort = false">
+  <div class="dropdown">
+    <span role="button"
+          class="dropdown-toggle"
+          data-toggle="dropdown"
+          >{{view}}</span>
+    <ul class="dropdown-menu"
+        role="menu"
+        ng-class="hidden">
+      <li ng-repeat="view in views">
+        <a href="" ng-click="applyView(view.view)">{{view.view}}</a>
+      </li>
+    </ul>
+  </div>
 
-    <div class="dropdown">
-      <span role="button"
-            class="dropdown-toggle"
-            data-toggle="dropdown"
-            >{{sort}}</span>
-      <ul class="dropdown-menu"
-          role="menu"
-          ng-class="hidden">
-        <li ng-repeat="sort in sorts">
-          <a href="" ng-click="applysort(sort.sort)">{{sort.sort}}</a>
-        </li>
-      </ul>
-    </div>
+  <div class="dropdown">
+    <span role="button"
+          class="dropdown-toggle"
+          data-toggle="dropdown"
+          >{{sort}}</span>
+    <ul class="dropdown-menu"
+        role="menu"
+        ng-class="hidden">
+      <li ng-repeat="sort in sorts">
+        <a href="" ng-click="applySort(sort.sort)">{{sort.sort}}</a>
+      </li>
+    </ul>
   </div>
 </div>
 <!-- / View Sort Controls -->

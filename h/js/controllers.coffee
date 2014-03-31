@@ -19,6 +19,7 @@ class App
     
     #This must be set so the view sort controller can autohide. 
     $scope.show_search = false
+    $scope.show_view_sort = false
 
     $scope.$watch 'auth.personas', (newValue, oldValue) =>
       unless newValue?.length
@@ -687,7 +688,7 @@ class Editor
 class Viewer
   this.$inject = [
     '$location', '$rootScope', '$routeParams', '$scope',
-    'annotator'
+    'annotator', 'viewFilter'
   ]
   constructor: (
     $location, $rootScope, $routeParams, $scope,
@@ -708,20 +709,12 @@ class Viewer
     $scope.predicate = 'updated'
     $scope.reverse = true
     $scope.hidden = 'hidden'
-    # $scope.xhover = false
 
-    $scope.$watch 'show_search', (newValue, oldValue) ->
-      if newValue
-        $scope.hidden = ''
-      else
-        $scope.hidden = 'hidden'
-
-    $scope.$watch 'xhover', (newValue, oldValue) ->
+    $scope.$watch 'show_view_sort', (newValue, oldValue) ->
       if newValue == true
         $scope.hidden = ''
       if newValue == false
-        if $scope.show_search == false
-          $scope.hidden = 'hidden'
+        $scope.hidden = 'hidden'
 
     $scope.focus = (annotation) ->
       if angular.isArray annotation
