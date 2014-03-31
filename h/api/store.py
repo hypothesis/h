@@ -11,8 +11,6 @@ import urlparse
 import flask
 
 from annotator import auth, store, es
-from annotator.annotation import Annotation
-from annotator.document import Document
 
 from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
@@ -117,6 +115,7 @@ def authorize(annotation, action, user=None):
 
 
 def before_request():
+    flask.g.annotation_class = models.Annotation
     flask.g.auth = auth.Authenticator(models.Consumer.get_by_key)
     flask.g.authorize = authorize
     flask.g.before_annotation_update = anonymize_deletes
@@ -181,12 +180,16 @@ def includeme(config):
     if 'es.index' in settings:
         app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
 
+    if 'es.compatibility' in settings:
+        compat = settings['es.compatibility']
+        app.config['ELASTICSEARCH_COMPATIBILITY_MODE'] = compat
+
     es.init_app(app)
 
     try:
         with app.test_request_context():
-            Annotation.create_all()
-            Document.create_all()
+            models.Annotation.create_all()
+            models.Document.create_all()
     except socket.error:
         raise Exception(
             "Can not access ElasticSearch at %s! Are you sure it's running?" %
@@ -194,9 +197,9 @@ def includeme(config):
         )
     except:
         with app.test_request_context():
-            Annotation.update_settings()
-            Annotation.create_all()
-            Document.create_all()
+            models.Annotation.update_settings()
+            models.Annotation.create_all()
+            models.Document.create_all()
 
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True

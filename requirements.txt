@@ -11,7 +11,7 @@ PyYAML==3.10
 SQLAlchemy==0.8.0
 WebOb==1.3.1
 Werkzeug==0.8.3
--e git+https://github.com/hypothesis/annotator-store.git@f302ecf08f07c208696c916905b52b65d21f44a9#egg=annotator-dev
+-e git+https://github.com/okfn/annotator-store.git@6440f03009b52e595e6a2607aec9647b58421cb#egg=annotator-dev
 alembic==0.6.3
 anykeystore==0.2
 certifi==0.0.8
@@ -20,6 +20,7 @@ colander==1.0a2
 cryptacular==1.4.1
 deform==0.9.5
 deform-bootstrap==0.2.2
+elasticsearch==0.4.5
 gevent==1.0
 gevent-websocket==0.3.6
 gunicorn==18.0

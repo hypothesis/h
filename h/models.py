@@ -1,6 +1,7 @@
 from functools import partial
 from uuid import uuid1, uuid4, UUID
 
+from annotator import annotation, document
 from annotator.auth import DEFAULT_TTL
 
 from horus.models import (
@@ -95,6 +96,109 @@ class GUID(TypeDecorator):
 
     def python_type(self):
         return UUID
+
+
+class Annotation(annotation.Annotation):
+    __mapping__ = {
+        'annotator_schema_version': {'type': 'string'},
+        'created': {'type': 'date'},
+        'updated': {'type': 'date'},
+        'quote': {'type': 'string'},
+        'tags': {'type': 'string', 'index_name': 'not_analyzed'},
+        'text': {'type': 'string'},
+        'deleted': {'type': 'boolean'},
+        'uri': {'type': 'string', 'index': 'not_analyzed'},
+        'user': {'type': 'string', 'index': 'not_analyzed'},
+        'consumer': {'type': 'string', 'index': 'not_analyzed'},
+        'target': {
+            'properties': {
+                'id': {
+                    'type': 'multi_field',
+                    'path': 'just_name',
+                    'fields': {
+                        'id': {'type': 'string', 'index': 'not_analyzed'},
+                        'uri': {'type': 'string', 'index': 'not_analyzed'},
+                    },
+                },
+                'source': {
+                    'type': 'multi_field',
+                    'path': 'just_name',
+                    'fields': {
+                        'source': {'type': 'string', 'index': 'not_analyzed'},
+                        'uri': {'type': 'string', 'index': 'not_analyzed'},
+                    },
+                },
+                'selector': {
+                    'properties': {
+                        'type': {'type': 'string', 'index': 'no'},
+
+                        # Annotator XPath+offset selector
+                        'startContainer': {'type': 'string', 'index': 'no'},
+                        'startOffset': {'type': 'long', 'index': 'no'},
+                        'endContainer': {'type': 'string', 'index': 'no'},
+                        'endOffset': {'type': 'long', 'index': 'no'},
+
+                        # Open Annotation TextQuoteSelector
+                        'exact': {
+                            'type': 'multi_field',
+                            'path': 'just_name',
+                            'fields': {
+                                'exact': {'type': 'string'},
+                                'quote': {'type': 'string'},
+                            },
+                        },
+                        'prefix': {'type': 'string'},
+                        'suffix': {'type': 'string'},
+
+                        # Open Annotation (Data|Text)PositionSelector
+                        'start': {'type': 'long'},
+                        'end':   {'type': 'long'},
+                    }
+                }
+            }
+        },
+        'permissions': {
+            'index_name': 'permission',
+            'properties': {
+                'read': {'type': 'string', 'index': 'not_analyzed'},
+                'update': {'type': 'string', 'index': 'not_analyzed'},
+                'delete': {'type': 'string', 'index': 'not_analyzed'},
+                'admin': {'type': 'string', 'index': 'not_analyzed'}
+            }
+        },
+        'references': {'type': 'string', 'index': 'not_analyzed'},
+        'document': {
+            'properties': document.MAPPING
+        },
+        'thread': {
+            'type': 'string',
+            'analyzer': 'thread'
+        }
+    }
+    __settings__ = {
+        'analysis': {
+            'analyzer': {
+                'thread': {
+                    'tokenizer': 'path_hierarchy'
+                }
+            }
+        }
+    }
+
+    @classmethod
+    def update_settings(cls):
+        cls.es.conn.indices.close(index=cls.es.index)
+        try:
+            cls.es.conn.indices.put_settings(
+                index=cls.es.index,
+                body=getattr(cls, '__settings__', {})
+            )
+        finally:
+            cls.es.conn.indices.open(index=cls.es.index)
+
+
+class Document(document.Document):
+    pass
 
 
 class ConsumerMixin(BaseModel):
