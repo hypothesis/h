@@ -330,8 +330,9 @@ class Hypothesis extends Annotator
           @buildReplyList annotations
           list = $rootScope.annotations
           for a in annotations
-            if a in list
-              list.splice list.indexOf(a), 1
+            index = list.indexOf a
+            if index isnt -1
+              list.splice index, 1
             else
               list.push a
         else
