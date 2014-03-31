@@ -7,7 +7,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2014-03-31 08:53:05Z
+** Built at: 2014-03-31 18:03:10Z
 */
 
 
@@ -325,12 +325,9 @@
       return _results;
     };
 
-    Delegator.prototype.addEvent = function(bindTo, event, functionName, eventData) {
+    Delegator.prototype.addEvent = function(bindTo, event, functionName) {
       var closure, f, isBlankSelector,
         _this = this;
-      if (eventData == null) {
-        eventData = null;
-      }
       f = typeof functionName === 'string' ? this[functionName] : functionName;
       closure = function() {
         return f.apply(_this, arguments);
@@ -340,12 +337,12 @@
         bindTo = this.element;
       }
       if (typeof bindTo === 'string') {
-        this.element.delegate(bindTo, event, eventData, closure);
+        this.element.delegate(bindTo, event, closure);
       } else {
         if (this.isCustomEvent(event)) {
           this.subscribe(event, closure);
         } else {
-          $(bindTo).bind(event, eventData, closure);
+          $(bindTo).bind(event, closure);
         }
       }
       return this;

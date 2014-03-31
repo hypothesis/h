@@ -33,25 +33,25 @@ class TextHighlight extends Annotator.Highlight
       # Make a proper array out of the list
       TextHighlight.$.makeArray annotations
 
-    annotator.addEvent ".annotator-hl", "mouseover",
-       ((event) => annotator.onAnchorMouseover event),
+    annotator.element.delegate ".annotator-hl", "mouseover",
        type: @highlightType
-       getAnnotations: (event) => getAnnotations event
+       getAnnotations: (event) => getAnnotations event,
+       ((event) => annotator.onAnchorMouseover event)
 
-    annotator.addEvent ".annotator-hl", "mouseout",
-       ((event) => annotator.onAnchorMouseout event),
+    annotator.element.delegate ".annotator-hl", "mouseout",
        type: @highlightType
-       getAnnotations: (event) => getAnnotations event
+       getAnnotations: (event) => getAnnotations event,
+       ((event) => annotator.onAnchorMouseout event)
 
-    annotator.addEvent ".annotator-hl", "mousedown",
-       ((event) => annotator.onAnchorMousedown event),
+    annotator.element.delegate ".annotator-hl", "mousedown",
        type: @highlightType
-       getAnnotations: (event) => getAnnotations event
+       getAnnotations: (event) => getAnnotations event,
+       ((event) => annotator.onAnchorMousedown event)
 
-    annotator.addEvent ".annotator-hl", "click",
+    annotator.element.delegate ".annotator-hl", "click",
+       type: @highlightType
+       getAnnotations: (event) => getAnnotations event,
        ((event) => annotator.onAnchorClick event)
-       type: @highlightType
-       getAnnotations: (event) => getAnnotations event
 
     @_inited.push annotator
 

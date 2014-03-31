@@ -71,7 +71,6 @@ class Delegator
   # bindTo       - Selector String matching child elements. (default: @element)
   # event        - The event to listen for.
   # functionName - A String function name to bind to the event.
-  # eventData    - eventData to pass to jQuery (which will be present in event.data)
   #
   # Examples
   #
@@ -83,7 +82,7 @@ class Delegator
   #   instance.addEvent('form :input', 'focus', 'onInputFocus')
   #
   # Returns itself.
-  addEvent: (bindTo, event, functionName, eventData = null) ->
+  addEvent: (bindTo, event, functionName) ->
     f = if typeof functionName is 'string'
       this[functionName]
     else
@@ -95,13 +94,12 @@ class Delegator
     bindTo = @element if isBlankSelector
 
     if typeof bindTo is 'string'
-      @element.delegate bindTo, event, eventData, closure
+      @element.delegate bindTo, event, closure
     else
       if this.isCustomEvent(event)
-        # TODO: no way to support eventData here?
         this.subscribe event, closure
       else
-        $(bindTo).bind event, eventData, closure
+        $(bindTo).bind event, closure
 
     this
 
