@@ -227,8 +227,8 @@ class Hypothesis extends Annotator
       $rootScope.$apply => this.updateViewer viewName, this._getAnnotationsFromIDs ids
     )
 
-    .bind('xorToViewer', (ctx, ids = []) =>
-      $rootScope.$apply => this.xorToViewer this._getAnnotationsFromIDs ids
+    .bind('toggleViewerSelection', (ctx, ids = []) =>
+      $rootScope.$apply => this.toggleViewerSelection this._getAnnotationsFromIDs ids
     )
 
     .bind('setTool', (ctx, name) =>
@@ -319,7 +319,7 @@ class Hypothesis extends Annotator
         annotation.reply_list = children.sort(@sortAnnotations).reverse()
         @buildReplyList children
 
-  xorToViewer: (annotations=[]) =>
+  toggleViewerSelection: (annotations=[]) =>
     annotations = annotations.filter (a) -> a?
     @element.injector().invoke [
       '$rootScope',

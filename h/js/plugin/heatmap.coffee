@@ -469,7 +469,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           d3.event.stopPropagation()
           @dynamicBucket = false
           if d3.event.ctrlKey or d3.event.metaKey
-            annotator.xorToViewer @buckets[bucket]
+            annotator.toggleViewerSelection @buckets[bucket]
           else
             annotator.showViewer "Selection", @buckets[bucket]
 

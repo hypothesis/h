@@ -198,9 +198,9 @@ class Annotator.Guest extends Annotator
         (a.id for a in annotations)
       ]
 
-  xorToViewer: (annotations) =>
+  toggleViewerSelection: (annotations) =>
     @panel?.notify
-      method: "xorToViewer"
+      method: "toggleViewerSelection"
       params: (a.id for a in annotations)
 
   updateViewer: (viewName, annotations) =>
@@ -301,7 +301,7 @@ class Annotator.Guest extends Annotator
 
     if event.metaKey or event.ctrlKey
       # Tell sidebar to add these annotations to the sidebar
-      this.xorToViewer annotations
+      this.toggleViewerSelection annotations
     else
       # Tell sidebar to show the viewer for these annotations
       this.showViewer "Selection", annotations
