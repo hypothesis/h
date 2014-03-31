@@ -325,7 +325,7 @@ class Annotator.Guest extends Annotator
 
   # Is this annotation a comment?
   isComment: (annotation) ->
-    # No targets and no references means that this is a comment.    
+    # No targets and no references means that this is a comment.
     not (annotation.inject or annotation.references?.length or annotation.target?.length)
 
   # Override for setupAnnotation, to handle comments
