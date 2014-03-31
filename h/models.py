@@ -125,7 +125,7 @@ class Annotation(annotation.Annotation):
                     'path': 'just_name',
                     'fields': {
                         'source': {'type': 'string', 'index': 'not_analyzed'},
-                        'uri': {'type': 'string', 'index': 'not_analyzed'},
+                        'uri': {'type': 'string', 'analyzer': 'uri'},
                     },
                 },
                 'selector': {
@@ -180,6 +180,10 @@ class Annotation(annotation.Annotation):
             'analyzer': {
                 'thread': {
                     'tokenizer': 'path_hierarchy'
+                },
+                'uri': {
+                    'tokenizer': 'uax_url_email',
+                    'filter': 'lowercase'
                 }
             }
         }
