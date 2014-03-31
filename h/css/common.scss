@@ -1221,7 +1221,7 @@ h3.stream {
   z-index: 4;
 
   &.hidden {
-    top: 0;
+    display: none;
   }
 }
 
@@ -1239,15 +1239,7 @@ h3.stream {
   .dropdown-menu {
     margin-top: 0;
 
-    li {
-      z-index: 0;
-    }
-
     &:before, &:after {
-      display: none;
-    }
-
-    &.hidden {
       display: none;
     }
   }
