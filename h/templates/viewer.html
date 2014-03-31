@@ -7,7 +7,7 @@
           >{{view}}</span>
     <ul class="dropdown-menu"
         role="menu"
-        ng-class="hidden">
+        ng-show="$parent.show_view_sort">
       <li ng-repeat="view in views">
         <a href="" ng-click="applyView(view.view)">{{view.view}}</a>
       </li>
@@ -21,7 +21,7 @@
           >{{sort}}</span>
     <ul class="dropdown-menu"
         role="menu"
-        ng-class="hidden">
+        ng-show="$parent.show_view_sort">
       <li ng-repeat="sort in sorts">
         <a href="" ng-click="applySort(sort.sort)">{{sort.sort}}</a>
       </li>
