@@ -20,6 +20,7 @@ colander==1.0a2
 cryptacular==1.4.1
 deform==0.9.5
 deform-bootstrap==0.2.2
+elasticsearch==0.4.5
 gevent==1.0
 gevent-websocket==0.3.6
 gunicorn==18.0

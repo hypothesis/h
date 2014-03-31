@@ -180,6 +180,10 @@ def includeme(config):
     if 'es.index' in settings:
         app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
 
+    if 'es.compatibility' in settings:
+        compat = settings['es.compatibility']
+        app.config['ELASTICSEARCH_COMPATIBILITY_MODE'] = compat
+
     es.init_app(app)
 
     try:
