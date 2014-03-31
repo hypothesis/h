@@ -6,6 +6,19 @@ class App
       collapsed: true
       tab: null
     ongoingHighlightSwitch: false
+    sorts: [
+      'Newest'
+      'Oldest'
+      'Location'
+    ]
+    views: [
+      'Screen'
+      'Document'
+      'Comments'
+    ]
+    viewState:
+      sort: 'Newest'
+      view: 'Screen'
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
@@ -148,7 +161,47 @@ class App
 
     $scope.$broadcast '$reset'
 
-    $rootScope.view = 'Screen'
+    # "View" -- which annotations are shown
+    $scope.applyView = (view) ->
+      $scope.viewState.view = view
+      switch view
+        when 'Screen'
+          # Go over all providers, and switch them to dynamic mode
+          # They will, in turn, call back updateView
+          # with the right set of annotations
+          for p in providers
+            p.channel.notify method: 'setDynamicBucketMode', params: true
+          break
+
+        when 'Document'
+          for p in providers
+            p.channel.notify method: 'showAll'
+          break
+
+        when 'Comments'
+          for p in providers
+            p.channel.notify method: 'setDynamicBucketMode', params: false
+          annotations = annotator.plugins.Store.annotations
+          comments = annotations.filter (a) -> annotator.isComment(a)
+          $rootScope.annotations = comments
+          break
+
+        else
+          throw new Error "Unknown view requested: " + view
+
+    # "Sort" -- order annotations are shown
+    $scope.applySort = (sort) ->
+      $scope.viewState.sort = sort
+      if sort == 'Newest'
+        $scope.predicate = 'updated'
+        $scope.reverse = true
+      if sort == 'Oldest'
+        $scope.predicate = 'updated'
+        $scope.reverse = false
+      if sort == 'Location'
+        $scope.predicate = 'target[0].selector[2].start'
+        $scope.reverse = false
+
 
     # Clean up the searchbar
     $scope.leaveSearch = =>
@@ -496,11 +549,11 @@ class Annotation
       switch $scope.action
         when 'create'
           if annotator.isComment(annotation)
-            if $rootScope.view isnt "Comments"
-              $rootScope.applyView "Comments"
+            if $scope.$parent.viewState.view isnt "Comments"
+              $scope.$parent.applyView "Comments"
           else if not annotator.isReply(annotation) and
-              $rootScope.view in ["Comments", "Selection"]
-            $rootScope.applyView "Screen"
+              $scope.$parent.viewState.view in ["Comments", "Selection"]
+            $scope.$parent.applyView "Screen"
           annotator.publish 'annotationCreated', annotation
         when 'delete'
           root = $scope.$root.annotations
@@ -690,19 +743,6 @@ class Viewer
     annotator
   ) ->
     {providers, threading} = annotator
-    $scope.sort = 'Newest'
-    $scope.views = [
-        {view:'Screen'}
-        {view:'Document'}
-        {view:"Comments"}
-    ]
-
-    $scope.sorts = [
-        {sort:'Newest'}
-        {sort:'Oldest'}
-        {sort:'Location'}]
-    $scope.predicate = 'updated'
-    $scope.reverse = true
 
     $scope.focus = (annotation) ->
       if angular.isArray annotation
@@ -721,44 +761,6 @@ class Viewer
         p.channel.notify
           method: 'scrollTo'
           params: annotation.$$tag
-
-    $rootScope.applyView = (view) ->
-      switch view
-        when 'Screen'
-          # Go over all providers, and switch them to dynamic mode
-          # They will, in turn, call back updateView
-          # with the right set of annotations
-          for p in providers
-            p.channel.notify method: 'setDynamicBucketMode', params: true
-          break
-
-        when 'Document'
-          for p in providers
-            p.channel.notify method: 'showAll'
-          break
-
-        when 'Comments'
-          for p in providers
-            p.channel.notify method: 'setDynamicBucketMode', params: false
-          annotations = annotator.plugins.Store.annotations
-          comments = annotations.filter (a) -> annotator.isComment(a)
-          $rootScope.annotations = comments
-          break
-
-        else
-          throw new Error "Unknown view requested: " + view
-
-    $scope.applySort = (sort) ->
-      $scope.sort = sort
-      if $scope.sort == 'Newest'
-        $scope.predicate = 'updated'
-        $scope.reverse = true
-      if $scope.sort == 'Oldest'
-        $scope.predicate = 'updated'
-        $scope.reverse = false
-      if $scope.sort == 'Location'
-        $scope.predicate = 'target[0].selector[2].start'
-        $scope.reverse = false
 
 
 class Search
