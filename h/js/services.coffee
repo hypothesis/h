@@ -175,23 +175,36 @@ class Hypothesis extends Annotator
     $rootScope.search_annotations = []
     $rootScope.focused = []
 
-    $rootScope.focus = (annotation, announce = false) =>
+    $rootScope.focus = (annotation,
+      announceToDoc = false,
+      announceToCards = false
+    ) =>
       unless annotation
         console.log "Warning: trying to focus on null annotation"
         return
 
       return if annotation in $rootScope.focused
 
+      # Put this on the list
       $rootScope.focused.push annotation
-      this._broadcastFocusInfo() if announce
+      # Tell the document, if we have to
+      this._broadcastFocusInfo() if announceToDoc
+      # Tell to the annotation cards, if we have to
+      this._scheduleFocusUpdate() if announceToCards
 
-    $rootScope.unFocus = (annotation, announce = false) =>
+    $rootScope.unFocus = (annotation,
+      announceToDoc = false,
+      announceToCards = false
+    ) =>
       index = $rootScope.focused.indexOf annotation
       return if index is -1
 
+      # Remove from the list
       $rootScope.focused.splice index, 1
-
-      this._broadcastFocusInfo() if announce
+      # Tell the document, if we have to
+      this._broadcastFocusInfo() if announceToDoc
+      # Tell to the annotation cards, if we have to
+      this._scheduleFocusUpdate() if announceToCards
 
     # Add new annotations to the view when they are created
     this.subscribe 'annotationCreated', (a) =>
@@ -209,6 +222,19 @@ class Hypothesis extends Annotator
       p.channel.notify
         method: 'setFocusedHighlights'
         params: (a.$$tag for a in $rootScope.focused)
+
+  # Schedule the broadcasting of the focusChanged signal
+  # to annotation cards
+  _scheduleFocusUpdate: ->
+    return if @_focusUpdatePending
+    @_focusUpdatePending = true
+    $timeout = @element.injector().get('$timeout')
+    $rootScope = @element.injector().get('$rootScope')
+    $timeout (=>
+      # Announce focus changes
+      $rootScope.$broadcast 'focusChange'
+      delete @_focusUpdatePending
+    ), 100
 
   _setupXDM: (options) ->
     $rootScope = @element.injector().get '$rootScope'
@@ -362,11 +388,11 @@ class Hypothesis extends Annotator
             index = list.indexOf a
             if index isnt -1
               list.splice index, 1
-              $rootScope.unFocus a, true
+              $rootScope.unFocus a, true, true
             else
               list.push a
               if focused
-                $rootScope.focus a, true
+                $rootScope.focus a, true, true
         else
           # We are not in selection mode,
           # so we switch to it, and make this list
@@ -389,18 +415,15 @@ class Hypothesis extends Annotator
           $rootScope.focused = []
           # Add the new elements
           for a in annotations
-            $rootScope.focus a, true
+            $rootScope.focus a, true, true
         else
           # Go over the old list, and unfocus the ones
           # that are not on this list
           for a in $rootScope.focused.slice() when a not in annotations
-            $rootScope.unFocus a, true
+            $rootScope.unFocus a, true, true
 
         # Update the main annotations list
         $rootScope.annotations = annotations
-
-        # Announce focus changes
-        $rootScope.$broadcast 'focusChange'
 
         unless $rootScope.viewState.view is viewName
           # We are changing the view

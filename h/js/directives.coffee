@@ -233,7 +233,8 @@ thread = ['$rootScope', '$window', ($rootScope, $window) ->
       if scope.annotation in $rootScope.focused
         scope.collapsed = false
       else
-        scope.collapsed = true
+        unless scope.annotation.references?.length
+          scope.collapsed = true
 
     scope.toggleCollapsed = (event) ->
       event.stopPropagation()
