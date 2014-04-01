@@ -191,10 +191,9 @@ class Annotator.Guest extends Annotator
   showViewer: (viewName, annotations) =>
     @panel?.notify
       method: "showViewer"
-      params: [
-        viewName
-        (a.id for a in annotations)
-      ]
+      params:
+        view: viewName
+        ids: (a.id for a in annotations)
 
   toggleViewerSelection: (annotations) =>
     @panel?.notify
@@ -204,10 +203,9 @@ class Annotator.Guest extends Annotator
   updateViewer: (viewName, annotations) =>
     @panel?.notify
       method: "updateViewer"
-      params: [
-        viewName
-        (a.id for a in annotations)
-      ]
+      params:
+        view: viewName
+        ids: (a.id for a in annotations)
 
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
