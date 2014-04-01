@@ -33,6 +33,9 @@ class Annotator.Guest extends Annotator
     # Create an array for holding the comments
     @comments = []
 
+    # These are in focus (visually marked here, and open in sidebar)
+    @focusedAnnotations = []
+
     @frame = $('<div></div>')
     .appendTo(@wrapper)
     .addClass('annotator-frame annotator-outer annotator-collapsed')
@@ -108,6 +111,18 @@ class Annotator.Guest extends Annotator
         else
           unless hl.isTemporary()
             hl.setActive false, true
+      this.publish "finalizeHighlights"
+    )
+
+    .bind('setFocusedHighlights', (ctx, tags=[]) =>
+      this.focusedAnnotations = []
+      for hl in @getHighlights()
+        annotation = hl.annotation
+        if annotation.$$tag in tags
+          this.focusedAnnotations.push annotation
+          hl.setFocused true, true
+        else
+          hl.setFocused false, true
       this.publish "finalizeHighlights"
     )
 
@@ -188,24 +203,28 @@ class Annotator.Guest extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
 
-  showViewer: (viewName, annotations) =>
+  showViewer: (viewName, annotations, focused = false) =>
     @panel?.notify
       method: "showViewer"
       params:
         view: viewName
         ids: (a.id for a in annotations)
+        focused: focused
 
-  toggleViewerSelection: (annotations) =>
+  toggleViewerSelection: (annotations, focused = false) =>
     @panel?.notify
       method: "toggleViewerSelection"
-      params: (a.id for a in annotations)
+      params:
+        ids: (a.id for a in annotations)
+        focused: focused
 
-  updateViewer: (viewName, annotations) =>
+  updateViewer: (viewName, annotations, focused = false) =>
     @panel?.notify
       method: "updateViewer"
       params:
         view: viewName
         ids: (a.id for a in annotations)
+        focused: focused
 
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
@@ -271,36 +290,54 @@ class Annotator.Guest extends Annotator
     else
       super
 
-  onAnchorMouseover: (event) ->
+  # Get the list of annotations impacted by a mouse event
+  _getImpactedAnnotations: (event) ->
+    # Get the raw list
+    annotations = event.data.getAnnotations event
+
+    # Are the highlights supposed to be visible?
     if (@tool is 'highlight') or @visibleHighlights
-      this.addEmphasis event.data.getAnnotations event
+      # Just use the whole list
+      annotations
+    else
+      # We need to check for focused annotations
+      a for a in annotations when a in this.focusedAnnotations
+
+  onAnchorMouseover: (event) ->
+    this.addEmphasis this._getImpactedAnnotations event
 
   onAnchorMouseout: (event) ->
-    if (@tool is 'highlight') or @visibleHighlights
-      this.removeEmphasis event.data.getAnnotations event
+    this.removeEmphasis this._getImpactedAnnotations event
 
   # When clicking on a highlight in highlighting mode,
   # set @noBack to true to prevent the sidebar from closing
   onAnchorMousedown: (event) =>
-    if (@tool is 'highlight') or @visibleHighlights
+    if this._getImpactedAnnotations(event).length
       @noBack = true
+
+  # Select some annotations.
+  #
+  # toggle: should this toggle membership in an existing selection?
+  # focus: should these annotation become focused?
+  selectAnnotations: (annotations, toggle, focus) =>
+    # Switch off dynamic mode; we are going to "Selection" scope
+    @plugins.Heatmap.dynamicBucket = false
+
+    if toggle
+      # Tell sidebar to add these annotations to the sidebar
+      this.toggleViewerSelection annotations, focus
+    else
+      # Tell sidebar to show the viewer for these annotations
+      this.showViewer "Selection", annotations, focus
 
   # When clicking on a highlight in highlighting mode,
   # tell the sidebar to bring up the viewer for the relevant annotations
   onAnchorClick: (event) =>
-    return unless (@tool is 'highlight') or @visibleHighlights and @noBack
+    annotations = this._getImpactedAnnotations event
+    return unless annotations.length and @noBack
 
-    # Switch off dynamic mode; we are going to "Selection" scope
-    @plugins.Heatmap.dynamicBucket = false
-
-    annotations = event.data.getAnnotations event
-
-    if event.metaKey or event.ctrlKey
-      # Tell sidebar to add these annotations to the sidebar
-      this.toggleViewerSelection annotations
-    else
-      # Tell sidebar to show the viewer for these annotations
-      this.showViewer "Selection", annotations
+    this.selectAnnotations annotations,
+      (event.metaKey or event.ctrlKey), true
 
     # We have already prevented closing the sidebar, now reset this flag
     @noBack = false

@@ -173,6 +173,25 @@ class Hypothesis extends Annotator
     # Track the visible annotations in the root scope
     $rootScope.annotations = []
     $rootScope.search_annotations = []
+    $rootScope.focused = []
+
+    $rootScope.focus = (annotation, announce = false) =>
+      unless annotation
+        console.log "Warning: trying to focus on null annotation"
+        return
+
+      return if annotation in $rootScope.focused
+
+      $rootScope.focused.push annotation
+      this._broadcastFocusInfo() if announce
+
+    $rootScope.unFocus = (annotation, announce = false) =>
+      index = $rootScope.focused.indexOf annotation
+      return if index is -1
+
+      $rootScope.focused.splice index, 1
+
+      this._broadcastFocusInfo() if announce
 
     # Add new annotations to the view when they are created
     this.subscribe 'annotationCreated', (a) =>
@@ -183,6 +202,13 @@ class Hypothesis extends Annotator
     this.subscribe 'annotationDeleted', (a) =>
       $rootScope.annotations = $rootScope.annotations.filter (b) -> b isnt a
       $rootScope.search_annotations = $rootScope.search_annotations.filter (b) -> b.message?
+
+  _broadcastFocusInfo: ->
+    $rootScope = @element.injector().get '$rootScope'
+    for p in @providers
+      p.channel.notify
+        method: 'setFocusedHighlights'
+        params: (a.$$tag for a in $rootScope.focused)
 
   _setupXDM: (options) ->
     $rootScope = @element.injector().get '$rootScope'
@@ -216,22 +242,22 @@ class Hypothesis extends Annotator
       $rootScope.$apply => this.show()
     )
 
-    .bind('showViewer', (ctx, {view, ids}) =>
+    .bind('showViewer', (ctx, {view, ids, focused}) =>
       ids ?= []
       return unless this.discardDrafts()
       $rootScope.$apply =>
-        this.showViewer view, this._getAnnotationsFromIDs ids
+        this.showViewer view, this._getAnnotationsFromIDs(ids), focused
     )
 
-    .bind('updateViewer', (ctx, {view, ids}) =>
+    .bind('updateViewer', (ctx, {view, ids, focused}) =>
       ids ?= []
       $rootScope.$apply =>
-        this.updateViewer view, this._getAnnotationsFromIDs ids
+        this.updateViewer view, this._getAnnotationsFromIDs(ids), focused
     )
 
-    .bind('toggleViewerSelection', (ctx, ids=[]) =>
+    .bind('toggleViewerSelection', (ctx, {ids, focused}) =>
       $rootScope.$apply =>
-        this.toggleViewerSelection this._getAnnotationsFromIDs ids
+        this.toggleViewerSelection this._getAnnotationsFromIDs(ids), focused
     )
 
     .bind('setTool', (ctx, name) =>
@@ -322,12 +348,12 @@ class Hypothesis extends Annotator
         annotation.reply_list = children.sort(@sortAnnotations).reverse()
         @buildReplyList children
 
-  toggleViewerSelection: (annotations=[]) =>
+  toggleViewerSelection: (annotations=[], focused) =>
     annotations = annotations.filter (a) -> a?
     @element.injector().invoke [
       '$rootScope',
       ($rootScope) =>
-        if $rootScope.view is "Selection"
+        if $rootScope.viewState.view is "Selection"
           # We are already in selection mode; just XOR this list
           # to the current selection
           @buildReplyList annotations
@@ -336,36 +362,61 @@ class Hypothesis extends Annotator
             index = list.indexOf a
             if index isnt -1
               list.splice index, 1
+              $rootScope.unFocus a, true
             else
               list.push a
+              if focused
+                $rootScope.focus a, true
         else
           # We are not in selection mode,
           # so we switch to it, and make this list
           # the new selection
-          $rootScope.view = "Selection"
+          $rootScope.viewState.view = "Selection"
           $rootScope.annotations = annotations
     ]
     this
 
-  updateViewer: (viewName, annotations=[]) =>
+  updateViewer: (viewName, annotations=[], focused = false) =>
     annotations = annotations.filter (a) -> a?
     @element.injector().invoke [
       '$rootScope',
       ($rootScope) =>
         @buildReplyList annotations
+
+        # Do we have to replace the focused list with this?
+        if focused
+          # Nuke the old focus list
+          $rootScope.focused = []
+          # Add the new elements
+          for a in annotations
+            $rootScope.focus a, true
+        else
+          # Go over the old list, and unfocus the ones
+          # that are not on this list
+          for a in $rootScope.focused.slice() when a not in annotations
+            $rootScope.unFocus a, true
+
+        # Update the main annotations list
         $rootScope.annotations = annotations
-        $rootScope.applyView viewName
+
+        # Announce focus changes
+        $rootScope.$broadcast 'focusChange'
+
+        unless $rootScope.viewState.view is viewName
+          # We are changing the view
+          $rootScope.viewState.view = viewName
+          $rootScope.showViewSort true, true
     ]
     this
 
-  showViewer: (viewName, annotations=[]) =>
+  showViewer: (viewName, annotations=[], focused = false) =>
     this.show()
     @element.injector().invoke [
       '$location',
       ($location) =>
         $location.path('/viewer').replace()
     ]
-    this.updateViewer viewName, annotations
+    this.updateViewer viewName, annotations, focused
 
   addEmphasis: (annotations=[]) =>
     annotations = annotations.filter (a) -> a? # Filter out null annotations

@@ -202,7 +202,7 @@ $baseFontSize: 14px;
 
 //HIGHLIGHTS////////////////////////////////
 .annotator-highlights-always-on .annotator-hl,
-.annotator-hl-active, .annotator-hl-temporary {
+.annotator-hl-active, .annotator-hl-temporary, .annotator-hl-focused {
   background: $highlightColor;
   box-shadow:3px 3px 4px -1px #999999;
   &::-moz-selection {
@@ -223,7 +223,8 @@ $baseFontSize: 14px;
   background: $highlightModeColor;
 }
 
-.annotator-highlights-always-on .annotator-hl-active, {
+.annotator-highlights-always-on .annotator-hl-active,
+.annotator-highlights-always-on .annotator-hl-focused {
   box-shadow:3px 3px 4px 3px #999999;
 }
 

@@ -213,7 +213,7 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
-thread = ['$window', ($window) ->
+thread = ['$rootScope', '$window', ($rootScope, $window) ->
   # Helper -- true if selection ends inside the target and is non-empty
   ignoreClick = (event) ->
     sel = $window.getSelection()
@@ -225,11 +225,25 @@ thread = ['$window', ($window) ->
   link: (scope, elem, attr, ctrl) ->
     childrenEditing = {}
 
+    # If this is supposed to be focused, then open it
+    if scope.annotation in $rootScope.focused
+      scope.collapsed = false
+
+    scope.$on "focusChange", ->
+      if scope.annotation in $rootScope.focused
+        scope.collapsed = false
+      else
+        scope.collapsed = true
+
     scope.toggleCollapsed = (event) ->
       event.stopPropagation()
       return if (ignoreClick event) or Object.keys(childrenEditing).length
       scope.collapsed = !scope.collapsed
-      scope.openDetails scope.annotation unless scope.collapsed
+      if scope.collapsed
+        $rootScope.unFocus scope.annotation, true
+      else
+        scope.openDetails scope.annotation
+        $rootScope.focus scope.annotation, true
 
     scope.$on 'toggleEditing', (event) ->
       {$id, editing} = event.targetScope
