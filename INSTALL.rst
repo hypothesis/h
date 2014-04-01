@@ -60,6 +60,13 @@ may be a niche use case. Pull requests which create an
 ``Install.<Platform>.rst`` are preferred. And of course, edits to existing
 docs should be done in a pull request.
 
+Troubleshooting
+---------------
+
+By default, ElasticSearch may try to join other nodes on the network resulting
+in ``IndexAlreadyExists`` errors at startup. See the documentation for how to
+turn off discovery.
+
 .. _pyramid: http://www.pylonsproject.org/
 .. _WSGI: http://www.wsgi.org/
 .. _gunicorn: http://gunicorn.org/
