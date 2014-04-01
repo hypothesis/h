@@ -244,7 +244,7 @@ visualsearch:
     - filters: cssrewrite, cssversion, cleancss
       output: css/visualsearch.min.css
       contents:
-        - h:lib/visualsearch.css
+        - h:css/visualsearch.css
     - filters: uglifyjs
       output: lib/underscore.min.js
       contents:
