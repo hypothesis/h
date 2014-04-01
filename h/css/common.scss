@@ -1213,6 +1213,7 @@ h3.stream {
 
 .viewsort {
   @include single-transition(top, .25s);
+  padding-bottom: 2em;
   width: 100%;
   text-align: center;
   position: fixed;
