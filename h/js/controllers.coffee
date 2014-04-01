@@ -165,17 +165,18 @@ class App
     # Show the sort/view control for a while.
     #
     # hide: should we hide it after a second?
-    $rootScope.showViewSort = (hide = false) =>
-      unless $scope.show_view_sort
-        $scope.show_view_sort = true
-        if hide
-          $timeout ->
-            $scope.show_view_sort = false
-          , 1000
+    _vstp = null
+    $rootScope.showViewSort = (show = true, hide = false) ->
+      if _vstp then $timeout.cancel _vstp
+      $rootScope.viewState.showControls = show
+      if $rootScope.viewState.showControls and hide
+        _vstp = $timeout (-> $rootScope.viewState.showControls = false), 1000
 
     # "View" -- which annotations are shown
     $rootScope.applyView = (view) ->
+      return if $rootScope.viewState.view is view
       $rootScope.viewState.view = view
+      $rootScope.showViewSort true, true
       switch view
         when 'Screen'
           # Go over all providers, and switch them to dynamic mode
@@ -195,12 +196,18 @@ class App
           comments = annotations.filter (a) -> annotator.isComment(a)
           $rootScope.annotations = comments
 
+        when 'Selection'
+          for p in providers
+            p.channel.notify method: 'setDynamicBucketMode', params: false
+
         else
           throw new Error "Unknown view requested: " + view
 
     # "Sort" -- order annotations are shown
     $rootScope.applySort = (sort) ->
+      return if $rootScope.viewState.sort is sort
       $rootScope.viewState.sort = sort
+      $rootScope.showViewSort true, true
       if sort == 'Newest'
         $scope.predicate = 'updated'
         $scope.reverse = true
@@ -557,12 +564,13 @@ class Annotation
 
       switch $scope.action
         when 'create'
-          if annotator.isComment(annotation)
-            if $rootScope.viewState.view isnt "Comments"
+          switch
+            when annotator.isComment(annotation) and
+                $rootScope.viewState.view isnt "Comments"
               $rootScope.applyView "Comments"
-          else if not annotator.isReply(annotation) and
-              $rootScope.viewState.view in ["Comments"]
-            $rootScope.applyView "Screen"
+            when not annotator.isReply(annotation) and
+                $rootScope.viewState.view not in ["Document", "Selection"]
+              $rootScope.applyView "Screen"
           annotator.publish 'annotationCreated', annotation
         when 'delete'
           root = $scope.$root.annotations
