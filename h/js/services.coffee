@@ -351,7 +351,10 @@ class Hypothesis extends Annotator
       ($rootScope) =>
         @buildReplyList annotations
         $rootScope.annotations = annotations
-        $rootScope.viewState.view = viewName
+        unless $rootScope.viewState.view is viewName
+          # We are changing the view
+          $rootScope.viewState.view = viewName
+          $rootScope.showViewSort true
     ]
     this
 
