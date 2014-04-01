@@ -74,4 +74,10 @@
       </li>
     </ul>
   </li>
+
+  <a ng-show="threads.length < 1 && viewState.view !='Document'"
+     ng-click="applyView('Document')"
+     href="">
+     No results in this view, click here to search whole document.
+  </a>
 </ul>

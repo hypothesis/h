@@ -228,13 +228,6 @@ class App
       @visualSearch.searchBox.disableFacets();
       @visualSearch.searchBox.value('');
       @visualSearch.searchBox.flags.allSelected = false;
-      # Set host/guests into dynamic bucket mode
-
-      if $rootScope.viewState.view is "Sceeen"
-        for p in annotator.providers
-          p.channel.notify
-            method: 'setDynamicBucketMode'
-            params: true
 
     $scope.$on '$routeChangeStart', (current, next) ->
       return unless next.$$route?
@@ -272,7 +265,6 @@ class App
           return unless annotator.discardDrafts()
 
           matched = []
-          whole_document = true
 
           parsedQuery =
             text: ''
@@ -280,10 +272,6 @@ class App
             quote: []
 
           for searchItem in searchCollection.models
-            if searchItem.attributes.category is 'scope' and
-            searchItem.attributes.value is 'sidebar'
-              whole_document = false
-
             category = searchItem.attributes.category
             value = searchItem.attributes.value
 
@@ -298,38 +286,26 @@ class App
             if category in ['quote']
                 parsedQuery[category].push val.toLowerCase() for val in value.split ' '
 
-          if whole_document
-            annotations = annotator.plugins.Store.annotations
-          else
-            annotations = $rootScope.annotations
-
+          annotations = $rootScope.annotations
           matchingIDs = viewFilter.filter annotations, parsedQuery
 
           # Set the path
           # TODO: do we really need this data in the location?
           search =
-            whole_document : whole_document
+            query: parsedQuery
             matched : matchingIDs
             in_body_text: parsedQuery.text
             quote: parsedQuery.quote
           $location.path('/page_search').search(search)
 
-          unless $scope.inSearch # If we are entering search right now
-            # Turn dynamic bucket mode off for host/guests
-            for p in annotator.providers
-              p.channel.notify
-                method: 'setDynamicBucketMode'
-                params: false
-
           $rootScope.$digest()
 
         facetMatches: (callback) =>
           if $scope.show_search
-            return callback ['text','tag', 'quote', 'scope', 'group','time','user'], {preserveOrder: true}
+            return callback ['text','tag', 'quote', 'group','time','user'], {preserveOrder: true}
         valueMatches: (facet, searchTerm, callback) ->
           switch facet
             when 'group' then callback ['Public', 'Private']
-            when 'scope' then callback ['sidebar', 'document']
             when 'time'
               callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
         clearSearch: (original) =>
@@ -790,8 +766,10 @@ class Viewer
 
 
 class Search
-  this.$inject = ['$filter', '$location', '$rootScope', '$routeParams', '$sce', '$scope', 'annotator']
-  constructor: ($filter, $location, $rootScope, $routeParams, $sce, $scope, annotator) ->
+  this.$inject = ['$filter', '$location', '$rootScope', '$routeParams', '$sce', '$scope',
+                  'annotator', 'viewFilter']
+  constructor: ($filter, $location, $rootScope, $routeParams, $sce, $scope,
+                annotator, viewFilter) ->
     {providers, threading} = annotator
 
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
@@ -863,6 +841,10 @@ class Search
           method: 'scrollTo'
           params: annotation.$$tag
 
+    $scope.$watchCollection 'annotations', (nVal, oVal) =>
+      $routeParams.matched = viewFilter.filter $rootScope.annotations, $routeParams.query
+      refresh()
+
     refresh = =>
       $scope.search_filter = $routeParams.matched
 
@@ -887,12 +869,15 @@ class Search
       threads = []
       roots = {}
       $scope.render_order = {}
+
       # Choose the root annotations to work with
       for id, thread of annotator.threading.idTable when thread.message?
         annotation = thread.message
         annotation_root = if annotation.references? then annotation.references[0] else annotation.id
         # Already handled thread
         if roots[annotation_root]? then continue
+        root_annotation = (annotator.threading.getContainer annotation_root).message
+        unless root_annotation in $rootScope.annotations then continue
 
         if annotation.id in $scope.search_filter
           # We have a winner, let's put its root annotation into our list and build the rendering

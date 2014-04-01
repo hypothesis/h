@@ -160,7 +160,7 @@ class Annotator.Guest extends Annotator
             annotations.push anchor.annotation
 
       # Show all the annotations
-      @showViewer "Document", annotations
+      @updateViewer "Document", annotations
     )
 
     .bind('setTool', (ctx, name) =>
