@@ -44,7 +44,7 @@ pyramid-layout==0.6
 pyramid-mailer==0.13
 pyramid-sockjs==0.3.9
 pyramid-tm==0.7
--e git+https://github.com/sontek/pyramid_webassets.git@#129862c39cc1642c70543c40f352c839d202b75aegg=pyramid_webassets-dev
+-e git+https://github.com/sontek/pyramid_webassets.git@129862c39cc1642c70543c40f352c839d202b75a#egg=pyramid_webassets-dev
 pystache==0.5.3
 pytest==2.2.4
 python-dateutil==2.1
