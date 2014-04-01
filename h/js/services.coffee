@@ -216,21 +216,22 @@ class Hypothesis extends Annotator
       $rootScope.$apply => this.show()
     )
 
-    .bind('showViewer', (ctx, data) =>
-      data.ids ?= []
+    .bind('showViewer', (ctx, {view, ids}) =>
+      ids ?= []
       return unless this.discardDrafts()
       $rootScope.$apply =>
-        this.showViewer data.viewName, this._getAnnotationsFromIDs data.ids
+        this.showViewer view, this._getAnnotationsFromIDs ids
     )
 
-    .bind('updateViewer', (ctx, data) =>
-      data.ids ?= []
+    .bind('updateViewer', (ctx, {view, ids}) =>
+      ids ?= []
       $rootScope.$apply =>
-        this.updateViewer data.viewName, this._getAnnotationsFromIDs data.ids
+        this.updateViewer view, this._getAnnotationsFromIDs ids
     )
 
-    .bind('toggleViewerSelection', (ctx, ids = []) =>
-      $rootScope.$apply => this.toggleViewerSelection this._getAnnotationsFromIDs ids
+    .bind('toggleViewerSelection', (ctx, ids=[]) =>
+      $rootScope.$apply =>
+        this.toggleViewerSelection this._getAnnotationsFromIDs ids
     )
 
     .bind('setTool', (ctx, name) =>
