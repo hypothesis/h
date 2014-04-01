@@ -16,9 +16,6 @@ class App
       'Document'
       'Comments'
     ]
-    viewState:
-      sort: 'Newest'
-      view: 'Screen'
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
@@ -161,9 +158,13 @@ class App
 
     $scope.$broadcast '$reset'
 
+    $rootScope.viewState =
+      sort: 'Newest'
+      view: 'Screen'
+
     # "View" -- which annotations are shown
-    $scope.applyView = (view) ->
-      $scope.viewState.view = view
+    $rootScope.applyView = (view) ->
+      $rootScope.viewState.view = view
       switch view
         when 'Screen'
           # Go over all providers, and switch them to dynamic mode
@@ -190,8 +191,8 @@ class App
           throw new Error "Unknown view requested: " + view
 
     # "Sort" -- order annotations are shown
-    $scope.applySort = (sort) ->
-      $scope.viewState.sort = sort
+    $rootScope.applySort = (sort) ->
+      $rootScope.viewState.sort = sort
       if sort == 'Newest'
         $scope.predicate = 'updated'
         $scope.reverse = true
@@ -549,11 +550,11 @@ class Annotation
       switch $scope.action
         when 'create'
           if annotator.isComment(annotation)
-            if $scope.$parent.viewState.view isnt "Comments"
-              $scope.$parent.applyView "Comments"
+            if $rootScope.viewState.view isnt "Comments"
+              $rootScope.applyView "Comments"
           else if not annotator.isReply(annotation) and
-              $scope.$parent.viewState.view in ["Comments", "Selection"]
-            $scope.$parent.applyView "Screen"
+              $rootScope.viewState.view in ["Comments", "Selection"]
+            $rootScope.applyView "Screen"
           annotator.publish 'annotationCreated', annotation
         when 'delete'
           root = $scope.$root.annotations

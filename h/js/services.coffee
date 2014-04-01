@@ -351,7 +351,7 @@ class Hypothesis extends Annotator
       ($rootScope) =>
         @buildReplyList annotations
         $rootScope.annotations = annotations
-        $rootScope.view = viewName
+        $rootScope.viewState.view = viewName
     ]
     this
 
