@@ -566,13 +566,16 @@ class Annotation
 
       switch $scope.action
         when 'create'
-          switch
-            when annotator.isComment(annotation) and
-                $rootScope.viewState.view isnt "Comments"
-              $rootScope.applyView "Comments"
-            when not annotator.isReply(annotation) and
-                $rootScope.viewState.view not in ["Document", "Selection"]
-              $rootScope.applyView "Screen"
+          # First, focus on the newly created annotation
+          unless annotator.isReply annotation
+            $rootScope.focus annotation, true
+        
+          if annotator.isComment(annotation) and
+              $rootScope.viewState.view isnt "Comments"
+            $rootScope.applyView "Comments"
+          else if not annotator.isReply(annotation) and
+              $rootScope.viewState.view not in ["Document", "Selection"]
+            $rootScope.applyView "Screen"
           annotator.publish 'annotationCreated', annotation
         when 'delete'
           root = $scope.$root.annotations
@@ -763,7 +766,7 @@ class Viewer
   ) ->
     {providers, threading} = annotator
 
-    $scope.focus = (annotation) ->
+    $scope.activate = (annotation) ->
       if angular.isArray annotation
         highlights = (a.$$tag for a in annotation when a?)
       else if angular.isObject annotation
@@ -834,7 +837,7 @@ class Search
           result = true
       result
 
-    $scope.focus = (annotation) ->
+    $scope.activate = (annotation) ->
       if angular.isArray annotation
         highlights = (a.$$tag for a in annotation when a?)
       else if angular.isObject annotation
@@ -850,6 +853,7 @@ class Search
       # Temporary workaround, until search result annotation card
       # scopes get their 'annotation' fields, too.
       return unless annotation
+
       for p in providers
         p.channel.notify
           method: 'scrollTo'

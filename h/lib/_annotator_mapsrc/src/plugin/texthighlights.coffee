@@ -115,6 +115,13 @@ class TextHighlight extends Annotator.Highlight
     else
       @$(@_highlights).removeClass('annotator-hl-active')
 
+  # Mark/unmark this hl as focused
+  setFocused: (value) ->
+    if value
+      @$(@_highlights).addClass('annotator-hl-focused')
+    else
+      @$(@_highlights).removeClass('annotator-hl-focused')
+
   # Remove all traces of this hl from the document
   removeFromDocument: ->
     for hl in @_highlights
