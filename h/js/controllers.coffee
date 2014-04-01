@@ -564,7 +564,7 @@ class Annotation
             if $rootScope.viewState.view isnt "Comments"
               $rootScope.applyView "Comments"
           else if not annotator.isReply(annotation) and
-              $rootScope.viewState.view in ["Comments", "Selection"]
+              $rootScope.viewState.view in ["Comments"]
             $rootScope.applyView "Screen"
           annotator.publish 'annotationCreated', annotation
         when 'delete'
