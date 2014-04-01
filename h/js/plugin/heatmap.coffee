@@ -470,8 +470,10 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           @commentClick()
         else
           d3.event.stopPropagation()
-          annotator.selectAnnotations @buckets[bucket].slice(),
-            (d3.event.ctrlKey or d3.event.metaKey), true
+          annotations = @buckets[bucket].slice()
+          annotator.selectAnnotations annotations,
+            (d3.event.ctrlKey or d3.event.metaKey),
+            (annotations.length is 1) # Only focus if there is only one
 
     tabs.exit().remove()
 
