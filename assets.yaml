@@ -241,7 +241,7 @@ uuid:
     - h:lib/uuid.js
 visualsearch:
   contents:
-    - filters: cssrewrite, cssversion, cleancss
+    - filters: cleancss
       output: css/visualsearch.min.css
       contents:
         - h:css/visualsearch.css
