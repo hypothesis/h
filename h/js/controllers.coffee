@@ -231,10 +231,12 @@ class App
       @visualSearch.searchBox.value('');
       @visualSearch.searchBox.flags.allSelected = false;
       # Set host/guests into dynamic bucket mode
-      for p in annotator.providers
-        p.channel.notify
-          method: 'setDynamicBucketMode'
-          params: true
+
+      if $rootScope.viewState.view is "Sceeen"
+        for p in annotator.providers
+          p.channel.notify
+            method: 'setDynamicBucketMode'
+            params: true
 
     $scope.$on '$routeChangeStart', (current, next) ->
       return unless next.$$route?
