@@ -13,6 +13,8 @@ class Highlight
   isTemporary: ->
     throw "Operation not implemented."
 
+  # TODO: review the usage of the batch parameters.
+
   # Mark/unmark this hl as active
   #
   # Value specifies whether it should be active or not
