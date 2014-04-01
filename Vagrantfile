@@ -21,7 +21,7 @@ AWS_AMI    = ENV['AWS_AMI']    || "ami-d13d4bb8"
 
 # Elasticsearch version.
 # Note that vagrant destroy is required to get elasticsearch to be re-downloaded
-$elversion="elasticsearch-0.20.6"
+$elversion="elasticsearch-0.90.13"
 
 $script = <<SCRIPT
   apt-get update -qq
