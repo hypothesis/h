@@ -183,12 +183,10 @@ class App
           # with the right set of annotations
           for p in providers
             p.channel.notify method: 'setDynamicBucketMode', params: true
-          break
 
         when 'Document'
           for p in providers
             p.channel.notify method: 'showAll'
-          break
 
         when 'Comments'
           for p in providers
@@ -196,7 +194,6 @@ class App
           annotations = annotator.plugins.Store.annotations
           comments = annotations.filter (a) -> annotator.isComment(a)
           $rootScope.annotations = comments
-          break
 
         else
           throw new Error "Unknown view requested: " + view
