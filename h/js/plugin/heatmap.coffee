@@ -68,7 +68,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     @element.on 'click', (event) =>
       event.stopPropagation()
-      this._fillDynamicBucket()
+      this._fillDynamicBucket true
       @dynamicBucket = true
 
     @element.on 'mouseup', (event) =>
@@ -496,7 +496,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     @tabs = tabs
 
-  _fillDynamicBucket: =>
+  _fillDynamicBucket: (changeLocation = false) =>
     top = window.pageYOffset
     bottom = top + $(window).innerHeight()
     anchors = @annotator.getHighlights()
@@ -507,7 +507,10 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       acc
     , []
 #    $.merge visible, @annotator.comments
-    @annotator.updateViewer "Screen", visible
+    if changeLocation
+      @annotator.showViewer "Screen", visible
+    else
+      @annotator.updateViewer "Screen", visible
 
   _getCommentBucket: => @index.length - 2
 
