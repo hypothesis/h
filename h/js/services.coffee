@@ -731,9 +731,12 @@ class ViewFilter
     results = []
 
     # Convert these fields to lower case, if they exist
-    for key in ['text', 'quote', 'user']
+    for key in ['text', 'user']
       if query[key]?
         query[key] = query[key].toLowerCase()
+
+    # We expect a list for quotes
+    query.quote.map (e) -> e.toLowerCase()
 
     for annotation in annotations
       matches = true
@@ -761,9 +764,14 @@ class ViewFilter
             else
               found = false
               for target in annotation.target
-                if target.quote? and target.quote.toLowerCase().indexOf(value) > -1
-                  found = true
-                  break
+                if target.quote?
+                  quote = target.quote.toLowerCase()
+                  for val in value
+                    if quote.indexOf(val) > -1
+                      found = true
+                    else
+                      found = false
+                      break
               unless found
                 matches = false
                 break

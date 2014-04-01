@@ -279,6 +279,7 @@ class App
           parsedQuery =
             text: ''
             tags: []
+            quote: []
 
           for searchItem in searchCollection.models
             if searchItem.attributes.category is 'scope' and
@@ -289,12 +290,12 @@ class App
             value = searchItem.attributes.value
 
             # Stuff we need to collect
-            if category in ['text', 'quote', 'user', 'time', 'group']
+            if category in ['text', 'user', 'time', 'group']
               parsedQuery[category] = value
 
             # Tags are specials, because we collect those into an array
-            if searchItem.attributes.category is 'tag'
-              parsedQuery.tags.push value.toLowerCase()
+            if category in ['tag', 'quote']
+              parsedQuery[category].push value.toLowerCase()
 
           if whole_document
             annotations = annotator.plugins.Store.annotations
@@ -865,13 +866,19 @@ class Search
       # Create the regexps for highlighting the matches inside the annotations' bodies
       $scope.text_tokens = $routeParams.in_body_text.split ' '
       $scope.text_regexp = []
-      $scope.quote = $routeParams.quote
-      $scope.quote_regexp = new RegExp($scope.quote ,"ig")
+      $scope.quote_tokens = $routeParams.quote
+      $scope.quote_regexp = []
+      # Saving the regexps and higlighter to the annotator for highlighttext regeneration
       for token in $scope.text_tokens
         regexp = new RegExp(token,"ig")
         $scope.text_regexp.push regexp
-      # Saving the regexps and higlighter to the annotator for highlighttext regeneration
+
+      for token in $scope.quote_tokens
+        regexp = new RegExp(token,"ig")
+        $scope.quote_regexp.push regexp
+
       annotator.text_regexp = $scope.text_regexp
+      annotator.quote_regexp = $scope.quote_regexp
       annotator.highlighter = $scope.highlighter
 
       threads = []
@@ -912,10 +919,13 @@ class Search
         $scope.ann_info.more_top[thread.message.id] = setMoreTop(thread.message.id, thread.message)
         $scope.ann_info.more_bottom[thread.message.id] = setMoreBottom(thread.message.id, thread.message)
 
-        if $scope.quote?.length > 0
+        if $scope.quote_tokens?.length > 0
           $scope.ann_info.show_quote[thread.message.id] = true
           for target in thread.message.target
-            target.highlightQuote = $sce.trustAsHtml target.quote.replace $scope.quote_regexp, $scope.highlighter
+            target.highlightQuote = target.quote
+            for regexp in $scope.quote_regexp
+              target.highlightQuote = target.highlightQuote.replace regexp, $scope.highlighter
+            target.highlightQuote = $sce.trustAsHtml target.highlightQuote
             if target.diffHTML?
               target.trustedDiffHTML = $sce.trustAsHtml target.diffHTML
               target.showDiff = not target.diffCaseOnly
