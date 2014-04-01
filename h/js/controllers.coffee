@@ -558,6 +558,7 @@ class Annotation
       # Forbid the publishing of annotations
       # without a body (text or tags)
       if $scope.form.privacy.$viewValue is "Public" and
+          $scope.action isnt "delete" and
           not annotation.text and not annotation.tags?.length
         $window.alert "You can not make this annotation public without adding some text, or at least a tag."
         return
