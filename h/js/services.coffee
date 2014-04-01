@@ -757,6 +757,7 @@ class ViewFilter
                 matches = false
                 break
           when 'quote'
+            unless value.length > 0 then continue
             # Reply annotations does not have a quote in this aspect
             if annotation.references?
               matches = false
