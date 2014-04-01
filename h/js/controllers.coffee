@@ -292,8 +292,11 @@ class App
               parsedQuery[category] = value
 
             # Tags are specials, because we collect those into an array
-            if category in ['tag', 'quote']
+            if category in ['tag']
               parsedQuery[category].push value.toLowerCase()
+
+            if category in ['quote']
+                parsedQuery[category].push val.toLowerCase() for val in value.split ' '
 
           if whole_document
             annotations = annotator.plugins.Store.annotations
