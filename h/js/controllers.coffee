@@ -162,6 +162,17 @@ class App
       sort: 'Newest'
       view: 'Screen'
 
+    # Show the sort/view control for a while.
+    #
+    # hide: should we hide it after a second?
+    $rootScope.showViewSort = (hide = false) =>
+      unless $scope.show_view_sort
+        $scope.show_view_sort = true
+        if hide
+          $timeout ->
+            $scope.show_view_sort = false
+          , 1000
+
     # "View" -- which annotations are shown
     $rootScope.applyView = (view) ->
       $rootScope.viewState.view = view
