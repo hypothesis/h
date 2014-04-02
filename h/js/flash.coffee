@@ -20,7 +20,7 @@ class FlashProvider
       if msgs.length
         msg = msgs.shift()
         unless q then [q, msg] = msg
-        if annotator.isOpen()
+        if annotator.isOpen() or not annotator.host
           notice = Annotator.showNotification msg, q
           @timeout = this._wait =>
             # work around Annotator.Notification not removing classes
