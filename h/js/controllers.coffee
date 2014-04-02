@@ -472,7 +472,7 @@ class App
               # XXX: Ugly workaround to update the scope content
               switch $rootScope.viewState.view
                 when 'Document'
-                  unless annotator.isComment(annotation)
+                  unless annotator.isComment(annotation) or annotation.references?
                     $rootScope.annotations.push annotation
                 when 'Comments'
                   if annotator.isComment(annotation)
