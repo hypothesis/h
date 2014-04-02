@@ -206,7 +206,7 @@ def extension(args, console):
     if exists('./build/chrome'): rmtree('./build/chrome')
     copytree(resolve('h:browser/chrome').abspath(), './build/chrome')
     copytree(resolve('h:images').abspath(), './build/chrome/public/images')
-    copytree(resolve('h:lib').abspath(), './build/chrome/public/lib')
+    copytree(resolve('h:lib/images').abspath(), './build/chrome/public/lib/images')
 
     settings = {'webassets.base_dir': abspath('./build/chrome/public')}
 
