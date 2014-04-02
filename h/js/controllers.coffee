@@ -468,6 +468,14 @@ class App
           $scope.$apply =>
             if annotator.plugins.Store?
               annotator.plugins.Store._onLoadAnnotations data
+              # XXX: Ugly workaround to update the scope content
+              switch $rootScope.viewState.view
+                when 'Document'
+                  unless annotator.isComment(annotation)
+                    $rootScope.annotations.push annotation
+                when 'Comments'
+                  if annotator.isComment(annotation)
+                    $rootScope.annotations.push annotation
         when 'update'
           $scope.markAnnotationUpdate data
           annotator.plugins.Store._onLoadAnnotations data
