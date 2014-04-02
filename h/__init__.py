@@ -50,6 +50,7 @@ def bootstrap(cfname, request=None, options=None, config_fn=None):
 
 def create_app(settings):
     import os
+    import urlparse
 
     from pyramid.config import Configurator
     from pyramid.authorization import ACLAuthorizationPolicy
@@ -58,6 +59,14 @@ def create_app(settings):
 
     from h.auth import HybridAuthenticationPolicy
     from h.models import groupfinder
+
+    if 'DATABASE_URL' in os.environ:
+        urlparse.uses_netloc.append("postgres")
+        urlparse.uses_netloc.append("sqlite")
+        url = urlparse.urlparse(os.environ["DATABASE_URL"])
+        if url.scheme == 'postgres':
+            url.scheme = url.scheme + '+psycopg2'
+        settings['sqlalchemy.url'] = urlparse.urlunparse(url)
 
     if 'MAIL_PORT' in os.environ:
         settings['mail.host'] = os.environ['MAIL_PORT_25_TCP_ADDR']
