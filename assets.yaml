@@ -290,10 +290,10 @@ app:
     - uuid
     - visualsearch
     - filters: uglifyjs
-      output: js/app.min.js
+      output: js/hypothesis.min.js
       contents:
         - filters: coffeescript
-          output: js/app.js
+          output: js/hypothesis.js
           # TODO: glob these or use browserify
           # Right now results in dependency problems
           contents:
@@ -309,7 +309,7 @@ app:
             - js/streamfilter.coffee
             - js/streamsearch.coffee
     - filters: compass, cssrewrite, cssversion, cleancss
-      output: css/app.min.css
+      output: css/hypothesis.min.css
       contents:
         - h:css/app.scss
       depends:
@@ -339,15 +339,15 @@ inject:
     - annotator_texthighlights
     - annotator_pdf
     - annotator_toolbar
-    - output: js/inject.min.js
+    - output: js/hypothesis-inject.min.js
       filters: uglifyjs
       contents:
         - filters: coffeescript
-          output: js/inject.js
+          output: js/hypothesis-inject.js
           contents:
             - h:js/guest.coffee
             - h:js/host.coffee
-    - output: css/inject.min.css
+    - output: css/hypothesis-inject.min.css
       filters: compass, cssrewrite, cssversion, cleancss
       contents:
         - h:css/inject.scss
