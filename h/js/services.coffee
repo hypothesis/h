@@ -738,7 +738,16 @@ class ViewFilter
     # We expect a list for quotes
     query.quote.map (e) -> e.toLowerCase()
 
+    # Now that this filter is called with the top level annotations, we have to add the children too
+    annotationsWithChildren = []
     for annotation in annotations
+      annotationsWithChildren.push annotation
+      children = annotation.thread?.flattenChildren()
+      if children?.length > 0
+        for child in children
+          annotationsWithChildren.push child
+
+    for annotation in annotationsWithChildren
       matches = true
       for category, value of query
         switch category
