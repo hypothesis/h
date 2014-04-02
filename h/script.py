@@ -57,9 +57,9 @@ def extension(args, console):
         return 2
 
     from codecs import open
-    from os import makedirs
+    from os import makedirs, mkdir, walk
     from os.path import abspath, exists, join
-    from shutil import copyfile, copytree, rmtree
+    from shutil import copyfile, rmtree
     from urlparse import (
         urljoin, urlparse, urlunparse, uses_netloc, uses_relative,
     )
@@ -73,6 +73,16 @@ def extension(args, console):
     from h import bootstrap, layouts
 
     resolve = AssetResolver().resolve
+
+    def merge(src, dst):
+        for src_dir, dirs, files in walk(src):
+            dst_dir = src_dir.replace(src, dst)
+            if not exists(dst_dir):
+                mkdir(dst_dir)
+            for f in files:
+                src_file = join(src_dir, f)
+                dst_file = join(dst_dir, f)
+                copyfile(src_file, dst_file)
 
     def make_relative(request, url):
         assets_url = request.webassets_env.url
@@ -199,14 +209,16 @@ def extension(args, console):
         webfont = resolve('h:templates/webfont.js').abspath()
         copyfile(webfont, join(asset_env.directory, 'webfont.js'))
 
-    # Make sure the common build dir exists
-    if not exists('./build'): makedirs('./build')
-
     # Build the chrome extension
-    if exists('./build/chrome'): rmtree('./build/chrome')
-    copytree(resolve('h:browser/chrome').abspath(), './build/chrome')
-    copytree(resolve('h:images').abspath(), './build/chrome/public/images')
-    copytree(resolve('h:lib/images').abspath(), './build/chrome/public/lib/images')
+    if exists('./build/chrome'):
+        rmtree('./build/chrome')
+
+    makedirs('./build/chrome/public/lib/images')
+
+    merge('./pdf.js/build/chromium', './build/chrome')
+    merge('./h/browser/chrome', './build/chrome')
+    merge('./h/images', './build/chrome/public/images')
+    merge('./h/lib/images', './build/chrome/public/lib/images')
 
     settings = {'webassets.base_dir': abspath('./build/chrome/public')}
 
