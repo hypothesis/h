@@ -16,7 +16,7 @@ imports = [
 configure = [
   '$locationProvider', '$provide', '$routeProvider', '$sceDelegateProvider',
   (
-   $locationProvider,   $provide,   $routeProvider,   $sceDelegateProvider
+   $locationProvider,   $provide,   $routeProvider, $sceDelegateProvider,
   ) ->
     $locationProvider.html5Mode(true)
 
@@ -51,13 +51,10 @@ configure = [
     $routeProvider.otherwise
       redirectTo: '/viewer'
 
-    if window.location.href.match /^chrome-extension:\/\//
-      # XXX: This hack is awful. It shouldn't be necessary.
-      # Angular should have the default 'self' work on extension pages.
-      $sceDelegateProvider.resourceUrlWhitelist [
-        'self'
-        '.*'
-      ]
+    # Configure CSP for templates
+    # Explicitly whitelist '.html' paths adjacent to application base URI
+    basePattern = document.baseURI.replace /\/[^\/]*$/, '/*.html'
+    $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
 ]
 
 
