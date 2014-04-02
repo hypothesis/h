@@ -46,7 +46,18 @@ def assets(args, console):
 def extension(args, console):
     """Build the browser extensions.
 
-    Accepts one (optional) argument which is the base URL of an h server."""
+    The first argument is the base URL of an h application:
+
+      http://localhost:5000/app
+
+    An optional second argument can be used to specify the location for static
+    assets.
+
+    Examples:
+
+      http://static.example.com/
+      chrome-extension://extensionid/public
+    """
 
     if len(args) == 0:
         console.error('You must supply a paste configuration file.')
