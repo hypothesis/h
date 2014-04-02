@@ -230,21 +230,25 @@ thread = ['$rootScope', '$window', ($rootScope, $window) ->
       scope.collapsed = false
 
     scope.$on "focusChange", ->
-      if scope.annotation in $rootScope.focused
+      # XXX: This not needed to be done when the viewer and search will be unified
+      ann = scope.annotation ? scope.thread.message
+      if ann in $rootScope.focused
         scope.collapsed = false
       else
-        unless scope.annotation.references?.length
+        unless ann.references?.length
           scope.collapsed = true
 
     scope.toggleCollapsed = (event) ->
       event.stopPropagation()
       return if (ignoreClick event) or Object.keys(childrenEditing).length
       scope.collapsed = !scope.collapsed
+      # XXX: This not needed to be done when the viewer and search will be unified
+      ann = scope.annotation ? scope.thread.message
       if scope.collapsed
-        $rootScope.unFocus scope.annotation, true
+        $rootScope.unFocus ann, true
       else
-        scope.openDetails scope.annotation
-        $rootScope.focus scope.annotation, true
+        scope.openDetails ann
+        $rootScope.focus ann, true
 
     scope.$on 'toggleEditing', (event) ->
       {$id, editing} = event.targetScope

@@ -963,6 +963,8 @@ class Search
 
       $rootScope.search_annotations = threads
       $scope.threads = threads
+      for thread in threads
+        $rootScope.focus thread.message, true
 
     $scope.$on 'ReRenderPageSearch', refresh
     $scope.$on '$routeUpdate', refresh
