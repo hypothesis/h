@@ -157,7 +157,7 @@ class App
     $scope.$broadcast '$reset'
 
     $rootScope.viewState =
-      sort: 'Newest'
+      sort: ''
       view: 'Screen'
 
     # Show the sort/view control for a while.
@@ -220,6 +220,7 @@ class App
           $rootScope.searchPredicate = 'message.target[0].selector[2].start'
           $rootScope.reverse = false
 
+    $rootScope.applySort "Newest"
 
     # Clean up the searchbar
     $scope.leaveSearch = =>
