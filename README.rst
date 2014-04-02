@@ -68,8 +68,13 @@ below. Issues tagged with the label 'cake' are ideal for new contributors.
 
 Chrome Extension
 ^^^^^^^^^^^^^^^^
-To build the Chrome extension, follow the installation instructions. Then,
-run the following command at the prompt::
+To build the Chrome extension, follow the installation instructions and then
+check out the pdf.js submodule::
+
+    $ git submodule init
+    $ git submodule update
+
+Then, run the following command at the prompt to build the extension::
 
     $ ./bin/hypothesis extension development.ini http://localhost:5000/app
 
