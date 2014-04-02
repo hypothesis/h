@@ -69,10 +69,13 @@ below. Issues tagged with the label 'cake' are ideal for new contributors.
 Chrome Extension
 ^^^^^^^^^^^^^^^^
 To build the Chrome extension, follow the installation instructions and then
-check out the pdf.js submodule::
+check out and build the pdf.js submodule::
 
     $ git submodule init
     $ git submodule update
+    $ cd pdf.js
+    $ node make generic
+    $ node make chromium
 
 Then, run the following command at the prompt to build the extension::
 
