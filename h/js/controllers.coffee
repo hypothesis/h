@@ -206,15 +206,19 @@ class App
       return if $rootScope.viewState.sort is sort
       $rootScope.viewState.sort = sort
       $rootScope.showViewSort true, true
-      if sort == 'Newest'
-        $scope.predicate = 'updated'
-        $scope.reverse = true
-      if sort == 'Oldest'
-        $scope.predicate = 'updated'
-        $scope.reverse = false
-      if sort == 'Location'
-        $scope.predicate = 'target[0].selector[2].start'
-        $scope.reverse = false
+      switch sort
+        when 'Newest'
+          $rootScope.predicate = 'updated'
+          $rootScope.searchPredicate = 'message.updated'
+          $rootScope.reverse = true
+        when 'Oldest'
+          $rootScope.predicate = 'updated'
+          $rootScope.searchPredicate = 'message.updated'
+          $rootScope.reverse = false
+        when 'Location'
+          $rootScope.predicate = 'target[0].selector[2].start'
+          $rootScope.searchPredicate = 'message.target[0].selector[2].start'
+          $rootScope.reverse = false
 
 
     # Clean up the searchbar

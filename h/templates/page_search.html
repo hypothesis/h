@@ -3,7 +3,7 @@
   <li
      ng-class="thread.message.$emphasis && 'card-emphasis'"
      ng-click="toggleCollapsed($event)"
-     ng-repeat="thread in search_annotations"
+     ng-repeat="thread in search_annotations | orderBy:searchPredicate:reverse track by thread.message.id"
      ng-mouseenter="activate(thread.message)"
      ng-mouseleave="activate()"
      ng-init="collapsed = ann_info.show_quote[thread.message.id]"
