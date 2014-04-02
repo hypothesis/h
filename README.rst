@@ -88,6 +88,14 @@ virtual environment is activated.
 The third argument is the base URL for the application. An optional, fourth
 argument may be passed to override the URL prefix used for static assets.
 
+Deployment
+----------
+
+Deployment is mostly left as an exercise to the reader until we document this
+better. Using `Docker`_ it is easy to configure the ElasticSearch host and the
+mail relay address. Simply create links with the names ``elasticsearch`` and
+``mail`` respectively.
+
 License
 -------
 
