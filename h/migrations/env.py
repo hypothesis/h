@@ -1,4 +1,8 @@
 from __future__ import with_statement
+
+import os
+import urlparse
+
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
@@ -23,6 +27,17 @@ target_metadata = None
 # ... etc.
 
 
+def get_database_url(hint):
+    if 'DATABASE_URL' in os.environ:
+        urlparse.uses_netloc.append("postgres")
+        urlparse.uses_netloc.append("sqlite")
+        url = urlparse.urlparse(os.environ["DATABASE_URL"])
+        if url.scheme == 'postgres':
+            url.scheme = url.scheme + '+psycopg2'
+        return urlparse.urlunparse(url)
+    return hint
+
+
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -36,6 +51,7 @@ def run_migrations_offline():
 
     """
     url = config.get_main_option("sqlalchemy.url")
+    url = get_database_url(url)
     context.configure(url=url)
 
     with context.begin_transaction():
@@ -49,6 +65,13 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
+    section = config.config_ini_section
+
+    url = config.get_section_option(section, 'sqlalchemy.url')
+    url = get_database_url(url)
+
+    config.set_section_option(section, 'sqlalchemy.url', url)
+
     engine = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix='sqlalchemy.',
