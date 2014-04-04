@@ -88,6 +88,11 @@ virtual environment is activated.
 The third argument is the base URL for the application. An optional, fourth
 argument may be passed to override the URL prefix used for static assets.
 
+At this point, a working extension should exist in ./build/chrome but with
+the development configuration the static assets are still loaded from the
+server. Start the application and ensure that the assets are built by visiting
+the /app route or by running ``./bin/hypothesis assets``.
+
 Deployment
 ----------
 
