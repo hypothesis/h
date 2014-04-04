@@ -168,7 +168,11 @@ class AppController(BaseController):
         self.request.user = None
         return self.respond(result)
 
-    @view_config(path_info='^/app/embed\.js$', renderer='templates/embed.txt')
+    @view_config(
+        accept='application/javascript',
+        path_info='^/app/embed\.js$',
+        renderer='templates/embed.txt',
+    )
     def embed(self):
         request = self.request
 
