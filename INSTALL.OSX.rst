@@ -27,7 +27,7 @@ Install Node and other required tools:
     gem install compass
     brew install node
     npm -g install uglify-js
-    npm -g install handlebars
+    npm -g install clean-css
     npm -g install coffee-script
 
 Add the tools' path to the $PATH variable:
