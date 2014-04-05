@@ -1,5 +1,5 @@
-Installing Hypothes.is on OS X ML
-######################
+Installing Hypothes.is on OSX
+#############################
 
 Run the following commands from the directory where you've cloned this repository.
 
@@ -58,5 +58,5 @@ To launch it manually without launchctl:
 
     elasticsearch -f -D es.config=/usr/local/opt/elasticsearch/config/elasticsearch.yml
 
-After installing the above, create the virtualenv, as described in the `INSTALL.rst`_.
+After installing the above, create the virtualenv, as described in the `<INSTALL.rst>`_.
 
