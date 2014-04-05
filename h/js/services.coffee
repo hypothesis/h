@@ -753,7 +753,7 @@ class ViewFilter
         switch category
           when 'user'
             userName = @user_filter annotation.user
-            unless userName.toLowerCase() is value
+            unless userName? and userName.toLowerCase() is value
               matches = false
               break
           when 'text'
