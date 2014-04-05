@@ -1,7 +1,8 @@
 Installing Hypothes.is on OS X ML
 ######################
 
-Install Homebrew:
+Install `Homebrew
+<http://brew.sh/>`_:
 
 .. code-block:: bash
 
@@ -26,15 +27,15 @@ Install Node and other required tools:
     gem install compass
     brew install node
     npm -g install uglify-js
-    npm -g install handlebars
+    npm -g install clean-css
     npm -g install coffee-script
 
 Add the tools' path to the $PATH variable:
 
 .. code-block:: bash
 
-    echo "export PATH=/usr/local/share/python:$PATH" >> ~/.profile
-    echo "export PATH=/usr/local/share/npm/bin:$PATH" >> ~/.profile
+    echo "export PATH=/usr/local/share/python:/usr/local/share/npm/bin:\$PATH" >> ~/.profile
+    source ~/.profile
 
 Install Elasticsearch:
 
