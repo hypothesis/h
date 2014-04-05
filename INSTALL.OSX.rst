@@ -1,7 +1,8 @@
 Installing Hypothes.is on OS X ML
 ######################
 
-Install Homebrew:
+Install `Homebrew
+<http://brew.sh/>`_:
 
 .. code-block:: bash
 
@@ -33,8 +34,8 @@ Add the tools' path to the $PATH variable:
 
 .. code-block:: bash
 
-    echo "export PATH=/usr/local/share/python:$PATH" >> ~/.profile
-    echo "export PATH=/usr/local/share/npm/bin:$PATH" >> ~/.profile
+    echo "export PATH=/usr/local/share/python:/usr/local/share/npm/bin:\$PATH" >> ~/.profile
+    source ~/.profile
 
 Install Elasticsearch:
 
