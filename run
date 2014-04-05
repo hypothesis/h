@@ -1,23 +1,9 @@
-#!/usr/bin/env python
-from os import environ
-from os.path import abspath, dirname, exists, join
-import sys
+#!/bin/bash -e
 
+if test -z "$VIRTUAL_ENV"; then
+	if test -e bin/activate; then
+		source bin/activate
+	fi
+fi
 
-def activate():
-    # Activate the virtual environment if it is present.
-    activate = abspath(join(dirname(__file__), 'bin', 'activate_this.py'))
-    if exists(activate):
-        with open(activate) as f:
-            code = compile(f.read(), activate, 'exec')
-            exec(code, {}, dict(__file__=activate))
-
-
-if __name__ == '__main__':
-    # Ensure the virtual environment is really active.
-    if 'VIRTUAL_ENV' not in environ:
-        activate()
-
-    # Start the application
-    from h.script import start
-    start(sys.argv[1:])
+hypothesis start $@
