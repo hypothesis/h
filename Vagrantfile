@@ -32,7 +32,7 @@ $script = <<SCRIPT
   apt-get update -qq
   apt-get -y install nodejs
   npm --quiet install --global coffee-script uglify-js
-  gem install -y sass compass
+  gem install -y --no-ri --no-rdoc sass compass
   if test ! -s #{$elversion}.deb; then
     wget -q https://download.elasticsearch.org/elasticsearch/elasticsearch/#{$elversion}.deb
     dpkg -i #{$elversion}.deb

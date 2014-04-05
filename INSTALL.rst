@@ -7,7 +7,7 @@ Dependencies:
 * CoffeeScript_ v1.6+
 * Sass_ v3.2+
 * Compass_ v0.12+
-* ElasticSearch_ v0.90+
+* ElasticSearch_ v1.0.x
 
 See the platform specific ``INSTALL.<platform>.rst`` files for more information
 about how to install the dependencies on any specific platform (see below).
