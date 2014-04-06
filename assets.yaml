@@ -68,6 +68,21 @@ annotator_textanchors:
   output: lib/annotator.textanchors.min.js
   contents:
     - h:lib/annotator.textanchors.js
+annotator_textrange:
+  filters: uglifyjs
+  output: lib/annotator.textrange.min.js
+  contents:
+    - h:lib/annotator.textrange.js
+annotator_textposition:
+  filters: uglifyjs
+  output: lib/annotator.textposition.min.js
+  contents:
+    - h:lib/annotator.textposition.js
+annotator_textquote:
+  filters: uglifyjs
+  output: lib/annotator.textquote.min.js
+  contents:
+    - h:lib/annotator.textquote.js
 annotator_texthighlights:
   filters: uglifyjs
   output: lib/annotator.texthighlights.min.js
@@ -339,6 +354,9 @@ inject:
     - annotator_document
     - annotator_heatmap
     - annotator_fuzzytextanchors
+    - annotator_textrange
+    - annotator_textposition
+    - annotator_textquote
     - annotator_texthighlights
     - annotator_pdf
     - annotator_toolbar
