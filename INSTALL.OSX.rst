@@ -1,5 +1,7 @@
-Installing Hypothes.is on OS X ML
-######################
+Installing Hypothes.is on OSX
+#############################
+
+Run the following commands from the directory where you've cloned this repository.
 
 Install `Homebrew
 <http://brew.sh/>`_:
@@ -37,7 +39,20 @@ Add the tools' path to the $PATH variable:
     echo "export PATH=/usr/local/share/python:/usr/local/share/npm/bin:\$PATH" >> ~/.profile
     source ~/.profile
 
-Install Elasticsearch:
+Install Elasticsearch (Optional)
+--------------------------------
+
+`Elasticsearch
+<http://www.elasticsearch.org/>`_ is required in order to store annotations 
+locally. Take care that you install a version that meets the requirements listed 
+in `<INSTALL.rst>`_. You can check what is available via Homebrew with:
+
+.. code-block:: bash
+
+    brew info elasticsearch
+
+If an appropriate version is available then follow the instructions below, 
+otherwise get a version from `<http://www.elasticsearch.org/>`_.
 
 .. code-block:: bash
 
@@ -56,6 +71,7 @@ To launch it manually without launchctl:
 
     elasticsearch -f -D es.config=/usr/local/opt/elasticsearch/config/elasticsearch.yml
 
-After installing the above, create the virtualenv, as described in the INSTALL.rst
+Next Steps
+----------
 
-(Run the commands from the directory where you've cloned the repository.)
+After installing the above, create the virtualenv, as described in `<INSTALL.rst>`_.
