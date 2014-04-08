@@ -294,7 +294,12 @@ class UserSubscriptions(BaseModel, Base):
 
     @declared_attr
     def template(self):
-        return sa.Column(sa.Enum('reply_notification', 'custom_search'), nullable=False, default='custom_search')
+        return sa.Column(
+            sa.Enum('reply_notification', 'custom_search',
+                    name='subscription_template'),
+            nullable=False,
+            default='custom_search'
+        )
 
     @declared_attr
     def description(self):
@@ -302,7 +307,11 @@ class UserSubscriptions(BaseModel, Base):
 
     @declared_attr
     def type(self):
-        return sa.Column(sa.Enum('system', 'user'), nullable=False, default='user')
+        return sa.Column(
+            sa.Enum('system', 'user', name='subscription_type'),
+            nullable=False,
+            default='user'
+        )
 
     @declared_attr
     def active(self):

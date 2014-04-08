@@ -17,8 +17,6 @@ except ImportError:
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy import text
-from sqlalchemy.sql import select
 from sqlalchemy.types import TypeDecorator, VARCHAR
 
 
@@ -45,8 +43,10 @@ class JSONEncodedDict(TypeDecorator):
         return value
 
 
-template_enum = sa.Enum('reply_notification', 'custom_search', name="pg_h_template")
-type_enum = sa.Enum('system', 'user', name="pg_h_type")
+template_enum = sa.Enum('reply_notification', 'custom_search',
+                        name="subscription_template")
+type_enum = sa.Enum('system', 'user',
+                    name="subscription_type")
 
 
 def upgrade():
