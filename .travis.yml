@@ -15,8 +15,8 @@ script:
   - make test
 env:
   global:
-  - secure: HsBNLFjPZjTbqoqcneSEOJG0BQdOZYK2JnebYMcoH1hEZ9oE1Fu2nK3qGT4EpTE1Kp6lFwRUJU1IZwm9DYSzzEHDhS2/SNWRaQ/epff82ioe1ArtAw4iuLc2+KM+QjdS36P3SqiKm4JEeolg1NzD5f/LE6oVyhWgLbRT9ah3+w0=
-  - secure: U8oXayWpm7qrqqyA6dyzb1HjqOsljB1Og2NcNf6UFQXds6Ff7lnd1LtDN8ZwQgypQhAzhLsKlh9b3uEhhAS0pWZwVLNwz3pwmK8D8Gqc04w5A5A8GVJvVnPUGmw/atouxo5R6kMhzmwlLiiCWYtLehXQNrOg4EUatpV8ojaSCYc=
+  - secure: PbEcB7ovbi9gu4nEaU2oAOiYDR7KQT/M6Wqfy0UtQPH29EhOj5+bngqzW2sI3uXx+Y6xlbmeke+TiTrO3/H/ludGDY8u7zgmaTmbfWaqA3qdcNfdluhZEPgPqFEmxeTESR7NmMUfkGH6+vOnfBhD0cGZqplk3nTqkVb62CWXhMQ=
+  - secure: Lb3BV9x+/bG127BmSdgJdroqovqqq0bTEa9mqvp7UvDhTWo7iEsDCk6n8h3Lm1gvJZx6V071LWWV9V6sginXAO6bU/S4oEGhEZGIgZkHJAsBHIFRzJ8olEooZZdVSlr2Ri0+GOjozNig5+YGk5onkVCxD4CKJSo1ZJcvktpBbeA=
 after_failure:
   - cat /tmp/gunicorn.error.log
 addons:
