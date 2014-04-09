@@ -11,39 +11,10 @@ if 'gevent' in sys.modules:
 import pyramid
 
 from webassets.filter import register_filter
-from webassets.filter.cssrewrite import urlpath
-from webassets.filter.cssrewrite.base import CSSUrlRewriter
 from webassets.loaders import YAMLLoader
 
 import logging
 log = logging.getLogger(__name__)
-
-
-class CSSVersion(CSSUrlRewriter):
-    """Source filter to resolve urls in CSS files using the asset resolver.
-
-    The 'cssrewrite' filter supplied with webassets will rewrite relative
-    URLs in the CSS so that they are relative to the output path of the
-    file so that paths are correct after merging CSS files from different
-    sources. This filter is designed to run after that in order to resolve
-    these URLs using the configured resolver so that the assets include
-    version information even when referenced from the CSS.
-    """
-
-    name = 'cssversion'
-    max_debug_level = 'merge'
-
-    def replace_url(self, url):
-        parsed = urlparse(url)
-        if parsed.scheme:
-            return url
-        else:
-            dirname = path.dirname(self.output_path)
-            filepath = path.join(dirname, parsed.path)
-            filepath = path.normpath(path.abspath(filepath))
-            resolved = self.env.resolver.resolve_source_to_url(filepath, url)
-            relative = urlpath.relpath(self.output_url, resolved)
-            return relative
 
 
 class WebassetsResourceRegistry(object):
@@ -94,8 +65,6 @@ def asset_response_subscriber(event):
 
 def includeme(config):
     config.include('pyramid_webassets')
-    register_filter(CSSVersion)
-
 
     # Set up a predicate and subscriber to set CORS headers on asset responses
     config.add_subscriber_predicate('asset_request', AssetRequest)
