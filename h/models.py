@@ -58,6 +58,7 @@ class JSONEncodedDict(TypeDecorator):
             value = json.loads(value)
         return value
 
+
 class GUID(TypeDecorator):
     """Platform-independent GUID type.
 
