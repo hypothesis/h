@@ -15,7 +15,7 @@ setup(
     install_requires=[
         'BeautifulSoup4>=4.2.1',
         'alembic==0.6.3',
-        'annotator>=0.9.1',
+        'annotator>=0.11.1',
         'clik==0.3.1',
         'deform_bootstrap>=0.2.1',
         'horus==0.9.15',
