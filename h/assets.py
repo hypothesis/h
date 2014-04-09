@@ -96,14 +96,6 @@ def includeme(config):
     config.include('pyramid_webassets')
     register_filter(CSSVersion)
 
-    env = config.get_webassets_env()
-
-    # Configure the static views
-    if env.url_expire is not False:
-        # Cache for one year (so-called "far future" Expires)
-        config.add_static_view(env.url, env.directory, cache_max_age=31536000)
-    else:
-        config.add_static_view(env.url, env.directory)
 
     # Set up a predicate and subscriber to set CORS headers on asset responses
     config.add_subscriber_predicate('asset_request', AssetRequest)
