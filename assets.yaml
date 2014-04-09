@@ -153,7 +153,7 @@ jquery_scrollintoview:
 # jQuery UI
 jquery_ui:
   contents:
-    - filters: cssrewrite, cssversion, cleancss
+    - filters: cssrewrite, cleancss
       output: css/jquery-ui-smoothness.min.css
       contents:
         - h:lib/jquery-ui-smoothness.css
@@ -308,15 +308,18 @@ app:
             - js/services.coffee
             - js/streamfilter.coffee
             - js/streamsearch.coffee
-    - filters: compass, cssrewrite, cssversion, cleancss
+    - filters: cleancss
       output: css/hypothesis.min.css
       contents:
-        - h:css/app.scss
-      depends:
-        - h:css/base.scss
-        - h:css/common.scss
-        - h:css/responsive.scss
-        - h:css/yui_grid.scss
+        - filters: compass, cssrewrite
+          output: css/hypothesis.css
+          contents:
+            - h:css/app.scss
+          depends:
+            - h:css/base.scss
+            - h:css/common.scss
+            - h:css/responsive.scss
+            - h:css/yui_grid.scss
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
 # the application. It sets up RPC channels for cross-domain communication
@@ -348,16 +351,22 @@ inject:
             - h:js/guest.coffee
             - h:js/host.coffee
     - output: css/hypothesis-inject.min.css
-      filters: compass, cssrewrite, cssversion, cleancss
+      filters: cleancss
       contents:
-        - h:css/inject.scss
-      depends:
-        - h:css/base.scss
+        - filters: compass, cssrewrite
+          output: css/hypothesis-inject.css
+          contents:
+            - h:css/inject.scss
+          depends:
+            - h:css/base.scss
 
 sidebar:
+  filters: cleancss
   output: css/sidebar.min.css
-  filters: compass, cssrewrite, cssversion, cleancss
   contents:
-    - h:css/sidebar.scss
-  depends:
-    - h:css/base.scss
+    - output: css/sidebar.css
+      filters: compass, cssrewrite
+      contents:
+        - h:css/sidebar.scss
+      depends:
+        - h:css/base.scss
