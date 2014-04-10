@@ -21,6 +21,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           window.annotator.showFrame()
         else
           window.annotator.hideFrame()
+      "mouseup": (event) -> event.stopPropagation()
     ,
       "title": "Show Annotations"
       "class": "alwaysonhighlights-icon"
@@ -29,6 +30,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         event.stopPropagation()
         state = not window.annotator.visibleHighlights
         window.annotator.setVisibleHighlights state
+      "mouseup": (event) -> event.stopPropagation()
     ,
       "title": "Highlighting Mode"
       "class": "highlighter-icon"
@@ -38,6 +40,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         state = not (window.annotator.tool is 'highlight')
         tool = if state then 'highlight' else 'comment'
         window.annotator.setTool tool
+      "mouseup": (event) -> event.stopPropagation()
     ,
       "title": "New Comment"
       "class": "commenter-icon"
@@ -45,6 +48,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         event.preventDefault()
         event.stopPropagation()
         window.annotator.addComment()
+      "mouseup": (event) -> event.stopPropagation()
     ]
 
   pluginInit: ->
@@ -59,6 +63,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
       .attr('href', '')
       .attr('title', item.title)
       .on('click', item.click)
+      .on('mouseup', item.mouseup)
       .addClass(item.class)
       button = $('<li></li>').append(anchor)
       buttons.add button
