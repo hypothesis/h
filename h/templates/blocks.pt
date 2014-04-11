@@ -1,177 +1,173 @@
-<!DOCTYPE html>
-<html lang='en'>
-  <head><title>Macro Blocks</title></head>
-  <body>
-    <metal:main define-macro="auth">
-      <tal:block i18n:translate="" content="structure form" />
-      <form tal:define="providers request.registry.velruse_providers | {}"
-            tal:repeat="provider providers.values()"
-            action="${request.route_url(provider.login_route)}"
-            target="hPopout">
-        <button class="${provider.name} login">${provider.name}</button>
-      </form>
-    </metal:main>
+<metal:main define-macro="auth">
+  <tal:block i18n:translate="" content="structure form" />
+  <form tal:define="providers request.registry.velruse_providers | {}"
+        tal:repeat="provider providers.values()"
+        action="${request.route_url(provider.login_route)}"
+        target="hPopout">
+    <button class="${provider.name} login">${provider.name}</button>
+  </form>
+</metal:main>
 
-    <metal:main define-macro="auth-tabs">
-      <!-- Login -->
-      <form data-title="Sign in"
-            data-value="login"
-            class="tab-pane"
-            name="login"
-            novalidate>
+<metal:main define-macro="auth-tabs">
+  <!-- Login -->
+  <form data-title="Sign in"
+        data-value="login"
+        class="tab-pane"
+        name="login"
+        novalidate>
 
-        <input type="text" name="username" value="" placeholder="Username"
-               ng-model="model.username" ng-minlength="3"
-               required autocapitalize="false" />
-        <span ng-show="login.username.$error.required"
-              slow-validate="username"
-              >Please enter your username.</span>
-        <span ng-show="login.username.$error.minlength"
-              slow-validate="username"
-              >Usernames are at least 3 characters.</span>
+    <input type="text" name="username" value="" placeholder="Username"
+           ng-model="model.username" ng-minlength="3"
+           required autocapitalize="false" />
+    <span ng-show="login.username.$error.required"
+          slow-validate="username"
+          >Please enter your username.</span>
+    <span ng-show="login.username.$error.minlength"
+          slow-validate="username"
+          >Usernames are at least 3 characters.</span>
 
-        <input type="password" name="password" value="" placeholder="Password"
-               ng-model="model.password"
-               required autocapitalize="false" autocorrect="false" />
-        <span ng-show="login.password.$error.required"
-              slow-validate="password"
-              >Please enter your password.</span>
+    <input type="password" name="password" value="" placeholder="Password"
+           ng-model="model.password"
+           required autocapitalize="false" autocorrect="false" />
+    <span ng-show="login.password.$error.required"
+          slow-validate="password"
+          >Please enter your password.</span>
 
-        <input type="submit" name="login" value="Sign in"
-               ng-disabled="!login.$valid" />
+    <input type="submit" name="login" value="Sign in"
+           ng-disabled="!login.$valid" />
 
-      </form>
-      <!-- / Login -->
+  </form>
+  <!-- / Login -->
 
-      <!-- Register -->
-      <form data-title="Create an account"
-            data-value="register"
-            class="tab-pane"
-            name="register"
-            novalidate>
+  <!-- Register -->
+  <form data-title="Create an account"
+        data-value="register"
+        class="tab-pane"
+        name="register"
+        novalidate>
 
-        <input type="text" name="username" value="" placeholder="Username"
-               required autocapitalize="false" ng-model="model.username"
-               ng-minlength="3" ng-maxlength="15"
-               ng-pattern="/^[A-Za-z0-9._]+$/" />
-        <span ng-show="register.username.$error.required"
-              slow-validate="username"
-              >Please choose a username.</span>
-        <span ng-show="register.username.$error.minlength"
-              slow-validate="username"
-              >Usernames must be at least 3 characters.</span>
-        <span ng-show="register.username.$error.maxlength"
-              slow-validate="username"
-              >Usernames must be 15 characters at most.</span>
-        <span ng-show="register.username.$error.pattern"
-              slow-validate="username"
-              >Only letters, numbers, underscore and dot are allowed. </span>
+    <input type="text" name="username" value="" placeholder="Username"
+           required autocapitalize="false" ng-model="model.username"
+           ng-minlength="3" ng-maxlength="15"
+           ng-pattern="/^[A-Za-z0-9._]+$/" />
+    <span ng-show="register.username.$error.required"
+          slow-validate="username"
+          >Please choose a username.</span>
+    <span ng-show="register.username.$error.minlength"
+          slow-validate="username"
+          >Usernames must be at least 3 characters.</span>
+    <span ng-show="register.username.$error.maxlength"
+          slow-validate="username"
+          >Usernames must be 15 characters at most.</span>
+    <span ng-show="register.username.$error.pattern"
+          slow-validate="username"
+          >Only letters, numbers, underscore and dot are allowed. </span>
 
-        <input type="email" name="email" value="" placeholder="Email"
-               ng-model="model.email" required autocapitalize="false" />
-        <span ng-show="register.email.$error.email"
-              slow-validate="email"
-              >Is this an email address?</span>
-        <span ng-show="register.email.$error.required"
-              slow-validate="email"
-              >Please enter your email.</span>
+    <input type="email" name="email" value="" placeholder="Email"
+           ng-model="model.email" required autocapitalize="false" />
+    <span ng-show="register.email.$error.email"
+          slow-validate="email"
+          >Is this an email address?</span>
+    <span ng-show="register.email.$error.required"
+          slow-validate="email"
+          >Please enter your email.</span>
 
-        <input type="password" name="password" value="" placeholder="Password"
-               required autocapitalize="false" autocorrect="false"
-               ng-minlength="2" ng-model="model.password" />
-        <span ng-show="register.password.$error.required"
-              slow-validate="password"
-              >Please enter a password.</span>
-        <span ng-show="register.password.$error.minlength"
-              slow-validate="password"
-              >Passwords must be at least 2 characters.</span>
+    <input type="password" name="password" value="" placeholder="Password"
+           required autocapitalize="false" autocorrect="false"
+           ng-minlength="2" ng-model="model.password" />
+    <span ng-show="register.password.$error.required"
+          slow-validate="password"
+          >Please enter a password.</span>
+    <span ng-show="register.password.$error.minlength"
+          slow-validate="password"
+          >Passwords must be at least 2 characters.</span>
 
-        <input type="submit" name="sign_up" value="Sign up"
-               ng-disabled="!register.$valid" />
+    <input type="submit" name="sign_up" value="Sign up"
+           ng-disabled="!register.$valid" />
 
-      </form>
-      <!-- / Register -->
+  </form>
+  <!-- / Register -->
 
-      <!-- Claim a username -->
-      <form data-title="Claim a username"
-            data-value="claim"
-            class="tab-pane"
-            name="claim"
-            novalidate>
+  <!-- Claim a username -->
+  <form data-title="Claim a username"
+        data-value="claim"
+        class="tab-pane"
+        name="claim"
+        novalidate>
 
-              <p>To activate your reserved username, please enter the email address you used.</p>
-        <!--Get Validation Code-->      
-        <input type="email" name="email" value="" placeholder="Email"
-               required autocapitalize="false" ng-model="model.email" />
-        <span ng-show="forgot.email.$error.email"
-              slow-validate="email"
-              >Is this an email address?</span>
-        <span ng-show="forgot.email.$error.required"
-              slow-validate="email"
-              >Please enter your email.</span>
+    <p>To activate your reserved username, please enter your email address.</p>
+    <!--Get Validation Code-->
+    <input type="email" name="email" value="" placeholder="Email"
+           required autocapitalize="false" ng-model="model.email" />
+    <span ng-show="forgot.email.$error.email"
+          slow-validate="email"
+          >Is this an email address?</span>
+    <span ng-show="forgot.email.$error.required"
+          slow-validate="email"
+          >Please enter your email.</span>
 
-        <input type="submit" name="forgot" value="Send activation"
-               ng-disabled="!claim.$valid" />
+    <input type="submit" name="forgot" value="Send activation"
+           ng-disabled="!claim.$valid" />
 
-      </form>
-      <!-- / Claim a username -->
+  </form>
+  <!-- / Claim a username -->
 
-      <!-- Activate -->
-      <form data-title="Activate"
-            data-value="activate"
-            class="tab-pane"
-            name="activate"
-            novalidate>
+  <!-- Activate -->
+  <form data-title="Activate"
+        data-value="activate"
+        class="tab-pane"
+        name="activate"
+        novalidate>
 
-           <p>Find the validation code in the confirmation email you recieved. Enter it below, along with the password you would like to use for your account.</p>
+    <p>Find the validation code in the confirmation email you recieved. Enter
+      it below, along with the password you would like to use for your
+      account.</p>
 
-        <input type="text" name="code" value="" placeholder="Activation Code"
-               required autocorrect="false" autocapitalize="false"
-               ng-model="model.code" />
-        <span ng-show="activate.code.$error.required"
-              slow-validate="code"
-              >Please enter your validation code.</span>
+    <input type="text" name="code" value="" placeholder="Activation Code"
+           required autocorrect="false" autocapitalize="false"
+           ng-model="model.code" />
+    <span ng-show="activate.code.$error.required"
+          slow-validate="code"
+          >Please enter your validation code.</span>
 
-        <input type="password" name="password" value="" placeholder="New Password"
-               required autocapitalize="false" autocorrect="false"
-               ng-minlength="2" ng-model="model.password" />
-        <span ng-show="activate.password.$error.required"
-              slow-validate="password"
-              >Please choose a password.</span>
-        <span ng-show="activate.password.$error.minlength"
-              slow-validate="password"
-              >Passwords must be at least 2 characters.</span>
+    <input type="password" name="password" value="" placeholder="New Password"
+           required autocapitalize="false" autocorrect="false"
+           ng-minlength="2" ng-model="model.password" />
+    <span ng-show="activate.password.$error.required"
+          slow-validate="password"
+          >Please choose a password.</span>
+    <span ng-show="activate.password.$error.minlength"
+          slow-validate="password"
+          >Passwords must be at least 2 characters.</span>
 
-        <input type="submit" name="activate" value="Sign in"
-               ng-disabled="!activate.$valid" />
+    <input type="submit" name="activate" value="Sign in"
+           ng-disabled="!activate.$valid" />
 
-      </form>
-      <!--/Claim a username-->
+  </form>
+  <!--/Claim a username-->
 
-      <!-- Forgot -->
-      <form data-title="Forgot"
-            data-value="forgot"
-            class="tab-pane"
-            name="forgot"
-            novalidate>
+  <!-- Forgot -->
+  <form data-title="Forgot"
+        data-value="forgot"
+        class="tab-pane"
+        name="forgot"
+        novalidate>
 
-        <p>Forgotten password? Enter your email below to send a recovery email.</p>
+    <p>Forgotten password? Enter your email below to send a recovery email.</p>
 
-        <input type="email" name="email" value="" placeholder="Email"
-               required autocapitalize="false" ng-model="model.email" />
-        <span ng-show="forgot.email.$error.email"
-              slow-validate="email"
-              >Is this an email address?</span>
-        <span ng-show="forgot.email.$error.required"
-              slow-validate="email"
-              >Please enter your email.</span>
+    <input type="email" name="email" value="" placeholder="Email"
+           required autocapitalize="false" ng-model="model.email" />
+    <span ng-show="forgot.email.$error.email"
+          slow-validate="email"
+          >Is this an email address?</span>
+    <span ng-show="forgot.email.$error.required"
+          slow-validate="email"
+          >Please enter your email.</span>
 
-        <input type="submit" name="forgot" value="Send recovery email"
-               ng-disabled="!forgot.$valid" />
+    <input type="submit" name="forgot" value="Send recovery email"
+           ng-disabled="!forgot.$valid" />
 
-      </form>
-      <!-- / Forgot -->
+  </form>
+  <!-- / Forgot -->
 
-    </metal:main>
-  </body>
-</html>
+</metal:main>

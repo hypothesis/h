@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag>
     <title>Hypothes.is</title>
