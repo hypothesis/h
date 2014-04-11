@@ -3,6 +3,8 @@ from pyramid_layout.layout import layout_config
 
 @layout_config(template='h:templates/base.pt')
 class BaseLayout(object):
+    app = None
+    controller = None
     csp = None
     inline_webfont = True
     requirements = (('app', None),)
@@ -37,9 +39,22 @@ class BaseLayout(object):
         return self.get_widget_resources()['js']
 
 
+@layout_config(name='annotation', template='h:templates/base.pt')
+class AnnotationLayout(BaseLayout):
+    app = 'h.displayer'
+
+
 @layout_config(name='sidebar', template='h:templates/base.pt')
 class SidebarLayout(BaseLayout):
+    app = 'h'
+    controller = 'AppController'
     requirements = (('app', None), ('sidebar', None))
+
+
+@layout_config(name='stream', template='h:templates/base.pt')
+class StreamLayout(BaseLayout):
+    app = 'h.streamsearch'
+    controller = 'StreamSearchController'
 
 
 def includeme(config):

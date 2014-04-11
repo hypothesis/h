@@ -47,7 +47,7 @@ def my_view(request):
     return request.root.embed
 
 
-@view_defaults(context='h.resources.Annotation')
+@view_defaults(context='h.resources.Annotation', layout='annotation')
 class AnnotationController(BaseController):
     @view_config(accept='text/html', renderer='templates/displayer.pt')
     def __html__(self):
@@ -268,6 +268,7 @@ class AppController(BaseController):
 
 @view_config(
     context='h.interfaces.IStreamResource',
+    layout='stream',
     renderer='templates/streamsearch.pt',
 )
 def stream(context, request):

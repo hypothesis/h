@@ -5,7 +5,7 @@
     </script>
     <title>Hypothesis</title>
   </head>
-  <body metal:fill-slot="body" class="dark-noise">
+  <body metal:fill-slot="body" tal:omit-tag>
     <div id="home" class="content paper">
       <metal:main use-macro="load: header.pt" />
       <p>Welcome to Hypothesis. For general information about the project, please
