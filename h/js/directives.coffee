@@ -226,7 +226,7 @@ thread = ['$rootScope', '$window', ($rootScope, $window) ->
     childrenEditing = {}
 
     # If this is supposed to be focused, then open it
-    if scope.annotation in $rootScope.focused
+    if scope.annotation in ($rootScope.focused or [])
       scope.collapsed = false
 
     scope.$on "focusChange", ->
