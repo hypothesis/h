@@ -32,7 +32,7 @@ class TestAnnotation(SeleniumTestCase):
         # make sure the heatmap shows our annotation
         # the middle heatmap label should have a "1" in it
         labels = lambda d: d.find_elements_by_css_selector(".heatmap-pointer")
-        w = WebDriverWait(self.driver, 5)
+        w = WebDriverWait(self.driver, 10)
         w.until(lambda d: len(labels(d)) == 3)
 
         a_label = labels(driver)[1]
@@ -44,7 +44,7 @@ class TestAnnotation(SeleniumTestCase):
         with Annotator(driver):
             annotation = (By.CLASS_NAME, 'annotation')
             ec = expected_conditions.visibility_of_element_located(annotation)
-            w = WebDriverWait(driver, 5).until(ec)
+            w = WebDriverWait(driver, 10).until(ec)
             annotation = driver.find_element_by_class_name('annotation')
             user = annotation.find_element_by_class_name('user')
             body = annotation.find_element_by_css_selector('markdown div p')
