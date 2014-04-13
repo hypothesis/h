@@ -19,6 +19,7 @@ class Annotator.Host extends Annotator.Guest
       hostOrigin ?= window.location.protocol + "//" + window.location.host
 
     app = $('<iframe></iframe>')
+    .attr('name', 'hyp_sidebar_frame')
     .attr('seamless', '')
     .attr('src', "#{options.app}#/?xdm=#{encodeURIComponent(hostOrigin)}")
 

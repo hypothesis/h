@@ -205,11 +205,9 @@ class Annotator():
             tb = self.driver.find_element_by_class_name("annotator-toolbar")
             tb.find_element_by_css_selector('li > a').click()
 
-        iframe = (By.TAG_NAME, 'iframe')
-        ec = expected_conditions.visibility_of_element_located(iframe)
+        ec = expected_conditions.frame_to_be_available_and_switch_to_it(
+            'hyp_sidebar_frame')
         WebDriverWait(self.driver, 10).until(ec)
-        iframe = container.find_element_by_tag_name('iframe')
-        self.driver.switch_to_frame(iframe)
 
     def __exit__(self, typ, value, traceback):
         count = self.g_state[self.driver]
