@@ -13,17 +13,13 @@ before_script:
   - curl https://gist.github.com/santiycr/5139565/raw/sauce_connect_setup.sh | bash
 script:
   - make test
-env:
-  global:
-  - secure: PbEcB7ovbi9gu4nEaU2oAOiYDR7KQT/M6Wqfy0UtQPH29EhOj5+bngqzW2sI3uXx+Y6xlbmeke+TiTrO3/H/ludGDY8u7zgmaTmbfWaqA3qdcNfdluhZEPgPqFEmxeTESR7NmMUfkGH6+vOnfBhD0cGZqplk3nTqkVb62CWXhMQ=
-  - secure: Lb3BV9x+/bG127BmSdgJdroqovqqq0bTEa9mqvp7UvDhTWo7iEsDCk6n8h3Lm1gvJZx6V071LWWV9V6sginXAO6bU/S4oEGhEZGIgZkHJAsBHIFRzJ8olEooZZdVSlr2Ri0+GOjozNig5+YGk5onkVCxD4CKJSo1ZJcvktpBbeA=
 after_failure:
   - cat /tmp/gunicorn.error.log
 addons:
   sauce_connect:
-    username: tilgovi
+    username: hypothesiseng
     access_key:
-      secure: LSlwjLHFH3oqH8c9vamD9wPJIE6jpEyL2ovASDTxz6LcPKL4GmT9Vnl60QhC+V9hKHXzJ+vSyA0T1dkTpyr0fq3GIksL3rqHvbVNqHbD8YSxlZIs/6I3gTFmkPz5mK8VdYoA0uSBRFIr/BBBERS8TNqAN3vqv0xFVVIpnedbfIk=
+      secure: pFqnZRSOVe9R3QsB/w7iYwQaGGSZ1g2c6554lHD/t2NbUKfRwrHRyNcANKcnIpiVu73FvWmHJH8SB7Mycnd3MrR80+oyUdC42Me9DmB5k8pYtpl9xPTC4P28oPe5bgyTKTgxoMoERzdJoSCjINZsEvtnmFNxfpAWRUIa5N1mE84=
 notifications:
   irc:
     channels:
