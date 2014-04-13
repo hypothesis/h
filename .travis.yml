@@ -13,6 +13,10 @@ before_script:
   - curl https://gist.github.com/santiycr/5139565/raw/sauce_connect_setup.sh | bash
 script:
   - make test
+env:
+  global:
+    - secure: jb2VHBM6N9GK7fhq5UGej8QarbQstsmGlo1LuwuTsPRf3l0d/AsmNz4+EhtpMQcnXdaGXnahBx+bbC+Qb6RVm8mmttg3ENT0Lt+1U4wHKQ3ZNifxHHw5EVAoquKmFBZSPC9Jk3JIwweqHu+yZezGmgT6Q7lluxsSjNHTZVChbbI=
+    - secure: FloRwk/6jmWgH39zAJ1OXaaTZGTUmwciON91vTMQA+ZYaKekTWn3bvtSmGCZ8hkQQC4MFokE+ERADfC+LcJAXfIk5Q2mCqScJi3B5WRUVJ7SN1E4sd6ZN1UBnuD7k2G9dZdtk5qJKbfXqwmvJD/glJ/krLLxyTmPAsrL9RAJ4AY=
 after_failure:
   - cat /tmp/gunicorn.error.log
 addons:
