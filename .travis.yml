@@ -19,6 +19,9 @@ env:
     - secure: FloRwk/6jmWgH39zAJ1OXaaTZGTUmwciON91vTMQA+ZYaKekTWn3bvtSmGCZ8hkQQC4MFokE+ERADfC+LcJAXfIk5Q2mCqScJi3B5WRUVJ7SN1E4sd6ZN1UBnuD7k2G9dZdtk5qJKbfXqwmvJD/glJ/krLLxyTmPAsrL9RAJ4AY=
 after_failure:
   - cat /tmp/gunicorn.error.log
+  - curl -H "Content-Type:text/json" -s -X PUT -d '{"passed": false}' http://${SAUCE_USERNAME}:${SAUCE_ACCESS_KEY}@saucelabs.com/rest/v1/${SAUCE_USERNAME}/jobs/${TRAVIS_JOB_ID}
+after_success:
+  - curl -H "Content-Type:text/json" -s -X PUT -d '{"passed": true}' http://${SAUCE_USERNAME}:${SAUCE_ACCESS_KEY}@saucelabs.com/rest/v1/${SAUCE_USERNAME}/jobs/${TRAVIS_JOB_ID}
 addons:
   sauce_connect: true
 notifications:
