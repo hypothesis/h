@@ -104,6 +104,7 @@ class Annotator extends Delegator
   constructor: (element, options) ->
     super
     @plugins = {}
+    @selectorCreators = []
     @anchoringStrategies = []
 
     # Return early if the annotator is not supported.
@@ -628,6 +629,19 @@ class Annotator extends Delegator
       this.startViewerHideTimer()
     @mouseIsDown = true
 
+  # This is called to create a target from a raw selection,
+  # using selectors created by the registered selector creators
+  _getTargetFromSelection: (selection) =>
+    selectors = []
+    for c in @selectorCreators
+      description = c.describe selection
+      for selector in description
+        selectors.push selector
+
+    # Create the target
+    source: @getHref()
+    selector: selectors
+
   # This method is to be called by the mechanisms responsible for
   # triggering annotation (and highlight) creation.
   #
@@ -646,8 +660,8 @@ class Annotator extends Delegator
     # Check whether we got a proper event
     unless event?
       throw "Called onSuccessfulSelection without an event!"
-    unless event.targets?
-      throw "Called onSuccessulSelection with an event with missing targets!"
+    unless event.segments?
+      throw "Called onSuccessulSelection with an event with missing segments!"
 
     # Are we allowed to create annotations?
     unless @canAnnotate
@@ -655,8 +669,8 @@ class Annotator extends Delegator
       #  @Annotator.Notification.INFO
       return false
 
-    # Store the selected targets
-    @selectedTargets = event.targets
+    # Describe the selection with targets
+    @selectedTargets = (@_getTargetFromSelection s for s in event.segments)
 
     # Do we want immediate annotation?
     if immediate
