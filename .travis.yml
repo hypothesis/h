@@ -20,10 +20,7 @@ env:
 after_failure:
   - cat /tmp/gunicorn.error.log
 addons:
-  sauce_connect:
-    username: hypothesiseng
-    access_key:
-      secure: pFqnZRSOVe9R3QsB/w7iYwQaGGSZ1g2c6554lHD/t2NbUKfRwrHRyNcANKcnIpiVu73FvWmHJH8SB7Mycnd3MrR80+oyUdC42Me9DmB5k8pYtpl9xPTC4P28oPe5bgyTKTgxoMoERzdJoSCjINZsEvtnmFNxfpAWRUIa5N1mE84=
+  sauce_connect: true
 notifications:
   irc:
     channels:
