@@ -31,7 +31,7 @@ class TestAnnotation(SeleniumTestCase):
 
         def wait_for_annotation(d):
             # make sure the heatmap shows our annotation
-            w = WebDriverWait(d, 10)
+            w = WebDriverWait(d, 30)
             w.until(lambda d: len(get_labels(d)) == 3)
 
         wait_for_annotation(driver)
