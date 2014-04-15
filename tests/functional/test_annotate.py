@@ -31,7 +31,6 @@ class TestAnnotation(SeleniumTestCase):
 
         def wait_for_annotation(d):
             # make sure the heatmap shows our annotation
-            # the middle heatmap label should have a "1" in it
             w = WebDriverWait(d, 10)
             w.until(lambda d: len(get_labels(d)) == 3)
 
@@ -42,6 +41,7 @@ class TestAnnotation(SeleniumTestCase):
 
         wait_for_annotation(driver)
 
+        # the middle heatmap label should have a "1" in it
         a_label = get_labels(driver)[1]
         assert a_label.text == "1"
 
