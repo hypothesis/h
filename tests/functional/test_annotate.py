@@ -26,16 +26,23 @@ class TestAnnotation(SeleniumTestCase):
             body.send_keys("test annotation")
             annotation.find_element_by_css_selector("button").click()
 
+        def get_labels(d):
+            return d.find_elements_by_css_selector(".heatmap-pointer")
+
+        def wait_for_annotation(d):
+            # make sure the heatmap shows our annotation
+            # the middle heatmap label should have a "1" in it
+            w = WebDriverWait(d, 10)
+            w.until(lambda d: len(get_labels(d)) == 3)
+
+        wait_for_annotation(driver)
+
         # go away and come back
         driver.get(self.base_url + "/")
 
-        # make sure the heatmap shows our annotation
-        # the middle heatmap label should have a "1" in it
-        labels = lambda d: d.find_elements_by_css_selector(".heatmap-pointer")
-        w = WebDriverWait(self.driver, 10)
-        w.until(lambda d: len(labels(d)) == 3)
+        wait_for_annotation(driver)
 
-        a_label = labels(driver)[1]
+        a_label = get_labels(driver)[1]
         assert a_label.text == "1"
 
         # if we click the heatmap we should see our annotation appear
