@@ -17,6 +17,9 @@ ifneq ($(TRAVIS_SECURE_ENV_VARS),false)
 	# start with clean test db
 	rm -f test.db
 
+	# ensure the assets are built
+	hypothesis assets test.ini
+
 	# start the test instance of h
 	pserve test.ini --daemon --pid-file=test.pid
 
