@@ -4,6 +4,11 @@
   <body metal:fill-slot="body" tal:omit-tag>
     <div class="content">
       <metal:main use-macro="load: header.pt" />
+      <div tal:condition="request.session.peek_flash()">
+        <span tal:repeat="message request.session.pop_flash()" tal:omit-tag>
+          ${message}<br/>
+        </span>
+      </div>
       <div class="auth">
         <tal:block metal:use-macro="blocks.macros['auth']" />
       </div>
