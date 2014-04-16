@@ -50,11 +50,12 @@
               title="Close"
               ng-click="sheet.collapsed = true"></span>
 
-        <div data-resettable="true"
+        <div class="form-vertical tabbable"
+             data-resettable="true"
              data-tab-reveal="['forgot','activate']"
+             ng-controller="AuthController"
              ng-model="sheet.tab"
-             ng-submit="submit(this[sheet.tab])"
-             class="authentication form-vertical tabbable">
+             ng-submit="submit(this[sheet.tab])">
           <metal:main use-macro="blocks['auth-tabs']" />
           <footer ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
             <ul>

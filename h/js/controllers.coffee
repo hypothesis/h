@@ -695,6 +695,31 @@ class Annotation
             $scope.model.highlightText.replace regexp, annotator.highlighter
 
 
+class Auth
+  scope:
+    username: null
+    email: null
+    password: null
+    code: null
+
+  this.$inject = [
+    '$scope', 'authentication',
+  ]
+  constructor: (
+     $scope,   authentication
+  ) ->
+    _reset = => angular.copy @scope, $scope.model
+
+    $scope.$on '$reset', _reset
+
+    $scope.submit = (form) ->
+      angular.extend authentication, $scope.model
+      return unless form.$valid
+      authentication["$#{form.$name}"] ->
+        _reset()
+        $scope.$emit 'success', form.$name
+
+
 class Editor
   this.$inject = [
     '$location', '$routeParams', '$sce', '$scope',
@@ -1035,6 +1060,7 @@ class Notification
 angular.module('h.controllers', ['bootstrap', 'h.streamfilter'])
   .controller('AppController', App)
   .controller('AnnotationController', Annotation)
+  .controller('AuthController', Auth)
   .controller('EditorController', Editor)
   .controller('ViewerController', Viewer)
   .controller('SearchController', Search)

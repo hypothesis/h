@@ -1,26 +1,3 @@
-authentication = ->
-  base =
-    username: null
-    email: null
-    password: null
-    code: null
-
-  link: (scope, elem, attr, ctrl) ->
-    angular.copy base, scope.model
-  controller: [
-    '$scope', 'authentication',
-    ($scope,   authentication) ->
-      $scope.$on '$reset', => angular.copy base, $scope.model
-
-      $scope.submit = (form) ->
-        angular.extend authentication, $scope.model
-        return unless form.$valid
-        authentication["$#{form.$name}"] ->
-          $scope.$emit 'success', form.$name
-  ]
-  restrict: 'ACE'
-
-
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
@@ -446,7 +423,6 @@ whenscrolled = ['$window', ($window) ->
 ]
 
 angular.module('h.directives', ['ngSanitize'])
-  .directive('authentication', authentication)
   .directive('fuzzytime', fuzzytime)
   .directive('markdown', markdown)
   .directive('privacy', privacy)
