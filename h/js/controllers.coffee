@@ -562,7 +562,7 @@ class Annotation
           # First, focus on the newly created annotation
           unless annotator.isReply annotation
             $rootScope.focus annotation, true
-        
+
           if annotator.isComment(annotation) and
               $rootScope.viewState.view isnt "Comments"
             $rootScope.applyView "Comments"
