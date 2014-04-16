@@ -13,7 +13,6 @@ from annotator import auth, store, es
 
 from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
-from pyramid.security import has_permission
 from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
@@ -107,7 +106,7 @@ def authorize(annotation, action, user=None):
     request = get_current_request()
     annotation = wrap_annotation(annotation)
 
-    result = has_permission(action, annotation, request)
+    result = request.has_permission(action, annotation)
     if not result:
         print result
     return result

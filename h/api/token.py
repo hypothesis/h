@@ -2,7 +2,6 @@ import urlparse
 
 from annotator import auth
 from pyramid.authentication import RemoteUserAuthenticationPolicy
-from pyramid.security import effective_principals
 from pyramid.view import view_config, view_defaults
 
 from h import interfaces, views
@@ -25,7 +24,7 @@ class TokenController(views.BaseController):
         try:
             message['userId'] = next(
                 p
-                for p in effective_principals(request)
+                for p in request.effective_principals
                 if str(p).startswith('acct:')
             )
         except StopIteration:

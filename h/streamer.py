@@ -17,7 +17,6 @@ from jsonpointer import resolve_pointer
 from jsonschema import validate
 
 from pyramid.events import subscriber
-from pyramid.security import has_permission
 
 from pyramid_sockjs.session import Session
 
@@ -476,7 +475,7 @@ def after_action(event):
         manager = request.get_sockjs_manager()
         for session in manager.active_sessions():
             try:
-                if not has_permission('read', annotation, session.request):
+                if not session.request.has_permission('read', annotation):
                     continue
 
                 if 'references' in annotation:

@@ -1,6 +1,6 @@
 import weakref
 
-from pyramid.security import forget, remember, unauthenticated_userid
+from pyramid.security import forget, remember
 
 from h import interfaces
 
@@ -42,7 +42,7 @@ class MemoizedProperty(property):
 
 
 def get_user(request):
-    userid = unauthenticated_userid(request)
+    userid = request.unauthenticated_userid
     user_class = request.registry.queryUtility(interfaces.IUserClass)
 
     if userid is not None:

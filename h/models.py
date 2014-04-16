@@ -333,7 +333,7 @@ def includeme(config):
     )
     config.set_authentication_policy(authn_policy)
 
-    config.set_request_property(lib.user_property, 'user')
+    config.add_request_method(lib.user_property, 'user', property=True)
 
     if not registry.queryUtility(interfaces.IDBSession):
         registry.registerUtility(Session, interfaces.IDBSession)
