@@ -265,7 +265,6 @@ class AppController(BaseController):
         }
 
 
-
 @view_config(
     context='h.interfaces.IStreamResource',
     layout='stream',
