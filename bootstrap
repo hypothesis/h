@@ -55,7 +55,7 @@ echo "Ensuring an up-to-date pip..."
 pip install -qU pip
 
 echo "Checking dependencies (may be a few minutes for first run)..."
-pip install -qr requirements.txt
+pip install --use-wheel -qr requirements.txt
 
 echo -n "Checking for Compass..."
 command -v compass || echo "...not found!"

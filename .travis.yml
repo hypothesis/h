@@ -6,7 +6,7 @@ install:
   - gem install sass
   - gem install compass
   - npm install -g coffee-script
-  - pip install -r requirements.txt
+  - pip install --use-wheel -r requirements.txt
 services:
   - elasticsearch
 before_script:
