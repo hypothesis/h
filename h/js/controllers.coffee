@@ -718,6 +718,8 @@ class Auth
       authentication["$#{form.$name}"] ->
         _reset()
         $scope.$emit 'success', form.$name
+        for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
+          ctrl.$setPristine()
 
 
 class Editor

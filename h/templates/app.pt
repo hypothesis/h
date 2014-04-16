@@ -51,7 +51,6 @@
               ng-click="sheet.collapsed = true"></span>
 
         <div class="form-vertical tabbable"
-             data-resettable="true"
              data-tab-reveal="['forgot','activate']"
              ng-controller="AuthController"
              ng-model="sheet.tab"

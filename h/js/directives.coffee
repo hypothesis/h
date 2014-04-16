@@ -104,20 +104,6 @@ recursive = ['$compile', '$timeout', ($compile, $timeout) ->
 ]
 
 
-resettable = ->
-  compile: (tElement, tAttrs, transclude) ->
-    post: (scope, iElement, iAttrs) ->
-      reset = ->
-        transclude scope, (el) ->
-          iElement.replaceWith el
-          iElement = el
-      reset()
-      scope.$on '$reset', reset
-  priority: 5000
-  restrict: 'A'
-  transclude: 'element'
-
-
 ###
 # The slow validation directive ties an to a model controller and hides
 # it while the model is being edited. This behavior improves the user
@@ -427,7 +413,6 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('markdown', markdown)
   .directive('privacy', privacy)
   .directive('recursive', recursive)
-  .directive('resettable', resettable)
   .directive('slowValidate', slowValidate)
   .directive('tabReveal', tabReveal)
   .directive('tags', tags)
