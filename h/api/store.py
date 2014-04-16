@@ -6,7 +6,6 @@ except ImportError:
 import os
 import socket
 import re
-import urlparse
 
 import flask
 
