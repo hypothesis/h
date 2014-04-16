@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
@@ -11,9 +11,6 @@
     <link rel="stylesheet"
           tal:attributes="href href"
           tal:repeat="href layout.css_links | []" />
-    <script type="text/javascript"
-            tal:attributes="src src"
-            tal:repeat="src layout.js_links | []" ></script>
     <script type="text/javascript" defer="defer"
             tal:condition="layout.inline_webfont"
             tal:content="structure webfont()"
@@ -21,6 +18,12 @@
     <script src="webfont.js" tal:condition="not layout.inline_webfont"></script>
     <tal:block metal:define-slot="head" />
   </head>
-  <body metal:define-slot="body">
+  <body tal:attributes="ng-app layout.app;
+                        ng-controller layout.controller;
+                        ng-csp layout.csp">
+    <tal:block metal:define-slot="body" />
+    <script type="text/javascript"
+            tal:attributes="src src"
+            tal:repeat="src layout.js_links | []" ></script>
   </body>
 </html>

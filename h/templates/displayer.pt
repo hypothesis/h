@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag>
     <title>Hypothes.is</title>
@@ -5,11 +6,8 @@
         document.init_annotation = ${annotation};
         document.init_path = "${request.resource_path(request.context)}";
     </script>
-
   </head>
-  <style type="text/css"></style>
-
-  <body metal:fill-slot="body" ng-app="h.displayer">
+  <body metal:fill-slot="body" tal:omit-tag>
     <!-- Markdown -->
     <script type="text/ng-template" id="markdown.html">
       <metal:main use-macro="load: markdown.html" />

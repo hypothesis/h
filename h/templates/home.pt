@@ -1,11 +1,12 @@
-<html lang="en" metal:use-macro="main_template">
+<!DOCTYPE html>
+<html metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag>
     <script type="text/javascript" defer="defer">
       <metal:main use-macro="load: embed.txt" />
     </script>
     <title>Hypothesis</title>
   </head>
-  <body metal:fill-slot="body" class="dark-noise">
+  <body metal:fill-slot="body" tal:omit-tag>
     <div id="home" class="content paper">
       <metal:main use-macro="load: header.pt" />
       <p>Welcome to Hypothesis. For general information about the project, please
