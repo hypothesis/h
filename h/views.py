@@ -159,7 +159,23 @@ class AppController(BaseController):
 
     @view_config(request_method='POST', request_param='__formid__=forgot')
     def forgot(self):
-        result = ForgotPasswordController(self.request).forgot_password()
+        controller = ForgotPasswordController(self.request)
+
+        # XXX: Horus currently has a bug where the Activation model isn't
+        # flushed before the email is generated, causing the link to be
+        # broken (hypothesis/h#1156).
+        #
+        # Not filed upstream because Horus is undergoing some migration
+        # to Pylons/horus right now during PyCon 2014.
+        def get_activation():
+            activation = self.Activation()
+            self.db.add(activation)
+            self.db.flush()
+            return activation
+
+        controller.Activation = get_activation
+        result = controller.forgot_password()
+
         return self.respond(result)
 
     @view_config(request_method='POST', request_param='__formid__=logout')
