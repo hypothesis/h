@@ -153,6 +153,9 @@ class App
     $scope.$on 'success', (event, action) ->
       if action == 'claim'
         $scope.sheet.tab = 'activate'
+      else
+        $scope.sheet.tab = 'login'
+        $scope.sheet.collapsed = true
 
     $scope.$broadcast '$reset'
 
