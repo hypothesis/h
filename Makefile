@@ -12,7 +12,7 @@ ifneq ($(TRAVIS_SECURE_ENV_VARS),false)
 	@echo "running functional tests"
 
 	# stop the test daemon if it is running
-	hypothesis serve --stop-daemon
+	hypothesis serve --stop-daemon --pid-file=test.pid
 
 	# start with clean test db
 	rm -f test.db
@@ -21,13 +21,13 @@ ifneq ($(TRAVIS_SECURE_ENV_VARS),false)
 	hypothesis assets test.ini
 
 	# start the test instance of h
-	hypothesis serve --daemon test.ini
+	hypothesis serve --daemon --pid-file=test.pid test.ini
 
 	# run the functional tests
 	py.test tests/functional/
 
 	# stop h
-	hypothesis serve --stop-daemon
+	hypothesis serve --stop-daemon --pid-file=test.pid
 endif
 
 unit_test: 
