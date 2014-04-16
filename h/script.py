@@ -20,6 +20,7 @@ command = clik.App(
     'hypothesis',
     version=version,
     description=description,
+    opts=pserve.PServeCommand.parser.option_list[1:],
 )
 
 
@@ -246,19 +247,21 @@ def extension(args, console):
     bootstrap(args[0], options=settings, config_fn=chrome)
 
 
-@command
-def start(args):
-    """Start the server.
+@command(usage='[options] config_uri')
+def serve(argv):
+    """Manage the server.
 
     With no arguments, starts the server in development mode using the
     configuration found in `deveopment.ini` and a hot code reloader enabled.
-    """
-    if not len(args):  # Default to dev mode
-        pserve.ensure_port_cleanup([('0.0.0.0', 5000)])
-        args.append('development.ini')
-        args.append('--reload')
 
-    pserve.main(['hypothesis'] + args)
+    Otherwise, acts as simple alias to the pserve command.
+    """
+    if len(argv) == 1:  # Default to dev mode
+        pserve.ensure_port_cleanup([('0.0.0.0', 5000)])
+        argv.append('development.ini')
+        argv.append('--reload')
+
+    pserve.PServeCommand(['hypothesis'] + argv[1:]).run()
 
 
 main = command.main

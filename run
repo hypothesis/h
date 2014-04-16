@@ -6,4 +6,4 @@ if test -z "$VIRTUAL_ENV"; then
 	fi
 fi
 
-hypothesis start $@
+hypothesis serve $@
