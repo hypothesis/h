@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Support for doing Selenium functional tests locally and remotely using
 SauceLabs. You should be able to write tests with Selenium IDE, export

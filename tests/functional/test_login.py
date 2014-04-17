@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 
 from selenium.webdriver.common.by import By

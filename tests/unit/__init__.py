@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 AppTestCase is a subclass of unittest.TestCase for writing unit tests
 that will have access to a clean h database.
