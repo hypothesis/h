@@ -11,7 +11,6 @@ if 'gevent' in sys.modules:
 
 import pyramid
 
-from webassets.filter import register_filter
 from webassets.loaders import YAMLLoader
 
 import logging
