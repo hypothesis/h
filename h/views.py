@@ -37,6 +37,18 @@ class BaseController(horus.views.BaseController):
         self.Token = getUtility(interfaces.ITokenClass)
 
 
+@view_config(
+    accept='application/json',
+    context='pyramid.exceptions.BadCSRFToken',
+    renderer='json',
+)
+def bad_csrf_token(request):
+    return {
+        'status': 'failure',
+        'reason': 'Something is wrong. Please try again.'
+    }
+
+
 @view_config(renderer='templates/home.pt', route_name='index')
 def home(request):
     return request.context.embed

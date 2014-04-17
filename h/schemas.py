@@ -1,11 +1,8 @@
 import colander
 import deform
 
-from horus.schemas import (
-    CSRFSchema,
-    ForgotPasswordSchema,
-    unique_email,
-)
+from horus.schemas import ForgotPasswordSchema, unique_email
+from pyramid.session import check_csrf_token
 
 from h import interfaces
 from h.models import _, get_session
@@ -18,6 +15,12 @@ def unique_username(node, value):
     if get_session(req).query(User).filter(User.username.ilike(value)).count():
         Str = req.registry.getUtility(interfaces.IUIStrings)
         raise colander.Invalid(node, Str.registration_username_exists)
+
+
+class CSRFSchema(colander.Schema):
+    def validator(self, form, value):
+        request = form.bindings['request']
+        check_csrf_token(request)
 
 
 class LoginSchema(CSRFSchema):
