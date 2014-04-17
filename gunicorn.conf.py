@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 # Smart detect heroku stack and assume a trusted proxy.

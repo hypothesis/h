@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid.httpexceptions import HTTPBadRequest
 
 from h.models import _

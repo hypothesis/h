@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid_layout.layout import layout_config
 
 

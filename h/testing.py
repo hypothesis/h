@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 
 from pyramid_mailer.interfaces import IMailer

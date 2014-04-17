@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unicodedata
 import re
 import traceback

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid.events import subscriber, BeforeRender, NewRequest
 from pyramid.renderers import get_renderer
 from pyramid.settings import asbool

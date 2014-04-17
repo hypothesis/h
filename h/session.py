@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from beaker.util import coerce_session_params
 from pyramid.interfaces import ISession
 from pyramid.settings import asbool

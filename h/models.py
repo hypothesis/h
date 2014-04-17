@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from functools import partial
 from uuid import uuid1, uuid4, UUID
 
