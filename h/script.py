@@ -33,7 +33,7 @@ def assets(args, console):
         console.error('You must supply a paste configuration file.')
         return 2
 
-    from h import bootstrap
+    from pyramid import paster
     from pyramid_webassets import IWebAssetsEnvironment
 
     def build(env):
@@ -41,7 +41,7 @@ def assets(args, console):
         for bundle in asset_env:
             bundle.urls()
 
-    bootstrap(args[0], config_fn=build)
+    build(paster.bootstrap(args[0]))
 
 
 @command(usage='CONFIG_FILE APP_URL [STATIC_URL]')
@@ -78,12 +78,13 @@ def extension(args, console):
     )
 
     from chameleon.zpt.template import PageTextTemplateFile
+    from pyramid.paster import bootstrap
     from pyramid.path import AssetResolver
     from pyramid.renderers import get_renderer, render
     from pyramid.settings import asbool
     from pyramid_webassets import IWebAssetsEnvironment
 
-    from h import bootstrap, layouts
+    from h import layouts
 
     resolve = AssetResolver().resolve
 
@@ -245,7 +246,7 @@ def extension(args, console):
     uses_netloc.append('chrome-extension')
     uses_relative.append('chrome-extension')
 
-    bootstrap(args[0], options=settings, config_fn=chrome)
+    chrome(bootstrap(args[0], options=settings))
 
 
 @command(usage='[options] config_uri')

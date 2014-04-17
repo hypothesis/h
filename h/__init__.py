@@ -30,26 +30,6 @@ def includeme(config):
     config.include('h.domain_mailer')
 
 
-def bootstrap(cfname, request=None, options=None, config_fn=None):
-    """Bootstrap the application with the given paste configuration file
-
-    An optional function argument may be supplied. This function will be
-    invoked with the bootstrapping environment.
-    """
-    from pyramid import paster
-
-    paster.setup_logging(cfname)
-    env = paster.bootstrap(cfname, request=request, options=options)
-
-    try:
-        if config_fn:
-            config_fn(env)
-    finally:
-        env['closer']()
-
-    return env['app']
-
-
 def create_app(settings):
     import os
     import urlparse
