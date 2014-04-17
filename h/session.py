@@ -17,7 +17,6 @@ def AngularSessionFactoryConfig(**options):
                 if exception is None and self.accessed():
                     csrft = self.get('_csrft_', None)
                     cookie = self.cookie
-                    headers = self.__dict__['_headers']
                     if csrft and self.dirty():
                         # Temporarily swap the cookie key and value
                         # for XSRF-TOKEN and the csrf_token. This motly avoids
