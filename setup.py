@@ -3,6 +3,7 @@ from setuptools import setup, find_packages
 
 import versioneer
 
+versioneer.VCS = 'git'
 versioneer.versionfile_source = 'h/_version.py'
 versioneer.versionfile_build = '_version.py'
 versioneer.tag_prefix = 'v'
