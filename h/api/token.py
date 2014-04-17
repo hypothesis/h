@@ -39,13 +39,6 @@ class TokenController(views.BaseController):
 
 
 class AuthTokenAuthenticationPolicy(RemoteUserAuthenticationPolicy):
-    def __init__(self, debug=False):
-        super(AuthTokenAuthenticationPolicy, self).__init__(
-            environ_key='HTTP_X_ANNOTATOR_AUTH_TOKEN',
-            callback=self.callback,
-            debug=debug,
-        )
-
     def unauthenticated_userid(self, request):
         token = request.environ.get(self.environ_key)
         try:
@@ -82,7 +75,11 @@ def includeme(config):
 
     authn_debug = config.registry.settings.get('pyramid.debug_authorization') \
         or config.registry.settings.get('debug_authorization')
-    authn_policy = AuthTokenAuthenticationPolicy(debug=authn_debug)
+    authn_policy = AuthTokenAuthenticationPolicy(
+        environ_key='HTTP_X_ANNOTATOR_AUTH_TOKEN',
+        callback=groupfinder,
+        debug=authn_debug,
+    )
     config.set_authentication_policy(authn_policy)
 
     if not config.registry.queryUtility(interfaces.ITokenClass):
