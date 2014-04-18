@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import colander
 import deform
-
 from horus.schemas import ForgotPasswordSchema, unique_email
 from pyramid.session import check_csrf_token
 

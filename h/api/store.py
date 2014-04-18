@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
+import json
+import logging
 import os
-import socket
 import re
-
-import flask
+import socket
 
 from annotator import auth, store, es
-
+import flask
 from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
 from pyramid.threadlocal import get_current_request
@@ -19,8 +14,7 @@ from pyramid.wsgi import wsgiapp2
 
 from h import api, events, interfaces, models
 
-import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable-msg=C0103
 
 
 class Store(object):

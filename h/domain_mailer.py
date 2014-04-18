@@ -2,17 +2,20 @@
 import re
 import logging
 from urlparse import urlparse
-import traceback
 
 import requests
 from bs4 import BeautifulSoup
-
 from pyramid.events import subscriber
 
 from h import events
-from h.notifier import user_profile_url, standalone_url, AnnotationNotifier, NotificationTemplate
+from h.notifier import (
+    AnnotationNotifier,
+    NotificationTemplate,
+    user_profile_url,
+    standalone_url,
+)
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable-msg=C0103
 
 
 class DocumentOwnerTemplate(NotificationTemplate):
@@ -21,7 +24,10 @@ class DocumentOwnerTemplate(NotificationTemplate):
 
     @staticmethod
     def _create_template_map(request, annotation):
-        tags = '\ntags: ' + ', '.join(annotation['tags']) if 'tags' in annotation else ''
+        if 'tags' in annotation:
+            tags = '\ntags: ' + ', '.join(annotation['tags'])
+        else:
+            tags = ''
         user = re.search("^acct:([^@]+)", annotation['user']).group(1)
         return {
             'document_title': annotation['title'],
@@ -40,7 +46,10 @@ class DocumentOwnerTemplate(NotificationTemplate):
         return [data['email']]
 
 
-AnnotationNotifier.register_template('document_owner', DocumentOwnerTemplate.generate_notification)
+AnnotationNotifier.register_template(
+    'document_owner',
+    DocumentOwnerTemplate.generate_notification
+)
 
 
 # TODO: Introduce proper cache for content parsing
@@ -49,7 +58,8 @@ def get_document_owners(content):
     documents = parsed_data.select('a[rel="reply-to"]')
     hrefs = []
     for d in documents:
-        if d['href'].lower()[0:7] == 'mailto:': hrefs.append(d['href'][7:])
+        if re.match(r'^mailto:', d['href'], re.IGNORECASE):
+            hrefs.append(d['href'][7:])
 
     return hrefs
 
@@ -66,8 +76,8 @@ def domain_notification(event):
 
             # Now send the notifications
             url_struct = urlparse(annotation['uri'])
-            domain = url_struct.hostname if len(url_struct.hostname) > 0 else url_struct.path
-            if domain[0:4] == 'www.': domain = domain[4:]
+            domain = url_struct.hostname or url_struct.path
+            domain = re.sub(r'^www.', '', domain)
             notifier = AnnotationNotifier(event.request)
             for email in emails:
                 # Domain matching
@@ -75,13 +85,15 @@ def domain_notification(event):
                 if mail_domain == domain:
                     try:
                         # Send notification to owners
-                        notifier.send_notification_to_owner(annotation, {'email': email}, 'document_owner')
+                        notifier.send_notification_to_owner(
+                            annotation,
+                            {'email': email},
+                            'document_owner'
+                        )
                     except:
-                        log.exception(traceback.format_exc())
-                        log.exception('Failed to send email!')
+                        log.exception('Problem sending email')
         except:
-            log.exception(traceback.format_exc())
-            log.exception('Notification_worker error!')
+            log.exception('Problem with domain notification')
 
 
 def includeme(config):

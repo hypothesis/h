@@ -1,31 +1,21 @@
 # -*- coding: utf-8 -*-
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
+import datetime
+import json
+import logging
 import operator
-import traceback
-
-from datetime import datetime, timedelta
-from urlparse import urlparse
-
-import transaction
+import re
+import urlparse
 
 from dateutil.tz import tzutc
-
 from jsonpointer import resolve_pointer
 from jsonschema import validate
-
 from pyramid.events import subscriber
-
 from pyramid_sockjs.session import Session
+import transaction
 
 from h import events, interfaces, models
-import re
 
-import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable-msg=C0103
 
 
 def check_favicon(icon_link, parsed_uri, domain):
@@ -33,7 +23,7 @@ def check_favicon(icon_link, parsed_uri, domain):
         if icon_link.startswith('http'):
             icon_link = icon_link
         elif icon_link.startswith('//'):
-            icon_link= parsed_uri[0] + "://" + icon_link[2:]
+            icon_link = parsed_uri[0] + "://" + icon_link[2:]
         else:
             icon_link = domain + icon_link
     else:
@@ -46,7 +36,7 @@ def url_values_from_document(annotation):
     title = annotation['uri']
     icon_link = ""
 
-    parsed_uri = urlparse(annotation['uri'])
+    parsed_uri = urlparse.urlparse(annotation['uri'])
     domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
     domain_stripped = parsed_uri[1]
     if parsed_uri[1].lower().startswith('www.'):
@@ -88,7 +78,8 @@ filter_schema = {
         "name": {"type": "string", "optional": True},
         "match_policy": {
             "type": "string",
-            "enum": ["include_any", "include_all", "exclude_any", "exclude_all"]
+            "enum": ["include_any", "include_all",
+                     "exclude_any", "exclude_all"]
         },
         "actions": {
             "create": {"type": "boolean", "default":  True},
@@ -101,8 +92,9 @@ filter_schema = {
                 "field": {"type": "string", "format": "json-pointer"},
                 "operator": {
                     "type": "string",
-                    "enum": ["equals", "matches", "lt", "le", "gt", "ge", "one_of", "first_of",
-                             "match_of", "lene", "leng", "lenge", "lenl", "lenle"]
+                    "enum": ["equals", "matches", "lt", "le", "gt", "ge",
+                             "one_of", "first_of", "match_of",
+                             "lene", "leng", "lenge", "lenl", "lenle"]
                 },
                 "value": "object",
                 "case_sensitive": {"type": "boolean", "default": True},
@@ -130,6 +122,7 @@ len_operators = {
     "lenle": "<="
 }
 
+
 class FilterToElasticFilter(object):
     def __init__(self, filter_json, request):
         self.request = request
@@ -146,13 +139,16 @@ class FilterToElasticFilter(object):
         if len(self.filter['clauses']):
             clauses = self.convert_clauses(self.filter['clauses'])
             # apply match policy
-            getattr(self, self.filter['match_policy'])(self.query['query']['bool'], clauses)
+            policy = getattr(self, self.filter['match_policy'])
+            policy(self.query['query']['bool'], clauses)
         else:
             self.query['query'] = {"match_all": {}}
 
         if self.filter['past_data']['load_past'] == 'time':
-            now = datetime.utcnow().replace(tzinfo=tzutc())
-            past = now - timedelta(seconds=60 * self.filter['past_data']['go_back'])
+            back = self.filter['past_data']['go_back']
+            now = datetime.datetime.utcnow().replace(tzinfo=tzutc())
+            delta = datetime.timedelta(minutes=back)
+            past = now - delta
             converted = past.strftime("%Y-%m-%dT%H:%M:%S")
             self.query['filter'] = {"range": {"created": {"gte": converted}}}
         elif self.filter['past_data']['load_past'] == 'hits':
@@ -215,9 +211,11 @@ class FilterToElasticFilter(object):
                         for val in value:
                             username = re.search("^acct:([^@]+)", val).group(1)
                             host = re.search("[^@]+$", val).group(0)
-                            userobj = models.User.get_by_username(self.request, username)
+                            userobj = models.User.get_by_username(self.request,
+                                                                  username)
                             if userobj:
-                                newvalue = 'acct:' + userobj.username + '@' + host
+                                newvalue = 'acct:%s@%s' % (userobj.username,
+                                                           host)
                             else:
                                 newvalue = val
                             res.append(newvalue)
@@ -229,7 +227,8 @@ class FilterToElasticFilter(object):
                     if field == 'user':
                         username = re.search("^acct:([^@]+)", value).group(1)
                         host = re.search("[^@]+$", value).group(0)
-                        userobj = models.User.get_by_username(self.request, username)
+                        userobj = models.User.get_by_username(self.request,
+                                                              username)
                         if userobj:
                             value = 'acct:' + userobj.username + '@' + host
             else:
@@ -244,7 +243,11 @@ class FilterToElasticFilter(object):
                     }
                 }
             elif clause['operator'][0:2] == 'len':
-                script = "doc['" + field + "'].values.length " + len_operators[clause['operator']] + " " + clause[value]
+                script = "doc['%s'].values.length %s %s" % (
+                    field,
+                    len_operators[clause['operator']],
+                    clause[value]
+                )
                 self.filter_scripts_to_add.append(script)
             else:
                 new_clause = getattr(self, clause['operator'])(field, value)
@@ -271,7 +274,8 @@ class FilterToElasticFilter(object):
         self._policy('must', target['must_not']['bool'], clauses)
 
 
-def first_of(a, b): return a[0] == b
+def first_of(a, b):
+    return a[0] == b
 setattr(operator, 'first_of', first_of)
 
 
@@ -283,23 +287,28 @@ def match_of(a, b):
 setattr(operator, 'match_of', match_of)
 
 
-def lene(a, b): return len(a) == b
+def lene(a, b):
+    return len(a) == b
 setattr(operator, 'lene', lene)
 
 
-def leng(a, b): return len(a) > b
+def leng(a, b):
+    return len(a) > b
 setattr(operator, 'leng', leng)
 
 
-def lenge(a, b): return len(a) >= b
+def lenge(a, b):
+    return len(a) >= b
 setattr(operator, 'lenge', lenge)
 
 
-def lenl(a, b): return len(a) < b
+def lenl(a, b):
+    return len(a) < b
 setattr(operator, 'lenl', lenl)
 
 
-def lenle(a, b): return len(a) <= b
+def lenle(a, b):
+    return len(a) <= b
 setattr(operator, 'lenle', lenle)
 
 
@@ -309,9 +318,20 @@ class FilterHandler(object):
 
     # operators
     operators = {
-        "equals": 'eq', "matches": 'contains', "lt": 'lt', "le": 'le', "gt": 'gt',
-        "ge": 'ge', "one_of": 'contains', "first_of": 'first_of', "match_of": 'match_of',
-        "lene": 'lene', "leng": 'leng', "lenge": 'lenge', "lenl": 'lenl', "lenle": 'lenle'
+        'equals': 'eq',
+        'matches': 'contains',
+        'lt': 'lt',
+        'le': 'le',
+        'gt': 'gt',
+        'ge': 'ge',
+        'one_of': 'contains',
+        'first_of': 'first_of',
+        'match_of': 'match_of',
+        'lene': 'lene',
+        'leng': 'leng',
+        'lenge': 'lenge',
+        'lenl': 'lenl',
+        'lenle': 'lenle',
     }
 
     def evaluate_clause(self, clause, target):
@@ -334,53 +354,66 @@ class FilterHandler(object):
 
             reversed_order = False
             # Determining operator order
-            # Normal order: field_value, clause['value'] (i.e. condition created > 2000.01.01)
-            # Here clause['value'] = '2001.01.01'. The field_value is target['created']
+            # Normal order: field_value, clause['value']
+            # i.e. condition created > 2000.01.01
+            # Here clause['value'] = '2001.01.01'.
+            # The field_value is target['created']
             # So the natural order is: ge(field_value, clause['value']
 
             # But!
             # Reversed operator order for contains (b in a)
             if type(cval) is list or type(fval) is list:
-                if clause['operator'] == 'one_of' or clause['operator'] == 'matches':
+                if clause['operator'] in ['one_of', 'matches']:
                     reversed_order = True
                     # But not in every case. (i.e. tags matches 'b')
-                    # Here field_value is a list, because an annotation can have many tags
-                    # And clause['value'] is 'b'
+                    # Here field_value is a list, because an annotation can
+                    # have many tags.
                     if type(field_value) is list:
                         reversed_order = False
 
             if reversed_order:
-                return getattr(operator, self.operators[clause['operator']])(cval, fval)
+                lval = cval
+                rval = fval
             else:
-                return getattr(operator, self.operators[clause['operator']])(fval, cval)
+                lval = fval
+                rval = cval
+
+            op = getattr(operator, self.operators[clause['operator']])
+            return op(lval, rval)
 
     # match_policies
     def include_any(self, target):
         for clause in self.filter['clauses']:
-            if self.evaluate_clause(clause, target): return True
+            if self.evaluate_clause(clause, target):
+                return True
         return False
 
     def include_all(self, target):
         for clause in self.filter['clauses']:
-            if not self.evaluate_clause(clause, target): return False
+            if not self.evaluate_clause(clause, target):
+                return False
         return True
 
     def exclude_all(self, target):
         for clause in self.filter['clauses']:
-            if not self.evaluate_clause(clause, target): return True
+            if not self.evaluate_clause(clause, target):
+                return True
         return False
 
     def exclude_any(self, target):
         for clause in self.filter['clauses']:
-            if self.evaluate_clause(clause, target): return False
+            if self.evaluate_clause(clause, target):
+                return False
         return True
 
     def match(self, target, action=None):
         if not action or action == 'past' or action in self.filter['actions']:
             if len(self.filter['clauses']) > 0:
                 return getattr(self, self.filter['match_policy'])(target)
-            else: return True
-        else: return False
+            else:
+                return True
+        else:
+            return False
 
 
 class StreamerSession(Session):
@@ -406,8 +439,7 @@ class StreamerSession(Session):
                         annotation['quote'] = parent['text']
                 send_annotations.append(annotation)
             except:
-                log.info(traceback.format_exc())
-                log.info("Error while updating the annotation's properties:" + str(annotation))
+                log.exception("Updating properties: %s", annotation)
 
         # Finally send filtered annotations
         # Can send zero to indicate that no past data is matched
@@ -430,9 +462,9 @@ class StreamerSession(Session):
         try:
             struct = json.loads(msg)
             self.clientID = struct['clientID'] if 'clientID' in struct else ''
-            type = struct['messageType'] if 'messageType' in struct else 'filter'
+            msg_type = struct.get('messageType', 'filter')
 
-            if type == 'filter':
+            if msg_type == 'filter':
                 payload = struct['filter']
                 self.offsetFrom = 0
 
@@ -441,25 +473,25 @@ class StreamerSession(Session):
                 self.filter = FilterHandler(payload)
 
                 # If past is given, send the annotations back.
-                if "past_data" in payload and payload["past_data"]["load_past"] != "none":
+                if payload.get('past_data', {}).get('load_past') != 'none':
                     self.query = FilterToElasticFilter(payload, self.request)
                     if 'size' in self.query.query:
                         self.offsetFrom = int(self.query.query['size'])
                     self.send_annotations()
-            elif type == 'more_hits':
-                more_hits = int(struct['moreHits']) if 'moreHits' in struct else 50
+            elif msg_type == 'more_hits':
+                more_hits = struct.get('moreHits', 50)
                 if 'size' in self.query.query:
                     self.query.query['from'] = self.offsetFrom
                     self.query.query['size'] = more_hits
                     self.send_annotations()
                     self.offsetFrom += self.received
         except:
-            log.info(traceback.format_exc())
-            log.info('Failed to parse filter:' + str(msg))
+            log.exception("Parsing filter: %s", msg)
             transaction.abort()
             self.close()
         else:
             transaction.commit()
+
 
 @subscriber(events.AnnotationEvent)
 def after_action(event):
@@ -501,13 +533,13 @@ def after_action(event):
 
                 session.send(packet)
             except:
-                log.info(traceback.format_exc())
-                log.info('An error occured during the match checking or the annotation sending phase. ')
-                log.info(str(annotation))
-                log.info(str(session.filter))
+                log.exception(
+                    'Checking stream match:\n%s\n%s',
+                    annotation,
+                    session.filter
+                )
     except:
-        log.info(traceback.format_exc())
-        log.info('Unexpected error occurred in after_action(): ' + str(event))
+        log.exception('Streaming event: %s', event)
 
 
 def includeme(config):

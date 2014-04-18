@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+import json
 from functools import partial
 from uuid import uuid1, uuid4, UUID
 
 from annotator import annotation, document
 from annotator.auth import DEFAULT_TTL
-
 from horus.models import (
     get_session,
     BaseModel,
@@ -13,30 +13,20 @@ from horus.models import (
     UserMixin,
     UserGroupMixin,
 )
-
 from pyramid.authentication import SessionAuthenticationPolicy
-
-import transaction
-
-from pyramid_basemodel import Base, Session
-
 from pyramid.i18n import TranslationStringFactory
-
-_ = TranslationStringFactory(__package__)
-
+from pyramid_basemodel import Base, Session
+import sqlalchemy as sa
 from sqlalchemy import func, or_
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer, TypeDecorator, CHAR, VARCHAR
 from sqlalchemy.ext.declarative import declared_attr
-import sqlalchemy as sa
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import transaction
 
 from h import interfaces, lib
+
+_ = TranslationStringFactory(__package__)
 
 
 class JSONEncodedDict(TypeDecorator):

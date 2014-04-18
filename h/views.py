@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import json
+import logging
 
 import colander
 import deform
-
 import horus.views
-
 from horus.lib import FlashMessage
 from horus.views import (
     AuthController,
     ForgotPasswordController,
     RegisterController,
 )
-
 from pyramid import httpexceptions
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
@@ -25,8 +20,7 @@ from h.models import _
 from h.streamer import url_values_from_document
 from h.events import LoginEvent
 
-import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable-msg=C0103
 
 
 class BaseController(horus.views.BaseController):
@@ -199,7 +193,7 @@ class AppController(BaseController):
 
     @view_config(
         accept='application/javascript',
-        path_info='^/app/embed\.js$',
+        path_info=r'^/app/embed.js$',
         renderer='templates/embed.txt',
     )
     def embed(self):

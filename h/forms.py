@@ -24,12 +24,9 @@ class Deform(deform.Form):
     __metaclass__ = FormMeta
     buttons = (deform.Button('submit'),)
 
-    def __init__(self, schema, action='', method='POST', buttons=(),
-                 formid=None, use_ajax=False, ajax_options='{}', **kw):
-        formid = formid or self.formid
-        buttons = buttons or self.buttons
-        super(Deform, self).__init__(schema, action, method, buttons,
-                                     formid, use_ajax, ajax_options, **kw)
+    def __init__(self, schema, **kwargs):
+        kwargs.setdefault('buttons', self.buttons)
+        super(Deform, self).__init__(schema, **kwargs)
 
 
 class LoginForm(Deform):

@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-import unicodedata
 import re
-import traceback
-from urlparse import urlparse
 import logging
-log = logging.getLogger(__name__)
+
+from urlparse import urlparse
 
 from horus.models import get_session
 from pyramid_mailer.interfaces import IMailer
@@ -16,14 +14,16 @@ from h import events, models
 from h.interfaces import IStoreClass
 from h.streamer import FilterHandler, parent_values
 
+log = logging.getLogger(__name__)  # pylint: disable-msg=C0103
+
 
 def user_profile_url(request, user):
     username = re.search("^acct:([^@]+)", user).group(1)
     return request.application_url + '/u/' + username
 
 
-def standalone_url(request, id):
-    return request.application_url + '/a/' + id
+def standalone_url(request, annotation_id):
+    return request.application_url + '/a/' + annotation_id
 
 
 class NotificationTemplate(object):
@@ -52,7 +52,7 @@ class NotificationTemplate(object):
             rendered, subject = cls.render(request, annotation)
             recipients = cls.get_recipients(request, annotation, data)
         except:
-            log.info(traceback.format_exc())
+            log.exception('Generating notification')
             return {'status': False}
         return {
             'status': True,
@@ -68,10 +68,23 @@ class ReplyTemplate(NotificationTemplate):
 
     @staticmethod
     def _create_template_map(request, reply):
-        parent_user = re.search("^acct:([^@]+)", reply['parent']['user']).group(1)
-        reply_user = re.search("^acct:([^@]+)", reply['user']).group(1)
-        parent_tags = '\ntags: ' + ', '.join(reply['parent']['tags']) if 'tags' in reply['parent'] else ''
-        reply_tags = '\ntags: ' + ', '.join(reply['tags']) if 'tags' in reply else ''
+        parent_tags = ''
+        reply_tags = ''
+
+        if 'tags' in reply['parent']:
+            parent_tags = '\ntags: ' + ', '.join(reply['parent']['tags'])
+        if 'tags' in reply:
+            reply_tags = '\ntags: ' + ', '.join(reply['tags'])
+
+        parent_user = re.search(
+            r'^acct:([^@]+)',
+            reply['parent']['user']
+        ).group(1)
+
+        reply_user = re.search(
+            r'^acct:([^@]+)',
+            reply['user']
+        ).group(1)
 
         return {
             'document_title': reply['title'],
@@ -81,7 +94,8 @@ class ReplyTemplate(NotificationTemplate):
             'parent_user': parent_user,
             'parent_tags': parent_tags,
             'parent_timestamp': reply['parent']['created'],
-            'parent_user_profile': user_profile_url(request, reply['parent']['user']),
+            'parent_user_profile': user_profile_url(request,
+                                                    reply['parent']['user']),
             'parent_path': standalone_url(request, reply['parent']['id']),
             'reply_quote': reply['quote'],
             'reply_text': reply['text'],
@@ -94,7 +108,10 @@ class ReplyTemplate(NotificationTemplate):
 
     @staticmethod
     def get_recipients(request, annotation, data):
-        username = re.search("^acct:([^@]+)", annotation['parent']['user']).group(1)
+        username = re.search(
+            r'^acct:([^@]+)',
+            annotation['parent']['user']
+        ).group(1)
         userobj = models.User.get_by_username(request, username)
         if not userobj:
             log.warn("User not found! " + str(username))
@@ -104,9 +121,11 @@ class ReplyTemplate(NotificationTemplate):
     @staticmethod
     def check_conditions(annotation, data):
         # Get the e-mail of the owner
-        if not annotation['parent']['user']: return False
-        # Do not notify me about my own message
-        if annotation['user'] == annotation['parent']['user']: return False
+        if not annotation['parent']['user']:
+            return False
+        # Do not notify users about their own replies
+        if annotation['user'] == annotation['parent']['user']:
+            return False
         # Else okay
         return True
 
@@ -117,7 +136,10 @@ class CustomSearchTemplate(NotificationTemplate):
 
     @staticmethod
     def _create_template_map(request, annotation):
-        tags = ', '.join(annotation['tags']) if 'tags' in annotation else '(none)'
+        tags = '(none)'
+        if 'tags' in annotation:
+            tags = ', '.join(annotation['tags'])
+
         return {
             'document_title': annotation['title'],
             'document_path': annotation['uri'],
@@ -129,7 +151,10 @@ class CustomSearchTemplate(NotificationTemplate):
 
     @staticmethod
     def get_recipients(request, annotation, data):
-        username = re.search("^acct:([^@]+)", annotation['parent']['user']).group(1)
+        username = re.search(
+            r'^acct:([^@]+)',
+            annotation['parent']['user']
+        ).group(1)
         userobj = models.User.get_by_username(request, username)
         if not userobj:
             log.warn("User not found! " + str(username))
@@ -152,9 +177,17 @@ class AnnotationNotifier(object):
 
     def send_notification_to_owner(self, annotation, data, template):
         if template in self.registered_templates:
-            notification = self.registered_templates[template](self.request, annotation, data)
+            notification = self.registered_templates[template](
+                self.request,
+                annotation,
+                data
+            )
             if notification['status']:
-                self._send_annotation(notification['rendered'], notification['subject'], notification['recipients'])
+                self._send_annotation(
+                    notification['rendered'],
+                    notification['subject'],
+                    notification['recipients']
+                )
 
     def _send_annotation(self, body, subject, recipients):
         body = body.decode('utf8')
@@ -163,10 +196,16 @@ class AnnotationNotifier(object):
                           recipients=recipients,
                           body=body)
         self.mailer.send(message)
-        log.info('sent: %s' % message.to_message().as_string())
+        log.info('sent: %s', message.to_message().as_string())
 
-AnnotationNotifier.register_template('reply_notification', ReplyTemplate.generate_notification)
-AnnotationNotifier.register_template('custom_search', CustomSearchTemplate.generate_notification)
+AnnotationNotifier.register_template(
+    'reply_notification',
+    ReplyTemplate.generate_notification
+)
+AnnotationNotifier.register_template(
+    'custom_search',
+    CustomSearchTemplate.generate_notification
+)
 
 
 @subscriber(events.AnnotationEvent)
@@ -181,14 +220,15 @@ def send_notifications(event):
         queries = models.UserSubscriptions.get_all(request).all()
         for query in queries:
             # Do not do anything for disabled queries
-            if not query.active: continue
+            if not query.active:
+                continue
 
             if FilterHandler(query.query).match(annotation, action):
-                # Send it to the template renderer, using the stored template type
-                notifier.send_notification_to_owner(annotation, {}, query.template)
+                # Send it to the renderer using the registered template
+                notifier.send_notification_to_owner(annotation, {},
+                                                    query.template)
     except:
-        log.info(traceback.format_exc())
-        log.info('Unexpected error occurred in send_notifications(): ' + str(event))
+        log.exception('Emailing event: %s', event)
 
 
 def generate_system_reply_query(username, domain):
@@ -227,7 +267,7 @@ def create_system_reply_query(user, domain, session):
 def create_default_subscription(request, user):
     session = get_session(request)
     url_struct = urlparse(request.application_url)
-    domain = url_struct.hostname if len(url_struct.hostname) > 0 else url_struct.path
+    domain = url_struct.hostname or url_struct.path
     create_system_reply_query(user, domain, session)
 
     # Added all subscriptions, write it to DB

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pyramid.events import subscriber, BeforeRender, NewRequest
+from pyramid.events import subscriber, BeforeRender
 from pyramid.renderers import get_renderer
 from pyramid.settings import asbool
 

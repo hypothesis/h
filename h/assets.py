@@ -1,20 +1,11 @@
 # -*- coding: utf-8 -*-
-from os import path
-from urlparse import urlparse
-
+import logging
 import re
-import sys
-
-if 'gevent' in sys.modules:
-    import gevent.subprocess
-    sys.modules['subprocess'] = gevent.subprocess
 
 import pyramid
-
 from webassets.loaders import YAMLLoader
 
-import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable-msg=C0103
 
 
 class WebassetsResourceRegistry(object):
@@ -25,7 +16,7 @@ class WebassetsResourceRegistry(object):
         result = {'js': [], 'css': []}
 
         urls = []
-        for name in zip(*requirements)[0]:
+        for name, version in requirements:
             log.info('name: ' + str(name))
             if name in self.env:
                 bundle = self.env[name]

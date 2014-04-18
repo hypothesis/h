@@ -10,10 +10,7 @@ Create Date: 2014-03-14 23:29:48.634081
 revision = '2246cd7f5801'
 down_revision = None
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 from alembic import op
 import sqlalchemy as sa

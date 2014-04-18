@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import urlparse
-
 from annotator import auth
 from pyramid.authentication import RemoteUserAuthenticationPolicy
 from pyramid.view import view_config, view_defaults

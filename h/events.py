@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
-__all__ = [
-    'NewRegistrationEvent',
-    'RegistrationActivatedEvent',
-    'PasswordResetEvent',
-    'ProfileUpdatedEvent',
-]
-
 from horus.events import (
     NewRegistrationEvent,
     RegistrationActivatedEvent,
     PasswordResetEvent,
     ProfileUpdatedEvent
 )
+
+__all__ = [
+    'NewRegistrationEvent',
+    'RegistrationActivatedEvent',
+    'PasswordResetEvent',
+    'ProfileUpdatedEvent',
+]
 
 
 class AnnotationEvent(object):

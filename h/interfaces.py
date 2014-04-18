@@ -1,27 +1,4 @@
 # -*- coding: utf-8 -*-
-__all__ = [
-    'IDBSession',
-    'IUIStrings',
-
-    'IUserClass',
-    'IActivationClass',
-    'IAnnotationClass',
-
-    'ILoginForm',
-    'IRegisterForm',
-    'IForgotPasswordForm',
-    'IResetPasswordForm',
-    'IProfileForm',
-
-    'ILoginSchema',
-    'IRegisterSchema',
-    'IForgotPasswordSchema',
-    'IResetPasswordSchema',
-    'IProfileSchema',
-]
-
-from zope.interface import Interface
-
 from hem.interfaces import IDBSession
 
 from horus.interfaces import (
@@ -42,6 +19,29 @@ from horus.interfaces import (
 
     IUIStrings,
 )
+
+from zope.interface import Interface
+
+__all__ = [
+    'IDBSession',
+    'IUIStrings',
+
+    'IUserClass',
+    'IActivationClass',
+    'IAnnotationClass',
+
+    'ILoginForm',
+    'IRegisterForm',
+    'IForgotPasswordForm',
+    'IResetPasswordForm',
+    'IProfileForm',
+
+    'ILoginSchema',
+    'IRegisterSchema',
+    'IForgotPasswordSchema',
+    'IResetPasswordSchema',
+    'IProfileSchema',
+]
 
 
 class IAnnotationClass(Interface):

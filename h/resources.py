@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import logging
+import json
 
 from pyramid.decorator import reify
 from pyramid.interfaces import ILocation
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
 from pyramid import httpexceptions
-
 from zope.interface import implementer
 
 from h import interfaces, security
 
-import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable-msg=C0103
 
 
 @implementer(ILocation)
@@ -26,7 +22,7 @@ class BaseResource(dict):
 
     def __init__(self, request, **kwargs):
         self.request = request
-        self.update(kwargs)
+        super(BaseResource, self).__init__(kwargs)
 
 
 class InnerResource(BaseResource):

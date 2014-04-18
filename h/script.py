@@ -1,21 +1,15 @@
 # -*- coding: utf-8 -*-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 import clik
-
 from pyramid.scripts import pserve
 
 from h import __version__
-
 
 version = __version__
 description = """\
 The Hypothes.is Project Annotation System
 """
-
 
 command = clik.App(
     'hypothesis',
@@ -69,7 +63,7 @@ def extension(args, console):
         console.error('You must supply a url to the hosted backend.')
         return 2
 
-    from codecs import open
+    import codecs
     from os import makedirs, mkdir, walk
     from os.path import abspath, exists, join
     from shutil import copyfile, rmtree
@@ -89,7 +83,7 @@ def extension(args, console):
     resolve = AssetResolver().resolve
 
     def merge(src, dst):
-        for src_dir, dirs, files in walk(src):
+        for src_dir, _, files in walk(src):
             dst_dir = src_dir.replace(src, dst)
             if not exists(dst_dir):
                 mkdir(dst_dir)
@@ -132,7 +126,7 @@ def extension(args, console):
         )
 
         app_html_file = join(asset_env.directory, 'app.html')
-        with open(app_html_file, 'w', 'utf-8-sig') as f:
+        with codecs.open(app_html_file, 'w', 'utf-8-sig') as f:
             f.write(app_page)
 
     def chrome(env):
@@ -205,7 +199,7 @@ def extension(args, console):
         )
 
         embed_js_file = join(asset_env.directory, 'js/embed.js')
-        with open(embed_js_file, 'w', 'utf-8-sig') as f:
+        with codecs.open(embed_js_file, 'w', 'utf-8-sig') as f:
             f.write(embed)
 
         # Chrome is strict about the format of the version string
@@ -216,7 +210,7 @@ def extension(args, console):
         manifest = manifest_renderer(src=asset_url, version=ext_version)
 
         manifest_json_file = join('./build/chrome', 'manifest.json')
-        with open(manifest_json_file, 'w', 'utf-8-sig') as f:
+        with codecs.open(manifest_json_file, 'w', 'utf-8-sig') as f:
             f.write(manifest)
 
         # Due to Content Security Policy, the web font script cannot be inline.
