@@ -61,6 +61,9 @@ setup(
         'Programming Language :: Python'
     ],
 
+    package_data={
+        'h': ['assets.yaml', 'development.ini', 'production.ini'],
+    },
     include_package_data=True,
     zip_safe=False,
 
