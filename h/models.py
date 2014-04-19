@@ -266,7 +266,7 @@ class UserGroup(UserGroupMixin, Base):
     pass
 
 
-class UserSubscriptionsMixin(object):
+class UserSubscriptionsMixin(BaseModel):
     @declared_attr
     def username(self):
         return sa.Column(
