@@ -10,7 +10,7 @@ from zope.interface import implementer
 
 from h import interfaces, security
 
-log = logging.getLogger(__name__)  # pylint: disable-msg=C0103
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 @implementer(ILocation)

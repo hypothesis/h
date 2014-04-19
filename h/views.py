@@ -20,7 +20,7 @@ from h.models import _
 from h.streamer import url_values_from_document
 from h.events import LoginEvent
 
-log = logging.getLogger(__name__)  # pylint: disable-msg=C0103
+log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 class BaseController(horus.views.BaseController):
