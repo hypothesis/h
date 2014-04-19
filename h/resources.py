@@ -86,7 +86,6 @@ class TagStreamFactory(BaseResource):
 
 
 class RootFactory(Stream, InnerResource):
-    @property
     def __acl__(self):
         defaultlist = [
             (Allow, 'group:admin', ALL_PERMISSIONS),
@@ -148,7 +147,6 @@ class RootFactory(Stream, InnerResource):
 
 
 class Annotation(BaseResource, dict):
-    @property
     def __acl__(self):
         acl = []
         # Convert annotator-store roles to pyramid principals
