@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=too-many-public-methods
 from hem.interfaces import IDBSession
 
 from horus.interfaces import (
