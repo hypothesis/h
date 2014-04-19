@@ -13,7 +13,7 @@ from pyramid.events import subscriber
 from pyramid_sockjs.session import Session
 import transaction
 
-from h import events, interfaces, models
+from h import events, interfaces
 
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -201,38 +201,34 @@ class FilterToElasticFilter(object):
         new_clauses = []
         for clause in clauses:
             field = clause['field'][1:].replace('/', '.')
-            if not clause['case_sensitive']:
+            if clause.get('case_sensitive', True):
+                value = clause['value']
+            else:
                 if type(clause['value']) is list:
                     value = [x.lower() for x in clause['value']]
-                    # XXX: Hack for username, to be able to search for case insensitive
-                    # without changing the ES index (currently: not analyzed)
-                    if field == 'user':
-                        res = []
-                        for val in value:
-                            username = re.search("^acct:([^@]+)", val).group(1)
-                            host = re.search("[^@]+$", val).group(0)
-                            userobj = models.User.get_by_username(self.request,
-                                                                  username)
-                            if userobj:
-                                newvalue = 'acct:%s@%s' % (userobj.username,
-                                                           host)
-                            else:
-                                newvalue = val
-                            res.append(newvalue)
-                        value = res
                 else:
-                    value = clause['value'].lower()
-                    # XXX: Hack for username, to be able to search for case insensitive
-                    # without changing the ES index (currently: not analyzed)
-                    if field == 'user':
-                        username = re.search("^acct:([^@]+)", value).group(1)
-                        host = re.search("[^@]+$", value).group(0)
-                        userobj = models.User.get_by_username(self.request,
-                                                              username)
-                        if userobj:
-                            value = 'acct:' + userobj.username + '@' + host
-            else:
-                value = clause['value']
+                    # Make it a list, just be change it back later.
+                    value = [clause['value'].lower()]
+
+                # XXX: Hack for case insensitive username search without
+                # changing the ES index (currently: not analyzed)
+                if field == 'user':
+                    registry = self.request.registry
+                    User = registry.queryUtility(interfaces.IUserClass)
+                    res = []
+                    for val in value:
+                        username = re.search(r'^acct:([^@]+)', val).group(1)
+                        host = re.search(r'[^@]+$', val).group(0)
+                        user = User.get_by_username(self.request, username)
+                        if user is not None:
+                            newvalue = 'acct:%s@%s' % (user.username, host)
+                        else:
+                            newvalue = val
+                        res.append(newvalue)
+
+                    # Be sure we end up with the same type as we started.
+                    value = res if type(clause['value']) is list else res[0]
+
             if clause["es_query_string"]:
                 # Generate query_string query
                 escaped_value = re.escape(value)
@@ -338,48 +334,49 @@ class FilterHandler(object):
         field_value = resolve_pointer(target, clause['field'], None)
         if field_value is None:
             return False
+
+        if clause.get('case_sensitive', True):
+            cval = clause['value']
+            fval = field_value
         else:
-            if not clause['case_sensitive']:
-                if type(clause['value']) is list:
-                    cval = [x.lower() for x in clause['value']]
-                else:
-                    cval = clause['value'].lower()
+            if type(clause['value']) is list:
+                cval = [x.lower() for x in clause['value']]
+            else:
+                cval = clause['value'].lower()  # pylint: disable=E1103
+
+            if type(field_value) is list:
+                fval = [x.lower() for x in field_value]
+            else:
+                fval = field_value.lower()  # pylint: disable=E1103
+
+        reversed_order = False
+        # Determining operator order
+        # Normal order: field_value, clause['value']
+        # i.e. condition created > 2000.01.01
+        # Here clause['value'] = '2001.01.01'.
+        # The field_value is target['created']
+        # So the natural order is: ge(field_value, clause['value']
+
+        # But!
+        # Reversed operator order for contains (b in a)
+        if type(cval) is list or type(fval) is list:
+            if clause['operator'] in ['one_of', 'matches']:
+                reversed_order = True
+                # But not in every case. (i.e. tags matches 'b')
+                # Here field_value is a list, because an annotation can
+                # have many tags.
                 if type(field_value) is list:
-                    fval = [x.lower() for x in field_value]
-                else:
-                    fval = field_value.lower()
-            else:
-                cval = clause['value']
-                fval = field_value
+                    reversed_order = False
 
-            reversed_order = False
-            # Determining operator order
-            # Normal order: field_value, clause['value']
-            # i.e. condition created > 2000.01.01
-            # Here clause['value'] = '2001.01.01'.
-            # The field_value is target['created']
-            # So the natural order is: ge(field_value, clause['value']
+        if reversed_order:
+            lval = cval
+            rval = fval
+        else:
+            lval = fval
+            rval = cval
 
-            # But!
-            # Reversed operator order for contains (b in a)
-            if type(cval) is list or type(fval) is list:
-                if clause['operator'] in ['one_of', 'matches']:
-                    reversed_order = True
-                    # But not in every case. (i.e. tags matches 'b')
-                    # Here field_value is a list, because an annotation can
-                    # have many tags.
-                    if type(field_value) is list:
-                        reversed_order = False
-
-            if reversed_order:
-                lval = cval
-                rval = fval
-            else:
-                lval = fval
-                rval = cval
-
-            op = getattr(operator, self.operators[clause['operator']])
-            return op(lval, rval)
+        op = getattr(operator, self.operators[clause['operator']])
+        return op(lval, rval)
 
     # match_policies
     def include_any(self, target):
