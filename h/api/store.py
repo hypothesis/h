@@ -14,10 +14,10 @@ from pyramid.wsgi import wsgiapp2
 
 from h import api, events, interfaces, models
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-class Store(object):  # pylint: disable=R0921
+class Store(object):
     def __init__(self, request):
         self.request = request
 
@@ -183,6 +183,7 @@ def includeme(config):
 
     try:
         with app.test_request_context():
+            # pylint: disable=no-member
             models.Annotation.create_all()
             models.Document.create_all()
     except socket.error:
@@ -192,6 +193,7 @@ def includeme(config):
         )
     except:
         with app.test_request_context():
+            # pylint: disable=no-member
             models.Annotation.update_settings()
             models.Annotation.create_all()
             models.Document.create_all()

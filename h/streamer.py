@@ -15,7 +15,7 @@ import transaction
 
 from h import events, interfaces
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def check_favicon(icon_link, parsed_uri, domain):
@@ -335,6 +335,7 @@ class FilterHandler(object):
         if field_value is None:
             return False
 
+        # pylint: disable=maybe-no-member
         if clause.get('case_sensitive', True):
             cval = clause['value']
             fval = field_value
@@ -342,12 +343,13 @@ class FilterHandler(object):
             if type(clause['value']) is list:
                 cval = [x.lower() for x in clause['value']]
             else:
-                cval = clause['value'].lower()  # pylint: disable=E1103
+                cval = clause['value'].lower()
 
             if type(field_value) is list:
                 fval = [x.lower() for x in field_value]
             else:
-                fval = field_value.lower()  # pylint: disable=E1103
+                fval = field_value.lower()
+        # pylint: enable=maybe-no-member
 
         reversed_order = False
         # Determining operator order

@@ -14,7 +14,7 @@ from h import events, models
 from h.interfaces import IStoreClass
 from h.streamer import FilterHandler, parent_values
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def user_profile_url(request, user):

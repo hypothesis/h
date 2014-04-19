@@ -20,10 +20,12 @@ from h.models import _
 from h.streamer import url_values_from_document
 from h.events import LoginEvent
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class BaseController(horus.views.BaseController):
+    # pylint: disable=too-few-public-methods
+
     def __init__(self, request):
         super(BaseController, self).__init__(request)
         getUtility = request.registry.getUtility

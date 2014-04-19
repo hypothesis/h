@@ -10,7 +10,7 @@ from zope.interface import implementer
 
 from h import interfaces, security
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 @implementer(ILocation)
@@ -86,7 +86,7 @@ class TagStreamFactory(BaseResource):
 
 
 class RootFactory(Stream, InnerResource):
-    def __acl__(self):
+    def __acl__(self):  # pylint: disable=no-self-use
         defaultlist = [
             (Allow, 'group:admin', ALL_PERMISSIONS),
             (Allow, Authenticated, 'view'),

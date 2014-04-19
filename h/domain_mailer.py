@@ -15,7 +15,7 @@ from h.notifier import (
     standalone_url,
 )
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class DocumentOwnerTemplate(NotificationTemplate):

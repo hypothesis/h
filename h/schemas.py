@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=no-init, too-few-public-methods
 import colander
 import deform
 from horus.schemas import ForgotPasswordSchema, unique_email
@@ -27,7 +28,7 @@ class CSRFSchema(colander.Schema):
 
     csrf_token = colander.SchemaNode(colander.String(), missing=None)
 
-    def validator(self, form, value):
+    def validator(self, form, value):  # pylint: disable=R0201
         request = form.bindings['request']
         check_csrf_token(request)
 

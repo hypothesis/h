@@ -8,6 +8,8 @@ from h import interfaces, views
 
 @view_defaults(renderer='string', route_name='token')
 class TokenController(views.BaseController):
+    # pylint: disable=too-few-public-methods
+
     @view_config(request_method="GET")
     def __call__(self):
         request = self.request

@@ -37,7 +37,7 @@ class JSONEncodedDict(TypeDecorator):
         JSONEncodedDict(255)
 
     """
-
+    # pylint: disable=too-many-public-methods
     impl = VARCHAR
 
     def process_bind_param(self, value, dialect):
@@ -62,6 +62,7 @@ class GUID(TypeDecorator):
     CHAR(32), storing as stringified hex values.
 
     """
+    # pylint: disable=too-many-public-methods
     impl = CHAR
 
     def load_dialect_impl(self, dialect):
@@ -181,6 +182,7 @@ class Annotation(annotation.Annotation):
 
     @classmethod
     def update_settings(cls):
+        # pylint: disable=no-member
         cls.es.conn.indices.close(index=cls.es.index)
         try:
             cls.es.conn.indices.put_settings(
@@ -234,6 +236,8 @@ class Group(GroupMixin, Base):
 
 
 class User(UserMixin, Base):
+    # pylint: disable=too-many-public-methods
+
     @declared_attr
     def subscriptions(self):
         return sa.Column(sa.BOOLEAN, nullable=False, default=False)
@@ -267,6 +271,8 @@ class UserGroup(UserGroupMixin, Base):
 
 
 class UserSubscriptionsMixin(BaseModel):
+    # pylint: disable=no-self-use
+
     @declared_attr
     def username(self):
         return sa.Column(

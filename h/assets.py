@@ -5,10 +5,12 @@ import re
 import pyramid
 from webassets.loaders import YAMLLoader
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class WebassetsResourceRegistry(object):
+    # pylint: disable=too-few-public-methods
+
     def __init__(self, env):
         self.env = env
 
@@ -33,6 +35,8 @@ class WebassetsResourceRegistry(object):
 
 
 class AssetRequest(object):
+    # pylint: disable=too-few-public-methods
+
     def __init__(self, val, config):
         self.env = config.get_webassets_env()
         self.val = val

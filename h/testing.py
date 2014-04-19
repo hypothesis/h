@@ -4,7 +4,7 @@ import logging
 from pyramid_mailer.interfaces import IMailer
 from pyramid_mailer.testing import DummyMailer
 
-log = logging.getLogger(__name__)  # pylint: disable=C0103
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class LoggingMailer(DummyMailer):

@@ -15,6 +15,8 @@ __all__ = [
 
 
 class AnnotationEvent(object):
+    # pylint: disable=too-few-public-methods
+
     def __init__(self, request, annotation, action):
         self.request = request
         self.annotation = annotation
@@ -22,6 +24,8 @@ class AnnotationEvent(object):
 
 
 class LoginEvent(object):
+    # pylint: disable=too-few-public-methods
+
     def __init__(self, request, user):
         self.request = request
         self.user = user
