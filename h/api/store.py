@@ -17,7 +17,7 @@ from h import api, events, interfaces, models
 log = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
-class Store(object):
+class Store(object):  # pylint: disable=R0921
     def __init__(self, request):
         self.request = request
 
