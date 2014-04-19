@@ -1,27 +1,10 @@
 # -*- coding: utf-8 -*-
-import re
-
 import deform
 
 from h import interfaces
 
 
-class FormMeta(type):
-    def __new__(mcs, name, bases, attrs):
-        """Constructs a new Form class."""
-        # Convert to the class name to a form id.
-        # Names like 'CamelCaseNameForm' will become 'camel-case-name'.
-        formid = name.replace('Form', '')
-        formid = (
-            formid[0].lower() +
-            re.sub(r'([A-Z])', lambda m: "-" + m.group(0).lower(), formid[1:])
-        )
-        attrs.setdefault('formid', formid)
-        return type.__new__(mcs, name, bases, attrs)
-
-
 class Deform(deform.Form):
-    __metaclass__ = FormMeta
     buttons = (deform.Button('submit'),)
 
     def __init__(self, schema, **kwargs):
