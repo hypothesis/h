@@ -157,7 +157,7 @@ class FilterToElasticFilter(object):
         if len(self.filter_scripts_to_add):
             if not 'filter' in self.query:
                 self.query['filter'] = {}
-            scripts = self.filter_scripts_to_add.join(" AND ")
+            scripts = ' AND '.join(self.filter_scripts_to_add)
             self.query['filter']['script'] = '"script": ' + scripts
 
     @staticmethod
