@@ -94,7 +94,6 @@ class RootFactory(Stream, InnerResource):
         ]
         return defaultlist
 
-
     @property
     def embed(self):
         env = {
