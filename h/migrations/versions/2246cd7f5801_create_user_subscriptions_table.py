@@ -39,6 +39,9 @@ class JSONEncodedDict(TypeDecorator):
             value = json.loads(value)
         return value
 
+    def python_type(self):
+        return dict
+
 
 template_enum = sa.Enum('reply_notification', 'custom_search',
                         name="subscription_template")

@@ -51,6 +51,9 @@ class JSONEncodedDict(TypeDecorator):
             value = json.loads(value)
         return value
 
+    def python_type(self):
+        return dict
+
 
 class GUID(TypeDecorator):
     """Platform-independent GUID type.
