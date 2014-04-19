@@ -40,7 +40,8 @@ class AuthTokenAuthenticationPolicy(RemoteUserAuthenticationPolicy):
     def unauthenticated_userid(self, request):
         token = request.environ.get(self.environ_key)
         try:
-            return auth.decode_token(token, verify=False).get('userId')
+            unsafe = auth.decode_token(token, verify=False) or {}
+            return unsafe.get('userId')
         except auth.TokenInvalid:
             return None
 

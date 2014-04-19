@@ -266,7 +266,7 @@ class UserGroup(UserGroupMixin, Base):
     pass
 
 
-class UserSubscriptions(BaseModel, Base):
+class UserSubscriptionsMixin(object):
     @declared_attr
     def username(self):
         return sa.Column(
@@ -307,6 +307,10 @@ class UserSubscriptions(BaseModel, Base):
     @declared_attr
     def active(self):
         return sa.Column(sa.BOOLEAN, default=True, nullable=False)
+
+
+class UserSubscriptions(UserSubscriptionsMixin, Base):
+    pass
 
 
 def groupfinder(userid, request):

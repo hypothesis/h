@@ -16,7 +16,7 @@ class WebassetsResourceRegistry(object):
         result = {'js': [], 'css': []}
 
         urls = []
-        for name, version in requirements:
+        for name, _ in requirements:
             log.info('name: ' + str(name))
             if name in self.env:
                 bundle = self.env[name]

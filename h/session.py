@@ -9,6 +9,7 @@ from zope.interface import implementer
 def AngularSessionFactoryConfig(**options):
     PyramidBeakerSessionObject = BeakerSessionFactoryConfig(**options)
 
+    @implementer(ISession)
     class PyramidAngularSessionObject(PyramidBeakerSessionObject):
         def __init__(self, request):
             PyramidBeakerSessionObject.__init__(self, request)
@@ -39,7 +40,7 @@ def AngularSessionFactoryConfig(**options):
             self._session().invalidate()
             self.new_csrf_token()
 
-    return implementer(ISession)(PyramidAngularSessionObject)
+    return PyramidAngularSessionObject
 
 
 # Lifted from pyramid_beaker

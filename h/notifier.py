@@ -27,6 +27,9 @@ def standalone_url(request, annotation_id):
 
 
 class NotificationTemplate(object):
+    template = None
+    subject = None
+
     @classmethod
     def render(cls, request, annotation):
         tmap = cls._create_template_map(request, annotation)
@@ -36,12 +39,16 @@ class NotificationTemplate(object):
 
     @staticmethod
     def _create_template_map(request, annotation):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     # Override this for checking
     @staticmethod
     def check_conditions(annotation, data):
         return True
+
+    @staticmethod
+    def get_recipients(request, annotation, data):
+        raise NotImplementedError()
 
     @classmethod
     def generate_notification(cls, request, annotation, data):
@@ -177,11 +184,8 @@ class AnnotationNotifier(object):
 
     def send_notification_to_owner(self, annotation, data, template):
         if template in self.registered_templates:
-            notification = self.registered_templates[template](
-                self.request,
-                annotation,
-                data
-            )
+            generator = self.registered_templates[template]
+            notification = generator(self.request, annotation, data)
             if notification['status']:
                 self._send_annotation(
                     notification['rendered'],

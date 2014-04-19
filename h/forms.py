@@ -7,7 +7,7 @@ from h import interfaces
 
 
 class FormMeta(type):
-    def __new__(cls, name, bases, attrs):
+    def __new__(mcs, name, bases, attrs):
         """Constructs a new Form class."""
         # Convert to the class name to a form id.
         # Names like 'CamelCaseNameForm' will become 'camel-case-name'.
@@ -17,7 +17,7 @@ class FormMeta(type):
             re.sub(r'([A-Z])', lambda m: "-" + m.group(0).lower(), formid[1:])
         )
         attrs.setdefault('formid', formid)
-        return type.__new__(cls, name, bases, attrs)
+        return type.__new__(mcs, name, bases, attrs)
 
 
 class Deform(deform.Form):
