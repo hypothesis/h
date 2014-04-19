@@ -15,7 +15,6 @@ setup(
     packages=find_packages(),
 
     install_requires=[
-        'Beaker>=1.6.4',
         'BeautifulSoup4>=4.2.1',
         'SQLAlchemy>=0.8.0',
         'alembic>=0.6.3',
@@ -29,7 +28,6 @@ setup(
         'pyramid>=1.5',
         'pyramid-basemodel>=0.2',
         'pyramid_deform>=0.2',
-        'pyramid-beaker>=0.8',
         'pyramid_chameleon>=0.1',
         'pyramid-layout>=0.8',
         'pyramid_mailer>=0.13',

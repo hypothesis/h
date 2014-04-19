@@ -257,19 +257,16 @@ class AppController(BaseController):
     def __call__(self):
         request = self.request
 
-        # Ensure we have a token in case this is the first request.
-        # I feel this is a little bit hacky.
+        # Ensure there is a csrf token in the session
         request.session.get_csrf_token()
-
-        model = {
-            'token': self.Token,
-            'persona': request.context.persona,
-            'personas': request.context.personas,
-        }
 
         return {
             'flash': self.pop_flash(),
-            'model': model,
+            'model': {
+                'token': self.Token,
+                'persona': request.context.persona,
+                'personas': request.context.personas,
+            },
         }
 
     @view_config(http_cache=0)
@@ -283,7 +280,6 @@ class AppController(BaseController):
     )
     def __html__(self):
         request = self.request
-        request.session.new_csrf_token()
         return {
             'service_url': request.route_url('api', subpath=''),
             'token_url': request.route_url('token'),

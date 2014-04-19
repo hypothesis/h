@@ -22,7 +22,6 @@ def includeme(config):
     config.include('h.layouts')
     config.include('h.panels')
     config.include('h.resources')
-    config.include('h.session')
     config.include('h.subscribers')
     config.include('h.views')
     config.include('h.streamer')
@@ -33,10 +32,13 @@ def includeme(config):
 def create_app(settings):
     import os
     import urlparse
+    import uuid
 
     from pyramid.config import Configurator
+    from pyramid.interfaces import ISessionFactory
     from pyramid.path import AssetResolver
     from pyramid.response import FileResponse
+    from pyramid.session import SignedCookieSessionFactory
 
     if 'DATABASE_URL' in os.environ:
         urlparse.uses_netloc.append("postgres")
@@ -65,6 +67,12 @@ def create_app(settings):
 
     # Include all the pyramid subcomponents
     config.include(includeme)
+
+    # Register a default session factory if there is still none registered
+    if config.registry.queryUtility(ISessionFactory) is None:
+        random_secret = uuid.uuid4().hex + uuid.uuid4().hex
+        session_factory = SignedCookieSessionFactory(random_secret)
+        config.set_session_factory(session_factory)
 
     return config.make_wsgi_app()
 
