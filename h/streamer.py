@@ -269,7 +269,7 @@ class FilterToElasticFilter(object):
     def exclude_any(self, target, clauses):
         self._policy('must_not', target, clauses)
 
-    def exclude_any(self, target, clauses):
+    def exclude_all(self, target, clauses):
         target['must_not'] = {"bool": {}}
         self._policy('must', target['must_not']['bool'], clauses)
 
