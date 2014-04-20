@@ -7,7 +7,14 @@ from h import events
 
 
 @subscriber(events.BeforeRender)
-def add_render_view_global(event):
+def add_renderer_globals(event):
+    request = event['request']
+
+    # Set the base url to use in the <base> tag
+    if hasattr(request, 'root'):
+        event['base_url'] = request.resource_url(request.root, 'app')
+
+    # Set the blocks property to refer to the block helpers template
     event['blocks'] = get_renderer('templates/blocks.pt').implementation()
 
 

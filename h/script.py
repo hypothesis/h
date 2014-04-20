@@ -109,19 +109,17 @@ def extension(args, console):
         api_url = api_url or urljoin(request.host_url, '/api/')
 
         app_layout = layouts.SidebarLayout(context, request)
+        app_layout.csp = ''
+
         app_page = render(
             'h:templates/app.pt',
             {
                 'base_url': base_url,
-                'layout': {
-                    'css_links': app_layout.css_links,
-                    'js_links': app_layout.js_links,
-                    'csp': '',
-                },
+                'layout': app_layout,
                 'main_template': base_template,
-                'request': request,
                 'service_url': api_url,
-            }
+            },
+            request=request,
         )
 
         app_html_file = join(asset_env.directory, 'app.html')
