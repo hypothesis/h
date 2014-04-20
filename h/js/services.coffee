@@ -10,8 +10,6 @@ class Hypothesis extends Annotator
     noDocAccess: true
     Discovery: {}
     Permissions:
-      permissions:
-        read: ['group:__world__']
       userAuthorize: (action, annotation, user) ->
         if annotation.permissions
           tokens = annotation.permissions[action] || []
