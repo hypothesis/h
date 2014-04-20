@@ -180,7 +180,8 @@ class Annotation(BaseResource, dict):
 
     def _nestlist(self, annotations, childTable):
         outlist = []
-        if annotations is None: return outlist
+        if annotations is None:
+            return outlist
 
         annotations = sorted(
             annotations,
