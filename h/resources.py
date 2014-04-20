@@ -198,7 +198,8 @@ class Annotation(BaseResource, dict):
 
     @property
     def quote(self):
-        if not 'target' in self: return ''
+        if 'target' not in self:
+            return ''
         quote = ''
         for target in self['target']:
             for selector in target['selector']:
