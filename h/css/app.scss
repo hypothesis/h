@@ -82,12 +82,67 @@ ol {
   }
 }
 
+
+.sheet {
+  @include smallshadow;
+  font-family: $sansFontFamily;
+  max-height: 480px;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+
+  .close {
+    position: absolute;
+    font-size: 14px;
+    right: 7px;
+    top: 7px;
+  }
+
+  &.collapsed {
+    max-height: 0;
+  }
+
+  footer {
+    font-size: .8em;
+    font-family: $sansFontFamily;
+    text-align: right;
+  }
+
+  input:not([type="submit"]) { width: 100%; }
+}
+
+
 .user {
-    font-weight: bold;
-    font-size: 1.1em;
+  font-weight: bold;
+  font-size: 1.1em;
+  &:hover {
+    color: $linkColorHover;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}
+
+
+.user-picker {
+  .avatar {
+    border-radius: 2px;
+  }
+
+  .dropdown-toggle {
+    .provider {
+      color: $grayLight;
+      display: none;
+    }
     &:hover {
-      color: $linkColorHover;
-      cursor: pointer;
-      text-decoration: underline;
+      .provider {
+        display: inline;
+      }
     }
   }
+
+  .dropdown.open .provider {
+    display: inline;
+  }
+}
