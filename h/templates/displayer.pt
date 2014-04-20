@@ -4,7 +4,6 @@
     <title>Hypothes.is</title>
     <script type="text/javascript">
         document.init_annotation = ${annotation};
-        document.init_path = "${request.resource_path(request.context)}";
     </script>
   </head>
   <body metal:fill-slot="body" tal:omit-tag>
@@ -32,7 +31,7 @@
            ng-hide="full_deleted">
         <div ng-view=""></div>
 
-        <div class="paper yui3-g thread steam-list">
+        <div class="paper yui3-g thread stream-list">
           <div class="yui3-u-1"
                ng-class="(annotation.text || annotation.replies.length || annotation.tags.length) && '' || '' ">
             <div class="excerpt"
