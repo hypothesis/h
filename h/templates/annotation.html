@@ -43,7 +43,9 @@
     </span>
 
     <!-- Timestamp -->
-    <fuzzytime class="small pull-right" ng-model="model.updated"></fuzzytime>
+    <fuzzytime class="small pull-right"
+               ng-hide="editing"
+               ng-model="model.updated"></fuzzytime>
   </header>
 
   <!-- Prompt -->
