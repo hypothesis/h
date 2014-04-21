@@ -512,7 +512,7 @@ class Hypothesis extends Annotator
           unless this.entities[uri]?
             console.log "Loading annotations for: " + uri
             this.entities[uri] = true
-            this.loadAnnotationsFromSearch (angular.extend query, uri: uri)
+            this.loadAnnotationsFromSearch (angular.extend {}, query, uri: uri)
 
     # When the store plugin finishes a request, update the annotation
     # using a monkey-patched update function which updates the threading
