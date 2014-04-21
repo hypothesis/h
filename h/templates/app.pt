@@ -1,14 +1,5 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
-  <head metal:fill-slot="head" tal:omit-tag>
-    <base target="_top"
-          tal:attributes="href base_url"
-          tal:condition="base_url | nothing" />
-    <link rel="service"
-          type="application/annotatorsvc+json"
-          tal:attributes="href service_url"
-          tal:condition="service_url | nothing" />
-  </head>
   <body metal:fill-slot="body" tal:omit-tag>
     <!-- Toolbar -->
     <div class="topbar"
