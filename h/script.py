@@ -117,7 +117,6 @@ def extension(args, console):
                     'css_links': app_layout.css_links,
                     'js_links': app_layout.js_links,
                     'csp': '',
-                    'inline_webfont': False,
                 },
                 'main_template': base_template,
                 'request': request,

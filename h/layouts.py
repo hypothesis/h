@@ -7,7 +7,6 @@ class BaseLayout(object):
     app = None
     controller = None
     csp = None
-    inline_webfont = True
     requirements = (('app', None),)
 
     def __init__(self, context, request):
@@ -38,6 +37,10 @@ class BaseLayout(object):
     @property
     def js_links(self):
         return self.get_widget_resources()['js']
+
+    @property
+    def inline_webfont(self):
+        return self.csp is None
 
 
 @layout_config(name='annotation', template='h:templates/base.pt')

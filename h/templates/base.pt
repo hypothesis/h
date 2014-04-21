@@ -15,7 +15,8 @@
             tal:condition="layout.inline_webfont"
             tal:content="structure webfont()"
             tal:define="webfont load: webfont.js"></script>
-    <script src="webfont.js" tal:condition="not layout.inline_webfont"></script>
+    <script type="text/javascript" defer="defer" src="webfont.js"
+            tal:condition="not layout.inline_webfont"></script>
     <tal:block metal:define-slot="head" />
   </head>
   <body tal:attributes="ng-app layout.app;
