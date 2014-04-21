@@ -279,11 +279,7 @@ class AppController(BaseController):
         renderer='h:templates/app.pt'
     )
     def __html__(self):
-        request = self.request
-        return {
-            'service_url': request.route_url('api', subpath=''),
-            'token_url': request.route_url('token'),
-        }
+        return {}
 
 
 @view_config(

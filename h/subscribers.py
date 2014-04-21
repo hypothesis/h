@@ -14,6 +14,9 @@ def add_renderer_globals(event):
     if hasattr(request, 'root'):
         event['base_url'] = request.resource_url(request.root, 'app')
 
+    # Set the service url to use for API discovery
+    event['service_url'] = request.route_url('api', subpath='')
+
     # Set the blocks property to refer to the block helpers template
     event['blocks'] = get_renderer('templates/blocks.pt').implementation()
 
