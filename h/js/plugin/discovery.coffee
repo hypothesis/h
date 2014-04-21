@@ -11,7 +11,7 @@ class Annotator.Plugin.Discovery extends Annotator.Plugin
     return unless svc.length
 
     href = svc[0].href
-    
+
     $.getJSON href, (data) =>
       return unless data?.links?
 

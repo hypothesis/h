@@ -847,6 +847,7 @@ class ViewFilter
 
     results
 
+
 angular.module('h.services', ['ngResource', 'h.filters'])
   .provider('authentication', AuthenticationProvider)
   .provider('drafts', DraftProvider)
