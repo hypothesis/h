@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 import re
+import sys
+
+# XXX: Hack to ensure that submodule is patched when running under gevent.
+# Remove this once h.script is updated to use gunicorn instead of pserve.
+# Issue #1162
+if 'gevent' in sys.modules:
+    import gevent.subprocess
+    sys.modules['subprocess'] = gevent.subprocess
 
 import pyramid
 from webassets.loaders import YAMLLoader
