@@ -39,8 +39,8 @@ Add the tools' path to the $PATH variable:
     echo "export PATH=/usr/local/share/python:/usr/local/share/npm/bin:\$PATH" >> ~/.profile
     source ~/.profile
 
-Install Elasticsearch (Optional)
---------------------------------
+Install Elasticsearch
+---------------------
 
 `Elasticsearch
 <http://www.elasticsearch.org/>`_ is required in order to store annotations 

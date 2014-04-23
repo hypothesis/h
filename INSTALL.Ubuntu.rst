@@ -36,8 +36,8 @@ The quickest way to install elastisearch is to simply install the deb package:
 
 .. code-block:: bash
 
-    wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.5.deb
-    sudo dpkg -i elasticsearch-0.20.5.deb
+    wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.1.1.deb
+    sudo dpkg -i elasticsearch-1.1.1.deb
 
 After installing the above, continue along in the INSTALL.rst
 
