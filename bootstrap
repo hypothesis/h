@@ -58,26 +58,39 @@ echo "Checking dependencies (may be a few minutes for first run)..."
 pip install --use-wheel -qr requirements.txt
 
 echo -n "Checking for Compass..."
-command -v compass || echo "...not found!"
+command -v compass || {
+	echo "...not found!"
+	echo "Please install Compass."
+	echo "See INSTALL.rst for details."
+	echo
+	exit 1
+}
 
 echo -n "Checking for CoffeeScript..."
-command -v coffee || echo "...not found!"
-
+command -v coffee || {
+	echo "...not found!"
+	echo
+	echo "Please install CoffeeScript."
+	echo "See INSTALL.rst for details."
+	echo
+	exit 1
+}
 
 echo -n "Checking for CleanCSS..."
 command -v cleancss || {
 	echo "...not found!"
 	echo
-	echo "CleanCSS was not found. You MUST run in debug mode."
-	echo "The development configuration does this."
-	echo
+	echo "CleanCSS was not found, but that's okay!"
+	echo "You will not be able to minify the CSS for production."
+	echo "The local development server should work, though."
 }
 
 echo -n "Checking for UglifyJS..."
 command -v uglifyjs || {
 	echo "...not found!"
 	echo
-	echo "UglifyJS was not found. You MUST run in debug mode."
-	echo "The development configuration does this."
+	echo "UglifyJS was not found, but that's okay!"
+	echo "You will not be able to minify the JS for production."
+	echo "The local development server should work, though."
 	echo
 }
