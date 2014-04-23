@@ -83,6 +83,7 @@ command -v cleancss || {
 	echo "CleanCSS was not found, but that's okay!"
 	echo "You will not be able to minify the CSS for production."
 	echo "The local development server should work, though."
+	echo
 }
 
 echo -n "Checking for UglifyJS..."
