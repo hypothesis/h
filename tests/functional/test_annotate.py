@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
+import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -15,6 +16,10 @@ class TestAnnotation(SeleniumTestCase):
         driver.get(self.base_url + "/")
 
         self.register()
+
+        # XXX: make sure we don't move too quickly here or it seems that we
+        # sometimes lose our session!! Gross hack.
+        time.sleep(1)
 
         # highlight the first paragraph and click the pen to annotate it
         self.highlight("p")
