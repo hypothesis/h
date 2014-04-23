@@ -143,6 +143,47 @@ def after_request(response):
     return response
 
 
+def store_from_settings(settings):
+    app = flask.Flask('annotator')  # Create the annotator-store app
+    app.register_blueprint(store.store)  # and register the store api.
+
+    if 'ELASTICSEARCH_PORT' in os.environ:
+        app.config['ELASTICSEARCH_HOST'] = 'http%s' % (
+            os.environ['ELASTICSEARCH_PORT'][3:],
+        )
+    elif 'es.host' in settings:
+        app.config['ELASTICSEARCH_HOST'] = settings['es.host']
+
+    if 'es.index' in settings:
+        app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
+
+    if 'es.compatibility' in settings:
+        compat = settings['es.compatibility']
+        app.config['ELASTICSEARCH_COMPATIBILITY_MODE'] = compat
+
+    es.init_app(app)
+    return app
+
+
+def create_db(app):
+    try:
+        with app.test_request_context():
+            # pylint: disable=no-member
+            models.Annotation.create_all()
+            models.Document.create_all()
+    except elasticsearch.exceptions.ConnectionError:
+        raise Exception(
+            "Can not access ElasticSearch at %s! Are you sure it's running?" %
+            (app.config["ELASTICSEARCH_HOST"],)
+        )
+    except:
+        with app.test_request_context():
+            # pylint: disable=no-member
+            models.Annotation.update_settings()
+            models.Annotation.create_all()
+            models.Document.create_all()
+
+
 def includeme(config):
     """Include the annotator-store API backend via http or route embedding.
 
@@ -160,43 +201,7 @@ def includeme(config):
 
     The default is to embed the store as a route bound to "/api".
     """
-
-    app = flask.Flask('annotator')  # Create the annotator-store app
-    app.register_blueprint(store.store)  # and register the store api.
-    settings = config.get_settings()
-
-    if 'ELASTICSEARCH_PORT' in os.environ:
-        app.config['ELASTICSEARCH_HOST'] = 'http%s' % (
-            os.environ['ELASTICSEARCH_PORT'][3:],
-        )
-    elif 'es.host' in settings:
-        app.config['ELASTICSEARCH_HOST'] = settings['es.host']
-
-    if 'es.index' in settings:
-        app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
-
-    if 'es.compatibility' in settings:
-        compat = settings['es.compatibility']
-        app.config['ELASTICSEARCH_COMPATIBILITY_MODE'] = compat
-
-    es.init_app(app)
-
-    try:
-        with app.test_request_context():
-            # pylint: disable=no-member
-            models.Annotation.create_all()
-            models.Document.create_all()
-    except elasticsearch.exceptions.ConnectionError:
-        raise Exception(
-            "Can not access ElasticSearch at %s! Are you sure it's running?" %
-            (app.config["ELASTICSEARCH_HOST"],)
-        )
-    except:
-        with app.test_request_context():
-            # pylint: disable=no-member
-            models.Annotation.update_settings()
-            models.Annotation.create_all()
-            models.Document.create_all()
+    app = store_from_settings(config.registry.settings)
 
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True

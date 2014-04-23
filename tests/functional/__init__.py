@@ -27,6 +27,7 @@ from paste.deploy.loadwsgi import appconfig
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 
+from h.api import store
 from h.models import Base, User
 
 
@@ -71,6 +72,8 @@ class SeleniumTestCase(unittest.TestCase):
         Base.metadata.bind = self.connection
         Base.metadata.create_all(self.engine)
 
+        # Create the database.
+        # store.create_db(store.store_from_settings(settings))
         self._wipe()
 
     def tearDown(self):
