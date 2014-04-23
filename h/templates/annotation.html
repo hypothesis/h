@@ -44,7 +44,7 @@
 
     <!-- Timestamp -->
     <fuzzytime class="small pull-right"
-               ng-hide="editing"
+               ng-show="!editing && model.updated"
                ng-model="model.updated"></fuzzytime>
   </header>
 

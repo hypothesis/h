@@ -27,22 +27,19 @@ class TestAnnotation(SeleniumTestCase):
             body.send_keys("test annotation")
             annotation.find_element_by_css_selector("button").click()
 
+            # Wait for save
+            ts = (By.TAG_NAME, "fuzzytime")
+            saved = expected_conditions.visibility_of_element_located(ts)
+            WebDriverWait(driver, 10).until(saved)
+
         def get_labels(d):
             return d.find_elements_by_css_selector(".heatmap-pointer")
-
-        def wait_for_annotation(d):
-            # make sure the heatmap shows our annotation
-            w = WebDriverWait(d, 30)
-            w.until(lambda d: len(get_labels(d)) == 3)
-
-        wait_for_annotation(driver)
 
         # go away and come back
         driver.get(self.base_url + "/")
 
-        wait_for_annotation(driver)
-
         # the middle heatmap label should have a "1" in it
+        WebDriverWait(driver, 10).until(lambda d: len(get_labels(d)) == 3)
         a_label = get_labels(driver)[1]
         assert a_label.text == "1"
 
