@@ -49,7 +49,7 @@ class TestAnnotation(SeleniumTestCase):
         with Annotator(driver):
             annotation = (By.CLASS_NAME, 'annotation')
             ec = expected_conditions.visibility_of_element_located(annotation)
-            w = WebDriverWait(driver, 10).until(ec)
+            WebDriverWait(driver, 10).until(ec)
             annotation = driver.find_element_by_class_name('annotation')
             user = annotation.find_element_by_class_name('user')
             body = annotation.find_element_by_css_selector('markdown div p')
