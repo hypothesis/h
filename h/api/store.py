@@ -3,9 +3,9 @@ import json
 import logging
 import os
 import re
-import socket
 
 from annotator import auth, store, es
+import elasticsearch
 import flask
 from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
@@ -186,7 +186,7 @@ def includeme(config):
             # pylint: disable=no-member
             models.Annotation.create_all()
             models.Document.create_all()
-    except socket.error:
+    except elasticsearch.exceptions.ConnectionError:
         raise Exception(
             "Can not access ElasticSearch at %s! Are you sure it's running?" %
             (app.config["ELASTICSEARCH_HOST"],)
