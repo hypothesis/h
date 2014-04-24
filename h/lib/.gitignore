@@ -15,3 +15,6 @@ visualsearch.min.*
 Markdown.Converter.min.js
 jquery-ui-smoothness.min.css
 sockjs-client.min.js
+
+dom_text.js
+page_text_mapper_core.js
