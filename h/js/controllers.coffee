@@ -56,6 +56,12 @@ class App
         plugins.Auth.token = newValue
         plugins.Auth.updateHeaders()
 
+      plugins.Permissions.setUser(null)
+      plugins.Permissions.options.permissions =
+        read: []
+        update: []
+        delete: []
+        admin: []
       if newValue?
         if not plugins.Auth?
           annotator.addPlugin 'Auth',
@@ -75,7 +81,6 @@ class App
             $scope.ongoingHighlightSwitch = false
             annotator.setTool 'highlight'
       else
-        plugins.Permissions.setUser(null)
         delete plugins.Auth
 
       if newValue isnt oldValue
