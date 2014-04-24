@@ -251,7 +251,7 @@ class Annotator.Guest extends Annotator
   confirmSelection: ->
     return true unless @selectedTargets.length is 1
 
-    quote = @plugins.TextAnchors.getQuoteForTarget @selectedTargets[0]
+    quote = @getQuoteForTarget @selectedTargets[0]
 
     if quote.length > 2 then return true
 
