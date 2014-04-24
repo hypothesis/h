@@ -156,11 +156,18 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     ## Notifications
     .bind('loadAnnotations', (txn, annotations) =>
       # First, parse the existing ones, for any updates
-      this._parse a for a in annotations when @cache[a.tag]
+      oldOnes = (this._parse a for a in annotations when @cache[a.tag])
+
+      # Announce the changes in old annotations
+      if oldOnes.length
+        @selfPublish = true
+        @annotator.publish 'annotationsLoaded', [oldOnes]
+        delete @selfPublish
+
       # Then collect the new ones
-      annotations = (this._parse a for a in annotations when not @cache[a.tag])
-      if annotations.length
-        @annotator.loadAnnotations annotations
+      newOnes = (this._parse a for a in annotations when not @cache[a.tag])
+      if newOnes.length
+        @annotator.loadAnnotations newOnes
     )
 
     .bind('showEditor', (ctx, annotation) =>
@@ -285,6 +292,11 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     this
 
   annotationsLoaded: (annotations) =>
+    return if @selfPublish
+    unless annotations.length
+      console.log "Useless call to 'annotationsLoaded()' with an empty list"
+      console.trace()
+      return
     this._notify
       method: 'loadAnnotations'
       params: (this._format a for a in annotations)
