@@ -258,7 +258,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     # Construct control points for the heatmap
     points = highlights.reduce (points, hl, i) =>
       d = hl.annotation
-      x = hl.getTop() - wrapper.offset().top - defaultView.pageYOffset
+      x = hl.getTop() - defaultView.pageYOffset
       h = hl.getHeight()
 
       if x <= @BUCKET_SIZE + @BUCKET_THRESHOLD_PAD
