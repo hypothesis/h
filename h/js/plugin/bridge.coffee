@@ -204,6 +204,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
           if error isnt 'timeout_error'
             console.log 'Error in call! Reason: ' + reason
             console.log error
+            console.log "Call was:", options
             console.log 'Destroying channel!'
             d.reject error, reason
           else
