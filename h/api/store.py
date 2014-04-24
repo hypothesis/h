@@ -185,6 +185,12 @@ def create_db(app):
             models.Document.create_all()
 
 
+def delete_db(app):
+    with app.test_request_context():
+        models.Annotation.drop_all()
+        models.Document.drop_all()
+
+
 def includeme(config):
     """Include the annotator-store API backend via http or route embedding.
 
@@ -206,6 +212,12 @@ def includeme(config):
 
     # Configure the annotator-store flask app
     app = store_from_settings(settings)
+
+    # Maybe initialize the models
+    if asbool(settings.get('basemodel.should_drop_all', False)):
+        delete_db(app)
+    if asbool(settings.get('basemodel.should_create_all', True)):
+        create_db(app)
 
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True
