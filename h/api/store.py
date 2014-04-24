@@ -9,6 +9,7 @@ import elasticsearch
 import flask
 from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
+from pyramid.settings import asbool
 from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
@@ -201,7 +202,10 @@ def includeme(config):
 
     The default is to embed the store as a route bound to "/api".
     """
-    app = store_from_settings(config.registry.settings)
+    settings = config.registry.settings
+
+    # Configure the annotator-store flask app
+    app = store_from_settings(settings)
 
     # Configure authentication and authorization
     app.config['AUTHZ_ON'] = True
@@ -209,8 +213,8 @@ def includeme(config):
     app.after_request(after_request)
 
     # Configure the API routes
-    api_endpoint = config.registry.settings.get('api.endpoint', None)
-    api_url = config.registry.settings.get('api.url', api_endpoint)
+    api_endpoint = settings.get('api.endpoint', None)
+    api_url = settings.get('api.url', api_endpoint)
 
     if api_endpoint is not None:
         api_path = api_endpoint.rstrip('/')
