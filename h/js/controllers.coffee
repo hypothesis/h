@@ -57,6 +57,10 @@ class App
         plugins.Auth.updateHeaders()
 
       plugins.Permissions.setUser(null)
+      # XXX: Temporary workaround until the fixed version upstream annotator is consumed
+      # The problem is that the permissions plugin, when setting the annotation.permissions property
+      # does not copy its options.permissions object, so modifying the annotation.permissions object
+      # modifes the plugin's options.permissions object too. After that this can be removed.
       plugins.Permissions.options.permissions =
         read: []
         update: []
