@@ -7,33 +7,17 @@ clean:
 
 test: elasticsearch functional_test unit_test
 
-functional_test: 
+functional_test:
 ifneq ($(TRAVIS_SECURE_ENV_VARS),false)
 	@echo "running functional tests"
-
-	# stop the test daemon if it is running
-	hypothesis serve --stop-daemon --pid-file=test.pid
-
-	# start with clean test db
-	rm -f test.db
-
 	# ensure the assets are built
 	hypothesis assets test.ini
-
-	# start the test instance of h
-	hypothesis serve --daemon --pid-file=test.pid test.ini
-
 	# run the functional tests
 	py.test tests/functional/
-
-	# stop h
-	hypothesis serve --stop-daemon --pid-file=test.pid
 endif
 
-unit_test: 
+unit_test:
 	@echo "running unit tests"
-
-	rm -f test.db
 	py.test tests/unit
 
 elasticsearch:

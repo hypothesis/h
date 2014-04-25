@@ -19,29 +19,29 @@ API.
 import os
 import unittest
 
+from pyramid import authorization, paster
+from pyramid.testing import testConfig
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
-from paste.deploy.loadwsgi import appconfig
-from sqlalchemy import engine_from_config
-from sqlalchemy.orm import sessionmaker
-
-from h.api import store
-from h.models import Base, User
-
-
-settings = appconfig('config:test.ini', relative_to='.')
 
 
 class SeleniumTestCase(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.engine = engine_from_config(settings)
-        cls.Session = sessionmaker(autoflush=False, autocommit=True)
-
     def setUp(self):
+        paster.setup_logging('test.ini')
+        self.settings = paster.get_appsettings('test.ini')
+        self.settings.update({
+            'basemodel.should_create_all': True,
+            'basemodel.should_drop_all': True,
+        })
+
+        with testConfig(settings=self.settings) as config:
+            authz = authorization.ACLAuthorizationPolicy()
+            config.set_authorization_policy(authz)
+            config.include('h.models')
+            config.include('h.api.store')
+
         self.base_url = "http://localhost:4000"
         env = os.environ
 
@@ -56,8 +56,13 @@ class SeleniumTestCase(unittest.TestCase):
             caps['tunnel-identifier'] = env['TRAVIS_JOB_NUMBER']
 
             hub_url = 'http://%s:%s@localhost:4445/wd/hub' % (username, key)
-            self.driver = webdriver.Remote(desired_capabilities=caps, command_executor=hub_url)
-            self.sauce_url = "https://saucelabs.com/jobs/%s" % self.driver.session_id
+            self.driver = webdriver.Remote(
+                desired_capabilities=caps,
+                command_executor=hub_url
+            )
+            self.sauce_url = 'https://saucelabs.com/jobs/{0}'.format(
+                self.driver.session_id
+            )
         else:
             self.driver = webdriver.Firefox()
 
@@ -66,37 +71,8 @@ class SeleniumTestCase(unittest.TestCase):
         self.verificationErrors = []
         self.accept_next_alert = True
 
-        # set up a database connection
-        self.connection = self.engine.connect()
-        self.session = self.Session(bind=self.connection)
-        Base.metadata.bind = self.connection
-        Base.metadata.create_all(self.engine)
-
-        # Create the database.
-        # store.create_db(store.store_from_settings(settings))
-        self._wipe()
-
     def tearDown(self):
         self.driver.quit()
-        self._wipe()
-
-    def _wipe(self):
-        self._wipe_users()
-        self._wipe_elasticsearch()
-
-    def _wipe_elasticsearch(self):
-        # TODO: ideally we should be able to use annotator.elasticsearch here
-        es_index = settings['es.index']
-        es_host = settings['es.host']
-        # XXX: delete annotations and documents
-        import requests
-        url = "%s/%s/annotation/_query?q=*:*" % (es_host, es_index)
-        requests.delete(url)
-
-    def _wipe_users(self):
-        for user in self.session.query(User).all():
-            self.session.delete(user)
-        self.session.flush()
 
     def login(self):
         "signs in as test/test@example.org/test"
@@ -164,6 +140,10 @@ class SeleniumTestCase(unittest.TestCase):
             password.send_keys("test")
 
             form.submit()
+
+            picker = (By.CLASS_NAME, 'user-picker')
+            ec = expected_conditions.visibility_of_element_located(picker)
+            WebDriverWait(self.driver, 10).until(ec)
 
     def highlight(self, css_selector):
         """A hack to select some text on the page, and trigger the
