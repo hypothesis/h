@@ -306,6 +306,7 @@ def stream(context, request):
 
 def includeme(config):
     config.include('pyramid_chameleon')
+    config.add_route('help', '/docs/help')
 
     config.add_view(
         'horus.views.AuthController',

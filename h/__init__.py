@@ -68,7 +68,6 @@ def create_app(settings):
         lambda request: FileResponse(favicon.abspath(), request=request),
         route_name='favicon'
     )
-    config.add_route('help', '/docs/help')
 
     config.add_route('ok', '/ruok')
     config.add_view(lambda request: 'imok', renderer='string', route_name='ok')
