@@ -9,6 +9,12 @@ from h import interfaces
 from h.models import _, get_session
 
 
+@colander.deferred
+def deferred_csrf_token(node, kw):
+    request = kw.get('request')
+    return request.session.get_csrf_token()
+
+
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
     req = node.bindings['request']
@@ -26,7 +32,10 @@ class CSRFSchema(colander.Schema):
     serialized appstruct.
     """
 
-    csrf_token = colander.SchemaNode(colander.String(), missing=None)
+    csrf_token = colander.SchemaNode(colander.String(),
+                                     widget=deform.widget.HiddenWidget(),
+                                     default=deferred_csrf_token,
+                                     missing=None)
 
     def validator(self, form, value):  # pylint: disable=R0201
         request = form.bindings['request']
