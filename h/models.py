@@ -27,7 +27,7 @@ from sqlalchemy.types import Integer, TypeDecorator, CHAR, VARCHAR
 from sqlalchemy.ext.declarative import declared_attr
 import transaction
 
-from h import interfaces, lib
+from h import interfaces
 
 _ = TranslationStringFactory(__package__)
 
@@ -439,8 +439,6 @@ def includeme(config):
 
     config.include('pyramid_basemodel')
     config.include('pyramid_tm')
-
-    config.add_request_method(lib.user_property, 'user', property=True)
 
     models = [
         (interfaces.IDBSession, Session),

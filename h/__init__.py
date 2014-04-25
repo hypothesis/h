@@ -13,37 +13,28 @@ from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
 
+from . import lib
+
 
 def includeme(config):
     config.set_root_factory('h.resources.RootFactory')
+    config.add_request_method(lib.user_property, 'user', property=True)
 
-    # Include the base configuration for horus integration
-    config.include('h.forms')
-    config.include('h.schemas')
-    config.include('horus')
-    config.commit()
-
-    # Include authentication, API and models
     config.include('pyramid_multiauth')
+
     config.include('h.api')
-    config.include('h.models')
-    config.commit()
-
-    # Include the rest of the application
-    config.include('h.assets')
-    config.include('h.layouts')
-    config.include('h.panels')
-    config.include('h.subscribers')
-    config.include('h.views')
-    config.include('h.streamer')
-    config.include('h.notifier')
     config.include('h.domain_mailer')
+    config.include('h.models')
+    config.include('h.notifier')
+    config.include('h.streamer')
+    config.include('h.views')
 
-    # Register a default session factory if there is still none registered
-    if config.registry.queryUtility(ISessionFactory) is None:
-        random_secret = uuid.uuid4().hex + uuid.uuid4().hex
-        session_factory = SignedCookieSessionFactory(random_secret)
-        config.set_session_factory(session_factory)
+    config.include('horus')
+
+    for name in ['login', 'logout', 'forgot_password', 'reset_password',
+                 'register', 'activate', 'profile']:
+        config.add_view('horus.views.AuthController', attr=name,
+                        renderer='h:templates/auth.pt', route_name=name)
 
 
 def create_app(settings):
@@ -59,8 +50,14 @@ def create_app(settings):
     config.add_route('ok', '/ruok')
     config.add_view(lambda request: 'imok', renderer='string', route_name='ok')
 
-    # Include all the pyramid subcomponents
     config.include(includeme)
+    config.commit()
+
+    # Register a default session factory if there is still none registered
+    if config.registry.queryUtility(ISessionFactory) is None:
+        random_secret = uuid.uuid4().hex + uuid.uuid4().hex
+        session_factory = SignedCookieSessionFactory(random_secret)
+        config.set_session_factory(session_factory)
 
     return config.make_wsgi_app()
 
