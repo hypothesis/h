@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
+import os
+import urlparse
+import uuid
+
+from pyramid.config import Configurator
+from pyramid.interfaces import ISessionFactory
+from pyramid.path import AssetResolver
+from pyramid.response import FileResponse
+from pyramid.session import SignedCookieSessionFactory
+
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
 
 
 def includeme(config):
-    import uuid
-
-    from pyramid.interfaces import ISessionFactory
-    from pyramid.session import SignedCookieSessionFactory
-
     # Include the base configuration for horus integration
     config.include('h.forms')
     config.include('h.schemas')
@@ -41,25 +46,6 @@ def includeme(config):
 
 
 def create_app(settings):
-    import os
-    import urlparse
-
-    from pyramid.config import Configurator
-    from pyramid.path import AssetResolver
-    from pyramid.response import FileResponse
-
-    if 'DATABASE_URL' in os.environ:
-        urlparse.uses_netloc.append("postgres")
-        urlparse.uses_netloc.append("sqlite")
-        url = urlparse.urlparse(os.environ["DATABASE_URL"])
-        if url.scheme == 'postgres':
-            url.scheme = url.scheme + '+psycopg2'
-        settings['sqlalchemy.url'] = urlparse.urlunparse(url)
-
-    if 'MAIL_PORT' in os.environ:
-        settings['mail.host'] = os.environ['MAIL_PORT_25_TCP_ADDR']
-        settings['mail.port'] = os.environ['MAIL_PORT_25_TCP_PORT']
-
     config = Configurator(settings=settings)
 
     favicon = AssetResolver().resolve('h:favicon.ico')
@@ -79,5 +65,17 @@ def create_app(settings):
 
 
 def main(global_config, **settings):
+    if 'DATABASE_URL' in os.environ:
+        urlparse.uses_netloc.append("postgres")
+        urlparse.uses_netloc.append("sqlite")
+        url = urlparse.urlparse(os.environ["DATABASE_URL"])
+        if url.scheme == 'postgres':
+            url.scheme = url.scheme + '+psycopg2'
+        settings['sqlalchemy.url'] = urlparse.urlunparse(url)
+
+    if 'MAIL_PORT' in os.environ:
+        settings['mail.host'] = os.environ['MAIL_PORT_25_TCP_ADDR']
+        settings['mail.port'] = os.environ['MAIL_PORT_25_TCP_PORT']
+
     settings.update(global_config)
     return create_app(settings)

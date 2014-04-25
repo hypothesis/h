@@ -10,6 +10,7 @@ if 'gevent' in sys.modules:
     import gevent.subprocess
     sys.modules['subprocess'] = gevent.subprocess
 
+from deform.field import Field
 import pyramid
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -77,7 +78,6 @@ def includeme(config):
         asset_request=True
     )
 
-    from deform.field import Field
     resource_registry = WebassetsResourceRegistry(config.get_webassets_env())
     Field.set_default_resource_registry(resource_registry)
     config.registry.resources = resource_registry

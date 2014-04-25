@@ -1,17 +1,29 @@
 # -*- coding: utf-8 -*-
+import codecs
 import json
+from os import makedirs, mkdir, walk
+from os.path import abspath, exists, join
+from shutil import copyfile, rmtree
+from urlparse import urljoin, urlparse, urlunparse, uses_netloc, uses_relative
 
-import clik
+from chameleon.zpt.template import PageTextTemplateFile
+from clik import App
+from pyramid.config import Configurator
+from pyramid.paster import bootstrap
+from pyramid.path import AssetResolver
+from pyramid.renderers import get_renderer, render
+from pyramid.settings import asbool
 from pyramid.scripts import pserve
+from pyramid import paster, scripting
+from h import __version__, api, layouts
 
-from h import __version__
 
 version = __version__
 description = """\
 The Hypothes.is Project Annotation System
 """
 
-command = clik.App(
+command = App(
     'hypothesis',
     version=version,
     description=description,
@@ -22,12 +34,10 @@ command = clik.App(
 @command(usage='CONFIG_FILE')
 def init_db(args):
     """Create the database models."""
-    from h.api import store
-    from pyramid import paster
+    settings = paster.get_appsettings(args[0])
 
-    settings_dict = paster.get_appsettings(args[0])
-    app = store.store_from_settings(settings_dict)
-    store.create_db(app)
+    app = api.store.store_from_settings(settings)
+    api.store.create_db(app)
 
 
 @command(usage='CONFIG_FILE')
@@ -38,10 +48,8 @@ def assets(args, console):
         console.error('You must supply a paste configuration file.')
         return 2
 
-    from pyramid import config, paster, scripting
-
     settings = paster.get_appsettings(args[0])
-    config = config.Configurator(settings=settings)
+    config = Configurator(settings=settings)
     config.include('h.assets')
     scripting.prepare(registry=config.registry)
 
@@ -74,23 +82,6 @@ def extension(args, console):
         console.error('You must supply a url to the hosted backend.')
         return 2
 
-    import codecs
-    from os import makedirs, mkdir, walk
-    from os.path import abspath, exists, join
-    from shutil import copyfile, rmtree
-    from urlparse import (
-        urljoin, urlparse, urlunparse, uses_netloc, uses_relative,
-    )
-
-    from chameleon.zpt.template import PageTextTemplateFile
-    from pyramid.paster import bootstrap
-    from pyramid.path import AssetResolver
-    from pyramid.renderers import get_renderer, render
-    from pyramid.settings import asbool
-    from pyramid_webassets import IWebAssetsEnvironment
-
-    from h import layouts
-
     resolve = AssetResolver().resolve
 
     def merge(src, dst):
@@ -110,10 +101,10 @@ def extension(args, console):
         return url
 
     def app(env, base_url=None):
-        asset_env = env['registry'].queryUtility(IWebAssetsEnvironment)
         request = env['request']
         context = request.context
 
+        assets_env = request.webassets_env
         base_template = get_renderer('h:templates/base.pt').implementation()
 
         api_url = request.registry.settings.get('api.url', None)
@@ -133,14 +124,14 @@ def extension(args, console):
             request=request,
         )
 
-        app_html_file = join(asset_env.directory, 'app.html')
+        app_html_file = join(assets_env.directory, 'app.html')
         with codecs.open(app_html_file, 'w', 'utf-8-sig') as f:
             f.write(app_page)
 
     def chrome(env):
         registry = env['registry']
         request = env['request']
-        asset_env = registry.queryUtility(IWebAssetsEnvironment)
+        asset_env = request.webassets_env
         settings = registry.settings
         develop = asbool(settings.get('webassets.debug', False))
 
