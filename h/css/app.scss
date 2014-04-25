@@ -30,6 +30,17 @@ ol {
   }
 }
 
+.auth {
+  @extend .form-vertical;
+
+  button[name^="forgot"] {
+    @extend .btn-link;
+    float: right;
+  }
+
+  input { width: 100%; }
+}
+
 .bookmarklet {
   @extend .btn;
   padding: .12em;
