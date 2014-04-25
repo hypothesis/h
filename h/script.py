@@ -38,15 +38,15 @@ def assets(args, console):
         console.error('You must supply a paste configuration file.')
         return 2
 
-    from pyramid import paster
-    from pyramid_webassets import IWebAssetsEnvironment
+    from pyramid import config, paster, scripting
 
-    def build(env):
-        asset_env = env['registry'].queryUtility(IWebAssetsEnvironment)
-        for bundle in asset_env:
-            bundle.urls()
+    settings = paster.get_appsettings(args[0])
+    config = config.Configurator(settings=settings)
+    config.include('h.assets')
+    scripting.prepare(registry=config.registry)
 
-    build(paster.bootstrap(args[0]))
+    for bundle in config.get_webassets_env():
+        bundle.urls()
 
 
 @command(usage='CONFIG_FILE APP_URL [STATIC_URL]')
