@@ -18,6 +18,7 @@ command = clik.App(
     opts=pserve.PServeCommand.parser.option_list[1:],
 )
 
+
 @command(usage='CONFIG_FILE')
 def init_db(args):
     """Create the database models."""
