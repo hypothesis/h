@@ -84,7 +84,34 @@ class TagStreamFactory(BaseResource):
         return Stream(self.request, stream_type='tag', stream_key=key)
 
 
+class AnnotationFactory(BaseResource):
+    def __getitem__(self, key):
+        request = self.request
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        data = ''
+
+        try:
+            data = store.read(key)
+        except httpexceptions.HTTPException as e:
+            # We want to add our custom error message for unauthorized errors
+            if e.status_code != 401:
+                raise e
+
+        Annotation = registry.queryUtility(interfaces.IAnnotationClass)
+        annotation = Annotation(data)
+        annotation.__name__ = key
+        annotation.__parent__ = self
+
+        return annotation
+
+
 class RootFactory(Stream, InnerResource):
+    a = AnnotationFactory
+    t = TagStreamFactory
+    u = UserStreamFactory
+    stream = Stream
+
     def __acl__(self):  # pylint: disable=no-self-use
         defaultlist = [
             (Allow, 'group:admin', ALL_PERMISSIONS),
@@ -142,36 +169,3 @@ class RootFactory(Stream, InnerResource):
             name: getattr(self, name)
             for name in ['persona', 'personas']
         }
-
-
-class AnnotationFactory(BaseResource):
-    def __getitem__(self, key):
-        request = self.request
-        registry = request.registry
-        store = registry.queryUtility(interfaces.IStoreClass)(request)
-        data = ''
-
-        try:
-            data = store.read(key)
-        except httpexceptions.HTTPException as e:
-            # We want to add our custom error message for unauthorized errors
-            if e.status_code != 401:
-                raise e
-
-        Annotation = registry.queryUtility(interfaces.IAnnotationClass)
-        annotation = Annotation(data)
-        annotation.__name__ = key
-        annotation.__parent__ = self
-
-        annotation.update(data)
-
-        return annotation
-
-
-def includeme(config):
-    config.set_root_factory(RootFactory)
-    config.add_route('index', '/')
-    RootFactory.a = AnnotationFactory
-    RootFactory.stream = Stream
-    RootFactory.u = UserStreamFactory
-    RootFactory.t = TagStreamFactory

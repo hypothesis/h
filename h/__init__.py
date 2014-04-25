@@ -15,6 +15,8 @@ del get_versions
 
 
 def includeme(config):
+    config.set_root_factory('h.resources.RootFactory')
+
     # Include the base configuration for horus integration
     config.include('h.forms')
     config.include('h.schemas')
@@ -31,7 +33,6 @@ def includeme(config):
     config.include('h.assets')
     config.include('h.layouts')
     config.include('h.panels')
-    config.include('h.resources')
     config.include('h.subscribers')
     config.include('h.views')
     config.include('h.streamer')
