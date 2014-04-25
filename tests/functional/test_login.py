@@ -29,9 +29,9 @@ class TestLogin(SeleniumTestCase):
             # Some bugs were fixed in selenium 2.35 + FF23 combo
             # Unfortunately, that means we need test both options
             try:
-                self.assertEqual(dropdown.text, "test")
+                assert dropdown.text == 'test'
             except AssertionError:
-                self.assertEqual(dropdown.text, "test/localhost")
+                assert dropdown.text == 'test/localhost'
 
 
 if __name__ == "__main__":
