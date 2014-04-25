@@ -209,7 +209,8 @@ def includeme(config):
 
     The default is to embed the store as a route bound to "/api".
     """
-    settings = config.registry.settings
+    registry = config.registry
+    settings = registry.settings
 
     # Configure the annotator-store flask app
     app = store_from_settings(settings)
@@ -226,23 +227,17 @@ def includeme(config):
     app.after_request(after_request)
 
     # Configure the API routes
-    api_endpoint = settings.get('api.endpoint', None)
+    api_endpoint = settings.get('api.endpoint', '/api').rstrip('/')
+    api_pattern = '/'.join([api_endpoint, '*subpath'])
+    config.add_route('api_real', api_pattern)
+
     api_url = settings.get('api.url', api_endpoint)
+    config.add_route('api', api_url + '/*subpath')
 
-    if api_endpoint is not None:
-        api_path = api_endpoint.rstrip('/')
-        api_pattern = '/'.join([api_path, '*subpath'])
+    # Configure the API views -- version 1 is just an annotator.store proxy
+    api_v1 = wsgiapp2(app)
+    config.add_view(api_v1, route_name='api_real')
+    config.add_view(api_v1, name='api_virtual')
 
-        # Configure the API views -- version 1 is just an annotator.store proxy
-        api_v1 = wsgiapp2(app)
-
-        config.add_route('api_real', api_pattern)
-        config.add_view(api_v1, route_name='api_real')
-        config.add_view(api_v1, name='api_virtual')
-
-    if api_url is not None:
-        api_url = api_url.strip('/')
-        config.add_route('api', api_url + '/*subpath')
-
-    if not config.registry.queryUtility(interfaces.IStoreClass):
-        config.registry.registerUtility(Store, interfaces.IStoreClass)
+    if not registry.queryUtility(interfaces.IStoreClass):
+        registry.registerUtility(Store, interfaces.IStoreClass)

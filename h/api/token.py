@@ -66,16 +66,11 @@ def includeme(config):
         [app:h]
         api.token_endpoint: /api/token
     """
+    registry = config.registry
+    settings = registry.settings
 
-    token_endpoint = config.registry.settings.get(
-        'api.token_endpoint',
-        '/api/token'
-    ).strip('/')
-    config.add_route('token', token_endpoint)
-    config.scan(__name__)
-
-    authn_debug = config.registry.settings.get('pyramid.debug_authorization') \
-        or config.registry.settings.get('debug_authorization')
+    authn_debug = settings.get('pyramid.debug_authorization') \
+        or settings.get('debug_authorization')
     authn_policy = AuthTokenAuthenticationPolicy(
         environ_key='HTTP_X_ANNOTATOR_AUTH_TOKEN',
         callback=groupfinder,
@@ -83,8 +78,12 @@ def includeme(config):
     )
     config.set_authentication_policy(authn_policy)
 
-    if not config.registry.queryUtility(interfaces.ITokenClass):
-        config.registry.registerUtility(
+    if not registry.queryUtility(interfaces.ITokenClass):
+        registry.registerUtility(
             TokenController,
             interfaces.ITokenClass
         )
+
+    token_url = settings.get('api.token_endpoint', '/api/token').strip('/')
+    config.add_route('token', token_url)
+    config.scan(__name__)

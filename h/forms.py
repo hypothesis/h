@@ -34,14 +34,17 @@ class ActivateForm(Deform):
 
 
 def includeme(config):
+    registry = config.registry
+
     forms = [
         (interfaces.ILoginForm, LoginForm),
         (interfaces.IRegisterForm, RegisterForm),
         (interfaces.IForgotPasswordForm, ForgotForm),
         (interfaces.IResetPasswordForm, ResetForm),
-        (interfaces.IActivateForm, ActivateForm)
+        (interfaces.IActivateForm, ActivateForm),
+
     ]
 
     for iface, imp in forms:
-        if not config.registry.queryUtility(iface):
-            config.registry.registerUtility(imp, iface)
+        if not registry.queryUtility(iface):
+            registry.registerUtility(imp, iface)

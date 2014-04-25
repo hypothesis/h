@@ -254,6 +254,8 @@ class AnnotationFactory(BaseResource):
 
 
 def includeme(config):
+    registry = config.registry
+
     config.set_root_factory(RootFactory)
     config.add_route('index', '/')
     RootFactory.a = AnnotationFactory
@@ -261,5 +263,5 @@ def includeme(config):
     RootFactory.u = UserStreamFactory
     RootFactory.t = TagStreamFactory
 
-    if not config.registry.queryUtility(interfaces.IAnnotationClass):
-        config.registry.registerUtility(Annotation, interfaces.IAnnotationClass)
+    if not registry.queryUtility(interfaces.IAnnotationClass):
+        registry.registerUtility(Annotation, interfaces.IAnnotationClass)

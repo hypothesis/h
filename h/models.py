@@ -13,6 +13,7 @@ from horus.models import (
     UserMixin,
     UserGroupMixin,
 )
+from horus.strings import UIStringsBase
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.i18n import TranslationStringFactory
 from pyramid_basemodel import Base, Session
@@ -340,32 +341,33 @@ def groupfinder(userid, request):
 
 def includeme(config):
     registry = config.registry
-    config.include('pyramid_basemodel')
-    config.include('pyramid_tm')
+    settings = registry.settings
 
-    authn_debug = config.registry.settings.get('pyramid.debug_authorization') \
-        or config.registry.settings.get('debug_authorizations')
+    authn_debug = settings.get('pyramid.debug_authorization') \
+        or settings.get('debug_authorizations')
     authn_policy = SessionAuthenticationPolicy(
         callback=groupfinder,
         debug=authn_debug
     )
     config.set_authentication_policy(authn_policy)
 
+    config.include('pyramid_basemodel')
+    config.include('pyramid_tm')
+
     config.add_request_method(lib.user_property, 'user', property=True)
 
-    if not registry.queryUtility(interfaces.IDBSession):
-        registry.registerUtility(Session, interfaces.IDBSession)
+    models = [
+        (interfaces.IDBSession, Session),
+        (interfaces.IUserClass, User),
+        (interfaces.IConsumerClass, Consumer),
+        (interfaces.IActivationClass, Activation),
+        (interfaces.IUIStrings, UIStringsBase),
+    ]
 
-    if not registry.queryUtility(interfaces.IUserClass):
-        registry.registerUtility(User, interfaces.IUserClass)
+    for iface, imp in models:
+        if not registry.queryUtility(iface):
+            registry.registerUtility(imp, iface)
 
-    if not registry.queryUtility(interfaces.IConsumerClass):
-        registry.registerUtility(Consumer, interfaces.IConsumerClass)
-
-    if not registry.queryUtility(interfaces.IActivationClass):
-        registry.registerUtility(Activation, interfaces.IActivationClass)
-
-    settings = config.get_settings()
     key = settings['api.key']
     secret = settings.get('api.secret')
     ttl = settings.get('api.ttl', DEFAULT_TTL)

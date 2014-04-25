@@ -100,14 +100,16 @@ class ActivateSchema(CSRFSchema):
 
 
 def includeme(config):
+    registry = config.registry
+
     schemas = [
         (interfaces.ILoginSchema, LoginSchema),
         (interfaces.IRegisterSchema, RegisterSchema),
         (interfaces.IForgotPasswordSchema, ForgotPasswordSchema),
         (interfaces.IResetPasswordSchema, ResetPasswordSchema),
-        (interfaces.IActivateSchema, ActivateSchema)
+        (interfaces.IActivateSchema, ActivateSchema),
     ]
 
-    for iface, schema in schemas:
-        if not config.registry.queryUtility(iface):
-            config.registry.registerUtility(schema, iface)
+    for iface, imp in schemas:
+        if not registry.queryUtility(iface):
+            registry.registerUtility(imp, iface)
