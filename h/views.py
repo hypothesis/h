@@ -46,14 +46,14 @@ def bad_csrf_token(request):
     }
 
 
+@view_config(accept='application/javascript', path_info=r'^/app/embed.js$',
+             name='app', renderer='templates/embed.txt')
+@view_config(accept='text/html', layout='sidebar',
+             name='app', renderer='templates/app.pt')
+@view_config(renderer='templates/help.pt', route_name='help')
 @view_config(renderer='templates/home.pt', route_name='index')
-def home(request):
-    return request.context.embed
-
-
-@view_config(route_name='help', renderer='templates/help.pt')
-def my_view(request):
-    return request.root.embed
+def page(context, request):
+    return {}
 
 
 @view_defaults(context='h.models.Annotation', layout='annotation')
@@ -100,12 +100,7 @@ class AnnotationController(BaseController):
         return request.context
 
 
-@view_defaults(
-    accept='application/json',
-    context='h.resources.RootFactory',
-    name='app',
-    renderer='json',
-)
+@view_defaults(accept='application/json', name='app', renderer='json')
 class AppController(BaseController):
     def __init__(self, request):
         super(AppController, self).__init__(request)
@@ -194,25 +189,6 @@ class AppController(BaseController):
         self.request.user = None
         return self.respond(result)
 
-    @view_config(
-        accept='application/javascript',
-        path_info=r'^/app/embed.js$',
-        renderer='templates/embed.txt',
-    )
-    def embed(self):
-        request = self.request
-
-        # Unless we're debugging, serve the embed with a 10 minute cache
-        # to reduce server load since this is potentially fetched frequently.
-        if not request.registry.settings.get('pyramid.reload_templates'):
-            request.response.cache_control.max_age = 600
-
-        # Don't leave them guessing
-        request.response.content_type = 'application/javascript'
-        request.response.charset = 'UTF-8'
-
-        return request.context.embed
-
     def success(self):
         result = self()
         result.update(status='okay')
@@ -273,14 +249,6 @@ class AppController(BaseController):
     @view_config(http_cache=0)
     def __json__(self):
         return self.success()
-
-    @view_config(
-        accept='text/html',
-        layout='sidebar',
-        renderer='h:templates/app.pt'
-    )
-    def __html__(self):
-        return {}
 
 
 @view_config(

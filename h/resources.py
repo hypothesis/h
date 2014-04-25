@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
 
 from pyramid.interfaces import ILocation
@@ -121,27 +120,6 @@ class RootFactory(Stream, InnerResource):
         return defaultlist
 
     @property
-    def embed(self):
-        env = {
-            pkg: json.dumps(self.request.webassets_env[pkg].urls())
-            for pkg in ['inject', 'jquery', 'raf']
-        }
-        options = {}
-        if not self.request.GET.get('light', False):
-            options.update({
-                'Heatmap': {
-                    'container': '.annotator-frame',
-                },
-                'Toolbar': {
-                    'container': '.annotator-frame',
-                },
-            })
-        env['app'] = json.dumps(self.request.resource_url(self, 'app'))
-        env['options'] = json.dumps(options)
-        env['role'] = json.dumps(self.request.GET.get('role', 'host'))
-        return env
-
-    @property
     def persona(self):
         request = self.request
 
@@ -163,9 +141,3 @@ class RootFactory(Stream, InnerResource):
             return [self.persona]
 
         return []
-
-    def __json__(self, request=None):
-        return {
-            name: getattr(self, name)
-            for name in ['persona', 'personas']
-        }

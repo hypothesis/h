@@ -12,16 +12,20 @@ yepnope.addFilter(function (resourceObj) {
 yepnope([
   {
     test: typeof(window.annotator) !== 'undefined',
-    nope: ${inject},
+    nope: ${request.webassets_env["inject"].urls()},
     complete: function () {
       window.annotator = null;
-      var app = ${app}
+      var app = '${request.resource_url(context, "app")}'
         , bootstrap = [
           'if (!window.annotator) {',
           '  var klass, options;',
-          '  klass = ${role} === "host" ? Annotator.Host : Annotator.Guest;',
-          '  options = ${options};',
-          '  options["app"] = "' + app + '";',
+          '  klass = "${request.GET.get("role", "host")}" === "host" ?',
+          '    Annotator.Host : Annotator.Guest;',
+          '  options = {app: "' + app + '"};',
+          '  if(!${request.GET.get("light", "false")}) {',
+          '    options["Heatmap"] = options["Toolbar"] =',
+          '      {"container": ".annotator-frame"};',
+          '  }',
           '  annotator = new klass(document.body, options);',
           '  window.Annotator.noConflict().$.noConflict(true);',
           '}'
@@ -38,7 +42,7 @@ yepnope([
   },
   {
     test: window.requestAnimationFrame,
-    nope: ${raf}
+    nope: ${request.webassets_env["raf"].urls()}
   }
 ]);
 /*]]>{/literal}*/
