@@ -7,7 +7,6 @@
     <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <!-- TODO: make deform use_ajax widgets delay after jQuery loads -->
     <link rel="stylesheet"
           tal:attributes="href href"
           tal:repeat="href layout.css_links | []" />
