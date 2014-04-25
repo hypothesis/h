@@ -56,7 +56,7 @@ def my_view(request):
     return request.root.embed
 
 
-@view_defaults(context='h.resources.Annotation', layout='annotation')
+@view_defaults(context='h.models.Annotation', layout='annotation')
 class AnnotationController(BaseController):
     @view_config(accept='text/html', renderer='templates/displayer.pt')
     def __html__(self):
@@ -71,7 +71,9 @@ class AnnotationController(BaseController):
 
         d = url_values_from_document(context)
         d['annotation'] = context
-        d['annotation']['referrers'] = context.referrers
+
+        referrers = self.Store(request).search(references=context['id'])
+        d['annotation']['referrers'] = referrers
 
         if context.get('references', []):
             parent = context.__parent__[context['references'][-1]]

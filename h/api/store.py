@@ -79,9 +79,7 @@ def wrap_annotation(annotation):
 
     request = get_current_request()
     cls = request.registry.queryUtility(interfaces.IAnnotationClass)
-    result = cls(request)
-    result.update(annotation)
-    return result
+    return cls(annotation)
 
 
 def anonymize_deletes(annotation):

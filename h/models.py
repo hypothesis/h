@@ -15,7 +15,9 @@ from horus.models import (
 )
 from horus.strings import UIStringsBase
 from pyramid.authentication import SessionAuthenticationPolicy
+from pyramid.decorator import reify
 from pyramid.i18n import TranslationStringFactory
+from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
 from pyramid_basemodel import Base, Session
 import sqlalchemy as sa
 from sqlalchemy import func, or_
@@ -98,6 +100,38 @@ class GUID(TypeDecorator):
 
 
 class Annotation(annotation.Annotation):
+    def __acl__(self):
+        acl = []
+        # Convert annotator-store roles to pyramid principals
+        for action, roles in self.get('permissions', {}).items():
+            for role in roles:
+                if role.startswith('group:'):
+                    if role == 'group:__world__':
+                        principal = Everyone
+                    elif role == 'group:__authenticated__':
+                        principal = Authenticated
+                    elif role == 'group:__consumer__':
+                        raise NotImplementedError("API consumer groups")
+                    else:
+                        principal = role
+                elif role.startswith('acct:'):
+                    principal = role
+                else:
+                    raise ValueError(
+                        "Unrecognized role '%s' in annotation '%s'" %
+                        (role, self.get('id'))
+                    )
+
+                # Append the converted rule tuple to the ACL
+                rule = (Allow, principal, action)
+                acl.append(rule)
+
+        if acl:
+            return acl
+        else:
+            # If there is no acl, it's an admin party!
+            return [(Allow, Everyone, ALL_PERMISSIONS)]
+
     __mapping__ = {
         'annotator_schema_version': {'type': 'string'},
         'created': {'type': 'date'},
@@ -200,6 +234,58 @@ class Annotation(annotation.Annotation):
             )
         finally:
             cls.es.conn.indices.open(index=cls.es.index)
+
+    def _nestlist(self, annotations, childTable):
+        outlist = []
+        if annotations is None:
+            return outlist
+
+        annotations = sorted(
+            annotations,
+            key=lambda reply: reply['created'],
+            reverse=True
+        )
+
+        for a in annotations:
+            children = self._nestlist(childTable.get(a['id']), childTable)
+            a['reply_count'] = \
+                sum(c['reply_count'] for c in children) + len(children)
+            a['replies'] = children
+            outlist.append(a)
+        return outlist
+
+    @property
+    def quote(self):
+        if 'target' not in self:
+            return ''
+        quote = ''
+        for target in self['target']:
+            for selector in target['selector']:
+                if selector['type'] == 'TextQuoteSelector':
+                    quote = quote + selector['exact'] + ' '
+
+        return quote
+
+    @reify
+    def referrers(self):
+        request = self.request
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        return store.search(references=self['id'])
+
+    @reify
+    def replies(self):
+        childTable = {}
+
+        for reply in self.referrers:
+            # Add this to its parent.
+            parent = reply.get('references', [])[-1]
+            pointer = childTable.setdefault(parent, [])
+            pointer.append(reply)
+
+        # Create nested list form
+        return self._nestlist(childTable.get(self['id']), childTable)
+
 
 
 class Document(document.Document):
@@ -361,6 +447,7 @@ def includeme(config):
         (interfaces.IUserClass, User),
         (interfaces.IConsumerClass, Consumer),
         (interfaces.IActivationClass, Activation),
+        (interfaces.IAnnotationClass, Annotation),
         (interfaces.IUIStrings, UIStringsBase),
     ]
 
