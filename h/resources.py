@@ -145,7 +145,7 @@ class RootFactory(Stream, InnerResource):
         }
 
 
-class Annotation(BaseResource, dict):
+class Annotation(BaseResource):
     def __acl__(self):
         acl = []
         # Convert annotator-store roles to pyramid principals
