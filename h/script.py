@@ -15,6 +15,8 @@ from pyramid.renderers import get_renderer, render
 from pyramid.settings import asbool
 from pyramid.scripts import pserve
 from pyramid import paster, scripting
+from sqlalchemy import engine_from_config
+
 from h import __version__, api, layouts
 
 
@@ -38,6 +40,9 @@ def init_db(args):
 
     app = api.store.store_from_settings(settings)
     api.store.create_db(app)
+
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    bind_engine(engine, should_create=True)
 
 
 @command(usage='CONFIG_FILE')
