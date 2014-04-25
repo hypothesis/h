@@ -18,6 +18,16 @@ command = clik.App(
     opts=pserve.PServeCommand.parser.option_list[1:],
 )
 
+@command(usage='CONFIG_FILE')
+def init_db(args):
+    """Create the database models."""
+    from h.api import store
+    from pyramid import paster
+
+    settings_dict = paster.get_appsettings(args[0])
+    app = store.store_from_settings(settings_dict)
+    store.create_db(app)
+
 
 @command(usage='CONFIG_FILE')
 def assets(args, console):
