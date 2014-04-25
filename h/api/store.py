@@ -186,6 +186,7 @@ def create_db(app):
 
 
 def delete_db(app):
+    # pylint: disable=no-member
     with app.test_request_context():
         models.Annotation.drop_all()
         models.Document.drop_all()
