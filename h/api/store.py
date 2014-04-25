@@ -167,22 +167,22 @@ def store_from_settings(settings):
 
 
 def create_db(app):
-    try:
-        with app.test_request_context():
-            # pylint: disable=no-member
-            models.Annotation.create_all()
-            models.Document.create_all()
-    except elasticsearch.exceptions.ConnectionError:
-        raise Exception(
-            "Can not access ElasticSearch at %s! Are you sure it's running?" %
-            (app.config["ELASTICSEARCH_HOST"],)
-        )
-    except:
-        with app.test_request_context():
-            # pylint: disable=no-member
-            models.Annotation.update_settings()
-            models.Annotation.create_all()
-            models.Document.create_all()
+    # pylint: disable=no-member
+    with app.test_request_context():
+        try:
+            es.conn.indices.create(es.index)
+        except elasticsearch.exceptions.RequestError as e:
+            if not e.error.startswith('IndexAlreadyExistsException'):
+                raise
+        except elasticsearch.exceptions.ConnectionError as e:
+            msg = 'Can not access ElasticSearch at {0}! ' \
+                  'Check to ensure it is running.' \
+                  .format(app.config['ELASTICSEARCH_HOST'])
+            raise elasticsearch.exceptions.ConnectionError('N/A', msg, e)
+        es.conn.cluster.health(wait_for_status='yellow')
+        models.Annotation.update_settings()
+        models.Annotation.create_all()
+        models.Document.create_all()
 
 
 def delete_db(app):
