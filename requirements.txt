@@ -2,6 +2,6 @@
 PyYAML
 elasticsearch>=0.4,<0.5,
 gunicorn
--e git+https://github.com/sontek/pyramid_webassets.git@243dcef8c5bca5aed828d56eee433120abc4ac62#egg=pyramid_webassets-master
+-e git+https://github.com/sontek/pyramid_webassets.git@9968c9a0590df3758e88974f8dcedda0da6e7265#egg=pyramid_webassets-master
 pytest>=2.5
 selenium==2.40.0

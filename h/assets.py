@@ -11,7 +11,6 @@ if 'gevent' in sys.modules:
     sys.modules['subprocess'] = gevent.subprocess
 
 import pyramid
-from webassets.loaders import YAMLLoader
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -67,6 +66,7 @@ def asset_response_subscriber(event):
 
 
 def includeme(config):
+    config.registry.settings.setdefault('webassets.bundles', 'assets.yaml')
     config.include('pyramid_webassets')
 
     # Set up a predicate and subscriber to set CORS headers on asset responses
@@ -76,13 +76,6 @@ def includeme(config):
         pyramid.events.NewResponse,
         asset_request=True
     )
-
-    assets_file = config.registry.settings.get('assets', 'assets.yaml')
-    loader = YAMLLoader(assets_file)
-    bundles = loader.load_bundles()
-    for bundle_name in bundles:
-        log.info('name: ' + str(bundle_name))
-        config.add_webasset(bundle_name, bundles[bundle_name])
 
     from deform.field import Field
     resource_registry = WebassetsResourceRegistry(config.get_webassets_env())
