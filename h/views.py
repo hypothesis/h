@@ -174,8 +174,7 @@ class AppController(BaseController):
         # flushed before the email is generated, causing the link to be
         # broken (hypothesis/h#1156).
         #
-        # Not filed upstream because Horus is undergoing some migration
-        # to Pylons/horus right now during PyCon 2014.
+        # Fixed in horus@90f838cef12be249a9e9deb5f38b37151649e801
         def get_activation():
             activation = self.Activation()
             self.db.add(activation)
