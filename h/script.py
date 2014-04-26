@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import codecs
 import json
 from os import makedirs, mkdir, walk
 from os.path import abspath, exists, join
@@ -9,16 +8,33 @@ from urlparse import urljoin, urlparse, urlunparse, uses_netloc, uses_relative
 from chameleon.zpt.template import PageTextTemplateFile
 from clik import App
 from pyramid.config import Configurator
-from pyramid.paster import bootstrap
+from pyramid.events import ContextFound
+from pyramid.paster import get_appsettings
 from pyramid.path import AssetResolver
-from pyramid.renderers import get_renderer, render
-from pyramid.settings import asbool
+from pyramid.request import Request
 from pyramid.scripts import pserve
-from pyramid import paster, scripting
+from pyramid.scripting import prepare
+from pyramid.settings import asbool
+from pyramid.view import render_view
+from pyramid_basemodel import bind_engine
 from sqlalchemy import engine_from_config
 
-from h import __version__, api, layouts
+from h import __version__, api, create_app
 
+
+def get_config(argv):
+    if len(argv) == 1:
+        argv.append('--reload')
+        argv.append('development.ini')
+        cf = argv[2]
+    else:
+        cf = argv[1]
+
+    settings = get_appsettings(cf)
+    settings['basemodel.should_create_all'] = False
+    settings['basemodel.should_drop_all'] = False
+
+    return dict(settings=settings)
 
 version = __version__
 description = """\
@@ -30,45 +46,103 @@ command = App(
     version=version,
     description=description,
     opts=pserve.PServeCommand.parser.option_list[1:],
+    args_callback=get_config,
 )
+
+# Teach urlparse about extension schemes
+uses_netloc.append('chrome-extension')
+uses_relative.append('chrome-extension')
+
+# Fetch an asset spec resolver
+resolve = AssetResolver().resolve
+
+
+def app(context, request):
+    assets_dir = request.webassets_env.directory
+    app_file = join(assets_dir, 'app.html')
+    with open(app_file, 'w') as f:
+        f.write(render_view(context, request, name='app'))
+
+
+def embed(context, request):
+    assets_dir = request.webassets_env.directory
+    embed_file = join(assets_dir, 'js/embed.js')
+    with open(embed_file, 'w') as f:
+        f.write(render_view(context, request, name='embed.js'))
+
+
+def manifest(context, request):
+    # Chrome is strict about the format of the version string
+    ext_version = '.'.join(version.replace('-', '.').split('.')[:4])
+    assets_url = request.webassets_env.url
+    manifest_file = resolve('h:browser/chrome/manifest.json').abspath()
+    manifest_json_file = join('./build/chrome', 'manifest.json')
+    manifest_renderer = PageTextTemplateFile(manifest_file)
+    with open(manifest_json_file, 'w') as f:
+        src = urljoin(request.resource_url(context), assets_url)
+        f.write(manifest_renderer(src=src, version=ext_version))
+
+
+def chrome(env):
+    registry = env['registry']
+    settings = registry.settings
+
+    request = env['request']
+    context = request.context
+
+    assets_dir = request.webassets_env.directory
+
+    registry.notify(ContextFound(request))
+    request.layout_manager.layout.csp = ''
+
+    embed(context, request)
+    manifest(context, request)
+
+    if asbool(settings.get('webassets.debug', False)) is False:
+        app(context, request)
+
+    # Due to Content Security Policy, the web font script cannot be inline.
+    webfont = resolve('h:templates/webfont.js').abspath()
+    copyfile(webfont, join(assets_dir, 'webfont.js'))
+
+
+def merge(src, dst):
+    for src_dir, _, files in walk(src):
+        dst_dir = src_dir.replace(src, dst)
+        if not exists(dst_dir):
+            mkdir(dst_dir)
+        for f in files:
+            src_file = join(src_dir, f)
+            dst_file = join(dst_dir, f)
+            copyfile(src_file, dst_file)
 
 
 @command(usage='CONFIG_FILE')
-def init_db(args):
+def init_db(settings):
     """Create the database models."""
-    settings = paster.get_appsettings(args[0])
-
-    app = api.store.store_from_settings(settings)
-    api.store.create_db(app)
+    store = api.store.store_from_settings(settings)
+    api.store.create_db(store)
 
     engine = engine_from_config(settings, 'sqlalchemy.')
     bind_engine(engine, should_create=True)
 
 
-@command(usage='CONFIG_FILE')
-def assets(args, console):
+@command(usage='config_file')
+def assets(settings):
     """Build the static assets."""
-
-    if len(args) == 0:
-        console.error('You must supply a paste configuration file.')
-        return 2
-
-    settings = paster.get_appsettings(args[0])
     config = Configurator(settings=settings)
     config.include('h.assets')
-    scripting.prepare(registry=config.registry)
-
     for bundle in config.get_webassets_env():
         bundle.urls()
 
 
-@command(usage='CONFIG_FILE APP_URL [STATIC_URL]')
-def extension(args, console):
+@command(usage='config_file base_url [static_url]')
+def extension(args, console, settings):
     """Build the browser extensions.
 
-    The first argument is the base URL of an h application:
+    The first argument is the base URL of an h installation:
 
-      http://localhost:5000/app
+      http://localhost:5000
 
     An optional second argument can be used to specify the location for static
     assets.
@@ -78,173 +152,50 @@ def extension(args, console):
       http://static.example.com/
       chrome-extension://extensionid/public
     """
+    settings['webassets.base_dir'] = abspath('./build/chrome/public')
 
-    if len(args) == 0:
-        console.error('You must supply a paste configuration file.')
-        return 2
-
-    if len(args) < 2:
+    if len(args) == 1:
         console.error('You must supply a url to the hosted backend.')
         return 2
+    elif len(args) == 2:
+        assets_url = settings['webassets.base_url']
+    else:
+        settings['webassets.base_url'] = args[2]
+        assets_url = args[2]
 
-    resolve = AssetResolver().resolve
+    base_url = args[1]
 
-    def merge(src, dst):
-        for src_dir, _, files in walk(src):
-            dst_dir = src_dir.replace(src, dst)
-            if not exists(dst_dir):
-                mkdir(dst_dir)
-            for f in files:
-                src_file = join(src_dir, f)
-                dst_file = join(dst_dir, f)
-                copyfile(src_file, dst_file)
+    # Fully-qualify the static asset url
+    parts = urlparse(assets_url)
+    if not parts.netloc:
+        base = urlparse(base_url)
+        parts = (base.scheme, base.netloc,
+                 parts.path, parts.params,
+                 parts.query, parts.fragment)
+        assets_url = urlunparse(parts)
 
-    def make_relative(request, url):
-        assets_url = request.webassets_env.url
-        if url.startswith(assets_url):
-            return url[len(assets_url):].strip('/')
-        return url
+    # Set up the assets url and source path mapping
+    settings['webassets.base_url'] = assets_url
+    settings['webassets.paths'] = json.dumps({
+        resolve('h:').abspath(): assets_url
+    })
 
-    def app(env, base_url=None):
-        request = env['request']
-        context = request.context
-
-        assets_env = request.webassets_env
-        base_template = get_renderer('h:templates/base.pt').implementation()
-
-        api_url = request.registry.settings.get('api.url', None)
-        api_url = api_url or urljoin(request.host_url, '/api/')
-
-        app_layout = layouts.SidebarLayout(context, request)
-        app_layout.csp = ''
-
-        app_page = render(
-            'h:templates/app.pt',
-            {
-                'base_url': base_url,
-                'layout': app_layout,
-                'main_template': base_template,
-                'service_url': api_url,
-            },
-            request=request,
-        )
-
-        app_html_file = join(assets_env.directory, 'app.html')
-        with codecs.open(app_html_file, 'w', 'utf-8-sig') as f:
-            f.write(app_page)
-
-    def chrome(env):
-        registry = env['registry']
-        request = env['request']
-        asset_env = request.webassets_env
-        settings = registry.settings
-        develop = asbool(settings.get('webassets.debug', False))
-
-        # Root the request at the app url
-        app_url = urlparse(args[1])
-        request.host = app_url.netloc
-        request.scheme = app_url.scheme
-        app_url = urlunparse(app_url)
-
-        # Fully-qualify the static asset url
-        asset_url = urlparse(asset_env.url)
-        if not asset_url.netloc:
-            asset_url = (
-                request.scheme,
-                request.host,
-                asset_url.path,
-                asset_url.params,
-                asset_url.query,
-                asset_url.fragment,
-            )
-        asset_url = urlunparse(asset_url)
-
-        # Configure the load path and output url
-        asset_env.append_path(resolve('h:').abspath(), asset_url)
-        asset_env.url = asset_url
-
-        def getUrl(url):
-            if not develop:
-                rel = make_relative(request, url)
-                if rel != url:
-                    return "chrome.extension.getURL('public/%s')" % rel
-            return '"%s"' % url
-
-        if develop:
-            # Load the app from the development server.
-            app_expr = json.dumps(app_url)
-        else:
-            # Load the app from the extension bundle.
-            app_expr = "chrome.extension.getURL('public/app.html')"
-            # Build the app html
-            app(env, base_url=app_url)
-
-        embed = render(
-            'h:templates/embed.txt',
-            {
-                'app': app_expr,
-                'options': json.dumps({
-                    'Heatmap': {
-                        "container": '.annotator-frame',
-                    },
-                    'Toolbar': {
-                        'container': '.annotator-frame',
-                    },
-                }),
-                'role': json.dumps('host'),
-                'inject': '[%s]' % ', '.join([
-                    getUrl(url)
-                    for url in asset_env['inject'].urls()
-                ]),
-                'jquery': getUrl(asset_env['jquery'].urls()[0]),
-                'raf': getUrl(asset_env['raf'].urls()[0]),
-            },
-            request=request,
-        )
-
-        embed_js_file = join(asset_env.directory, 'js/embed.js')
-        with codecs.open(embed_js_file, 'w', 'utf-8-sig') as f:
-            f.write(embed)
-
-        # Chrome is strict about the format of the version string
-        ext_version = '.'.join(version.replace('-', '.').split('.')[:4])
-
-        manifest_file = resolve('h:browser/chrome/manifest.json').abspath()
-        manifest_renderer = PageTextTemplateFile(manifest_file)
-        manifest = manifest_renderer(src=asset_url, version=ext_version)
-
-        manifest_json_file = join('./build/chrome', 'manifest.json')
-        with codecs.open(manifest_json_file, 'w', 'utf-8-sig') as f:
-            f.write(manifest)
-
-        # Due to Content Security Policy, the web font script cannot be inline.
-        webfont = resolve('h:templates/webfont.js').abspath()
-        copyfile(webfont, join(asset_env.directory, 'webfont.js'))
-
-    # Build the chrome extension
+    # Remove any existing build
     if exists('./build/chrome'):
         rmtree('./build/chrome')
 
+    # Copy over all the assets
+    assets(settings)
     makedirs('./build/chrome/public/lib/images')
-
     merge('./pdf.js/build/chromium', './build/chrome')
     merge('./h/browser/chrome', './build/chrome')
     merge('./h/images', './build/chrome/public/images')
     merge('./h/lib/images', './build/chrome/public/lib/images')
 
-    settings = {'webassets.base_dir': abspath('./build/chrome/public')}
-
-    # Override static asset route generation with the STATIC_URL argument
-    if len(args) > 2:
-        settings.update({
-            'webassets.base_url': args[2],
-        })
-
-    # Make sure urlparse understands chrome-extension:// URLs
-    uses_netloc.append('chrome-extension')
-    uses_relative.append('chrome-extension')
-
-    chrome(bootstrap(args[0], options=settings))
+    # Build it
+    wsgi = create_app(settings)
+    request = Request.blank('/app', base_url=base_url)
+    chrome(prepare(registry=wsgi.registry, request=request))
 
 
 @command(usage='[options] config_uri')
@@ -256,11 +207,6 @@ def serve(argv):
 
     Otherwise, acts as simple alias to the pserve command.
     """
-    if len(argv) == 1:  # Default to dev mode
-        pserve.ensure_port_cleanup([('0.0.0.0', 5000)])
-        argv.append('development.ini')
-        argv.append('--reload')
-
     pserve.PServeCommand(['hypothesis'] + argv[1:]).run()
 
 

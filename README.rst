@@ -79,7 +79,7 @@ check out and build the pdf.js submodule::
 
 Then, run the following command at the prompt to build the extension::
 
-    $ ./bin/hypothesis extension development.ini http://localhost:5000/app
+    $ ./bin/hypothesis extension development.ini http://localhost:5000
 
 If you are managing your virtual environment yourself, the script may not be
 located in the ``bin`` directory, but should be available in your path when the
@@ -91,7 +91,7 @@ argument may be passed to override the URL prefix used for static assets.
 At this point, a working extension should exist in ./build/chrome but with
 the development configuration the static assets are still loaded from the
 server. Start the application and ensure that the assets are built by visiting
-the /app route or by running ``./bin/hypothesis assets``.
+the home page or by running ``./bin/hypothesis assets``.
 
 Deployment
 ----------
