@@ -18,6 +18,7 @@ from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.decorator import reify
 from pyramid.i18n import TranslationStringFactory
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
+from pyramid.settings import asbool
 from pyramid_basemodel import Base, Session
 import sqlalchemy as sa
 from sqlalchemy import func, or_
@@ -453,16 +454,15 @@ def includeme(config):
         if not registry.queryUtility(iface):
             registry.registerUtility(imp, iface)
 
-    key = settings['api.key']
-    secret = settings.get('api.secret')
-    ttl = settings.get('api.ttl', DEFAULT_TTL)
+    if asbool(settings.get('basemodel.should_create_all', True)):
+        key = settings['api.key']
+        secret = settings.get('api.secret')
+        ttl = settings.get('api.ttl', DEFAULT_TTL)
 
-    session = Session()
-    with transaction.manager:
+        session = Session()
         consumer = Consumer.get_by_key(key)
         if not consumer:
-            consumer = Consumer(key=key)
-        consumer.secret = secret
-        consumer.ttl = ttl
-        session.add(consumer)
-        session.flush()
+            with transaction.manager:
+                consumer = Consumer(key=key, secret=secret, ttl=ttl)
+                session.add(consumer)
+                session.flush()
