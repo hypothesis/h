@@ -29,7 +29,7 @@ setup(
         'pyramid-basemodel>=0.2',
         'pyramid_deform>=0.2',
         'pyramid_chameleon>=0.1',
-        'pyramid-layout>=0.8',
+        'pyramid-layout>=0.9',
         'pyramid_mailer>=0.13',
         'pyramid-multiauth>=0.4.0',
         'pyramid_tm>=0.7',
