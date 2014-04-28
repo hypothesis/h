@@ -219,6 +219,14 @@ def send_notifications(event):
         request = event.request
         notifier = AnnotationNotifier(request)
         annotation = event.annotation
+
+        # Check for authorization. Send notification only for public annotation
+        # XXX: This will be changed and fine grained when
+        # user groups will be introduced
+        read = annotation['permissions']['read']
+        if "group:__world__" not in read:
+            return
+
         annotation['parent'] = parent_values(annotation, request)
 
         queries = models.UserSubscriptions.get_all(request).all()
