@@ -224,25 +224,6 @@ class FilterToElasticFilter(object):
                     # Make it a list, just be change it back later.
                     value = [clause['value'].lower()]
 
-                # XXX: Hack for case insensitive username search without
-                # changing the ES index (currently: not analyzed)
-                if field == 'user':
-                    registry = self.request.registry
-                    User = registry.queryUtility(interfaces.IUserClass)
-                    res = []
-                    for val in value:
-                        username = re.search(r'^acct:([^@]+)', val).group(1)
-                        host = re.search(r'[^@]+$', val).group(0)
-                        user = User.get_by_username(self.request, username)
-                        if user is not None:
-                            newvalue = 'acct:%s@%s' % (user.username, host)
-                        else:
-                            newvalue = val
-                        res.append(newvalue)
-
-                    # Be sure we end up with the same type as we started.
-                    value = res if type(clause['value']) is list else res[0]
-
             if clause["es_query_string"]:
                 # Generate query_string query
                 escaped_value = re.escape(value)
