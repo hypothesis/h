@@ -162,24 +162,38 @@ class FilterToElasticFilter(object):
 
     @staticmethod
     def equals(field, value):
-        return {"term": {field: value}}
+        if type(value) is list:
+            return {"terms": {field: value}}
+        else:
+            return {"term": {field: value}}
 
     @staticmethod
     def one_of(field, value):
-        return {"term": {field: value}}
+        if type(value) is list:
+            return {"terms": {field: value}}
+        else:
+            return {"term": {field: value}}
 
     @staticmethod
     def first_of(field, value):
-        return {"term": {field: value}}
+        if type(value) is list:
+            return {"terms": {field: value}}
+        else:
+            return {"term": {field: value}}
 
     @staticmethod
     def match_of(field, value):
-        #TODO: proper implementation
-        return {"term": {field: value}}
+        if type(value) is list:
+            return {"terms": {field: value}}
+        else:
+            return {"term": {field: value}}
 
     @staticmethod
     def matches(field, value):
-        return {"term": {field: value}}
+        if type(value) is list:
+            return {"terms": {field: value}}
+        else:
+            return {"term": {field: value}}
 
     @staticmethod
     def lt(field, value):
