@@ -5,4 +5,4 @@ gunicorn
 mock
 -e git+https://github.com/sontek/pyramid_webassets.git@9968c9a0590df3758e88974f8dcedda0da6e7265#egg=pyramid_webassets-master
 pytest>=2.5
-selenium==2.40.0
+selenium
