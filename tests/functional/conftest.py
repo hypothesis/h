@@ -7,24 +7,24 @@ import pytest
 
 class TestApplication(wsgiapp.WSGIApplication):
 
-    """A Gunicorn Paster Application suitable for usage in tests.
+    """A Gunicorn Paster Application suitable for use in tests.
 
     Extends the base :class:`gunicorn.app.base.Application` class to skip
     processing of command line arguments and directly load a configuration
-    from the Paster test configuration file and ensure the assets are built.
+    from the test.ini file.
     """
-    cfgurl = 'config:test.ini'
 
     def load_config(self):
+        self.cfgurl = 'config:test.ini'
         self.cfg = config.Config()
         self.cfg.set('paste', self.cfgurl)
+        self.cfg.set('logconfig', 'test.ini')
+        self.relpath = util.getcwd()
 
-        cfg = pasterapp.paste_config(self.cfg, self.cfgurl, '.')
+        cfg = pasterapp.paste_config(self.cfg, self.cfgurl, self.relpath)
 
         for k, v in cfg.items():
             self.cfg.set(k.lower(), v)
-
-        self.relpath = util.getcwd()
 
 
 def run(start):
