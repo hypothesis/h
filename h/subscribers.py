@@ -21,7 +21,7 @@ def add_renderer_globals(event):
     event['blocks'] = get_renderer('templates/blocks.pt').implementation()
 
 
-@subscriber(events.NewRequest)
+@subscriber(events.NewRequest, asset_request=False)
 def set_csrf_cookie(event):
     request = event.request
     session = request.session
