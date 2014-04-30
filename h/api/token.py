@@ -17,6 +17,7 @@ class TokenController(views.BaseController):
         consumer = self.Consumer.get_by_key(self.settings['api.key'])
         assert(consumer)
 
+        persona = request.params.get('persona')
         message = {
             'consumerKey': str(consumer.key),
             'ttl': consumer.ttl,
@@ -24,9 +25,10 @@ class TokenController(views.BaseController):
 
         try:
             message['userId'] = next(
-                p
-                for p in request.effective_principals
-                if str(p).startswith('acct:')
+                principal
+                for principal in request.effective_principals
+                if principal == persona
+                or (persona is None and principal.startswith('acct:'))
             )
         except StopIteration:
             pass
