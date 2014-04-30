@@ -237,7 +237,6 @@ class AppController(BaseController):
         return {
             'flash': self.pop_flash(),
             'model': {
-                'token': self.Token,
                 'persona': request.context.persona,
                 'personas': request.context.personas,
             },

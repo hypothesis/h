@@ -28,40 +28,38 @@ class App
     {plugins, host, providers} = annotator
 
     $scope.$watch 'auth.personas', (newValue, oldValue) =>
-      unless newValue?.length
-        authentication.persona = null
-        authentication.token = null
+      if newValue?.length
+        unless $scope.auth.persona and $scope.auth.persona in newValue
+          $scope.auth.persona = newValue[0]
+      else
+        $scope.auth.persona = null
 
     $scope.$watch 'auth.persona', (newValue, oldValue) =>
-      if oldValue? and not newValue?
-        if annotator.discardDrafts()
-          # TODO: better knowledge of routes
-          authentication.$logout => $scope.$broadcast '$reset'
-        else
-          $scope.auth.persona = oldValue
-      else if newValue?
-        $scope.sheet.collapsed = true
+      $scope.sheet.collapsed = true
 
-    $scope.$watch 'auth.token', (newValue, oldValue) =>
+      unless annotator.discardDrafts()
+        $scope.auth.persona = oldValue
+        return
+
       if plugins.Auth?
-        plugins.Auth.token = newValue
+        plugins.Auth.token = null
         plugins.Auth.updateHeaders()
+        delete plugins.Auth
 
-      plugins.Permissions.setUser(null)
-      # XXX: Temporary workaround until the fixed version upstream annotator is consumed
-      # The problem is that the permissions plugin, when setting the annotation.permissions property
-      # does not copy its options.permissions object, so modifying the annotation.permissions object
-      # modifes the plugin's options.permissions object too. After that this can be removed.
-      plugins.Permissions.options.permissions =
-        read: []
-        update: []
-        delete: []
-        admin: []
+      if plugins.Permissions?
+        plugins.Permissions.setUser(null)
+        # XXX: Temporary workaround until Annotator v2.0 or v1.2.10
+        plugins.Permissions.options.permissions =
+          read: []
+          update: []
+          delete: []
+          admin: []
+
       if newValue?
-        if not plugins.Auth?
-          annotator.addPlugin 'Auth', token: newValue
-        else
-          plugins.Auth.setToken(newValue)
+        acct = "acct:#{newValue.username}@#{newValue.provider}"
+        annotator.addPlugin 'Auth',
+          tokenUrl: "/api/token?persona=#{acct}"
+
         plugins.Auth.withToken (token) =>
           plugins.Permissions._setAuthFromToken token
 
@@ -75,8 +73,9 @@ class App
             annotator.setTool 'highlight'
           else
             $scope.reloadAnnotations()
-      else
-        delete plugins.Auth
+      else if oldValue?
+        authentication.$logout => $scope.$broadcast '$reset'
+
         if annotator.tool isnt 'comment'
           annotator.setTool 'comment'
         else
