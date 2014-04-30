@@ -190,16 +190,6 @@ class AppController(BaseController):
         self.request.user = None
         return self.respond(result)
 
-    def success(self):
-        result = self()
-        result.update(status='okay')
-        return result
-
-    def failure(self, reason):
-        result = self()
-        result.update(status='failure', reason=reason)
-        return result
-
     def respond(self, result):
         errors = isinstance(result, dict) and result.pop('errors', []) or []
         if len(errors):
@@ -210,10 +200,11 @@ class AppController(BaseController):
                     msgs = [str(e)]
                 for m in msgs:
                     FlashMessage(self.request, m, kind='error')
-            return self.failure(_('Your submission is invalid. '
-                                  'Please try again.'))
+            return self(status='failure',
+                        reason=_('Your submission is invalid. '
+                                 'Please try again.'))
         else:
-            return self.success()
+            return self()
 
     def pop_flash(self):
         session = self.request.session
@@ -232,9 +223,12 @@ class AppController(BaseController):
 
         return result
 
-    def __call__(self):
+    @view_config(http_cache=0)
+    def __call__(self, status='okay', reason=None):
         request = self.request
-        return {
+
+        result = {
+            'status': status,
             'flash': self.pop_flash(),
             'model': {
                 'persona': request.context.persona,
@@ -242,9 +236,10 @@ class AppController(BaseController):
             },
         }
 
-    @view_config(http_cache=0)
-    def __json__(self):
-        return self.success()
+        if reason:
+            result.update(reason=reason)
+
+        return result
 
 
 @view_config(
