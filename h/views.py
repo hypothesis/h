@@ -234,10 +234,6 @@ class AppController(BaseController):
 
     def __call__(self):
         request = self.request
-
-        # Ensure there is a csrf token in the session
-        request.session.get_csrf_token()
-
         return {
             'flash': self.pop_flash(),
             'model': {

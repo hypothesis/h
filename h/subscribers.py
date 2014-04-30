@@ -21,14 +21,17 @@ def add_renderer_globals(event):
     event['blocks'] = get_renderer('templates/blocks.pt').implementation()
 
 
-@subscriber(events.NewResponse)
+@subscriber(events.NewRequest)
 def set_csrf_cookie(event):
     request = event.request
-    response = event.response
     session = request.session
     token = session.get_csrf_token()
-    if request.cookies.get('XSRF-TOKEN') != token:
+
+    def _set_cookie(request, response):
         response.set_cookie('XSRF-TOKEN', token)
+
+    if request.cookies.get('XSRF-TOKEN') != token:
+        request.add_response_callback(_set_cookie)
 
 
 @subscriber(events.NewRegistrationEvent)
