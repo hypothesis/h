@@ -32,15 +32,6 @@ class App
         authentication.persona = null
         authentication.token = null
 
-        # Leave Highlighting mode when logging out
-        if annotator.tool is 'highlight'
-          # Because of logging out, we must leave Highlighting Mode.
-          annotator.setTool 'comment'
-          # No need to reload annotations after login, since the Social View
-          # change (caused by leaving Highlighting Mode) will trigger
-          # a reload anyway.
-          $scope.skipAuthChangeReload = true
-
     $scope.$watch 'auth.persona', (newValue, oldValue) =>
       if oldValue? and not newValue?
         if annotator.discardDrafts()
@@ -82,17 +73,14 @@ class App
           if $scope.ongoingHighlightSwitch
             $scope.ongoingHighlightSwitch = false
             annotator.setTool 'highlight'
+          else
+            $scope.reloadAnnotations()
       else
         delete plugins.Auth
-
-      if newValue isnt oldValue
-        unless $scope.skipAuthChangeReload
+        if annotator.tool isnt 'comment'
+          annotator.setTool 'comment'
+        else
           $scope.reloadAnnotations()
-          if $scope.inSearch
-            $timeout ->
-              $rootScope.$broadcast 'ReRenderPageSearch'
-            , 3000
-        delete $scope.skipAuthChangeReload
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
@@ -398,6 +386,7 @@ class App
           annotations = (a for a in annotations when a not in deleted)
           if annotations.length is 0
             annotator.unsubscribe 'annotationsLoaded', cleanup
+            refresh()
         , 10
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup
@@ -1012,7 +1001,6 @@ class Search
       for thread in threads
         $rootScope.focus thread.message, true
 
-    $scope.$on 'ReRenderPageSearch', refresh
     $scope.$on '$routeUpdate', refresh
 
     $scope.getThreadId = (id) ->

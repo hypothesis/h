@@ -588,13 +588,10 @@ class Hypothesis extends Annotator
 
     if name is 'highlight'
       # Check login state first
-      unless @plugins.Auth? and @plugins.Auth.haveValidToken()
+      unless @plugins.Permissions?.user
         scope = @element.scope()
         # If we are not logged in, start the auth process
         scope.ongoingHighlightSwitch = true
-        # No need to reload annotations upon login, since Social View change
-        # will trigger a reload anyway.
-        scope.skipAuthChangeReload = true
         scope.sheet.collapsed = false
         scope.sheet.tab = 'login'
         this.show()
