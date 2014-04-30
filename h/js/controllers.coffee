@@ -68,9 +68,7 @@ class App
         admin: []
       if newValue?
         if not plugins.Auth?
-          annotator.addPlugin 'Auth',
-            tokenUrl: $scope.tokenUrl
-            token: newValue
+          annotator.addPlugin 'Auth', token: newValue
         else
           plugins.Auth.setToken(newValue)
         plugins.Auth.withToken (token) =>
