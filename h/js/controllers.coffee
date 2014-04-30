@@ -386,7 +386,7 @@ class App
           annotations = (a for a in annotations when a not in deleted)
           if annotations.length is 0
             annotator.unsubscribe 'annotationsLoaded', cleanup
-            refresh()
+            $scope.$broadcast 'ReRenderPageSearch'
         , 10
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup
@@ -1001,6 +1001,7 @@ class Search
       for thread in threads
         $rootScope.focus thread.message, true
 
+    $scope.$on 'ReRenderPageSearch', refresh
     $scope.$on '$routeUpdate', refresh
 
     $scope.getThreadId = (id) ->
