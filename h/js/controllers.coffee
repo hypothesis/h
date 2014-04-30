@@ -74,12 +74,14 @@ class App
           else
             $scope.reloadAnnotations()
       else if oldValue?
-        authentication.$logout => $scope.$broadcast '$reset'
+        authentication.$logout =>
+          $scope.$broadcast '$reset'
 
-        if annotator.tool isnt 'comment'
-          annotator.setTool 'comment'
-        else
-          $scope.reloadAnnotations()
+          if annotator.tool isnt 'comment'
+            annotator.setTool 'comment'
+          else
+            $scope.reloadAnnotations()
+
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
