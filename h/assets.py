@@ -57,9 +57,11 @@ class AssetRequest(object):
     def __call__(self, event):
         request = event.request
         if request.matched_route is None:
-            return False
+            val = False
         else:
-            return request.matched_route.pattern.startswith(self.env.url)
+            val = request.matched_route.pattern.startswith(self.env.url)
+
+        return self.val == val
 
 
 def asset_response_subscriber(event):
