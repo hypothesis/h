@@ -12,7 +12,7 @@ yepnope.addFilter(function (resourceObj) {
 yepnope([
   {
     test: typeof(window.annotator) !== 'undefined',
-    nope: ${request.webassets_env["inject"].urls()},
+    nope: ${map(str, request.webassets_env["inject"].urls())},
     complete: function () {
       window.annotator = null;
       var app = '${request.resource_url(context, "app")}'
@@ -42,7 +42,7 @@ yepnope([
   },
   {
     test: window.requestAnimationFrame,
-    nope: ${request.webassets_env["raf"].urls()}
+    nope: ${map(str, request.webassets_env["raf"].urls())}
   }
 ]);
 /*]]>{/literal}*/
