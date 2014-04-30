@@ -46,8 +46,9 @@ def bad_csrf_token(request):
     }
 
 
+@view_config(name='embed.js', renderer='templates/embed.txt')
 @view_config(accept='application/javascript', path_info=r'^/app/embed.js$',
-             name='app', renderer='templates/embed.txt')
+             name='app', renderer='templates/embed.txt')  # XXX: Deprecated
 @view_config(accept='text/html', layout='sidebar',
              name='app', renderer='templates/app.pt')
 @view_config(renderer='templates/help.pt', route_name='help')
