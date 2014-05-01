@@ -316,7 +316,7 @@ username = ['$filter', '$window', ($filter, $window) ->
     return unless ctrl?
 
     ctrl.$render = ->
-      scope.uname = ($filter 'userName') ctrl.$viewValue
+      scope.uname = ($filter 'persona') ctrl.$viewValue
 
     scope.uclick = (event) ->
       event.stopPropagation()

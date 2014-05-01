@@ -705,7 +705,7 @@ class ViewFilter
 
   this.$inject = ['$filter']
   constructor: ($filter) ->
-    @user_filter = $filter('userName')
+    @user_filter = $filter('persona')
 
   # Filters a set of annotations, according to a given query.
   #
@@ -747,8 +747,8 @@ class ViewFilter
       for category, value of query
         switch category
           when 'user'
-            userName = @user_filter annotation.user
-            unless userName?.toLowerCase() is value
+            username = @user_filter annotation.user
+            unless username?.toLowerCase() is value
               matches = false
               break
           when 'text'

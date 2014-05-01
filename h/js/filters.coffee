@@ -40,8 +40,9 @@ fuzzyTime = (date) ->
     fuzzy = Math.round(delta / year) + ' years ago'
   fuzzy
 
-userName = (user) ->
-  (user?.match /^acct:([^@]+)/)?[1]
+persona = (user, part='username') ->
+  part = ['term', 'username', 'provider'].indexOf(part)
+  (user?.match /^acct:([^@]+)@(.+)/)?[part]
 
 elide = (text, split_length) ->
   if text.length > split_length
@@ -53,5 +54,5 @@ elide = (text, split_length) ->
 angular.module('h.filters', [])
   .filter('converter', -> (new Converter()).makeHtml)
   .filter('fuzzyTime', -> fuzzyTime)
-  .filter('userName', -> userName)
+  .filter('persona', -> persona)
   .filter('elide', -> elide)
