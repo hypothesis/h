@@ -90,8 +90,6 @@ def chrome(env):
     request = env['request']
     context = request.context
 
-    assets_dir = request.webassets_env.directory
-
     registry.notify(ContextFound(request))
     request.layout_manager.layout.csp = ''
 
@@ -100,10 +98,6 @@ def chrome(env):
 
     if asbool(settings.get('webassets.debug', False)) is False:
         app(context, request)
-
-    # Due to Content Security Policy, the web font script cannot be inline.
-    webfont = resolve('h:templates/webfont.js').abspath()
-    copyfile(webfont, join(assets_dir, 'webfont.js'))
 
 
 def merge(src, dst):

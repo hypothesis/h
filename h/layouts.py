@@ -38,10 +38,6 @@ class BaseLayout(object):
     def js_links(self):
         return self.get_widget_resources()['js']
 
-    @property
-    def inline_webfont(self):
-        return self.csp is None
-
 
 @layout_config(name='annotation', template='h:templates/base.pt')
 class AnnotationLayout(BaseLayout):
