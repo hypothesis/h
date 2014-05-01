@@ -41,24 +41,20 @@ class App
         $scope.auth.persona = oldValue
         return
 
-      if plugins.Auth?
-        plugins.Auth.token = null
-        plugins.Auth.updateHeaders()
-        delete plugins.Auth
+      plugins.Auth?.element.removeData('annotator:headers')
+      delete plugins.Auth
 
-      if plugins.Permissions?
-        plugins.Permissions.setUser(null)
-        # XXX: Temporary workaround until Annotator v2.0 or v1.2.10
-        plugins.Permissions.options.permissions =
-          read: []
-          update: []
-          delete: []
-          admin: []
+      plugins.Permissions?.setUser(null)
+      # XXX: Temporary workaround until Annotator v2.0 or v1.2.10
+      plugins.Permissions?.options.permissions =
+        read: []
+        update: []
+        delete: []
+        admin: []
 
       if newValue?
         acct = "acct:#{newValue.username}@#{newValue.provider}"
-        annotator.addPlugin 'Auth',
-          tokenUrl: "/api/token?persona=#{acct}"
+        annotator.addPlugin 'Auth', tokenUrl: "/api/token?persona=#{acct}"
 
         plugins.Auth.withToken (token) =>
           plugins.Permissions._setAuthFromToken token
