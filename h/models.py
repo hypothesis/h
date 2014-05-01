@@ -14,7 +14,7 @@ from horus.models import (
     UserGroupMixin,
 )
 from horus.strings import UIStringsBase
-from pyramid.authentication import SessionAuthenticationPolicy
+from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.decorator import reify
 from pyramid.i18n import TranslationStringFactory
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
@@ -432,8 +432,10 @@ def includeme(config):
 
     authn_debug = settings.get('pyramid.debug_authorization') \
         or settings.get('debug_authorizations')
-    authn_policy = SessionAuthenticationPolicy(
+    authn_policy = AuthTktAuthenticationPolicy(
+        settings.get('auth.secret', uuid4().hex + uuid4().hex),
         callback=groupfinder,
+        hashalg='sha512',
         debug=authn_debug
     )
     config.set_authentication_policy(authn_policy)
