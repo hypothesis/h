@@ -37,7 +37,6 @@ class Hypothesis extends Annotator
         true
       showEditPermissionsCheckbox: false,
       showViewPermissionsCheckbox: false,
-      userString: (user) -> user.replace(/^acct:(.+)@(.+)$/, '$1 on $2')
     Threading: {}
 
   # Internal state
