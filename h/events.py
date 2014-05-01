@@ -5,7 +5,7 @@ from horus.events import (
     PasswordResetEvent,
     ProfileUpdatedEvent,
 )
-from pyramid.events import BeforeRender, NewRequest
+from pyramid.events import BeforeRender, NewRequest, NewResponse
 
 __all__ = [
     'NewRegistrationEvent',
@@ -14,6 +14,7 @@ __all__ = [
     'ProfileUpdatedEvent',
     'BeforeRender',
     'NewRequest',
+    'NewResponse',
 ]
 
 

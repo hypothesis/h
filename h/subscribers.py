@@ -22,16 +22,22 @@ def add_renderer_globals(event):
 
 
 @subscriber(events.NewRequest, asset_request=False)
+def ensure_csrf(event):
+    event.request.session.get_csrf_token()
+
+
+@subscriber(events.NewResponse, asset_request=False)
 def set_csrf_cookie(event):
     request = event.request
+    response = event.response
     session = request.session
-    token = session.get_csrf_token()
 
-    def _set_cookie(request, response):
-        response.set_cookie('XSRF-TOKEN', token)
-
-    if request.cookies.get('XSRF-TOKEN') != token:
-        request.add_response_callback(_set_cookie)
+    if len(session) == 0:
+        response.set_cookie('XSRF-TOKEN', None)
+    else:
+        token = session.get_csrf_token()
+        if request.cookies.get('XSRF-TOKEN') != token:
+            response.set_cookie('XSRF-TOKEN', token)
 
 
 @subscriber(events.NewRegistrationEvent)
