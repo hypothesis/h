@@ -95,10 +95,7 @@ class AnnotationController(BaseController):
 
     @view_config(accept='application/json', renderer='json')
     def __call__(self):
-        request = self.request
-        request.response.content_type = 'application/json'
-        request.response.charset = 'UTF-8'
-        return request.context
+        return self.request.context
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
