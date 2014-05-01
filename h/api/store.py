@@ -18,6 +18,18 @@ from h import api, events, interfaces, models
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
+class Authenticator(auth.Authenticator):
+    def __init__(self, request):
+        self.request = request
+        super(Authenticator, self).__init__(self.consumer_fetcher)
+
+    def consumer_fetcher(self, key):
+        request = self.request
+        registry = request.registry
+        Consumer = registry.getUtility(interfaces.IConsumerClass)
+        return Consumer.get_by_key(request, key)
+
+
 class Store(object):
     def __init__(self, request):
         self.request = request
@@ -110,8 +122,10 @@ def authorize(annotation, action, user=None):
 
 
 def before_request():
-    flask.g.annotation_class = models.Annotation
-    flask.g.auth = auth.Authenticator(models.Consumer.get_by_key)
+    request = get_current_request()
+    Annotation = request.registry.getUtility(interfaces.IAnnotationClass)
+    flask.g.annotation_class = Annotation
+    flask.g.auth = Authenticator(request)
     flask.g.authorize = authorize
     flask.g.before_annotation_update = anonymize_deletes
 

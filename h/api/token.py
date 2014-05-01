@@ -14,7 +14,7 @@ class TokenController(views.BaseController):
     def __call__(self):
         request = self.request
 
-        consumer = self.Consumer.get_by_key(self.settings['api.key'])
+        consumer = self.Consumer.get_by_key(request, self.settings['api.key'])
         assert(consumer)
 
         persona = request.params.get('persona')

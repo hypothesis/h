@@ -288,7 +288,6 @@ class Annotation(annotation.Annotation):
         return self._nestlist(childTable.get(self['id']), childTable)
 
 
-
 class Document(document.Document):
     pass
 
@@ -315,8 +314,8 @@ class ConsumerMixin(BaseModel):
         return '<Consumer %r>' % self.key
 
     @classmethod
-    def get_by_key(cls, key):
-        return Session().query(cls).filter(cls.key == key).first()
+    def get_by_key(cls, request, key):
+        return get_session(request).query(cls).filter(cls.key == key).first()
 
 
 class Activation(ActivationMixin, Base):
@@ -462,7 +461,7 @@ def includeme(config):
         ttl = settings.get('api.ttl', DEFAULT_TTL)
 
         session = Session()
-        consumer = Consumer.get_by_key(key)
+        consumer = session.query(Consumer).filter(Consumer.key == key).first()
         if not consumer:
             with transaction.manager:
                 consumer = Consumer(key=key, secret=secret, ttl=ttl)
