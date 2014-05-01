@@ -13,18 +13,15 @@ def token(request):
     assert(consumer)
 
     persona = request.params.get('persona')
+    personas = request.session.get('personas', [])
+
     message = {
         'consumerKey': str(consumer.key),
         'ttl': consumer.ttl,
     }
 
     try:
-        message['userId'] = next(
-            principal
-            for principal in request.effective_principals
-            if principal == persona
-            or (persona is None and principal.startswith('acct:'))
-        )
+        message['userId'] = next(p for p in personas if p == persona)
     except StopIteration:
         pass
 

@@ -118,26 +118,3 @@ class RootFactory(Stream, InnerResource):
             (Allow, security.Authorizations, 'account'),
         ]
         return defaultlist
-
-    @property
-    def persona(self):
-        request = self.request
-
-        # Transition code until multiple sign-in is implemented
-        if request.user:
-            return {
-                'username': request.user.username,
-                'provider': request.server_name,
-            }
-
-        return None
-
-    @property
-    def personas(self):
-        request = self.request
-
-        # Transition code until multiple sign-in is implemented
-        if request.user:
-            return [self.persona]
-
-        return []

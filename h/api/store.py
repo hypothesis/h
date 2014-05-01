@@ -61,15 +61,10 @@ class Store(object):
 
     def _invoke_subrequest(self, subreq):
         request = self.request
-
-        token = api.token.token(request)
-        subreq.headers['X-Annotator-Auth-Token'] = token
-
+        subreq.session = request.session
         result = request.invoke_subrequest(subreq)
-
         if result.status_int > 400:
             raise exception_response(result.status_int)
-
         return result
 
 

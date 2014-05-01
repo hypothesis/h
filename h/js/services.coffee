@@ -556,9 +556,9 @@ class Hypothesis extends Annotator
         console.log "Not applying any Social View filters."
         delete query.user
       when "single-player"
-        if (p = @auth.persona)?
+        if @auth.persona
           console.log "Social View filter: single player mode."
-          query.user = "acct:" + p.username + "@" + p.provider
+          query.user = @auth.persona
         else
           console.log "Social View: single-player mode, but ignoring it, since not logged in."
           delete query.user

@@ -228,14 +228,12 @@ class AppController(BaseController):
     @view_config(http_cache=0)
     def __call__(self, status='okay', reason=None):
         request = self.request
-
         result = {
             'status': status,
             'flash': self.pop_flash(),
             'model': {
-                'persona': request.context.persona,
-                'personas': request.context.personas,
-            },
+                'personas': request.session.get('personas', []),
+            }
         }
 
         if reason:

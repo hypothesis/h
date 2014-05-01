@@ -53,8 +53,7 @@ class App
         admin: []
 
       if newValue?
-        acct = "acct:#{newValue.username}@#{newValue.provider}"
-        annotator.addPlugin 'Auth', tokenUrl: "/api/token?persona=#{acct}"
+        annotator.addPlugin 'Auth', tokenUrl: "/api/token?persona=#{newValue}"
 
         plugins.Auth.withToken (token) =>
           plugins.Permissions._setAuthFromToken token

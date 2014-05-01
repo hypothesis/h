@@ -48,13 +48,14 @@ def set_csrf_cookie(event):
 def login(event):
     request = event.request
     user = event.user
-    request.user = user
+    session = request.session
 
+    persona = 'acct:%s@%s' % (user.username, request.server_name)
+    personas = session.setdefault('personas', [])
 
-@subscriber(events.LogoutEvent)
-def logout(event):
-    request = event.request
-    request.user = None
+    if persona not in personas:
+        personas.append(persona)
+        session.changed()
 
 
 class AutoLogin(object):
