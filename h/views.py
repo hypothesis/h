@@ -117,8 +117,12 @@ class AppController(BaseController):
     @view_config(request_method='POST', request_param='__formid__=login')
     def login(self):
         result = AuthController(self.request).login()
-        event = LoginEvent(self.request, self.request.user)
-        self.request.registry.notify(event)
+
+        if isinstance(result, dict) is False:
+            if self.request.user:
+                event = LoginEvent(self.request, self.request.user)
+                self.request.registry.notify(event)
+
         return self.respond(result)
 
     @view_config(request_method='POST', request_param='__formid__=register')
