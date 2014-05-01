@@ -13,12 +13,9 @@ from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
 
-from . import lib
-
 
 def includeme(config):
     config.set_root_factory('h.resources.RootFactory')
-    config.add_request_method(lib.user_property, 'user', property=True)
 
     config.include('pyramid_multiauth')
 
