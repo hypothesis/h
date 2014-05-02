@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+import functools
 import json
 import logging
 import os
 import re
 
-from annotator import auth, store, es
+from annotator import store, es
 import elasticsearch
 import flask
 from pyramid.httpexceptions import exception_response
@@ -14,20 +15,9 @@ from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
 from h import api, events, interfaces, models
+from h.api import lib
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-class Authenticator(auth.Authenticator):
-    def __init__(self, request):
-        self.request = request
-        super(Authenticator, self).__init__(self.consumer_fetcher)
-
-    def consumer_fetcher(self, key):
-        request = self.request
-        registry = request.registry
-        Consumer = registry.getUtility(interfaces.IConsumerClass)
-        return Consumer.get_by_key(request, key)
 
 
 class Store(object):
@@ -72,7 +62,7 @@ class Store(object):
     def _invoke_subrequest(self, subreq):
         request = self.request
 
-        token = api.token.TokenController(request)()
+        token = api.token.token(request)
         subreq.headers['X-Annotator-Auth-Token'] = token
 
         result = request.invoke_subrequest(subreq)
@@ -81,18 +71,6 @@ class Store(object):
             raise exception_response(result.status_int)
 
         return result
-
-
-def wrap_annotation(annotation):
-    """Wraps a dict as an instance of the registered Annotation model class.
-
-    Arguments:
-    - `annotation`: a dictionary-like object containing the model data
-    """
-
-    request = get_current_request()
-    cls = request.registry.queryUtility(interfaces.IAnnotationClass)
-    return cls(annotation)
 
 
 def anonymize_deletes(annotation):
@@ -111,22 +89,12 @@ def anonymize_deletes(annotation):
             annotation['permissions'][action] = filtered
 
 
-def authorize(annotation, action, user=None):
-    request = get_current_request()
-    annotation = wrap_annotation(annotation)
-
-    result = request.has_permission(action, annotation)
-    if not result:
-        print result
-    return result
-
-
 def before_request():
     request = get_current_request()
     Annotation = request.registry.getUtility(interfaces.IAnnotationClass)
     flask.g.annotation_class = Annotation
-    flask.g.auth = Authenticator(request)
-    flask.g.authorize = authorize
+    flask.g.auth = lib.authenticator(request)
+    flask.g.authorize = functools.partial(lib.authorize, request)
     flask.g.before_annotation_update = anonymize_deletes
 
 
@@ -150,7 +118,7 @@ def after_request(response):
             else:
                 data = json.loads(response.data)
 
-            annotation = wrap_annotation(data)
+            annotation = lib.wrap_annotation(request, data)
             event = events.AnnotationEvent(request, annotation, action)
 
             request.registry.notify(event)

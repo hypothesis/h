@@ -31,7 +31,6 @@ class BaseController(horus.views.BaseController):
         getUtility = request.registry.getUtility
         self.Consumer = getUtility(interfaces.IConsumerClass)
         self.Store = getUtility(interfaces.IStoreClass)
-        self.Token = getUtility(interfaces.ITokenClass)
 
 
 @view_config(

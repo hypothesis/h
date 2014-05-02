@@ -1,58 +1,48 @@
 # -*- coding: utf-8 -*-
 from annotator import auth
 from pyramid.authentication import RemoteUserAuthenticationPolicy
-from pyramid.view import view_config, view_defaults
+from pyramid.view import view_config
 
-from h import interfaces, views
+from h.api import lib
 
 
-@view_defaults(renderer='string', route_name='token')
-class TokenController(views.BaseController):
-    # pylint: disable=too-few-public-methods
+@view_config(renderer='string', route_name='token')
+def token(request):
+    key = request.registry.settings['api.key']
+    consumer = lib.get_consumer(request, key)
+    assert(consumer)
 
-    @view_config(request_method="GET")
-    def __call__(self):
-        request = self.request
+    persona = request.params.get('persona')
+    message = {
+        'consumerKey': str(consumer.key),
+        'ttl': consumer.ttl,
+    }
 
-        consumer = self.Consumer.get_by_key(request, self.settings['api.key'])
-        assert(consumer)
+    try:
+        message['userId'] = next(
+            principal
+            for principal in request.effective_principals
+            if principal == persona
+            or (persona is None and principal.startswith('acct:'))
+        )
+    except StopIteration:
+        pass
 
-        persona = request.params.get('persona')
-        message = {
-            'consumerKey': str(consumer.key),
-            'ttl': consumer.ttl,
-        }
-
-        try:
-            message['userId'] = next(
-                principal
-                for principal in request.effective_principals
-                if principal == persona
-                or (persona is None and principal.startswith('acct:'))
-            )
-        except StopIteration:
-            pass
-
-        return auth.encode_token(message, consumer.secret)
-
-    @classmethod
-    def __json__(cls, request):
-        return cls(request)()
+    return auth.encode_token(message, consumer.secret)
 
 
 class AuthTokenAuthenticationPolicy(RemoteUserAuthenticationPolicy):
     def unauthenticated_userid(self, request):
-        token = request.environ.get(self.environ_key)
+        auth_token = request.environ.get(self.environ_key)
         try:
-            unsafe = auth.decode_token(token, verify=False) or {}
+            unsafe = auth.decode_token(auth_token, verify=False) or {}
             return unsafe.get('userId')
         except auth.TokenInvalid:
             return None
 
 
 def groupfinder(userid, request):
-    Consumer = request.registry.queryUtility(interfaces.IConsumerClass)
-    user = auth.Authenticator(Consumer.get_by_key).request_user(request)
+    user = lib.authenticator(request).request_user(request)
     if user:
         # TODO: Group support for auth tokens
         return []
@@ -79,12 +69,6 @@ def includeme(config):
         debug=authn_debug,
     )
     config.set_authentication_policy(authn_policy)
-
-    if not registry.queryUtility(interfaces.ITokenClass):
-        registry.registerUtility(
-            TokenController,
-            interfaces.ITokenClass
-        )
 
     token_url = settings.get('api.token_endpoint', '/api/token').strip('/')
     config.add_route('token', token_url)

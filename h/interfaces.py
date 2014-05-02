@@ -57,10 +57,6 @@ class IStoreClass(Interface):
     pass
 
 
-class ITokenClass(Interface):
-    pass
-
-
 class IActivateForm(Interface):
     pass
 
