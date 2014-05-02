@@ -1,9 +1,12 @@
 SHELL := bash
 PATH := bin:${PATH}
 
+default:
+	./bootstrap
+
 clean:
-	find h/js -iname '*.js' | xargs rm
-	find h/css -iname '*.css' | xargs rm
+	find h/js -iname '*.js' | xargs -r rm
+	find h/css -iname '*.css' | sed /visualsearch/d | xargs -r rm
 
 test: elasticsearch functional_test unit_test
 
@@ -24,3 +27,5 @@ elasticsearch:
 	@echo "elasticsearch running?"
 	$(eval es := $(shell wget --quiet --output-document - http://localhost:9200))
 	@if [ -n '${es}' ] ; then echo "elasticsearch running" ; else echo "please start elasticsearch"; exit 1; fi
+
+.PHONY: clean test functional_test unit_test elasticsearch
