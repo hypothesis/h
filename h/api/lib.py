@@ -15,9 +15,13 @@ def authorize(request, annotation, action, user=None):
 
     if user is None:
         principals = request.session.get('personas', [])
-        principals = [security.Everyone]
     else:
-        principals = [security.Everyone, security.Authenticated, user.id]
+        principals = [user.id]
+
+    if len(principals):
+        principals.append(security.Authenticated)
+
+    principals.append(security.Everyone)
 
     return set(allowed) & set(principals) != set()
 
