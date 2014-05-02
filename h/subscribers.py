@@ -22,6 +22,7 @@ def add_renderer_globals(event):
 
 
 @subscriber(events.NewRequest, asset_request=False)
+@subscriber(events.LogoutEvent)
 def ensure_csrf(event):
     event.request.session.get_csrf_token()
 
