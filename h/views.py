@@ -18,7 +18,7 @@ from pyramid.view import view_config, view_defaults
 from h import interfaces
 from h.models import _
 from h.streamer import url_values_from_document
-from h.events import LoginEvent, LogoutEvent
+from h.events import LoginEvent, LogoutEvent, RegistrationActivatedEvent
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -149,12 +149,13 @@ class AppController(BaseController):
             if activation:
                 user = self.User.get_by_activation(request, activation)
 
-            request.user = user
             if user:
                 user.password = appstruct['password']
                 self.db.add(user)
                 self.db.delete(activation)
                 FlashMessage(request, self.Str.authenticated, kind='success')
+                event = RegistrationActivatedEvent(request, user, activation)
+                request.registry.notify(event)
             else:
                 form.error = colander.Invalid(
                     form.schema,
