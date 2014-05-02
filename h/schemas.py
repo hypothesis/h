@@ -2,7 +2,7 @@
 # pylint: disable=no-init, too-few-public-methods
 import colander
 import deform
-from horus.schemas import ForgotPasswordSchema, unique_email
+from horus.schemas import unique_email
 from pyramid.session import check_csrf_token
 
 from h import interfaces
@@ -48,6 +48,10 @@ class LoginSchema(CSRFSchema):
         colander.String(),
         widget=deform.widget.PasswordWidget()
     )
+
+
+class ForgotPasswordSchema(CSRFSchema):
+    email = colander.SchemaNode(colander.String(), validator=colander.Email())
 
 
 class RegisterSchema(CSRFSchema):
