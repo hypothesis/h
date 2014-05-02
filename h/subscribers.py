@@ -50,6 +50,12 @@ def login(event):
     request.user = user
 
 
+@subscriber(events.LogoutEvent)
+def logout(event):
+    request = event.request
+    request.user = None
+
+
 class AutoLogin(object):
     # pylint: disable=too-few-public-methods
 

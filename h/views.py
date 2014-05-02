@@ -18,7 +18,7 @@ from pyramid.view import view_config, view_defaults
 from h import interfaces
 from h.models import _
 from h.streamer import url_values_from_document
-from h.events import LoginEvent
+from h.events import LoginEvent, LogoutEvent
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -188,7 +188,8 @@ class AppController(BaseController):
     @view_config(request_method='POST', request_param='__formid__=logout')
     def logout(self):
         result = AuthController(self.request).logout()
-        self.request.user = None
+        event = LogoutEvent(self.request)
+        self.request.registry.notify(event)
         return self.respond(result)
 
     def respond(self, result):
