@@ -40,16 +40,35 @@ def set_csrf_cookie(event):
             response.set_cookie('XSRF-TOKEN', token)
 
 
-@subscriber(events.NewRegistrationEvent)
+@subscriber(events.LoginEvent)
+@subscriber(events.NewRegistrationEvent, autologin=True)
+@subscriber(events.PasswordResetEvent, autologin=True)
 @subscriber(events.RegistrationActivatedEvent)
-def registration(event):
+def login(event):
     request = event.request
-    settings = request.registry.settings
-    autologin = asbool(settings.get('horus.autologin', False))
+    user = event.user
+    request.user = user
 
-    if isinstance(event, events.RegistrationActivatedEvent) or autologin:
-        request.user = event.user
+
+class AutoLogin(object):
+    # pylint: disable=too-few-public-methods
+
+    def __init__(self, val, config):
+        self.env = config.get_webassets_env()
+        self.val = val
+
+    def text(self):
+        return 'autologin = %s' % (self.val,)
+
+    phash = text
+
+    def __call__(self, event):
+        request = event.request
+        settings = request.registry.settings
+        autologin = asbool(settings.get('horus.autologin', False))
+        return self.val == autologin
 
 
 def includeme(config):
+    config.add_subscriber_predicate('autologin', AutoLogin)
     config.scan(__name__)
