@@ -1,7 +1,24 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
+import sys
 
 import versioneer
+
+
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
+
+cmdclass = versioneer.get_cmdclass()
+cmdclass['test'] = PyTest
 
 versioneer.VCS = 'git'
 versioneer.versionfile_source = 'h/_version.py'
@@ -39,6 +56,8 @@ setup(
         'webassets==0.8',
     ],
 
+    tests_require=['pytest', 'mock', 'selenium', 'tox'],
+
     author='Hypothes.is Project & contributors',
     maintainer='Randall Leeds',
     maintainer_email='tilgovi@hypothes.is',
@@ -74,7 +93,6 @@ setup(
         ],
     },
 
-    cmdclass=versioneer.get_cmdclass(),
-
-    test_suite='test'
+    cmdclass=cmdclass,
+    test_suite='tests',
 )

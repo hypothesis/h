@@ -8,24 +8,13 @@ clean:
 	find h/js -iname '*.js' | xargs -r rm
 	find h/css -iname '*.css' | sed /visualsearch/d | xargs -r rm
 
-test: elasticsearch functional_test unit_test
-
-functional_test:
-ifneq ($(TRAVIS_SECURE_ENV_VARS),false)
-	@echo "running functional tests"
-	# ensure the assets are built
+test: elasticsearch
 	hypothesis assets test.ini
-	# run the functional tests
-	py.test tests/functional/
-endif
-
-unit_test:
-	@echo "running unit tests"
-	py.test tests/unit
+	python setup.py test
 
 elasticsearch:
-	@echo "elasticsearch running?"
+	@echo -n "Checking to see if elasticsearch is running..."
 	$(eval es := $(shell wget --quiet --output-document - http://localhost:9200))
-	@if [ -n '${es}' ] ; then echo "elasticsearch running" ; else echo "please start elasticsearch"; exit 1; fi
+	@if [ -n '${es}' ] ; then echo "yes." ; else echo "no!"; exit 1; fi
 
 .PHONY: clean test functional_test unit_test elasticsearch

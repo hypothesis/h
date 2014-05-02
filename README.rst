@@ -66,6 +66,13 @@ below. Issues tagged with the label 'cake' are ideal for new contributors.
    :alt: Build Status
    :height: 18px
 
+Testing
+-------
+
+To run the test suite simply follow the standard Python testing procedure::
+
+    $ python setup.py test
+
 Chrome Extension
 ^^^^^^^^^^^^^^^^
 To build the Chrome extension, follow the installation instructions and then
