@@ -143,7 +143,7 @@ class App
         socialView: annotator.socialView
 
     $scope.$on 'success', (event, action) ->
-      if action == 'claim'
+      if action == 'forgot'
         $scope.sheet.tab = 'activate'
       else
         $scope.sheet.tab = 'login'

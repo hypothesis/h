@@ -86,14 +86,14 @@
   </form>
   <!-- / Register -->
 
-  <!-- Claim a username -->
-  <form data-title="Claim a username"
-        data-value="claim"
+  <!-- Forgot password -->
+  <form data-title="Claim an account"
+        data-value="forgot"
         class="tab-pane"
-        name="claim"
+        name="forgot"
         novalidate>
 
-    <p>To activate your reserved username, please enter your email address.</p>
+    <p>Please enter your email address.</p>
     <!--Get Validation Code-->
     <input type="email" name="email" value="" placeholder="Email"
            required autocapitalize="false" ng-model="model.email" />
@@ -104,22 +104,20 @@
             >Please enter your email.</span>
     </span>
 
-    <input type="submit" name="forgot" value="Send activation"
-           ng-disabled="!claim.$valid" />
+    <input type="submit" name="forgot" value="Request access"
+           ng-disabled="!forgot.$valid" />
 
   </form>
-  <!-- / Claim a username -->
+  <!-- / Forgot password -->
 
   <!-- Activate -->
-  <form data-title="Activate"
+  <form data-title="Activate an account"
         data-value="activate"
         class="tab-pane"
         name="activate"
         novalidate>
 
-    <p>Find the validation code in the confirmation email you recieved. Enter
-      it below, along with the password you would like to use for your
-      account.</p>
+    <p>Enter an activation code and a new password.</p>
 
     <input type="text" name="code" value="" placeholder="Activation Code"
            required autocorrect="false" autocapitalize="false"
@@ -138,34 +136,10 @@
             >Passwords must be at least 2 characters.</span>
     </span>
 
-    <input type="submit" name="activate" value="Sign in"
+    <input type="submit" name="activate" value="Activate"
            ng-disabled="!activate.$valid" />
 
   </form>
-  <!--/Claim a username-->
-
-  <!-- Forgot -->
-  <form data-title="Forgot"
-        data-value="forgot"
-        class="tab-pane"
-        name="forgot"
-        novalidate>
-
-    <p>Forgotten password? Enter your email below to send a recovery email.</p>
-
-    <input type="email" name="email" value="" placeholder="Email"
-           required autocapitalize="false" ng-model="model.email" />
-    <span ng-show="forgot.email.$dirty" slow-validate="email">
-      <span ng-show="forgot.email.$error.email"
-            >Is this an email address?</span>
-      <span ng-show="forgot.email.$error.required"
-            >Please enter your email.</span>
-    </span>
-
-    <input type="submit" name="forgot" value="Send recovery email"
-           ng-disabled="!forgot.$valid" />
-
-  </form>
-  <!-- / Forgot -->
+  <!--/ Activate -->
 
 </metal:main>
