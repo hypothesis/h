@@ -69,9 +69,11 @@ below. Issues tagged with the label 'cake' are ideal for new contributors.
 Testing
 -------
 
-To run the test suite simply follow the standard Python testing procedure::
+To run the test suite, ensure the assets are built and then invoke the tests
+in the usual fashion of Python::
 
-    $ python setup.py test
+    $ ./bin/hypothesis assets test.ini
+    $ ./bin/python setup.py test
 
 Chrome Extension
 ^^^^^^^^^^^^^^^^
