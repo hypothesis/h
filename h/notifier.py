@@ -128,7 +128,7 @@ class ReplyTemplate(NotificationTemplate):
     @staticmethod
     def check_conditions(annotation, data):
         # Get the e-mail of the owner
-        if not annotation['parent']['user']:
+        if 'user' not in annotation['parent'] or not annotation['parent']['user']:
             return False
         # Do not notify users about their own replies
         if annotation['user'] == annotation['parent']['user']:
