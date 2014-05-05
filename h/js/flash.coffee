@@ -23,9 +23,6 @@ class FlashProvider
         if annotator.isOpen() or not annotator.host
           notice = Annotator.showNotification msg, q
           @timeout = this._wait =>
-            # work around Annotator.Notification not removing classes
-            for _, klass of notice.options.classes
-              notice.element.removeClass klass
             this._process()
         else
           annotator.host.notify
