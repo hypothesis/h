@@ -265,8 +265,6 @@ class Annotator.Guest extends Annotator
 
       # Are we allowed to create annotations? Return false if we can't.
       unless @canAnnotate
-        #@Annotator.showNotification "You are already editing an annotation!",
-        #  @Annotator.Notification.INFO
         return false
 
       # Do we really want to make this selection?
@@ -446,7 +444,7 @@ class Annotator.Guest extends Annotator
     # We have to clear the selection.
     # (Annotator does this automatically by focusing on
     # one of the input fields in the editor.)
-    @Annotator.util.getGlobal().getSelection().removeAllRanges()
+    Annotator.util.getGlobal().getSelection().removeAllRanges()
 
   onSetTool: (name) ->
     switch name

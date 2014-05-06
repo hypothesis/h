@@ -65,39 +65,39 @@
     </div>
     <!-- / Toolbar -->
 
-    <!-- View Sort Controls -->
-    <div class="viewsort"
-         ng-mouseenter="showViewSort()"
-         ng-mouseleave="showViewSort(false)"
-         ng-show="viewState.showControls">
-      <div class="dropdown">
-        <span role="button"
-              class="dropdown-toggle"
-              data-toggle="dropdown"
-              >{{viewState.view}}</span>
-        <ul class="dropdown-menu" role="menu">
-          <li ng-repeat="view in views">
-            <a href="" ng-click="applyView(view)">{{view}}</a>
-          </li>
-        </ul>
-      </div>
-
-      <div class="dropdown">
-        <span role="button"
-              class="dropdown-toggle"
-              data-toggle="dropdown"
-              >{{viewState.sort}}</span>
-        <ul class="dropdown-menu" role="menu">
-          <li ng-repeat="sort in sorts">
-            <a href="" ng-click="applySort(sort)">{{sort}}</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <!-- / View Sort Controls -->
-
     <!-- Content -->
     <div id="wrapper" class="content">
+      <!-- View Sort Controls -->
+      <div class="viewsort"
+           ng-mouseenter="showViewSort()"
+           ng-mouseleave="showViewSort(false)"
+           ng-show="viewState.showControls">
+        <div class="dropdown">
+          <span role="button"
+                class="dropdown-toggle"
+                data-toggle="dropdown"
+                >{{viewState.view}}</span>
+          <ul class="dropdown-menu" role="menu">
+            <li ng-repeat="view in views">
+              <a href="" ng-click="applyView(view)">{{view}}</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="dropdown">
+          <span role="button"
+                class="dropdown-toggle"
+                data-toggle="dropdown"
+                >{{viewState.sort}}</span>
+          <ul class="dropdown-menu" role="menu">
+            <li ng-repeat="sort in sorts">
+              <a href="" ng-click="applySort(sort)">{{sort}}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- / View Sort Controls -->
+
       <!-- Angular view -->
       <div ng-view=""></div>
     </div>

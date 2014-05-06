@@ -222,24 +222,15 @@ $input-border-radius: 2px;
 //FLASH/TOAST/ALERTS///////////////////////////////
 .annotator-notice {
   @include border-radius(.1em);
-  @include smallshadow;
+  @include box-shadow(inset 2px 1px 1px hsla(0, 0%, 0%, .1));
   @include single-transition(opacity, .2s);
-  padding: .3em;
   font-family: $sansFontFamily;
-  border: solid 1px;
-  bottom: 18%;
-  left: 50%;
-  margin-left: -15%;
+  line-height: 29px;
   opacity: 0;
-  pointer-events: none;
-  position: fixed;
   text-align: center;
-  width: 30%;
-  z-index: 2000;
 
   &.show, &.annotator-notice-show {
-    opacity: .8;
-    pointer-events: initial;
+    opacity: 1;
   }
 }
 

@@ -5,7 +5,6 @@ class FlashProvider
     error: []
     success: []
   notice: null
-  timeout: null
 
   constructor: ->
     # Configure notification classes
@@ -15,31 +14,22 @@ class FlashProvider
       SUCCESS: 'success'
 
   _process: ->
-    @timeout = null
     for q, msgs of @queues
       if msgs.length
         msg = msgs.shift()
         unless q then [q, msg] = msg
-        if annotator.isOpen() or not annotator.host
-          notice = Annotator.showNotification msg, q
-          @timeout = this._wait =>
-            this._process()
-        else
-          annotator.host.notify
-            method: "showNotification"
-            params:
-              message: msg
-              type: q
-          @timeout = this._wait =>
-            annotator.host.notify
-              method: "removeNotification"
-            this._process()
+        notice = new Hypothesis.Notification()
+        notice.show(msg, q)
+        notice.element.hide().slideDown()
+        this._wait =>
+          notice.element.slideUp ->
+            notice.element.remove()
         break
 
   _flash: (queue, messages) ->
     if @queues[queue]?
       @queues[queue] = @queues[queue]?.concat messages
-      this._process() unless @timeout?
+      this._process()
 
   $get: ['$timeout', ($timeout) ->
     this._wait = (cb) -> $timeout cb, 5000
