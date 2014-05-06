@@ -28,9 +28,16 @@ def includeme(config):
 
     config.include('horus')
 
-    for name in ['login', 'logout', 'forgot_password', 'reset_password',
-                 'register', 'activate', 'profile']:
+    for name in ['login', 'logout']:
         config.add_view('horus.views.AuthController', attr=name,
+                        renderer='h:templates/auth.pt', route_name=name)
+
+    for name in ['forgot_password', 'reset_password']:
+        config.add_view('horus.views.ForgotPasswordController', attr=name,
+                        renderer='h:templates/auth.pt', route_name=name)
+
+    for name in ['register', 'activate']:
+        config.add_view('horus.views.RegisterController', attr=name,
                         renderer='h:templates/auth.pt', route_name=name)
 
 
