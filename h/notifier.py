@@ -11,7 +11,6 @@ from pyramid.renderers import render
 from pyramid.events import subscriber
 
 from h import events, models
-from h.interfaces import IStoreClass
 from h.streamer import FilterHandler, parent_values
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -176,7 +175,6 @@ class AnnotationNotifier(object):
         self.request = request
         self.registry = request.registry
         self.mailer = self.registry.queryUtility(IMailer)
-        self.store = self.registry.queryUtility(IStoreClass)(request)
 
     @classmethod
     def register_template(cls, template, function):
