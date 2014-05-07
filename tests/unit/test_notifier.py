@@ -8,7 +8,7 @@ from h.streamer import FilterHandler
 from . import AppTestCase
 
 
-class NotifierTest(AppTestCase): # pylint: disable=R0904
+class NotifierTest(AppTestCase):  # pylint: disable=R0904
     """All Notification related unit tests live here"""
     class QueryMock(object):  # pylint: disable=R0903
         """This class is used to simulate user subscription queries"""
