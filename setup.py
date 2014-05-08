@@ -38,6 +38,7 @@ setup(
         'annotator>=0.11.1',
         'clik==0.3.1',
         'deform_bootstrap>=0.2.0',
+        'elasticsearch>=0.4,<0.5',
         'gevent-websocket==0.3.6',
         'horus>=0.9.15',
         'jsonpointer==1.0',
@@ -56,7 +57,7 @@ setup(
         'webassets==0.8',
     ],
 
-    tests_require=['pytest', 'mock', 'selenium'],
+    tests_require=['pytest>=2.5', 'mock', 'selenium'],
 
     author='Hypothes.is Project & contributors',
     maintainer='Randall Leeds',
