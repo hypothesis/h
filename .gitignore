@@ -3,6 +3,7 @@
 !.webassets-cache
 
 /*.db
+/*.db-journal
 /*.egg
 /*.egg-info
 /*.ini
