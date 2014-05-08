@@ -26,6 +26,10 @@ class TestApplication(wsgiapp.WSGIApplication):
         for k, v in cfg.items():
             self.cfg.set(k.lower(), v)
 
+        default_config = config.get_default_config_file()
+        if default_config is not None:
+            self.load_config_from_file(default_config)
+
 
 def run(start):
     start.acquire()
