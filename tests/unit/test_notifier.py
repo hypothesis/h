@@ -15,6 +15,7 @@ class NotifierTest(AppTestCase):
     class QueryMock(object):
         """This class is used to simulate user subscription queries"""
         # pylint: disable=too-few-public-methods
+
         def __init__(self, active=False, query=None, template=""):
             self.active = active
             self.query = query or {}
@@ -97,9 +98,11 @@ class NotifierTest(AppTestCase):
     def test_template_registration(self):
         """Make sure the AnnotatioNotifier uses the given key and function
         for template registration"""
+
         def test_fn():
             """Dummy test function"""
             pass
+
         notifier.AnnotationNotifier.register_template('test_template', test_fn)
         templates = notifier.AnnotationNotifier.registered_templates
         assert 'test_template' in templates
@@ -109,26 +112,31 @@ class NotifierTest(AppTestCase):
         """Make sure we do not process anything for false templates"""
         request = DummyRequest()
         notif = notifier.AnnotationNotifier(request)
-        notif._send_annotation = Mock()  # pylint: disable=W0212
-        notif.send_notification_to_owner({}, {}, 'false_template')
-        assert notif._send_annotation.called is False  # pylint: disable=W0212
+        with patch.object(notif, '_send_annotation') as send:
+            notif.send_notification_to_owner({}, {}, 'false_template')
+            assert send.called is False
 
     def test_bad_status(self):
         """Make sure if a renderer throws a false status (i.e. for errors)
         then no notification is sent"""
-        def test_generator(request, annotation, data):  # pylint: disable=W0613
+
+        def test_generator(request, annotation, data):
+            # pylint: disable=unused-argument
             """Our test template function, auto fails"""
             return {"status": False}
+
         notifier.AnnotationNotifier.register_template("test", test_generator)
         request = DummyRequest()
         notif = notifier.AnnotationNotifier(request)
-        notif._send_annotation = Mock()  # pylint: disable=W0212
-        notif.send_notification_to_owner({}, {}, 'test')
-        assert notif._send_annotation.call_count == 0  # pylint: disable=W0212
+        with patch.object(notif, '_send_annotation') as send:
+            notif.send_notification_to_owner({}, {}, 'test')
+            assert send.call_count == 0
 
     def test_template_parameters(self):
         """Make sure the body, subject, recipients fields are correct"""
-        def test_generator(request, annotation, data):  # pylint: disable=W0613
+
+        def test_generator(request, annotation, data):
+            # pylint: disable=unused-argument
             """Our test template function"""
             return {
                 "status": True,
@@ -136,6 +144,7 @@ class NotifierTest(AppTestCase):
                 "subject": "Test subject",
                 "recipients": ["Test user"]
             }
+
         notifier.AnnotationNotifier.register_template("test", test_generator)
         request = DummyRequest()
         notif = notifier.AnnotationNotifier(request)
@@ -173,7 +182,7 @@ class NotifierTest(AppTestCase):
                 return ["test user"]
 
             @classmethod
-            def render(cls, request, annotation):  # pylint: disable=W0613
+            def render(cls, request, annotation):
                 """Our mock render function"""
                 return "test body", "test subject"
 
