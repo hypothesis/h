@@ -53,9 +53,10 @@ class Annotator.Notification extends Delegator
   #
   # Returns itself.
   show: (message, status=Annotator.Notification.INFO) =>
+    @currentStatus = status
     $(@element)
       .addClass(@options.classes.show)
-      .addClass(@options.classes[status])
+      .addClass(@options.classes[@currentStatus])
       .html(Util.escape(message || ""))
 
     setTimeout this.hide, 5000
@@ -70,7 +71,10 @@ class Annotator.Notification extends Delegator
   #
   # Returns itself.
   hide: =>
-    $(@element).removeClass(@options.classes.show)
+    @currentStatus ?= Annotator.Notification.INFO
+    $(@element)
+      .removeClass(@options.classes.show)
+      .removeClass(@options.classes[@currentStatus])
     this
 
 # Constants for controlling the display of the notification. Each constant
