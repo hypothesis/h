@@ -3,6 +3,7 @@
 !.webassets-cache
 
 /*.db
+/*.egg
 /*.egg-info
 /*.ini
 /bin
