@@ -2,7 +2,7 @@ SHELL := bash
 PATH := bin:${PATH}
 
 default:
-	./bootstrap
+	@yes | ./bootstrap
 
 clean:
 	find h/js -iname '*.js' | xargs -r rm
