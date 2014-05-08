@@ -56,7 +56,7 @@ setup(
         'webassets==0.8',
     ],
 
-    tests_require=['pytest', 'mock', 'selenium', 'tox'],
+    tests_require=['pytest', 'mock', 'selenium'],
 
     author='Hypothes.is Project & contributors',
     maintainer='Randall Leeds',
