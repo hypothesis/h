@@ -8,15 +8,17 @@ function create_virtualenv() {
 
 function maybe_create_virtualenv() {
 	echo "
-This script can create an isolated environment for installing python
-software libraries needed for development. This setup is recommended.
+This script will create an isolated environment for installing python
+software libraries needed for development unless one exists.
+
+This setup is recommended.
 
 If you are not familiar with using virtualenv [1] to manage a python
 development environment you may wish to take a few minutes to read a
 bit about it.
 
-If you are comfortable managing it yourself, e.g. through a tool
-like virtualenv-wrapper [2], you may decline to create one now.
+If you are comfortable managing it yourself, e.g. through a tool like
+virtualenv-wrapper [2], run this command after activating it.
 
 [1] http://www.virtualenv.org/
 [2] http://virtualenvwrapper.readthedocs.org/
