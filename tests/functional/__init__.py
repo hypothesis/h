@@ -36,9 +36,6 @@ class SeleniumTestCase(unittest.TestCase):
             'basemodel.should_drop_all': True,
         })
 
-        if os.environ.get('TRAVIS') == 'true':
-            self.settings['es.compatibility'] = 'pre-1.0.0'
-
         with testConfig(settings=self.settings) as config:
             authz = authorization.ACLAuthorizationPolicy()
             config.set_authorization_policy(authz)

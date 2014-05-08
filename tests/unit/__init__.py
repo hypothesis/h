@@ -17,6 +17,3 @@ class AppTestCase(TestCase):
             'basemodel.should_create_all': True,
             'basemodel.should_drop_all': True,
         })
-
-        if os.environ.get('TRAVIS') == 'true':
-            self.settings['es.compatibility'] = 'pre-1.0.0'
