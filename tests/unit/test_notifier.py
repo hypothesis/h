@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for our email notifications module"""
+"""Defines unit tests for h.notifier."""
 from mock import patch, Mock
 from pyramid.testing import DummyRequest
 

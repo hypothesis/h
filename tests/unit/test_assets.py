@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+"""Defines unit tests for h.assets."""
 from mock import Mock
 from pyramid.testing import DummyRequest, testConfig
 
@@ -6,36 +8,51 @@ from . import AppTestCase
 
 
 class DummyEvent(object):
+    """A dummy event for testing registry events."""
+    # pylint: disable=too-few-public-methods
+
     def __init__(self, request):
         self.request = request
 
 
 class DummyRoute(object):
-    pass
+    """A dummy route for testing routing."""
+    # pylint: disable=too-few-public-methods
+
+    pattern = None
 
 
 class AssetsTest(AppTestCase):
-    def test_asset_request_subscriber_predicate(self):
-        m1 = Mock()
-        m2 = Mock()
+    """Asset unit tests."""
+    # pylint: disable=too-many-public-methods
+
+    def test_subscriber_predicate(self):
+        """Test that the ``asset_request`` subscriber predicate.
+
+        It should correctly match asset requests when its value is ``True``,
+        and other requests when ``False``.
+        """
+        mock1 = Mock()
+        mock2 = Mock()
 
         with testConfig(settings=self.settings) as config:
+            # pylint: disable=attribute-defined-outside-init
             config.include(assets)
-            config.add_subscriber(m1, DummyEvent, asset_request=False)
-            config.add_subscriber(m2, DummyEvent, asset_request=True)
+            config.add_subscriber(mock1, DummyEvent, asset_request=False)
+            config.add_subscriber(mock2, DummyEvent, asset_request=True)
 
-            r1 = DummyRequest('/')
-            r1.matched_route = None
+            request1 = DummyRequest('/')
+            request1.matched_route = None
 
-            r2 = DummyRequest(config.get_webassets_env().url + '/i/t.png')
-            r2.matched_route = DummyRoute()
-            r2.matched_route.pattern = config.get_webassets_env().url
+            request2 = DummyRequest(config.get_webassets_env().url + '/t.png')
+            request2.matched_route = DummyRoute()
+            request2.matched_route.pattern = config.get_webassets_env().url
 
-            e1 = DummyEvent(r1)
-            e2 = DummyEvent(r2)
+            event1 = DummyEvent(request1)
+            event2 = DummyEvent(request2)
 
-            config.registry.notify(e1)
-            config.registry.notify(e2)
+            config.registry.notify(event1)
+            config.registry.notify(event2)
 
-            m1.assert_called_once_with(e1)
-            m2.assert_called_once_with(e2)
+            mock1.assert_called_onceventwith(event1)
+            mock2.assert_called_onceventwith(event2)

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Provides a base class for writing unit tests for h."""
 import os
 from unittest import TestCase
 
@@ -6,8 +7,8 @@ from pyramid import paster
 
 
 class AppTestCase(TestCase):
-
     """A subclass of unittest.TestCase for writing unit tests for h."""
+    # pylint: disable=too-many-public-methods
 
     def setUp(self):
         paster.setup_logging('test.ini')
