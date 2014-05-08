@@ -94,5 +94,4 @@ setup(
     },
 
     cmdclass=cmdclass,
-    test_suite='tests',
 )
