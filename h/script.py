@@ -59,10 +59,10 @@ class Application(wsgiapp.WSGIApplication):
 
 def get_config(args):
     if len(args) == 0:
-        args.append('--reload')
         args.append('development.ini')
+        args.append('--reload')
 
-    settings = get_appsettings(args[-1])
+    settings = get_appsettings(args[0])
     settings['basemodel.should_create_all'] = False
     settings['basemodel.should_drop_all'] = False
 
