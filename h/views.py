@@ -4,45 +4,101 @@ import logging
 
 import colander
 import deform
-import horus.views
+from horus import views
 from horus.lib import FlashMessage
-from horus.views import (
-    AuthController,
-    ForgotPasswordController,
-    RegisterController,
-)
 from pyramid import httpexceptions
-from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config, view_defaults
 
-from h import interfaces
+from h import events, interfaces
 from h.models import _
 from h.streamer import url_values_from_document
-from h.events import LoginEvent, LogoutEvent, RegistrationActivatedEvent
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-class BaseController(horus.views.BaseController):
-    # pylint: disable=too-few-public-methods
+def ajax_form(request, result):
+    errors = []
 
-    def __init__(self, request):
-        super(BaseController, self).__init__(request)
-        getUtility = request.registry.getUtility
-        self.Consumer = getUtility(interfaces.IConsumerClass)
-        self.Store = getUtility(interfaces.IStoreClass)
+    if isinstance(result, httpexceptions.HTTPRedirection):
+        request.response.headers.update(result.headers)
+        result = {'status': 'okay'}
+    elif isinstance(result, httpexceptions.HTTPError):
+        request.response.status_code = result.code
+        result = {'status': 'failure', 'reason': str(result)}
+    else:
+        errors = result.pop('errors', [])
+        if errors:
+            request.response.status_code = 400
+            result['status'] = 'failure'
+            result['reason'] = _('Please check your input.')
+        else:
+            result['status'] = 'okay'
+
+    for e in errors:
+        if isinstance(e, colander.Invalid):
+            result.setdefault('errors', {})
+            result['errors'].update(e.asdict())
+
+    return result
 
 
-@view_config(
-    accept='application/json',
-    context='pyramid.exceptions.BadCSRFToken',
-    renderer='json',
-)
-def bad_csrf_token(request):
-    return {
-        'status': 'failure',
-        'reason': 'Something is wrong. Please try again.'
+def pop_flash(request):
+    session = request.session
+
+    queues = {
+        name[3:]: [msg for msg in session.pop_flash(name[3:])]
+        for name in session.keys()
+        if name.startswith('_f_')
     }
+
+    # Deal with bag.web.pyramid.flash_msg style mesages
+    for msg in queues.pop('', []):
+        q = getattr(msg, 'kind', '')
+        msg = getattr(msg, 'plain', msg)
+        queues.setdefault(q, []).append(msg)
+
+    return queues
+
+
+def model(request):
+    session = request.session
+    return dict(personas=session.get('personas', []))
+
+
+class AsyncFormViewMapper(object):
+    def __init__(self, **kw):
+        self.attr = kw['attr']
+
+    def __call__(self, view):
+        def wrapper(context, request):
+            if request.method == 'POST':
+                data = request.json_body
+                data.update(request.params)
+                request.content_type = 'application/x-www-form-urlencoded'
+                request.POST.clear()
+                request.POST.update(data)
+            inst = view(request)
+            meth = getattr(inst, self.attr)
+            result = meth()
+            result = ajax_form(request, result)
+            result['flash'] = pop_flash(request)
+            result['model'] = model(request)
+            result.pop('form', None)
+            return result
+        return wrapper
+
+
+@view_config(accept='application/json',  name='app', renderer='json')
+def app(request):
+    return dict(status='okay', flash=pop_flash(request), model=model(request))
+
+
+@view_config(accept='application/json', renderer='json',
+             context='pyramid.exceptions.BadCSRFToken')
+def bad_csrf_token(context, request):
+    reason = _('Session is invalid.')
+    result = httpexceptions.HTTPBadRequest(reason)
+    return ajax_form(request, result)
 
 
 @view_config(name='embed.js', renderer='templates/embed.txt')
@@ -57,7 +113,12 @@ def page(context, request):
 
 
 @view_defaults(context='h.models.Annotation', layout='annotation')
-class AnnotationController(BaseController):
+class AnnotationController(views.BaseController):
+    def __init__(self, request):
+        super(AnnotationController, self).__init__(request)
+        getUtility = request.registry.getUtility
+        self.Store = getUtility(interfaces.IStoreClass)
+
     @view_config(accept='text/html', renderer='templates/displayer.pt')
     def __html__(self):
         request = self.request
@@ -97,149 +158,120 @@ class AnnotationController(BaseController):
         return self.request.context
 
 
-@view_defaults(accept='application/json', name='app', renderer='json')
-class AppController(BaseController):
-    def __init__(self, request):
-        super(AppController, self).__init__(request)
-
-        if request.method == 'POST':
-            try:
-                data = request.json_body
-                data.update(request.params)
-            except ValueError:
-                pass  # Request from legacy client or non-js browser.
-            else:
-                request.content_type = 'application/x-www-form-urlencoded'
-                request.POST.clear()
-                request.POST.update(data)
-
-    @view_config(request_method='POST', request_param='__formid__=login')
+@view_defaults(accept='text/html', renderer='templates/auth.pt')
+@view_config(attr='login', route_name='login')
+@view_config(attr='logout', route_name='logout')
+class AuthController(views.AuthController):
     def login(self):
-        result = AuthController(self.request).login()
-
-        if isinstance(result, dict) is False:
-            if self.request.user:
-                event = LoginEvent(self.request, self.request.user)
-                self.request.registry.notify(event)
-
-        return self.respond(result)
-
-    @view_config(request_method='POST', request_param='__formid__=register')
-    def register(self):
-        result = RegisterController(self.request).register()
-        return self.respond(result)
-
-    @view_config(request_method='POST', request_param='__formid__=activate')
-    def activate(self):
         request = self.request
-        schema = request.registry.getUtility(interfaces.IActivateSchema)
-        schema = schema().bind(request=self.request)
-        form = request.registry.getUtility(interfaces.IActivateForm)(schema)
+        result = super(AuthController, self).login()
 
-        appstruct = None
-        result = None
-        try:
-            appstruct = form.validate(request.POST.items())
-        except deform.ValidationFailure as e:
-            result = dict(form=e.render(), errors=e.error.children)
-        else:
-            code = appstruct['code']
-            activation = self.Activation.get_by_code(request, code)
-            user = None
-            if activation:
-                user = self.User.get_by_activation(request, activation)
+        if request.user:
+            # XXX: Horus should maybe do this for us
+            event = events.LoginEvent(request, request.user)
+            request.registry.notify(event)
 
-            if user:
-                user.password = appstruct['password']
-                self.db.add(user)
-                self.db.delete(activation)
-                FlashMessage(request, self.Str.authenticated, kind='success')
-                event = RegistrationActivatedEvent(request, user, activation)
-                request.registry.notify(event)
-            else:
-                form.error = colander.Invalid(
-                    form.schema,
-                    _('This activation code is not valid.')
-                )
-                result = dict(form=form.render(), errors=[form.error])
+        return result
 
-        return self.respond(result)
+    def logout(self):
+        request = self.request
+        result = super(AuthController, self).logout()
 
-    @view_config(request_method='POST', request_param='__formid__=forgot')
-    def forgot(self):
-        controller = ForgotPasswordController(self.request)
+        # XXX: Horus should maybe do this for us
+        event = events.LogoutEvent(request)
+        request.registry.notify(event)
 
+        return result
+
+
+@view_defaults(accept='application/json', name='app', renderer='json')
+@view_config(attr='login', request_param='__formid__=login')
+@view_config(attr='logout', request_param='__formid__=logout')
+class AsyncAuthController(AuthController):
+    __view_mapper__ = AsyncFormViewMapper
+
+
+@view_defaults(accept='text/html', renderer='templates/auth.pt')
+@view_config(attr='forgot_password', route_name='forgot_password')
+@view_config(attr='reset_password', route_name='reset_password')
+class ForgotPasswordController(views.ForgotPasswordController):
+    def __init__(self, request):
+        super(ForgotPasswordController, self).__init__(request)
+        Activation = self.Activation
+        self.Activation = self.get_activation(Activation)
+
+    def get_activation(self, Activation):
         # XXX: Horus currently has a bug where the Activation model isn't
         # flushed before the email is generated, causing the link to be
         # broken (hypothesis/h#1156).
         #
         # Fixed in horus@90f838cef12be249a9e9deb5f38b37151649e801
-        def get_activation():
-            activation = self.Activation()
-            self.db.add(activation)
-            self.db.flush()
-            return activation
+        activation = Activation()
+        self.db.add(activation)
+        self.db.flush()
+        return activation
 
-        controller.Activation = get_activation
-        result = controller.forgot_password()
 
-        return self.respond(result)
+@view_defaults(accept='application/json', name='app', renderer='json')
+@view_config(attr='forgot_password', request_param='__formid__=forgot')
+class AsyncForgotPasswordController(ForgotPasswordController):
+    __view_mapper__ = AsyncFormViewMapper
 
-    @view_config(request_method='POST', request_param='__formid__=logout')
-    def logout(self):
-        result = AuthController(self.request).logout()
-        event = LogoutEvent(self.request)
-        self.request.registry.notify(event)
-        return self.respond(result)
 
-    def respond(self, result):
-        errors = isinstance(result, dict) and result.pop('errors', []) or []
-        if len(errors):
-            for e in errors:
-                if isinstance(e, colander.Invalid):
-                    msgs = e.messages()
-                else:
-                    msgs = [str(e)]
-                for m in msgs:
-                    FlashMessage(self.request, m, kind='error')
-            return self(status='failure',
-                        reason=_('Your submission is invalid. '
-                                 'Please try again.'))
-        else:
-            return self()
+@view_defaults(accept='text/html', renderer='templates/auth.pt')
+@view_config(attr='register', route_name='register')
+@view_config(attr='activate', route_name='activate')
+class RegisterController(views.RegisterController):
+    pass
 
-    def pop_flash(self):
-        session = self.request.session
 
-        result = {
-            name[3:]: [msg for msg in session.pop_flash(name[3:])]
-            for name in session.keys()
-            if name.startswith('_f_')
-        }
+@view_defaults(accept='application/json', name='app', renderer='json')
+@view_config(attr='register', request_param='__formid__=register')
+@view_config(attr='activate', request_param='__formid__=activate')
+class AsyncRegisterController(RegisterController):
+    __view_mapper__ = AsyncFormViewMapper
 
-        # Deal with bag.web.pyramid.flash_msg style mesages
-        for msg in result.pop('', []):
-            q = getattr(msg, 'kind', '')
-            msg = getattr(msg, 'plain', msg)
-            result.setdefault(q, []).append(msg)
+    def activate(self):
+        """Activate a user and set a password given an activation code.
 
-        return result
-
-    @view_config(http_cache=0)
-    def __call__(self, status='okay', reason=None):
+        This view is different from the activation view in horus because it
+        does not require the user id to be passed. It trusts the activation
+        code and updates the password.
+        """
         request = self.request
-        result = {
-            'status': status,
-            'flash': self.pop_flash(),
-            'model': {
-                'personas': request.session.get('personas', []),
-            }
-        }
+        Str = self.Str
 
-        if reason:
-            result.update(reason=reason)
+        schema = request.registry.getUtility(interfaces.IActivateSchema)
+        schema = schema().bind(request=request)
+        form = request.registry.getUtility(interfaces.IActivateForm)(schema)
+        appstruct = None
 
-        return result
+        try:
+            appstruct = form.validate(request.POST.items())
+        except deform.ValidationFailure as e:
+            return dict(errors=e.error.children)
+
+        code = appstruct['code']
+        activation = self.Activation.get_by_code(request, code)
+
+        user = None
+        if activation:
+            user = self.User.get_by_activation(request, activation)
+
+        if user is None:
+            return dict(errors=[_('This activation code is not valid.')])
+
+        user.password = appstruct['password']
+        self.db.delete(activation)
+        self.db.add(user)
+
+        FlashMessage(request, Str.reset_password_done, kind='success')
+
+        # XXX: Horus should maybe do this for us
+        event = events.RegistrationActivatedEvent(request, user, activation)
+        request.registry.notify(event)
+
+        return {}
 
 
 @view_config(
@@ -259,7 +291,7 @@ def stream(context, request):
 
     if query is not None:
         location = request.resource_url(context, 'stream', query=query)
-        return HTTPFound(location=location)
+        return httpexceptions.HTTPFound(location=location)
     else:
         return context
 
@@ -273,6 +305,8 @@ def includeme(config):
     config.include('h.panels')
     config.include('h.schemas')
     config.include('h.subscribers')
+
+    config.include('horus')
 
     config.add_route('index', '/')
     config.add_route('help', '/docs/help')
