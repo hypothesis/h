@@ -333,10 +333,6 @@ class Group(GroupMixin, Base):
 class User(UserMixin, Base):
     # pylint: disable=too-many-public-methods
 
-    @declared_attr
-    def subscriptions(self):
-        return sa.Column(sa.BOOLEAN, nullable=False, default=False)
-
     @classmethod
     def get_by_username(cls, request, username):
         session = get_session(request)
@@ -359,6 +355,39 @@ class User(UserMixin, Base):
                 cls.email == email
             )
         ).first()
+
+    @property
+    def email_confirmed(self):
+        return bool((self.status or 0) & 0b001)
+
+    @email_confirmed.setter
+    def email_confirmed(self, value):
+        if value:
+            self.status = (self.status or 0) | 0b001
+        else:
+            self.status = (self.status or 0) & ~0b001
+
+    @property
+    def optout(self):
+        return bool((self.status or 0) & 0b010)
+
+    @optout.setter
+    def optout(self, value):
+        if value:
+            self.status = (self.status or 0) | 0b010
+        else:
+            self.status = (self.status or 0) & ~0b010
+
+    @property
+    def subscriptions(self):
+        return bool((self.status or 0) & 0b100)
+
+    @subscriptions.setter
+    def subscriptions(self, value):
+        if value:
+            self.status = (self.status or 0) | 0b100
+        else:
+            self.status = (self.status or 0) & ~0b100
 
 
 class UserGroup(UserGroupMixin, Base):

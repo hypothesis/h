@@ -50,11 +50,6 @@ type_enum = sa.Enum('system', 'user',
 
 
 def upgrade():
-    op.add_column(
-        'user',
-        sa.Column('subscriptions', sa.BOOLEAN, default=False, nullable=True)
-    )
-
     op.create_table(
         'user_subscriptions',
         sa.Column('id', sa.INTEGER, primary_key=True),
@@ -77,7 +72,6 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_column('user', 'subscriptions')
     op.drop_table('user_subscriptions')
     template_enum.drop(op.get_bind(), checkfirst=False)
     type_enum.drop(op.get_bind(), checkfirst=False)
