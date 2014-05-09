@@ -1,3 +1,23 @@
+class Notification extends Annotator.Notification
+  @INFO: 'info'
+  @ERROR: 'error'
+  @SUCCESS: 'success'
+
+  constructor: (options) ->
+    element = $(@options.html).hide()[0]
+    Annotator.Delegator.call(this, element, options)
+
+  # Retain the fat arrow binding despite skipping the super-class constructor
+  # XXX: replace with _appendElement override when we move to Annotator v2.
+  show: (message, status = Notification.INFO) =>
+    super
+    @element.prependTo(document.body).slideDown()
+
+  hide: =>
+    super
+    @element.slideUp => @element.remove()
+
+
 class FlashProvider
   queues:
     '': []
@@ -6,35 +26,22 @@ class FlashProvider
     success: []
   notice: null
 
-  constructor: ->
-    # Configure notification classes
-    angular.extend Annotator.Notification,
-      INFO: 'info'
-      ERROR: 'error'
-      SUCCESS: 'success'
+  $get: ->
+    angular.bind this, this._flash
 
   _process: ->
     for q, msgs of @queues
       if msgs.length
         msg = msgs.shift()
         unless q then [q, msg] = msg
-        notice = new Hypothesis.Notification()
+        notice = new Notification()
         notice.show(msg, q)
-        notice.element.hide().slideDown()
-        this._wait =>
-          notice.element.slideUp ->
-            notice.element.remove()
         break
 
   _flash: (queue, messages) ->
     if @queues[queue]?
       @queues[queue] = @queues[queue]?.concat messages
       this._process()
-
-  $get: ['$timeout', ($timeout) ->
-    this._wait = (cb) -> $timeout cb, 5000
-    angular.bind this, this._flash
-  ]
 
 
 flashInterceptor = ['$q', 'flash', ($q, flash) ->

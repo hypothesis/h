@@ -631,17 +631,6 @@ class Hypothesis extends Annotator
     return @element.injector().get('drafts').discard()
 
 
-class Hypothesis.Notification extends Annotator.Notification
-  constructor: (options) ->
-    element = $(@options.html).prependTo('body')[0]
-    Annotator.Delegator.call(this, element, options)
-
-  # Retain the fat arrow binding despite skipping the super-class constructor
-  # XXX: replace with _appendElement override when we move to Annotator v2.
-  show: => super
-  hide: => super
-
-
 class AuthenticationProvider
   constructor: ->
     @actions =
