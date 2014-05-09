@@ -57,8 +57,14 @@ configure = [
       redirectTo: '/viewer'
 
     # Configure CSP for templates
+    # XXX: IE workaround for the lack of document.baseURI property
+    baseURI = document.baseURI
+    if not baseURI
+      baseTags = document.getElementsByTagName "base"
+      baseURI = if baseTags.length then baseTags[0].href else document.URL
+
     # Explicitly whitelist '.html' paths adjacent to application base URI
-    basePattern = document.baseURI.replace /\/[^\/]*$/, '/*.html'
+    basePattern = baseURI.replace /\/[^\/]*$/, '/*.html'
     $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
 ]
 
