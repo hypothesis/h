@@ -56,7 +56,7 @@ development mailing list and read about `contributing`_. Then consider getting
 started on one of the issues that are ready for work by clicking on the badge
 below. Issues tagged with the label 'cake' are ideal for new contributors.
 
-.. image:: https://badge.waffle.io/hypothesis/h.png
+.. image:: https://badge.waffle.io/hypothesis/h.svg?label=1%20-%20Ready
    :target: https://waffle.io/hypothesis/h
    :alt: Stories in Ready
 .. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
