@@ -69,8 +69,11 @@ Testing
 To run the test suite, ensure the assets are built and then invoke the tests
 in the usual fashion of Python::
 
-    $ ./bin/hypothesis assets test.ini
     $ ./bin/python setup.py test
+
+As a convenience, there is a make target for this::
+
+    $ make test
 
 Chrome Extension
 ^^^^^^^^^^^^^^^^

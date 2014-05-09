@@ -1,41 +1,22 @@
 import multiprocessing
 
-from gunicorn import config, util
-from gunicorn.app import pasterapp, wsgiapp
 import pytest
 
-
-class TestApplication(wsgiapp.WSGIApplication):
-
-    """A Gunicorn Paster Application suitable for use in tests.
-
-    Extends the base :class:`gunicorn.app.base.Application` class to skip
-    processing of command line arguments and directly load a configuration
-    from the test.ini file.
-    """
-
-    def load_config(self):
-        self.cfgurl = 'config:test.ini'
-        self.cfg = config.Config()
-        self.cfg.set('paste', self.cfgurl)
-        self.cfg.set('logconfig', 'test.ini')
-        self.relpath = util.getcwd()
-
-        cfg = pasterapp.paste_config(self.cfg, self.cfgurl, self.relpath)
-
-        for k, v in cfg.items():
-            self.cfg.set(k.lower(), v)
-
-        default_config = config.get_default_config_file()
-        if default_config is not None:
-            self.load_config_from_file(default_config)
+from h.script import Application, assets, get_config
 
 
 def run(start):
+    def prepare(worker):
+        settings = get_config(['test.ini'])['settings']
+        assets(settings)
+        start.release()
+
     start.acquire()
     start.notify()
-    app = TestApplication()
-    app.cfg.set('post_worker_init', lambda worker: start.release())
+
+    app = Application('test.ini')
+    app.cfg.set('post_worker_init', prepare)
+
     app.run()
 
 
