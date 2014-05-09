@@ -293,9 +293,8 @@ def registration_subscriptions(event):
 
 @subscriber(events.LoginEvent)
 def login_subscriptions(event):
-    if event.user:
-        if not event.user.subscriptions:
-            create_default_subscription(event.request, event.user)
+    if not event.user.subscriptions:
+        create_default_subscription(event.request, event.user)
 
 
 def includeme(config):
