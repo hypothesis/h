@@ -40,6 +40,7 @@ setup(
         'deform_bootstrap>=0.2.0',
         'elasticsearch>=0.4,<0.5',
         'gevent-websocket==0.3.6',
+        'gunicorn>=18.0',
         'horus>=0.9.15',
         'jsonpointer==1.0',
         'jsonschema==1.3.0',
@@ -57,7 +58,8 @@ setup(
         'webassets==0.8',
     ],
 
-    tests_require=['pytest>=2.5', 'mock', 'selenium'],
+    extras_require={'YAML': ['PyYAML']},
+    tests_require=['PyYAML', 'pytest>=2.5', 'mock', 'selenium'],
 
     author='Hypothes.is Project & contributors',
     maintainer='Randall Leeds',

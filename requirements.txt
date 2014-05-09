@@ -1,4 +1,2 @@
--e .
-PyYAML
-gunicorn
+-e .[YAML]
 -e git+https://github.com/sontek/pyramid_webassets.git@9968c9a0590df3758e88974f8dcedda0da6e7265#egg=pyramid_webassets-master
