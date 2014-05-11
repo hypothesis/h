@@ -14,7 +14,7 @@ from pyramid.settings import asbool
 from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
-from h import api, events, interfaces, models
+from h import events, interfaces, models
 from h.api import lib
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
