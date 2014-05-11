@@ -140,11 +140,11 @@ def chrome(env):
     request = env['request']
     context = request.context
 
-    registry.notify(ContextFound(request))
+    registry.notify(ContextFound(request))  # pyramid_layout attrs
     request.layout_manager.layout.csp = ''
 
-    embed(context, request)
     manifest(context, request)
+    embed(context, request)
 
     if asbool(settings.get('webassets.debug', False)) is False:
         app(context, request)
@@ -196,8 +196,6 @@ def extension(args, console, settings):
       http://static.example.com/
       chrome-extension://extensionid/public
     """
-    settings['webassets.base_dir'] = abspath('./build/chrome/public')
-
     if len(args) == 1:
         console.error('You must supply a url to the hosted backend.')
         return 2
@@ -219,6 +217,7 @@ def extension(args, console, settings):
         assets_url = urlunparse(parts)
 
     # Set up the assets url and source path mapping
+    settings['webassets.base_dir'] = abspath('./build/chrome/public')
     settings['webassets.base_url'] = assets_url
     settings['webassets.paths'] = json.dumps({
         resolve('h:').abspath(): assets_url
