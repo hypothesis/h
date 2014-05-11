@@ -43,10 +43,17 @@ class WebassetsResourceRegistry(object):
 
 
 class AssetRequest(object):
+    """A subscriber predicate that checks whether a route is a static asset.
+
+    This predicate relies on the facto that static assets registered via
+    :meth:`pyramid.config.Configurator.add_static_view` are prefixed with
+    a double underscore. While this approach seems brittle, it works (provided
+    users don't register their own views this way) and it supports all static
+    view requests (not just those registered by pyramid_webassets).
+    """
     # pylint: disable=too-few-public-methods
 
     def __init__(self, val, config):
-        self.env = config.get_webassets_env()
         self.val = val
 
     def text(self):
@@ -59,7 +66,7 @@ class AssetRequest(object):
         if request.matched_route is None:
             val = False
         else:
-            val = request.matched_route.pattern.startswith(self.env.url)
+            val = request.matched_route.name.startswith('__')
 
         return self.val == val
 

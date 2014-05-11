@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.assets."""
 from mock import Mock
+from pyramid.urldispatch import Route
 from pyramid.testing import DummyRequest, testConfig
 
 from h import assets
@@ -13,13 +14,6 @@ class DummyEvent(object):
 
     def __init__(self, request):
         self.request = request
-
-
-class DummyRoute(object):
-    """A dummy route for testing routing."""
-    # pylint: disable=too-few-public-methods
-
-    pattern = None
 
 
 class AssetsTest(AppTestCase):
@@ -44,9 +38,9 @@ class AssetsTest(AppTestCase):
             request1 = DummyRequest('/')
             request1.matched_route = None
 
+            pattern = config.get_webassets_env().url + '*subpath'
             request2 = DummyRequest(config.get_webassets_env().url + '/t.png')
-            request2.matched_route = DummyRoute()
-            request2.matched_route.pattern = config.get_webassets_env().url
+            request2.matched_route = Route('__' + pattern, pattern)
 
             event1 = DummyEvent(request1)
             event2 = DummyEvent(request2)
