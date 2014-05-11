@@ -637,6 +637,7 @@ class AuthenticationProvider
       load:
         method: 'GET'
         withCredentials: true
+        interceptor: this
 
     for action in ['login', 'logout', 'register', 'forgot', 'activate']
       @actions[action] =
@@ -644,11 +645,20 @@ class AuthenticationProvider
         params:
           '__formid__': action
         withCredentials: true
+        interceptor: this
+
+  response: (response) =>  # bw compat
+    if angular.isObject(@model.persona)
+      persona = @model.persona
+      @model.persona = "acct:#{persona.username}@#{persona.provider}"
+      @model.personas = for persona in @model.personas
+        "acct:#{persona.username}@#{persona.provider}"
+    response
 
   $get: [
     '$resource', 'baseURI'
     ($resource,   baseURI) ->
-      $resource(baseURI, {}, @actions).load()
+      @model = $resource(baseURI, {}, @actions).load()
   ]
 
 
