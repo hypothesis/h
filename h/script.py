@@ -10,7 +10,7 @@ from clik import App
 from gunicorn.app import pasterapp, wsgiapp
 from gunicorn import config, util
 from pyramid.config import Configurator
-from pyramid.events import ContextFound
+from pyramid.events import BeforeRender, ContextFound
 from pyramid.paster import get_appsettings
 from pyramid.path import AssetResolver
 from pyramid.request import Request
@@ -21,7 +21,7 @@ from pyramid.view import render_view
 from pyramid_basemodel import bind_engine
 from sqlalchemy import engine_from_config
 
-from h import __version__, api, create_app
+from h import __version__, api
 
 
 class Application(wsgiapp.WSGIApplication):
@@ -89,9 +89,24 @@ uses_relative.append('chrome-extension')
 resolve = AssetResolver().resolve
 
 
+def add_base_url(event):
+    request = event['request']
+
+    assets_env = request.webassets_env
+    view_name = getattr(request, 'view_name', None)
+
+    if view_name == 'embed.js' and not assets_env.debug:
+        base_url = join(request.webassets_env.url, 'app.html')
+    else:
+        base_url = request.resource_url(request.context, 'app')
+
+    event['base_url'] = base_url
+
+
 def app(context, request):
     assets_dir = request.webassets_env.directory
     app_file = join(assets_dir, 'app.html')
+    request.accept = 'text/html'
     with open(app_file, 'w') as f:
         f.write(render_view(context, request, name='app'))
 
@@ -99,8 +114,11 @@ def app(context, request):
 def embed(context, request):
     assets_dir = request.webassets_env.directory
     embed_file = join(assets_dir, 'js/embed.js')
+
+    setattr(request, 'view_name', 'embed.js')
     with open(embed_file, 'w') as f:
         f.write(render_view(context, request, name='embed.js'))
+    delattr(request, 'view_name')
 
 
 def manifest(context, request):
@@ -218,10 +236,14 @@ def extension(args, console, settings):
     merge('./h/images', './build/chrome/public/images')
     merge('./h/lib/images', './build/chrome/public/lib/images')
 
+    config = Configurator(settings=settings)
+    config.include('h')
+    config.add_subscriber(add_base_url, BeforeRender)
+    config.commit()
+
     # Build it
-    wsgi = create_app(settings)
     request = Request.blank('/app', base_url=base_url)
-    chrome(prepare(registry=wsgi.registry, request=request))
+    chrome(prepare(registry=config.registry, request=request))
 
 
 @command(usage='[options] config_uri')

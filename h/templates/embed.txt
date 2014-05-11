@@ -15,7 +15,7 @@ yepnope([
     nope: ${map(str, request.webassets_env["inject"].urls())},
     complete: function () {
       window.annotator = null;
-      var app = '${request.resource_url(context, "app")}'
+      var app = '${base_url}'
         , bootstrap = [
           'if (!window.annotator) {',
           '  var klass, options;',
