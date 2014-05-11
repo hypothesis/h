@@ -5,7 +5,7 @@ import logging
 import os
 import re
 
-from annotator import store, es
+from annotator import auth, es, store
 import elasticsearch
 import flask
 from pyramid.httpexceptions import exception_response
@@ -91,6 +91,14 @@ def before_request():
     flask.g.auth = lib.authenticator(request)
     flask.g.authorize = functools.partial(lib.authorize, request)
     flask.g.before_annotation_update = anonymize_deletes
+
+    # Use the first persona as the default request user.
+    # TODO: support multiple authorizations on store requests
+    personas = request.session.get('personas', [])
+    if len(personas):
+        key = request.registry.settings['api.key']
+        consumer = lib.get_consumer(request, key)
+        flask.g.user = auth.User(personas[0], consumer, False)
 
 
 def after_request(response):

@@ -27,8 +27,16 @@ def authorize(request, annotation, action, user=None):
 
 
 def get_consumer(request, key):
-    Consumer = request.registry.getUtility(interfaces.IConsumerClass)
-    return Consumer.get_by_key(request, key)
+    klass = request.registry.getUtility(interfaces.IConsumerClass)
+    inst = klass.get_by_key(request, key)
+
+    # Coerce types so elasticsearch doesn't choke on the UUIDs.
+    # TODO: Can we add magic to h.models.GUID to take care of this?
+    result = auth.Consumer(str(key))
+    result.secret = str(inst.secret)
+    result.ttl = inst.ttl
+
+    return result
 
 
 def wrap_annotation(request, annotation):
