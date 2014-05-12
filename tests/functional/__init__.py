@@ -19,8 +19,6 @@ API.
 import os
 import unittest
 
-from pyramid import authorization, paster
-from pyramid.testing import testConfig
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -29,19 +27,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 class SeleniumTestCase(unittest.TestCase):
     def setUp(self):
-        paster.setup_logging('test.ini')
-        self.settings = paster.get_appsettings('test.ini')
-        self.settings.update({
-            'basemodel.should_create_all': True,
-            'basemodel.should_drop_all': True,
-        })
-
-        with testConfig(settings=self.settings) as config:
-            authz = authorization.ACLAuthorizationPolicy()
-            config.set_authorization_policy(authz)
-            config.include('h.models')
-            config.include('h.api.store')
-
         self.base_url = "http://localhost:4000"
         env = os.environ
 
