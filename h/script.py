@@ -7,8 +7,9 @@ from urlparse import urljoin, urlparse, urlunparse, uses_netloc, uses_relative
 
 from chameleon.zpt.template import PageTextTemplateFile
 from clik import App
-from gunicorn.app import pasterapp, wsgiapp
 from gunicorn import config, util
+from gunicorn.app.pasterapp import load_pasteapp, paste_config
+from gunicorn.app.wsgiapp import WSGIApplication
 from pyramid.config import Configurator
 from pyramid.events import BeforeRender, ContextFound
 from pyramid.paster import get_appsettings
@@ -24,7 +25,7 @@ from sqlalchemy import engine_from_config
 from h import __version__, api
 
 
-class Application(wsgiapp.WSGIApplication):
+class Application(WSGIApplication):
 
     """A Gunicorn Paster Application
 
@@ -36,10 +37,11 @@ class Application(wsgiapp.WSGIApplication):
     when Gunicorn R19 is released.
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename, settings=None):
         self.relpath = util.getcwd()
         self.cfgpath = abspath(normpath(join(self.relpath, filename)))
         self.cfgurl = 'config:' + self.cfgpath
+        self.settings = settings
         super(Application, self).__init__()
 
     def load_config(self):
@@ -47,7 +49,7 @@ class Application(wsgiapp.WSGIApplication):
         self.cfg.set('paste', self.cfgurl)
         self.cfg.set('logconfig', self.cfgpath)
 
-        cfg = pasterapp.paste_config(self.cfg, self.cfgurl, self.relpath)
+        cfg = paste_config(self.cfg, self.cfgurl, self.relpath, self.settings)
 
         for k, v in cfg.items():
             self.cfg.set(k.lower(), v)
@@ -55,6 +57,10 @@ class Application(wsgiapp.WSGIApplication):
         default_config = config.get_default_config_file()
         if default_config is not None:
             self.load_config_from_file(default_config)
+
+    def load_pasteapp(self):
+        self.chdir()
+        return load_pasteapp(self.cfgurl, self.relpath, self.settings)
 
 
 def get_config(args):
