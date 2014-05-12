@@ -76,6 +76,10 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     $(window).on 'message', this._onMessage
     this._beacon()
 
+  destroy: ->
+    super
+    $(window).off 'message', this._onMessage
+
   # Assign a non-enumerable tag to objects which cross the bridge.
   # This tag is used to identify the objects between message.
   _tag: (msg, tag) ->

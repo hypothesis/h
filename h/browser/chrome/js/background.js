@@ -119,6 +119,9 @@ function onPageAction(tab) {
 
   if (state(tab.id) == 'active') {
     newState = state(tab.id, 'sleeping')
+    chrome.tabs.executeScript(tab.id, {
+      file: 'public/js/destroy.js'
+    })
   } else {
     newState = state(tab.id, 'active')
     if (tab.status == 'complete') {

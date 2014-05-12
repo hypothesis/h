@@ -206,6 +206,28 @@ class Annotator.Guest extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
 
+  destroy: ->
+    $(document).unbind({
+      "mouseup":   this.checkForEndSelection
+      "mousedown": this.checkForStartSelection
+    })
+
+    $('#annotator-dynamic-style').remove()
+
+    @adder.remove()
+    @frame.remove()
+
+    @wrapper.find('.annotator-hl').each ->
+      $(this).contents().insertBefore(this)
+      $(this).remove()
+
+    @element.data('annotator', null)
+
+    for name, plugin of @plugins
+      @plugins[name].destroy()
+
+    this.removeEvents()
+
   showViewer: (viewName, annotations, focused = false) =>
     @panel?.notify
       method: "showViewer"
