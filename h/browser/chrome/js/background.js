@@ -35,15 +35,15 @@ function injecting(tabId, value) {
 }
 
 
-function inject(tab) {
+function inject(tabId) {
   // If we are already injecting, don't have to do anything.
-  if (!injecting(tab)) {
+  if (!injecting(tabId)) {
     console.log(new Date(), "Initiating code injectation for tab", tab);
-    injecting(tab, true);
+    injecting(tabId, true);
     setTimeout(function(){ // Give it some time before insertation
-      injecting(tab, false);
+      injecting(tabId, false);
       console.log(new Date(), "Executing code injectation on tab", tab);
-      chrome.tabs.executeScript(null, {
+      chrome.tabs.executeScript(tabId, {
         file: 'public/js/embed.js'
       })
     }, 1000);
