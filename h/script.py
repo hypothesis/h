@@ -7,7 +7,6 @@ from urlparse import urljoin, urlparse, urlunparse, uses_netloc, uses_relative
 
 from chameleon.zpt.template import PageTextTemplateFile
 from clik import App
-import elasticsearch
 from gunicorn import config, util
 from gunicorn.app.pasterapp import load_pasteapp, paste_config
 from gunicorn.app.wsgiapp import WSGIApplication
@@ -21,9 +20,7 @@ from pyramid.scripting import prepare
 from pyramid.settings import asbool
 from pyramid.view import render_view
 from pyramid_basemodel import bind_engine
-import requests
 from sqlalchemy import engine_from_config
-import urlparse
 
 from h import __version__, api
 
@@ -178,74 +175,6 @@ def init_db(settings):
 
     engine = engine_from_config(settings, 'sqlalchemy.')
     bind_engine(engine, should_create=True)
-
-# Helper function to create an ES connection
-def connect_es(host):
-    parsed = urlparse.urlparse(host)
-
-    connargs = {
-      'host': parsed.hostname,
-    }
-
-    username = parsed.username
-    password = parsed.password
-    if username is not None or password is not None:
-        connargs['http_auth'] = ((username or ''), (password or ''))
-
-    if parsed.port is not None:
-        connargs['port'] = parsed.port
-
-    if parsed.path:
-        connargs['url_prefix'] = parsed.path
-
-    conn = elasticsearch.Elasticsearch(
-        hosts=[connargs],
-        connection_class=elasticsearch.Urllib3HttpConnection)
-
-    return conn
-
-
-@command(usage='annotation_id')
-def fetch_from_prod(args, console, settings):
-    """Import an annotation from the production db to the local db"""
-    if len(args) == 1:
-        console.error("You must supply an annotation ID!")
-        return 2
-    else:
-        id = args[1]
-
-        try:
-          es_host = settings["es.host"]
-          console.error("Checking with local ES database at " + es_host + " ...")
-          conn = connect_es(es_host)
-          r = conn.get(index="annotator", doc_type="annotation", id=id)
-          console.error("The wanted annotation already exists locally!")
-          return 2
-
-        except elasticsearch.exceptions.NotFoundError:
-          console.error("OK, the wanted annotation does not exist locally.")
-        except err:
-          console.error("Error: can't task to ES!");
-          return 2
-
-        console.error("Fetching annotation" + id)
-        uri = "https://api.hypothes.is/annotations/" + id
-        result = requests.get(uri)
-        if result.status_code != 200:
-            console.error(result.text)
-            return 2
-
-        annotation = result.json()
-
-        console.error("Creating annotation locally...")
-
-        r = conn.index(index="annotator",
-                       doc_type="annotation",
-                       id=id,
-                       body=annotation,
-                       refresh=True)
-
-        console.error("Inserted annotation to local DB.")
 
 
 @command(usage='config_file')
