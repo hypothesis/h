@@ -38,7 +38,7 @@ setup(
         'annotator>=0.11.1',
         'clik==0.3.1',
         'deform_bootstrap>=0.2.0',
-        'elasticsearch>=0.4,<0.5',
+        'elasticsearch',
         'gevent-websocket==0.3.6',
         'gunicorn>=18.0',
         'horus>=0.9.15',
