@@ -703,7 +703,10 @@ class Auth
   constructor: (
      $scope,   authentication
   ) ->
-    _reset = => angular.copy @scope, $scope.model
+    _reset = =>
+      angular.copy @scope, $scope.model
+      for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
+        ctrl.$setPristine()
 
     $scope.$on '$reset', _reset
 
@@ -713,8 +716,6 @@ class Auth
       authentication["$#{form.$name}"] ->
         _reset()
         $scope.$emit 'success', form.$name
-        for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
-          ctrl.$setPristine()
 
 
 class Editor
