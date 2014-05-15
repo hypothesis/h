@@ -68,7 +68,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     local = annotation.target  # The current target list
 
     if local and local.length > remote.length
-      console.log "Ignoring update which would make me loose a target in",
+#      console.log "Ignoring update which would make me loose a target in",
         if gateway then "sidebar" else "host frame"
     else if local and local.length is remote.length
       # Same targets, just update the data
@@ -76,7 +76,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
         @_mergeTarget local[i], remote[i], gateway
     else
       # We have more targets now!
-      console.log "Receiving new targets in",
+#      console.log "Receiving new targets in",
         if gateway then "sidebar" else "host frame"
       annotation.target = remote
 
