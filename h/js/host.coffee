@@ -1,4 +1,6 @@
+Annotator = @Annotator
 $ = Annotator.$
+
 
 class Annotator.Host extends Annotator.Guest
   # Drag state variables
@@ -35,10 +37,6 @@ class Annotator.Host extends Annotator.Guest
 
     # Scan the document
     this.scanDocument "Host initialized"
-
-    # Save this reference to the Annotator class, so it's available
-    # later, even if someone has deleted the original reference
-    @Annotator = Annotator
 
   _setupXDM: (options) ->
     channel = super

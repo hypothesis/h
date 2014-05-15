@@ -1,4 +1,6 @@
+Annotator = @Annotator
 $ = Annotator.$
+
 
 class Annotator.Guest extends Annotator
   # Events to be bound on Annotator#element.
@@ -466,7 +468,7 @@ class Annotator.Guest extends Annotator
     # We have to clear the selection.
     # (Annotator does this automatically by focusing on
     # one of the input fields in the editor.)
-    @Annotator.util.getGlobal().getSelection().removeAllRanges()
+    Annotator.util.getGlobal().getSelection().removeAllRanges()
 
   onSetTool: (name) ->
     switch name
