@@ -11,6 +11,75 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     'annotationsLoaded': 'annotationsLoaded'
     'enableAnnotating': 'enableAnnotating'
 
+  # Helper method for merging info from a remote target
+  @_mergeTarget: (local, remote, gateway) =>
+#    console.log "Updating target in",
+#      if gateway then "sidebar" else "host frame"
+
+    deleted = []
+    for field, val of local when (not remote[field]?)
+      if not gateway and field in ["diffHTML", "diffCaseOnly"]
+#        console.log "Ignoring attempt to delete", field, "from host frame"
+      else
+        deleted.push
+          field: field
+          value: val
+
+    changed = []
+    for field, val of local when (remote[field]? and remote[field] isnt val)
+      unless Array.isArray val
+        if not gateway and field in ["quote"]
+#          console.log "Ignoring attempt to change", field, "in host frame"
+        else
+          changed.push
+            field: field
+            oldValue: val
+            newValue: remote[field]
+
+    added = []
+    for field, val of remote when (not local[field]?)
+      added.push
+        field: field
+        val: val
+
+    if deleted.length
+#      console.log "Deleted old values:"
+      deleted.forEach (d) ->
+#        console.log "'" + d.field + "': ", d.value
+        delete local[d.field]
+
+
+    if changed.length
+#      console.log "Changed values:"
+      changed.forEach (c) ->
+#        console.log "'" + c.field + "': '" + c.oldValue + "'" + " -> " + "'" + c.newValue + "'"
+        local[c.field] = c.newValue
+
+    if added.length
+#      console.log "Newly added values:"
+      added.forEach (a) ->
+#        console.log "'" + a.field + "': ", a.val
+        local[a.field] = a.val
+
+
+  # Helper method for merging info from a list of remote targets
+  @_mergeTargets: (annotation, remote, gateway) =>
+
+    local = annotation.target  # The current target list
+
+    if local and local.length > remote.length
+      console.log "Ignoring update which would make me loose a target in",
+        if gateway then "sidebar" else "host frame"
+    else if local and local.length is remote.length
+      # Same targets, just update the data
+      for i in [0 ... local.length]
+        @_mergeTarget local[i], remote[i], gateway
+    else
+      # We have more targets now!
+      console.log "Receiving new targets in",
+        if gateway then "sidebar" else "host frame"
+      annotation.target = remote
+
   # Plugin configuration
   options:
 
@@ -40,8 +109,8 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     # keys of the remote object into the local copy
     merge: (local, remote) ->
       for k, v of remote
-        if k is "target" and local[k] and local[k].length > v.length
-#          console.log "Ignoring update which would make me loose a target."
+        if k is "target"
+          Bridge._mergeTargets local, v, @gateway
         else
           local[k] = v
       local
