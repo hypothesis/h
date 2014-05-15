@@ -3,8 +3,9 @@ Contributing to Development
 
 Communications
 --------------
-Please be courteous and respectful in your communication on IRC,
-the mailing list, and Github. Humor is appreciated, but remember that
+Please be courteous and respectful in your communication on IRC
+(`#hypothes.is`_ on `freenode.net`_), the mailing list (`subscribe`_,
+`archive`_), and `Github`_. Humor is appreciated, but remember that
 some nuance may be lost in the medium and plan accordingly.
 
 When writing commit messages, please bear the following in mind:
@@ -161,6 +162,11 @@ a long-running branch up to date. It is better to start a new branch
 and, if applicable, a new pull request when performing this action on
 branches you have published.
 
+.. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
+.. _freenode.net: http://freenode.net/
+.. _subscribe: mailto:dev+subscribe@list.hypothes.is
+.. _archive: http://list.hypothes.is/archive/dev
+.. _Github: http://github.com/hypothesis/h
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
 .. _Google Python Style Guide: https://google-styleguide.googlecode.com/svn/trunk/pyguide.html
 .. _Google JavaScript Style Guide: https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
