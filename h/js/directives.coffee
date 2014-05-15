@@ -110,26 +110,24 @@ recursive = ['$compile', '$timeout', ($compile, $timeout) ->
 # experience of filling out forms by delaying validation messages until
 # after the user has made a mistake.
 ###
-slowValidate = ['$parse', '$timeout', ($parse, $timeout) ->
+slowValidate = ->
   link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
-
-    promise = null
+    fieldName = attr.slowValidate
+    return unless ctrl.$name? and ctrl?[fieldName]
 
     elem.addClass 'slow-validate'
 
-    ctrl[attr.slowValidate]?.$viewChangeListeners?.push (value) ->
-      elem.removeClass 'slow-validate-show'
+    fieldPath = [ctrl.$name, fieldName, '$viewValue'].join('.')
+    modelCtrl = ctrl?[fieldName]
 
-      if promise
-        $timeout.cancel promise
-        promise = null
-
-      promise = $timeout -> elem.addClass 'slow-validate-show'
+    scope.$watch fieldPath, ->
+      if modelCtrl.$invalid and modelCtrl.$dirty
+        elem.addClass 'slow-validate-show'
+      else
+        elem.removeClass 'slow-validate-show'
 
   require: '^form'
   restrict: 'A'
-]
 
 
 tabReveal = ['$parse', ($parse) ->

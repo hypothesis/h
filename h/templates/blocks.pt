@@ -19,7 +19,7 @@
     <input type="text" name="username" value="" placeholder="Username"
            ng-model="model.username" ng-minlength="3"
            required autocapitalize="false" />
-    <span ng-show="login.username.$dirty" slow-validate="username">
+    <span slow-validate="username">
       <span ng-show="login.username.$error.required"
             >Please enter your username.</span>
       <span ng-show="login.username.$error.minlength"
@@ -29,9 +29,7 @@
     <input type="password" name="password" value="" placeholder="Password"
            ng-model="model.password"
            required autocapitalize="false" autocorrect="false" />
-    <span ng-show="login.password.$dirty && login.password.$error.required"
-          slow-validate="password"
-          >Please enter your password.</span>
+    <span slow-validate="password">Please enter your password.</span>
 
     <input type="submit" name="login" value="Sign in"
            ng-disabled="!login.$valid" />
@@ -50,7 +48,7 @@
            required autocapitalize="false" ng-model="model.username"
            ng-minlength="3" ng-maxlength="15"
            ng-pattern="/^[A-Za-z0-9._]+$/" />
-    <span ng-show="register.username.$dirty" slow-validate="username">
+    <span slow-validate="username">
       <span ng-show="register.username.$error.required"
             >Please choose a username.</span>
       <span ng-show="register.username.$error.minlength"
@@ -63,7 +61,7 @@
 
     <input type="email" name="email" value="" placeholder="Email"
            ng-model="model.email" required autocapitalize="false" />
-    <span ng-show="register.email.$dirty" slow-validate="email">
+    <span slow-validate="email">
       <span ng-show="register.email.$error.email"
             >Is this an email address?</span>
       <span ng-show="register.email.$error.required"
@@ -73,7 +71,7 @@
     <input type="password" name="password" value="" placeholder="Password"
            required autocapitalize="false" autocorrect="false"
            ng-minlength="2" ng-model="model.password" />
-    <span ng-show="register.password.$dirty" slow-validate="password">
+    <span slow-validate="password">
       <span ng-show="register.password.$error.required"
             >Please enter a password.</span>
       <span ng-show="register.password.$error.minlength"
@@ -97,7 +95,7 @@
     <!--Get Validation Code-->
     <input type="email" name="email" value="" placeholder="Email"
            required autocapitalize="false" ng-model="model.email" />
-    <span ng-show="forgot.email.$dirty" slow-validate="email">
+    <span slow-validate="email">
       <span ng-show="forgot.email.$error.email"
             >Is this an email address?</span>
       <span ng-show="forgot.email.$error.required"
@@ -122,14 +120,12 @@
     <input type="text" name="code" value="" placeholder="Activation Code"
            required autocorrect="false" autocapitalize="false"
            ng-model="model.code" />
-    <span ng-show="activate.code.$dirty && activate.code.$error.required"
-          slow-validate="code"
-          >Please enter your validation code.</span>
+    <span slow-validate="code">Please enter your validation code.</span>
 
     <input type="password" name="password" value="" placeholder="New Password"
            required autocapitalize="false" autocorrect="false"
            ng-minlength="2" ng-model="model.password" />
-    <span ng-show="activate.password.$dirty" slow-validate="password">
+    <span slow-validate="password">
       <span ng-show="activate.password.$error.required"
             >Please choose a password.</span>
       <span ng-show="activate.password.$error.minlength"
