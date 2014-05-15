@@ -96,7 +96,10 @@ class App
           p.channel.notify method: 'setActiveHighlights'
 
     $scope.$watch 'sheet.collapsed', (hidden) ->
-      unless hidden then $scope.sheet.tab = 'login'
+      if hidden
+        $element.find('.sheet').scope().$broadcast('$reset')
+      else
+        $scope.sheet.tab = 'login'
 
     $scope.$watch 'sheet.tab', (tab) ->
       return unless tab
