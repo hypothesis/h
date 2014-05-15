@@ -55,7 +55,7 @@ flashInterceptor = ['$q', 'flash', ($q, flash) ->
 
       if data.status is 'failure'
         flash 'error', data.reason
-        $q.reject(data.reason)
+        $q.reject(data)
       else if data.status is 'okay' and data.model
         response.data = data.model
         response
