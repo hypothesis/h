@@ -26,7 +26,7 @@ class TestAnnotator(SeleniumTestCase):
 
             picker = (By.CLASS_NAME, 'user-picker')
             ec = expected_conditions.visibility_of_element_located(picker)
-            WebDriverWait(self.driver, 10).until(ec)
+            WebDriverWait(driver, 3).until(ec)
 
             picker = driver.find_element_by_class_name('user-picker')
             dropdown = picker.find_element_by_class_name('dropdown-toggle')
@@ -57,7 +57,7 @@ class TestAnnotator(SeleniumTestCase):
             # Wait for save
             ts = (By.TAG_NAME, "fuzzytime")
             saved = expected_conditions.visibility_of_element_located(ts)
-            WebDriverWait(driver, 10).until(saved)
+            WebDriverWait(driver, 3).until(saved)
 
         def get_labels(d):
             return d.find_elements_by_css_selector(".heatmap-pointer")
@@ -66,7 +66,7 @@ class TestAnnotator(SeleniumTestCase):
         driver.get(self.base_url + "/")
 
         # the middle heatmap label should have a "1" in it
-        WebDriverWait(driver, 10).until(lambda d: len(get_labels(d)) == 3)
+        WebDriverWait(driver, 30).until(lambda d: len(get_labels(d)) == 3)
         a_label = get_labels(driver)[1]
         assert a_label.text == "1"
 
@@ -76,7 +76,7 @@ class TestAnnotator(SeleniumTestCase):
         with Annotator(driver):
             annotation = (By.CLASS_NAME, 'annotation')
             ec = expected_conditions.visibility_of_element_located(annotation)
-            WebDriverWait(driver, 10).until(ec)
+            WebDriverWait(driver, 3).until(ec)
             annotation = driver.find_element_by_class_name('annotation')
             user = annotation.find_element_by_class_name('user')
             body = annotation.find_element_by_css_selector('markdown div p')
