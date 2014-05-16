@@ -88,7 +88,7 @@ class SeleniumTestCase(unittest.TestCase):
         with Annotator(driver):
             picker = (By.CLASS_NAME, 'user-picker')
             ec = expected_conditions.visibility_of_element_located(picker)
-            WebDriverWait(self.driver, 10).until(ec)
+            WebDriverWait(self.driver, 3).until(ec)
 
             picker = driver.find_element_by_class_name('user-picker')
             dropdown = picker.find_element_by_class_name('dropdown-toggle')
@@ -128,7 +128,7 @@ class SeleniumTestCase(unittest.TestCase):
 
             picker = (By.CLASS_NAME, 'user-picker')
             ec = expected_conditions.visibility_of_element_located(picker)
-            WebDriverWait(self.driver, 10).until(ec)
+            WebDriverWait(self.driver, 3).until(ec)
 
     def highlight(self, css_selector):
         """A hack to select some text on the page, and trigger the
@@ -165,18 +165,19 @@ class Annotator():
         if count > 0:
             return
 
+        driver = self.driver
         container = (By.CLASS_NAME, 'annotator-frame')
         ec = expected_conditions.visibility_of_element_located(container)
-        WebDriverWait(self.driver, 10).until(ec)
-        container = self.driver.find_element_by_class_name('annotator-frame')
+        WebDriverWait(driver, 30).until(ec)
+        container = driver.find_element_by_class_name('annotator-frame')
         collapsed = 'annotator-collapsed' in container.get_attribute('class')
         if collapsed:
-            tb = self.driver.find_element_by_class_name("annotator-toolbar")
+            tb = driver.find_element_by_class_name("annotator-toolbar")
             tb.find_element_by_css_selector('li > a').click()
 
         ec = expected_conditions.frame_to_be_available_and_switch_to_it(
             'hyp_sidebar_frame')
-        WebDriverWait(self.driver, 10).until(ec)
+        WebDriverWait(driver, 3).until(ec)
 
     def __exit__(self, typ, value, traceback):
         count = self.g_state[self.driver]
