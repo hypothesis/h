@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 import unittest
 import time
+import os
 
+import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
 from . import SeleniumTestCase, Annotator
+
+pytestmark = pytest.mark.skipif(
+    os.environ.get('TRAVIS_SECURE_ENV_VARS') == 'false',
+    reason="No access to secure Travis variables.")
 
 
 class TestAnnotator(SeleniumTestCase):
