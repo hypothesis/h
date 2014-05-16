@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import unittest
-import time
 import os
 
 import pytest
@@ -84,7 +82,3 @@ class TestAnnotator(SeleniumTestCase):
             body = annotation.find_element_by_css_selector('markdown div p')
             assert user.text == 'test'
             assert body.text == 'test annotation'
-
-
-if __name__ == "__main__":
-    unittest.main()
