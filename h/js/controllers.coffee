@@ -96,7 +96,10 @@ class App
           p.channel.notify method: 'setActiveHighlights'
 
     $scope.$watch 'sheet.collapsed', (hidden) ->
-      unless hidden then $scope.sheet.tab = 'login'
+      if hidden
+        $element.find('.sheet').scope().$broadcast('$reset')
+      else
+        $scope.sheet.tab = 'login'
 
     $scope.$watch 'sheet.tab', (tab) ->
       return unless tab
@@ -698,23 +701,35 @@ class Auth
     code: null
 
   this.$inject = [
-    '$scope', 'authentication',
+    '$scope', 'authentication', 'flash'
   ]
   constructor: (
-     $scope,   authentication
+     $scope,   authentication,   flash
   ) ->
-    _reset = => angular.copy @scope, $scope.model
+    _reset = =>
+      angular.copy @scope, $scope.model
+      for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
+        ctrl.$setPristine()
+
+    _success = ->
+      _reset()
+      $scope.$emit 'success', form.$name
+
+    _error = (response) ->
+      if response.errors
+        # TODO: show these messages inline with the form
+        for field, error of response.errors
+          console.log(field, error)
+          flash('error', error)
+      if response.reason
+        flash('error', reason)
 
     $scope.$on '$reset', _reset
 
     $scope.submit = (form) ->
       angular.extend authentication, $scope.model
       return unless form.$valid
-      authentication["$#{form.$name}"] ->
-        _reset()
-        $scope.$emit 'success', form.$name
-        for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
-          ctrl.$setPristine()
+      authentication["$#{form.$name}"] _success, _error
 
 
 class Editor
