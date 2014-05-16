@@ -130,7 +130,7 @@ $input-border-radius: 2px;
     }
   }
 
-  &:active {
+  &:active:not([disabled]) {
     @include background-image(
       linear-gradient(top, #fcfcfc 0%, #f3f3f3 50%, #e1e1e1 51%, #fbfbfb 100%));
     @include box-shadow(
