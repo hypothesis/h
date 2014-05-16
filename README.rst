@@ -125,6 +125,6 @@ license information can be found in the included `<LICENSE>`_ file.
 .. _freenode: http://freenode.net/
 .. _subscribe: mailto:dev+subscribe@list.hypothes.is
 .. _contributing: CONTRIBUTING.rst
-.. _Annotator project: http://okfnlabs.org/annotator/
+.. _Annotator project: http://okfnlabs.org/projects/annotator/
 .. _Open Knowledge Foundation: http://okfn.org/
 .. _2-Clause BSD License: http://www.opensource.org/licenses/BSD-2-Clause
