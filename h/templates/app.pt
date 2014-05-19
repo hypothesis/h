@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html metal:use-macro="main_template">
   <body metal:fill-slot="body" tal:omit-tag>
     <!-- Toolbar -->

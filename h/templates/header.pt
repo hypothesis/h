@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html>
-  <header>
-    <img height="72px" width="72px"
-         src="${webassets(request, 'images/hypothelogo_square.png')[0]}" />
-    <hgroup>
-      <h1>Hypothes<span class="red">.</span>is</h1>
-      <h2>The&#160;Internet, peer&#160;reviewed.</h2>
-    </hgroup>
-  </header>
-</html>
+<header>
+  <img height="72px" width="72px"
+       src="${webassets(request, 'images/hypothelogo_square.png')[0]}" />
+  <hgroup>
+    <h1>Hypothes<span class="red">.</span>is</h1>
+    <h2>The&#160;Internet, peer&#160;reviewed.</h2>
+  </hgroup>
+</header>

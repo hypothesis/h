@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag>
     <script type="text/javascript" defer="defer">
