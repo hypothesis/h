@@ -191,19 +191,23 @@ class AsyncAuthController(AuthController):
 class ForgotPasswordController(views.ForgotPasswordController):
     def __init__(self, request):
         super(ForgotPasswordController, self).__init__(request)
-        Activation = self.Activation
-        self.Activation = self.get_activation(Activation)
+        self.Activation = self.get_activation_surrogate(self.Activation)
 
-    def get_activation(self, Activation):
+    def get_activation_surrogate(self, BaseActivation):
         # XXX: Horus currently has a bug where the Activation model isn't
         # flushed before the email is generated, causing the link to be
         # broken (hypothesis/h#1156).
         #
         # Fixed in horus@90f838cef12be249a9e9deb5f38b37151649e801
-        activation = Activation()
-        self.db.add(activation)
-        self.db.flush()
-        return activation
+        db = self.db
+
+        class Activation(BaseActivation):
+            def __init__(self, *args, **kwargs):
+                super(Activation, self).__init__(*args, **kwargs)
+                db.add(self)
+                db.flush()
+
+        return Activation
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
