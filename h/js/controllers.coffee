@@ -157,11 +157,6 @@ class App
       sort: ''
       view: 'Screen'
 
-    $rootScope.collapseViewSortMenus = () ->
-      $(".viewsort .dropdown-toggle").toArray().forEach (toggle) ->
-        if $(toggle).parent().hasClass "open"
-          $(toggle).click()
-
     # Show the sort/view control for a while.
     #
     # hide: should we hide it after a second?
@@ -169,12 +164,8 @@ class App
     $rootScope.showViewSort = (show = true, hide = false) ->
       if _vstp then $timeout.cancel _vstp
       $rootScope.viewState.showControls = show
-      $rootScope.collapseViewSortMenus() unless show
       if $rootScope.viewState.showControls and hide
-        _vstp = $timeout (->
-          $rootScope.viewState.showControls = false
-          $rootScope.collapseViewSortMenus()
-        ), 1000
+        _vstp = $timeout (-> $rootScope.viewState.showControls = false), 1000
 
     # "View" -- which annotations are shown
     $rootScope.applyView = (view) ->
