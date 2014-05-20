@@ -720,7 +720,7 @@ class Auth
       for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
         ctrl.$setPristine()
 
-    _success = ->
+    _success = (form) ->
       _reset()
       $scope.$emit 'success', form.$name
 
@@ -738,7 +738,7 @@ class Auth
     $scope.submit = (form) ->
       angular.extend authentication, $scope.model
       return unless form.$valid
-      authentication["$#{form.$name}"] _success, _error
+      authentication["$#{form.$name}"] (-> _success form), _error
 
 
 class Editor
