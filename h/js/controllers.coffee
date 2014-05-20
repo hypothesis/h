@@ -730,8 +730,6 @@ class Auth
         for field, error of response.errors
           console.log(field, error)
           flash('error', error)
-      if response.reason
-        flash('error', reason)
 
     $scope.$on '$reset', _reset
 
