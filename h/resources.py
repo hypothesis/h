@@ -88,13 +88,17 @@ class AnnotationFactory(BaseResource):
         request = self.request
         registry = request.registry
         store = registry.queryUtility(interfaces.IStoreClass)(request)
-        data = ''
 
         try:
             data = store.read(key)
         except httpexceptions.HTTPException as e:
-            # We want to add our custom error message for unauthorized errors
-            if e.status_code != 401:
+            if e.status_code in [401, 404]:
+                raise httpexceptions.HTTPNotFound(
+                    body_template=
+                    "Either no annotation exists with this identifier, or you "
+                    "don't have the permissions required for viewing it."
+                )
+            else:
                 raise e
 
         Annotation = registry.queryUtility(interfaces.IAnnotationClass)

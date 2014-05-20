@@ -123,12 +123,6 @@ class AnnotationController(views.BaseController):
     def __html__(self):
         request = self.request
         context = request.context
-        if len(context) == 0:
-            raise httpexceptions.HTTPNotFound(
-                body_template=
-                "Either no annotation exists with this identifier, or you "
-                "don't have the permissions required for viewing it."
-            )
 
         d = url_values_from_document(context)
         d['annotation'] = context
