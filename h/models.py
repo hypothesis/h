@@ -17,6 +17,7 @@ from horus.strings import UIStringsBase
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.decorator import reify
 from pyramid.i18n import TranslationStringFactory
+from pyramid.threadlocal import get_current_request
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
 from pyramid.settings import asbool
 from pyramid_basemodel import Base, Session
@@ -319,7 +320,18 @@ class ConsumerMixin(BaseModel):
 
 
 class Activation(ActivationMixin, Base):
-    pass
+    def __init__(self, *args, **kwargs):
+        super(Activation, self).__init__(*args, **kwargs)
+
+        # XXX: Horus currently has a bug where the Activation model isn't
+        # flushed before the email is generated, causing the link to be
+        # broken (hypothesis/h#1156).
+        #
+        # Fixed in horus@90f838cef12be249a9e9deb5f38b37151649e801
+        request = get_current_request()
+        db = get_session(request)
+        db.add(self)
+        db.flush()
 
 
 class Consumer(ConsumerMixin, Base):
