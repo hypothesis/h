@@ -1217,7 +1217,6 @@ h3.stream {
 
 .viewsort {
   @include single-transition(top, .25s);
-  padding-bottom: 2em;
   width: 100%;
   text-align: center;
   position: absolute;
@@ -1228,6 +1227,7 @@ h3.stream {
   &.ng-hide {
     top: 0;
     display:block!important;
+    overflow: hidden;
   }
 }
 
