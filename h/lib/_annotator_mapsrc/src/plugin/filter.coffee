@@ -109,6 +109,16 @@ class Annotator.Plugin.Filter extends Annotator.Plugin
     if @options.addAnnotationFilter == true
       this.addFilter {label: Annotator._t('Annotation'), property: 'text'}
 
+  # Public: remove the filter plugin instance and unbind events.
+  #
+  # Returns nothing.
+  destroy: ->
+    super
+    html = $('html')
+    currentMargin = parseInt(html.css('padding-top'), 10) || 0
+    html.css('padding-top', currentMargin - @element.outerHeight())
+    @element.remove()
+
   # Adds margin to the current document to ensure that the annotation toolbar
   # doesn't cover the page when not scrolled.
   #

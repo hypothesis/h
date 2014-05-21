@@ -270,6 +270,36 @@ class Annotator extends Delegator
 
     this
 
+  # Public: Destroy the current Annotator instance, unbinding all events and
+  # disposing of all relevant elements.
+  #
+  # Returns nothing.
+  destroy: ->
+    $(document).unbind({
+      "mouseup":   this.checkForEndSelection
+      "mousedown": this.checkForStartSelection
+    })
+
+    $('#annotator-dynamic-style').remove()
+
+    @adder.remove()
+    @viewer.destroy()
+    @editor.destroy()
+
+    @wrapper.find('.annotator-hl').each ->
+      $(this).contents().insertBefore(this)
+      $(this).remove()
+
+    @wrapper.contents().insertBefore(@wrapper)
+    @wrapper.remove()
+    @element.data('annotator', null)
+
+    for name, plugin of @plugins
+      @plugins[name].destroy()
+
+    this.removeEvents()
+
+
   # Enables or disables the creation of annotations
   #
   # When it's set to false, nobody os supposed to call
@@ -869,11 +899,15 @@ class Annotator.Plugin extends Delegator
 
   pluginInit: ->
 
+  destroy: ->
+    this.removeEvents()
+
 # Sniff the browser environment and attempt to add missing functionality.
 g = util.getGlobal()
 
-if not g.document?.evaluate?
-  $.getScript('http://assets.annotateit.org/vendor/xpath.min.js')
+# Checks for the presence of wicked-good-xpath
+# It is always safe to install it, it'll not overwrite existing functions
+if g.wgxpath? then g.wgxpath.install()
 
 if not g.getSelection?
   $.getScript('http://assets.annotateit.org/vendor/ierange.min.js')
@@ -905,6 +939,9 @@ Annotator.Delegator = Delegator
 Annotator.Range = Range
 Annotator.util = util
 Annotator.Util = Util
+
+# Expose a global instance registry
+Annotator._instances = []
 
 Annotator.Highlight = Highlight
 Annotator.Anchor = Anchor

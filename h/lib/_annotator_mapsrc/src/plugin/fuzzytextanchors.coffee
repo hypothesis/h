@@ -4,9 +4,11 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
   pluginInit: ->
     # Do we have the basic text anchors plugin loaded?
     unless @annotator.plugins.TextAnchors
-      throw "The FuzzyTextAnchors Annotator plugin requires the TextAnchors plugin."
-    unless @annotator.plugins.TextPosition
-      throw "The FuzzyTextAnchors Annotator plugin requires the TextPosition plugin."
+      console.warn "The FuzzyTextAnchors Annotator plugin requires the TextAnchors plugin. Skipping."
+      return
+    unless @annotator.plugins.DomTextMapper
+      console.warn "The FuzzyTextAnchors Annotator plugin requires the DomTextMapper plugin. Skipping."
+      return
 
     @Annotator = Annotator
 

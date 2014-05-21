@@ -47,7 +47,8 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
 
     # Do we have the basic text anchors plugin loaded?
     unless @annotator.plugins.DomTextMapper
-      throw new Error "The TextPosition Annotator plugin requires the DomTextMapper plugin."
+      console.warn "The TextPosition Annotator plugin requires the DomTextMapper plugin. Skipping."
+      return
 
     # Register the creator for text quote selectors
     @annotator.selectorCreators.push

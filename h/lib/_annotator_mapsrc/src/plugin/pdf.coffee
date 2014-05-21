@@ -150,7 +150,8 @@ class Annotator.Plugin.PDF extends Annotator.Plugin
   pluginInit: ->
     # We need dom-text-mapper
     unless @annotator.plugins.DomTextMapper
-      throw "The PDF Annotator plugin requires the DomTextMapper plugin."
+      console.warn "The PDF Annotator plugin requires the DomTextMapper plugin. Skipping."
+      return
 
     @annotator.documentAccessStrategies.unshift
       # Strategy to handle PDF documents rendered by PDF.js
