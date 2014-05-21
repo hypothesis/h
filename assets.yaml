@@ -267,6 +267,11 @@ visualsearch:
       output: lib/visualsearch.min.js
       contents:
         - h:lib/visualsearch.js
+wgxpath:
+  filters: uglifyjs
+  output: lib/wgxpath.install.min.js
+  contents:
+    - h:lib/wgxpath.install.js
 
 # Application
 app:
@@ -343,6 +348,7 @@ inject:
     - jquery_ui
     - jschannel
     - gettext
+    - wgxpath
     - annotator_i18n
     - annotator
     - annotator_bridge
