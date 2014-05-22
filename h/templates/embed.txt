@@ -11,6 +11,10 @@ yepnope.addFilter(function (resourceObj) {
 });
 yepnope([
   {
+    test: window.document.evaluate,
+    nope: ${map(str, request.webassets_env["wgxpath"].urls())}
+  },
+  {
     test: typeof(window.Annotator) !== 'undefined',
     nope: ${map(str, request.webassets_env["inject"].urls())},
     complete: function () {

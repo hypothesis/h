@@ -348,7 +348,6 @@ inject:
     - jquery_ui
     - jschannel
     - gettext
-    - wgxpath
     - annotator_i18n
     - annotator
     - annotator_bridge
