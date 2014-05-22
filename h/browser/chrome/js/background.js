@@ -15,43 +15,11 @@ var ACTION_STATES = {
   }
 }
 
-function injecting(tabId, value) {
-  var stateMap = localStorage.getItem('injectState')
-  stateMap = stateMap ? JSON.parse(stateMap) : {}
-
-  if (value === undefined) {
-    return stateMap[tabId]
-  }
-
-  if (value) {
-    stateMap[tabId] = value
-  } else {
-    delete stateMap[tabId]
-  }
-
-  localStorage.setItem('injectState', JSON.stringify(stateMap))
-
-  return value
-}
-
 
 function inject(tabId) {
-  // If we are already injecting, don't have to do anything.
-  if (!injecting(tabId)) {
-    console.log(new Date(), "Initiating code injectation for tab", tabId);
-    injecting(tabId, true);
-    setTimeout(function(){ // Give it some time before insertation
-      injecting(tabId, false);
-      console.log(new Date(), "Executing code injectation on tab", tabId);
-      chrome.tabs.executeScript(tabId, {
-        file: 'public/js/embed.js'
-      })
-    }, 1000);
-  } else {
-    console.log(new Date(), "Requested code injectation for tab", tabId,
-                "but since an injectation is already in progress,",
-                "not doing anything.");
-  }
+  chrome.tabs.executeScript(tabId, {
+    file: 'public/js/embed.js'
+  })
 }
 
 
@@ -146,20 +114,11 @@ function onTabRemoved(tab) {
 
 
 function onTabUpdated(tabId, info) {
-  if (info.status == "loading") {
-    // No need to do anything yet. We will get another notification soon.
-    console.log(new Date(), "tab", tabId, "is loading. Not doing anything.");
-    return;
-  }
-
-  console.log(new Date(), "tab", tabId, "has been updated.");
   var currentState = state(tabId) || 'sleeping'
-  console.log(new Date(), "State of tab", tabId, "is '", currentState, "'.");
 
   setPageAction(tabId, currentState)
 
   if (currentState == 'active' && info.status == 'complete') {
-    console.log (new Date(), "Requesting code injectation for tab", tabId)
     inject(tabId)
   }
 }
