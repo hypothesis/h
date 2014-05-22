@@ -4,7 +4,7 @@ class window.DomTextMapper
 
   USE_TABLE_TEXT_WORKAROUND = true
   USE_EMPTY_TEXT_WORKAROUND = true
-  SELECT_CHILDREN_INSTEAD = ["thead", "tbody", "ol", "a", "caption", "p", "span", "div", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "li", "form"]
+  SELECT_CHILDREN_INSTEAD = ["thead", "tbody", "tfoot", "ol", "a", "caption", "p", "span", "div", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "li", "form"]
   CONTEXT_LEN = 32
 
   @instances: 0
@@ -220,11 +220,57 @@ class window.DomTextMapper
       throw new Error "Found no info for path '" + path + "'!"
     result
 
+  # Return the offset of the start of given path in the DOM
+  getStartPosForPath: (path) ->
+    info = @getInfoForPath path
+    info.start ? @getFirstPosAfter info.node
+
+  getFirstPosAfter: (node) ->
+    if node.nextSibling? # Do we have a next sibling?
+      # Check the sibling
+      node = node.nextSibling
+      path = @getPathTo node
+      info = @path[path]
+
+      info.start ? @getFirstPosAfter node
+    else
+      # Nothing to see on this level. Move up in the tree.
+      @getFirstPosAfter node.parentNode
+
+  # Return the offset of the start of given path in the DOM
+  getEndPosForPath: (path) ->
+    info = @getInfoForPath path
+    info.end ? @getFirstPosBefore info.node
+
+  getFirstPosBefore: (node) ->
+    if node.previousSibling? # Do we have a previous sibling?
+      # Check the sibling
+      node = node.previousSibling
+      path = @getPathTo node
+      info = @path[path]
+
+      info.end ? @getFirstPosBefore node
+    else
+      # Nothing to see on this level. Move up in the tree.
+      @getFirstPosBefore node.parentNode
+
   # Return info for a given node in the DOM
   getInfoForNode: (node) ->
     unless node?
       throw new Error "Called getInfoForNode(node) with null node!"
     @getInfoForPath @getPathTo node
+
+  # Return the offset of the start of given node in the DOM
+  getStartPosForNode: (node) ->
+    unless node?
+      throw new Error "Called getStartInfoForNode(node) with null node!"
+    @getStartPosForPath @getPathTo node
+
+  # Return the offset of the end of a given node in the DOM
+  getEndPosForNode: (node) ->
+    unless node?
+      throw new Error "Called getInfoForNode(node) with null node!"
+    @getEndPosForPath @getPathTo node
 
   # Get the matching DOM elements for a given set of charRanges
   # (Calles getMappingsForCharRange for each element in the given ist)
