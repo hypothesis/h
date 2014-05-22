@@ -106,7 +106,7 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
       #  " Current quote is '#{currentQuote}'.)"
       return null
 
-    if startInfo?.start? and endInfo?.end?
+    if startInfo?
       # Create a TextPositionAnchor from the start and end offsets
       # of this range
       # (to be used with dom-text-mapper)

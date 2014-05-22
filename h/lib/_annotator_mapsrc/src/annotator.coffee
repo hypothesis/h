@@ -372,13 +372,16 @@ class Annotator extends Delegator
       try
         a = s.code.call this, annotation, target
         if a
-#          console.log "Strategy '" + s.name + "' yielded an anchor:", a
+#          console.log "Strategy '" + s.name + "' yielded an anchor."
           return result: a
 #        else
 #          console.log "Strategy '" + s.name + "' did NOT yield an anchor."
       catch error
-        console.log "Strategy '" + s.name + "' has thrown an error.",
-          error.stack ? error
+#        console.log "Strategy '" + s.name + "' has thrown an error."
+        if error instanceof Range.RangeError
+          return error: error
+        else
+          throw error
 
     return error: "No strategies worked."
 
@@ -413,7 +416,6 @@ class Annotator extends Delegator
     annotation.quote = []
     annotation.anchors = []
 
-#    console.log "Running setupAnnotation for", annotation.id
     for t in annotation.target
       try
         # Create an anchor for this target
@@ -441,8 +443,9 @@ class Annotator extends Delegator
           console.log "Could not create anchor for annotation '",
             annotation.id, "'."
       catch exception
-        console.log "Error in setupAnnotation for", annotation.id,
-          ":", exception.stack ? exception
+        if exception.stack? then console.log exception.stack
+        console.log exception.message
+        console.log exception
 
     # Join all the quotes into one string.
     annotation.quote = annotation.quote.join(' / ')

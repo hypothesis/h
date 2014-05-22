@@ -69,27 +69,14 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
   _getTextPositionSelector: (selection) =>
     return [] unless selection.type is "text range"
 
-    startOffset = @annotator.domMapper.getStartPosForNode selection.range.start
-    endOffset = @annotator.domMapper.getEndPosForNode selection.range.end
+    startOffset = (@annotator.domMapper.getInfoForNode selection.range.start).start
+    endOffset = (@annotator.domMapper.getInfoForNode selection.range.end).end
 
-    if startOffset? and endOffset?
-      [
-        type: "TextPositionSelector"
-        start: startOffset
-        end: endOffset
-      ]
-    else
-      # It looks like we can't determine the start and end offsets.
-      # That means no valid TextPosition selector can be generated from this.
-      unless startOffset?
-        console.log "Warning: can't generate TextPosition selector, because",
-          selection.range.start,
-          "does not have a valid start position."
-      unless endOffset?
-        console.log "Warning: can't generate TextPosition selector, because",
-          selection.range.end,
-          "does not have a valid end position."
-      [ ]
+    [
+      type: "TextPositionSelector"
+      start: startOffset
+      end: endOffset
+    ]
 
   # Create an anchor using the saved TextPositionSelector.
   # The quote is verified.
@@ -98,14 +85,6 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
     # We need the TextPositionSelector
     selector = @annotator.findSelector target.selector, "TextPositionSelector"
     return unless selector?
-
-    unless selector.start?
-      console.log "Warning: 'start' field is missing from TextPositionSelector. Skipping."
-      return null
-
-    unless selector.end?
-      console.log "Warning: 'end' field is missing from TextPositionSelector. Skipping."
-      return null
 
     content = @annotator.domMapper.getCorpus()[selector.start .. selector.end-1].trim()
     currentQuote = @annotator.normalizeString content
