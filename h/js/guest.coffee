@@ -282,11 +282,10 @@ class Annotator.Guest extends Annotator
     return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
 
   onSuccessfulSelection: (event, immediate) ->
-    # Describe the selection with targets
-    @selectedTargets = (@_getTargetFromSelection(s) for s in event.segments)
-
     if @tool is 'highlight'
 
+      # Describe the selection with targets
+      @selectedTargets = (@_getTargetFromSelection(s) for s in event.segments)
       # Are we allowed to create annotations? Return false if we can't.
       unless @canAnnotate
         return false
