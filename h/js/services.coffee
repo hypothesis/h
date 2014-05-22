@@ -352,6 +352,11 @@ class Hypothesis extends Annotator
   # (Optionally) put some HTML formatting around a quote
   getHtmlQuote: (quote) -> quote
 
+  # Just some debug output
+  loadAnnotations: (annotations) ->
+    console.log "Loaded", annotations.length, "annotations."
+    super
+
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) ->
     annotation.highlights = []
