@@ -34,25 +34,32 @@ class Annotator.Plugin.TextQuote extends Annotator.Plugin
     unless rangeEnd?
       throw new Error "Called getTextQuoteSelector() on a range with no valid end."
 
-    [
-      if @annotator.plugins.DomTextMapper
-        # Calculate the quote and context using DTM
+    if @annotator.plugins.DomTextMapper
+      # Calculate the quote and context using DTM
 
-        startOffset = (@annotator.domMapper.getInfoForNode rangeStart).start
-        endOffset = (@annotator.domMapper.getInfoForNode rangeEnd).end
+      startOffset = @annotator.domMapper.getStartPosForNode rangeStart
+      endOffset = @annotator.domMapper.getEndPosForNode rangeEnd
+
+      if startOffset? and endOffset?
         quote = @annotator.domMapper.getCorpus()[startOffset .. endOffset-1].trim()
         [prefix, suffix] = @annotator.domMapper.getContextForCharRange startOffset, endOffset
 
-        type: "TextQuoteSelector"
-        exact: quote
-        prefix: prefix
-        suffix: suffix
+        [
+          type: "TextQuoteSelector"
+          exact: quote
+          prefix: prefix
+          suffix: suffix
+        ]
       else
-        # Get the quote directly from the range
-
+        # It looks like we can't determine the start and end offsets.
+        # That means no valid TextQuote selector can be generated from this.
+        console.log "Warning: can't generate TextQuote selector.", startOffset, endOffset
+        [ ]
+    else
+      # Get the quote directly from the range
+      [
         type: "TextQuoteSelector"
         exact: selection.range.text().trim()
-
-    ]
+      ]
 
 
