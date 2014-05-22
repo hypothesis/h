@@ -87,6 +87,18 @@ class window.PageTextMapperCore
     info.pageIndex = pageData.index
     info
 
+  # Look up the start offset of a give DOM node, uniting page and node info
+  getStartPosForNode: (node) ->
+    pageData = @getPageForNode node        
+    nodeStart = pageData.domMapper.getStartPosForNode node
+    pageData.start + nodeStart
+
+  # Look up the end offset of a give DOM node, uniting page and node info
+  getEndPosForNode: (node) ->
+    pageData = @getPageForNode node                
+    nodeEnd = pageData.domMapper.getEndPosForNode node
+    pageData.start + nodeEnd
+
   # Return some data about a given character range
   getMappingsForCharRange: (start, end, pages) ->
     #console.log "Get mappings for char range [" + start + "; " + end + "], for pages " + pages + "."
