@@ -97,6 +97,11 @@ class window.PDFTextMapper extends window.PageTextMapperCore
     # Get a handle on the page
     page = PDFFindController.pdfPageSource.pages[pageIndex]
 
+    unless page?
+#      console.log "Delaying text extraction from page", pageIndex
+      setTimeout (=> @_extractPageText pageIndex), 100
+      return
+
     # Start the collection of page contents
     page.getTextContent().then (data) =>
 
@@ -107,7 +112,9 @@ class window.PDFTextMapper extends window.PageTextMapperCore
       content = @_parseExtractedText rawContent
 
       # Save the extracted content to our page information registery
-      @pageInfo[pageIndex] = content: content
+      @pageInfo[pageIndex] =
+        index: pageIndex
+        content: content
 
       if pageIndex is PDFView.pages.length - 1
         @_finishScan()
