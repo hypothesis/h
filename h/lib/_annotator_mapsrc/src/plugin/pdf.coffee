@@ -97,7 +97,7 @@ class window.PDFTextMapper extends window.PageTextMapperCore
     # Get a handle on the page
     page = PDFFindController.pdfPageSource.pages[pageIndex]
 
-    unless page?
+    unless page?.pdfPage?
 #      console.log "Delaying text extraction from page", pageIndex
       setTimeout (=> @_extractPageText pageIndex), 100
       return

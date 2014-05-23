@@ -7,7 +7,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2014-05-23 03:09:10Z
+** Built at: 2014-05-23 03:17:31Z
 */
 
 
@@ -128,7 +128,7 @@
       var page,
         _this = this;
       page = PDFFindController.pdfPageSource.pages[pageIndex];
-      if (page == null) {
+      if ((page != null ? page.pdfPage : void 0) == null) {
         setTimeout((function() {
           return _this._extractPageText(pageIndex);
         }), 100);
