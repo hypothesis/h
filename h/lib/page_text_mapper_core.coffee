@@ -16,8 +16,8 @@ class window.PageTextMapperCore
     #console.log "Allegedly rendered page #" + index
 
     # Is it really rendered?
-    unless @_isPageRendered index
-    #console.log "Page #" + index + " is not really rendered yet."
+    unless @_isPageRendered(index) and @pageInfo[index]
+#      console.log "Page #" + index + " is not really rendered yet."
       setTimeout (=> @_onPageRendered index), 1000
       return
 
@@ -30,6 +30,7 @@ class window.PageTextMapperCore
 
    # Create the mappings for a given page    
   _mapPage: (info) ->
+#    console.log "Mapping page", info.index
     info.node = @getRootNodeForPage info.index        
     info.domMapper = new DomTextMapper("d-t-m for page #" + info.index)
     info.domMapper.setRootNode info.node
@@ -145,7 +146,6 @@ class window.PageTextMapperCore
     # Go over the pages, and calculate some basic info
     pos = 0
     @pageInfo.forEach (info, i) =>
-      info.index = i
       info.len = info.content.length        
       info.start = pos
       info.end = (pos += info.len + 1)
