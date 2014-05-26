@@ -12,3 +12,4 @@ var terminate = [
 ;
 script.text = terminate;
 insBeforeObj.insertBefore(script, first);
+delete window.hypothesisHasRun;

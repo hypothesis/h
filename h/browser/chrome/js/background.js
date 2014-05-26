@@ -94,9 +94,7 @@ function onPageAction(tab) {
     })
   } else {
     newState = state(tab.id, 'active')
-    if (tab.status == 'complete') {
-      inject(tab.id)
-    }
+    inject(tab.id)
   }
 
   setPageAction(tab.id, newState)
@@ -118,7 +116,7 @@ function onTabUpdated(tabId, info) {
 
   setPageAction(tabId, currentState)
 
-  if (currentState == 'active' && info.status == 'complete') {
+  if (currentState == 'active') {
     inject(tabId)
   }
 }
