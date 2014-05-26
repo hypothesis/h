@@ -102,6 +102,9 @@ the development configuration the static assets are still loaded from the
 server. Start the application and ensure that the assets are built by visiting
 the home page or by running ``./bin/hypothesis assets``.
 
+Note: Bundling the assets in the extension only works at the moment when the
+``webassets.debug`` setting is falsy.
+
 Deployment
 ----------
 
