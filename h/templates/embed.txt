@@ -18,7 +18,6 @@ yepnope([
     test: typeof(window.Annotator) !== 'undefined',
     nope: ${map(str, request.webassets_env["inject"].urls())},
     complete: function () {
-      if (window.annotator) return;
       var app = '${base_url}'
         , bootstrap = [
           'if (!window.annotator) {',
@@ -30,7 +29,7 @@ yepnope([
           '    options["Heatmap"] = options["Toolbar"] =',
           '      {"container": ".annotator-frame"};',
           '  }',
-          '  annotator = new klass(document.body, options);',
+          '  window.annotator = new klass(document.body, options);',
           '  window.Annotator.noConflict().$.noConflict(true);',
           '}'
         ].join('\n')
