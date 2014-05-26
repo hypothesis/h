@@ -56,6 +56,17 @@ function runHypothesisEmbed() {
 
 if (!window.hypothesisHasRun) {
   window.hypothesisHasRun = true;
-  runHypothesisEmbed();
+  /* PDF.js sets hasRun before it injects the viewer.
+     The body element count check detects the pre-rendered state of PDF.js. */
+  if (window.hasRun
+      && (document.body.childElementCount <= 1
+          || document.body.childElementCount == undefined)) {
+    window.addEventListener('DOMContentLoaded', function listener() {
+      runHypothesisEmbed();
+      window.removeEventListener('DOMContentLoaded', listener);
+    });
+  } else {
+    runHypothesisEmbed();
+  }
 }
 /*]]>{/literal}*/
