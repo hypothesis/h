@@ -69,6 +69,14 @@ def domain_notification(event):
     if event.action == 'create':
         try:
             annotation = event.annotation
+
+            # Check for authorization. Send notification only for public annotation
+            # XXX: This can be changed and fine grained when
+            # user groups will be introduced
+            read = annotation['permissions']['read']
+            if "group:__world__" not in read:
+                return
+
             uri = annotation['uri']
             # TODO: Fetching the page should be done via a webproxy
             r = requests.get(uri)
