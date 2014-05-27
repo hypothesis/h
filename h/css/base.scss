@@ -223,7 +223,9 @@ $input-border-radius: 2px;
   font-family: $sansFontFamily;
   line-height: 29px;
   opacity: 0;
+  position: relative;
   text-align: center;
+  z-index: 5;
 
   &.show, &.annotator-notice-show {
     opacity: 1;
