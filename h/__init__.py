@@ -20,7 +20,6 @@ def includeme(config):
     config.include('pyramid_multiauth')
 
     config.include('h.api')
-    config.include('h.domain_mailer')
     config.include('h.models')
     config.include('h.notifier')
     config.include('h.streamer')
