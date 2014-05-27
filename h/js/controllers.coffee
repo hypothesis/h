@@ -217,7 +217,7 @@ class App
           $rootScope.searchPredicate = 'message.target[0].pos.top'
           $rootScope.reverse = false
 
-    $rootScope.applySort "Newest"
+    $rootScope.applySort "Location"
 
     # Clean up the searchbar
     $scope.leaveSearch = =>
