@@ -62,7 +62,8 @@ def pop_flash(request):
 
 def model(request):
     session = request.session
-    return dict(personas=session.get('personas', []))
+    return dict(csrf=session.get_csrf_token(),
+                personas=session.get('personas', []))
 
 
 class AsyncFormViewMapper(object):

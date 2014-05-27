@@ -314,6 +314,7 @@ app:
           contents:
             - js/app.coffee
             - js/controllers.coffee
+            - js/csrf.coffee
             - js/flash.coffee
             - js/filters.coffee
             - js/directives.coffee

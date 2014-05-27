@@ -2,6 +2,7 @@ imports = [
   'bootstrap'
   'ngAnimate'
   'ngRoute'
+  'h.csrf'
   'h.controllers'
   'h.directives'
   'h.app_directives'
@@ -14,15 +15,8 @@ imports = [
 
 
 configure = [
-  '$httpProvider', '$locationProvider', '$provide', '$routeProvider',
-  '$sceDelegateProvider',
-  (
-   $httpProvider,   $locationProvider,   $provide,   $routeProvider,
-   $sceDelegateProvider,
-  ) ->
-    # Use the Pyramid XSRF header name
-    $httpProvider.defaults.xsrfHeaderName = 'X-CSRF-Token'
-
+  '$locationProvider', '$provide', '$routeProvider', '$sceDelegateProvider',
+  ($locationProvider,   $provide,   $routeProvider,   $sceDelegateProvider) ->
     $locationProvider.html5Mode(true)
 
     # Disable annotating while drafting
