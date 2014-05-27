@@ -235,7 +235,7 @@ class Annotator.Guest extends Annotator
       method: "showViewer"
       params:
         view: viewName
-        ids: (a.id for a in annotations)
+        ids: (a.id for a in annotations when a.id)
         focused: focused
 
   toggleViewerSelection: (annotations, focused = false) =>
@@ -250,7 +250,7 @@ class Annotator.Guest extends Annotator
       method: "updateViewer"
       params:
         view: viewName
-        ids: (a.id for a in annotations)
+        ids: (a.id for a in annotations when a.id)
         focused: focused
 
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
