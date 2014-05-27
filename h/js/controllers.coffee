@@ -213,8 +213,8 @@ class App
           $rootScope.searchPredicate = 'message.updated'
           $rootScope.reverse = false
         when 'Location'
-          $rootScope.predicate = 'target[0].selector[2].start'
-          $rootScope.searchPredicate = 'message.target[0].selector[2].start'
+          $rootScope.predicate = 'target[0].pos.top'
+          $rootScope.searchPredicate = 'message.target[0].pos.top'
           $rootScope.reverse = false
 
     $rootScope.applySort "Newest"

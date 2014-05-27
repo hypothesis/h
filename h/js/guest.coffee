@@ -90,6 +90,47 @@ class Annotator.Guest extends Annotator
           @comments[i..i] = []
           @plugins.Heatmap._update()
 
+    # Watch for newly rendered highlights, and update positions in sidebar
+    this.subscribe "highlightsCreated", (highlights) =>
+      unless Array.isArray highlights
+        highlights = [highlights]
+      highlights.forEach (hl) ->
+        hls = hl.anchor.highlight  # Fetch all the highlights
+        # Get the pages we have highlights on (for the given anchor)
+        pages = Object.keys(hls).map (s) -> parseInt s
+        firstPage = pages.sort()[0]  # Determine the first page
+        firstHl = hls[firstPage]     # Determine the first (topmost) hl
+        # Store the position of this anchor inside target
+        hl.anchor.target.pos =
+          top: hl.getTop()
+          heigth: hl.getHeight()
+
+      # Collect all impacted annotations
+      annotations = (hl.annotation for hl in highlights)
+      # Announce the new positions, so that the sidebar knows
+      this.publish "annotationsLoaded", [annotations]
+
+    # Watch for removed highlights, and update positions in sidebar
+    this.subscribe "highlightRemoved", (highlight) =>
+      hls = highlight.anchor.highlight  # Fetch all the highlights
+      # Get the pages we have highlights on (for the given anchor)
+      pages = Object.keys(hls).map (s) -> parseInt s
+      # Do we have any highlights left?
+      if pages.length
+        console.log "We still have something left"
+        firstPage = pages.sort()[0]  # Determine the first page
+        firstHl = hls[firstPage]     # Determine the first (topmost) hl
+        # Store the position of this anchor inside target
+        highlight.anchor.target.pos =
+          top: highlight.getTop()
+          heigth: highlight.getHeight()
+      else
+        console.log "No pos left"
+        delete highlight.anchor.target.pos
+
+      # Announce the new positions, so that the sidebar knows
+      this.publish "annotationsLoaded", [[highlight.annotation]]
+
   _setupXDM: (options) ->
     # jschannel chokes FF and Chrome extension origins.
     if (options.origin.match /^chrome-extension:\/\//) or
