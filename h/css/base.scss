@@ -215,10 +215,6 @@ $input-border-radius: 2px;
   background: url("../images/noise_1.png");
 }
 
-.dark-noise {
-  background: url("../images/dark_noise_1.png");
-}
-
 //FLASH/TOAST/ALERTS///////////////////////////////
 .annotator-notice {
   @include border-radius(.1em);
