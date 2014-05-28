@@ -32,7 +32,7 @@
       <script type="text/ng-template" id="streamviewer.html">
         <metal:main use-macro="load: streamviewer.html" />
       </script>
-      <streamviewer/>
+      <streamviewer></streamviewer>
     </div>
   </body>
 </html>

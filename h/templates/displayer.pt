@@ -39,7 +39,7 @@
               <blockquote ng-hide="root.quoteSource == 'document'">
                 <markdown ng-model="root.quote"
                           ng-readonly="true"
-                          name="quote" />
+                          name="quote"></markdown>
               </blockquote>
             </div>
             <div class="domain">
@@ -64,22 +64,21 @@
                   <span ng-show="annotation.deleted">Reason:</span>
                   <markdown ng-model="annotation.text"
                             ng-readonly="true"
-                            name="text" />
+                            name="text"></markdown>
 
                 </div>
 
                 <ul ng-model="annotation.tags"
                     ng-readonly="true"
                     name="annotator.tags"
-                    class="tags"
-                    />
+                    class="tags"></ul>
 
                 <div class="magicontrols small">
                   <span class="reply-count"
                         ng-pluralize=""
                         ng-show="annotation.reply_count"
                         count="annotation.reply_count"
-                        when="{one: '1 reply', other: '{} replies'}" />
+                        when="{one: '1 reply', other: '{} replies'}"></span>
                 </div>
               </div>
 
@@ -103,7 +102,7 @@
                       <span ng-show="reply.deleted">Reason:</span>
                       <markdown ng-model="reply.text"
                                 ng-readonly="true"
-                                name="text" />
+                                name="text"></markdown>
                     </div>
 
                     <div>
@@ -118,7 +117,7 @@
                          ng-pluralize=""
                          ng-show="reply.reply_count"
                          count="reply.reply_count"
-                         when="{one: '1 reply', other: '{} replies'}" />
+                         when="{one: '1 reply', other: '{} replies'}"></span>
                     </div>
                   </div>
 
