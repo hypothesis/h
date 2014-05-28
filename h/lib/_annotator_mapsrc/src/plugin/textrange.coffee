@@ -85,7 +85,7 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
       return null
 
     # Get the text of this range
-    currentQuote = @annotator.normalizeString if @annotator.plugins.DomTextMapper
+    currentQuote = @annotator.normalizeString if @annotator.domMapper.getInfoForNode?
       # Determine the current content of the given range using DTM
 
       startInfo = @annotator.domMapper.getInfoForNode normedRange.start

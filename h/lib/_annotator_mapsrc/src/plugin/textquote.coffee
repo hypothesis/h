@@ -34,7 +34,7 @@ class Annotator.Plugin.TextQuote extends Annotator.Plugin
     unless rangeEnd?
       throw new Error "Called getTextQuoteSelector() on a range with no valid end."
 
-    if @annotator.plugins.DomTextMapper
+    if @annotator.domMapper.getStartPosForNode?
       # Calculate the quote and context using DTM
 
       startOffset = @annotator.domMapper.getStartPosForNode rangeStart

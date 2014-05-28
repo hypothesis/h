@@ -6,9 +6,6 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
     unless @annotator.plugins.TextAnchors
       console.warn "The FuzzyTextAnchors Annotator plugin requires the TextAnchors plugin. Skipping."
       return
-    unless @annotator.plugins.DomTextMapper
-      console.warn "The FuzzyTextAnchors Annotator plugin requires the DomTextMapper plugin. Skipping."
-      return
 
     @Annotator = Annotator
 
@@ -31,6 +28,9 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
       code: this.fuzzyMatching
 
   twoPhaseFuzzyMatching: (annotation, target) =>
+    # This won't work without DTM
+    return unless @annotator.domMapper.getInfoForNode?
+
     # Fetch the quote and the context
     quoteSelector = @annotator.findSelector target.selector, "TextQuoteSelector"
     prefix = quoteSelector?.prefix
@@ -74,6 +74,9 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
       unless match.exact then match.exactExceptCase
 
   fuzzyMatching: (annotation, target) =>
+    # This won't work without DTM
+    return unless @annotator.domMapper.getInfoForNode?
+
     # Fetch the quote
     quoteSelector = @annotator.findSelector target.selector, "TextQuoteSelector"
     quote = quoteSelector?.exact

@@ -45,11 +45,6 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
 
     @Annotator = Annotator
 
-    # Do we have the basic text anchors plugin loaded?
-    unless @annotator.plugins.DomTextMapper
-      console.warn "The TextPosition Annotator plugin requires the DomTextMapper plugin. Skipping."
-      return
-
     # Register the creator for text quote selectors
     @annotator.selectorCreators.push
       name: "TextPositionSelector"
@@ -67,7 +62,11 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
 
   # Create a TextPositionSelector around a range
   _getTextPositionSelector: (selection) =>
+    # We only care about "text range" selections.
     return [] unless selection.type is "text range"
+
+    # We need dom-text-mapper - style functionality
+    return [] unless @annotator.domMapper.getStartPosForNode?
 
     startOffset = @annotator.domMapper.getStartPosForNode selection.range.start
     endOffset = @annotator.domMapper.getEndPosForNode selection.range.end
