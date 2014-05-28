@@ -13,9 +13,13 @@ class Annotator.Guest extends Annotator
   # Plugin configuration
   options:
     TextHighlights: {}
+    DomTextMapper: {}
     TextAnchors: {}
     TextRange: {}
+    TextPosition: {}
     TextQuote: {}
+    FuzzyTextAnchors: {}
+    PDF: {}
     Document: {}
 
   # Internal state

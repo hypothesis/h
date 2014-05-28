@@ -20,12 +20,6 @@ var HYPOTHESIS_YEPNOPE_RULES = [
           '    options["Heatmap"] = options["Toolbar"] =',
           '      {"container": ".annotator-frame"};',
           '  }',
-          '  if(${request.GET.get("dtm", "true")}) {',
-          '    options["DomTextMapper"] =',
-          '    options["TextPosition"] =',
-          '    options["FuzzyTextAnchors"] =',
-          '    options["PDF"] = {};',
-          '  }',
           '  window.annotator = new klass(document.body, options);',
           '  window.Annotator.noConflict().$.noConflict(true);',
           '}'
