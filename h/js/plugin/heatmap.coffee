@@ -134,8 +134,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     return unless document.getElementsByTagName('base').length
 
-    location = window.location
-    base = "#{location.protocol}//#{location.host}#{location.pathname}"
+    loc = window.location
+    base = "#{loc.protocol}//#{loc.host}#{loc.pathname}#{loc.search}"
 
     rect = @element.find('rect')
     fill = rect.attr('fill')
