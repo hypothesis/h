@@ -337,21 +337,12 @@ class Annotator.Guest extends Annotator
       # Add a flag about what's happening
       @creatingHL = true
 
-      # Create the annotation right away
-
-      # Don't use the default method to create an annotation,
-      # because we don't want to publish the beforeAnnotationCreated event
-      # just yet.
-      #
-      # annotation = this.createAnnotation()
-      #
-      # Create an empty annotation manually instead
+      # Create the annotation
       annotation = {inject: true}
-
-      annotation = this.setupAnnotation annotation
-
-      # Notify listeners
       this.publish 'beforeAnnotationCreated', annotation
+
+      # Set up the annotation
+      annotation = this.setupAnnotation annotation
       this.publish 'annotationCreated', annotation
     else
       super
