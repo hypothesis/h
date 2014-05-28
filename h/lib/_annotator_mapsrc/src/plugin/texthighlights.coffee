@@ -2,6 +2,9 @@
 # required for annotating text.
 
 class TextHighlight extends Annotator.Highlight
+  # XXX: This is a temporay workaround until the Highlighter extension
+  # PR will be merged which will restore separation properly
+  @highlightClass = 'annotator-hl'
 
   # Save the Annotator class reference, while we have access to it.
   # TODO: Is this really the way to go? How do other plugins do it?

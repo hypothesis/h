@@ -62,7 +62,7 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
   # Create a RangeSelector around a range
   _getRangeSelector: (selection) =>
     return [] unless selection.type is "text range"
-    sr = selection.range.serialize @annotator.wrapper[0]
+    sr = selection.range.serialize @annotator.wrapper[0], '.' + @Annotator.TextHighlight.highlightClass
     [
       type: "RangeSelector"
       startContainer: sr.startContainer
