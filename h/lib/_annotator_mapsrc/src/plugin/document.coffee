@@ -12,7 +12,7 @@ class Annotator.Plugin.Document extends Annotator.Plugin
   
   uri: =>
     uri = decodeURIComponent document.location.href
-    for link in @metadata
+    for link in @metadata.link
       if link.rel == "canonical"
         uri = link.href
     return uri
