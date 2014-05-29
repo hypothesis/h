@@ -1,0 +1,9 @@
+{
+  "name": "hypothesis",
+  "title": "hypothes.is",
+  "id": "jid1-AcSDAi7Q3iBaIQ",
+  "description": "Annotate, highlight, and comment on anything on the Web.",
+  "author": "hypothes.is",
+  "license": "BSD",
+  "version": "0.1.0"
+}
