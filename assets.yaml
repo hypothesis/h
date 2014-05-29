@@ -194,6 +194,12 @@ raf:
   output: lib/polyfills/raf.min.js
   contents:
     - h:lib/polyfills/raf.js
+wgxpath:
+  filters: uglifyjs
+  output: lib/polyfills/wgxpath.install.min.js
+  contents:
+    - h:lib/polyfills/wgxpath.install.js
+
 
 # Other dependencies
 d3:
@@ -267,11 +273,6 @@ visualsearch:
       output: lib/visualsearch.min.js
       contents:
         - h:lib/visualsearch.js
-wgxpath:
-  filters: uglifyjs
-  output: lib/wgxpath.install.min.js
-  contents:
-    - h:lib/wgxpath.install.js
 
 # Application
 app:
