@@ -97,9 +97,11 @@ def app(request):
 @view_config(accept='application/json', renderer='json',
              context='pyramid.exceptions.BadCSRFToken')
 def bad_csrf_token(context, request):
-    reason = _('Session is invalid.')
-    result = httpexceptions.HTTPBadRequest(reason)
-    return ajax_form(request, result)
+    reason = _('Session is invalid. Please try again.')
+    exception = httpexceptions.HTTPBadRequest(reason)
+    result = ajax_form(request, exception)
+    result['model'] = model(request)
+    return result
 
 
 @view_config(name='embed.js', renderer='templates/embed.txt')
