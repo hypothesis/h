@@ -1011,22 +1011,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   vertical-align: middle;
 }
 
-.searchbar {
-  margin-top: 8em;
-}
-
-.searchinput {
-  width: 79%;
-}
-
-.searchbutton {
-  width: 19%
-}
-
-.searchfield {
-  width: 100%
-}
-
 .small-padding {
   padding-top: 1em;
   padding-bottom: 1em;
@@ -1091,105 +1075,50 @@ h3.stream {
 
 //Visual Search////////////////////////////////
 //Override their css here
-
-.collapsed-container {
-  height: 1em;
-  visibility: hidden;
-}
-
-.VS-search .search_facet {
-  float: left;
-  margin: 0;
-  padding: 0 0 0 14px;
-  position: relative;
-  border: 1px solid transparent;
-  height: 20px;
-  margin: 3px -8px 4px 0;
-}
-
-.small-inner {
-  margin:0px .5em 0px 1em;
-}
-
 .search-container {
-  width: auto;
-  float: none;
   overflow: hidden;
 }
 
-.VS-search .VS-search-box {
-  min-height: 20px;
-  height: 24px;
-}
-
-.VS-search .VS-icon-search {
-  position: absolute;
-  left: 9px;
-  top: 7px;
-}
-
-.VS-search .VS-icon-cancel {
-  position: absolute;
-  right: 9px;
-  top: 7px;
-}
-
-.VS-search .VS-search-inner {
-  position: relative;
-  margin: 0 20px 0 22px;
-  overflow: hidden;
-  display: block; 
-}
-
-.visual-search {
-  .VS-search .VS-search-box {
+.VS-search {
+  .search_facet input,
+  .search_input input,
+  .VS-input-width-tester {
+    @include box-shadow(none);
+    @include box-sizing(content-box);
     border: 0;
-    min-height: 22px;
-    margin-top: 1px;
-    margin-bottom: 1px;
   }
 
-  .VS-search input,.VS-search .VS-input-width-tester {
-    border: none;
-    -moz-box-sizing:content-box;
-    -webkit-box-sizing:content-box;
-    box-sizing: content-box;
+  .VS-search-box {
+    border: 0;
+    height: 26px;
+    margin: 1px 0;
+    min-height: 26px;
   }
 
-  .VS-search .search_input input {
-    width: 4px;
+  &.VS-search-collapsed .VS-search-box {
+    @include box-shadow(none);
+    background: inherit;
+  }
+
+  .VS-icon-cancel {
+    background-image: url(../images/svg/cancel.svg);
+    background-size: contain;
+    &:hover {
+      background-image: url(../images/svg/cancel_black.svg);
+      background-position: center 0;
+    }
+  }
+
+  .VS-icon-search {
+    background-image: url(../images/svg/search.svg);
+    background-size: contain;
+    &:hover {
+      background-image: url(../images/svg/search_dark.svg);
+      cursor: pointer;
+    }
   }
 }
 
-.VS-search .VS-icon {
-  background-repeat: no-repeat;
-  background-position: center center;
-  vertical-align: middle;
-  width: 16px; height: 16px;
-}
-
-.VS-search .VS-icon-cancel {
-  width: 11px; height: 11px;
-  background-position: center 0;
-  background-image: url(../images/svg/cancel.svg);
-  background-size: contain;
-  cursor: pointer;
-}
-
-.VS-search .VS-icon-cancel:hover { 
-  width: 11px; height: 11px;
-  background-position: center 0;
-  background-image: url(../images/svg/cancel_black.svg);
-  background-size: contain;
-  cursor: pointer;
-}
-
-.VS-search .VS-icon-search {
-  width: 12px; 
-  height: 12px;
-  background-image: url(../images/svg/search.svg);
-  background-size: contain;
-}
 
 .thread {
   .load-more {
@@ -1198,18 +1127,6 @@ h3.stream {
     font-weight:bold;
     font-size: .8em;
   }
-}
-
-.magnify-glass {
-  width: 2.25em;
-  min-height: 22px;
-}
-
-.magnify-glass .VS-icon-search:hover {
-  width:12px;
-  height:12px;
-  background-image: url(../images/svg/search_dark.svg);
-  cursor: pointer;
 }
 
 
