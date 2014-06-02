@@ -39,5 +39,5 @@ def wipe(settings):
     with testConfig(settings=settings) as config:
         authz = authorization.ACLAuthorizationPolicy()
         config.set_authorization_policy(authz)
-        config.include('h.models')
-        config.include('h.api.store')
+        config.include('h.api')
+        config.include('h.auth.local.models')

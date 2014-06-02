@@ -1,19 +1,10 @@
 # -*- coding: utf-8 -*-
-from horus.events import (
-    NewRegistrationEvent,
-    RegistrationActivatedEvent,
-    PasswordResetEvent,
-    ProfileUpdatedEvent,
-)
 from pyramid.events import BeforeRender, NewRequest, NewResponse
 
 __all__ = [
+    'AnnotationEvent',
     'LoginEvent',
     'LogoutEvent',
-    'NewRegistrationEvent',
-    'RegistrationActivatedEvent',
-    'PasswordResetEvent',
-    'ProfileUpdatedEvent',
     'BeforeRender',
     'NewRequest',
     'NewResponse',

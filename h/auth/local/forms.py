@@ -2,7 +2,8 @@
 # pylint: disable=too-many-public-methods
 import deform
 
-from h import interfaces
+from horus import interfaces
+from zope.interface import Interface
 
 
 class Deform(deform.Form):
@@ -41,8 +42,6 @@ def includeme(config):
         (interfaces.IRegisterForm, RegisterForm),
         (interfaces.IForgotPasswordForm, ForgotForm),
         (interfaces.IResetPasswordForm, ResetForm),
-        (interfaces.IActivateForm, ActivateForm),
-
     ]
 
     for iface, imp in forms:

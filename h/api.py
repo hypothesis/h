@@ -8,6 +8,7 @@ import re
 from annotator import auth, es, store
 import elasticsearch
 import flask
+from pyramid import security
 from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
 from pyramid.settings import asbool
@@ -15,9 +16,63 @@ from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
 from h import events, interfaces, models
-from h.api import lib
+from h.auth.local.oauth import LocalAuthenticationPolicy
+from h.auth.local.views import token as access_token
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+
+def authorize(request, annotation, action, user=None):
+    annotation = wrap_annotation(request, annotation)
+    allowed = security.principals_allowed_by_permission(annotation, action)
+
+    if user is None:
+        principals = request.session.get('personas', [])
+    else:
+        principals = [user.id]
+
+    if len(principals):
+        principals.append(security.Authenticated)
+
+    principals.append(security.Everyone)
+
+    return set(allowed) & set(principals) != set()
+
+
+def token(request):
+    return json.loads(access_token(request).body).get('access_token', '')
+
+
+def wrap_annotation(request, annotation):
+    """Wraps a dict as an instance of the registered Annotation model class.
+
+    Arguments:
+    - `annotation`: a dictionary-like object containing the model data
+    """
+    cls = request.registry.queryUtility(interfaces.IAnnotationClass)
+    return cls(annotation)
+
+
+class Authenticator(object):
+    def __init__(self, request):
+        self.request = request
+        self.settings = request.registry.settings
+
+    def request_user(self, _flask_request):
+        key = self.settings['api.key']
+        secret = self.settings.get('api.secret')
+        ttl = self.settings.get('api.ttl', auth.DEFAULT_TTL)
+
+        consumer = auth.Consumer(key)
+        if secret is not None:
+            consumer.secret = secret
+            consumer.ttl = ttl
+
+        userid = self.request.authenticated_userid
+        if userid is not None:
+            return auth.User(userid, consumer, False)
+
+        return None
 
 
 class Store(object):
@@ -88,17 +143,9 @@ def before_request():
     request = get_current_request()
     Annotation = request.registry.getUtility(interfaces.IAnnotationClass)
     flask.g.annotation_class = Annotation
-    flask.g.auth = lib.authenticator(request)
-    flask.g.authorize = functools.partial(lib.authorize, request)
+    flask.g.auth = Authenticator(request)
+    flask.g.authorize = functools.partial(authorize, request)
     flask.g.before_annotation_update = anonymize_deletes
-
-    # Use the first persona as the default request user.
-    # TODO: support multiple authorizations on store requests
-    personas = request.session.get('personas', [])
-    if len(personas):
-        key = request.registry.settings['api.key']
-        consumer = lib.get_consumer(request, key)
-        flask.g.user = auth.User(personas[0], consumer, False)
 
 
 def after_request(response):
@@ -121,7 +168,7 @@ def after_request(response):
             else:
                 data = json.loads(response.data)
 
-            annotation = lib.wrap_annotation(request, data)
+            annotation = wrap_annotation(request, data)
             event = events.AnnotationEvent(request, annotation, action)
 
             request.registry.notify(event)
@@ -195,6 +242,19 @@ def includeme(config):
     """
     registry = config.registry
     settings = registry.settings
+
+    # Configure the token policy
+    authn_debug = settings.get('pyramid.debug_authorization') \
+        or settings.get('debug_authorization')
+    authn_policy = LocalAuthenticationPolicy(
+        environ_key='HTTP_X_ANNOTATOR_AUTH_TOKEN',
+        debug=authn_debug,
+    )
+    config.set_authentication_policy(authn_policy)
+
+    # Configure the token view
+    config.add_route('api_token', '/api/token')
+    config.add_view(token, renderer='string', route_name='api_token')
 
     # Configure the annotator-store flask app
     app = store_from_settings(settings)

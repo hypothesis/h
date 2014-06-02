@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from pyramid.events import subscriber
 from pyramid.renderers import get_renderer
-from pyramid.settings import asbool
 
 from h import events
 
@@ -42,41 +41,22 @@ def set_csrf_cookie(event):
 
 
 @subscriber(events.LoginEvent)
-@subscriber(events.NewRegistrationEvent, autologin=True)
-@subscriber(events.PasswordResetEvent, autologin=True)
-@subscriber(events.RegistrationActivatedEvent)
 def login(event):
     request = event.request
     user = event.user
     session = request.session
 
-    persona = 'acct:%s@%s' % (user.username, request.server_name)
     personas = session.setdefault('personas', [])
 
-    if persona not in personas:
-        personas.append(persona)
+    if user not in personas:
+        personas.append(user)
         session.changed()
 
 
-class AutoLogin(object):
-    # pylint: disable=too-few-public-methods
-
-    def __init__(self, val, config):
-        self.env = config.get_webassets_env()
-        self.val = val
-
-    def text(self):
-        return 'autologin = %s' % (self.val,)
-
-    phash = text
-
-    def __call__(self, event):
-        request = event.request
-        settings = request.registry.settings
-        autologin = asbool(settings.get('horus.autologin', False))
-        return self.val == autologin
+@subscriber(events.LogoutEvent)
+def logout(event):
+    event.request.session.invalidate()
 
 
 def includeme(config):
-    config.add_subscriber_predicate('autologin', AutoLogin)
     config.scan(__name__)
