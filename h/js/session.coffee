@@ -1,3 +1,9 @@
+imports = [
+  'ngResource'
+  'h.helpers'
+]
+
+
 # bw compat
 sessionPersonaInterceptor = (response) ->
   data = response.data
@@ -72,5 +78,5 @@ class SessionProvider
   ]
 
 
-angular.module('h.session', ['ngResource'])
+angular.module('h.session', imports)
 .provider('session', SessionProvider)

@@ -35,4 +35,4 @@ annotation = ['$filter', 'annotator', ($filter, annotator) ->
 ]
 
 angular.module('h.app_directives', ['ngSanitize'])
-  .directive('annotation', annotation)
+.directive('annotation', annotation)

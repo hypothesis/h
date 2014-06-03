@@ -1,3 +1,12 @@
+imports = [
+  'bootstrap'
+  'h.directives'
+  'h.filters'
+  'h.helpers'
+  'h.streamfilter'
+]
+
+
 get_quote = (annotation) ->
   if annotation.quote? then return annotation.quote
   if not 'target' in annotation then return ''
@@ -313,5 +322,5 @@ configure = [
 ]
 
 
-angular.module('h.streamsearch',['h.streamfilter','h.filters','h.directives','h.helpers','bootstrap'], configure)
-  .controller('StreamSearchController', StreamSearch)
+angular.module('h.streamsearch', imports, configure)
+.controller('StreamSearchController', StreamSearch)

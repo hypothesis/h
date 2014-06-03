@@ -1,3 +1,9 @@
+imports = [
+  'h.filters'
+  'h.session'
+]
+
+
 class Hypothesis extends Annotator
   events:
     'annotationCreated': 'updateAncestors'
@@ -826,7 +832,7 @@ class ViewFilter
     results
 
 
-angular.module('h.services', ['h.filters', 'h.session'])
-  .provider('drafts', DraftProvider)
-  .service('annotator', Hypothesis)
-  .service('viewFilter', ViewFilter)
+angular.module('h.services', imports)
+.provider('drafts', DraftProvider)
+.service('annotator', Hypothesis)
+.service('viewFilter', ViewFilter)

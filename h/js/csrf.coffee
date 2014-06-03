@@ -1,3 +1,6 @@
+imports = ['h.helpers']
+
+
 configure = ['$httpProvider', ($httpProvider) ->
   # Use the Pyramid XSRF header name
   $httpProvider.defaults.xsrfHeaderName = 'X-CSRF-Token'
@@ -31,4 +34,4 @@ configure = ['$httpProvider', ($httpProvider) ->
 ]
 
 
-angular.module('h.csrf', ['h.helpers'], configure)
+angular.module('h.csrf', imports, configure)

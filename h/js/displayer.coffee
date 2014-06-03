@@ -1,3 +1,12 @@
+imports = [
+  'bootstrap'
+  'h.filters'
+  'h.directives'
+  'h.helpers'
+  'h.streamfilter'
+]
+
+
 get_quote = (annotation) ->
   if not 'target' in annotation then return ''
   quote = '(This is a reply annotation)'
@@ -138,5 +147,5 @@ class Displayer
     document.init_annotation = null
     $scope.open()
 
-angular.module('h.displayer',['h.streamfilter','h.filters','h.directives', 'h.helpers','bootstrap'])
-  .controller('DisplayerCtrl', Displayer)
+angular.module('h.displayer', imports)
+.controller('DisplayerCtrl', Displayer)

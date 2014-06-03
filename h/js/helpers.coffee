@@ -12,4 +12,4 @@ baseURI = [
 
 
 angular.module('h.helpers', [])
-  .factory('baseURI', baseURI)
+.factory('baseURI', baseURI)

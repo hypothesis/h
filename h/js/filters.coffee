@@ -52,7 +52,7 @@ elide = (text, split_length) ->
 
 
 angular.module('h.filters', [])
-  .filter('converter', -> (new Converter()).makeHtml)
-  .filter('fuzzyTime', -> fuzzyTime)
-  .filter('persona', -> persona)
-  .filter('elide', -> elide)
+.filter('converter', -> (new Converter()).makeHtml)
+.filter('fuzzyTime', -> fuzzyTime)
+.filter('persona', -> persona)
+.filter('elide', -> elide)

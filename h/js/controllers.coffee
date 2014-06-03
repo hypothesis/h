@@ -1,3 +1,10 @@
+imports = [
+  'bootstrap'
+  'h.helpers'
+  'h.streamfilter'
+]
+
+
 class App
   scope:
     frame:
@@ -1067,11 +1074,11 @@ class Notification
   ) ->
 
 
-angular.module('h.controllers', ['bootstrap', 'h.streamfilter'])
-  .controller('AppController', App)
-  .controller('AnnotationController', Annotation)
-  .controller('AuthController', Auth)
-  .controller('EditorController', Editor)
-  .controller('ViewerController', Viewer)
-  .controller('SearchController', Search)
-  .controller('NotificationController', Notification)
+angular.module('h.controllers', imports)
+.controller('AppController', App)
+.controller('AnnotationController', Annotation)
+.controller('AuthController', Auth)
+.controller('EditorController', Editor)
+.controller('ViewerController', Viewer)
+.controller('SearchController', Search)
+.controller('NotificationController', Notification)
