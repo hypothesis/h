@@ -44,6 +44,7 @@ setup(
         'horus>=0.9.15',
         'jsonpointer==1.0',
         'jsonschema==1.3.0',
+        'oauthlib>=0.6.1',
         'pyramid>=1.5',
         'pyramid-basemodel>=0.2',
         'pyramid_deform>=0.2',

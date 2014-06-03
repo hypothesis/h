@@ -21,8 +21,8 @@ def includeme(config):
 
     config.include('h.api')
     config.include('h.models')
-    config.include('h.notifier')
     config.include('h.streamer')
+    config.include('h.subscribers')
     config.include('h.views')
 
 

@@ -10,7 +10,8 @@ from pyramid_mailer.message import Message
 from pyramid.renderers import render
 from pyramid.events import subscriber
 
-from h import events, models
+from h import events
+from h.auth.local import models
 from h.streamer import FilterHandler, parent_values
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -284,11 +285,6 @@ def create_default_subscription(request, user):
     user.subscriptions = True
     session.add(user)
     session.flush()
-
-
-@subscriber(events.NewRegistrationEvent)
-def registration_subscriptions(event):
-    create_default_subscription(event.request, event.user)
 
 
 @subscriber(events.LoginEvent)

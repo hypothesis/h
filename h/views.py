@@ -2,44 +2,14 @@
 import json
 import logging
 
-import colander
-import deform
-from horus import views
-from horus.lib import FlashMessage
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 
-from h import events, interfaces
+from h import interfaces
 from h.models import _
 from h.streamer import url_values_from_document
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-def ajax_form(request, result):
-    errors = []
-
-    if isinstance(result, httpexceptions.HTTPRedirection):
-        request.response.headers.extend(result.headers)
-        result = {'status': 'okay'}
-    elif isinstance(result, httpexceptions.HTTPError):
-        request.response.status_code = result.code
-        result = {'status': 'failure', 'reason': str(result)}
-    else:
-        errors = result.pop('errors', [])
-        if errors:
-            request.response.status_code = 400
-            result['status'] = 'failure'
-            result['reason'] = _('Please check your input.')
-        else:
-            result['status'] = 'okay'
-
-    for e in errors:
-        if isinstance(e, colander.Invalid):
-            result.setdefault('errors', {})
-            result['errors'].update(e.asdict())
-
-    return result
 
 
 def pop_flash(request):
@@ -66,29 +36,6 @@ def model(request):
                 personas=session.get('personas', []))
 
 
-class AsyncFormViewMapper(object):
-    def __init__(self, **kw):
-        self.attr = kw['attr']
-
-    def __call__(self, view):
-        def wrapper(context, request):
-            if request.method == 'POST':
-                data = request.json_body
-                data.update(request.params)
-                request.content_type = 'application/x-www-form-urlencoded'
-                request.POST.clear()
-                request.POST.update(data)
-            inst = view(request)
-            meth = getattr(inst, self.attr)
-            result = meth()
-            result = ajax_form(request, result)
-            result['flash'] = pop_flash(request)
-            result['model'] = model(request)
-            result.pop('form', None)
-            return result
-        return wrapper
-
-
 @view_config(accept='application/json',  name='app', renderer='json')
 def app(request):
     return dict(status='okay', flash=pop_flash(request), model=model(request))
@@ -98,10 +45,11 @@ def app(request):
              context='pyramid.exceptions.BadCSRFToken')
 def bad_csrf_token(context, request):
     reason = _('Session is invalid. Please try again.')
-    exception = httpexceptions.HTTPBadRequest(reason)
-    result = ajax_form(request, exception)
-    result['model'] = model(request)
-    return result
+    return {
+        'status': 'failure',
+        'reason': reason,
+        'model': model(request),
+    }
 
 
 @view_config(name='embed.js', renderer='templates/embed.txt')
@@ -116,11 +64,10 @@ def page(context, request):
 
 
 @view_defaults(context='h.models.Annotation', layout='annotation')
-class AnnotationController(views.BaseController):
+class AnnotationController(object):
     def __init__(self, request):
-        super(AnnotationController, self).__init__(request)
-        getUtility = request.registry.getUtility
-        self.Store = getUtility(interfaces.IStoreClass)
+        self.request = request
+        self.Store = request.registry.getUtility(interfaces.IStoreClass)
 
     @view_config(accept='text/html', renderer='templates/displayer.pt')
     def __html__(self):
@@ -155,108 +102,6 @@ class AnnotationController(views.BaseController):
         return self.request.context
 
 
-@view_defaults(accept='text/html', renderer='templates/auth.pt')
-@view_config(attr='login', route_name='login')
-@view_config(attr='logout', route_name='logout')
-class AuthController(views.AuthController):
-    def login(self):
-        request = self.request
-        result = super(AuthController, self).login()
-
-        if request.user:
-            # XXX: Horus should maybe do this for us
-            event = events.LoginEvent(request, request.user)
-            request.registry.notify(event)
-
-        return result
-
-    def logout(self):
-        request = self.request
-        result = super(AuthController, self).logout()
-
-        # XXX: Horus should maybe do this for us
-        event = events.LogoutEvent(request)
-        request.registry.notify(event)
-
-        return result
-
-
-@view_defaults(accept='application/json', name='app', renderer='json')
-@view_config(attr='login', request_param='__formid__=login')
-@view_config(attr='logout', request_param='__formid__=logout')
-class AsyncAuthController(AuthController):
-    __view_mapper__ = AsyncFormViewMapper
-
-
-@view_defaults(accept='text/html', renderer='templates/auth.pt')
-@view_config(attr='forgot_password', route_name='forgot_password')
-@view_config(attr='reset_password', route_name='reset_password')
-class ForgotPasswordController(views.ForgotPasswordController):
-    pass
-
-
-@view_defaults(accept='application/json', name='app', renderer='json')
-@view_config(attr='forgot_password', request_param='__formid__=forgot')
-class AsyncForgotPasswordController(ForgotPasswordController):
-    __view_mapper__ = AsyncFormViewMapper
-
-
-@view_defaults(accept='text/html', renderer='templates/auth.pt')
-@view_config(attr='register', route_name='register')
-@view_config(attr='activate', route_name='activate')
-class RegisterController(views.RegisterController):
-    pass
-
-
-@view_defaults(accept='application/json', name='app', renderer='json')
-@view_config(attr='register', request_param='__formid__=register')
-@view_config(attr='activate', request_param='__formid__=activate')
-class AsyncRegisterController(RegisterController):
-    __view_mapper__ = AsyncFormViewMapper
-
-    def activate(self):
-        """Activate a user and set a password given an activation code.
-
-        This view is different from the activation view in horus because it
-        does not require the user id to be passed. It trusts the activation
-        code and updates the password.
-        """
-        request = self.request
-        Str = self.Str
-
-        schema = request.registry.getUtility(interfaces.IActivateSchema)
-        schema = schema().bind(request=request)
-        form = request.registry.getUtility(interfaces.IActivateForm)(schema)
-        appstruct = None
-
-        try:
-            appstruct = form.validate(request.POST.items())
-        except deform.ValidationFailure as e:
-            return dict(errors=e.error.children)
-
-        code = appstruct['code']
-        activation = self.Activation.get_by_code(request, code)
-
-        user = None
-        if activation:
-            user = self.User.get_by_activation(request, activation)
-
-        if user is None:
-            return dict(errors=[_('This activation code is not valid.')])
-
-        user.password = appstruct['password']
-        self.db.delete(activation)
-        self.db.add(user)
-
-        FlashMessage(request, Str.reset_password_done, kind='success')
-
-        # XXX: Horus should maybe do this for us
-        event = events.RegistrationActivatedEvent(request, user, activation)
-        request.registry.notify(event)
-
-        return {}
-
-
 @view_config(
     context='h.interfaces.IStreamResource',
     layout='stream',
@@ -283,13 +128,8 @@ def includeme(config):
     config.include('pyramid_chameleon')
 
     config.include('h.assets')
-    config.include('h.forms')
     config.include('h.layouts')
     config.include('h.panels')
-    config.include('h.schemas')
-    config.include('h.subscribers')
-
-    config.include('horus')
 
     config.add_route('index', '/')
     config.add_route('help', '/docs/help')

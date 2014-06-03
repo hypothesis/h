@@ -38,7 +38,7 @@ def test_passive_queries():
     event = events.AnnotationEvent(request, annotation, 'create')
 
     with patch('h.notifier.AnnotationNotifier') as mock_notif:
-        with patch('h.models.UserSubscriptions.get_all') \
+        with patch('h.auth.local.models.UserSubscriptions.get_all') \
                 as mock_subscription:
             query = QueryMock()
             mock_subscription.all = Mock(return_value=[query])
@@ -57,12 +57,12 @@ def test_query_matches():
     request = DummyRequest()
     event = events.AnnotationEvent(request, annotation, 'create')
     with patch('h.notifier.AnnotationNotifier') as mock_notif:
-        with patch('h.models.UserSubscriptions') as mock_subscription:
+        with patch('h.auth.local.models.UserSubscriptions') as mock_subs:
             with patch('h.notifier.FilterHandler') as mock_filter:
                 query = QueryMock(active=True)
                 als = Mock()
                 als.all = Mock(return_value=[query])
-                mock_subscription.get_all = Mock(return_value=als)
+                mock_subs.get_all = Mock(return_value=als)
 
                 mock_filter().match = Mock(return_value=True)
                 notifier.send_notifications(event)
@@ -81,12 +81,12 @@ def test_query_mismatch():
     request = DummyRequest()
     event = events.AnnotationEvent(request, annotation, 'create')
     with patch('h.notifier.AnnotationNotifier') as mock_notif:
-        with patch('h.models.UserSubscriptions') as mock_subscription:
+        with patch('h.auth.local.models.UserSubscriptions') as mock_subs:
             with patch('h.notifier.FilterHandler') as mock_filter:
                 query = QueryMock(active=True)
                 als = Mock()
                 als.all = Mock(return_value=[query])
-                mock_subscription.get_all = Mock(return_value=als)
+                mock_subs.get_all = Mock(return_value=als)
 
                 mock_filter().match = Mock(return_value=False)
                 notifier.send_notifications(event)

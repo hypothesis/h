@@ -2,11 +2,12 @@
 # pylint: disable=no-init, too-few-public-methods
 import colander
 import deform
+from hem.db import get_session
+from horus import interfaces
 from horus.schemas import unique_email
 from pyramid.session import check_csrf_token
 
-from h import interfaces
-from h.models import _, get_session
+from h.models import _
 
 
 @colander.deferred
@@ -93,7 +94,7 @@ class ResetPasswordSchema(CSRFSchema):
 class ActivateSchema(CSRFSchema):
     code = colander.SchemaNode(
         colander.String(),
-        title="Security Code"
+        title=_("Security Code")
     )
     password = colander.SchemaNode(
         colander.String(),
@@ -111,7 +112,6 @@ def includeme(config):
         (interfaces.IRegisterSchema, RegisterSchema),
         (interfaces.IForgotPasswordSchema, ForgotPasswordSchema),
         (interfaces.IResetPasswordSchema, ResetPasswordSchema),
-        (interfaces.IActivateSchema, ActivateSchema),
     ]
 
     for iface, imp in schemas:
