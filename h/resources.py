@@ -40,12 +40,14 @@ class InnerResource(BaseResource):
         :class:`pyramid.interfaces.ILocation` will be returned as is.
 
         Attributes which are constructors for implementing classes will
-        be replaced with a constructed instance by reifying the newly
-        constructed resource in place of the attribute.
+        be replaced with a constructed instance.
 
         Assignment to the sub-resources `__name__` and `__parent__` properties
         is handled automatically.
         """
+
+        if name in self:
+            return super(InnerResource, self).__getitem__(name)
 
         factory_or_resource = getattr(self, name, None)
 
@@ -55,6 +57,7 @@ class InnerResource(BaseResource):
                     inst = factory_or_resource(self.request)
                     inst.__name__ = name
                     inst.__parent__ = self
+                    self.__dict__[name] = inst
                     return inst
             except TypeError:
                 pass
