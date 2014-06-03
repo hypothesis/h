@@ -306,7 +306,7 @@ blockquote {
   position: absolute;
   z-index: 2;
 
-  li {
+  li:not(.ng-hide) {
     cursor: pointer;
     line-height: 1;
     text-align: left;
