@@ -19,11 +19,11 @@ class App
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
-    'annotator', 'authentication', 'baseURI', 'streamfilter', 'viewFilter'
+    'annotator', 'baseURI', 'session', 'streamfilter', 'viewFilter'
   ]
   constructor: (
     $element, $filter, $http, $location, $rootScope, $scope, $timeout
-    annotator, authentication, baseURI, streamfilter, viewFilter
+    annotator, baseURI, session, streamfilter, viewFilter
   ) ->
     {plugins, host, providers} = annotator
 
@@ -69,7 +69,7 @@ class App
           else
             $scope.reloadAnnotations()
       else if oldValue?
-        authentication.$logout =>
+        session.$logout =>
           $scope.$broadcast '$reset'
 
           if annotator.tool isnt 'comment'
@@ -140,7 +140,7 @@ class App
       delete annotator.ongoing_edit
       base = angular.copy @scope
       angular.extend $scope, base,
-        auth: authentication
+        auth: session
         frame: $scope.frame or @scope.frame
         socialView: annotator.socialView
 
@@ -701,10 +701,10 @@ class Auth
     code: null
 
   this.$inject = [
-    '$scope', 'authentication', 'flash'
+    '$scope', 'session', 'flash'
   ]
   constructor: (
-     $scope,   authentication,   flash
+     $scope,   session,   flash
   ) ->
     _reset = =>
       angular.copy @scope, $scope.model
@@ -725,9 +725,9 @@ class Auth
     $scope.$on '$reset', _reset
 
     $scope.submit = (form) ->
-      angular.extend authentication, $scope.model
+      angular.extend session, $scope.model
       return unless form.$valid
-      authentication["$#{form.$name}"] (-> _success form), _error
+      session["$#{form.$name}"] (-> _success form), _error
 
 
 class Editor

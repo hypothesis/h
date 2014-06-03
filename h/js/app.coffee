@@ -10,6 +10,7 @@ imports = [
   'h.helpers'
   'h.flash'
   'h.filters'
+  'h.session'
   'h.services'
 ]
 

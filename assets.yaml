@@ -322,6 +322,7 @@ app:
             - js/app_directives.coffee
             - js/displayer.coffee
             - js/helpers.coffee
+            - js/session.coffee
             - js/services.coffee
             - js/streamfilter.coffee
             - js/streamsearch.coffee

@@ -53,11 +53,11 @@ class Hypothesis extends Annotator
 
   this.$inject = [
     '$document', '$location', '$rootScope', '$route', '$window',
-    'authentication'
+    'session'
   ]
   constructor: (
      $document,   $location,   $rootScope,   $route,   $window,
-     authentication
+     session
   ) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
@@ -70,7 +70,7 @@ class Hypothesis extends Annotator
     @clientID = uuid.unparse buffer
     $.ajaxSetup headers: "x-client-id": @clientID
 
-    @auth = authentication
+    @auth = session
     @providers = []
     @socialView =
       name: "none" # "single-player"
@@ -636,37 +636,6 @@ class Hypothesis extends Annotator
     return @element.injector().get('drafts').discard()
 
 
-class AuthenticationProvider
-  constructor: ->
-    @actions =
-      load:
-        method: 'GET'
-        withCredentials: true
-        interceptor: this
-
-    for action in ['login', 'logout', 'register', 'forgot', 'activate']
-      @actions[action] =
-        method: 'POST'
-        params:
-          '__formid__': action
-        withCredentials: true
-        interceptor: this
-
-  response: (response) =>  # bw compat
-    if angular.isObject(@model.persona)
-      persona = @model.persona
-      @model.persona = "acct:#{persona.username}@#{persona.provider}"
-      @model.personas = for persona in @model.personas
-        "acct:#{persona.username}@#{persona.provider}"
-    response
-
-  $get: [
-    '$resource', 'baseURI'
-    ($resource,   baseURI) ->
-      @model = $resource(baseURI, {}, @actions).load()
-  ]
-
-
 class DraftProvider
   drafts: null
 
@@ -857,8 +826,7 @@ class ViewFilter
     results
 
 
-angular.module('h.services', ['ngResource', 'h.filters'])
-  .provider('authentication', AuthenticationProvider)
+angular.module('h.services', ['h.filters', 'h.session'])
   .provider('drafts', DraftProvider)
   .service('annotator', Hypothesis)
   .service('viewFilter', ViewFilter)
