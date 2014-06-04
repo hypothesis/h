@@ -3,6 +3,7 @@ imports = [
   'h.directives'
   'h.filters'
   'h.helpers'
+  'h.socket'
   'h.streamfilter'
 ]
 
@@ -151,17 +152,15 @@ class StreamSearch
       and_or: 'and'
       operator: 'ge'
 
-  this.inject = ['$element', '$location', '$scope', '$timeout', 'baseURI','streamfilter']
+  this.inject = [
+    '$element', '$location', '$scope', '$timeout',
+    'baseURI', 'socket', 'streamfilter'
+  ]
   constructor: (
-    $element, $location, $scope, $timeout, baseURI, streamfilter
+     $element,   $location,   $scope,   $timeout,
+     baseURI,   socket,   streamfilter
   ) ->
-    prefix = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, ''
     $scope.empty = false
-
-    # Generate client ID
-    buffer = new Array(16)
-    uuid.v4 null, buffer, 0
-    @clientID = uuid.unparse buffer
 
     $scope.sortAnnotations = (a, b) ->
       a_upd = if a.updated? then new Date(a.updated) else new Date()
@@ -231,13 +230,9 @@ class StreamSearch
       if $scope.sock? then $scope.sock.close()
       $scope.annotations = new Array()
 
-      $scope.sock = new SockJS prefix + '/__streamer__'
-
-      $scope.sock.onopen = =>
-        sockmsg =
-          filter: filter
-          clientID: @clientID
-        $scope.sock.send JSON.stringify sockmsg
+      $scope.sock = socket()
+      $scope.sock.onopen = ->
+        $scope.sock.send(JSON.stringify({filter}))
 
       $scope.sock.onclose = =>
         # stream is closed
@@ -264,7 +259,7 @@ class StreamSearch
       for annotation in data
         annotation.action = action
         annotation.quote = get_quote annotation
-        annotation._share_link = prefix + '/a/' + annotation.id
+        annotation._share_link = "#{baseURI}a/#{annotation.id}"
 
         if annotation in $scope.annotations then continue
 
@@ -303,7 +298,6 @@ class StreamSearch
       unless $scope.sock? then return
       sockmsg =
         messageType: 'more_hits'
-        clientID: @clientID
         moreHits: number
 
       $scope.sock.send JSON.stringify sockmsg

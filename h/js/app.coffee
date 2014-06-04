@@ -12,6 +12,7 @@ imports = [
   'h.filters'
   'h.session'
   'h.services'
+  'h.socket'
 ]
 
 

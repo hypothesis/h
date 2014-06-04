@@ -11,7 +11,7 @@ def add_renderer_globals(event):
 
     # Set the base url to use in the <base> tag
     if hasattr(request, 'root'):
-        event['base_url'] = request.resource_url(request.root, 'app')
+        event['base_url'] = request.resource_url(request.root, '')
 
     # Set the service url to use for API discovery
     event['service_url'] = request.route_url('api', subpath='')

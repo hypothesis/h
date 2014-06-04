@@ -1,6 +1,7 @@
 imports = [
   'bootstrap'
   'h.helpers'
+  'h.socket'
   'h.streamfilter'
 ]
 
@@ -26,11 +27,11 @@ class App
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
-    'annotator', 'baseURI', 'session', 'streamfilter', 'viewFilter'
+    'annotator', 'session', 'socket', 'streamfilter', 'viewFilter'
   ]
   constructor: (
-    $element, $filter, $http, $location, $rootScope, $scope, $timeout
-    annotator, baseURI, session, streamfilter, viewFilter
+     $element,   $filter,   $http,   $location,   $rootScope,   $scope,   $timeout
+     annotator,   session,   socket,   streamfilter,   viewFilter
   ) ->
     {plugins, host, providers} = annotator
 
@@ -412,15 +413,9 @@ class App
           .addClause('/uri', 'one_of', Object.keys(annotator.plugins.Store.entities))
           .getFilter()
 
-      streamerURI = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, '/__streamer__'
-      $scope.updater = new SockJS streamerURI
-
-      $scope.updater.onopen = =>
-        sockmsg =
-          filter: filter
-          clientID: annotator.clientID
-        #console.log sockmsg
-        $scope.updater.send JSON.stringify sockmsg
+      $scope.updater = socket()
+      $scope.updater.onopen = ->
+        $scope.updater.send(JSON.stringify({filter}))
 
       $scope.updater.onclose = =>
         $timeout $scope.initUpdater, 60000
@@ -431,10 +426,6 @@ class App
           return
         data = msg.data.payload
         action = msg.data.options.action
-        clientID = msg.data.options.clientID
-
-        if clientID is annotator.clientID
-          return
 
         unless data instanceof Array then data = [data]
 
@@ -648,15 +639,7 @@ class Annotation
         if drafts.contains $scope.model
           $scope.editing = true
 
-
-        # XXX: This should be done some other way since we should not assume
-        # the annotation share URL is in any particular path relation to the
-        # app base URL. It's time to start reflecting routes, I think. I'm
-        # just not sure how best to do that with pyramid traversal since there
-        # is not a pre-determined route map. One possibility would be to
-        # unify everything so that it's relative to the app URL.
-        prefix = baseURI.replace /\/\w+\/?$/, ''
-        $scope.shared_link = prefix + '/a/' + $scope.model.id
+        $scope.shared_link = "#{baseURI}a/#{$scope.model.id}"
 
     $scope.$watch 'model.target', (targets) ->
       return unless targets

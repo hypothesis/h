@@ -9,7 +9,7 @@ var HYPOTHESIS_YEPNOPE_RULES = [
     test: typeof(window.Annotator) !== 'undefined',
     nope: ${map(str, request.webassets_env["inject"].urls())},
     complete: function () {
-      var app = '${base_url}'
+      var app = '${base_url}app'
         , bootstrap = [
           'if (!window.annotator) {',
           '  var klass, options;',

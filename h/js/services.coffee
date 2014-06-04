@@ -70,12 +70,6 @@ class Hypothesis extends Annotator
 
     window.annotator = this
 
-    # Generate client ID
-    buffer = new Array(16)
-    uuid.v4 null, buffer, 0
-    @clientID = uuid.unparse buffer
-    $.ajaxSetup headers: "x-client-id": @clientID
-
     @auth = session
     @providers = []
     @socialView =

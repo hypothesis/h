@@ -3,6 +3,7 @@ imports = [
   'h.filters'
   'h.directives'
   'h.helpers'
+  'h.socket'
   'h.streamfilter'
 ]
 
@@ -20,16 +21,14 @@ get_quote = (annotation) ->
 class Displayer
   idTable : {}
 
-  this.$inject = ['$scope','$element','$timeout','baseURI', 'streamfilter']
-  constructor: ($scope, $element, $timeout, baseURI, streamfilter) ->
-    # Set streamer url
-    streamerURI = baseURI.replace /\/\w+(\/?\??[^\/]*)\/?$/, '/__streamer__'
-
-    # Generate client ID
-    buffer = new Array(16)
-    uuid.v4 null, buffer, 0
-    @clientID = uuid.unparse buffer
-
+  this.$inject = [
+    '$element', '$scope', '$timeout',
+    'socket', 'streamfilter'
+  ]
+  constructor: (
+     $element,   $scope,   $timeout,
+     socket,   streamfilter
+  ) ->
     $scope.root = document.init_annotation
     $scope.annotation = $scope.root.annotation
     $scope.annotations = [$scope.annotation]
@@ -39,7 +38,7 @@ class Displayer
       if $scope.annotation.references? then $scope.annotation.references.length else 0
     $scope.full_deleted = false
     @idTable[$scope.annotation.id] = $scope.annotation
-    $scope.filter =
+    filter =
       streamfilter
         .setPastDataNone()
         .setMatchPolicyIncludeAny()
@@ -57,14 +56,10 @@ class Displayer
       to_change.replies = replies
       to_change.reply_count = reply_count
 
-    $scope.open = =>
-      $scope.sock = new SockJS streamerURI
-
-      $scope.sock.onopen = =>
-        sockmsg =
-          filter: $scope.filter
-          clientID: @clientID
-        $scope.sock.send JSON.stringify sockmsg
+    $scope.open = ->
+      $scope.sock = socket()
+      $scope.sock.onopen = ->
+        $scope.sock.send(JSON.stringify({filter}))
 
       $scope.sock.onclose = =>
         $timeout $scope.open, 5000

@@ -437,25 +437,19 @@ class StreamerSession(Session):
 
         # Finally send filtered annotations
         # Can send zero to indicate that no past data is matched
-        if self.clientID is None:
-            # Backwards-compatibility code
-            packet = [send_annotations, 'past']
-        else:
-            packet = {
-                'payload': send_annotations,
-                'type': 'annotation-notification',
-                'options': {
-                    'action': 'past',
-                    'clientID': self.clientID
-                }
+        packet = {
+            'payload': send_annotations,
+            'type': 'annotation-notification',
+            'options': {
+                'action': 'past',
             }
+        }
         self.send(packet)
 
     def on_message(self, msg):
         transaction.begin()
         try:
             struct = json.loads(msg)
-            self.clientID = struct['clientID'] if 'clientID' in struct else ''
             msg_type = struct.get('messageType', 'filter')
 
             if msg_type == 'filter':
@@ -479,6 +473,8 @@ class StreamerSession(Session):
                     self.query.query['size'] = more_hits
                     self.send_annotations()
                     self.offsetFrom += self.received
+            elif msg_type == 'client_id':
+                self.clientID = struct.get('value')
         except:
             log.exception("Parsing filter: %s", msg)
             transaction.abort()
@@ -491,6 +487,8 @@ class StreamerSession(Session):
 def after_action(event):
     try:
         request = event.request
+        clientID = request.headers.get('X-Client-Id')
+
         action = event.action
         if action == 'read':
             return
@@ -501,6 +499,9 @@ def after_action(event):
 
         manager = request.get_sockjs_manager()
         for session in manager.active_sessions():
+            if session.clientID == clientID:
+                continue
+
             try:
                 if not session.request.has_permission('read', annotation):
                     continue
@@ -512,18 +513,13 @@ def after_action(event):
                 if not (flt and flt.match(annotation, action)):
                     continue
 
-                if session.clientID is None:
-                    # Backwards-compatibility code
-                    packet = [annotation, action]
-                else:
-                    packet = {
-                        'payload': [annotation],
-                        'type': 'annotation-notification',
-                        'options': {
-                            'action': action,
-                            'clientID': request.headers.get('X-Client-Id'),
-                        },
-                    }
+                packet = {
+                    'payload': [annotation],
+                    'type': 'annotation-notification',
+                    'options': {
+                        'action': action,
+                    },
+                }
 
                 session.send(packet)
             except:

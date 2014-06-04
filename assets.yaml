@@ -324,6 +324,7 @@ app:
             - js/helpers.coffee
             - js/session.coffee
             - js/services.coffee
+            - js/socket.coffee
             - js/streamfilter.coffee
             - js/streamsearch.coffee
     - filters: cleancss

@@ -74,7 +74,7 @@ class SessionProvider
       for name, options of ACTION_OPTION
         actions[name] = angular.extend {}, options, @options
 
-      model = $resource(baseURI, {}, actions).load()
+      model = $resource("#{baseURI}app", {}, actions).load()
   ]
 
 
