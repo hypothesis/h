@@ -227,29 +227,34 @@ class App
 
     $rootScope.applySort "Location"
 
-    # Clean up the searchbar
-    $scope.leaveSearch = =>
-      # Got back from search page
+    $scope.query = $location.search()
+
+    $scope.search = (searchCollection) ->
+      return unless annotator.discardDrafts()
+
+      matched = []
+      query =
+        tags: []
+        quote: []
+
+      for item in searchCollection.models
+        {category, value} = item.attributes
+
+        # Stuff we need to collect
+        switch
+          when category in ['text', 'user', 'time', 'group']
+            query[category] = value
+          when category == 'tag'
+            # Tags are specials, because we collect those into an array
+            query.tags.push value.toLowerCase()
+          when category == 'quote'
+            query.quote = query.quote.concat(value.split(/\s+/))
+
+      $location.path('/page_search').search(query)
+
+    $scope.searchClear = ->
+      $location.url('/viewer')
       $scope.show_search = false
-
-      # We have to call all these internal methods
-      # of VS, because the public API does not have
-      # a method for clearing search.
-      @visualSearch.searchBox.disableFacets();
-      @visualSearch.searchBox.value('');
-      @visualSearch.searchBox.flags.allSelected = false;
-
-    $scope.$on '$routeChangeStart', (current, next) ->
-      return unless next.$$route?
-
-      # Will we be in search mode after this change?
-      willSearch = next.$$route?.controller is "SearchController"
-
-      if $scope.inSearch and not willSearch
-        # We were in search mode, but we are leaving it now.
-        $scope.leaveSearch()
-
-      $scope.inSearch = willSearch
 
     # Update scope with auto-filled form field values
     $timeout ->
@@ -258,86 +263,6 @@ class App
         $i.triggerHandler('change')
         $i.triggerHandler('input')
     , 200  # We hope this is long enough
-
-    search_query = ''
-
-    @visualSearch = VS.init
-      container: $element.find('.visual-search')
-      query: search_query
-      callbacks:
-        search: (query, searchCollection) =>
-          unless query
-            if $scope.inSearch
-              $location.path('/viewer')
-              $rootScope.$digest()
-            return
-
-          return unless annotator.discardDrafts()
-
-          matched = []
-
-          parsedQuery =
-            text: ''
-            tags: []
-            quote: []
-
-          for searchItem in searchCollection.models
-            category = searchItem.attributes.category
-            value = searchItem.attributes.value
-
-            # Stuff we need to collect
-            if category in ['text', 'user', 'time', 'group']
-              parsedQuery[category] = value
-
-            # Tags are specials, because we collect those into an array
-            if category in ['tag']
-              parsedQuery[category].push value.toLowerCase()
-
-            if category in ['quote']
-                parsedQuery[category].push val.toLowerCase() for val in value.split ' '
-
-          annotations = $rootScope.annotations
-          matchingIDs = viewFilter.filter annotations, parsedQuery
-
-          # Set the path
-          # TODO: do we really need this data in the location?
-          search =
-            query: parsedQuery
-            matched : matchingIDs
-            in_body_text: parsedQuery.text
-            quote: parsedQuery.quote
-          $location.path('/page_search').search(search)
-
-          $rootScope.$digest()
-
-        facetMatches: (callback) =>
-          if $scope.show_search
-            return callback ['text','tag', 'quote', 'group','time','user'], {preserveOrder: true}
-        valueMatches: (facet, searchTerm, callback) ->
-          switch facet
-            when 'group' then callback ['Public', 'Private']
-            when 'time'
-              callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
-        clearSearch: (original) =>
-          # Execute clearSearch's internal method for resetting search
-          original()
-
-          # If we are in a search view, then the act of leaving it
-          # will trigger the route change watch, which will call
-          # leaveSearch(). However, if we have not yet started searching,
-          # (only opened the searcbar), no route change will happen,
-          # so we will have to trigger the cleanup manually.
-          $scope.leaveSearch() unless $scope.inSearch
-
-          # Go to viewer
-          $location.path('/viewer')
-
-          $rootScope.$digest()
-
-    if search_query.length > 0
-      $timeout =>
-        @visualSearch.searchBox.searchEvent('')
-      , 1500
 
     $scope.reloadAnnotations = ->
       $rootScope.applyView "Screen"
@@ -812,6 +737,7 @@ class Search
 
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
     $scope.filter_orderBy = $filter('orderBy')
+    $scope.matches = []
     $scope.render_order = {}
     $scope.render_pos = {}
     $scope.ann_info =
@@ -833,19 +759,19 @@ class Search
         buildRenderOrder(threadid, thread.children)
 
     setMoreTop = (threadid, annotation) =>
-      unless annotation.id in $scope.search_filter
+      unless annotation.id in $scope.matches
         return false
 
       result = false
       pos = $scope.render_pos[annotation.id]
       if pos > 0
         prev = $scope.render_order[threadid][pos-1]
-        unless prev in $scope.search_filter
+        unless prev in $scope.matches
           result = true
       result
 
     setMoreBottom = (threadid, annotation) =>
-      unless annotation.id in $scope.search_filter
+      unless annotation.id in $scope.matches
         return false
 
       result = false
@@ -853,7 +779,7 @@ class Search
 
       if pos < $scope.render_order[threadid].length-1
         next = $scope.render_order[threadid][pos+1]
-        unless next in $scope.search_filter
+        unless next in $scope.matches
           result = true
       result
 
@@ -880,14 +806,12 @@ class Search
           params: annotation.$$tag
 
     $scope.$watchCollection 'annotations', (nVal, oVal) =>
-      $routeParams.matched = viewFilter.filter $rootScope.annotations, $routeParams.query
       refresh()
 
     refresh = =>
-      $scope.search_filter = $routeParams.matched
-
+      $scope.matches = viewFilter.filter $rootScope.annotations, $routeParams
       # Create the regexps for highlighting the matches inside the annotations' bodies
-      $scope.text_tokens = $routeParams.in_body_text.split ' '
+      $scope.text_tokens = $routeParams.text?.split(/\s+/) or []
       $scope.text_regexp = []
       $scope.quote_tokens = $routeParams.quote
       $scope.quote_regexp = []
@@ -917,7 +841,7 @@ class Search
         root_annotation = (annotator.threading.getContainer annotation_root).message
         unless root_annotation in $rootScope.annotations then continue
 
-        if annotation.id in $scope.search_filter
+        if annotation.id in $scope.matches
           # We have a winner, let's put its root annotation into our list and build the rendering
           root_thread = annotator.threading.getContainer annotation_root
           threads.push root_thread
@@ -934,7 +858,7 @@ class Search
       # - Open detail mode for quote hits
       for thread in threads
         thread.message.highlightText = thread.message.text
-        if thread.message.id in $scope.search_filter
+        if thread.message.id in $scope.matches
           $scope.ann_info.shown[thread.message.id] = true
           if thread.message.text?
             for regexp in $scope.text_regexp
@@ -968,7 +892,7 @@ class Search
         if children?
           for child in children
             child.highlightText = child.text
-            if child.id in $scope.search_filter
+            if child.id in $scope.matches
               $scope.ann_info.shown[child.id] = true
               for regexp in $scope.text_regexp
                 child.highlightText = child.highlightText.replace regexp, $scope.highlighter
@@ -986,7 +910,7 @@ class Search
         hidden = 0
         last_shown = null
         for id in order
-          if id in $scope.search_filter
+          if id in $scope.matches
             if last_shown? then $scope.ann_info.more_bottom_num[last_shown] = hidden
             $scope.ann_info.more_top_num[id] = hidden
             last_shown = id

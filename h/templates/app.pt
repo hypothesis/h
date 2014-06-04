@@ -19,7 +19,15 @@
         <!-- Searchbar -->
         <div class="search-container">
           <div ng-show="show_search"
-               class="visual-search visual-container"></div>
+               class="visual-search visual-container"
+               query="query"
+               onsearch="search(this)"
+               facets="['text','tag', 'quote', 'group', 'time', 'user']"
+               values="{'group': ['Public', 'Private'],
+                        'time': ['5 min', '30 min', '1 hour', '12 hours',
+                                 '1 day', '1 week', '1 month', '1 year']}"
+               onclear="searchClear()"
+               ></div>
           <div ng-hide="show_search"
                class="visual-container"
                ng-click="show_search = true">

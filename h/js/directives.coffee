@@ -394,6 +394,49 @@ streamviewer = [ ->
   templateUrl: 'streamviewer.html'
 ]
 
+
+visualSearch = ['$parse', ($parse) ->
+  link: (scope, elem, attr, ctrl) ->
+    _search = $parse(attr.onsearch)
+    _clear = $parse(attr.onclear)
+    _facets = $parse(attr.facets)
+    _values = $parse(attr.values)
+
+    _vs = VS.init
+      container: elem
+      callbacks:
+        search: (query, modelCollection) ->
+          scope.$apply ->
+            _search(scope, {"this": modelCollection})
+        clearSearch: (original) ->
+          _vs.searchBox.value('')
+          if attr.onclear
+            scope.$apply ->
+              _clear(scope)
+          else
+            original()
+        facetMatches: (callback) ->
+          facets = _facets(scope) or []
+          callback(facets or [], preserveOrder: true)
+        valueMatches: (facet, term, callback) ->
+          values = _values(scope)?[facet]
+          callback(values or [], preserveOrder: true)
+
+    scope.$watch attr.query, (query) ->
+      terms =
+        for k, v of query
+          continue unless v?.length
+          if ' ' in v
+            "#{k}: \"#{v}\""
+          else
+            "#{k}: #{v}"
+
+      _vs.searchBox.value(terms.join(' '))
+      _search(scope, {"this": _vs.searchQuery})
+
+  restrict: 'C'
+]
+
 whenscrolled = ['$window', ($window) ->
   link: (scope, elem, attr) ->
     $window = angular.element($window)
@@ -419,4 +462,5 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('userPicker', userPicker)
 .directive('repeatAnim', repeatAnim)
 .directive('streamviewer', streamviewer)
+.directive('visualSearch', visualSearch)
 .directive('whenscrolled', whenscrolled)
