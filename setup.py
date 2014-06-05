@@ -56,6 +56,7 @@ setup(
         'python-dateutil>=2.1',
         'pyramid-sockjs==0.3.9',
         'requests>=2.2.1',
+        'requests_oauthlib>=0.4.0',
         'webassets==0.8',
     ],
 
