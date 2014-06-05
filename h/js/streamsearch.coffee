@@ -107,7 +107,10 @@ class StreamSearch
   rules:
     user:
       formatter: (user) ->
-        'acct:' + user + '@' + window.location.hostname
+        # FIXME: inject $window
+        unless '@' in user
+          user += '@' + window.location.hostname
+        'acct:' + user
       path: '/user'
       exact_match: true
       case_sensitive: false
