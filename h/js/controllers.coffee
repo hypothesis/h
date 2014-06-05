@@ -5,6 +5,12 @@ imports = [
   'h.streamfilter'
 ]
 
+SEARCH_FACETS = ['text', 'tags', 'uri', 'quote', 'since', 'user', 'results']
+SEARCH_VALUES =
+  group: ['Public', 'Private'],
+  since: ['5 min', '30 min', '1 hour', '12 hours',
+          '1 day', '1 week', '1 month', '1 year']
+
 
 class App
   scope:
@@ -228,6 +234,8 @@ class App
     $rootScope.applySort "Location"
 
     $scope.query = $location.search()
+    $scope.searchFacets = SEARCH_FACETS
+    $scope.searchValues = SEARCH_VALUES
 
     $scope.search = (searchCollection) ->
       return unless annotator.discardDrafts()
