@@ -239,6 +239,7 @@ class App
 
     $scope.search = (searchCollection) ->
       return unless annotator.discardDrafts()
+      return unless searchCollection.models.length
 
       matched = []
       query =
