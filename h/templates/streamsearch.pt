@@ -10,7 +10,13 @@
 
         <!-- Searchbar -->
         <div class="search-container yui3-u-1">
-          <div class="visual-search visual-container"></div>
+          <div class="visual-search visual-container"
+               query="query"
+               onsearch="search(this)"
+               facets="searchFacets"
+               values="searchValues"
+               onclear="searchClear()"
+               ></div>
         </div>
       </div>
     </div>
