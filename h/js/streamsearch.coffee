@@ -7,6 +7,12 @@ imports = [
   'h.streamfilter'
 ]
 
+SEARCH_FACETS = ['text', 'tags', 'uri', 'quote', 'since', 'user', 'results']
+SEARCH_VALUES =
+  group: ['Public', 'Private'],
+  since: ['5 min', '30 min', '1 hour', '12 hours',
+          '1 day', '1 week', '1 month', '1 year']
+
 
 get_quote = (annotation) ->
   if annotation.quote? then return annotation.quote
@@ -168,63 +174,33 @@ class StreamSearch
       a_upd.getTime() - b_upd.getTime()
 
     # Read search params
-    search_query = ''
-    params = $location.search()
-    for param, values of params
-      # Ignore non facet parameters
-      if param in @facets
-        unless values instanceof Array then values = [values]
-        for value in values
-          search_query += param + ': "' + value + '" '
+    $scope.query = $location.search()
+    $scope.searchFacets = SEARCH_FACETS
+    $scope.searchValues = SEARCH_VALUES
 
-    # Initialize Visual search
-    @search = VS.init
-      container: $element.find('.visual-search')
-      query: search_query
-      callbacks:
-        search: (query, searchCollection) =>
-          # Assemble the filter json
-          filter =
-            streamfilter
-              .setMatchPolicyIncludeAll()
-              .noClauses()
+    $scope.search = (searchCollection) =>
+      # Assemble the filter json
+      filter =
+        streamfilter
+          .setMatchPolicyIncludeAll()
+          .noClauses()
 
-          [filter, $scope.categories] =
-            new SearchHelper().populateFilter filter, searchCollection.models, @rules
-          $scope.initStream filter
+      [filter, $scope.categories] =
+        new SearchHelper().populateFilter filter, searchCollection.models, @rules
+      $scope.initStream filter
 
-          # Update the parameters
-          $location.search $scope.categories
+      # Update the parameters
+      $location.search $scope.categories
 
-        facetMatches: (callback) =>
-          # Created and limit should be singleton.
-          add_limit = true
-          add_created = true
-          for facet in @search.searchQuery.facets()
-            if facet.hasOwnProperty 'results' then add_limit = false
-            if facet.hasOwnProperty 'since' then add_created = false
-
-          if add_limit and add_created then list = ['text','tags', 'uri', 'quote','since','user','results']
-          else
-            if add_limit then list = ['text','tags', 'uri', 'quote','user', 'results']
-            else
-              if add_created then list = ['text','tags', 'uri', 'quote','since','user']
-              else list = ['text','tags', 'uri', 'quote','user']
-
-          return callback list, {preserveOrder: true}
-        valueMatches: (facet, searchTerm, callback) ->
-          switch facet
-            when 'results'
-              callback ['0', '10', '25', '50', '100', '250', '1000']
-            when 'since'
-              callback ['5 min', '30 min', '1 hour', '12 hours', '1 day', '1 week', '1 month', '1 year'], {preserveOrder: true}
-        clearSearch: (original) =>
-          # Execute clearSearch's internal method for resetting search
-          original()
-          $scope.$apply ->
-            $scope.annotations = []
-            $scope.empty = false
-            $location.search {}
+    $scope.searchClear = ->
+      filter =
+        streamfilter
+          .resetFilter()
+          .setPastDataHits(50)
+      $scope.annotations = []
+      $scope.empty = false
+      $scope.initStream filter.getFilter()
+      $location.search({})
 
     $scope.initStream = (filter) ->
       if $scope.sock? then $scope.sock.close()
@@ -304,9 +280,6 @@ class StreamSearch
 
 
     $scope.annotations = []
-    $timeout =>
-      @search.searchBox.app.options.callbacks.search @search.searchBox.value(), @search.searchBox.app.searchQuery
-    ,500
 
 
 configure = [
