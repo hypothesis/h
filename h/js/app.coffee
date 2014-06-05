@@ -38,6 +38,21 @@ configure = [
         $delegate
       ]
 
+    $routeProvider.when '/wpd/callback',
+      resolve:
+        channel: ['$window', ($window) ->
+          _channel = Channel.build
+            origin: $window.location.origin
+            scope: 'annotator:auth'
+            window: $window.opener
+            onReady: ->
+              _channel.call
+                method: 'success'
+                params: $window.oauth_status
+                success: ->
+                  $window.close()
+        ]
+      redirectTo: '/viewer'
     $routeProvider.when '/editor',
       controller: 'EditorController'
       templateUrl: 'editor.html'

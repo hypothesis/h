@@ -32,11 +32,11 @@ class App
     ]
 
   this.$inject = [
-    '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
+    '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout', '$window',
     'annotator', 'session', 'socket', 'streamfilter', 'viewFilter'
   ]
   constructor: (
-     $element,   $filter,   $http,   $location,   $rootScope,   $scope,   $timeout
+     $element,   $filter,   $http,   $location,   $rootScope,   $scope,   $timeout,   $window,
      annotator,   session,   socket,   streamfilter,   viewFilter
   ) ->
     {plugins, host, providers} = annotator
@@ -112,8 +112,6 @@ class App
     $scope.$watch 'sheet.collapsed', (hidden) ->
       if hidden
         $element.find('.sheet').scope().$broadcast('$reset')
-      else
-        $scope.sheet.tab = 'login'
 
     $scope.$watch 'sheet.tab', (tab) ->
       return unless tab
@@ -232,6 +230,24 @@ class App
           $rootScope.reverse = false
 
     $rootScope.applySort "Location"
+
+    $scope.login = ->
+      $scope.sheet.collapsed = false
+      $scope.sheet.tab = 'authorizing'
+
+      left = Math.round((screen.width - 320) / 2)
+      top = Math.round((screen.height - 480) / 2)
+      dims = "width=320,height=480,left=#{left},top=#{top}"
+      opts = "dependent,dialog,resizable,scrollbars,status,#{dims}"
+
+      channel = Channel.build
+        origin: $window.location.origin
+        scope: 'annotator:auth'
+        window: $window.open('/wpd/login', 'Annotator_Auth', opts)
+      .bind 'success', (ctx, result) ->
+        $scope.$apply ->
+          angular.extend session, result
+          $scope.sheet.collapsed = true
 
     $scope.query = $location.search()
     $scope.searchFacets = SEARCH_FACETS

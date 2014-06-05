@@ -6,8 +6,7 @@
          ng-mouseenter="showViewSort(true, true)">
       <div class="inner" ng-switch="!!auth.persona">
         <a class="pull-right" href=""
-           ng-click="sheet.collapsed = false;
-                     sheet.tab = 'login';"
+           ng-click="login()"
            ng-switch-when="false"
            ng-show="sheet.collapsed">Sign in</a>
         <div class="pull-right user-picker"
@@ -49,7 +48,7 @@
               ng-click="sheet.collapsed = true"></span>
 
         <div class="form-vertical tabbable"
-             data-tab-reveal="['forgot','activate']"
+             data-tab-reveal="['login', 'register', 'forgot', 'activate']"
              ng-controller="AuthController"
              ng-model="sheet.tab"
              ng-submit="submit(this[sheet.tab])">

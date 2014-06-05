@@ -1,0 +1,5 @@
+<html metal:use-macro="main_template">
+  <body metal:fill-slot="body" tal:omit-tag>
+    <script>window.oauth_status = ${structure: result};</script>
+  </body>
+</html>
