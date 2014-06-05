@@ -107,13 +107,16 @@ class LocalAuthenticationPolicy(RemoteUserAuthenticationPolicy):
         if token is not None:
             request.authorization = 'Bearer %s' % token
 
-        valid, r = server.verify_request(
-            request.url,
-            request.method,
-            None,
-            request.headers,
-            ['annotations'],
-        )
+        try:
+            valid, r = server.verify_request(
+                request.url,
+                request.method,
+                None,
+                request.headers,
+                ['annotations'],
+            )
+        except:
+            valid = False
 
         if valid:
             return r.user
