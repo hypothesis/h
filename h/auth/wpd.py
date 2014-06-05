@@ -40,7 +40,7 @@ def login(request):
             provider._client.access_token = provider.token['access_token']
             result = provider.get(profile_endpoint)
             provider_login = result.json()['username']
-            userid = 'acct:{}@webplatform.org'.format(provider_login)
+            userid = 'acct:{}@notes.webplatform.org'.format(provider_login)
             event = events.LoginEvent(request, userid)
             registry.notify(event)
             result = views.model(request)
