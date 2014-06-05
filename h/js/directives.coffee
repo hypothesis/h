@@ -314,11 +314,12 @@ username = ['$filter', '$window', ($filter, $window) ->
     return unless ctrl?
 
     ctrl.$render = ->
-      scope.uname = ($filter 'persona') ctrl.$viewValue
+      scope.uname = ($filter 'persona') ctrl.$viewValue, 'username'
+      scope.provider = ($filter 'persona') ctrl.$viewValue, 'provider'
 
     scope.uclick = (event) ->
       event.stopPropagation()
-      $window.open "/u/" + scope.uname
+      $window.open "/u/#{scope.uname}@#{scope.provider}"
       return
 
   require: '?ngModel'
