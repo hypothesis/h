@@ -1,7 +1,7 @@
 <a class="btn bookmarklet"
    href="javascript:(function() {
            var ssl = !!document.location.protocol.match(/^https:/)
-           , embedUrl = '${request.resource_url(context, 'app', 'embed.js')}'
+           , embedUrl = '${request.resource_url(context, 'embed.js')}'
            ;
 
            if (ssl && !embedUrl.match(/^https:/)) {
