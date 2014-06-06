@@ -353,6 +353,11 @@ app_css:
 # between frames participating in annotation by using the annotator bridge
 # plugin.
 inject:
+  contents:
+    - inject_js
+    - inject_css
+
+inject_js:
   output: js/hypothesis-assets.js
   contents:
     - d3
@@ -381,6 +386,8 @@ inject:
           contents:
             - h:js/guest.coffee
             - h:js/host.coffee
+
+inject_css:
     - output: css/hypothesis-inject.min.css
       filters: cleancss
       contents:
