@@ -168,25 +168,31 @@ jquery_scrollintoview:
 # jQuery UI
 jquery_ui:
   contents:
-    - filters: cssrewrite, cleancss
-      output: css/jquery-ui-smoothness.min.css
-      contents:
-        - h:lib/jquery-ui-smoothness.css
-    - filters: uglifyjs
-      output: lib/jquery.ui.full.min.js
-      contents:
-        - h:lib/jquery.ui.core.js
-        - h:lib/jquery.ui.position.js
-        - h:lib/jquery.ui.widget.js
-        - h:lib/jquery.ui.tooltip.js
-        - contents:
-            - h:lib/jquery.ui.autocomplete.js
-            - h:lib/jquery.ui.menu.js
-        - contents:
-            - h:lib/jquery.ui.effect.js
-            - h:lib/jquery.ui.effect-blind.js
-            - h:lib/jquery.ui.effect-forecolor-highlight.js
-            - h:lib/jquery.ui.effect-highlight.js
+    - jquery_ui_css
+    - jquery_ui_js
+
+jquery_ui_css:
+  filters: cssrewrite, cleancss
+  output: css/jquery-ui-smoothness.min.css
+  contents:
+    - h:lib/jquery-ui-smoothness.css
+
+jquery_ui_js:
+  filters: uglifyjs
+  output: lib/jquery.ui.full.min.js
+  contents:
+    - h:lib/jquery.ui.core.js
+    - h:lib/jquery.ui.position.js
+    - h:lib/jquery.ui.widget.js
+    - h:lib/jquery.ui.tooltip.js
+    - contents:
+        - h:lib/jquery.ui.autocomplete.js
+        - h:lib/jquery.ui.menu.js
+    - contents:
+        - h:lib/jquery.ui.effect.js
+        - h:lib/jquery.ui.effect-blind.js
+        - h:lib/jquery.ui.effect-forecolor-highlight.js
+        - h:lib/jquery.ui.effect-highlight.js
 
 # Polyfills
 raf:
@@ -257,10 +263,16 @@ uuid:
     - h:lib/uuid.js
 visualsearch:
   contents:
+    - visualsearch_css
+    - visualsearch_js
+visualsearch_css:
+  contents:
     - filters: cleancss
       output: css/visualsearch.min.css
       contents:
         - h:css/visualsearch.css
+visualsearch_js:
+  contents:
     - filters: uglifyjs
       output: lib/underscore.min.js
       contents:
@@ -277,8 +289,8 @@ visualsearch:
 # Application
 app:
   contents:
-    - app_js
     - app_css
+    - app_js
 
 app_js:
   output: js/hypothesis-app.js
@@ -307,10 +319,10 @@ app_js:
     - pagedown
     - raf
     - sockjs
-    - jquery_ui
+    - jquery_ui_js
     - tag_it
     - uuid
-    - visualsearch
+    - visualsearch_js
     - filters: uglifyjs
       output: js/hypothesis.min.js
       contents:
@@ -338,6 +350,8 @@ app_css:
     filters: cleancss
     output: css/hypothesis.min.css
     contents:
+      - jquery_ui_css
+      - visualsearch_css
       - filters: compass, cssrewrite
         output: css/hypothesis.css
         contents:
@@ -354,8 +368,8 @@ app_css:
 # plugin.
 inject:
   contents:
-    - inject_js
     - inject_css
+    - inject_js
 
 inject_js:
   output: js/hypothesis-assets.js
@@ -363,7 +377,7 @@ inject_js:
     - d3
     - jquery
     - jquery_scrollintoview
-    - jquery_ui
+    - jquery_ui_js
     - jschannel
     - gettext
     - annotator_i18n
@@ -388,15 +402,16 @@ inject_js:
             - h:js/host.coffee
 
 inject_css:
-    - output: css/hypothesis-inject.min.css
-      filters: cleancss
+  output: css/hypothesis-inject.min.css
+  filters: cleancss
+  contents:
+    - jquery_ui_css
+    - filters: compass, cssrewrite
+      output: css/hypothesis-inject.css
       contents:
-        - filters: compass, cssrewrite
-          output: css/hypothesis-inject.css
-          contents:
-            - h:css/inject.scss
-          depends:
-            - h:css/base.scss
+        - h:css/inject.scss
+      depends:
+        - h:css/base.scss
 
 sidebar:
   filters: cleancss
