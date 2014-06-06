@@ -281,7 +281,7 @@ app:
     - app_css
 
 app_js:
-  output: js/hypothesis-assets.js
+  output: js/hypothesis-app.js
   contents:
     - jquery
     - jquery_mousewheel
@@ -353,6 +353,7 @@ app_css:
 # between frames participating in annotation by using the annotator bridge
 # plugin.
 inject:
+  output: js/hypothesis-assets.js
   contents:
     - d3
     - jquery
