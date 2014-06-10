@@ -50,7 +50,7 @@ class Annotation(annotation.Annotation):
         'tags': {'type': 'string', 'index': 'analyzed', 'analyzer': 'lower_keyword'},
         'text': {'type': 'string'},
         'deleted': {'type': 'boolean'},
-        'uri': {'type': 'string', 'index': 'not_analyzed'},
+        'uri': {'type': 'string', 'index_analyzer': 'uri_index', 'search_analyzer': 'uri_search'},
         'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'lower_keyword'},
         'consumer': {'type': 'string', 'index': 'not_analyzed'},
         'target': {
@@ -60,7 +60,7 @@ class Annotation(annotation.Annotation):
                     'path': 'just_name',
                     'fields': {
                         'id': {'type': 'string', 'index': 'not_analyzed'},
-                        'uri': {'type': 'string', 'index': 'not_analyzed'},
+                        'uri': {'type': 'string', 'index_analyzer': 'uri_index', 'search_analyzer': 'uri_search'},
                     },
                 },
                 'source': {
@@ -68,7 +68,7 @@ class Annotation(annotation.Annotation):
                     'path': 'just_name',
                     'fields': {
                         'source': {'type': 'string', 'index': 'not_analyzed'},
-                        'uri': {'type': 'string', 'index': 'not_analyzed'},
+                        'uri': {'type': 'string', 'index_analyzer': 'uri_index', 'search_analyzer': 'uri_search'},
                     },
                 },
                 'selector': {
@@ -120,6 +120,16 @@ class Annotation(annotation.Annotation):
     }
     __settings__ = {
         'analysis': {
+            'filter': {
+                'uri': {
+                    'type': 'pattern_capture',
+                    'preserve_original': 1,
+                    'patterns': [
+                        '([^\\/\\?\\#\\.]+)',
+                        '((\\w+|\\d+)(?:\\.(\\w+|\\d+))*)'
+                    ]
+                }
+            },
             'analyzer': {
                 'thread': {
                     'tokenizer': 'path_hierarchy'
@@ -128,6 +138,14 @@ class Annotation(annotation.Annotation):
                     'type': 'custom',
                     'tokenizer': 'keyword',
                     'filter': 'lowercase'
+                },
+                'uri_index': {
+                    'tokenizer': 'uax_url_email',
+                    'filter': ['uri', 'lowercase', 'unique']
+                },
+                'uri_search': {
+                    'tokenizer': 'keyword',
+                    'filter': ['lowercase']
                 }
             }
         }

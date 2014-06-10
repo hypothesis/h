@@ -140,7 +140,7 @@ class StreamSearch
       path: '/uri'
       exact_match: false
       case_sensitive: false
-      es_query_string: true
+      es_query_string: false
       and_or: 'or'
     since:
       formatter: (past) ->
