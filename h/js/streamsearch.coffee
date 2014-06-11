@@ -177,7 +177,12 @@ class StreamSearch
       a_upd.getTime() - b_upd.getTime()
 
     # Read search params
-    $scope.query = $location.search()
+    search =  $location.search()
+    for k,v of search
+      if '+' in v
+        search[k] = v.replace /\+/g, ' '
+
+    $scope.query = search
     $scope.searchFacets = SEARCH_FACETS
     $scope.searchValues = SEARCH_VALUES
 
