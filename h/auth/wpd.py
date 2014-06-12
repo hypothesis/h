@@ -19,12 +19,12 @@ def login(request):
     secret = settings['auth.wpd.client_secret']
     code = request.params.get('code')
     state = session.get('oauth_state')
-    scope = ['profile']
+    scope = ['session']
     provider = OAuth2Session(key, scope=scope, state=state)
 
     authz_endpoint = request.route_url('auth.wpd.authorize')
     token_endpoint = request.route_url('auth.wpd.token')
-    profile_endpoint = 'https://profile.accounts.webplatform.org/v1/profile'
+    profile_endpoint = 'https://profile.accounts.webplatform.org/v1/session/read'
 
     if code is not None:
         try:
