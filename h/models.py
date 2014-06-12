@@ -47,11 +47,11 @@ class Annotation(annotation.Annotation):
         'created': {'type': 'date'},
         'updated': {'type': 'date'},
         'quote': {'type': 'string'},
-        'tags': {'type': 'string', 'index_name': 'not_analyzed'},
+        'tags': {'type': 'string', 'index': 'analyzed', 'analyzer': 'lower_keyword'},
         'text': {'type': 'string'},
         'deleted': {'type': 'boolean'},
         'uri': {'type': 'string', 'index': 'not_analyzed'},
-        'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'user'},
+        'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'lower_keyword'},
         'consumer': {'type': 'string', 'index': 'not_analyzed'},
         'target': {
             'properties': {
@@ -124,7 +124,7 @@ class Annotation(annotation.Annotation):
                 'thread': {
                     'tokenizer': 'path_hierarchy'
                 },
-                'user': {
+                'lower_keyword': {
                     'type': 'custom',
                     'tokenizer': 'keyword',
                     'filter': 'lowercase'
