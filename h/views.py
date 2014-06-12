@@ -103,7 +103,7 @@ class AnnotationController(object):
 @view_config(
     context='h.interfaces.IStreamResource',
     layout='stream',
-    renderer='templates/streamsearch.pt',
+    renderer='templates/app.pt',
 )
 def stream(context, request):
     stream_type = context.get('stream_type')

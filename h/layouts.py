@@ -53,8 +53,8 @@ class SidebarLayout(BaseLayout):
 
 @layout_config(name='stream', template='h:templates/base.pt')
 class StreamLayout(BaseLayout):
-    app = 'h.streamsearch'
-    controller = 'StreamSearchController'
+    app = 'h'
+    controller = 'AppController'
 
 
 def includeme(config):

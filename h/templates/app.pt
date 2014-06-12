@@ -19,11 +19,11 @@
         <div class="search-container">
           <div ng-show="show_search"
                class="visual-search visual-container"
-               query="query"
-               onsearch="search(this)"
+               query="search.query()"
+               onsearch="search.update(this)"
                facets="searchFacets"
                values="searchValues"
-               onclear="searchClear()"
+               onclear="search.clear()"
                ></div>
           <div ng-hide="show_search"
                class="visual-container"
