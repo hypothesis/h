@@ -387,15 +387,6 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
   template: '<a target="_blank" href="{{shared_link}}" title="{{hint}}">{{ftime | date:mediumDate}}</a>'
 ]
 
-streamviewer = [ ->
-  link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
-
-  require: '?ngModel'
-  restrict: 'E'
-  templateUrl: 'streamviewer.html'
-]
-
 
 visualSearch = ['$parse', ($parse) ->
   link: (scope, elem, attr, ctrl) ->
@@ -423,6 +414,9 @@ visualSearch = ['$parse', ($parse) ->
         valueMatches: (facet, term, callback) ->
           values = _values(scope)?[facet]
           callback(values or [], preserveOrder: true)
+
+    scope.$on 'VSSearch', ->
+      _search(scope, {"this": _vs.searchQuery})
 
     scope.$watch attr.query, (query) ->
       terms =
@@ -463,6 +457,5 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('username', username)
 .directive('userPicker', userPicker)
 .directive('repeatAnim', repeatAnim)
-.directive('streamviewer', streamviewer)
 .directive('visualSearch', visualSearch)
 .directive('whenscrolled', whenscrolled)
