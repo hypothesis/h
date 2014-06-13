@@ -102,9 +102,9 @@ def add_base_url(event):
     view_name = getattr(request, 'view_name', None)
 
     if view_name == 'embed.js' and not assets_env.debug:
-        base_url = join(request.webassets_env.url, 'app.html')
+        base_url = join(request.webassets_env.url, '')
     else:
-        base_url = request.resource_url(request.context, 'app')
+        base_url = request.resource_url(request.context, '')
 
     event['base_url'] = base_url
 
@@ -112,9 +112,8 @@ def add_base_url(event):
 def app(context, request):
     assets_dir = request.webassets_env.directory
     app_file = join(assets_dir, 'app.html')
-    request.accept = 'text/html'
     with open(app_file, 'w') as f:
-        f.write(render_view(context, request, name='app'))
+        f.write(render_view(context, request, name='app.html'))
 
 
 def embed(context, request):
