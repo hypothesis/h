@@ -41,7 +41,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   index: []
 
   # whether to update the viewer as the window is scrolled
-  dynamicBucket: true
+  dynamicBucket: false
 
   constructor: (element, options) ->
     super $(@html), options
