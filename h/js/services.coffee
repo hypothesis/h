@@ -695,7 +695,7 @@ class ViewFilter
   #   user: username to search for
   #   text: text to search for in the body (all the words must be present)
   #   quote: text to search for in the quote (exact phrease must be present)
-  #   tag: list of tags to search for. (all must be present)
+  #   tags: list of tags to search for. (all must be present)
   #   time: maximum age of annotation. Accepted values:
   #     '5 min', '30 min', '1 hour', '12 hours',
   #     '1 day', '1 week', '1 month', '1 year'
@@ -780,7 +780,6 @@ class ViewFilter
                   break
               unless found
                 matches = false
-                console.log "No, tag", wantedTag, "is missing."
                 break
 
           when 'time'

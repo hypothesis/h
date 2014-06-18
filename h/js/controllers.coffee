@@ -253,7 +253,7 @@ class App
         switch
           when category in ['text', 'user', 'time', 'group']
             query[category] = value
-          when category == 'tag'
+          when category == 'tags'
             # Tags are specials, because we collect those into an array
             query.tags.push value.toLowerCase()
           when category == 'quote'
