@@ -9,18 +9,18 @@ Hypothes.is into their own Python applications. ::
       "message": "Annotator Store API", 
       "links": {
         "search": {
-          "url": "https://api.hypothes.is/search", 
+          "url": "https://hypothes.is/api/search", 
           "method": "GET", 
           "desc": "Basic search API"
         }, 
         "annotation": {
           "read": {
-            "url": "https://api.hypothes.is/annotations/:id", 
+            "url": "https://hypothes.is/api/annotations/:id", 
             "method": "GET", 
             "desc": "Get an existing annotation"
           }, 
           "create": {
-            "url": "https://api.hypothes.is/annotations", 
+            "url": "https://hypothes.is/api/annotations", 
             "query": {
               "refresh": {
                 "type": "bool", 
@@ -31,7 +31,7 @@ Hypothes.is into their own Python applications. ::
             "desc": "Create a new annotation"
           }, 
           "update": {
-            "url": "https://api.hypothes.is/annotations/:id", 
+            "url": "https://hypothes.is/api/annotations/:id", 
             "query": {
               "refresh": {
                 "type": "bool", 
@@ -42,13 +42,13 @@ Hypothes.is into their own Python applications. ::
             "desc": "Update an existing annotation"
           }, 
           "delete": {
-            "url": "https://api.hypothes.is/annotations/:id", 
+            "url": "https://hypothes.is/api/annotations/:id", 
             "method": "DELETE", 
             "desc": "Delete an annotation"
           }
         }, 
         "search_raw": {
-          "url": "https://api.hypothes.is/search_raw", 
+          "url": "https://hypothes.is/api/search_raw", 
           "method": "GET/POST", 
           "desc": "Advanced search API -- direct access to ElasticSearch. Uses the same API as the ElasticSearch query endpoint."
         }
@@ -65,13 +65,13 @@ Search for annotations annotations
 
 Examples:
 
-https://api.hypothes.is/search?limit=1000&uri=http%3A%2F%2Fepubjs-reader.appspot.com%2F%2Fmoby-dick%2FOPS%2Fchapter_003.xhtml&user=acct:gluejar@hypothes.is
+https://hypothes.is/api/search?limit=1000&uri=http%3A%2F%2Fepubjs-reader.appspot.com%2F%2Fmoby-dick%2FOPS%2Fchapter_003.xhtml&user=acct:gluejar@hypothes.is
 
-https://api.hypothes.is/search?limit=1000&user=acct:gluejar@hypothes.is
+https://hypothes.is/api/search?limit=1000&user=acct:gluejar@hypothes.is
 
-https://api.hypothes.is/search?limit=1000&quote=limber
+https://hypothes.is/api/search?limit=1000&quote=limber
 
-https://api.hypothes.is/search?limit=1000&text=consider
+https://hypothes.is/api/search?limit=1000&text=consider
 
 
 params:
@@ -83,7 +83,7 @@ quote - words that the annotation is quoting. This is very brittle - text is not
 
 **/annotations**
 
-https://api.hypothes.is/annotations/<annotation id>
+https://hypothes.is/api/annotations/<annotation id>
 
 method: GET
 
@@ -91,7 +91,7 @@ get an annotation
     
 Examples:
 
-https://api.hypothes.is/annotations/utalbWjUQZK5ifydnohjmA
+https://hypothes.is/api/annotations/utalbWjUQZK5ifydnohjmA
 
 method: POST
 
@@ -120,3 +120,7 @@ Advanced search API - direct access to ElasticSearch. Uses the same API as the E
    :maxdepth: 1
 
    api/resources
+
+**legacy**
+
+Old-style `https://api.hypothes.is/` URLs now redirect to `https://hypothes.is/api/` URLs.
