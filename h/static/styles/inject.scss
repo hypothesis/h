@@ -260,6 +260,33 @@ $base-font-size: 14px;
 
   &.annotator-collapsed {
     margin-left: 0;
+
+    &.hiddenheatmap {
+      .annotator-heatmap {
+        @include transition(left .25s);
+        left: -($heatmap-width - 10px);
+        &:hover {
+          left: -($heatmap-width + 18px);
+          .heatmap-pointer {
+            &.upper {
+              display: block;
+            }
+            &.lower {
+              display: block;
+            }
+          }
+        }
+      }
+    }
+    
+    .heatmap-pointer {
+      &.upper {
+        display: none;
+      }
+      &.lower {
+        display: none;
+      }
+    }
   }
 
   * {

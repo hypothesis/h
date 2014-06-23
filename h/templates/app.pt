@@ -16,6 +16,7 @@
             --><span class="provider">/{{persona|persona:'provider'}}</span><!--
             --><i class="icon-triangle"></i></span>
           <ul class="dropdown-menu pull-right" role="menu">
+            <li ng-click="$parent.toggleSettingsPanel()">Settings</li>
             <li><a href="http://hypothes.is/contact/"
                    target="_blank">Feedback</a></li>
             <li><a href="/docs/help" target="_blank">Help</a></li>
@@ -37,6 +38,11 @@
 
     <!-- Wrapper -->
     <div id="wrapper" whenscrolled="loadMore(10)">
+      <!-- Settings Panel -->
+      <div class="settings-panel"
+           data-settings-panel-model="auth.persona"></div>
+      <!-- / Settings Panel -->
+
       <!-- View Sort Controls -->
       <div class="ng-cloak viewsort"
            ng-mouseenter="showViewSort()"
@@ -110,6 +116,15 @@
     </script>
     <script type="text/ng-template" id="notification.html">
       <metal:main use-macro="load: h:templates/notification.html" />
+    </script>
+    <script type="text/ng-template" id="settingsPanel.html">
+      <metal:main use-macro="load: settingsPanel.html" />
+    </script>
+    <script type="text/ng-template" id="accountManagement.html">
+      <metal:main use-macro="load: accountManagement.html" />
+    </script>
+    <script type="text/ng-template" id="profile.html">
+      <metal:main use-macro="load: profile.html" />
     </script>
   </body>
 </html>
