@@ -1,0 +1,21 @@
+<!-- Edit Profile -->
+<form ng-submit="">
+	<div class="niceforms">
+		<h2>Profile Information</h2>
+		<p><input class="fullwidth" type="text" placeholder="Name" ng-model="user.name"></p>
+		<p><input class="fullwidth" type="text" placeholder="Location" ng-model="user.location"></p>
+		<p><textarea class="fullwidth" type="text" name="description" ng-model="user.bio" style="width:100%; height: 150px;" rows="10" cols="30" placeholder="Short bio"></textarea>
+		<p><input class="fullwidth" type="text" placeholder="Website" ng-model="user.website"></p>
+		<p><input class="fullwidth" type="text" placeholder="@Twitter" ng-model="user.twitter"></p>
+		<p>
+			<img class="gravatar" src="http://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=100">
+			<span>Note: Your gravatar image can be changed at <a href="https://gravatar.com">https://gravatar.com</a>.</span>
+			<!-- Maybe we don't need this... -->
+			<input type="checkbox"> Don’t use my gravatar
+		</p>
+		<p>
+			<button class="btn check-icon clear" style="float: left; clear: both;" ng-click="">Save</button>
+		</p>
+	</div>
+</form>
+<!-- / Edit Profile -->

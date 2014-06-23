@@ -1,0 +1,50 @@
+<div class="slideover" ng-class="$parent.settingsPanel && 'shown'">
+  <div class="panelcontainer">
+    <ul class="nav nav-tabs">
+    	<li ng-class="panel.active && 'active'" ng-repeat="panel in panels" ng-click="togglePanel(panel)">
+    		<span style="position: relative; top: 2px;">{{ panel.name }}</span>
+    	</li>
+    	<li ng-click="toggleSettingsPanel()" style="position: absolute; right: 0px; top: 36px;"><span class="x-icon" role="button" title="Close">Close</span></li>
+	</ul>
+    <div class="panel">
+
+    	<!-- Profile -->
+    	<div class="account-profile" ng-show="activePanel.name == 'Profile'"></div>
+    	<!-- / Profile -->
+
+    	<!-- Account -->
+    	<div class="account-management" ng-show="activePanel.name == 'Account'"></div>
+    	<!-- / Account -->
+
+      	<!-- Settings -->
+	    <form ng-show="activePanel.name == 'Settings'"
+	    	  ng-submit="">
+		    <div class="niceforms">
+		      <h2>Settings</h2>
+	    	  <p>Heatmap options:
+		    	  <select class="pull-right">
+					  <option value="On">On</option>
+					  <option value="Hidden">Hidden</option>
+					  <option value="Off">Off</option>
+				  </select> 
+			  </p>
+			  <p>Use PDF.js in Chrome:
+				  <select class="pull-right">
+					  <option ng-disabled value="On">Always</option>
+					  <option ng-disabled value="whenActive">Only when active</option>
+					  <option ng-disabled value="Off">Never</option>
+				  </select> 
+			  </p>
+		      <p>Notify me when:</p>
+			  <p><input type="checkbox" name="Replies"> Someone replies to an annotation I made.</p>
+			  <p><input type="checkbox" name="Replies"> Someone annotates a page I’m watching.</p>
+			  <p><input type="checkbox" name="Replies"> Someone subscribes to my stream or page.</p>
+
+			  <button class="btn check-icon" ng-click="toggleHideHeatmap()">Save</button>
+			</div>
+      	</form>
+      	<!-- / Settings -->
+
+    </div>
+  </div>
+</div>
