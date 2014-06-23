@@ -449,18 +449,146 @@ whenscrolled = ['$window', ($window) ->
         scope.$apply attr.whenscrolled
 ]
 
+match = ->
+  # Checks to see if two values match each other.
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
+
+    elem
+    .on 'keyup', ->
+      currentValue = scope.match == ctrl.$modelValue
+      ctrl.$setValidity('match', currentValue)
+
+  scope:
+    match: '='
+  restrict: 'A'
+  require: 'ngModel'
+
+confirmPasswordCheck = ['$resource', ($resource)->
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
+    # Check password against server.
+  restrict: 'A'
+  require: 'ngModel'
+]
+
+# The settings panel houses settings.
+# Thought: should each setting be it's own directive? Perhaps we should start a settings.coffee file?
+# For example: the toggle heatmap directive.
+settingsPanel = ->
+  link: (scope, elem, attr, ctrl) ->
+    scope.togglePanel = (panel)->
+      scope.activePanel.active = !scope.activePanel.active
+      scope.activePanel = panel
+      scope.activePanel.active = !scope.activePanel.active
+
+    scope.toggleHideHeatmap = ->
+      scope.hideheatmap = !scope.hideheatmap
+      parent.annotator.plugins.Heatmap.hideheatmap(scope.hideheatmap)
+      console.log "Heatmap toggled."
+
+    visibleHighlights = ->
+      return parent.window.annotator.visibleHighlights
+
+    scope.$watch visibleHighlights, (newValue, oldValue) ->
+      if newValue != oldValue
+        if scope.hideheatmap and newValue
+          parent.annotator.plugins.Heatmap.hideheatmap(false)
+        if scope.hideheatmap and !newValue
+          parent.annotator.plugins.Heatmap.hideheatmap(true)
+
+  # Ujvari, you may want to move this to the controllers.coffee file.
+  controller: ($scope, $rootScope, $filter, $element) ->
+    $rootScope.settingsPanel = false
+    $rootScope.toggleSettingsPanel = ->
+      # Toggles Settings Panel shown or hidden.
+      $rootScope.settingsPanel = !$rootScope.settingsPanel
+      $rootScope.viewState.showControls = false
+    $scope.hideheatmap = false
+
+    # This is the list of panels that will be shown. In the settingsPanel.html template
+    # there are elements with ng-show on them, for example:
+    #     <div ng-show="activePanel.name == 'Notifications'">
+    #     My Html for a new panel.
+    #     </div>
+    $scope.panels = [
+      {name:"Profile", active: true, icon:"user-icon"}
+      {name:"Account", active: false, icon:"plus-icon"}
+      {name:"Settings", active: false, icon:"cog-icon"}]
+    $scope.activePanel = $scope.panels[0]
+
+    $scope.submit = (form) ->
+      console.log form
+      # Handles submitting of the form.
+
+    # Jake's Note: there is an addional piece of UI I would like to implement. The basic idea being
+    # to give some visual indication that the changes they have made have been applied successfully.
+    # If they change their email, it would be nice to have an event (or something) to tell the front end that
+    # the request was successful.
+
+  restrict: 'C'
+  templateUrl: 'settingsPanel.html'
+
+accountManagement = ->
+  link: (scope, elem, attr, ctrl) ->
+    scope.emailCheck = ->
+      # Checks to see if email is duplicate.
+      return
+  controller: ($scope, $rootScope, $filter, $element) ->
+    $scope.deleteAccount = ->
+      r = window.confirm "Are you sure you want to delete your account? Deleting an account is irreversible.
+If you have contributed to public conversations that others have replied to we will not delete your
+individual annotations. If you want to delete your annotations, you must do so before deleting your
+account, and you must delete each annotation individually, by hand. Deleting an annotation does not
+delete replies to that annotation, it creates a blank stub that replies are still attached to."
+      if r
+        return
+  restrict: 'C'
+  templateUrl: 'accountManagement.html'
+
+# This is the acount profile stuff that will eventually be outside of the settings panel.
+# Rational for keeping it in the settings panel (temporarily):
+# 1. We might as well write the back end for this stuff, then when I do the front end stuff for profiles we'll
+#    have the backend work started.
+# 2. As a directive it is extremely easy to move this around and get it out of the side bar.
+
+accountProfile = ->
+  link: (scope, elem, attr, ctrl) ->
+    scope.editProfile = ->
+      # Switches profile into edit mode.
+      return
+  controller: ($scope) ->
+    $scope.demoData =
+      # Is there any thing else we should be collecting for now?
+      name : "Jake Hartnell"
+      password : "password"
+      twitter: "@JakeHartnell"
+      location : "Berkeley, CA"
+      bio : "Science Fiction Writer currently working as a Product designer and frontend engineer at Hypothes.is."
+      website : "http://jakehartnell.com"
+      gravatar : ""
+
+  restrict: 'C'
+  templateUrl: 'profile.html'
 
 angular.module('h.directives', ['ngSanitize'])
-.directive('formValidate', formValidate)
-.directive('fuzzytime', fuzzytime)
-.directive('markdown', markdown)
-.directive('privacy', privacy)
-.directive('recursive', recursive)
-.directive('tabReveal', tabReveal)
-.directive('tags', tags)
-.directive('thread', thread)
-.directive('username', username)
-.directive('userPicker', userPicker)
-.directive('repeatAnim', repeatAnim)
-.directive('visualSearch', visualSearch)
-.directive('whenscrolled', whenscrolled)
+  .directive('formValidate', formValidate)
+  .directive('fuzzytime', fuzzytime)
+  .directive('markdown', markdown)
+  .directive('privacy', privacy)
+  .directive('recursive', recursive)
+  .directive('slowValidate', slowValidate)
+  .directive('tabReveal', tabReveal)
+  .directive('tags', tags)
+  .directive('thread', thread)
+  .directive('username', username)
+  .directive('userPicker', userPicker)
+  .directive('repeatAnim', repeatAnim)
+  .directive('streamviewer', streamviewer)
+  .directive('visualSearch', visualSearch)
+  .directive('whenscrolled', whenscrolled)
+  .directive('settingsPanel', settingsPanel)
+  .directive('match', match)
+  .directive('confirmPasswordCheck', confirmPasswordCheck)
+  .directive('accountManagement', accountManagement)
+  .directive('accountProfile', accountProfile)

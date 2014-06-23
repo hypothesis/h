@@ -1,4 +1,5 @@
 @import 'compass/typography/text/force-wrap';
+@import 'compass/layout/stretching';
 
 @import 'reset';
 @import 'base';
@@ -352,6 +353,9 @@ blockquote {
 //ICON CLASSES////////////////////////////////
 .loading-icon {
   text-align: center
+}
+.close-icon {
+ @include fonticon("\36", left);
 }
 
 
@@ -837,3 +841,79 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     }
   }
 }
+
+// Settings Panel //////////////////////////////
+
+.slideover{
+  @extend .content;
+  @include stretch-y;
+  @include transition(transform .4s);
+  @include translateX(100%);
+  height: 100%;
+  overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+  right: 0px;
+  left: 0px;
+  z-index: 5;
+
+  &.shown {
+    @include translateX(0);
+  }
+}
+
+.panelcontainer {
+  background: url("../images/noise_1.png");
+  margin-right: -15px;
+
+  .niceforms {
+    clear: both;
+    padding: 0px 8px 28px 0px;
+    font-size: 14px;
+
+    p {
+      margin: 0px 0px 10px;
+    }
+
+    input {
+      
+      &.fullwidth {
+        width: 100%;
+      }
+
+    }
+  }
+  
+  .gravatar {
+    float: left;
+    margin: 0px 10px 10px 0px;
+    border:1px solid $grayLighter;
+  }
+
+  .x-icon {
+    width: 1em;
+    height: 1em;
+    opacity: 0.9;
+    position: relative;
+    
+    &:before {
+      position: relative;
+      top: 2px;
+    }
+
+    &:hover {
+      cursor: pointer;
+      opacity: 1;
+    }
+  }
+
+  .panel {
+    box-shadow: 0px 5px 7px rgba(0, 0, 0, 0.18);
+    padding: 25px;
+    height: 100%;
+    position: absolute;
+    background-color: white;
+    width: 100%;
+    font-family: $sansFontFamily;
+  }
+}
+

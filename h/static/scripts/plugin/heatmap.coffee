@@ -534,3 +534,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   commentClick: =>
     @dynamicBucket = false
     annotator.showViewer "Comments", @buckets[@_getCommentBucket()]
+
+  hideheatmap : (bool) ->
+    if bool
+      $(".annotator-frame").addClass('hiddenheatmap')
+    else
+      $(".annotator-frame").removeClass('hiddenheatmap')

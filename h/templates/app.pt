@@ -35,6 +35,11 @@
     </div>
     <!-- / Toolbar -->
 
+    <!-- Settings Panel -->
+    <div class="settings-panel"
+         data-settings-panel-model="auth.persona"></div>
+    <!-- / Settings Panel -->
+
     <!-- Content -->
     <div id="wrapper" class="content">
       <!-- View Sort Controls -->
@@ -114,6 +119,15 @@
     </script>
     <script type="text/ng-template" id="notification.html">
       <metal:main use-macro="load: h:templates/notification.html" />
+    </script>
+    <script type="text/ng-template" id="settingsPanel.html">
+      <metal:main use-macro="load: settingsPanel.html" />
+    </script>
+    <script type="text/ng-template" id="accountManagement.html">
+      <metal:main use-macro="load: accountManagement.html" />
+    </script>
+    <script type="text/ng-template" id="profile.html">
+      <metal:main use-macro="load: profile.html" />
     </script>
   </body>
 </html>
