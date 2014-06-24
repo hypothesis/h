@@ -1,5 +1,5 @@
 Installing Hypothes.is with Vagrant
-######################
+###################################
 
 Running Hypothes.is on a VM enables development on Windows machines, and also provides a "clean box"
 for testing dependencies.  The following instructions will use Vagrant to create and manage
@@ -39,7 +39,7 @@ Notes on Using the VM
 
 * The vagrant commands are very simple: ``vagrant up``, ``vagrant ssh``, ``vagrant halt``, ``vagrant destroy``
   and a few others.  ``vagrant help`` for explanations.
-  
+
 * This vagrant configuration forwards port 5000 from the guest to the host.  This means that from your
   host machine (and from outside), "http://localhost:5000" (or your hostname or 127.0.0.1)
   will be routed to the h server on the VM.
@@ -52,7 +52,7 @@ VM State
 --------
 
 VM state is normally preserved across runs (e.g. ``vagrant halt`` followed by ``vagrant run``).
-This includes the h server state (the annotation database), installed software, etc.  
+This includes the h server state (the annotation database), installed software, etc.
 
 In addition, the h directory (this directory) is mirrored on the VM (at ``/h``).  Changes can be made to the directory
 either on the host or the guest.  For example, you can edit code and invoke git while on the VM.
@@ -70,7 +70,7 @@ Notes for Windows Development
 
 If you are working with a Windows host, you want the shared directory to use Unix line endings.
 Do that by configuring this git repository as follows:
- 
+
 .. code-block:: bash
 
     git config core.eol lf

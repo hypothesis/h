@@ -1,5 +1,5 @@
-Installing Hypothes.is on Debian
-######################
+Installing Hypothes.is on Fedora
+################################
 
 To install the dependencies, run these commands:
 
@@ -15,14 +15,8 @@ If not available as an RPM, you can use this:
 
     gem install compass
 
-After that:
-
-.. code-block:: bash
-
-    npm install -g coffee-script uglify-js
-
 Follow the instructions at elastisearch_rpm_ to build and install the elasticsearch server,
-but don't start it just yet: 
+but don't start it just yet:
 
 Before you start the elasticsearch daemon:
 
