@@ -43,15 +43,15 @@ Install Elasticsearch
 ---------------------
 
 `Elasticsearch
-<http://www.elasticsearch.org/>`_ is required in order to store annotations 
-locally. Take care that you install a version that meets the requirements listed 
+<http://www.elasticsearch.org/>`_ is required in order to store annotations
+locally. Take care that you install a version that meets the requirements listed
 in `<INSTALL.rst>`_. You can check what is available via Homebrew with:
 
 .. code-block:: bash
 
     brew info elasticsearch
 
-If an appropriate version is available then follow the instructions below, 
+If an appropriate version is available then follow the instructions below,
 otherwise get a version from `<http://www.elasticsearch.org/>`_.
 
 .. code-block:: bash
@@ -70,6 +70,11 @@ To launch it manually without launchctl:
 .. code-block:: bash
 
     elasticsearch -f -D es.config=/usr/local/opt/elasticsearch/config/elasticsearch.yml
+
+NOTE: You will also need a Java runtime to be able to run elasticsearch. OSX
+should prompt you to install one. If not, an installer can be downloaded
+from the `Oracle website
+<http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_.
 
 Next Steps
 ----------
