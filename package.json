@@ -1,0 +1,23 @@
+{
+  "name": "h",
+  "private": true,
+  "version": "0.0.0",
+  "description": "The Internet, peer reviewed.",
+  "devDependencies": {
+    "coffee-script": "1.7.1",
+    "clean-css": "2.2.2",
+    "uglify-js": "2.4.14"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hypothesis/h.git"
+  },
+  "license": "Simplified BSD License",
+  "bugs": {
+    "url": "https://github.com/hypothesis/h/issues"
+  },
+  "homepage": "https://github.com/hypothesis/h"
+}
