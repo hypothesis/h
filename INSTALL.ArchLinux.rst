@@ -5,15 +5,15 @@ Install the following packages:
 
 .. code-block:: bash
 
-    python2-pip python2-virtualenv libyaml gcc git
+    python2-pip python2-virtualenv libyaml gcc git nodejs
 
 From the Arch User Repository (AUR), obtain:
 
 .. code-block:: bash
 
-    coffee-script elasticsearch ruby-compass nodejs-uglify-js
+    elasticsearch ruby-compass
 
-Due to ArchLinux idiosyncracies where python 2 and python 3 are concerned, you need to run the following 
+Due to ArchLinux idiosyncracies where python 2 and python 3 are concerned, you need to run the following
 in the top directory (i.e., inside h/) for hypothesis to correctly use python 2:
 
 .. code-block:: bash

@@ -28,30 +28,27 @@ Install Node and other required tools:
 
     gem install compass
     brew install node
-    npm -g install uglify-js
-    npm -g install clean-css
-    npm -g install coffee-script
 
 Add the tools' path to the $PATH variable:
 
 .. code-block:: bash
 
-    echo "export PATH=/usr/local/share/python:/usr/local/share/npm/bin:\$PATH" >> ~/.profile
+    echo "export PATH=/usr/local/share/python:\$PATH" >> ~/.profile
     source ~/.profile
 
 Install Elasticsearch
 ---------------------
 
 `Elasticsearch
-<http://www.elasticsearch.org/>`_ is required in order to store annotations 
-locally. Take care that you install a version that meets the requirements listed 
+<http://www.elasticsearch.org/>`_ is required in order to store annotations
+locally. Take care that you install a version that meets the requirements listed
 in `<INSTALL.rst>`_. You can check what is available via Homebrew with:
 
 .. code-block:: bash
 
     brew info elasticsearch
 
-If an appropriate version is available then follow the instructions below, 
+If an appropriate version is available then follow the instructions below,
 otherwise get a version from `<http://www.elasticsearch.org/>`_.
 
 .. code-block:: bash

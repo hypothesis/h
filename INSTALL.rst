@@ -35,13 +35,14 @@ pulling new commits from upstream, or checking out a new branch, which may
 have changed (for example: updated) requirements.
 
 For building the static assets, requirements currently include CoffeeScript_
-and Sass_ with Compass_ installed. These tools are widely available in package
-repositories. Check the platform-specific installation instructions for
-details.
+and Sass_ with Compass_ installed. CoffeeScript will be installed for you but
+Sass and Compass must be installed manually. These tools are widely available
+in package repositories. Check the platform-specific installation instructions
+for details.
 
 For production use, the application will use UglifyJS_ and clean-css_ for
 minification needs. These are not required when running the project in a
-development configuration.
+development configuration but will be installed locally.
 
 Platform Specific Instructions
 ------------------------------

@@ -59,6 +59,9 @@ pip install -qU pip
 echo "Checking dependencies (may be a few minutes for first run)..."
 pip install --use-wheel -qr requirements.txt
 
+echo "Checking front-end dependencies..."
+npm install --quiet
+
 echo -n "Checking for Compass..."
 command -v compass || {
 	echo "...not found!"
@@ -66,34 +69,4 @@ command -v compass || {
 	echo "See INSTALL.rst for details."
 	echo
 	exit 1
-}
-
-echo -n "Checking for CoffeeScript..."
-command -v coffee || {
-	echo "...not found!"
-	echo
-	echo "Please install CoffeeScript."
-	echo "See INSTALL.rst for details."
-	echo
-	exit 1
-}
-
-echo -n "Checking for CleanCSS..."
-command -v cleancss || {
-	echo "...not found!"
-	echo
-	echo "CleanCSS was not found, but that's okay!"
-	echo "You will not be able to minify the CSS for production."
-	echo "The local development server should work, though."
-	echo
-}
-
-echo -n "Checking for UglifyJS..."
-command -v uglifyjs || {
-	echo "...not found!"
-	echo
-	echo "UglifyJS was not found, but that's okay!"
-	echo "You will not be able to minify the JS for production."
-	echo "The local development server should work, though."
-	echo
 }
