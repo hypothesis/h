@@ -56,6 +56,11 @@ setup(
         'python-dateutil>=2.1',
         'pyramid-sockjs==0.3.9',
         'requests>=2.2.1',
+
+        # Version pin for known bug
+        # https://github.com/repoze/repoze.sendmail/issues/31
+        'repoze.sendmail<4.2',
+
         'webassets==0.8',
     ],
 
