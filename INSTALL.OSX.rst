@@ -68,6 +68,11 @@ To launch it manually without launchctl:
 
     elasticsearch -f -D es.config=/usr/local/opt/elasticsearch/config/elasticsearch.yml
 
+NOTE: You will also need a Java runtime to be able to run elasticsearch. OSX
+should prompt you to install one. If not, an installer can be downloaded
+from the `Oracle website
+<http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_.
+
 Next Steps
 ----------
 
