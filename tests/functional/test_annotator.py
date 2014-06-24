@@ -30,12 +30,7 @@ class TestAnnotator(SeleniumTestCase):
 
             picker = driver.find_element_by_class_name('user-picker')
             dropdown = picker.find_element_by_class_name('dropdown-toggle')
-            # Some bugs were fixed in selenium 2.35 + FF23 combo
-            # Unfortunately, that means we need test both options
-            try:
-                assert dropdown.text == 'test'
-            except AssertionError:
-                assert dropdown.text == 'test/localhost'
+            assert dropdown.text == 'test/localhost'
 
     def test_annotation(self):
         driver = self.driver
