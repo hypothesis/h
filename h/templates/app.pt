@@ -120,11 +120,11 @@
     <script type="text/ng-template" id="notification.html">
       <metal:main use-macro="load: h:templates/notification.html" />
     </script>
-    <script type="text/ng-template" id="settingsPanel.html">
-      <metal:main use-macro="load: settingsPanel.html" />
+    <script type="text/ng-template" id="settingspanel.html">
+      <metal:main use-macro="load: settingspanel.html" />
     </script>
-    <script type="text/ng-template" id="accountManagement.html">
-      <metal:main use-macro="load: accountManagement.html" />
+    <script type="text/ng-template" id="accountmanagement.html">
+      <metal:main use-macro="load: accountmanagement.html" />
     </script>
     <script type="text/ng-template" id="profile.html">
       <metal:main use-macro="load: profile.html" />

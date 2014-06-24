@@ -527,7 +527,7 @@ settingsPanel = ->
     # the request was successful.
 
   restrict: 'C'
-  templateUrl: 'settingsPanel.html'
+  templateUrl: 'settingspanel.html'
 
 accountManagement = ->
   link: (scope, elem, attr, ctrl) ->
@@ -544,7 +544,7 @@ delete replies to that annotation, it creates a blank stub that replies are stil
       if r
         return
   restrict: 'C'
-  templateUrl: 'accountManagement.html'
+  templateUrl: 'accountmanagement.html'
 
 # This is the acount profile stuff that will eventually be outside of the settings panel.
 # Rational for keeping it in the settings panel (temporarily):
