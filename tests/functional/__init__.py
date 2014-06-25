@@ -29,30 +29,8 @@ class SeleniumTestCase(unittest.TestCase):
     def setUp(self):
         self.base_url = "http://localhost:4000"
         env = os.environ
-
-        if 'SAUCE_USERNAME' in env and 'SAUCE_ACCESS_KEY' in env:
-            username = env['SAUCE_USERNAME']
-            key = env['SAUCE_ACCESS_KEY']
-            caps = webdriver.DesiredCapabilities.FIREFOX
-            caps['name'] = str(self)
-            caps['platform'] = "Linux"
-            caps['build'] = env['TRAVIS_BUILD_NUMBER']
-            caps['tags'] = [env['TRAVIS_PYTHON_VERSION'], 'CI']
-            caps['tunnel-identifier'] = env['TRAVIS_JOB_NUMBER']
-
-            hub_url = 'http://%s:%s@localhost:4445/wd/hub' % (username, key)
-            self.driver = webdriver.Remote(
-                desired_capabilities=caps,
-                command_executor=hub_url
-            )
-            self.sauce_url = 'https://saucelabs.com/jobs/{0}'.format(
-                self.driver.session_id
-            )
-        else:
-            self.driver = webdriver.Firefox()
-
+        self.driver = webdriver.PhantomJS('./node_modules/.bin/phantomjs')
         self.driver.maximize_window()
-
         self.verificationErrors = []
         self.accept_next_alert = True
 

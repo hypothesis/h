@@ -9,11 +9,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from . import SeleniumTestCase, Annotator
 
-pytestmark = pytest.mark.skipif(
-    os.environ.get('TRAVIS_SECURE_ENV_VARS') == 'false',
-    reason="No access to secure Travis variables.")
-
-
 class TestAnnotator(SeleniumTestCase):
     def test_login(self):
         driver = self.driver

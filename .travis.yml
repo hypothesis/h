@@ -5,20 +5,11 @@ python:
 install:
   - gem install sass
   - gem install compass
-  - npm install -g coffee-script
   - make
 services:
   - elasticsearch
-before_script:
-  - curl https://gist.github.com/santiycr/5139565/raw/sauce_connect_setup.sh | bash
 script:
   - make test
-env:
-  global:
-    - secure: gQlc+9aECFEEjaGZ/vnzF7HL5chf7aazhMSsVu3dSHO1bv4KS+9c4E3Z1LYuJd28ZDRO740xWFVwbsP7mYeqAGp1gPFVMjnovjnPzLvM/c36WUuFdpO4i/j5iKFkhw9Jgmh2U65hhDTlxpj1sn9U+7zJgYItWoHoYiJRItt8uzE=
-    - secure: XNjgXIu2ZaRISkRYhgm/m9F8x/yfGYDh++k8/TYFHgJ9gW2eoypuvNnFgDIQtFlgBrhnooJi9AhBUF1fl4WKLu6CzesjvI4IuQSPFNWMaL/W9+uhkFnrXve7DnzUVAnpcbdLIh4uAlcKrYrfOEN53vPgCGLHNR84Mgy6281FLQg=
-addons:
-  sauce_connect: true
 notifications:
   irc:
     channels:
