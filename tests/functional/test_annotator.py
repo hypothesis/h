@@ -3,6 +3,7 @@ import os
 
 import pytest
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -31,12 +32,17 @@ class TestAnnotator(SeleniumTestCase):
             picker = driver.find_element_by_class_name('user-picker')
             user_element = picker.find_element_by_class_name('dropdown-toggle')
 
+            # Because the provider is hidden until hover, we access the
+            # textContent property here to get the full username. Selenium
+            # only returns the visible content otherwise.
+            actual_username = user_element.get_attribute('textContent')
+
             # Some systems (OSX) seem to set the SERVER_NAME request
             # environment variable to 127.0.0.1 rather than localhost. This
             # should be configurable but I haven't found the setting yet.
             # In the mean time we just allow a range of valid values.
             accepted_usernames = ('test/localhost', 'test/127.0.0.1')
-            assert user_element.text in accepted_usernames
+            assert actual_username in accepted_usernames
 
     def test_annotation(self):
         driver = self.driver
