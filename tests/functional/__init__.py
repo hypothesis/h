@@ -88,7 +88,7 @@ class SeleniumTestCase(unittest.TestCase):
         with Annotator(driver):
             picker = (By.CLASS_NAME, 'user-picker')
             ec = expected_conditions.visibility_of_element_located(picker)
-            WebDriverWait(self.driver, 3).until(ec)
+            WebDriverWait(self.driver, 30).until(ec)
 
             picker = driver.find_element_by_class_name('user-picker')
             dropdown = picker.find_element_by_class_name('dropdown-toggle')
@@ -128,7 +128,7 @@ class SeleniumTestCase(unittest.TestCase):
 
             picker = (By.CLASS_NAME, 'user-picker')
             ec = expected_conditions.visibility_of_element_located(picker)
-            WebDriverWait(self.driver, 3).until(ec)
+            WebDriverWait(self.driver, 30).until(ec)
 
     def highlight(self, css_selector):
         """A hack to select some text on the page, and trigger the
@@ -177,7 +177,7 @@ class Annotator():
 
         ec = expected_conditions.frame_to_be_available_and_switch_to_it(
             'hyp_sidebar_frame')
-        WebDriverWait(driver, 3).until(ec)
+        WebDriverWait(driver, 30).until(ec)
 
     def __exit__(self, typ, value, traceback):
         count = self.g_state[self.driver]
