@@ -5,8 +5,8 @@ default:
 	@yes | ./bootstrap
 
 clean:
-	find h/js -iname '*.js' | xargs -r rm
-	find h/css -iname '*.css' | sed /visualsearch/d | xargs -r rm
+	find h/js  -iname '*.js' -exec rm {} \;
+	find h/css -iname '*.css' -not -iname '*visualsearch*' -exec rm {} \;
 
 test:
 	@echo -n "Checking to see if elasticsearch is running..."
