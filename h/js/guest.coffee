@@ -210,7 +210,7 @@ class Annotator.Guest extends Annotator
     )
 
     .bind('setTool', (ctx, name) =>
-      this.setTool name
+      @tool = name
       this.publish 'setTool', name
     )
 
@@ -400,7 +400,6 @@ class Annotator.Guest extends Annotator
     @noBack = false
 
   setTool: (name) ->
-    @tool = name
     @panel?.notify
       method: 'setTool'
       params: name
