@@ -29,8 +29,14 @@ class TestAnnotator(SeleniumTestCase):
             WebDriverWait(driver, 3).until(ec)
 
             picker = driver.find_element_by_class_name('user-picker')
-            dropdown = picker.find_element_by_class_name('dropdown-toggle')
-            assert dropdown.text == 'test/localhost'
+            user_element = picker.find_element_by_class_name('dropdown-toggle')
+
+            # Some systems (OSX) seem to set the SERVER_NAME request
+            # environment variable to 127.0.0.1 rather than localhost. This
+            # should be configurable but I haven't found the setting yet.
+            # In the mean time we just allow a range of valid values.
+            accepted_usernames = ('test/localhost', 'test/127.0.0.1')
+            assert user_element.text in accepted_usernames
 
     def test_annotation(self):
         driver = self.driver
