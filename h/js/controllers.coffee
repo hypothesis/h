@@ -16,6 +16,7 @@ class App
   scope:
     frame:
       visible: false
+    model: {}
     sheet:
       collapsed: true
       tab: null
@@ -41,18 +42,21 @@ class App
   ) ->
     {plugins, host, providers} = annotator
 
-    $scope.$watch 'auth.personas', (newValue, oldValue) =>
-      if newValue?.length
-        unless $scope.auth.persona and $scope.auth.persona in newValue
-          $scope.auth.persona = newValue[0]
-      else
-        $scope.auth.persona = null
+    session.$promise.then (data) ->
+      angular.extend $scope.model, data
 
-    $scope.$watch 'auth.persona', (newValue, oldValue) =>
+    $scope.$watch 'model.personas', (newValue, oldValue) =>
+      if newValue?.length
+        unless $scope.model.persona and $scope.model.persona in newValue
+          $scope.model.persona = newValue[0]
+      else
+        $scope.model.persona = null
+
+    $scope.$watch 'model.persona', (newValue, oldValue) =>
       $scope.sheet.collapsed = true
 
       unless annotator.discardDrafts()
-        $scope.auth.persona = oldValue
+        $scope.model.persona = oldValue
         return
 
       plugins.Auth?.element.removeData('annotator:headers')
@@ -110,15 +114,20 @@ class App
           p.channel.notify method: 'setActiveHighlights'
 
     $scope.$watch 'sheet.collapsed', (hidden) ->
-      if hidden
-        $element.find('.sheet').scope().$broadcast('$reset')
-      else
-        $scope.sheet.tab = 'login'
+      $scope.sheet.tab = if hidden then null else 'login'
 
+    authTimeout = null
     $scope.$watch 'sheet.tab', (tab) ->
-      return unless tab
+      if authTimeout
+        $timeout.cancel authTimeout
 
-      $timeout =>
+      unless $scope.model.persona
+        authTimeout = $timeout (-> $scope.$broadcast '$reset'), 60000
+        unless tab
+          $scope.ongoingHighlightSwitch = false
+          delete annotator.ongoing_edit
+
+      $timeout ->
         $element
         .find('form')
         .filter(-> this.name is tab)
@@ -128,16 +137,6 @@ class App
         .focus()
       , 10
 
-      reset = $timeout (-> $scope.$broadcast '$reset'), 60000
-      unwatch = $scope.$watch 'sheet.tab', (newTab) ->
-        $timeout.cancel reset
-        if newTab
-          reset = $timeout (-> $scope.$broadcast '$reset'), 60000
-        else
-          $scope.ongoingHighlightSwitch = false
-          delete annotator.ongoing_edit
-          unwatch()
-
     $scope.$on 'back', ->
       return unless annotator.discardDrafts()
       if $location.path() == '/viewer' and $location.search()?.id?
@@ -146,23 +145,20 @@ class App
         annotator.hide()
 
     $scope.$on 'showAuth', (event, show=true) ->
-      angular.extend $scope.sheet,
-        collapsed: !show
-        tab: 'login'
+      $scope.sheet.collapsed = !show
 
     $scope.$on '$reset', =>
       delete annotator.ongoing_edit
       base = angular.copy @scope
       angular.extend $scope, base,
-        auth: session
         frame: $scope.frame or @scope.frame
         socialView: annotator.socialView
 
     $scope.$on 'success', (event, action) ->
+      angular.extend $scope.model, session.model
       if action == 'forgot'
         $scope.sheet.tab = 'activate'
       else
-        $scope.sheet.tab = 'login'
         $scope.sheet.collapsed = true
 
     $scope.$broadcast '$reset'
@@ -363,7 +359,7 @@ class App
 
         unless data instanceof Array then data = [data]
 
-        p = $scope.auth.persona
+        p = $scope.model.persona
         user = if p? then "acct:" + p.username + "@" + p.provider else ''
         unless data instanceof Array then data = [data]
 
@@ -618,40 +614,37 @@ class Annotation
 
 
 class Auth
-  scope:
-    username: null
-    email: null
-    password: null
-    code: null
-
   this.$inject = [
     '$scope', 'session', 'flash'
   ]
   constructor: (
      $scope,   session,   flash
   ) ->
-    _reset = =>
-      angular.copy @scope, $scope.model
+    base =
+      username: null
+      email: null
+      password: null
+      code: null
+
+    _reset = ->
+      angular.copy base, $scope.model
       for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
         ctrl.$setPristine()
 
-    _success = (form) ->
-      _reset()
-      $scope.$emit 'success', form.$name
-
-    _error = (response) ->
-      if response.errors
-        # TODO: show these messages inline with the form
-        for field, error of response.errors
-          console.log(field, error)
-          flash('error', error)
+    _error = (errors={}) ->
+      # TODO: show these messages inline with the form
+      for field, error of errors
+        console.log(field, error)
+        flash('error', error)
 
     $scope.$on '$reset', _reset
 
     $scope.submit = (form) ->
       angular.extend session, $scope.model
       return unless form.$valid
-      session["$#{form.$name}"] (-> _success form), _error
+      promise = session["$#{form.$name}"] ->
+        $scope.$emit 'success', form.$name
+      promise.then(angular.noop, _error)
 
 
 class Editor

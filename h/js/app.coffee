@@ -2,7 +2,6 @@ imports = [
   'bootstrap'
   'ngAnimate'
   'ngRoute'
-  'h.csrf'
   'h.controllers'
   'h.directives'
   'h.app_directives'

@@ -4,16 +4,15 @@
     <div class="topbar"
          ng-class="frame.visible && 'shown'"
          ng-mouseenter="showViewSort(true, true)">
-      <div class="inner" ng-switch="!!auth.persona">
+      <div class="inner" ng-switch="!!model.persona">
         <a class="pull-right" href=""
-           ng-click="sheet.collapsed = false;
-                     sheet.tab = 'login';"
+           ng-click="sheet.collapsed = false"
            ng-switch-when="false"
            ng-show="sheet.collapsed">Sign in</a>
         <div class="pull-right user-picker"
              ng-switch-default
-             data-user-picker-model="auth.persona"
-             data-user-picker-options="auth.personas">
+             data-user-picker-model="model.persona"
+             data-user-picker-options="model.personas">
         </div>
 
         <!-- Searchbar -->
