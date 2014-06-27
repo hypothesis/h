@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-import os
-
-import pytest
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
 from . import SeleniumTestCase, Annotator
+
 
 class TestAnnotator(SeleniumTestCase):
     def test_login(self):

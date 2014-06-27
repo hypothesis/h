@@ -16,7 +16,6 @@ annotation, since it seemed impossible to achieve with the Selenium webdriver
 API.
 """
 
-import os
 import unittest
 
 from selenium import webdriver
@@ -28,7 +27,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 class SeleniumTestCase(unittest.TestCase):
     def setUp(self):
         self.base_url = "http://localhost:4000"
-        env = os.environ
         self.driver = webdriver.PhantomJS('./node_modules/.bin/phantomjs')
         self.driver.maximize_window()
         self.verificationErrors = []
