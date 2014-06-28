@@ -55,11 +55,9 @@ class SeleniumTestCase(unittest.TestCase):
             WebDriverWait(driver, 30).until(ec)
 
             username = form.find_element_by_name('username')
-            username.clear()
             username.send_keys("test")
 
             password = form.find_element_by_name('password')
-            password.clear()
             password.send_keys("test")
 
             form.submit()
@@ -98,15 +96,12 @@ class SeleniumTestCase(unittest.TestCase):
             WebDriverWait(driver, 30).until(ec)
 
             username = form.find_element_by_name('username')
-            username.clear()
             username.send_keys("test")
 
             email = form.find_element_by_name('email')
-            email.clear()
             email.send_keys("test@example.org")
 
             password = form.find_element_by_name('password')
-            password.clear()
             password.send_keys("test")
 
             form.submit()
