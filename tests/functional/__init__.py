@@ -28,6 +28,7 @@ class SeleniumTestCase(unittest.TestCase):
     def setUp(self):
         self.base_url = "http://localhost:4000"
         self.driver = webdriver.PhantomJS('./node_modules/.bin/phantomjs')
+        self.driver.implicitly_wait(10)
         self.driver.maximize_window()
         self.verificationErrors = []
         self.accept_next_alert = True
