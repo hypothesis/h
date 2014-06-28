@@ -41,6 +41,8 @@ class SeleniumTestCase(unittest.TestCase):
         with Annotator(driver):
             # Find the signin link and click it
             signin = driver.find_element_by_link_text("Sign in")
+            ec = expected_conditions.visibility_of(signin)
+            WebDriverWait(driver, 30).until(ec)
             signin.click()
 
             # Find the authentication form sheet
@@ -77,6 +79,8 @@ class SeleniumTestCase(unittest.TestCase):
         with Annotator(driver):
             # Find the signin link and click it
             signin = driver.find_element_by_link_text("Sign in")
+            ec = expected_conditions.visibility_of(signin)
+            WebDriverWait(driver, 30).until(ec)
             signin.click()
 
             # Find the authentication form sheet
