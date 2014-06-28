@@ -50,6 +50,8 @@ class SeleniumTestCase(unittest.TestCase):
 
             # Find the login pane
             form = auth.find_element_by_name('login')
+            ec = expected_conditions.visibility_of(form)
+            WebDriverWait(driver, 30).until(ec)
 
             username = form.find_element_by_name('username')
             username.clear()
@@ -91,6 +93,8 @@ class SeleniumTestCase(unittest.TestCase):
 
             # Get the registration pane
             form = auth.find_element_by_name('register')
+            ec = expected_conditions.visibility_of(form)
+            WebDriverWait(driver, 30).until(ec)
 
             username = form.find_element_by_name('username')
             username.clear()
