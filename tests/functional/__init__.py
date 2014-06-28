@@ -16,7 +16,6 @@ annotation, since it seemed impossible to achieve with the Selenium webdriver
 API.
 """
 
-import os
 import unittest
 
 from selenium import webdriver
@@ -28,31 +27,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 class SeleniumTestCase(unittest.TestCase):
     def setUp(self):
         self.base_url = "http://localhost:4000"
-        env = os.environ
-
-        if 'SAUCE_USERNAME' in env and 'SAUCE_ACCESS_KEY' in env:
-            username = env['SAUCE_USERNAME']
-            key = env['SAUCE_ACCESS_KEY']
-            caps = webdriver.DesiredCapabilities.FIREFOX
-            caps['name'] = str(self)
-            caps['platform'] = "Linux"
-            caps['build'] = env['TRAVIS_BUILD_NUMBER']
-            caps['tags'] = [env['TRAVIS_PYTHON_VERSION'], 'CI']
-            caps['tunnel-identifier'] = env['TRAVIS_JOB_NUMBER']
-
-            hub_url = 'http://%s:%s@localhost:4445/wd/hub' % (username, key)
-            self.driver = webdriver.Remote(
-                desired_capabilities=caps,
-                command_executor=hub_url
-            )
-            self.sauce_url = 'https://saucelabs.com/jobs/{0}'.format(
-                self.driver.session_id
-            )
-        else:
-            self.driver = webdriver.Firefox()
-
+        self.driver = webdriver.PhantomJS('./node_modules/.bin/phantomjs')
+        self.driver.implicitly_wait(10)
         self.driver.maximize_window()
-
         self.verificationErrors = []
         self.accept_next_alert = True
 
@@ -65,6 +42,8 @@ class SeleniumTestCase(unittest.TestCase):
         with Annotator(driver):
             # Find the signin link and click it
             signin = driver.find_element_by_link_text("Sign in")
+            ec = expected_conditions.visibility_of(signin)
+            WebDriverWait(driver, 30).until(ec)
             signin.click()
 
             # Find the authentication form sheet
@@ -72,13 +51,13 @@ class SeleniumTestCase(unittest.TestCase):
 
             # Find the login pane
             form = auth.find_element_by_name('login')
+            ec = expected_conditions.visibility_of(form)
+            WebDriverWait(driver, 30).until(ec)
 
             username = form.find_element_by_name('username')
-            username.clear()
             username.send_keys("test")
 
             password = form.find_element_by_name('password')
-            password.clear()
             password.send_keys("test")
 
             form.submit()
@@ -88,7 +67,7 @@ class SeleniumTestCase(unittest.TestCase):
         with Annotator(driver):
             picker = (By.CLASS_NAME, 'user-picker')
             ec = expected_conditions.visibility_of_element_located(picker)
-            WebDriverWait(self.driver, 3).until(ec)
+            WebDriverWait(self.driver, 30).until(ec)
 
             picker = driver.find_element_by_class_name('user-picker')
             dropdown = picker.find_element_by_class_name('dropdown-toggle')
@@ -101,6 +80,8 @@ class SeleniumTestCase(unittest.TestCase):
         with Annotator(driver):
             # Find the signin link and click it
             signin = driver.find_element_by_link_text("Sign in")
+            ec = expected_conditions.visibility_of(signin)
+            WebDriverWait(driver, 30).until(ec)
             signin.click()
 
             # Find the authentication form sheet
@@ -111,24 +92,23 @@ class SeleniumTestCase(unittest.TestCase):
 
             # Get the registration pane
             form = auth.find_element_by_name('register')
+            ec = expected_conditions.visibility_of(form)
+            WebDriverWait(driver, 30).until(ec)
 
             username = form.find_element_by_name('username')
-            username.clear()
             username.send_keys("test")
 
             email = form.find_element_by_name('email')
-            email.clear()
             email.send_keys("test@example.org")
 
             password = form.find_element_by_name('password')
-            password.clear()
             password.send_keys("test")
 
             form.submit()
 
             picker = (By.CLASS_NAME, 'user-picker')
             ec = expected_conditions.visibility_of_element_located(picker)
-            WebDriverWait(self.driver, 3).until(ec)
+            WebDriverWait(self.driver, 30).until(ec)
 
     def highlight(self, css_selector):
         """A hack to select some text on the page, and trigger the
@@ -177,7 +157,7 @@ class Annotator():
 
         ec = expected_conditions.frame_to_be_available_and_switch_to_it(
             'hyp_sidebar_frame')
-        WebDriverWait(driver, 3).until(ec)
+        WebDriverWait(driver, 30).until(ec)
 
     def __exit__(self, typ, value, traceback):
         count = self.g_state[self.driver]

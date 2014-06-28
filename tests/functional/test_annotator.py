@@ -1,16 +1,9 @@
 # -*- coding: utf-8 -*-
-import os
-
-import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
 from . import SeleniumTestCase, Annotator
-
-pytestmark = pytest.mark.skipif(
-    os.environ.get('TRAVIS_SECURE_ENV_VARS') == 'false',
-    reason="No access to secure Travis variables.")
 
 
 class TestAnnotator(SeleniumTestCase):
@@ -26,17 +19,22 @@ class TestAnnotator(SeleniumTestCase):
 
             picker = (By.CLASS_NAME, 'user-picker')
             ec = expected_conditions.visibility_of_element_located(picker)
-            WebDriverWait(driver, 3).until(ec)
+            WebDriverWait(driver, 30).until(ec)
 
             picker = driver.find_element_by_class_name('user-picker')
             user_element = picker.find_element_by_class_name('dropdown-toggle')
+
+            # Because the provider is hidden until hover, we access the
+            # textContent property here to get the full username. Selenium
+            # only returns the visible content otherwise.
+            actual_username = user_element.get_attribute('textContent')
 
             # Some systems (OSX) seem to set the SERVER_NAME request
             # environment variable to 127.0.0.1 rather than localhost. This
             # should be configurable but I haven't found the setting yet.
             # In the mean time we just allow a range of valid values.
             accepted_usernames = ('test/localhost', 'test/127.0.0.1')
-            assert user_element.text in accepted_usernames
+            assert actual_username in accepted_usernames
 
     def test_annotation(self):
         driver = self.driver
@@ -58,7 +56,7 @@ class TestAnnotator(SeleniumTestCase):
             # Wait for save
             ts = (By.TAG_NAME, "fuzzytime")
             saved = expected_conditions.visibility_of_element_located(ts)
-            WebDriverWait(driver, 3).until(saved)
+            WebDriverWait(driver, 30).until(saved)
 
         def get_labels(d):
             return d.find_elements_by_css_selector(".heatmap-pointer")
@@ -77,7 +75,7 @@ class TestAnnotator(SeleniumTestCase):
         with Annotator(driver):
             annotation = (By.CLASS_NAME, 'annotation')
             ec = expected_conditions.visibility_of_element_located(annotation)
-            WebDriverWait(driver, 3).until(ec)
+            WebDriverWait(driver, 30).until(ec)
             annotation = driver.find_element_by_class_name('annotation')
             user = annotation.find_element_by_class_name('user')
             body = annotation.find_element_by_css_selector('markdown div p')

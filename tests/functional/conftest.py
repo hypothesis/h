@@ -17,6 +17,7 @@ def run(start, settings):
 
     app = Application('development.ini', settings)
     app.cfg.set('post_worker_init', prepare)
+    app.cfg.set('logconfig', None)
 
     app.run()
 
