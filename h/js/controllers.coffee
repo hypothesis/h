@@ -42,6 +42,15 @@ class App
   ) ->
     {plugins, host, providers} = annotator
 
+    _reset = =>
+      delete annotator.ongoing_edit
+      base = angular.copy @scope
+      angular.extend $scope, base,
+        frame: $scope.frame or @scope.frame
+        socialView: annotator.socialView
+
+    _reset()
+
     session.$promise.then (data) ->
       angular.extend $scope.model, data
 
@@ -88,7 +97,7 @@ class App
             $scope.reloadAnnotations()
       else if oldValue?
         session.$logout =>
-          $scope.$broadcast '$reset'
+          $scope.$broadcast 'reset'
 
           if annotator.tool isnt 'comment'
             annotator.setTool 'comment'
@@ -122,7 +131,7 @@ class App
         $timeout.cancel authTimeout
 
       unless $scope.model.persona
-        authTimeout = $timeout (-> $scope.$broadcast '$reset'), 60000
+        authTimeout = $timeout (-> $scope.$broadcast 'reset'), 60000
         unless tab
           $scope.ongoingHighlightSwitch = false
           delete annotator.ongoing_edit
@@ -147,12 +156,7 @@ class App
     $scope.$on 'showAuth', (event, show=true) ->
       $scope.sheet.collapsed = !show
 
-    $scope.$on '$reset', =>
-      delete annotator.ongoing_edit
-      base = angular.copy @scope
-      angular.extend $scope, base,
-        frame: $scope.frame or @scope.frame
-        socialView: annotator.socialView
+    $scope.$on 'reset', _reset
 
     $scope.$on 'success', (event, action) ->
       angular.extend $scope.model, session.model
@@ -160,8 +164,6 @@ class App
         $scope.sheet.tab = 'activate'
       else
         $scope.sheet.collapsed = true
-
-    $scope.$broadcast '$reset'
 
     $rootScope.viewState =
       sort: ''
@@ -637,7 +639,7 @@ class Auth
         console.log(field, error)
         flash('error', error)
 
-    $scope.$on '$reset', _reset
+    $scope.$on 'reset', _reset
 
     $scope.submit = (form) ->
       angular.extend session, $scope.model
