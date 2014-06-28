@@ -1,6 +1,5 @@
 imports = [
   'h.filters'
-  'h.session'
 ]
 
 
@@ -59,18 +58,15 @@ class Hypothesis extends Annotator
 
   this.$inject = [
     '$document', '$location', '$rootScope', '$route', '$window',
-    'session'
   ]
   constructor: (
      $document,   $location,   $rootScope,   $route,   $window,
-     session
   ) ->
     Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
     window.annotator = this
 
-    @auth = session
     @providers = []
     @socialView =
       name: "none" # "single-player"
@@ -561,9 +557,9 @@ class Hypothesis extends Annotator
         console.log "Not applying any Social View filters."
         delete query.user
       when "single-player"
-        if @auth.persona
+        if @plugins.Permissions?.user
           console.log "Social View filter: single player mode."
-          query.user = @auth.persona
+          query.user = @plugins.Permissions.user
         else
           console.log "Social View: single-player mode, but ignoring it, since not logged in."
           delete query.user
@@ -597,7 +593,6 @@ class Hypothesis extends Annotator
         # If we are not logged in, start the auth process
         scope.ongoingHighlightSwitch = true
         scope.sheet.collapsed = false
-        scope.sheet.tab = 'login'
         this.show()
         return
 
