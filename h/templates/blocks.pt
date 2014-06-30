@@ -58,6 +58,7 @@
       <span ng-show="register.username.$error.pattern"
             >Only letters, numbers, underscore and dot are allowed.</span>
     </span>
+    <span>{{errors.register.username}}</span>
 
     <input type="email" name="email" value="" placeholder="Email"
            ng-model="model.email" required autocapitalize="false" />
@@ -67,6 +68,7 @@
       <span ng-show="register.email.$error.required"
             >Please enter your email.</span>
     </span>
+    <span>{{errors.register.email}}</span>
 
     <input type="password" name="password" value="" placeholder="Password"
            required autocapitalize="false" autocorrect="false"
@@ -77,6 +79,7 @@
       <span ng-show="register.password.$error.minlength"
             >Passwords must be at least 2 characters.</span>
     </span>
+    <span>{{errors.activate.code}}</span>
 
     <input type="submit" name="sign_up" value="Sign up"
            ng-disabled="!register.$valid" />
@@ -121,6 +124,7 @@
            required autocorrect="false" autocapitalize="false"
            ng-model="model.code" />
     <span slow-validate="code">Please enter your validation code.</span>
+    <span>{{errors.activate.code}}</span>
 
     <input type="password" name="password" value="" placeholder="New Password"
            required autocapitalize="false" autocorrect="false"

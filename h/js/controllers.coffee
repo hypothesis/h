@@ -632,20 +632,22 @@ class Auth
       for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
         ctrl.$setPristine()
 
-    _error = (errors={}) ->
-      # TODO: show these messages inline with the form
+    _error = (form, errors={}) ->
+      $scope.errors = {}
+      $scope.errors[form] = {}
       for field, error of errors
-        console.log(field, error)
-        flash('error', error)
+        $scope.errors[form][field] = error
 
     $scope.$on 'reset', _reset
 
     $scope.submit = (form) ->
       angular.extend session, $scope.model
       return unless form.$valid
+
       promise = session["$#{form.$name}"] ->
         $scope.$emit 'success', form.$name
-      promise.then(_reset, _error)
+
+      promise.then(_reset, _error.bind(null, form.$name))
 
 
 class Editor

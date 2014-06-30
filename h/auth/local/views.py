@@ -27,7 +27,6 @@ def ajax_form(request, result):
         if errors:
             request.response.status_code = 400
             result['status'] = 'failure'
-            result['reason'] = _('Please check your input.')
         else:
             result['status'] = 'okay'
 
