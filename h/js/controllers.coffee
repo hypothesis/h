@@ -629,7 +629,7 @@ class Auth
       code: null
 
     _reset = ->
-      angular.copy base, $scope.model
+      angular.extend $scope.model, base
       for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
         ctrl.$setPristine()
 
@@ -646,7 +646,7 @@ class Auth
       return unless form.$valid
       promise = session["$#{form.$name}"] ->
         $scope.$emit 'success', form.$name
-      promise.then(angular.noop, _error)
+      promise.then(_reset, _error)
 
 
 class Editor
