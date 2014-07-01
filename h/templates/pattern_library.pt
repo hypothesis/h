@@ -1,0 +1,156 @@
+<html metal:use-macro="main_template">
+  <head metal:fill-slot="head" tal:omit-tag>
+    <title>Hypothesis</title>
+  </head>
+  <body metal:fill-slot="body" tal:omit-tag>
+    <div class="pattern-library-doc">
+      <h1>Pattern Primer</h1>
+      <p>This document gives an overview of all the components currently in the
+      Hypothesis UI.</p>
+    </div>
+    <div class="pattern-library-example">
+      <div class="pattern-library-example-header">
+        <h1>Text Inputs</h1>
+      </div>
+      <div class="pattern-libarary-example-content">
+        <div class="form-field">
+          <label class="form-label" for="">Text Input <span class="form-reqired">*</span></label>
+          <input class="form-input" type="text" name="" value="" placeholder="Placeholder" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="">Password</label>
+          <input class="form-input" type="password" name="" value="" placeholder="Password" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="">Web Address</label>
+          <input class="form-input" type="url" name="" value="" placeholder="http://example.com" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="">Email Address</label>
+          <input class="form-input" type="email" name="" value="" placeholder="bill@example.com" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="">Number Input</label>
+          <input class="form-input" type="number" name="" value="" placeholder="12345" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="">Text Area</label>
+          <textarea class="form-input" name="" rows="8" columns="48" placeholder="Longer form text…"></textarea>
+        </div>
+        <div class="form-field form-field-error">
+          <label class="form-label" for="">Focussed</label>
+          <input class="form-input js-focus" type="text" name="" value="Focussed" placeholder="Placeholder" />
+        </div>
+        <div class="form-field form-field-error">
+          <label class="form-label" for="">Error</label>
+          <input class="form-input" type="text" name="" value="Bad Input" placeholder="Placeholder" />
+        </div>
+        <div class="form-field form-field-valid">
+          <label class="form-label" for="">Valid</label>
+          <input class="form-input" type="text" name="" value="Valid Input" placeholder="Placeholder" />
+        </div>
+      </div>
+    </div>
+    <div class="pattern-library-example">
+      <div class="pattern-library-example-header">
+        <h1>Select Inputs</h1>
+      </div>
+      <div class="pattern-libarary-example-content">
+        <div class="form-field">
+          <label for="">Select</label>
+          <select id="" name="">
+            <optgroup label="Option Group">
+              <option value="1">Option One</option>
+              <option value="2">Option Two</option>
+              <option value="3">Option Three</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="pattern-library-example">
+      <div class="pattern-library-example-header">
+        <h1>Check Boxes</h1>
+      </div>
+      <div class="pattern-libarary-example-content">
+        <div class="form-field">
+          <label for="">Check Boxes</label>
+          <div>
+            <input type="hidden" id="" name="checkbox-1" value="0" />
+            <input type="checkbox" id="" name="checkbox-1" value="1" />
+            <label for="">Checkbox One</label>
+          </div>
+          <div>
+            <input type="hidden" id="" name="checkbox-2" value="0" />
+            <input type="checkbox" id="" name="checkbox-2" value="1" />
+            <label for="">Checkbox Two</label>
+          </div>
+          <div>
+            <input type="hidden" id="" name="checkbox-3" value="0" />
+            <input type="checkbox" id="" name="checkbox-3" value="1" />
+            <label for="">Checkbox Three</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pattern-library-example">
+      <div class="pattern-library-example-header">
+        <h1>Radio Buttons</h1>
+      </div>
+      <div class="pattern-libarary-example-content">
+        <div class="form-field">
+          <label for="">Radio Buttons</label>
+          <div>
+            <input type="radio" id="" name="radio" value="1" checked />
+            <label for="">Radio One</label>
+          </div>
+          <div>
+            <input type="radio" id="" name="radio" value="2" />
+            <label for="">Radio Two</label>
+          </div>
+          <div>
+            <input type="radio" id="" name="radio" value="3" />
+            <label for="">Radio Three</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pattern-library-example">
+      <div class="pattern-library-example-header">
+        <h1>Buttons</h1>
+      </div>
+      <div class="pattern-libarary-example-content">
+        <div class="form-field">
+          <input class="btn" type="submit" name="" value="Input" />
+        </div>
+        <div class="form-field">
+          <button class="btn" type="submit" name="">Button</button>
+        </div>
+        <div class="form-field">
+          <a class="btn" href="#">Anchor</a>
+        </div>
+        <div class="form-field">
+          <button class="btn" type="submit" name="" disabled>Button (disabled)</button>
+        </div>
+        <div class="form-field">
+          <button class="btn js-focus" type="submit" name="">Button (hover)</button>
+        </div>
+        <div class="form-field">
+          <button class="btn js-active" type="submit" name="">Button (active)</button>
+        </div>
+        <div class="form-field">
+          <button class="btn" type="submit" name="">Primary Button</button>
+        </div>
+        <div class="form-field">
+          <button class="btn" type="submit" name="" disabled>Primary Button (disabled)</button>
+        </div>
+        <div class="form-field">
+          <button class="btn js-focus" type="submit" name="">Primary Button (focus/hover)</button>
+        </div>
+        <div class="form-field">
+          <button class="btn js-active" type="submit" name="">Primary Button (active)</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

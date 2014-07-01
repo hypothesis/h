@@ -1,0 +1,19 @@
+// Common form styles.
+
+.form-field {
+  margin-bottom: 10px;
+}
+
+.form-label {
+  width: 100%;
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  display: block;
+}
+
+.btn {
+  @include sweetbutton;
+}

@@ -57,6 +57,7 @@ def bad_csrf_token(context, request):
 @view_config(layout='app', name='app.html', renderer='templates/app.pt')
 @view_config(renderer='templates/help.pt', route_name='help')
 @view_config(renderer='templates/home.pt', route_name='index')
+@view_config(renderer='templates/pattern_library.pt', route_name='pattern_library')
 def page(context, request):
     return {}
 
@@ -131,5 +132,6 @@ def includeme(config):
 
     config.add_route('index', '/')
     config.add_route('help', '/docs/help')
+    config.add_route('pattern_library', '/dev/pattern-library')
 
     config.scan(__name__)
