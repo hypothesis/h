@@ -21,24 +21,41 @@
 	    	  ng-submit="">
 		    <div class="niceforms">
 		      <h2>Settings</h2>
-	    	  <p>Heatmap options:
-		    	  <select class="pull-right">
-					  <option value="On">On</option>
-					  <option value="Hidden">Hidden</option>
-					  <option value="Off">Off</option>
-				  </select> 
-			  </p>
-			  <p>Use PDF.js in Chrome:
-				  <select class="pull-right">
-					  <option ng-disabled value="On">Always</option>
-					  <option ng-disabled value="whenActive">Only when active</option>
-					  <option ng-disabled value="Off">Never</option>
-				  </select> 
-			  </p>
-		      <p>Notify me when:</p>
+		      <ul>
+		      <!--
+	    	  <li>Heatmap options:
+	    	  	<div class="dropdown pull-right">
+	    	  	   <span role="button"
+				         class="dropdown-toggle"
+				         data-toggle="dropdown"
+				         > Chosen option</span>
+		    	   <ul class="dropdown-menu pull-right" role="menu">
+					  <li value="On">On</li>
+					  <li value="Hidden">Hidden</li>
+					  <li value="Off">Off</li>
+				   </ul> 
+				</div>
+			  </li>
+			  -->
+			  <li>Use PDF.js in Chrome:
+	    	  	<div class="dropdown pull-right">
+	    	  	   <span role="button"
+				         class="dropdown-toggle"
+				         data-toggle="dropdown"
+				         > Chosen option</span>
+		    	   <ul class="dropdown-menu pull-right" role="menu">
+					  <li ng-disabled value="On">Always</li>
+					  <li ng-disabled value="whenActive">Only when active</li>
+					  <li ng-disabled value="Off">Never</li>
+				  </ul> 
+				</div>
+			  </li>
+		      <li>Notify me when:
 			  <p><input type="checkbox" name="Replies"> Someone replies to an annotation I made.</p>
 			  <p><input type="checkbox" name="Replies"> Someone annotates a page I’m watching.</p>
 			  <p><input type="checkbox" name="Replies"> Someone subscribes to my stream or page.</p>
+			</li>
+		</ul>
 
 			  <button class="btn check-icon" ng-click="toggleHideHeatmap()">Save</button>
 			</div>
