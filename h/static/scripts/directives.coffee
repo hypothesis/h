@@ -440,10 +440,10 @@ settingsPanel = ->
       scope.activePanel = panel
       scope.activePanel.active = !scope.activePanel.active
 
-    scope.toggleHideHeatmap = ->
-      scope.hideheatmap = !scope.hideheatmap
-      parent.annotator.plugins.Heatmap.hideheatmap(scope.hideheatmap)
-      console.log "Heatmap toggled."
+    # scope.toggleHideHeatmap = ->
+    #   scope.hideheatmap = !scope.hideheatmap
+    #   parent.annotator.plugins.Heatmap.hideheatmap(scope.hideheatmap)
+    #   console.log "Heatmap toggled."
 
     visibleHighlights = ->
       return parent.window.annotator.visibleHighlights
@@ -462,7 +462,7 @@ settingsPanel = ->
       # Toggles Settings Panel shown or hidden.
       $rootScope.settingsPanel = !$rootScope.settingsPanel
       $rootScope.viewState.showControls = false
-    $scope.hideheatmap = false
+    # $scope.hideheatmap = false
 
     # This is the list of panels that will be shown. In the settingsPanel.html template
     # there are elements with ng-show on them, for example:
