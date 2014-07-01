@@ -615,12 +615,8 @@ class Annotation
 
 
 class Auth
-  this.$inject = [
-    '$scope', 'session', 'flash'
-  ]
-  constructor: (
-     $scope,   session,   flash
-  ) ->
+  this.$inject = ['$scope', 'session']
+  constructor: (   $scope,   session) ->
     base =
       username: null
       email: null
