@@ -864,23 +864,10 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 .panelcontainer {
   background: url("../images/noise_1.png");
   margin-right: -15px;
-
-  .niceforms {
-    clear: both;
-    padding: 0px 8px 28px 0px;
-    font-size: 14px;
-
-    p {
-      margin: 0px 0px 10px;
-    }
-
-    input {
+  font-size: 14px;
       
-      &.fullwidth {
-        width: 100%;
-      }
-
-    }
+  .fullwidth {
+    width: 100%;
   }
   
   .gravatar {
