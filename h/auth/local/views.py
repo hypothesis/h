@@ -14,7 +14,7 @@ from h.models import _
 
 
 def ajax_form(request, result):
-    errors = []
+    flash = views.pop_flash(request)
 
     if isinstance(result, httpexceptions.HTTPRedirection):
         request.response.headers.extend(result.headers)
@@ -27,13 +27,20 @@ def ajax_form(request, result):
         if errors:
             request.response.status_code = 400
             result['status'] = 'failure'
-        else:
-            result['status'] = 'okay'
 
-    for e in errors:
-        if isinstance(e, colander.Invalid):
-            result.setdefault('errors', {})
-            result['errors'].update(e.asdict())
+            for e in errors:
+                if isinstance(e, colander.Invalid):
+                    result.setdefault('errors', {})
+                    result['errors'].update(e.asdict())
+
+        reasons = flash.pop('error', [])
+        if reasons:
+            assert(len(reasons) == 1)
+            request.response.status_code = 400
+            result['status'] = 'failure'
+            result['reason'] = reasons[0]
+
+    result['flash'] = flash
 
     return result
 
@@ -54,7 +61,6 @@ class AsyncFormViewMapper(object):
             meth = getattr(inst, self.attr)
             result = meth()
             result = ajax_form(request, result)
-            result['flash'] = views.pop_flash(request)
             result['model'] = views.model(request)
             result.pop('form', None)
             return result
