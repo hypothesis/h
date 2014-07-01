@@ -2,6 +2,7 @@
 
 @import 'reset';
 @import 'base';
+@import 'forms';
 @import 'responsive';
 @import 'yui_grid';
 
@@ -138,7 +139,10 @@ button, input[type=submit], .btn {
   cursor: pointer;
   color: $linkColor;
   position: static;
-  &:hover { color: $linkColorHover; }
+
+  &:hover, &:focus, &.js-focus, &.js-hover {
+    color: $linkColorHover;
+  }
 }
 
 .red {
