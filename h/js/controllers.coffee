@@ -624,12 +624,14 @@ class Auth
       code: null
 
     _reset = ->
+      delete $scope.errors
       angular.extend $scope.model, base
       for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
         ctrl.$setPristine()
 
-    _error = (form, errors={}) ->
-      $scope.errors = {}
+    _error = (form, data) ->
+      {errors, reason} = data
+      $scope.errors = session: reason
       $scope.errors[form] = {}
       for field, error of errors
         $scope.errors[form][field] = error

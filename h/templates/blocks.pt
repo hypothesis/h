@@ -142,4 +142,6 @@
   </form>
   <!--/ Activate -->
 
+  <span>{{errors.session}}</span>
+
 </metal:main>
