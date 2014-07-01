@@ -199,7 +199,7 @@ class App
         when 'Comments'
           for p in providers
             p.channel.notify method: 'setDynamicBucketMode', params: false
-          annotations = annotator.plugins.Store.annotations
+          annotations = plugins.Store?.annotations
           comments = annotations.filter (a) -> annotator.isComment(a)
           $rootScope.annotations = comments
 
@@ -273,12 +273,12 @@ class App
 
     $scope.reloadAnnotations = ->
       $rootScope.applyView "Document"
-      return unless annotator.plugins.Store
+      return unless plugins.Store
       $scope.$root.annotations = []
       annotator.threading.thread []
       annotator.threading.idTable = {}
 
-      Store = annotator.plugins.Store
+      Store = plugins.Store
       annotations = Store.annotations.slice()
 
       # XXX: Hacky hacky stuff to ensure that any search requests in-flight
@@ -297,7 +297,7 @@ class App
       # * Make the update function into a noop.
       Store.updateAnnotation = angular.noop
       # * Remove the plugin and re-add it to the annotator.
-      delete annotator.plugins.Store
+      delete plugins.Store
       annotator.addPlugin 'Store', annotator.options.Store
 
       # Even though most operations on the old Store are now noops the Annotator
@@ -321,7 +321,7 @@ class App
               annotator.deleteAnnotation(l)
               deleted.push l
               if existing
-                annotator.plugins.Threading.thread existing
+                plugins.Threading.thread existing
           annotations = (a for a in annotations when a not in deleted)
           if annotations.length is 0
             annotator.unsubscribe 'annotationsLoaded', cleanup
@@ -342,7 +342,7 @@ class App
         streamfilter
           .setPastDataNone()
           .setMatchPolicyIncludeAny()
-          .addClause('/uri', 'one_of', Object.keys(annotator.plugins.Store.entities))
+          .addClause('/uri', 'one_of', Object.keys(plugins.Store.entities))
           .getFilter()
 
       $scope.updater = socket()
@@ -379,8 +379,8 @@ class App
           if container?.message?
             container.message._updatedAnnotation = true
             # Temporary workarund to force publish changes
-            if annotator.plugins.Store?
-              annotator.plugins.Store._onLoadAnnotations [container.message]
+            if plugins.Store?
+              plugins.Store._onLoadAnnotations [container.message]
         else
           annotation._updatedAnnotation = true
 
@@ -390,13 +390,13 @@ class App
           # XXX: Temporary workaround until solving the race condition for annotationsLoaded event
           # Between threading and bridge plugins
           for annotation in data
-            annotator.plugins.Threading.thread annotation
+            plugins.Threading.thread annotation
 
           $scope.markAnnotationUpdate data
 
           $scope.$apply =>
-            if annotator.plugins.Store?
-              annotator.plugins.Store._onLoadAnnotations data
+            if plugins.Store?
+              plugins.Store._onLoadAnnotations data
               # XXX: Ugly workaround to update the scope content
               switch $rootScope.viewState.view
                 when 'Document'
@@ -407,7 +407,7 @@ class App
                     $rootScope.annotations.push annotation
         when 'update'
           $scope.markAnnotationUpdate data
-          annotator.plugins.Store._onLoadAnnotations data
+          plugins.Store._onLoadAnnotations data
         when 'delete'
           $scope.markAnnotationUpdate data
           for annotation in data
@@ -415,8 +415,8 @@ class App
             if container.message
               # XXX: This is a temporary workaround until real client-side only
               # XXX: delete will be introduced
-              index = annotator.plugins.Store.annotations.indexOf container.message
-              annotator.plugins.Store.annotations[index..index] = [] if index > -1
+              index = plugins.Store.annotations.indexOf container.message
+              plugins.Store.annotations[index..index] = [] if index > -1
               annotator.deleteAnnotation container.message
 
       # Finally blink the changed tabs
@@ -445,7 +445,7 @@ class Annotation
      $window,
      annotator,   baseURI,   drafts
   ) ->
-    threading = annotator.threading
+    {plugins, threading} = annotator
     $scope.action = 'create'
     $scope.editing = false
 
@@ -509,7 +509,7 @@ class Annotation
 
     $scope.reply = ($event) ->
       $event?.stopPropagation()
-      unless annotator.plugins.Auth? and annotator.plugins.Auth.haveValidToken()
+      unless plugins.Auth? and plugins.Auth.haveValidToken()
         $window.alert "In order to reply, you need to sign in."
         return
 
@@ -548,8 +548,7 @@ class Annotation
           if $scope.form.privacy.$viewValue is 'Private' and replies
             #Cascade delete its children
             for reply in $scope.thread.flattenChildren()
-              if annotator.plugins?.Permissions? and
-              annotator.plugins.Permissions.authorize 'delete', reply
+              if plugins?.Permissions?.authorize 'delete', reply
                 annotator.deleteAnnotation reply
 
           annotator.deleteAnnotation $scope.model
