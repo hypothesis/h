@@ -1,23 +1,19 @@
 <!-- Edit Profile -->
 <form ng-submit="">
-	<div class="niceforms">
-		<h2>Profile Information</h2>
-		<ul>
-			<li><input class="fullwidth" type="text" placeholder="Name" ng-model="user.name"></li>
-			<li><input class="fullwidth" type="text" placeholder="Location" ng-model="user.location"></li>
-			<li><textarea class="fullwidth" type="text" name="description" ng-model="user.bio" style="width:100%; height: 150px;" placeholder="Short bio"></textarea></li>
-			<li><input class="fullwidth" type="text" placeholder="Website" ng-model="user.website"></li>
-			<li><input class="fullwidth" type="text" placeholder="@Twitter" ng-model="user.twitter"></li>
-			<li>
-				<img class="gravatar" src="http://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=100">
-				<span>Note: Your gravatar image can be changed at <a href="https://gravatar.com">https://gravatar.com</a>.</span>
-				<!-- Maybe we don't need this... -->
-				<p><input type="checkbox"> Don’t use my gravatar</p>
-			</li>
-			<li>
-				<button class="btn check-icon clear" style="float: left; clear: both;" ng-click="">Save</button>
-			</li>
-		</ul>
-	</div>
+	<h2>Profile Information</h2>
+	
+	<input class="fullwidth" type="text" placeholder="Name" ng-model="user.name">
+	
+	<input class="fullwidth" type="text" placeholder="Location" ng-model="user.location">
+	
+	<textarea class="fullwidth" type="text" name="description" ng-model="user.bio" style="width:100%; height: 150px;" placeholder="Short bio"></textarea>
+	
+	<input class="fullwidth" type="text" placeholder="Website" ng-model="user.website">
+	
+	<img class="gravatar" src="http://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=100">
+	<span>Note: Your avatar can be changed at <a href="https://gravatar.com">https://gravatar.com</a>.</span>
+	<!-- Maybe we don't need this... -->
+	<p><input type="checkbox"> Don’t use my gravatar</p>
+	<button class="btn check-icon clear" style="float: left; clear: both;" ng-click="">Save</button>
 </form>
 <!-- / Edit Profile -->
