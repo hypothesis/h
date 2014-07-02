@@ -15,7 +15,7 @@
           ng-click="model = options[$index]"
           ng-show="model != options[$index]"
           >{{option|persona:username}}/{{option|persona:'provider'}}</li>
-      <li ng-click="$parent.toggleShowPanels()">Settings</li>
+      <li ng-click="$parent.toggleShowPanels()">Account</li>
       <li><a href="http://hypothes.is/contact/" target="_blank">Feedback</a></li>
       <li><a href="/docs/help" target="_blank">Help</a></li>
       <li><a href="/stream?user={{model|persona}}"

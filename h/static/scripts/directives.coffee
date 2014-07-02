@@ -495,9 +495,10 @@ panels = ->
     #     My Html for a new panel.
     #     </div>
     $scope.panelList = [
-      {name:"Profile", active: true, icon:"user-icon"}
+      # {name:"Profile", active: true, icon:"user-icon"}
       {name:"Account", active: false, icon:"plus-icon"}
-      {name:"Settings", active: false, icon:"cog-icon"}]
+      # {name:"Settings", active: false, icon:"cog-icon"}
+    ]
     $scope.activePanel = $scope.panelList[0]
 
   restrict: 'C'
