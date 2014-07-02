@@ -33,8 +33,14 @@ get_quote = (annotation) ->
 #      exact_match: true|false (default: true)
 #      case_sensitive: true|false (default: false)
 #      and_or: and|or for multiple values should it threat them as 'or' or 'and' (def: or)
-#      es_query_string: should the streaming backend use query_string es query for this facet
 #      operator: if given it'll use this operator regardless of other circumstances
+#
+#      options: backend specific options
+#      options.es: elasticsearch specific options
+#      options.es.query_type : can be: simple, query_string, match
+#         defaults to: simple, determines which es query type to use
+#      options.es.cutoff_frequency: if set, the query will be given a cutoff_frequency for this facet
+#      options.es.and_or: match queries can use this, defaults to and
 # }
 # The models is the direct output from visualsearch
 # The limit is the default limit
@@ -71,14 +77,13 @@ class SearchHelper
       case_sensitive = if rule.case_sensitive? then rule.case_sensitive else false
       and_or = if rule.and_or? then rule.and_or else 'or'
       mapped_field = if rule.path? then rule.path else '/'+category
-      es_query_string = if rule.es_query_string? then rule.es_query_string else false
 
       if values.length is 1
         oper_part =
           if rule.operator? then rule.operator
           else if exact_match then 'equals' else 'matches'
         value_part = if rule.formatter then rule.formatter values[0] else values[0]
-        filter.addClause mapped_field, oper_part, value_part, case_sensitive, es_query_string
+        filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
       else
         if and_or is 'or'
           val_list = ''
@@ -90,14 +95,14 @@ class SearchHelper
           oper_part =
             if rule.operator? then rule.operator
             else if exact_match then 'one_of' else 'match_of'
-          filter.addClause mapped_field, oper_part, val_list, case_sensitive, es_query_string
+          filter.addClause mapped_field, oper_part, val_list, case_sensitive, rule.options
         else
           oper_part =
             if rule.operator? then rule.operator
             else if exact_match then 'equals' else 'matches'
           for val in values
             value_part = if rule.formatter then rule.formatter val else val
-            filter.addClause mapped_field, oper_part, value_part, case_sensitive, es_query_string
+            filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
 
     if limit != 50 then categories['results'] = [limit]
     [filter.getFilter(), categories]
@@ -132,16 +137,17 @@ class StreamSearch
       and_or: 'and'
     uri:
       formatter: (uri) ->
-        uri = uri.toLowerCase()
-        if uri.match(/http:\/\//) then uri = uri.substring(7)
-        if uri.match(/https:\/\//) then uri = uri.substring(8)
-        if uri.match(/^www\./) then uri = uri.substring(4)
-        uri
+        uri.toLowerCase()
       path: '/uri'
       exact_match: false
       case_sensitive: false
-      es_query_string: false
       and_or: 'or'
+      options:
+        es:
+          query_type: 'match'
+          cutoff_frequency: 0.001
+          and_or: 'and'
+
     since:
       formatter: (past) ->
         seconds =

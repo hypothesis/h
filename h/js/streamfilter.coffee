@@ -13,7 +13,6 @@ class StreamFilter
         load_past: "none"
 
   constructor: ->
-    @parser = new ClauseParser()
 
   getFilter: -> return @filter
   getPastData: -> return @filter.past_data
