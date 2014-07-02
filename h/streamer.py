@@ -98,7 +98,10 @@ filter_schema = {
                 },
                 "value": "object",
                 "case_sensitive": {"type": "boolean", "default": True},
-                "es_query_string": {"type": "boolean", "default": False}
+                "options": {"type": "object", "default": {}}
+
+                # XXX: Left for reverse-compatibility, has to be removed shortly
+                , "es_query_string": {"type": "boolean", "default": False}
             }
         },
         "past_data": {
@@ -215,16 +218,25 @@ class FilterToElasticFilter(object):
         new_clauses = []
         for clause in clauses:
             field = clause['field'][1:].replace('/', '.')
+            es = clause['options']['es'] if 'es' in clause['options'] else None
+            if es:
+                query_type = es['query_type'] if 'query_type' in es else 'simple'
+
+                # XXX: Backwards compatibily, can be removed later
+                if 'es_query_string' in clause and clause['es_query_string']:
+                    query_type = 'query_string'
+            else:
+                query_type = 'simple'
+
             if clause.get('case_sensitive', True):
                 value = clause['value']
             else:
                 if type(clause['value']) is list:
                     value = [x.lower() for x in clause['value']]
                 else:
-                    # Make it a list, just be change it back later.
-                    value = [clause['value'].lower()]
+                    value = clause['value'].lower()
 
-            if clause["es_query_string"]:
+            if query_type == 'query_string':
                 # Generate query_string query
                 escaped_value = re.escape(value)
                 new_clause = {
@@ -233,6 +245,16 @@ class FilterToElasticFilter(object):
                         "fields": [field]
                     }
                 }
+            elif query_type == 'match':
+                cutoff_freq = es['cutoff_frequency'] if 'cutoff_frequency' in es else None
+                and_or = es['and_or'] if 'and_or' in es else 'and'
+                message = {
+                    "query": value,
+                    "operator": and_or
+                }
+                if cutoff_freq:
+                    message['cutoff_frequency'] = cutoff_freq
+                new_clause = {"match": {field: message}}
             elif clause['operator'][0:2] == 'len':
                 script = "doc['%s'].values.length %s %s" % (
                     field,
@@ -242,6 +264,7 @@ class FilterToElasticFilter(object):
                 self.filter_scripts_to_add.append(script)
             else:
                 new_clause = getattr(self, clause['operator'])(field, value)
+
             new_clauses.append(new_clause)
         return new_clauses
 
