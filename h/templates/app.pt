@@ -35,10 +35,10 @@
     </div>
     <!-- / Toolbar -->
 
-    <!-- Settings Panel -->
-    <div class="settings-panel"
+    <!-- Panels -->
+    <div class="panels"
          data-settings-panel-model="auth.persona"></div>
-    <!-- / Settings Panel -->
+    <!-- / Panels -->
 
     <!-- Content -->
     <div id="wrapper" class="content">
@@ -120,8 +120,11 @@
     <script type="text/ng-template" id="notification.html">
       <metal:main use-macro="load: h:templates/notification.html" />
     </script>
-    <script type="text/ng-template" id="settingspanel.html">
-      <metal:main use-macro="load: settingspanel.html" />
+    <script type="text/ng-template" id="panels.html">
+      <metal:main use-macro="load: panels.html" />
+    </script>
+    <script type="text/ng-template" id="settings.html">
+      <metal:main use-macro="load: settings.html" />
     </script>
     <script type="text/ng-template" id="accountmanagement.html">
       <metal:main use-macro="load: accountmanagement.html" />

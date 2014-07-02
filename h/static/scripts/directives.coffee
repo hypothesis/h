@@ -472,62 +472,36 @@ confirmPasswordCheck = ['$resource', ($resource)->
   require: 'ngModel'
 ]
 
-# The settings panel houses settings.
-# Thought: should each setting be it's own directive? Perhaps we should start a settings.coffee file?
-# For example: the toggle heatmap directive.
-settingsPanel = ->
+panels = ->
+  # This panels directive houses panels in the sidebar (such as settings, accountmanagement, etc). Each panel is it's own directive.
   link: (scope, elem, attr, ctrl) ->
-    scope.togglePanel = (panel)->
+    scope.togglePanels = (panel)->
       scope.activePanel.active = !scope.activePanel.active
       scope.activePanel = panel
       scope.activePanel.active = !scope.activePanel.active
 
-    # scope.toggleHideHeatmap = ->
-    #   scope.hideheatmap = !scope.hideheatmap
-    #   parent.annotator.plugins.Heatmap.hideheatmap(scope.hideheatmap)
-    #   console.log "Heatmap toggled."
-
-    visibleHighlights = ->
-      return parent.window.annotator.visibleHighlights
-
-    scope.$watch visibleHighlights, (newValue, oldValue) ->
-      if newValue != oldValue
-        if scope.hideheatmap and newValue
-          parent.annotator.plugins.Heatmap.hideheatmap(false)
-        if scope.hideheatmap and !newValue
-          parent.annotator.plugins.Heatmap.hideheatmap(true)
-
   # Ujvari, you may want to move this to the controllers.coffee file.
   controller: ($scope, $rootScope, $filter, $element) ->
-    $rootScope.settingsPanel = false
-    $rootScope.toggleSettingsPanel = ->
-      # Toggles Settings Panel shown or hidden.
-      $rootScope.settingsPanel = !$rootScope.settingsPanel
-      $rootScope.viewState.showControls = false
-    # $scope.hideheatmap = false
+    $rootScope.showPanels = false
 
-    # This is the list of panels that will be shown. In the settingsPanel.html template
+    # Toggles Panels shown or hidden.
+    $rootScope.toggleShowPanels = ->
+      $rootScope.showPanels = !$rootScope.showPanels
+      $rootScope.viewState.showControls = false
+
+    # This is the list of panels that will be shown. In the panels.html template
     # there are elements with ng-show on them, for example:
     #     <div ng-show="activePanel.name == 'Notifications'">
     #     My Html for a new panel.
     #     </div>
-    $scope.panels = [
+    $scope.panelList = [
       {name:"Profile", active: true, icon:"user-icon"}
       {name:"Account", active: false, icon:"plus-icon"}
       {name:"Settings", active: false, icon:"cog-icon"}]
-    $scope.activePanel = $scope.panels[0]
-
-    $scope.submit = (form) ->
-      console.log form
-      # Handles submitting of the form.
-
-    # Jake's Note: there is an addional piece of UI I would like to implement. The basic idea being
-    # to give some visual indication that the changes they have made have been applied successfully.
-    # If they change their email, it would be nice to have an event (or something) to tell the front end that
-    # the request was successful.
+    $scope.activePanel = $scope.panelList[0]
 
   restrict: 'C'
-  templateUrl: 'settingspanel.html'
+  templateUrl: 'panels.html'
 
 accountManagement = ->
   link: (scope, elem, attr, ctrl) ->
@@ -543,16 +517,25 @@ account, and you must delete each annotation individually, by hand. Deleting an 
 delete replies to that annotation, it creates a blank stub that replies are still attached to."
       if r
         return
+
+    $scope.submit = (form) ->
+      console.log form
+      # Handles submitting of the form.
+
+    # Jake's Note: there is an addional piece of UI I would like to implement. The basic idea being
+    # to give some visual indication that the changes they have made have been applied successfully.
+    # If they change their email, it would be nice to have an event (or something) to tell the front end that
+    # the request was successful.
+
   restrict: 'C'
   templateUrl: 'accountmanagement.html'
 
-# This is the acount profile stuff that will eventually be outside of the settings panel.
-# Rational for keeping it in the settings panel (temporarily):
-# 1. We might as well write the back end for this stuff, then when I do the front end stuff for profiles we'll
-#    have the backend work started.
-# 2. As a directive it is extremely easy to move this around and get it out of the side bar.
-
 accountProfile = ->
+  # This is the acount profile stuff that will eventually be outside of the settings panel.
+  # Rational for keeping it in the settings panel (temporarily):
+  # 1. We might as well write the back end for this stuff, then when I do the front end stuff for profiles we'll
+  #    have the backend work started.
+  # 2. As a directive it is extremely easy to move this around and get it out of the side bar.
   link: (scope, elem, attr, ctrl) ->
     scope.editProfile = ->
       # Switches profile into edit mode.
@@ -562,14 +545,22 @@ accountProfile = ->
       # Is there any thing else we should be collecting for now?
       name : "Jake Hartnell"
       password : "password"
-      twitter: "@JakeHartnell"
       location : "Berkeley, CA"
       bio : "Science Fiction Writer currently working as a Product designer and frontend engineer at Hypothes.is."
       website : "http://jakehartnell.com"
       gravatar : ""
-
   restrict: 'C'
   templateUrl: 'profile.html'
+
+settings = ->
+  # Question: Should each setting be it's own directive?
+  link: (scope, elem, attr, ctrl) ->
+    return
+  controller: ($scope) ->
+    return
+  restrict: 'C'
+  templateUrl: 'settings.html'
+
 
 angular.module('h.directives', ['ngSanitize'])
   .directive('formValidate', formValidate)
@@ -587,8 +578,9 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('streamviewer', streamviewer)
   .directive('visualSearch', visualSearch)
   .directive('whenscrolled', whenscrolled)
-  .directive('settingsPanel', settingsPanel)
+  .directive('panels', panels)
   .directive('match', match)
   .directive('confirmPasswordCheck', confirmPasswordCheck)
   .directive('accountManagement', accountManagement)
   .directive('accountProfile', accountProfile)
+  .directive('settings', settings)

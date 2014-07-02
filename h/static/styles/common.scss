@@ -842,12 +842,10 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   }
 }
 
-// Settings Panel //////////////////////////////
-
+// Panels //////////////////////////////
 .slideover{
   @extend .content;
   @include stretch-y;
-  @include transition(transform .4s);
   @include translateX(100%);
   height: 100%;
   overflow: hidden;
@@ -855,6 +853,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   right: 0px;
   left: 0px;
   z-index: 5;
+  max-width: none !important;
 
   &.shown {
     @include translateX(0);
@@ -901,6 +900,14 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     background-color: white;
     width: 100%;
     font-family: $sansFontFamily;
+
+    input {
+      margin: 5px 0;
+    }
+
+    textarea {
+      margin: 5px 0;
+    }
   }
 }
 
