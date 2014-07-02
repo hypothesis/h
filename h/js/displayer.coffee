@@ -42,8 +42,8 @@ class Displayer
       streamfilter
         .setPastDataNone()
         .setMatchPolicyIncludeAny()
-        .addClausesParse('references:^' + $scope.annotation.id)
-        .addClausesParse('id:=' + $scope.annotation.id)
+        .addClause('references', 'first_of', $scope.annotation.id, true)
+        .addClause('id', 'equals', $scope.annotation.id, true)
         .getFilter()
 
     $scope.change_annotation_content = (id, new_annotation) =>
