@@ -468,18 +468,18 @@ accountManagement = ->
       # Checks to see if email is duplicate.
       return
   controller: ($scope, $rootScope, $filter, $element) ->
-    $scope.deleteAccount = ->
-      r = window.confirm "Are you sure you want to delete your account? Deleting an account is irreversible.
-If you have contributed to public conversations that others have replied to we will not delete your
-individual annotations. If you want to delete your annotations, you must do so before deleting your
-account, and you must delete each annotation individually, by hand. Deleting an annotation does not
-delete replies to that annotation, it creates a blank stub that replies are still attached to."
-      if r
-        return
+    $scope.confirmDelete = false
+    $scope.toggleConfirmDelete = ->
+      $scope.confirmDelete = !$scope.confirmDelete
+
+    $scope.deleteAcount = (form) ->
+      # If the password is correct, the account is deleted.
+      # The extension is then removed from the page.
+      # Confirmation of success is given.  
+      alert("Account deleted.")
 
     $scope.submit = (form) ->
-      console.log form
-      # Handles submitting of the form.
+      # Handles submitting of the form. 
 
     # Jake's Note: there is an addional piece of UI I would like to implement. The basic idea being
     # to give some visual indication that the changes they have made have been applied successfully.
@@ -505,7 +505,7 @@ accountProfile = ->
       name : "Jake Hartnell"
       password : "password"
       location : "Berkeley, CA"
-      bio : "Science Fiction Writer currently working as a Product designer and frontend engineer at Hypothes.is."
+      bio : "A short bio..."
       website : "http://jakehartnell.com"
       gravatar : ""
   restrict: 'C'
