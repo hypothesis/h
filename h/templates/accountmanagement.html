@@ -1,6 +1,5 @@
-<!-- Account -->
 <form name="edit_profile"
-	  ng-show="activePanel.name == 'Account'"
+	  ng-show="activePanel.name == 'Account' && !confirmDelete"
 	  novalidate>
   
     <h2>Change Email</h2>
@@ -36,7 +35,7 @@
 </form>
 
 <form name="changepassword"
-	  ng-show="activePanel.name == 'Account'"
+	  ng-show="activePanel.name == 'Account' && !confirmDelete"
 	  novalidate>
 	  
     <h2>Change Password</h2>
@@ -68,6 +67,27 @@
     </span>
 
 	  <button class="btn check-icon" ng-click="submit(changepassword)" ng-disabled="!changepassword.$valid">Save</button>
-	  <a class="pull-right" href="" ng-click="deleteAccount()">Delete account</a>
 </form>
-<!-- / Account -->
+
+<form name="deleteaccount"
+      ng-show="activePanel.name == 'Account'"
+      novalidate>
+      <h2>Delete Account</h2>
+      <button class="btn" ng-click="toggleConfirmDelete()" ng-hide="confirmDelete">Delete account</button>
+      <div ng-show="confirmDelete">
+        <p>Deleting an account is irreversible. If you have contributed to public conversations that others have replied to we will not delete your individual annotations.</p>
+
+        <p><em>If you want to delete your annotations, you must do so before deleting your account</em>, and you must delete each annotation individually, by hand. Deleting an annotation does not delete replies to that annotation, it creates a blank stub that replies are still attached to.</p>
+
+        <p>Are you sure you want to delete your account? Please enter your password to confirm:</p>
+
+        <input class="fullwidth" type="password" name="password" ng-model="model.password" placeholder="Password" required autocapitalize="false" >
+        <span slow-validate="password">
+          <span ng-show="deleteaccount.password.$error.minlength"
+                >Your password does not match the one we have on record.</span>
+        </span>
+        <br />
+        <button class="btn" ng-click="deleteAccount()" ng-disabled="!deleteaccount.$valid">Delete account</button>
+        <button class="btn" ng-click="toggleConfirmDelete()">Cancel</button>
+      </div>
+</form>
