@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from pyramid.view import view_config
 from pyramid_mailer.interfaces import IMailer
 from pyramid_mailer.testing import DummyMailer
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+@view_config(renderer='templates/pattern_library.pt', route_name='pattern_library')
+def page(context, request):
+    return {}
 
 class LoggingMailer(DummyMailer):
     def __init__(self):
@@ -31,5 +35,7 @@ class LoggingMailer(DummyMailer):
 
 
 def includeme(config):
+    config.add_route('pattern_library', '/dev/pattern-library')
+
     mailer = LoggingMailer()
     config.registry.registerUtility(mailer, IMailer)
