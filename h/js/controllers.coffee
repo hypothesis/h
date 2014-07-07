@@ -615,12 +615,8 @@ class Annotation
 
 
 class Auth
-  this.$inject = [
-    '$scope', 'session', 'flash'
-  ]
-  constructor: (
-     $scope,   session,   flash
-  ) ->
+  this.$inject = ['$scope', 'session']
+  constructor: (   $scope,   session) ->
     base =
       username: null
       email: null
@@ -628,24 +624,28 @@ class Auth
       code: null
 
     _reset = ->
+      delete $scope.errors
       angular.extend $scope.model, base
       for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
         ctrl.$setPristine()
 
-    _error = (errors={}) ->
-      # TODO: show these messages inline with the form
+    _error = (form, data) ->
+      {errors, reason} = data
+      $scope.errors = session: reason
+      $scope.errors[form] = {}
       for field, error of errors
-        console.log(field, error)
-        flash('error', error)
+        $scope.errors[form][field] = error
 
     $scope.$on 'reset', _reset
 
     $scope.submit = (form) ->
       angular.extend session, $scope.model
       return unless form.$valid
+
       promise = session["$#{form.$name}"] ->
         $scope.$emit 'success', form.$name
-      promise.then(_reset, _error)
+
+      promise.then(_reset, _error.bind(null, form.$name))
 
 
 class Editor

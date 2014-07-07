@@ -89,8 +89,7 @@ class SessionProvider
 
         # Return the response or a rejected response.
         if data.status is 'failure'
-          flash 'error', data.reason
-          $q.reject(data.errors)
+          $q.reject(data)
         else
           model
 

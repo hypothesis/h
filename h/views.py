@@ -44,6 +44,7 @@ def app(request):
 @view_config(accept='application/json', renderer='json',
              context='pyramid.exceptions.BadCSRFToken')
 def bad_csrf_token(context, request):
+    request.response.status_code = 403
     reason = _('Session is invalid. Please try again.')
     return {
         'status': 'failure',

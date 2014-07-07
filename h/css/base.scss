@@ -101,6 +101,12 @@ $input-border-radius: 2px;
   &:disabled {
     background-color: $grayLightest;
   }
+  &.ng-dirty.ng-invalid {
+    border: 1px solid $red;
+  }
+  &.ng-valid {
+    border: 1px solid $green;
+  }
 }
 
 @mixin sweetbutton {
