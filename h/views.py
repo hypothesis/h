@@ -110,6 +110,5 @@ def includeme(config):
 
     config.add_route('index', '/')
     config.add_route('help', '/docs/help')
-    config.add_route('pattern_library', '/dev/pattern-library')
 
     config.scan(__name__)
