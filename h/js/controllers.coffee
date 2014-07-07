@@ -34,13 +34,15 @@ class App
 
   this.$inject = [
     '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
-    'annotator', 'session', 'socket', 'streamfilter', 'viewFilter'
+    'annotator', 'flash', 'session', 'socket', 'streamfilter', 'viewFilter'
   ]
   constructor: (
      $element,   $filter,   $http,   $location,   $rootScope,   $scope,   $timeout
-     annotator,   session,   socket,   streamfilter,   viewFilter
+     annotator,   flash,   session,   socket,   streamfilter,   viewFilter
   ) ->
     {plugins, host, providers} = annotator
+
+    _authTimeout = null
 
     _reset = =>
       delete annotator.ongoing_edit
@@ -48,11 +50,30 @@ class App
       angular.extend $scope, base,
         frame: $scope.frame or @scope.frame
         socialView: annotator.socialView
+        ongoingHighlightSwitch: false
+
+    _startAuthTimeout = ->
+      # Reset the auth forms after five minutes of inactivity
+      if _authTimeout
+        $timeout.cancel _authTimeout
+
+      _authTimeout = $timeout ->
+        # Skip the reset if we're logged in
+        unless $scope.model.persona
+          $scope.$broadcast 'reset'
+          flash 'info',
+            'For your security, the forms have been reset due to inactivity.'
+      , 300000
 
     _reset()
 
     session.$promise.then (data) ->
       angular.extend $scope.model, data
+
+    $scope.$watchCollection 'model', ->
+      # (Re)start (i.e., delay) the authentication form timeout
+      unless $scope.sheet.collapsed
+        _startAuthTimeout()
 
     $scope.$watch 'model.personas', (newValue, oldValue) =>
       if newValue?.length
@@ -125,17 +146,7 @@ class App
     $scope.$watch 'sheet.collapsed', (hidden) ->
       $scope.sheet.tab = if hidden then null else 'login'
 
-    authTimeout = null
     $scope.$watch 'sheet.tab', (tab) ->
-      if authTimeout
-        $timeout.cancel authTimeout
-
-      unless $scope.model.persona
-        authTimeout = $timeout (-> $scope.$broadcast 'reset'), 60000
-        unless tab
-          $scope.ongoingHighlightSwitch = false
-          delete annotator.ongoing_edit
-
       $timeout ->
         $element
         .find('form')
