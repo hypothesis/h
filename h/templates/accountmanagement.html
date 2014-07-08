@@ -80,9 +80,9 @@
       <br>
       <br>
       Please enter your password to proceed:
-      <input class="fullwidth" type="password" name="password" ng-model="model.password" placeholder="Password" required autocapitalize="false" >
-      <span slow-validate="password">
-        <span ng-show="deleteaccount.password.$error.minlength"
+      <input class="fullwidth" type="password" name="deleteaccountpassword" ng-model="model.deleteaccountpassword" placeholder="Password" required autocapitalize="false" >
+      <span slow-validate="deleteaccountpassword">
+        <span ng-show="deleteaccount.deleteaccountpassword.$error.minlength"
               >Your password does not match the one we have on record.</span>
       </span>
       <button class="btn danger" ng-click="deleteAccount()" ng-disabled="!deleteaccount.$valid">Delete account</button>
