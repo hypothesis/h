@@ -104,6 +104,16 @@ class ActivateSchema(CSRFSchema):
     )
 
 
+class EditProfileSchema(CSRFSchema):
+    email = colander.SchemaNode(colander.String(), validator=colander.Email())
+    password = colander.SchemaNode(
+        colander.String(),
+        title=_('Password'),
+        validator=colander.Length(min=2),
+        widget=deform.widget.PasswordWidget()
+    )
+
+
 def includeme(config):
     registry = config.registry
 
@@ -112,6 +122,7 @@ def includeme(config):
         (interfaces.IRegisterSchema, RegisterSchema),
         (interfaces.IForgotPasswordSchema, ForgotPasswordSchema),
         (interfaces.IResetPasswordSchema, ResetPasswordSchema),
+        (interfaces.IProfileSchema, EditProfileSchema)
     ]
 
     for iface, imp in schemas:

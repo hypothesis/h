@@ -11,6 +11,7 @@ ACTION = [
   'register'
   'forgot'
   'activate'
+  'edit_profile'
 ]
 
 ACTION_OPTION =
