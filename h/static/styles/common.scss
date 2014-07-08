@@ -872,8 +872,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 }
 
 .panel {
-  overflow-y: auto;
-  overflow-x: hidden;
+  padding: 35px 25px;
+  background-color: #FFF;
+  display: none;
 
   &.shown {
     display: block;
@@ -911,12 +912,11 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 .btn {
   &.danger {
     color: white;
-    background-image: -moz-linear-gradient(center top , #BD5862 10%, #BD5862 10%, #BD5862 100%);
-    box-shadow: 0px 0.2em 0px rgba(158, 95, 95, 0.2) inset, 0px 0.05em 0.1em rgba(0, 0, 0, 0.08);
+    text-shadow: none;
+    box-shadow: none;
+    background: none repeat scroll 0% 0% #BD5862;
     &:disabled {
-      color: white;
-      background-image: -moz-linear-gradient(center top , rgba(221, 196, 198, 1) 10%, #C6B2B4 10%, #C6B2B4 100%);
-      box-shadow: 0px 0.2em 0px rgba(158, 95, 95, 0.2) inset, 0px 0.05em 0.1em rgba(0, 0, 0, 0.08);
+      background: none repeat scroll 0% 0% #D48C93;
     }
   }
 }
