@@ -4,14 +4,20 @@
   margin-bottom: 10px;
 }
 
-.form-field-error {
-  .form-input {
-    &, &:focus, &.js-focus {
-      color: #b4777a;
-      border-color: #f5adb7;
-      background-color: #fff1f3;
-    }
+%form-input-error-state {
+  &, &:focus, &.js-focus {
+    color: #b4777a;
+    border-color: #f5adb7;
+    background-color: #fff1f3;
   }
+
+  @include placeholder {
+    color: #e0b0b0;
+  }
+}
+
+.form-field-error .form-input {
+  @extend %form-input-error-state;
 }
 
 .form-input,
@@ -23,7 +29,7 @@
 .form-label {
   cursor: pointer;
   font-weight: bold;
-  font-size: 15px;
+  font-size: 13px;
   margin-bottom: 5px;
 }
 
@@ -62,6 +68,11 @@
     @include placeholder {
       color: #cbbb95;
     }
+  }
+
+  // This is not ideal
+  &.ng-dirty.ng-invalid {
+    @extend %form-input-error-state;
   }
 }
 
@@ -104,17 +115,18 @@
 }
 
 .form-actions {
+  @include pie-clearfix;
   margin-top: 5px;
-  overflow: hidden;
 }
 
 .form-actions-message {
+  font-size: 13px;
   float: left;
-  margin-top: 2px;
+  margin-top: 7px;
 }
 
 .form-actions-buttons {
-  overflow: hidden;
+  @include pie-clearfix;
   float: right;
 
   * {

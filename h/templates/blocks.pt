@@ -12,27 +12,44 @@
   <!-- Login -->
   <form data-title="Sign in"
         data-value="login"
-        class="tab-pane"
+        class="form tab-pane"
         name="login"
         novalidate>
 
-    <input type="text" name="username" value="" placeholder="Username"
-           ng-model="model.username" ng-minlength="3"
-           required autocapitalize="false" />
-    <span slow-validate="username">
-      <span ng-show="login.username.$error.required"
-            >Please enter your username.</span>
-      <span ng-show="login.username.$error.minlength"
-            >Usernames are at least 3 characters.</span>
-    </span>
+    <div class="form-field">
+      <label class="form-label" for="field-username">Username:</label>
+      <input class="form-input" type="text" id="field-username" name="username" value="" placeholder="bill"
+      ng-model="model.username" ng-minlength="3"
+      required autocapitalize="false" />
+      <ul class="form-error-list" slow-validate="username">
+        <li class="form-error" ng-show="login.username.$error.required"
+          >Please enter your username.</li>
+        <li class="form-error" ng-show="login.username.$error.minlength"
+          >Usernames are at least 3 characters.</li>
+      </ul>
+    </div>
 
-    <input type="password" name="password" value="" placeholder="Password"
-           ng-model="model.password"
-           required autocapitalize="false" autocorrect="false" />
-    <span slow-validate="password">Please enter your password.</span>
+    <div class="form-field">
+      <label class="form-label" for="field-password">Password:</label>
+      <input class="form-input" id="field-password" type="password" name="password" value="" placeholder="&bull;&bull;&bull;&bull;"
+             ng-model="model.password"
+             required autocapitalize="false" autocorrect="false" />
+      <ul class="form-error-list" slow-validate="password">
+        <li class="form-error">Please enter your password.</li>
+      </ul>
+    </div>
 
-    <input type="submit" name="login" value="Sign in"
-           ng-disabled="!login.$valid" />
+    <div class="form-actions">
+      <div class="form-actions-message">
+        <a href="" ng-click="sheet.tab = 'forgot'">Forgotten your password</a> or
+        <a href="" ng-click="sheet.tab = 'activate'"
+          >have an activation code?</a>
+      </div>
+      <div class="form-actions-buttons">
+        <button class="btn btn-primary" type="submit" name="login"
+          ng-disabled="!login.$valid">Sign in</button>
+      </div>
+    </div>
 
   </form>
   <!-- / Login -->
