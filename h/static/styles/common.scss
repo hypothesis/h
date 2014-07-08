@@ -332,6 +332,71 @@ h6 {
   }
 }
 
+<<<<<<< HEAD
+=======
+
+
+//ICON CLASSES////////////////////////////////
+.flag-icon {
+  @include fonticon("\28", left);
+}
+
+.fave-icon {
+  @include fonticon("\e006", left);
+  &.checked:before {
+    content: "\e005";
+  }
+}
+
+.reply-icon {
+  @include fonticon("\e004", left);
+}
+
+.share-icon {
+  @include fonticon("\25", left);
+}
+
+.down-icon {
+  @include fonticon("\e007", left);
+}
+
+.clipboard-icon {
+  @include fonticon("\33", left);
+}
+
+.check-icon {
+  @include fonticon("\35", left);
+}
+
+.plus-icon {
+  @include fonticon("\e012", left);
+}
+
+.x-icon {
+  @include fonticon("\36", left);
+}
+
+.vis-icon {
+  @include fonticon("\e001", left);
+}
+
+.highlight-icon {
+  @include fonticon("\e601", left);
+}
+
+.comment-icon {
+  @include fonticon("\e600", left);
+}
+
+.launch-icon {
+  @include fonticon("\2a", left);
+}
+
+.loading-icon {
+  text-align: center
+}
+
+>>>>>>> Revise interface to make it a bit cleaner.
 //TABS////////////////////////////////
 .nav-tabs {
   border: 1px none $gray-lighter;
@@ -602,6 +667,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 }
 
 // Panels //////////////////////////////
+<<<<<<< HEAD
 .slideover{
   @extend .content;
   @include stretch-y;
@@ -611,15 +677,22 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   right: 0px;
+=======
+.panelsnav {
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+  position: absolute;
+>>>>>>> Revise interface to make it a bit cleaner.
   left: 0px;
-  z-index: 5;
-  max-width: none !important;
+  right: 0px;
+  top: 0px;
+  display: none;
 
   &.shown {
-    @include translateX(0);
+    display: block;
   }
 }
 
+<<<<<<< HEAD
 .panelcontainer {
   background: url("../images/noise_1.png");
   margin-right: -15px;
@@ -645,30 +718,43 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
       position: relative;
       top: 2px;
     }
+=======
+.panel {
+  overflow-y: auto;
+  overflow-x: hidden;
 
-    &:hover {
-      cursor: pointer;
-      opacity: 1;
-    }
+  &.shown {
+    display: block;
   }
 
-  .panel {
-    box-shadow: 0px 5px 7px rgba(0, 0, 0, 0.18);
-    padding: 25px;
-    // height: 100%;
-    position: absolute;
-    background-color: white;
-    width: 100%;
-    font-family: $sansFontFamily;
-
-    input {
-      margin: 5px 0;
-    }
-
-    textarea {
-      margin: 5px 0;
-    }
+  input {
+    margin: 5px 0;
   }
+>>>>>>> Revise interface to make it a bit cleaner.
+
+  textarea {
+    margin: 5px 0;
+  }
+}
+
+.closepanel {
+  @extend .x-icon;
+  width: 1em;
+  height: 1em;
+  opacity: 0.9;
+  position: absolute;
+  right: 7px;
+  top: 7px;
+}
+
+.fullwidth {
+  width: 100%;
+}
+
+.gravatar {
+  float: left;
+  margin: 0px 10px 10px 0px;
+  border:1px solid $gray-lighter;
 }
 
 .btn {
@@ -676,6 +762,10 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     color: white;
     background-image: -moz-linear-gradient(center top , #BD5862 10%, #BD5862 10%, #BD5862 100%);
     box-shadow: 0px 0.2em 0px rgba(158, 95, 95, 0.2) inset, 0px 0.05em 0.1em rgba(0, 0, 0, 0.08);
+    &:disabled {
+      color: white;
+      background-image: -moz-linear-gradient(center top , rgba(221, 196, 198, 1) 10%, #C6B2B4 10%, #C6B2B4 100%);
+      box-shadow: 0px 0.2em 0px rgba(158, 95, 95, 0.2) inset, 0px 0.05em 0.1em rgba(0, 0, 0, 0.08);
+    }
   }
 }
-

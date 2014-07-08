@@ -1,47 +1,47 @@
 <form name="edit_profile"
-	  ng-show="activePanel.name == 'Account'"
-	  novalidate>
-  
+    ng-show="activePanel.name == 'Account'"
+    novalidate>
+
     <h2>Change Email</h2>
     Current Email: <em>User's Email to go here.</em>
-		
+
     <input type="email" name="email" class="fullwidth" ng-model="model.email" placeholder="New email" required autocapitalize="false" />
     <span slow-validate="email">
-      		<span ng-show="edit_profile.email.$error.email"
+          <span ng-show="edit_profile.email.$error.email"
             >Is this an email address?</span>
-      		<span ng-show="edit_profile.email.$error.required"
+          <span ng-show="edit_profile.email.$error.required"
             >Please enter your email.</span>
-	  </span>
+    </span>
 
     <input class="fullwidth" type="text" name="confirmemail" ng-model="model.confirmemail" placeholder="Confirm new email"required autocapitalize="false">
-	  <span slow-validate="confirmemail">
-   		<span ng-show="edit_profile.confirmemail.$error.match"
+    <span slow-validate="confirmemail">
+      <span ng-show="edit_profile.confirmemail.$error.match"
           >Email does not match.</span>
-    	<span ng-show="edit_profile.confirmemail.$error.email"
+      <span ng-show="edit_profile.confirmemail.$error.email"
           >Is this an email address?</span>
-    	<span ng-show="edit_profile.confirmemail.$error.required"
+      <span ng-show="edit_profile.confirmemail.$error.required"
           >Please confirm your new email.</span>
-	  </span>
-		
-    <input class="fullwidth" type="password" name="password" ng-model="model.password" placeholder="Password" required autocapitalize="false" >
-		<span slow-validate="password">
-  		<span ng-show="edit_profile.password.$error.email"
-        >This password is incorrect</span>
-  		<span ng-show="edit_profile.password.$error.required"
-        >Please confirm your new email.</span>
-	  </span>
+    </span>
 
-	  <button class="btn check-icon" ng-click="submit(edit_profile)" ng-disabled="!edit_profile.$valid">Save</button>
+    <input class="fullwidth" type="password" name="password" ng-model="model.password" placeholder="Password" required autocapitalize="false" >
+    <span slow-validate="password">
+      <span ng-show="edit_profile.password.$error.email"
+        >This password is incorrect</span>
+      <span ng-show="edit_profile.password.$error.required"
+        >Please confirm your new email.</span>
+    </span>
+
+    <button class="btn icon-checkmark2" ng-click="submit(edit_profile)" ng-disabled="!edit_profile.$valid">Save</button>
 </form>
 
 <form name="changepassword"
-	  ng-show="activePanel.name == 'Account' && !confirmDelete"
-	  novalidate>
-	  
+    ng-show="activePanel.name == 'Account' && !confirmDelete"
+    novalidate>
+
     <h2>Change Password</h2>
 
     <input class="fullwidth" type="password" name="oldpassword" required placeholder="Old password" ng-model="model.oldpassword">
-  	<span slow-validate="oldpassword">
+    <span slow-validate="oldpassword">
       <span ng-show="changepassword.oldpassword.$error.required"
             >Please enter your current password.</span>
       <span ng-show="changepassword.oldpassword.$error.minlength"
@@ -57,7 +57,7 @@
     </span>
 
     <input class="fullwidth" name="confirmpassword" ng-model="model.confirmpassword" type="password" placeholder="Confirm new password" match="confirmpassword" required>
-	  <span slow-validate="confirmpassword">
+    <span slow-validate="confirmpassword">
       <span ng-show="changepassword.confirmpassword.$error.required"
             >Please confirm your new password.</span>
       <span ng-show="changepassword.confirmpassword.$error.minlength"
@@ -66,20 +66,24 @@
             >Passwords do not match.</span>
     </span>
 
-	  <button class="btn check-icon" ng-click="submit(changepassword)" ng-disabled="!changepassword.$valid">Save</button>
+    <button class="btn icon-checkmark2" ng-click="submit(changepassword)" ng-disabled="!changepassword.$valid">Save</button>
 </form>
 
 <form name="deleteaccount"
       ng-show="activePanel.name == 'Account'"
       novalidate>
       <h2>Delete Account</h2>
-      <h3>Deleting your account <strong>cannot be undone</strong>. Your account data will be permanently removed.</h3>
-      <p>However, if you want to delete your annotations, you must do so <strong>before</strong> deleting your account, and you must delete each annotation individually, by hand. Deleting an annotation does not delete it's replies.</p>
-      <p>Please enter your password to proceed:</p>
+      Deleting your account <strong>cannot be undone</strong>. Your account data will be permanently removed.
+      <br>
+      <br>
+      However, if you want to delete your annotations, you must do so <strong>before</strong> deleting your account, and you must delete each annotation individually, by hand. Deleting an annotation does not delete it's replies.
+      <br>
+      <br>
+      Please enter your password to proceed:
       <input class="fullwidth" type="password" name="password" ng-model="model.password" placeholder="Password" required autocapitalize="false" >
       <span slow-validate="password">
         <span ng-show="deleteaccount.password.$error.minlength"
               >Your password does not match the one we have on record.</span>
       </span>
-      <a class="btn danger" ng-click="deleteAccount()" ng-disabled="!deleteaccount.$valid">Delete account</a>
+      <button class="btn danger" ng-click="deleteAccount()" ng-disabled="!deleteaccount.$valid">Delete account</button>
 </form>
