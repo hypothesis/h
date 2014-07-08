@@ -169,6 +169,37 @@ class AsyncRegisterController(RegisterController):
         return {}
 
 
+@view_defaults(accept='text/html', renderer='h:templates/accountmanagement.html')
+@view_config(attr='edit_profile', route_name='edit_profile')
+class ProfileController(horus.views.ProfileController):
+    def edit_profile(self):
+        request = self.request
+        data = request.POST
+
+        if data['formname'] == 'edit_profile':
+            pwd = data['password']
+        elif data['formname'] == 'changepassword':
+            pwd = data['oldpassword']
+            data['password'] = data['newpassword']
+        else:
+            return httpexceptions.HTTPNotFound()
+
+        user = self.User.get_user(request, data['username'], pwd)
+        if user:
+            request.context = user
+            if data['formname'] == 'changepassword':
+                data['email'] = user.email
+            return super(ProfileController, self).edit_profile()
+        else:
+            FlashMessage(request, _('Invalid password.'), kind='error')
+            return httpexceptions.HTTPFound(location=request.url)
+
+@view_defaults(accept='application/json', name='app', renderer='json')
+@view_config(attr='edit_profile', request_param='__formid__=edit_profile')
+class AsyncProfileController(ProfileController):
+    __view_mapper__ = AsyncFormViewMapper
+
+
 @view_config(route_name='auth.local.authorize')
 def authorize(request):
     raise NotImplemented()
