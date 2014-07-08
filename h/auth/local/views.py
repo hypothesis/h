@@ -175,6 +175,74 @@ class AsyncRegisterController(RegisterController):
         return {}
 
 
+@view_defaults(accept='text/html', renderer='h:templates/accountmanagement.html')
+@view_config(attr='edit_profile', route_name='edit_profile')
+class ProfileController(horus.views.ProfileController):
+    def edit_profile(self):
+        request = self.request
+        data = request.POST
+
+        if data['formname'] == 'edit_profile':
+            pwd = data['password']
+        elif data['formname'] == 'changepassword':
+            pwd = data['oldpassword']
+            data['password'] = data['newpassword']
+        else:
+            return httpexceptions.HTTPNotFound()
+
+        user = self.User.get_user(request, data['username'], pwd)
+        if user:
+            request.context = user
+            if data['formname'] == 'changepassword':
+                data['email'] = user.email
+            return super(ProfileController, self).edit_profile()
+        else:
+            FlashMessage(request, _('Invalid password.'), kind='error')
+            return httpexceptions.HTTPFound(location=request.url)
+
+@view_defaults(accept='application/json', name='app', renderer='json')
+@view_config(attr='edit_profile', request_param='__formid__=edit_profile')
+class AsyncProfileController(ProfileController):
+    __view_mapper__ = AsyncFormViewMapper
+
+
+@view_config(route_name='auth.local.authorize')
+def authorize(request):
+    raise NotImplemented()
+
+
+@view_config(route_name='auth.local.token')
+def token(request):
+    validator = oauth.RequestValidator(request)
+    token_generator = oauth.generate_token
+    server = oauth.BackendApplicationServer(validator, token_generator)
+
+    # TODO: determine credentials from grant instead of query.
+    # We will need to support other grant types for this.
+    persona = unquote(request.params.get('persona', ''))
+    personas = request.session.get('personas', [])
+
+    try:
+        credentials = dict(userId=next(p for p in personas if p == persona))
+    except StopIteration:
+        credentials = None
+
+    headers, body, status = server.create_token_response(
+        request.url,
+        request.method,
+        request.body,
+        request.headers,
+        credentials,
+    )
+
+    request.response.headers.update(headers)
+    request.response.status_int = status
+    request.response.content_type = 'application/json'
+    request.response.charset = 'UTF-8'
+    request.response.body = body
+
+    return request.response
+
 def includeme(config):
     registry = config.registry
     settings = registry.settings

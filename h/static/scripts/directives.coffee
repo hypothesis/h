@@ -462,12 +462,22 @@ panels = ->
   restrict: 'C'
   templateUrl: 'panels.html'
 
-accountManagement = ->
+accountManagement = ['$filter', 'flash', 'session', ($filter, flash, session) ->
   link: (scope, elem, attr, ctrl) ->
     scope.emailCheck = ->
       # Checks to see if email is duplicate.
       return
-  controller: ($scope, $rootScope, $filter, $element) ->
+  controller: ($scope, $filter) ->
+    persona_filter = $filter('persona')
+
+    _answer = ->
+      console.log '_answer() - insert code here'
+
+    _error = (errors={}) ->
+      for field, error of errors
+        console.log(field, error)
+        flash('error', error)
+
     $scope.confirmDelete = false
     $scope.toggleConfirmDelete = ->
       $scope.confirmDelete = !$scope.confirmDelete
@@ -479,7 +489,16 @@ accountManagement = ->
       alert("Account deleted.")
 
     $scope.submit = (form) ->
-      # Handles submitting of the form. 
+      # In the frontend change_email and change_password are two different
+      # forms. However, in the backend it is just one: edit_profile
+      $scope.model.username = persona_filter $scope.model.persona
+      $scope.model.formname = form.$name
+      angular.extend session, $scope.model
+      return unless form.$valid
+      promise = session["$edit_profile"] ->
+        $scope.$emit 'success', form.$name
+      promise.then(_answer, _error)
+
 
     # Jake's Note: there is an addional piece of UI I would like to implement. The basic idea being
     # to give some visual indication that the changes they have made have been applied successfully.
@@ -488,6 +507,7 @@ accountManagement = ->
 
   restrict: 'C'
   templateUrl: 'accountmanagement.html'
+]
 
 accountProfile = ->
   # This is the acount profile stuff that will eventually be outside of the settings panel.
