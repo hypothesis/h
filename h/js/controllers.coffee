@@ -364,7 +364,10 @@ class App
       _dfdSock = $q.defer()
       _sock = socket()
 
-      $scope.updater?.then (sock) -> sock.close()
+      $scope.updater?.then (sock) ->
+        sock.onclose = null  # break automatic reconnect
+        sock.close()
+
       $scope.updater = _dfdSock.promise
 
       _sock.onopen = ->
