@@ -33,11 +33,11 @@ class App
     ]
 
   this.$inject = [
-    '$element', '$location', '$q', '$rootScope', '$scope', '$timeout',
+    '$element', '$location', '$q', '$rootScope', '$route', '$scope', '$timeout',
     'annotator', 'session', 'socket', 'streamfilter'
   ]
   constructor: (
-     $element,   $location,   $q,   $rootScope,   $scope,   $timeout
+     $element,   $location,   $q,   $rootScope,   $route,   $scope,   $timeout
      annotator,   session,   socket,   streamfilter
   ) ->
     {plugins, host, providers} = annotator
@@ -238,7 +238,6 @@ class App
     $scope.search = {}
     $scope.search.update = angular.noop
     $scope.search.clear = angular.noop
-    $scope.search.query = -> $scope.query
 
     $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
       unless next.$$route? then return
@@ -275,7 +274,8 @@ class App
               when category == 'quote'
                 query.quote = query.quote.concat(value.split(/\s+/))
 
-          $location.path('/page_search').search(query)
+          unless angular.equals $location.search(), query
+            $location.path('/page_search').search(query)
 
         $scope.search.clear = ->
           $location.url('/viewer')
@@ -342,7 +342,7 @@ class App
           annotations = (a for a in annotations when a not in deleted)
           if annotations.length is 0
             annotator.unsubscribe 'annotationsLoaded', cleanup
-            $scope.$broadcast 'RefreshSearch'
+            $route.reload()
         , 10
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup
@@ -468,8 +468,8 @@ class App
               plugins.Store.annotations[index..index] = [] if index > -1
               annotator.deleteAnnotation container.message
 
-      # Refresh page_search
-      $rootScope.$broadcast 'RefreshSearch' if $location.path() is '/page_search' and data.length
+      # Refresh page search
+      $route.reload() if $location.path() is '/page_search' and data.length
 
       # Finally blink the changed tabs
       $timeout =>
@@ -792,6 +792,7 @@ class Search
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
     $scope.filter_orderBy = $filter('orderBy')
     $scope.matches = []
+    $scope.search.query = $location.search()
     $scope.render_order = {}
     $scope.render_pos = {}
     $scope.ann_info =
@@ -978,7 +979,6 @@ class Search
       for thread in threads
         $rootScope.focus thread.message, true
 
-    $scope.$on 'RefreshSearch', refresh
     $scope.$on '$routeUpdate', refresh
 
     $scope.getThreadId = (id) ->
