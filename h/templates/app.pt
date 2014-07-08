@@ -19,7 +19,7 @@
         <div class="search-container">
           <div ng-show="show_search"
                class="visual-search visual-container"
-               query="search.query()"
+               query="search.query"
                onsearch="search.update(this)"
                facets="searchFacets"
                values="searchValues"

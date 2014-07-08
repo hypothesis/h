@@ -414,9 +414,6 @@ visualSearch = ['$parse', ($parse) ->
           values = _values(scope)?[facet]
           callback(values or [], preserveOrder: true)
 
-    scope.$on 'VSSearch', ->
-      _search(scope, {"this": _vs.searchQuery})
-
     scope.$watch attr.query, (query) ->
       terms =
         for k, v of query

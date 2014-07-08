@@ -6,7 +6,6 @@ imports = [
   'h.flash'
   'h.helpers'
   'h.session'
-  'h.socket'
   'h.streamfilter'
 ]
 
@@ -18,51 +17,39 @@ SEARCH_VALUES =
 
 class StreamSearch
   this.inject = [
-    '$location', '$rootScope', '$scope', '$timeout',
-    'annotator', 'baseURI', 'queryparser', 'session', 'socket', 'streamfilter'
+    '$location', '$scope', '$rootScope',
+    'queryparser', 'session', 'streamfilter'
   ]
   constructor: (
-     $location, $rootScope, $scope, $timeout,
-     annotator, baseURI, queryparser, session, socket, streamfilter
+     $location,   $scope,   $rootScope,
+     queryparser,   session,   streamfilter
   ) ->
-    $scope.empty = false
+    # Create the base filter
+    filter =
+      streamfilter
+        .resetFilter()
+        .setMatchPolicyIncludeAll()
+        .setPastDataHits(50)
 
-    $scope.removeAnnotations = ->
-      $rootScope.annotations = []
-      if annotator.plugins.Store?
-        # Copy annotation list
-        annotations = annotator.plugins.Store.annotations.splice(0)
-        # XXX: Temporary workaround until client-side delete only is implemented
-        annotator.plugins.Store.annotations = []
-        annotator.deleteAnnotation annotation for annotation in annotations
+    # Apply query clauses
+    queryparser.populateFilter filter, $location.search()
 
-        annotations = []
+    # Update the subscription
+    session.$promise.then ->
+      $scope.updater.then (sock) ->
+         sock.send(JSON.stringify(filter: filter.getFilter()))
+
+    $rootScope.annotations = []
+    $rootScope.applyView "Document"  # Non-sensical, but best for the moment
+    $rootScope.applySort "Newest"
 
     $scope.search.update = (searchCollection) ->
-      return unless searchCollection.models.length
-
-      # Empty the stream
-      $scope.removeAnnotations()
-
-      # Assemble the filter json
-      filter =
-        streamfilter
-          .resetFilter()
-          .setMatchPolicyIncludeAll()
-          .setPastDataHits(50)
-
-      query = queryparser.populateFilter filter, searchCollection.models
-      filter = streamfilter.getFilter()
-
-      session.$promise.then ->
-        $scope.updater.then (sock) ->
-          sock.send(JSON.stringify(filter: filter))
-
-      # Update the parameters
-      $location.search query
+      # Update the query parameters
+      query = queryparser.parseModels searchCollection.models
+      unless angular.equals $location.search(), query
+        $location.search query
 
     $scope.search.clear = ->
-      $scope.removeAnnotations()
       filter =
         streamfilter
           .resetFilter()
@@ -78,13 +65,9 @@ class StreamSearch
 
       $scope.updater.send(JSON.stringify(sockmsg))
 
-    $scope.search.query = -> $scope.query
-    $scope.query = $location.search()
+    $scope.search.query = $location.search()
 
-    $scope.$on 'RefreshSearch', ->
-      $rootScope.$broadcast 'VSSearch'
 
-    $rootScope.$broadcast 'VSSearch'
 angular.module('h.streamsearch', imports, configure)
 .constant('searchFacets', SEARCH_FACETS)
 .constant('searchValues', SEARCH_VALUES)

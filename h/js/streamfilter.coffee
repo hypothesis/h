@@ -71,15 +71,15 @@ class QueryParser
       and_or: 'and'
       operator: 'ge'
 
-  populateFilter: (filter, models) =>
-    # First cluster the different facets into categories
+  parseModels: (models) ->
+    # Cluster facets together
     categories = {}
     for searchItem in models
       category = searchItem.attributes.category
       value = searchItem.attributes.value
 
-      limit = 50
-      if category is 'results' then limit = value
+      if category is 'results'
+        categories['results'] = [value]
       else
         if category is 'text'
           # Visualsearch sickly automatically cluster the text field
@@ -90,9 +90,11 @@ class QueryParser
         else
           if category of categories then categories[category].push value
           else categories[category] = [value]
+    categories
 
-    # Now for the categories
-    for category, values of categories
+  populateFilter: (filter, query) =>
+    # Populate a filter with a query object
+    for category, values of query
       unless @rules[category]? then continue
       unless values.length then continue
       rule = @rules[category]
@@ -128,10 +130,6 @@ class QueryParser
           for val in values
             value_part = if rule.formatter then rule.formatter val else val
             filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
-
-    categories['results'] = [limit]
-
-    categories
 
 
 class StreamFilter
