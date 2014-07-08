@@ -1,13 +1,4 @@
-<div class="slideover" ng-class="$parent.showPanels && 'shown'">
-  <div class="panelcontainer">
-    <ul class="nav nav-tabs">
-    	<li ng-class="panel.active && 'active'" ng-repeat="panel in panelList" ng-click="togglePanels(panel)">
-    		<span style="position: relative; top: 2px;">{{ panel.name }}</span>
-    	</li>
-    	<li ng-click="toggleShowPanels()" style="position: absolute; right: 0px; top: 36px;"><span class="x-icon" role="button" title="Close">Close</span></li>
-	</ul>
-    <div class="panel">
-
+<div class="panel" ng-class="$parent.showPanels && 'shown'">
     	<!-- Profile -->
     	<div class="account-profile" ng-show="activePanel.name == 'Profile'"></div>
     	<!-- / Profile -->
@@ -16,9 +7,7 @@
     	<div class="account-management" ng-show="activePanel.name == 'Account'"></div>
     	<!-- / Account -->
 
-      	<!-- Settings -->
-      	<div class="settings" ng-show="activePanel.name == 'Settings'"></div>
-      	<!-- / Settings -->
-    </div>
-  </div>
+    	<!-- Settings -->
+    	<div class="settings" ng-show="activePanel.name == 'Settings'"></div>
+    	<!-- / Settings -->
 </div>

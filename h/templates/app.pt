@@ -35,18 +35,13 @@
     </div>
     <!-- / Toolbar -->
 
-    <!-- Panels -->
-    <div class="panels"
-         data-settings-panel-model="auth.persona"></div>
-    <!-- / Panels -->
-
     <!-- Content -->
     <div id="wrapper" class="content">
       <!-- View Sort Controls -->
       <div class="ng-cloak viewsort"
            ng-mouseenter="showViewSort()"
            ng-mouseleave="showViewSort(false)"
-           ng-show="viewState.showControls">
+           ng-show="viewState.showControls && !showPanels">
         <div class="dropdown">
           <span role="button"
                 class="dropdown-toggle"
@@ -89,6 +84,21 @@
         </div>
       </div>
       <!-- / Account and Authentication -->
+
+      <!-- Panels Nav-->
+      <div class="sheet" ng-show="showPanels">
+        <i class="close icon-cancel"
+            role="button"
+            title="Close"
+            ng-click="toggleShowPanels()"></i>
+        <ul class="nav nav-tabs">
+          <li ng-class="panel.active && 'active'" ng-repeat="panel in panelList" ng-click="togglePanels(panel)">
+            <a href="#">{{ panel.name }}</a>
+          </li>
+        </ul>
+        <div class="tab-content panels" data-settings-panel-model="auth.persona"></div>
+      </div>
+      <!-- / Panels Nav -->
 
       <!-- Angular view -->
       <div ng-view="" whenscrolled="loadMore(10)"></div>
