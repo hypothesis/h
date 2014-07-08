@@ -54,7 +54,7 @@ def bad_csrf_token(context, request):
 
 
 @view_config(name='embed.js', renderer='templates/embed.txt')
-@view_config(layout='sidebar', name='app.html', renderer='templates/app.pt')
+@view_config(layout='app', name='app.html', renderer='templates/app.pt')
 @view_config(renderer='templates/help.pt', route_name='help')
 @view_config(renderer='templates/home.pt', route_name='index')
 def page(context, request):
@@ -102,7 +102,7 @@ class AnnotationController(object):
 
 @view_config(
     context='h.interfaces.IStreamResource',
-    layout='stream',
+    layout='app',
     renderer='templates/app.pt',
 )
 def stream(context, request):

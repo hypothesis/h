@@ -49,11 +49,10 @@ ol {
 
 .content {
   margin: 0 auto;
-  padding: 36px 1em 1em;
-  padding-top: 36px;
+  padding: .72em;
 
   @include respond-to(tablets desktops) {
-    padding: 36px 4em 4em;
+    padding: .72em 4em 4em;
     margin: auto;
     max-width: $break-medium;
   }

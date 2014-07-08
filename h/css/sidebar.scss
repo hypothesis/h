@@ -11,6 +11,7 @@ body {
   background-color: transparent;
   height: 100%;
   font-size: .8em;
+  padding-top: 30px;
   position: fixed;
   width: 100%;
 }
@@ -23,11 +24,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 .annotator-hide {
   display: none;
   visibility: hidden;
-}
-
-
-.excerpt {
-  margin-bottom: 1em;
 }
 
 

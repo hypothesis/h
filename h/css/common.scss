@@ -232,6 +232,7 @@ button, input[type=submit], .btn {
 
 //EXCERPT////////////////////////////////
 .excerpt {
+  margin-bottom: 1em;
   position: relative;
   blockquote {
     margin-bottom: 0;
@@ -568,6 +569,7 @@ blockquote {
   position: fixed;
   left: 0;
   right: 0;
+  top: 0;
   z-index: 5;
 
   .barbutton {
@@ -706,7 +708,7 @@ blockquote {
   }
 
   & > ul {
-    padding-left: $thread-padding;
+    padding-left: $thread-padding + .15em;
     margin-left: -$thread-padding;
   }
 
@@ -743,10 +745,12 @@ blockquote {
   }
 
   .threadexp {
+    font-size: 1.1em;  // to match the username header
     height: $threadexp-width;
     width: $threadexp-width;
     position: absolute;
-    top: $threadexp-width / 2;
+    // .7em is 50% of a line-height of 1.4;
+    top: .7em - ($threadexp-width / 2);
     left: -($threadexp-width / 2);
     outline: 1px solid #aaa;
     @include icon("minus_1.png");
@@ -873,7 +877,7 @@ blockquote {
 
 .stream-list {
   & > * {
-    margin-bottom: .75em;
+    margin-bottom: .72em;
   }
 
   .card-emphasis {

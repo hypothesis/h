@@ -44,17 +44,11 @@ class AnnotationLayout(BaseLayout):
     app = 'h.displayer'
 
 
-@layout_config(name='sidebar', template='h:templates/base.pt')
-class SidebarLayout(BaseLayout):
+@layout_config(name='app', template='h:templates/base.pt')
+class AppLayout(BaseLayout):
     app = 'h'
     controller = 'AppController'
     requirements = (('app', None), ('sidebar', None))
-
-
-@layout_config(name='stream', template='h:templates/base.pt')
-class StreamLayout(BaseLayout):
-    app = 'h'
-    controller = 'AppController'
 
 
 def includeme(config):
