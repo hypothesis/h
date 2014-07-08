@@ -53,6 +53,7 @@ class App
 
     session.$promise.then (data) ->
       angular.extend $scope.model, data
+      $scope.initUpdater()
 
     $scope.$watch 'model.personas', (newValue, oldValue) =>
       if newValue?.length
@@ -95,6 +96,7 @@ class App
             annotator.setTool 'highlight'
           else
             $scope.reloadAnnotations()
+            $scope.initUpdater()
       else if oldValue?
         session.$logout =>
           $scope.$broadcast 'reset'
@@ -103,7 +105,7 @@ class App
             annotator.setTool 'comment'
           else
             $scope.reloadAnnotations()
-
+            $scope.initUpdater()
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
@@ -430,9 +432,6 @@ class App
             method: 'blinkBuckets'
       , 500
 
-    $timeout =>
-      $scope.initUpdater()
-    , 5000
 
 class Annotation
   this.$inject = [
