@@ -485,7 +485,7 @@ accountManagement = ['$filter', 'flash', 'session', ($filter, flash, session) ->
     $scope.deleteAcount = (form) ->
       # If the password is correct, the account is deleted.
       # The extension is then removed from the page.
-      # Confirmation of success is given.  
+      # Confirmation of success is given.
       alert("Account deleted.")
 
     $scope.submit = (form) ->
@@ -542,6 +542,7 @@ settings = ->
 
 
 angular.module('h.directives', ['ngSanitize'])
+<<<<<<< HEAD
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)

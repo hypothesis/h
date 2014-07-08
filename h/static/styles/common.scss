@@ -409,10 +409,6 @@ blockquote {
 .loading-icon {
   text-align: center
 }
-.close-icon {
- @include fonticon("\36", left);
-}
-
 
 //TABS////////////////////////////////
 .nav-tabs {
@@ -862,71 +858,54 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 }
 
 // Panels //////////////////////////////
-.slideover{
-  @extend .content;
-  @include stretch-y;
-  @include translateX(100%);
-  height: 100%;
-  overflow-y: auto; 
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  right: 0px;
+.panelsnav {
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+  position: absolute;
   left: 0px;
-  z-index: 5;
-  max-width: none !important;
+  right: 0px;
+  top: 0px;
+  display: none;
 
   &.shown {
-    @include translateX(0);
+    display: block;
   }
 }
 
-.panelcontainer {
-  background: url("../images/noise_1.png");
-      
-  .fullwidth {
-    width: 100%;
-  }
-  
-  .gravatar {
-    float: left;
-    margin: 0px 10px 10px 0px;
-    border:1px solid $grayLighter;
+.panel {
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &.shown {
+    display: block;
   }
 
-  .x-icon {
-    width: 1em;
-    height: 1em;
-    opacity: 0.9;
-    position: relative;
-    
-    &:before {
-      position: relative;
-      top: 2px;
-    }
-
-    &:hover {
-      cursor: pointer;
-      opacity: 1;
-    }
+  input {
+    margin: 5px 0;
   }
 
-  .panel {
-    box-shadow: 0px 5px 7px rgba(0, 0, 0, 0.18);
-    padding: 25px;
-    // height: 100%;
-    position: absolute;
-    background-color: white;
-    width: 100%;
-    font-family: $sansFontFamily;
-
-    input {
-      margin: 5px 0;
-    }
-
-    textarea {
-      margin: 5px 0;
-    }
+  textarea {
+    margin: 5px 0;
   }
+}
+
+.closepanel {
+  @extend .x-icon;
+  width: 1em;
+  height: 1em;
+  opacity: 0.9;
+  position: absolute;
+  right: 7px;
+  top: 7px;
+}
+
+.fullwidth {
+  width: 100%;
+}
+
+.gravatar {
+  float: left;
+  margin: 0px 10px 10px 0px;
+  border:1px solid $gray-lighter;
 }
 
 .btn {
@@ -934,6 +913,10 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     color: white;
     background-image: -moz-linear-gradient(center top , #BD5862 10%, #BD5862 10%, #BD5862 100%);
     box-shadow: 0px 0.2em 0px rgba(158, 95, 95, 0.2) inset, 0px 0.05em 0.1em rgba(0, 0, 0, 0.08);
+    &:disabled {
+      color: white;
+      background-image: -moz-linear-gradient(center top , rgba(221, 196, 198, 1) 10%, #C6B2B4 10%, #C6B2B4 100%);
+      box-shadow: 0px 0.2em 0px rgba(158, 95, 95, 0.2) inset, 0px 0.05em 0.1em rgba(0, 0, 0, 0.08);
+    }
   }
 }
-

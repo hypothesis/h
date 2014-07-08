@@ -48,10 +48,9 @@
            ng-mouseenter="showViewSort()"
            ng-mouseleave="showViewSort(false)"
            ng-show="viewState.showControls">
-        <div class="dropdown"
-             ng-show="viewState.show">
-          <span role="button"
+        <div class="dropdown" ng-show="viewState.show">
                 class="dropdown-toggle"
+          <span role="button"
                 data-toggle="dropdown"
                 >{{viewState.view}}<i class="icon-triangle"></i></span>
           <ul class="dropdown-menu" role="menu">
@@ -86,6 +85,21 @@
         </div>
       </div>
       <!-- / Account and Authentication -->
+
+      <!-- Panels Nav-->
+      <div class="sheet" ng-show="showPanels">
+        <i class="close icon-cancel"
+            role="button"
+            title="Close"
+            ng-click="toggleShowPanels()"></i>
+        <ul class="nav nav-tabs">
+          <li ng-class="panel.active && 'active'" ng-repeat="panel in panelList" ng-click="togglePanels(panel)">
+            <a href="#">{{ panel.name }}</a>
+          </li>
+        </ul>
+        <div class="tab-content panels" data-settings-panel-model="auth.persona"></div>
+      </div>
+      <!-- / Panels Nav -->
 
       <!-- Angular view -->
       <main class="content" ng-view=""></main>
