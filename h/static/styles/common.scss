@@ -24,8 +24,9 @@ a {
 body {
   background-color: $bodyBackground;
   color: $textColor;
-  font-smoothing: antialiased;
-  -webkit-font-smoothing: antialiased;
+  // FIXME
+  // font-smoothing: antialiased;
+  // -webkit-font-smoothing: antialiased;
   line-height: 1.4;
 }
 
@@ -94,30 +95,31 @@ h6 {
   margin: 1.67em 0;
 }
 
-input, textarea {
-  @include plainform;
-}
+// input, textarea {
+//   @include plainform;
+// }
+//
+// select {
+//   @include plainform;
+//   padding: 0;
+//   text-decoration: underline;
+//   border: 0;
+//   &:focus {
+//     border: 0;
+//   }
+// }
 
-select {
-  @include plainform;
-  padding: 0;
-  text-decoration: underline;
-  border: 0;
-  &:focus {
-    border: 0;
-  }
-}
-
-label {
-  @extend .visuallyhidden;
-}
+// FIXUP
+// label {
+//   @extend .visuallyhidden;
+// }
 
 
 
 //MCRANDOM////////////////////////////////
-button, input[type=submit], .btn {
-  @include sweetbutton;
-}
+// button, input[type=submit], .btn {
+//   @include sweetbutton;
+// }
 
 .alert-block {
   span.errorMsgLbl { @extend .visuallyhidden; }

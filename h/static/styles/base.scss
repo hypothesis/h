@@ -69,6 +69,15 @@ $score-height: $score-width;
 $heatmap-width: 22px;
 $input-border-radius: 2px;
 
+/* Style input placeholders */
+@mixin placeholder {
+  &.placeholder { @content; }
+  &:-moz-placeholder { @content; }
+  &::-moz-placeholder { @content; }
+  &:-ms-input-placeholder { @content; }
+  &::-webkit-input-placeholder { @content; }
+}
+
 /* Shadow mixins */
 @mixin smallshadow($a: 0, $b: 1px, $c: .1) {
   @include box-shadow($a $b 1px hsla(0, 0%, 0%, $c));
