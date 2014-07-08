@@ -48,7 +48,7 @@
              ng-model="sheet.tab"
              ng-submit="submit(this[sheet.tab])">
           <metal:main use-macro="blocks['auth-tabs']" />
-          <footer ng-show="sheet.tab == 'login' || sheet.tab == 'register'">
+          <footer ng-show="false">
             <ul>
               <li>
                 <a href="" ng-click="sheet.tab = 'forgot'">Password help?</a>
