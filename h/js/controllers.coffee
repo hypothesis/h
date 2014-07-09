@@ -180,7 +180,7 @@ class App
 
     $rootScope.viewState =
       sort: ''
-      view: 'Document'
+      view: 'Screen'
 
     # Show the sort/view control for a while.
     #
@@ -285,7 +285,7 @@ class App
     , 200  # We hope this is long enough
 
     $scope.reloadAnnotations = ->
-      $rootScope.applyView "Document"
+      $rootScope.applyView "Screen"
       return unless plugins.Store
       $scope.$root.annotations = []
       annotator.threading.thread []
