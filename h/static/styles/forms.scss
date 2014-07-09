@@ -1,4 +1,6 @@
 // Common form styles.
+@import "compass/css3/images";
+@import "compass/utilities/general/clearfix";
 
 .form-field {
   margin-bottom: 10px;
@@ -140,6 +142,8 @@
 }
 
 .btn {
+  @include background(linear-gradient(top, #fff, #f0f0f0));
+
   display: inline-block;
   font-size: 13px;
   font-weight: bold;
@@ -147,10 +151,6 @@
   text-shadow: 0 1px 0 #FFF;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
   border-radius: 2px;
-  background-image: -moz-linear-gradient(-89deg, #FFFFFF 0%, #F0F0F0 100%);
-  background-image: -ms-linear-gradient(-89deg, #FFFFFF 0%, #F0F0F0 100%);
-  background-image: -o-linear-gradient(-89deg, #FFFFFF 0%, #F0F0F0 100%);
-  background-image: linear-gradient(-179deg, #FFFFFF 0%, #F0F0F0 100%);
   border: 1px solid #ACACAC;
   padding: 6px 12px;
 
