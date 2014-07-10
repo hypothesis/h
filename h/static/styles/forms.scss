@@ -144,39 +144,66 @@
   }
 }
 
+// Allows buttons to be positioned explicitly.
+.form-actions-left {
+  float: left;
+}
+
+.form-actions-right {
+  float: right;
+}
+
 .btn {
   @include background(linear-gradient(top, #fff, #f0f0f0));
+  @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15));
 
   display: inline-block;
   font-size: 13px;
   font-weight: bold;
   color: #585858;
   text-shadow: 0 1px 0 #FFF;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
   border-radius: 2px;
   border: 1px solid #ACACAC;
   padding: 6px 12px;
 
   &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
+    @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.05));
     outline: none;
     color: #585858;
     background: #fff;
     border-color: #bababa;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
   }
 
   &:active, &.js-active {
+    @include box-shadow(inset 0 1px 0 rgba(0, 0, 0, 0.1));
     background: #F0F0F0;
     color: #424242;
     border-color: #bababa;
-    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
   }
 
   &[disabled], &.js-disabled {
+    @include box-shadow(none);
     cursor: default;
     background: #F0F0F0;
-    box-shadow: none;
     border-color: #CECECE;
     color: #999;
+  }
+}
+
+.btn-clean {
+  &, &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
+    @include box-shadow(none);
+    padding-left: 0;
+    padding-right: 0;
+    background: none;
+    border-color: transparent;
+  }
+
+  &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
+    color: $linkColor;
+  }
+
+  &:active, &.js-active {
+    color: $linkColorHover;
   }
 }
