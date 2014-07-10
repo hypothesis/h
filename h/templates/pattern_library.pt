@@ -165,6 +165,15 @@
           <div class="form-field">
             <button class="btn js-active" type="submit" name="">Primary Button (active)</button>
           </div>
+          <div class="form-field">
+            <button class="btn btn-clean" type="submit" name="">Button Clean</button>
+          </div>
+          <div class="form-field">
+            <button class="btn btn-clean js-focus" type="submit" name="">Button Clean (focus/hover)</button>
+          </div>
+          <div class="form-field">
+            <button class="btn btn-clean js-active" type="submit" name="">Button Clean (active)</button>
+          </div>
         </div>
       </div>
       <div class="pattern-library-example">
