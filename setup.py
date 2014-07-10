@@ -46,7 +46,6 @@ setup(
         'jsonschema==1.3.0',
         'oauthlib>=0.6.1',
         'pyramid>=1.5',
-        'pyramid_debugtoolbar>=2.1',
         'pyramid-basemodel>=0.2',
         'pyramid_deform>=0.2',
         'pyramid_chameleon>=0.1',
@@ -65,7 +64,10 @@ setup(
         'webassets==0.8',
     ],
 
-    extras_require={'YAML': ['PyYAML']},
+    extras_require={
+        'dev': ['pyramid_debugtoolbar>=2.1'],
+        'YAML': ['PyYAML'],
+    },
     tests_require=['PyYAML', 'pytest>=2.5', 'mock', 'selenium'],
 
     author='Hypothes.is Project & contributors',
