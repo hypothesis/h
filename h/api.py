@@ -1,37 +1,288 @@
 # -*- coding: utf-8 -*-
-import functools
+
+"""This API mostly mimics the annotator-store REST API, but is based on Pyramid
+rather than Flask. Also it includes Hypothes.is-specific modifications."""
+
 import json
 import logging
-import re
 
-from annotator import auth, es, store
-import elasticsearch
-import flask
+from annotator import auth, es
+from elasticsearch import exceptions as elasticsearch_exceptions
 from oauthlib.oauth2 import BearerToken
-from pyramid import security
 from pyramid.authentication import RemoteUserAuthenticationPolicy
-from pyramid.httpexceptions import exception_response
-from pyramid.request import Request
 from pyramid.settings import asbool
-from pyramid.threadlocal import get_current_request
-from pyramid.wsgi import wsgiapp2
+from pyramid.view import view_config
 
-from h import events, interfaces, models
+from h import events, models, interfaces
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+"""
+A quick explanation for those unfamiliar with the Pyramid Web Framework.
+The resources defined in resources.py create the tree ('folder') structure using
+Pyramid's "traversal" pattern. For example, "/api/annotations/" will result in
+h.resources.AnnotationFactory being selected as the request's Context.
 
-def authorize(request, annotation, action, user=None):
-    annotation = wrap_annotation(request, annotation)
-    allowed = security.principals_allowed_by_permission(annotation, action)
+For more information about Traversal and View configuration, see (respectively):
+http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/traversal.html
+http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/viewconfig.html
+"""
 
-    if user is None:
-        principals = request.effective_principals
-    else:
-        principals = [security.Everyone, security.Authenticated, user.id]
 
-    return set(allowed) & set(principals) != set()
+# These annotation fields are not to be set by the user.
+PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
+
+
+def api_config(**kwargs):
+    """Set default view configuration"""
+    config = {
+        # XXX: The containment predicate ensures we only respond to API calls
+        'containment': 'h.resources.APIResource',
+        'accept': 'application/json',
+        'renderer': 'json',
+    }
+    config.update(kwargs)
+    return view_config(**config)
+
+
+@api_config(context='h.resources.APIResource')
+def index(context, request):
+    """Return the API descriptor document
+
+    Clients may use this to discover endpoints for the API.
+    """
+    return {
+        'message': "Annotator Store API",
+        'links': {
+            'annotation': {
+                'create': {
+                    'method': 'POST',
+                    'url': request.resource_url(context, 'annotations'),
+                    'desc': "Create a new annotation"
+                },
+                'read': {
+                    'method': 'GET',
+                    'url': request.resource_url(context, 'annotations', ':id'),
+                    'desc': "Get an existing annotation"
+                },
+                'update': {
+                    'method': 'PUT',
+                    'url': request.resource_url(context, 'annotations', ':id'),
+                    'desc': "Update an existing annotation"
+                },
+                'delete': {
+                    'method': 'DELETE',
+                    'url': request.resource_url(context, 'annotations', ':id'),
+                    'desc': "Delete an annotation"
+                }
+            },
+            'search': {
+                'method': 'GET',
+                'url': request.resource_url(context, 'search'),
+                'desc': 'Basic search API'
+            },
+        }
+    }
+
+
+@api_config(context='h.resources.APIResource', name='search')
+def api_search(context, request):
+    """Search the database for annotations matching with the given query."""
+    registry = request.registry
+
+    kwargs = dict()
+    params = dict(request.params)
+
+    # Take limit and offset out of the parameters
+    if 'offset' in params:
+        try:
+            kwargs['offset'] = int(params.pop('offset'))
+        except ValueError:
+            pass  # raise error?
+
+    if 'limit' in params:
+        try:
+            kwargs['limit'] = int(params.pop('limit'))
+        except ValueError:
+            pass  # raise error?
+
+    # All remaining parameters are considered searched fields.
+    kwargs['query'] = params
+
+    # Lowercase all.
+    # See https://github.com/openannotation/annotator-store/issues/77 and 73
+    for field in params:
+        params[field] = params[field].lower()
+
+    # The search results are filtered for the authenticated user
+    user = get_user(request)
+    log.debug("Searching with user=%s, for uri=%s",
+              user.id if user else 'None',
+              params.get('uri'))
+    kwargs['user'] = user
+
+    Annotation = registry.queryUtility(interfaces.IAnnotationClass)
+    results = Annotation.search(**kwargs)
+    total = Annotation.count(**kwargs)
+
+    return {
+        'rows': results,
+        'total': total,
+    }
+
+
+@api_config(context='h.resources.APIResource', name='token', renderer='string')
+def api_token(context, request):
+    """Return the user's API authentication token."""
+    response = request.create_token_response()
+    return response.json_body.get('access_token', response)
+
+@api_config(context='h.resources.AnnotationFactory', request_method='GET')
+def annotations_index(context, request):
+    """Do a search for all annotations on anything and return results.
+
+    This will use the default limit, 20 at time of writing, and results
+    are ordered most recent first.
+    """
+    Annotation = context.Annotation
+    user = get_user(request)
+    return Annotation.search(user=user)
+
+
+@api_config(context='h.resources.AnnotationFactory',
+            request_method='POST',
+            permission='create')
+def create(context, request):
+    """Read the POSTed JSON-encoded annotation and persist it."""
+    Annotation = context.Annotation
+
+    # Read the annotation that is to be stored
+    try:
+        fields = request.json_body
+    except ValueError:
+        return _api_error(request,
+                          'No JSON payload sent. Annotation not created.',
+                          status=400)  # Client Error: Bad Request
+
+    # Some fields are not to be set by the user, ignore them
+    for field in PROTECTED_FIELDS:
+        fields.pop(field, None)
+    # Create Annotation instance
+    annotation = Annotation(fields)
+
+    # Set user and consumer fields
+    user = get_user(request)
+    assert user is not None  # Because creation requires authentication
+
+    annotation['user'] = user.id
+    annotation['consumer'] = user.consumer.key
+
+    log.debug('User: %s' % annotation['user'])
+    log.debug('Consumer key: %s' % annotation['consumer'])
+
+    # Save it in the database
+    annotation.save()
+
+    # Notify any subscribers
+    event = events.AnnotationEvent(request, annotation, 'create')
+    request.registry.notify(event)
+
+    # Return it so the client gets to know its ID and such
+    return annotation
+
+
+@api_config(context='h.interfaces.IAnnotationClass',
+            request_method='GET',
+            permission='read')
+def read(context, request):
+    """Return the annotation (simply how it was stored in the database)"""
+    annotation = context
+
+    # Notify any subscribers
+    event = events.AnnotationEvent(request, annotation, 'read')
+    request.registry.notify(event)
+
+    return annotation
+
+
+@api_config(context='h.interfaces.IAnnotationClass',
+            request_method='PUT',
+            permission='update')
+def update(context, request):
+    """Update the fields we received and store the updated version"""
+    annotation = context
+
+    # Read the new fields for the annotation
+    try:
+        fields = request.json_body
+    except ValueError:
+        return _api_error(request,
+                          'No JSON payload sent. Annotation not created.',
+                          status=400)  # Client Error: Bad Request
+
+    # Some fields are not to be set by the user, ignore them
+    for field in PROTECTED_FIELDS:
+        fields.pop(field, None)
+
+    # If the user is changing access permissions, check if it's allowed.
+    changing_permissions = (
+        'permissions' in fields
+        and fields['permissions'] != annotation.get('permissions', {})
+    )
+    if changing_permissions:
+        if not request.has_permission('admin', annotation):
+            return _api_error(
+                request,
+                'Not authorized to change annotation permissions.',
+                status=401)  # Unauthorized
+
+    # Update the annotation with the new data
+    annotation.update(fields)
+
+    # If the annotation is flagged as deleted, remove mentions of the user
+    if annotation.get('deleted', False):
+        _anonymize_deletes(annotation)
+
+    # Save the annotation in the database, overwriting the old version.
+    annotation.save()
+
+    # Notify any subscribers
+    event = events.AnnotationEvent(request, annotation, 'update')
+    request.registry.notify(event)
+
+    # Return the updated version that was just stored.
+    return annotation
+
+
+@api_config(context='h.interfaces.IAnnotationClass',
+            request_method='DELETE',
+            permission='delete')
+def delete(context, request):
+    """Delete the annotation permanently."""
+    annotation = context
+    id = annotation.id
+    # Delete the annotation from the database.
+    annotation.delete()
+
+    # Notify any subscribers
+    event = events.AnnotationEvent(request, annotation, 'delete')
+    request.registry.notify(event)
+
+    # Return a confirmation
+    return {
+        'id': id,
+        'deleted': True,
+    }
+
+
+def get_user(request):
+    """Create a User object for annotator-store"""
+    consumer = get_consumer(request)
+    userid = request.authenticated_userid
+    if userid is not None:
+        return auth.User(userid, consumer, False)
+    return None
 
 
 def get_consumer(request):
@@ -41,51 +292,14 @@ def get_consumer(request):
     key = request.params.get('client_id', settings['api.key'])
     secret = request.params.get('client_secret', settings.get('api.secret'))
 
-    consumer_ctor = registry.getUtility(interfaces.IConsumerClass)
+    Consumer = registry.getUtility(interfaces.IConsumerClass)
 
     if key == settings['api.key'] and secret is not None:
-        consumer = consumer_ctor(key=key, secret=secret)
+        consumer = Consumer(key=key, secret=secret)
     else:
-        consumer = consumer_ctor.get_by_key(request, key)
+        consumer = Consumer.get_by_key(request, key)
 
     return consumer
-
-
-def token(request):
-    response = request.create_token_response()
-    return response.json_body.get('access_token', response)
-
-
-def wrap_annotation(request, annotation):
-    """Wraps a dict as an instance of the registered Annotation model class.
-
-    Arguments:
-    - `annotation`: a dictionary-like object containing the model data
-    """
-    cls = request.registry.queryUtility(interfaces.IAnnotationClass)
-    return cls(annotation)
-
-
-class Authenticator(object):
-    def __init__(self, request):
-        self.request = request
-        self.settings = request.registry.settings
-
-    def request_user(self, _flask_request):
-        key = self.settings['api.key']
-        secret = self.settings.get('api.secret')
-        ttl = self.settings.get('api.ttl', auth.DEFAULT_TTL)
-
-        consumer = auth.Consumer(key)
-        if secret is not None:
-            consumer.secret = secret
-            consumer.ttl = ttl
-
-        userid = self.request.authenticated_userid
-        if userid is not None:
-            return auth.User(userid, consumer, False)
-
-        return None
 
 
 class OAuthAuthenticationPolicy(RemoteUserAuthenticationPolicy):
@@ -99,67 +313,6 @@ class OAuthAuthenticationPolicy(RemoteUserAuthenticationPolicy):
             return getattr(request, 'user', None)
         else:
             return None
-
-
-class Store(object):
-    def __init__(self, request):
-        self.request = request
-
-    def create(self):
-        raise NotImplementedError()
-
-    def read(self, key):
-        url = self.request.route_url('api_real',
-                                     subpath='annotations/%s' % key)
-        subreq = Request.blank(url)
-        return self._invoke_subrequest(subreq).json
-
-    def update(self, key, data):
-        raise NotImplementedError()
-
-    def delete(self, key):
-        raise NotImplementedError()
-
-    def search(self, **query):
-        url = self.request.route_url('api_real', subpath='search',
-                                     _query=query)
-        subreq = Request.blank(url)
-        return self._invoke_subrequest(subreq).json['rows']
-
-    def search_raw(self, query):
-        url = self.request.route_url('api_real', subpath='search_raw')
-        subreq = Request.blank(url, method='POST')
-        subreq.json = query
-        result = self._invoke_subrequest(subreq)
-        payload = json.loads(result.body)
-
-        hits = []
-        for res in payload['hits']['hits']:
-            # Add id
-            res["_source"]["id"] = res["_id"]
-            hits.append(res["_source"])
-        return hits
-
-    def _invoke_subrequest(self, subreq):
-        request = self.request
-
-        # Copy non-standard headers
-        subreq.headers.update(
-            (k, v)
-            for k, v in request.headers.items()
-            if re.match('^X-', k, re.IGNORECASE)
-        )
-
-        # Copy any authorization headers
-        subreq.authorization = request.authorization
-
-        # Copy the session
-        subreq.session = request.session
-
-        result = request.invoke_subrequest(subreq)
-        if result.status_int > 400:
-            raise exception_response(result.status_int)
-        return result
 
 
 class Token(BearerToken):
@@ -203,119 +356,74 @@ class Token(BearerToken):
             return 0
 
 
-def anonymize_deletes(annotation):
-    if annotation.get('deleted', False):
-        user = annotation.get('user', '')
-        if user:
-            annotation['user'] = ''
-
-        permissions = annotation.get('permissions', {})
-        for action in permissions.keys():
-            filtered = [
-                role
-                for role in annotation['permissions'][action]
-                if role != user
-            ]
-            annotation['permissions'][action] = filtered
+def _api_error(request, reason, status_code):
+    request.response.status_code = status_code
+    response_info = {
+        'status': 'failure',
+        'reason': reason,
+    }
+    return response_info
 
 
-def before_request():
-    request = get_current_request()
-    annotation_ctor = request.registry.getUtility(interfaces.IAnnotationClass)
-    flask.g.annotation_class = annotation_ctor
-    flask.g.auth = Authenticator(request)
-    flask.g.authorize = functools.partial(authorize, request)
-    flask.g.before_annotation_update = anonymize_deletes
+def _anonymize_deletes(annotation):
+    """Clear the author and remove the user from the annotation permissions"""
 
+    # Delete the annotation author, if present
+    user = annotation.pop('user')
 
-def after_request(response):
-    if flask.request.method == 'OPTIONS':
-        in_value = response.headers.get('Access-Control-Allow-Headers', '')
-        allowed = [h.strip() for h in in_value.split(',')]
-        allowed.append('X-Client-ID')
-        out_value = ', '.join(allowed)
-        response.headers['Access-Control-Allow-Headers'] = out_value
-        return response
-
-    if 200 <= response.status_code < 300:
-        match = re.match(r'^store\.(\w+)_annotation$', flask.request.endpoint)
-        if match:
-            request = get_current_request()
-
-            action = match.group(1)
-            if action == 'delete':
-                data = json.loads(flask.request.data)
-            else:
-                data = json.loads(response.data)
-
-            annotation = wrap_annotation(request, data)
-            event = events.AnnotationEvent(request, annotation, action)
-
-            request.registry.notify(event)
-    return response
+    # Remove the user from the permissions, but keep any others in place.
+    permissions = annotation.get('permissions', {})
+    for action in permissions.keys():
+        filtered = [
+            role
+            for role in annotation['permissions'][action]
+            if role != user
+        ]
+        annotation['permissions'][action] = filtered
 
 
 def store_from_settings(settings):
-    app = flask.Flask('annotator')  # Create the annotator-store app
-    app.register_blueprint(store.store)  # and register the store api.
-
     if 'es.host' in settings:
-        app.config['ELASTICSEARCH_HOST'] = settings['es.host']
+        es.host = settings['es.host']
 
     if 'es.index' in settings:
-        app.config['ELASTICSEARCH_INDEX'] = settings['es.index']
+        es.index = settings['es.index']
 
     if 'es.compatibility' in settings:
-        compat = settings['es.compatibility']
-        app.config['ELASTICSEARCH_COMPATIBILITY_MODE'] = compat
+        es.compatibility_mode = settings['es.compatibility']
 
-    es.init_app(app)
-    return app
+    # We want search results to be filtered according to their read-permissions,
+    # which is done in the store itself.
+    es.authorization_enabled = True
 
-
-def create_db(app):
-    # pylint: disable=no-member
-    with app.test_request_context():
-        try:
-            es.conn.indices.create(es.index)
-        except elasticsearch.exceptions.RequestError as e:
-            if not e.error.startswith('IndexAlreadyExistsException'):
-                raise
-        except elasticsearch.exceptions.ConnectionError as e:
-            msg = 'Can not access ElasticSearch at {0}! ' \
-                  'Check to ensure it is running.' \
-                  .format(app.config['ELASTICSEARCH_HOST'])
-            raise elasticsearch.exceptions.ConnectionError('N/A', msg, e)
-        es.conn.cluster.health(wait_for_status='yellow')
-        models.Annotation.update_settings()
-        models.Annotation.create_all()
-        models.Document.create_all()
+    return es
 
 
-def delete_db(app):
-    # pylint: disable=no-member
-    with app.test_request_context():
-        models.Annotation.drop_all()
-        models.Document.drop_all()
+def create_db():
+    """Create the ElasticSearch index for Annotations and Documents"""
+    try:
+        es.conn.indices.create(es.index)
+    except elasticsearch_exceptions.RequestError as e:
+        if not e.error.startswith('IndexAlreadyExistsException'):
+            raise
+    except elasticsearch_exceptions.ConnectionError as e:
+        msg = ('Can not access ElasticSearch at {0}! '
+               'Check to ensure it is running.').format(es.host)
+        raise elasticsearch_exceptions.ConnectionError('N/A', msg, e)
+    es.conn.cluster.health(wait_for_status='yellow')
+    # Should we use registry.queryUtility(interfaces.IAnnotationClass) ?
+    models.Annotation.update_settings()
+    models.Annotation.create_all()
+    models.Document.create_all()
+
+
+def delete_db():
+    # Should we use registry.queryUtility(interfaces.IAnnotationClass) ?
+    models.Annotation.drop_all()
+    models.Document.drop_all()
 
 
 def includeme(config):
-    """Include the annotator-store API backend via http or route embedding.
-
-    Example INI file:
-    .. code-block:: ini
-        [app:h]
-        api.key: 00000000-0000-0000-0000-000000000000
-        api.endpoint: https://example.com/api
-
-    or use a relative path for the endpoint to embed the annotation store
-    directly in the application.
-    .. code-block:: ini
-        [app:h]
-        api.endpoint: /api
-
-    The default is to embed the store as a route bound to "/api".
-    """
     registry = config.registry
     settings = registry.settings
 
@@ -330,36 +438,13 @@ def includeme(config):
     )
     config.set_authentication_policy(authn_policy)
 
-    # Configure the token view
-    config.add_route('api_token', '/api/token')
-    config.add_view(token, renderer='string', route_name='api_token')
-
-    # Configure the annotator-store flask app
-    app = store_from_settings(settings)
+    # Configure ElasticSearch
+    store_from_settings(settings)
 
     # Maybe initialize the models
     if asbool(settings.get('basemodel.should_drop_all', False)):
-        delete_db(app)
+        delete_db()
     if asbool(settings.get('basemodel.should_create_all', True)):
-        create_db(app)
+        create_db()
 
-    # Configure authentication and authorization
-    app.config['AUTHZ_ON'] = True
-    app.before_request(before_request)
-    app.after_request(after_request)
-
-    # Configure the API routes
-    api_endpoint = settings.get('api.endpoint', '/api').rstrip('/')
-    api_pattern = '/'.join([api_endpoint, '*subpath'])
-    config.add_route('api_real', api_pattern)
-
-    api_url = settings.get('api.url', api_endpoint)
-    config.add_route('api', api_url + '/*subpath')
-
-    # Configure the API views -- version 1 is just an annotator.store proxy
-    api_v1 = wsgiapp2(app)
-    config.add_view(api_v1, route_name='api_real')
-    config.add_view(api_v1, name='api_virtual')
-
-    if not registry.queryUtility(interfaces.IStoreClass):
-        registry.registerUtility(Store, interfaces.IStoreClass)
+    config.scan(__name__)

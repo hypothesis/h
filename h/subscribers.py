@@ -12,7 +12,7 @@ def add_renderer_globals(event):
         event['base_url'] = request.resource_url(request.root, '')
 
     # Set the service url to use for API discovery
-    event['service_url'] = request.route_url('api', subpath='')
+    event['service_url'] = request.resource_url(request.root, 'api', '')
 
     # Set the blocks property to refer to the block helpers template
     event['blocks'] = get_renderer('h:templates/blocks.pt').implementation()

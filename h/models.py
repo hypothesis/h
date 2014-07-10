@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
+
 from annotator import annotation, document
 from pyramid.i18n import TranslationStringFactory
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
+from zope.interface import implementer
 
 from h import interfaces
 
 _ = TranslationStringFactory(__package__)
 
 
+@implementer(interfaces.IAnnotationClass)
 class Annotation(annotation.Annotation):
     def __acl__(self):
         acl = []

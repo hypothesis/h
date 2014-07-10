@@ -11,9 +11,5 @@ class IConsumerClass(Interface):
     pass
 
 
-class IStoreClass(Interface):
-    pass
-
-
 class IStreamResource(Interface):
     pass

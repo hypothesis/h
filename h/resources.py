@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from pyramid.interfaces import ILocation
-from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS
 from pyramid import httpexceptions
+from pyramid.interfaces import ILocation
+from pyramid.security import Allow, Everyone, Authenticated, ALL_PERMISSIONS
 from zope.interface import implementer
 
 from h import interfaces, security
@@ -87,41 +87,36 @@ class TagStreamFactory(BaseResource):
 
 
 class AnnotationFactory(BaseResource):
-    def __getitem__(self, key):
-        request = self.request
+    def __init__(self, request, **kwargs):
         registry = request.registry
-        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        self.Annotation = registry.queryUtility(interfaces.IAnnotationClass)
+        super(AnnotationFactory, self).__init__(request, **kwargs)
 
-        try:
-            data = store.read(key)
-        except httpexceptions.HTTPException as e:
-            if e.status_code in [401, 404]:
-                raise httpexceptions.HTTPNotFound(
-                    body_template=("Either no annotation exists with this "
-                                   "identifier, or you don't have the "
-                                   "permissions required for viewing it.")
-                )
-            else:
-                raise e
-
-        annotation_ctor = registry.queryUtility(interfaces.IAnnotationClass)
-        annotation = annotation_ctor(data)
+    def __getitem__(self, key):
+        annotation = self.Annotation.fetch(key)
+        if annotation is None:
+            raise KeyError(key)
         annotation.__name__ = key
         annotation.__parent__ = self
 
         return annotation
 
 
+class APIResource(InnerResource):
+    annotations = AnnotationFactory
+
+
 class RootFactory(Stream, InnerResource):
     a = AnnotationFactory
     t = TagStreamFactory
     u = UserStreamFactory
+    api = APIResource
     stream = Stream
 
     def __acl__(self):  # pylint: disable=no-self-use
         defaultlist = [
             (Allow, 'group:admin', ALL_PERMISSIONS),
-            (Allow, Authenticated, 'view'),
+            (Allow, Authenticated, 'create'),
             (Allow, security.Authorizations, 'account'),
         ]
         return defaultlist
