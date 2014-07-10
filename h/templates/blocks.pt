@@ -4,7 +4,11 @@
         tal:repeat="provider providers.values()"
         action="${request.route_url(provider.login_route)}"
         target="hPopout">
-    <button class="${provider.name} login">${provider.name}</button>
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn ${provider.name} login">${provider.name}</button>
+      </div>
+    </div>
   </form>
 </metal:main>
 
