@@ -31,11 +31,12 @@
 
     <div class="form-field">
       <label class="form-label" for="field-password">Password:</label>
-      <input class="form-input" id="field-password" type="password" name="password" value="" placeholder="&bull;&bull;&bull;&bull;"
+      <input class="form-input" id="field-password" type="password" name="password" value="" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
              ng-model="model.password"
              required autocapitalize="false" autocorrect="false" />
-      <ul class="form-error-list" ng-show="login.password.$dirty && login.password.$invalid">
-        <li class="form-error">Please enter your password.</li>
+      <ul class="form-error-list" ng-show="errors.session || (login.password.$dirty && login.password.$invalid)">
+        <li class="form-error" ng-show="login.password.$error.required">Please enter your password.</li>
+        <li class="form-error" ng-show="errors.session">{{errors.session}}</li>
       </ul>
     </div>
 
@@ -50,7 +51,6 @@
           ng-disabled="!login.$valid">Sign in</button>
       </div>
     </div>
-
   </form>
   <!-- / Login -->
 
@@ -136,15 +136,15 @@
 
     <div class="form-field">
       <label class="form-label" for="field-forgot-email">Please enter your email address:</label>
-      <input id="field-forgot-email" class="form-input" type="email" name="email" value="" placeholder="Email"
+      <input id="field-forgot-email" class="form-input" type="email" name="email" value="" placeholder="bill@example.com"
              required autocapitalize="false" ng-model="model.email" />
-      <ul class="form-error-list" ng-show="register.password.$dirty && register.password.$invalid">
-        <li ng-show="forgot.email.$error.email">Is this an email address?</li>
-        <li ng-show="forgot.email.$error.required">Please enter your email.</li>
+      <ul class="form-error-list" ng-show="register.email.$dirty && register.email.$invalid">
+        <li class="form-error" ng-show="forgot.email.$error.email">Is this an email address?</li>
+        <li class="form-error" ng-show="forgot.email.$error.required">Please enter your email.</li>
       </ul>
    </div>
 
-    <div class="form-actions">
+   <div class="form-actions">
       <div class="form-actions-buttons">
         <button class="btn" type="submit" name="forgot" ng-disabled="!forgot.$valid">Request access</button>
       </div>
@@ -155,34 +155,42 @@
   <!-- Activate -->
   <form data-title="Activate an account"
         data-value="activate"
-        class="tab-pane"
+        class="form tab-pane"
         name="activate"
         novalidate>
 
-    <p>Enter an activation code and a new password.</p>
+    <div class="form-field">
+      <label class="form-label" for="field-activate-code">Your activation code:</label>
+      <input id="field-activate-code" class="form-input" type="text"
+             name="code" value="" placeholder="12345678"
+             required autocorrect="false" autocapitalize="false"
+             ng-model="model.code" />
+      <ul class="form-error-list" ng-show="activate.code.$dirty && activate.code.$invalid">
+        <li class="form-error" ng-show="activate.code.$error.required">Please enter your activation code</li>
+        <li class="form-error" ng-show="error.activate.code">{{error.activate.code}}</li>
+      </ul>
+    </div>
 
-    <input type="text" name="code" value="" placeholder="Activation Code"
-           required autocorrect="false" autocapitalize="false"
-           ng-model="model.code" />
-    <span slow-validate="code">Please enter your validation code.</span>
-    <span>{{error.activate.code}}</span>
+    <div class="">
+      <label class="form-label" for="field-activate-password">Account password:
+        <span class="form-hint">(at least two characters)</span>
+      </label>
+      <input id="field-activate-password" class="form-input" type="password" name="password" value="" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+             required autocapitalize="false" autocorrect="false"
+             ng-minlength="2" ng-model="model.password" />
+      <ul class="form-error-list" ng-show="activate.password.$dirty && activate.password.$invalid">
+        <li class="form-error" ng-show="activate.password.$error.required"
+              >Please choose a password.</li>
+        <li class="form-error" ng-show="activate.password.$error.minlength"
+              >Passwords must be at least 2 characters.</li>
+      </ul>
+    </div>
 
-    <input type="password" name="password" value="" placeholder="New Password"
-           required autocapitalize="false" autocorrect="false"
-           ng-minlength="2" ng-model="model.password" />
-    <span slow-validate="password">
-      <span ng-show="activate.password.$error.required"
-            >Please choose a password.</span>
-      <span ng-show="activate.password.$error.minlength"
-            >Passwords must be at least 2 characters.</span>
-    </span>
-
-    <input type="submit" name="activate" value="Activate"
-           ng-disabled="!activate.$valid" />
-
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn" type="submit" name="activate" ng-disabled="!activate.$valid">Activate</button>
+      </div>
+    </div>
   </form>
   <!--/ Activate -->
-
-  <span>{{errors.session}}</span>
-
 </metal:main>
