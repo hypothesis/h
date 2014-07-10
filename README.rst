@@ -63,6 +63,18 @@ below. Issues tagged with the label 'cake' are ideal for new contributors.
    :target: https://travis-ci.org/hypothesis/h
    :alt: Build Status
 
+Debugging
+---------
+
+The `debugtoolbar`_ package is loaded by default in the development
+environment.  This will provide stack traces for exceptions and allow basic
+debugging. A more advanced profiler can also be accessed at the /_debug_toolbar
+path.
+
+    http://localhost:5000/_debug_toolbar/
+
+Check out the documentation for information on how to use and configure it.
+
 Testing
 -------
 
@@ -131,3 +143,4 @@ license information can be found in the included `<LICENSE>`_ file.
 .. _Annotator project: http://okfnlabs.org/projects/annotator/
 .. _Open Knowledge Foundation: http://okfn.org/
 .. _2-Clause BSD License: http://www.opensource.org/licenses/BSD-2-Clause
+.. _debugtoolbar: http://docs.pylonsproject.org/projects/pyramid-debugtoolbar/en/latest/
