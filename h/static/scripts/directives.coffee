@@ -462,7 +462,7 @@ panels = ->
   restrict: 'C'
   templateUrl: 'panels.html'
 
-accountManagement = ['$filter', 'flash', 'session', ($filter, flash, session) ->
+accountManagement = ['$filter', 'flash', 'profile', ($filter, flash, profile) ->
   link: (scope, elem, attr, ctrl) ->
     scope.emailCheck = ->
       # Checks to see if email is duplicate.
@@ -470,19 +470,25 @@ accountManagement = ['$filter', 'flash', 'session', ($filter, flash, session) ->
   controller: ($scope, $filter) ->
     persona_filter = $filter('persona')
 
-    _answer = ->
+    _answer = (response) ->
       console.log '_answer() - insert code here'
+      console.log response
+
+      # Fire flash messages.
+      for q, msgs of response.flash
+        flash q, msgs
 
     _error = (errors={}) ->
+      console.log '_error() - insert code here'
       for field, error of errors
         console.log(field, error)
-        flash('error', error)
+        #flash('error', error)
 
     $scope.confirmDelete = false
     $scope.toggleConfirmDelete = ->
       $scope.confirmDelete = !$scope.confirmDelete
 
-    $scope.deleteAcount = (form) ->
+    $scope.deleteAccount = (form) ->
       # If the password is correct, the account is deleted.
       # The extension is then removed from the page.
       # Confirmation of success is given.
@@ -491,14 +497,22 @@ accountManagement = ['$filter', 'flash', 'session', ($filter, flash, session) ->
     $scope.submit = (form) ->
       # In the frontend change_email and change_password are two different
       # forms. However, in the backend it is just one: edit_profile
-      $scope.model.username = persona_filter $scope.model.persona
-      $scope.model.formname = form.$name
-      angular.extend session, $scope.model
       return unless form.$valid
-      promise = session["$edit_profile"] ->
-        $scope.$emit 'success', form.$name
-      promise.then(_answer, _error)
 
+      username = persona_filter $scope.model.persona
+      if form.$name is 'edit_profile'
+        packet =
+          username: username
+          email: form.email.$modelValue
+          pwd: form.password.$modelValue
+      else
+        packet =
+          username: username
+          pwd: form.oldpassword.$modelValue
+          password: form.newpassword.$modelValue
+
+      promise = profile.edit_profile packet
+      promise.$promise.then(_answer, _error)
 
     # Jake's Note: there is an addional piece of UI I would like to implement. The basic idea being
     # to give some visual indication that the changes they have made have been applied successfully.
