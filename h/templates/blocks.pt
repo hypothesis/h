@@ -130,24 +130,25 @@
   <!-- Forgot password -->
   <form data-title="Claim an account"
         data-value="forgot"
-        class="tab-pane"
+        class="form tab-pane"
         name="forgot"
         novalidate>
 
-    <p>Please enter your email address.</p>
-    <!--Get Validation Code-->
-    <input type="email" name="email" value="" placeholder="Email"
-           required autocapitalize="false" ng-model="model.email" />
-    <span slow-validate="email">
-      <span ng-show="forgot.email.$error.email"
-            >Is this an email address?</span>
-      <span ng-show="forgot.email.$error.required"
-            >Please enter your email.</span>
-    </span>
+    <div class="form-field">
+      <label class="form-label" for="field-forgot-email">Please enter your email address:</label>
+      <input id="field-forgot-email" class="form-input" type="email" name="email" value="" placeholder="Email"
+             required autocapitalize="false" ng-model="model.email" />
+      <ul class="form-error-list" ng-show="register.password.$dirty && register.password.$invalid">
+        <li ng-show="forgot.email.$error.email">Is this an email address?</li>
+        <li ng-show="forgot.email.$error.required">Please enter your email.</li>
+      </ul>
+   </div>
 
-    <input type="submit" name="forgot" value="Request access"
-           ng-disabled="!forgot.$valid" />
-
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn" type="submit" name="forgot" ng-disabled="!forgot.$valid">Request access</button>
+      </div>
+    </div>
   </form>
   <!-- / Forgot password -->
 
