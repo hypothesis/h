@@ -68,16 +68,18 @@
   <span ng-hide="!editing" class="tip"><a href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown</a> is supported.</span>
 
   <!-- Tags -->
-  <ul ng-readonly="!editing"
-      ng-model="model.tags"
-      name="tags"
-      class="tags"
-      placeholder="Add tags"
-  />
+  <div class="form-field">
+    <ul ng-readonly="!editing"
+        ng-model="model.tags"
+        name="tags"
+        class="tags"
+        placeholder="Add tags…"
+    />
+  </div>
 
-  <!-- Bottom controls -->
-  <div class="buttonbar" ng-show="editing">
-    <div class="annotator-controls">
+  <!-- Bottom controls TODO: Align buttons to the left -->
+  <div class="form-actions" ng-show="editing">
+    <div class="form-actions-buttons form-actions-left">
       <ng-switch on="action">
         <button ng-switch-when="edit"
                 ng-click="save($event)"
@@ -92,7 +94,7 @@
                 ng-disabled="!form.$valid"
                 class="btn"><i class="icon-checkmark2"></i> Save</button>
       </ng-switch>
-      <span role="button" ng-click="cancel($event)" ><i class="icon-x"></i> Cancel</span>
+      <button class="btn btn-clean" ng-click="cancel($event)"><i class="icon-x"></i> Cancel</button>
     </div>
   </div>
 
