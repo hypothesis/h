@@ -755,12 +755,22 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   margin-top: .2em;
   margin-bottom: .2em;
 
+  .tagit-choice {
+    border-radius: 2px;
+    padding: 0.307em 1.7em 0.307em 0.76em;
+  }
+
   .tagit-close {
     cursor: pointer;
     position: absolute;
     right: .1em;
     top: 50%;
     margin-top: -8px;
+  }
+
+  .tagit-new input[type=text] {
+    padding-top: 5px;
+    padding-bottom: 5px;
   }
 
   .text-icon { display: none; }
@@ -774,7 +784,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     opacity: .8;
 
     &:hover { opacity: 1; }
-    &.tagit-choice { margin-top: .33em; }
     &.tagit-new { padding: 0; }
     & + li { margin-left: .4em; }
   }

@@ -75,33 +75,24 @@
   <span ng-hide="!editing" class="tip"><a href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown</a> is supported.</span>
 
   <!-- Tags -->
-  <ul ng-readonly="!editing"
-      ng-model="model.tags"
-      name="tags"
-      class="tags"
-      placeholder="Add tags"
-  />
+  <div class="form-field">
+    <ul ng-readonly="!editing"
+        ng-model="model.tags"
+        name="tags"
+        class="tags"
+        placeholder="Add tags…"
+    />
+  </div>
 
-  <!-- Bottom controls -->
-  <div class="buttonbar" ng-show="editing">
-    <div class="annotator-controls">
+  <!-- Bottom controls TODO: Align buttons to the left -->
+  <div class="form-actions" ng-show="editing">
+    <div class="form-actions-buttons form-actions-left">
       <ng-switch on="action">
-        <button ng-switch-when="edit"
-                ng-click="save($event)"
-                ng-disabled="!form.$valid"
-                class="btn icon-checkmark2"> Save</button>
-        <button ng-switch-when="delete"
-                ng-click="save($event)"
-                ng-disabled="!form.$valid"
-                class="btn icon-checkmark2"> Delete</button>
-        <button ng-switch-default
-                ng-click="save($event)"
-                ng-disabled="!form.$valid"
-                class="btn icon-checkmark2"> Save</button>
+        <button class="btn icon-checkmark2" ng-switch-when="edit" ng-click="save($event)" ng-disabled="!form.$valid">Save</button>
+        <button class="btn icon-checkmark2" ng-switch-when="delete" ng-click="save($event)" ng-disabled="!form.$valid">Delete</button>
+        <button class="btn icon-checkmark2" ng-switch-default ng-click="save($event)" ng-disabled="!form.$valid">Save</button>
       </ng-switch>
-      <span role="button"
-            ng-click="cancel($event)"
-            class="icon-x"> Cancel</span>
+      <button class="btn btn-clean x-icon" ng-click="cancel($event)">Cancel</button>
     </div>
   </div>
 
