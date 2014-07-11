@@ -73,14 +73,8 @@
       ng-show="activePanel.name == 'Account'"
       novalidate>
       <h2>Delete Account</h2>
-      Deleting your account <strong>cannot be undone</strong>. Your account data will be permanently removed.
-      <br>
-      <br>
-      However, if you want to delete your annotations, you must do so <strong>before</strong> deleting your account, and you must delete each annotation individually, by hand. Deleting an annotation does not delete it's replies.
-      <br>
-      <br>
-      Please enter your password to proceed:
-      <input class="fullwidth" type="password" name="deleteaccountpassword" ng-model="model.deleteaccountpassword" placeholder="Password" required autocapitalize="false" >
+      <p>This will delete your user account. If you would like to delete your annotations, do so before continuing or email us at <a href="mailto:support@hypothes.is">support@hypothes.is</a>.</p>
+      <input class="fullwidth" type="password" name="deleteaccountpassword" ng-model="model.deleteaccountpassword" placeholder="Please enter your password to proceed" required autocapitalize="false" >
       <span slow-validate="deleteaccountpassword">
         <span ng-show="deleteaccount.deleteaccountpassword.$error.minlength"
               >Your password does not match the one we have on record.</span>
