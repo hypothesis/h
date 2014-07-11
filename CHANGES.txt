@@ -1,8 +1,19 @@
-Changelog for h
-===============
+Next release
+============
+
+- Searchable stream
+- Sidebar search
+- Realtime updates
+- Private annotations
+- Page level comments
+- Support for tags on annotations
+- Support for annotating PDF.js viewers
+- Chrome and Firefox extensions
+- Addition of unit tests for some modules
+- Support for sharing a sidebar between frames
 
 0.0.6 (2013-01-08)
-------------------
+==================
 
 - Flash messages (#233)
 - Static asset build script (#161)
@@ -11,7 +22,7 @@ Changelog for h
 - Slide-over detail view (#150)
 
 0.0.5 (2012-11-27)
-------------------
+==================
 
 - Use AngularJS (#198)
 - Confirm discarding of drafts (#188)
@@ -19,14 +30,14 @@ Changelog for h
 - Resizable sidebar (#26)
 
 0.0.4 (2012-11-6)
------------------
+=================
 
 - Refactoring of horus and SCSS
 - Reply counts on threads
 - Visual improvements
 
 0.0.3 (2012-10-16)
-------------------
+==================
 
 - Up/down tabs are hidden when count is zero
 - Long excerpts are truncated and show with less/more links
@@ -35,7 +46,7 @@ Changelog for h
 - Initial sphinx documentation added
 
 0.0.2 (2012-10-09)
-------------------
+==================
 
 - Replace account system
 - Threaded replies
@@ -44,6 +55,6 @@ Changelog for h
 - Miscellaneous gardening
 
 0.0.1 (2012-04-16)
-------------------
+==================
 
 - Set up scaffolding, accounts, annotator
