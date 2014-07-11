@@ -1,16 +1,19 @@
 Next release
 ============
 
-- Searchable stream
-- Sidebar search
-- Realtime updates
-- Private annotations
-- Page level comments
-- Support for tags on annotations
-- Support for annotating PDF.js viewers
-- Chrome and Firefox extensions
-- Addition of unit tests for some modules
-- Support for sharing a sidebar between frames
+- Searchable stream (#719)
+- Sidebar search (#606)
+- Realtime updates (#356)
+- Private annotations and highlights (#530)
+- Page level comments (#115)
+- Support for tags on annotations (#514)
+- Support for annotating PDF.js viewers (#74)
+- Chrome and Firefox extensions (#43)
+- Addition of unit tests for some modules (#240)
+- Support for sharing a sidebar between frames (#778)
+- Improved URI search (#1243)
+- Improved authentication form errors (#1279)
+- Pluggable authentication via pyramid_multiauth (#1167)
 
 0.0.6 (2013-01-08)
 ==================
