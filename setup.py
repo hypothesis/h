@@ -72,8 +72,8 @@ setup(
     tests_require=['PyYAML', 'pytest>=2.5', 'mock', 'selenium'],
 
     author='Hypothes.is Project & contributors',
-    maintainer='Randall Leeds',
-    maintainer_email='tilgovi@hypothes.is',
+    maintainer='Hypothes.is Engineering',
+    maintainer_email='eng@hypothes.is',
     description='The Internet. Peer-reviewed.',
     long_description="A platform for collaborative evaluation of information.",
     license='Simplified (2-Clause) BSD License',
