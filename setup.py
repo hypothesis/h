@@ -55,6 +55,7 @@ setup(
         'pyramid_tm>=0.7',
         'python-dateutil>=2.1',
         'pyramid-sockjs==0.3.9',
+        'pyramid_webassets>=0.8',
         'requests>=2.2.1',
 
         # Version pin for known bug

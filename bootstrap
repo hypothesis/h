@@ -58,6 +58,7 @@ pip install -qU pip
 
 echo "Checking dependencies (may be a few minutes for first run)..."
 pip install --use-wheel -qr requirements.txt
+pip install --use-wheel -qe .[dev]
 
 echo "Checking front-end dependencies..."
 npm install --quiet
