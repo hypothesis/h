@@ -76,7 +76,7 @@ h1 {
 
 h2 {
   font-size: 1.5em;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 h3 {
@@ -840,11 +840,10 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
 // Panels //////////////////////////////
 .panelsnav {
-  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
   position: absolute;
   left: 0px;
   right: 0px;
-  top: 0px;
+  top: 2px;
   display: none;
 
   &.shown {
@@ -853,9 +852,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 }
 
 .panel {
+  @extend .tab-content;
+  max-width: none !important;
   padding: 35px 25px;
-  background-color: #FFF;
-  display: none;
 
   &.shown {
     display: block;
@@ -881,7 +880,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   opacity: 0.9;
   position: absolute;
   right: 7px;
-  top: 7px;
+  top: 5px;
 }
 
 .fullwidth {
