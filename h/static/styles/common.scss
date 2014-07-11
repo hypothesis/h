@@ -78,7 +78,7 @@ h1 {
 
 h2 {
   font-size: 1.5em;
-  margin: .75em 0;
+  margin-top: 10px;
 }
 
 h3 {
@@ -732,6 +732,10 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     margin: 5px 0;
   }
 >>>>>>> Revise interface to make it a bit cleaner.
+
+  .btn {
+    margin-top: 5px;
+  }
 
   textarea {
     margin: 5px 0;
