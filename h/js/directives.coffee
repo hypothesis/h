@@ -311,19 +311,17 @@ tags = ['$window', ($window) ->
 
 
 username = ['$filter', '$window', ($filter, $window) ->
-  link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
-
-    ctrl.$render = ->
-      scope.uname = ($filter 'persona') ctrl.$viewValue, 'username'
-      scope.provider = ($filter 'persona') ctrl.$viewValue, 'provider'
+  link: (scope, elem, attr) ->
+    scope.uname = ($filter 'persona') scope.user, 'username'
+    scope.provider = ($filter 'persona') scope.user, 'provider'
 
     scope.uclick = (event) ->
       event.stopPropagation()
       $window.open "/u/#{scope.uname}@#{scope.provider}"
       return
 
-  require: '?ngModel'
+  scope:
+    user: '=ngModel'
   restrict: 'E'
   template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
 ]
