@@ -164,7 +164,7 @@
   text-shadow: 0 1px 0 #FFF;
   border-radius: 2px;
   border: 1px solid #ACACAC;
-  padding: 6px 12px;
+  padding: 7px 12px 6px;
 
   &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
     @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.05));
@@ -206,4 +206,80 @@
   &:active, &.js-active {
     color: $linkColorHover;
   }
+}
+
+// Includes an icon within the button
+.btn-with-icon {
+  position: relative;
+  padding-left: 34px;
+
+  .btn-icon {
+    position: absolute;
+    top: 5px;
+    left: 8px;
+  }
+}
+
+// Absolutely positions a message/icon to the left of a button.
+.btn-with-message {
+  position: relative;
+}
+
+.btn-message {
+  font-size: 13px;
+  font-style: italic;
+  color: #999;
+  margin-right: 6px;
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  margin-top: -9px;
+  white-space: nowrap;
+}
+
+.btn-message-icon {
+  display: inline-block;
+  position: relative;
+  top: 0px;
+  background: #76B800;
+  border-radius: 50%;
+  color: #FFF;
+  font-size: 12px;
+  height: 20px;
+  line-height: 13px;
+  margin-left: 4px;
+  padding: 4px;
+  width: 20px;
+}
+
+// Handles state transitions from "default" -> "loading" -> "success"
+[data-btn-message-state] .btn-message {
+  top: -999em;
+  left: -999em;
+  right: auto;
+}
+
+[data-btn-message-state=success] .btn-message-success,
+[data-btn-message-state=loading] .btn-message-loading {
+  top: 50%;
+  left: auto;
+  right: 100%;
+}
+
+[data-btn-message-state] .btn-message-text {
+  @include transition(opacity 0.2s 0.6s ease-in);
+  opacity: 0;
+}
+
+[data-btn-message-state=success] .btn-message-success .btn-message-text {
+  opacity: 1;
+}
+
+[data-btn-message-state] .btn-message-success .btn-message-icon {
+  @include transform(scale(0));
+}
+
+[data-btn-message-state=success] .btn-message-success .btn-message-icon {
+  @include transition(transform 0.15s 0 cubic-bezier(0, 1.8, 1, 1.8));
+  @include transform(scale(1));
 }
