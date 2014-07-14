@@ -6,7 +6,7 @@ imports = [
   'h.flash'
   'h.helpers'
   'h.session'
-  'h.streamfilter'
+  'h.searchfilters'
 ]
 
 SEARCH_FACETS = ['text', 'tags', 'uri', 'quote', 'since', 'user', 'results']

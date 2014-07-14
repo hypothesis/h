@@ -351,7 +351,7 @@ app_js:
             - scripts/session.coffee
             - scripts/services.coffee
             - scripts/socket.coffee
-            - scripts/streamfilter.coffee
+            - scripts/searchfilters.coffee
             - scripts/streamsearch.coffee
 
 app_css:
