@@ -347,7 +347,7 @@ app_js:
             - js/session.coffee
             - js/services.coffee
             - js/socket.coffee
-            - js/streamfilter.coffee
+            - js/searchfilters.coffee
             - js/streamsearch.coffee
 
 app_css:

@@ -314,11 +314,10 @@ username = ['$filter', '$window', ($filter, $window) ->
   link: (scope, elem, attr) ->
     scope.$watch 'user', ->
       scope.uname = $filter('persona')(scope.user, 'username')
-      scope.provider = $filter('persona')(scope.user, 'provider')
 
     scope.uclick = (event) ->
       event.preventDefault()
-      $window.open "/u/#{scope.uname}@#{scope.provider}"
+      $window.open "/u/#{scope.uname}"
       return
 
   scope:
@@ -427,6 +426,20 @@ visualSearch = ['$parse', ($parse) ->
   restrict: 'C'
 ]
 
+simpleSearch = ['$parse', ($parse) ->
+  link: (scope, elem, attr, ctrl) ->
+    scope.dosearch = ->
+      #_search(scope.generateSearchResults())
+      scope.search.update(scope.searchtext)
+
+    scope.$watch attr.query, (query) ->
+      scope.searchtext = query
+      scope.search.update(scope.searchtext)
+
+  restrict: 'C'
+  template: '<form name="searchBox" ng-submit="dosearch()"><input type="text" ng-model="searchtext" name="searchText" style="width: 20em"></form>'
+]
+
 whenscrolled = ['$window', ($window) ->
   link: (scope, elem, attr) ->
     $window = angular.element($window)
@@ -450,4 +463,5 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('userPicker', userPicker)
 .directive('repeatAnim', repeatAnim)
 .directive('visualSearch', visualSearch)
+.directive('simpleSearch', simpleSearch)
 .directive('whenscrolled', whenscrolled)

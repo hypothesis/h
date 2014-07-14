@@ -2,7 +2,7 @@ imports = [
   'bootstrap'
   'h.helpers'
   'h.socket'
-  'h.streamfilter'
+  'h.searchfilters'
 ]
 
 SEARCH_FACETS = ['text', 'tags', 'uri', 'quote', 'since', 'user', 'results']
@@ -256,7 +256,7 @@ class App
     $scope.search.update = angular.noop
     $scope.search.clear = angular.noop
 
-    $scope.show_search = Object.keys($scope.query).length > 0
+    #$scope.show_search = Object.keys($scope.query).length > 0
 
     $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
       unless next.$$route? then return
@@ -264,30 +264,7 @@ class App
       unless next.$$route.originalPath is '/stream'
         $scope.search.update = (searchCollection) ->
           return unless annotator.discardDrafts()
-          return unless searchCollection.models.length
-
-          models = searchCollection.models
-          matched = []
-          query =
-            tags: []
-            quote: []
-
-          for item in models
-            {category, value} = item.attributes
-
-            # Stuff we need to collect
-            switch
-              when category in ['text', 'user', 'time', 'group']
-                query[category] = value
-              when category == 'tags'
-                # Tags are specials, because we collect those into an array
-                query.tags.push value.toLowerCase()
-              when category == 'quote'
-                query.quote = query.quote.concat(value.split(/\s+/))
-
-          unless angular.equals $location.search(), query
-            $location.path('/page_search').search(query)
-
+          $location.path('/page_search').search({query: searchCollection})
         $scope.search.clear = ->
           $location.url('/viewer')
           $scope.show_search = false
@@ -815,7 +792,7 @@ class Search
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
     $scope.filter_orderBy = $filter('orderBy')
     $scope.matches = []
-    $scope.search.query = $location.search()
+    #$scope.search.query = $location.search()
     $scope.render_order = {}
     $scope.render_pos = {}
     $scope.ann_info =
@@ -887,12 +864,18 @@ class Search
       refresh()
 
     refresh = =>
-      $scope.matches = viewFilter.filter $rootScope.annotations, $routeParams
+      [$scope.matches, $scope.filters] = viewFilter.filter $rootScope.annotations, $routeParams
       # Create the regexps for highlighting the matches inside the annotations' bodies
-      $scope.text_tokens = $routeParams.text?.split(/\s+/) or []
+      $scope.text_tokens = $scope.filters.text.terms.slice()
       $scope.text_regexp = []
-      $scope.quote_tokens = $routeParams.quote
+      $scope.quote_tokens = $scope.filters.quote.terms.slice()
       $scope.quote_regexp = []
+
+      # Highligh any matches
+      for term in $scope.filters.any.terms
+        $scope.text_tokens.push term
+        $scope.quote_tokens.push term
+
       # Saving the regexps and higlighter to the annotator for highlighttext regeneration
       for token in $scope.text_tokens
         regexp = new RegExp(token,"ig")

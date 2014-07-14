@@ -1,3 +1,115 @@
+#ToDo: write me
+# This class will parse the search filter and produce a faceted search filter object
+class SearchFilter
+
+  # This function will slice the searchtext
+  # Slice character: space,
+  # but an expression between quotes (' or ") is considered one
+  _tokenize: (searchtext) ->
+    return [] unless searchtext
+    tokens = searchtext.match /(?:[^\s"']+|"[^"]*"|'[^']*')+/g
+
+    # Cut the opening and closing quote characters
+    for token in tokens
+      start = token.slice 0,1
+      end = token.slice -1
+      if (start is '"' or start is "'") and (start is end)
+        token = token.slice 1, token.length - 1
+
+    tokens
+
+  generateFacetedFilter: (searchtext) ->
+    return unless searchtext
+    terms = @_tokenize(searchtext)
+
+    any = []
+    quote = []
+    result = []
+    since = []
+    tag = []
+    text = []
+    uri = []
+    user = []
+
+    for term in terms
+      filter = term.slice 0, term.indexOf ":"
+      unless filter? then filter = ""
+      switch filter
+        when 'quote' then quote.push term[6..]
+        when 'result' then result.push term[7..]
+        when 'since'
+          # We'll turn this into seconds
+          time = term[6..].toLowerCase()
+          if time.match /^\d+$/
+            # Only digits, assuming seconds
+            since.push time
+          if time.match /^\d+sec$/
+            # Time given in seconds
+            t = /^(\d+)sec$/.exec(time)[1]
+            since.push t
+          if time.match /^\d+min$/
+            # Time given in minutes
+            t = /^(\d+)min$/.exec(time)[1]
+            since.push t * 60
+          if time.match /^\d+hour$/
+            # Time given in hours
+            t = /^(\d+)hour$/.exec(time)[1]
+            since.push t * 60 * 60
+          if time.match /^\d+day$/
+            # Time given in days
+            t = /^(\d+)day$/.exec(time)[1]
+            since.push t * 60 * 60 * 24
+          if time.match /^\d+week$/
+            # Time given in week
+            t = /^(\d+)week$/.exec(time)[1]
+            since.push t * 60 * 60 * 24 * 7
+          if time.match /^\d+month$/
+            # Time given in month
+            t = /^(\d+)month$/.exec(time)[1]
+            since.push t * 60 * 60 * 24 * 30
+          if time.match /^\d+year$/
+            # Time given in year
+            t = /^(\d+)year$/.exec(time)[1]
+            since.push t * 60 * 60 * 24 * 365
+        when 'tag' then tag.push term[4..]
+        when 'text' then text.push term[5..]
+        when 'uri' then uri.push term[4..]
+        when 'user' then user.push term[5..]
+        else any.push term
+    any:
+      terms: any
+      operator: 'and'
+      lowercase: true
+    quote:
+      terms: quote
+      operator: 'lower'
+      lowercase: true
+    result:
+      terms: result
+      operator: 'min'
+      lowercase: false
+    since:
+      terms: since
+      operator: 'min'
+      lowercase: false
+    tag:
+      terms: tag
+      operator: 'and'
+      lowercase: true
+    text:
+      terms: text
+      operator: 'and'
+      lowercase: true
+    uri:
+      terms: uri
+      operator: 'or'
+      lowercase: true
+    user:
+      terms: user
+      operator: 'or'
+      lowercase: true
+
+
 # This class will process the results of search and generate the correct filter
 # It expects the following dict format as rules
 # { facet_name : {
@@ -220,6 +332,7 @@ class StreamFilter
     this
 
 
-angular.module('h.streamfilter', [])
+angular.module('h.searchfilters', [])
+.service('searchfilter', SearchFilter)
 .service('queryparser', QueryParser)
 .service('streamfilter', StreamFilter)
