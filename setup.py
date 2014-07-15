@@ -76,7 +76,7 @@ setup(
     maintainer='Hypothes.is Engineering',
     maintainer_email='eng@hypothes.is',
     description='The Internet. Peer-reviewed.',
-    long_description="A platform for collaborative evaluation of information.",
+    long_description=open('README.rst', 'rt').read(),
     license='Simplified (2-Clause) BSD License',
     keywords='annotation web javascript',
 
