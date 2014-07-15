@@ -159,6 +159,12 @@ class App
         .focus()
       , 10
 
+    $scope.$watch 'show_search', (value, old) ->
+      if value and not old
+        $timeout ->
+          $element.find('.visual-search').find('input').last().focus()
+        , 10
+
     $scope.$on 'back', ->
       return unless annotator.discardDrafts()
       if $location.path() == '/viewer' and $location.search()?.id?
@@ -342,13 +348,6 @@ class App
         , 10
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup
-
-    $scope.$watch 'show_search', (value, old) ->
-      if value and not old
-        $timeout ->
-          $element.find('.visual-search').find('input').last().focus()
-        , 10
-
 
     $scope.initUpdater = ->
       filter =
