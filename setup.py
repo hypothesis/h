@@ -66,28 +66,8 @@ testing_extras = ['mock', 'pytest>=2.5', 'pytest-cov', 'selenium']
 setup(
     name='h',
     version=versioneer.get_version(),
-    packages=find_packages(),
-
-    install_requires=install_requires,
-    extras_require={
-        'dev': development_extras,
-        'testing': testing_extras,
-        'YAML': ['PyYAML']
-    },
-    tests_require=development_extras + testing_extras + ['PyYAML'],
-
-    author='Hypothes.is Project & contributors',
-    author_email='contact@hypothes.is',
-    maintainer='Hypothes.is Engineering',
-    maintainer_email='eng@hypothes.is',
     description='The Internet. Peer-reviewed.',
     long_description=open('README.rst', 'rt').read(),
-    license='Simplified (2-Clause) BSD License',
-    keywords='annotation web javascript',
-
-    url='http://hypothes.is/',
-    download_url='https://github.com/hypothesis/h',
-
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
@@ -96,7 +76,22 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python'
     ],
-
+    keywords='annotation web javascript',
+    author='Hypothes.is Project & contributors',
+    author_email='contact@hypothes.is',
+    url='https://docs.hypothes.is',
+    license='Simplified (2-Clause) BSD License',
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
+    install_requires=install_requires,
+    extras_require={
+        'dev': development_extras,
+        'testing': testing_extras,
+        'YAML': ['PyYAML']
+    },
+    tests_require=development_extras + testing_extras + ['PyYAML'],
+    cmdclass=cmdclass,
     package_data={
         'h': [
             'css/*.css',
@@ -117,17 +112,8 @@ setup(
             'templates/emails/*.txt',
         ]
     },
-    include_package_data=True,
-    zip_safe=False,
-
     entry_points={
-        'paste.app_factory': [
-            'main=h:main'
-        ],
-        'console_scripts': [
-            'hypothesis=h.script:main'
-        ],
+        'paste.app_factory': ['main=h:main'],
+        'console_scripts': ['hypothesis=h.script:main'],
     },
-
-    cmdclass=cmdclass,
 )
