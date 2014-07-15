@@ -71,6 +71,14 @@ class App
       angular.extend $scope.model, data
       $scope.initUpdater()
 
+    # Update scope with auto-filled form field values
+    $timeout ->
+      for i in $element.find('input') when i.value
+        $i = angular.element(i)
+        $i.triggerHandler('change')
+        $i.triggerHandler('input')
+    , 200  # We hope this is long enough
+
     $scope.$watchCollection 'model', ->
       # (Re)start (i.e., delay) the authentication form timeout
       unless $scope.sheet.collapsed
@@ -281,14 +289,6 @@ class App
     $scope.searchClear = ->
       $location.url('/viewer')
       $scope.show_search = false
-
-    # Update scope with auto-filled form field values
-    $timeout ->
-      for i in $element.find('input') when i.value
-        $i = angular.element(i)
-        $i.triggerHandler('change')
-        $i.triggerHandler('input')
-    , 200  # We hope this is long enough
 
     $scope.reloadAnnotations = ->
       $rootScope.applyView "Screen"
