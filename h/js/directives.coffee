@@ -314,12 +314,9 @@ tags = ['$window', ($window) ->
 
 username = ['$filter', '$window', ($filter, $window) ->
   link: (scope, elem, attr) ->
-    updateScopeProperties = ->
+    scope.$watch 'user', ->
       scope.uname = $filter('persona')(scope.user, 'username')
       scope.provider = $filter('persona')(scope.user, 'provider')
-    updateScopeProperties()
-
-    scope.$watch('user', updateScopeProperties)
 
     scope.uclick = (event) ->
       event.preventDefault()
