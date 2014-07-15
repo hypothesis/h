@@ -97,6 +97,7 @@ setup(
             'css/*.css',
             'js/*.js',
             'js/**/*.js',
+            'lib/*.css',
             'lib/*.js',
             'lib/images/*',
             'lib/polyfills/*.js',
@@ -106,6 +107,7 @@ setup(
             'images/svg/*.svg',
             'templates/*.html',
             'templates/*.pt',
+            'templates/*.txt',
             'templates/deform/*.pt',
             'templates/emails/*.txt',
         ]
