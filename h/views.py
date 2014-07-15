@@ -53,11 +53,11 @@ def bad_csrf_token(context, request):
     }
 
 
-@view_config(name='embed.js', renderer='templates/embed.txt')
+@view_config(name='embed.js', renderer='h:templates/embed.txt')
 @view_config(layout='app', context='pyramid.httpexceptions.HTTPNotFound',
-             renderer='templates/app.pt')
-@view_config(renderer='templates/help.pt', route_name='help')
-@view_config(renderer='templates/home.pt', route_name='index')
+             renderer='h:templates/app.pt')
+@view_config(renderer='h:templates/help.pt', route_name='help')
+@view_config(renderer='h:templates/home.pt', route_name='index')
 def page(context, request):
     return {}
 
@@ -68,7 +68,7 @@ class AnnotationController(object):
         self.request = request
         self.Store = request.registry.getUtility(interfaces.IStoreClass)
 
-    @view_config(accept='text/html', renderer='templates/displayer.pt')
+    @view_config(accept='text/html', renderer='h:templates/displayer.pt')
     def __html__(self):
         request = self.request
         context = request.context
@@ -104,7 +104,7 @@ class AnnotationController(object):
 @view_config(
     context='h.interfaces.IStreamResource',
     layout='app',
-    renderer='templates/app.pt',
+    renderer='h:templates/app.pt',
 )
 def stream(context, request):
     stream_type = context.get('stream_type')
