@@ -285,8 +285,6 @@ tags = ['$window', ($window) ->
         tag = ui.tagLabel
         $window.open "/t/" + tag
 
-    elem.find('input').addClass('form-input')
-
     ctrl.$formatters.push (tags=[]) ->
       assigned = elem.tagit 'assignedTags'
       for t in assigned when t not in tags
