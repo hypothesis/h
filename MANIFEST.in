@@ -1,2 +1,4 @@
-include *.txt *.rst LICENSE NOTICE versioneer.py
-recursive-include h *.ico *.css *.gif *.jpg *.png *.txt *.pt *.js 
+include *.ini *.txt *.rst *.yaml LICENSE NOTICE versioneer.py
+recursive-include h *.ico *.css *.html *.js *.txt *.pt
+recursive-include h/images *.gif *.jpg *.png *.svg
+recursive-include h/images/icomoon *.eot *.svg *.ttf *.woff
