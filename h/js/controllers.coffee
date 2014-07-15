@@ -69,7 +69,8 @@ class App
 
     session.$promise.then (data) ->
       angular.extend $scope.model, data
-      $scope.initUpdater()
+      unless data.personas?.length
+        $scope.initUpdater()
 
     # Update scope with auto-filled form field values
     $timeout ->
@@ -359,6 +360,7 @@ class App
 
       $scope.updater = socket()
       $scope.updater.onopen = ->
+        return if this isnt $scope.updater
         $scope.updater.send(JSON.stringify({filter}))
 
       $scope.updater.onclose = =>
