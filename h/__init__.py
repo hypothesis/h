@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
 import urlparse
 
@@ -9,6 +10,8 @@ from pyramid.response import FileResponse
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
+
+log = logging.getLogger(__name__)
 
 
 def includeme(config):
@@ -51,6 +54,8 @@ def _environment_overrides():
 
     # DATABASE_URL matches the Heroku environment variable
     if 'DATABASE_URL' in os.environ:
+        log.info("Found DATABASE_URL environment variable. Overwriting "
+                 "sqlalchemy.url setting.")
         urlparse.uses_netloc.append("postgres")
         urlparse.uses_netloc.append("sqlite")
         url = list(urlparse.urlparse(os.environ["DATABASE_URL"]))
@@ -59,31 +64,43 @@ def _environment_overrides():
         overrides['sqlalchemy.url'] = urlparse.urlunparse(url)
 
     if 'ELASTICSEARCH_INDEX' in os.environ:
+        log.info("Found ELASTICSEARCH_INDEX environment variable. Overwriting "
+                 "es.index setting.")
         overrides['es.index'] = os.environ['ELASTICSEARCH_INDEX']
 
     # ELASTICSEARCH_PORT and MAIL_PORT match Docker container links
     if 'ELASTICSEARCH_PORT' in os.environ:
+        log.info("Found ELASTICSEARCH_PORT environment variable. Overwriting "
+                 "es.host setting.")
         es_host = os.environ['ELASTICSEARCH_PORT_9200_TCP_ADDR']
         es_port = os.environ['ELASTICSEARCH_PORT_9200_TCP_PORT']
         overrides['es.host'] = 'http://{}:{}'.format(es_host, es_port)
 
     if 'MAIL_PORT' in os.environ:
+        log.info("Found MAIL_PORT environment variable. Overwriting mail.host "
+                 "and mail.port settings.")
         mail_host = os.environ['MAIL_PORT_25_TCP_ADDR']
         mail_port = os.environ['MAIL_PORT_25_TCP_PORT']
         overrides['mail.host'] = mail_host
         overrides['mail.port'] = mail_port
 
     if 'REDIS_PORT' in os.environ:
+        log.info("Found REDIS_PORT environment variable. Overwriting "
+                 "redis.sessions.{host|port} settings.")
         redis_host = os.environ['REDIS_PORT_6379_TCP_ADDR']
         redis_port = os.environ['REDIS_PORT_6379_TCP_PORT']
         overrides['redis.sessions.host'] = redis_host
         overrides['redis.sessions.port'] = redis_port
 
     if 'SESSION_SECRET' in os.environ:
+        log.info("Found SESSION_SECRET environment variable. Overwriting "
+                 "session.secret and redis.sessions.secret settings.")
         overrides['session.secret'] = os.environ['SESSION_SECRET']
         overrides['redis.sessions.secret'] = os.environ['SESSION_SECRET']
 
     if 'STATSD_PORT' in os.environ:
+        log.info("Found STATSD_PORT environment variable. Overwriting "
+                 "statsd.host and statsd.port settings.")
         statsd_host = urlparse.urlparse(os.environ['STATSD_PORT_8125_UDP'])
         overrides['statsd.host'] = statsd_host.hostname
         overrides['statsd.port'] = statsd_host.port
