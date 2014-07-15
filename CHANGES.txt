@@ -1,3 +1,8 @@
+0.1.1 (2014-07-14)
+==================
+
+- Fix versioneer issue with Python release packages
+
 0.1.0 (2014-07-11)
 ==================
 
