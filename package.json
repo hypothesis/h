@@ -9,6 +9,12 @@
     "uglify-js": "2.4.14"
   },
   "devDependencies": {
+    "karma": "^0.12.17",
+    "karma-cli": "0.0.4",
+    "karma-coffee-preprocessor": "^0.2.1",
+    "karma-mocha": "^0.1.4",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "mocha": "^1.20.1",
     "phantomjs": "1.9.7-10"
   },
   "engines": {

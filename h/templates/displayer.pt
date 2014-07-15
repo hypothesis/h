@@ -57,7 +57,7 @@
 
                 <strong>
                   <span ng-show="annotation.deleted" class="user">Annotation deleted</span>
-                  <username ng-show="annotation.deleted || annotation.text || annotation.tags.length" ng-model="annotation.user"></username>
+                  <username ng-show="annotation.deleted || annotation.text || annotation.tags.length" data-user="annotation.user"></username>
                 </strong>
 
                 <div class="body">
@@ -95,7 +95,7 @@
 
                     <strong>
                       <span ng-show="reply.deleted" class="user">Annotation deleted</span>
-                      <username ng-hide="reply.deleted" ng-model="reply.user"></username>
+                      <username ng-hide="reply.deleted" data-user="reply.user"></username>
                     </strong>
 
                     <div class="body">

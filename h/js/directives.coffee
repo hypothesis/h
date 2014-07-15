@@ -285,6 +285,8 @@ tags = ['$window', ($window) ->
         tag = ui.tagLabel
         $window.open "/t/" + tag
 
+    elem.find('input').addClass('form-input')
+
     ctrl.$formatters.push (tags=[]) ->
       assigned = elem.tagit 'assignedTags'
       for t in assigned when t not in tags
@@ -311,19 +313,18 @@ tags = ['$window', ($window) ->
 
 
 username = ['$filter', '$window', ($filter, $window) ->
-  link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
-
-    ctrl.$render = ->
-      scope.uname = ($filter 'persona') ctrl.$viewValue, 'username'
-      scope.provider = ($filter 'persona') ctrl.$viewValue, 'provider'
+  link: (scope, elem, attr) ->
+    scope.$watch 'user', ->
+      scope.uname = $filter('persona')(scope.user, 'username')
+      scope.provider = $filter('persona')(scope.user, 'provider')
 
     scope.uclick = (event) ->
-      event.stopPropagation()
+      event.preventDefault()
       $window.open "/u/#{scope.uname}@#{scope.provider}"
       return
 
-  require: '?ngModel'
+  scope:
+    user: '='
   restrict: 'E'
   template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
 ]
