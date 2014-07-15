@@ -22,7 +22,7 @@ cmdclass['test'] = PyTest
 
 versioneer.VCS = 'git'
 versioneer.versionfile_source = 'h/_version.py'
-versioneer.versionfile_build = '_version.py'
+versioneer.versionfile_build = 'h/_version.py'
 versioneer.tag_prefix = 'v'
 versioneer.parentdir_prefix = 'h-'
 
