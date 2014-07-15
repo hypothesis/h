@@ -324,7 +324,6 @@ app_js:
     - uuid
     - visualsearch_js
     - filters: uglifyjs
-      output: js/hypothesis.min.js
       contents:
         - filters: coffeescript
           output: js/hypothesis.js
@@ -391,8 +390,7 @@ inject_js:
     - annotator_texthighlights
     - annotator_pdf
     - annotator_toolbar
-    - output: js/hypothesis-inject.min.js
-      filters: uglifyjs
+    - filters: uglifyjs
       contents:
         - filters: coffeescript
           output: js/hypothesis-inject.js
