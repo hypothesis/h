@@ -13,5 +13,6 @@ test:
 	$(eval es := $(shell wget --quiet --output-document - http://localhost:9200))
 	@if [ -n '${es}' ] ; then echo "yes." ; else echo "no!"; exit 1; fi
 	python setup.py test
+	"$$(npm bin)"/karma start karma.config.js --single-run
 
 .PHONY: clean test
