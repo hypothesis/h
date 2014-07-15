@@ -26,50 +26,55 @@ versioneer.versionfile_build = 'h/_version.py'
 versioneer.tag_prefix = 'v'
 versioneer.parentdir_prefix = 'h-'
 
+install_requires = [
+    'BeautifulSoup4>=4.2.1',
+    'SQLAlchemy>=0.8.0',
+    'alembic>=0.6.3',
+    'annotator>=0.11.1',
+    'clik==0.3.1',
+    'deform_bootstrap>=0.2.0',
+    'elasticsearch',
+    'gevent-websocket==0.3.6',
+    'gunicorn>=18.0',
+    'horus>=0.9.15',
+    'jsonpointer==1.0',
+    'jsonschema==1.3.0',
+    'oauthlib>=0.6.1',
+    'pyramid>=1.5',
+    'pyramid-basemodel>=0.2',
+    'pyramid_deform>=0.2',
+    'pyramid_chameleon>=0.1',
+    'pyramid-layout>=0.9',
+    'pyramid_mailer>=0.13',
+    'pyramid-multiauth>=0.4.0',
+    'pyramid_tm>=0.7',
+    'python-dateutil>=2.1',
+    'pyramid-sockjs==0.3.9',
+    'pyramid_webassets>=0.8',
+    'requests>=2.2.1',
+
+    # Version pin for known bug
+    # https://github.com/repoze/repoze.sendmail/issues/31
+    'repoze.sendmail<4.2',
+
+    'webassets==0.8',
+]
+
+development_extras = ['pyramid_debugtoolbar>=2.1']
+testing_extras = ['mock', 'pytest>=2.5', 'pytest-cov', 'selenium']
+
 setup(
     name='h',
     version=versioneer.get_version(),
     packages=find_packages(),
 
-    install_requires=[
-        'BeautifulSoup4>=4.2.1',
-        'SQLAlchemy>=0.8.0',
-        'alembic>=0.6.3',
-        'annotator>=0.11.1',
-        'clik==0.3.1',
-        'deform_bootstrap>=0.2.0',
-        'elasticsearch',
-        'gevent-websocket==0.3.6',
-        'gunicorn>=18.0',
-        'horus>=0.9.15',
-        'jsonpointer==1.0',
-        'jsonschema==1.3.0',
-        'oauthlib>=0.6.1',
-        'pyramid>=1.5',
-        'pyramid-basemodel>=0.2',
-        'pyramid_deform>=0.2',
-        'pyramid_chameleon>=0.1',
-        'pyramid-layout>=0.9',
-        'pyramid_mailer>=0.13',
-        'pyramid-multiauth>=0.4.0',
-        'pyramid_tm>=0.7',
-        'python-dateutil>=2.1',
-        'pyramid-sockjs==0.3.9',
-        'pyramid_webassets>=0.8',
-        'requests>=2.2.1',
-
-        # Version pin for known bug
-        # https://github.com/repoze/repoze.sendmail/issues/31
-        'repoze.sendmail<4.2',
-
-        'webassets==0.8',
-    ],
-
+    install_requires=install_requires,
     extras_require={
-        'dev': ['pyramid_debugtoolbar>=2.1'],
-        'YAML': ['PyYAML'],
+        'dev': development_extras,
+        'testing': testing_extras,
+        'YAML': ['PyYAML']
     },
-    tests_require=['PyYAML', 'pytest>=2.5', 'mock', 'selenium'],
+    tests_require=development_extras + testing_extras + ['PyYAML'],
 
     author='Hypothes.is Project & contributors',
     author_email='contact@hypothes.is',
