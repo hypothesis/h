@@ -1,3 +1,2 @@
 include *.txt *.rst LICENSE NOTICE versioneer.py
 recursive-include h *.ico *.css *.gif *.jpg *.png *.txt *.pt *.js 
-include h/_version.py
