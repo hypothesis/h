@@ -72,6 +72,7 @@ setup(
     tests_require=['PyYAML', 'pytest>=2.5', 'mock', 'selenium'],
 
     author='Hypothes.is Project & contributors',
+    author_email='contact@hypothes.is',
     maintainer='Hypothes.is Engineering',
     maintainer_email='eng@hypothes.is',
     description='The Internet. Peer-reviewed.',
