@@ -43,6 +43,7 @@ class App
     {plugins, host, providers} = annotator
 
     _authTimeout = null
+    _updater = null
 
     _reset = =>
       delete annotator.ongoing_edit
@@ -51,6 +52,64 @@ class App
         frame: $scope.frame or @scope.frame
         socialView: annotator.socialView
         ongoingHighlightSwitch: false
+
+    _resetStore = ->
+      $rootScope.$applyView "Screen"
+      return unless plugins.Store
+      $scope.$root.annotations = []
+      annotator.threading.thread []
+      annotator.threading.idTable = {}
+
+      Store = plugins.Store
+      annotations = Store.annotations.slice()
+
+      # XXX: Hacky hacky stuff to ensure that any search requests in-flight
+      # at this time have no effect when they resolve and that future events
+      # have no effect on this Store. Unfortunately, it's not possible to
+      # unregister all the events or properly unload the Store because the
+      # registration loses the closure. The approach here is perhaps
+      # cleaner than fishing them out of the jQuery private data.
+      # * Overwrite the Store's handle to the annotator, giving it one
+      #   with a noop `loadAnnotations` method.
+      Store.annotator = loadAnnotations: angular.noop
+      # * Make all api requests into a noop.
+      Store._apiRequest = angular.noop
+      # * Ignore pending searches
+      Store._onLoadAnnotations = angular.noop
+      # * Make the update function into a noop.
+      Store.updateAnnotation = angular.noop
+      delete plugins.Store
+      annotator.addPlugin 'Store', annotator.options.Store
+
+      # Even though most operations on the old Store are now noops the Annotator
+      # itself may still be setting up previously fetched annotatiosn. We may
+      # delete annotations which are later set up in the DOM again, causing
+      # issues with the viewer and heatmap. As these are loaded, we can delete
+      # them, but the threading plugin will get confused and break threading.
+      # Here, we cleanup these annotations as they are set up by the Annotator,
+      # preserving the existing threading. This is all a bit paranoid, but
+      # important when many annotations are loading as authentication is
+      # changing. It's all so ugly it makes me cry, though. Someone help
+      # restore sanity?
+      cleanup = (loaded) ->
+        $timeout ->  # Give the threading plugin time to thread this annotation
+          deleted = []
+          for l in loaded
+            if l in annotations
+              # If this annotation still exists, we'll need to thread it again
+              # since the delete will mangle the threading data structures.
+              existing = annotator.threading.idTable[l.id]?.message
+              annotator.deleteAnnotation(l)
+              deleted.push l
+              if existing
+                plugins.Threading.thread existing
+          annotations = (a for a in annotations when a not in deleted)
+          if annotations.length is 0
+            annotator.unsubscribe 'annotationsLoaded', cleanup
+            $scope.$broadcast 'ReRenderPageSearch'
+        , 10
+      cleanup (a for a in annotations when a.thread)
+      annotator.subscribe 'annotationsLoaded', cleanup
 
     _startAuthTimeout = ->
       # Reset the auth forms after five minutes of inactivity
@@ -65,12 +124,41 @@ class App
             'For your security, the forms have been reset due to inactivity.'
       , 300000
 
+    _startUpdater = ->
+      _updater = socket()
+      _updater.onopen = ->
+        return if this isnt _updater
+        filter = streamfilter.getFilter()
+        _updater.send(JSON.stringify({filter}))
+
+      _updater.onclose = =>
+        $timeout _startUpdater, 60000
+
+      _updater.onmessage = (msg) =>
+        #console.log msg
+        unless msg.data.type? and msg.data.type is 'annotation-notification'
+          return
+        data = msg.data.payload
+        action = msg.data.options.action
+
+        unless data instanceof Array then data = [data]
+
+        p = $scope.model.persona
+        user = if p? then "acct:" + p.username + "@" + p.provider else ''
+        unless data instanceof Array then data = [data]
+
+        if $scope.socialView.name is 'single-player'
+          owndata = data.filter (d) -> d.user is user
+          $scope.applyUpdates action, owndata
+        else
+          $scope.applyUpdates action, data
+
     _reset()
 
     session.$promise.then (data) ->
       angular.extend $scope.model, data
       unless data.personas?.length
-        $scope.initUpdater()
+        _startUpdater()
 
     # Update scope with auto-filled form field values
     $timeout ->
@@ -125,8 +213,8 @@ class App
             $scope.ongoingHighlightSwitch = false
             annotator.setTool 'highlight'
           else
-            $scope.reloadAnnotations()
-            $scope.initUpdater()
+            _resetStore()
+            _startUpdater()
       else if oldValue?
         session.$logout =>
           $scope.$broadcast 'reset'
@@ -134,13 +222,13 @@ class App
           if annotator.tool isnt 'comment'
             annotator.setTool 'comment'
           else
-            $scope.reloadAnnotations()
-            $scope.initUpdater()
+            _resetStore()
+            _startUpdater()
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
       console.log "Social View changed to '" + newValue + "'. Reloading annotations."
-      $scope.reloadAnnotations()
+      _resetStore()
 
     $scope.$watch 'frame.visible', (newValue, oldValue) ->
       routeName = $location.path().replace /^\//, ''
@@ -290,100 +378,6 @@ class App
     $scope.searchClear = ->
       $location.url('/viewer')
       $scope.show_search = false
-
-    $scope.reloadAnnotations = ->
-      $rootScope.applyView "Screen"
-      return unless plugins.Store
-      $scope.$root.annotations = []
-      annotator.threading.thread []
-      annotator.threading.idTable = {}
-
-      Store = plugins.Store
-      annotations = Store.annotations.slice()
-
-      # XXX: Hacky hacky stuff to ensure that any search requests in-flight
-      # at this time have no effect when they resolve and that future events
-      # have no effect on this Store. Unfortunately, it's not possible to
-      # unregister all the events or properly unload the Store because the
-      # registration loses the closure. The approach here is perhaps
-      # cleaner than fishing them out of the jQuery private data.
-      # * Overwrite the Store's handle to the annotator, giving it one
-      #   with a noop `loadAnnotations` method.
-      Store.annotator = loadAnnotations: angular.noop
-      # * Make all api requests into a noop.
-      Store._apiRequest = angular.noop
-      # * Ignore pending searches
-      Store._onLoadAnnotations = angular.noop
-      # * Make the update function into a noop.
-      Store.updateAnnotation = angular.noop
-      # * Remove the plugin and re-add it to the annotator.
-      delete plugins.Store
-      annotator.addPlugin 'Store', annotator.options.Store
-
-      # Even though most operations on the old Store are now noops the Annotator
-      # itself may still be setting up previously fetched annotatiosn. We may
-      # delete annotations which are later set up in the DOM again, causing
-      # issues with the viewer and heatmap. As these are loaded, we can delete
-      # them, but the threading plugin will get confused and break threading.
-      # Here, we cleanup these annotations as they are set up by the Annotator,
-      # preserving the existing threading. This is all a bit paranoid, but
-      # important when many annotations are loading as authentication is
-      # changing. It's all so ugly it makes me cry, though. Someone help
-      # restore sanity?
-      cleanup = (loaded) ->
-        $timeout ->  # Give the threading plugin time to thread this annotation
-          deleted = []
-          for l in loaded
-            if l in annotations
-              # If this annotation still exists, we'll need to thread it again
-              # since the delete will mangle the threading data structures.
-              existing = annotator.threading.idTable[l.id]?.message
-              annotator.deleteAnnotation(l)
-              deleted.push l
-              if existing
-                plugins.Threading.thread existing
-          annotations = (a for a in annotations when a not in deleted)
-          if annotations.length is 0
-            annotator.unsubscribe 'annotationsLoaded', cleanup
-            $scope.$broadcast 'ReRenderPageSearch'
-        , 10
-      cleanup (a for a in annotations when a.thread)
-      annotator.subscribe 'annotationsLoaded', cleanup
-
-    $scope.initUpdater = ->
-      filter =
-        streamfilter
-          .setPastDataNone()
-          .setMatchPolicyIncludeAny()
-          .addClause('/uri', 'one_of', Object.keys(plugins.Store.entities))
-          .getFilter()
-
-      $scope.updater = socket()
-      $scope.updater.onopen = ->
-        return if this isnt $scope.updater
-        $scope.updater.send(JSON.stringify({filter}))
-
-      $scope.updater.onclose = =>
-        $timeout $scope.initUpdater, 60000
-
-      $scope.updater.onmessage = (msg) =>
-        #console.log msg
-        unless msg.data.type? and msg.data.type is 'annotation-notification'
-          return
-        data = msg.data.payload
-        action = msg.data.options.action
-
-        unless data instanceof Array then data = [data]
-
-        p = $scope.model.persona
-        user = if p? then "acct:" + p.username + "@" + p.provider else ''
-        unless data instanceof Array then data = [data]
-
-        if $scope.socialView.name is 'single-player'
-          owndata = data.filter (d) -> d.user is user
-          $scope.applyUpdates action, owndata
-        else
-          $scope.applyUpdates action, data
 
     $scope.markAnnotationUpdate = (data) =>
       for annotation in data
