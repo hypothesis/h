@@ -10,9 +10,11 @@ describe 'h.directives', ->
 
     $provide.value('$window', fakeWindow)
 
-    # Return filter key rather than value.
     $filterProvider.register 'persona', ->
-      (obj, value) -> value
+      (user, part) ->
+        parts = user.slice(5).split('@')
+        {username: parts[0], provider: parts[1]}[part]
+
     return
 
   beforeEach module('h.directives')
@@ -25,15 +27,34 @@ describe 'h.directives', ->
     $element = null
 
     beforeEach ->
-      $scope.user = 'acct:bill@127.0.0.1'
+      $scope.model = 'acct:bill@127.0.0.1'
 
-      $element = $compile('<username ng-model="user"></username>')($scope)
+      $element = $compile('<username data-user="model"></username>')($scope)
       $scope.$digest()
 
     it 'renders with the username', ->
       text = $element.find('.user').text()
-      assert(text, 'username')
+      assert.equal(text, 'bill')
 
-    it 'runs successfully', ->
+    it 'opens a new window for the user when clicked', ->
       $element.find('.user').click()
-      sinon.assert.calledWith(fakeWindow.open, '/u/username@provider')
+      sinon.assert.calledWith(fakeWindow.open, '/u/bill@127.0.0.1')
+
+    it 'prevents the default browser action on click', ->
+      event = jQuery.Event('click')
+      $element.find('.user').trigger(event)
+
+      assert(event.isDefaultPrevented())
+
+    describe 'when model is changed', ->
+      beforeEach ->
+        $scope.model = 'acct:jim@hypothesis'
+        $scope.$digest()
+
+      it 'keeps the username in sync', ->
+        text = $element.find('.user').text()
+        assert.equal(text, 'jim')
+
+      it 'keeps the url in sync', ->
+        $element.find('.user').click()
+        sinon.assert.calledWith(fakeWindow.open, '/u/jim@hypothesis')
