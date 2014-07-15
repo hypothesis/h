@@ -435,9 +435,7 @@ whenscrolled = ['$window', ($window) ->
     $window.on 'scroll', ->
       windowBottom = $window.height() + $window.scrollTop()
       elementBottom = elem.offset().top + elem.height()
-      remaining = elementBottom - windowBottom
-      shouldScroll = remaining <= $window.height() * 0
-      if shouldScroll
+      if elementBottom > 0 and elementBottom - windowBottom <= 0
         scope.$apply attr.whenscrolled
 ]
 

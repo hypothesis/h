@@ -58,12 +58,14 @@ class StreamSearch
 
     $scope.openDetails = (annotation) ->
     $scope.loadMore = (number) =>
+      # TODO: debounce
       unless $scope.updater? then return
       sockmsg =
         messageType: 'more_hits'
         moreHits: number
 
-      $scope.updater.send(JSON.stringify(sockmsg))
+      $scope.updater.then (sock) ->
+        sock.send(JSON.stringify(sockmsg))
 
     $scope.search.query = $location.search()
 

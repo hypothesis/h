@@ -105,7 +105,7 @@
       <!-- / View Sort Controls -->
 
       <!-- Angular view -->
-      <div ng-view=""></div>
+      <div ng-view="" whenscrolled="loadMore(10)"></div>
     </div>
     <!-- / Content -->
 
