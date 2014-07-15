@@ -93,7 +93,22 @@ setup(
     ],
 
     package_data={
-        'h': ['assets.yaml', 'development.ini', 'production.ini'],
+        'h': [
+            'css/*.css',
+            'js/*.js',
+            'js/**/*.js',
+            'lib/*.js',
+            'lib/images/*',
+            'lib/polyfills/*.js',
+            'locale/*',
+            'images/*.png',
+            'images/icomoon/fonts/*',
+            'images/svg/*.svg',
+            'templates/*.html',
+            'templates/*.pt',
+            'templates/deform/*.pt',
+            'templates/emails/*.txt',
+        ]
     },
     include_package_data=True,
     zip_safe=False,
