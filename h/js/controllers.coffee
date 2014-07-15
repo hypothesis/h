@@ -173,13 +173,6 @@ class App
           $element.find('.visual-search').find('input').last().focus()
         , 10
 
-    $scope.$on 'back', ->
-      return unless annotator.discardDrafts()
-      if $location.path() == '/viewer' and $location.search()?.id?
-        $location.search('id', null).replace()
-      else
-        annotator.hide()
-
     $scope.$on 'showAuth', (event, show=true) ->
       $scope.sheet.collapsed = !show
 
