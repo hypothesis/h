@@ -67,9 +67,9 @@ setup(
 
     extras_require={
         'dev': ['pyramid_debugtoolbar>=2.1'],
-        'YAML': ['PyYAML'],
+        'test': ['PyYAML', 'pytest>=2.5', 'mock', 'selenium'],
+        'YAML': ['PyYAML']
     },
-    tests_require=['PyYAML', 'pytest>=2.5', 'mock', 'selenium'],
 
     author='Hypothes.is Project & contributors',
     author_email='contact@hypothes.is',
