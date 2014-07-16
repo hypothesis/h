@@ -559,50 +559,6 @@ blockquote {
 }
 
 
-//TOOL BAR////////////////////////////////
-.topbar {
-  background: $white;
-  border: solid 1px $grayLighter;
-  border-style: solid none;
-  height: 30px;
-  line-height: 28px;
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 5;
-
-  .barbutton {
-    &:hover {
-      @include box-shadow(inset 0 1px 3px hsla(0, 0%, 0%, .1));
-    }
-
-    &:active {
-      @include box-shadow(inset 0 2px 3px hsla(0, 0%, 0%, .1));
-    }
-  }
-
-  .inner {
-    margin: 0 auto;
-    max-width: $break-medium;
-    padding-left: 3.6em;
-    padding-right: 3.6em;
-
-    @include respond-to(wide-handhelds handhelds) {
-      padding-left: .9em;
-      padding-right: .9em;
-    }
-
-    &.pull-right {
-      display: inline-block;
-      font-family: $sansFontFamily;
-    }
-
-    & > * { margin: 0 4px; }
-  }
-}
-
-
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
@@ -971,6 +927,24 @@ blockquote {
 .sidebar_anim_hide_left-setup.sidebar_anim_hide_left-start {
   opacity: 0;
   width: 0em;
+}
+
+//SEARCH HIGHLIGHTS////////////////////////////////
+.search-hl-active {
+  background: $highlightColor;
+  box-shadow:3px 3px 4px -1px #999999;
+  &::-moz-selection {
+    background: $highlightColor;
+    box-shadow:3px 3px 4px #999999;
+  }
+  &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
+    background: $highlightColor;
+    box-shadow:3px 3px 4px #999999;
+  }
+  &::selection, &::selection:window-inactive {
+    background: $highlightColor;
+    box-shadow:3px 3px 4px #999999;
+  }
 }
 
 .searchbar-border {

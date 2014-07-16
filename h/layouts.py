@@ -42,13 +42,14 @@ class BaseLayout(object):
 @layout_config(name='annotation', template='h:templates/base.pt')
 class AnnotationLayout(BaseLayout):
     app = 'h.displayer'
+    requirements = (('app', None), ('topbar', None))
 
 
 @layout_config(name='app', template='h:templates/base.pt')
 class AppLayout(BaseLayout):
     app = 'h'
     controller = 'AppController'
-    requirements = (('app', None), ('sidebar', None))
+    requirements = (('app', None), ('topbar', None))
 
 
 def includeme(config):

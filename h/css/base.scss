@@ -225,6 +225,11 @@ $input-border-radius: 2px;
   }
 }
 
+.annotator-hide {
+  display: none;
+  visibility: hidden;
+}
+
 .annotator-notice-info {
   color: #3a87ad;
   background-color: #d9edf7;
