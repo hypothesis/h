@@ -214,10 +214,6 @@ class StreamFilter
     @filter.clauses = []
     this
 
-  addClause: (clause) ->
-    @filter.clauses.push clause
-    this
-
   addClause: (field, operator, value, case_sensitive = false, options = {}) ->
     @filter.clauses.push
       field: field
