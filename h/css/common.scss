@@ -1115,6 +1115,7 @@ h3.stream {
 
 .viewsort {
   @include single-transition(top, .25s);
+  @include transition-timing-function(cubic-bezier(0, 1, .55, 1));
   width: 100%;
   text-align: center;
   position: fixed;
@@ -1123,6 +1124,7 @@ h3.stream {
   z-index: 4;
 
   &.ng-hide {
+    @include transition-timing-function(cubic-bezier(1, .55, 0, 1));
     top: 0;
     display:block!important;
     overflow: hidden;
