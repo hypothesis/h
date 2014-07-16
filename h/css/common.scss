@@ -173,12 +173,7 @@ button, input[type=submit], .btn {
   float: right;
   width: 1em;
   height: 1em;
-  opacity: .2;
-
-  &:hover {
-    cursor: pointer;
-    opacity: .4;
-  }
+  opacity: .4;
 }
 
 

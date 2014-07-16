@@ -103,9 +103,8 @@ ol {
 
   .close {
     position: absolute;
-    font-size: 14px;
-    right: 7px;
-    top: 7px;
+    right: .5em;
+    top: 0;
   }
 
   &.collapsed {
