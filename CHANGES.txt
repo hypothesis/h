@@ -7,6 +7,7 @@ Next release
 - Exponential backoff on socket failures (#1291)
 - Fix infinite scroll regression on stream
 - Add a front end test framework (#240, #1309)
+- Revalidate forms when autofilled (#374)
 
 0.1.3 (2014-07-14)
 ==================
