@@ -1080,11 +1080,14 @@ h3.stream {
 }
 
 .VS-search {
+  * {
+    @include box-sizing(content-box);
+  }
+
   .search_facet input,
   .search_input input,
   .VS-input-width-tester {
     @include box-shadow(none);
-    @include box-sizing(content-box);
     border: 0;
   }
 
