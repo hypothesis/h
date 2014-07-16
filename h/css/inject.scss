@@ -267,48 +267,37 @@ $baseFontSize: 14px;
 
 //CONTROLBAR STUFF////////////////////////////////
 .annotator-toolbar {
-  @include transition(
-    height .25s,
-    min-height .25s,
-    max-height .25s
-  );
   position: absolute;
-  overflow: hidden;
-  height: 200px;
   left: -($heatmap-width + 18px - 7px);
   right: 0;
+  width: 37px;
   z-index: 2;
+
+  ul {
+    height: 100%;
+  }
 
   ul, li {
     @include box-sizing(border-box);
     @include reset-box-model;
     @include reset-list-style;
   }
-
-  li {
-    border-width: 1px;
-    max-height: 30px;
-    margin-bottom: 5px;
-    min-height: 30px;
-  }
 }
 
 .annotator-toolbar.annotator-hide {
-  @include transition-delay(.25s);
   display: initial;
-  height: 37px; // 30px height + 2px (top+bottom border) + 5px shadow
   visibility: initial;
 
   li {
-    @include transition-delay(.2s, 0, 0);
-    border-width: 0;
+    @include transition-delay(.75s);
+    @include transition-timing-function(cubic-bezier(1, .1, .55, 0));
+    height: 0;
+    left: 34px;
     margin-bottom: 0;
-    max-height: 0;
-    min-height: 0;
-
     &:first-child, &.pushed {
-      border-width: 1px;
-      max-height: 30px;
+      @include transition-delay(0);
+      left: 3px;
+      height: 30px;
       margin-bottom: 5px;
     }
   }
@@ -317,9 +306,14 @@ $baseFontSize: 14px;
 .annotator-toolbar li {
   @include border-radius(4px);
   @include smallshadow;
-  @include transition(max-height .25s);
+  @include transition-property(left, height, margin-bottom);
+  @include transition-duration(.25s);
+  @include transition-delay(0);
+  @include transition-timing-function(cubic-bezier(0, .55, .1, 1));
   background: $white;
   border: solid 1px $grayLighter;
+  left: 0;
+  margin-bottom: 5px;
   overflow: hidden;
   position: relative;
   height: 30px;
@@ -329,12 +323,18 @@ $baseFontSize: 14px;
     @include border-radius(4px 0 0 4px);
     @include box-shadow(none);
     border-right-style: none;
-    left: 0;
     width: 36px;
+    z-index: 1;
   }
 
   &.pushed {
     @include box-shadow(none);
+    left: 3px;
+    z-index: 1;
+
+    a, a:hover, a:active, a:visited, a:link, a:link:hover {
+      color: $linkColor;
+    }
   }
 
   a, a:hover, a:active, a:visited, a:link, a:link:hover {
@@ -349,8 +349,12 @@ $baseFontSize: 14px;
     color: rgba(200, 200, 200, .3);
 
     text-decoration: none;
+    text-shadow:
+    0 0 2px $grayLightest,
+    0 0 0 $gray;
 
     &:focus { outline: 0; }
+    &:hover { color: $linkColorHover; }
 
     &.tri-icon {
       text-shadow:
@@ -359,16 +363,6 @@ $baseFontSize: 14px;
 
       &:hover {
         color: fade-out($grayLightest, .9);
-      }
-    }
-
-    &.alwaysonhighlights-icon, &.highlighter-icon, &.commenter-icon {
-      text-shadow:
-      0 0 2px $grayLightest,
-      0 0 0 $gray;
-
-      &:hover {
-        color: $linkColorHover;
       }
     }
   }
