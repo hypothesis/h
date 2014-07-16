@@ -42,8 +42,6 @@ class App
   ) ->
     {plugins, host, providers} = annotator
 
-    _authTimeout = null
-
     _reset = =>
       delete annotator.ongoing_edit
       base = angular.copy @scope
@@ -51,19 +49,6 @@ class App
         frame: $scope.frame or @scope.frame
         socialView: annotator.socialView
         ongoingHighlightSwitch: false
-
-    _startAuthTimeout = ->
-      # Reset the auth forms after five minutes of inactivity
-      if _authTimeout
-        $timeout.cancel _authTimeout
-
-      _authTimeout = $timeout ->
-        # Skip the reset if we're logged in
-        unless $scope.model.persona
-          $scope.$broadcast 'reset'
-          flash 'info',
-            'For your security, the forms have been reset due to inactivity.'
-      , 300000
 
     _reset()
 
@@ -84,11 +69,6 @@ class App
         $i.triggerHandler('change')
         $i.triggerHandler('input')
     , 200  # We hope this is long enough
-
-    $scope.$watchCollection 'model', ->
-      # (Re)start (i.e., delay) the authentication form timeout
-      unless $scope.sheet.collapsed
-        _startAuthTimeout()
 
     $scope.$watch 'model.personas', (newValue, oldValue) =>
       if newValue?.length
@@ -190,6 +170,13 @@ class App
       $scope.updater.then (sock) ->
         filter = streamfilter.getFilter()
         sock.send(JSON.stringify({filter}))
+
+    $scope.$on 'authTimeout', ->
+      # Skip the reset if we're logged in
+      unless $scope.model.persona
+        $scope.$broadcast 'reset'
+        flash 'info',
+          'For your security, the forms have been reset due to inactivity.'
 
     $scope.$on 'showAuth', (event, show=true) ->
       $scope.sheet.collapsed = !show
@@ -698,13 +685,15 @@ class Annotation
 
 
 class Auth
-  this.$inject = ['$scope', 'session']
-  constructor: (   $scope,   session) ->
+  this.$inject = ['$scope', '$timeout', 'session']
+  constructor: (   $scope,   $timeout,   session) ->
     base =
       username: null
       email: null
       password: null
       code: null
+
+    _timeout = null
 
     _reset = ->
       delete $scope.errors
@@ -719,7 +708,17 @@ class Auth
       for field, error of errors
         $scope.errors[form][field] = error
 
+    _startTimeout = ->
+      # Reset the auth forms after five minutes of inactivity
+      if _timeout then $timeout.cancel _timeout
+      _timeout = $timeout (-> $scope.$emit 'authTimeout'), 3000000
+
     $scope.$on 'reset', _reset
+
+    $scope.$watchCollection 'model', ->
+      # (Re)start (i.e., delay) the authentication form timeout
+      unless $scope.sheet.collapsed
+        _startTimeout()
 
     $scope.submit = (form) ->
       angular.extend session, $scope.model
