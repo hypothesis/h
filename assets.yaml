@@ -195,6 +195,11 @@ jquery_ui_js:
         - h:lib/jquery.ui.effect-highlight.js
 
 # Polyfills
+autofill:
+  filter: uglifyjs
+  output: lib/polyfills/autofill-event.min.js
+  contents:
+    - h:lib/polyfills/autofill-event.js
 raf:
   filters: uglifyjs
   output: lib/polyfills/raf.min.js
@@ -317,6 +322,7 @@ app_js:
     - jwz
     - momentjs
     - pagedown
+    - autofill
     - raf
     - sockjs
     - jquery_ui_js
@@ -376,7 +382,6 @@ inject_js:
     - jquery
     - jquery_scrollintoview
     - jquery_ui_js
-    - lib/polyfills/autofill-event.js
     - jschannel
     - gettext
     - annotator_i18n
