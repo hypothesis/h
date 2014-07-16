@@ -24,20 +24,18 @@ class StreamSearch
      $location,   $scope,   $rootScope,
      queryparser,   session,   streamfilter
   ) ->
-    # Create the base filter
-    filter =
-      streamfilter
-        .resetFilter()
-        .setMatchPolicyIncludeAll()
-        .setPastDataHits(50)
+    # Initialize the base filter
+    streamfilter
+      .resetFilter()
+      .setMatchPolicyIncludeAll()
+      .setPastDataHits(50)
 
     # Apply query clauses
-    queryparser.populateFilter filter, $location.search()
+    queryparser.populateFilter streamfilter, $location.search()
 
-    # Update the subscription
-    session.$promise.then ->
-      $scope.updater.then (sock) ->
-         sock.send(JSON.stringify(filter: filter.getFilter()))
+    $scope.updater?.then (sock) ->
+      filter = streamfilter.getFilter()
+      sock.send(JSON.stringify({filter}))
 
     $rootScope.annotations = []
     $rootScope.applyView "Document"  # Non-sensical, but best for the moment
@@ -50,10 +48,6 @@ class StreamSearch
         $location.search query
 
     $scope.search.clear = ->
-      filter =
-        streamfilter
-          .resetFilter()
-          .setPastDataHits(50)
       $location.search({})
 
     $scope.openDetails = (annotation) ->

@@ -67,10 +67,15 @@ class App
 
     _reset()
 
-    session.$promise.then (data) ->
-      angular.extend $scope.model, data
-      unless data.personas?.length
-        $scope.initUpdater()
+    annotator.subscribe 'serviceDiscovery', (options) ->
+      annotator.options.Store ?= {}
+      angular.extend annotator.options.Store, options
+
+      session.$promise.then (data) ->
+        angular.extend $scope.model, data
+        unless data.personas?.length
+          $scope.initUpdater()
+          $scope.reloadAnnotations()
 
     # Update scope with auto-filled form field values
     $timeout ->
@@ -174,6 +179,18 @@ class App
           $element.find('.visual-search').find('input').last().focus()
         , 10
 
+    $scope.$watch 'store.entities', (entities, oldEntities) ->
+      return if entities is oldEntities
+
+      if entities.length
+        streamfilter
+          .resetFilter()
+          .addClause('/uri', 'one_of', entities)
+
+      $scope.updater.then (sock) ->
+        filter = streamfilter.getFilter()
+        sock.send(JSON.stringify({filter}))
+
     $scope.$on 'showAuth', (event, show=true) ->
       $scope.sheet.collapsed = !show
 
@@ -266,14 +283,6 @@ class App
       unless next.$$route? then return
 
       unless next.$$route.originalPath is '/stream'
-        session.$promise.then ->
-          $scope.updater.then (sock) ->
-            $timeout ->
-              entities = Object.keys(plugins.Store?.entities or {})
-              streamfilter.resetFilter().addClause('/uri', 'one_of', entities)
-              filter = streamfilter.getFilter()
-              sock.send(JSON.stringify(filter: filter))
-
         $scope.search.update = (searchCollection) ->
           return unless annotator.discardDrafts()
           return unless searchCollection.models.length
@@ -305,14 +314,18 @@ class App
           $scope.show_search = false
 
     $scope.reloadAnnotations = ->
-      $rootScope.applyView "Screen"
-      return unless plugins.Store
-      $scope.$root.annotations = []
+      Store = plugins.Store
+
+      delete plugins.Store
+      annotator.addPlugin 'Store', annotator.options.Store
+
       annotator.threading.thread []
       annotator.threading.idTable = {}
 
-      Store = plugins.Store
-      annotations = Store.annotations.slice()
+      $scope.$root.annotations = []
+      $scope.store = plugins.Store
+
+      return unless Store
 
       # XXX: Hacky hacky stuff to ensure that any search requests in-flight
       # at this time have no effect when they resolve and that future events
@@ -330,8 +343,6 @@ class App
       # * Make the update function into a noop.
       Store.updateAnnotation = angular.noop
       # * Remove the plugin and re-add it to the annotator.
-      delete plugins.Store
-      annotator.addPlugin 'Store', annotator.options.Store
 
       # Even though most operations on the old Store are now noops the Annotator
       # itself may still be setting up previously fetched annotatiosn. We may
@@ -343,6 +354,7 @@ class App
       # important when many annotations are loading as authentication is
       # changing. It's all so ugly it makes me cry, though. Someone help
       # restore sanity?
+      annotations = Store.annotations.slice()
       cleanup = (loaded) ->
         $timeout ->  # Give the threading plugin time to thread this annotation
           deleted = []
