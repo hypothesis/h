@@ -260,6 +260,8 @@ class App
     $scope.search.update = angular.noop
     $scope.search.clear = angular.noop
 
+    $scope.show_search = Object.keys($scope.query).length > 0
+
     $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
       unless next.$$route? then return
 
