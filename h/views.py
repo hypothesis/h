@@ -88,7 +88,7 @@ class AnnotationController(object):
             d['quote'] = context.quote
             context['references'] = []
 
-        if not 'deleted' in context:
+        if 'deleted' not in context:
             context['deleted'] = False
 
         context['date'] = context['updated']
