@@ -123,21 +123,8 @@ button, input[type=submit], .btn {
   span.errorMsg { @extend .visuallyhidden; }
 }
 
-.inline-block {
-  display: inline-block
-}
-
 .small {
   font-size: .8em;
-}
-
-.icon-hidden {
-  &:before {
-    color: transparent;
-  }
-  &:after {
-    color: transparent;
-  }
 }
 
 //Candidate for cleanup
@@ -453,29 +440,6 @@ blockquote {
   text-align: center
 }
 
-//VISIBILITY
-.visibility {
-  .dropdown-toggle {
-    @include fonticon("\3c", right);
-  }
-  li {
-    @include fonticon("\35", right);
-    &:after {
-      opacity: 0;
-    }
-    &.selected {
-      &:after {
-        opacity: 1;
-      }
-    }
-  }
-  .vis-public {
-    border-bottom: 1px solid $grayLighter;
-    margin: .4em 0 0;
-    padding: 0 .5em 0;
-  }
-}
-
 
 //TABS////////////////////////////////
 .nav-tabs {
@@ -532,16 +496,6 @@ blockquote {
       display: inherit !important;
     }
   }
-}
-
-
-//KNOCKOUT///////////
-//Provides a knockout background
-.knockout {
-  @include border-radius(8px);
-  @include pie-clearfix;
-  @include box-shadow(inset 1px 1px 3px hsla(0, 0%, 0%, .1));
-  padding: 16px;
 }
 
 
@@ -663,6 +617,13 @@ blockquote {
     margin-left: -$thread-padding;
   }
 
+  .load-more {
+    @include pie-clearfix;
+    font-family: $sansFontFamily;
+    font-weight:bold;
+    font-size: .8em;
+  }
+
   .thread {
     border-left: 1px dotted $grayLight;
     height: 100%;
@@ -713,10 +674,6 @@ blockquote {
     }
   }
 
-  .search-collapsed {
-    background-image: url("../images/plus_1.png");
-  }
-
   &.collapsed {
     display: block !important;
 
@@ -750,7 +707,6 @@ blockquote {
     }
   }
 }
-
 
 .thread.ng-enter,
 .thread.ng-leave,
@@ -807,25 +763,6 @@ blockquote {
   }
 }
 
-//STREAMER////////////////////////////////
-//This is specific to the streamer page
-.main-content {
-  margin:0;
-}
-
-.knockout {
-  .center {
-    text-align: center;
-  }
-}
-
-.button_controls {
-  margin-left: 1em;
-  margin-right: 1em;
-  margin-bottom: .5em;
-  margin-top: .5em;
-}
-
 .stream-list {
   & > * {
     margin-bottom: .72em;
@@ -834,94 +771,6 @@ blockquote {
   .card-emphasis {
     @include box-shadow(6px 6px 8px -2px $grayLight);
   }
-}
-
-.no-overflow {
-  overflow: hidden;
-}
-
-.strech {
-  width: 100%;
-  white-space: nowrap;
-}
-
-.filter-body {
- overflow: visible;
- padding-bottom: 1.5em;
-}
-
-.side-bar-right {
-    width: 15em;
-    height: 100%;
-    position: absolute;
-    top: 0px;
-    right: 0px;
-}
-
-.side-bar-left {
-    width: 30em;
-    height: 100%;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-}
-
-.card-grid {
-  .full-quote {
-    margin: 0;
-    padding-left: 2em;
-    padding-right: 1.75em;
-  }
-}
-@mixin sidebar_animation {
-  -webkit-transition: 1s linear all;
-  -moz-transition: 1s linear all;
-  -o-transition: 1s linear all;
-  transition: 1s linear all;
-  overflow-y:hidden;
-}
-
-.sidebar_anim_show_left-setup {
-  @include sidebar_animation;
-  opacity: 0;
-  width: 0em;
-}
-
-.sidebar_anim_show_left-setup.sidebar_anim_show_left-start {
-  opacity: 1;
-  width: 30em;
-}
-
-.sidebar_anim_show_right-setup {
-  @include sidebar_animation;
-  opacity: 0;
-  width: 0em;
-}
-
-.sidebar_anim_show_right-setup.sidebar_anim_show_right-start {
-  opacity: 1;
-  width: 15em;
-}
-.sidebar_anim_hide_right-setup {
-  @include sidebar_animation;
-  opacity: 1;
-  width: 15em;
-}
-
-.sidebar_anim_hide_right-setup.sidebar_anim_hide_right-start {
-  opacity: 0;
-  width: 0em;
-}
-
-.sidebar_anim_hide_left-setup {
-  @include sidebar_animation;
-  opacity: 1;
-  width: 30em;
-}
-
-.sidebar_anim_hide_left-setup.sidebar_anim_hide_left-start {
-  opacity: 0;
-  width: 0em;
 }
 
 //SEARCH HIGHLIGHTS////////////////////////////////
@@ -942,62 +791,7 @@ blockquote {
   }
 }
 
-.searchbar-border {
-  height: auto;
-  padding-bottom: 2em;
-}
-
-.searchbar-error {
-  color: red;
-}
-
-.menu-width {
-  width: 20em;
-  white-space: pre-line;
-}
-
 pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
-.string { color: green; }
-.number { color: darkorange; }
-.boolean { color: blue; }
-.null { color: magenta; }
-.key { color: red; }
-
-.sidebar-content {
-  padding-top: 4em;
-  overflow-x:hidden;
-  overflow-y:hidden;
-}
-
-.annotation-header-border {
-  padding: .5em;
-  overflow: hidden;
-}
-
-.annotation-header-width {
-  padding: .2em;
-  overflow: hidden;
-}
-
-.annotation-header-favicon {
-  width: 1em;
-  vertical-align: middle;
-}
-
-.small-padding {
-  padding-top: 1em;
-  padding-bottom: 1em;
-}
-
-//A grid of cards
-.card-grid {
-  position: relative;
-  margin: 0 -1em;
-  & > * {
-    padding: 1em;
-    margin: -1em 0;
-  }
-}
 
 // Tags for the annotations
 .tags {
@@ -1038,12 +832,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     li { padding-right: .3em; }
     li.tagit-choice { margin-top: .1em; }
   }
-}
-
-h3.stream {
-  letter-spacing: normal;
-  word-spacing: normal;
-  margin-top: 0;
 }
 
 //Visual Search////////////////////////////////
@@ -1095,19 +883,7 @@ h3.stream {
   }
 }
 
-
-.thread {
-  .load-more {
-    @include pie-clearfix;
-    font-family: $sansFontFamily;
-    font-weight:bold;
-    font-size: .8em;
-  }
-}
-
-
 // View and Sort tabs ////////////////////
-
 .viewsort {
   @include single-transition(top, .25s);
   @include transition-timing-function(cubic-bezier(0, 1, .55, 1));
