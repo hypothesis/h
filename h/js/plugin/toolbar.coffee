@@ -2,7 +2,7 @@ $ = Annotator.$
 
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
   events:
-    '.annotator-toolbar li:first-child mouseenter': 'show'
+    '.annotator-toolbar mouseenter': 'show'
     '.annotator-toolbar mouseleave': 'hide'
     'setTool': 'onSetTool'
     'setVisibleHighlights': 'onSetVisibleHighlights'
