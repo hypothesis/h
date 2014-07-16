@@ -361,7 +361,7 @@ class App
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup
 
-    $scope.initUpdater = ->
+    $scope.initUpdater = (failureCount=0) ->
       _dfdSock = $q.defer()
       _sock = socket()
 
@@ -372,10 +372,17 @@ class App
       $scope.updater = _dfdSock.promise
 
       _sock.onopen = ->
+        failureCount = 0
         _dfdSock.resolve(_sock)
+        _dfdSock = null
 
       _sock.onclose = ->
-        $scope.initUpdater()
+        failureCount = Math.min(10, ++failureCount)
+        slots = Math.random() * (Math.pow(2, failureCount) - 1)
+        $timeout ->
+          _retry = $scope.initUpdater(failureCount)
+          _dfdSock?.resolve(_retry)
+        , slots * 500
 
       _sock.onmessage = (msg) ->
         #console.log msg
@@ -395,6 +402,8 @@ class App
           $scope.applyUpdates action, owndata
         else
           $scope.applyUpdates action, data
+
+      _dfdSock.promise
 
     $scope.markAnnotationUpdate = (data) ->
       for annotation in data
