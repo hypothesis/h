@@ -74,7 +74,7 @@ $neutral: #0171ba;
 $highlightColor: rgba(201, 215, 241, .5);
 $highlightModeColor: rgba(255, 255, 60, .5);
 $thread-padding: 1em;
-$threadexp-width: 10px;
+$threadexp-width: .72em;
 $score-width: 40px;
 $score-height: $score-width;
 $heatmap-width: 22px;
@@ -169,18 +169,16 @@ $input-border-radius: 2px;
 
 
 //FONTICON////////////////////////////////
-@mixin fonticon($char, $iconside, $offset: 0) {
+@mixin fonticon($char, $iconside, $offset: .5em) {
   text-decoration: none;
-  line-height: 1;
   cursor: pointer;
   &:hover {
     opacity: 1;
   }
   @if $iconside == left {
     &:before {
-      content: $char + '\a0' !important;
+      content: $char !important;
       font-family: 'icomoon';
-      font-style: normal;
       margin-right: $offset;
       speak: none;
       font-weight: normal;
@@ -188,28 +186,17 @@ $input-border-radius: 2px;
     &:after {
       content: "" !important;
     }
-    &:empty {
-      &:before {
-        content: $char !important;
-      }
-    }
   }
   @if $iconside == right {
     &:before {
       content: "" !important;
     }
     &:after {
-      content: '\a0' + $char !important;
+      content: $char !important;
       font-family: 'icomoon';
-      font-style: normal;
       margin-left: $offset;
       speak: none;
       font-weight: normal;
-    }
-    &:empty {
-      &:after {
-        content: $char !important;
-      }
     }
   }
 }
@@ -236,6 +223,11 @@ $input-border-radius: 2px;
   &.show, &.annotator-notice-show {
     opacity: 1;
   }
+}
+
+.annotator-hide {
+  display: none;
+  visibility: hidden;
 }
 
 .annotator-notice-info {

@@ -19,11 +19,11 @@
         <div class="search-container">
           <div ng-show="show_search"
                class="visual-search visual-container"
-               query="query"
-               onsearch="search(this)"
+               query="search.query"
+               onsearch="search.update(this)"
                facets="searchFacets"
                values="searchValues"
-               onclear="searchClear()"
+               onclear="search.clear()"
                ></div>
           <div ng-hide="show_search"
                class="visual-container"
@@ -72,7 +72,7 @@
     <!-- / Toolbar -->
 
     <!-- Content -->
-    <div id="wrapper" class="content">
+    <div id="wrapper">
       <!-- View Sort Controls -->
       <div class="viewsort"
            ng-mouseenter="showViewSort()"
@@ -105,7 +105,7 @@
       <!-- / View Sort Controls -->
 
       <!-- Angular view -->
-      <div ng-view=""></div>
+      <div class="content" ng-view="" whenscrolled="loadMore(10)"></div>
     </div>
     <!-- / Content -->
 

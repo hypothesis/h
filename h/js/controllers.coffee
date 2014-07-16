@@ -33,11 +33,11 @@ class App
     ]
 
   this.$inject = [
-    '$element', '$filter', '$http', '$location', '$rootScope', '$scope', '$timeout',
+    '$element', '$location', '$q', '$rootScope', '$route', '$scope', '$timeout',
     'annotator', 'flash', 'session', 'socket', 'streamfilter', 'viewFilter'
   ]
   constructor: (
-     $element,   $filter,   $http,   $location,   $rootScope,   $scope,   $timeout
+     $element,   $location,   $q,   $rootScope,   $route,   $scope,   $timeout
      annotator,   flash,   session,   socket,   streamfilter,   viewFilter
   ) ->
     {plugins, host, providers} = annotator
@@ -67,9 +67,15 @@ class App
 
     _reset()
 
-    session.$promise.then (data) ->
-      angular.extend $scope.model, data
-      $scope.initUpdater()
+    annotator.subscribe 'serviceDiscovery', (options) ->
+      annotator.options.Store ?= {}
+      angular.extend annotator.options.Store, options
+
+      session.$promise.then (data) ->
+        angular.extend $scope.model, data
+        unless data.personas?.length
+          $scope.initUpdater()
+          $scope.reloadAnnotations()
 
     # Update scope with auto-filled form field values
     $timeout ->
@@ -173,6 +179,18 @@ class App
           $element.find('.visual-search').find('input').last().focus()
         , 10
 
+    $scope.$watch 'store.entities', (entities, oldEntities) ->
+      return if entities is oldEntities
+
+      if entities.length
+        streamfilter
+          .resetFilter()
+          .addClause('/uri', 'one_of', entities)
+
+      $scope.updater.then (sock) ->
+        filter = streamfilter.getFilter()
+        sock.send(JSON.stringify({filter}))
+
     $scope.$on 'showAuth', (event, show=true) ->
       $scope.sheet.collapsed = !show
 
@@ -255,43 +273,59 @@ class App
     $scope.searchFacets = SEARCH_FACETS
     $scope.searchValues = SEARCH_VALUES
 
-    $scope.search = (searchCollection) ->
-      return unless annotator.discardDrafts()
-      return unless searchCollection.models.length
+    $scope.search = {}
+    $scope.search.update = angular.noop
+    $scope.search.clear = angular.noop
 
-      matched = []
-      query =
-        tags: []
-        quote: []
+    $scope.show_search = Object.keys($scope.query).length > 0
 
-      for item in searchCollection.models
-        {category, value} = item.attributes
+    $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
+      unless next.$$route? then return
 
-        # Stuff we need to collect
-        switch
-          when category in ['text', 'user', 'time', 'group']
-            query[category] = value
-          when category == 'tags'
-            # Tags are specials, because we collect those into an array
-            query.tags.push value.toLowerCase()
-          when category == 'quote'
-            query.quote = query.quote.concat(value.split(/\s+/))
+      unless next.$$route.originalPath is '/stream'
+        $scope.search.update = (searchCollection) ->
+          return unless annotator.discardDrafts()
+          return unless searchCollection.models.length
 
-      $location.path('/page_search').search(query)
+          models = searchCollection.models
+          matched = []
+          query =
+            tags: []
+            quote: []
 
-    $scope.searchClear = ->
-      $location.url('/viewer')
-      $scope.show_search = false
+          for item in models
+            {category, value} = item.attributes
+
+            # Stuff we need to collect
+            switch
+              when category in ['text', 'user', 'time', 'group']
+                query[category] = value
+              when category == 'tags'
+                # Tags are specials, because we collect those into an array
+                query.tags.push value.toLowerCase()
+              when category == 'quote'
+                query.quote = query.quote.concat(value.split(/\s+/))
+
+          unless angular.equals $location.search(), query
+            $location.path('/page_search').search(query)
+
+        $scope.search.clear = ->
+          $location.url('/viewer')
+          $scope.show_search = false
 
     $scope.reloadAnnotations = ->
-      $rootScope.applyView "Screen"
-      return unless plugins.Store
-      $scope.$root.annotations = []
+      Store = plugins.Store
+
+      delete plugins.Store
+      annotator.addPlugin 'Store', annotator.options.Store
+
       annotator.threading.thread []
       annotator.threading.idTable = {}
 
-      Store = plugins.Store
-      annotations = Store.annotations.slice()
+      $scope.$root.annotations = []
+      $scope.store = plugins.Store
+
+      return unless Store
 
       # XXX: Hacky hacky stuff to ensure that any search requests in-flight
       # at this time have no effect when they resolve and that future events
@@ -309,8 +343,6 @@ class App
       # * Make the update function into a noop.
       Store.updateAnnotation = angular.noop
       # * Remove the plugin and re-add it to the annotator.
-      delete plugins.Store
-      annotator.addPlugin 'Store', annotator.options.Store
 
       # Even though most operations on the old Store are now noops the Annotator
       # itself may still be setting up previously fetched annotatiosn. We may
@@ -322,6 +354,7 @@ class App
       # important when many annotations are loading as authentication is
       # changing. It's all so ugly it makes me cry, though. Someone help
       # restore sanity?
+      annotations = Store.annotations.slice()
       cleanup = (loaded) ->
         $timeout ->  # Give the threading plugin time to thread this annotation
           deleted = []
@@ -337,27 +370,35 @@ class App
           annotations = (a for a in annotations when a not in deleted)
           if annotations.length is 0
             annotator.unsubscribe 'annotationsLoaded', cleanup
-            $scope.$broadcast 'ReRenderPageSearch'
+            $route.reload()
         , 10
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup
 
-    $scope.initUpdater = ->
-      filter =
-        streamfilter
-          .setPastDataNone()
-          .setMatchPolicyIncludeAny()
-          .addClause('/uri', 'one_of', Object.keys(plugins.Store.entities))
-          .getFilter()
+    $scope.initUpdater = (failureCount=0) ->
+      _dfdSock = $q.defer()
+      _sock = socket()
 
-      $scope.updater = socket()
-      $scope.updater.onopen = ->
-        $scope.updater.send(JSON.stringify({filter}))
+      $scope.updater?.then (sock) ->
+        sock.onclose = null  # break automatic reconnect
+        sock.close()
 
-      $scope.updater.onclose = =>
-        $timeout $scope.initUpdater, 60000
+      $scope.updater = _dfdSock.promise
 
-      $scope.updater.onmessage = (msg) =>
+      _sock.onopen = ->
+        failureCount = 0
+        _dfdSock.resolve(_sock)
+        _dfdSock = null
+
+      _sock.onclose = ->
+        failureCount = Math.min(10, ++failureCount)
+        slots = Math.random() * (Math.pow(2, failureCount) - 1)
+        $timeout ->
+          _retry = $scope.initUpdater(failureCount)
+          _dfdSock?.resolve(_retry)
+        , slots * 500
+
+      _sock.onmessage = (msg) ->
         #console.log msg
         unless msg.data.type? and msg.data.type is 'annotation-notification'
           return
@@ -376,7 +417,9 @@ class App
         else
           $scope.applyUpdates action, data
 
-    $scope.markAnnotationUpdate = (data) =>
+      _dfdSock.promise
+
+    $scope.markAnnotationUpdate = (data) ->
       for annotation in data
         # We need to flag the top level
         if annotation.references?
@@ -389,9 +432,30 @@ class App
         else
           annotation._updatedAnnotation = true
 
-    $scope.applyUpdates = (action, data) =>
+    $scope.applyUpdates = (action, data) ->
+      return unless data?.length
+      if action == 'past'
+        action = 'create'
+
+      inRootScope = (annotation) ->
+        for ann in $rootScope.annotations
+          return true if ann.id is annotation.id
+        false
+
       switch action
         when 'create'
+          # Sorting the data for updates.
+          # Because sometimes a reply can arrive in the same package as the
+          # Root annotation, we have to make a len(references, updates sort
+          data.sort (a,b) ->
+            ref_a = a.references?.length or 0
+            ref_b = b.references?.length or 0
+            return ref_a - ref_b if ref_a != ref_b
+
+            a_upd = if a.updated? then new Date(a.updated) else new Date()
+            b_upd = if b.updated? then new Date(b.updated) else new Date()
+            a_upd.getTime() - b_upd.getTime()
+
           # XXX: Temporary workaround until solving the race condition for annotationsLoaded event
           # Between threading and bridge plugins
           for annotation in data
@@ -399,23 +463,37 @@ class App
 
           $scope.markAnnotationUpdate data
 
-          $scope.$apply =>
-            if plugins.Store?
-              plugins.Store._onLoadAnnotations data
-              # XXX: Ugly workaround to update the scope content
+          if plugins.Store?
+            plugins.Store._onLoadAnnotations data
+            # XXX: Ugly workaround to update the scope content
+
+            for annotation in data
               switch $rootScope.viewState.view
                 when 'Document'
                   unless annotator.isComment(annotation) or annotation.references?
-                    $rootScope.annotations.push annotation
+                    $rootScope.annotations.push annotation if not inRootScope(annotation)
                 when 'Comments'
                   if annotator.isComment(annotation)
-                    $rootScope.annotations.push annotation
+                    $rootScope.annotations.push annotation if not inRootScope(annotation)
+                else
+                    $rootScope.annotations.push annotation if not inRootScope(annotation)
         when 'update'
           $scope.markAnnotationUpdate data
           plugins.Store._onLoadAnnotations data
+
+          if $location.path() is '/stream'
+            for annotation in data
+              $rootScope.annotations.push annotation if not inRootScope(annotation)
         when 'delete'
           $scope.markAnnotationUpdate data
+
           for annotation in data
+            # Remove it from the rootScope too
+            for ann, index in $rootScope.annotations
+              if ann.id is annotation.id
+                $rootScope.annotations.splice(index, 1)
+                break
+
             container = annotator.threading.getContainer annotation.id
             if container.message
               # XXX: This is a temporary workaround until real client-side only
@@ -423,6 +501,9 @@ class App
               index = plugins.Store.annotations.indexOf container.message
               plugins.Store.annotations[index..index] = [] if index > -1
               annotator.deleteAnnotation container.message
+
+      # Refresh page search
+      $route.reload() if $location.path() is '/page_search' and data.length
 
       # Finally blink the changed tabs
       $timeout =>
@@ -706,7 +787,7 @@ class Editor
 class Viewer
   this.$inject = [
     '$location', '$rootScope', '$routeParams', '$scope',
-    'annotator', 'viewFilter'
+    'annotator'
   ]
   constructor: (
     $location, $rootScope, $routeParams, $scope,
@@ -743,6 +824,7 @@ class Search
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
     $scope.filter_orderBy = $filter('orderBy')
     $scope.matches = []
+    $scope.search.query = $location.search()
     $scope.render_order = {}
     $scope.render_pos = {}
     $scope.ann_info =
@@ -929,7 +1011,6 @@ class Search
       for thread in threads
         $rootScope.focus thread.message, true
 
-    $scope.$on 'ReRenderPageSearch', refresh
     $scope.$on '$routeUpdate', refresh
 
     $scope.getThreadId = (id) ->

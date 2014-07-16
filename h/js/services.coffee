@@ -8,7 +8,6 @@ class Hypothesis extends Annotator
     'annotationCreated': 'updateAncestors'
     'annotationUpdated': 'updateAncestors'
     'annotationDeleted': 'updateAncestors'
-    'serviceDiscovery': 'serviceDiscovery'
 
   # Plugin configuration
   options:
@@ -506,13 +505,16 @@ class Hypothesis extends Annotator
       query = limit: 1000
       @annotator.considerSocialView.call @annotator, query
 
-      this.entities ?= {}
+      entities = {}
+
       for p in @annotator.providers
         for uri in p.entities
-          unless this.entities[uri]?
+          unless entities[uri]?
             console.log "Loading annotations for: " + uri
-            this.entities[uri] = true
+            entities[uri] = true
             this.loadAnnotationsFromSearch (angular.extend {}, query, uri: uri)
+
+      this.entities = Object.keys(entities)
 
     # When the store plugin finishes a request, update the annotation
     # using a monkey-patched update function which updates the threading
@@ -576,11 +578,6 @@ class Hypothesis extends Annotator
         $timeout (=> @plugins.Bridge.updateAnnotation rel), 10
         this.updateAncestors(rel)
         break  # Only the nearest existing ancestor, the rest is by induction.
-
-  serviceDiscovery: (options) =>
-    @options.Store ?= {}
-    angular.extend @options.Store, options
-    this.addPlugin 'Store', @options.Store
 
   setTool: (name) =>
     return if name is @tool

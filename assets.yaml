@@ -410,13 +410,14 @@ inject_css:
       depends:
         - h:css/base.scss
 
-sidebar:
+topbar:
+  output: css/topbar.min.css
   filters: cleancss
-  output: css/sidebar.min.css
   contents:
-    - output: css/sidebar.css
+    - output: css/topbar.css
       filters: compass, cssrewrite
       contents:
-        - h:css/sidebar.scss
+        - h:css/topbar.scss
       depends:
         - h:css/base.scss
+        - h:css/responsive.scss

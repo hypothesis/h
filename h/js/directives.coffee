@@ -386,15 +386,6 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
   template: '<a target="_blank" href="{{shared_link}}" title="{{hint}}">{{ftime | date:mediumDate}}</a>'
 ]
 
-streamviewer = [ ->
-  link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
-
-  require: '?ngModel'
-  restrict: 'E'
-  templateUrl: 'streamviewer.html'
-]
-
 
 visualSearch = ['$parse', ($parse) ->
   link: (scope, elem, attr, ctrl) ->
@@ -424,15 +415,13 @@ visualSearch = ['$parse', ($parse) ->
           callback(values or [], preserveOrder: true)
 
     scope.$watch attr.query, (query) ->
-      terms =
-        for k, v of query
-          continue unless v?.length
-          if ' ' in v
-            "#{k}: \"#{v}\""
-          else
-            "#{k}: #{v}"
-
-      _vs.searchBox.value(terms.join(' '))
+      p = 0
+      _vs.searchBox.value('')
+      for k, values of query
+        continue unless values?.length
+        unless angular.isArray values then values = [values]
+        for v in values
+          _vs.searchBox.addFacet(k, v, p++)
       _search(scope, {"this": _vs.searchQuery})
 
   restrict: 'C'
@@ -444,9 +433,7 @@ whenscrolled = ['$window', ($window) ->
     $window.on 'scroll', ->
       windowBottom = $window.height() + $window.scrollTop()
       elementBottom = elem.offset().top + elem.height()
-      remaining = elementBottom - windowBottom
-      shouldScroll = remaining <= $window.height() * 0
-      if shouldScroll
+      if elementBottom > 0 and elementBottom - windowBottom <= 0
         scope.$apply attr.whenscrolled
 ]
 
@@ -462,6 +449,5 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('username', username)
 .directive('userPicker', userPicker)
 .directive('repeatAnim', repeatAnim)
-.directive('streamviewer', streamviewer)
 .directive('visualSearch', visualSearch)
 .directive('whenscrolled', whenscrolled)
