@@ -62,14 +62,6 @@ class App
           $scope.initUpdater()
           $scope.reloadAnnotations()
 
-    # Update scope with auto-filled form field values
-    $timeout ->
-      for i in $element.find('input') when i.value
-        $i = angular.element(i)
-        $i.triggerHandler('change')
-        $i.triggerHandler('input')
-    , 200  # We hope this is long enough
-
     $scope.$watch 'model.personas', (newValue, oldValue) =>
       if newValue?.length
         unless $scope.model.persona and $scope.model.persona in newValue
