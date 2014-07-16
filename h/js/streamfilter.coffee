@@ -77,19 +77,10 @@ class QueryParser
     for searchItem in models
       category = searchItem.attributes.category
       value = searchItem.attributes.value
-
-      if category is 'results'
-        categories['results'] = [value]
+      if category of categories
+        categories[category].push value
       else
-        if category is 'text'
-          # Visualsearch sickly automatically cluster the text field
-          # (and only the text filed) into a space separated string
-          catlist = []
-          catlist.push val for val in value.split ' '
-          categories[category] = catlist
-        else
-          if category of categories then categories[category].push value
-          else categories[category] = [value]
+        categories[category] = [value]
     categories
 
   populateFilter: (filter, query) =>
@@ -99,37 +90,33 @@ class QueryParser
       unless values.length then continue
       rule = @rules[category]
 
+      unless angular.isArray values
+        values = [values]
+
       # Now generate the clause with the help of the rule
       exact_match = if rule.exact_match? then rule.exact_match else true
       case_sensitive = if rule.case_sensitive? then rule.case_sensitive else false
       and_or = if rule.and_or? then rule.and_or else 'or'
       mapped_field = if rule.path? then rule.path else '/'+category
 
-      if values.length is 1
+      if and_or is 'or'
+        val_list = ''
+        first = true
+        for val in values
+          unless first then val_list += ',' else first = false
+          value_part = if rule.formatter then rule.formatter val else val
+          val_list += value_part
+        oper_part =
+          if rule.operator? then rule.operator
+          else if exact_match then 'one_of' else 'match_of'
+        filter.addClause mapped_field, oper_part, val_list, case_sensitive, rule.options
+      else
         oper_part =
           if rule.operator? then rule.operator
           else if exact_match then 'equals' else 'matches'
-        value_part = if rule.formatter then rule.formatter values[0] else values[0]
-        filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
-      else
-        if and_or is 'or'
-          val_list = ''
-          first = true
-          for val in values
-            unless first then val_list += ',' else first = false
-            value_part = if rule.formatter then rule.formatter val else val
-            val_list += value_part
-          oper_part =
-            if rule.operator? then rule.operator
-            else if exact_match then 'one_of' else 'match_of'
-          filter.addClause mapped_field, oper_part, val_list, case_sensitive, rule.options
-        else
-          oper_part =
-            if rule.operator? then rule.operator
-            else if exact_match then 'equals' else 'matches'
-          for val in values
-            value_part = if rule.formatter then rule.formatter val else val
-            filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
+        for val in values
+          value_part = if rule.formatter then rule.formatter val else val
+          filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
 
 
 class StreamFilter

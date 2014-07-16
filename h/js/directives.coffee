@@ -415,15 +415,13 @@ visualSearch = ['$parse', ($parse) ->
           callback(values or [], preserveOrder: true)
 
     scope.$watch attr.query, (query) ->
-      terms =
-        for k, v of query
-          continue unless v?.length
-          if ' ' in v
-            "#{k}: \"#{v}\""
-          else
-            "#{k}: #{v}"
-
-      _vs.searchBox.value(terms.join(' '))
+      p = 0
+      _vs.searchBox.value('')
+      for k, values of query
+        continue unless values?.length
+        unless angular.isArray values then values = [values]
+        for v in values
+          _vs.searchBox.addFacet(k, v, p++)
       _search(scope, {"this": _vs.searchQuery})
 
   restrict: 'C'
