@@ -67,7 +67,10 @@ setup(
     name='h',
     version=versioneer.get_version(),
     description='The Internet. Peer-reviewed.',
-    long_description=open('README.rst', 'rt').read(),
+    long_description='\n\n'.join([
+        open('README.rst', 'rt').read(),
+        open('CHANGES.txt', 'rt').read(),
+    ]),
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
