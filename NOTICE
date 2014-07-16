@@ -59,3 +59,7 @@ This product also includes the following third-party components:
    Copyright © 2009-2010 Dominic Baggott
    Copyright © 2009-2010 Ash Berlin
    Copyright © 2011 Christoph Dorn
+
+ * Autofill event polyfill (https://github.com/tbosch/autofill-event)
+
+   Copyright 2014 Google, Inc.
