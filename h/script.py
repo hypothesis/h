@@ -169,8 +169,8 @@ def merge(src, dst):
 @command(usage='CONFIG_FILE')
 def init_db(settings):
     """Create the database models."""
-    store = api.store.store_from_settings(settings)
-    api.store.create_db(store)
+    store = api.store_from_settings(settings)
+    api.create_db(store)
 
     engine = engine_from_config(settings, 'sqlalchemy.')
     bind_engine(engine, should_create=True)
