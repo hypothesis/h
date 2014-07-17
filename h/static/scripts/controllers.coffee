@@ -260,6 +260,9 @@ class App
       $scope.search.show = not angular.equals($location.search(), {})
 
       unless next.$$route.originalPath is '/stream'
+        if current and next.$$route.originalPath is '/a/:id'
+          $scope.reloadAnnotations()
+
         $scope.search.update = (searchCollection) ->
           return unless annotator.discardDrafts()
           return unless searchCollection.models.length
@@ -284,7 +287,10 @@ class App
                 query.quote = query.quote.concat(value.split(/\s+/))
 
           unless angular.equals $location.search(), query
-            $location.path('/page_search').search(query)
+            if $location.path() == '/viewer'
+              $location.path('/page_search').search(query)
+            else
+              $location.path('/stream').search(query)
 
         $scope.search.clear = ->
           $location.url('/viewer')
@@ -300,6 +306,27 @@ class App
 
       $scope.$root.annotations = []
       $scope.store = plugins.Store
+
+      _id = $route.current.params.id
+      _promise = null
+
+      # Load any initial annotations that should be displayed
+      if _id
+        if $scope.loadAnnotations
+          # Load annotations from inline page data
+          plugins.Store._onLoadAnnotations $scope.loadAnnotations
+          delete $scope.loadAnnotations
+          _promise = $scope.loadAnnotations
+        else
+          # Load annotations from the API
+          # XXX: Two requests here is less than ideal
+          _promise = plugins.Store.loadAnnotationsFromSearch({_id})
+            .then ->
+              plugins.Store.loadAnnotationsFromSearch({references: _id})
+
+        $q.when _promise, ->
+          thread = annotator.threading.getContainer _id
+          $scope.$root.annotations = [thread.message]
 
       return unless Store
 
@@ -346,7 +373,7 @@ class App
           annotations = (a for a in annotations when a not in deleted)
           if annotations.length is 0
             annotator.unsubscribe 'annotationsLoaded', cleanup
-            $route.reload()
+            $rootScope.$digest()
         , 10
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup

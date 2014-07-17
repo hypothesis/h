@@ -36,6 +36,20 @@ def model(request):
                 personas=session.get('personas', []))
 
 
+@view_config(
+    layout='app',
+    context='h.models.Annotation',
+    renderer='h:templates/app.pt',
+)
+def annotation(context, request):
+    Store = request.registry.getUtility(interfaces.IStoreClass)
+    referrers = Store(request).search(references=context['id'])
+    annotations = json.dumps([context] + referrers).replace('"', '\'')
+    return {
+        'init': 'loadAnnotations={}'.format(annotations)
+    }
+
+
 @view_config(accept='application/json',  name='app', renderer='json')
 def app(request):
     return dict(status='okay', flash=pop_flash(request), model=model(request))
@@ -62,48 +76,9 @@ def page(context, request):
     return {}
 
 
-@view_defaults(context='h.models.Annotation', layout='annotation')
-class AnnotationController(object):
-    def __init__(self, request):
-        self.request = request
-        self.Store = request.registry.getUtility(interfaces.IStoreClass)
-
-    @view_config(accept='text/html', renderer='h:templates/displayer.pt')
-    def __html__(self):
-        request = self.request
-        context = request.context
-
-        d = url_values_from_document(context)
-        d['annotation'] = context
-
-        referrers = self.Store(request).search(references=context['id'])
-        d['annotation']['referrers'] = referrers
-
-        if context.get('references', []):
-            parent = context.__parent__[context['references'][-1]]
-            d['quoteSource'] = 'annotation'
-            d['quoteUser'] = parent['user']
-            d['quote'] = parent['text']
-        else:
-            d['quoteSource'] = 'document'
-            d['quote'] = context.quote
-            context['references'] = []
-
-        if 'deleted' not in context:
-            context['deleted'] = False
-
-        context['date'] = context['updated']
-
-        return {'annotation': json.dumps(d)}
-
-    @view_config(accept='application/json', renderer='json')
-    def __call__(self):
-        return self.request.context
-
-
 @view_config(
-    context='h.interfaces.IStreamResource',
     layout='app',
+    context='h.interfaces.IStreamResource',
     renderer='h:templates/app.pt',
 )
 def stream(context, request):

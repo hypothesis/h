@@ -163,57 +163,6 @@ class Annotation(annotation.Annotation):
         finally:
             cls.es.conn.indices.open(index=cls.es.index)
 
-    def _nestlist(self, annotations, childTable):
-        outlist = []
-        if annotations is None:
-            return outlist
-
-        annotations = sorted(
-            annotations,
-            key=lambda reply: reply['created'],
-            reverse=True
-        )
-
-        for a in annotations:
-            children = self._nestlist(childTable.get(a['id']), childTable)
-            a['reply_count'] = \
-                sum(c['reply_count'] for c in children) + len(children)
-            a['replies'] = children
-            outlist.append(a)
-        return outlist
-
-    @property
-    def quote(self):
-        if 'target' not in self:
-            return ''
-        quote = ''
-        for target in self['target']:
-            for selector in target['selector']:
-                if selector['type'] == 'TextQuoteSelector':
-                    quote = quote + selector['exact'] + ' '
-
-        return quote
-
-    @reify
-    def referrers(self):
-        request = self.request
-        registry = request.registry
-        store = registry.queryUtility(interfaces.IStoreClass)(request)
-        return store.search(references=self['id'])
-
-    @reify
-    def replies(self):
-        childTable = {}
-
-        for reply in self.referrers:
-            # Add this to its parent.
-            parent = reply.get('references', [])[-1]
-            pointer = childTable.setdefault(parent, [])
-            pointer.append(reply)
-
-        # Create nested list form
-        return self._nestlist(childTable.get(self['id']), childTable)
-
 
 class Document(document.Document):
     pass

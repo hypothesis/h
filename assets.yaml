@@ -346,7 +346,6 @@ app_js:
             - scripts/filters.coffee
             - scripts/directives.coffee
             - scripts/app_directives.coffee
-            - scripts/displayer.coffee
             - scripts/helpers.coffee
             - scripts/session.coffee
             - scripts/services.coffee
