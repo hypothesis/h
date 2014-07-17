@@ -36,7 +36,7 @@ class WebassetsResourceRegistry(object):
             # check asset type (js or css), modulo cache-busting qs
             for thing in ('js', 'css'):
                 if re.search(r'\.%s(\??[^/]+)?$' % thing, source):
-                    if not source in result[thing]:
+                    if source not in result[thing]:
                         result[thing].append(source)
 
         return result
