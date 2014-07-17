@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
-from os import makedirs, mkdir, walk
+from os import chdir, getcwd, makedirs, mkdir, walk
 from os.path import abspath, exists, join, normpath
 from shutil import copyfile, rmtree
 from urlparse import urljoin, urlparse, urlunparse, uses_netloc, uses_relative
@@ -17,7 +17,6 @@ from pyramid.path import AssetResolver
 from pyramid.request import Request
 from pyramid.scripts import pserve
 from pyramid.scripting import prepare
-from pyramid.settings import asbool
 from pyramid.view import render_view
 from pyramid_basemodel import bind_engine
 from sqlalchemy import engine_from_config
@@ -101,7 +100,7 @@ def add_base_url(event):
     assets_env = request.webassets_env
     view_name = getattr(request, 'view_name', None)
 
-    if view_name == 'embed.js' and not assets_env.debug:
+    if view_name == 'embed.js' and not assets_env.url.startswith('http'):
         base_url = join(request.webassets_env.url, '')
     else:
         base_url = request.resource_url(request.context, '')
@@ -110,18 +109,13 @@ def add_base_url(event):
 
 
 def app(context, request):
-    assets_dir = request.webassets_env.directory
-    app_file = join(assets_dir, 'app.html')
-    with open(app_file, 'w') as f:
+    with open('public/app.html', 'w') as f:
         f.write(render_view(context, request, name='app.html'))
 
 
 def embed(context, request):
-    assets_dir = request.webassets_env.directory
-    embed_file = join(assets_dir, 'scripts/embed.js')
-
     setattr(request, 'view_name', 'embed.js')
-    with open(embed_file, 'w') as f:
+    with open('public/scripts/embed.js', 'w') as f:
         f.write(render_view(context, request, name='embed.js'))
     delattr(request, 'view_name')
 
@@ -131,28 +125,47 @@ def manifest(context, request):
     ext_version = '.'.join(version.replace('-', '.').split('.')[:4])
     assets_url = request.webassets_env.url
     manifest_file = resolve('h:browser/chrome/manifest.json').abspath()
-    manifest_json_file = join('./build/chrome', 'manifest.json')
     manifest_renderer = PageTextTemplateFile(manifest_file)
-    with open(manifest_json_file, 'w') as f:
+    with open('manifest.json', 'w') as f:
         src = urljoin(request.resource_url(context), assets_url)
         f.write(manifest_renderer(src=src, version=ext_version))
 
 
 def chrome(env):
     registry = env['registry']
-    settings = registry.settings
-
     request = env['request']
     context = request.context
 
     registry.notify(ContextFound(request))  # pyramid_layout attrs
     request.layout_manager.layout.csp = ''
 
+    # Remove any existing build
+    if exists('./build/chrome'):
+        rmtree('./build/chrome')
+
+    # Create the new build directory
+    makedirs('./build/chrome/public')
+
+    # Change to the output directory
+    old_dir = getcwd()
+    chdir('./build/chrome')
+
+    # Bundle in pdf.js
+    merge('../../pdf.js/build/chromium', './')
+
+    # Build the app html and copy assets if they are being bundled
+    if request.webassets_env.url.startswith('chrome-extension://'):
+        makedirs('./public/styles/images')
+        merge('../../h/static/styles/images', './public/styles/images')
+        merge('../../h/static/images', './public/images')
+        merge('../../h/browser/chrome', './')
+        app(context, request)
+
     manifest(context, request)
     embed(context, request)
 
-    if asbool(settings.get('webassets.debug', False)) is False:
-        app(context, request)
+    # Reset the directory
+    chdir(old_dir)
 
 
 def merge(src, dst):
@@ -228,18 +241,7 @@ def extension(args, console, settings):
         resolve('h:static').abspath(): assets_url
     })
 
-    # Remove any existing build
-    if exists('./build/chrome'):
-        rmtree('./build/chrome')
-
-    # Copy over all the assets
-    assets(settings)
-    merge('./pdf.js/build/chromium', './build/chrome')
-    merge('./h/browser/chrome', './build/chrome')
     merge('./h/static/fonts', './build/chrome/public/fonts')
-    merge('./h/static/images', './build/chrome/public/images')
-    merge('./h/static/styles/images', './build/chrome/public/styles/images')
-
     config = Configurator(settings=settings)
     config.include('h')
     config.add_subscriber(add_base_url, BeforeRender)
