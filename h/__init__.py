@@ -52,6 +52,7 @@ def create_app(settings):
 
 
 def main(global_config, **settings):
+    # DATABASE_URL matches the Heroku environment variable
     if 'DATABASE_URL' in os.environ:
         urlparse.uses_netloc.append("postgres")
         urlparse.uses_netloc.append("sqlite")
@@ -60,6 +61,7 @@ def main(global_config, **settings):
             url.scheme = url.scheme + '+psycopg2'
         settings['sqlalchemy.url'] = urlparse.urlunparse(url)
 
+    # ELASTICSEARCH_PORT and MAIL_PORT match Docker container links
     if 'ELASTICSEARCH_PORT' in os.environ:
         settings['es.host'] = 'http://{}:{}'.format(
             os.environ['ELASTICSEARCH_PORT'][3:]
