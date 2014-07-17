@@ -382,6 +382,7 @@ inject_js:
     - jquery
     - jquery_scrollintoview
     - jquery_ui_js
+    - lib/polyfills/autofill-event.js
     - jschannel
     - gettext
     - annotator_i18n
