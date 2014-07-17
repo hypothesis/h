@@ -65,8 +65,9 @@ def main(global_config, **settings):
             os.environ['ELASTICSEARCH_PORT'][3:]
         )
     if 'MAIL_PORT' in os.environ:
-        settings['mail.host'] = os.environ['MAIL_PORT_25_TCP_ADDR']
-        settings['mail.port'] = os.environ['MAIL_PORT_25_TCP_PORT']
+        mail_host, mail_port = os.environ['MAIL_PORT'][3:].split(':')
+        settings['mail.host'] = mail_host
+        settings['mail.port'] = mail_port
 
     settings.update(global_config)
     return create_app(settings)
