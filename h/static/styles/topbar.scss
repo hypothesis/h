@@ -45,10 +45,11 @@ body {
     max-width: $break-medium;
     padding-left: 3.6em;
     padding-right: 3.6em;
+    position: relative;
 
     @include respond-to(wide-handhelds handhelds) {
-      padding-left: .9em;
-      padding-right: .9em;
+      padding-left: 0;
+      padding-right: 0;
     }
 
     &.pull-right {
@@ -56,6 +57,6 @@ body {
       font-family: $sansFontFamily;
     }
 
-    & > * { margin: 0 4px; }
+    & > * { margin: 0 .72em; }
   }
 }
