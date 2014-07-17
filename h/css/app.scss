@@ -35,8 +35,6 @@ ol {
     @extend .btn-link;
     float: right;
   }
-
-  input { width: 100%; }
 }
 
 .bookmarklet {
@@ -92,23 +90,21 @@ ol {
 
 
 .sheet {
-  @include smallshadow;
+  @include border-radius(2px);
+  border: solid 1px $grayLighter;
   font-family: $sansFontFamily;
-  max-height: 480px;
-  overflow: hidden;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
+  margin-bottom: .72em;
+  position: relative;
 
   .close {
     position: absolute;
-    right: .5em;
-    top: 0;
+    right: 1em;
+    top: 1em;
   }
 
   &.collapsed {
-    max-height: 0;
+    display: none;
+    overflow: hidden;
   }
 
   footer {
