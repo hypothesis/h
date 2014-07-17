@@ -179,11 +179,7 @@ def store_from_settings(settings):
     app = flask.Flask('annotator')  # Create the annotator-store app
     app.register_blueprint(store.store)  # and register the store api.
 
-    if 'ELASTICSEARCH_PORT' in os.environ:
-        app.config['ELASTICSEARCH_HOST'] = 'http%s' % (
-            os.environ['ELASTICSEARCH_PORT'][3:],
-        )
-    elif 'es.host' in settings:
+    if 'es.host' in settings:
         app.config['ELASTICSEARCH_HOST'] = settings['es.host']
 
     if 'es.index' in settings:

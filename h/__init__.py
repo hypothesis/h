@@ -60,6 +60,10 @@ def main(global_config, **settings):
             url.scheme = url.scheme + '+psycopg2'
         settings['sqlalchemy.url'] = urlparse.urlunparse(url)
 
+    if 'ELASTICSEARCH_PORT' in os.environ:
+        settings['es.host'] = 'http://{}:{}'.format(
+            os.environ['ELASTICSEARCH_PORT'][3:]
+        )
     if 'MAIL_PORT' in os.environ:
         settings['mail.host'] = os.environ['MAIL_PORT_25_TCP_ADDR']
         settings['mail.port'] = os.environ['MAIL_PORT_25_TCP_PORT']
