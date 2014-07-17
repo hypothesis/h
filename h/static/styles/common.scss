@@ -782,11 +782,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
 //Visual Search////////////////////////////////
 //Override their css here
-.search-container {
-  overflow: hidden;
-}
-
 .VS-search {
+  overflow: hidden;
+
   * {
     @include box-sizing(content-box);
   }

@@ -16,25 +16,20 @@
         </div>
 
         <!-- Searchbar -->
-        <div class="search-container">
-          <div ng-show="show_search"
-               class="visual-search visual-container"
-               query="search.query"
-               onsearch="search.update(this)"
-               facets="searchFacets"
-               values="searchValues"
-               onclear="search.clear()"
-               ></div>
-          <div ng-hide="show_search"
-               class="visual-container"
-               ng-click="show_search = true">
-            <div class="VS-search VS-search-collapsed">
-              <div class="VS-search-box-wrapper VS-search-box">
-                <div class="VS-icon VS-icon-search"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+       <div class="visual-search"
+            query="search.query"
+            facets="search.facets"
+            values="search.values"
+            onclear="search.show = false; search.clear()"
+            onsearch="search.update(this)"
+            ng-show="search.show"></div>
+       <div ng-click="search.show = true" ng-hide="search.show">
+         <div class="VS-search VS-search-collapsed">
+           <div class="VS-search-box-wrapper VS-search-box">
+             <div class="VS-icon VS-icon-search"></div>
+           </div>
+         </div>
+       </div>
       </div>
 
       <!-- Account and Authentication -->
