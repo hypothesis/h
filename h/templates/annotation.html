@@ -115,10 +115,15 @@
   <div class="share-dialog" ng-show="!editing">
     <div class="icon-input">
       <div class="go-icon">
-  <a class="launch-icon show" href="{{shared_link}}" target="_blank"></a>
+        <a class="launch-icon show" ng-href="{{shared_link}}"
+           target="_blank"></a>
       </div>
       <div class="share-div">
-        <input class="share-text" type="text" ng-model="shared_link" readonly ng-blur="toggle()" />
+        <input class="share-text"
+               type="text"
+               ng-blur="toggle()"
+               ng-model="shared_link"
+               readonly/>
       </div>
     </div>
   </div>
