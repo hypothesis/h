@@ -443,8 +443,10 @@ blockquote {
 
 //TABS////////////////////////////////
 .nav-tabs {
-  @include pie-clearfix;
-  margin: 0;
+  background-color: $bodyBackground;
+  border: 1px none $grayLighter;
+  border-bottom-style: solid;
+  padding: 1em;
 
   a {
     font-family: $sansFontFamily;
@@ -452,43 +454,30 @@ blockquote {
   }
 
   & > li {
-    @include box-shadow(inset 2px -10px 13px -8px hsla(0, 0%, 0%, .1));
-    background: darken($white, 2%);
-    border-top-right-radius: 32px 80px;
-    border-top-left-radius: 32px 80px;
-    border: 1px solid $grayLighter;
-    border-bottom: none;
     cursor: pointer;
     display: inline-block;
     line-height: 1;
-    margin-right: -8px;
-    padding: 4px 16px 8px;
-    position: relative;
-
-    &:hover {
-      background: $white;
-    }
 
     &.active, &:active {
-      @include box-shadow(none);
-      background: $white;
       color: #333;
     }
 
-    &.active {
-      z-index: 1;
+    &:before {
+      content: "/";
+      margin: 0 1em;
+    }
+
+    &:first-child:before {
+      content: "";
+      margin: 0;
     }
   }
 }
 
 .tab-content {
-  @include border-radius(1px);
   background: $white;
-  border: solid 1px $grayLighter;
   line-height: 1.4;
-  margin-top: -3px;
-  padding: 16px;
-  position: relative;
+  padding: 1em;
 
   .tab-pane {
     display: none;
