@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 if test -z "$VIRTUAL_ENV"; then
 	if test -e bin/activate; then
@@ -7,3 +7,12 @@ if test -z "$VIRTUAL_ENV"; then
 fi
 
 hypothesis serve $@
+SERVE_EXIT_STATUS=$?
+
+if [ "$SERVE_EXIT_STATUS" -ne 0 ]; then
+  echo "
+  -- SERVER HAS ERRORED --
+  If you're seeing a DistributionNotFound error run ./bootstrap'"
+fi
+
+exit $SERVE_EXIT_STATUS
