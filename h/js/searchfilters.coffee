@@ -10,11 +10,11 @@ class SearchFilter
     tokens = searchtext.match /(?:[^\s"']+|"[^"]*"|'[^']*')+/g
 
     # Cut the opening and closing quote characters
-    for token in tokens
+    for token, index in tokens
       start = token.slice 0,1
       end = token.slice -1
       if (start is '"' or start is "'") and (start is end)
-        token = token.slice 1, token.length - 1
+        tokens[index] = token.slice 1, token.length - 1
 
     tokens
 
