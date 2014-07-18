@@ -16,7 +16,6 @@ class App
   scope:
     frame:
       visible: false
-    model: {}
     sheet:
       collapsed: true
       tab: null
@@ -49,6 +48,7 @@ class App
         frame: $scope.frame or @scope.frame
         socialView: annotator.socialView
         ongoingHighlightSwitch: false
+        model: {}
 
     _reset()
 
