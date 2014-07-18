@@ -690,18 +690,22 @@ blockquote {
 }
 
 .share-dialog {
-   display: none;
-   position: relative;
+  display: none;
 
-  input {
-    margin-bottom: 4px;
-    margin-left: 1.5em;
-    width: 100%;
+  a {
+    float: left;
+    line-height: 1.4;
+    margin-right: .5em;
+    vertical-align: middle;
   }
 
-  .launch-icon {
-    position: absolute;
-    top: .33em;
+  div {
+    overflow: hidden;
+  }
+
+  input {
+    padding: 0;
+    width: 100%;
   }
 }
 

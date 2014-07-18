@@ -119,10 +119,12 @@
   <div class="share-dialog" ng-show="!editing">
     <a class="icon-export" ng-href="{{shared_link}}"
        target="_blank"></a>
-    <input type="text"
-           ng-blur="toggle()"
-           ng-model="shared_link"
-           readonly>
+    <div>
+      <input type="text"
+             ng-blur="toggle()"
+             ng-model="shared_link"
+             readonly>
+    </div>
   </div>
 
   <a class="reply-count small"
