@@ -356,7 +356,7 @@ $baseFontSize: 14px;
     &:focus { outline: 0; }
     &:hover { color: $linkColorHover; }
 
-    &.tri-icon {
+    &.icon-comment {
       text-shadow:
       0 0 2px $grayLightest,
       0 0 0 $gray;
@@ -366,23 +366,6 @@ $baseFontSize: 14px;
       }
     }
   }
-}
-
-// Toolbar Icons
-.alwaysonhighlights-icon {
-  @include fonticon("\e602", left);
-}
-
-.highlighter-icon {
-  @include fonticon("\e601", left);
-}
-
-.commenter-icon {
-  @include fonticon("\e012", left);
-}
-
-.tri-icon {
-  @include fonticon("\e00b", left);
 }
 
 

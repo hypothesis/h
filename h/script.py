@@ -236,6 +236,7 @@ def extension(args, console, settings):
     assets(settings)
     merge('./pdf.js/build/chromium', './build/chrome')
     merge('./h/browser/chrome', './build/chrome')
+    merge('./h/static/fonts', './build/chrome/public/fonts')
     merge('./h/static/images', './build/chrome/public/images')
     merge('./h/static/styles/images', './build/chrome/public/styles/images')
 

@@ -12,7 +12,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
   options:
     items: [
       "title": "Toggle Sidebar"
-      "class": "tri-icon"
+      "class": "icon-comment"
       "click": (event) ->
         event.preventDefault()
         event.stopPropagation()
@@ -23,7 +23,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           window.annotator.hideFrame()
     ,
       "title": "Show Annotations"
-      "class": "alwaysonhighlights-icon"
+      "class": "icon-visible"
       "click": (event) ->
         event.preventDefault()
         event.stopPropagation()
@@ -31,7 +31,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         window.annotator.setVisibleHighlights state
     ,
       "title": "Highlighting Mode"
-      "class": "highlighter-icon"
+      "class": "icon-highlighter2"
       "click": (event) ->
         event.preventDefault()
         event.stopPropagation()
@@ -40,7 +40,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         window.annotator.setTool tool
     ,
       "title": "New Comment"
-      "class": "commenter-icon"
+      "class": "icon-plus"
       "click": (event) ->
         event.preventDefault()
         event.stopPropagation()

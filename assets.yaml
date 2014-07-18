@@ -286,6 +286,16 @@ visualsearch_js:
       contents:
         - h:static/scripts/vendor/visualsearch.js
 
+
+# Fonts
+icomoon_css:
+  contents:
+    - filters: cssrewrite
+      output: styles/icomoon.css
+      contents:
+        - h:static/icomoon.css
+
+
 # Application
 app:
   contents:
@@ -348,6 +358,7 @@ app_css:
     filters: cleancss
     output: styles/hypothesis.min.css
     contents:
+      - icomoon_css
       - jquery_ui_css
       - visualsearch_css
       - filters: compass, cssrewrite
@@ -401,6 +412,7 @@ inject_css:
   output: styles/hypothesis-inject.min.css
   filters: cleancss
   contents:
+    - icomoon_css
     - jquery_ui_css
     - filters: compass, cssrewrite
       output: styles/hypothesis-inject.css
