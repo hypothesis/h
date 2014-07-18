@@ -52,25 +52,37 @@ def create_app(settings):
 
 
 def main(global_config, **settings):
+    overrides = _environment_overrides()
+
+    settings.update(overrides)
+    settings.update(global_config)
+
+    return create_app(settings)
+
+def _environment_overrides():
+    overrides = {}
+
     # DATABASE_URL matches the Heroku environment variable
     if 'DATABASE_URL' in os.environ:
         urlparse.uses_netloc.append("postgres")
         urlparse.uses_netloc.append("sqlite")
-        url = urlparse.urlparse(os.environ["DATABASE_URL"])
-        if url.scheme == 'postgres':
-            url.scheme = url.scheme + '+psycopg2'
-        settings['sqlalchemy.url'] = urlparse.urlunparse(url)
+        url = list(urlparse.urlparse(os.environ["DATABASE_URL"]))
+        if url[0] == 'postgres':
+            url[0] = url[0] + '+psycopg2'
+        overrides['sqlalchemy.url'] = urlparse.urlunparse(url)
 
     # ELASTICSEARCH_PORT and MAIL_PORT match Docker container links
     # The format is tcp://<ip>:<port>
     if 'ELASTICSEARCH_PORT' in os.environ:
-        settings['es.host'] = 'http://{}:{}'.format(
-            os.environ['ELASTICSEARCH_PORT'][6:]
-        )
+        es_host, es_port = os.environ['ELASTICSEARCH_PORT'][6:].split(':')
+        overrides['es.host'] = 'http://{}:{}'.format(es_host, es_port)
+
+    if 'ELASTICSEARCH_INDEX' in os.environ:
+        overrides['es.index'] = os.environ['ELASTICSEARCH_INDEX']
+
     if 'MAIL_PORT' in os.environ:
         mail_host, mail_port = os.environ['MAIL_PORT'][6:].split(':')
-        settings['mail.host'] = mail_host
-        settings['mail.port'] = mail_port
+        overrides['mail.host'] = mail_host
+        overrides['mail.port'] = mail_port
 
-    settings.update(global_config)
-    return create_app(settings)
+    return overrides
