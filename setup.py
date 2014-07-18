@@ -56,8 +56,6 @@ install_requires = [
     # Version pin for known bug
     # https://github.com/repoze/repoze.sendmail/issues/31
     'repoze.sendmail<4.2',
-
-    'webassets==0.8',
 ]
 
 development_extras = ['pyramid_debugtoolbar>=2.1']
