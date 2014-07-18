@@ -61,7 +61,6 @@ class Hypothesis extends Annotator
   constructor: (
      $document,   $location,   $rootScope,   $route,   $window,
   ) ->
-    Gettext.prototype.parse_locale_data annotator_locale_data
     super ($document.find 'body')
 
     window.annotator = this

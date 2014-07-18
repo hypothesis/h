@@ -36,7 +36,7 @@
 
   "background": {
     "persistent": true,
-    "scripts": ["pdfHandler.js", "pdfHandler-local.js", "js/background.js"]
+    "scripts": ["pdfHandler.js", "pdfHandler-local.js", "background.js"]
   },
   "page_action": {
     "placeholder": "work around http://crbug.com/86449"
