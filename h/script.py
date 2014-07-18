@@ -251,6 +251,10 @@ def extension(args, console, settings):
     request = Request.blank('/app', base_url=base_url)
     chrome(prepare(registry=config.registry, request=request))
 
+    # XXX: Change when webassets allows setting the cache option
+    # As of 0.10 it's only possible to pass a sass config  with string values
+    rmtree('./build/chrome/public/.sass-cache')
+
 
 @command(usage='[options] config_uri')
 def serve(args):
