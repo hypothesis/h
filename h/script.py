@@ -241,6 +241,9 @@ def extension(args, console, settings):
         resolve('h:static').abspath(): assets_url
     })
 
+    # Turn off the webassets cache
+    settings['webassets.cache'] = None
+
     merge('./h/static/fonts', './build/chrome/public/fonts')
     config = Configurator(settings=settings)
     config.include('h')
