@@ -62,12 +62,13 @@ def main(global_config, **settings):
         settings['sqlalchemy.url'] = urlparse.urlunparse(url)
 
     # ELASTICSEARCH_PORT and MAIL_PORT match Docker container links
+    # The format is tcp://<ip>:<port>
     if 'ELASTICSEARCH_PORT' in os.environ:
         settings['es.host'] = 'http://{}:{}'.format(
-            os.environ['ELASTICSEARCH_PORT'][3:]
+            os.environ['ELASTICSEARCH_PORT'][6:]
         )
     if 'MAIL_PORT' in os.environ:
-        mail_host, mail_port = os.environ['MAIL_PORT'][3:].split(':')
+        mail_host, mail_port = os.environ['MAIL_PORT'][6:].split(':')
         settings['mail.host'] = mail_host
         settings['mail.port'] = mail_port
 
