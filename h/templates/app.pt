@@ -42,7 +42,7 @@
            ng-class="sheet.collapsed && 'collapsed'"
            ng-init="sheet.collapsed = true">
 
-        <span class="close"
+        <span class="close icon-x"
               role="button"
               title="Close"
               ng-click="sheet.collapsed = true"></span>
