@@ -1,5 +1,6 @@
 @import 'compass/css3';
 
+
 $white: #fff !default;
 $black: #000 !default;
 
@@ -52,18 +53,6 @@ $altFontFamily:         $serifFontFamily !default;
 $headingsFontFamily:    inherit !default;
 $headingsFontWeight:    bold !default;
 $headingsColor:         inherit !default;
-
-//ICON FONT IMPORT
-@font-face {
-  font-family: 'icomoon';
-  src:url('../images/icomoon/fonts/h.eot');
-  src:url('../images/icomoon/fonts/h.eot?#iefix') format('embedded-opentype'),
-    url('../images/icomoon/fonts/h.svg#icomoon') format('svg'),
-    url('../images/icomoon/fonts/h.woff') format('woff'),
-    url('../images/icomoon/fonts/h.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
 
 //STANCE COLORS
 $positive: #3aab39;
@@ -166,41 +155,6 @@ $input-border-radius: 2px;
   @include icon_resets;
   background-image: url("../images/#{$icon}");
 }
-
-
-//FONTICON////////////////////////////////
-@mixin fonticon($char, $iconside, $offset: .5em) {
-  text-decoration: none;
-  cursor: pointer;
-  &:hover {
-    opacity: 1;
-  }
-  @if $iconside == left {
-    &:before {
-      content: $char !important;
-      font-family: 'icomoon';
-      margin-right: $offset;
-      speak: none;
-      font-weight: normal;
-    }
-    &:after {
-      content: "" !important;
-    }
-  }
-  @if $iconside == right {
-    &:before {
-      content: "" !important;
-    }
-    &:after {
-      content: $char !important;
-      font-family: 'icomoon';
-      margin-left: $offset;
-      speak: none;
-      font-weight: normal;
-    }
-  }
-}
-
 
 //NOISE///////////
 //Provides the noise background

@@ -118,7 +118,7 @@ def app(context, request):
 
 def embed(context, request):
     assets_dir = request.webassets_env.directory
-    embed_file = join(assets_dir, 'js/embed.js')
+    embed_file = join(assets_dir, 'scripts/embed.js')
 
     setattr(request, 'view_name', 'embed.js')
     with open(embed_file, 'w') as f:
@@ -225,7 +225,7 @@ def extension(args, console, settings):
     settings['webassets.base_dir'] = abspath('./build/chrome/public')
     settings['webassets.base_url'] = assets_url
     settings['webassets.paths'] = json.dumps({
-        resolve('h:').abspath(): assets_url
+        resolve('h:static').abspath(): assets_url
     })
 
     # Remove any existing build
@@ -234,11 +234,11 @@ def extension(args, console, settings):
 
     # Copy over all the assets
     assets(settings)
-    makedirs('./build/chrome/public/lib/images')
     merge('./pdf.js/build/chromium', './build/chrome')
     merge('./h/browser/chrome', './build/chrome')
-    merge('./h/images', './build/chrome/public/images')
-    merge('./h/lib/images', './build/chrome/public/lib/images')
+    merge('./h/static/fonts', './build/chrome/public/fonts')
+    merge('./h/static/images', './build/chrome/public/images')
+    merge('./h/static/styles/images', './build/chrome/public/styles/images')
 
     config = Configurator(settings=settings)
     config.include('h')

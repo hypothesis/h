@@ -1,169 +1,164 @@
 # Annotator core
 annotator:
   filters: uglifyjs
-  output: lib/annotator.min.js
+  output: scripts/vendor/annotator.min.js
   contents:
-    - h:lib/annotator.js
+    - h:static/scripts/vendor/annotator.js
 
 # Annotator i18n
 gettext:
   filters: uglifyjs
-  output: lib/gettext.min.js
+  output: scripts/vendor/gettext.min.js
   contents:
-    - h:lib/gettext.js
-annotator_i18n:
-  filters: uglifyjs
-  output: locale/data.min.js
-  contents:
-    - h:locale/data.js
+    - h:static/scripts/vendor/gettext.js
 
 # Annotator plugins maintained upstream
 annotator_auth:
   filters: uglifyjs
-  output: lib/annotator.auth.min.js
+  output: scripts/vendor/annotator.auth.min.js
   contents:
-    - h:lib/annotator.auth.js
+    - h:static/scripts/vendor/annotator.auth.js
 annotator_document:
   filters: uglifyjs
-  output: lib/annotator.document.min.js
+  output: scripts/vendor/annotator.document.min.js
   contents:
-    - h:lib/annotator.document.js
+    - h:static/scripts/vendor/annotator.document.js
 annotator_permissions:
   filters: uglifyjs
-  output: lib/annotator.permissions.min.js
+  output: scripts/vendor/annotator.permissions.min.js
   contents:
-    - h:lib/annotator.permissions.js
+    - h:static/scripts/vendor/annotator.permissions.js
 annotator_store:
   filters: uglifyjs
-  output: lib/annotator.store.min.js
+  output: scripts/vendor/annotator.store.min.js
   contents:
-    - h:lib/annotator.store.js
+    - h:static/scripts/vendor/annotator.store.js
 
 # Annotator plugins maintained out of tree by Hypothesis
 annotator_fuzzytextanchors:
   filters: uglifyjs
-  output: lib/annotator.fuzzytextanchors.min.js
+  output: scripts/vendor/annotator.fuzzytextanchors.min.js
   contents:
-    - h:lib/diff_match_patch_uncompressed.js
+    - h:static/scripts/vendor/diff_match_patch_uncompressed.js
     - filters: coffeescript
-      output: lib/dom_text.js
+      output: scripts/vendor/dom_text.js
       contents:
-        - h:lib/dom_text_mapper.coffee
-        - h:lib/dom_text_matcher.coffee
-        - h:lib/text_match_engines.coffee
-    - h:lib/annotator.domtextmapper.js
-    - h:lib/annotator.textanchors.js
-    - h:lib/annotator.fuzzytextanchors.js
+        - h:static/scripts/vendor/dom_text_mapper.coffee
+        - h:static/scripts/vendor/dom_text_matcher.coffee
+        - h:static/scripts/vendor/text_match_engines.coffee
+    - h:static/scripts/vendor/annotator.domtextmapper.js
+    - h:static/scripts/vendor/annotator.textanchors.js
+    - h:static/scripts/vendor/annotator.fuzzytextanchors.js
 annotator_pdf:
   filters: uglifyjs
-  output: lib/annotator.pdf.min.js
+  output: scripts/vendor/annotator.pdf.min.js
   contents:
     - filters: coffeescript
-      output: lib/page_text_mapper_core.js
+      output: scripts/vendor/page_text_mapper_core.js
       contents:
-        - h:lib/page_text_mapper_core.coffee
-    - h:lib/annotator.pdf.js
+        - h:static/scripts/vendor/page_text_mapper_core.coffee
+    - h:static/scripts/vendor/annotator.pdf.js
 annotator_textanchors:
   filters: uglifyjs
-  output: lib/annotator.textanchors.min.js
+  output: scripts/vendor/annotator.textanchors.min.js
   contents:
-    - h:lib/annotator.textanchors.js
+    - h:static/scripts/vendor/annotator.textanchors.js
 annotator_textrange:
   filters: uglifyjs
-  output: lib/annotator.textrange.min.js
+  output: scripts/vendor/annotator.textrange.min.js
   contents:
-    - h:lib/annotator.textrange.js
+    - h:static/scripts/vendor/annotator.textrange.js
 annotator_textposition:
   filters: uglifyjs
-  output: lib/annotator.textposition.min.js
+  output: scripts/vendor/annotator.textposition.min.js
   contents:
-    - h:lib/annotator.textposition.js
+    - h:static/scripts/vendor/annotator.textposition.js
 annotator_textquote:
   filters: uglifyjs
-  output: lib/annotator.textquote.min.js
+  output: scripts/vendor/annotator.textquote.min.js
   contents:
-    - h:lib/annotator.textquote.js
+    - h:static/scripts/vendor/annotator.textquote.js
 annotator_texthighlights:
   filters: uglifyjs
-  output: lib/annotator.texthighlights.min.js
+  output: scripts/vendor/annotator.texthighlights.min.js
   contents:
-    - h:lib/annotator.texthighlights.js
+    - h:static/scripts/vendor/annotator.texthighlights.js
 
 # Annotator plugins maintained in tree
 annotator_bridge:
   filters: coffeescript
-  output: js/plugin/bridge.js
+  output: scripts/plugin/bridge.js
   contents:
-    - h:js/plugin/bridge.coffee
+    - h:static/scripts/plugin/bridge.coffee
 annotator_discovery:
   filters: coffeescript
-  output: js/plugin/discovery.js
+  output: scripts/plugin/discovery.js
   contents:
-    - h:js/plugin/discovery.coffee
+    - h:static/scripts/plugin/discovery.coffee
 annotator_heatmap:
   filters: coffeescript
-  output: js/plugin/heatmap.js
+  output: scripts/plugin/heatmap.js
   contents:
-    - h:js/plugin/heatmap.coffee
+    - h:static/scripts/plugin/heatmap.coffee
 annotator_threading:
   filters: coffeescript
-  output: js/plugin/threading.js
+  output: scripts/plugin/threading.js
   contents:
-    - h:js/plugin/threading.coffee
+    - h:static/scripts/plugin/threading.coffee
 annotator_toolbar:
   filters: coffeescript
-  output: js/plugin/toolbar.js
+  output: scripts/plugin/toolbar.js
   contents:
-    - h:js/plugin/toolbar.coffee
+    - h:static/scripts/plugin/toolbar.coffee
 
 # Angular
 angular:
   filters: uglifyjs
-  output: lib/angular.min.js
+  output: scripts/vendor/angular.min.js
   contents:
-    - h:lib/angular.js
+    - h:static/scripts/vendor/angular.js
 angular_animate:
   filters: uglifyjs
-  output: lib/angular-animate.min.js
+  output: scripts/vendor/angular-animate.min.js
   contents:
-    - h:lib/angular-animate.js
+    - h:static/scripts/vendor/angular-animate.js
 angular_bootstrap:
   filters: uglifyjs
-  output: lib/angular-bootstrap.min.js
+  output: scripts/vendor/angular-bootstrap.min.js
   contents:
-    - h:lib/angular-bootstrap.js
+    - h:static/scripts/vendor/angular-bootstrap.js
 angular_resource:
   filters: uglifyjs
-  output: lib/angular-resource.min.js
+  output: scripts/vendor/angular-resource.min.js
   contents:
-    - h:lib/angular-resource.js
+    - h:static/scripts/vendor/angular-resource.js
 angular_route:
   filters: uglifyjs
-  output: lib/angular-route.min.js
+  output: scripts/vendor/angular-route.min.js
   contents:
-    - h:lib/angular-route.js
+    - h:static/scripts/vendor/angular-route.js
 angular_sanitize:
   filters: uglifyjs
-  output: lib/angular-sanitize.min.js
+  output: scripts/vendor/angular-sanitize.min.js
   contents:
-    - h:lib/angular-sanitize.js
+    - h:static/scripts/vendor/angular-sanitize.js
 
 # jQuery
 jquery:
   filters: uglifyjs
-  output: lib/jquery.min.js
+  output: scripts/vendor/jquery.min.js
   contents:
-    - h:lib/jquery-1.10.2.js
+    - h:static/scripts/vendor/jquery-1.10.2.js
 jquery_mousewheel:
   filters: uglifyjs
-  output: lib/jquery.mousewheel.min.js
+  output: scripts/vendor/jquery.mousewheel.min.js
   contents:
-    - h:lib/jquery.mousewheel.js
+    - h:static/scripts/vendor/jquery.mousewheel.js
 jquery_scrollintoview:
   filters: uglifyjs
-  output: lib/jquery.scrollintoview.min.js
+  output: scripts/vendor/jquery.scrollintoview.min.js
   contents:
-    - h:lib/jquery.scrollintoview.js
+    - h:static/scripts/vendor/jquery.scrollintoview.js
 
 # jQuery UI
 jquery_ui:
@@ -173,99 +168,99 @@ jquery_ui:
 
 jquery_ui_css:
   filters: cssrewrite, cleancss
-  output: css/jquery-ui-smoothness.min.css
+  output: styles/jquery-ui-smoothness.min.css
   contents:
-    - h:lib/jquery-ui-smoothness.css
+    - h:static/styles/jquery-ui-smoothness.css
 
 jquery_ui_js:
   filters: uglifyjs
-  output: lib/jquery.ui.full.min.js
+  output: scripts/vendor/jquery.ui.full.min.js
   contents:
-    - h:lib/jquery.ui.core.js
-    - h:lib/jquery.ui.position.js
-    - h:lib/jquery.ui.widget.js
-    - h:lib/jquery.ui.tooltip.js
+    - h:static/scripts/vendor/jquery.ui.core.js
+    - h:static/scripts/vendor/jquery.ui.position.js
+    - h:static/scripts/vendor/jquery.ui.widget.js
+    - h:static/scripts/vendor/jquery.ui.tooltip.js
     - contents:
-        - h:lib/jquery.ui.autocomplete.js
-        - h:lib/jquery.ui.menu.js
+        - h:static/scripts/vendor/jquery.ui.autocomplete.js
+        - h:static/scripts/vendor/jquery.ui.menu.js
     - contents:
-        - h:lib/jquery.ui.effect.js
-        - h:lib/jquery.ui.effect-blind.js
-        - h:lib/jquery.ui.effect-forecolor-highlight.js
-        - h:lib/jquery.ui.effect-highlight.js
+        - h:static/scripts/vendor/jquery.ui.effect.js
+        - h:static/scripts/vendor/jquery.ui.effect-blind.js
+        - h:static/scripts/vendor/jquery.ui.effect-forecolor-highlight.js
+        - h:static/scripts/vendor/jquery.ui.effect-highlight.js
 
 # Polyfills
 autofill:
   filter: uglifyjs
-  output: lib/polyfills/autofill-event.min.js
+  output: scripts/vendor/polyfills/autofill-event.min.js
   contents:
-    - h:lib/polyfills/autofill-event.js
+    - h:static/scripts/vendor/polyfills/autofill-event.js
 raf:
   filters: uglifyjs
-  output: lib/polyfills/raf.min.js
+  output: scripts/vendor/polyfills/raf.min.js
   contents:
-    - h:lib/polyfills/raf.js
+    - h:static/scripts/vendor/polyfills/raf.js
 wgxpath:
   filters: uglifyjs
-  output: lib/polyfills/wgxpath.install.min.js
+  output: scripts/vendor/polyfills/wgxpath.install.min.js
   contents:
-    - h:lib/polyfills/wgxpath.install.js
+    - h:static/scripts/vendor/polyfills/wgxpath.install.js
 
 
 # Other dependencies
 d3:
   filters: uglifyjs
-  output: lib/d3.min.js
+  output: scripts/vendor/d3.min.js
   contents:
-    - h:lib/d3.js
+    - h:static/scripts/vendor/d3.js
 jschannel:
   filters: uglifyjs
-  output: lib/jschannel.min.js
+  output: scripts/vendor/jschannel.min.js
   contents:
-    - h:lib/jschannel.js
+    - h:static/scripts/vendor/jschannel.js
 jwz:
   filters: uglifyjs
-  output: lib/jwz.min.js
+  output: scripts/vendor/jwz.min.js
   contents:
-    - h:lib/jwz.js
+    - h:static/scripts/vendor/jwz.js
 momentjs:
   contents:
     - filters: uglifyjs
-      output: lib/moment.min.js
+      output: scripts/vendor/moment.min.js
       contents:
-      - h:lib/moment-with-langs.js
+      - h:static/scripts/vendor/moment-with-langs.js
     - filters: uglifyjs
-      output: lib/jstz.min.js
+      output: scripts/vendor/jstz.min.js
       contents:
-      - h:lib/jstz.js
+      - h:static/scripts/vendor/jstz.js
     - filters: uglifyjs
-      output: lib/moment-timezone.min.js
+      output: scripts/vendor/moment-timezone.min.js
       contents:
-      - h:lib/moment-timezone.js
+      - h:static/scripts/vendor/moment-timezone.js
     - filters: uglifyjs
-      output: lib/moment-timezone-data.min.js
+      output: scripts/vendor/moment-timezone-data.min.js
       contents:
-      - h:lib/moment-timezone-data.js
+      - h:static/scripts/vendor/moment-timezone-data.js
 pagedown:
   filters: uglifyjs
-  output: lib/Markdown.Converter.min.js
+  output: scripts/vendor/Markdown.Converter.min.js
   contents:
-    - h:lib/Markdown.Converter.js
+    - h:static/scripts/vendor/Markdown.Converter.js
 sockjs:
   filters: uglifyjs
-  output: lib/sockjs.min.js
+  output: scripts/vendor/sockjs.min.js
   contents:
-    - h:lib/sockjs-0.3.4.js
+    - h:static/scripts/vendor/sockjs-0.3.4.js
 tag_it:
   filters: uglifyjs
-  output: lib/tag-it.min.js
+  output: scripts/vendor/tag-it.min.js
   contents:
-    - h:lib/tag-it.js
+    - h:static/scripts/vendor/tag-it.js
 uuid:
   filters: uglifyjs
-  output: lib/uuid.min.js
+  output: scripts/vendor/uuid.min.js
   contents:
-    - h:lib/uuid.js
+    - h:static/scripts/vendor/uuid.js
 visualsearch:
   contents:
     - visualsearch_css
@@ -273,23 +268,33 @@ visualsearch:
 visualsearch_css:
   contents:
     - filters: cleancss
-      output: css/visualsearch.min.css
+      output: styles/visualsearch.min.css
       contents:
-        - h:css/visualsearch.css
+        - h:static/styles/visualsearch.css
 visualsearch_js:
   contents:
     - filters: uglifyjs
-      output: lib/underscore.min.js
+      output: scripts/vendor/underscore.min.js
       contents:
-        - h:lib/underscore-1.4.3.js
+        - h:static/scripts/vendor/underscore-1.4.3.js
     - filters: uglifyjs
-      output: lib/backbone.min.js
+      output: scripts/vendor/backbone.min.js
       contents:
-        - h:lib/backbone-0.9.10.js
+        - h:static/scripts/vendor/backbone-0.9.10.js
     - filters: uglifyjs
-      output: lib/visualsearch.min.js
+      output: scripts/vendor/visualsearch.min.js
       contents:
-        - h:lib/visualsearch.js
+        - h:static/scripts/vendor/visualsearch.js
+
+
+# Fonts
+icomoon_css:
+  contents:
+    - filters: cssrewrite
+      output: styles/icomoon.css
+      contents:
+        - h:static/icomoon.css
+
 
 # Application
 app:
@@ -298,7 +303,7 @@ app:
     - app_js
 
 app_js:
-  output: js/hypothesis-app.js
+  output: scripts/hypothesis-app.js
   contents:
     - jquery
     - jquery_mousewheel
@@ -309,7 +314,6 @@ app_js:
     - angular_route
     - angular_sanitize
     - gettext
-    - annotator_i18n
     - annotator
     - annotator_auth
     - annotator_bridge
@@ -332,39 +336,40 @@ app_js:
     - filters: uglifyjs
       contents:
         - filters: coffeescript
-          output: js/hypothesis.js
+          output: scripts/hypothesis.js
           # TODO: glob these or use browserify
           # Right now results in dependency problems
           contents:
-            - js/app.coffee
-            - js/controllers.coffee
-            - js/flash.coffee
-            - js/filters.coffee
-            - js/directives.coffee
-            - js/app_directives.coffee
-            - js/displayer.coffee
-            - js/helpers.coffee
-            - js/session.coffee
-            - js/services.coffee
-            - js/socket.coffee
-            - js/streamfilter.coffee
-            - js/streamsearch.coffee
+            - scripts/app.coffee
+            - scripts/controllers.coffee
+            - scripts/flash.coffee
+            - scripts/filters.coffee
+            - scripts/directives.coffee
+            - scripts/app_directives.coffee
+            - scripts/displayer.coffee
+            - scripts/helpers.coffee
+            - scripts/session.coffee
+            - scripts/services.coffee
+            - scripts/socket.coffee
+            - scripts/streamfilter.coffee
+            - scripts/streamsearch.coffee
 
 app_css:
     filters: cleancss
-    output: css/hypothesis.min.css
+    output: styles/hypothesis.min.css
     contents:
+      - icomoon_css
       - jquery_ui_css
       - visualsearch_css
       - filters: compass, cssrewrite
-        output: css/hypothesis.css
+        output: styles/hypothesis.css
         contents:
-          - h:css/app.scss
+          - h:static/styles/app.scss
         depends:
-          - h:css/base.scss
-          - h:css/common.scss
-          - h:css/responsive.scss
-          - h:css/yui_grid.scss
+          - h:static/styles/base.scss
+          - h:static/styles/common.scss
+          - h:static/styles/responsive.scss
+          - h:static/styles/yui_grid.scss
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
 # the application. It sets up RPC channels for cross-domain communication
@@ -376,7 +381,7 @@ inject:
     - inject_js
 
 inject_js:
-  output: js/hypothesis-assets.js
+  output: scripts/hypothesis-assets.js
   contents:
     - d3
     - jquery
@@ -384,7 +389,6 @@ inject_js:
     - jquery_ui_js
     - jschannel
     - gettext
-    - annotator_i18n
     - annotator
     - annotator_bridge
     - annotator_document
@@ -399,31 +403,32 @@ inject_js:
     - filters: uglifyjs
       contents:
         - filters: coffeescript
-          output: js/hypothesis-inject.js
+          output: scripts/hypothesis-inject.js
           contents:
-            - h:js/guest.coffee
-            - h:js/host.coffee
+            - h:static/scripts/guest.coffee
+            - h:static/scripts/host.coffee
 
 inject_css:
-  output: css/hypothesis-inject.min.css
+  output: styles/hypothesis-inject.min.css
   filters: cleancss
   contents:
+    - icomoon_css
     - jquery_ui_css
     - filters: compass, cssrewrite
-      output: css/hypothesis-inject.css
+      output: styles/hypothesis-inject.css
       contents:
-        - h:css/inject.scss
+        - h:static/styles/inject.scss
       depends:
-        - h:css/base.scss
+        - h:static/styles/base.scss
 
 topbar:
-  output: css/topbar.min.css
+  output: styles/topbar.min.css
   filters: cleancss
   contents:
-    - output: css/topbar.css
+    - output: styles/topbar.css
       filters: compass, cssrewrite
       contents:
-        - h:css/topbar.scss
+        - h:static/styles/topbar.scss
       depends:
-        - h:css/base.scss
-        - h:css/responsive.scss
+        - h:static/styles/base.scss
+        - h:static/styles/responsive.scss

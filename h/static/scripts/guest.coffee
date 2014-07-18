@@ -29,8 +29,6 @@ class Annotator.Guest extends Annotator
   noBack: false
 
   constructor: (element, options, config = {}) ->
-    Gettext.prototype.parse_locale_data annotator_locale_data
-
     options.noScan = true
     super
     delete @options.noScan
