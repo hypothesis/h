@@ -17,27 +17,7 @@
 
         <!-- Searchbar -->
         <div class="search-container">
-          <div ng-show="show_search">
-               <div ng-click="show_search = false; search.clear()" class="pull-left">
-                <div class="VS-search VS-search-collapsed">
-                  <div class="VS-search-box-wrapper VS-search-box">
-                    <div class="VS-icon VS-icon-search"></div>
-                  </div>
-                </div>
-               </div>
-               <div class="simpleSearch visual-container"
-                 style="margin-left: 2em"
-               ></div>
-          </div>
-          <div ng-hide="show_search"
-               class="visual-container"
-               ng-click="show_search = true">
-            <div class="VS-search VS-search-collapsed">
-              <div class="VS-search-box-wrapper VS-search-box">
-                <div class="VS-icon VS-icon-search"></div>
-              </div>
-            </div>
-          </div>
+          <div class="simpleSearch visual-container"></div>
         </div>
       </div>
 

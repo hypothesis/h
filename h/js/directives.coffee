@@ -432,12 +432,22 @@ simpleSearch = ['$parse', ($parse) ->
       #_search(scope.generateSearchResults())
       scope.search.update(scope.searchtext)
 
+    scope.reset = (event) ->
+      event.preventDefault()
+      scope.searchtext = ''
+      scope.search.clear()
+
     scope.$watch attr.query, (query) ->
       scope.searchtext = query
       scope.search.update(scope.searchtext)
 
   restrict: 'C'
-  template: '<form name="searchBox" ng-submit="dosearch()"><input type="text" ng-model="searchtext" name="searchText" style="width: 20em"></form>'
+  template: '''
+            <form class="simple-search-form" name="searchBox" ng-submit="dosearch()">
+              <input class="simple-search-input" type="text" ng-model="searchtext" name="searchText" />
+              <button class="simple-search-clear" type="reset" ng-hide="!searchtext" ng-click="reset($event)"></button>
+            </form>
+            '''
 ]
 
 whenscrolled = ['$window', ($window) ->
