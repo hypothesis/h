@@ -4,6 +4,7 @@
 @import 'base';
 @import 'responsive';
 @import 'yui_grid';
+@import 'simple-search';
 
 
 $baseFontSize: 16px;
@@ -413,7 +414,7 @@ blockquote {
 }
 
 .plus-icon {
-  @include fonticon("\e012", left);  
+  @include fonticon("\e012", left);
 }
 
 .x-icon {
@@ -838,6 +839,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 //Override their css here
 .search-container {
   overflow: hidden;
+  padding-right: 0.8em;
 }
 
 .VS-search {
