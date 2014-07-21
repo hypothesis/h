@@ -250,7 +250,7 @@ class App
 
           query = {query: searchCollection}
           unless angular.equals $location.search(), query
-            if $location.path() == '/viewer'
+            if $location.path() == '/viewer' or $location.path() == '/page_search'
               $location.path('/page_search').search(query)
             else
               $location.path('/stream').search(query)

@@ -17,7 +17,8 @@
 
         <!-- Searchbar -->
         <div class="search-container">
-          <div class="simpleSearch visual-container"></div>
+          <div class="simpleSearch visual-container"
+               query="query"></div>
         </div>
       </div>
       <!-- / Searchbar -->

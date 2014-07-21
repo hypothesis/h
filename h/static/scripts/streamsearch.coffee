@@ -31,8 +31,9 @@ class StreamSearch
       .setPastDataHits(50)
 
     # Apply query clauses
-    query = searchfilter.generateFacetedFilter $location.search().query
-    queryparser.populateFilter streamfilter, query
+    $scope.query = $location.search()['query']
+    terms = searchfilter.generateFacetedFilter $scope.query
+    queryparser.populateFilter streamfilter, terms
 
     $scope.updater?.then (sock) ->
       filter = streamfilter.getFilter()
