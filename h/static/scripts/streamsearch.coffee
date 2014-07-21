@@ -18,11 +18,11 @@ SEARCH_VALUES =
 class StreamSearch
   this.inject = [
     '$location', '$scope', '$rootScope',
-    'queryparser', 'session', 'streamfilter'
+    'queryparser', 'session', 'searchfilter', 'streamfilter'
   ]
   constructor: (
      $location,   $scope,   $rootScope,
-     queryparser,   session,   streamfilter
+     queryparser,   session,   searchfilter,   streamfilter
   ) ->
     # Initialize the base filter
     streamfilter
@@ -31,7 +31,8 @@ class StreamSearch
       .setPastDataHits(50)
 
     # Apply query clauses
-    queryparser.populateFilter streamfilter, $location.search()
+    query = searchfilter.generateFacetedFilter $location.search().query
+    queryparser.populateFilter streamfilter, query
 
     $scope.updater?.then (sock) ->
       filter = streamfilter.getFilter()
@@ -44,11 +45,9 @@ class StreamSearch
     $scope.search.query = $location.search()
     $scope.search.show = not angular.equals($location.search(), {})
 
-    $scope.search.update = (searchCollection) ->
-      # Update the query parameters
-      query = queryparser.parseModels searchCollection.models
-      unless angular.equals $location.search(), query
-        $location.search query
+    $scope.search.update = (query) ->
+      unless angular.equals $location.search(query), query
+        $location.search {query:query}
 
     $scope.search.clear = ->
       $location.search({})
