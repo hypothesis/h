@@ -75,6 +75,10 @@
   // This is not ideal
   &.ng-dirty.ng-invalid {
     @extend %form-input-error-state;
+
+    &.ng-touched ~ .form-error-list {
+      display: block;
+    }
   }
 }
 
@@ -83,16 +87,10 @@
 }
 
 .form-error-list {
-  margin-top: 5px;
-}
+  display: none;
 
-.form-field {
-  & .form-error-list {
-    display: none;
-  }
-
-  &.form-field-errors .form-error-list {
-    display: block;
+  &:first-child {
+    margin-top: 5px;
   }
 }
 

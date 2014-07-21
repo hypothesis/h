@@ -714,8 +714,10 @@ class Auth
     _reset = ->
       delete $scope.errors
       angular.extend $scope.model, base
-      for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
+      for own _, ctrl of $scope when angular.isFunction ctrl?.$setPristine
         ctrl.$setPristine()
+        for own _, field of ctrl when angular.isFunction field?.$setUntouched
+          field.$setUntouched()
 
     _error = (form, data) ->
       {errors, reason} = data
