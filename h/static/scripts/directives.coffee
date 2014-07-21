@@ -1,3 +1,32 @@
+formErrorList = ->
+  link: (scope, elem, attr, form) ->
+    field = form[attr.target]
+    return unless field?
+
+    field.$setUntouched = ->
+      field.$untouched = true
+      field.$touched = false
+      elem.parent().children('input').removeClass('ng-touched')
+
+    field.$setTouched = ->
+      field.$untouched = false
+      field.$touched = true
+      elem.parent().children('input').addClass('ng-touched')
+  require: '^form'
+  restrict: 'C'
+
+
+formValidate = ->
+  link: (scope, elem, attr, form) ->
+    elem.on 'blur', ':input', ->
+      form[this.name]?.$setTouched()
+
+    elem.on 'submit', (event) ->
+      for fieldName of form
+        form[fieldName]?.$setTouched?()
+  require: 'form'
+
+
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
@@ -102,32 +131,6 @@ recursive = ['$compile', '$timeout', ($compile, $timeout) ->
   restrict: 'A'
   terminal: true
 ]
-
-
-###
-# The slow validation directive ties an to a model controller and hides
-# it while the model is being edited. This behavior improves the user
-# experience of filling out forms by delaying validation messages until
-# after the user has made a mistake.
-###
-slowValidate = ->
-  link: (scope, elem, attr, ctrl) ->
-    fieldName = attr.slowValidate
-    return unless ctrl.$name? and ctrl?[fieldName]
-
-    elem.addClass 'slow-validate'
-
-    fieldPath = [ctrl.$name, fieldName, '$viewValue'].join('.')
-    modelCtrl = ctrl?[fieldName]
-
-    scope.$watch fieldPath, ->
-      if modelCtrl.$invalid and modelCtrl.$dirty
-        elem.addClass 'slow-validate-show'
-      else
-        elem.removeClass 'slow-validate-show'
-
-  require: '^form'
-  restrict: 'A'
 
 
 tabReveal = ['$parse', ($parse) ->
@@ -439,38 +442,14 @@ whenscrolled = ['$window', ($window) ->
         scope.$apply attr.whenscrolled
 ]
 
-validateForm = ['$parse', ($parse) ->
-  require: 'form',
-  link: (scope, elem, attr, formController) ->
-    onSuccess = $parse(attr.validateForm)
-    touchedInputs = {} # Inputs that the user has blurred.
-
-    scope.isFieldValid = (fieldName) ->
-      field = formController[fieldName]
-      unless field
-        throw new Error("The #{field} field could not be found on this form")
-      touchedInputs[fieldName] && field.$dirty && field.$invalid
-
-    scope.fieldClass = (fieldName, defaults, error) ->
-      if scope.isFieldValid(fieldName) then "#{defaults} #{error}" else defaults
-
-    elem.on 'submit', (event) ->
-      Object.keys(formController).forEach (prop) ->
-        if prop.indexOf('$') != 0
-          formController[prop].$dirty = true
-          touchedInputs[prop] = true
-
-    elem.on 'blur', ':input', ->
-      touchedInputs[this.name] = true
-      scope.$apply()
-]
 
 angular.module('h.directives', ['ngSanitize'])
+.directive('formErrorList', formErrorList)
+.directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
 .directive('privacy', privacy)
 .directive('recursive', recursive)
-.directive('slowValidate', slowValidate)
 .directive('tabReveal', tabReveal)
 .directive('tags', tags)
 .directive('thread', thread)
@@ -479,4 +458,3 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('repeatAnim', repeatAnim)
 .directive('visualSearch', visualSearch)
 .directive('whenscrolled', whenscrolled)
-.directive('validateForm', validateForm)

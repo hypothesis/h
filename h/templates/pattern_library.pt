@@ -94,7 +94,7 @@
             <label class="form-label" for="">Text Area</label>
             <textarea class="form-input" name="" rows="8" columns="48" placeholder="Longer form text…"></textarea>
           </div>
-          <div class="form-field form-field-valid">
+          <div class="form-field">
             <label class="form-label" for="">With Hint <span class="form-hint">(between 3 and 15 characters)</span></label>
             <input class="form-input" type="text" name="" value="" placeholder="Placeholder" />
           </div>
@@ -102,15 +102,15 @@
             <label class="form-label" for="">Focussed</label>
             <input class="form-input js-focus" type="text" name="" value="Focussed" placeholder="Placeholder" />
           </div>
-          <div class="form-field form-field-error">
+          <div class="form-field">
             <label class="form-label" for="">Error <span class="form-hint">(between 3 and 15 characters)</span></label>
-            <input class="form-input" type="text" name="" value="Bad Input" placeholder="Placeholder" />
+            <input class="form-input ng-dirty ng-invalid" type="text" name="" value="Bad Input" placeholder="Placeholder" />
             <ul class="form-error-list">
               <li class="form-error">Password must be more that 3 characters long</li>
               <li class="form-error">Password is not valid for this username</li>
             </ul>
           </div>
-          <div class="form-field form-field-valid">
+          <div class="form-field">
             <label class="form-label" for="">Valid</label>
             <input class="form-input" type="text" name="" value="Valid Input" placeholder="Placeholder" />
           </div>

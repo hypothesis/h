@@ -18,28 +18,31 @@
         data-value="login"
         class="form tab-pane"
         name="login"
-        validate-form
+        form-validate
         novalidate>
 
-    <div ng-class="fieldClass('username', 'form-field', 'form-field-errors')">
-      <label class="form-label" for="field-username">Username:</label>
-      <input class="form-input" type="text" id="field-username" name="username" value="" placeholder="bill"
-      ng-model="model.username" ng-minlength="3"
-      required autocapitalize="false" />
-      <ul class="form-error-list">
+    <div class="form-field">
+      <label class="form-label" for="field-login-username">Username:</label>
+      <input class="form-input" type="text" id="field-login-username"
+             name="username" value="" placeholder="bill"
+             ng-model="model.username" ng-minlength="3"
+             required autocapitalize="false" />
+      <ul class="form-error-list" data-target="username">
         <li class="form-error" ng-show="login.username.$error.required"
-          >Please enter your username.</li>
+            >Please enter your username.</li>
         <li class="form-error" ng-show="login.username.$error.minlength"
-          >Usernames are at least 3 characters.</li>
+            >Usernames are at least 3 characters.</li>
       </ul>
     </div>
 
-    <div ng-class="fieldClass('password', 'form-field', 'form-field-errors')">
-      <label class="form-label" for="field-password">Password:</label>
-      <input class="form-input" id="field-password" type="password" name="password" value="" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+    <div class="form-field">
+      <label class="form-label" for="field-login-password">Password:</label>
+      <input class="form-input" id="field-login-password"
+             type="password" name="password" value=""
+             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
              ng-model="model.password"
              required autocapitalize="false" autocorrect="false" />
-      <ul class="form-error-list">
+      <ul class="form-error-list" data-target="password">
         <li class="form-error" ng-show="login.password.$error.required">Please enter your password.</li>
         <li class="form-error" ng-show="errors.session">{{errors.session}}</li>
       </ul>
@@ -63,18 +66,20 @@
         data-value="register"
         class="form tab-pane"
         name="register"
+        form-validate
         novalidate>
 
     <div class="form-field">
       <label class="form-label" for="field-register-username">Username:
         <span class="form-hint">(between 3 and 15 characters)</span>
       </label>
-      <input id="field-register-username" class="form-input" type="text" name="username" value="" placeholder="bill"
+      <input class="form-input" id="field-register-username"
+             type="text" name="username" value="" placeholder="bill"
              required autocapitalize="false" ng-model="model.username"
              ng-minlength="3" ng-maxlength="15"
              ng-pattern="/^[A-Za-z0-9._]+$/"
              ng-model-options="{updateOn: 'blur'}" />
-      <ul class="form-error-list" ng-show="errors.register.username || (register.username.$dirty && register.username.$invalid)">
+      <ul class="form-error-list" data-target="username">
         <li class="form-error" ng-show="register.username.$error.required"
               >Please choose a username.</li>
         <li class="form-error" ng-show="register.username.$error.minlength"
@@ -89,11 +94,11 @@
 
     <div class="form-field">
       <label class="form-label" for="field-register-email">Email Address:</label>
-      <input id="field-register-email"  class="form-input" type="email" name="email"
-             value="" placeholder="bill@example.com"
+      <input class="form-input" id="field-register-email"
+             type="email" name="email" value="" placeholder="bill@example.com"
              ng-model="model.email" required autocapitalize="false"
              ng-model-options="{updateOn: 'blur'}" />
-      <ul class="form-error-list" ng-show="errors.register.email || (register.email.$dirty && register.email.$invalid)">
+      <ul class="form-error-list" data-target="email">
         <li class="form-error" ng-show="register.email.$error.email"
               >Is this an email address?</li>
         <li class="form-error" ng-show="register.email.$error.required"
@@ -112,7 +117,7 @@
              required autocapitalize="false" autocorrect="false"
              ng-minlength="2" ng-model="model.password"
              ng-model-options="{updateOn: 'blur'}" />
-      <ul class="form-error-list" ng-show="errors.activate.code || (register.password.$dirty && register.password.$invalid)">
+      <ul class="form-error-list" data-target="password">
         <li class="form-error" ng-show="register.password.$error.required"
               >Please enter a password.</li>
         <li class="form-error" ng-show="register.password.$error.minlength"
@@ -136,13 +141,15 @@
         data-value="forgot"
         class="form tab-pane"
         name="forgot"
+        form-validate
         novalidate>
 
     <div class="form-field">
       <label class="form-label" for="field-forgot-email">Please enter your email address:</label>
-      <input id="field-forgot-email" class="form-input" type="email" name="email" value="" placeholder="bill@example.com"
+      <input class="form-input" id="field-forgot-email"
+             type="email" name="email" value="" placeholder="bill@example.com"
              required autocapitalize="false" ng-model="model.email" />
-      <ul class="form-error-list" ng-show="register.email.$dirty && register.email.$invalid">
+      <ul class="form-error-list" data-target="email">
         <li class="form-error" ng-show="forgot.email.$error.email">Is this an email address?</li>
         <li class="form-error" ng-show="forgot.email.$error.required">Please enter your email.</li>
       </ul>
@@ -161,28 +168,31 @@
         data-value="activate"
         class="form tab-pane"
         name="activate"
+        form-validate
         novalidate>
 
     <div class="form-field">
       <label class="form-label" for="field-activate-code">Your activation code:</label>
-      <input id="field-activate-code" class="form-input" type="text"
-             name="code" value="" placeholder="12345678"
+      <input class="form-input" id="field-activate-code"
+             type="text" name="code" value="" placeholder="12345678"
              required autocorrect="false" autocapitalize="false"
              ng-model="model.code" />
-      <ul class="form-error-list" ng-show="activate.code.$dirty && activate.code.$invalid">
+      <ul class="form-error-list" data-target="code">
         <li class="form-error" ng-show="activate.code.$error.required">Please enter your activation code</li>
         <li class="form-error" ng-show="error.activate.code">{{error.activate.code}}</li>
       </ul>
     </div>
 
-    <div class="">
+    <div class="form-field">
       <label class="form-label" for="field-activate-password">Account password:
         <span class="form-hint">(at least two characters)</span>
       </label>
-      <input id="field-activate-password" class="form-input" type="password" name="password" value="" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+      <input class="form-input" id="field-activate-password"
+             type="password" name="password" value=""
+             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
              required autocapitalize="false" autocorrect="false"
              ng-minlength="2" ng-model="model.password" />
-      <ul class="form-error-list" ng-show="activate.password.$dirty && activate.password.$invalid">
+      <ul class="form-error-list" data-target="password">
         <li class="form-error" ng-show="activate.password.$error.required"
               >Please choose a password.</li>
         <li class="form-error" ng-show="activate.password.$error.minlength"

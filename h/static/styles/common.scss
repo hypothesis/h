@@ -173,18 +173,6 @@ h6 {
   display: none;
 }
 
-.slow-validate {
-  display: block;
-  font-family: $sansFontFamily;
-  max-height: 0;
-  overflow: hidden;
-
-  &.slow-validate-show {
-    @include transition(max-height .25s ease-in 2s);
-    max-height: 10em;
-  }
-}
-
 .visuallyhidden {
   position: absolute;
   overflow: hidden;
