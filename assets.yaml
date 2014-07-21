@@ -261,31 +261,6 @@ uuid:
   output: scripts/vendor/uuid.min.js
   contents:
     - h:static/scripts/vendor/uuid.js
-visualsearch:
-  contents:
-    - visualsearch_css
-    - visualsearch_js
-visualsearch_css:
-  contents:
-    - filters: cleancss
-      output: styles/visualsearch.min.css
-      contents:
-        - h:static/styles/visualsearch.css
-visualsearch_js:
-  contents:
-    - filters: uglifyjs
-      output: scripts/vendor/underscore.min.js
-      contents:
-        - h:static/scripts/vendor/underscore-1.4.3.js
-    - filters: uglifyjs
-      output: scripts/vendor/backbone.min.js
-      contents:
-        - h:static/scripts/vendor/backbone-0.9.10.js
-    - filters: uglifyjs
-      output: scripts/vendor/visualsearch.min.js
-      contents:
-        - h:static/scripts/vendor/visualsearch.js
-
 
 # Fonts
 icomoon_css:
@@ -294,7 +269,6 @@ icomoon_css:
       output: styles/icomoon.css
       contents:
         - h:static/icomoon.css
-
 
 # Application
 app:
@@ -332,7 +306,6 @@ app_js:
     - jquery_ui_js
     - tag_it
     - uuid
-    - visualsearch_js
     - filters: uglifyjs
       contents:
         - filters: coffeescript
@@ -360,7 +333,6 @@ app_css:
     contents:
       - icomoon_css
       - jquery_ui_css
-      - visualsearch_css
       - filters: compass, cssrewrite
         output: styles/hypothesis.css
         contents:

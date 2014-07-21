@@ -398,46 +398,6 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
 ]
 
 
-visualSearch = ['$parse', ($parse) ->
-  link: (scope, elem, attr, ctrl) ->
-    _search = $parse(attr.onsearch)
-    _clear = $parse(attr.onclear)
-    _facets = $parse(attr.facets)
-    _values = $parse(attr.values)
-
-    _vs = VS.init
-      container: elem
-      callbacks:
-        search: (query, modelCollection) ->
-          scope.$apply ->
-            _search(scope, {"this": modelCollection})
-        clearSearch: (original) ->
-          _vs.searchBox.value('')
-          if attr.onclear
-            scope.$apply ->
-              _clear(scope)
-          else
-            original()
-        facetMatches: (callback) ->
-          facets = _facets(scope) or []
-          callback(facets or [], preserveOrder: true)
-        valueMatches: (facet, term, callback) ->
-          values = _values(scope)?[facet]
-          callback(values or [], preserveOrder: true)
-
-    scope.$watch attr.query, (query) ->
-      p = 0
-      _vs.searchBox.value('')
-      for k, values of query
-        continue unless values?.length
-        unless angular.isArray values then values = [values]
-        for v in values
-          _vs.searchBox.addFacet(k, v, p++)
-      _search(scope, {"this": _vs.searchQuery})
-
-  restrict: 'C'
-]
-
 simpleSearch = ['$parse', ($parse) ->
   link: (scope, elem, attr, ctrl) ->
     scope.dosearch = ->
@@ -485,6 +445,5 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('username', username)
 .directive('userPicker', userPicker)
 .directive('repeatAnim', repeatAnim)
-.directive('visualSearch', visualSearch)
 .directive('simpleSearch', simpleSearch)
 .directive('whenscrolled', whenscrolled)
