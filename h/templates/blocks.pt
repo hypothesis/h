@@ -18,14 +18,15 @@
         data-value="login"
         class="form tab-pane"
         name="login"
+        validate-form
         novalidate>
 
-    <div class="form-field">
+    <div ng-class="fieldClass('username', 'form-field', 'form-field-errors')">
       <label class="form-label" for="field-username">Username:</label>
       <input class="form-input" type="text" id="field-username" name="username" value="" placeholder="bill"
       ng-model="model.username" ng-minlength="3"
       required autocapitalize="false" />
-      <ul class="form-error-list" ng-show="login.username.$dirty && login.username.$invalid">
+      <ul class="form-error-list">
         <li class="form-error" ng-show="login.username.$error.required"
           >Please enter your username.</li>
         <li class="form-error" ng-show="login.username.$error.minlength"
@@ -33,12 +34,12 @@
       </ul>
     </div>
 
-    <div class="form-field">
+    <div ng-class="fieldClass('password', 'form-field', 'form-field-errors')">
       <label class="form-label" for="field-password">Password:</label>
       <input class="form-input" id="field-password" type="password" name="password" value="" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
              ng-model="model.password"
              required autocapitalize="false" autocorrect="false" />
-      <ul class="form-error-list" ng-show="errors.session || (login.password.$dirty && login.password.$invalid)">
+      <ul class="form-error-list">
         <li class="form-error" ng-show="login.password.$error.required">Please enter your password.</li>
         <li class="form-error" ng-show="errors.session">{{errors.session}}</li>
       </ul>
@@ -51,8 +52,7 @@
           >have an activation code?</a>
       </div>
       <div class="form-actions-buttons">
-        <button class="btn btn-primary" type="submit" name="login"
-          ng-disabled="!login.$valid">Sign in</button>
+        <button class="btn btn-primary" type="submit" name="login">Sign in</button>
       </div>
     </div>
   </form>

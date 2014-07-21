@@ -86,6 +86,16 @@
   margin-top: 5px;
 }
 
+.form-field {
+  & .form-error-list {
+    display: none;
+  }
+
+  &.form-field-errors .form-error-list {
+    display: block;
+  }
+}
+
 .form-error {
   font-size: 13px;
   line-height: 1.5;
