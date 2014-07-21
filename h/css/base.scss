@@ -182,6 +182,7 @@ $input-border-radius: 2px;
       margin-right: $offset;
       speak: none;
       font-weight: normal;
+      @content; // Allow additonal styles for the icon.
     }
     &:after {
       content: "" !important;
