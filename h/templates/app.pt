@@ -106,28 +106,28 @@
 
     <!-- Templates -->
     <script type="text/ng-template" id="annotation.html">
-      <metal:main use-macro="load: annotation.html" />
+      <metal:main use-macro="load: h:templates/annotation.html" />
     </script>
     <script type="text/ng-template" id="editor.html">
-      <metal:main use-macro="load: editor.html" />
+      <metal:main use-macro="load: h:templates/editor.html" />
     </script>
     <script type="text/ng-template" id="markdown.html">
-      <metal:main use-macro="load: markdown.html" />
+      <metal:main use-macro="load: h:templates/markdown.html" />
     </script>
     <script type="text/ng-template" id="privacy.html">
-      <metal:main use-macro="load: privacy.html" />
+      <metal:main use-macro="load: h:templates/privacy.html" />
     </script>
     <script type="text/ng-template" id="userPicker.html">
-      <metal:main use-macro="load: userPicker.html" />
+      <metal:main use-macro="load: h:templates/userPicker.html" />
     </script>
     <script type="text/ng-template" id="viewer.html">
-      <metal:main use-macro="load: viewer.html" />
+      <metal:main use-macro="load: h:templates/viewer.html" />
     </script>
     <script type="text/ng-template" id="page_search.html">
-      <metal:main use-macro="load: page_search.html" />
+      <metal:main use-macro="load: h:templates/page_search.html" />
     </script>
     <script type="text/ng-template" id="notification.html">
-      <metal:main use-macro="load: notification.html" />
+      <metal:main use-macro="load: h:templates/notification.html" />
     </script>
   </body>
 </html>

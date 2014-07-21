@@ -1,13 +1,13 @@
 <html metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag>
     <script type="text/javascript" defer="defer">
-      <metal:main use-macro="load: embed.txt" />
+      <metal:main use-macro="load: h:templates/embed.txt" />
     </script>
     <title>Hypothesis</title>
   </head>
   <body metal:fill-slot="body" tal:omit-tag>
     <div id="home" class="content paper">
-      <metal:main use-macro="load: header.pt" />
+      <metal:main use-macro="load: h:templates/header.pt" />
       <p>Welcome to Hypothesis. For general information about the project, please
         visit the <a href="http://hypothes.is">home page</a> where you can
         reserve a username, sign up for our newsletter or learn how to get
@@ -26,7 +26,7 @@
         <li>Highlight any piece of text to leave an annotation of your own (try
           annotating these instructions).</li>
         <li>Use this bookmarklet to annotate any page on the Web:
-          <metal:main use-macro="load: bookmarklet.pt" /></li>
+          <metal:main use-macro="load: h:templates/bookmarklet.pt" /></li>
       </ol>
       <h2>Contributing<span class="redtext">.</span></h2>
         <p>Hypothes.is is an open source effort licensed under a 2-Clause <a href="https://en.wikipedia.org/wiki/BSD_licenses">BSD License</a>, sometimes referred to as the "Simplified BSD License" or the "FreeBSD License". Development is coordinated through <a href="https://github.com/hypothesis">our Github repository</a> utilizing the issue tracking and wiki tools provided there. Additionally, we manage a mailing list which you can subscribe to by sending an email to <a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#111;&#58;&#100;&#101;&#x76;&#x2b;&#x73;&#x75;&#x62;&#115;&#99;&#114;&#105;&#98;&#x65;&#x40;&#x6c;&#x69;&#x73;&#116;&#46;&#104;&#121;&#112;&#x6f;&#x74;&#x68;&#x65;&#x73;&#46;&#105;&#115;">&#100;&#101;&#x76;&#x2b;&#x73;&#x75;&#x62;&#115;&#99;&#114;&#105;&#98;&#x65;&#x40;&#x6c;&#x69;&#x73;&#116;&#46;&#104;&#121;&#112;&#x6f;&#x74;&#x68;&#x65;&#x73;&#46;&#105;&#115;</a> (<a href="http://list.hypothes.is/archive/dev">archive</a>).</p>

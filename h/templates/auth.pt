@@ -3,7 +3,7 @@
   </head>
   <body metal:fill-slot="body" tal:omit-tag>
     <div class="content">
-      <metal:main use-macro="load: header.pt" />
+      <metal:main use-macro="load: h:templates/header.pt" />
       <div tal:condition="request.session.peek_flash()">
         <span tal:repeat="message request.session.pop_flash()" tal:omit-tag>
           ${message}<br/>
