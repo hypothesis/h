@@ -122,10 +122,12 @@ class SearchFilter
 #
 #      options: backend specific options
 #      options.es: elasticsearch specific options
-#      options.es.query_type : can be: simple, query_string, match
+#      options.es.query_type : can be: simple, query_string, match, multi_match
 #         defaults to: simple, determines which es query type to use
 #      options.es.cutoff_frequency: if set, the query will be given a cutoff_frequency for this facet
-#      options.es.and_or: match queries can use this, defaults to and
+#      options.es.and_or: match and multi_match queries can use this, defaults to and
+#      options.es.match_type: multi_match query type
+#      options.es.fields: fields to search for in multi-match query
 # }
 # The models is the direct output from visualsearch
 class QueryParser
@@ -182,6 +184,18 @@ class QueryParser
       case_sensitive: true
       and_or: 'and'
       operator: 'ge'
+    any:
+      exact_match: false
+      case_sensitive: false
+      and_or: 'and'
+      path:   ['/quote', '/tags', '/text', '/uri', '/user']
+      options:
+        es:
+         query_type: 'multi_match'
+         match_type: 'cross_fields'
+         and_or: 'and'
+         fields:   ['quote', 'tags', 'text', 'uri', 'user']
+
 
   parseModels: (models) ->
     # Cluster facets together
@@ -197,13 +211,12 @@ class QueryParser
 
   populateFilter: (filter, query) =>
     # Populate a filter with a query object
-    for category, values of query
+    for category, value of query
       unless @rules[category]? then continue
-      unless values.length then continue
+      terms = value.terms
+      unless terms.length then continue
       rule = @rules[category]
 
-      unless angular.isArray values
-        values = [values]
 
       # Now generate the clause with the help of the rule
       exact_match = if rule.exact_match? then rule.exact_match else true
@@ -214,7 +227,7 @@ class QueryParser
       if and_or is 'or'
         val_list = ''
         first = true
-        for val in values
+        for val in terms
           unless first then val_list += ',' else first = false
           value_part = if rule.formatter then rule.formatter val else val
           val_list += value_part
@@ -226,7 +239,7 @@ class QueryParser
         oper_part =
           if rule.operator? then rule.operator
           else if exact_match then 'equals' else 'matches'
-        for val in values
+        for val in terms
           value_part = if rule.formatter then rule.formatter val else val
           filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
 

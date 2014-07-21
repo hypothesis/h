@@ -747,7 +747,7 @@ class ViewFilter
   _anyMatches: (filter, value, match) ->
     matchresult = []
     for term in filter.terms
-      if value instanceof Array
+      if angular.isArray value
           matchresult.push match value, term
       else
           matchresult.push match term, value
@@ -758,7 +758,7 @@ class ViewFilter
     return false if autofalsefn? and autofalsefn annotation
 
     value = checker.value annotation
-    if value instanceof Array
+    if angular.isArray value
       if filter.lowercase then value = value.map (e) -> e.toLowerCase()
       return @_arrayMatches filter, value, checker.match
     else
@@ -815,7 +815,6 @@ class ViewFilter
       if limit and results.length >= limit then break
 
       for category, filter of filters
-        continue if category is 'timestamp'
         break unless matches
         terms = filter.terms
         # No condition for this category
@@ -835,7 +834,7 @@ class ViewFilter
 
               continue if conf.autofalse? and conf.autofalse annotation
               value = conf.value annotation
-              if value instanceof Array
+              if angular.isArray value
                 if filter.lowercase
                   value = value.map (e) -> e.toLowerCase()
               else
