@@ -439,6 +439,32 @@ whenscrolled = ['$window', ($window) ->
         scope.$apply attr.whenscrolled
 ]
 
+validateForm = ['$parse', ($parse) ->
+  require: 'form',
+  link: (scope, elem, attr, formController) ->
+    onSuccess = $parse(attr.validateForm)
+    touchedInputs = {} # Inputs that the user has blurred.
+
+    scope.isFieldValid = (fieldName) ->
+      field = formController[fieldName]
+      unless field
+        throw new Error("The #{field} field could not be found on this form")
+      touchedInputs[fieldName] && field.$dirty && field.$invalid
+
+    scope.fieldClass = (fieldName, defaults, error) ->
+      if scope.isFieldValid(fieldName) then "#{defaults} #{error}" else defaults
+
+    elem.on 'submit', (event) ->
+      Object.keys(formController).forEach (prop) ->
+        if prop.indexOf('$') != 0
+          formController[prop].$dirty = true
+          touchedInputs[prop] = true
+
+    elem.on 'blur', ':input', ->
+      touchedInputs[this.name] = true
+      scope.$apply()
+]
+
 angular.module('h.directives', ['ngSanitize'])
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
@@ -453,3 +479,4 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('repeatAnim', repeatAnim)
 .directive('visualSearch', visualSearch)
 .directive('whenscrolled', whenscrolled)
+.directive('validateForm', validateForm)
