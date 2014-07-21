@@ -130,7 +130,7 @@ p {
 .clearfix:after {
 	clear: both;
 }
-.noLiga-true {
+.hidden-true {
 	display: none;
 }
 .textbox0 {
@@ -142,6 +142,7 @@ p {
 }
 #testDrive {
 	padding-top: 24px;
+	line-height: 1.5;
 }
 .fs0 {
 	font-size: 16px;
