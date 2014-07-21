@@ -410,8 +410,9 @@ simpleSearch = ['$parse', ($parse) ->
       scope.search.clear()
 
     scope.$watch attr.query, (query) ->
-      scope.searchtext = query
-      scope.search.update(scope.searchtext)
+      if query.query?
+        scope.searchtext = query.query
+        scope.search.update(scope.searchtext)
 
   restrict: 'C'
   template: '''

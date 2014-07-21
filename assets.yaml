@@ -344,7 +344,7 @@ app_css:
           - h:static/styles/yui_grid.scss
           - h:static/styles/forms.scss
           - h:static/styles/spinner.scss
-          - h:static/style/simple-search.scss
+          - h:static/styles/simple-search.scss
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
 # the application. It sets up RPC channels for cross-domain communication
