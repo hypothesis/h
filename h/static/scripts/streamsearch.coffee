@@ -61,8 +61,6 @@ class StreamSearch
       $scope.updater.then (sock) ->
         sock.send(JSON.stringify(sockmsg))
 
-    $scope.search.query = $location.search()
-
 
 angular.module('h.streamsearch', imports, configure)
 .constant('searchFacets', SEARCH_FACETS)

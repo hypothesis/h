@@ -49,6 +49,11 @@ class App
         socialView: annotator.socialView
         ongoingHighlightSwitch: false
         model: {}
+        search:
+          facets: SEARCH_FACETS
+          values: SEARCH_VALUES
+          query: $location.search()
+          show: not angular.equals($location.search(), {})
 
     _reset()
 
@@ -114,6 +119,12 @@ class App
             $scope.reloadAnnotations()
             $scope.initUpdater()
 
+    $scope.$watch 'search.show', (visible) ->
+      if visible
+        $timeout ->
+          $element.find('.visual-search').find('input').last().focus()
+        , 10
+
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
       console.log "Social View changed to '" + newValue + "'. Reloading annotations."
@@ -144,12 +155,6 @@ class App
         .first()
         .focus()
       , 10
-
-    $scope.$watch 'show_search', (value, old) ->
-      if value and not old
-        $timeout ->
-          $element.find('.visual-search').find('input').last().focus()
-        , 10
 
     $scope.$watch 'store.entities', (entities, oldEntities) ->
       return if entities is oldEntities
@@ -248,18 +253,11 @@ class App
 
     $rootScope.applySort "Location"
 
-    $scope.query = $location.search()
-    $scope.searchFacets = SEARCH_FACETS
-    $scope.searchValues = SEARCH_VALUES
-
-    $scope.search = {}
-    $scope.search.update = angular.noop
-    $scope.search.clear = angular.noop
-
-    $scope.show_search = Object.keys($scope.query).length > 0
-
     $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
       unless next.$$route? then return
+
+      $scope.search.query = $location.search()
+      $scope.search.show = not angular.equals($location.search(), {})
 
       unless next.$$route.originalPath is '/stream'
         $scope.search.update = (searchCollection) ->
@@ -290,7 +288,6 @@ class App
 
         $scope.search.clear = ->
           $location.url('/viewer')
-          $scope.show_search = false
 
     $scope.reloadAnnotations = ->
       Store = plugins.Store
