@@ -41,6 +41,9 @@ class StreamSearch
     $rootScope.applyView "Document"  # Non-sensical, but best for the moment
     $rootScope.applySort "Newest"
 
+    $scope.search.query = $location.search()
+    $scope.search.show = not angular.equals($location.search(), {})
+
     $scope.search.update = (searchCollection) ->
       # Update the query parameters
       query = queryparser.parseModels searchCollection.models

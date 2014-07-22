@@ -256,9 +256,6 @@ class App
     $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
       unless next.$$route? then return
 
-      $scope.search.query = $location.search()
-      $scope.search.show = not angular.equals($location.search(), {})
-
       unless next.$$route.originalPath is '/stream'
         $scope.search.update = (searchCollection) ->
           return unless annotator.discardDrafts()
@@ -813,6 +810,7 @@ class Search
     $scope.filter_orderBy = $filter('orderBy')
     $scope.matches = []
     $scope.search.query = $location.search()
+    $scope.search.show = true
     $scope.render_order = {}
     $scope.render_pos = {}
     $scope.ann_info =
