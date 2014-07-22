@@ -64,8 +64,8 @@ class SessionProvider
     ($q,   $resource,   baseURI,   flash) ->
       actions = {}
 
-      _process = (response) ->
-        data = response.data
+      process = (data, headersGetter) ->
+        data = angular.fromJson data
         model = data.model
 
         # bw compat
@@ -85,19 +85,12 @@ class SessionProvider
         csrfToken = model.csrf
         delete model.csrf
 
-        # Lift the model object so it becomes the response data.
-
-        # Return the response or a rejected response.
-        if data.status is 'failure'
-          $q.reject(data)
-        else
-          model
+        # Return just the model
+        model
 
       for name, options of ACTION_OPTION
         actions[name] = angular.extend {}, options, @options
-        actions[name].interceptor =
-          response: _process
-          responseError: _process
+        actions[name].transformResponse = process
 
       $resource("#{baseURI}app", {}, actions).load()
   ]

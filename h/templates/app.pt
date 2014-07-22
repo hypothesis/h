@@ -4,15 +4,15 @@
     <div class="topbar"
          ng-class="frame.visible && 'shown'"
          ng-mouseenter="showViewSort(true, true)">
-      <div class="inner" ng-switch="!!model.persona">
+      <div class="inner" ng-switch="!!session.persona">
         <a class="pull-right" href=""
            ng-click="sheet.collapsed = false"
            ng-switch-when="false"
            ng-show="sheet.collapsed">Sign in</a>
         <div class="pull-right user-picker"
              ng-switch-default
-             data-user-picker-model="model.persona"
-             data-user-picker-options="model.personas">
+             data-user-picker-model="session.persona"
+             data-user-picker-options="session.personas">
         </div>
 
         <!-- Searchbar -->
@@ -33,10 +33,10 @@
       </div>
 
       <!-- Account and Authentication -->
-      <div class="sheet collapsed"
+      <div auth="session"
+           class="sheet collapsed"
            ng-class="sheet.collapsed && 'collapsed'"
            ng-init="sheet.collapsed = true">
-
         <span class="close icon-x"
               role="button"
               title="Close"
@@ -44,7 +44,6 @@
 
         <div class="form-vertical tabbable"
              data-tab-reveal="['forgot','activate']"
-             ng-controller="AuthController"
              ng-model="sheet.tab"
              ng-submit="submit(this[sheet.tab])">
           <metal:main use-macro="blocks['auth-tabs']" />
