@@ -721,10 +721,14 @@ class Auth
 
     _error = (form, data) ->
       {errors, reason} = data
-      $scope.errors = session: reason
-      $scope.errors[form] = {}
+
+      if reason # Seems legit, and only used for login messages...
+        $scope.login.password.$setValidity('server', false)
+        $scope.login.password.serverError = reason
+
       for field, error of errors
-        $scope.errors[form][field] = error
+        $scope[form][field].$setValidity('server', false)
+        $scope[form][field].serverError = error
 
     _startTimeout = ->
       # Reset the auth forms after five minutes of inactivity
