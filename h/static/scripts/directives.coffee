@@ -1,29 +1,40 @@
-formErrorList = ->
+formField = ->
   link: (scope, elem, attr, form) ->
     field = form[attr.target]
     return unless field?
 
-    field.$setUntouched = ->
-      field.$untouched = true
-      field.$touched = false
-      elem.parent().children('input').removeClass('ng-touched')
+    field.unsetFieldError = ->
+      elem.removeClass('form-field-error')
 
-    field.$setTouched = ->
-      field.$untouched = false
-      field.$touched = true
-      elem.parent().children('input').addClass('ng-touched')
+    field.setFieldError = ->
+      elem.addClass('form-field-error')
+
   require: '^form'
   restrict: 'C'
 
 
 formValidate = ->
   link: (scope, elem, attr, form) ->
-    elem.on 'blur', ':input', ->
-      form[this.name]?.$setTouched()
+    updateField = (field) ->
+      return unless field?
 
+      if field.$valid
+        field.unsetFieldError()
+      else
+        field.setFieldError()
+
+    # Immediately show feedback for corrections.
+    elem.on 'keyup', ':input', ->
+      updateField(form[this.name]) if form[this.name]?.$valid
+
+    # Validate field when the content changes.
+    elem.on 'change', ':input', ->
+      updateField(form[this.name])
+
+    # Validate the field when submit is clicked.
     elem.on 'submit', (event) ->
-      for fieldName of form
-        form[fieldName]?.$setTouched?()
+      updateField(field) for _, field of form
+
   require: 'form'
 
 
@@ -444,7 +455,7 @@ whenscrolled = ['$window', ($window) ->
 
 
 angular.module('h.directives', ['ngSanitize'])
-.directive('formErrorList', formErrorList)
+.directive('formField', formField)
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)

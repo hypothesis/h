@@ -18,8 +18,14 @@
   }
 }
 
-.form-field-error .form-input {
-  @extend %form-input-error-state;
+.form-field-error {
+  .form-input {
+    @extend %form-input-error-state;
+  }
+
+  .form-error-list {
+    display: block;
+  }
 }
 
 .form-input,
@@ -69,15 +75,6 @@
 
     @include placeholder {
       color: #cbbb95;
-    }
-  }
-
-  // This is not ideal
-  &.ng-dirty.ng-invalid {
-    @extend %form-input-error-state;
-
-    &.ng-touched ~ .form-error-list {
-      display: block;
     }
   }
 }
