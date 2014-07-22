@@ -33,7 +33,7 @@ formValidate = ->
 
     # Validate the field when submit is clicked.
     elem.on 'submit', (event) ->
-      updateField(field) for _, field of form
+      updateField(field) for own key, field of form when key[0] != '$'
 
   require: 'form'
 
