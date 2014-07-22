@@ -48,7 +48,7 @@ class App
         frame: $scope.frame or @scope.frame
         socialView: annotator.socialView
         ongoingHighlightSwitch: false
-        model: {}
+        model: session
         search:
           facets: SEARCH_FACETS
           values: SEARCH_VALUES
@@ -62,7 +62,6 @@ class App
       angular.extend annotator.options.Store, options
 
       session.$promise.then (data) ->
-        angular.extend $scope.model, data
         unless data.personas?.length
           $scope.initUpdater()
           $scope.reloadAnnotations()
