@@ -5,17 +5,10 @@
           role="button"
           title="More actions"></span>
     <ul class="dropdown-menu pull-right" role="menu">
-      <li class="icon-reply"
-          ng-click="reply()"> Reply</li>
-      <li class="icon-copy"
-          ng-show="auth.update"
-          ng-click="edit()"> Edit</li>
-      <li class="icon-x"
-          ng-show="auth.delete"
-          ng-click="delete()"> Delete…</li>
-      <li class="icon-flag"
-          ng-hide="auth.delete"
-          ng-click="flag()"> Flag…</li>
+      <li ng-click="reply()"><i class="icon-reply"></i> Reply</li>
+      <li ng-show="auth.update" ng-click="edit()"><i class="icon-copy"></i> Edit</li>
+      <li ng-show="auth.delete" ng-click="delete()"><i class="icon-x"></i> Delete…</li>
+      <li ng-hide="auth.delete" ng-click="flag()"><i class="icon-flag"></i> Flag…</li>
     </ul>
   </div>
 
@@ -89,19 +82,17 @@
         <button ng-switch-when="edit"
                 ng-click="save($event)"
                 ng-disabled="!form.$valid"
-                class="btn icon-checkmark2"> Save</button>
+                class="btn"><i class="icon-checkmark2"></i> Save</button>
         <button ng-switch-when="delete"
                 ng-click="save($event)"
                 ng-disabled="!form.$valid"
-                class="btn icon-checkmark2"> Delete</button>
+                class="btn"><i class="icon-checkmark2"></i> Delete</button>
         <button ng-switch-default
                 ng-click="save($event)"
                 ng-disabled="!form.$valid"
-                class="btn icon-checkmark2"> Save</button>
+                class="btn"><i class="icon-checkmark2"></i> Save</button>
       </ng-switch>
-      <span role="button"
-            ng-click="cancel($event)"
-            class="icon-x"> Cancel</span>
+      <span role="button" ng-click="cancel($event)" ><i class="icon-x"></i> Cancel</span>
     </div>
   </div>
 
@@ -136,19 +127,19 @@
      ng-click="toggleCollapsed($event)" />
 
   <!-- Bottom control strip -->
-  <a class="small magicontrol icon-reply" href="" title="Reply"
+  <a class="small magicontrol" href="" title="Reply"
      ng-hide="editing"
-     ng-click="reply($event)"> Reply</a>
-  <a class="small magicontrol icon-export" href="" title="Share"
+     ng-click="reply($event)"><i class="icon-reply"></i> Reply</a>
+  <a class="small magicontrol" href="" title="Share"
      ng-hide="editing"
-     ng-click="share($event)"> Share</a>
-  <a class="small magicontrol icon-copy" href="" title="Edit"
+     ng-click="share($event)"><i class="icon-export"></i> Share</a>
+  <a class="small magicontrol" href="" title="Edit"
      ng-show="auth.update && !editing"
-     ng-click="edit($event)"> Edit</a>
-  <a class="small magicontrol icon-x" href="" title="Delete"
+     ng-click="edit($event)"><i class="icon-copy"></i> Edit</a>
+  <a class="small magicontrol" href="" title="Delete"
      ng-show="auth.delete && !editing"
-     ng-click="delete($event)"> Delete</a>
-  <a class="small magicontrol icon-flag" href="" title="flag"
+     ng-click="delete($event)"><i class="icon-x"></i> Delete</a>
+  <a class="small magicontrol" href="" title="flag"
      ng-show="!auth.delete && !editing"
-     ng-click="flag($event)"> Flag</a>
+     ng-click="flag($event)"><i class="icon-flag"></i> Flag</a>
 </form>
