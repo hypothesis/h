@@ -44,7 +44,7 @@
              required autocapitalize="false" autocorrect="false" />
       <ul class="form-error-list">
         <li class="form-error" ng-show="login.password.$error.required">Please enter your password.</li>
-        <li class="form-error" ng-show="errors.session">{{errors.session}}</li>
+        <li class="form-error" ng-show="login.password.$error.server">{{login.password.serverError}}</li>
       </ul>
     </div>
 
@@ -103,7 +103,7 @@
               >Is this an email address?</li>
         <li class="form-error" ng-show="register.email.$error.required"
               >Please enter your email.</li>
-        <li class="form-error" ng-show="errors.register.email">{{errors.register.email}}</li>
+        <li class="form-error" ng-show="register.email.$error.server">{{register.email.serverError}}</li>
       </ul>
     </div>
 
