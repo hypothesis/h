@@ -52,8 +52,6 @@
       <ul class="form-error-list">
         <li class="form-error" ng-show="login.password.$error.required"
             >Please enter your password.</li>
-        <li class="form-error" ng-show="login.password.$error.invalid"
-            >The username and password do not match.</li>
         <li class="form-error" ng-show="login.password.$error.response"
             >{{login.password.responseErrorMessage}}</li>
       </ul>

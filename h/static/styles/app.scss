@@ -101,17 +101,6 @@ ol {
     top: 1em;
   }
 
-  &.collapsed {
-    display: none;
-    overflow: hidden;
-  }
-
-  footer {
-    font-size: .8em;
-    font-family: $sansFontFamily;
-    text-align: right;
-  }
-
   input:not([type="submit"]) { width: 100%; }
 }
 
