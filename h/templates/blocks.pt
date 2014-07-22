@@ -92,13 +92,13 @@
       </ul>
     </div>
 
-    <div class="form-field">
+    <div class="form-field" data-target="email">
       <label class="form-label" for="field-register-email">Email Address:</label>
       <input class="form-input" id="field-register-email"
              type="email" name="email" value="" placeholder="bill@example.com"
              ng-model="model.email" required autocapitalize="false"
              ng-model-options="{updateOn: 'blur'}" />
-      <ul class="form-error-list" data-target="email">
+      <ul class="form-error-list">
         <li class="form-error" ng-show="register.email.$error.email"
               >Is this an email address?</li>
         <li class="form-error" ng-show="register.email.$error.required"
@@ -128,8 +128,7 @@
 
     <div class="form-actions">
       <div class="form-actions-buttons">
-        <button class="btn" type="submit" name="sign_up"
-          ng-disabled="!register.$valid">Sign up</button>
+        <button class="btn" type="submit" name="sign_up">Sign up</button>
       </div>
     </div>
 
@@ -157,7 +156,7 @@
 
    <div class="form-actions">
       <div class="form-actions-buttons">
-        <button class="btn" type="submit" name="forgot" ng-disabled="!forgot.$valid">Request access</button>
+        <button class="btn" type="submit" name="forgot">Request access</button>
       </div>
     </div>
   </form>
@@ -202,7 +201,7 @@
 
     <div class="form-actions">
       <div class="form-actions-buttons">
-        <button class="btn" type="submit" name="activate" ng-disabled="!activate.$valid">Activate</button>
+        <button class="btn" type="submit" name="activate">Activate</button>
       </div>
     </div>
   </form>
