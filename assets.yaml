@@ -341,6 +341,7 @@ app_js:
           # Right now results in dependency problems
           contents:
             - scripts/app.coffee
+            - scripts/auth.coffee
             - scripts/controllers.coffee
             - scripts/flash.coffee
             - scripts/filters.coffee
