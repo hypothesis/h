@@ -5,7 +5,6 @@ imports = [
   'h.controllers'
   'h.directives'
   'h.app_directives'
-  'h.displayer'
   'h.helpers'
   'h.flash'
   'h.filters'
@@ -38,6 +37,9 @@ configure = [
         $delegate
       ]
 
+    $routeProvider.when '/a/:id',
+      controller: 'ViewerController'
+      templateUrl: 'viewer.html'
     $routeProvider.when '/editor',
       controller: 'EditorController'
       templateUrl: 'editor.html'

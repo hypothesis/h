@@ -23,7 +23,8 @@
   </head>
   <body tal:attributes="ng-app layout.app;
                         ng-controller layout.controller;
-                        ng-csp layout.csp">
+                        ng-csp layout.csp;
+                        ng-init structure: init | nothing;">
     <tal:block metal:define-slot="body" />
     <script type="text/javascript"
             tal:attributes="src src"
