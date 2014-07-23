@@ -71,17 +71,18 @@ def _environment_overrides():
             url[0] = url[0] + '+psycopg2'
         overrides['sqlalchemy.url'] = urlparse.urlunparse(url)
 
-    # ELASTICSEARCH_PORT and MAIL_PORT match Docker container links
-    # The format is tcp://<ip>:<port>
-    if 'ELASTICSEARCH_PORT' in os.environ:
-        es_host, es_port = os.environ['ELASTICSEARCH_PORT'][6:].split(':')
-        overrides['es.host'] = 'http://{}:{}'.format(es_host, es_port)
-
     if 'ELASTICSEARCH_INDEX' in os.environ:
         overrides['es.index'] = os.environ['ELASTICSEARCH_INDEX']
 
+    # ELASTICSEARCH_PORT_* and MAIL_PORT_* match Docker container links
+    if 'ELASTICSEARCH_PORT' in os.environ:
+        es_host = os.environ['ELASTICSEARCH_PORT_9200_TCP_ADDR']
+        es_port = os.environ['ELASTICSEARCH_PORT_9200_TCP_PORT']
+        overrides['es.host'] = 'http://{}:{}'.format(es_host, es_port)
+
     if 'MAIL_PORT' in os.environ:
-        mail_host, mail_port = os.environ['MAIL_PORT'][6:].split(':')
+        mail_host = os.environ['MAIL_PORT_25_TCP_ADDR']
+        mail_port = os.environ['MAIL_PORT_25_TCP_PORT']
         overrides['mail.host'] = mail_host
         overrides['mail.port'] = mail_port
 
