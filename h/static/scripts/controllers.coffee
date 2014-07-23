@@ -685,23 +685,34 @@ class Auth
     _timeout = null
 
     _reset = ->
-      delete $scope.errors
       angular.extend $scope.model, base
       for own _, ctrl of $scope when angular.isFunction ctrl?.$setPristine
         ctrl.$setPristine()
-        for own _, field of ctrl when angular.isFunction field?.$setUntouched
-          field.$setUntouched()
+
+    _updateFormValidity = (form, reason) ->
+      if reason == 'Invalid username or password.'
+        form.password.$setValidity('invalid', false)
+      else if reason
+        form.responseErrorMessage = reason
+
+    _updateFieldValidity = (form, errors) ->
+      for field, error of errors
+        form[field].$setValidity('response', false)
+        form[field].responseErrorMessage = error
+
+    _resetFormValidity = (form) ->
+      form.password.$setValidity('invalid', true)
+      for own _, field of form when field.$setValidity
+        field.$setValidity('response', true)
+        field.responseErrorMessage = null
 
     _error = (form, data) ->
       {errors, reason} = data
 
-      if reason # Seems legit, and only used for login messages...
-        $scope.login.password.$setValidity('server', false)
-        $scope.login.password.serverError = reason
+      _updateFormValidity(form, reason)
+      _updateFieldValidity(form, errors)
 
-      for field, error of errors
-        $scope[form][field].$setValidity('server', false)
-        $scope[form][field].serverError = error
+      $scope.$emit('error', form.$name)
 
     _startTimeout = ->
       # Reset the auth forms after five minutes of inactivity
@@ -716,13 +727,15 @@ class Auth
         _startTimeout()
 
     $scope.submit = (form) ->
+      _resetFormValidity(form)
+
       angular.extend session, $scope.model
       return unless form.$valid
 
       promise = session["$#{form.$name}"] ->
-        $scope.$emit 'success', form.$name
+        $scope.$emit('success', form.$name)
 
-      promise.then(_reset, _error.bind(null, form.$name))
+      promise.then(_reset, _error.bind(null, form))
 
 
 class Editor

@@ -21,7 +21,11 @@
         form-validate
         novalidate>
 
-    <div class="form-field" data-target="username">
+    <p class="form-description form-error" ng-show="login.responseErrorMessage">
+      {{login.responseErrorMessage}}
+    </p>
+
+    <div class="form-field" data-error-class="form-field-error" data-target="username">
       <label class="form-label" for="field-login-username">Username:</label>
       <input class="form-input" type="text" id="field-login-username"
              name="username" value="" placeholder="bill"
@@ -32,10 +36,12 @@
             >Please enter your username.</li>
         <li class="form-error" ng-show="login.username.$error.minlength"
             >Usernames are at least 3 characters.</li>
+        <li class="form-error" ng-show="login.username.$error.response"
+            >{{login.username.responseErrorMessage}}</li>
       </ul>
     </div>
 
-    <div class="form-field" data-target="password">
+    <div class="form-field" data-error-class="form-field-error" data-target="password">
       <label class="form-label" for="field-login-password">Password:</label>
       <input class="form-input" id="field-login-password"
              type="password" name="password" value=""
@@ -43,8 +49,12 @@
              ng-model="model.password"
              required autocapitalize="false" autocorrect="false" />
       <ul class="form-error-list">
-        <li class="form-error" ng-show="login.password.$error.required">Please enter your password.</li>
-        <li class="form-error" ng-show="login.password.$error.server">{{login.password.serverError}}</li>
+        <li class="form-error" ng-show="login.password.$error.required"
+            >Please enter your password.</li>
+        <li class="form-error" ng-show="login.password.$error.invalid"
+            >The username and password do not match.</li>
+        <li class="form-error" ng-show="login.password.$error.response"
+            >{{login.password.responseErrorMessage}}</li>
       </ul>
     </div>
 
@@ -69,7 +79,11 @@
         form-validate
         novalidate>
 
-    <div class="form-field" data-target="username">
+    <p class="form-description form-error" ng-show="register.responseErrorMessage">
+      {{register.responseErrorMessage}}
+    </p>
+
+    <div class="form-field" data-error-class="form-field-error" data-target="username">
       <label class="form-label" for="field-register-username">Username:
         <span class="form-hint">(between 3 and 15 characters)</span>
       </label>
@@ -88,11 +102,12 @@
               >Usernames must be 15 characters at most.</li>
         <li class="form-error" ng-show="register.username.$error.pattern"
               >Only letters, numbers, underscore and dot are allowed.</li>
-        <li class="form-error" ng-show="errors.register.username">{{errors.register.username}}</li>
+        <li class="form-error" ng-show="register.username.$error.response"
+              >{{register.username.responseErrorMessage}}</li>
       </ul>
     </div>
 
-    <div class="form-field" data-target="email">
+    <div class="form-field" data-error-class="form-field-error" data-target="email">
       <label class="form-label" for="field-register-email">Email Address:</label>
       <input class="form-input" id="field-register-email"
              type="email" name="email" value="" placeholder="bill@example.com"
@@ -103,11 +118,12 @@
               >Is this an email address?</li>
         <li class="form-error" ng-show="register.email.$error.required"
               >Please enter your email.</li>
-        <li class="form-error" ng-show="register.email.$error.server">{{register.email.serverError}}</li>
+        <li class="form-error" ng-show="register.email.$error.response"
+              >{{register.email.responseErrorMessage}}</li>
       </ul>
     </div>
 
-    <div class="form-field" data-target="password">
+    <div class="form-field" data-error-class="form-field-error" data-target="password">
       <label class="form-label" for="field-register-password">Password:
         <span class="form-hint">(at least two characters)</span>
       </label>
@@ -122,7 +138,8 @@
               >Please enter a password.</li>
         <li class="form-error" ng-show="register.password.$error.minlength"
               >Passwords must be at least 2 characters.</li>
-        <li class="form-error" ng-show="errors.activate.code">{{errors.activate.code}}</li>
+        <li class="form-error" ng-show="register.password.$error.response"
+              >{{register.password.responseErrorMessage}}</li>
       </ul>
     </div>
 
@@ -143,7 +160,10 @@
         form-validate
         novalidate>
 
-    <div class="form-field" data-target="email">
+    <p class="form-description form-error" ng-show="forgot.responseErrorMessage">
+      {{forgot.responseErrorMessage}}
+    </p>
+    <div class="form-field" data-error-class="form-field-error" data-target="email">
       <label class="form-label" for="field-forgot-email">Please enter your email address:</label>
       <input class="form-input" id="field-forgot-email"
              type="email" name="email" value="" placeholder="bill@example.com"
@@ -151,6 +171,8 @@
       <ul class="form-error-list">
         <li class="form-error" ng-show="forgot.email.$error.email">Is this an email address?</li>
         <li class="form-error" ng-show="forgot.email.$error.required">Please enter your email.</li>
+        <li class="form-error" ng-show="forgot.email.$error.response"
+              >{{forgot.email.responseErrorMessage}}</li>
       </ul>
    </div>
 
@@ -170,7 +192,11 @@
         form-validate
         novalidate>
 
-    <div class="form-field" data-target="code">
+    <p class="form-description form-error" ng-show="activate.responseErrorMessage">
+      {{activate.responseErrorMessage}}
+    </p>
+
+    <div class="form-field" data-error-class="form-field-error" data-target="code">
       <label class="form-label" for="field-activate-code">Your activation code:</label>
       <input class="form-input" id="field-activate-code"
              type="text" name="code" value="" placeholder="12345678"
@@ -178,11 +204,12 @@
              ng-model="model.code" />
       <ul class="form-error-list">
         <li class="form-error" ng-show="activate.code.$error.required">Please enter your activation code</li>
-        <li class="form-error" ng-show="error.activate.code">{{error.activate.code}}</li>
+        <li class="form-error" ng-show="activate.code.$error.response"
+              >{{activate.code.responseErrorMessage}}</li>
       </ul>
     </div>
 
-    <div class="form-field" data-target="password">
+    <div class="form-field" data-error-class="form-field-error" data-target="password">
       <label class="form-label" for="field-activate-password">Account password:
         <span class="form-hint">(at least two characters)</span>
       </label>
@@ -196,6 +223,8 @@
               >Please choose a password.</li>
         <li class="form-error" ng-show="activate.password.$error.minlength"
               >Passwords must be at least 2 characters.</li>
+        <li class="form-error" ng-show="activate.password.$error.response"
+              >{{activate.password.responseErrorMessage}}</li>
       </ul>
     </div>
 
