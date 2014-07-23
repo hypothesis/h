@@ -59,6 +59,7 @@ def main(global_config, **settings):
 
     return create_app(settings)
 
+
 def _environment_overrides():
     overrides = {}
 
@@ -74,7 +75,7 @@ def _environment_overrides():
     if 'ELASTICSEARCH_INDEX' in os.environ:
         overrides['es.index'] = os.environ['ELASTICSEARCH_INDEX']
 
-    # ELASTICSEARCH_PORT_* and MAIL_PORT_* match Docker container links
+    # ELASTICSEARCH_PORT and MAIL_PORT match Docker container links
     if 'ELASTICSEARCH_PORT' in os.environ:
         es_host = os.environ['ELASTICSEARCH_PORT_9200_TCP_ADDR']
         es_port = os.environ['ELASTICSEARCH_PORT_9200_TCP_PORT']
