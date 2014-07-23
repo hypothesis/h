@@ -1,8 +1,10 @@
 formValidate = ->
   link: (scope, elem, attr, form) ->
+    errorClassName = attr.formValidateErrorClass
+
     toggleClass = (field, {addClass}) ->
       fieldEl = elem.find("[data-target=#{field.$name}]")
-      fieldEl.toggleClass('form-field-error', addClass)
+      fieldEl.toggleClass(errorClassName, addClass)
 
     updateField = (field) ->
       return unless field?
