@@ -4,7 +4,11 @@
         tal:repeat="provider providers.values()"
         action="${request.route_url(provider.login_route)}"
         target="hPopout">
-    <button class="${provider.name} login">${provider.name}</button>
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn ${provider.name} login">${provider.name}</button>
+      </div>
+    </div>
   </form>
 </metal:main>
 
@@ -12,77 +16,138 @@
   <!-- Login -->
   <form data-title="Sign in"
         data-value="login"
-        class="tab-pane"
+        class="form tab-pane"
         name="login"
+        form-validate
+        data-form-validate-error-class="form-field-error"
         novalidate>
 
-    <input type="text" name="username" value="" placeholder="Username"
-           ng-model="model.username" ng-minlength="3"
-           required autocapitalize="false" />
-    <span slow-validate="username">
-      <span ng-show="login.username.$error.required"
-            >Please enter your username.</span>
-      <span ng-show="login.username.$error.minlength"
-            >Usernames are at least 3 characters.</span>
-    </span>
+    <p class="form-description form-error" ng-show="login.responseErrorMessage">
+      {{login.responseErrorMessage}}
+    </p>
 
-    <input type="password" name="password" value="" placeholder="Password"
-           ng-model="model.password"
-           required autocapitalize="false" autocorrect="false" />
-    <span slow-validate="password">Please enter your password.</span>
+    <div class="form-field" data-target="username">
+      <label class="form-label" for="field-login-username">Username:</label>
+      <input class="form-input" type="text" id="field-login-username"
+             name="username" value="" placeholder="bill"
+             ng-model="model.username" ng-minlength="3"
+             required autocapitalize="false" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="login.username.$error.required"
+            >Please enter your username.</li>
+        <li class="form-error" ng-show="login.username.$error.minlength"
+            >Usernames are at least 3 characters.</li>
+        <li class="form-error" ng-show="login.username.$error.response"
+            >{{login.username.responseErrorMessage}}</li>
+      </ul>
+    </div>
 
-    <input type="submit" name="login" value="Sign in"
-           ng-disabled="!login.$valid" />
+    <div class="form-field" data-target="password">
+      <label class="form-label" for="field-login-password">Password:</label>
+      <input class="form-input" id="field-login-password"
+             type="password" name="password" value=""
+             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+             ng-model="model.password"
+             required autocapitalize="false" autocorrect="false" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="login.password.$error.required"
+            >Please enter your password.</li>
+        <li class="form-error" ng-show="login.password.$error.response"
+            >{{login.password.responseErrorMessage}}</li>
+      </ul>
+    </div>
 
+    <div class="form-actions">
+      <div class="form-actions-message">
+        <a href="" ng-click="sheet.tab = 'forgot'">Forgotten your password</a> or
+        <a href="" ng-click="sheet.tab = 'activate'"
+          >have an activation code?</a>
+      </div>
+      <div class="form-actions-buttons">
+        <button class="btn btn-primary" type="submit" name="login">Sign in</button>
+      </div>
+    </div>
   </form>
   <!-- / Login -->
 
   <!-- Register -->
   <form data-title="Create an account"
         data-value="register"
-        class="tab-pane"
+        class="form tab-pane"
         name="register"
+        form-validate
+        data-form-validate-error-class="form-field-error"
         novalidate>
 
-    <input type="text" name="username" value="" placeholder="Username"
-           required autocapitalize="false" ng-model="model.username"
-           ng-minlength="3" ng-maxlength="15"
-           ng-pattern="/^[A-Za-z0-9._]+$/" />
-    <span slow-validate="username">
-      <span ng-show="register.username.$error.required"
-            >Please choose a username.</span>
-      <span ng-show="register.username.$error.minlength"
-            >Usernames must be at least 3 characters.</span>
-      <span ng-show="register.username.$error.maxlength"
-            >Usernames must be 15 characters at most.</span>
-      <span ng-show="register.username.$error.pattern"
-            >Only letters, numbers, underscore and dot are allowed.</span>
-    </span>
-    <span>{{errors.register.username}}</span>
+    <p class="form-description form-error" ng-show="register.responseErrorMessage">
+      {{register.responseErrorMessage}}
+    </p>
 
-    <input type="email" name="email" value="" placeholder="Email"
-           ng-model="model.email" required autocapitalize="false" />
-    <span slow-validate="email">
-      <span ng-show="register.email.$error.email"
-            >Is this an email address?</span>
-      <span ng-show="register.email.$error.required"
-            >Please enter your email.</span>
-    </span>
-    <span>{{errors.register.email}}</span>
+    <div class="form-field" data-target="username">
+      <label class="form-label" for="field-register-username">Username:
+        <span class="form-hint">(between 3 and 15 characters)</span>
+      </label>
+      <input class="form-input" id="field-register-username"
+             type="text" name="username" value="" placeholder="bill"
+             required autocapitalize="false" ng-model="model.username"
+             ng-minlength="3" ng-maxlength="15"
+             ng-pattern="/^[A-Za-z0-9._]+$/"
+             ng-model-options="{updateOn: 'blur'}" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="register.username.$error.required"
+              >Please choose a username.</li>
+        <li class="form-error" ng-show="register.username.$error.minlength"
+              >Usernames must be at least 3 characters.</li>
+        <li class="form-error" ng-show="register.username.$error.maxlength"
+              >Usernames must be 15 characters at most.</li>
+        <li class="form-error" ng-show="register.username.$error.pattern"
+              >Only letters, numbers, underscore and dot are allowed.</li>
+        <li class="form-error" ng-show="register.username.$error.response"
+              >{{register.username.responseErrorMessage}}</li>
+      </ul>
+    </div>
 
-    <input type="password" name="password" value="" placeholder="Password"
-           required autocapitalize="false" autocorrect="false"
-           ng-minlength="2" ng-model="model.password" />
-    <span slow-validate="password">
-      <span ng-show="register.password.$error.required"
-            >Please enter a password.</span>
-      <span ng-show="register.password.$error.minlength"
-            >Passwords must be at least 2 characters.</span>
-    </span>
-    <span>{{errors.activate.code}}</span>
+    <div class="form-field" data-target="email">
+      <label class="form-label" for="field-register-email">Email Address:</label>
+      <input class="form-input" id="field-register-email"
+             type="email" name="email" value="" placeholder="bill@example.com"
+             ng-model="model.email" required autocapitalize="false"
+             ng-model-options="{updateOn: 'blur'}" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="register.email.$error.email"
+              >Is this an email address?</li>
+        <li class="form-error" ng-show="register.email.$error.required"
+              >Please enter your email.</li>
+        <li class="form-error" ng-show="register.email.$error.response"
+              >{{register.email.responseErrorMessage}}</li>
+      </ul>
+    </div>
 
-    <input type="submit" name="sign_up" value="Sign up"
-           ng-disabled="!register.$valid" />
+    <div class="form-field" data-target="password">
+      <label class="form-label" for="field-register-password">Password:
+        <span class="form-hint">(at least two characters)</span>
+      </label>
+      <input id="field-register-password" class="form-input"
+             type="password" name="password" value=""
+             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+             required autocapitalize="false" autocorrect="false"
+             ng-minlength="2" ng-model="model.password"
+             ng-model-options="{updateOn: 'blur'}" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="register.password.$error.required"
+              >Please enter a password.</li>
+        <li class="form-error" ng-show="register.password.$error.minlength"
+              >Passwords must be at least 2 characters.</li>
+        <li class="form-error" ng-show="register.password.$error.response"
+              >{{register.password.responseErrorMessage}}</li>
+      </ul>
+    </div>
+
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn" type="submit" name="sign_up">Sign up</button>
+      </div>
+    </div>
 
   </form>
   <!-- / Register -->
@@ -90,58 +155,86 @@
   <!-- Forgot password -->
   <form data-title="Claim an account"
         data-value="forgot"
-        class="tab-pane"
+        class="form tab-pane"
         name="forgot"
+        form-validate
+        data-form-validate-error-class="form-field-error"
         novalidate>
 
-    <p>Please enter your email address.</p>
-    <!--Get Validation Code-->
-    <input type="email" name="email" value="" placeholder="Email"
-           required autocapitalize="false" ng-model="model.email" />
-    <span slow-validate="email">
-      <span ng-show="forgot.email.$error.email"
-            >Is this an email address?</span>
-      <span ng-show="forgot.email.$error.required"
-            >Please enter your email.</span>
-    </span>
+    <p class="form-description form-error" ng-show="forgot.responseErrorMessage">
+      {{forgot.responseErrorMessage}}
+    </p>
+    <div class="form-field" data-target="email">
+      <label class="form-label" for="field-forgot-email">Please enter your email address:</label>
+      <input class="form-input" id="field-forgot-email"
+             type="email" name="email" value="" placeholder="bill@example.com"
+             required autocapitalize="false" ng-model="model.email" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="forgot.email.$error.email">Is this an email address?</li>
+        <li class="form-error" ng-show="forgot.email.$error.required">Please enter your email.</li>
+        <li class="form-error" ng-show="forgot.email.$error.response"
+              >{{forgot.email.responseErrorMessage}}</li>
+      </ul>
+   </div>
 
-    <input type="submit" name="forgot" value="Request access"
-           ng-disabled="!forgot.$valid" />
-
+   <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn" type="submit" name="forgot">Request access</button>
+      </div>
+    </div>
   </form>
   <!-- / Forgot password -->
 
   <!-- Activate -->
   <form data-title="Activate an account"
         data-value="activate"
-        class="tab-pane"
+        class="form tab-pane"
         name="activate"
+        form-validate
+        data-form-validate-error-class="form-field-error"
         novalidate>
 
-    <p>Enter an activation code and a new password.</p>
+    <p class="form-description form-error" ng-show="activate.responseErrorMessage">
+      {{activate.responseErrorMessage}}
+    </p>
 
-    <input type="text" name="code" value="" placeholder="Activation Code"
-           required autocorrect="false" autocapitalize="false"
-           ng-model="model.code" />
-    <span slow-validate="code">Please enter your validation code.</span>
-    <span>{{errors.activate.code}}</span>
+    <div class="form-field" data-target="code">
+      <label class="form-label" for="field-activate-code">Your activation code:</label>
+      <input class="form-input" id="field-activate-code"
+             type="text" name="code" value="" placeholder="12345678"
+             required autocorrect="false" autocapitalize="false"
+             ng-model="model.code" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="activate.code.$error.required">Please enter your activation code</li>
+        <li class="form-error" ng-show="activate.code.$error.response"
+              >{{activate.code.responseErrorMessage}}</li>
+      </ul>
+    </div>
 
-    <input type="password" name="password" value="" placeholder="New Password"
-           required autocapitalize="false" autocorrect="false"
-           ng-minlength="2" ng-model="model.password" />
-    <span slow-validate="password">
-      <span ng-show="activate.password.$error.required"
-            >Please choose a password.</span>
-      <span ng-show="activate.password.$error.minlength"
-            >Passwords must be at least 2 characters.</span>
-    </span>
+    <div class="form-field" data-target="password">
+      <label class="form-label" for="field-activate-password">Account password:
+        <span class="form-hint">(at least two characters)</span>
+      </label>
+      <input class="form-input" id="field-activate-password"
+             type="password" name="password" value=""
+             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+             required autocapitalize="false" autocorrect="false"
+             ng-minlength="2" ng-model="model.password" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="activate.password.$error.required"
+              >Please choose a password.</li>
+        <li class="form-error" ng-show="activate.password.$error.minlength"
+              >Passwords must be at least 2 characters.</li>
+        <li class="form-error" ng-show="activate.password.$error.response"
+              >{{activate.password.responseErrorMessage}}</li>
+      </ul>
+    </div>
 
-    <input type="submit" name="activate" value="Activate"
-           ng-disabled="!activate.$valid" />
-
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn" type="submit" name="activate">Activate</button>
+      </div>
+    </div>
   </form>
   <!--/ Activate -->
-
-  <span>{{errors.session}}</span>
-
 </metal:main>

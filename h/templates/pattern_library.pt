@@ -1,0 +1,379 @@
+<html metal:use-macro="main_template">
+  <head metal:fill-slot="head" tal:omit-tag>
+    <title>Hypothesis</title>
+    <style>
+      .pattern-library-wrapper {
+        width: 80%;
+        margin: 30px auto;
+      }
+
+      .pattern-library-example {
+        overflow: hidden;
+        clear: both;
+      }
+
+      .pattern-library-example-code {
+        display: none;
+        margin: 0;
+        padding: 10px;
+        outline: none;
+        white-space: pre;
+      }
+
+      .pattern-library-example-code code {
+        font-family: Menlo, Monaco, monospace;
+        font-size: 14px;
+        word-wrap: normal;
+      }
+
+      .pattern-library-toggle {
+        position: fixed;
+        top: 0;
+        right: 10%;
+        display: block;
+        padding: 10px 20px;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #fff;
+        background: #BD1C2B;
+        border: 1px solid #BD1C2B;
+      }
+
+      .pattern-library-toggle:focus,
+      .pattern-library-toggle:hover {
+        color: #fff;
+        box-shadow: inset 0 0 0 1px #fff;
+      }
+
+      .js-show-code .pattern-library-example-code {
+        width: 48%;
+        float: right;
+        display: block;
+      }
+
+      .js-show-code .pattern-library-example-content {
+        width: 48%;
+        float: left;
+      }
+    </style>
+  </head>
+  <body metal:fill-slot="body" tal:omit-tag>
+    <div class="pattern-library-wrapper">
+      <div class="pattern-library-doc">
+        <h1>Pattern Primer</h1>
+        <p>This document gives an overview of all the components currently in the
+        Hypothesis UI.</p>
+        <a class="pattern-library-toggle" href="#">Show Code</a>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Text Inputs</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="form-field">
+            <label class="form-label" for="">Text Input <abbr class="form-required" title="required">*</abbr></label>
+            <input class="form-input" type="text" name="" value="" placeholder="Placeholder" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="">Password</label>
+            <input class="form-input" type="password" name="" value="" placeholder="Password" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="">Web Address</label>
+            <input class="form-input" type="url" name="" value="" placeholder="http://example.com" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="">Email Address</label>
+            <input class="form-input" type="email" name="" value="" placeholder="bill@example.com" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="">Number Input</label>
+            <input class="form-input" type="number" name="" value="" placeholder="12345" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="">Text Area</label>
+            <textarea class="form-input" name="" rows="8" columns="48" placeholder="Longer form text…"></textarea>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="">With Hint <span class="form-hint">(between 3 and 15 characters)</span></label>
+            <input class="form-input" type="text" name="" value="" placeholder="Placeholder" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="">Focussed</label>
+            <input class="form-input js-focus" type="text" name="" value="Focussed" placeholder="Placeholder" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="">Error <span class="form-hint">(between 3 and 15 characters)</span></label>
+            <input class="form-input ng-dirty ng-invalid" type="text" name="" value="Bad Input" placeholder="Placeholder" />
+            <ul class="form-error-list">
+              <li class="form-error">Password must be more that 3 characters long</li>
+              <li class="form-error">Password is not valid for this username</li>
+            </ul>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="">Valid</label>
+            <input class="form-input" type="text" name="" value="Valid Input" placeholder="Placeholder" />
+          </div>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Select Inputs</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="form-field">
+            <label class="form-label" for="">Select</label>
+            <select id="" class="form-select" name="">
+              <optgroup label="Option Group">
+                <option value="1">Option One</option>
+                <option value="2">Option Two</option>
+                <option value="3">Option Three</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Check Boxes</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="form-field form-checkbox-list">
+            <label class="form-label">Multiple Check Boxes</label>
+            <div class="form-checkbox-item">
+              <input type="hidden" name="checkbox-1" value="0" />
+              <input type="checkbox" id="checkbox-list-one" name="checkbox-1" value="1" />
+              <label class="form-label" for="checkbox-list-one">Checkbox One</label>
+            </div>
+            <div class="form-checkbox-item">
+              <input type="hidden" name="checkbox-2" value="0" />
+              <input type="checkbox" id="checkbox-list-two" name="checkbox-2" value="1" />
+              <label class="form-label" for="checkbox-list-two">Checkbox Two</label>
+            </div>
+            <div class="form-checkbox-item">
+              <input type="hidden" name="checkbox-3" value="0" />
+              <input type="checkbox" id="checkbox-list-three" name="checkbox-3" value="1" />
+              <label class="form-label" for="checkbox-list-three">Checkbox Three<br />with multi-line label</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Radio Buttons</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="form-field form-checkbox-list">
+            <label class="form-label">Multiple Radio Options</label>
+            <div class="form-checkbox-item">
+              <input type="radio" id="radio-list-one" name="radio-1" value="1" />
+              <label class="form-label" for="radio-list-one">Option One</label>
+            </div>
+            <div class="form-checkbox-item">
+              <input type="radio" id="radio-list-two" name="radio-1" value="2" />
+              <label class="form-label" for="radio-list-two">Option Two</label>
+            </div>
+            <div class="form-checkbox-item">
+              <input type="radio" id="radio-list-three" name="radio-1" value="3" />
+              <label class="form-label" for="radio-list-three">Option Three<br />with multi-line label</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Buttons</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="form-field">
+            <input class="btn" type="submit" name="" value="Input" />
+          </div>
+          <div class="form-field">
+            <button class="btn" type="submit" name="">Button</button>
+          </div>
+          <div class="form-field">
+            <a class="btn" href="#">Anchor</a>
+          </div>
+          <div class="form-field">
+            <button class="btn" type="submit" name="" disabled>Button (disabled)</button>
+          </div>
+          <div class="form-field">
+            <button class="btn js-focus" type="submit" name="">Button (hover)</button>
+          </div>
+          <div class="form-field">
+            <button class="btn js-active" type="submit" name="">Button (active)</button>
+          </div>
+          <div class="form-field">
+            <button class="btn" type="submit" name="">Primary Button</button>
+          </div>
+          <div class="form-field">
+            <button class="btn" type="submit" name="" disabled>Primary Button (disabled)</button>
+          </div>
+          <div class="form-field">
+            <button class="btn js-focus" type="submit" name="">Primary Button (focus/hover)</button>
+          </div>
+          <div class="form-field">
+            <button class="btn js-active" type="submit" name="">Primary Button (active)</button>
+          </div>
+          <div class="form-field">
+            <button class="btn btn-clean" type="submit" name="">Button Clean</button>
+          </div>
+          <div class="form-field">
+            <button class="btn btn-clean js-focus" type="submit" name="">Button Clean (focus/hover)</button>
+          </div>
+          <div class="form-field">
+            <button class="btn btn-clean js-active" type="submit" name="">Button Clean (active)</button>
+          </div>
+          <div class="form-field">
+            <button class="btn btn-with-icon js-disabled" type="submit" name="">
+              <span class="btn-icon spinner"><span><span></span></span></span>
+              Button Loading
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Button Async States</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="form-field" style="width: 230px; text-align: right">
+            <span class="btn-with-message">
+              <span class="btn-message btn-message-loading">
+                <span class="btn-icon spinner"><span><span></span></span></span>
+              </span>
+              <button class="btn js-disabled" type="submit" name="">
+                Button Loading
+              </button>
+            </span>
+          </div>
+          <div class="form-field" style="width: 230px; text-align: right">
+            <span class="btn-with-message">
+              <span class="btn-message btn-message-success">Saved! <i class="btn-message-icon icon-checkmark2"></i></span>
+              <button class="btn" type="submit" name="">
+                Button Loading
+              </button>
+            </span>
+          </div>
+          <div class="form-field" style="width: 230px; text-align: right">
+            <span id="button-loading-demo" class="btn-with-message" data-btn-message-state>
+              <!-- Insert with JavaScript -->
+              <span class="btn-message btn-message-loading">
+                <span class="btn-icon spinner"><span><span></span></span></span>
+              </span>
+              <!-- Insert with JavaScript -->
+              <span class="btn-message btn-message-success">
+                <span class="btn-message-text">Saved!</span> <i class="btn-message-icon icon-checkmark2"></i>
+              </span>
+              <button class="btn" type="submit" name="">
+                Button Loading
+              </button>
+            </span>
+            <script>
+              (function () {
+                var container = document.getElementById('button-loading-demo');
+                var timer;
+
+                container.querySelector('button').onclick = function (event) {
+                  event.preventDefault();
+                  event.target.disabled = true;
+                  container.setAttribute('data-btn-message-state', 'loading');
+
+                  clearTimeout(timer);
+                  timer = setTimeout(function () {
+                    event.target.disabled = false;
+                    container.setAttribute('data-btn-message-state', 'success');
+
+                    timer = setTimeout(function () {
+                      container.setAttribute('data-btn-message-state', 'default');
+                    }, 5000);
+                  }, 1000);
+                };
+              })();
+            </script>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Loading Spinner</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <span class="spinner"><span><span></span></span></span>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Login Form</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <form class="form" action="" method="">
+            <div class="form-field">
+              <label class="form-label" for="">Username:</label>
+              <input class="form-input" type="text" name="" value="" placeholder="johndoe" />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="">Password:</label>
+              <input class="form-input" type="text" name="" value="" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+            </div>
+            <div class="form-actions">
+              <div class="form-actions-message">
+                <div class="form-checkbox-item">
+                  <input type="checkbox" id="login-checkbox" />
+                  <label class="form-label" for="login-checkbox">Keep me logged in</label>
+                </div>
+              </div>
+              <div class="form-actions-buttons">
+                <button class="btn">Cancel</button>
+                <button class="btn btn-primary" type="submit">Login</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Inline Form</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <form class="form" action="" method="">
+            <div class="form-field">
+              <label class="form-label" for="">Search:</label>
+              <span class="form-inline">
+                <input class="form-input" type="text" name="" value="" placeholder="johndoe" />
+                <button class="btn btn-primary" type="submit">Go</button>
+              </span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script>
+      var examples = document.querySelectorAll('.pattern-library-example-content');
+      [].forEach.call(examples, function (example) {
+        var code = document.createElement('code');
+        var pre = document.createElement('pre');
+        pre.classList.add('pattern-library-example-code');
+        pre.appendChild(code);
+        var source = example.innerHTML.replace(/^\n+/, '');
+        var indent = source.split('\n')[0].match(/\S/).index;
+        var regexp = new RegExp('^\\s{' + indent + '}', 'gm');
+        code.appendChild(document.createTextNode(source.replace(regexp, '').trim()));
+
+        example.parentNode.appendChild(pre);
+      });
+
+      document.querySelector('.pattern-library-toggle').addEventListener('click', function (event) {
+          event.preventDefault();
+          var bodyClassList = document.body.classList;
+          if (bodyClassList.contains('js-show-code')) {
+            event.target.innerHTML = 'Show Code';
+            bodyClassList.remove('js-show-code');
+          } else {
+            event.target.innerHTML = 'Hide Code';
+            bodyClassList.add('js-show-code');
+          }
+      }, false);
+    </script>
+  </body>
+</html>

@@ -1,5 +1,6 @@
 <form
   id="${field.formid}"
+  class="form"
   action="${field.action}"
   method="${field.method}"
   enctype="multipart/form-data"
@@ -26,18 +27,21 @@
       <p class="error">${field.errormsg}</p>
     </div>
 
+
     <div tal:condition="field.buttons" class="form-actions">
-      <tal:block repeat="button field.buttons">
-        <button
-            tal:attributes="disabled button.disabled"
-            id="${field.formid+button.name}"
-            name="${button.name}"
-            type="${button.type}"
-            class="btn ${repeat.button.start and 'btn-primary' or ''}"
-            value="${button.value}">
-          ${button.title}
-        </button>
-      </tal:block>
+      <div class="form-actions-buttons">
+        <tal:block repeat="button field.buttons">
+          <button
+              tal:attributes="disabled button.disabled"
+              id="${field.formid+button.name}"
+              name="${button.name}"
+              type="${button.type}"
+              class="btn ${repeat.button.start and 'btn-primary' or ''}"
+              value="${button.value}">
+            ${button.title}
+          </button>
+        </tal:block>
+      </div>
     </div>
 
   </fieldset>

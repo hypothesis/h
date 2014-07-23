@@ -1,0 +1,51 @@
+<div tal:define="error_class error_class|field.widget.error_class;
+                 description description|field.description;
+                 title title|field.title;
+                 oid oid|field.oid;
+                 hidden hidden|field.widget.hidden;
+                 category category|field.widget.category;
+                 structural hidden or category == 'structural';
+                 required required|field.required;"
+     class="form-field ${field.error and 'has-error' or ''} ${field.widget.item_css_class or ''}"
+     title="${description}"
+     id="item-${oid}"
+     tal:omit-tag="structural"
+     i18n:domain="deform">
+
+  <label for="${oid}"
+         class="form-label ${required and 'required' or ''}"
+         tal:condition="not structural"
+         id="req-${oid}"
+         >
+         ${title}
+         <abbr class="form-required" title="required" tal:condition="required">*</abbr>
+         <span tal:condition="field.description and not field.widget.hidden"
+         class="form-hint">
+           ${field.description}
+         </span>
+  </label>
+
+  <div tal:define="input_prepend field.widget.input_prepend | None;
+                   input_append field.widget.input_append  | None"
+       tal:omit-tag="not (input_prepend or input_append)"
+       class="input-group">
+    <span class="input-group-addon"
+          tal:condition="input_prepend">${input_prepend}</span
+    ><span tal:replace="structure field.serialize(cstruct).strip()"
+    /><span class="input-group-addon"
+            tal:condition="input_append">${input_append}</span>
+  </div>
+
+  <ul class="form-error-list">
+    <li class="form-error"
+      tal:define="errstr 'error-%s' % field.oid"
+      tal:repeat="msg field.error.messages()"
+      i18n:translate=""
+      tal:attributes="id repeat.msg.index==0 and errstr or
+      ('%s-%s' % (errstr, repeat.msg.index))"
+      tal:condition="field.error and not field.widget.hidden and not field.typ.__class__.__name__=='Mapping'">
+      ${msg}
+    </li>
+  </ul>
+
+</div>

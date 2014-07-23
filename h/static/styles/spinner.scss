@@ -1,0 +1,84 @@
+// CSS Spinner modified from http://dabblet.com/gist/7615212
+// Works in modern browsers & IE10, IE9 gets stationary spinner.
+//
+// Examples
+//
+//   <!-- Three nested spans -->
+//   <span class="spinner"><span><span></span></span></span>
+
+@-webkit-keyframes spin {
+  to { @include transform(rotate(1turn)); }
+}
+
+@-moz-keyframes spin {
+  to { @include transform(rotate(1turn)); }
+}
+
+@-o-keyframes spin {
+  to { @include transform(rotate(1turn)); }
+}
+
+@keyframes spin {
+  to { @include transform(rotate(1turn)); }
+}
+
+.spinner {
+  position: relative;
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  font-size: 10px;
+  text-indent: 999em;
+  overflow: hidden;
+  -webkit-animation: spin 1.25s infinite steps(12); /* Safari 4+ */
+  -moz-animation: spin 1.25s infinite steps(12); /* Fx 5+ */
+  -o-animation: spin 1.25s infinite steps(12); /* Opera 12+ */
+  animation: spin 1.25s infinite steps(12); /* IE 10+, Fx 29+ */
+}
+
+.spinner:before,
+.spinner:after,
+.spinner > span:before,
+.spinner > span:after,
+.spinner > span > span:before,
+.spinner > span > span:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0.9em; /* (container width - part width)/2  */
+  width: 0.2em;
+  height: 0.6em;
+  border-radius: 0.1em;
+  background: #eee;
+  @include box-shadow(0 1.4em rgba(0, 0, 0, 0.15)); /* container height - part height */
+  @include transform-origin(50%, 1em); /* container height / 2 */
+}
+
+.spinner:before {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.spinner:after {
+  @include transform(rotate(-30deg));
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.spinner > span:before {
+  @include transform(rotate(-60deg));
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.spinner > span:after {
+  @include transform(rotate(-90deg));
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.spinner > span > span:before {
+    @include transform(rotate(-120deg));
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.spinner > span > span:after {
+    @include transform(rotate(-150deg));
+    background: rgba(0, 0, 0, 0.2);
+}

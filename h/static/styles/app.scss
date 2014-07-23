@@ -35,12 +35,9 @@ ol {
     @extend .btn-link;
     float: right;
   }
-
-  input { width: 100%; }
 }
 
 .bookmarklet {
-  @extend .btn;
   padding: .12em;
   border: 1px dashed $gray;
 }
@@ -92,29 +89,16 @@ ol {
 
 
 .sheet {
-  @include smallshadow;
+  @include border-radius(2px);
+  border: solid 1px $grayLighter;
   font-family: $sansFontFamily;
-  max-height: 480px;
-  overflow: hidden;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
+  margin-bottom: .72em;
+  position: relative;
 
   .close {
     position: absolute;
-    right: .5em;
-    top: .5em;
-  }
-
-  &.collapsed {
-    max-height: 0;
-  }
-
-  footer {
-    font-size: .8em;
-    font-family: $sansFontFamily;
-    text-align: right;
+    right: 1em;
+    top: 1em;
   }
 
   input:not([type="submit"]) { width: 100%; }

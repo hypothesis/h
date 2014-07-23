@@ -1,3 +1,39 @@
+formValidate = ->
+  link: (scope, elem, attr, form) ->
+    errorClassName = attr.formValidateErrorClass
+
+    toggleClass = (field, {addClass}) ->
+      fieldEl = elem.find("[data-target=#{field.$name}]")
+      fieldEl.toggleClass(errorClassName, addClass)
+
+    updateField = (field) ->
+      return unless field?
+
+      if field.$valid
+        toggleClass(field, addClass: false)
+      else
+        toggleClass(field, addClass: true)
+
+    # Immediately show feedback for corrections.
+    elem.on 'keyup', ':input', ->
+      updateField(form[this.name]) if form[this.name]?.$valid
+
+    # Validate field when the content changes.
+    elem.on 'change', ':input', ->
+      updateField(form[this.name])
+
+    # Validate the field when submit is clicked.
+    elem.on 'submit', (event) ->
+      updateField(field) for own _, field of form when field.$name?
+
+    # Validate when a response is processed.
+    scope.$on 'error', (event, name) ->
+      return unless form.$name == name
+      updateField(field) for own _, field of form when field.$name?
+
+  require: 'form'
+
+
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
@@ -102,32 +138,6 @@ recursive = ['$compile', '$timeout', ($compile, $timeout) ->
   restrict: 'A'
   terminal: true
 ]
-
-
-###
-# The slow validation directive ties an to a model controller and hides
-# it while the model is being edited. This behavior improves the user
-# experience of filling out forms by delaying validation messages until
-# after the user has made a mistake.
-###
-slowValidate = ->
-  link: (scope, elem, attr, ctrl) ->
-    fieldName = attr.slowValidate
-    return unless ctrl.$name? and ctrl?[fieldName]
-
-    elem.addClass 'slow-validate'
-
-    fieldPath = [ctrl.$name, fieldName, '$viewValue'].join('.')
-    modelCtrl = ctrl?[fieldName]
-
-    scope.$watch fieldPath, ->
-      if modelCtrl.$invalid and modelCtrl.$dirty
-        elem.addClass 'slow-validate-show'
-      else
-        elem.removeClass 'slow-validate-show'
-
-  require: '^form'
-  restrict: 'A'
 
 
 tabReveal = ['$parse', ($parse) ->
@@ -285,6 +295,8 @@ tags = ['$window', ($window) ->
         tag = ui.tagLabel
         $window.open "/t/" + tag
 
+    elem.find('input').addClass('form-input')
+
     ctrl.$formatters.push (tags=[]) ->
       assigned = elem.tagit 'assignedTags'
       for t in assigned when t not in tags
@@ -437,12 +449,13 @@ whenscrolled = ['$window', ($window) ->
         scope.$apply attr.whenscrolled
 ]
 
+
 angular.module('h.directives', ['ngSanitize'])
+.directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
 .directive('privacy', privacy)
 .directive('recursive', recursive)
-.directive('slowValidate', slowValidate)
 .directive('tabReveal', tabReveal)
 .directive('tags', tags)
 .directive('thread', thread)

@@ -69,6 +69,15 @@ $score-height: $score-width;
 $heatmap-width: 22px;
 $input-border-radius: 2px;
 
+/* Style input placeholders */
+@mixin placeholder {
+  &.placeholder { @content; }
+  &:-moz-placeholder { @content; }
+  &::-moz-placeholder { @content; }
+  &:-ms-input-placeholder { @content; }
+  &::-webkit-input-placeholder { @content; }
+}
+
 /* Shadow mixins */
 @mixin smallshadow($a: 0, $b: 1px, $c: .1) {
   @include box-shadow($a $b 1px hsla(0, 0%, 0%, $c));
@@ -82,7 +91,7 @@ $input-border-radius: 2px;
   font-family: "Source Sans Pro", "Open Sans", sans-serif;
   font-size: 1em;
   padding: .33em .5em;
-  &:focus {
+  &:focus, &.js-focus {
     outline: 0;
     border: 1px solid $gray;
     @include box-shadow( inset 1px 1px 6px -1px $grayLighter);
@@ -115,7 +124,7 @@ $input-border-radius: 2px;
   color: $grayDark;
   border-color: $grayLight $grayLight $gray;
 
-  &:hover {
+  &:hover, &:focus, &:active, &.js-focus, &.js-hover, &.js-active {
     @include background-image(
       linear-gradient(top, #fefefe 0%, #f4f4f4 50%, #e2e2e2 51%, #fdfdfd 100%));
     color: black;
@@ -125,7 +134,7 @@ $input-border-radius: 2px;
     }
   }
 
-  &:active:not([disabled]) {
+  &:active:not([disabled]), &.js-active {
     @include background-image(
       linear-gradient(top, #fcfcfc 0%, #f3f3f3 50%, #e1e1e1 51%, #fbfbfb 100%));
     @include box-shadow(

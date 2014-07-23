@@ -16,10 +16,8 @@ class App
   scope:
     frame:
       visible: false
-    sheet:
-      collapsed: true
-      tab: null
     ongoingHighlightSwitch: false
+    sheet: {}
     sorts: [
       'Newest'
       'Oldest'
@@ -48,12 +46,12 @@ class App
         frame: $scope.frame or @scope.frame
         socialView: annotator.socialView
         ongoingHighlightSwitch: false
-        model: {}
         search:
           facets: SEARCH_FACETS
           values: SEARCH_VALUES
           query: $location.search()
           show: not angular.equals($location.search(), {})
+        session: session
 
     _reset()
 
@@ -62,23 +60,20 @@ class App
       angular.extend annotator.options.Store, options
 
       session.$promise.then (data) ->
-        angular.extend $scope.model, data
         unless data.personas?.length
           $scope.initUpdater()
           $scope.reloadAnnotations()
 
-    $scope.$watch 'model.personas', (newValue, oldValue) =>
+    $scope.$watch 'session.personas', (newValue, oldValue) =>
       if newValue?.length
-        unless $scope.model.persona and $scope.model.persona in newValue
-          $scope.model.persona = newValue[0]
+        unless $scope.session.persona and $scope.session.persona in newValue
+          $scope.session.persona = newValue[0]
       else
-        $scope.model.persona = null
+        $scope.session.persona = null
 
-    $scope.$watch 'model.persona', (newValue, oldValue) =>
-      $scope.sheet.collapsed = true
-
+    $scope.$watch 'session.persona', (newValue, oldValue) =>
       unless annotator.discardDrafts()
-        $scope.model.persona = oldValue
+        $scope.session.persona = oldValue
         return
 
       plugins.Auth?.element.removeData('annotator:headers')
@@ -136,14 +131,13 @@ class App
         annotator.show()
         annotator.host.notify method: 'showFrame', params: routeName
       else if oldValue
-        $scope.sheet.collapsed = true
         annotator.hide()
         annotator.host.notify method: 'hideFrame', params: routeName
         for p in annotator.providers
           p.channel.notify method: 'setActiveHighlights'
 
-    $scope.$watch 'sheet.collapsed', (hidden) ->
-      $scope.sheet.tab = if hidden then null else 'login'
+    $scope.$watch 'sheet.show', (visible) ->
+      $scope.sheet.tab = if visible then 'login' else null
 
     $scope.$watch 'sheet.tab', (tab) ->
       $timeout ->
@@ -167,25 +161,6 @@ class App
       $scope.updater.then (sock) ->
         filter = streamfilter.getFilter()
         sock.send(JSON.stringify({filter}))
-
-    $scope.$on 'authTimeout', ->
-      # Skip the reset if we're logged in
-      unless $scope.model.persona
-        $scope.$broadcast 'reset'
-        flash 'info',
-          'For your security, the forms have been reset due to inactivity.'
-
-    $scope.$on 'showAuth', (event, show=true) ->
-      $scope.sheet.collapsed = !show
-
-    $scope.$on 'reset', _reset
-
-    $scope.$on 'success', (event, action) ->
-      angular.extend $scope.model, session.model
-      if action == 'forgot'
-        $scope.sheet.tab = 'activate'
-      else
-        $scope.sheet.collapsed = true
 
     $rootScope.viewState =
       sort: ''
@@ -378,6 +353,14 @@ class App
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup
 
+    $scope.authSuccess = ->
+      $scope.sheet.show = false
+
+    $scope.authTimeout = ->
+      flash 'info',
+        'For your security, the forms have been reset due to inactivity.'
+      _reset()
+
     $scope.initUpdater = (failureCount=0) ->
       _dfdSock = $q.defer()
       _sock = socket()
@@ -410,7 +393,7 @@ class App
 
         unless data instanceof Array then data = [data]
 
-        p = $scope.model.persona
+        p = $scope.session.persona
         user = if p? then "acct:" + p.username + "@" + p.provider else ''
         unless data instanceof Array then data = [data]
 
@@ -698,52 +681,6 @@ class Annotation
         for regexp in annotator.text_regexp
           $scope.model.highlightText =
             $scope.model.highlightText.replace regexp, annotator.highlighter
-
-
-class Auth
-  this.$inject = ['$scope', '$timeout', 'session']
-  constructor: (   $scope,   $timeout,   session) ->
-    base =
-      username: null
-      email: null
-      password: null
-      code: null
-
-    _timeout = null
-
-    _reset = ->
-      delete $scope.errors
-      angular.extend $scope.model, base
-      for own _, ctrl of $scope when typeof ctrl?.$setPristine is 'function'
-        ctrl.$setPristine()
-
-    _error = (form, data) ->
-      {errors, reason} = data
-      $scope.errors = session: reason
-      $scope.errors[form] = {}
-      for field, error of errors
-        $scope.errors[form][field] = error
-
-    _startTimeout = ->
-      # Reset the auth forms after five minutes of inactivity
-      if _timeout then $timeout.cancel _timeout
-      _timeout = $timeout (-> $scope.$emit 'authTimeout'), 3000000
-
-    $scope.$on 'reset', _reset
-
-    $scope.$watchCollection 'model', ->
-      # (Re)start (i.e., delay) the authentication form timeout
-      unless $scope.sheet.collapsed
-        _startTimeout()
-
-    $scope.submit = (form) ->
-      angular.extend session, $scope.model
-      return unless form.$valid
-
-      promise = session["$#{form.$name}"] ->
-        $scope.$emit 'success', form.$name
-
-      promise.then(_reset, _error.bind(null, form.$name))
 
 
 class Editor
@@ -1085,7 +1022,6 @@ class Notification
 angular.module('h.controllers', imports)
 .controller('AppController', App)
 .controller('AnnotationController', Annotation)
-.controller('AuthController', Auth)
 .controller('EditorController', Editor)
 .controller('ViewerController', Viewer)
 .controller('SearchController', Search)

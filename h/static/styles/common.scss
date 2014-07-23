@@ -2,6 +2,8 @@
 
 @import 'reset';
 @import 'base';
+@import 'forms';
+@import 'spinner';
 @import 'responsive';
 @import 'yui_grid';
 
@@ -23,8 +25,9 @@ a {
 body {
   background-color: $bodyBackground;
   color: $textColor;
-  font-smoothing: antialiased;
-  -webkit-font-smoothing: antialiased;
+  // FIXME
+  // font-smoothing: antialiased;
+  // -webkit-font-smoothing: antialiased;
   line-height: 1.4;
 }
 
@@ -93,30 +96,7 @@ h6 {
   margin: 1.67em 0;
 }
 
-input, textarea {
-  @include plainform;
-}
-
-select {
-  @include plainform;
-  padding: 0;
-  text-decoration: underline;
-  border: 0;
-  &:focus {
-    border: 0;
-  }
-}
-
-label {
-  @extend .visuallyhidden;
-}
-
-
-
 //MCRANDOM////////////////////////////////
-button, input[type=submit], .btn {
-  @include sweetbutton;
-}
 
 .alert-block {
   span.errorMsgLbl { @extend .visuallyhidden; }
@@ -138,7 +118,10 @@ button, input[type=submit], .btn {
   cursor: pointer;
   color: $linkColor;
   position: static;
-  &:hover { color: $linkColorHover; }
+
+  &:hover, &:focus, &.js-focus, &.js-hover {
+    color: $linkColorHover;
+  }
 }
 
 .red {
@@ -158,9 +141,11 @@ button, input[type=submit], .btn {
 .close {
   cursor: pointer;
   float: right;
-  width: 1em;
-  height: 1em;
-  opacity: .4;
+  line-height: 1.4;
+  opacity: .6;
+  &:active, &:hover {
+    opacity: 1;
+  }
 }
 
 
@@ -182,24 +167,12 @@ button, input[type=submit], .btn {
 .form-vertical {
   select, textarea, input, button {
     display: block;
-    margin-top: .75em;
+    // margin-top: .75em;
   }
 }
 
 .req {
   display: none;
-}
-
-.slow-validate {
-  display: block;
-  font-family: $sansFontFamily;
-  max-height: 0;
-  overflow: hidden;
-
-  &.slow-validate-show {
-    @include transition(max-height .25s ease-in 2s);
-    max-height: 10em;
-  }
 }
 
 .visuallyhidden {
@@ -387,52 +360,42 @@ blockquote {
 
 //TABS////////////////////////////////
 .nav-tabs {
-  @include pie-clearfix;
-  margin: 0;
-
-  a {
-    font-family: $sansFontFamily;
-    color: $grayDark;
-  }
+  background-color: $bodyBackground;
+  border: 1px none $grayLighter;
+  border-bottom-style: solid;
+  padding: 1em;
 
   & > li {
-    @include box-shadow(inset 2px -10px 13px -8px hsla(0, 0%, 0%, .1));
-    background: darken($white, 2%);
-    border-top-right-radius: 32px 80px;
-    border-top-left-radius: 32px 80px;
-    border: 1px solid $grayLighter;
-    border-bottom: none;
-    cursor: pointer;
     display: inline-block;
     line-height: 1;
-    margin-right: -8px;
-    padding: 4px 16px 8px;
-    position: relative;
 
-    &:hover {
-      background: $white;
+    a {
+      font-family: $sansFontFamily;
+      font-weight: bold;
+      color: $grayDark;
+      cursor: pointer;
     }
 
-    &.active, &:active {
-      @include box-shadow(none);
-      background: $white;
-      color: #333;
+    &.active a, &:active a {
+      color: $hypothered;
     }
 
-    &.active {
-      z-index: 1;
+    &:before {
+      content: "/";
+      margin: 0 1em;
+    }
+
+    &:first-child:before {
+      content: "";
+      margin: 0;
     }
   }
 }
 
 .tab-content {
-  @include border-radius(1px);
   background: $white;
-  border: solid 1px $grayLighter;
   line-height: 1.4;
-  margin-top: -3px;
-  padding: 16px;
-  position: relative;
+  padding: 1em;
 
   .tab-pane {
     display: none;
@@ -749,12 +712,22 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   margin-top: .2em;
   margin-bottom: .2em;
 
+  .tagit-choice {
+    border-radius: 2px;
+    padding: 0.307em 1.7em 0.307em 0.76em;
+  }
+
   .tagit-close {
     cursor: pointer;
     position: absolute;
     right: .1em;
     top: 50%;
     margin-top: -8px;
+  }
+
+  .tagit-new input[type=text] {
+    padding-top: 5px;
+    padding-bottom: 5px;
   }
 
   .text-icon { display: none; }
@@ -768,7 +741,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     opacity: .8;
 
     &:hover { opacity: 1; }
-    &.tagit-choice { margin-top: .33em; }
     &.tagit-new { padding: 0; }
     & + li { margin-left: .4em; }
   }
