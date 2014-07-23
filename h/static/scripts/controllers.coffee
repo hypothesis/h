@@ -688,6 +688,7 @@ class Auth
       angular.extend $scope.model, base
       for own _, ctrl of $scope when angular.isFunction ctrl?.$setPristine
         ctrl.$setPristine()
+      form.responseErrorMessage = null
 
     _updateFormValidity = (form, reason) ->
       if reason == 'Invalid username or password.'

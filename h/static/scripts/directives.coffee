@@ -1,32 +1,16 @@
-formField = ->
-  link: (scope, elem, attr, form) ->
-    field = form[attr.target]
-    errorClass = attr.errorClass
-
-    return unless field?
-
-    unless errorClass
-      throw new Error('FormField directive requires an error-class attribute')
-
-    field.unsetFieldError = ->
-      elem.removeClass(errorClass)
-
-    field.setFieldError = ->
-      elem.addClass(errorClass)
-
-  require: '^form'
-  restrict: 'C'
-
-
 formValidate = ->
   link: (scope, elem, attr, form) ->
+    toggleClass = (field, {addClass}) ->
+      fieldEl = elem.find("[data-target=#{field.$name}]")
+      fieldEl.toggleClass('form-field-error', addClass)
+
     updateField = (field) ->
       return unless field?
 
       if field.$valid
-        field.unsetFieldError()
+        toggleClass(field, addClass: false)
       else
-        field.setFieldError()
+        toggleClass(field, addClass: true)
 
     # Immediately show feedback for corrections.
     elem.on 'keyup', ':input', ->
@@ -465,7 +449,6 @@ whenscrolled = ['$window', ($window) ->
 
 
 angular.module('h.directives', ['ngSanitize'])
-.directive('formField', formField)
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
