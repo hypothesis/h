@@ -6,6 +6,10 @@
   margin-bottom: 10px;
 }
 
+.form-description {
+  margin-bottom: 1em;
+}
+
 %form-input-error-state {
   &, &:focus, &.js-focus {
     color: #b4777a;

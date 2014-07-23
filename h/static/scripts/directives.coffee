@@ -1,13 +1,18 @@
 formField = ->
   link: (scope, elem, attr, form) ->
     field = form[attr.target]
+    errorClass = attr.errorClass
+
     return unless field?
 
+    unless errorClass
+      throw new Error('FormField directive requires an error-class attribute')
+
     field.unsetFieldError = ->
-      elem.removeClass('form-field-error')
+      elem.removeClass(errorClass)
 
     field.setFieldError = ->
-      elem.addClass('form-field-error')
+      elem.addClass(errorClass)
 
   require: '^form'
   restrict: 'C'
@@ -33,7 +38,12 @@ formValidate = ->
 
     # Validate the field when submit is clicked.
     elem.on 'submit', (event) ->
-      updateField(field) for own key, field of form when key[0] != '$'
+      updateField(field) for own _, field of form when field.$name?
+
+    # Validate when a response is processed.
+    scope.$on 'error', (event, name) ->
+      return unless form.$name == name
+      updateField(field) for own _, field of form when field.$name?
 
   require: 'form'
 
