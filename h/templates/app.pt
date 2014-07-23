@@ -58,7 +58,7 @@
           <span role="button"
                 class="dropdown-toggle"
                 data-toggle="dropdown"
-                >{{viewState.sort}}<span class="icon-triangle"></span>
+                >{{viewState.sort}}<span class="icon-triangle"></span></span>
           <ul class="dropdown-menu" role="menu">
             <li ng-repeat="sort in sorts">
               <a href="" ng-click="applySort(sort)">{{sort}}</a>
