@@ -31,43 +31,12 @@
          </div>
        </div>
       </div>
-
-      <!-- Account and Authentication -->
-      <div class="sheet collapsed"
-           ng-class="sheet.collapsed && 'collapsed'"
-           ng-init="sheet.collapsed = true">
-
-        <span class="close icon-x"
-              role="button"
-              title="Close"
-              ng-click="sheet.collapsed = true"></span>
-
-        <div class="form-vertical tabbable"
-             data-tab-reveal="['forgot','activate']"
-             ng-controller="AuthController"
-             ng-model="sheet.tab"
-             ng-submit="submit(this[sheet.tab])">
-          <metal:main use-macro="blocks['auth-tabs']" />
-          <footer ng-show="false">
-            <ul>
-              <li>
-                <a href="" ng-click="sheet.tab = 'forgot'">Password help?</a>
-              </li>
-              <li>
-                <a href="" ng-click="sheet.tab = 'activate'"
-                   >I have an activation code.</a>
-              </li>
-            </ul>
-          </footer>
-        </div>
-      </div>
-      <!-- / Account and Authentication -->
-
+        <!-- / Searchbar -->
     </div>
     <!-- / Toolbar -->
 
     <!-- Content -->
-    <div id="wrapper">
+    <div id="wrapper" class="content">
       <!-- View Sort Controls -->
       <div class="viewsort"
            ng-mouseenter="showViewSort()"
@@ -99,8 +68,29 @@
       </div>
       <!-- / View Sort Controls -->
 
+
+      <!-- Account and Authentication -->
+      <div class="sheet collapsed"
+           ng-class="sheet.collapsed && 'collapsed'"
+           ng-init="sheet.collapsed = true">
+
+        <span class="close icon-cancel"
+              role="button"
+              title="Close"
+              ng-click="sheet.collapsed = true"></span>
+
+        <div class="form-vertical tabbable"
+             data-tab-reveal="['forgot','activate']"
+             ng-controller="AuthController"
+             ng-model="sheet.tab"
+             ng-submit="submit(this[sheet.tab])">
+          <metal:main use-macro="blocks['auth-tabs']" />
+        </div>
+      </div>
+      <!-- / Account and Authentication -->
+
       <!-- Angular view -->
-      <div class="content" ng-view="" whenscrolled="loadMore(10)"></div>
+      <div ng-view="" whenscrolled="loadMore(10)"></div>
     </div>
     <!-- / Content -->
 
