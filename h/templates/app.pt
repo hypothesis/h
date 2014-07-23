@@ -1,7 +1,7 @@
 <html metal:use-macro="main_template">
   <body metal:fill-slot="body" tal:omit-tag>
     <!-- Toolbar -->
-    <div class="topbar"
+    <div class="ng-cloak topbar"
          ng-class="frame.visible && 'shown'"
          ng-mouseenter="showViewSort(true, true)">
       <div class="inner" ng-switch="!!session.persona">
@@ -38,7 +38,7 @@
     <!-- Content -->
     <div id="wrapper" class="content">
       <!-- View Sort Controls -->
-      <div class="viewsort"
+      <div class="ng-cloak viewsort"
            ng-mouseenter="showViewSort()"
            ng-mouseleave="showViewSort(false)"
            ng-show="viewState.showControls">
@@ -69,7 +69,7 @@
       <!-- / View Sort Controls -->
 
       <!-- Account and Authentication -->
-      <div class="sheet" ng-show="sheet.show">
+      <div class="ng-cloak sheet" ng-show="sheet.show">
         <i class="close icon-cancel"
             role="button"
             title="Close"
