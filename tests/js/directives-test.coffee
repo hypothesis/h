@@ -34,7 +34,7 @@ describe 'h.directives', ->
       $scope.model = {username: ''}
 
       template = '''
-      <form form-validate name="login" onsubmit="return false">
+      <form form-validate data-form-validate-error-class="form-field-error" name="login" onsubmit="return false">
         <div class="form-field" data-error-class="form-field-error" data-target="username">
           <input type="text" class="" ng-model="model.username" name="username" required ng-minlength="3" />
         </div>
