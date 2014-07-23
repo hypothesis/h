@@ -400,19 +400,21 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
 
 simpleSearch = ['$parse', ($parse) ->
   link: (scope, elem, attr, ctrl) ->
+    _search = $parse(attr.onsearch)
+    _clear = $parse(attr.onclear)
+
     scope.dosearch = ->
-      #_search(scope.generateSearchResults())
-      scope.search.update(scope.searchtext)
+      _search(scope, {"this": scope.searchtext})
 
     scope.reset = (event) ->
       event.preventDefault()
       scope.searchtext = ''
-      scope.search.clear()
+      _clear(scope) if attr.onclear
 
     scope.$watch attr.query, (query) ->
       if query.query?
         scope.searchtext = query.query
-        scope.search.update(scope.searchtext)
+        _search(scope, {"this": scope.searchtext})
 
   restrict: 'C'
   template: '''

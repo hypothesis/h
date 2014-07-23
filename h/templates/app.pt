@@ -18,7 +18,9 @@
         <!-- Searchbar -->
         <div class="search-container">
           <div class="simpleSearch visual-container"
-               query="query"></div>
+               query="query"
+               onsearch="search.update(this)"
+               onclear="search.show = false; search.clear()"></div>
         </div>
       </div>
       <!-- / Searchbar -->
@@ -32,7 +34,8 @@
            ng-mouseenter="showViewSort()"
            ng-mouseleave="showViewSort(false)"
            ng-show="viewState.showControls">
-        <div class="dropdown">
+        <div class="dropdown"
+             ng-show="viewState.show">
           <span role="button"
                 class="dropdown-toggle"
                 data-toggle="dropdown"
