@@ -7,9 +7,12 @@ from pyramid_mailer.testing import DummyMailer
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-@view_config(renderer='templates/pattern_library.pt', route_name='pattern_library')
+
+@view_config(renderer='h:templates/pattern_library.pt',
+             route_name='pattern_library')
 def page(context, request):
     return {}
+
 
 class LoggingMailer(DummyMailer):
     def __init__(self):
@@ -39,3 +42,5 @@ def includeme(config):
 
     mailer = LoggingMailer()
     config.registry.registerUtility(mailer, IMailer)
+
+    config.scan(__name__)
