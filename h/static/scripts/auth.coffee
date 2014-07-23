@@ -8,6 +8,28 @@ class AuthController
   constructor:   ( $scope,   $timeout,   session ) ->
     timeout = null
 
+    success = ->
+      $scope.model = null
+      $scope.$broadcast 'success'
+
+    failure = (form, response) ->
+      {errors, reason} = response.data
+
+      if reason
+        if reason == 'Invalid username or password.'
+          form.password.$setValidity('response', false)
+          form.password.responseErrorMessage = reason
+        else
+          form.responseErrorMessage = reason
+      else
+        form.responseErrorMessage = null
+
+      for field, error of errors
+        form[field].$setValidity('response', false)
+        form[field].responseErrorMessage = error
+
+      $scope.$broadcast 'error', form.$name
+
     this.submit = (form) ->
       return unless form.$valid
 
@@ -18,29 +40,7 @@ class AuthController
         delete session[key]
 
       angular.extend session, $scope.model
-
-      session[method](
-        (session) ->
-          $scope.model = null
-          $scope.$broadcast 'success'
-      , (response) ->
-          {errors, reason} = response.data
-
-          if reason
-            if reason == 'Invalid username or password.'
-              form.password.$setValidity('response', false)
-              form.password.responseErrorMessage = reason
-            else
-              form.responseErrorMessage = reason
-          else
-            form.responseErrorMessage = null
-
-          for field, error of errors
-            form[field].$setValidity('response', false)
-            form[field].responseErrorMessage = error
-
-          $scope.$broadcast 'error', form.$name
-      )
+      session[method] success, angular.bind(this, failure, form)
 
     $scope.$on '$destroy', ->
       if timeout
