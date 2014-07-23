@@ -5,13 +5,6 @@ imports = [
   'h.searchfilters'
 ]
 
-SEARCH_FACETS = ['text', 'tags', 'uri', 'quote', 'since', 'user', 'results']
-SEARCH_VALUES =
-  group: ['Public', 'Private'],
-  since: ['5 min', '30 min', '1 hour', '12 hours',
-          '1 day', '1 week', '1 month', '1 year']
-
-
 class App
   scope:
     frame:
@@ -47,8 +40,6 @@ class App
         socialView: annotator.socialView
         ongoingHighlightSwitch: false
         search:
-          facets: SEARCH_FACETS
-          values: SEARCH_VALUES
           query: $location.search()
           show: not angular.equals($location.search(), {})
         session: session
@@ -229,8 +220,6 @@ class App
     $rootScope.applySort "Location"
 
     $scope.query = $location.search()
-    $scope.searchFacets = SEARCH_FACETS
-    $scope.searchValues = SEARCH_VALUES
 
     $scope.search = {}
     $scope.search.update = angular.noop
@@ -240,6 +229,14 @@ class App
 
     $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
       unless next.$$route? then return
+
+      $scope.search.query = $location.search()
+      $scope.search.show = not angular.equals($location.search(), {})
+
+      if next.$$route.originalPath is '/viewer'
+        $rootScope.viewState.show = true
+      else
+        $rootScope.viewState.show = false
 
       unless next.$$route.originalPath is '/stream'
         if current and next.$$route.originalPath is '/a/:id'

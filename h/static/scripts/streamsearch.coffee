@@ -9,12 +9,6 @@ imports = [
   'h.searchfilters'
 ]
 
-SEARCH_FACETS = ['text', 'tags', 'uri', 'quote', 'since', 'user', 'results']
-SEARCH_VALUES =
-  group: ['Public', 'Private'],
-  since: ['5 min', '30 min', '1 hour', '12 hours',
-          '1 day', '1 week', '1 month', '1 year']
-
 class StreamSearch
   this.inject = [
     '$location', '$scope', '$rootScope',
@@ -66,6 +60,4 @@ class StreamSearch
 
 
 angular.module('h.streamsearch', imports, configure)
-.constant('searchFacets', SEARCH_FACETS)
-.constant('searchValues', SEARCH_VALUES)
 .controller('StreamSearchController', StreamSearch)
