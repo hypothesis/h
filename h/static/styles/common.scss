@@ -416,7 +416,7 @@ blockquote {
   background-color: $body-background;
   border: 1px none $gray-lighter;
   border-bottom-style: solid;
-  padding: 1em;
+  padding: 0.9em 1em 1.1em;
 
   & > li {
     display: inline-block;
@@ -427,10 +427,21 @@ blockquote {
       font-weight: bold;
       color: $gray-dark;
       cursor: pointer;
+      border-bottom: 3px solid $gray-lighter;
+      padding-left: 2 / 13 * 1em;
+      padding-right: 2 / 13 * 1em;
+      padding-bottom: 3 / 13 * 1em;
     }
 
-    &.active a, &:active a {
-      color: $hypothered;
+    &:active a {
+      position: relative;
+      top: 1 / 13 * 1em;
+      padding-bottom: 2 / 13 * 1em;
+    }
+
+    &:active a,
+    &.active a {
+      border-color: $hypothered-desat;
     }
 
     &:before {
@@ -439,8 +450,7 @@ blockquote {
     }
 
     &:first-child:before {
-      content: "";
-      margin: 0;
+      content: none;
     }
   }
 }
