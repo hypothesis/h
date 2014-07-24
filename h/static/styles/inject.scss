@@ -205,6 +205,14 @@ $base-font-size: 14px;
 .annotator-hl-active, .annotator-hl-temporary, .annotator-hl-focused {
   background: $highlight-color;
 
+  .annotator-hl {
+    background-color: $highlight-color-second;
+  }
+
+  .annotator-hl .annotator-hl {
+    background-color: $highlight-color-third;
+  }
+
   &::-moz-selection {
     background: $highlight-color;
   }
@@ -218,11 +226,19 @@ $base-font-size: 14px;
 
 .annotator-highlights-always-on .annotator-hl {
   background: $highlight-mode-color;
+
+  .annotator-hl {
+    background-color: $highlight-mode-color-second;
+  }
+
+  .annotator-hl .annotator-hl {
+    background-color: $highlight-mode-color-third;
+  }
 }
 
 .annotator-highlights-always-on .annotator-hl-active,
 .annotator-highlights-always-on .annotator-hl-focused {
-  background-color: rgba($highlight-mode-color, 0.7)
+  background-color: $highlight-mode-active-color;
 }
 
 // Sidebar
