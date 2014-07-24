@@ -19,9 +19,6 @@ class SearchFilter
     tokens
 
   generateFacetedFilter: (searchtext) ->
-    return unless searchtext
-    terms = @_tokenize(searchtext)
-
     any = []
     quote = []
     result = []
@@ -31,51 +28,54 @@ class SearchFilter
     uri = []
     user = []
 
-    for term in terms
-      filter = term.slice 0, term.indexOf ":"
-      unless filter? then filter = ""
-      switch filter
-        when 'quote' then quote.push term[6..]
-        when 'result' then result.push term[7..]
-        when 'since'
-          # We'll turn this into seconds
-          time = term[6..].toLowerCase()
-          if time.match /^\d+$/
-            # Only digits, assuming seconds
-            since.push time
-          if time.match /^\d+sec$/
-            # Time given in seconds
-            t = /^(\d+)sec$/.exec(time)[1]
-            since.push t
-          if time.match /^\d+min$/
-            # Time given in minutes
-            t = /^(\d+)min$/.exec(time)[1]
-            since.push t * 60
-          if time.match /^\d+hour$/
-            # Time given in hours
-            t = /^(\d+)hour$/.exec(time)[1]
-            since.push t * 60 * 60
-          if time.match /^\d+day$/
-            # Time given in days
-            t = /^(\d+)day$/.exec(time)[1]
-            since.push t * 60 * 60 * 24
-          if time.match /^\d+week$/
-            # Time given in week
-            t = /^(\d+)week$/.exec(time)[1]
-            since.push t * 60 * 60 * 24 * 7
-          if time.match /^\d+month$/
-            # Time given in month
-            t = /^(\d+)month$/.exec(time)[1]
-            since.push t * 60 * 60 * 24 * 30
-          if time.match /^\d+year$/
-            # Time given in year
-            t = /^(\d+)year$/.exec(time)[1]
-            since.push t * 60 * 60 * 24 * 365
-        when 'tag' then tag.push term[4..]
-        when 'text' then text.push term[5..]
-        when 'uri' then uri.push term[4..]
-        when 'user' then user.push term[5..]
-        else any.push term
+    if searchtext
+      terms = @_tokenize(searchtext)
+      for term in terms
+        filter = term.slice 0, term.indexOf ":"
+        unless filter? then filter = ""
+        switch filter
+          when 'quote' then quote.push term[6..]
+          when 'result' then result.push term[7..]
+          when 'since'
+            # We'll turn this into seconds
+            time = term[6..].toLowerCase()
+            if time.match /^\d+$/
+              # Only digits, assuming seconds
+              since.push time
+            if time.match /^\d+sec$/
+              # Time given in seconds
+              t = /^(\d+)sec$/.exec(time)[1]
+              since.push t
+            if time.match /^\d+min$/
+              # Time given in minutes
+              t = /^(\d+)min$/.exec(time)[1]
+              since.push t * 60
+            if time.match /^\d+hour$/
+              # Time given in hours
+              t = /^(\d+)hour$/.exec(time)[1]
+              since.push t * 60 * 60
+            if time.match /^\d+day$/
+              # Time given in days
+              t = /^(\d+)day$/.exec(time)[1]
+              since.push t * 60 * 60 * 24
+            if time.match /^\d+week$/
+              # Time given in week
+              t = /^(\d+)week$/.exec(time)[1]
+              since.push t * 60 * 60 * 24 * 7
+            if time.match /^\d+month$/
+              # Time given in month
+              t = /^(\d+)month$/.exec(time)[1]
+              since.push t * 60 * 60 * 24 * 30
+            if time.match /^\d+year$/
+              # Time given in year
+              t = /^(\d+)year$/.exec(time)[1]
+              since.push t * 60 * 60 * 24 * 365
+          when 'tag' then tag.push term[4..]
+          when 'text' then text.push term[5..]
+          when 'uri' then uri.push term[4..]
+          when 'user' then user.push term[5..]
+          else any.push term
+
     any:
       terms: any
       operator: 'and'
