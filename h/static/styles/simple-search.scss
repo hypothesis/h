@@ -1,22 +1,21 @@
 @import "base.scss";
 
 .simple-search-form {
+  position: relative;
   color: $gray;
-
-  @include fonticon("\e60c", left) {
-    position: absolute;
-    top: 50%;
-    left: 8px;
-    margin-top: -0.5em;
-    font-size: 14px;
-    line-height: 1;
-  }
 
   &.simple-search-inactive {
     color: $grayLighter;
   }
+}
 
-  position: relative;
+.simple-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  margin-top: -0.5em;
+  font-size: 14px;
+  line-height: 1;
 }
 
 .simple-search-input {
@@ -33,7 +32,7 @@
 }
 
 .simple-search-clear {
-  @include fonticon("\36", left) {
+  [class^="icon-"], [class*=" icon-"] {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -50,10 +49,12 @@
   color: #fff;
   width: 16px;
   height: 16px;
+  padding: 0;
   margin-top: -8px;
-  font-size: 8px;
+  font-size: 9px;
   text-align: center;
   text-shadow: none;
+  @include box-shadow(none);
 
   &:focus, &:hover, &:active:not([disabled]) {
     @include transition(background-color 200ms ease-in);

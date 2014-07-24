@@ -419,8 +419,11 @@ simpleSearch = ['$parse', ($parse) ->
   restrict: 'C'
   template: '''
             <form class="simple-search-form" name="searchBox" ng-submit="dosearch()">
+              <i class="simple-search-icon icon-search"></i>
               <input class="simple-search-input" type="text" ng-model="searchtext" name="searchText" />
-              <button class="simple-search-clear" type="reset" ng-hide="!searchtext" ng-click="reset($event)"></button>
+              <button class="simple-search-clear" type="reset" ng-hide="!searchtext" ng-click="reset($event)">
+                <i class="icon-x"></i>
+              </button>
             </form>
             '''
 ]
