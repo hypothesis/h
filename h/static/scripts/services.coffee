@@ -783,7 +783,6 @@ class ViewFilter
   #
   # Returns the list of matching annotation IDs.
   filter: (annotations, query) =>
-    return [] unless query.query
     filters = @searchfilter.generateFacetedFilter query.query
     results = []
 
