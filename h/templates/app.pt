@@ -46,7 +46,7 @@
           <span role="button"
                 class="dropdown-toggle"
                 data-toggle="dropdown"
-                >{{viewState.view}}<span class="icon-triangle"></span></span>
+                >{{viewState.view}}<i class="icon-triangle"></i></span>
           <ul class="dropdown-menu" role="menu">
             <li ng-repeat="view in views">
               <a href="" ng-click="applyView(view)">{{view}}</a>
@@ -58,7 +58,7 @@
           <span role="button"
                 class="dropdown-toggle"
                 data-toggle="dropdown"
-                >{{viewState.sort}}<span class="icon-triangle"></span></span>
+                >{{viewState.sort}}<i class="icon-triangle"></i></span>
           <ul class="dropdown-menu" role="menu">
             <li ng-repeat="sort in sorts">
               <a href="" ng-click="applySort(sort)">{{sort}}</a>
@@ -70,10 +70,10 @@
 
       <!-- Account and Authentication -->
       <div class="sheet" ng-show="sheet.show">
-        <span class="close icon-cancel"
-              role="button"
-              title="Close"
-              ng-click="sheet.show = false"></span>
+        <i class="close icon-cancel"
+            role="button"
+            title="Close"
+            ng-click="sheet.show = false"></i>
         <div class="auth form-vertical tabbable"
              data-tab-reveal="['forgot','activate']"
              on-success="authSuccess"

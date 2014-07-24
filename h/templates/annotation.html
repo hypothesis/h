@@ -1,9 +1,9 @@
 <form name="form">
   <!-- More actions -->
   <div class="small magicontrol dropdown pull-right" ng-hide="editing">
-    <span class="dropdown-toggle icon-triangle"
-          role="button"
-          title="More actions"></span>
+    <i class="dropdown-toggle icon-triangle"
+       role="button"
+       title="More actions"></i>
     <ul class="dropdown-menu pull-right" role="menu">
       <li ng-click="reply()"><i class="icon-reply"></i> Reply</li>
       <li ng-show="auth.update" ng-click="edit()"><i class="icon-copy"></i> Edit</li>
@@ -29,12 +29,12 @@
     <!-- User -->
     <span ng-switch-default class="indicators">
       <username data-user="model.user"></username>
-      <span class="small icon-locked"
-            ng-show="form.privacy.$viewValue != 'Public'"></span>
-      <span class="small icon-highlighter2"
-            ng-hide="model.text || editing || model.deleted || model.tags.length"></span>
-      <span class="small icon-comment3"
-            ng-hide="model.target.length || model.references"></span>
+      <i class="small icon-locked"
+         ng-show="form.privacy.$viewValue != 'Public'"></i>
+      <i class="small icon-highlighter2"
+         ng-hide="model.text || editing || model.deleted || model.tags.length"></i>
+      <i class="small icon-comment3"
+         ng-hide="model.target.length || model.references"></i>
     </span>
 
     <!-- Timestamp -->
