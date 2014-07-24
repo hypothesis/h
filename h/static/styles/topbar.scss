@@ -20,7 +20,7 @@ body {
 
 .topbar {
   background: $white;
-  border: solid 1px $grayLighter;
+  border: solid 1px $gray-lighter;
   border-style: solid none;
   height: 30px;
   line-height: 28px;
@@ -54,7 +54,7 @@ body {
 
     &.pull-right {
       display: inline-block;
-      font-family: $sansFontFamily;
+      font-family: $sans-font-family;
     }
 
     & > * { margin: 0 .72em; }

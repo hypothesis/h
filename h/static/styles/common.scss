@@ -8,26 +8,23 @@
 @import 'yui_grid';
 
 
-$baseFontSize: 16px;
-$baseLineHeight: 26px;
-$sansFontFamily: "Source Sans Pro", $sansFontFamily;
-$serifFontFamily: "Merriweather", $serifFontFamily;
-$headingsColor: $textColor;
+$base-font-size: 16px;
+$base-line-height: 26px;
+$sans-font-family: "Source Sans Pro", $sans-font-family;
+$serif-font-family: "Merriweather", $serif-font-family;
+$headings-color: $text-color;
 
 
 //ELEMENT STYLES////////////////////////////////
 a {
-  color: $linkColor;
-  &:hover { color: $linkColorHover; }
+  color: $link-color;
+  &:hover { color: $link-color-hover; }
   text-decoration: none;
 }
 
 body {
-  background-color: $bodyBackground;
-  color: $textColor;
-  // FIXME
-  // font-smoothing: antialiased;
-  // -webkit-font-smoothing: antialiased;
+  background-color: $body-background;
+  color: $text-color;
   line-height: 1.4;
 }
 
@@ -44,8 +41,8 @@ p {
 em { font-style: italic; }
 
 html {
-  font-size: $baseFontSize / 16px * 1em;
-  line-height: $baseLineHeight / 16px * 1em;
+  font-size: $base-font-size / 16px * 1em;
+  line-height: $base-line-height / 16px * 1em;
 
   @include yui_grid();
 
@@ -67,8 +64,8 @@ html {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: $sansFontFamily;
-  color: $headingsColor;
+  font-family: $sans-font-family;
+  color: $headings-color;
 }
 
 h1 {
@@ -116,11 +113,11 @@ h6 {
   text-decoration: underline;
   border: none;
   cursor: pointer;
-  color: $linkColor;
+  color: $link-color;
   position: static;
 
   &:hover, &:focus, &.js-focus, &.js-hover {
-    color: $linkColorHover;
+    color: $link-color-hover;
   }
 }
 
@@ -194,7 +191,7 @@ h6 {
   }
   .more, .less {
     font-size: .9em;
-    font-family: $sansFontFamily;
+    font-family: $sans-font-family;
     display: block;
     text-align: right;
   }
@@ -202,13 +199,13 @@ h6 {
 
 blockquote {
   color: $gray;
-  font-family: $serifFontFamily;
+  font-family: $serif-font-family;
   font-size: 1em;
   margin-bottom: 1em;
   padding: 0 .8em;
 
   &:before, &:after {
-    color: $grayLighter;
+    color: $gray-lighter;
     font-family: "h";
     position: absolute;
   }
@@ -252,7 +249,7 @@ blockquote {
 .dropdown-menu {
   @include rotateX(90deg);
   background: $white;
-  border: solid 1px $grayLighter;
+  border: solid 1px $gray-lighter;
   margin-top: .8em;
   top: 100%;
   float: left;
@@ -282,10 +279,10 @@ blockquote {
     }
     &.inactive {
       font-weight: 400;
-      color: $grayLighter;
+      color: $gray-lighter;
       cursor: default;
       &:hover {
-        color: $grayLighter;
+        color: $gray-lighter;
       }
       & * {
         cursor: default;
@@ -293,7 +290,7 @@ blockquote {
     }
 
     & + li {
-      border-top: dotted 1px $grayLighter;
+      border-top: dotted 1px $gray-lighter;
     }
   }
 
@@ -317,7 +314,7 @@ blockquote {
   }
 
   &:before {
-    border-bottom-color: $grayLighter;
+    border-bottom-color: $gray-lighter;
     top: -7px;
   }
 
@@ -360,8 +357,8 @@ blockquote {
 
 //TABS////////////////////////////////
 .nav-tabs {
-  background-color: $bodyBackground;
-  border: 1px none $grayLighter;
+  background-color: $body-background;
+  border: 1px none $gray-lighter;
   border-bottom-style: solid;
   padding: 1em;
 
@@ -370,9 +367,9 @@ blockquote {
     line-height: 1;
 
     a {
-      font-family: $sansFontFamily;
+      font-family: $sans-font-family;
       font-weight: bold;
-      color: $grayDark;
+      color: $gray-dark;
       cursor: pointer;
     }
 
@@ -411,7 +408,7 @@ blockquote {
 .paper {
   @include border-radius(2px);
   background: $white;
-  border: solid 1px $grayLighter;
+  border: solid 1px $gray-lighter;
 }
 
 
@@ -419,25 +416,25 @@ blockquote {
 //This is for everything that is formatted as an annotation.
 .annotation {
   @include pie-clearfix;
-  font-family: $sansFontFamily;
+  font-family: $sans-font-family;
   position: relative;
 
   &:hover fuzzytime a, &:hover .reply-count {
-    color: $linkColor;
+    color: $link-color;
   }
 
   fuzzytime {
     margin: 0 .4em;
     a {
-      color: $textColor;
-      &:hover { color: $linkColorHover; }
+      color: $text-color;
+      &:hover { color: $link-color-hover; }
       &:focus { outline: 0; }
     }
   }
 
   .reply-count {
-    color: $textColor;
-    &:hover { color: $linkColorHover; }
+    color: $text-color;
+    &:hover { color: $link-color-hover; }
     &:focus { outline: 0; }
   }
 
@@ -445,7 +442,7 @@ blockquote {
     font-weight: bold;
     font-size: 1.1em;
     &:hover {
-      color: $linkColorHover;
+      color: $link-color-hover;
       cursor: pointer;
       text-decoration: underline;
     }
@@ -501,7 +498,7 @@ blockquote {
 .annotation-displayer {
   .user {
     &:hover {
-      color: $linkColorHover;
+      color: $link-color-hover;
       cursor: pointer;
       text-decoration: underline;
     }
@@ -526,13 +523,13 @@ blockquote {
 
   .load-more {
     @include pie-clearfix;
-    font-family: $sansFontFamily;
+    font-family: $sans-font-family;
     font-weight:bold;
     font-size: .8em;
   }
 
   .thread {
-    border-left: 1px dotted $grayLight;
+    border-left: 1px dotted $gray-light;
     height: 100%;
     padding: 0;
     padding-left: $thread-padding;
@@ -585,7 +582,7 @@ blockquote {
     display: block !important;
 
     &:hover {
-      background-color: $grayLightest;
+      background-color: $gray-lightest;
     }
 
     & > ul {
@@ -678,24 +675,24 @@ blockquote {
   }
 
   .card-emphasis {
-    @include box-shadow(6px 6px 8px -2px $grayLight);
+    @include box-shadow(6px 6px 8px -2px $gray-light);
   }
 }
 
 //SEARCH HIGHLIGHTS////////////////////////////////
 .search-hl-active {
-  background: $highlightColor;
+  background: $highlight-color;
   box-shadow:3px 3px 4px -1px #999999;
   &::-moz-selection {
-    background: $highlightColor;
+    background: $highlight-color;
     box-shadow:3px 3px 4px #999999;
   }
   &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
-    background: $highlightColor;
+    background: $highlight-color;
     box-shadow:3px 3px 4px #999999;
   }
   &::selection, &::selection:window-inactive {
-    background: $highlightColor;
+    background: $highlight-color;
     box-shadow:3px 3px 4px #999999;
   }
 }
@@ -822,9 +819,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   @include smallshadow(0);
   border-bottom-right-radius: 24px 72px;
   border-bottom-left-radius: 24px 72px;
-  font-family: $sansFontFamily;
+  font-family: $sans-font-family;
   background: $white;
-  border: solid 1px $grayLighter;
+  border: solid 1px $gray-lighter;
   padding: 0 10px;
   margin: 0 3px;
   display: inline-block;

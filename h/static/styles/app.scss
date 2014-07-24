@@ -10,7 +10,7 @@
 
 body {
   @extend .noise;
-  font-family: $sansFontFamily;
+  font-family: $sans-font-family;
   word-wrap: break-word;
 }
 
@@ -96,8 +96,8 @@ ol {
 
 .sheet {
   @include border-radius(2px);
-  border: solid 1px $grayLighter;
-  font-family: $sansFontFamily;
+  border: solid 1px $gray-lighter;
+  font-family: $sans-font-family;
   margin-bottom: .72em;
   position: relative;
 
@@ -115,7 +115,7 @@ ol {
   font-weight: bold;
   font-size: 1.1em;
   &:hover {
-    color: $linkColorHover;
+    color: $link-color-hover;
     cursor: pointer;
     text-decoration: underline;
   }
@@ -129,7 +129,7 @@ ol {
 
   .dropdown-toggle {
     .provider {
-      color: $grayLight;
+      color: $gray-light;
       display: none;
     }
     &:hover {

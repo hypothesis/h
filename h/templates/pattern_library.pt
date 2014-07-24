@@ -102,7 +102,7 @@
             <label class="form-label" for="">Focussed</label>
             <input class="form-input js-focus" type="text" name="" value="Focussed" placeholder="Placeholder" />
           </div>
-          <div class="form-field">
+          <div class="form-field form-field-error">
             <label class="form-label" for="">Error <span class="form-hint">(between 3 and 15 characters)</span></label>
             <input class="form-input ng-dirty ng-invalid" type="text" name="" value="Bad Input" placeholder="Placeholder" />
             <ul class="form-error-list">

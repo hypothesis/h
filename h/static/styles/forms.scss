@@ -10,28 +10,6 @@
   margin-bottom: 1em;
 }
 
-%form-input-error-state {
-  &, &:focus, &.js-focus {
-    color: #b4777a;
-    border-color: #f5adb7;
-    background-color: #fff1f3;
-  }
-
-  @include placeholder {
-    color: #e0b0b0;
-  }
-}
-
-.form-field-error {
-  .form-input {
-    @extend %form-input-error-state;
-  }
-
-  .form-error-list {
-    display: block;
-  }
-}
-
 .form-input,
 .form-label {
   width: 100%;
@@ -48,24 +26,24 @@
 .form-hint {
   font-size: 12px;
   margin-left: 5px;
-  color: #949292;
+  color: $gray-light;
   -webkit-font-smoothing: antialiased;
 }
 
 .form-required, .form-required[title] {
   cursor: help;
-  color: #949292;
+  color: $gray-light;
   border-bottom: none;
   -webkit-font-smoothing: antialiased;
 }
 
 .form-input {
-  border: 1px solid #d8ddde;
+  border: 1px solid $gray-lighter;
   border-radius: 2px;
   padding: 7px 10px;
   font-weight: normal;
   font-size: 15px;
-  color: #797979;
+  color: $gray;
 
   @include placeholder {
     -webkit-font-smoothing: antialiased;
@@ -73,15 +51,33 @@
 
   &:focus, &.js-focus {
     outline: none;
-    color: #7b776a;
-    border-color: #ece3c5;
-    background-color: #fffbeb;
+    border-color: $focus-yellow-dark;
+    background-color: $focus-yellow;
 
     @include placeholder {
-      color: #cbbb95;
+      color: $focus-yellow-darker;
     }
   }
 }
+
+.form-field-error {
+  .form-input {
+    &, &:focus, &.js-focus {
+      color: $error-red;
+      border-color: $error-red-light;
+      background-color: $error-red-lightest;
+    }
+
+    @include placeholder {
+      color: $error-red-light;
+    }
+  }
+
+  .form-error-list {
+    display: block;
+  }
+}
+
 
 .form-select {
   display: block;
@@ -98,7 +94,7 @@
 .form-error {
   font-size: 13px;
   line-height: 1.5;
-  color: #b4777a;
+  color: $error-red;
 }
 
 .form-checkbox-item {
@@ -163,13 +159,13 @@
 }
 
 .btn {
-  @include background(linear-gradient(top, #fff, #f0f0f0));
+  @include background(linear-gradient($button-background-gradient...));
   @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15));
 
   display: inline-block;
   font-size: 13px;
   font-weight: bold;
-  color: #585858;
+  color: $button-text-color;
   text-shadow: 0 1px 0 #FFF;
   border-radius: 2px;
   border: 1px solid #ACACAC;
@@ -178,14 +174,14 @@
   &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
     @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.05));
     outline: none;
-    color: #585858;
-    background: #fff;
+    color: $button-text-color;
+    background: $button-background-start;
     border-color: #bababa;
   }
 
   &:active, &.js-active {
     @include box-shadow(inset 0 1px 0 rgba(0, 0, 0, 0.1));
-    background: #F0F0F0;
+    background: $button-background-end;
     color: #424242;
     border-color: #bababa;
   }
@@ -195,7 +191,7 @@
     cursor: default;
     background: #F0F0F0;
     border-color: #CECECE;
-    color: #999;
+    color: $gray-light;
   }
 }
 
@@ -209,11 +205,11 @@
   }
 
   &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
-    color: $linkColor;
+    color: $link-color;
   }
 
   &:active, &.js-active {
-    color: $linkColorHover;
+    color: $link-color-hover;
   }
 }
 
@@ -237,7 +233,7 @@
 .btn-message {
   font-size: 13px;
   font-style: italic;
-  color: #999;
+  color: $gray-light;
   margin-right: 6px;
   position: absolute;
   right: 100%;
@@ -250,7 +246,7 @@
   display: inline-block;
   position: relative;
   top: 0px;
-  background: #76B800;
+  background: $success-green;
   border-radius: 50%;
   color: #FFF;
   font-size: 12px;
