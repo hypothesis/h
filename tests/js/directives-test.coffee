@@ -112,7 +112,7 @@ describe 'h.directives', ->
 
     it 'opens a new window for the user when clicked', ->
       $element.find('.user').click()
-      sinon.assert.calledWith(fakeWindow.open, '/u/bill@127.0.0.1')
+      sinon.assert.calledWith(fakeWindow.open, '/u/bill')
 
     it 'prevents the default browser action on click', ->
       event = jQuery.Event('click')
@@ -129,6 +129,6 @@ describe 'h.directives', ->
         text = $element.find('.user').text()
         assert.equal(text, 'jim')
 
-      it 'keeps the url in sync', ->
+      it 'opens with only the username', ->
         $element.find('.user').click()
-        sinon.assert.calledWith(fakeWindow.open, '/u/jim@hypothesis')
+        sinon.assert.calledWith(fakeWindow.open, '/u/jim')
