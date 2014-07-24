@@ -3,7 +3,7 @@
 @import "compass/utilities/general/clearfix";
 
 .form-field {
-  margin-bottom: 10px;
+  margin-bottom: 2px;
 }
 
 .form-description {
@@ -213,16 +213,11 @@
   }
 }
 
-// Includes an icon within the button
-.btn-with-icon {
+// Positions the icon nicely within the button.
+.btn-icon {
   position: relative;
-  padding-left: 34px;
-
-  .btn-icon {
-    position: absolute;
-    top: 5px;
-    left: 8px;
-  }
+  top: 1px;
+  right: 3px;
 }
 
 // Absolutely positions a message/icon to the left of a button.

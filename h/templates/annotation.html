@@ -64,9 +64,6 @@
               name="text" />
   </div>
 
-  <!-- Tip about Markdown -->
-  <span ng-hide="!editing" class="tip"><a href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown</a> is supported.</span>
-
   <!-- Tags -->
   <div class="form-field">
     <ul ng-readonly="!editing"
@@ -84,17 +81,17 @@
         <button ng-switch-when="edit"
                 ng-click="save($event)"
                 ng-disabled="!form.$valid"
-                class="btn"><i class="icon-checkmark2"></i> Save</button>
+                class="btn"><i class="icon-checkmark2 btn-icon"></i> Save</button>
         <button ng-switch-when="delete"
                 ng-click="save($event)"
                 ng-disabled="!form.$valid"
-                class="btn"><i class="icon-checkmark2"></i> Delete</button>
+                class="btn"><i class="icon-checkmark2 btn-icon"></i> Delete</button>
         <button ng-switch-default
                 ng-click="save($event)"
                 ng-disabled="!form.$valid"
-                class="btn"><i class="icon-checkmark2"></i> Save</button>
+                class="btn"><i class="icon-checkmark2 btn-icon"></i> Save</button>
       </ng-switch>
-      <button class="btn btn-clean" ng-click="cancel($event)"><i class="icon-x"></i> Cancel</button>
+      <button class="btn btn-clean" ng-click="cancel($event)"><i class="icon-x btn-icon"></i> Cancel</button>
     </div>
   </div>
 

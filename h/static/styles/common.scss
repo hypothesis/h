@@ -744,7 +744,10 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
   &[readonly] {
     .tagit-new, .tagit-close { display: none; }
-    li { padding-right: .3em; }
+    li { 
+      padding: 1px 6px; 
+      font-size: 11px; 
+    }
     li.tagit-choice { margin-top: .1em; }
   }
 }
