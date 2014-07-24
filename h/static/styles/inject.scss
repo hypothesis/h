@@ -3,12 +3,12 @@
 @import 'compass/layout/stretching';
 @import 'compass/reset/utilities';
 
-$baseFontSize: 14px;
+$base-font-size: 14px;
 
 //ADDER////////////////////////////////
 .annotator-adder {
   $border: $gray;
-  $hoverborder: $grayDark;
+  $hoverborder: $gray-dark;
   @include box-sizing(border-box);
   height: 40px;
   margin-left: -20px;
@@ -56,7 +56,7 @@ $baseFontSize: 14px;
   }
 
   &:hover {
-    @include box-shadow(1px 1px 6px -2px $grayLight);
+    @include box-shadow(1px 1px 6px -2px $gray-light);
     border-color: $hoverborder;
 
     &:before {
@@ -79,7 +79,7 @@ $baseFontSize: 14px;
   svg {
     @include stretch-y;
     background: hsla(0, 0, 0, .1);
-    border-left: solid 1px $grayLighter;
+    border-left: solid 1px $gray-lighter;
     height: 100%;
     left: 18px;
     width: $heatmap-width;
@@ -112,9 +112,9 @@ $baseFontSize: 14px;
     @include reset-box-model;
     @include reset-font;
     background: none;
-    color: $textColor;
+    color: $text-color;
     font-weight: bold;
-    font-family: $sansFontFamily;
+    font-family: $sans-font-family;
     font-size: 11px;
     line-height: 20px;
     left: 5px;
@@ -203,24 +203,24 @@ $baseFontSize: 14px;
 //HIGHLIGHTS////////////////////////////////
 .annotator-highlights-always-on .annotator-hl,
 .annotator-hl-active, .annotator-hl-temporary, .annotator-hl-focused {
-  background: $highlightColor;
+  background: $highlight-color;
   box-shadow:3px 3px 4px -1px #999999;
   &::-moz-selection {
-    background: $highlightColor;
+    background: $highlight-color;
     box-shadow:3px 3px 4px #999999;
   }
   &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
-    background: $highlightColor;
+    background: $highlight-color;
     box-shadow:3px 3px 4px #999999;
   }
   &::selection, &::selection:window-inactive {
-    background: $highlightColor;
+    background: $highlight-color;
     box-shadow:3px 3px 4px #999999;
   }
 }
 
 .annotator-highlights-always-on .annotator-hl {
-  background: $highlightModeColor;
+  background: $highlight-mode-color;
 }
 
 .annotator-highlights-always-on .annotator-hl-active,
@@ -233,8 +233,8 @@ $baseFontSize: 14px;
   @include reset-box-model;
   @include user-select(none);
   @extend .noise;
-  font-size: $baseFontSize;
-  line-height: $baseLineHeight;
+  font-size: $base-font-size;
+  line-height: $base-line-height;
   height: 100%;
   position: fixed;
   top: 0;
@@ -311,7 +311,7 @@ $baseFontSize: 14px;
   @include transition-delay(0);
   @include transition-timing-function(cubic-bezier(0, .55, .1, 1));
   background: $white;
-  border: solid 1px $grayLighter;
+  border: solid 1px $gray-lighter;
   left: 0;
   margin-bottom: 5px;
   overflow: hidden;
@@ -333,7 +333,7 @@ $baseFontSize: 14px;
     z-index: 1;
 
     a, a:hover, a:active, a:visited, a:link, a:link:hover {
-      color: $linkColor;
+      color: $link-color;
     }
   }
 
@@ -350,19 +350,19 @@ $baseFontSize: 14px;
 
     text-decoration: none;
     text-shadow:
-    0 0 2px $grayLightest,
+    0 0 2px $gray-lightest,
     0 0 0 $gray;
 
     &:focus { outline: 0; }
-    &:hover { color: $linkColorHover; }
+    &:hover { color: $link-color-hover; }
 
     &.icon-comment {
       text-shadow:
-      0 0 2px $grayLightest,
+      0 0 2px $gray-lightest,
       0 0 0 $gray;
 
       &:hover {
-        color: fade-out($grayLightest, .9);
+        color: fade-out($gray-lightest, .9);
       }
     }
   }
@@ -371,7 +371,7 @@ $baseFontSize: 14px;
 
 // Toolbar notification counter
 .annotator-notification-counter {
-  font-family: $sansFontFamily;
+  font-family: $sans-font-family;
   pointer-events: none;
   position: absolute;
   margin-left: 11px;

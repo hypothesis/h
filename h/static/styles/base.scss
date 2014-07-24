@@ -1,58 +1,56 @@
 @import 'compass/css3';
 
-
 $white: #fff !default;
 $black: #000 !default;
 
 // GRAYS
 $gray: #777 !default;
-$grayDark: darken($gray, 12%) !default;
-$grayDarker: darken($gray, 36%) !default;
-$grayLight: lighten($gray, 12%) !default;
-$grayLighter: lighten($gray, 36%) !default;
-$grayLightest: #f9f9f9 !default;
+$gray-dark: #585858;
+$gray-light: #969696 !default;
+$gray-lighter: #d3d3d3 !default;
+$gray-lightest: #f9f9f9 !default;
 
 //COLORS
 $hypothered: #bd1c2b !default;
 $hypothered-desat: #bd5862 !default;
-$inputBorder: $grayLight !default;
-$inputDisabledBackground: $grayLight !default;
-$inputBackground: white !default;
 
-// Accent colors
-// -------------------------
-$blue:                  #049cdb !default;
-$blueDark:              #0064cd !default;
-$green:                 #46a546 !default;
-$red:                   #9d261d !default;
-$yellow:                #ffc40d !default;
-$orange:                #f89406 !default;
-$pink:                  #c3325f !default;
-$purple:                #7a43b6 !default;
+$error-red: $hypothered-desat !default;
+$error-red-light: #e0b0b0 !default;
+$error-red-lightest: #fff1f3 !default;
+
+$focus-yellow: #fffbeb !default;
+$focus-yellow-dark: #ece3c5 !default;
+$focus-yellow-darker: #cbbb95 !default;
+
+$button-text-color: $gray-dark !default;
+$button-background-start: $white !default;
+$button-background-end: #f0f0f0 !default;
+$button-background-gradient: top, $button-background-start, $button-background-end !default;
+
+$success-green: #76B800 !default;
 
 // Scaffolding
 // -------------------------
-$bodyBackground:        $white !default;
-$textColor:             $grayDark !default;
+$body-background:        $white !default;
+$text-color:             $gray-dark !default;
 
 //LINKS
-$linkColor:             $hypothered-desat !default;
-$linkColorHover:        $hypothered !default;
+$link-color:             $hypothered-desat !default;
+$link-color-hover:       $hypothered !default;
 
 // Typography
 // -------------------------
-$sansFontFamily:        "Helvetica Neue", Helvetica, Arial, sans-serif !default;
-$serifFontFamily:       Georgia, "Times New Roman", Times, serif !default;
-$monoFontFamily:        Monaco, Menlo, Consolas, "Courier New", monospace !default;
+$sans-font-family:        "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+$serif-font-family:       Georgia, "Times New Roman", Times, serif !default;
+$mono-font-family:        Monaco, Menlo, Consolas, "Courier New", monospace !default;
 
-$baseFontSize:          16px !default;
-$baseFontFamily:        $sansFontFamily !default;
-$baseLineHeight:        20px !default;
-$altFontFamily:         $serifFontFamily !default;
+$base-font-size:          16px !default;
+$base-font-family:        $sans-font-family !default;
+$base-line-height:        20px !default;
+$alt-font-family:         $serif-font-family !default;
 
-$headingsFontFamily:    inherit !default;
-$headingsFontWeight:    bold !default;
-$headingsColor:         inherit !default;
+$headings-font-family:    inherit !default;
+$headings-color:          inherit !default;
 
 //STANCE COLORS
 $positive: #3aab39;
@@ -60,8 +58,8 @@ $negative: #d11c2b;
 $neutral: #0171ba;
 
 //OTHER VARIABLES
-$highlightColor: rgba(201, 215, 241, .5);
-$highlightModeColor: rgba(255, 255, 60, .5);
+$highlight-color: rgba(201, 215, 241, .5);
+$highlight-mode-color: rgba(255, 255, 60, .5);
 $thread-padding: 1em;
 $threadexp-width: .72em;
 $score-width: 40px;
@@ -86,7 +84,7 @@ $input-border-radius: 2px;
 @mixin plainform {
   color: $gray;
   background-color: white;
-  border: 1px solid $grayLighter;
+  border: 1px solid $gray-lighter;
   border-radius: .2em;
   font-family: "Source Sans Pro", "Open Sans", sans-serif;
   font-size: 1em;
@@ -94,10 +92,10 @@ $input-border-radius: 2px;
   &:focus, &.js-focus {
     outline: 0;
     border: 1px solid $gray;
-    @include box-shadow( inset 1px 1px 6px -1px $grayLighter);
+    @include box-shadow( inset 1px 1px 6px -1px $gray-lighter);
   }
   &:disabled {
-    background-color: $grayLightest;
+    background-color: $gray-lightest;
   }
   &.ng-dirty.ng-invalid {
     border: 1px solid $red;
@@ -121,8 +119,8 @@ $input-border-radius: 2px;
   position: relative;
   text-decoration: none;
   text-shadow: 0 1px 2px rgba(255, 255, 255, .9);
-  color: $grayDark;
-  border-color: $grayLight $grayLight $gray;
+  color: $gray-dark;
+  border-color: $gray-light $gray-light $gray;
 
   &:hover, &:focus, &:active, &.js-focus, &.js-hover, &.js-active {
     @include background-image(
@@ -140,14 +138,14 @@ $input-border-radius: 2px;
     @include box-shadow(
       inset 0 .15em .25em rgba(0, 0, 0, .15),
       0 .05em .1em rgba(0, 0, 0, .0));
-    border-color: $grayLight $grayLight $gray;
+    border-color: $gray-light $gray-light $gray;
     top: 1px;
   }
 
   &:disabled {
-    color: $grayLight;
-    border-color: $grayLighter;
-    background: $grayLightest;
+    color: $gray-light;
+    border-color: $gray-lighter;
+    background: $gray-lightest;
     cursor: default;
   }
 }
@@ -176,7 +174,7 @@ $input-border-radius: 2px;
   @include border-radius(.1em);
   @include box-shadow(inset 2px 1px 1px hsla(0, 0%, 0%, .1));
   @include single-transition(opacity, .2s);
-  font-family: $sansFontFamily;
+  font-family: $sans-font-family;
   line-height: 29px;
   opacity: 0;
   position: relative;
