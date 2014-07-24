@@ -132,3 +132,44 @@ describe 'h.directives', ->
       it 'opens with only the username', ->
         $element.find('.user').click()
         sinon.assert.calledWith(fakeWindow.open, '/u/jim')
+
+  describe '.simpleSearch', ->
+    $element = null
+    beforeEach ->
+      $scope.query = {}
+      $scope.update = ->
+      $scope.clear = ->
+
+      template= '''
+      <div class="simpleSearch"
+            query="query"
+            onsearch="update(this)"
+            onclear="clear()">
+      </div>
+      '''
+
+      $element = $compile(angular.element(template))($scope)
+      $scope.$digest()
+
+    it 'updates the search-bar', ->
+      $scope.query = {query: "Test query"}
+      $scope.$digest()
+      assert.equal($scope.searchtext, $scope.query.query)
+
+    it 'calls the given search function', ->
+      $scope.query = {query: "Test query"}
+      $scope.update = sinon.spy()
+      $scope.$digest()
+      $element.trigger('submit')
+      sinon.assert.calledWith($scope.update, "Test query")
+
+    it 'calls the given clear function', ->
+      $scope.clear = sinon.spy()
+      $element.find('.simple-search-clear').click()
+      assert($scope.clear.called)
+
+    it 'clear clears the search-bar', ->
+      $scope.query = {query: "Test query"}
+      $scope.$digest()
+      $element.find('.simple-search-clear').click()
+      assert.equal($scope.searchtext, '')
