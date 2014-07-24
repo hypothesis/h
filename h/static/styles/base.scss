@@ -98,10 +98,7 @@ $input-border-radius: 2px;
     background-color: $gray-lightest;
   }
   &.ng-dirty.ng-invalid {
-    border: 1px solid $red;
-  }
-  &.ng-valid {
-    border: 1px solid $green;
+    border: 1px solid $error-red-light;
   }
 }
 
