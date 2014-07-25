@@ -168,8 +168,19 @@ describe 'h.directives', ->
       $element.find('.simple-search-clear').click()
       assert($scope.clear.called)
 
-    it 'clear clears the search-bar', ->
+    it 'clears the search-bar', ->
       $scope.query = {query: "Test query"}
       $scope.$digest()
       $element.find('.simple-search-clear').click()
       assert.equal($scope.searchtext, '')
+
+    it 'adds a class to the form when there is no input value', ->
+      $form = $element.find('.simple-search-form')
+      assert.include($form.prop('className'), 'simple-search-inactive')
+
+    it 'removes the class from the form when there is an input value', ->
+      $scope.query = {query: "Test query"}
+      $scope.$digest()
+
+      $form = $element.find('.simple-search-form')
+      assert.notInclude($form.prop('className'), 'simple-search-inactive')
