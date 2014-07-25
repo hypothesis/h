@@ -736,17 +736,17 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     padding: .01em 1.3em .01em .3em;
     position: relative;
     opacity: .8;
+    margin-right: 0.4em;
 
     &:hover { opacity: 1; }
     &.tagit-new { padding: 0; }
-    & + li { margin-left: .4em; }
   }
 
   &[readonly] {
     .tagit-new, .tagit-close { display: none; }
     li { 
-      padding: 1px 6px; 
-      font-size: 11px; 
+      padding: .1em .3em; 
+      font-size: 12px; 
     }
     li.tagit-choice { margin-top: .1em; }
   }

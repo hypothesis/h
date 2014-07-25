@@ -216,6 +216,9 @@
             <button class="btn js-active" type="submit" name="">Primary Button (active)</button>
           </div>
           <div class="form-field">
+            <button class="btn"><i class="icon-checkmark2 btn-icon"></i> Button with Icon Inside</button>
+          </div>  
+          <div class="form-field">
             <button class="btn btn-clean" type="submit" name="">Button Clean</button>
           </div>
           <div class="form-field">
@@ -344,6 +347,70 @@
                 <button class="btn btn-primary" type="submit">Go</button>
               </span>
             </div>
+          </form>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Tags</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <form class="form" action="" method="">
+            
+            <label class="form-label" for="">Editable Tags</label>
+            <ul ng-readonly="!editing" ng-model="model.tags" name="tags" class="tags ng-valid tagit ui-widget ui-widget-content ui-corner-all ng-dirty" placeholder="Add tags…">
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 1</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 1" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 2</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 2" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 3</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 3" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 4</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 4" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 5</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 5" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 6</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 6" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 7</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 7" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 8</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 8" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 9</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 9" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 10</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 10" name="tags" type="hidden">
+              </li>
+              <li class="tagit-new"><span class="ui-helper-hidden-accessible" aria-live="polite" role="status">No search results.</span><input placeholder="Add tags…" autocomplete="off" class="ui-widget-content ui-autocomplete-input form-input" type="text">
+              </li>
+            </ul>
+
+            <label class="form-label" for="">Readonly Tags</label>
+
+            <ul readonly="readonly" ng-readonly="!editing" ng-model="model.tags" name="tags" class="tags ng-valid tagit ui-widget ui-widget-content ui-corner-all ng-dirty" placeholder="Add tags…">
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 1</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 1" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 2</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 2" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 3</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 3" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable"><a class="tagit-label">Tag 4</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 4" name="tags" type="hidden">
+              </li>
+              <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
+                <a class="tagit-label">Tag 5</a><a class="tagit-close"><span class="text-icon">×</span><span class="ui-icon ui-icon-close"></span></a><input style="display:none;" value="Tag 5" name="tags" type="hidden">
+              </li>
+            </ul>
           </form>
         </div>
       </div>

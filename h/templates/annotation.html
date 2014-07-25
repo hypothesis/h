@@ -65,7 +65,7 @@
   </div>
 
   <!-- Tags -->
-  <div class="form-field">
+  <div ng-class="editing && 'form-field'" >
     <ul ng-readonly="!editing"
         ng-model="model.tags"
         name="tags"
