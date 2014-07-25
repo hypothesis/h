@@ -2,6 +2,10 @@
   <head metal:fill-slot="head" tal:omit-tag>
     <title>Hypothesis</title>
     <style>
+      body {
+        background: none;
+      }
+
       .pattern-library-wrapper {
         width: 80%;
         margin: 30px auto;
@@ -104,7 +108,7 @@
           </div>
           <div class="form-field form-field-error">
             <label class="form-label" for="">Error <span class="form-hint">(between 3 and 15 characters)</span></label>
-            <input class="form-input ng-dirty ng-invalid" type="text" name="" value="Bad Input" placeholder="Placeholder" />
+            <input class="form-input" type="text" name="" value="Bad Input" placeholder="Placeholder" />
             <ul class="form-error-list">
               <li class="form-error">Password must be more that 3 characters long</li>
               <li class="form-error">Password is not valid for this username</li>
@@ -344,6 +348,31 @@
                 <button class="btn btn-primary" type="submit">Go</button>
               </span>
             </div>
+          </form>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Simple Search</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <form class="simple-search-form">
+            <i class="simple-search-icon icon-search"></i>
+            <input class="simple-search-input" type="text" name="searchText" />
+            <button class="simple-search-clear" type="reset">
+              <i class="icon-x"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Simple Search (inactive)</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <form class="simple-search-form simple-search-inactive" name="searchBox">
+            <i class="simple-search-icon icon-search"></i>
+            <input class="simple-search-input" type="text" name="searchText" />
           </form>
         </div>
       </div>
