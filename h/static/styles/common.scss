@@ -413,7 +413,6 @@ blockquote {
 
 //TABS////////////////////////////////
 .nav-tabs {
-  background-color: $body-background;
   border: 1px none $gray-lighter;
   border-bottom-style: solid;
   padding: 0.9em 1em 1.1em;
@@ -427,7 +426,7 @@ blockquote {
       font-weight: bold;
       color: $gray-dark;
       cursor: pointer;
-      border-bottom: 3px solid $gray-lighter;
+      border-bottom: 3px solid transparent;
       padding-left: 2 / 13 * 1em;
       padding-right: 2 / 13 * 1em;
       padding-bottom: 3 / 13 * 1em;
@@ -436,12 +435,15 @@ blockquote {
     &:active a {
       position: relative;
       top: 1 / 13 * 1em;
-      padding-bottom: 2 / 13 * 1em;
     }
 
-    &:active a,
+
+    &.active:active a {
+      top: 0;
+    }
+
     &.active a {
-      border-color: $hypothered-desat;
+      border-color: $gray-lighter;
     }
 
     &:before {
@@ -456,7 +458,6 @@ blockquote {
 }
 
 .tab-content {
-  background: $white;
   line-height: 1.4;
   padding: 1em;
 
