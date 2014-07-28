@@ -224,6 +224,27 @@
   }
 }
 
+.btn-danger {
+  @include background(linear-gradient(top, $hypothered, shade($hypothered, 5%)));
+  color: white;
+  border-color: shade($hypothered, 15%);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1);
+
+  &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
+    @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.05));
+    color: white;
+    background: #e02b3c;
+    border-color: $hypothered;
+  }
+
+  &:active, &.js-active {
+    @include box-shadow(inset 0 1px 0 rgba(0, 0, 0, 0.3));
+    color: white;
+    background: shade($hypothered, 10%);
+    border-color: shade($hypothered, 30%);
+  }
+}
+
 .btn-clean {
   &, &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
     @include box-shadow(none);

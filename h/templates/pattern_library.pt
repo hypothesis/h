@@ -216,8 +216,17 @@
             <button class="btn js-active" type="submit" name="">Primary Button (active)</button>
           </div>
           <div class="form-field">
+            <button class="btn btn-danger" type="submit" name="">Danger Button</button>
+          </div>
+          <div class="form-field">
+            <button class="btn btn-danger js-focus" type="submit" name="">Danger Button (focus/hover)</button>
+          </div>
+          <div class="form-field">
+            <button class="btn btn-danger js-active" type="submit" name="">Danger Button (active)</button>
+          </div>
+          <div class="form-field">
             <button class="btn"><i class="icon-checkmark2 btn-icon"></i> Button with Icon Inside</button>
-          </div>  
+          </div>
           <div class="form-field">
             <button class="btn btn-clean" type="submit" name="">Button Clean</button>
           </div>
@@ -356,7 +365,7 @@
         </div>
         <div class="pattern-library-example-content">
           <form class="form" action="" method="">
-            
+
             <label class="form-label" for="">Editable Tags</label>
             <ul ng-readonly="!editing" ng-model="model.tags" name="tags" class="tags ng-valid tagit ui-widget ui-widget-content ui-corner-all ng-dirty" placeholder="Add tags…">
               <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
