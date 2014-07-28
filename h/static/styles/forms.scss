@@ -6,6 +6,35 @@
   margin-bottom: 10px;
 }
 
+.form-heading {
+  position: relative;
+  font-size: 1em;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-top: 0;
+  margin-bottom: 20px;
+
+  span {
+    position: relative;
+    background: white;
+    padding-right: 5px;
+    z-index: 1;
+  }
+
+  &::after {
+    content: "";
+    display: block;
+    height: 1px;
+    background: $gray-lighter;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    margin-top: -1px;
+    z-index: 0;
+  }
+}
+
 .form-description {
   margin-bottom: 1em;
 }
