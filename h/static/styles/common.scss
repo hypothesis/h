@@ -810,9 +810,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
   &[readonly] {
     .tagit-new, .tagit-close { display: none; }
-    li { 
-      padding: .1em .3em; 
-      font-size: 12px; 
+    li {
+      padding: .1em .3em;
+      font-size: 12px;
     }
     li.tagit-choice { margin-top: .1em; }
   }
@@ -871,24 +871,10 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 }
 
 .panel {
-  @extend .tab-content;
-  max-width: none !important;
-  padding: 35px 25px;
+  padding: (20 / 13 * 1em) 0;
 
   &.shown {
     display: block;
-  }
-
-  input {
-    margin: 5px 0;
-  }
-
-  .btn {
-    margin-top: 5px;
-  }
-
-  textarea {
-    margin: 5px 0;
   }
 }
 

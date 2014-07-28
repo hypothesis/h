@@ -88,10 +88,10 @@
 
       <!-- Panels Nav-->
       <div class="sheet" ng-show="showPanels">
-        <i class="close icon-cancel"
-            role="button"
+        <span href="#" class="close icon-cancel"
             title="Close"
-            ng-click="toggleShowPanels()"></i>
+            role="button"
+            ng-click="toggleShowPanels()"></span>
         <ul class="nav nav-tabs">
           <li ng-class="panel.active && 'active'" ng-repeat="panel in panelList" ng-click="togglePanels(panel)">
             <a href="#">{{ panel.name }}</a>
