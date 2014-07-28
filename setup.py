@@ -30,7 +30,7 @@ install_requires = [
     'BeautifulSoup4>=4.2.1',
     'SQLAlchemy>=0.8.0',
     'alembic>=0.6.3',
-    'annotator>=0.11.1',
+    'annotator>=0.11.2',
     'clik==0.3.1',
     'deform_bootstrap>=0.2.0',
     'elasticsearch',
