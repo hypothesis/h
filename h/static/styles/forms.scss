@@ -155,7 +155,7 @@
 
 .form-actions {
   @include pie-clearfix;
-  margin-top: 5px;
+  margin-top: 20px;
 }
 
 .form-actions-message {
@@ -311,4 +311,10 @@
 [data-btn-message-state=success] .btn-message-success .btn-message-icon {
   @include transition(transform 0.15s 0 cubic-bezier(0, 1.8, 1, 1.8));
   @include transform(scale(1));
+}
+
+// TODO: Move into seperate module stylesheet.
+.account-form {
+  margin-top: 30 / 13 * 1em;
+  margin-bottom: 30 / 13 * 1em;
 }
