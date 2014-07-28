@@ -1,37 +1,42 @@
-<form name="edit_profile"
-    ng-show="activePanel.name == 'Account'"
-    novalidate>
+<form class="form" name="edit_profile" ng-show="activePanel.name == 'Account'" ng-submit="submit(edit_profile)" novalidate form-validate data-form-validate-error-class="form-field-error">
+  <h2 class="form-heading"><span>Change Your Email</span></h2>
 
-    <h2>Change Email</h2>
-    Current Email: <em>User's Email to go here.</em>
+  <div class="form-field" data-target="email">
+    <label class="form-label" for="field-current-email">New Email: <em class="form-hint">User's Email to go here.</em></label>
+    <input id="field-current-email" class="form-input" type="email" name="email" ng-model="model.email" required autocapitalize="false" />
 
-    <input type="email" name="email" class="fullwidth" ng-model="model.email" placeholder="New email" required autocapitalize="false" />
-    <span slow-validate="email">
-          <span ng-show="edit_profile.email.$error.email"
-            >Is this an email address?</span>
-          <span ng-show="edit_profile.email.$error.required"
-            >Please enter your email.</span>
-    </span>
+    <ul class="form-error-list">
+      <li class="form-error" ng-show="edit_profile.email.$error.email">Is this an email address?</li>
+      <li class="form-error" ng-show="edit_profile.email.$error.required">Please choose a new email address.</li>
+    </ul>
+  </div>
 
-    <input class="fullwidth" type="text" name="confirmemail" ng-model="model.confirmemail" placeholder="Confirm new email"required autocapitalize="false">
-    <span slow-validate="confirmemail">
-      <span ng-show="edit_profile.confirmemail.$error.match"
-          >Email does not match.</span>
-      <span ng-show="edit_profile.confirmemail.$error.email"
-          >Is this an email address?</span>
-      <span ng-show="edit_profile.confirmemail.$error.required"
-          >Please confirm your new email.</span>
-    </span>
+  <div class="form-field" data-target="confirmemail">
+    <label class="form-label" for="field-confirm-email">Confirm Email:</label>
+    <input id="field-confirm-email" class="form-input" type="email" name="confirmemail" ng-model="model.confirmemail" required autocapitalize="false">
 
-    <input class="fullwidth" type="password" name="password" ng-model="model.password" placeholder="Password" required autocapitalize="false" >
-    <span slow-validate="password">
-      <span ng-show="edit_profile.password.$error.email"
-        >This password is incorrect</span>
-      <span ng-show="edit_profile.password.$error.required"
-        >Please confirm your new email.</span>
-    </span>
+    <ul class="form-error-list">
+      <li class="form-error" ng-show="edit_profile.confirmemail.$error.match">New and confirmation emails do not match.</li>
+      <li class="form-error" ng-show="edit_profile.confirmemail.$error.email">Is this an email address?</li>
+      <li class="form-error" ng-show="edit_profile.confirmemail.$error.required">Please confirm your new email address.</li>
+    </ul>
+  </div>
 
-    <button class="btn icon-checkmark2" ng-click="submit(edit_profile)" ng-disabled="!edit_profile.$valid">Save</button>
+  <div class="form-field" data-target="password">
+    <label class="form-label" for="field-confirm-password">Password:</label>
+    <input id="field-confirm-password" class="form-input" type="password" name="password" ng-model="model.password" required autocapitalize="false" >
+
+    <ul class="form-error-list">
+      <li class="form-error" ng-show="edit_profile.password.$error.email">This password is not valid for this account.</li>
+      <li class="form-error" ng-show="edit_profile.password.$error.required">Please enter your password to confirm this change.</li>
+    </ul>
+  </div>
+
+  <div class="form-actions">
+    <div class="form-actions-buttons">
+      <button class="btn" type="submit">Update</button>
+    </div>
+  </div>
 </form>
 
 <form name="changepassword"

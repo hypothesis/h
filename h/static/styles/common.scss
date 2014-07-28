@@ -332,71 +332,6 @@ h6 {
   }
 }
 
-<<<<<<< HEAD
-=======
-
-
-//ICON CLASSES////////////////////////////////
-.flag-icon {
-  @include fonticon("\28", left);
-}
-
-.fave-icon {
-  @include fonticon("\e006", left);
-  &.checked:before {
-    content: "\e005";
-  }
-}
-
-.reply-icon {
-  @include fonticon("\e004", left);
-}
-
-.share-icon {
-  @include fonticon("\25", left);
-}
-
-.down-icon {
-  @include fonticon("\e007", left);
-}
-
-.clipboard-icon {
-  @include fonticon("\33", left);
-}
-
-.check-icon {
-  @include fonticon("\35", left);
-}
-
-.plus-icon {
-  @include fonticon("\e012", left);
-}
-
-.x-icon {
-  @include fonticon("\36", left);
-}
-
-.vis-icon {
-  @include fonticon("\e001", left);
-}
-
-.highlight-icon {
-  @include fonticon("\e601", left);
-}
-
-.comment-icon {
-  @include fonticon("\e600", left);
-}
-
-.launch-icon {
-  @include fonticon("\2a", left);
-}
-
-.loading-icon {
-  text-align: center
-}
-
->>>>>>> Revise interface to make it a bit cleaner.
 //TABS////////////////////////////////
 .nav-tabs {
   border: 1px none $gray-lighter;
@@ -667,20 +602,8 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 }
 
 // Panels //////////////////////////////
-<<<<<<< HEAD
-.slideover{
-  @extend .content;
-  @include stretch-y;
-  @include translateX(100%);
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  right: 0px;
-=======
 .panelsnav {
   position: absolute;
->>>>>>> Revise interface to make it a bit cleaner.
   left: 0px;
   right: 0px;
   top: 2px;
@@ -691,37 +614,8 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   }
 }
 
-<<<<<<< HEAD
-.panelcontainer {
-  background: url("../images/noise_1.png");
-  margin-right: -15px;
-  font-size: 14px;
-
-  .fullwidth {
-    width: 100%;
-  }
-
-  .gravatar {
-    float: left;
-    margin: 0px 10px 10px 0px;
-    border:1px solid $grayLighter;
-  }
-
-  .x-icon {
-    width: 1em;
-    height: 1em;
-    opacity: 0.9;
-    position: relative;
-
-    &:before {
-      position: relative;
-      top: 2px;
-    }
-=======
 .panel {
-  @extend .tab-content;
-  max-width: none !important;
-  padding: 35px 25px;
+  padding: (20 / 13 * 1em) 0;
 
   &.shown {
     display: block;
@@ -730,7 +624,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   input {
     margin: 5px 0;
   }
->>>>>>> Revise interface to make it a bit cleaner.
 
   .btn {
     margin-top: 5px;
