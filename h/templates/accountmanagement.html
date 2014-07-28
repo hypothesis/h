@@ -27,7 +27,7 @@
     <input id="field-change-email-password" class="form-input" type="password" name="password" ng-model="model.password" required autocapitalize="false" >
 
     <ul class="form-error-list">
-      <li class="form-error" ng-show="edit_profile.password.$error.email">This password is not valid for this account.</li>
+      <li class="form-error" ng-show="edit_profile.password.$error.email">Your password does not match the one we have on record.</li>
       <li class="form-error" ng-show="edit_profile.password.$error.required">Please enter your password to confirm this change.</li>
     </ul>
   </div>
@@ -75,20 +75,27 @@
 
   <div class="form-actions">
     <div class="form-actions-buttons">
-      <button class="btn">Update</button>
+      <button class="btn" type="submit">Update</button>
     </div>
   </div>
 </form>
 
-<form class="account-form" name="deleteaccount"
-      ng-show="activePanel.name == 'Account'"
-      novalidate>
-      <h2>Delete Account</h2>
-      <p>This will delete your user account. If you would like to delete your annotations, do so before continuing or email us at <a href="mailto:support@hypothes.is">support@hypothes.is</a>.</p>
-      <input class="fullwidth" type="password" name="deleteaccountpassword" ng-model="model.deleteaccountpassword" placeholder="Please enter your password to proceed" required autocapitalize="false" >
-      <span slow-validate="deleteaccountpassword">
-        <span ng-show="deleteaccount.deleteaccountpassword.$error.minlength"
-              >Your password does not match the one we have on record.</span>
-      </span>
-      <button class="btn danger" ng-click="deleteAccount()" ng-disabled="!deleteaccount.$valid">Delete account</button>
+<form class="account-form form" name="deleteaccount" ng-show="activePanel.name == 'Account'" ng-submit="deleteAccount()" novalidate form-validate data-form-validate-error-class="form-field-error">
+  <h2 class="form-heading"><span>Delete Account</span></h2>
+  <p class="form-description">This will delete your user account. If you would like to delete your annotations, do so before continuing or email us at <a href="mailto:support@hypothes.is">support@hypothes.is</a>.</p>
+
+  <div class="form-field" data-target="confirmpassword">
+    <label class="form-label" for="confirm-account-deletion">Confirm Password:</label>
+    <input id="confirm-account-deletion" class="form-input" type="password" name="confirmpassword" ng-model="model.confirmpassword" match="confirmpassword" required>
+
+    <ul class="form-error-list">
+      <li class="form-error" ng-show="deleteaccount.deleteaccountpassword.$error.minlength">Your password does not match the one we have on record.</li>
+    </ul>
+  </div>
+
+  <div class="form-actions">
+    <div class="form-actions-buttons">
+      <button class="btn btn-danger" type="submit">Delete Account</button>
+    </div>
+  </div>
 </form>
