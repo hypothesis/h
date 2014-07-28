@@ -228,9 +228,9 @@
             <button class="btn btn-clean js-active" type="submit" name="">Button Clean (active)</button>
           </div>
           <div class="form-field">
-            <button class="btn btn-with-icon js-disabled" type="submit" name="">
+            <button class="btn js-disabled" type="submit" name="">
               <span class="btn-icon spinner"><span><span></span></span></span>
-              Button Loading
+              <span style="position: relative; bottom: 3px; left: 1px;">Button Loading</span>
             </button>
           </div>
         </div>
