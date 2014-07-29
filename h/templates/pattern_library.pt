@@ -264,7 +264,7 @@
             </span>
           </div>
           <div class="form-field" style="width: 230px; text-align: right">
-            <span id="button-loading-demo" class="btn-with-message" data-btn-message-state>
+            <span id="button-loading-demo" class="btn-with-message" status-button-state>
               <!-- Insert with JavaScript -->
               <span class="btn-message btn-message-loading">
                 <span class="btn-icon spinner"><span><span></span></span></span>
@@ -285,15 +285,15 @@
                 container.querySelector('button').onclick = function (event) {
                   event.preventDefault();
                   event.target.disabled = true;
-                  container.setAttribute('data-btn-message-state', 'loading');
+                  container.setAttribute('status-button-state', 'loading');
 
                   clearTimeout(timer);
                   timer = setTimeout(function () {
                     event.target.disabled = false;
-                    container.setAttribute('data-btn-message-state', 'success');
+                    container.setAttribute('status-button-state', 'success');
 
                     timer = setTimeout(function () {
-                      container.setAttribute('data-btn-message-state', 'default');
+                      container.setAttribute('status-button-state', '');
                     }, 5000);
                   }, 1000);
                 };
