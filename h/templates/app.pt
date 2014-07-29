@@ -127,17 +127,8 @@
     <script type="text/ng-template" id="notification.html">
       <metal:main use-macro="load: h:templates/notification.html" />
     </script>
-    <script type="text/ng-template" id="panels.html">
-      <metal:main use-macro="load: panels.html" />
-    </script>
-    <script type="text/ng-template" id="settings.html">
-      <metal:main use-macro="load: settings.html" />
-    </script>
     <script type="text/ng-template" id="account_management.html">
       <metal:main use-macro="load: account_management.html" />
-    </script>
-    <script type="text/ng-template" id="profile.html">
-      <metal:main use-macro="load: profile.html" />
     </script>
   </body>
 </html>
