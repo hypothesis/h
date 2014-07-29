@@ -17,7 +17,8 @@ class App
     frame:
       visible: false
     ongoingHighlightSwitch: false
-    sheet: {}
+    sheet: {tab: null, show: false}
+    accountManagement: {show: false}
     sorts: [
       'Newest'
       'Oldest'
@@ -161,6 +162,9 @@ class App
       $scope.updater.then (sock) ->
         filter = streamfilter.getFilter()
         sock.send(JSON.stringify({filter}))
+
+    $scope.$on 'nav:account', ->
+      $scope.accountManagement.show = true
 
     $rootScope.viewState =
       sort: ''
