@@ -535,38 +535,6 @@ accountManagement = ['$filter', 'flash', 'profile', ($filter, flash, profile) ->
   templateUrl: 'account_management.html'
 ]
 
-accountProfile = ->
-  # This is the acount profile stuff that will eventually be outside of the settings panel.
-  # Rational for keeping it in the settings panel (temporarily):
-  # 1. We might as well write the back end for this stuff, then when I do the front end stuff for profiles we'll
-  #    have the backend work started.
-  # 2. As a directive it is extremely easy to move this around and get it out of the side bar.
-  link: (scope, elem, attr, ctrl) ->
-    scope.editProfile = ->
-      # Switches profile into edit mode.
-      return
-  controller: ($scope) ->
-    $scope.demoData =
-      # Is there any thing else we should be collecting for now?
-      name : "Jake Hartnell"
-      password : "password"
-      location : "Berkeley, CA"
-      bio : "A short bio..."
-      website : "http://jakehartnell.com"
-      gravatar : ""
-  restrict: 'C'
-  templateUrl: 'profile.html'
-
-settings = ->
-  # Question: Should each setting be it's own directive?
-  link: (scope, elem, attr, ctrl) ->
-    return
-  controller: ($scope) ->
-    return
-  restrict: 'C'
-  templateUrl: 'settings.html'
-
-
 angular.module('h.directives', ['ngSanitize'])
   .directive('formValidate', formValidate)
   .directive('fuzzytime', fuzzytime)
@@ -584,5 +552,3 @@ angular.module('h.directives', ['ngSanitize'])
   .directive('match', match)
   .directive('confirmPasswordCheck', confirmPasswordCheck)
   .directive('accountManagement', accountManagement)
-  .directive('accountProfile', accountProfile)
-  .directive('settings', settings)
