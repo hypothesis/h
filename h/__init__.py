@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 import urlparse
-import uuid
 
 from pyramid.config import Configurator
-from pyramid.interfaces import ISessionFactory
 from pyramid.path import AssetResolver
 from pyramid.response import FileResponse
-from pyramid.session import SignedCookieSessionFactory
 
 from ._version import get_versions
 __version__ = get_versions()['version']
@@ -15,19 +12,13 @@ del get_versions
 
 
 def includeme(config):
-    config.set_root_factory('h.resources.RootFactory')
-
     config.include('pyramid_multiauth')
-
     config.include('h.api')
     config.include('h.models')
     config.include('h.streamer')
     config.include('h.subscribers')
     config.include('h.views')
-
-
-def create_app(settings):
-    config = Configurator(settings=settings)
+    config.set_root_factory('h.resources.RootFactory')
 
     favicon = AssetResolver().resolve('h:favicon.ico')
     config.add_route('favicon', '/favicon.ico')
@@ -39,15 +30,10 @@ def create_app(settings):
     config.add_route('ok', '/ruok')
     config.add_view(lambda request: 'imok', renderer='string', route_name='ok')
 
+
+def create_app(settings):
+    config = Configurator(settings=settings)
     config.include(includeme)
-    config.commit()
-
-    # Register a default session factory if there is still none registered
-    if config.registry.queryUtility(ISessionFactory) is None:
-        random_secret = uuid.uuid4().hex + uuid.uuid4().hex
-        session_factory = SignedCookieSessionFactory(random_secret)
-        config.set_session_factory(session_factory)
-
     return config.make_wsgi_app()
 
 

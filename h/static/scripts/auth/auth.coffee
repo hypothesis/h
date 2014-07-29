@@ -9,6 +9,7 @@ class AuthController
     timeout = null
 
     success = ->
+      $scope.tab = if $scope.tab is 'forgot' then 'activate' else null
       $scope.model = null
       $scope.$broadcast 'success'
 
@@ -36,11 +37,10 @@ class AuthController
       data = {}
       method = '$' + form.$name
 
-      for own key of session
-        delete session[key]
-
-      angular.extend session, $scope.model
-      session[method] success, angular.bind(this, failure, form)
+      angular.copy $scope.model, session
+      session.$promise = session[method] success,
+        angular.bind(this, failure, form)
+      session.$resolved = false
 
     $scope.$on '$destroy', ->
       if timeout
@@ -59,36 +59,58 @@ class AuthController
         , 300000
 
 
-authDirective = ->
+authDirective = ['$timeout', ($timeout) ->
   controller: 'AuthController'
-  link: (scope, elem, attrs, [form, auth]) ->
+  link: (scope, elem, attrs, [auth, form]) ->
     elem.on 'submit', (event) ->
       scope.$apply ->
         $target = angular.element event.target
         $form = $target.controller('form')
 
-        $form.responseErrorMessage = null
+        delete $form.responseErrorMessage
 
         for ctrl in $form.$error.response?.slice?() or []
           ctrl.$setValidity('response', true)
 
         auth.submit($form)
 
+    scope.model = {}
+
+    scope.$on 'authorize', ->
+      scope.tab = 'login'
+
     scope.$on 'error', (event) ->
-      scope[attrs.onError]?(event)
+      scope.onError()
 
     scope.$on 'success', (event) ->
-      scope[attrs.onSuccess]?(event)
+      scope.onSuccess()
 
     scope.$on 'timeout', (event) ->
-      scope[attrs.onTimeout]?(event)
+      scope.onTimeout()
 
     scope.$watch 'model', (value) ->
       if value is null
         form.$setPristine()
-  require: ['form', 'auth']
+
+    scope.$watch 'tab', (name) ->
+      $timeout ->
+        elem
+          .find('form')
+          .filter(-> this.name is name)
+          .find('input')
+          .filter(-> this.type isnt 'hidden')
+          .first()
+          .focus()
+  require: ['auth', 'form']
   restrict: 'C'
-  scope: true
+  scope:
+    onError: '&'
+    onSuccess: '&'
+    onTimeout: '&'
+    session: '='
+    tab: '=ngModel'
+  templateUrl: 'auth.html'
+]
 
 
 angular.module('h.auth', imports)

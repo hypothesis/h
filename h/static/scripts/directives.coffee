@@ -235,13 +235,6 @@ thread = ['$rootScope', '$window', ($rootScope, $window) ->
 ]
 
 
-userPicker = ->
-  restrict: 'ACE'
-  scope:
-    model: '=userPickerModel'
-    options: '=userPickerOptions'
-  templateUrl: 'userPicker.html'
-
 repeatAnim = ->
   restrict: 'A'
   scope:
@@ -446,7 +439,6 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('tags', tags)
 .directive('thread', thread)
 .directive('username', username)
-.directive('userPicker', userPicker)
 .directive('repeatAnim', repeatAnim)
 .directive('simpleSearch', simpleSearch)
 .directive('whenscrolled', whenscrolled)

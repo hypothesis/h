@@ -4,15 +4,24 @@
     <div class="ng-cloak topbar"
          ng-class="frame.visible && 'shown'"
          ng-mouseenter="showViewSort(true, true)">
-      <div class="inner" ng-switch="!!session.persona">
+      <div class="inner" ng-switch="!!persona">
         <a class="pull-right" href=""
-           ng-click="sheet.show= true"
-           ng-switch-when="false"
-           ng-hide="sheet.show">Sign in</a>
-        <div class="pull-right user-picker"
-             ng-switch-default
-             data-user-picker-model="session.persona"
-             data-user-picker-options="session.personas">
+           ng-click="id.request()"
+           ng-switch-when="false">Sign in</a>
+        <div class="dropdown pull-right user-picker" ng-switch-default>
+          <span role="button"
+                class="dropdown-toggle"
+                data-toggle="dropdown">{{persona|persona}}<!--
+            --><span class="provider">/{{persona|persona:'provider'}}</span><!--
+            --><i class="icon-triangle"></i></span>
+          <ul class="dropdown-menu pull-right" role="menu">
+            <li><a href="http://hypothes.is/contact/"
+                   target="_blank">Feedback</a></li>
+            <li><a href="/docs/help" target="_blank">Help</a></li>
+            <li><a href="/stream?user={{persona|persona}}"
+                   target="_blank">My Annotations</a></li>
+            <li ng-click="id.logout()">Sign out</li>
+          </ul>
         </div>
 
         <!-- Searchbar -->
@@ -39,7 +48,7 @@
                 data-toggle="dropdown"
                 >{{viewState.view}}<i class="icon-triangle"></i></span>
           <ul class="dropdown-menu" role="menu">
-            <li ng-repeat="view in views">
+            <li ng-repeat="view in ['Screen', 'Document', 'Comments']">
               <a href="" ng-click="applyView(view)">{{view}}</a>
             </li>
           </ul>
@@ -51,7 +60,7 @@
                 data-toggle="dropdown"
                 >{{viewState.sort}}<i class="icon-triangle"></i></span>
           <ul class="dropdown-menu" role="menu">
-            <li ng-repeat="sort in sorts">
+            <li ng-repeat="sort in ['Newest', 'Oldest', 'Location']">
               <a href="" ng-click="applySort(sort)">{{sort}}</a>
             </li>
           </ul>
@@ -60,19 +69,12 @@
       <!-- / View Sort Controls -->
 
       <!-- Account and Authentication -->
-      <div class="content ng-cloak" ng-show="sheet.show">
-        <div class="auth sheet form-vertical tabbable"
-             data-tab-reveal="['forgot','activate']"
-             on-success="authSuccess"
-             on-timeout="authTimeout"
-             ng-form="form"
-             ng-model="sheet.tab">
-          <i class="close icon-cancel"
-             role="button"
-             title="Close"
-             ng-click="sheet.show = false"></i>
-          <metal:main use-macro="blocks['auth-tabs']" />
-        </div>
+      <div class="content ng-cloak sheet" ng-show="!!sheet">
+        <i class="close icon-cancel"
+            role="button"
+            title="Close"
+            ng-click="sheet = false"></i>
+        <metal:main use-macro="blocks['auth']" />
       </div>
       <!-- / Account and Authentication -->
 
@@ -85,6 +87,9 @@
     <script type="text/ng-template" id="annotation.html">
       <metal:main use-macro="load: h:templates/annotation.html" />
     </script>
+    <script type="text/ng-template" id="auth.html">
+      <metal:main use-macro="load: h:templates/auth.html" />
+    </script>
     <script type="text/ng-template" id="editor.html">
       <metal:main use-macro="load: h:templates/editor.html" />
     </script>
@@ -93,9 +98,6 @@
     </script>
     <script type="text/ng-template" id="privacy.html">
       <metal:main use-macro="load: h:templates/privacy.html" />
-    </script>
-    <script type="text/ng-template" id="userPicker.html">
-      <metal:main use-macro="load: h:templates/userPicker.html" />
     </script>
     <script type="text/ng-template" id="viewer.html">
       <metal:main use-macro="load: h:templates/viewer.html" />

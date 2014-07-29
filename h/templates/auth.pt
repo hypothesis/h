@@ -10,7 +10,7 @@
         </span>
       </div>
       <div class="auth">
-        <tal:block metal:use-macro="blocks.macros['auth']" />
+        <tal:block content="structure form" />
       </div>
     </div>
     <script type="text/javascript">

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pyramid.events import subscriber
 from pyramid.renderers import get_renderer
+from pyramid.security import forget, remember
 
 from h import events
 
@@ -44,18 +45,14 @@ def set_csrf_cookie(event):
 def login(event):
     request = event.request
     user = event.user
-    session = request.session
-
-    personas = session.setdefault('personas', [])
-
-    if user not in personas:
-        personas.append(user)
-        session.changed()
+    request.response.headerlist.extend(remember(request, user))
 
 
 @subscriber(events.LogoutEvent)
 def logout(event):
-    event.request.session.invalidate()
+    request = event.request
+    forget(request)
+    request.session.invalidate()
 
 
 def includeme(config):

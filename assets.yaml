@@ -268,17 +268,10 @@ icomoon_css:
 # Application
 app:
   contents:
-    - app_css
-    - app_js
-
-app_js:
-  output: scripts/hypothesis-app.js
-  contents:
     - jquery
     - angular
     - angular_animate
     - angular_bootstrap
-    - angular_resource
     - angular_route
     - angular_sanitize
     - gettext
@@ -300,6 +293,14 @@ app_js:
     - jquery_ui_js
     - tag_it
     - uuid
+    - auth_css
+    - auth_js
+    - app_css
+    - app_js
+
+app_js:
+  output: scripts/hypothesis-app.js
+  contents:
     - filters: uglifyjs
       contents:
         - filters: coffeescript
@@ -308,7 +309,6 @@ app_js:
           # Right now results in dependency problems
           contents:
             - scripts/app.coffee
-            - scripts/auth.coffee
             - scripts/controllers.coffee
             - scripts/flash.coffee
             - scripts/filters.coffee
@@ -316,7 +316,6 @@ app_js:
             - scripts/directives/status-button.coffee
             - scripts/app_directives.coffee
             - scripts/helpers.coffee
-            - scripts/session.coffee
             - scripts/services.coffee
             - scripts/socket.coffee
             - scripts/searchfilters.coffee
@@ -339,6 +338,27 @@ app_css:
           - h:static/styles/forms.scss
           - h:static/styles/spinner.scss
           - h:static/styles/simple-search.scss
+
+# Authentication
+auth:
+  contents:
+    - jquery
+    - angular
+    - angular_resource
+    - auth_css
+    - auth_js
+
+auth_css:
+
+auth_js:
+  output: scripts/hypothesis-auth.min.js
+  filters: uglifyjs
+  contents:
+    - output: scripts/hypothesis-auth.js
+      filters: coffeescript
+      contents:
+        - h:static/scripts/auth/*.coffee
+
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
 # the application. It sets up RPC channels for cross-domain communication

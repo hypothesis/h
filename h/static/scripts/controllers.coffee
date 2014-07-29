@@ -1,114 +1,128 @@
 imports = [
   'bootstrap'
+  'h.flash'
   'h.helpers'
+  'h.identity'
+  'h.services'
   'h.socket'
   'h.searchfilters'
 ]
 
 class App
-  scope:
-    frame:
-      visible: false
-    ongoingHighlightSwitch: false
-    search: {}
-    sheet: {}
-    sorts: [
-      'Newest'
-      'Oldest'
-      'Location'
-    ]
-    views: [
-      'Screen'
-      'Document'
-      'Comments'
-    ]
-
   this.$inject = [
     '$element', '$location', '$q', '$rootScope', '$route', '$scope', '$timeout',
-    'annotator', 'flash', 'session', 'socket', 'streamfilter', 'viewFilter'
+    'annotator', 'flash', 'identity', 'queryparser', 'socket',
+    'streamfilter', 'viewFilter'
   ]
   constructor: (
      $element,   $location,   $q,   $rootScope,   $route,   $scope,   $timeout
-     annotator,   flash,   session,   socket,   streamfilter,   viewFilter
+     annotator,   flash,   identity,   queryparser,   socket,
+     streamfilter,   viewFilter
   ) ->
     {plugins, host, providers} = annotator
 
-    _reset = =>
-      delete annotator.ongoing_edit
-      base = angular.copy @scope
-      angular.extend $scope, base,
-        frame: $scope.frame or @scope.frame
-        socialView: annotator.socialView
-        ongoingHighlightSwitch: false
-        search:
-          query: $location.search()['q']
-        session: session
+    # Verified user id.
+    # Undefined means we don't track the session, but the identity module will
+    # tell us the state of the session. A null value means that the session
+    # has been checked and it was found that there is no user logged in.
+    loggedInUser = undefined
 
-    _reset()
+    # Resolved once the API service has been discovered.
+    storeReady = $q.defer()
 
-    annotator.subscribe 'serviceDiscovery', (options) ->
-      annotator.options.Store ?= {}
-      angular.extend annotator.options.Store, options
+    configureIdentity = (persona) ->
+      # Store the argument as the claimed user id.
+      claimedUser = persona
 
-      session.$promise.then (data) ->
-        unless data.personas?.length
-          $scope.initUpdater()
-          $scope.reloadAnnotations()
+      # Convert it to the format used by persona.
+      if claimedUser then claimedUser = claimedUser.replace(/^acct:/, '')
 
-    $scope.$watch 'session.personas', (newValue, oldValue) =>
-      if newValue?.length
-        unless $scope.session.persona and $scope.session.persona in newValue
-          $scope.session.persona = newValue[0]
-      else
-        $scope.session.persona = null
+      if claimedUser is loggedInUser
+        if loggedInUser is undefined
+          # This is the first execution.
+          # Configure the identity callbacks and the initial user id claim.
+          identity.watch
+            loggedInUser: claimedUser
+            onlogin: (assertion) ->
+              onlogin(assertion)
+            onlogout: ->
+              onlogout()
+      else if annotator.discardDrafts()
+        if claimedUser
+          identity.request()
+        else
+          identity.logout()
 
-    $scope.$watch 'session.persona', (newValue, oldValue) =>
-      unless annotator.discardDrafts()
-        $scope.session.persona = oldValue
-        return
+    onlogin = (assertion) ->
+      # Delete any old Auth plugin.
+      delete plugins.Auth
 
+      # Configure the Auth plugin with the issued assertion as refresh token.
+      annotator.addPlugin 'Auth',
+        tokenUrl: "#{baseURI}api/token?assertion=#{assertion}"
+
+      # Set the user from the token.
+      plugins.Auth.withToken (token) ->
+        plugins.Permissions._setAuthFromToken(token)
+        loggedInUser = plugins.Permissions.user.replace /^acct:/, ''
+        reset()
+
+    onlogout = ->
       plugins.Auth?.element.removeData('annotator:headers')
       delete plugins.Auth
 
-      plugins.Permissions?.setUser(null)
+      plugins.Permissions.setUser(null)
+
       # XXX: Temporary workaround until Annotator v2.0 or v1.2.10
-      plugins.Permissions?.options.permissions =
+      plugins.Permissions.options.permissions =
         read: []
         update: []
         delete: []
         admin: []
 
-      if newValue?
-        annotator.addPlugin 'Auth', tokenUrl: "/api/token?persona=#{newValue}"
+      loggedInUser = null
+      reset()
 
-        plugins.Auth.withToken (token) =>
-          plugins.Permissions._setAuthFromToken token
+    reset = ->
+      # Do not rely on the identity service to invoke callbacks within an
+      # angular digest cycle.
+      $scope.$evalAsync ->
+        if annotator.ongoing_edit
+          annotator.clickAdder()
 
-          if annotator.ongoing_edit
-            $timeout ->
-              annotator.clickAdder()
-            , 1000
+        if $scope.ongoingHighlightSwitch
+          $scope.ongoingHighlightSwitch = false
+          annotator.setTool 'highlight'
+        else
+          annotator.setTool 'comment'
 
-          if $scope.ongoingHighlightSwitch
-            $scope.ongoingHighlightSwitch = false
-            annotator.setTool 'highlight'
-          else
-            $scope.reloadAnnotations()
-            $scope.initUpdater()
-      else if oldValue?
-        session.$logout =>
-          $scope.$broadcast 'reset'
+        # Convert the verified user id to the format used by the API.
+        persona = loggedInUser
+        if persona then persona = "acct:#{persona}"
 
-          if annotator.tool isnt 'comment'
-            annotator.setTool 'comment'
-          else
-            $scope.reloadAnnotations()
-            $scope.initUpdater()
+        # Ensure it is synchronized on the scope.
+        # Without this, failed identity changes will remain on the scope.
+        $scope.persona = persona
+
+        # Reload services
+        storeReady.promise.then ->
+          initStore()
+          initUpdater()
+
+    annotator.subscribe 'serviceDiscovery', (options) ->
+      annotator.options.Store ?= {}
+      angular.extend annotator.options.Store, options
+      storeReady.resolve()
+
+    $scope.$watch 'persona', configureIdentity
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
-      console.log "Social View changed to '" + newValue + "'. Reloading annotations."
-      $scope.reloadAnnotations()
+
+      if $scope.persona
+        initStore()
+      else if newValue is 'single-player'
+        identity.request()
 
     $scope.$watch 'frame.visible', (newValue, oldValue) ->
       routeName = $location.path().replace /^\//, ''
@@ -120,20 +134,6 @@ class App
         annotator.host.notify method: 'hideFrame', params: routeName
         for p in annotator.providers
           p.channel.notify method: 'setActiveHighlights'
-
-    $scope.$watch 'sheet.show', (visible) ->
-      $scope.sheet.tab = if visible then 'login' else null
-
-    $scope.$watch 'sheet.tab', (tab) ->
-      $timeout ->
-        $element
-        .find('form')
-        .filter(-> this.name is tab)
-        .find('input')
-        .filter(-> this.type isnt 'hidden')
-        .first()
-        .focus()
-      , 10
 
     $scope.$watch 'store.entities', (entities, oldEntities) ->
       return if entities is oldEntities
@@ -232,15 +232,7 @@ class App
       $scope.updater.then (sock) ->
         sock.send(JSON.stringify(sockmsg))
 
-    $scope.search.clear = ->
-      $location.search('q', null)
-
-    $scope.search.update = (query) ->
-      unless angular.equals $location.search()['q'], query
-        if annotator.discardDrafts()
-          $location.search('q', query or null)
-
-    $scope.reloadAnnotations = ->
+    initStore = ->
       Store = plugins.Store
 
       delete plugins.Store
@@ -323,15 +315,29 @@ class App
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup
 
-    $scope.authSuccess = ->
-      $scope.sheet.show = false
-
     $scope.authTimeout = ->
+      delete annotator.ongoing_edit
+      $scope.ongoingHighlightSwitch = false
       flash 'info',
         'For your security, the forms have been reset due to inactivity.'
-      _reset()
 
-    $scope.initUpdater = (failureCount=0) ->
+    $scope.frame = visible: false
+    $scope.id = identity
+
+    $scope.model = persona: undefined
+
+    $scope.search =
+      clear: ->
+        $location.search('q', null)
+
+      update: (query) ->
+        unless angular.equals $location.search()['q'], query
+          if annotator.discardDrafts()
+            $location.search('q', query or null)
+
+    $scope.socialView = annotator.socialView
+
+    initUpdater = (failureCount=0) ->
       _dfdSock = $q.defer()
       _sock = socket()
 
@@ -350,7 +356,7 @@ class App
         failureCount = Math.min(10, ++failureCount)
         slots = Math.random() * (Math.pow(2, failureCount) - 1)
         $timeout ->
-          _retry = $scope.initUpdater(failureCount)
+          _retry = initUpdater(failureCount)
           _dfdSock?.resolve(_retry)
         , slots * 500
 
@@ -363,7 +369,7 @@ class App
 
         unless data instanceof Array then data = [data]
 
-        p = $scope.session.persona
+        p = $scope.persona
         user = if p? then "acct:" + p.username + "@" + p.provider else ''
         unless data instanceof Array then data = [data]
 

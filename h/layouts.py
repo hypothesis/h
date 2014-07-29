@@ -49,7 +49,7 @@ class AnnotationLayout(BaseLayout):
 class AppLayout(BaseLayout):
     app = 'h'
     controller = 'AppController'
-    requirements = (('app', None), ('topbar', None))
+    requirements = (('app', None), ('auth', None), ('topbar', None))
 
 
 def includeme(config):

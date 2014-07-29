@@ -2,13 +2,14 @@
 import functools
 import json
 import logging
-import os
 import re
 
 from annotator import auth, es, store
 import elasticsearch
 import flask
+from oauthlib.oauth2 import BearerToken
 from pyramid import security
+from pyramid.authentication import RemoteUserAuthenticationPolicy
 from pyramid.httpexceptions import exception_response
 from pyramid.request import Request
 from pyramid.settings import asbool
@@ -16,8 +17,7 @@ from pyramid.threadlocal import get_current_request
 from pyramid.wsgi import wsgiapp2
 
 from h import events, interfaces, models
-from h.auth.local.oauth import LocalAuthenticationPolicy
-from h.auth.local.views import token as access_token
+
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -27,20 +27,39 @@ def authorize(request, annotation, action, user=None):
     allowed = security.principals_allowed_by_permission(annotation, action)
 
     if user is None:
-        principals = request.session.get('personas', [])
+        principals = request.effective_principals
     else:
-        principals = [user.id]
-
-    if len(principals):
-        principals.append(security.Authenticated)
-
-    principals.append(security.Everyone)
+        principals = [security.Everyone, security.Authenticated, user.id]
 
     return set(allowed) & set(principals) != set()
 
 
+def get_consumer(request):
+    registry = request.registry
+    settings = registry.settings
+
+    key = request.params.get('client_id', settings['api.key'])
+    secret = request.params.get('client_secret', settings.get('api.secret'))
+
+    Consumer = registry.getUtility(interfaces.IConsumerClass)
+
+    if key == settings['api.key'] and secret is not None:
+        consumer = Consumer(key=key, secret=secret)
+    else:
+        consumer = Consumer.get_by_key(request, key)
+
+    return consumer
+
+
 def token(request):
-    return json.loads(access_token(request).body).get('access_token', '')
+    userid = request.authenticated_userid
+    if userid is not None:
+        credentials = dict(userId=userid)
+    else:
+        credentials = None
+
+    token_response = request.create_token_response(credentials=credentials)
+    return token_response.json_body['access_token']
 
 
 def wrap_annotation(request, annotation):
@@ -73,6 +92,19 @@ class Authenticator(object):
             return auth.User(userid, consumer, False)
 
         return None
+
+
+class OAuthAuthenticationPolicy(RemoteUserAuthenticationPolicy):
+    def unauthenticated_userid(self, request):
+        token = request.environ.get(self.environ_key)
+
+        if token is None:
+            return None
+
+        if request.verify_request():
+            return getattr(request, 'user', None)
+        else:
+            return None
 
 
 class Store(object):
@@ -116,11 +148,53 @@ class Store(object):
 
     def _invoke_subrequest(self, subreq):
         request = self.request
+        subreq.headers = request.headers
         subreq.session = request.session
         result = request.invoke_subrequest(subreq)
         if result.status_int > 400:
             raise exception_response(result.status_int)
         return result
+
+
+class Token(BearerToken):
+    def create_token(self, request, refresh_token=False):
+        client = request.client
+        message = dict(consumerKey=client.client_id, ttl=client.ttl)
+        message.update(request.extra_credentials or {})
+        token = {
+            'access_token': auth.encode_token(message, client.secret),
+            'expires_in': client.ttl,
+            'token_type': 'http://annotateit.org/api/token',
+        }
+        return token
+
+    def validate_request(self, request):
+        token = request.headers.get('X-Annotator-Auth-Token')
+        if token is None:
+            return False
+
+        client = get_consumer(request)
+
+        if client is None:
+            return False
+
+        try:
+            token = auth.decode_token(token, client.secret, client.ttl)
+        except auth.TokenInvalid:
+            return False
+
+        if token['consumerKey'] != client.client_id:
+            return False
+
+        request.user = token.get('userId')
+
+        return True
+
+    def estimate_type(self, request):
+        if request.headers.get('X-Annotator-Auth-Token') is not None:
+            return 9
+        else:
+            return 0
 
 
 def anonymize_deletes(annotation):
@@ -239,10 +313,12 @@ def includeme(config):
     registry = config.registry
     settings = registry.settings
 
+    config.include('pyramid_oauthlib')
+    config.add_token_type(Token)
+
     # Configure the token policy
-    authn_debug = settings.get('pyramid.debug_authorization') \
-        or settings.get('debug_authorization')
-    authn_policy = LocalAuthenticationPolicy(
+    authn_debug = config.registry.settings.get('debug_authorization')
+    authn_policy = OAuthAuthenticationPolicy(
         environ_key='HTTP_X_ANNOTATOR_AUTH_TOKEN',
         debug=authn_debug,
     )

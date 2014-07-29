@@ -5,18 +5,17 @@ imports = [
   'h.filters'
   'h.flash'
   'h.helpers'
-  'h.session'
   'h.searchfilters'
 ]
 
 class StreamSearch
   this.inject = [
     '$scope', '$rootScope',
-    'queryparser', 'session', 'searchfilter', 'streamfilter'
+    'queryparser', 'searchfilter', 'streamfilter'
   ]
   constructor: (
      $scope,   $rootScope,
-     queryparser,   session,   searchfilter,   streamfilter
+     queryparser,   searchfilter,   streamfilter
   ) ->
     # Initialize the base filter
     streamfilter

@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from urllib import unquote
-
 import colander
 import deform
 import horus.views
@@ -9,7 +7,7 @@ from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 
 from h import events, views
-from h.auth.local import forms, models, oauth, schemas
+from h.auth.local import forms, models, schemas
 from h.models import _
 
 
@@ -41,6 +39,14 @@ def ajax_form(request, result):
             result['reason'] = reasons[0]
 
     result['flash'] = flash
+
+    # We do this here rather than in a subscriber because horus will fire
+    # events before calling :func:`pyramid.security.remember`. We want to
+    # correct the state of things after that.
+    if hasattr(request.user, 'id'):
+        user = 'acct:%s@%s' % (request.user.username, request.server_name)
+        event = events.LoginEvent(request, user)
+        request.registry.notify(event)
 
     return result
 
@@ -167,44 +173,6 @@ class AsyncRegisterController(RegisterController):
         request.registry.notify(event)
 
         return {}
-
-
-@view_config(route_name='auth.local.authorize')
-def authorize(request):
-    raise NotImplemented()
-
-
-@view_config(route_name='auth.local.token')
-def token(request):
-    validator = oauth.RequestValidator(request)
-    token_generator = oauth.generate_token
-    server = oauth.BackendApplicationServer(validator, token_generator)
-
-    # TODO: determine credentials from grant instead of query.
-    # We will need to support other grant types for this.
-    persona = unquote(request.params.get('persona', ''))
-    personas = request.session.get('personas', [])
-
-    try:
-        credentials = dict(userId=next(p for p in personas if p == persona))
-    except StopIteration:
-        credentials = None
-
-    headers, body, status = server.create_token_response(
-        request.url,
-        request.method,
-        request.body,
-        request.headers,
-        credentials,
-    )
-
-    request.response.headers.update(headers)
-    request.response.status_int = status
-    request.response.content_type = 'application/json'
-    request.response.charset = 'UTF-8'
-    request.response.body = body
-
-    return request.response
 
 
 def includeme(config):
