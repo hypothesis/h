@@ -675,6 +675,7 @@ class DraftProvider
 
 
 class ViewFilter
+  # This object is the filter matching configuration used by the filter() function
   checkers:
     quote:
       autofalse: (annotation) -> return annotation.references?
@@ -713,9 +714,8 @@ class ViewFilter
 
 
 
-  this.$inject = ['$filter', 'searchfilter']
-  constructor: ($filter, searchfilter) ->
-    @user_filter = $filter('persona')
+  this.$inject = ['searchfilter']
+  constructor: (searchfilter) ->
     @searchfilter = searchfilter
 
   _matches: (filter, value, match) ->
@@ -767,21 +767,26 @@ class ViewFilter
 
 
   # Filters a set of annotations, according to a given query.
+  # Inputs:
+  #   annotations is the input list of annotations (array)
+  #   query is the query string. It will be converted to faceted filter by the SearchFilter
   #
-  # annotations is the input list of annotations (array)
-  # ToDo: update me I'm not up to date!
-  # query is the query; it's a map. Supported key values are:
-  #   user: username to search for
-  #   text: text to search for in the body (all the words must be present)
-  #   quote: text to search for in the quote (exact phrase must be present)
-  #   tags: list of tags to search for. (all must be present)
-  #   time: maximum age of annotation. Accepted values:
-  #     '5 min', '30 min', '1 hour', '12 hours',
-  #     '1 day', '1 week', '1 month', '1 year'
+  # It'll handle the annotation matching by the returned facet configuration (operator, lowercase, etc.)
+  # and the here configured @checkers. This @checkers object contains instructions how to verify the match.
+  # Structure:
+  # [facet_name]:
+  #   autofalse: a function for a preliminary false match result
+  #              (i.e. if the annotation does not even have a 'text' field, do not try to match the 'text' facet)
+  #   value: a function to extract to facet value for the annotation.
+  #         (i.e. for the quote facet it is the annotation.target.quote from the right target from the annotations)
+  #   match: a function to check if the extracted value matches with the facet value
+  #         (i.e. for the text facet it has to check that if the facet is a substring of the annotation.text or not.
   #
-  # All search is case insensitive.
-  #
-  # Returns the list of matching annotation IDs.
+  # Returns a two-element list:
+  # [
+  #   matched annotation IDs list,
+  #   the faceted filters
+  # ]
   filter: (annotations, query) =>
     filters = @searchfilter.generateFacetedFilter query.query
     results = []

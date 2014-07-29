@@ -1,10 +1,13 @@
-#ToDo: write me
 # This class will parse the search filter and produce a faceted search filter object
+# It expects a search query string where the search term are separated by space character
+# and collects them into the given term arrays
 class SearchFilter
 
-  # This function will slice the searchtext
+  # This function will slice the search-text input
   # Slice character: space,
   # but an expression between quotes (' or ") is considered one
+  # I.e from the string: "text user:john 'to be or not to be' it will produce:
+  # ["text", "user:john", "to be or not to be"]
   _tokenize: (searchtext) ->
     return [] unless searchtext
     tokens = searchtext.match /(?:[^\s"']+|"[^"]*"|'[^']*')+/g
@@ -18,6 +21,21 @@ class SearchFilter
 
     tokens
 
+  # This function will generate the facets from the search-text input
+  # It'll first tokenize it and then sorts them into facet lists
+  # The output will be a dict with the following structure:
+  # An object with facet_names as keys.
+  # A value for a key:
+  # [facet_name]:
+  #   [operator]: 'and'|'or'|'min' (for the elements of the facet terms list)
+  #   [lowercase]: true|false
+  #   [terms]: an array for the matched terms for this facet
+  # The facet selection is done by analyzing each token.
+  # It generally expects a <facet_name>:<facet_term> structure for a token
+  # Where the facet names are: 'quote', 'result', 'since', 'tag', 'text', 'uri', 'user
+  # Anything that didn't match go to the 'any' facet
+  # For the 'since' facet the the time string is scanned and is converted to seconds
+  # So i.e the 'since:7min' token will be converted to 7*60 = 420 for the since facet value
   generateFacetedFilter: (searchtext) ->
     any = []
     quote = []
@@ -82,7 +100,7 @@ class SearchFilter
       lowercase: true
     quote:
       terms: quote
-      operator: 'lower'
+      operator: 'and'
       lowercase: true
     result:
       terms: result
@@ -90,7 +108,7 @@ class SearchFilter
       lowercase: false
     since:
       terms: since
-      operator: 'min'
+      operator: 'and'
       lowercase: false
     tag:
       terms: tag
