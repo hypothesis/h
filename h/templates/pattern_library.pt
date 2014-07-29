@@ -424,8 +424,8 @@
         </div>
         <div class="pattern-library-example-content">
           <form class="simple-search-form">
+            <input class="simple-search-input" type="text" name="searchText" placeholder="Search…" />
             <i class="simple-search-icon icon-search"></i>
-            <input class="simple-search-input" type="text" name="searchText" />
             <button class="simple-search-clear" type="reset">
               <i class="icon-x"></i>
             </button>
@@ -438,8 +438,8 @@
         </div>
         <div class="pattern-library-example-content">
           <form class="simple-search-form simple-search-inactive" name="searchBox">
+            <input class="simple-search-input" type="text" name="searchText" placeholder="Search…" />
             <i class="simple-search-icon icon-search"></i>
-            <input class="simple-search-input" type="text" name="searchText" />
           </form>
         </div>
       </div>
