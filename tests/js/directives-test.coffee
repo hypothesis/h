@@ -3,6 +3,7 @@ assert = chai.assert
 describe 'h.directives', ->
   $scope = null
   $compile = null
+  $injector = null
   fakeWindow = null
 
   beforeEach module ($provide, $filterProvider) ->
@@ -21,11 +22,13 @@ describe 'h.directives', ->
 
     return
 
+  beforeEach module('h.templates')
   beforeEach module('h.directives')
 
-  beforeEach inject (_$compile_, _$rootScope_) ->
+  beforeEach inject (_$compile_, _$rootScope_, _$injector_) ->
     $compile = _$compile_
     $scope = _$rootScope_.$new()
+    $injector = _$injector_
 
   describe '.formValidate', ->
     $element = null

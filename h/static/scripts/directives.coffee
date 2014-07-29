@@ -245,6 +245,15 @@ thread = ['$rootScope', '$window', ($rootScope, $window) ->
 ]
 
 
+# TODO: Move this behaviour to a route.
+showAccount = ->
+  restrict: 'A'
+  link: (scope, elem, attr) ->
+    elem.on 'click', (event) ->
+      event.preventDefault()
+      scope.$emit('nav:account')
+
+
 repeatAnim = ->
   restrict: 'A'
   scope:
@@ -430,38 +439,6 @@ confirmPasswordCheck = ['$resource', ($resource)->
   require: 'ngModel'
 ]
 
-panels = ->
-  # This panels directive houses panels in the sidebar (such as settings, account_management, etc). Each panel is it's own directive.
-  link: (scope, elem, attr, ctrl) ->
-    scope.togglePanels = (panel)->
-      scope.activePanel.active = !scope.activePanel.active
-      scope.activePanel = panel
-      scope.activePanel.active = !scope.activePanel.active
-
-  # Ujvari, you may want to move this to the controllers.coffee file.
-  controller: ($scope, $rootScope, $filter, $element) ->
-    $rootScope.showPanels = false
-
-    # Toggles Panels shown or hidden.
-    $rootScope.toggleShowPanels = ->
-      $rootScope.showPanels = !$rootScope.showPanels
-      $rootScope.viewState.showControls = false
-
-    # This is the list of panels that will be shown. In the panels.html template
-    # there are elements with ng-show on them, for example:
-    #     <div ng-show="activePanel.name == 'Notifications'">
-    #     My Html for a new panel.
-    #     </div>
-    $scope.panelList = [
-      {name:"Account", active: true}
-      # {name:"Profile", active: false}
-      # {name:"Settings", active: false}
-    ]
-    $scope.activePanel = $scope.panelList[0]
-
-  restrict: 'C'
-  templateUrl: 'panels.html'
-
 accountManagement = ['$filter', 'flash', 'profile', ($filter, flash, profile) ->
   link: (scope, elem, attr, ctrl) ->
     scope.emailCheck = ->
@@ -556,7 +533,6 @@ settings = ->
 
 
 angular.module('h.directives', ['ngSanitize'])
-<<<<<<< HEAD
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
@@ -566,9 +542,9 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('tags', tags)
 .directive('thread', thread)
 .directive('username', username)
+.directive('showAccount', showAccount)
 .directive('repeatAnim', repeatAnim)
 .directive('whenscrolled', whenscrolled)
-.directive('panels', panels)
 .directive('match', match)
 .directive('confirmPasswordCheck', confirmPasswordCheck)
 .directive('accountManagement', accountManagement)
