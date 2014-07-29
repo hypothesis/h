@@ -3,6 +3,7 @@ assert = chai.assert
 describe 'h.directives', ->
   $scope = null
   $compile = null
+  $injector = null
   fakeWindow = null
 
   beforeEach module ($provide, $filterProvider) ->
@@ -21,11 +22,13 @@ describe 'h.directives', ->
 
     return
 
+  beforeEach module('h.templates')
   beforeEach module('h.directives')
 
-  beforeEach inject (_$compile_, _$rootScope_) ->
+  beforeEach inject (_$compile_, _$rootScope_, _$injector_) ->
     $compile = _$compile_
     $scope = _$rootScope_.$new()
+    $injector = _$injector_
 
   describe '.formValidate', ->
     $element = null
@@ -132,3 +135,18 @@ describe 'h.directives', ->
       it 'keeps the url in sync', ->
         $element.find('.user').click()
         sinon.assert.calledWith(fakeWindow.open, '/u/jim@hypothesis')
+
+  describe '.userPicker', ->
+    $element = null
+
+    beforeEach ->
+      $scope.model = 'acct:bill@localhost'
+      $scope.options = []
+
+      $element = $compile('<user-picker data-user-picker-model="model" data-user-picker-options="options"></user-picker>')($scope)
+      $scope.$digest()
+
+    it 'triggers the "nav:account" event when the Account item is clicked', (done) ->
+      $scope.$on 'nav:account', ->
+        done()
+      $element.find('li', -> this.text == 'Account').click()
