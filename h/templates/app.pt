@@ -92,8 +92,7 @@
             title="Close"
             role="button"
             ng-click="accountManagement.show = false"></span>
-        <div class="tabbable">
-          <metal:main use-macro="load: account_management.html" />
+        <div class="tabbable account-management">
         </div>
       </div>
       <!-- / Panels Nav -->
@@ -135,6 +134,7 @@
       <metal:main use-macro="load: settings.html" />
     </script>
     <script type="text/ng-template" id="account_management.html">
+      <metal:main use-macro="load: account_management.html" />
     </script>
     <script type="text/ng-template" id="profile.html">
       <metal:main use-macro="load: profile.html" />
