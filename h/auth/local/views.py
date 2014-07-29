@@ -170,7 +170,7 @@ class AsyncRegisterController(RegisterController):
         return {}
 
 
-@view_defaults(accept='text/html', renderer='h:templates/accountmanagement.html')
+@view_defaults(accept='text/html', renderer='h:templates/account_management.html')
 @view_config(attr='edit_profile', route_name='edit_profile')
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):

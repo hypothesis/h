@@ -473,7 +473,7 @@ confirmPasswordCheck = ['$resource', ($resource)->
 ]
 
 panels = ->
-  # This panels directive houses panels in the sidebar (such as settings, accountmanagement, etc). Each panel is it's own directive.
+  # This panels directive houses panels in the sidebar (such as settings, account_management, etc). Each panel is it's own directive.
   link: (scope, elem, attr, ctrl) ->
     scope.togglePanels = (panel)->
       scope.activePanel.active = !scope.activePanel.active
@@ -562,7 +562,7 @@ accountManagement = ['$filter', 'flash', 'profile', ($filter, flash, profile) ->
     # the request was successful.
 
   restrict: 'C'
-  templateUrl: 'accountmanagement.html'
+  templateUrl: 'account_management.html'
 ]
 
 accountProfile = ->
