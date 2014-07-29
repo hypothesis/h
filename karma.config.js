@@ -60,7 +60,8 @@ module.exports = function(config) {
       'h/static/scripts/hypothesis.js',
       'h/static/scripts/vendor/sinon.js',
       'h/static/scripts/vendor/chai.js',
-      'tests/js/**/*-test.coffee'
+      'h/templates/*.{html,pt}',
+      'tests/js/**/*-test.coffee',
     ],
 
 
@@ -72,7 +73,8 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      '**/*.coffee': ['coffee']
+      '**/*.coffee': ['coffee'],
+      'h/templates/*.{html,pt}': ['ng-html2js'],
     },
 
 
@@ -106,6 +108,11 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false
+    singleRun: false,
+
+    ngHtml2JsPreprocessor: {
+      stripPrefix: 'h/templates/',
+      moduleName: 'h.templates',
+    }
   });
 };
