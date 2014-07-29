@@ -1,101 +1,103 @@
-<form class="account-form form" name="edit_profile" ng-show="activePanel.name == 'Account'" ng-submit="submit(edit_profile)" novalidate form-validate data-form-validate-error-class="form-field-error">
-  <h2 class="form-heading"><span>Change Your Email</span></h2>
+<div class="tab-pane" title="Account">
+  <form class="account-form form" name="edit_profile" ng-submit="submit(edit_profile)" novalidate form-validate data-form-validate-error-class="form-field-error">
+    <h2 class="form-heading"><span>Change Your Email</span></h2>
 
-  <div class="form-field" data-target="email">
-    <label class="form-label" for="field-current-email">New Email: <em class="form-hint">User's Email to go here.</em></label>
-    <input id="field-current-email" class="form-input" type="email" name="email" ng-model="model.email" required autocapitalize="false" />
+    <div class="form-field" data-target="email">
+      <label class="form-label" for="field-current-email">New Email: <em class="form-hint">User's Email to go here.</em></label>
+      <input id="field-current-email" class="form-input" type="email" name="email" ng-model="model.email" required autocapitalize="false" />
 
-    <ul class="form-error-list">
-      <li class="form-error" ng-show="edit_profile.email.$error.email">Is this an email address?</li>
-      <li class="form-error" ng-show="edit_profile.email.$error.required">Please choose a new email address.</li>
-    </ul>
-  </div>
-
-  <div class="form-field" data-target="confirmemail">
-    <label class="form-label" for="field-confirm-email">Confirm Email:</label>
-    <input id="field-confirm-email" class="form-input" type="email" name="confirmemail" ng-model="model.confirmemail" required autocapitalize="false">
-
-    <ul class="form-error-list">
-      <li class="form-error" ng-show="edit_profile.confirmemail.$error.match">New and confirmation emails do not match.</li>
-      <li class="form-error" ng-show="edit_profile.confirmemail.$error.email">Is this an email address?</li>
-      <li class="form-error" ng-show="edit_profile.confirmemail.$error.required">Please confirm your new email address.</li>
-    </ul>
-  </div>
-
-  <div class="form-field" data-target="password">
-    <label class="form-label" for="field-change-email-password">Password:</label>
-    <input id="field-change-email-password" class="form-input" type="password" name="password" ng-model="model.password" required autocapitalize="false" >
-
-    <ul class="form-error-list">
-      <li class="form-error" ng-show="edit_profile.password.$error.email">Your password does not match the one we have on record.</li>
-      <li class="form-error" ng-show="edit_profile.password.$error.required">Please enter your password to confirm this change.</li>
-    </ul>
-  </div>
-
-  <div class="form-actions">
-    <div class="form-actions-buttons">
-      <button class="btn" type="submit">Update</button>
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="edit_profile.email.$error.email">Is this an email address?</li>
+        <li class="form-error" ng-show="edit_profile.email.$error.required">Please choose a new email address.</li>
+      </ul>
     </div>
-  </div>
-</form>
 
-<form class="account-form form" name="changepassword" ng-show="activePanel.name == 'Account' && !confirmDelete" ng-submit="submit(edit_profile)" novalidate form-validate data-form-validate-error-class="form-field-error">
-  <h2 class="form-heading"><span>Change Your Password</span></h2>
+    <div class="form-field" data-target="confirmemail">
+      <label class="form-label" for="field-confirm-email">Confirm Email:</label>
+      <input id="field-confirm-email" class="form-input" type="email" name="confirmemail" ng-model="model.confirmemail" required autocapitalize="false">
 
-  <div class="form-field" data-target="oldpassword">
-    <label class="form-label" for="field-old-password">Current Password:</label>
-    <input id="field-old-password" class="form-input" type="password" name="oldpassword" required ng-model="model.oldpassword" />
-
-    <ul class="form-error-list">
-      <li class="form-error" ng-show="changepassword.oldpassword.$error.required">Please enter your current password.</li>
-      <li class="form-error" ng-show="changepassword.oldpassword.$error.minlength">Your password does not match the one we have on record.</li>
-    </ul>
-  </div>
-
-  <div class="form-field" data-target="newpassword">
-    <label class="form-label" for="field-new-password">New Password:</label>
-    <input id="field-new-password" class="form-input" type="password" name="newpassword" required ng-model="model.newpassword" />
-
-    <ul class="form-error-list">
-      <li class="form-error" ng-show="changepassword.newpassword.$error.required">Please enter a password.</li>
-      <li class="form-error" ng-show="changepassword.newpassword.$error.minlength">Passwords must be at least 2 characters.</li>
-    </ul>
-  </div>
-
-  <div class="form-field" data-target="confirmpassword">
-    <label class="form-label" for="field-confirm-password">Confirm Password:</label>
-    <input id="field-confirm-password" class="form-input" type="password" name="confirmpassword" ng-model="model.confirmpassword" match="confirmpassword" required>
-
-    <ul class="form-error-list">
-      <li class="form-error" ng-show="changepassword.confirmpassword.$error.required">Please confirm your new password.</li>
-      <li class="form-error" ng-show="changepassword.confirmpassword.$error.minlength">Passwords must be at least 2 characters.</li>
-      <li class="form-error" ng-show="changepassword.confirmpassword.$error.match">Passwords do not match.</li>
-    </ul>
-  </div>
-
-  <div class="form-actions">
-    <div class="form-actions-buttons">
-      <button class="btn" type="submit">Update</button>
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="edit_profile.confirmemail.$error.match">New and confirmation emails do not match.</li>
+        <li class="form-error" ng-show="edit_profile.confirmemail.$error.email">Is this an email address?</li>
+        <li class="form-error" ng-show="edit_profile.confirmemail.$error.required">Please confirm your new email address.</li>
+      </ul>
     </div>
-  </div>
-</form>
 
-<form class="account-form form" name="deleteaccount" ng-show="activePanel.name == 'Account'" ng-submit="deleteAccount()" novalidate form-validate data-form-validate-error-class="form-field-error">
-  <h2 class="form-heading"><span>Delete Account</span></h2>
-  <p class="form-description">This will delete your user account. If you would like to delete your annotations, do so before continuing or email us at <a href="mailto:support@hypothes.is">support@hypothes.is</a>.</p>
+    <div class="form-field" data-target="password">
+      <label class="form-label" for="field-change-email-password">Password:</label>
+      <input id="field-change-email-password" class="form-input" type="password" name="password" ng-model="model.password" required autocapitalize="false" >
 
-  <div class="form-field" data-target="confirmpassword">
-    <label class="form-label" for="confirm-account-deletion">Confirm Password:</label>
-    <input id="confirm-account-deletion" class="form-input" type="password" name="confirmpassword" ng-model="model.confirmpassword" match="confirmpassword" required>
-
-    <ul class="form-error-list">
-      <li class="form-error" ng-show="deleteaccount.deleteaccountpassword.$error.minlength">Your password does not match the one we have on record.</li>
-    </ul>
-  </div>
-
-  <div class="form-actions">
-    <div class="form-actions-buttons">
-      <button class="btn btn-danger" type="submit">Delete Account</button>
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="edit_profile.password.$error.email">Your password does not match the one we have on record.</li>
+        <li class="form-error" ng-show="edit_profile.password.$error.required">Please enter your password to confirm this change.</li>
+      </ul>
     </div>
-  </div>
-</form>
+
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn" type="submit">Update</button>
+      </div>
+    </div>
+  </form>
+
+  <form class="account-form form" name="changepassword" ng-show="!confirmDelete" ng-submit="submit(edit_profile)" novalidate form-validate data-form-validate-error-class="form-field-error">
+    <h2 class="form-heading"><span>Change Your Password</span></h2>
+
+    <div class="form-field" data-target="oldpassword">
+      <label class="form-label" for="field-old-password">Current Password:</label>
+      <input id="field-old-password" class="form-input" type="password" name="oldpassword" required ng-model="model.oldpassword" />
+
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="changepassword.oldpassword.$error.required">Please enter your current password.</li>
+        <li class="form-error" ng-show="changepassword.oldpassword.$error.minlength">Your password does not match the one we have on record.</li>
+      </ul>
+    </div>
+
+    <div class="form-field" data-target="newpassword">
+      <label class="form-label" for="field-new-password">New Password:</label>
+      <input id="field-new-password" class="form-input" type="password" name="newpassword" required ng-model="model.newpassword" />
+
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="changepassword.newpassword.$error.required">Please enter a password.</li>
+        <li class="form-error" ng-show="changepassword.newpassword.$error.minlength">Passwords must be at least 2 characters.</li>
+      </ul>
+    </div>
+
+    <div class="form-field" data-target="confirmpassword">
+      <label class="form-label" for="field-confirm-password">Confirm Password:</label>
+      <input id="field-confirm-password" class="form-input" type="password" name="confirmpassword" ng-model="model.confirmpassword" match="confirmpassword" required>
+
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="changepassword.confirmpassword.$error.required">Please confirm your new password.</li>
+        <li class="form-error" ng-show="changepassword.confirmpassword.$error.minlength">Passwords must be at least 2 characters.</li>
+        <li class="form-error" ng-show="changepassword.confirmpassword.$error.match">Passwords do not match.</li>
+      </ul>
+    </div>
+
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn" type="submit">Update</button>
+      </div>
+    </div>
+  </form>
+
+  <form class="account-form form" name="deleteaccount" ng-submit="deleteAccount()" novalidate form-validate data-form-validate-error-class="form-field-error">
+    <h2 class="form-heading"><span>Delete Account</span></h2>
+    <p class="form-description">This will delete your user account. If you would like to delete your annotations, do so before continuing or email us at <a href="mailto:support@hypothes.is">support@hypothes.is</a>.</p>
+
+    <div class="form-field" data-target="confirmpassword">
+      <label class="form-label" for="confirm-account-deletion">Confirm Password:</label>
+      <input id="confirm-account-deletion" class="form-input" type="password" name="confirmpassword" ng-model="model.confirmpassword" match="confirmpassword" required>
+
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="deleteaccount.deleteaccountpassword.$error.minlength">Your password does not match the one we have on record.</li>
+      </ul>
+    </div>
+
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn btn-danger" type="submit">Delete Account</button>
+      </div>
+    </div>
+  </form>
+</div>

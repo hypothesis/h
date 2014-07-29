@@ -87,17 +87,14 @@
       <!-- / Account and Authentication -->
 
       <!-- Panels Nav-->
-      <div class="sheet" ng-show="showPanels">
+      <div class="ng-cloak sheet" ng-show="accountManagement.show">
         <span href="#" class="close icon-cancel"
             title="Close"
             role="button"
-            ng-click="toggleShowPanels()"></span>
-        <ul class="nav nav-tabs">
-          <li ng-class="panel.active && 'active'" ng-repeat="panel in panelList" ng-click="togglePanels(panel)">
-            <a href="#">{{ panel.name }}</a>
-          </li>
-        </ul>
-        <div class="tab-content panels" data-settings-panel-model="auth.persona"></div>
+            ng-click="accountManagement.show = false"></span>
+        <div class="tabbable">
+          <metal:main use-macro="load: account_management.html" />
+        </div>
       </div>
       <!-- / Panels Nav -->
 
@@ -138,7 +135,6 @@
       <metal:main use-macro="load: settings.html" />
     </script>
     <script type="text/ng-template" id="account_management.html">
-      <metal:main use-macro="load: account_management.html" />
     </script>
     <script type="text/ng-template" id="profile.html">
       <metal:main use-macro="load: profile.html" />
