@@ -14,7 +14,7 @@ class MockSession
 
 describe 'h.auth', ->
   beforeEach module('h.auth')
-  beforeEach module('auth.html')
+  beforeEach module('h.templates')
 
   beforeEach module ($provide) ->
     $provide.value '$timeout', sinon.spy()

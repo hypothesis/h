@@ -75,7 +75,7 @@ module.exports = function(config) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       '**/*.coffee': ['coffee'],
-      '**/*.html': ['html2js']
+      'h/templates/*.html': ['ng-html2js'],
     },
 
 
@@ -109,6 +109,11 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false
+    singleRun: false,
+
+    ngHtml2JsPreprocessor: {
+      stripPrefix: 'h/templates/',
+      moduleName: 'h.templates',
+    }
   });
 };
