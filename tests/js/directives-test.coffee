@@ -137,8 +137,8 @@ describe 'h.directives', ->
     $element = null
     beforeEach ->
       $scope.query = {}
-      $scope.update = ->
-      $scope.clear = ->
+      $scope.update = sinon.spy()
+      $scope.clear = sinon.spy()
 
       template= '''
       <div class="simpleSearch"
@@ -158,13 +158,11 @@ describe 'h.directives', ->
 
     it 'calls the given search function', ->
       $scope.query = {query: "Test query"}
-      $scope.update = sinon.spy()
       $scope.$digest()
       $element.trigger('submit')
       sinon.assert.calledWith($scope.update, "Test query")
 
     it 'calls the given clear function', ->
-      $scope.clear = sinon.spy()
       $element.find('.simple-search-clear').click()
       assert($scope.clear.called)
 
