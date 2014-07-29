@@ -16,7 +16,7 @@
             --><span class="provider">/{{persona|persona:'provider'}}</span><!--
             --><i class="icon-triangle"></i></span>
           <ul class="dropdown-menu pull-right" role="menu">
-            <li ng-click="$parent.toggleShowPanels()">Account</li>
+            <li><a href="#" show-account>Account</a></li>
             <li><a href="http://hypothes.is/contact/"
                    target="_blank">Feedback</a></li>
             <li><a href="/docs/help" target="_blank">Help</a></li>
