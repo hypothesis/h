@@ -290,6 +290,7 @@ app_js:
             - scripts/directives/annotation.coffee
             - scripts/helpers.coffee
             - scripts/services.coffee
+            - scripts/util.coffee
             - scripts/socket.coffee
             - scripts/searchfilters.coffee
             - scripts/streamsearch.coffee
