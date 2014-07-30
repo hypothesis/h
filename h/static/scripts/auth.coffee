@@ -4,8 +4,8 @@ imports = [
 
 
 class AuthController
-  this.$inject = ['$scope', '$timeout', 'session']
-  constructor:   ( $scope,   $timeout,   session ) ->
+  this.$inject = ['$scope', '$timeout', 'session', 'util']
+  constructor:   ( $scope,   $timeout,   session,   util ) ->
     timeout = null
 
     success = ->
@@ -24,11 +24,7 @@ class AuthController
       else
         form.responseErrorMessage = null
 
-      for field, error of errors
-        form[field].$setValidity('response', false)
-        form[field].responseErrorMessage = error
-
-      $scope.$broadcast 'error', form.$name
+      util.applyValidationErrors(form, errors)
 
     this.submit = (form) ->
       return unless form.$valid
