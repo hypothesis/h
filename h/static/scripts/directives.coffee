@@ -466,15 +466,12 @@ whenscrolled = ['$window', ($window) ->
 ]
 
 match = ->
-  # Checks to see if two values match each other.
-  link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
+  link: (scope, elem, attr, input) ->
+    validate = ->
+      input.$setValidity('match', scope.match == input.$modelValue)
 
-    elem
-    .on 'keyup', ->
-      currentValue = scope.match == ctrl.$modelValue
-      ctrl.$setValidity('match', currentValue)
-
+    elem.on('keyup', validate)
+    scope.$watch('match', validate)
   scope:
     match: '='
   restrict: 'A'

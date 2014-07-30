@@ -65,7 +65,7 @@
 
     <div class="form-field">
       <label class="form-label" for="field-confirm-password">Confirm Password:</label>
-      <input id="field-confirm-password" class="form-input" type="password" name="confirmpassword" ng-model="model.confirmpassword" match="confirmpassword" required>
+      <input id="field-confirm-password" class="form-input" type="password" name="confirmpassword" ng-model="model.confirmpassword" match="model.newpassword" required>
 
       <ul class="form-error-list">
         <li class="form-error" ng-show="changepassword.confirmpassword.$error.required">Please confirm your new password.</li>
@@ -87,7 +87,7 @@
 
     <div class="form-field">
       <label class="form-label" for="confirm-account-deletion">Confirm Password:</label>
-      <input id="confirm-account-deletion" class="form-input" type="password" name="confirmpassword" ng-model="model.confirmpassword" match="confirmpassword" required>
+      <input id="confirm-account-deletion" class="form-input" type="password" name="confirmpassword" ng-model="model.confirmdeletion" required>
 
       <ul class="form-error-list">
         <li class="form-error" ng-show="deleteaccount.deleteaccountpassword.$error.minlength">Your password does not match the one we have on record.</li>
