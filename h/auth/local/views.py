@@ -3,13 +3,13 @@ import colander
 import deform
 import horus.views
 from horus.lib import FlashMessage
+from horus.resources import UserFactory
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 
 from h import events, views
 from h.auth.local import forms, models, schemas
 from h.models import _
-
 
 def ajax_form(request, result):
     flash = views.pop_flash(request)
@@ -177,6 +177,7 @@ class AsyncRegisterController(RegisterController):
 
 @view_defaults(accept='text/html', renderer='h:templates/account_management.html')
 @view_config(attr='edit_profile', route_name='edit_profile')
+@view_config(attr='disable_user', route_name='disable_user')
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
         request = self.request
@@ -191,9 +192,25 @@ class ProfileController(horus.views.ProfileController):
             FlashMessage(request, _('Invalid password.'), kind='error')
             return httpexceptions.HTTPFound(location=request.url)
 
+    def disable_user(self):
+        request = self.request
+        username = request.POST['username']
+        pwd = request.POST['pwd']
+
+        # Password check
+        user = self.User.get_user(request, username, pwd)
+        if user:
+            user.activation_id = -1
+            self.db.add(user)
+            return {}
+        else:
+            FlashMessage(request, _('Invalid password.'), kind='error')
+            return httpexceptions.HTTPFound(location=request.url)
+
 
 @view_defaults(accept='application/json', name='app', renderer='json')
 @view_config(attr='edit_profile', request_param='__formid__=edit_profile')
+@view_config(attr='disable_user', request_param='__formid__=disable_user')
 class AsyncProfileController(ProfileController):
     __view_mapper__ = AsyncFormViewMapper
 
@@ -244,6 +261,9 @@ def includeme(config):
 
     token_endpoint = settings.get('auth.local.token', '/oauth/token')
     config.add_route('auth.local.token', token_endpoint)
+    config.add_route('disable_user', '/disable/{user_id}',
+                     factory=UserFactory,
+                     traverse="/{user_id}")
 
     config.include('horus')
     config.scan(__name__)
