@@ -8,7 +8,7 @@
 .simple-search-icon {
   position: absolute;
   top: 50%;
-  left: 8px;
+  left: 8 / 14 * 1em;
   margin-top: -0.5em;
   font-size: 14px;
   line-height: 1;
@@ -22,9 +22,9 @@
 .simple-search-input {
   outline: none;
   color: $text-color;
-  height: 26px; // Temporary fix for FF.
+  height: 2em; // Temporary fix for FF.
   width: 100%;
-  border-radius: 15px;
+  border-radius: 1em;
   border: 1px solid $gray-lighter !important; // Override base input styles.
   padding-left: 2em;
 
@@ -44,16 +44,16 @@
 
   position: absolute;
   outline: none;
-  right: 5px;
+  right: 5 / 9 * 1em;
   top: 50%;
   border: none;
   border-radius: 50%;
   background: $gray-light;
   color: #fff;
-  width: 16px;
-  height: 16px;
+  width: 16 / 9 * 1em;
+  height: 16 / 9 * 1em;
   padding: 0;
-  margin-top: -8px;
+  margin-top: -8 / 9 * 1em;
   font-size: 9px;
   text-align: center;
   text-shadow: none;
