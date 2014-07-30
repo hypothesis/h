@@ -1,9 +1,12 @@
-formValidate = ->
+formValidate = ['$timeout', ($timeout) ->
   link: (scope, elem, attr, form) ->
-    errorClassName = attr.formValidateErrorClass
+    isSubmitted = false
+    fieldClassName = 'form-field'
+    errorClassName = 'form-field-error'
 
     toggleClass = (field, {addClass}) ->
-      fieldEl = elem.find("[data-target=#{field.$name}]")
+      inputEl = elem.find("[name=#{field.$name}]")
+      fieldEl = inputEl.parents(".#{fieldClassName}").first()
       fieldEl.toggleClass(errorClassName, addClass)
 
     updateField = (field) ->
@@ -30,18 +33,23 @@ formValidate = ->
 
     # Validate field when the content changes.
     elem.on 'change', ':input', ->
-      updateField(form[this.name])
-
-    # Validate the field when submit is clicked.
-    elem.on 'submit', (event) ->
       forEachField(updateField)
 
-    # Validate when a response is processed.
-    scope.$on 'error', (event, name) ->
-      return unless form.$name == name
-      forEachField(updateField)
+    # Validate form on submit and set flag for error watcher.
+    elem.on 'submit', ->
+      isSubmitted = true
+      forEachField (field) ->
+        field.$setViewValue(field.$viewValue)
+        updateField(field)
+
+    scope.$watch form.$name + '.$error', ->
+      if isSubmitted
+        forEachField(updateField)
+        isSubmitted = false
+    , true
 
   require: 'form'
+]
 
 
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->

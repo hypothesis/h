@@ -37,8 +37,8 @@ describe 'h.directives', ->
       $scope.model = {username: ''}
 
       template = '''
-      <form form-validate data-form-validate-error-class="form-field-error" name="login" onsubmit="return false">
-        <div class="form-field" data-error-class="form-field-error" data-target="username">
+      <form form-validate name="login" onsubmit="return false">
+        <div class="form-field">
           <input type="text" class="" ng-model="model.username" name="username" required ng-minlength="3" />
         </div>
       </form>
@@ -82,8 +82,8 @@ describe 'h.directives', ->
       $element.triggerHandler('submit')
       assert.notInclude($field.prop('className'), 'form-field-error')
 
-    it 'should apply an error class to an invalid field on "error" event', ->
-      $scope.$emit('error', 'login')
+    it 'should apply an error class if the form recieves errors after a submit action', ->
+      $element.trigger('submit')
       $element.controller('form').username.$setValidity('response', false)
 
       $field = $element.find('.form-field')
@@ -103,23 +103,23 @@ describe 'h.directives', ->
 
       assert.notInclude($field.prop('className'), 'form-field-error')
 
-    it 'should reset the "response" error on change', ->
+    it 'should reset the "response" error when the view changes', ->
       $field = $element.find('.form-field')
       $input = $element.find('[name=username]')
       controller = $input.controller('ngModel')
       controller.$setViewValue('abc')
 
       # Submit Event
+      $element.triggerHandler('submit')
       controller.$setValidity('response', false)
       controller.responseErrorMessage = 'fail'
-      $scope.$emit('error', $input.controller('form').$name)
-      assert.include($field.prop('className'), 'form-field-error')
-
-      controller.$setViewValue('abc')
       $scope.$digest()
 
-      assert.notInclude($field.prop('className'), 'form-field-error')
+      assert.include($field.prop('className'), 'form-field-error', 'Fail fast check')
 
+      controller.$setViewValue('abc')
+
+      assert.notInclude($field.prop('className'), 'form-field-error')
 
   describe '.username', ->
     $element = null
