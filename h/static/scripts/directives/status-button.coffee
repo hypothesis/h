@@ -1,7 +1,7 @@
 # Augments a button to provide loading/status flags for asynchronous actions.
 #
 # Requires that the attribute provide a "target" form name. It will then listen
-# to "form-state" events on the scope. These events are expected to provide a
+# to "formState" events on the scope. These events are expected to provide a
 # the form name and a status.
 #
 # Example
@@ -33,7 +33,7 @@ statusButton = ->
     wrapper.insertBefore(elem)
     wrapper.append(elem)
 
-    scope.$on 'form-state', (event, formName, formState) ->
+    scope.$on 'formState', (event, formName, formState) ->
       return unless formName == targetForm
       unless formState in [STATE_LOADING, STATE_SUCCESS]
         formState = ''

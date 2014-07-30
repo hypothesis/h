@@ -27,15 +27,15 @@ describe 'h.directives.statusButton', ->
 
   it 'sets the status-button-state attribute when a loading event is triggered', ->
     parent = $element.parent()
-    $scope.$emit('form-state', 'test', 'loading')
+    $scope.$emit('formState', 'test', 'loading')
     assert.equal(parent.attr('status-button-state'), 'loading')
 
   it 'sets the status-button-state attribute when a success event is triggered', ->
     parent = $element.parent()
-    $scope.$emit('form-state', 'test', 'success')
+    $scope.$emit('formState', 'test', 'success')
     assert.equal(parent.attr('status-button-state'), 'success')
 
   it 'unsets the status-button-state attribute when another event is triggered', ->
     parent = $element.parent()
-    $scope.$emit('form-state', 'test', 'reset')
+    $scope.$emit('formState', 'test', 'reset')
     assert.equal(parent.attr('status-button-state'), '')
