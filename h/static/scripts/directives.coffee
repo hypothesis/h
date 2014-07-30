@@ -1,9 +1,12 @@
-formValidate = ->
+formValidate = ['$timeout', ($timeout) ->
   link: (scope, elem, attr, form) ->
-    errorClassName = attr.formValidateErrorClass
+    isSubmitted = false
+    fieldClassName = 'form-field'
+    errorClassName = 'form-field-error'
 
     toggleClass = (field, {addClass}) ->
-      fieldEl = elem.find("[data-target=#{field.$name}]")
+      inputEl = elem.find("[name=#{field.$name}]")
+      fieldEl = inputEl.parents(".#{fieldClassName}").first()
       fieldEl.toggleClass(errorClassName, addClass)
 
     updateField = (field) ->
@@ -14,24 +17,35 @@ formValidate = ->
       else
         toggleClass(field, addClass: true)
 
+    # Updates all fields optionally takes an isValid option that will only
+    # update the field if it is valid.
+    updateAllFields = (options = {}) ->
+      {ifValid} = options
+      for own _, field of form when field?.$name? and field.$dirty
+        updateField(field) unless ifValid == true and !field.$valid
+
     # Immediately show feedback for corrections.
     elem.on 'keyup', ':input', ->
-      updateField(form[this.name]) if form[this.name]?.$valid
+      updateAllFields(ifValid: true)
 
     # Validate field when the content changes.
     elem.on 'change', ':input', ->
-      updateField(form[this.name])
+      updateAllFields()
 
-    # Validate the field when submit is clicked.
-    elem.on 'submit', (event) ->
-      updateField(field) for own _, field of form when field.$name?
+    # Validate form on submit and set flag for error watcher.
+    elem.on 'submit', ->
+      isSubmitted = true
+      field.$setViewValue(field.$viewValue) for own _, field of form when field.$name?
+      updateAllFields()
 
-    # Validate when a response is processed.
-    scope.$on 'error', (event, name) ->
-      return unless form.$name == name
-      updateField(field) for own _, field of form when field.$name?
+    scope.$watch form.$name + '.$error', ->
+      if isSubmitted
+        updateAllFields()
+        isSubmitted = false
+    , true
 
   require: 'form'
+]
 
 
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->

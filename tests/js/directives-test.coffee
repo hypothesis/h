@@ -38,7 +38,7 @@ describe 'h.directives', ->
 
       template = '''
       <form form-validate data-form-validate-error-class="form-field-error" name="login" onsubmit="return false">
-        <div class="form-field" data-error-class="form-field-error" data-target="username">
+        <div class="form-field" data-error-class="form-field-error">
           <input type="text" class="" ng-model="model.username" name="username" required ng-minlength="3" />
         </div>
       </form>
@@ -74,31 +74,26 @@ describe 'h.directives', ->
       $element.trigger('submit')
       assert.notInclude $field.prop('className'), 'form-field-error'
 
-    it 'should apply an error class to an invalid field on "error" event', ->
-      $scope.$emit('error', 'login')
+    it 'should apply an error class if the form recieves errors after a submit action', ->
+      $element.trigger('submit')
       $element.controller('form').username.$setValidity('response', false)
 
       $field = $element.find('.form-field')
       assert.include $field.prop('className'), 'form-field-error'
 
     it 'should remove an error class on valid input on keyup', ->
-      $scope.model.username = 'abc'
-      $scope.$digest()
-
       $field = $element.find('.form-field').addClass('form-field-error')
-      $element.find('[name=username]').keyup()
+      $input = $element.find('[name=username]').val('abc').trigger('input')
+      $input.keyup()
 
       assert.notInclude $field.prop('className'), 'form-field-error'
 
     it 'should not add an error class on invalid input on keyup', ->
-      $scope.model.username = ''
-      $scope.$digest()
-
       $field = $element.find('.form-field')
-      $element.find('[name=username]').keyup()
+      $input = $element.find('[name=username]').val('ab').trigger('input')
+      $input.keyup()
 
       assert.notInclude $field.prop('className'), 'form-field-error'
-
 
   describe '.username', ->
     $element = null
