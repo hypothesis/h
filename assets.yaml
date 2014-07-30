@@ -350,6 +350,7 @@ app_js:
             - scripts/helpers.coffee
             - scripts/session.coffee
             - scripts/services.coffee
+            - scripts/util.coffee
             - scripts/socket.coffee
             - scripts/streamfilter.coffee
             - scripts/streamsearch.coffee

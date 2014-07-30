@@ -11,6 +11,7 @@ imports = [
   'h.filters'
   'h.session'
   'h.services'
+  'h.util'
   'h.socket'
   'h.streamsearch'
 ]
