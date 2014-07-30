@@ -119,6 +119,11 @@ profileProvider = [
         params:
           __formid__: "edit_profile"
         withCredentials: true
+      disable_user:
+        method: 'POST'
+        params:
+          __formid__: "disable_user"
+        withCredentials: true
 
     $resource("#{baseURI}app", {}, actions)
 ]

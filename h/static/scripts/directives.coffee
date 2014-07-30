@@ -486,11 +486,13 @@ confirmPasswordCheck = ['$resource', ($resource)->
 ]
 
 accountManagement = ['$filter', 'flash', 'profile', ($filter, flash, profile) ->
-  link: (scope, elem, attr, ctrl) ->
-    scope.emailCheck = ->
+  link: ($scope, elem, attr, ctrl) ->
+
+    $scope.emailCheck = ->
+      console.log 'scope.emailCheck'
       # Checks to see if email is duplicate.
       return
-  controller: ($scope, $filter) ->
+  controller: ($scope, $filter, $rootScope) ->
     persona_filter = $filter('persona')
 
     _answer = (response) ->
@@ -515,14 +517,22 @@ accountManagement = ['$filter', 'flash', 'profile', ($filter, flash, profile) ->
       # If the password is correct, the account is deleted.
       # The extension is then removed from the page.
       # Confirmation of success is given.
-      alert("Account deleted.")
+      return unless form.$valid
+      username = persona_filter $scope.session.persona
+
+      packet =
+        username: username
+        pwd: form.deleteaccountpassword.$modelValue
+
+      promise = profile.disable_user packet
+      promise.$promise.then(_answer, _error)
 
     $scope.submit = (form) ->
       # In the frontend change_email and change_password are two different
       # forms. However, in the backend it is just one: edit_profile
       return unless form.$valid
 
-      username = persona_filter $scope.model.persona
+      username = persona_filter $scope.session.persona
       if form.$name is 'edit_profile'
         packet =
           username: username
