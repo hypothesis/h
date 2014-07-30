@@ -81,13 +81,13 @@
     </div>
   </form>
 
-  <form class="account-form form" name="deleteaccount" ng-submit="deleteAccount()" novalidate form-validate>
+  <form class="account-form form" name="deleteaccount" ng-submit="deleteAccount(deleteaccount)" novalidate form-validate>
     <h2 class="form-heading"><span>Delete Account</span></h2>
     <p class="form-description">This will delete your user account. If you would like to delete your annotations, do so before continuing or email us at <a href="mailto:support@hypothes.is">support@hypothes.is</a>.</p>
 
     <div class="form-field">
       <label class="form-label" for="confirm-account-deletion">Confirm Password:</label>
-      <input id="confirm-account-deletion" class="form-input" type="password" name="confirmpassword" ng-model="model.confirmdeletion" required>
+      <input id="confirm-account-deletion" class="form-input" type="password" name="deleteaccountpassword" ng-model="model.deleteaccountpassword" required>
 
       <ul class="form-error-list">
         <li class="form-error" ng-show="deleteaccount.deleteaccountpassword.$error.minlength">Your password does not match the one we have on record.</li>
