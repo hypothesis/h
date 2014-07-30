@@ -318,6 +318,7 @@ app_js:
             - scripts/app_directives.coffee
             - scripts/helpers.coffee
             - scripts/services.coffee
+            - scripts/util.coffee
             - scripts/socket.coffee
             - scripts/searchfilters.coffee
             - scripts/streamsearch.coffee
