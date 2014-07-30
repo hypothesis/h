@@ -156,3 +156,50 @@ describe 'h.directives', ->
       it 'opens with only the username', ->
         $element.find('.user').click()
         sinon.assert.calledWith(fakeWindow.open, '/u/jim')
+
+  describe '.match', ->
+    $element = null
+
+    beforeEach ->
+      $scope.model = {a: 1, b: 1}
+
+      $element = $compile('<input name="confirmation" ng-model="model.b" match="model.a" />')($scope)
+      $scope.$digest()
+
+    it 'is valid if both properties have the same value', ->
+      controller = $element.controller('ngModel')
+      assert.isFalse(controller.$error.match)
+
+    # TODO: Work out how to watch for changes to the model.
+    it 'is invalid if the local property differs'
+    # it 'is invalid if the local property differs', ->
+    #   $scope.model.b = 2
+    #   $scope.$digest()
+
+    #   controller = $element.controller('ngModel')
+    #   assert.isTrue(controller.$error.match)
+
+    it 'is invalid if the matched property differs', ->
+      $scope.model.a = 2
+      $scope.$digest()
+
+      controller = $element.controller('ngModel')
+      assert.isTrue(controller.$error.match)
+
+    it 'is invalid if the input itself is changed', ->
+      $element.val('2').trigger('input').keyup()
+
+      controller = $element.controller('ngModel')
+      assert.isTrue(controller.$error.match)
+
+  describe '.showAccount', ->
+    $element = null
+
+    beforeEach ->
+      $element = $compile('<a show-account>Account</a>')($scope)
+      $scope.$digest()
+
+    it 'triggers the "nav:account" event when the Account item is clicked', (done) ->
+      $scope.$on 'nav:account', ->
+        done()
+      $element.click()
