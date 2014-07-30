@@ -492,7 +492,7 @@ accountManagement = ['$filter', 'flash', 'profile', ($filter, flash, profile) ->
       console.log 'scope.emailCheck'
       # Checks to see if email is duplicate.
       return
-  controller: ($scope, $filter, $rootScope) ->
+  controller: ($scope, $filter) ->
     persona_filter = $filter('persona')
 
     _answer = (response) ->
