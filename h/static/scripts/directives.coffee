@@ -436,29 +436,33 @@ match = ->
   restrict: 'A'
   require: 'ngModel'
 
-accountManagement = ['$filter', 'flash', 'profile', ($filter, flash, profile) ->
-  link: ($scope, elem, attr, ctrl) ->
+confirmPasswordCheck = ['$resource', ($resource)->
+  link: (scope, elem, attr, ctrl) ->
+    return unless ctrl?
+    # Check password against server.
+  restrict: 'A'
+  require: 'ngModel'
+]
 
-    $scope.emailCheck = ->
-      console.log 'scope.emailCheck'
+accountManagement = ['$filter', 'flash', 'profile', 'util', ($filter, flash, profile, util) ->
+  link: (scope, elem, attr, ctrl) ->
+    scope.emailCheck = ->
       # Checks to see if email is duplicate.
       return
+
   controller: ($scope, $filter) ->
     persona_filter = $filter('persona')
 
-    _answer = (response) ->
-      console.log '_answer() - insert code here'
-      console.log response
-
+    onSuccess = (response) ->
       # Fire flash messages.
-      for q, msgs of response.flash
-        flash q, msgs
+      for type, msgs of response.flash
+        flash(type, msgs)
 
-    _error = (errors={}) ->
-      console.log '_error() - insert code here'
-      for field, error of errors
-        console.log(field, error)
-        #flash('error', error)
+    onError = (form, data) ->
+      if 400 >= data.status < 500
+        util.applyValidationErrors(form, data.errors)
+      else
+        flash('error', 'Sorry, we were unable to perform your request')
 
     $scope.confirmDelete = false
     $scope.toggleConfirmDelete = ->
@@ -470,13 +474,12 @@ accountManagement = ['$filter', 'flash', 'profile', ($filter, flash, profile) ->
       # Confirmation of success is given.
       return unless form.$valid
       username = persona_filter $scope.session.persona
-
       packet =
         username: username
         pwd: form.deleteaccountpassword.$modelValue
 
       promise = profile.disable_user packet
-      promise.$promise.then(_answer, _error)
+      promise.$promise.then(onSuccess, onError.bind(null, form))
 
     $scope.submit = (form) ->
       # In the frontend change_email and change_password are two different
@@ -496,7 +499,7 @@ accountManagement = ['$filter', 'flash', 'profile', ($filter, flash, profile) ->
           password: form.newpassword.$modelValue
 
       promise = profile.edit_profile packet
-      promise.$promise.then(_answer, _error)
+      promise.$promise.then(onSuccess, onError.bind(null, form))
 
     # Jake's Note: there is an addional piece of UI I would like to implement. The basic idea being
     # to give some visual indication that the changes they have made have been applied successfully.
