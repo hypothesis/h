@@ -138,7 +138,7 @@ class AsyncRegisterController(RegisterController):
         request = self.request
         Str = self.Str
 
-        schema = schemas.ActivationSchema.bind(request=request)
+        schema = schemas.ActivateSchema.bind(request=request)
         form = forms.ActivateForm(schema)
         appstruct = None
 
@@ -176,32 +176,54 @@ class AsyncRegisterController(RegisterController):
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
         request = self.request
-        data = request.POST
+        schema = schemas.EditProfileSchema.bind(schemas.EditProfileSchema(), request=request)
+        form = forms.EditProfileForm(schema)
+
+        try:
+            appstruct = form.validate(request.POST.items())
+        except deform.ValidationFailure as e:
+            return dict(errors=e.error.children)
+
+        username = appstruct['username']
+        pwd = appstruct['pwd']
 
         # Password check
-        user = self.User.get_user(request, data['username'], data['pwd'])
+        user = self.User.get_user(request, username, pwd)
         if user:
             request.context = user
             return super(ProfileController, self).edit_profile()
         else:
-            FlashMessage(request, _('Invalid password.'), kind='error')
+            FlashMessage(self.request,
+                _('Invalid password.'), kind='error')
             return httpexceptions.HTTPFound(location=request.url)
 
     def disable_user(self):
         request = self.request
-        username = request.POST['username']
-        pwd = request.POST['pwd']
+        schema = schemas.EditProfileSchema.bind(schemas.EditProfileSchema(), request=request)
+        form = forms.EditProfileForm(schema)
+
+        try:
+            appstruct = form.validate(request.POST.items())
+        except deform.ValidationFailure as e:
+            return dict(errors=e.error.children)
+
+        username = appstruct['username']
+        pwd = appstruct['pwd']
 
         # Password check
         user = self.User.get_user(request, username, pwd)
         if user:
             user.activation_id = -1
             self.db.add(user)
-            return {}
+            FlashMessage(self.request,
+                 _('User disabled'),
+                 kind='success')
         else:
-            FlashMessage(request, _('Invalid password.'), kind='error')
-            return httpexceptions.HTTPFound(location=request.url)
+            FlashMessage(self.request,
+                _('Invalid password.'),
+                kind='error')
 
+        return httpexceptions.HTTPFound(location=request.url)
 
 @view_defaults(accept='application/json', name='app', renderer='json')
 @view_config(attr='edit_profile', request_param='__formid__=edit_profile')
