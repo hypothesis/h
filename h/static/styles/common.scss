@@ -42,8 +42,8 @@ p {
 em { font-style: italic; }
 
 html {
-  font-size: $base-font-size / 16px * 1em;
-  line-height: $base-line-height / 16px * 1em;
+  font-size: $base-font-size;
+  line-height: $base-line-height;
 
   @include yui_grid();
 
@@ -806,11 +806,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     }
     li.tagit-choice { margin-top: .1em; }
   }
-}
-
-.search-container {
-  overflow: hidden;
-  padding-right: 0.8em;
 }
 
 // View and Sort tabs ////////////////////

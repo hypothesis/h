@@ -57,6 +57,9 @@ body {
       font-family: $sans-font-family;
     }
 
-    & > * { margin: 0 .72em; }
+    & > * {
+      line-height: 28px;
+      margin: 0 .72em;
+    }
   }
 }
