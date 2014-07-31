@@ -11,11 +11,10 @@
 
 .simple-search-icon {
   position: absolute;
+  font-size: 1.1em;
   top: 50%;
-  left: 8 / 14 * 1em;
-  margin-top: -0.5em;
-  font-size: 14px;
-  line-height: 1;
+  left: .6em;
+  margin-top: -.5em;
   pointer-events: none;
 
   :not(:focus) ~ & {
@@ -26,11 +25,11 @@
 .simple-search-input {
   outline: none;
   color: $text-color;
-  height: 2em; // Temporary fix for FF.
+  line-height: 24px;
   width: 100%;
-  border-radius: 1em;
+  border-radius: 2em;
   border: 1px solid $gray-lighter !important; // Override base input styles.
-  padding-left: 2em;
+  padding: 0 2em;
 
   .simple-search-inactive &:not(:focus) {
     border-color: #f3f3f3 !important;
@@ -42,25 +41,23 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    margin-top: -0.5em;
-    margin-left: -0.5em;
+    margin-top: -.5em;
+    margin-left: -.5em;
+    font-size: .7em;
   }
 
   position: absolute;
   outline: none;
-  right: 5 / 9 * 1em;
+  right: .35em;
   top: 50%;
   border: none;
   border-radius: 50%;
   background: $gray-light;
   color: #fff;
-  width: 16 / 9 * 1em;
-  height: 16 / 9 * 1em;
+  width: 1.33em;
+  height: 1.33em;
   padding: 0;
-  margin-top: -8 / 9 * 1em;
-  font-size: 9px;
-  text-align: center;
-  text-shadow: none;
+  margin-top: -.65em;
   @include box-shadow(none);
 
   &:focus, &:hover, &:active:not([disabled]) {
@@ -70,6 +67,5 @@
     border: none;
     background-image: none;
     box-shadow: none;
-    top: 50%; // Reset button state.
   }
 }
