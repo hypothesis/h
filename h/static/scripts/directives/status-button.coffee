@@ -13,7 +13,7 @@ statusButton = ->
   STATE_SUCCESS = 'success'
 
   template = '''
-  <span class="btn-with-message" status-button-state>
+  <span class="btn-with-message">
     <span class="btn-message btn-message-loading">
       <span class="btn-icon spinner"><span><span></span></span></span>
     </span>
@@ -23,25 +23,22 @@ statusButton = ->
   </span>
   '''
 
-  compile: (button, attr) ->
+  link: (scope, placeholder, attr, ctrl, transclude) ->
     targetForm = attr.statusButton
 
     unless targetForm
       throw new Error('status-button attribute should provide a form name')
 
-    # Remove the attribute to prevent recusive parsing.
-    button.removeAttr('status-button')
+    elem = angular.element(template)
+    placeholder.after(elem)
+    transclude(scope, (clone) -> elem.append(clone))
 
-    wrapper = angular.element(template)
-    wrapper.insertBefore(button)
-    wrapper.append(button)
-
-    post: (scope, elem, attr) ->
-      scope.$on 'formState', (event, formName, formState) ->
-        return unless formName == targetForm
-        unless formState in [STATE_LOADING, STATE_SUCCESS]
-          formState = ''
-        wrapper.attr(STATE_ATTRIBUTE, formState)
+    scope.$on 'formState', (event, formName, formState) ->
+      return unless formName == targetForm
+      unless formState in [STATE_LOADING, STATE_SUCCESS]
+        formState = ''
+      elem.attr(STATE_ATTRIBUTE, formState)
+  transclude: 'element'
 
 
 angular.module('h.directives').directive('statusButton', statusButton)

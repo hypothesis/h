@@ -16,26 +16,21 @@ describe 'h.directives.statusButton', ->
     <button status-button="test">Test Button</button>
     '''
 
-    $element = $compile(angular.element(template))($scope)
+    $element = $compile(angular.element(template))($scope).next()
 
   it 'wraps the button with status labels', ->
-    parent = $element.parent()
-    assert.include(parent.prop('className'), 'btn-with-message')
-
-    assert.equal(parent.find('.btn-message-loading').length, 1)
-    assert.equal(parent.find('.btn-message-success').length, 1)
+    assert.include($element.prop('className'), 'btn-with-message')
+    assert.equal($element.find('.btn-message-loading').length, 1)
+    assert.equal($element.find('.btn-message-success').length, 1)
 
   it 'sets the status-button-state attribute when a loading event is triggered', ->
-    parent = $element.parent()
     $scope.$emit('formState', 'test', 'loading')
-    assert.equal(parent.attr('status-button-state'), 'loading')
+    assert.equal($element.attr('status-button-state'), 'loading')
 
   it 'sets the status-button-state attribute when a success event is triggered', ->
-    parent = $element.parent()
     $scope.$emit('formState', 'test', 'success')
-    assert.equal(parent.attr('status-button-state'), 'success')
+    assert.equal($element.attr('status-button-state'), 'success')
 
   it 'unsets the status-button-state attribute when another event is triggered', ->
-    parent = $element.parent()
     $scope.$emit('formState', 'test', 'reset')
-    assert.equal(parent.attr('status-button-state'), '')
+    assert.equal($element.attr('status-button-state'), '')
