@@ -808,11 +808,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   }
 }
 
-.search-container {
-  overflow: hidden;
-  padding-right: 0.8em;
-}
-
 // View and Sort tabs ////////////////////
 .viewsort {
   @include single-transition(top, .25s);

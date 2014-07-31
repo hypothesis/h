@@ -1,5 +1,9 @@
 @import "base.scss";
 
+.simple-search {
+  overflow: hidden;
+}
+
 .simple-search-form {
   position: relative;
   color: $gray;

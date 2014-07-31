@@ -16,14 +16,12 @@
         </div>
 
         <!-- Searchbar -->
-        <div class="search-container">
-          <div class="simpleSearch visual-container"
-               query="query"
-               onsearch="search.update(this)"
-               onclear="search.show = false; search.clear()"></div>
-        </div>
+        <div class="simple-search"
+             query="query"
+             onsearch="search.update(this)"
+             onclear="search.show = false; search.clear()"></div>
+        <!-- / Searchbar -->
       </div>
-      <!-- / Searchbar -->
     </div>
     <!-- / Toolbar -->
 
