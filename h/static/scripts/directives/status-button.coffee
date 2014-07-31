@@ -23,17 +23,20 @@ statusButton = ->
   </span>
   '''
 
-  compile: ->
-    pre: (scope, elem, attr) ->
-      targetForm = attr.statusButton
+  compile: (button, attr) ->
+    targetForm = attr.statusButton
 
-      unless targetForm
-        throw new Error('status-button attribute should provide a form name')
+    unless targetForm
+      throw new Error('status-button attribute should provide a form name')
 
-      wrapper = angular.element(template)
-      wrapper.insertBefore(elem)
-      wrapper.append(elem)
+    # Remove the attribute to prevent recusive parsing.
+    button.removeAttr('status-button')
 
+    wrapper = angular.element(template)
+    wrapper.insertBefore(button)
+    wrapper.append(button)
+
+    post: (scope, elem, attr) ->
       scope.$on 'formState', (event, formName, formState) ->
         return unless formName == targetForm
         unless formState in [STATE_LOADING, STATE_SUCCESS]
