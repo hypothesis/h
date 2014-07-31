@@ -29,7 +29,7 @@
     <div class="form-field" data-target="username">
       <label class="form-label" for="field-login-username">Username:</label>
       <input class="form-input" type="text" id="field-login-username"
-             name="username" value="" placeholder="bill"
+             name="username" value=""
              ng-model="model.username" ng-minlength="3"
              required autocapitalize="false" />
       <ul class="form-error-list">
@@ -46,7 +46,6 @@
       <label class="form-label" for="field-login-password">Password:</label>
       <input class="form-input" id="field-login-password"
              type="password" name="password" value=""
-             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
              ng-model="model.password"
              required autocapitalize="false" autocorrect="false" />
       <ul class="form-error-list">
@@ -88,7 +87,7 @@
         <span class="form-hint">(between 3 and 15 characters)</span>
       </label>
       <input class="form-input" id="field-register-username"
-             type="text" name="username" value="" placeholder="bill"
+             type="text" name="username" value=""
              required autocapitalize="false" ng-model="model.username"
              ng-minlength="3" ng-maxlength="15"
              ng-pattern="/^[A-Za-z0-9._]+$/"
@@ -110,7 +109,7 @@
     <div class="form-field" data-target="email">
       <label class="form-label" for="field-register-email">Email Address:</label>
       <input class="form-input" id="field-register-email"
-             type="email" name="email" value="" placeholder="bill@example.com"
+             type="email" name="email" value=""
              ng-model="model.email" required autocapitalize="false"
              ng-model-options="{updateOn: 'blur'}" />
       <ul class="form-error-list">
@@ -129,7 +128,6 @@
       </label>
       <input id="field-register-password" class="form-input"
              type="password" name="password" value=""
-             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
              required autocapitalize="false" autocorrect="false"
              ng-minlength="2" ng-model="model.password"
              ng-model-options="{updateOn: 'blur'}" />
@@ -167,7 +165,7 @@
     <div class="form-field" data-target="email">
       <label class="form-label" for="field-forgot-email">Please enter your email address:</label>
       <input class="form-input" id="field-forgot-email"
-             type="email" name="email" value="" placeholder="bill@example.com"
+             type="email" name="email" value=""
              required autocapitalize="false" ng-model="model.email" />
       <ul class="form-error-list">
         <li class="form-error" ng-show="forgot.email.$error.email">Is this an email address?</li>
@@ -217,7 +215,6 @@
       </label>
       <input class="form-input" id="field-activate-password"
              type="password" name="password" value=""
-             placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
              required autocapitalize="false" autocorrect="false"
              ng-minlength="2" ng-model="model.password" />
       <ul class="form-error-list">
