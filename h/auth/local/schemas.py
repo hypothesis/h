@@ -105,6 +105,11 @@ class ActivateSchema(CSRFSchema):
 
 
 class EditProfileSchema(CSRFSchema):
+    username = colander.SchemaNode(colander.String())
+    pwd = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.PasswordWidget()
+    )
     email = colander.SchemaNode(
         colander.String(),
         default='',
