@@ -4,7 +4,7 @@ imports = [
   'h.directives'
   'h.helpers'
   'h.socket'
-  'h.streamfilter'
+  'h.searchfilters'
 ]
 
 

@@ -2,15 +2,8 @@ imports = [
   'bootstrap'
   'h.helpers'
   'h.socket'
-  'h.streamfilter'
+  'h.searchfilters'
 ]
-
-SEARCH_FACETS = ['text', 'tags', 'uri', 'quote', 'since', 'user', 'results']
-SEARCH_VALUES =
-  group: ['Public', 'Private'],
-  since: ['5 min', '30 min', '1 hour', '12 hours',
-          '1 day', '1 week', '1 month', '1 year']
-
 
 class App
   scope:
@@ -47,8 +40,6 @@ class App
         socialView: annotator.socialView
         ongoingHighlightSwitch: false
         search:
-          facets: SEARCH_FACETS
-          values: SEARCH_VALUES
           query: $location.search()
           show: not angular.equals($location.search(), {})
         session: session
@@ -228,8 +219,24 @@ class App
 
     $rootScope.applySort "Location"
 
+    $scope.query = $location.search()
+
+    $scope.search = {}
+    $scope.search.update = angular.noop
+    $scope.search.clear = angular.noop
+
+    #$scope.show_search = Object.keys($scope.query).length > 0
+
     $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
       unless next.$$route? then return
+
+      $scope.search.query = $location.search()
+      $scope.search.show = not angular.equals($location.search(), {})
+
+      if next.$$route.originalPath is '/viewer'
+        $rootScope.viewState.show = true
+      else
+        $rootScope.viewState.show = false
 
       unless next.$$route.originalPath is '/stream'
         if current and next.$$route.originalPath is '/a/:id'
@@ -237,29 +244,10 @@ class App
 
         $scope.search.update = (searchCollection) ->
           return unless annotator.discardDrafts()
-          return unless searchCollection.models.length
 
-          models = searchCollection.models
-          matched = []
-          query =
-            tags: []
-            quote: []
-
-          for item in models
-            {category, value} = item.attributes
-
-            # Stuff we need to collect
-            switch
-              when category in ['text', 'user', 'time', 'group']
-                query[category] = value
-              when category == 'tags'
-                # Tags are specials, because we collect those into an array
-                query.tags.push value.toLowerCase()
-              when category == 'quote'
-                query.quote = query.quote.concat(value.split(/\s+/))
-
+          query = {query: searchCollection}
           unless angular.equals $location.search(), query
-            if $location.path() == '/viewer'
+            if $location.path() == '/viewer' or $location.path() == '/page_search'
               $location.path('/page_search').search(query)
             else
               $location.path('/stream').search(query)
@@ -846,12 +834,18 @@ class Search
       refresh()
 
     refresh = =>
-      $scope.matches = viewFilter.filter $rootScope.annotations, $routeParams
+      [$scope.matches, $scope.filters] = viewFilter.filter $rootScope.annotations, $routeParams
       # Create the regexps for highlighting the matches inside the annotations' bodies
-      $scope.text_tokens = $routeParams.text?.split(/\s+/) or []
+      $scope.text_tokens = $scope.filters.text.terms.slice()
       $scope.text_regexp = []
-      $scope.quote_tokens = $routeParams.quote
+      $scope.quote_tokens = $scope.filters.quote.terms.slice()
       $scope.quote_regexp = []
+
+      # Highligh any matches
+      for term in $scope.filters.any.terms
+        $scope.text_tokens.push term
+        $scope.quote_tokens.push term
+
       # Saving the regexps and higlighter to the annotator for highlighttext regeneration
       for token in $scope.text_tokens
         regexp = new RegExp(token,"ig")

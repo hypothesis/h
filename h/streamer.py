@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import copy
 import datetime
 import json
 import logging
@@ -217,7 +218,12 @@ class FilterToElasticFilter(object):
     def convert_clauses(self, clauses):
         new_clauses = []
         for clause in clauses:
-            field = clause['field'][1:].replace('/', '.')
+            if isinstance(clause['field'], list):
+                field = []
+                for f in clause['field']:
+                    field.append(f[1:].replace('/', '.'))
+            else:
+                field = clause['field'][1:].replace('/', '.')
             es = clause['options']['es'] if 'es' in clause['options'] else None
             if es:
                 query_type = es['query_type'] if 'query_type' in es else 'simple'
@@ -255,6 +261,16 @@ class FilterToElasticFilter(object):
                 if cutoff_freq:
                     message['cutoff_frequency'] = cutoff_freq
                 new_clause = {"match": {field: message}}
+            elif query_type == 'multi_match':
+                and_or = es['and_or'] if 'and_or' in es else 'and'
+                match_type = es['match_type'] if 'mach_type' in es else 'cross_fields'
+                message = {
+                    "query": value,
+                    "operator": and_or,
+                    "type": match_type,
+                    "fields": es['fields']
+                }
+                new_clause = {"multi_match": message}
             elif clause['operator'][0:2] == 'len':
                 script = "doc['%s'].values.length %s %s" % (
                     field,
@@ -349,54 +365,63 @@ class FilterHandler(object):
     }
 
     def evaluate_clause(self, clause, target):
-        field_value = resolve_pointer(target, clause['field'], None)
-        if field_value is None:
+        if isinstance(clause['field'], list):
+            for field in clause['field']:
+                copied = copy.deepcopy(clause)
+                copied['field'] = field
+                result = self.evaluate_clause(copied, target)
+                if result:
+                    return True
             return False
-
-        # pylint: disable=maybe-no-member
-        if clause.get('case_sensitive', True):
-            cval = clause['value']
-            fval = field_value
         else:
-            if type(clause['value']) is list:
-                cval = [x.lower() for x in clause['value']]
+            field_value = resolve_pointer(target, clause['field'], None)
+            if field_value is None:
+                return False
+
+            # pylint: disable=maybe-no-member
+            if clause.get('case_sensitive', True):
+                cval = clause['value']
+                fval = field_value
             else:
-                cval = clause['value'].lower()
+                if type(clause['value']) is list:
+                    cval = [x.lower() for x in clause['value']]
+                else:
+                    cval = clause['value'].lower()
 
-            if type(field_value) is list:
-                fval = [x.lower() for x in field_value]
-            else:
-                fval = field_value.lower()
-        # pylint: enable=maybe-no-member
-
-        reversed_order = False
-        # Determining operator order
-        # Normal order: field_value, clause['value']
-        # i.e. condition created > 2000.01.01
-        # Here clause['value'] = '2001.01.01'.
-        # The field_value is target['created']
-        # So the natural order is: ge(field_value, clause['value']
-
-        # But!
-        # Reversed operator order for contains (b in a)
-        if type(cval) is list or type(fval) is list:
-            if clause['operator'] in ['one_of', 'matches']:
-                reversed_order = True
-                # But not in every case. (i.e. tags matches 'b')
-                # Here field_value is a list, because an annotation can
-                # have many tags.
                 if type(field_value) is list:
-                    reversed_order = False
+                    fval = [x.lower() for x in field_value]
+                else:
+                    fval = field_value.lower()
+            # pylint: enable=maybe-no-member
 
-        if reversed_order:
-            lval = cval
-            rval = fval
-        else:
-            lval = fval
-            rval = cval
+            reversed_order = False
+            # Determining operator order
+            # Normal order: field_value, clause['value']
+            # i.e. condition created > 2000.01.01
+            # Here clause['value'] = '2001.01.01'.
+            # The field_value is target['created']
+            # So the natural order is: ge(field_value, clause['value']
 
-        op = getattr(operator, self.operators[clause['operator']])
-        return op(lval, rval)
+            # But!
+            # Reversed operator order for contains (b in a)
+            if type(cval) is list or type(fval) is list:
+                if clause['operator'] in ['one_of', 'matches']:
+                    reversed_order = True
+                    # But not in every case. (i.e. tags matches 'b')
+                    # Here field_value is a list, because an annotation can
+                    # have many tags.
+                    if type(field_value) is list:
+                        reversed_order = False
+
+            if reversed_order:
+                lval = cval
+                rval = fval
+            else:
+                lval = fval
+                rval = cval
+
+            op = getattr(operator, self.operators[clause['operator']])
+            return op(lval, rval)
 
     # match_policies
     def include_any(self, target):

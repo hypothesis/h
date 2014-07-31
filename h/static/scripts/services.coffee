@@ -1,5 +1,6 @@
 imports = [
-  'h.filters'
+  'h.filters',
+  'h.searchfilters'
 ]
 
 
@@ -674,36 +675,133 @@ class DraftProvider
 
 
 class ViewFilter
+  # This object is the filter matching configuration used by the filter() function
+  checkers:
+    quote:
+      autofalse: (annotation) -> return annotation.references?
+      value: (annotation) ->
+        for target in annotation.target
+          return target.quote if target.quote?
+        ''
+      match: (term, value) -> return value.indexOf(term) > -1
+    since:
+      autofalse: (annotation) -> return not annotation.updated?
+      value: (annotation) -> return annotation.updated
+      match: (term, value) ->
+        delta = Math.round((+new Date - new Date(value)) / 1000)
+        return delta <= term
+    tag:
+      autofalse: (annotation) -> return not annotation.tags?
+      value: (annotation) -> return annotation.tags
+      match: (term, value) -> return value in term
+    text:
+      autofalse: (annotation) -> return not annotation.text?
+      value: (annotation) -> return annotation.text
+      match: (term, value) -> return value.indexOf(term) > -1
+    uri:
+      autofalse: (annotation) -> return not annotation.uri?
+      value: (annotation) -> return annotation.uri
+      match: (term, value) -> return value is term
+    user:
+      autofalse: (annotation) -> return not annotation.user?
+      value: (annotation) ->
+        # XXX: Hopefully there is a cleaner solution
+        # XXX: To reach persona filter from here
+        return (annotation.user?.match /^acct:([^@]+)@(.+)/)?[1]
+      match: (term, value) -> return value is term
+    any:
+      fields: ['quote', 'text', 'tag', 'user']
 
-  this.$inject = ['$filter']
-  constructor: ($filter) ->
-    @user_filter = $filter('persona')
+
+
+  this.$inject = ['searchfilter']
+  constructor: (searchfilter) ->
+    @searchfilter = searchfilter
+
+  _matches: (filter, value, match) ->
+    matches = true
+
+    for term in filter.terms
+      unless match term, value
+        matches = false
+        if filter.operator is 'and'
+          break
+      else
+        matches = true
+        if filter.operator is 'or'
+          break
+    matches
+
+  _arrayMatches: (filter, value, match) ->
+    matches = true
+    # Make copy for filtering
+    copy = value.slice()
+    copy.filter (e) ->
+      not match filter.terms, e
+
+    if (filter.operator is 'and' and copy.length < value.length) or
+    (filter.operator is 'or' and not copy.length)
+        matches = false
+    matches
+
+  _anyMatches: (filter, value, match) ->
+    matchresult = []
+    for term in filter.terms
+      if angular.isArray value
+          matchresult.push match value, term
+      else
+          matchresult.push match term, value
+    matchresult
+
+  _checkMatch: (filter, annotation, checker) ->
+    autofalsefn = checker.autofalse
+    return false if autofalsefn? and autofalsefn annotation
+
+    value = checker.value annotation
+    if angular.isArray value
+      if filter.lowercase then value = value.map (e) -> e.toLowerCase()
+      return @_arrayMatches filter, value, checker.match
+    else
+      value = value.toLowerCase() if filter.lowercase
+      return @_matches filter, value, checker.match
+
 
   # Filters a set of annotations, according to a given query.
+  # Inputs:
+  #   annotations is the input list of annotations (array)
+  #   query is the query string. It will be converted to faceted filter by the SearchFilter
   #
-  # annotations is the input list of annotations (array)
-  # query is the query; it's a map. Supported key values are:
-  #   user: username to search for
-  #   text: text to search for in the body (all the words must be present)
-  #   quote: text to search for in the quote (exact phrease must be present)
-  #   tags: list of tags to search for. (all must be present)
-  #   time: maximum age of annotation. Accepted values:
-  #     '5 min', '30 min', '1 hour', '12 hours',
-  #     '1 day', '1 week', '1 month', '1 year'
+  # It'll handle the annotation matching by the returned facet configuration (operator, lowercase, etc.)
+  # and the here configured @checkers. This @checkers object contains instructions how to verify the match.
+  # Structure:
+  # [facet_name]:
+  #   autofalse: a function for a preliminary false match result
+  #              (i.e. if the annotation does not even have a 'text' field, do not try to match the 'text' facet)
+  #   value: a function to extract to facet value for the annotation.
+  #         (i.e. for the quote facet it is the annotation.target.quote from the right target from the annotations)
+  #   match: a function to check if the extracted value matches with the facet value
+  #         (i.e. for the text facet it has to check that if the facet is a substring of the annotation.text or not.
   #
-  # All search is case insensitive.
-  #
-  # Returns the list of matching annotation IDs.
-  filter: (annotations, query) ->
+  # Returns a two-element list:
+  # [
+  #   matched annotation IDs list,
+  #   the faceted filters
+  # ]
+  filter: (annotations, query) =>
+    filters = @searchfilter.generateFacetedFilter query.query
     results = []
 
-    # Convert these fields to lower case, if they exist
-    for key in ['text', 'user']
-      if query[key]?
-        query[key] = query[key].toLowerCase()
+    # Check for given limit
+    # Find the minimal
+    limit = 0
+    if filters.result.terms.length
+      limit = filter.result.terms[0]
+      for term in filter.result.terms
+        if limit > term then limit = term
 
-    # We expect a list for quotes
-    query.quote.map (e) -> e.toLowerCase()
+    # Convert terms to lowercase if needed
+    for _, filter of filters
+      if filter.lowercase then filter.terms.map (e) -> e.toLowerCase()
 
     # Now that this filter is called with the top level annotations, we have to add the children too
     annotationsWithChildren = []
@@ -716,104 +814,54 @@ class ViewFilter
 
     for annotation in annotationsWithChildren
       matches = true
-      for category, value of query
+      #ToDo: What about given zero limit?
+      # Limit reached
+      if limit and results.length >= limit then break
+
+      for category, filter of filters
+        break unless matches
+        terms = filter.terms
+        # No condition for this category
+        continue unless terms.length
+
         switch category
-          when 'user'
-            username = @user_filter annotation.user
-            unless username?.toLowerCase() is value
-              matches = false
-              break
-          when 'text'
-            unless annotation.text?
-              matches = false
-              break
-            lowerCaseText = annotation.text.toLowerCase()
-            for token in value.split ' '
-              if lowerCaseText.indexOf(token) is -1
-                matches = false
-                break
-          when 'quote'
-            unless value.length > 0 then continue
-            # Reply annotations does not have a quote in this aspect
-            if annotation.references?
-              matches = false
-              break
+          when 'result'
+            # Handled above
+            continue
+          when 'any'
+            # Special case
+            matchterms = []
+            matchterms.push false for term in terms
+
+            for field in @checkers.any.fields
+              conf = @checkers[field]
+
+              continue if conf.autofalse? and conf.autofalse annotation
+              value = conf.value annotation
+              if angular.isArray value
+                if filter.lowercase
+                  value = value.map (e) -> e.toLowerCase()
+              else
+                value = value.toLowerCase() if filter.lowercase
+              matchresult = @_anyMatches filter, value, conf.match
+              matchterms = matchterms.map (t, i) -> t or matchresult[i]
+
+            # Now let's see what we got.
+            matched = 0
+            for _, value of matchterms
+              matched++ if value
+
+            if (filter.operator is 'or' and matched  > 0) or (filter.operator is 'and' and matched is terms.length)
+              matches = true
             else
-              found = false
-              for target in annotation.target
-                if target.quote?
-                  quote = target.quote.toLowerCase()
-                  for val in value
-                    if quote.indexOf(val) > -1
-                      found = true
-                    else
-                      found = false
-                      break
-              unless found
-                matches = false
-                break
-          when 'tags'
-            # Don't bother if we got an empty list for required tags
-            break unless value.length
-
-            # If this has no tags, this is in instant failure
-            if value.length and not annotation.tags?
-              matches = false
-              break
-
-            # OK, there are some tags, and we need some tags.
-            # Gotta check for each wanted tag
-            for wantedTag in value
-              found = false
-              for existingTag in annotation.tags
-                if existingTag.toLowerCase().indexOf(wantedTag) > -1
-                  found = true
-                  break
-              unless found
-                matches = false
-                break
-
-          when 'time'
-              delta = Math.round((+new Date - new Date(annotation.updated)) / 1000)
-              switch value
-                when '5 min'
-                  unless delta <= 60*5
-                    matches = false
-                when '30 min'
-                  unless delta <= 60*30
-                    matches = false
-                when '1 hour'
-                  unless delta <= 60*60
-                    matches = false
-                when '12 hours'
-                  unless delta <= 60*60*12
-                    matches = false
-                when '1 day'
-                  unless delta <= 60*60*24
-                    matches = false
-                when '1 week'
-                  unless delta <= 60*60*24*7
-                    matches = false
-                when '1 month'
-                  unless delta <= 60*60*24*31
-                    matches = false
-                when '1 year'
-                  unless delta <= 60*60*24*366
-                    matches = false
-          when 'group'
-            priv_public = 'group:__world__' in (annotation.permissions.read or [])
-            switch value
-              when 'Public'
-                unless priv_public
-                  matches = false
-              when 'Private'
-                if priv_public
-                   matches = false
-
+              matches  = false
+          else
+            # For all other categories
+            matches = @_checkMatch filter, annotation, @checkers[category]
       if matches
         results.push annotation.id
 
-    results
+    [results, filters]
 
 
 angular.module('h.services', imports)

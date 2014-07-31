@@ -6,23 +6,17 @@ imports = [
   'h.flash'
   'h.helpers'
   'h.session'
-  'h.streamfilter'
+  'h.searchfilters'
 ]
-
-SEARCH_FACETS = ['text', 'tags', 'uri', 'quote', 'since', 'user', 'results']
-SEARCH_VALUES =
-  group: ['Public', 'Private'],
-  since: ['5 min', '30 min', '1 hour', '12 hours',
-          '1 day', '1 week', '1 month', '1 year']
 
 class StreamSearch
   this.inject = [
     '$location', '$scope', '$rootScope',
-    'queryparser', 'session', 'streamfilter'
+    'queryparser', 'session', 'searchfilter', 'streamfilter'
   ]
   constructor: (
      $location,   $scope,   $rootScope,
-     queryparser,   session,   streamfilter
+     queryparser,   session,   searchfilter,   streamfilter
   ) ->
     # Initialize the base filter
     streamfilter
@@ -31,7 +25,9 @@ class StreamSearch
       .setPastDataHits(50)
 
     # Apply query clauses
-    queryparser.populateFilter streamfilter, $location.search()
+    $scope.query = $location.search()['query']
+    terms = searchfilter.generateFacetedFilter $scope.query
+    queryparser.populateFilter streamfilter, terms
 
     $scope.updater?.then (sock) ->
       filter = streamfilter.getFilter()
@@ -44,11 +40,9 @@ class StreamSearch
     $scope.search.query = $location.search()
     $scope.search.show = not angular.equals($location.search(), {})
 
-    $scope.search.update = (searchCollection) ->
-      # Update the query parameters
-      query = queryparser.parseModels searchCollection.models
-      unless angular.equals $location.search(), query
-        $location.search query
+    $scope.search.update = (query) ->
+      unless angular.equals $location.search(query), query
+        $location.search {query:query}
 
     $scope.search.clear = ->
       $location.search({})
@@ -66,6 +60,4 @@ class StreamSearch
 
 
 angular.module('h.streamsearch', imports, configure)
-.constant('searchFacets', SEARCH_FACETS)
-.constant('searchValues', SEARCH_VALUES)
 .controller('StreamSearchController', StreamSearch)

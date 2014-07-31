@@ -6,6 +6,7 @@
 @import 'spinner';
 @import 'responsive';
 @import 'yui_grid';
+@import 'simple-search';
 
 
 $base-font-size: 16px;
@@ -41,8 +42,8 @@ p {
 em { font-style: italic; }
 
 html {
-  font-size: $base-font-size / 16px * 1em;
-  line-height: $base-line-height / 16px * 1em;
+  font-size: $base-font-size;
+  line-height: $base-line-height;
 
   @include yui_grid();
 
@@ -350,6 +351,61 @@ blockquote {
 
 
 //ICON CLASSES////////////////////////////////
+.flag-icon {
+  @include fonticon("\28", left);
+}
+
+.fave-icon {
+  @include fonticon("\e006", left);
+  &.checked:before {
+    content: "\e005";
+  }
+}
+
+.reply-icon {
+  @include fonticon("\e004", left);
+}
+
+.share-icon {
+  @include fonticon("\25", left);
+}
+
+.down-icon {
+  @include fonticon("\e007", left);
+}
+
+.clipboard-icon {
+  @include fonticon("\33", left);
+}
+
+.check-icon {
+  @include fonticon("\35", left);
+}
+
+.plus-icon {
+  @include fonticon("\e012", left);
+}
+
+.x-icon {
+  @include fonticon("\36", left);
+}
+
+.vis-icon {
+  @include fonticon("\e001", left);
+}
+
+.highlight-icon {
+  @include fonticon("\e601", left);
+}
+
+.comment-icon {
+  @include fonticon("\e600", left);
+}
+
+.launch-icon {
+  @include fonticon("\2a", left);
+}
+
 .loading-icon {
   text-align: center
 }
@@ -749,53 +805,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
       font-size: 12px; 
     }
     li.tagit-choice { margin-top: .1em; }
-  }
-}
-
-//Visual Search////////////////////////////////
-//Override their css here
-.VS-search {
-  overflow: hidden;
-
-  * {
-    @include box-sizing(content-box);
-  }
-
-  .search_facet input,
-  .search_input input,
-  .VS-input-width-tester {
-    @include box-shadow(none);
-    border: 0;
-  }
-
-  .VS-search-box {
-    border: 0;
-    height: 26px;
-    margin: 1px 0;
-    min-height: 26px;
-  }
-
-  &.VS-search-collapsed .VS-search-box {
-    @include box-shadow(none);
-    background: inherit;
-  }
-
-  .VS-icon-cancel {
-    background-image: url(../images/svg/cancel.svg);
-    background-size: contain;
-    &:hover {
-      background-image: url(../images/svg/cancel_black.svg);
-      background-position: center 0;
-    }
-  }
-
-  .VS-icon-search {
-    background-image: url(../images/svg/search.svg);
-    background-size: contain;
-    &:hover {
-      background-image: url(../images/svg/search_dark.svg);
-      cursor: pointer;
-    }
   }
 }
 

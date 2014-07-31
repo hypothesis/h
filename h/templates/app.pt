@@ -15,23 +15,13 @@
              data-user-picker-options="session.personas">
         </div>
 
-       <!-- Searchbar -->
-       <div class="visual-search"
-            query="search.query"
-            facets="search.facets"
-            values="search.values"
-            onclear="search.show = false; search.clear()"
-            onsearch="search.update(this)"
-            ng-show="search.show"></div>
-       <div ng-click="search.show = true" ng-hide="search.show">
-         <div class="VS-search VS-search-collapsed">
-           <div class="VS-search-box-wrapper VS-search-box">
-             <div class="VS-icon VS-icon-search"></div>
-           </div>
-         </div>
-       </div>
+        <!-- Searchbar -->
+        <div class="simple-search"
+             query="query"
+             onsearch="search.update(this)"
+             onclear="search.show = false; search.clear()"></div>
+        <!-- / Searchbar -->
       </div>
-      <!-- / Searchbar -->
     </div>
     <!-- / Toolbar -->
 
@@ -42,7 +32,8 @@
            ng-mouseenter="showViewSort()"
            ng-mouseleave="showViewSort(false)"
            ng-show="viewState.showControls">
-        <div class="dropdown">
+        <div class="dropdown"
+             ng-show="viewState.show">
           <span role="button"
                 class="dropdown-toggle"
                 data-toggle="dropdown"

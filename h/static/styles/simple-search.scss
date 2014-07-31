@@ -1,0 +1,71 @@
+@import "base.scss";
+
+.simple-search {
+  overflow: hidden;
+}
+
+.simple-search-form {
+  position: relative;
+  color: $gray;
+}
+
+.simple-search-icon {
+  position: absolute;
+  font-size: 1.1em;
+  top: 50%;
+  left: .6em;
+  margin-top: -.5em;
+  pointer-events: none;
+
+  :not(:focus) ~ & {
+    color: $gray-lighter;
+  }
+}
+
+.simple-search-input {
+  outline: none;
+  color: $text-color;
+  line-height: 24px;
+  width: 100%;
+  border-radius: 2em;
+  border: 1px solid $gray-lighter !important; // Override base input styles.
+  padding: 0 2em;
+
+  .simple-search-inactive &:not(:focus) {
+    border-color: #f3f3f3 !important;
+  }
+}
+
+.simple-search-clear {
+  [class^="icon-"], [class*=" icon-"] {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -.5em;
+    margin-left: -.5em;
+    font-size: .7em;
+  }
+
+  position: absolute;
+  outline: none;
+  right: .35em;
+  top: 50%;
+  border: none;
+  border-radius: 50%;
+  background: $gray-light;
+  color: #fff;
+  width: 1.33em;
+  height: 1.33em;
+  padding: 0;
+  margin-top: -.65em;
+  @include box-shadow(none);
+
+  &:focus, &:hover, &:active:not([disabled]) {
+    @include transition(background-color 200ms ease-in);
+    background-color: $gray-light;
+    color: #fff;
+    border: none;
+    background-image: none;
+    box-shadow: none;
+  }
+}

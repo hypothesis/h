@@ -1,3 +1,133 @@
+# This class will parse the search filter and produce a faceted search filter object
+# It expects a search query string where the search term are separated by space character
+# and collects them into the given term arrays
+class SearchFilter
+
+  # This function will slice the search-text input
+  # Slice character: space,
+  # but an expression between quotes (' or ") is considered one
+  # I.e from the string: "text user:john 'to be or not to be' it will produce:
+  # ["text", "user:john", "to be or not to be"]
+  _tokenize: (searchtext) ->
+    return [] unless searchtext
+    tokens = searchtext.match /(?:[^\s"']+|"[^"]*"|'[^']*')+/g
+
+    # Cut the opening and closing quote characters
+    for token, index in tokens
+      start = token.slice 0,1
+      end = token.slice -1
+      if (start is '"' or start is "'") and (start is end)
+        tokens[index] = token.slice 1, token.length - 1
+
+    tokens
+
+  # This function will generate the facets from the search-text input
+  # It'll first tokenize it and then sorts them into facet lists
+  # The output will be a dict with the following structure:
+  # An object with facet_names as keys.
+  # A value for a key:
+  # [facet_name]:
+  #   [operator]: 'and'|'or'|'min' (for the elements of the facet terms list)
+  #   [lowercase]: true|false
+  #   [terms]: an array for the matched terms for this facet
+  # The facet selection is done by analyzing each token.
+  # It generally expects a <facet_name>:<facet_term> structure for a token
+  # Where the facet names are: 'quote', 'result', 'since', 'tag', 'text', 'uri', 'user
+  # Anything that didn't match go to the 'any' facet
+  # For the 'since' facet the the time string is scanned and is converted to seconds
+  # So i.e the 'since:7min' token will be converted to 7*60 = 420 for the since facet value
+  generateFacetedFilter: (searchtext) ->
+    any = []
+    quote = []
+    result = []
+    since = []
+    tag = []
+    text = []
+    uri = []
+    user = []
+
+    if searchtext
+      terms = @_tokenize(searchtext)
+      for term in terms
+        filter = term.slice 0, term.indexOf ":"
+        unless filter? then filter = ""
+        switch filter
+          when 'quote' then quote.push term[6..]
+          when 'result' then result.push term[7..]
+          when 'since'
+            # We'll turn this into seconds
+            time = term[6..].toLowerCase()
+            if time.match /^\d+$/
+              # Only digits, assuming seconds
+              since.push time
+            if time.match /^\d+sec$/
+              # Time given in seconds
+              t = /^(\d+)sec$/.exec(time)[1]
+              since.push t
+            if time.match /^\d+min$/
+              # Time given in minutes
+              t = /^(\d+)min$/.exec(time)[1]
+              since.push t * 60
+            if time.match /^\d+hour$/
+              # Time given in hours
+              t = /^(\d+)hour$/.exec(time)[1]
+              since.push t * 60 * 60
+            if time.match /^\d+day$/
+              # Time given in days
+              t = /^(\d+)day$/.exec(time)[1]
+              since.push t * 60 * 60 * 24
+            if time.match /^\d+week$/
+              # Time given in week
+              t = /^(\d+)week$/.exec(time)[1]
+              since.push t * 60 * 60 * 24 * 7
+            if time.match /^\d+month$/
+              # Time given in month
+              t = /^(\d+)month$/.exec(time)[1]
+              since.push t * 60 * 60 * 24 * 30
+            if time.match /^\d+year$/
+              # Time given in year
+              t = /^(\d+)year$/.exec(time)[1]
+              since.push t * 60 * 60 * 24 * 365
+          when 'tag' then tag.push term[4..]
+          when 'text' then text.push term[5..]
+          when 'uri' then uri.push term[4..]
+          when 'user' then user.push term[5..]
+          else any.push term
+
+    any:
+      terms: any
+      operator: 'and'
+      lowercase: true
+    quote:
+      terms: quote
+      operator: 'and'
+      lowercase: true
+    result:
+      terms: result
+      operator: 'min'
+      lowercase: false
+    since:
+      terms: since
+      operator: 'and'
+      lowercase: false
+    tag:
+      terms: tag
+      operator: 'and'
+      lowercase: true
+    text:
+      terms: text
+      operator: 'and'
+      lowercase: true
+    uri:
+      terms: uri
+      operator: 'or'
+      lowercase: true
+    user:
+      terms: user
+      operator: 'or'
+      lowercase: true
+
+
 # This class will process the results of search and generate the correct filter
 # It expects the following dict format as rules
 # { facet_name : {
@@ -10,10 +140,12 @@
 #
 #      options: backend specific options
 #      options.es: elasticsearch specific options
-#      options.es.query_type : can be: simple, query_string, match
+#      options.es.query_type : can be: simple, query_string, match, multi_match
 #         defaults to: simple, determines which es query type to use
 #      options.es.cutoff_frequency: if set, the query will be given a cutoff_frequency for this facet
-#      options.es.and_or: match queries can use this, defaults to and
+#      options.es.and_or: match and multi_match queries can use this, defaults to and
+#      options.es.match_type: multi_match query type
+#      options.es.fields: fields to search for in multi-match query
 # }
 # The models is the direct output from visualsearch
 class QueryParser
@@ -70,6 +202,18 @@ class QueryParser
       case_sensitive: true
       and_or: 'and'
       operator: 'ge'
+    any:
+      exact_match: false
+      case_sensitive: false
+      and_or: 'and'
+      path:   ['/quote', '/tags', '/text', '/uri', '/user']
+      options:
+        es:
+         query_type: 'multi_match'
+         match_type: 'cross_fields'
+         and_or: 'and'
+         fields:   ['quote', 'tags', 'text', 'uri', 'user']
+
 
   parseModels: (models) ->
     # Cluster facets together
@@ -85,13 +229,12 @@ class QueryParser
 
   populateFilter: (filter, query) =>
     # Populate a filter with a query object
-    for category, values of query
+    for category, value of query
       unless @rules[category]? then continue
-      unless values.length then continue
+      terms = value.terms
+      unless terms.length then continue
       rule = @rules[category]
 
-      unless angular.isArray values
-        values = [values]
 
       # Now generate the clause with the help of the rule
       exact_match = if rule.exact_match? then rule.exact_match else true
@@ -102,7 +245,7 @@ class QueryParser
       if and_or is 'or'
         val_list = ''
         first = true
-        for val in values
+        for val in terms
           unless first then val_list += ',' else first = false
           value_part = if rule.formatter then rule.formatter val else val
           val_list += value_part
@@ -114,7 +257,7 @@ class QueryParser
         oper_part =
           if rule.operator? then rule.operator
           else if exact_match then 'equals' else 'matches'
-        for val in values
+        for val in terms
           value_part = if rule.formatter then rule.formatter val else val
           filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
 
@@ -220,6 +363,7 @@ class StreamFilter
     this
 
 
-angular.module('h.streamfilter', [])
+angular.module('h.searchfilters', [])
+.service('searchfilter', SearchFilter)
 .service('queryparser', QueryParser)
 .service('streamfilter', StreamFilter)

@@ -1,10 +1,10 @@
 @font-face {
 	font-family: 'h';
-	src:url('fonts/h.eot');
-	src:url('fonts/h.eot?#iefix') format('embedded-opentype'),
-		url('fonts/h.woff') format('woff'),
-		url('fonts/h.ttf') format('truetype'),
-		url('fonts/h.svg#h') format('svg');
+	src:url('fonts/h.eot?jsvc9t');
+	src:url('fonts/h.eot?#iefixjsvc9t') format('embedded-opentype'),
+		url('fonts/h.woff?jsvc9t') format('woff'),
+		url('fonts/h.ttf?jsvc9t') format('truetype'),
+		url('fonts/h.svg?jsvc9t#h') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -244,4 +244,7 @@
 }
 .icon-link:before {
 	content: "\e60a";
+}
+.icon-search:before {
+	content: "\e60c";
 }
