@@ -3,7 +3,37 @@
 @import "compass/utilities/general/clearfix";
 
 .form-field {
+  @include clearfix;
   margin-bottom: 10px;
+}
+
+.form-heading {
+  position: relative;
+  font-size: 1em;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-top: 0;
+  margin-bottom: 20px;
+
+  span {
+    position: relative;
+    background: white;
+    padding-right: 5px;
+    z-index: 1;
+  }
+
+  &::after {
+    content: "";
+    display: block;
+    height: 1px;
+    background: $gray-lighter;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    margin-top: -1px;
+    z-index: 0;
+  }
 }
 
 .form-description {
@@ -78,16 +108,37 @@
   }
 }
 
-
 .form-select {
   display: block;
 }
 
 .form-error-list {
+  position: relative;
   display: none;
+  background: $hypothered;
+  margin-top: (10 / 13 * 1em);
+  padding: (4 / 13 * 1em) (11 / 13 * 1em);
+  float: left;
+  border-radius: 2px;
 
-  &:first-child {
-    margin-top: 5px;
+  .form-error {
+    font-size: 12px;
+    color: white;
+  }
+
+  &:after {
+    bottom: 100%;
+    left: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-color: rgba($hypothered, 0);
+    border-bottom-color: $hypothered;
+    border-width: 4px;
+    margin-left: -4px;
   }
 }
 
@@ -126,7 +177,7 @@
 
 .form-actions {
   @include pie-clearfix;
-  margin-top: 5px;
+  margin-top: 20px;
 }
 
 .form-actions-message {
@@ -192,6 +243,27 @@
     background: #F0F0F0;
     border-color: #CECECE;
     color: $gray-light;
+  }
+}
+
+.btn-danger {
+  @include background(linear-gradient(top, $hypothered, shade($hypothered, 5%)));
+  color: white;
+  border-color: shade($hypothered, 15%);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1);
+
+  &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
+    @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.05));
+    color: white;
+    background: #e02b3c;
+    border-color: $hypothered;
+  }
+
+  &:active, &.js-active {
+    @include box-shadow(inset 0 1px 0 rgba(0, 0, 0, 0.3));
+    color: white;
+    background: shade($hypothered, 10%);
+    border-color: shade($hypothered, 30%);
   }
 }
 
@@ -282,4 +354,10 @@
 [data-btn-message-state=success] .btn-message-success .btn-message-icon {
   @include transition(transform 0.15s 0 cubic-bezier(0, 1.8, 1, 1.8));
   @include transform(scale(1));
+}
+
+// TODO: Move into seperate module stylesheet.
+.account-form {
+  margin-top: 30 / 13 * 1em;
+  margin-bottom: 30 / 13 * 1em;
 }
