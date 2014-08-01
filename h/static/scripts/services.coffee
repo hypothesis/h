@@ -788,7 +788,7 @@ class ViewFilter
   #   the faceted filters
   # ]
   filter: (annotations, query) =>
-    filters = @searchfilter.generateFacetedFilter query.query
+    filters = @searchfilter.generateFacetedFilter query
     results = []
 
     # Check for given limit

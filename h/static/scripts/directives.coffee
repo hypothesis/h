@@ -412,8 +412,8 @@ simpleSearch = ['$parse', ($parse) ->
       _clear(scope) if attr.onclear
 
     scope.$watch attr.query, (query) ->
-      if query.query?
-        scope.searchtext = query.query
+      if query?
+        scope.searchtext = query
         _search(scope, {"this": scope.searchtext})
 
   restrict: 'C'
