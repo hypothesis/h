@@ -190,12 +190,12 @@
   @include pie-clearfix;
   float: right;
 
-  * {
+  > * {
     float: left;
     margin-left: 10px;
   }
 
-  *:first-child {
+  > *:first-child {
     margin-left: 0;
   }
 }
@@ -325,33 +325,33 @@
 }
 
 // Handles state transitions from "default" -> "loading" -> "success"
-[data-btn-message-state] .btn-message {
+[status-button-state] .btn-message {
   top: -999em;
   left: -999em;
   right: auto;
 }
 
-[data-btn-message-state=success] .btn-message-success,
-[data-btn-message-state=loading] .btn-message-loading {
+[status-button-state=success] .btn-message-success,
+[status-button-state=loading] .btn-message-loading {
   top: 50%;
   left: auto;
   right: 100%;
 }
 
-[data-btn-message-state] .btn-message-text {
+[status-button-state] .btn-message-text {
   @include transition(opacity 0.2s 0.6s ease-in);
   opacity: 0;
 }
 
-[data-btn-message-state=success] .btn-message-success .btn-message-text {
+[status-button-state=success] .btn-message-success .btn-message-text {
   opacity: 1;
 }
 
-[data-btn-message-state] .btn-message-success .btn-message-icon {
+[status-button-state] .btn-message-success .btn-message-icon {
   @include transform(scale(0));
 }
 
-[data-btn-message-state=success] .btn-message-success .btn-message-icon {
+[status-button-state=success] .btn-message-success .btn-message-icon {
   @include transition(transform 0.15s 0 cubic-bezier(0, 1.8, 1, 1.8));
   @include transform(scale(1));
 }

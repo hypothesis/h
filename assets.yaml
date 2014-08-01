@@ -319,6 +319,7 @@ app_js:
             - scripts/flash.coffee
             - scripts/filters.coffee
             - scripts/directives.coffee
+            - scripts/directives/status-button.coffee
             - scripts/app_directives.coffee
             - scripts/helpers.coffee
             - scripts/session.coffee
