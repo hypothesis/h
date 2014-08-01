@@ -110,7 +110,7 @@ class SearchFilter
       terms: since
       operator: 'and'
       lowercase: false
-    tag:
+    tags:
       terms: tag
       operator: 'and'
       lowercase: true
