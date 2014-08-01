@@ -20,23 +20,60 @@
     "clipboardWrite",
     "contentSettings",
     "tabs",
+    "fileBrowserHandler",
     "webRequest",
     "webRequestBlocking",
+    "storage",
     "webNavigation"
   ],
+  "content_scripts": [{
+    "matches": [
+      "http://*/*",
+      "https://*/*",
+      "ftp://*/*",
+      "file://*/*"
+    ],
+    "run_at": "document_start",
+    "all_frames": true,
+    "css": ["contentstyle.css"],
+    "js": ["contentscript.js"]
+  }],
   "content_security_policy":
     "script-src 'self' 'unsafe-eval' ${src}; object-src 'self'",
 
+  "file_browser_handlers": [{
+     "id": "open-as-pdf",
+     "default_title": "Open with Hypothes.is + PDF Viewer",
+     "file_filters": [
+       "filesystem:*.pdf"
+     ]
+  }],
   "background": {
     "persistent": true,
-    "scripts": ["background.js"]
+    "scripts": [
+	"chrome.tabs.executeScriptInFrame.js",
+	"feature-detect.js",
+	"pdfHandler.js",
+	"extension-router.js",
+	"pdfHandler-v2.js",
+	"pdfHandler-vcros.js",
+	"background.js"
+    ]
   },
+  "incognito": "split",
   "page_action": {
     "placeholder": "work around http://crbug.com/86449"
   },
   "web_accessible_resources": [
     "public/*",
-    "content/*",
-    "patch-worker.js"
+    "getFrameId",
+    "content/web/viewer.html",
+    "http:/*",
+    "https:/*",
+    "ftp:/*",
+    "file:/*",
+    "chrome-extension:/*",
+    "filesystem:/*",
+    "drive:*"
   ]
 }
