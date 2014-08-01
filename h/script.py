@@ -160,6 +160,12 @@ def chrome(env):
         merge('../../h/static/styles/images', './public/styles/images')
         merge('../../h/static/images', './public/images')
         merge('../../h/static/fonts', './public/fonts')
+
+        # Copy over the vendor assets since they won't be processed otherwise
+        if request.webassets_env.debug:
+            makedirs('./public/scripts/vendor')
+            merge('../../h/static/scripts/vendor', './public/scripts/vendor')
+
         app(context, request)
 
     manifest(context, request)
