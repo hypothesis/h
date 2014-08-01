@@ -89,9 +89,9 @@ def stream(context, request):
     query = None
 
     if stream_type == 'user':
-        query = {'user': stream_key}
+        query = {'q': 'user:{}'.format(stream_key)}
     elif stream_type == 'tag':
-        query = {'tags': stream_key}
+        query = {'q': 'tag:{}'.format(stream_key)}
 
     if query is not None:
         location = request.resource_url(context, 'stream', query=query)

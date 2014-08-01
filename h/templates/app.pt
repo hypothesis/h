@@ -17,9 +17,9 @@
 
         <!-- Searchbar -->
         <div class="simple-search"
-             query="query"
+             query="search.query"
              onsearch="search.update(this)"
-             onclear="search.show = false; search.clear()"></div>
+             onclear="search.clear()"></div>
         <!-- / Searchbar -->
       </div>
     </div>

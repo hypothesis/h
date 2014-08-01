@@ -162,13 +162,13 @@ class QueryParser
       exact_match: false
       case_sensitive: false
       and_or: 'and'
-    tags:
+    tag:
       path: '/tags'
       exact_match: false
       case_sensitive: false
       and_or: 'or'
     quote:
-      path: "/quote"
+      path: '/quote'
       exact_match: false
       case_sensitive: false
       and_or: 'and'
@@ -212,7 +212,7 @@ class QueryParser
          query_type: 'multi_match'
          match_type: 'cross_fields'
          and_or: 'and'
-         fields:   ['quote', 'tags', 'text', 'uri', 'user']
+         fields:   ['quote', 'tag', 'text', 'uri', 'user']
 
 
   parseModels: (models) ->

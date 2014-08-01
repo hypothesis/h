@@ -136,7 +136,6 @@ describe 'h.directives', ->
   describe '.simpleSearch', ->
     $element = null
     beforeEach ->
-      $scope.query = {}
       $scope.update = sinon.spy()
       $scope.clear = sinon.spy()
 
@@ -152,12 +151,12 @@ describe 'h.directives', ->
       $scope.$digest()
 
     it 'updates the search-bar', ->
-      $scope.query = {query: "Test query"}
+      $scope.query = "Test query"
       $scope.$digest()
-      assert.equal($scope.searchtext, $scope.query.query)
+      assert.equal($scope.searchtext, $scope.query)
 
     it 'calls the given search function', ->
-      $scope.query = {query: "Test query"}
+      $scope.query = "Test query"
       $scope.$digest()
       $element.trigger('submit')
       sinon.assert.calledWith($scope.update, "Test query")
@@ -167,7 +166,7 @@ describe 'h.directives', ->
       assert($scope.clear.called)
 
     it 'clears the search-bar', ->
-      $scope.query = {query: "Test query"}
+      $scope.query = "Test query"
       $scope.$digest()
       $element.find('.simple-search-clear').click()
       assert.equal($scope.searchtext, '')
@@ -177,7 +176,7 @@ describe 'h.directives', ->
       assert.include($form.prop('className'), 'simple-search-inactive')
 
     it 'removes the class from the form when there is an input value', ->
-      $scope.query = {query: "Test query"}
+      $scope.query = "Test query"
       $scope.$digest()
 
       $form = $element.find('.simple-search-form')

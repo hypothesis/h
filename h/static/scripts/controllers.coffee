@@ -10,6 +10,7 @@ class App
     frame:
       visible: false
     ongoingHighlightSwitch: false
+    search: {}
     sheet: {}
     sorts: [
       'Newest'
@@ -40,8 +41,7 @@ class App
         socialView: annotator.socialView
         ongoingHighlightSwitch: false
         search:
-          query: $location.search()
-          show: not angular.equals($location.search(), {})
+          query: $location.search()['q']
         session: session
 
     _reset()
@@ -104,12 +104,6 @@ class App
           else
             $scope.reloadAnnotations()
             $scope.initUpdater()
-
-    $scope.$watch 'search.show', (visible) ->
-      if visible
-        $timeout ->
-          $element.find('.visual-search').find('input').last().focus()
-        , 10
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
@@ -219,41 +213,23 @@ class App
 
     $rootScope.applySort "Location"
 
-    $scope.query = $location.search()
-
-    $scope.search = {}
-    $scope.search.update = angular.noop
-    $scope.search.clear = angular.noop
-
-    #$scope.show_search = Object.keys($scope.query).length > 0
-
     $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
       unless next.$$route? then return
 
-      $scope.search.query = $location.search()
-      $scope.search.show = not angular.equals($location.search(), {})
-
-      if next.$$route.originalPath is '/viewer'
-        $rootScope.viewState.show = true
-      else
-        $rootScope.viewState.show = false
+      $scope.search.query = $location.search()['q']
+      $rootScope.viewState.show = next.$$route.originalPath is '/viewer'
 
       unless next.$$route.originalPath is '/stream'
         if current and next.$$route.originalPath is '/a/:id'
           $scope.reloadAnnotations()
 
-        $scope.search.update = (searchCollection) ->
-          return unless annotator.discardDrafts()
+    $scope.search.clear = ->
+      $location.search('q', null)
 
-          query = {query: searchCollection}
-          unless angular.equals $location.search(), query
-            if $location.path() == '/viewer' or $location.path() == '/page_search'
-              $location.path('/page_search').search(query)
-            else
-              $location.path('/stream').search(query)
-
-        $scope.search.clear = ->
-          $location.url('/viewer')
+    $scope.search.update = (query) ->
+      unless angular.equals $location.search()['q'], query
+        if annotator.discardDrafts()
+          $location.search('q', query or null)
 
     $scope.reloadAnnotations = ->
       Store = plugins.Store
@@ -730,6 +706,9 @@ class Viewer
     $location, $rootScope, $routeParams, $scope,
     annotator
   ) ->
+    if $routeParams.q
+      return $location.path('/page_search').replace()
+
     {providers, threading} = annotator
 
     $scope.activate = (annotation) ->
@@ -756,13 +735,14 @@ class Search
                   'annotator', 'viewFilter']
   constructor: ($filter, $location, $rootScope, $routeParams, $sce, $scope,
                 annotator, viewFilter) ->
+    unless $routeParams.q
+      return $location.path('/viewer').replace()
+
     {providers, threading} = annotator
 
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
     $scope.filter_orderBy = $filter('orderBy')
     $scope.matches = []
-    $scope.search.query = $location.search()
-    $scope.search.show = true
     $scope.render_order = {}
     $scope.render_pos = {}
     $scope.ann_info =
@@ -834,7 +814,8 @@ class Search
       refresh()
 
     refresh = =>
-      [$scope.matches, $scope.filters] = viewFilter.filter $rootScope.annotations, $routeParams
+      query = $routeParams.q
+      [$scope.matches, $scope.filters] = viewFilter.filter $rootScope.annotations, query
       # Create the regexps for highlighting the matches inside the annotations' bodies
       $scope.text_tokens = $scope.filters.text.terms.slice()
       $scope.text_regexp = []

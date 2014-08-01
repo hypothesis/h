@@ -736,12 +736,13 @@ class ViewFilter
     matches = true
     # Make copy for filtering
     copy = value.slice()
-    copy.filter (e) ->
-      not match filter.terms, e
 
-    if (filter.operator is 'and' and copy.length < value.length) or
+    copy = copy.filter (e) ->
+      match filter.terms, e
+
+    if (filter.operator is 'and' and copy.length < filter.terms.length) or
     (filter.operator is 'or' and not copy.length)
-        matches = false
+      matches = false
     matches
 
   _anyMatches: (filter, value, match) ->
@@ -788,7 +789,7 @@ class ViewFilter
   #   the faceted filters
   # ]
   filter: (annotations, query) =>
-    filters = @searchfilter.generateFacetedFilter query.query
+    filters = @searchfilter.generateFacetedFilter query
     results = []
 
     # Check for given limit

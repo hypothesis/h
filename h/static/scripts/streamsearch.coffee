@@ -11,11 +11,11 @@ imports = [
 
 class StreamSearch
   this.inject = [
-    '$location', '$scope', '$rootScope',
+    '$scope', '$rootScope',
     'queryparser', 'session', 'searchfilter', 'streamfilter'
   ]
   constructor: (
-     $location,   $scope,   $rootScope,
+     $scope,   $rootScope,
      queryparser,   session,   searchfilter,   streamfilter
   ) ->
     # Initialize the base filter
@@ -25,8 +25,7 @@ class StreamSearch
       .setPastDataHits(50)
 
     # Apply query clauses
-    $scope.query = $location.search()['query']
-    terms = searchfilter.generateFacetedFilter $scope.query
+    terms = searchfilter.generateFacetedFilter $scope.search.query
     queryparser.populateFilter streamfilter, terms
 
     $scope.updater?.then (sock) ->
@@ -36,16 +35,6 @@ class StreamSearch
     $rootScope.annotations = []
     $rootScope.applyView "Document"  # Non-sensical, but best for the moment
     $rootScope.applySort "Newest"
-
-    $scope.search.query = $location.search()
-    $scope.search.show = not angular.equals($location.search(), {})
-
-    $scope.search.update = (query) ->
-      unless angular.equals $location.search(query), query
-        $location.search {query:query}
-
-    $scope.search.clear = ->
-      $location.search({})
 
     $scope.openDetails = (annotation) ->
     $scope.loadMore = (number) =>
