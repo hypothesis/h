@@ -248,8 +248,9 @@ def extension(args, console, settings):
         resolve('h:static').abspath(): assets_url
     })
 
-    # Turn off the webassets cache
+    # Turn off the webassets cache and manifest
     settings['webassets.cache'] = None
+    settings['webassets.manifest'] = None
 
     config = Configurator(settings=settings)
     config.include('h')
