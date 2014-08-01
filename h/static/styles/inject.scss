@@ -37,7 +37,7 @@ $base-font-size: 14px;
     width: 6px;
   }
 
-  button {
+  button, button:first-child {
     @include sweetbutton;
     background-image: url("../images/pen_1.png") !important;
     background-size: 65%;
