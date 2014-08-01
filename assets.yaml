@@ -331,8 +331,7 @@ app_css:
     filters: cleancss
     output: styles/hypothesis.min.css
     contents:
-      - icomoon_css
-      - jquery_ui_css
+      - theme
       - filters: compass, cssrewrite
         output: styles/hypothesis.css
         contents:
@@ -387,14 +386,22 @@ inject_css:
   output: styles/hypothesis-inject.min.css
   filters: cleancss
   contents:
-    - icomoon_css
-    - jquery_ui_css
+    - theme
     - filters: compass, cssrewrite
       output: styles/hypothesis-inject.css
       contents:
         - h:static/styles/inject.scss
       depends:
         - h:static/styles/base.scss
+
+
+theme:
+  debug: false
+  output: styles/theme.css
+  contents:
+    - icomoon_css
+    - jquery_ui_css
+
 
 topbar:
   output: styles/topbar.min.css
