@@ -38,7 +38,6 @@ class StreamSearch
     $rootScope.applySort "Newest"
 
     $scope.search.query = $location.search()
-    $scope.search.show = not angular.equals($location.search(), {})
 
     $scope.search.update = (query) ->
       unless angular.equals $location.search(query), query

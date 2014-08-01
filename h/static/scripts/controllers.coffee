@@ -41,7 +41,6 @@ class App
         ongoingHighlightSwitch: false
         search:
           query: $location.search()
-          show: not angular.equals($location.search(), {})
         session: session
 
     _reset()
@@ -104,12 +103,6 @@ class App
           else
             $scope.reloadAnnotations()
             $scope.initUpdater()
-
-    $scope.$watch 'search.show', (visible) ->
-      if visible
-        $timeout ->
-          $element.find('.visual-search').find('input').last().focus()
-        , 10
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
@@ -225,13 +218,10 @@ class App
     $scope.search.update = angular.noop
     $scope.search.clear = angular.noop
 
-    #$scope.show_search = Object.keys($scope.query).length > 0
-
     $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
       unless next.$$route? then return
 
       $scope.search.query = $location.search()
-      $scope.search.show = not angular.equals($location.search(), {})
 
       if next.$$route.originalPath is '/viewer'
         $rootScope.viewState.show = true
@@ -762,7 +752,6 @@ class Search
     $scope.filter_orderBy = $filter('orderBy')
     $scope.matches = []
     $scope.search.query = $location.search()
-    $scope.search.show = true
     $scope.render_order = {}
     $scope.render_pos = {}
     $scope.ann_info =
