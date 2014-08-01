@@ -5,6 +5,8 @@ default:
 	@yes | ./bootstrap
 
 clean:
+	@rm -rf h/static/.sass-cache
+	@rm -rf h/static/.webassets-cache
 	find h/static/scripts \
 		-iname '*.js' \
 		-path './vendor' -prune \
