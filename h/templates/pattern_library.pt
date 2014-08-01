@@ -1,6 +1,7 @@
 <html metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag>
     <title>Hypothesis</title>
+    <link rel="stylesheet" type="text/css" href="/assets/styles/hypothesis-inject.css" />
     <style>
       body {
         background: none;
@@ -221,7 +222,7 @@
           </div>
           <div class="form-field">
             <button class="btn"><i class="icon-checkmark2 btn-icon"></i> Button with Icon Inside</button>
-          </div>  
+          </div>
           <div class="form-field">
             <button class="btn btn-clean" type="submit" name="">Button Clean</button>
           </div>
@@ -356,11 +357,35 @@
       </div>
       <div class="pattern-library-example">
         <div class="pattern-library-example-header">
+          <h1>Simple Search</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <form class="simple-search-form">
+            <input class="simple-search-input" type="text" name="searchText" placeholder="Search…" />
+            <i class="simple-search-icon icon-search"></i>
+            <button class="simple-search-clear" type="reset">
+              <i class="icon-x"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Simple Search (inactive)</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <form class="simple-search-form simple-search-inactive" name="searchBox">
+            <input class="simple-search-input" type="text" name="searchText" placeholder="Search…" />
+            <i class="simple-search-icon icon-search"></i>
+          </form>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
           <h1>Tags</h1>
         </div>
         <div class="pattern-library-example-content">
           <form class="form" action="" method="">
-            
             <label class="form-label" for="">Editable Tags</label>
             <ul ng-readonly="!editing" ng-model="model.tags" name="tags" class="tags ng-valid tagit ui-widget ui-widget-content ui-corner-all ng-dirty" placeholder="Add tags…">
               <li class="tagit-choice ui-widget-content ui-state-default ui-corner-all tagit-choice-editable">
@@ -420,27 +445,52 @@
       </div>
       <div class="pattern-library-example">
         <div class="pattern-library-example-header">
-          <h1>Simple Search</h1>
+          <h1>Focused Highlight</h1>
         </div>
         <div class="pattern-library-example-content">
-          <form class="simple-search-form">
-            <input class="simple-search-input" type="text" name="searchText" placeholder="Search…" />
-            <i class="simple-search-icon icon-search"></i>
-            <button class="simple-search-clear" type="reset">
-              <i class="icon-x"></i>
-            </button>
-          </form>
+          <p>Alice was beginning to get very tired of sitting by her sister on
+          the bank, and of <span class="annotator-hl annotator-hl-focused">having
+          nothing to do: once or twice she had peeped
+          into the book her sister was reading, but
+          <span class="annotator-hl annotator-hl-focused">it had no
+          <span class="annotator-hl annotator-hl-focused">pictures or
+          conversations</span> in it</span></span>
+          <span class="annotator-hl annotator-hl-focused">, 'and what is the use
+          of a book,' thought Alice 'without pictures or conversations?'</span></p>
         </div>
       </div>
       <div class="pattern-library-example">
         <div class="pattern-library-example-header">
-          <h1>Simple Search (inactive)</h1>
+          <h1>Always On Highlight</h1>
         </div>
         <div class="pattern-library-example-content">
-          <form class="simple-search-form simple-search-inactive" name="searchBox">
-            <input class="simple-search-input" type="text" name="searchText" placeholder="Search…" />
-            <i class="simple-search-icon icon-search"></i>
-          </form>
+          <p class="annotator-highlights-always-on">Alice was beginning to
+          get very tired of sitting by her sister on
+          the bank, and of <span class="annotator-hl">having
+          nothing to do: once or twice she had peeped
+          into the book her sister was reading, but
+          <span class="annotator-hl">it had no
+          <span class="annotator-hl">pictures or
+          conversations</span> in it</span></span>
+          <span class="annotator-hl">, 'and what is the use
+          of a book,' thought Alice 'without pictures or conversations?'</span></p>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Focused Always On Highlight</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <p class="annotator-highlights-always-on">Alice was beginning to
+          get very tired of sitting by her sister on
+          the bank, and of <span class="annotator-hl annotator-hl-focused">having
+          nothing to do: once or twice she had peeped
+          into the book her sister was reading, but
+          <span class="annotator-hl annotator-hl-focused">it had no
+          <span class="annotator-hl annotator-hl-focused">pictures or
+          conversations</span> in it</span></span>
+          <span class="annotator-hl annotator-hl-focused">, 'and what is the use
+          of a book,' thought Alice 'without pictures or conversations?'</span></p>
         </div>
       </div>
     </div>

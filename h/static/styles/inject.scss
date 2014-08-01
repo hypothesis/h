@@ -204,28 +204,41 @@ $base-font-size: 14px;
 .annotator-highlights-always-on .annotator-hl,
 .annotator-hl-active, .annotator-hl-temporary, .annotator-hl-focused {
   background: $highlight-color;
-  box-shadow:3px 3px 4px -1px #999999;
+
+  .annotator-hl {
+    background-color: $highlight-color-second;
+  }
+
+  .annotator-hl .annotator-hl {
+    background-color: $highlight-color-third;
+  }
+
   &::-moz-selection {
     background: $highlight-color;
-    box-shadow:3px 3px 4px #999999;
   }
   &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
     background: $highlight-color;
-    box-shadow:3px 3px 4px #999999;
   }
   &::selection, &::selection:window-inactive {
     background: $highlight-color;
-    box-shadow:3px 3px 4px #999999;
   }
 }
 
 .annotator-highlights-always-on .annotator-hl {
   background: $highlight-mode-color;
+
+  .annotator-hl {
+    background-color: $highlight-mode-color-second;
+  }
+
+  .annotator-hl .annotator-hl {
+    background-color: $highlight-mode-color-third;
+  }
 }
 
 .annotator-highlights-always-on .annotator-hl-active,
 .annotator-highlights-always-on .annotator-hl-focused {
-  box-shadow:3px 3px 4px 3px #999999;
+  background-color: $highlight-mode-active-color;
 }
 
 // Sidebar
