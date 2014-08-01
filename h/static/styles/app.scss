@@ -34,15 +34,6 @@ ol {
   }
 }
 
-.auth {
-  @extend .form-vertical;
-
-  button[name^="forgot"] {
-    @extend .btn-link;
-    float: right;
-  }
-}
-
 .bookmarklet {
   padding: .12em;
   border: 1px dashed $gray;
@@ -100,6 +91,7 @@ ol {
   font-family: $sans-font-family;
   margin-bottom: .72em;
   position: relative;
+  background-color: $body-background;
 
   .close {
     position: absolute;

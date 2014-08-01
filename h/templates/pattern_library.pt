@@ -493,6 +493,28 @@
           of a book,' thought Alice 'without pictures or conversations?'</span></p>
         </div>
       </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Navigation Tabs</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="sheet">
+            <i class="close icon-cancel" role="button" title="Close"></i>
+            <div class="tabbable">
+              <ul class="nav nav-tabs">
+                <li class="active">
+                  <a href="#">Sign in</a>
+                </li>
+                <li>
+                  <a href="#">Create an account</a>
+                </li>
+              </ul>
+            </div>
+            <div class="tab-content">
+              This is where the content would go…
+            </div>
+        </div>
+      </div>
     </div>
     <script>
       var examples = document.querySelectorAll('.pattern-library-example-content');
