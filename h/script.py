@@ -115,7 +115,7 @@ def app(context, request):
 
 def embed(context, request):
     setattr(request, 'view_name', 'embed.js')
-    with open('public/scripts/embed.js', 'w') as f:
+    with open('public/embed.js', 'w') as f:
         f.write(render_view(context, request, name='embed.js'))
     delattr(request, 'view_name')
 
@@ -150,7 +150,8 @@ def chrome(env):
     old_dir = getcwd()
     chdir('./build/chrome')
 
-    # Bundle in pdf.js
+    # Bundle together the extension code and pdf.js
+    merge('../../h/browser/chrome', './')
     merge('../../pdf.js/build/chromium', './')
 
     # Build the app html and copy assets if they are being bundled
@@ -158,7 +159,7 @@ def chrome(env):
         makedirs('./public/styles/images')
         merge('../../h/static/styles/images', './public/styles/images')
         merge('../../h/static/images', './public/images')
-        merge('../../h/browser/chrome', './')
+        merge('../../h/static/fonts', './public/fonts')
         app(context, request)
 
     manifest(context, request)
@@ -244,7 +245,6 @@ def extension(args, console, settings):
     # Turn off the webassets cache
     settings['webassets.cache'] = None
 
-    merge('./h/static/fonts', './build/chrome/public/fonts')
     config = Configurator(settings=settings)
     config.include('h')
     config.add_subscriber(add_base_url, BeforeRender)

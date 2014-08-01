@@ -18,7 +18,7 @@ var ACTION_STATES = {
 
 function inject(tabId) {
   chrome.tabs.executeScript(tabId, {
-    file: 'public/scripts/embed.js'
+    file: 'public/embed.js'
   })
 }
 
@@ -90,7 +90,7 @@ function onPageAction(tab) {
   if (state(tab.id) == 'active') {
     newState = state(tab.id, 'sleeping')
     chrome.tabs.executeScript(tab.id, {
-      file: 'public/scripts/destroy.js'
+      file: 'public/destroy.js'
     })
   } else {
     newState = state(tab.id, 'active')
