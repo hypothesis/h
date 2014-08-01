@@ -29,7 +29,7 @@ formValidate = ->
     # Validate when a response is processed.
     scope.$on 'error', (event, name) ->
       return unless form.$name == name
-      updateField(field) for own _, field of form when field.$name?
+      updateField(field) for own _, field of form when field?.$name?
 
   require: 'form'
 
