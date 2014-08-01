@@ -343,6 +343,7 @@ app_css:
           - h:static/styles/responsive.scss
           - h:static/styles/yui_grid.scss
           - h:static/styles/forms.scss
+          - h:static/styles/reset.scss
           - h:static/styles/spinner.scss
           - h:static/styles/simple-search.scss
 
@@ -394,6 +395,7 @@ inject_css:
         - h:static/styles/inject.scss
       depends:
         - h:static/styles/base.scss
+        - h:static/styles/reset.scss
 
 
 theme:
