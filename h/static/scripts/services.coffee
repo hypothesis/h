@@ -302,30 +302,6 @@ class Hypothesis extends Annotator
 
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
-    .on 'mousewheel', (event, delta) ->
-      # prevent overscroll from scrolling host frame
-      # This is actually a bit tricky. Starting from the event target and
-      # working up the DOM tree, find an element which is scrollable
-      # and has a scrollHeight larger than its clientHeight.
-      # I've obsered that some styles, such as :before content, may increase
-      # scrollHeight of non-scrollable elements, and that there a mysterious
-      # discrepancy of 1px sometimes occurs that invalidates the equation
-      # typically cited for determining when scrolling has reached bottom:
-      #   (scrollHeight - scrollTop == clientHeight)
-      $current = $(event.target)
-      while $current.css('overflow') in ['hidden', 'visible']
-        $parent = $current.parent()
-        # Break out on document nodes
-        if $parent.get(0).nodeType == 9
-          event.preventDefault()
-          return
-        $current = $parent
-      scrollTop = $current[0].scrollTop
-      scrollEnd = $current[0].scrollHeight - $current[0].clientHeight
-      if delta > 0 and scrollTop == 0
-        event.preventDefault()
-      else if delta < 0 and scrollEnd - scrollTop <= 5
-        event.preventDefault()
     this
 
   _setupDocumentEvents: ->
@@ -333,6 +309,7 @@ class Hypothesis extends Annotator
       @host?.notify
         method: 'dragFrame'
         params: event.screenX
+    this
 
   # Override things not used in the angular version.
   _setupDynamicStyle: -> this

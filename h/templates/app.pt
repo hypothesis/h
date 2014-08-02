@@ -25,8 +25,8 @@
     </div>
     <!-- / Toolbar -->
 
-    <!-- Content -->
-    <div id="wrapper" class="content">
+    <!-- Wrapper -->
+    <div id="wrapper" whenscrolled="loadMore(10)">
       <!-- View Sort Controls -->
       <div class="ng-cloak viewsort"
            ng-mouseenter="showViewSort()"
@@ -60,26 +60,26 @@
       <!-- / View Sort Controls -->
 
       <!-- Account and Authentication -->
-      <div class="ng-cloak sheet" ng-show="sheet.show">
-        <i class="close icon-cancel"
-            role="button"
-            title="Close"
-            ng-click="sheet.show = false"></i>
-        <div class="auth form-vertical tabbable"
+      <div class="content ng-cloak" ng-show="sheet.show">
+        <div class="auth sheet form-vertical tabbable"
              data-tab-reveal="['forgot','activate']"
              on-success="authSuccess"
              on-timeout="authTimeout"
              ng-form="form"
              ng-model="sheet.tab">
+          <i class="close icon-cancel"
+             role="button"
+             title="Close"
+             ng-click="sheet.show = false"></i>
           <metal:main use-macro="blocks['auth-tabs']" />
         </div>
       </div>
       <!-- / Account and Authentication -->
 
       <!-- Angular view -->
-      <div ng-view="" whenscrolled="loadMore(10)"></div>
+      <main class="content" ng-view=""></main>
     </div>
-    <!-- / Content -->
+    <!-- / Wrapper -->
 
     <!-- Templates -->
     <script type="text/ng-template" id="annotation.html">
