@@ -16,7 +16,6 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'h/static/scripts/vendor/jquery-1.10.2.js',
-      'h/static/scripts/vendor/jquery.mousewheel.js',
       'h/static/scripts/vendor/angular.js',
       'h/static/scripts/vendor/angular-mocks.js',
       'h/static/scripts/vendor/angular-animate.js',
