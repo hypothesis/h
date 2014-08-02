@@ -39,14 +39,23 @@ ol {
   border: 1px dashed $gray;
 }
 
-.content {
-  margin: 0 auto;
+#wrapper {
   padding: .72em;
+  text-align: center;
 
   @include respond-to(tablets desktops) {
-    padding: .72em 4em 4em;
+    padding-bottom: 4em;
+  }
+}
+
+.content {
+  margin: 0 auto;
+  text-align: left;
+
+  @include respond-to(tablets desktops) {
     margin: auto;
     max-width: $break-medium;
+    padding: 0 4em;
   }
 
   & > header {

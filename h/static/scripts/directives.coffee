@@ -428,15 +428,12 @@ simpleSearch = ['$parse', ($parse) ->
             '''
 ]
 
-whenscrolled = ['$window', ($window) ->
+whenscrolled = ->
   link: (scope, elem, attr) ->
-    $window = angular.element($window)
-    $window.on 'scroll', ->
-      windowBottom = $window.height() + $window.scrollTop()
-      elementBottom = elem.offset().top + elem.height()
-      if elementBottom > 0 and elementBottom - windowBottom <= 0
+    elem.bind 'scroll', ->
+      {clientHeight, scrollHeight, scrollTop} = elem[0]
+      if scrollHeight - scrollTop <= clientHeight + 40
         scope.$apply attr.whenscrolled
-]
 
 
 angular.module('h.directives', ['ngSanitize'])

@@ -476,6 +476,7 @@ blockquote {
   @include border-radius(2px);
   background: $white;
   border: solid 1px $gray-lighter;
+  padding: 1em;
 }
 
 
@@ -576,7 +577,6 @@ blockquote {
 //Threaded discussion specific
 .thread {
   cursor: pointer;
-  padding: 1em;
   position: relative;
 
   & > * {
