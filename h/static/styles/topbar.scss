@@ -43,7 +43,6 @@ body {
   .inner {
     margin: 0 auto;
     max-width: $break-medium;
-    padding: 0 4em;
     position: relative;
 
     @include respond-to(wide-handhelds handhelds) {
