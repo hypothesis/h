@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from annotator import annotation, document
-from pyramid.decorator import reify
 from pyramid.i18n import TranslationStringFactory
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
 

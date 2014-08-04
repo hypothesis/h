@@ -73,14 +73,6 @@ class SessionProvider
         model.errors = data.errors
         model.reason = data.reason
 
-        # bw compat
-        if angular.isObject(data.persona)
-          persona = data.persona
-          data.persona = "acct:#{persona.username}@#{persona.provider}"
-          data.personas = for persona in data.personas
-            "acct:#{persona.username}@#{persona.provider}"
-        # end bw compat
-
         # Fire flash messages.
         for q, msgs of data.flash
           flash q, msgs

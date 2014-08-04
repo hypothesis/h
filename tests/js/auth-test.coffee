@@ -14,6 +14,7 @@ class MockSession
 
 describe 'h.auth', ->
   beforeEach module('h.auth')
+  beforeEach module('auth.html')
 
   beforeEach module ($provide) ->
     $provide.value '$timeout', sinon.spy()
@@ -97,39 +98,41 @@ describe 'h.auth', ->
       elem = angular.element(
         '''
         <div class="auth" ng-form="form"
-             on-error="stub" on-success="stub" on-timeout="stub">
-          <form name="login">
-            <input type="text" name="username" ng-model="username"></input>
-          </form>
+             on-error="stub()" on-success="stub()" on-timeout="stub()">
         </div>
         '''
       )
       session = _session_
       $rootScope = _$rootScope_
-      $scope = $compile(elem)($rootScope).scope()
-      $scope.$digest()
+
+      $compile(elem)($rootScope)
+      $rootScope.$digest()
+
+      $scope = elem.isolateScope()
 
     it 'should reset response errors before submit', ->
-      $scope.form.login.responseErrorMessage = 'test'
-      $scope.form.login.username.$setValidity('response', false)
-      assert.isFalse $scope.form.login.$valid
+      $scope.login.username.$setViewValue('test')
+      $scope.login.password.$setViewValue('1234')
+      $scope.login.responseErrorMessage = 'test'
+      $scope.login.username.$setValidity('response', false)
+      assert.isFalse $scope.login.$valid
 
       elem.find('input').trigger('submit')
-      assert.isTrue $scope.form.login.$valid
-      assert.isNull $scope.form.login.responseErrorMessage
+      assert.isTrue $scope.login.$valid
+      assert.isUndefined $scope.login.responseErrorMessage
 
     it 'should reset to pristine state when the model is reset', ->
-      $scope.form.$setDirty()
-      $scope.$digest()
-      assert.isFalse $scope.form.$pristine
+      $rootScope.form.$setDirty()
+      $rootScope.$digest()
+      assert.isFalse $rootScope.form.$pristine
 
       $scope.model = null
       $scope.$digest()
-      assert.isTrue $scope.form.$pristine
+      assert.isTrue $rootScope.form.$pristine
 
     it 'should invoke handlers set by attributes', ->
-      $scope.stub = sinon.stub()
+      $rootScope.stub = sinon.stub()
       for event in ['error', 'success', 'timeout']
-        $scope.stub.reset()
+        $rootScope.stub.reset()
         $scope.$broadcast(event)
-        assert.called $scope.stub
+        assert.called $rootScope.stub

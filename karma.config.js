@@ -53,9 +53,11 @@ module.exports = function(config) {
       'h/static/scripts/vendor/jquery.ui.effect-highlight.js',
       'h/static/scripts/vendor/tag-it.js',
       'h/static/scripts/vendor/uuid.js',
+      'h/static/scripts/hypothesis-auth.js',
       'h/static/scripts/hypothesis.js',
       'h/static/scripts/vendor/sinon.js',
       'h/static/scripts/vendor/chai.js',
+      'h/templates/*.html',
       'tests/js/**/*-test.coffee'
     ],
 
@@ -64,11 +66,16 @@ module.exports = function(config) {
     exclude: [
     ],
 
+    // strip templates of leading path
+    ngHtml2JsPreprocessor: {
+      stripPrefix: 'h/templates/'
+    },
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      '**/*.coffee': ['coffee']
+      '**/*.coffee': ['coffee'],
+      '**/*.html': ['html2js']
     },
 
 

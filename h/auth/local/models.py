@@ -6,7 +6,11 @@ from uuid import uuid1, uuid4, UUID
 from annotator import auth
 from hem.interfaces import IDBSession
 from hem.db import get_session
-from horus import interfaces
+from horus.interfaces import (
+    IActivationClass,
+    IUserClass,
+    IUIStrings,
+)
 from horus.models import (
     BaseModel,
     ActivationMixin,
@@ -25,7 +29,8 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer, TypeDecorator, CHAR, VARCHAR
 import transaction
-from zope.interface import Interface
+
+from h.interfaces import IConsumerClass
 
 
 class JSONEncodedDict(TypeDecorator):
@@ -135,9 +140,13 @@ class ConsumerMixin(BaseModel):
     def get_by_key(cls, request, key):
         return get_session(request).query(cls).filter(cls.key == key).first()
 
+    @property
+    def client_id(self):
+        return unicode(self.key)
 
-class IConsumerClass(Interface):
-    pass
+    @property
+    def client_secret(self):
+        return unicode(self.secret)
 
 
 class Consumer(ConsumerMixin, Base):
@@ -269,9 +278,9 @@ def includeme(config):
     config.include('pyramid_tm')
 
     models = [
-        (interfaces.IActivationClass, Activation),
-        (interfaces.IUserClass, User),
-        (interfaces.IUIStrings, UIStringsBase),
+        (IActivationClass, Activation),
+        (IUserClass, User),
+        (IUIStrings, UIStringsBase),
         (IConsumerClass, Consumer),
         (IDBSession, Session)
     ]

@@ -435,13 +435,13 @@ class Hypothesis extends Annotator
   showEditor: (annotation) =>
     this.show()
     @element.injector().invoke [
-      '$location', '$rootScope', 'drafts'
-      ($location,   $rootScope,   drafts) =>
+      '$location', '$rootScope', 'drafts', 'identity',
+      ($location,   $rootScope,   drafts,   identity) =>
         @ongoing_edit = annotation
 
         unless this.plugins.Auth? and this.plugins.Auth.haveValidToken()
           $rootScope.$apply ->
-            $rootScope.$broadcast 'showAuth', true
+            identity.request()
           for p in @providers
             p.channel.notify method: 'onEditorHide'
           return
@@ -566,7 +566,7 @@ class Hypothesis extends Annotator
         scope = @element.scope()
         # If we are not logged in, start the auth process
         scope.ongoingHighlightSwitch = true
-        scope.sheet.collapsed = false
+        @element.injector().get('identity').request()
         this.show()
         return
 

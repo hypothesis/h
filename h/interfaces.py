@@ -27,8 +27,14 @@ __all__ = [
 class IAnnotationClass(Interface):
     pass
 
+
+class IConsumerClass(Interface):
+    pass
+
+
 class IStoreClass(Interface):
     pass
+
 
 class IStreamResource(Interface):
     pass

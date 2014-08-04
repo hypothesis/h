@@ -3,11 +3,10 @@ import json
 import logging
 
 from pyramid import httpexceptions
-from pyramid.view import view_config, view_defaults
+from pyramid.view import view_config
 
 from h import interfaces
 from h.models import _
-from h.streamer import url_values_from_document
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -31,9 +30,9 @@ def pop_flash(request):
 
 
 def model(request):
-    session = request.session
-    return dict(csrf=session.get_csrf_token(),
-                personas=session.get('personas', []))
+    session = {k: v for k, v in request.session.items() if k[0] != '_'}
+    session['csrf_token'] = request.session.get_csrf_token()
+    return session
 
 
 @view_config(

@@ -1,17 +1,12 @@
 imports = [
-  'bootstrap'
   'ngAnimate'
   'ngRoute'
+  'h.app_directives'
   'h.auth'
   'h.controllers'
   'h.directives'
-  'h.app_directives'
-  'h.helpers'
-  'h.flash'
   'h.filters'
-  'h.session'
-  'h.services'
-  'h.socket'
+  'h.identity'
   'h.streamsearch'
 ]
 
