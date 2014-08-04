@@ -436,79 +436,6 @@ match = ->
   restrict: 'A'
   require: 'ngModel'
 
-confirmPasswordCheck = ['$resource', ($resource)->
-  link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
-    # Check password against server.
-  restrict: 'A'
-  require: 'ngModel'
-]
-
-accountManagement = ['$filter', 'flash', 'profile', 'util', ($filter, flash, profile, util) ->
-  link: (scope, elem, attr, ctrl) ->
-    scope.emailCheck = ->
-      # Checks to see if email is duplicate.
-      return
-
-  controller: ($scope, $filter) ->
-    persona_filter = $filter('persona')
-
-    onSuccess = (response) ->
-      # Fire flash messages.
-      for type, msgs of response.flash
-        flash(type, msgs)
-
-    onError = (form, data) ->
-      if 400 >= data.status < 500
-        util.applyValidationErrors(form, data.errors)
-      else
-        flash('error', 'Sorry, we were unable to perform your request')
-
-    $scope.confirmDelete = false
-    $scope.toggleConfirmDelete = ->
-      $scope.confirmDelete = !$scope.confirmDelete
-
-    $scope.deleteAccount = (form) ->
-      # If the password is correct, the account is deleted.
-      # The extension is then removed from the page.
-      # Confirmation of success is given.
-      return unless form.$valid
-      username = persona_filter $scope.session.persona
-      packet =
-        username: username
-        pwd: form.deleteaccountpassword.$modelValue
-
-      promise = profile.disable_user packet
-      promise.$promise.then(onSuccess, onError.bind(null, form))
-
-    $scope.submit = (form) ->
-      # In the frontend change_email and change_password are two different
-      # forms. However, in the backend it is just one: edit_profile
-      return unless form.$valid
-
-      username = persona_filter $scope.session.persona
-      if form.$name is 'edit_profile'
-        packet =
-          username: username
-          email: form.email.$modelValue
-          pwd: form.password.$modelValue
-      else
-        packet =
-          username: username
-          pwd: form.oldpassword.$modelValue
-          password: form.newpassword.$modelValue
-
-      promise = profile.edit_profile packet
-      promise.$promise.then(onSuccess, onError.bind(null, form))
-
-    # Jake's Note: there is an addional piece of UI I would like to implement. The basic idea being
-    # to give some visual indication that the changes they have made have been applied successfully.
-    # If they change their email, it would be nice to have an event (or something) to tell the front end that
-    # the request was successful.
-
-  restrict: 'C'
-  templateUrl: 'account_management.html'
-]
 
 angular.module('h.directives', ['ngSanitize'])
 .directive('formValidate', formValidate)
@@ -524,4 +451,3 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('repeatAnim', repeatAnim)
 .directive('whenscrolled', whenscrolled)
 .directive('match', match)
-.directive('accountManagement', accountManagement)
