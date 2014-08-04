@@ -343,6 +343,7 @@ app_js:
             - scripts/app.coffee
             - scripts/auth.coffee
             - scripts/controllers.coffee
+            - scripts/controllers/account-management.coffee
             - scripts/flash.coffee
             - scripts/filters.coffee
             - scripts/directives.coffee
