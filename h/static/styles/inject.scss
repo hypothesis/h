@@ -37,7 +37,7 @@ $base-font-size: 14px;
     width: 6px;
   }
 
-  button {
+  button, button:first-child {
     @include sweetbutton;
     background-image: url("../images/pen_1.png") !important;
     background-size: 65%;
@@ -67,7 +67,7 @@ $base-font-size: 14px;
 
 
 //HEATMAP STUFF////////////////////////////////
-.annotator-heatmap {
+.annotator-frame .annotator-heatmap {
   cursor: ew-resize;
   position: absolute;
   overflow: hidden;
@@ -86,7 +86,7 @@ $base-font-size: 14px;
   }
 }
 
-.heatmap-pointer {
+.annotator-frame .heatmap-pointer {
   @include transition-property(left);
   @include transition-duration(.2s);
   color: #666;
@@ -243,9 +243,12 @@ $base-font-size: 14px;
 
 // Sidebar
 .annotator-frame {
+  @import 'reset';
+  @include nested-reset;
   @include reset-box-model;
   @include user-select(none);
   @extend .noise;
+  background: none;
   font-size: $base-font-size;
   line-height: $base-line-height;
   height: 100%;
@@ -260,17 +263,22 @@ $base-font-size: 14px;
   }
 
   * {
+    background: none;
     font-size: 100%;
+    height: initial;
+    width: initial;
   }
 
   & > iframe {
-    @include reset-box-model;
     height: 100%;
     width: 100%;
     z-index: 3;
     position: relative;
   }
 
+  [class^="icon-"], [class*=" icon-"] {
+    font-family: 'h';
+  }
 }
 
 .annotator-no-transition {
@@ -279,7 +287,7 @@ $base-font-size: 14px;
 
 
 //CONTROLBAR STUFF////////////////////////////////
-.annotator-toolbar {
+.annotator-frame .annotator-toolbar {
   position: absolute;
   left: -($heatmap-width + 18px - 7px);
   right: 0;
@@ -297,7 +305,7 @@ $base-font-size: 14px;
   }
 }
 
-.annotator-toolbar.annotator-hide {
+.annotator-frame .annotator-toolbar.annotator-hide {
   display: initial;
   visibility: initial;
 
@@ -316,7 +324,7 @@ $base-font-size: 14px;
   }
 }
 
-.annotator-toolbar li {
+.annotator-frame .annotator-toolbar li {
   @include border-radius(4px);
   @include smallshadow;
   @include transition-property(left, height, margin-bottom);
