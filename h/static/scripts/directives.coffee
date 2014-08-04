@@ -24,7 +24,7 @@ formValidate = ->
 
     # Validate the field when submit is clicked.
     elem.on 'submit', (event) ->
-      updateField(field) for own _, field of form when field.$name?
+      updateField(field) for own _, field of form when field?.$name?
 
     # Validate when a response is processed.
     scope.$on 'error', (event, name) ->
