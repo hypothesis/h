@@ -47,7 +47,7 @@ install_requires = [
     'pyramid-layout>=0.9',
     'pyramid_mailer>=0.13',
     'pyramid-multiauth>=0.4.0',
-    'pyramid-oauthlib==0.1',
+    'pyramid-oauthlib==0.1.1',
     'pyramid_tm>=0.7',
     'python-dateutil>=2.1',
     'pyramid-sockjs==0.3.9',

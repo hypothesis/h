@@ -1,3 +1,2 @@
 -e .[YAML]
--e git+https://github.com/tilgovi/pyramid-oauthlib.git@master#egg=pyramid-oauthlib-0.1
 -e git+https://github.com/sontek/pyramid_webassets.git@master#egg=pyramid_webassets-0.8
