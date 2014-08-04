@@ -57,7 +57,6 @@ echo "Ensuring an up-to-date pip..."
 pip install -qU pip
 
 echo "Checking dependencies (may be a few minutes for first run)..."
-pip install --use-wheel -qr requirements.txt
 pip install --use-wheel -qe .[dev,testing]
 
 echo "Checking front-end dependencies..."

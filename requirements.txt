@@ -1,2 +1,0 @@
--e .[YAML]
--e git+https://github.com/sontek/pyramid_webassets.git@master#egg=pyramid_webassets-0.8
