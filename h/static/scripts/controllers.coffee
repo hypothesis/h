@@ -10,9 +10,6 @@ imports = [
 
 
 class App
-  scope:
-    accountManagement: {show: false} # TODO: Refactor this out.
-
   this.$inject = [
     '$element', '$location', '$q', '$rootScope', '$route', '$scope', '$timeout',
     'annotator', 'flash', 'identity', 'queryparser', 'socket',
@@ -351,9 +348,6 @@ class App
       $scope.updater.then (sock) ->
         filter = streamfilter.getFilter()
         sock.send(JSON.stringify({filter}))
-
-    $scope.$on 'nav:account', ->
-      $scope.accountManagement.show = true
 
     $rootScope.viewState =
       sort: ''

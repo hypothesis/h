@@ -16,7 +16,7 @@
             --><span class="provider">/{{persona|persona:'provider'}}</span><!--
             --><i class="icon-triangle"></i></span>
           <ul class="dropdown-menu pull-right" role="menu">
-            <li><a href="#" show-account>Account</a></li>
+            <li show-account><a href="#">Account</a></li>
             <li><a href="http://hypothes.is/contact/"
                    target="_blank">Feedback</a></li>
             <li><a href="/docs/help" target="_blank">Help</a></li>
@@ -87,12 +87,14 @@
       <!-- / Account and Authentication -->
 
       <!-- Panels Nav-->
-      <div class="ng-cloak sheet" ng-show="accountManagement.show">
-        <span href="#" class="close icon-cancel"
-            title="Close"
-            role="button"
-            ng-click="accountManagement.show = false"></span>
-        <div ng-controller="AccountManagement" ng-include="'account_management.html'"></div>
+      <div class="content ng-cloak">
+        <div class="sheet" ng-controller="AccountManagement" ng-show="!!sheet">
+          <span href="#" class="close icon-cancel"
+              title="Close"
+              role="button"
+              ng-click="sheet = false"></span>
+          <div ng-include="'account_management.html'"></div>
+        </div>
       </div>
       <!-- / Panels Nav -->
 
