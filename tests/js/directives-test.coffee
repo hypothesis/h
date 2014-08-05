@@ -48,28 +48,36 @@ describe 'h.directives', ->
 
     it 'should apply an error class to an invalid field on change', ->
       $field = $element.find('.form-field')
-      $element.find('[name=username]').val('ab').change()
-      assert.include $field.prop('className'), 'form-field-error'
+      $input = $element.find('[name=username]')
+
+      controller = $input.controller('ngModel')
+      controller.$setViewValue('ab')
+      $input.change()
+
+      assert.include($field.prop('className'), 'form-field-error')
 
     it 'should remove an error class to an valid field on change', ->
       $field = $element.find('.form-field').addClass('form-field-error')
       $input = $element.find('[name=username]')
-      $input.val('abc').change()
-      assert.notInclude $field.prop('className'), 'form-field-error'
+
+      controller = $input.controller('ngModel')
+      controller.$setViewValue('abc')
+      $input.triggerHandler('change')
+
+      assert.notInclude($field.prop('className'), 'form-field-error')
 
     it 'should apply an error class to an invalid field on submit', ->
       $field = $element.find('.form-field')
-      $element.trigger('submit')
-      assert.include $field.prop('className'), 'form-field-error'
+      $element.triggerHandler('submit')
+      assert.include($field.prop('className'), 'form-field-error')
 
     it 'should remove an error class from a valid field on submit', ->
-      $scope.model.username = 'abc'
-      $scope.$digest()
-
       $field = $element.find('.form-field').addClass('form-field-error')
+      controller = $element.find('[name=username]').controller('ngModel')
+      controller.$setViewValue('abc')
 
-      $element.trigger('submit')
-      assert.notInclude $field.prop('className'), 'form-field-error'
+      $element.triggerHandler('submit')
+      assert.notInclude($field.prop('className'), 'form-field-error')
 
     it 'should apply an error class to an invalid field on "error" event', ->
       $scope.$emit('error', 'login')
@@ -78,23 +86,19 @@ describe 'h.directives', ->
       $field = $element.find('.form-field')
       assert.include $field.prop('className'), 'form-field-error'
 
-    it 'should remove an error class on valid input on keyup', ->
-      $scope.model.username = 'abc'
-      $scope.$digest()
-
+    it 'should remove an error class on valid input when the view changes', ->
       $field = $element.find('.form-field').addClass('form-field-error')
-      $element.find('[name=username]').keyup()
+      controller = $element.find('[name=username]').controller('ngModel')
+      controller.$setViewValue('abc')
 
-      assert.notInclude $field.prop('className'), 'form-field-error'
+      assert.notInclude($field.prop('className'), 'form-field-error')
 
-    it 'should not add an error class on invalid input on keyup', ->
-      $scope.model.username = ''
-      $scope.$digest()
-
+    it 'should not add an error class on invalid input on when the view changes', ->
       $field = $element.find('.form-field')
-      $element.find('[name=username]').keyup()
+      controller = $element.find('[name=username]').controller('ngModel')
+      controller.$setViewValue('ab')
 
-      assert.notInclude $field.prop('className'), 'form-field-error'
+      assert.notInclude($field.prop('className'), 'form-field-error')
 
 
   describe '.username', ->
@@ -116,7 +120,7 @@ describe 'h.directives', ->
 
     it 'prevents the default browser action on click', ->
       event = jQuery.Event('click')
-      $element.find('.user').trigger(event)
+      $element.find('.user').triggerHandler(event)
 
       assert(event.isDefaultPrevented())
 
@@ -158,7 +162,7 @@ describe 'h.directives', ->
     it 'calls the given search function', ->
       $scope.query = "Test query"
       $scope.$digest()
-      $element.trigger('submit')
+      $element.triggerHandler('submit')
       sinon.assert.calledWith($scope.update, "Test query")
 
     it 'calls the given clear function', ->
