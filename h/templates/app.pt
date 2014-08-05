@@ -49,8 +49,8 @@
            ng-mouseleave="showViewSort(false)"
            ng-show="viewState.showControls">
         <div class="dropdown" ng-show="viewState.show">
-                class="dropdown-toggle"
           <span role="button"
+                class="dropdown-toggle"
                 data-toggle="dropdown"
                 >{{viewState.view}}<i class="icon-triangle"></i></span>
           <ul class="dropdown-menu" role="menu">
