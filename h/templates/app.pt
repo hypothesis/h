@@ -4,10 +4,11 @@
     <div class="ng-cloak topbar"
          ng-class="frame.visible && 'shown'"
          ng-mouseenter="showViewSort(true, true)">
-      <div class="inner" ng-switch="!!persona">
+      <div class="inner" ng-switch="persona">
+        <span class="pull-right" ng-switch-when="undefined">⋯</span>
         <a class="pull-right" href=""
            ng-click="id.request()"
-           ng-switch-when="false">Sign in</a>
+           ng-switch-when="null">Sign in</a>
         <div class="dropdown pull-right user-picker" ng-switch-default>
           <span role="button"
                 class="dropdown-toggle"
