@@ -35,7 +35,7 @@ install_requires = [
     'deform_bootstrap>=0.2.0',
     'elasticsearch',
     'gevent-websocket==0.3.6',
-    'gunicorn>=18.0',
+    'gunicorn>=19.1,<20',
     'horus>=0.9.15',
     'jsonpointer==1.0',
     'jsonschema==1.3.0',

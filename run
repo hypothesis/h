@@ -1,12 +1,20 @@
 #!/bin/bash
 
 if test -z "$VIRTUAL_ENV"; then
-	if test -e bin/activate; then
-		source bin/activate
-	fi
+  if test -e bin/activate; then
+    source bin/activate
+  fi
 fi
 
-hypothesis serve $@
+ARGS=("$@")
+
+if test $# -eq 0; then
+  ARGS+=("--reload --paste development.ini")
+elif test $# -eq 1; then
+  ARGS=("--paste ${ARGS[*]}")
+fi
+
+gunicorn ${ARGS[*]}
 SERVE_EXIT_STATUS=$?
 
 if [ "$SERVE_EXIT_STATUS" -ne 0 ]; then

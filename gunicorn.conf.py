@@ -9,10 +9,6 @@ if 'heroku' in os.environ.get('LD_LIBRARY_PATH', ''):
 
 
 def post_fork(_server, _worker):
-    if 'gevent' in sys.modules:
-        import gevent.subprocess
-        sys.modules['subprocess'] = gevent.subprocess
-
     try:
         import psycogreen.gevent
         psycogreen.gevent.patch_psycopg()

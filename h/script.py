@@ -1,21 +1,17 @@
 # -*- coding: utf-8 -*-
 import json
 from os import chdir, getcwd, makedirs, mkdir, walk
-from os.path import abspath, exists, join, normpath
+from os.path import abspath, exists, join
 from shutil import copyfile, rmtree
 from urlparse import urljoin, urlparse, urlunparse, uses_netloc, uses_relative
 
 from chameleon.zpt.template import PageTextTemplateFile
 from clik import App
-from gunicorn import config, util
-from gunicorn.app.pasterapp import load_pasteapp, paste_config
-from gunicorn.app.wsgiapp import WSGIApplication
 from pyramid.config import Configurator
 from pyramid.events import BeforeRender, ContextFound
 from pyramid.paster import get_appsettings
 from pyramid.path import AssetResolver
 from pyramid.request import Request
-from pyramid.scripts import pserve
 from pyramid.scripting import prepare
 from pyramid.view import render_view
 from pyramid_basemodel import bind_engine
@@ -24,49 +20,7 @@ from sqlalchemy import engine_from_config
 from h import __version__, api
 
 
-class Application(WSGIApplication):
-
-    """A Gunicorn Paster Application
-
-    Extends the base :class:`gunicorn.app.wsgiapp.WSGIApplication` class to
-    skip processing of command line arguments and directly load a configuration
-    from a configuration file.
-
-    TODO: remove in favor of gunicorn.app.base.BaseApplication customization
-    when Gunicorn R19 is released.
-    """
-
-    def __init__(self, filename, settings=None):
-        self.relpath = util.getcwd()
-        self.cfgpath = abspath(normpath(join(self.relpath, filename)))
-        self.cfgurl = 'config:' + self.cfgpath
-        self.settings = settings
-        super(Application, self).__init__()
-
-    def load_config(self):
-        self.cfg = config.Config()
-        self.cfg.set('paste', self.cfgurl)
-        self.cfg.set('logconfig', self.cfgpath)
-
-        cfg = paste_config(self.cfg, self.cfgurl, self.relpath, self.settings)
-
-        for k, v in cfg.items():
-            self.cfg.set(k.lower(), v)
-
-        default_config = config.get_default_config_file()
-        if default_config is not None:
-            self.load_config_from_file(default_config)
-
-    def load_pasteapp(self):
-        self.chdir()
-        return load_pasteapp(self.cfgurl, self.relpath, self.settings)
-
-
 def get_config(args):
-    if len(args) == 0:
-        args.append('development.ini')
-        args.append('--reload')
-
     settings = get_appsettings(args[0])
     settings['basemodel.should_create_all'] = False
     settings['basemodel.should_drop_all'] = False
@@ -82,7 +36,6 @@ command = App(
     'hypothesis',
     version=version,
     description=description,
-    opts=pserve.PServeCommand.parser.option_list[1:],
     args_callback=get_config,
 )
 
@@ -264,18 +217,6 @@ def extension(args, console, settings):
     # XXX: Change when webassets allows setting the cache option
     # As of 0.10 it's only possible to pass a sass config  with string values
     rmtree('./build/chrome/public/.sass-cache')
-
-
-@command(usage='[options] config_uri')
-def serve(args):
-    """Manage the server.
-
-    With no arguments, starts the server in development mode using the
-    configuration found in `deveopment.ini` and a hot code reloader enabled.
-
-    Otherwise, acts as simple alias to the pserve command.
-    """
-    pserve.PServeCommand(['hypothesis'] + args).run()
 
 
 main = command.main
