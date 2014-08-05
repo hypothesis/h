@@ -148,8 +148,20 @@ class Store(object):
 
     def _invoke_subrequest(self, subreq):
         request = self.request
-        subreq.headers = request.headers
+
+        # Copy non-standard headers
+        subreq.headers.update(
+            (k, v)
+            for k, v in request.headers.items()
+            if re.match('^X-', k, re.IGNORECASE)
+        )
+
+        # Copy any authorization headers
+        subreq.authorization = request.authorization
+
+        # Copy the session
         subreq.session = request.session
+
         result = request.invoke_subrequest(subreq)
         if result.status_int > 400:
             raise exception_response(result.status_int)
