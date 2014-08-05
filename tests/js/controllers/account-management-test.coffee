@@ -7,6 +7,7 @@ describe 'h.controllers.AccountManagement', ->
   fakeUtil = null
   fakeFlash = null
   fakeProfile = null
+  fakeIdentity = null
   editProfilePromise = null
   disableUserPromise = null
   createController = null
@@ -14,6 +15,8 @@ describe 'h.controllers.AccountManagement', ->
   beforeEach module ($provide, $filterProvider) ->
     fakeProfile = {}
     fakeFlash = sandbox.spy()
+    fakeIdentity =
+      logout: sandbox.spy()
     fakeUtil =
       applyValidationErrors: sandbox.spy()
 
@@ -22,6 +25,7 @@ describe 'h.controllers.AccountManagement', ->
 
     $provide.value 'profile', fakeProfile
     $provide.value 'flash', fakeFlash
+    $provide.value 'identity', fakeIdentity
     $provide.value 'util', fakeUtil
     return
 
@@ -29,7 +33,7 @@ describe 'h.controllers.AccountManagement', ->
 
   beforeEach inject ($rootScope, $q, $controller) ->
     $scope = $rootScope.$new()
-    $scope.session = persona: 'egon@columbia.edu'
+    $scope.session = userid: 'egon@columbia.edu'
 
     disableUserPromise = {then: sandbox.stub()}
     editProfilePromise = {then: sandbox.stub()}
@@ -127,7 +131,7 @@ describe 'h.controllers.AccountManagement', ->
 
       assert.calledWith(fakeFlash, 'error')
 
-  describe '.deleteAccount', ->
+  describe '.delete', ->
     it 'disables the user account', ->
       fakeForm =
         $name: 'deleteAccount'
@@ -135,7 +139,7 @@ describe 'h.controllers.AccountManagement', ->
         deleteaccountpassword: $modelValue: 'paranormal'
 
       controller = createController()
-      $scope.deleteAccount(fakeForm)
+      $scope.delete(fakeForm)
 
       assert.calledWith fakeProfile.disable_user,
         username: 'STUBBED_PERSONA_FILTER'
@@ -150,7 +154,7 @@ describe 'h.controllers.AccountManagement', ->
         deleteaccountpassword: $modelValue: 'paranormal'
 
       controller = createController()
-      $scope.deleteAccount(fakeForm)
+      $scope.delete(fakeForm)
 
       # Resolve the request.
       disableUserPromise.then.callArg 1,
@@ -168,7 +172,7 @@ describe 'h.controllers.AccountManagement', ->
         deleteaccountpassword: $modelValue: 'paranormal'
 
       controller = createController()
-      $scope.deleteAccount(fakeForm)
+      $scope.delete(fakeForm)
 
       # Resolve the request.
       disableUserPromise.then.callArg 1,
