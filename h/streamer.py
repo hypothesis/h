@@ -100,9 +100,6 @@ filter_schema = {
                 "value": "object",
                 "case_sensitive": {"type": "boolean", "default": True},
                 "options": {"type": "object", "default": {}}
-
-                # XXX: Left for reverse-compatibility, has to be removed shortly
-                , "es_query_string": {"type": "boolean", "default": False}
             }
         },
         "past_data": {
@@ -226,11 +223,7 @@ class FilterToElasticFilter(object):
                 field = clause['field'][1:].replace('/', '.')
             es = clause['options']['es'] if 'es' in clause['options'] else None
             if es:
-                query_type = es['query_type'] if 'query_type' in es else 'simple'
-
-                # XXX: Backwards compatibily, can be removed later
-                if 'es_query_string' in clause and clause['es_query_string']:
-                    query_type = 'query_string'
+                query_type = es.get('query_type', 'simple')
             else:
                 query_type = 'simple'
 
