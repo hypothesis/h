@@ -1,7 +1,7 @@
 class AccountManagement
-  @inject = ['$scope, $filter', 'flash', 'profile', 'util']
+  @inject = ['$scope', '$rootScope', '$filter', 'flash', 'profile', 'util']
 
-  constructor: ($scope, $filter, flash, profile, util) ->
+  constructor: ($scope, $rootScope, $filter, flash, profile, util) ->
     persona_filter = $filter('persona')
 
     onSuccess = (response) ->
@@ -47,6 +47,9 @@ class AccountManagement
 
       promise = profile.edit_profile(packet)
       promise.$promise.then(onSuccess, angular.bind(null, onError, form))
+
+    $rootScope.$on 'nav:account', ->
+      $scope.$apply -> $scope.sheet = true
 
 angular.module('h.controllers.AccountManagement', [])
 .controller('AccountManagement', AccountManagement)
