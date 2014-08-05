@@ -100,6 +100,23 @@ describe 'h.directives', ->
 
       assert.notInclude($field.prop('className'), 'form-field-error')
 
+    it 'should reset the "response" error on change', ->
+      $field = $element.find('.form-field')
+      $input = $element.find('[name=username]')
+      controller = $input.controller('ngModel')
+      controller.$setViewValue('abc')
+
+      # Submit Event
+      controller.$setValidity('response', false)
+      controller.responseErrorMessage = 'fail'
+      $scope.$emit('error', $input.controller('form').$name)
+      assert.include($field.prop('className'), 'form-field-error')
+
+      controller.$setViewValue('abc')
+      $scope.$digest()
+
+      assert.notInclude($field.prop('className'), 'form-field-error')
+
 
   describe '.username', ->
     $element = null
