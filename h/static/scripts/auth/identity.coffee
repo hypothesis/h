@@ -53,6 +53,7 @@ identityFactory = [
       $promise = session.$logout()
       $resolved = false
       angular.copy({$promise, $resolved}, session)
+      $rootScope.$broadcast 'logout'
 
     request: ->
       $rootScope.$broadcast 'authorize'
