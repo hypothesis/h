@@ -44,7 +44,7 @@ def ajax_form(request, result):
     # events before calling :func:`pyramid.security.remember`. We want to
     # correct the state of things after that.
     if hasattr(request.user, 'id'):
-        user = 'acct:%s@%s' % (request.user.username, request.server_name)
+        user = 'acct:%s@%s' % (request.user.username, request.domain)
         event = events.LoginEvent(request, user)
         request.registry.notify(event)
 
@@ -83,7 +83,7 @@ class AuthController(horus.views.AuthController):
 
         if request.user:
             # XXX: Horus should maybe do this for us
-            user = 'acct:%s@%s' % (request.user.username, request.server_name)
+            user = 'acct:%s@%s' % (request.user.username, request.domain)
             event = events.LoginEvent(request, user)
             request.registry.notify(event)
 
