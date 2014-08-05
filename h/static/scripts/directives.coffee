@@ -33,7 +33,7 @@ formValidate = ['$timeout', ($timeout) ->
 
     # Validate field when the content changes.
     elem.on 'change', ':input', ->
-      forEachField(updateField)
+      forEachField (field) -> updateField(field) if field.$dirty
 
     # Validate form on submit and set flag for error watcher.
     elem.on 'submit', ->
