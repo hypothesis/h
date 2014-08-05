@@ -49,7 +49,10 @@ class AccountManagement
       promise.$promise.then(onSuccess, angular.bind(null, onError, form))
 
     $rootScope.$on 'nav:account', ->
-      $scope.$apply -> $scope.sheet = true
+      $scope.sheet = true
+
+    $rootScope.$on 'logout', ->
+      $scope.sheet = false
 
 angular.module('h.controllers.AccountManagement', [])
 .controller('AccountManagement', AccountManagement)
