@@ -70,12 +70,14 @@
       <!-- / View Sort Controls -->
 
       <!-- Account and Authentication -->
-      <div class="content ng-cloak sheet" ng-show="!!sheet">
-        <i class="close icon-cancel"
-            role="button"
-            title="Close"
-            ng-click="sheet = false"></i>
-        <metal:main use-macro="blocks['auth']" />
+      <div class="content ng-cloak" ng-show="!!sheet">
+        <div class="sheet">
+          <i class="close icon-cancel"
+             role="button"
+             title="Close"
+             ng-click="sheet = false"></i>
+          <metal:main use-macro="blocks['auth']" />
+        </div>
       </div>
       <!-- / Account and Authentication -->
 
