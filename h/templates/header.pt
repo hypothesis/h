@@ -1,6 +1,6 @@
 <header>
   <img height="72px" width="72px"
-       src="${request.static_url('h:static/images/hypothelogo_square.png')}" />
+       src="${request.static_url('h:static/images/logo.png')}" />
   <hgroup>
     <h1>Hypothes<span class="red">.</span>is</h1>
     <h2>The&#160;Internet, peer&#160;reviewed.</h2>
