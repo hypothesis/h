@@ -52,7 +52,7 @@ class AuthController
         $timeout.cancel timeout
 
       # If the model is not empty, start the timeout
-      if value
+      if value and not angular.equals(value, {})
         timeout = $timeout ->
           $scope.model = null
           $scope.$broadcast 'timeout'

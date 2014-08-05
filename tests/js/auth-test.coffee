@@ -84,6 +84,11 @@ describe 'h.auth', ->
         assert.calledWith $scope.$broadcast, 'timeout'
 
       it 'should not happen if the model is empty', ->
+        $scope.model = undefined
+        $scope.$digest()
+        assert.notCalled $timeout
+
+        $scope.model = {}
         $scope.$digest()
         assert.notCalled $timeout
 
