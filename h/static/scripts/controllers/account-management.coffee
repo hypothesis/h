@@ -9,6 +9,11 @@ class AccountManagement
       for type, msgs of response.flash
         flash(type, msgs)
 
+      form.$setPristine()
+      formModel = form.$name.slice(0, -4)
+      $scope[formModel] = {} # Reset form fields.
+
+
     onDelete = (form, response) ->
       identity.logout()
       onSuccess(form, response)
@@ -18,6 +23,11 @@ class AccountManagement
         util.applyValidationErrors(form, data.errors)
       else
         flash('error', 'Sorry, we were unable to perform your request')
+
+    # Data for each of the forms
+    $scope.editProfile = {}
+    $scope.changePassword = {}
+    $scope.deleteAccount = {}
 
     $scope.delete = (form) ->
       # If the password is correct, the account is deleted.
@@ -41,11 +51,11 @@ class AccountManagement
       return unless form.$valid
 
       username = persona_filter $scope.session.userid
-      if form.$name is 'editProfile'
+      if form.$name is 'editProfileForm'
         packet =
           username: username
           email: form.email.$modelValue
-          pwd: form.password.$modelValue
+          pwd: form.pwd.$modelValue
       else
         packet =
           username: username
