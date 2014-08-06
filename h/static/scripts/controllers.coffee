@@ -399,7 +399,9 @@ class App
       if action == 'past'
         action = 'create'
 
-      inRootScope = (annotation) ->
+      inRootScope = (annotation, recursive = false) ->
+        if recursive and  annotation.references?
+          return inRootScope({id: annotation.references[0]})
         for ann in $rootScope.annotations
           return true if ann.id is annotation.id
         false
@@ -432,8 +434,8 @@ class App
             for annotation in data
               switch $rootScope.viewState.view
                 when 'Document'
-                  unless annotator.isComment(annotation) or annotation.references?
-                    $rootScope.annotations.push annotation if not inRootScope(annotation)
+                  unless annotator.isComment(annotation)
+                    $rootScope.annotations.push annotation if not inRootScope(annotation, true)
                 when 'Comments'
                   if annotator.isComment(annotation)
                     $rootScope.annotations.push annotation if not inRootScope(annotation)
