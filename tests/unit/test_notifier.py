@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
-from mock import patch, Mock
+from mock import patch, Mock, MagicMock
 from pyramid.testing import DummyRequest
 
 from h import events, notifier
@@ -28,70 +28,6 @@ def test_authorization():
     with patch('h.notifier.AnnotationNotifier') as mock:
         notifier.send_notifications(event)
         assert mock.call_count == 0
-
-
-def test_passive_queries():
-    """Make sure if a query is passive the notifier system
-    does not get called"""
-    annotation = {'permissions': {'read': ["group:__world__"]}}
-    request = DummyRequest()
-    event = events.AnnotationEvent(request, annotation, 'create')
-
-    with patch('h.notifier.AnnotationNotifier') as mock_notif:
-        with patch('h.auth.local.models.UserSubscriptions.get_all') \
-                as mock_subscription:
-            query = QueryMock()
-            mock_subscription.all = Mock(return_value=[query])
-            mock_notif().send_notification_to_owner = Mock()
-            notifier.send_notifications(event)
-            assert mock_notif().send_notification_to_owner.call_count == 0
-
-
-def test_query_matches():
-    """Make sure that the query match triggers the notifier call"""
-    annotation = {
-        'permissions': {'read': ["group:__world__"]},
-        'parent': {'user': 'acct:testuser@testdomain'},
-        'user': 'acct:testuser@testdomain'
-    }
-    request = DummyRequest()
-    event = events.AnnotationEvent(request, annotation, 'create')
-    with patch('h.notifier.AnnotationNotifier') as mock_notif:
-        with patch('h.auth.local.models.UserSubscriptions') as mock_subs:
-            with patch('h.notifier.FilterHandler') as mock_filter:
-                query = QueryMock(active=True)
-                als = Mock()
-                als.all = Mock(return_value=[query])
-                mock_subs.get_all = Mock(return_value=als)
-
-                mock_filter().match = Mock(return_value=True)
-                notifier.send_notifications(event)
-                actual = mock_notif().send_notification_to_owner.call_count
-                assert actual == 1
-
-
-def test_query_mismatch():
-    """Make sure that the lack of matching prevents calling
-    the AnnotationNotifier"""
-    annotation = {
-        'permissions': {'read': ["group:__world__"]},
-        'parent': {'user': 'acct:testuser@testdomain'},
-        'user': 'acct:testuser@testdomain'
-    }
-    request = DummyRequest()
-    event = events.AnnotationEvent(request, annotation, 'create')
-    with patch('h.notifier.AnnotationNotifier') as mock_notif:
-        with patch('h.auth.local.models.UserSubscriptions') as mock_subs:
-            with patch('h.notifier.FilterHandler') as mock_filter:
-                query = QueryMock(active=True)
-                als = Mock()
-                als.all = Mock(return_value=[query])
-                mock_subs.get_all = Mock(return_value=als)
-
-                mock_filter().match = Mock(return_value=False)
-                notifier.send_notifications(event)
-                actual = mock_notif().send_notification_to_owner.call_count
-                assert actual == 0
 
 
 # Tests for AnnotationNotifier
@@ -209,68 +145,95 @@ def test_reply_registration():
 
 
 def test_reply_query_match():
-    """Check if the generated query really matches on
-    the parent annotation user"""
-    annotation = {'parent': {'user': 'acct:testuser@testdomain'}}
-    query = notifier.generate_system_reply_query('testuser', 'testdomain')
-    assert FilterHandler(query).match(annotation, 'create') is True
+    """Test if the notifier.send_notifications is called
+    """
+    annotation = {
+        'user': 'acct:testuser@testdomain',
+        'permissions': {'read': ["group:__world__"]}
+    }
+    request = DummyRequest()
+    event = events.AnnotationEvent(request, annotation, 'create')
+
+    with patch('h.notifier.AnnotationNotifier') as mock_notif:
+        with patch('h.notifier.parent_values') as mock_parent:
+            mock_parent.return_value={'user': 'acct:parent@testdomain'}
+            notifier.send_notifications(event)
+            assert mock_notif().send_notification_to_owner.call_count == 1
 
 
 def test_reply_username_mismatch():
-    """Check if the generated query requires the domain to match."""
-    annotation = {'parent': {'user': 'acct:testuser2@testdomain'}}
-    query = notifier.generate_system_reply_query('testuser', 'testdomain')
-    assert FilterHandler(query).match(annotation, 'create') is False
+    """Username different, domain the same -> should send reply"""
+    annotation = {
+        'user': 'acct:testuser@testdomain',
+        'permissions': {'read': ["group:__world__"]}
+    }
+    request = DummyRequest()
+    event = events.AnnotationEvent(request, annotation, 'create')
 
+    with patch('h.notifier.AnnotationNotifier') as mock_notif:
+        with patch('h.notifier.parent_values') as mock_parent:
+            mock_parent.return_value={'user': 'acct:testuser2@testdomain'}
+            notifier.send_notifications(event)
+            assert mock_notif().send_notification_to_owner.call_count == 1
 
 def test_reply_domain_mismatch():
-    """Check if the generated query really do not match on
-    any other domain"""
-    annotation = {'parent': {'user': 'acct:testuser@testdomain2'}}
-    query = notifier.generate_system_reply_query('testuser', 'testdomain')
-    assert FilterHandler(query).match(annotation, 'create') is False
-
-
-def test_reply_ignore_root():
-    """Don't send reply notification for a top level annotation"""
+    """Username same, domain different -> should send reply"""
     annotation = {
-        'permissions': {'read': ['group:__world__']},
-        'user': 'acct:testuser@domain'
+        'user': 'acct:testuser@testdomain',
+        'permissions': {'read': ["group:__world__"]}
     }
-
     request = DummyRequest()
-    with patch('h.notifier.parent_values') as mock_parent_fn:
-        mock_parent_fn.return_value = {}
-        annotation['parent'] = notifier.parent_values(annotation, request)
-        actual = notifier.ReplyTemplate.check_conditions(annotation, {})
-        assert actual is False
+    event = events.AnnotationEvent(request, annotation, 'create')
 
+    with patch('h.notifier.AnnotationNotifier') as mock_notif:
+        with patch('h.notifier.parent_values') as mock_parent:
+            mock_parent.return_value={'user': 'acct:testuser@testdomain2'}
+            notifier.send_notifications(event)
+            assert mock_notif().send_notification_to_owner.call_count == 1
 
-def test_reply_to_self():
-    """Don't send reply notification to yourself"""
+def test_reply_same_creator():
+    """Username same, domain same -> should not send reply"""
     annotation = {
-        'permissions': {'read': ['group:__world__']},
-        'user': 'acct:testuser@domain'
+        'user': 'acct:testuser@testdomain',
+        'permissions': {'read': ["group:__world__"]}
     }
-
     request = DummyRequest()
-    with patch('h.notifier.parent_values') as mock_parent_fn:
-        mock_parent_fn.return_value = {'user': 'acct:testuser@domain'}
-        annotation['parent'] = notifier.parent_values(annotation, request)
-        actual = notifier.ReplyTemplate.check_conditions(annotation, {})
-        assert actual is False
+    event = events.AnnotationEvent(request, annotation, 'create')
+
+    with patch('h.notifier.AnnotationNotifier') as mock_notif:
+        with patch('h.notifier.parent_values') as mock_parent:
+            mock_parent.return_value={'user': 'acct:testuser@testdomain'}
+            notifier.send_notifications(event)
+            assert mock_notif().send_notification_to_owner.call_count == 0
 
 
-def test_reply_to_other():
-    """Send reply notification when somebody replies to you"""
+def test_no_parent_user():
+    """Should not throw error and should not send annotation if the parent user is missing"""
     annotation = {
-        'permissions': {'read': ['group:__world__']},
-        'user': 'acct:testuser@domain'
+        'user': 'acct:testuser@testdomain',
+        'permissions': {'read': ["group:__world__"]}
     }
-
     request = DummyRequest()
-    with patch('h.notifier.parent_values') as mock_parent_fn:
-        mock_parent_fn.return_value = {'user': 'acct:testuser2@domain'}
-        annotation['parent'] = notifier.parent_values(annotation, request)
-        actual = notifier.ReplyTemplate.check_conditions(annotation, {})
-        assert actual is True
+    event = events.AnnotationEvent(request, annotation, 'create')
+
+    with patch('h.notifier.AnnotationNotifier') as mock_notif:
+        with patch('h.notifier.parent_values') as mock_parent:
+            mock_parent.return_value={}
+            notifier.send_notifications(event)
+            assert mock_notif().send_notification_to_owner.call_count == 0
+
+
+def test_reply_update():
+    """Should not do anything if the action is update"""
+    annotation = {
+        'user': 'acct:testuser@testdomain',
+        'permissions': {'read': ["group:__world__"]}
+    }
+    request = DummyRequest()
+    event = events.AnnotationEvent(request, annotation, 'update')
+
+    with patch('h.notifier.AnnotationNotifier') as mock_notif:
+        with patch('h.notifier.parent_values') as mock_parent:
+            mock_parent.return_value={}
+            notifier.send_notifications(event)
+            assert mock_notif().send_notification_to_owner.call_count == 0
