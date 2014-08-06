@@ -1,46 +1,5 @@
 <div class="tabbable">
   <div class="tab-pane" title="Account">
-    <form class="account-form form" name="editProfileForm" ng-submit="submit(editProfileForm)" novalidate form-validate>
-      <h2 class="form-heading"><span>Change Your Email</span></h2>
-
-      <div class="form-field">
-        <label class="form-label" for="field-current-email">New Email: <em class="form-hint">User&rsquo;s Email to go here.</em></label>
-        <input id="field-current-email" class="form-input" type="email" name="email" ng-model="editProfile.email" required autocapitalize="false" />
-
-        <ul class="form-error-list">
-          <li class="form-error" ng-show="editProfileForm.email.$error.email">Is this an email address?</li>
-          <li class="form-error" ng-show="editProfileForm.email.$error.required">Please choose a new email address.</li>
-        </ul>
-      </div>
-
-      <div class="form-field">
-        <label class="form-label" for="field-confirm-email">Confirm Email:</label>
-        <input id="field-confirm-email" class="form-input" type="email" name="confirmEmail" ng-model="editProfile.confirmEmail" match="editProfile.email" required autocapitalize="false">
-
-        <ul class="form-error-list">
-          <li class="form-error" ng-show="editProfileForm.confirmEmail.$error.match">New and confirmation emails do not match.</li>
-          <li class="form-error" ng-show="editProfileForm.confirmEmail.$error.email">Is this an email address?</li>
-          <li class="form-error" ng-show="editProfileForm.confirmEmail.$error.required">Please confirm your new email address.</li>
-        </ul>
-      </div>
-
-      <div class="form-field">
-        <label class="form-label" for="field-change-email-password">Password:</label>
-        <input id="field-change-email-password" class="form-input" type="password" name="pwd" ng-model="editProfile.pwd" required autocapitalize="false" >
-
-        <ul class="form-error-list">
-          <li class="form-error" ng-show="editProfileForm.pwd.$error.email">Your password does not match the one we have on record.</li>
-          <li class="form-error" ng-show="editProfileForm.pwd.$error.required">Please enter your password to confirm this change.</li>
-        </ul>
-      </div>
-
-      <div class="form-actions">
-        <div class="form-actions-buttons">
-          <button class="btn" type="submit">Update</button>
-        </div>
-      </div>
-    </form>
-
     <form class="account-form form" name="changePasswordForm" ng-submit="submit(changePasswordForm)" novalidate form-validate>
       <h2 class="form-heading"><span>Change Your Password</span></h2>
 
