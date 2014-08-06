@@ -15,7 +15,7 @@ formValidate = ['$timeout', ($timeout) ->
       if field.$valid
         toggleClass(field, addClass: false)
       else
-        toggleClass(field, addClass: true)
+        toggleClass(field, addClass: true) if field.$dirty
 
     # A custom parser for each form field that is used to reset the "response"
     # error state whenever the $viewValue changes.
@@ -33,7 +33,7 @@ formValidate = ['$timeout', ($timeout) ->
 
     # Validate field when the content changes.
     elem.on 'change', ':input', ->
-      forEachField (field) -> updateField(field) if field.$dirty
+      forEachField(updateField)
 
     # Validate form on submit and set flag for error watcher.
     elem.on 'submit', ->
