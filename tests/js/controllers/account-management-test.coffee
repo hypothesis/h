@@ -46,10 +46,11 @@ describe 'h.controllers.AccountManagement', ->
   describe '.submit', ->
     it 'updates the email address on the backend', ->
       fakeForm =
-        $name: 'editProfile'
+        $name: 'editProfileForm'
         $valid: true
+        $setPristine: sandbox.spy()
         email: $modelValue: 'egon@columbia.edu'
-        password: $modelValue: 'paranormal'
+        pwd: $modelValue: 'paranormal'
 
       controller = createController()
       $scope.submit(fakeForm)
@@ -62,10 +63,11 @@ describe 'h.controllers.AccountManagement', ->
 
     it 'updates the password on the backend', ->
       fakeForm =
-        $name: 'changePassword'
+        $name: 'changePasswordForm'
         $valid: true
-        oldpassword: $modelValue: 'gozer'
-        newpassword: $modelValue: 'paranormal'
+        $setPristine: sandbox.spy()
+        pwd: $modelValue: 'gozer'
+        password: $modelValue: 'paranormal'
 
       controller = createController()
       $scope.submit(fakeForm)
@@ -78,10 +80,11 @@ describe 'h.controllers.AccountManagement', ->
 
     it 'displays a flash message on success', ->
       fakeForm =
-        $name: 'changePassword'
+        $name: 'changePasswordForm'
         $valid: true
-        oldpassword: $modelValue: 'gozer'
-        newpassword: $modelValue: 'paranormal'
+        $setPristine: sandbox.spy()
+        pwd: $modelValue: 'gozer'
+        password: $modelValue: 'paranormal'
 
       # Resolve the request.
       editProfilePromise.then.yields(flash: {
@@ -95,12 +98,33 @@ describe 'h.controllers.AccountManagement', ->
         'Your profile has been updated.'
       ])
 
+    it 'clears the password field', ->
+      controller = createController()
+
+      $scope.changePassword = {pwd: 'password', password: 'password'}
+
+      fakeForm =
+        $name: 'changePasswordForm'
+        $valid: true
+        $setPristine: sandbox.spy()
+        pwd: $modelValue: 'gozer'
+        password: $modelValue: 'paranormal'
+
+      # Resolve the request.
+      editProfilePromise.then.yields(flash: {
+        success: ['Your profile has been updated.']
+      })
+      $scope.submit(fakeForm)
+
+      assert.deepEqual($scope.changePassword, {})
+
     it 'updates the error fields on bad response', ->
       fakeForm =
-        $name: 'changePassword'
+        $name: 'changePasswordForm'
         $valid: true
-        oldpassword: $modelValue: 'gozer'
-        newpassword: $modelValue: 'paranormal'
+        $setPristine: sandbox.spy()
+        pwd: $modelValue: 'gozer'
+        password: $modelValue: 'paranormal'
 
       controller = createController()
       $scope.submit(fakeForm)
@@ -109,18 +133,18 @@ describe 'h.controllers.AccountManagement', ->
       editProfilePromise.then.callArg 1,
         status: 400
         errors:
-          oldpassword: 'this is wrong'
-
+          pwd: 'this is wrong'
 
       assert.calledWith fakeUtil.applyValidationErrors, fakeForm,
-        oldpassword: 'this is wrong'
+        pwd: 'this is wrong'
 
     it 'displays a flash message if a server error occurs', ->
       fakeForm =
-        $name: 'changePassword'
+        $name: 'changePasswordForm'
         $valid: true
-        oldpassword: $modelValue: 'gozer'
-        newpassword: $modelValue: 'paranormal'
+        $setPristine: sandbox.spy()
+        pwd: $modelValue: 'gozer'
+        password: $modelValue: 'paranormal'
 
       controller = createController()
       $scope.submit(fakeForm)
@@ -134,9 +158,10 @@ describe 'h.controllers.AccountManagement', ->
   describe '.delete', ->
     it 'disables the user account', ->
       fakeForm =
-        $name: 'deleteAccount'
+        $name: 'deleteAccountForm'
         $valid: true
-        deleteaccountpassword: $modelValue: 'paranormal'
+        $setPristine: sandbox.spy()
+        pwd: $modelValue: 'paranormal'
 
       controller = createController()
       $scope.delete(fakeForm)
@@ -145,13 +170,44 @@ describe 'h.controllers.AccountManagement', ->
         username: 'STUBBED_PERSONA_FILTER'
         pwd: 'paranormal'
 
-    it 'logs the user out of the application'
+    it 'logs the user out of the application', ->
+      fakeForm =
+        $name: 'deleteAccountForm'
+        $valid: true
+        $setPristine: sandbox.spy()
+        pwd: $modelValue: 'paranormal'
+
+      controller = createController()
+      $scope.delete(fakeForm)
+
+      # Resolve the request.
+      disableUserPromise.then.callArg 0,
+        status: 200
+
+      assert.calledWith(fakeIdentity.logout)
+
+    it 'clears the password field', ->
+      controller = createController()
+
+      fakeForm =
+        $name: 'deleteAccountForm'
+        $valid: true
+        $setPristine: sandbox.spy()
+        pwd: $modelValue: 'paranormal'
+
+      $scope.deleteAccount = {pwd: ''}
+      $scope.delete(fakeForm)
+      disableUserPromise.then.callArg 0,
+        status: 200
+
+      assert.deepEqual($scope.deleteAccount, {})
 
     it 'updates the error fields on bad response', ->
       fakeForm =
-        $name: 'deleteAccount'
+        $name: 'deleteAccountForm'
         $valid: true
-        deleteaccountpassword: $modelValue: 'paranormal'
+        $setPristine: sandbox.spy()
+        pwd: $modelValue: 'paranormal'
 
       controller = createController()
       $scope.delete(fakeForm)
@@ -160,16 +216,17 @@ describe 'h.controllers.AccountManagement', ->
       disableUserPromise.then.callArg 1,
         status: 400
         errors:
-          oldpassword: 'this is wrong'
+          pwd: 'this is wrong'
 
       assert.calledWith fakeUtil.applyValidationErrors, fakeForm,
-        oldpassword: 'this is wrong'
+        pwd: 'this is wrong'
 
     it 'displays a flash message if a server error ocurrs', ->
       fakeForm =
-        $name: 'deleteAccount'
+        $name: 'deleteAccountForm'
         $valid: true
-        deleteaccountpassword: $modelValue: 'paranormal'
+        $setPristine: sandbox.spy()
+        pwd: $modelValue: 'paranormal'
 
       controller = createController()
       $scope.delete(fakeForm)
