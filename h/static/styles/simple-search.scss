@@ -5,17 +5,24 @@
 }
 
 .simple-search-form {
+  @include clearfix;
   position: relative;
+  padding: 0 (20 / 13 * 1em);
   color: $gray;
 }
 
+.simple-search-form * {
+  box-sizing: border-box;
+}
+
 .simple-search-icon {
-  position: absolute;
+  float: left;
+  display: inline;
   font-size: 1.1em;
-  top: 50%;
-  left: .6em;
-  margin-top: -.5em;
-  pointer-events: none;
+  line-height: 2;
+  margin-left: -100%;
+  position: relative;
+  right: 20 / 14 * 1em;
 
   :not(:focus) ~ & {
     color: $gray-lighter;
@@ -23,13 +30,12 @@
 }
 
 .simple-search-input {
+  float: left;
   outline: none;
   color: $text-color;
-  line-height: 24px;
   width: 100%;
-  border-radius: 2em;
-  border: 1px solid $gray-lighter !important; // Override base input styles.
-  padding: 0 2em;
+  border: none !important; // Override base input styles.
+  padding: (5 / 13 * 1em) 0;
 
   .simple-search-inactive &:not(:focus) {
     border-color: #f3f3f3 !important;
@@ -43,29 +49,23 @@
     left: 50%;
     margin-top: -.5em;
     margin-left: -.5em;
-    font-size: .7em;
+    font-size: 0.85em;
   }
 
-  position: absolute;
+  float: left;
+  position: relative;
+  top: 6 / 13 * 1em;
+  margin-right: -1.33em;
+  padding: 0;
   outline: none;
-  right: .35em;
-  top: 50%;
   border: none;
-  border-radius: 50%;
-  background: $gray-light;
-  color: #fff;
+  background: none;
+  color: $gray;
   width: 1.33em;
   height: 1.33em;
-  padding: 0;
-  margin-top: -.65em;
   @include box-shadow(none);
 
   &:focus, &:hover, &:active:not([disabled]) {
-    @include transition(background-color 200ms ease-in);
-    background-color: $gray-light;
-    color: #fff;
-    border: none;
-    background-image: none;
-    box-shadow: none;
+    color: $text-color;
   }
 }
