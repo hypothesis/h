@@ -51,16 +51,10 @@ class AccountManagement
       return unless form.$valid
 
       username = persona_filter $scope.session.userid
-      if form.$name is 'editProfileForm'
-        packet =
-          username: username
-          email: form.email.$modelValue
-          pwd: form.pwd.$modelValue
-      else
-        packet =
-          username: username
-          pwd: form.pwd.$modelValue
-          password: form.password.$modelValue
+      packet =
+        username: username
+        pwd: form.pwd.$modelValue
+        password: form.password.$modelValue
 
       successHandler = angular.bind(null, onSuccess, form)
       errorHandler   = angular.bind(null, onError, form)

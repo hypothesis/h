@@ -44,23 +44,6 @@ describe 'h.controllers.AccountManagement', ->
       $controller('AccountManagement', {$scope: $scope})
 
   describe '.submit', ->
-    it 'updates the email address on the backend', ->
-      fakeForm =
-        $name: 'editProfileForm'
-        $valid: true
-        $setPristine: sandbox.spy()
-        email: $modelValue: 'egon@columbia.edu'
-        pwd: $modelValue: 'paranormal'
-
-      controller = createController()
-      $scope.submit(fakeForm)
-
-      assert.calledWith(fakeProfile.edit_profile, {
-        username: 'STUBBED_PERSONA_FILTER'
-        email: 'egon@columbia.edu'
-        pwd: 'paranormal'
-      })
-
     it 'updates the password on the backend', ->
       fakeForm =
         $name: 'changePasswordForm'
