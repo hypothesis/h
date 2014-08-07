@@ -10,6 +10,7 @@
         <ul class="form-error-list">
           <li class="form-error" ng-show="changePasswordForm.pwd.$error.required">Please enter your current password.</li>
           <li class="form-error" ng-show="changePasswordForm.pwd.$error.minlength">Your password does not match the one we have on record.</li>
+          <li class="form-error" ng-show="changePasswordForm.pwd.$error.response">{{changePasswordForm.pwd.responseErrorMessage}}</li>
         </ul>
       </div>
 
@@ -20,6 +21,7 @@
         <ul class="form-error-list">
           <li class="form-error" ng-show="changePasswordForm.password.$error.required">Please enter a password.</li>
           <li class="form-error" ng-show="changePasswordForm.password.$error.minlength">Passwords must be at least 2 characters.</li>
+          <li class="form-error" ng-show="changePasswordForm.password.$error.response">{{changePasswordForm.password.responseErrorMessage}}</li>
         </ul>
       </div>
 
@@ -50,7 +52,8 @@
         <input id="confirm-account-deletion" class="form-input" type="password" name="pwd" ng-model="deleteAccount.pwd" required>
 
         <ul class="form-error-list">
-          <li class="form-error" ng-show="deleteAccountForm.pwd.$error.minlength">Your password does not match the one we have on record.</li>
+          <li class="form-error" ng-show="deleteAccountForm.pwd.$error.required">Please enter your password to confirm</li>
+          <li class="form-error" ng-show="deleteAccountForm.pwd.$error.response">{{deleteAccountForm.pwd.responseErrorMessage}}</li>
         </ul>
       </div>
 
