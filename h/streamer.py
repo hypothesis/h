@@ -412,7 +412,7 @@ class StreamerSession(Session):
         registry = request.registry
         Annotation = registry.queryUtility(interfaces.IAnnotationClass)
         user = get_user(request)
-        annotations = _search_raw(Annotation, query=self.query.query, user=user)
+        annotations = Annotation.search_raw(query=self.query.query, user=user)
         self.received = len(annotations)
 
         # Can send zero to indicate that no past data is matched
@@ -460,28 +460,6 @@ class StreamerSession(Session):
             self.close()
         else:
             transaction.commit()
-
-
-def _search_raw(Annotation, query, user=None):
-    """Perform a search on Elasticsearch"""
-
-    # Add a filter for the authorized user
-    # (user=None implies only public annotations are obtained)
-    f = authz.permissions_filter(user)
-    if not f:
-        return [] # Refuse to perform the query
-    query['query'] = {'filtered': {'query': query['query'], 'filter': f}}
-
-    # Directly query the Elasticsearch database
-    result = es.conn.search(index=es.index,
-                   doc_type=Annotation.__type__,
-                   body=query)
-    hits = []
-    # Add the id to each annotation
-    for res in result['hits']['hits']:
-        res['_source']['id'] = res['_id']
-        hits.append(res['_source'])
-    return hits
 
 
 @subscriber(events.AnnotationEvent)
