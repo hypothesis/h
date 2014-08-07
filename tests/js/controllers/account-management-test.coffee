@@ -44,14 +44,17 @@ describe 'h.controllers.AccountManagement', ->
       $controller('AccountManagement', {$scope: $scope})
 
   describe '.submit', ->
-    it 'updates the password on the backend', ->
-      fakeForm =
+    createFakeForm = (overrides={}) ->
+      defaults =
         $name: 'changePasswordForm'
         $valid: true
         $setPristine: sandbox.spy()
         pwd: $modelValue: 'gozer'
         password: $modelValue: 'paranormal'
+      angular.extend(defaults, overrides)
 
+    it 'updates the password on the backend', ->
+      fakeForm = createFakeForm()
       controller = createController()
       $scope.submit(fakeForm)
 
@@ -61,13 +64,36 @@ describe 'h.controllers.AccountManagement', ->
         password: 'paranormal'
       })
 
+    it 'clears the fields', ->
+      controller = createController()
+      $scope.changePassword = {pwd: 'password', password: 'password'}
+      fakeForm = createFakeForm()
+
+      # Resolve the request.
+      editProfilePromise.then.yields(flash: {
+        success: ['Your profile has been updated.']
+      })
+      $scope.submit(fakeForm)
+
+      assert.deepEqual($scope.changePassword, {})
+
+    it 'updates the error fields on bad response', ->
+      fakeForm = createFakeForm()
+      controller = createController()
+      $scope.submit(fakeForm)
+
+      # Resolve the request.
+      editProfilePromise.then.callArg 1,
+        status: 400
+        data:
+          errors:
+            pwd: 'this is wrong'
+
+      assert.calledWith fakeUtil.applyValidationErrors, fakeForm,
+        pwd: 'this is wrong'
+
     it 'displays a flash message on success', ->
-      fakeForm =
-        $name: 'changePasswordForm'
-        $valid: true
-        $setPristine: sandbox.spy()
-        pwd: $modelValue: 'gozer'
-        password: $modelValue: 'paranormal'
+      fakeForm = createFakeForm()
 
       # Resolve the request.
       editProfilePromise.then.yields(flash: {
@@ -81,71 +107,43 @@ describe 'h.controllers.AccountManagement', ->
         'Your profile has been updated.'
       ])
 
-    it 'clears the password field', ->
-      controller = createController()
-
-      $scope.changePassword = {pwd: 'password', password: 'password'}
-
-      fakeForm =
-        $name: 'changePasswordForm'
-        $valid: true
-        $setPristine: sandbox.spy()
-        pwd: $modelValue: 'gozer'
-        password: $modelValue: 'paranormal'
-
-      # Resolve the request.
-      editProfilePromise.then.yields(flash: {
-        success: ['Your profile has been updated.']
-      })
-      $scope.submit(fakeForm)
-
-      assert.deepEqual($scope.changePassword, {})
-
-    it 'updates the error fields on bad response', ->
-      fakeForm =
-        $name: 'changePasswordForm'
-        $valid: true
-        $setPristine: sandbox.spy()
-        pwd: $modelValue: 'gozer'
-        password: $modelValue: 'paranormal'
-
-      controller = createController()
-      $scope.submit(fakeForm)
-
-      # Resolve the request.
-      editProfilePromise.then.callArg 1,
-        status: 400
-        errors:
-          pwd: 'this is wrong'
-
-      assert.calledWith fakeUtil.applyValidationErrors, fakeForm,
-        pwd: 'this is wrong'
-
     it 'displays a flash message if a server error occurs', ->
-      fakeForm =
-        $name: 'changePasswordForm'
-        $valid: true
-        $setPristine: sandbox.spy()
-        pwd: $modelValue: 'gozer'
-        password: $modelValue: 'paranormal'
-
+      fakeForm = createFakeForm()
       controller = createController()
       $scope.submit(fakeForm)
 
       # Resolve the request.
       editProfilePromise.then.callArg 1,
         status: 500
+        data:
+          flash:
+            error: ['Something bad happened']
 
-      assert.calledWith(fakeFlash, 'error')
+      assert.calledWith(fakeFlash, 'error', ['Something bad happened'])
+
+    it 'displays a fallback flash message if none are present', ->
+      fakeForm = createFakeForm()
+      controller = createController()
+      $scope.submit(fakeForm)
+
+      # Resolve the request.
+      editProfilePromise.then.callArg 1,
+        status: 500
+        data: {}
+
+      assert.calledWith(fakeFlash, 'error', 'Sorry, we were unable to perform your request')
 
   describe '.delete', ->
-    it 'disables the user account', ->
-      fakeForm =
+    createFakeForm = (overrides={}) ->
+      defaults =
         $name: 'deleteAccountForm'
         $valid: true
         $setPristine: sandbox.spy()
         pwd: $modelValue: 'paranormal'
+      angular.extend(defaults, overrides)
 
+    it 'disables the user account', ->
+      fakeForm = createFakeForm()
       controller = createController()
       $scope.delete(fakeForm)
 
@@ -154,12 +152,7 @@ describe 'h.controllers.AccountManagement', ->
         pwd: 'paranormal'
 
     it 'logs the user out of the application', ->
-      fakeForm =
-        $name: 'deleteAccountForm'
-        $valid: true
-        $setPristine: sandbox.spy()
-        pwd: $modelValue: 'paranormal'
-
+      fakeForm = createFakeForm()
       controller = createController()
       $scope.delete(fakeForm)
 
@@ -172,12 +165,7 @@ describe 'h.controllers.AccountManagement', ->
     it 'clears the password field', ->
       controller = createController()
 
-      fakeForm =
-        $name: 'deleteAccountForm'
-        $valid: true
-        $setPristine: sandbox.spy()
-        pwd: $modelValue: 'paranormal'
-
+      fakeForm = createFakeForm()
       $scope.deleteAccount = {pwd: ''}
       $scope.delete(fakeForm)
       disableUserPromise.then.callArg 0,
@@ -186,37 +174,42 @@ describe 'h.controllers.AccountManagement', ->
       assert.deepEqual($scope.deleteAccount, {})
 
     it 'updates the error fields on bad response', ->
-      fakeForm =
-        $name: 'deleteAccountForm'
-        $valid: true
-        $setPristine: sandbox.spy()
-        pwd: $modelValue: 'paranormal'
-
+      fakeForm = createFakeForm()
       controller = createController()
       $scope.delete(fakeForm)
 
       # Resolve the request.
       disableUserPromise.then.callArg 1,
         status: 400
-        errors:
-          pwd: 'this is wrong'
+        data:
+          errors:
+            pwd: 'this is wrong'
 
       assert.calledWith fakeUtil.applyValidationErrors, fakeForm,
         pwd: 'this is wrong'
 
-    it 'displays a flash message if a server error ocurrs', ->
-      fakeForm =
-        $name: 'deleteAccountForm'
-        $valid: true
-        $setPristine: sandbox.spy()
-        pwd: $modelValue: 'paranormal'
-
+    it 'displays a flash message if a server error occurs', ->
+      fakeForm = createFakeForm()
       controller = createController()
       $scope.delete(fakeForm)
 
       # Resolve the request.
       disableUserPromise.then.callArg 1,
         status: 500
+        data:
+          flash:
+            error: ['Something bad happened']
 
-      assert.calledWith(fakeFlash, 'error')
+      assert.calledWith(fakeFlash, 'error', ['Something bad happened'])
 
+    it 'displays a fallback flash message if none are present', ->
+      fakeForm = createFakeForm()
+      controller = createController()
+      $scope.delete(fakeForm)
+
+      # Resolve the request.
+      disableUserPromise.then.callArg 1,
+        status: 500
+        data: {}
+
+      assert.calledWith(fakeFlash, 'error', 'Sorry, we were unable to perform your request')

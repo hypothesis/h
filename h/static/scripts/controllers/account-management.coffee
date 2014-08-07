@@ -18,11 +18,14 @@ class AccountManagement
       identity.logout()
       onSuccess(form, response)
 
-    onError = (form, data) ->
-      if 400 >= data.status < 500
-        util.applyValidationErrors(form, data.errors)
+    onError = (form, response) ->
+      if response.status >= 400 and response.status < 500
+        util.applyValidationErrors(form, response.data.errors)
       else
-        flash('error', 'Sorry, we were unable to perform your request')
+        if response.data.flash
+          flash(type, msgs) for own type, msgs of response.data.flash
+        else
+          flash('error', 'Sorry, we were unable to perform your request')
 
     # Data for each of the forms
     $scope.editProfile = {}
