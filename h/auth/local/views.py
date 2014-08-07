@@ -11,6 +11,7 @@ from h import events, views
 from h.auth.local import forms, models, schemas
 from h.models import _
 
+
 def ajax_form(request, result):
     flash = views.pop_flash(request)
 
@@ -23,13 +24,16 @@ def ajax_form(request, result):
     else:
         errors = result.pop('errors', [])
         if errors:
-            request.response.status_code = 400
+            status_code = result.pop('code', 400)
+            request.response.status_code = status_code
             result['status'] = 'failure'
 
+            result.setdefault('errors', {})
             for e in errors:
                 if isinstance(e, colander.Invalid):
-                    result.setdefault('errors', {})
                     result['errors'].update(e.asdict())
+                else:
+                    result['errors'].update(e)
 
         reasons = flash.pop('error', [])
         if reasons:
@@ -160,7 +164,7 @@ class AsyncRegisterController(RegisterController):
             user = self.User.get_by_activation(request, activation)
 
         if user is None:
-            return dict(errors=[_('This activation code is not valid.')])
+            return dict(errors=[{'activation_code': _('This activation code is not valid.')}])
 
         user.password = appstruct['password']
         self.db.delete(activation)
@@ -198,9 +202,7 @@ class ProfileController(horus.views.ProfileController):
             request.context = user
             return super(ProfileController, self).edit_profile()
         else:
-            FlashMessage(self.request,
-                _('Invalid password.'), kind='error')
-            return httpexceptions.HTTPFound(location=request.url)
+            return dict(errors=[{'pwd':_('Invalid password')}], code=401)
 
     def disable_user(self):
         request = self.request
@@ -224,11 +226,9 @@ class ProfileController(horus.views.ProfileController):
                  _('User disabled'),
                  kind='success')
         else:
-            FlashMessage(self.request,
-                _('Invalid password.'),
-                kind='error')
+            return dict(errors=[{'pwd':_('Invalid password')}], code=401)
 
-        return httpexceptions.HTTPFound(location=request.url)
+        return {}
 
 @view_defaults(accept='application/json', name='app', renderer='json')
 @view_config(attr='edit_profile', request_param='__formid__=edit_profile')
