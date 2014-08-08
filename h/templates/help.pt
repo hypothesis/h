@@ -72,11 +72,6 @@
       <img height="auto" width="450"
            src="${request.static_url('h:static/images/helpdocumentation/searchmenu.jpg')}" />
 
-      <h2>[Feature Pending] Flagging for spam:</h2>
-      <p>We want to maintain a high standard for annotation. If you find something you believe is spam or inappropriate, please flag it. You can do this by hovering over the annotation and selecting “flag.” </p>
-      <img height="" width=""
-           src="${request.static_url('h:static/images/helpdocumentation/flag.jpg')}" />
-
       <h1>Making annotations:</h1>
 
       <h2>Creating an annotation</h2>

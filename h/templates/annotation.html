@@ -8,7 +8,6 @@
       <li ng-click="reply()"><i class="icon-reply"></i> Reply</li>
       <li ng-show="auth.update" ng-click="edit()"><i class="icon-copy"></i> Edit</li>
       <li ng-show="auth.delete" ng-click="delete()"><i class="icon-x"></i> Delete…</li>
-      <li ng-hide="auth.delete" ng-click="flag()"><i class="icon-flag"></i> Flag…</li>
     </ul>
   </div>
 
@@ -138,7 +137,4 @@
   <a class="small magicontrol" href="" title="Delete"
      ng-show="auth.delete && !editing"
      ng-click="delete($event)"><i class="icon-x"></i> Delete</a>
-  <a class="small magicontrol" href="" title="flag"
-     ng-show="!auth.delete && !editing"
-     ng-click="flag($event)"><i class="icon-flag"></i> Flag</a>
 </form>
