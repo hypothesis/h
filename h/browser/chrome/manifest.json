@@ -24,19 +24,12 @@
     "webRequestBlocking",
     "webNavigation"
   ],
-  "content_scripts": [{
-      "matches": [
-          "*://*/*.pdf*",
-          "*://*/*.PDF*"
-       ],
-       "css": ["hide-xhtml-error.css"]
-  }],
   "content_security_policy":
     "script-src 'self' 'unsafe-eval' ${src}; object-src 'self'",
 
   "background": {
     "persistent": true,
-    "scripts": ["pdfHandler.js", "pdfHandler-local.js", "background.js"]
+    "scripts": ["background.js"]
   },
   "page_action": {
     "placeholder": "work around http://crbug.com/86449"

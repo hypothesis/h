@@ -103,9 +103,8 @@ def chrome(env):
     old_dir = getcwd()
     chdir('./build/chrome')
 
-    # Bundle together the extension code and pdf.js
+    # Copy the extension code
     merge('../../h/browser/chrome', './')
-    merge('../../pdf.js/build/chromium', './')
 
     # Build the app html and copy assets if they are being bundled
     if request.webassets_env.url.startswith('chrome-extension://'):
