@@ -89,16 +89,7 @@ As a convenience, there is a make target for this::
 
 Chrome Extension
 ^^^^^^^^^^^^^^^^
-To build the Chrome extension, follow the installation instructions and then
-check out and build the pdf.js submodule::
-
-    $ git submodule init
-    $ git submodule update
-    $ cd pdf.js
-    $ node make generic
-    $ node make chromium
-
-Then, run the following command at the prompt to build the extension::
+Run the following command at the prompt to build the extension::
 
     $ ./bin/hypothesis extension development.ini http://localhost:5000
 
