@@ -166,7 +166,7 @@ class QueryParser
       path: '/tags'
       exact_match: false
       case_sensitive: false
-      and_or: 'or'
+      and_or: 'and'
     quote:
       path: '/quote'
       exact_match: false
@@ -245,14 +245,10 @@ class QueryParser
       if and_or is 'or'
         val_list = ''
         first = true
-        for val in terms
-          unless first then val_list += ',' else first = false
-          value_part = if rule.formatter then rule.formatter val else val
-          val_list += value_part
         oper_part =
           if rule.operator? then rule.operator
           else if exact_match then 'one_of' else 'match_of'
-        filter.addClause mapped_field, oper_part, val_list, case_sensitive, rule.options
+        filter.addClause mapped_field, oper_part, terms, case_sensitive, rule.options
       else
         oper_part =
           if rule.operator? then rule.operator
