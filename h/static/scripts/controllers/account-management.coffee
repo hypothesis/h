@@ -32,6 +32,9 @@ class AccountManagement
     $scope.changePassword = {}
     $scope.deleteAccount = {}
 
+    # Initial form state.
+    $scope.sheet = false
+
     $scope.delete = (form) ->
       # If the password is correct, the account is deleted.
       # The extension is then removed from the page.

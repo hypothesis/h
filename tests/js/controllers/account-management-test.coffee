@@ -43,6 +43,21 @@ describe 'h.controllers.AccountManagement', ->
     createController = ->
       $controller('AccountManagement', {$scope: $scope})
 
+  it 'hides the sheet by default', ->
+      controller = createController()
+      assert.isFalse($scope.sheet)
+
+  describe 'event subscriptions', ->
+    it 'should show the sheet on "nav:account" event', ->
+      controller = createController()
+      $scope.$emit('nav:account')
+      assert.isTrue($scope.sheet)
+
+    it 'should hide the sheet on "logout" event', ->
+      controller = createController()
+      $scope.$emit('logout')
+      assert.isFalse($scope.sheet)
+
   describe '.submit', ->
     createFakeForm = (overrides={}) ->
       defaults =
