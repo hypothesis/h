@@ -55,7 +55,7 @@ def _environment_overrides():
         urlparse.uses_netloc.append("sqlite")
         url = list(urlparse.urlparse(os.environ["DATABASE_URL"]))
         if url[0] == 'postgres':
-            url[0] = url[0] + '+psycopg2'
+            url[0] = 'postgresql+psycopg2'
         overrides['sqlalchemy.url'] = urlparse.urlunparse(url)
 
     if 'ELASTICSEARCH_INDEX' in os.environ:

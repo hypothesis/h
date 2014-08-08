@@ -51,7 +51,7 @@ def test_postgres_database_environment_overrides(create_app):
 
     main({})
     expected_config = {
-        'sqlalchemy.url': 'postgres+psycopg2://postgres:1234/database'
+        'sqlalchemy.url': 'postgresql+psycopg2://postgres:1234/database'
     }
     assert create_app.mock_calls == [call(expected_config)]
 
