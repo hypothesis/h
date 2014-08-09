@@ -47,6 +47,14 @@ def login(event):
     user = event.user
     request.response.headerlist.extend(remember(request, user))
 
+    # bw compat
+    session = request.session
+    personas = session.setdefault('personas', [])
+
+    if user not in personas:
+        personas.append(user)
+        session.changed()
+
 
 @subscriber(events.LogoutEvent)
 def logout(event):

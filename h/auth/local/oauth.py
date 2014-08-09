@@ -10,10 +10,16 @@ from h.api import get_consumer
 
 class SessionGrant(ClientCredentialsGrant):
     def validate_token_request(self, request):
-        try:
-            check_csrf_token(request, token='assertion')
-        except BadCSRFToken:
-            raise InvalidClientError(request=request)
+        # bw compat
+        persona = request.params.get('persona')
+        if persona is not None:
+            if persona not in request.session.get('personas', []):
+                raise InvalidClientError(request=request)
+        else:
+            try:
+                check_csrf_token(request, token='assertion')
+            except BadCSRFToken:
+                raise InvalidClientError(request=request)
 
         request.client = get_consumer(request)
 
