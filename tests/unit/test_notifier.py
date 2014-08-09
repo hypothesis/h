@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
-from mock import patch, Mock, MagicMock
+from mock import patch
 from pyramid.testing import DummyRequest
 
 from h import events, notifier
-from h.streamer import FilterHandler
 
 
 class QueryMock(object):
@@ -156,7 +155,7 @@ def test_reply_query_match():
 
     with patch('h.notifier.AnnotationNotifier') as mock_notif:
         with patch('h.notifier.parent_values') as mock_parent:
-            mock_parent.return_value={'user': 'acct:parent@testdomain'}
+            mock_parent.return_value = {'user': 'acct:parent@testdomain'}
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 1
 
@@ -172,7 +171,7 @@ def test_reply_username_mismatch():
 
     with patch('h.notifier.AnnotationNotifier') as mock_notif:
         with patch('h.notifier.parent_values') as mock_parent:
-            mock_parent.return_value={'user': 'acct:testuser2@testdomain'}
+            mock_parent.return_value = {'user': 'acct:testuser2@testdomain'}
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 1
 
@@ -187,7 +186,7 @@ def test_reply_domain_mismatch():
 
     with patch('h.notifier.AnnotationNotifier') as mock_notif:
         with patch('h.notifier.parent_values') as mock_parent:
-            mock_parent.return_value={'user': 'acct:testuser@testdomain2'}
+            mock_parent.return_value = {'user': 'acct:testuser@testdomain2'}
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 1
 
@@ -202,13 +201,13 @@ def test_reply_same_creator():
 
     with patch('h.notifier.AnnotationNotifier') as mock_notif:
         with patch('h.notifier.parent_values') as mock_parent:
-            mock_parent.return_value={'user': 'acct:testuser@testdomain'}
+            mock_parent.return_value = {'user': 'acct:testuser@testdomain'}
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 0
 
 
 def test_no_parent_user():
-    """Should not throw error and should not send annotation if the parent user is missing"""
+    """Should not throw or send annotation if the parent user is missing"""
     annotation = {
         'user': 'acct:testuser@testdomain',
         'permissions': {'read': ["group:__world__"]}
@@ -218,7 +217,7 @@ def test_no_parent_user():
 
     with patch('h.notifier.AnnotationNotifier') as mock_notif:
         with patch('h.notifier.parent_values') as mock_parent:
-            mock_parent.return_value={}
+            mock_parent.return_value = {}
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 0
 
@@ -234,6 +233,6 @@ def test_reply_update():
 
     with patch('h.notifier.AnnotationNotifier') as mock_notif:
         with patch('h.notifier.parent_values') as mock_parent:
-            mock_parent.return_value={}
+            mock_parent.return_value = {}
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 0
