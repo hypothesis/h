@@ -30,7 +30,7 @@ class App
     # Resolved once the API service has been discovered.
     storeReady = $q.defer()
 
-    configureIdentity = (persona) ->
+    initIdentity = (persona) ->
       # Store the argument as the claimed user id.
       claimedUser = persona
 
@@ -52,6 +52,133 @@ class App
           identity.request()
         else
           identity.logout()
+
+    initStore = ->
+      Store = plugins.Store
+
+      delete plugins.Store
+      annotator.addPlugin 'Store', annotator.options.Store
+
+      annotator.threading.thread []
+      annotator.threading.idTable = {}
+
+      $scope.$root.annotations = []
+      $scope.store = plugins.Store
+
+      _id = $route.current.params.id
+      _promise = null
+
+      # Load any initial annotations that should be displayed
+      if _id
+        if $scope.loadAnnotations
+          # Load annotations from inline page data
+          plugins.Store._onLoadAnnotations $scope.loadAnnotations
+          delete $scope.loadAnnotations
+          _promise = $scope.loadAnnotations
+        else
+          # Load annotations from the API
+          # XXX: Two requests here is less than ideal
+          _promise = plugins.Store.loadAnnotationsFromSearch({_id})
+            .then ->
+              plugins.Store.loadAnnotationsFromSearch({references: _id})
+
+        $q.when _promise, ->
+          thread = annotator.threading.getContainer _id
+          $scope.$root.annotations = [thread.message]
+
+      return unless Store
+
+      # XXX: Hacky hacky stuff to ensure that any search requests in-flight
+      # at this time have no effect when they resolve and that future events
+      # have no effect on this Store. Unfortunately, it's not possible to
+      # unregister all the events or properly unload the Store because the
+      # registration loses the closure. The approach here is perhaps
+      # cleaner than fishing them out of the jQuery private data.
+      # * Overwrite the Store's handle to the annotator, giving it one
+      #   with a noop `loadAnnotations` method.
+      Store.annotator = loadAnnotations: angular.noop
+      # * Make all api requests into a noop.
+      Store._apiRequest = angular.noop
+      # * Ignore pending searches
+      Store._onLoadAnnotations = angular.noop
+      # * Make the update function into a noop.
+      Store.updateAnnotation = angular.noop
+      # * Remove the plugin and re-add it to the annotator.
+
+      # Even though most operations on the old Store are now noops the Annotator
+      # itself may still be setting up previously fetched annotatiosn. We may
+      # delete annotations which are later set up in the DOM again, causing
+      # issues with the viewer and heatmap. As these are loaded, we can delete
+      # them, but the threading plugin will get confused and break threading.
+      # Here, we cleanup these annotations as they are set up by the Annotator,
+      # preserving the existing threading. This is all a bit paranoid, but
+      # important when many annotations are loading as authentication is
+      # changing. It's all so ugly it makes me cry, though. Someone help
+      # restore sanity?
+      annotations = Store.annotations.slice()
+      cleanup = (loaded) ->
+        $timeout ->  # Give the threading plugin time to thread this annotation
+          deleted = []
+          for l in loaded
+            if l in annotations
+              # If this annotation still exists, we'll need to thread it again
+              # since the delete will mangle the threading data structures.
+              existing = annotator.threading.idTable[l.id]?.message
+              annotator.deleteAnnotation(l)
+              deleted.push l
+              if existing
+                plugins.Threading.thread existing
+          annotations = (a for a in annotations when a not in deleted)
+          if annotations.length is 0
+            annotator.unsubscribe 'annotationsLoaded', cleanup
+            $rootScope.$digest()
+        , 10
+      cleanup (a for a in annotations when a.thread)
+      annotator.subscribe 'annotationsLoaded', cleanup
+
+    initUpdater = (failureCount=0) ->
+      _dfdSock = $q.defer()
+      _sock = socket()
+
+      $scope.updater?.then (sock) ->
+        sock.onclose = null  # break automatic reconnect
+        sock.close()
+
+      $scope.updater = _dfdSock.promise
+
+      _sock.onopen = ->
+        failureCount = 0
+        _dfdSock.resolve(_sock)
+        _dfdSock = null
+
+      _sock.onclose = ->
+        failureCount = Math.min(10, ++failureCount)
+        slots = Math.random() * (Math.pow(2, failureCount) - 1)
+        $timeout ->
+          _retry = initUpdater(failureCount)
+          _dfdSock?.resolve(_retry)
+        , slots * 500
+
+      _sock.onmessage = (msg) ->
+        #console.log msg
+        unless msg.data.type? and msg.data.type is 'annotation-notification'
+          return
+        data = msg.data.payload
+        action = msg.data.options.action
+
+        unless data instanceof Array then data = [data]
+
+        p = $scope.persona
+        user = if p? then "acct:" + p.username + "@" + p.provider else ''
+        unless data instanceof Array then data = [data]
+
+        if $scope.socialView.name is 'single-player'
+          owndata = data.filter (d) -> d.user is user
+          $scope.applyUpdates action, owndata
+        else
+          $scope.applyUpdates action, data
+
+      _dfdSock.promise
 
     onlogin = (assertion) ->
       # Delete any old Auth plugin.
@@ -114,7 +241,7 @@ class App
       angular.extend annotator.options.Store, options
       storeReady.resolve()
 
-    $scope.$watch 'persona', configureIdentity
+    $scope.$watch 'persona', initIdentity
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
@@ -232,89 +359,6 @@ class App
       $scope.updater.then (sock) ->
         sock.send(JSON.stringify(sockmsg))
 
-    initStore = ->
-      Store = plugins.Store
-
-      delete plugins.Store
-      annotator.addPlugin 'Store', annotator.options.Store
-
-      annotator.threading.thread []
-      annotator.threading.idTable = {}
-
-      $scope.$root.annotations = []
-      $scope.store = plugins.Store
-
-      _id = $route.current.params.id
-      _promise = null
-
-      # Load any initial annotations that should be displayed
-      if _id
-        if $scope.loadAnnotations
-          # Load annotations from inline page data
-          plugins.Store._onLoadAnnotations $scope.loadAnnotations
-          delete $scope.loadAnnotations
-          _promise = $scope.loadAnnotations
-        else
-          # Load annotations from the API
-          # XXX: Two requests here is less than ideal
-          _promise = plugins.Store.loadAnnotationsFromSearch({_id})
-            .then ->
-              plugins.Store.loadAnnotationsFromSearch({references: _id})
-
-        $q.when _promise, ->
-          thread = annotator.threading.getContainer _id
-          $scope.$root.annotations = [thread.message]
-
-      return unless Store
-
-      # XXX: Hacky hacky stuff to ensure that any search requests in-flight
-      # at this time have no effect when they resolve and that future events
-      # have no effect on this Store. Unfortunately, it's not possible to
-      # unregister all the events or properly unload the Store because the
-      # registration loses the closure. The approach here is perhaps
-      # cleaner than fishing them out of the jQuery private data.
-      # * Overwrite the Store's handle to the annotator, giving it one
-      #   with a noop `loadAnnotations` method.
-      Store.annotator = loadAnnotations: angular.noop
-      # * Make all api requests into a noop.
-      Store._apiRequest = angular.noop
-      # * Ignore pending searches
-      Store._onLoadAnnotations = angular.noop
-      # * Make the update function into a noop.
-      Store.updateAnnotation = angular.noop
-      # * Remove the plugin and re-add it to the annotator.
-
-      # Even though most operations on the old Store are now noops the Annotator
-      # itself may still be setting up previously fetched annotatiosn. We may
-      # delete annotations which are later set up in the DOM again, causing
-      # issues with the viewer and heatmap. As these are loaded, we can delete
-      # them, but the threading plugin will get confused and break threading.
-      # Here, we cleanup these annotations as they are set up by the Annotator,
-      # preserving the existing threading. This is all a bit paranoid, but
-      # important when many annotations are loading as authentication is
-      # changing. It's all so ugly it makes me cry, though. Someone help
-      # restore sanity?
-      annotations = Store.annotations.slice()
-      cleanup = (loaded) ->
-        $timeout ->  # Give the threading plugin time to thread this annotation
-          deleted = []
-          for l in loaded
-            if l in annotations
-              # If this annotation still exists, we'll need to thread it again
-              # since the delete will mangle the threading data structures.
-              existing = annotator.threading.idTable[l.id]?.message
-              annotator.deleteAnnotation(l)
-              deleted.push l
-              if existing
-                plugins.Threading.thread existing
-          annotations = (a for a in annotations when a not in deleted)
-          if annotations.length is 0
-            annotator.unsubscribe 'annotationsLoaded', cleanup
-            $rootScope.$digest()
-        , 10
-      cleanup (a for a in annotations when a.thread)
-      annotator.subscribe 'annotationsLoaded', cleanup
-
     $scope.authTimeout = ->
       delete annotator.ongoing_edit
       $scope.ongoingHighlightSwitch = false
@@ -336,50 +380,6 @@ class App
             $location.search('q', query or null)
 
     $scope.socialView = annotator.socialView
-
-    initUpdater = (failureCount=0) ->
-      _dfdSock = $q.defer()
-      _sock = socket()
-
-      $scope.updater?.then (sock) ->
-        sock.onclose = null  # break automatic reconnect
-        sock.close()
-
-      $scope.updater = _dfdSock.promise
-
-      _sock.onopen = ->
-        failureCount = 0
-        _dfdSock.resolve(_sock)
-        _dfdSock = null
-
-      _sock.onclose = ->
-        failureCount = Math.min(10, ++failureCount)
-        slots = Math.random() * (Math.pow(2, failureCount) - 1)
-        $timeout ->
-          _retry = initUpdater(failureCount)
-          _dfdSock?.resolve(_retry)
-        , slots * 500
-
-      _sock.onmessage = (msg) ->
-        #console.log msg
-        unless msg.data.type? and msg.data.type is 'annotation-notification'
-          return
-        data = msg.data.payload
-        action = msg.data.options.action
-
-        unless data instanceof Array then data = [data]
-
-        p = $scope.persona
-        user = if p? then "acct:" + p.username + "@" + p.provider else ''
-        unless data instanceof Array then data = [data]
-
-        if $scope.socialView.name is 'single-player'
-          owndata = data.filter (d) -> d.user is user
-          $scope.applyUpdates action, owndata
-        else
-          $scope.applyUpdates action, data
-
-      _dfdSock.promise
 
     $scope.markAnnotationUpdate = (data) ->
       for annotation in data
