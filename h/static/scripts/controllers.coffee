@@ -31,6 +31,7 @@ class App
     storeReady = $q.defer()
 
     applyUpdates = (action, data) ->
+      """Update the application with new data from the websocket."""
       return unless data?.length
       if action == 'past'
         action = 'create'
@@ -101,6 +102,7 @@ class App
       $route.reload() if $location.path() is '/page_search' and data.length
 
     initIdentity = (persona) ->
+      """Initialize identity callbacks."""
       # Store the argument as the claimed user id.
       claimedUser = persona
 
@@ -124,6 +126,7 @@ class App
           identity.logout()
 
     initStore = ->
+      """Initialize the storage component."""
       Store = plugins.Store
 
       delete plugins.Store
@@ -207,6 +210,7 @@ class App
       annotator.subscribe 'annotationsLoaded', cleanup
 
     initUpdater = (failureCount=0) ->
+      """Initialize the websocket used for realtime updates."""
       _dfdSock = $q.defer()
       _sock = socket()
 
