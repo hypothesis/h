@@ -390,18 +390,6 @@ $base-font-size: 14px;
 }
 
 
-// Toolbar notification counter
-.annotator-notification-counter {
-  font-family: $sans-font-family;
-  pointer-events: none;
-  position: absolute;
-  margin-left: 11px;
-  margin-top: 4px;
-  z-index: 2;
-  font-size: .86em;
-}
-
-
 /*
   Mobile layout
   240-479 px

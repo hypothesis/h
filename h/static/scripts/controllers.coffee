@@ -387,12 +387,9 @@ class App
         if annotation.references?
           container = annotator.threading.getContainer annotation.references[0]
           if container?.message?
-            container.message._updatedAnnotation = true
             # Temporary workarund to force publish changes
             if plugins.Store?
               plugins.Store._onLoadAnnotations [container.message]
-        else
-          annotation._updatedAnnotation = true
 
     $scope.applyUpdates = (action, data) ->
       return unless data?.length

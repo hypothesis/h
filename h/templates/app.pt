@@ -108,8 +108,5 @@
     <script type="text/ng-template" id="page_search.html">
       <metal:main use-macro="load: h:templates/page_search.html" />
     </script>
-    <script type="text/ng-template" id="notification.html">
-      <metal:main use-macro="load: h:templates/notification.html" />
-    </script>
   </body>
 </html>

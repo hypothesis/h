@@ -509,23 +509,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   _getCommentBucket: => @index.length - 2
 
-  blinkBuckets: =>
-    for tab, index in @tabs[0]
-      bucket = @buckets[@bucketIndices[index]]
-
-      hasUpdate = false
-      for annotation in bucket
-        if annotation._updatedAnnotation?
-          hasUpdate = true
-          delete annotation._updatedAnnotation
-
-      unless hasUpdate then continue
-      element = $(tab)
-      element.toggle('fg_highlight', {color: 'lightblue'})
-      setTimeout ->
-        element.toggle('fg_highlight', {color: 'lightblue'})
-      , 500
-
   isUpper:   (i) => i == 1
   isLower:   (i) => i == @index.length - 3
   isComment: (i) => i is @_getCommentBucket()
