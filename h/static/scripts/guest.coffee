@@ -217,10 +217,6 @@ class Annotator.Guest extends Annotator
       this.publish 'setVisibleHighlights', state
     )
 
-    .bind('blinkBuckets', =>
-      @plugins.Heatmap.blinkBuckets()
-    )
-
     .bind('updateHeatmap', =>
       @plugins.Heatmap._scheduleUpdate()
     )

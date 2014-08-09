@@ -451,17 +451,6 @@ class App
       # Refresh page search
       $route.reload() if $location.path() is '/page_search' and data.length
 
-      # Finally blink the changed tabs
-      $timeout =>
-        for p in annotator.providers
-          p.channel.notify
-            method: 'updateHeatmap'
-
-        for p in annotator.providers
-          p.channel.notify
-            method: 'blinkBuckets'
-      , 500
-
 
 class Annotation
   this.$inject = [
