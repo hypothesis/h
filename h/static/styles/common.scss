@@ -678,29 +678,6 @@ blockquote {
   }
 }
 
-.thread.ng-enter,
-.thread.ng-leave,
-.thread.ng-move {
-  @include transition-duration(.25s);
-  @include transition-property(max-height);
-  overflow: hidden;
-
-  .threadexp { display: none; }
-}
-
-.thread.ng-leave.ng-leave-active,
-.thread.ng-enter {
-  @include transition-timing-function(cubic-bezier(0, 1, 0, 1));
-	max-height: 0;
-}
-
-.thread.ng-enter.ng-enter-active,
-.thread.ng-leave {
-  @include transition-duration(.1s);
-  @include transition-timing-function(cubic-bezier(1, 0, 1, 0));
-	max-height: 65536px;
-}
-
 
 //MAGICONTROL////////////////////////////////
 .magicontrol {
