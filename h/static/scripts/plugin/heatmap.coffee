@@ -359,40 +359,20 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     # maximum count.
     max = 0
     for b in @buckets
-      info = b.reduce (info, a) ->
-        subtotal = a.reply_count or 0
-        return {
-          top: info.top + 1
-          replies: (info.replies or 0) + subtotal
-          total : (info.total or 0) + subtotal + 1
-        }
-      ,
-        top: 0
-        replies: 0
-        total: 0
-      max = Math.max max, info.total
-      b.total = info.total
-      b.top = info.top
-      b.replies = info.replies
-
-      # Set up displayed number in a tab.
-      # Format: <top>+<replies> if this string is no longer than 4 characters
-      # Otherwise display: <ŧotal>
-      temp = b.top + '+' + b.replies
-      b.display =  if temp.length < 5 and b.replies > 0 then temp else b.total
+      max = Math.max max, b.length
 
     # Set up the stop interpolations for data binding
     stopData = $.map @buckets, (bucket, i) =>
       x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
       offsets = [@index[i], x2]
-      if bucket.total
-        start = @buckets[i-1]?.total and ((@buckets[i-1].total + bucket.total) / 2) or 1e-6
-        end = @buckets[i+1]?.total and ((@buckets[i+1].total + bucket.total) / 2) or 1e-6
+      if bucket.length
+        start = @buckets[i-1]?.length and ((@buckets[i-1].length + bucket.length) / 2) or 1e-6
+        end = @buckets[i+1]?.length and ((@buckets[i+1].length + bucket.length) / 2) or 1e-6
         curve = d3.scale.pow().exponent(.1)
           .domain([0, .5, 1])
           .range([
             [offsets[0], i, 0, start]
-            [d3.mean(offsets), i, .5, bucket.total]
+            [d3.mean(offsets), i, .5, bucket.length]
             [offsets[1], i, 1, end]
           ])
           .interpolate(d3.interpolateArray)
@@ -482,7 +462,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       "#{(@index[d] + @index[d+1]) / 2}px"
 
     .html (d) =>
-      "<div class='label'>#{@buckets[d].display}</div><div class='svg'></div>"
+      "<div class='label'>#{@buckets[d].length}</div><div class='svg'></div>"
 
     .classed('upper', @isUpper)
     .classed('lower', @isLower)
