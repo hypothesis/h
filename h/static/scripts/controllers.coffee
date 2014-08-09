@@ -30,6 +30,76 @@ class App
     # Resolved once the API service has been discovered.
     storeReady = $q.defer()
 
+    applyUpdates = (action, data) ->
+      return unless data?.length
+      if action == 'past'
+        action = 'create'
+
+      inRootScope = (annotation, recursive = false) ->
+        if recursive and  annotation.references?
+          return inRootScope({id: annotation.references[0]})
+        for ann in $rootScope.annotations
+          return true if ann.id is annotation.id
+        false
+
+      switch action
+        when 'create'
+          # Sorting the data for updates.
+          # Because sometimes a reply can arrive in the same package as the
+          # Root annotation, we have to make a len(references, updates sort
+          data.sort (a,b) ->
+            ref_a = a.references?.length or 0
+            ref_b = b.references?.length or 0
+            return ref_a - ref_b if ref_a != ref_b
+
+            a_upd = if a.updated? then new Date(a.updated) else new Date()
+            b_upd = if b.updated? then new Date(b.updated) else new Date()
+            a_upd.getTime() - b_upd.getTime()
+
+          # XXX: Temporary workaround until solving the race condition for annotationsLoaded event
+          # Between threading and bridge plugins
+          for annotation in data
+            plugins.Threading.thread annotation
+
+          if plugins.Store?
+            plugins.Store._onLoadAnnotations data
+            # XXX: Ugly workaround to update the scope content
+
+            for annotation in data
+              switch $rootScope.viewState.view
+                when 'Document'
+                  unless annotator.isComment(annotation)
+                    $rootScope.annotations.push annotation if not inRootScope(annotation, true)
+                when 'Comments'
+                  if annotator.isComment(annotation)
+                    $rootScope.annotations.push annotation if not inRootScope(annotation)
+                else
+                    $rootScope.annotations.push annotation if not inRootScope(annotation)
+        when 'update'
+          plugins.Store._onLoadAnnotations data
+
+          if $location.path() is '/stream'
+            for annotation in data
+              $rootScope.annotations.push annotation if not inRootScope(annotation)
+        when 'delete'
+          for annotation in data
+            # Remove it from the rootScope too
+            for ann, index in $rootScope.annotations
+              if ann.id is annotation.id
+                $rootScope.annotations.splice(index, 1)
+                break
+
+            container = annotator.threading.getContainer annotation.id
+            if container.message
+              # XXX: This is a temporary workaround until real client-side only
+              # XXX: delete will be introduced
+              index = plugins.Store.annotations.indexOf container.message
+              plugins.Store.annotations[index..index] = [] if index > -1
+              annotator.deleteAnnotation container.message
+
+      # Refresh page search
+      $route.reload() if $location.path() is '/page_search' and data.length
+
     initIdentity = (persona) ->
       # Store the argument as the claimed user id.
       claimedUser = persona
@@ -380,76 +450,6 @@ class App
             $location.search('q', query or null)
 
     $scope.socialView = annotator.socialView
-
-    applyUpdates = (action, data) ->
-      return unless data?.length
-      if action == 'past'
-        action = 'create'
-
-      inRootScope = (annotation, recursive = false) ->
-        if recursive and  annotation.references?
-          return inRootScope({id: annotation.references[0]})
-        for ann in $rootScope.annotations
-          return true if ann.id is annotation.id
-        false
-
-      switch action
-        when 'create'
-          # Sorting the data for updates.
-          # Because sometimes a reply can arrive in the same package as the
-          # Root annotation, we have to make a len(references, updates sort
-          data.sort (a,b) ->
-            ref_a = a.references?.length or 0
-            ref_b = b.references?.length or 0
-            return ref_a - ref_b if ref_a != ref_b
-
-            a_upd = if a.updated? then new Date(a.updated) else new Date()
-            b_upd = if b.updated? then new Date(b.updated) else new Date()
-            a_upd.getTime() - b_upd.getTime()
-
-          # XXX: Temporary workaround until solving the race condition for annotationsLoaded event
-          # Between threading and bridge plugins
-          for annotation in data
-            plugins.Threading.thread annotation
-
-          if plugins.Store?
-            plugins.Store._onLoadAnnotations data
-            # XXX: Ugly workaround to update the scope content
-
-            for annotation in data
-              switch $rootScope.viewState.view
-                when 'Document'
-                  unless annotator.isComment(annotation)
-                    $rootScope.annotations.push annotation if not inRootScope(annotation, true)
-                when 'Comments'
-                  if annotator.isComment(annotation)
-                    $rootScope.annotations.push annotation if not inRootScope(annotation)
-                else
-                    $rootScope.annotations.push annotation if not inRootScope(annotation)
-        when 'update'
-          plugins.Store._onLoadAnnotations data
-
-          if $location.path() is '/stream'
-            for annotation in data
-              $rootScope.annotations.push annotation if not inRootScope(annotation)
-        when 'delete'
-          for annotation in data
-            # Remove it from the rootScope too
-            for ann, index in $rootScope.annotations
-              if ann.id is annotation.id
-                $rootScope.annotations.splice(index, 1)
-                break
-
-            container = annotator.threading.getContainer annotation.id
-            if container.message
-              # XXX: This is a temporary workaround until real client-side only
-              # XXX: delete will be introduced
-              index = plugins.Store.annotations.indexOf container.message
-              plugins.Store.annotations[index..index] = [] if index > -1
-              annotator.deleteAnnotation container.message
-
-      # Refresh page search
-      $route.reload() if $location.path() is '/page_search' and data.length
 
 
 class Annotation
