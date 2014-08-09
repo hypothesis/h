@@ -93,7 +93,7 @@ class SessionProvider
       $resource("#{baseURI}app", {}, actions).load()
   ]
 
-# Function providing a server-side session resource.
+# Function providing a server-side user profile resource.
 #
 # This function provides an angular $resource factory
 # for manipulating server-side account-profile settings. It defines the
