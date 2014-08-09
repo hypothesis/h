@@ -174,9 +174,9 @@ class App
 
         if $scope.socialView.name is 'single-player'
           owndata = data.filter (d) -> d.user is user
-          $scope.applyUpdates action, owndata
+          applyUpdates action, owndata
         else
-          $scope.applyUpdates action, data
+          applyUpdates action, data
 
       _dfdSock.promise
 
@@ -381,7 +381,7 @@ class App
 
     $scope.socialView = annotator.socialView
 
-    $scope.applyUpdates = (action, data) ->
+    applyUpdates = (action, data) ->
       return unless data?.length
       if action == 'past'
         action = 'create'
