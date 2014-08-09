@@ -93,7 +93,7 @@
               title="Close"
               role="button"
               ng-click="sheet = false"></span>
-          <div ng-include="'account_management.html'"></div>
+          <div ng-include="'account.html'"></div>
         </div>
       </div>
       <!-- / Panels Nav -->
@@ -104,6 +104,9 @@
     <!-- / Wrapper -->
 
     <!-- Templates -->
+    <script type="text/ng-template" id="account.html">
+      <metal:main use-macro="load: account.html" />
+    </script>
     <script type="text/ng-template" id="annotation.html">
       <metal:main use-macro="load: h:templates/annotation.html" />
     </script>
@@ -127,9 +130,6 @@
     </script>
     <script type="text/ng-template" id="notification.html">
       <metal:main use-macro="load: h:templates/notification.html" />
-    </script>
-    <script type="text/ng-template" id="account_management.html">
-      <metal:main use-macro="load: account_management.html" />
     </script>
   </body>
 </html>

@@ -181,7 +181,7 @@ class AsyncRegisterController(RegisterController):
         return {}
 
 
-@view_defaults(accept='text/html', renderer='h:templates/account_management.html')
+@view_defaults(accept='text/html', renderer='h:templates/account.html')
 @view_config(attr='edit_profile', route_name='edit_profile')
 @view_config(attr='disable_user', route_name='disable_user')
 class ProfileController(horus.views.ProfileController):
