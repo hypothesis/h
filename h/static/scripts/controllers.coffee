@@ -381,16 +381,6 @@ class App
 
     $scope.socialView = annotator.socialView
 
-    $scope.markAnnotationUpdate = (data) ->
-      for annotation in data
-        # We need to flag the top level
-        if annotation.references?
-          container = annotator.threading.getContainer annotation.references[0]
-          if container?.message?
-            # Temporary workarund to force publish changes
-            if plugins.Store?
-              plugins.Store._onLoadAnnotations [container.message]
-
     $scope.applyUpdates = (action, data) ->
       return unless data?.length
       if action == 'past'
@@ -422,8 +412,6 @@ class App
           for annotation in data
             plugins.Threading.thread annotation
 
-          $scope.markAnnotationUpdate data
-
           if plugins.Store?
             plugins.Store._onLoadAnnotations data
             # XXX: Ugly workaround to update the scope content
@@ -439,15 +427,12 @@ class App
                 else
                     $rootScope.annotations.push annotation if not inRootScope(annotation)
         when 'update'
-          $scope.markAnnotationUpdate data
           plugins.Store._onLoadAnnotations data
 
           if $location.path() is '/stream'
             for annotation in data
               $rootScope.annotations.push annotation if not inRootScope(annotation)
         when 'delete'
-          $scope.markAnnotationUpdate data
-
           for annotation in data
             # Remove it from the rootScope too
             for ann, index in $rootScope.annotations
