@@ -187,7 +187,8 @@ class AsyncRegisterController(RegisterController):
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
         request = self.request
-        schema = schemas.EditProfileSchema.bind(schemas.EditProfileSchema(), request=request)
+        schema = schemas.EditProfileSchema.bind(schemas.EditProfileSchema(),
+                                                request=request)
         form = forms.EditProfileForm(schema)
 
         try:
@@ -208,7 +209,8 @@ class ProfileController(horus.views.ProfileController):
 
     def disable_user(self):
         request = self.request
-        schema = schemas.EditProfileSchema.bind(schemas.EditProfileSchema(), request=request)
+        schema = schemas.EditProfileSchema.bind(schemas.EditProfileSchema(),
+                                                request=request)
         form = forms.EditProfileForm(schema)
 
         try:
@@ -224,13 +226,11 @@ class ProfileController(horus.views.ProfileController):
         if user:
             user.activation_id = -1
             self.db.add(user)
-            FlashMessage(self.request,
-                 _('User disabled'),
-                 kind='success')
+            FlashMessage(self.request, _('User disabled'), kind='success')
+            return {}
         else:
             return dict(errors={'pwd': _('Invalid password')}, code=401)
 
-        return {}
 
 @view_defaults(accept='application/json', name='app', renderer='json')
 @view_config(attr='edit_profile', request_param='__formid__=edit_profile')
