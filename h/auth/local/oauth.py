@@ -39,6 +39,13 @@ def includeme(config):
     config.set_authentication_policy(authn_policy)
 
     # Configure the session
-    random_secret = os.urandom(128)
-    session_factory = SignedCookieSessionFactory(random_secret)
+    if 'session.secret' not in config.registry.settings:
+        # Get a 128-bit (16-byte) random secret from a secure source (urandom)
+        # This length is chosen to ensure the secret is at least as long as the
+        # block size of the default hash algorithm (sha256) to avoid the zero
+        # padding that would otherwise occur, potentially weakening the secret.
+        config.registry.settings['session.secret'] = os.urandom(16)
+
+    session_secret = config.registry.settings['session.secret']
+    session_factory = SignedCookieSessionFactory(session_secret)
     config.set_session_factory(session_factory)
