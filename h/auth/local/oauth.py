@@ -1,4 +1,4 @@
-import uuid
+import os
 
 from oauthlib.oauth2 import ClientCredentialsGrant, InvalidClientError
 from pyramid.authentication import SessionAuthenticationPolicy
@@ -39,6 +39,6 @@ def includeme(config):
     config.set_authentication_policy(authn_policy)
 
     # Configure the session
-    random_secret = uuid.uuid4().hex + uuid.uuid4().hex
+    random_secret = os.urandom(128)
     session_factory = SignedCookieSessionFactory(random_secret)
     config.set_session_factory(session_factory)
