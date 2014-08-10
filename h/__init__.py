@@ -18,7 +18,6 @@ def includeme(config):
     config.include('h.streamer')
     config.include('h.subscribers')
     config.include('h.views')
-    config.include('h.notifier')
     config.set_root_factory('h.resources.RootFactory')
 
     favicon = AssetResolver().resolve('h:favicon.ico')
