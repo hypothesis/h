@@ -165,7 +165,6 @@ class AnnotationNotifier(object):
                           recipients=recipients,
                           body=body)
         self.mailer.send(message)
-        log.info('sent: %s', message.to_message().as_string())
 
 AnnotationNotifier.register_template(
     'reply_notification',
