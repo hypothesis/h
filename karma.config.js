@@ -49,7 +49,6 @@ module.exports = function(config) {
       'h/static/scripts/vendor/jquery.ui.menu.js',
       'h/static/scripts/vendor/jquery.ui.effect.js',
       'h/static/scripts/vendor/jquery.ui.effect-blind.js',
-      'h/static/scripts/vendor/jquery.ui.effect-forecolor-highlight.js',
       'h/static/scripts/vendor/jquery.ui.effect-highlight.js',
       'h/static/scripts/vendor/tag-it.js',
       'h/static/scripts/vendor/uuid.js',
