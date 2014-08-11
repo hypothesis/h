@@ -2,12 +2,23 @@ Next release
 ============
 
 - Improve usability of the toolbar (#1268, #1316)
-- Make stream interactive (#1281, #1290)
+- Make the stream cards interactive (#1281, #1290)
+- Make the annotation card on a standalone annotation page interactive (#427)
 - Fix race conditions with realtime updates (#1306, #1307)
 - Exponential backoff on socket failures (#1291)
 - Fix infinite scroll regression on stream
 - Add a front end test framework (#240, #1309)
 - Revalidate forms when autofilled (#374)
+- Introduce environment variable overrides for important settings
+- Allow bundling assets of a debug build in the extension (#1230)
+- Make it possible to override all templates (#1337)
+- Simplify the search entry, getting rid of visualsearch.js (#1326)
+- Fix infinite scroll in stream (#1373)
+- Fix several reports of broken styles on certain sites (#1372)
+- Factor out the identity, session, and authentication system into its own
+  package, making it entirely optional (#1357)
+- Remove PDF.js from the Chrome extension until it can be made opt-in (#1384)
+- Rework the reply notification emails -- still disabled by default (#1378)
 
 0.1.3 (2014-07-14)
 ==================
