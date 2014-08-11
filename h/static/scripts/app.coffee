@@ -42,6 +42,7 @@ configure = [
     $routeProvider.when '/viewer',
       controller: 'ViewerController'
       templateUrl: 'viewer.html'
+      reloadOnSearch: false  # FIXME: shouldn't be needed
     $routeProvider.when '/page_search',
       controller: 'SearchController'
       templateUrl: 'page_search.html'
