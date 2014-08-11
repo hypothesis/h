@@ -24,6 +24,7 @@ def get_config(args):
     settings = get_appsettings(args[0])
     settings['basemodel.should_create_all'] = False
     settings['basemodel.should_drop_all'] = False
+    settings['pyramid.includes'] = []
 
     return dict(settings=settings)
 
