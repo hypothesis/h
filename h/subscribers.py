@@ -21,12 +21,6 @@ def add_renderer_globals(event):
     event['blocks'] = get_renderer('h:templates/blocks.pt').implementation()
 
 
-@subscriber(events.NewRequest, asset_request=False)
-@subscriber(events.LogoutEvent)
-def ensure_csrf(event):
-    event.request.session.get_csrf_token()
-
-
 @subscriber(events.NewResponse, asset_request=False)
 def set_csrf_cookie(event):
     request = event.request
