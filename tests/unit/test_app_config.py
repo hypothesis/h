@@ -58,13 +58,13 @@ def test_postgres_database_environment_overrides(create_app):
 
 @patch('h.create_app')
 @patch.dict(os.environ)
-def test_session_secret_overrides(create_app):
-    os.environ['SESSION_SECRET'] = os.urandom(128)
+def test_session_secret_environment_overrides(create_app):
+    os.environ['SESSION_SECRET'] = 's3kr1t'
 
     main({})
     expected_config = {
-        'session.secret': os.environ['SESSION_SECRET'],
-        'redis.session.secret': os.environ['SESSION_SECRET'],
+        'session.secret': 's3kr1t',
+        'redis.sessions.secret': 's3kr1t',
     }
     assert create_app.mock_calls == [call(expected_config)]
 
