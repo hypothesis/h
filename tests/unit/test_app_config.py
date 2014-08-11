@@ -58,6 +58,21 @@ def test_postgres_database_environment_overrides(create_app):
 
 @patch('h.create_app')
 @patch.dict(os.environ)
+def test_redis_database_environment_overrides(create_app):
+    os.environ['REDIS_PORT'] = 'tcp://127.0.0.1:4567'
+    os.environ['REDIS_PORT_6379_TCP_ADDR'] = '127.0.0.1'
+    os.environ['REDIS_PORT_6379_TCP_PORT'] = '4567'
+
+    main({})
+    expected_config = {
+        'redis.sessions.host': '127.0.0.1',
+        'redis.sessions.port': '4567',
+    }
+    assert create_app.mock_calls == [call(expected_config)]
+
+
+@patch('h.create_app')
+@patch.dict(os.environ)
 def test_session_secret_environment_overrides(create_app):
     os.environ['SESSION_SECRET'] = 's3kr1t'
 
