@@ -58,6 +58,19 @@ def test_postgres_database_environment_overrides(create_app):
 
 @patch('h.create_app')
 @patch.dict(os.environ)
+def test_session_secret_overrides(create_app):
+    os.environ['SESSION_SECRET'] = os.urandom(128)
+
+    main({})
+    expected_config = {
+        'session.secret': os.environ['SESSION_SECRET'],
+        'redis.session.secret': os.environ['SESSION_SECRET'],
+    }
+    assert create_app.mock_calls == [call(expected_config)]
+
+
+@patch('h.create_app')
+@patch.dict(os.environ)
 def test_global_config_precence(create_app):
     os.environ['DATABASE_URL'] = 'postgres://postgres:1234/database'
 

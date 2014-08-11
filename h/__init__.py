@@ -73,4 +73,8 @@ def _environment_overrides():
         overrides['mail.host'] = mail_host
         overrides['mail.port'] = mail_port
 
+    if 'SESSION_SECRET' in os.environ:
+        overrides['session.secret'] = os.environ['SESSION_SECRET']
+        overrides['redis.sessions.secret'] = os.environ['SESSION_SECRET']
+
     return overrides
