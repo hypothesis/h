@@ -1,9 +1,12 @@
-formValidate = ->
+formValidate = ['$timeout', ($timeout) ->
   link: (scope, elem, attr, form) ->
-    errorClassName = attr.formValidateErrorClass
+    isSubmitted = false
+    fieldClassName = 'form-field'
+    errorClassName = 'form-field-error'
 
     toggleClass = (field, {addClass}) ->
-      fieldEl = elem.find("[data-target=#{field.$name}]")
+      inputEl = elem.find("[name=#{field.$name}]")
+      fieldEl = inputEl.parents(".#{fieldClassName}").first()
       fieldEl.toggleClass(errorClassName, addClass)
 
     updateField = (field) ->
@@ -12,7 +15,7 @@ formValidate = ->
       if field.$valid
         toggleClass(field, addClass: false)
       else
-        toggleClass(field, addClass: true)
+        toggleClass(field, addClass: true) if field.$dirty
 
     # A custom parser for each form field that is used to reset the "response"
     # error state whenever the $viewValue changes.
@@ -30,18 +33,28 @@ formValidate = ->
 
     # Validate field when the content changes.
     elem.on 'change', ':input', ->
-      updateField(form[this.name])
-
-    # Validate the field when submit is clicked.
-    elem.on 'submit', (event) ->
       forEachField(updateField)
 
-    # Validate when a response is processed.
-    scope.$on 'error', (event, name) ->
-      return unless form.$name == name
-      forEachField(updateField)
+    # Validate form on submit and set flag for error watcher.
+    elem.on 'submit', ->
+      isSubmitted = true
+      forEachField (field) ->
+        field.$setViewValue(field.$viewValue)
+        updateField(field)
+
+    scope.$watch form.$name + '.$error', ->
+      if isSubmitted
+        forEachField(updateField)
+        isSubmitted = false
+    , true
+
+    scope.$watch form.$name + '.$pristine', (value) ->
+      if value == true
+        forEachField (field) ->
+          toggleClass(field, addClass: false)
 
   require: 'form'
+]
 
 
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
@@ -245,6 +258,15 @@ thread = ['$rootScope', '$window', ($rootScope, $window) ->
 ]
 
 
+# TODO: Move this behaviour to a route.
+showAccount = ->
+  restrict: 'A'
+  link: (scope, elem, attr) ->
+    elem.on 'click', (event) ->
+      event.preventDefault()
+      scope.$emit('nav:account')
+
+
 repeatAnim = ->
   restrict: 'A'
   scope:
@@ -407,6 +429,18 @@ whenscrolled = ->
       if scrollHeight - scrollTop <= clientHeight + 40
         scope.$apply attr.whenscrolled
 
+match = ->
+  link: (scope, elem, attr, input) ->
+    validate = ->
+      input.$setValidity('match', scope.match == input.$modelValue)
+
+    elem.on('keyup', validate)
+    scope.$watch('match', validate)
+  scope:
+    match: '='
+  restrict: 'A'
+  require: 'ngModel'
+
 
 angular.module('h.directives', ['ngSanitize'])
 .directive('formValidate', formValidate)
@@ -418,5 +452,7 @@ angular.module('h.directives', ['ngSanitize'])
 .directive('tags', tags)
 .directive('thread', thread)
 .directive('username', username)
+.directive('showAccount', showAccount)
 .directive('repeatAnim', repeatAnim)
 .directive('whenscrolled', whenscrolled)
+.directive('match', match)

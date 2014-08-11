@@ -16,6 +16,7 @@
             --><span class="provider">/{{persona|persona:'provider'}}</span><!--
             --><i class="icon-triangle"></i></span>
           <ul class="dropdown-menu pull-right" role="menu">
+            <li show-account><a href="#">Account</a></li>
             <li><a href="http://hypothes.is/contact/"
                    target="_blank">Feedback</a></li>
             <li><a href="/docs/help" target="_blank">Help</a></li>
@@ -37,13 +38,17 @@
 
     <!-- Wrapper -->
     <div id="wrapper" whenscrolled="loadMore(10)">
+      <!-- Panels -->
+      <div class="panels"
+           data-settings-panel-model="auth.persona"></div>
+      <!-- / Panels -->
+
       <!-- View Sort Controls -->
       <div class="ng-cloak viewsort"
            ng-mouseenter="showViewSort()"
            ng-mouseleave="showViewSort(false)"
            ng-show="viewState.showControls">
-        <div class="dropdown"
-             ng-show="viewState.show">
+        <div class="dropdown" ng-show="viewState.show">
           <span role="button"
                 class="dropdown-toggle"
                 data-toggle="dropdown"
@@ -81,12 +86,27 @@
       </div>
       <!-- / Account and Authentication -->
 
+      <!-- Panels Nav-->
+      <div class="content ng-cloak">
+        <div class="sheet" ng-controller="AccountManagement" ng-show="!!sheet">
+          <span href="#" class="close icon-cancel"
+              title="Close"
+              role="button"
+              ng-click="sheet = false"></span>
+          <div ng-include="'account.html'"></div>
+        </div>
+      </div>
+      <!-- / Panels Nav -->
+
       <!-- Angular view -->
       <main class="content" ng-view=""></main>
     </div>
     <!-- / Wrapper -->
 
     <!-- Templates -->
+    <script type="text/ng-template" id="account.html">
+      <metal:main use-macro="load: account.html" />
+    </script>
     <script type="text/ng-template" id="annotation.html">
       <metal:main use-macro="load: h:templates/annotation.html" />
     </script>

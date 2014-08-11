@@ -1,4 +1,5 @@
 @import 'compass/typography/text/force-wrap';
+@import 'compass/layout/stretching';
 
 @import 'base';
 @import 'forms';
@@ -75,7 +76,7 @@ h1 {
 
 h2 {
   font-size: 1.5em;
-  margin: .75em 0;
+  margin-top: 15px;
 }
 
 h3 {
@@ -408,7 +409,6 @@ blockquote {
 .loading-icon {
   text-align: center
 }
-
 
 //TABS////////////////////////////////
 .nav-tabs {
@@ -787,9 +787,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
   &[readonly] {
     .tagit-new, .tagit-close { display: none; }
-    li { 
-      padding: .1em .3em; 
-      font-size: 12px; 
+    li {
+      padding: .1em .3em;
+      font-size: 12px;
     }
     li.tagit-choice { margin-top: .1em; }
   }

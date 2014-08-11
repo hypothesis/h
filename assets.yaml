@@ -309,6 +309,7 @@ app_js:
           contents:
             - scripts/app.coffee
             - scripts/controllers.coffee
+            - scripts/controllers/account-management.coffee
             - scripts/flash.coffee
             - scripts/filters.coffee
             - scripts/directives.coffee
@@ -317,6 +318,7 @@ app_js:
             - scripts/app_directives.coffee
             - scripts/helpers.coffee
             - scripts/services.coffee
+            - scripts/util.coffee
             - scripts/socket.coffee
             - scripts/searchfilters.coffee
             - scripts/streamsearch.coffee

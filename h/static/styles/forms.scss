@@ -360,4 +360,8 @@
 .account-form {
   margin-top: 30 / 13 * 1em;
   margin-bottom: 30 / 13 * 1em;
+
+  &:first-child {
+    margin-top: 15 / 13 * 1em;
+  }
 }

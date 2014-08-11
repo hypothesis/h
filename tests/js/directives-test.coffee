@@ -3,6 +3,7 @@ assert = chai.assert
 describe 'h.directives', ->
   $scope = null
   $compile = null
+  $injector = null
   fakeWindow = null
 
   beforeEach module ($provide, $filterProvider) ->
@@ -21,11 +22,13 @@ describe 'h.directives', ->
 
     return
 
+  beforeEach module('h.templates')
   beforeEach module('h.directives')
 
-  beforeEach inject (_$compile_, _$rootScope_) ->
+  beforeEach inject (_$compile_, _$rootScope_, _$injector_) ->
     $compile = _$compile_
     $scope = _$rootScope_.$new()
+    $injector = _$injector_
 
   describe '.formValidate', ->
     $element = null
@@ -34,8 +37,8 @@ describe 'h.directives', ->
       $scope.model = {username: ''}
 
       template = '''
-      <form form-validate data-form-validate-error-class="form-field-error" name="login" onsubmit="return false">
-        <div class="form-field" data-error-class="form-field-error" data-target="username">
+      <form form-validate name="login" onsubmit="return false">
+        <div class="form-field">
           <input type="text" class="" ng-model="model.username" name="username" required ng-minlength="3" />
         </div>
       </form>
@@ -79,8 +82,8 @@ describe 'h.directives', ->
       $element.triggerHandler('submit')
       assert.notInclude($field.prop('className'), 'form-field-error')
 
-    it 'should apply an error class to an invalid field on "error" event', ->
-      $scope.$emit('error', 'login')
+    it 'should apply an error class if the form recieves errors after a submit action', ->
+      $element.trigger('submit')
       $element.controller('form').username.$setValidity('response', false)
 
       $field = $element.find('.form-field')
@@ -100,23 +103,38 @@ describe 'h.directives', ->
 
       assert.notInclude($field.prop('className'), 'form-field-error')
 
-    it 'should reset the "response" error on change', ->
+    it 'should reset the "response" error when the view changes', ->
       $field = $element.find('.form-field')
       $input = $element.find('[name=username]')
       controller = $input.controller('ngModel')
       controller.$setViewValue('abc')
 
       # Submit Event
+      $element.triggerHandler('submit')
       controller.$setValidity('response', false)
       controller.responseErrorMessage = 'fail'
-      $scope.$emit('error', $input.controller('form').$name)
-      assert.include($field.prop('className'), 'form-field-error')
+      $scope.$digest()
+
+      assert.include($field.prop('className'), 'form-field-error', 'Fail fast check')
 
       controller.$setViewValue('abc')
-      $scope.$digest()
 
       assert.notInclude($field.prop('className'), 'form-field-error')
 
+    # No idea why this is failing, it works for the login form...
+    it 'should hide errors if the field is pristine', ->
+      $field = $element.find('.form-field').addClass('form-field-error')
+      $input = $element.find('[name=username]')
+
+      formController = $input.controller('form')
+      modelController = $input.controller('ngModel')
+      modelController.$setViewValue('a') # Change the model state to $dirty
+
+      # Clear out the model and set to $pristine
+      $scope.model = {}
+      formController.$setPristine()
+
+      assert.notInclude($field.prop('className'), 'form-field-error')
 
   describe '.username', ->
     $element = null
@@ -153,3 +171,50 @@ describe 'h.directives', ->
       it 'opens with only the username', ->
         $element.find('.user').click()
         sinon.assert.calledWith(fakeWindow.open, '/u/jim')
+
+  describe '.match', ->
+    $element = null
+
+    beforeEach ->
+      $scope.model = {a: 1, b: 1}
+
+      $element = $compile('<input name="confirmation" ng-model="model.b" match="model.a" />')($scope)
+      $scope.$digest()
+
+    it 'is valid if both properties have the same value', ->
+      controller = $element.controller('ngModel')
+      assert.isFalse(controller.$error.match)
+
+    # TODO: Work out how to watch for changes to the model.
+    it 'is invalid if the local property differs'
+    # it 'is invalid if the local property differs', ->
+    #   $scope.model.b = 2
+    #   $scope.$digest()
+
+    #   controller = $element.controller('ngModel')
+    #   assert.isTrue(controller.$error.match)
+
+    it 'is invalid if the matched property differs', ->
+      $scope.model.a = 2
+      $scope.$digest()
+
+      controller = $element.controller('ngModel')
+      assert.isTrue(controller.$error.match)
+
+    it 'is invalid if the input itself is changed', ->
+      $element.val('2').trigger('input').keyup()
+
+      controller = $element.controller('ngModel')
+      assert.isTrue(controller.$error.match)
+
+  describe '.showAccount', ->
+    $element = null
+
+    beforeEach ->
+      $element = $compile('<a show-account>Account</a>')($scope)
+      $scope.$digest()
+
+    it 'triggers the "nav:account" event when the Account item is clicked', (done) ->
+      $scope.$on 'nav:account', ->
+        done()
+      $element.click()

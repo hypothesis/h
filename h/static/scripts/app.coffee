@@ -4,9 +4,11 @@ imports = [
   'h.app_directives'
   'h.auth'
   'h.controllers'
+  'h.controllers.AccountManagement'
   'h.directives'
   'h.filters'
   'h.identity'
+  'h.util'
   'h.streamsearch'
 ]
 
