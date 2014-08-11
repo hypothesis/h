@@ -9,7 +9,7 @@ fi
 ARGS=("$@")
 
 if test $# -eq 0; then
-  ARGS+=("--reload --paste development.ini")
+  ARGS+=("--reload --paste development.ini --log-config development.ini")
 elif test $# -eq 1; then
   ARGS=("--paste ${ARGS[*]}")
 fi
