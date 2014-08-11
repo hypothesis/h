@@ -1,0 +1,4 @@
+include *.ini *.txt *.rst *.yaml LICENSE NOTICE versioneer.py
+recursive-include h *.ico *.css *.html *.js *.txt *.pt
+recursive-include h/static/images *.gif *.jpg *.png *.svg
+recursive-include h/static/fonts *.eot *.svg *.ttf *.woff
