@@ -1,15 +1,11 @@
-from pyramid.events import NewRequest, subscriber
+from pyramid.events import subscriber
 from pyramid.settings import asbool
+
 from horus.events import (
     NewRegistrationEvent,
     RegistrationActivatedEvent,
     PasswordResetEvent,
 )
-
-
-@subscriber(NewRequest, asset_request=False)
-def ensure_csrf(event):
-    event.request.session.get_csrf_token()
 
 
 @subscriber(NewRegistrationEvent, autologin=True)

@@ -30,11 +30,10 @@ def pop_flash(request):
 
 
 def model(request):
-    """Returns the session data from the request.
-
-    Keys starting with an underscore ('_') are ignored.
-    """
-    return {k: v for k, v in request.session.items() if k[0] != '_'}
+    session = {k: v for k, v in request.session.items() if k[0] != '_'}
+    session['csrf_token'] = request.session.get_csrf_token()
+    session['csrf'] = request.session.get_csrf_token()  # bw compat
+    return session
 
 
 @view_config(

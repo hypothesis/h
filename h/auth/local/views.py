@@ -51,16 +51,6 @@ def ajax_form(request, result):
     return result
 
 
-def add_csrf_token(request, result):
-    # Ensure we have a csrf token in the session and add it to response.
-    # This is needed so long as we expect to be able to perform protected
-    # actions on the account from within a third-party frame.
-    # XXX: Stop doing this.
-    csrft = request.session.get_csrf_token()
-    result['model']['csrf_token'] = csrft
-    result['model']['csrf'] = csrft  # bw compat
-
-
 class AsyncFormViewMapper(object):
     def __init__(self, **kw):
         self.attr = kw['attr']
@@ -79,7 +69,6 @@ class AsyncFormViewMapper(object):
             result = ajax_form(request, result)
             result['model'] = views.model(request)
             result.pop('form', None)
-            add_csrf_token(request, result)
             return result
         return wrapper
 
