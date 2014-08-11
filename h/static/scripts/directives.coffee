@@ -48,6 +48,11 @@ formValidate = ['$timeout', ($timeout) ->
         isSubmitted = false
     , true
 
+    scope.$watch form.$name + '.$pristine', (value) ->
+      if value == true
+        forEachField (field) ->
+          toggleClass(field, addClass: false)
+
   require: 'form'
 ]
 
