@@ -1,3 +1,9 @@
+0.2.1 (2014-08-11)
+==================
+
+- Revert to using MANIFEST.in so built assets get shipped in the source
+  release.
+
 0.2.0 (2014-08-10)
 ==================
 
