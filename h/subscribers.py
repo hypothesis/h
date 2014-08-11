@@ -27,12 +27,12 @@ def set_csrf_cookie(event):
     response = event.response
     session = request.session
 
-    if len(session) == 0:
-        response.set_cookie('XSRF-TOKEN', None)
-    else:
+    if session.keys():
         token = session.get_csrf_token()
         if request.cookies.get('XSRF-TOKEN') != token:
             response.set_cookie('XSRF-TOKEN', token)
+    elif 'XSRF-TOKEN' in request.cookies:
+        response.delete_cookie('XSRF-TOKEN')
 
 
 @subscriber(events.LoginEvent)
