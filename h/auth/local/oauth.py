@@ -40,11 +40,12 @@ def includeme(config):
 
     # Configure the session
     if 'session.secret' not in config.registry.settings:
-        # Get a 128-bit (16-byte) random secret from a secure source (urandom)
-        # This length is chosen to ensure the secret is at least as long as the
-        # block size of the default hash algorithm (sha256) to avoid the zero
-        # padding that would otherwise occur, potentially weakening the secret.
-        config.registry.settings['session.secret'] = os.urandom(16)
+        # Get 32 bytes (256 bits) from a secure source (urandom) as a secret.
+        # Pyramid will add a salt to this. The salt and the secret together
+        # will still be less than the, and therefore right zero-padded to,
+        # 1024-bit block size of the default hash algorithm, sha512. However,
+        # 256 bits of random should be more than enough for session secrets.
+        config.registry.settings['session.secret'] = os.urandom(32)
 
     session_secret = config.registry.settings['session.secret']
     session_factory = SignedCookieSessionFactory(session_secret)
