@@ -121,6 +121,21 @@ describe 'h.directives', ->
 
       assert.notInclude($field.prop('className'), 'form-field-error')
 
+    # No idea why this is failing, it works for the login form...
+    it 'should hide errors if the field is pristine', ->
+      $field = $element.find('.form-field').addClass('form-field-error')
+      $input = $element.find('[name=username]')
+
+      formController = $input.controller('form')
+      modelController = $input.controller('ngModel')
+      modelController.$setViewValue('a') # Change the model state to $dirty
+
+      # Clear out the model and set to $pristine
+      $scope.model = {}
+      formController.$setPristine()
+
+      assert.notInclude($field.prop('className'), 'form-field-error')
+
   describe '.username', ->
     $element = null
 
