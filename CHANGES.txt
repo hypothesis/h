@@ -1,5 +1,5 @@
-Next release
-============
+0.2.0 (2014-08-10)
+==================
 
 - Improve usability of the toolbar (#1268, #1316)
 - Make the stream cards interactive (#1281, #1290)
