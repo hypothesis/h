@@ -35,7 +35,11 @@
       </section>
       <section>
         <h2 class="email-preview__subtitle">Plain Text:</h2>
-        <pre class="email-preview__output"><code>${email['rendered']}</code></pre>
+        <pre class="email-preview__output"><code>${email['text']}</code></pre>
+      </section>
+      <section>
+        <h2 class="email-preview__subtitle">HTML:</h2>
+        <div class="email-preview__output">${structure: email['html']}</div>
       </section>
     </article>
   </body>

@@ -68,6 +68,7 @@ class NotificationTemplate(object):
 
 class ReplyTemplate(NotificationTemplate):
     template = 'h:templates/emails/reply_notification.txt'
+    html_template = 'h:templates/emails/reply_notification.pt'
     subject = 'h:templates/emails/reply_notification_subject.txt'
 
     @staticmethod
