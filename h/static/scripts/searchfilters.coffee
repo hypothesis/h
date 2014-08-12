@@ -248,7 +248,13 @@ class QueryParser
         oper_part =
           if rule.operator? then rule.operator
           else if exact_match then 'one_of' else 'match_of'
-        filter.addClause mapped_field, oper_part, terms, case_sensitive, rule.options
+
+        value_part = []
+        for term in terms
+          t = if rule.formatter then rule.formatter term else term
+          value_part.push t
+
+        filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
       else
         oper_part =
           if rule.operator? then rule.operator
