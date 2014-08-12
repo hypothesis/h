@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
-from mock import patch
-from pyramid.testing import DummyRequest
+from mock import patch, Mock
+from pyramid.testing import DummyRequest, testConfig
+from datetime import datetime
 
 from h import events, notifier
 
@@ -14,6 +15,28 @@ class QueryMock(object):
         self.active = active
         self.query = query or {}
         self.template = template
+
+
+def create_annotation():
+    annotation = {
+        'id': '2',
+        'title': 'Example annotation',
+        'quote': '',
+        'text': 'this is a reply',
+        'user': 'acct:testuser@testdomain',
+        'permissions': {'read': ["group:__world__"]},
+        'created': datetime.now(),
+    }
+    annotation_parent = {
+        'uri': 'http://example.com',
+        'quote': 'parent quote',
+        'text': 'parent text',
+        'created': datetime.now(),
+        'user': 'acct:parent@testdomain',
+        'id': '1',
+    }
+    annotation['parent'] = annotation_parent
+    return annotation
 
 
 # Tests for handling AnnotationEvent
@@ -160,6 +183,56 @@ def test_reply_query_match():
             mock_parent.return_value = {'user': 'acct:parent@testdomain'}
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 1
+
+
+def test_reply_notification_content():
+    """
+    The reply notification should have a subject, and both plain and
+    html bodies.
+    """
+    with testConfig() as config:
+        config.include('pyramid_chameleon')
+
+        annotation = create_annotation()
+        request = DummyRequest()
+
+        with patch('h.auth.local.models.User') as mock_user:
+            user = Mock(email='acct:parent@testdomain')
+            mock_user.get_by_username.return_value = user
+
+            notification = notifier.ReplyTemplate.generate_notification(
+                request, annotation, {})
+
+            assert notification['status']
+            assert notification['recipients'] == ['acct:parent@testdomain']
+            assert 'testuser has just left a reply on your annotation' in \
+                notification['text']
+            assert '<a href="http://example.com/u/testuser">testuser</a> '\
+                'has just left a reply on your annotation' \
+                in notification['html']
+            assert notification['subject'] == \
+                'testuser has just replied to your annotation on ' \
+                '"Example annotation"\n'
+
+
+def test_reply_notification_no_recipient():
+    """
+    The reply notification should have a False status if the recipient cannot
+    be found in the User table.
+    """
+    with testConfig() as config:
+        config.include('pyramid_chameleon')
+
+        annotation = create_annotation()
+        request = DummyRequest()
+
+        with patch('h.auth.local.models.User') as mock_user:
+            mock_user.get_by_username.return_value = None
+
+            notification = notifier.ReplyTemplate.generate_notification(
+                request, annotation, {})
+
+            assert notification['status'] is False
 
 
 def test_reply_username_mismatch():
