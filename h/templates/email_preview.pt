@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <style>
+      .email-preview {
+        display: block;
+        font-family: Helvetica, Helvetica Neue, Arial, sans-serif;
+        font-size: 14px;
+      }
+
+      .email-preview__title {
+        font-size: 16px;
+      }
+
+      .email-preview__subtitle {
+        font-size: 14px;
+      }
+
+      .email-preview__output {
+        background-color: #efefef;
+        padding: 1em;
+        border-radius: 5px;
+      }
+
+      .email-preview__output code {
+        font-family: Source Code Pro, Menlo, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="email-preview" tal:repeat="email emails">
+      <h1 class="email-preview__title">${email['title']}</h1>
+      <section>
+        <h2 class="email-preview__subtitle">Subject:</h2>
+        <pre class="email-preview__output"><code>${email['subject']}</code></pre>
+      </section>
+      <section>
+        <h2 class="email-preview__subtitle">Plain Text:</h2>
+        <pre class="email-preview__output"><code>${email['rendered']}</code></pre>
+      </section>
+    </article>
+  </body>
+</html>
