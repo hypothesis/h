@@ -48,7 +48,7 @@ def page(context, request):
                 'title': 'Notification Email',
                 'subject': render(ReplyTemplate.subject,
                            notification_email_data, request),
-                'text': render(ReplyTemplate.template,
+                'text': render(ReplyTemplate.text_template,
                             notification_email_data, request),
                 'html': render(ReplyTemplate.html_template,
                             notification_email_data, request),

@@ -71,14 +71,15 @@ def test_bad_status():
 
 
 def test_template_parameters():
-    """Make sure the body, subject, recipients fields are correct"""
+    """Make sure the body, html, subject, recipients fields are correct"""
 
     def test_generator(request, annotation, data):
         # pylint: disable=unused-argument
         """Our test template function"""
         return {
             "status": True,
-            "rendered": "Test body",
+            "text": "Test body",
+            "html": "Test html",
             "subject": "Test subject",
             "recipients": ["Test user"]
         }
@@ -124,12 +125,13 @@ def test_subject_and_recipients():
         @classmethod
         def render(cls, request, annotation):
             """Our mock render function"""
-            return "test body", "test subject"
+            return "test subject", "test body", "test html"
 
     result = TestTemplate.generate_notification({}, {}, {})
     assert result['status'] is True
     assert result['recipients'] == ['test user']
-    assert result['rendered'] == 'test body'
+    assert result['text'] == 'test body'
+    assert result['html'] == 'test html'
     assert result['subject'] == 'test subject'
 
 

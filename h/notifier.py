@@ -24,15 +24,17 @@ def standalone_url(request, annotation_id):
 
 
 class NotificationTemplate(object):
-    template = None
+    text_template = None
+    html_template = None
     subject = None
 
     @classmethod
     def render(cls, request, annotation):
         tmap = cls._create_template_map(request, annotation)
-        template = render(cls.template, tmap, request)
+        text = render(cls.text_template, tmap, request)
+        html = render(cls.html_template, tmap, request)
         subject = render(cls.subject, tmap, request)
-        return template, subject
+        return subject, text, html
 
     @staticmethod
     def _create_template_map(request, annotation):
@@ -53,7 +55,7 @@ class NotificationTemplate(object):
         if not checks:
             return {'status': False}
         try:
-            rendered, subject = cls.render(request, annotation)
+            subject, text, html = cls.render(request, annotation)
             recipients = cls.get_recipients(request, annotation, data)
         except:
             log.exception('Generating notification')
@@ -61,13 +63,14 @@ class NotificationTemplate(object):
         return {
             'status': True,
             'recipients': recipients,
-            'rendered': rendered,
+            'text': text,
+            'html': html,
             'subject': subject
         }
 
 
 class ReplyTemplate(NotificationTemplate):
-    template = 'h:templates/emails/reply_notification.txt'
+    text_template = 'h:templates/emails/reply_notification.txt'
     html_template = 'h:templates/emails/reply_notification.pt'
     subject = 'h:templates/emails/reply_notification_subject.txt'
 
@@ -154,17 +157,19 @@ class AnnotationNotifier(object):
             notification = generator(self.request, annotation, data)
             if notification['status']:
                 self._send_annotation(
-                    notification['rendered'],
                     notification['subject'],
+                    notification['text'],
+                    notification['html'],
                     notification['recipients']
                 )
 
-    def _send_annotation(self, body, subject, recipients):
+    def _send_annotation(self, subject, text, html, recipients):
         body = body.decode('utf8')
         subject = subject.decode('utf8')
         message = Message(subject=subject,
                           recipients=recipients,
-                          body=body)
+                          body=body,
+                          html=html)
         self.mailer.send(message)
 
 AnnotationNotifier.register_template(
