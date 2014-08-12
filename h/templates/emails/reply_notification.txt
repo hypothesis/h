@@ -1,17 +1,13 @@
-Your annotation has a new reply.
+${reply_user} has just left a reply on your annotation in "${document_title}".
+${document_path}
 
-At ${document_title} (1)
-${parent_user} (2) on ${parent_timestamp}
+On ${parent_timestamp.strftime('%d %B at %H:%M')} you said:
 
-${parent_text}${parent_tags}
-${parent_path}
+"${parent_text}"
 
-${reply_user} (3) on ${parent_timestamp} said:
+On ${reply_timestamp.strftime('%d %B at %H:%M')} ${reply_user} said:
 
-${reply_text}${reply_tags}
-${reply_path}
+"${reply_text}"
 
-
-(1) ${document_path}
-(2) ${parent_user_profile}
-(3) ${reply_user_profile}
+View this reply: ${reply_path}
+or view anna's stream: ${reply_user_profile}
