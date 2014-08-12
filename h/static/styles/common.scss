@@ -349,67 +349,6 @@ blockquote {
 
 
 
-//ICON CLASSES////////////////////////////////
-.flag-icon {
-  @include fonticon("\28", left);
-}
-
-.fave-icon {
-  @include fonticon("\e006", left);
-  &.checked:before {
-    content: "\e005";
-  }
-}
-
-.reply-icon {
-  @include fonticon("\e004", left);
-}
-
-.share-icon {
-  @include fonticon("\25", left);
-}
-
-.down-icon {
-  @include fonticon("\e007", left);
-}
-
-.clipboard-icon {
-  @include fonticon("\33", left);
-}
-
-.check-icon {
-  @include fonticon("\35", left);
-}
-
-.plus-icon {
-  @include fonticon("\e012", left);
-}
-
-.x-icon {
-  @include fonticon("\36", left);
-}
-
-.vis-icon {
-  @include fonticon("\e001", left);
-}
-
-.highlight-icon {
-  @include fonticon("\e601", left);
-}
-
-.comment-icon {
-  @include fonticon("\e600", left);
-}
-
-.launch-icon {
-  @include fonticon("\2a", left);
-}
-
-.loading-icon {
-  text-align: center
-}
-
-
 //TABS////////////////////////////////
 .nav-tabs {
   border: 1px none $gray-lighter;

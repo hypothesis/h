@@ -29,7 +29,7 @@
     <span ng-switch-default class="indicators">
       <username data-user="model.user"></username>
       <i class="small icon-locked"
-         ng-show="form.privacy.$viewValue != 'Public'"></i>
+         ng-show="form.privacy.$viewValue != 'Public' && !editing"></i>
       <i class="small icon-highlighter2"
          ng-hide="model.text || editing || model.deleted || model.tags.length"></i>
       <i class="small icon-comment3"
