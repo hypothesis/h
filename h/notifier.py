@@ -57,9 +57,9 @@ class NotificationTemplate(object):
         try:
             subject, text, html = cls.render(request, annotation)
             recipients = cls.get_recipients(request, annotation, data)
-        except:
-            log.exception('Generating notification')
+        except TemplateRenderException:
             return {'status': False}
+
         return {
             'status': True,
             'recipients': recipients,
@@ -67,6 +67,10 @@ class NotificationTemplate(object):
             'html': html,
             'subject': subject
         }
+
+
+class TemplateRenderException(Exception):
+    pass
 
 
 class ReplyTemplate(NotificationTemplate):
@@ -124,7 +128,7 @@ class ReplyTemplate(NotificationTemplate):
         userobj = models.User.get_by_username(request, username)
         if not userobj:
             log.warn("User not found! " + str(username))
-            raise Exception('User not found')
+            raise TemplateRenderException('User not found')
         return [userobj.email]
 
     @staticmethod
@@ -164,7 +168,7 @@ class AnnotationNotifier(object):
                 )
 
     def _send_annotation(self, subject, text, html, recipients):
-        body = body.decode('utf8')
+        body = text.decode('utf8')
         subject = subject.decode('utf8')
         message = Message(subject=subject,
                           recipients=recipients,
