@@ -3,7 +3,7 @@
 @import "compass/utilities/general/clearfix";
 
 .form-field {
-  @include clearfix;
+  clear: both;
   margin-bottom: 10px;
 }
 
@@ -80,6 +80,7 @@
   }
 
   &:focus, &.js-focus {
+    outline: none;
     background-color: #FFF;
     border-color: #51A7E8;
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.075) inset, 0px 0px 5px rgba(81, 167, 232, 0.5);
@@ -222,12 +223,17 @@
   border: 1px solid #ACACAC;
   padding: 7px 12px 6px;
 
-  &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
+  &:hover, &:active, &.js-hover, &.js-active {
     @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.05));
     outline: none;
     color: $button-text-color;
     background: $button-background-start;
     border-color: #bababa;
+  }
+
+  &:focus, &.js-focus {
+    border-color: #51A7E8;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.075) inset, 0px 0px 5px rgba(81, 167, 232, 0.5);
   }
 
   &:active, &.js-active {
