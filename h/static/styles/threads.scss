@@ -1,0 +1,121 @@
+@import 'base';
+
+$thread-padding: 1em;
+$threadexp-width: .6em;
+
+.thread {
+  cursor: pointer;
+  position: relative;
+
+  & > * {
+    @include pie-clearfix;
+  }
+
+  & > ul {
+    padding-left: $thread-padding + .15em;
+    margin-left: -$thread-padding;
+  }
+
+  .load-more {
+    @include pie-clearfix;
+    font-family: $sans-font-family;
+    font-weight:bold;
+    font-size: .8em;
+  }
+
+  .thread {
+    border-left: 1px dotted $gray-light;
+    height: 100%;
+    padding: 0;
+    padding-left: $thread-padding;
+
+    &.collapsed {
+      & > .annotation {
+        fuzzytime {
+          float: none;
+          font-style: italic;
+        }
+
+        header {
+          display: inline-block;
+        }
+
+        .body {
+          display: none;
+        }
+
+        .magicontrol {
+          display: none;
+        }
+
+        .reply-count {
+          font-style: italic;
+        }
+      }
+    }
+  }
+
+  .threadexp {
+    background: $white;
+    color: $gray-light;
+    position: absolute;
+    width: 1.4em;
+    height: 1.4em;
+    top: 0;
+    left: -.7em;
+
+    span {
+      position: absolute;
+      top: (1.4 - $threadexp-width) / 2;
+      left: (1.4 - $threadexp-width) / 2;
+      width: $threadexp-width;
+      height: $threadexp-width;
+
+      &:before {
+        font-size: $threadexp-width;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+    }
+  }
+
+  .annotation {
+    &.squished {
+      padding-left: 0;
+    }
+  }
+
+  &.collapsed {
+    display: block !important;
+
+    &:hover {
+      background-color: $gray-lightest;
+    }
+
+    & > ul {
+      max-height: 0;
+      overflow: hidden;
+    }
+
+    & > .annotation {
+      .body * {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .indicators {
+        display: run-in;
+        margin-right: .25em;
+      }
+    }
+
+    & > .threadexp {
+      background-image: url("../images/plus_1.png");
+    }
+  }
+}

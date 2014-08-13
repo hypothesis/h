@@ -4,6 +4,7 @@
 @import 'forms';
 @import 'spinner';
 @import 'responsive';
+@import 'threads';
 @import 'yui_grid';
 @import 'simple-search';
 
@@ -349,67 +350,6 @@ blockquote {
 
 
 
-//ICON CLASSES////////////////////////////////
-.flag-icon {
-  @include fonticon("\28", left);
-}
-
-.fave-icon {
-  @include fonticon("\e006", left);
-  &.checked:before {
-    content: "\e005";
-  }
-}
-
-.reply-icon {
-  @include fonticon("\e004", left);
-}
-
-.share-icon {
-  @include fonticon("\25", left);
-}
-
-.down-icon {
-  @include fonticon("\e007", left);
-}
-
-.clipboard-icon {
-  @include fonticon("\33", left);
-}
-
-.check-icon {
-  @include fonticon("\35", left);
-}
-
-.plus-icon {
-  @include fonticon("\e012", left);
-}
-
-.x-icon {
-  @include fonticon("\36", left);
-}
-
-.vis-icon {
-  @include fonticon("\e001", left);
-}
-
-.highlight-icon {
-  @include fonticon("\e601", left);
-}
-
-.comment-icon {
-  @include fonticon("\e600", left);
-}
-
-.launch-icon {
-  @include fonticon("\2a", left);
-}
-
-.loading-icon {
-  text-align: center
-}
-
-
 //TABS////////////////////////////////
 .nav-tabs {
   border: 1px none $gray-lighter;
@@ -572,113 +512,6 @@ blockquote {
   }
 }
 
-//THREADING////////////////////////////////
-//Threaded discussion specific
-.thread {
-  cursor: pointer;
-  position: relative;
-
-  & > * {
-    @include pie-clearfix;
-  }
-
-  & > ul {
-    padding-left: $thread-padding + .15em;
-    margin-left: -$thread-padding;
-  }
-
-  .load-more {
-    @include pie-clearfix;
-    font-family: $sans-font-family;
-    font-weight:bold;
-    font-size: .8em;
-  }
-
-  .thread {
-    border-left: 1px dotted $gray-light;
-    height: 100%;
-    padding: 0;
-    padding-left: $thread-padding;
-
-    &.collapsed {
-      & > .annotation {
-        fuzzytime {
-          float: none;
-          font-style: italic;
-        }
-
-        header {
-          display: inline-block;
-        }
-
-        .body {
-          display: none;
-        }
-
-        .magicontrol {
-          display: none;
-        }
-
-        .reply-count {
-          font-style: italic;
-        }
-      }
-    }
-  }
-
-  .threadexp {
-    font-size: 1.1em;  // to match the username header
-    height: $threadexp-width;
-    width: $threadexp-width;
-    position: absolute;
-    // .7em is 50% of a line-height of 1.4;
-    top: .7em - ($threadexp-width / 2);
-    left: -($threadexp-width / 2);
-    outline: 1px solid #aaa;
-    @include icon("minus_1.png");
-  }
-
-  .annotation {
-    &.squished {
-      padding-left: 0;
-    }
-  }
-
-  &.collapsed {
-    display: block !important;
-
-    &:hover {
-      background-color: $gray-lightest;
-    }
-
-    & > ul {
-      max-height: 0;
-      overflow: hidden;
-    }
-
-    & > .annotation {
-      .body * {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        -o-text-overflow: ellipsis;
-        white-space: nowrap;
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .indicators {
-        display: run-in;
-        margin-right: .25em;
-      }
-    }
-
-    & > .threadexp {
-      background-image: url("../images/plus_1.png");
-    }
-  }
-}
-
-
 //MAGICONTROL////////////////////////////////
 .magicontrol {
   @include transition(opacity);
@@ -778,7 +611,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     float: left;
     padding: .01em 1.3em .01em .3em;
     position: relative;
-    opacity: .8;
     margin-right: 0.4em;
 
     &:hover { opacity: 1; }

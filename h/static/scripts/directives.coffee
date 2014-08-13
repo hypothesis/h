@@ -77,7 +77,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 
 
 privacy = ->
-  levels = ['Public', 'Private']
+  levels = ['Public', 'Only Me']
 
   link: (scope, elem, attrs, controller) ->
     return unless controller?
@@ -88,7 +88,7 @@ privacy = ->
       if 'group:__world__' in (permissions.read or [])
         'Public'
       else
-        'Private'
+        'Only Me'
 
     controller.$parsers.push (privacy) ->
       return unless privacy?

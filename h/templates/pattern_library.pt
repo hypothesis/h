@@ -203,7 +203,7 @@
             <button class="btn" type="submit" name="" disabled>Button (disabled)</button>
           </div>
           <div class="form-field">
-            <button class="btn js-focus" type="submit" name="">Button (hover)</button>
+            <button class="btn js-focus" type="submit" name="">Button (focus/hover)</button>
           </div>
           <div class="form-field">
             <button class="btn js-active" type="submit" name="">Button (active)</button>

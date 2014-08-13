@@ -3,7 +3,7 @@
 @import "compass/utilities/general/clearfix";
 
 .form-field {
-  @include clearfix;
+  clear: both;
   margin-bottom: 10px;
 }
 
@@ -74,18 +74,16 @@
   font-weight: normal;
   font-size: 15px;
   color: $gray;
-
-  @include placeholder {
-    -webkit-font-smoothing: antialiased;
-  }
+  background-color: #FAFAFA;
 
   &:focus, &.js-focus {
     outline: none;
-    border-color: $focus-yellow-dark;
-    background-color: $focus-yellow;
+    background-color: #FFF;
+    border-color: #51A7E8;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.075) inset, 0px 0px 5px rgba(81, 167, 232, 0.5);
 
     @include placeholder {
-      color: $focus-yellow-darker;
+      color: $gray;
     }
   }
 }
@@ -177,7 +175,6 @@
 
 .form-actions {
   @include pie-clearfix;
-  margin-top: 20px;
 }
 
 .form-actions-message {
@@ -222,12 +219,17 @@
   border: 1px solid #ACACAC;
   padding: 7px 12px 6px;
 
-  &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
+  &:hover, &:active, &.js-hover, &.js-active {
     @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.05));
     outline: none;
     color: $button-text-color;
     background: $button-background-start;
     border-color: #bababa;
+  }
+
+  &:focus, &.js-focus {
+    border-color: #51A7E8;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.075) inset, 0px 0px 5px rgba(81, 167, 232, 0.5);
   }
 
   &:active, &.js-active {
