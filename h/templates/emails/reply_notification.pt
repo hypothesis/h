@@ -1,4 +1,4 @@
-<p><a href="${reply_user_profile}">${reply_user}</a> has just left a reply on your annotation in
+<p><a href="${reply_user_profile}">${reply_user}</a> has just left a reply to your annotation on
 &ldquo;<a href="${document_path}">${document_title}</a>&rdquo;.</p>
 
 <p>On <a href="${parent_path}">${parent_timestamp.strftime('%d %B at %H:%M')} you said</a>:</p>

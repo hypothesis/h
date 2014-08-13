@@ -205,14 +205,13 @@ def test_reply_notification_content():
 
             assert notification['status']
             assert notification['recipients'] == ['acct:parent@testdomain']
-            assert 'testuser has just left a reply on your annotation' in \
+            assert 'testuser has just left a reply to your annotation on' in \
                 notification['text']
             assert '<a href="http://example.com/u/testuser">testuser</a> '\
-                'has just left a reply on your annotation' \
+                'has just left a reply to your annotation on' \
                 in notification['html']
             assert notification['subject'] == \
-                'testuser has just replied to your annotation on ' \
-                '"Example annotation"\n'
+                'testuser has replied to your annotation\n'
 
 
 def test_reply_notification_no_recipient():
@@ -250,6 +249,7 @@ def test_reply_username_mismatch():
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 1
 
+
 def test_reply_domain_mismatch():
     """Username same, domain different -> should send reply"""
     annotation = {
@@ -264,6 +264,7 @@ def test_reply_domain_mismatch():
             mock_parent.return_value = {'user': 'acct:testuser@testdomain2'}
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 1
+
 
 def test_reply_same_creator():
     """Username same, domain same -> should not send reply"""
