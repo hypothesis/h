@@ -472,9 +472,9 @@ blockquote {
 //PAPER////////////////////////////////
 //Provides the white background upon which items sit
 .paper {
-  @include border-radius(2px);
   background: $white;
   border: solid 1px $gray-lighter;
+  border-radius: 2px;
   padding: 1em;
 }
 

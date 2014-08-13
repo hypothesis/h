@@ -87,10 +87,10 @@ $base-font-size: 14px;
 }
 
 .annotator-frame .heatmap-pointer {
-  @include border-radius(2px 4px 4px 2px);
   @include box-sizing(border-box);
   background: $white;
   border: solid 1px $gray-lighter;
+  border-radius: 2px 4px 4px 2px;
   right: 0;
   position: absolute;
   margin-top: -8px;
@@ -147,7 +147,7 @@ $base-font-size: 14px;
   }
 
   &.upper {
-    @include border-radius(2px 2px 4px 4px);
+    border-radius: 2px 2px 4px 4px;
 
     &:before, &:after {
       top: auto;
@@ -168,7 +168,7 @@ $base-font-size: 14px;
   }
 
   &.lower {
-    @include border-radius(4px 4px 2px 2px);
+    border-radius: 4px 4px 2px 2px;
 
     &:before, &:after {
       bottom: auto;
@@ -317,7 +317,6 @@ $base-font-size: 14px;
 }
 
 .annotator-frame .annotator-toolbar li {
-  @include border-radius(4px);
   @include smallshadow;
   @include transition-property(left, height, margin-top);
   @include transition-duration(.25s);
@@ -325,6 +324,7 @@ $base-font-size: 14px;
   @include transition-timing-function(cubic-bezier(0, .55, .1, 1));
   background: $white;
   border: solid 1px $gray-lighter;
+  border-radius: 4px;
   left: 0;
   margin-top: 5px;
   overflow: hidden;
@@ -333,8 +333,8 @@ $base-font-size: 14px;
   width: 30px;
 
   &:first-child {
-    @include border-radius(4px 0 0 4px);
     @include box-shadow(none);
+    border-radius: 4px 0 0 4px;
     border-right-style: none;
     margin-top: 0;
     width: 36px;
