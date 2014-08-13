@@ -1,7 +1,6 @@
 <html metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag>
     <title>Hypothesis</title>
-    <link rel="stylesheet" type="text/css" href="/assets/styles/hypothesis-inject.css" />
     <style>
       body {
         background: none;

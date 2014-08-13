@@ -2,16 +2,28 @@
 import logging
 
 from pyramid.view import view_config
+from pyramid_layout.layout import layout_config
 from pyramid_mailer.interfaces import IMailer
 from pyramid_mailer.testing import DummyMailer
+
+from h.layouts import BaseLayout
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-@view_config(renderer='h:templates/pattern_library.pt',
+@view_config(layout='pattern_library',
+             renderer='h:templates/pattern_library.pt',
              route_name='pattern_library')
 def page(context, request):
     return {}
+
+
+@layout_config(name='pattern_library', template='h:templates/base.pt')
+class PatternLibraryLayout(BaseLayout):
+    requirements = (
+        ('app', None),
+        ('inject_css', None),
+    )
 
 
 class LoggingMailer(DummyMailer):
@@ -38,6 +50,8 @@ class LoggingMailer(DummyMailer):
 
 
 def includeme(config):
+    config.include('pyramid_layout')
+
     config.add_route('pattern_library', '/dev/pattern-library')
 
     mailer = LoggingMailer()
