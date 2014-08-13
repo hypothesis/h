@@ -8,7 +8,7 @@
         <i class="icon-triangle"></i>
   </span>
   <ul class="dropdown-menu" role="menu">
-    <li ng-repeat="p in levels" ng-click="setLevel(p)" ng-class="p == level && 'selected'">
+    <li ng-repeat="p in levels" ng-click="setLevel(p)">
     	<i class="small" ng-class="{'icon-earth': p == 'Public', 'icon-locked': p == 'Only Me'}"></i>
     	{{p}}
     </li>

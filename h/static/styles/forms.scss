@@ -74,10 +74,7 @@
   font-weight: normal;
   font-size: 15px;
   color: $gray;
-
-  @include placeholder {
-    -webkit-font-smoothing: antialiased;
-  }
+  background-color: #FAFAFA;
 
   &:focus, &.js-focus {
     outline: none;
