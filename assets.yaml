@@ -185,7 +185,7 @@ jquery_ui_js:
 
 # Polyfills
 autofill:
-  filter: uglifyjs
+  filters: uglifyjs
   output: scripts/vendor/polyfills/autofill-event.min.js
   contents:
     - h:static/scripts/vendor/polyfills/autofill-event.js
