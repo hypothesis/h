@@ -152,55 +152,6 @@ $input-border-radius: 2px;
   }
 }
 
-
-//ICON IMAGES////////////////////////////////
-@mixin icon_resets {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
-}
-
-@mixin icon($icon) {
-  @include icon_resets;
-  background-image: url("../images/#{$icon}");
-}
-
-
-//FONTICON////////////////////////////////
-@mixin fonticon($char, $iconside, $offset: .5em) {
-  text-decoration: none;
-  cursor: pointer;
-  &:hover {
-    opacity: 1;
-  }
-  @if $iconside == left {
-    &:before {
-      content: $char !important;
-      font-family: 'icomoon';
-      margin-right: $offset;
-      speak: none;
-      font-weight: normal;
-      @content; // Allow additonal styles for the icon.
-    }
-    &:after {
-      content: "" !important;
-    }
-  }
-  @if $iconside == right {
-    &:before {
-      content: "" !important;
-    }
-    &:after {
-      content: $char !important;
-      font-family: 'icomoon';
-      margin-left: $offset;
-      speak: none;
-      font-weight: normal;
-    }
-  }
-}
-
-
 //NOISE///////////
 //Provides the noise background
 .noise {
