@@ -409,6 +409,7 @@ inject_css:
         - h:static/styles/inject.scss
       depends:
         - h:static/styles/base.scss
+        - h:static/styles/pointers.scss
         - h:static/styles/reset.scss
 
 
