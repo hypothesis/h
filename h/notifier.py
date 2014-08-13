@@ -210,6 +210,8 @@ def send_notifications(event):
                     annotation, {}, 'reply_notification')
     except:
         log.exception('Emailing event: %s', event)
+        raise
+
 
 def includeme(config):
     config.scan(__name__)
