@@ -1,7 +1,6 @@
 <html metal:use-macro="main_template">
   <head metal:fill-slot="head" tal:omit-tag>
     <title>Hypothesis</title>
-    <link rel="stylesheet" type="text/css" href="/assets/styles/hypothesis-inject.css" />
     <style>
       body {
         background: none;
@@ -513,6 +512,25 @@
             <div class="tab-content">
               This is where the content would go…
             </div>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Heatmap tabs</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="annotator-frame" style="position: static; margin: 10px;">
+            <div class="heatmap-pointer" style="position: relative; display: inline-block">
+              <div class="label">8</div>
+            </div>
+            <div class="heatmap-pointer upper" style="position: relative; display: inline-block">
+              <div class="label">64</div>
+            </div>
+            <div class="heatmap-pointer lower" style="position: relative; display: inline-block">
+              <div class="label">512</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

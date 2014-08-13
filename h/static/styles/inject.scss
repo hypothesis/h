@@ -86,119 +86,9 @@ $base-font-size: 14px;
   }
 }
 
-.annotator-frame .heatmap-pointer {
-  @include transition-property(left);
-  @include transition-duration(.2s);
-  color: #666;
-  left: 0;
-  position: absolute;
-  height: 20px;
-  width: $heatmap-width + 18px;
-  margin-top: -10px;
-  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-  text-align: center;
-  cursor: pointer;
-
-  .svg {
-    width: 100%;
-    height: 100%;
-    background-image: url("../images/svg/side_tab.svg");
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-  }
-
-  .label {
-    @include reset-box-model;
-    @include reset-font;
-    background: none;
-    color: $text-color;
-    font-weight: bold;
-    font-family: $sans-font-family;
-    font-size: 11px;
-    line-height: 20px;
-    left: 5px;
-    right: 2px;
-    position: absolute;
-  }
-
-  &:hover {
-    left: 2px;
-  }
-
-  &.lower, &.upper, &.commenter {
-    left: 7px;
-    width: 33px;
-
-    &:hover {
-      left: 7px;
-    }
-
-    .label {
-      left: 0;
-      right: 0;
-    }
-  }
-
-  &.lower, &.upper {
-    @include single-transition(margin-top, .2s);
-    height: 30px;
-  }
-
-  &.upper {
-    margin-top: -26px;
-
-    .svg {
-      background-image: url("../images/svg/up_tab.svg");
-    }
-
-    .label {
-      bottom: 1px;
-    }
-
-    &:hover {
-      margin-top: -20px;
-    }
-  }
-
-  &.lower {
-    margin-top: -20px;
-
-    .svg {
-      background-image: url("../images/svg/down_tab.svg");
-    }
-
-    .label {
-      top: 1px;
-    }
-
-    &:hover {
-      margin-top: -18px;
-    }
-  }
-
-  &.flip {
-    @include rotateY(180deg);
-
-    .label {
-      @include rotateY(180deg);
-    }
-  }
-
-  &.commenter {
-    @include single-transition(margin-top, .2s);
-    margin-top: -18px;
-
-    .svg {
-      background-image: url("../images/svg/comment_tab.svg");
-    }
-
-    &:hover {
-      margin-top: -18px;
-    }
-  }
+.annotator-frame {
+  @import 'pointers';
 }
-
 
 //HIGHLIGHTS////////////////////////////////
 .annotator-highlights-always-on .annotator-hl,
@@ -314,36 +204,39 @@ $base-font-size: 14px;
     @include transition-timing-function(cubic-bezier(1, .1, .55, 0));
     height: 0;
     left: 34px;
-    margin-bottom: 0;
+    margin-top: -2px;
     &:first-child, &.pushed {
       @include transition-delay(0);
       left: 3px;
       height: 30px;
-      margin-bottom: 5px;
+    }
+    &.pushed {
+      margin-top: 5px;
     }
   }
 }
 
 .annotator-frame .annotator-toolbar li {
-  @include border-radius(4px);
   @include smallshadow;
-  @include transition-property(left, height, margin-bottom);
+  @include transition-property(left, height, margin-top);
   @include transition-duration(.25s);
   @include transition-delay(0);
   @include transition-timing-function(cubic-bezier(0, .55, .1, 1));
   background: $white;
   border: solid 1px $gray-lighter;
+  border-radius: 4px;
   left: 0;
-  margin-bottom: 5px;
+  margin-top: 5px;
   overflow: hidden;
   position: relative;
   height: 30px;
   width: 30px;
 
   &:first-child {
-    @include border-radius(4px 0 0 4px);
     @include box-shadow(none);
+    border-radius: 4px 0 0 4px;
     border-right-style: none;
+    margin-top: 0;
     width: 36px;
     z-index: 1;
   }
