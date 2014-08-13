@@ -334,6 +334,7 @@ app_css:
           - h:static/styles/base.scss
           - h:static/styles/common.scss
           - h:static/styles/responsive.scss
+          - h:static/styles/threads.scss
           - h:static/styles/yui_grid.scss
           - h:static/styles/forms.scss
           - h:static/styles/reset.scss
