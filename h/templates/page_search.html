@@ -13,7 +13,8 @@
     <a href="" class="threadexp"
        title="{{collapsed && 'Expand' || 'Collapse'}}"
        ng-show="ann_info.shown[thread.message.id] && !ann_info.more_top[thread.message.id] && thread.message.references"
-       />
+       ><span ng-class="{'icon-minus': !!collapsed,
+                         'icon-plus': !collapsed}"></span></a>
 
     <!-- Excerpts -->
     <div class="excerpt"

@@ -13,7 +13,9 @@
     <a href="" class="threadexp"
        title="{{collapsed && 'Expand' || 'Collapse'}}"
        ng-show="$parent.annotation"
-       />
+       ><span ng-class="{'icon-minus': !!collapsed,
+                         'icon-plus': !collapsed}"></span></a>
+
 
     <!-- Excerpts -->
     <div class="excerpt"
