@@ -3,9 +3,7 @@ $ = Annotator.$
 class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # prototype constants
   BUCKET_THRESHOLD_PAD: 30
-  BUCKET_SIZE: 50
-  BOTTOM_CORRECTION: 14
-
+  BUCKET_SIZE: 16
 
   # heatmap svg skeleton
   html: """
@@ -253,8 +251,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     $.merge above, this._collectVirtualAnnotations 0, currentPage-1
     $.merge below, this._collectVirtualAnnotations currentPage+1, lastPage
 
-    comments = @annotator.comments.slice()
-
     # Construct control points for the heatmap
     points = highlights.reduce (points, hl, i) =>
       d = hl.annotation
@@ -334,26 +330,16 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         counts: []
         latest: 0
 
-    # Add the scroll buckets
-    @buckets.unshift [], above, []
-    @buckets.push below
-    # Add comment bucket
-    @buckets.push comments, []
-
     # Scroll up
-    @index.unshift 0, @BUCKET_THRESHOLD_PAD,
-      (@BUCKET_THRESHOLD_PAD + @BUCKET_SIZE)
+    @buckets.unshift [], above, []
+    @index.unshift 0, @BUCKET_THRESHOLD_PAD + 6,
+      (@BUCKET_THRESHOLD_PAD + @BUCKET_SIZE) + 6
+
     # Scroll down
-    @index.push $(window).height() - @BUCKET_SIZE
-    # If there are items in the comment bucket then it has be in the bottom
-    # and possible lower bucket has to be slightly above it
-    # if there are no comments, than the lower bucket has to travel lower to the page
-    if comments.length
-      @index.push $(window).height() - @BUCKET_SIZE + @BOTTOM_CORRECTION*2
-      @index.push $(window).height() + @BUCKET_SIZE - @BOTTOM_CORRECTION*3
-    else
-      @index.push $(window).height() + @BOTTOM_CORRECTION
-      @index.push $(window).height() + @BOTTOM_CORRECTION
+    @buckets.push [], below, []
+    @index.push $(window).height() - @BUCKET_SIZE - 12,
+      $(window).height() - @BUCKET_SIZE - 11,
+      $(window).height()
 
     # Calculate the total count for each bucket (without replies) and the
     # maximum count.
@@ -446,8 +432,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         else if (@isLower bucket)
           @dynamicBucket = true
           @_jumpMinMax @buckets[bucket], "down"
-        else if (@isComment bucket)
-          @commentClick()
         else
           d3.event.stopPropagation()
           annotations = @buckets[bucket].slice()
@@ -458,15 +442,17 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     tabs.exit().remove()
 
     tabs
+    .style 'margin-top', (d) =>
+      if @isUpper(d) or @isLower(d) then '-9px' else '-8px'
+
     .style 'top', (d) =>
       "#{(@index[d] + @index[d+1]) / 2}px"
 
     .html (d) =>
-      "<div class='label'>#{@buckets[d].length}</div><div class='svg'></div>"
+      "<div class='label'>#{@buckets[d].length}</div>"
 
     .classed('upper', @isUpper)
     .classed('lower', @isLower)
-    .classed('commenter', @isComment)
 
     .style 'display', (d) =>
       if (@buckets[d].length is 0) then 'none' else ''
@@ -487,13 +473,5 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       acc
     , []
 
-  _getCommentBucket: => @index.length - 2
-
   isUpper:   (i) => i == 1
-  isLower:   (i) => i == @index.length - 3
-  isComment: (i) => i is @_getCommentBucket()
-
-  # Simulate clicking on the comments tab
-  commentClick: =>
-    @dynamicBucket = false
-    annotator.showViewer "Comments", @buckets[@_getCommentBucket()]
+  isLower:   (i) => i == @index.length - 2
