@@ -86,27 +86,27 @@ annotator_texthighlights:
 
 # Annotator plugins maintained in tree
 annotator_bridge:
-  filters: coffeescript
+  filters: coffeescript, uglifyjs
   output: scripts/plugin/bridge.js
   contents:
     - h:static/scripts/plugin/bridge.coffee
 annotator_discovery:
-  filters: coffeescript
+  filters: coffeescript, uglifyjs
   output: scripts/plugin/discovery.js
   contents:
     - h:static/scripts/plugin/discovery.coffee
 annotator_heatmap:
-  filters: coffeescript
+  filters: coffeescript, uglifyjs
   output: scripts/plugin/heatmap.js
   contents:
     - h:static/scripts/plugin/heatmap.coffee
 annotator_threading:
-  filters: coffeescript
+  filters: coffeescript, uglifyjs
   output: scripts/plugin/threading.js
   contents:
     - h:static/scripts/plugin/threading.coffee
 annotator_toolbar:
-  filters: coffeescript
+  filters: coffeescript, uglifyjs
   output: scripts/plugin/toolbar.js
   contents:
     - h:static/scripts/plugin/toolbar.coffee
