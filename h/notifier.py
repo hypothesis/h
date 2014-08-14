@@ -184,33 +184,29 @@ AnnotationNotifier.register_template(
 
 @subscriber(events.AnnotationEvent)
 def send_notifications(event):
-    try:
-        action = event.action
-        request = event.request
-        annotation = event.annotation
+    action = event.action
+    request = event.request
+    annotation = event.annotation
 
-        # Now process only the reply-notifications
-        # And for them we need only the creation action
-        if action != 'create':
-            return
+    # Now process only the reply-notifications
+    # And for them we need only the creation action
+    if action != 'create':
+        return
 
-        # Check for authorization. Send notification only for public annotation
-        # XXX: This will be changed and fine grained when
-        # user groups will be introduced
-        read = annotation['permissions']['read']
-        if "group:__world__" not in read:
-            return
+    # Check for authorization. Send notification only for public annotation
+    # XXX: This will be changed and fine grained when
+    # user groups will be introduced
+    read = annotation['permissions']['read']
+    if "group:__world__" not in read:
+        return
 
-        notifier = AnnotationNotifier(request)
-        annotation['parent'] = parent_values(annotation, request)
-        if 'user' in annotation['parent'] and 'user' in annotation:
-            parentuser = annotation['parent']['user']
-            if len(parentuser) and parentuser != annotation['user']:
-                notifier.send_notification_to_owner(
-                    annotation, {}, 'reply_notification')
-    except:
-        log.exception('Emailing event: %s', event)
-        raise
+    notifier = AnnotationNotifier(request)
+    annotation['parent'] = parent_values(annotation, request)
+    if 'user' in annotation['parent'] and 'user' in annotation:
+        parentuser = annotation['parent']['user']
+        if len(parentuser) and parentuser != annotation['user']:
+            notifier.send_notification_to_owner(
+                annotation, {}, 'reply_notification')
 
 
 def includeme(config):
