@@ -12,10 +12,10 @@ formValidate = ['$timeout', ($timeout) ->
     updateField = (field) ->
       return unless field?
 
-      if field.$valid
+      if field.$valid or field.$pristine
         toggleClass(field, addClass: false)
-      else
-        toggleClass(field, addClass: true) if field.$dirty
+      else if field.$dirty
+        toggleClass(field, addClass: true)
 
     # A custom parser for each form field that is used to reset the "response"
     # error state whenever the $viewValue changes.
@@ -49,9 +49,7 @@ formValidate = ['$timeout', ($timeout) ->
     , true
 
     scope.$watch form.$name + '.$pristine', (value) ->
-      if value == true
-        forEachField (field) ->
-          toggleClass(field, addClass: false)
+      forEachField(updateField) if value is true
 
   require: 'form'
 ]
