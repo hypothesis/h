@@ -131,15 +131,6 @@ describe 'h.auth', ->
       assert.isTrue $scope.login.$valid
       assert.isUndefined $scope.login.responseErrorMessage
 
-    it 'should reset to pristine state when the model is reset', ->
-      $rootScope.form.$setDirty()
-      $rootScope.$digest()
-      assert.isFalse $rootScope.form.$pristine
-
-      $scope.model = null
-      $scope.$digest()
-      assert.isTrue $rootScope.form.$pristine
-
     it 'should invoke handlers set by attributes', ->
       $rootScope.stub = sandbox.stub()
       for event in ['error', 'success', 'timeout']
