@@ -1,10 +1,10 @@
 imports = [
   'ngAnimate'
   'ngRoute'
-  'h.app_directives'
   'h.auth'
   'h.controllers'
   'h.directives'
+  'h.directives.annotation'
   'h.filters'
   'h.streamsearch'
 ]

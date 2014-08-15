@@ -287,7 +287,7 @@ app_js:
             - scripts/directives.coffee
             - scripts/directives/simple-search.coffee
             - scripts/directives/status-button.coffee
-            - scripts/app_directives.coffee
+            - scripts/directives/annotation.coffee
             - scripts/helpers.coffee
             - scripts/services.coffee
             - scripts/socket.coffee
