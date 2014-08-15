@@ -1,58 +1,58 @@
-formValidate = ['$timeout', ($timeout) ->
-  link: (scope, elem, attr, form) ->
-    isSubmitted = false
+formInput = ->
+  link: (scope, elem, attr, [form, model, validator]) ->
+    return unless form?.$name and model?.$name and validator
+
     fieldClassName = 'form-field'
     errorClassName = 'form-field-error'
 
-    toggleClass = (field, {addClass}) ->
-      inputEl = elem.find("[name=#{field.$name}]")
-      fieldEl = inputEl.parents(".#{fieldClassName}").first()
-      fieldEl.toggleClass(errorClassName, addClass)
+    render = model.$render
 
-    updateField = (field) ->
-      return unless field?
+    resetResponse = (value) ->
+      model.$setValidity('response', true)
+      value
 
-      if field.$valid or field.$pristine
-        toggleClass(field, addClass: false)
-      else if field.$dirty
-        toggleClass(field, addClass: true)
+    toggleClass = (addClass) ->
+      elem.toggleClass(errorClassName, addClass)
+      elem.parent().toggleClass(errorClassName, addClass)
 
-    # A custom parser for each form field that is used to reset the "response"
-    # error state whenever the $viewValue changes.
-    fieldParser = (field, value) ->
-      field.$setValidity('response', true)
-      updateField(field) if field.$valid
-      return value
+    model.$parsers.unshift(resetResponse)
+    model.$render = ->
+      toggleClass(model.$invalid and model.$dirty)
+      render()
 
-    forEachField = (fn) ->
-      fn(field) for own _, field of form when field?.$name?
+    validator.addControl(model)
+    scope.$on '$destroy', -> validator.removeControl this
 
-    forEachField (field) ->
-      parser = angular.bind(null, fieldParser, field)
-      field.$parsers.push(parser)
+    scope.$watch ->
+      if model.$modelValue? or model.$pristine
+        model.$render()
+      return
 
-    # Validate field when the content changes.
-    elem.on 'change', ':input', ->
-      forEachField(updateField)
+  require: ['^?form', '?ngModel', '^?formValidate']
+  restrict: 'C'
 
-    # Validate form on submit and set flag for error watcher.
+
+formValidate = ->
+  controller: ->
+    controls = {}
+
+    addControl: (control) ->
+      if control.$name
+        controls[control.$name] = control
+
+    removeControl: (control) ->
+      if control.$name
+        delete controls[control.$name]
+
+    submit: ->
+      # make all the controls dirty and re-render them
+      for _, control of controls
+        control.$setViewValue(control.$viewValue)
+        control.$render()
+
+  link: (scope, elem, attr, ctrl) ->
     elem.on 'submit', ->
-      isSubmitted = true
-      forEachField (field) ->
-        field.$setViewValue(field.$viewValue)
-        updateField(field)
-
-    scope.$watch form.$name + '.$error', ->
-      if isSubmitted
-        forEachField(updateField)
-        isSubmitted = false
-    , true
-
-    scope.$watch form.$name + '.$pristine', (value) ->
-      forEachField(updateField) if value is true
-
-  require: 'form'
-]
+      ctrl.submit()
 
 
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
@@ -441,6 +441,7 @@ match = ->
 
 
 angular.module('h.directives', ['ngSanitize'])
+.directive('formInput', formInput)
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
