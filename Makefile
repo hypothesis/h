@@ -8,8 +8,8 @@ clean:
 	@rm -rf h/static/.sass-cache
 	@rm -rf h/static/.webassets-cache
 	find h/static/scripts \
-		-iname '*.js' \
-		-path './vendor' -prune \
+		-path 'h/static/scripts/vendor' -prune \
+		-o -iname '*.js' \
 		-exec rm {} \;
 	find h/static/styles \
 		-iname '*.css' \
