@@ -40,7 +40,7 @@ class Socket extends SockJS
       this.send = send
 
 
-angular.module('h.socket', imports, configure)
+angular.module('h.socket', imports)
 .factory('clientID', clientID)
 .factory('socket', socket)
 .run(run)
