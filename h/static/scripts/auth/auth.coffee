@@ -79,14 +79,12 @@ authDirective = ['$timeout', ($timeout) ->
       scope.onError()
 
     scope.$on 'success', (event) ->
+      form.$setPristine()
       scope.onSuccess()
 
     scope.$on 'timeout', (event) ->
+      form.$setPristine()
       scope.onTimeout()
-
-    scope.$watch 'model', (value) ->
-      if value is null
-        form.$setPristine()
 
     scope.$watch 'tab', (name) ->
       $timeout ->

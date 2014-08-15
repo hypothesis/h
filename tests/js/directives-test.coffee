@@ -34,34 +34,30 @@ describe 'h.directives', ->
     $element = null
 
     beforeEach ->
-      $scope.model = {username: ''}
+      $scope.model = {username: undefined}
 
       template = '''
       <form form-validate name="login" onsubmit="return false">
         <div class="form-field">
-          <input type="text" class="" ng-model="model.username" name="username" required ng-minlength="3" />
+          <input type="text" class="form-input" name="username"
+                 ng-model="model.username" name="username"
+                 required ng-minlength="3" />
         </div>
       </form>
       '''
 
-      # Needs to be passed through angular.element() to work. Otherwise it
-      # will not link the form-validate directive.
       $element = $compile(angular.element(template))($scope)
       $scope.$digest()
 
-    it 'should apply an error class to an invalid field on change', ->
-      $field = $element.find('.form-field')
-      $input = $element.find('[name=username]')
-      $input.val('ab').change()
-
-      assert.include($field.prop('className'), 'form-field-error')
-
     it 'should remove an error class to an valid field on change', ->
       $field = $element.find('.form-field').addClass('form-field-error')
-      $input = $element.find('[name=username]')
-      $input.val('abc').trigger('input').change()
+      $input = $element.find('[name=username]').addClass('form-field-error')
+
+      $input.controller('ngModel').$setViewValue('abc')
+      $scope.$digest()
 
       assert.notInclude($field.prop('className'), 'form-field-error')
+      assert.notInclude($input.prop('className'), 'form-field-error')
 
     it 'should apply an error class to an invalid field on submit', ->
       $field = $element.find('.form-field')
@@ -112,29 +108,28 @@ describe 'h.directives', ->
       assert.include($field.prop('className'), 'form-field-error', 'Fail fast check')
 
       controller.$setViewValue('abc')
+      $scope.$digest()
 
       assert.notInclude($field.prop('className'), 'form-field-error')
 
-    # TODO: I can't get this test to pass, it should create a dirty form
-    # state and then reset it. However the scope watch handler for the form
-    # $prisine change doesn't fire when $setPrisine is called. I've tried
-    # $scope.$digest and other tricks. The form and input all have their
-    # internal $pristine values updated correctly.
-    it 'should hide errors if the field is pristine'
-    # it 'should hide errors if the field is pristine', ->
-    #   $field = $element.find('.form-field').addClass('form-field-error')
-    #   $input = $element.find('[name=username]')
-    #
-    #   formController = $input.controller('form')
-    #   modelController = formController.username
-    #   $input.val('a').trigger('input')
-    #
-    #   # Clear out the model and set to $pristine
-    #   $scope.model = {}
-    #   $scope.login = formController
-    #   formController.$setPristine() # Not triggering $pristine watch event.
-    #
-    #   assert.notInclude($field.prop('className'), 'form-field-error')
+    it 'should hide errors if the model is marked as pristine', ->
+      $field = $element.find('.form-field').addClass('form-field-error')
+      $input = $element.find('[name=username]')
+      controller = $input.controller('ngModel')
+
+      # Submit Event
+      $element.triggerHandler('submit')
+      controller.$setValidity('response', false)
+      controller.responseErrorMessage = 'fail'
+      $scope.$digest()
+
+      assert.include($field.prop('className'), 'form-field-error', 'Fail fast check')
+
+      # Then clear it out and mark it as pristine
+      controller.$setPristine()
+      $scope.$digest()
+
+      assert.notInclude($field.prop('className'), 'form-field-error')
 
   describe '.username', ->
     $element = null
@@ -174,25 +169,25 @@ describe 'h.directives', ->
 
   describe '.match', ->
     $element = null
+    $isolateScope = null
 
     beforeEach ->
       $scope.model = {a: 1, b: 1}
 
       $element = $compile('<input name="confirmation" ng-model="model.b" match="model.a" />')($scope)
+      $isolateScope = $element.isolateScope()
       $scope.$digest()
 
     it 'is valid if both properties have the same value', ->
       controller = $element.controller('ngModel')
       assert.isFalse(controller.$error.match)
 
-    # TODO: Work out how to watch for changes to the model.
-    it 'is invalid if the local property differs'
-    # it 'is invalid if the local property differs', ->
-    #   $scope.model.b = 2
-    #   $scope.$digest()
+    it 'is invalid if the local property differs', ->
+      $isolateScope.match = 2
+      $isolateScope.$digest()
 
-    #   controller = $element.controller('ngModel')
-    #   assert.isTrue(controller.$error.match)
+      controller = $element.controller('ngModel')
+      assert.isTrue(controller.$error.match)
 
     it 'is invalid if the matched property differs', ->
       $scope.model.a = 2
@@ -203,6 +198,7 @@ describe 'h.directives', ->
 
     it 'is invalid if the input itself is changed', ->
       $element.val('2').trigger('input').keyup()
+      $scope.$digest()
 
       controller = $element.controller('ngModel')
       assert.isTrue(controller.$error.match)
