@@ -157,19 +157,8 @@ jquery_scrollintoview:
 
 # jQuery UI
 jquery_ui:
-  contents:
-    - jquery_ui_css
-    - jquery_ui_js
-
-jquery_ui_css:
-  filters: cssrewrite, cleancss
-  output: styles/jquery-ui-smoothness.min.css
-  contents:
-    - h:static/styles/jquery-ui-smoothness.css
-
-jquery_ui_js:
-  filters: uglifyjs
   output: scripts/vendor/jquery.ui.full.min.js
+  filters: uglifyjs
   contents:
     - h:static/scripts/vendor/jquery.ui.core.js
     - h:static/scripts/vendor/jquery.ui.position.js
@@ -256,16 +245,13 @@ uuid:
   contents:
     - h:static/scripts/vendor/uuid.js
 
-# Fonts
-icomoon_css:
+# Common components
+common:
   contents:
-    - filters: cssrewrite
-      output: styles/icomoon.css
-      contents:
-        - h:static/icomoon.css
+    - common_js
+    - common_css
 
-# Application
-app:
+common_js:
   contents:
     - jquery
     - angular
@@ -289,25 +275,15 @@ app:
     - autofill
     - raf
     - sockjs
-    - jquery_ui_js
+    - jquery_ui
     - tag_it
     - uuid
-    - auth_css
-    - auth_js
-    - app_css
-    - app_js
-
-app_js:
-  output: scripts/hypothesis-app.js
-  contents:
-    - filters: uglifyjs
+    - output: scripts/common.min.js
+      filters: uglifyjs
       contents:
-        - filters: coffeescript
-          output: scripts/hypothesis.js
-          # TODO: glob these or use browserify
-          # Right now results in dependency problems
+        - output: scripts/common.js
+          filters: coffeescript
           contents:
-            - scripts/app.coffee
             - scripts/controllers.coffee
             - scripts/flash.coffee
             - scripts/filters.coffee
@@ -319,48 +295,79 @@ app_js:
             - scripts/services.coffee
             - scripts/socket.coffee
             - scripts/searchfilters.coffee
-            - scripts/streamsearch.coffee
+
+common_css:
+  output: styles/common.min.css
+  filters: cleancss
+  contents:
+    - h:static/styles/jquery-ui-smoothness.css
+    - output: styles/common.css
+      filters: compass, cssrewrite
+      contents:
+        - h:static/styles/common.scss
+      depends:
+        - h:static/styles/base.scss
+        - h:static/styles/forms.scss
+        - h:static/styles/responsive.scss
+        - h:static/styles/sheet.scss
+        - h:static/styles/simple-search.scss
+        - h:static/styles/spinner.scss
+        - h:static/styles/threads.scss
+        - h:static/styles/yui_grid.scss
+
+# Application
+app:
+  contents:
+    - common
+    - app_js
+    - app_css
+
+app_js:
+  output: scripts/app.min.js
+  filters: uglifyjs
+  contents:
+    - output: scripts/app.js
+      filters: coffeescript
+      contents:
+        - scripts/app.coffee
+        - scripts/streamsearch.coffee
 
 app_css:
-    filters: cleancss
-    output: styles/hypothesis.min.css
-    contents:
-      - theme
-      - filters: compass, cssrewrite
-        output: styles/hypothesis.css
-        contents:
-          - h:static/styles/app.scss
-        depends:
-          - h:static/styles/base.scss
-          - h:static/styles/common.scss
-          - h:static/styles/responsive.scss
-          - h:static/styles/threads.scss
-          - h:static/styles/yui_grid.scss
-          - h:static/styles/forms.scss
-          - h:static/styles/reset.scss
-          - h:static/styles/spinner.scss
-          - h:static/styles/simple-search.scss
+  output: styles/app.min.css
+  filters: cssrewrite, cleancss
+  contents:
+    - h:static/icomoon.css
+    - output: styles/app.css
+      filters: compass
+      contents:
+         - h:static/styles/app.scss
+      depends:
+        - h:static/styles/base.scss
+        - h:static/styles/reset.scss
+        - h:static/styles/topbar.scss
+        - h:static/styles/typography.scss
 
 # Authentication
 auth:
   contents:
+    - common
+    - auth_js
+    - auth_css
+
+auth_js:
+  contents:
     - jquery
     - angular
     - angular_resource
-    - auth_css
-    - auth_js
+    - output: scripts/auth.min.js
+      filters: uglifyjs
+      contents:
+        - output: scripts/auth.js
+          filters: coffeescript
+          contents:
+            - h:static/scripts/auth/*.coffee
 
 auth_css:
-
-auth_js:
-  output: scripts/hypothesis-auth.min.js
-  filters: uglifyjs
-  contents:
-    - output: scripts/hypothesis-auth.js
-      filters: coffeescript
-      contents:
-        - h:static/scripts/auth/*.coffee
-
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
 # the application. It sets up RPC channels for cross-domain communication
@@ -372,12 +379,12 @@ inject:
     - inject_js
 
 inject_js:
-  output: scripts/hypothesis-assets.js
+  output: scripts/hypothesis.min.js
   contents:
     - d3
     - jquery
     - jquery_scrollintoview
-    - jquery_ui_js
+    - jquery_ui
     - jschannel
     - gettext
     - annotator
@@ -393,43 +400,21 @@ inject_js:
     - annotator_toolbar
     - filters: uglifyjs
       contents:
-        - filters: coffeescript
-          output: scripts/hypothesis-inject.js
+        - output: scripts/hypothesis.js
+          filters: coffeescript
           contents:
             - h:static/scripts/guest.coffee
             - h:static/scripts/host.coffee
 
 inject_css:
-  output: styles/hypothesis-inject.min.css
-  filters: cleancss
+  output: styles/hypothesis.min.css
+  filters: cssrewrite, cleancss
   contents:
-    - theme
-    - filters: compass, cssrewrite
-      output: styles/hypothesis-inject.css
+    - h:static/icomoon.css
+    - output: styles/hypothesis.css
+      filters: compass
       contents:
         - h:static/styles/inject.scss
       depends:
         - h:static/styles/base.scss
         - h:static/styles/pointers.scss
-        - h:static/styles/reset.scss
-
-
-theme:
-  debug: false
-  output: styles/theme.css
-  contents:
-    - icomoon_css
-    - jquery_ui_css
-
-
-topbar:
-  output: styles/topbar.min.css
-  filters: cleancss
-  contents:
-    - output: styles/topbar.css
-      filters: compass, cssrewrite
-      contents:
-        - h:static/styles/topbar.scss
-      depends:
-        - h:static/styles/base.scss
-        - h:static/styles/responsive.scss

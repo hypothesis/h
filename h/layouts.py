@@ -7,7 +7,10 @@ class BaseLayout(object):
     app = None
     controller = None
     csp = None
-    requirements = (('app', None),)
+    requirements = (
+        ('app', None),
+        ('auth', None),
+    )
 
     def __init__(self, context, request):
         self.context = context
@@ -42,14 +45,20 @@ class BaseLayout(object):
 @layout_config(name='annotation', template='h:templates/base.pt')
 class AnnotationLayout(BaseLayout):
     app = 'h.displayer'
-    requirements = (('app', None), ('topbar', None))
+    requirements = (
+        ('app', None),
+        ('auth', None),
+    )
 
 
 @layout_config(name='app', template='h:templates/base.pt')
 class AppLayout(BaseLayout):
     app = 'h'
     controller = 'AppController'
-    requirements = (('app', None), ('auth', None), ('topbar', None))
+    requirements = (
+        ('app', None),
+        ('auth', None),
+    )
 
 
 def includeme(config):

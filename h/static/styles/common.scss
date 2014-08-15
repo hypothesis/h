@@ -1,20 +1,28 @@
+@import 'compass/reset/utilities';
 @import 'compass/typography/text/force-wrap';
 
 @import 'base';
 @import 'forms';
-@import 'spinner';
 @import 'responsive';
+@import 'sheet';
+@import 'simple-search';
+@import 'spinner';
 @import 'threads';
 @import 'yui_grid';
-@import 'simple-search';
 
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak],
+.ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
 
-$base-font-size: 16px;
-$base-line-height: 26px;
-$sans-font-family: "Source Sans Pro", $sans-font-family;
-$serif-font-family: "Merriweather", $serif-font-family;
-$headings-color: $text-color;
+#wrapper {
+  padding: .72em;
+  text-align: center;
 
+  @include respond-to(tablets desktops) {
+    padding-bottom: 4em;
+  }
+}
 
 //ELEMENT STYLES////////////////////////////////
 a {
@@ -24,27 +32,12 @@ a {
 }
 
 body {
+  @extend .noise;
   background-color: $body-background;
   color: $text-color;
-  line-height: 1.4;
 }
-
-p {
-  -webkit-hyphens: auto;
-     -moz-hyphens: auto;
-          hyphens: auto;
-
-  & + p {
-    margin: 2em 0 0;
-  }
-}
-
-em { font-style: italic; }
 
 html {
-  font-size: $base-font-size;
-  line-height: $base-line-height;
-
   @include yui_grid();
 
   @include respond-to(handhelds) {
@@ -64,35 +57,18 @@ html {
   }
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: $sans-font-family;
-  color: $headings-color;
+svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
+
+ol {
+  list-style-type: decimal;
+  padding-left: 3em;
+  margin-left: -1.5em;
+
+  li + li {
+    margin-top: 1em;
+  }
 }
 
-h1 {
-  font-size: 2em;
-  margin: .67em 0;
-}
-
-h2 {
-  font-size: 1.5em;
-  margin: .75em 0;
-}
-
-h3 {
-  font-size: 1.17em;
-  margin: .83em 0;
-}
-
-h5 {
-  font-size: .83em;
-  margin: 1.5em 0;
-}
-
-h6 {
-  font-size: .75em;
-  margin: 1.67em 0;
-}
 
 //MCRANDOM////////////////////////////////
 
@@ -192,40 +168,10 @@ h6 {
   }
   .more, .less {
     font-size: .9em;
-    font-family: $sans-font-family;
     display: block;
     text-align: right;
   }
 }
-
-blockquote {
-  color: $gray;
-  font-family: $serif-font-family;
-  font-size: 1em;
-  margin-bottom: 1em;
-  padding: 0 .8em;
-
-  &:before, &:after {
-    color: $gray-lighter;
-    font-family: "h";
-    position: absolute;
-  }
-
-  &:before {
-    content: "\23";
-    font-size: 6em;
-    top: -.36em;
-    left: -.31em;
-  }
-
-  &:after {
-    content: "\24";
-    font-size: 5em;
-    right: -.31em;
-    bottom: -.27em;
-  }
-}
-
 
 
 //DROPDOWNS////////////////////////////////
@@ -361,7 +307,6 @@ blockquote {
     line-height: 1;
 
     a {
-      font-family: $sans-font-family;
       font-weight: bold;
       color: $gray-dark;
       cursor: pointer;
@@ -423,7 +368,6 @@ blockquote {
 //This is for everything that is formatted as an annotation.
 .annotation {
   @include pie-clearfix;
-  font-family: $sans-font-family;
   position: relative;
 
   &:hover fuzzytime a, &:hover .reply-count {
@@ -650,7 +594,6 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   @include smallshadow(0);
   border-bottom-right-radius: 24px 72px;
   border-bottom-left-radius: 24px 72px;
-  font-family: $sans-font-family;
   background: $white;
   border: solid 1px $gray-lighter;
   padding: 0 10px;
@@ -662,6 +605,69 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
     &:before, &:after {
       display: none;
+    }
+  }
+}
+
+
+.user {
+  font-weight: bold;
+  font-size: 1.1em;
+  &:hover {
+    color: $link-color-hover;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}
+
+
+.user-picker {
+  .avatar {
+    border-radius: 2px;
+  }
+
+  .dropdown-toggle {
+    .provider {
+      color: $gray-light;
+      display: none;
+    }
+    &:hover {
+      .provider {
+        display: inline;
+      }
+    }
+  }
+
+  .dropdown.open .provider {
+    display: inline;
+  }
+}
+
+.content {
+  margin: 0 auto;
+  text-align: left;
+
+  @include respond-to(tablets desktops) {
+    margin: auto;
+    max-width: $break-medium;
+    padding: 0 4em;
+  }
+
+  & > header {
+    @include respond-to(handhelds) {
+      text-align: center;
+    }
+
+    @include respond-to(wide-handhelds tablets desktops) {
+      @include pie-clearfix;
+      text-align: left;
+      img { float: left; }
+    }
+
+    margin-bottom: 2em;
+
+    hgroup h1 {
+      margin-bottom: 0 !important;
     }
   }
 }
