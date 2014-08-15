@@ -1,3 +1,20 @@
+Next release
+============
+
+0.2.2 (2014-08-15)
+==================
+
+Fixes
+-----
+
+- Fix user search (#1391)
+- Fix page search
+
+Known issues
+------------
+
+- In some circumstances, Firefox can freeze on initial load.
+
 0.2.1 (2014-08-11)
 ==================
 
