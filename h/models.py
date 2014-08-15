@@ -48,13 +48,9 @@ class Annotation(annotation.Annotation):
         'annotator_schema_version': {'type': 'string'},
         'created': {'type': 'date'},
         'updated': {'type': 'date'},
-        'quote': {'type': 'string'},
-        'tags': {
-            'type': 'string',
-            'index': 'analyzed',
-            'analyzer': 'lower_keyword'
-        },
-        'text': {'type': 'string'},
+        'quote': {'type': 'string', 'analyzer': 'standard'},
+        'tags': {'type': 'string', 'index': 'analyzed', 'analyzer': 'lower_keyword'},
+        'text': {'type': 'string', 'analyzer': 'standard'},
         'deleted': {'type': 'boolean'},
         'uri': {
             'type': 'string',
@@ -62,14 +58,14 @@ class Annotation(annotation.Annotation):
             'search_analyzer': 'uri_search'
         },
         'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'user'},
-        'consumer': {'type': 'string', 'index': 'not_analyzed'},
+        'consumer': {'type': 'string'},
         'target': {
             'properties': {
                 'id': {
                     'type': 'multi_field',
                     'path': 'just_name',
                     'fields': {
-                        'id': {'type': 'string', 'index': 'not_analyzed'},
+                        'id': {'type': 'string'},
                         'uri': {
                             'type': 'string',
                             'index_analyzer': 'uri_index',
@@ -81,7 +77,7 @@ class Annotation(annotation.Annotation):
                     'type': 'multi_field',
                     'path': 'just_name',
                     'fields': {
-                        'source': {'type': 'string', 'index': 'not_analyzed'},
+                        'source': {'type': 'string'},
                         'uri': {
                             'type': 'string',
                             'index_analyzer': 'uri_index',
@@ -121,13 +117,13 @@ class Annotation(annotation.Annotation):
         'permissions': {
             'index_name': 'permission',
             'properties': {
-                'read': {'type': 'string', 'index': 'not_analyzed'},
-                'update': {'type': 'string', 'index': 'not_analyzed'},
-                'delete': {'type': 'string', 'index': 'not_analyzed'},
-                'admin': {'type': 'string', 'index': 'not_analyzed'}
+                'read': {'type': 'string'},
+                'update': {'type': 'string'},
+                'delete': {'type': 'string'},
+                'admin': {'type': 'string'}
             }
         },
-        'references': {'type': 'string', 'index': 'not_analyzed'},
+        'references': {'type': 'string'},
         'document': {
             'properties': document.MAPPING
         },

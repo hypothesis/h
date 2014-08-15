@@ -110,11 +110,6 @@ def api_search(context, request):
     # All remaining parameters are considered searched fields.
     kwargs['query'] = params
 
-    # Lowercase all.
-    # See https://github.com/openannotation/annotator-store/issues/77 and 73
-    for field in params:
-        params[field] = params[field].lower()
-
     # The search results are filtered for the authenticated user
     user = get_user(request)
     log.debug("Searching with user=%s, for uri=%s",
