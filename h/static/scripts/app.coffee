@@ -1,7 +1,7 @@
 imports = [
   'ngAnimate'
   'ngRoute'
-  'h.app_directives'
+  'h.annotation'
   'h.auth'
   'h.controllers'
   'h.directives'
