@@ -6,7 +6,6 @@ imports = [
   'h.controllers'
   'h.directives'
   'h.filters'
-  'h.identity'
   'h.streamsearch'
 ]
 
