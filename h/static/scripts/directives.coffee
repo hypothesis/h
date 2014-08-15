@@ -367,7 +367,8 @@ whenscrolled = ->
 match = ->
   link: (scope, elem, attr, input) ->
     validate = ->
-      input.$setValidity('match', scope.match == input.$modelValue)
+      scope.$evalAsync ->
+        input.$setValidity('match', scope.match == input.$modelValue)
 
     elem.on('keyup', validate)
     scope.$watch('match', validate)
