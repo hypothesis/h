@@ -77,6 +77,10 @@ class window.PageTextMapperCore
   # Look up info about a give DOM node, uniting page and node info
   getInfoForNode: (node) ->
     pageData = @getPageForNode node
+
+    # Give up if the given page is not mapped yet
+    return null unless pageData.domMapper
+
     nodeData = pageData.domMapper.getInfoForNode node
     # Copy info about the node
     info = {}
@@ -129,7 +133,10 @@ class window.PageTextMapperCore
     # Return the data
     sections: sections
 
-  getCorpus: -> @_corpus
+  getCorpus: ->
+    unless @_corpus
+      throw new Error "Hey! Called getCorpus() before corpus defined!"
+    @_corpus
 
   getContextForCharRange: (start, end) ->
     prefixStart = Math.max 0, start - @CONTEXT_LEN
