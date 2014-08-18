@@ -101,7 +101,7 @@ class Annotator.Guest extends Annotator
         # Store the position of this anchor inside target
         hl.anchor.target.pos =
           top: hl.getTop()
-          heigth: hl.getHeight()
+          height: hl.getHeight()
 
       # Collect all impacted annotations
       annotations = (hl.annotation for hl in highlights)
