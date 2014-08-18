@@ -1,15 +1,4 @@
 <form name="form">
-  <!-- More actions -->
-  <div class="small magicontrol dropdown pull-right" ng-hide="editing">
-    <i class="dropdown-toggle icon-triangle"
-       role="button"
-       title="More actions"></i>
-    <ul class="dropdown-menu pull-right" role="menu">
-      <li ng-click="reply()"><i class="icon-reply"></i> Reply</li>
-      <li ng-show="auth.update" ng-click="edit()"><i class="icon-copy"></i> Edit</li>
-      <li ng-show="auth.delete" ng-click="delete()"><i class="icon-x"></i> Delete…</li>
-    </ul>
-  </div>
 
   <!-- Deletion notice -->
   <span ng-show="!editing && model.deleted"
@@ -40,6 +29,18 @@
     <fuzzytime class="small pull-right"
                ng-show="!editing && model.updated"
                ng-model="model.updated"></fuzzytime>
+
+    <!-- More actions -->
+    <div class="small magicontrol dropdown pull-right" ng-hide="editing">
+      <i class="dropdown-toggle icon-triangle"
+         role="button"
+         title="More actions"></i>
+      <ul class="dropdown-menu pull-right" role="menu">
+        <li ng-click="reply()"><i class="icon-reply"></i> Reply</li>
+        <li ng-show="auth.update" ng-click="edit()"><i class="icon-copy"></i> Edit</li>
+        <li ng-show="auth.delete" ng-click="delete()"><i class="icon-x"></i> Delete…</li>
+      </ul>
+    </div>
   </header>
 
   <!-- Prompt -->

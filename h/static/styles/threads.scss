@@ -29,28 +29,17 @@ $threadexp-width: .6em;
     padding: 0;
     padding-left: $thread-padding;
 
-    &.collapsed {
-      & > .annotation {
-        fuzzytime {
-          float: none;
-          font-style: italic;
-        }
+    &.collapsed > .annotation {
+      .body {
+        display: none;
+      }
 
-        header {
-          display: inline-block;
-        }
+      .magicontrol {
+        display: none;
+      }
 
-        .body {
-          display: none;
-        }
-
-        .magicontrol {
-          display: none;
-        }
-
-        .reply-count {
-          font-style: italic;
-        }
+      .reply-count {
+        font-style: italic;
       }
     }
   }
