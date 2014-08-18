@@ -16,7 +16,7 @@
 
     <!-- User -->
     <span ng-switch-default class="indicators">
-      <username data-user="model.user"></username>
+      <username data-user="model.user" ng-show="!editing"></username>
       <i class="small icon-locked"
          ng-show="form.privacy.$viewValue != 'Public' && !editing"></i>
       <i class="small icon-highlighter2"
@@ -28,6 +28,18 @@
         <span class="annotation-citation-domain" ng-show="document.domain != document.title">({{document.domain}})</span>
       </span>
     </span>
+
+    <!-- Write / Preview Tabs -->
+    <div ng-show="editing">
+      <ul class="nav-tabs nobottomborder">
+        <li ng-class="!preview && 'active'">
+          <a href="" ng-click="preview = false">Write</a>
+        </li>
+        <li ng-class="preview && 'active'">
+          <a href="" ng-click="preview = true">Preview</a>
+        </li>
+      </ul>
+    </div>
 
     <!-- Timestamp -->
     <fuzzytime class="small pull-right"
@@ -59,17 +71,17 @@
   <!-- Body -->
   <div class="body" ng-show="mode=='search' && !editing">
     <markdown ng-model="model.highlightText"
-              ng-readonly="!editing"
+              ng-readonly="!editing || preview"
               name="text" />
   </div>
   <div class="body" ng-hide="mode=='search' && !editing">
     <markdown ng-model="model.text"
-              ng-readonly="!editing"
+              ng-readonly="!editing || preview"
               name="text" />
   </div>
 
   <!-- Tags -->
-  <div class="form-field" ng-show="editing">
+  <div class="form-field" ng-show="editing && !preview">
     <tags-input ng-model="tags"
                 name="tags"
                 class="tags"

@@ -37,7 +37,7 @@ p {
           hyphens: auto;
 
   & + p {
-    margin: 2em 0 0;
+    margin: 1em 0 0;
   }
 }
 
@@ -338,6 +338,14 @@ h6 {
   border-bottom-style: solid;
   padding: 0.9em 1em 1.1em;
 
+  &.nobottomborder {
+    border: 0px;
+    padding: 0px 0px 10px 0;
+    & > li {
+      a { padding-bottom: 1 / 13 * 1em;}
+    }
+  }
+
   & > li {
     display: inline-block;
     line-height: 1;
@@ -443,6 +451,8 @@ h6 {
   }
 
   .body {
+    position: relative;
+
     div {
       clear: both;
       margin: .25em 0;
@@ -450,22 +460,37 @@ h6 {
         @include force-wrap;
       }
 
-      ol, ul {
-        padding-left: 1.25em;
+      h1, h2, h3, h4, h5, h6 {
+        margin: 0px;
       }
 
       ol {
         list-style-type: decimal;
+        padding-left: 3em;
       }
 
       ul {
         list-style-type: disc;
+        padding-left: 3em;
       }
+    }
+
+    .icon-markdownhelp {
+      &:before {
+        content: "\e60e";
+      }
+      color: $gray-light;
+      position: absolute;
+      float: right;
+      right: 20px;
+      bottom: 3px;
+      font-size: 16px;
     }
 
     textarea {
       min-height: 8em;
       width: 100%;
+      resize: vertical;
     }
   }
 
