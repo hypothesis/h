@@ -272,10 +272,14 @@ def delete(context, request):
 
 def get_user(request):
     """Create a User object for annotator-store"""
-    consumer = get_consumer(request)
     userid = request.authenticated_userid
     if userid is not None:
-        return auth.User(userid, consumer, False)
+        try:
+            consumer_api = request.client
+        except AttributeError:
+            consumer_api = get_consumer(request)
+        consumer_ann = auth.Consumer(consumer_api.client_id)
+        return auth.User(userid, consumer_ann, False)
     return None
 
 
@@ -322,11 +326,12 @@ class Token(BearerToken):
         return token
 
     def validate_request(self, request):
+        client = get_consumer(request)
+        request.client = client
+
         token = request.headers.get('X-Annotator-Auth-Token')
         if token is None:
             return False
-
-        client = get_consumer(request)
 
         if client is None:
             return False
