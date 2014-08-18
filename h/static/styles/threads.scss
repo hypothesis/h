@@ -29,17 +29,21 @@ $threadexp-width: .6em;
     padding: 0;
     padding-left: $thread-padding;
 
-    &.collapsed > .annotation {
-      .body {
-        display: none;
-      }
+    &.collapsed {
+      border-color: transparent;
 
-      .magicontrol {
-        display: none;
-      }
+      & > .annotation {
+        .body {
+          display: none;
+        }
 
-      .reply-count {
-        font-style: italic;
+        .magicontrol {
+          display: none;
+        }
+
+        .reply-count {
+          font-style: italic;
+        }
       }
     }
   }
