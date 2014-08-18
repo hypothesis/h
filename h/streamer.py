@@ -15,6 +15,7 @@ import transaction
 
 from h import events, interfaces
 from h.api import get_user
+from h.models import Annotation
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -409,7 +410,6 @@ class StreamerSession(Session):
     def send_annotations(self):
         request = self.request
         registry = request.registry
-        Annotation = registry.queryUtility(interfaces.IAnnotationClass)
         user = get_user(request)
         annotations = Annotation.search_raw(query=self.query.query, user=user)
         self.received = len(annotations)

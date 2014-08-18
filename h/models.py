@@ -3,14 +3,10 @@
 from annotator import annotation, document
 from pyramid.i18n import TranslationStringFactory
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
-from zope.interface import implementer
-
-from h import interfaces
 
 _ = TranslationStringFactory(__package__)
 
 
-@implementer(interfaces.IAnnotationClass)
 class Annotation(annotation.Annotation):
     def __acl__(self):
         acl = []
@@ -189,15 +185,3 @@ class Annotation(annotation.Annotation):
 
 class Document(document.Document):
     pass
-
-
-def includeme(config):
-    registry = config.registry
-
-    models = [
-        (interfaces.IAnnotationClass, Annotation),
-    ]
-
-    for iface, imp in models:
-        if not registry.queryUtility(iface):
-            registry.registerUtility(imp, iface)

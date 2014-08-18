@@ -7,6 +7,7 @@ from pyramid.security import Allow, Everyone, Authenticated, ALL_PERMISSIONS
 from zope.interface import implementer
 
 from h import interfaces, security
+from h.models import Annotation
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -89,11 +90,10 @@ class TagStreamFactory(BaseResource):
 class AnnotationFactory(BaseResource):
     def __init__(self, request, **kwargs):
         registry = request.registry
-        self.Annotation = registry.queryUtility(interfaces.IAnnotationClass)
         super(AnnotationFactory, self).__init__(request, **kwargs)
 
     def __getitem__(self, key):
-        annotation = self.Annotation.fetch(key)
+        annotation = Annotation.fetch(key)
         if annotation is None:
             raise KeyError(key)
         annotation.__name__ = key

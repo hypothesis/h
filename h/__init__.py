@@ -14,7 +14,6 @@ del get_versions
 def includeme(config):
     config.include('pyramid_multiauth')
     config.include('h.api')
-    config.include('h.models')
     config.include('h.streamer')
     config.include('h.subscribers')
     config.include('h.views')

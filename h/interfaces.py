@@ -3,10 +3,6 @@
 from zope.interface import Interface
 
 
-class IAnnotationClass(Interface):
-    pass
-
-
 class IConsumerClass(Interface):
     pass
 

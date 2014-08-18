@@ -13,7 +13,8 @@ from pyramid.authentication import RemoteUserAuthenticationPolicy
 from pyramid.settings import asbool
 from pyramid.view import view_config
 
-from h import events, models, interfaces
+from h import events, interfaces
+from h.models import Annotation, Document
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -117,7 +118,6 @@ def api_search(context, request):
               params.get('uri'))
     kwargs['user'] = user
 
-    Annotation = registry.queryUtility(interfaces.IAnnotationClass)
     results = Annotation.search(**kwargs)
     total = Annotation.count(**kwargs)
 
@@ -140,7 +140,6 @@ def annotations_index(context, request):
     This will use the default limit, 20 at time of writing, and results
     are ordered most recent first.
     """
-    Annotation = context.Annotation
     user = get_user(request)
     return Annotation.search(user=user)
 
@@ -150,7 +149,6 @@ def annotations_index(context, request):
             permission='create')
 def create(context, request):
     """Read the POSTed JSON-encoded annotation and persist it."""
-    Annotation = context.Annotation
 
     # Read the annotation that is to be stored
     try:
@@ -186,7 +184,7 @@ def create(context, request):
     return annotation
 
 
-@api_config(context='h.interfaces.IAnnotationClass',
+@api_config(context='h.models.Annotation',
             request_method='GET',
             permission='read')
 def read(context, request):
@@ -200,7 +198,7 @@ def read(context, request):
     return annotation
 
 
-@api_config(context='h.interfaces.IAnnotationClass',
+@api_config(context='h.models.Annotation',
             request_method='PUT',
             permission='update')
 def update(context, request):
@@ -249,7 +247,7 @@ def update(context, request):
     return annotation
 
 
-@api_config(context='h.interfaces.IAnnotationClass',
+@api_config(context='h.models.Annotation',
             request_method='DELETE',
             permission='delete')
 def delete(context, request):
@@ -410,14 +408,14 @@ def create_db():
                'Check to ensure it is running.').format(es.host)
         raise elasticsearch_exceptions.ConnectionError('N/A', msg, e)
     es.conn.cluster.health(wait_for_status='yellow')
-    models.Annotation.update_settings()
-    models.Annotation.create_all()
-    models.Document.create_all()
+    Annotation.update_settings()
+    Annotation.create_all()
+    Document.create_all()
 
 
 def delete_db():
-    models.Annotation.drop_all()
-    models.Document.drop_all()
+    Annotation.drop_all()
+    Document.drop_all()
 
 
 def includeme(config):
