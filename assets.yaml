@@ -174,7 +174,6 @@ jquery_ui_js:
     - h:static/scripts/vendor/jquery.ui.core.js
     - h:static/scripts/vendor/jquery.ui.position.js
     - h:static/scripts/vendor/jquery.ui.widget.js
-    - h:static/scripts/vendor/jquery.ui.tooltip.js
     - contents:
         - h:static/scripts/vendor/jquery.ui.autocomplete.js
         - h:static/scripts/vendor/jquery.ui.menu.js
