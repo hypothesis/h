@@ -37,7 +37,7 @@ PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 def api_config(**kwargs):
     """Set default view configuration"""
     config = {
-        # XXX: The containment predicate ensures we only respond to API calls
+        # The containment predicate ensures we only respond to API calls
         'containment': 'h.resources.APIResource',
         'accept': 'application/json',
         'renderer': 'json',
@@ -168,7 +168,6 @@ def create(context, request):
 
     # Set user and consumer fields
     user = get_user(request)
-    assert user is not None  # Because creation requires authentication
 
     annotation['user'] = user.id
     annotation['consumer'] = user.consumer.key
@@ -406,14 +405,12 @@ def create_db():
                'Check to ensure it is running.').format(es.host)
         raise elasticsearch_exceptions.ConnectionError('N/A', msg, e)
     es.conn.cluster.health(wait_for_status='yellow')
-    # Should we use registry.queryUtility(interfaces.IAnnotationClass) ?
     models.Annotation.update_settings()
     models.Annotation.create_all()
     models.Document.create_all()
 
 
 def delete_db():
-    # Should we use registry.queryUtility(interfaces.IAnnotationClass) ?
     models.Annotation.drop_all()
     models.Document.drop_all()
 

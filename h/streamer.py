@@ -6,7 +6,6 @@ import logging
 import operator
 import re
 
-from annotator import authz, es
 from dateutil.tz import tzutc
 from jsonpointer import resolve_pointer
 from jsonschema import validate
