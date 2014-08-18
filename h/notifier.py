@@ -80,15 +80,6 @@ class ReplyTemplate(NotificationTemplate):
 
     @staticmethod
     def _create_template_map(request, reply):
-        parent_tags = ''
-        reply_tags = ''
-        reply_quote = reply.get('quote', '')
-
-        if 'tags' in reply['parent']:
-            parent_tags = '\ntags: ' + ', '.join(reply['parent']['tags'])
-        if 'tags' in reply:
-            reply_tags = '\ntags: ' + ', '.join(reply['tags'])
-
         parent_user = re.search(
             r'^acct:([^@]+)',
             reply['parent']['user']
@@ -102,18 +93,14 @@ class ReplyTemplate(NotificationTemplate):
         return {
             'document_title': reply['title'],
             'document_path': reply['parent']['uri'],
-            'parent_quote': reply['parent']['quote'],
             'parent_text': reply['parent']['text'],
             'parent_user': parent_user,
-            'parent_tags': parent_tags,
             'parent_timestamp': reply['parent']['created'],
-            'parent_user_profile': user_profile_url(request,
-                                                    reply['parent']['user']),
+            'parent_user_profile': user_profile_url(
+                request, reply['parent']['user']),
             'parent_path': standalone_url(request, reply['parent']['id']),
-            'reply_quote': reply_quote,
             'reply_text': reply['text'],
             'reply_user': reply_user,
-            'reply_tags': reply_tags,
             'reply_timestamp': reply['created'],
             'reply_user_profile': user_profile_url(request, reply['user']),
             'reply_path': standalone_url(request, reply['id'])
