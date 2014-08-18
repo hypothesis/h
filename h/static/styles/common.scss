@@ -187,9 +187,11 @@ h6 {
 .excerpt {
   margin-bottom: 1em;
   position: relative;
-  blockquote {
+
+  .annotation-quote {
     margin-bottom: 0;
   }
+
   .more, .less {
     font-size: .9em;
     font-family: $sans-font-family;
@@ -198,34 +200,14 @@ h6 {
   }
 }
 
-blockquote {
+.annotation-quote {
   color: $gray;
   font-family: $serif-font-family;
   font-size: 1em;
   margin-bottom: 1em;
-  padding: 0 .8em;
-
-  &:before, &:after {
-    color: $gray-lighter;
-    font-family: "h";
-    position: absolute;
-  }
-
-  &:before {
-    content: "\23";
-    font-size: 6em;
-    top: -.36em;
-    left: -.31em;
-  }
-
-  &:after {
-    content: "\24";
-    font-size: 5em;
-    right: -.31em;
-    bottom: -.27em;
-  }
+  padding: 0 .615em;
+  border-left: 3px solid $gray-lighter;
 }
-
 
 
 //DROPDOWNS////////////////////////////////
