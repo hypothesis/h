@@ -1,0 +1,59 @@
+// Styles for the ngTagsInput plugin.
+// http://mbenford.github.io/ngTagsInput/gettingstarted
+
+@import "mixins/forms";
+
+tags-input {
+  .host {
+    outline: none;
+  }
+
+  .tags {
+    @include form-input;
+    @include clearfix;
+
+    &.focused {
+      @include form-input-focus;
+    }
+
+    // Input
+    .input {
+      float: left;
+      margin-top: .33em;
+      padding: .2em 0;
+      outline: none;
+      border: none !important;
+      background: none;
+      color: $gray;
+    }
+  }
+
+  .tag-list {
+    margin-top: -.33em; // Absorb the first row of margin-top on the tags.
+  }
+
+  .tag-item {
+    @include btn;
+    float: left;
+    position: relative;
+    padding: .307em 1.538em .307em .615em;
+    margin-top: .384em;
+    margin-right: .384em;
+
+    &.selected {
+      @include btn-hover;
+      @include focus-outline;
+    }
+
+    .remove-button {
+      position: absolute;
+      top: 50%;
+      right: 5px;
+      color: #585858;
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      margin-top: -10px;
+    }
+  }
+}
