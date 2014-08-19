@@ -66,12 +66,13 @@
 
   <!-- Tags -->
   <div ng-class="editing && 'form-field'" >
-    <ul ng-readonly="!editing"
-        ng-model="model.tags"
-        name="tags"
-        class="tags"
-        placeholder="Add tags…"
-    />
+    <tags-input ng-model="tags"
+                name="tags"
+                class="tags"
+                placeholder="Add tags…"
+                replace-spaces-with-dashes="false"
+                on-tag-added="addTag($tag)"
+                on-tag-removed="removeTag($tag)"></tags-input>
   </div>
 
   <!-- Bottom controls TODO: Align buttons to the left -->

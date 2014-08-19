@@ -142,6 +142,12 @@ angular_sanitize:
   output: scripts/vendor/angular-sanitize.min.js
   contents:
     - h:static/scripts/vendor/angular-sanitize.js
+angular_tags_input:
+  filters: uglifyjs
+  output: scripts/vendor/ng-tags-input.min.js
+  contents:
+    - h:static/scripts/vendor/ng-tags-input.js
+
 
 # jQuery
 jquery:
@@ -155,32 +161,6 @@ jquery_scrollintoview:
   contents:
     - h:static/scripts/vendor/jquery.scrollintoview.js
 
-# jQuery UI
-jquery_ui:
-  contents:
-    - jquery_ui_css
-    - jquery_ui_js
-
-jquery_ui_css:
-  filters: cssrewrite, cleancss
-  output: styles/jquery-ui-smoothness.min.css
-  contents:
-    - h:static/styles/jquery-ui-smoothness.css
-
-jquery_ui_js:
-  filters: uglifyjs
-  output: scripts/vendor/jquery.ui.full.min.js
-  contents:
-    - h:static/scripts/vendor/jquery.ui.core.js
-    - h:static/scripts/vendor/jquery.ui.position.js
-    - h:static/scripts/vendor/jquery.ui.widget.js
-    - contents:
-        - h:static/scripts/vendor/jquery.ui.autocomplete.js
-        - h:static/scripts/vendor/jquery.ui.menu.js
-    - contents:
-        - h:static/scripts/vendor/jquery.ui.effect.js
-        - h:static/scripts/vendor/jquery.ui.effect-blind.js
-        - h:static/scripts/vendor/jquery.ui.effect-highlight.js
 
 # Polyfills
 autofill:
@@ -244,11 +224,6 @@ sockjs:
   output: scripts/vendor/sockjs.min.js
   contents:
     - h:static/scripts/vendor/sockjs-0.3.4.js
-tag_it:
-  filters: uglifyjs
-  output: scripts/vendor/tag-it.min.js
-  contents:
-    - h:static/scripts/vendor/tag-it.js
 uuid:
   filters: uglifyjs
   output: scripts/vendor/uuid.min.js
@@ -272,6 +247,7 @@ app:
     - angular_bootstrap
     - angular_route
     - angular_sanitize
+    - angular_tags_input
     - gettext
     - annotator
     - annotator_auth
@@ -288,8 +264,6 @@ app:
     - autofill
     - raf
     - sockjs
-    - jquery_ui_js
-    - tag_it
     - uuid
     - auth_css
     - auth_js
@@ -376,7 +350,6 @@ inject_js:
     - d3
     - jquery
     - jquery_scrollintoview
-    - jquery_ui_js
     - jschannel
     - gettext
     - annotator
@@ -418,7 +391,6 @@ theme:
   output: styles/theme.css
   contents:
     - icomoon_css
-    - jquery_ui_css
 
 
 topbar:
