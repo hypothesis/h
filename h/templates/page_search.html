@@ -20,8 +20,8 @@
     <div class="excerpt"
          ng-repeat="target in thread.message.target"
          ng-hide="collapsed">
-      <blockquote ng-bind-html="target.highlightQuote" ng-hide="target.showDiff" />
-      <blockquote ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
+      <blockquote class="annotation-quote" ng-bind-html="target.highlightQuote" ng-hide="target.showDiff" />
+      <blockquote class="annotation-quote" ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
       <div class="small pull-right" ng-show="target.diffHTML">
         <input type="checkbox" ng-model="target.showDiff"> Show differences</input>
       </div>

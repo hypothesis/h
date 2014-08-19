@@ -275,55 +275,6 @@ repeatAnim = ->
             .animate({ 'margin-left': '0px' }, 1500)
       return
 
-# Directive to edit/display a tag list.
-tags = ['$window', ($window) ->
-  link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
-
-    elem.tagit
-      caseSensitive: false
-      placeholderText: attr.placeholder
-      keepPlaceholder: true
-      allowSpaces: true
-      preprocessTag: (val) ->
-        val.replace /[^a-zA-Z0-9\-\_\s]/g, ''
-      afterTagAdded: (evt, ui) ->
-        ctrl.$setViewValue elem.tagit 'assignedTags'
-      afterTagRemoved: (evt, ui) ->
-        ctrl.$setViewValue elem.tagit 'assignedTags'
-      autocomplete:
-        source: []
-      onTagClicked: (evt, ui) ->
-        evt.stopPropagation()
-        tag = ui.tagLabel
-        $window.open "/t/" + tag
-
-    elem.find('input').addClass('form-input')
-
-    ctrl.$formatters.push (tags=[]) ->
-      assigned = elem.tagit 'assignedTags'
-      for t in assigned when t not in tags
-        elem.tagit 'removeTagByLabel', t
-      for t in tags when t not in assigned
-        elem.tagit 'createTag', t
-      if assigned.length or not attr.readOnly then elem.show() else elem.hide()
-
-    attr.$observe 'readonly', (readonly) ->
-      tagInput = elem.find('input').last()
-      assigned = elem.tagit 'assignedTags'
-      if readonly
-        tagInput.attr('disabled', true)
-        tagInput.removeAttr('placeholder')
-        if assigned.length then elem.show() else elem.hide()
-      else
-        tagInput.removeAttr('disabled')
-        tagInput.attr('placeholder', attr['placeholder'])
-        elem.show()
-
-  require: '?ngModel'
-  restrict: 'C'
-]
-
 
 username = ['$filter', '$window', ($filter, $window) ->
   link: (scope, elem, attr) ->
@@ -349,11 +300,6 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
     .find('a')
     .bind 'click', (event) ->
       event.stopPropagation()
-    .tooltip
-      tooltipClass: 'small'
-      position:
-        collision: 'fit'
-        at: "left center"
 
     ctrl.$render = ->
       scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
@@ -373,15 +319,6 @@ fuzzytime = ['$filter', '$window', ($filter, $window) ->
       catch error
         # For invalid timezone, use the default
         scope.hint = momentDate.format('LLLL')
-
-      toolparams =
-        tooltipClass: 'small'
-        position:
-          collision: 'none'
-          at: "left center"
-
-
-      elem.tooltip(toolparams)
 
     timefunct = ->
       $window.setInterval =>
@@ -408,14 +345,13 @@ whenscrolled = ->
         scope.$apply attr.whenscrolled
 
 
-angular.module('h.directives', ['ngSanitize'])
+angular.module('h.directives', ['ngSanitize', 'ngTagsInput'])
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
 .directive('privacy', privacy)
 .directive('recursive', recursive)
 .directive('tabReveal', tabReveal)
-.directive('tags', tags)
 .directive('thread', thread)
 .directive('username', username)
 .directive('repeatAnim', repeatAnim)

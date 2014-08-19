@@ -8,6 +8,14 @@ annotation = ['$filter', 'annotator', ($filter, annotator) ->
         if e.keyCode == 13 && e.shiftKey
           scope.save(e)
 
+    scope.addTag = (tag) ->
+      scope.model.tags ?= []
+      scope.model.tags.push(tag.text)
+
+    scope.removeTag = (tag) ->
+      scope.model.tags = scope.model.tags.filter((t) -> t isnt tag.text)
+      delete scope.model.tags if scope.model.tags.length is 0
+
     # Watch for changes
     scope.$watch 'model', (model) ->
       scope.thread = annotator.threading.idTable[model.id]
@@ -23,6 +31,8 @@ annotation = ['$filter', 'annotator', ($filter, annotator) ->
           annotator.plugins.Permissions.authorize 'update', model
         else
           true
+
+      scope.tags = ({text: tag} for tag in scope.model.tags or [])
 
   controller: 'AnnotationController'
   require: '?ngModel'

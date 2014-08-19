@@ -1,15 +1,4 @@
 <form name="form">
-  <!-- More actions -->
-  <div class="small magicontrol dropdown pull-right" ng-hide="editing">
-    <i class="dropdown-toggle icon-triangle"
-       role="button"
-       title="More actions"></i>
-    <ul class="dropdown-menu pull-right" role="menu">
-      <li ng-click="reply()"><i class="icon-reply"></i> Reply</li>
-      <li ng-show="auth.update" ng-click="edit()"><i class="icon-copy"></i> Edit</li>
-      <li ng-show="auth.delete" ng-click="delete()"><i class="icon-x"></i> Delete…</li>
-    </ul>
-  </div>
 
   <!-- Deletion notice -->
   <span ng-show="!editing && model.deleted"
@@ -40,6 +29,18 @@
     <fuzzytime class="small pull-right"
                ng-show="!editing && model.updated"
                ng-model="model.updated"></fuzzytime>
+
+    <!-- More actions -->
+    <div class="small magicontrol dropdown pull-right" ng-hide="editing">
+      <i class="dropdown-toggle icon-triangle"
+         role="button"
+         title="More actions"></i>
+      <ul class="dropdown-menu pull-right" role="menu">
+        <li ng-click="reply()"><i class="icon-reply"></i> Reply</li>
+        <li ng-show="auth.update" ng-click="edit()"><i class="icon-copy"></i> Edit</li>
+        <li ng-show="auth.delete" ng-click="delete()"><i class="icon-x"></i> Delete…</li>
+      </ul>
+    </div>
   </header>
 
   <!-- Prompt -->
@@ -64,13 +65,24 @@
   </div>
 
   <!-- Tags -->
-  <div ng-class="editing && 'form-field'" >
-    <ul ng-readonly="!editing"
-        ng-model="model.tags"
-        name="tags"
-        class="tags"
-        placeholder="Add tags…"
-    />
+  <div class="form-field" ng-show="editing">
+    <tags-input ng-model="tags"
+                name="tags"
+                class="tags"
+                placeholder="Add tags…"
+                replace-spaces-with-dashes="false"
+                enable-editing-last-tag="true"
+                on-tag-added="addTag($tag)"
+                on-tag-removed="removeTag($tag)"></tags-input>
+  </div>
+
+  <div class="tags tags-read-only" ng-show="tags.length && !editing">
+    Tagged:
+    <ul class="tag-list">
+      <li class="tag-item" ng-repeat="tag in tags">
+        <a href="/stream?q=tag:{{tag.text}}" target="_blank">{{tag.text}}</a>
+      </li>
+    </ul>
   </div>
 
   <!-- Bottom controls TODO: Align buttons to the left -->

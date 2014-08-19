@@ -30,16 +30,9 @@ $threadexp-width: .6em;
     padding-left: $thread-padding;
 
     &.collapsed {
+      border-color: transparent;
+
       & > .annotation {
-        fuzzytime {
-          float: none;
-          font-style: italic;
-        }
-
-        header {
-          display: inline-block;
-        }
-
         .body {
           display: none;
         }
