@@ -8,6 +8,7 @@ imports = [
   'h.searchfilters'
 ]
 
+
 class App
   this.$inject = [
     '$element', '$location', '$q', '$rootScope', '$route', '$scope', '$timeout',
@@ -454,7 +455,6 @@ class App
             $location.search('q', query or null)
 
     $scope.socialView = annotator.socialView
-
 
 class Editor
   this.$inject = [

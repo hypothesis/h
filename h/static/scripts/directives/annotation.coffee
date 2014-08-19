@@ -5,6 +5,14 @@ imports = [
 ]
 
 
+# Use an anchor tag to extract the
+extractURIComponent = (uri, component) ->
+  unless extractURIComponent.a
+    extractURIComponent.a = document.createElement('a')
+  extractURIComponent.a.href = uri
+  extractURIComponent.a[component]
+
+
 class Annotation
   this.$inject = [
     '$element', '$location', '$rootScope', '$sce', '$scope', '$timeout',
@@ -16,9 +24,18 @@ class Annotation
      $window,
      annotator,   baseURI,   drafts
   ) ->
+    model = $scope.model
     {plugins, threading} = annotator
+
     $scope.action = 'create'
     $scope.editing = false
+
+    if model.document and model.target.length
+      domain = extractURIComponent(model.uri, 'hostname')
+      $scope.document =
+        uri: model.uri
+        domain: domain
+        title: model.document.title or domain
 
     $scope.cancel = ($event) ->
       $event?.stopPropagation()
