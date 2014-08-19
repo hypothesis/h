@@ -4,6 +4,9 @@
 @import 'compass/reset/utilities';
 
 $base-font-size: 14px;
+$base-line-height: 20px;
+$sans-font-family: "Source Sans Pro", $sans-font-family;
+$serif-font-family: "Merriweather", $serif-font-family;
 
 //ADDER////////////////////////////////
 .annotator-adder {

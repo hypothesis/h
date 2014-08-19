@@ -3,15 +3,13 @@
 
 
 body {
-  background-color: transparent;
-  font-size: .8em;
   height: 100%;
   width: 100%;
-  padding-top: 30px;
   position: fixed;
 }
 
 #wrapper {
+  margin-top: 30px;
   height: 100%;
   overflow-y: auto;
   position: relative;
@@ -53,11 +51,9 @@ body {
 
     &.pull-right {
       display: inline-block;
-      font-family: $sans-font-family;
     }
 
     & > * {
-      line-height: 28px;
       margin: 0 .72em;
     }
   }
