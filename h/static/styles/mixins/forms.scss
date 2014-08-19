@@ -1,0 +1,73 @@
+@import "../base";
+
+@mixin focus-outline {
+  border-color: #51A7E8;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.075) inset, 0px 0px 5px rgba(81, 167, 232, 0.5);
+}
+
+@mixin form-input {
+  border: 1px solid $gray-lighter;
+  border-radius: 2px;
+  padding: 7px 10px;
+  font-weight: normal;
+  font-size: 15px;
+  color: $gray;
+  background-color: #FAFAFA;
+}
+
+@mixin form-input-focus {
+  outline: none;
+  background-color: #FFF;
+
+  @include focus-outline;
+  @include placeholder {
+    color: $gray;
+  }
+}
+
+@mixin form-input-error {
+  color: $error-red;
+  border-color: $error-red-light;
+  background-color: $error-red-lightest;
+
+  @include placeholder {
+    color: $error-red-light;
+  }
+}
+
+@mixin btn {
+  @include background(linear-gradient($button-background-gradient...));
+  @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.15));
+
+  display: inline-block;
+  font-size: 13px;
+  font-weight: bold;
+  color: $button-text-color;
+  text-shadow: 0 1px 0 #FFF;
+  border-radius: 2px;
+  border: 1px solid #ACACAC;
+  padding: 7px 12px 6px;
+}
+
+@mixin btn-hover {
+  @include box-shadow(0 1px 0 rgba(0, 0, 0, 0.05));
+  outline: none;
+  color: $button-text-color;
+  background: $button-background-start;
+  border-color: #bababa;
+}
+
+@mixin btn-active {
+  @include box-shadow(inset 0 1px 0 rgba(0, 0, 0, 0.1));
+  background: $button-background-end;
+  color: #424242;
+  border-color: #bababa;
+}
+
+@mixin btn-disabled {
+  @include box-shadow(none);
+  cursor: default;
+  background: #F0F0F0;
+  border-color: #CECECE;
+  color: $gray-light;
+}

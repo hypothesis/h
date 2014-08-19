@@ -7,6 +7,7 @@
 @import 'threads';
 @import 'yui_grid';
 @import 'simple-search';
+@import 'tags-input';
 
 
 $base-font-size: 16px;
@@ -561,58 +562,6 @@ h6 {
 }
 
 pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
-
-// Tags for the annotations
-.tags {
-  @include pie-clearfix;
-  @include reset-box-model;
-  @include reset-font;
-  background: none;
-  clear: both;
-  margin-top: .2em;
-  margin-bottom: .2em;
-
-  .tagit-choice {
-    border-radius: 2px;
-    padding: 0.307em 1.7em 0.307em 0.76em;
-  }
-
-  .tagit-close {
-    cursor: pointer;
-    position: absolute;
-    right: .1em;
-    top: 50%;
-    margin-top: -8px;
-  }
-
-  .tagit-new input[type=text] {
-    padding-top: 5px;
-    padding-bottom: 5px;
-  }
-
-  .text-icon { display: none; }
-
-  li {
-    cursor: pointer;
-    display: block;
-    float: left;
-    padding: .01em 1.3em .01em .3em;
-    position: relative;
-    margin-right: 0.4em;
-
-    &:hover { opacity: 1; }
-    &.tagit-new { padding: 0; }
-  }
-
-  &[readonly] {
-    .tagit-new, .tagit-close { display: none; }
-    li {
-      padding: .1em .3em;
-      font-size: 12px;
-    }
-    li.tagit-choice { margin-top: .1em; }
-  }
-}
 
 // View and Sort tabs ////////////////////
 .viewsort {
