@@ -65,7 +65,7 @@
   </div>
 
   <!-- Tags -->
-  <div ng-class="editing && 'form-field'" >
+  <div class="form-field" ng-show="editing">
     <tags-input ng-model="tags"
                 name="tags"
                 class="tags"
@@ -74,6 +74,15 @@
                 enable-editing-last-tag="true"
                 on-tag-added="addTag($tag)"
                 on-tag-removed="removeTag($tag)"></tags-input>
+  </div>
+
+  <div class="tags tags-read-only" ng-show="tags.length && !editing">
+    Tagged:
+    <ul class="tag-list">
+      <li class="tag-item" ng-repeat="tag in tags">
+        <a href="/stream?q=tag:{{tag.text}}" target="_blank">{{tag.text}}</a>
+      </li>
+    </ul>
   </div>
 
   <!-- Bottom controls TODO: Align buttons to the left -->

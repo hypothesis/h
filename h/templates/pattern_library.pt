@@ -428,6 +428,26 @@
             </div>
           </tags-input>
         </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Tags (Read Only)</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="tags tags-read-only">
+            Tagged:
+            <ul class="tag-list">
+              <li class="tag-item">
+                <a href="/stream?q=tag:apples" target="_blank">apples</a>
+              </li>
+              <li class="tag-item">
+                <a href="/stream?q=tag:oranges" target="_blank">oranges</a>
+              </li>
+              <li class="tag-item">
+                <a href="/stream?q=tag:pears" target="_blank">pears</a>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
       <div class="pattern-library-example">
         <div class="pattern-library-example-header">
