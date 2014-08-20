@@ -111,7 +111,7 @@ function onPageAction(tab) {
   if (state(tab.id) == 'active') {
     newState = state(tab.id, 'sleeping')
     if (currentPdfState == 'pdfjs') {
-      console.log("Going back to the native viewer.")
+      // console.log("Going back to the native viewer.")
       params = {url: decodeURIComponent(parsePdfExtensionURL(tab.url))};
       chrome.tabs.update(tab.id, params)
     } else if (currentPdfState == 'native') {
@@ -125,7 +125,7 @@ function onPageAction(tab) {
   } else {
     newState = state(tab.id, 'active')
     if (currentPdfState == 'native') {
-      console.log("Reloading document with PDF.js...")
+      // console.log("Reloading document with PDF.js...")
       chrome.tabs.reload(tab.id);
       // TODO: investigate if we could do this without repeating
       // the network transfer (probably yes)

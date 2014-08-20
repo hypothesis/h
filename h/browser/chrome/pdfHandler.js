@@ -118,10 +118,10 @@ chrome.webRequest.onHeadersReceived.addListener(
 
     // Hypothes.is addition ************
     if (state(details.tabId) == 'active') {
-      console.log("Activating PDF.js + Hypothes.is. (Method 1)");
+      // console.log("Activating PDF.js + Hypothes.is. (Method 1)");
       pdfState(details.tabId, "pdfjs");
     } else {
-      console.log("NOT activating PDF.js + Hypothes.is. (Method 1)");
+      // console.log("NOT activating PDF.js + Hypothes.is. (Method 1)");
       pdfState(details.tabId, "native");
       return;
     }
@@ -201,10 +201,10 @@ chrome.webRequest.onBeforeRequest.addListener(
     
     // Hypothes.is addition ************
     if (state(details.tabId) == 'active') {
-      console.log("Activating PDF.js + Hypothes.is. (Method 2)");
+      // console.log("Activating PDF.js + Hypothes.is. (Method 2)");
       pdfState(details.tabId, "pdfjs");
     } else {
-      console.log("NOT activating PDF.js + Hypothes.is. (Method 2)");
+      // console.log("NOT activating PDF.js + Hypothes.is. (Method 2)");
       pdfState(details.tabId, "native");
       return;
     }
@@ -234,10 +234,10 @@ chrome.webRequest.onBeforeRequest.addListener(
 
     // Hypothes.is addition ************
     if (state(details.tabId) == 'active') {
-      console.log("Activating PDF.js + Hypothes.is. (Method 3)");
+      // console.log("Activating PDF.js + Hypothes.is. (Method 3)");
       pdfState(details.tabId, "pdfjs");
     } else {
-      console.log("NOT activating PDF.js + Hypothes.is. (Method 3)");
+      // console.log("NOT activating PDF.js + Hypothes.is. (Method 3)");
       pdfState(details.tabId, "native");
       return;
     }
