@@ -68,6 +68,7 @@ def bad_csrf_token(context, request):
 
 
 @view_config(name='embed.js', renderer='h:templates/embed.txt')
+@view_config(name='embed-pdf.js', renderer='h:templates/embed-pdf.txt')
 @view_config(layout='app', name='app.html', renderer='h:templates/app.pt')
 @view_config(layout='app', name='viewer', renderer='h:templates/app.pt')
 @view_config(layout='app', name='editor', renderer='h:templates/app.pt')
