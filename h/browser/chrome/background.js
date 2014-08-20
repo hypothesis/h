@@ -16,12 +16,41 @@ var ACTION_STATES = {
 }
 
 
-function inject(tabId) {
-  chrome.tabs.executeScript(tabId, {
-    file: 'public/embed.js'
-  })
+var PDF_VIEWER_URL = chrome.extension.getURL('content/web/viewer.html');
+
+function getPDFViewerURL(url) {
+  return PDF_VIEWER_URL + '?file=' + encodeURIComponent(url);
 }
 
+function inject(tab) {
+  if (isPDF(tab.url)) {
+    if (!inExtension(tab.url)) {
+      // console.log("Reloading document with PDF.js...")
+      chrome.tabs.update(tab.id, {
+        url: getPDFViewerURL(tab.url)
+      });
+    }
+  } else {
+    // console.log("Doing normal non-pdf insertion on page action")
+    chrome.tabs.executeScript(tab.id, {
+      file: 'public/embed.js'
+    });
+  }
+}
+
+function remove(tab) {
+  if (isPDF(tab.url)) {
+    // console.log("Going back to the native viewer.")
+    chrome.tabs.update(tab.id, {
+      url: decodeURIComponent(parsePdfExtensionURL(tab.url))
+    })
+  } else {
+    // console.log("Doing normal non-pdf removal on page action")
+    chrome.tabs.executeScript(tab.id, {
+      file: 'public/destroy.js'
+    })
+  }
+}
 
 function state(tabId, value) {
   var stateMap = localStorage.getItem('state')
@@ -42,6 +71,8 @@ function state(tabId, value) {
   return value
 }
 
+function isPDF(url)   { return url.toLowerCase().indexOf('.pdf') > 0 }
+function inExtension(url) { return url.indexOf(chrome.extension.getURL('')) == 0 }
 
 function setPageAction(tabId, value) {
   chrome.pageAction.setIcon({
@@ -89,12 +120,10 @@ function onPageAction(tab) {
 
   if (state(tab.id) == 'active') {
     newState = state(tab.id, 'sleeping')
-    chrome.tabs.executeScript(tab.id, {
-      file: 'public/destroy.js'
-    })
+    remove(tab)
   } else {
     newState = state(tab.id, 'active')
-    inject(tab.id)
+    inject(tab)
   }
 
   setPageAction(tab.id, newState)
@@ -111,13 +140,13 @@ function onTabRemoved(tab) {
 }
 
 
-function onTabUpdated(tabId, info) {
+function onTabUpdated(tabId, info, tab) {
   var currentState = state(tabId) || 'sleeping'
 
   setPageAction(tabId, currentState)
 
   if (currentState == 'active') {
-    inject(tabId)
+    inject(tab)
   }
 }
 
