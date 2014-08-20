@@ -43,6 +43,26 @@ function state(tabId, value) {
 }
 
 
+function pdfState(tabId, value) {
+  var stateMap = localStorage.getItem('pdf-state')
+  stateMap = stateMap ? JSON.parse(stateMap) : {}
+
+  if (value === undefined) {
+    return stateMap[tabId]
+  }
+
+  if (value) {
+    stateMap[tabId] = value
+  } else {
+    delete stateMap[tabId]
+  }
+
+  localStorage.setItem('pdf-state', JSON.stringify(stateMap))
+
+  return value
+}
+
+
 function setPageAction(tabId, value) {
   chrome.pageAction.setIcon({
     tabId: tabId,
@@ -85,16 +105,36 @@ function onUpdateAvailable() {
 
 
 function onPageAction(tab) {
+  var currentPdfState = pdfState(tab.id) || 'none'
   var newState
 
   if (state(tab.id) == 'active') {
     newState = state(tab.id, 'sleeping')
-    chrome.tabs.executeScript(tab.id, {
-      file: 'public/destroy.js'
-    })
+    if (currentPdfState == 'pdfjs') {
+      console.log("Going back to the native viewer.")
+      params = {url: decodeURIComponent(parsePdfExtensionURL(tab.url))};
+      chrome.tabs.update(tab.id, params)
+    } else if (currentPdfState == 'native') {
+      console.warn("Inconsistent state. This should not be happening.")
+    } else { // We are in the 'none' state
+      // Normal non-pdf removal on page action
+      chrome.tabs.executeScript(tab.id, {
+        file: 'public/destroy.js'
+      })
+    }
   } else {
     newState = state(tab.id, 'active')
-    inject(tab.id)
+    if (currentPdfState == 'native') {
+      console.log("Reloading document with PDF.js...")
+      chrome.tabs.reload(tab.id);
+      // TODO: investigate if we could do this without repeating
+      // the network transfer (probably yes)
+    } else if (currentPdfState == 'pdfjs') {
+      console.warn("Inconsistent state. This should not be happening.")
+    } else { // We are in the 'none' state
+      // Normal non-pdf injection on page action
+      inject(tab.id)
+    }
   }
 
   setPageAction(tab.id, newState)
@@ -103,20 +143,23 @@ function onPageAction(tab) {
 
 function onTabCreated(tab) {
   state(tab.id, 'sleeping')
+  pdfState(tab.id, 'none')
 }
 
 
 function onTabRemoved(tab) {
   state(tab.id, null)
+  pdfState(tab.id, null)
 }
 
 
 function onTabUpdated(tabId, info) {
   var currentState = state(tabId) || 'sleeping'
+  var currentPdfState = pdfState(tabId) || 'none'
 
   setPageAction(tabId, currentState)
 
-  if (currentState == 'active') {
+  if ((currentState == 'active') && (currentPdfState == 'none')) {
     inject(tabId)
   }
 }
