@@ -141,11 +141,10 @@ class Annotation(annotation.Annotation):
                 },
                 'uri_index': {
                     'tokenizer': 'keyword',
-                    'filter': ['uri', 'lowercase', 'unique']
+                    'filter': ['uri', 'unique']
                 },
                 'uri_search': {
                     'tokenizer': 'keyword',
-                    'filter': ['lowercase']
                 }
             }
         }
