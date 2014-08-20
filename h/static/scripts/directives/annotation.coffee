@@ -5,7 +5,7 @@ imports = [
 ]
 
 
-# Use an anchor tag to extract the
+# Use an anchor tag to extract specific components within a uri.
 extractURIComponent = (uri, component) ->
   unless extractURIComponent.a
     extractURIComponent.a = document.createElement('a')
