@@ -139,7 +139,7 @@ class Annotation(annotation.Annotation):
                     'filter': 'lowercase'
                 },
                 'uri_index': {
-                    'tokenizer': 'uax_url_email',
+                    'tokenizer': 'keyword',
                     'filter': ['uri', 'lowercase', 'unique']
                 },
                 'uri_search': {
