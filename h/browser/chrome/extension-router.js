@@ -89,6 +89,9 @@ limitations under the License.
     }
   }
 
+  // Export this function so that we can use it from background.js
+  window.parsePdfExtensionURL = parseExtensionURL;
+
   // TODO(rob): Use declarativeWebRequest once declared URL-encoding is
   //            supported, see http://crbug.com/273589
   //            (or rewrite the query string parser in viewer.js to get it to
@@ -110,11 +113,12 @@ limitations under the License.
     })
   }, ['blocking']);
 
-  chrome.runtime.onMessage.addListener(function(message, sender) {
-    if (message === 'showPageAction' && sender.tab) {
-      showPageAction(sender.tab.id, sender.tab.url);
-    }
-  });
+  // Hypothes.is change: we are disabling this feature
+  //    chrome.runtime.onMessage.addListener(function(message, sender) {
+  //      if (message === 'showPageAction' && sender.tab) {
+  //        showPageAction(sender.tab.id, sender.tab.url);
+  //      }
+  //      });
 
   // When session restore is used, viewer pages may be loaded before the
   // webRequest event listener is attached (= page not found).

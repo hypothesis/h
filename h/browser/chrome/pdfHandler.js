@@ -104,6 +104,10 @@ chrome.webRequest.onHeadersReceived.addListener(
       return;
     }
     if (!isPdfFile(details)) {
+      // Hypothes.is addition ************
+      // console.log("Marking tab as _not_ PDF");
+      markAsNotPDF(details.tabId);
+      // End of Hypothes.is addition ************
       return;
     }
     if (isPdfDownloadable(details)) {
@@ -112,6 +116,11 @@ chrome.webRequest.onHeadersReceived.addListener(
     }
 
     var viewerUrl = getViewerURL(details.url);
+
+    // Hypothes.is addition ************
+    markAsPDF(details.tabId);
+    return;
+    // End of Hypothes.is addition ************
 
     // Replace frame with viewer
     if (Features.webRequestRedirectUrl) {
@@ -184,6 +193,11 @@ chrome.webRequest.onBeforeRequest.addListener(
     if (isPdfDownloadable(details)) {
       return;
     }
+    
+    // Hypothes.is addition ************
+    markAsPDF(details.tabId);
+    return;
+    // End of Hypothes.is addition ************
     var viewerUrl = getViewerURL(details.url);
     return { redirectUrl: viewerUrl };
   },
@@ -206,6 +220,11 @@ chrome.webRequest.onBeforeRequest.addListener(
     // at file://*/* to make sure that the viewer can load the PDF file
     // through XMLHttpRequest. Necessary to deal with http://crbug.com/302548
     var viewerUrl = getViewerURL(details.url);
+
+    // Hypothes.is addition ************
+    markAsPDF(details.tabId);
+    return;
+    // End of Hypothes.is addition ************
 
     return { redirectUrl: viewerUrl };
   },
