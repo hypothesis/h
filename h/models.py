@@ -125,7 +125,8 @@ class Annotation(annotation.Annotation):
                     'preserve_original': 1,
                     'patterns': [
                         '([^\\/\\?\\#\\.]+)',
-                        '((\\w+|\\d+)(?:\\.(\\w+|\\d+))*)'
+                        '([a-zA-Z0-9]+)(?:\\.([a-zA-Z0-9]+))*',
+                        '([a-zA-Z0-9-]+)(?:\\.([a-zA-Z0-9-]+))*',
                     ]
                 }
             },
