@@ -68,6 +68,16 @@ function watchObjectOrEmbed(elem) {
   if (mimeType && 'application/pdf' !== mimeType.toLowerCase()) {
     return;
   }
+
+    // Hypothes.is addition ************
+    if (false) {
+      console.log("Activating PDF.js + Hypothes.is. (Method 4)");
+    } else {
+      console.log("NOT activating PDF.js + Hypothes.is. (Method 4)");
+      return;
+    }
+    // End of Hypothes.is addition ************
+
   // <embed src> <object data>
   var srcAttribute = 'src' in elem ? 'src' : 'data';
   var path = elem[srcAttribute];
