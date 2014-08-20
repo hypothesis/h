@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
-from mock import patch
-from pyramid.testing import DummyRequest
+from mock import patch, Mock
+from pyramid.testing import DummyRequest, testConfig
+from datetime import datetime
 
 from h import events, notifier
 
@@ -14,6 +15,28 @@ class QueryMock(object):
         self.active = active
         self.query = query or {}
         self.template = template
+
+
+def create_annotation():
+    annotation = {
+        'id': '2',
+        'title': 'Example annotation',
+        'quote': '',
+        'text': 'this is a reply',
+        'user': 'acct:testuser@testdomain',
+        'permissions': {'read': ["group:__world__"]},
+        'created': datetime.now(),
+    }
+    annotation_parent = {
+        'uri': 'http://example.com',
+        'quote': 'parent quote',
+        'text': 'parent text',
+        'created': datetime.now(),
+        'user': 'acct:parent@testdomain',
+        'id': '1',
+    }
+    annotation['parent'] = annotation_parent
+    return annotation
 
 
 # Tests for handling AnnotationEvent
@@ -71,14 +94,15 @@ def test_bad_status():
 
 
 def test_template_parameters():
-    """Make sure the body, subject, recipients fields are correct"""
+    """Make sure the body, html, subject, recipients fields are correct"""
 
     def test_generator(request, annotation, data):
         # pylint: disable=unused-argument
         """Our test template function"""
         return {
             "status": True,
-            "rendered": "Test body",
+            "text": "Test body",
+            "html": "Test html",
             "subject": "Test subject",
             "recipients": ["Test user"]
         }
@@ -124,12 +148,13 @@ def test_subject_and_recipients():
         @classmethod
         def render(cls, request, annotation):
             """Our mock render function"""
-            return "test body", "test subject"
+            return "test subject", "test body", "test html"
 
     result = TestTemplate.generate_notification({}, {}, {})
     assert result['status'] is True
     assert result['recipients'] == ['test user']
-    assert result['rendered'] == 'test body'
+    assert result['text'] == 'test body'
+    assert result['html'] == 'test html'
     assert result['subject'] == 'test subject'
 
 
@@ -160,6 +185,55 @@ def test_reply_query_match():
             assert mock_notif().send_notification_to_owner.call_count == 1
 
 
+def test_reply_notification_content():
+    """
+    The reply notification should have a subject, and both plain and
+    html bodies.
+    """
+    with testConfig() as config:
+        config.include('pyramid_chameleon')
+
+        annotation = create_annotation()
+        request = DummyRequest()
+
+        with patch('h.auth.local.models.User') as mock_user:
+            user = Mock(email='acct:parent@testdomain')
+            mock_user.get_by_username.return_value = user
+
+            notification = notifier.ReplyTemplate.generate_notification(
+                request, annotation, {})
+
+            assert notification['status']
+            assert notification['recipients'] == ['acct:parent@testdomain']
+            assert 'testuser has just left a reply to your annotation on' in \
+                notification['text']
+            assert '<a href="http://example.com/u/testuser">testuser</a> '\
+                'has just left a reply to your annotation on' \
+                in notification['html']
+            assert notification['subject'] == \
+                'testuser has replied to your annotation\n'
+
+
+def test_reply_notification_no_recipient():
+    """
+    The reply notification should have a False status if the recipient cannot
+    be found in the User table.
+    """
+    with testConfig() as config:
+        config.include('pyramid_chameleon')
+
+        annotation = create_annotation()
+        request = DummyRequest()
+
+        with patch('h.auth.local.models.User') as mock_user:
+            mock_user.get_by_username.return_value = None
+
+            notification = notifier.ReplyTemplate.generate_notification(
+                request, annotation, {})
+
+            assert notification['status'] is False
+
+
 def test_reply_username_mismatch():
     """Username different, domain the same -> should send reply"""
     annotation = {
@@ -175,6 +249,7 @@ def test_reply_username_mismatch():
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 1
 
+
 def test_reply_domain_mismatch():
     """Username same, domain different -> should send reply"""
     annotation = {
@@ -189,6 +264,7 @@ def test_reply_domain_mismatch():
             mock_parent.return_value = {'user': 'acct:testuser@testdomain2'}
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 1
+
 
 def test_reply_same_creator():
     """Username same, domain same -> should not send reply"""

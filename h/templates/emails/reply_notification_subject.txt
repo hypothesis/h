@@ -1,1 +1,1 @@
-A reply to you at: ${document_title} (${document_path})
+${reply_user} has replied to your annotation

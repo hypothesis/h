@@ -24,15 +24,17 @@ def standalone_url(request, annotation_id):
 
 
 class NotificationTemplate(object):
-    template = None
+    text_template = None
+    html_template = None
     subject = None
 
     @classmethod
     def render(cls, request, annotation):
         tmap = cls._create_template_map(request, annotation)
-        template = render(cls.template, tmap, request)
+        text = render(cls.text_template, tmap, request)
+        html = render(cls.html_template, tmap, request)
         subject = render(cls.subject, tmap, request)
-        return template, subject
+        return subject, text, html
 
     @staticmethod
     def _create_template_map(request, annotation):
@@ -53,34 +55,31 @@ class NotificationTemplate(object):
         if not checks:
             return {'status': False}
         try:
-            rendered, subject = cls.render(request, annotation)
+            subject, text, html = cls.render(request, annotation)
             recipients = cls.get_recipients(request, annotation, data)
-        except:
-            log.exception('Generating notification')
+        except TemplateRenderException:
             return {'status': False}
+
         return {
             'status': True,
             'recipients': recipients,
-            'rendered': rendered,
+            'text': text,
+            'html': html,
             'subject': subject
         }
 
 
+class TemplateRenderException(Exception):
+    pass
+
+
 class ReplyTemplate(NotificationTemplate):
-    template = 'h:templates/emails/reply_notification.txt'
+    text_template = 'h:templates/emails/reply_notification.txt'
+    html_template = 'h:templates/emails/reply_notification.pt'
     subject = 'h:templates/emails/reply_notification_subject.txt'
 
     @staticmethod
     def _create_template_map(request, reply):
-        parent_tags = ''
-        reply_tags = ''
-        reply_quote = reply.get('quote', '')
-
-        if 'tags' in reply['parent']:
-            parent_tags = '\ntags: ' + ', '.join(reply['parent']['tags'])
-        if 'tags' in reply:
-            reply_tags = '\ntags: ' + ', '.join(reply['tags'])
-
         parent_user = re.search(
             r'^acct:([^@]+)',
             reply['parent']['user']
@@ -94,18 +93,14 @@ class ReplyTemplate(NotificationTemplate):
         return {
             'document_title': reply['title'],
             'document_path': reply['parent']['uri'],
-            'parent_quote': reply['parent']['quote'],
             'parent_text': reply['parent']['text'],
             'parent_user': parent_user,
-            'parent_tags': parent_tags,
             'parent_timestamp': reply['parent']['created'],
-            'parent_user_profile': user_profile_url(request,
-                                                    reply['parent']['user']),
+            'parent_user_profile': user_profile_url(
+                request, reply['parent']['user']),
             'parent_path': standalone_url(request, reply['parent']['id']),
-            'reply_quote': reply_quote,
             'reply_text': reply['text'],
             'reply_user': reply_user,
-            'reply_tags': reply_tags,
             'reply_timestamp': reply['created'],
             'reply_user_profile': user_profile_url(request, reply['user']),
             'reply_path': standalone_url(request, reply['id'])
@@ -120,7 +115,7 @@ class ReplyTemplate(NotificationTemplate):
         userobj = models.User.get_by_username(request, username)
         if not userobj:
             log.warn("User not found! " + str(username))
-            raise Exception('User not found')
+            raise TemplateRenderException('User not found')
         return [userobj.email]
 
     @staticmethod
@@ -153,17 +148,19 @@ class AnnotationNotifier(object):
             notification = generator(self.request, annotation, data)
             if notification['status']:
                 self._send_annotation(
-                    notification['rendered'],
                     notification['subject'],
+                    notification['text'],
+                    notification['html'],
                     notification['recipients']
                 )
 
-    def _send_annotation(self, body, subject, recipients):
-        body = body.decode('utf8')
+    def _send_annotation(self, subject, text, html, recipients):
+        body = text.decode('utf8')
         subject = subject.decode('utf8')
         message = Message(subject=subject,
                           recipients=recipients,
-                          body=body)
+                          body=body,
+                          html=html)
         self.mailer.send(message)
 
 AnnotationNotifier.register_template(
@@ -174,32 +171,30 @@ AnnotationNotifier.register_template(
 
 @subscriber(events.AnnotationEvent)
 def send_notifications(event):
-    try:
-        action = event.action
-        request = event.request
-        annotation = event.annotation
+    action = event.action
+    request = event.request
+    annotation = event.annotation
 
-        # Now process only the reply-notifications
-        # And for them we need only the creation action
-        if action != 'create':
-            return
+    # Now process only the reply-notifications
+    # And for them we need only the creation action
+    if action != 'create':
+        return
 
-        # Check for authorization. Send notification only for public annotation
-        # XXX: This will be changed and fine grained when
-        # user groups will be introduced
-        read = annotation['permissions']['read']
-        if "group:__world__" not in read:
-            return
+    # Check for authorization. Send notification only for public annotation
+    # XXX: This will be changed and fine grained when
+    # user groups will be introduced
+    read = annotation['permissions']['read']
+    if "group:__world__" not in read:
+        return
 
-        notifier = AnnotationNotifier(request)
-        annotation['parent'] = parent_values(annotation, request)
-        if 'user' in annotation['parent'] and 'user' in annotation:
-            parentuser = annotation['parent']['user']
-            if len(parentuser) and parentuser != annotation['user']:
-                notifier.send_notification_to_owner(
-                    annotation, {}, 'reply_notification')
-    except:
-        log.exception('Emailing event: %s', event)
+    notifier = AnnotationNotifier(request)
+    annotation['parent'] = parent_values(annotation, request)
+    if 'user' in annotation['parent'] and 'user' in annotation:
+        parentuser = annotation['parent']['user']
+        if len(parentuser) and parentuser != annotation['user']:
+            notifier.send_notification_to_owner(
+                annotation, {}, 'reply_notification')
+
 
 def includeme(config):
     config.scan(__name__)
