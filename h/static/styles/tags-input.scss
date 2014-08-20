@@ -19,7 +19,7 @@ tags-input {
     // Input
     .input {
       float: left;
-      margin-top: .33em;
+      margin-top: .1875em;
       padding: .2em 0;
       outline: none;
       border: none !important;
@@ -33,12 +33,15 @@ tags-input {
   }
 
   .tag-item {
-    @include btn;
     float: left;
     position: relative;
-    padding: .307em 1.538em .307em .615em;
+    padding: .154em 1.307em .154em .538em;
     margin-top: .384em;
     margin-right: .384em;
+    font-size: .866em;
+    color: $button-text-color;
+    border: 1px solid $gray-lighter;
+    border-radius: 2px;
 
     &.selected {
       @include btn-hover;
@@ -46,14 +49,18 @@ tags-input {
     }
 
     .remove-button {
+      display: block;
       position: absolute;
-      top: 50%;
-      right: 5px;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 16px;
+      font-size: 17px;
+      font-weight: bold;
+      line-height: 1.4;
+      text-align: center;
       color: #585858;
-      font-size: 20px;
       cursor: pointer;
-      line-height: 1;
-      margin-top: -10px;
     }
   }
 }
