@@ -5,6 +5,14 @@ imports = [
 ]
 
 
+# Use an anchor tag to extract specific components within a uri.
+extractURIComponent = (uri, component) ->
+  unless extractURIComponent.a
+    extractURIComponent.a = document.createElement('a')
+  extractURIComponent.a.href = uri
+  extractURIComponent.a[component]
+
+
 class Annotation
   this.$inject = [
     '$element', '$location', '$rootScope', '$sce', '$scope', '$timeout',
@@ -16,9 +24,23 @@ class Annotation
      $window,
      annotator,   baseURI,   drafts
   ) ->
+    model = $scope.model
     {plugins, threading} = annotator
+
     $scope.action = 'create'
     $scope.editing = false
+
+    if model.document and model.target.length
+      domain = extractURIComponent(model.uri, 'hostname')
+
+      title = model.document.title or domain
+      if title.length > 30
+        title = title.slice(0, 30) + '…'
+
+      $scope.document =
+        uri: model.uri
+        domain: domain
+        title: title
 
     $scope.cancel = ($event) ->
       $event?.stopPropagation()
@@ -185,9 +207,11 @@ class Annotation
             $scope.model.highlightText.replace regexp, annotator.highlighter
 
 
-annotation = ['$filter', 'annotator', ($filter, annotator) ->
+annotation = ['$filter', '$parse', 'annotator', ($filter, $parse, annotator) ->
   link: (scope, elem, attrs, controller) ->
     return unless controller?
+
+    scope.embedded = $parse(attrs.annotationEmbedded)() is true
 
     # Bind shift+enter to save
     elem.bind

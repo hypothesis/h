@@ -23,6 +23,10 @@
          ng-hide="model.text || editing || model.deleted || model.tags.length"></i>
       <i class="small icon-comment3"
          ng-hide="model.target.length || model.references"></i>
+      <span class="annotation-citation" ng-show="!embedded && document.title">
+        left an annotation on &ldquo;<a href="{{document.uri}}" target="_blank">{{document.title}}</a>&rdquo;
+        <span class="annotation-citation-domain" ng-show="document.domain != document.title">({{document.domain}})</span>
+      </span>
     </span>
 
     <!-- Timestamp -->

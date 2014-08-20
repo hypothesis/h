@@ -33,7 +33,7 @@ configure = [
       ]
 
     $routeProvider.when '/a/:id',
-      controller: 'ViewerController'
+      controller: 'AnnotationViewerController'
       templateUrl: 'viewer.html'
     $routeProvider.when '/editor',
       controller: 'EditorController'

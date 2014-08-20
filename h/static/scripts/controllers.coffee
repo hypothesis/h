@@ -8,6 +8,7 @@ imports = [
   'h.searchfilters'
 ]
 
+
 class App
   this.$inject = [
     '$element', '$location', '$q', '$rootScope', '$route', '$scope', '$timeout',
@@ -455,7 +456,6 @@ class App
 
     $scope.socialView = annotator.socialView
 
-
 class Editor
   this.$inject = [
     '$location', '$routeParams', '$sce', '$scope',
@@ -509,6 +509,18 @@ class Editor
           target.showDiff = false
 
 
+class AnnotationViewer
+  this.$inject = ['$scope']
+  constructor: ($scope) ->
+    # Tells the view that these annotations are standalone
+    $scope.isEmbedded = false
+
+    # Provide no-ops until these methods are moved elsewere. They only apply
+    # to annotations loaded into the stream.
+    $scope.activate = angular.noop
+    $scope.openDetails = angular.noop
+
+
 class Viewer
   this.$inject = [
     '$location', '$rootScope', '$routeParams', '$scope',
@@ -520,6 +532,9 @@ class Viewer
   ) ->
     if $routeParams.q
       return $location.path('/page_search').replace()
+
+    # Tells the view that these annotations are embedded into the owner doc
+    $scope.isEmbedded = true
 
     {providers, threading} = annotator
 
@@ -808,5 +823,6 @@ angular.module('h.controllers', imports)
 .controller('AppController', App)
 .controller('EditorController', Editor)
 .controller('ViewerController', Viewer)
+.controller('AnnotationViewerController', AnnotationViewer)
 .controller('SearchController', Search)
 .controller('NotificationController', Notification)
