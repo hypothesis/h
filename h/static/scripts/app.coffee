@@ -58,7 +58,8 @@ configure = [
       baseURI = if baseTags.length then baseTags[0].href else document.URL
 
     # Explicitly whitelist '.html' paths adjacent to application base URI
-    basePattern = baseURI.replace /\/[^\/]*$/, '/*.html'
+    # TODO: move all front-end templates into their own directory for safety
+    basePattern = baseURI.replace /\/[^\/]*$/, '/**.html'
     $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
 ]
 
