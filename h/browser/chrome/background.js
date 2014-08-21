@@ -133,6 +133,7 @@ function onPageAction(tab) {
       console.warn("Inconsistent state. This should not be happening.")
     } else { // We are in the 'none' state
       // Normal non-pdf injection on page action
+      // console.log("Doing normal non-pdf insertion on page action");
       inject(tab.id)
     }
   }
@@ -160,6 +161,7 @@ function onTabUpdated(tabId, info) {
   setPageAction(tabId, currentState)
 
   if ((currentState == 'active') && (currentPdfState == 'none')) {
+    // console.log("Doing normal non-pdf insertion on update");
     inject(tabId)
   }
 }
