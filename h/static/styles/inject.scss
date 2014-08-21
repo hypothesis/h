@@ -155,6 +155,7 @@ $base-font-size: 14px;
   * {
     background: none;
     font-size: 100%;
+    text-indent: 0;
     height: initial;
     width: initial;
   }
@@ -252,6 +253,7 @@ $base-font-size: 14px;
   }
 
   a, a:hover, a:active, a:visited, a:link, a:link:hover {
+    background: $white;
     font-size: 1.3em;
     line-height: 28px;
 
