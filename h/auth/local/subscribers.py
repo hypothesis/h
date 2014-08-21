@@ -7,13 +7,18 @@ from horus.events import (
     PasswordResetEvent,
 )
 
+from h.events import LoginEvent
+
 
 @subscriber(NewRegistrationEvent, autologin=True)
 @subscriber(PasswordResetEvent, autologin=True)
 @subscriber(RegistrationActivatedEvent)
 def login(event):
     request = event.request
-    request.user = event.user
+    user = event.user
+    userid = 'acct:{}@{}'.format(user.username, request.domain)
+    event = LoginEvent(request, userid)
+    request.registry.notify(event)
 
 
 class AutoLogin(object):

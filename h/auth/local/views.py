@@ -5,6 +5,7 @@ import horus.views
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
 from pyramid import httpexceptions
+from pyramid.security import remember
 from pyramid.view import view_config, view_defaults
 
 from h import events, views
@@ -44,14 +45,6 @@ def ajax_form(request, result):
 
     result['flash'] = flash
 
-    # We do this here rather than in a subscriber because horus will fire
-    # events before calling :func:`pyramid.security.remember`. We want to
-    # correct the state of things after that.
-    if hasattr(request.user, 'id'):
-        user = 'acct:%s@%s' % (request.user.username, request.domain)
-        event = events.LoginEvent(request, user)
-        request.registry.notify(event)
-
     return result
 
 
@@ -85,10 +78,10 @@ class AuthController(horus.views.AuthController):
         request = self.request
         result = super(AuthController, self).login()
 
+        # XXX: Candidate for horus integration overhaul
         if request.user:
-            # XXX: Horus should maybe do this for us
-            user = 'acct:%s@%s' % (request.user.username, request.domain)
-            event = events.LoginEvent(request, user)
+            userid = 'acct:{}@{}'.format(request.user.username, request.domain)
+            event = events.LoginEvent(request, userid)
             request.registry.notify(event)
 
         return result
@@ -128,7 +121,16 @@ class AsyncForgotPasswordController(ForgotPasswordController):
 @view_config(attr='register', route_name='register')
 @view_config(attr='activate', route_name='activate')
 class RegisterController(horus.views.RegisterController):
-    pass
+    def register(self):
+        request = self.request
+        result = super(RegisterController, self).register()
+
+        # XXX: Candidate for horus integration overhaul
+        if request.user:
+            userid = 'acct:{}@{}'.format(request.user.username, request.domain)
+            request.response.headerlist.extend(remember(request, userid))
+
+        return result
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
