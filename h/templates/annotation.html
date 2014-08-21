@@ -30,8 +30,8 @@
     </span>
 
     <!-- Write / Preview Tabs -->
-    <div ng-show="editing">
-      <ul class="nav-tabs nobottomborder">
+    <div ng-show="editing"> 
+      <ul class="nav-tabs">
         <li ng-class="!preview && 'active'">
           <a href="" ng-click="preview = false">Write</a>
         </li>
@@ -39,6 +39,11 @@
           <a href="" ng-click="preview = true">Preview</a>
         </li>
       </ul>
+      <a class="icon-markdown" 
+         ng-hide="readonly" 
+         target="_blank" 
+         title="Parsed as Markdown" 
+         href="https://guides.github.com/features/mastering-markdown/" />
     </div>
 
     <!-- Timestamp -->

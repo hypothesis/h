@@ -1,9 +1,5 @@
 <textarea class="form-input form-field" ng-hide="readonly"
           ng-click="$event.stopPropagation()"
-          ng-required="required" 
-          placeholder="Your comments here… markdown is also supported.  *Italics*, **Bold**, [Link Title](http://example.com), ![Image Title](http://example.com/image.jpg)" />
-<a class="icon-markdownhelp"
-   ng-hide="readonly"
-   target="_blank"
-   href="https://guides.github.com/features/mastering-markdown/" />
+          ng-required="required" />
 <div class="markdownrendered" ng-bind-html="rendered" ng-show="readonly" />
+<p class="form-field" ng-show="$parent.preview && !$parent.model.text">Nothing to preview.</p>

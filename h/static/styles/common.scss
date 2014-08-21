@@ -334,17 +334,7 @@ h6 {
 
 //TABS////////////////////////////////
 .nav-tabs {
-  border: 1px none $gray-lighter;
-  border-bottom-style: solid;
-  padding: 0.9em 1em 1.1em;
-
-  &.nobottomborder {
-    border: 0px;
-    padding: 0px 0px 10px 0;
-    & > li {
-      a { padding-bottom: 1 / 13 * 1em;}
-    }
-  }
+  padding-bottom: 10px;
 
   & > li {
     display: inline-block;
@@ -358,7 +348,7 @@ h6 {
       border-bottom: 3px solid transparent;
       padding-left: 2 / 13 * 1em;
       padding-right: 2 / 13 * 1em;
-      padding-bottom: 3 / 13 * 1em;
+      padding-bottom: 1 / 13 * 1em;
     }
 
     &:active a {
@@ -377,7 +367,7 @@ h6 {
 
     &:before {
       content: "/";
-      margin: 0 1em;
+      margin: 0 .75em;
     }
 
     &:first-child:before {
@@ -451,7 +441,6 @@ h6 {
   }
 
   .body {
-    position: relative;
 
     div {
       clear: both;
@@ -475,23 +464,11 @@ h6 {
       }
     }
 
-    .icon-markdownhelp {
-      &:before {
-        content: "\e60e";
-      }
-      color: $gray-light;
-      position: absolute;
-      float: right;
-      right: 20px;
-      bottom: 3px;
-      font-size: 16px;
-    }
-
     textarea {
       min-height: 8em;
       width: 100%;
       resize: vertical;
-    }
+    }   
   }
 
   .buttonbar {
@@ -523,6 +500,15 @@ h6 {
     }
   }
 }
+
+.icon-markdown {
+  color: $gray-lighter;
+  font-size: 16px;
+  position: absolute;
+  top: 1px;
+  left: 117px;
+} 
+
 
 //MAGICONTROL////////////////////////////////
 .magicontrol {
