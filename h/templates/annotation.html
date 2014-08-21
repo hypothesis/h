@@ -74,12 +74,12 @@
   </div>
 
   <!-- Body -->
-  <div class="body" ng-show="mode=='search' && !editing">
+  <div class="styled-text" ng-show="mode=='search' && !editing">
     <markdown ng-model="model.highlightText"
               ng-readonly="!editing || preview"
               name="text" />
   </div>
-  <div class="body" ng-hide="mode=='search' && !editing">
+  <div class="styled-text" ng-hide="mode=='search' && !editing">
     <markdown ng-model="model.text"
               ng-readonly="!editing || preview"
               name="text" />

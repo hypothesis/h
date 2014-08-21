@@ -82,17 +82,22 @@ h2 {
 }
 
 h3 {
-  font-size: 1.17em;
+  font-size: 1.25em;
+  margin: .83em 0;
+}
+
+h4 {
+  font-size: 1.15em;
   margin: .83em 0;
 }
 
 h5 {
-  font-size: .83em;
+  font-size: 1.05em;
   margin: 1.5em 0;
 }
 
 h6 {
-  font-size: .75em;
+  font-size: 1em;
   margin: 1.67em 0;
 }
 
@@ -334,7 +339,7 @@ h6 {
 
 //TABS////////////////////////////////
 .nav-tabs {
-  padding-bottom: 10px;
+  margin-bottom: 10px;
 
   & > li {
     display: inline-block;
@@ -440,35 +445,50 @@ h6 {
     }
   }
 
-  .body {
+  .styled-text {
+    // This class applies to the annotation body.
 
     div {
       clear: both;
       margin: .25em 0;
-      #{elements-of-type(inline)}, #{headings()}, p, li {
+      #{elements-of-type(inline)}, #{headings()}, p {
         @include force-wrap;
       }
+    }
+ 
+    h1, h2, h3, h4, h5, h6 {
+      margin: 0px;
+    }
 
-      h1, h2, h3, h4, h5, h6 {
-        margin: 0px;
-      }
+    ol {
+      list-style-type: decimal;
+      padding-left: 1.5em;
+    }
 
-      ol {
-        list-style-type: decimal;
-        padding-left: 3em;
-      }
+    ul {
+      list-style-type: disc;
+      padding-left: 1.5em;
+    }
 
-      ul {
-        list-style-type: disc;
-        padding-left: 3em;
-      }
+    img {
+      display: block;
+      max-width: 100%;
     }
 
     textarea {
       min-height: 8em;
       width: 100%;
       resize: vertical;
-    }   
+    }
+
+    code {
+      color: #666;
+      font-family: "Courier New", monospace;
+    }
+    
+    blockquote {
+      @extend .annotation-quote;
+    }
   }
 
   .buttonbar {

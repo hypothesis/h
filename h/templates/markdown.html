@@ -1,5 +1,5 @@
 <textarea class="form-input form-field" ng-hide="readonly"
           ng-click="$event.stopPropagation()"
           ng-required="required" />
-<div class="markdownrendered" ng-bind-html="rendered" ng-show="readonly" />
+<div class="styled-text" ng-bind-html="rendered" ng-show="readonly" />
 <p class="form-field" ng-show="$parent.preview && !$parent.model.text">Nothing to preview.</p>
