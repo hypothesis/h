@@ -166,9 +166,7 @@ class AsyncRegisterController(RegisterController):
             user = self.User.get_by_activation(request, activation)
 
         if user is None:
-            return dict(errors={
-                'activation_code': _('This activation code is not valid.')
-            })
+            return dict(errors=[{'activation_code': _('This activation code is not valid.')}])
 
         user.password = appstruct['password']
         self.db.delete(activation)
@@ -207,7 +205,7 @@ class ProfileController(horus.views.ProfileController):
             request.context = user
             return super(ProfileController, self).edit_profile()
         else:
-            return dict(errors={'pwd': _('Invalid password')}, code=401)
+            return dict(errors=[{'pwd':_('Invalid password')}], code=401)
 
     def disable_user(self):
         request = self.request
@@ -232,7 +230,7 @@ class ProfileController(horus.views.ProfileController):
             FlashMessage(self.request, _('User disabled'), kind='success')
             return {}
         else:
-            return dict(errors={'pwd': _('Invalid password')}, code=401)
+            return dict(errors=[{'pwd':_('Invalid password')}], code=401)
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
