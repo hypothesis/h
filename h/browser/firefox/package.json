@@ -1,0 +1,9 @@
+{
+  "name": "hypothesis",
+  "title": "hypothes.is",
+  "id": "firefox@hypothes.is",
+  "description": "Annotate, highlight, and comment on anything on the Web.",
+  "author": "hypothes.is",
+  "license": "BSD",
+  "version": "0.1.0"
+}
