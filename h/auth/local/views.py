@@ -224,7 +224,8 @@ class ProfileController(horus.views.ProfileController):
         # Password check
         user = self.User.get_user(request, username, pwd)
         if user:
-            user.activation_id = -1
+            # TODO: maybe have an explicit disabled flag in the status
+            user.password = self.User.generate_random_password()
             self.db.add(user)
             FlashMessage(self.request, _('User disabled'), kind='success')
             return {}
