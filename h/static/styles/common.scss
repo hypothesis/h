@@ -486,8 +486,12 @@ h6 {
     }
 
     code {
-      color: #666;
-      font-family: "Courier New", monospace;
+      display: block;
+      font-family: monospace,monospace;
+      padding: 0 0.615em;
+      border: 1px solid #DDD;
+      background-color: #F8F8F8;
+      border-radius: 3px;
     }
     
     blockquote {
