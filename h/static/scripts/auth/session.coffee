@@ -11,6 +11,7 @@ ACTION = [
   'register'
   'forgot'
   'activate'
+  'edit_profile'
 ]
 
 ACTION_OPTION =
@@ -92,6 +93,33 @@ class SessionProvider
       $resource("#{baseURI}app", {}, actions).load()
   ]
 
+# Function providing a server-side user profile resource.
+#
+# This function provides an angular $resource factory
+# for manipulating server-side account-profile settings. It defines the
+# actions (such as 'login', 'register') as REST-ish actions
+profileProvider = [
+  '$q', '$resource', 'baseURI',
+  ($q,   $resource,   baseURI) ->
+    defaults =
+      email: ""
+      password: ""
+
+    actions =
+      edit_profile:
+        method: 'POST'
+        params:
+          __formid__: "edit_profile"
+        withCredentials: true
+      disable_user:
+        method: 'POST'
+        params:
+          __formid__: "disable_user"
+        withCredentials: true
+
+    $resource("#{baseURI}app", {}, actions)
+]
+
 
 configure = ['$httpProvider', ($httpProvider) ->
   defaults = $httpProvider.defaults
@@ -113,3 +141,4 @@ configure = ['$httpProvider', ($httpProvider) ->
 
 angular.module('h.session', imports, configure)
 .provider('session', SessionProvider)
+.factory('profile', profileProvider)

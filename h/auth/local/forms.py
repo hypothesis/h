@@ -34,6 +34,10 @@ class ActivateForm(Deform):
     buttons = (deform.Button('Sign in'),)
 
 
+class EditProfileForm(Deform):
+    buttons = (deform.Button('Save'),)
+
+
 def includeme(config):
     registry = config.registry
 
@@ -42,6 +46,7 @@ def includeme(config):
         (interfaces.IRegisterForm, RegisterForm),
         (interfaces.IForgotPasswordForm, ForgotForm),
         (interfaces.IResetPasswordForm, ResetForm),
+        (interfaces.IProfileForm, EditProfileForm),
     ]
 
     for iface, imp in forms:

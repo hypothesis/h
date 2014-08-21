@@ -475,3 +475,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
   isUpper:   (i) => i == 1
   isLower:   (i) => i == @index.length - 2
+  isComment: (i) => i is @_getCommentBucket()
+
+  # Simulate clicking on the comments tab
+  commentClick: =>
+    @dynamicBucket = false
+    annotator.showViewer "Comments", @buckets[@_getCommentBucket()]

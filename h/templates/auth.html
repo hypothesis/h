@@ -4,14 +4,13 @@
       class="form tab-pane"
       name="login"
       form-validate
-      data-form-validate-error-class="form-field-error"
       novalidate>
 
   <p class="form-description form-error" ng-show="login.responseErrorMessage">
     {{login.responseErrorMessage}}
   </p>
 
-  <div class="form-field" data-target="username">
+  <div class="form-field">
     <label class="form-label" for="field-login-username">Username:</label>
     <input class="form-input" type="text" id="field-login-username"
            name="username" value=""
@@ -27,7 +26,7 @@
     </ul>
   </div>
 
-  <div class="form-field" data-target="password">
+  <div class="form-field">
     <label class="form-label" for="field-login-password">Password:</label>
     <input class="form-input" id="field-login-password"
            type="password" name="password" value=""
@@ -60,14 +59,13 @@
       class="form tab-pane"
       name="register"
       form-validate
-      data-form-validate-error-class="form-field-error"
       novalidate>
 
   <p class="form-description form-error" ng-show="register.responseErrorMessage">
     {{register.responseErrorMessage}}
   </p>
 
-  <div class="form-field" data-target="username">
+  <div class="form-field">
     <label class="form-label" for="field-register-username">Username:
       <span class="form-hint">(between 3 and 15 characters)</span>
     </label>
@@ -91,7 +89,7 @@
     </ul>
   </div>
 
-  <div class="form-field" data-target="email">
+  <div class="form-field">
     <label class="form-label" for="field-register-email">Email Address:</label>
     <input class="form-input" id="field-register-email"
            type="email" name="email" value=""
@@ -107,7 +105,7 @@
     </ul>
   </div>
 
-  <div class="form-field" data-target="password">
+  <div class="form-field">
     <label class="form-label" for="field-register-password">Password:
       <span class="form-hint">(at least two characters)</span>
     </label>
@@ -141,13 +139,12 @@
       class="form tab-pane"
       name="forgot"
       form-validate
-      data-form-validate-error-class="form-field-error"
       novalidate>
 
   <p class="form-description form-error" ng-show="forgot.responseErrorMessage">
     {{forgot.responseErrorMessage}}
   </p>
-  <div class="form-field" data-target="email">
+  <div class="form-field">
     <label class="form-label" for="field-forgot-email">Please enter your email address:</label>
     <input class="form-input" id="field-forgot-email"
            type="email" name="email" value=""
@@ -174,14 +171,13 @@
       class="form tab-pane"
       name="activate"
       form-validate
-      data-form-validate-error-class="form-field-error"
       novalidate>
 
   <p class="form-description form-error" ng-show="activate.responseErrorMessage">
     {{activate.responseErrorMessage}}
   </p>
 
-  <div class="form-field" data-target="code">
+  <div class="form-field">
     <label class="form-label" for="field-activate-code">Your activation code:</label>
     <input class="form-input" id="field-activate-code"
            type="text" name="code" value="" placeholder="12345678"
@@ -194,7 +190,7 @@
     </ul>
   </div>
 
-  <div class="form-field" data-target="password">
+  <div class="form-field">
     <label class="form-label" for="field-activate-password">Account password:
       <span class="form-hint">(at least two characters)</span>
     </label>

@@ -1,47 +1,58 @@
+formInput = ->
+  link: (scope, elem, attr, [form, model, validator]) ->
+    return unless form?.$name and model?.$name and validator
+
+    fieldClassName = 'form-field'
+    errorClassName = 'form-field-error'
+
+    render = model.$render
+
+    resetResponse = (value) ->
+      model.$setValidity('response', true)
+      value
+
+    toggleClass = (addClass) ->
+      elem.toggleClass(errorClassName, addClass)
+      elem.parent().toggleClass(errorClassName, addClass)
+
+    model.$parsers.unshift(resetResponse)
+    model.$render = ->
+      toggleClass(model.$invalid and model.$dirty)
+      render()
+
+    validator.addControl(model)
+    scope.$on '$destroy', -> validator.removeControl this
+
+    scope.$watch ->
+      if model.$modelValue? or model.$pristine
+        model.$render()
+      return
+
+  require: ['^?form', '?ngModel', '^?formValidate']
+  restrict: 'C'
+
+
 formValidate = ->
-  link: (scope, elem, attr, form) ->
-    errorClassName = attr.formValidateErrorClass
+  controller: ->
+    controls = {}
 
-    toggleClass = (field, {addClass}) ->
-      fieldEl = elem.find("[data-target=#{field.$name}]")
-      fieldEl.toggleClass(errorClassName, addClass)
+    addControl: (control) ->
+      if control.$name
+        controls[control.$name] = control
 
-    updateField = (field) ->
-      return unless field?
+    removeControl: (control) ->
+      if control.$name
+        delete controls[control.$name]
 
-      if field.$valid
-        toggleClass(field, addClass: false)
-      else
-        toggleClass(field, addClass: true)
+    submit: ->
+      # make all the controls dirty and re-render them
+      for _, control of controls
+        control.$setViewValue(control.$viewValue)
+        control.$render()
 
-    # A custom parser for each form field that is used to reset the "response"
-    # error state whenever the $viewValue changes.
-    fieldParser = (field, value) ->
-      field.$setValidity('response', true)
-      updateField(field) if field.$valid
-      return value
-
-    forEachField = (fn) ->
-      fn(field) for own _, field of form when field?.$name?
-
-    forEachField (field) ->
-      parser = angular.bind(null, fieldParser, field)
-      field.$parsers.push(parser)
-
-    # Validate field when the content changes.
-    elem.on 'change', ':input', ->
-      updateField(form[this.name])
-
-    # Validate the field when submit is clicked.
-    elem.on 'submit', (event) ->
-      forEachField(updateField)
-
-    # Validate when a response is processed.
-    scope.$on 'error', (event, name) ->
-      return unless form.$name == name
-      forEachField(updateField)
-
-  require: 'form'
+  link: (scope, elem, attr, ctrl) ->
+    elem.on 'submit', ->
+      ctrl.submit()
 
 
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
@@ -245,6 +256,15 @@ thread = ['$rootScope', '$window', ($rootScope, $window) ->
 ]
 
 
+# TODO: Move this behaviour to a route.
+showAccount = ->
+  restrict: 'A'
+  link: (scope, elem, attr) ->
+    elem.on 'click', (event) ->
+      event.preventDefault()
+      scope.$emit('nav:account')
+
+
 repeatAnim = ->
   restrict: 'A'
   scope:
@@ -344,8 +364,22 @@ whenscrolled = ->
       if scrollHeight - scrollTop <= clientHeight + 40
         scope.$apply attr.whenscrolled
 
+match = ->
+  link: (scope, elem, attr, input) ->
+    validate = ->
+      scope.$evalAsync ->
+        input.$setValidity('match', scope.match == input.$modelValue)
+
+    elem.on('keyup', validate)
+    scope.$watch('match', validate)
+  scope:
+    match: '='
+  restrict: 'A'
+  require: 'ngModel'
+
 
 angular.module('h.directives', ['ngSanitize', 'ngTagsInput'])
+.directive('formInput', formInput)
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
@@ -354,5 +388,7 @@ angular.module('h.directives', ['ngSanitize', 'ngTagsInput'])
 .directive('tabReveal', tabReveal)
 .directive('thread', thread)
 .directive('username', username)
+.directive('showAccount', showAccount)
 .directive('repeatAnim', repeatAnim)
 .directive('whenscrolled', whenscrolled)
+.directive('match', match)

@@ -3,6 +3,7 @@ import colander
 import deform
 import horus.views
 from horus.lib import FlashMessage
+from horus.resources import UserFactory
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 
@@ -23,13 +24,16 @@ def ajax_form(request, result):
     else:
         errors = result.pop('errors', [])
         if errors:
-            request.response.status_code = 400
+            status_code = result.pop('code', 400)
+            request.response.status_code = status_code
             result['status'] = 'failure'
 
+            result.setdefault('errors', {})
             for e in errors:
                 if isinstance(e, colander.Invalid):
-                    result.setdefault('errors', {})
                     result['errors'].update(e.asdict())
+                elif isinstance(e, dict):
+                    result['errors'].update(e)
 
         reasons = flash.pop('error', [])
         if reasons:
@@ -143,7 +147,7 @@ class AsyncRegisterController(RegisterController):
         request = self.request
         Str = self.Str
 
-        schema = schemas.ActivationSchema.bind(request=request)
+        schema = schemas.ActivateSchema.bind(request=request)
         form = forms.ActivateForm(schema)
         appstruct = None
 
@@ -160,7 +164,9 @@ class AsyncRegisterController(RegisterController):
             user = self.User.get_by_activation(request, activation)
 
         if user is None:
-            return dict(errors=[_('This activation code is not valid.')])
+            return dict(errors={
+                'activation_code': _('This activation code is not valid.')
+            })
 
         user.password = appstruct['password']
         self.db.delete(activation)
@@ -175,6 +181,64 @@ class AsyncRegisterController(RegisterController):
         return {}
 
 
+@view_defaults(accept='text/html', renderer='h:templates/account.html')
+@view_config(attr='edit_profile', route_name='edit_profile')
+@view_config(attr='disable_user', route_name='disable_user')
+class ProfileController(horus.views.ProfileController):
+    def edit_profile(self):
+        request = self.request
+        schema = schemas.EditProfileSchema.bind(schemas.EditProfileSchema(),
+                                                request=request)
+        form = forms.EditProfileForm(schema)
+
+        try:
+            appstruct = form.validate(request.POST.items())
+        except deform.ValidationFailure as e:
+            return dict(errors=e.error.children)
+
+        username = appstruct['username']
+        pwd = appstruct['pwd']
+
+        # Password check
+        user = self.User.get_user(request, username, pwd)
+        if user:
+            request.context = user
+            return super(ProfileController, self).edit_profile()
+        else:
+            return dict(errors={'pwd': _('Invalid password')}, code=401)
+
+    def disable_user(self):
+        request = self.request
+        schema = schemas.EditProfileSchema.bind(schemas.EditProfileSchema(),
+                                                request=request)
+        form = forms.EditProfileForm(schema)
+
+        try:
+            appstruct = form.validate(request.POST.items())
+        except deform.ValidationFailure as e:
+            return dict(errors=e.error.children)
+
+        username = appstruct['username']
+        pwd = appstruct['pwd']
+
+        # Password check
+        user = self.User.get_user(request, username, pwd)
+        if user:
+            user.activation_id = -1
+            self.db.add(user)
+            FlashMessage(self.request, _('User disabled'), kind='success')
+            return {}
+        else:
+            return dict(errors={'pwd': _('Invalid password')}, code=401)
+
+
+@view_defaults(accept='application/json', name='app', renderer='json')
+@view_config(attr='edit_profile', request_param='__formid__=edit_profile')
+@view_config(attr='disable_user', request_param='__formid__=disable_user')
+class AsyncProfileController(ProfileController):
+    __view_mapper__ = AsyncFormViewMapper
+
+
 def includeme(config):
     registry = config.registry
     settings = registry.settings
@@ -184,6 +248,9 @@ def includeme(config):
 
     token_endpoint = settings.get('auth.local.token', '/oauth/token')
     config.add_route('auth.local.token', token_endpoint)
+    config.add_route('disable_user', '/disable/{user_id}',
+                     factory=UserFactory,
+                     traverse="/{user_id}")
 
     config.include('horus')
     config.scan(__name__)

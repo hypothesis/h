@@ -1,9 +1,10 @@
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
+sandbox = sinon.sandbox.create()
 
 
 class MockSession
-  $login: sinon.stub()
+  $login: sandbox.stub()
   $register: (callback, errback) ->
     errback
       data:
@@ -11,16 +12,21 @@ class MockSession
           username: 'taken'
         reason: 'registration error'
 
+mockUtil = applyValidationErrors: sandbox.spy()
 
 describe 'h.auth', ->
   beforeEach module('h.auth')
-  beforeEach module('auth.html')
+  beforeEach module('h.templates')
 
   beforeEach module ($provide) ->
-    $provide.value '$timeout', sinon.spy()
-    $provide.value 'flash', sinon.spy()
+    $provide.value '$timeout', sandbox.spy()
+    $provide.value 'flash', sandbox.spy()
     $provide.value 'session', new MockSession()
+    $provide.value 'util', mockUtil
     return
+
+  afterEach ->
+    sandbox.restore()
 
   describe 'AuthController', ->
     $scope = null
@@ -55,20 +61,19 @@ describe 'h.auth', ->
           $name: 'register'
           $valid: true
           username:
-            $setValidity: sinon.stub()
+            $setValidity: sandbox.stub()
           email:
-            $setValidity: sinon.stub()
+            $setValidity: sandbox.stub()
 
         auth.submit(form)
 
-        assert.calledWith form.username.$setValidity, 'response', false
-        assert.equal form.username.responseErrorMessage, 'taken'
-
+        assert.calledWith mockUtil.applyValidationErrors, form,
+          username: 'taken'
         assert.equal form.responseErrorMessage, 'registration error'
 
     describe 'timeout', ->
       it 'should happen after a period of inactivity', ->
-        sinon.spy $scope, '$broadcast'
+        sandbox.spy $scope, '$broadcast'
         $scope.model =
           username: 'test'
           email: 'test@example.com'
@@ -126,17 +131,8 @@ describe 'h.auth', ->
       assert.isTrue $scope.login.$valid
       assert.isUndefined $scope.login.responseErrorMessage
 
-    it 'should reset to pristine state when the model is reset', ->
-      $rootScope.form.$setDirty()
-      $rootScope.$digest()
-      assert.isFalse $rootScope.form.$pristine
-
-      $scope.model = null
-      $scope.$digest()
-      assert.isTrue $rootScope.form.$pristine
-
     it 'should invoke handlers set by attributes', ->
-      $rootScope.stub = sinon.stub()
+      $rootScope.stub = sandbox.stub()
       for event in ['error', 'success', 'timeout']
         $rootScope.stub.reset()
         $scope.$broadcast(event)
