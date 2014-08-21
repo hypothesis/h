@@ -62,6 +62,13 @@ function pdfState(tabId, value) {
   return value
 }
 
+function markAsNotPDF(tabId) { pdfState(tabId, 'none') }
+function markAsPDF(tabId)    { pdfState(tabId, 'pdf')  }
+
+function isPDF(tabId) {
+  tabState = pdfState(tabId) || 'unknown'
+  return tabState == 'pdf'
+}
 
 function setPageAction(tabId, value) {
   chrome.pageAction.setIcon({
@@ -105,33 +112,28 @@ function onUpdateAvailable() {
 
 
 function onPageAction(tab) {
-  var currentPdfState = pdfState(tab.id) || 'none'
+  var pdf = isPDF(tab.id)
   var newState
 
   if (state(tab.id) == 'active') {
     newState = state(tab.id, 'sleeping')
-    if (currentPdfState == 'pdfjs') {
+    if (pdf) {
       // console.log("Going back to the native viewer.")
       params = {url: decodeURIComponent(parsePdfExtensionURL(tab.url))};
       chrome.tabs.update(tab.id, params)
-    } else if (currentPdfState == 'native') {
-      console.warn("Inconsistent state. This should not be happening.")
-    } else { // We are in the 'none' state
+    } else {
       // Normal non-pdf removal on page action
+      // console.log("Doing normal non-pdf removal on page action");
       chrome.tabs.executeScript(tab.id, {
         file: 'public/destroy.js'
       })
     }
   } else {
     newState = state(tab.id, 'active')
-    if (currentPdfState == 'native') {
+    if (pdf) {
       // console.log("Reloading document with PDF.js...")
       chrome.tabs.reload(tab.id);
-      // TODO: investigate if we could do this without repeating
-      // the network transfer (probably yes)
-    } else if (currentPdfState == 'pdfjs') {
-      console.warn("Inconsistent state. This should not be happening.")
-    } else { // We are in the 'none' state
+    } else {
       // Normal non-pdf injection on page action
       // console.log("Doing normal non-pdf insertion on page action");
       inject(tab.id)
@@ -144,7 +146,7 @@ function onPageAction(tab) {
 
 function onTabCreated(tab) {
   state(tab.id, 'sleeping')
-  pdfState(tab.id, 'none')
+  pdfState(tab.id, null)
 }
 
 
@@ -156,11 +158,11 @@ function onTabRemoved(tab) {
 
 function onTabUpdated(tabId, info) {
   var currentState = state(tabId) || 'sleeping'
-  var currentPdfState = pdfState(tabId) || 'none'
+  var pdf = isPDF(tabId)
 
   setPageAction(tabId, currentState)
 
-  if ((currentState == 'active') && (currentPdfState == 'none')) {
+  if ((currentState == 'active') && !pdf) {
     // console.log("Doing normal non-pdf insertion on update");
     inject(tabId)
   }
