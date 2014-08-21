@@ -66,19 +66,50 @@ tags-input {
 }
 
 .tags-read-only {
-  font-size: 0.92em;
-  margin: 0.16em 0;
 
-  .tag-list, .tag-item {
-    display: inline;
-  }
+  .tag-list {
+    margin: 0.2em 0;
+    padding: 0;
+    border: 0 none;
+    background: none repeat scroll 0% 0% transparent;
+    clear: both;
+    vertical-align: baseline;
 
-  .tag-item a:after {
-    content: ", ";
-    color: $text-color;
-  }
+    &:after {
+      display: table;
+      clear: both;
+      content: "";
+    }
 
-  .tag-item:last-child a:after {
-    content: none;
+    li {
+      padding: 0 .3em;
+      font-size: 11px;
+      cursor: pointer;
+      display: block;
+      float: left;
+      padding: 0.01em 1.3em 0.01em 0.3em;
+      position: relative;
+      margin-right: 0.4em;
+
+      &.tag-item {
+        margin-top: 0.1em;
+        border: 1px solid #d3d3d3;
+        background: rgba(230, 230, 230, 0.5)50% 50% repeat-x;
+        font-weight: 400;
+        color: $gray;
+        padding: 0 .3em;
+        border-radius: 2px;
+      }
+
+      a {
+        color: $gray;
+        text-decoration: none;
+        
+        &:hover {
+          color: $link-color-hover;
+        }
+      }
+    }
   }
 }
+
