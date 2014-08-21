@@ -22,6 +22,12 @@ function inject(tabId) {
   })
 }
 
+function remove(tabId) {
+  chrome.tabs.executeScript(tabId, {
+    file: 'public/destroy.js'
+  })
+}
+
 
 function state(tabId, value) {
   var stateMap = localStorage.getItem('state')
@@ -124,9 +130,7 @@ function onPageAction(tab) {
     } else {
       // Normal non-pdf removal on page action
       // console.log("Doing normal non-pdf removal on page action");
-      chrome.tabs.executeScript(tab.id, {
-        file: 'public/destroy.js'
-      })
+      remove(tab.id)
     }
   } else {
     newState = state(tab.id, 'active')
