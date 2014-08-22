@@ -146,6 +146,15 @@ $input-border-radius: 2px;
   }
 }
 
+@mixin quote {
+  color: $gray;
+  font-family: $serif-font-family;
+  font-size: 1em;
+  margin-bottom: 1em;
+  padding: 0 .615em;
+  border-left: 3px solid $gray-lighter;
+}
+
 //NOISE///////////
 //Provides the noise background
 .noise {

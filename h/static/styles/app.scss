@@ -141,13 +141,13 @@ ol {
   }
 }
 
-.auth {
+.tabbable {
   .nav-tabs {
     border: 1px none $gray-lighter;
     border-bottom-style: solid;
     padding: 0.9em 1em 1.1em;
       & > li {
-        a { padding-bottom: 3 / 13 * 1em;}
+        a { padding-bottom: .231em;}
       }
   }
 }

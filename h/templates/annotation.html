@@ -23,7 +23,7 @@
          ng-hide="model.text || editing || model.deleted || model.tags.length"></i>
       <i class="small icon-comment3"
          ng-hide="model.target.length || model.references || editing"></i>
-      <span class="annotation-citation" ng-show="!embedded && document.title">
+      <span class="annotation-citation" ng-show="!editing && !embedded && document.title">
         left an annotation on &ldquo;<a href="{{document.uri}}" target="_blank">{{document.title}}</a>&rdquo;
         <span class="annotation-citation-domain" ng-show="document.domain != document.title">({{document.domain}})</span>
       </span>
@@ -37,13 +37,13 @@
         </li>
         <li ng-class="preview && 'active'">
           <a href="" ng-click="preview = true">Preview</a>
+          <a class="icon-markdown"
+             ng-hide="readonly"
+             target="_blank"
+             title="Parsed as Markdown"
+             href="https://guides.github.com/features/mastering-markdown/" />
         </li>
       </ul>
-      <a class="icon-markdown" 
-         ng-hide="readonly" 
-         target="_blank" 
-         title="Parsed as Markdown" 
-         href="https://guides.github.com/features/mastering-markdown/" />
     </div>
 
     <!-- Timestamp -->
@@ -86,7 +86,7 @@
   </div>
 
   <!-- Tags -->
-  <div class="form-field" ng-show="editing && !preview">
+  <div class="form-field" ng-show="editing">
     <tags-input ng-model="tags"
                 name="tags"
                 class="tags"

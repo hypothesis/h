@@ -208,12 +208,7 @@ h6 {
 }
 
 .annotation-quote {
-  color: $gray;
-  font-family: $serif-font-family;
-  font-size: 1em;
-  margin-bottom: 1em;
-  padding: 0 .615em;
-  border-left: 3px solid $gray-lighter;
+  @include quote;
 }
 
 
@@ -339,7 +334,7 @@ h6 {
 
 //TABS////////////////////////////////
 .nav-tabs {
-  margin-bottom: 10px;
+  margin-bottom: .7em;
 
   & > li {
     display: inline-block;
@@ -351,9 +346,9 @@ h6 {
       color: $gray-dark;
       cursor: pointer;
       border-bottom: 3px solid transparent;
-      padding-left: 2 / 13 * 1em;
-      padding-right: 2 / 13 * 1em;
-      padding-bottom: 1 / 13 * 1em;
+      padding-left: .153em;
+      padding-right: .153em;
+      padding-bottom: .076em;
 
       &:hover {
         color: $link-color-hover;
@@ -362,7 +357,7 @@ h6 {
 
     &:active a {
       position: relative;
-      top: 1 / 13 * 1em;
+      top: .076em;
     }
 
 
@@ -382,6 +377,16 @@ h6 {
     &:first-child:before {
       content: none;
     }
+
+    a.icon-markdown {
+      color: $gray-lighter;
+      font-size: 16px;
+      position: relative;
+      top: .15em;
+      left: .1em;
+      font-family: h;
+      font-weight: unset;
+    } 
   }
 }
 
@@ -449,21 +454,14 @@ h6 {
     }
   }
 
+// Break this out into a separate file. 
+// This class applies to the annotation body.
   .styled-text {
-    // This class applies to the annotation body.
 
-    div {
-      clear: both;
-      margin: .25em 0;
-      #{elements-of-type(inline)}, #{headings()}, p {
-        @include force-wrap;
-      }
-    }
- 
-    h1, h2, h3, h4, h5, h6 {
-      margin: 0px;
-    }
-
+    p, h1, h2, h3, h4, h5, h6, ol, ul, img, pre, blockquote {
+      margin: 0 0 .25em 0;
+    } 
+    
     ol {
       list-style-type: decimal;
       list-style-position:inside;
@@ -488,16 +486,18 @@ h6 {
     }
 
     code {
+      font-family: monospace;
+    }
+
+    pre code {
+      padding: 5px;
       display: block;
-      font-family: monospace,monospace;
-      padding: 0 0.615em;
-      border: 1px solid #DDD;
-      background-color: #F8F8F8;
-      border-radius: 3px;
+      background-color: $gray-lighter;
+      border-radius: .2em;
     }
     
     blockquote {
-      @extend .annotation-quote;
+      @include quote;
     }
   }
 
@@ -530,14 +530,6 @@ h6 {
     }
   }
 }
-
-.icon-markdown {
-  color: $gray-lighter;
-  font-size: 16px;
-  position: absolute;
-  top: 1px;
-  left: 117px;
-} 
 
 
 //MAGICONTROL////////////////////////////////
@@ -601,7 +593,7 @@ h6 {
   }
 }
 
-pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+// pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
 // View and Sort tabs ////////////////////
 .viewsort {
