@@ -34,11 +34,9 @@ class Annotation
       uri = model.uri
       if uri.indexOf("urn") is 0
         # This URI is not clickable, see if we have something better
-        model.document.link.forEach (x) ->
-          href = x.href
-          unless href.indexOf("urn") is 0
-            # Let's use this instead
-            uri = href
+        for link in model.document.link when link.href.indexOf("urn")
+          uri = link.href
+          break
 
       domain = extractURIComponent(uri, 'hostname')
 
