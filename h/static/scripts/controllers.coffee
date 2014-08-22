@@ -191,7 +191,7 @@ class App
       # restore sanity?
       annotations = Store.annotations.slice()
       cleanup = (loaded) ->
-        $timeout ->  # Give the threading plugin time to thread this annotation
+        $rootScope.$evalAsync ->  # Let plugins react
           deleted = []
           for l in loaded
             if l in annotations
@@ -205,8 +205,6 @@ class App
           annotations = (a for a in annotations when a not in deleted)
           if annotations.length is 0
             annotator.unsubscribe 'annotationsLoaded', cleanup
-            $rootScope.$digest()
-        , 10
       cleanup (a for a in annotations when a.thread)
       annotator.subscribe 'annotationsLoaded', cleanup
 
