@@ -88,7 +88,12 @@ Chrome Extension
 ^^^^^^^^^^^^^^^^
 Run the following command at the prompt to build the extension::
 
-    $ ./bin/hypothesis extension development.ini http://localhost:5000
+    $ ./bin/hypothesis extension chrome development.ini http://localhost:5000
+
+Or, to load the assets from within the extension::
+
+    $ ./bin/hypothesis extension chrome development.ini http://localhost:5000 \
+    chrome-extension://extensionid/public
 
 If you are managing your virtual environment yourself, the script may not be
 located in the ``bin`` directory, but should be available in your path when the

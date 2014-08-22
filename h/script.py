@@ -165,7 +165,7 @@ def assets(settings):
         bundle.urls()
 
 
-@command(usage='config_file base_url [static_url]')
+@command(usage='config_file browser base_url [static_url]')
 def extension(args, console, settings):
     """Build the browser extensions.
 
@@ -182,15 +182,19 @@ def extension(args, console, settings):
       chrome-extension://extensionid/public
     """
     if len(args) == 1:
-        console.error('You must supply a url to the hosted backend.')
+        console.error('You must supply a browser name: `chrome` or `firefox`.')
         return 2
     elif len(args) == 2:
+        console.error('You must supply a url to the hosted backend.')
+        return 2
+    elif len(args) == 3:
         assets_url = settings['webassets.base_url']
     else:
-        settings['webassets.base_url'] = args[2]
-        assets_url = args[2]
+        settings['webassets.base_url'] = args[3]
+        assets_url = args[3]
 
-    base_url = args[1]
+    browser = args[1]
+    base_url = args[2]
 
     # Fully-qualify the static asset url
     parts = urlparse(assets_url)
@@ -202,7 +206,14 @@ def extension(args, console, settings):
         assets_url = urlunparse(parts)
 
     # Set up the assets url and source path mapping
-    settings['webassets.base_dir'] = abspath('./build/chrome/public')
+    if browser == 'chrome':
+        settings['webassets.base_dir'] = abspath('./build/chrome/public')
+    elif browser == 'firefox':
+        settings['webassets.base_dir'] = abspath('./build/firefox/data')
+    else:
+        console.error('You must supply a browser name: `chrome` or `firefox`.')
+        return 2
+
     settings['webassets.base_url'] = assets_url
     settings['webassets.paths'] = json.dumps({
         resolve('h:static').abspath(): assets_url
@@ -219,12 +230,12 @@ def extension(args, console, settings):
 
     # Build it
     request = Request.blank('/app', base_url=base_url)
-    chrome(prepare(registry=config.registry, request=request))
+    globals()[browser](prepare(registry=config.registry, request=request))
 
     # XXX: Change when webassets allows setting the cache option
     # As of 0.10 it's only possible to pass a sass config  with string values
     try:
-        rmtree('./build/chrome/public/.sass-cache')
+        rmtree('./build/' + browser + '/public/.sass-cache')
     except OSError:
         pass  # newer Sass doesn't write this it seems
 
