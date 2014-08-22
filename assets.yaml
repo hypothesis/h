@@ -307,6 +307,7 @@ app_css:
           - h:static/styles/app.scss
         depends:
           - h:static/styles/base.scss
+          - h:static/styles/annotations.scss
           - h:static/styles/mixins/forms.scss
           - h:static/styles/common.scss
           - h:static/styles/responsive.scss

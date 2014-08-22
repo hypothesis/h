@@ -1,7 +1,14 @@
 @import 'compass/typography/text/force-wrap';
 @import 'compass/layout/stretching';
-
 @import 'base';
+
+$base-font-size: 16px;
+$base-line-height: 26px;
+$sans-font-family: "Source Sans Pro", $sans-font-family;
+$serif-font-family: "Merriweather", $serif-font-family;
+$headings-color: $text-color;
+
+@import 'annotations';
 @import 'forms';
 @import 'spinner';
 @import 'responsive';
@@ -9,13 +16,6 @@
 @import 'yui_grid';
 @import 'simple-search';
 @import 'tags-input';
-
-
-$base-font-size: 16px;
-$base-line-height: 26px;
-$sans-font-family: "Source Sans Pro", $sans-font-family;
-$serif-font-family: "Merriweather", $serif-font-family;
-$headings-color: $text-color;
 
 
 //ELEMENT STYLES////////////////////////////////
@@ -99,6 +99,15 @@ h5 {
 h6 {
   font-size: 1em;
   margin: 1.67em 0;
+}
+
+//PAPER////////////////////////////////
+//Provides the white background upon which items sit
+.paper {
+  background: $white;
+  border: solid 1px $gray-lighter;
+  border-radius: 2px;
+  padding: 1em;
 }
 
 //MCRANDOM////////////////////////////////
@@ -186,29 +195,6 @@ h6 {
   clip: rect(0 0 0 0);
   height: 1px; width: 1px;
   margin: -1px; padding: 0; border: 0;
-}
-
-
-
-//EXCERPT////////////////////////////////
-.excerpt {
-  margin-bottom: 1em;
-  position: relative;
-
-  .annotation-quote {
-    margin-bottom: 0;
-  }
-
-  .more, .less {
-    font-size: .9em;
-    font-family: $sans-font-family;
-    display: block;
-    text-align: right;
-  }
-}
-
-.annotation-quote {
-  @include quote;
 }
 
 
@@ -403,178 +389,6 @@ h6 {
 }
 
 
-//PAPER////////////////////////////////
-//Provides the white background upon which items sit
-.paper {
-  background: $white;
-  border: solid 1px $gray-lighter;
-  border-radius: 2px;
-  padding: 1em;
-}
-
-
-//ANNOTATION////////////////////////////////
-//This is for everything that is formatted as an annotation.
-.annotation {
-  @include pie-clearfix;
-  font-family: $sans-font-family;
-  position: relative;
-
-  &:hover fuzzytime a, &:hover .reply-count {
-    color: $link-color;
-  }
-
-  .magicontrol.dropdown {
-    top: 4px;
-  }
-
-  fuzzytime {
-    line-height: 2;
-
-    a {
-      color: $text-color;
-      &:hover { color: $link-color-hover; }
-      &:focus { outline: 0; }
-    }
-  }
-
-  .reply-count {
-    color: $text-color;
-    &:hover { color: $link-color-hover; }
-    &:focus { outline: 0; }
-  }
-
-  .user {
-    font-weight: bold;
-    font-size: 1.1em;
-    &:hover {
-      color: $link-color-hover;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-  }
-
-// Break this out into a separate file. 
-// This class applies to the annotation body.
-  .styled-text {
-
-    p, h1, h2, h3, h4, h5, h6, ol, ul, img, pre, blockquote {
-      margin: 0 0 .25em 0;
-    } 
-    
-    ol {
-      list-style-type: decimal;
-      list-style-position:inside;
-      padding-left: 1.5em;
-    }
-
-    ul {
-      list-style-type: disc;
-      list-style-position:inside;
-      padding-left: 1.5em;
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-    }
-
-    textarea {
-      min-height: 8em;
-      width: 100%;
-      resize: vertical;
-    }
-
-    code {
-      font-family: monospace;
-    }
-
-    pre code {
-      padding: 5px;
-      display: block;
-      background-color: $gray-lighter;
-      border-radius: .2em;
-    }
-    
-    blockquote {
-      @include quote;
-    }
-  }
-
-  .buttonbar {
-    @include pie-clearfix;
-    margin: .25em 0;
-
-    .btn {
-      margin-right: .5em;
-    }
-  }
-
-  .tip {
-    @extend .small;
-    float: right;
-  }
-
-  .quote {
-    font-style: italic
-  }
-}
-
-// Temporary hack until sidebar and displayer are unified
-.annotation-displayer {
-  .user {
-    &:hover {
-      color: $link-color-hover;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-  }
-}
-
-
-//MAGICONTROL////////////////////////////////
-.magicontrol {
-  @include transition(opacity);
-  @include transition-duration(.15s);
-  margin: 0 .4em;
-  opacity: 0;
-
-  &.open, :hover > & {
-    @include transition-duration(.15s);
-    opacity: 1;
-  }
-}
-
-.share-dialog {
-  display: none;
-
-  a {
-    float: left;
-    line-height: 1.4;
-    margin-right: .5em;
-    vertical-align: middle;
-  }
-
-  div {
-    overflow: hidden;
-  }
-
-  input {
-    padding: 0;
-    width: 100%;
-  }
-}
-
-.stream-list {
-  & > * {
-    margin-bottom: .72em;
-  }
-
-  .card-emphasis {
-    @include box-shadow(6px 6px 8px -2px $gray-light);
-  }
-}
-
 //SEARCH HIGHLIGHTS////////////////////////////////
 .search-hl-active {
   background: $highlight-color;
@@ -593,7 +407,6 @@ h6 {
   }
 }
 
-// pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
 // View and Sort tabs ////////////////////
 .viewsort {
