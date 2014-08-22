@@ -56,7 +56,7 @@ def add_base_url(event):
     assets_env = request.webassets_env
     view_name = getattr(request, 'view_name', None)
 
-    if view_name == 'embed.js' and not assets_env.url.startswith('http'):
+    if view_name == 'embed.js' and assets_env.url.startswith('chrome-extension'):
         base_url = join(request.webassets_env.url, '')
     else:
         base_url = request.resource_url(request.context, '')
