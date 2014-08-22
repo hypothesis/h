@@ -68,10 +68,10 @@ tags-input {
 .tags-read-only {
 
   .tag-list {
-    margin: 0.2em 0;
+    margin: 1em 0 0;
     padding: 0;
     border: 0 none;
-    background: none repeat scroll 0% 0% transparent;
+    background: none;
     clear: both;
     vertical-align: baseline;
 
@@ -82,27 +82,26 @@ tags-input {
     }
 
     li {
-      padding: 0 .3em;
+      padding: 0 .4em;
       font-size: 11px;
       cursor: pointer;
       display: block;
       float: left;
-      padding: 0.01em 1.3em 0.01em 0.3em;
+      padding: .01em 1.3em .01em .3em;
       position: relative;
       margin-right: 0.4em;
 
       &.tag-item {
-        margin-top: 0.1em;
+        margin-top: .4em;
         border: 1px solid #d3d3d3;
-        background: rgba(230, 230, 230, 0.5)50% 50% repeat-x;
+        background: $gray-lightest;
         font-weight: 400;
-        color: $gray;
-        padding: 0 .3em;
+        padding: 0 .4em;
         border-radius: 2px;
       }
 
       a {
-        color: $gray;
+        color: $gray-light;
         text-decoration: none;
         
         &:hover {
