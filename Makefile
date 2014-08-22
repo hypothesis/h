@@ -13,9 +13,7 @@ clean:
 		-exec rm {} \;
 	find h/static/styles \
 		-iname '*.css' \
-		-not -iname 'icomoon.css' \
 		-not -iname 'visualsearch.css' \
-		-not -iname 'jquery-ui-smoothness.css' \
 		-exec rm {} \;
 
 test:
