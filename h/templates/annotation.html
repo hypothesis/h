@@ -81,7 +81,6 @@
   </div>
 
   <div class="tags tags-read-only" ng-show="tags.length && !editing">
-    Tagged:
     <ul class="tag-list">
       <li class="tag-item" ng-repeat="tag in tags">
         <a href="/stream?q=tag:{{tag.text}}" target="_blank">{{tag.text}}</a>
