@@ -54,7 +54,7 @@ def add_base_url(event):
     assets_env = request.webassets_env
     view_name = getattr(request, 'view_name', None)
 
-    if view_name == 'embed.js' and not assets_env.url.startswith('http'):
+    if (view_name == 'embed.js' or view_name == 'embed-pdf.js') and not assets_env.url.startswith('http'):
         base_url = join(request.webassets_env.url, '')
     else:
         base_url = request.resource_url(request.context, '')
@@ -71,6 +71,12 @@ def embed(context, request):
     setattr(request, 'view_name', 'embed.js')
     with open('public/embed.js', 'w') as f:
         f.write(render_view(context, request, name='embed.js'))
+    delattr(request, 'view_name')
+
+def embed_pdf(context, request):
+    setattr(request, 'view_name', 'embed-pdf.js')
+    with open('public/embed-pdf.js', 'w') as f:
+        f.write(render_view(context, request, name='embed-pdf.js'))
     delattr(request, 'view_name')
 
 
@@ -123,6 +129,7 @@ def chrome(env):
 
     manifest(context, request)
     embed(context, request)
+    embed_pdf(context, request)
 
     # Reset the directory
     chdir(old_dir)
