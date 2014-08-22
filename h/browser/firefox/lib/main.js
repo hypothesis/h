@@ -25,10 +25,10 @@ btn_config = {
   label: "Annotate",
   contentURL: "http://hypothes.is/wp-content/uploads/2012/12/favicon1.ico",
   icon: {
-    "18": './18.png',
-    "32": './32.png',
-    "36": './36.png',
-    "64": './64.png'
+    "18": './images/sleeping_18.png',
+    "32": './images/sleeping_32.png',
+    "36": './images/sleeping_36.png',
+    "64": './images/sleeping_64.png'
   },
   onClick: function(state) {
     tabToggle(tabs.activeTab)
