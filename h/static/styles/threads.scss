@@ -80,8 +80,6 @@ $threadexp-width: .6em;
   }
 
   &.collapsed {
-    display: block !important;
-
     &:hover {
       background-color: $gray-lightest;
     }
@@ -92,13 +90,16 @@ $threadexp-width: .6em;
     }
 
     & > .annotation {
-      .body * {
+      markdown > div > * {
+        display: none;
+      }
+
+      markdown > div > *:first-child {
+        display: block;
         overflow: hidden;
         text-overflow: ellipsis;
         -o-text-overflow: ellipsis;
         white-space: nowrap;
-        margin-top: 0;
-        margin-bottom: 0;
       }
 
       .indicators {
