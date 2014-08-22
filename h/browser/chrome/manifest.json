@@ -42,7 +42,7 @@
 
   "file_browser_handlers": [{
      "id": "open-as-pdf",
-     "default_title": "Open with Hypothes.is + PDF Viewer",
+     "default_title": "Open with Hypothes.is",
      "file_filters": [
        "filesystem:*.pdf"
      ]
