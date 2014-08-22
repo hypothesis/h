@@ -131,36 +131,6 @@ privacy = ->
   templateUrl: 'privacy.html'
 
 
-recursive = ['$compile', '$timeout', ($compile, $timeout) ->
-  compile: (tElement, tAttrs, transclude) ->
-    placeholder = angular.element '<!-- recursive -->'
-    attachQueue = []
-    tick = false
-
-    template = tElement.contents().clone()
-    tElement.html ''
-
-    transclude = $compile template, (scope, cloneAttachFn) ->
-      clone = placeholder.clone()
-      cloneAttachFn clone
-      $timeout ->
-        transclude scope, (el, scope) -> attachQueue.push [clone, el]
-        unless tick
-          tick = true
-          requestAnimationFrame ->
-            tick = false
-            for [clone, el] in attachQueue
-              clone.after el
-              clone.bind '$destroy', -> el.remove()
-            attachQueue = []
-      clone
-    post: (scope, iElement, iAttrs, controller) ->
-      transclude scope, (contents) -> iElement.append contents
-  restrict: 'A'
-  terminal: true
-]
-
-
 tabReveal = ['$parse', ($parse) ->
   compile: (tElement, tAttrs, transclude) ->
     panes = []
@@ -205,7 +175,7 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
-thread = ['$rootScope', '$window', ($rootScope, $window) ->
+thread = ['$$rAF', '$filter', '$window', ($$rAF, $filter, $window) ->
   # Helper -- true if selection ends inside the target and is non-empty
   ignoreClick = (event) ->
     sel = $window.getSelection()
@@ -214,33 +184,37 @@ thread = ['$rootScope', '$window', ($rootScope, $window) ->
         return true
     return false
 
+  renderFrame = null
+  renderQueue = []
+
+  render = ->
+    return if renderFrame or renderQueue.length is 0
+
+    renderFrame = $$rAF ->
+      renderFrame = null
+
+      [scope, data] = renderQueue.shift()
+      while renderQueue[0]?[0] is scope
+        angular.extend data, renderQueue.shift()[1]
+
+      angular.extend scope, data
+      scope.$digest()
+
+      render()
+
   link: (scope, elem, attr, ctrl) ->
     childrenEditing = {}
 
-    # If this is supposed to be focused, then open it
-    if scope.annotation in ($rootScope.focused or [])
-      scope.collapsed = false
-
-    scope.$on "focusChange", ->
-      # XXX: This not needed to be done when the viewer and search will be unified
-      ann = scope.annotation ? scope.thread.message
-      if ann in $rootScope.focused
-        scope.collapsed = false
-      else
-        unless ann.references?.length
-          scope.collapsed = true
+    scope.annotation = null
+    scope.replies = null
 
     scope.toggleCollapsed = (event) ->
       event.stopPropagation()
       return if (ignoreClick event) or Object.keys(childrenEditing).length
       scope.collapsed = !scope.collapsed
-      # XXX: This not needed to be done when the viewer and search will be unified
-      ann = scope.annotation ? scope.thread.message
-      if scope.collapsed
-        $rootScope.unFocus ann, true
-      else
-        scope.openDetails ann
-        $rootScope.focus ann, true
+
+    scope.$on 'destroy', ->
+      renderQueue = ([s, _] for [s, _] in renderQueue is s isnt scope)
 
     scope.$on 'toggleEditing', (event) ->
       {$id, editing} = event.targetScope
@@ -252,6 +226,19 @@ thread = ['$rootScope', '$window', ($rootScope, $window) ->
           childrenEditing[$id] = true
       else
         delete childrenEditing[$id]
+
+    scope.$watch 'thread', (thread) ->
+      return unless thread
+      annotation = thread.message
+      renderQueue.push [scope, {annotation}]
+      render()
+
+    scope.$watchCollection 'thread.children', (children) ->
+      return unless children
+      replies = $filter('orderBy')(children, 'message.updated', true)
+      renderQueue.push [scope, {replies}]
+      render()
+
   restrict: 'C'
 ]
 
@@ -384,7 +371,6 @@ angular.module('h.directives', ['ngSanitize', 'ngTagsInput'])
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
 .directive('privacy', privacy)
-.directive('recursive', recursive)
 .directive('tabReveal', tabReveal)
 .directive('thread', thread)
 .directive('username', username)

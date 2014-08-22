@@ -162,11 +162,6 @@ autofill:
   output: scripts/vendor/polyfills/autofill-event.min.js
   contents:
     - h:static/scripts/vendor/polyfills/autofill-event.js
-raf:
-  filters: uglifyjs
-  output: scripts/vendor/polyfills/raf.min.js
-  contents:
-    - h:static/scripts/vendor/polyfills/raf.js
 wgxpath:
   filters: uglifyjs
   output: scripts/vendor/polyfills/wgxpath.install.min.js
@@ -256,7 +251,6 @@ app:
     - momentjs
     - pagedown
     - autofill
-    - raf
     - sockjs
     - uuid
     - auth_css

@@ -3,7 +3,7 @@
     <!-- Toolbar -->
     <div class="ng-cloak topbar"
          ng-class="frame.visible && 'shown'"
-         ng-mouseenter="showViewSort(true, true)">
+         ng-mouseenter="viewState.showControls = true">
       <div class="inner" ng-switch="persona">
         <span class="pull-right" ng-switch-when="undefined">⋯</span>
         <a class="pull-right" href=""
@@ -43,23 +43,11 @@
            data-settings-panel-model="auth.persona"></div>
       <!-- / Panels -->
 
-      <!-- View Sort Controls -->
+      <!-- Sort Controls -->
       <div class="ng-cloak viewsort"
-           ng-mouseenter="showViewSort()"
-           ng-mouseleave="showViewSort(false)"
+           ng-mouseenter="viewStote.showControls = true"
+           ng-mouseleave="viewState.showControls = false"
            ng-show="viewState.showControls">
-        <div class="dropdown" ng-show="viewState.show">
-          <span role="button"
-                class="dropdown-toggle"
-                data-toggle="dropdown"
-                >{{viewState.view}}<i class="icon-triangle"></i></span>
-          <ul class="dropdown-menu" role="menu">
-            <li ng-repeat="view in ['Screen', 'Document', 'Comments']">
-              <a href="" ng-click="applyView(view)">{{view}}</a>
-            </li>
-          </ul>
-        </div>
-
         <div class="dropdown">
           <span role="button"
                 class="dropdown-toggle"
@@ -72,7 +60,7 @@
           </ul>
         </div>
       </div>
-      <!-- / View Sort Controls -->
+      <!-- / Sort Controls -->
 
       <!-- Account and Authentication -->
       <div class="content ng-cloak" ng-show="!!sheet">
@@ -125,8 +113,8 @@
     <script type="text/ng-template" id="viewer.html">
       <metal:main use-macro="load: h:templates/viewer.html" />
     </script>
-    <script type="text/ng-template" id="page_search.html">
-      <metal:main use-macro="load: h:templates/page_search.html" />
+    <script type="text/ng-template" id="thread.html">
+      <metal:main use-macro="load: h:templates/thread.html" />
     </script>
     <script type="text/ng-template" id="notification.html">
       <metal:main use-macro="load: h:templates/notification.html" />

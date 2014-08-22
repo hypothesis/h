@@ -15,12 +15,12 @@ extractURIComponent = (uri, component) ->
 
 class Annotation
   this.$inject = [
-    '$element', '$location', '$rootScope', '$sce', '$scope', '$timeout',
+    '$element', '$location', '$sce', '$scope', '$timeout',
     '$window',
     'annotator', 'documentHelpers', 'drafts'
   ]
   constructor: (
-     $element,   $location,   $rootScope,   $sce,   $scope,   $timeout,
+     $element,   $location,   $sce,   $scope,   $timeout,
      $window,
      annotator,   documentHelpers,   drafts
   ) ->
@@ -81,20 +81,8 @@ class Annotation
 
       switch $scope.action
         when 'create'
-          # First, focus on the newly created annotation
-          unless annotator.isReply annotation
-            $rootScope.focus annotation, true
-
-          if annotator.isComment(annotation) and
-              $rootScope.viewState.view isnt "Comments"
-            $rootScope.applyView "Comments"
-          else if not annotator.isReply(annotation) and
-              $rootScope.viewState.view not in ["Document", "Selection"]
-            $rootScope.applyView "Screen"
           annotator.publish 'annotationCreated', annotation
         when 'delete'
-          root = $scope.$root.annotations
-          root = (a for a in root when a isnt root)
           annotation.deleted = true
           unless annotation.text? then annotation.text = ''
           annotator.updateAnnotation annotation
@@ -158,7 +146,7 @@ class Annotation
 
     $scope.$watch 'model.id', (id) ->
       if id?
-        $scope.thread = $scope.model.thread
+        $scope.thread = annotator.threading.getContainer(id)
 
         # Check if this is a brand new annotation
         if drafts.contains $scope.model
@@ -183,12 +171,6 @@ class Annotation
         $timeout -> $element.find('input').select()
         $scope.shared = false
         return
-
-    $scope.$watchCollection 'model.thread.children', (newValue=[]) ->
-      return unless $scope.model
-      replies = (r.message for r in newValue)
-      replies = replies.sort(annotator.sortAnnotations).reverse()
-      $scope.model.reply_list = replies
 
     $scope.toggle = ->
       $element.find('.share-dialog').slideToggle()

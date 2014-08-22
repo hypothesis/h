@@ -23,7 +23,6 @@ class Annotator.Guest extends Annotator
     Document: {}
 
   # Internal state
-  comments: null
   tool: 'comment'
   visibleHighlights: false
   noBack: false
@@ -32,12 +31,6 @@ class Annotator.Guest extends Annotator
     options.noScan = true
     super
     delete @options.noScan
-
-    # Create an array for holding the comments
-    @comments = []
-
-    # These are in focus (visually marked here, and open in sidebar)
-    @focusedAnnotations = []
 
     @frame = $('<div></div>')
     .appendTo(@wrapper)
@@ -79,14 +72,6 @@ class Annotator.Guest extends Annotator
     unless config.dontScan
       # Scan the document text with the DOM Text libraries
       this.scanDocument "Guest initialized"
-
-    # Watch for deleted comments
-    this.subscribe 'annotationDeleted', (annotation) =>
-      if this.isComment annotation
-        i = @comments.indexOf annotation
-        if i isnt -1
-          @comments[i..i] = []
-          @plugins.Heatmap._update()
 
     # Watch for newly rendered highlights, and update positions in sidebar
     this.subscribe "highlightsCreated", (highlights) =>
@@ -144,6 +129,7 @@ class Annotator.Guest extends Annotator
 
     .bind('setDynamicBucketMode', (ctx, value) =>
       return unless @plugins.Heatmap
+      return if @plugins.Heatmap.dynamicBucket is value
       @plugins.Heatmap.dynamicBucket = value
       if value then @plugins.Heatmap._update()
     )
@@ -159,11 +145,9 @@ class Annotator.Guest extends Annotator
     )
 
     .bind('setFocusedHighlights', (ctx, tags=[]) =>
-      this.focusedAnnotations = []
       for hl in @getHighlights()
         annotation = hl.annotation
         if annotation.$$tag in tags
-          this.focusedAnnotations.push annotation
           hl.setFocused true, true
         else
           hl.setFocused false, true
@@ -189,22 +173,6 @@ class Annotator.Guest extends Annotator
         uri: @plugins.Document.uri()
         metadata: @plugins.Document.metadata
       }
-    )
-
-    .bind('showAll', =>
-      # Switch off dynamic mode on the heatmap
-      if @plugins.Heatmap
-        @plugins.Heatmap.dynamicBucket = false
-
-      # Collect all successfully attached annotations
-      annotations = []
-      for page, anchors of @anchors
-        for anchor in anchors
-          unless anchor.annotation in annotations
-            annotations.push anchor.annotation
-
-      # Show all the annotations
-      @updateViewer "Document", annotations
     )
 
     .bind('setTool', (ctx, name) =>
@@ -265,28 +233,20 @@ class Annotator.Guest extends Annotator
 
     this.removeEvents()
 
-  showViewer: (viewName, annotations, focused = false) =>
+  showViewer: (annotations) =>
     @panel?.notify
       method: "showViewer"
-      params:
-        view: viewName
-        ids: (a.id for a in annotations when a.id)
-        focused: focused
+      params: (a.id for a in annotations when a.id)
 
-  toggleViewerSelection: (annotations, focused = false) =>
+  toggleViewerSelection: (annotations) =>
     @panel?.notify
       method: "toggleViewerSelection"
-      params:
-        ids: (a.id for a in annotations)
-        focused: focused
+      params: (a.id for a in annotations)
 
-  updateViewer: (viewName, annotations, focused = false) =>
+  updateViewer: (annotations) =>
     @panel?.notify
       method: "updateViewer"
-      params:
-        view: viewName
-        ids: (a.id for a in annotations when a.id)
-        focused: focused
+      params: (a.id for a in annotations when a.id)
 
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
@@ -341,57 +301,33 @@ class Annotator.Guest extends Annotator
     else
       super
 
-  # Get the list of annotations impacted by a mouse event
-  _getImpactedAnnotations: (event) ->
-    # Get the raw list
-    annotations = event.data.getAnnotations event
-
-    # Are the highlights supposed to be visible?
-    if (@tool is 'highlight') or @visibleHighlights
-      # Just use the whole list
-      annotations
-    else
-      # We need to check for focused annotations
-      a for a in annotations when a in this.focusedAnnotations
-
   onAnchorMouseover: (event) ->
-    this.addEmphasis this._getImpactedAnnotations event
+    this.addEmphasis event.data.getAnnotations event
 
   onAnchorMouseout: (event) ->
-    this.removeEmphasis this._getImpactedAnnotations event
-
-  # When clicking on a highlight in highlighting mode,
-  # set @noBack to true to prevent the sidebar from closing
-  onAnchorMousedown: (event) =>
-    if this._getImpactedAnnotations(event).length
-      @noBack = true
+    this.removeEmphasis event.data.getAnnotations event
 
   # Select some annotations.
   #
   # toggle: should this toggle membership in an existing selection?
-  # focus: should these annotation become focused?
-  selectAnnotations: (annotations, toggle, focus) =>
+  selectAnnotations: (annotations, toggle) =>
     # Switch off dynamic mode; we are going to "Selection" scope
     @plugins.Heatmap.dynamicBucket = false
 
     if toggle
       # Tell sidebar to add these annotations to the sidebar
-      this.toggleViewerSelection annotations, focus
+      this.toggleViewerSelection annotations
     else
       # Tell sidebar to show the viewer for these annotations
-      this.showViewer "Selection", annotations, focus
+      this.showViewer annotations
 
   # When clicking on a highlight in highlighting mode,
   # tell the sidebar to bring up the viewer for the relevant annotations
   onAnchorClick: (event) =>
-    annotations = this._getImpactedAnnotations event
-    return unless annotations.length and @noBack
-
-    this.selectAnnotations annotations,
-      (event.metaKey or event.ctrlKey), true
-
-    # We have already prevented closing the sidebar, now reset this flag
-    @noBack = false
+    if @visibleHighlights or @tool is 'highlight'
+      event.stopPropagation()
+      this.selectAnnotations (event.data.getAnnotations event),
+        (event.metaKey or event.ctrlKey)
 
   setTool: (name) ->
     @panel?.notify
@@ -423,12 +359,6 @@ class Annotator.Guest extends Annotator
   isComment: (annotation) ->
     # No targets and no references means that this is a comment.
     not (annotation.inject or annotation.references?.length or annotation.target?.length)
-
-  # Override for setupAnnotation, to handle comments
-  setupAnnotation: (annotation) ->
-    annotation = super # Set up annotation as usual
-    if this.isComment annotation then @comments.push annotation
-    annotation
 
   # Open the sidebar
   showFrame: ->

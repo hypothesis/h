@@ -46,7 +46,7 @@ configure = [
       templateUrl: 'viewer.html'
     $routeProvider.when '/page_search',
       controller: 'SearchController'
-      templateUrl: 'page_search.html'
+      templateUrl: 'viewer.html'
     $routeProvider.when '/stream',
       controller: 'StreamSearchController'
       templateUrl: 'viewer.html'

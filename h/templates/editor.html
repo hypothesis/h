@@ -6,5 +6,8 @@
       <input type="checkbox" ng-model="target.showDiff" ng-click="$event.stopPropagation()"> Show differences</input>
     </div>
   </div>
-  <div ng-model="annotation" class="annotation" annotation-embedded="true" />
+  <div class="annotation"
+       annotation-embedded="true"
+       ng-if="annotation"
+       ng-model="annotation" />
 </div>

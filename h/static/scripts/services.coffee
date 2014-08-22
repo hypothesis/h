@@ -5,10 +5,7 @@ imports = [
 
 
 class Hypothesis extends Annotator
-  events:
-    'annotationCreated': 'updateAncestors'
-    'annotationUpdated': 'updateAncestors'
-    'annotationDeleted': 'updateAncestors'
+  events: {}
 
   # Plugin configuration
   options:
@@ -162,71 +159,10 @@ class Hypothesis extends Annotator
           for action, roles of annotation.permissions
             unless userId in roles then roles.push userId
 
-    # Track the visible annotations in the root scope
-    $rootScope.annotations = []
-    $rootScope.search_annotations = []
-    $rootScope.focused = []
-
-    $rootScope.focus = (annotation,
-      announceToDoc = false,
-      announceToCards = false
-    ) =>
-      unless annotation
-        console.log "Warning: trying to focus on null annotation"
-        return
-
-      return if annotation in $rootScope.focused
-
-      # Put this on the list
-      $rootScope.focused.push annotation
-      # Tell the document, if we have to
-      this._broadcastFocusInfo() if announceToDoc
-      # Tell to the annotation cards, if we have to
-      this._scheduleFocusUpdate() if announceToCards
-
-    $rootScope.unFocus = (annotation,
-      announceToDoc = false,
-      announceToCards = false
-    ) =>
-      index = $rootScope.focused.indexOf annotation
-      return if index is -1
-
-      # Remove from the list
-      $rootScope.focused.splice index, 1
-      # Tell the document, if we have to
-      this._broadcastFocusInfo() if announceToDoc
-      # Tell to the annotation cards, if we have to
-      this._scheduleFocusUpdate() if announceToCards
-
-    # Add new annotations to the view when they are created
-    this.subscribe 'annotationCreated', (a) =>
-      unless a.references?
-        $rootScope.annotations.unshift a
-
-    # Remove annotations from the application when they are deleted
+    # Remove annotations from the view when they are deleted
     this.subscribe 'annotationDeleted', (a) =>
-      $rootScope.annotations = $rootScope.annotations.filter (b) -> b isnt a
-      $rootScope.search_annotations = $rootScope.search_annotations.filter (b) -> b.message?
-
-  _broadcastFocusInfo: ->
-    $rootScope = @element.injector().get '$rootScope'
-    for p in @providers
-      p.channel.notify
-        method: 'setFocusedHighlights'
-        params: (a.$$tag for a in $rootScope.focused)
-
-  # Schedule the broadcasting of the focusChanged signal
-  # to annotation cards
-  _scheduleFocusUpdate: ->
-    return if @_focusUpdatePending
-    @_focusUpdatePending = true
-    $timeout = @element.injector().get('$timeout')
-    $rootScope = @element.injector().get('$rootScope')
-    $timeout (=>
-      # Announce focus changes
-      $rootScope.$broadcast 'focusChange'
-      delete @_focusUpdatePending
-    ), 100
+      scope = @element.scope()
+      scope.annotations = scope.annotations.filter (b) -> b isnt a
 
   _setupXDM: (options) ->
     $rootScope = @element.injector().get '$rootScope'
@@ -260,22 +196,22 @@ class Hypothesis extends Annotator
       $rootScope.$apply => this.show()
     )
 
-    .bind('showViewer', (ctx, {view, ids, focused}) =>
+    .bind('showViewer', (ctx, ids) =>
       ids ?= []
       return unless this.discardDrafts()
       $rootScope.$apply =>
-        this.showViewer view, this._getAnnotationsFromIDs(ids), focused
+        this.showViewer this._getAnnotationsFromIDs(ids)
     )
 
-    .bind('updateViewer', (ctx, {view, ids, focused}) =>
+    .bind('updateViewer', (ctx, ids) =>
       ids ?= []
       $rootScope.$apply =>
-        this.updateViewer view, this._getAnnotationsFromIDs(ids), focused
+        this.updateViewer this._getAnnotationsFromIDs(ids)
     )
 
-    .bind('toggleViewerSelection', (ctx, {ids, focused}) =>
+    .bind('toggleViewerSelection', (ctx, ids) =>
       $rootScope.$apply =>
-        this.toggleViewerSelection this._getAnnotationsFromIDs(ids), focused
+        this.toggleViewerSelection this._getAnnotationsFromIDs(ids)
     )
 
     .bind('setTool', (ctx, name) =>
@@ -334,86 +270,40 @@ class Hypothesis extends Annotator
     annotation.highlights = []
     annotation
 
-  sortAnnotations: (a, b) ->
-    a_upd = if a.updated? then new Date(a.updated) else new Date()
-    b_upd = if b.updated? then new Date(b.updated) else new Date()
-    a_upd.getTime() - b_upd.getTime()
-
-  buildReplyList: (annotations=[]) =>
-    $filter = @element.injector().get '$filter'
-    for annotation in annotations
-      if annotation?
-        thread = @threading.getContainer annotation.id
-        children = (r.message for r in (thread.children or []))
-        annotation.reply_list = children.sort(@sortAnnotations).reverse()
-        @buildReplyList children
-
-  toggleViewerSelection: (annotations=[], focused) =>
+  toggleViewerSelection: (annotations=[]) =>
     annotations = annotations.filter (a) -> a?
-    @element.injector().invoke [
-      '$rootScope',
-      ($rootScope) =>
-        if $rootScope.viewState.view is "Selection"
-          # We are already in selection mode; just XOR this list
-          # to the current selection
-          @buildReplyList annotations
-          list = $rootScope.annotations
-          for a in annotations
-            index = list.indexOf a
-            if index isnt -1
-              list.splice index, 1
-              $rootScope.unFocus a, true, true
-            else
-              list.push a
-              if focused
-                $rootScope.focus a, true, true
-        else
-          # We are not in selection mode,
-          # so we switch to it, and make this list
-          # the new selection
-          $rootScope.viewState.view = "Selection"
-          $rootScope.annotations = annotations
-    ]
+    scope = @element.scope()
+    # XOR this list to the current selection
+    list = scope.annotations = scope.annotations.slice()
+    for a in annotations
+      index = list.indexOf a
+      if index isnt -1
+        list.splice index, 1
+      else
+        list.push a
+    # View and sort the selection
+    scope.applyView "Selection"
+    scope.applySort scope.viewState.sort
     this
 
-  updateViewer: (viewName, annotations=[], focused = false) =>
+  updateViewer: (annotations=[]) =>
     annotations = annotations.filter (a) -> a?
-    @element.injector().invoke [
-      '$rootScope',
-      ($rootScope) =>
-        @buildReplyList annotations
-
-        # Do we have to replace the focused list with this?
-        if focused
-          # Nuke the old focus list
-          $rootScope.focused = []
-          # Add the new elements
-          for a in annotations
-            $rootScope.focus a, true, true
-        else
-          # Go over the old list, and unfocus the ones
-          # that are not on this list
-          for a in $rootScope.focused.slice() when a not in annotations
-            $rootScope.unFocus a, true, true
-
-        # Update the main annotations list
-        $rootScope.annotations = annotations
-
-        unless $rootScope.viewState.view is viewName
-          # We are changing the view
-          $rootScope.viewState.view = viewName
-          $rootScope.showViewSort true, true
-    ]
+    scope = @element.scope()
+    commentFilter = angular.bind(this, this.isComment)
+    comments = (scope.$root.annotations or []).filter(commentFilter)
+    scope.annotations = annotations
+    scope.applySort scope.viewState.sort
+    scope.annotations = [scope.annotations..., comments...]
     this
 
-  showViewer: (viewName, annotations=[], focused = false) =>
+  showViewer: (annotations=[]) =>
+    location = @element.injector().get('$location')
+    location.path('/viewer').replace()
+    scope = @element.scope()
+    scope.annotations = annotations
+    scope.applyView 'Selection'
+    scope.applySort scope.viewState.sort
     this.show()
-    @element.injector().invoke [
-      '$location',
-      ($location) =>
-        $location.path('/viewer').replace()
-    ]
-    this.updateViewer viewName, annotations, focused
 
   addEmphasis: (annotations=[]) =>
     annotations = annotations.filter (a) -> a? # Filter out null annotations
@@ -544,17 +434,6 @@ class Hypothesis extends Annotator
           delete query.user
       else
         console.warn "Unsupported Social View: '" + @socialView.name + "'!"
-
-  # Bubbles updates through the thread so that guests see accurate
-  # reply counts.
-  updateAncestors: (annotation) =>
-    for ref in (annotation.references?.slice().reverse() or [])
-      rel = (@threading.getContainer ref).message
-      if rel?
-        $timeout = @element.injector().get('$timeout')
-        $timeout (=> @plugins.Bridge.updateAnnotation rel), 10
-        this.updateAncestors(rel)
-        break  # Only the nearest existing ancestor, the rest is by induction.
 
   setTool: (name) =>
     return if name is @tool

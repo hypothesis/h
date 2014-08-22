@@ -1,47 +1,17 @@
 <!-- Thread view -->
 <ul class="stream-list">
   <li
-     ng-class="{'card-emphasis': annotation.$emphasis, 'collapsed': collapsed}"
+     ng-class="{'card-emphasis': thread.message.$emphasis, 'collapsed': collapsed}"
      ng-click="toggleCollapsed($event)"
-     ng-init="collapsed = true"
-     ng-mouseenter="activate(annotation)"
+     ng-init="collapsed = !search.query"
+     ng-include="'thread.html'"
+     ng-mouseenter="activate(thread.message)"
      ng-mouseleave="activate()"
-     ng-repeat="annotation in annotations | orderBy:predicate:reverse track by annotation.id"
-     class="paper thread"
-     data-recursive=""
-     >
-    <a href="" class="threadexp"
-       title="{{collapsed && 'Expand' || 'Collapse'}}"
-       ng-show="$parent.annotation"
-       ><span ng-class="{'icon-minus': !collapsed,
-                         'icon-plus': !!collapsed}"></span></a>
-
-
-    <!-- Excerpts -->
-    <div class="excerpt"
-         ng-repeat="target in annotation.target"
-         ng-hide="collapsed">
-      <blockquote class="annotation-quote" ng-bind="target.quote" ng-hide="target.showDiff" />
-      <blockquote class="annotation-quote" ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
-      <div class="small pull-right" ng-show="target.diffHTML">
-        <input type="checkbox" ng-model="target.showDiff" ng-click="$event.stopPropagation()"> Show differences</input>
-      </div>
-    </div>
-
-    <!-- Annotation -->
-    <div class="annotation"
-         name="annotation"
-         ng-model="annotation"
-         annotation-embedded="{{isEmbedded}}" />
-
-    <!-- Replies -->
-    <ul>
-      <li class="thread"
-          ng-class="{'collapsed': collapsed}"
-          ng-click="toggleCollapsed($event)"
-          ng-repeat="annotation in annotation.reply_list"
-          ng-transclude
-          />
-    </ul>
-  </li>
+     ng-repeat="thread in threads track by thread.message.id"
+     class="paper thread"></li>
+  <li ng-show="viewState.view == 'Search' && !threads"
+      >No annotations matching "{{search.query}}".</li>
+  <li ng-hide="viewState.view == 'Document'"
+      ><a href="" ng-click="search.query = ''; applyView('Document')"
+          >Back to all annotations</a>.</li>
 </ul>

@@ -25,7 +25,6 @@ $threadexp-width: .6em;
 
   .thread {
     border-left: 1px dotted $gray-light;
-    height: 100%;
     padding: 0;
     padding-left: $thread-padding;
 
@@ -85,8 +84,7 @@ $threadexp-width: .6em;
     }
 
     & > ul {
-      max-height: 0;
-      overflow: hidden;
+      display: none;
     }
 
     & > .annotation {

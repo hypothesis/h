@@ -99,13 +99,10 @@
 
 //MAGICONTROL////////////////////////////////
 .magicontrol {
-  @include transition(opacity);
-  @include transition-duration(.15s);
   margin: 0 .4em;
   opacity: 0;
 
   &.open, :hover > & {
-    @include transition-duration(.15s);
     opacity: 1;
   }
 }

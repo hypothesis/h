@@ -10,11 +10,11 @@ imports = [
 class StreamSearch
   this.inject = [
     '$scope', '$rootScope',
-    'queryparser', 'searchfilter', 'streamfilter'
+    'annotator', 'queryparser', 'searchfilter', 'streamfilter'
   ]
   constructor: (
      $scope,   $rootScope,
-     queryparser,   searchfilter,   streamfilter
+     annotator,   queryparser,   searchfilter,   streamfilter
   ) ->
     # Initialize the base filter
     streamfilter
@@ -30,11 +30,9 @@ class StreamSearch
       filter = streamfilter.getFilter()
       sock.send(JSON.stringify({filter}))
 
-    $rootScope.annotations = []
-    $rootScope.applyView "Document"  # Non-sensical, but best for the moment
-    $rootScope.applySort "Newest"
-
-    $scope.openDetails = (annotation) ->
+    annotator.plugins.Store?.annotations = []
+    $rootScope.applyView 'Document'  # Non-sensical but works for now
+    $rootScope.applySort 'Newest'
 
 
 angular.module('h.streamsearch', imports, configure)
