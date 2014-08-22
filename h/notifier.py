@@ -7,9 +7,8 @@ from pyramid_mailer.message import Message
 from pyramid.renderers import render
 from pyramid.events import subscriber
 
-from h import events
+from h import events, interfaces
 from h.auth.local import models
-from h.streamer import parent_values
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -188,9 +187,11 @@ def send_notifications(event):
         return
 
     notifier = AnnotationNotifier(request)
-    annotation['parent'] = parent_values(annotation, request)
-    if 'user' in annotation['parent'] and 'user' in annotation:
-        parentuser = annotation['parent']['user']
+    store = request.registry.queryUtility(interfaces.IStoreClass)(request)
+    parent = store.read(annotation['references'][-1])
+
+    if parent and 'user' in annotation['parent'] and 'user' in annotation:
+        parentuser = parent['user']
         if len(parentuser) and parentuser != annotation['user']:
             notifier.send_notification_to_owner(
                 annotation, {}, 'reply_notification')
