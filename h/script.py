@@ -43,6 +43,8 @@ command = App(
 # Teach urlparse about extension schemes
 uses_netloc.append('chrome-extension')
 uses_relative.append('chrome-extension')
+uses_netloc.append('resource')
+uses_relative.append('resource')
 
 # Fetch an asset spec resolver
 resolve = AssetResolver().resolve
@@ -62,14 +64,14 @@ def add_base_url(event):
     event['base_url'] = base_url
 
 
-def app(context, request):
-    with open('public/app.html', 'w') as f:
+def app(app_path, context, request):
+    with open(app_path, 'w') as f:
         f.write(render_view(context, request, name='app.html'))
 
 
-def embed(context, request):
+def embed(embed_path, context, request):
     setattr(request, 'view_name', 'embed.js')
-    with open('public/embed.js', 'w') as f:
+    with open(embed_path, 'w') as f:
         f.write(render_view(context, request, name='embed.js'))
     delattr(request, 'view_name')
 
@@ -126,10 +128,57 @@ def chrome(env):
             makedirs('./public/scripts/vendor')
             merge('../../h/static/scripts/vendor', './public/scripts/vendor')
 
-        app(context, request)
+        # Copy over the bootstrap and destroy scripts
+        copyfile('../../h/static/bootstrap.js', './public/bootstrap.js')
+        copyfile('../../h/static/destroy.js', './public/destroy.js')
+
+        app('public/app.html', context, request)
 
     manifest(context, request)
-    embed(context, request)
+    embed('public/embed.js', context, request)
+
+    # Reset the directory
+    chdir(old_dir)
+
+
+def firefox(env):
+    registry = env['registry']
+    request = env['request']
+    context = request.context
+
+    registry.notify(ContextFound(request))  # pyramid_layout attrs
+    request.layout_manager.layout.csp = ''
+
+    # Remove any existing build
+    if exists('./build/firefox'):
+        rmtree('./build/firefox')
+
+    # Create the new build directory
+    makedirs('./build/firefox/data')
+
+    # Change to the output directory
+    old_dir = getcwd()
+    chdir('./build/firefox')
+
+    # Copy the extension code
+    merge('../../h/browser/firefox', './')
+
+    # Build the app html and copy assets if they are being bundled
+    if request.webassets_env.url.startswith('resource://'):
+        makedirs('./data/styles/images')
+        merge('../../h/static/styles/images', './data/styles/images')
+        merge('../../h/static/images', './data/images')
+        merge('../../h/static/fonts', './data/fonts')
+
+        # Copy over the vendor assets since they won't be processed otherwise
+        if request.webassets_env.debug:
+            makedirs('./data/scripts/vendor')
+            merge('../../h/static/scripts/vendor', './data/scripts/vendor')
+
+        app('data/app.html', context, request)
+
+    manifest(context, request)
+    embed('data/embed.js', context, request)
 
     # Reset the directory
     chdir(old_dir)
