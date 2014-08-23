@@ -49,6 +49,14 @@ ol {
   }
 }
 
+#home {
+  border-top: none;
+
+  @include respond-to(tablets desktops) {
+    padding: 2em 4em 4em;
+  }
+}
+
 .content {
   margin: 0 auto;
   text-align: left;
