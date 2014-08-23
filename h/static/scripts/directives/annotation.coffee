@@ -29,7 +29,7 @@ class Annotation
 
     $scope.action = 'create'
     $scope.editing = false
-    $scope.preview = false
+    $scope.preview = 'no'
 
     if model.document and model.target.length
       domain = extractURIComponent(model.uri, 'hostname')

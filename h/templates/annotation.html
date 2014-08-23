@@ -29,23 +29,6 @@
       </span>
     </span>
 
-    <!-- Write / Preview Tabs -->
-    <div ng-show="editing"> 
-      <ul class="nav-tabs">
-        <li ng-class="!preview && 'active'">
-          <a href="" ng-click="preview = false">Write</a>
-        </li>
-        <li ng-class="preview && 'active'">
-          <a href="" ng-click="preview = true">Preview</a>
-          <a class="icon-markdown"
-             ng-hide="readonly"
-             target="_blank"
-             title="Parsed as Markdown"
-             href="https://guides.github.com/features/mastering-markdown/" />
-        </li>
-      </ul>
-    </div>
-
     <!-- Timestamp -->
     <fuzzytime class="small pull-right"
                ng-show="!editing && model.updated"
@@ -73,16 +56,27 @@
     </ng-switch>
   </div>
 
-  <!-- Body -->
-  <div class="styled-text" ng-show="mode=='search' && !editing">
-    <markdown ng-model="model.highlightText"
-              ng-readonly="!editing || preview"
-              name="text" />
+  <!-- Body Write / Preview Tabs -->
+  <div class="tabbable"
+       ng-model="preview"
+       ng-show="editing">
+    <div class="styled-text tab-pane" data-value="no" data-title="Write">
+      <markdown ng-model="model.text" name="text" />
+    </div>
+    <div class="styled-text tab-pane" data-value="yes" data-title="Preview">
+      <p class="form-field" ng-show="!model.text">Nothing to preview.</p>
+      <markdown ng-model="model.text" ng-readonly="true" name="text" />
+    </div>
   </div>
-  <div class="styled-text" ng-hide="mode=='search' && !editing">
-    <markdown ng-model="model.text"
-              ng-readonly="!editing || preview"
-              name="text" />
+
+  <div ng-hide="editing" ng-switch="mode">
+    <markdown name="text"
+              ng-model="model.highlightText"
+              ng-switch-when="'search'" />
+    <markdown name="text"
+              ng-model="model.text"
+              ng-readonly="true"
+              ng-switch-default />
   </div>
 
   <!-- Tags -->

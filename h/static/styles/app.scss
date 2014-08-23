@@ -30,6 +30,18 @@ ol {
   padding-left: 3em;
 }
 
+.auth {
+  padding: 1em;
+  .nav-tabs {
+    border: 1px none $gray-lighter;
+    border-bottom-style: solid;
+    padding: 0 0 1.1em;
+    & > li {
+      a { padding-bottom: .231em;}
+    }
+  }
+}
+
 .bookmarklet {
   padding: .12em;
   border: 1px dashed $gray;
@@ -138,17 +150,6 @@ ol {
 
   .dropdown.open .provider {
     display: inline;
-  }
-}
-
-.tabbable {
-  .nav-tabs {
-    border: 1px none $gray-lighter;
-    border-bottom-style: solid;
-    padding: 0.9em 1em 1.1em;
-      & > li {
-        a { padding-bottom: .231em;}
-      }
   }
 }
 
