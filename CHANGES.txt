@@ -1,6 +1,37 @@
 Next release
 ============
 
+New Features
+------------
+
+- Account deactivation and password change support (#632, #1275)
+- Heatmap tabs no longer show reply count.
+- HTML emails for reply notifications
+- Update dom-text libraries to support PDF.js v1.0.277
+- Better tokenization of URIs for search (#1308, #1407)
+- Markdown previews (#1418)
+
+Fixes
+-----
+
+- Improved form validation (#1275, #1388, #1394)
+- Source citation information on cards in the stream (#1390, #1423, #1425)
+- Searching for a bare username works again (#1391)
+- Add iconography for privacy settings
+- Replace various SVGs with CSS (#1399)
+- Drop jQueryUI
+- Make clean properly removes only what it should now
+- Improve the copy on reply notification emails
+- Restyle tags (#1430, #1435)
+- Various other usability and style enhancements (#1354, #1410, #1414)
+
+Known Issues
+------------
+
+- Searching for tags with spaces does not work
+- Standalone annotation page shows stream updates
+- Sphinx documentation is broken
+
 0.2.2 (2014-08-15)
 ==================
 
