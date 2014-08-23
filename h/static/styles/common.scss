@@ -363,16 +363,6 @@ h6 {
     &:first-child:before {
       content: none;
     }
-
-    a.icon-markdown {
-      color: $gray-lighter;
-      font-size: 16px;
-      position: relative;
-      top: .15em;
-      left: .1em;
-      font-family: h;
-      font-weight: unset;
-    }
   }
 }
 

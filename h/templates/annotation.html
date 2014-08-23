@@ -60,6 +60,10 @@
   <div class="tabbable"
        ng-model="preview"
        ng-show="editing">
+    <a class="icon-markdown"
+       target="_blank"
+       title="Parsed as Markdown"
+       href="https://guides.github.com/features/mastering-markdown/" />
     <div class="styled-text tab-pane" data-value="no" data-title="Write">
       <markdown ng-model="model.text" name="text" />
     </div>
