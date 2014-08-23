@@ -1,7 +1,14 @@
 @import 'compass/typography/text/force-wrap';
 @import 'compass/layout/stretching';
-
 @import 'base';
+
+$base-font-size: 16px;
+$base-line-height: 26px;
+$sans-font-family: "Source Sans Pro", $sans-font-family;
+$serif-font-family: "Merriweather", $serif-font-family;
+$headings-color: $text-color;
+
+@import 'annotations';
 @import 'forms';
 @import 'spinner';
 @import 'responsive';
@@ -9,13 +16,6 @@
 @import 'yui_grid';
 @import 'simple-search';
 @import 'tags-input';
-
-
-$base-font-size: 16px;
-$base-line-height: 26px;
-$sans-font-family: "Source Sans Pro", $sans-font-family;
-$serif-font-family: "Merriweather", $serif-font-family;
-$headings-color: $text-color;
 
 
 //ELEMENT STYLES////////////////////////////////
@@ -37,7 +37,7 @@ p {
           hyphens: auto;
 
   & + p {
-    margin: 2em 0 0;
+    margin: 1em 0 0;
   }
 }
 
@@ -82,18 +82,32 @@ h2 {
 }
 
 h3 {
-  font-size: 1.17em;
+  font-size: 1.25em;
+  margin: .83em 0;
+}
+
+h4 {
+  font-size: 1.15em;
   margin: .83em 0;
 }
 
 h5 {
-  font-size: .83em;
+  font-size: 1.05em;
   margin: 1.5em 0;
 }
 
 h6 {
-  font-size: .75em;
+  font-size: 1em;
   margin: 1.67em 0;
+}
+
+//PAPER////////////////////////////////
+//Provides the white background upon which items sit
+.paper {
+  background: $white;
+  border: solid 1px $gray-lighter;
+  border-radius: 2px;
+  padding: 1em;
 }
 
 //MCRANDOM////////////////////////////////
@@ -181,34 +195,6 @@ h6 {
   clip: rect(0 0 0 0);
   height: 1px; width: 1px;
   margin: -1px; padding: 0; border: 0;
-}
-
-
-
-//EXCERPT////////////////////////////////
-.excerpt {
-  margin-bottom: 1em;
-  position: relative;
-
-  .annotation-quote {
-    margin-bottom: 0;
-  }
-
-  .more, .less {
-    font-size: .9em;
-    font-family: $sans-font-family;
-    display: block;
-    text-align: right;
-  }
-}
-
-.annotation-quote {
-  color: $gray;
-  font-family: $serif-font-family;
-  font-size: 1em;
-  margin-bottom: 1em;
-  padding: 0 .615em;
-  border-left: 3px solid $gray-lighter;
 }
 
 
@@ -334,9 +320,7 @@ h6 {
 
 //TABS////////////////////////////////
 .nav-tabs {
-  border: 1px none $gray-lighter;
-  border-bottom-style: solid;
-  padding: 0.9em 1em 1.1em;
+  margin-bottom: .7em;
 
   & > li {
     display: inline-block;
@@ -348,14 +332,18 @@ h6 {
       color: $gray-dark;
       cursor: pointer;
       border-bottom: 3px solid transparent;
-      padding-left: 2 / 13 * 1em;
-      padding-right: 2 / 13 * 1em;
-      padding-bottom: 3 / 13 * 1em;
+      padding-left: .153em;
+      padding-right: .153em;
+      padding-bottom: .076em;
+
+      &:hover {
+        color: $link-color-hover;
+      }
     }
 
     &:active a {
       position: relative;
-      top: 1 / 13 * 1em;
+      top: .076em;
     }
 
 
@@ -369,18 +357,27 @@ h6 {
 
     &:before {
       content: "/";
-      margin: 0 1em;
+      margin: 0 .75em;
     }
 
     &:first-child:before {
       content: none;
+    }
+
+    a.icon-markdown {
+      color: $gray-lighter;
+      font-size: 16px;
+      position: relative;
+      top: .15em;
+      left: .1em;
+      font-family: h;
+      font-weight: unset;
     }
   }
 }
 
 .tab-content {
   line-height: 1.4;
-  padding: 1em;
 
   .tab-pane {
     display: none;
@@ -390,157 +387,6 @@ h6 {
   }
 }
 
-
-//PAPER////////////////////////////////
-//Provides the white background upon which items sit
-.paper {
-  background: $white;
-  border: solid 1px $gray-lighter;
-  border-radius: 2px;
-  padding: 1em;
-}
-
-
-//ANNOTATION////////////////////////////////
-//This is for everything that is formatted as an annotation.
-.annotation {
-  @include pie-clearfix;
-  font-family: $sans-font-family;
-  position: relative;
-
-  &:hover fuzzytime a, &:hover .reply-count {
-    color: $link-color;
-  }
-
-  .magicontrol.dropdown {
-    top: 4px;
-  }
-
-  fuzzytime {
-    line-height: 2;
-
-    a {
-      color: $text-color;
-      &:hover { color: $link-color-hover; }
-      &:focus { outline: 0; }
-    }
-  }
-
-  .reply-count {
-    color: $text-color;
-    &:hover { color: $link-color-hover; }
-    &:focus { outline: 0; }
-  }
-
-  .user {
-    font-weight: bold;
-    font-size: 1.1em;
-    &:hover {
-      color: $link-color-hover;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-  }
-
-  .body {
-    div {
-      clear: both;
-      margin: .25em 0;
-      #{elements-of-type(inline)}, #{headings()}, p, li {
-        @include force-wrap;
-      }
-
-      ol, ul {
-        padding-left: 1.25em;
-      }
-
-      ol {
-        list-style-type: decimal;
-      }
-
-      ul {
-        list-style-type: disc;
-      }
-    }
-
-    textarea {
-      min-height: 8em;
-      width: 100%;
-    }
-  }
-
-  .buttonbar {
-    @include pie-clearfix;
-    margin: .25em 0;
-
-    .btn {
-      margin-right: .5em;
-    }
-  }
-
-  .tip {
-    @extend .small;
-    float: right;
-  }
-
-  .quote {
-    font-style: italic
-  }
-}
-
-// Temporary hack until sidebar and displayer are unified
-.annotation-displayer {
-  .user {
-    &:hover {
-      color: $link-color-hover;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-  }
-}
-
-//MAGICONTROL////////////////////////////////
-.magicontrol {
-  @include transition(opacity);
-  @include transition-duration(.15s);
-  margin: 0 .4em;
-  opacity: 0;
-
-  &.open, :hover > & {
-    @include transition-duration(.15s);
-    opacity: 1;
-  }
-}
-
-.share-dialog {
-  display: none;
-
-  a {
-    float: left;
-    line-height: 1.4;
-    margin-right: .5em;
-    vertical-align: middle;
-  }
-
-  div {
-    overflow: hidden;
-  }
-
-  input {
-    padding: 0;
-    width: 100%;
-  }
-}
-
-.stream-list {
-  & > * {
-    margin-bottom: .72em;
-  }
-
-  .card-emphasis {
-    @include box-shadow(6px 6px 8px -2px $gray-light);
-  }
-}
 
 //SEARCH HIGHLIGHTS////////////////////////////////
 .search-hl-active {
@@ -560,7 +406,6 @@ h6 {
   }
 }
 
-pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 
 // View and Sort tabs ////////////////////
 .viewsort {
