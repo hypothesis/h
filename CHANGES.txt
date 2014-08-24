@@ -1,6 +1,11 @@
 Next Release
 ============
 
+Fixes
+-----
+
+- The token API returns OAuth errors rather than choking (#1406)
+
 0.3.0 (2014-08-23)
 ==================
 

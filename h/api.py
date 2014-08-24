@@ -59,7 +59,9 @@ def token(request):
         credentials = None
 
     token_response = request.create_token_response(credentials=credentials)
-    return token_response.json_body['access_token']
+    body = token_response.json_body
+
+    return body.get('access_token', body)
 
 
 def wrap_annotation(request, annotation):
