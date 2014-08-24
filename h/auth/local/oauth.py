@@ -9,7 +9,13 @@ from pyramid.session import check_csrf_token, SignedCookieSessionFactory
 from h.api import get_consumer
 
 
-class SessionGrant(ClientCredentialsGrant):
+def add_credentials(request, **credentials):
+    new_credentials = (request.extra_credentials or {})
+    new_credentials.update(credentials)
+    request.extra_credentials = new_credentials
+
+
+class SessionAuthenticationGrant(ClientCredentialsGrant):
     def validate_token_request(self, request):
         # bw compat
         persona = request.params.get('persona')
@@ -29,6 +35,10 @@ class SessionGrant(ClientCredentialsGrant):
 
         request.client_id = request.client_id or request.client.client_id
 
+        userid = request.authenticated_userid
+        if userid:
+            add_credentials(request, userId=userid)
+
 
 def session_from_config(settings, prefix='session.'):
     """Return a session factory from the provided settings."""
@@ -47,7 +57,7 @@ def session_from_config(settings, prefix='session.'):
 
 def includeme(config):
     config.include('pyramid_oauthlib')
-    config.add_grant_type(SessionGrant)
+    config.add_grant_type(SessionAuthenticationGrant)
 
     # Configure the authentication policy
     authn_debug = config.registry.settings.get('debug_authorization')

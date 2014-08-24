@@ -52,13 +52,7 @@ def get_consumer(request):
 
 
 def token(request):
-    userid = request.authenticated_userid
-    if userid is not None:
-        credentials = dict(userId=userid)
-    else:
-        credentials = None
-
-    response = request.create_token_response(credentials=credentials)
+    response = request.create_token_response()
     return response.json_body.get('access_token', response)
 
 
