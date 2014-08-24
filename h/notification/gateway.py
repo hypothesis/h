@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
-from h.auth.local import models
+from h.accounts import models
 
 
 def user_name(user):

@@ -2,10 +2,6 @@
 
 """Defines unit tests for h.api."""
 
-from collections import namedtuple
-import unittest
-
-from annotator import auth
 from mock import patch, MagicMock, Mock
 from pytest import fixture, raises
 from pyramid.testing import DummyRequest, DummyResource
@@ -70,66 +66,6 @@ def user(monkeypatch):
     get_user.return_value = user
     monkeypatch.setattr(api, 'get_user', get_user)
     return user
-
-
-FakeClient = namedtuple('FakeClient', 'client_id client_secret ttl')
-
-
-class TestToken(unittest.TestCase):
-
-    def setUp(self):
-        self.tok = api.Token()
-
-        self.client = FakeClient('myclientid', 'secretz!', 3600)
-        self.request = DummyRequest(client=self.client,
-                                    extra_credentials=None)
-        self.request.headers['X-Annotator-Auth-Token'] = 'foobarbaz'
-
-        self.decode_token_patcher = patch('annotator.auth.decode_token')
-        self.decode_token = self.decode_token_patcher.start()
-        self.decode_token.return_value = {'consumerKey': 'myclientid'}
-
-        self.get_consumer_patcher = patch('h.api.get_consumer')
-        self.get_consumer = self.get_consumer_patcher.start()
-        self.get_consumer.return_value = self.client
-
-    def tearDown(self):
-        self.decode_token_patcher.stop()
-        self.get_consumer_patcher.stop()
-
-    def test_created_token_has_access_token(self):
-        res = self.tok.create_token(self.request)
-        assert res['access_token'] is not None
-
-    def test_created_token_has_correct_ttl(self):
-        self.request.client = FakeClient('foo', 'bar', 1234)
-        res = self.tok.create_token(self.request)
-        assert res['expires_in'] == 1234
-
-    def test_validate_request_no_header(self):
-        del self.request.headers['X-Annotator-Auth-Token']
-        res = self.tok.validate_request(self.request)
-        assert res is False
-
-    def test_validate_request_no_client(self):
-        self.get_consumer.return_value = None
-        res = self.tok.validate_request(self.request)
-        assert res is False
-
-    def test_validate_request_invalid_token(self):
-        self.decode_token.side_effect = auth.TokenInvalid
-        res = self.tok.validate_request(self.request)
-        assert res is False
-
-    def test_validate_request_incorrect_client(self):
-        self.decode_token.return_value = {'consumerKey': 'someoneelse'}
-        res = self.tok.validate_request(self.request)
-        assert res is False
-
-    def test_validate_request_uses_header(self):
-        self.tok.validate_request(self.request)
-        self.decode_token.assert_called_once_with(
-            'foobarbaz', 'secretz!', 3600)
 
 
 def test_index():

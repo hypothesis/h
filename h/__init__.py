@@ -8,6 +8,8 @@ __all__ = ['main']
 
 
 def includeme(config):
+    config.include('h.authentication')
+    config.include('h.authorization')
     config.include('h.features')
     config.include('h.queue')
     config.include('h.subscribers')

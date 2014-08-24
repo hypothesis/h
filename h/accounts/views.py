@@ -10,15 +10,17 @@ from horus.resources import UserFactory
 from pyramid import httpexceptions, security
 from pyramid.view import view_config, view_defaults
 
-from h.auth.local import schemas
+from h import session
 from h.events import LoginEvent
 from h.models import _
 from h.stats import get_client as stats
 from h.notification.models import Subscriptions
 
+from . import schemas
+
 
 def ajax_form(request, result):
-    flash = pop_flash(request)
+    flash = session.pop_flash(request)
 
     if isinstance(result, httpexceptions.HTTPRedirection):
         request.response.headers.extend(result.headers)
@@ -52,30 +54,6 @@ def ajax_form(request, result):
     return result
 
 
-def pop_flash(request):
-    session = request.session
-
-    queues = {
-        name[3:]: [msg for msg in session.pop_flash(name[3:])]
-        for name in session.keys()
-        if name.startswith('_f_')
-    }
-
-    # Deal with bag.web.pyramid.flash_msg style mesages
-    for msg in queues.pop('', []):
-        q = getattr(msg, 'kind', '')
-        msg = getattr(msg, 'plain', msg)
-        queues.setdefault(q, []).append(msg)
-
-    return queues
-
-
-def model(request):
-    session = {k: v for k, v in request.session.items() if k[0] != '_'}
-    session['csrf'] = request.session.get_csrf_token()
-    return session
-
-
 def remember(request, user):
     if user is not None:
         userid = 'acct:{}@{}'.format(user.username, request.domain)
@@ -83,15 +61,9 @@ def remember(request, user):
         request.response.headerlist.extend(headers)
 
 
-def set_csrf_token(request, response):
-    csrft = request.session.get_csrf_token()
-    if request.cookies.get('XSRF-TOKEN') != csrft:
-        response.set_cookie('XSRF-TOKEN', csrft)
-
-
 def ensure_csrf_token(view_fn):
     def wrapper(context, request):
-        request.add_response_callback(set_csrf_token)
+        request.add_response_callback(session.set_csrf_token)
         return view_fn(context, request)
 
     return wrapper
@@ -105,13 +77,6 @@ def view_auth_defaults(fn, *args, **kwargs):
     return view_defaults(*args, **kwargs)(fn)
 
 
-# TODO: change to something other than /app
-@view_config(accept='application/json',  name='app', renderer='json')
-def session(request):
-    request.add_response_callback(set_csrf_token)
-    return dict(status='okay', flash=pop_flash(request), model=model(request))
-
-
 @view_config(accept='application/json', renderer='json',
              context='pyramid.exceptions.BadCSRFToken')
 def bad_csrf_token(context, request):
@@ -120,7 +85,7 @@ def bad_csrf_token(context, request):
     return {
         'status': 'failure',
         'reason': reason,
-        'model': model(request),
+        'model': session.model(request),
     }
 
 
@@ -130,7 +95,7 @@ class AsyncFormViewMapper(object):
 
     def __call__(self, view):
         def wrapper(context, request):
-            request.add_response_callback(set_csrf_token)
+            request.add_response_callback(session.set_csrf_token)
             if request.method == 'POST':
                 data = request.json_body
                 data.update(request.params)
@@ -142,9 +107,9 @@ class AsyncFormViewMapper(object):
             result = meth()
             result = ajax_form(request, result)
             if 'model' in result:
-                result['model'].update(model(request))
+                result['model'].update(session.model(request))
             else:
-                result['model'] = model(request)
+                result['model'] = session.model(request)
             result.pop('form', None)
             return result
         return wrapper
@@ -341,14 +306,6 @@ class AsyncProfileController(ProfileController):
 
 
 def includeme(config):
-    registry = config.registry
-    settings = registry.settings
-
-    authz_endpoint = settings.get('auth.local.authorize', '/oauth/authorize')
-    config.add_route('auth.local.authorize', authz_endpoint)
-
-    token_endpoint = settings.get('auth.local.token', '/oauth/token')
-    config.add_route('auth.local.token', token_endpoint)
     config.add_route('disable_user', '/disable/{user_id}',
                      factory=UserFactory,
                      traverse="/{user_id}")
@@ -356,4 +313,5 @@ def includeme(config):
                      traverse="/{subscription_id}")
 
     config.include('horus')
+    config.add_request_method(name='user')  # horus override (unset property)
     config.scan(__name__)

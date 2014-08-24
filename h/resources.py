@@ -5,7 +5,7 @@ from pyramid.interfaces import ILocation
 from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS
 from zope.interface import implementer
 
-from h import interfaces, security
+from h import interfaces
 from h.models import Annotation
 
 log = logging.getLogger(__name__)
@@ -112,6 +112,5 @@ class RootFactory(Stream, InnerResource):
         defaultlist = [
             (Allow, 'group:admin', ALL_PERMISSIONS),
             (Allow, Authenticated, 'create'),
-            (Allow, security.Authorizations, 'account'),
         ]
         return defaultlist
