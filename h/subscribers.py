@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-from pyramid.events import subscriber
+from pyramid.events import BeforeRender, NewRequest, NewResponse, subscriber
 from pyramid.renderers import get_renderer
-from pyramid.security import forget, remember
-
-from h import events
 
 
-@subscriber(events.BeforeRender)
+@subscriber(BeforeRender)
 def add_renderer_globals(event):
     request = event['request']
 
@@ -21,13 +18,12 @@ def add_renderer_globals(event):
     event['blocks'] = get_renderer('h:templates/blocks.pt').implementation()
 
 
-@subscriber(events.NewRequest, asset_request=False)
-@subscriber(events.LogoutEvent)
+@subscriber(NewRequest, asset_request=False)
 def ensure_csrf(event):
     event.request.session.get_csrf_token()
 
 
-@subscriber(events.NewResponse, asset_request=False)
+@subscriber(NewResponse, asset_request=False)
 def set_csrf_cookie(event):
     request = event.request
     response = event.response
@@ -39,28 +35,6 @@ def set_csrf_cookie(event):
             response.set_cookie('XSRF-TOKEN', token)
     elif 'XSRF-TOKEN' in request.cookies:
         response.delete_cookie('XSRF-TOKEN')
-
-
-@subscriber(events.LoginEvent)
-def login(event):
-    request = event.request
-    user = event.user
-    request.response.headerlist.extend(remember(request, user))
-
-    # bw compat
-    session = request.session
-    personas = session.setdefault('personas', [])
-
-    if user not in personas:
-        personas.append(user)
-        session.changed()
-
-
-@subscriber(events.LogoutEvent)
-def logout(event):
-    request = event.request
-    forget(request)
-    request.session.invalidate()
 
 
 def includeme(config):

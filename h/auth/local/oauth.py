@@ -17,16 +17,10 @@ def add_credentials(request, **credentials):
 
 class SessionAuthenticationGrant(ClientCredentialsGrant):
     def validate_token_request(self, request):
-        # bw compat
-        persona = request.params.get('persona')
-        if persona is not None:
-            if persona not in request.session.get('personas', []):
-                raise InvalidClientError(request=request)
-        else:
-            try:
-                check_csrf_token(request, token='assertion')
-            except BadCSRFToken:
-                raise InvalidClientError(request=request)
+        try:
+            check_csrf_token(request, token='assertion')
+        except BadCSRFToken:
+            raise InvalidClientError(request=request)
 
         request.client = get_consumer(request)
 

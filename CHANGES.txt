@@ -6,6 +6,11 @@ Fixes
 
 - The token API returns OAuth errors rather than choking (#1406)
 
+Backwards Incompatibilities
+---------------------------
+
+- Support for clients before v0.2 has been dropped
+
 0.3.0 (2014-08-23)
 ==================
 

@@ -4,11 +4,10 @@ import deform
 import horus.views
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
-from pyramid import httpexceptions
-from pyramid.security import remember
+from pyramid import httpexceptions, security
 from pyramid.view import view_config, view_defaults
 
-from h import events, views
+from h import views
 from h.auth.local import forms, models, schemas
 from h.models import _
 
@@ -48,6 +47,13 @@ def ajax_form(request, result):
     return result
 
 
+def remember(request, user):
+    if user is not None:
+        userid = 'acct:{}@{}'.format(user.username, request.domain)
+        headers = security.remember(request, userid)
+        request.response.headerlist.extend(headers)
+
+
 class AsyncFormViewMapper(object):
     def __init__(self, **kw):
         self.attr = kw['attr']
@@ -77,23 +83,7 @@ class AuthController(horus.views.AuthController):
     def login(self):
         request = self.request
         result = super(AuthController, self).login()
-
-        # XXX: Candidate for horus integration overhaul
-        if request.user:
-            userid = 'acct:{}@{}'.format(request.user.username, request.domain)
-            event = events.LoginEvent(request, userid)
-            request.registry.notify(event)
-
-        return result
-
-    def logout(self):
-        request = self.request
-        result = super(AuthController, self).logout()
-
-        # XXX: Horus should maybe do this for us
-        event = events.LogoutEvent(request)
-        request.registry.notify(event)
-
+        remember(request, request.user)
         return result
 
 
@@ -108,7 +98,11 @@ class AsyncAuthController(AuthController):
 @view_config(attr='forgot_password', route_name='forgot_password')
 @view_config(attr='reset_password', route_name='reset_password')
 class ForgotPasswordController(horus.views.ForgotPasswordController):
-    pass
+    def reset_password(self):
+        request = self.request
+        result = super(ForgotPasswordController, self).reset_password()
+        remember(request, request.user)
+        return result
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
@@ -124,12 +118,7 @@ class RegisterController(horus.views.RegisterController):
     def register(self):
         request = self.request
         result = super(RegisterController, self).register()
-
-        # XXX: Candidate for horus integration overhaul
-        if request.user:
-            userid = 'acct:{}@{}'.format(request.user.username, request.domain)
-            request.response.headerlist.extend(remember(request, userid))
-
+        remember(request, request.user)
         return result
 
 
@@ -173,11 +162,7 @@ class AsyncRegisterController(RegisterController):
         self.db.add(user)
 
         FlashMessage(request, Str.reset_password_done, kind='success')
-
-        # XXX: Horus should maybe do this for us
-        event = events.RegistrationActivatedEvent(request, user, activation)
-        request.registry.notify(event)
-
+        remember(request, user)
         return {}
 
 
