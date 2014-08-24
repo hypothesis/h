@@ -9,7 +9,6 @@ def includeme(config):
         api.token_endpoint: /api/token
     """
     config.include('.models')
-    config.include('.oauth')
     config.include('.schemas')
     config.include('.subscribers')
     config.include('.views')

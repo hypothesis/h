@@ -5,12 +5,13 @@
 from collections import namedtuple
 import unittest
 
-from annotator import auth
+from annotator.auth import TokenInvalid
 from mock import patch, MagicMock, Mock
 from pytest import fixture, raises
 from pyramid.testing import DummyRequest, DummyResource
 
-from h import api
+from h import api, auth, security
+from h.auth import tokens
 
 
 class DictMock(Mock):
@@ -78,18 +79,27 @@ FakeClient = namedtuple('FakeClient', 'client_id client_secret ttl')
 class TestToken(unittest.TestCase):
 
     def setUp(self):
-        self.tok = api.Token()
+        self.tok = tokens.AnnotatorToken(
+            request_validator=auth.ClientCredentialsValidator())
 
         self.client = FakeClient('myclientid', 'secretz!', 3600)
-        self.request = DummyRequest(client=self.client,
-                                    extra_credentials=None)
+        self.consumer = FakeClient('myconsumerid', 'shhh', 86400)
+        self.request = DummyRequest(
+            access_token=None,
+            client=self.client,
+            consumer=self.consumer,
+            state=None,
+            scopes=[security.OpenID],
+            extra_credentials=None,
+            user=None,
+        )
         self.request.headers['X-Annotator-Auth-Token'] = 'foobarbaz'
 
         self.decode_token_patcher = patch('annotator.auth.decode_token')
         self.decode_token = self.decode_token_patcher.start()
         self.decode_token.return_value = {'consumerKey': 'myclientid'}
 
-        self.get_consumer_patcher = patch('h.api.get_consumer')
+        self.get_consumer_patcher = patch('h.auth.utils.get_consumer')
         self.get_consumer = self.get_consumer_patcher.start()
         self.get_consumer.return_value = self.client
 
@@ -117,14 +127,16 @@ class TestToken(unittest.TestCase):
         assert res is False
 
     def test_validate_request_invalid_token(self):
-        self.decode_token.side_effect = auth.TokenInvalid
+        self.decode_token.side_effect = TokenInvalid
         res = self.tok.validate_request(self.request)
         assert res is False
 
     def test_validate_request_incorrect_client(self):
-        self.decode_token.return_value = {'consumerKey': 'someoneelse'}
+        self.decode_token.side_effect = TokenInvalid
+        self.get_consumer.return_value = FakeClient('booz', 'baz', 3200)
         res = self.tok.validate_request(self.request)
         assert res is False
+        self.decode_token.assert_called_with('foobarbaz', 'baz', 3200)
 
     def test_validate_request_uses_header(self):
         self.tok.validate_request(self.request)

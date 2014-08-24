@@ -13,17 +13,22 @@ del get_versions
 
 def includeme(config):
     config.include('pyramid_jinja2')
-    config.include('pyramid_multiauth')
     config.include('h.api')
+    config.include('h.auth')
     config.include('h.features')
+    config.include('h.session')
     config.include('h.streamer')
     config.include('h.subscribers')
     config.include('h.views')
-    config.set_root_factory('h.resources.RootFactory')
-
     config.add_jinja2_renderer('.js')
     config.add_jinja2_renderer('.txt')
     config.add_jinja2_renderer('.html')
+
+
+def create_app(settings):
+    config = Configurator(settings=settings)
+
+    config.include('h')
 
     favicon = AssetResolver().resolve('h:favicon.ico')
     config.add_route('favicon', '/favicon.ico')
@@ -35,9 +40,7 @@ def includeme(config):
     config.add_route('ok', '/ruok')
     config.add_view(lambda request: 'imok', renderer='string', route_name='ok')
 
-
-def create_app(settings):
-    config = Configurator(settings=settings)
+    config.set_root_factory('h.resources.RootFactory')
     return config.make_wsgi_app()
 
 
