@@ -2,6 +2,13 @@
 # It expects a search query string where the search term are separated by space character
 # and collects them into the given term arrays
 class SearchFilter
+  # Small helper function for removing
+  _removeQuoteCharacter: (text) ->
+    start = text.slice 0,1
+    end = text.slice -1
+    if (start is '"' or start is "'") and (start == end)
+      text = text.slice 1, text.length - 1
+    text
 
   # This function will slice the search-text input
   # Slice character: space,
@@ -13,11 +20,17 @@ class SearchFilter
     tokens = searchtext.match /(?:[^\s"']+|"[^"]*"|'[^']*')+/g
 
     # Cut the opening and closing quote characters
+    tokens = tokens.map @_removeQuoteCharacter
+
+    # Remove quotes for power search.
+    # I.e. 'tag:"foo bar"' -> 'tag:foo bar'
     for token, index in tokens
-      start = token.slice 0,1
-      end = token.slice -1
-      if (start is '"' or start is "'") and (start is end)
-        tokens[index] = token.slice 1, token.length - 1
+      filter = token.slice 0, token.indexOf ":"
+      unless filter? then filter = ""
+
+      if filter in ['quote', 'result', 'since', 'tag', 'text', 'uri', 'user']
+        token_part = token[filter.length+1..]
+        tokens[index] = filter + ':' + (@_removeQuoteCharacter token_part)
 
     tokens
 
