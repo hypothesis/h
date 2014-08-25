@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-import logging
-
 from datetime import datetime, timedelta
-from h.notifier import ReplyTemplate
+
 from pyramid.view import view_config
 from pyramid_layout.layout import layout_config
 from pyramid_mailer.interfaces import IMailer
@@ -10,7 +8,9 @@ from pyramid_mailer.testing import DummyMailer
 from pyramid.renderers import render
 
 from h.layouts import BaseLayout
+from h.notifier import ReplyTemplate
 
+import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
