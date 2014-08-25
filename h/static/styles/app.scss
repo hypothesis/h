@@ -99,7 +99,7 @@ ol {
   position: relative;
   background-color: $body-background;
 
-  .auth .nav-tabs {
+  .nav-tabs {
     border: 1px none $gray-lighter;
     border-bottom-style: solid;
     padding: 0 0 1.1em;
@@ -111,8 +111,6 @@ ol {
     right: 1em;
     top: 1em;
   }
-
-  input:not([type="submit"]) { width: 100%; }
 }
 
 
