@@ -31,7 +31,8 @@ def pop_flash(request):
 
 def model(request):
     session = {k: v for k, v in request.session.items() if k[0] != '_'}
-    session['csrf_token'] = request.session.get_csrf_token()
+    session['csrf_token'] = request.session.get_csrf_token()  # bw compat
+    session['csrf'] = request.session.get_csrf_token()
     return session
 
 

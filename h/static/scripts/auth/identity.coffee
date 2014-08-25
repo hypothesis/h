@@ -27,7 +27,7 @@ identityFactory = [
         if loggedInUser is null
           if persona
             loggedInUser = persona
-            onlogin?(session.csrf_token)
+            onlogin?(session.csrf)
           else
             onmatch?()
         else if loggedInUser
@@ -36,14 +36,14 @@ identityFactory = [
               onmatch?()
             else
               loggedInUser = persona
-              onlogin?(session.csrf_token)
+              onlogin?(session.csrf)
           else
             loggedInUser = null
             onlogout?()
         else
           if persona
             loggedInUser = persona
-            onlogin?(session.csrf_token)
+            onlogin?(session.csrf)
           else
             loggedInUser = null
             onlogout?()
