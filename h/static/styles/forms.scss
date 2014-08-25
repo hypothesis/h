@@ -328,4 +328,8 @@
   &:first-child {
     margin-top: 15 / 13 * 1em;
   }
+
+  &:last-child {
+    margin-bottom: 15 / 13 * 1em;
+  }
 }
