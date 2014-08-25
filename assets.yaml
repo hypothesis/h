@@ -319,6 +319,7 @@ app_css:
           - h:static/styles/styled-text.scss
           - h:static/styles/simple-search.scss
           - h:static/styles/tags-input.scss
+          - h:static/styles/page.scss
 
 # Authentication
 auth:
