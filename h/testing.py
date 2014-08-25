@@ -64,26 +64,18 @@ class PatternLibraryLayout(BaseLayout):
 
 
 class LoggingMailer(DummyMailer):
+    class destination(list):
+        def __init__(self, prefix):
+            self.prefix = prefix
+
+        def append(self, message):
+            message.sender = message.sender or 'Default Sender'
+            log.info('%s:\n%s', self.prefix, message.to_message().as_string())
+            list.append(self, message)
+
     def __init__(self):
-        super(LoggingMailer, self).__init__()
-
-    def send(self, message):
-        if not message.sender:
-            message.sender = 'fake@localhost'
-        super(LoggingMailer, self).send(message)
-        log.info('sent: %s', message.to_message().as_string())
-
-    def send_immediately(self, message, fail_silently=False):
-        if not message.sender:
-            message.sender = 'fake@localhost'
-        super(LoggingMailer, self).send_immediately(message, fail_silently)
-        log.info('sent immediately: %s', message.to_message().as_string())
-
-    def send_to_queue(self, message):
-        if not message.sender:
-            message.sender = 'fake@localhost'
-        super(LoggingMailer, self).send_to_queue(message)
-        log.info('queued: %s', message.to_message().as_string())
+        self.outbox = self.destination('Sending email')
+        self.queue = self.destination('Queuing email')
 
 
 def includeme(config):
