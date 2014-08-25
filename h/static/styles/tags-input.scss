@@ -66,30 +66,27 @@ tags-input {
 }
 
 .tags-read-only {
+  font-size: 11px;
+  margin: .4545em 0;
 
   .tag-list {
     @include pie-clearfix;
-    margin: .2em 0;
+    margin-top: -.4545em;
 
     .tag-item {
-      font-size: 11px;
-      cursor: pointer;
-      display: block;
       float: left;
-      position: relative;
-      margin-right: 0.4em;
-      margin-top: .4em;
-      border: 1px solid #d3d3d3;
-      background: $gray-lightest;
-      font-weight: 400;
-      border-radius: 2px;
+      margin-right: .4545em;
+      margin-top: .4545em;
 
       a {
-        color: $gray-light;
-        padding: 0 .4em;
         text-decoration: none;
-        
-        &:hover {
+        border: 1px solid $gray-lighter;
+        border-radius: 2px;
+        padding: 0 .4545em .1818em;
+        color: $gray-light;
+        background: $gray-lightest;
+
+        &:hover, &:focus {
           color: $link-color-hover;
         }
       }
