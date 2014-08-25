@@ -64,20 +64,20 @@
        target="_blank"
        title="Parsed as Markdown"
        href="https://guides.github.com/features/mastering-markdown/" />
-    <div class="styled-text tab-pane" data-value="no" data-title="Write">
-      <markdown ng-model="model.text" name="text" />
+    <div class="tab-pane" data-value="no" data-title="Write">
+      <markdown class="form-field" ng-model="model.text" name="text" />
     </div>
     <div class="tab-pane" data-value="yes" data-title="Preview">
       <p class="form-field" ng-show="!model.text">Nothing to preview.</p>
-      <markdown ng-model="model.text" ng-readonly="true" name="text" />
+      <markdown class="form-field" ng-model="model.text" ng-readonly="true" name="text" />
     </div>
   </div>
 
   <div ng-hide="editing" ng-switch="mode">
-    <markdown name="text"
+    <markdown class="form-field" name="text"
               ng-model="model.highlightText"
               ng-switch-when="'search'" />
-    <markdown name="text"
+    <markdown class="form-field" name="text"
               ng-model="model.text"
               ng-readonly="true"
               ng-switch-default />
