@@ -58,3 +58,8 @@ img::selection,
 img::-moz-selection {
   background: transparent;
 }
+
+// Custom elements
+markdown {
+  display: block;
+}

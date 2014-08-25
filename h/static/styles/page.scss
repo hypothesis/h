@@ -1,0 +1,26 @@
+// Styles for full pages
+
+.page {
+  li, p {
+    line-height: 1.5;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+  }
+
+  h1 {
+    font-size: 1.991em;
+    margin: .618em 0 .309em;
+  }
+
+  h2 {
+    font-size: 1.618em;
+    margin: .7606em 0 .3803em;
+  }
+
+  h3 {
+    font-size: 1.231em;
+    margin: .9888em 0 .4944em;
+  }
+}

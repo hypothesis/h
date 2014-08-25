@@ -6,7 +6,7 @@
     <title>Hypothesis</title>
   </head>
   <body metal:fill-slot="body" tal:omit-tag>
-    <div id="home" class="content paper">
+    <div id="home" class="content paper styled-text page">
       <metal:main use-macro="load: h:templates/header.pt" />
       <p>Welcome to Hypothesis. For general information about the project, please
         visit the <a href="http://hypothes.is">home page</a> where you can

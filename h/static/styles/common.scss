@@ -14,9 +14,10 @@ $headings-color: $text-color;
 @import 'responsive';
 @import 'threads';
 @import 'yui_grid';
+@import 'styled-text';
 @import 'simple-search';
 @import 'tags-input';
-
+@import 'page';
 
 //ELEMENT STYLES////////////////////////////////
 a {
@@ -64,41 +65,6 @@ html {
   @include respond-to(desktops) {
     @include yui_grid('d-');
   }
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: $sans-font-family;
-  color: $headings-color;
-}
-
-h1 {
-  font-size: 2em;
-  margin: .67em 0;
-}
-
-h2 {
-  font-size: 1.5em;
-  margin-top: 15px;
-}
-
-h3 {
-  font-size: 1.25em;
-  margin: .83em 0;
-}
-
-h4 {
-  font-size: 1.15em;
-  margin: .83em 0;
-}
-
-h5 {
-  font-size: 1.05em;
-  margin: 1.5em 0;
-}
-
-h6 {
-  font-size: 1em;
-  margin: 1.67em 0;
 }
 
 //PAPER////////////////////////////////

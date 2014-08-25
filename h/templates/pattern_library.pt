@@ -6,13 +6,30 @@
         background: none;
       }
 
+      .pattern-library-doc h1 {
+        font-size: 2em;
+        margin-bottom: .5em;
+      }
+
       .pattern-library-wrapper {
         width: 80%;
         margin: 30px auto;
       }
 
-      .pattern-library-example {
-        overflow: hidden;
+      .pattern-library-example-header h1 {
+        text-transform: uppercase;
+        border-bottom: 1px solid lightgray;
+        padding-bottom: 1em;
+        margin: 2em 0 1em;
+      }
+
+      .pattern-library-example:before,
+      .pattern-library-example:after {
+        content: " ";
+        display: table;
+      }
+
+      .pattern-library-example:before {
         clear: both;
       }
 
@@ -68,6 +85,50 @@
         <p>This document gives an overview of all the components currently in the
         Hypothesis UI.</p>
         <a class="pattern-library-toggle" href="#">Show Code</a>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Styled Text</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="styled-text">
+            <p>Styled text is a wrapper around pure HTML without any classes etc. It's generally used to style HTML generated from Markdown, the following are all the elements generatable with Markdown.</p>
+            <p>It's very easy to make some words <strong>bold</strong> and other words <em>italic</em> with Markdown. You can even <a href="http://google.com">link to Google!</a>.</p>
+            <p>Sometimes you want numbered lists:</p>
+            <ol><li>One</li><li>Two</li><li>Three</li></ol>
+            <p>Sometimes you want bullet points:</p>
+            <ul><li>Start a line with a star</li><li>Profit!</li></ul>
+            <p>Alternatively,</p>
+            <ul>
+              <li>Dashes work just as well</li>
+              <li>And if you have sub points, put two spaces before the dash or star:
+                <ul>
+                  <li>This is the first sub point.</li>
+                  <li>This is the second sub point.</li>
+                </ul>
+              </li>
+            </ul>
+            <p>If you want to embed images, this is how you do it:</p>
+            <p><img src="https://octodex.github.com/images/yaktocat.png" alt="Image of Yaktocat"/></p>
+            <h1>Structured documents</h1><p>Sometimes it's useful to have different levels of headings to structure your documents. Start lines with a <code>#</code> to create headings. Multiple <code>##</code> in a row denote smaller heading sizes.</p>
+            <h2>This is a second-tier heading</h2>
+            <p>And a paragraph under the second level heading, this is likely to be used often.</p>
+            <h3>This is a third-tier heading</h3><p>And a paragraph under the third level heading, used less often.</p>
+            <h4>This is a fourth-tier heading</h4><p>And a paragraph under the second level heading, this will hopefully not be used much.</p>
+            <h5>This is a fifth-tier heading</h5><p>We're in trouble if a comment requires five levels of headings!</p>
+            <h6>This is a sixth-tier heading</h6><p>A ridiculous number of headings now!</p>
+            <p>You can use  one <code>#</code> all the way up to <code>######</code> six for different heading sizes.</p>
+            <p>If you'd like to quote someone, use the > character before the line:</p>
+            <blockquote>
+              <p>Coffee. The finest organic suspension ever devised... I beat the Borg with it.</p>
+              <p>&mdash; Captain Janeway</p>
+            </blockquote>
+            <p>There are many different ways to style code with markdown. If you have inline code blocks, wrap them in backticks: <code>var example = true</code>.  If you've got a longer block of code, you can indent with four spaces:</p>
+            <pre><code>if (isAwesome) {
+    return true;
+}</code></pre>
+          </div>
+        </div>
       </div>
       <div class="pattern-library-example">
         <div class="pattern-library-example-header">

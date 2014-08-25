@@ -76,6 +76,12 @@
   }
 }
 
+.form-textarea {
+  min-height: 8em;
+  max-width: 100%;
+  resize: vertical;
+}
+
 .form-field-error {
   .form-input {
     &, &:focus, &.js-focus {

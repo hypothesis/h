@@ -316,8 +316,10 @@ app_css:
           - h:static/styles/forms.scss
           - h:static/styles/reset.scss
           - h:static/styles/spinner.scss
+          - h:static/styles/styled-text.scss
           - h:static/styles/simple-search.scss
           - h:static/styles/tags-input.scss
+          - h:static/styles/page.scss
 
 # Authentication
 auth:

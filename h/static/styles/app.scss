@@ -45,13 +45,15 @@ ol {
 }
 
 .content {
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
   text-align: left;
 
   @include respond-to(tablets desktops) {
     margin: auto;
     max-width: $break-medium;
-    padding: 0 4em;
+    padding-left: 4em;
+    padding-right: 4em;
   }
 
   & > header {
@@ -65,7 +67,7 @@ ol {
       img { float: left; }
     }
 
-    margin-bottom: 2em;
+    margin-bottom: 1em;
 
     hgroup h1 {
       margin-bottom: 0 !important;
@@ -144,5 +146,17 @@ ol {
 
   .dropdown.open .provider {
     display: inline;
+  }
+}
+
+.masthead {
+  .masthead-heading {
+    margin: 0;
+    padding-top: 4px;
+  }
+
+  .masthead-subheading {
+    font-size: 1.231em;
+    margin: 0;
   }
 }
