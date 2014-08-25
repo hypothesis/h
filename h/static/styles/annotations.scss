@@ -39,52 +39,6 @@
     }
   }
 
-// This class applies to the markdown rendered annotation body.
-  .styled-text {
-
-    p, h1, h2, h3, h4, h5, h6, ol, ul, img, pre, blockquote {
-      margin: 0 0 .25em 0;
-    }
-
-    ol {
-      list-style-type: decimal;
-      list-style-position:inside;
-      padding-left: 1.5em;
-    }
-
-    ul {
-      list-style-type: disc;
-      list-style-position:inside;
-      padding-left: 1.5em;
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-    }
-
-    textarea {
-      min-height: 8em;
-      width: 100%;
-      resize: vertical;
-    }
-
-    code {
-      font-family: monospace;
-    }
-
-    pre code {
-      padding: 5px;
-      display: block;
-      background-color: $gray-lighter;
-      border-radius: .2em;
-    }
-
-    blockquote {
-      @include quote;
-    }
-  }
-
   .buttonbar {
     @include pie-clearfix;
     margin: .25em 0;
