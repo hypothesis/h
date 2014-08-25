@@ -30,18 +30,6 @@ ol {
   padding-left: 3em;
 }
 
-.auth {
-  padding: 1em;
-  .nav-tabs {
-    border: 1px none $gray-lighter;
-    border-bottom-style: solid;
-    padding: 0 0 1.1em;
-    & > li {
-      a { padding-bottom: .231em;}
-    }
-  }
-}
-
 .bookmarklet {
   padding: .12em;
   border: 1px dashed $gray;
@@ -107,8 +95,16 @@ ol {
   border-radius: 2px;
   font-family: $sans-font-family;
   margin-bottom: .72em;
+  padding: 1em;
   position: relative;
   background-color: $body-background;
+
+  .auth .nav-tabs {
+    border: 1px none $gray-lighter;
+    border-bottom-style: solid;
+    padding: 0 0 1.1em;
+    li a { padding-bottom: .231em }
+  }
 
   .close {
     position: absolute;
