@@ -35,14 +35,14 @@
       <img height="150px" width="150px"
            src="${request.static_url('h:static/images/helpdocumentation/createanaccount.jpg')}" />
 
-      <h2>Claiming a username:</h2>
-      <p>Have you already reserved a username? Use the “Claim your username” tab instead.</p>
+      <h2>Confirm an account or Claim a username:</h2>
+      <p>Have you already reserved a username? Use the “Confirm account” tab instead.</p>
 
       <h2>Forgotten Password?</h2>
-      <p>Click “Password help” and enter the email address you signed up for your account with.</p>
+      <p>Click “Forgotten your password” and enter the email address you signed up for your account with.</p>
       <img height="203px;" width="420px;"
            src="${request.static_url('h:static/images/helpdocumentation/password1.jpg')}" />
-      <p>An email will be sent containing an activation code for your account. Click “I have an activation code.</p>
+      <p>An email will be sent containing an activation code for your account. Click “have an activation code.”</p>
       <img height="203px;" width="420px;"
            src="${request.static_url('h:static/images/helpdocumentation/password2.jpg')}" />
       <p>Enter the activation code and the new password for your account. Click sign in, and your password will be reset.</p>
