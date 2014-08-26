@@ -80,9 +80,6 @@
     <script type="text/ng-template" id="auth.html">
       <metal:main use-macro="load: h:templates/auth.html" />
     </script>
-    <script type="text/ng-template" id="editor.html">
-      <metal:main use-macro="load: h:templates/editor.html" />
-    </script>
     <script type="text/ng-template" id="markdown.html">
       <metal:main use-macro="load: h:templates/markdown.html" />
     </script>

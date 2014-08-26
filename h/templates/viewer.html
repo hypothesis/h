@@ -1,28 +1,33 @@
 <!-- Thread view -->
 <ul class="stream-list">
-  <li ng-show="search.query"
+  <li ng-show="!!matches"
       ><span ng-pluralize
              count="matches.length"
-             when="{'0': 'Found noresults.',
-                    'one': 'Found one matching annotation.',
+             when="{'0': 'Found no results.',
+                    'one': 'Found 1 matching annotation.',
                     'other': 'Found {} matching annotations.'}"></span>
       <a href="" ng-click="clearSelection()">Clear search</a>.</li>
-  <li ng-show="selectedAnnotations && !search.query"
-      >Showing selected annotations.
-    <a href="" ng-click="clearSelection()">Clear selection</a>.</li>
-  <li>
-    <span class="ng-cloak dropdown">
+  <li ng-show="selectedAnnotations && !matches"
+      ><span ng-pluralize
+             count="selectedAnnotationsCount"
+             when="{'0': 'No annotations selected',
+                    'one': 'Showing 1 selected annotation.',
+                    'other': 'Showing {} selected annotations.'}"></span>
+      <a href="" ng-click="clearSelection()">Clear selection</a>.</li>
+  <li ng-show="isStream">
+    <div class="ng-cloak dropdown">
       <span role="button"
             class="dropdown-toggle"
-            data-toggle="dropdown"
-            >Sorted by {{sort.name | lowercase}}
-        <i class="icon-triangle small" /></span>
+            data-toggle="dropdown">
+        Sorted by {{sort.name | lowercase}}
+        <i class="icon-triangle small"></i>
+      </span>
       <ul class="dropdown-menu pull-right" role="menu">
         <li ng-click="sort.name = option"
             ng-repeat="option in ['Newest', 'Oldest', 'Location']"
             >{{option}}</li>
       </ul>
-    </span>
+    </div>
   </li>
   <li class="paper thread"
       thread="{message: ongoingEdit}"
@@ -35,9 +40,7 @@
       ng-click="toggleCollapsed($event)"
       ng-include="'thread.html'"
       ng-init="collapsed = !search.query"
-      ng-show="ann_info.shown[thread.message.id] || !anno_info &&
-               (selectedAnnotations == null ||
-                selectedAnnotations[thread.message.id])"
+      ng-show="shouldShowAnnotation(thread.message.id)"
       ng-mouseenter="activate(thread.message)"
       ng-mouseleave="activate()"
       ng-repeat="thread in threadRoot.children

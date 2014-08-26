@@ -295,6 +295,7 @@ class App
     $scope.clearSelection = ->
       $scope.search.query = ''
       $scope.selectedAnnotations = null
+      $scope.selectedAnnotationsCount = 0
 
     $scope.frame = visible: false
     $scope.id = identity
@@ -321,10 +322,13 @@ class AnnotationViewer
   constructor: ($routeParams, $scope, streamfilter) ->
     # Tells the view that these annotations are standalone
     $scope.isEmbedded = false
+    $scope.isStream = false
 
     # Provide no-ops until these methods are moved elsewere. They only apply
     # to annotations loaded into the stream.
     $scope.activate = angular.noop
+
+    $scope.shouldShowAnnotation = (id) -> true
 
     $scope.$watch 'updater', (updater) ->
       if updater?
@@ -340,18 +344,15 @@ class AnnotationViewer
 
 class Viewer
   this.$inject = [
-    '$location', '$routeParams', '$scope',
-    'annotator'
+    '$location', '$routeParams', '$scope', 'annotator'
   ]
-  constructor: (
-    $location, $routeParams, $scope,
-    annotator
-  ) ->
+  constructor: ($location, $routeParams, $scope, annotator) ->
     if $routeParams.q
       return $location.path('/page_search').replace()
 
     # Tells the view that these annotations are embedded into the owner doc
     $scope.isEmbedded = true
+    $scope.isStream = true
 
     {providers, threading} = annotator
 
@@ -367,6 +368,10 @@ class Viewer
           method: 'setActiveHighlights'
           params: highlights
 
+    $scope.shouldShowAnnotation = (id) ->
+      selectedAnnotations = $scope.selectedAnnotations
+      !selectedAnnotations or selectedAnnotations?[id]
+
 
 class Search
   this.$inject = ['$filter', '$location', '$routeParams', '$sce', '$scope',
@@ -377,6 +382,9 @@ class Search
       return $location.path('/viewer').replace()
 
     {providers, threading} = annotator
+
+    $scope.isEmbedded = true
+    $scope.isStream = true
 
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
     $scope.filter_orderBy = $filter('orderBy')
@@ -390,6 +398,10 @@ class Search
       more_bottom : {}
       more_top_num : {}
       more_bottom_num: {}
+
+    $scope.shouldShowAnnotation = (id) ->
+      shownAnnotations = $scope.ann_info?.shown or {}
+      !!shownAnnotations[id]
 
     buildRenderOrder = (threadid, threads) =>
       unless threads?.length

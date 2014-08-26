@@ -26,6 +26,9 @@ class StreamSearch
     terms = searchfilter.generateFacetedFilter $scope.search.query
     queryparser.populateFilter streamfilter, terms
 
+    $scope.isEmbedded = false
+    $scope.isStream = true
+
     $scope.sort.name = 'Newest'
 
 

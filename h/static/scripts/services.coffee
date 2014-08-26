@@ -259,16 +259,22 @@ class Hypothesis extends Annotator
 
   toggleViewerSelection: (annotations=[]) =>
     scope = @element.scope()
+
     selected = scope.selectedAnnotations or {}
     for a in annotations
       if selected[a.id]
         delete selected[a.id]
       else
         selected[a.id] = true
-    if Object.keys(selected).length
+
+    count = Object.keys(selected).length
+    scope.selectedAnnotationsCount = count
+
+    if count
       scope.selectedAnnotations = selected
     else
       scope.selectedAnnotations = null
+
     this
 
   updateViewer: (annotations=[]) =>
@@ -281,6 +287,7 @@ class Hypothesis extends Annotator
     for a in annotations
       selected[a.id] = true
     scope.selectedAnnotations = selected
+    scope.selectedAnnotationsCount = Object.keys(selected).length
     this.show()
     this
 
