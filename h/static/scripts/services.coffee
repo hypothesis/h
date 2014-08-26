@@ -4,8 +4,33 @@ imports = [
 ]
 
 
+# The render function accepts a scope and a data object and schedule the scope
+# to be updated with the provided data and digested before the next repaint
+# using window.requestAnimationFrame() (or a fallback). If the resulting digest
+# causes a subsequent invocation of the render function the digest rate is
+# effectively limited to ensure a responsive user interface.
+renderFactory = ['$$rAF', ($$rAF) ->
+  renderFrame = null
+  renderQueue = []
+
+  render = ->
+    return renderFrame = null if renderQueue.length is 0
+    {data, cb} = renderQueue.shift()
+    $$rAF(render)
+    cb(data)
+
+  (data, cb) ->
+    renderQueue.push {data, cb}
+    renderFrame = $$rAF(render) unless renderFrame
+]
+
+
 class Hypothesis extends Annotator
-  events: {}
+  events:
+    'annotationCreated': 'digest'
+    'annotationDeleted': 'digest'
+    'annotationUpdated': 'digest'
+    'annotationsLoaded': 'digest'
 
   # Plugin configuration
   options:
@@ -53,12 +78,8 @@ class Hypothesis extends Annotator
   viewer:
     addField: (-> )
 
-  this.$inject = [
-    '$document', '$location', '$rootScope', '$route', '$window',
-  ]
-  constructor: (
-     $document,   $location,   $rootScope,   $route,   $window,
-  ) ->
+  this.$inject = ['$document', '$window']
+  constructor:   ( $document,   $window ) ->
     super ($document.find 'body')
 
     window.annotator = this
@@ -86,10 +107,6 @@ class Hypothesis extends Annotator
         formatted = {}
         for k, v of annotation when k in whitelist
           formatted[k] = v
-        if annotation.thread? and annotation.thread?.children.length
-          formatted.reply_count = annotation.thread.flattenChildren().length
-        else
-          formatted.reply_count = 0
         formatted
       parser: (annotation) =>
         parsed = {}
@@ -160,8 +177,6 @@ class Hypothesis extends Annotator
             unless userId in roles then roles.push userId
 
   _setupXDM: (options) ->
-    $rootScope = @element.injector().get '$rootScope'
-
     # jschannel chokes FF and Chrome extension origins.
     if (options.origin.match /^chrome-extension:\/\//) or
         (options.origin.match /^resource:\/\//)
@@ -181,55 +196,44 @@ class Hypothesis extends Annotator
 
     .bind('back', =>
       # Navigate "back" out of the interface.
-      $rootScope.$apply =>
-        return unless this.discardDrafts()
+      @element.scope().$apply =>
+        return if @element.scope().ongoingEdit
         this.hide()
     )
 
     .bind('open', =>
       # Pop out the sidebar
-      $rootScope.$apply => this.show()
+      @element.scope().$apply => this.show()
     )
 
-    .bind('showViewer', (ctx, ids) =>
-      ids ?= []
-      return unless this.discardDrafts()
-      $rootScope.$apply =>
-        this.showViewer this._getAnnotationsFromIDs(ids)
+    .bind('showViewer', (ctx, tags=[]) =>
+      @element.scope().$apply =>
+        this.showViewer this._getLocalAnnotations(tags)
     )
 
-    .bind('updateViewer', (ctx, ids) =>
-      ids ?= []
-      $rootScope.$apply =>
-        this.updateViewer this._getAnnotationsFromIDs(ids)
+    .bind('updateViewer', (ctx, tags=[]) =>
+      @element.scope().$apply =>
+        this.updateViewer this._getLocalAnnotations(tags)
     )
 
-    .bind('toggleViewerSelection', (ctx, ids) =>
-      $rootScope.$apply =>
-        this.toggleViewerSelection this._getAnnotationsFromIDs(ids)
+    .bind('toggleViewerSelection', (ctx, tags=[]) =>
+      @element.scope().$apply =>
+        this.toggleViewerSelection this._getLocalAnnotations(tags)
     )
 
     .bind('setTool', (ctx, name) =>
-      $rootScope.$apply => this.setTool name
+      @element.scope().$apply => this.setTool name
     )
 
     .bind('setVisibleHighlights', (ctx, state) =>
-      $rootScope.$apply => this.setVisibleHighlights state
+      @element.scope().$apply => this.setVisibleHighlights state
     )
 
-    .bind('addEmphasis', (ctx, ids=[]) =>
-      this.addEmphasis this._getAnnotationsFromIDs ids
-    )
+   # Look up an annotation based on its bridge tag
+  _getLocalAnnotation: (tag) -> @plugins.Bridge.cache[tag]
 
-    .bind('removeEmphasis', (ctx, ids=[]) =>
-      this.removeEmphasis this._getAnnotationsFromIDs ids
-    )
-
-   # Look up an annotation based on the ID
-  _getAnnotationFromID: (id) -> @threading.getContainer(id)?.message
-
-   # Look up a list of annotations, based on their IDs
-  _getAnnotationsFromIDs: (ids) -> this._getAnnotationFromID id for id in ids
+   # Look up a list of annotations, based on their bridge tags
+  _getLocalAnnotations: (tags) -> this._getLocalAnnotation t for t in tags
 
   _setupWrapper: ->
     @wrapper = @element.find('#wrapper')
@@ -257,7 +261,7 @@ class Hypothesis extends Annotator
     annotation.highlights = []
     annotation
 
-  toggleViewerSelection: (annotations=[]) =>
+  toggleViewerSelection: (annotations=[]) ->
     scope = @element.scope()
 
     selected = scope.selectedAnnotations or {}
@@ -277,11 +281,11 @@ class Hypothesis extends Annotator
 
     this
 
-  updateViewer: (annotations=[]) =>
+  updateViewer: (annotations=[]) ->
     # TODO: re-implement
     this
 
-  showViewer: (annotations=[]) =>
+  showViewer: (annotations=[]) ->
     scope = @element.scope()
     selected = {}
     for a in annotations
@@ -291,42 +295,25 @@ class Hypothesis extends Annotator
     this.show()
     this
 
-  addEmphasis: (annotations=[]) =>
-    annotations = annotations.filter (a) -> a? # Filter out null annotations
-    for a in annotations
-      a.$emphasis = true
-    @element.injector().get('$rootScope').$digest()
-
-  removeEmphasis: (annotations=[]) =>
-    annotations = annotations.filter (a) -> a? # Filter out null annotations
-    for a in annotations
-      delete a.$emphasis
-    @element.injector().get('$rootScope').$digest()
-
-  clickAdder: =>
-    for p in @providers
-      p.channel.notify
-        method: 'adderClick'
-
-  showEditor: (annotation) =>
-    @element.injector().get('drafts').add(annotation)
-    @element.scope().ongoingEdit = annotation
+  showEditor: (annotation) ->
+    scope = @element.scope()
+    scope.ongoingEdit = mail.messageContainer(annotation)
+    scope.$digest()  # XXX: unify with other RPC, digest cycle
+    delete scope.selectedAnnotations
     this.show()
     this
 
-  show: =>
+  show: ->
     @element.scope().frame.visible = true
 
-  hide: =>
+  hide: ->
     @element.scope().frame.visible = false
 
-  isOpen: =>
-    @element.scope().frame.visible
+  digest: ->
+    @element.scope().$evalAsync angular.noop
 
   patch_store: ->
-    $location = @element.injector().get '$location'
-    $rootScope = @element.injector().get '$rootScope'
-
+    scope = @element.scope()
     Store = Annotator.Plugin.Store
 
     # When the Store plugin is first instantiated, don't load annotations.
@@ -352,36 +339,32 @@ class Hypothesis extends Annotator
     # if the annotation has a newly-assigned id and ensures that the id
     # is enumerable.
     Store.prototype.updateAnnotation = (annotation, data) =>
-      unless Object.keys(data).length
-        return
-
-      if annotation.id? and annotation.id != data.id
-        # Update the id table for the threading
-        thread = @threading.getContainer annotation.id
-        thread.id = data.id
-        @threading.idTable[data.id] = thread
-        delete @threading.idTable[annotation.id]
-
-        # The id is no longer temporary and should be serialized
-        # on future Store requests.
-        Object.defineProperty annotation, 'id',
-          configurable: true
-          enumerable: true
-          writable: true
-
-        # If the annotation is loaded in a view, switch the view
-        # to reference the new id.
-        search = $location.search()
-        if search? and search.id == annotation.id
-          search.id = data.id
-          $location.search(search).replace()
-
       # Update the annotation with the new data
       annotation = angular.extend annotation, data
-      @plugins.Bridge?.updateAnnotation annotation
 
-      # Give angular a chance to react
-      $rootScope.$digest()
+      # Update the thread table
+      update = (parent) ->
+        for child in parent.children when child.message is annotation
+          scope.threading.idTable[data.id] = child
+          return true
+        return false
+
+      # Check its references
+      references = annotation.references or []
+      if typeof(annotation.references) == 'string' then references = []
+      for ref in references.slice().reverse()
+        container = scope.threading.idTable[ref]
+        continue unless container?
+        break if update container
+
+      # Check the root
+      update scope.threading.root
+
+      # Sync data to other frames
+      @plugins.Bridge.sync([annotation])
+
+      # Tell angular about the changes.
+      scope.$digest()
 
   considerSocialView: (query) ->
     switch @socialView.name
@@ -399,7 +382,7 @@ class Hypothesis extends Annotator
       else
         console.warn "Unsupported Social View: '" + @socialView.name + "'!"
 
-  setTool: (name) =>
+  setTool: (name) ->
     return if name is @tool
     return unless this.discardDrafts()
 
@@ -424,7 +407,7 @@ class Hypothesis extends Annotator
         method: 'setTool'
         params: name
 
-  setVisibleHighlights: (state) =>
+  setVisibleHighlights: (state) ->
     return if state is @visibleHighlights
     @visibleHighlights = state
     this.publish 'setVisibleHighlights', state
@@ -676,6 +659,7 @@ class ViewFilter
 
 
 angular.module('h.services', imports)
+.factory('render', renderFactory)
 .provider('drafts', DraftProvider)
 .service('annotator', Hypothesis)
 .service('viewFilter', ViewFilter)

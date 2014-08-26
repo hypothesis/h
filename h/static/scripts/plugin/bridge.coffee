@@ -189,10 +189,6 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     channel = Channel.build(options)
 
     ## Remote method call bindings
-    .bind('setupAnnotation', (txn, annotation) =>
-      this._format (@annotator.setupAnnotation (this._parse annotation))
-    )
-
     .bind('beforeCreateAnnotation', (txn, annotation) =>
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
@@ -226,21 +222,14 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       res
     )
 
+    .bind('sync', (ctx, annotations) =>
+      (this._format (this._parse a) for a in annotations)
+    )
+
     ## Notifications
     .bind('loadAnnotations', (txn, annotations) =>
-      # First, parse the existing ones, for any updates
-      oldOnes = (this._parse a for a in annotations when @cache[a.tag])
-
-      # Announce the changes in old annotations
-      if oldOnes.length
-        @selfPublish = true
-        @annotator.publish 'annotationsLoaded', [oldOnes]
-        delete @selfPublish
-
-      # Then collect the new ones
-      newOnes = (this._parse a for a in annotations when not @cache[a.tag])
-      if newOnes.length
-        @annotator.loadAnnotations newOnes
+      annotations = (this._parse a for a in annotations)
+      @annotator.loadAnnotations annotations
     )
 
     .bind('showEditor', (ctx, annotation) =>
@@ -288,10 +277,15 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
 
     $.when(deferreds...)
     .then (results...) =>
-      annotation = {}
-      for r in results when r isnt null
-        $.extend annotation, (this._parse r)
-      options.callback? null, annotation
+      if Array.isArray(results[0])
+        acc = []
+        foldFn = (_, cur) =>
+          (this._parse(a) for a in cur)
+      else
+        acc = {}
+        foldFn = (_, cur) =>
+          this._parse(cur)
+      options.callback? null, results.reduce(foldFn, acc)
     .fail (failure) =>
       options.callback? failure
 
@@ -366,26 +360,16 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     this
 
   annotationsLoaded: (annotations) =>
-    return if @selfPublish
-    unless annotations.length
-      console.log "Useless call to 'annotationsLoaded()' with an empty list"
-      console.trace()
-      return
+    annotations = (this._format a for a in annotations when not a.$$tag)
+    return unless annotations.length
     this._notify
       method: 'loadAnnotations'
-      params: (this._format a for a in annotations)
+      params: annotations
     this
 
   beforeCreateAnnotation: (annotation, cb) ->
     this._call
       method: 'beforeCreateAnnotation'
-      params: this._format annotation
-      callback: cb
-    annotation
-
-  setupAnnotation: (annotation, cb) ->
-    this._call
-      method: 'setupAnnotation'
       params: this._format annotation
       callback: cb
     annotation
@@ -410,6 +394,14 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       params: this._format annotation
       callback: cb
     annotation
+
+  sync: (annotations, cb) ->
+    annotations = (this._format a for a in annotations)
+    this._call
+      method: 'sync'
+      params: annotations
+      callback: cb
+    this
 
   showEditor: (annotation) ->
     this._notify

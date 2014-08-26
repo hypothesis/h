@@ -25,7 +25,6 @@ class Annotator.Guest extends Annotator
   # Internal state
   tool: 'comment'
   visibleHighlights: false
-  noBack: false
 
   constructor: (element, options, config = {}) ->
     options.noScan = true
@@ -51,7 +50,6 @@ class Annotator.Guest extends Annotator
           formatted.document.title = formatted.document.title.slice()
         formatted
       onConnect: (source, origin, scope) =>
-        this.publish "enableAnnotating", @canAnnotate
         @panel = this._setupXDM
           window: source
           origin: origin
@@ -90,8 +88,9 @@ class Annotator.Guest extends Annotator
 
       # Collect all impacted annotations
       annotations = (hl.annotation for hl in highlights)
+
       # Announce the new positions, so that the sidebar knows
-      this.publish "annotationsLoaded", [annotations]
+      this.plugins.Bridge.sync(annotations)
 
     # Watch for removed highlights, and update positions in sidebar
     this.subscribe "highlightRemoved", (highlight) =>
@@ -112,7 +111,7 @@ class Annotator.Guest extends Annotator
         delete highlight.anchor.target.pos
 
       # Announce the new positions, so that the sidebar knows
-      this.publish "annotationsLoaded", [[highlight.annotation]]
+      this.plugins.Bridge.sync([highlight.annotation])
 
   _setupXDM: (options) ->
     # jschannel chokes FF and Chrome extension origins.
@@ -161,13 +160,6 @@ class Annotator.Guest extends Annotator
           return
     )
 
-    .bind('adderClick', =>
-      @selectedTargets = @forcedLoginTargets
-      @onAdderClick @forcedLoginEvent
-      delete @forcedLoginTargets
-      delete @forcedLoginEvent
-    )
-
     .bind('getDocumentInfo', =>
       return {
         uri: @plugins.Document.uri()
@@ -200,11 +192,8 @@ class Annotator.Guest extends Annotator
   _setupWrapper: ->
     @wrapper = @element
     .on 'click', =>
-      if @canAnnotate and not @noBack and not @creatingHL
-        setTimeout =>
-          unless @selectedTargets?.length
-            @hideFrame()
-      delete @creatingHL
+      unless @selectedTargets?.length
+        @hideFrame()
     this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
@@ -236,29 +225,29 @@ class Annotator.Guest extends Annotator
   showViewer: (annotations) =>
     @panel?.notify
       method: "showViewer"
-      params: (a.id for a in annotations when a.id)
+      params: (a.$$tag for a in annotations)
 
   toggleViewerSelection: (annotations) =>
     @panel?.notify
       method: "toggleViewerSelection"
-      params: (a.id for a in annotations)
+      params: (a.$$tag for a in annotations)
 
   updateViewer: (annotations) =>
     @panel?.notify
       method: "updateViewer"
-      params: (a.id for a in annotations when a.id)
+      params: (a.$$tag for a in annotations)
 
   showEditor: (annotation) => @plugins.Bridge.showEditor annotation
 
   addEmphasis: (annotations) =>
     @panel?.notify
       method: "addEmphasis"
-      params: (a.id for a in annotations when a.id)
+      params: (a.$$tag for a in annotations when a.$$tag)
 
   removeEmphasis: (annotations) =>
     @panel?.notify
       method: "removeEmphasis"
-      params: (a.id for a in annotations when a.id)
+      params: (a.$$tag for a in annotations when a.$$tag)
 
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
@@ -281,15 +270,9 @@ class Annotator.Guest extends Annotator
 
       # Describe the selection with targets
       @selectedTargets = (@_getTargetFromSelection(s) for s in event.segments)
-      # Are we allowed to create annotations? Return false if we can't.
-      unless @canAnnotate
-        return false
 
       # Do we really want to make this selection?
       return false unless this.confirmSelection()
-
-      # Add a flag about what's happening
-      @creatingHL = true
 
       # Create the annotation
       annotation = {inject: true}
@@ -374,55 +357,11 @@ class Annotator.Guest extends Annotator
       params: token
 
   onAdderClick: (event) =>
-    """
-    Differs from upstream in a few ways:
-    - Don't fire annotationCreated events: that's the job of the sidebar
-    - Save the event for retriggering if login interrupts the flow
-    """
     event?.preventDefault()
-
-    # Save the event and targets for restarting edit on forced login
-    @forcedLoginEvent = event
-    @forcedLoginTargets = @selectedTargets
-
-    # Hide the adder
     @adder.hide()
     @inAdderClick = false
-    position = @adder.position()
-
-    # Show a temporary highlight so the user can see what they selected
-    # Also extract the quotation and serialize the ranges
     annotation = this.setupAnnotation(this.createAnnotation())
-
-    hl.setTemporary(true) for hl in @getHighlights([annotation])
-
-    # Subscribe to the editor events
-
-    # Make the highlights permanent if the annotation is saved
-    save = =>
-      do cleanup
-      hl.setTemporary false for hl in @getHighlights [annotation]
-
-    # Remove the highlights if the edit is cancelled
-    cancel = =>
-      do cleanup
-      this.deleteAnnotation(annotation)
-
-    # Don't leak handlers at the end
-    cleanup = =>
-      this.unsubscribe('annotationEditorHidden', cancel)
-      this.unsubscribe('annotationEditorSubmit', save)
-
-    this.subscribe('annotationEditorHidden', cancel)
-    this.subscribe('annotationEditorSubmit', save)
-
-    # Display the editor.
-    this.showEditor(annotation, position)
-
-    # We have to clear the selection.
-    # (Annotator does this automatically by focusing on
-    # one of the input fields in the editor.)
-    Annotator.util.getGlobal().getSelection().removeAllRanges()
+    this.showEditor(annotation)
 
   onSetTool: (name) ->
     switch name
@@ -434,14 +373,3 @@ class Annotator.Guest extends Annotator
   onSetVisibleHighlights: (state) =>
     this.visibleHighlights = state
     this.setVisibleHighlights state, false
-
-  # TODO: Workaround for double annotation deletion.
-  # The short story: hiding the editor sometimes triggers
-  # a spurious annotation delete.
-  # Uncomment the traces below to investigate this further.
-  deleteAnnotation: (annotation) ->
-    if annotation.deleted
-      return
-    else
-      annotation.deleted = true
-    super

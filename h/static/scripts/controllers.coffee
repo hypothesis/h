@@ -42,15 +42,10 @@ class App
           plugins.Store?._onLoadAnnotations data
         when 'delete'
           for annotation in data
-            container = annotator.threading.getContainer annotation.id
-            if container.message
-              # XXX: This is a temporary workaround until real client-side only
-              # XXX: delete will be introduced
-              index = plugins.Store.annotations.indexOf container.message
-              plugins.Store.annotations[index..index] = [] if index > -1
-              annotator.deleteAnnotation container.message
-
-      $scope.$digest()
+            annotation = plugins.Threading.idTable[annotation.id]?.message
+            continue unless annotation?
+            plugins.Store?.unregisterAnnotation(annotation)
+            annotator.deleteAnnotation(annotation)
 
     initIdentity = (persona) ->
       """Initialize identity callbacks."""
@@ -80,8 +75,9 @@ class App
       """Initialize the storage component."""
       Store = plugins.Store
       delete plugins.Store
-      delete $scope.threadRoot
       annotator.addPlugin 'Store', annotator.options.Store
+
+      $scope.store = plugins.Store
 
       _id = $route.current.params.id
       _promise = null
@@ -110,6 +106,28 @@ class App
       Store._onLoadAnnotations = angular.noop
       # * Make the update function into a noop.
       Store.updateAnnotation = angular.noop
+
+      # Sort out which annotations should remain in place.
+      user = $scope.persona
+      cull = (acc, annotation) ->
+        if annotator.tool is 'highlight' and annotation.user != user
+          acc.drop.push annotation
+        else if plugins.Permissions.authorize('read', annotation, user)
+          acc.keep.push annotation
+        else
+          acc.drop.push annotation
+        acc
+
+      {keep, drop} = Store.annotations.reduce cull, {keep: [], drop: []}
+      Store.annotations = []
+      plugins.Store.annotations = keep
+
+      # Clean up the ones that should be removed.
+      do cleanup = (drop) ->
+        return if drop.length == 0
+        [first, rest...] = drop
+        annotator.deleteAnnotation first
+        $timeout -> cleanup rest
 
     initUpdater = (failureCount=0) ->
       """Initialize the websocket used for realtime updates."""
@@ -153,6 +171,8 @@ class App
           applyUpdates action, owndata
         else
           applyUpdates action, data
+
+        $scope.$digest()
 
       _dfdSock.promise
 
@@ -212,24 +232,17 @@ class App
           initUpdater()
 
     annotator.subscribe 'annotationCreated', (annotation) ->
-      unless annotation.thread.parent
-        $scope.threadRoot.addChild annotation.thread
-
-      if annotation is $scope.ongoingEdit
+      if annotation is $scope.ongoingEdit?.message
         delete $scope.ongoingEdit
         for p in providers
           p.channel.notify method: 'onEditorSubmit'
           p.channel.notify method: 'onEditorHide'
 
     annotator.subscribe 'annotationDeleted', (annotation) ->
-      if annotation is $scope.ongoingEdit
+      if annotation is $scope.ongoingEdit?.message
         delete $scope.ongoingEdit
         for p in providers
           p.channel.notify method: 'onEditorHide'
-
-    annotator.subscribe 'annotationsLoaded', (annotations) ->
-      $scope.threadRoot ?= annotator.threading.thread(annotations)
-      $scope.$digest()
 
     annotator.subscribe 'serviceDiscovery', (options) ->
       annotator.options.Store ?= {}
@@ -247,13 +260,12 @@ class App
         identity.request()
 
     $scope.$watch 'frame.visible', (newValue, oldValue) ->
-      routeName = $location.path().replace /^\//, ''
       if newValue
         annotator.show()
-        annotator.host.notify method: 'showFrame', params: routeName
+        annotator.host.notify method: 'showFrame'
       else if oldValue
         annotator.hide()
-        annotator.host.notify method: 'hideFrame', params: routeName
+        annotator.host.notify method: 'hideFrame'
         for p in annotator.providers
           p.channel.notify method: 'setActiveHighlights'
 
@@ -273,9 +285,9 @@ class App
           .resetFilter()
           .addClause('/uri', 'one_of', entities)
 
-      $scope.updater.then (sock) ->
-        filter = streamfilter.getFilter()
-        sock.send(JSON.stringify({filter}))
+        $scope.updater.then (sock) ->
+          filter = streamfilter.getFilter()
+          sock.send(JSON.stringify({filter}))
 
     $scope.loadMore = (number) ->
       unless $scope.updater? then return
@@ -297,10 +309,12 @@ class App
       $scope.selectedAnnotations = null
       $scope.selectedAnnotationsCount = 0
 
+    $scope.baseURI = documentHelpers.baseURI
     $scope.frame = visible: false
     $scope.id = identity
 
     $scope.model = persona: undefined
+    $scope.threading = plugins.Threading
 
     $scope.search =
       query: $location.search()['q']
@@ -354,13 +368,13 @@ class Viewer
     $scope.isEmbedded = true
     $scope.isStream = true
 
-    {providers, threading} = annotator
+    {providers} = annotator
 
     $scope.activate = (annotation) ->
-      if angular.isArray annotation
-        highlights = (a.$$tag for a in annotation when a?)
-      else if angular.isObject annotation
+      if angular.isObject annotation
         highlights = [annotation.$$tag]
+      else if $scope.ongoingEdit
+        highlights = [$scope.ongoingEdit.message.$$tag]
       else
         highlights = []
       for p in providers
@@ -381,7 +395,7 @@ class Search
     unless $routeParams.q
       return $location.path('/viewer').replace()
 
-    {providers, threading} = annotator
+    {plugins, providers} = annotator
 
     $scope.isEmbedded = true
     $scope.isStream = true
@@ -401,7 +415,7 @@ class Search
 
     $scope.shouldShowAnnotation = (id) ->
       shownAnnotations = $scope.ann_info?.shown or {}
-      !!shownAnnotations[id]
+      !!shownAnnotations[id] or $scope.render_order[id]
 
     buildRenderOrder = (threadid, threads) =>
       unless threads?.length
@@ -421,7 +435,7 @@ class Search
       pos = $scope.render_pos[annotation.id]
       if pos > 0
         prev = $scope.render_order[threadid][pos-1]
-        unless prev in $scope.matches
+        unless prev is threadid or prev in $scope.matches
           result = true
       result
 
@@ -439,9 +453,7 @@ class Search
       result
 
     $scope.activate = (annotation) ->
-      if angular.isArray annotation
-        highlights = (a.$$tag for a in annotation when a?)
-      else if angular.isObject annotation
+      if angular.isObject annotation
         highlights = [annotation.$$tag]
       else
         highlights = []
@@ -455,7 +467,7 @@ class Search
 
     refresh = =>
       query = $routeParams.q
-      annotations = $scope.threadRoot.flattenChildren()
+      annotations = $scope.threading.root.flattenChildren()
       [$scope.matches, $scope.filters] = viewFilter.filter annotations, query
       # Create the regexps for highlighting the matches inside the annotations' bodies
       $scope.text_tokens = $scope.filters.text.terms.slice()
@@ -486,17 +498,17 @@ class Search
       $scope.render_order = {}
 
       # Choose the root annotations to work with
-      for id, thread of annotator.threading.idTable when thread.message?
+      for id, thread of $scope.threading.idTable when thread.message?
         annotation = thread.message
         annotation_root = if annotation.references? then annotation.references[0] else annotation.id
         # Already handled thread
         if roots[annotation_root]? then continue
-        root_annotation = (annotator.threading.getContainer annotation_root).message
+        root_annotation = ($scope.threading.getContainer annotation_root).message
         unless root_annotation in annotations then continue
 
         if annotation.id in $scope.matches
           # We have a winner, let's put its root annotation into our list and build the rendering
-          root_thread = annotator.threading.getContainer annotation_root
+          root_thread = $scope.threading.getContainer annotation_root
           threads.push root_thread
           $scope.render_order[annotation_root] = []
           buildRenderOrder(annotation_root, [root_thread])
@@ -575,7 +587,7 @@ class Search
     $scope.$on '$routeUpdate', refresh
 
     $scope.getThreadId = (id) ->
-      thread = annotator.threading.getContainer id
+      thread = $scope.threading.getContainer id
       threadid = id
       if thread.message.references?
         threadid = thread.message.references[0]

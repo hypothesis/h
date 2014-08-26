@@ -16,6 +16,11 @@ class StreamSearch
      $scope,   $rootScope,
      annotator,   queryparser,   searchfilter,   streamfilter
   ) ->
+    # Clear out loaded annotations and threads
+    # XXX: Resolve threading, storage, and updater better for all routes.
+    annotator.plugins.Threading?.pluginInit()
+    annotator.plugins.Store?.annotations = []
+
     # Initialize the base filter
     streamfilter
       .resetFilter()
@@ -30,6 +35,13 @@ class StreamSearch
     $scope.isStream = true
 
     $scope.sort.name = 'Newest'
+
+    $scope.shouldShowAnnotation = (id) -> true
+
+    $scope.$watch 'updater', (updater) ->
+      updater?.then (sock) ->
+        filter = streamfilter.getFilter()
+        sock.send(JSON.stringify({filter}))
 
 
 angular.module('h.streamsearch', imports, configure)

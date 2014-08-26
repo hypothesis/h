@@ -5,7 +5,6 @@ imports = [
   'h.controllers'
   'h.controllers.AccountManagement'
   'h.directives'
-  'h.directives.annotation'
   'h.filters'
   'h.identity'
   'h.streamsearch'
@@ -14,26 +13,9 @@ imports = [
 
 
 configure = [
-  '$locationProvider', '$provide', '$routeProvider', '$sceDelegateProvider',
-  ($locationProvider,   $provide,   $routeProvider,   $sceDelegateProvider) ->
+  '$locationProvider', '$routeProvider', '$sceDelegateProvider',
+  ($locationProvider,   $routeProvider,   $sceDelegateProvider) ->
     $locationProvider.html5Mode(true)
-
-    # Disable annotating while drafting
-    $provide.decorator 'drafts', [
-      'annotator', '$delegate',
-      (annotator,   $delegate) ->
-        {add, remove} = $delegate
-
-        $delegate.add = (draft) ->
-          add.call $delegate, draft
-          annotator.disableAnnotating $delegate.isEmpty()
-
-        $delegate.remove = (draft) ->
-          remove.call $delegate, draft
-          annotator.enableAnnotating $delegate.isEmpty()
-
-        $delegate
-      ]
 
     $routeProvider.when '/a/:id',
       controller: 'AnnotationViewerController'

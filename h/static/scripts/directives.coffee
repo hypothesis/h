@@ -1,3 +1,11 @@
+imports = [
+  'ngSanitize'
+  'ngTagsInput'
+  'h.helpers.documentHelpers'
+  'h.services'
+]
+
+
 formInput = ->
   link: (scope, elem, attr, [form, model, validator]) ->
     return unless form?.$name and model?.$name and validator
@@ -175,71 +183,6 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
-thread = ['$$rAF', '$parse', '$window', ($$rAF, $parse, $window) ->
-  # Helper -- true if selection ends inside the target and is non-empty
-  ignoreClick = (event) ->
-    sel = $window.getSelection()
-    if sel.focusNode?.compareDocumentPosition(event.target) & 8
-      if sel.toString().length
-        return true
-    return false
-
-  renderFrame = null
-  renderQueue = []
-
-  render = ->
-    return if renderFrame or renderQueue.length is 0
-
-    renderFrame = $$rAF ->
-      renderFrame = null
-
-      {scope, data} = renderQueue.shift()
-      while renderQueue[0]?.scope is scope
-        angular.extend data, renderQueue.shift().data
-
-      angular.extend scope, data
-      scope.$digest()
-
-      render()
-
-  link: (scope, elem, attr, ctrl) ->
-    childrenEditing = {}
-    threadWatch = $parse(attr.thread)
-
-    scope.annotation = null
-    scope.replies = null
-
-    scope.toggleCollapsed = (event) ->
-      event.stopPropagation()
-      return if (ignoreClick event) or Object.keys(childrenEditing).length
-      scope.collapsed = !scope.collapsed
-
-    scope.$on 'destroy', ->
-      renderQueue = (item for item in renderQueue if item.scope isnt scope)
-
-    scope.$on 'toggleEditing', (event) ->
-      {$id, editing} = event.targetScope
-      if editing
-        scope.collapsed = false
-        unless childrenEditing[$id]
-          event.targetScope.$on '$destroy', ->
-            delete childrenEditing[$id]
-          childrenEditing[$id] = true
-      else
-        delete childrenEditing[$id]
-
-    scope.$watchCollection threadWatch, (thread) ->
-      return unless thread
-      annotation = thread.message
-      replies = thread.children
-      data = {annotation, replies}
-      renderQueue.push {scope, data}
-      render()
-
-  scope: true
-]
-
-
 # TODO: Move this behaviour to a route.
 showAccount = ->
   restrict: 'A'
@@ -362,14 +305,13 @@ match = ->
   require: 'ngModel'
 
 
-angular.module('h.directives', ['ngSanitize', 'ngTagsInput'])
+angular.module('h.directives', imports)
 .directive('formInput', formInput)
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
 .directive('privacy', privacy)
 .directive('tabReveal', tabReveal)
-.directive('thread', thread)
 .directive('username', username)
 .directive('showAccount', showAccount)
 .directive('repeatAnim', repeatAnim)

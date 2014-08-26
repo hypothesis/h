@@ -1,14 +1,55 @@
-@import 'base';
-
 $thread-padding: 1em;
 $threadexp-width: .6em;
+
+.magicontrol {
+  margin: 0 .4em;
+  opacity: 0;
+
+  &.dropdown {
+    top: 4px;
+  }
+
+  :hover > & {
+    opacity: 1;
+  }
+}
+
+.share-dialog {
+  a {
+    float: left;
+    line-height: 1.4;
+    margin-right: .5em;
+    vertical-align: middle;
+  }
+
+  div {
+    overflow: hidden;
+  }
+
+  input {
+    padding: 0;
+    width: 100%;
+  }
+}
+
+.stream-list {
+  & > * {
+    margin-bottom: .72em;
+  }
+
+  .card-emphasis {
+    @include box-shadow(6px 6px 8px -2px $gray-light);
+  }
+}
 
 .thread {
   cursor: pointer;
   position: relative;
 
-  & > * {
-    @include pie-clearfix;
+  &.thread-collapsed {
+    .reply-count {
+      font-style: italic;
+    }
   }
 
   & > ul {
@@ -23,26 +64,22 @@ $threadexp-width: .6em;
     font-size: .8em;
   }
 
+  .reply-count {
+    color: $text-color;
+    &:hover { color: $link-color-hover; }
+    &:focus { outline: 0; }
+  }
+
   .thread {
     border-left: 1px dotted $gray-light;
     padding: 0;
     padding-left: $thread-padding;
 
-    &.collapsed {
+    &.thread-collapsed {
       border-color: transparent;
 
-      & > .annotation {
-        .body {
-          display: none;
-        }
-
-        .magicontrol {
-          display: none;
-        }
-
-        .reply-count {
-          font-style: italic;
-        }
+      & > article markdown {
+        display: none;
       }
     }
   }
@@ -72,13 +109,7 @@ $threadexp-width: .6em;
     }
   }
 
-  .annotation {
-    &.squished {
-      padding-left: 0;
-    }
-  }
-
-  &.collapsed {
+  &.thread-collapsed {
     &:hover {
       background-color: $gray-lightest;
     }
@@ -99,15 +130,6 @@ $threadexp-width: .6em;
         -o-text-overflow: ellipsis;
         white-space: nowrap;
       }
-
-      .indicators {
-        margin-right: .25em;
-      }
     }
   }
-}
-
-.annotation-citation-domain {
-  color: $gray-light;
-  font-size: .923em;
 }

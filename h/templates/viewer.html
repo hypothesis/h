@@ -15,7 +15,7 @@
                     'other': 'Showing {} selected annotations.'}"></span>
       <a href="" ng-click="clearSelection()">Clear selection</a>.</li>
   <li ng-show="isStream">
-    <div class="ng-cloak dropdown">
+    <span class="ng-cloak dropdown">
       <span role="button"
             class="dropdown-toggle"
             data-toggle="dropdown">
@@ -24,27 +24,21 @@
       </span>
       <ul class="dropdown-menu pull-right" role="menu">
         <li ng-click="sort.name = option"
+            ng-hide="option == 'Location' && !isEmbedded"
             ng-repeat="option in ['Newest', 'Oldest', 'Location']"
             >{{option}}</li>
       </ul>
-    </div>
+    </span>
   </li>
   <li class="paper thread"
-      thread="{message: ongoingEdit}"
-      ng-if="ongoingEdit"
-      ng-include="'thread.html'"></li>
-  <li class="paper thread"
-      thread="thread"
-      ng-class="{'card-emphasis': thread.message.$emphasis,
-                 'collapsed': collapsed}"
-      ng-click="toggleCollapsed($event)"
+      thread="child"
+      thread-collapsed="!search.query"
+      ng-if="child.message.id || child.children.length"
       ng-include="'thread.html'"
-      ng-init="collapsed = !search.query"
-      ng-show="shouldShowAnnotation(thread.message.id)"
-      ng-mouseenter="activate(thread.message)"
+      ng-mouseenter="activate(child.message)"
       ng-mouseleave="activate()"
-      ng-repeat="thread in threadRoot.children
-                 | orderBy : sort.predicate : sort.reverse
-                 track by thread.message.id"></li>
+      ng-repeat="child in threading.root.children
+                 | orderBy : sort.predicate : sort.reverse"
+      ng-show="shouldShowAnnotation(child.message.id)"></li>
 </ul>
 <!-- / Thread view -->
