@@ -246,8 +246,6 @@ class QueryParser
       mapped_field = if rule.path? then rule.path else '/'+category
 
       if and_or is 'or'
-        val_list = ''
-        first = true
         oper_part =
           if rule.operator? then rule.operator
           else if exact_match then 'one_of' else 'match_of'
