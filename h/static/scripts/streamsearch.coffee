@@ -4,7 +4,6 @@ imports = [
   'h.directives'
   'h.filters'
   'h.flash'
-  'h.helpers'
   'h.searchfilters'
 ]
 

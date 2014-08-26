@@ -1,12 +1,11 @@
 imports = [
-  'h.helpers'
   'h.session'
 ]
 
 
 identityFactory = [
-  '$rootScope', 'baseURI', 'session',
-  ($rootScope,   baseURI,   session) ->
+  '$rootScope', 'session',
+  ($rootScope,   session) ->
     loggedInUser = undefined
 
     onlogin = null

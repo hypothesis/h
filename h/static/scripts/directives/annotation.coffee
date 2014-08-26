@@ -1,6 +1,6 @@
 imports = [
   'ngSanitize'
-  'h.helpers'
+  'h.helpers.documentHelpers'
   'h.services'
 ]
 
@@ -17,12 +17,12 @@ class Annotation
   this.$inject = [
     '$element', '$location', '$rootScope', '$sce', '$scope', '$timeout',
     '$window',
-    'annotator', 'baseURI', 'drafts'
+    'annotator', 'documentHelpers', 'drafts'
   ]
   constructor: (
      $element,   $location,   $rootScope,   $sce,   $scope,   $timeout,
      $window,
-     annotator,   baseURI,   drafts
+     annotator,   documentHelpers,   drafts
   ) ->
     model = $scope.model
     {plugins, threading} = annotator
@@ -164,7 +164,8 @@ class Annotation
         if drafts.contains $scope.model
           $scope.editing = true
 
-        $scope.shared_link = "#{baseURI}a/#{$scope.model.id}"
+        link = documentHelpers.absoluteURI("/a/#{$scope.model.id}")
+        $scope.shared_link = link
 
     $scope.$watch 'model.target', (targets) ->
       return unless targets
