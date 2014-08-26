@@ -1,17 +1,47 @@
 <!-- Thread view -->
 <ul class="stream-list">
-  <li
-     ng-class="{'card-emphasis': thread.message.$emphasis, 'collapsed': collapsed}"
-     ng-click="toggleCollapsed($event)"
-     ng-init="collapsed = !search.query"
-     ng-include="'thread.html'"
-     ng-mouseenter="activate(thread.message)"
-     ng-mouseleave="activate()"
-     ng-repeat="thread in threads track by thread.message.id"
-     class="paper thread"></li>
-  <li ng-show="viewState.view == 'Search' && !threads"
-      >No annotations matching "{{search.query}}".</li>
-  <li ng-hide="viewState.view == 'Document'"
-      ><a href="" ng-click="search.query = ''; applyView('Document')"
-          >Back to all annotations</a>.</li>
+  <li ng-show="search.query"
+      ><span ng-pluralize
+             count="matches.length"
+             when="{'0': 'Found noresults.',
+                    'one': 'Found one matching annotation.',
+                    'other': 'Found {} matching annotations.'}"></span>
+      <a href="" ng-click="clearSelection()">Clear search</a>.</li>
+  <li ng-show="selectedAnnotations && !search.query"
+      >Showing selected annotations.
+    <a href="" ng-click="clearSelection()">Clear selection</a>.</li>
+  <li>
+    <span class="ng-cloak dropdown">
+      <span role="button"
+            class="dropdown-toggle"
+            data-toggle="dropdown"
+            >Sorted by {{sort.name | lowercase}}
+        <i class="icon-triangle small" /></span>
+      <ul class="dropdown-menu pull-right" role="menu">
+        <li ng-click="sort.name = option"
+            ng-repeat="option in ['Newest', 'Oldest', 'Location']"
+            >{{option}}</li>
+      </ul>
+    </span>
+  </li>
+  <li class="paper thread"
+      thread="{message: ongoingEdit}"
+      ng-if="ongoingEdit"
+      ng-include="'thread.html'"></li>
+  <li class="paper thread"
+      thread="thread"
+      ng-class="{'card-emphasis': thread.message.$emphasis,
+                 'collapsed': collapsed}"
+      ng-click="toggleCollapsed($event)"
+      ng-include="'thread.html'"
+      ng-init="collapsed = !search.query"
+      ng-show="ann_info.shown[thread.message.id] || !anno_info &&
+               (selectedAnnotations == null ||
+                selectedAnnotations[thread.message.id])"
+      ng-mouseenter="activate(thread.message)"
+      ng-mouseleave="activate()"
+      ng-repeat="thread in threadRoot.children
+                 | orderBy : sort.predicate : sort.reverse
+                 track by thread.message.id"></li>
 </ul>
+<!-- / Thread view -->

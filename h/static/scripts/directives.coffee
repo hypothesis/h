@@ -175,7 +175,7 @@ tabReveal = ['$parse', ($parse) ->
 ]
 
 
-thread = ['$$rAF', '$filter', '$window', ($$rAF, $filter, $window) ->
+thread = ['$$rAF', '$parse', '$window', ($$rAF, $parse, $window) ->
   # Helper -- true if selection ends inside the target and is non-empty
   ignoreClick = (event) ->
     sel = $window.getSelection()
@@ -193,9 +193,9 @@ thread = ['$$rAF', '$filter', '$window', ($$rAF, $filter, $window) ->
     renderFrame = $$rAF ->
       renderFrame = null
 
-      [scope, data] = renderQueue.shift()
-      while renderQueue[0]?[0] is scope
-        angular.extend data, renderQueue.shift()[1]
+      {scope, data} = renderQueue.shift()
+      while renderQueue[0]?.scope is scope
+        angular.extend data, renderQueue.shift().data
 
       angular.extend scope, data
       scope.$digest()
@@ -204,6 +204,7 @@ thread = ['$$rAF', '$filter', '$window', ($$rAF, $filter, $window) ->
 
   link: (scope, elem, attr, ctrl) ->
     childrenEditing = {}
+    threadWatch = $parse(attr.thread)
 
     scope.annotation = null
     scope.replies = null
@@ -214,7 +215,7 @@ thread = ['$$rAF', '$filter', '$window', ($$rAF, $filter, $window) ->
       scope.collapsed = !scope.collapsed
 
     scope.$on 'destroy', ->
-      renderQueue = ([s, _] for [s, _] in renderQueue is s isnt scope)
+      renderQueue = (item for item in renderQueue if item.scope isnt scope)
 
     scope.$on 'toggleEditing', (event) ->
       {$id, editing} = event.targetScope
@@ -227,19 +228,15 @@ thread = ['$$rAF', '$filter', '$window', ($$rAF, $filter, $window) ->
       else
         delete childrenEditing[$id]
 
-    scope.$watch 'thread', (thread) ->
+    scope.$watchCollection threadWatch, (thread) ->
       return unless thread
       annotation = thread.message
-      renderQueue.push [scope, {annotation}]
+      replies = thread.children
+      data = {annotation, replies}
+      renderQueue.push {scope, data}
       render()
 
-    scope.$watchCollection 'thread.children', (children) ->
-      return unless children
-      replies = $filter('orderBy')(children, 'message.updated', true)
-      renderQueue.push [scope, {replies}]
-      render()
-
-  restrict: 'C'
+  scope: true
 ]
 
 

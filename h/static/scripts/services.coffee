@@ -159,11 +159,6 @@ class Hypothesis extends Annotator
           for action, roles of annotation.permissions
             unless userId in roles then roles.push userId
 
-    # Remove annotations from the view when they are deleted
-    this.subscribe 'annotationDeleted', (a) =>
-      scope = @element.scope()
-      scope.annotations = scope.annotations.filter (b) -> b isnt a
-
   _setupXDM: (options) ->
     $rootScope = @element.injector().get '$rootScope'
 
@@ -257,53 +252,37 @@ class Hypothesis extends Annotator
   _setupDocumentAccessStrategies: -> this
   _scan: -> this
 
-  # (Optionally) put some HTML formatting around a quote
-  getHtmlQuote: (quote) -> quote
-
-  # Just some debug output
-  loadAnnotations: (annotations) ->
-    console.log "Loaded", annotations.length, "annotations."
-    super
-
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) ->
     annotation.highlights = []
     annotation
 
   toggleViewerSelection: (annotations=[]) =>
-    annotations = annotations.filter (a) -> a?
     scope = @element.scope()
-    # XOR this list to the current selection
-    list = scope.annotations = scope.annotations.slice()
+    selected = scope.selectedAnnotations or {}
     for a in annotations
-      index = list.indexOf a
-      if index isnt -1
-        list.splice index, 1
+      if selected[a.id]
+        delete selected[a.id]
       else
-        list.push a
-    # View and sort the selection
-    scope.applyView "Selection"
-    scope.applySort scope.viewState.sort
+        selected[a.id] = true
+    if Object.keys(selected).length
+      scope.selectedAnnotations = selected
+    else
+      scope.selectedAnnotations = null
     this
 
   updateViewer: (annotations=[]) =>
-    annotations = annotations.filter (a) -> a?
-    scope = @element.scope()
-    commentFilter = angular.bind(this, this.isComment)
-    comments = (scope.$root.annotations or []).filter(commentFilter)
-    scope.annotations = annotations
-    scope.applySort scope.viewState.sort
-    scope.annotations = [scope.annotations..., comments...]
+    # TODO: re-implement
     this
 
   showViewer: (annotations=[]) =>
-    location = @element.injector().get('$location')
-    location.path('/viewer').replace()
     scope = @element.scope()
-    scope.annotations = annotations
-    scope.applyView 'Selection'
-    scope.applySort scope.viewState.sort
+    selected = {}
+    for a in annotations
+      selected[a.id] = true
+    scope.selectedAnnotations = selected
     this.show()
+    this
 
   addEmphasis: (annotations=[]) =>
     annotations = annotations.filter (a) -> a? # Filter out null annotations
@@ -323,31 +302,9 @@ class Hypothesis extends Annotator
         method: 'adderClick'
 
   showEditor: (annotation) =>
+    @element.injector().get('drafts').add(annotation)
+    @element.scope().ongoingEdit = annotation
     this.show()
-    @element.injector().invoke [
-      '$location', '$rootScope', 'drafts', 'identity',
-      ($location,   $rootScope,   drafts,   identity) =>
-        @ongoing_edit = annotation
-
-        unless this.plugins.Auth? and this.plugins.Auth.haveValidToken()
-          $rootScope.$apply ->
-            identity.request()
-          for p in @providers
-            p.channel.notify method: 'onEditorHide'
-          return
-
-        # Set the path
-        search =
-          id: annotation.id
-          action: 'create'
-        $location.path('/editor').search(search)
-
-        # Store the draft
-        drafts.add annotation
-
-        # Digest the change
-        $rootScope.$digest()
-    ]
     this
 
   show: =>
@@ -468,16 +425,6 @@ class Hypothesis extends Annotator
       p.channel.notify
         method: 'setVisibleHighlights'
         params: state
-
-  # Is this annotation a comment?
-  isComment: (annotation) ->
-    # No targets and no references means that this is a comment
-    not (annotation.references?.length or annotation.target?.length)
-
-  # Is this annotation a reply?
-  isReply: (annotation) ->
-    # The presence of references means that this is a reply
-    annotation.references?.length
 
   # Discard all drafts, deleting unsaved annotations from the annotator
   discardDrafts: ->

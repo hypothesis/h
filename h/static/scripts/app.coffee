@@ -38,9 +38,6 @@ configure = [
     $routeProvider.when '/a/:id',
       controller: 'AnnotationViewerController'
       templateUrl: 'viewer.html'
-    $routeProvider.when '/editor',
-      controller: 'EditorController'
-      templateUrl: 'editor.html'
     $routeProvider.when '/viewer',
       controller: 'ViewerController'
       templateUrl: 'viewer.html'

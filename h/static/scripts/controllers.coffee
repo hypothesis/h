@@ -11,14 +11,14 @@ imports = [
 
 class App
   this.$inject = [
-    '$element', '$filter', '$location', '$q', '$rootScope', '$route', '$scope', '$timeout',
-    'annotator', 'flash', 'identity', 'queryparser', 'socket',
-    'streamfilter', 'viewFilter', 'documentHelpers'
+    '$location', '$q', '$route', '$scope', '$timeout',
+    'annotator', 'flash', 'identity', 'socket', 'streamfilter',
+    'documentHelpers'
   ]
   constructor: (
-     $element,   $filter,   $location,   $q,   $rootScope,   $route,   $scope,   $timeout
-     annotator,   flash,   identity,   queryparser,   socket,
-     streamfilter,   viewFilter,   documentHelpers
+     $location,   $q,   $route,   $scope,   $timeout
+     annotator,   flash,   identity,   socket,   streamfilter,
+     documentHelpers
   ) ->
     {plugins, host, providers} = annotator
 
@@ -40,7 +40,6 @@ class App
       switch action
         when 'create', 'update'
           plugins.Store?._onLoadAnnotations data
-            $scope.$digest()
         when 'delete'
           for annotation in data
             container = annotator.threading.getContainer annotation.id
@@ -51,7 +50,7 @@ class App
               plugins.Store.annotations[index..index] = [] if index > -1
               annotator.deleteAnnotation container.message
 
-      $rootScope.$digest()
+      $scope.$digest()
 
     initIdentity = (persona) ->
       """Initialize identity callbacks."""
@@ -80,12 +79,9 @@ class App
     initStore = ->
       """Initialize the storage component."""
       Store = plugins.Store
-
       delete plugins.Store
+      delete $scope.threadRoot
       annotator.addPlugin 'Store', annotator.options.Store
-
-      annotator.threading.thread []
-      annotator.threading.idTable = {}
 
       _id = $route.current.params.id
       _promise = null
@@ -114,36 +110,6 @@ class App
       Store._onLoadAnnotations = angular.noop
       # * Make the update function into a noop.
       Store.updateAnnotation = angular.noop
-      # * Remove the plugin and re-add it to the annotator.
-
-      # Even though most operations on the old Store are now noops the Annotator
-      # itself may still be setting up previously fetched annotatiosn. We may
-      # delete annotations which are later set up in the DOM again, causing
-      # issues with the viewer and heatmap. As these are loaded, we can delete
-      # them, but the threading plugin will get confused and break threading.
-      # Here, we cleanup these annotations as they are set up by the Annotator,
-      # preserving the existing threading. This is all a bit paranoid, but
-      # important when many annotations are loading as authentication is
-      # changing. It's all so ugly it makes me cry, though. Someone help
-      # restore sanity?
-      annotations = Store.annotations.slice()
-      cleanup = (loaded) ->
-        $rootScope.$evalAsync ->  # Let plugins react
-          deleted = []
-          for l in loaded
-            if l in annotations
-              # If this annotation still exists, we'll need to thread it again
-              # since the delete will mangle the threading data structures.
-              existing = annotator.threading.idTable[l.id]?.message
-              annotator.deleteAnnotation(l)
-              deleted.push l
-              if existing
-                plugins.Threading.thread existing
-          annotations = (a for a in annotations when a not in deleted)
-          if annotations.length is 0
-            annotator.unsubscribe 'annotationsLoaded', cleanup
-      cleanup (a for a in annotations when a.thread)
-      annotator.subscribe 'annotationsLoaded', cleanup
 
     initUpdater = (failureCount=0) ->
       """Initialize the websocket used for realtime updates."""
@@ -226,9 +192,6 @@ class App
       # Do not rely on the identity service to invoke callbacks within an
       # angular digest cycle.
       $scope.$evalAsync ->
-        if annotator.ongoing_edit
-          annotator.clickAdder()
-
         if $scope.ongoingHighlightSwitch
           $scope.ongoingHighlightSwitch = false
           annotator.setTool 'highlight'
@@ -248,21 +211,30 @@ class App
           initStore()
           initUpdater()
 
+    annotator.subscribe 'annotationCreated', (annotation) ->
+      unless annotation.thread.parent
+        $scope.threadRoot.addChild annotation.thread
+
+      if annotation is $scope.ongoingEdit
+        delete $scope.ongoingEdit
+        for p in providers
+          p.channel.notify method: 'onEditorSubmit'
+          p.channel.notify method: 'onEditorHide'
+
+    annotator.subscribe 'annotationDeleted', (annotation) ->
+      if annotation is $scope.ongoingEdit
+        delete $scope.ongoingEdit
+        for p in providers
+          p.channel.notify method: 'onEditorHide'
+
     annotator.subscribe 'annotationsLoaded', (annotations) ->
-      $rootScope.$evalAsync ->  # Give plugins time to react
-        $rootScope.annotations = plugins.Store.annotations
-        $rootScope.applyView $rootScope.viewState.view
-        $rootScope.applySort $rootScope.viewState.sort
+      $scope.threadRoot ?= annotator.threading.thread(annotations)
+      $scope.$digest()
 
     annotator.subscribe 'serviceDiscovery', (options) ->
       annotator.options.Store ?= {}
       angular.extend annotator.options.Store, options
       storeReady.resolve()
-
-    $scope.$watch 'annotations', (annotations=[]) ->
-      threading = annotator.threading
-      $scope.threads = for a in annotations when a.thread
-        if a.thread.parent then continue else a.thread
 
     $scope.$watch 'persona', initIdentity
 
@@ -285,6 +257,14 @@ class App
         for p in annotator.providers
           p.channel.notify method: 'setActiveHighlights'
 
+    $scope.$watch 'sort.name', (name) ->
+      return unless name
+      [predicate, reverse] = switch name
+        when 'Newest' then ['message.updated', true]
+        when 'Oldest' then ['message.updated', false]
+        when 'Location' then ['message.target[0].pos.top', false]
+      $scope.sort = {name, predicate, reverse}
+
     $scope.$watch 'store.entities', (entities, oldEntities) ->
       return if entities is oldEntities
 
@@ -297,66 +277,6 @@ class App
         filter = streamfilter.getFilter()
         sock.send(JSON.stringify({filter}))
 
-    $rootScope.viewState =
-      sort: 'Location'
-      view: 'Document'
-
-    # "View" -- which annotations are shown
-    $rootScope.applyView = (view) ->
-      $rootScope.viewState.view = view
-      switch view
-        when 'Document'
-          if $rootScope.viewState.sort is 'Location'
-            dynamic = true
-          else
-            dynamic = false
-
-        when 'Selection'
-          if $scope.annotations.length is 0
-            return $rootScope.applyView 'Document'
-          dynamic = false
-
-        when 'Search'
-          dynamic = false
-
-        else
-          throw new Error "Unknown view requested: " + view
-
-      for p in providers
-        p.channel.notify method: 'setDynamicBucketMode', params: dynamic
-
-    # "Sort" -- order annotations are shown
-    $rootScope.applySort = (sort) ->
-      $rootScope.viewState.sort = sort
-
-      [predicate, reverse] = switch sort
-        when 'Newest' then ['updated', true]
-        when 'Oldest' then ['updated', false]
-        when 'Location' then ['target[0].pos.top', false]
-
-      if sort is 'Location'
-        dynamic = $rootScope.viewState.view is 'Document'
-        byComment = angular.bind(annotator, annotator.isComment)
-        sorted = $filter('orderBy')(sorted, byComment)
-      else
-        dynamic = false
-        delete $scope.annotations
-
-      sorted = $filter('orderBy')($scope.annotations, predicate, reverse)
-      $scope.annotations = sorted
-
-      for p in providers
-        p.channel.notify method: 'setDynamicBucketMode', params: dynamic
-
-    $rootScope.$on '$routeChangeSuccess', (event, next, current) ->
-      unless next.$$route? then return
-
-      $scope.search.query = $location.search()['q']
-
-      unless next.$$route.originalPath is '/stream'
-        if current and next.$$route.originalPath is '/a/:id'
-          $scope.reloadAnnotations()
-
     $scope.loadMore = (number) ->
       unless $scope.updater? then return
       sockmsg =
@@ -367,10 +287,14 @@ class App
         sock.send(JSON.stringify(sockmsg))
 
     $scope.authTimeout = ->
-      delete annotator.ongoing_edit
+      delete $scope.ongoingEdit
       $scope.ongoingHighlightSwitch = false
       flash 'info',
         'For your security, the forms have been reset due to inactivity.'
+
+    $scope.clearSelection = ->
+      $scope.search.query = ''
+      $scope.selectedAnnotations = null
 
     $scope.frame = visible: false
     $scope.id = identity
@@ -378,6 +302,8 @@ class App
     $scope.model = persona: undefined
 
     $scope.search =
+      query: $location.search()['q']
+
       clear: ->
         $location.search('q', null)
 
@@ -387,57 +313,7 @@ class App
             $location.search('q', query or null)
 
     $scope.socialView = annotator.socialView
-
-class Editor
-  this.$inject = [
-    '$location', '$routeParams', '$sce', '$scope',
-    'annotator'
-  ]
-  constructor: (
-     $location,   $routeParams,   $sce,   $scope,
-     annotator
-  ) ->
-    {providers} = annotator
-
-    save = ->
-      $location.path('/viewer').search('id', $scope.annotation.id).replace()
-      for p in providers
-        p.channel.notify method: 'onEditorSubmit'
-        p.channel.notify method: 'onEditorHide'
-
-    cancel = ->
-      $location.path('/viewer').search('id', null).replace()
-      for p in providers
-        p.channel.notify method: 'onEditorHide'
-
-    $scope.action = if $routeParams.action? then $routeParams.action else 'create'
-    if $scope.action is 'create'
-      annotator.subscribe 'annotationCreated', save
-      annotator.subscribe 'annotationDeleted', cancel
-    else
-      if $scope.action is 'edit' or $scope.action is 'redact'
-        annotator.subscribe 'annotationUpdated', save
-
-    $scope.$on '$destroy', ->
-      if $scope.action is 'edit' or $scope.action is 'redact'
-        annotator.unsubscribe 'annotationUpdated', save
-      else
-        if $scope.action is 'create'
-          annotator.unsubscribe 'annotationCreated', save
-          annotator.unsubscribe 'annotationDeleted', cancel
-
-    $scope.thread = message: annotator.ongoing_edit
-    delete annotator.ongoing_edit
-
-    $scope.$watch 'annotation.target', (targets) ->
-      return unless targets
-      for target in targets
-        if target.diffHTML?
-          target.trustedDiffHTML = $sce.trustAsHtml target.diffHTML
-          target.showDiff = not target.diffCaseOnly
-        else
-          delete target.trustedDiffHTML
-          target.showDiff = false
+    $scope.sort = name: 'Location'
 
 
 class AnnotationViewer
@@ -464,11 +340,11 @@ class AnnotationViewer
 
 class Viewer
   this.$inject = [
-    '$location', '$rootScope', '$routeParams', '$scope',
+    '$location', '$routeParams', '$scope',
     'annotator'
   ]
   constructor: (
-    $location, $rootScope, $routeParams, $scope,
+    $location, $routeParams, $scope,
     annotator
   ) ->
     if $routeParams.q
@@ -493,15 +369,12 @@ class Viewer
 
 
 class Search
-  this.$inject = ['$filter', '$location', '$rootScope', '$routeParams', '$sce', '$scope',
+  this.$inject = ['$filter', '$location', '$routeParams', '$sce', '$scope',
                   'annotator', 'viewFilter']
-  constructor: ($filter, $location, $rootScope, $routeParams, $sce, $scope,
+  constructor: ($filter, $location, $routeParams, $sce, $scope,
                 annotator, viewFilter) ->
     unless $routeParams.q
-      $rootScope.applyView 'Document'
       return $location.path('/viewer').replace()
-
-    $rootScope.applyView 'Search'
 
     {providers, threading} = annotator
 
@@ -570,7 +443,8 @@ class Search
 
     refresh = =>
       query = $routeParams.q
-      [$scope.matches, $scope.filters] = viewFilter.filter $rootScope.annotations, query
+      annotations = $scope.threadRoot.flattenChildren()
+      [$scope.matches, $scope.filters] = viewFilter.filter annotations, query
       # Create the regexps for highlighting the matches inside the annotations' bodies
       $scope.text_tokens = $scope.filters.text.terms.slice()
       $scope.text_regexp = []
@@ -606,7 +480,7 @@ class Search
         # Already handled thread
         if roots[annotation_root]? then continue
         root_annotation = (annotator.threading.getContainer annotation_root).message
-        unless root_annotation in $rootScope.annotations then continue
+        unless root_annotation in annotations then continue
 
         if annotation.id in $scope.matches
           # We have a winner, let's put its root annotation into our list and build the rendering
@@ -686,8 +560,6 @@ class Search
             hidden += 1
         if last_shown? then $scope.ann_info.more_bottom_num[last_shown] = hidden
 
-      $scope.threads = threads
-
     $scope.$on '$routeUpdate', refresh
 
     $scope.getThreadId = (id) ->
@@ -739,7 +611,6 @@ class Search
 
 angular.module('h.controllers', imports)
 .controller('AppController', App)
-.controller('EditorController', Editor)
 .controller('ViewerController', Viewer)
 .controller('AnnotationViewerController', AnnotationViewer)
 .controller('SearchController', Search)

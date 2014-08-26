@@ -61,8 +61,12 @@ class Annotation
       annotation = $scope.model
 
       # Forbid saving comments without a body (text or tags)
-      if annotator.isComment(annotation) and not annotation.text and
-      not annotation.tags?.length
+      unless (
+        annotation.references?.length or
+        annotation.target?.length or
+        annotation.tags?.length or
+        annotation.text
+      )
         $window.alert "You can not add a comment without adding some text, or at least a tag."
         return
 
@@ -146,12 +150,8 @@ class Annotation
 
     $scope.$watch 'model.id', (id) ->
       if id?
-        $scope.thread = annotator.threading.getContainer(id)
-
-        # Check if this is a brand new annotation
-        if drafts.contains $scope.model
-          $scope.editing = true
-
+        $scope.thread = $scope.model.thread
+        $scope.editing = drafts.contains $scope.model
         link = documentHelpers.absoluteURI("/a/#{$scope.model.id}")
         $scope.shared_link = link
 

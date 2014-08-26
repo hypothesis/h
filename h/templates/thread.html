@@ -1,6 +1,6 @@
 <a href="" class="threadexp"
    title="{{collapsed && 'Expand' || 'Collapse'}}"
-   ng-show="$parent.$parent.thread && (!$parent.ann_info || $parent.ann_info.shown[annotation.id]) && !$parent.ann_info.more_top[annotation.id]"
+   ng-show="thread.parent.message && (!$parent.ann_info || $parent.ann_info.shown[annotation.id]) && !$parent.ann_info.more_top[annotation.id]"
    ><span ng-class="{'icon-plus': !!collapsed,
                     'icon-minus': !collapsed}"></span></a>
 <!-- Excerpts -->
@@ -53,8 +53,11 @@
 <!-- Replies -->
 <ul>
   <li class="thread"
+      thread="thread"
       ng-class="{'collapsed': collapsed}"
       ng-click="toggleCollapsed($event)"
       ng-include="'thread.html'"
-      ng-repeat="thread in replies track by thread.message.id" />
+      ng-repeat="thread in replies
+                 | orderBy : message.updated : true
+                 track by thread.message.id" />
 </ul>
