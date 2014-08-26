@@ -510,8 +510,8 @@ class Editor
 
 
 class AnnotationViewer
-  this.$inject = ['$scope']
-  constructor: ($scope) ->
+  this.$inject = ['$routeParams', '$scope', 'streamfilter']
+  constructor: ($routeParams, $scope, streamfilter) ->
     # Tells the view that these annotations are standalone
     $scope.isEmbedded = false
 
@@ -519,6 +519,17 @@ class AnnotationViewer
     # to annotations loaded into the stream.
     $scope.activate = angular.noop
     $scope.openDetails = angular.noop
+
+    $scope.$watch 'updater', (updater) ->
+      if updater?
+        updater.then (sock) ->
+          filter = streamfilter
+            .setPastDataNone()
+            .setMatchPolicyIncludeAny()
+            .addClause('/references', 'first_of', $routeParams.id, true)
+            .addClause('/id', 'equals', $routeParams.id, true)
+            .getFilter()
+          sock.send(JSON.stringify({filter}))
 
 
 class Viewer
