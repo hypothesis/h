@@ -4,10 +4,10 @@ sandbox = sinon.sandbox.create()
 
 describe 'h.controllers.AccountManagement', ->
   $scope = null
-  fakeUtil = null
   fakeFlash = null
   fakeProfile = null
   fakeIdentity = null
+  fakeFormHelpers = null
   editProfilePromise = null
   disableUserPromise = null
   createController = null
@@ -17,7 +17,7 @@ describe 'h.controllers.AccountManagement', ->
     fakeFlash = sandbox.spy()
     fakeIdentity =
       logout: sandbox.spy()
-    fakeUtil =
+    fakeFormHelpers =
       applyValidationErrors: sandbox.spy()
 
     $filterProvider.register 'persona', ->
@@ -26,7 +26,7 @@ describe 'h.controllers.AccountManagement', ->
     $provide.value 'profile', fakeProfile
     $provide.value 'flash', fakeFlash
     $provide.value 'identity', fakeIdentity
-    $provide.value 'util', fakeUtil
+    $provide.value 'formHelpers', fakeFormHelpers
     return
 
   beforeEach module('h.controllers.AccountManagement')
@@ -104,7 +104,7 @@ describe 'h.controllers.AccountManagement', ->
           errors:
             pwd: 'this is wrong'
 
-      assert.calledWith fakeUtil.applyValidationErrors, fakeForm,
+      assert.calledWith fakeFormHelpers.applyValidationErrors, fakeForm,
         pwd: 'this is wrong'
 
     it 'displays a flash message on success', ->
@@ -200,7 +200,7 @@ describe 'h.controllers.AccountManagement', ->
           errors:
             pwd: 'this is wrong'
 
-      assert.calledWith fakeUtil.applyValidationErrors, fakeForm,
+      assert.calledWith fakeFormHelpers.applyValidationErrors, fakeForm,
         pwd: 'this is wrong'
 
     it 'displays a flash message if a server error occurs', ->

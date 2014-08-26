@@ -1,7 +1,9 @@
 class AccountManagement
-  @inject = ['$scope', '$rootScope', '$filter', 'flash', 'profile', 'identity', 'util']
+  @inject = ['$scope', '$rootScope', '$filter', 'flash', 'profile',
+             'identity', 'formHelpers']
 
-  constructor: ($scope, $rootScope, $filter, flash, profile, identity, util) ->
+  constructor: ($scope, $rootScope, $filter, flash, profile,
+                identity, formHelpers) ->
     persona_filter = $filter('persona')
 
     onSuccess = (form, response) ->
@@ -20,7 +22,7 @@ class AccountManagement
 
     onError = (form, response) ->
       if response.status >= 400 and response.status < 500
-        util.applyValidationErrors(form, response.data.errors)
+        formHelpers.applyValidationErrors(form, response.data.errors)
       else
         if response.data.flash
           flash(type, msgs) for own type, msgs of response.data.flash

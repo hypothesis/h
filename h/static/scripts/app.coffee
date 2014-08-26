@@ -8,8 +8,8 @@ imports = [
   'h.directives.annotation'
   'h.filters'
   'h.identity'
-  'h.util'
   'h.streamsearch'
+  'h.helpers.formHelpers'
 ]
 
 

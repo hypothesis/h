@@ -12,7 +12,7 @@ class MockSession
           username: 'taken'
         reason: 'registration error'
 
-mockUtil = applyValidationErrors: sandbox.spy()
+mockFormHelpers = applyValidationErrors: sandbox.spy()
 
 describe 'h.auth', ->
   beforeEach module('h.auth')
@@ -22,7 +22,7 @@ describe 'h.auth', ->
     $provide.value '$timeout', sandbox.spy()
     $provide.value 'flash', sandbox.spy()
     $provide.value 'session', new MockSession()
-    $provide.value 'util', mockUtil
+    $provide.value 'formHelpers', mockFormHelpers
     return
 
   afterEach ->
@@ -67,7 +67,7 @@ describe 'h.auth', ->
 
         auth.submit(form)
 
-        assert.calledWith mockUtil.applyValidationErrors, form,
+        assert.calledWith mockFormHelpers.applyValidationErrors, form,
           username: 'taken'
         assert.equal form.responseErrorMessage, 'registration error'
 

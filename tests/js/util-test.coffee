@@ -1,13 +1,13 @@
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
-describe 'h.util', ->
-  util = null
+describe 'h.helpers.formHelpers', ->
+  formHelpers = null
 
-  beforeEach module('h.util')
+  beforeEach module('h.helpers.formHelpers')
 
-  beforeEach inject (_util_) ->
-    util = _util_
+  beforeEach inject (_formHelpers_) ->
+    formHelpers = _formHelpers_
 
   describe '.applyValidationErrors', ->
     form = null
@@ -18,7 +18,7 @@ describe 'h.util', ->
         password: {$setValidity: sinon.spy()}
 
     it 'invalidates the "response" input for each error', ->
-      util.applyValidationErrors form,
+      formHelpers.applyValidationErrors form,
         username: 'must be at least 3 characters'
         password: 'must be present'
 
@@ -26,7 +26,7 @@ describe 'h.util', ->
       assert.calledWith(form.password.$setValidity, 'response', false)
 
     it 'adds an error message to each input controller', ->
-      util.applyValidationErrors form,
+      formHelpers.applyValidationErrors form,
         username: 'must be at least 3 characters'
         password: 'must be present'
 
