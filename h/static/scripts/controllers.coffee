@@ -810,17 +810,9 @@ class Search
     refresh()
 
 
-class Notification
-  this.inject = ['$scope']
-  constructor: (
-    $scope
-  ) ->
-
-
 angular.module('h.controllers', imports)
 .controller('AppController', App)
 .controller('EditorController', Editor)
 .controller('ViewerController', Viewer)
 .controller('AnnotationViewerController', AnnotationViewer)
 .controller('SearchController', Search)
-.controller('NotificationController', Notification)
