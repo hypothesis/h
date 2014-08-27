@@ -164,9 +164,7 @@ class SearchFilter
 class QueryParser
   rules:
     user:
-      formatter: (user) ->
-        'acct:' + user + '@' + window.location.hostname
-      path: '/user'
+      path: '/username'
       exact_match: true
       case_sensitive: false
       and_or: 'or'
@@ -219,13 +217,13 @@ class QueryParser
       exact_match: false
       case_sensitive: false
       and_or: 'and'
-      path:   ['/quote', '/tags', '/text', '/uri', '/user']
+      path:   ['/quote', '/tags', '/text', '/uri', '/username']
       options:
         es:
          query_type: 'multi_match'
          match_type: 'cross_fields'
          and_or: 'and'
-         fields:   ['quote', 'tag', 'text', 'uri', 'user']
+         fields:   ['quote', 'tag', 'text', 'uri', 'username']
 
 
   parseModels: (models) ->
