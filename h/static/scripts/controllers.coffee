@@ -77,6 +77,7 @@ class App
                     $rootScope.annotations.push annotation if not inRootScope(annotation)
                 else
                     $rootScope.annotations.push annotation if not inRootScope(annotation)
+            $scope.$digest()
         when 'update'
           plugins.Store._onLoadAnnotations data
 
