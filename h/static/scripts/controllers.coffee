@@ -76,7 +76,7 @@ class App
                   if annotator.isComment(annotation)
                     $rootScope.annotations.push annotation if not inRootScope(annotation)
                 else
-                    $rootScope.annotations.push annotation if not inRootScope(annotation)
+                    $rootScope.annotations.push annotation if not inRootScope(annotation) and not annotation.references?
         when 'update'
           plugins.Store._onLoadAnnotations data
 
