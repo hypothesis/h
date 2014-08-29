@@ -10,6 +10,7 @@ $base-font-size: 14px;
   $border: $gray;
   $hoverborder: $gray-dark;
   @include box-sizing(border-box);
+  direction: ltr;
   height: 40px;
   margin-left: -20px;
   margin-top: -50px;
@@ -138,6 +139,7 @@ $base-font-size: 14px;
   @include reset-box-model;
   @include user-select(none);
   @extend .noise;
+  direction: ltr;
   background: none;
   font-size: $base-font-size;
   line-height: $base-line-height;
@@ -181,7 +183,6 @@ $base-font-size: 14px;
 .annotator-frame .annotator-toolbar {
   position: absolute;
   left: -($heatmap-width + 18px - 7px);
-  right: 0;
   width: 37px;
   z-index: 2;
 

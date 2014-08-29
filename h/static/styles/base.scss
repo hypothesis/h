@@ -165,6 +165,7 @@ $input-border-radius: 2px;
 .annotator-notice {
   @include box-shadow(inset 2px 1px 1px hsla(0, 0%, 0%, .1));
   @include single-transition(opacity, .2s);
+  direction: ltr;
   font-family: $sans-font-family;
   line-height: 29px;
   opacity: 0;
