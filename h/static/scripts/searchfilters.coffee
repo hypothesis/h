@@ -2,14 +2,6 @@
 # It expects a search query string where the search term are separated by space character
 # and collects them into the given term arrays
 class SearchFilter
-  # Small helper function for removing
-  _removeQuoteCharacter: (text) ->
-    start = text.slice 0,1
-    end = text.slice -1
-    if (start is '"' or start is "'") and (start == end)
-      text = text.slice 1, text.length - 1
-    text
-
   # This function will slice the search-text input
   # Slice character: space,
   # but an expression between quotes (' or ") is considered one
@@ -17,10 +9,26 @@ class SearchFilter
   # ["text", "user:john", "to be or not to be"]
   _tokenize: (searchtext) ->
     return [] unless searchtext
+
+    # Small helper function for removing quote characters
+    # from the beginning- and end of a string, if the
+    # quote characters are the same.
+    # I.e.
+    #   'foo' -> foo
+    #   "bar" -> bar
+    #   'foo" -> 'foo"
+    #   bar"  -> bar"
+    _removeQuoteCharacter = (text) ->
+      start = text.slice 0,1
+      end = text.slice -1
+      if (start is '"' or start is "'") and (start == end)
+        text = text.slice 1, text.length - 1
+      text
+
     tokens = searchtext.match /(?:[^\s"']+|"[^"]*"|'[^']*')+/g
 
     # Cut the opening and closing quote characters
-    tokens = tokens.map @_removeQuoteCharacter
+    tokens = tokens.map _removeQuoteCharacter
 
     # Remove quotes for power search.
     # I.e. 'tag:"foo bar"' -> 'tag:foo bar'
@@ -29,8 +37,8 @@ class SearchFilter
       unless filter? then filter = ""
 
       if filter in ['quote', 'result', 'since', 'tag', 'text', 'uri', 'user']
-        token_part = token[filter.length+1..]
-        tokens[index] = filter + ':' + (@_removeQuoteCharacter token_part)
+        tokenPart = token[filter.length+1..]
+        tokens[index] = filter + ':' + (_removeQuoteCharacter tokenPart)
 
     tokens
 
