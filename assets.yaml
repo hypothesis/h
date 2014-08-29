@@ -218,6 +218,11 @@ sockjs:
   output: scripts/vendor/sockjs.min.js
   contents:
     - h:static/scripts/vendor/sockjs-0.3.4.js
+tinymce:
+  filters: uglifyjs
+  output: scripts/vendor/tinymcecat.min.js
+  contents:
+    - h:static/scripts/vendor/tinymce/tinymce.min.js
 uuid:
   filters: uglifyjs
   output: scripts/vendor/uuid.min.js
@@ -263,12 +268,14 @@ app:
     - auth_js
     - app_css
     - app_js
+    - tinymce
 
 app_js:
   output: scripts/hypothesis-app.js
   contents:
     - filters: uglifyjs
       contents:
+        - scripts/directives/tinymceeditor.js
         - filters: coffeescript
           output: scripts/hypothesis.js
           # TODO: glob these or use browserify

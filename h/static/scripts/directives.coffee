@@ -86,6 +86,57 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   templateUrl: 'markdown.html'
 ]
 
+uiTinymce = [ "uiTinymceConfig", (uiTinymceConfig) ->
+  uiTinymceConfig = uiTinymceConfig or {}
+  generatedIds = 0
+  return (
+    require: "?ngModel"
+    link: (scope, elm, attrs, ngModel) ->
+      expression = undefined
+      options = undefined
+      tinyInstance = undefined
+      attrs.$set "id", "uiTinymce" + generatedIds++  unless attrs.id
+      options =
+        setup: (ed) ->
+          ed.on "init", (args) ->
+            ngModel.$render()
+            return
+
+          ed.on "ExecCommand", (e) ->
+            ed.save()
+            ngModel.$setViewValue elm.val()
+            scope.$apply()  unless scope.$$phase
+            return
+
+          ed.on "KeyUp", (e) ->
+            console.log ed.isDirty()
+            ed.save()
+            ngModel.$setViewValue elm.val()
+            scope.$apply()  unless scope.$$phase
+            return
+
+          return
+
+        mode: "exact"
+        elements: attrs.id
+
+      if attrs.uiTinymce
+        expression = scope.$eval(attrs.uiTinymce)
+      else
+        expression = {}
+      angular.extend options, uiTinymceConfig, expression
+      setTimeout ->
+        tinymce.init options
+        return
+
+      ngModel.$render = ->
+        tinyInstance = tinymce.get(attrs.id)  unless tinyInstance
+        tinyInstance.setContent ngModel.$viewValue or ""  if tinyInstance
+        return
+
+      return
+  )
+]
 
 privacy = ->
   levels = ['Public', 'Only Me']
@@ -383,6 +434,7 @@ angular.module('h.directives', ['ngSanitize', 'ngTagsInput'])
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
+.value('uiTinymceConfig', {}).directive('uiTinymce', uiTinymce)
 .directive('privacy', privacy)
 .directive('recursive', recursive)
 .directive('tabReveal', tabReveal)
