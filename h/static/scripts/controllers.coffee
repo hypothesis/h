@@ -1,7 +1,7 @@
 imports = [
   'bootstrap'
   'h.flash'
-  'h.helpers'
+  'h.helpers.documentHelpers'
   'h.identity'
   'h.services'
   'h.socket'
@@ -13,12 +13,12 @@ class App
   this.$inject = [
     '$element', '$location', '$q', '$rootScope', '$route', '$scope', '$timeout',
     'annotator', 'flash', 'identity', 'queryparser', 'socket',
-    'streamfilter', 'viewFilter'
+    'streamfilter', 'viewFilter', 'documentHelpers'
   ]
   constructor: (
      $element,   $location,   $q,   $rootScope,   $route,   $scope,   $timeout
      annotator,   flash,   identity,   queryparser,   socket,
-     streamfilter,   viewFilter
+     streamfilter,   viewFilter,   documentHelpers
   ) ->
     {plugins, host, providers} = annotator
 
@@ -260,7 +260,8 @@ class App
 
       # Configure the Auth plugin with the issued assertion as refresh token.
       annotator.addPlugin 'Auth',
-        tokenUrl: "#{baseURI}api/token?assertion=#{assertion}"
+        tokenUrl: documentHelpers.absoluteURI(
+          "/api/token?assertion=#{assertion}")
 
       # Set the user from the token.
       plugins.Auth.withToken (token) ->

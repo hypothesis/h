@@ -25,7 +25,7 @@ describe 'h.directives.annotation', ->
         $timeout: sinon.spy()
         $window: {}
         annotator: {plugins: {}}
-        baseURI: null
+        documentHelpers: {baseURI: '', absoluteURI: sinon.spy()}
         drafts: null
 
   it 'provides a document title', ->

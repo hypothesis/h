@@ -1,7 +1,7 @@
 imports = [
   'ngResource'
   'h.flash'
-  'h.helpers'
+  'h.helpers.documentHelpers'
 ]
 
 
@@ -61,8 +61,8 @@ class SessionProvider
     @options = {}
 
   $get: [
-    '$q', '$resource', 'baseURI', 'flash',
-    ($q,   $resource,   baseURI,   flash) ->
+    '$q', '$resource', 'documentHelpers', 'flash',
+    ($q,   $resource,   documentHelpers,   flash) ->
       actions = {}
 
       process = (data, headersGetter) ->
@@ -89,7 +89,8 @@ class SessionProvider
         actions[name] = angular.extend {}, options, @options
         actions[name].transformResponse = process
 
-      $resource("#{baseURI}app", {}, actions).load()
+      endpoint = documentHelpers.absoluteURI('/app')
+      $resource(endpoint, {}, actions).load()
   ]
 
 # Function providing a server-side user profile resource.
@@ -98,8 +99,8 @@ class SessionProvider
 # for manipulating server-side account-profile settings. It defines the
 # actions (such as 'login', 'register') as REST-ish actions
 profileProvider = [
-  '$q', '$resource', 'baseURI',
-  ($q,   $resource,   baseURI) ->
+  '$q', '$resource', 'documentHelpers',
+  ($q,   $resource,   documentHelpers) ->
     defaults =
       email: ""
       password: ""
@@ -116,7 +117,8 @@ profileProvider = [
           __formid__: "disable_user"
         withCredentials: true
 
-    $resource("#{baseURI}app", {}, actions)
+    endpoint = documentHelpers.absoluteURI('/app')
+    $resource(endpoint, {}, actions)
 ]
 
 
@@ -126,9 +128,10 @@ configure = ['$httpProvider', ($httpProvider) ->
   # Use the Pyramid XSRF header name
   defaults.xsrfHeaderName = 'X-CSRF-Token'
 
-  $httpProvider.interceptors.push ['baseURI', (baseURI) ->
+  $httpProvider.interceptors.push ['documentHelpers', (documentHelpers) ->
     request: (config) ->
-      if config.url.match("#{baseURI}app")?.index == 0
+      endpoint = documentHelpers.absoluteURI('/app')
+      if config.url.indexOf(endpoint) == 0
         # Set the cross site request forgery token
         cookieName = config.xsrfCookieName || defaults.xsrfCookieName
         headerName = config.xsrfHeaderName || defaults.xsrfHeaderName

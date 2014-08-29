@@ -1,5 +1,5 @@
 imports = [
-  'h.helpers'
+  'h.helpers.documentHelpers'
 ]
 
 
@@ -16,8 +16,8 @@ run = ['clientID', (clientID) ->
       "X-Client-Id": clientID
 ]
 
-socket = ['baseURI', 'clientID', (baseURI, clientID) ->
-  -> new Socket(clientID, "#{baseURI}__streamer__")
+socket = ['documentHelpers', 'clientID', (documentHelpers, clientID) ->
+  -> new Socket(clientID, "#{documentHelpers.baseURI}__streamer__")
 ]
 
 
