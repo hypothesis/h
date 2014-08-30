@@ -219,8 +219,6 @@ sockjs:
   contents:
     - h:static/scripts/vendor/sockjs-0.3.4.js
 tinymce:
-  filters: uglifyjs
-  output: scripts/vendor/tinymcecat.min.js
   contents:
     - h:static/scripts/vendor/tinymce/tinymce.min.js
 uuid:
