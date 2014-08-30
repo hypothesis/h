@@ -86,8 +86,15 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   templateUrl: 'markdown.html'
 ]
 
-uiTinymce = [ "uiTinymceConfig", (uiTinymceConfig) ->
-  uiTinymceConfig = uiTinymceConfig or {}
+uiTinymce = ->
+  # The tiny MCE editor can be configured here. See http://www.tinymce.com
+  # for full configuration options.
+  uiTinymceConfig = {
+    plugins: ["paste", "link", "image", "fullscreen", "media"]
+    statusbar : false
+    menubar : false
+    toolbar: "styleselect | bold italic | link image media | fullscreen"
+  }
   generatedIds = 0
   return (
     require: "?ngModel"
@@ -136,7 +143,7 @@ uiTinymce = [ "uiTinymceConfig", (uiTinymceConfig) ->
 
       return
   )
-]
+
 
 privacy = ->
   levels = ['Public', 'Only Me']
@@ -434,7 +441,7 @@ angular.module('h.directives', ['ngSanitize', 'ngTagsInput'])
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
-.value('uiTinymceConfig', {}).directive('uiTinymce', uiTinymce)
+.directive('uiTinymce', uiTinymce)
 .directive('privacy', privacy)
 .directive('recursive', recursive)
 .directive('tabReveal', tabReveal)

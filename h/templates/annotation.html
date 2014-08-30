@@ -58,7 +58,7 @@
 
   <!-- Body Write / Preview Tabs -->
   <div ng-show="editing">
-    <textarea ui-tinymce id="tinymce1" ng-model="model.text" ng-required="required" />
+    <textarea ui-tinymce ng-model="model.text" ng-required="required" />
   </div>
 
   <div ng-hide="editing" ng-switch="mode">
