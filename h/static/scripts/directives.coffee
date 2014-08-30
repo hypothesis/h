@@ -87,6 +87,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 ]
 
 uiTinymce = ->
+  # Code based on https://github.com/angular-ui/ui-tinymce (MIT License)
   # The tiny MCE editor can be configured here. See http://www.tinymce.com
   # for full configuration options.
   uiTinymceConfig = {

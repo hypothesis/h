@@ -275,7 +275,6 @@ app_js:
   contents:
     - filters: uglifyjs
       contents:
-        - scripts/directives/tinymceeditor.js
         - filters: coffeescript
           output: scripts/hypothesis.js
           # TODO: glob these or use browserify
