@@ -91,9 +91,12 @@ uiTinymce = ->
   # The tiny MCE editor can be configured here. See http://www.tinymce.com
   # for full configuration options.
   uiTinymceConfig = {
-    plugins: ["compat3x", "paste", "link", "image", "fullscreen", "media", "autosave", "latex"]
+    plugins: ["compat3x", "paste", "link", "image", "fullscreen", "autosave", "latex"]
     statusbar : false
     menubar : false
+    image_dimensions: false
+    link_title: false
+    target_list: false
     style_formats: [
       {title: "Headers", items: [
           {title: "Header 1", format: "h1"},
@@ -119,7 +122,7 @@ uiTinymce = ->
           {title: "Pre", format: "pre"}
       ]}
     ]
-    toolbar: "styleselect | bold italic | link image media | fullscreen | latex"
+    toolbar: "styleselect | bold italic | link image | fullscreen | latex"
   }
   generatedIds = 0
   return (
