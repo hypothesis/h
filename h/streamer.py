@@ -5,6 +5,8 @@ import json
 import logging
 import operator
 import re
+import unicodedata
+import urlparse
 
 from dateutil.tz import tzutc
 from jsonpointer import resolve_pointer
@@ -18,6 +20,19 @@ from h.api import get_user
 from h.models import Annotation
 
 log = logging.getLogger(__name__)
+
+
+def unidecode(text, normalization='NFKD'):
+    # Convert str to unicode
+    if isinstance(text, str):
+        text = unicode(text, "utf-8")
+
+    # Do not touch other types
+    if not isinstance(text, unicode):
+        return text
+
+    text = unicodedata.normalize(normalization, text)
+    return u"".join([c for c in text if not unicodedata.combining(c)])
 
 filter_schema = {
     "type": "object",
@@ -333,6 +348,39 @@ class FilterHandler(object):
                     fval = [x.lower() for x in field_value]
                 else:
                     fval = field_value.lower()
+            if clause.get('normalize', False):
+                if type(cval) is list:
+                    tval = []
+                    for cv in cval:
+                        if isinstance(cv, str):
+                            cv = unicode(cv, "utf-8")
+                        if isinstance(cv, unicode):
+                            tval.append(unidecode(cv))
+                        else:
+                            tval.append(cv)
+                    cval = tval
+                else:
+                    if isinstance(cval, str):
+                        cval = unicode(cval, "utf-8")
+                    if isinstance(cval, unicode):
+                        cval = unidecode(cval)
+
+                if type(fval) is list:
+                    tval = []
+                    for fv in fval:
+                        if isinstance(fv, str):
+                            fv = unicode(fv, "utf-8")
+                        if isinstance(fv, unicode):
+                            tval.append(unidecode(fv))
+                        else:
+                            tval.append(fv)
+                    fval = tval
+                else:
+                    if isinstance(fval, str):
+                        fval = unicode(fval, "utf-8")
+                    if isinstance(fval, unicode):
+                        fval = unidecode(fval)
+            # pylint: enable=maybe-no-member
 
             reversed_order = False
             # Determining operator order
