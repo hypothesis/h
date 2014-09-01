@@ -9,8 +9,25 @@ Dependencies:
 * Compass_ v0.12+
 * ElasticSearch_ v1.0+
 
-See the platform specific ``INSTALL.<platform>.rst`` files for more information
-about how to install the dependencies on any specific platform (see below).
+Platform Specific Instructions
+------------------------------
+
+To install the dependencies on any specific platform, follow the instructions in one of the following files (see below).  
+
+* ArchLinux_
+* Debian_
+* Fedora_
+* OSX_ 
+* Ubuntu_
+* Vagrant_ (*contains information for installing on Windows*)
+
+Feel free to add a section for a new platform, particularly if you think it
+may be a niche use case. Pull requests which create an
+``Install.<Platform>.rst`` are preferred. And of course, edits to existing
+docs should be done in a pull request.
+
+General Instructions
+--------------------
 
 In the future, releases will include built versions of static assets which
 will eliminate the need for those who wish to integrate with their own
@@ -43,23 +60,6 @@ for details.
 For production use, the application will use UglifyJS_ and clean-css_ for
 minification needs. These are not required when running the project in a
 development configuration but will be installed locally.
-
-Platform Specific Instructions
-------------------------------
-
-Platform specific instructions currently exist for the following platforms:
-
-* ArchLinux_
-* Debian_
-* Fedora_
-* OSX_
-* Ubuntu_
-* Vagrant_ (contains information for installing on Windows)
-
-Feel free to add a section for a new platform, particularly if you think it
-may be a niche use case. Pull requests which create an
-``Install.<Platform>.rst`` are preferred. And of course, edits to existing
-docs should be done in a pull request.
 
 Troubleshooting
 ---------------
