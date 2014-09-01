@@ -138,8 +138,8 @@ Branching and Pull Requests
 ---------------------------
 For trivial changes, such as documentation changes or minor errors, 
 PRs may be submitted directly to master. This also applies to changes 
-made through the Github editing interface. Committers do not need to 
-sign the CLA for these, or follow fork or commite naming guidelines.
+made through the GitHub editing interface. Committers do not need to 
+sign the CLA for these, or follow fork or commit naming guidelines.
 
 For any non-trivial changes, please create a branch for review. Fork
 the main repository and create a local branch. Later, when the branch
