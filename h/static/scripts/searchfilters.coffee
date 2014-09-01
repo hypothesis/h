@@ -50,6 +50,7 @@ class SearchFilter
   # [facet_name]:
   #   [operator]: 'and'|'or'|'min' (for the elements of the facet terms list)
   #   [lowercase]: true|false
+  #   [normalize]: true|flase (unicode normalization)
   #   [terms]: an array for the matched terms for this facet
   # The facet selection is done by analyzing each token.
   # It generally expects a <facet_name>:<facet_term> structure for a token
@@ -118,28 +119,43 @@ class SearchFilter
     any:
       terms: any
       operator: 'and'
+      lowercase: true
+      normalize: true
     quote:
       terms: quote
       operator: 'and'
+      lowercase: true
+      normalize: true
     result:
       terms: result
       operator: 'min'
+      lowercase: false
+      normalize: false
     since:
       terms: since
       operator: 'and'
+      lowercase: false
+      normalize: false
     tag:
       terms: tag
       operator: 'and'
+      lowercase: true
+      normalize: true
     text:
       terms: text
       operator: 'and'
+      lowercase: true
+      normalize: true
     uri:
       terms: uri
       operator: 'or'
+      lowercase: true
+      normalize: true
     user:
       terms: user
       operator: 'or'
-
+      lowercase: true
+      normalize: true
 
 # This class will process the results of search and generate the correct filter
 # It expects the following dict format as rules

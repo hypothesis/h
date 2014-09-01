@@ -435,6 +435,12 @@ class ViewFilter
     any:
       fields: ['quote', 'text', 'tag', 'user']
 
+  this.$inject = ['searchfilter','stringHelpers']
+  constructor: (searchfilter, stringHelpers) ->
+    @searchfilter = searchfilter
+
+    @_normalize = (e) -> stringHelpers.unidecode(e)
+
   _matches: (filter, value, match) ->
     matches = true
 
@@ -462,17 +468,29 @@ class ViewFilter
       matches = false
     matches
 
+  _anyMatches: (filter, value, match) ->
+    matchresult = []
+    for term in filter.terms
+      if angular.isArray value
+        matchresult.push match value, term
+      else
+        matchresult.push match term, value
+    matchresult
+
   _checkMatch: (filter, annotation, checker) ->
     autofalsefn = checker.autofalse
     return false if autofalsefn? and autofalsefn annotation
 
     value = checker.value annotation
     if angular.isArray value
-      if typeof(value[0]) == 'string'
-        value = value.map (v) -> v.toLowerCase()
+      if filter.lowercase
+        value = value.map (e) -> e.toLowerCase()
+      if filter.normalize
+        value = value.map (e) => @_normalize(e)
       return @_arrayMatches filter, value, checker.match
     else
-      value = value.toLowerCase() if typeof(value) == 'string'
+      value = value.toLowerCase() if filter.lowercase
+      value = @_normalize(value) if filter.normalize
       return @_matches filter, value, checker.match
 
   # Filters a set of annotations, according to a given query.
@@ -493,9 +511,39 @@ class ViewFilter
   #   matched annotation IDs list,
   #   the faceted filters
   # ]
-  filter: (annotations, filters) ->
-    limit = Math.min((filters.result?.terms or [])...)
-    count = 0
+  filter: (annotations, query) =>
+    filters = @searchfilter.generateFacetedFilter query
+    results = []
+
+    # Check for given limit
+    # Find the minimal
+    limit = 0
+    if filters.result.terms.length
+      limit = filter.result.terms[0]
+      for term in filter.result.terms
+        if limit > term then limit = term
+
+    # Normalize terms if needed
+    for _, filter of filters
+      if filter.lowercase
+        filter.terms = filter.terms.map (e) -> e.toLowerCase()
+      if filter.normalize
+        filter.terms = filter.terms.map (e) => @_normalize(e)
+
+    # Now that this filter is called with the top level annotations, we have to add the children too
+    annotationsWithChildren = []
+    for annotation in annotations
+      annotationsWithChildren.push annotation
+      children = annotation.thread?.flattenChildren()
+      if children?.length > 0
+        for child in children
+          annotationsWithChildren.push child
+
+    for annotation in annotationsWithChildren
+      matches = true
+      #ToDo: What about given zero limit?
+      # Limit reached
+      if limit and results.length >= limit then break
 
     results = for annotation in annotations
       break if count >= limit
@@ -509,10 +557,30 @@ class ViewFilter
           when 'any'
             categoryMatch = false
             for field in @checkers.any.fields
-              if @_checkMatch(filter, annotation, @checkers[field])
-                categoryMatch = true
-                break
-            match = categoryMatch
+              conf = @checkers[field]
+
+              continue if conf.autofalse? and conf.autofalse annotation
+              value = conf.value annotation
+              if angular.isArray value
+                if filter.lowercase
+                  value = value.map (e) -> e.toLowerCase()
+                if filter.normalize
+                  value = value.map (e) => @_normalize(e)
+              else
+                value = value.toLowerCase() if filter.lowercase
+                value = @_normalize(value) if filter.normalize
+              matchresult = @_anyMatches filter, value, conf.match
+              matchterms = matchterms.map (t, i) -> t or matchresult[i]
+
+            # Now let's see what we got.
+            matched = 0
+            for _, value of matchterms
+              matched++ if value
+
+            if (filter.operator is 'or' and matched  > 0) or (filter.operator is 'and' and matched is terms.length)
+              matches = true
+            else
+              matches  = false
           else
             match = @_checkMatch filter, annotation, @checkers[category]
 
