@@ -136,6 +136,11 @@ follow the branching and merging strategy outlined in the next section.
 
 Branching and Pull Requests
 ---------------------------
+For trivial changes, such as documentation changes or minor errors, 
+PRs may be submitted directly to master. This also applies to changes 
+made through the GitHub editing interface. Authors do not need to 
+sign the CLA for these, or follow fork or branch naming guidelines.
+
 For any non-trivial changes, please create a branch for review. Fork
 the main repository and create a local branch. Later, when the branch
 is ready for review, push it to a fork and submit a pull request.
