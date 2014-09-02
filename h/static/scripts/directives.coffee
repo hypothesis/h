@@ -91,10 +91,11 @@ uiTinymce = ->
   # The tiny MCE editor can be configured here. See http://www.tinymce.com
   # for full configuration options.
   uiTinymceConfig = {
-    plugins: ["compat3x", "paste", "link", "image", "fullscreen", "latex"]
+    plugins: ["compat3x", "paste", "link", "autoresize", "image", "fullscreen", "latex"]
     statusbar : false
     menubar : false
     image_dimensions: false
+    autoresize_max_height: 500
     link_title: false
     browser_spellcheck : true
     target_list: false
