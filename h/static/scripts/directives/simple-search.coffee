@@ -6,17 +6,18 @@ simpleSearch = ['$parse', ($parse) ->
     scope.reset = (event) ->
       event.preventDefault()
       scope.query = ''
-      scope.onClear?()
 
     scope.search = (event) ->
       event.preventDefault()
       scope.query = scope.searchtext
 
-    scope.$watch 'query', (query, old) ->
-      return if query is old
+    scope.$watch 'query', (query) ->
+      return if query is undefined
       scope.searchtext = query
       if query
         scope.onSearch?(query: scope.searchtext)
+      else
+        scope.onClear?()
 
   restrict: 'C'
   scope:

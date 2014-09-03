@@ -51,6 +51,14 @@ describe 'h.directives', ->
       $element.find('.simple-search-clear').click()
       assert.equal(isolate.searchtext, '')
 
+    it 'invokes callbacks when the input model changes', ->
+      $scope.query = "Test query"
+      $scope.$digest()
+      sinon.assert.calledOnce($scope.update)
+      $scope.query = ""
+      $scope.$digest()
+      sinon.assert.calledOnce($scope.clear)
+
     it 'adds a class to the form when there is no input value', ->
       $form = $element.find('.simple-search-form')
       assert.include($form.prop('className'), 'simple-search-inactive')
