@@ -70,6 +70,30 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
     input = elem.find('textarea')
     output = elem.find('div')
 
+    # Inserts a markdown link guide. 
+    scope.insertLink = ->
+      # console.log window.getSelection().toString()
+      if input[0].selectionStart != undefined
+        startPos = input[0].selectionStart
+        endPos = input[0].selectionEnd
+        selectedText = input[0].value.substring(startPos, endPos)
+        textBefore = input[0].value.substring(0, (startPos))
+        textAfter = input[0].value.substring(endPos)
+        newtext = textBefore + '[' + selectedText + '](https://example.com)' + textAfter
+        input[0].value = newtext
+
+    scope.insertIMG = ->
+      # console.log window.getSelection().toString()
+      if input[0].selectionStart != undefined
+        startPos = input[0].selectionStart
+        endPos = input[0].selectionEnd
+        selectedText = input[0].value.substring(startPos, endPos)
+        console.log selectedText
+        newtext = input[0].value.substring(0, (startPos)) + '![' + selectedText + '](https://yourimage.jpg)' + input[0].value.substring(endPos)
+        input[0].value = newtext
+
+    
+
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
       input.val (ctrl.$viewValue or '')
