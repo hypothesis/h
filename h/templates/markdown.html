@@ -1,8 +1,20 @@
-<div class="pull-right">
-<a class="" ng-hide="readonly" ng-click="insertLink()" href="">Insert Link</a>
-<a class="" ng-hide="readonly" ng-click="insertIMG()" href="">Insert Image</a>
+<div ng-hide="readonly" class="markdowntools" ng-class="preview && 'disable'">
+	<i class="icon-bold" ng-click="insertBold()" title="Insert Bold" />
+	<i class="icon-italic" ng-click="insertItalic()" title="Insert Italic" />
+	<i class="icon-quote" ng-click="insertQuote()" title="Insert Quote" />
+	<i class="icon-link" ng-click="insertLink()" title="Insert Link" />
+	<i class="icon-image" ng-click="insertIMG()" title="Insert Image" />
+	<i class="icon-math" ng-click="insertMath()" title="Insert Math" />
+	<i class="icon-numlist" ng-click="insertNumList()" title="Insert Numbered List" />
+	<i class="icon-ulist" ng-click="insertList()" title="Insert List" />
+	<i class="icon-code" ng-click="insertCode()" title="Insert Code" />
+	<div class="preview-toggle">
+		<a class="icon-markdown" href="https://help.github.com/articles/markdown-basics" title="Parsed as Markdown" target="_blank" />
+		<a href="" ng-click="togglePreview()" ng-show="!preview">Preview</a>
+		<a href="" ng-click="togglePreview()" ng-show="preview">Write</a>
+	</div>
 </div>
-<textarea class="form-input form-textarea" ng-hide="readonly"
+<textarea class="form-input form-textarea" ng-hide="readonly || preview"
           ng-click="$event.stopPropagation()"
           ng-required="required" />
-<div class="styled-text" ng-bind-html="rendered" ng-show="readonly" />
+<div class="styled-text" ng-class="preview && 'preview'" ng-click="togglePreview()" ng-bind-html="rendered" ng-show="readonly || preview" />

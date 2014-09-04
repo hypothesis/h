@@ -22,6 +22,16 @@
     </span>
   </span>
 
+  <!-- Editing controls -->
+  <aside class="pull-right" ng-if="vm.editing">
+    <privacy ng-click="$event.stopPropagation()"
+             ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
+             ng-model="vm.annotation.permissions"
+             class="dropdown privacy pull-right"
+             name="privacy" />
+  </aside>
+  <!-- / Editing controls -->
+
   <!-- Timestamp -->
   <a class="annotation-timestamp small pull-right"
      target="_blank"
@@ -49,49 +59,11 @@
 </section>
 <!-- / Excerpts -- >
 
-<!-- Editing controls -->
-<aside class="pull-right" ng-if="vm.editing">
-  <a class="icon-markdown pull-right"
-   target="_blank"
-   title="Parsed as Markdown"
-   href="https://guides.github.com/features/mastering-markdown/"
-   ng-if="vm.editing"></a>
-  <privacy ng-click="$event.stopPropagation()"
-           ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
-           ng-model="vm.annotation.permissions"
-           class="dropdown privacy pull-right"
-           name="privacy" />
-</aside>
-<!-- / Editing controls -->
-
 <!-- Body -->
-<section class="annotation-section annotation-body tabbable"
-         ng-model="vm.preview"
-         ng-if="vm.editing">
-  <div class="tab-pane" data-value="no" data-title="Write">
-    <div class="form-field"
-         ng-model="vm.annotation.text"
-         name="text"
-         markdown>
-    </div>
-  </div>
-  <div class="tab-pane" data-value="yes" data-title="Preview">
-    <p class="form-field" ng-show="!vm.annotation.text">Nothing to preview.</p>
-    <div class="form-field"
-         name="text"
-         ng-model="vm.annotation.text"
-         ng-readonly="true"
-         markdown>
-    </div>
-  </div>
-</section>
-
 <section name="text"
-         class="annotation-section annotation-body"
-         ng-if="!vm.editing"
+         class="markdown annotation-body"
          ng-model="vm.annotation.text"
-         ng-readonly="true"
-         markdown>
+         ng-readonly="!vm.editing">
 </section>
 <!-- / Body -->
 

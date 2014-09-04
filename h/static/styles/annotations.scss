@@ -42,12 +42,53 @@
   font-size: .923em;
 }
 
-.icon-markdown {
-  color: $text-color;
-  line-height: 1.4;
-  margin-left: .5em;
+
+// Markdown Controls ////////////////////////
+.markdown {
+  .preview {
+    overflow: auto;
+    border: 1px solid $gray-lighter;
+    background-color: $gray-lightest;
+    min-height: 120px;
+    padding-left: 10px;
+    resize: vertical;
+  }
+
+  .markdowntools {
+    margin-top: 10px;
+    border-top: 1px solid #D3D3D3;
+    border-left: 1px solid #D3D3D3;
+    border-right: 1px solid #D3D3D3;
+    border-radius: 2px 2px 0 0;
+    width: 100%;
+    margin-bottom: -1px;
+    padding: .7em .7em .7em .5em;
+
+    &.disable {
+      i {
+        color: $gray-lighter;
+        pointer-events: none;
+      }
+    }
+
+    i {padding: 5px;}
+
+    i, a {
+      color: $gray;
+
+      &:hover {
+        color: black;
+      }
+    }
+
+    .preview-toggle {
+      float: right;
+    }
+  }
 }
 
+
+//MAGICONTROL////////////////////////////////
 .magicontrol {
   margin-right: .8em;
   color: $gray-lighter;
