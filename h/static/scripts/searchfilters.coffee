@@ -169,7 +169,7 @@ class SearchFilter
 #
 #      options: backend specific options
 #      options.es: elasticsearch specific options
-#      options.es.query_type : can be: simple, query_string, match, multi_match
+#      options.es.query_type : can be: simple (term), query_string, match, multi_match
 #         defaults to: simple, determines which es query type to use
 #      options.es.cutoff_frequency: if set, the query will be given a cutoff_frequency for this facet
 #      options.es.and_or: match and multi_match queries can use this, defaults to and
@@ -187,14 +187,23 @@ class QueryParser
       path: '/text'
       case_sensitive: false
       and_or: 'and'
+      options:
+        es:
+         query_type: 'match'
     tag:
       path: '/tags'
       case_sensitive: false
       and_or: 'and'
+      options:
+        es:
+         query_type: 'match'
     quote:
       path: '/quote'
       case_sensitive: false
       and_or: 'and'
+      options:
+        es:
+         query_type: 'match'
     uri:
       formatter: (uri) ->
         uri.toLowerCase()

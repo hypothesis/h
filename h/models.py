@@ -44,13 +44,9 @@ class Annotation(annotation.Annotation):
         'annotator_schema_version': {'type': 'string'},
         'created': {'type': 'date'},
         'updated': {'type': 'date'},
-        'quote': {'type': 'string', 'analyzer': 'standard'},
-        'tags': {
-            'type': 'string',
-            'index': 'analyzed',
-            'analyzer': 'lower_keyword'
-        },
-        'text': {'type': 'string', 'analyzer': 'standard'},
+        'quote': {'type': 'string', 'analyzer': 'uni_normalizer'},
+        'tags': {'type': 'string', 'analyzer': 'uni_normalizer'},
+        'text': {'type': 'string', 'analyzer': 'uni_normalizer'},
         'deleted': {'type': 'boolean'},
         'uri': {
             'type': 'string',
@@ -101,7 +97,7 @@ class Annotation(annotation.Annotation):
                             'path': 'just_name',
                             'fields': {
                                 'exact': {'type': 'string'},
-                                'quote': {'type': 'string'},
+                                'quote': {'type': 'string', 'analyzer': 'uni_normalizer'},
                             },
                         },
                         'prefix': {'type': 'string'},
@@ -169,6 +165,10 @@ class Annotation(annotation.Annotation):
                 'user': {
                     'tokenizer': 'keyword',
                     'filter': ['user', 'lowercase']
+                },
+                'uni_normalizer': {
+                    'tokenizer': 'icu_tokenizer',
+                    'filter': ['icu_normalizer', 'asciifolding']
                 }
             }
         }
