@@ -401,7 +401,8 @@ def create_db():
     try:
         es.conn.indices.create(es.index)
     except elasticsearch_exceptions.RequestError as e:
-        if not e.error.startswith('IndexAlreadyExistsException'):
+        if not (e.error.startswith('IndexAlreadyExistsException')
+                or e.error.startswith('InvalidIndexNameException')):
             raise
     except elasticsearch_exceptions.ConnectionError as e:
         msg = ('Can not access ElasticSearch at {0}! '
