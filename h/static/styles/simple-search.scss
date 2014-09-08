@@ -35,7 +35,7 @@
   color: $text-color;
   width: 100%;
   border: none !important; // Override base input styles.
-  padding: .4615em 0;
+  padding: .4615em 0 0;
 
   .simple-search-inactive &:not(:focus) {
     border-color: #f3f3f3 !important;
