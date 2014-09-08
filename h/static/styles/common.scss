@@ -4,8 +4,6 @@
 
 $base-font-size: 16px;
 $base-line-height: 26px;
-$sans-font-family: "Source Sans Pro", $sans-font-family;
-$serif-font-family: "Merriweather", $serif-font-family;
 $headings-color: $text-color;
 
 @import 'annotations';
@@ -383,6 +381,7 @@ html {
   border-bottom-right-radius: 24px 72px;
   border-bottom-left-radius: 24px 72px;
   font-family: $sans-font-family;
+  font-weight: 300;
   background: $white;
   border: solid 1px $gray-lighter;
   padding: 0 10px;

@@ -44,7 +44,12 @@
   }
 
   ol, ul {
-    padding-left: 1.25em;
+    list-style-position: inside;
+    padding-left: 0;
+
+    ol, ul {
+      padding-left: 1em;
+    }
   }
 
   ol {
@@ -80,7 +85,6 @@
 
   blockquote {
     @include quote;
-    font-size: .8125em; // Serif font is much larger than sans.
     margin: 1em 0;
 
     p, ol, ul, img, pre, blockquote {
@@ -93,7 +97,7 @@
   }
 
   code {
-    font-family: Open Sans Mono, Menlo, DejaVu Sans Mono, monospace;
+    font-family: $mono-font-family;
     font-size: .875em;
     color: black;
   }
