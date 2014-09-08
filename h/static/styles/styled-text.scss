@@ -85,7 +85,6 @@
 
   blockquote {
     @include quote;
-    font-size: .8125em; // Serif font is much larger than sans.
     margin: 1em 0;
 
     p, ol, ul, img, pre, blockquote {
