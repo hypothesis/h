@@ -12,6 +12,7 @@
 body {
   @extend .noise;
   font-family: $sans-font-family;
+  font-weight: 300;
   word-wrap: break-word;
 }
 
@@ -104,6 +105,7 @@ ol {
   border: solid 1px $gray-lighter;
   border-radius: 2px;
   font-family: $sans-font-family;
+  font-weight: 300;
   margin-bottom: .72em;
   padding: 1em;
   position: relative;

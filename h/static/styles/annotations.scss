@@ -3,6 +3,7 @@
 .annotation {
   @include pie-clearfix;
   font-family: $sans-font-family;
+  font-weight: 300;
   position: relative;
 
   &:hover fuzzytime a, &:hover .reply-count {
@@ -82,6 +83,7 @@
   .more, .less {
     font-size: .9em;
     font-family: $sans-font-family;
+    font-weight: 300;
     display: block;
     text-align: right;
   }

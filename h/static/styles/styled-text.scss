@@ -44,7 +44,12 @@
   }
 
   ol, ul {
-    padding-left: 1.25em;
+    list-style-position: inside;
+    padding-left: 0;
+
+    ol, ul {
+      padding-left: 1em;
+    }
   }
 
   ol {

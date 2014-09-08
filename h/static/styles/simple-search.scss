@@ -7,7 +7,7 @@
 .simple-search-form {
   @include clearfix;
   position: relative;
-  padding: 0 (20 / 13 * 1em);
+  padding: 0 1.5385em;
   color: $gray;
 }
 
@@ -35,7 +35,7 @@
   color: $text-color;
   width: 100%;
   border: none !important; // Override base input styles.
-  padding: (5 / 13 * 1em) 0;
+  padding: .4615em 0;
 
   .simple-search-inactive &:not(:focus) {
     border-color: #f3f3f3 !important;
