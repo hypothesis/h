@@ -191,8 +191,6 @@ jwz:
   contents:
     - h:static/scripts/vendor/jwz.js
 mathjax:
-  filters: uglifyjs
-  output: scripts/vendor/MathJax.min.js
   contents:
     - h:static/scripts/vendor/MathJax/MathJax.js
 momentjs:
