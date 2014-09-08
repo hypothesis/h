@@ -50,7 +50,22 @@ class Annotation(annotation.Annotation):
         'text': {'type': 'string'},
         'deleted': {'type': 'boolean'},
         'uri': {'type': 'string', 'index_analyzer': 'uri_index', 'search_analyzer': 'uri_search'},
-        'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'lower_keyword'},
+        'user': {
+            'type': 'multi_field',
+            'path': 'just_name',
+            'fields': {
+                'user': {
+                    'type': 'string',
+                    'index': 'analyzed',
+                    'analyzer': 'lower_keyword'},
+                'username': {
+                    'type': 'string',
+                    'index': 'analyzed',
+                    'index_analyzer': 'username',
+                    'search_analyzer': 'lower_keyword'
+                }
+            }
+        },
         'consumer': {'type': 'string', 'index': 'not_analyzed'},
         'target': {
             'properties': {
@@ -130,6 +145,13 @@ class Annotation(annotation.Annotation):
                     ]
                 }
             },
+            'tokenizer': {
+                'username': {
+                    'type': 'pattern',
+                    'group': 1,
+                    'pattern': '^acct:(.+)@.*$'
+                }
+            },
             'analyzer': {
                 'thread': {
                     'tokenizer': 'path_hierarchy'
@@ -145,6 +167,10 @@ class Annotation(annotation.Annotation):
                 },
                 'uri_search': {
                     'tokenizer': 'keyword',
+                },
+                'username': {
+                    'tokenizer': 'username',
+                    'filter': 'lowercase'
                 }
             }
         }

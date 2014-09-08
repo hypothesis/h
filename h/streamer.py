@@ -528,7 +528,7 @@ class StreamerSession(Session):
 def after_action(event):
     try:
         request = event.request
-        clientID = request.headers.get('X-Client-Id')
+        clientid = request.headers.get('X-Client-Id')
 
         action = event.action
         if action == 'read':
@@ -540,7 +540,7 @@ def after_action(event):
 
         manager = request.get_sockjs_manager()
         for session in manager.active_sessions():
-            if session.clientID == clientID:
+            if session.clientID == clientid:
                 continue
 
             try:
@@ -549,6 +549,10 @@ def after_action(event):
 
                 if 'references' in annotation:
                     annotation['quote'] = annotation['parent']['text']
+
+                if 'user' in annotation:
+                    username = re.match('^acct:(.+)@.*$', annotation['user'])
+                    annotation['username'] = username.group(1) if username else ''
 
                 flt = session.filter
                 if not (flt and flt.match(annotation, action)):
