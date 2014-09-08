@@ -28,15 +28,10 @@ tags-input {
     }
   }
 
-  .tag-list {
-    margin-top: -.33em; // Absorb the first row of margin-top on the tags.
-  }
-
   .tag-item {
     float: left;
     position: relative;
-    padding: .154em 1.307em .154em .538em;
-    margin-top: .384em;
+    padding: .154em .288em .154em .538em;
     margin-right: .384em;
     font-size: .866em;
     color: $button-text-color;
@@ -49,16 +44,6 @@ tags-input {
     }
 
     .remove-button {
-      display: block;
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 16px;
-      font-size: 17px;
-      font-weight: bold;
-      line-height: 1.2;
-      text-align: center;
       color: #585858;
       cursor: pointer;
     }
