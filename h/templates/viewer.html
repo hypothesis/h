@@ -1,8 +1,8 @@
 <!-- Thread view -->
 <ul class="stream-list">
-  <li ng-show="!!matches"
+  <li ng-show="!!matches || !!search.query"
       ><span ng-pluralize
-             count="matches.length"
+             count="(matches || threading.root.children).length"
              when="{'0': 'Found no results.',
                     'one': 'Found 1 matching annotation.',
                     'other': 'Found {} matching annotations.'}"></span>
