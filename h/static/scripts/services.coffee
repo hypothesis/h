@@ -384,7 +384,7 @@ class Hypothesis extends Annotator
 
   setTool: (name) ->
     return if name is @tool
-    return unless this.discardDrafts()
+    return unless @element.injector().get('drafts').discard()
 
     if name is 'highlight'
       # Check login state first
@@ -415,10 +415,6 @@ class Hypothesis extends Annotator
       p.channel.notify
         method: 'setVisibleHighlights'
         params: state
-
-  # Discard all drafts, deleting unsaved annotations from the annotator
-  discardDrafts: ->
-    return @element.injector().get('drafts').discard()
 
 
 class DraftProvider

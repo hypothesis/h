@@ -13,12 +13,12 @@ class App
   this.$inject = [
     '$location', '$q', '$route', '$scope', '$timeout',
     'annotator', 'flash', 'identity', 'socket', 'streamfilter',
-    'documentHelpers'
+    'documentHelpers', 'drafts'
   ]
   constructor: (
      $location,   $q,   $route,   $scope,   $timeout
      annotator,   flash,   identity,   socket,   streamfilter,
-     documentHelpers
+     documentHelpers,   drafts
   ) ->
     {plugins, host, providers} = annotator
 
@@ -65,7 +65,7 @@ class App
               onlogin(assertion)
             onlogout: ->
               onlogout()
-      else if annotator.discardDrafts()
+      else if drafts.discard()
         if claimedUser
           identity.request()
         else
@@ -324,7 +324,7 @@ class App
 
       update: (query) ->
         unless angular.equals $location.search()['q'], query
-          if annotator.discardDrafts()
+          if drafts.discard()
             $location.search('q', query or null)
 
     $scope.socialView = annotator.socialView
