@@ -50,7 +50,7 @@ class Annotation(annotation.Annotation):
         'text': {'type': 'string'},
         'deleted': {'type': 'boolean'},
         'uri': {'type': 'string', 'index_analyzer': 'uri_index', 'search_analyzer': 'uri_search'},
-        'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'lower_keyword'},
+        'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'user'},
         'consumer': {'type': 'string', 'index': 'not_analyzed'},
         'target': {
             'properties': {
@@ -128,6 +128,11 @@ class Annotation(annotation.Annotation):
                         '([a-zA-Z0-9]+)(?:\\.([a-zA-Z0-9]+))*',
                         '([a-zA-Z0-9-]+)(?:\\.([a-zA-Z0-9-]+))*',
                     ]
+                },
+                'username': {
+                    'type': 'pattern_capture',
+                    'preserve_original': 1,
+                    'patterns': ['^acct:((.+)@.*)$']
                 }
             },
             'analyzer': {
@@ -145,6 +150,10 @@ class Annotation(annotation.Annotation):
                 },
                 'uri_search': {
                     'tokenizer': 'keyword',
+                },
+                'user': {
+                    'tokenizer': 'keyword',
+                    'filter': ['username', 'lowercase']
                 }
             }
         }

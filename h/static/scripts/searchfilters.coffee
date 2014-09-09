@@ -164,13 +164,8 @@ class SearchFilter
 class QueryParser
   rules:
     user:
-      formatter: (user) ->
-        if user.indexOf('acct:') != 0
-          'acct:' + user + '@' + window.location.hostname
-        else
-          user
       path: '/user'
-      exact_match: true
+      exact_match: false
       case_sensitive: false
       and_or: 'or'
     text:
