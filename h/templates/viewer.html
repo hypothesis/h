@@ -3,9 +3,9 @@
   <li ng-show="!!matches || !!search.query"
       ><span ng-pluralize
              count="(matches || threading.root.children).length"
-             when="{'0': 'Found no results.',
-                    'one': 'Found 1 matching annotation.',
-                    'other': 'Found {} matching annotations.'}"></span>
+             when="{'0': 'No results.',
+                    'one': 'Found one result.',
+                    'other': 'Found {} results.'}"></span>
       <a href="" ng-click="clearSelection()">Clear search</a>.</li>
   <li ng-show="selectedAnnotations && !matches"
       ><span ng-pluralize
