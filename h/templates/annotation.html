@@ -57,7 +57,7 @@
   </div>
 
   <!-- Body Write / Preview Tabs -->
-  <div class="tabbable"
+<!--   <div class="tabbable"
        ng-model="preview"
        ng-show="editing">
     <a class="icon-markdown"
@@ -71,9 +71,32 @@
       <p class="form-field" ng-show="!model.text">Nothing to preview.</p>
       <markdown class="form-field" ng-model="model.text" ng-readonly="true" name="text" />
     </div>
+  </div> -->
+
+  <div ng-show="editing">
+    <ul class="nav-tabs nobottomborder">
+      <li ng-class="!preview && 'active'">
+        <a href="" ng-click="preview = false">Write</a>
+      </li>
+      <li ng-class="preview && 'active'">
+        <a href="" ng-click="preview = true">Preview</a>
+      </li>
+    </ul>
   </div>
 
-  <div ng-hide="editing" ng-switch="mode">
+
+  <!-- Body -->
+  <div class="body" ng-show="mode=='search' && !editing">
+    <markdown ng-model="model.highlightText" 
+              name="text" />
+  </div>
+  <div class="body" ng-hide="mode=='search' && !editing">
+    <markdown ng-model="model.text"
+              ng-readonly="!editing || preview"
+              name="text" />
+  </div>
+
+<!--   <div ng-hide="editing" ng-switch="mode">
     <markdown class="form-field" name="text"
               ng-model="model.highlightText"
               ng-switch-when="'search'" />
@@ -81,7 +104,7 @@
               ng-model="model.text"
               ng-readonly="true"
               ng-switch-default />
-  </div>
+  </div> -->
 
   <!-- Tags -->
   <div class="form-field" ng-show="editing">
