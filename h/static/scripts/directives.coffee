@@ -71,11 +71,13 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
     input.bind 'blur change keyup', ->
       ctrl.$setViewValue input.val()
       scope.$digest()
+      scope.$apply MathJax.Hub.Queue(['Typeset', MathJax.Hub])
 
     # Auto-focus the input box when the widget becomes editable.
     # Re-render when it becomes uneditable.
     scope.$watch 'readonly', (readonly) ->
       ctrl.$render()
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub])
       unless readonly then $timeout -> input.focus()
 
   require: '?ngModel'
