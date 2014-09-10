@@ -23,9 +23,7 @@ configure = [
     $routeProvider.when '/viewer',
       controller: 'ViewerController'
       templateUrl: 'viewer.html'
-    $routeProvider.when '/page_search',
-      controller: 'SearchController'
-      templateUrl: 'viewer.html'
+      reloadOnSearch: false
     $routeProvider.when '/stream',
       controller: 'StreamSearchController'
       templateUrl: 'viewer.html'

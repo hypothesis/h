@@ -358,12 +358,13 @@ class AnnotationViewer
 
 class Viewer
   this.$inject = [
-    '$location', '$routeParams', '$scope', 'annotator'
+    '$filter', '$routeParams', '$sce', '$scope',
+    'annotator', 'viewFilter'
   ]
-  constructor: ($location, $routeParams, $scope, annotator) ->
-    if $routeParams.q
-      return $location.path('/page_search').replace()
-
+  constructor: (
+     $filter,   $routeParams,   $sce,   $scope,
+     annotator,   viewFilter
+  ) ->
     # Tells the view that these annotations are embedded into the owner doc
     $scope.isEmbedded = true
     $scope.isStream = true
@@ -383,26 +384,15 @@ class Viewer
           params: highlights
 
     $scope.shouldShowAnnotation = (id) ->
-      selectedAnnotations = $scope.selectedAnnotations
-      !selectedAnnotations or selectedAnnotations?[id]
-
-
-class Search
-  this.$inject = ['$filter', '$location', '$routeParams', '$sce', '$scope',
-                  'annotator', 'viewFilter']
-  constructor: ($filter, $location, $routeParams, $sce, $scope,
-                annotator, viewFilter) ->
-    unless $routeParams.q
-      return $location.path('/viewer').replace()
-
-    {plugins, providers} = annotator
-
-    $scope.isEmbedded = true
-    $scope.isStream = true
+      if $routeParams.q
+        shownAnnotations = $scope.ann_info.shown
+        (shownAnnotations[id] or $scope.render_order[id])
+      else
+        selectedAnnotations = $scope.selectedAnnotations
+        (!selectedAnnotations or selectedAnnotations?[id])
 
     $scope.highlighter = '<span class="search-hl-active">$&</span>'
     $scope.filter_orderBy = $filter('orderBy')
-    $scope.matches = []
     $scope.render_order = {}
     $scope.render_pos = {}
     $scope.ann_info =
@@ -412,10 +402,6 @@ class Search
       more_bottom : {}
       more_top_num : {}
       more_bottom_num: {}
-
-    $scope.shouldShowAnnotation = (id) ->
-      shownAnnotations = $scope.ann_info?.shown or {}
-      !!shownAnnotations[id] or $scope.render_order[id]
 
     buildRenderOrder = (threadid, threads) =>
       unless threads?.length
@@ -452,20 +438,13 @@ class Search
           result = true
       result
 
-    $scope.activate = (annotation) ->
-      if angular.isObject annotation
-        highlights = [annotation.$$tag]
-      else
-        highlights = []
-      for p in providers
-        p.channel.notify
-          method: 'setActiveHighlights'
-          params: highlights
-
-    $scope.$watch 'annotations', (nVal, oVal) =>
-      refresh()
-
     refresh = =>
+      if $routeParams.q
+        delete $scope.selectedAnnotations
+      else
+        delete $scope.matches
+        return
+
       query = $routeParams.q
       annotations = $scope.threading.root.flattenChildren()
       [$scope.matches, $scope.filters] = viewFilter.filter annotations, query
@@ -552,7 +531,6 @@ class Search
             target.highlightQuote = target.quote
           $scope.ann_info.show_quote[thread.message.id] = false
 
-
         children = thread.flattenChildren()
         if children?
           for child in children
@@ -568,7 +546,6 @@ class Search
             $scope.ann_info.more_bottom[child.id] = setMoreBottom(thread.message.id, child)
 
             $scope.ann_info.show_quote[child.id] = false
-
 
       # Calculate the number of hidden annotations for <x> more labels
       for threadid, order of $scope.render_order
@@ -611,7 +588,6 @@ class Search
         $scope.ann_info.shown[prev_id] = true
         pos -= 1
 
-
     $scope.clickMoreBottom = (id, $event) ->
       $event?.stopPropagation()
       threadid = $scope.getThreadId id
@@ -637,4 +613,3 @@ angular.module('h.controllers', imports)
 .controller('AppController', App)
 .controller('ViewerController', Viewer)
 .controller('AnnotationViewerController', AnnotationViewer)
-.controller('SearchController', Search)
