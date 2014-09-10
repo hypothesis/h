@@ -130,6 +130,3 @@
   })(Annotator.Plugin);
 
 }).call(this);
-
-//
-//# sourceMappingURL=annotator.textrange.map

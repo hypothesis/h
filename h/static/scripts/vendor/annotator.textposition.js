@@ -134,6 +134,3 @@
   })(Annotator.Plugin);
 
 }).call(this);
-
-//
-//# sourceMappingURL=annotator.textposition.map

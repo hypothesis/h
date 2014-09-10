@@ -187,6 +187,3 @@
   })(Annotator.Plugin);
 
 }).call(this);
-
-//
-//# sourceMappingURL=annotator.texthighlights.map

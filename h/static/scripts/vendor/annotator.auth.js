@@ -230,6 +230,3 @@
   })(Annotator.Plugin);
 
 }).call(this);
-
-//
-//# sourceMappingURL=annotator.auth.map
