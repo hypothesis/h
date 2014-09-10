@@ -2,6 +2,7 @@
 // http://mbenford.github.io/ngTagsInput/gettingstarted
 
 @import "mixins/forms";
+@import "compass/css3/user-interface";
 
 tags-input {
   .host {
@@ -19,8 +20,8 @@ tags-input {
     // Input
     .input {
       float: left;
-      margin-top: .1875em;
-      padding: .2em 0;
+      margin-top: .2667em;
+      padding: .2em 0 .2em;
       outline: none;
       border: none !important;
       background: none;
@@ -35,7 +36,7 @@ tags-input {
   .tag-item {
     float: left;
     position: relative;
-    padding: .154em 1.307em .154em .538em;
+    padding: .0769em 1.307em .0769em .538em;
     margin-top: .384em;
     margin-right: .384em;
     font-size: .866em;
@@ -49,15 +50,16 @@ tags-input {
     }
 
     .remove-button {
+      @include user-select(none);
       display: block;
       position: absolute;
       top: 0;
       right: 0;
       bottom: 0;
-      width: 16px;
-      font-size: 17px;
+      width: .9412em;
+      font-size: 1.3077em;
       font-weight: bold;
-      line-height: 1.2;
+      line-height: 1;
       text-align: center;
       color: #585858;
       cursor: pointer;
