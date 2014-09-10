@@ -9,11 +9,11 @@ imports = [
 
 class StreamSearch
   this.inject = [
-    '$scope', '$rootScope',
+    '$scope', '$rootScope', '$routeParams',
     'annotator', 'queryparser', 'searchfilter', 'streamfilter'
   ]
   constructor: (
-     $scope,   $rootScope,
+     $scope,   $rootScope,   $routeParams
      annotator,   queryparser,   searchfilter,   streamfilter
   ) ->
     # Clear out loaded annotations and threads
@@ -28,6 +28,7 @@ class StreamSearch
       .setPastDataHits(50)
 
     # Apply query clauses
+    $scope.search.query = $routeParams.q
     terms = searchfilter.generateFacetedFilter $scope.search.query
     queryparser.populateFilter streamfilter, terms
 
