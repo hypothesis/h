@@ -452,7 +452,7 @@ class FilterHandler(object):
 
 
 class StreamerSession(Session):
-    clientID = None
+    client_id = None
     filter = None
 
     def on_open(self):
@@ -515,7 +515,7 @@ class StreamerSession(Session):
                     self.send_annotations()
                     self.offsetFrom += self.received
             elif msg_type == 'client_id':
-                self.clientID = struct.get('value')
+                self.client_id = struct.get('value')
         except:
             log.exception("Parsing filter: %s", msg)
             transaction.abort()
@@ -528,7 +528,7 @@ class StreamerSession(Session):
 def after_action(event):
     try:
         request = event.request
-        clientID = request.headers.get('X-Client-Id')
+        client_id = request.headers.get('X-Client-Id')
 
         action = event.action
         if action == 'read':
@@ -540,7 +540,7 @@ def after_action(event):
 
         manager = request.get_sockjs_manager()
         for session in manager.active_sessions():
-            if session.clientID == clientID:
+            if session.client_id == client_id:
                 continue
 
             try:
