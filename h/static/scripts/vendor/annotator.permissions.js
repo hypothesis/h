@@ -220,6 +220,3 @@
   })(Annotator.Plugin);
 
 }).call(this);
-
-//
-//# sourceMappingURL=annotator.permissions.map

@@ -2419,6 +2419,3 @@
   });
 
 }).call(this);
-
-//
-//# sourceMappingURL=annotator.map

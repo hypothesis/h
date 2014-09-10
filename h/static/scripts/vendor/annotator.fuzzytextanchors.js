@@ -118,6 +118,3 @@
   })(Annotator.Plugin);
 
 }).call(this);
-
-//
-//# sourceMappingURL=annotator.fuzzytextanchors.map
