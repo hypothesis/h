@@ -146,7 +146,6 @@ class SearchFilter
 # { facet_name : {
 #      formatter: to format the value (optional)
 #      path: json path mapping to the annotation field
-#      exact_match: true|false (default: true)
 #      case_sensitive: true|false (default: false)
 #      and_or: and|or for multiple values should it threat them as 'or' or 'and' (def: or)
 #      operator: if given it'll use this operator regardless of other circumstances
@@ -165,29 +164,24 @@ class QueryParser
   rules:
     user:
       path: '/user'
-      exact_match: false
       case_sensitive: false
       and_or: 'or'
     text:
       path: '/text'
-      exact_match: false
       case_sensitive: false
       and_or: 'and'
     tag:
       path: '/tags'
-      exact_match: false
       case_sensitive: false
       and_or: 'and'
     quote:
       path: '/quote'
-      exact_match: false
       case_sensitive: false
       and_or: 'and'
     uri:
       formatter: (uri) ->
         uri.toLowerCase()
       path: '/uri'
-      exact_match: false
       case_sensitive: false
       and_or: 'or'
       options:
@@ -209,12 +203,10 @@ class QueryParser
             when '1 year' then 365*24*60*60
         new Date(new Date().valueOf() - seconds*1000)
       path: '/created'
-      exact_match: false
       case_sensitive: true
       and_or: 'and'
       operator: 'ge'
     any:
-      exact_match: false
       case_sensitive: false
       and_or: 'and'
       path:   ['/quote', '/tags', '/text', '/uri', '/user']
@@ -231,19 +223,16 @@ class QueryParser
       unless @rules[category]? then continue
       terms = value.terms
       unless terms.length then continue
-      rule = @rules[category]
+      rule = @rules[category] 
 
 
       # Now generate the clause with the help of the rule
-      exact_match = if rule.exact_match? then rule.exact_match else true
       case_sensitive = if rule.case_sensitive? then rule.case_sensitive else false
       and_or = if rule.and_or? then rule.and_or else 'or'
       mapped_field = if rule.path? then rule.path else '/'+category
 
       if and_or is 'or'
-        oper_part =
-          if rule.operator? then rule.operator
-          else if exact_match then 'one_of' else 'match_of'
+        oper_part = if rule.operator? then rule.operator else 'match_of'
 
         value_part = []
         for term in terms
@@ -252,9 +241,7 @@ class QueryParser
 
         filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
       else
-        oper_part =
-          if rule.operator? then rule.operator
-          else if exact_match then 'equals' else 'matches'
+        oper_part = if rule.operator? then rule.operator else 'matches'
         for val in terms
           value_part = if rule.formatter then rule.formatter val else val
           filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
