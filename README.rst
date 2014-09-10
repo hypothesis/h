@@ -54,7 +54,7 @@ join us in `#hypothes.is`_ on freenode_ for discussion.
 Those wishing to contribute to the project should also `subscribe`_ to the
 development mailing list and read about `contributing`_. Then consider getting
 started on one of the issues that are ready for work by clicking on the badge
-below. Issues tagged with the label 'cake' are ideal for new contributors.
+below. Issues tagged with the label 'New Contributor Friendly' are ideal for new contributors.
 
 .. image:: https://badge.waffle.io/hypothesis/h.svg?label=1%20-%20Ready
    :target: https://waffle.io/hypothesis/h
