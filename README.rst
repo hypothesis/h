@@ -116,6 +116,15 @@ better. Using `Docker`_ it is easy to configure the ElasticSearch host and the
 mail relay address. Simply create links with the names ``elasticsearch`` and
 ``mail`` respectively.
 
+Documentation
+--------------------------
+
+To build the documentation, ensure that Sphinx_ is installed and issue the
+```make html``` command from the docs directory::
+
+    $ cd docs/
+    $ make html
+
 License
 -------
 
@@ -135,3 +144,4 @@ license information can be found in the included `<LICENSE>`_ file.
 .. _Open Knowledge Foundation: http://okfn.org/
 .. _2-Clause BSD License: http://www.opensource.org/licenses/BSD-2-Clause
 .. _debugtoolbar: http://docs.pylonsproject.org/projects/pyramid-debugtoolbar/en/latest/
+.. _Sphinx: http://sphinx-doc.org/
