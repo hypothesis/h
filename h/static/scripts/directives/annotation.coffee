@@ -226,8 +226,9 @@ annotation = ['$filter', '$parse', 'annotator', ($filter, $parse, annotator) ->
       scope.model.tags.push(tag.text)
 
     scope.removeTag = (tag) ->
-      scope.model.tags = scope.model.tags.filter((t) -> t isnt tag.text)
-      delete scope.model.tags if scope.model.tags.length is 0
+      if tag and scope.model.tags
+        scope.model.tags = scope.model.tags.filter((t) -> t isnt tag.text)
+        delete scope.model.tags if scope.model.tags.length is 0
 
     # Watch for changes
     scope.$watch 'model', (model) ->
