@@ -2,7 +2,7 @@
 <ul class="stream-list">
   <li ng-show="!!matches || !!search.query"
       ><span ng-pluralize
-             count="(matches || threading.root.children).length"
+             count="matches || threading.root.children.length"
              when="{'0': 'No results.',
                     'one': 'Found one result.',
                     'other': 'Found {} results.'}"></span>
@@ -39,6 +39,6 @@
       ng-mouseleave="activate()"
       ng-repeat="child in threading.root.children
                  | orderBy : sort.predicate : sort.reverse"
-      ng-show="shouldShowAnnotation(child.message.id)"></li>
+      ng-show="shouldShowThread(child)"></li>
 </ul>
 <!-- / Thread view -->

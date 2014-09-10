@@ -73,7 +73,7 @@ class SearchFilter
         filter = term.slice 0, term.indexOf ":"
         unless filter? then filter = ""
         switch filter
-          when 'quote' then quote.push term[6..]
+          when 'quote' then quote.push term[6..].toLowerCase()
           when 'result' then result.push term[7..]
           when 'since'
             # We'll turn this into seconds
@@ -109,44 +109,36 @@ class SearchFilter
               # Time given in year
               t = /^(\d+)year$/.exec(time)[1]
               since.push t * 60 * 60 * 24 * 365
-          when 'tag' then tag.push term[4..]
-          when 'text' then text.push term[5..]
-          when 'uri' then uri.push term[4..]
-          when 'user' then user.push term[5..]
-          else any.push term
+          when 'tag' then tag.push term[4..].toLowerCase()
+          when 'text' then text.push term[5..].toLowerCase()
+          when 'uri' then uri.push term[4..].toLowerCase()
+          when 'user' then user.push term[5..].toLowerCase()
+          else any.push term.toLowerCase()
 
     any:
       terms: any
       operator: 'and'
-      lowercase: true
     quote:
       terms: quote
       operator: 'and'
-      lowercase: true
     result:
       terms: result
       operator: 'min'
-      lowercase: false
     since:
       terms: since
       operator: 'and'
-      lowercase: false
     tag:
       terms: tag
       operator: 'and'
-      lowercase: true
     text:
       terms: text
       operator: 'and'
-      lowercase: true
     uri:
       terms: uri
       operator: 'or'
-      lowercase: true
     user:
       terms: user
       operator: 'or'
-      lowercase: true
 
 
 # This class will process the results of search and generate the correct filter
@@ -234,19 +226,6 @@ class QueryParser
          match_type: 'cross_fields'
          and_or: 'and'
          fields:   ['quote', 'tag', 'text', 'uri', 'user']
-
-
-  parseModels: (models) ->
-    # Cluster facets together
-    categories = {}
-    for searchItem in models
-      category = searchItem.attributes.category
-      value = searchItem.attributes.value
-      if category of categories
-        categories[category].push value
-      else
-        categories[category] = [value]
-    categories
 
   populateFilter: (filter, query) =>
     # Populate a filter with a query object

@@ -36,7 +36,7 @@ class StreamSearch
 
     $scope.sort.name = 'Newest'
 
-    $scope.shouldShowAnnotation = (id) -> true
+    $scope.shouldShowThread = (container) -> true
 
     $scope.$watch 'updater', (updater) ->
       updater?.then (sock) ->

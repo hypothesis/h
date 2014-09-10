@@ -1,29 +1,20 @@
 <a href="" class="threadexp"
    title="{{vm.collapsed && 'Expand' || 'Collapse'}}"
-   ng-if="vm.container.parent.message &&
-          (!ann_info || ann_info.shown[vm.container.message.id]) &&
-          !ann_info.more_top[vm.container.message.id]"
+   ng-if="vm.container.parent.parent && shouldShowThread(vm.container)"
    ><span ng-class="{'icon-plus': !!vm.collapsed,
                      'icon-minus': !vm.collapsed}"></span></a>
 
-<!--"Load more replies" label for the top -->
+<!-- Show more -->
 <a href=""
    class="load-more"
-   ng-if="ann_info.more_top[vm.container.message.id] &&
-          ann_info.more_top_num[vm.container.message.id] < 2"
-   ng-click="clickMoreTop(vm.container.message.id, $event)">
-  show one reply above
-</a>
+   ng-if="vm.container.moreTop > 0"
+   ng-click="showMoreTop(vm.container); $event.stopPropagation()"
+   ng-pluralize=""
+   count="vm.container.moreTop"
+   when="{one: 'Show one other annotation in conversation.',
+          other: 'Show {} other annotations in conversation.'}"></a>
 
-<a href=""
-   class="load-more"
-   ng-if="ann_info.more_top[vm.container.message.id] &&
-          ann_info.more_top_num[vm.container.message.id] > 1"
-   ng-click="clickMoreTop(vm.container.message.id, $event)">
-  show {{ann_info.more_top_num[vm.container.message.id]}} replies above
-</a>
-
-<article ng-show="shouldShowAnnotation(vm.container.message.id)">
+<article ng-show="shouldShowThread(vm.container)">
   <!-- Annotation -->
   <div class="annotation"
        name="annotation"
@@ -68,22 +59,16 @@
      ><i class="icon-export"></i> Share</a>
 </article>
 
-<!--"Load more replies" label for the bottom -->
-<a href=""
-   class="load-more"
-   ng-if="ann_info.more_bottom[vm.container.message.id] &&
-          ann_info.more_bottom_num[vm.container.message.id] < 2"
-   ng-click="clickMoreBottom(vm.container.message.id, $event)">
-  show one reply below
-</a>
 
+<!-- Show more -->
 <a href=""
    class="load-more"
-   ng-if="ann_info.more_bottom[vm.container.message.id] &&
-          ann_info.more_bottom_num[vm.container.message.id] > 1"
-   ng-click="clickMoreBottom(vm.container.message.id, $event)">
-  show {{ann_info.more_bottom_num[vm.container.message.id]}} replies below
-</a>
+   ng-if="vm.container.moreBottom > 0"
+   ng-click="showMoreBottom(vm.container); $event.stopPropagation()"
+   ng-pluralize=""
+   count="vm.container.moreBottom"
+   when="{one: 'Show one other annotation in conversation.',
+          other: 'Show {} other annotations in conversation.'}"></a>
 
 <!-- Replies -->
 <ul>
@@ -91,5 +76,5 @@
       thread="child"
       ng-include="'thread.html'"
       ng-repeat="child in vm.container.children
-                 | orderBy : 'message.updated' : true"></li>
+                 | orderBy : 'message.updated'"></li>
 </ul>
