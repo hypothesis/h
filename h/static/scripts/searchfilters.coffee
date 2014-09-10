@@ -50,7 +50,6 @@ class SearchFilter
   # [facet_name]:
   #   [operator]: 'and'|'or'|'min' (for the elements of the facet terms list)
   #   [lowercase]: true|false
-  #   [normalize]: true|flase (unicode normalization)
   #   [terms]: an array for the matched terms for this facet
   # The facet selection is done by analyzing each token.
   # It generally expects a <facet_name>:<facet_term> structure for a token
@@ -120,42 +119,34 @@ class SearchFilter
       terms: any
       operator: 'and'
       lowercase: true
-      normalize: true
     quote:
       terms: quote
       operator: 'and'
       lowercase: true
-      normalize: true
     result:
       terms: result
       operator: 'min'
       lowercase: false
-      normalize: false
     since:
       terms: since
       operator: 'and'
       lowercase: false
-      normalize: false
     tag:
       terms: tag
       operator: 'and'
       lowercase: true
-      normalize: true
     text:
       terms: text
       operator: 'and'
       lowercase: true
-      normalize: true
     uri:
       terms: uri
       operator: 'or'
       lowercase: true
-      normalize: true
     user:
       terms: user
       operator: 'or'
       lowercase: true
-      normalize: true
 
 # This class will process the results of search and generate the correct filter
 # It expects the following dict format as rules
@@ -163,7 +154,6 @@ class SearchFilter
 #      formatter: to format the value (optional)
 #      path: json path mapping to the annotation field
 #      case_sensitive: true|false (default: false)
-#      normalize: true| false (default: false)
 #      and_or: and|or for multiple values should it threat them as 'or' or 'and' (def: or)
 #      operator: if given it'll use this operator regardless of other circumstances
 #
@@ -253,7 +243,6 @@ class QueryParser
 
       # Now generate the clause with the help of the rule
       case_sensitive = if rule.case_sensitive? then rule.case_sensitive else false
-      normalize = if value.normalize? then value.normalize else false
       and_or = if rule.and_or? then rule.and_or else 'or'
       mapped_field = if rule.path? then rule.path else '/'+category
 
@@ -265,12 +254,12 @@ class QueryParser
           t = if rule.formatter then rule.formatter term else term
           value_part.push t
 
-        filter.addClause mapped_field, oper_part, value_part, case_sensitive, normalize, rule.options
+        filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
       else
         oper_part = if rule.operator? then rule.operator else 'matches'
         for val in terms
           value_part = if rule.formatter then rule.formatter val else val
-          filter.addClause mapped_field, oper_part, value_part, case_sensitive, normalize, rule.options
+          filter.addClause mapped_field, oper_part, value_part, case_sensitive, rule.options
 
 
 class StreamFilter
@@ -355,13 +344,12 @@ class StreamFilter
     @filter.clauses = []
     this
 
-  addClause: (field, operator, value, case_sensitive = false, normalize = false, options = {}) ->
+  addClause: (field, operator, value, case_sensitive = false, options = {}) ->
     @filter.clauses.push
       field: field
       operator: operator
       value: value
       case_sensitive: case_sensitive
-      normalize: normalize
       options: options
     this
 
