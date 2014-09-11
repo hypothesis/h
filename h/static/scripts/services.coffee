@@ -197,6 +197,11 @@ class Hypothesis extends Annotator
       @element.scope().$apply => this.show()
     )
 
+    .bind('showEditor', (ctx, tag) =>
+      @element.scope().$apply =>
+        this.showEditor this._getLocalAnnotation(tag)
+    )
+
     .bind('showViewer', (ctx, tags=[]) =>
       @element.scope().$apply =>
         this.showViewer this._getLocalAnnotations(tags)
@@ -291,7 +296,6 @@ class Hypothesis extends Annotator
   showEditor: (annotation) ->
     scope = @element.scope()
     scope.ongoingEdit = mail.messageContainer(annotation)
-    scope.$digest()  # XXX: unify with other RPC, digest cycle
     delete scope.selectedAnnotations
     this.show()
     this

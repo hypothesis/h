@@ -237,7 +237,10 @@ class Annotator.Guest extends Annotator
       method: "updateViewer"
       params: (a.$$tag for a in annotations)
 
-  showEditor: (annotation) => @plugins.Bridge.showEditor annotation
+  showEditor: (annotation) =>
+    @panel?.notify
+      method: "showEditor"
+      params: annotation.$$tag
 
   addEmphasis: (annotations) =>
     @panel?.notify

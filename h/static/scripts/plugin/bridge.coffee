@@ -232,10 +232,6 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       @annotator.loadAnnotations annotations
     )
 
-    .bind('showEditor', (ctx, annotation) =>
-      @annotator.showEditor (this._parse annotation)
-    )
-
     .bind('enableAnnotating', (ctx, state) =>
       @annotator.enableAnnotating state, false
     )
@@ -401,12 +397,6 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       method: 'sync'
       params: annotations
       callback: cb
-    this
-
-  showEditor: (annotation) ->
-    this._notify
-      method: 'showEditor'
-      params: this._format annotation
     this
 
   enableAnnotating: (state) ->
