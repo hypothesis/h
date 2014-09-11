@@ -66,7 +66,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
     ctrl.$render = ->
       input.val (ctrl.$viewValue or '')
       scope.rendered = ($filter 'converter') (ctrl.$viewValue or '')
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub])
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub]) unless scope.readonly
       
     # React to the changes to the text area
     input.bind 'blur change keyup', ->
@@ -75,13 +75,11 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 
     scope.$watch 'preview', (preview) ->
       ctrl.$render()
-      console.log "preview"
 
     # Auto-focus the input box when the widget becomes editable.
     # Re-render when it becomes uneditable.
     scope.$watch 'readonly', (readonly) ->
       ctrl.$render()
-      console.log "readonly"
       unless readonly then $timeout -> input.focus()
 
   require: '?ngModel'
