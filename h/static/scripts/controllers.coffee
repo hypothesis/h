@@ -155,6 +155,7 @@ class App
           $scope.$root.annotations = [thread.message]
 
       return unless Store
+      Store.destroy()
 
       # XXX: Hacky hacky stuff to ensure that any search requests in-flight
       # at this time have no effect when they resolve and that future events
@@ -249,6 +250,7 @@ class App
 
     onlogin = (assertion) ->
       # Delete any old Auth plugin.
+      plugins.Auth?.destroy()
       delete plugins.Auth
 
       # Configure the Auth plugin with the issued assertion as refresh token.
