@@ -357,12 +357,6 @@ class Hypothesis extends Annotator
       # Check the root
       update scope.threading.root
 
-      # Sync data to other frames
-      @plugins.Bridge.sync([annotation])
-
-      # Tell angular about the changes.
-      scope.$digest()
-
   considerSocialView: (query) ->
     switch @socialView.name
       when "none"
