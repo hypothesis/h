@@ -48,18 +48,17 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
             return  # no dupes
           prev.addChild(thread)
 
+    this.pruneEmpties(@root)
     @root
 
   beforeAnnotationCreated: (annotation) =>
     this.thread([annotation])
 
   annotationDeleted: ({id}) =>
-    container = @idTable[id]
-    return unless container?
+    container = this.getContainer id
     container.message = null
-    if container.children.length == 0
-      container.parent.removeChild(container)
-      delete @idTable[id]
+    this.pruneEmpties(@root)
 
   annotationsLoaded: (annotations) =>
-    this.thread(annotations)
+    messages = (@root.flattenChildren() or []).concat(annotations)
+    this.thread(messages)
