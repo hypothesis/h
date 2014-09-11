@@ -145,17 +145,10 @@ class App
 
       # Load any initial annotations that should be displayed
       if _id
-        if $scope.loadAnnotations
-          # Load annotations from inline page data
-          plugins.Store._onLoadAnnotations $scope.loadAnnotations
-          delete $scope.loadAnnotations
-          _promise = $scope.loadAnnotations
-        else
-          # Load annotations from the API
-          # XXX: Two requests here is less than ideal
-          _promise = plugins.Store.loadAnnotationsFromSearch({_id})
-            .then ->
-              plugins.Store.loadAnnotationsFromSearch({references: _id})
+        # XXX: Two requests here is less than ideal
+        _promise = plugins.Store.loadAnnotationsFromSearch({_id})
+          .then ->
+            plugins.Store.loadAnnotationsFromSearch({references: _id})
 
         $q.when _promise, ->
           thread = annotator.threading.getContainer _id

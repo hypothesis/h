@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
 
 from pyramid import httpexceptions
 from pyramid.view import view_config
 
-from h import interfaces
 from h.models import _
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -42,12 +40,7 @@ def model(request):
     renderer='h:templates/app.pt',
 )
 def annotation(context, request):
-    Store = request.registry.getUtility(interfaces.IStoreClass)
-    referrers = Store(request).search(references=context['id'])
-    annotations = json.dumps([context] + referrers).replace('"', '\'')
-    return {
-        'init': 'loadAnnotations={}'.format(annotations)
-    }
+    return {}
 
 
 @view_config(accept='application/json',  name='app', renderer='json')
