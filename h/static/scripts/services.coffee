@@ -257,6 +257,7 @@ class Hypothesis extends Annotator
 
   toggleViewerSelection: (annotations=[]) ->
     scope = @element.scope()
+    scope.search.query = ''
 
     selected = scope.selectedAnnotations or {}
     for a in annotations
@@ -281,6 +282,7 @@ class Hypothesis extends Annotator
 
   showViewer: (annotations=[]) ->
     scope = @element.scope()
+    scope.search.query = ''
     selected = {}
     for a in annotations
       selected[a.id] = true
