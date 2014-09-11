@@ -468,10 +468,6 @@ class StreamerSession(Session):
         for annotation in annotations:
             try:
                 annotation.update(url_values_from_document(annotation))
-                if 'references' in annotation:
-                    parent = store.read(annotation['references'][-1])
-                    if 'text' in parent:
-                        annotation['quote'] = parent['text']
                 send_annotations.append(annotation)
             except:
                 log.exception("Updating properties: %s", annotation)
