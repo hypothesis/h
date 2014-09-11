@@ -91,10 +91,7 @@ class Hypothesis extends Annotator
 
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    whitelist = [
-      'diffHTML', 'inject', 'quote', 'ranges', 'target', 'id', 'references',
-      'uri', 'diffCaseOnly', 'document',
-    ]
+    whitelist = ['target', 'document', 'uri']
     this.addPlugin 'Bridge',
       gateway: true
       formatter: (annotation) =>
