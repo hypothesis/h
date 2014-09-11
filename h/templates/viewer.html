@@ -1,13 +1,13 @@
 <!-- Thread view -->
 <ul class="stream-list">
-  <li ng-show="!!matches || !!search.query"
+  <li ng-show="!!search.query"
       ><span ng-pluralize
-             count="matches || threading.root.children.length"
+             count="results"
              when="{'0': 'No results.',
                     'one': 'Found one result.',
                     'other': 'Found {} results.'}"></span>
       <a href="" ng-click="clearSelection()">Clear search</a>.</li>
-  <li ng-show="selectedAnnotations && !matches"
+  <li ng-show="selectedAnnotations && !search.query"
       ><span ng-pluralize
              count="selectedAnnotationsCount"
              when="{'0': 'No annotations selected',
@@ -33,7 +33,6 @@
   <li class="paper thread"
       thread="child"
       thread-collapsed="!search.query"
-      ng-if="child.message.id || child.children.length"
       ng-include="'thread.html'"
       ng-mouseenter="activate(child.message)"
       ng-mouseleave="activate()"

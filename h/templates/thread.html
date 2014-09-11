@@ -4,17 +4,7 @@
    ><span ng-class="{'icon-plus': !!vm.collapsed,
                      'icon-minus': !vm.collapsed}"></span></a>
 
-<!-- Show more -->
-<a href=""
-   class="load-more"
-   ng-if="vm.container.moreTop > 0"
-   ng-click="showMoreTop(vm.container); $event.stopPropagation()"
-   ng-pluralize=""
-   count="vm.container.moreTop"
-   when="{one: 'Show one other annotation in conversation.',
-          other: 'Show {} other annotations in conversation.'}"></a>
-
-<article ng-show="shouldShowThread(vm.container)">
+<article ng-if="vm.container" ng-show="shouldShowThread(vm.container)">
   <!-- Annotation -->
   <div class="annotation"
        name="annotation"
@@ -23,7 +13,7 @@
        ng-if="vm.container.message">
   </div>
 
-  <div ng-if="!vm.container.message"><em>Annotation unavailable.</em></div>
+  <p ng-if="!vm.container.message"><em>This annotation is unavailable.</em></p>
 
   <!-- Share -->
   <div class="share-dialog"
@@ -40,35 +30,37 @@
     </div>
   </div>
 
-  <!-- Reply count -->
-  <a class="reply-count small"
-     href=""
-     ng-pluralize=""
-     ng-if="vm.container.children.length"
-     count="vm.container.flattenChildren().length"
-     when="{one: '1 reply', other: '{} replies'}" />
+  <footer>
+    <!-- Reply count -->
+    <a class="reply-count small"
+       href=""
+       ng-pluralize=""
+       ng-if="vm.container.children.length && !vm.container.more"
+       count="vm.container.flattenChildren().length"
+       when="{one: '1 reply', other: '{} replies'}" />
 
-  <!-- Bottom control strip -->
-  <a class="small magicontrol" href="" title="Reply"
-     ng-click="vm.reply(); $event.stopPropagation()"
-     ng-if="vm.container.message.id"
-     ><i class="icon-reply"></i> Reply</a>
-  <a class="small magicontrol" href="" title="Share"
-     ng-click="vm.toggleShared(); $event.stopPropagation()"
-     ng-if="vm.container.message.id"
-     ><i class="icon-export"></i> Share</a>
+    <!-- Bottom control strip -->
+    <a class="small magicontrol" href="" title="Reply"
+       ng-click="vm.reply(); $event.stopPropagation()"
+       ng-if="vm.container.message.id"
+       ><i class="icon-reply"></i> Reply</a>
+    <a class="small magicontrol" href="" title="Share"
+       ng-click="vm.toggleShared(); $event.stopPropagation()"
+       ng-if="vm.container.message.id"
+       ><i class="icon-export"></i> Share</a>
+  </footer>
 </article>
-
 
 <!-- Show more -->
 <a href=""
    class="load-more"
-   ng-if="vm.container.moreBottom > 0"
-   ng-click="showMoreBottom(vm.container); $event.stopPropagation()"
+   ng-if="vm.container.more > 0"
+   ng-click="showMore(vm.container); $event.stopPropagation()"
    ng-pluralize=""
-   count="vm.container.moreBottom"
-   when="{one: 'Show one other annotation in conversation.',
-          other: 'Show {} other annotations in conversation.'}"></a>
+   count="vm.container.more"
+   when="{one: 'Show one reply in another branch of this conversation.',
+          other: 'Show {} replies in other branches of this conversation.'}"
+   ></a>
 
 <!-- Replies -->
 <ul>

@@ -385,100 +385,66 @@ class Viewer
       if $routeParams.q
         container.shown
       else if $scope.selectedAnnotations?
-        $scope.selectedAnnotations[container.message?.id]
+        if container.parent is $scope.threading.root
+          $scope.selectedAnnotations[container.message?.id]
+        else
+          true
       else
         true
 
-    $scope.showMoreTop = (container) ->
-      rendered = container.renderOrder
-      pos = rendered.indexOf(container)
-      container.moreTop = 0
-
-      while --pos >= 0
-        prev = rendered[pos]
-        prev.moreBottom = 0
-        break if prev.shown
-        prev.moreTop = 0
-        prev.shown = true
-
-    $scope.showMoreBottom = (container) ->
-      $event?.stopPropagation()
-      rendered = container.renderOrder
-      pos = rendered.indexOf(container)
-      container.moreBottom = 0
-
-      while ++pos < rendered.length
-        next = rendered[pos]
-        next.moreTop = 0
+    $scope.showMore = (container) ->
+      {order, renderList} = container
+      container.more = 0
+      while ++order < renderList.length
+        next = renderList[order]
         break if next.shown
-        next.moreBottom = 0
+        next.more = 0
         next.shown = true
 
-    matches = null
+    matchSet = null
     orderBy = $filter('orderBy')
 
-    render = (thread, last, current) ->
-      current.renderOrder = thread.renderOrder
-      current.shown = matches[current.message?.id]?
+    makeSet = (arr) ->
+      arr.reduce ((set, item) -> set[item?.id or item] = true; set), {}
 
-      order = thread.renderOrder.length
-      thread.renderOrder.push current
+    render = (acc, container) ->
+      {lastShown, renderList} = acc
+      container.more = 0
+      container.order = renderList.length
+      container.renderList = renderList
+      container.shown = matchSet is null or matchSet[container.message?.id]?
+      renderList.push container
 
-      if current.shown
-        current.renderOrder[last].moreBottom = 0
-        current.moreTop = order - last - 1
-        current.moreBottom = 0
-        last = order
-      else if last != order
-        current.moreTop = 0
-        current.moreBottom = 0
-        current.renderOrder[last].moreBottom++
+      if container.shown
+        acc.matchCount++
+        acc.lastShown = container
+      else if lastShown
+        lastShown.more++
+      else
+        acc.lastShown = container
 
-      sorted = orderBy (current.children or []), 'message.updated'
-      sorted.reduce(angular.bind(null, render, thread), last)
+      sorted = orderBy container.children, 'message.updated'
+      sorted.reduce render, acc
 
     refresh = ->
       annotations = $scope.threading.root.flattenChildren() or []
-      matches = {}
-      rendered = {}
       query = $routeParams.q
 
       if query
-        # Get the set of matches
         filters = searchfilter.generateFacetedFilter query
-        for match in viewFilter.filter annotations, filters
-          matches[match] = true
-
-        # Find the top posts and render them
-        for annotation in annotations
-          {id, references} = annotation
-          if typeof(references) == 'string' then references = [references]
-          if matches[id]?
-            top = references?[0] or id
-            continue if rendered[top]
-            container = $scope.threading.getContainer(top)
-            container.renderOrder = []
-            render container, 0, container
-            container.shown = true
-            rendered[id] = true
-          else
-            container = $scope.threading.getContainer(annotation.id)
-            container.shown = false
+        match = viewFilter.filter annotations, filters
+        matchSet = makeSet match
+        $scope.results = match.length
+        delete $scope.selectedAnnotations
       else
-        for annotation in annotations
-          container = $scope.threading.getContainer(annotation.id)
-          angular.extend container,
-            moreTop: 0
-            moreBottom: 0
-            renderOrder: null
-            shown: true
+        matchSet = null
 
-      $scope.matches = Object.keys(matches).length
-      delete $scope.selectedAnnotations
+      for container in $scope.threading.root.children
+        acc = matchCount: 0, renderList: []
+        container.shown = (render acc, container).matchCount > 0
 
-
-    $scope.$on '$routeChangeSuccess', refresh
     $scope.$on '$routeUpdate', refresh
+    refresh()
 
 
 angular.module('h.controllers', imports)
