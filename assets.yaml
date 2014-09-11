@@ -218,6 +218,9 @@ sockjs:
   output: scripts/vendor/sockjs.min.js
   contents:
     - h:static/scripts/vendor/sockjs-0.3.4.js
+tinymce:
+  contents:
+    - h:static/scripts/vendor/tinymce/tinymce.min.js
 uuid:
   filters: uglifyjs
   output: scripts/vendor/uuid.min.js
@@ -263,6 +266,7 @@ app:
     - auth_js
     - app_css
     - app_js
+    - tinymce
 
 app_js:
   output: scripts/hypothesis-app.js

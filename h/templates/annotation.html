@@ -16,7 +16,7 @@
 
     <!-- User -->
     <span ng-switch-default class="indicators">
-      <username data-user="model.user" ng-show="!editing"></username>
+      <username data-user="model.user"></username>
       <i class="small icon-locked"
          ng-show="form.privacy.$viewValue != 'Public' && !editing"></i>
       <i class="small icon-highlighter2"
@@ -57,20 +57,8 @@
   </div>
 
   <!-- Body Write / Preview Tabs -->
-  <div class="tabbable"
-       ng-model="preview"
-       ng-show="editing">
-    <a class="icon-markdown"
-       target="_blank"
-       title="Parsed as Markdown"
-       href="https://guides.github.com/features/mastering-markdown/" />
-    <div class="tab-pane" data-value="no" data-title="Write">
-      <markdown class="form-field" ng-model="model.text" name="text" />
-    </div>
-    <div class="tab-pane" data-value="yes" data-title="Preview">
-      <p class="form-field" ng-show="!model.text">Nothing to preview.</p>
-      <markdown class="form-field" ng-model="model.text" ng-readonly="true" name="text" />
-    </div>
+  <div class="wysiwigeditor" ng-show="editing">
+    <textarea ui-tinymce ng-model="model.text" ng-required="required" />
   </div>
 
   <div ng-hide="editing" ng-switch="mode">
@@ -78,10 +66,11 @@
               ng-model="model.highlightText"
               ng-switch-when="'search'" />
     <markdown class="form-field" name="text"
-              ng-model="model.text"
               ng-readonly="true"
+              ng-model="model.text"
               ng-switch-default />
   </div>
+
 
   <!-- Tags -->
   <div class="form-field" ng-show="editing">

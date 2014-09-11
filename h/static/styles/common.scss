@@ -396,3 +396,14 @@ html {
     }
   }
 }
+
+// TinyMCE ////////////
+.wysiwigeditor {
+  margin-bottom: 10px;
+
+  div {
+  &:focus {
+    @include form-input-focus;
+  }
+}
+}

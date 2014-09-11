@@ -86,6 +86,95 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   templateUrl: 'markdown.html'
 ]
 
+uiTinymce = ->
+  # Code based on https://github.com/angular-ui/ui-tinymce (MIT License)
+  # The tiny MCE editor can be configured here. See http://www.tinymce.com
+  # for full configuration options.
+  uiTinymceConfig = {
+    plugins: ["compat3x", "paste", "link", "autoresize", "image", "fullscreen", "latex"]
+    statusbar : false
+    menubar : false
+    image_dimensions: false
+    autoresize_max_height: 500
+    link_title: false
+    browser_spellcheck : true
+    target_list: false
+    style_formats: [
+      {title: "Headers", items: [
+          {title: "Header 1", format: "h1"},
+          {title: "Header 2", format: "h2"},
+          {title: "Header 3", format: "h3"},
+          {title: "Header 4", format: "h4"},
+          {title: "Header 5", format: "h5"},
+          {title: "Header 6", format: "h6"}
+      ]},
+      {title: "Inline", items: [
+          {title: "Bold", icon: "bold", format: "bold"},
+          {title: "Italic", icon: "italic", format: "italic"},
+          {title: "Underline", icon: "underline", format: "underline"},
+          {title: "Strikethrough", icon: "strikethrough", format: "strikethrough"},
+          {title: "Superscript", icon: "superscript", format: "superscript"},
+          {title: "Subscript", icon: "subscript", format: "subscript"},
+          {title: "Code", icon: "code", format: "code"}
+      ]},
+      {title: "Blocks", items: [
+          {title: "Paragraph", format: "p"},
+          {title: "Blockquote", format: "blockquote"},
+          {title: "Div", format: "div"},
+          {title: "Pre", format: "pre"}
+      ]}
+    ]
+    toolbar: "styleselect | bold italic | link image | fullscreen | latex"
+  }
+  generatedIds = 0
+  return (
+    require: "?ngModel"
+    link: (scope, elm, attrs, ngModel) ->
+      expression = undefined
+      options = undefined
+      tinyInstance = undefined
+      attrs.$set "id", "uiTinymce" + generatedIds++  unless attrs.id
+      options =
+        setup: (ed) ->
+          ed.on "init", (args) ->
+            ngModel.$render()
+            return
+
+          ed.on "ExecCommand", (e) ->
+            ed.save()
+            ngModel.$setViewValue elm.val()
+            scope.$apply()  unless scope.$$phase
+            return
+
+          ed.on "KeyUp", (e) ->
+            console.log ed.isDirty()
+            ed.save()
+            ngModel.$setViewValue elm.val()
+            scope.$apply()  unless scope.$$phase
+            return
+
+          return
+
+        mode: "exact"
+        elements: attrs.id
+
+      if attrs.uiTinymce
+        expression = scope.$eval(attrs.uiTinymce)
+      else
+        expression = {}
+      angular.extend options, uiTinymceConfig, expression
+      setTimeout ->
+        tinymce.init options
+        return
+
+      ngModel.$render = ->
+        tinyInstance = tinymce.get(attrs.id)  unless tinyInstance
+        tinyInstance.setContent ngModel.$viewValue or ""  if tinyInstance
+        return
+
+      return
+  )
+
 
 privacy = ->
   levels = ['Public', 'Only Me']
@@ -383,6 +472,7 @@ angular.module('h.directives', ['ngSanitize', 'ngTagsInput'])
 .directive('formValidate', formValidate)
 .directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
+.directive('uiTinymce', uiTinymce)
 .directive('privacy', privacy)
 .directive('recursive', recursive)
 .directive('tabReveal', tabReveal)
