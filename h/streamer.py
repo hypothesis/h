@@ -156,7 +156,7 @@ class FilterToElasticFilter(object):
             self.query['size'] = self.filter['past_data']['hits']
 
         if len(self.filter_scripts_to_add):
-            if not 'filter' in self.query:
+            if 'filter' not in self.query:
                 self.query['filter'] = {}
             scripts = ' AND '.join(self.filter_scripts_to_add)
             self.query['filter']['script'] = '"script": ' + scripts
