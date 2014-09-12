@@ -161,13 +161,15 @@ AnnotationController = [
       if updated then drafts.remove model
       vm.render()
 
-    # Save highlights once logged in.
+    # Update once logged in.
     $scope.$watch (-> model.user), (user) ->
-      return unless highlight and not model.references
-      if user
-        annotator.publish 'annotationCreated', model
+      if highlight and not model.references
+        if user
+          annotator.publish 'annotationCreated', model
+        else
+          drafts.add model, -> vm.revert()
       else
-        drafts.add model, -> vm.revert()
+        vm.render()
 
     # Initialize brand now annotations
     unless model.id?
