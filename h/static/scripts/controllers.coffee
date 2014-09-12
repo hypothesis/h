@@ -31,6 +31,9 @@ class App
     # Resolved once the API service has been discovered.
     storeReady = $q.defer()
 
+    # Whether there is MathML or LaTex on the page to be rendered by MathJax.
+    $rootScope.math = false
+
     applyUpdates = (action, data) ->
       """Update the application with new data from the websocket."""
       return unless data?.length

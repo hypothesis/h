@@ -55,18 +55,31 @@ formValidate = ->
       ctrl.submit()
 
 
-markdown = ['$filter', '$timeout', ($filter, $timeout) ->
+markdown = ['$filter', '$timeout', '$rootScope', ($filter, $timeout, $rootScope) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
     input = elem.find('textarea')
     output = elem.find('div')
 
+    checkforMath = (textToCheck) ->
+      scope.mathOnPage = $rootScope.math
+      # MathJax uses "$$" in its markup.
+      regEx = /\$\$/
+      return textToCheck.search regEx
+
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
       input.val (ctrl.$viewValue or '')
       scope.rendered = ($filter 'converter') (ctrl.$viewValue or '')
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub]) unless scope.readonly
+      if checkforMath(scope.rendered) != -1
+        $rootScope.math = true
+        if !scope.mathOnPage # Check to see if that we haven't loaded MathJax already.
+          $.ajax { 
+            url:"https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+            dataType: 'script'
+          }
+      MathJax?.Hub.Queue(['Typeset', MathJax.Hub]) unless scope.readonly
       
     # React to the changes to the text area
     input.bind 'blur change keyup', ->

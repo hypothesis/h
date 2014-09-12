@@ -190,9 +190,6 @@ jwz:
   output: scripts/vendor/jwz.min.js
   contents:
     - h:static/scripts/vendor/jwz.js
-mathjax:
-  contents:
-    - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
 momentjs:
   contents:
     - filters: uglifyjs
@@ -256,7 +253,6 @@ app:
     - annotator_threading
     - jschannel
     - jwz
-    - mathjax
     - momentjs
     - pagedown
     - autofill
