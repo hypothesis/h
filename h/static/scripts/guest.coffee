@@ -191,8 +191,12 @@ class Annotator.Guest extends Annotator
 
   _setupWrapper: ->
     @wrapper = @element
-    .on 'click', =>
-      unless @selectedTargets?.length
+    .on 'click', (event) =>
+      if @selectedTargets?.length
+        if @tool is 'highlight'
+          # Create the annotation
+          annotation = this.setupAnnotation(this.createAnnotation())
+      else
         @hideFrame()
     this
 
@@ -269,23 +273,14 @@ class Annotator.Guest extends Annotator
     return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
 
   onSuccessfulSelection: (event, immediate) ->
+    return unless @canAnnotate
     if @tool is 'highlight'
-
-      # Describe the selection with targets
-      @selectedTargets = (@_getTargetFromSelection(s) for s in event.segments)
-
       # Do we really want to make this selection?
       return false unless this.confirmSelection()
-
-      # Create the annotation
-      annotation = {inject: true}
-      this.publish 'beforeAnnotationCreated', annotation
-
-      # Set up the annotation
-      annotation = this.setupAnnotation annotation
-      this.publish 'annotationCreated', annotation
-    else
-      super
+      # Describe the selection with targets
+      @selectedTargets = (@_getTargetFromSelection(s) for s in event.segments)
+      return
+    super
 
   onAnchorMouseover: (event) ->
     this.addEmphasis event.data.getAnnotations event
@@ -333,18 +328,7 @@ class Annotator.Guest extends Annotator
         @element.removeClass markerClass
 
   addComment: ->
-    sel = @selectedTargets   # Save the selection
-    # Nuke the selection, since we won't be using that.
-    # We will attach this to the end of the document.
-    # Our override for setupAnnotation will add that highlight.
-    @selectedTargets = []
-    this.onAdderClick()     # Open editor (with 0 targets)
-    @selectedTargets = sel # restore the selection
-
-  # Is this annotation a comment?
-  isComment: (annotation) ->
-    # No targets and no references means that this is a comment.
-    not (annotation.inject or annotation.references?.length or annotation.target?.length)
+    this.showEditor(this.createAnnotation())
 
   # Open the sidebar
   showFrame: ->
@@ -359,10 +343,12 @@ class Annotator.Guest extends Annotator
       method: 'addToken'
       params: token
 
+  onAdderMousedown: angular.noop
+
   onAdderClick: (event) =>
-    event?.preventDefault()
+    event.preventDefault()
+    event.stopPropagation()
     @adder.hide()
-    @inAdderClick = false
     annotation = this.setupAnnotation(this.createAnnotation())
     this.showEditor(annotation)
 

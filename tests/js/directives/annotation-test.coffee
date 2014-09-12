@@ -4,6 +4,7 @@ describe 'h.directives.annotation', ->
   $scope = null
   annotation = null
   createController = null
+  flash = null
 
   beforeEach module('h.directives')
 
@@ -15,11 +16,13 @@ describe 'h.directives.annotation', ->
         title: 'A special document'
       target: [{}]
       uri: 'http://example.com'
+    flash = sinon.spy()
 
     createController = ->
       $controller 'AnnotationController',
         $scope: $scope
         annotator: {plugins: {}, publish: sinon.spy()}
+        flash: flash
 
   it 'provides a document title', ->
     controller = createController()

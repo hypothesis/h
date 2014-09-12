@@ -17,8 +17,8 @@ COLLAPSED_CLASS = 'thread-collapsed'
 # replying and sharing.
 ###
 ThreadController = [
-  '$attrs', '$element', '$parse', '$scope', 'render',
-  ($attrs,   $element,   $parse,   $scope,   render) ->
+  '$attrs', '$element', '$parse', '$scope', 'flash', 'render',
+  ($attrs,   $element,   $parse,   $scope,   flash,   render) ->
     @container = null
     @collapsed = false
     @hover = false
@@ -33,6 +33,8 @@ ThreadController = [
     # Creates a new message in reply to this thread.
     ###
     this.reply = ->
+      unless @container.message.id
+        return flash 'error', 'You must publish this before replying to it.'
       if @collapsed then this.toggleCollapsed()
 
       # Extract the references value from this container.
@@ -71,6 +73,8 @@ ThreadController = [
     # Toggle the shared property.
     ###
     this.toggleShared = ->
+      unless @container.message.id
+        return flash 'error', 'You must publish this before sharing it.'
       @shared = not @shared
       if @shared
         # Focus and select the share link

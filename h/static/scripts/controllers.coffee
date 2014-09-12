@@ -9,6 +9,32 @@ imports = [
 ]
 
 
+# User authorization function for the Permissions plugin.
+authorizeAction = (action, annotation, user) ->
+  if annotation.permissions
+    tokens = annotation.permissions[action] || []
+
+    if tokens.length == 0
+      # Empty or missing tokens array: only admin can perform action.
+      return false
+
+    for token in tokens
+      if user == token
+        return true
+      if token == 'group:__world__'
+        return true
+
+    # No tokens matched: action should not be performed.
+    return false
+
+  # Coarse-grained authorization
+  else if annotation.user
+    return user and user == annotation.user
+
+  # No authorization info on annotation: free-for-all!
+  true
+
+
 class App
   this.$inject = [
     '$location', '$q', '$route', '$scope', '$timeout',
@@ -75,18 +101,20 @@ class App
       """Initialize the storage component."""
       Store = plugins.Store
       delete plugins.Store
-      annotator.addPlugin 'Store', annotator.options.Store
 
-      $scope.store = plugins.Store
+      if $scope.persona or annotator.socialView.name is 'none'
+        annotator.addPlugin 'Store', annotator.options.Store
 
-      _id = $route.current.params.id
-      _promise = null
+        $scope.store = plugins.Store
 
-      # Load any initial annotations that should be displayed
-      if _id
-        # XXX: Two requests here is less than ideal
-        plugins.Store.loadAnnotationsFromSearch({_id}).then ->
-          plugins.Store.loadAnnotationsFromSearch({references: _id})
+        _id = $route.current.params.id
+        _promise = null
+
+        # Load any initial annotations that should be displayed
+        if _id
+          # XXX: Two requests here is less than ideal
+          plugins.Store.loadAnnotationsFromSearch({_id}).then ->
+            plugins.Store.loadAnnotationsFromSearch({references: _id})
 
       return unless Store
       Store.destroy()
@@ -112,7 +140,7 @@ class App
       cull = (acc, annotation) ->
         if annotator.tool is 'highlight' and annotation.user != user
           acc.drop.push annotation
-        else if plugins.Permissions.authorize('read', annotation, user)
+        else if authorizeAction 'read', annotation, user
           acc.keep.push annotation
         else
           acc.drop.push annotation
@@ -120,7 +148,11 @@ class App
 
       {keep, drop} = Store.annotations.reduce cull, {keep: [], drop: []}
       Store.annotations = []
-      plugins.Store.annotations = keep
+
+      if plugins.Store?
+        plugins.Store.annotations = keep
+      else
+        drop = drop.concat keep
 
       # Clean up the ones that should be removed.
       do cleanup = (drop) ->
@@ -177,10 +209,6 @@ class App
       _dfdSock.promise
 
     onlogin = (assertion) ->
-      # Delete any old Auth plugin.
-      plugins.Auth?.destroy()
-      delete plugins.Auth
-
       # Configure the Auth plugin with the issued assertion as refresh token.
       annotator.addPlugin 'Auth',
         tokenUrl: documentHelpers.absoluteURI(
@@ -188,22 +216,27 @@ class App
 
       # Set the user from the token.
       plugins.Auth.withToken (token) ->
-        plugins.Permissions._setAuthFromToken(token)
-        loggedInUser = plugins.Permissions.user.replace /^acct:/, ''
+        annotator.addPlugin 'Permissions',
+          user: token.userId
+          userAuthorize: authorizeAction
+          permissions:
+            read: [token.userId]
+            update: [token.userId]
+            delete: [token.userId]
+            admin: [token.userId]
+        loggedInUser = token.userId.replace /^acct:/, ''
         reset()
 
     onlogout = ->
+      return unless drafts.discard()
+
       plugins.Auth?.element.removeData('annotator:headers')
+      plugins.Auth?.destroy()
       delete plugins.Auth
 
-      plugins.Permissions.setUser(null)
-
-      # XXX: Temporary workaround until Annotator v2.0 or v1.2.10
-      plugins.Permissions.options.permissions =
-        read: []
-        update: []
-        delete: []
-        admin: []
+      plugins.Permissions?.setUser(null)
+      plugins.Permissions?.destroy()
+      delete plugins.Permissions
 
       loggedInUser = null
       reset()
@@ -212,11 +245,9 @@ class App
       # Do not rely on the identity service to invoke callbacks within an
       # angular digest cycle.
       $scope.$evalAsync ->
-        if $scope.ongoingHighlightSwitch
-          $scope.ongoingHighlightSwitch = false
-          annotator.setTool 'highlight'
-        else
-          annotator.setTool 'comment'
+        # Update any edits in progress.
+        for draft in drafts.all()
+          annotator.publish 'beforeAnnotationCreated', draft
 
         # Convert the verified user id to the format used by the API.
         persona = loggedInUser
@@ -231,19 +262,6 @@ class App
           initStore()
           initUpdater()
 
-    annotator.subscribe 'annotationCreated', (annotation) ->
-      if annotation is $scope.ongoingEdit?.message
-        delete $scope.ongoingEdit
-        for p in providers
-          p.channel.notify method: 'onEditorSubmit'
-          p.channel.notify method: 'onEditorHide'
-
-    annotator.subscribe 'annotationDeleted', (annotation) ->
-      if annotation is $scope.ongoingEdit?.message
-        delete $scope.ongoingEdit
-        for p in providers
-          p.channel.notify method: 'onEditorHide'
-
     annotator.subscribe 'serviceDiscovery', (options) ->
       annotator.options.Store ?= {}
       angular.extend annotator.options.Store, options
@@ -253,21 +271,11 @@ class App
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
-
-      if $scope.persona
-        initStore()
-      else if newValue is 'single-player'
-        identity.request()
-
-    $scope.$watch 'frame.visible', (newValue, oldValue) ->
-      if newValue
+      initStore()
+      if newValue is 'single-player' and not $scope.persona
         annotator.show()
-        annotator.host.notify method: 'showFrame'
-      else if oldValue
-        annotator.hide()
-        annotator.host.notify method: 'hideFrame'
-        for p in annotator.providers
-          p.channel.notify method: 'setActiveHighlights'
+        flash 'info',
+          'You will need to sign in for your highlights to be saved.'
 
     $scope.$watch 'sort.name', (name) ->
       return unless name
@@ -299,8 +307,6 @@ class App
         sock.send(JSON.stringify(sockmsg))
 
     $scope.authTimeout = ->
-      delete $scope.ongoingEdit
-      $scope.ongoingHighlightSwitch = false
       flash 'info',
         'For your security, the forms have been reset due to inactivity.'
 
@@ -310,7 +316,6 @@ class App
       $scope.selectedAnnotationsCount = 0
 
     $scope.baseURI = documentHelpers.baseURI
-    $scope.frame = visible: false
     $scope.id = identity
 
     $scope.model = persona: undefined
@@ -324,8 +329,7 @@ class App
 
       update: (query) ->
         unless angular.equals $location.search()['q'], query
-          if drafts.discard()
-            $location.search('q', query or null)
+          $location.search('q', query or null)
 
     $scope.socialView = annotator.socialView
     $scope.sort = name: 'Location'
@@ -372,8 +376,6 @@ class Viewer
     $scope.activate = (annotation) ->
       if angular.isObject annotation
         highlights = [annotation.$$tag]
-      else if $scope.ongoingEdit
-        highlights = [$scope.ongoingEdit.message.$$tag]
       else
         highlights = []
       for p in annotator.providers
@@ -383,7 +385,7 @@ class Viewer
 
     $scope.shouldShowThread = (container) ->
       if $routeParams.q
-        container.shown
+        container.shown or not container.message.id
       else if $scope.selectedAnnotations?
         if container.parent is $scope.threading.root
           $scope.selectedAnnotations[container.message?.id]
@@ -409,10 +411,11 @@ class Viewer
 
     render = (acc, container) ->
       {lastShown, renderList} = acc
+      id = container.message?.id
       container.more = 0
       container.order = renderList.length
       container.renderList = renderList
-      container.shown = matchSet is null or matchSet[container.message?.id]?
+      container.shown = matchSet is null or not id or matchSet[id]
       renderList.push container
 
       if container.shown

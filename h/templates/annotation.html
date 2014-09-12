@@ -54,20 +54,19 @@
              ng-model="vm.annotation.updated"></fuzzytime>
 
   <!-- More actions -->
-  <div class="annotation-actions pull-right small" ng-if="!vm.editing">
-    <div class="dropdown">
-      <i class="dropdown-toggle icon-triangle"
-         role="button"
-         title="More actions"></i>
-      <ul class="dropdown-menu" role="menu">
-        <li ng-show="vm.authorize('update')"
-            ng-click="vm.edit()"
-            ><i class="icon-copy"></i> Edit</li>
-        <li ng-show="vm.authorize('delete')"
-            ng-click="vm.delete()"
-            ><i class="icon-x"></i> Delete…</li>
-      </ul>
-    </div>
+  <div class="annotation-actions dropdown pull-right small"
+       ng-if="vm.annotation.id && !vm.editing">
+    <i class="dropdown-toggle icon-triangle"
+       role="button"
+       title="More actions"></i>
+    <ul class="dropdown-menu" role="menu">
+      <li ng-show="vm.authorize('update')"
+          ng-click="vm.edit()"
+          ><i class="icon-copy"></i> Edit</li>
+      <li ng-show="vm.authorize('delete')"
+          ng-click="vm.delete()"
+          ><i class="icon-x"></i> Delete…</li>
+    </ul>
   </div>
 </header>
 

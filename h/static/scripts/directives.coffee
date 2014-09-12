@@ -225,8 +225,11 @@ repeatAnim = ->
 
 username = ['$filter', '$window', ($filter, $window) ->
   link: (scope, elem, attr) ->
-    scope.$watch 'user', ->
-      scope.uname = $filter('persona')(scope.user, 'username')
+    scope.$watch 'user', (user) ->
+      if user
+        scope.uname = $filter('persona')(scope.user, 'username')
+      else
+        scope.uname =  '<nobody>'
 
     scope.uclick = (event) ->
       event.preventDefault()

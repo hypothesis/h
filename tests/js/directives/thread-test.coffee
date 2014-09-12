@@ -7,6 +7,7 @@ describe 'h.directives.thread', ->
   $element = null
   container = null
   createController = null
+  flash = null
 
   beforeEach module('h.directives')
 
@@ -16,13 +17,14 @@ describe 'h.directives.thread', ->
       $removeClass: sinon.spy()
       thread: 'thread'
     $scope = $rootScope.$new()
+    flash = sinon.spy()
     render = (value, cb) -> cb(value)
 
     createController = ->
       $scope.thread = mail.messageContainer()
       $scope.thread.message = id: 'foo', uri: 'http://example.com/'
       $element = angular.element('<div thread="thread"><input /></div>')
-      $controller 'ThreadController', {$attrs, $element, $scope, render}
+      $controller 'ThreadController', {$attrs, $element, $scope, flash, render}
 
   afterEach ->
     sandbox.restore()

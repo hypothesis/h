@@ -21,6 +21,7 @@ renderFactory = ['$$rAF', ($$rAF) ->
 
 class Hypothesis extends Annotator
   events:
+    'beforeAnnotationCreated': 'digest'
     'annotationCreated': 'digest'
     'annotationDeleted': 'digest'
     'annotationUpdated': 'digest'
@@ -30,34 +31,6 @@ class Hypothesis extends Annotator
   options:
     noDocAccess: true
     Discovery: {}
-    Permissions:
-      userAuthorize: (action, annotation, user) ->
-        if annotation.permissions
-          tokens = annotation.permissions[action] || []
-
-          if tokens.length == 0
-            # Empty or missing tokens array: only admin can perform action.
-            return false
-
-          for token in tokens
-            if this.userId(user) == token
-              return true
-            if token == 'group:__world__'
-              return true
-            if token == 'group:__authenticated__' and this.user?
-              return true
-
-          # No tokens matched: action should not be performed.
-          return false
-
-        # Coarse-grained authorization
-        else if annotation.user
-          return user and this.userId(user) == this.userId(annotation.user)
-
-        # No authorization info on annotation: free-for-all!
-        true
-      showEditPermissionsCheckbox: false,
-      showViewPermissionsCheckbox: false,
     Threading: {}
 
   # Internal state
@@ -69,8 +42,10 @@ class Hypothesis extends Annotator
 
   # Here as a noop just to make the Permissions plugin happy
   # XXX: Change me when Annotator stops assuming things about viewers
+  editor:
+    addField: angular.noop
   viewer:
-    addField: (-> )
+    addField: angular.noop
 
   this.$inject = ['$document', '$window']
   constructor:   ( $document,   $window ) ->
@@ -146,27 +121,6 @@ class Hypothesis extends Annotator
       unless annotation.highlights?
         annotation.highlights = []
 
-      # Register it with the draft service, except when it's an injection
-       # This is an injection. Delete the marker.
-      if annotation.inject
-        # Set permissions for private
-        permissions = @plugins.Permissions
-        userId = permissions.options.userId permissions.user
-        annotation.permissions =
-          read: [userId]
-          admin: [userId]
-          update: [userId]
-          delete: [userId]
-
-    # Set default owner permissions on all annotations
-    for event in ['beforeAnnotationCreated', 'beforeAnnotationUpdated']
-      this.subscribe event, (annotation) =>
-        permissions = @plugins.Permissions
-        if permissions.user?
-          userId = permissions.options.userId(permissions.user)
-          for action, roles of annotation.permissions
-            unless userId in roles then roles.push userId
-
   _setupXDM: (options) ->
     # jschannel chokes FF and Chrome extension origins.
     if (options.origin.match /^chrome-extension:\/\//) or
@@ -187,9 +141,7 @@ class Hypothesis extends Annotator
 
     .bind('back', =>
       # Navigate "back" out of the interface.
-      @element.scope().$apply =>
-        return if @element.scope().ongoingEdit
-        this.hide()
+      @element.scope().$apply => this.hide()
     )
 
     .bind('open', =>
@@ -294,17 +246,15 @@ class Hypothesis extends Annotator
     this
 
   showEditor: (annotation) ->
-    scope = @element.scope()
-    scope.ongoingEdit = mail.messageContainer(annotation)
-    delete scope.selectedAnnotations
+    delete @element.scope().selectedAnnotations
     this.show()
     this
 
   show: ->
-    @element.scope().frame.visible = true
+    @host.notify method: 'showFrame'
 
   hide: ->
-    @element.scope().frame.visible = false
+    @host.notify method: 'hideFrame'
 
   digest: ->
     @element.scope().$evalAsync angular.noop
@@ -375,18 +325,8 @@ class Hypothesis extends Annotator
 
   setTool: (name) ->
     return if name is @tool
-    return unless @element.injector().get('drafts').discard()
 
     if name is 'highlight'
-      # Check login state first
-      unless @plugins.Permissions?.user
-        scope = @element.scope()
-        # If we are not logged in, start the auth process
-        scope.ongoingHighlightSwitch = true
-        @element.injector().get('identity').request()
-        this.show()
-        return
-
       this.socialView.name = 'single-player'
     else
       this.socialView.name = 'none'
@@ -409,45 +349,47 @@ class Hypothesis extends Annotator
 
 
 class DraftProvider
-  drafts: null
+  _drafts: null
 
   constructor: ->
-    this.drafts = []
+    this._drafts = []
 
   $get: -> this
 
-  add: (draft, cb) -> @drafts.push {draft, cb}
+  all: -> draft for {draft} in @_drafts
+
+  add: (draft, cb) -> @_drafts.push {draft, cb}
 
   remove: (draft) ->
     remove = []
-    for d, i in @drafts
+    for d, i in @_drafts
       remove.push i if d.draft is draft
     while remove.length
-      @drafts.splice(remove.pop(), 1)
+      @_drafts.splice(remove.pop(), 1)
 
   contains: (draft) ->
-    for d in @drafts
+    for d in @_drafts
       if d.draft is draft then return true
     return false
 
-  isEmpty: -> @drafts.length is 0
+  isEmpty: -> @_drafts.length is 0
 
   discard: ->
     text =
-      switch @drafts.length
+      switch @_drafts.length
         when 0 then null
         when 1
           """You have an unsaved reply.
 
           Do you really want to discard this draft?"""
         else
-          """You have #{@drafts.length} unsaved replies.
+          """You have #{@_drafts.length} unsaved replies.
 
           Do you really want to discard these drafts?"""
 
-    if @drafts.length is 0 or confirm text
-      discarded = @drafts.slice()
-      @drafts = []
+    if @_drafts.length is 0 or confirm text
+      discarded = @_drafts.slice()
+      @_drafts = []
       d.cb?() for d in discarded
       true
     else

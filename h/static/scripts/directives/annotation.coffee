@@ -14,7 +14,6 @@ extractURIComponent = (uri, component) ->
 # A non-public annotation requires only a target (e.g. a highlight).
 validate = (value) ->
   return unless angular.isObject value
-  return unless value.user or value.deleted
   worldReadable = 'group:__world__' in (value.permissions?.read or [])
   (value.tags?.length or value.text?.length) or
   (value.target?.length and not worldReadable)
@@ -38,8 +37,8 @@ validate = (value) ->
 # {@link annotator annotator service} for persistence.
 ###
 AnnotationController = [
-  '$scope', 'annotator', 'drafts',
-  ($scope,   annotator,   drafts) ->
+  '$scope', 'annotator', 'drafts', 'flash'
+  ($scope,   annotator,   drafts,   flash) ->
     @annotation = {}
     @action = 'view'
     @document = null
@@ -47,7 +46,8 @@ AnnotationController = [
     @editing = false
     @embedded = false
 
-    model = null
+    highlight = annotator.tool is 'highlight'
+    model = $scope.annotationGet()
     original = null
     vm = this
 
@@ -80,7 +80,7 @@ AnnotationController = [
     # @description Switches the view to an editor.
     ###
     this.edit = ->
-      drafts.add model, => this.revert()
+      drafts.add model, -> vm.revert()
       @action = if model.id? then 'edit' else 'create'
       @editing = true
       @preview = 'no'
@@ -105,7 +105,10 @@ AnnotationController = [
     # @description Saves any edits and returns to the viewer.
     ###
     this.save = ->
-      return unless validate(@annotation)
+      unless model.user or model.deleted
+        return flash 'info', 'Please sign in to save annotations.'
+      unless validate(@annotation)
+        return flash 'info', 'Please add text or a tag before publishing.'
       @editing = false
 
       angular.extend model, @annotation,
@@ -124,11 +127,6 @@ AnnotationController = [
     # changes. Initializes brand new annotations and
     ###
     this.render = ->
-      # Initialize brand new annotations.
-      unless model.id? or drafts.contains model
-        annotator.publish 'beforeAnnotationCreated', model
-        this.edit()
-
       # Extend the view model with a copy of the domain model.
       # Note that copy is used so that deep properties aren't shared.
       angular.extend @annotation, angular.copy model
@@ -158,12 +156,26 @@ AnnotationController = [
     $scope.$on 'threadCollapse', (event) ->
       event.preventDefault() if vm.editing
 
-    # Render on updates
-    $scope.$watchCollection (-> $scope.annotationGet()), (value) ->
-      model = value
-      if value?
-        if value.updated then drafts.remove model
-        vm.render()
+    # Render on updates.
+    $scope.$watch (-> model.updated), (updated) ->
+      if updated then drafts.remove model
+      vm.render()
+
+    # Save highlights once logged in.
+    $scope.$watch (-> model.user), (user) ->
+      return unless highlight and not model.references
+      if user
+        annotator.publish 'annotationCreated', model
+      else
+        drafts.add model, -> vm.revert()
+
+    # Initialize brand now annotations
+    unless model.id?
+      if model.references
+        annotator.publish 'beforeAnnotationCreated', model
+        vm.edit()
+      else if not highlight
+        vm.edit()
 
     this
 ]
