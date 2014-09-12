@@ -1,20 +1,18 @@
-# The render function accepts a scope and a data object and schedule the scope
-# to be updated with the provided data and digested before the next repaint
-# using window.requestAnimationFrame() (or a fallback). If the resulting digest
-# causes a subsequent invocation of the render function the digest rate is
-# effectively limited to ensure a responsive user interface.
+# The render service is a function wrapper for scheduling sequential updates
+# on window.requestAnimationFrame(). Invoke the function with a callback that
+# and the callback will be queued. One callback is handled per animation frame.
+# Use this service to schedule DOM-intensive digests.
 renderFactory = ['$$rAF', ($$rAF) ->
   renderFrame = null
   renderQueue = []
 
   render = ->
     return renderFrame = null if renderQueue.length is 0
-    {data, cb} = renderQueue.shift()
+    do renderQueue.shift()
     $$rAF(render)
-    cb(data)
 
-  (data, cb) ->
-    renderQueue.push {data, cb}
+  (cb) ->
+    renderQueue.push cb
     renderFrame = $$rAF(render) unless renderFrame
 ]
 

@@ -85,8 +85,8 @@ ThreadController = [
     $element.hide()
 
     # Render the view in a future animation frame
-    render $parse($attrs.thread)($scope), (value) ->
-      vm.container = value
+    render ->
+      vm.container = $parse($attrs.thread)($scope)
       $scope.$digest()
       $element.show()
 

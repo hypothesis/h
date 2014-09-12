@@ -18,7 +18,7 @@ describe 'h.directives.thread', ->
       thread: 'thread'
     $scope = $rootScope.$new()
     flash = sinon.spy()
-    render = (value, cb) -> cb(value)
+    render = (cb) -> cb()
 
     createController = ->
       $scope.thread = mail.messageContainer()
