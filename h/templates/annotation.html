@@ -76,6 +76,7 @@
   <strong ng-switch-when="true">You may provide an explanation here.</strong>
   <div count="vm.annotation.text.length"
        when="{'0': '(no reason given)',
+              one: 'Reason:',
               other: 'Reason:'}"
        ng-pluralize ng-switch-default></div>
 </div>
