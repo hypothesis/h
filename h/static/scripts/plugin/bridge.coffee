@@ -9,7 +9,6 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     'annotationUpdated': 'annotationUpdated'
     'annotationDeleted': 'annotationDeleted'
     'annotationsLoaded': 'annotationsLoaded'
-    'enableAnnotating': 'enableAnnotating'
 
   # Helper method for merging info from a remote target
   @_mergeTarget: (local, remote, gateway) =>
@@ -232,10 +231,6 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       @annotator.loadAnnotations annotations
     )
 
-    .bind('enableAnnotating', (ctx, state) =>
-      @annotator.enableAnnotating state, false
-    )
-
   # Send out a beacon to let other frames know to connect to us
   _beacon: ->
     queue = [window.top]
@@ -398,8 +393,3 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       params: annotations
       callback: cb
     this
-
-  enableAnnotating: (state) ->
-    this._notify
-      method: 'enableAnnotating'
-      params: state

@@ -246,16 +246,6 @@ class Annotator.Guest extends Annotator
       method: "showEditor"
       params: annotation.$$tag
 
-  addEmphasis: (annotations) =>
-    @panel?.notify
-      method: "addEmphasis"
-      params: (a.$$tag for a in annotations when a.$$tag)
-
-  removeEmphasis: (annotations) =>
-    @panel?.notify
-      method: "removeEmphasis"
-      params: (a.$$tag for a in annotations when a.$$tag)
-
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
     # viewer but preserve the manipulation of the attribute `mouseIsDown` which
@@ -281,12 +271,6 @@ class Annotator.Guest extends Annotator
       @selectedTargets = (@_getTargetFromSelection(s) for s in event.segments)
       return
     super
-
-  onAnchorMouseover: (event) ->
-    this.addEmphasis event.data.getAnnotations event
-
-  onAnchorMouseout: (event) ->
-    this.removeEmphasis event.data.getAnnotations event
 
   # Select some annotations.
   #
