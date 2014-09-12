@@ -420,6 +420,15 @@ class App
         if current and next.$$route.originalPath is '/a/:id'
           $scope.reloadAnnotations()
 
+    $scope.loadMore = (number) ->
+      unless $scope.updater? then return
+      sockmsg =
+        messageType: 'more_hits'
+        moreHits: number
+
+      $scope.updater.then (sock) ->
+        sock.send(JSON.stringify(sockmsg))
+
     $scope.authTimeout = ->
       delete annotator.ongoing_edit
       $scope.ongoingHighlightSwitch = false
