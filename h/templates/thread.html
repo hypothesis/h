@@ -32,9 +32,8 @@
     <!-- Reply count -->
     <a class="reply-count small"
        href=""
-       ng-pluralize=""
-       ng-if="vm.container.children.length && !vm.container.more"
-       count="vm.container.flattenChildren().length"
+       ng-if="vm.messageCount.all > 1 && !vm.container.more"
+       ng-pluralize count="vm.messageCount.all - 1"
        when="{one: '1 reply', other: '{} replies'}" />
 
     <!-- Bottom control strip -->

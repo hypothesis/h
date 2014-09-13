@@ -23,7 +23,9 @@ ThreadController = [
     @collapsed = false
     @hover = false
     @shared = false
+    @messageCount = all: 0
 
+    parentThread = $element.parent().controller('thread')
     vm = this
 
     ###*
@@ -81,12 +83,30 @@ ThreadController = [
         $scope.$evalAsync ->
           $element.find('input').focus().select()
 
+    this.addMessageCount = do -> __cancelFrame = null; (delta, key='all') ->
+      @messageCount[key] ?= 0
+      @messageCount[key] += delta
+
+      if parentThread
+        # Bubble updates.
+        parentThread.addMessageCount delta, key
+      else
+        # Debounce digests from the top.
+        if __cancelFrame then __cancelFrame()
+        __cancelFrame = render ->
+          $scope.$digest()
+          __cancelFrame = null
+
     # Hide the view initially
     $element.hide()
+
+    $scope.$on '$destroy', ->
+      if parentThread then parentThread.addMessageCount -1
 
     # Render the view in a future animation frame
     render ->
       vm.container = $parse($attrs.thread)($scope)
+      vm.addMessageCount(if vm.container.message then 1 else 0)
       $scope.$digest()
       $element.show()
 

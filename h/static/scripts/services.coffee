@@ -1,19 +1,28 @@
-# The render service is a function wrapper for scheduling sequential updates
-# on window.requestAnimationFrame(). Invoke the function with a callback that
-# and the callback will be queued. One callback is handled per animation frame.
+###*
+# @ngdoc service
+# @name render
+# @param {function()} fn A function to execute in a future animation frame.
+# @returns {function()} A function to cancel the execution.
+# @description
+# The render service is a wrapper around `window#requestAnimationFrame()` for
+# scheduling sequential updates in successive animation frames. It has the
+# same signature as the original function, but will queue successive calls
+# for future frames so that at most one callback is handled per animation frame.
 # Use this service to schedule DOM-intensive digests.
+###
 renderFactory = ['$$rAF', ($$rAF) ->
-  renderFrame = null
-  renderQueue = []
+  cancel = null
+  queue = []
 
   render = ->
-    return renderFrame = null if renderQueue.length is 0
-    do renderQueue.shift()
+    return cancel = null if queue.length is 0
+    do queue.shift()
     $$rAF(render)
 
-  (cb) ->
-    renderQueue.push cb
-    renderFrame = $$rAF(render) unless renderFrame
+  (fn) ->
+    queue.push fn
+    unless cancel then cancel = $$rAF(render)
+    -> queue = (f for f in queue when f isnt fn)
 ]
 
 
