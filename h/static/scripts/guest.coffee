@@ -246,6 +246,10 @@ class Annotator.Guest extends Annotator
       method: "showEditor"
       params: annotation.$$tag
 
+  onAnchorMouseover: angular.noop
+  onAnchorMouseout: angular.noop
+  onAnchorMousedown: angular.noop
+
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
     # viewer but preserve the manipulation of the attribute `mouseIsDown` which
