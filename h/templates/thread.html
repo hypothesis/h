@@ -1,10 +1,10 @@
 <a href="" class="threadexp"
    title="{{vm.collapsed && 'Expand' || 'Collapse'}}"
-   ng-if="vm.container.parent.parent && shouldShowThread(vm.container)"
+   ng-if="vm.container.parent.parent"
    ><span ng-class="{'icon-plus': !!vm.collapsed,
                      'icon-minus': !vm.collapsed}"></span></a>
 
-<article ng-if="vm.container" ng-show="shouldShowThread(vm.container)">
+<article ng-if="vm.container" ng-show="threadFilter.check(vm.container)">
   <!-- Annotation -->
   <div class="annotation"
        name="annotation"
@@ -32,7 +32,7 @@
     <!-- Reply count -->
     <a class="reply-count small"
        href=""
-       ng-if="vm.messageCount.all > 1 && !vm.container.more"
+       ng-if="vm.messageCount.all > 1"
        ng-pluralize count="vm.messageCount.all - 1"
        when="{one: '1 reply', other: '{} replies'}" />
 
@@ -46,22 +46,25 @@
   </footer>
 </article>
 
-<!-- Show more -->
-<a href=""
-   class="load-more"
-   ng-if="vm.container.more > 0"
-   ng-click="showMore(vm.container); $event.stopPropagation()"
-   ng-pluralize=""
-   count="vm.container.more"
-   when="{one: 'Show one reply in another branch of this conversation.',
-          other: 'Show {} replies in other branches of this conversation.'}"
-   ></a>
-
 <!-- Replies -->
-<ul>
+<ul ng-hide="vm.collapsed">
   <li class="thread"
-      thread="child"
+      ng-if="vm.container && threadFilter.active()"
+      ng-show="threadFilter.check(vm.container) || !vm.container.parent.parent">
+    <a href=""
+       class="load-more small"
+       ng-click="threadFilter.active(false); $event.stopPropagation()"
+       ng-pluralize count="vm.messageCount.all - vm.messageCount.filter"
+       when="{'0': '',
+             one: 'Show one other annotation in this conversation.',
+             other: 'Show {} other annotations in this conversation.'}"
+       ></a>
+  </li>
+  <li class="thread"
+      thread="child" thread-filter
+      ng-hide="threadFilter.active() && !vm.messageCount.filter"
       ng-include="'thread.html'"
       ng-repeat="child in vm.container.children
-                 | orderBy : 'message.updated'"></li>
+                 | orderBy : 'message.updated'">
+  </li>
 </ul>

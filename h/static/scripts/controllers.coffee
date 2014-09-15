@@ -330,6 +330,8 @@ class App
       update: (query) ->
         unless angular.equals $location.search()['q'], query
           $location.search('q', query or null)
+          delete $scope.selectedAnnotations
+          delete $scope.selectedAnnotationsCount
 
     $scope.socialView = annotator.socialView
     $scope.sort = name: 'Location'
@@ -384,70 +386,10 @@ class Viewer
           params: highlights
 
     $scope.shouldShowThread = (container) ->
-      if $routeParams.q
-        container.shown or not container.message.id
-      else if $scope.selectedAnnotations?
-        if container.parent is $scope.threading.root
-          $scope.selectedAnnotations[container.message?.id]
-        else
-          true
+      if $scope.selectedAnnotations? and not container.parent.parent
+        $scope.selectedAnnotations[container.message?.id]
       else
         true
-
-    $scope.showMore = (container) ->
-      {order, renderList} = container
-      container.more = 0
-      while ++order < renderList.length
-        next = renderList[order]
-        break if next.shown
-        next.more = 0
-        next.shown = true
-
-    matchSet = null
-    orderBy = $filter('orderBy')
-
-    makeSet = (arr) ->
-      arr.reduce ((set, item) -> set[item?.id or item] = true; set), {}
-
-    render = (acc, container) ->
-      {lastShown, renderList} = acc
-      id = container.message?.id
-      container.more = 0
-      container.order = renderList.length
-      container.renderList = renderList
-      container.shown = matchSet is null or not id or matchSet[id]
-      renderList.push container
-
-      if container.shown
-        acc.matchCount++
-        acc.lastShown = container
-      else if lastShown
-        lastShown.more++
-      else
-        acc.lastShown = container
-
-      sorted = orderBy container.children, 'message.updated'
-      sorted.reduce render, acc
-
-    refresh = ->
-      annotations = $scope.threading.root.flattenChildren() or []
-      query = $routeParams.q
-
-      if query
-        filters = searchfilter.generateFacetedFilter query
-        match = viewFilter.filter annotations, filters
-        matchSet = makeSet match
-        $scope.results = match.length
-        delete $scope.selectedAnnotations
-      else
-        matchSet = null
-
-      for container in $scope.threading.root.children
-        acc = matchCount: 0, renderList: []
-        container.shown = (render acc, container).matchCount > 0
-
-    $scope.$on '$routeUpdate', refresh
-    refresh()
 
 
 angular.module('h.controllers', imports)
