@@ -32,14 +32,21 @@ class Annotation
     $scope.preview = 'no'
 
     if model.document and model.target.length
-      domain = extractURIComponent(model.uri, 'hostname')
+      uri = model.uri
+      if uri.indexOf("urn") is 0
+        # This URI is not clickable, see if we have something better
+        for link in model.document.link when link.href.indexOf("urn")
+          uri = link.href
+          break
+
+      domain = extractURIComponent(uri, 'hostname')
 
       title = model.document.title or domain
       if title.length > 30
         title = title.slice(0, 30) + '…'
 
       $scope.document =
-        uri: model.uri
+        uri: uri
         domain: domain
         title: title
 
