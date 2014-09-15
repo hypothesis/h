@@ -274,6 +274,7 @@ app_js:
             - scripts/flash.coffee
             - scripts/filters.coffee
             - scripts/directives.coffee
+            - scripts/directives/deepCount.coffee
             - scripts/directives/simple-search.coffee
             - scripts/directives/status-button.coffee
             - scripts/directives/thread.coffee

@@ -4,7 +4,7 @@
    ><span ng-class="{'icon-plus': !!vm.collapsed,
                      'icon-minus': !vm.collapsed}"></span></a>
 
-<article ng-if="vm.container" ng-show="threadFilter.check(vm.container)">
+<article ng-show="threadFilter.check(vm.container)">
   <!-- Annotation -->
   <div class="annotation"
        name="annotation"
@@ -13,7 +13,7 @@
        ng-if="vm.container.message">
   </div>
 
-  <footer>
+  <footer ng-if="vm.container.message.id">
     <!-- Share -->
     <div class="share-dialog"
          ng-show="vm.shared"
@@ -32,8 +32,8 @@
     <!-- Reply count -->
     <a class="reply-count small"
        href=""
-       ng-if="vm.messageCount.all > 1"
-       ng-pluralize count="vm.messageCount.all - 1"
+       ng-if="count('message') > 1"
+       ng-pluralize count="count('message') - 1"
        when="{one: '1 reply', other: '{} replies'}" />
 
     <!-- Bottom control strip -->
@@ -49,22 +49,24 @@
 <!-- Replies -->
 <ul ng-hide="vm.collapsed">
   <li class="thread"
-      ng-if="vm.container && threadFilter.active()"
+      ng-if="vm.container.message.id && count('edit') < count('match')"
       ng-show="threadFilter.check(vm.container) || !vm.container.parent.parent">
     <a href=""
        class="load-more small"
        ng-click="threadFilter.active(false); $event.stopPropagation()"
-       ng-pluralize count="vm.messageCount.all - vm.messageCount.filter"
+       ng-pluralize count="count('message') - count('match')"
        when="{'0': '',
              one: 'Show one other annotation in this conversation.',
              other: 'Show {} other annotations in this conversation.'}"
        ></a>
   </li>
   <li class="thread"
+      deep-count="count"
       thread="child" thread-filter
-      ng-hide="threadFilter.active() && !vm.messageCount.filter"
       ng-include="'thread.html'"
+      ng-init="child.message.id || threadFilter.active(false)"
       ng-repeat="child in vm.container.children
-                 | orderBy : 'message.updated'">
+                 | orderBy : 'message.updated'"
+      ng-show="count('edit') || count('match') || !threadFilter.active()">
   </li>
 </ul>

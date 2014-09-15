@@ -1,8 +1,11 @@
 <!-- Thread view -->
-<ul class="stream-list" thread="threading.root" thread-filter="search.query">
+<ul class="stream-list"
+    deep-count="count"
+    thread="threading.root"
+    thread-filter="search.query">
   <li ng-show="threadFilter.active()"
       ><span ng-pluralize
-             count="vm.messageCount.filter"
+             count="count('match')"
              when="{'0': 'No results for “{{search.query}}”.',
                     'one': 'Found one result.',
                     'other': 'Found {} results.'}"></span>
@@ -31,15 +34,16 @@
     </span>
   </li>
   <li class="paper thread"
+      deep-count="count"
       thread="child" thread-filter
       thread-collapsed="!search.query"
-      ng-hide="!shouldShowThread(child) ||
-               (threadFilter.active() && !vm.messageCount.filter)"
       ng-include="'thread.html'"
       ng-mouseenter="activate(child.message)"
       ng-mouseleave="activate()"
       ng-repeat="child in vm.container.children
-                 | orderBy : sort.predicate : sort.reverse">
+                 | orderBy : sort.predicate : sort.reverse"
+      ng-show="(shouldShowThread(child) || threadFilter.active()) &&
+               (count('edit') || count('match') || !threadFilter.active())">
   </li>
 </ul>
 <!-- / Thread view -->

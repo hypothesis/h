@@ -96,8 +96,8 @@ AnnotationController = [
         annotator.publish 'annotationDeleted', model
       else
         this.render()
-      @action = 'view'
-      @editing = false
+        @action = 'view'
+        @editing = false
 
     ###*
     # @ngdoc method
@@ -152,10 +152,6 @@ AnnotationController = [
     $scope.$on '$destroy', ->
       drafts.remove model
 
-    # Prevent threads from collapsing during editing.
-    $scope.$on 'threadCollapse', (event) ->
-      event.preventDefault() if vm.editing
-
     # Render on updates.
     $scope.$watch (-> model.updated), (updated) ->
       if updated then drafts.remove model
@@ -196,14 +192,14 @@ AnnotationController = [
 # an embedded widget.
 ###
 annotation = ['annotator', (annotator) ->
-  linkFn = (scope, elem, attrs, [ctrl, threadCtrl]) ->
+  linkFn = (scope, elem, attrs, [ctrl, thread, counter]) ->
     # Helper function to remove the temporary thread created for a new reply.
     prune = (message) ->
       return if message.id?  # threading plugin will take care of it
-      return unless threadCtrl.container.message is message
-      threadCtrl.container.parent?.removeChild(threadCtrl.container)
+      return unless thread.container.message is message
+      thread.container.parent?.removeChild(thread.container)
 
-    if threadCtrl?
+    if thread?
       annotator.subscribe 'annotationDeleted', prune
       scope.$on '$destroy', ->
         annotator.unsubscribe 'annotationDeleted', prune
@@ -219,10 +215,19 @@ annotation = ['annotator', (annotator) ->
         scope.$evalAsync ->
           ctrl.save()
 
+    scope.$on '$destroy', ->
+      if ctrl.editing then counter?.count 'edit', -1
+
+    scope.$watch (-> ctrl.editing), (editing, old) ->
+      if editing
+        counter?.count 'edit', 1
+      else if old
+        counter?.count 'edit', -1
+
   controller: 'AnnotationController'
   controllerAs: 'vm'
   link: linkFn
-  require: ['annotation', '?^thread']
+  require: ['annotation', '?^thread', '?^deepCount']
   scope:
     annotationGet: '&annotation'
   templateUrl: 'annotation.html'
@@ -230,5 +235,5 @@ annotation = ['annotator', (annotator) ->
 
 
 angular.module('h.directives')
-.controller('AnnotationController', AnnotationController)
-.directive('annotation', annotation)
+.controller('AnnotationController', AnnotationController).
+directive('annotation', annotation)

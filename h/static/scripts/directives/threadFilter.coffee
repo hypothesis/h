@@ -48,13 +48,12 @@ ThreadFilterController = [
     # This method is a getter / setter.
     #
     # Set the filter configuration when called with an argument and return
-    # return the configuration. Resets the `hits` property to zero.
+    # return the configuration.
     ###
     this.filters = (filters) ->
       if filters is undefined then return @_filters
       else if @filters == filters then return @_filters
       else
-        @hits = 0
         child.filters filters for child in @_children
         @_filters = filters
 
@@ -69,21 +68,18 @@ ThreadFilterController = [
     # @description
     # Check whether a message container carries a message matching the
     # configured filters. If filtering is not active then the result is
-    # always `true`. Similarly, messages without an `id` are always treated
-    # as matches so that they are always visible for editing. Updates the
-    # `hits` property when a match is found that has not been seen before.
+    # always `true`.  Updates the `hits` property to reflect changes in match
+    # status of the container by caching the result is the `__filterResult`
+    # property of the container.
     ###
     this.check = (container) ->
-      unless this.active() then return true
-      unless container.__filters is @_filters
-        if container.message.id
-          match = !!viewFilter.filter([container.message], @_filters).length
-        else
-          match = true
-        if match then @hits++
-        container.__filters = @_filters
-        container.__filterResult = match
-      container.__filterResult
+      unless container? then return false
+      if this.active()
+        match = !!viewFilter.filter([container.message], @_filters).length
+      else
+        match = true
+      @hits += (match - !!container.__filterResult)
+      container.__filterResult = match
 
     ###*
     # @ngdoc method
@@ -133,16 +129,13 @@ ThreadFilterController = [
 threadFilter = [
   '$parse', 'searchfilter'
   ($parse,   searchfilter) ->
-    linkFn = (scope, elem, attrs, [ctrl, threadCtrl]) ->
+    linkFn = (scope, elem, attrs, [ctrl, thread, counter]) ->
       scope.$watch (-> ctrl.hits), (newValue=0, oldValue=0) ->
-        if (delta = newValue - oldValue) == 0 then return
-        threadCtrl.addMessageCount delta, 'filter'
+        counter?.count 'match', newValue - oldValue
 
       scope.$on '$destroy', ->
-        threadCtrl.addMessageCount -ctrl.hits, 'filter'
-        if threadCtrl.container?
-          delete threadCtrl.container.__filters
-          delete threadCtrl.container.__filterResult
+        if thread.container then delete thread.container.__filterResult
+        counter?.count 'match', -ctrl.hits
 
       if parentCtrl = elem.parent().controller('threadFilter')
         ctrl.filters parentCtrl.filters()
@@ -159,7 +152,7 @@ threadFilter = [
     controller: 'ThreadFilterController'
     controllerAs: 'threadFilter'
     link: linkFn
-    require: ['threadFilter', 'thread']
+    require: ['threadFilter', 'thread', '?^deepCount']
 ]
 
 
