@@ -13,6 +13,8 @@
        ng-if="vm.container.message">
   </div>
 
+  <p ng-if="!vm.container.message"><em>Annotation not available.</em></p>
+
   <footer ng-if="vm.container.message.id">
     <!-- Share -->
     <div class="share-dialog"
