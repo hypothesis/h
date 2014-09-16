@@ -212,9 +212,7 @@ class Hypothesis extends Annotator
   _scan: -> this
 
   # Do nothing in the app frame, let the host handle it.
-  setupAnnotation: (annotation) ->
-    annotation.highlights = []
-    annotation
+  setupAnnotation: (annotation) -> annotation
 
   toggleViewerSelection: (annotations=[]) ->
     scope = @element.scope()
