@@ -7,7 +7,7 @@ $threadexp-width: .6em;
   }
 
   .card-emphasis {
-    @include box-shadow(6px 6px 8px -2px $gray-light);
+    box-shadow: 6px 6px 8px -2px $gray-light;
   }
 }
 
