@@ -41,7 +41,7 @@ DeepCountController = [
         parent.count key, delta
       else
         # Debounce digests from the top.
-        if cancelFrame then __cancelFrame()
+        if cancelFrame then cancelFrame()
         cancelFrame = render ->
           $scope.$digest()
           cancelFrame = null
