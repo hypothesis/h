@@ -40,7 +40,7 @@
       ng-include="'thread.html'"
       ng-init="child.message.id || threadFilter.active(false)"
       ng-repeat="child in vm.container.children
-                 | orderBy : 'message.updated'"
+                 | orderBy : 'message.updated' : true"
       ng-show="count('edit') || count('match') || !threadFilter.active()">
   </li>
 </ul>
