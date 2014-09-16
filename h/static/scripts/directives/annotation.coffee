@@ -153,8 +153,7 @@ AnnotationController = [
     ###*
     # @ngdoc method
     # @name annotation.AnnotationController#render
-    # @description Called to update the view model when the domain model
-    # changes. Initializes brand new annotations and
+    # @description Called to update the view when the model changes.
     ###
     this.render = ->
       # Extend the view model with a copy of the domain model.
