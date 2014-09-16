@@ -54,7 +54,7 @@ join us in `#hypothes.is`_ on freenode_ for discussion.
 Those wishing to contribute to the project should also `subscribe`_ to the
 development mailing list and read about `contributing`_. Then consider getting
 started on one of the issues that are ready for work by clicking on the badge
-below. Issues tagged with the label 'cake' are ideal for new contributors.
+below. Issues tagged with the label 'New Contributor Friendly' are ideal for new contributors.
 
 .. image:: https://badge.waffle.io/hypothesis/h.svg?label=1%20-%20Ready
    :target: https://waffle.io/hypothesis/h
@@ -116,6 +116,15 @@ better. Using `Docker`_ it is easy to configure the ElasticSearch host and the
 mail relay address. Simply create links with the names ``elasticsearch`` and
 ``mail`` respectively.
 
+Documentation
+--------------------------
+
+To build the documentation, ensure that Sphinx_ is installed and issue the
+```make html``` command from the docs directory::
+
+    $ cd docs/
+    $ make html
+
 License
 -------
 
@@ -135,3 +144,4 @@ license information can be found in the included `<LICENSE>`_ file.
 .. _Open Knowledge Foundation: http://okfn.org/
 .. _2-Clause BSD License: http://www.opensource.org/licenses/BSD-2-Clause
 .. _debugtoolbar: http://docs.pylonsproject.org/projects/pyramid-debugtoolbar/en/latest/
+.. _Sphinx: http://sphinx-doc.org/
