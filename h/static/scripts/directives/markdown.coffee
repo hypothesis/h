@@ -38,11 +38,24 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
       if text.selection == ""
         newtext = text.before + markup + innertext + markup + text.after
         input[0].value = newtext
+        input[0].selectionStart = (text.before + markup).length
+        input[0].selectionEnd = (text.before + innertext + markup).length
       else
-        newtext = text.before + markup + text.selection + markup + text.after
-        input[0].value = newtext
-      input[0].selectionStart = (text.before + markup).length
-      input[0].selectionEnd = (text.before + innertext + markup).length
+        # Check to see if markup has already been applied before to the selection.
+        slice1 = text.before.slice((text.before.length - markup.length))
+        slice2 = text.after.slice(0, markup.length)
+        if slice1 == markup and slice2 == markup
+          # Remove markup 
+          newtext = text.before.slice(0, (text.before.length - markup.length)) + text.selection + text.after.slice(markup.length)
+          input[0].value = newtext
+          input[0].selectionStart = text.before.length - markup.length
+          input[0].selectionEnd = (text.before + text.selection).length - markup.length
+        else
+          # Apply markup
+          newtext = text.before + markup + text.selection + markup + text.after
+          input[0].value = newtext
+          input[0].selectionStart = (text.before + markup).length
+          input[0].selectionEnd = (text.before + text.selection + markup).length
 
     scope.insertItalic = ->
       # Shares the same logic as insertBold() but with different markup.
@@ -60,6 +73,9 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
         input[0].selectionStart = text.before.length + 1
         input[0].selectionEnd = text.before.length + 10
       else
+        # Check to see if markup has already been applied to avoid double presses.
+        if text.selection == "Link Text" or text.selection == "https://example.com"
+          return          
         newtext = text.before + '[' + text.selection + '](https://example.com)' + text.after
         input[0].value = newtext
         input[0].selectionStart = (text.before + text.selection).length + 3
@@ -73,6 +89,9 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
         input[0].selectionStart = text.before.length + 21
         input[0].selectionEnd = text.before.length + 42
       else
+        # Check to see if markup has already been applied to avoid double presses.
+        if text.selection == "https://yourimage.jpg"
+          return     
         newtext = text.before + '![' + text.selection + '](https://yourimage.jpg)' + text.after
         input[0].value = newtext
         input[0].selectionStart = (text.before + text.selection).length + 4
@@ -80,7 +99,6 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
 
     scope.insertList = (markup = "* ") ->
       text = scope.returnSelection()
-      # If the character preceeding the curser is a newline just insert a "* ".
       if text.selection != ""
         newstring = ""
         index = text.before.length
@@ -109,8 +127,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
             index += 1
           if not newlinedetected
             # Edge case: The selection does not include any new lines and does not start at 0.
-            # We need to find the newline before the currently selected text and add markup there. 
-            # console.log input[0].value.substring(0, (text.before + text.selection).length)
+            # We need to find the newline before the currently selected text and add markup there.
             i = 0
             indexoflastnewline = undefined
             newstring = ""
@@ -140,19 +157,37 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
         input[0].selectionEnd = (text.before + markup).length
       else
         # No selection, cursor is not on new line. Go to the previous newline and insert markup there.
+        # # Check to see if markup has already been inserted.
+        if text.before.slice(text.before.length - markup.length) == markup
+          newtext = text.before.substring(0, (index)) + "\n" + text.before.substring(index + 1 + markup.length) + text.after
         i = 0
         for char in text.before
           if char == "\n" and i != 0
             index = i
           i += 1
-        if !index
-          # If the line of text happens to fall on the first line and index is not set.
-          newtext = markup + text.before.substring(0) + text.after
+        if !index # If the line of text happens to fall on the first line and index is not set.
+          # Check to see if markup has already been inserted and undo it. 
+          if text.before.slice(0, markup.length) == markup
+            newtext = text.before.substring(markup.length) + text.after
+            input[0].value = newtext
+            input[0].selectionStart = text.before.length - markup.length
+            input[0].selectionEnd = text.before.length - markup.length
+          else
+            newtext = markup + text.before.substring(0) + text.after
+            input[0].value = newtext
+            input[0].selectionStart = (text.before + markup).length
+            input[0].selectionEnd = (text.before + markup).length
+        # Check to see if markup has already been inserted and undo it.
+        else if text.before.slice((index + 1), (index + 1 + markup.length)) == markup
+          newtext = text.before.substring(0, (index)) + "\n" + text.before.substring(index + 1 + markup.length) + text.after
+          input[0].value = newtext
+          input[0].selectionStart = text.before.length - markup.length
+          input[0].selectionEnd = text.before.length - markup.length
         else
           newtext = text.before.substring(0, (index)) + "\n" + markup + text.before.substring(index + 1) + text.after
-        input[0].value = newtext
-        input[0].selectionStart = (text.before + markup).length
-        input[0].selectionEnd = (text.before + markup).length
+          input[0].value = newtext
+          input[0].selectionStart = (text.before + markup).length
+          input[0].selectionEnd = (text.before + markup).length
 
     scope.insertNumList = ->
       # Shares the same logic as insertList but with different markup.
