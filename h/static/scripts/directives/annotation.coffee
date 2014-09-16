@@ -196,17 +196,17 @@ AnnotationController = [
       else
         @document = null
 
-      # Form the tags for ngTagsInput
+      # Form the tags for ngTagsInput.
       @annotation.tags = ({text} for text in (model.tags or []))
 
     # Discard the draft if the scope goes away.
     $scope.$on '$destroy', ->
       drafts.remove model
 
-    # Render on updates..l
+    # Render on updates.
     $scope.$watch (-> model.updated), (updated) =>
       if updated then drafts.remove model
-      this.render()
+      this.render()  # XXX: TODO: don't clobber the view when collaborating
 
     # Update once logged in.
     $scope.$watch (-> model.user), (user) =>
