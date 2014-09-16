@@ -16,7 +16,7 @@
     "karma-ng-html2js-preprocessor": "^0.1.0",
     "karma-phantomjs-launcher": "^0.1.4",
     "mocha": "^1.20.1",
-    "phantomjs": "1.9.7-10"
+    "phantomjs": "^1.9.7"
   },
   "engines": {
     "node": "0.10.x"

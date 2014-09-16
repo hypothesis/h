@@ -4,6 +4,7 @@ describe 'h.directives', ->
   $scope = null
   $compile = null
   fakeWindow = null
+  isolate = null
 
   beforeEach module('h.directives')
 
@@ -20,23 +21,24 @@ describe 'h.directives', ->
       template= '''
       <div class="simpleSearch"
             query="query"
-            onsearch="update(this)"
-            onclear="clear()">
+            on-search="update(query)"
+            on-clear="clear()">
       </div>
       '''
 
       $element = $compile(angular.element(template))($scope)
       $scope.$digest()
+      isolate = $element.isolateScope()
 
     it 'updates the search-bar', ->
       $scope.query = "Test query"
       $scope.$digest()
-      assert.equal($scope.searchtext, $scope.query)
+      assert.equal(isolate.searchtext, $scope.query)
 
     it 'calls the given search function', ->
-      $scope.query = "Test query"
-      $scope.$digest()
-      $element.triggerHandler('submit')
+      isolate.searchtext = "Test query"
+      isolate.$digest()
+      $element.find('form').triggerHandler('submit')
       sinon.assert.calledWith($scope.update, "Test query")
 
     it 'calls the given clear function', ->
@@ -44,10 +46,18 @@ describe 'h.directives', ->
       assert($scope.clear.called)
 
     it 'clears the search-bar', ->
+      isolate.searchtext = "Test query"
+      isolate.$digest()
+      $element.find('.simple-search-clear').click()
+      assert.equal(isolate.searchtext, '')
+
+    it 'invokes callbacks when the input model changes', ->
       $scope.query = "Test query"
       $scope.$digest()
-      $element.find('.simple-search-clear').click()
-      assert.equal($scope.searchtext, '')
+      sinon.assert.calledOnce($scope.update)
+      $scope.query = ""
+      $scope.$digest()
+      sinon.assert.calledOnce($scope.clear)
 
     it 'adds a class to the form when there is no input value', ->
       $form = $element.find('.simple-search-form')

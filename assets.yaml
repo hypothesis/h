@@ -162,11 +162,6 @@ autofill:
   output: scripts/vendor/polyfills/autofill-event.min.js
   contents:
     - h:static/scripts/vendor/polyfills/autofill-event.js
-raf:
-  filters: uglifyjs
-  output: scripts/vendor/polyfills/raf.min.js
-  contents:
-    - h:static/scripts/vendor/polyfills/raf.js
 wgxpath:
   filters: uglifyjs
   output: scripts/vendor/polyfills/wgxpath.install.min.js
@@ -256,7 +251,6 @@ app:
     - momentjs
     - pagedown
     - autofill
-    - raf
     - sockjs
     - uuid
     - auth_css
@@ -280,8 +274,11 @@ app_js:
             - scripts/flash.coffee
             - scripts/filters.coffee
             - scripts/directives.coffee
+            - scripts/directives/deepCount.coffee
             - scripts/directives/simple-search.coffee
             - scripts/directives/status-button.coffee
+            - scripts/directives/thread.coffee
+            - scripts/directives/threadFilter.coffee
             - scripts/directives/annotation.coffee
             - scripts/services.coffee
             - scripts/helpers/form-helpers.coffee

@@ -58,16 +58,11 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       'annotationsLoaded'
     ]
     for event in events
-      if event is 'annotationCreated'
-        @annotator.subscribe event, =>
-          this._scheduleUpdate()
-      else
-        @annotator.subscribe event, this._scheduleUpdate
+      @annotator.subscribe event, this._scheduleUpdate
 
     @element.on 'click', (event) =>
       event.stopPropagation()
-      @dynamicBucket = true
-      @annotator.showViewer "Screen", this._getDynamicBucket()
+      @annotator.showFrame()
 
     @element.on 'mouseup', (event) =>
       event.stopPropagation()
@@ -437,7 +432,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           annotations = @buckets[bucket].slice()
           annotator.selectAnnotations annotations,
             (d3.event.ctrlKey or d3.event.metaKey),
-            (annotations.length is 1) # Only focus if there is only one
 
     tabs.exit().remove()
 
@@ -458,7 +452,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       if (@buckets[d].length is 0) then 'none' else ''
 
     if @dynamicBucket
-      @annotator.updateViewer "Screen", this._getDynamicBucket()
+      @annotator.updateViewer this._getDynamicBucket()
 
     @tabs = tabs
 
@@ -480,4 +474,4 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # Simulate clicking on the comments tab
   commentClick: =>
     @dynamicBucket = false
-    annotator.showViewer "Comments", @buckets[@_getCommentBucket()]
+    annotator.showViewer @buckets[@_getCommentBucket()]

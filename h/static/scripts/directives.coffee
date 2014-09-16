@@ -1,3 +1,11 @@
+imports = [
+  'ngSanitize'
+  'ngTagsInput'
+  'h.helpers.documentHelpers'
+  'h.services'
+]
+
+
 formInput = ->
   link: (scope, elem, attr, [form, model, validator]) ->
     return unless form?.$name and model?.$name and validator
@@ -79,7 +87,6 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
       unless readonly then $timeout -> input.focus()
 
   require: '?ngModel'
-  restrict: 'E'
   scope:
     readonly: '@'
     required: '@'
@@ -131,36 +138,6 @@ privacy = ->
   templateUrl: 'privacy.html'
 
 
-recursive = ['$compile', '$timeout', ($compile, $timeout) ->
-  compile: (tElement, tAttrs, transclude) ->
-    placeholder = angular.element '<!-- recursive -->'
-    attachQueue = []
-    tick = false
-
-    template = tElement.contents().clone()
-    tElement.html ''
-
-    transclude = $compile template, (scope, cloneAttachFn) ->
-      clone = placeholder.clone()
-      cloneAttachFn clone
-      $timeout ->
-        transclude scope, (el, scope) -> attachQueue.push [clone, el]
-        unless tick
-          tick = true
-          requestAnimationFrame ->
-            tick = false
-            for [clone, el] in attachQueue
-              clone.after el
-              clone.bind '$destroy', -> el.remove()
-            attachQueue = []
-      clone
-    post: (scope, iElement, iAttrs, controller) ->
-      transclude scope, (contents) -> iElement.append contents
-  restrict: 'A'
-  terminal: true
-]
-
-
 tabReveal = ['$parse', ($parse) ->
   compile: (tElement, tAttrs, transclude) ->
     panes = []
@@ -202,57 +179,6 @@ tabReveal = ['$parse', ($parse) ->
             pane.element.css 'display', 'none'
             angular.element(tabs[i]).css 'display', 'none'
   require: ['ngModel', 'tabbable']
-]
-
-
-thread = ['$rootScope', '$window', ($rootScope, $window) ->
-  # Helper -- true if selection ends inside the target and is non-empty
-  ignoreClick = (event) ->
-    sel = $window.getSelection()
-    if sel.focusNode?.compareDocumentPosition(event.target) & 8
-      if sel.toString().length
-        return true
-    return false
-
-  link: (scope, elem, attr, ctrl) ->
-    childrenEditing = {}
-
-    # If this is supposed to be focused, then open it
-    if scope.annotation in ($rootScope.focused or [])
-      scope.collapsed = false
-
-    scope.$on "focusChange", ->
-      # XXX: This not needed to be done when the viewer and search will be unified
-      ann = scope.annotation ? scope.thread.message
-      if ann in $rootScope.focused
-        scope.collapsed = false
-      else
-        unless ann.references?.length
-          scope.collapsed = true
-
-    scope.toggleCollapsed = (event) ->
-      event.stopPropagation()
-      return if (ignoreClick event) or Object.keys(childrenEditing).length
-      scope.collapsed = !scope.collapsed
-      # XXX: This not needed to be done when the viewer and search will be unified
-      ann = scope.annotation ? scope.thread.message
-      if scope.collapsed
-        $rootScope.unFocus ann, true
-      else
-        scope.openDetails ann
-        $rootScope.focus ann, true
-
-    scope.$on 'toggleEditing', (event) ->
-      {$id, editing} = event.targetScope
-      if editing
-        scope.collapsed = false
-        unless childrenEditing[$id]
-          event.targetScope.$on '$destroy', ->
-            delete childrenEditing[$id]
-          childrenEditing[$id] = true
-      else
-        delete childrenEditing[$id]
-  restrict: 'C'
 ]
 
 
@@ -298,8 +224,9 @@ repeatAnim = ->
 
 username = ['$filter', '$window', ($filter, $window) ->
   link: (scope, elem, attr) ->
-    scope.$watch 'user', ->
-      scope.uname = $filter('persona')(scope.user, 'username')
+    scope.$watch 'user', (user) ->
+      if user
+        scope.uname = $filter('persona')(scope.user, 'username')
 
     scope.uclick = (event) ->
       event.preventDefault()
@@ -312,50 +239,6 @@ username = ['$filter', '$window', ($filter, $window) ->
   template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
 ]
 
-fuzzytime = ['$filter', '$window', ($filter, $window) ->
-  link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
-
-    elem
-    .find('a')
-    .bind 'click', (event) ->
-      event.stopPropagation()
-
-    ctrl.$render = ->
-      scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
-
-      # Determining the timezone name
-      timezone = jstz.determine().name()
-      # The browser language
-      userLang = navigator.language || navigator.userLanguage
-
-      # Now to make a localized hint date, set the language
-      momentDate = moment ctrl.$viewValue
-      momentDate.lang(userLang)
-
-      # Try to localize to the browser's timezone
-      try
-        scope.hint = momentDate.tz(timezone).format('LLLL')
-      catch error
-        # For invalid timezone, use the default
-        scope.hint = momentDate.format('LLLL')
-
-    timefunct = ->
-      $window.setInterval =>
-        scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
-        scope.$digest()
-      , 5000
-
-    scope.timer = timefunct()
-
-    scope.$on '$destroy', ->
-      $window.clearInterval scope.timer
-
-  require: '?ngModel'
-  restrict: 'E'
-  scope: true
-  template: '<a target="_blank" href="{{shared_link}}" title="{{hint}}">{{ftime | date:mediumDate}}</a>'
-]
 
 whenscrolled = ->
   link: (scope, elem, attr) ->
@@ -378,15 +261,12 @@ match = ->
   require: 'ngModel'
 
 
-angular.module('h.directives', ['ngSanitize', 'ngTagsInput'])
+angular.module('h.directives', imports)
 .directive('formInput', formInput)
 .directive('formValidate', formValidate)
-.directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
 .directive('privacy', privacy)
-.directive('recursive', recursive)
 .directive('tabReveal', tabReveal)
-.directive('thread', thread)
 .directive('username', username)
 .directive('showAccount', showAccount)
 .directive('repeatAnim', repeatAnim)

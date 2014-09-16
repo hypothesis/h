@@ -1,55 +1,64 @@
 class Annotator.Plugin.Threading extends Annotator.Plugin
-  # These events maintain the awareness of annotations between the two
-  # communicating annotators.
   events:
+    'beforeAnnotationCreated': 'beforeAnnotationCreated'
     'annotationDeleted': 'annotationDeleted'
     'annotationsLoaded': 'annotationsLoaded'
-    'beforeAnnotationCreated': 'beforeAnnotationCreated'
 
-  # Cache of annotations which have crossed the bridge for fast, encapsulated
-  # association of annotations received in arguments to window-local copies.
-  cache: {}
+  root: null
 
   pluginInit: ->
-    @annotator.threading = mail.messageThread()
+    # Create a root container.
+    @root = mail.messageContainer()
 
-  thread: (annotation) ->
-    # Get or create a thread to contain the annotation
-    thread = (@annotator.threading.getContainer annotation.id)
-    thread.message = annotation
+    # Mix in message thread properties, preserving local overrides.
+    $.extend(this, mail.messageThread(), thread: this.thread)
 
-    # Attach the thread to its parent, if any.
-    if annotation.references?.length
-      prev = annotation.references[annotation.references.length-1]
-      @annotator.threading.getContainer(prev).addChild thread
+  # TODO: Refactor the jwz API for progressive updates.
+  # Right now the idTable is wiped when `messageThread.thread()` is called and
+  # empty containers are pruned. We want to show empties so that replies attach
+  # to missing parents and threads can be updates as new data arrives.
+  thread: (messages) ->
+    for message in messages
+      # Get or create a thread to contain the annotation
+      if message.id
+        thread = (this.getContainer message.id)
+        thread.message = message
+      else
+        # XXX: relies on outside code to update the idTable if the message
+        # later acquires an id.
+        thread = mail.messageContainer(message)
 
-    # Expose the thread to the annotation
-    Object.defineProperty annotation, 'thread',
-        configurable: true
-        enumerable: false
-        writable: true
-        value: thread
+      prev = @root
 
-    # Update the id table
-    @annotator.threading.idTable[annotation.id] = thread
+      references = message.references or []
+      if typeof(message.references) == 'string'
+        references = [references]
 
-    thread
+      # Build out an ancestry from the root
+      for reference in references
+        container = this.getContainer(reference)
+        unless container.parent? or container.hasDescendant(prev)  # no cycles
+          prev.addChild(container)
+        prev = container
 
-  annotationDeleted: (annotation) =>
-    parent = annotation.thread.parent
-    annotation.thread.message = null  # Break cyclic reference
-    delete @annotator.threading.idTable[annotation.id]
-    delete annotation.thread
-    if parent? then @annotator.threading.pruneEmpties parent
+      # Attach the thread at its leaf location
+      unless thread.hasDescendant(prev)  # no cycles
+        do ->
+          for child in prev.children when child.message is message
+            return  # no dupes
+          prev.addChild(thread)
 
-  annotationsLoaded: (annotations) =>
-    this.thread a for a in annotations
+    this.pruneEmpties(@root)
+    @root
 
   beforeAnnotationCreated: (annotation) =>
-    # Assign temporary id. Threading relies on the id.
-    Object.defineProperty annotation, 'id',
-      configurable: true
-      enumerable: false
-      writable: true
-      value: window.btoa Math.random()
-    this.thread annotation
+    this.thread([annotation])
+
+  annotationDeleted: ({id}) =>
+    container = this.getContainer id
+    container.message = null
+    this.pruneEmpties(@root)
+
+  annotationsLoaded: (annotations) =>
+    messages = (@root.flattenChildren() or []).concat(annotations)
+    this.thread(messages)

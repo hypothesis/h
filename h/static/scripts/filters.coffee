@@ -40,6 +40,25 @@ fuzzyTime = (date) ->
     fuzzy = Math.round(delta / year) + ' years ago'
   fuzzy
 
+
+momentFilter = ->
+  (value, format) ->
+    # Determine the timezone name and browser language.
+    timezone = jstz.determine().name()
+    userLang = navigator.language || navigator.userLanguage
+
+    # Now make a localized date and set the language.
+    momentDate = moment value
+    momentDate.lang userLang
+
+    # Try to localize to the browser's timezone.
+    try
+      momentDate.tz(timezone).format('LLLL')
+    catch error
+      # For an invalid timezone, use the default.
+      momentDate.format('LLLL')
+
+
 persona = (user, part='username') ->
   part = ['term', 'username', 'provider'].indexOf(part)
   (user?.match /^acct:([^@]+)@(.+)/)?[part]
@@ -54,5 +73,6 @@ elide = (text, split_length) ->
 angular.module('h.filters', [])
 .filter('converter', -> (new Converter()).makeHtml)
 .filter('fuzzyTime', -> fuzzyTime)
+.filter('moment', momentFilter)
 .filter('persona', -> persona)
 .filter('elide', -> elide)

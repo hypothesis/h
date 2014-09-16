@@ -37,10 +37,6 @@ var HYPOTHESIS_YEPNOPE_RULES = [
       script.text = bootstrap;
       insBeforeObj.insertBefore(script, first);
     }
-  },
-  {
-    test: window.requestAnimationFrame,
-    nope: ${map(str, request.webassets_env["raf"].urls())}
   }
 ];
 

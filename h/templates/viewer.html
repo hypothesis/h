@@ -1,47 +1,49 @@
 <!-- Thread view -->
-<ul class="stream-list">
-  <li
-     ng-class="{'card-emphasis': annotation.$emphasis, 'collapsed': collapsed}"
-     ng-click="toggleCollapsed($event)"
-     ng-init="collapsed = true"
-     ng-mouseenter="activate(annotation)"
-     ng-mouseleave="activate()"
-     ng-repeat="annotation in annotations | orderBy:predicate:reverse track by annotation.id"
-     class="paper thread"
-     data-recursive=""
-     >
-    <a href="" class="threadexp"
-       title="{{collapsed && 'Expand' || 'Collapse'}}"
-       ng-show="$parent.annotation"
-       ><span ng-class="{'icon-minus': !collapsed,
-                         'icon-plus': !!collapsed}"></span></a>
-
-
-    <!-- Excerpts -->
-    <div class="excerpt"
-         ng-repeat="target in annotation.target"
-         ng-hide="collapsed">
-      <blockquote class="annotation-quote" ng-bind="target.quote" ng-hide="target.showDiff" />
-      <blockquote class="annotation-quote" ng-bind-html="target.trustedDiffHTML" ng-show="target.showDiff" />
-      <div class="small pull-right" ng-show="target.diffHTML">
-        <input type="checkbox" ng-model="target.showDiff" ng-click="$event.stopPropagation()"> Show differences</input>
-      </div>
-    </div>
-
-    <!-- Annotation -->
-    <div class="annotation"
-         name="annotation"
-         ng-model="annotation"
-         annotation-embedded="{{isEmbedded}}" />
-
-    <!-- Replies -->
-    <ul>
-      <li class="thread"
-          ng-class="{'collapsed': collapsed}"
-          ng-click="toggleCollapsed($event)"
-          ng-repeat="annotation in annotation.reply_list"
-          ng-transclude
-          />
-    </ul>
+<ul class="stream-list"
+    deep-count="count"
+    thread="threading.root"
+    thread-filter="search.query">
+  <li ng-show="threadFilter.active()"
+      ><span ng-pluralize
+             count="count('match')"
+             when="{'0': 'No results for “{{search.query}}”.',
+                    'one': 'Found one result.',
+                    'other': 'Found {} results.'}"></span>
+      <a href="" ng-click="clearSelection()">Clear search</a>.</li>
+  <li ng-show="!threadFilter.active() && selectedAnnotations"
+      ><span ng-pluralize
+             count="selectedAnnotationsCount"
+             when="{'0': 'No annotations selected',
+                    'one': 'Showing 1 selected annotation.',
+                    'other': 'Showing {} selected annotations.'}"></span>
+      <a href="" ng-click="clearSelection()">Clear selection</a>.</li>
+  <li ng-show="isStream">
+    <span class="ng-cloak dropdown">
+      <span role="button"
+            class="dropdown-toggle"
+            data-toggle="dropdown">
+        Sorted by {{sort.name | lowercase}}
+        <i class="icon-triangle small"></i>
+      </span>
+      <ul class="dropdown-menu pull-right" role="menu">
+        <li ng-click="sort.name = option"
+            ng-hide="option == 'Location' && !isEmbedded"
+            ng-repeat="option in ['Newest', 'Oldest', 'Location']"
+            >{{option}}</li>
+      </ul>
+    </span>
+  </li>
+  <li class="paper thread"
+      deep-count="count"
+      thread="child" thread-filter
+      thread-collapsed="!search.query"
+      ng-include="'thread.html'"
+      ng-mouseenter="activate(child.message)"
+      ng-mouseleave="activate()"
+      ng-repeat="child in vm.container.children
+                 | orderBy : sort.predicate : sort.reverse"
+      ng-show="vm.container && shouldShowThread(child) &&
+               (count('edit') || count('match') || !threadFilter.active())">
   </li>
 </ul>
+<!-- / Thread view -->

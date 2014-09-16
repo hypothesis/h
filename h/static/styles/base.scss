@@ -150,6 +150,7 @@ $input-border-radius: 2px;
 @mixin quote {
   color: $gray;
   font-family: $serif-font-family;
+  font-style: italic;
   padding: 0 .615em;
   border-left: 3px solid $gray-lighter;
 }

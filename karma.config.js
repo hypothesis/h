@@ -40,7 +40,6 @@ module.exports = function(config) {
       'h/static/scripts/vendor/moment-timezone.js',
       'h/static/scripts/vendor/moment-timezone-data.js',
       'h/static/scripts/vendor/Markdown.Converter.js',
-      'h/static/scripts/vendor/polyfills/raf.js',
       'h/static/scripts/vendor/sockjs-0.3.4.js',
       'h/static/scripts/vendor/uuid.js',
       'h/static/scripts/hypothesis-auth.js',

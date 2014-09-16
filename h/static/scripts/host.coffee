@@ -43,29 +43,17 @@ class Annotator.Host extends Annotator.Guest
 
     channel
 
-    .bind('showFrame', (ctx, routeName) =>
+    .bind('showFrame', (ctx) =>
       unless @drag.enabled
         @frame.css 'margin-left': "#{-1 * @frame.width()}px"
       @frame.removeClass 'annotator-no-transition'
       @frame.removeClass 'annotator-collapsed'
-
-      switch routeName
-        when 'editor'
-          this.publish 'annotationEditorShown'
-        when 'viewer'
-          this.publish 'annotationViewerShown'
     )
 
-    .bind('hideFrame', (ctx, routeName) =>
+    .bind('hideFrame', (ctx) =>
       @frame.css 'margin-left': ''
       @frame.removeClass 'annotator-no-transition'
       @frame.addClass 'annotator-collapsed'
-
-      switch routeName
-        when 'editor'
-          this.publish 'annotationEditorHidden'
-        when 'viewer'
-          this.publish 'annotationViewerHidden'
     )
 
     .bind('dragFrame', (ctx, screenX) => this._dragUpdate screenX)

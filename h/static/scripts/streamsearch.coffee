@@ -9,13 +9,18 @@ imports = [
 
 class StreamSearch
   this.inject = [
-    '$scope', '$rootScope',
-    'queryparser', 'searchfilter', 'streamfilter'
+    '$scope', '$rootScope', '$routeParams',
+    'annotator', 'queryparser', 'searchfilter', 'streamfilter'
   ]
   constructor: (
-     $scope,   $rootScope,
-     queryparser,   searchfilter,   streamfilter
+     $scope,   $rootScope,   $routeParams
+     annotator,   queryparser,   searchfilter,   streamfilter
   ) ->
+    # Clear out loaded annotations and threads
+    # XXX: Resolve threading, storage, and updater better for all routes.
+    annotator.plugins.Threading?.pluginInit()
+    annotator.plugins.Store?.annotations = []
+
     # Initialize the base filter
     streamfilter
       .resetFilter()
@@ -23,18 +28,21 @@ class StreamSearch
       .setPastDataHits(50)
 
     # Apply query clauses
+    $scope.search.query = $routeParams.q
     terms = searchfilter.generateFacetedFilter $scope.search.query
     queryparser.populateFilter streamfilter, terms
 
-    $scope.updater?.then (sock) ->
-      filter = streamfilter.getFilter()
-      sock.send(JSON.stringify({filter}))
+    $scope.isEmbedded = false
+    $scope.isStream = true
 
-    $rootScope.annotations = []
-    $rootScope.applyView "Document"  # Non-sensical, but best for the moment
-    $rootScope.applySort "Newest"
+    $scope.sort.name = 'Newest'
 
-    $scope.openDetails = (annotation) ->
+    $scope.shouldShowThread = (container) -> true
+
+    $scope.$watch 'updater', (updater) ->
+      updater?.then (sock) ->
+        filter = streamfilter.getFilter()
+        sock.send(JSON.stringify({filter}))
 
 
 angular.module('h.streamsearch', imports, configure)

@@ -1,34 +1,24 @@
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
-  @include pie-clearfix;
   font-family: $sans-font-family;
   font-weight: 300;
   position: relative;
 
-  &:hover fuzzytime a, &:hover .reply-count {
+  &:hover .annotation-timestamp, &:hover .reply-count {
     color: $link-color;
   }
 
-  .magicontrol.dropdown {
-    top: 4px;
-  }
-
-  fuzzytime {
+  .annotation-timestamp {
     line-height: 2;
-
-    a {
-      color: $text-color;
-      &:hover { color: $link-color-hover; }
-      &:focus { outline: 0; }
-    }
-  }
-
-  .reply-count {
     color: $text-color;
     &:hover { color: $link-color-hover; }
     &:focus { outline: 0; }
   }
+
+  .annotation-header { margin-bottom: .8em }
+  .annotation-section { margin: .8em 0 }
+  .annotation-footer { margin-top: .8em }
 
   .user {
     font-weight: bold;
@@ -39,80 +29,37 @@
       text-decoration: underline;
     }
   }
-
-  .buttonbar {
-    @include pie-clearfix;
-    margin: .25em 0;
-
-    .btn {
-      margin-right: .5em;
-    }
-  }
-
-  .tip {
-    @extend .small;
-    float: right;
-  }
-
-  .quote {
-    font-style: italic
-  }
-}
-
-// Temporary hack until sidebar and displayer are unified
-.annotation-displayer {
-  .user {
-    &:hover {
-      color: $link-color-hover;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-  }
-}
-
-
-//EXCERPT////////////////////////////////
-.excerpt {
-  margin-bottom: 1em;
-  position: relative;
-
-  .more, .less {
-    font-size: .9em;
-    font-family: $sans-font-family;
-    font-weight: 300;
-    display: block;
-    text-align: right;
-  }
 }
 
 .annotation-quote {
   @include quote;
 }
 
-.icon-markdown {
-  color: $text-color;
-  position: absolute;
-  left: 9em;
-  line-height: 1.5;
-  top: 0;
+.annotation-citation-domain {
+  color: $gray-light;
+  font-size: .923em;
 }
 
-//MAGICONTROL////////////////////////////////
-.magicontrol {
-  @include transition(opacity);
-  @include transition-duration(.15s);
-  margin: 0 .4em;
-  opacity: 0;
+.icon-markdown {
+  color: $text-color;
+  line-height: 1.4;
+  margin-left: .5em;
+}
 
-  &.open, :hover > & {
-    @include transition-duration(.15s);
-    opacity: 1;
+.magicontrol {
+  margin-right: .8em;
+  color: $gray-lighter;
+
+  &.dropdown {
+    top: 4px;
+  }
+
+  .annotation:hover & {
+    color: $link-color;
   }
 }
 
 .share-dialog {
-  display: none;
-
   a {
     float: left;
     line-height: 1.4;
@@ -127,15 +74,5 @@
   input {
     padding: 0;
     width: 100%;
-  }
-}
-
-.stream-list {
-  & > * {
-    margin-bottom: .72em;
-  }
-
-  .card-emphasis {
-    @include box-shadow(6px 6px 8px -2px $gray-light);
   }
 }

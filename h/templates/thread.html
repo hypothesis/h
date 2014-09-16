@@ -1,0 +1,46 @@
+<a href="" class="threadexp"
+   title="{{vm.collapsed && 'Expand' || 'Collapse'}}"
+   ng-if="vm.container.parent.parent"
+   ><span ng-class="{'icon-plus': !!vm.collapsed,
+                     'icon-minus': !vm.collapsed}"></span></a>
+
+<!-- Annotation -->
+<div ng-if="vm.container && !vm.container.message">
+  <em>Message not available.</em>
+</div>
+<article class="annotation thread-message"
+         name="annotation"
+         annotation="vm.container.message"
+         annotation-embedded="{{isEmbedded}}"
+         ng-if="vm.container.message"
+         ng-show="threadFilter.check(vm.container)">
+</article>
+
+<!-- Reply count -->
+<a class="reply-count small"
+   href=""
+   ng-if="!threadFilter.active() || count('message') == count('match')"
+   ng-pluralize count="count('message') - 1"
+   when="{'0': '', one: '1 reply', other: '{} replies'}"></a>
+<a class="load-more small"
+   href=""
+   ng-click="threadFilter.active(false)"
+   ng-if="vm.container.message.id"
+   ng-pluralize count="count('message') - count('match')"
+   when="{'0': '',
+         one: 'View one more in conversation',
+         other: 'View {} more in conversation'}"
+   ></a>
+
+<!-- Replies -->
+<ul class="thread-list" ng-hide="vm.collapsed">
+  <li class="thread"
+      deep-count="count"
+      thread="child" thread-filter
+      ng-include="'thread.html'"
+      ng-init="child.message.id || threadFilter.active(false)"
+      ng-repeat="child in vm.container.children
+                 | orderBy : 'message.updated' : true"
+      ng-show="count('edit') || count('match') || !threadFilter.active()">
+  </li>
+</ul>

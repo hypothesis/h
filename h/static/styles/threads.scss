@@ -1,49 +1,52 @@
-@import 'base';
-
 $thread-padding: 1em;
 $threadexp-width: .6em;
+
+.stream-list {
+  & > * {
+    margin-bottom: .72em;
+  }
+
+  .card-emphasis {
+    box-shadow: 6px 6px 8px -2px $gray-light;
+  }
+}
+
+.thread-list {
+  margin-top: 0.5em;
+}
 
 .thread {
   cursor: pointer;
   position: relative;
-
-  & > * {
-    @include pie-clearfix;
-  }
 
   & > ul {
     padding-left: $thread-padding + .15em;
     margin-left: -$thread-padding;
   }
 
-  .load-more {
-    @include pie-clearfix;
-    font-family: $sans-font-family;
-    font-weight:bold;
-    font-size: .8em;
+  .reply-count {
+    color: $text-color;
+    &:focus { outline: 0; }
+  }
+
+  &:hover .reply-count {
+    color: $link-color;
+
+    &:hover, &:focus {
+      color: $link-color-hover;
+    }
   }
 
   .thread {
     border-left: 1px dotted $gray-light;
-    height: 100%;
     padding: 0;
     padding-left: $thread-padding;
 
-    &.collapsed {
+    &.thread-collapsed {
       border-color: transparent;
 
-      & > .annotation {
-        .body {
-          display: none;
-        }
-
-        .magicontrol {
-          display: none;
-        }
-
-        .reply-count {
-          font-style: italic;
-        }
+      & > article markdown {
+        display: none;
       }
     }
   }
@@ -73,43 +76,32 @@ $threadexp-width: .6em;
     }
   }
 
-  .annotation {
-    &.squished {
-      padding-left: 0;
-    }
-  }
-
-  &.collapsed {
+  &.thread-collapsed {
     &:hover {
       background-color: $gray-lightest;
     }
 
     & > ul {
-      max-height: 0;
-      overflow: hidden;
+      display: none;
     }
 
-    & > .annotation {
-      markdown > div > * {
-        display: none;
-      }
-
-      markdown > div > *:first-child {
+    & > .thread-message {
+      .styled-text > * { display: none }
+      .styled-text *:first-child {
         display: block;
+        margin: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         -o-text-overflow: ellipsis;
         white-space: nowrap;
       }
 
-      .indicators {
-        margin-right: .25em;
-      }
+      .thread &, .thread & header, .thread & section { margin: 0 }
+      .thread & footer { display: none }
     }
   }
 }
 
-.annotation-citation-domain {
-  color: $gray-light;
-  font-size: .923em;
+.thread-message {
+  margin-bottom: .8em;
 }
