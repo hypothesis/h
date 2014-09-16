@@ -137,8 +137,9 @@ class App
 
       # Sort out which annotations should remain in place.
       user = $scope.persona
+      view = annotator.socialView.name
       cull = (acc, annotation) ->
-        if annotator.tool is 'highlight' and annotation.user != user
+        if view is 'single-player' and annotation.user != user
           acc.drop.push annotation
         else if authorizeAction 'read', annotation, user
           acc.keep.push annotation
