@@ -433,11 +433,8 @@ class ViewFilter
       match: (term, value) -> return value is term
     user:
       autofalse: (annotation) -> return not annotation.user?
-      value: (annotation) ->
-        # XXX: Hopefully there is a cleaner solution
-        # XXX: To reach persona filter from here
-        return (annotation.user?.match /^acct:([^@]+)@(.+)/)?[1]
-      match: (term, value) -> return value is term
+      value: (annotation) -> return annotation.user
+      match: (term, value) -> return value.indexOf(term) > -1
     any:
       fields: ['quote', 'text', 'tag', 'user']
 
