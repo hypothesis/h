@@ -199,7 +199,9 @@ AnnotationController = [
         vm.render()
 
     # Start editing brand new annotations immediately
-    unless model.id? then if model.references or not highlight then vm.edit()
+    unless model.id?
+      if model.references or not highlight or not model.target.length
+        vm.edit()
 
     this
 ]
