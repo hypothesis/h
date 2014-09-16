@@ -2,7 +2,7 @@
 # @ngdoc type
 # @name threadFilter.ThreadFilterController
 #
-# @property {Object} hits The number of messages that match the filters.
+# @property {boolean} match True if the last checked message was a match.
 #
 # @description
 # `ThreadFilterController` provides an API for maintaining filtering over
@@ -11,7 +11,7 @@
 ThreadFilterController = [
   'viewFilter'
   (viewFilter) ->
-    @hits = 0
+    @match = false
 
     @_active = false
     @_children = []
@@ -86,18 +86,14 @@ ThreadFilterController = [
     # @description
     # Check whether a message container carries a message matching the
     # configured filters. If filtering is not active then the result is
-    # always `true`.  Updates the `hits` property to reflect changes in match
-    # status of the container by caching the result is the `__filterResult`
-    # property of the container.
+    # always `true`. Updates the `match` property to reflect the result.
     ###
     this.check = (container) ->
       unless container?.message then return false
       if this.active()
-        match = !!viewFilter.filter([container.message], @_filters).length
+        @match = !!viewFilter.filter([container.message], @_filters).length
       else
-        match = true
-      @hits += (match - !!container.__filterResult)
-      container.__filterResult = match
+        @match = true
 
     ###*
     # @ngdoc method
@@ -141,19 +137,22 @@ ThreadFilterController = [
 # The threadFilter directive utilizes the {@link searchfilter searchfilter}
 # service to parse the expression passed in the directive attribute as a
 # faceted search query and configures its controller with the resulting
-# filters. It watches the `hits` property of the controller and updates
+# filters. It watches the `match` property of the controller and updates
 # its thread's message count under the 'filter' key.
 ###
 threadFilter = [
   '$parse', 'searchfilter'
   ($parse,   searchfilter) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, counter]) ->
-      scope.$watch (-> ctrl.hits), (newValue=0, oldValue=0) ->
-        counter?.count 'match', newValue - oldValue
+      if counter?
+        scope.$watch (-> ctrl.match), (match, old) ->
+          if match and not old
+            counter.count 'match', 1
+          else if old
+            counter.count 'match', -1
 
-      scope.$on '$destroy', ->
-        if thread.container then delete thread.container.__filterResult
-        counter?.count 'match', -ctrl.hits
+        scope.$on '$destroy', ->
+          if ctrl.match then counter.count 'match', -1
 
       if parentCtrl = elem.parent().controller('threadFilter')
         ctrl.filters parentCtrl.filters()
