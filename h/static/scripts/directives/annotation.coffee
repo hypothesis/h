@@ -51,7 +51,6 @@ AnnotationController = [
     highlight = annotator.tool is 'highlight'
     model = $scope.annotationGet()
     original = null
-    vm = this
 
     ###*
     # @ngdoc method
@@ -82,7 +81,7 @@ AnnotationController = [
     # @description Switches the view to an editor.
     ###
     this.edit = ->
-      drafts.add model, -> vm.revert()
+      drafts.add model, => this.revert()
       @action = if model.id? then 'edit' else 'create'
       @editing = true
       @preview = 'no'
@@ -183,25 +182,25 @@ AnnotationController = [
     $scope.$on '$destroy', ->
       drafts.remove model
 
-    # Render on updates.
-    $scope.$watch (-> model.updated), (updated) ->
+    # Render on updates..l
+    $scope.$watch (-> model.updated), (updated) =>
       if updated then drafts.remove model
-      vm.render()
+      this.render()
 
     # Update once logged in.
-    $scope.$watch (-> model.user), (user) ->
+    $scope.$watch (-> model.user), (user) =>
       if highlight and not model.references
         if user
           annotator.publish 'annotationCreated', model
         else
-          drafts.add model, -> vm.revert()
+          drafts.add model, => this.revert()
       else
-        vm.render()
+        this.render()
 
     # Start editing brand new annotations immediately
     unless model.id?
       if model.references or not highlight or not model.target.length
-        vm.edit()
+        this.edit()
 
     this
 ]
