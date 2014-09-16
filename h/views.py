@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import re
 
 from pyramid import httpexceptions
 from pyramid.view import view_config
@@ -82,7 +83,11 @@ def stream(context, request):
     query = None
 
     if stream_type == 'user':
-        query = {'q': 'user:{}'.format(stream_key)}
+        parts = re.match(r'^acct:([^@]+)@(.*)$', stream_key)
+        if parts is not None and parts.groups()[1] == request.domain:
+            query = {'q': 'user:{}'.format(parts.groups()[0])}
+        else:
+            query = {'q': 'user:{}'.format(stream_key)}
     elif stream_type == 'tag':
         query = {'q': 'tag:{}'.format(stream_key)}
 
