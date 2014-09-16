@@ -54,17 +54,39 @@ AnnotationController = [
 
     ###*
     # @ngdoc method
+    # @name annotation.AnnotationController#isComment.
+    # @returns {boolean} True if the annotation is a comment.
+    ###
+    this.isComment = ->
+      not (model.target.length or model.references)
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#isHighlight.
+    # @returns {boolean} True if the annotation is a highlight.
+    ###
+    this.isHighlight = ->
+      not (model.text or model.deleted or model.tags.length)
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#isPrivate
+    # @returns {boolean} True if the annotation is private to the current user.
+    ###
+    this.isPrivate = ->
+      model.user and angular.equals(model.permissions?.read or [], [model.user])
+
+    ###*
+    # @ngdoc method
     # @name annotation.AnnotationController#authorize
     # @param {string} action The action to authorize.
-    # @param {string=} principal Defaults to the current user.
-    # @returns {boolean} True if the action is authorized for the principal.
-    # @description Checks whether the given principal can perform an action
-    # on the annotation.
+    # @returns {boolean} True if the action is authorized for the current user.
+    # @description Checks whether the current user can perform an action on
+    # the annotation.
     ###
-    this.authorize = (action, principal) ->
+    this.authorize = (action) ->
       return false unless model?
-      return true if 'group:__world__' in (model.permissions?[action] or [])
-      annotator.plugins.Permissions?.authorize action, model, principal
+      annotator.plugins.Permissions?.authorize action, model
 
     ###*
     # @ngdoc method
@@ -188,7 +210,7 @@ AnnotationController = [
 
     # Update once logged in.
     $scope.$watch (-> model.user), (user) =>
-      if highlight and not model.references
+      if highlight and this.isHighlight()
         if user
           annotator.publish 'annotationCreated', model
         else
@@ -197,9 +219,7 @@ AnnotationController = [
         this.render()
 
     # Start editing brand new annotations immediately
-    unless model.id?
-      if model.references or not highlight or not model.target.length
-        this.edit()
+    unless model.id? or this.isHighlight() then this.edit()
 
     this
 ]

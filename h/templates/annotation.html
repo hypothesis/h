@@ -5,14 +5,9 @@
   <!-- User -->
   <span ng-if="!vm.editing && vm.annotation.user">
     <username user="vm.annotation.user"></username>
-    <i class="small icon-locked"
-       ng-hide="vm.authorize('read', 'group:__world__')"></i>
-    <i class="small icon-highlighter2"
-       ng-hide="vm.annotation.text ||
-                vm.annotation.deleted ||
-                vm.annotation.tags.length"></i>
-    <i class="small icon-comment3"
-       ng-hide="vm.annotation.target.length || vm.annotation.references"></i>
+    <i class="small icon-locked" ng-show="vm.isPrivate()"></i>
+    <i class="small icon-highlighter2" ng-show="vm.isHighlight()"></i>
+    <i class="small icon-comment3" ng-show="vm.isComment()"></i>
     <span class="annotation-citation"
           ng-if="!vm.embedded"
           ng-show="vm.document.title">
