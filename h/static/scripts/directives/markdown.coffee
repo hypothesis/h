@@ -1,4 +1,4 @@
-# This directive controls both the rendering and display of markdown in annotations, as well as 
+# This directive controls both the rendering and display of markdown in annotations, as well as
 # the markdown editor interface.
 
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
@@ -11,14 +11,11 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
     scope.returnSelection = ->
       # Maybe get selections from other parts of the text? Such as the quote or a reply?
       ourIframeSelection = window.getSelection().toString()
-      parentDocumentSelection = parent.window.getSelection().toString()
       if input[0].selectionStart != undefined
         startPos = input[0].selectionStart
         endPos = input[0].selectionEnd
         if ourIframeSelection
           selectedText = ourIframeSelection
-        else if parentDocumentSelection
-          selectedText = parentDocumentSelection
         else
           selectedText = input[0].value.substring(startPos, endPos)
         textBefore = input[0].value.substring(0, (startPos))

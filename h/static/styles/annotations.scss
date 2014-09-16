@@ -43,7 +43,12 @@
 }
 
 
-// Markdown Controls ////////////////////////
+// Markdown Editor Controls ////////////////////////
+privacy {
+  position: relative;
+  top: 2px;
+}
+
 .markdown {
   .preview {
     overflow: auto;

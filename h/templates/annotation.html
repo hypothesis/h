@@ -20,17 +20,16 @@
             ng-show="vm.document.domain != vm.document.title"
             >({{vm.document.domain}})</span>
     </span>
+    <!-- Editing controls -->
+    <aside class="pull-right" ng-if="vm.editing">
+      <privacy ng-click="$event.stopPropagation()"
+               ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
+               ng-model="vm.annotation.permissions"
+               class="dropdown privacy pull-right"
+               name="privacy" />
+    </aside>
+    <!-- / Editing controls -->
   </span>
-
-  <!-- Editing controls -->
-  <aside class="pull-right" ng-if="vm.editing">
-    <privacy ng-click="$event.stopPropagation()"
-             ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
-             ng-model="vm.annotation.permissions"
-             class="dropdown privacy pull-right"
-             name="privacy" />
-  </aside>
-  <!-- / Editing controls -->
 
   <!-- Timestamp -->
   <a class="annotation-timestamp small pull-right"
