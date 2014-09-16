@@ -86,10 +86,8 @@ $threadexp-width: .6em;
     }
 
     & > .thread-message {
-      .thread &, .thread & header, .thread & section { margin: 0 }
-      .thread & footer { display: none }
-      [markdown] > div > * { display: none }
-      [markdown] > div > *:first-child {
+      .styled-text > * { display: none }
+      .styled-text *:first-child {
         display: block;
         margin: 0;
         overflow: hidden;
@@ -97,6 +95,9 @@ $threadexp-width: .6em;
         -o-text-overflow: ellipsis;
         white-space: nowrap;
       }
+
+      .thread &, .thread & header, .thread & section { margin: 0 }
+      .thread & footer { display: none }
     }
   }
 }
