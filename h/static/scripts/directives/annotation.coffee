@@ -281,5 +281,5 @@ annotation = ['annotator', 'documentHelpers', (annotator, documentHelpers) ->
 
 
 angular.module('h.directives')
-.controller('AnnotationController', AnnotationController).
-directive('annotation', annotation)
+.controller('AnnotationController', AnnotationController)
+.directive('annotation', annotation)
