@@ -246,9 +246,9 @@ class Annotator.Guest extends Annotator
       method: "showEditor"
       params: annotation.$$tag
 
-  onAnchorMouseover: angular.noop
-  onAnchorMouseout: angular.noop
-  onAnchorMousedown: angular.noop
+  onAnchorMouseover: ->
+  onAnchorMouseout: ->
+  onAnchorMousedown: ->
 
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
@@ -331,7 +331,7 @@ class Annotator.Guest extends Annotator
       method: 'addToken'
       params: token
 
-  onAdderMousedown: angular.noop
+  onAdderMousedown: ->
 
   onAdderClick: (event) =>
     event.preventDefault()
