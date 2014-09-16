@@ -55,7 +55,8 @@
    title="Parsed as Markdown"
    href="https://guides.github.com/features/mastering-markdown/"
    ng-if="vm.editing"></a>
-  <privacy ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
+  <privacy ng-click="$event.stopPropagation()"
+           ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
            ng-model="vm.annotation.permissions"
            class="dropdown privacy pull-right"
            name="privacy" />
@@ -112,9 +113,7 @@
 </div>
 <!-- / Tags -->
 
-<footer class="form-actions"
-        ng-click="$event.stopPropagation()"
-        ng-switch="vm.action">
+<footer class="form-actions" ng-switch="vm.action">
   <div ng-show="vm.annotation.id" ng-switch-when="view">
     <a class="small magicontrol" href="" title="Reply"
        ng-click="vm.reply()"

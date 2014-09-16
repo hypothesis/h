@@ -24,7 +24,7 @@
    when="{'0': '', one: '1 reply', other: '{} replies'}"></a>
 <a class="load-more small"
    href=""
-   ng-click="threadFilter.active(false); $event.stopPropagation()"
+   ng-click="threadFilter.active(false)"
    ng-if="vm.container.message.id"
    ng-pluralize count="count('message') - count('match')"
    when="{'0': '',

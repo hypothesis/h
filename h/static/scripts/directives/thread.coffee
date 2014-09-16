@@ -44,8 +44,8 @@ ThreadController = [
 # the collapsed state of the thread.
 ###
 thread = [
-  '$document', '$parse', '$window', 'render',
-  ($document,   $parse,   $window,   render) ->
+  '$parse', '$window', 'render',
+  ($parse,   $window,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter]) ->
       # Toggle collapse on click.
       elem.on 'click', (event) ->
@@ -61,9 +61,9 @@ thread = [
         if sel.containsNode(event.target, true) and sel.toString().length
           return
 
-        # Ignore if the user just activated a form element.
-        if $document.activeElement is event.target
-          return
+        # Ignore if the user clicked a link
+        if event.target.tagName in ['A', 'INPUT']
+          return unless angular.element(event.target).hasClass 'reply-count'
 
         # Ignore a collapse if edit interactions are present in the view.
         if counter?.count('edit') > 0 and not ctrl.collapsed
