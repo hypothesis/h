@@ -421,6 +421,7 @@ class App
           $scope.reloadAnnotations()
 
     $scope.loadMore = (number) ->
+      unless streamfilter.getPastData().hits then return
       unless $scope.updater? then return
       sockmsg =
         messageType: 'more_hits'
