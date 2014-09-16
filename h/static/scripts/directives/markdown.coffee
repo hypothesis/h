@@ -1,5 +1,11 @@
+###*
+# @ngdoc directive
+# @name markdown
+# @restrict C
+# @description
 # This directive controls both the rendering and display of markdown in annotations, as well as
-# the markdown editor interface.
+# the markdown editor.
+###
 
 markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
