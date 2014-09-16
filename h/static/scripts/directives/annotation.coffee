@@ -143,7 +143,6 @@ AnnotationController = [
         when 'delete', 'edit'
           annotator.publish 'annotationUpdated', model
 
-      this.render()
       @editing = false
       @action = 'view'
 
