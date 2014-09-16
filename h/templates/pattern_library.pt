@@ -593,6 +593,181 @@
       </div>
       <div class="pattern-library-example">
         <div class="pattern-library-example-header">
+          <h1>Annotation Card</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <ul>
+          <li class="paper thread">
+            <article class="annotation thread-message">
+              <header>
+                <span class="">
+                  <username class="">
+                    <span class="user">aron</span>
+                  </username>
+                  <i class="small icon-locked ng-hide"></i>
+                  <i class="small icon-highlighter2 ng-hide"></i>
+                  <i class="small icon-comment3 ng-hide"></i>
+                </span>
+                <fuzzytime class="small pull-right ng-pristine ng-valid">
+                  <a target="_blank" href="" title="Friday, August 22 2014 10:07 AM" class="">25 days ago</a>
+                </fuzzytime>
+              </header>
+              <section class="">
+                <blockquote class="annotation-quote">Hypothes.is is an open source effort licensed under a 2-Clause BSD License, sometimes referred to as the "Simplified BSD License" or the "FreeBSD License".</blockquote>
+              </section>
+              <section name="text" markdown="" class="" readonly="readonly">
+                <textarea class="form-input form-textarea ng-hide"></textarea>
+                <div class="styled-text ng-binding"><p>This is the first comment on the post. It's an annotation on some text. This comment is a couple of sentences because we hope people will write substantial comments.</p></div>
+              </section>
+                <div class="tags tags-read-only">
+                  <ul class="tag-list">
+                    <li class="tag-item">
+                      <a href="/stream?q=tag:apples" target="_blank" class="">apples</a>
+                    </li>
+                    <li class="tag-item">
+                      <a href="/stream?q=tag:'oranges'" target="_blank" class="">oranges</a>
+                    </li>
+                    <li class="tag-item">
+                      <a href="/stream?q=tag:'pears'" target="_blank" class="">pears</a>
+                    </li>
+                  </ul>
+                </div>
+                <footer class="form-actions">
+                  <div class="">
+                    <a class="small magicontrol" href="" title="Reply"><i class="icon-reply"></i> Reply</a>
+                    <a class="small magicontrol" href="" title="Share"><i class="icon-export"></i> Share</a>
+                    <a class="small magicontrol" title="Edit"><i class="icon-copy"></i> Edit</a>
+                    <a class="small magicontrol" title="Delete"><i class="icon-x"></i> Delete…</a>
+                    <div class="share-dialog ng-hide">
+                      <a class="icon-export" target="_blank" href="http://localhost:5000/a/Vh9tTm6UQOuRsrnCvHYb4g"></a>
+                      <div>
+                        <input type="text" value="http://localhost:5000/a/Vh9tTm6UQOuRsrnCvHYb4g" readonly="">
+                      </div>
+                    </div>
+                  </div>
+                </footer>
+              </article>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Annotation Card with children</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <ul>
+          <li class="paper thread">
+            <article class="annotation thread-message">
+              <header>
+                <span class="">
+                  <username class="">
+                    <span class="user">aron</span>
+                  </username>
+                  <i class="small icon-locked ng-hide"></i>
+                  <i class="small icon-highlighter2 ng-hide"></i>
+                  <i class="small icon-comment3 ng-hide"></i>
+                </span>
+                <fuzzytime class="small pull-right ng-pristine ng-valid">
+                  <a target="_blank" href="" title="Friday, August 22 2014 10:07 AM" class="">25 days ago</a>
+                </fuzzytime>
+              </header>
+              <section class="">
+                <blockquote class="annotation-quote">Hypothes.is is an open source effort licensed under a 2-Clause BSD License, sometimes referred to as the "Simplified BSD License" or the "FreeBSD License".</blockquote>
+              </section>
+              <section name="text" markdown="" class="" readonly="readonly">
+                <textarea class="form-input form-textarea ng-hide"></textarea>
+                <div class="styled-text ng-binding"><p>This is the first comment on the post. It's an annotation on some text. This comment is a couple of sentences because we hope people will write substantial comments.</p></div>
+              </section>
+                <div class="tags tags-read-only">
+                  <ul class="tag-list">
+                    <li class="tag-item">
+                      <a href="/stream?q=tag:apples" target="_blank" class="">apples</a>
+                    </li>
+                    <li class="tag-item">
+                      <a href="/stream?q=tag:'oranges'" target="_blank" class="">oranges</a>
+                    </li>
+                    <li class="tag-item">
+                      <a href="/stream?q=tag:'pears'" target="_blank" class="">pears</a>
+                    </li>
+                  </ul>
+                </div>
+                <footer class="form-actions">
+                  <div class="">
+                    <a class="small magicontrol" href="" title="Reply"><i class="icon-reply"></i> Reply</a>
+                    <a class="small magicontrol" href="" title="Share"><i class="icon-export"></i> Share</a>
+                    <a class="small magicontrol" title="Edit"><i class="icon-copy"></i> Edit</a>
+                    <a class="small magicontrol" title="Delete"><i class="icon-x"></i> Delete…</a>
+                    <div class="share-dialog ng-hide">
+                      <a class="icon-export" target="_blank" href="http://localhost:5000/a/Vh9tTm6UQOuRsrnCvHYb4g"></a>
+                      <div>
+                        <input type="text" value="http://localhost:5000/a/Vh9tTm6UQOuRsrnCvHYb4g" readonly="">
+                      </div>
+                    </div>
+                  </div>
+                </footer>
+              </article>
+
+              <a class="reply-count small" href="">1 reply</a>
+              <a class="load-more small" href=""></a>
+
+              <ul class="thread-list">
+                <li class="thread" deep-count="count" thread="child" thread-filter="">
+                  <a href="" class="threadexp" title="Collapse"><span class="icon-minus"></span></a>
+
+                  <article class="annotation thread-message" name="annotation" annotation="vm.container.message" annotation-embedded="true" >
+                    <header>
+                      <span class="">
+                        <username user="vm.annotation.user" class=""><span class="user ng-binding">aron</span></username>
+                        <i class="small icon-locked ng-hide"></i>
+                        <i class="small icon-highlighter2 ng-hide"></i>
+                      </span>
+
+                      <fuzzytime class="small pull-right ng-pristine ng-valid"><a target="_blank" href="" title="Tuesday, August 19 2014 5:36 PM" class="ng-binding">28 days ago</a></fuzzytime>
+                    </header>
+
+                    <section name="text" markdown="" class="ng-pristine ng-valid" readonly="readonly">
+                      <textarea class="form-input form-textarea ng-hide"></textarea>
+                      <div class="styled-text ng-binding"><p>This is a second child comment.</p></div>
+
+                    </section>
+
+                    <div class="tags tags-read-only">
+                      <ul class="tag-list">
+                        <li class="tag-item">
+                          <a href="/stream?q=tag:'tag'" target="_blank" class="ng-binding">tag</a>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <footer class="form-actions">
+                      <div class="">
+                        <a class="small magicontrol" href="" title="Reply"><i class="icon-reply"></i> Reply</a>
+                        <a class="small magicontrol" href="" title="Share"><i class="icon-export"></i> Share</a>
+                        <a class="small magicontrol ng-hide" href="" title="Edit"><i class="icon-copy"></i> Edit</a>
+                        <a class="small magicontrol ng-hide" href="" title="Delete"><i class="icon-x"></i> Delete…</a>
+                        <div class="share-dialog ng-hide">
+                          <a class="icon-export" target="_blank" href="http://localhost:5000/a/a5dDt67oQBSKhgqwGcgLuw"></a>
+                          <div>
+                            <input type="text" value="http://localhost:5000/a/a5dDt67oQBSKhgqwGcgLuw" readonly="">
+                          </div>
+                        </div>
+                      </div>
+                    </footer>
+                  </article>
+
+                  <a class="reply-count small" href=""></a>
+                  <ul class="thread-list">
+                  </ul>
+                </li>
+              </ul>
+
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
           <h1>Heatmap tabs</h1>
         </div>
         <div class="pattern-library-example-content">
