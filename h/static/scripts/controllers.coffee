@@ -364,14 +364,8 @@ class AnnotationViewer
 
 
 class Viewer
-  this.$inject = [
-    '$filter', '$routeParams', '$sce', '$scope',
-    'annotator', 'searchfilter', 'viewFilter'
-  ]
-  constructor: (
-     $filter,   $routeParams,   $sce,   $scope,
-     annotator,   searchfilter,   viewFilter
-  ) ->
+  this.$inject = ['$scope', 'annotator']
+  constructor:   ( $scope,   annotator ) ->
     # Tells the view that these annotations are embedded into the owner doc
     $scope.isEmbedded = true
     $scope.isStream = true
