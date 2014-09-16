@@ -359,7 +359,7 @@ class DraftProvider
   _drafts: null
 
   constructor: ->
-    this._drafts = []
+    @_drafts = []
 
   $get: -> this
 
