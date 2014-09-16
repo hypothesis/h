@@ -5,18 +5,15 @@
   font-weight: 300;
   position: relative;
 
-  &:hover fuzzytime a, &:hover .reply-count {
+  &:hover .annotation-timestamp, &:hover .reply-count {
     color: $link-color;
   }
 
-  fuzzytime {
+  .annotation-timestamp {
     line-height: 2;
-
-    a {
-      color: $text-color;
-      &:hover { color: $link-color-hover; }
-      &:focus { outline: 0; }
-    }
+    color: $text-color;
+    &:hover { color: $link-color-hover; }
+    &:focus { outline: 0; }
   }
 
   .annotation-header { margin-bottom: .8em }

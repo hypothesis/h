@@ -239,50 +239,6 @@ username = ['$filter', '$window', ($filter, $window) ->
   template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
 ]
 
-fuzzytime = ['$filter', '$window', ($filter, $window) ->
-  link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
-
-    elem
-    .find('a')
-    .bind 'click', (event) ->
-      event.stopPropagation()
-
-    ctrl.$render = ->
-      scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
-
-      # Determining the timezone name
-      timezone = jstz.determine().name()
-      # The browser language
-      userLang = navigator.language || navigator.userLanguage
-
-      # Now to make a localized hint date, set the language
-      momentDate = moment ctrl.$viewValue
-      momentDate.lang(userLang)
-
-      # Try to localize to the browser's timezone
-      try
-        scope.hint = momentDate.tz(timezone).format('LLLL')
-      catch error
-        # For invalid timezone, use the default
-        scope.hint = momentDate.format('LLLL')
-
-    timefunct = ->
-      $window.setInterval =>
-        scope.ftime = ($filter 'fuzzyTime') ctrl.$viewValue
-        scope.$digest()
-      , 5000
-
-    scope.timer = timefunct()
-
-    scope.$on '$destroy', ->
-      $window.clearInterval scope.timer
-
-  require: '?ngModel'
-  restrict: 'E'
-  scope: true
-  template: '<a target="_blank" href="{{shared_link}}" title="{{hint}}">{{ftime | date:mediumDate}}</a>'
-]
 
 whenscrolled = ->
   link: (scope, elem, attr) ->
@@ -308,7 +264,6 @@ match = ->
 angular.module('h.directives', imports)
 .directive('formInput', formInput)
 .directive('formValidate', formValidate)
-.directive('fuzzytime', fuzzytime)
 .directive('markdown', markdown)
 .directive('privacy', privacy)
 .directive('tabReveal', tabReveal)
