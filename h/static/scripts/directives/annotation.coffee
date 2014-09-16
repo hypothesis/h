@@ -58,7 +58,7 @@ AnnotationController = [
     # @returns {boolean} True if the annotation is a comment.
     ###
     this.isComment = ->
-      not (model.target.length or model.references)
+      not (model.target?.length or model.references?.length)
 
     ###*
     # @ngdoc method
@@ -66,7 +66,8 @@ AnnotationController = [
     # @returns {boolean} True if the annotation is a highlight.
     ###
     this.isHighlight = ->
-      not (model.text or model.deleted or model.tags.length)
+      model.target?.length and not model.references?.length and
+      not (model.text or model.deleted or model.tags?.length)
 
     ###*
     # @ngdoc method
@@ -219,7 +220,7 @@ AnnotationController = [
         this.render()
 
     # Start editing brand new annotations immediately
-    unless model.id? or this.isHighlight() then this.edit()
+    unless model.id? or (highlight and this.isHighlight()) then this.edit()
 
     this
 ]
