@@ -165,7 +165,10 @@ class QueryParser
   rules:
     user:
       formatter: (user) ->
-        'acct:' + user + '@' + window.location.hostname
+        if user.indexOf('acct:') != 0
+          'acct:' + user + '@' + window.location.hostname
+        else
+          user
       path: '/user'
       exact_match: true
       case_sensitive: false
