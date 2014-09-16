@@ -1,4 +1,4 @@
-<header>
+<header class="annotator-header">
   <!-- Deletion notice -->
   <span ng-if="!vm.editing && vm.annotation.deleted">Annotation deleted.</span>
 
@@ -31,7 +31,7 @@
 </header>
 
 <!-- Excerpts -->
-<section ng-repeat="target in vm.annotation.target">
+<section class="annotator-target" ng-repeat="target in vm.annotation.target">
   <blockquote class="annotation-quote"
               ng-repeat="target in vm.annotation.target"
               ng-bind-html="target.quote"
@@ -64,7 +64,7 @@
 <!-- / Editing controls -->
 
 <!-- Body -->
-<section class="tabbable"
+<section class="annotation-body tabbable"
          ng-model="vm.preview"
          ng-if="vm.editing">
   <div class="tab-pane" data-value="no" data-title="Write">
@@ -86,6 +86,7 @@
 </section>
 
 <section name="text"
+         class="annotation-body"
          ng-if="!vm.editing"
          ng-model="vm.annotation.text"
          ng-readonly="true"
