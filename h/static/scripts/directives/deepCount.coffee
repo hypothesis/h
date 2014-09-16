@@ -12,6 +12,7 @@
 DeepCountController = [
   '$element', '$scope', 'render',
   ($element,   $scope,   render) ->
+    cancelFrame = null
     counters = {}
     parent = $element.parent().controller('deepCount')
 
@@ -28,7 +29,7 @@ DeepCountController = [
     # Modify an aggregate when called with an argument and return its current
     # value.
     ###
-    this.count = do -> __cancelFrame = null; (key, delta) ->
+    this.count = (key, delta) ->
       if delta is undefined or delta is 0 then return counters[key] or 0
       counters[key] ?= 0
       counters[key] += delta
@@ -40,10 +41,10 @@ DeepCountController = [
         parent.count key, delta
       else
         # Debounce digests from the top.
-        if __cancelFrame then __cancelFrame()
-        __cancelFrame = render ->
+        if cancelFrame then __cancelFrame()
+        cancelFrame = render ->
           $scope.$digest()
-          __cancelFrame = null
+          cancelFrame = null
 
       counters[key] or 0
 
