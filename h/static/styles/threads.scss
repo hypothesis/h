@@ -1,37 +1,6 @@
 $thread-padding: 1em;
 $threadexp-width: .6em;
 
-.magicontrol {
-  margin: 0 .4em;
-  opacity: 0;
-
-  &.dropdown {
-    top: 4px;
-  }
-
-  :hover > & {
-    opacity: 1;
-  }
-}
-
-.share-dialog {
-  a {
-    float: left;
-    line-height: 1.4;
-    margin-right: .5em;
-    vertical-align: middle;
-  }
-
-  div {
-    overflow: hidden;
-  }
-
-  input {
-    padding: 0;
-    width: 100%;
-  }
-}
-
 .stream-list {
   & > * {
     margin-bottom: .72em;
@@ -55,13 +24,6 @@ $threadexp-width: .6em;
   & > ul {
     padding-left: $thread-padding + .15em;
     margin-left: -$thread-padding;
-  }
-
-  .load-more {
-    @include pie-clearfix;
-    font-family: $sans-font-family;
-    font-weight:bold;
-    font-size: .8em;
   }
 
   .reply-count {
@@ -118,13 +80,13 @@ $threadexp-width: .6em;
       display: none;
     }
 
-    & > .annotation {
-      markdown > div > * {
-        display: none;
-      }
-
-      markdown > div > *:first-child {
+    & > .thread-message {
+      .thread &, .thread & header, .thread & section { margin: 0 }
+      .thread & footer { display: none }
+      [markdown] > div > * { display: none }
+      [markdown] > div > *:first-child {
         display: block;
+        margin: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         -o-text-overflow: ellipsis;
@@ -132,4 +94,8 @@ $threadexp-width: .6em;
       }
     }
   }
+}
+
+.thread-message {
+  margin-bottom: .8em;
 }

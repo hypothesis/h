@@ -19,6 +19,10 @@
     }
   }
 
+  header { margin-bottom: .8em }
+  section { margin: .8em 0 }
+  footer { margin-top: .8em }
+
   .user {
     font-weight: bold;
     font-size: 1.1em;
@@ -30,10 +34,6 @@
   }
 }
 
-.annotation-actions {
-  margin-top: .4em;
-}
-
 .annotation-quote {
   @include quote;
 }
@@ -43,21 +43,39 @@
   font-size: .923em;
 }
 
-.excerpt {
-  margin-bottom: 1em;
-  position: relative;
+.icon-markdown {
+  color: $text-color;
+  line-height: 1.4;
+  margin-left: .5em;
+}
 
-  .more, .less {
-    font-size: .9em;
-    font-family: $sans-font-family;
-    font-weight: 300;
-    display: block;
-    text-align: right;
+.magicontrol {
+  margin-right: .8em;
+  color: $gray-lighter;
+
+  &.dropdown {
+    top: 4px;
+  }
+
+  .annotation:hover & {
+    color: $link-color;
   }
 }
 
-.icon-markdown {
-  color: $text-color;
-  line-height: 1.5;
-  margin-right: .5em;
+.share-dialog {
+  a {
+    float: left;
+    line-height: 1.4;
+    margin-right: .5em;
+    vertical-align: middle;
+  }
+
+  div {
+    overflow: hidden;
+  }
+
+  input {
+    padding: 0;
+    width: 100%;
+  }
 }

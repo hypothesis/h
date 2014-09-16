@@ -315,7 +315,6 @@ class App
       $scope.selectedAnnotations = null
       $scope.selectedAnnotationsCount = 0
 
-    $scope.baseURI = documentHelpers.baseURI
     $scope.id = identity
 
     $scope.model = persona: undefined

@@ -87,7 +87,6 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
       unless readonly then $timeout -> input.focus()
 
   require: '?ngModel'
-  restrict: 'E'
   scope:
     readonly: '@'
     required: '@'
@@ -228,8 +227,6 @@ username = ['$filter', '$window', ($filter, $window) ->
     scope.$watch 'user', (user) ->
       if user
         scope.uname = $filter('persona')(scope.user, 'username')
-      else
-        scope.uname =  '<nobody>'
 
     scope.uclick = (event) ->
       event.preventDefault()

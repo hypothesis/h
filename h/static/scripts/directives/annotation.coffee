@@ -29,6 +29,7 @@ validate = (value) ->
 # @property {string} preview If previewing an edit then 'yes', else 'no'.
 # @property {boolean} editing True if editing components are shown.
 # @property {boolean} embedded True if the annotation is an embedded widget.
+# @property {boolean} shared True if the share link is visible.
 #
 # @description
 #
@@ -45,6 +46,7 @@ AnnotationController = [
     @preview = 'no'
     @editing = false
     @embedded = false
+    @shared = false
 
     highlight = annotator.tool is 'highlight'
     model = $scope.annotationGet()
@@ -106,10 +108,9 @@ AnnotationController = [
     ###
     this.save = ->
       unless model.user or model.deleted
-        return flash 'info', 'Please sign in to save annotations.'
+        return flash 'info', 'Please sign in to save your annotations.'
       unless validate(@annotation)
         return flash 'info', 'Please add text or a tag before publishing.'
-      @editing = false
 
       angular.extend model, @annotation,
         tags: (tag.text for tag in @annotation.tags)
@@ -119,6 +120,36 @@ AnnotationController = [
           annotator.publish 'annotationCreated', model
         when 'delete', 'edit'
           annotator.publish 'annotationUpdated', model
+
+      this.render()
+      @editing = false
+      @action = 'view'
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#reply
+    # @description
+    # Creates a new message in reply to this annotation.
+    ###
+    this.reply = ->
+      # Extract the references value from this container.
+      {id, references, uri} = model
+      references = references or []
+      if typeof(references) == 'string' then references = [references]
+
+      # Construct the reply.
+      references = [references..., id]
+      reply = {references, uri}
+      annotator.publish 'beforeAnnotationCreated', reply
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#toggleShared
+    # @description
+    # Toggle the shared property.
+    ###
+    this.toggleShared = ->
+      @shared = not @shared
 
     ###*
     # @ngdoc method
@@ -167,13 +198,8 @@ AnnotationController = [
       else
         vm.render()
 
-    # Initialize brand now annotations
-    unless model.id?
-      if model.references
-        annotator.publish 'beforeAnnotationCreated', model
-        vm.edit()
-      else if not highlight
-        vm.edit()
+    # Start editing brand new annotations immediately
+    unless model.id? then if model.references or not highlight then vm.edit()
 
     this
 ]
@@ -191,8 +217,8 @@ AnnotationController = [
 # value is used to signal whether the annotation is being displayed inside
 # an embedded widget.
 ###
-annotation = ['annotator', (annotator) ->
-  linkFn = (scope, elem, attrs, [ctrl, thread, counter]) ->
+annotation = ['annotator', 'documentHelpers', (annotator, documentHelpers) ->
+  linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
     # Helper function to remove the temporary thread created for a new reply.
     prune = (message) ->
       return if message.id?  # threading plugin will take care of it
@@ -215,19 +241,39 @@ annotation = ['annotator', (annotator) ->
         scope.$evalAsync ->
           ctrl.save()
 
-    scope.$on '$destroy', ->
-      if ctrl.editing then counter?.count 'edit', -1
+    # Focus and select the share link when it becomes available.
+    scope.$watch (-> ctrl.shared), (shared) ->
+      if shared then scope.$evalAsync ->
+        elem.find('input').focus().select()
 
-    scope.$watch (-> ctrl.editing), (editing, old) ->
-      if editing
-        counter?.count 'edit', 1
-      else if old
-        counter?.count 'edit', -1
+    # Keep track of edits going on in the thread.
+    if counter?
+      # Expand the thread if descendants are editing.
+      scope.$watch (-> counter.count 'edit'), (count) ->
+        if count and not ctrl.editing and thread.collapsed
+          thread.toggleCollapsed()
+
+      # Propagate changes through the counters.
+      scope.$watch (-> ctrl.editing), (editing, old) ->
+        if editing
+          counter.count 'edit', 1
+          # Disable the filter and freeze it to always match while editing.
+          threadFilter?.freeze()
+        else if old
+          counter.count 'edit', -1
+          threadFilter?.freeze(false)
+
+      # Clean up when the thread is destroyed
+      scope.$on '$destroy', ->
+        if ctrl.editing then counter?.count 'edit', -1
+
+    # Export the baseURI for the share link
+    scope.baseURI = documentHelpers.baseURI
 
   controller: 'AnnotationController'
   controllerAs: 'vm'
   link: linkFn
-  require: ['annotation', '?^thread', '?^deepCount']
+  require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount']
   scope:
     annotationGet: '&annotation'
   templateUrl: 'annotation.html'

@@ -1,33 +1,9 @@
-<!-- Deletion notice -->
-<span ng-if="!vm.editing && vm.annotation.deleted">Annotation deleted.</span>
-
-<!-- Excerpts -->
-<div class="excerpt" ng-repeat="target in vm.annotation.target">
-  <blockquote class="annotation-quote"
-              ng-bind-html="target.quote"
-              ng-hide="target.showDiff" />
-  <blockquote class="annotation-quote"
-              ng-bind-html="target.trustedDiffHTML"
-              ng-show="target.showDiff" />
-  <label ng-show="target.diffHTML">
-    Show differences
-    <input class="small pull-right"
-           type="checkbox"
-           ng-model="target.showDiff"
-           ng-click="$event.stopPropagation()" />
-  </label>
-</div>
-
-<!-- Preface -->
 <header>
-  <!-- Privacy -->
-  <privacy ng-if="vm.editing && action != 'delete'"
-           ng-model="vm.annotation.permissions"
-           class="dropdown privacy pull-right"
-           name="privacy" />
+  <!-- Deletion notice -->
+  <span ng-if="!vm.editing && vm.annotation.deleted">Annotation deleted.</span>
 
   <!-- User -->
-  <span ng-if="!vm.editing">
+  <span ng-if="!vm.editing && vm.annotation.user">
     <username user="vm.annotation.user"></username>
     <i class="small icon-locked"
        ng-hide="vm.authorize('read', 'group:__world__')"></i>
@@ -52,60 +28,69 @@
   <fuzzytime class="small pull-right"
              ng-show="!vm.editing && vm.annotation.updated"
              ng-model="vm.annotation.updated"></fuzzytime>
-
-  <!-- More actions -->
-  <div class="annotation-actions dropdown pull-right small"
-       ng-if="vm.annotation.id && !vm.editing">
-    <i class="dropdown-toggle icon-triangle"
-       role="button"
-       title="More actions"></i>
-    <ul class="dropdown-menu" role="menu">
-      <li ng-show="vm.authorize('update')"
-          ng-click="vm.edit()"
-          ><i class="icon-copy"></i> Edit</li>
-      <li ng-show="vm.authorize('delete')"
-          ng-click="vm.delete()"
-          ><i class="icon-x"></i> Delete…</li>
-    </ul>
-  </div>
 </header>
 
-<!-- Prompt -->
-<!-- TODO: replace with placeholder on markdown elements? -->
-<div ng-show="vm.annotation.deleted" ng-switch="vm.editing">
-  <strong ng-switch-when="true">You may provide an explanation here.</strong>
-  <div count="vm.annotation.text.length"
-       when="{'0': '(no reason given)',
-              one: 'Reason:',
-              other: 'Reason:'}"
-       ng-pluralize ng-switch-default></div>
-</div>
+<!-- Excerpts -->
+<section ng-repeat="target in vm.annotation.target">
+  <blockquote class="annotation-quote"
+              ng-repeat="target in vm.annotation.target"
+              ng-bind-html="target.quote"
+              ng-if="!target.showDiff">
+  <blockquote class="annotation-quote"
+              ng-bind-html="target.trustedDiffHTML"
+              ng-if="target.showDiff">
+  <label ng-if="target.diffHTML">
+    Show differences
+    <input class="small pull-right"
+           type="checkbox"
+           ng-model="target.showDiff" />
+  </label>
+</section>
+<!-- / Excerpts -- >
 
-<!-- Body Write / Preview Tabs -->
-<a class="icon-markdown pull-left"
+<!-- Editing controls -->
+<aside class="pull-right" ng-if="vm.editing">
+  <a class="icon-markdown pull-right"
    target="_blank"
    title="Parsed as Markdown"
    href="https://guides.github.com/features/mastering-markdown/"
-   ng-click="$event.stopPropagation()"
-   ng-if="vm.editing" />
-<div class="tabbable"
-     ng-model="vm.preview"
-     ng-if="vm.editing">
+   ng-if="vm.editing"></a>
+  <privacy ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
+           ng-model="vm.annotation.permissions"
+           class="dropdown privacy pull-right"
+           name="privacy" />
+</aside>
+<!-- / Editing controls -->
+
+<!-- Body -->
+<section class="tabbable"
+         ng-model="vm.preview"
+         ng-if="vm.editing">
   <div class="tab-pane" data-value="no" data-title="Write">
-    <markdown class="form-field" ng-model="vm.annotation.text" name="text" />
+    <div class="form-field"
+         ng-model="vm.annotation.text"
+         name="text"
+         markdown>
+    </div>
   </div>
   <div class="tab-pane" data-value="yes" data-title="Preview">
     <p class="form-field" ng-show="!vm.annotation.text">Nothing to preview.</p>
-    <markdown class="form-field" name="text"
-              ng-model="vm.annotation.text"
-              ng-readonly="true" />
+    <div class="form-field"
+         name="text"
+         ng-model="vm.annotation.text"
+         ng-readonly="true"
+         markdown>
+    </div>
   </div>
-</div>
+</section>
 
-<markdown class="form-field" name="text"
-          ng-if="!vm.editing"
-          ng-model="vm.annotation.text"
-          ng-readonly="true" />
+<section name="text"
+         ng-if="!vm.editing"
+         ng-model="vm.annotation.text"
+         ng-readonly="true"
+         markdown>
+</section>
+<!-- / Body -->
 
 <!-- Tags -->
 <div class="form-field" ng-if="vm.editing">
@@ -125,23 +110,50 @@
     </li>
   </ul>
 </div>
+<!-- / Tags -->
 
-<!-- Bottom controls -->
-<div class="form-actions" ng-if="vm.editing">
-  <div class="form-actions-buttons form-actions-left" ng-switch="action">
-    <ng-switch on="action">
-      <button ng-switch-when="edit"
-              ng-click="vm.save(); $event.stopPropagation()"
-              class="btn"><i class="icon-checkmark2 btn-icon"></i> Save</button>
-      <button ng-switch-when="delete"
-              ng-click="vm.save(); $event.stopPropagation()"
-              class="btn"><i class="icon-checkmark2 btn-icon"></i> Delete</button>
-      <button ng-switch-default
-              ng-click="vm.save(); $event.stopPropagation()"
-              class="btn"><i class="icon-checkmark2 btn-icon"></i> Save</button>
-    </ng-switch>
+<footer class="form-actions"
+        ng-click="$event.stopPropagation()"
+        ng-switch="vm.action">
+  <div ng-show="vm.annotation.id" ng-switch-when="view">
+    <a class="small magicontrol" href="" title="Reply"
+       ng-click="vm.reply()"
+       ><i class="icon-reply"></i> Reply</a>
+    <a class="small magicontrol" href="" title="Share"
+       ng-click="vm.toggleShared()"
+       ><i class="icon-export"></i> Share</a>
+    <a class="small magicontrol" href="" title="Edit"
+       ng-show="vm.authorize('update')"
+       ng-click="vm.edit()"
+       ><i class="icon-copy"></i> Edit</a>
+    <a class="small magicontrol" href="" title="Delete"
+       ng-show="vm.authorize('delete')"
+       ng-click="vm.delete()"
+       ><i class="icon-x"></i> Delete…</a>
+    <div class="share-dialog" ng-show="vm.shared">
+      <a class="icon-export"
+         target="_blank"
+         ng-href="{{baseURI}}a/{{vm.annotation.id}}"></a>
+      <div>
+        <input type="text"
+               ng-blur="vm.toggleShared()"
+               value="{{baseURI}}a/{{vm.annotation.id}}"
+               readonly>
+      </div>
+    </div>
+  </div>
+  <div class="form-actions-buttons form-actions-left" ng-if="vm.editing">
+    <button ng-switch-when="edit"
+            ng-click="vm.save()"
+            class="btn"><i class="icon-checkmark2 btn-icon"></i> Save</button>
+    <button ng-switch-when="delete"
+            ng-click="vm.save()"
+            class="btn"><i class="icon-checkmark2 btn-icon"></i> Delete</button>
+    <button ng-switch-default
+            ng-click="vm.save()"
+            class="btn"><i class="icon-checkmark2 btn-icon"></i> Save</button>
     <button class="btn btn-clean"
-            ng-click="vm.revert(); $event.stopPropagation()"
+            ng-click="vm.revert()"
             ><i class="icon-x btn-icon"></i> Cancel</button>
   </div>
-</div>
+</footer>

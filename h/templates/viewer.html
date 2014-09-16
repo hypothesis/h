@@ -42,7 +42,7 @@
       ng-mouseleave="activate()"
       ng-repeat="child in vm.container.children
                  | orderBy : sort.predicate : sort.reverse"
-      ng-show="(shouldShowThread(child) || threadFilter.active()) &&
+      ng-show="vm.container && shouldShowThread(child) &&
                (count('edit') || count('match') || !threadFilter.active())">
   </li>
 </ul>

@@ -1,7 +1,9 @@
 assert = chai.assert
+sandbox = sinon.sandbox.create()
 
 describe 'h.directives.annotation', ->
   $scope = null
+  annotator = null
   annotation = null
   createController = null
   flash = null
@@ -11,7 +13,9 @@ describe 'h.directives.annotation', ->
   beforeEach inject ($controller, $rootScope) ->
     $scope = $rootScope.$new()
     $scope.annotationGet = (locals) -> annotation
+    annotator = {plugins: {}, publish: sandbox.spy()}
     annotation =
+      id: 'deadbeef'
       document:
         title: 'A special document'
       target: [{}]
@@ -21,8 +25,11 @@ describe 'h.directives.annotation', ->
     createController = ->
       $controller 'AnnotationController',
         $scope: $scope
-        annotator: {plugins: {}, publish: sinon.spy()}
+        annotator: annotator
         flash: flash
+
+  afterEach ->
+    sandbox.restore()
 
   it 'provides a document title', ->
     controller = createController()
@@ -63,3 +70,23 @@ describe 'h.directives.annotation', ->
     controller = createController()
     $scope.$digest()
     assert.isNull(controller.document)
+
+  describe '#reply', ->
+    controller = null
+    container = null
+
+    beforeEach ->
+      controller = createController()
+
+    it 'creates a new reply with the proper uri and references', ->
+      controller.reply()
+      match = sinon.match {references: [annotation.id], uri: annotation.uri}
+      assert.calledWith(annotator.publish, 'beforeAnnotationCreated', match)
+
+  describe '#toggleShared', ->
+    it 'sets the shared property', ->
+      controller = createController()
+      before = controller.shared
+      controller.toggleShared()
+      after = controller.shared
+      assert.equal(before, !after)

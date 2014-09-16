@@ -16,6 +16,7 @@ ThreadFilterController = [
     @_active = false
     @_children = []
     @_filters = null
+    @_frozen = false
 
     ###*
     # @ngdoc method
@@ -35,7 +36,7 @@ ThreadFilterController = [
       else if @active == active then return @_active
       else
         child.active active for child in @_children
-        @_active = active
+        if @_frozen then @_active else @_active = active
 
     ###*
     # @ngdoc method
@@ -55,7 +56,24 @@ ThreadFilterController = [
       else if @filters == filters then return @_filters
       else
         child.filters filters for child in @_children
-        @_filters = filters
+        if @_frozen then @_filters else @_filters = filters
+
+    ###*
+    # @ngdoc method
+    # @name threadFilter.ThreadFilterController#freeze
+    #
+    # @param {boolean=} frozen New state
+    # @return {boolean} frozen state
+    #
+    # @description
+    # This method is a getter / setter.
+    #
+    # Freeze or unfreeze the filter when called with an argument and
+    # return the frozen state. A frozen filter will not change its activation
+    # state or filter configuration.
+    ###
+    this.freeze = (frozen=true) ->
+      if frozen? then @_frozen = frozen else @_frozen
 
     ###*
     # @ngdoc method
@@ -73,7 +91,7 @@ ThreadFilterController = [
     # property of the container.
     ###
     this.check = (container) ->
-      unless container? then return false
+      unless container?.message then return false
       if this.active()
         match = !!viewFilter.filter([container.message], @_filters).length
       else

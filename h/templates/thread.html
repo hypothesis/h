@@ -4,64 +4,36 @@
    ><span ng-class="{'icon-plus': !!vm.collapsed,
                      'icon-minus': !vm.collapsed}"></span></a>
 
-<article ng-show="threadFilter.check(vm.container)">
-  <!-- Annotation -->
-  <div class="annotation"
-       name="annotation"
-       annotation="vm.container.message"
-       annotation-embedded="{{isEmbedded}}"
-       ng-if="vm.container.message">
-  </div>
-
-  <p ng-if="!vm.container.message"><em>Annotation not available.</em></p>
-
-  <footer ng-if="vm.container.message.id">
-    <!-- Share -->
-    <div class="share-dialog"
-         ng-show="vm.shared"
-         ng-click="$event.stopPropagation()">
-      <a class="icon-export"
-         target="_blank"
-         ng-href="{{baseURI}}a/{{vm.container.message.id}}"></a>
-      <div>
-        <input type="text"
-               ng-blur="vm.toggleShared()"
-               value="{{baseURI}}a/{{vm.container.message.id}}"
-               readonly>
-      </div>
-    </div>
-
-    <!-- Reply count -->
-    <a class="reply-count small"
-       href=""
-       ng-if="count('message') > 1"
-       ng-pluralize count="count('message') - 1"
-       when="{one: '1 reply', other: '{} replies'}" />
-
-    <!-- Bottom control strip -->
-    <a class="small magicontrol" href="" title="Reply"
-       ng-click="vm.reply(); $event.stopPropagation()"
-       ><i class="icon-reply"></i> Reply</a>
-    <a class="small magicontrol" href="" title="Share"
-       ng-click="vm.toggleShared(); $event.stopPropagation()"
-       ><i class="icon-export"></i> Share</a>
-  </footer>
+<!-- Annotation -->
+<div ng-if="vm.container && !vm.container.message">
+  <em>Message not available.</em>
+</div>
+<article class="annotation thread-message"
+         name="annotation"
+         annotation="vm.container.message"
+         annotation-embedded="{{isEmbedded}}"
+         ng-if="vm.container.message"
+         ng-show="threadFilter.check(vm.container)">
 </article>
+
+<!-- Reply count -->
+<a class="reply-count small"
+   href=""
+   ng-if="!threadFilter.active() || count('message') == count('match')"
+   ng-pluralize count="count('message') - 1"
+   when="{'0': '', one: '1 reply', other: '{} replies'}"></a>
+<a class="load-more small"
+   href=""
+   ng-click="threadFilter.active(false); $event.stopPropagation()"
+   ng-if="vm.container.message.id"
+   ng-pluralize count="count('message') - count('match')"
+   when="{'0': '',
+         one: 'View one more in conversation',
+         other: 'View {} more in conversation'}"
+   ></a>
 
 <!-- Replies -->
 <ul ng-hide="vm.collapsed">
-  <li class="thread"
-      ng-if="vm.container.message.id && count('edit') < count('match')"
-      ng-show="threadFilter.check(vm.container) || !vm.container.parent.parent">
-    <a href=""
-       class="load-more small"
-       ng-click="threadFilter.active(false); $event.stopPropagation()"
-       ng-pluralize count="count('message') - count('match')"
-       when="{'0': '',
-             one: 'Show one other annotation in this conversation.',
-             other: 'Show {} other annotations in this conversation.'}"
-       ></a>
-  </li>
   <li class="thread"
       deep-count="count"
       thread="child" thread-filter
