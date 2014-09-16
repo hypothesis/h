@@ -15,12 +15,6 @@ $threadexp-width: .6em;
   cursor: pointer;
   position: relative;
 
-  &.thread-collapsed {
-    .reply-count {
-      font-style: italic;
-    }
-  }
-
   & > ul {
     padding-left: $thread-padding + .15em;
     margin-left: -$thread-padding;
