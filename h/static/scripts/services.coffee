@@ -465,15 +465,6 @@ class ViewFilter
       matches = false
     matches
 
-  _anyMatches: (filter, value, match) ->
-    matchresult = []
-    for term in filter.terms
-      if angular.isArray value
-          matchresult.push match value, term
-      else
-          matchresult.push match term, value
-    matchresult
-
   _checkMatch: (filter, annotation, checker) ->
     autofalsefn = checker.autofalse
     return false if autofalsefn? and autofalsefn annotation
