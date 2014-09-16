@@ -4,7 +4,9 @@
 
   <!-- User -->
   <span ng-if="!vm.editing && vm.annotation.user">
-    <username user="vm.annotation.user"></username>
+    <a class="annotation-user"
+       ng-href="{{baseURI}}u/{{vm.annotation.user}}"
+       >{{vm.annotation.user | persona}}</a>
     <i class="small icon-locked" ng-show="vm.isPrivate()"></i>
     <i class="small icon-highlighter2" ng-show="vm.isHighlight()"></i>
     <i class="small icon-comment3" ng-show="vm.isComment()"></i>

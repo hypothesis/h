@@ -222,24 +222,6 @@ repeatAnim = ->
       return
 
 
-username = ['$filter', '$window', ($filter, $window) ->
-  link: (scope, elem, attr) ->
-    scope.$watch 'user', (user) ->
-      if user
-        scope.uname = $filter('persona')(scope.user, 'username')
-
-    scope.uclick = (event) ->
-      event.preventDefault()
-      $window.open "/u/#{scope.uname}"
-      return
-
-  scope:
-    user: '='
-  restrict: 'E'
-  template: '<span class="user" ng-click="uclick($event)">{{uname}}</span>'
-]
-
-
 whenscrolled = ->
   link: (scope, elem, attr) ->
     elem.bind 'scroll', ->
@@ -267,7 +249,6 @@ angular.module('h.directives', imports)
 .directive('markdown', markdown)
 .directive('privacy', privacy)
 .directive('tabReveal', tabReveal)
-.directive('username', username)
 .directive('showAccount', showAccount)
 .directive('repeatAnim', repeatAnim)
 .directive('whenscrolled', whenscrolled)

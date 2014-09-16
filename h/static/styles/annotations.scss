@@ -20,7 +20,8 @@
   .annotation-section { margin: .8em 0 }
   .annotation-footer { margin-top: .8em }
 
-  .user {
+  .annotation-user {
+    color: $text-color;
     font-weight: bold;
     font-size: 1.1em;
     &:hover {
