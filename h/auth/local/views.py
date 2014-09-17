@@ -7,13 +7,12 @@ from horus.resources import UserFactory
 from pyramid import httpexceptions, security
 from pyramid.view import view_config, view_defaults
 
-from h import views
 from h.auth.local import forms, models, schemas
 from h.models import _
 
 
 def ajax_form(request, result):
-    flash = views.pop_flash(request)
+    flash = pop_flash(request)
 
     if isinstance(result, httpexceptions.HTTPRedirection):
         request.response.headers.extend(result.headers)
@@ -47,11 +46,56 @@ def ajax_form(request, result):
     return result
 
 
+def pop_flash(request):
+    session = request.session
+
+    queues = {
+        name[3:]: [msg for msg in session.pop_flash(name[3:])]
+        for name in session.keys()
+        if name.startswith('_f_')
+    }
+
+    # Deal with bag.web.pyramid.flash_msg style mesages
+    for msg in queues.pop('', []):
+        q = getattr(msg, 'kind', '')
+        msg = getattr(msg, 'plain', msg)
+        queues.setdefault(q, []).append(msg)
+
+    return queues
+
+
+def model(request):
+    session = {k: v for k, v in request.session.items() if k[0] != '_'}
+    session['csrf_token'] = request.session.get_csrf_token()  # bw compat
+    session['csrf'] = request.session.get_csrf_token()
+    if request.cookies.get('XSRF-TOKEN') != session['csrf']:
+        request.response.set_cookie('XSRF-TOKEN', session['csrf'])
+    return session
+
+
 def remember(request, user):
     if user is not None:
         userid = 'acct:{}@{}'.format(user.username, request.domain)
         headers = security.remember(request, userid)
         request.response.headerlist.extend(headers)
+
+
+# TODO: change to something other than /app
+@view_config(accept='application/json',  name='app', renderer='json')
+def session(request):
+    return dict(status='okay', flash=pop_flash(request), model=model(request))
+
+
+@view_config(accept='application/json', renderer='json',
+             context='pyramid.exceptions.BadCSRFToken')
+def bad_csrf_token(context, request):
+    request.response.status_code = 403
+    reason = _('Session is invalid. Please try again.')
+    return {
+        'status': 'failure',
+        'reason': reason,
+        'model': model(request),
+    }
 
 
 class AsyncFormViewMapper(object):
@@ -70,7 +114,7 @@ class AsyncFormViewMapper(object):
             meth = getattr(inst, self.attr)
             result = meth()
             result = ajax_form(request, result)
-            result['model'] = views.model(request)
+            result['model'] = model(request)
             result.pop('form', None)
             return result
         return wrapper

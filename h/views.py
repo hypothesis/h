@@ -5,34 +5,8 @@ import re
 from pyramid import httpexceptions
 from pyramid.view import view_config
 
-from h.models import _
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-def pop_flash(request):
-    session = request.session
-
-    queues = {
-        name[3:]: [msg for msg in session.pop_flash(name[3:])]
-        for name in session.keys()
-        if name.startswith('_f_')
-    }
-
-    # Deal with bag.web.pyramid.flash_msg style mesages
-    for msg in queues.pop('', []):
-        q = getattr(msg, 'kind', '')
-        msg = getattr(msg, 'plain', msg)
-        queues.setdefault(q, []).append(msg)
-
-    return queues
-
-
-def model(request):
-    session = {k: v for k, v in request.session.items() if k[0] != '_'}
-    session['csrf_token'] = request.session.get_csrf_token()  # bw compat
-    session['csrf'] = request.session.get_csrf_token()
-    return session
 
 
 @view_config(
@@ -42,23 +16,6 @@ def model(request):
 )
 def annotation(context, request):
     return {}
-
-
-@view_config(accept='application/json',  name='app', renderer='json')
-def app(request):
-    return dict(status='okay', flash=pop_flash(request), model=model(request))
-
-
-@view_config(accept='application/json', renderer='json',
-             context='pyramid.exceptions.BadCSRFToken')
-def bad_csrf_token(context, request):
-    request.response.status_code = 403
-    reason = _('Session is invalid. Please try again.')
-    return {
-        'status': 'failure',
-        'reason': reason,
-        'model': model(request),
-    }
 
 
 @view_config(name='embed.js', renderer='h:templates/embed.txt')
