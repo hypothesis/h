@@ -87,7 +87,7 @@ $threadexp-width: .6em;
 
     & > .thread-message {
       .styled-text > * { display: none }
-      .styled-text *:first-child {
+      .styled-text > *:first-child {
         display: block;
         margin: 0;
         overflow: hidden;
