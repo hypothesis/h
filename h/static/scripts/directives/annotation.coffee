@@ -188,7 +188,7 @@ AnnotationController = [
       angular.extend @annotation, angular.copy model
 
       # Extract the document metadata.
-      if model.document and model.target.length
+      if model.document
         domain = extractURIComponent(model.uri, 'hostname')
 
         @document =
