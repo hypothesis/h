@@ -259,9 +259,9 @@ annotation = ['annotator', 'documentHelpers', (annotator, documentHelpers) ->
     attrs.$observe 'annotationEmbedded', (value) ->
       ctrl.embedded = value? and value != 'false'
 
-    # Save on Shift + Enter.
+    # Save on Meta + Enter or Ctrl + Enter.
     elem.on 'keydown', (event) ->
-      if event.keyCode == 13 && event.shiftKey
+      if event.keyCode == 13 and (event.metaKey or event.ctrlKey)
         event.preventDefault()
         scope.$evalAsync ->
           ctrl.save()
