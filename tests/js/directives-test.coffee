@@ -131,41 +131,6 @@ describe 'h.directives', ->
 
       assert.notInclude($field.prop('className'), 'form-field-error')
 
-  describe '.username', ->
-    $element = null
-
-    beforeEach ->
-      $scope.model = 'acct:bill@127.0.0.1'
-
-      $element = $compile('<username data-user="model"></username>')($scope)
-      $scope.$digest()
-
-    it 'renders with the username', ->
-      text = $element.find('.user').text()
-      assert.equal(text, 'bill')
-
-    it 'opens a new window for the user when clicked', ->
-      $element.find('.user').click()
-      sinon.assert.calledWith(fakeWindow.open, '/u/bill')
-
-    it 'prevents the default browser action on click', ->
-      event = jQuery.Event('click')
-      $element.find('.user').triggerHandler(event)
-
-      assert(event.isDefaultPrevented())
-
-    describe 'when model is changed', ->
-      beforeEach ->
-        $scope.model = 'acct:jim@hypothesis'
-        $scope.$digest()
-
-      it 'keeps the username in sync', ->
-        text = $element.find('.user').text()
-        assert.equal(text, 'jim')
-
-      it 'opens with only the username', ->
-        $element.find('.user').click()
-        sinon.assert.calledWith(fakeWindow.open, '/u/jim')
 
   describe '.match', ->
     $element = null
