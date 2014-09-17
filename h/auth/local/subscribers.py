@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid.events import subscriber
 from pyramid.settings import asbool
 
