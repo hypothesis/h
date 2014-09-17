@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 import re
 import logging
+from datetime import datetime
 
 from pyramid_mailer.interfaces import IMailer
 from pyramid_mailer.message import Message
 from pyramid.renderers import render
 from pyramid.events import subscriber
 
-from h import events
+from h import events, interfaces
 from h.auth.local import models
-from h.streamer import parent_values
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -23,14 +23,28 @@ def standalone_url(request, annotation_id):
     return request.application_url + '/a/' + annotation_id
 
 
+def parent_values(annotation, request):
+    if 'references' in annotation:
+        registry = request.registry
+        store = registry.queryUtility(interfaces.IStoreClass)(request)
+        parent = store.read(annotation['references'][-1])
+        if 'references' in parent:
+            grandparent = store.read(parent['references'][-1])
+            parent['quote'] = grandparent['text']
+
+        return parent
+    else:
+        return {}
+
+
 class NotificationTemplate(object):
     text_template = None
     html_template = None
     subject = None
 
     @classmethod
-    def render(cls, request, annotation):
-        tmap = cls._create_template_map(request, annotation)
+    def render(cls, request, annotation, data):
+        tmap = cls._create_template_map(request, annotation, data)
         text = render(cls.text_template, tmap, request)
         html = render(cls.html_template, tmap, request)
         subject = render(cls.subject, tmap, request)
@@ -55,7 +69,7 @@ class NotificationTemplate(object):
         if not checks:
             return {'status': False}
         try:
-            subject, text, html = cls.render(request, annotation)
+            subject, text, html = cls.render(request, annotation, data)
             recipients = cls.get_recipients(request, annotation, data)
         except TemplateRenderException:
             return {'status': False}
@@ -79,10 +93,14 @@ class ReplyTemplate(NotificationTemplate):
     subject = 'h:templates/emails/reply_notification_subject.txt'
 
     @staticmethod
-    def _create_template_map(request, reply):
+    def _create_template_map(request, reply, data):
+        document_title = ''
+        if 'document' in reply:
+            document_title = reply['document'].get('title', '')
+
         parent_user = re.search(
             r'^acct:([^@]+)',
-            reply['parent']['user']
+            data['parent']['user']
         ).group(1)
 
         reply_user = re.search(
@@ -90,18 +108,25 @@ class ReplyTemplate(NotificationTemplate):
             reply['user']
         ).group(1)
 
+        # Currently we cut the UTC format because time.strptime has problems
+        # parsing it, and of course it'd only correct the backend's timezone
+        # which is not meaningful for international users
+        format = '%Y-%m-%dT%H:%M:%S.%f'
+        parent_timestamp = datetime.strptime(data['parent']['created'][:-6], format)
+        reply_timestamp = datetime.strptime(reply['created'][:-6], format)
+
         return {
-            'document_title': reply['title'],
-            'document_path': reply['parent']['uri'],
-            'parent_text': reply['parent']['text'],
+            'document_title': document_title,
+            'document_path': data['parent']['uri'],
+            'parent_text': data['parent']['text'],
             'parent_user': parent_user,
-            'parent_timestamp': reply['parent']['created'],
+            'parent_timestamp': parent_timestamp,
             'parent_user_profile': user_profile_url(
-                request, reply['parent']['user']),
-            'parent_path': standalone_url(request, reply['parent']['id']),
+                request, data['parent']['user']),
+            'parent_path': standalone_url(request, data['parent']['id']),
             'reply_text': reply['text'],
             'reply_user': reply_user,
-            'reply_timestamp': reply['created'],
+            'reply_timestamp': reply_timestamp,
             'reply_user_profile': user_profile_url(request, reply['user']),
             'reply_path': standalone_url(request, reply['id'])
         }
@@ -110,7 +135,7 @@ class ReplyTemplate(NotificationTemplate):
     def get_recipients(request, annotation, data):
         username = re.search(
             r'^acct:([^@]+)',
-            annotation['parent']['user']
+            data['parent']['user']
         ).group(1)
         userobj = models.User.get_by_username(request, username)
         if not userobj:
@@ -121,10 +146,10 @@ class ReplyTemplate(NotificationTemplate):
     @staticmethod
     def check_conditions(annotation, data):
         # Get the e-mail of the owner
-        if 'user' not in annotation['parent'] or not annotation['parent']['user']:
+        if 'user' not in data['parent'] or not data['parent']['user']:
             return False
         # Do not notify users about their own replies
-        if annotation['user'] == annotation['parent']['user']:
+        if annotation['user'] == data['parent']['user']:
             return False
         # Else okay
         return True
@@ -188,12 +213,16 @@ def send_notifications(event):
         return
 
     notifier = AnnotationNotifier(request)
-    annotation['parent'] = parent_values(annotation, request)
-    if 'user' in annotation['parent'] and 'user' in annotation:
-        parentuser = annotation['parent']['user']
-        if len(parentuser) and parentuser != annotation['user']:
+    # Store the parent values as additional data
+    data = {
+        'parent': parent_values(annotation, request)
+    }
+
+    if 'user' in data['parent'] and 'user' in annotation:
+        parent_user = data['parent']['user']
+        if len(parent_user) and parent_user != annotation['user']:
             notifier.send_notification_to_owner(
-                annotation, {}, 'reply_notification')
+                annotation, data, 'reply_notification')
 
 
 def includeme(config):
