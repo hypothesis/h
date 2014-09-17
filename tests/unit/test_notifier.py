@@ -25,18 +25,17 @@ def create_annotation():
         'text': 'this is a reply',
         'user': 'acct:testuser@testdomain',
         'permissions': {'read': ["group:__world__"]},
-        'created': datetime.now(),
+        'created': '2014-09-17T09:10:44.427079+00:00',
     }
     annotation_parent = {
         'uri': 'http://example.com',
         'quote': 'parent quote',
         'text': 'parent text',
-        'created': datetime.now(),
+        'created': '2014-09-17T09:10:44.427079+00:00',
         'user': 'acct:parent@testdomain',
         'id': '1',
     }
-    annotation['parent'] = annotation_parent
-    return annotation
+    return annotation, {'parent': annotation_parent}
 
 
 # Tests for handling AnnotationEvent
@@ -146,7 +145,7 @@ def test_subject_and_recipients():
             return ["test user"]
 
         @classmethod
-        def render(cls, request, annotation):
+        def render(cls, request, annotation, data):
             """Our mock render function"""
             return "test subject", "test body", "test html"
 
@@ -193,7 +192,7 @@ def test_reply_notification_content():
     with testConfig() as config:
         config.include('pyramid_chameleon')
 
-        annotation = create_annotation()
+        annotation, parent = create_annotation()
         request = DummyRequest()
 
         with patch('h.auth.local.models.User') as mock_user:
@@ -201,7 +200,7 @@ def test_reply_notification_content():
             mock_user.get_by_username.return_value = user
 
             notification = notifier.ReplyTemplate.generate_notification(
-                request, annotation, {})
+                request, annotation, parent)
 
             assert notification['status']
             assert notification['recipients'] == ['acct:parent@testdomain']
@@ -222,14 +221,14 @@ def test_reply_notification_no_recipient():
     with testConfig() as config:
         config.include('pyramid_chameleon')
 
-        annotation = create_annotation()
+        annotation, parent = create_annotation()
         request = DummyRequest()
 
         with patch('h.auth.local.models.User') as mock_user:
             mock_user.get_by_username.return_value = None
 
             notification = notifier.ReplyTemplate.generate_notification(
-                request, annotation, {})
+                request, annotation, parent)
 
             assert notification['status'] is False
 

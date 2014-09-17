@@ -5,7 +5,6 @@ import json
 import logging
 import operator
 import re
-import urlparse
 
 from dateutil.tz import tzutc
 from jsonpointer import resolve_pointer
@@ -17,61 +16,6 @@ import transaction
 from h import events, interfaces
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-def check_favicon(icon_link, parsed_uri, domain):
-    if icon_link:
-        if icon_link.startswith('http'):
-            icon_link = icon_link
-        elif icon_link.startswith('//'):
-            icon_link = parsed_uri[0] + "://" + icon_link[2:]
-        else:
-            icon_link = domain + icon_link
-    else:
-        icon_link = ''
-
-    return icon_link
-
-
-def url_values_from_document(annotation):
-    title = annotation['uri']
-    icon_link = ""
-
-    parsed_uri = urlparse.urlparse(annotation['uri'])
-    domain = '{}://{}/'.format(parsed_uri[0], parsed_uri[1])
-    domain_stripped = parsed_uri[1]
-    if parsed_uri[1].lower().startswith('www.'):
-        domain_stripped = domain_stripped[4:]
-
-    if 'document' in annotation:
-        if 'title' in annotation['document']:
-            title = annotation['document']['title']
-
-        if 'favicon' in annotation['document']:
-            icon_link = annotation['document']['favicon']
-
-        icon_link = check_favicon(icon_link, parsed_uri, domain)
-    return {
-        'title': title,
-        'uri': annotation['uri'],
-        'source': domain,
-        'source_stripped': domain_stripped,
-        'favicon_link': icon_link
-    }
-
-
-def parent_values(annotation, request):
-    if 'references' in annotation:
-        registry = request.registry
-        store = registry.queryUtility(interfaces.IStoreClass)(request)
-        parent = store.read(annotation['references'][-1])
-        if not ('quote' in parent):
-            grandparent = store.read(parent['references'][-1])
-            parent['quote'] = grandparent['text']
-
-        return parent
-    else:
-        return {}
 
 filter_schema = {
     "type": "object",
@@ -113,7 +57,6 @@ filter_schema = {
     },
     "required": ["match_policy", "clauses", "actions"]
 }
-
 
 len_operators = {
     "lene": "=",
@@ -464,18 +407,10 @@ class StreamerSession(Session):
         store = registry.queryUtility(interfaces.IStoreClass)(request)
         annotations = store.search_raw(self.query.query)
         self.received = len(annotations)
-        send_annotations = []
-        for annotation in annotations:
-            try:
-                annotation.update(url_values_from_document(annotation))
-                send_annotations.append(annotation)
-            except:
-                log.exception("Updating properties: %s", annotation)
 
-        # Finally send filtered annotations
         # Can send zero to indicate that no past data is matched
         packet = {
-            'payload': send_annotations,
+            'payload': annotations,
             'type': 'annotation-notification',
             'options': {
                 'action': 'past',
@@ -531,9 +466,6 @@ def after_action(event):
             return
 
         annotation = event.annotation
-        annotation.update(url_values_from_document(annotation))
-        annotation['parent'] = parent_values(annotation, request)
-
         manager = request.get_sockjs_manager()
         for session in manager.active_sessions():
             if session.client_id == client_id:
@@ -542,9 +474,6 @@ def after_action(event):
             try:
                 if not session.request.has_permission('read', annotation):
                     continue
-
-                if 'references' in annotation:
-                    annotation['quote'] = annotation['parent']['text']
 
                 flt = session.filter
                 if not (flt and flt.match(annotation, action)):
