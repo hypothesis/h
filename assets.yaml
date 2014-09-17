@@ -268,24 +268,24 @@ app_js:
           # TODO: glob these or use browserify
           # Right now results in dependency problems
           contents:
-            - h:scripts/app.coffee
-            - h:scripts/controllers.coffee
-            - h:scripts/controllers/account-management.coffee
-            - h:scripts/flash.coffee
-            - h:scripts/filters.coffee
-            - h:scripts/directives.coffee
-            - h:scripts/directives/deep-count.coffee
-            - h:scripts/directives/simple-search.coffee
-            - h:scripts/directives/status-button.coffee
-            - h:scripts/directives/thread.coffee
-            - h:scripts/directives/thread-filter.coffee
-            - h:scripts/directives/annotation.coffee
-            - h:scripts/services.coffee
-            - h:scripts/helpers/form-helpers.coffee
-            - h:scripts/helpers/document-helpers.coffee
-            - h:scripts/socket.coffee
-            - h:scripts/searchfilters.coffee
-            - h:scripts/streamsearch.coffee
+            - h:static/scripts/app.coffee
+            - h:static/scripts/controllers.coffee
+            - h:static/scripts/controllers/account-management.coffee
+            - h:static/scripts/flash.coffee
+            - h:static/scripts/filters.coffee
+            - h:static/scripts/directives.coffee
+            - h:static/scripts/directives/deep-count.coffee
+            - h:static/scripts/directives/simple-search.coffee
+            - h:static/scripts/directives/status-button.coffee
+            - h:static/scripts/directives/thread.coffee
+            - h:static/scripts/directives/thread-filter.coffee
+            - h:static/scripts/directives/annotation.coffee
+            - h:static/scripts/services.coffee
+            - h:static/scripts/helpers/form-helpers.coffee
+            - h:static/scripts/helpers/document-helpers.coffee
+            - h:static/scripts/socket.coffee
+            - h:static/scripts/searchfilters.coffee
+            - h:static/scripts/streamsearch.coffee
 
 app_css:
     filters: cleancss
