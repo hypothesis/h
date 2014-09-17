@@ -44,11 +44,6 @@
 
 
 // Markdown Editor Controls ////////////////////////
-privacy {
-  position: relative;
-  top: 2px;
-}
-
 [markdown] {
   .preview {
     overflow: auto;
@@ -96,6 +91,13 @@ privacy {
       float: right;
     }
   }
+}
+
+
+// Privacy Controll /////////////////////////
+privacy {
+  position: relative;
+  top: 2px;
 }
 
 

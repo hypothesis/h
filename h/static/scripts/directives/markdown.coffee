@@ -3,7 +3,7 @@
 # @name markdown
 # @restrict A
 # @description
-# This directive controls both the rendering and display of markdown in annotations, as well as
+# This directive controls both the rendering and display of markdown, as well as
 # the markdown editor.
 ###
 
