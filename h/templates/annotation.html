@@ -1,4 +1,4 @@
-<header class="annotator-header">
+<header class="annotation-header">
   <!-- Deletion notice -->
   <span ng-if="!vm.editing && vm.annotation.deleted">Annotation deleted.</span>
 
@@ -32,7 +32,7 @@
 </header>
 
 <!-- Excerpts -->
-<section class="annotator-target" ng-repeat="target in vm.annotation.target">
+<section class="annotation-target" ng-repeat="target in vm.annotation.target">
   <blockquote class="annotation-quote"
               ng-repeat="target in vm.annotation.target"
               ng-bind-html="target.quote"
@@ -65,7 +65,7 @@
 <!-- / Editing controls -->
 
 <!-- Body -->
-<section class="annotation-body tabbable"
+<section class="annotation-section annotation-body tabbable"
          ng-model="vm.preview"
          ng-if="vm.editing">
   <div class="tab-pane" data-value="no" data-title="Write">
@@ -87,7 +87,7 @@
 </section>
 
 <section name="text"
-         class="annotation-body"
+         class="annotation-section annotation-body"
          ng-if="!vm.editing"
          ng-model="vm.annotation.text"
          ng-readonly="true"
@@ -96,7 +96,7 @@
 <!-- / Body -->
 
 <!-- Tags -->
-<div class="form-field" ng-if="vm.editing">
+<div class="annotation-section form-field" ng-if="vm.editing">
   <tags-input ng-model="vm.annotation.tags"
               name="tags"
               class="tags"
@@ -105,7 +105,7 @@
               enable-editing-last-tag="true"></tags-input>
 </div>
 
-<div class="tags tags-read-only"
+<div class="annotation-section tags tags-read-only"
      ng-if="vm.annotation.tags.length && !vm.editing">
   <ul class="tag-list">
     <li class="tag-item" ng-repeat="tag in vm.annotation.tags">
@@ -115,7 +115,7 @@
 </div>
 <!-- / Tags -->
 
-<footer class="form-actions" ng-switch="vm.action">
+<footer class="annotation-footer form-actions" ng-switch="vm.action">
   <div ng-switch-when="view">
     <a class="small magicontrol" href="" title="Reply"
        ng-click="vm.reply()"
