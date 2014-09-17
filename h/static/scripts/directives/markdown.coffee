@@ -7,16 +7,16 @@
 # the markdown editor.
 ###
 
-markdown = ['$filter', '$timeout', ($filter, $timeout) ->
+markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
     input = elem.find('textarea')
     output = elem.find('div')
 
-    scope.returnSelection = ->
+    returnSelection = ->
       # Maybe get selections from other parts of the text? Such as the quote or a reply?
-      ourIframeSelection = window.getSelection().toString()
+      ourIframeSelection = $window.getSelection().toString()
       if input[0].selectionStart != undefined
         startPos = input[0].selectionStart
         endPos = input[0].selectionEnd
@@ -36,8 +36,8 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
       input.focus()
       return selection
 
-    scope.insertBold = (markup="**", innertext="Bold")->
-      text = scope.returnSelection()
+    scope.applyMarkup = (markup, innertext)->
+      text = returnSelection()
       if text.selection == ""
         newtext = text.before + markup + innertext + markup + text.after
         input[0].value = newtext
@@ -60,16 +60,17 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
           input[0].selectionStart = (text.before + markup).length
           input[0].selectionEnd = (text.before + text.selection + markup).length
 
+    scope.insertBold = ->
+      scope.applyMarkup("**", "Bold")
+
     scope.insertItalic = ->
-      # Shares the same logic as insertBold() but with different markup.
-      scope.insertBold("*", "Italic")
+      scope.applyMarkup("*", "Italic")
 
     scope.insertMath = ->
-      # Shares the same logic as insertBold() but with different markup.
-      scope.insertBold("$$", "LaTex")
+      scope.applyMarkup("$$", "LaTex")
 
     scope.insertLink = ->
-      text = scope.returnSelection()
+      text = returnSelection()
       if text.selection == ""
         newtext = text.before + "[Link Text](https://example.com)" + text.after
         input[0].value = newtext
@@ -85,7 +86,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
         input[0].selectionEnd = (text.before + text.selection).length + 22
 
     scope.insertIMG = ->
-      text = scope.returnSelection()
+      text = returnSelection()
       if text.selection == ""
         newtext = text.before + "![Image Description](https://yourimage.jpg)" + text.after
         input[0].value = newtext
@@ -101,7 +102,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
         input[0].selectionEnd = (text.before + text.selection).length + 25
 
     scope.insertList = (markup = "* ") ->
-      text = scope.returnSelection()
+      text = returnSelection()
       if text.selection != ""
         newstring = ""
         index = text.before.length
