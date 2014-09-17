@@ -15,7 +15,6 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
     output = elem.find('div')
 
     returnSelection = ->
-      # Maybe get selections from other parts of the text? Such as the quote or a reply?
       ourIframeSelection = $window.getSelection().toString()
       if input[0].selectionStart != undefined
         startPos = input[0].selectionStart
@@ -36,13 +35,20 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
       input.focus()
       return selection
 
-    scope.applyMarkup = (markup, innertext)->
+    insertMarkup = (value, selectionStart, selectionEnd) ->
+      # New value is set for the textarea
+      input[0].value = value
+      # A new selection is set, or the cursur is positioned inside the textarea.
+      input[0].selectionStart = selectionStart
+      input[0].selectionEnd = selectionEnd
+
+    applyInlineMarkup = (markup, innertext)->
       text = returnSelection()
       if text.selection == ""
         newtext = text.before + markup + innertext + markup + text.after
-        input[0].value = newtext
-        input[0].selectionStart = (text.before + markup).length
-        input[0].selectionEnd = (text.before + innertext + markup).length
+        start = (text.before + markup).length
+        end = (text.before + innertext + markup).length
+        insertMarkup(newtext, start, end)
       else
         # Check to see if markup has already been applied before to the selection.
         slice1 = text.before.slice((text.before.length - markup.length))
@@ -50,58 +56,58 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
         if slice1 == markup and slice2 == markup
           # Remove markup 
           newtext = text.before.slice(0, (text.before.length - markup.length)) + text.selection + text.after.slice(markup.length)
-          input[0].value = newtext
-          input[0].selectionStart = text.before.length - markup.length
-          input[0].selectionEnd = (text.before + text.selection).length - markup.length
+          start = text.before.length - markup.length
+          end = (text.before + text.selection).length - markup.length
+          insertMarkup(newtext, start, end)
         else
           # Apply markup
           newtext = text.before + markup + text.selection + markup + text.after
-          input[0].value = newtext
-          input[0].selectionStart = (text.before + markup).length
-          input[0].selectionEnd = (text.before + text.selection + markup).length
+          start = (text.before + markup).length
+          end = (text.before + text.selection + markup).length
+          insertMarkup(newtext, start, end)
 
     scope.insertBold = ->
-      scope.applyMarkup("**", "Bold")
+      applyInlineMarkup("**", "Bold")
 
     scope.insertItalic = ->
-      scope.applyMarkup("*", "Italic")
+      applyInlineMarkup("*", "Italic")
 
     scope.insertMath = ->
-      scope.applyMarkup("$$", "LaTex")
+      applyInlineMarkup("$$", "LaTex")
 
     scope.insertLink = ->
       text = returnSelection()
       if text.selection == ""
         newtext = text.before + "[Link Text](https://example.com)" + text.after
-        input[0].value = newtext
-        input[0].selectionStart = text.before.length + 1
-        input[0].selectionEnd = text.before.length + 10
+        start = text.before.length + 1
+        end = text.before.length + 10
+        insertMarkup(newtext, start, end)
       else
         # Check to see if markup has already been applied to avoid double presses.
         if text.selection == "Link Text" or text.selection == "https://example.com"
           return          
         newtext = text.before + '[' + text.selection + '](https://example.com)' + text.after
-        input[0].value = newtext
-        input[0].selectionStart = (text.before + text.selection).length + 3
-        input[0].selectionEnd = (text.before + text.selection).length + 22
+        start = (text.before + text.selection).length + 3
+        end = (text.before + text.selection).length + 22
+        insertMarkup(newtext, start, end)
 
     scope.insertIMG = ->
       text = returnSelection()
       if text.selection == ""
         newtext = text.before + "![Image Description](https://yourimage.jpg)" + text.after
-        input[0].value = newtext
-        input[0].selectionStart = text.before.length + 21
-        input[0].selectionEnd = text.before.length + 42
+        start = text.before.length + 21
+        end = text.before.length + 42
+        insertMarkup(newtext, start, end)
       else
         # Check to see if markup has already been applied to avoid double presses.
         if text.selection == "https://yourimage.jpg"
           return     
         newtext = text.before + '![' + text.selection + '](https://yourimage.jpg)' + text.after
-        input[0].value = newtext
-        input[0].selectionStart = (text.before + text.selection).length + 4
-        input[0].selectionEnd = (text.before + text.selection).length + 25
+        start = (text.before + text.selection).length + 4
+        end = (text.before + text.selection).length + 25
+        insertMarkup(newtext, start, end)
 
-    scope.insertList = (markup = "* ") ->
+    scope.applyBlockMarkup = (markup) ->
       text = returnSelection()
       if text.selection != ""
         newstring = ""
@@ -145,20 +151,23 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
               newstring = markup + newstring
             else
               newstring = newstring.substring(0, (indexoflastnewline + 1)) + markup + newstring.substring(indexoflastnewline + 1)
-            input[0].value = newstring + text.after
-            input[0].selectionStart = (text.before + markup).length
-            input[0].selectionEnd = (text.before + text.selection + markup).length
+            value = newstring + text.after
+            start = (text.before + markup).length
+            end = (text.before + text.selection + markup).length
+            insertMarkup(value, start, end)
             return
         # Sets textarea value and selection for cases where there are new lines in the selection 
         # or the selection is at the start
-        input[0].value = text.before + newstring + text.after
-        input[0].selectionStart = (text.before + newstring).length
-        input[0].selectionEnd = (text.before + newstring).length
+        value = text.before + newstring + text.after
+        start = (text.before + newstring).length
+        end = (text.before + newstring).length
+        insertMarkup(value, start, end)
       else if input[0].value.substring((text.start - 1 ), text.start) == "\n"
         # Edge case, no selection, the cursor is on a new line.
-        input[0].value = text.before + markup + text.selection + text.after
-        input[0].selectionStart = (text.before + markup).length
-        input[0].selectionEnd = (text.before + markup).length
+        value = text.before + markup + text.selection + text.after
+        start = (text.before + markup).length
+        end = (text.before + markup).length
+        insertMarkup(value, start, end)
       else
         # No selection, cursor is not on new line. Go to the previous newline and insert markup there.
         # # Check to see if markup has already been inserted.
@@ -173,50 +182,50 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
           # Check to see if markup has already been inserted and undo it. 
           if text.before.slice(0, markup.length) == markup
             newtext = text.before.substring(markup.length) + text.after
-            input[0].value = newtext
-            input[0].selectionStart = text.before.length - markup.length
-            input[0].selectionEnd = text.before.length - markup.length
+            start = text.before.length - markup.length
+            end = text.before.length - markup.length
+            insertMarkup(newtext, start, end)
           else
             newtext = markup + text.before.substring(0) + text.after
-            input[0].value = newtext
-            input[0].selectionStart = (text.before + markup).length
-            input[0].selectionEnd = (text.before + markup).length
+            start = (text.before + markup).length
+            end = (text.before + markup).length
+            insertMarkup(newtext, start, end)
         # Check to see if markup has already been inserted and undo it.
         else if text.before.slice((index + 1), (index + 1 + markup.length)) == markup
           newtext = text.before.substring(0, (index)) + "\n" + text.before.substring(index + 1 + markup.length) + text.after
-          input[0].value = newtext
-          input[0].selectionStart = text.before.length - markup.length
-          input[0].selectionEnd = text.before.length - markup.length
+          start = text.before.length - markup.length
+          end = text.before.length - markup.length
+          insertMarkup(newtext, start, end)
         else
           newtext = text.before.substring(0, (index)) + "\n" + markup + text.before.substring(index + 1) + text.after
-          input[0].value = newtext
-          input[0].selectionStart = (text.before + markup).length
-          input[0].selectionEnd = (text.before + markup).length
+          start = (text.before + markup).length
+          end = (text.before + markup).length
+          insertMarkup(newtext, start, end)
+
+    scope.insertList = ->
+      scope.applyBlockMarkup("* ")
 
     scope.insertNumList = ->
-      # Shares the same logic as insertList but with different markup.
-      scope.insertList("1. ")
+      scope.applyBlockMarkup("1. ")
 
     scope.insertQuote = ->
-      # Shares the same logic as insertList but with different markup.
-      scope.insertList("> ")
+      scope.applyBlockMarkup("> ")
       
     scope.insertCode = ->
-      # Shares the same logic as insertList but with different markup.
-      scope.insertList("    ")
+      scope.applyBlockMarkup("    ")
 
     # Keyboard shortcuts for bold, italic, and link.
-    elem.bind
+    elem.on
       keydown: (e) ->
-        if e.keyCode == 66 && (e.ctrlKey || e.metaKey)
+        shortcuts =
+          66: scope.insertBold
+          73: scope.insertItalic
+          75: scope.insertLink
+
+        shortcut = shortcuts[e.keyCode]
+        if shortcut && (e.ctrlKey || e.metaKey)
           e.preventDefault()
-          scope.insertBold()
-        if e.keyCode == 73 && (e.ctrlKey || e.metaKey)
-          e.preventDefault()
-          scope.insertItalic()
-        if e.keyCode == 75 && (e.ctrlKey || e.metaKey)
-          e.preventDefault()
-          scope.insertLink()
+          shortcut()
 
     scope.preview = false
     scope.togglePreview = ->
