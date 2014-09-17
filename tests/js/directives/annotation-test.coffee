@@ -65,12 +65,6 @@ describe 'h.directives.annotation', ->
     $scope.$digest()
     assert.isNull(controller.document)
 
-  it 'skips the document object if the annotation has no targets', ->
-    annotation.target = []
-    controller = createController()
-    $scope.$digest()
-    assert.isNull(controller.document)
-
   describe '#reply', ->
     controller = null
     container = null
