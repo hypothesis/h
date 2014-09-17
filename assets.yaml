@@ -270,19 +270,19 @@ app_js:
           contents:
             - h:static/scripts/app.coffee
             - h:static/scripts/controllers.coffee
-            - h:static/scripts/controllers/account-management.coffee
+            - h:static/scripts/controllers/accountManagement.coffee
             - h:static/scripts/flash.coffee
             - h:static/scripts/filters.coffee
             - h:static/scripts/directives.coffee
-            - h:static/scripts/directives/deep-count.coffee
-            - h:static/scripts/directives/simple-search.coffee
-            - h:static/scripts/directives/status-button.coffee
+            - h:static/scripts/directives/deepCount.coffee
+            - h:static/scripts/directives/simpleSearch.coffee
+            - h:static/scripts/directives/statusButton.coffee
             - h:static/scripts/directives/thread.coffee
-            - h:static/scripts/directives/thread-filter.coffee
+            - h:static/scripts/directives/threadFilter.coffee
             - h:static/scripts/directives/annotation.coffee
             - h:static/scripts/services.coffee
-            - h:static/scripts/helpers/form-helpers.coffee
-            - h:static/scripts/helpers/document-helpers.coffee
+            - h:static/scripts/helpers/formHelpers.coffee
+            - h:static/scripts/helpers/documentHelpers.coffee
             - h:static/scripts/socket.coffee
             - h:static/scripts/searchfilters.coffee
             - h:static/scripts/streamsearch.coffee
