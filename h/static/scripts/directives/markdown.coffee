@@ -1,7 +1,7 @@
 ###*
 # @ngdoc directive
 # @name markdown
-# @restrict C
+# @restrict A
 # @description
 # This directive controls both the rendering and display of markdown in annotations, as well as
 # the markdown editor.
@@ -248,7 +248,7 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
       unless readonly then $timeout -> input.focus()
 
   require: '?ngModel'
-  restrict: 'C'
+  restrict: 'A'
   scope:
     readonly: '@'
     required: '@'

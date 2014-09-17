@@ -3,7 +3,7 @@
   <span ng-if="!vm.editing && vm.annotation.deleted">Annotation deleted.</span>
 
   <!-- User -->
-  <span ng-if="!vm.editing && vm.annotation.user">
+  <span ng-if="vm.annotation.user">
     <a class="annotation-user"
        target="_blank"
        ng-href="{{baseURI}}u/{{vm.annotation.user}}"
@@ -60,9 +60,10 @@
 
 <!-- Body -->
 <section name="text"
-         class="markdown annotation-body"
+         class="annotation-body"
          ng-model="vm.annotation.text"
-         ng-readonly="!vm.editing">
+         ng-readonly="!vm.editing"
+         markdown>
 </section>
 <!-- / Body -->
 

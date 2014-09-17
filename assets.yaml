@@ -270,6 +270,7 @@ app_js:
             - h:static/scripts/filters.coffee
             - h:static/scripts/directives.coffee
             - h:static/scripts/directives/deep-count.coffee
+            - h:static/scripts/directives/markdown.coffee
             - h:static/scripts/directives/simple-search.coffee
             - h:static/scripts/directives/status-button.coffee
             - h:static/scripts/directives/thread.coffee

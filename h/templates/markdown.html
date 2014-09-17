@@ -1,20 +1,20 @@
-<div ng-hide="readonly" class="markdowntools" ng-class="preview && 'disable'">
-	<i class="icon-bold" ng-click="insertBold()" title="Insert Bold" />
-	<i class="icon-italic" ng-click="insertItalic()" title="Insert Italic" />
-	<i class="icon-quote" ng-click="insertQuote()" title="Insert Quote" />
-	<i class="icon-link" ng-click="insertLink()" title="Insert Link" />
-	<i class="icon-image" ng-click="insertIMG()" title="Insert Image" />
-	<i class="icon-math" ng-click="insertMath()" title="Insert Math" />
-	<i class="icon-numlist" ng-click="insertNumList()" title="Insert Numbered List" />
-	<i class="icon-ulist" ng-click="insertList()" title="Insert List" />
-	<i class="icon-code" ng-click="insertCode()" title="Insert Code" />
+<div ng-hide="readonly" class="markdown-tools" ng-class="preview && 'disable'">
+	<i class="icon-bold markdown-tools-button" ng-click="insertBold()" title="Embolden text" />
+	<i class="icon-italic markdown-tools-button" ng-click="insertItalic()" title="Italicize text" />
+	<i class="icon-quote markdown-tools-button" ng-click="insertQuote()" title="Quote text" />
+	<i class="icon-link markdown-tools-button" ng-click="insertLink()" title="Insert Link" />
+	<i class="icon-image markdown-tools-button" ng-click="insertIMG()" title="Insert Image" />
+	<i class="icon-math markdown-tools-button" ng-click="insertMath()" title="Insert mathematical notation (LaTex is supported)" />
+	<i class="icon-numlist markdown-tools-button" ng-click="insertNumList()" title="Insert Numbered List" />
+	<i class="icon-ulist markdown-tools-button" ng-click="insertList()" title="Insert List" />
+	<i class="icon-code markdown-tools-button" ng-click="insertCode()" title="Insert Code" />
 	<div class="preview-toggle">
 		<a class="icon-markdown" href="https://help.github.com/articles/markdown-basics" title="Parsed as Markdown" target="_blank" />
-		<a href="" ng-click="togglePreview()" ng-show="!preview">Preview</a>
-		<a href="" ng-click="togglePreview()" ng-show="preview">Write</a>
+		<a href="" class="markdown-tools-toggle" ng-click="togglePreview()" ng-show="!preview">Preview</a>
+		<a href="" class="markdown-tools-toggle" ng-click="togglePreview()" ng-show="preview">Write</a>
 	</div>
 </div>
 <textarea class="form-input form-textarea" ng-hide="readonly || preview"
           ng-click="$event.stopPropagation()"
           ng-required="required" />
-<div class="styled-text" ng-class="preview && 'preview'" ng-click="togglePreview()" ng-bind-html="rendered" ng-show="readonly || preview" />
+<div class="styled-text" ng-class="preview && 'preview'" ng-dblclick="togglePreview()" ng-bind-html="rendered" ng-show="readonly || preview" />

@@ -49,7 +49,7 @@ privacy {
   top: 2px;
 }
 
-.markdown {
+[markdown] {
   .preview {
     overflow: auto;
     border: 1px solid $gray-lighter;
@@ -59,7 +59,7 @@ privacy {
     resize: vertical;
   }
 
-  .markdowntools {
+  .markdown-tools {
     margin-top: 10px;
     border-top: 1px solid #D3D3D3;
     border-left: 1px solid #D3D3D3;
@@ -76,15 +76,15 @@ privacy {
     -ms-user-select: none;
 
     &.disable {
-      i {
+      .markdown-tools-button {
         color: $gray-lighter;
         pointer-events: none;
       }
     }
 
-    i {padding: 5px;}
+    .markdown-tools-button {padding: 5px;}
 
-    i, a {
+    .markdown-tools-button, .markdown-tools-toggle, .icon-markdown {
       color: $gray;
 
       &:hover {
