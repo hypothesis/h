@@ -226,6 +226,11 @@ class Annotator.Guest extends Annotator
 
     this.removeEvents()
 
+  createAnnotation: ->
+    annotation = super
+    this.plugins.Bridge.sync([annotation])
+    annotation
+
   showViewer: (annotations) =>
     @panel?.notify
       method: "showViewer"
