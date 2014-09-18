@@ -1,1 +1,1 @@
-web: gunicorn --paster production.ini --log-config production.ini
+web: gunicorn --paster production.ini
