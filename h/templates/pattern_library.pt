@@ -605,8 +605,8 @@
                     <span class="user">aron</span>
                   </username>
                   <i class="small icon-locked ng-hide"></i>
-                  <i class="small icon-highlighter2 ng-hide"></i>
-                  <i class="small icon-comment3 ng-hide"></i>
+                  <i class="small icon-highlighter ng-hide"></i>
+                  <i class="small icon-comment ng-hide"></i>
                 </span>
                 <fuzzytime class="small pull-right ng-pristine ng-valid">
                   <a target="_blank" href="" title="Friday, August 22 2014 10:07 AM" class="">25 days ago</a>
@@ -665,8 +665,8 @@
                     <span class="user">aron</span>
                   </username>
                   <i class="small icon-locked ng-hide"></i>
-                  <i class="small icon-highlighter2 ng-hide"></i>
-                  <i class="small icon-comment3 ng-hide"></i>
+                  <i class="small icon-highlighter ng-hide"></i>
+                  <i class="small icon-comment ng-hide"></i>
                 </span>
                 <fuzzytime class="small pull-right ng-pristine ng-valid">
                   <a target="_blank" href="" title="Friday, August 22 2014 10:07 AM" class="">25 days ago</a>
@@ -720,7 +720,7 @@
                       <span class="">
                         <username user="vm.annotation.user" class=""><span class="user ng-binding">aron</span></username>
                         <i class="small icon-locked ng-hide"></i>
-                        <i class="small icon-highlighter2 ng-hide"></i>
+                        <i class="small icon-highlighter ng-hide"></i>
                       </span>
 
                       <fuzzytime class="small pull-right ng-pristine ng-valid"><a target="_blank" href="" title="Tuesday, August 19 2014 5:36 PM" class="ng-binding">28 days ago</a></fuzzytime>
