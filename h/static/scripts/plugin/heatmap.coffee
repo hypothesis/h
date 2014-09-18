@@ -50,7 +50,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       $(element).append @element
 
   pluginInit: ->
-    return unless d3?
     this._maybeRebaseUrls()
 
     events = [
@@ -349,56 +348,22 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       if bucket.length
         start = @buckets[i-1]?.length and ((@buckets[i-1].length + bucket.length) / 2) or 1e-6
         end = @buckets[i+1]?.length and ((@buckets[i+1].length + bucket.length) / 2) or 1e-6
-        curve = d3.scale.pow().exponent(.1)
-          .domain([0, .5, 1])
-          .range([
-            [offsets[0], i, 0, start]
-            [d3.mean(offsets), i, .5, bucket.length]
-            [offsets[1], i, 1, end]
-          ])
-          .interpolate(d3.interpolateArray)
-        curve(v) for v in d3.range(0, 1, .05)
       else
         [ [offsets[0], i, 0, 1e-6]
           [offsets[1], i, 1, 1e-6] ]
 
     # Update the data bindings
-    element = d3.select(@element[0])
-
-    # Update gradient stops
-    opacity = d3.scale.pow().domain([0, max]).range([.1, .6]).exponent(2)
-
-    stops = element
-    .select('#heatmap-gradient')
-    .selectAll('stop')
-    .data(stopData, (d) => d)
-
-    stops.enter().append('stop')
-    stops.exit().remove()
-    stops.order()
-      .attr('offset', (v) => v[0] / $(window).height())
-      .attr('stop-color', (v) =>
-        if max == 0 then this._colorize(1e-6) else this._colorize(v[3] / max))
-      .attr('stop-opacity', (v) ->
-        if max == 0 then .1 else opacity(v[3]))
+    element = @element.empty()
 
     # Update bucket pointers
-    tabs = element
-    .selectAll('div.heatmap-pointer')
-
-    .data =>
-      buckets = []
-      @index.forEach (b, i) =>
-        if @buckets[i].length > 0 or @isUpper(i) or @isLower(i)
-          buckets.push i
-      @bucketIndices = buckets
-      buckets
-
-    tabs.enter().append('div')
-      .classed('heatmap-pointer', true)
+    tabs = $.map stopData,  =>
+      div = $('<div/>')
+      .appendTo(element)
+      .addClass('heatmap-pointer')
 
       # Creates highlights corresponding bucket when mouse is hovered
-      .on 'mousemove', (bucket) =>
+      .on 'mousemove', (event) =>
+        bucket = @tabs.index(event.currentTarget)
         for hl in @annotator.getHighlights()
           if hl.annotation in @buckets[bucket]
             hl.setActive true, true
@@ -415,8 +380,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         @annotator.publish "finalizeHighlights"
 
       # Does one of a few things when a tab is clicked depending on type
-      .on 'click', (bucket) =>
-        d3.event.stopPropagation()
+      .on 'click', (event) =>
+        bucket = @tabs.index(event.currentTarget)
+        event.stopPropagation()
         pad = defaultView.innerHeight * .2
 
         # If it's the upper tab, scroll to next anchor above
@@ -428,28 +394,28 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           @dynamicBucket = true
           @_jumpMinMax @buckets[bucket], "down"
         else
-          d3.event.stopPropagation()
           annotations = @buckets[bucket].slice()
           annotator.selectAnnotations annotations,
             (d3.event.ctrlKey or d3.event.metaKey),
+      .get()
 
-    tabs.exit().remove()
-
-    tabs
-    .style 'margin-top', (d) =>
+    tabs = $(tabs)
+    .css 'margin-top', (d) =>
       if @isUpper(d) or @isLower(d) then '-9px' else '-8px'
 
-    .style 'top', (d) =>
+    .css 'top', (d) =>
       "#{(@index[d] + @index[d+1]) / 2}px"
 
     .html (d) =>
+      return unless @buckets[d]
       "<div class='label'>#{@buckets[d].length}</div>"
 
-    .classed('upper', @isUpper)
-    .classed('lower', @isLower)
+    .toggleClass('upper', @isUpper)
+    .toggleClass('lower', @isLower)
 
-    .style 'display', (d) =>
-      if (@buckets[d].length is 0) then 'none' else ''
+    .css 'display', (d) =>
+      bucket = @buckets[d]
+      if (!bucket or bucket.length is 0) then 'none' else ''
 
     if @dynamicBucket
       @annotator.updateViewer this._getDynamicBucket()
