@@ -147,13 +147,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         return 1
     return 0
 
-  _colorize: (v) ->
-    c = d3.scale.pow().exponent(2)
-    .domain([0, 1])
-    .range(['#f7fbff', '#08306b'])
-    .interpolate(d3.interpolateHcl)
-    c(v).toString()
-
   _collectVirtualAnnotations: (startPage, endPage) ->
     results = []
     for page in [startPage .. endPage]
@@ -396,7 +389,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         else
           annotations = @buckets[bucket].slice()
           annotator.selectAnnotations annotations,
-            (d3.event.ctrlKey or d3.event.metaKey),
+            (event.ctrlKey or event.metaKey),
       .get()
 
     tabs = $(tabs)
