@@ -9,8 +9,8 @@
        ng-href="{{baseURI}}u/{{vm.annotation.user}}"
        >{{vm.annotation.user | persona}}</a>
     <i class="small icon-locked" ng-show="vm.isPrivate()"></i>
-    <i class="small icon-highlighter2" ng-show="vm.isHighlight()"></i>
-    <i class="small icon-comment3" ng-show="vm.isComment()"></i>
+    <i class="small icon-highlighter" ng-show="vm.isHighlight()"></i>
+    <i class="small icon-comment" ng-show="vm.isComment()"></i>
     <span class="annotation-citation"
           ng-if="!vm.embedded"
           ng-show="vm.document.title">

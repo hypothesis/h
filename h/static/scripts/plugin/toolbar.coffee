@@ -31,7 +31,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         window.annotator.setVisibleHighlights state
     ,
       "title": "Highlighting Mode"
-      "class": "icon-highlighter2"
+      "class": "icon-highlighter"
       "click": (event) ->
         event.preventDefault()
         event.stopPropagation()
