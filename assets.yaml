@@ -170,11 +170,6 @@ wgxpath:
 
 
 # Other dependencies
-d3:
-  filters: uglifyjs
-  output: scripts/vendor/d3.min.js
-  contents:
-    - h:static/scripts/vendor/d3.js
 jschannel:
   filters: uglifyjs
   output: scripts/vendor/jschannel.min.js
@@ -345,7 +340,6 @@ inject:
 inject_js:
   output: scripts/hypothesis-assets.js
   contents:
-    - d3
     - jquery
     - jquery_scrollintoview
     - jschannel
