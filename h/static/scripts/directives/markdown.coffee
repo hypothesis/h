@@ -12,19 +12,20 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
     return unless ctrl?
 
     input = elem.find('textarea')
-    output = elem.find('div')
+    output = elem.find('div')[1]
+    textarea = input[0]
 
     returnSelection = ->
       ourIframeSelection = $window.getSelection().toString()
-      if input[0].selectionStart != undefined
-        startPos = input[0].selectionStart
-        endPos = input[0].selectionEnd
+      if textarea.selectionStart != undefined
+        startPos = textarea.selectionStart
+        endPos = textarea.selectionEnd
         if ourIframeSelection
           selectedText = ourIframeSelection
         else
-          selectedText = input[0].value.substring(startPos, endPos)
-        textBefore = input[0].value.substring(0, (startPos))
-        textAfter = input[0].value.substring(endPos)
+          selectedText = textarea.value.substring(startPos, endPos)
+        textBefore = textarea.value.substring(0, (startPos))
+        textAfter = textarea.value.substring(endPos)
         selection = {
           before: textBefore
           after: textAfter
@@ -37,10 +38,10 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
 
     insertMarkup = (value, selectionStart, selectionEnd) ->
       # New value is set for the textarea
-      input[0].value = value
+      textarea.value = value
       # A new selection is set, or the cursur is positioned inside the textarea.
-      input[0].selectionStart = selectionStart
-      input[0].selectionEnd = selectionEnd
+      textarea.selectionStart = selectionStart
+      textarea.selectionEnd = selectionEnd
 
     applyInlineMarkup = (markup, innertext)->
       text = returnSelection()
@@ -124,7 +125,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
             index += 1
         else
           newlinedetected = false
-          if input[0].value.substring(index - 1).charAt(0) == "\n"
+          if textarea.value.substring(index - 1).charAt(0) == "\n"
             # Look to see if the selection falls at the beginning of a new line.
             newstring = newstring + markup
             newlinedetected = true
@@ -162,7 +163,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
         start = (text.before + newstring).length
         end = (text.before + newstring).length
         insertMarkup(value, start, end)
-      else if input[0].value.substring((text.start - 1 ), text.start) == "\n"
+      else if textarea.value.substring((text.start - 1 ), text.start) == "\n"
         # Edge case, no selection, the cursor is on a new line.
         value = text.before + markup + text.selection + text.after
         start = (text.before + markup).length
@@ -232,10 +233,10 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
       if !scope.readonly
         scope.preview = !scope.preview
         if scope.preview
-          output[2].style.height = input[0].style.height
+          output.style.height = textarea.style.height
           ctrl.$render()
         else
-          input[0].style.height = output[2].style.height
+          textarea.style.height = output.style.height
           $timeout -> input.focus()
 
     # Re-render the markdown when the view needs updating.
@@ -253,7 +254,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
     # Auto-focus the input box when the widget becomes editable.
     scope.$watch 'readonly', (readonly) ->
       scope.preview = false
-      output[2].style.height = ""
+      output.style.height = ""
       ctrl.$render()
       unless readonly then $timeout -> input.focus()
 

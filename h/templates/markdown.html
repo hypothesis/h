@@ -8,11 +8,11 @@
 	<i class="icon-numlist markdown-tools-button" ng-click="insertNumList()" title="Insert Numbered List" />
 	<i class="icon-ulist markdown-tools-button" ng-click="insertList()" title="Insert List" />
 	<i class="icon-code markdown-tools-button" ng-click="insertCode()" title="Insert Code" />
-	<div class="preview-toggle">
+	<span class="preview-toggle">
 		<a class="icon-markdown" href="https://help.github.com/articles/markdown-basics" title="Parsed as Markdown" target="_blank" />
 		<a href="" class="markdown-tools-toggle" ng-click="togglePreview()" ng-show="!preview">Preview</a>
 		<a href="" class="markdown-tools-toggle" ng-click="togglePreview()" ng-show="preview">Write</a>
-	</div>
+	</span>
 </div>
 <textarea class="form-input form-textarea" ng-hide="readonly || preview"
           ng-click="$event.stopPropagation()"
