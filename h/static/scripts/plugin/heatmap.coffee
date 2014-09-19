@@ -8,20 +8,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # heatmap svg skeleton
   html: """
         <div class="annotator-heatmap">
-          <svg xmlns="http://www.w3.org/2000/svg"
-               version="1.1">
-             <defs>
-               <linearGradient id="heatmap-gradient" x2="0" y2="100%">
-               </linearGradient>
-               <filter id="heatmap-blur">
-                 <feGaussianBlur stdDeviation="0 2"></feGaussianBlur>
-               </filter>
-             </defs>
-             <rect x="0" y="0" width="100%" height="100%"
-                   fill="url('#heatmap-gradient')"
-                   filter="url('#heatmap-blur')" >
-             </rect>
-           </svg>
+          <div class="annotator-heatmap-bar"></div>
         </div>
         """
 
@@ -38,6 +25,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # index for fast hit detection in the buckets
   index: []
 
+  # tab elements
+  tabs: null
+
   # whether to update the viewer as the window is scrolled
   dynamicBucket: true
 
@@ -50,9 +40,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       $(element).append @element
 
   pluginInit: ->
-    return unless d3?
-    this._maybeRebaseUrls()
-
     events = [
       'annotationCreated', 'annotationUpdated', 'annotationDeleted',
       'annotationsLoaded'
@@ -67,8 +54,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     @element.on 'mouseup', (event) =>
       event.stopPropagation()
 
-    $(window).on 'resize scroll', this._update
-    $(document.body).on 'resize scroll', '*', this._update
+    $(window).on 'resize scroll', this._scheduleUpdate
+    $(document.body).on 'resize scroll', '*', this._scheduleUpdate
 
     # Event handler to finish scrolling when we have to
     # wait for anchors to be realized
@@ -83,7 +70,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         # Weird, but for now, let's work around it.
         highlights.anchor
       if anchor.annotation.id? # Is this a finished annotation ?
-        @_scheduleUpdate()
+        this._scheduleUpdate()
 
       if @pendingScroll? and anchor in @pendingScroll.anchors
         # One of the wanted anchors has been realized
@@ -106,39 +93,18 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     @annotator.subscribe "highlightRemoved", (highlight) =>
       if highlight.annotation.id? # Is this a finished annotation ?
-        @_scheduleUpdate()
+        this._scheduleUpdate()
 
-    addEventListener "docPageScrolling", => @_update()
+    addEventListener "docPageScrolling", this._scheduleUpdate
 
   # Update the heatmap sometimes soon
   _scheduleUpdate: =>
     return if @_updatePending
     @_updatePending = true
-    setTimeout ( =>
+    setTimeout =>
       delete @_updatePending
       @_update()
-    ), 200
-
-  _maybeRebaseUrls: ->
-    # We can't rely on browsers to implement the xml:base property correctly.
-    # Therefore, we must rebase the fragment references we use in the SVG for
-    # the heatmap in case the page contains a <base> tag which might otherwise
-    # break these references.
-
-    return unless document.getElementsByTagName('base').length
-
-    loc = window.location
-    base = "#{loc.protocol}//#{loc.host}#{loc.pathname}#{loc.search}"
-
-    rect = @element.find('rect')
-    fill = rect.attr('fill')
-    filter = rect.attr('filter')
-
-    fill = fill.replace(/(#\w+)/, "#{base}$1")
-    filter = filter.replace(/(#\w+)/, "#{base}$1")
-
-    rect.attr('fill', fill)
-    rect.attr('filter', filter)
+    , 60 / 1000
 
   _collate: (a, b) ->
     for i in [0..a.length-1]
@@ -147,13 +113,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       if a[i] > b[i]
         return 1
     return 0
-
-  _colorize: (v) ->
-    c = d3.scale.pow().exponent(2)
-    .domain([0, 1])
-    .range(['#f7fbff', '#08306b'])
-    .interpolate(d3.interpolateHcl)
-    c(v).toString()
 
   _collectVirtualAnnotations: (startPage, endPage) ->
     results = []
@@ -342,63 +301,27 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     for b in @buckets
       max = Math.max max, b.length
 
-    # Set up the stop interpolations for data binding
-    stopData = $.map @buckets, (bucket, i) =>
-      x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
-      offsets = [@index[i], x2]
-      if bucket.length
-        start = @buckets[i-1]?.length and ((@buckets[i-1].length + bucket.length) / 2) or 1e-6
-        end = @buckets[i+1]?.length and ((@buckets[i+1].length + bucket.length) / 2) or 1e-6
-        curve = d3.scale.pow().exponent(.1)
-          .domain([0, .5, 1])
-          .range([
-            [offsets[0], i, 0, start]
-            [d3.mean(offsets), i, .5, bucket.length]
-            [offsets[1], i, 1, end]
-          ])
-          .interpolate(d3.interpolateArray)
-        curve(v) for v in d3.range(0, 1, .05)
-      else
-        [ [offsets[0], i, 0, 1e-6]
-          [offsets[1], i, 1, 1e-6] ]
-
     # Update the data bindings
-    element = d3.select(@element[0])
+    element = @element
 
-    # Update gradient stops
-    opacity = d3.scale.pow().domain([0, max]).range([.1, .6]).exponent(2)
+    # Keep track of tabs to keep element creation to a minimum.
+    @tabs ||= $([])
 
-    stops = element
-    .select('#heatmap-gradient')
-    .selectAll('stop')
-    .data(stopData, (d) => d)
+    # Remove any extra tabs and update @tabs.
+    @tabs.slice(@buckets.length).remove()
+    @tabs = @tabs.slice(0, @buckets.length)
 
-    stops.enter().append('stop')
-    stops.exit().remove()
-    stops.order()
-      .attr('offset', (v) => v[0] / $(window).height())
-      .attr('stop-color', (v) =>
-        if max == 0 then this._colorize(1e-6) else this._colorize(v[3] / max))
-      .attr('stop-opacity', (v) ->
-        if max == 0 then .1 else opacity(v[3]))
+    # Create any new tabs if needed.
+    $.each @buckets.slice(@tabs.length), =>
+      div = $('<div/>').appendTo(element)
 
-    # Update bucket pointers
-    tabs = element
-    .selectAll('div.heatmap-pointer')
+      @tabs.push(div[0])
 
-    .data =>
-      buckets = []
-      @index.forEach (b, i) =>
-        if @buckets[i].length > 0 or @isUpper(i) or @isLower(i)
-          buckets.push i
-      @bucketIndices = buckets
-      buckets
-
-    tabs.enter().append('div')
-      .classed('heatmap-pointer', true)
+      div.addClass('heatmap-pointer')
 
       # Creates highlights corresponding bucket when mouse is hovered
-      .on 'mousemove', (bucket) =>
+      .on 'mousemove', (event) =>
+        bucket = @tabs.index(event.currentTarget)
         for hl in @annotator.getHighlights()
           if hl.annotation in @buckets[bucket]
             hl.setActive true, true
@@ -415,8 +338,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         @annotator.publish "finalizeHighlights"
 
       # Does one of a few things when a tab is clicked depending on type
-      .on 'click', (bucket) =>
-        d3.event.stopPropagation()
+      .on 'click', (event) =>
+        bucket = @tabs.index(event.currentTarget)
+        event.stopPropagation()
         pad = defaultView.innerHeight * .2
 
         # If it's the upper tab, scroll to next anchor above
@@ -428,33 +352,30 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           @dynamicBucket = true
           @_jumpMinMax @buckets[bucket], "down"
         else
-          d3.event.stopPropagation()
           annotations = @buckets[bucket].slice()
           annotator.selectAnnotations annotations,
-            (d3.event.ctrlKey or d3.event.metaKey),
+            (event.ctrlKey or event.metaKey),
 
-    tabs.exit().remove()
-
-    tabs
-    .style 'margin-top', (d) =>
+    @tabs
+    .css 'margin-top', (d) =>
       if @isUpper(d) or @isLower(d) then '-9px' else '-8px'
 
-    .style 'top', (d) =>
+    .css 'top', (d) =>
       "#{(@index[d] + @index[d+1]) / 2}px"
 
     .html (d) =>
+      return unless @buckets[d]
       "<div class='label'>#{@buckets[d].length}</div>"
 
-    .classed('upper', @isUpper)
-    .classed('lower', @isLower)
+    .addClass (d) => if @isUpper(d) then 'upper' else ''
+    .addClass (d) => if @isLower(d) then 'lower' else ''
 
-    .style 'display', (d) =>
-      if (@buckets[d].length is 0) then 'none' else ''
+    .css 'display', (d) =>
+      bucket = @buckets[d]
+      if (!bucket or bucket.length is 0) then 'none' else ''
 
     if @dynamicBucket
       @annotator.updateViewer this._getDynamicBucket()
-
-    @tabs = tabs
 
   _getDynamicBucket: ->
     top = window.pageYOffset

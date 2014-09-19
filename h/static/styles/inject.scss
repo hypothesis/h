@@ -68,16 +68,18 @@ $base-font-size: 14px;
 
 
 //HEATMAP STUFF////////////////////////////////
-.annotator-frame .annotator-heatmap {
-  cursor: ew-resize;
-  position: absolute;
-  overflow: hidden;
+.annotator-frame {
+  .annotator-heatmap {
+    cursor: ew-resize;
+    position: absolute;
+    overflow: hidden;
 
-  height: 100%;
-  width: $heatmap-width + 18px;
-  left: -($heatmap-width + 18px);
+    height: 100%;
+    width: $heatmap-width + 18px;
+    left: -($heatmap-width + 18px);
+  }
 
-  svg {
+  .annotator-heatmap-bar {
     @include stretch-y;
     background: hsla(0, 0, 0, .1);
     border-left: solid 1px $gray-lighter;
