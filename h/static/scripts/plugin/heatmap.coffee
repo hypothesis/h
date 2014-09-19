@@ -8,20 +8,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # heatmap svg skeleton
   html: """
         <div class="annotator-heatmap">
-          <svg xmlns="http://www.w3.org/2000/svg"
-               version="1.1">
-             <defs>
-               <linearGradient id="heatmap-gradient" x2="0" y2="100%">
-               </linearGradient>
-               <filter id="heatmap-blur">
-                 <feGaussianBlur stdDeviation="0 2"></feGaussianBlur>
-               </filter>
-             </defs>
-             <rect x="0" y="0" width="100%" height="100%"
-                   fill="url('#heatmap-gradient')"
-                   filter="url('#heatmap-blur')" >
-             </rect>
-           </svg>
+          <div class="annotator-heatmap-bar"></div>
         </div>
         """
 
@@ -53,8 +40,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       $(element).append @element
 
   pluginInit: ->
-    this._maybeRebaseUrls()
-
     events = [
       'annotationCreated', 'annotationUpdated', 'annotationDeleted',
       'annotationsLoaded'
@@ -120,27 +105,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       delete @_updatePending
       @_update()
     , 60 / 1000
-
-  _maybeRebaseUrls: ->
-    # We can't rely on browsers to implement the xml:base property correctly.
-    # Therefore, we must rebase the fragment references we use in the SVG for
-    # the heatmap in case the page contains a <base> tag which might otherwise
-    # break these references.
-
-    return unless document.getElementsByTagName('base').length
-
-    loc = window.location
-    base = "#{loc.protocol}//#{loc.host}#{loc.pathname}#{loc.search}"
-
-    rect = @element.find('rect')
-    fill = rect.attr('fill')
-    filter = rect.attr('filter')
-
-    fill = fill.replace(/(#\w+)/, "#{base}$1")
-    filter = filter.replace(/(#\w+)/, "#{base}$1")
-
-    rect.attr('fill', fill)
-    rect.attr('filter', filter)
 
   _collate: (a, b) ->
     for i in [0..a.length-1]
