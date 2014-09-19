@@ -334,22 +334,11 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     for b in @buckets
       max = Math.max max, b.length
 
-    # Set up the stop interpolations for data binding
-    stopData = $.map @buckets, (bucket, i) =>
-      x2 = if @index[i+1]? then @index[i+1] else wrapper.height()
-      offsets = [@index[i], x2]
-      if bucket.length
-        start = @buckets[i-1]?.length and ((@buckets[i-1].length + bucket.length) / 2) or 1e-6
-        end = @buckets[i+1]?.length and ((@buckets[i+1].length + bucket.length) / 2) or 1e-6
-      else
-        [ [offsets[0], i, 0, 1e-6]
-          [offsets[1], i, 1, 1e-6] ]
-
     # Update the data bindings
     element = @element.empty()
 
     # Update bucket pointers
-    tabs = $.map stopData,  =>
+    tabs = $.map @index, =>
       div = $('<div/>')
       .appendTo(element)
       .addClass('heatmap-pointer')
@@ -403,8 +392,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       return unless @buckets[d]
       "<div class='label'>#{@buckets[d].length}</div>"
 
-    .toggleClass('upper', @isUpper)
-    .toggleClass('lower', @isLower)
+    .addClass (d) => if @isUpper(d) then 'upper' else ''
+    .addClass (d) => if @isLower(d) then 'lower' else ''
 
     .css 'display', (d) =>
       bucket = @buckets[d]
