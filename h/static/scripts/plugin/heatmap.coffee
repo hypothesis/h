@@ -38,6 +38,9 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # index for fast hit detection in the buckets
   index: []
 
+  # tab elements
+  tabs: null
+
   # whether to update the viewer as the window is scrolled
   dynamicBucket: true
 
@@ -66,8 +69,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     @element.on 'mouseup', (event) =>
       event.stopPropagation()
 
-    $(window).on 'resize scroll', this._update
-    $(document.body).on 'resize scroll', '*', this._update
+    $(window).on 'resize scroll', this._scheduleUpdate
+    $(document.body).on 'resize scroll', '*', this._scheduleUpdate
 
     # Event handler to finish scrolling when we have to
     # wait for anchors to be realized
@@ -82,7 +85,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         # Weird, but for now, let's work around it.
         highlights.anchor
       if anchor.annotation.id? # Is this a finished annotation ?
-        @_scheduleUpdate()
+        this._scheduleUpdate()
 
       if @pendingScroll? and anchor in @pendingScroll.anchors
         # One of the wanted anchors has been realized
@@ -105,18 +108,18 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     @annotator.subscribe "highlightRemoved", (highlight) =>
       if highlight.annotation.id? # Is this a finished annotation ?
-        @_scheduleUpdate()
+        this._scheduleUpdate()
 
-    addEventListener "docPageScrolling", => @_update()
+    addEventListener "docPageScrolling", this._scheduleUpdate
 
   # Update the heatmap sometimes soon
   _scheduleUpdate: =>
     return if @_updatePending
     @_updatePending = true
-    setTimeout ( =>
+    setTimeout =>
       delete @_updatePending
       @_update()
-    ), 200
+    , 60 / 1000
 
   _maybeRebaseUrls: ->
     # We can't rely on browsers to implement the xml:base property correctly.
