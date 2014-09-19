@@ -335,13 +335,22 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       max = Math.max max, b.length
 
     # Update the data bindings
-    element = @element.empty()
+    element = @element
 
-    # Update bucket pointers
-    tabs = $.map @index, =>
-      div = $('<div/>')
-      .appendTo(element)
-      .addClass('heatmap-pointer')
+    # Keep track of tabs to keep element creation to a minimum.
+    @tabs ||= $([])
+
+    # Remove any extra tabs and update @tabs.
+    @tabs.slice(@buckets.length).remove()
+    @tabs = @tabs.slice(0, @buckets.length)
+
+    # Create any new tabs if needed.
+    $.each @buckets.slice(@tabs.length), =>
+      div = $('<div/>').appendTo(element)
+
+      @tabs.push(div[0])
+
+      div.addClass('heatmap-pointer')
 
       # Creates highlights corresponding bucket when mouse is hovered
       .on 'mousemove', (event) =>
@@ -379,9 +388,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           annotations = @buckets[bucket].slice()
           annotator.selectAnnotations annotations,
             (event.ctrlKey or event.metaKey),
-      .get()
 
-    tabs = $(tabs)
+    @tabs
     .css 'margin-top', (d) =>
       if @isUpper(d) or @isLower(d) then '-9px' else '-8px'
 
@@ -401,8 +409,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     if @dynamicBucket
       @annotator.updateViewer this._getDynamicBucket()
-
-    @tabs = tabs
 
   _getDynamicBucket: ->
     top = window.pageYOffset
