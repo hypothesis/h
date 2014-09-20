@@ -21,7 +21,7 @@
    href=""
    ng-if="!threadFilter.active() || count('message') == count('match')"
    ng-pluralize count="count('message') - 1"
-   when="{'0': '', one: '1 reply', other: '{} replies'}"></a>
+   when="{'0': '', one: '1 comment', other: '{} comments'}"></a>
 <a class="load-more small"
    href=""
    ng-click="threadFilter.active(false)"
