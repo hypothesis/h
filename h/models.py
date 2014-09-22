@@ -129,7 +129,7 @@ class Annotation(annotation.Annotation):
                         '([a-zA-Z0-9-]+)(?:\\.([a-zA-Z0-9-]+))*',
                     ]
                 },
-                'username': {
+                'user': {
                     'type': 'pattern_capture',
                     'preserve_original': 1,
                     'patterns': ['^acct:((.+)@.*)$']
@@ -153,7 +153,7 @@ class Annotation(annotation.Annotation):
                 },
                 'user': {
                     'tokenizer': 'keyword',
-                    'filter': ['username', 'lowercase']
+                    'filter': ['user', 'lowercase']
                 }
             }
         }
