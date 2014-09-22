@@ -15,7 +15,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
     output = elem.find('div')[1]
     textarea = input[0]
 
-    returnSelection = ->
+    userSelection = ->
       ourIframeSelection = $window.getSelection().toString()
       if textarea.selectionStart != undefined
         startPos = textarea.selectionStart
@@ -33,18 +33,19 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
           start: startPos
           end: endPos
         }
-      input.focus()
       return selection
 
     insertMarkup = (value, selectionStart, selectionEnd) ->
       # New value is set for the textarea
       textarea.value = value
-      # A new selection is set, or the cursur is positioned inside the textarea.
+      # A new selection is set, or the cursor is positioned inside the textarea.
       textarea.selectionStart = selectionStart
       textarea.selectionEnd = selectionEnd
+      # Focus the textarea
+      textarea.focus()
 
     applyInlineMarkup = (markup, innertext)->
-      text = returnSelection()
+      text = userSelection()
       if text.selection == ""
         newtext = text.before + markup + innertext + markup + text.after
         start = (text.before + markup).length
@@ -52,7 +53,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
         insertMarkup(newtext, start, end)
       else
         # Check to see if markup has already been applied before to the selection.
-        slice1 = text.before.slice((text.before.length - markup.length))
+        slice1 = text.before.slice(text.before.length - markup.length)
         slice2 = text.after.slice(0, markup.length)
         if slice1 == markup and slice2 == markup
           # Remove markup 
@@ -77,7 +78,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
       applyInlineMarkup("$$", "LaTex")
 
     scope.insertLink = ->
-      text = returnSelection()
+      text = userSelection()
       if text.selection == ""
         newtext = text.before + "[Link Text](https://example.com)" + text.after
         start = text.before.length + 1
@@ -93,7 +94,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
         insertMarkup(newtext, start, end)
 
     scope.insertIMG = ->
-      text = returnSelection()
+      text = userSelection()
       if text.selection == ""
         newtext = text.before + "![Image Description](https://yourimage.jpg)" + text.after
         start = text.before.length + 21
@@ -109,7 +110,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
         insertMarkup(newtext, start, end)
 
     scope.applyBlockMarkup = (markup) ->
-      text = returnSelection()
+      text = userSelection()
       if text.selection != ""
         newstring = ""
         index = text.before.length
