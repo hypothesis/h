@@ -119,6 +119,10 @@ def chrome(env):
             makedirs('./public/scripts/vendor')
             merge('../../h/static/scripts/vendor', './public/scripts/vendor')
 
+        # Copy over the bootstrap and destroy scripts
+        copyfile('../../h/static/bootstrap.js', './public/bootstrap.js')
+        copyfile('../../h/static/destroy.js', './public/destroy.js')
+
         app(context, request)
 
     manifest(context, request)
