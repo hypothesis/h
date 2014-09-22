@@ -43,57 +43,6 @@
 }
 
 
-//MARKDOWN EDITOR CONTROLS//////////////////////////
-[markdown] {
-  .preview {
-    overflow: auto;
-    border: 1px solid $gray-lighter;
-    background-color: $gray-lightest;
-    min-height: 120px;
-    padding-left: 10px;
-    resize: vertical;
-  }
-
-  .markdown-tools {
-    margin-top: 10px;
-    border-top: 1px solid #D3D3D3;
-    border-left: 1px solid #D3D3D3;
-    border-right: 1px solid #D3D3D3;
-    border-radius: 2px 2px 0 0;
-    width: 100%;
-    margin-bottom: -1px;
-    padding: .7em .7em .7em .5em;
-    user-select: none;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-
-    &.disable {
-      .markdown-tools-button {
-        color: $gray-lighter;
-        pointer-events: none;
-      }
-    }
-
-    .markdown-tools-button {padding: 5px;}
-
-    .markdown-tools-button, .markdown-tools-toggle, .icon-markdown {
-      color: $gray;
-
-      &:hover {
-        color: black;
-      }
-    }
-
-    .preview-toggle {
-      float: right;
-    }
-  }
-}
-
-
 //PRIVACY CONTROL////////////////////////////
 privacy {
   position: relative;
