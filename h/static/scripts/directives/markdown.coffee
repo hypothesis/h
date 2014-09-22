@@ -11,21 +11,20 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
-    input = elem.find('textarea')
-    output = elem.find('div')[1]
-    textarea = input[0]
+    inputEl = elem.find('.js-markdown-input')
+    input = elem.find('.js-markdown-input')[0]
+    output = elem.find('.js-markdown-preview')[0]
 
     userSelection = ->
-      ourIframeSelection = $window.getSelection().toString()
-      if textarea.selectionStart != undefined
-        startPos = textarea.selectionStart
-        endPos = textarea.selectionEnd
-        if ourIframeSelection
-          selectedText = ourIframeSelection
+      if input.selectionStart != undefined
+        startPos = input.selectionStart
+        endPos = input.selectionEnd
+        if $window.getSelection().toString()
+          selectedText = $window.getSelection().toString()
         else
-          selectedText = textarea.value.substring(startPos, endPos)
-        textBefore = textarea.value.substring(0, (startPos))
-        textAfter = textarea.value.substring(endPos)
+          selectedText = input.value.substring(startPos, endPos)
+        textBefore = input.value.substring(0, (startPos))
+        textAfter = input.value.substring(endPos)
         selection = {
           before: textBefore
           after: textAfter
@@ -36,13 +35,13 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
       return selection
 
     insertMarkup = (value, selectionStart, selectionEnd) ->
-      # New value is set for the textarea
-      textarea.value = value
-      # A new selection is set, or the cursor is positioned inside the textarea.
-      textarea.selectionStart = selectionStart
-      textarea.selectionEnd = selectionEnd
-      # Focus the textarea
-      textarea.focus()
+      # New value is set for the input
+      input.value = value
+      # A new selection is set, or the cursor is positioned inside the input.
+      input.selectionStart = selectionStart
+      input.selectionEnd = selectionEnd
+      # Focus the input
+      input.focus()
 
     applyInlineMarkup = (markup, innertext)->
       text = userSelection()
@@ -115,7 +114,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
         newstring = ""
         index = text.before.length
         if index == 0
-          # The selection takes place at the very start of the textarea
+          # The selection takes place at the very start of the input
           for char in text.selection
             if char == "\n"
               newstring = newstring + "\n" + markup
@@ -126,7 +125,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
             index += 1
         else
           newlinedetected = false
-          if textarea.value.substring(index - 1).charAt(0) == "\n"
+          if input.value.substring(index - 1).charAt(0) == "\n"
             # Look to see if the selection falls at the beginning of a new line.
             newstring = newstring + markup
             newlinedetected = true
@@ -158,13 +157,13 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
             end = (text.before + text.selection + markup).length
             insertMarkup(value, start, end)
             return
-        # Sets textarea value and selection for cases where there are new lines in the selection 
+        # Sets input value and selection for cases where there are new lines in the selection 
         # or the selection is at the start
         value = text.before + newstring + text.after
         start = (text.before + newstring).length
         end = (text.before + newstring).length
         insertMarkup(value, start, end)
-      else if textarea.value.substring((text.start - 1 ), text.start) == "\n"
+      else if input.value.substring((text.start - 1 ), text.start) == "\n"
         # Edge case, no selection, the cursor is on a new line.
         value = text.before + markup + text.selection + text.after
         start = (text.before + markup).length
@@ -234,20 +233,20 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
       if !scope.readonly
         scope.preview = !scope.preview
         if scope.preview
-          output.style.height = textarea.style.height
+          output.style.height = input.style.height
           ctrl.$render()
         else
-          textarea.style.height = output.style.height
-          $timeout -> input.focus()
+          input.style.height = output.style.height
+          $timeout -> inputEl.focus()
 
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
-      input.val (ctrl.$viewValue or '')
+      inputEl.val (ctrl.$viewValue or '')
       scope.rendered = ($filter 'converter') (ctrl.$viewValue or '')
 
-    # React to the changes to the text area
-    input.bind 'blur change keyup', ->
-      ctrl.$setViewValue input.val()
+    # React to the changes to the input
+    inputEl.bind 'blur change keyup', ->
+      ctrl.$setViewValue inputEl.val()
       scope.$digest()
 
     # Reset height of output div incase it has been changed.
@@ -257,7 +256,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
       scope.preview = false
       output.style.height = ""
       ctrl.$render()
-      unless readonly then $timeout -> input.focus()
+      unless readonly then $timeout -> inputEl.focus()
 
   require: '?ngModel'
   restrict: 'A'
