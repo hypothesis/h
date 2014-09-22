@@ -116,6 +116,29 @@ better. Using `Docker`_ it is easy to configure the ElasticSearch host and the
 mail relay address. Simply create links with the names ``elasticsearch`` and
 ``mail`` respectively.
 
+Customized embedding
+--------------------
+
+By default, Hypothesis instantiates the ``Annotator.Host`` class defined in
+the injected code loaded by ``embed.js``. It is possible to change this by
+assigning an alternate constructor to ``window.hypothesisRole``. To customize
+the plugins that are loaded, define a function ``window.hypothesisConfig`` which
+will be invoked with an empty ``Object`` value as its ``this`` context. This
+object is passed to the constructor as its second argument::
+
+    window.hypothesisConfig = function () {
+      this.app = 'https://example.com/custom_sidebar_iframe';
+      this.Toolbar = {container: '.toolbar-wrapper'};
+    }
+
+With the exception of ``app``, the keys for the options object are the names
+of Annotator plugins and their values are the options passed to the individual
+plugin constructors.
+
+The full range of possibilities here is still in need of documentation and we
+would appreciate any help to improve that.
+
+
 Documentation
 --------------------------
 
