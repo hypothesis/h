@@ -28,6 +28,16 @@ ThreadController = [
     this.toggleCollapsed = ->
       @collapsed = not @collapsed
 
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#showReplyToggle
+    # @description
+    # Determines whether the reply toggle button should be displayed for the
+    # current thread.
+    ###
+    this.showReplyToggle = (messageCount) ->
+      messageCount > 1 && !(@collapsed && @container.parent.parent)
+
     this
 ]
 

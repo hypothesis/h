@@ -87,32 +87,8 @@
 </div>
 <!-- / Tags -->
 
-<footer class="annotation-footer form-actions" ng-switch="vm.action">
-  <div ng-switch-when="view">
-    <a class="small magicontrol" href="" title="Reply"
-       ng-click="vm.reply()"
-       ><i class="icon-reply"></i> Reply</a>
-    <a class="small magicontrol" href="" title="Share"
-       ng-click="vm.toggleShared()"
-       ><i class="icon-export"></i> Share</a>
-    <a class="small magicontrol" href="" title="Edit"
-       ng-show="vm.authorize('update')"
-       ng-click="vm.edit()"
-       ><i class="icon-copy"></i> Edit</a>
-    <a class="small magicontrol" href="" title="Delete"
-       ng-show="vm.authorize('delete')"
-       ng-click="vm.delete()"
-       ><i class="icon-x"></i> Delete…</a>
-    <div class="share-dialog" ng-show="vm.shared">
-      <a class="icon-export"
-         target="_blank"
-         ng-href="{{baseURI}}a/{{vm.annotation.id}}"></a>
-      <div>
-        <input type="text" value="{{baseURI}}a/{{vm.annotation.id}}" readonly>
-      </div>
-    </div>
-  </div>
-  <div class="form-actions-buttons form-actions-left" ng-if="vm.editing">
+<footer class="annotation-footer form-actions" ng-switch="vm.action" ng-if="vm.editing">
+  <div class="form-actions-buttons form-actions-left">
     <button ng-switch-when="edit"
             ng-click="vm.save()"
             class="btn"><i class="icon-checkmark2 btn-icon"></i> Save</button>
@@ -126,4 +102,28 @@
             ng-click="vm.revert()"
             ><i class="icon-x btn-icon"></i> Cancel</button>
   </div>
+</footer>
+
+<footer class="annotation-footer annotation-actions" ng-switch="vm.action" ng-if="vm.action == 'view'">
+  <a class="small magicontrol" href="" title="Reply"
+    ng-click="vm.reply()"
+    ><i class="icon-reply"></i> Reply</a>
+  <span class="magicontrol share-dialog-wrapper">
+    <a class="small dropdown-toggle" tooltip-trigger="vm.test" tooltip-html-unsafe="{{vm.shareMarkup()}}" href="#" title="Share"
+      ><i class="icon-export"></i> Share</a>
+    <span class="share-dialog" ng-click="$event.stopPropagation()">
+      <a class="icon-export"
+        target="_blank"
+        ng-href="{{vm.annotationURI}}"></a>
+      <input type="text" value="{{vm.annotationURI}}" readonly>
+    </span>
+  </span>
+  <a class="small magicontrol" href="" title="Edit"
+    ng-show="vm.authorize('update')"
+    ng-click="vm.edit()"
+    ><i class="icon-copy"></i> Edit</a>
+  <a class="small magicontrol" href="" title="Delete"
+    ng-show="vm.authorize('delete')"
+    ng-click="vm.delete()"
+    ><i class="icon-x"></i> Delete…</a>
 </footer>

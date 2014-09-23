@@ -38,8 +38,8 @@ validate = (value) ->
 # {@link annotator annotator service} for persistence.
 ###
 AnnotationController = [
-  '$scope', 'annotator', 'drafts', 'flash'
-  ($scope,   annotator,   drafts,   flash) ->
+  '$scope', 'annotator', 'drafts', 'flash', 'documentHelpers',
+  ($scope,   annotator,   drafts,   flash,   documentHelpers) ->
     @annotation = {}
     @action = 'view'
     @document = null
@@ -51,6 +51,7 @@ AnnotationController = [
     highlight = annotator.tool is 'highlight'
     model = $scope.annotationGet()
     original = null
+    vm = this
 
     ###*
     # @ngdoc method
@@ -204,6 +205,9 @@ AnnotationController = [
       # Form the tags for ngTagsInput.
       @annotation.tags = ({text} for text in (model.tags or []))
 
+    # Export the baseURI for the share link
+    this.baseURI = documentHelpers.baseURI
+
     # Discard the draft if the scope goes away.
     $scope.$on '$destroy', ->
       drafts.remove model
@@ -222,6 +226,9 @@ AnnotationController = [
           drafts.add model, => this.revert()
       else
         this.render()
+
+    $scope.$watch (=> @annotation.id), =>
+      vm.annotationURI = documentHelpers.absoluteURI("/a/#{@annotation.id}")
 
     # Start editing brand new annotations immediately
     unless model.id? or (highlight and this.isHighlight()) then this.edit()
@@ -291,9 +298,6 @@ annotation = ['annotator', 'documentHelpers', (annotator, documentHelpers) ->
       # Clean up when the thread is destroyed
       scope.$on '$destroy', ->
         if ctrl.editing then counter?.count 'edit', -1
-
-    # Export the baseURI for the share link
-    scope.baseURI = documentHelpers.baseURI
 
   controller: 'AnnotationController'
   controllerAs: 'vm'
