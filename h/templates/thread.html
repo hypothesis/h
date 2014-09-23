@@ -17,20 +17,25 @@
 </article>
 
 <!-- Reply count -->
-<a class="reply-count small"
-   href=""
-   ng-if="!threadFilter.active() || count('message') == count('match')"
-   ng-pluralize count="count('message') - 1"
-   when="{'0': '', one: '1 reply', other: '{} replies'}"></a>
-<a class="load-more small"
-   href=""
-   ng-click="threadFilter.active(false)"
-   ng-if="vm.container.message.id"
-   ng-pluralize count="count('message') - count('match')"
-   when="{'0': '',
-         one: 'View one more in conversation',
-         other: 'View {} more in conversation'}"
-   ></a>
+<div class="thread-reply" ng-show="vm.showReplyToggle(count('message'))">
+  <a class="reply-count small"
+     href=""
+     ng-if="!threadFilter.active() || count('message') == count('match')"
+     ng-pluralize count="count('message') - 1"
+     when="{'0': '', one: '1 reply', other: '{} replies'}"></a>
+</div>
+
+<div class="thread-load-more" ng-show="threadFilter.active()">
+  <a class="load-more small"
+     href=""
+     ng-click="threadFilter.active(false)"
+     ng-if="vm.container.message.id"
+     ng-pluralize count="count('message') - count('match')"
+     when="{'0': '',
+           one: 'View one more in conversation',
+           other: 'View {} more in conversation'}"
+     ></a>
+</div>
 
 <!-- Replies -->
 <ul class="thread-list" ng-hide="vm.collapsed">

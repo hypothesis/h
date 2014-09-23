@@ -4,32 +4,43 @@
   font-family: $sans-font-family;
   font-weight: 300;
   position: relative;
+  @include pie-clearfix;
 
   &:hover .annotation-timestamp, &:hover .reply-count {
     color: $link-color;
   }
+}
 
-  .annotation-timestamp {
-    line-height: 2;
-    color: $text-color;
-    &:hover { color: $link-color-hover; }
-    &:focus { outline: 0; }
+.annotation-timestamp {
+  line-height: 2;
+  color: $text-color;
+  &:hover { color: $link-color-hover; }
+  &:focus { outline: 0; }
+}
+
+.annotation-header { margin-bottom: .8em }
+.annotation-section { margin: .8em 0 }
+.annotation-target { margin: .8em 0 }
+.annotation-footer { margin-top: .8em }
+
+.annotation-user {
+  color: $text-color;
+  font-weight: bold;
+  font-size: 1.1em;
+  &:hover {
+    color: $link-color-hover;
+    cursor: pointer;
+    text-decoration: underline;
   }
+}
 
-  .annotation-header { margin-bottom: .8em }
-  .annotation-section { margin: .8em 0 }
-  .annotation-target { margin: .8em 0 }
-  .annotation-footer { margin-top: .8em }
+.annotation-actions {
+  float: right;
+  margin-top: 0;
 
-  .annotation-user {
-    color: $text-color;
-    font-weight: bold;
-    font-size: 1.1em;
-    &:hover {
-      color: $link-color-hover;
-      cursor: pointer;
-      text-decoration: underline;
-    }
+  .magicontrol {
+    margin-left: 0.8em;
+    margin-right: 0;
   }
 }
 
@@ -50,31 +61,87 @@
 
 .magicontrol {
   margin-right: .8em;
-  color: $gray-lighter;
+
+  &, a {
+    color: $gray-light;
+  }
 
   &.dropdown {
     top: 4px;
   }
 
-  .annotation:hover & {
+  .annotation:hover &, .annotation:hover & a {
     color: $link-color;
   }
 }
 
-.share-dialog {
-  a {
-    float: left;
-    line-height: 1.4;
-    margin-right: .5em;
-    vertical-align: middle;
+.share-dialog-wrapper {
+  position: relative;
+
+  .share-dialog {
+    display: none;
   }
 
-  div {
-    overflow: hidden;
+  &.open .share-dialog {
+    display: block;
+  }
+}
+
+.share-dialog {
+  position: absolute;
+  right: 100%;
+  bottom: 100%;
+  width: 240px;
+  margin-right: -46px;
+  margin-bottom: 2px;
+  padding: 3px 5px 3px 23px;
+  z-index: 1;
+  display: block;
+  line-height: 1.4;
+  background: #fff;
+  border: 1px solid #d3d3d3;
+  border-radius: 2px;
+
+  &:after, &:before {
+    top: 100%;
+    right: 20px;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  &:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-top-color: #fff;
+    border-width: 5px;
+    margin-right: -5px;
+  }
+
+  &:before {
+    border-color: rgba(211, 211, 211, 0);
+    border-top-color: #d3d3d3;
+    border-width: 6px;
+    margin-right: -6px;
+  }
+
+  a {
+    position: absolute;
+    left: 0;
+    line-height: 1.4;
+    left: 5px;
+    vertical-align: middle;
   }
 
   input {
     padding: 0;
     width: 100%;
+    font-size: 0.84em;
+    padding: 1px 3px;
+    border: none;
+    color: $text-color;
+    outline: $gray-lighter solid 1px;
   }
 }

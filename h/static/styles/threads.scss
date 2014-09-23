@@ -25,16 +25,8 @@ $threadexp-width: .6em;
   }
 
   .reply-count {
-    color: $text-color;
+    color: $gray-light;
     &:focus { outline: 0; }
-  }
-
-  &:hover .reply-count {
-    color: $link-color;
-
-    &:hover, &:focus {
-      color: $link-color-hover;
-    }
   }
 
   .thread {
@@ -104,4 +96,23 @@ $threadexp-width: .6em;
 
 .thread-message {
   margin-bottom: .8em;
+}
+
+.thread-reply {
+  margin-top: -2.153em;
+  margin-bottom: .8em;
+}
+
+.thread-message:hover + .thread-reply {
+  .reply-count {
+    color: $link-color;
+
+    &:hover, &:focus {
+      color: $link-color-hover;
+    }
+  }
+}
+
+.thread-load-more {
+  clear: both;
 }
