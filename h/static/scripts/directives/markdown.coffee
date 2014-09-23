@@ -7,7 +7,7 @@
 # the markdown editor.
 ###
 
-markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
+markdown = ['$filter', '$timeout', ($filter, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
@@ -19,10 +19,7 @@ markdown = ['$filter', '$timeout', '$window', ($filter, $timeout, $window) ->
       if input.selectionStart != undefined
         startPos = input.selectionStart
         endPos = input.selectionEnd
-        if $window.getSelection().toString()
-          selectedText = $window.getSelection().toString()
-        else
-          selectedText = input.value.substring(startPos, endPos)
+        selectedText = input.value.substring(startPos, endPos)
         textBefore = input.value.substring(0, (startPos))
         textAfter = input.value.substring(endPos)
         selection = {
