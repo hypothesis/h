@@ -53,7 +53,10 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
         slice2 = text.after.slice(0, markup.length)
         if slice1 == markup and slice2 == markup
           # Remove markup 
-          newtext = text.before.slice(0, (text.before.length - markup.length)) + text.selection + text.after.slice(markup.length)
+          newtext = (
+            text.before.slice(0, (text.before.length - markup.length)) +
+            text.selection + text.after.slice(markup.length)
+          )
           start = text.before.length - markup.length
           end = (text.before + text.selection).length - markup.length
           insertMarkup(newtext, start, end)
@@ -148,7 +151,10 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
               # The partial selection happens to fall on the firstline
               newstring = markup + newstring
             else
-              newstring = newstring.substring(0, (indexoflastnewline + 1)) + markup + newstring.substring(indexoflastnewline + 1)
+              newstring = (
+                newstring.substring(0, (indexoflastnewline + 1)) +
+                markup + newstring.substring(indexoflastnewline + 1)
+              )
             value = newstring + text.after
             start = (text.before + markup).length
             end = (text.before + text.selection + markup).length
@@ -167,10 +173,13 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
         end = (text.before + markup).length
         insertMarkup(value, start, end)
       else
-        # No selection, cursor is not on new line. Go to the previous newline and insert markup there.
-        # # Check to see if markup has already been inserted.
+        # No selection, cursor is not on new line.
+        # Check to see if markup has already been inserted.
         if text.before.slice(text.before.length - markup.length) == markup
-          newtext = text.before.substring(0, (index)) + "\n" + text.before.substring(index + 1 + markup.length) + text.after
+          newtext = (
+            text.before.substring(0, (index)) + "\n" +
+            text.before.substring(index + 1 + markup.length) + text.after
+          )
         i = 0
         for char in text.before
           if char == "\n" and i != 0
@@ -190,12 +199,18 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
             insertMarkup(newtext, start, end)
         # Check to see if markup has already been inserted and undo it.
         else if text.before.slice((index + 1), (index + 1 + markup.length)) == markup
-          newtext = text.before.substring(0, (index)) + "\n" + text.before.substring(index + 1 + markup.length) + text.after
+          newtext = (
+            text.before.substring(0, (index)) + "\n" +
+            text.before.substring(index + 1 + markup.length) + text.after
+          )
           start = text.before.length - markup.length
           end = text.before.length - markup.length
           insertMarkup(newtext, start, end)
         else
-          newtext = text.before.substring(0, (index)) + "\n" + markup + text.before.substring(index + 1) + text.after
+          newtext = (
+            text.before.substring(0, (index)) + "\n" +
+            markup + text.before.substring(index + 1) + text.after
+          )
           start = (text.before + markup).length
           end = (text.before + markup).length
           insertMarkup(newtext, start, end)
