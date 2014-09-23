@@ -1,11 +1,26 @@
-var base = $('link').filter(function () {
-  return this.type == 'application/annotator+html';
-}).attr('href');
-var klass = window.hypothesisRole || window.Annotator.Host, options = {};
-(window.hypothesisConfig || (function () {
-  this.app = base;
-  this.Heatmap = {container: '.annotator-frame'};
-  this.Toolbar = {container: '.annotator-frame'};
-})).call(options);
-window.annotator = new klass(document.body, options);
+var Klass = window.Annotator.Host;
+var docs = 'https://github.com/hypothesis/h/blob/master/README.rst#customized-embedding'
+var options = {
+  app: $('link[type="application/annotator+html"]').attr('href'),
+  Heatmap: {container: '.annotator-frame'},
+  Toolbar: {container: '.annotator-frame'}
+}
+
+if (window.hasOwnProperty('hypothesisRole')) {
+  if (typeof window.hypothesisRole === 'function') {
+    Klass = window.hypothesisRole;
+  } else {
+    throw new TypeError('hypothesisRole must be a constructor function, see: ' + docs);
+  }
+}
+
+if (window.hasOwnProperty('hypothesisConfig')) {
+  if (typeof window.hypothesisConfig === 'function') {
+    options = window.hypothesisConfig();
+  } else {
+    throw new TypeError('hypothesisConfig must be a function, see: ' + docs);
+  }
+}
+
+window.annotator = new Klass(document.body, options);
 window.Annotator.noConflict().$.noConflict(true);
