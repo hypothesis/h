@@ -364,6 +364,9 @@ inject_js:
           contents:
             - h:static/scripts/guest.coffee
             - h:static/scripts/host.coffee
+    - contents:
+      - h:static/bootstrap.js
+
 
 inject_css:
   output: styles/hypothesis-inject.min.css
