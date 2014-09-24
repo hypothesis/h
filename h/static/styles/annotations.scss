@@ -18,7 +18,7 @@
   &:focus { outline: 0; }
 }
 
-.annotation-header { margin-bottom: .8em }
+.annotation-header, .annotation-body { margin-bottom: .8em }
 .annotation-section { margin: .8em 0 }
 .annotation-target { margin: .8em 0 }
 .annotation-footer { margin-top: .8em }
@@ -64,6 +64,7 @@ privacy {
 //MAGICONTROL////////////////////////////////
 .magicontrol {
   margin-right: .8em;
+  opacity: 0;
 
   &, a {
     color: $gray-light;
@@ -75,6 +76,7 @@ privacy {
 
   .annotation:hover &, .annotation:hover & a {
     color: $link-color;
+    opacity: 1;
   }
 }
 
