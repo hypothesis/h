@@ -87,7 +87,9 @@
 </div>
 <!-- / Tags -->
 
-<footer class="annotation-footer form-actions" ng-switch="vm.action" ng-if="vm.editing">
+<footer class="annotation-footer form-actions"
+        ng-if="vm.editing"
+        ng-switch="vm.action">
   <div class="form-actions-buttons form-actions-left">
     <button ng-switch-when="edit"
             ng-click="vm.save()"
