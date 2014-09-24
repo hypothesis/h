@@ -33,7 +33,7 @@ formInput = ->
 
     scope.$watch ->
       if model.$modelValue? or model.$pristine
-        model.$render()
+        toggleClass(model.$invalid and model.$dirty)
       return
 
   require: ['^?form', '?ngModel', '^?formValidate']
