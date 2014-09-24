@@ -104,7 +104,8 @@
   </div>
 </footer>
 
-<footer class="annotation-footer annotation-actions" ng-switch="vm.action" ng-if="vm.action == 'view'">
+<footer class="annotation-footer annotation-actions"
+        ng-if="!vm.editing && vm.annotation.id">
   <a class="small magicontrol" href="" title="Reply"
     ng-click="vm.reply()"
     ><i class="icon-reply"></i> Reply</a>

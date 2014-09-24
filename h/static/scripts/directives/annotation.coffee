@@ -152,9 +152,6 @@ AnnotationController = [
     # Creates a new message in reply to this annotation.
     ###
     this.reply = ->
-      unless model.id?
-        return flash 'error', 'Please save this annotation before replying.'
-
       # Extract the references value from this container.
       {id, references, uri} = model
       references = references or []
