@@ -7,7 +7,7 @@
 # the markdown editor.
 ###
 
-markdown = ['$filter', '$timeout', ($filter, $timeout) ->
+markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sce, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
@@ -251,10 +251,39 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
           input.style.height = output.style.height
           $timeout -> inputEl.focus()
 
+    scope.renderMath = (textToCheck) ->
+      # Parses text for math as denoted by '$$'
+      i = 0
+      startMath = null
+      endMath = null
+      for char in textToCheck
+        if char == "$" and textToCheck[i + 1] == "$"
+          if startMath == null
+            startMath = i + 2
+          else
+            endMath = i
+        i++
+        if startMath != null and endMath != null
+          try
+            math = katex.renderToString(textToCheck.substring(startMath, endMath))
+          catch error
+            # Show error on the frontend so users have some insight of which Tex Commands
+            # caused the error. KaTex does not yet support all Tex Commands.
+            math = error
+          textToCheck = textToCheck.substring(0, (startMath - 2)) + math + textToCheck.substring((endMath + 2))
+          startMath = null
+          endMath = null
+          scope.renderMath(textToCheck)
+      return textToCheck
+
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
-      inputEl.val (ctrl.$viewValue or '')
-      scope.rendered = ($filter 'converter') (ctrl.$viewValue or '')
+      if !scope.readonly and !scope.preview
+        inputEl.val (ctrl.$viewValue or '')
+      value = ctrl.$viewValue or ''
+      markdown = $sanitize $filter('converter') value
+      rendered = scope.renderMath markdown
+      scope.rendered = $sce.trustAsHtml rendered
 
     # React to the changes to the input
     inputEl.bind 'blur change keyup', ->
