@@ -76,11 +76,3 @@ describe 'h.directives.annotation', ->
       controller.reply()
       match = sinon.match {references: [annotation.id], uri: annotation.uri}
       assert.calledWith(annotator.publish, 'beforeAnnotationCreated', match)
-
-  describe '#toggleShared', ->
-    it 'sets the shared property', ->
-      controller = createController()
-      before = controller.shared
-      controller.toggleShared()
-      after = controller.shared
-      assert.equal(before, !after)

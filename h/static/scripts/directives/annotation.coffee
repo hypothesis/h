@@ -29,7 +29,6 @@ validate = (value) ->
 # @property {string} preview If previewing an edit then 'yes', else 'no'.
 # @property {boolean} editing True if editing components are shown.
 # @property {boolean} embedded True if the annotation is an embedded widget.
-# @property {boolean} shared True if the share link is visible.
 #
 # @description
 #
@@ -46,7 +45,6 @@ AnnotationController = [
     @preview = 'no'
     @editing = false
     @embedded = false
-    @shared = false
 
     highlight = annotator.tool is 'highlight'
     model = $scope.annotationGet()
@@ -169,17 +167,6 @@ AnnotationController = [
 
     ###*
     # @ngdoc method
-    # @name annotation.AnnotationController#toggleShared
-    # @description
-    # Toggle the shared property.
-    ###
-    this.toggleShared = ->
-      unless model.id?
-        return flash 'error', 'Please save this annotation before sharing.'
-      @shared = not @shared
-
-    ###*
-    # @ngdoc method
     # @name annotation.AnnotationController#render
     # @description Called to update the view when the model changes.
     ###
@@ -272,11 +259,6 @@ annotation = ['annotator', 'documentHelpers', (annotator, documentHelpers) ->
         event.preventDefault()
         scope.$evalAsync ->
           ctrl.save()
-
-    # Focus and select the share link when it becomes available.
-    scope.$watch (-> ctrl.shared), (shared) ->
-      if shared then scope.$evalAsync ->
-        elem.find('input').focus().select()
 
     # Keep track of edits going on in the thread.
     if counter?
