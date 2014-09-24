@@ -56,7 +56,7 @@
       <!-- Panels Nav-->
       <div class="content ng-cloak">
         <div class="sheet" ng-controller="AccountManagement" ng-show="!!sheet">
-          <span href="#" class="close icon-cancel"
+          <span href="" class="close icon-cancel"
               title="Close"
               role="button"
               ng-click="sheet = false"></span>
