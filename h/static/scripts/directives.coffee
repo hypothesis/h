@@ -63,37 +63,6 @@ formValidate = ->
       ctrl.submit()
 
 
-markdown = ['$filter', '$timeout', ($filter, $timeout) ->
-  link: (scope, elem, attr, ctrl) ->
-    return unless ctrl?
-
-    input = elem.find('textarea')
-    output = elem.find('div')
-
-    # Re-render the markdown when the view needs updating.
-    ctrl.$render = ->
-      input.val (ctrl.$viewValue or '')
-      scope.rendered = ($filter 'converter') (ctrl.$viewValue or '')
-
-    # React to the changes to the text area
-    input.bind 'blur change keyup', ->
-      ctrl.$setViewValue input.val()
-      scope.$digest()
-
-    # Auto-focus the input box when the widget becomes editable.
-    # Re-render when it becomes uneditable.
-    scope.$watch 'readonly', (readonly) ->
-      ctrl.$render()
-      unless readonly then $timeout -> input.focus()
-
-  require: '?ngModel'
-  scope:
-    readonly: '@'
-    required: '@'
-  templateUrl: 'markdown.html'
-]
-
-
 privacy = ->
   levels = ['Public', 'Only Me']
 
@@ -246,7 +215,6 @@ match = ->
 angular.module('h.directives', imports)
 .directive('formInput', formInput)
 .directive('formValidate', formValidate)
-.directive('markdown', markdown)
 .directive('privacy', privacy)
 .directive('tabReveal', tabReveal)
 .directive('showAccount', showAccount)

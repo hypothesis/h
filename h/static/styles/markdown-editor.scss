@@ -1,0 +1,43 @@
+@import 'compass/css3/user-interface';
+
+//MARKDOWN EDITOR //////////////////////////
+.markdown-preview {
+  overflow: auto;
+  border: .1em solid $gray-lighter;
+  background-color: $gray-lightest;
+  min-height: 120px;
+  padding-left: 0.9em;
+  resize: vertical;
+}
+
+.markdown-tools {
+  border-top: .1em solid #D3D3D3;
+  border-left: .1em solid #D3D3D3;
+  border-right: .1em solid #D3D3D3;
+  border-radius: .15em .15em 0 0;
+  width: 100%;
+  margin-bottom: -.1em;
+  padding: .7em .7em .7em .5em;
+  @include user-select(none);
+
+  &.disable {
+    .markdown-tools-button {
+      color: $gray-lighter;
+      pointer-events: none;
+    }
+  }
+
+  .markdown-tools-button {padding: .4em;}
+
+  .markdown-tools-button, .markdown-tools-toggle, .icon-markdown {
+    color: $gray;
+
+    &:hover {
+      color: black;
+    }
+  }
+
+  .markdown-preview-toggle {
+    float: right;
+  }
+}

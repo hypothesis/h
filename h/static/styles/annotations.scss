@@ -42,12 +42,15 @@
   font-size: .923em;
 }
 
-.icon-markdown {
-  color: $text-color;
-  line-height: 1.4;
-  margin-left: .5em;
+
+//PRIVACY CONTROL////////////////////////////
+privacy {
+  position: relative;
+  top: 2px;
 }
 
+
+//MAGICONTROL////////////////////////////////
 .magicontrol {
   margin-right: .8em;
   color: $gray-lighter;
