@@ -4,10 +4,14 @@ createFormHelpers = ->
   # API and updates the validity of the form. The field.$errors.response
   # property will be true if there are errors and the responseErrorMessage
   # will contain the API error message.
-  applyValidationErrors: (form, errors) ->
+  applyValidationErrors: (form, errors, reason) ->
     for own field, error of errors
       form[field].$setValidity('response', false)
       form[field].responseErrorMessage = error
+
+    if reason
+      form.$setValidity('response', false)
+      form.responseErrorMessage = reason
 
 
 angular.module('h.helpers.formHelpers', [])

@@ -46,6 +46,7 @@ describe 'h.auth', ->
         auth.submit
           $name: 'login'
           $valid: true
+          $setValidity: sandbox.stub()
 
         assert.called session.$login
 
@@ -53,13 +54,15 @@ describe 'h.auth', ->
         auth.submit
           $name: 'login'
           $valid: false
+          $setValidity: sandbox.stub()
 
         assert.notCalled session.$login
 
-      it 'should set response errors', ->
+      it 'should apply validation errors on submit', ->
         form =
           $name: 'register'
           $valid: true
+          $setValidity: sandbox.stub()
           username:
             $setValidity: sandbox.stub()
           email:
@@ -68,8 +71,8 @@ describe 'h.auth', ->
         auth.submit(form)
 
         assert.calledWith mockFormHelpers.applyValidationErrors, form,
-          username: 'taken'
-        assert.equal form.responseErrorMessage, 'registration error'
+          {username: 'taken'},
+          'registration error'
 
     describe 'timeout', ->
       it 'should happen after a period of inactivity', ->
@@ -119,17 +122,6 @@ describe 'h.auth', ->
       $rootScope.$digest()
 
       $scope = elem.isolateScope()
-
-    it 'should reset response errors before submit', ->
-      $scope.login.username.$setViewValue('test')
-      $scope.login.password.$setViewValue('1234')
-      $scope.login.responseErrorMessage = 'test'
-      $scope.login.username.$setValidity('response', false)
-      assert.isFalse $scope.login.$valid
-
-      elem.find('input').trigger('submit')
-      assert.isTrue $scope.login.$valid
-      assert.isUndefined $scope.login.responseErrorMessage
 
     it 'should invoke handlers set by attributes', ->
       $rootScope.stub = sandbox.stub()

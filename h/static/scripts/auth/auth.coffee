@@ -15,19 +15,12 @@ class AuthController
 
     failure = (form, response) ->
       {errors, reason} = response.data
-
-      if reason
-        if reason == 'Invalid username or password.'
-          form.password.$setValidity('response', false)
-          form.password.responseErrorMessage = reason
-        else
-          form.responseErrorMessage = reason
-      else
-        form.responseErrorMessage = null
-
-      formHelpers.applyValidationErrors(form, errors)
+      formHelpers.applyValidationErrors(form, errors, reason)
 
     this.submit = (form) ->
+      delete form.responseErrorMessage
+      form.$setValidity('response', true)
+
       return unless form.$valid
 
       data = {}
@@ -62,12 +55,6 @@ authDirective = ['$timeout', ($timeout) ->
       scope.$apply ->
         $target = angular.element event.target
         $form = $target.controller('form')
-
-        delete $form.responseErrorMessage
-
-        for ctrl in $form.$error.response?.slice?() or []
-          ctrl.$setValidity('response', true)
-
         auth.submit($form)
 
     scope.model = {}
