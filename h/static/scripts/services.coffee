@@ -120,14 +120,6 @@ class Hypothesis extends Annotator
           channel: channel
           entities: entities
 
-    # Add some info to new annotations
-    this.subscribe 'beforeAnnotationCreated', (annotation) =>
-      # Annotator assumes a valid array of targets and highlights.
-      unless annotation.target?
-        annotation.target = []
-      unless annotation.highlights?
-        annotation.highlights = []
-
   _setupXDM: (options) ->
     # jschannel chokes FF and Chrome extension origins.
     if (options.origin.match /^chrome-extension:\/\//) or
@@ -407,7 +399,7 @@ class ViewFilter
     quote:
       autofalse: (annotation) -> return annotation.references?
       value: (annotation) ->
-        for target in annotation.target
+        for target in (annotation.target or [])
           return target.quote if target.quote?
         ''
       match: (term, value) -> return value.indexOf(term) > -1
