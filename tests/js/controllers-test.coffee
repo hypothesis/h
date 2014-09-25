@@ -16,6 +16,7 @@ describe 'h.controllers', ->
 
     beforeEach inject ($controller, $rootScope) ->
       $scope = $rootScope.$new()
+      $scope.search = {}
       annotationViewer = $controller 'AnnotationViewerController',
         $scope: $scope
 

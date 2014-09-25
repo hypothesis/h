@@ -63,15 +63,6 @@ class AppController
 
         $scope.store = plugins.Store
 
-        _id = $route.current.params.id
-        _promise = null
-
-        # Load any initial annotations that should be displayed
-        if _id
-          # XXX: Two requests here is less than ideal
-          plugins.Store.loadAnnotationsFromSearch({_id}).then ->
-            plugins.Store.loadAnnotationsFromSearch({references: _id})
-
       return unless Store
       Store.destroy()
 
@@ -296,11 +287,16 @@ class AppController
 
 
 class AnnotationViewerController
-  this.$inject = ['$routeParams', '$scope', 'streamfilter']
-  constructor: ($routeParams, $scope, streamfilter) ->
+  this.$inject = ['$location', '$routeParams', '$scope', 'annotator', 'streamfilter']
+  constructor: ($location, $routeParams, $scope, annotator, streamfilter) ->
     # Tells the view that these annotations are standalone
     $scope.isEmbedded = false
     $scope.isStream = false
+
+    # Clear out loaded annotations and threads
+    # XXX: Resolve threading, storage, and updater better for all routes.
+    annotator.plugins.Threading?.pluginInit()
+    annotator.plugins.Store?.annotations = []
 
     # Provide no-ops until these methods are moved elsewere. They only apply
     # to annotations loaded into the stream.
@@ -308,17 +304,24 @@ class AnnotationViewerController
 
     $scope.shouldShowThread = -> true
 
+    $scope.search.update = (query) ->
+      $location.path('/stream').search('q', query)
+
     $scope.$watch 'updater', (updater) ->
       if updater?
         updater.then (sock) ->
-          filter = streamfilter
-            .setPastDataNone()
-            .setMatchPolicyIncludeAny()
-            .addClause('/references', 'first_of', $routeParams.id, true)
-            .addClause('/id', 'equals', $routeParams.id, true)
-            .getFilter()
-          sock.send(JSON.stringify({filter}))
+          if $routeParams.id?
+            _id = $routeParams.id
+            annotator.plugins.Store?.loadAnnotationsFromSearch({_id}).then ->
+              annotator.plugins.Store?.loadAnnotationsFromSearch({references: _id})
 
+            filter = streamfilter
+              .setPastDataNone()
+              .setMatchPolicyIncludeAny()
+              .addClause('/references', 'first_of', _id, true)
+              .addClause('/id', 'equals', _id, true)
+              .getFilter()
+            sock.send(JSON.stringify({filter}))
 
 class ViewerController
   this.$inject = ['$scope', 'annotator']
