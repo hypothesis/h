@@ -41,9 +41,9 @@
 </header>
 
 <!-- Excerpts -->
-<section class="annotation-target" ng-repeat="target in vm.annotation.target">
+<section class="annotation-target"
+         ng-repeat="target in vm.annotation.target track by $index">
   <blockquote class="annotation-quote"
-              ng-repeat="target in vm.annotation.target"
               ng-bind-html="target.quote"
               ng-if="!target.showDiff">
   <blockquote class="annotation-quote"
