@@ -1,12 +1,3 @@
-###*
-# @ngdoc directive
-# @name markdown
-# @restrict A
-# @description
-# This directive controls both the rendering and display of markdown, as well as
-# the markdown editor.
-###
-
 loadMathJax = ->
   if !MathJax?
     $.ajax {
@@ -19,6 +10,15 @@ loadMathJax = ->
           showMathMenu: false
         })
     }
+
+###*
+# @ngdoc directive
+# @name markdown
+# @restrict A
+# @description
+# This directive controls both the rendering and display of markdown, as well as
+# the markdown editor.
+###
 
 markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sce, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
@@ -283,8 +283,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           catch
             # KaTex does not have full math support. In the case that we come across math we
             # can't render, we load MathJax and render the Math with MathJax.
-            math = textToCheck.substring(startMath, endMath)
-            scope.MathJaxFallback = true
+            MathJaxFallback = true
             loadMathJax()
             return textToCheck
           textToCheck = (
