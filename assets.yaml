@@ -180,9 +180,6 @@ jwz:
   output: scripts/vendor/jwz.min.js
   contents:
     - h:static/scripts/vendor/jwz.js
-katex:
-  contents:
-    - h:static/scripts/vendor/katex/katex.min.js
 momentjs:
   contents:
     - filters: uglifyjs
@@ -246,7 +243,7 @@ app:
     - annotator_threading
     - jschannel
     - jwz
-    - katex
+    - h:static/scripts/vendor/katex/katex.min.js
     - momentjs
     - pagedown
     - autofill
