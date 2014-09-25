@@ -167,15 +167,3 @@ describe 'h.directives', ->
 
       controller = $element.controller('ngModel')
       assert.isTrue(controller.$error.match)
-
-  describe '.showAccount', ->
-    $element = null
-
-    beforeEach ->
-      $element = $compile('<a show-account>Account</a>')($scope)
-      $scope.$digest()
-
-    it 'triggers the "nav:account" event when the Account item is clicked', (done) ->
-      $scope.$on 'nav:account', ->
-        done()
-      $element.click()
