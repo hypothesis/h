@@ -7,6 +7,19 @@
 # the markdown editor.
 ###
 
+loadMathJax = ->
+  if !MathJax?
+    $.ajax {
+      url:"//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+      dataType: 'script'
+      cache: true
+      complete: ->
+        # MathJax configuration overides.
+        MathJax.Hub.Config({
+          showMathMenu: false
+        })
+    }
+
 markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sce, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
@@ -252,22 +265,6 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           $timeout -> inputEl.focus()
 
     MathJaxFallback = false
-    loadMathJax = ->
-      try
-        if !MathJax?
-          $.ajax {
-            url:"//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
-            dataType: 'script'
-            cache: true
-            complete: ->
-              # MathJax configuration overides.
-              MathJax.Hub.Config({
-                showMathMenu: false
-              })
-          }
-      catch error
-        console.log error
-
     renderMath = (textToCheck) ->
       # Parses text for math as denoted by '$$'
       i = 0
