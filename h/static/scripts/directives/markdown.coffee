@@ -252,6 +252,22 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           $timeout -> inputEl.focus()
 
     MathJaxFallback = false
+    loadMathJax = ->
+      try
+        if !MathJax?
+          $.ajax {
+            url:"//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+            dataType: 'script'
+            cache: true
+            complete: ->
+              # MathJax configuration overides.
+              MathJax.Hub.Config({
+                showMathMenu: false
+              })
+          }
+      catch error
+        console.log error
+
     renderMath = (textToCheck) ->
       # Parses text for math as denoted by '$$'
       i = 0
@@ -267,26 +283,13 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
         if startMath != null and endMath != null
           try
             math = katex.renderToString(textToCheck.substring(startMath, endMath))
-          catch error
+          catch
             # KaTex does not have full math support. In the case that we come across math we
             # can't render, we load MathJax and render the Math with MathJax.
             math = textToCheck.substring(startMath, endMath)
             scope.MathJaxFallback = true
-            try
-              if !MathJax?
-                $.ajax {
-                  url:"//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
-                  dataType: 'script'
-                  cache: true
-                  complete: ->
-                    # MathJax configuration overides.
-                    MathJax.Hub.Config({
-                      showMathMenu: false
-                    })
-                }
-                return textToCheck
-            catch error
-              console.log error
+            loadMathJax()
+            return textToCheck
           textToCheck = (
             textToCheck.substring(0, (startMath - 2)) + math +
             textToCheck.substring((endMath + 2))
