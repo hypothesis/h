@@ -12,6 +12,7 @@ ACTION = [
   'forgot'
   'activate'
   'edit_profile'
+  'disable_user'
 ]
 
 ACTION_OPTION =
@@ -90,36 +91,8 @@ class SessionProvider
         actions[name].transformResponse = process
 
       endpoint = documentHelpers.absoluteURI('/app')
-      $resource(endpoint, {}, actions).load()
+      $resource(endpoint, {}, actions)
   ]
-
-# Function providing a server-side user profile resource.
-#
-# This function provides an angular $resource factory
-# for manipulating server-side account-profile settings. It defines the
-# actions (such as 'login', 'register') as REST-ish actions
-profileProvider = [
-  '$q', '$resource', 'documentHelpers',
-  ($q,   $resource,   documentHelpers) ->
-    defaults =
-      email: ""
-      password: ""
-
-    actions =
-      edit_profile:
-        method: 'POST'
-        params:
-          __formid__: "edit_profile"
-        withCredentials: true
-      disable_user:
-        method: 'POST'
-        params:
-          __formid__: "disable_user"
-        withCredentials: true
-
-    endpoint = documentHelpers.absoluteURI('/app')
-    $resource(endpoint, {}, actions)
-]
 
 
 configure = ['$httpProvider', ($httpProvider) ->
@@ -143,4 +116,3 @@ configure = ['$httpProvider', ($httpProvider) ->
 
 angular.module('h.session', imports, configure)
 .provider('session', SessionProvider)
-.factory('profile', profileProvider)

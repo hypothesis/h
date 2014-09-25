@@ -1,9 +1,7 @@
 class AccountManagement
-  @inject = ['$scope', '$rootScope', '$filter', 'flash', 'profile',
-             'identity', 'formHelpers']
+  @inject = ['$scope', '$filter', 'flash', 'session', 'identity', 'formHelpers']
 
-  constructor: ($scope, $rootScope, $filter, flash, profile,
-                identity, formHelpers) ->
+  constructor: ($scope, $filter, flash, session, identity, formHelpers) ->
     persona_filter = $filter('persona')
 
     onSuccess = (form, response) ->
@@ -36,15 +34,12 @@ class AccountManagement
     $scope.changePassword = {}
     $scope.deleteAccount = {}
 
-    # Initial form state.
-    $scope.sheet = false
-
     $scope.delete = (form) ->
       # If the password is correct, the account is deleted.
       # The extension is then removed from the page.
       # Confirmation of success is given.
       return unless form.$valid
-      username = persona_filter $scope.session.userid
+      username = persona_filter $scope.persona
       packet =
         username: username
         pwd: form.pwd.$modelValue
@@ -52,7 +47,7 @@ class AccountManagement
       successHandler = angular.bind(null, onDelete, form)
       errorHandler   = angular.bind(null, onError, form)
 
-      promise = profile.disable_user(packet)
+      promise = session.disable_user(packet)
       promise.$promise.then(successHandler, errorHandler)
 
     $scope.submit = (form) ->
@@ -60,7 +55,7 @@ class AccountManagement
       # forms. However, in the backend it is just one: edit_profile
       return unless form.$valid
 
-      username = persona_filter $scope.session.userid
+      username = persona_filter $scope.persona
       packet =
         username: username
         pwd: form.pwd.$modelValue
@@ -70,14 +65,9 @@ class AccountManagement
       errorHandler   = angular.bind(null, onError, form)
 
       $scope.$broadcast 'formState', form.$name, 'loading'  # Update status btn
-      promise = profile.edit_profile(packet)
+      promise = session.edit_profile(packet)
       promise.$promise.then(successHandler, errorHandler)
 
-    $rootScope.$on 'nav:account', ->
-      $scope.$apply -> $scope.sheet = true
-
-    $rootScope.$on 'logout', ->
-      $scope.sheet = false
 
 angular.module('h.controllers.AccountManagement', [])
 .controller('AccountManagement', AccountManagement)

@@ -12,53 +12,47 @@ identityFactory = [
     onlogout = null
     onmatch = null
 
-    $rootScope.session = session
+    $rootScope.$on 'session', (event, session) ->
+      # Get the userid and convert it to the persona format.
+      persona = session.userid?.replace(/^acct:/, '') or null
 
-    $rootScope.$watch 'session.$promise', (promise) ->
-      # Wait for any pending action to resolve.
-      promise.finally ->
-        # Get the userid and convert it to the persona format.
-        persona = session.userid?.replace(/^acct:/, '') or null
-
-        # Fire callbacks as appropriate.
-        # Consult the state matrix in the `navigator.id.watch` documentation.
-        # https://developer.mozilla.org/en-US/docs/Web/API/navigator.id.watch
-        if loggedInUser is null
-          if persona
-            loggedInUser = persona
-            onlogin?(session.csrf)
-          else
-            onmatch?()
-        else if loggedInUser
-          if persona
-            if loggedInUser is persona
-              onmatch?()
-            else
-              loggedInUser = persona
-              onlogin?(session.csrf)
-          else
-            loggedInUser = null
-            onlogout?()
+      # Fire callbacks as appropriate.
+      # Consult the state matrix in the `navigator.id.watch` documentation.
+      # https://developer.mozilla.org/en-US/docs/Web/API/navigator.id.watch
+      if loggedInUser is null
+        if persona
+          loggedInUser = persona
+          onlogin?(session.csrf)
         else
-          if persona
+          onmatch?()
+      else if loggedInUser
+        if persona
+          if loggedInUser is persona
+            onmatch?()
+          else
             loggedInUser = persona
             onlogin?(session.csrf)
-          else
-            loggedInUser = null
-            onlogout?()
+        else
+          loggedInUser = null
+          onlogout?()
+      else
+        if persona
+          loggedInUser = persona
+          onlogin?(session.csrf)
+        else
+          loggedInUser = null
+          onlogout?()
 
     logout: ->
-      # Clear the session but preserve its identity and give it a new promise.
-      $promise = session.$logout()
-      $resolved = false
-      angular.copy({$promise, $resolved}, session)
-      $rootScope.$broadcast 'logout'
+      session.logout({}).$promise.then ->
+        $rootScope.$emit 'session', {}
 
     request: ->
       $rootScope.$broadcast 'authorize'
 
     watch: (options) ->
       {loggedInUser, onlogin, onlogout, onmatch} = options
+      session.load().$promise.then (data) -> $rootScope.$emit 'session', data
 ]
 
 
