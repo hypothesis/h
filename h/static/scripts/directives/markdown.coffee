@@ -251,8 +251,8 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           input.style.height = output.style.height
           $timeout -> inputEl.focus()
 
-    scope.MathJaxFallback = false
-    scope.renderMath = (textToCheck) ->
+    MathJaxFallback = false
+    renderMath = (textToCheck) ->
       # Parses text for math as denoted by '$$'
       i = 0
       startMath = null
@@ -293,7 +293,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           )
           startMath = null
           endMath = null
-          scope.renderMath(textToCheck)
+          renderMath(textToCheck)
       return textToCheck
 
     # Re-render the markdown when the view needs updating.
@@ -302,9 +302,9 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
         inputEl.val (ctrl.$viewValue or '')
       value = ctrl.$viewValue or ''
       markdown = $sanitize $filter('converter') value
-      rendered = scope.renderMath markdown
+      rendered = renderMath markdown
       scope.rendered = $sce.trustAsHtml rendered
-      if scope.MathJaxFallback
+      if MathJaxFallback
         MathJax?.Hub.Queue(["Typeset",MathJax.Hub])
 
     # React to the changes to the input
