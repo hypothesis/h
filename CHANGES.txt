@@ -1,6 +1,12 @@
 Next Release
 ============
 
+0.3.2 (2014-09-24)
+==================
+
+Patch release to upgrade angular.js in light of security vulnerabilities.
+See http://avlidienbrunn.se/angular.txt
+
 0.3.1 (2014-08-25)
 ==================
 
