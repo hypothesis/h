@@ -399,10 +399,12 @@ class ViewFilter
     quote:
       autofalse: (annotation) -> return annotation.references?
       value: (annotation) ->
-        for t in (annotation.target or [])
+        quotes = for t in (annotation.target or [])
           for s in (t.selector or []) when s.type is 'TextQuoteSelector'
-            if s.exact then return s.exact
-        ''
+            unless s.exact then continue
+            s.exact
+        quotes = Array::concat quotes...
+        quotes.join('\n')
       match: (term, value) -> return value.indexOf(term) > -1
     since:
       autofalse: (annotation) -> return not annotation.updated?
