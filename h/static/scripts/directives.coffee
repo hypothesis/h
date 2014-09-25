@@ -123,8 +123,8 @@ tabReveal = ['$parse', ($parse) ->
           element: element
           attr: attr
         =>
-          for i in [0..panes.length]
-            if panes[i].element is element
+          for i, pane of panes
+            if pane.element is element
               panes.splice i, 1
               break
           removePane()
@@ -138,8 +138,7 @@ tabReveal = ['$parse', ($parse) ->
         hiddenPanes = hiddenPanesGet scope
         return unless angular.isArray hiddenPanes
 
-        for i in [0..panes.length-1]
-          pane = panes[i]
+        for i, pane of panes
           value = pane.attr.value || pane.attr.title
           if value == ngModel.$viewValue
             pane.element.css 'display', ''
