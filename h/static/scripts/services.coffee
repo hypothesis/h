@@ -399,8 +399,9 @@ class ViewFilter
     quote:
       autofalse: (annotation) -> return annotation.references?
       value: (annotation) ->
-        for target in (annotation.target or [])
-          return target.quote if target.quote?
+        for t in (annotation.target or [])
+          for s in (t.selector or []) when s.type is 'TextQuoteSelector'
+            if s.exact then return s.exact
         ''
       match: (term, value) -> return value.indexOf(term) > -1
     since:
@@ -478,11 +479,8 @@ class ViewFilter
   # Structure:
   # [facet_name]:
   #   autofalse: a function for a preliminary false match result
-  #              (i.e. if the annotation does not even have a 'text' field, do not try to match the 'text' facet)
   #   value: a function to extract to facet value for the annotation.
-  #         (i.e. for the quote facet it is the annotation.target.quote from the right target from the annotations)
   #   match: a function to check if the extracted value matches with the facet value
-  #         (i.e. for the text facet it has to check that if the facet is a substring of the annotation.text or not.
   #
   # Returns a two-element list:
   # [
