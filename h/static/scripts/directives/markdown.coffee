@@ -251,6 +251,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           input.style.height = output.style.height
           $timeout -> inputEl.focus()
 
+    scope.MathJaxFallback = false
     scope.renderMath = (textToCheck) ->
       # Parses text for math as denoted by '$$'
       i = 0
@@ -267,10 +268,29 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           try
             math = katex.renderToString(textToCheck.substring(startMath, endMath))
           catch error
-            # Show error on the frontend so users have some insight of which Tex Commands
-            # caused the error. KaTex does not yet support all Tex Commands.
-            math = error
-          textToCheck = textToCheck.substring(0, (startMath - 2)) + math + textToCheck.substring((endMath + 2))
+            # KaTex does not have full math support. In the case that we come across math we
+            # can't render, we load MathJax and render the Math with MathJax.
+            math = textToCheck.substring(startMath, endMath)
+            scope.MathJaxFallback = true
+            try
+              if !MathJax?
+                $.ajax {
+                  url:"//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+                  dataType: 'script'
+                  cache: true
+                  complete: ->
+                    # MathJax configuration overides.
+                    MathJax.Hub.Config({
+                      showMathMenu: false
+                    })
+                }
+                return textToCheck
+            catch error
+              console.log error
+          textToCheck = (
+            textToCheck.substring(0, (startMath - 2)) + math +
+            textToCheck.substring((endMath + 2))
+          )
           startMath = null
           endMath = null
           scope.renderMath(textToCheck)
@@ -284,6 +304,8 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       markdown = $sanitize $filter('converter') value
       rendered = scope.renderMath markdown
       scope.rendered = $sce.trustAsHtml rendered
+      if scope.MathJaxFallback
+        MathJax?.Hub.Queue(["Typeset",MathJax.Hub])
 
     # React to the changes to the input
     inputEl.bind 'blur change keyup', ->
