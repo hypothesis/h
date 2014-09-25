@@ -4,14 +4,14 @@ imports = [
 
 
 class AuthController
-  this.$inject = ['$scope', '$timeout', 'session', 'formHelpers']
-  constructor:   ( $scope,   $timeout,   session,   formHelpers ) ->
+  this.$inject = ['$scope', '$timeout', 'flash', 'session', 'formHelpers']
+  constructor:   ( $scope,   $timeout,   flash,   session,   formHelpers ) ->
     timeout = null
 
-    success = ->
+    success = (data) ->
       $scope.tab = if $scope.tab is 'forgot' then 'activate' else null
       $scope.model = null
-      $scope.$broadcast 'success'
+      $scope.$emit 'session', data
 
     failure = (form, response) ->
       {errors, reason} = response.data
@@ -23,13 +23,10 @@ class AuthController
 
       return unless form.$valid
 
-      data = {}
-      method = '$' + form.$name
-
-      angular.copy $scope.model, session
-      session.$promise = session[method] success,
+      session[form.$name] $scope.model, success,
         angular.bind(this, failure, form)
-      session.$resolved = false
+
+    $scope.model = null
 
     $scope.$on '$destroy', ->
       if timeout
@@ -43,57 +40,12 @@ class AuthController
       # If the model is not empty, start the timeout
       if value and not angular.equals(value, {})
         timeout = $timeout ->
+          $scope.form?.$setPristine()
           $scope.model = null
-          $scope.$broadcast 'timeout'
+          flash 'info',
+            'For your security, the forms have been reset due to inactivity.'
         , 300000
-
-
-authDirective = ['$timeout', ($timeout) ->
-  controller: 'AuthController'
-  link: (scope, elem, attrs, [auth, form]) ->
-    elem.on 'submit', (event) ->
-      scope.$apply ->
-        $target = angular.element event.target
-        $form = $target.controller('form')
-        auth.submit($form)
-
-    scope.model = {}
-
-    scope.$on 'authorize', ->
-      scope.tab = 'login'
-
-    scope.$on 'error', (event) ->
-      scope.onError()
-
-    scope.$on 'success', (event) ->
-      form.$setPristine()
-      scope.onSuccess()
-
-    scope.$on 'timeout', (event) ->
-      form.$setPristine()
-      scope.onTimeout()
-
-    scope.$watch 'tab', (name) ->
-      $timeout ->
-        elem
-          .find('form')
-          .filter(-> this.name is name)
-          .find('input')
-          .filter(-> this.type isnt 'hidden')
-          .first()
-          .focus()
-  require: ['auth', 'form']
-  restrict: 'C'
-  scope:
-    onError: '&'
-    onSuccess: '&'
-    onTimeout: '&'
-    session: '='
-    tab: '=ngModel'
-  templateUrl: 'auth.html'
-]
 
 
 angular.module('h.auth', imports)
 .controller('AuthController', AuthController)
-.directive('auth', authDirective)
