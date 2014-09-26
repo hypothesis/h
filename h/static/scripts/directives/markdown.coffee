@@ -264,7 +264,6 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           input.style.height = output.style.height
           $timeout -> inputEl.focus()
 
-    MathJaxFallback = false
     renderMath = (textToCheck) ->
       # Parses text for math as denoted by '$$'
       i = 0
@@ -278,14 +277,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
             endMath = i
         i++
         if startMath != null and endMath != null
-          try
-            math = katex.renderToString(textToCheck.substring(startMath, endMath))
-          catch
-            # KaTex does not have full math support. In the case that we come across math we
-            # can't render, we load MathJax and render the Math with MathJax.
-            MathJaxFallback = true
-            loadMathJax()
-            return textToCheck
+          math = katex.renderToString(textToCheck.substring(startMath, endMath))
           textToCheck = (
             textToCheck.substring(0, (startMath - 2)) + math +
             textToCheck.substring((endMath + 2))
@@ -301,10 +293,14 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
         inputEl.val (ctrl.$viewValue or '')
       value = ctrl.$viewValue or ''
       markdown = $sanitize $filter('converter') value
-      rendered = renderMath markdown
-      scope.rendered = $sce.trustAsHtml rendered
-      if MathJaxFallback
+      try
+        rendered = renderMath markdown
+      catch
+        if !MathJax?
+          loadMathJax()
+        rendered = markdown
         MathJax?.Hub.Queue(["Typeset", MathJax.Hub, output])
+      scope.rendered = $sce.trustAsHtml rendered
 
     # React to the changes to the input
     inputEl.bind 'blur change keyup', ->
