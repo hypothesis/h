@@ -7,6 +7,7 @@
 /*.egg
 /*.egg-info
 /*.ini
+/MANIFEST
 /bin
 /build
 /dist
