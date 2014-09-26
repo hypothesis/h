@@ -295,12 +295,13 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       markdown = $sanitize $filter('converter') value
       try
         rendered = renderMath markdown
+        scope.rendered = $sce.trustAsHtml rendered
       catch
         if !MathJax?
           loadMathJax()
         rendered = markdown
-        MathJax?.Hub.Queue(["Typeset", MathJax.Hub, output])
-      scope.rendered = $sce.trustAsHtml rendered
+        scope.rendered = $sce.trustAsHtml rendered
+        $timeout -> MathJax?.Hub.Queue(["Typeset", MathJax.Hub, output])
 
     # React to the changes to the input
     inputEl.bind 'blur change keyup', ->
