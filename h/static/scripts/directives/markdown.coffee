@@ -1,3 +1,16 @@
+loadMathJax = ->
+  if !MathJax?
+    $.ajax {
+      url:"//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+      dataType: 'script'
+      cache: true
+      complete: ->
+        # MathJax configuration overides.
+        MathJax.Hub.Config({
+          showMathMenu: false
+        })
+    }
+
 ###*
 # @ngdoc directive
 # @name markdown
@@ -7,7 +20,7 @@
 # the markdown editor.
 ###
 
-markdown = ['$filter', '$timeout', ($filter, $timeout) ->
+markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sce, $timeout) ->
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
@@ -251,10 +264,43 @@ markdown = ['$filter', '$timeout', ($filter, $timeout) ->
           input.style.height = output.style.height
           $timeout -> inputEl.focus()
 
+    renderMath = (textToCheck) ->
+      # Parses text for math as denoted by '$$'
+      i = 0
+      startMath = null
+      endMath = null
+      for char in textToCheck
+        if char == "$" and textToCheck[i + 1] == "$"
+          if startMath == null
+            startMath = i + 2
+          else
+            endMath = i
+        i++
+        if startMath != null and endMath != null
+          math = katex.renderToString(textToCheck.substring(startMath, endMath))
+          textToCheck = (
+            textToCheck.substring(0, (startMath - 2)) + math +
+            textToCheck.substring((endMath + 2))
+          )
+          startMath = null
+          endMath = null
+          return renderMath(textToCheck)
+      return textToCheck
+
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
-      inputEl.val (ctrl.$viewValue or '')
-      scope.rendered = ($filter 'converter') (ctrl.$viewValue or '')
+      if !scope.readonly and !scope.preview
+        inputEl.val (ctrl.$viewValue or '')
+      value = ctrl.$viewValue or ''
+      markdown = $sanitize $filter('converter') value
+      try
+        rendered = renderMath markdown
+        scope.rendered = $sce.trustAsHtml rendered
+      catch
+        loadMathJax()
+        rendered = markdown
+        scope.rendered = $sce.trustAsHtml rendered
+        $timeout (-> MathJax?.Hub.Queue ['Typeset', MathJax.Hub, output]), 0, false
 
     # React to the changes to the input
     inputEl.bind 'blur change keyup', ->

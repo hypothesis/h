@@ -243,6 +243,7 @@ app:
     - annotator_threading
     - jschannel
     - jwz
+    - h:static/scripts/vendor/katex/katex.min.js
     - momentjs
     - pagedown
     - autofill
@@ -288,6 +289,7 @@ app_css:
     output: styles/hypothesis.min.css
     contents:
       - theme
+      - h:static/scripts/vendor/katex/katex.min.css
       - filters: compass, cssrewrite
         output: styles/hypothesis.css
         contents:
