@@ -284,7 +284,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           )
           startMath = null
           endMath = null
-          renderMath(textToCheck)
+          return renderMath(textToCheck)
       return textToCheck
 
     # Re-render the markdown when the view needs updating.
