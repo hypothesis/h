@@ -246,6 +246,8 @@ class App
       # Do not rely on the identity service to invoke callbacks within an
       # angular digest cycle.
       $scope.$evalAsync ->
+        $scope.dialog.visible = false
+
         # Update any edits in progress.
         for draft in drafts.all()
           annotator.publish 'beforeAnnotationCreated', draft
@@ -308,15 +310,12 @@ class App
       $scope.updater.then (sock) ->
         sock.send(JSON.stringify(sockmsg))
 
-    $scope.authTimeout = ->
-      flash 'info',
-        'For your security, the forms have been reset due to inactivity.'
-
     $scope.clearSelection = ->
       $scope.search.query = ''
       $scope.selectedAnnotations = null
       $scope.selectedAnnotationsCount = 0
 
+    $scope.dialog = visible: false
     $scope.id = identity
 
     $scope.model = persona: undefined
