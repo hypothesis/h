@@ -357,6 +357,12 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
             (event.ctrlKey or event.metaKey),
 
     @tabs
+    .attr 'title', (d) =>
+      if (len = @buckets[d].length) > 1
+        "Show #{len} annotations"
+      else if len > 0
+        "Show one annotation"
+
     .css 'margin-top', (d) =>
       if @isUpper(d) or @isLower(d) then '-9px' else '-8px'
 
