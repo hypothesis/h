@@ -29,7 +29,7 @@ statusButton = ->
     unless targetForm
       throw new Error('status-button attribute should provide a form name')
 
-    elem = angular.element(template)
+    elem = angular.element(template).attr(STATE_ATTRIBUTE, '')
     placeholder.after(elem)
     transclude(scope, (clone) -> elem.append(clone))
 

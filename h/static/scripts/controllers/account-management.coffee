@@ -14,7 +14,7 @@ class AccountManagement
       form.$setPristine()
       formModel = form.$name.slice(0, -4)
       $scope[formModel] = {} # Reset form fields.
-
+      $scope.$broadcast 'formState', form.$name, 'success'  # Update status btn
 
     onDelete = (form, response) ->
       identity.logout()
@@ -28,6 +28,8 @@ class AccountManagement
           flash(type, msgs) for own type, msgs of response.data.flash
         else
           flash('error', 'Sorry, we were unable to perform your request')
+
+      $scope.$broadcast 'formState', form.$name, ''  # Update status btn
 
     # Data for each of the forms
     $scope.editProfile = {}
@@ -67,6 +69,7 @@ class AccountManagement
       successHandler = angular.bind(null, onSuccess, form)
       errorHandler   = angular.bind(null, onError, form)
 
+      $scope.$broadcast 'formState', form.$name, 'loading'  # Update status btn
       promise = profile.edit_profile(packet)
       promise.$promise.then(successHandler, errorHandler)
 

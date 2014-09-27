@@ -31,6 +31,11 @@ class AuthController
         angular.bind(this, failure, form)
       session.$resolved = false
 
+      # Update status btn
+      $scope.$broadcast 'formState', form.$name, 'loading'
+      session.$promise.finally ->
+        $scope.$broadcast 'formState', form.$name, ''
+
     $scope.$on '$destroy', ->
       if timeout
         $timeout.cancel timeout
