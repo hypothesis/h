@@ -286,7 +286,7 @@ app_css:
     filters: cleancss
     output: styles/hypothesis.min.css
     contents:
-      - theme
+      - icomoon_css
       - h:static/scripts/vendor/katex/katex.min.css
       - filters: compass, cssrewrite
         output: styles/hypothesis.css
@@ -372,7 +372,7 @@ inject_css:
   output: styles/hypothesis-inject.min.css
   filters: cleancss
   contents:
-    - theme
+    - icomoon_css
     - filters: compass, cssrewrite
       output: styles/hypothesis-inject.css
       contents:
@@ -381,13 +381,6 @@ inject_css:
         - h:static/styles/base.scss
         - h:static/styles/pointers.scss
         - h:static/styles/reset.scss
-
-
-theme:
-  debug: false
-  output: styles/theme.css
-  contents:
-    - icomoon_css
 
 
 topbar:
