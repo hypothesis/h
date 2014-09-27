@@ -209,6 +209,10 @@ class App
 
       _dfdSock.promise
 
+    oncancel = ->
+      loggedInuser = null
+      reset()
+
     onlogin = (assertion) ->
       # Configure the Auth plugin with the issued assertion as refresh token.
       annotator.addPlugin 'Auth',
@@ -299,6 +303,14 @@ class App
           filter = streamfilter.getFilter()
           sock.send(JSON.stringify({filter}))
 
+    $scope.login = ->
+      $scope.dialog.visible = true
+      identity.request {oncancel}
+
+    $scope.logout = ->
+      $scope.dialog.visible = false
+      identity.logout()
+
     $scope.loadMore = (number) ->
       unless streamfilter.getPastData().hits then return
       unless $scope.updater? then return
@@ -315,7 +327,6 @@ class App
       $scope.selectedAnnotationsCount = 0
 
     $scope.dialog = visible: false
-    $scope.id = identity
 
     $scope.model = persona: undefined
     $scope.threading = plugins.Threading

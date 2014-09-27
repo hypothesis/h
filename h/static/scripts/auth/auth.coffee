@@ -1,4 +1,5 @@
 imports = [
+  'h.identity'
   'h.session'
 ]
 
@@ -9,9 +10,10 @@ class AuthController
     timeout = null
 
     success = (data) ->
-      $scope.tab = if $scope.tab is 'forgot' then 'activate' else null
+      if $scope.tab is 'forgot' then $scope.tab = 'activate'
+      if data.userid then $scope.$emit 'session', data
       $scope.model = null
-      $scope.$emit 'session', data
+      $scope.form?.$setPristine()
 
     failure = (form, response) ->
       {errors, reason} = response.data
@@ -50,5 +52,28 @@ class AuthController
         , 300000
 
 
-angular.module('h.auth', imports)
+configure = ['$provide', 'identityProvider', ($provide, identityProvider) ->
+  identityProvider.checkAuthorization = [
+    'session',
+    (session) ->
+      session.load().$promise
+  ]
+
+  identityProvider.forgetAuthorization = [
+    'session',
+    (session) ->
+      session.logout({}).$promise
+  ]
+
+  identityProvider.requestAuthorization = [
+    '$q', '$rootScope',
+    ($q,   $rootScope) ->
+      deferred = $q.defer()
+      $rootScope.$on 'session', (event, data) -> deferred.resolve data
+      deferred.promise
+  ]
+]
+
+
+angular.module('h.auth', imports, configure)
 .controller('AuthController', AuthController)

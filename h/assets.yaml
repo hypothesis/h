@@ -277,6 +277,7 @@ app_js:
             - h:static/scripts/directives/thread.coffee
             - h:static/scripts/directives/thread-filter.coffee
             - h:static/scripts/directives/annotation.coffee
+            - h:static/scripts/identity.coffee
             - h:static/scripts/services.coffee
             - h:static/scripts/helpers/form-helpers.coffee
             - h:static/scripts/helpers/document-helpers.coffee
