@@ -249,8 +249,6 @@ app:
     - autofill
     - sockjs
     - uuid
-    - auth_css
-    - auth_js
     - app_css
     - app_js
 
