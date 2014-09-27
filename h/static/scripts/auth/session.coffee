@@ -34,33 +34,44 @@ for action in ACTION
 csrfToken = null
 
 
-# Class providing a server-side session resource.
-#
+###*
+# @ngdoc provider
+# @name sessionProvider
+# @property {Object} options additional options mix into resource actions.
+# @description
 # This class provides an angular $resource factory as an angular service
-# for manipulating server-side sessions. It defines the authentication-oriented
-# actions (such as 'login', 'register') as REST-ish actions on the session
-# resource.
-#
-# @example Using the session with BrowserID
-#   navigator.id.beginAuthentication(function (email) {
-#     session.load({email: email}, function (session) {
-#       var user = session.user;
-#       if(user && user.email == email) {
-#         navigator.id.completeAuthentication();
-#       } else {
-#         displayLoginForm();
-#       }
-#     });
-#   });
-#
-# Use the 'options' property of its provider to provide additional options
-# to be mixed into the resource action definitions.
+# for manipulating server-side sessions. It defines the REST-ish actions
+# that return the state of the users session after modifying it through
+# registration, authentication, or account management.
+###
 class SessionProvider
   options: null
 
   constructor: ->
     @options = {}
 
+  ###*
+  # @ngdoc service
+  # @name session
+  # @description
+  # An angular resource factory for sessions. See the documentation for
+  # {@link sessionProvider sessionProvider} for ways to configure the
+  # resource.
+  #
+  # @example
+  # Using the session with BrowserID.
+  #
+  #   navigator.id.beginAuthentication(function (email) {
+  #     session.load({email: email}, function (session) {
+  #       var user = session.user;
+  #       if(user && user.email == email) {
+  #         navigator.id.completeAuthentication();
+  #       } else {
+  #         displayLoginForm();
+  #       }
+  #     });
+  #   });
+  ###
   $get: [
     '$q', '$resource', 'documentHelpers', 'flash',
     ($q,   $resource,   documentHelpers,   flash) ->
