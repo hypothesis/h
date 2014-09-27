@@ -6,7 +6,6 @@ imports = [
   'h.controllers.AccountManagement'
   'h.directives'
   'h.filters'
-  'h.identity'
   'h.streamsearch'
   'h.helpers.formHelpers'
 ]

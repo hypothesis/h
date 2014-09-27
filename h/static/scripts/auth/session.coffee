@@ -81,7 +81,7 @@ class SessionProvider
 
         # Capture the cross site request forgery token without cookies.
         # If cookies are blocked this is our only way to get it.
-        csrfToken = model.csrf
+        csrfToken = model.certificate
 
         # Return the model
         model

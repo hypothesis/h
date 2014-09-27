@@ -5,7 +5,7 @@
       <div class="inner" ng-switch="persona">
         <span class="pull-right" ng-switch-when="undefined">⋯</span>
         <a class="pull-right" href=""
-           ng-click="dialog.visible = true; id.request()"
+           ng-click="login()"
            ng-switch-when="null">Sign in</a>
         <div class="dropdown pull-right user-picker" ng-switch-default>
           <span role="button"
@@ -20,7 +20,7 @@
             <li><a href="/docs/help" target="_blank">Help</a></li>
             <li><a href="/stream?q=user:{{persona|persona}}"
                    target="_blank">My Annotations</a></li>
-            <li ng-click="id.logout()">Sign out</li>
+            <li ng-click="logout()">Sign out</li>
           </ul>
         </div>
 
