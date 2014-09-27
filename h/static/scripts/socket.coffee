@@ -1,8 +1,3 @@
-imports = [
-  'h.helpers.documentHelpers'
-]
-
-
 clientID = ->
   # Generate client ID
   buffer = (new Array(16))
@@ -40,7 +35,7 @@ class Socket extends SockJS
       this.send = send
 
 
-angular.module('h.socket', imports)
+angular.module('h')
 .factory('clientID', clientID)
 .factory('socket', socket)
 .run(run)

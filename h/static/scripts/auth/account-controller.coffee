@@ -1,7 +1,3 @@
-imports = [
-  'h.session'
-]
-
 class AccountController
   @inject = ['$scope', '$filter', 'flash', 'session', 'identity', 'formHelpers']
   constructor: ($scope, $filter, flash, session, identity, formHelpers) ->
@@ -72,5 +68,5 @@ class AccountController
       promise.$promise.then(successHandler, errorHandler)
 
 
-angular.module('h.account', imports)
+angular.module('h.auth')
 .controller('AccountController', AccountController)

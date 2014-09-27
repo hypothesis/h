@@ -288,6 +288,6 @@ annotation = ['annotator', 'documentHelpers', (annotator, documentHelpers) ->
 ]
 
 
-angular.module('h.directives')
+angular.module('h')
 .controller('AnnotationController', AnnotationController)
 .directive('annotation', annotation)

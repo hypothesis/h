@@ -1,10 +1,3 @@
-imports = [
-  'ngResource'
-  'h.flash'
-  'h.helpers.documentHelpers'
-]
-
-
 ACTION = [
   'login'
   'logout'
@@ -106,24 +99,5 @@ class SessionProvider
   ]
 
 
-configure = ['$httpProvider', ($httpProvider) ->
-  defaults = $httpProvider.defaults
-
-  # Use the Pyramid XSRF header name
-  defaults.xsrfHeaderName = 'X-CSRF-Token'
-
-  $httpProvider.interceptors.push ['documentHelpers', (documentHelpers) ->
-    request: (config) ->
-      endpoint = documentHelpers.absoluteURI('/app')
-      if config.url.indexOf(endpoint) == 0
-        # Set the cross site request forgery token
-        cookieName = config.xsrfCookieName || defaults.xsrfCookieName
-        headerName = config.xsrfHeaderName || defaults.xsrfHeaderName
-        config.headers[headerName] ?= csrfToken
-      config
-  ]
-]
-
-
-angular.module('h.session', imports, configure)
+angular.module('h.auth')
 .provider('session', SessionProvider)
