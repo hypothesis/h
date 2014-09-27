@@ -70,7 +70,7 @@ elide = (text, split_length) ->
   text
 
 
-angular.module('h.filters', [])
+angular.module('h')
 .filter('converter', -> (new Converter()).makeHtml)
 .filter('fuzzyTime', -> fuzzyTime)
 .filter('moment', momentFilter)

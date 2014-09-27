@@ -36,4 +36,5 @@ simpleSearch = ['$parse', ($parse) ->
 ]
 
 
-angular.module('h.directives').directive('simpleSearch', simpleSearch)
+angular.module('h')
+.directive('simpleSearch', simpleSearch)

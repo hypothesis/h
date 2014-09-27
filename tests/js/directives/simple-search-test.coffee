@@ -6,7 +6,7 @@ describe 'h.directives', ->
   fakeWindow = null
   isolate = null
 
-  beforeEach module('h.directives')
+  beforeEach module('h')
 
   beforeEach inject (_$compile_, _$rootScope_) ->
     $compile = _$compile_

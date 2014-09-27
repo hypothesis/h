@@ -516,7 +516,7 @@ class ViewFilter
       count++
       annotation.id
 
-angular.module('h.services', [])
+angular.module('h')
 .factory('render', renderFactory)
 .provider('drafts', DraftProvider)
 .service('annotator', Hypothesis)

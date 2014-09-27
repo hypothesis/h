@@ -16,5 +16,5 @@ createDocumentHelpers = [
 ]
 
 
-angular.module('h.helpers.documentHelpers', [])
+angular.module('h.helpers')
 .factory('documentHelpers', createDocumentHelpers)

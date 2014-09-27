@@ -1,14 +1,3 @@
-imports = [
-  'bootstrap'
-  'h.flash'
-  'h.helpers.documentHelpers'
-  'h.identity'
-  'h.services'
-  'h.socket'
-  'h.searchfilters'
-]
-
-
 # User authorization function for the Permissions plugin.
 authorizeAction = (action, annotation, user) ->
   if annotation.permissions
@@ -35,7 +24,7 @@ authorizeAction = (action, annotation, user) ->
   true
 
 
-class App
+class AppController
   this.$inject = [
     '$location', '$q', '$route', '$scope', '$timeout',
     'annotator', 'flash', 'identity', 'socket', 'streamfilter',
@@ -347,7 +336,7 @@ class App
     $scope.sort = name: 'Location'
 
 
-class AnnotationViewer
+class AnnotationViewerController
   this.$inject = ['$routeParams', '$scope', 'streamfilter']
   constructor: ($routeParams, $scope, streamfilter) ->
     # Tells the view that these annotations are standalone
@@ -372,7 +361,7 @@ class AnnotationViewer
           sock.send(JSON.stringify({filter}))
 
 
-class Viewer
+class ViewerController
   this.$inject = ['$scope', 'annotator']
   constructor:   ( $scope,   annotator ) ->
     # Tells the view that these annotations are embedded into the owner doc
@@ -396,7 +385,7 @@ class Viewer
         true
 
 
-angular.module('h.controllers', imports)
-.controller('AppController', App)
-.controller('ViewerController', Viewer)
-.controller('AnnotationViewerController', AnnotationViewer)
+angular.module('h')
+.controller('AppController', AppController)
+.controller('ViewerController', ViewerController)
+.controller('AnnotationViewerController', AnnotationViewerController)

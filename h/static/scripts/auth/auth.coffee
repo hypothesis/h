@@ -1,58 +1,27 @@
 imports = [
+  'ngResource'
   'h.identity'
-  'h.session'
+  'h.helpers'
 ]
 
 
-class AuthController
-  this.$inject = ['$scope', '$timeout', 'flash', 'session', 'formHelpers']
-  constructor:   ( $scope,   $timeout,   flash,   session,   formHelpers ) ->
-    timeout = null
+configure = ['$httpProvider', 'identityProvider', ($httpProvider, identityProvider) ->
+  defaults = $httpProvider.defaults
 
-    success = (data) ->
-      if $scope.tab is 'forgot' then $scope.tab = 'activate'
-      if data.userid then $scope.$emit 'session', data
-      $scope.model = null
-      $scope.form?.$setPristine()
+  # Use the Pyramid XSRF header name
+  defaults.xsrfHeaderName = 'X-CSRF-Token'
 
-    failure = (form, response) ->
-      {errors, reason} = response.data
-      formHelpers.applyValidationErrors(form, errors, reason)
+  $httpProvider.interceptors.push ['documentHelpers', (documentHelpers) ->
+    request: (config) ->
+      endpoint = documentHelpers.absoluteURI('/app')
+      if config.url.indexOf(endpoint) == 0
+        # Set the cross site request forgery token
+        cookieName = config.xsrfCookieName || defaults.xsrfCookieName
+        headerName = config.xsrfHeaderName || defaults.xsrfHeaderName
+        config.headers[headerName] ?= csrfToken
+      config
+  ]
 
-    this.submit = (form) ->
-      delete form.responseErrorMessage
-      form.$setValidity('response', true)
-
-      return unless form.$valid
-
-      $scope.$broadcast 'formState', form.$name, 'loading'
-      session[form.$name] $scope.model, success,
-        angular.bind(this, failure, form)
-      .$promise.finally -> $scope.$broadcast 'formState', form.$name, ''
-
-    $scope.model = null
-    $scope.tab = 'login'
-
-    $scope.$on '$destroy', ->
-      if timeout
-        $timeout.cancel timeout
-
-    $scope.$watchCollection 'model', (value) ->
-      # Reset the auth forms after five minutes of inactivity
-      if timeout
-        $timeout.cancel timeout
-
-      # If the model is not empty, start the timeout
-      if value and not angular.equals(value, {})
-        timeout = $timeout ->
-          $scope.form?.$setPristine()
-          $scope.model = null
-          flash 'info',
-            'For your security, the forms have been reset due to inactivity.'
-        , 300000
-
-
-configure = ['$provide', 'identityProvider', ($provide, identityProvider) ->
   identityProvider.checkAuthorization = [
     'session',
     (session) ->
@@ -76,4 +45,3 @@ configure = ['$provide', 'identityProvider', ($provide, identityProvider) ->
 
 
 angular.module('h.auth', imports, configure)
-.controller('AuthController', AuthController)

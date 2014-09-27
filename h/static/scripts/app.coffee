@@ -1,12 +1,12 @@
 imports = [
   'ngAnimate'
   'ngRoute'
+  'ngSanitize'
+  'ngTagsInput'
+  'bootstrap'
   'h.auth'
-  'h.controllers'
-  'h.directives'
-  'h.filters'
-  'h.streamsearch'
-  'h.helpers.formHelpers'
+  'h.helpers'
+  'h.identity'
 ]
 
 

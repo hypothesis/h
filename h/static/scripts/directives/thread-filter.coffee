@@ -173,6 +173,6 @@ threadFilter = [
 ]
 
 
-angular.module('h.directives')
+angular.module('h')
 .controller('ThreadFilterController', ThreadFilterController)
 .directive('threadFilter', threadFilter)
