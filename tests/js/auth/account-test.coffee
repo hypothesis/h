@@ -2,7 +2,7 @@ assert = chai.assert
 sinon.assert.expose assert, prefix: null
 sandbox = sinon.sandbox.create()
 
-describe 'h.controllers.AccountManagement', ->
+describe 'h.account.AccountController', ->
   $scope = null
   fakeFlash = null
   fakeSession = null
@@ -11,6 +11,8 @@ describe 'h.controllers.AccountManagement', ->
   editProfilePromise = null
   disableUserPromise = null
   createController = null
+
+  beforeEach module('h.account')
 
   beforeEach module ($provide, $filterProvider) ->
     fakeSession = {}
@@ -29,8 +31,6 @@ describe 'h.controllers.AccountManagement', ->
     $provide.value 'formHelpers', fakeFormHelpers
     return
 
-  beforeEach module('h.controllers.AccountManagement')
-
   beforeEach inject ($rootScope, $q, $controller) ->
     $scope = $rootScope.$new()
     $scope.persona = 'egon@columbia.edu'
@@ -41,7 +41,7 @@ describe 'h.controllers.AccountManagement', ->
     fakeSession.disable_user = sandbox.stub().returns($promise: disableUserPromise)
 
     createController = ->
-      $controller('AccountManagement', {$scope: $scope})
+      $controller('AccountController', {$scope: $scope})
 
   describe '.submit', ->
     createFakeForm = (overrides={}) ->

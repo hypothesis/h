@@ -1,6 +1,9 @@
-class AccountManagement
-  @inject = ['$scope', '$filter', 'flash', 'session', 'identity', 'formHelpers']
+imports = [
+  'h.session'
+]
 
+class AccountController
+  @inject = ['$scope', '$filter', 'flash', 'session', 'identity', 'formHelpers']
   constructor: ($scope, $filter, flash, session, identity, formHelpers) ->
     persona_filter = $filter('persona')
 
@@ -69,5 +72,5 @@ class AccountManagement
       promise.$promise.then(successHandler, errorHandler)
 
 
-angular.module('h.controllers.AccountManagement', [])
-.controller('AccountManagement', AccountManagement)
+angular.module('h.account', imports)
+.controller('AccountController', AccountController)

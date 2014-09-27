@@ -266,7 +266,6 @@ app_js:
           contents:
             - h:static/scripts/app.coffee
             - h:static/scripts/controllers.coffee
-            - h:static/scripts/controllers/account-management.coffee
             - h:static/scripts/flash.coffee
             - h:static/scripts/filters.coffee
             - h:static/scripts/directives.coffee
