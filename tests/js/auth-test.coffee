@@ -4,13 +4,14 @@ sandbox = sinon.sandbox.create()
 
 
 class MockSession
-  $login: sandbox.stub()
+  $login: sandbox.stub().returns(finally: sandbox.stub())
   $register: (callback, errback) ->
     errback
       data:
         errors:
           username: 'taken'
         reason: 'registration error'
+    finally: sandbox.stub()
 
 mockFormHelpers = applyValidationErrors: sandbox.spy()
 
