@@ -1,5 +1,6 @@
 include *.ini *.txt *.rst LICENSE NOTICE versioneer.py
 recursive-include h *.ico *.css *.html *.txt *.pt *.yaml
+recursive-include h/static *.js
 recursive-include h/static/images *.gif *.jpg *.png
 recursive-include h/static/fonts *.eot *.svg *.ttf *.woff
 recursive-include h/static/scripts *.coffee *.js
