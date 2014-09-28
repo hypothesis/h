@@ -1,6 +1,5 @@
 .*
 !.gitignore
-.webassets-cache
 
 /*.db
 /*.db-journal
