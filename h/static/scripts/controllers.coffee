@@ -259,9 +259,8 @@ class App
         $scope.persona = persona
 
         # Reload services
-        storeReady.promise.then ->
-          initStore()
-          initUpdater()
+        storeReady.promise.then -> initStore()
+        initUpdater()
 
     annotator.subscribe 'serviceDiscovery', (options) ->
       annotator.options.Store ?= {}
