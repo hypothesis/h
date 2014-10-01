@@ -265,17 +265,20 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           $timeout -> inputEl.focus()
 
     renderMath = (textToCheck) ->
-      # Parses text for math as denoted by '$$'
-      i = 0
+      re = /(?:\$\$)|(?:\\\(?\)?)/g
       startMath = null
       endMath = null
-      for char in textToCheck
-        if char == "$" and textToCheck[i + 1] == "$"
-          if startMath == null
-            startMath = i + 2
-          else
-            endMath = i
-        i++
+      match = undefined
+      indexes = []
+      while match = re.exec(textToCheck)
+        indexes.push [
+          match.index
+        ]
+      for index in indexes
+        if startMath == null
+          startMath = index[0] + 2
+        else
+          endMath = index[0]
         if startMath != null and endMath != null
           math = katex.renderToString(textToCheck.substring(startMath, endMath))
           textToCheck = (
