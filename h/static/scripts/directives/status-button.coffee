@@ -41,4 +41,5 @@ statusButton = ->
   transclude: 'element'
 
 
-angular.module('h.directives').directive('statusButton', statusButton)
+angular.module('h')
+.directive('statusButton', statusButton)

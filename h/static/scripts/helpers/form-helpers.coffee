@@ -14,5 +14,5 @@ createFormHelpers = ->
       form.responseErrorMessage = reason
 
 
-angular.module('h.helpers.formHelpers', [])
+angular.module('h.helpers')
 .factory('formHelpers', createFormHelpers)

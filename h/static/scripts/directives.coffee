@@ -1,11 +1,3 @@
-imports = [
-  'ngSanitize'
-  'ngTagsInput'
-  'h.helpers.documentHelpers'
-  'h.services'
-]
-
-
 formInput = ->
   link: (scope, elem, attr, [form, model, validator]) ->
     return unless form?.$name and model?.$name and validator
@@ -220,7 +212,7 @@ match = ->
   require: 'ngModel'
 
 
-angular.module('h.directives', imports)
+angular.module('h')
 .directive('formInput', formInput)
 .directive('formValidate', formValidate)
 .directive('privacy', privacy)

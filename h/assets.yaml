@@ -264,29 +264,23 @@ app_js:
           contents:
             - h:static/scripts/app.coffee
             - h:static/scripts/controllers.coffee
-            - h:static/scripts/flash.coffee
-            - h:static/scripts/filters.coffee
             - h:static/scripts/directives.coffee
-            - h:static/scripts/directives/deep-count.coffee
-            - h:static/scripts/directives/markdown.coffee
-            - h:static/scripts/directives/simple-search.coffee
-            - h:static/scripts/directives/status-button.coffee
-            - h:static/scripts/directives/thread.coffee
-            - h:static/scripts/directives/thread-filter.coffee
-            - h:static/scripts/directives/annotation.coffee
+            - h:static/scripts/directives/*.coffee
+            - h:static/scripts/filters.coffee
+            - h:static/scripts/flash.coffee
+            - h:static/scripts/helpers/helpers.coffee
+            - h:static/scripts/helpers/*-helpers.coffee
             - h:static/scripts/identity.coffee
-            - h:static/scripts/services.coffee
-            - h:static/scripts/helpers/form-helpers.coffee
-            - h:static/scripts/helpers/document-helpers.coffee
-            - h:static/scripts/socket.coffee
             - h:static/scripts/searchfilters.coffee
+            - h:static/scripts/services.coffee
+            - h:static/scripts/socket.coffee
             - h:static/scripts/streamsearch.coffee
 
 app_css:
     filters: cleancss
     output: styles/hypothesis.min.css
     contents:
-      - theme
+      - icomoon_css
       - h:static/scripts/vendor/katex/katex.min.css
       - filters: compass, cssrewrite
         output: styles/hypothesis.css
@@ -327,7 +321,9 @@ auth_js:
     - output: scripts/hypothesis-auth.js
       filters: coffeescript
       contents:
-        - h:static/scripts/auth/*.coffee
+        - h:static/scripts/auth/auth.coffee
+        - h:static/scripts/auth/*-controller.coffee
+        - h:static/scripts/auth/*-service.coffee
 
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
@@ -372,7 +368,7 @@ inject_css:
   output: styles/hypothesis-inject.min.css
   filters: cleancss
   contents:
-    - theme
+    - icomoon_css
     - filters: compass, cssrewrite
       output: styles/hypothesis-inject.css
       contents:
@@ -381,13 +377,6 @@ inject_css:
         - h:static/styles/base.scss
         - h:static/styles/pointers.scss
         - h:static/styles/reset.scss
-
-
-theme:
-  debug: false
-  output: styles/theme.css
-  contents:
-    - icomoon_css
 
 
 topbar:

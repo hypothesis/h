@@ -10,6 +10,7 @@ describe 'h.directives', ->
     fakeWindow = {open: sinon.spy()}
     fakeDocument = angular.element({
       createElement: (tag) -> document.createElement(tag)
+      baseURI: 'http://example.com'
     })
 
     $provide.value('$window', fakeWindow)
@@ -22,8 +23,7 @@ describe 'h.directives', ->
 
     return
 
-  beforeEach module('h.templates')
-  beforeEach module('h.directives')
+  beforeEach module('h')
 
   beforeEach inject (_$compile_, _$rootScope_, _$injector_) ->
     $compile = _$compile_

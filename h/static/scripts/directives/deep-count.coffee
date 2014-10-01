@@ -73,6 +73,6 @@ deepCount = [
 ]
 
 
-angular.module('h.directives')
+angular.module('h')
 .controller('DeepCountController', DeepCountController)
 .directive('deepCount', deepCount)

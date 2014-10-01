@@ -324,4 +324,5 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
   templateUrl: 'markdown.html'
 ]
 
-angular.module('h.directives').directive('markdown', markdown)
+angular.module('h')
+.directive('markdown', markdown)

@@ -348,7 +348,7 @@ class StreamFilter
     this
 
 
-angular.module('h.searchfilters', [])
+angular.module('h')
 .service('searchfilter', SearchFilter)
 .service('queryparser', QueryParser)
 .service('streamfilter', StreamFilter)

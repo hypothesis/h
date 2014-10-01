@@ -8,7 +8,7 @@ describe 'h.directives.thread', ->
   createController = null
   flash = null
 
-  beforeEach module('h.directives')
+  beforeEach module('h')
 
   beforeEach inject ($controller, $rootScope) ->
     $scope = $rootScope.$new()

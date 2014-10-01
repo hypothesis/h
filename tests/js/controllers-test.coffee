@@ -3,7 +3,7 @@ assert = chai.assert
 describe 'h.controllers', ->
   fakeParams = null
 
-  beforeEach module('h.controllers')
+  beforeEach module('h')
 
   beforeEach module ($provide) ->
     fakeParams = {id: 'test'}
