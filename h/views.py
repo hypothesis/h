@@ -19,6 +19,10 @@ def annotation(context, request):
 
 
 @view_config(name='embed.js', renderer='h:templates/embed.txt')
+def js(context, request):
+    request.response.content_type = 'text/javascript'
+    return {}
+
 @view_config(layout='app', name='app.html', renderer='h:templates/app.pt')
 @view_config(layout='app', name='viewer', renderer='h:templates/app.pt')
 @view_config(layout='app', name='editor', renderer='h:templates/app.pt')
