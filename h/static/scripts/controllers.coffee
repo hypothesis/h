@@ -27,24 +27,15 @@ authorizeAction = (action, annotation, user) ->
 class AppController
   this.$inject = [
     '$location', '$q', '$route', '$scope', '$timeout',
-    'annotator', 'flash', 'identity', 'socket', 'streamfilter',
+    'annotator', 'flash', 'identity', 'session', 'socket', 'streamfilter',
     'documentHelpers', 'drafts'
   ]
   constructor: (
      $location,   $q,   $route,   $scope,   $timeout
-     annotator,   flash,   identity,   socket,   streamfilter,
+     annotator,   flash,   identity,   session,   socket,   streamfilter,
      documentHelpers,   drafts
   ) ->
     {plugins, host, providers} = annotator
-
-    # Verified user id.
-    # Undefined means we don't track the session, but the identity module will
-    # tell us the state of the session. A null value means that the session
-    # has been checked and it was found that there is no user logged in.
-    loggedInUser = undefined
-
-    # Resolved once the API service has been discovered.
-    storeReady = $q.defer()
 
     applyUpdates = (action, data) ->
       """Update the application with new data from the websocket."""
@@ -61,30 +52,6 @@ class AppController
             continue unless annotation?
             plugins.Store?.unregisterAnnotation(annotation)
             annotator.deleteAnnotation(annotation)
-
-    initIdentity = (persona) ->
-      """Initialize identity callbacks."""
-      # Store the argument as the claimed user id.
-      claimedUser = persona
-
-      # Convert it to the format used by persona.
-      if claimedUser then claimedUser = claimedUser.replace(/^acct:/, '')
-
-      if claimedUser is loggedInUser
-        if loggedInUser is undefined
-          # This is the first execution.
-          # Configure the identity callbacks and the initial user id claim.
-          identity.watch
-            loggedInUser: claimedUser
-            onlogin: (assertion) ->
-              onlogin(assertion)
-            onlogout: ->
-              onlogout()
-      else if drafts.discard()
-        if claimedUser
-          identity.request()
-        else
-          identity.logout()
 
     initStore = ->
       """Initialize the storage component."""
@@ -198,9 +165,6 @@ class AppController
 
       _dfdSock.promise
 
-    oncancel = ->
-      loggedInuser = null
-
     onlogin = (assertion) ->
       # Configure the Auth plugin with the issued assertion as refresh token.
       annotator.addPlugin 'Auth',
@@ -217,7 +181,7 @@ class AppController
             update: [token.userId]
             delete: [token.userId]
             admin: [token.userId]
-        loggedInUser = token.userId.replace /^acct:/, ''
+        $scope.persona = token.userId
         reset()
 
     onlogout = ->
@@ -231,8 +195,17 @@ class AppController
       plugins.Permissions?.destroy()
       delete plugins.Permissions
 
-      loggedInUser = null
+      $scope.persona = null
       reset()
+
+    onready = ->
+      $scope.$evalAsync ->
+        $scope.persona ?= null
+
+    oncancel = ->
+      $scope.$evalAsync ->
+        flash 'info', 'Sign in canceled.'
+        $scope.dialog.visible = false
 
     reset = ->
       # Do not rely on the identity service to invoke callbacks within an
@@ -244,14 +217,6 @@ class AppController
         for draft in drafts.all()
           annotator.publish 'beforeAnnotationCreated', draft
 
-        # Convert the verified user id to the format used by the API.
-        persona = loggedInUser
-        if persona then persona = "acct:#{persona}"
-
-        # Ensure it is synchronized on the scope.
-        # Without this, failed identity changes will remain on the scope.
-        $scope.persona = persona
-
         # Reload services
         storeReady.promise.then -> initStore()
         initUpdater()
@@ -261,7 +226,7 @@ class AppController
       angular.extend annotator.options.Store, options
       storeReady.resolve()
 
-    $scope.$watch 'persona', initIdentity
+    identity.watch {onlogin, onlogout, onready}
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue

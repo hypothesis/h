@@ -14,12 +14,11 @@ configure = [
     identityProvider.checkAuthentication = [
       '$q', 'session',
       ($q,   session) ->
-        (authCheck = $q.defer())
-        .promise.then do ->
+        (authCheck = $q.defer()).promise.then do ->
           session.load().$promise.then (data) ->
-            authCheck.resolve
-              certificate: data.csrf
-              userid: data.userid
+            if data.userid then authCheck.resolve data.csrf
+            else authCheck.reject 'no session'
+          , -> authCheck.reject 'request failure'
     ]
 
     identityProvider.forgetAuthentication = [
@@ -31,16 +30,10 @@ configure = [
     identityProvider.requestAuthentication = [
       '$q', '$rootScope',
       ($q,   $rootScope) ->
-        if authCheck then authCheck.reject()
-        (authCheck = $q.defer())
-        .promise.finally do ->
+        (authCheck = $q.defer()).promise.finally do ->
           $rootScope.$on 'auth', (event, err, data) ->
-            if err
-              authCheck.reject(err)
-            else
-              authCheck.resolve
-                certificate: data.csrf
-                userid: data.userid
+            if err then authCheck.reject err
+            else authCheck.resolve data.csrf
     ]
 ]
 

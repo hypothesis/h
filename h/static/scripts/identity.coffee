@@ -57,42 +57,8 @@ identityProvider = ->
     '$injector', '$q',
     ($injector,   $q) ->
       provider = this
-      loggedInUser = undefined
-      oncancel = null
       onlogin = null
       onlogout = null
-      onmatch = null
-      onready = null
-
-      invokeCallbacks = (grant={}) ->
-        {userid, certificate} = grant
-        userid or= null
-        # Fire callbacks as appropriate.
-        # Consult the state matrix in the `navigator.id.watch` documentation.
-        # https://developer.mozilla.org/en-US/docs/Web/API/navigator.id.watch
-        if loggedInUser is null
-          if userid
-            loggedInUser = userid
-            onlogin?(certificate)
-          else
-            onmatch?()
-        else if loggedInUser
-          if userid
-            if loggedInUser is userid
-              onmatch?()
-            else
-              loggedInUser = userid
-              onlogin?(certificate)
-          else
-            loggedInUser = null
-            onlogout?()
-        else
-          if userid
-            loggedInUser = userid
-            onlogin?(certificate)
-          else
-            loggedInUser = null
-            onlogout?()
 
       ###*
       # @ngdoc method
@@ -102,7 +68,7 @@ identityProvider = ->
       ###
       logout: ->
         result = $injector.invoke(provider.forgetAuthentication, provider)
-        $q.when(result).finally(invokeCallbacks)
+        $q.when(result).finally(onlogout)
 
       ###*
       # @ngdoc method
@@ -113,7 +79,7 @@ identityProvider = ->
       request: (options={}) ->
         {oncancel} = options
         result = $injector.invoke(provider.requestAuthentication, provider)
-        $q.when(result).then(invokeCallbacks, oncancel)
+        $q.when(result).then(onlogin, oncancel)
 
       ###*
       # @ngdoc method
@@ -122,9 +88,9 @@ identityProvider = ->
       # https://developer.mozilla.org/en-US/docs/Web/API/navigator.id.watch
       ###
       watch: (options) ->
-        {loggedInUser, onlogin, onlogout, onmatch, onready} = options
+        {loggedInUser, onlogin, onlogout, onready} = options
         result = $injector.invoke(provider.checkAuthentication, provider)
-        $q.when(result).then(invokeCallbacks, null, onready)
+        $q.when(result).then(onlogin).finally(-> onready?())
   ]
 
 
