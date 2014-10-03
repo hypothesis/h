@@ -3,19 +3,20 @@
 # @name identityProvider
 
 # @property {function} checkAuthentication A function to check for an
-# authenticated user. It is expected to return the promise of an authorization
-# grant if the user has authorized signing in to the requesting application.
-# The function arguments are injected.
+# authenticated user. This function should return an authorization certificate,
+# or a promise of the same, if the user has authorized signing in to the
+# application. Its arguments are injected.
 #
 # @property {function} forgetAuthentication A function to forget the current
 # authentication. The return value, if any, will be resolved as a promise
-# before the identity service fires logout callbacks. The identity provider
-# should ensure any sessions are cleared. The function arguments are injected.
+# before the identity service fires logout callbacks. This function should
+# ensure any active session is invalidated. Its arguments are injected.
 #
 # @property {function} requestAuthentication A function to request that the
-# the user begin authenticating. It is expected to return the promise of an
-# authorization grant once the user has authenticated and authorized signing
-# in to the requesting application. The function arguments are injected.
+# the user begin authenticating. This function should start a flow that
+# authenticates the user before asking the user grant authorization to the
+# application and then returning an authorization certificate or a promise
+# of the same. Its arguments are injected.
 #
 # @description
 # The `identityProvider` is used to configure functions that fulfill
@@ -25,10 +26,7 @@
 # {@link h.identity:identity identity} service.
 #
 # An application wishing to export an identity provider should override all
-# of the public methods of this provider. The all are expected to return a
-# promise of an authorization grant that may be the null value or an object.
-# If it is an object, it is considered a valid grant if it contains the keys
-# ``userid`` and ``certificate``.
+# of the public methods of this provider.
 ###
 identityProvider = ->
   checkAuthentication: ['$q', ($q) ->
