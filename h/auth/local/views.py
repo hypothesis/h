@@ -181,7 +181,7 @@ class AsyncRegisterController(RegisterController):
         request = self.request
         Str = self.Str
 
-        schema = schemas.ActivateSchema.bind(request=request)
+        schema = schemas.ActivateSchema().bind(request=request)
         form = forms.ActivateForm(schema)
         appstruct = None
 
@@ -217,8 +217,7 @@ class AsyncRegisterController(RegisterController):
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
         request = self.request
-        schema = schemas.EditProfileSchema.bind(schemas.EditProfileSchema(),
-                                                request=request)
+        schema = schemas.EditProfileSchema().bind(request=request)
         form = forms.EditProfileForm(schema)
 
         try:
@@ -235,12 +234,11 @@ class ProfileController(horus.views.ProfileController):
             request.context = user
             return super(ProfileController, self).edit_profile()
         else:
-            return dict(errors=[{'pwd':_('Invalid password')}], code=401)
+            return dict(errors=[{'pwd': _('Invalid password')}], code=401)
 
     def disable_user(self):
         request = self.request
-        schema = schemas.EditProfileSchema.bind(schemas.EditProfileSchema(),
-                                                request=request)
+        schema = schemas.EditProfileSchema().bind(request=request)
         form = forms.EditProfileForm(schema)
 
         try:
