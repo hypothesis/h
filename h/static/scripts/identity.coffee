@@ -66,7 +66,7 @@ identityProvider = ->
       ###
       logout: ->
         result = $injector.invoke(provider.forgetAuthentication, provider)
-        $q.when(result).finally(onlogout)
+        $q.when(result).then(onlogout)
 
       ###*
       # @ngdoc method

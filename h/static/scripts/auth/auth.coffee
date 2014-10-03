@@ -22,9 +22,11 @@ configure = [
     ]
 
     identityProvider.forgetAuthentication = [
-      'session',
-      (session) ->
-        session.logout({}).$promise
+      'flash', 'session',
+      (flash,   session) ->
+        session.logout({}).$promise.catch (err) ->
+          flash 'error', 'Sign out failed!'
+          throw err
     ]
 
     identityProvider.requestAuthentication = [
