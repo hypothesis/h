@@ -51,8 +51,8 @@ identityProvider = ->
   # See https://developer.mozilla.org/en-US/docs/Web/API/navigator.id
   ###
   $get: [
-    '$injector',
-    ($injector) ->
+    '$injector', '$q',
+    ($injector,   $q) ->
       provider = this
       loggedInUser = undefined
       oncancel = null
@@ -97,8 +97,8 @@ identityProvider = ->
       # https://developer.mozilla.org/en-US/docs/Web/API/navigator.id.logout
       ###
       logout: ->
-        $injector.invoke(provider.forgetAuthorization, provider)
-        .then(invokeCallbacks)
+        result = $injector.invoke(provider.forgetAuthorization, provider)
+        $q.when(result).finally(-> onlogout?())
 
       ###*
       # @ngdoc method
@@ -108,8 +108,8 @@ identityProvider = ->
       ###
       request: (options={}) ->
         {oncancel} = options
-        $injector.invoke(provider.requestAuthorization, provider)
-        .then(invokeCallbacks, oncancel)
+        result = $injector.invoke(provider.requestAuthorization, provider)
+        $q.when(result).then(invokeCallbacks, oncancel)
 
       ###*
       # @ngdoc method
@@ -119,8 +119,8 @@ identityProvider = ->
       ###
       watch: (options) ->
         {loggedInUser, onlogin, onlogout, onmatch} = options
-        $injector.invoke(provider.checkAuthorization, provider)
-        .then(invokeCallbacks)
+        result = $injector.invoke(provider.checkAuthorization, provider)
+        result.then(invokeCallbacks)
   ]
 
 
