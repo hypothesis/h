@@ -9,9 +9,8 @@ createFormHelpers = ->
       form[field].$setValidity('response', false)
       form[field].responseErrorMessage = error
 
-    if reason
-      form.$setValidity('response', false)
-      form.responseErrorMessage = reason
+    form.$setValidity('response', !reason)
+    form.responseErrorMessage = reason
 
 
 angular.module('h.helpers')

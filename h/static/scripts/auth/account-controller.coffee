@@ -50,8 +50,7 @@ class AccountController
       promise.$promise.then(successHandler, errorHandler)
 
     $scope.submit = (form) ->
-      # In the frontend change_email and change_password are two different
-      # forms. However, in the backend it is just one: edit_profile
+      formHelpers.applyValidationErrors(form)
       return unless form.$valid
 
       username = persona_filter $scope.persona

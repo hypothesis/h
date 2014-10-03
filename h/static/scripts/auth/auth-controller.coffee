@@ -14,9 +14,7 @@ class AuthController
       formHelpers.applyValidationErrors(form, errors, reason)
 
     this.submit = (form) ->
-      delete form.responseErrorMessage
-      form.$setValidity('response', true)
-
+      formHelpers.applyValidationErrors(form)
       return unless form.$valid
 
       $scope.$broadcast 'formState', form.$name, 'loading'

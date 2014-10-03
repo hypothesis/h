@@ -14,10 +14,11 @@ describe 'h.helpers.formHelpers', ->
 
     beforeEach ->
       form =
+        $setValidity: sinon.spy()
         username: {$setValidity: sinon.spy()}
         password: {$setValidity: sinon.spy()}
 
-    it 'invalidates the "response" input for each error', ->
+    it 'sets the "response" error key for each field with errors', ->
       formHelpers.applyValidationErrors form,
         username: 'must be at least 3 characters'
         password: 'must be present'
@@ -32,3 +33,11 @@ describe 'h.helpers.formHelpers', ->
 
       assert.equal(form.username.responseErrorMessage, 'must be at least 3 characters')
       assert.equal(form.password.responseErrorMessage, 'must be present')
+
+    it 'sets the "response" error key if the form has a failure reason', ->
+      formHelpers.applyValidationErrors form, null, 'fail'
+      assert.calledWith(form.$setValidity, 'response', false)
+
+    it 'adds an reason message as the response error', ->
+      formHelpers.applyValidationErrors form, null, 'fail'
+      assert.equal(form.responseErrorMessage, 'fail')

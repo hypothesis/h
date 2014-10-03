@@ -12,7 +12,7 @@
         form-validate
         novalidate>
 
-    <p class="form-description form-error" ng-show="login.responseErrorMessage">
+    <p class="form-description form-error" ng-show="login.$error.response">
       {{login.responseErrorMessage}}
     </p>
 
@@ -68,7 +68,7 @@
         form-validate
         novalidate>
 
-    <p class="form-description form-error" ng-show="register.responseErrorMessage">
+    <p class="form-description form-error" ng-show="register.$error.response">
       {{register.responseErrorMessage}}
     </p>
 
@@ -149,7 +149,7 @@
         form-validate
         novalidate>
 
-    <p class="form-description form-error" ng-show="forgot.responseErrorMessage">
+    <p class="form-description form-error" ng-show="forgot.$error.response">
       {{forgot.responseErrorMessage}}
     </p>
     <div class="form-field">
@@ -182,7 +182,7 @@
         form-validate
         novalidate>
 
-    <p class="form-description form-error" ng-show="activate.responseErrorMessage">
+    <p class="form-description form-error" ng-show="activate.$error.response">
       {{activate.responseErrorMessage}}
     </p>
 
