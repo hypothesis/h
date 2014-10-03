@@ -2,17 +2,19 @@ assert = chai.assert
 sinon.assert.expose assert, prefix: null
 sandbox = sinon.sandbox.create()
 
-fakePromise = finally: sandbox.stub()
-
 class MockSession
-  login: sandbox.stub().returns($promise: fakePromise)
+  login: (data, success, failure) ->
+    success?(userid: 'alice')
+    $promise:
+      finally: sandbox.stub()
   register: (data, callback, errback) ->
     errback
       data:
         errors:
           username: 'taken'
         reason: 'registration error'
-    $promise: fakePromise
+    $promise:
+      finally: sandbox.stub()
 
 mockFlash = sandbox.spy()
 mockFormHelpers = applyValidationErrors: sandbox.spy()
@@ -42,10 +44,11 @@ describe 'h.auth', ->
       $timeout = _$timeout_
       auth = $controller 'AuthController', {$scope}
       session = _session_
-      session.login.reset()
+      sandbox.spy session, 'login'
 
     describe '#submit()', ->
       it 'should call session methods on submit', ->
+
         auth.submit
           $name: 'login'
           $valid: true
@@ -76,6 +79,22 @@ describe 'h.auth', ->
         assert.calledWith mockFormHelpers.applyValidationErrors, form,
           {username: 'taken'},
           'registration error'
+
+      it 'should emit an auth event once authenticated', ->
+        form =
+          $name: 'login'
+          $valid: true
+          $setValidity: sandbox.stub()
+
+        sandbox.spy $scope, '$emit'
+
+        auth.submit(form)
+        assert.calledWith $scope.$emit, 'auth', null, userid: 'alice'
+
+      it 'should emit an auth event if destroyed before authentication', ->
+        sandbox.spy $scope, '$emit'
+        $scope.$destroy()
+        assert.calledWith $scope.$emit, 'auth', 'cancel'
 
     describe 'timeout', ->
       it 'should happen after a period of inactivity', ->
