@@ -103,5 +103,5 @@ class SessionProvider
   ]
 
 
-angular.module('h.auth')
+angular.module('h')
 .provider('session', SessionProvider)

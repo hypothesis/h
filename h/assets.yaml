@@ -275,6 +275,7 @@ app_js:
             - h:static/scripts/services.coffee
             - h:static/scripts/socket.coffee
             - h:static/scripts/streamsearch.coffee
+            - h:static/scripts/*-service.coffee
 
 app_css:
     filters: cleancss
