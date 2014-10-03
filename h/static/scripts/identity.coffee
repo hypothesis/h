@@ -2,17 +2,20 @@
 # @ngdoc provider
 # @name identityProvider
 
-# @property {function} checkAuthorization A function to check for a current
-# authorization grant. It is expected to return the promise of a grant.
+# @property {function} checkAuthentication A function to check for an
+# authenticated user. It is expected to return the promise of an authorization
+# grant if the user has authorized signing in to the requesting application.
+# The function arguments are injected.
 #
-# @property {function} forgetAuthorization A function to forget the current
-# authorization grant. It is expected to return the promise of a grant. If
-# the user is successfully logged out the grant should be null or invalid.
+# @property {function} forgetAuthentication A function to forget the current
+# authentication. The return value, if any, will be resolved as a promise
+# before the identity service fires logout callbacks. The identity provider
+# should ensure any sessions are cleared. The function arguments are injected.
 #
-# @property {function} requestAuthorization A function to request that the
-# the client begin authenticated the current user. It is expected to return the
-# promise of an authorization grant once the user has authenticated and
-# authorized signing in to the requesting application.
+# @property {function} requestAuthentication A function to request that the
+# the user begin authenticating. It is expected to return the promise of an
+# authorization grant once the user has authenticated and authorized signing
+# in to the requesting application. The function arguments are injected.
 #
 # @description
 # The `identityProvider` is used to configure functions that fulfill
@@ -28,16 +31,16 @@
 # ``userid`` and ``certificate``.
 ###
 identityProvider = ->
-  checkAuthorization: ['$q', ($q) ->
-    $q.reject 'Not implemented idenityProvider#checkAuthorization.'
+  checkAuthentication: ['$q', ($q) ->
+    $q.reject 'Not implemented idenityProvider#checkAuthentication.'
   ]
 
-  forgetAuthorization: ['$q', ($q) ->
-    $q.reject 'Not implemented idenityProvider#forgetAuthorization.'
+  forgetAuthentication: ['$q', ($q) ->
+    $q.reject 'Not implemented idenityProvider#forgetAuthentication.'
   ]
 
-  requestAuthorization: ['$q', ($q) ->
-    $q.reject 'Not implemented idenityProvider#requestAuthorization.'
+  requestAuthentication: ['$q', ($q) ->
+    $q.reject 'Not implemented idenityProvider#requestAuthentication.'
   ]
 
   ###*
@@ -59,6 +62,7 @@ identityProvider = ->
       onlogin = null
       onlogout = null
       onmatch = null
+      onready = null
 
       invokeCallbacks = (grant={}) ->
         {userid, certificate} = grant
@@ -97,8 +101,8 @@ identityProvider = ->
       # https://developer.mozilla.org/en-US/docs/Web/API/navigator.id.logout
       ###
       logout: ->
-        result = $injector.invoke(provider.forgetAuthorization, provider)
-        $q.when(result).finally(-> onlogout?())
+        result = $injector.invoke(provider.forgetAuthentication, provider)
+        $q.when(result).finally(invokeCallbacks)
 
       ###*
       # @ngdoc method
@@ -108,7 +112,7 @@ identityProvider = ->
       ###
       request: (options={}) ->
         {oncancel} = options
-        result = $injector.invoke(provider.requestAuthorization, provider)
+        result = $injector.invoke(provider.requestAuthentication, provider)
         $q.when(result).then(invokeCallbacks, oncancel)
 
       ###*
@@ -118,9 +122,9 @@ identityProvider = ->
       # https://developer.mozilla.org/en-US/docs/Web/API/navigator.id.watch
       ###
       watch: (options) ->
-        {loggedInUser, onlogin, onlogout, onmatch} = options
-        result = $injector.invoke(provider.checkAuthorization, provider)
-        result.then(invokeCallbacks)
+        {loggedInUser, onlogin, onlogout, onmatch, onready} = options
+        result = $injector.invoke(provider.checkAuthentication, provider)
+        $q.when(result).then(invokeCallbacks, null, onready)
   ]
 
 

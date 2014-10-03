@@ -5,7 +5,7 @@ class AuthController
 
     success = (data) ->
       if $scope.tab is 'forgot' then $scope.tab = 'activate'
-      if data.userid then $scope.$emit 'session', data
+      if data.userid then $scope.$emit 'auth', null, data
       $scope.model = null
       $scope.form?.$setPristine()
 
@@ -27,9 +27,10 @@ class AuthController
     $scope.model = null
     $scope.tab = 'login'
 
-    $scope.$on '$destroy', ->
-      if timeout
-        $timeout.cancel timeout
+    $scope.$on 'auth', do ->
+      preventCancel = $scope.$on '$destroy', ->
+        if timeout then $timeout.cancel timeout
+        $scope.$emit 'auth', 'cancel'
 
     $scope.$watchCollection 'model', (value) ->
       # Reset the auth forms after five minutes of inactivity

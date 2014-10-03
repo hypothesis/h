@@ -11,31 +11,36 @@ configure = [
     # Use the Pyramid XSRF header name
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRF-Token'
 
-    identityProvider.checkAuthorization = [
-      'session',
-      (session) ->
-        session.load().$promise.then (data) ->
-          certificate: data.csrf
-          userid: data.userid
+    identityProvider.checkAuthentication = [
+      '$q', 'session',
+      ($q,   session) ->
+        (authCheck = $q.defer())
+        .promise.then do ->
+          session.load().$promise.then (data) ->
+            authCheck.resolve
+              certificate: data.csrf
+              userid: data.userid
     ]
 
-    identityProvider.forgetAuthorization = [
+    identityProvider.forgetAuthentication = [
       'session',
       (session) ->
         session.logout({}).$promise
     ]
 
-    identityProvider.requestAuthorization = [
+    identityProvider.requestAuthentication = [
       '$q', '$rootScope',
       ($q,   $rootScope) ->
-        deferred = $q.defer()
-
-        $rootScope.$on 'session', (event, data) ->
-          deferred.resolve
-            certificate: data.csrf
-            userid: data.userid
-
-        deferred.promise
+        if authCheck then authCheck.reject()
+        (authCheck = $q.defer())
+        .promise.finally do ->
+          $rootScope.$on 'auth', (event, err, data) ->
+            if err
+              authCheck.reject(err)
+            else
+              authCheck.resolve
+                certificate: data.csrf
+                userid: data.userid
     ]
 ]
 

@@ -200,7 +200,6 @@ class AppController
 
     oncancel = ->
       loggedInuser = null
-      reset()
 
     onlogin = (assertion) ->
       # Configure the Auth plugin with the issued assertion as refresh token.
