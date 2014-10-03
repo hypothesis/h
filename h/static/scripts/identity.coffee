@@ -62,6 +62,7 @@ identityProvider = ->
 
       invokeCallbacks = (grant={}) ->
         {userid, certificate} = grant
+        userid or= null
         # Fire callbacks as appropriate.
         # Consult the state matrix in the `navigator.id.watch` documentation.
         # https://developer.mozilla.org/en-US/docs/Web/API/navigator.id.watch

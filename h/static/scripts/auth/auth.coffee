@@ -14,7 +14,9 @@ configure = [
     identityProvider.checkAuthorization = [
       'session',
       (session) ->
-        session.load().$promise
+        session.load().$promise.then (data) ->
+          certificate: data.csrf
+          userid: data.userid
     ]
 
     identityProvider.forgetAuthorization = [
@@ -27,7 +29,12 @@ configure = [
       '$q', '$rootScope',
       ($q,   $rootScope) ->
         deferred = $q.defer()
-        $rootScope.$on 'session', (event, data) -> deferred.resolve data
+
+        $rootScope.$on 'session', (event, data) ->
+          deferred.resolve
+            certificate: data.csrf
+            userid: data.userid
+
         deferred.promise
     ]
 ]
