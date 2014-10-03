@@ -80,7 +80,7 @@ class SessionProvider
         data = angular.fromJson data
 
         # Lift response data
-        model = data.model
+        model = data.model or {}
         model.errors = data.errors
         model.reason = data.reason
 
