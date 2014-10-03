@@ -11,13 +11,9 @@
 }
 
 .markdown-tools {
-  border-top: .1em solid #D3D3D3;
-  border-left: .1em solid #D3D3D3;
-  border-right: .1em solid #D3D3D3;
-  border-radius: .15em .15em 0 0;
   width: 100%;
-  margin-bottom: -.1em;
-  padding: .7em .7em .7em .5em;
+  max-height: 1.4em;
+  overflow: hidden;
   @include user-select(none);
 
   &.disable {
@@ -27,7 +23,14 @@
     }
   }
 
-  .markdown-tools-button {padding: .4em;}
+  .markdown-tools-button {
+    padding: .4em
+  }
+
+  .markdown-preview-toggle {
+    float: right;
+    margin-right: .4em;
+  }
 
   .markdown-tools-button, .markdown-tools-toggle, .icon-markdown {
     color: $gray;
@@ -37,7 +40,4 @@
     }
   }
 
-  .markdown-preview-toggle {
-    float: right;
-  }
 }
