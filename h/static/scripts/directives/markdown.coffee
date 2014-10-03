@@ -86,8 +86,43 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
     scope.insertItalic = ->
       applyInlineMarkup("*", "Italic")
 
+    inlineMath = (text) ->
+      slice1 = text.before.slice(text.before.length - 2)
+      slice2 = text.after.slice(0, 2)
+      if slice1 == "\\(" or slice1 == "$$" 
+        if slice2 == "\\)" or slice2 == "$$"
+          # Remove markup 
+          newtext = (
+            text.before.slice(0, (text.before.length - 2)) +
+            text.selection + text.after.slice(2)
+          )
+          start = text.before.length - 2
+          end = (text.before + text.selection).length - 2
+          insertMarkup(newtext, start, end)
+          return
+      newtext = text.before + "\\(" + "LaTex or MathML" + "\\)" + text.after
+      start = text.before.length + 2
+      end = (text.before + "LaTex or MathML").length + 2
+      insertMarkup(newtext, start, end)
+
     scope.insertMath = ->
-      applyInlineMarkup("$$", "LaTex")
+      text = userSelection()
+      index = text.before.length
+      if index == 0
+        # The selection takes place at the very start of the input
+        applyInlineMarkup("$$", "LaTex or MathML")
+      else if text.selection != ""
+        if input.value.substring(index - 1).charAt(0) == "\n"
+          # Look to see if the selection falls at the beginning of a new line.
+          applyInlineMarkup("$$", "LaTex or MathML")
+        else
+          inlineMath(text)
+      else if input.value.substring((text.start - 1 ), text.start) == "\n"
+        # Edge case, no selection, the cursor is on a new line.
+        applyInlineMarkup("$$", "LaTex or MathML")
+      else
+        # No selection, cursor is not on new line.
+        inlineMath(text)
 
     scope.insertLink = ->
       text = userSelection()
