@@ -218,13 +218,8 @@ class AppController
           annotator.publish 'beforeAnnotationCreated', draft
 
         # Reload services
-        storeReady.promise.then -> initStore()
+        initStore()
         initUpdater()
-
-    annotator.subscribe 'serviceDiscovery', (options) ->
-      annotator.options.Store ?= {}
-      angular.extend annotator.options.Store, options
-      storeReady.resolve()
 
     identity.watch {onlogin, onlogout, onready}
 

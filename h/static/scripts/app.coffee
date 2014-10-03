@@ -10,6 +10,19 @@ imports = [
 ]
 
 
+resolve =
+  storeConfig: ['$q', 'annotator', ($q, annotator) ->
+    storeReady = $q.defer()
+    resolve = (options) ->
+      annotator.options.Store ?= {}
+      angular.extend annotator.options.Store, options
+      storeReady.resolve()
+    annotator.subscribe 'serviceDiscovery', resolve
+    storeReady.promise.finally ->
+      annotator.unsubscribe 'serviceDiscovery', resolve
+  ]
+
+
 configure = [
   '$locationProvider', '$routeProvider', '$sceDelegateProvider',
   ($locationProvider,   $routeProvider,   $sceDelegateProvider) ->
@@ -18,13 +31,16 @@ configure = [
     $routeProvider.when '/a/:id',
       controller: 'AnnotationViewerController'
       templateUrl: 'viewer.html'
+      resolve: resolve
     $routeProvider.when '/viewer',
       controller: 'ViewerController'
       templateUrl: 'viewer.html'
       reloadOnSearch: false
+      resolve: resolve
     $routeProvider.when '/stream',
       controller: 'StreamSearchController'
       templateUrl: 'viewer.html'
+      resolve: resolve
     $routeProvider.otherwise
       redirectTo: '/viewer'
 
