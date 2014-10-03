@@ -21,12 +21,6 @@ for action in ACTION
     withCredentials: true
 
 
-# Global because $resource doesn't support request interceptors, so a
-# the default http request interceptor and the session resource interceptor
-# need to share it.
-csrfToken = null
-
-
 ###*
 # @ngdoc provider
 # @name sessionProvider
@@ -66,9 +60,20 @@ class SessionProvider
   #   });
   ###
   $get: [
-    '$q', '$resource', 'documentHelpers', 'flash',
-    ($q,   $resource,   documentHelpers,   flash) ->
+    '$http', '$q', '$resource', 'documentHelpers', 'flash',
+    ($http,   $q,   $resource,   documentHelpers,   flash) ->
       actions = {}
+      provider = this
+
+      # Capture the state of the cross site request forgery token.
+      # If cookies are blocked this is our only way to get it.
+      xsrfToken = null
+
+      prepare = (data, headersGetter) ->
+        if xsrfToken
+          headers = headersGetter()
+          headers[$http.defaults.xsrfHeaderName] = xsrfToken
+        return angular.toJson data
 
       process = (data, headersGetter) ->
         # Parse as json
@@ -83,15 +88,14 @@ class SessionProvider
         for q, msgs of data.flash
           flash q, msgs
 
-        # Capture the cross site request forgery token without cookies.
-        # If cookies are blocked this is our only way to get it.
-        csrfToken = model.certificate
+        xsrfToken = model.csrf
 
         # Return the model
         model
 
       for name, options of ACTION_OPTION
         actions[name] = angular.extend {}, options, @options
+        actions[name].transformRequest = prepare
         actions[name].transformResponse = process
 
       endpoint = documentHelpers.absoluteURI('/app')

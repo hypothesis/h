@@ -65,12 +65,10 @@ def pop_flash(request):
 
 
 def model(request):
-    csrf_token = request.session.get_csrf_token()
     session = {k: v for k, v in request.session.items() if k[0] != '_'}
-    session['csrf_token'] = csrf_token  # bw compat
-    session['certificate'] = csrf_token
-    if request.cookies.get('XSRF-TOKEN') != csrf_token:
-        request.response.set_cookie('XSRF-TOKEN', csrf_token)
+    session['csrf'] = request.session.get_csrf_token()
+    if request.cookies.get('XSRF-TOKEN') != session['csrf']:
+        request.response.set_cookie('XSRF-TOKEN', session['csrf'])
     return session
 
 
