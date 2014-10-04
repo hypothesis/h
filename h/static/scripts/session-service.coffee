@@ -1,29 +1,7 @@
-ACTION = [
-  'login'
-  'logout'
-  'register'
-  'forgot'
-  'activate'
-  'edit_profile'
-  'disable_user'
-]
-
-ACTION_OPTION =
-  load:
-    method: 'GET'
-    withCredentials: true
-
-for action in ACTION
-  ACTION_OPTION[action] =
-    method: 'POST'
-    params:
-      __formid__: action
-    withCredentials: true
-
-
 ###*
 # @ngdoc provider
 # @name sessionProvider
+# @property {Object} actions additional actions to mix into the resource.
 # @property {Object} options additional options mix into resource actions.
 # @description
 # This class provides an angular $resource factory as an angular service
@@ -32,9 +10,11 @@ for action in ACTION
 # registration, authentication, or account management.
 ###
 class SessionProvider
+  actions: null
   options: null
 
   constructor: ->
+    @actions = {}
     @options = {}
 
   ###*
@@ -49,8 +29,8 @@ class SessionProvider
   # Using the session with BrowserID.
   #
   #   navigator.id.beginAuthentication(function (email) {
-  #     session.load({email: email}, function (session) {
-  #       var user = session.user;
+  #     session.load(function (data) {
+  #       var user = data.user;
   #       if(user && user.email == email) {
   #         navigator.id.completeAuthentication();
   #       } else {
@@ -93,7 +73,7 @@ class SessionProvider
         # Return the model
         model
 
-      for name, options of ACTION_OPTION
+      for name, options of provider.actions
         actions[name] = angular.extend {}, options, @options
         actions[name].transformRequest = prepare
         actions[name].transformResponse = process
@@ -103,5 +83,5 @@ class SessionProvider
   ]
 
 
-angular.module('h')
+angular.module('h.session', ['ngResource'])
 .provider('session', SessionProvider)

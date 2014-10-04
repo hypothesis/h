@@ -2,23 +2,25 @@ assert = chai.assert
 sinon.assert.expose assert, prefix: null
 sandbox = sinon.sandbox.create()
 
-absoluteURI = (path) -> "https://example.com#{path}"
-
 mockFlash = sandbox.spy()
-mockDocumentHelpers = {absoluteURI}
+mockDocumentHelpers = {absoluteURI: -> '/session'}
 
-describe 'session-service', ->
-  beforeEach module('h')
+describe 'session', ->
+  beforeEach module('h.session')
 
-  beforeEach module ($provide) ->
+  beforeEach module ($provide, sessionProvider) ->
     $provide.value 'documentHelpers', mockDocumentHelpers
     $provide.value 'flash', mockFlash
+    sessionProvider.actions =
+      login:
+        url: '/login'
+        method: 'POST'
     return
 
   afterEach ->
     sandbox.restore()
 
-  describe 'session', ->
+  describe 'sessionService', ->
     $httpBackend = null
     session = null
 
@@ -26,17 +28,13 @@ describe 'session-service', ->
       $httpBackend = _$httpBackend_
       session = _session_
 
-    it 'should have a HTTP GET "load" action', ->
-      response =
-        model:
-          userid: 'alice'
-      $httpBackend.expectGET(absoluteURI('/app')).respond(response)
-      result = session.load()
-      $httpBackend.flush()
-      assert.equal result.userid, 'alice'
-
     describe '#<action>()', ->
-      url = absoluteURI('/app?__formid__=login')
+      url = '/login'
+
+      it 'should send an HTTP POST to the action', ->
+        $httpBackend.expectPOST(url, code: 123).respond({})
+        result = session.login(code: 123)
+        $httpBackend.flush()
 
       it 'should invoke the flash service with any flash messages', ->
         response =
@@ -62,15 +60,15 @@ describe 'session-service', ->
         assert.match result.reason, response.reason, 'the reason is present'
 
       it 'should capture and send the xsrf token', ->
+        xsrf = 'deadbeef'
         headers =
           'Accept': 'application/json, text/plain, */*'
           'Content-Type': 'application/json;charset=utf-8'
-          'X-CSRF-Token': 'deadbeef'
-        csrf = 'deadbeef'
-        model = {csrf}
+          'X-XSRF-TOKEN': xsrf
+        model = {csrf: xsrf}
         request = $httpBackend.expectPOST(url).respond({model})
         result = session.login({})
         $httpBackend.flush()
-        $httpBackend.expectPOST(url, {}, headers).respond({model})
+        $httpBackend.expectPOST(url, {}, headers).respond({})
         session.login({})
         $httpBackend.flush()

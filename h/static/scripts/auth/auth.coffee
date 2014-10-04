@@ -1,13 +1,23 @@
 imports = [
-  'ngResource'
   'h.identity'
   'h.helpers'
+  'h.session'
+]
+
+AUTH_SESSION_ACTIONS = [
+  'login'
+  'logout'
+  'register'
+  'forgot'
+  'activate'
+  'edit_profile'
+  'disable_user'
 ]
 
 
 configure = [
-  '$httpProvider', 'identityProvider',
-  ($httpProvider,   identityProvider) ->
+  '$httpProvider', 'identityProvider', 'sessionProvider'
+  ($httpProvider,   identityProvider,   sessionProvider) ->
     # Use the Pyramid XSRF header name
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRF-Token'
 
@@ -37,6 +47,17 @@ configure = [
             if err then authCheck.reject err
             else authCheck.resolve data.csrf
     ]
+
+    sessionProvider.actions.load =
+      method: 'GET'
+      withCredentials: true
+
+    for action in AUTH_SESSION_ACTIONS
+      sessionProvider.actions[action] =
+        method: 'POST'
+        params:
+          __formid__: action
+        withCredentials: true
 ]
 
 
