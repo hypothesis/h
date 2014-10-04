@@ -85,8 +85,12 @@ identityProvider = ->
       # @description
       # https://developer.mozilla.org/en-US/docs/Web/API/navigator.id.watch
       ###
-      watch: (options) ->
-        {loggedInUser, onlogin, onlogout, onready} = options
+      watch: (options={}) ->
+        {onlogin, onlogout, onready} = options
+        for key, fn of options when key.match /^on/
+          unless angular.isFunction fn
+            throw new Error 'argument "' + key + '" must be a function'
+        unless onlogin then throw new Error 'argument "onlogin" is required'
         result = $injector.invoke(provider.checkAuthentication, provider)
         $q.when(result).then(onlogin).finally(-> onready?())
   ]

@@ -270,7 +270,6 @@ app_js:
             - h:static/scripts/flash.coffee
             - h:static/scripts/helpers/helpers.coffee
             - h:static/scripts/helpers/*-helpers.coffee
-            - h:static/scripts/identity.coffee
             - h:static/scripts/searchfilters.coffee
             - h:static/scripts/services.coffee
             - h:static/scripts/socket.coffee
