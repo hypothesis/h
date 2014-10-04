@@ -35,6 +35,8 @@ class StreamSearchController
         filter = streamfilter.getFilter()
         sock.send(JSON.stringify({filter}))
 
+    $scope.$on '$destroy', ->
+      $scope.search.query = ''
 
 angular.module('h')
 .controller('StreamSearchController', StreamSearchController)
