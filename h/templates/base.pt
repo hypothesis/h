@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta tal:attributes="attrs" tal:repeat="attrs meta | []" />
+    <link tal:attributes="attrs" tal:repeat="attrs link | []" />
     <link rel="stylesheet" type="text/css"
           tal:attributes="href href"
           tal:repeat="href layout.css_links | []" />
