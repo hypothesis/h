@@ -27,12 +27,12 @@ authorizeAction = (action, annotation, user) ->
 class AppController
   this.$inject = [
     '$location', '$q', '$route', '$scope', '$timeout',
-    'annotator', 'flash', 'identity', 'session', 'socket', 'streamfilter',
+    'annotator', 'flash', 'identity', 'socket', 'streamfilter',
     'documentHelpers', 'drafts'
   ]
   constructor: (
      $location,   $q,   $route,   $scope,   $timeout
-     annotator,   flash,   identity,   session,   socket,   streamfilter,
+     annotator,   flash,   identity,   socket,   streamfilter,
      documentHelpers,   drafts
   ) ->
     {plugins, host, providers} = annotator
