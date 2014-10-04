@@ -110,6 +110,6 @@ thread = [
 ]
 
 
-angular.module('h.directives')
+angular.module('h')
 .controller('ThreadController', ThreadController)
 .directive('thread', thread)

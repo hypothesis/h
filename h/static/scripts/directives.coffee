@@ -1,11 +1,3 @@
-imports = [
-  'ngSanitize'
-  'ngTagsInput'
-  'h.helpers.documentHelpers'
-  'h.services'
-]
-
-
 formInput = ->
   link: (scope, elem, attr, [form, model, validator]) ->
     return unless form?.$name and model?.$name and validator
@@ -107,6 +99,24 @@ privacy = ->
   templateUrl: 'privacy.html'
 
 
+# Extend the tabbable directive from angular-bootstrap with autofocus
+tabbable = ['$timeout', ($timeout) ->
+  link: (scope, elem, attrs, ctrl) ->
+    return unless ctrl
+    render = ctrl.$render
+    ctrl.$render = ->
+      render.call(ctrl)
+      $timeout ->
+        elem
+        .find(':input')
+        .filter(':visible:first')
+        .focus()
+      , false
+  require: '?ngModel'
+  restrict: 'C'
+]
+
+
 tabReveal = ['$parse', ($parse) ->
   compile: (tElement, tAttrs, transclude) ->
     panes = []
@@ -148,15 +158,6 @@ tabReveal = ['$parse', ($parse) ->
             angular.element(tabs[i]).css 'display', 'none'
   require: ['ngModel', 'tabbable']
 ]
-
-
-# TODO: Move this behaviour to a route.
-showAccount = ->
-  restrict: 'A'
-  link: (scope, elem, attr) ->
-    elem.on 'click', (event) ->
-      event.preventDefault()
-      scope.$emit('nav:account')
 
 
 repeatAnim = ->
@@ -211,12 +212,12 @@ match = ->
   require: 'ngModel'
 
 
-angular.module('h.directives', imports)
+angular.module('h')
 .directive('formInput', formInput)
 .directive('formValidate', formValidate)
 .directive('privacy', privacy)
+.directive('tabbable', tabbable)
 .directive('tabReveal', tabReveal)
-.directive('showAccount', showAccount)
 .directive('repeatAnim', repeatAnim)
 .directive('whenscrolled', whenscrolled)
 .directive('match', match)

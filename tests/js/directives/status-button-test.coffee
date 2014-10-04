@@ -5,7 +5,7 @@ describe 'h.directives.statusButton', ->
   $compile = null
   $element = null
 
-  beforeEach module('h.directives')
+  beforeEach module('h')
 
   beforeEach inject (_$compile_, _$rootScope_) ->
     $compile = _$compile_

@@ -1,10 +1,8 @@
-<metal:main define-macro="auth">
-  <div class="auth form-vertical tabbable"
-       data-tab-reveal="['forgot', 'activate']"
-       on-success="sheet = null"
-       on-timeout="authTimeout()"
-       ng-form="form"
-       ng-init="model = {}"
-       ng-model="sheet">
+<metal:main define-macro="dialog">
+  <div ng-if="persona">
+    <metal:main use-macro="load: h:templates/account.html">
+  </div>
+  <div ng-if="!persona">
+    <metal:main use-macro="load: h:templates/auth.html">
   </div>
 </metal:main>

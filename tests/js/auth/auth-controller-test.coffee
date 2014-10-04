@@ -2,17 +2,21 @@ assert = chai.assert
 sinon.assert.expose assert, prefix: null
 sandbox = sinon.sandbox.create()
 
-
 class MockSession
-  $login: sandbox.stub().returns(finally: sandbox.stub())
-  $register: (callback, errback) ->
+  login: (data, success, failure) ->
+    success?(userid: 'alice')
+    $promise:
+      finally: sandbox.stub()
+  register: (data, callback, errback) ->
     errback
       data:
         errors:
           username: 'taken'
         reason: 'registration error'
-    finally: sandbox.stub()
+    $promise:
+      finally: sandbox.stub()
 
+mockFlash = sandbox.spy()
 mockFormHelpers = applyValidationErrors: sandbox.spy()
 
 describe 'h.auth', ->
@@ -21,7 +25,7 @@ describe 'h.auth', ->
 
   beforeEach module ($provide) ->
     $provide.value '$timeout', sandbox.spy()
-    $provide.value 'flash', sandbox.spy()
+    $provide.value 'flash', mockFlash
     $provide.value 'session', new MockSession()
     $provide.value 'formHelpers', mockFormHelpers
     return
@@ -40,16 +44,17 @@ describe 'h.auth', ->
       $timeout = _$timeout_
       auth = $controller 'AuthController', {$scope}
       session = _session_
-      session.$login.reset()
+      sandbox.spy session, 'login'
 
     describe '#submit()', ->
       it 'should call session methods on submit', ->
+
         auth.submit
           $name: 'login'
           $valid: true
           $setValidity: sandbox.stub()
 
-        assert.called session.$login
+        assert.called session.login
 
       it 'should do nothing when the form is invalid', ->
         auth.submit
@@ -57,7 +62,7 @@ describe 'h.auth', ->
           $valid: false
           $setValidity: sandbox.stub()
 
-        assert.notCalled session.$login
+        assert.notCalled session.login
 
       it 'should apply validation errors on submit', ->
         form =
@@ -75,9 +80,26 @@ describe 'h.auth', ->
           {username: 'taken'},
           'registration error'
 
+      it 'should emit an auth event once authenticated', ->
+        form =
+          $name: 'login'
+          $valid: true
+          $setValidity: sandbox.stub()
+
+        sandbox.spy $scope, '$emit'
+
+        auth.submit(form)
+        assert.calledWith $scope.$emit, 'auth', null, userid: 'alice'
+
+      it 'should emit an auth event if destroyed before authentication', ->
+        sandbox.spy $scope, '$emit'
+        $scope.$destroy()
+        assert.calledWith $scope.$emit, 'auth', 'cancel'
+
     describe 'timeout', ->
       it 'should happen after a period of inactivity', ->
         sandbox.spy $scope, '$broadcast'
+        $scope.form = $setPristine: sandbox.stub()
         $scope.model =
           username: 'test'
           email: 'test@example.com'
@@ -88,9 +110,9 @@ describe 'h.auth', ->
         assert.called $timeout
 
         $timeout.lastCall.args[0]()
+        assert.called $scope.form.$setPristine, 'the form is pristine'
         assert.isNull $scope.model, 'the model is erased'
-
-        assert.calledWith $scope.$broadcast, 'timeout'
+        assert.called mockFlash, 'a notification is flashed'
 
       it 'should not happen if the model is empty', ->
         $scope.model = undefined
@@ -100,33 +122,3 @@ describe 'h.auth', ->
         $scope.model = {}
         $scope.$digest()
         assert.notCalled $timeout
-
-
-  describe 'authDirective', ->
-    elem = null
-    session = null
-    $rootScope = null
-    $scope = null
-
-    beforeEach inject ($compile, _$rootScope_, _session_) ->
-      elem = angular.element(
-        '''
-        <div class="auth" ng-form="form"
-             on-error="stub()" on-success="stub()" on-timeout="stub()">
-        </div>
-        '''
-      )
-      session = _session_
-      $rootScope = _$rootScope_
-
-      $compile(elem)($rootScope)
-      $rootScope.$digest()
-
-      $scope = elem.isolateScope()
-
-    it 'should invoke handlers set by attributes', ->
-      $rootScope.stub = sandbox.stub()
-      for event in ['error', 'success', 'timeout']
-        $rootScope.stub.reset()
-        $scope.$broadcast(event)
-        assert.called $rootScope.stub

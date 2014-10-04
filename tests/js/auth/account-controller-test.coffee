@@ -2,18 +2,20 @@ assert = chai.assert
 sinon.assert.expose assert, prefix: null
 sandbox = sinon.sandbox.create()
 
-describe 'h.controllers.AccountManagement', ->
+describe 'h.auth.AccountController', ->
   $scope = null
   fakeFlash = null
-  fakeProfile = null
+  fakeSession = null
   fakeIdentity = null
   fakeFormHelpers = null
   editProfilePromise = null
   disableUserPromise = null
   createController = null
 
+  beforeEach module('h.auth')
+
   beforeEach module ($provide, $filterProvider) ->
-    fakeProfile = {}
+    fakeSession = {}
     fakeFlash = sandbox.spy()
     fakeIdentity =
       logout: sandbox.spy()
@@ -23,40 +25,23 @@ describe 'h.controllers.AccountManagement', ->
     $filterProvider.register 'persona', ->
       sandbox.stub().returns('STUBBED_PERSONA_FILTER')
 
-    $provide.value 'profile', fakeProfile
+    $provide.value 'session', fakeSession
     $provide.value 'flash', fakeFlash
     $provide.value 'identity', fakeIdentity
     $provide.value 'formHelpers', fakeFormHelpers
     return
 
-  beforeEach module('h.controllers.AccountManagement')
-
   beforeEach inject ($rootScope, $q, $controller) ->
     $scope = $rootScope.$new()
-    $scope.session = userid: 'egon@columbia.edu'
+    $scope.persona = 'egon@columbia.edu'
 
     disableUserPromise = {then: sandbox.stub()}
     editProfilePromise = {then: sandbox.stub()}
-    fakeProfile.edit_profile = sandbox.stub().returns($promise: editProfilePromise)
-    fakeProfile.disable_user = sandbox.stub().returns($promise: disableUserPromise)
+    fakeSession.edit_profile = sandbox.stub().returns($promise: editProfilePromise)
+    fakeSession.disable_user = sandbox.stub().returns($promise: disableUserPromise)
 
     createController = ->
-      $controller('AccountManagement', {$scope: $scope})
-
-  it 'hides the sheet by default', ->
-      controller = createController()
-      assert.isFalse($scope.sheet)
-
-  describe 'event subscriptions', ->
-    it 'should show the sheet on "nav:account" event', ->
-      controller = createController()
-      $scope.$emit('nav:account')
-      assert.isTrue($scope.sheet)
-
-    it 'should hide the sheet on "logout" event', ->
-      controller = createController()
-      $scope.$emit('logout')
-      assert.isFalse($scope.sheet)
+      $controller('AccountController', {$scope: $scope})
 
   describe '.submit', ->
     createFakeForm = (overrides={}) ->
@@ -73,7 +58,7 @@ describe 'h.controllers.AccountManagement', ->
       controller = createController()
       $scope.submit(fakeForm)
 
-      assert.calledWith(fakeProfile.edit_profile, {
+      assert.calledWith(fakeSession.edit_profile, {
         username: 'STUBBED_PERSONA_FILTER'
         pwd: 'gozer'
         password: 'paranormal'
@@ -162,7 +147,7 @@ describe 'h.controllers.AccountManagement', ->
       controller = createController()
       $scope.delete(fakeForm)
 
-      assert.calledWith fakeProfile.disable_user,
+      assert.calledWith fakeSession.disable_user,
         username: 'STUBBED_PERSONA_FILTER'
         pwd: 'paranormal'
 

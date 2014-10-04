@@ -10,6 +10,7 @@ describe 'h.directives', ->
     fakeWindow = {open: sinon.spy()}
     fakeDocument = angular.element({
       createElement: (tag) -> document.createElement(tag)
+      baseURI: 'http://example.com'
     })
 
     $provide.value('$window', fakeWindow)
@@ -22,8 +23,7 @@ describe 'h.directives', ->
 
     return
 
-  beforeEach module('h.templates')
-  beforeEach module('h.directives')
+  beforeEach module('h')
 
   beforeEach inject (_$compile_, _$rootScope_, _$injector_) ->
     $compile = _$compile_
@@ -167,15 +167,3 @@ describe 'h.directives', ->
 
       controller = $element.controller('ngModel')
       assert.isTrue(controller.$error.match)
-
-  describe '.showAccount', ->
-    $element = null
-
-    beforeEach ->
-      $element = $compile('<a show-account>Account</a>')($scope)
-      $scope.$digest()
-
-    it 'triggers the "nav:account" event when the Account item is clicked', (done) ->
-      $scope.$on 'nav:account', ->
-        done()
-      $element.click()

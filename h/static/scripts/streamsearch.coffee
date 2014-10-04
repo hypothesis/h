@@ -1,13 +1,4 @@
-imports = [
-  'bootstrap'
-  'h.controllers'
-  'h.directives'
-  'h.filters'
-  'h.flash'
-  'h.searchfilters'
-]
-
-class StreamSearch
+class StreamSearchController
   this.inject = [
     '$scope', '$rootScope', '$routeParams',
     'annotator', 'queryparser', 'searchfilter', 'streamfilter'
@@ -45,5 +36,5 @@ class StreamSearch
         sock.send(JSON.stringify({filter}))
 
 
-angular.module('h.streamsearch', imports, configure)
-.controller('StreamSearchController', StreamSearch)
+angular.module('h')
+.controller('StreamSearchController', StreamSearchController)
