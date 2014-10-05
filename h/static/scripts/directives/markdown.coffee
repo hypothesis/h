@@ -300,45 +300,32 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           $timeout -> inputEl.focus()
 
     renderMath = (textToCheck) ->
+      convert = $filter('converter')
       re = /(?:\$\$)|(?:\\\(?\)?)/g
-      startMath = null
-      endMath = null
-      match = undefined
-      indexes = []
-      while match = re.exec(textToCheck)
-        indexes.push [
-          match.index
-        ]
-      for index in indexes
-        if startMath == null
-          startMath = index[0] + 2
+
+      startMath = 0
+      endMath = 0
+
+      indexes = (match.index while match = re.exec(textToCheck))
+      indexes.push(textToCheck.length)
+
+      parts = for index in indexes
+        if startMath > endMath
+          endMath = index + 2
+          katex.renderToString($sanitize textToCheck.substring(startMath, index))
         else
-          endMath = index[0]
-        if startMath != null and endMath != null
-          math = katex.renderToString(textToCheck.substring(startMath, endMath))
-          textToCheck = (
-            textToCheck.substring(0, (startMath - 2)) + math +
-            textToCheck.substring((endMath + 2))
-          )
-          startMath = null
-          endMath = null
-          return renderMath(textToCheck)
-      return textToCheck
+          startMath = index + 2
+          $sanitize convert textToCheck.substring(endMath, index)
+
+      return parts.join('')
 
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
       if !scope.readonly and !scope.preview
         inputEl.val (ctrl.$viewValue or '')
       value = ctrl.$viewValue or ''
-      markdown = $sanitize $filter('converter') value
-      try
-        rendered = renderMath markdown
-        scope.rendered = $sce.trustAsHtml rendered
-      catch
-        loadMathJax()
-        rendered = markdown
-        scope.rendered = $sce.trustAsHtml rendered
-        $timeout (-> MathJax?.Hub.Queue ['Typeset', MathJax.Hub, output]), 0, false
+      rendered = renderMath value
+      scope.rendered = $sce.trustAsHtml rendered
 
     # React to the changes to the input
     inputEl.bind 'blur change keyup', ->
