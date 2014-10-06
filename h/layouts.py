@@ -39,12 +39,6 @@ class BaseLayout(object):
         return self.get_widget_resources()['js']
 
 
-@layout_config(name='annotation', template='h:templates/base.pt')
-class AnnotationLayout(BaseLayout):
-    app = 'h.displayer'
-    requirements = (('app', None), ('topbar', None))
-
-
 @layout_config(name='app', template='h:templates/base.pt')
 class AppLayout(BaseLayout):
     app = 'h'
