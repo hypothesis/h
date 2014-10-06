@@ -229,6 +229,7 @@ app:
     - angular
     - angular_animate
     - angular_bootstrap
+    - angular_resource
     - angular_route
     - angular_sanitize
     - angular_tags_input
@@ -308,7 +309,6 @@ auth:
   contents:
     - jquery
     - angular
-    - angular_resource
     - auth_css
     - auth_js
 
