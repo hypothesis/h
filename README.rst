@@ -1,6 +1,10 @@
 Hypothes.is
 ===========
 
+.. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
+   :target: https://travis-ci.org/hypothesis/h
+   :alt: Build Status
+
 About
 -----
 
@@ -55,10 +59,6 @@ Those wishing to contribute to the project should also `subscribe`_ to the
 development mailing list and read about `contributing`_. Then consider getting
 started on one of the issues that are ready for work. Issues tagged with the
 label 'New Contributor Friendly' are ideal for those just getting started.
-
-.. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
-   :target: https://travis-ci.org/hypothesis/h
-   :alt: Build Status
 
 Debugging
 ---------
