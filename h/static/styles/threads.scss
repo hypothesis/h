@@ -16,6 +16,7 @@ $threadexp-width: .6em;
 
   .thread-collapsed {
     .tag-list, .annotation-body {display: none;}
+    .thread-reply { margin-top: 0 }
   }
 }
 
@@ -82,17 +83,9 @@ $threadexp-width: .6em;
     }
 
     & > .thread-message {
-      .styled-text > * { display: none }
-      .styled-text > *:first-child {
-        display: block;
-        margin: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        -o-text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .thread &, .thread & header, .thread & section { margin: 0 }
+      .thread &,
+      .thread & .annotation-header,
+      .thread & .annotation-section { margin: 0 }
       .thread & footer { display: none }
     }
   }
