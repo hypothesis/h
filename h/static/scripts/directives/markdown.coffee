@@ -299,9 +299,10 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           input.style.height = output.style.height
           $timeout -> inputEl.focus()
 
+    MathJaxFallback = false
     renderMath = (textToCheck) ->
       convert = $filter('converter')
-      re = /(?:\$\$)|(?:\\\(?\)?)/g
+      re = /(?:\$\$)|(?:\\\(|\\\))/g
 
       startMath = 0
       endMath = 0
@@ -312,7 +313,12 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       parts = for index in indexes
         if startMath > endMath
           endMath = index + 2
-          katex.renderToString($sanitize textToCheck.substring(startMath, index))
+          try
+            katex.renderToString($sanitize textToCheck.substring(startMath, index))
+          catch
+            loadMathJax()
+            MathJaxFallback = true
+            $sanitize textToCheck.substring(startMath, index)
         else
           startMath = index + 2
           $sanitize convert textToCheck.substring(endMath, index)
@@ -326,6 +332,8 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       value = ctrl.$viewValue or ''
       rendered = renderMath value
       scope.rendered = $sce.trustAsHtml rendered
+      if MathJaxFallback
+        $timeout (-> MathJax?.Hub.Queue ['Typeset', MathJax.Hub, output]), 0, false
 
     # React to the changes to the input
     inputEl.bind 'blur change keyup', ->
