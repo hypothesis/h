@@ -53,12 +53,9 @@ join us in `#hypothes.is`_ on freenode_ for discussion.
 
 Those wishing to contribute to the project should also `subscribe`_ to the
 development mailing list and read about `contributing`_. Then consider getting
-started on one of the issues that are ready for work by clicking on the badge
-below. Issues tagged with the label 'New Contributor Friendly' are ideal for new contributors.
+started on one of the issues that are ready for work. Issues tagged with the
+label 'New Contributor Friendly' are ideal for those just getting started.
 
-.. image:: https://badge.waffle.io/hypothesis/h.svg?label=1%20-%20Ready
-   :target: https://waffle.io/hypothesis/h
-   :alt: Stories in Ready
 .. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
    :target: https://travis-ci.org/hypothesis/h
    :alt: Build Status
