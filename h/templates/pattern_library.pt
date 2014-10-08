@@ -290,7 +290,7 @@
             <button class="btn btn-danger js-active" type="submit" name="">Danger Button (active)</button>
           </div>
           <div class="form-field">
-            <button class="btn"><i class="icon-checkmark2 btn-icon"></i> Button with Icon Inside</button>
+            <button class="btn"><i class="icon-checkmark btn-icon"></i> Button with Icon Inside</button>
           </div>
           <div class="form-field">
             <button class="btn btn-clean" type="submit" name="">Button Clean</button>
@@ -326,7 +326,7 @@
           </div>
           <div class="form-field" style="width: 230px; text-align: right">
             <span class="btn-with-message">
-              <span class="btn-message btn-message-success">Saved! <i class="btn-message-icon icon-checkmark2"></i></span>
+              <span class="btn-message btn-message-success">Saved! <i class="btn-message-icon icon-checkmark"></i></span>
               <button class="btn" type="submit" name="">
                 Button Loading
               </button>
@@ -340,7 +340,7 @@
               </span>
               <!-- Insert with JavaScript -->
               <span class="btn-message btn-message-success">
-                <span class="btn-message-text">Saved!</span> <i class="btn-message-icon icon-checkmark2"></i>
+                <span class="btn-message-text">Saved!</span> <i class="btn-message-icon icon-checkmark"></i>
               </span>
               <button class="btn" type="submit" name="">
                 Button Loading
