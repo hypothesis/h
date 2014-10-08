@@ -171,7 +171,7 @@ $base-font-size: 14px;
     position: relative;
   }
 
-  [class^="icon-"], [class*=" icon-"] {
+  [class^="h-icon-"], [class*=" h-icon-"] {
     font-family: 'h';
   }
 }
@@ -275,7 +275,7 @@ $base-font-size: 14px;
     &:focus { outline: 0; }
     &:hover { color: $link-color-hover; }
 
-    &.icon-comment {
+    &.h-icon-comment {
       text-shadow:
       0 0 2px $gray-lightest,
       0 0 0 $gray;

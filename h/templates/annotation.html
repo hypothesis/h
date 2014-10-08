@@ -8,9 +8,9 @@
        target="_blank"
        ng-href="{{baseURI}}u/{{vm.annotation.user}}"
        >{{vm.annotation.user | persona}}</a>
-    <i class="small icon-locked" ng-show="vm.isPrivate()"></i>
-    <i class="small icon-highlighter" ng-show="vm.isHighlight() && !vm.editing"></i>
-    <i class="small icon-comment" ng-show="vm.isComment()"></i>
+    <i class="small h-icon-locked" ng-show="vm.isPrivate()"></i>
+    <i class="small h-icon-highlighter" ng-show="vm.isHighlight() && !vm.editing"></i>
+    <i class="small h-icon-comment" ng-show="vm.isComment()"></i>
     <span class="annotation-citation"
           ng-if="!vm.embedded"
           ng-show="vm.document.title">
@@ -86,16 +86,16 @@
   <div class="form-actions-buttons form-actions-left">
     <button ng-switch-when="edit"
             ng-click="vm.save()"
-            class="btn"><i class="icon-checkmark2 btn-icon"></i> Save</button>
+            class="btn"><i class="h-icon-checkmark2 btn-icon"></i> Save</button>
     <button ng-switch-when="delete"
             ng-click="vm.save()"
-            class="btn"><i class="icon-checkmark2 btn-icon"></i> Delete</button>
+            class="btn"><i class="h-icon-checkmark2 btn-icon"></i> Delete</button>
     <button ng-switch-default
             ng-click="vm.save()"
-            class="btn"><i class="icon-checkmark2 btn-icon"></i> Save</button>
+            class="btn"><i class="h-icon-checkmark2 btn-icon"></i> Save</button>
     <button class="btn btn-clean"
             ng-click="vm.revert()"
-            ><i class="icon-x btn-icon"></i> Cancel</button>
+            ><i class="h-icon-x btn-icon"></i> Cancel</button>
   </div>
 </footer>
 
@@ -103,12 +103,12 @@
         ng-if="!vm.editing && vm.annotation.id">
   <a class="small magicontrol" href="" title="Reply"
     ng-click="vm.reply()"
-    ><i class="icon-reply"></i> Reply</a>
+    ><i class="h-icon-reply"></i> Reply</a>
   <span class="magicontrol share-dialog-wrapper">
     <a class="small dropdown-toggle" href="" title="Share"
-      ><i class="icon-export"></i> Share</a>
+      ><i class="h-icon-export"></i> Share</a>
     <span class="share-dialog" ng-click="$event.stopPropagation()">
-      <a class="icon-export"
+      <a class="h-icon-export"
         target="_blank"
         ng-href="{{vm.annotationURI}}"></a>
       <input type="text" value="{{vm.annotationURI}}" readonly>
