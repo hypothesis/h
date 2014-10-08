@@ -1,60 +1,3 @@
-formInput = ->
-  link: (scope, elem, attr, [form, model, validator]) ->
-    return unless form?.$name and model?.$name and validator
-
-    fieldClassName = 'form-field'
-    errorClassName = 'form-field-error'
-
-    render = model.$render
-
-    resetResponse = (value) ->
-      model.$setValidity('response', true)
-      value
-
-    toggleClass = (addClass) ->
-      elem.toggleClass(errorClassName, addClass)
-      elem.parent().toggleClass(errorClassName, addClass)
-
-    model.$parsers.unshift(resetResponse)
-    model.$render = ->
-      toggleClass(model.$invalid and model.$dirty)
-      render()
-
-    validator.addControl(model)
-    scope.$on '$destroy', -> validator.removeControl this
-
-    scope.$watch ->
-      if model.$modelValue? or model.$pristine
-        toggleClass(model.$invalid and model.$dirty)
-      return
-
-  require: ['^?form', '?ngModel', '^?formValidate']
-  restrict: 'C'
-
-
-formValidate = ->
-  controller: ->
-    controls = {}
-
-    addControl: (control) ->
-      if control.$name
-        controls[control.$name] = control
-
-    removeControl: (control) ->
-      if control.$name
-        delete controls[control.$name]
-
-    submit: ->
-      # make all the controls dirty and re-render them
-      for _, control of controls
-        control.$setViewValue(control.$viewValue)
-        control.$render()
-
-  link: (scope, elem, attr, ctrl) ->
-    elem.on 'submit', ->
-      ctrl.submit()
-
-
 privacy = ->
   levels = ['Public', 'Only Me']
 
@@ -97,67 +40,6 @@ privacy = ->
   restrict: 'E'
   scope: {}
   templateUrl: 'privacy.html'
-
-
-# Extend the tabbable directive from angular-bootstrap with autofocus
-tabbable = ['$timeout', ($timeout) ->
-  link: (scope, elem, attrs, ctrl) ->
-    return unless ctrl
-    render = ctrl.$render
-    ctrl.$render = ->
-      render.call(ctrl)
-      $timeout ->
-        elem
-        .find(':input')
-        .filter(':visible:first')
-        .focus()
-      , false
-  require: '?ngModel'
-  restrict: 'C'
-]
-
-
-tabReveal = ['$parse', ($parse) ->
-  compile: (tElement, tAttrs, transclude) ->
-    panes = []
-    hiddenPanesGet = $parse tAttrs.tabReveal
-
-    pre: (scope, iElement, iAttrs, [ngModel, tabbable] = controller) ->
-      # Hijack the tabbable controller's addPane so that the visibility of the
-      # secret ones can be managed. This avoids traversing the DOM to find
-      # the tab panes.
-      addPane = tabbable.addPane
-      tabbable.addPane = (element, attr) =>
-        removePane = addPane.call tabbable, element, attr
-        panes.push
-          element: element
-          attr: attr
-        =>
-          for i, pane of panes
-            if pane.element is element
-              panes.splice i, 1
-              break
-          removePane()
-
-    post: (scope, iElement, iAttrs, [ngModel, tabbable] = controller) ->
-      tabs = angular.element(iElement.children()[0].childNodes)
-      render = angular.bind ngModel, ngModel.$render
-
-      ngModel.$render = ->
-        render()
-        hiddenPanes = hiddenPanesGet scope
-        return unless angular.isArray hiddenPanes
-
-        for i, pane of panes
-          value = pane.attr.value || pane.attr.title
-          if value == ngModel.$viewValue
-            pane.element.css 'display', ''
-            angular.element(tabs[i]).css 'display', ''
-          else if value in hiddenPanes
-            pane.element.css 'display', 'none'
-            angular.element(tabs[i]).css 'display', 'none'
-  require: ['ngModel', 'tabbable']
-]
 
 
 repeatAnim = ->
@@ -213,11 +95,7 @@ match = ->
 
 
 angular.module('h')
-.directive('formInput', formInput)
-.directive('formValidate', formValidate)
 .directive('privacy', privacy)
-.directive('tabbable', tabbable)
-.directive('tabReveal', tabReveal)
 .directive('repeatAnim', repeatAnim)
 .directive('whenscrolled', whenscrolled)
 .directive('match', match)

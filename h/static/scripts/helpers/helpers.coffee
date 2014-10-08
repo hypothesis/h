@@ -1,1 +1,1 @@
-angular.module('h.helpers', [])
+angular.module('h.helpers', ['bootstrap'])

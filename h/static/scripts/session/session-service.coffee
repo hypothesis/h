@@ -83,5 +83,5 @@ class SessionProvider
   ]
 
 
-angular.module('h.session', ['ngResource'])
+angular.module('h.session')
 .provider('session', SessionProvider)
