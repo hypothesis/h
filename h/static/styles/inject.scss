@@ -276,7 +276,7 @@ $base-font-size: 14px;
     &:focus { outline: 0; }
     &:hover { color: $link-color-hover; }
 
-    &.h-icon-comment {
+    &.annotator-toolbar-toggle {
       text-shadow:
       0 0 2px $gray-lightest,
       0 0 0 $gray;

@@ -12,7 +12,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
   options:
     items: [
       "title": "Toggle Sidebar"
-      "class": "h-icon-comment"
+      "class": "annotator-toolbar-toggle h-icon-comment"
       "click": (event) ->
         event.preventDefault()
         event.stopPropagation()
