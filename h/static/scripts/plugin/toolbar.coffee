@@ -1,6 +1,8 @@
 $ = Annotator.$
 
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
+  PUSHED_CLASS = 'annotator-pushed'
+
   events:
     '.annotator-toolbar mouseenter': 'show'
     '.annotator-toolbar mouseleave': 'hide'
@@ -74,20 +76,20 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
 
   onSetTool: (name) ->
     if name is 'highlight'
-      $(@buttons[2]).addClass('pushed')
+      $(@buttons[2]).addClass(PUSHED_CLASS)
     else
-      $(@buttons[2]).removeClass('pushed')
+      $(@buttons[2]).removeClass(PUSHED_CLASS)
     this._updateStickyButtons()
 
   onSetVisibleHighlights: (state) ->
     if state
-      $(@buttons[1]).addClass('pushed')
+      $(@buttons[1]).addClass(PUSHED_CLASS)
     else
-      $(@buttons[1]).removeClass('pushed')
+      $(@buttons[1]).removeClass(PUSHED_CLASS)
     this._updateStickyButtons()
 
   _updateStickyButtons: ->
-    count = $(@buttons).filter(-> $(this).hasClass('pushed')).length
+    count = $(@buttons).filter(-> $(this).hasClass(PUSHED_CLASS)).length
     if count
       height = (count + 1) * 35  # +1 -- top button is always visible
       this.toolbar.css("min-height", "#{height}px")

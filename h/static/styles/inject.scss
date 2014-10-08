@@ -210,12 +210,12 @@ $base-font-size: 14px;
     height: 0;
     left: 34px;
     margin-top: -2px;
-    &:first-child, &.pushed {
+    &:first-child, &.annotator-pushed {
       @include transition-delay(0);
       left: 3px;
       height: 30px;
     }
-    &.pushed {
+    &.annotator-pushed {
       margin-top: 5px;
     }
   }
@@ -246,7 +246,7 @@ $base-font-size: 14px;
     z-index: 1;
   }
 
-  &.pushed {
+  &.annotator-pushed {
     @include box-shadow(none);
     left: 3px;
     z-index: 1;
