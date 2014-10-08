@@ -29,10 +29,10 @@
 
   .markdown-tools-button {padding: .4em;}
 
-  .markdown-tools-button, .markdown-tools-toggle, .h-icon-markdown {
+  .markdown-tools-button, .markdown-tools-toggle, .markdown-tools-badge {
     color: $gray;
 
-    &:hover {
+    &:hover, &:focus {
       color: black;
     }
   }
