@@ -300,38 +300,56 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           $timeout -> inputEl.focus()
 
     MathJaxFallback = false
-    renderMath = (textToCheck) ->
-      convert = $filter('converter')
-      re = /(?:\$\$)|(?:\\\(|\\\))/g
-
-      startMath = 0
-      endMath = 0
-
-      indexes = (match.index while match = re.exec(textToCheck))
-      indexes.push(textToCheck.length)
-
-      parts = for index in indexes
-        if startMath > endMath
-          endMath = index + 2
-          try
-            katex.renderToString($sanitize textToCheck.substring(startMath, index))
-          catch
-            loadMathJax()
-            MathJaxFallback = true
-            $sanitize textToCheck.substring(startMath, index)
-        else
-          startMath = index + 2
-          $sanitize convert textToCheck.substring(endMath, index)
-
-      return parts.join('')
-
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
       if !scope.readonly and !scope.preview
         inputEl.val (ctrl.$viewValue or '')
       value = ctrl.$viewValue or ''
-      rendered = renderMath value
-      scope.rendered = $sce.trustAsHtml rendered
+      convert = $filter('converter')
+      re = /(?:\$\$)|(?:\\\(|\\\))/g
+
+      startMath = 0
+      endMath = 0
+      i = 0
+      parts = []
+
+      indexes = (match while match = re.exec(value))
+      indexes.push(value.length)
+
+      for match in indexes
+        if startMath > endMath
+          endMath = match.index + 2
+          try
+            parts.push katex.renderToString($sanitize value.substring(startMath, match.index))
+          catch
+            loadMathJax()
+            MathJaxFallback = true
+            parts.push $sanitize value.substring(startMath, match.index)
+        else
+          startMath = match.index + 2
+          # Inline math needs to fall inline, which can be tricky considering the markdown
+          # converter will take the part that comes before a peice of math and surround it
+          # with markup: <p>Here is some inline math: </p>\(2 + 2 = 4\)
+          # Here we look for various cases.
+          if match[0] == "\\("
+            # Text falls between two instances of inline math, we must remove the opening and
+            # closing <p> tags since this is meant to be one paragraph.
+            if i - 1 >= 0 and indexes[i - 1].toString() == "\\)"
+              markdown = $sanitize convert value.substring(endMath, match.index)
+              parts.push markdown.substring(3, markdown.length - 4)
+            # Text preceeds a case of inline math. We must remove the ending </p> tag
+            # so that the math is inline.
+            else
+              markdown = $sanitize convert value.substring(endMath, match.index)
+              parts.push markdown.substring(0, markdown.length - 4)
+          # Text follows a case of inline math, we must remove opening <p> tag.
+          else if i - 1 >= 0 and indexes[i - 1].toString() == "\\)"
+            markdown = $sanitize convert value.substring(endMath, match.index)
+            parts.push markdown.substring(3, markdown.length)
+          else # Block Math or no math.
+            parts.push $sanitize convert value.substring(endMath, match.index)
+        i++
+      scope.rendered = $sce.trustAsHtml parts.join('')
       if MathJaxFallback
         $timeout (-> MathJax?.Hub.Queue ['Typeset', MathJax.Hub, output]), 0, false
 
