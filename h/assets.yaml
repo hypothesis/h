@@ -291,6 +291,7 @@ app_css:
           - h:static/styles/base.scss
           - h:static/styles/annotations.scss
           - h:static/styles/mixins/forms.scss
+          - h:static/styles/mixins/icons.scss
           - h:static/styles/common.scss
           - h:static/styles/responsive.scss
           - h:static/styles/threads.scss
