@@ -18,7 +18,7 @@ statusButton = ->
       <span class="btn-icon spinner"><span><span></span></span></span>
     </span>
     <span class="btn-message btn-message-success">
-      <span class="btn-message-text">Saved!</span> <i class="btn-message-icon icon-checkmark2"></i>
+      <span class="btn-message-text">Saved!</span> <i class="btn-message-icon h-icon-checkmark"></i>
     </span>
   </span>
   '''

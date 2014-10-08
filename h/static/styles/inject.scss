@@ -1,4 +1,5 @@
 @import 'base';
+@import 'mixins/icons';
 @import 'compass/css3/user-interface';
 @import 'compass/layout/stretching';
 @import 'compass/reset/utilities';
@@ -171,7 +172,7 @@ $base-font-size: 14px;
     position: relative;
   }
 
-  [class^="icon-"], [class*=" icon-"] {
+  @include icons {
     font-family: 'h';
   }
 }
@@ -209,12 +210,12 @@ $base-font-size: 14px;
     height: 0;
     left: 34px;
     margin-top: -2px;
-    &:first-child, &.pushed {
+    &:first-child, &.annotator-pushed {
       @include transition-delay(0);
       left: 3px;
       height: 30px;
     }
-    &.pushed {
+    &.annotator-pushed {
       margin-top: 5px;
     }
   }
@@ -245,48 +246,38 @@ $base-font-size: 14px;
     z-index: 1;
   }
 
-  &.pushed {
+  &.annotator-pushed {
     @include box-shadow(none);
     left: 3px;
     z-index: 1;
 
-    a, a:hover, a:active, a:visited, a:link, a:link:hover {
+    a {
       color: $link-color;
     }
   }
 
-  a, a:hover, a:active, a:visited, a:link, a:link:hover {
+  a {
     background: $white;
     font-size: 1.3em;
     line-height: 28px;
-
-    font-smoothing: antialiased;
-    -webkit-font-smoothing: antialiased;
 
     position: absolute;
     left: 5px;
     color: rgba(200, 200, 200, .3);
 
     text-decoration: none;
-    text-shadow:
-    0 0 2px $gray-lightest,
-    0 0 0 $gray;
+    text-shadow: 0 0 2px $gray-lightest, 0 0 0 $gray;
+  }
 
-    &:focus { outline: 0; }
-    &:hover { color: $link-color-hover; }
+  a:focus, a:hover {
+    outline: 0;
+    color: $link-color-hover;
+  }
 
-    &.icon-comment {
-      text-shadow:
-      0 0 2px $gray-lightest,
-      0 0 0 $gray;
-
-      &:hover {
-        color: fade-out($gray-lightest, .9);
-      }
-    }
+  .annotator-toolbar-toggle:hover {
+    color: fade-out($gray-lightest, .9);
   }
 }
-
 
 /*
   Mobile layout
