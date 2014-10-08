@@ -44,5 +44,5 @@ class FlashProvider
       this._process()
 
 
-angular.module('h')
+angular.module('h.session')
 .provider('flash', FlashProvider)

@@ -214,13 +214,6 @@ uuid:
   contents:
     - h:static/scripts/vendor/uuid.js
 
-# Fonts
-icomoon_css:
-  contents:
-    - filters: cssrewrite
-      output: styles/icomoon.css
-      contents:
-        - h:static/icomoon.css
 
 # Application
 app:
@@ -228,10 +221,15 @@ app:
     - jquery
     - angular
     - angular_animate
-    - angular_bootstrap
-    - angular_resource
     - angular_route
     - angular_sanitize
+    - app_css
+    - app_js
+    - helpers
+
+app_js:
+  output: scripts/app.min.js
+  contents:
     - angular_tags_input
     - gettext
     - annotator
@@ -250,27 +248,16 @@ app:
     - autofill
     - sockjs
     - uuid
-    - app_css
-    - app_js
-
-app_js:
-  output: scripts/hypothesis-app.js
-  contents:
     - filters: uglifyjs
       contents:
         - filters: coffeescript
-          output: scripts/hypothesis.js
-          # TODO: glob these or use browserify
-          # Right now results in dependency problems
+          output: scripts/app.js
           contents:
             - h:static/scripts/app.coffee
             - h:static/scripts/controllers.coffee
             - h:static/scripts/directives.coffee
             - h:static/scripts/directives/*.coffee
             - h:static/scripts/filters.coffee
-            - h:static/scripts/flash.coffee
-            - h:static/scripts/helpers/helpers.coffee
-            - h:static/scripts/helpers/*-helpers.coffee
             - h:static/scripts/searchfilters.coffee
             - h:static/scripts/services.coffee
             - h:static/scripts/socket.coffee
@@ -278,13 +265,13 @@ app_js:
             - h:static/scripts/*-service.coffee
 
 app_css:
-    filters: cleancss
-    output: styles/hypothesis.min.css
+    filters: cleancss, cssrewrite
+    output: styles/app.min.css
     contents:
-      - icomoon_css
+      - h:static/icomoon.css
       - h:static/scripts/vendor/katex/katex.min.css
-      - filters: compass, cssrewrite
-        output: styles/hypothesis.css
+      - filters: compass
+        output: styles/app.css
         contents:
           - h:static/styles/app.scss
         depends:
@@ -304,26 +291,50 @@ app_css:
           - h:static/styles/tags-input.scss
           - h:static/styles/page.scss
 
-# Authentication
+
 auth:
   contents:
     - jquery
     - angular
-    - auth_css
-    - auth_js
-
-auth_css:
-
-auth_js:
-  output: scripts/hypothesis-auth.min.js
-  filters: uglifyjs
-  contents:
-    - output: scripts/hypothesis-auth.js
-      filters: coffeescript
+    - angular_route
+    - helpers
+    - session
+    - output: scripts/auth.min.js
+      filters: uglifyjs
       contents:
-        - h:static/scripts/auth/auth.coffee
-        - h:static/scripts/auth/*-controller.coffee
-        - h:static/scripts/auth/*-service.coffee
+        - output: scripts/auth.js
+          filters: coffeescript
+          contents:
+            - h:static/scripts/auth/auth.coffee
+            - h:static/scripts/auth/*-controller.coffee
+            - h:static/scripts/auth/*-service.coffee
+
+
+helpers:
+  output: scripts/helpers.min.js
+  contents:
+    - angular_bootstrap
+    - filters: uglifyjs
+      contents:
+        - filters: coffeescript
+          output: scripts/helpers.js
+          contents:
+            - h:static/scripts/helpers/helpers.coffee
+            - h:static/scripts/helpers/*-helpers.coffee
+
+
+session:
+  output: scripts/session.min.js
+  contents:
+    - angular_resource
+    - contents:
+      - filters: uglifyjs
+        contents:
+          - filters: coffeescript
+            output: scripts/session.js
+            contents:
+              - h:static/scripts/session/session.coffee
+              - h:static/scripts/session/*-service.coffee
 
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
@@ -336,7 +347,7 @@ inject:
     - inject_js
 
 inject_js:
-  output: scripts/hypothesis-assets.js
+  output: scripts/hypothesis.min.js
   contents:
     - jquery
     - jquery_scrollintoview
@@ -356,21 +367,20 @@ inject_js:
     - filters: uglifyjs
       contents:
         - filters: coffeescript
-          output: scripts/hypothesis-inject.js
+          output: scripts/hypothesis.js
           contents:
             - h:static/scripts/guest.coffee
             - h:static/scripts/host.coffee
-    - contents:
-      - h:static/bootstrap.js
+        - h:static/bootstrap.js
 
 
 inject_css:
-  output: styles/hypothesis-inject.min.css
-  filters: cleancss
+  output: styles/hypothesis.min.css
+  filters: cleancss, cssrewrite
   contents:
-    - icomoon_css
-    - filters: compass, cssrewrite
-      output: styles/hypothesis-inject.css
+    - h:static/icomoon.css
+    - filters: compass
+      output: styles/inject.css
       contents:
         - h:static/styles/inject.scss
       depends:
@@ -384,7 +394,7 @@ topbar:
   filters: cleancss
   contents:
     - output: styles/topbar.css
-      filters: compass, cssrewrite
+      filters: compass
       contents:
         - h:static/styles/topbar.scss
       depends:
