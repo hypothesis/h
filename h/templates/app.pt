@@ -12,7 +12,7 @@
                 class="dropdown-toggle"
                 data-toggle="dropdown">{{persona|persona}}<!--
             --><span class="provider">/{{persona|persona:'provider'}}</span><!--
-            --><i class="icon-triangle"></i></span>
+            --><i class="h-icon-triangle"></i></span>
           <ul class="dropdown-menu pull-right" role="menu">
             <li><a href="" ng-click="dialog.visible = 'true'">Account</a></li>
             <li><a href="http://hypothes.is/contact/"
@@ -39,7 +39,7 @@
       <!-- Dialog -->
       <div class="content ng-cloak" ng-if="dialog.visible">
         <div id="dialog" class="sheet">
-          <i class="close icon-cancel"
+          <i class="close h-icon-cancel"
              role="button"
              title="Close"
              ng-click="dialog.visible = false"></i>
