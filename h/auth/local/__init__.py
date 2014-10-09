@@ -8,7 +8,6 @@ def includeme(config):
         [app:h]
         api.token_endpoint: /api/token
     """
-    config.include('.forms')
     config.include('.models')
     config.include('.oauth')
     config.include('.schemas')

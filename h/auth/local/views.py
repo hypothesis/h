@@ -7,7 +7,7 @@ from horus.resources import UserFactory
 from pyramid import httpexceptions, security
 from pyramid.view import view_config, view_defaults
 
-from h.auth.local import forms, models, schemas
+from h.auth.local import schemas
 from h.models import _
 
 
@@ -67,8 +67,6 @@ def pop_flash(request):
 def model(request):
     session = {k: v for k, v in request.session.items() if k[0] != '_'}
     session['csrf'] = request.session.get_csrf_token()
-    if request.cookies.get('XSRF-TOKEN') != session['csrf']:
-        request.response.set_cookie('XSRF-TOKEN', session['csrf'])
     return session
 
 
@@ -79,9 +77,32 @@ def remember(request, user):
         request.response.headerlist.extend(headers)
 
 
+def set_csrf_token(request, response):
+    csrft = request.session.get_csrf_token()
+    if request.cookies.get('XSRF-TOKEN') != csrft:
+        response.set_cookie('XSRF-TOKEN', csrft)
+
+
+def ensure_csrf_token(view_fn):
+    def wrapper(context, request):
+        request.add_response_callback(set_csrf_token)
+        return view_fn(context, request)
+
+    return wrapper
+
+
+def view_auth_defaults(fn, *args, **kwargs):
+    kwargs.setdefault('accept', 'text/html')
+    kwargs.setdefault('decorator', ensure_csrf_token)
+    kwargs.setdefault('layout', 'auth')
+    kwargs.setdefault('renderer', 'h:templates/auth.pt')
+    return view_defaults(*args, **kwargs)(fn)
+
+
 # TODO: change to something other than /app
 @view_config(accept='application/json',  name='app', renderer='json')
 def session(request):
+    request.add_response_callback(set_csrf_token)
     return dict(status='okay', flash=pop_flash(request), model=model(request))
 
 
@@ -103,6 +124,7 @@ class AsyncFormViewMapper(object):
 
     def __call__(self, view):
         def wrapper(context, request):
+            request.add_response_callback(set_csrf_token)
             if request.method == 'POST':
                 data = request.json_body
                 data.update(request.params)
@@ -119,7 +141,7 @@ class AsyncFormViewMapper(object):
         return wrapper
 
 
-@view_defaults(accept='text/html', renderer='h:templates/auth.pt')
+@view_auth_defaults
 @view_config(attr='login', route_name='login')
 @view_config(attr='logout', route_name='logout')
 class AuthController(horus.views.AuthController):
@@ -137,7 +159,7 @@ class AsyncAuthController(AuthController):
     __view_mapper__ = AsyncFormViewMapper
 
 
-@view_defaults(accept='text/html', renderer='h:templates/auth.pt')
+@view_auth_defaults
 @view_config(attr='forgot_password', route_name='forgot_password')
 @view_config(attr='reset_password', route_name='reset_password')
 class ForgotPasswordController(horus.views.ForgotPasswordController):
@@ -149,12 +171,24 @@ class ForgotPasswordController(horus.views.ForgotPasswordController):
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
-@view_config(attr='forgot_password', request_param='__formid__=forgot')
+@view_config(
+    attr='forgot_password',
+    request_param='__formid__=forgot_password'
+)
+@view_config(
+    attr='reset_password',
+    request_param='__formid__=reset_password'
+)
 class AsyncForgotPasswordController(ForgotPasswordController):
     __view_mapper__ = AsyncFormViewMapper
 
+    def reset_password(self):
+        request = self.request
+        request.matchdict = request.POST
+        return super(AsyncForgotPasswordController, self).reset_password()
 
-@view_defaults(accept='text/html', renderer='h:templates/auth.pt')
+
+@view_auth_defaults
 @view_config(attr='register', route_name='register')
 @view_config(attr='activate', route_name='activate')
 class RegisterController(horus.views.RegisterController):
@@ -171,54 +205,15 @@ class RegisterController(horus.views.RegisterController):
 class AsyncRegisterController(RegisterController):
     __view_mapper__ = AsyncFormViewMapper
 
-    def activate(self):
-        """Activate a user and set a password given an activation code.
 
-        This view is different from the activation view in horus because it
-        does not require the user id to be passed. It trusts the activation
-        code and updates the password.
-        """
-        request = self.request
-        Str = self.Str
-
-        schema = schemas.ActivateSchema().bind(request=request)
-        form = forms.ActivateForm(schema)
-        appstruct = None
-
-        try:
-            appstruct = form.validate(request.POST.items())
-        except deform.ValidationFailure as e:
-            return dict(errors=e.error.children)
-
-        code = appstruct['code']
-        activation = models.Activation.get_by_code(request, code)
-
-        user = None
-        if activation:
-            user = self.User.get_by_activation(request, activation)
-
-        if user is None:
-            return dict(errors=[
-                {'activation_code': _('This activation code is not valid.')}
-            ])
-
-        user.password = appstruct['password']
-        self.db.delete(activation)
-        self.db.add(user)
-
-        FlashMessage(request, Str.reset_password_done, kind='success')
-        remember(request, user)
-        return {}
-
-
-@view_defaults(accept='text/html', renderer='h:templates/account.html')
+@view_auth_defaults
 @view_config(attr='edit_profile', route_name='edit_profile')
 @view_config(attr='disable_user', route_name='disable_user')
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
         request = self.request
         schema = schemas.EditProfileSchema().bind(request=request)
-        form = forms.EditProfileForm(schema)
+        form = deform.Form(schema)
 
         try:
             appstruct = form.validate(request.POST.items())
@@ -239,7 +234,7 @@ class ProfileController(horus.views.ProfileController):
     def disable_user(self):
         request = self.request
         schema = schemas.EditProfileSchema().bind(request=request)
-        form = forms.EditProfileForm(schema)
+        form = deform.Form(schema)
 
         try:
             appstruct = form.validate(request.POST.items())
@@ -255,7 +250,7 @@ class ProfileController(horus.views.ProfileController):
             # TODO: maybe have an explicit disabled flag in the status
             user.password = self.User.generate_random_password()
             self.db.add(user)
-            FlashMessage(self.request, _('User disabled'), kind='success')
+            FlashMessage(self.request, _('Account disabled.'), kind='success')
             return {}
         else:
             return dict(errors=[{'pwd': _('Invalid password')}], code=401)

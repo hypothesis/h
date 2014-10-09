@@ -1,4 +1,5 @@
 imports = [
+  'ngRoute'
   'h.identity'
   'h.helpers'
   'h.session'
@@ -8,18 +9,70 @@ AUTH_SESSION_ACTIONS = [
   'login'
   'logout'
   'register'
-  'forgot'
-  'activate'
+  'forgot_password'
+  'reset_password'
   'edit_profile'
   'disable_user'
 ]
 
 
+class AuthAppController
+  this.$inject = ['$location', '$scope', '$timeout', '$window', 'session']
+  constructor:   ( $location,   $scope,   $timeout,   $window,   session ) ->
+    onlogin = ->
+      $window.location.href = '/stream'
+
+    $scope.auth = {}
+    $scope.model = {}
+
+    $scope.auth.tab = $location.path().split('/')[1]
+
+    $scope.$on 'auth', (event, err, data) ->
+      if data.userid
+        $timeout onlogin, 1000
+
+    $scope.$watch 'auth.tab', (tab, old) ->
+      unless tab is old then $location.path("/#{tab}")
+
+    # TODO: We should be calling identity.beginProvisioning() here in order to
+    # move toward become a federated BrowserID provider.
+    session.load (data) ->
+      if data.userid then onlogin()
+
+
+class AuthPageController
+  this.$inject = ['$routeParams', '$scope']
+  constructor:   ( $routeParams,   $scope ) ->
+    angular.extend $scope.model, $routeParams
+
+
 configure = [
-  '$httpProvider', 'identityProvider', 'sessionProvider'
-  ($httpProvider,   identityProvider,   sessionProvider) ->
+  '$httpProvider', '$locationProvider', '$routeProvider',
+  'identityProvider', 'sessionProvider'
+  (
+   $httpProvider,   $locationProvider,   $routeProvider,
+   identityProvider,   sessionProvider
+  ) ->
+    # Pending authentication check
+    authCheck = null
+
     # Use the Pyramid XSRF header name
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRF-Token'
+
+    $locationProvider.html5Mode(true)
+
+    $routeProvider.when '/login',
+      controller: 'AuthPageController'
+      templateUrl: 'auth.html'
+    $routeProvider.when '/register',
+      controller: 'AuthPageController'
+      templateUrl: 'auth.html'
+    $routeProvider.when '/forgot_password',
+      controller: 'AuthPageController'
+      templateUrl: 'auth.html'
+    $routeProvider.when '/reset_password/:code?',
+      controller: 'AuthPageController'
+      templateUrl: 'auth.html'
 
     identityProvider.checkAuthentication = [
       '$q', 'session',
@@ -32,9 +85,14 @@ configure = [
     ]
 
     identityProvider.forgetAuthentication = [
-      'flash', 'session',
-      (flash,   session) ->
-        session.logout({}).$promise.catch (err) ->
+      '$q', 'flash', 'session',
+      ($q,   flash,   session) ->
+        session.logout({}).$promise
+        .then ->
+          authCheck = $q.defer()
+          authCheck.reject 'no session'
+          return null
+        .catch (err) ->
           flash 'error', 'Sign out failed!'
           throw err
     ]
@@ -42,10 +100,11 @@ configure = [
     identityProvider.requestAuthentication = [
       '$q', '$rootScope',
       ($q,   $rootScope) ->
-        (authCheck = $q.defer()).promise.finally do ->
-          $rootScope.$on 'auth', (event, err, data) ->
-            if err then authCheck.reject err
-            else authCheck.resolve data.csrf
+        authCheck.promise.catch ->
+          (authRequest = $q.defer()).promise.finally do ->
+            $rootScope.$on 'auth', (event, err, data) ->
+              if err then authRequest.reject err
+              else authRequest.resolve data.csrf
     ]
 
     sessionProvider.actions.load =
@@ -62,3 +121,5 @@ configure = [
 
 
 angular.module('h.auth', imports, configure)
+.controller('AuthAppController', AuthAppController)
+.controller('AuthPageController', AuthPageController)

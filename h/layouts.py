@@ -46,6 +46,13 @@ class AppLayout(BaseLayout):
     requirements = (('app', None), ('auth', None), ('topbar', None))
 
 
+@layout_config(name='auth', template='h:templates/base.pt')
+class AuthLayout(BaseLayout):
+    app = 'h'
+    controller = 'AuthAppController'
+    requirements = (('app', None), ('auth', None))
+
+
 def includeme(config):
     config.include('pyramid_layout')
     config.scan(__name__)

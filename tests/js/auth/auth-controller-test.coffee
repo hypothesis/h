@@ -111,7 +111,7 @@ describe 'h.auth', ->
 
         $timeout.lastCall.args[0]()
         assert.called $scope.form.$setPristine, 'the form is pristine'
-        assert.isNull $scope.model, 'the model is erased'
+        assert.deepEqual $scope.model, {}, 'the model is erased'
         assert.called mockFlash, 'a notification is flashed'
 
       it 'should not happen if the model is empty', ->
