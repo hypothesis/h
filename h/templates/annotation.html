@@ -8,7 +8,7 @@
        target="_blank"
        ng-href="{{baseURI}}u/{{vm.annotation.user}}"
        >{{vm.annotation.user | persona}}</a>
-    <i class="small h-icon-locked" ng-show="vm.isPrivate()"></i>
+    <i class="small h-icon-locked" ng-show="vm.isPrivate() && !vm.editing"></i>
     <i class="small h-icon-highlighter" ng-show="vm.isHighlight() && !vm.editing"></i>
     <i class="small h-icon-comment" ng-show="vm.isComment()"></i>
     <span class="annotation-citation"
