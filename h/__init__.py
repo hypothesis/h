@@ -18,6 +18,7 @@ def includeme(config):
     config.include('h.streamer')
     config.include('h.subscribers')
     config.include('h.views')
+    config.include('h.notification')
     config.set_root_factory('h.resources.RootFactory')
 
     config.add_jinja2_renderer('.js')

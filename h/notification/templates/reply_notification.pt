@@ -1,0 +1,12 @@
+<p><a href="${reply_user_profile}">${reply_user}</a> has just left a reply to your annotation on
+&ldquo;<a href="${document_path}">${document_title}</a>&rdquo;.</p>
+
+<p>On <a href="${parent_path}">${parent_timestamp.strftime('%d %B at %H:%M')} you said</a>:</p>
+
+<blockquote cite="${reply_path}">&ldquo;${parent_text}&rdquo;</blockquote>
+
+<p>On <a href="${reply_path}">${reply_timestamp.strftime('%d %B at %H:%M')} ${reply_user} said</a>:</p>
+
+<blockquote>&ldquo;${reply_text}&rdquo;</blockquote>
+
+<p><a href="">Reply to ${reply_user}</a>.</p>

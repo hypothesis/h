@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import re
 import logging
-from datetime import datetime
 
 from pyramid_mailer.interfaces import IMailer
 from pyramid_mailer.message import Message
@@ -9,18 +7,9 @@ from pyramid.renderers import render
 from pyramid.events import subscriber
 
 from h import events, interfaces
-from h.auth.local import models
+from h.notification.models import Subscriptions
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-def user_profile_url(request, user):
-    username = re.search("^acct:([^@]+)", user).group(1)
-    return request.application_url + '/u/' + username
-
-
-def standalone_url(request, annotation_id):
-    return request.application_url + '/a/' + annotation_id
 
 
 def parent_values(annotation, request):
@@ -87,75 +76,6 @@ class TemplateRenderException(Exception):
     pass
 
 
-class ReplyTemplate(NotificationTemplate):
-    text_template = 'h:templates/emails/reply_notification.txt'
-    html_template = 'h:templates/emails/reply_notification.html'
-    subject = 'h:templates/emails/reply_notification_subject.txt'
-
-    @staticmethod
-    def _create_template_map(request, reply, data):
-        document_title = ''
-        if 'document' in reply:
-            document_title = reply['document'].get('title', '')
-
-        parent_user = re.search(
-            r'^acct:([^@]+)',
-            data['parent']['user']
-        ).group(1)
-
-        reply_user = re.search(
-            r'^acct:([^@]+)',
-            reply['user']
-        ).group(1)
-
-        # Currently we cut the UTC format because time.strptime has problems
-        # parsing it, and of course it'd only correct the backend's timezone
-        # which is not meaningful for international users
-        format = '%Y-%m-%dT%H:%M:%S.%f'
-        parent_timestamp = datetime.strptime(data['parent']['created'][:-6],
-                                             format)
-        reply_timestamp = datetime.strptime(reply['created'][:-6], format)
-
-        return {
-            'document_title': document_title,
-            'document_path': data['parent']['uri'],
-            'parent_text': data['parent']['text'],
-            'parent_user': parent_user,
-            'parent_timestamp': parent_timestamp,
-            'parent_user_profile': user_profile_url(
-                request, data['parent']['user']),
-            'parent_path': standalone_url(request, data['parent']['id']),
-            'reply_text': reply['text'],
-            'reply_user': reply_user,
-            'reply_timestamp': reply_timestamp,
-            'reply_user_profile': user_profile_url(request, reply['user']),
-            'reply_path': standalone_url(request, reply['id'])
-        }
-
-    @staticmethod
-    def get_recipients(request, annotation, data):
-        username = re.search(
-            r'^acct:([^@]+)',
-            data['parent']['user']
-        ).group(1)
-        userobj = models.User.get_by_username(request, username)
-        if not userobj:
-            log.warn("User not found! " + str(username))
-            raise TemplateRenderException('User not found')
-        return [userobj.email]
-
-    @staticmethod
-    def check_conditions(annotation, data):
-        # Get the e-mail of the owner
-        if 'user' not in data['parent'] or not data['parent']['user']:
-            return False
-        # Do not notify users about their own replies
-        if annotation['user'] == data['parent']['user']:
-            return False
-        # Else okay
-        return True
-
-
 class AnnotationNotifier(object):
     registered_templates = {}
 
@@ -189,11 +109,6 @@ class AnnotationNotifier(object):
                           html=html)
         self.mailer.send(message)
 
-AnnotationNotifier.register_template(
-    'reply_notification',
-    ReplyTemplate.generate_notification
-)
-
 
 @subscriber(events.AnnotationEvent)
 def send_notifications(event):
@@ -219,11 +134,16 @@ def send_notifications(event):
         'parent': parent_values(annotation, request)
     }
 
-    if 'user' in data['parent'] and 'user' in annotation:
-        parent_user = data['parent']['user']
-        if len(parent_user) and parent_user != annotation['user']:
-            notifier.send_notification_to_owner(
-                annotation, data, 'reply_notification')
+    subscriptions = Subscriptions.get_active_subscriptions(request)
+    for subscription in subscriptions:
+        data['subscription'] = {
+            'uri': subscription.uri,
+            'parameters': subscription.parameters,
+            'query': subscription.query
+        }
+
+        notifier.send_notification_to_owner(
+            annotation, data, subscription.template)
 
 
 def includeme(config):
