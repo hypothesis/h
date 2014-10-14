@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import sqlalchemy as sa
-from sqlalchemy import func, Index
+from sqlalchemy import Index
 from sqlalchemy.types import TypeDecorator, VARCHAR
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -40,7 +40,7 @@ class SubscriptionsMixin(BaseModel):
     # pylint: disable=no-self-use
     @declared_attr
     def __table_args__(self):
-        return (Index('subs_uri_idx_%s' % self.__tablename__, 'uri'),)
+        return Index('subs_uri_idx_%s' % self.__tablename__, 'uri'),
 
     @declared_attr
     def uri(self):

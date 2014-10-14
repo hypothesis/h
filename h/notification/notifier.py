@@ -26,50 +26,31 @@ def parent_values(annotation, request):
         return {}
 
 
-class NotificationTemplate(object):
-    text_template = None
-    html_template = None
-    subject = None
+def render(template, request, annotation, data):
+    tmap = template['template_map'](request, annotation, data)
+    text = render(template['text_template'], tmap, request)
+    html = render(template['html_template'], tmap, request)
+    subject = render(template['subject'], tmap, request)
+    return subject, text, html
 
-    @classmethod
-    def render(cls, request, annotation, data):
-        tmap = cls._create_template_map(request, annotation, data)
-        text = render(cls.text_template, tmap, request)
-        html = render(cls.html_template, tmap, request)
-        subject = render(cls.subject, tmap, request)
-        return subject, text, html
 
-    @staticmethod
-    def _create_template_map(request, annotation):
-        raise NotImplementedError()
+def generate_notification(template, request, annotation, data):
+    checks = template['conditions'](annotation, data)
+    if not checks:
+        return {'status': False}
+    try:
+        subject, text, html = render(request, annotation, data)
+        recipients = template['recipients'](request, annotation, data)
+    except TemplateRenderException:
+        return {'status': False}
 
-    # Override this for checking
-    @staticmethod
-    def check_conditions(annotation, data):
-        return True
-
-    @staticmethod
-    def get_recipients(request, annotation, data):
-        raise NotImplementedError()
-
-    @classmethod
-    def generate_notification(cls, request, annotation, data):
-        checks = cls.check_conditions(annotation, data)
-        if not checks:
-            return {'status': False}
-        try:
-            subject, text, html = cls.render(request, annotation, data)
-            recipients = cls.get_recipients(request, annotation, data)
-        except TemplateRenderException:
-            return {'status': False}
-
-        return {
-            'status': True,
-            'recipients': recipients,
-            'text': text,
-            'html': html,
-            'subject': subject
-        }
+    return {
+        'status': True,
+        'recipients': recipients,
+        'text': text,
+        'html': html,
+        'subject': subject
+    }
 
 
 class TemplateRenderException(Exception):
@@ -85,13 +66,13 @@ class AnnotationNotifier(object):
         self.mailer = self.registry.queryUtility(IMailer)
 
     @classmethod
-    def register_template(cls, template, function):
-        cls.registered_templates[template] = function
+    def register_template(cls, template, functions):
+        cls.registered_templates[template] = functions
 
     def send_notification_to_owner(self, annotation, data, template):
         if template in self.registered_templates:
-            generator = self.registered_templates[template]
-            notification = generator(self.request, annotation, data)
+            functions = self.registered_templates[template]
+            notification = generate_notification(functions, self.request, annotation, data)
             if notification['status']:
                 self._send_annotation(
                     notification['subject'],
