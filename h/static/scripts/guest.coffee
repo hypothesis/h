@@ -31,6 +31,9 @@ class Annotator.Guest extends Annotator
     super
     delete @options.noScan
 
+    if window.PDFJS
+      delete @options.Document
+
     @frame = $('<div></div>')
     .appendTo(@wrapper)
     .addClass('annotator-frame annotator-outer annotator-collapsed')
@@ -40,8 +43,7 @@ class Annotator.Guest extends Annotator
     this.addPlugin 'Bridge',
       formatter: (annotation) =>
         formatted = {}
-        if annotation.document?
-          formatted['uri'] = @plugins.Document.uri()
+        formatted['uri'] = @getHref()
         for k, v of annotation when k isnt 'anchors'
           formatted[k] = v
         # Work around issue in jschannel where a repeated object is considered
@@ -113,6 +115,10 @@ class Annotator.Guest extends Annotator
       # Announce the new positions, so that the sidebar knows
       this.plugins.Bridge.sync([highlight.annotation])
 
+  # Utility function to get the decoded form of the document URI
+  getHref: =>
+    @plugins.PDF?.uri() ? @plugins.Document.uri() ? super
+
   _setupXDM: (options) ->
     # jschannel chokes FF and Chrome extension origins.
     if (options.origin.match /^chrome-extension:\/\//) or
@@ -160,11 +166,21 @@ class Annotator.Guest extends Annotator
           return
     )
 
-    .bind('getDocumentInfo', =>
-      return {
-        uri: @plugins.Document.uri()
-        metadata: @plugins.Document.metadata
-      }
+    .bind('getDocumentInfo', (trans) =>
+      (@plugins.PDF?.getMetaData() ? Promise.reject())
+        .then (md) =>
+           # console.log "Returning PDF metadata", md
+           trans.complete
+             uri: @getHref()
+             metadata: md
+        .catch (problem) =>
+           # console.log "Returning standard metadata, because"
+           # console.log problem.stack ? problem
+           trans.complete
+             uri: @getHref()
+             metadata: @plugins.Document?.metadata
+
+      trans.delayReturn(true)
     )
 
     .bind('setTool', (ctx, name) =>
