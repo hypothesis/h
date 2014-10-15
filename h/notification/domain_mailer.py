@@ -8,47 +8,49 @@ from bs4 import BeautifulSoup
 from pyramid.events import subscriber
 
 from h import events
-from h.notifier import (
-    AnnotationNotifier,
-    NotificationTemplate,
-    user_profile_url,
-    standalone_url,
-)
+from h.notification.gateway import user_profile_url, standalone_url
+from h.notification.types import DOCUMENT_OWNER
+import h.notification.notifier as notifier
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-class DocumentOwnerTemplate(NotificationTemplate):
-    template = 'h:templates/emails/document_owner_notification.txt'
-    subject = 'h:templates/emails/document_owner_notification_subject.txt'
-
-    @staticmethod
-    def _create_template_map(request, annotation):
-        if 'tags' in annotation:
-            tags = '\ntags: ' + ', '.join(annotation['tags'])
-        else:
-            tags = ''
-        user = re.search("^acct:([^@]+)", annotation['user']).group(1)
-        return {
-            'document_title': annotation['title'],
-            'document_path': annotation['uri'],
-            'text': annotation['text'],
-            'tags': tags,
-            'user_profile': user_profile_url(request, annotation['user']),
-            'user': user,
-            'path': standalone_url(request, annotation['id']),
-            'timestamp': annotation['created'],
-            'selection': annotation['quote']
-        }
-
-    @staticmethod
-    def get_recipients(request, annotation, data):
-        return [data['email']]
+def create_template_map(request, annotation):
+    if 'tags' in annotation:
+        tags = '\ntags: ' + ', '.join(annotation['tags'])
+    else:
+        tags = ''
+    user = re.search("^acct:([^@]+)", annotation['user']).group(1)
+    return {
+        'document_title': annotation['title'],
+        'document_path': annotation['uri'],
+        'text': annotation['text'],
+        'tags': tags,
+        'user_profile': user_profile_url(request, annotation['user']),
+        'user': user,
+        'path': standalone_url(request, annotation['id']),
+        'timestamp': annotation['created'],
+        'selection': annotation['quote']
+    }
 
 
-AnnotationNotifier.register_template(
-    'document_owner',
-    DocumentOwnerTemplate.generate_notification
+def get_recipients(request, annotation, data):
+    return [data['email']]
+
+
+def check_conditions(annotation, data):
+    return True
+
+# Register the template
+notifier.AnnotationNotifier.register_template(
+    DOCUMENT_OWNER, {
+        'template': 'h:notification/templates/emails/document_owner_notification.txt',
+        'html_template': 'h:notification/templates/emails/document_owner_notification.pt',
+        'subject': 'h:notification/templates/emails/document_owner_notification_subject.txt',
+        'template_map': create_template_map,
+        'recipients': get_recipients,
+        'conditions': check_conditions
+    }
 )
 
 
@@ -64,6 +66,8 @@ def get_document_owners(content):
     return hrefs
 
 
+# XXX: All below can be removed in the future after
+# we can create a custom subscription for page uri
 @subscriber(events.AnnotationEvent)
 def domain_notification(event):
     if event.action == 'create':
@@ -87,17 +91,17 @@ def domain_notification(event):
             url_struct = urlparse(annotation['uri'])
             domain = url_struct.hostname or url_struct.path
             domain = re.sub(r'^www.', '', domain)
-            notifier = AnnotationNotifier(event.request)
+            notif = notifier.AnnotationNotifier(event.request)
             for email in emails:
                 # Domain matching
                 mail_domain = email.split('@')[-1]
                 if mail_domain == domain:
                     try:
                         # Send notification to owners
-                        notifier.send_notification_to_owner(
+                        notif.send_notification_to_owner(
                             annotation,
                             {'email': email},
-                            'document_owner'
+                            DOCUMENT_OWNER
                         )
                     except:
                         log.exception('Problem sending email')
