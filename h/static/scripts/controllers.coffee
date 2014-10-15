@@ -195,7 +195,6 @@ class AppController
 
     oncancel = ->
       $scope.$evalAsync ->
-        flash 'info', 'Sign in canceled.'
         $scope.dialog.visible = false
 
     reset = ->
