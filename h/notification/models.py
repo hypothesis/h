@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
+import logging
 import json
 import sqlalchemy as sa
-from sqlalchemy import Index
 from sqlalchemy.types import TypeDecorator, VARCHAR
 from sqlalchemy.ext.declarative import declared_attr
 
 from pyramid_basemodel import Base
 from hem.db import get_session
 from horus.models import BaseModel
+
+log = logging.getLogger(__name__)
 
 
 class JSONEncodedDict(TypeDecorator):
@@ -40,7 +42,7 @@ class SubscriptionsMixin(BaseModel):
     # pylint: disable=no-self-use
     @declared_attr
     def __table_args__(self):
-        return Index('subs_uri_idx_%s' % self.__tablename__, 'uri'),
+        return sa.Index('subs_uri_idx_%s' % self.__tablename__, 'uri'),
 
     @declared_attr
     def uri(self):
@@ -80,4 +82,6 @@ class Subscriptions(SubscriptionsMixin, Base):
 
 
 def includeme(config):
-    pass
+    config.include('pyramid_basemodel')
+    config.include('pyramid_tm')
+    config.scan(__name__)

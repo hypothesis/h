@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 import logging
+import transaction
 from datetime import datetime
+
+from pyramid.events import subscriber
+from hem.db import get_session
+from horus.events import NewRegistrationEvent
+
 
 import h.notification.notifier as notifier
 from h.notification.types import REPLY_TEMPLATE
+from h.notification.models import Subscriptions
 from h.notification.gateway import user_name, user_profile_url, standalone_url, get_user_by_name
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -20,9 +27,9 @@ def create_template_map(request, reply, data):
     # Currently we cut the UTC format because time.strptime has problems
     # parsing it, and of course it'd only correct the backend's timezone
     # which is not meaningful for international users
-    format = '%Y-%m-%dT%H:%M:%S.%f'
-    parent_timestamp = datetime.strptime(data['parent']['created'][:-6], format)
-    reply_timestamp = datetime.strptime(reply['created'][:-6], format)
+    date_format = '%Y-%m-%dT%H:%M:%S.%f'
+    parent_timestamp = datetime.strptime(data['parent']['created'][:-6], date_format)
+    reply_timestamp = datetime.strptime(reply['created'][:-6], date_format)
 
     return {
         'document_title': document_title,
@@ -78,5 +85,27 @@ notifier.AnnotationNotifier.register_template(
 )
 
 
+# Create a reply template for a uri
+def create_subscription(request, uri, active):
+    session = get_session(request)
+    subs = Subscriptions(
+        uri=uri,
+        template=REPLY_TEMPLATE,
+        description='Generated reply notification template',
+        active=active
+    )
+
+    with transaction.manager:
+        session.add(subs)
+        session.flush()
+
+
+@subscriber(NewRegistrationEvent)
+def registration_subscriptions(event):
+    request = event.request
+    user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
+    create_subscription(event.request, user_uri, True)
+
+
 def includeme(config):
-    pass
+    config.scan(__name__)
