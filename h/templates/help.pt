@@ -23,15 +23,7 @@
           <ol>
             <li>Create an account.</li>
             <li>Go forth and annotate!</li>
-            <li>Create an account to save your annotations.</li>
-            <li>Disable the extension for pages at any time in the url bar.</li>
           </ol>
-        </section>
-        <section>
-          <h2 id="getting-help">Getting Help</h2>
-          <p>If at any time you find yourself needing help with using Hypothesis
-             please get in touch <a href="">via our forums</a> or
-             <a href="">email us directly</a>.</p>
         </section>
         <section>
           <h2 id="key-features">Key Features</h2>
@@ -46,18 +38,26 @@
             <li>There are a few different types of annotations that can be created
               with the application:
               <ul>
-                <li>Create a <strong>note</strong> by selecting some text and clicking the button
+                <li>Create a  <strong>note</strong> by selecting some text and clicking the button
                   that appears above the selection. You can then add your own
                   comments and tags.</li>
-                <li>Leave a <strong>comment</strong> on the document by using the comment button
+                <li>Leave a  <strong>comment</strong> on the document by using the comment <i class="h-icon-plus"></i> button
                   in the application menu.</li>
-                <li>Quick <strong>highlights</strong> can be created with the highlighter mode;
-                  enable this by using the highlighter button in the application
+                <li>Quick  <strong>highlights</strong> can be created with the highlighter mode;
+                  enable this by using the  highlighter <i class="h-icon-highlighter"></i> button in the application
                   menu.</li>
-                <li>You can <strong>reply</strong> to any annotation by using the reply action
+                <li>You can  <strong>reply</strong> to any annotation by using the  reply <i class="h-icon-reply"></i> action
                   found at the bottom of each card.</li>
               </ul>
             </li>
+          </ul>
+        </section>
+        <section>
+          <h2>Resources</h2>
+          <ul>
+            <li><a href="">Discussion Forums</a></li>
+            <li><a href="">Contact Us</a></li>
+            <li><a href="">About the Project</a></li>
           </ul>
         </section>
         <section>
@@ -71,9 +71,6 @@
             mailing list which you can subscribe to by sending an email to <a
               href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#111;&#58;&#100;&#101;&#x76;&#x2b;&#x73;&#x75;&#x62;&#115;&#99;&#114;&#105;&#98;&#x65;&#x40;&#x6c;&#x69;&#x73;&#116;&#46;&#104;&#121;&#112;&#x6f;&#x74;&#x68;&#x65;&#x73;&#46;&#105;&#115;">&#100;&#101;&#x76;&#x2b;&#x73;&#x75;&#x62;&#115;&#99;&#114;&#105;&#98;&#x65;&#x40;&#x6c;&#x69;&#x73;&#116;&#46;&#104;&#121;&#112;&#x6f;&#x74;&#x68;&#x65;&#x73;&#46;&#105;&#115;</a>
             (<a href="http://list.hypothes.is/archive/dev">archive</a>).</p>
-        </section>
-        <section>
-          <h2>Resources</h2>
           <p>Note the <a href="https://github.com/hypothesis/h/wiki">project
               wiki</a>, including a <a
               href="http://docs.hypothes.is/roadmap/">roadmap</a>, detailed <a
