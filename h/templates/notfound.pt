@@ -1,0 +1,14 @@
+<html metal:use-macro="load: h:templates/base.pt">
+  <head metal:fill-slot="head" tal:omit-tag>
+    <script type="text/javascript" defer="defer">
+      <metal:main use-macro="load: h:templates/embed.txt" />
+    </script>
+    <title>Hypothesis</title>
+  </head>
+  <body metal:fill-slot="body" tal:omit-tag>
+	 <div id="home" class="content paper styled-text page">
+      <metal:main use-macro="load: h:templates/header.pt" />
+      <h1>404</h1>  
+   </div>
+  </body>
+</html>
