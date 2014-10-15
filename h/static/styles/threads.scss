@@ -86,6 +86,27 @@ $threadexp-width: .6em;
       .thread &,
       .thread & .annotation-header,
       .thread & .annotation-section { margin: 0 }
+      
+      .styled-text > .MathJax_Display {
+          display: none !important;
+        }
+
+      .styled-text > *:nth-child(2) {
+        &.MathJax_Display {
+          display: block !important;
+        }
+      }
+
+      .styled-text > * { display: none }
+      .styled-text > *:first-child {
+        display: block;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
       .thread & footer { display: none }
     }
   }

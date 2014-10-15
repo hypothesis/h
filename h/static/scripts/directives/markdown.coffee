@@ -306,7 +306,8 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
         inputEl.val (ctrl.$viewValue or '')
       value = ctrl.$viewValue or ''
       convert = $filter('converter')
-      re = /(?:\$\$)|(?:\\\(|\\\))/g
+      re = /(?:\$\$)|(?:\\?\\\(|\\?\\\))/g
+      htmlElement = /<[a-z]+>/
 
       startMath = 0
       endMath = 0
@@ -318,7 +319,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
 
       for match in indexes
         if startMath > endMath
-          endMath = match.index + 2
+          endMath = match.index + match.toString().length
           try
             parts.push katex.renderToString($sanitize value.substring(startMath, match.index))
           catch
@@ -326,7 +327,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
             MathJaxFallback = true
             parts.push $sanitize value.substring(startMath, match.index)
         else
-          startMath = match.index + 2
+          startMath = match.index + match.toString().length
           # Inline math needs to fall inline, which can be tricky considering the markdown
           # converter will take the part that comes before a peice of math and surround it
           # with markup: <p>Here is some inline math: </p>\(2 + 2 = 4\)
@@ -336,19 +337,23 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
             # closing <p> tags since this is meant to be one paragraph.
             if i - 1 >= 0 and indexes[i - 1].toString() == "\\)"
               markdown = $sanitize convert value.substring(endMath, match.index)
-              parts.push markdown.substring(3, markdown.length - 4)
+              tagLength = htmlElement.exec(markdown)[0].length
+              parts.push markdown.substring(tagLength, markdown.length - (tagLength + 1))
             # Text preceeds a case of inline math. We must remove the ending </p> tag
             # so that the math is inline.
             else
               markdown = $sanitize convert value.substring(endMath, match.index)
-              parts.push markdown.substring(0, markdown.length - 4)
+              tagLength = htmlElement.exec(markdown)[0].length
+              parts.push markdown.substring(0, markdown.length - (tagLength + 1))
           # Text follows a case of inline math, we must remove opening <p> tag.
           else if i - 1 >= 0 and indexes[i - 1].toString() == "\\)"
             markdown = $sanitize convert value.substring(endMath, match.index)
-            parts.push markdown.substring(3, markdown.length)
+            tagLength = htmlElement.exec(markdown)[0].length
+            parts.push markdown.substring(tagLength, markdown.length)
           else # Block Math or no math.
             parts.push $sanitize convert value.substring(endMath, match.index)
         i++
+
       scope.rendered = $sce.trustAsHtml parts.join('')
       if MathJaxFallback
         $timeout (-> MathJax?.Hub.Queue ['Typeset', MathJax.Hub, output]), 0, false
