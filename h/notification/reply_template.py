@@ -95,9 +95,8 @@ def create_subscription(request, uri, active):
         active=active
     )
 
-    with transaction.manager:
-        session.add(subs)
-        session.flush()
+    session.add(subs)
+    session.flush()
 
 
 @subscriber(NewRegistrationEvent)
@@ -105,6 +104,7 @@ def registration_subscriptions(event):
     request = event.request
     user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
     create_subscription(event.request, user_uri, True)
+    event.user.subscriptions = True
 
 
 def includeme(config):

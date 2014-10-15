@@ -28,6 +28,7 @@ class AccountController
 
       $scope.$broadcast 'formState', form.$name, ''  # Update status btn
 
+    $scope.tab = 'account'
     # Data for each of the forms
     $scope.editProfile = {}
     $scope.changePassword = {}

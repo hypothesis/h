@@ -1,5 +1,9 @@
-<div class="tabbable" ng-controller="AccountController">
-  <div class="tab-pane" title="Account">
+<div class="tabbable"
+     tab-reveal="['account', 'notifications']"
+     ng-controller="AccountController"
+     ng-model="tab"
+>
+  <div class="tab-pane" title="Account" ng-click="tab = 'account'">
     <form class="account-form form" name="changePasswordForm" ng-submit="submit(changePasswordForm)" novalidate form-validate>
       <h2 class="form-heading"><span>Change Your Password</span></h2>
 
@@ -65,5 +69,7 @@
         </div>
       </div>
     </form>
+  </div>
+  <div class="tab-pane" title="Notifications" ng-click="tab = 'notifications'">
   </div>
 </div>
