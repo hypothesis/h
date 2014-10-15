@@ -69,7 +69,6 @@ ol {
     @include respond-to(wide-handhelds tablets desktops) {
       @include pie-clearfix;
       text-align: left;
-      img { float: left; }
     }
 
     margin-bottom: 1em;
@@ -164,5 +163,9 @@ ol {
   .masthead-subheading {
     font-size: 1.231em;
     margin: 0;
+  }
+
+  img {
+    float: left;
   }
 }
