@@ -17,6 +17,7 @@ $headings-color: $text-color;
 @import 'simple-search';
 @import 'tags-input';
 @import 'page';
+@import 'help-page';
 
 //ELEMENT STYLES////////////////////////////////
 a {
@@ -26,6 +27,7 @@ a {
 }
 
 body {
+  position: relative;
   background-color: $body-background;
   color: $text-color;
   line-height: 1.4;

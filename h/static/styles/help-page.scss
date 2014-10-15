@@ -1,0 +1,38 @@
+@import "./mixins/icons";
+
+.help-page {
+  padding-right: 460px;
+}
+
+.help-page-content {
+  padding: 40px 10% 40px 20%;
+  margin: auto;
+}
+
+.help-page-sidebar {
+  position: fixed;
+  top: 20px;
+  right: 40px;
+  bottom: 20px;
+  width: 380px;
+  display: block;
+  border: $gray-lighter dotted 2px;
+  border-radius: 3px;
+}
+
+#help-1 {
+  position: fixed;
+  top: 30%;
+  right: 60px;
+  width: 340px;
+  color: $gray-light;
+
+  @include icons {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 4px;
+    border-radius: 4px;
+    background: #FFF;
+    text-shadow: 0 0 2px #F9F9F9, 0 0 0 #777;
+    color: rgba(200, 200, 200, 0.3);
+  }
+}
