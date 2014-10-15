@@ -6,122 +6,100 @@
     <title>Hypothesis</title>
   </head>
   <body metal:fill-slot="body" tal:omit-tag>
-    <div id="home" class="content paper styled-text page">
-      <metal:main use-macro="load: header.pt" />
-      <h1>Help</h1>
-      <p>This page contains general information about using the application. If it does not answer your questions please post on the <a href="https://groups.google.com/forum/#!forum/hypothesis-forum">forum</a> or simply <a href="http://hypothes.is/contact/">contact us</a>. Additionally, feel free to annotate this page so that we can improve the documentation.</p>
-
-      <p>For general information about the project, please visit the <a href="http://hypothes.is">home page</a> where you can reserve a username, sign up for our newsletter, or learn how to get involved in working to improve Hypothesis.</p>
-
-      <h1>Getting Started:</h1>
-
-      <h2>Using the Chrome Extension:</h2>
-      <p>If you’re using the extension, first click the annotation icon in your address bar.  Hypothesis will turn on and enable the sidebar on the document you are currently viewing. Note: after installing the extension you may have to refresh this page before annotation icon will appear.</p>
-      <img height="150px" width="150px"
-          src="${request.static_url('h:static/images/helpdocumentation/enableannotation.png')}" />
-
-      <h2>Using the Bookmarklet:</h2>
-      <p>Navigate to the page you want to annotate. Clicking the Bookmarklet will load Hypothes.is and enable the sidebar on the document you are currently viewing.</p>
-
-      <h2>Opening the sidebar:</h2>
-      <p>To open the sidebar, simply click on the small tab at the upper right. To close it, click on it again or click anywhere on the page outside of the sidebar.</p>
-      <img height="150px" width="150px"
-           src="${request.static_url('h:static/images/helpdocumentation/opensidebar.png')}" />
-
-      <h2>Creating an account:</h2>
-      <p>Click “sign In” and then on the “Create an account” tab to create an account. When you receive the confirmation email, click the link inside.  You are now ready to annotate.</p>
-      <img height="150px" width="150px"
-           src="${request.static_url('h:static/images/helpdocumentation/signin.jpg')}" />
-      <img height="150px" width="150px"
-           src="${request.static_url('h:static/images/helpdocumentation/createanaccount.jpg')}" />
-
-      <h2>Confirm an account or Claim a username:</h2>
-      <p>Have you already reserved a username? Use the “Confirm account” tab instead.</p>
-
-      <h2>Forgotten Password?</h2>
-      <p>Click “Forgotten your password” and enter the email address you signed up for your account with.</p>
-      <img height="203px;" width="420px;"
-           src="${request.static_url('h:static/images/helpdocumentation/password1.jpg')}" />
-      <p>An email will be sent containing an activation code for your account. Click “have an activation code.”</p>
-      <img height="203px;" width="420px;"
-           src="${request.static_url('h:static/images/helpdocumentation/password2.jpg')}" />
-      <p>Enter the activation code and the new password for your account. Click sign in, and your password will be reset.</p>
-      <img height="203px;" width="420px;"
-           src="${request.static_url('h:static/images/helpdocumentation/password3.jpg')}" />
-
-      <h2>Submitting Feedback</h2>
-      <p>Feel free to use our <a href="http://hypothes.is/contact/">contact form.</a></p>
-
-      <h1>Viewing annotations:</h1>
-
-      <h2>The Heatmap:</h2>
-      <p>The heatmap shows you where annotations are on the page. Click on a tab to open the sidebar and view the annotations. Click on an annotation to see its detail view.</p>
-      <img height="150px" width="150px"
-           src="${request.static_url('h:static/images/helpdocumentation/heatmap.png')}" />
-
-      <h2>Navigation:</h2>
-      <p>Click on the up tab and down tab to navigate to the next and previous annotations on the page.</p>
-      <img height="150px" width="150px"
-           src="${request.static_url('h:static/images/helpdocumentation/navigation.png')}" />
-
-      <h2>Search/Filters</h2>
-      <p>To use the search bar click on the magnifying glass.</p>
-      <img height="" width=""
-           src="${request.static_url('h:static/images/helpdocumentation/magnify.jpg')}" />
-      <p>The search bar will appear.</p>
-      <img height="auto" width="450"
-           src="${request.static_url('h:static/images/helpdocumentation/searchmenu.jpg')}" />
-
-      <h1>Making annotations:</h1>
-
-      <h2>Creating an annotation</h2>
-      <p>To create an annotation select the text you want and click on the pen icon.</p>
-      <img height="auto" width="450"
-           src="${request.static_url('h:static/images/helpdocumentation/selection.jpg')}" />
-
-      <p>The side bar will open and you’ll be able to add text and tags. It should be noted that markdown is supported, and you can use this to attach links and pictures to your annotations. You can learn more about markdown <a href="http://en.wikipedia.org/wiki/Markdown">here</a>.
-        <img height="auto" width="450"
-             src="${request.static_url('h:static/images/helpdocumentation/annotating.jpg')}" />
-
-
-        <h2>Private vs Public Annotations</h2>
-      <p>Annotations can currently be set to be either public or private. Private annotations are visible only to you. You can change this setting this when you create or edit an annotation.</p>
-      <img height="" width=""
-           src="${request.static_url('h:static/images/helpdocumentation/visibility.jpg')}" />
-
-      <h2>Editing an annotation</h2>
-      <p>To edit an annotation, simply hover over the annotation card and select the edit button.</p>
-      <img height="" width=""
-           src="${request.static_url('h:static/images/helpdocumentation/edit.jpg')}" />
-
-      <h2>Replying to an annotation</h2>
-      <p>To reply to an annotation, hover over the annotation card and select reply.</p>
-
-      <h2>Deleting annotations</h2>
-      <p>To delete an annotation, hover over the corresponding annotation card and select delete.</p>
-      <img height="" width=""
-           src="${request.static_url('h:static/images/helpdocumentation/delete.jpg')}" />
-      <p>Note: if your annotation has been replied to, it can still be deleted, but the comments of people who replied to your annotation won’t be deleted. Instead a place holder card will replace the deleted annotation.</p>
-
-      <h2>Accessing the control bar:</h2>
-      <p>Roll over and hover on the speech bubble in the tool tab.  A set of controls will drop down.  They are each turned off by default.</p>
-      <img height="" width=""
-           src="${request.static_url('h:static/images/helpdocumentation/accesscontrolbar.jpg')}" />
-
-      <h2>Show annotations</h2>
-      <p>Clicking on the eye in controlbar menu renders all annotations and highlights visible in the page. Clicking on any highlight in the text, shows the annotation under the cursor at that spot.</p>
-
-      <h2>The highlight tool</h2>
-      <img height="" width=""
-           src="${request.static_url('h:static/images/helpdocumentation/highlightingmode.jpg')}" />
-      <p>To use the highlight tool, simply select it from the controlbar menu. To highlight something simply select text to create a new highlight (it’s that easy). Highlights default to private annotations, so they are only visible if you share the link to them.</p>
-      <p>If you click on a highlight it will show you the corresponding card in the sidebar. Likewise, hovering over an annotation card in the side bar will reveal the corresponding highlight in the document.</p>
-      <img height="" width=""
-           src="${request.static_url('h:static/images/helpdocumentation/highlight.jpg')}" />
-      <p>To turn highlighting mode off, simply select it again from the controlbar menu.</p>
-
-      <h2>New Comment</h2>
-      <p>This button creates a new unattached comment as opposed to a specific annotation. Comments are useful for general discussion about the topic of the article, without having to anchor it to a specific part of the text.</p>
+    <div class="page help-page">
+      <div class="help-page-content styled-text">
+        <metal:main use-macro="load: header.pt" />
+        <section>
+          <h2 id="installation">Installation</h2>
+          <p>There are a couple of installations of Hypothesis to choose from:</p>
+          <ol>
+            <li>If you want to annotate and comment on documents then head over to the Hypothesis homepage and install our browser extension.</li>
+            <li>If you want to install Hypothesis on your own site then head over to GitHub.</li>
+          </ol>
+        </section>
+        <section>
+          <h2 id="getting-started">Getting started</h2>
+          <p>Now you have the extension up and running. It's time to start annotating some documents.</p>
+          <ol>
+            <li>Create an account.</li>
+            <li>Go forth and annotate!</li>
+            <li>Create an account to save your annotations.</li>
+            <li>Disable the extension for pages at any time in the url bar.</li>
+          </ol>
+        </section>
+        <section>
+          <h2 id="getting-help">Getting Help</h2>
+          <p>If at any time you find yourself needing help with using Hypothesis
+             please get in touch <a href="">via our forums</a> or
+             <a href="">email us directly</a>.</p>
+        </section>
+        <section>
+          <h2 id="key-features">Key Features</h2>
+          <ul>
+            <li>Annotate any web page or PDF document using the Chrome extension
+              on any website. We provide a bookmarklet for browsers other than Chrome
+              if you would like to see a Hypothesis extension for another browser
+              please let us know.</li>
+            <li>Annotations have two levels of privacy. They can either be public
+              and viewable by anyone viewing the page or private and only visible
+              to you.</li>
+            <li>There are a few different types of annotations that can be created
+              with the application:
+              <ul>
+                <li>Create a <strong>note</strong> by selecting some text and clicking the button
+                  that appears above the selection. You can then add your own
+                  comments and tags.</li>
+                <li>Leave a <strong>comment</strong> on the document by using the comment button
+                  in the application menu.</li>
+                <li>Quick <strong>highlights</strong> can be created with the highlighter mode;
+                  enable this by using the highlighter button in the application
+                  menu.</li>
+                <li>You can <strong>reply</strong> to any annotation by using the reply action
+                  found at the bottom of each card.</li>
+              </ul>
+            </li>
+          </ul>
+        </section>
+        <section>
+          <h2 id="contributing">Contributing</h2>
+          <p>Hypothes.is is an open source effort licensed under a 2-Clause <a
+              href="https://en.wikipedia.org/wiki/BSD_licenses">BSD License</a>,
+            sometimes referred to as the "Simplified BSD License" or the "FreeBSD
+            License". Development is coordinated through <a
+              href="https://github.com/hypothesis">our Github repository</a> utilizing
+            the issue tracking and wiki tools provided there. Additionally, we manage a
+            mailing list which you can subscribe to by sending an email to <a
+              href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#111;&#58;&#100;&#101;&#x76;&#x2b;&#x73;&#x75;&#x62;&#115;&#99;&#114;&#105;&#98;&#x65;&#x40;&#x6c;&#x69;&#x73;&#116;&#46;&#104;&#121;&#112;&#x6f;&#x74;&#x68;&#x65;&#x73;&#46;&#105;&#115;">&#100;&#101;&#x76;&#x2b;&#x73;&#x75;&#x62;&#115;&#99;&#114;&#105;&#98;&#x65;&#x40;&#x6c;&#x69;&#x73;&#116;&#46;&#104;&#121;&#112;&#x6f;&#x74;&#x68;&#x65;&#x73;&#46;&#105;&#115;</a>
+            (<a href="http://list.hypothes.is/archive/dev">archive</a>).</p>
+        </section>
+        <section>
+          <h2>Resources</h2>
+          <p>Note the <a href="https://github.com/hypothesis/h/wiki">project
+              wiki</a>, including a <a
+              href="http://docs.hypothes.is/roadmap/">roadmap</a>, detailed <a
+              href="https://github.com/hypothesis/h/wiki/_pages">descriptions</a> and <a
+              href="https://github.com/hypothesis/h/wiki/Mockup-index">mockups</a> of
+            upcoming features, and <a href="https://github.com/hypothesis/h/issues">current
+              issues</a> needing development attention. Additionally, our <a
+              href="https://groups.google.com/forum/#!forum/hypothesis-forum"
+              target="_blank">forum</a> is a great place to get answers and offer feedback.
+            After you're done familiarizing yourself with the project landscape we
+            recommend reading our <a
+              href="https://github.com/hypothesis/h/blob/develop/CONTRIBUTING.rst">contributor
+              guide</a> which details our work-flow, conventions and licensing administrivia.
+            Additionally, please feel free to join us in <a
+              href="http://webchat.freenode.net/?channels=hypothes.is">#hypothes.is</a> on <a
+              href="http://freenode.net/">freenode</a> and subscribe to our mailing list.</p>
+        </section>
+      </div>
+      <div class="help-page-sidebar">
+        <div id="help-0">
+          <p>Sidebar</p>
+        </div>
+        <div id="help-1">
+          <p>Show and hide the sidebar using the <i class="h-icon-comment"></i> button</p>
+        </div>
+      </div>
     </div>
   </body>
 </html>
