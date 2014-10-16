@@ -15,38 +15,46 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     items: [
       "title": "Toggle Sidebar"
       "class": "annotator-toolbar-toggle h-icon-comment"
-      "click": (event) ->
-        event.preventDefault()
-        event.stopPropagation()
-        collapsed = window.annotator.frame.hasClass('annotator-collapsed')
-        if collapsed
-          window.annotator.showFrame()
-        else
-          window.annotator.hideFrame()
+      "on":
+        "click": (event) ->
+          event.preventDefault()
+          event.stopPropagation()
+          collapsed = window.annotator.frame.hasClass('annotator-collapsed')
+          if collapsed
+            window.annotator.showFrame()
+          else
+            window.annotator.hideFrame()
+        # Remove focus from the anchor when clicked, this removes the focus
+        # styles intended only for keyboard navigation. IE/FF apply the focus
+        # psuedo-class to a clicked element.
+        "mouseup": (event) -> $(event.target).blur()
     ,
       "title": "Show Annotations"
       "class": "h-icon-visible"
-      "click": (event) ->
-        event.preventDefault()
-        event.stopPropagation()
-        state = not window.annotator.visibleHighlights
-        window.annotator.setVisibleHighlights state
+      "on":
+        "click": (event) ->
+          event.preventDefault()
+          event.stopPropagation()
+          state = not window.annotator.visibleHighlights
+          window.annotator.setVisibleHighlights state
     ,
       "title": "Highlighting Mode"
       "class": "h-icon-highlighter"
-      "click": (event) ->
-        event.preventDefault()
-        event.stopPropagation()
-        state = not (window.annotator.tool is 'highlight')
-        tool = if state then 'highlight' else 'comment'
-        window.annotator.setTool tool
+      "on":
+        "click": (event) ->
+          event.preventDefault()
+          event.stopPropagation()
+          state = not (window.annotator.tool is 'highlight')
+          tool = if state then 'highlight' else 'comment'
+          window.annotator.setTool tool
     ,
       "title": "New Comment"
       "class": "h-icon-plus"
-      "click": (event) ->
-        event.preventDefault()
-        event.stopPropagation()
-        window.annotator.addComment()
+      "on":
+        "click": (event) ->
+          event.preventDefault()
+          event.stopPropagation()
+          window.annotator.addComment()
     ]
 
   pluginInit: ->
@@ -60,7 +68,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
       anchor = $('<a></a>')
       .attr('href', '')
       .attr('title', item.title)
-      .on('click', item.click)
+      .on(item.on)
       .addClass(item.class)
       button = $('<li></li>').append(anchor)
       buttons.add button
