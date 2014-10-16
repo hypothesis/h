@@ -14,11 +14,27 @@ var ACTION_STATES = {
     title: "Enable annotation"
   }
 }
-
+var CRX_BASE_URL = chrome.extension.getURL('/')
 
 function inject(tabId) {
   chrome.tabs.executeScript(tabId, {
     file: 'public/embed.js'
+  }, function () {
+    chrome.tabs.executeScript(tab.id, {
+      code: 'window.annotator = true;'
+    })
+  })
+}
+
+
+function remove(tabId) {
+  chrome.tabs.executeScript(tabId, {
+    code: [
+      'var script = document.createElement("script");',
+      'script.src = "' + CRX_BASE_URL + 'public/destroy.js' + '";',
+      'document.body.appendChild(script);',
+      'delete window.annotator;',
+    ].join('\n')
   })
 }
 
@@ -89,9 +105,7 @@ function onPageAction(tab) {
 
   if (state(tab.id) == 'active') {
     newState = state(tab.id, 'sleeping')
-    chrome.tabs.executeScript(tab.id, {
-      file: 'public/destroy.js'
-    })
+    remove(tab.id)
   } else {
     newState = state(tab.id, 'active')
     inject(tab.id)
