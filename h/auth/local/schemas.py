@@ -6,7 +6,7 @@ import colander
 import deform
 from hem.db import get_session
 from horus import interfaces
-from horus.schemas import unique_email
+from horus.schemas import email_exists, unique_email
 from pyramid.session import check_csrf_token
 
 from h.models import _
@@ -78,7 +78,10 @@ class LoginSchema(CSRFSchema):
 
 
 class ForgotPasswordSchema(CSRFSchema):
-    email = colander.SchemaNode(colander.String(), validator=colander.Email())
+    email = colander.SchemaNode(
+        colander.String(),
+        validator=colander.All(colander.Email(), email_exists)
+    )
 
 
 class RegisterSchema(CSRFSchema):
