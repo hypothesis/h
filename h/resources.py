@@ -88,10 +88,6 @@ class TagStreamFactory(BaseResource):
 
 
 class AnnotationFactory(BaseResource):
-    def __init__(self, request, **kwargs):
-        registry = request.registry
-        super(AnnotationFactory, self).__init__(request, **kwargs)
-
     def __getitem__(self, key):
         annotation = Annotation.fetch(key)
         if annotation is None:
