@@ -11,14 +11,23 @@ from pyramid.session import check_csrf_token
 
 from h.models import _
 
-USERNAME_BLACKLIST = set(
-    l.strip().lower() for l in resource_stream(__name__, 'blacklist')
-)
+USERNAME_BLACKLIST = None
+
 
 @colander.deferred
 def deferred_csrf_token(node, kw):
     request = kw.get('request')
     return request.session.get_csrf_token()
+
+
+def get_blacklist():
+    global USERNAME_BLACKLIST
+    if USERNAME_BLACKLIST is None:
+        USERNAME_BLACKLIST = set(
+            l.strip().lower()
+            for l in resource_stream(__package__, 'blacklist')
+        )
+    return USERNAME_BLACKLIST
 
 
 def unique_username(node, value):
@@ -33,7 +42,7 @@ def unique_username(node, value):
 def unblacklisted_username(node, value, blacklist=None):
     '''Colander validator that ensures the username is not blacklisted.'''
     if blacklist is None:
-         blacklist = USERNAME_BLACKLIST
+        blacklist = get_blacklist()
     if value.lower() in blacklist:
         # We raise a generic "user with this name already exists" error so as
         # not to make explicit the presence of a blacklist.
