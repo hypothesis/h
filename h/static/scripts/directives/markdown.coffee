@@ -317,6 +317,24 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       indexes = (match while match = re.exec(value))
       indexes.push(value.length)
 
+      ###
+      XXX Hacky stuff: Our markdown converter removes backslashes causing problems for certain
+      types of math. To address this we split the input up on math delimiters, and now don't
+      run the math through our markdown converter. This works great for blockmath but inline math
+      causes some difficulties. While the code below works for most things, there are a few edge
+      cases such as use of math within block quotes or lists that cause the output to look weird.
+      This is because the input to the markdown convert is getting split up in ways that do not
+      reflect how the text should actually be rendered.
+
+      For example:
+      * We can use inline math like this \(1+1=2\) see!
+
+      Renders as:
+      <ul>
+      <li>We can use inline math like this </li>
+      <span class="katex">MATH</span>see!<p></p></ul>
+      ###
+
       for match in indexes
         if startMath > endMath
           endMath = match.index + match.toString().length
