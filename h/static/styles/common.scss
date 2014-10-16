@@ -12,7 +12,6 @@ $headings-color: $text-color;
 @import 'spinner';
 @import 'responsive';
 @import 'threads';
-@import 'yui_grid';
 @import 'styled-text';
 @import 'simple-search';
 @import 'tags-input';
@@ -46,24 +45,6 @@ em { font-style: italic; }
 html {
   font-size: $base-font-size;
   line-height: $base-line-height;
-
-  @include yui_grid();
-
-  @include respond-to(handhelds) {
-    @include yui_grid('h-');
-  }
-
-  @include respond-to(wide-handhelds) {
-    @include yui_grid('wh-');
-  }
-
-  @include respond-to(tablets) {
-    @include yui_grid('t-');
-  }
-
-  @include respond-to(desktops) {
-    @include yui_grid('d-');
-  }
 }
 
 //PAPER////////////////////////////////
