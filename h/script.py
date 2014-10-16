@@ -113,6 +113,7 @@ def chrome(env):
         merge('../../h/static/styles/images', './public/styles/images')
         merge('../../h/static/images', './public/images')
         merge('../../h/static/fonts', './public/fonts')
+        copyfile('../../h/static/icomoon.css', './public/icomoon.css')
 
         # Copy over the vendor assets since they won't be processed otherwise
         if request.webassets_env.debug:
