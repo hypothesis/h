@@ -100,9 +100,9 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           end = (text.before + text.selection).length - 2
           insertMarkup(newtext, start, end)
           return
-      newtext = text.before + "\\(" + "LaTex or MathML" + "\\)" + text.after
+      newtext = text.before + "\\(" + "LaTex" + "\\)" + text.after
       start = text.before.length + 2
-      end = (text.before + "LaTex or MathML").length + 2
+      end = (text.before + "LaTex").length + 2
       insertMarkup(newtext, start, end)
 
     scope.insertMath = ->
@@ -110,16 +110,16 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       index = text.before.length
       if index == 0
         # The selection takes place at the very start of the input
-        applyInlineMarkup("$$", "LaTex or MathML")
+        applyInlineMarkup("$$", "LaTex")
       else if text.selection != ""
         if input.value.substring(index - 1).charAt(0) == "\n"
           # Look to see if the selection falls at the beginning of a new line.
-          applyInlineMarkup("$$", "LaTex or MathML")
+          applyInlineMarkup("$$", "LaTex")
         else
           inlineMath(text)
       else if input.value.substring((text.start - 1 ), text.start) == "\n"
         # Edge case, no selection, the cursor is on a new line.
-        applyInlineMarkup("$$", "LaTex or MathML")
+        applyInlineMarkup("$$", "LaTex")
       else
         # No selection, cursor is not on new line.
         inlineMath(text)
