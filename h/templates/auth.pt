@@ -2,19 +2,12 @@
   <head metal:fill-slot="head" tal:omit-tag>
   </head>
   <body metal:fill-slot="body" tal:omit-tag>
-    <div class="content styled-text page">
+    <div id="auth" class="content paper ng-cloak">
       <metal:main use-macro="load: h:templates/header.pt" />
-      <div tal:condition="request.session.peek_flash()">
-        <span tal:repeat="message request.session.pop_flash()" tal:omit-tag>
-          ${message}<br/>
-        </span>
-      </div>
-      <div class="auth">
-        <tal:block content="structure form" />
-      </div>
+      <main ng-view></main>
     </div>
-    <script type="text/javascript">
-      deformField2.focus()
+    <script type="text/ng-template" id="auth.html">
+      <metal:main use-macro="load: h:templates/auth.html" />
     </script>
   </body>
 </html>

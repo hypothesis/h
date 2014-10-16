@@ -39,6 +39,7 @@ def page(context, request):
     context='h.interfaces.IStreamResource',
     renderer='h:templates/app.pt',
 )
+@view_config(layout='app', route_name='stream', renderer='h:templates/app.pt')
 def stream(context, request):
     stream_type = context.get('stream_type')
     stream_key = context.get('stream_key')
@@ -68,6 +69,7 @@ def includeme(config):
     config.include('h.panels')
 
     config.add_route('index', '/')
+    config.add_route('stream', '/stream')
     config.add_route('help', '/docs/help')
 
     config.scan(__name__)

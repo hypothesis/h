@@ -172,8 +172,9 @@ class AppController
             update: [token.userId]
             delete: [token.userId]
             admin: [token.userId]
-        $scope.persona = token.userId
-        reset()
+        $scope.$apply ->
+          $scope.persona = token.userId
+          reset()
 
     onlogout = ->
       return unless drafts.discard()
@@ -190,26 +191,21 @@ class AppController
       reset()
 
     onready = ->
-      $scope.$evalAsync ->
-        $scope.persona ?= null
+      $scope.persona ?= null
 
     oncancel = ->
-      $scope.$evalAsync ->
-        $scope.dialog.visible = false
+      $scope.dialog.visible = false
 
     reset = ->
-      # Do not rely on the identity service to invoke callbacks within an
-      # angular digest cycle.
-      $scope.$evalAsync ->
-        $scope.dialog.visible = false
+      $scope.dialog.visible = false
 
-        # Update any edits in progress.
-        for draft in drafts.all()
-          annotator.publish 'beforeAnnotationCreated', draft
+      # Update any edits in progress.
+      for draft in drafts.all()
+        annotator.publish 'beforeAnnotationCreated', draft
 
-        # Reload services
-        initStore()
-        initUpdater()
+      # Reload services
+      initStore()
+      initUpdater()
 
     identity.watch {onlogin, onlogout, onready}
 
@@ -266,9 +262,6 @@ class AppController
 
     $scope.dialog = visible: false
 
-    $scope.model = persona: undefined
-    $scope.threading = plugins.Threading
-
     $scope.search =
       query: $location.search()['q']
 
@@ -283,6 +276,7 @@ class AppController
 
     $scope.socialView = annotator.socialView
     $scope.sort = name: 'Location'
+    $scope.threading = plugins.Threading
 
 
 class AnnotationViewerController

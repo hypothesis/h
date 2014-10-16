@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 from functools import partial
+import re
 from uuid import uuid1, uuid4, UUID
 
 from annotator import auth
@@ -159,6 +160,14 @@ class Group(GroupMixin, Base):
 
 class User(UserMixin, Base):
     # pylint: disable=too-many-public-methods
+
+    @classmethod
+    def get_by_id(cls, request, userid):
+        match = re.match(r'acct:([^@]+)@{}'.format(request.domain), userid)
+        if match:
+            return cls.get_by_username(request, match.group(1))
+        else:
+            return super(User, cls).get_by_id(request, userid)
 
     @classmethod
     def get_by_username(cls, request, username):
