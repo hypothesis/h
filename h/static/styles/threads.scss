@@ -86,17 +86,9 @@ $threadexp-width: .6em;
       .thread &,
       .thread & .annotation-header,
       .thread & .annotation-section { margin: 0 }
+
+      .thread & footer { display: none }
       
-      .styled-text > .MathJax_Display {
-          display: none !important;
-        }
-
-      .styled-text > *:nth-child(2) {
-        &.MathJax_Display {
-          display: block !important;
-        }
-      }
-
       .styled-text > * { display: none }
       .styled-text > *:first-child {
         display: block;
@@ -107,7 +99,19 @@ $threadexp-width: .6em;
         white-space: nowrap;
       }
 
-      .thread & footer { display: none }
+      .styled-text > .MathJax_Display {
+          display: none !important;
+        }
+
+      .styled-text > *:nth-child(2) {
+        &.MathJax_Display {
+          display: block !important;
+        }
+      }
+
+      .styled-text {
+        &.markdown-preview > * { display: block; }
+      }
     }
   }
 }
