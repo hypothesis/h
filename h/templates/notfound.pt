@@ -1,14 +1,28 @@
 <html metal:use-macro="load: h:templates/base.pt">
   <head metal:fill-slot="head" tal:omit-tag>
-    <script type="text/javascript" defer="defer">
-      <metal:main use-macro="load: h:templates/embed.txt" />
-    </script>
-    <title>Hypothesis</title>
+    <title>Hypothesis / ?</title>
   </head>
   <body metal:fill-slot="body" tal:omit-tag>
-	 <div id="home" class="content paper styled-text page">
+	 <div id="home" style="margin-top:20px" class="content paper styled-text page">
       <metal:main use-macro="load: h:templates/header.pt" />
-      <h1>404</h1>  
+      <h1>404</h1>
+      <p>Either this page doesn't exist, or you don't have the permissions required for viewing it.</p>
+      <form class="form" accept-charset="UTF-8" id="search" action="/stream" method="get">
+        <div class="form-field">
+          <label class="form-label" for="search">Search Hypothes.is:</label>
+          <input class="form-input"
+                 name="q"
+                 type="text">
+          <div class="form-actions">
+            <div class="form-actions-message">
+              <a href="https://hypothes.is/contact/">Contact Us</a>
+            </div>
+            <div class="form-actions-buttons">
+              <button class="btn btn-primary" type="submit" name="Search" status-button="login">Search</button>
+            </div>
+          </div>
+        </div>
+      </form>
    </div>
   </body>
 </html>
