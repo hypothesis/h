@@ -16,17 +16,11 @@
   "offline_enabled": false,
   "permissions": [
     "<all_urls>",
-
-    "clipboardWrite",
     "contentSettings",
-    "tabs",
-    "webRequest",
-    "webRequestBlocking",
-    "webNavigation"
+    "tabs"
   ],
   "content_security_policy":
-    "script-src 'self' 'unsafe-eval' ${src}; object-src 'self'",
-
+  "script-src 'self' 'unsafe-eval' ${src}; object-src 'self'",
   "background": {
     "persistent": true,
     "scripts": ["background.js"]
@@ -35,8 +29,8 @@
     "placeholder": "work around http://crbug.com/86449"
   },
   "web_accessible_resources": [
-    "public/*",
     "content/*",
-    "patch-worker.js"
+    "public/*",
+    "content/web/viewer.html"
   ]
 }
