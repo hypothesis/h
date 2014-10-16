@@ -274,8 +274,10 @@ $base-font-size: 14px;
     color: $link-color-hover;
   }
 
-  .annotator-toolbar-toggle:hover {
-    color: fade-out($gray-lightest, .9);
+  .annotator-toolbar-toggle {
+    &:hover, &:focus {
+      color: fade-out($gray-lightest, .9);
+    }
   }
 }
 
