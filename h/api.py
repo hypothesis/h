@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This API mostly mimics the annotator-store REST API, but is based on Pyramid
-rather than Flask. Also it includes Hypothes.is-specific modifications."""
+"""HTTP/REST API for interacting with the annotation store."""
 
 import json
 import logging
@@ -18,17 +17,6 @@ from h.models import Annotation, Document
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-"""
-A quick explanation for those unfamiliar with the Pyramid Web Framework.
-The resources defined in resources.py create the tree ('folder') structure using
-Pyramid's "traversal" pattern. For example, "/api/annotations/" will result in
-h.resources.AnnotationFactory being selected as the request's Context.
-
-For more information about Traversal and View configuration, see (respectively):
-http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/traversal.html
-http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/viewconfig.html
-"""
 
 
 # These annotation fields are not to be set by the user.
