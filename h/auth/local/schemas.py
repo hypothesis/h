@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-init, too-few-public-methods
+from pkg_resources import resource_stream
+
 import colander
 import deform
 from hem.db import get_session
@@ -9,6 +11,9 @@ from pyramid.session import check_csrf_token
 
 from h.models import _
 
+USERNAME_BLACKLIST = set(
+    l.strip().lower() for l in resource_stream(__name__, 'blacklist')
+)
 
 @colander.deferred
 def deferred_csrf_token(node, kw):
@@ -21,6 +26,18 @@ def unique_username(node, value):
     req = node.bindings['request']
     User = req.registry.getUtility(interfaces.IUserClass)
     if get_session(req).query(User).filter(User.username.ilike(value)).count():
+        Str = req.registry.getUtility(interfaces.IUIStrings)
+        raise colander.Invalid(node, Str.registration_username_exists)
+
+
+def unblacklisted_username(node, value, blacklist=None):
+    '''Colander validator that ensures the username is not blacklisted.'''
+    if blacklist is None:
+         blacklist = USERNAME_BLACKLIST
+    if value.lower() in blacklist:
+        # We raise a generic "user with this name already exists" error so as
+        # not to make explicit the presence of a blacklist.
+        req = node.bindings['request']
         Str = req.registry.getUtility(interfaces.IUIStrings)
         raise colander.Invalid(node, Str.registration_username_exists)
 
@@ -62,6 +79,7 @@ class RegisterSchema(CSRFSchema):
             colander.Length(min=3, max=15),
             colander.Regex('(?i)^[A-Z0-9._]+$'),
             unique_username,
+            unblacklisted_username,
         ),
     )
     email = colander.SchemaNode(
