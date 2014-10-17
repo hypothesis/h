@@ -100,9 +100,9 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           end = (text.before + text.selection).length - 2
           insertMarkup(newtext, start, end)
           return
-      newtext = text.before + "\\(" + "LaTex" + "\\)" + text.after
+      newtext = text.before + "\\(" + "LaTex or MathML" + "\\)" + text.after
       start = text.before.length + 2
-      end = (text.before + "LaTex").length + 2
+      end = (text.before + "LaTex or MathML").length + 2
       insertMarkup(newtext, start, end)
 
     scope.insertMath = ->
@@ -110,16 +110,16 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       index = text.before.length
       if index == 0
         # The selection takes place at the very start of the input
-        applyInlineMarkup("$$", "LaTex")
+        applyInlineMarkup("$$", "LaTex or MathML")
       else if text.selection != ""
         if input.value.substring(index - 1).charAt(0) == "\n"
           # Look to see if the selection falls at the beginning of a new line.
-          applyInlineMarkup("$$", "LaTex")
+          applyInlineMarkup("$$", "LaTex or MathML")
         else
           inlineMath(text)
       else if input.value.substring((text.start - 1 ), text.start) == "\n"
         # Edge case, no selection, the cursor is on a new line.
-        applyInlineMarkup("$$", "LaTex")
+        applyInlineMarkup("$$", "LaTex or MathML")
       else
         # No selection, cursor is not on new line.
         inlineMath(text)
@@ -299,81 +299,66 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           input.style.height = output.style.height
           $timeout -> inputEl.focus()
 
-    MathJaxFallback = false
+    mathJaxFallback = false
+    renderMathAndMarkdown = (textToCheck) ->
+      convert = $filter('converter')
+      re = /\$\$/g
+
+      startMath = 0
+      endMath = 0
+
+      indexes = (match.index while match = re.exec(textToCheck))
+      indexes.push(textToCheck.length)
+
+      parts = for index in indexes
+        if startMath > endMath
+          endMath = index + 2
+          try
+            katex.renderToString($sanitize textToCheck.substring(startMath, index))
+          catch
+            loadMathJax()
+            mathJaxFallback = true
+            $sanitize textToCheck.substring(startMath, index)
+        else
+          startMath = index + 2
+          $sanitize convert renderInlineMath textToCheck.substring(endMath, index)
+
+      return parts.join('')
+
+    renderInlineMath = (textToCheck) ->
+      re = /\\?\\\(|\\?\\\)/g
+      startMath = null
+      endMath = null
+      match = undefined
+      indexes = []
+      while match = re.exec(textToCheck)
+        indexes.push [
+          match.index
+        ]
+      for index in indexes
+        if startMath == null
+          startMath = index[0] + 2
+        else
+          endMath = index[0]
+        if startMath != null and endMath != null
+          math = katex.renderToString(textToCheck.substring(startMath, endMath))
+          textToCheck = (
+            textToCheck.substring(0, (startMath - 2)) + math +
+            textToCheck.substring((endMath + 2))
+          )
+          startMath = null
+          endMath = null
+          return renderInlineMath(textToCheck)
+      return textToCheck
+
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
       if !scope.readonly and !scope.preview
         inputEl.val (ctrl.$viewValue or '')
       value = ctrl.$viewValue or ''
-      convert = $filter('converter')
-      re = /(?:\$\$)|(?:\\?\\\(|\\?\\\))/g
-      htmlElement = /<[a-z]+>/
-
-      startMath = 0
-      endMath = 0
-      i = 0
-      parts = []
-
-      indexes = (match while match = re.exec(value))
-      indexes.push(value.length)
-
-      ###
-      XXX Hacky stuff: Our markdown converter removes backslashes causing problems for certain
-      types of math. To address this we split the input up on math delimiters, and now don't
-      run the math through our markdown converter. This works great for blockmath but inline math
-      causes some difficulties. While the code below works for most things, there are a few edge
-      cases such as use of math within block quotes or lists that cause the output to look weird.
-      This is because the input to the markdown convert is getting split up in ways that do not
-      reflect how the text should actually be rendered.
-
-      For example:
-      * We can use inline math like this \(1+1=2\) see!
-
-      Renders as:
-      <ul>
-      <li>We can use inline math like this </li>
-      <span class="katex">MATH</span>see!<p></p></ul>
-      ###
-
-      for match in indexes
-        if startMath > endMath
-          endMath = match.index + match.toString().length
-          try
-            parts.push katex.renderToString($sanitize value.substring(startMath, match.index))
-          catch
-            loadMathJax()
-            MathJaxFallback = true
-            parts.push $sanitize value.substring(startMath, match.index)
-        else
-          startMath = match.index + match.toString().length
-          # Inline math needs to fall inline, which can be tricky considering the markdown
-          # converter will take the part that comes before a peice of math and surround it
-          # with markup: <p>Here is some inline math: </p>\(2 + 2 = 4\)
-          # Here we look for various cases.
-          if match[0] == "\\("
-            # Text falls between two instances of inline math, we must remove the opening and
-            # closing <p> tags since this is meant to be one paragraph.
-            if i - 1 >= 0 and indexes[i - 1].toString() == "\\)"
-              markdown = $sanitize convert value.substring(endMath, match.index)
-              tagLength = htmlElement.exec(markdown)[0].length
-              parts.push markdown.substring(tagLength, markdown.length - (tagLength + 1))
-            # Text preceeds a case of inline math. We must remove the ending </p> tag
-            # so that the math is inline.
-            else
-              markdown = $sanitize convert value.substring(endMath, match.index)
-              tagLength = htmlElement.exec(markdown)[0].length
-              parts.push markdown.substring(0, markdown.length - (tagLength + 1))
-          # Text follows a case of inline math, we must remove opening <p> tag.
-          else if i - 1 >= 0 and indexes[i - 1].toString() == "\\)"
-            markdown = $sanitize convert value.substring(endMath, match.index)
-            tagLength = htmlElement.exec(markdown)[0].length
-            parts.push markdown.substring(tagLength, markdown.length)
-          else # Block Math or no math.
-            parts.push $sanitize convert value.substring(endMath, match.index)
-        i++
-
-      scope.rendered = $sce.trustAsHtml parts.join('')
-      if MathJaxFallback
+      rendered = renderMathAndMarkdown value
+      scope.rendered = $sce.trustAsHtml rendered
+      if mathJaxFallback
         $timeout (-> MathJax?.Hub.Queue ['Typeset', MathJax.Hub, output]), 0, false
 
     # React to the changes to the input
