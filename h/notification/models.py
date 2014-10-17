@@ -4,6 +4,7 @@ import json
 import sqlalchemy as sa
 from sqlalchemy.types import TypeDecorator, VARCHAR
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy import func, and_
 
 from pyramid_basemodel import Base
 from hem.db import get_session
@@ -75,6 +76,13 @@ class SubscriptionsMixin(BaseModel):
     def get_active_subscriptions(cls, request):
         session = get_session(request)
         return session.query(cls).filter(cls.active is True).all()
+
+    @classmethod
+    def get_subscriptions_for_uri(cls, request, uri):
+        session = get_session(request)
+        return session.query(cls).filter(
+            func.lower(cls.uri) == func.lower(uri)
+        ).all()
 
 
 class Subscriptions(SubscriptionsMixin, Base):

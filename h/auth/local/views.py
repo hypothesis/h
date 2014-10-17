@@ -4,6 +4,7 @@ import datetime
 import colander
 import deform
 import horus.views
+import json
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
 from pyramid import httpexceptions, security
@@ -12,6 +13,7 @@ from pyramid.view import view_config, view_defaults
 from h.auth.local import schemas
 from h.models import _
 from h.stats import get_client as stats
+from h.notification.models import Subscriptions
 
 
 def ajax_form(request, result):
@@ -138,7 +140,10 @@ class AsyncFormViewMapper(object):
             meth = getattr(inst, self.attr)
             result = meth()
             result = ajax_form(request, result)
-            result['model'] = model(request)
+            if 'model' in result:
+                result['model'].update(model(request))
+            else:
+                result['model'] = model(request)
             result.pop('form', None)
             return result
         return wrapper
@@ -255,6 +260,7 @@ class AsyncRegisterController(RegisterController):
 @view_auth_defaults
 @view_config(attr='edit_profile', route_name='edit_profile')
 @view_config(attr='disable_user', route_name='disable_user')
+@view_config(attr='profile', route_name='profile')
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
         request = self.request
@@ -268,6 +274,21 @@ class ProfileController(horus.views.ProfileController):
 
         username = appstruct['username']
         pwd = appstruct['pwd']
+        subscriptions = appstruct['subscriptions']
+
+        if subscriptions:
+            # Update the subscriptions table
+            subs = json.loads(subscriptions)
+            if username == subs['uri']:
+                s = Subscriptions.get_by_id(request, subs['id'])
+                if s:
+                    s.active = subs['active']
+                    self.db.add(s)
+                    return {}
+                else:
+                    return dict(errors=[{'subscriptions': _('Non existing subscription')}], code=404)
+            else:
+                return dict(errors=[{'username': _('Invalid username')}], code=400)
 
         # Password check
         user = self.User.get_user(request, username, pwd)
@@ -301,10 +322,17 @@ class ProfileController(horus.views.ProfileController):
         else:
             return dict(errors=[{'pwd': _('Invalid password')}], code=401)
 
+    def profile(self):
+        request = self.request
+        user_id = request.authenticated_userid
+        subscriptions = Subscriptions.get_subscriptions_for_uri(request, user_id)
+        return {'model': {'subscriptions': subscriptions}}
+
 
 @view_defaults(accept='application/json', name='app', renderer='json')
 @view_config(attr='edit_profile', request_param='__formid__=edit_profile')
 @view_config(attr='disable_user', request_param='__formid__=disable_user')
+@view_config(attr='profile', request_param='__formid__=profile')
 class AsyncProfileController(ProfileController):
     __view_mapper__ = AsyncFormViewMapper
 

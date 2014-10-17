@@ -28,7 +28,11 @@ class AccountController
 
       $scope.$broadcast 'formState', form.$name, ''  # Update status btn
 
-    $scope.tab = 'account'
+    $scope.tab = 'Account'
+    session.profile({user_id: $scope.persona}).$promise
+      .then (result) =>
+        $scope.subscriptions = result.subscriptions
+
     # Data for each of the forms
     $scope.editProfile = {}
     $scope.changePassword = {}
@@ -66,6 +70,17 @@ class AccountController
       $scope.$broadcast 'formState', form.$name, 'loading'  # Update status btn
       promise = session.edit_profile(packet)
       promise.$promise.then(successHandler, errorHandler)
+
+    $scope.updated = (index, form) ->
+      packet =
+        username: $scope.persona
+        subscriptions: JSON.stringify $scope.subscriptions[index]
+
+      successHandler = angular.bind(null, onSuccess, form)
+      errorHandler   = angular.bind(null, onError, form)
+      promise = session.edit_profile(packet)
+      promise.$promise.then(successHandler, errorHandler)
+
 
 
 angular.module('h.auth')

@@ -7,6 +7,7 @@ from pyramid.renderers import render
 from pyramid.events import subscriber
 
 from h import events, interfaces
+from h.notification import types
 from h.notification.models import Subscriptions
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -26,21 +27,24 @@ def parent_values(annotation, request):
         return {}
 
 
-def render(template, request, annotation, data):
-    tmap = template['template_map'](request, annotation, data)
-    text = render(template['text_template'], tmap, request)
-    html = render(template['html_template'], tmap, request)
-    subject = render(template['subject'], tmap, request)
-    return subject, text, html
+def render_template(template, request, annotation, data):
+    try:
+        tmap = template[types.TEMPLATE_MAP](request, annotation, data)
+        text = render(template[types.TEXT_PATH], tmap, request)
+        html = render(template[types.HTML_PATH], tmap, request)
+        subject = render(template[types.SUBJECT_PATH], tmap, request)
+        return subject, text, html
+    except:
+        raise TemplateRenderException("Failed to render template")
 
 
 def generate_notification(template, request, annotation, data):
-    checks = template['conditions'](annotation, data)
+    checks = template[types.CONDITIONS](annotation, data)
     if not checks:
         return {'status': False}
     try:
-        subject, text, html = render(request, annotation, data)
-        recipients = template['recipients'](request, annotation, data)
+        subject, text, html = render_template(template, request, annotation, data)
+        recipients = template[types.RECIPIENTS](request, annotation, data)
     except TemplateRenderException:
         return {'status': False}
 

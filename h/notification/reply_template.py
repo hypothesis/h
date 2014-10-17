@@ -9,7 +9,7 @@ from horus.events import NewRegistrationEvent
 
 
 import h.notification.notifier as notifier
-from h.notification.types import REPLY_TEMPLATE
+from h.notification import types
 from h.notification.models import Subscriptions
 from h.notification.gateway import user_name, user_profile_url, standalone_url, get_user_by_name
 
@@ -74,13 +74,13 @@ def check_conditions(annotation, data):
 
 # Register the template
 notifier.AnnotationNotifier.register_template(
-    REPLY_TEMPLATE, {
-        'text_template': 'h:notification/templates/reply_notification.txt',
-        'html_template': 'h:notification/templates/reply_notification.pt',
-        'subject': 'h:notification/templates/reply_notification_subject.txt',
-        'template_map': create_template_map,
-        'recipients': get_recipients,
-        'conditions': check_conditions
+    types.REPLY_TEMPLATE, {
+        types.TEXT_PATH: 'h:notification/templates/reply_notification.txt',
+        types.HTML_PATH: 'h:notification/templates/reply_notification.pt',
+        types.SUBJECT_PATH: 'h:notification/templates/reply_notification_subject.txt',
+        types.TEMPLATE_MAP: create_template_map,
+        types.RECIPIENTS: get_recipients,
+        types.CONDITIONS: check_conditions
     }
 )
 
@@ -90,7 +90,7 @@ def create_subscription(request, uri, active):
     session = get_session(request)
     subs = Subscriptions(
         uri=uri,
-        template=REPLY_TEMPLATE,
+        template=types.REPLY_TEMPLATE,
         description='Generated reply notification template',
         active=active
     )

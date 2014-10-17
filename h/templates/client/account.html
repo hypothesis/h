@@ -1,10 +1,12 @@
 <div class="tabbable"
-     tab-reveal="['account', 'notifications']"
      ng-controller="AccountController"
      ng-model="tab"
 >
-  <div class="tab-pane" title="Account" ng-click="tab = 'account'">
-    <form class="account-form form" name="changePasswordForm" ng-submit="submit(changePasswordForm)" novalidate form-validate>
+  <div class="tab-pane" title="Account">
+    <form class="account-form form"
+          name="changePasswordForm"
+          ng-submit="submit(changePasswordForm)"
+          novalidate form-validate>
       <h2 class="form-heading"><span>Change Your Password</span></h2>
 
       <div class="form-field">
@@ -70,6 +72,16 @@
       </div>
     </form>
   </div>
-  <div class="tab-pane" title="Notifications" ng-click="tab = 'notifications'">
+  <div class="tab-pane" title="Notifications">
+      <form class="account-form form" name="notificationsForm">
+          <ul>
+            <li ng-repeat="subscription in subscriptions">
+                <input type="checkbox"
+                       ng-model="subscription.active"
+                       ng-change="updated($index, notificationsForm)">
+                <span>{{subscription.description}}</span>
+            </li>
+          </ul>
+      </form>
   </div>
 </div>

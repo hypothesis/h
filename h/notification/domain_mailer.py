@@ -9,7 +9,7 @@ from pyramid.events import subscriber
 
 from h import events
 from h.notification.gateway import user_profile_url, standalone_url
-from h.notification.types import DOCUMENT_OWNER
+from h.notification import types
 import h.notification.notifier as notifier
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -43,13 +43,13 @@ def check_conditions(annotation, data):
 
 # Register the template
 notifier.AnnotationNotifier.register_template(
-    DOCUMENT_OWNER, {
-        'template': 'h:notification/templates/emails/document_owner_notification.txt',
-        'html_template': 'h:notification/templates/emails/document_owner_notification.pt',
-        'subject': 'h:notification/templates/emails/document_owner_notification_subject.txt',
-        'template_map': create_template_map,
-        'recipients': get_recipients,
-        'conditions': check_conditions
+    types.DOCUMENT_OWNER, {
+        types.TEXT_PATH: 'h:notification/templates/emails/document_owner_notification.txt',
+        types.HTML_PATH: 'h:notification/templates/emails/document_owner_notification.pt',
+        types.SUBJECT_PATH: 'h:notification/templates/emails/document_owner_notification_subject.txt',
+        types.TEMPLATE_MAP: create_template_map,
+        types.RECIPIENTS: get_recipients,
+        types.CONDITIONS: check_conditions
     }
 )
 
@@ -101,7 +101,7 @@ def domain_notification(event):
                         notif.send_notification_to_owner(
                             annotation,
                             {'email': email},
-                            DOCUMENT_OWNER
+                            types.DOCUMENT_OWNER
                         )
                     except:
                         log.exception('Problem sending email')
