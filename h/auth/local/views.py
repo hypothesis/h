@@ -145,11 +145,44 @@ class AsyncFormViewMapper(object):
 @view_config(attr='login', route_name='login')
 @view_config(attr='logout', route_name='logout')
 class AuthController(horus.views.AuthController):
+    def check_credentials(self, username, password):
+        allow_email_auth = self.settings.get('horus.allow_email_auth', False)
+
+        user = self.User.get_by_username(self.request, username)
+
+        if allow_email_auth and not user:
+            user = self.User.get_by_email(self.request, username)
+
+        if not user:
+            raise httpexceptions.HTTPBadRequest({
+                'errors': [{
+                    'username': _('User does not exist.'),
+                }],
+            })
+
+        if not self.User.validate_user(user, password):
+            raise httpexceptions.HTTPBadRequest({
+                'errors': [{
+                    'password': _('Incorrect password. Please try again.'),
+                }],
+            })
+
+        if not self.allow_inactive_login and self.require_activation \
+                and not user.is_activated:
+            reason = _('Your account is not active, please check your e-mail.')
+            raise httpexceptions.HTTPBadRequest({'reason': reason})
+
+        return user
+
     def login(self):
         request = self.request
-        result = super(AuthController, self).login()
-        remember(request, request.user)
-        return result
+        try:
+            result = super(AuthController, self).login()
+        except httpexceptions.HTTPBadRequest as e:
+            return e.detail
+        else:
+            remember(request, request.user)
+            return result
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
