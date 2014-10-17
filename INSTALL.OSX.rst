@@ -26,7 +26,7 @@ Install Node and other required tools:
 
 .. code-block:: bash
 
-    gem install compass
+    gem install sass:3.4.5 compass
     brew install node
 
 Add the tools' path to the $PATH variable:

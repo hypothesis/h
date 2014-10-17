@@ -3,7 +3,10 @@ language:
 python:
   - '2.7'
 install:
-  - gem install sass
+  # Install temporarily pinned to avoid a regression in sass==3.4.6
+  #
+  #   https://github.com/sass/sass/issues/1476
+  - gem install sass:3.4.5
   - gem install compass
   - make
 services:
