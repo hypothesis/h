@@ -56,7 +56,7 @@ ol {
 
   @include respond-to(tablets desktops) {
     margin: auto;
-    max-width: $break-medium;
+    max-width: $break-tablet;
     padding-left: 4em;
     padding-right: 4em;
   }

@@ -1,0 +1,48 @@
+@import "mixins/responsive";
+@import "mixins/grid";
+
+// A mobile first grid system. Requires the columns to be wrapped in a
+// .grid container. Each column then should have a width applied. See
+// mixins/grid for more info on available widths.
+//
+// By default a column width will apply to all viewport widths. In most cases
+// a mobile viewport should not use columns so a more specific class will be
+// required. The viewports available are:
+//
+//   wide-handheld, tablet and desktop
+//
+// Each of these cascade, so a tablet class will apply to tablet sized
+// viewports as well as desktops.
+//
+// Examples
+//
+// This creates a grid that only has rows on mobile. Two columns on tablets and
+// four columns on desktop sized viewports.
+//
+//   <div class="grid">
+//     <div class="column-tablet-one-half column-desktop-one-quarter"></div>
+//     <div class="column-tablet-one-half column-desktop-one-quarter"></div>
+//     <div class="column-tablet-one-half column-desktop-one-quarter"></div>
+//     <div class="column-tablet-one-half column-desktop-one-quarter"></div>
+//   </div>
+.grid {
+  @include grid-row;
+}
+
+[class^="column-"], [class*=" column-"] {
+  @include grid-column;
+}
+
+@include grid-setup("column");
+
+@include wide-handheld-and-up {
+  @include grid-setup("column-wide-handheld");
+}
+
+@include tablet-and-up {
+  @include grid-setup("column-tablet");
+}
+
+@include desktop-and-up {
+  @include grid-setup("column-desktop");
+}

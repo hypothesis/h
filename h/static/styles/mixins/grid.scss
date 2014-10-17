@@ -1,0 +1,48 @@
+// Mixins for working with grids. A grid consists of an outer grid container
+// and internal columns. Each column has a gutter defined by $grid-gutter.
+// The implementation is largely based on the grid system created by
+// Harry Roberts <http://csswizardry.com/csswizardry-grids/>.
+$grid-gutter: 20px;
+
+// Sets up styles for the grid wrapper.
+@mixin grid-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin-left: -$grid-gutter; // Remove the margin from the first column.
+  letter-spacing: -0.31em; // Collapse whitespace between inline-block elements.
+  word-spacing: -0.43em;
+  @content;
+}
+
+// Defines a column, can be included in any selector, widths can be provided
+// by passing a @content block.
+//
+// Example
+//
+// .my-awkward-item {
+//   @include grid-column { width: 43%; }
+// }
+@mixin grid-column {
+  display: inline-block;
+  padding-left: $grid-gutter;
+  vertical-align: top;
+  width: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  letter-spacing: normal;
+  word-spacing: normal;
+  @content;
+}
+
+// Defines selectors for a class based grid system. Only includes a few common
+// sizes at the moment, but can be expanded as necessary.
+@mixin grid-setup($prefix: "") {
+  .#{$prefix}-one-whole { width: 100%; }
+  .#{$prefix}-one-half  { width: 50%; }
+  .#{$prefix}-one-third { width: 33.333%; }
+  .#{$prefix}-two-thirds { width: 66.666%; }
+  .#{$prefix}-one-quarter { width: 25%; }
+  .#{$prefix}-three-quarters { width: 75%; }
+}

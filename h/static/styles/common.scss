@@ -6,11 +6,12 @@ $base-font-size: 16px;
 $base-line-height: 26px;
 $headings-color: $text-color;
 
+@import 'mixins/responsive';
+@import 'grid';
 @import 'annotations';
 @import 'forms';
 @import 'markdown-editor';
 @import 'spinner';
-@import 'responsive';
 @import 'threads';
 @import 'styled-text';
 @import 'simple-search';
