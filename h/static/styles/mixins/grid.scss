@@ -1,3 +1,5 @@
+@import "compass/utilities/general/clearfix";
+
 // Mixins for working with grids. A grid consists of an outer grid container
 // and internal columns. Each column has a gutter defined by $grid-gutter.
 // The implementation is largely based on the grid system created by
@@ -10,8 +12,7 @@ $grid-gutter: 20px;
   margin: 0;
   padding: 0;
   margin-left: -$grid-gutter; // Remove the margin from the first column.
-  letter-spacing: -0.31em; // Collapse whitespace between inline-block elements.
-  word-spacing: -0.43em;
+  @include pie-clearfix;
   @content;
 }
 
@@ -24,15 +25,11 @@ $grid-gutter: 20px;
 //   @include grid-column { width: 43%; }
 // }
 @mixin grid-column {
-  display: inline-block;
+  float: left;
   padding-left: $grid-gutter;
   vertical-align: top;
   width: 100%;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
-  letter-spacing: normal;
-  word-spacing: normal;
   @content;
 }
 
