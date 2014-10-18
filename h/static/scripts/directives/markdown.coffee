@@ -53,31 +53,35 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       # Focus the input
       input.focus()
 
-    applyInlineMarkup = (markup, innertext)->
+    applyInlineMarkup = (markupL, innertext, markupR) ->
+      markupR or= markupL
       text = userSelection()
       if text.selection == ""
-        newtext = text.before + markup + innertext + markup + text.after
-        start = (text.before + markup).length
-        end = (text.before + innertext + markup).length
+        newtext = text.before + markupL + innertext + markupR + text.after
+        start = (text.before + markupL).length
+        end = (text.before + innertext + markupR).length
         insertMarkup(newtext, start, end)
       else
         # Check to see if markup has already been applied before to the selection.
-        slice1 = text.before.slice(text.before.length - markup.length)
-        slice2 = text.after.slice(0, markup.length)
-        if slice1 == markup and slice2 == markup
+        slice1 = text.before.slice(text.before.length - markupL.length)
+        slice2 = text.after.slice(0, markupR.length)
+        # Edge case: scope.insertMath() is called for inline and block markup, to avoid a case
+        # in which pressing the math button to remove block math markup adds inline math inside of
+        # block math $$\(LaTex or MathML\)$$ we check for $$ here.
+        if (slice1 == markupL and slice2 == markupR) or (slice1 == '$$' and slice2 == '$$')
           # Remove markup 
           newtext = (
-            text.before.slice(0, (text.before.length - markup.length)) +
-            text.selection + text.after.slice(markup.length)
+            text.before.slice(0, (text.before.length - markupL.length)) +
+            text.selection + text.after.slice(markupR.length)
           )
-          start = text.before.length - markup.length
-          end = (text.before + text.selection).length - markup.length
+          start = text.before.length - markupL.length
+          end = (text.before + text.selection).length - markupR.length
           insertMarkup(newtext, start, end)
         else
           # Apply markup
-          newtext = text.before + markup + text.selection + markup + text.after
-          start = (text.before + markup).length
-          end = (text.before + text.selection + markup).length
+          newtext = text.before + markupL + text.selection + markupR + text.after
+          start = (text.before + markupL).length
+          end = (text.before + text.selection + markupR).length
           insertMarkup(newtext, start, end)
 
     scope.insertBold = ->
@@ -86,43 +90,13 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
     scope.insertItalic = ->
       applyInlineMarkup("*", "Italic")
 
-    inlineMath = (text) ->
-      slice1 = text.before.slice(text.before.length - 2)
-      slice2 = text.after.slice(0, 2)
-      if slice1 == "\\(" or slice1 == "$$" 
-        if slice2 == "\\)" or slice2 == "$$"
-          # Remove markup 
-          newtext = (
-            text.before.slice(0, (text.before.length - 2)) +
-            text.selection + text.after.slice(2)
-          )
-          start = text.before.length - 2
-          end = (text.before + text.selection).length - 2
-          insertMarkup(newtext, start, end)
-          return
-      newtext = text.before + "\\(" + "LaTex or MathML" + "\\)" + text.after
-      start = text.before.length + 2
-      end = (text.before + "LaTex or MathML").length + 2
-      insertMarkup(newtext, start, end)
-
     scope.insertMath = ->
       text = userSelection()
       index = text.before.length
-      if index == 0
-        # The selection takes place at the very start of the input
-        applyInlineMarkup("$$", "LaTex or MathML")
-      else if text.selection != ""
-        if input.value.substring(index - 1).charAt(0) == "\n"
-          # Look to see if the selection falls at the beginning of a new line.
-          applyInlineMarkup("$$", "LaTex or MathML")
-        else
-          inlineMath(text)
-      else if input.value.substring((text.start - 1 ), text.start) == "\n"
-        # Edge case, no selection, the cursor is on a new line.
-        applyInlineMarkup("$$", "LaTex or MathML")
+      if index == 0 or input.value[index - 1] == '\n'
+        applyInlineMarkup('$$', 'LaTeX or MathML')
       else
-        # No selection, cursor is not on new line.
-        inlineMath(text)
+        applyInlineMarkup('\\(', 'LaTeX or MathML', '\\)')
 
     scope.insertLink = ->
       text = userSelection()
@@ -332,19 +306,17 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       match = undefined
       indexes = []
       while match = re.exec(textToCheck)
-        indexes.push [
-          match.index
-        ]
+        indexes.push match.index
       for index in indexes
         if startMath == null
-          startMath = index[0] + 2
+          startMath = index + 2
         else
-          endMath = index[0]
+          endMath = index
         if startMath != null and endMath != null
           math = katex.renderToString(textToCheck.substring(startMath, endMath))
           textToCheck = (
             textToCheck.substring(0, (startMath - 2)) + math +
-            textToCheck.substring((endMath + 2))
+            textToCheck.substring(endMath + 2)
           )
           startMath = null
           endMath = null
