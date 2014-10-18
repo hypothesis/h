@@ -76,7 +76,7 @@ def index(context, request):
 
 
 @api_config(context='h.resources.APIResource', name='search')
-def api_search(context, request):
+def search(context, request):
     """Search the database for annotations matching with the given query."""
     registry = request.registry
 
@@ -116,7 +116,7 @@ def api_search(context, request):
 
 
 @api_config(context='h.resources.APIResource', name='token', renderer='string')
-def api_token(context, request):
+def token(context, request):
     """Return the user's API authentication token."""
     response = request.create_token_response()
     return response.json_body.get('access_token', response)
