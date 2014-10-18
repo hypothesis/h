@@ -65,10 +65,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
         # Check to see if markup has already been applied before to the selection.
         slice1 = text.before.slice(text.before.length - markupL.length)
         slice2 = text.after.slice(0, markupR.length)
-        # Edge case: scope.insertMath() is called for inline and block markup, to avoid a case
-        # in which pressing the math button to remove block math markup adds inline math inside of
-        # block math $$\(LaTex or MathML\)$$ we check for $$ here.
-        if (slice1 == markupL and slice2 == markupR) or (slice1 == '$$' and slice2 == '$$')
+        if (slice1 == markupL and slice2 == markupR)
           # Remove markup 
           newtext = (
             text.before.slice(0, (text.before.length - markupL.length)) +
@@ -93,7 +90,11 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
     scope.insertMath = ->
       text = userSelection()
       index = text.before.length
-      if index == 0 or input.value[index - 1] == '\n'
+      if (
+        index == 0 or
+        input.value[index - 1] == '\n' or
+        (input.value[index - 1] == '$' and input.value[index - 2] == '$')
+      )
         applyInlineMarkup('$$', 'LaTeX or MathML')
       else
         applyInlineMarkup('\\(', 'LaTeX or MathML', '\\)')
