@@ -10,6 +10,7 @@ describe 'h.auth.AccountController', ->
   fakeFormHelpers = null
   editProfilePromise = null
   disableUserPromise = null
+  profilePromise = null
   createController = null
 
   beforeEach module('h.auth')
@@ -37,8 +38,10 @@ describe 'h.auth.AccountController', ->
 
     disableUserPromise = {then: sandbox.stub()}
     editProfilePromise = {then: sandbox.stub()}
+    profilePromise = {then: sandbox.stub()}
     fakeSession.edit_profile = sandbox.stub().returns($promise: editProfilePromise)
     fakeSession.disable_user = sandbox.stub().returns($promise: disableUserPromise)
+    fakeSession.profile = sandbox.stub().returns($promise: profilePromise)
 
     createController = ->
       $controller('AccountController', {$scope: $scope})

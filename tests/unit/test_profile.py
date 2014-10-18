@@ -33,10 +33,21 @@ def configure(config):
     config.registry.registerUtility(SubmitForm, IProfileForm)
 
 
-def _get_fake_request(username, password):
+def _get_fake_request(username, password, with_subscriptions=False, active=True):
     fake_request = DummyRequest()
+
+    def get_fake_token():
+        return 'fake_token'
+
+    fake_request.params['csrf_token'] = 'fake_token'
+    fake_request.session.get_csrf_token = get_fake_token
     fake_request.POST['username'] = username
     fake_request.POST['pwd'] = password
+
+    if with_subscriptions:
+        subs = '{"active": activestate, "uri": "username", "id": 1}'
+        subs = subs.replace('activestate', str(active).lower()).replace('username', username)
+        fake_request.POST['subscriptions'] = subs
     return fake_request
 
 
@@ -62,13 +73,11 @@ def test_profile_invalid_password():
         configure(config)
         with patch('horus.models.UserMixin') as mock_user:
             with patch('horus.lib.FlashMessage') as mock_flash:
-                with patch('h.auth.local.schemas.EditProfileSchema') as mock_schema:
-                    mock_schema.validator = MagicMock(name='validator')
-                    mock_user.get_user = MagicMock(side_effect=_bad_password)
-                    profile = ProfileController(request)
-                    profile.User = mock_user
-                    profile.edit_profile()
-                    assert mock_flash.called_with(request, _('Invalid password.'), kind='error')
+                mock_user.get_user = MagicMock(side_effect=_bad_password)
+                profile = ProfileController(request)
+                profile.User = mock_user
+                profile.edit_profile()
+                assert mock_flash.called_with(request, _('Invalid password.'), kind='error')
 
 
 def test_profile_calls_super():
@@ -79,14 +88,31 @@ def test_profile_calls_super():
     with testConfig() as config:
         configure(config)
         with patch('horus.models.UserMixin') as mock_user:
-            with patch('h.auth.local.schemas.EditProfileSchema') as mock_schema:
-                with patch('horus.views.ProfileController.edit_profile') as mock_super_profile:
-                    mock_user.get_user = MagicMock(side_effect=_good_password_simple)
-                    profile = ProfileController(request)
-                    profile.User = mock_user
-                    profile.edit_profile()
-                    assert profile.request.context == True
-                    assert mock_super_profile.called
+            with patch('horus.views.ProfileController.edit_profile') as mock_super_profile:
+                mock_user.get_user = MagicMock(side_effect=_good_password_simple)
+                profile = ProfileController(request)
+                profile.User = mock_user
+                profile.edit_profile()
+                assert profile.request.context is True
+                assert mock_super_profile.called
+
+
+# Tests for changing the subscription state
+def test_subscription_update():
+    """Make sure that the new status is written into the DB
+    """
+    request = _get_fake_request('acct:john@doe', 'smith', True, True)
+    print "request", request.POST
+    with testConfig() as config:
+        configure(config)
+        with patch('h.auth.local.views.Subscriptions') as mock_subs:
+            mock_subs.get_by_id = MagicMock()
+            mock_subs.get_by_id.return_value = Mock(active=True)
+            profile = ProfileController(request)
+            profile.db = Mock()
+            profile.db.add = MagicMock(name='add')
+            profile.edit_profile()
+            assert profile.db.add.called
 
 
 # Tests for disable_user calls
