@@ -8,6 +8,9 @@ from pyramid.testing import DummyRequest, DummyResource
 
 from h import api
 
+from helpers import DictMock
+
+
 def test_index():
     """Get the API descriptor"""
     context = DummyResource()
@@ -77,9 +80,8 @@ def test_annotations_index(mock_Annotation, mock_get_user):
 
 
 @patch('h.api.get_user')
-@patch('h.api.Annotation')
+@patch('h.api.Annotation', new_callable=DictMock)
 def test_create(mock_Annotation, mock_get_user):
-    annotation = mock_Annotation.return_value = MagicMock()
     user = mock_get_user.return_value = MagicMock()
     user.id = 'alice'
     user.consumer.key = 'real_consumer'
@@ -89,9 +91,12 @@ def test_create(mock_Annotation, mock_get_user):
 
     result = api.create(context, request)
 
-    mock_Annotation.assert_called_once_with({'text': 'blabla', 'quote': 'blub'})
-    annotation.__setitem__.assert_any_call('user', 'alice')
-    annotation.__setitem__.assert_any_call('consumer', 'real_consumer')
+    annotation = mock_Annotation.instances[0]
+    assert annotation['text'] == 'blabla'
+    assert annotation['quote'] == 'blub'
+    assert annotation['user'] == 'alice'
+    assert annotation['consumer'] == 'real_consumer'
+    assert annotation['permissions'] == _json_annotation['permissions']
     annotation.save.assert_called_once()
 
     assert request.registry.notify.call_count == 1, "Annotation event should have occured"
@@ -111,30 +116,82 @@ def test_read():
 
 
 def test_update():
-    annotation = MagicMock()
+    annotation = DictMock()(_old_annotation)
     context = annotation
     request = DummyRequest(json_body=_json_annotation)
     request.registry = MagicMock()
+    request.has_permission = MagicMock(return_value=True)
 
     result = api.update(context, request)
 
-    annotation.update.assert_called_once({'text':'blabla', 'quote':'blub'})
+    assert annotation['text'] == 'blabla'
+    assert annotation['quote'] == 'blub'
+    assert annotation['user'] == 'alice'
+    assert annotation['consumer'] == 'real_consumer'
+    assert annotation['permissions'] == _json_annotation['permissions']
     annotation.save.assert_called_once()
     assert request.registry.notify.call_count == 1, "Annotation event should have occured"
     assert request.registry.notify.call_args[0][0].action == 'update', "Annotation event action should be 'update'"
     assert result == context, "Annotation should have been returned"
 
 
-def test_update_anonymize_deletes():
-    pass
+@patch('h.api._anonymize_deletes')
+def test_update_anonymize_deletes(mock_anonymize_deletes):
+    annotation = DictMock()(_old_annotation)
+    annotation['deleted'] = True
+    context = annotation
+    request = DummyRequest(json_body=_json_annotation)
+
+    result = api.update(context, request)
+
+    mock_anonymize_deletes.assert_called_once_with(annotation)
 
 
-def test_update_change_permissions():
-    pass
+def test_anonymize_deletes():
+    annotation = DictMock()(_old_annotation)
+    annotation['deleted'] = True
+
+    result = api._anonymize_deletes(annotation)
+
+    assert 'user' not in annotation
+    assert annotation['permissions'] == {
+        'admin': [],
+        'update': ['bob'],
+        'read': ['group:__world__'],
+        'delete': [],
+    }
+
+
+@patch('h.api._api_error')
+def test_update_change_permissions_disallowed(mock_api_error):
+    response_info = mock_api_error.return_value = MagicMock()
+    annotation = DictMock()(_old_annotation)
+    context = annotation
+    request = DummyRequest(json_body=_json_annotation)
+    request.registry = MagicMock()
+    request.has_permission = MagicMock(return_value=False)
+
+    result = api.update(context, request)
+
+    assert mock_api_error.called
+    assert annotation['text'] == 'old_text'
+    assert annotation.save.call_count == 0
+    assert request.registry.notify.call_count == 0, "Annotation event should NOT have occured"
+    assert result == response_info, "Error information should have been returned"
 
 
 def test_delete():
-    pass
+    annotation = DictMock()(_old_annotation)
+    context = annotation
+    request = DummyRequest()
+    request.registry = MagicMock()
+
+    result = api.delete(context, request)
+
+    assert annotation.delete.assert_called_once()
+    assert request.registry.notify.call_count == 1, "Annotation event should have occured"
+    assert request.registry.notify.call_args[0][0].action == 'delete', "Annotation event action should be 'delete'"
+    assert result == {'id': '1234', 'deleted': True}, "Deletion confirmation should have been returned"
 
 
 _json_annotation = {
@@ -145,4 +202,26 @@ _json_annotation = {
     'user': 'eve',
     'consumer': 'fake_consumer',
     'id': '1337',
+    'permissions': {
+        'admin': ['alice'],
+        'update': ['alice'],
+        'read': ['alice', 'group:__world__'],
+        'delete': ['alice'],
+    },
+}
+
+_old_annotation = {
+    'text': 'old_text',
+    'quote': 'old_quote',
+    'created': '2010-01-01',
+    'updated': '2010-01-02',
+    'user': 'alice',
+    'consumer': 'real_consumer',
+    'id': '1234',
+    'permissions': {
+        'admin': ['alice'],
+        'update': ['alice', 'bob'],
+        'read': ['alice', 'group:__world__'],
+        'delete': ['alice'],
+    },
 }
