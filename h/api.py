@@ -145,7 +145,7 @@ def create(context, request):
     except ValueError:
         return _api_error(request,
                           'No JSON payload sent. Annotation not created.',
-                          status=400)  # Client Error: Bad Request
+                          status_code=400)  # Client Error: Bad Request
 
     # Some fields are not to be set by the user, ignore them
     for field in PROTECTED_FIELDS:
@@ -200,7 +200,7 @@ def update(context, request):
     except ValueError:
         return _api_error(request,
                           'No JSON payload sent. Annotation not created.',
-                          status=400)  # Client Error: Bad Request
+                          status_code=400)  # Client Error: Bad Request
 
     # Some fields are not to be set by the user, ignore them
     for field in PROTECTED_FIELDS:
@@ -216,7 +216,7 @@ def update(context, request):
             return _api_error(
                 request,
                 'Not authorized to change annotation permissions.',
-                status=401)  # Unauthorized
+                status_code=401)  # Unauthorized
 
     # Update the annotation with the new data
     annotation.update(fields)
