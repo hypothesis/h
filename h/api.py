@@ -121,6 +121,7 @@ def token(context, request):
     response = request.create_token_response()
     return response.json_body.get('access_token', response)
 
+
 @api_config(context='h.resources.AnnotationFactory', request_method='GET')
 def annotations_index(context, request):
     """Do a search for all annotations on anything and return results.
