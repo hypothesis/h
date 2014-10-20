@@ -16,7 +16,7 @@ if (window.hasOwnProperty('hypothesisRole')) {
 
 if (window.hasOwnProperty('hypothesisConfig')) {
   if (typeof window.hypothesisConfig === 'function') {
-    options = window.hypothesisConfig();
+    options = jQuery.extend(options, window.hypothesisConfig());
   } else {
     throw new TypeError('hypothesisConfig must be a function, see: ' + docs);
   }
