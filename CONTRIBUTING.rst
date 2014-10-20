@@ -2,7 +2,7 @@
 Contributing to Development
 ***************************
 
-Front matter
+Introduction
 ============
 
 Communications
