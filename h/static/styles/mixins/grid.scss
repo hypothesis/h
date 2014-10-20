@@ -36,10 +36,10 @@ $grid-gutter: 20px;
 // Defines selectors for a class based grid system. Only includes a few common
 // sizes at the moment, but can be expanded as necessary.
 @mixin grid-setup($prefix: "") {
-  .#{$prefix}-one-whole { width: 100%; }
-  .#{$prefix}-one-half  { width: 50%; }
-  .#{$prefix}-one-third { width: 33.333%; }
-  .#{$prefix}-two-thirds { width: 66.666%; }
-  .#{$prefix}-one-quarter { width: 25%; }
-  .#{$prefix}-three-quarters { width: 75%; }
+  .#{$prefix}one-whole { width: 100%; }
+  .#{$prefix}one-half  { width: 50%; }
+  .#{$prefix}one-third { width: 33.333%; }
+  .#{$prefix}two-thirds { width: 66.666%; }
+  .#{$prefix}one-quarter { width: 25%; }
+  .#{$prefix}three-quarters { width: 75%; }
 }

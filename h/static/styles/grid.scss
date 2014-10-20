@@ -33,16 +33,16 @@
   @include grid-column;
 }
 
-@include grid-setup("column");
+@include grid-setup("column-");
 
 @include wide-handheld-and-up {
-  @include grid-setup("column-wide-handheld");
+  @include grid-setup("column-wide-handheld-");
 }
 
 @include tablet-and-up {
-  @include grid-setup("column-tablet");
+  @include grid-setup("column-tablet-");
 }
 
 @include desktop-and-up {
-  @include grid-setup("column-desktop");
+  @include grid-setup("column-desktop-");
 }
