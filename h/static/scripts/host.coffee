@@ -29,6 +29,9 @@ class Annotator.Host extends Annotator.Guest
 
     app.appendTo(@frame)
 
+    if options.firstRun
+      this.on 'panelReady', this.actuallyShowFrame(transition: false)
+
     if @plugins.Heatmap?
       this._setupDragEvents()
       @plugins.Heatmap.element.on 'click', (event) =>
@@ -38,17 +41,21 @@ class Annotator.Host extends Annotator.Guest
     # Scan the document
     this._scan()
 
+  actuallyShowFrame: (options={transition: true}) ->
+    unless @drag.enabled
+      @frame.css 'margin-left': "#{-1 * @frame.width()}px"
+    if options.transition
+      @frame.removeClass 'annotator-no-transition'
+    else
+      @frame.addClass 'annotator-no-transition'
+    @frame.removeClass 'annotator-collapsed'
+
   _setupXDM: (options) ->
     channel = super
 
     channel
 
-    .bind('showFrame', (ctx) =>
-      unless @drag.enabled
-        @frame.css 'margin-left': "#{-1 * @frame.width()}px"
-      @frame.removeClass 'annotator-no-transition'
-      @frame.removeClass 'annotator-collapsed'
-    )
+    .bind 'showFrame', (ctx) => this.actuallyShowFrame()
 
     .bind('hideFrame', (ctx) =>
       @frame.css 'margin-left': ''
