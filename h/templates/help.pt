@@ -11,7 +11,7 @@
         <metal:main use-macro="load: header.pt" />
       </header>
       <article class="help-page-content">
-        <section class="help-page-section">
+        <section class="help-page-section" tal:condition="is_help">
           <h2 id="installation" class="help-page-heading">Installation</h2>
           <p class="help-page-lede">There are a couple of installations of Hypothesis to choose from:</p>
           <div class="numbered-list grid">
@@ -19,7 +19,7 @@
             <div class="column-1-2"><div class="numbered-list-item">If you wish to install Hypothesis on your own site then head over to GitHub.</div></div>
           </div>
         </section>
-        <section class="help-page-section">
+        <section class="help-page-section" tal:condition="not is_help">
           <h2 id="getting-started" class="help-page-heading">Getting started</h2>
           <p class="help-page-lede">Now you have the extension up and running. It's time to start annotating some documents.</p>
           <div class="numbered-list grid">
@@ -104,7 +104,7 @@
             </ul>
           </div>
         </section>
-        <section class="help-page-section">
+        <section class="help-page-section" tal:condition="is_index">
           <h2 id="contributing" class="help-page-heading">Contributing</h2>
           <div class="styled-text">
             <p>Hypothes.is is an open source effort licensed under a 2-Clause <a
