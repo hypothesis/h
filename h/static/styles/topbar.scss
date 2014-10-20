@@ -1,6 +1,5 @@
 @import 'base';
-@import 'responsive';
-
+@import 'mixins/responsive';
 
 body {
   background-color: transparent;
@@ -42,7 +41,7 @@ body {
 
   .inner {
     margin: 0 auto;
-    max-width: $break-medium;
+    max-width: $break-tablet;
     padding: 0 4em;
     position: relative;
 

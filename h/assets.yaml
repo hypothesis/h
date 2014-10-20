@@ -279,10 +279,11 @@ app_css:
           - h:static/styles/annotations.scss
           - h:static/styles/mixins/forms.scss
           - h:static/styles/mixins/icons.scss
+          - h:static/styles/mixins/responsive.scss
+          - h:static/styles/mixins/grid.scss
           - h:static/styles/common.scss
-          - h:static/styles/responsive.scss
+          - h:static/styles/grid.scss
           - h:static/styles/threads.scss
-          - h:static/styles/yui_grid.scss
           - h:static/styles/forms.scss
           - h:static/styles/markdown-editor.scss
           - h:static/styles/reset.scss
@@ -400,4 +401,4 @@ topbar:
         - h:static/styles/topbar.scss
       depends:
         - h:static/styles/base.scss
-        - h:static/styles/responsive.scss
+        - h:static/styles/mixins/responsive.scss

@@ -76,6 +76,15 @@
         width: 48%;
         float: left;
       }
+
+      .pattern-library-column-example {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 5px;
+        padding: 10px 0;
+        margin-bottom: 10px;
+        text-align: center;
+        font-family: monospace;
+      }
     </style>
   </head>
   <body metal:fill-slot="body" tal:omit-tag>
@@ -127,6 +136,73 @@
             <pre><code>if (isAwesome) {
     return true;
 }</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Grid System</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="grid">
+            <div class="column-1-1"><div class="pattern-library-column-example">.column-1-1</div></div>
+            <div class="column-1-2"><div class="pattern-library-column-example">.column-1-2</div></div>
+            <div class="column-1-4"><div class="pattern-library-column-example">.column-1-4</div></div>
+            <div class="column-1-4"><div class="pattern-library-column-example">.column-1-4</div></div>
+            <div class="column-1-3"><div class="pattern-library-column-example">.column-1-3</div></div>
+            <div class="column-2-3"><div class="pattern-library-column-example">.column-2-3</div></div>
+            <div class="column-1-4"><div class="pattern-library-column-example">.column-1-4</div></div>
+            <div class="column-3-4"><div class="pattern-library-column-example">.column-3-4</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Grid System (Wide Handheld and up)</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="grid">
+            <div class="column-wide-handheld-1-1"><div class="pattern-library-column-example">.column-wide-handheld-1-1</div></div>
+            <div class="column-wide-handheld-1-2"><div class="pattern-library-column-example">.column-wide-handheld-1-2</div></div>
+            <div class="column-wide-handheld-1-4"><div class="pattern-library-column-example">.column-wide-handheld-1-4</div></div>
+            <div class="column-wide-handheld-1-4"><div class="pattern-library-column-example">.column-wide-handheld-1-4</div></div>
+            <div class="column-wide-handheld-1-3"><div class="pattern-library-column-example">.column-wide-handheld-1-3</div></div>
+            <div class="column-wide-handheld-2-3"><div class="pattern-library-column-example">.column-wide-handheld-2-3</div></div>
+            <div class="column-wide-handheld-1-4"><div class="pattern-library-column-example">.column-wide-handheld-1-4</div></div>
+            <div class="column-wide-handheld-3-4"><div class="pattern-library-column-example">.column-wide-handheld-3-4</div></div>
+          </div>
+        </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Grid System (Tablet and up)</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="grid">
+            <div class="column-tablet-1-1"><div class="pattern-library-column-example">.column-tablet-1-1</div></div>
+            <div class="column-tablet-1-2"><div class="pattern-library-column-example">.column-tablet-1-2</div></div>
+            <div class="column-tablet-1-4"><div class="pattern-library-column-example">.column-tablet-1-4</div></div>
+            <div class="column-tablet-1-4"><div class="pattern-library-column-example">.column-tablet-1-4</div></div>
+            <div class="column-tablet-1-3"><div class="pattern-library-column-example">.column-tablet-1-3</div></div>
+            <div class="column-tablet-2-3"><div class="pattern-library-column-example">.column-tablet-2-3</div></div>
+            <div class="column-tablet-1-4"><div class="pattern-library-column-example">.column-tablet-1-4</div></div>
+            <div class="column-tablet-3-4"><div class="pattern-library-column-example">.column-tablet-3-4</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-library-example">
+        <div class="pattern-library-example-header">
+          <h1>Grid System (Desktop and up)</h1>
+        </div>
+        <div class="pattern-library-example-content">
+          <div class="grid">
+            <div class="column-desktop-1-1"><div class="pattern-library-column-example">.column-desktop-1-1</div></div>
+            <div class="column-desktop-1-2"><div class="pattern-library-column-example">.column-desktop-1-2</div></div>
+            <div class="column-desktop-1-4"><div class="pattern-library-column-example">.column-desktop-1-4</div></div>
+            <div class="column-desktop-1-4"><div class="pattern-library-column-example">.column-desktop-1-4</div></div>
+            <div class="column-desktop-1-3"><div class="pattern-library-column-example">.column-desktop-1-3</div></div>
+            <div class="column-desktop-2-3"><div class="pattern-library-column-example">.column-desktop-2-3</div></div>
+            <div class="column-desktop-1-4"><div class="pattern-library-column-example">.column-desktop-1-4</div></div>
+            <div class="column-desktop-3-4"><div class="pattern-library-column-example">.column-desktop-3-4</div></div>
           </div>
         </div>
       </div>
