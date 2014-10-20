@@ -74,57 +74,23 @@ HTML and CSS
 ^^^^^^^^^^^^^
 Once again, the `Google HTML/CSS Style Guide`_ is the place to look.
 
-CoffeeScript
-^^^^^^^^^^^^^
-As JavaScript, above. Plus these additional suggestions:
-
-Parenthesis are Lisp over ALGOL, except when chaining:
-
-Yes::
-
-    (merge (parse object))
-    $(this).css({top: 0}).addClass('red')
-
-No::
-
-    merge(parse(object))
-
-Use implicit returns wherever possible. For instance, a good exception
-would be when using return to short circuit a function on an error
-condition.
-
-Yes::
-
-    if this
-        that
-    else
-        theOtherThing
-
-No::
-
-    if this
-        return that
-    else
-        return theOtherThing
-
 AngularJS
 ^^^^^^^^^
-Bare attribute names are used unless the directive is not namespaced.
+Our style is loosely based on a synthesis of several community efforts to
+document Angular best practices.
 
-Yes::
+For filesystem structure and naming see the `Best Practices Recommendations
+for Angular App Structure`_ document.
 
-    <a href="" ng-click="foo()">Click me!</a>
-    <span data-custom-directive="bar">Data Attribute Used Here</span>
-    <span my-custom-directive="bar">Custom directive has "my" prefix</span>
+For additional tips on writing good AngularJS code, see the following two
+recommended guides, which differ slightly but are both very good.
 
-No::
-
-    <a href="" data-ng-click="foo()">Click me!</a>
-    <span custom-directive="bar">Bad: No Data Attribute Used Here</span>
+* https://github.com/johnpapa/angularjs-styleguide
+* https://github.com/toddmotto/angularjs-styleguide
 
 Committing Policy
 -----------------
-Committers are those with push access to the `main repository`. These
+"Committers" are those with push access to the `main repository`. These
 people should feel free to commit small changes in good faith. It is
 expected that these people should read upstream commits made by others
 when they feel qualified to review the material and comment with any
@@ -136,9 +102,9 @@ follow the branching and merging strategy outlined in the next section.
 
 Branching and Pull Requests
 ---------------------------
-For trivial changes, such as documentation changes or minor errors, 
-PRs may be submitted directly to master. This also applies to changes 
-made through the GitHub editing interface. Authors do not need to 
+For trivial changes, such as documentation changes or minor errors,
+PRs may be submitted directly to master. This also applies to changes
+made through the GitHub editing interface. Authors do not need to
 sign the CLA for these, or follow fork or branch naming guidelines.
 
 For any non-trivial changes, please create a branch for review. Fork
@@ -148,7 +114,7 @@ is ready for review, push it to a fork and submit a pull request.
 Please use the recommended naming policy for branches as it makes it
 easier to follow the history back to issues. The recommended template
 is <issue name>-<slug>.
- 
+
 For instance, 43-browser-extensions would be a branch to address issue
 #43, which is to create browser extensions.
 
@@ -176,5 +142,5 @@ branches you have published.
 .. _Google Python Style Guide: https://google-styleguide.googlecode.com/svn/trunk/pyguide.html
 .. _Google JavaScript Style Guide: https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
 .. _Google HTML/CSS Style Guide: https://google-styleguide.googlecode.com/svn/trunk/htmlcssguide.xml
+.. _Best Practice Recommendations for Angular App Structure: https://docs.google.com/document/d/1XXMvReO8-Awi1EZXAXS4PzDzdNvV6pGcuaF4Q9821Es/pub
 .. _main repository: https://github.com/hypothesis/h
-
