@@ -1,5 +1,9 @@
+***************************
 Contributing to Development
-===========================
+***************************
+
+Front matter
+============
 
 Communications
 --------------
@@ -47,6 +51,9 @@ you have any questions, please contact us.
     2261 Market St #632
     SF, CA 94114
 
+Making Contributions
+====================
+
 Code Style
 ----------
 Notes on code style follow for the different languages used in the
@@ -79,7 +86,7 @@ AngularJS
 Our style is loosely based on a synthesis of several community efforts to
 document Angular best practices.
 
-For filesystem structure and naming see the `Best Practices Recommendations
+For filesystem structure and naming see the `Best Practice Recommendations
 for Angular App Structure`_ document.
 
 For additional tips on writing good AngularJS code, see the following two
@@ -88,8 +95,11 @@ recommended guides, which differ slightly but are both very good.
 * https://github.com/johnpapa/angularjs-styleguide
 * https://github.com/toddmotto/angularjs-styleguide
 
-Committing Policy
------------------
+Getting Changes Merged
+----------------------
+
+Committer Policy
+^^^^^^^^^^^^^^^^
 "Committers" are those with push access to the `main repository`. These
 people should feel free to commit small changes in good faith. It is
 expected that these people should read upstream commits made by others
@@ -101,7 +111,7 @@ Larger changes, and changes being submitted by non-committers, should
 follow the branching and merging strategy outlined in the next section.
 
 Branching and Pull Requests
----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 For trivial changes, such as documentation changes or minor errors,
 PRs may be submitted directly to master. This also applies to changes
 made through the GitHub editing interface. Authors do not need to
@@ -128,10 +138,24 @@ that it is easy to see the intent of the patch!
 
 Please do not merge on feature branches. Feature branches should merge
 into upstream branches, but never contain merge commits in the other
-direction. Consider using '--rebase' when pulling if you must keep
+direction. Consider using ``--rebase`` when pulling if you must keep
 a long-running branch up to date. It is better to start a new branch
 and, if applicable, a new pull request when performing this action on
 branches you have published.
+
+Documentation
+^^^^^^^^^^^^^
+Comments are a critical component of documentation. All pull requests should
+come with code comments. For Python code these should be in the form of
+Python `docstrings`_. For AngularJS code please use `ngdoc`_. Other
+documentation can be put into the ``docs/`` subdirectory, but is not required
+for acceptance.
+
+Testing
+^^^^^^^
+All pull requests should come with unit tests. For the time being, functional
+and integration tests should be considered optional if the project does not
+have any harness set up yet.
 
 .. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
 .. _freenode.net: http://freenode.net/
@@ -143,4 +167,6 @@ branches you have published.
 .. _Google JavaScript Style Guide: https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
 .. _Google HTML/CSS Style Guide: https://google-styleguide.googlecode.com/svn/trunk/htmlcssguide.xml
 .. _Best Practice Recommendations for Angular App Structure: https://docs.google.com/document/d/1XXMvReO8-Awi1EZXAXS4PzDzdNvV6pGcuaF4Q9821Es/pub
+.. _docstrings: http://legacy.python.org/dev/peps/pep-0257/
+.. _ngdoc: https://github.com/angular/angular.js/wiki/Writing-AngularJS-Documentation
 .. _main repository: https://github.com/hypothesis/h
