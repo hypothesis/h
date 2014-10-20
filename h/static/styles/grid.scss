@@ -25,12 +25,15 @@
 //     <div class="column-tablet-1-2 column-desktop-1-4"></div>
 //     <div class="column-tablet-1-2 column-desktop-1-4"></div>
 //   </div>
+
+$grid-default-gutter: 20px !default;
+
 .grid {
-  @include grid-row;
+  @include grid-row($grid-default-gutter);
 }
 
 [class^="column-"], [class*=" column-"] {
-  @include grid-column;
+  @include grid-column($grid-default-gutter);
 }
 
 @include grid-setup("column-");

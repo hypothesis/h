@@ -145,14 +145,14 @@
         </div>
         <div class="pattern-library-example-content">
           <div class="grid">
-            <div class="column-one-whole"><div class="pattern-library-column-example">.column-one-whole</div></div>
-            <div class="column-one-half"><div class="pattern-library-column-example">.column-one-half</div></div>
-            <div class="column-one-quarter"><div class="pattern-library-column-example">.column-one-quarter</div></div>
-            <div class="column-one-quarter"><div class="pattern-library-column-example">.column-one-quarter</div></div>
-            <div class="column-one-third"><div class="pattern-library-column-example">.column-one-third</div></div>
-            <div class="column-two-thirds"><div class="pattern-library-column-example">.column-two-thirds</div></div>
-            <div class="column-one-quarter"><div class="pattern-library-column-example">.column-one-quarter</div></div>
-            <div class="column-three-quarters"><div class="pattern-library-column-example">.column-three-quarters</div></div>
+            <div class="column-1-1"><div class="pattern-library-column-example">.column-1-1</div></div>
+            <div class="column-1-2"><div class="pattern-library-column-example">.column-1-2</div></div>
+            <div class="column-1-4"><div class="pattern-library-column-example">.column-1-4</div></div>
+            <div class="column-1-4"><div class="pattern-library-column-example">.column-1-4</div></div>
+            <div class="column-1-3"><div class="pattern-library-column-example">.column-1-3</div></div>
+            <div class="column-2-3"><div class="pattern-library-column-example">.column-2-3</div></div>
+            <div class="column-1-4"><div class="pattern-library-column-example">.column-1-4</div></div>
+            <div class="column-3-4"><div class="pattern-library-column-example">.column-3-4</div></div>
           </div>
         </div>
       </div>
@@ -162,14 +162,14 @@
         </div>
         <div class="pattern-library-example-content">
           <div class="grid">
-            <div class="column-wide-handheld-one-whole"><div class="pattern-library-column-example">.column-one-whole</div></div>
-            <div class="column-wide-handheld-one-half"><div class="pattern-library-column-example">.column-one-half</div></div>
-            <div class="column-wide-handheld-one-quarter"><div class="pattern-library-column-example">.column-one-quarter</div></div>
-            <div class="column-wide-handheld-one-quarter"><div class="pattern-library-column-example">.column-one-quarter</div></div>
-            <div class="column-wide-handheld-one-third"><div class="pattern-library-column-example">.column-wide-handheld-one-third</div></div>
-            <div class="column-wide-handheld-two-thirds"><div class="pattern-library-column-example">.column-wide-handheld-two-thirds</div></div>
-            <div class="column-wide-handheld-one-quarter"><div class="pattern-library-column-example">.column-one-quarter</div></div>
-            <div class="column-wide-handheld-three-quarters"><div class="pattern-library-column-example">.column-three-quarters</div></div>
+            <div class="column-wide-handheld-1-1"><div class="pattern-library-column-example">.column-wide-handheld-1-1</div></div>
+            <div class="column-wide-handheld-1-2"><div class="pattern-library-column-example">.column-wide-handheld-1-2</div></div>
+            <div class="column-wide-handheld-1-4"><div class="pattern-library-column-example">.column-wide-handheld-1-4</div></div>
+            <div class="column-wide-handheld-1-4"><div class="pattern-library-column-example">.column-wide-handheld-1-4</div></div>
+            <div class="column-wide-handheld-1-3"><div class="pattern-library-column-example">.column-wide-handheld-1-3</div></div>
+            <div class="column-wide-handheld-2-3"><div class="pattern-library-column-example">.column-wide-handheld-2-3</div></div>
+            <div class="column-wide-handheld-1-4"><div class="pattern-library-column-example">.column-wide-handheld-1-4</div></div>
+            <div class="column-wide-handheld-3-4"><div class="pattern-library-column-example">.column-wide-handheld-3-4</div></div>
           </div>
         </div>
       <div class="pattern-library-example">
@@ -178,14 +178,14 @@
         </div>
         <div class="pattern-library-example-content">
           <div class="grid">
-            <div class="column-tablet-one-whole"><div class="pattern-library-column-example">.column-tablet-one-whole</div></div>
-            <div class="column-tablet-one-half"><div class="pattern-library-column-example">.column-tablet-one-half</div></div>
-            <div class="column-tablet-one-quarter"><div class="pattern-library-column-example">.column-tablet-one-quarter</div></div>
-            <div class="column-tablet-one-quarter"><div class="pattern-library-column-example">.column-tablet-one-quarter</div></div>
-            <div class="column-tablet-one-third"><div class="pattern-library-column-example">.column-tablet-one-third</div></div>
-            <div class="column-tablet-two-thirds"><div class="pattern-library-column-example">.column-tablet-two-thirds</div></div>
-            <div class="column-tablet-one-quarter"><div class="pattern-library-column-example">.column-tablet-one-quarter</div></div>
-            <div class="column-tablet-three-quarters"><div class="pattern-library-column-example">.column-tablet-three-quarters</div></div>
+            <div class="column-tablet-1-1"><div class="pattern-library-column-example">.column-tablet-1-1</div></div>
+            <div class="column-tablet-1-2"><div class="pattern-library-column-example">.column-tablet-1-2</div></div>
+            <div class="column-tablet-1-4"><div class="pattern-library-column-example">.column-tablet-1-4</div></div>
+            <div class="column-tablet-1-4"><div class="pattern-library-column-example">.column-tablet-1-4</div></div>
+            <div class="column-tablet-1-3"><div class="pattern-library-column-example">.column-tablet-1-3</div></div>
+            <div class="column-tablet-2-3"><div class="pattern-library-column-example">.column-tablet-2-3</div></div>
+            <div class="column-tablet-1-4"><div class="pattern-library-column-example">.column-tablet-1-4</div></div>
+            <div class="column-tablet-3-4"><div class="pattern-library-column-example">.column-tablet-3-4</div></div>
           </div>
         </div>
       </div>
@@ -195,14 +195,14 @@
         </div>
         <div class="pattern-library-example-content">
           <div class="grid">
-            <div class="column-desktop-one-whole"><div class="pattern-library-column-example">.column-desktop-one-whole</div></div>
-            <div class="column-desktop-one-half"><div class="pattern-library-column-example">.column-desktop-one-half</div></div>
-            <div class="column-desktop-one-quarter"><div class="pattern-library-column-example">.column-desktop-one-quarter</div></div>
-            <div class="column-desktop-one-quarter"><div class="pattern-library-column-example">.column-desktop-one-quarter</div></div>
-            <div class="column-desktop-one-third"><div class="pattern-library-column-example">.column-desktop-one-third</div></div>
-            <div class="column-desktop-two-thirds"><div class="pattern-library-column-example">.column-desktop-two-thirds</div></div>
-            <div class="column-desktop-one-quarter"><div class="pattern-library-column-example">.column-desktop-one-quarter</div></div>
-            <div class="column-desktop-three-quarters"><div class="pattern-library-column-example">.column-desktop-three-quarters</div></div>
+            <div class="column-desktop-1-1"><div class="pattern-library-column-example">.column-desktop-1-1</div></div>
+            <div class="column-desktop-1-2"><div class="pattern-library-column-example">.column-desktop-1-2</div></div>
+            <div class="column-desktop-1-4"><div class="pattern-library-column-example">.column-desktop-1-4</div></div>
+            <div class="column-desktop-1-4"><div class="pattern-library-column-example">.column-desktop-1-4</div></div>
+            <div class="column-desktop-1-3"><div class="pattern-library-column-example">.column-desktop-1-3</div></div>
+            <div class="column-desktop-2-3"><div class="pattern-library-column-example">.column-desktop-2-3</div></div>
+            <div class="column-desktop-1-4"><div class="pattern-library-column-example">.column-desktop-1-4</div></div>
+            <div class="column-desktop-3-4"><div class="pattern-library-column-example">.column-desktop-3-4</div></div>
           </div>
         </div>
       </div>
