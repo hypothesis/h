@@ -4,6 +4,7 @@
 @import "compass/utilities/general/clearfix";
 
 .form-field {
+  @include pie-clearfix;
   clear: both;
   margin-bottom: 10px;
 }
