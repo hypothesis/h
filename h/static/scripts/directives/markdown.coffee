@@ -53,31 +53,32 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       # Focus the input
       input.focus()
 
-    applyInlineMarkup = (markup, innertext)->
+    applyInlineMarkup = (markupL, innertext, markupR) ->
+      markupR or= markupL
       text = userSelection()
       if text.selection == ""
-        newtext = text.before + markup + innertext + markup + text.after
-        start = (text.before + markup).length
-        end = (text.before + innertext + markup).length
+        newtext = text.before + markupL + innertext + markupR + text.after
+        start = (text.before + markupL).length
+        end = (text.before + innertext + markupR).length
         insertMarkup(newtext, start, end)
       else
         # Check to see if markup has already been applied before to the selection.
-        slice1 = text.before.slice(text.before.length - markup.length)
-        slice2 = text.after.slice(0, markup.length)
-        if slice1 == markup and slice2 == markup
+        slice1 = text.before.slice(text.before.length - markupL.length)
+        slice2 = text.after.slice(0, markupR.length)
+        if (slice1 == markupL and slice2 == markupR)
           # Remove markup 
           newtext = (
-            text.before.slice(0, (text.before.length - markup.length)) +
-            text.selection + text.after.slice(markup.length)
+            text.before.slice(0, (text.before.length - markupL.length)) +
+            text.selection + text.after.slice(markupR.length)
           )
-          start = text.before.length - markup.length
-          end = (text.before + text.selection).length - markup.length
+          start = text.before.length - markupL.length
+          end = (text.before + text.selection).length - markupR.length
           insertMarkup(newtext, start, end)
         else
           # Apply markup
-          newtext = text.before + markup + text.selection + markup + text.after
-          start = (text.before + markup).length
-          end = (text.before + text.selection + markup).length
+          newtext = text.before + markupL + text.selection + markupR + text.after
+          start = (text.before + markupL).length
+          end = (text.before + text.selection + markupR).length
           insertMarkup(newtext, start, end)
 
     scope.insertBold = ->
@@ -87,7 +88,16 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       applyInlineMarkup("*", "Italic")
 
     scope.insertMath = ->
-      applyInlineMarkup("$$", "LaTex")
+      text = userSelection()
+      index = text.before.length
+      if (
+        index == 0 or
+        input.value[index - 1] == '\n' or
+        (input.value[index - 1] == '$' and input.value[index - 2] == '$')
+      )
+        applyInlineMarkup('$$', 'LaTeX or MathML')
+      else
+        applyInlineMarkup('\\(', 'LaTeX or MathML', '\\)')
 
     scope.insertLink = ->
       text = userSelection()
@@ -264,27 +274,54 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
           input.style.height = output.style.height
           $timeout -> inputEl.focus()
 
-    renderMath = (textToCheck) ->
-      # Parses text for math as denoted by '$$'
-      i = 0
+    mathJaxFallback = false
+    renderMathAndMarkdown = (textToCheck) ->
+      convert = $filter('converter')
+      re = /\$\$/g
+
+      startMath = 0
+      endMath = 0
+
+      indexes = (match.index while match = re.exec(textToCheck))
+      indexes.push(textToCheck.length)
+
+      parts = for index in indexes
+        if startMath > endMath
+          endMath = index + 2
+          try
+            katex.renderToString($sanitize textToCheck.substring(startMath, index))
+          catch
+            loadMathJax()
+            mathJaxFallback = true
+            $sanitize textToCheck.substring(startMath, index)
+        else
+          startMath = index + 2
+          $sanitize convert renderInlineMath textToCheck.substring(endMath, index)
+
+      return parts.join('')
+
+    renderInlineMath = (textToCheck) ->
+      re = /\\?\\\(|\\?\\\)/g
       startMath = null
       endMath = null
-      for char in textToCheck
-        if char == "$" and textToCheck[i + 1] == "$"
-          if startMath == null
-            startMath = i + 2
-          else
-            endMath = i
-        i++
+      match = undefined
+      indexes = []
+      while match = re.exec(textToCheck)
+        indexes.push match.index
+      for index in indexes
+        if startMath == null
+          startMath = index + 2
+        else
+          endMath = index
         if startMath != null and endMath != null
           math = katex.renderToString(textToCheck.substring(startMath, endMath))
           textToCheck = (
             textToCheck.substring(0, (startMath - 2)) + math +
-            textToCheck.substring((endMath + 2))
+            textToCheck.substring(endMath + 2)
           )
           startMath = null
           endMath = null
-          return renderMath(textToCheck)
+          return renderInlineMath(textToCheck)
       return textToCheck
 
     # Re-render the markdown when the view needs updating.
@@ -292,14 +329,9 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       if !scope.readonly and !scope.preview
         inputEl.val (ctrl.$viewValue or '')
       value = ctrl.$viewValue or ''
-      markdown = $sanitize $filter('converter') value
-      try
-        rendered = renderMath markdown
-        scope.rendered = $sce.trustAsHtml rendered
-      catch
-        loadMathJax()
-        rendered = markdown
-        scope.rendered = $sce.trustAsHtml rendered
+      rendered = renderMathAndMarkdown value
+      scope.rendered = $sce.trustAsHtml rendered
+      if mathJaxFallback
         $timeout (-> MathJax?.Hub.Queue ['Typeset', MathJax.Hub, output]), 0, false
 
     # React to the changes to the input
