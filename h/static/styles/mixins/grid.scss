@@ -3,8 +3,9 @@
 // Mixins for working with grids. A grid consists of an outer grid container
 // and internal columns. Each column has a gutter defined by $grid-gutter.
 // The implementation is largely based on the grid system created by
-// Harry Roberts <http://csswizardry.com/csswizardry-grids/>.
-$grid-gutter: 20px;
+// Harry Roberts <http://csswizardry.com/csswizardry-grids/> and the Yahoo
+// Pure system <http://git.io/ogODXA>
+$grid-gutter: 20px !default;
 
 // Sets up styles for the grid wrapper.
 @mixin grid-row {
