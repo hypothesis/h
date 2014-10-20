@@ -20,10 +20,10 @@
 // four columns on desktop sized viewports.
 //
 //   <div class="grid">
-//     <div class="column-tablet-one-half column-desktop-one-quarter"></div>
-//     <div class="column-tablet-one-half column-desktop-one-quarter"></div>
-//     <div class="column-tablet-one-half column-desktop-one-quarter"></div>
-//     <div class="column-tablet-one-half column-desktop-one-quarter"></div>
+//     <div class="column-tablet-1-2 column-desktop-1-4"></div>
+//     <div class="column-tablet-1-2 column-desktop-1-4"></div>
+//     <div class="column-tablet-1-2 column-desktop-1-4"></div>
+//     <div class="column-tablet-1-2 column-desktop-1-4"></div>
 //   </div>
 .grid {
   @include grid-row;

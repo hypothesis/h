@@ -5,14 +5,13 @@
 // The implementation is largely based on the grid system created by
 // Harry Roberts <http://csswizardry.com/csswizardry-grids/> and the Yahoo
 // Pure system <http://git.io/ogODXA>
-$grid-gutter: 20px !default;
 
 // Sets up styles for the grid wrapper.
-@mixin grid-row {
+@mixin grid-row($gutter: 0) {
   margin: 0;
   padding: 0;
   // Remove the margin from the first column.
-  margin-left: -$grid-gutter;
+  margin-left: -$gutter;
   // Removes whitespace on browsers that do not support flexbox.
   letter-spacing: -0.31em;
   // Remove optimizeLegibility if applied.
@@ -33,12 +32,12 @@ $grid-gutter: 20px !default;
 // Example
 //
 // .my-awkward-item {
-//   @include grid-column { width: 43%; }
+//   @include grid-column($default-gutter) { width: 43%; }
 // }
-@mixin grid-column {
+@mixin grid-column($gutter: 0) {
   display: inline-block;
   vertical-align: top;
-  padding-left: $grid-gutter;
+  padding-left: $gutter;
   vertical-align: top;
   width: 100%;
   box-sizing: border-box;
