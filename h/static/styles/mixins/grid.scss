@@ -9,11 +9,21 @@ $grid-gutter: 20px !default;
 
 // Sets up styles for the grid wrapper.
 @mixin grid-row {
-  list-style: none;
   margin: 0;
   padding: 0;
-  margin-left: -$grid-gutter; // Remove the margin from the first column.
-  @include pie-clearfix;
+  // Remove the margin from the first column.
+  margin-left: -$grid-gutter;
+  // Removes whitespace on browsers that do not support flexbox.
+  letter-spacing: -0.31em;
+  // Remove optimizeLegibility if applied.
+  text-rendering: optimizespeed;
+
+  // Removes whitespaec between elements in supporting browsers.
+  display: -webkit-flex;
+  -webkit-flex-flow: row wrap;
+  display: -ms-flexbox;
+  -ms-flex-flow: row wrap;
+
   @content;
 }
 
@@ -26,11 +36,17 @@ $grid-gutter: 20px !default;
 //   @include grid-column { width: 43%; }
 // }
 @mixin grid-column {
-  float: left;
+  display: inline-block;
+  vertical-align: top;
   padding-left: $grid-gutter;
   vertical-align: top;
   width: 100%;
   box-sizing: border-box;
+
+  // Reset letter spacing.
+  letter-spacing: normal;
+  text-rendering: auto;
+
   @content;
 }
 
