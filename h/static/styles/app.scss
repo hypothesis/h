@@ -169,3 +169,24 @@ ol {
     float: left;
   }
 }
+
+.masthead-small {
+  img {
+    width: 48px;
+    height: auto;
+    padding-top: 1px;
+  }
+
+  hgroup {
+    margin-left: 54px;
+  }
+
+  .masthead-heading {
+    font-size: 20px;
+    line-height: 1em;
+  }
+
+  .masthead-subheading {
+    font-size: 14px;
+  }
+}
