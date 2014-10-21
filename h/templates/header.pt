@@ -1,7 +1,7 @@
 <header class="masthead">
-  <a href="https://hypothes.is/">
-  <img height="72px" width="72px"
-       src="${request.static_url('h:static/images/logo.png')}" />
+  <a href="${request.resource_url(request.root)}">
+	  <img height="72px" width="72px"
+	       src="${request.static_url('h:static/images/logo.png')}" />
   </a>
   <hgroup>
     <h1 class="masthead-heading">Hypothes<span class="red">.</span>is</h1>

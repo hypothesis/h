@@ -64,6 +64,7 @@ def stream(context, request):
 
 @notfound_view_config(renderer='h:templates/notfound.pt')
 def notfound(context, request):
+    # Dispatch ContextFound for pyramid_layout subscriber
     event = ContextFound(request)
     request.context = context
     request.registry.notify(event)
