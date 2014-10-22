@@ -28,7 +28,7 @@
             start annotating some documents.</p>
           <div class="numbered-list grid">
             <div class="column-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
-            <div class="column-1-2"><div class="numbered-list-item">Go forth and annotate! The sidebar can be enabled by clicking the icon in the url.</div></div>
+            <div class="column-1-2"><div class="numbered-list-item">Go forth and annotate! Enable the sidebar via the button in the location bar.</div></div>
           </div>
         </section>
         <section class="help-page-section" tal:condition="is_index">
