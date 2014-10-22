@@ -159,7 +159,12 @@ AnnotationController = [
 
       # Construct the reply.
       references = [references..., id]
-      reply = {references, uri}
+
+      # If replying to a public annotation make the response public.
+      if 'group:__world__' in model.permissions.read or []
+        permissions = {read: ['group:__world__']}
+
+      reply = {references, uri, permissions}
       annotator.publish 'beforeAnnotationCreated', reply
 
     ###*
