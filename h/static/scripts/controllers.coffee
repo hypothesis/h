@@ -191,7 +191,9 @@ class AppController
       reset()
 
     onready = ->
-      $scope.persona ?= null
+      if $scope.persona is undefined
+        $scope.persona = null
+        reset()
 
     oncancel = ->
       $scope.dialog.visible = false
