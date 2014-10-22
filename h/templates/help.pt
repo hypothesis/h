@@ -41,8 +41,10 @@
         </section>
         <section class="help-page-section">
           <h2 id="key-features" class="help-page-heading">Key Features</h2>
-          <p class="help-page-lede">We're constantly looking to improve Hypothesis to fit in with your workflows. Check out our Roadmap to see what's coming up. In the mean
-            time we've highlighted a few of our favorites:</p>
+          <p class="help-page-lede">We're constantly looking to improve
+            Hypothesis to fit in with your workflows. Check out our <a
+            href="http://hypothes.is/roadmap/">roadmap</a> to see what's coming
+            up. In the mean time we've highlighted a few of our favorites:</p>
           <div class="grid feature-content">
             <section class="feature column-tablet-1-3">
               <h3 class="feature-heading"><i class="feature-icon h-icon-earth"></i> Annotate Anywhere</h3>
@@ -63,7 +65,7 @@
               <h3 class="feature-heading"><i class="feature-icon h-icon-locked"></i> Privacy</h3>
               <div class="feature-content">
                 <p>Annotations are either public and viewable by everyone
-                  with access to the document or private and visible only to you.</p>
+                  or private and visible only to you.</p>
               </div>
             </section>
           </div>
