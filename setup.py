@@ -50,7 +50,7 @@ install_requires = [
     'pyramid_tm>=0.7',
     'python-dateutil>=2.1',
     'pyramid-sockjs==0.3.9',
-    'pyramid_webassets>=0.8',
+    'pyramid_webassets>=0.9,<1.0',
     'requests>=2.2.1',
 
     # Version pin for known bug
