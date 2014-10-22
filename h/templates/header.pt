@@ -1,5 +1,5 @@
 <header class="masthead">
-  <a href="${request.resource_url(request.root)}">
+  <a href="${base_url}">
 	  <img height="72px" width="72px"
 	       src="${request.static_url('h:static/images/logo.png')}" />
   </a>
