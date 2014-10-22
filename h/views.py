@@ -3,7 +3,8 @@ import logging
 import re
 
 from pyramid import httpexceptions
-from pyramid.view import view_config
+from pyramid.events import ContextFound
+from pyramid.view import view_config, notfound_view_config
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -59,6 +60,15 @@ def stream(context, request):
         return httpexceptions.HTTPFound(location=location)
     else:
         return context
+
+
+@notfound_view_config(renderer='h:templates/notfound.pt')
+def notfound(context, request):
+    # Dispatch ContextFound for pyramid_layout subscriber
+    event = ContextFound(request)
+    request.context = context
+    request.registry.notify(event)
+    return {}
 
 
 def includeme(config):
