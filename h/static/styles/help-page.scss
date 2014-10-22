@@ -130,3 +130,16 @@
 .help-icon {
     @include help-icon;
 }
+
+.bookmarklet {
+  color: $gray-darker;
+  padding: 2px 4px;
+  border: 1px solid;
+  border-radius: 2px;
+  font-size: 13px;
+  cursor: move;
+
+  @include icons {
+    font-size: 12px;
+  }
+}

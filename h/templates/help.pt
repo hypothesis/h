@@ -22,12 +22,21 @@
             <div class="column-1-2"><div class="numbered-list-item">If you wish to install Hypothesis on your own site then head over to GitHub.</div></div>
           </div>
         </section>
-        <section class="help-page-section" tal:condition="not is_help">
+        <section class="help-page-section" tal:condition="is_onboarding">
           <h2 id="getting-started" class="help-page-heading">Getting started</h2>
-          <p class="help-page-lede">Now you have the extension up and running. It's time to start annotating some documents.</p>
+          <p class="help-page-lede">Now you have the extension up and running. It's time to
+            start annotating some documents.</p>
           <div class="numbered-list grid">
             <div class="column-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
             <div class="column-1-2"><div class="numbered-list-item">Go forth and annotate! The sidebar can be enabled by clicking the icon in the url.</div></div>
+          </div>
+        </section>
+        <section class="help-page-section" tal:condition="is_index">
+          <h2 id="getting-started" class="help-page-heading">Getting started</h2>
+          <p class="help-page-lede">Great, you've got the server up and running, you're now ready to start kicking the tires.</p>
+          <div class="numbered-list grid">
+            <div class="column-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
+            <div class="column-1-2"><div class="numbered-list-item">Create some annotations on this page or use this dev bookmarklet: <metal:main use-macro="load: h:templates/bookmarklet.pt" /></div></div>
           </div>
         </section>
         <section class="help-page-section">
