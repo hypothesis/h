@@ -67,8 +67,8 @@ thread = [
           return
 
         # Ignore if the user just created a non-empty selection.
-        sel = $window.getSelection()
-        if sel.containsNode(event.target, true) and sel.toString().length
+        sel = $window.getSelection()  # XXX: Portable containsNode?
+        if sel.containsNode?(event.target, true) and sel.toString().length
           return
 
         # Ignore if the user clicked a link
