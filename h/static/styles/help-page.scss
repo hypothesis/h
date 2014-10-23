@@ -3,8 +3,11 @@
 .help-page {
   padding-top: 2.5em;
   padding-bottom: 2.5em;
-  padding-right: 460px;
   background: white;
+
+  @include breakpoint(920px) {
+    padding-right: 460px;
+  }
 
   .masthead {
     margin-bottom: 2.5em;
@@ -12,8 +15,17 @@
 }
 
 .help-page-content {
-  padding: 0 10% 0 20%;
   margin: auto;
+  padding: 0 20px;
+  min-width: 480px;
+
+  @include breakpoint(1160px) {
+    padding: 0 5% 0 10%;
+  }
+
+  @include breakpoint(1400px) {
+    padding: 0 10% 0 20%;
+  }
 }
 
 .help-page-heading {
@@ -38,6 +50,7 @@
 
   &:first-child {
     border-top: none;
+    padding-top: 0;
   }
 }
 
@@ -48,8 +61,11 @@
   bottom: 20px;
   width: 380px;
   display: block;
-  border: $gray-lighter dotted 2px;
-  border-radius: 3px;
+
+  @include breakpoint(920px) {
+    border: $gray-lighter dotted 2px;
+    border-radius: 3px;
+  }
 }
 
 @mixin help-icon {
@@ -87,7 +103,6 @@
 
 .numbered-list {
   counter-reset: numbered-list;
-  margin-bottom: 2.5em;
 }
 
 .numbered-list-item {
@@ -95,6 +110,7 @@
   counter-increment: numbered-list;
   padding-left: 3em;
   padding-right: 1.25em;
+  margin-bottom: 2.5em;
   list-style-type: none;
 
   &:before {
@@ -132,6 +148,7 @@
 }
 
 .bookmarklet {
+  white-space: nowrap;
   color: $gray-darker;
   padding: 2px 4px;
   border: 1px solid;

@@ -13,7 +13,6 @@ body {
   @extend .noise;
   font-family: $sans-font-family;
   font-weight: 300;
-  word-wrap: break-word;
 }
 
 #{nest("hgroup", "#{headings()}")} {
