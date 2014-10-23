@@ -72,7 +72,32 @@ describe 'h.directives.annotation', ->
     beforeEach ->
       controller = createController()
 
+      annotation.permissions =
+        read: ['acct:joe@localhost']
+        update: ['acct:joe@localhost']
+        destroy: ['acct:joe@localhost']
+        admin: ['acct:joe@localhost']
+
+      annotator.publish = sinon.spy (event, ann) ->
+        return unless event == 'beforeAnnotationCreated'
+        ann.permissions =
+          read: ['acct:bill@localhost']
+          update: ['acct:bill@localhost']
+          destroy: ['acct:bill@localhost']
+          admin: ['acct:bill@localhost']
+
     it 'creates a new reply with the proper uri and references', ->
       controller.reply()
       match = sinon.match {references: [annotation.id], uri: annotation.uri}
       assert.calledWith(annotator.publish, 'beforeAnnotationCreated', match)
+
+    it 'adds the world readable principal if the parent is public', ->
+      annotation.permissions.read.push('group:__world__')
+      controller.reply()
+      newAnnotation = annotator.publish.lastCall.args[1]
+      assert.include(newAnnotation.permissions.read, 'group:__world__')
+
+    it 'does not add the world readable principal if the parent is privace', ->
+      controller.reply()
+      newAnnotation = annotator.publish.lastCall.args[1]
+      assert.notInclude(newAnnotation.permissions.read, 'group:__world__')
