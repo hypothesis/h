@@ -102,7 +102,11 @@ function setPageAction(tabId, value) {
 }
 
 
-function onInstalled() {
+function onInstalled(installDetails) {
+  if (installDetails.reason === 'install') {
+    chrome.tabs.create({url: 'http://hypothes.is/welcome'});
+  }
+
   /* We need this so that 3-rd party cookie blocking does not kill us.
      See https://github.com/hypothesis/h/issues/634 for more info.
      This is intended to be a temporary fix only.
