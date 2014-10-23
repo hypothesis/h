@@ -191,7 +191,7 @@ class AppController
       reset()
 
     onready = ->
-      if $scope.persona is undefined
+      if plugins.Auth is undefined
         $scope.persona = null
         reset()
 
