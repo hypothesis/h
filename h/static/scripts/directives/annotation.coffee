@@ -160,12 +160,12 @@ AnnotationController = [
       # Construct the reply.
       references = [references..., id]
 
-      # If replying to a public annotation make the response public.
-      if 'group:__world__' in model.permissions.read or []
-        permissions = {read: ['group:__world__']}
-
-      reply = {references, uri, permissions}
+      reply = {references, uri}
       annotator.publish 'beforeAnnotationCreated', reply
+
+      # If replying to a public annotation make the response public.
+      if 'group:__world__' in (model.permissions.read or [])
+        reply.permissions.read.push('group:__world__')
 
     ###*
     # @ngdoc method
