@@ -457,6 +457,7 @@ class StreamerSession(Session):
 
 @subscriber(events.AnnotationEvent)
 def after_action(event):
+    return  # hypothesis/vision#96
     try:
         request = event.request
         client_id = request.headers.get('X-Client-Id')
