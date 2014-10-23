@@ -130,7 +130,7 @@ function onTabUpdated(tabId, info) {
 
   setPageAction(tabId, currentState)
 
-  if (currentState == 'active') {
+  if (currentState == 'active' && info.status == 'complete') {
     inject(tabId)
   }
 }
