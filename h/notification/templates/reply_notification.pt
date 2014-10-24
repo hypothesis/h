@@ -10,3 +10,4 @@
 <blockquote>&ldquo;${reply_text}&rdquo;</blockquote>
 
 <p><a href="">Reply to ${reply_user}</a>.</p>
+<p>If you'd rather not get this notification you can unsubscribe from it <a href="${unsubscribe}">here</a></p>

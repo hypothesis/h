@@ -31,6 +31,9 @@ def create_template_map(request, reply, data):
     parent_timestamp = datetime.strptime(data['parent']['created'][:-6], date_format)
     reply_timestamp = datetime.strptime(reply['created'][:-6], date_format)
 
+    seq = ('http://', str(request.domain), '/app?__formid__=unsubscribe&subscription_id=', str(data['subscription']['id']))
+    unsubscribe = "".join(seq)
+
     return {
         'document_title': document_title,
         'document_path': data['parent']['uri'],
@@ -44,7 +47,8 @@ def create_template_map(request, reply, data):
         'reply_user': reply_user,
         'reply_timestamp': reply_timestamp,
         'reply_user_profile': user_profile_url(request, reply['user']),
-        'reply_path': standalone_url(request, reply['id'])
+        'reply_path': standalone_url(request, reply['id']),
+        'unsubscribe': unsubscribe
     }
 
 
@@ -91,7 +95,7 @@ def create_subscription(request, uri, active):
     subs = Subscriptions(
         uri=uri,
         template=types.REPLY_TEMPLATE,
-        description='Generated reply notification template',
+        description='General reply notification',
         active=active
     )
 

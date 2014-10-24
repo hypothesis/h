@@ -122,6 +122,7 @@ def send_notifications(event):
     subscriptions = Subscriptions.get_active_subscriptions(request)
     for subscription in subscriptions:
         data['subscription'] = {
+            'id': subscription.id,
             'uri': subscription.uri,
             'parameters': subscription.parameters,
             'query': subscription.query
