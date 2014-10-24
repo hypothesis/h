@@ -304,5 +304,3 @@
 
 }).call(this);
 
-//
-//# sourceMappingURL=annotator.pdf.map
