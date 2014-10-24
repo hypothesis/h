@@ -20,7 +20,7 @@ function inject(tabId) {
   chrome.tabs.executeScript(tabId, {
     file: 'public/embed.js'
   }, function () {
-    chrome.tabs.executeScript(tab.id, {
+    chrome.tabs.executeScript(tabId, {
       code: 'window.annotator = true;'
     })
   })
