@@ -221,7 +221,10 @@ def extension(args, console, settings):
 
     # XXX: Change when webassets allows setting the cache option
     # As of 0.10 it's only possible to pass a sass config  with string values
-    rmtree('./build/chrome/public/.sass-cache')
+    try:
+        rmtree('./build/chrome/public/.sass-cache')
+    except OSError:
+        pass  # newer Sass doesn't write this it seems
 
 
 main = command.main
