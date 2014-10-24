@@ -75,7 +75,7 @@ class SubscriptionsMixin(BaseModel):
     @classmethod
     def get_active_subscriptions(cls, request):
         session = get_session(request)
-        return session.query(cls).filter(cls.active is True).all()
+        return session.query(cls).filter(cls.active == True).all()
 
     @classmethod
     def get_subscriptions_for_uri(cls, request, uri):

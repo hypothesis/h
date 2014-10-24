@@ -261,6 +261,7 @@ class AsyncRegisterController(RegisterController):
 @view_config(attr='edit_profile', route_name='edit_profile')
 @view_config(attr='disable_user', route_name='disable_user')
 @view_config(attr='profile', route_name='profile')
+@view_config(attr='unsubscribe', route_name='unsubscribe')
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
         request = self.request
@@ -328,11 +329,22 @@ class ProfileController(horus.views.ProfileController):
         subscriptions = Subscriptions.get_subscriptions_for_uri(request, user_id)
         return {'model': {'subscriptions': subscriptions}}
 
+    def unsubscribe(self):
+        request = self.request
+        subscription_id = request.GET['subscription_id']
+        subscription = Subscriptions.get_by_id(request, subscription_id)
+        if subscription:
+            subscription.active = False
+            self.db.add(subscription)
+            return {}
+        return {}
+
 
 @view_defaults(accept='application/json', name='app', renderer='json')
 @view_config(attr='edit_profile', request_param='__formid__=edit_profile')
 @view_config(attr='disable_user', request_param='__formid__=disable_user')
 @view_config(attr='profile', request_param='__formid__=profile')
+@view_config(attr='unsubscribe', request_param='__formid__=unsubscribe')
 class AsyncProfileController(ProfileController):
     __view_mapper__ = AsyncFormViewMapper
 
@@ -349,6 +361,8 @@ def includeme(config):
     config.add_route('disable_user', '/disable/{user_id}',
                      factory=UserFactory,
                      traverse="/{user_id}")
+    config.add_route('unsubscribe', '/unsubscribe/{subscription_id}',
+                         traverse="/{subscription_id}")
 
     config.include('horus')
     config.scan(__name__)
