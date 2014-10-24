@@ -1,15 +1,15 @@
 var ACTION_STATES = {
   active: {
     icons: {
-      19: "images/active_19.png",
-      38: "images/active_38.png"
+      19: "images/action-icon-active.png",
+      38: "images/action-icon-active@2x.png"
     },
     title: "Disable annotation"
   },
   sleeping: {
     icons: {
-      19: "images/sleeping_19.png",
-      38: "images/sleeping_38.png"
+      19: "images/action-icon-inactive.png",
+      38: "images/action-icon-inactive@2x.png"
     },
     title: "Enable annotation"
   }
