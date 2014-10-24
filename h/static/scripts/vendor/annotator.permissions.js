@@ -231,5 +231,3 @@
 
 }).call(this);
 
-//
-//# sourceMappingURL=annotator.permissions.map

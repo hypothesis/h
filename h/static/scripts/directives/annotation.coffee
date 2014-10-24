@@ -179,10 +179,17 @@ AnnotationController = [
 
       # Extract the document metadata.
       if model.document
-        domain = extractURIComponent(model.uri, 'hostname')
+        uri = model.uri
+        if uri.indexOf("urn") is 0
+          # This URI is not clickable, see if we have something better
+          for link in model.document.link when link.href.indexOf("urn")
+            uri = link.href
+            break
+
+        domain = extractURIComponent(uri, 'hostname')
 
         @document =
-          uri: model.uri
+          uri: uri
           domain: domain
           title: model.document.title or domain
 

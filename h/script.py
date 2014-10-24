@@ -107,6 +107,10 @@ def chrome(env):
     # Copy the extension code
     merge('../../h/browser/chrome', './')
 
+    # Copy over the bootstrap and destroy scripts
+    copyfile('../../h/static/bootstrap.js', './public/bootstrap.js')
+    copyfile('../../h/static/destroy.js', './public/destroy.js')
+
     # Build the app html and copy assets if they are being bundled
     if request.webassets_env.url.startswith('chrome-extension://'):
         makedirs('./public/styles/images')
@@ -119,10 +123,6 @@ def chrome(env):
         if request.webassets_env.debug:
             makedirs('./public/scripts/vendor')
             merge('../../h/static/scripts/vendor', './public/scripts/vendor')
-
-        # Copy over the bootstrap and destroy scripts
-        copyfile('../../h/static/bootstrap.js', './public/bootstrap.js')
-        copyfile('../../h/static/destroy.js', './public/destroy.js')
 
         app(context, request)
 

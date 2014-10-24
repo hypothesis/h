@@ -17,12 +17,8 @@
   "permissions": [
     "<all_urls>",
 
-    "clipboardWrite",
     "contentSettings",
-    "tabs",
-    "webRequest",
-    "webRequestBlocking",
-    "webNavigation"
+    "tabs"
   ],
   "content_security_policy":
     "script-src 'self' 'unsafe-eval' ${src}; object-src 'self'",
@@ -37,6 +33,6 @@
   "web_accessible_resources": [
     "public/*",
     "content/*",
-    "patch-worker.js"
+    "content/web/viewer.html"
   ]
 }
