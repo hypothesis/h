@@ -171,7 +171,11 @@ if (typeof PDFJS === 'undefined') {
   if (typeof VBArray !== 'undefined') {
     Object.defineProperty(xhrPrototype, 'response', {
       get: function xmlHttpRequestResponseGet() {
-        return new Uint8Array(new VBArray(this.responseBody).toArray());
+        if (this.responseType === 'arraybuffer') {
+          return new Uint8Array(new VBArray(this.responseBody).toArray());
+        } else {
+          return this.responseText;
+        }
       }
     });
     return;
@@ -237,7 +241,7 @@ if (typeof PDFJS === 'undefined') {
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
   window.atob = function (input) {
     input = input.replace(/=+$/, '');
-    if (input.length % 4 == 1) {
+    if (input.length % 4 === 1) {
       throw new Error('bad atob input');
     }
     for (
@@ -293,7 +297,7 @@ if (typeof PDFJS === 'undefined') {
       var dataset = {};
       for (var j = 0, jj = this.attributes.length; j < jj; j++) {
         var attribute = this.attributes[j];
-        if (attribute.name.substring(0, 5) != 'data-') {
+        if (attribute.name.substring(0, 5) !== 'data-') {
           continue;
         }
         var key = attribute.name.substring(5).replace(/\-([a-z])/g,
@@ -416,7 +420,7 @@ if (typeof PDFJS === 'undefined') {
   function isDisabled(node) {
     return node.disabled || (node.parentNode && isDisabled(node.parentNode));
   }
-  if (navigator.userAgent.indexOf('Opera') != -1) {
+  if (navigator.userAgent.indexOf('Opera') !== -1) {
     // use browser detection since we cannot feature-check this bug
     document.addEventListener('click', ignoreIfTargetDisabled, true);
   }
