@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 import colander
 import deform
 import horus.views
@@ -181,6 +183,9 @@ class AuthController(horus.views.AuthController):
         except httpexceptions.HTTPBadRequest as e:
             return e.detail
         else:
+            if request.user is not None:
+                request.user.last_login_date = datetime.datetime.utcnow()
+                self.db.add(request.user)
             remember(request, request.user)
             return result
 
