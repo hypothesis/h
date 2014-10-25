@@ -57,7 +57,6 @@ class Annotator.Guest extends Annotator
           origin: origin
           scope: "#{scope}:provider"
           onReady: =>
-            console.log "Guest functions are ready for #{origin}"
             setTimeout =>
               event = document.createEvent "UIEvents"
               event.initUIEvent "annotatorReady", false, false, window, 0
@@ -101,7 +100,6 @@ class Annotator.Guest extends Annotator
       pages = Object.keys(hls).map (s) -> parseInt s
       # Do we have any highlights left?
       if pages.length
-        console.log "We still have something left"
         firstPage = pages.sort()[0]  # Determine the first page
         firstHl = hls[firstPage]     # Determine the first (topmost) hl
         # Store the position of this anchor inside target
@@ -109,7 +107,6 @@ class Annotator.Guest extends Annotator
           top: highlight.getTop()
           heigth: highlight.getHeight()
       else
-        console.log "No pos left"
         delete highlight.anchor.target.pos
 
       # Announce the new positions, so that the sidebar knows
@@ -169,13 +166,10 @@ class Annotator.Guest extends Annotator
     .bind('getDocumentInfo', (trans) =>
       (@plugins.PDF?.getMetaData() ? Promise.reject())
         .then (md) =>
-           # console.log "Returning PDF metadata", md
            trans.complete
              uri: @getHref()
              metadata: md
         .catch (problem) =>
-           # console.log "Returning standard metadata, because"
-           # console.log problem.stack ? problem
            trans.complete
              uri: @getHref()
              metadata: @plugins.Document?.metadata

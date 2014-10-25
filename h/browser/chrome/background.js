@@ -34,13 +34,11 @@ function isPDFViewerURL(url) {
 function inject(tab) {
   if (isPDFURL(tab.url)) {
       if (!isPDFViewerURL(tab.url)) {
-        // console.log("Reloading document with PDF.js...")
         chrome.tabs.update(tab.id, {
           url: getPDFViewerURL(tab.url)
         })
       }
   } else {
-    // console.log("Doing normal non-pdf insertion on page action")
     chrome.tabs.executeScript(tab.id, {
       file: 'public/embed.js'
     }, function () {
@@ -54,13 +52,11 @@ function inject(tab) {
 
 function remove(tab) {
   if (isPDFViewerURL(tab.url)) {
-    // console.log("Going back to the native viewer.")
     url = tab.url.slice(getPDFViewerURL('').length).split('#')[0];
     chrome.tabs.update(tab.id, {
       url: decodeURIComponent(url)
     })
   } else {
-    // console.log("Doing normal non-pdf removal on page action")
     chrome.tabs.executeScript(tab.id, {
       code: [
         'var script = document.createElement("script");',

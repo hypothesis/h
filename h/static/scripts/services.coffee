@@ -92,7 +92,6 @@ class Hypothesis extends Annotator
           origin: origin
           scope: "#{scope}:provider"
           onReady: =>
-            console.log "Provider functions are ready for #{origin}"
             if source is $window.parent then @host = channel
         entities = []
         channel = this._setupXDM options
@@ -272,7 +271,6 @@ class Hypothesis extends Annotator
       for p in @annotator.providers
         for uri in p.entities
           unless entities[uri]?
-            console.log "Loading annotations for: " + uri
             entities[uri] = true
             this.loadAnnotationsFromSearch (angular.extend {}, query, uri: uri)
 
@@ -308,17 +306,12 @@ class Hypothesis extends Annotator
     switch @socialView.name
       when "none"
         # Sweet, nothing to do, just clean up previous filters
-        console.log "Not applying any Social View filters."
         delete query.user
       when "single-player"
         if @plugins.Permissions?.user
-          console.log "Social View filter: single player mode."
           query.user = @plugins.Permissions.user
         else
-          console.log "Social View: single-player mode, but ignoring it, since not logged in."
           delete query.user
-      else
-        console.warn "Unsupported Social View: '" + @socialView.name + "'!"
 
   setTool: (name) ->
     return if name is @tool
