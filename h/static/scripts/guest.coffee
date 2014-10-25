@@ -71,7 +71,7 @@ class Annotator.Guest extends Annotator
 
     unless config.dontScan
       # Scan the document text with the DOM Text libraries
-      this.scanDocument "Guest initialized"
+      this._scan()
 
     # Watch for newly rendered highlights, and update positions in sidebar
     this.subscribe "highlightsCreated", (highlights) =>
@@ -196,14 +196,6 @@ class Annotator.Guest extends Annotator
     .bind('updateHeatmap', =>
       @plugins.Heatmap._scheduleUpdate()
     )
-
-  scanDocument: (reason = "something happened") =>
-    try
-      console.log "Analyzing host frame, because " + reason + "..."
-      this._scan()
-    catch e
-      console.log e.message
-      console.log e.stack
 
   _setupWrapper: ->
     @wrapper = @element

@@ -36,7 +36,7 @@ class Annotator.Host extends Annotator.Guest
           this.showFrame()
 
     # Scan the document
-    this.scanDocument "Host initialized"
+    this._scan()
 
   _setupXDM: (options) ->
     channel = super
