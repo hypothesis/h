@@ -135,7 +135,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       anchor = ann.anchors[0]
       if not next? or start.page*dir < anchor.startPage*dir
         # This one is obviously better
-        #console.log "Found anchor on better page."
         start:
           page: anchor.startPage
           top: anchor.highlight[anchor.startPage]?.getTop()
@@ -146,7 +145,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         if hl?
           # We have a real highlight, let's compare coordinates
           if start.top*dir < hl.getTop()*dir
-            #console.log "Found anchor on same page, better pos."
             # OK, this one is better
             start:
               page: start.page
@@ -154,19 +152,16 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
             next: [anchor]
           else
             # No, let's keep the old one instead
-            #console.log "Found anchor on same page, worse pos. (Known: ", start.top, "; found: ", hl.getTop(), ")"
             acc
         else
           # The page is not yet rendered, can't decide yet.
           # Let's just store this one, too
-          #console.log "Found anchor on same page, unknown pos."
           start: page: start.page
           next: $.merge next, [anchor]
       else
         # No, we have clearly seen better alternatives
         acc
     , {}
-    #console.log "Next is", next
 
     # Get an anchor from the page we want to go to
     anchor = next[0]

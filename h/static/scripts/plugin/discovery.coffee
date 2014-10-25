@@ -1,7 +1,5 @@
 class Annotator.Plugin.Discovery extends Annotator.Plugin
   pluginInit: ->
-    console.log "Initializing discovery plugin."
-
     svc = $('link')
     .filter ->
       this.rel is 'service' and this.type is 'application/annotatorsvc+json'

@@ -111,8 +111,6 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
         (options.origin.match /^resource:\/\//)
       options.origin = '*'
 
-    console.log "Bridge plugin connecting to #{options.origin}"
-#    options.debugOutput = true
     channel = Channel.build(options)
 
     ## Remote method call bindings
@@ -165,7 +163,6 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
     while queue.length
       parent = queue.shift()
       if parent isnt window
-        console.log window.location.toString(), 'sending beacon...'
         parent.postMessage '__annotator_dhcp_discovery', @options.origin
       for child in parent.frames
         queue.push child
@@ -183,10 +180,6 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
         success: (result) -> d.resolve result
         error: (error, reason) ->
           if error isnt 'timeout_error'
-            console.log 'Error in call! Reason: ' + reason
-            console.log error
-            console.log "Call was:", options
-            console.log 'Destroying channel!'
             d.reject error, reason
           else
             d.resolve null

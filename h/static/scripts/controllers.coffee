@@ -134,7 +134,6 @@ class AppController
         , slots * 500
 
       _sock.onmessage = (msg) ->
-        #console.log msg
         unless msg.data.type? and msg.data.type is 'annotation-notification'
           return
         data = msg.data.payload
