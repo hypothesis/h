@@ -40,6 +40,7 @@ def create_annotation(with_subscription=False):
     parent = {'parent': annotation_parent}
     if with_subscription:
         parent['subscription'] = {
+            'id': '1',
             'uri': parent['parent']['user'],
             'parameters': {},
             'query': {}
@@ -97,7 +98,7 @@ def test_authorization():
     request = DummyRequest()
     event = events.AnnotationEvent(request, annotation, 'create')
 
-    with patch('h.notifier.AnnotationNotifier') as mock:
+    with patch('h.notification.notifier.AnnotationNotifier') as mock:
         notifier.send_notifications(event)
         assert mock.call_count == 0
 
@@ -260,6 +261,7 @@ def test_reply_notification_content():
 
         annotation, parent = create_annotation(True)
         request = DummyRequest()
+        request.domain = 'testdomain'
 
         with patch('h.auth.local.models.User') as mock_user:
             user = Mock(email='acct:parent@testdomain')
@@ -315,16 +317,17 @@ def test_reply_same_creator():
     request = DummyRequest()
     event = events.AnnotationEvent(request, annotation, 'create')
 
-    with patch('h.notifier.AnnotationNotifier') as mock_notif:
-        with patch('h.notifier.parent_values') as mock_parent:
+    with patch('h.notification.notifier.AnnotationNotifier') as mock_notif:
+        with patch('h.notification.notifier.parent_values') as mock_parent:
             with patch('h.notification.notifier.Subscriptions.get_active_subscriptions') as mock_subs:
                 mock_subs.return_value = [
-                    Mock(uri='acct:testuser@testdomain',
+                    Mock(id=1,
+                         uri='acct:testuser@testdomain',
                          template=types.REPLY_TEMPLATE)
                 ]
                 mock_parent.return_value = {'user': 'acct:testuser@testdomain'}
                 notifier.send_notifications(event)
-                assert mock_notif().send_notification_to_owner.call_count == 0
+                assert mock_notif()._send_annotation.call_count == 0
 
 
 def test_no_parent_user():
@@ -336,8 +339,8 @@ def test_no_parent_user():
     request = DummyRequest()
     event = events.AnnotationEvent(request, annotation, 'create')
 
-    with patch('h.notifier.AnnotationNotifier') as mock_notif:
-        with patch('h.notifier.parent_values') as mock_parent:
+    with patch('h.notification.notifier.AnnotationNotifier') as mock_notif:
+        with patch('h.notification.notifier.parent_values') as mock_parent:
             with patch('h.notification.notifier.Subscriptions.get_active_subscriptions') as mock_subs:
                 mock_subs.return_value = [
                     Mock(uri='acct:testuse2r@testdomain',
@@ -345,7 +348,7 @@ def test_no_parent_user():
                 ]
                 mock_parent.return_value = {}
                 notifier.send_notifications(event)
-                assert mock_notif().send_notification_to_owner.call_count == 0
+                assert mock_notif()._send_annotation.call_count == 0
 
 
 def test_reply_update():
@@ -357,8 +360,8 @@ def test_reply_update():
     request = DummyRequest()
     event = events.AnnotationEvent(request, annotation, 'update')
 
-    with patch('h.notifier.AnnotationNotifier') as mock_notif:
-        with patch('h.notifier.parent_values') as mock_parent:
+    with patch('h.notification.notifier.AnnotationNotifier') as mock_notif:
+        with patch('h.notification.notifier.parent_values') as mock_parent:
             mock_parent.return_value = {}
             notifier.send_notifications(event)
             assert mock_notif().send_notification_to_owner.call_count == 0
