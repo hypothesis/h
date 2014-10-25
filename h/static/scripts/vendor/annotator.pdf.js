@@ -7,7 +7,7 @@
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2014-10-23 22:40:29Z
+** Built at: 2014-10-25 11:58:09Z
 */
 
 
@@ -141,9 +141,10 @@
     };
 
     PDFTextMapper.prototype._extractPageText = function(pageIndex) {
-      var page,
+      var page, pageSource, _ref,
         _this = this;
-      page = PDFFindController.pdfPageSource.pages[pageIndex];
+      pageSource = (_ref = PDFFindController.pdfPageSource) != null ? _ref : PDFView.findController.pdfPageSource;
+      page = pageSource.pages[pageIndex];
       if ((page != null ? page.pdfPage : void 0) == null) {
         setTimeout((function() {
           return _this._extractPageText(pageIndex);
@@ -151,8 +152,8 @@
         return;
       }
       return page.getTextContent().then(function(data) {
-        var content, rawContent, text, textData, _ref, _ref1;
-        textData = (_ref = (_ref1 = data.bidiTexts) != null ? _ref1 : data.items) != null ? _ref : data;
+        var content, rawContent, text, textData, _ref1, _ref2;
+        textData = (_ref1 = (_ref2 = data.bidiTexts) != null ? _ref2 : data.items) != null ? _ref1 : data;
         rawContent = ((function() {
           var _i, _len, _results;
           _results = [];
