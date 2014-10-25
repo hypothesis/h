@@ -12,6 +12,7 @@ import h.notification.notifier as notifier
 from h.notification import types
 from h.notification.models import Subscriptions
 from h.notification.gateway import user_name, user_profile_url, standalone_url, get_user_by_name
+from h.events import LoginEvent
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -109,6 +110,17 @@ def registration_subscriptions(event):
     user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
     create_subscription(event.request, user_uri, True)
     event.user.subscriptions = True
+
+
+# For backwards compatibility, generate reply notification if not exists
+@subscriber(LoginEvent)
+def check_reply_subscriptions(event):
+    request = event.request
+    user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
+    res = Subscriptions.get_a_template_for_uri(request, user_uri, types.REPLY_TEMPLATE)
+    if not len(res):
+        create_subscription(event.request, user_uri, True)
+        event.user.subscriptions = True
 
 
 def includeme(config):

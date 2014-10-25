@@ -11,6 +11,7 @@ from pyramid import httpexceptions, security
 from pyramid.view import view_config, view_defaults
 
 from h.auth.local import schemas
+from h.events import LoginEvent
 from h.models import _
 from h.stats import get_client as stats
 from h.notification.models import Subscriptions
@@ -194,6 +195,8 @@ class AuthController(horus.views.AuthController):
                 request.user.last_login_date = datetime.datetime.utcnow()
                 self.db.add(request.user)
             remember(request, request.user)
+            event = LoginEvent(self.request, self.request.user)
+            self.request.registry.notify(event)
             return result
 
     def logout(self):

@@ -84,6 +84,16 @@ class SubscriptionsMixin(BaseModel):
             func.lower(cls.uri) == func.lower(uri)
         ).all()
 
+    @classmethod
+    def get_a_template_for_uri(cls, request, uri, template):
+        session = get_session(request)
+        return session.query(cls).filter(
+            and_(
+                func.lower(cls.uri) == func.lower(uri),
+                func.lower(cls.template) == func.lower(template)
+            )
+        ).all()
+
 
 class Subscriptions(SubscriptionsMixin, Base):
     pass

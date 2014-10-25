@@ -9,3 +9,9 @@ class AnnotationEvent(object):
         self.request = request
         self.annotation = annotation
         self.action = action
+
+
+class LoginEvent(object):
+    def __init__(self, request, user):
+        self.request = request
+        self.user = user
