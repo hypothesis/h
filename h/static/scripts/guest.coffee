@@ -7,6 +7,7 @@ class Annotator.Guest extends Annotator
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
+    ".annotator-adder button mouseup":   "onAdderMouseup"
     "setTool": "onSetTool"
     "setVisibleHighlights": "onSetVisibleHighlights"
 
@@ -338,6 +339,10 @@ class Annotator.Guest extends Annotator
       method: 'addToken'
       params: token
 
+  onAdderMouseup: ->
+    event.preventDefault()
+    event.stopPropagation()
+
   onAdderMousedown: ->
 
   onAdderClick: (event) =>
@@ -346,6 +351,7 @@ class Annotator.Guest extends Annotator
     @adder.hide()
     annotation = this.setupAnnotation(this.createAnnotation())
     this.showEditor(annotation)
+    Annotator.util.getGlobal().getSelection().removeAllRanges()
 
   onSetTool: (name) ->
     switch name
