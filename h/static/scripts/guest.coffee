@@ -339,13 +339,16 @@ class Annotator.Guest extends Annotator
       params: token
 
   onAdderMousedown: ->
+    @inAdderClick = true
 
   onAdderClick: (event) =>
     event.preventDefault()
     event.stopPropagation()
     @adder.hide()
+    @inAdderClick = false
     annotation = this.setupAnnotation(this.createAnnotation())
     this.showEditor(annotation)
+    Annotator.util.getGlobal().getSelection().removeAllRanges()
 
   onSetTool: (name) ->
     switch name
