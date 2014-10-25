@@ -13,7 +13,6 @@ clean:
 		-exec rm {} \;
 	find h/static/styles \
 		-iname '*.css' \
-		-not -iname 'visualsearch.css' \
 		-exec rm {} \;
 
 test:
