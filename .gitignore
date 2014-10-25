@@ -11,6 +11,9 @@
 /build
 /dist
 /docs/_build
+/h/css
+/h/js
+/h/lib
 /include
 /lib
 /local
