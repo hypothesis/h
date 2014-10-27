@@ -27,7 +27,6 @@ def parent_values(annotation, request):
         if 'references' in parent:
             grandparent = store.read(parent['references'][-1])
             parent['quote'] = grandparent['text']
-
         return parent
     else:
         return {}
@@ -94,20 +93,6 @@ def check_conditions(annotation, data):
     return True
 
 
-# Create a reply template for a uri
-def create_subscription(request, uri, active):
-    session = get_session(request)
-    subs = Subscriptions(
-        uri=uri,
-        template=types.REPLY_TEMPLATE,
-        description='General reply notification',
-        active=active
-    )
-
-    session.add(subs)
-    session.flush()
-
-
 @subscriber(AnnotationEvent)
 def send_notifications(event):
     # Extract data
@@ -154,6 +139,20 @@ def send_notifications(event):
                 log.exception('Failed to render subscription template %s', subscription)
             except:
                 log.exception('Unknown error when trying to render subscription template %s', subscription)
+
+
+# Create a reply template for a uri
+def create_subscription(request, uri, active):
+    session = get_session(request)
+    subs = Subscriptions(
+        uri=uri,
+        template=types.REPLY_TEMPLATE,
+        description='General reply notification',
+        active=active
+    )
+
+    session.add(subs)
+    session.flush()
 
 
 @subscriber(NewRegistrationEvent)
