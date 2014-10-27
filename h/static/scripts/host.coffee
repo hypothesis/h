@@ -35,7 +35,7 @@ class Annotator.Host extends Annotator.Guest
     app.appendTo(@frame)
 
     if options.firstRun
-      this.on 'panelReady', this.actuallyShowFrame(transition: false)
+      this.on 'panelReady', => this.actuallyShowFrame(transition: false)
 
     if @plugins.Heatmap?
       this._setupDragEvents()

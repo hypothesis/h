@@ -58,7 +58,7 @@ class Annotator.Guest extends Annotator
           origin: origin
           scope: "#{scope}:provider"
           onReady: =>
-            @trigger('panelReady')
+            this.publish('panelReady')
             setTimeout =>
               event = document.createEvent "UIEvents"
               event.initUIEvent "annotatorReady", false, false, window, 0
