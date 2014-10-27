@@ -109,9 +109,27 @@ Deployment
 ----------
 
 Deployment is mostly left as an exercise to the reader until we document this
-better. Using `Docker`_ it is easy to configure the ElasticSearch host and the
-mail relay address. Simply create links with the names ``elasticsearch`` and
-``mail`` respectively.
+better. Using `Docker`_ or the shell environment it is easy to customize a few
+different deployment options.
+
+Docker links
+^^^^^^^^^^^^
+
+The following docker link names are supported for automatic configuration of
+services:
+
+- ``elasticsearch``
+- ``mail``
+- ``redis``
+- ``statsd``
+
+Shell environment
+^^^^^^^^^^^^^^^^^
+
+The following shell environment variables are supported:
+
+- ``DATABASE_URL`` in the format used by Heroku
+- ``SESSION_SECRET`` a unique string secret for cookie validation
 
 Customized embedding
 --------------------
