@@ -1,15 +1,15 @@
 var ACTION_STATES = {
   active: {
     icons: {
-      19: "images/action-icon-active.png",
-      38: "images/action-icon-active@2x.png"
+      19: "images/browser-icon-active.png",
+      38: "images/browser-icon-active@2x.png"
     },
     title: "Disable annotation"
   },
   sleeping: {
     icons: {
-      19: "images/action-icon-inactive.png",
-      38: "images/action-icon-inactive@2x.png"
+      19: "images/browser-icon-inactive.png",
+      38: "images/browser-icon-inactive@2x.png"
     },
     title: "Enable annotation"
   }
@@ -89,16 +89,15 @@ function state(tabId, value) {
 }
 
 
-function setPageAction(tabId, value) {
-  chrome.pageAction.setIcon({
+function setBrowserAction(tabId, value) {
+  chrome.browserAction.setIcon({
     tabId: tabId,
     path: ACTION_STATES[value].icons
   })
-  chrome.pageAction.setTitle({
+  chrome.browserAction.setTitle({
     tabId: tabId,
     title: ACTION_STATES[value].title
   })
-  chrome.pageAction.show(tabId)
 }
 
 
@@ -123,7 +122,7 @@ function onInstalled(installDetails) {
     for (var i in tabs) {
       var tabId = tabs[i].id
         , tabState = state(tabId) || 'sleeping'
-      setPageAction(tabId, tabState)
+      setBrowserAction(tabId, tabState)
     }
   })
 }
@@ -134,7 +133,7 @@ function onUpdateAvailable() {
 }
 
 
-function onPageAction(tab) {
+function onBrowserAction(tab) {
   var newState
 
   if (state(tab.id) == 'active') {
@@ -145,7 +144,7 @@ function onPageAction(tab) {
     inject(tab)
   }
 
-  setPageAction(tab.id, newState)
+  setBrowserAction(tab.id, newState)
 }
 
 
@@ -162,7 +161,7 @@ function onTabRemoved(tab) {
 function onTabUpdated(tabId, info, tab) {
   var currentState = state(tabId) || 'sleeping'
 
-  setPageAction(tabId, currentState)
+  setBrowserAction(tabId, currentState)
 
   if (currentState == 'active' && info.status == 'loading') {
     inject(tab)
@@ -172,7 +171,7 @@ function onTabUpdated(tabId, info, tab) {
 
 chrome.runtime.onInstalled.addListener(onInstalled)
 chrome.runtime.onUpdateAvailable.addListener(onUpdateAvailable)
-chrome.pageAction.onClicked.addListener(onPageAction)
+chrome.browserAction.onClicked.addListener(onBrowserAction)
 chrome.tabs.onCreated.addListener(onTabCreated)
 chrome.tabs.onRemoved.addListener(onTabRemoved)
 chrome.tabs.onUpdated.addListener(onTabUpdated)

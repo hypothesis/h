@@ -27,7 +27,7 @@
     "persistent": true,
     "scripts": ["background.js"]
   },
-  "page_action": {
+  "browser_action": {
     "placeholder": "work around http://crbug.com/86449"
   },
   "web_accessible_resources": [
