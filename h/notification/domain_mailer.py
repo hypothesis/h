@@ -6,15 +6,19 @@ from urlparse import urlparse
 import requests
 from bs4 import BeautifulSoup
 from pyramid.events import subscriber
+from pyramid.renderers import render
+from pyramid.security import Everyone, principals_allowed_by_permission
 
 from h import events
 from h.notification.gateway import user_profile_url, standalone_url
-from h.notification import types
-import h.notification.notifier as notifier
+from h.notification.notifier import send_email, TemplateRenderException
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
+# ToDo: Turn this feature into uri based.
+# Add page uris to the subscriptions table
+# And then the domain mailer can be configured to separate web-pages
 def create_template_map(request, annotation):
     if 'tags' in annotation:
         tags = '\ntags: ' + ', '.join(annotation['tags'])
@@ -34,26 +38,6 @@ def create_template_map(request, annotation):
     }
 
 
-def get_recipients(request, annotation, data):
-    return [data['email']]
-
-
-def check_conditions(annotation, data):
-    return True
-
-# Register the template
-notifier.AnnotationNotifier.register_template(
-    types.DOCUMENT_OWNER, {
-        types.TEXT_PATH: 'h:notification/templates/emails/document_owner_notification.txt',
-        types.HTML_PATH: 'h:notification/templates/emails/document_owner_notification.pt',
-        types.SUBJECT_PATH: 'h:notification/templates/emails/document_owner_notification_subject.txt',
-        types.TEMPLATE_MAP: create_template_map,
-        types.RECIPIENTS: get_recipients,
-        types.CONDITIONS: check_conditions
-    }
-)
-
-
 # TODO: Introduce proper cache for content parsing
 def get_document_owners(content):
     parsed_data = BeautifulSoup(content)
@@ -70,43 +54,47 @@ def get_document_owners(content):
 # we can create a custom subscription for page uri
 @subscriber(events.AnnotationEvent)
 def domain_notification(event):
-    if event.action == 'create':
-        try:
-            annotation = event.annotation
+    if event.action != 'create':
+        return
+    try:
+        annotation = event.annotation
+        request = event.request
 
-            # Check for authorization. Send notification only for public
-            # annotation
-            # XXX: This can be changed and fine grained when user
-            # groups will be introduced
-            read = annotation['permissions']['read']
-            if "group:__world__" not in read:
-                return
+        # Check for authorization. Send notification only for public annotation
+        # XXX: This will be changed and fine grained when
+        # user groups will be introduced
+        if Everyone not in principals_allowed_by_permission(annotation, 'read'):
+            return
 
-            uri = annotation['uri']
-            # TODO: Fetching the page should be done via a webproxy
-            r = requests.get(uri)
-            emails = get_document_owners(r.text)
+        uri = annotation['uri']
+        # TODO: Fetching the page should be done via a webproxy
+        r = requests.get(uri)
+        emails = get_document_owners(r.text)
 
-            # Now send the notifications
-            url_struct = urlparse(annotation['uri'])
-            domain = url_struct.hostname or url_struct.path
-            domain = re.sub(r'^www.', '', domain)
-            notif = notifier.AnnotationNotifier(event.request)
-            for email in emails:
-                # Domain matching
-                mail_domain = email.split('@')[-1]
-                if mail_domain == domain:
-                    try:
-                        # Send notification to owners
-                        notif.send_notification_to_owner(
-                            annotation,
-                            {'email': email},
-                            types.DOCUMENT_OWNER
-                        )
-                    except:
-                        log.exception('Problem sending email')
-        except:
-            log.exception('Problem with domain notification')
+        # Now send the notifications
+        url_struct = urlparse(annotation['uri'])
+        domain = url_struct.hostname or url_struct.path
+        domain = re.sub(r'^www.', '', domain)
+
+        for email in emails:
+            # Domain matching
+            mail_domain = email.split('@')[-1]
+            if mail_domain == domain:
+                try:
+                    # Render e-mail parts
+                    tmap = create_template_map(request, annotation)
+                    text = render('h:notification/templates/document_owner_notification.txt', tmap, request)
+                    html = render('h:notification/templates/document_owner_notification.pt', tmap, request)
+                    subject = render('h:notification/templates/document_owner_notification_subject.txt', tmap, request)
+                    send_email(request, subject, text, html, [email])
+
+                # ToDo: proper exception handling here
+                except TemplateRenderException:
+                    log.exception('Failed to render domain-mailer template')
+                except:
+                    log.exception('Unknown error when trying to render domain-mailer template')
+    except:
+        log.exception('Problem with domain notification')
 
 
 def includeme(config):

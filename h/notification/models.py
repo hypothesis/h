@@ -78,6 +78,16 @@ class SubscriptionsMixin(BaseModel):
         return session.query(cls).filter(cls.active == True).all()
 
     @classmethod
+    def get_active_subscriptions_for_a_template(cls, request, template):
+        session = get_session(request)
+        return session.query(cls).filter(
+            and_(
+                cls.active == True,
+                func.lower(cls.template) == func.lower(template)
+            )
+        ).all()
+
+    @classmethod
     def get_subscriptions_for_uri(cls, request, uri):
         session = get_session(request)
         return session.query(cls).filter(
