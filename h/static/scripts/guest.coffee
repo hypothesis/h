@@ -27,6 +27,9 @@ class Annotator.Guest extends Annotator
   tool: 'comment'
   visibleHighlights: false
 
+  html: jQuery.extend {}, Annotator::html,
+    adder: '<div class="annotator-adder"><button class="h-icon-pen"></button></div>'
+
   constructor: (element, options, config = {}) ->
     options.noScan = true
     super
