@@ -4,9 +4,11 @@ import datetime
 import colander
 import deform
 import horus.views
+from horus.events import RegistrationActivatedEvent
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
 from pyramid import httpexceptions, security
+from pyramid.events import subscriber
 from pyramid.view import view_config, view_defaults
 
 from h.auth.local import schemas
@@ -184,6 +186,9 @@ class AuthController(horus.views.AuthController):
             return e.detail
         else:
             if request.user is not None:
+                log.info("Stat: auth.local.login",
+                         extra={"metric": "auth.local.login", "value": "1",
+                                "mtype": "count"})
                 request.user.last_login_date = datetime.datetime.utcnow()
                 self.db.add(request.user)
             remember(request, request.user)
@@ -204,6 +209,9 @@ class ForgotPasswordController(horus.views.ForgotPasswordController):
     def reset_password(self):
         request = self.request
         result = super(ForgotPasswordController, self).reset_password()
+        log.info("Stat: auth.local.reset_password",
+                 extra={"metric": "auth.local.reset_password", "value": "1",
+                        "mtype": "count"})
         remember(request, request.user)
         return result
 
@@ -233,8 +241,18 @@ class RegisterController(horus.views.RegisterController):
     def register(self):
         request = self.request
         result = super(RegisterController, self).register()
+        log.info("Stat: auth.local.register",
+                 extra={"metric": "auth.local.register", "value": "1",
+                        "mtype": "count"})
         remember(request, request.user)
         return result
+
+
+@subscriber(RegistrationActivatedEvent)
+def activate(event):
+    log.info("Stat: auth.local.activate",
+             extra={"metric": "auth.local.activate", "value": "1",
+                    "mtype": "count"})
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
