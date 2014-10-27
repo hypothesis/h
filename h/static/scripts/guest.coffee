@@ -7,6 +7,7 @@ class Annotator.Guest extends Annotator
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
+    ".annotator-adder button mouseup":   "onAdderMouseup"
     "setTool": "onSetTool"
     "setVisibleHighlights": "onSetVisibleHighlights"
 
@@ -337,6 +338,10 @@ class Annotator.Guest extends Annotator
     @api.notify
       method: 'addToken'
       params: token
+
+  onAdderMouseup: ->
+    event.preventDefault()
+    event.stopPropagation()
 
   onAdderMousedown: ->
 
