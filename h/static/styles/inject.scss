@@ -39,26 +39,30 @@ $base-font-size: 14px;
     width: 6px;
   }
 
-  button, button:first-child {
+  button {
     @include sweetbutton;
-    background-image: url("../images/pen_1.png") !important;
-    background-size: 65%;
-    background-position: center;
-    background-repeat: no-repeat;
+    font-family: h;
     border: none;
     cursor: pointer;
     height: 100%;
-    text-indent: -999em;
     width: 100%;
+    font-size: 1.2em;
     margin: 0;
+    padding: 0;
+    text-align: center;
+    background: white !important;
+    color: $border !important;
 
     &::-moz-focus-inner {
       border: 0;
     }
+
+    &:hover {
+      color: $hoverborder !important;
+    }
   }
 
   &:hover {
-    @include box-shadow(1px 1px 6px -2px $gray-light);
     border-color: $hoverborder;
 
     &:before {
