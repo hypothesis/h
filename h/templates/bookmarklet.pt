@@ -1,4 +1,5 @@
-<a class="btn bookmarklet"
+<a class="bookmarklet"
+   title="Drag this to your bookmarks"
    href="javascript:(function() {
            var ssl = !!document.location.protocol.match(/^https:/)
            , embedUrl = '${request.resource_url(context, 'embed.js')}'
@@ -16,4 +17,5 @@
              embed.setAttribute('src', embedUrl);
              document.body.appendChild(embed);
            }
-         })();">Annotate</a>
+           })();"><i class="h-icon-move"></i> Annotate</a>
+

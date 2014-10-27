@@ -1,0 +1,162 @@
+@import "./mixins/icons";
+
+.help-page {
+  padding-top: 2.5em;
+  padding-bottom: 2.5em;
+  background: white;
+
+  @include breakpoint(920px) {
+    padding-right: 460px;
+  }
+
+  .masthead {
+    margin-bottom: 2.5em;
+  }
+}
+
+.help-page-content {
+  margin: auto;
+  padding: 0 20px;
+  min-width: 480px;
+
+  @include breakpoint(1160px) {
+    padding: 0 5% 0 10%;
+  }
+
+  @include breakpoint(1400px) {
+    padding: 0 10% 0 20%;
+  }
+}
+
+.help-page-heading {
+  color: $gray-darker;
+  margin-bottom: 1em;
+  font-size: 1.5em;
+}
+
+.help-page-heading,
+.help-page-lede {
+  text-align: center;
+}
+
+.help-page-lede {
+  font-style: italic;
+  margin-bottom: 2.5em;
+}
+
+.help-page-section {
+  padding: 2.5em;
+  border-top: 1px solid #EAEAEA;
+
+  &:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+}
+
+.help-page-sidebar {
+  position: fixed;
+  top: 20px;
+  right: 2.5em;
+  bottom: 20px;
+  width: 380px;
+  display: block;
+
+  @include breakpoint(920px) {
+    border: $gray-lighter dotted 2px;
+    border-radius: 3px;
+  }
+}
+
+@mixin help-icon {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 0.4em;
+  border-radius: 0.4em;
+  background: #FFF;
+  text-shadow: 0 0 2px #F9F9F9, 0 0 0 #777;
+  color: rgba(200, 200, 200, 0.3);
+  font-size: 10px;
+}
+
+#help-1 {
+  position: fixed;
+  top: 60px;
+  right: 60px;
+  width: 210px;
+  color: $gray-light;
+  text-align: right;
+
+  @include icons {
+    @include help-icon;
+    font-size: 14px;
+  }
+}
+
+#help-2 {
+  background: url(../images/help-arrow.svg) 0 0 no-repeat;
+  width: 60px;
+  height: 45px;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+}
+
+.numbered-list {
+  counter-reset: numbered-list;
+}
+
+.numbered-list-item {
+  position: relative;
+  counter-increment: numbered-list;
+  padding-left: 3em;
+  padding-right: 1.25em;
+  margin-bottom: 2.5em;
+  list-style-type: none;
+
+  &:before {
+    content: counter(numbered-list);
+    display: block;
+    position: absolute;
+    top: .125em;
+    left: 0;
+    width: 2.125em;
+    height: 1.8125em;
+    border: .125em solid $hypothered;
+    border-radius: 50%;
+    text-align: center;
+    padding-top: .3125em; // 24px == Line height of text.
+  }
+}
+
+.feature {
+  margin-bottom: 1.5em;
+}
+
+.feature-heading {
+  color: $gray-darker;
+  font-size: 1.125em;
+  margin-bottom: .555em;
+}
+
+.feature-icon {
+  font-size: .875em;
+  margin-right: .3em;
+}
+
+.help-icon {
+    @include help-icon;
+}
+
+.bookmarklet {
+  white-space: nowrap;
+  color: $gray-darker;
+  padding: 2px 4px;
+  border: 1px solid;
+  border-radius: 2px;
+  font-size: 13px;
+  cursor: move;
+
+  @include icons {
+    font-size: 12px;
+  }
+}

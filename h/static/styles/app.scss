@@ -13,7 +13,6 @@ body {
   @extend .noise;
   font-family: $sans-font-family;
   font-weight: 300;
-  word-wrap: break-word;
 }
 
 #{nest("hgroup", "#{headings()}")} {
@@ -25,11 +24,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 ol {
   list-style-type: decimal;
   padding-left: 3em;
-}
-
-.bookmarklet {
-  padding: .12em;
-  border: 1px dashed $gray;
 }
 
 #wrapper {
@@ -69,7 +63,6 @@ ol {
     @include respond-to(wide-handhelds tablets desktops) {
       @include pie-clearfix;
       text-align: left;
-      img { float: left; }
     }
 
     margin-bottom: 1em;
@@ -164,5 +157,30 @@ ol {
   .masthead-subheading {
     font-size: 1.231em;
     margin: 0;
+  }
+
+  img {
+    float: left;
+  }
+}
+
+.masthead-small {
+  img {
+    width: 48px;
+    height: auto;
+    padding-top: 1px;
+  }
+
+  hgroup {
+    margin-left: 54px;
+  }
+
+  .masthead-heading {
+    font-size: 20px;
+    line-height: 1em;
+  }
+
+  .masthead-subheading {
+    font-size: 14px;
   }
 }

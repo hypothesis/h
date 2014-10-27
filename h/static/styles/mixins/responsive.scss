@@ -34,22 +34,28 @@ $break-desktop: 1024px !default;
   }
 }
 
+@mixin breakpoint($min) {
+  @media only screen and (min-width: $min) {
+    @content;
+  }
+}
+
 // Mobile first media queries. Encorages development to work with mobile and
 // modify as the viewport grows rather than designing for individual bands.
 @mixin wide-handheld-and-up {
-  @media only screen and (min-width: $break-wide-handheld + 1) {
+  @include breakpoint($break-wide-handheld + 1) {
     @content;
   }
 }
 
 @mixin tablet-and-up {
-  @media only screen and (min-width: $break-tablet + 1) {
+  @include breakpoint($break-tablet + 1) {
     @content;
   }
 }
 
 @mixin desktop-and-up {
-  @media only screen and (min-width: $break-desktop + 1) {
+  @include breakpoint($break-desktop + 1) {
     @content;
   }
 }

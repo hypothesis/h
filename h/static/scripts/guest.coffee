@@ -58,6 +58,7 @@ class Annotator.Guest extends Annotator
           origin: origin
           scope: "#{scope}:provider"
           onReady: =>
+            this.publish('panelReady')
             setTimeout =>
               event = document.createEvent "UIEvents"
               event.initUIEvent "annotatorReady", false, false, window, 0
@@ -66,7 +67,7 @@ class Annotator.Guest extends Annotator
 
     # Load plugins
     for own name, opts of @options
-      if not @plugins[name]
+      if not @plugins[name] and Annotator.Plugin[name]
         this.addPlugin(name, opts)
 
     unless config.dontScan

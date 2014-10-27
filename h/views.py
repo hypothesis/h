@@ -29,10 +29,20 @@ def js(context, request):
 @view_config(layout='app', name='viewer', renderer='h:templates/app.pt')
 @view_config(layout='app', name='editor', renderer='h:templates/app.pt')
 @view_config(layout='app', name='page_search', renderer='h:templates/app.pt')
-@view_config(renderer='h:templates/help.pt', route_name='help')
-@view_config(renderer='h:templates/home.pt', route_name='index')
 def page(context, request):
     return {}
+
+
+@view_config(renderer='h:templates/help.pt', route_name='index')
+@view_config(renderer='h:templates/help.pt', route_name='help')
+@view_config(renderer='h:templates/help.pt', route_name='onboarding')
+def help_page(context, request):
+    current_route = request.matched_route.name
+    return {
+        'is_index': current_route == 'index',
+        'is_help': current_route == 'help',
+        'is_onboarding': current_route == 'onboarding',
+    }
 
 
 @view_config(
@@ -81,5 +91,6 @@ def includeme(config):
     config.add_route('index', '/')
     config.add_route('stream', '/stream')
     config.add_route('help', '/docs/help')
+    config.add_route('onboarding', '/welcome')
 
     config.scan(__name__)
