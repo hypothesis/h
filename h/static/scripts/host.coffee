@@ -20,10 +20,15 @@ class Annotator.Host extends Annotator.Guest
       # XXX: Hack for missing window.location.origin in FF
       hostOrigin ?= window.location.protocol + "//" + window.location.host
 
+    src = options.app
+    if options.firstRun
+      # Allow options.app to contain query string params.
+      src = src + (if '?' in src then '&' else '?') + 'firstrun'
+
     app = $('<iframe></iframe>')
     .attr('name', 'hyp_sidebar_frame')
     .attr('seamless', '')
-    .attr('src', "#{options.app}#/?xdm=#{encodeURIComponent(hostOrigin)}")
+    .attr('src', src)
 
     super element, options, dontScan: true
 

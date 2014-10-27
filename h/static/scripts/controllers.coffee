@@ -31,11 +31,13 @@ class AppController
     'documentHelpers', 'drafts'
   ]
   constructor: (
-     $location,   $q,   $route,   $scope,   $timeout
+     $location,   $q,   $route,   $scope,   $timeout,
      annotator,   flash,   identity,   socket,   streamfilter,
      documentHelpers,   drafts
   ) ->
     {plugins, host, providers} = annotator
+
+    isFirstRun = $location.search().hasOwnProperty('firstrun')
 
     applyUpdates = (action, data) ->
       """Update the application with new data from the websocket."""
@@ -193,6 +195,8 @@ class AppController
       if plugins.Auth is undefined
         $scope.persona = null
         reset()
+
+      $scope.login() if isFirstRun
 
     oncancel = ->
       $scope.dialog.visible = false
