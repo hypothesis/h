@@ -83,4 +83,9 @@ def _environment_overrides():
         overrides['session.secret'] = os.environ['SESSION_SECRET']
         overrides['redis.sessions.secret'] = os.environ['SESSION_SECRET']
 
+    if 'STATSD_PORT' in os.environ:
+        statsd_host = urlparse.urlparse(os.environ['STATSD_PORT_8125_UDP'])
+        overrides['statsd.host'] = statsd_host.hostname
+        overrides['statsd.port'] = statsd_host.port
+
     return overrides
