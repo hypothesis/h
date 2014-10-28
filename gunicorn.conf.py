@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
 import urlparse
 
 # Smart detect heroku stack and assume a trusted proxy.
