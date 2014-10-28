@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime
-import logging
 
 import colander
 import deform
@@ -12,8 +11,7 @@ from pyramid.view import view_config, view_defaults
 
 from h.auth.local import schemas
 from h.models import _
-
-log = logging.getLogger(__name__)
+from h.stats import get_client as stats
 
 
 def ajax_form(request, result):
@@ -187,14 +185,15 @@ class AuthController(horus.views.AuthController):
             return e.detail
         else:
             if request.user is not None:
-                log.info("Stat: auth.local.login",
-                         extra={"metric": "auth.local.login",
-                                "value": 1,
-                                "mtype": "counter"})
+                stats(request).get_counter('auth.local.login').increment()
                 request.user.last_login_date = datetime.datetime.utcnow()
                 self.db.add(request.user)
             remember(request, request.user)
             return result
+
+    def logout(self):
+        stats(self.request).get_counter('auth.local.logout').increment()
+        return super(AuthController, self).logout()
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
@@ -211,10 +210,7 @@ class ForgotPasswordController(horus.views.ForgotPasswordController):
     def reset_password(self):
         request = self.request
         result = super(ForgotPasswordController, self).reset_password()
-        log.info("Stat: auth.local.reset_password",
-                 extra={"metric": "auth.local.reset_password",
-                        "value": 1,
-                        "mtype": "counter"})
+        stats(request).get_counter('auth.local.reset_password').increment()
         remember(request, request.user)
         return result
 
@@ -244,10 +240,7 @@ class RegisterController(horus.views.RegisterController):
     def register(self):
         request = self.request
         result = super(RegisterController, self).register()
-        log.info("Stat: auth.local.register",
-                 extra={"metric": "auth.local.register",
-                        "value": 1,
-                        "mtype": "counter"})
+        stats(request).get_counter('auth.local.register').increment()
         remember(request, request.user)
         return result
 

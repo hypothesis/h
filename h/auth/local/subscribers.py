@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import logging
-
 from pyramid.events import subscriber
 from pyramid.settings import asbool
 
@@ -10,15 +8,12 @@ from horus.events import (
     PasswordResetEvent,
 )
 
-log = logging.getLogger(__name__)
+from h.stats import get_client as stats
 
 
 @subscriber(RegistrationActivatedEvent)
 def activate(event):
-    log.info("Stat: auth.local.activate",
-             extra={"metric": "auth.local.activate",
-                    "value": 1,
-                    "mtype": "counter"})
+    stats(event.request).get_counter('auth.local.activate').increment()
 
 
 @subscriber(NewRegistrationEvent, autologin=True)

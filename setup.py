@@ -49,6 +49,7 @@ install_requires = [
     'pyramid-oauthlib==0.1.1',
     'pyramid_tm>=0.7',
     'python-dateutil>=2.1',
+    'python-statsd>=1.7.0,<1.8.0',
     'pyramid-sockjs==0.3.9',
     'pyramid_webassets>=0.9,<1.0',
     'requests>=2.2.1',
