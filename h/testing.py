@@ -64,7 +64,7 @@ class PatternLibraryLayout(BaseLayout):
 
 
 class LoggingMailer(DummyMailer):
-    class destination(list):
+    class Destination(list):
         def __init__(self, prefix):
             self.prefix = prefix
 
@@ -74,8 +74,8 @@ class LoggingMailer(DummyMailer):
             list.append(self, message)
 
     def __init__(self):
-        self.outbox = self.destination('Sending email')
-        self.queue = self.destination('Queuing email')
+        self.outbox = self.Destination('Sending email')
+        self.queue = self.Destination('Queuing email')
 
 
 def includeme(config):

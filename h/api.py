@@ -41,12 +41,12 @@ def get_consumer(request):
     key = request.params.get('client_id', settings['api.key'])
     secret = request.params.get('client_secret', settings.get('api.secret'))
 
-    Consumer = registry.getUtility(interfaces.IConsumerClass)
+    consumer_ctor = registry.getUtility(interfaces.IConsumerClass)
 
     if key == settings['api.key'] and secret is not None:
-        consumer = Consumer(key=key, secret=secret)
+        consumer = consumer_ctor(key=key, secret=secret)
     else:
-        consumer = Consumer.get_by_key(request, key)
+        consumer = consumer_ctor.get_by_key(request, key)
 
     return consumer
 
@@ -221,8 +221,8 @@ def anonymize_deletes(annotation):
 
 def before_request():
     request = get_current_request()
-    Annotation = request.registry.getUtility(interfaces.IAnnotationClass)
-    flask.g.annotation_class = Annotation
+    annotation_ctor = request.registry.getUtility(interfaces.IAnnotationClass)
+    flask.g.annotation_class = annotation_ctor
     flask.g.auth = Authenticator(request)
     flask.g.authorize = functools.partial(authorize, request)
     flask.g.before_annotation_update = anonymize_deletes

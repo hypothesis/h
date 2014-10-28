@@ -97,15 +97,15 @@ class AnnotationFactory(BaseResource):
         except httpexceptions.HTTPException as e:
             if e.status_code in [401, 404]:
                 raise httpexceptions.HTTPNotFound(
-                    body_template=
-                    "Either no annotation exists with this identifier, or you "
-                    "don't have the permissions required for viewing it."
+                    body_template=("Either no annotation exists with this "
+                                   "identifier, or you don't have the "
+                                   "permissions required for viewing it.")
                 )
             else:
                 raise e
 
-        Annotation = registry.queryUtility(interfaces.IAnnotationClass)
-        annotation = Annotation(data)
+        annotation_ctor = registry.queryUtility(interfaces.IAnnotationClass)
+        annotation = annotation_ctor(data)
         annotation.__name__ = key
         annotation.__parent__ = self
 
