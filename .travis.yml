@@ -8,11 +8,13 @@ install:
   #   https://github.com/sass/sass/issues/1476
   - gem install sass:3.4.5
   - gem install compass
+  - pip install flake8 pep8-naming
   - make
 services:
   - elasticsearch
 script:
   - make test
+  - flake8 h
 notifications:
   irc:
     channels:
