@@ -165,7 +165,7 @@ function onTabUpdated(tabId, info, tab) {
 
   setBrowserAction(tabId, currentState)
 
-  if (currentState == 'active' && info.status == 'loading') {
+  if (currentState == 'active' && info.status == 'complete') {
     inject(tab)
   }
 }
