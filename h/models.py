@@ -46,10 +46,18 @@ class Annotation(annotation.Annotation):
         'created': {'type': 'date'},
         'updated': {'type': 'date'},
         'quote': {'type': 'string'},
-        'tags': {'type': 'string', 'index': 'analyzed', 'analyzer': 'lower_keyword'},
+        'tags': {
+            'type': 'string',
+            'index': 'analyzed',
+            'analyzer': 'lower_keyword'
+        },
         'text': {'type': 'string'},
         'deleted': {'type': 'boolean'},
-        'uri': {'type': 'string', 'index_analyzer': 'uri_index', 'search_analyzer': 'uri_search'},
+        'uri': {
+            'type': 'string',
+            'index_analyzer': 'uri_index',
+            'search_analyzer': 'uri_search'
+        },
         'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'user'},
         'consumer': {'type': 'string', 'index': 'not_analyzed'},
         'target': {
@@ -59,7 +67,11 @@ class Annotation(annotation.Annotation):
                     'path': 'just_name',
                     'fields': {
                         'id': {'type': 'string', 'index': 'not_analyzed'},
-                        'uri': {'type': 'string', 'index_analyzer': 'uri_index', 'search_analyzer': 'uri_search'},
+                        'uri': {
+                            'type': 'string',
+                            'index_analyzer': 'uri_index',
+                            'search_analyzer': 'uri_search'
+                        },
                     },
                 },
                 'source': {
@@ -67,7 +79,11 @@ class Annotation(annotation.Annotation):
                     'path': 'just_name',
                     'fields': {
                         'source': {'type': 'string', 'index': 'not_analyzed'},
-                        'uri': {'type': 'string', 'index_analyzer': 'uri_index', 'search_analyzer': 'uri_search'},
+                        'uri': {
+                            'type': 'string',
+                            'index_analyzer': 'uri_index',
+                            'search_analyzer': 'uri_search'
+                        },
                     },
                 },
                 'selector': {

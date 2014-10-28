@@ -33,10 +33,11 @@ def get_blacklist():
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
     req = node.bindings['request']
-    User = req.registry.getUtility(interfaces.IUserClass)
-    if get_session(req).query(User).filter(User.username.ilike(value)).count():
-        Str = req.registry.getUtility(interfaces.IUIStrings)
-        raise colander.Invalid(node, Str.registration_username_exists)
+    user_ctor = req.registry.getUtility(interfaces.IUserClass)
+    query = get_session(req).query(user_ctor)
+    if query.filter(user_ctor.username.ilike(value)).count():
+        str_ = req.registry.getUtility(interfaces.IUIStrings)
+        raise colander.Invalid(node, str_.registration_username_exists)
 
 
 def unblacklisted_username(node, value, blacklist=None):
@@ -47,8 +48,8 @@ def unblacklisted_username(node, value, blacklist=None):
         # We raise a generic "user with this name already exists" error so as
         # not to make explicit the presence of a blacklist.
         req = node.bindings['request']
-        Str = req.registry.getUtility(interfaces.IUIStrings)
-        raise colander.Invalid(node, Str.registration_username_exists)
+        str_ = req.registry.getUtility(interfaces.IUIStrings)
+        raise colander.Invalid(node, str_.registration_username_exists)
 
 
 class CSRFSchema(colander.Schema):

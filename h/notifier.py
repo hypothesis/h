@@ -112,7 +112,8 @@ class ReplyTemplate(NotificationTemplate):
         # parsing it, and of course it'd only correct the backend's timezone
         # which is not meaningful for international users
         format = '%Y-%m-%dT%H:%M:%S.%f'
-        parent_timestamp = datetime.strptime(data['parent']['created'][:-6], format)
+        parent_timestamp = datetime.strptime(data['parent']['created'][:-6],
+                                             format)
         reply_timestamp = datetime.strptime(reply['created'][:-6], format)
 
         return {

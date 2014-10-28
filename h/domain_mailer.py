@@ -70,9 +70,10 @@ def domain_notification(event):
         try:
             annotation = event.annotation
 
-            # Check for authorization. Send notification only for public annotation
-            # XXX: This can be changed and fine grained when
-            # user groups will be introduced
+            # Check for authorization. Send notification only for public
+            # annotation
+            # XXX: This can be changed and fine grained when user
+            # groups will be introduced
             read = annotation['permissions']['read']
             if "group:__world__" not in read:
                 return

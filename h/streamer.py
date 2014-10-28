@@ -188,7 +188,9 @@ class FilterToElasticFilter(object):
                     }
                 }
             elif query_type == 'match':
-                cutoff_freq = es['cutoff_frequency'] if 'cutoff_frequency' in es else None
+                cutoff_freq = None
+                if 'cutoff_frequency' in es:
+                    cutoff_freq = es['cutoff_frequency']
                 and_or = es['and_or'] if 'and_or' in es else 'and'
                 message = {
                     "query": value,
@@ -199,7 +201,9 @@ class FilterToElasticFilter(object):
                 new_clause = {"match": {field: message}}
             elif query_type == 'multi_match':
                 and_or = es['and_or'] if 'and_or' in es else 'and'
-                match_type = es['match_type'] if 'mach_type' in es else 'cross_fields'
+                match_type = None
+                if 'match_type' in es:
+                    match_type = es['match_type']
                 message = {
                     "query": value,
                     "operator": and_or,
