@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
 
 import colander
 import deform
 import horus.views
-from horus.events import RegistrationActivatedEvent
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
 from pyramid import httpexceptions, security
-from pyramid.events import subscriber
 from pyramid.view import view_config, view_defaults
 
 from h.auth.local import schemas
 from h.models import _
+
+log = logging.getLogger(__name__)
 
 
 def ajax_form(request, result):
@@ -246,13 +247,6 @@ class RegisterController(horus.views.RegisterController):
                         "mtype": "count"})
         remember(request, request.user)
         return result
-
-
-@subscriber(RegistrationActivatedEvent)
-def activate(event):
-    log.info("Stat: auth.local.activate",
-             extra={"metric": "auth.local.activate", "value": "1",
-                    "mtype": "count"})
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
