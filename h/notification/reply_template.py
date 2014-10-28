@@ -12,11 +12,17 @@ from horus.events import NewRegistrationEvent
 from h.notification.notifier import send_email, TemplateRenderException
 from h.notification import types
 from h.notification.models import Subscriptions
-from h.notification.gateway import user_name, user_profile_url, standalone_url, get_user_by_name
+from h.notification.gateway import user_name, \
+    user_profile_url, standalone_url, get_user_by_name
+from h.notification.types import ROOT_PATH
 from h.events import LoginEvent, AnnotationEvent
 from h import interfaces
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+TXT_TEMPLATE = ROOT_PATH + 'reply_notification.txt'
+HTML_TEMPLATE = ROOT_PATH + 'reply_notification.pt'
+SUBJECT_TEMPLATE = ROOT_PATH + 'reply_notification_subject.txt'
 
 
 def parent_values(annotation, request):
@@ -44,10 +50,14 @@ def create_template_map(request, reply, data):
     # parsing it, and of course it'd only correct the backend's timezone
     # which is not meaningful for international users
     date_format = '%Y-%m-%dT%H:%M:%S.%f'
-    parent_timestamp = datetime.strptime(data['parent']['created'][:-6], date_format)
-    reply_timestamp = datetime.strptime(reply['created'][:-6], date_format)
+    parent_timestamp = datetime.strptime(data['parent']['created'][:-6],
+                                         date_format)
+    reply_timestamp = datetime.strptime(reply['created'][:-6],
+                                        date_format)
 
-    seq = ('http://', str(request.domain), '/app?__formid__=unsubscribe&subscription_id=', str(data['subscription']['id']))
+    seq = ('http://', str(request.domain),
+           '/app?__formid__=unsubscribe&subscription_id=',
+           str(data['subscription']['id']))
     unsubscribe = "".join(seq)
 
     return {
@@ -115,7 +125,10 @@ def send_notifications(event):
         'parent': parent_values(annotation, request)
     }
 
-    subscriptions = Subscriptions.get_active_subscriptions_for_a_template(request, types.REPLY_TEMPLATE)
+    subscriptions = Subscriptions.get_active_subscriptions_for_a_template(
+        request,
+        types.REPLY_TEMPLATE
+    )
     for subscription in subscriptions:
         data['subscription'] = {
             'id': subscription.id,
@@ -129,16 +142,18 @@ def send_notifications(event):
             try:
                 # Render e-mail parts
                 tmap = create_template_map(request, annotation, data)
-                text = render('h:notification/templates/reply_notification.txt', tmap, request)
-                html = render('h:notification/templates/reply_notification.pt', tmap, request)
-                subject = render('h:notification/templates/reply_notification_subject.txt', tmap, request)
+                text = render(TXT_TEMPLATE, tmap, request)
+                html = render(HTML_TEMPLATE, tmap, request)
+                subject = render(SUBJECT_TEMPLATE, tmap, request)
                 recipients = get_recipients(request, data)
                 send_email(request, subject, text, html, recipients)
             # ToDo: proper exception handling here
             except TemplateRenderException:
-                log.exception('Failed to render subscription template %s', subscription)
+                log.exception('Failed to render subscription'
+                              ' template %s', subscription)
             except:
-                log.exception('Unknown error when trying to render subscription template %s', subscription)
+                log.exception('Unknown error when trying to render'
+                              ' subscription template %s', subscription)
 
 
 # Create a reply template for a uri
@@ -168,7 +183,11 @@ def registration_subscriptions(event):
 def check_reply_subscriptions(event):
     request = event.request
     user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
-    res = Subscriptions.get_a_template_for_uri(request, user_uri, types.REPLY_TEMPLATE)
+    res = Subscriptions.get_a_template_for_uri(
+        request,
+        user_uri,
+        types.REPLY_TEMPLATE
+    )
     if not len(res):
         create_subscription(event.request, user_uri, True)
         event.user.subscriptions = True

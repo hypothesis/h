@@ -290,9 +290,16 @@ class ProfileController(horus.views.ProfileController):
                     self.db.add(s)
                     return {}
                 else:
-                    return dict(errors=[{'subscriptions': _('Non existing subscription')}], code=404)
+                    return dict(
+                        errors=[
+                            {'subscriptions': _('Non existing subscription')}
+                        ],
+                        code=404
+                    )
             else:
-                return dict(errors=[{'username': _('Invalid username')}], code=400)
+                return dict(
+                    errors=[{'username': _('Invalid username')}], code=400
+                )
 
         # Password check
         user = self.User.get_user(request, username, pwd)
@@ -329,7 +336,10 @@ class ProfileController(horus.views.ProfileController):
     def profile(self):
         request = self.request
         user_id = request.authenticated_userid
-        subscriptions = Subscriptions.get_subscriptions_for_uri(request, user_id)
+        subscriptions = Subscriptions.get_subscriptions_for_uri(
+            request,
+            user_id
+        )
         return {'model': {'subscriptions': subscriptions}}
 
     def unsubscribe(self):
@@ -365,7 +375,7 @@ def includeme(config):
                      factory=UserFactory,
                      traverse="/{user_id}")
     config.add_route('unsubscribe', '/unsubscribe/{subscription_id}',
-                         traverse="/{subscription_id}")
+                     traverse="/{subscription_id}")
 
     config.include('horus')
     config.scan(__name__)

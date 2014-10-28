@@ -2,6 +2,7 @@
 import re
 from h.auth.local import models
 
+
 def user_name(user):
     return re.search(r'^acct:([^@]+)', user).group(1)
 

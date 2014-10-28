@@ -12,8 +12,13 @@ from pyramid.security import Everyone, principals_allowed_by_permission
 from h import events
 from h.notification.gateway import user_profile_url, standalone_url
 from h.notification.notifier import send_email, TemplateRenderException
+from h.notification.types import ROOT_PATH
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+TXT_TEMPLATE = ROOT_PATH + 'document_owner_notification.txt'
+HTML_TEMPLATE = ROOT_PATH + 'document_owner_notification.pt'
+SUBJECT_TEMPLATE = ROOT_PATH + 'document_owner_notification_subject.txt'
 
 
 # ToDo: Turn this feature into uri based.
@@ -63,7 +68,8 @@ def domain_notification(event):
         # Check for authorization. Send notification only for public annotation
         # XXX: This will be changed and fine grained when
         # user groups will be introduced
-        if Everyone not in principals_allowed_by_permission(annotation, 'read'):
+        allowed = principals_allowed_by_permission(annotation, 'read')
+        if Everyone not in allowed:
             return
 
         uri = annotation['uri']
@@ -83,16 +89,18 @@ def domain_notification(event):
                 try:
                     # Render e-mail parts
                     tmap = create_template_map(request, annotation)
-                    text = render('h:notification/templates/document_owner_notification.txt', tmap, request)
-                    html = render('h:notification/templates/document_owner_notification.pt', tmap, request)
-                    subject = render('h:notification/templates/document_owner_notification_subject.txt', tmap, request)
+                    text = render(TXT_TEMPLATE, tmap, request)
+                    html = render(HTML_TEMPLATE, tmap, request)
+                    subject = render(SUBJECT_TEMPLATE, tmap, request)
                     send_email(request, subject, text, html, [email])
 
                 # ToDo: proper exception handling here
                 except TemplateRenderException:
                     log.exception('Failed to render domain-mailer template')
                 except:
-                    log.exception('Unknown error when trying to render domain-mailer template')
+                    log.exception(
+                        'Unknown error when trying to render'
+                        'domain-mailer template')
     except:
         log.exception('Problem with domain notification')
 

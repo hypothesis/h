@@ -10,6 +10,7 @@ Create Date: 2014-10-24 13:19:15.932243
 revision = '209c3cd1a864'
 down_revision = '2246cd7f5801'
 
+import json
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.types import TypeDecorator, VARCHAR
@@ -54,7 +55,12 @@ def upgrade():
         sa.Column('uri', sa.Unicode(256), nullable=False),
         sa.Column('query', JSONEncodedDict(4096), nullable=True, default={}),
         sa.Column('template', sa.VARCHAR(64), nullable=False),
-        sa.Column('parameters', JSONEncodedDict(1024), nullable=True, default={}),
+        sa.Column(
+            'parameters',
+            JSONEncodedDict(1024),
+            nullable=True,
+            default={}
+        ),
         sa.Column('description', sa.VARCHAR(256), default=""),
         sa.Column('active', sa.BOOLEAN, default=True, nullable=False)
     )
