@@ -3,7 +3,7 @@
     <script>
       function hypothesisConfig() { return {firstRun: true} }
     </script>
-    <script type="text/javascript" defer="defer">
+    <script type="text/javascript" defer="defer" tal:condition="not is_onboarding">
       <metal:main use-macro="load: embed.txt" />
     </script>
     <title>Hypothesis</title>

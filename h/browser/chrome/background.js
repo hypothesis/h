@@ -103,7 +103,9 @@ function setBrowserAction(tabId, value) {
 
 function onInstalled(installDetails) {
   if (installDetails.reason === 'install') {
-    chrome.tabs.create({url: 'http://hypothes.is/welcome'});
+    chrome.tabs.create({url: 'http://hypothes.is/welcome'}, function (tab) {
+      onBrowserAction(tab);
+    });
   }
 
   /* We need this so that 3-rd party cookie blocking does not kill us.
