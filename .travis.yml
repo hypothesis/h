@@ -14,7 +14,7 @@ services:
   - elasticsearch
 script:
   - make test
-  - flake8 h
+  - flake8 h --exclude=_version.py
 notifications:
   irc:
     channels:
