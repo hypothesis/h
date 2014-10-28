@@ -191,6 +191,10 @@ class AuthController(horus.views.AuthController):
             remember(request, request.user)
             return result
 
+    def logout(self):
+        stats(self.request).get_counter('auth.local.logout').increment()
+        return super(AuthController, self).logout()
+
 
 @view_defaults(accept='application/json', name='app', renderer='json')
 @view_config(attr='login', request_param='__formid__=login')
