@@ -36,6 +36,12 @@ describe 'h.directives.annotation', ->
     $scope.$digest()
     assert.equal(controller.document.title, 'A special document')
 
+  it 'uses the first title when there are more than one', ->
+    annotation.document.title = ['first title', 'second title']
+    controller = createController()
+    $scope.$digest()
+    assert.equal(controller.document.title, 'first title')
+
   it 'truncates long titles', ->
     annotation.document.title = '''A very very very long title that really
     shouldn't be found on a page on the internet.'''

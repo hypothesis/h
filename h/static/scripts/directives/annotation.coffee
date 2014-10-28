@@ -187,11 +187,15 @@ AnnotationController = [
             break
 
         domain = extractURIComponent(uri, 'hostname')
+        documentTitle = if Array.isArray(model.document.title)
+          model.document.title[0]
+        else
+          model.document.title
 
         @document =
           uri: uri
           domain: domain
-          title: model.document.title or domain
+          title: documentTitle or domain
 
         if @document.title.length > 30
           @document.title = @document.title[0..29] + '…'
