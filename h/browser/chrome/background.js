@@ -103,8 +103,8 @@ function setBrowserAction(tabId, value) {
 
 function onInstalled(installDetails) {
   if (installDetails.reason === 'install') {
-    chrome.tabs.create({url: 'http://hypothes.is/welcome'}, function (tab) {
-      onBrowserAction(tab);
+    chrome.tabs.create({url: 'https://hypothes.is/welcome'}, function (tab) {
+      state(tab.id, 'active');
     });
   }
 
