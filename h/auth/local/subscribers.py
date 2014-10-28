@@ -18,7 +18,7 @@ def activate(event):
     log.info("Stat: auth.local.activate",
              extra={"metric": "auth.local.activate",
                     "value": 1,
-                    "mtype": "count"})
+                    "mtype": "counter"})
 
 
 @subscriber(NewRegistrationEvent, autologin=True)
