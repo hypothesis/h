@@ -104,6 +104,7 @@
       if (!this.pathStartNode.ownerDocument.body.contains(this.pathStartNode)) {
         return;
       }
+      this.documentChanged();
       startTime = this.timestamp();
       this.saveSelection();
       this.path = {};
@@ -832,3 +833,5 @@
   })();
 
 }).call(this);
+
+//# sourceMappingURL=dom_text_mapper.map
