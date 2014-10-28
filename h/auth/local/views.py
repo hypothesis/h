@@ -187,7 +187,6 @@ class AuthController(horus.views.AuthController):
             return e.detail
         else:
             if request.user is not None:
-                import pdb; pdb.set_trace()
                 log.info("Stat: auth.local.login",
                          extra={"metric": "auth.local.login",
                                 "value": 1,
