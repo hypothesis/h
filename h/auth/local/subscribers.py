@@ -16,7 +16,8 @@ log = logging.getLogger(__name__)
 @subscriber(RegistrationActivatedEvent)
 def activate(event):
     log.info("Stat: auth.local.activate",
-             extra={"metric": "auth.local.activate", "value": "1",
+             extra={"metric": "auth.local.activate",
+                    "value": 1,
                     "mtype": "count"})
 
 

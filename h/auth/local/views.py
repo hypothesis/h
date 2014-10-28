@@ -188,7 +188,8 @@ class AuthController(horus.views.AuthController):
         else:
             if request.user is not None:
                 log.info("Stat: auth.local.login",
-                         extra={"metric": "auth.local.login", "value": "1",
+                         extra={"metric": "auth.local.login",
+                                "value": 1,
                                 "mtype": "count"})
                 request.user.last_login_date = datetime.datetime.utcnow()
                 self.db.add(request.user)
@@ -211,7 +212,8 @@ class ForgotPasswordController(horus.views.ForgotPasswordController):
         request = self.request
         result = super(ForgotPasswordController, self).reset_password()
         log.info("Stat: auth.local.reset_password",
-                 extra={"metric": "auth.local.reset_password", "value": "1",
+                 extra={"metric": "auth.local.reset_password",
+                        "value": 1,
                         "mtype": "count"})
         remember(request, request.user)
         return result
@@ -243,7 +245,8 @@ class RegisterController(horus.views.RegisterController):
         request = self.request
         result = super(RegisterController, self).register()
         log.info("Stat: auth.local.register",
-                 extra={"metric": "auth.local.register", "value": "1",
+                 extra={"metric": "auth.local.register",
+                        "value": 1,
                         "mtype": "count"})
         remember(request, request.user)
         return result
