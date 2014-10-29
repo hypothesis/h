@@ -73,15 +73,14 @@
     </form>
   </div>
   <div class="tab-pane" title="Notifications">
-      <form class="account-form form" name="notificationsForm">
-          <ul>
-            <li ng-repeat="subscription in subscriptions">
-                <input type="checkbox"
-                       ng-model="subscription.active"
-                       ng-change="updated($index, notificationsForm)">
-                <span>{{subscription.description}}</span>
-            </li>
-          </ul>
-      </form>
+    <form class="account-form form" name="notificationsForm">
+      <p class="form-description">Recieve notification emails for:</p>
+      <div class="form-field form-checkbox-list">
+        <div class="form-checkbox-item" ng-repeat="subscription in subscriptions">
+          <input id="checkbox-{{$index}}" type="checkbox" ng-model="subscription.active" ng-change="updated($index, notificationsForm)" />
+          <label class="form-label" for="checkbox-{{$index}}">{{subscription.description}}</label>
+        </div>
+      </div>
+    </form>
   </div>
 </div>
