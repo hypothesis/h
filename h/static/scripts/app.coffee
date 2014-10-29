@@ -11,6 +11,7 @@ imports = [
 
 resolve =
   storeConfig: ['$q', 'annotator', ($q, annotator) ->
+    if annotator.plugins.Store then return
     storeReady = $q.defer()
     resolve = (options) ->
       annotator.options.Store ?= {}
