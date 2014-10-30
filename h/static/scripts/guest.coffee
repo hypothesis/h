@@ -188,7 +188,6 @@ class Annotator.Guest extends Annotator
     )
 
     .bind('setVisibleHighlights', (ctx, state) =>
-      this.setVisibleHighlights state, false
       this.publish 'setVisibleHighlights', state
     )
 
@@ -315,17 +314,10 @@ class Annotator.Guest extends Annotator
       method: 'setTool'
       params: name
 
-  setVisibleHighlights: (state=true, notify=true) ->
-    if notify
-      @panel?.notify
-        method: 'setVisibleHighlights'
-        params: state
-    else
-      markerClass = 'annotator-highlights-always-on'
-      if state or this.tool is 'highlight'
-        @element.addClass markerClass
-      else
-        @element.removeClass markerClass
+  setVisibleHighlights: (state) ->
+    @panel?.notify
+      method: 'setVisibleHighlights'
+      params: state
 
   addComment: ->
     this.showEditor(this.createAnnotation())
@@ -360,10 +352,14 @@ class Annotator.Guest extends Annotator
   onSetTool: (name) ->
     switch name
       when 'comment'
-        this.setVisibleHighlights this.visibleHighlights, false
+        this.setVisibleHighlights this.visibleHighlights
       when 'highlight'
-        this.setVisibleHighlights true, false
+        this.setVisibleHighlights true
 
-  onSetVisibleHighlights: (state) =>
+  onSetVisibleHighlights: (state) ->
+    markerClass = 'annotator-highlights-always-on'
+    if state or this.tool is 'highlight'
+      @element.addClass markerClass
+    else
+      @element.removeClass markerClass
     this.visibleHighlights = state
-    this.setVisibleHighlights state, false
