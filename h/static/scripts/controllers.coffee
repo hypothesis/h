@@ -224,11 +224,11 @@ class AppController
 
     $scope.$watch 'sort.name', (name) ->
       return unless name
-      [predicate, reverse] = switch name
-        when 'Newest' then ['message.updated', true]
-        when 'Oldest' then ['message.updated', false]
-        when 'Location' then ['message.target[0].pos.top', false]
-      $scope.sort = {name, predicate, reverse}
+      predicate = switch name
+        when 'Newest' then ['-!!message', '-message.updated']
+        when 'Oldest' then ['-!!message',  'message.updated']
+        when 'Location' then ['-!!message', 'message.target[0].pos.top']
+      $scope.sort = {name, predicate}
 
     $scope.$watch 'store.entities', (entities, oldEntities) ->
       return if entities is oldEntities
