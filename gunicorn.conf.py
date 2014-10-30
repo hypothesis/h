@@ -7,6 +7,9 @@ import urlparse
 if 'heroku' in os.environ.get('LD_LIBRARY_PATH', ''):
     forwarded_allow_ips = '*'
 
+if 'NUM_WORKERS' in os.environ:
+    workers = int(os.environ['NUM_WORKERS'])
+
 if 'STATSD_PORT' in os.environ:
     statsd_host = urlparse.urlparse(os.environ['STATSD_PORT_8125_UDP']).netloc
 
