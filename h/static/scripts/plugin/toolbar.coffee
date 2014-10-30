@@ -1,5 +1,14 @@
 $ = Annotator.$
 
+makeButton = (item) ->
+  anchor = $('<a></a>')
+  .attr('href', '')
+  .attr('title', item.title)
+  .on(item.on)
+  .addClass(item.class)
+  button = $('<li></li>').append(anchor)
+  return button[0]
+
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
   PUSHED_CLASS = 'annotator-pushed'
 
@@ -64,15 +73,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     else
       $(@element).append @toolbar
 
-    @buttons = @options.items.reduce  (buttons, item) =>
-      anchor = $('<a></a>')
-      .attr('href', '')
-      .attr('title', item.title)
-      .on(item.on)
-      .addClass(item.class)
-      button = $('<li></li>').append(anchor)
-      buttons.add button
-    , $()
+    @buttons = $(makeButton(item) for item in @options.items)
 
     list = $('<ul></ul>')
     @buttons.appendTo(list)
