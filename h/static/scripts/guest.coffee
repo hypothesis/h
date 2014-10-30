@@ -3,13 +3,15 @@ $ = Annotator.$
 
 
 class Annotator.Guest extends Annotator
+  SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
+
   # Events to be bound on Annotator#element.
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-adder button mouseup":   "onAdderMouseup"
     "setTool": "onSetTool"
-    "setVisibleHighlights": "onSetVisibleHighlights"
+    "setVisibleHighlights": "setVisibleHighlights"
 
   # Plugin configuration
   options:
@@ -314,10 +316,23 @@ class Annotator.Guest extends Annotator
       method: 'setTool'
       params: name
 
-  setVisibleHighlights: (state) ->
+  # Pass true to show the highlights in the frame or false to disable.
+  setVisibleHighlights: (shouldShowHighlights) ->
+    return if @visibleHighlights == shouldShowHighlights
+
     @panel?.notify
       method: 'setVisibleHighlights'
-      params: state
+      params: shouldShowHighlights
+
+    this.toggleHighlightClass(shouldShowHighlights or @tool == 'highlight')
+
+  toggleHighlightClass: (shouldShowHighlights) ->
+    if shouldShowHighlights
+      @element.addClass(SHOW_HIGHLIGHTS_CLASS)
+    else
+      @element.removeClass(SHOW_HIGHLIGHTS_CLASS)
+
+    @visibleHighlights = shouldShowHighlights
 
   addComment: ->
     this.showEditor(this.createAnnotation())
@@ -355,11 +370,3 @@ class Annotator.Guest extends Annotator
         this.setVisibleHighlights this.visibleHighlights
       when 'highlight'
         this.setVisibleHighlights true
-
-  onSetVisibleHighlights: (state) ->
-    markerClass = 'annotator-highlights-always-on'
-    if state or this.tool is 'highlight'
-      @element.addClass markerClass
-    else
-      @element.removeClass markerClass
-    this.visibleHighlights = state
