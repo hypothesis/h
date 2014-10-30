@@ -40,8 +40,7 @@
       ng-include="'thread.html'"
       ng-mouseenter="activate(child.message)"
       ng-mouseleave="activate()"
-      ng-repeat="child in vm.container.children
-                 | orderBy : sort.predicate : sort.reverse"
+      ng-repeat="child in vm.container.children | orderBy : sort.predicate"
       ng-show="vm.container && shouldShowThread(child) &&
                (count('edit') || count('match') || !threadFilter.active())">
   </li>
