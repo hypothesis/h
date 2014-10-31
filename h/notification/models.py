@@ -110,6 +110,4 @@ class Subscriptions(SubscriptionsMixin, Base):
 
 
 def includeme(config):
-    config.include('pyramid_basemodel')
-    config.include('pyramid_tm')
     config.scan(__name__)

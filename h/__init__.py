@@ -38,7 +38,6 @@ def includeme(config):
 
 def create_app(settings):
     config = Configurator(settings=settings)
-    config.include(includeme)
     return config.make_wsgi_app()
 
 

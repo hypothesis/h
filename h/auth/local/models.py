@@ -20,9 +20,8 @@ from horus.models import (
 )
 from horus.strings import UIStringsBase
 from pyramid_basemodel import Base, Session
-from pyramid.settings import asbool
 from pyramid.threadlocal import get_current_request
-from sqlalchemy import func, or_
+from sqlalchemy import event, func, or_
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Integer, TypeDecorator, CHAR
@@ -201,12 +200,26 @@ class UserGroup(UserGroupMixin, Base):
     pass
 
 
+def create_event_listeners(config):
+    settings = config.registry.settings
+
+    @event.listens_for(Consumer.__table__, 'after_create')
+    def create_api_consumer(target, connection, **kwargs):
+        key = settings['api.key']
+        secret = settings.get('api.secret')
+        ttl = settings.get('api.ttl', auth.DEFAULT_TTL)
+
+        session = Session()
+        consumer = session.query(Consumer).filter(Consumer.key == key).first()
+        if not consumer:
+            with transaction.manager:
+                consumer = Consumer(key=key, secret=secret, ttl=ttl)
+                session.add(consumer)
+                session.flush()
+
+
 def includeme(config):
     registry = config.registry
-    settings = registry.settings
-
-    config.include('pyramid_basemodel')
-    config.include('pyramid_tm')
 
     models = [
         (IActivationClass, Activation),
@@ -220,15 +233,4 @@ def includeme(config):
         if not registry.queryUtility(iface):
             registry.registerUtility(imp, iface)
 
-    if asbool(settings.get('basemodel.should_create_all', True)):
-        key = settings['api.key']
-        secret = settings.get('api.secret')
-        ttl = settings.get('api.ttl', auth.DEFAULT_TTL)
-
-        session = Session()
-        consumer = session.query(Consumer).filter(Consumer.key == key).first()
-        if not consumer:
-            with transaction.manager:
-                consumer = Consumer(key=key, secret=secret, ttl=ttl)
-                session.add(consumer)
-                session.flush()
+    create_event_listeners(config)
