@@ -142,9 +142,9 @@ def send_notifications(event):
             try:
                 # Render e-mail parts
                 tmap = create_template_map(request, annotation, data)
-                text = render(TXT_TEMPLATE, tmap, request)
-                html = render(HTML_TEMPLATE, tmap, request)
-                subject = render(SUBJECT_TEMPLATE, tmap, request)
+                text = render(TXT_TEMPLATE, tmap, request).strip()
+                html = render(HTML_TEMPLATE, tmap, request).strip()
+                subject = render(SUBJECT_TEMPLATE, tmap, request).strip()
                 recipients = get_recipients(request, data)
                 send_email(request, subject, text, html, recipients)
             # ToDo: proper exception handling here
