@@ -45,7 +45,11 @@ class Annotation(annotation.Annotation):
         'created': {'type': 'date'},
         'updated': {'type': 'date'},
         'quote': {'type': 'string', 'analyzer': 'standard'},
-        'tags': {'type': 'string', 'index': 'analyzed', 'analyzer': 'lower_keyword'},
+        'tags': {
+            'type': 'string',
+            'index': 'analyzed',
+            'analyzer': 'lower_keyword'
+        },
         'text': {'type': 'string', 'analyzer': 'standard'},
         'deleted': {'type': 'boolean'},
         'uri': {

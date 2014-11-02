@@ -2,7 +2,6 @@
 
 """HTTP/REST API for interacting with the annotation store."""
 
-import json
 import logging
 
 from annotator import auth, es
@@ -78,8 +77,6 @@ def index(context, request):
 @api_config(context='h.resources.APIResource', name='search')
 def search(context, request):
     """Search the database for annotations matching with the given query."""
-    registry = request.registry
-
     kwargs = dict()
     params = dict(request.params)
 
@@ -277,12 +274,12 @@ def get_consumer(request):
     key = request.params.get('client_id', settings['api.key'])
     secret = request.params.get('client_secret', settings.get('api.secret'))
 
-    Consumer = registry.getUtility(interfaces.IConsumerClass)
+    consumer_ctor = registry.getUtility(interfaces.IConsumerClass)
 
     if key == settings['api.key'] and secret is not None:
-        consumer = Consumer(key=key, secret=secret)
+        consumer = consumer_ctor(key=key, secret=secret)
     else:
-        consumer = Consumer.get_by_key(request, key)
+        consumer = consumer_ctor.get_by_key(request, key)
 
     return consumer
 
@@ -378,8 +375,8 @@ def store_from_settings(settings):
     if 'es.compatibility' in settings:
         es.compatibility_mode = settings['es.compatibility']
 
-    # We want search results to be filtered according to their read-permissions,
-    # which is done in the store itself.
+    # We want search results to be filtered according to their
+    # read-permissions, which is done in the store itself.
     es.authorization_enabled = True
 
     return es

@@ -13,7 +13,7 @@ from pyramid.events import subscriber
 from pyramid_sockjs.session import Session
 import transaction
 
-from h import events, interfaces
+from h import events
 from h.api import get_user
 from h.models import Annotation
 
@@ -409,7 +409,6 @@ class StreamerSession(Session):
 
     def send_annotations(self):
         request = self.request
-        registry = request.registry
         user = get_user(request)
         annotations = Annotation.search_raw(query=self.query.query, user=user)
         self.received = len(annotations)

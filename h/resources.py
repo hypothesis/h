@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from pyramid import httpexceptions
 from pyramid.interfaces import ILocation
-from pyramid.security import Allow, Everyone, Authenticated, ALL_PERMISSIONS
+from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS
 from zope.interface import implementer
 
 from h import interfaces, security
