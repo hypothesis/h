@@ -107,13 +107,15 @@ class Hypothesis extends Annotator
               entities.push href
             this.plugins.Store?.loadAnnotations()
 
-        channel.notify
-          method: 'setTool'
-          params: this.tool
+        # Allow the host to define it's own state
+        unless source is $window.parent
+          channel.notify
+            method: 'setTool'
+            params: this.tool
 
-        channel.notify
-          method: 'setVisibleHighlights'
-          params: this.visibleHighlights
+          channel.notify
+            method: 'setVisibleHighlights'
+            params: this.visibleHighlights
 
         @providers.push
           channel: channel
