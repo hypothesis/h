@@ -12,6 +12,7 @@ del get_versions
 
 
 def includeme(config):
+    config.include('pyramid_jinja2')
     config.include('pyramid_multiauth')
     config.include('h.api')
     config.include('h.models')
@@ -19,6 +20,8 @@ def includeme(config):
     config.include('h.subscribers')
     config.include('h.views')
     config.set_root_factory('h.resources.RootFactory')
+
+    config.add_jinja2_renderer('.html')
 
     favicon = AssetResolver().resolve('h:favicon.ico')
     config.add_route('favicon', '/favicon.ico')
