@@ -110,7 +110,8 @@ def chrome(env):
 
     # Copy over the bootstrap and destroy scripts
     copyfile('../../h/static/bootstrap.js', './public/bootstrap.js')
-    copyfile('../../h/static/destroy.js', './public/destroy.js')
+    copyfile('../../h/static/extension/destroy.js', './public/destroy.js')
+    copyfile('../../h/static/extension/config.js', './public/config.js')
 
     # Build the app html and copy assets if they are being bundled
     if request.webassets_env.url.startswith('chrome-extension://'):
