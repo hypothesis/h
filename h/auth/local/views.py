@@ -98,7 +98,7 @@ def view_auth_defaults(fn, *args, **kwargs):
     kwargs.setdefault('accept', 'text/html')
     kwargs.setdefault('decorator', ensure_csrf_token)
     kwargs.setdefault('layout', 'auth')
-    kwargs.setdefault('renderer', 'h:templates/auth.pt')
+    kwargs.setdefault('renderer', 'h:templates/auth.html')
     return view_defaults(*args, **kwargs)(fn)
 
 

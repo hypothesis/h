@@ -15,7 +15,7 @@ def add_renderer_globals(event):
     event['service_url'] = request.route_url('api', subpath='')
 
     # Set the blocks property to refer to the block helpers template
-    event['blocks'] = get_renderer('h:templates/blocks.pt').implementation()
+    # event['blocks'] = get_renderer('h:templates/blocks.pt').implementation()
 
 
 def includeme(config):
