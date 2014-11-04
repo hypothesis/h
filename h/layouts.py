@@ -34,7 +34,6 @@ class BaseLayout(object):
     def xpath_polyfil_urls(self):
         return self.request.webassets_env['wgxpath'].urls()
 
-
     @property
     def app_inject_urls(self):
         return self.request.webassets_env['inject'].urls()

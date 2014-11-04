@@ -50,7 +50,11 @@ def help_page(context, request):
     context='h.interfaces.IStreamResource',
     renderer='h:templates/app.html',
 )
-@view_config(layout='app', route_name='stream', renderer='h:templates/app.html')
+@view_config(
+    layout='app',
+    route_name='stream',
+    renderer='h:templates/app.html'
+)
 def stream(context, request):
     stream_type = context.get('stream_type')
     stream_key = context.get('stream_key')

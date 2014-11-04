@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pyramid.events import BeforeRender, subscriber
-from pyramid.renderers import get_renderer
+# from pyramid.renderers import get_renderer
 
 
 @subscriber(BeforeRender)
