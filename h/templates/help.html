@@ -2,7 +2,7 @@
 {% block content %}
   <div class="help-page">
     <div class="help-page-content masthead-small">
-      {% include "header.html" %}
+      {% include "includes/header.html" %}
     </div>
     <article class="help-page-content">
       {% if is_help %}
@@ -32,7 +32,7 @@
           <p class="help-page-lede">Great, you've got the server up and running, you're now ready to start kicking the tires.</p>
           <div class="numbered-list grid">
             <div class="column-desktop-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
-            <div class="column-desktop-1-2"><div class="numbered-list-item">Annotate this page or use this bookmarklet: {% include "bookmarklet.html" %}</div></div>
+            <div class="column-desktop-1-2"><div class="numbered-list-item">Annotate this page or use this bookmarklet: {% include "includes/bookmarklet.html" %}</div></div>
           </div>
         </section>
       {% endif %}
