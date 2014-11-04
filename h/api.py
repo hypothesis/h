@@ -23,7 +23,7 @@ PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 
 
 def api_config(**kwargs):
-    """Set default view configuration"""
+    """Pyramid's @view_config decorator but with modified defaults"""
     config = {
         # The containment predicate ensures we only respond to API calls
         'containment': 'h.resources.APIResource',
@@ -366,6 +366,7 @@ def _anonymize_deletes(annotation):
 
 
 def store_from_settings(settings):
+    """Configure the Elasticsearch wrapper provided by annotator-store"""
     if 'es.host' in settings:
         es.host = settings['es.host']
 
@@ -379,6 +380,8 @@ def store_from_settings(settings):
     # read-permissions, which is done in the store itself.
     es.authorization_enabled = True
 
+    # Note that we do not have to actually open the database connection or
+    # anything, annotator-store will do so on the first invoked action.
     return es
 
 
