@@ -3,13 +3,15 @@ $ = Annotator.$
 
 
 class Annotator.Guest extends Annotator
+  SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
+
   # Events to be bound on Annotator#element.
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-adder button mouseup":   "onAdderMouseup"
     "setTool": "onSetTool"
-    "setVisibleHighlights": "onSetVisibleHighlights"
+    "setVisibleHighlights": "setVisibleHighlights"
 
   # Plugin configuration
   options:
@@ -188,7 +190,6 @@ class Annotator.Guest extends Annotator
     )
 
     .bind('setVisibleHighlights', (ctx, state) =>
-      this.setVisibleHighlights state, false
       this.publish 'setVisibleHighlights', state
     )
 
@@ -315,17 +316,23 @@ class Annotator.Guest extends Annotator
       method: 'setTool'
       params: name
 
-  setVisibleHighlights: (state=true, notify=true) ->
-    if notify
-      @panel?.notify
-        method: 'setVisibleHighlights'
-        params: state
+  # Pass true to show the highlights in the frame or false to disable.
+  setVisibleHighlights: (shouldShowHighlights) ->
+    return if @visibleHighlights == shouldShowHighlights
+
+    @panel?.notify
+      method: 'setVisibleHighlights'
+      params: shouldShowHighlights
+
+    this.toggleHighlightClass(shouldShowHighlights or @tool == 'highlight')
+
+  toggleHighlightClass: (shouldShowHighlights) ->
+    if shouldShowHighlights
+      @element.addClass(SHOW_HIGHLIGHTS_CLASS)
     else
-      markerClass = 'annotator-highlights-always-on'
-      if state or this.tool is 'highlight'
-        @element.addClass markerClass
-      else
-        @element.removeClass markerClass
+      @element.removeClass(SHOW_HIGHLIGHTS_CLASS)
+
+    @visibleHighlights = shouldShowHighlights
 
   addComment: ->
     this.showEditor(this.createAnnotation())
@@ -360,10 +367,6 @@ class Annotator.Guest extends Annotator
   onSetTool: (name) ->
     switch name
       when 'comment'
-        this.setVisibleHighlights this.visibleHighlights, false
+        this.setVisibleHighlights this.visibleHighlights
       when 'highlight'
-        this.setVisibleHighlights true, false
-
-  onSetVisibleHighlights: (state) =>
-    this.visibleHighlights = state
-    this.setVisibleHighlights state, false
+        this.setVisibleHighlights true
