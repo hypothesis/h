@@ -21,7 +21,7 @@ def page(context, request):
     return {}
 
 
-@view_config(renderer='h:templates/email_preview.pt',
+@view_config(renderer='h:templates/email_preview.html',
              route_name='email_preview')
 def email_preview(context, request):
     notification_email_data = {
