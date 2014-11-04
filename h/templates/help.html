@@ -16,15 +16,15 @@
         </section>
       {% endif %}
       {% if is_onboarding %}
-      <section class="help-page-section">
-        <h2 id="getting-started" class="help-page-heading">Getting started</h2>
-        <p class="help-page-lede">Now you have the extension up and running. It's time to
-          start annotating some documents.</p>
-        <div class="numbered-list grid">
-          <div class="column-desktop-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
-          <div class="column-desktop-1-2"><div class="numbered-list-item">Go forth and annotate! Enable the sidebar via the button in the location bar.</div></div>
-        </div>
-      </section>
+        <section class="help-page-section">
+          <h2 id="getting-started" class="help-page-heading">Getting started</h2>
+          <p class="help-page-lede">Now you have the extension up and running. It's time to
+            start annotating some documents.</p>
+          <div class="numbered-list grid">
+            <div class="column-desktop-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
+            <div class="column-desktop-1-2"><div class="numbered-list-item">Go forth and annotate! Enable the sidebar via the button in the location bar.</div></div>
+          </div>
+        </section>
       {% endif %}
       {% if is_index %}
         <section class="help-page-section">
@@ -32,7 +32,7 @@
           <p class="help-page-lede">Great, you've got the server up and running, you're now ready to start kicking the tires.</p>
           <div class="numbered-list grid">
             <div class="column-desktop-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
-            <div class="column-desktop-1-2"><div class="numbered-list-item">Annotate this page or use this bookmarklet: <metal:main use-macro="load: h:templates/bookmarklet.pt" /></div></div>
+            <div class="column-desktop-1-2"><div class="numbered-list-item">Annotate this page or use this bookmarklet: {% include "bookmarklet.html" %}</div></div>
           </div>
         </section>
       {% endif %}
