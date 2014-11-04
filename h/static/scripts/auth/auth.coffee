@@ -28,7 +28,7 @@ class AuthAppController
     $scope.auth.tab = $location.path().split('/')[1]
 
     $scope.$on 'auth', (event, err, data) ->
-      if data.userid
+      if data?.userid
         $timeout onlogin, 1000
 
     $scope.$watch 'auth.tab', (tab, old) ->
