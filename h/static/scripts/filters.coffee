@@ -63,16 +63,9 @@ persona = (user, part='username') ->
   part = ['term', 'username', 'provider'].indexOf(part)
   (user?.match /^acct:([^@]+)@(.+)/)?[part]
 
-elide = (text, split_length) ->
-  if text.length > split_length
-    text = text.substring 0,split_length
-    text = text + '\u2026'
-  text
-
 
 angular.module('h')
 .filter('converter', -> (new Converter()).makeHtml)
 .filter('fuzzyTime', -> fuzzyTime)
 .filter('moment', momentFilter)
 .filter('persona', -> persona)
-.filter('elide', -> elide)
