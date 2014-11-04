@@ -14,6 +14,9 @@
              );
              alert(msg);
            } else {
+             window.hypothesisConfig = function () {
+               return {showHighlights: true};
+             };
              var embed = document.createElement('script');
              embed.setAttribute('src', embedUrl);
              document.body.appendChild(embed);
