@@ -53,15 +53,7 @@ def upgrade():
         'subscriptions',
         sa.Column('id', sa.INTEGER, primary_key=True),
         sa.Column('uri', sa.Unicode(256), nullable=False),
-        sa.Column('query', JSONEncodedDict(4096), nullable=True, default={}),
         sa.Column('template', sa.VARCHAR(64), nullable=False),
-        sa.Column(
-            'parameters',
-            JSONEncodedDict(1024),
-            nullable=True,
-            default={}
-        ),
-        sa.Column('description', sa.VARCHAR(256), default=""),
         sa.Column('active', sa.BOOLEAN, default=True, nullable=False)
     )
 

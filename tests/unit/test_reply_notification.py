@@ -343,6 +343,14 @@ def test_action_create():
             assert mock_subs.get_active_subscriptions_for_a_template.called
 
 
+class MockSubscription(Mock):
+    def __json__(self, request):
+        return {
+            'id': self.id or '',
+            'uri': self.uri or ''
+        }
+
+
 def test_check_conditions_false_stops_sending():
     """If the check conditions() returns False, no notification is sent"""
     with testConfig() as config:
@@ -355,7 +363,7 @@ def test_check_conditions_false_stops_sending():
         event = events.AnnotationEvent(request, annotation, 'create')
         with patch('h.notification.reply_template.Subscriptions') as mock_subs:
             mock_subs.get_active_subscriptions_for_a_template.return_value = [
-                Mock(id=1, uri='acct:elephant@nomouse.pls', parameters={}, query={})
+                MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
             ]
             with patch('h.notification.reply_template.check_conditions') as mock_conditions:
                 mock_conditions.return_value = False
@@ -376,7 +384,7 @@ def test_send_if_everything_is_okay():
         event = events.AnnotationEvent(request, annotation, 'create')
         with patch('h.notification.reply_template.Subscriptions') as mock_subs:
             mock_subs.get_active_subscriptions_for_a_template.return_value = [
-                Mock(id=1, uri='acct:elephant@nomouse.pls', parameters={}, query={})
+                MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
             ]
             with patch('h.notification.reply_template.check_conditions') as mock_conditions:
                 mock_conditions.return_value = True

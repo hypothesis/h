@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-import json
 import sqlalchemy as sa
-from sqlalchemy.types import TypeDecorator, VARCHAR
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy import func, and_
 
@@ -11,32 +9,6 @@ from hem.db import get_session
 from horus.models import BaseModel
 
 log = logging.getLogger(__name__)
-
-
-class JSONEncodedDict(TypeDecorator):
-    """Represents an immutable structure as a json-encoded string.
-
-    Usage::
-
-        JSONEncodedDict(255)
-
-    """
-    # pylint: disable=too-many-public-methods
-    impl = VARCHAR
-
-    def process_bind_param(self, value, dialect):
-        if value is not None:
-            value = json.dumps(value)
-
-        return value
-
-    def process_result_value(self, value, dialect):
-        if value is not None:
-            value = json.loads(value)
-        return value
-
-    def python_type(self):
-        return dict
 
 
 class SubscriptionsMixin(BaseModel):
@@ -53,20 +25,8 @@ class SubscriptionsMixin(BaseModel):
         )
 
     @declared_attr
-    def query(self):
-        return sa.Column(JSONEncodedDict(4096), nullable=True, default={})
-
-    @declared_attr
     def template(self):
         return sa.Column(sa.VARCHAR(64), nullable=False)
-
-    @declared_attr
-    def parameters(self):
-        return sa.Column(JSONEncodedDict(1024), nullable=True, default={})
-
-    @declared_attr
-    def description(self):
-        return sa.Column(sa.VARCHAR(256), default="")
 
     @declared_attr
     def active(self):

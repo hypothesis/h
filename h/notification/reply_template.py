@@ -130,12 +130,7 @@ def send_notifications(event):
         types.REPLY_TEMPLATE
     )
     for subscription in subscriptions:
-        data['subscription'] = {
-            'id': subscription.id,
-            'uri': subscription.uri,
-            'parameters': subscription.parameters,
-            'query': subscription.query
-        }
+        data['subscription'] = subscription.__json__(request)
 
         # Validate annotation
         if check_conditions(annotation, data):
@@ -162,7 +157,6 @@ def create_subscription(request, uri, active):
     subs = Subscriptions(
         uri=uri,
         template=types.REPLY_TEMPLATE,
-        description='General reply notification',
         active=active
     )
 
