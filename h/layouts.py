@@ -2,7 +2,7 @@
 from pyramid_layout.layout import layout_config
 
 
-@layout_config(template='h:templates/base.html')
+@layout_config(template='h:templates/layouts/base.html')
 class BaseLayout(object):
     app = None
     controller = None
@@ -48,14 +48,14 @@ class BaseLayout(object):
         return self.get_widget_resources()['js']
 
 
-@layout_config(name='app', template='h:templates/base.html')
+@layout_config(name='app', template='h:templates/layouts/base.html')
 class AppLayout(BaseLayout):
     app = 'h'
     controller = 'AppController'
     requirements = (('app', None), ('auth', None), ('topbar', None))
 
 
-@layout_config(name='auth', template='h:templates/base.html')
+@layout_config(name='auth', template='h:templates/layouts/base.html')
 class AuthLayout(BaseLayout):
     app = 'h'
     controller = 'AuthAppController'
