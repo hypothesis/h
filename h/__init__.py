@@ -21,6 +21,7 @@ def includeme(config):
     config.include('h.views')
     config.set_root_factory('h.resources.RootFactory')
 
+    config.add_jinja2_renderer('.js')
     config.add_jinja2_renderer('.html')
 
     favicon = AssetResolver().resolve('h:favicon.ico')
