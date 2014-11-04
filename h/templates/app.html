@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block body_tag %}
-  <body ng-app="{{ layout.app }}" ng-controller="{{ layout.controller }}" ng-csp="{{ layout.csp }}">
+<body ng-app="{{ layout.app }}" ng-controller="{{ layout.controller }}"{% if layout.csp %} ng-csp="{{ layout.csp }}"{% endif %}>
 {% endblock %}
 
 {% block content %}
