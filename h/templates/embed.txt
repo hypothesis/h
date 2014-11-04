@@ -1,5 +1,3 @@
-/* -*- js -*- */
-/*{literal}<![CDATA[*/
 (function () {
   if (window.annotator) return;
   /*yepnope1.5.x|WTFPL-csillag-1fa7a3e0*/
@@ -12,14 +10,13 @@
     return resourceObj;
   });
   yepnope([{ test: window.document.evaluate,
-             nope: ${map(str, request.webassets_env['wgxpath'].urls())} },
+             nope: ['{{ layout.xpath_polyfil_urls | map("string") | join("', '") | safe }}'] },
            { test: typeof(window.Annotator) !== 'undefined',
-             nope: ${map(str, request.webassets_env['inject'].urls())} }]);
+             nope: ['{{ layout.app_inject_urls | map("string") | join("', '") | safe }}'] }]);
   delete window.yepnope;
   var baseUrl = document.createElement('link');
   baseUrl.rel = 'sidebar';
-  baseUrl.href = '${base_url}app.html';
+  baseUrl.href = '{{ base_url }}app.html';
   baseUrl.type = 'application/annotator+html';
   document.head.appendChild(baseUrl);
 })();
-/*]]>{/literal}*/

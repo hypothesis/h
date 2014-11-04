@@ -1,8 +1,0 @@
-<metal:main define-macro="dialog">
-  <div ng-if="persona">
-    <metal:main use-macro="load: h:templates/account.html">
-  </div>
-  <div ng-if="!persona">
-    <metal:main use-macro="load: h:templates/auth.html">
-  </div>
-</metal:main>
