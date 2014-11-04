@@ -78,7 +78,7 @@
       <div class="form-field form-checkbox-list">
         <div class="form-checkbox-item" ng-repeat="subscription in subscriptions">
           <input id="checkbox-{{$index}}" type="checkbox" ng-model="subscription.active" ng-change="updated($index, notificationsForm)" />
-          <label class="form-label" for="checkbox-{{$index}}">{{subscription_description[subscription.template]}}</label>
+          <label class="form-label" for="checkbox-{{$index}}">{{subscriptionDescription[subscription.type]}}</label>
         </div>
       </div>
     </form>

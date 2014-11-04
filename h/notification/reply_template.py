@@ -82,7 +82,6 @@ def get_recipients(request, data):
     username = user_name(data['parent']['user'])
     user_obj = get_user_by_name(request, username)
     if not user_obj:
-        log.warn("User not found! " + str(username))
         raise TemplateRenderException('User not found')
     return [user_obj.email]
 
@@ -125,9 +124,9 @@ def send_notifications(event):
         'parent': parent_values(annotation, request)
     }
 
-    subscriptions = Subscriptions.get_active_subscriptions_for_a_template(
+    subscriptions = Subscriptions.get_active_subscriptions_for_a_type(
         request,
-        types.REPLY_TEMPLATE
+        types.REPLY_TYPE
     )
     for subscription in subscriptions:
         data['subscription'] = subscription.__json__(request)
@@ -156,7 +155,7 @@ def create_subscription(request, uri, active):
     session = get_session(request)
     subs = Subscriptions(
         uri=uri,
-        template=types.REPLY_TEMPLATE,
+        type=types.REPLY_TYPE,
         active=active
     )
 
@@ -177,10 +176,10 @@ def registration_subscriptions(event):
 def check_reply_subscriptions(event):
     request = event.request
     user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
-    res = Subscriptions.get_a_template_for_uri(
+    res = Subscriptions.get_templates_for_uri_and_type(
         request,
         user_uri,
-        types.REPLY_TEMPLATE
+        types.REPLY_TYPE
     )
     if not len(res):
         create_subscription(event.request, user_uri, True)

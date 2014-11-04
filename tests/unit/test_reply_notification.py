@@ -338,9 +338,9 @@ def test_action_create():
         annotation = store_fake_data[1]
         event = events.AnnotationEvent(request, annotation, 'create')
         with patch('h.notification.reply_template.Subscriptions') as mock_subs:
-            mock_subs.get_active_subscriptions_for_a_template.return_value = []
+            mock_subs.get_active_subscriptions_for_a_type.return_value = []
             rt.send_notifications(event)
-            assert mock_subs.get_active_subscriptions_for_a_template.called
+            assert mock_subs.get_active_subscriptions_for_a_type.called
 
 
 class MockSubscription(Mock):
@@ -362,7 +362,7 @@ def test_check_conditions_false_stops_sending():
         annotation = store_fake_data[1]
         event = events.AnnotationEvent(request, annotation, 'create')
         with patch('h.notification.reply_template.Subscriptions') as mock_subs:
-            mock_subs.get_active_subscriptions_for_a_template.return_value = [
+            mock_subs.get_active_subscriptions_for_a_type.return_value = [
                 MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
             ]
             with patch('h.notification.reply_template.check_conditions') as mock_conditions:
@@ -383,7 +383,7 @@ def test_send_if_everything_is_okay():
         annotation = store_fake_data[1]
         event = events.AnnotationEvent(request, annotation, 'create')
         with patch('h.notification.reply_template.Subscriptions') as mock_subs:
-            mock_subs.get_active_subscriptions_for_a_template.return_value = [
+            mock_subs.get_active_subscriptions_for_a_type.return_value = [
                 MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
             ]
             with patch('h.notification.reply_template.check_conditions') as mock_conditions:

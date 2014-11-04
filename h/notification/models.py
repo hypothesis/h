@@ -25,7 +25,7 @@ class SubscriptionsMixin(BaseModel):
         )
 
     @declared_attr
-    def template(self):
+    def type(self):
         return sa.Column(sa.VARCHAR(64), nullable=False)
 
     @declared_attr
@@ -38,12 +38,12 @@ class SubscriptionsMixin(BaseModel):
         return session.query(cls).filter(cls.active).all()
 
     @classmethod
-    def get_active_subscriptions_for_a_template(cls, request, template):
+    def get_active_subscriptions_for_a_type(cls, request, ttype):
         session = get_session(request)
         return session.query(cls).filter(
             and_(
                 cls.active,
-                func.lower(cls.template) == func.lower(template)
+                func.lower(cls.type) == func.lower(ttype)
             )
         ).all()
 
@@ -55,12 +55,12 @@ class SubscriptionsMixin(BaseModel):
         ).all()
 
     @classmethod
-    def get_a_template_for_uri(cls, request, uri, template):
+    def get_templates_for_uri_and_type(cls, request, uri, ttype):
         session = get_session(request)
         return session.query(cls).filter(
             and_(
                 func.lower(cls.uri) == func.lower(uri),
-                func.lower(cls.template) == func.lower(template)
+                func.lower(cls.type) == func.lower(ttype)
             )
         ).all()
 
