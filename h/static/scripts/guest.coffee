@@ -363,6 +363,10 @@ class Annotator.Guest extends Annotator
     annotation = this.setupAnnotation(this.createAnnotation())
     Annotator.util.getGlobal().getSelection().removeAllRanges()
     this.showEditor(annotation)
+    Annotator.util.getGlobal().getSelection().removeAllRanges()
+    for a in annotation.anchors
+      for page, hl of a.highlight
+        hl.select?()
 
   onSetTool: (name) ->
     switch name
