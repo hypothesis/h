@@ -31,6 +31,15 @@ class BaseLayout(object):
         return self.request.registry.resources(requirements)
 
     @property
+    def xpath_polyfil_urls(self):
+        return self.request.webassets_env['wgxpath'].urls()
+
+
+    @property
+    def app_inject_urls(self):
+        return self.request.webassets_env['inject'].urls()
+
+    @property
     def css_links(self):
         return self.get_widget_resources()['css']
 
