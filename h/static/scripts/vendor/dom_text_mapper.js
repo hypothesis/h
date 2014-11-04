@@ -34,7 +34,6 @@
     DomTextMapper.prototype.log = function() {
       var msg;
       msg = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return console.log.apply(console, [this.id, ": "].concat(__slice.call(msg)));
     };
 
     DomTextMapper.prototype._onChange = function(event) {
