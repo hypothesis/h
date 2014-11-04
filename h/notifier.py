@@ -89,7 +89,7 @@ class TemplateRenderException(Exception):
 
 class ReplyTemplate(NotificationTemplate):
     text_template = 'h:templates/emails/reply_notification.txt'
-    html_template = 'h:templates/emails/reply_notification.pt'
+    html_template = 'h:templates/emails/reply_notification.html'
     subject = 'h:templates/emails/reply_notification_subject.txt'
 
     @staticmethod
