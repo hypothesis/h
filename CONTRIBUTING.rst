@@ -27,7 +27,7 @@ fixes, feel free to open a pull request without any prior discussion.
 
 Licensing
 ---------
-Before submitting significant contributions, we ask that sign one of
+Before submitting significant contributions, we ask that you sign one of
 our Contributor License Agreements. This practice ensures that the
 rights of contributors to their contributions are preserved and
 protects the ongoing availability of the project and a commitment to
