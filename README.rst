@@ -98,7 +98,7 @@ Or, to load the assets from within the extension::
 To build the Firefox extension, run the following::
 
     $ ./bin/hypothesis extension development.ini firefox \
-    http://localhost:5000 resource://firefox-at-hypothes-is/hypothesis/data
+    http://localhost:5000 resource://firefox-at-hypothes-dot-is/hypothesis/data
 
 If you are managing your virtual environment yourself, the script may not be
 located in the ``bin`` directory, but should be available in your path when the
