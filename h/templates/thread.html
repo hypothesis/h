@@ -5,9 +5,10 @@
                      'h-icon-minus': !vm.collapsed}"></span></a>
 
 <!-- Annotation -->
-<div ng-if="vm.container && !vm.container.message">
-  <em>Message not available.</em>
+<div ng-if="vm.container && !vm.container.message" class="thread-deleted">
+  <p><em>Message not available.</em></p>
 </div>
+
 <article class="annotation thread-message"
          name="annotation"
          annotation="vm.container.message"
