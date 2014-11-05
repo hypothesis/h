@@ -33,37 +33,34 @@ def test_index():
     assert links['search']['url'] == host + '/search'
 
 
-@patch('h.api.get_user')
-@patch('h.api.Annotation')
-def test_search(mock_Annotation, mock_get_user):
-    params = {
+def test_search_parameters():
+    request_params = {
         'offset': '3',
         'limit': '100',
         'uri': 'http://bla.test',
         'some_field': 'something',
     }
-    search_results = mock_Annotation.search.return_value = MagicMock()
-    count_result = mock_Annotation.count.return_value = MagicMock()
-    user = mock_get_user.return_value = MagicMock()
-    context = DummyResource()
-    request = DummyRequest(params=params)
-
-    result = api.search(context, request)
-
-    kwargs = {
+    user = object()
+    assert api._search_params(request_params, user=user) == {
         'query': {
             'uri': 'http://bla.test',
-            'some_field': 'something'
+            'some_field': 'something',
         },
         'offset': 3,
         'limit': 100,
         'user': user,
     }
-    mock_Annotation.search.assert_called_once_with(**kwargs)
-    mock_Annotation.count.assert_called_once_with(**kwargs)
-    assert result['rows'] == search_results, "Search results should have been returned"
-    assert result['total'] == count_result, "Total result count should have been returned"
 
+def test_bad_search_parameters():
+    request_params = {
+        'offset': '3foo',
+        'limit': '\' drop table annotations',
+    }
+    user = object()
+    assert api._search_params(request_params, user=user) == {
+        'query': {},
+        'user': user,
+    }
 
 @patch('h.api.get_user')
 @patch('h.api.Annotation')
