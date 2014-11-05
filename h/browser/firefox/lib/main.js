@@ -1,6 +1,6 @@
-var data = require("sdk/self").data;
-var tabs = require("sdk/tabs");
-var { ToggleButton } = require("sdk/ui/button/toggle");
+const data = require("sdk/self").data;
+const tabs = require("sdk/tabs");
+const { ToggleButton } = require("sdk/ui/button/toggle");
 var btn_config = {};
 var btn;
 
