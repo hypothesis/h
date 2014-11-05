@@ -23,7 +23,6 @@ function tabToggle(tab) {
 btn_config = {
   id: "hypothesis",
   label: "Annotate",
-  contentURL: "http://hypothes.is/wp-content/uploads/2012/12/favicon1.ico",
   icon: {
     "18": './images/sleeping_18.png',
     "32": './images/sleeping_32.png',
