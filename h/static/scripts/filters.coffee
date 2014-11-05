@@ -7,7 +7,7 @@ class Converter extends Markdown.Converter
       text.replace /<a href=/g, "<a target=\"_blank\" href="
 
 
-fuzzyTime = (date) ->
+fuzzyTime = (date, next = false) ->
   return '' if not date
   delta = Math.round((+new Date - new Date(date)) / 1000)
 
@@ -20,25 +20,39 @@ fuzzyTime = (date) ->
 
   if (delta < 30)
     fuzzy = 'moments ago'
+    nextUpdate = 30 - delta
   else if (delta < minute)
     fuzzy = delta + ' seconds ago'
+    nextUpdate = 1
    else if (delta < 2 * minute)
     fuzzy = 'a minute ago'
+    nextUpdate = 2*minute - delta
    else if (delta < hour)
     fuzzy = Math.floor(delta / minute) + ' minutes ago'
+    nextUpdate = minute
    else if (Math.floor(delta / hour) == 1)
     fuzzy = '1 hour ago'
+    nextUpdate = hour
    else if (delta < day)
     fuzzy = Math.floor(delta / hour) + ' hours ago'
+    nextUpdate = hour
    else if (delta < day * 2)
     fuzzy = 'yesterday'
+    nextUpdate = 2*day - delta
    else if (delta < month)
     fuzzy = Math.round(delta / day) + ' days ago'
+    nextUpdate = day
    else if (delta < year)
     fuzzy = Math.round(delta / month) + ' months ago'
+    nextUpdate = month
    else
     fuzzy = Math.round(delta / year) + ' years ago'
-  fuzzy
+    nextUpdate = year
+
+  if next
+    nextUpdate
+  else
+    fuzzy
 
 
 momentFilter = ->
