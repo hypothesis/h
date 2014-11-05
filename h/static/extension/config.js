@@ -1,6 +1,9 @@
 function hypothesisConfig() {
+  // Pages on our site can include a meta tag to trigger specific behaviour
+  // when the extension loads.
+  var hypothesisIntent = document.querySelector('[name="hypothesis-intent"]');
   return {
-    firstRun: location.pathname.indexOf('/welcome') === 0,
+    firstRun: hypothesisIntent && hypothesisIntent.content === 'first-run',
     showHighlights: true
   };
 }

@@ -1,4 +1,12 @@
 {% extends "layouts/base.html" %}
+
+{% block meta %}
+  {{ super() }}
+  {% if is_onboarding %}
+    <meta name="hypothesis-intent" content="first-run" />
+  {% endif %}
+{% endblock %}
+
 {% block content %}
   <div class="help-page">
     <div class="help-page-content masthead-small">
