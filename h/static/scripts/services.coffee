@@ -30,7 +30,7 @@ class Hypothesis extends Annotator
   events:
     'beforeAnnotationCreated': 'digest'
     'annotationCreated': 'digest'
-    'annotationDeleted': 'digest'
+    'annotationDeleted': 'annotationDeleted'
     'annotationUpdated': 'digest'
     'annotationsLoaded': 'digest'
 
@@ -205,6 +205,17 @@ class Hypothesis extends Annotator
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) -> annotation
 
+  # Properly set the selectedAnnotations- and the Count variables
+  _setSelectedAnnotations: (selected) ->
+    scope = @element.scope()
+    count = Object.keys(selected).length
+    scope.selectedAnnotationsCount = count
+
+    if count
+      scope.selectedAnnotations = selected
+    else
+      scope.selectedAnnotations = null
+
   toggleViewerSelection: (annotations=[]) ->
     scope = @element.scope()
     scope.search.query = ''
@@ -215,15 +226,7 @@ class Hypothesis extends Annotator
         delete selected[a.id]
       else
         selected[a.id] = true
-
-    count = Object.keys(selected).length
-    scope.selectedAnnotationsCount = count
-
-    if count
-      scope.selectedAnnotations = selected
-    else
-      scope.selectedAnnotations = null
-
+    @_setSelectedAnnotations selected
     this
 
   updateViewer: (annotations=[]) ->
@@ -236,8 +239,7 @@ class Hypothesis extends Annotator
     selected = {}
     for a in annotations
       selected[a.id] = true
-    scope.selectedAnnotations = selected
-    scope.selectedAnnotationsCount = Object.keys(selected).length
+    @_setSelectedAnnotations selected
     this.show()
     this
 
@@ -254,6 +256,13 @@ class Hypothesis extends Annotator
 
   digest: ->
     @element.scope().$evalAsync angular.noop
+
+  annotationDeleted: (annotation) ->
+    scope = @element.scope()
+    if scope.selectedAnnotations?[annotation.id]
+      delete scope.selectedAnnotations[annotation.id]
+      @_setSelectedAnnotations scope.selectedAnnotations
+    @digest()
 
   patch_store: ->
     scope = @element.scope()
