@@ -62,19 +62,6 @@ def test_bad_search_parameters():
         'user': user,
     }
 
-@patch('h.api.get_user')
-@patch('h.api.Annotation')
-def test_annotations_index(mock_Annotation, mock_get_user):
-    search_results = mock_Annotation.search.return_value = MagicMock()
-    user = mock_get_user.return_value = MagicMock()
-    context = DummyResource()
-    request = DummyRequest()
-
-    result = api.annotations_index(context, request)
-
-    mock_Annotation.search.assert_called_once_with(user=user)
-    assert result == search_results, "Search results should have been returned"
-
 
 @patch('h.api.get_user')
 @patch('h.api.Annotation', new_callable=DictMock)
