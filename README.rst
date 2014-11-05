@@ -88,16 +88,16 @@ Browser Extensions
 ^^^^^^^^^^^^^^^^^^
 Run the following command at the prompt to build the Chrome extension::
 
-    $ ./bin/hypothesis extension chrome development.ini http://localhost:5000
+    $ ./bin/hypothesis extension development.ini chrome http://localhost:5000
 
 Or, to load the assets from within the extension::
 
-    $ ./bin/hypothesis extension chrome development.ini http://localhost:5000 \
+    $ ./bin/hypothesis extension development.ini chrome http://localhost:5000 \
     chrome-extension://extensionid/public
 
 To build the Firefox extension, run the following::
 
-    $ ./bin/hypothesis extension firefox development.ini \
+    $ ./bin/hypothesis extension development.ini firefox \
     http://localhost:5000 resource://firefox-at-hypothes-is/hypothesis/data
 
 If you are managing your virtual environment yourself, the script may not be

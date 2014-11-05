@@ -218,11 +218,14 @@ def assets(settings):
 def extension(args, console, settings):
     """Build the browser extensions.
 
-    The first argument is the base URL of an h installation:
+    The first argument is the target browser for which to build the extension.
+    Choices are: chrome or firefox.
+
+    The second argument is the base URL of an h installation:
 
       http://localhost:5000
 
-    An optional second argument can be used to specify the location for static
+    An optional third argument can be used to specify the location for static
     assets.
 
     Examples:
