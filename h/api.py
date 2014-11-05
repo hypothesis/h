@@ -77,34 +77,19 @@ def index(context, request):
 @api_config(context='h.resources.APIResource', name='search')
 def search(context, request):
     """Search the database for annotations matching with the given query."""
-    kwargs = dict()
-    params = dict(request.params)
-
-    # Take limit and offset out of the parameters
-    if 'offset' in params:
-        try:
-            kwargs['offset'] = int(params.pop('offset'))
-        except ValueError:
-            pass  # raise error?
-
-    if 'limit' in params:
-        try:
-            kwargs['limit'] = int(params.pop('limit'))
-        except ValueError:
-            pass  # raise error?
-
-    # All remaining parameters are considered searched fields.
-    kwargs['query'] = params
 
     # The search results are filtered for the authenticated user
     user = get_user(request)
+
+    # Compile search parameters
+    search_params = _search_params(request.params, user=user)
+
     log.debug("Searching with user=%s, for uri=%s",
               user.id if user else 'None',
-              params.get('uri'))
-    kwargs['user'] = user
+              search_params.get('uri'))
 
-    results = Annotation.search(**kwargs)
-    total = Annotation.count(**kwargs)
+    results = Annotation.search(**search_params)
+    total = Annotation.count(**search_params)
 
     return {
         'rows': results,
@@ -346,6 +331,28 @@ def _api_error(request, reason, status_code):
         'reason': reason,
     }
     return response_info
+
+
+def _search_params(request_params, user=None):
+    """Turn request parameters into annotator-store search parameters"""
+    request_params = request_params.copy()
+    search_params = {}
+
+    # Take limit and offset out of the parameters
+    try:
+        search_params['offset'] = int(request_params.pop('offset'))
+    except (KeyError, ValueError):
+        pass
+    try:
+        search_params['limit'] = int(request_params.pop('limit'))
+    except (KeyError, ValueError):
+        pass
+
+    # All remaining parameters are considered searched fields.
+    search_params['query'] = request_params
+
+    search_params['user'] = user
+    return search_params
 
 
 def _anonymize_deletes(annotation):
