@@ -169,15 +169,20 @@ def firefox(env):
         merge('../../h/static/styles/images', './data/styles/images')
         merge('../../h/static/images', './data/images')
         merge('../../h/static/fonts', './data/fonts')
+        copyfile('../../h/static/icomoon.css', './data/icomoon.css')
 
         # Copy over the vendor assets since they won't be processed otherwise
         if request.webassets_env.debug:
             makedirs('./data/scripts/vendor')
             merge('../../h/static/scripts/vendor', './data/scripts/vendor')
 
+        # Copy over the bootstrap and destroy scripts
+        copyfile('../../h/static/bootstrap.js', './data/bootstrap.js')
+        copyfile('../../h/static/destroy.js', './data/destroy.js')
+
+
         app('data/app.html', context, request)
 
-    manifest(context, request)
     embed('data/embed.js', context, request)
 
     # Reset the directory
