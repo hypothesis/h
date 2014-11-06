@@ -40,4 +40,4 @@ if (undefined === ToggleButton) {
   btn = ToggleButton(btn_config);
 }
 
-tabs.on('ready', tabToggle);
+tabs.on('pageshow', tabToggle);
