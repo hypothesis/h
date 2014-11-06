@@ -56,7 +56,8 @@ def add_base_url(event):
     assets_env = request.webassets_env
     view_name = getattr(request, 'view_name', None)
 
-    if view_name == 'embed.js' and assets_env.url.startswith('chrome-extension'):
+    if (view_name == 'embed.js' and
+            assets_env.url.startswith('chrome-extension')):
         base_url = join(request.webassets_env.url, '')
     else:
         base_url = request.resource_url(request.context, '')
@@ -122,12 +123,14 @@ def build_extension(env, browser, content_dir):
         merge('../../h/static/styles/images', content_dir + '/styles/images')
         merge('../../h/static/images', content_dir + '/images')
         merge('../../h/static/fonts', content_dir + '/fonts')
-        copyfile('../../h/static/styles/icomoon.css', content_dir + '/styles/icomoon.css')
+        copyfile('../../h/static/styles/icomoon.css',
+                 content_dir + '/styles/icomoon.css')
 
         # Copy over the vendor assets since they won't be processed otherwise
         if request.webassets_env.debug:
             makedirs(content_dir + '/scripts/vendor')
-            merge('../../h/static/scripts/vendor', content_dir + '/scripts/vendor')
+            merge('../../h/static/scripts/vendor',
+                  content_dir + '/scripts/vendor')
 
         app(content_dir + '/app.html', context, request)
 
@@ -238,7 +241,7 @@ def extension(args, console, settings):
     # Build it
     request = Request.blank('/app', base_url=base_url)
     build_extension(prepare(registry=config.registry, request=request),
-            browser, settings['webassets.base_dir'])
+                    browser, settings['webassets.base_dir'])
 
     # XXX: Change when webassets allows setting the cache option
     # As of 0.10 it's only possible to pass a sass config  with string values
