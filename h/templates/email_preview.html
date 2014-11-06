@@ -1,0 +1,58 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Email Previews{% endblock %}
+
+{% block styles %}
+  <style>
+    .email-preview {
+      display: block;
+      font-family: Helvetica, Helvetica Neue, Arial, sans-serif;
+      font-size: 14px;
+      padding: 20px;
+    }
+
+    .email-preview section {
+      margin-bottom: 20px;
+    }
+
+    .email-preview__title {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .email-preview__subtitle {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .email-preview__output {
+      background-color: #efefef;
+      padding: 1em;
+      border-radius: 5px;
+    }
+
+    .email-preview__output code {
+      font-family: Source Code Pro, Menlo, monospace;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  {% for email in emails %}
+    <article class="email-preview">
+      <h1 class="email-preview__title">{{ email.title }}</h1>
+      <section>
+        <h2 class="email-preview__subtitle">Subject:</h2>
+        <pre class="email-preview__output"><code>{{ email.subject }}</code></pre>
+      </section>
+      <section>
+        <h2 class="email-preview__subtitle">Plain Text:</h2>
+        <pre class="email-preview__output"><code>{{ email.text }}</code></pre>
+      </section>
+      <section>
+        <h2 class="email-preview__subtitle">HTML:</h2>
+        <div class="email-preview__output">{{ email.html | safe }}</div>
+      </section>
+    </article>
+  {% endfor %}
+{% endblock %}

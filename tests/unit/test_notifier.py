@@ -2,7 +2,6 @@
 """Defines unit tests for h.notifier."""
 from mock import patch, Mock
 from pyramid.testing import DummyRequest, testConfig
-from datetime import datetime
 
 from h import events, notifier
 
@@ -190,7 +189,9 @@ def test_reply_notification_content():
     html bodies.
     """
     with testConfig() as config:
-        config.include('pyramid_chameleon')
+        config.include('pyramid_jinja2')
+        config.add_jinja2_renderer('.txt')
+        config.add_jinja2_renderer('.html')
 
         annotation, parent = create_annotation()
         request = DummyRequest()
@@ -210,7 +211,7 @@ def test_reply_notification_content():
                 'has just left a reply to your annotation on' \
                 in notification['html']
             assert notification['subject'] == \
-                'testuser has replied to your annotation\n'
+                'testuser has replied to your annotation'
 
 
 def test_reply_notification_no_recipient():
@@ -219,7 +220,9 @@ def test_reply_notification_no_recipient():
     be found in the User table.
     """
     with testConfig() as config:
-        config.include('pyramid_chameleon')
+        config.include('pyramid_jinja2')
+        config.add_jinja2_renderer('.txt')
+        config.add_jinja2_renderer('.html')
 
         annotation, parent = create_annotation()
         request = DummyRequest()

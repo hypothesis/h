@@ -13,29 +13,29 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 @view_config(
     layout='app',
     context='h.models.Annotation',
-    renderer='h:templates/app.pt',
+    renderer='h:templates/app.html',
 )
 def annotation(context, request):
     return {}
 
 
-@view_config(name='embed.js', renderer='h:templates/embed.txt')
+@view_config(name='embed.js', renderer='h:templates/embed.js')
 def js(context, request):
     request.response.content_type = 'text/javascript'
     return {}
 
 
-@view_config(layout='app', name='app.html', renderer='h:templates/app.pt')
-@view_config(layout='app', name='viewer', renderer='h:templates/app.pt')
-@view_config(layout='app', name='editor', renderer='h:templates/app.pt')
-@view_config(layout='app', name='page_search', renderer='h:templates/app.pt')
+@view_config(layout='app', name='app.html', renderer='h:templates/app.html')
+@view_config(layout='app', name='viewer', renderer='h:templates/app.html')
+@view_config(layout='app', name='editor', renderer='h:templates/app.html')
+@view_config(layout='app', name='page_search', renderer='h:templates/app.html')
 def page(context, request):
     return {}
 
 
-@view_config(renderer='h:templates/help.pt', route_name='index')
-@view_config(renderer='h:templates/help.pt', route_name='help')
-@view_config(renderer='h:templates/help.pt', route_name='onboarding')
+@view_config(renderer='h:templates/help.html', route_name='index')
+@view_config(renderer='h:templates/help.html', route_name='help')
+@view_config(renderer='h:templates/help.html', route_name='onboarding')
 def help_page(context, request):
     current_route = request.matched_route.name
     return {
@@ -48,9 +48,13 @@ def help_page(context, request):
 @view_config(
     layout='app',
     context='h.interfaces.IStreamResource',
-    renderer='h:templates/app.pt',
+    renderer='h:templates/app.html',
 )
-@view_config(layout='app', route_name='stream', renderer='h:templates/app.pt')
+@view_config(
+    layout='app',
+    route_name='stream',
+    renderer='h:templates/app.html'
+)
 def stream(context, request):
     stream_type = context.get('stream_type')
     stream_key = context.get('stream_key')
@@ -72,7 +76,7 @@ def stream(context, request):
         return context
 
 
-@notfound_view_config(renderer='h:templates/notfound.pt')
+@notfound_view_config(renderer='h:templates/notfound.html')
 def notfound(context, request):
     # Dispatch ContextFound for pyramid_layout subscriber
     event = ContextFound(request)

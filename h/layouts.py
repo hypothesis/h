@@ -2,7 +2,7 @@
 from pyramid_layout.layout import layout_config
 
 
-@layout_config(template='h:templates/base.pt')
+@layout_config(template='h:templates/layouts/base.html')
 class BaseLayout(object):
     app = None
     controller = None
@@ -31,6 +31,14 @@ class BaseLayout(object):
         return self.request.registry.resources(requirements)
 
     @property
+    def xpath_polyfil_urls(self):
+        return self.request.webassets_env['wgxpath'].urls()
+
+    @property
+    def app_inject_urls(self):
+        return self.request.webassets_env['inject'].urls()
+
+    @property
     def css_links(self):
         return self.get_widget_resources()['css']
 
@@ -39,14 +47,14 @@ class BaseLayout(object):
         return self.get_widget_resources()['js']
 
 
-@layout_config(name='app', template='h:templates/base.pt')
+@layout_config(name='app', template='h:templates/layouts/base.html')
 class AppLayout(BaseLayout):
     app = 'h'
     controller = 'AppController'
     requirements = (('app', None), ('auth', None), ('topbar', None))
 
 
-@layout_config(name='auth', template='h:templates/base.pt')
+@layout_config(name='auth', template='h:templates/layouts/base.html')
 class AuthLayout(BaseLayout):
     app = 'h'
     controller = 'AuthAppController'

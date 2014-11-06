@@ -1,0 +1,92 @@
+{% extends "layouts/base.html" %}
+
+{% block body_tag %}
+<body ng-app="{{ layout.app }}" ng-controller="{{ layout.controller }}"{% if layout.csp %} ng-csp="{{ layout.csp }}"{% endif %}>
+{% endblock %}
+
+{% block content %}
+  <!-- Toolbar -->
+  <div class="ng-cloak topbar" ng-class="frame.visible && 'shown'">
+    <div class="inner" ng-switch="persona">
+      <span class="pull-right" ng-switch-when="undefined">⋯</span>
+      <a class="pull-right" href=""
+         ng-click="login()"
+         ng-switch-when="null">Sign in</a>
+      <div class="dropdown pull-right user-picker" ng-switch-default>
+        <span role="button"
+              class="dropdown-toggle"
+              data-toggle="dropdown">{% raw %}{{ persona|persona }}{% endraw %}<!--
+          --><span class="provider">/{% raw %}{{ persona|persona:'provider' }}{% endraw %}</span><!--
+          --><i class="h-icon-triangle"></i></span>
+        <ul class="dropdown-menu pull-right" role="menu">
+          <li><a href="" ng-click="dialog.visible='true'">Account</a></li>
+          <li><a href="http://hypothes.is/contact/"
+                 target="_blank">Feedback</a></li>
+          <li><a href="/docs/help" target="_blank">Help</a></li>
+          <li><a href="/stream?q=user:{% raw %}{{ persona|persona }}{% endraw %}"
+                 target="_blank">My Annotations</a></li>
+          <li ng-click="logout()">Sign out</li>
+        </ul>
+      </div>
+
+      <!-- Searchbar -->
+      <div class="simple-search"
+           query="search.query"
+           on-search="search.update(query)"
+           on-clear="search.clear()"></div>
+      <!-- / Searchbar -->
+    </div>
+  </div>
+  <!-- / Toolbar -->
+
+  <!-- Wrapper -->
+  <div id="wrapper" whenscrolled="loadMore(10)">
+    <!-- Dialog -->
+    <div class="content ng-cloak" ng-if="dialog.visible">
+      <div id="dialog" class="sheet">
+        <i class="close h-icon-cancel"
+           role="button"
+           title="Close"
+           ng-click="dialog.visible = false"></i>
+        <div ng-if="persona">
+          {% include_raw "client/account.html" %}
+        </div>
+        <div ng-if="!persona">
+          {% include_raw "client/auth.html" %}
+        </div>
+      </div>
+    </div>
+    <!-- / Dialog -->
+
+    <!-- Angular view -->
+    <main class="content" ng-view=""></main>
+  </div>
+  <!-- / Wrapper -->
+{% endblock %}
+
+{% block templates %}
+  <script type="text/ng-template" id="annotation.html">
+    {% include_raw "client/annotation.html" %}
+  </script>
+  <script type="text/ng-template" id="markdown.html">
+    {% include_raw "client/markdown.html" %}
+  </script>
+  <script type="text/ng-template" id="privacy.html">
+    {% include_raw "client/privacy.html" %}
+  </script>
+  <script type="text/ng-template" id="viewer.html">
+    {% include_raw "client/viewer.html" %}
+  </script>
+  <script type="text/ng-template" id="thread.html">
+    {% include_raw "client/thread.html" %}
+  </script>
+  <script type="text/ng-template" id="notification.html">
+    {% include_raw "client/notification.html" %}
+  </script>
+{% endblock %}
+
+{% block scripts %}
+  {% for src in layout.js_links %}
+    <script src="{{src}}"></script>
+  {% endfor %}
+{% endblock %}

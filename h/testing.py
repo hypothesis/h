@@ -15,13 +15,13 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 @view_config(layout='pattern_library',
-             renderer='h:templates/pattern_library.pt',
+             renderer='h:templates/pattern_library.html',
              route_name='pattern_library')
 def page(context, request):
     return {}
 
 
-@view_config(renderer='h:templates/email_preview.pt',
+@view_config(renderer='h:templates/email_preview.html',
              route_name='email_preview')
 def email_preview(context, request):
     notification_email_data = {
