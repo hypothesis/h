@@ -3,13 +3,15 @@ const tabs = require("sdk/tabs");
 const { ToggleButton } = require("sdk/ui/button/toggle");
 var btn_config = {};
 var btn;
+// tab state machine
+var tab_state = {};
 
 function tabToggle(tab) {
-  if (btn.state('window').checked) {
+  if (tab_state[tab.id] === true) {
     tab.attach({
       contentScriptFile: data.url('embed.js')
     });
-  } else {
+  } else if (undefined === tab_state[tab.id] || tab_state[tab.id] === false) {
     tab.attach({
       contentScript: [
         'var s = document.createElement("script");',
@@ -29,7 +31,12 @@ btn_config = {
     "36": './images/sleeping_36.png',
     "64": './images/sleeping_64.png'
   },
-  onClick: function(state) {
+  onChange: function() {
+    // delete the window-wide state default
+    this.state('window', null);
+    // but turn it back on for this tab
+    this.state('tab', {checked: !this.state('tab').checked});
+    tab_state[tabs.activeTab.id] = this.state('tab').checked;
     tabToggle(tabs.activeTab)
   }
 };
@@ -41,3 +48,7 @@ if (undefined === ToggleButton) {
 }
 
 tabs.on('pageshow', tabToggle);
+tabs.on('open', function(tab) {
+  // h is off by default on new tabs
+  tab_state[tab.id] = false;
+});
