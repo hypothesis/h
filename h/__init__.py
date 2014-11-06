@@ -81,14 +81,16 @@ def _environment_overrides():
         overrides['mail.port'] = mail_port
 
     if 'REDIS_PORT' in os.environ:
-        _log_override('REDIS_PORT', 'redis.sessions.host', 'redis.sessions.port')
+        _log_override('REDIS_PORT',
+                      'redis.sessions.host', 'redis.sessions.port')
         redis_host = os.environ['REDIS_PORT_6379_TCP_ADDR']
         redis_port = os.environ['REDIS_PORT_6379_TCP_PORT']
         overrides['redis.sessions.host'] = redis_host
         overrides['redis.sessions.port'] = redis_port
 
     if 'SESSION_SECRET' in os.environ:
-        _log_override('SESSION_SECRET', 'session.secret', 'redis.sessions.secret')
+        _log_override('SESSION_SECRET',
+                      'session.secret', 'redis.sessions.secret')
         overrides['session.secret'] = os.environ['SESSION_SECRET']
         overrides['redis.sessions.secret'] = os.environ['SESSION_SECRET']
 
