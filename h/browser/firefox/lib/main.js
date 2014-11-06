@@ -40,7 +40,4 @@ if (undefined === ToggleButton) {
   btn = ToggleButton(btn_config);
 }
 
-tabs.on('open', function(tab) {
-  tab.on('activate', tabToggle);
-  tab.on('pageshow', tabToggle);
-});
+tabs.on('ready', tabToggle);
