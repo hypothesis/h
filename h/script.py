@@ -128,10 +128,6 @@ def chrome(env):
             makedirs('./public/scripts/vendor')
             merge('../../h/static/scripts/vendor', './public/scripts/vendor')
 
-        # Copy over the bootstrap and destroy scripts
-        copyfile('../../h/static/bootstrap.js', './public/bootstrap.js')
-        copyfile('../../h/static/destroy.js', './public/destroy.js')
-
         app('public/app.html', context, request)
 
     manifest(context, request)
@@ -163,6 +159,10 @@ def firefox(env):
     # Copy the extension code
     merge('../../h/browser/firefox', './')
 
+    # Copy over the bootstrap and destroy scripts
+    copyfile('../../h/static/bootstrap.js', './data/bootstrap.js')
+    copyfile('../../h/static/destroy.js', './data/destroy.js')
+
     # Build the app html and copy assets if they are being bundled
     if request.webassets_env.url.startswith('resource://'):
         makedirs('./data/styles/images')
@@ -175,11 +175,6 @@ def firefox(env):
         if request.webassets_env.debug:
             makedirs('./data/scripts/vendor')
             merge('../../h/static/scripts/vendor', './data/scripts/vendor')
-
-        # Copy over the bootstrap and destroy scripts
-        copyfile('../../h/static/bootstrap.js', './data/bootstrap.js')
-        copyfile('../../h/static/destroy.js', './data/destroy.js')
-
 
         app('data/app.html', context, request)
 
