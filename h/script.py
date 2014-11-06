@@ -121,7 +121,7 @@ def chrome(env):
         merge('../../h/static/styles/images', './public/styles/images')
         merge('../../h/static/images', './public/images')
         merge('../../h/static/fonts', './public/fonts')
-        copyfile('../../h/static/icomoon.css', './public/icomoon.css')
+        copyfile('../../h/static/styles/icomoon.css', './public/styles/icomoon.css')
 
         # Copy over the vendor assets since they won't be processed otherwise
         if request.webassets_env.debug:
@@ -169,7 +169,7 @@ def firefox(env):
         merge('../../h/static/styles/images', './data/styles/images')
         merge('../../h/static/images', './data/images')
         merge('../../h/static/fonts', './data/fonts')
-        copyfile('../../h/static/icomoon.css', './data/icomoon.css')
+        copyfile('../../h/static/styles/icomoon.css', './data/styles/icomoon.css')
 
         # Copy over the vendor assets since they won't be processed otherwise
         if request.webassets_env.debug:
