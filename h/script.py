@@ -87,7 +87,7 @@ def manifest(context, request):
         f.write(manifest_tpl.render(src=src, version=ext_version))
 
 
-def chrome(env):
+def build_extension(env, browser, content_dir):
     registry = env['registry']
     request = env['request']
     request.root = env['root']
@@ -97,88 +97,43 @@ def chrome(env):
     request.layout_manager.layout.csp = ''
 
     # Remove any existing build
-    if exists('./build/chrome'):
-        rmtree('./build/chrome')
+    if exists('./build/' + browser):
+        rmtree('./build/' + browser)
 
     # Create the new build directory
-    makedirs('./build/chrome/public')
+    makedirs(content_dir)
 
     # Change to the output directory
     old_dir = getcwd()
-    chdir('./build/chrome')
+    chdir('./build/' + browser)
 
     # Copy the extension code
-    merge('../../h/browser/chrome', './')
+    merge('../../h/browser/' + browser, './')
 
     # Copy over the bootstrap and destroy scripts
-    copyfile('../../h/static/bootstrap.js', './public/bootstrap.js')
-    copyfile('../../h/static/extension/destroy.js', './public/destroy.js')
-    copyfile('../../h/static/extension/config.js', './public/config.js')
+    copyfile('../../h/static/bootstrap.js', content_dir + '/bootstrap.js')
+    copyfile('../../h/static/extension/destroy.js', content_dir + '/destroy.js')
+    copyfile('../../h/static/extension/config.js', content_dir + '/config.js')
 
     # Build the app html and copy assets if they are being bundled
-    if request.webassets_env.url.startswith('chrome-extension://'):
-        makedirs('./public/styles/images')
-        merge('../../h/static/styles/images', './public/styles/images')
-        merge('../../h/static/images', './public/images')
-        merge('../../h/static/fonts', './public/fonts')
-        copyfile('../../h/static/styles/icomoon.css', './public/styles/icomoon.css')
+    if (request.webassets_env.url.startswith('chrome-extension://') or
+            request.webassets_env.url.startswith('resource://')):
+        makedirs(content_dir + '/styles/images')
+        merge('../../h/static/styles/images', content_dir + '/styles/images')
+        merge('../../h/static/images', content_dir + '/images')
+        merge('../../h/static/fonts', content_dir + '/fonts')
+        copyfile('../../h/static/styles/icomoon.css', content_dir + '/styles/icomoon.css')
 
         # Copy over the vendor assets since they won't be processed otherwise
         if request.webassets_env.debug:
-            makedirs('./public/scripts/vendor')
-            merge('../../h/static/scripts/vendor', './public/scripts/vendor')
+            makedirs(content_dir + '/scripts/vendor')
+            merge('../../h/static/scripts/vendor', content_dir + '/scripts/vendor')
 
-        app('public/app.html', context, request)
+        app(content_dir + '/app.html', context, request)
 
-    manifest(context, request)
-    embed('public/embed.js', context, request)
-
-    # Reset the directory
-    chdir(old_dir)
-
-
-def firefox(env):
-    registry = env['registry']
-    request = env['request']
-    context = request.context
-
-    registry.notify(ContextFound(request))  # pyramid_layout attrs
-    request.layout_manager.layout.csp = ''
-
-    # Remove any existing build
-    if exists('./build/firefox'):
-        rmtree('./build/firefox')
-
-    # Create the new build directory
-    makedirs('./build/firefox/data')
-
-    # Change to the output directory
-    old_dir = getcwd()
-    chdir('./build/firefox')
-
-    # Copy the extension code
-    merge('../../h/browser/firefox', './')
-
-    # Copy over the bootstrap and destroy scripts
-    copyfile('../../h/static/bootstrap.js', './data/bootstrap.js')
-    copyfile('../../h/static/destroy.js', './data/destroy.js')
-
-    # Build the app html and copy assets if they are being bundled
-    if request.webassets_env.url.startswith('resource://'):
-        makedirs('./data/styles/images')
-        merge('../../h/static/styles/images', './data/styles/images')
-        merge('../../h/static/images', './data/images')
-        merge('../../h/static/fonts', './data/fonts')
-        copyfile('../../h/static/styles/icomoon.css', './data/styles/icomoon.css')
-
-        # Copy over the vendor assets since they won't be processed otherwise
-        if request.webassets_env.debug:
-            makedirs('./data/scripts/vendor')
-            merge('../../h/static/scripts/vendor', './data/scripts/vendor')
-
-        app('data/app.html', context, request)
-
-    embed('data/embed.js', context, request)
+    if browser == 'chrome':
+        manifest(context, request)
+    embed(content_dir + '/embed.js', context, request)
 
     # Reset the directory
     chdir(old_dir)
@@ -282,7 +237,8 @@ def extension(args, console, settings):
 
     # Build it
     request = Request.blank('/app', base_url=base_url)
-    globals()[browser](prepare(registry=config.registry, request=request))
+    build_extension(prepare(registry=config.registry, request=request),
+            browser, settings['webassets.base_dir'])
 
     # XXX: Change when webassets allows setting the cache option
     # As of 0.10 it's only possible to pass a sass config  with string values
