@@ -3,8 +3,6 @@ const tabs = require("sdk/tabs");
 const { ToggleButton } = require("sdk/ui/button/toggle");
 var btn_config = {};
 var btn;
-// tab state machine
-var tab_state = {};
 // icons
 var icons = {
   'sleeping': {
@@ -23,15 +21,11 @@ var icons = {
 };
 
 function tabToggle(tab) {
-  if (tab_state[tab.id] === true) {
+  if (btn.state(tab).checked) {
     tab.attach({
       contentScriptFile: data.url('embed.js')
     });
-  } else if (undefined === tab_state[tab.id] || tab_state[tab.id] === false) {
-    btn.state(tab, {
-      label: 'Annotate',
-      icon: icons['sleeping']
-    });
+  } else {
     tab.attach({
       contentScript: [
         'var s = document.createElement("script");',
@@ -56,14 +50,12 @@ btn_config = {
         label: 'Annotating',
         icon: icons['active']
       });
-      tab_state[tabs.activeTab.id] = true;
     } else {
       this.state(tabs.activeTab, {
         checked: false,
         label: 'Annotate',
         icon: icons['sleeping']
       });
-      tab_state[tabs.activeTab.id] = false;
     }
     tabToggle(tabs.activeTab)
   }
@@ -78,5 +70,5 @@ if (undefined === ToggleButton) {
 tabs.on('pageshow', tabToggle);
 tabs.on('open', function(tab) {
   // h is off by default on new tabs
-  tab_state[tab.id] = false;
+  btn.state(tab).checked = false;
 });
