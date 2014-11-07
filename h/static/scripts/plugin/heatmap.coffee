@@ -370,6 +370,8 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     .addClass (d) => if @isUpper(d) then 'upper' else ''
     .addClass (d) => if @isLower(d) then 'lower' else ''
+    .removeClass  (d) => unless @isUpper(d) then 'upper' else ''
+    .removeClass  (d) => unless @isLower(d) then 'lower' else ''
 
     .css 'display', (d) =>
       bucket = @buckets[d]
