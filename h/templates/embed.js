@@ -43,11 +43,11 @@
     };
 
     if (!window.document.evaluate) {
-      resources = resources.concat(${map(str, request.webassets_env['wgxpath'].urls())});
+      resources = resources.concat(['{{ layout.xpath_polyfil_urls | map("string") | join("', '") | safe }}']);
     }
 
     if (typeof window.Annotator === 'undefined') {
-      resources = resources.concat(${map(str, request.webassets_env['inject'].urls())});
+      resources = resources.concat(['{{ layout.app_inject_urls | map("string") | join("', '") | safe }}']);
     }
 
     (function next(err) {
