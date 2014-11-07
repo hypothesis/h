@@ -120,8 +120,9 @@ def annotations_index(context, request):
             permission='create')
 def create(context, request):
     """Read the POSTed JSON-encoded annotation and persist it."""
+    user = get_user(request)
 
-    # Read the annotation that is to be stored
+    # Read the annotation from the request payload
     try:
         fields = request.json_body
     except ValueError:
@@ -129,27 +130,11 @@ def create(context, request):
                           'No JSON payload sent. Annotation not created.',
                           status_code=400)  # Client Error: Bad Request
 
-    # Some fields are not to be set by the user, ignore them
-    for field in PROTECTED_FIELDS:
-        fields.pop(field, None)
-    # Create Annotation instance
-    annotation = Annotation(fields)
-
-    # Set user and consumer fields
-    user = get_user(request)
-
-    annotation['user'] = user.id
-    annotation['consumer'] = user.consumer.key
-
-    log.debug('User: %s' % annotation['user'])
-    log.debug('Consumer key: %s' % annotation['consumer'])
-
-    # Save it in the database
-    annotation.save()
+    # Create the annotation
+    annotation = _create_annotation(fields, user)
 
     # Notify any subscribers
-    event = events.AnnotationEvent(request, annotation, 'create')
-    request.registry.notify(event)
+    _trigger_event(request, annotation, 'create')
 
     # Return it so the client gets to know its ID and such
     return annotation
@@ -163,8 +148,7 @@ def read(context, request):
     annotation = context
 
     # Notify any subscribers
-    event = events.AnnotationEvent(request, annotation, 'read')
-    request.registry.notify(event)
+    _trigger_event(request, annotation, 'read')
 
     return annotation
 
@@ -184,35 +168,20 @@ def update(context, request):
                           'No JSON payload sent. Annotation not created.',
                           status_code=400)  # Client Error: Bad Request
 
-    # Some fields are not to be set by the user, ignore them
-    for field in PROTECTED_FIELDS:
-        fields.pop(field, None)
+    # Check user's permissions
+    has_admin_permission = request.has_permission('admin', annotation)
 
-    # If the user is changing access permissions, check if it's allowed.
-    changing_permissions = (
-        'permissions' in fields
-        and fields['permissions'] != annotation.get('permissions', {})
-    )
-    if changing_permissions:
-        if not request.has_permission('admin', annotation):
-            return _api_error(
-                request,
-                'Not authorized to change annotation permissions.',
-                status_code=401)  # Unauthorized
-
-    # Update the annotation with the new data
-    annotation.update(fields)
-
-    # If the annotation is flagged as deleted, remove mentions of the user
-    if annotation.get('deleted', False):
-        _anonymize_deletes(annotation)
-
-    # Save the annotation in the database, overwriting the old version.
-    annotation.save()
+    # Update and store the annotation
+    try:
+        _update_annotation(annotation, fields, has_admin_permission)
+    except RuntimeError as err:
+        return _api_error(
+            request,
+            err.args[0],
+            status_code=err.args[1])
 
     # Notify any subscribers
-    event = events.AnnotationEvent(request, annotation, 'update')
-    request.registry.notify(event)
+    _trigger_event(request, annotation, 'update')
 
     # Return the updated version that was just stored.
     return annotation
@@ -229,8 +198,7 @@ def delete(context, request):
     annotation.delete()
 
     # Notify any subscribers
-    event = events.AnnotationEvent(request, annotation, 'delete')
-    request.registry.notify(event)
+    _trigger_event(request, annotation, 'delete')
 
     # Return a confirmation
     return {
@@ -324,6 +292,12 @@ class Token(BearerToken):
             return 0
 
 
+def _trigger_event(request, annotation, action):
+    """Trigger any callback functions listening for AnnotationEvents"""
+    event = events.AnnotationEvent(request, annotation, action)
+    request.registry.notify(event)
+
+
 def _api_error(request, reason, status_code):
     request.response.status_code = status_code
     response_info = {
@@ -353,6 +327,53 @@ def _search_params(request_params, user=None):
 
     search_params['user'] = user
     return search_params
+
+
+def _create_annotation(fields, user):
+    """Create and store an annotation"""
+
+    # Some fields are not to be set by the user, ignore them
+    for field in PROTECTED_FIELDS:
+        fields.pop(field, None)
+
+    # Create Annotation instance
+    annotation = Annotation(fields)
+
+    annotation['user'] = user.id
+    annotation['consumer'] = user.consumer.key
+
+    # Save it in the database
+    annotation.save()
+
+    log.debug('Created annotation; user: %s, consumer key: %s',
+              annotation['user'], annotation['consumer'])
+
+    return annotation
+
+
+def _update_annotation(annotation, fields, has_admin_permission):
+    # Some fields are not to be set by the user, ignore them
+    for field in PROTECTED_FIELDS:
+        fields.pop(field, None)
+
+    # If the user is changing access permissions, check if it's allowed.
+    changing_permissions = (
+        'permissions' in fields
+        and fields['permissions'] != annotation.get('permissions', {})
+    )
+    if changing_permissions and not has_admin_permission:
+        raise RuntimeError("Not authorized to change annotation permissions.",
+                           401)  # Unauthorized
+
+    # Update the annotation with the new data
+    annotation.update(fields)
+
+    # If the annotation is flagged as deleted, remove mentions of the user
+    if annotation.get('deleted', False):
+        _anonymize_deletes(annotation)
+
+    # Save the annotation in the database, overwriting the old version.
+    annotation.save()
 
 
 def _anonymize_deletes(annotation):
