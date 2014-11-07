@@ -42,7 +42,6 @@ install_requires = [
     'oauthlib==0.6.3',
     'pyramid>=1.5',
     'pyramid-basemodel>=0.2',
-    'pyramid_chameleon>=0.1',
     'pyramid-layout>=0.9',
     'pyramid_mailer>=0.13',
     'pyramid-multiauth>=0.4.0',
