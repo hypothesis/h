@@ -178,8 +178,6 @@ class AppController
           reset()
 
     onlogout = ->
-      return unless drafts.discard()
-
       plugins.Auth?.element.removeData('annotator:headers')
       plugins.Auth?.destroy()
       delete plugins.Auth
@@ -247,6 +245,7 @@ class AppController
       identity.request {oncancel}
 
     $scope.logout = ->
+      return unless drafts.discard()
       $scope.dialog.visible = false
       identity.logout()
 
