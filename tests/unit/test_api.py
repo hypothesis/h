@@ -2,8 +2,8 @@
 
 """Defines unit tests for h.api."""
 
-from mock import call, patch, MagicMock
-import pytest
+from mock import patch, MagicMock
+from pytest import fixture, raises
 from pyramid.testing import DummyRequest, DummyResource
 
 from h import api
@@ -11,12 +11,35 @@ from h import api
 from helpers import DictMock
 
 
+@fixture(autouse=True)
+def replace_io(monkeypatch):
+    """For all tests, mock paths to the "outside" world"""
+    Annotation = DictMock()
+    _trigger_event = MagicMock()
+    _api_error = MagicMock()
+    monkeypatch.setattr(api, 'Annotation', Annotation)
+    monkeypatch.setattr(api, '_trigger_event', _trigger_event)
+    monkeypatch.setattr(api, '_api_error', _api_error)
+
+
+@fixture()
+def user(monkeypatch):
+    """Provide a mock user"""
+    user = MagicMock()
+    user.id = 'alice'
+    user.consumer.key = 'consumer_key'
+
+    # Make api.get_user() return our alice
+    get_user = MagicMock()
+    get_user.return_value = user
+    monkeypatch.setattr(api, 'get_user', get_user)
+    return user
+
+
 def test_index():
     """Get the API descriptor"""
-    context = DummyResource()
-    request = DummyRequest()
 
-    result = api.index(context, request)
+    result = api.index(DummyResource(), DummyRequest())
 
     # Pyramid's host url defaults to http://example.com
     host = 'http://example.com'
@@ -51,6 +74,7 @@ def test_search_parameters():
         'user': user,
     }
 
+
 def test_bad_search_parameters():
     request_params = {
         'offset': '3foo',
@@ -63,79 +87,79 @@ def test_bad_search_parameters():
     }
 
 
-@patch('h.api.get_user')
-@patch('h.api.Annotation', new_callable=DictMock)
-def test_create(mock_Annotation, mock_get_user):
-    user = mock_get_user.return_value = MagicMock()
-    user.id = 'alice'
-    user.consumer.key = 'real_consumer'
-    context = DummyResource()
-    request = DummyRequest(json_body=_json_annotation)
-    request.registry = MagicMock()
+@patch('h.api._create_annotation')
+def test_create(mock_create_annotation, user):
+    request = DummyRequest(json_body=_new_annotation)
 
-    result = api.create(context, request)
+    annotation = api.create(DummyResource, request)
 
-    annotation = mock_Annotation.instances[0]
+    api._create_annotation.assert_called_once_with(_new_annotation, user)
+    assert annotation == api._create_annotation.return_value
+    _assert_event_triggered('create')
+
+
+def test_create_annotation(user):
+    annotation = api._create_annotation(_new_annotation, user)
     assert annotation['text'] == 'blabla'
-    assert annotation['quote'] == 'blub'
     assert annotation['user'] == 'alice'
-    assert annotation['consumer'] == 'real_consumer'
-    assert annotation['permissions'] == _json_annotation['permissions']
+    assert annotation['consumer'] == 'consumer_key'
+    assert annotation['permissions'] == _new_annotation['permissions']
     annotation.save.assert_called_once()
-
-    assert request.registry.notify.call_count == 1, "Annotation event should have occured"
-    assert request.registry.notify.call_args[0][0].action == 'create', "Annotation event action should be 'create'"
 
 
 def test_read():
-    context = DummyResource()
-    request = DummyRequest()
-    request.registry = MagicMock()
+    annotation = DummyResource()
 
-    result = api.read(context, request)
+    result = api.read(annotation, DummyRequest())
 
-    assert request.registry.notify.call_count == 1, "Annotation event should have occured"
-    assert request.registry.notify.call_args[0][0].action == 'read', "Annotation event action should be 'read'"
-    assert result == context, "Annotation should have been returned"
+    _assert_event_triggered('read')
+    assert result == annotation, "Annotation should have been returned"
 
 
-def test_update():
-    annotation = DictMock()(_old_annotation)
-    context = annotation
-    request = DummyRequest(json_body=_json_annotation)
-    request.registry = MagicMock()
+@patch('h.api._update_annotation')
+def test_update(mock_update_annotation):
+    annotation = api.Annotation(_old_annotation)
+    request = DummyRequest(json_body=_new_annotation)
     request.has_permission = MagicMock(return_value=True)
 
-    result = api.update(context, request)
+    result = api.update(annotation, request)
+
+    api._update_annotation.assert_called_once_with(annotation,
+                                                   _new_annotation,
+                                                   True)
+    _assert_event_triggered('update')
+    assert result is annotation, "Annotation should have been returned"
+
+
+def test_update_annotation(user):
+    annotation = api.Annotation(_old_annotation)
+
+    api._update_annotation(annotation, _new_annotation, True)
 
     assert annotation['text'] == 'blabla'
-    assert annotation['quote'] == 'blub'
+    assert annotation['quote'] == 'original_quote'
     assert annotation['user'] == 'alice'
-    assert annotation['consumer'] == 'real_consumer'
-    assert annotation['permissions'] == _json_annotation['permissions']
+    assert annotation['consumer'] == 'consumer_key'
+    assert annotation['permissions'] == _new_annotation['permissions']
     annotation.save.assert_called_once()
-    assert request.registry.notify.call_count == 1, "Annotation event should have occured"
-    assert request.registry.notify.call_args[0][0].action == 'update', "Annotation event action should be 'update'"
-    assert result == context, "Annotation should have been returned"
 
 
 @patch('h.api._anonymize_deletes')
 def test_update_anonymize_deletes(mock_anonymize_deletes):
-    annotation = DictMock()(_old_annotation)
+    annotation = api.Annotation(_old_annotation)
     annotation['deleted'] = True
-    context = annotation
-    request = DummyRequest(json_body=_json_annotation)
+    request = DummyRequest(json_body=_new_annotation)
 
-    result = api.update(context, request)
+    api.update(annotation, request)
 
-    mock_anonymize_deletes.assert_called_once_with(annotation)
+    api._anonymize_deletes.assert_called_once_with(annotation)
 
 
 def test_anonymize_deletes():
-    annotation = DictMock()(_old_annotation)
+    annotation = api.Annotation(_old_annotation)
     annotation['deleted'] = True
 
-    result = api._anonymize_deletes(annotation)
+    api._anonymize_deletes(annotation)
 
     assert 'user' not in annotation
     assert annotation['permissions'] == {
@@ -146,41 +170,33 @@ def test_anonymize_deletes():
     }
 
 
-@patch('h.api._api_error')
-def test_update_change_permissions_disallowed(mock_api_error):
-    response_info = mock_api_error.return_value = MagicMock()
-    annotation = DictMock()(_old_annotation)
-    context = annotation
-    request = DummyRequest(json_body=_json_annotation)
-    request.registry = MagicMock()
-    request.has_permission = MagicMock(return_value=False)
+def test_update_change_permissions_disallowed():
+    annotation = api.Annotation(_old_annotation)
 
-    result = api.update(context, request)
+    with raises(RuntimeError):
+        api._update_annotation(annotation, _new_annotation, False)
 
-    assert mock_api_error.called
     assert annotation['text'] == 'old_text'
     assert annotation.save.call_count == 0
-    assert request.registry.notify.call_count == 0, "Annotation event should NOT have occured"
-    assert result == response_info, "Error information should have been returned"
 
 
 def test_delete():
-    annotation = DictMock()(_old_annotation)
-    context = annotation
-    request = DummyRequest()
-    request.registry = MagicMock()
+    annotation = api.Annotation(_old_annotation)
 
-    result = api.delete(context, request)
+    result = api.delete(annotation, DummyRequest())
 
     assert annotation.delete.assert_called_once()
-    assert request.registry.notify.call_count == 1, "Annotation event should have occured"
-    assert request.registry.notify.call_args[0][0].action == 'delete', "Annotation event action should be 'delete'"
+    _assert_event_triggered('delete')
     assert result == {'id': '1234', 'deleted': True}, "Deletion confirmation should have been returned"
 
 
-_json_annotation = {
-    'text':'blabla',
-    'quote': 'blub',
+def _assert_event_triggered(action):
+    assert api._trigger_event.call_count == 1, "Annotation event should have occured"
+    assert api._trigger_event.call_args[0][2] == action, "Annotation event action should be " % action
+
+
+_new_annotation = {
+    'text': 'blabla',
     'created': '2040-05-20',
     'updated': '2040-05-23',
     'user': 'eve',
@@ -196,11 +212,11 @@ _json_annotation = {
 
 _old_annotation = {
     'text': 'old_text',
-    'quote': 'old_quote',
+    'quote': 'original_quote',
     'created': '2010-01-01',
     'updated': '2010-01-02',
     'user': 'alice',
-    'consumer': 'real_consumer',
+    'consumer': 'consumer_key',
     'id': '1234',
     'permissions': {
         'admin': ['alice'],
