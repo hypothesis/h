@@ -13,7 +13,9 @@ from pyramid.events import subscriber
 from pyramid_sockjs.session import Session
 import transaction
 
-from h import events, interfaces
+from h import events
+from h.api import get_user
+from h.models import Annotation
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -407,9 +409,8 @@ class StreamerSession(Session):
 
     def send_annotations(self):
         request = self.request
-        registry = request.registry
-        store = registry.queryUtility(interfaces.IStoreClass)(request)
-        annotations = store.search_raw(self.query.query)
+        user = get_user(request)
+        annotations = Annotation.search_raw(query=self.query.query, user=user)
         self.received = len(annotations)
 
         # Can send zero to indicate that no past data is matched

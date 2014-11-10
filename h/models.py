@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
+
 from annotator import annotation, document
 from pyramid.i18n import TranslationStringFactory
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
-
-from h import interfaces
 
 _ = TranslationStringFactory(__package__)
 
@@ -45,13 +44,13 @@ class Annotation(annotation.Annotation):
         'annotator_schema_version': {'type': 'string'},
         'created': {'type': 'date'},
         'updated': {'type': 'date'},
-        'quote': {'type': 'string'},
+        'quote': {'type': 'string', 'analyzer': 'standard'},
         'tags': {
             'type': 'string',
             'index': 'analyzed',
             'analyzer': 'lower_keyword'
         },
-        'text': {'type': 'string'},
+        'text': {'type': 'string', 'analyzer': 'standard'},
         'deleted': {'type': 'boolean'},
         'uri': {
             'type': 'string',
@@ -59,14 +58,14 @@ class Annotation(annotation.Annotation):
             'search_analyzer': 'uri_search'
         },
         'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'user'},
-        'consumer': {'type': 'string', 'index': 'not_analyzed'},
+        'consumer': {'type': 'string'},
         'target': {
             'properties': {
                 'id': {
                     'type': 'multi_field',
                     'path': 'just_name',
                     'fields': {
-                        'id': {'type': 'string', 'index': 'not_analyzed'},
+                        'id': {'type': 'string'},
                         'uri': {
                             'type': 'string',
                             'index_analyzer': 'uri_index',
@@ -78,7 +77,7 @@ class Annotation(annotation.Annotation):
                     'type': 'multi_field',
                     'path': 'just_name',
                     'fields': {
-                        'source': {'type': 'string', 'index': 'not_analyzed'},
+                        'source': {'type': 'string'},
                         'uri': {
                             'type': 'string',
                             'index_analyzer': 'uri_index',
@@ -118,13 +117,13 @@ class Annotation(annotation.Annotation):
         'permissions': {
             'index_name': 'permission',
             'properties': {
-                'read': {'type': 'string', 'index': 'not_analyzed'},
-                'update': {'type': 'string', 'index': 'not_analyzed'},
-                'delete': {'type': 'string', 'index': 'not_analyzed'},
-                'admin': {'type': 'string', 'index': 'not_analyzed'}
+                'read': {'type': 'string'},
+                'update': {'type': 'string'},
+                'delete': {'type': 'string'},
+                'admin': {'type': 'string'}
             }
         },
-        'references': {'type': 'string', 'index': 'not_analyzed'},
+        'references': {'type': 'string'},
         'document': {
             'properties': document.MAPPING
         },
@@ -190,15 +189,3 @@ class Annotation(annotation.Annotation):
 
 class Document(document.Document):
     pass
-
-
-def includeme(config):
-    registry = config.registry
-
-    models = [
-        (interfaces.IAnnotationClass, Annotation),
-    ]
-
-    for iface, imp in models:
-        if not registry.queryUtility(iface):
-            registry.registerUtility(imp, iface)
