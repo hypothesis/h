@@ -8,6 +8,7 @@ from annotator import auth, es
 from elasticsearch import exceptions as elasticsearch_exceptions
 from oauthlib.oauth2 import BearerToken
 from pyramid.authentication import RemoteUserAuthenticationPolicy
+from pyramid.renderers import JSON
 from pyramid.settings import asbool
 from pyramid.view import view_config
 
@@ -440,6 +441,8 @@ def delete_db():
 def includeme(config):
     registry = config.registry
     settings = registry.settings
+
+    config.add_renderer('json', JSON(indent=4))
 
     config.include('pyramid_oauthlib')
     config.add_token_type(Token)
