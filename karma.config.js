@@ -46,6 +46,7 @@ module.exports = function(config) {
       'h/static/scripts/auth.js',
       'h/static/scripts/helpers.js',
       'h/static/scripts/session.js',
+      'h/static/scripts/hypothesis.js',
       'h/static/scripts/vendor/sinon.js',
       'h/static/scripts/vendor/chai.js',
       'h/templates/*.html',

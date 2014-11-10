@@ -350,7 +350,7 @@ class Annotator.Guest extends Annotator
       method: 'addToken'
       params: token
 
-  onAdderMouseup: ->
+  onAdderMouseup: (event) ->
     event.preventDefault()
     event.stopPropagation()
 
