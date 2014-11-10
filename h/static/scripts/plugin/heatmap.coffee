@@ -315,6 +315,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       div.addClass('heatmap-pointer')
 
       # Creates highlights corresponding bucket when mouse is hovered
+      # TODO: This should use event delegation on the container.
       .on 'mousemove', (event) =>
         bucket = @tabs.index(event.currentTarget)
         for hl in @annotator.getHighlights()
@@ -351,13 +352,19 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           annotator.selectAnnotations annotations,
             (event.ctrlKey or event.metaKey),
 
+    this._buildTabs(@tabs, @buckets)
+
+    if @dynamicBucket
+      @annotator.updateViewer this._getDynamicBucket()
+
+  _buildTabs: ->
     @tabs.each (d, el) =>
       el = $(el)
       bucket = @buckets[d]
       bucketLength = bucket?.length
 
-      title = if bucketLength > 1
-        'Show #{bucketLength} annotations'
+      title = if bucketLength != 1
+        "Show #{bucketLength} annotations"
       else if bucketLength > 0
         'Show one annotation'
 
@@ -373,11 +380,6 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
       if bucket
         el.html("<div class='label'>#{bucketLength}</div>")
-
-
-
-    if @dynamicBucket
-      @annotator.updateViewer this._getDynamicBucket()
 
   _getDynamicBucket: ->
     top = window.pageYOffset
