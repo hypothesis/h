@@ -74,16 +74,14 @@ if (undefined === ToggleButton) {
 tabs.on('pageshow', tabToggle);
 tabs.on('open', function(tab) {
   // h is off by default on new tabs
-  if (tab.url.split('//')[1] != 'hypothes.is/welcome') {
-    btn.state(tab).checked = false;
-  }
+  btn.state(tab).checked = false;
 });
 
 if (self.loadReason === 'install') {
   tabs.open({
     url: 'https://hypothes.is/welcome',
-    onOpen: function(tab) {
-      btn.state(tab).checked = true;
+    onPageShow: function(tab) {
+      btn.click();
     }
   });
 }
