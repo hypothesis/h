@@ -3,20 +3,23 @@ const tabs = require("sdk/tabs");
 const { ToggleButton } = require("sdk/ui/button/toggle");
 var btn_config = {};
 var btn;
-// icons
+
+// NOTE: The 18 and 36 icons are actually 16x16 and 32x32 respectively as
+// FireFox will downscale 18x18 icons. I can't find any documentation on
+// on why this happens or how to prevent this.
 var icons = {
   'sleeping': {
-    "18": './images/sleeping_18.png',
-    "32": './images/sleeping_32.png',
-    "36": './images/sleeping_36.png',
-    "64": './images/sleeping_64.png'
+    "18": './images/toolbar-inactive.png',
+    "32": './images/menu-item.png',
+    "36": './images/toolbar-inactive@2x.png',
+    "64": './images/menu-item@2x.png'
   },
   // for all occasionas
   'active': {
-    "18": './images/active_18.png',
-    "32": './images/active_32.png',
-    "36": './images/active_36.png',
-    "64": './images/active_64.png'
+    "18": './images/toolbar-active.png',
+    "32": './images/menu-item.png',
+    "36": './images/toolbar-active@2x.png',
+    "64": './images/menu-item@2x.png'
   }
 };
 
