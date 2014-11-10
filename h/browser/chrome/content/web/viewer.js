@@ -5668,6 +5668,10 @@ function webViewerInitialized() {
       xhr.responseType = 'arraybuffer';
       xhr.send();
     } catch (e) {
+      if (e.code == 19) {
+        // Probably access denied. Show an explanation about permissions.
+        location.assign("/../help/permissions.html")
+      }
       PDFView.error(mozL10n.get('loading_error', null,
             'An error occurred while loading the PDF.'), e);
     }
