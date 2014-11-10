@@ -35,6 +35,7 @@ def api_config(**kwargs):
 
 
 @api_config(context='h.resources.APIResource')
+@api_config(context='h.resources.APIResource', route_name='index')
 def index(context, request):
     """Return the API descriptor document
 
