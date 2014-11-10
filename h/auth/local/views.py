@@ -179,7 +179,7 @@ class AuthController(horus.views.AuthController):
         if not self.allow_inactive_login and self.require_activation \
                 and not user.is_activated:
             reason = _('Your account is not active, please check your e-mail.')
-            raise httpexceptions.HTTPBadRequest({'reason': reason})
+            raise httpexceptions.HTTPBadRequest(reason)
 
         return user
 
@@ -188,12 +188,12 @@ class AuthController(horus.views.AuthController):
         try:
             result = super(AuthController, self).login()
         except httpexceptions.HTTPBadRequest as e:
-            return e.detail
-        else:
-            if request.user is not None:
-                stats(request).get_counter('auth.local.login').increment()
-                request.user.last_login_date = datetime.datetime.utcnow()
-                self.db.add(request.user)
+            return e
+
+        if request.user is not None:
+            stats(request).get_counter('auth.local.login').increment()
+            request.user.last_login_date = datetime.datetime.utcnow()
+            self.db.add(request.user)
             remember(request, request.user)
             event = LoginEvent(self.request, self.request.user)
             self.request.registry.notify(event)
