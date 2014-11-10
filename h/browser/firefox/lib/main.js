@@ -1,4 +1,5 @@
-const data = require("sdk/self").data;
+const self = require("sdk/self");
+const data = self.data;
 const tabs = require("sdk/tabs");
 const { ToggleButton } = require("sdk/ui/button/toggle");
 var btn_config = {};
@@ -73,5 +74,16 @@ if (undefined === ToggleButton) {
 tabs.on('pageshow', tabToggle);
 tabs.on('open', function(tab) {
   // h is off by default on new tabs
-  btn.state(tab).checked = false;
+  if (tab.url.split('//')[1] != 'hypothes.is/welcome') {
+    btn.state(tab).checked = false;
+  }
 });
+
+if (self.loadReason === 'install') {
+  tabs.open({
+    url: 'https://hypothes.is/welcome',
+    onOpen: function(tab) {
+      btn.state(tab).checked = true;
+    }
+  });
+}
