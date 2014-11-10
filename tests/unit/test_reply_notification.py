@@ -2,31 +2,12 @@
 """Defines unit tests for h.notifier."""
 from datetime import datetime
 
-from mock import patch, Mock
-from pyramid.testing import DummyRequest, testConfig
+from mock import patch, Mock, MagicMock
+from pyramid.testing import DummyRequest
 
 from h import events
-from h import interfaces
-from h.notification.gateway import user_name, user_profile_url, standalone_url, get_user_by_name
+from h.notification.gateway import user_name, user_profile_url, standalone_url
 from h.notification import reply_template as rt
-
-
-class DummyStoreClass(object):
-    data = []
-
-    def __init__(self, request):
-        self.request = request
-
-    def read(self, index):
-        return self.data[index]
-
-    @classmethod
-    def set_data(cls, d):
-        cls.data = d
-
-
-def configure(config):
-    config.registry.registerUtility(DummyStoreClass, interfaces.IStoreClass)
 
 store_fake_data = [
     {
@@ -71,15 +52,17 @@ store_fake_data = [
 ]
 
 
+def fake_fetch(id):
+    return store_fake_data[id]
+
+
 # Tests for the parent_values function
 def test_parent_values_reply():
     """Test if the function gives back the correct parent_value"""
-    with testConfig() as config:
-        configure(config)
-        request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         annotation = store_fake_data[1]
-        parent = rt.parent_values(annotation, request)
+        parent = rt.parent_values(annotation)
 
         assert parent['id'] == '0'
         assert 'quote' not in parent
@@ -87,24 +70,20 @@ def test_parent_values_reply():
 
 def test_parent_values_root_annotation():
     """Test if it gives back an empty dict for root annotations"""
-    with testConfig() as config:
-        configure(config)
-        request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         annotation = store_fake_data[0]
-        parent = rt.parent_values(annotation, request)
+        parent = rt.parent_values(annotation)
 
         assert len(parent.items()) == 0
 
 
 def test_parent_values_second_level_reply():
     """Test if it the grandparent values are filled for a second level reply"""
-    with testConfig() as config:
-        configure(config)
-        request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         annotation = store_fake_data[2]
-        parent = rt.parent_values(annotation, request)
+        parent = rt.parent_values(annotation)
 
         assert parent['id'] == '1'
         assert parent['quote'] == store_fake_data[0]['text']
@@ -113,15 +92,14 @@ def test_parent_values_second_level_reply():
 # Tests for the create_template_map function
 def test_all_keys_are_there():
     """Checks for the existence of every needed key for the template"""
-    with testConfig() as config:
-        configure(config)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
         request.domain = 'www.howtoreachtheark.now'
         annotation = store_fake_data[1]
 
         data = {
-            'parent': rt.parent_values(annotation, request),
+            'parent': rt.parent_values(annotation),
             'subscription': {'id': 1}
         }
         tmap = rt.create_template_map(request, annotation, data)
@@ -143,15 +121,14 @@ def test_all_keys_are_there():
 
 def test_template_map_key_values():
     """This test checks whether the keys holds the correct values"""
-    with testConfig() as config:
-        configure(config)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
         request.domain = 'www.howtoreachtheark.now'
         annotation = store_fake_data[1]
 
         data = {
-            'parent': rt.parent_values(annotation, request),
+            'parent': rt.parent_values(annotation),
             'subscription': {'id': 1}
         }
         tmap = rt.create_template_map(request, annotation, data)
@@ -192,19 +169,18 @@ def test_template_map_key_values():
 # Tests for the get_recipients function
 def test_get_email():
     """Tests whether it gives back the user.email property"""
-    with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
-        user = Mock()
-        user.email = 'testmail@test.com'
-        mock_user_db.return_value = user
-        with testConfig() as config:
-            configure(config)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
+        with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
+            user = Mock()
+            user.email = 'testmail@test.com'
+            mock_user_db.return_value = user
             request = DummyRequest()
-            DummyStoreClass.set_data(store_fake_data)
             request.domain = 'www.howtoreachtheark.now'
 
             annotation = store_fake_data[1]
             data = {
-                'parent': rt.parent_values(annotation, request),
+                'parent': rt.parent_values(annotation),
                 'subscription': {'id': 1}
             }
 
@@ -214,17 +190,16 @@ def test_get_email():
 
 def test_no_email():
     """If user has no email we must throw an exception"""
-    with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
-        mock_user_db.return_value = {}
-        with testConfig() as config:
-            configure(config)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
+        with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
+            mock_user_db.return_value = {}
             request = DummyRequest()
-            DummyStoreClass.set_data(store_fake_data)
             request.domain = 'www.howtoreachtheark.now'
 
             annotation = store_fake_data[1]
             data = {
-                'parent': rt.parent_values(annotation, request),
+                'parent': rt.parent_values(annotation),
                 'subscription': {'id': 1}
             }
 
@@ -240,15 +215,14 @@ def test_no_email():
 def test_dont_send_to_the_same_user():
     """Tests that if the parent user and the annotation user is the same
     then this function returns False"""
-    with testConfig() as config:
-        configure(config)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
         request.domain = 'www.howtoreachtheark.now'
 
         annotation = store_fake_data[0]
         data = {
-            'parent': rt.parent_values(annotation, request),
+            'parent': rt.parent_values(annotation),
             'subscription': {'id': 1}
         }
 
@@ -258,15 +232,12 @@ def test_dont_send_to_the_same_user():
 
 def test_dont_send_if_parent_is_missing():
     """Tests that this function returns False if the annotations parent's user is missing"""
-    with testConfig() as config:
-        configure(config)
-        request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
-        request.domain = 'www.howtoreachtheark.now'
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
 
         annotation = store_fake_data[3]
         data = {
-            'parent': rt.parent_values(annotation, request),
+            'parent': rt.parent_values(annotation),
             'subscription': {'id': 1}
         }
 
@@ -276,15 +247,12 @@ def test_dont_send_if_parent_is_missing():
 
 def test_different_subscription():
     """If subscription.uri is different from user, do not send!"""
-    with testConfig() as config:
-        configure(config)
-        request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
-        request.domain = 'www.howtoreachtheark.now'
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
 
         annotation = store_fake_data[1]
         data = {
-            'parent': rt.parent_values(annotation, request),
+            'parent': rt.parent_values(annotation),
             'subscription': {
                 'id': 1,
                 'uri': 'acct:hippopotamus@stucked.sos'
@@ -297,15 +265,12 @@ def test_different_subscription():
 
 def test_good_conditions():
     """If conditions match, this function returns with a True value"""
-    with testConfig() as config:
-        configure(config)
-        request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
-        request.domain = 'www.howtoreachtheark.now'
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
 
         annotation = store_fake_data[1]
         data = {
-            'parent': rt.parent_values(annotation, request),
+            'parent': rt.parent_values(annotation),
             'subscription': {
                 'id': 1,
                 'uri': 'acct:elephant@nomouse.pls'
@@ -329,10 +294,9 @@ def test_action_update():
 
 def test_action_create():
     """If the action is create, it'll try to get the subscriptions"""
-    with testConfig() as config:
-        configure(config)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
         request.domain = 'www.howtoreachtheark.now'
 
         annotation = store_fake_data[1]
@@ -353,10 +317,9 @@ class MockSubscription(Mock):
 
 def test_check_conditions_false_stops_sending():
     """If the check conditions() returns False, no notification is sent"""
-    with testConfig() as config:
-        configure(config)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
         request.domain = 'www.howtoreachtheark.now'
 
         annotation = store_fake_data[1]
@@ -374,10 +337,9 @@ def test_check_conditions_false_stops_sending():
 
 def test_send_if_everything_is_okay():
     """Test whether we call the send_email() if every condition is okay"""
-    with testConfig() as config:
-        configure(config)
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         request = DummyRequest()
-        DummyStoreClass.set_data(store_fake_data)
         request.domain = 'www.howtoreachtheark.now'
 
         annotation = store_fake_data[1]

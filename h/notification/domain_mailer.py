@@ -17,7 +17,7 @@ from h.notification.types import ROOT_PATH
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 TXT_TEMPLATE = ROOT_PATH + 'document_owner_notification.txt'
-HTML_TEMPLATE = ROOT_PATH + 'document_owner_notification.pt'
+HTML_TEMPLATE = ROOT_PATH + 'document_owner_notification.html'
 SUBJECT_TEMPLATE = ROOT_PATH + 'document_owner_notification_subject.txt'
 
 

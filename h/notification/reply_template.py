@@ -16,22 +16,20 @@ from h.notification.gateway import user_name, \
     user_profile_url, standalone_url, get_user_by_name
 from h.notification.types import ROOT_PATH
 from h.events import LoginEvent, AnnotationEvent
-from h import interfaces
+from h.models import Annotation
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 TXT_TEMPLATE = ROOT_PATH + 'reply_notification.txt'
-HTML_TEMPLATE = ROOT_PATH + 'reply_notification.pt'
+HTML_TEMPLATE = ROOT_PATH + 'reply_notification.html'
 SUBJECT_TEMPLATE = ROOT_PATH + 'reply_notification_subject.txt'
 
 
-def parent_values(annotation, request):
+def parent_values(annotation):
     if 'references' in annotation:
-        registry = request.registry
-        store = registry.queryUtility(interfaces.IStoreClass)(request)
-        parent = store.read(annotation['references'][-1])
+        parent = Annotation.fetch(annotation['references'][-1])
         if 'references' in parent:
-            grandparent = store.read(parent['references'][-1])
+            grandparent = Annotation.fetch(parent['references'][-1])
             parent['quote'] = grandparent['text']
         return parent
     else:
@@ -121,7 +119,7 @@ def send_notifications(event):
 
     # Store the parent values as additional data
     data = {
-        'parent': parent_values(annotation, request)
+        'parent': parent_values(annotation)
     }
 
     subscriptions = Subscriptions.get_active_subscriptions_for_a_type(
