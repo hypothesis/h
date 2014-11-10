@@ -315,6 +315,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
       div.addClass('heatmap-pointer')
 
       # Creates highlights corresponding bucket when mouse is hovered
+      # TODO: This should use event delegation on the container.
       .on 'mousemove', (event) =>
         bucket = @tabs.index(event.currentTarget)
         for hl in @annotator.getHighlights()
@@ -351,32 +352,34 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
           annotator.selectAnnotations annotations,
             (event.ctrlKey or event.metaKey),
 
-    @tabs
-    .attr 'title', (d) =>
-      if (len = @buckets[d].length) > 1
-        "Show #{len} annotations"
-      else if len > 0
-        "Show one annotation"
-
-    .css 'margin-top', (d) =>
-      if @isUpper(d) or @isLower(d) then '-9px' else '-8px'
-
-    .css 'top', (d) =>
-      "#{(@index[d] + @index[d+1]) / 2}px"
-
-    .html (d) =>
-      return unless @buckets[d]
-      "<div class='label'>#{@buckets[d].length}</div>"
-
-    .addClass (d) => if @isUpper(d) then 'upper' else ''
-    .addClass (d) => if @isLower(d) then 'lower' else ''
-
-    .css 'display', (d) =>
-      bucket = @buckets[d]
-      if (!bucket or bucket.length is 0) then 'none' else ''
+    this._buildTabs(@tabs, @buckets)
 
     if @dynamicBucket
       @annotator.updateViewer this._getDynamicBucket()
+
+  _buildTabs: ->
+    @tabs.each (d, el) =>
+      el = $(el)
+      bucket = @buckets[d]
+      bucketLength = bucket?.length
+
+      title = if bucketLength != 1
+        "Show #{bucketLength} annotations"
+      else if bucketLength > 0
+        'Show one annotation'
+
+      el.attr('title', title)
+      el.toggleClass('upper', @isUpper(d))
+      el.toggleClass('lower', @isLower(d))
+
+      el.css({
+        top: (@index[d] + @index[d+1]) / 2
+        marginTop: if @isUpper(d) or @isLower(d) then -9 else -8
+        display: unless bucketLength then 'none' else ''
+      })
+
+      if bucket
+        el.html("<div class='label'>#{bucketLength}</div>")
 
   _getDynamicBucket: ->
     top = window.pageYOffset
