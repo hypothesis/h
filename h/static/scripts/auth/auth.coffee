@@ -111,6 +111,12 @@ configure = [
       method: 'GET'
       withCredentials: true
 
+    sessionProvider.actions.profile =
+      method: 'GET'
+      params:
+        __formid__: 'profile'
+      withCredentials: true
+
     for action in AUTH_SESSION_ACTIONS
       sessionProvider.actions[action] =
         method: 'POST'

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 from functools import partial
 import re
 from uuid import uuid1, uuid4, UUID
@@ -21,43 +20,14 @@ from horus.models import (
 )
 from horus.strings import UIStringsBase
 from pyramid_basemodel import Base, Session
-from pyramid.settings import asbool
 from pyramid.threadlocal import get_current_request
-import sqlalchemy as sa
-from sqlalchemy import func, or_
+from sqlalchemy import event, func, or_
 from sqlalchemy.dialects import postgresql as pg
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.schema import Column
-from sqlalchemy.types import Integer, TypeDecorator, CHAR, VARCHAR
+from sqlalchemy.types import Integer, TypeDecorator, CHAR
 import transaction
 
 from h.interfaces import IConsumerClass
-
-
-class JSONEncodedDict(TypeDecorator):
-    """Represents an immutable structure as a json-encoded string.
-
-    Usage::
-
-        JSONEncodedDict(255)
-
-    """
-    # pylint: disable=too-many-public-methods
-    impl = VARCHAR
-
-    def process_bind_param(self, value, dialect):
-        if value is not None:
-            value = json.dumps(value)
-
-        return value
-
-    def process_result_value(self, value, dialect):
-        if value is not None:
-            value = json.loads(value)
-        return value
-
-    def python_type(self):
-        return dict
 
 
 class GUID(TypeDecorator):
@@ -230,61 +200,26 @@ class UserGroup(UserGroupMixin, Base):
     pass
 
 
-class UserSubscriptionsMixin(BaseModel):
-    # pylint: disable=no-self-use
+def create_event_listeners(config):
+    settings = config.registry.settings
 
-    @declared_attr
-    def username(self):
-        return sa.Column(
-            sa.Unicode(30),
-            sa.ForeignKey(
-                '%s.%s' % (UserMixin.__tablename__, 'username'),
-                onupdate='CASCADE',
-                ondelete='CASCADE'
-            ),
-            nullable=False
-        )
+    @event.listens_for(Consumer.__table__, 'after_create')
+    def create_api_consumer(target, connection, **kwargs):
+        key = settings['api.key']
+        secret = settings.get('api.secret')
+        ttl = settings.get('api.ttl', auth.DEFAULT_TTL)
 
-    @declared_attr
-    def query(self):
-        return sa.Column(JSONEncodedDict(4096), nullable=False)
-
-    @declared_attr
-    def template(self):
-        return sa.Column(
-            sa.Enum('reply_notification', 'custom_search',
-                    name='subscription_template'),
-            nullable=False,
-            default='custom_search'
-        )
-
-    @declared_attr
-    def description(self):
-        return sa.Column(sa.VARCHAR(256), default="")
-
-    @declared_attr
-    def type(self):
-        return sa.Column(
-            sa.Enum('system', 'user', name='subscription_type'),
-            nullable=False,
-            default='user'
-        )
-
-    @declared_attr
-    def active(self):
-        return sa.Column(sa.BOOLEAN, default=True, nullable=False)
-
-
-class UserSubscriptions(UserSubscriptionsMixin, Base):
-    pass
+        session = Session()
+        consumer = session.query(Consumer).filter(Consumer.key == key).first()
+        if not consumer:
+            with transaction.manager:
+                consumer = Consumer(key=key, secret=secret, ttl=ttl)
+                session.add(consumer)
+                session.flush()
 
 
 def includeme(config):
     registry = config.registry
-    settings = registry.settings
-
-    config.include('pyramid_basemodel')
-    config.include('pyramid_tm')
 
     models = [
         (IActivationClass, Activation),
@@ -298,15 +233,4 @@ def includeme(config):
         if not registry.queryUtility(iface):
             registry.registerUtility(imp, iface)
 
-    if asbool(settings.get('basemodel.should_create_all', True)):
-        key = settings['api.key']
-        secret = settings.get('api.secret')
-        ttl = settings.get('api.ttl', auth.DEFAULT_TTL)
-
-        session = Session()
-        consumer = session.query(Consumer).filter(Consumer.key == key).first()
-        if not consumer:
-            with transaction.manager:
-                consumer = Consumer(key=key, secret=secret, ttl=ttl)
-                session.add(consumer)
-                session.flush()
+    create_event_listeners(config)

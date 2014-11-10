@@ -139,7 +139,9 @@ class EditProfileSchema(CSRFSchema):
     username = colander.SchemaNode(colander.String())
     pwd = colander.SchemaNode(
         colander.String(),
-        widget=deform.widget.PasswordWidget()
+        widget=deform.widget.PasswordWidget(),
+        default='',
+        missing=colander.null
     )
     email = colander.SchemaNode(
         colander.String(),
@@ -152,6 +154,11 @@ class EditProfileSchema(CSRFSchema):
         widget=deform.widget.PasswordWidget(),
         default='',
         missing=colander.null
+    )
+    subscriptions = colander.SchemaNode(
+        colander.String(),
+        missing=colander.null,
+        default=''
     )
 
 

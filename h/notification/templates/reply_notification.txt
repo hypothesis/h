@@ -11,3 +11,5 @@ On {{ reply_timestamp.strftime('%d %B at %H:%M') }} {{ reply_user }} said:
 
 View this reply: {{ reply_path }}
 or view anna's stream: {{ reply_user_profile }}
+
+If you'd rather not get this notification you can unsubscribe from it by clicking here: {{ unsubscribe }}
