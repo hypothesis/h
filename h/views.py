@@ -86,8 +86,6 @@ def notfound(context, request):
 
 
 def includeme(config):
-    config.include('pyramid_chameleon')
-
     config.include('h.assets')
     config.include('h.layouts')
     config.include('h.panels')

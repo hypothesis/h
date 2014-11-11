@@ -5,8 +5,8 @@ from os.path import abspath, exists, join
 from shutil import copyfile, rmtree
 from urlparse import urljoin, urlparse, urlunparse, uses_netloc, uses_relative
 
-from chameleon.zpt.template import PageTextTemplateFile
 from clik import App
+from jinja2 import Template
 from pyramid.config import Configurator
 from pyramid.events import BeforeRender, ContextFound
 from pyramid.paster import get_appsettings
@@ -78,16 +78,17 @@ def manifest(context, request):
     # Chrome is strict about the format of the version string
     ext_version = '.'.join(version.replace('-', '.').split('.')[:4])
     assets_url = request.webassets_env.url
-    manifest_file = resolve('h:browser/chrome/manifest.json').abspath()
-    manifest_renderer = PageTextTemplateFile(manifest_file)
+    manifest_file = resolve('h:browser/chrome/manifest.json').stream()
+    manifest_tpl = Template(manifest_file.read())
     with open('manifest.json', 'w') as f:
         src = urljoin(request.resource_url(context), assets_url)
-        f.write(manifest_renderer(src=src, version=ext_version))
+        f.write(manifest_tpl.render(src=src, version=ext_version))
 
 
 def chrome(env):
     registry = env['registry']
     request = env['request']
+    request.root = env['root']
     context = request.context
 
     registry.notify(ContextFound(request))  # pyramid_layout attrs
