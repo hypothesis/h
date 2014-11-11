@@ -15,6 +15,8 @@ services:
 script:
   - make test
   - flake8 h --exclude=_version.py
+  # Build Chrome extension
+  - hypothesis extension development.ini http://localhost
 notifications:
   irc:
     channels:
