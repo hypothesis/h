@@ -38,6 +38,14 @@ function injectionFailed(tab) {
   setBrowserAction(tab.id, state(tab.id, 'sleeping'))
 }
 
+function injectIntoPDF(tab) {
+  if (!isPDFViewerURL(tab.url)) {
+    chrome.tabs.update(tab.id, {
+      url: getPDFViewerURL(tab.url)
+    })
+  }
+}
+
 function inject(tab) {
   chrome.tabs.executeScript(tab.id, {
     code: [
@@ -51,11 +59,7 @@ function inject(tab) {
         if (allowed) {
           if (isPDFURL(tab.url)) {
             // This a local PDF, and we have permission - good to go.
-            if (!isPDFViewerURL(tab.url)) {
-              chrome.tabs.update(tab.id, {
-                url: getPDFViewerURL(tab.url)
-              })
-            }
+            injectIntoPDF(tab)
           } else {
             // This a local HTML. Even with permission, this won't work.
             alert("Sorry, but as of now, this service can't be used on local HTMLs documents loaded via the file:/// protocol. (Local PDF documents are supported, though.)");
@@ -73,11 +77,7 @@ function inject(tab) {
     }
 
     if (isPDFURL(tab.url)) {
-      if (!isPDFViewerURL(tab.url)) {
-        chrome.tabs.update(tab.id, {
-          url: getPDFViewerURL(tab.url)
-        })
-      }
+      injectIntoPDF(tab)
     } else {
       chrome.tabs.executeScript(tab.id, {
         file: 'public/embed.js'
