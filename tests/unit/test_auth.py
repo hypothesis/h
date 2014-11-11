@@ -6,7 +6,6 @@ from horus.interfaces import IUIStrings
 from horus.strings import UIStringsBase
 import pytest
 from pyramid.testing import DummyRequest, testConfig
-from six import StringIO
 
 from h.auth.local.schemas import unblacklisted_username
 
