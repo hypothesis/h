@@ -298,9 +298,16 @@ annotation = [
           if ctrl.editing then counter?.count 'edit', -1
 
       updateTimeStamp = ->
-        {message, updateAt} = timeHelpers.timestamp ctrl.annotation.updated
-        scope.timestamp = dateFilter message
-        $timeout -> render updateTimeStamp, 1000*updateAt+500, false
+        stamp = ctrl.annotation.updated
+        fuzzyString= timeHelpers.toFuzzyString stamp
+        scope.timestamp = dateFilter fuzzyString
+
+        fuzzyUpdate = timeHelpers.nextFuzzyUpdate(stamp)
+        # Handle null value, give default 5 sec
+        fuzzyUpdate ?=5
+        nextUpdate = 1000*fuzzyUpdate+500
+
+        $timeout -> render updateTimeStamp, nextUpdate, false
 
       render updateTimeStamp
 

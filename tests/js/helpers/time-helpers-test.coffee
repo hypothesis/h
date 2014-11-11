@@ -1,5 +1,4 @@
 assert = chai.assert
-sandbox = sinon.sandbox.create()
 
 minute = 60
 hour = minute * 60
@@ -7,57 +6,74 @@ day = hour * 24
 month = day * 30
 year = day * 365
 
-FIXTURES_TO_TEST = [
-  [10, 'moments ago', 20]
-  [29, 'moments ago', 1]
-  [49, '49 seconds ago', 1]
-  [minute + 5, 'a minute ago', 55]
-  [3 * minute + 5, '3 minutes ago', minute]
-  [4 * hour, '4 hours ago', hour]
-  [27 * hour, 'yesterday', 21*hour]
-  [3 * day + 30 * minute, '3 days ago', day]
-  [6 * month + 2 * day, '6 months ago', month]
-  [8 * year, '8 years ago', year]
+
+FIXTURES_TO_FUZZY_STRING = [
+  [10, 'moments ago']
+  [29, 'moments ago']
+  [49, '49 seconds ago']
+  [minute + 5, 'a minute ago']
+  [3 * minute + 5, '3 minutes ago']
+  [4 * hour, '4 hours ago']
+  [27 * hour, 'yesterday']
+  [3 * day + 30 * minute, '3 days ago']
+  [6 * month + 2 * day, '6 months ago']
+  [8 * year, '8 years ago']
+]
+
+FIXTURES_NEXT_FUZZY_UPDATE = [
+  [10, 1]
+  [29, 1]
+  [49, 1]
+  [minute + 5, minute]
+  [3 * minute + 5, minute]
+  [4 * hour, hour]
+  [27 * hour, day]
+  [3 * day + 30 * minute, day]
+  [6 * month + 2 * day, month]
+  [8 * year, year]
 ]
 
 describe 'timeHelpers', ->
   beforeEach module('h.helpers')
   timeHelpers = null
+  sandbox = null
 
   beforeEach inject (_timeHelpers_) ->
     timeHelpers = _timeHelpers_
+    sandbox = sinon.sandbox.create()
     sandbox.useFakeTimers()
 
   afterEach ->
     sandbox.restore()
 
-
-  describe 'timestamp', ->
-    it 'Handles undefined', ->
-      time = undefined
-      {message, updateAt} = timeHelpers.timestamp time
-      assert.equal(message, '')
-      assert.equal(updateAt, 5)
-
-    it 'it counts the seconds', ->
-      time = new Date()
-      sandbox.clock.tick(5000)
-
-      timeHelpers.timestamp time
-      sandbox.clock.tick(1000)
-
-      {message, updateAt} = timeHelpers.timestamp time
-      assert.equal(message, 'moments ago')
-      assert.equal(updateAt, 24)
-
+  describe '.toFuzzyString', ->
+    it 'Handles empty dates', ->
+      time = null
+      expect = ''
+      assert.equal(timeHelpers.toFuzzyString(time), expect)
 
     testFixture = (f) ->
       ->
         time = new Date()
+        expect = f[1]
         sandbox.clock.tick(f[0]*1000)
-        {message, updateAt} = timeHelpers.timestamp time
-        assert.equal(message, f[1])
-        assert.equal(updateAt, f[2])
+        assert.equal(timeHelpers.toFuzzyString(time), expect)
 
-    for f,i in FIXTURES_TO_TEST
-      it 'gives correct next fuzzy update time for fixture #{i}', testFixture(f)
+    for f, i in FIXTURES_TO_FUZZY_STRING
+      it "creates correct fuzzy string for fixture #{i}", testFixture(f)
+
+  describe '.nextFuzzyUpdate', ->
+    it 'Handles empty dates', ->
+      time = null
+      expect = null
+      assert.equal(timeHelpers.nextFuzzyUpdate(time), expect)
+
+    testFixture = (f) ->
+      ->
+        time = new Date()
+        expect = f[1]
+        sandbox.clock.tick(f[0]*1000)
+        assert.equal(timeHelpers.nextFuzzyUpdate(time), expect)
+
+    for f, i in FIXTURES_NEXT_FUZZY_UPDATE
+      it "gives correct next fuzzy update time for fixture #{i}", testFixture(f)
