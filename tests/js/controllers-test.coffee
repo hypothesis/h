@@ -1,7 +1,7 @@
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
 
-describe 'h.controllers', ->
+describe 'h', ->
   $scope = null
   fakeIdentity = null
   fakeLocation = null
@@ -91,7 +91,7 @@ describe 'h.controllers', ->
       onready()
       assert.isFalse($scope.dialog.visible)
 
-  describe 'AnnotationViewer', ->
+  describe 'AnnotationViewerController', ->
     annotationViewer = null
 
     beforeEach inject ($controller, $rootScope) ->
