@@ -88,6 +88,7 @@ def manifest(context, request):
 def chrome(env):
     registry = env['registry']
     request = env['request']
+    request.root = env['root']
     context = request.context
 
     registry.notify(ContextFound(request))  # pyramid_layout attrs
