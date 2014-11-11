@@ -46,51 +46,64 @@ function injectIntoPDF(tab) {
   }
 }
 
-function inject(tab) {
+function injectIntoHTML(tab) {
   chrome.tabs.executeScript(tab.id, {
-    code: [
-      'var script = document.createElement("script");',
-      'script.src = "' + CRX_BASE_URL + 'public/config.js' + '";',
-      'document.body.appendChild(script);'
-    ].join('\n')
-  }, function () {
+    file: 'public/embed.js'
+  }, function (result) {
+    if (result !== undefined) {
+      chrome.tabs.executeScript(tab.id, {
+        code: 'window.annotator = true;'
+      })
+    } else {
+      injectionFailed(tab)
+    }
+  })
+}
+
+function handleFilePermissionProblem(tab) {
+  // Access denied. We are lacking the proper permissions.
+  injectionFailed(tab)
+  chrome.tabs.update(tab.id, {
+    url: CRX_BASE_URL + "help/permissions.html"
+  })
+}
+
+function handleFileProtocolProblem(tab) {
+  // This a local HTML. Even having the correct permissions,
+  // this won't work.
+  injectionFailed(tab)
+  alert("Sorry, but as of now, this service can't be used on local HTMLs documents loaded via the file:/// protocol. (Local PDF documents are supported, though.)");
+}
+
+function injectConfig(tab, fn) {
+  var src  = CRX_BASE_URL + 'public/config.js'
+  var code = 'var script = document.createElement("script");' +
+             'script.src = "{}";' +
+             'document.body.appendChild(script);'
+
+  chrome.tabs.executeScript(tab.id, {code: code.replace('{}', src)}, fn);
+}
+
+function inject(tab) {
+  injectConfig(tab, function () {
     if (isFileURL(tab.url)) {
       chrome.extension.isAllowedFileSchemeAccess(function (allowed) {
         if (allowed) {
           if (isPDFURL(tab.url)) {
-            // This a local PDF, and we have permission - good to go.
             injectIntoPDF(tab)
           } else {
-            // This a local HTML. Even with permission, this won't work.
-            alert("Sorry, but as of now, this service can't be used on local HTMLs documents loaded via the file:/// protocol. (Local PDF documents are supported, though.)");
-            injectionFailed(tab)
+            handleFileProtocolProblem(tab)
           }
         } else {
-          // Access denied. Show an explanation about permissions.
-          injectionFailed(tab)
-          chrome.tabs.update(tab.id, {
-            url: CRX_BASE_URL + "help/permissions.html"
-          })
+          handleFilePermissionProblem(tab)
         }
       });
-      return;
-    }
-
-    if (isPDFURL(tab.url)) {
-      injectIntoPDF(tab)
     } else {
-      chrome.tabs.executeScript(tab.id, {
-        file: 'public/embed.js'
-      }, function (result) {
-        if (result !== undefined) {
-          chrome.tabs.executeScript(tab.id, {
-            code: 'window.annotator = true;'
-          })
-        } else {
-          // Injection failed, so stop trying
-          state(tab.id, 'sleeping')
-        }
-      })
+      if (isPDFURL(tab.url)) {
+        injectIntoPDF(tab)
+      } else {
+        injectIntoHTML(tab)
+      }
     }
   })
 }
