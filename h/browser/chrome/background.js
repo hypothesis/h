@@ -27,11 +27,11 @@ function isPDFURL(url) {
 }
 
 function isPDFViewerURL(url) {
-  return url.indexOf(getPDFViewerURL('')) == 0
+  return url.indexOf(getPDFViewerURL('')) === 0
 }
 
 function isFileURL(url) {
-  return url.indexOf("file://") == 0
+  return url.indexOf("file://") === 0
 }
 
 function injectionFailed(tab) {
@@ -183,7 +183,7 @@ function onUpdateAvailable() {
 function onBrowserAction(tab) {
   var newState
 
-  if (state(tab.id) == 'active') {
+  if (state(tab.id) === 'active') {
     newState = state(tab.id, 'sleeping')
     remove(tab)
   } else {
@@ -210,7 +210,7 @@ function onTabUpdated(tabId, info, tab) {
 
   setBrowserAction(tabId, currentState)
 
-  if (currentState == 'active' && info.status == 'complete') {
+  if (currentState === 'active' && info.status === 'complete') {
     inject(tab)
   }
 }
