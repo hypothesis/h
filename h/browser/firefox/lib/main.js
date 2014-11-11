@@ -24,20 +24,20 @@ var icons = {
   }
 };
 
-function tabToggle(tab) {
-  if (btn.state(tab).checked) {
-    tab.attach({
-      contentScriptFile: data.url('embed.js')
-    });
-  } else {
-    tab.attach({
-      contentScript: [
-        'var s = document.createElement("script");',
-        's.setAttribute("src", "' + data.url('destroy.js') + '");',
-        'document.body.appendChild(s);'
-      ]
-    });
-  }
+function enable(tab) {
+  tab.attach({
+    contentScriptFile: data.url('embed.js')
+  });
+}
+
+function disable(tab) {
+  tab.attach({
+    contentScript: [
+      'var s = document.createElement("script");',
+      's.setAttribute("src", "' + data.url('destroy.js') + '");',
+      'document.body.appendChild(s);'
+    ]
+  });
 }
 
 btn_config = {
@@ -54,14 +54,15 @@ btn_config = {
         label: 'Annotating',
         icon: icons['active']
       });
+      enable(tabs.activeTab);
     } else {
       this.state(tabs.activeTab, {
         checked: false,
         label: 'Annotate',
         icon: icons['sleeping']
       });
+      disable(tabs.activeTab);
     }
-    tabToggle(tabs.activeTab)
   }
 };
 
@@ -71,7 +72,14 @@ if (undefined === ToggleButton) {
   btn = ToggleButton(btn_config);
 }
 
-tabs.on('pageshow', tabToggle);
+tabs.on('pageshow', function(tab) {
+  if (btn.state(tab).checked) {
+    enable(tab);
+  } else {
+    disable(tab);
+  }
+});
+
 tabs.on('open', function(tab) {
   // h is off by default on new tabs
   btn.state(tab).checked = false;
@@ -80,7 +88,7 @@ tabs.on('open', function(tab) {
 if (self.loadReason === 'install') {
   tabs.open({
     url: 'https://hypothes.is/welcome',
-    onPageShow: function(tab) {
+    onPageShow: function() {
       btn.click();
     }
   });
