@@ -23,6 +23,7 @@
 
     function DomTextMapper(id) {
       this.id = id;
+      this.destroy = __bind(this.destroy, this);
       this._onChange = __bind(this._onChange, this);
       this.setRealRoot();
       DomTextMapper.instances += 1;
@@ -530,8 +531,7 @@
           this.log("Collected info about path " + path);
         }
         if (invisible) {
-          this.log("Something seems to be wrong. I see visible content @ " + path + ", while some of the ancestor nodes reported empty contents. Probably a new selection API bug....");
-          this.log("Anyway, text is '" + cont + "'.");
+          throw new Error("Failed to scan document: got inconsistent data from selection API.");
         }
       } else {
         if (verbose) {
@@ -809,6 +809,17 @@
         ok;
       }
       return null;
+    };
+
+    DomTextMapper.prototype.destroy = function() {
+      var sel;
+      if (this.savedSelection) {
+        this.restoreSelection();
+      } else {
+        sel = this.rootWin.getSelection();
+        sel.removeAllRanges();
+      }
+      return delete this.path;
     };
 
     DomTextMapper.prototype.getPageIndex = function() {
