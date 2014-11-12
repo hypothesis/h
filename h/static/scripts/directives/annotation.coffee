@@ -250,10 +250,9 @@ AnnotationController = [
 # an embedded widget.
 ###
 annotation = [
-  'annotator', 'documentHelpers', 'render', 'timeHelpers', '$filter', '$timeout',
-  (annotator,   documentHelpers,   render,   timeHelpers,   $filter,   $timeout) ->
+  'annotator', 'documentHelpers', 'render', 'timeHelpers', '$timeout',
+  (annotator,   documentHelpers,   render,   timeHelpers,   $timeout) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
-      dateFilter = $filter('date')
       # Helper function to remove the temporary thread created for a new reply.
       prune = (message) ->
         return if message.id?  # threading plugin will take care of it
@@ -299,8 +298,7 @@ annotation = [
 
       updateTimeStamp = ->
         stamp = ctrl.annotation.updated
-        fuzzyString= timeHelpers.toFuzzyString stamp
-        scope.timestamp = dateFilter fuzzyString
+        scope.timestamp = timeHelpers.toFuzzyString stamp
 
         fuzzyUpdate = timeHelpers.nextFuzzyUpdate(stamp)
         # Handle null value, give default 5 sec
