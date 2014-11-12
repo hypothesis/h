@@ -6,7 +6,6 @@ import logging
 import operator
 import re
 import unicodedata
-import urlparse
 
 from dateutil.tz import tzutc
 from jsonpointer import resolve_pointer
@@ -59,7 +58,7 @@ filter_schema = {
                              "lene", "leng", "lenge", "lenl", "lenle"]
                 },
                 "value": "object",
-                "case_sensitive": {"type": "boolean", "default": True},
+                "case_sensitive": {"type": "boolean", "default": False},
                 "options": {"type": "object", "default": {}}
             }
         },
@@ -185,7 +184,7 @@ class FilterToElasticFilter(object):
             if es:
                 query_type = es.get('query_type', 'simple')
             else:
-                query_type = 'simple'
+                query_type = 'match'
 
             if clause.get('case_sensitive', True):
                 value = clause['value']
@@ -206,9 +205,12 @@ class FilterToElasticFilter(object):
                 }
             elif query_type == 'match':
                 cutoff_freq = None
-                if 'cutoff_frequency' in es:
-                    cutoff_freq = es['cutoff_frequency']
-                and_or = es['and_or'] if 'and_or' in es else 'and'
+                and_or = 'and'
+                if es:
+                    if 'cutoff_frequency' in es:
+                        cutoff_freq = es['cutoff_frequency']
+                    if 'and_or' in es:
+                        and_or = es['and_or']
                 message = {
                     "query": value,
                     "operator": and_or

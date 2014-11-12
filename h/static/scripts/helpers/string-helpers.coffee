@@ -10,5 +10,5 @@ createStringHelpers = ->
     # remove combining characters and return the str
     str.replace regexSymbolsWithCombiningMarks, (_, symbol, combining) -> symbol
 
-angular.module('h.helpers.stringHelpers', [])
+angular.module('h.helpers')
 .service('stringHelpers', createStringHelpers)

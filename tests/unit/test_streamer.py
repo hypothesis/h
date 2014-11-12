@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.streamer."""
 
-from mock import patch
+from mock import patch, MagicMock
 from pyramid.testing import DummyRequest
 from h.streamer import FilterToElasticFilter
 
@@ -174,7 +174,11 @@ def test_operator_call():
             'field': 'text',
             'operator': 'equals',
             'value': 'foo bar',
-            'options': {}
+            'options': {
+                'es': {
+                    'query_type': 'simple'
+                }
+            }
         }],
         'past_data': {
             'load_past': 'time',
@@ -182,7 +186,7 @@ def test_operator_call():
         }
     }
 
-    with patch.object(FilterToElasticFilter, 'equals') as eq:
-        eq.return_value = ""
-        FilterToElasticFilter(filter_json, request)
-    assert eq.called
+    FilterToElasticFilter.equals = MagicMock(return_value="")
+
+    FilterToElasticFilter(filter_json, request)
+    assert FilterToElasticFilter.equals.called

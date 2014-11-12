@@ -97,7 +97,10 @@ class Annotation(annotation.Annotation):
                             'path': 'just_name',
                             'fields': {
                                 'exact': {'type': 'string'},
-                                'quote': {'type': 'string', 'analyzer': 'uni_normalizer'},
+                                'quote': {
+                                    'type': 'string',
+                                    'analyzer': 'uni_normalizer'
+                                }
                             },
                         },
                         'prefix': {'type': 'string'},

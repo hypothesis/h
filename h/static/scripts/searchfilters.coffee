@@ -2,6 +2,7 @@
 # It expects a search query string where the search term are separated by space character
 # and collects them into the given term arrays
 class SearchFilter
+
   # This function will slice the search-text input
   # Slice character: space,
   # but an expression between quotes (' or ") is considered one
@@ -42,6 +43,14 @@ class SearchFilter
 
     tokens
 
+  # Converts a string into lowercase and asciifolds
+  this.$inject = ['stringHelpers']
+  constructor: (stringHelpers) ->
+    @_normalize = (str) ->
+      if typeof str is 'string'
+        return stringHelpers.unidecode(str.toLowerCase())
+      else return str
+
   # This function will generate the facets from the search-text input
   # It'll first tokenize it and then sorts them into facet lists
   # The output will be a dict with the following structure:
@@ -73,7 +82,7 @@ class SearchFilter
         filter = term.slice 0, term.indexOf ":"
         unless filter? then filter = ""
         switch filter
-          when 'quote' then quote.push term[6..].toLowerCase()
+          when 'quote' then quote.push @_normalize term[6..]
           when 'result' then result.push term[7..]
           when 'since'
             # We'll turn this into seconds
@@ -109,44 +118,36 @@ class SearchFilter
               # Time given in year
               t = /^(\d+)year$/.exec(time)[1]
               since.push t * 60 * 60 * 24 * 365
-          when 'tag' then tag.push term[4..].toLowerCase()
-          when 'text' then text.push term[5..].toLowerCase()
-          when 'uri' then uri.push term[4..].toLowerCase()
-          when 'user' then user.push term[5..].toLowerCase()
-          else any.push term.toLowerCase()
+          when 'tag' then tag.push @_normalize term[4..]
+          when 'text' then text.push @_normalize term[5..]
+          when 'uri' then uri.push @_normalize term[4..]
+          when 'user' then user.push @_normalize term[5..]
+          else any.push @_normalize term
 
     any:
       terms: any
       operator: 'and'
-      lowercase: true
     quote:
       terms: quote
       operator: 'and'
-      lowercase: true
     result:
       terms: result
       operator: 'min'
-      lowercase: false
     since:
       terms: since
       operator: 'and'
-      lowercase: false
     tag:
       terms: tag
       operator: 'and'
-      lowercase: true
     text:
       terms: text
       operator: 'and'
-      lowercase: true
     uri:
       terms: uri
       operator: 'or'
-      lowercase: true
     user:
       terms: user
       operator: 'or'
-      lowercase: true
 
 # This class will process the results of search and generate the correct filter
 # It expects the following dict format as rules
@@ -171,34 +172,20 @@ class QueryParser
   rules:
     user:
       path: '/user'
-      case_sensitive: false
       and_or: 'or'
     text:
       path: '/text'
-      case_sensitive: false
       and_or: 'and'
-      options:
-        es:
-         query_type: 'match'
     tag:
       path: '/tags'
-      case_sensitive: false
       and_or: 'and'
-      options:
-        es:
-         query_type: 'match'
     quote:
       path: '/quote'
-      case_sensitive: false
       and_or: 'and'
-      options:
-        es:
-         query_type: 'match'
     uri:
       formatter: (uri) ->
         uri.toLowerCase()
       path: '/uri'
-      case_sensitive: false
       and_or: 'or'
       options:
         es:
@@ -219,11 +206,9 @@ class QueryParser
             when '1 year' then 365*24*60*60
         new Date(new Date().valueOf() - seconds*1000)
       path: '/created'
-      case_sensitive: true
       and_or: 'and'
       operator: 'ge'
     any:
-      case_sensitive: false
       and_or: 'and'
       path:   ['/quote', '/tags', '/text', '/uri', '/user']
       options:

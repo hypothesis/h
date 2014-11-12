@@ -4,7 +4,7 @@ sinon.assert.expose(assert, prefix: '')
 describe 'h.helpers.stringHelpers', ->
   stringHelpers = null
 
-  beforeEach module('h.helpers.stringHelpers')
+  beforeEach module('h.helpers')
 
   beforeEach inject (_stringHelpers_) ->
     stringHelpers = _stringHelpers_
