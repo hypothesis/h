@@ -249,58 +249,73 @@ AnnotationController = [
 # value is used to signal whether the annotation is being displayed inside
 # an embedded widget.
 ###
-annotation = ['annotator', 'documentHelpers', (annotator, documentHelpers) ->
-  linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
-    # Helper function to remove the temporary thread created for a new reply.
-    prune = (message) ->
-      return if message.id?  # threading plugin will take care of it
-      return unless thread.container.message is message
-      thread.container.parent?.removeChild(thread.container)
+annotation = [
+  'annotator', 'documentHelpers', 'render', 'timeHelpers', '$timeout',
+  (annotator,   documentHelpers,   render,   timeHelpers,   $timeout) ->
+    linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
+      # Helper function to remove the temporary thread created for a new reply.
+      prune = (message) ->
+        return if message.id?  # threading plugin will take care of it
+        return unless thread.container.message is message
+        thread.container.parent?.removeChild(thread.container)
 
-    if thread?
-      annotator.subscribe 'annotationDeleted', prune
-      scope.$on '$destroy', ->
-        annotator.unsubscribe 'annotationDeleted', prune
+      if thread?
+        annotator.subscribe 'annotationDeleted', prune
+        scope.$on '$destroy', ->
+          annotator.unsubscribe 'annotationDeleted', prune
 
-    # Observe the embedded attribute
-    attrs.$observe 'annotationEmbedded', (value) ->
-      ctrl.embedded = value? and value != 'false'
+      # Observe the embedded attribute
+      attrs.$observe 'annotationEmbedded', (value) ->
+        ctrl.embedded = value? and value != 'false'
 
-    # Save on Meta + Enter or Ctrl + Enter.
-    elem.on 'keydown', (event) ->
-      if event.keyCode == 13 and (event.metaKey or event.ctrlKey)
-        event.preventDefault()
-        scope.$evalAsync ->
-          ctrl.save()
+      # Save on Meta + Enter or Ctrl + Enter.
+      elem.on 'keydown', (event) ->
+        if event.keyCode == 13 and (event.metaKey or event.ctrlKey)
+          event.preventDefault()
+          scope.$evalAsync ->
+            ctrl.save()
 
-    # Keep track of edits going on in the thread.
-    if counter?
-      # Expand the thread if descendants are editing.
-      scope.$watch (-> counter.count 'edit'), (count) ->
-        if count and not ctrl.editing and thread.collapsed
-          thread.toggleCollapsed()
+      # Keep track of edits going on in the thread.
+      if counter?
+        # Expand the thread if descendants are editing.
+        scope.$watch (-> counter.count 'edit'), (count) ->
+          if count and not ctrl.editing and thread.collapsed
+            thread.toggleCollapsed()
 
-      # Propagate changes through the counters.
-      scope.$watch (-> ctrl.editing), (editing, old) ->
-        if editing
-          counter.count 'edit', 1
-          # Disable the filter and freeze it to always match while editing.
-          threadFilter?.freeze()
-        else if old
-          counter.count 'edit', -1
-          threadFilter?.freeze(false)
+        # Propagate changes through the counters.
+        scope.$watch (-> ctrl.editing), (editing, old) ->
+          if editing
+            counter.count 'edit', 1
+            # Disable the filter and freeze it to always match while editing.
+            threadFilter?.freeze()
+          else if old
+            counter.count 'edit', -1
+            threadFilter?.freeze(false)
 
-      # Clean up when the thread is destroyed
-      scope.$on '$destroy', ->
-        if ctrl.editing then counter?.count 'edit', -1
+        # Clean up when the thread is destroyed
+        scope.$on '$destroy', ->
+          if ctrl.editing then counter?.count 'edit', -1
 
-  controller: 'AnnotationController'
-  controllerAs: 'vm'
-  link: linkFn
-  require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount']
-  scope:
-    annotationGet: '&annotation'
-  templateUrl: 'annotation.html'
+      updateTimeStamp = ->
+        stamp = ctrl.annotation.updated
+        scope.timestamp = timeHelpers.toFuzzyString stamp
+
+        fuzzyUpdate = timeHelpers.nextFuzzyUpdate(stamp)
+        # Handle null value, give default 5 sec
+        fuzzyUpdate ?=5
+        nextUpdate = 1000*fuzzyUpdate+500
+
+        $timeout -> render updateTimeStamp, nextUpdate, false
+
+      render updateTimeStamp
+
+    controller: 'AnnotationController'
+    controllerAs: 'vm'
+    link: linkFn
+    require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount']
+    scope:
+      annotationGet: '&annotation'
+    templateUrl: 'annotation.html'
 ]
 
 

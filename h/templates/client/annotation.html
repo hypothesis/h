@@ -37,7 +37,7 @@
      title="{{vm.annotation.update | moment:'LLLL'}}"
      ng-if="!vm.editing && vm.annotation.updated"
      ng-href="{{baseURI}}a/{{vm.annotation.id}}"
-     >{{vm.annotation.updated | fuzzyTime | date : mediumDate}}</a>
+     >{{timestamp}}</a>
 </header>
 
 <!-- Excerpts -->

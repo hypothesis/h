@@ -7,40 +7,6 @@ class Converter extends Markdown.Converter
       text.replace /<a href=/g, "<a target=\"_blank\" href="
 
 
-fuzzyTime = (date) ->
-  return '' if not date
-  delta = Math.round((+new Date - new Date(date)) / 1000)
-
-  minute = 60
-  hour = minute * 60
-  day = hour * 24
-  week = day * 7
-  month = day * 30
-  year = day * 365
-
-  if (delta < 30)
-    fuzzy = 'moments ago'
-  else if (delta < minute)
-    fuzzy = delta + ' seconds ago'
-   else if (delta < 2 * minute)
-    fuzzy = 'a minute ago'
-   else if (delta < hour)
-    fuzzy = Math.floor(delta / minute) + ' minutes ago'
-   else if (Math.floor(delta / hour) == 1)
-    fuzzy = '1 hour ago'
-   else if (delta < day)
-    fuzzy = Math.floor(delta / hour) + ' hours ago'
-   else if (delta < day * 2)
-    fuzzy = 'yesterday'
-   else if (delta < month)
-    fuzzy = Math.round(delta / day) + ' days ago'
-   else if (delta < year)
-    fuzzy = Math.round(delta / month) + ' months ago'
-   else
-    fuzzy = Math.round(delta / year) + ' years ago'
-  fuzzy
-
-
 momentFilter = ->
   (value, format) ->
     # Determine the timezone name and browser language.
@@ -66,6 +32,5 @@ persona = (user, part='username') ->
 
 angular.module('h')
 .filter('converter', -> (new Converter()).makeHtml)
-.filter('fuzzyTime', -> fuzzyTime)
 .filter('moment', momentFilter)
 .filter('persona', -> persona)
