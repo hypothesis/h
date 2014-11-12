@@ -8,7 +8,7 @@ from pyramid_mailer.testing import DummyMailer
 from pyramid.renderers import render
 
 from h.layouts import BaseLayout
-from h.notifier import ReplyTemplate
+from h.notification import reply_template
 
 import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -44,12 +44,15 @@ def email_preview(context, request):
         'emails': (
             {
                 'title': 'Notification Email',
-                'subject': render(ReplyTemplate.subject,
-                                  notification_email_data, request),
-                'text': render(ReplyTemplate.text_template,
-                               notification_email_data, request),
-                'html': render(ReplyTemplate.html_template,
-                               notification_email_data, request),
+                'subject': render(reply_template.SUBJECT_TEMPLATE,
+                                  notification_email_data,
+                                  request),
+                'text': render(reply_template.TXT_TEMPLATE,
+                               notification_email_data,
+                               request),
+                'html': render(reply_template.HTML_TEMPLATE,
+                               notification_email_data,
+                               request),
             },
         )
     }
