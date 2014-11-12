@@ -305,7 +305,7 @@ annotation = [
         fuzzyUpdate ?=5
         nextUpdate = 1000*fuzzyUpdate+500
 
-        $timeout -> render updateTimeStamp, nextUpdate, false
+        $timeout (-> render updateTimeStamp), nextUpdate, false
 
       render updateTimeStamp
 
