@@ -46,6 +46,16 @@ function injectIntoPDF(tab) {
   }
 }
 
+function injectIntoLocalPDF(tab) {
+  chrome.extension.isAllowedFileSchemeAccess(function (allowed) {
+    if (allowed) {
+      injectIntoPDF(tab)
+    } else {
+      showNoFileAccessHelpPage(tab)
+    }
+  });
+}
+
 function injectIntoHTML(tab) {
   chrome.tabs.executeScript(tab.id, {
     file: 'public/embed.js'
@@ -60,20 +70,17 @@ function injectIntoHTML(tab) {
   })
 }
 
-function handleFilePermissionProblem(tab) {
-  // Access denied. We are lacking the proper permissions.
+// Render the help page. The helpSection should correspond to the id of a
+// section within the help page.
+function showHelpPage(helpSection, tab) {
   injectionFailed(tab)
   chrome.tabs.update(tab.id, {
-    url: CRX_BASE_URL + "help/permissions.html"
+    url: CRX_BASE_URL + "help/permissions.html#" + helpSection
   })
 }
 
-function handleFileProtocolProblem(tab) {
-  // This a local HTML. Even having the correct permissions,
-  // this won't work.
-  injectionFailed(tab)
-  alert("Sorry, but as of now, this service can't be used on local HTMLs documents loaded via the file:/// protocol. (Local PDF documents are supported, though.)");
-}
+var showLocalFileHelpPage = showHelpPage.bind(null, 'local-file')
+var showNoFileAccessHelpPage = showHelpPage.bind(null, 'no-file-access')
 
 function injectConfig(tab, fn) {
   var src  = CRX_BASE_URL + 'public/config.js'
@@ -86,24 +93,18 @@ function injectConfig(tab, fn) {
 
 function inject(tab) {
   injectConfig(tab, function () {
-    if (isFileURL(tab.url)) {
-      chrome.extension.isAllowedFileSchemeAccess(function (allowed) {
-        if (allowed) {
-          if (isPDFURL(tab.url)) {
-            injectIntoPDF(tab)
-          } else {
-            handleFileProtocolProblem(tab)
-          }
-        } else {
-          handleFilePermissionProblem(tab)
-        }
-      });
-    } else {
+    function checkPDF(success, fallback) {
       if (isPDFURL(tab.url)) {
-        injectIntoPDF(tab)
+        success(tab)
       } else {
-        injectIntoHTML(tab)
+        fallback(tab)
       }
+    }
+
+    if (isFileURL(tab.url)) {
+      checkPDF(injectIntoLocalPDF, showLocalFileHelpPage)
+    } else {
+      checkPDF(injectIntoPDF, injectIntoHTML)
     }
   })
 }
