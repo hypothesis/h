@@ -258,7 +258,7 @@ class Token(BearerToken):
         message = dict(consumerKey=client.client_id, ttl=client.ttl)
         message.update(request.extra_credentials or {})
         token = {
-            'access_token': auth.encode_token(message, client.secret),
+            'access_token': auth.encode_token(message, client.client_secret),
             'expires_in': client.ttl,
             'token_type': 'http://annotateit.org/api/token',
         }
@@ -276,7 +276,7 @@ class Token(BearerToken):
             return False
 
         try:
-            token = auth.decode_token(token, client.secret, client.ttl)
+            token = auth.decode_token(token, client.client_secret, client.ttl)
         except auth.TokenInvalid:
             return False
 
