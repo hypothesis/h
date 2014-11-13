@@ -83,7 +83,7 @@ setup(
     author_email='contact@hypothes.is',
     url='https://docs.hypothes.is',
     license='Simplified (2-Clause) BSD License',
-    packages=find_packages(),
+    packages=find_packages(exclude=['*.test']),
     include_package_data=True,
     zip_safe=False,
     install_requires=install_requires,
