@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.assets."""
 from mock import Mock
+from pyramid.paster import get_appsettings
 from pyramid.urldispatch import Route
 from pyramid.testing import DummyRequest, testConfig
+import pytest
 
 from h import assets
 
@@ -13,6 +15,19 @@ class DummyEvent(object):
 
     def __init__(self, request):
         self.request = request
+
+
+@pytest.fixture
+def settings():
+    settings = get_appsettings('development.ini')
+    settings['bind'] = 'localhost:4000'
+    settings['es.index'] = 'annotator-test'
+    settings['sqlalchemy.url'] = 'sqlite:///test.db'
+    settings.update({
+        'basemodel.should_create_all': 'True',
+        'basemodel.should_drop_all': 'True',
+    })
+    return settings
 
 
 def test_subscriber_predicate(settings):
