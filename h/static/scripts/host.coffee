@@ -37,6 +37,11 @@ class Annotator.Host extends Annotator.Guest
     if options.firstRun
       this.on 'panelReady', => this.actuallyShowFrame(transition: false)
 
+    # Host frame dictates the toolbar options.
+    this.on 'panelReady', =>
+      this.setTool('comment')
+      this.setVisibleHighlights(!!options.showHighlights)
+
     if @plugins.Heatmap?
       this._setupDragEvents()
       @plugins.Heatmap.element.on 'click', (event) =>

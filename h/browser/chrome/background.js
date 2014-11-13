@@ -32,21 +32,27 @@ function isPDFViewerURL(url) {
 
 
 function inject(tab) {
-  if (isPDFURL(tab.url)) {
-      if (!isPDFViewerURL(tab.url)) {
-        chrome.tabs.update(tab.id, {
-          url: getPDFViewerURL(tab.url)
-        })
-      }
-  } else {
-    chrome.tabs.executeScript(tab.id, {
-      file: 'public/embed.js'
-    }, function () {
-      chrome.tabs.executeScript(tab.id, {
-        code: 'window.annotator = true;'
+  chrome.tabs.executeScript(tab.id, {
+    code: [
+      'var script = document.createElement("script");',
+      'script.src = "' + CRX_BASE_URL + 'public/config.js' + '";',
+      'document.body.appendChild(script);'
+    ].join('\n')
+  }, function () {
+    if (isPDFURL(tab.url) && !isPDFViewerURL(tab.url)) {
+      chrome.tabs.update(tab.id, {
+        url: getPDFViewerURL(tab.url)
       })
-    })
-  }
+    } else {
+      chrome.tabs.executeScript(tab.id, {
+        file: 'public/embed.js'
+      }, function () {
+        chrome.tabs.executeScript(tab.id, {
+          code: 'window.annotator = true;'
+        })
+      })
+    }
+  });
 }
 
 

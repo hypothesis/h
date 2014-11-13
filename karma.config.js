@@ -50,6 +50,7 @@ module.exports = function(config) {
       'h/static/scripts/plugin/heatmap.js',
       'h/static/scripts/vendor/sinon.js',
       'h/static/scripts/vendor/chai.js',
+      'h/static/scripts/hypothesis.js',
       'h/templates/*.html',
       'tests/js/**/*-test.coffee'
     ],
