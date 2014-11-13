@@ -14,7 +14,7 @@ services:
   - elasticsearch
 script:
   - make test
-  - flake8 h --exclude=_version.py
+  - flake8 h --exclude='_version.py,*_test.py'
   # Build Chrome extension
   - hypothesis extension development.ini http://localhost
 notifications:
