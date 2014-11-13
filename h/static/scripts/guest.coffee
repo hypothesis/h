@@ -209,6 +209,7 @@ class Annotator.Guest extends Annotator
     this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
+  _setupDynamicStyle: -> this
   _setupViewer: -> this
   _setupEditor: -> this
 
