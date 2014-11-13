@@ -37,6 +37,7 @@ class AppController
   ) ->
     {plugins, host, providers} = annotator
 
+    checkingToken = false
     isFirstRun = $location.search().hasOwnProperty('firstrun')
 
     applyUpdates = (action, data) ->
@@ -158,6 +159,8 @@ class AppController
       _dfdSock.promise
 
     onlogin = (assertion) ->
+      checkingToken = true
+
       # Configure the Auth plugin with the issued assertion as refresh token.
       annotator.addPlugin 'Auth',
         tokenUrl: documentHelpers.absoluteURI(
@@ -165,6 +168,7 @@ class AppController
 
       # Set the user from the token.
       plugins.Auth.withToken (token) ->
+        checkingToken = false
         annotator.addPlugin 'Permissions',
           user: token.userId
           userAuthorize: authorizeAction
@@ -187,14 +191,18 @@ class AppController
       delete plugins.Permissions
 
       $scope.persona = null
+      checkingToken = false
       reset()
 
     onready = ->
-      if plugins.Auth is undefined
+      if not checkingToken and typeof $scope.persona == 'undefined'
+        # If we're not checking the token and persona is undefined, onlogin
+        # hasn't run, which means we aren't authenticated.
         $scope.persona = null
         reset()
 
-      $scope.login() if isFirstRun
+        if isFirstRun
+          $scope.login()
 
     oncancel = ->
       $scope.dialog.visible = false
