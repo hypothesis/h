@@ -58,7 +58,6 @@ filter_schema = {
                              "lene", "leng", "lenge", "lenl", "lenle"]
                 },
                 "value": "object",
-                "case_sensitive": {"type": "boolean", "default": False},
                 "options": {"type": "object", "default": {}}
             }
         },
@@ -186,13 +185,10 @@ class FilterToElasticFilter(object):
             else:
                 query_type = 'match'
 
-            if clause.get('case_sensitive', True):
-                value = clause['value']
+            if type(clause['value']) is list:
+                value = [x.lower() for x in clause['value']]
             else:
-                if type(clause['value']) is list:
-                    value = [x.lower() for x in clause['value']]
-                else:
-                    value = clause['value'].lower()
+                value = clause['value'].lower()
 
             if query_type == 'query_string':
                 # Generate query_string query
