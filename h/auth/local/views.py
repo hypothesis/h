@@ -27,8 +27,8 @@ def ajax_form(request, result):
         request.response.status_code = result.code
         result = {'status': 'failure', 'reason': str(result)}
     else:
-        errors = result.pop('errors', [])
-        if errors:
+        errors = result.pop('errors', None)
+        if errors is not None:
             status_code = result.pop('code', 400)
             request.response.status_code = status_code
             result['status'] = 'failure'
@@ -154,50 +154,26 @@ class AsyncFormViewMapper(object):
 @view_config(attr='login', route_name='login')
 @view_config(attr='logout', route_name='logout')
 class AuthController(horus.views.AuthController):
-    def check_credentials(self, username, password):
-        allow_email_auth = self.settings.get('horus.allow_email_auth', False)
-
-        user = self.User.get_by_username(self.request, username)
-
-        if allow_email_auth and not user:
-            user = self.User.get_by_email(self.request, username)
-
-        if not user:
-            raise httpexceptions.HTTPBadRequest({
-                'errors': [{
-                    'username': _('User does not exist.'),
-                }],
-            })
-
-        if not self.User.validate_user(user, password):
-            raise httpexceptions.HTTPBadRequest({
-                'errors': [{
-                    'password': _('Incorrect password. Please try again.'),
-                }],
-            })
-
-        if not self.allow_inactive_login and self.require_activation \
-                and not user.is_activated:
-            reason = _('Your account is not active, please check your e-mail.')
-            raise httpexceptions.HTTPBadRequest({'reason': reason})
-
-        return user
-
     def login(self):
         request = self.request
+
         try:
-            result = super(AuthController, self).login()
-        except httpexceptions.HTTPBadRequest as e:
-            return e.detail
-        else:
-            if request.user is not None:
-                stats(request).get_counter('auth.local.login').increment()
-                request.user.last_login_date = datetime.datetime.utcnow()
-                self.db.add(request.user)
-            remember(request, request.user)
-            event = LoginEvent(self.request, self.request.user)
-            self.request.registry.notify(event)
-            return result
+            user = self.form.validate(request.POST.items())['user']
+        except deform.ValidationFailure as e:
+            return {
+                'status': 'failure',
+                'errors': e.error.children,
+                'reason': e.error.msg,
+            }
+
+        stats(request).get_counter('auth.local.login').increment()
+        user.last_login_date = datetime.datetime.utcnow()
+        self.db.add(user)
+        remember(request, user)
+        event = LoginEvent(self.request, user)
+        self.request.registry.notify(event)
+
+        return {'status': 'okay'}
 
     def logout(self):
         stats(self.request).get_counter('auth.local.logout').increment()

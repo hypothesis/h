@@ -7,6 +7,7 @@ import deform
 from hem.db import get_session
 from horus import interfaces
 from horus.schemas import email_exists, unique_email
+from pyramid.settings import asbool
 from pyramid.session import check_csrf_token
 
 from h.models import _
@@ -76,6 +77,48 @@ class LoginSchema(CSRFSchema):
         colander.String(),
         widget=deform.widget.PasswordWidget()
     )
+
+    def validator(self, node, value):
+        super(LoginSchema, self).validator(node, value)
+        request = node.bindings['request']
+        registry = request.registry
+        settings = registry.settings
+
+        allow_email_auth = asbool(
+            settings.get('horus.allow_email_auth', False)
+        )
+        allow_inactive_login = asbool(
+            settings.get('horus.allow_inactive_login', False)
+        )
+        require_activation = asbool(
+            settings.get('horus.require_activation', True)
+        )
+
+        user_ctor = registry.getUtility(interfaces.IUserClass)
+
+        username = value.get('username')
+        password = value.get('password')
+
+        user = user_ctor.get_by_username(request, username)
+        if user is None and allow_email_auth:
+            user = user_ctor.get_by_email(request, username)
+
+        if user is None:
+            err = colander.Invalid(node)
+            err['username'] = _('User does not exist.')
+            raise err
+
+        if not user_ctor.validate_user(user, password):
+            err = colander.Invalid(node)
+            err['password'] = _('Incorrect password. Please try again.')
+            raise err
+
+        if not allow_inactive_login and require_activation \
+                and not user.is_activated:
+            reason = _('Your account is not active. Please check your e-mail.')
+            raise colander.Invalid(node, reason)
+
+        value['user'] = user
 
 
 class ForgotPasswordSchema(CSRFSchema):
