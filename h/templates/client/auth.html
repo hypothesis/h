@@ -13,7 +13,7 @@
         novalidate>
 
     <p class="form-description form-error"
-       ng-show="login.$error.response">
+       ng-show="login.responseErrorMessage">
       {{login.responseErrorMessage}}
     </p>
 
@@ -74,7 +74,7 @@
         novalidate>
 
     <p class="form-description form-error"
-       ng-show="register.$error.response">
+       ng-show="register.responseErrorMessage">
       {{register.responseErrorMessage}}
     </p>
 
@@ -172,7 +172,7 @@
         novalidate>
 
     <p class="form-description form-error"
-       ng-show="forgot_password.$error.response">
+       ng-show="forgot_password.responseErrorMessage">
       {{forgot_passwordresponseErrorMessage}}
     </p>
     <div class="form-field">
@@ -212,7 +212,7 @@
         novalidate>
 
     <p class="form-description form-error"
-       ng-show="reset_password.$error.response">
+       ng-show="reset_password.responseErrorMessage">
       {{reset_password.responseErrorMessage}}
     </p>
 
