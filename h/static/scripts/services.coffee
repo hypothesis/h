@@ -507,6 +507,14 @@ class ViewFilter
     limit = Math.min((filters.result?.terms or [])...)
     count = 0
 
+    # Normalizing the filters, need to do only once.
+    for _, filter of filters
+      if filter.terms
+        filter.terms = filter.terms.map (e) =>
+          e = e.toLowerCase()
+          e = @_normalize e
+          e
+
     for annotation in annotations
       break if count >= limit
 
