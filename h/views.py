@@ -7,7 +7,7 @@ from pyramid.events import ContextFound
 from pyramid.view import view_config, notfound_view_config
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 @view_config(

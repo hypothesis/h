@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=no-init, too-few-public-methods
 from pkg_resources import resource_stream
 
 import colander
@@ -66,7 +65,7 @@ class CSRFSchema(colander.Schema):
                                      default=deferred_csrf_token,
                                      missing=None)
 
-    def validator(self, form, value):  # pylint: disable=R0201
+    def validator(self, form, value):
         request = form.bindings['request']
         check_csrf_token(request)
 

@@ -18,7 +18,7 @@ from h.notification.types import ROOT_PATH
 from h.events import LoginEvent, AnnotationEvent
 from h.models import Annotation
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 TXT_TEMPLATE = ROOT_PATH + 'reply_notification.txt'
 HTML_TEMPLATE = ROOT_PATH + 'reply_notification.html'

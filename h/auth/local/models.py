@@ -40,7 +40,6 @@ class GUID(TypeDecorator):
     CHAR(32), storing as stringified hex values.
 
     """
-    # pylint: disable=too-many-public-methods
     impl = CHAR
 
     def load_dialect_impl(self, dialect):
@@ -129,7 +128,6 @@ class Group(GroupMixin, Base):
 
 
 class User(UserMixin, Base):
-    # pylint: disable=too-many-public-methods
 
     @classmethod
     def get_by_id(cls, request, userid):

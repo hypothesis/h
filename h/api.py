@@ -16,7 +16,7 @@ from h import events, interfaces
 from h.models import Annotation, Document
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 # These annotation fields are not to be set by the user.

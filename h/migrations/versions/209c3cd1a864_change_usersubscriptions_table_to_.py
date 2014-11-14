@@ -24,7 +24,6 @@ class JSONEncodedDict(TypeDecorator):
         JSONEncodedDict(255)
 
     """
-    # pylint: disable=too-many-public-methods
     impl = VARCHAR
 
     def process_bind_param(self, value, dialect):

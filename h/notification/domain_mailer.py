@@ -14,7 +14,7 @@ from h.notification.gateway import user_profile_url, standalone_url
 from h.notification.notifier import send_email, TemplateRenderException
 from h.notification.types import ROOT_PATH
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 TXT_TEMPLATE = ROOT_PATH + 'document_owner_notification.txt'
 HTML_TEMPLATE = ROOT_PATH + 'document_owner_notification.html'

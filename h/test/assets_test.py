@@ -11,7 +11,6 @@ from h import assets
 
 class DummyEvent(object):
     """A dummy event for testing registry events."""
-    # pylint: disable=too-few-public-methods
 
     def __init__(self, request):
         self.request = request
@@ -40,7 +39,6 @@ def test_subscriber_predicate(settings):
     mock2 = Mock()
 
     with testConfig(settings=settings) as config:
-        # pylint: disable=attribute-defined-outside-init
         config.include(assets)
         config.add_subscriber(mock1, DummyEvent, asset_request=False)
         config.add_subscriber(mock2, DummyEvent, asset_request=True)

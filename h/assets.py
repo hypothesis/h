@@ -5,11 +5,10 @@ import re
 from deform.field import Field
 import pyramid
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 class WebassetsResourceRegistry(object):
-    # pylint: disable=too-few-public-methods
 
     def __init__(self, env):
         self.env = env
@@ -43,7 +42,6 @@ class AssetRequest(object):
     users don't register their own views this way) and it supports all static
     view requests (not just those registered by pyramid_webassets).
     """
-    # pylint: disable=too-few-public-methods
 
     def __init__(self, val, config):
         self.val = val

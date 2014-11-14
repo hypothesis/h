@@ -17,7 +17,7 @@ from h import events
 from h.api import get_user
 from h.models import Annotation
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 filter_schema = {
     "type": "object",
@@ -320,7 +320,6 @@ class FilterHandler(object):
             if field_value is None:
                 return False
 
-            # pylint: disable=maybe-no-member
             if clause.get('case_sensitive', True):
                 cval = clause['value']
                 fval = field_value
@@ -334,7 +333,6 @@ class FilterHandler(object):
                     fval = [x.lower() for x in field_value]
                 else:
                     fval = field_value.lower()
-            # pylint: enable=maybe-no-member
 
             reversed_order = False
             # Determining operator order

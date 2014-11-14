@@ -11,7 +11,7 @@ from h.layouts import BaseLayout
 from h.notification import reply_template
 
 import logging
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 @view_config(layout='pattern_library',
