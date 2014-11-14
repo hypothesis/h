@@ -37,6 +37,10 @@ $script = <<SCRIPT
     wget -q https://download.elasticsearch.org/elasticsearch/elasticsearch/#{$elversion}.deb
     dpkg -i #{$elversion}.deb
   fi
+  update-rc.d elasticsearch defaults
+  service elasticsearch start
+  cd /h
+  sed -i s/host:\\ localhost/host:\\ 0.0.0.0/ development.ini
 SCRIPT
 
 
