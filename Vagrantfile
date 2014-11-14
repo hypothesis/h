@@ -40,7 +40,7 @@ $script = <<SCRIPT
   update-rc.d elasticsearch defaults
   service elasticsearch start
   cd /h
-  sed -i s/host:\\ localhost/host:\\ `ip addr show dev eth0 | awk '/inet\\ / {print $2}' | cut -d/ -f1`/ development.ini
+  sed -i s/host:\\ localhost/host:\\ 0.0.0.0/ development.ini
 SCRIPT
 
 
