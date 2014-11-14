@@ -17,10 +17,11 @@ describe 'h.helpers.stringHelpers', ->
       assert.equal decoded, 'die Straße'
 
     it 'calls the right normalization', ->
-      unorm.nfc = sinon.stub().returns('')
-      stringHelpers.uniFold '', 'nfc'
+      stub = sinon.stub(unorm, "nfkd").returns('')
+      stringHelpers.uniFold ''
 
-      sinon.assert.called unorm.nfc
+      sinon.assert.called unorm.nfkd
+      stub.restore()
 
     it 'removes combining characters', ->
       text = 'Fürge rőt róka túlszökik zsíros étkű kutyán'

@@ -19,7 +19,7 @@ from h.models import Annotation
 log = logging.getLogger(__name__)
 
 
-def uni_fold(text, normalization='NFKD'):
+def uni_fold(text):
     # Convert str to unicode
     if isinstance(text, str):
         text = unicode(text, "utf-8")
@@ -28,7 +28,8 @@ def uni_fold(text, normalization='NFKD'):
     if not isinstance(text, unicode):
         return text
 
-    text = unicodedata.normalize(normalization, text)
+    text = text.lower()
+    text = unicodedata.normalize('NFKD', text)
     return u"".join([c for c in text if not unicodedata.combining(c)])
 
 filter_schema = {
