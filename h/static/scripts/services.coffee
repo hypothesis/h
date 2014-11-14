@@ -441,7 +441,7 @@ class ViewFilter
 
     @_normalize = (e) ->
       if typeof e is 'string'
-        return stringHelpers.unidecode(e)
+        return stringHelpers.uniFold(e)
       else return e
 
   _matches: (filter, value, match) ->
