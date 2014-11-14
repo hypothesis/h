@@ -171,7 +171,7 @@ class Annotation(annotation.Annotation):
                 },
                 'uni_normalizer': {
                     'tokenizer': 'icu_tokenizer',
-                    'filter': ['icu_normalizer', 'asciifolding']
+                    'filter': ['icu_folding']
                 }
             }
         }
