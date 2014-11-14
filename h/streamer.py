@@ -21,7 +21,7 @@ from h.models import Annotation
 log = logging.getLogger(__name__)
 
 
-def unidecode(text, normalization='NFKD'):
+def uni_fold(text, normalization='NFKD'):
     # Convert str to unicode
     if isinstance(text, str):
         text = unicode(text, "utf-8")
@@ -349,18 +349,18 @@ class FilterHandler(object):
             if type(cval) is list:
                 tval = []
                 for cv in cval:
-                    tval.append(unidecode(cv))
+                    tval.append(uni_fold(cv))
                 cval = tval
             else:
-                cval = unidecode(cval)
+                cval = uni_fold(cval)
 
             if type(fval) is list:
                 tval = []
                 for fv in fval:
-                    tval.append(unidecode(fv))
+                    tval.append(uni_fold(fv))
                 fval = tval
             else:
-                fval = unidecode(fval)
+                fval = uni_fold(fval)
 
             reversed_order = False
             # Determining operator order
