@@ -22,7 +22,7 @@ def test_zero_clauses():
 
 
 def test_hits():
-    """Test the query size limit
+    """Test setting the query size limit right
     """
     request = DummyRequest()
     filter_json = {
@@ -44,7 +44,7 @@ def test_hits():
 
 
 def test_past_time():
-    """Test the query size limit
+    """Test setting the time range filter right
     """
     request = DummyRequest()
     filter_json = {
@@ -66,8 +66,6 @@ def test_past_time():
 
 
 def test_policy_include_any():
-    """Test the include_any match policy
-    """
     request = DummyRequest()
     filter_json = {
         'match_policy': 'include_any',
@@ -90,8 +88,6 @@ def test_policy_include_any():
 
 
 def test_policy_include_all():
-    """Test the include_all match policy
-    """
     request = DummyRequest()
     filter_json = {
         'match_policy': 'include_all',
@@ -114,8 +110,6 @@ def test_policy_include_all():
 
 
 def test_policy_exclude_any():
-    """Test the exclude_any match policy
-    """
     request = DummyRequest()
     filter_json = {
         'match_policy': 'exclude_any',
@@ -138,8 +132,6 @@ def test_policy_exclude_any():
 
 
 def test_policy_exclude_all():
-    """Test the exclude_all match policy
-    """
     request = DummyRequest()
     filter_json = {
         'match_policy': 'exclude_all',
@@ -162,16 +154,12 @@ def test_policy_exclude_all():
 
 
 def test_operator_call():
-    """Test if the correct operator fn is called
-    """
-    """Test the query size limit
-    """
     request = DummyRequest()
 
     filter_json = {
         'match_policy': 'include_all',
         'clauses': [{
-            'field': 'text',
+            'field': '/text',
             'operator': 'equals',
             'value': 'foo bar',
             'options': {
@@ -186,7 +174,8 @@ def test_operator_call():
         }
     }
 
-    FilterToElasticFilter.equals = MagicMock(return_value="")
+    generated = FilterToElasticFilter(filter_json, request)
+    query = generated.query['query']['bool']['must'][0]
+    expected = 'foo bar'
 
-    FilterToElasticFilter(filter_json, request)
-    assert FilterToElasticFilter.equals.called
+    assert query['term']['text'] == expected
