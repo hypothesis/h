@@ -268,7 +268,7 @@ app_css:
     filters: cleancss, cssrewrite
     output: styles/app.min.css
     contents:
-      - h:static/icomoon.css
+      - h:static/styles/icomoon.css
       - h:static/scripts/vendor/katex/katex.min.css
       - filters: compass
         output: styles/app.css
@@ -381,7 +381,7 @@ inject_css:
   output: styles/hypothesis.min.css
   filters: cleancss, cssrewrite
   contents:
-    - h:static/icomoon.css
+    - h:static/styles/icomoon.css
     - filters: compass
       output: styles/inject.css
       contents:

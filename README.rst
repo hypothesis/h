@@ -84,23 +84,35 @@ As a convenience, there is a make target for this::
 
     $ make test
 
-Chrome Extension
-^^^^^^^^^^^^^^^^
-Run the following command at the prompt to build the extension::
+Browser Extensions
+^^^^^^^^^^^^^^^^^^
+Run the following command at the prompt to build the Chrome extension::
 
-    $ ./bin/hypothesis extension development.ini http://localhost:5000
+    $ ./bin/hypothesis extension development.ini chrome http://localhost:5000
+
+Or, to load the assets from within the extension::
+
+    $ ./bin/hypothesis extension development.ini chrome http://localhost:5000 \
+    chrome-extension://extensionid/public
+
+To build the Firefox extension, run the following::
+
+    $ ./bin/hypothesis extension development.ini firefox \
+    http://localhost:5000 resource://firefox-at-hypothes-dot-is/hypothesis/data
 
 If you are managing your virtual environment yourself, the script may not be
 located in the ``bin`` directory, but should be available in your path when the
 virtual environment is activated.
 
-The third argument is the base URL for the application. An optional, fourth
-argument may be passed to override the URL prefix used for static assets.
+The fourth argument is the base URL for the application. An optional (for the
+Chrome extension), fifth argument may be passed to override the URL prefix used
+for static assets.
 
-At this point, a working extension should exist in ./build/chrome but with
-the development configuration the static assets are still loaded from the
-server. Start the application and ensure that the assets are built by visiting
-the home page or by running ``./bin/hypothesis assets``.
+At this point, a working extension should exist in either ``./build/chrome``
+or ``./build/firefox`` but with the development configuration the static assets
+are still loaded from the server. Start the application and ensure that the
+assets are built by visiting the home page or by running
+``./bin/hypothesis assets``.
 
 Note: Bundling the assets in the extension only works at the moment when the
 ``webassets.debug`` setting is falsy.

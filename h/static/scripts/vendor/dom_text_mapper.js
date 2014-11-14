@@ -843,5 +843,3 @@
   })();
 
 }).call(this);
-
-//# sourceMappingURL=dom_text_mapper.map

@@ -43,6 +43,8 @@ command = App(
 # Teach urlparse about extension schemes
 uses_netloc.append('chrome-extension')
 uses_relative.append('chrome-extension')
+uses_netloc.append('resource')
+uses_relative.append('resource')
 
 # Fetch an asset spec resolver
 resolve = AssetResolver().resolve
@@ -54,7 +56,8 @@ def add_base_url(event):
     assets_env = request.webassets_env
     view_name = getattr(request, 'view_name', None)
 
-    if view_name == 'embed.js' and not assets_env.url.startswith('http'):
+    if (view_name == 'embed.js' and
+            assets_env.url.startswith('chrome-extension')):
         base_url = join(request.webassets_env.url, '')
     else:
         base_url = request.resource_url(request.context, '')
@@ -62,14 +65,14 @@ def add_base_url(event):
     event['base_url'] = base_url
 
 
-def app(context, request):
-    with open('public/app.html', 'w') as f:
+def app(app_path, context, request):
+    with open(app_path, 'w') as f:
         f.write(render_view(context, request, name='app.html'))
 
 
-def embed(context, request):
+def embed(embed_path, context, request):
     setattr(request, 'view_name', 'embed.js')
-    with open('public/embed.js', 'w') as f:
+    with open(embed_path, 'w') as f:
         f.write(render_view(context, request, name='embed.js'))
     delattr(request, 'view_name')
 
@@ -85,7 +88,7 @@ def manifest(context, request):
         f.write(manifest_tpl.render(src=src, version=ext_version))
 
 
-def chrome(env):
+def build_extension(env, browser, content_dir):
     registry = env['registry']
     request = env['request']
     request.root = env['root']
@@ -95,41 +98,45 @@ def chrome(env):
     request.layout_manager.layout.csp = ''
 
     # Remove any existing build
-    if exists('./build/chrome'):
-        rmtree('./build/chrome')
+    if exists('./build/' + browser):
+        rmtree('./build/' + browser)
 
     # Create the new build directory
-    makedirs('./build/chrome/public')
+    makedirs(content_dir)
 
     # Change to the output directory
     old_dir = getcwd()
-    chdir('./build/chrome')
+    chdir('./build/' + browser)
 
     # Copy the extension code
-    merge('../../h/browser/chrome', './')
+    merge('../../h/browser/' + browser, './')
 
     # Copy over the bootstrap and destroy scripts
-    copyfile('../../h/static/bootstrap.js', './public/bootstrap.js')
-    copyfile('../../h/static/extension/destroy.js', './public/destroy.js')
-    copyfile('../../h/static/extension/config.js', './public/config.js')
+    copyfile('../../h/static/bootstrap.js', content_dir + '/bootstrap.js')
+    copyfile('../../h/static/extension/destroy.js', content_dir + '/destroy.js')
+    copyfile('../../h/static/extension/config.js', content_dir + '/config.js')
 
     # Build the app html and copy assets if they are being bundled
-    if request.webassets_env.url.startswith('chrome-extension://'):
-        makedirs('./public/styles/images')
-        merge('../../h/static/styles/images', './public/styles/images')
-        merge('../../h/static/images', './public/images')
-        merge('../../h/static/fonts', './public/fonts')
-        copyfile('../../h/static/icomoon.css', './public/icomoon.css')
+    if (request.webassets_env.url.startswith('chrome-extension://') or
+            request.webassets_env.url.startswith('resource://')):
+        makedirs(content_dir + '/styles/images')
+        merge('../../h/static/styles/images', content_dir + '/styles/images')
+        merge('../../h/static/images', content_dir + '/images')
+        merge('../../h/static/fonts', content_dir + '/fonts')
+        copyfile('../../h/static/styles/icomoon.css',
+                 content_dir + '/styles/icomoon.css')
 
         # Copy over the vendor assets since they won't be processed otherwise
         if request.webassets_env.debug:
-            makedirs('./public/scripts/vendor')
-            merge('../../h/static/scripts/vendor', './public/scripts/vendor')
+            makedirs(content_dir + '/scripts/vendor')
+            merge('../../h/static/scripts/vendor',
+                  content_dir + '/scripts/vendor')
 
-        app(context, request)
+        app(content_dir + '/app.html', context, request)
 
-    manifest(context, request)
-    embed(context, request)
+    if browser == 'chrome':
+        manifest(context, request)
+    embed(content_dir + '/embed.js', context, request)
 
     # Reset the directory
     chdir(old_dir)
@@ -165,15 +172,18 @@ def assets(settings):
         bundle.urls()
 
 
-@command(usage='config_file base_url [static_url]')
+@command(usage='config_file browser base_url [static_url]')
 def extension(args, console, settings):
     """Build the browser extensions.
 
-    The first argument is the base URL of an h installation:
+    The first argument is the target browser for which to build the extension.
+    Choices are: chrome or firefox.
+
+    The second argument is the base URL of an h installation:
 
       http://localhost:5000
 
-    An optional second argument can be used to specify the location for static
+    An optional third argument can be used to specify the location for static
     assets.
 
     Examples:
@@ -182,15 +192,19 @@ def extension(args, console, settings):
       chrome-extension://extensionid/public
     """
     if len(args) == 1:
-        console.error('You must supply a url to the hosted backend.')
+        console.error('You must supply a browser name: `chrome` or `firefox`.')
         return 2
     elif len(args) == 2:
+        console.error('You must supply a url to the hosted backend.')
+        return 2
+    elif len(args) == 3:
         assets_url = settings['webassets.base_url']
     else:
-        settings['webassets.base_url'] = args[2]
-        assets_url = args[2]
+        settings['webassets.base_url'] = args[3]
+        assets_url = args[3]
 
-    base_url = args[1]
+    browser = args[1]
+    base_url = args[2]
 
     # Fully-qualify the static asset url
     parts = urlparse(assets_url)
@@ -202,7 +216,14 @@ def extension(args, console, settings):
         assets_url = urlunparse(parts)
 
     # Set up the assets url and source path mapping
-    settings['webassets.base_dir'] = abspath('./build/chrome/public')
+    if browser == 'chrome':
+        settings['webassets.base_dir'] = abspath('./build/chrome/public')
+    elif browser == 'firefox':
+        settings['webassets.base_dir'] = abspath('./build/firefox/data')
+    else:
+        console.error('You must supply a browser name: `chrome` or `firefox`.')
+        return 2
+
     settings['webassets.base_url'] = assets_url
     settings['webassets.paths'] = json.dumps({
         resolve('h:static').abspath(): assets_url
@@ -219,12 +240,13 @@ def extension(args, console, settings):
 
     # Build it
     request = Request.blank('/app', base_url=base_url)
-    chrome(prepare(registry=config.registry, request=request))
+    build_extension(prepare(registry=config.registry, request=request),
+                    browser, settings['webassets.base_dir'])
 
     # XXX: Change when webassets allows setting the cache option
     # As of 0.10 it's only possible to pass a sass config  with string values
     try:
-        rmtree('./build/chrome/public/.sass-cache')
+        rmtree('./build/' + browser + '/public/.sass-cache')
     except OSError:
         pass  # newer Sass doesn't write this it seems
 
