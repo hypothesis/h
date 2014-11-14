@@ -203,7 +203,10 @@ class UserGroup(UserGroupMixin, Base):
 def create_event_listeners(config):
     settings = config.registry.settings
 
-    @event.listens_for(Consumer.__table__, 'after_create')
+    # The sqlalchemy table object is created magically at runtime
+    table = Consumer.__table__  # pylint: disable=no-member
+
+    @event.listens_for(table, 'after_create')
     def create_api_consumer(target, connection, **kwargs):
         key = settings['api.key']
         secret = settings.get('api.secret')

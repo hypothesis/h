@@ -1,6 +1,3 @@
-.*
-!.gitignore
-
 /*.db
 /*.db-journal
 /*.egg
@@ -14,6 +11,8 @@
 /h/css
 /h/js
 /h/lib
+/h/static/.sass-cache
+/h/static/.webassets-cache
 /include
 /lib
 /local

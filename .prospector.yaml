@@ -1,0 +1,16 @@
+output_format: grouped
+inherits:
+  - full_pep8
+  - strictness_low
+pylint:
+  disable:
+    # This check (for missing method arguments) is broken in latest pylint:
+    #
+    #     https://bitbucket.org/logilab/pylint/issue/205
+    - E1120
+pep8:
+  options:
+    max-line-length: 79
+ignore:
+  - "^_version.py"
+  - "^migrations/"

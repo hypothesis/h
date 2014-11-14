@@ -460,50 +460,6 @@ class StreamerSession(Session):
             transaction.commit()
 
 
-@subscriber(events.AnnotationEvent)
-def after_action(event):
-    return  # hypothesis/vision#96
-    try:
-        request = event.request
-        client_id = request.headers.get('X-Client-Id')
-
-        action = event.action
-        if action == 'read':
-            return
-
-        annotation = event.annotation
-        manager = request.get_sockjs_manager()
-        for session in manager.active_sessions():
-            if session.client_id == client_id:
-                continue
-
-            try:
-                if not session.request.has_permission('read', annotation):
-                    continue
-
-                flt = session.filter
-                if not (flt and flt.match(annotation, action)):
-                    continue
-
-                packet = {
-                    'payload': [annotation],
-                    'type': 'annotation-notification',
-                    'options': {
-                        'action': action,
-                    },
-                }
-
-                session.send(packet)
-            except:
-                log.exception(
-                    'Checking stream match:\n%s\n%s',
-                    annotation,
-                    session.filter
-                )
-    except:
-        log.exception('Streaming event: %s', event)
-
-
 def includeme(config):
     config.include('pyramid_sockjs')
     config.add_sockjs_route(prefix='__streamer__', session=StreamerSession)

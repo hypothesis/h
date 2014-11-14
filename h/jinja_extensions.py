@@ -10,7 +10,16 @@ class IncludeRawExtension(Extension):
     tags = set(['include_raw'])
 
     def __init__(self, environment):
+        # This check (for use of super in old-style classes) is broken in
+        # latest pylint but fixed on pylint tip:
+        #
+        #     https://bitbucket.org/logilab/pylint/issue/24
+        #
+        # FIXME: remove when pylint>1.3.1 is released.
+        #
+        # pylint: disable=super-on-old-class
         super(IncludeRawExtension, self).__init__(environment)
+        # pylint: enable=super-on-old-class
 
     def parse(self, parser):
         lineno = parser.stream.next().lineno

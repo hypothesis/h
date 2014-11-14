@@ -8,13 +8,13 @@ install:
   #   https://github.com/sass/sass/issues/1476
   - gem install sass:3.4.5
   - gem install compass
-  - pip install flake8 pep8-naming
+  - pip install prospector
   - make
 services:
   - elasticsearch
 script:
   - make test
-  - flake8 h --exclude='_version.py,*_test.py'
+  - prospector -P .prospector.yaml h
   # Build Chrome extension
   - hypothesis extension development.ini http://localhost
 notifications:
