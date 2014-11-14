@@ -15,8 +15,8 @@ services:
 script:
   - make test
   - prospector -P .prospector.yaml h
-  # Build Chrome extension
-  - hypothesis extension development.ini http://localhost
+  - hypothesis extension development.ini chrome http://localhost
+  - hypothesis extension development.ini firefox http://localhost
 notifications:
   irc:
     channels:
