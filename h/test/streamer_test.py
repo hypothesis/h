@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.streamer."""
 
-from mock import patch, MagicMock
+import unittest
+
+from mock import MagicMock
+from mock import patch
 from pyramid.testing import DummyRequest
+
 from h.streamer import FilterToElasticFilter
+from h.streamer import StreamClient
+from h.streamer import annotation_packet
 
 
 # Tests for the FilterToElasticFilter class
@@ -179,3 +185,42 @@ def test_operator_call():
     expected = 'foo bar'
 
     assert query['term']['text'] == expected
+
+
+def test_annotation_packet():
+    res = annotation_packet(['foo', 'bar'], 'read')
+    assert res['payload'] == ['foo', 'bar']
+    assert res['type'] == 'annotation-notification'
+    assert res['options']['action'] == 'read'
+
+
+class TestStreamClient(unittest.TestCase):
+    def setUp(self):
+        self.session = MagicMock()
+        self.session.filter.match.return_value = True
+        self.c = StreamClient(self.session)
+
+    def test_send_annotation_event_no_filter(self):
+        self.session.filter = None
+
+        self.c.send_annotation_event({}, 'update')
+        assert self.session.send.called
+
+    def test_send_annotation_event_doesnt_send_reads(self):
+        self.c.send_annotation_event({}, 'read')
+        assert not self.session.send.called
+
+    def test_send_annotation_event_filtered(self):
+        self.session.filter.match.return_value = False
+
+        self.c.send_annotation_event({}, 'update')
+        assert not self.session.send.called
+
+    def test_send_annotation_event_check_permissions(self):
+        self.session.request.has_permission.return_value = False
+
+        anno = object()
+
+        self.c.send_annotation_event(anno, 'update')
+        assert not self.session.send.called
+        assert self.session.request.has_permission.called_with('read', anno)

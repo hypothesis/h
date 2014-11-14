@@ -430,6 +430,14 @@ class FilterHandler(object):
             return False
 
 
+def annotation_packet(annotations, action):
+    return {
+        'payload': annotations,
+        'type': 'annotation-notification',
+        'options': {'action': action},
+    }
+
+
 class StreamerSession(Session):
     client_id = None
     filter = None
@@ -444,13 +452,7 @@ class StreamerSession(Session):
         self.received = len(annotations)
 
         # Can send zero to indicate that no past data is matched
-        packet = {
-            'payload': annotations,
-            'type': 'annotation-notification',
-            'options': {
-                'action': 'past',
-            }
-        }
+        packet = annotation_packet(annotations, 'past')
         self.send(packet)
 
     def on_message(self, msg):
@@ -490,49 +492,41 @@ class StreamerSession(Session):
             transaction.commit()
 
 
+class StreamClient(object):
+    def __init__(self, session):
+        self.session = session
+
+    def send_annotation_event(self, annotation, action):
+        if action == 'read':
+            return
+
+        if not self.session.request.has_permission('read', annotation):
+            return
+
+        if not self._filter_permits(annotation, action):
+            return
+
+        packet = annotation_packet([annotation], action)
+        self.session.send(packet)
+
+    def _filter_permits(self, annotation, action):
+        if self.session.filter is None:
+            return True
+        return self.session.filter.match(annotation, action)
+
+
 @subscriber(events.AnnotationEvent)
 def after_action(event):
     if not event.request.feature('streamer'):
         return
-    try:
-        request = event.request
-        client_id = request.headers.get('X-Client-Id')
 
-        action = event.action
-        if action == 'read':
-            return
+    client_id = event.request.headers.get('X-Client-Id')
+    manager = event.request.get_sockjs_manager()
 
-        annotation = event.annotation
-        manager = request.get_sockjs_manager()
-        for session in manager.active_sessions():
-            if session.client_id == client_id:
-                continue
-
-            try:
-                if not session.request.has_permission('read', annotation):
-                    continue
-
-                flt = session.filter
-                if not (flt and flt.match(annotation, action)):
-                    continue
-
-                packet = {
-                    'payload': [annotation],
-                    'type': 'annotation-notification',
-                    'options': {
-                        'action': action,
-                    },
-                }
-
-                session.send(packet)
-            except:
-                log.exception(
-                    'Checking stream match:\n%s\n%s',
-                    annotation,
-                    session.filter
-                )
-    except:
-        log.exception('Streaming event: %s', event)
+    for session in manager.active_sessions():
+        if session.client_id != client_id:
+            client = StreamClient(session)
+            client.send_annotation_event(event.annotation, event.action)
 
 
 def includeme(config):
