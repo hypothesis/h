@@ -8,7 +8,7 @@ from zope.interface import implementer
 from h import interfaces, security
 from h.models import Annotation
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 @implementer(ILocation)
@@ -108,7 +108,7 @@ class RootFactory(Stream, InnerResource):
     api = APIResource
     stream = Stream
 
-    def __acl__(self):  # pylint: disable=no-self-use
+    def __acl__(self):
         defaultlist = [
             (Allow, 'group:admin', ALL_PERMISSIONS),
             (Allow, Authenticated, 'create'),

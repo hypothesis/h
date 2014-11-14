@@ -12,7 +12,6 @@ log = logging.getLogger(__name__)
 
 
 class SubscriptionsMixin(BaseModel):
-    # pylint: disable=no-self-use
     @declared_attr
     def __table_args__(self):
         return sa.Index('subs_uri_idx_%s' % self.__tablename__, 'uri'),

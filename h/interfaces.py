@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=too-many-public-methods
 from zope.interface import Interface
 
 

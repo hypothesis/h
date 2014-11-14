@@ -176,6 +176,9 @@ class Annotation(annotation.Annotation):
 
     @classmethod
     def update_settings(cls):
+        # Due to metaprogramming magic happening in the annotator library, we
+        # have to pretend to pylint that cls.es exists
+        #
         # pylint: disable=no-member
         cls.es.conn.indices.close(index=cls.es.index)
         try:

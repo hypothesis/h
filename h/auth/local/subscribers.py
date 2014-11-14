@@ -26,7 +26,6 @@ def login(event):
 
 
 class AutoLogin(object):
-    # pylint: disable=too-few-public-methods
 
     def __init__(self, val, config):
         self.val = val
