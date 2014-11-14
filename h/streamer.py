@@ -169,6 +169,49 @@ class FilterToElasticFilter(object):
     def ge(field, value):
         return {"range": {field: {"gte": value}}}
 
+
+    @staticmethod
+    def _query_string_query(field, value):
+        # Generate query_string query
+        escaped_value = re.escape(value)
+        return {
+            "query_string": {
+                "query": "*" + escaped_value + "*",
+                "fields": [field]
+            }
+        }
+
+    @staticmethod
+    def _match_query(es, field, value):
+        cutoff_freq = None
+        and_or = 'and'
+        if es:
+            if 'cutoff_frequency' in es:
+                cutoff_freq = es['cutoff_frequency']
+            if 'and_or' in es:
+                and_or = es['and_or']
+        message = {
+            "query": value,
+            "operator": and_or
+        }
+        if cutoff_freq:
+            message['cutoff_frequency'] = cutoff_freq
+        return {"match": {field: message}}
+
+    @staticmethod
+    def _multi_match_query(es, value):
+        and_or = es['and_or'] if 'and_or' in es else 'and'
+        match_type = None
+        if 'match_type' in es:
+            match_type = es['match_type']
+        message = {
+            "query": value,
+            "operator": and_or,
+            "type": match_type,
+            "fields": es['fields']
+        }
+        return {"multi_match": message}
+
     def convert_clauses(self, clauses):
         new_clauses = []
         for clause in clauses:
@@ -190,41 +233,11 @@ class FilterToElasticFilter(object):
                 value = clause['value'].lower()
 
             if query_type == 'query_string':
-                # Generate query_string query
-                escaped_value = re.escape(value)
-                new_clause = {
-                    "query_string": {
-                        "query": "*" + escaped_value + "*",
-                        "fields": [field]
-                    }
-                }
+                new_clause = self._query_string_query(field, value)
             elif query_type == 'match':
-                cutoff_freq = None
-                and_or = 'and'
-                if es:
-                    if 'cutoff_frequency' in es:
-                        cutoff_freq = es['cutoff_frequency']
-                    if 'and_or' in es:
-                        and_or = es['and_or']
-                message = {
-                    "query": value,
-                    "operator": and_or
-                }
-                if cutoff_freq:
-                    message['cutoff_frequency'] = cutoff_freq
-                new_clause = {"match": {field: message}}
+                new_clause = self._match_query(es, field, value)
             elif query_type == 'multi_match':
-                and_or = es['and_or'] if 'and_or' in es else 'and'
-                match_type = None
-                if 'match_type' in es:
-                    match_type = es['match_type']
-                message = {
-                    "query": value,
-                    "operator": and_or,
-                    "type": match_type,
-                    "fields": es['fields']
-                }
-                new_clause = {"multi_match": message}
+                new_clause = self._multi_match_query(es, value)
             elif clause['operator'][0:2] == 'len':
                 script = "doc['%s'].values.length %s %s" % (
                     field,
@@ -332,19 +345,9 @@ class FilterHandler(object):
             if field_value is None:
                 return False
 
-            if clause.get('case_sensitive', True):
-                cval = clause['value']
-                fval = field_value
-            else:
-                if type(clause['value']) is list:
-                    cval = [x.lower() for x in clause['value']]
-                else:
-                    cval = clause['value'].lower()
+            cval = clause['value']
+            fval = field_value
 
-                if type(field_value) is list:
-                    fval = [x.lower() for x in field_value]
-                else:
-                    fval = field_value.lower()
             if type(cval) is list:
                 tval = []
                 for cv in cval:
