@@ -10,22 +10,44 @@ describe 'h.helpers.stringHelpers', ->
     stringHelpers = _stringHelpers_
 
   describe '.uniFold', ->
-    it 'normalizes the input string', ->
-      text = 'die Stra\u00DFe'
-      decoded = stringHelpers.uniFold text
-
-      assert.equal decoded, 'die Straße'
-
-    it 'calls the right normalization', ->
-      stub = sinon.stub(unorm, "nfkd").returns('')
-      stringHelpers.uniFold ''
-
-      sinon.assert.called unorm.nfkd
-      stub.restore()
-
-    it 'removes combining characters', ->
+    it 'removes hungarian marks', ->
       text = 'Fürge rőt róka túlszökik zsíros étkű kutyán'
       decoded = stringHelpers.uniFold text
       expected = 'Furge rot roka tulszokik zsiros etku kutyan'
+
+      assert.equal decoded, expected
+
+    it 'removes greek marks', ->
+      text = 'Καλημέρα κόσμε'
+      decoded = stringHelpers.uniFold text
+      expected = 'Καλημερα κοσμε'
+
+      assert.equal decoded, expected
+
+    it 'removes japanese marks', ->
+      text = 'カタカナコンバータ'
+      decoded = stringHelpers.uniFold text
+      expected = 'カタカナコンハータ'
+
+      assert.equal decoded, expected
+
+    it 'removes marathi marks', ->
+      text = 'काचं शक्नोम्यत्तुम'
+      decoded = stringHelpers.uniFold text
+      expected = 'कच शकनमयततम'
+
+      assert.equal decoded, expected
+
+    it 'removes thai marks', ->
+      text = 'ฉันกินกระจกได้ แต่มันไม่ทำให้ฉันเจ็บ'
+      decoded = stringHelpers.uniFold text
+      expected = 'ฉนกนกระจกได แตมนไมทาใหฉนเจบ'
+
+      assert.equal decoded, expected
+
+    it 'removes all marks', ->
+      text = '̀ ́ ̂ ̃ ̄ ̅ ̆ ̇ ̈ ̉ ̊ ̋ ̌ ̍ ̎ ̏ ̐ ̑ ̒ ̓ ̔ ̕ ̖ ̗ ̘ ̙ ̚ ̛ ̜ ̝ ̞ ̟ ̠ ̡ ̢ ̣ ̤ ̥ ̦ ̧ ̨ ̩ ̪ ̫ ̬ ̭ ̮ ̯ ̰ ̱ ̲ ̳ ̴ ̵ ̶ ̷ ̸ ̹ ̺ ̻ ̼ ̽ ̾ ̿ ̀ ́ ͂ ̓ ̈́ ͅ ͠ ͡"'
+      decoded = stringHelpers.uniFold text
+      expected = '                                                                       "'
 
       assert.equal decoded, expected
