@@ -4,7 +4,7 @@ from pyramid.settings import asbool
 class Client(object):
     """
     Client provides access to the current configuration of feature flags as
-    recorded in the underlying storage.
+    recorded in the underlying (dict-like) storage.
 
     Typical simple usage involves creating a client with a storage and then
     querying it for the current state of named features:
@@ -27,37 +27,28 @@ class Client(object):
         return res
 
 
-class SettingsStorage(object):
-    """
-    SettingsStorage abstracts the loading of feature flags from a Pyramid
-    settings object.
-
-    Feature flags are settings with a boolean (or boolean-coerceable) value
-    prefixed by the name of this feature module or a specified prefix. They
-    might look like the following in a .ini file:
-
-        h.features.widgets_enabled = True
-    """
-    def __init__(self, settings, prefix=__name__):
-        self.settings = settings
-        self.prefix = prefix
-
-    def get(self, name):
-        try:
-            setting = self.settings[self.prefix + '.' + name]
-        except KeyError:
-            return None
-        else:
-            return asbool(setting)
-
-
 class UnknownFeatureError(Exception):
     pass
 
 
 def get_client(request):
-    storage = SettingsStorage(request.registry.settings)
+    """
+    get_client returns a feature client configured using data found in the
+    settings of the current application.
+    """
+    storage = _features_from_settings(request.registry.settings)
+
     return Client(storage)
+
+
+def _features_from_settings(settings, prefix=__package__ + '.feature.'):
+    storage = {}
+
+    for k, v in settings.items():
+        if k.startswith(prefix):
+            storage[k[len(prefix):]] = asbool(v)
+
+    return storage
 
 
 def includeme(config):

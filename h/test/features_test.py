@@ -1,10 +1,12 @@
 import unittest
 
+from mock import patch
+from pyramid.testing import DummyRequest, testConfig
 import pytest
 
 from h.features import Client
-from h.features import SettingsStorage
 from h.features import UnknownFeatureError
+from h.features import get_client
 
 
 class TestClient(unittest.TestCase):
@@ -27,20 +29,20 @@ class TestClient(unittest.TestCase):
             c('unknown_feature')
 
 
-class TestSettingsStorage(unittest.TestCase):
-    def setUp(self):
-        self.settings = {
-            'foo.features.enabled_feature': 'on',
-            'foo.features.disabled_feature': False,
-        }
+@patch('h.features.Client')
+def test_get_client(client_mock):
+    settings = {
+        'h.feature.enabled_feature': 'on',
+        'h.feature.disabled_feature': False,
+        'unrelated_feature': 123,
+    }
 
-    def test_get_returns_boolean(self):
-        s = SettingsStorage(self.settings, 'foo.features')
+    with testConfig(settings=settings) as config:
+        request = DummyRequest(registry=config.registry)
 
-        assert s.get('enabled_feature') is True
-        assert s.get('disabled_feature') is False
+        get_client(request)
 
-    def test_get_returns_none(self):
-        s = SettingsStorage(self.settings, 'foo.features')
-
-        assert s.get('unknown_feature') is None
+        client_mock.assert_called_with({
+            'enabled_feature': True,
+            'disabled_feature': False
+        })
