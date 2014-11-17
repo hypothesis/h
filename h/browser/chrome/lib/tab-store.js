@@ -39,8 +39,9 @@
       try {
         local = JSON.parse(storage.getItem(key));
       } catch (e) {
-        local = {};
+        local = null;
       }
+      local = local || {};
     };
 
     this.reload();
