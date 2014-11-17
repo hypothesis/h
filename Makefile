@@ -23,5 +23,6 @@ test:
 	python setup.py test
 	hypothesis assets development.ini
 	"$$(npm bin)"/karma start karma.config.js --single-run
+	"$$(npm bin)"/karma start h/browser/chrome/karma.config.js --single-run
 
 .PHONY: clean test
