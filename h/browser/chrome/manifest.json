@@ -25,7 +25,14 @@
 
   "background": {
     "persistent": true,
-    "scripts": ["background.js"]
+    "scripts": [
+      "lib/tab-store.js",
+      "lib/tab-state.js",
+      "lib/sidebar-injector.js",
+      "lib/browser-action.js",
+      "lib/hypothesis-chrome-extension.js",
+      "background.js"
+    ]
   },
   "browser_action": {
     "placeholder": "work around http://crbug.com/86449"
@@ -33,6 +40,7 @@
   "web_accessible_resources": [
     "public/*",
     "content/*",
+    "lib/*",
     "content/web/viewer.html"
   ]
 }
