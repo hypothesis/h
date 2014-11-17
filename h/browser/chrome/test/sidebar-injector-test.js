@@ -128,6 +128,14 @@ describe('SidebarInjector', function () {
           done();
         });
       });
+
+      it('retuns an error before loading the config', function (done) {
+        var url = 'file://foo.html';
+        injector.injectIntoTab({id: 1, url: url}, function (err) {
+          sinon.assert.notCalled(fakeChromeTabs.executeScript);
+          done();
+        });
+      });
     });
   });
 

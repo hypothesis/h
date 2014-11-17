@@ -22,25 +22,25 @@
         return setTimeout(fn.bind(null, null));
       }
 
-      injectConfig(tab, function () {
-        function checkPDF(success, fallback) {
+      function checkPDF(success, fallback) {
+        injectConfig(tab, function () {
           if (isPDFURL(tab.url)) {
             success(tab, fn);
           } else {
             fallback(tab, fn);
           }
-        }
+        });
+      }
 
-        if (isFileURL(tab.url)) {
-          if (isPDFURL(tab.url)) {
-            checkPDF(injectIntoLocalPDF, showLocalFileHelpPage);
-          } else {
-            fn(createError('local-file', 'Local non-PDF files are not supported'));
-          }
+      if (isFileURL(tab.url)) {
+        if (isPDFURL(tab.url)) {
+          checkPDF(injectIntoLocalPDF, showLocalFileHelpPage);
         } else {
-          checkPDF(injectIntoPDF, injectIntoHTML);
+          fn(createError('local-file', 'Local non-PDF files are not supported'));
         }
-      });
+      } else {
+        checkPDF(injectIntoPDF, injectIntoHTML);
+      }
     };
 
     this.removeFromTab = function (tab, fn) {
@@ -57,6 +57,8 @@
           url: decodeURIComponent(url)
         }, fn.bind(null, null));
       } else {
+        // TODO: Needs to check for local file permissions or just not run
+        // when not injected.
         chromeTabs.executeScript(tab.id, {
           code: [
             'var script = document.createElement("script");',
