@@ -1,10 +1,10 @@
 (function () {
   'use strict';
 
-  var browserExtension = new HypotheisChromeExtension({
+  var browserExtension = new h.HypotheisChromeExtension({
     chromeTabs: chrome.tabs,
     chromeBrowserAction: chrome.browserAction,
-    getExtensionURL: function (path) {
+    extensionURL: function (path) {
       return chrome.extension.getURL(path);
     },
     isAllowedFileSchemeAccess: function () {
@@ -41,4 +41,4 @@
   function onUpdateAvailable() {
     chrome.runtime.reload()
   }
-}();
+})();
