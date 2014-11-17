@@ -39,10 +39,15 @@
     };
 
     function onTabStateChange(tabId, current, previous) {
-      browserAction.setState(tabId, current);
-      if (!state.isTabErrored(tabId)) {
-        store.set(tabId, current);
-        chromeTabs.get(tabId, updateTabDocument);
+      if (current) {
+        browserAction.setState(tabId, current);
+
+        if (!state.isTabErrored(tabId)) {
+          store.set(tabId, current);
+          chromeTabs.get(tabId, updateTabDocument);
+        }
+      } else {
+        store.unset(tabId);
       }
     };
 
@@ -58,10 +63,17 @@
       }
     };
 
-    function onTabUpdated(tab) {
-      if (state.isTabErrored(tab.id)) {
-        state.restorePreviousState(tab.id);
+    function onTabUpdated(tabId, changeInfo, tab) {
+      if (state.isTabErrored(tabId)) {
+        state.restorePreviousState(tabId);
       }
+
+      if (state.isTabActive(tab.id)) {
+        browserAction.activate(tabId);
+      } else {
+        browserAction.deactivate(tabId);
+      }
+
       updateTabDocument(tab);
     }
 
@@ -69,8 +81,8 @@
       state.deactivateTab(tab.id);
     }
 
-    function onTabRemoved(tab) {
-      state.clearTab(tab.id);
+    function onTabRemoved(tabId) {
+      state.clearTab(tabId);
     }
 
     function updateTabDocument(tab) {
