@@ -28,6 +28,26 @@ describe('SidebarInjector', function () {
       fakeChromeTabs.executeScript.yields([]);
     });
 
+    it('bails early when trying to load a chrome url', function (done) {
+      var spy = fakeChromeTabs.executeScript;
+      var url = 'chrome://extensions/';
+
+      injector.injectIntoTab({id: 1, url: url}, function () {
+        sinon.assert.notCalled(spy);
+        done();
+      });
+    });
+
+    it('bails early when trying to load a devtools url', function (done) {
+      var spy = fakeChromeTabs.executeScript;
+      var url = 'chrome-devtools://foobar/';
+
+      injector.injectIntoTab({id: 1, url: url}, function () {
+        sinon.assert.notCalled(spy);
+        done();
+      });
+    });
+
     describe('when viewing a remote PDF', function () {
       it('injects hypothesis into the page', function (done) {
         var spy = fakeChromeTabs.update.yields({tab: 1});
@@ -112,6 +132,26 @@ describe('SidebarInjector', function () {
   });
 
   describe('.removeFromTab', function () {
+    it('bails early when trying to load a chrome url', function (done) {
+      var spy = fakeChromeTabs.executeScript;
+      var url = 'chrome://extensions/';
+
+      injector.injectIntoTab({id: 1, url: url}, function () {
+        sinon.assert.notCalled(spy);
+        done();
+      });
+    });
+
+    it('bails early when trying to load a devtools url', function (done) {
+      var spy = fakeChromeTabs.executeScript;
+      var url = 'chrome-devtools://foobar/';
+
+      injector.injectIntoTab({id: 1, url: url}, function () {
+        sinon.assert.notCalled(spy);
+        done();
+      });
+    });
+
     describe('when viewing a PDF', function () {
       it('reverts the tab back to the original document', function () {
         var spy = fakeChromeTabs.update;

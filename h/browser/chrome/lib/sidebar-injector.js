@@ -18,6 +18,10 @@
     this.injectIntoTab = function (tab, fn) {
       fn = fn || function () {};
 
+      if (isChromeURL(tab.url)) {
+        return setTimeout(fn.bind(null, null));
+      }
+
       injectConfig(tab, function () {
         function checkPDF(success, fallback) {
           if (isPDFURL(tab.url)) {
@@ -42,6 +46,10 @@
     this.removeFromTab = function (tab, fn) {
       var url;
       fn = fn || function () {};
+
+      if (isChromeURL(tab.url)) {
+        return setTimeout(fn.bind(null, null));
+      }
 
       if (isPDFViewerURL(tab.url)) {
         url = tab.url.slice(getPDFViewerURL('').length).split('#')[0];
@@ -75,6 +83,10 @@
 
     function isFileURL(url) {
       return url.indexOf("file://") === 0;
+    }
+
+    function isChromeURL(url) {
+      return url.indexOf('chrome://') === 0 || url.indexOf('chrome-devtools://') === 0;
     }
 
     function injectionFailed(tab) {
