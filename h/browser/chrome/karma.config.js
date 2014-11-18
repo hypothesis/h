@@ -18,10 +18,12 @@ module.exports = function(config) {
       '../../static/scripts/vendor/sinon.js',
       '../../static/scripts/vendor/chai.js',
       '../../static/scripts/vendor/bind.js',
+      'lib/errors.js',
       'lib/tab-store.js',
       'lib/tab-state.js',
       'lib/sidebar-injector.js',
       'lib/browser-action.js',
+      'lib/help-page.js',
       'lib/hypothesis-chrome-extension.js',
       'test/*-test.js'
     ],
