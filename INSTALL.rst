@@ -8,16 +8,17 @@ Dependencies:
 * Sass_ v3.2+
 * Compass_ v0.12+
 * ElasticSearch_ v1.0+
+* `ElasticSearch ICU Analysis`_ plugin
 
 Platform Specific Instructions
 ------------------------------
 
-To install the dependencies on any specific platform, follow the instructions in one of the following files (see below).  
+To install the dependencies on any specific platform, follow the instructions in one of the following files (see below).
 
 * ArchLinux_
 * Debian_
 * Fedora_
-* OSX_ 
+* OSX_
 * Ubuntu_
 * Vagrant_ (*contains information for installing on Windows*)
 
@@ -29,9 +30,8 @@ docs should be done in a pull request.
 General Instructions
 --------------------
 
-In the future, releases will include built versions of static assets which
-will eliminate the need for those who wish to integrate with their own
-Python web services but do not need to modify the front-end sources.
+Once the basic dependencies are installed, the `ElasticSearch ICU Analysis`_
+plugin is needed. Follow the instructions available from that project.
 
 The project code itself is a pyramid_ application which can be integrated
 into any WSGI_ compatible framework and run on any WSGI web server (such
@@ -61,6 +61,10 @@ For production use, the application will use UglifyJS_ and clean-css_ for
 minification needs. These are not required when running the project in a
 development configuration but will be installed locally.
 
+In the future, releases will include built versions of static assets which
+will eliminate the need for those who wish to integrate with their own
+Python web services but do not need to modify the front-end sources.
+
 Troubleshooting
 ---------------
 
@@ -73,6 +77,7 @@ turn off discovery.
 .. _gunicorn: http://gunicorn.org/
 .. _uWSGI: http://projects.unbit.it/uwsgi/
 .. _ElasticSearch: http://www.elasticsearch.org/
+.. _ElasticSearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
 .. _CoffeeScript: http://coffeescript.org/
 .. _Sass: http://sass-lang.com/
 .. _Compass: http://compass-style.org/

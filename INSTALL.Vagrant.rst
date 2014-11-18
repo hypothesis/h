@@ -78,4 +78,3 @@ Do that by configuring this git repository as follows:
 
 You will probably also need to ``git reset --hard`` to re-extract all files with approproate line endings.
 Do this *before* proceeding with bootstrapping.
-
