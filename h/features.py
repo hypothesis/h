@@ -31,12 +31,12 @@ class UnknownFeatureError(Exception):
     pass
 
 
-def get_client(request):
+def get_client(config):
     """
     get_client returns a feature client configured using data found in the
     settings of the current application.
     """
-    storage = _features_from_settings(request.registry.settings)
+    storage = _features_from_settings(config.registry.settings)
 
     return Client(storage)
 
@@ -52,4 +52,4 @@ def _features_from_settings(settings, prefix=__package__ + '.feature.'):
 
 
 def includeme(config):
-    config.set_request_property(get_client, name='feature', reify=True)
+    config.registry.feature = get_client(config)

@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
+import base64
 import copy
 import datetime
 import json
 import logging
 import operator
+import random
 import re
+import struct
 import unicodedata
 
 from dateutil.tz import tzutc
+import gevent
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.events import subscriber
-from pyramid_sockjs.session import Session
+from pyramid_sockjs import get_session_manager
+from pyramid_sockjs import Session
 import transaction
 
 from h import events
@@ -430,14 +435,6 @@ class FilterHandler(object):
             return False
 
 
-def annotation_packet(annotations, action):
-    return {
-        'payload': annotations,
-        'type': 'annotation-notification',
-        'options': {'action': action},
-    }
-
-
 class StreamerSession(Session):
     client_id = None
     filter = None
@@ -452,17 +449,17 @@ class StreamerSession(Session):
         self.received = len(annotations)
 
         # Can send zero to indicate that no past data is matched
-        packet = annotation_packet(annotations, 'past')
+        packet = _annotation_packet(annotations, 'past')
         self.send(packet)
 
     def on_message(self, msg):
         transaction.begin()
         try:
-            struct = json.loads(msg)
-            msg_type = struct.get('messageType', 'filter')
+            data = json.loads(msg)
+            msg_type = data.get('messageType', 'filter')
 
             if msg_type == 'filter':
-                payload = struct['filter']
+                payload = data['filter']
                 self.offsetFrom = 0
 
                 # Let's try to validate the schema
@@ -476,14 +473,14 @@ class StreamerSession(Session):
                         self.offsetFrom = int(self.query.query['size'])
                     self.send_annotations()
             elif msg_type == 'more_hits':
-                more_hits = struct.get('moreHits', 50)
+                more_hits = data.get('moreHits', 50)
                 if 'size' in self.query.query:
                     self.query.query['from'] = self.offsetFrom
                     self.query.query['size'] = more_hits
                     self.send_annotations()
                     self.offsetFrom += self.received
             elif msg_type == 'client_id':
-                self.client_id = struct.get('value')
+                self.client_id = data.get('value')
         except:
             log.exception("Parsing filter: %s", msg)
             transaction.abort()
@@ -492,44 +489,90 @@ class StreamerSession(Session):
             transaction.commit()
 
 
-class StreamClient(object):
-    def __init__(self, session):
-        self.session = session
-
-    def send_annotation_event(self, annotation, action):
-        if action == 'read':
-            return
-
-        if not self.session.request.has_permission('read', annotation):
-            return
-
-        if not self._filter_permits(annotation, action):
-            return
-
-        packet = annotation_packet([annotation], action)
-        self.session.send(packet)
-
-    def _filter_permits(self, annotation, action):
-        if self.session.filter is None:
-            return True
-        return self.session.filter.match(annotation, action)
-
-
 @subscriber(events.AnnotationEvent)
-def after_action(event):
-    if not event.request.feature('streamer'):
+def cb_annotation_event(event):
+    queue = event.request.get_queue_writer()
+
+    data = {
+        'action': event.action,
+        'annotation': event.annotation,
+        'src_client_id': event.request.headers.get('X-Client-Id'),
+    }
+    queue.publish('annotations', json.dumps(data))
+
+
+def _annotation_packet(annotations, action):
+    """
+    Generate a packet suitable for sending down the websocket that represents
+    the specified action applied to the passed annotations.
+    """
+    return {
+        'payload': annotations,
+        'type': 'annotation-notification',
+        'options': {'action': action},
+    }
+
+
+def broadcast_from_queue(queue, manager):
+    """
+    Pulls messages from a passed queue object, and handles dispatching them to
+    appropriate active sessions of the manager. Manager is a
+    :py:func:`pyramid_sockjs.SessionManager` or an object with a similar API.
+    """
+    for message in queue:
+        data = json.loads(message.body)
+
+        for session in manager.active_sessions():
+            if session.client_id == data['src_client_id']:
+                continue
+
+            annotation = Annotation(**data['annotation'])
+            send_annotation_event(session, annotation, data['action'])
+
+
+def send_annotation_event(session, annotation, action):
+    """
+    Inspects the passed annotation and action and decides whether or not
+    the underlying session should receive the event. If it should, the
+    action is wrapped up in a websocket packet and sent to the client.
+    """
+    if action == 'read':
         return
 
-    client_id = event.request.headers.get('X-Client-Id')
-    manager = event.request.get_sockjs_manager()
+    if not session.request.has_permission('read', annotation):
+        return
 
-    for session in manager.active_sessions():
-        if session.client_id != client_id:
-            client = StreamClient(session)
-            client.send_annotation_event(event.annotation, event.action)
+    if session.filter is not None:
+        if not session.filter.match(annotation, action):
+            return
+
+    packet = _annotation_packet([annotation], action)
+    session.send(packet)
+
+
+def _random_id():
+    """Generate a short random string"""
+    data = struct.pack('Q', random.getrandbits(64))
+    return base64.urlsafe_b64encode(data).strip(b'=')
 
 
 def includeme(config):
     config.include('pyramid_sockjs')
-    config.add_sockjs_route(prefix='__streamer__', session=StreamerSession)
+    config.add_sockjs_route(name='streamer',
+                            prefix='__streamer__',
+                            session=StreamerSession)
     config.scan(__name__)
+
+    if config.registry.feature('streamer'):
+        # Process-internal queue to pass messages between greenlets
+        q = gevent.queue.Queue()
+
+        # Start a greenlet to read from the external NSQ queue
+        reader = config.get_queue_reader('annotations',
+                                         'stream-' + _random_id() + '#ephemeral')
+        reader.on_message.connect(lambda r, message: q.put(message), weak=False)
+        reader.start(block=False)
+
+        # Start a greenlet to process the messages
+        manager = get_session_manager('streamer', config.registry)
+        gevent.spawn(broadcast_from_queue, q, manager)

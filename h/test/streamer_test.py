@@ -3,13 +3,51 @@
 
 import unittest
 
+from collections import namedtuple
+import json
+
 from mock import MagicMock
+from mock import call
 from mock import patch
 from pyramid.testing import DummyRequest
 
 from h.streamer import FilterToElasticFilter
-from h.streamer import StreamClient
-from h.streamer import annotation_packet
+from h.streamer import send_annotation_event
+from h.streamer import broadcast_from_queue
+
+
+FakeMessage = namedtuple('FakeMessage', 'body')
+FakeSession = namedtuple('FakeSession', 'client_id')
+
+
+def has_ordered_sublist(lst, sublist):
+    """
+    Determines whether the passed list contains, in the specified order, all
+    the elements in sublist.
+    """
+    sub_idx = 0
+    max_idx = len(sublist) - 1
+    for x in lst:
+        if x == sublist[sub_idx]:
+            sub_idx += 1
+        if sub_idx > max_idx:
+            return True
+    return sub_idx > max_idx
+
+
+class ObjectIncluding(object):
+    def __init__(self, include):
+        self.include = include
+
+    def __eq__(self, other):
+        try:
+            for k, v in self.include.items():
+                if other[k] != v:
+                    return False
+        except (KeyError, TypeError):
+            return False
+        else:
+            return True
 
 
 # Tests for the FilterToElasticFilter class
@@ -187,33 +225,84 @@ def test_operator_call():
     assert query['term']['text'] == expected
 
 
-def test_annotation_packet():
-    res = annotation_packet(['foo', 'bar'], 'read')
-    assert res['payload'] == ['foo', 'bar']
-    assert res['type'] == 'annotation-notification'
-    assert res['options']['action'] == 'read'
+class TestBroadcast(unittest.TestCase):
+    def setUp(self):
+        self.message_data = [
+            {'annotation': {'id': 1},
+             'action': 'delete',
+             'src_client_id': 'pigeon'},
+            {'annotation': {'id': 2},
+             'action': 'update',
+             'src_client_id': 'pigeon'},
+            {'annotation': {'id': 3},
+             'action': 'delete',
+             'src_client_id': 'cat'},
+        ]
+        self.messages = [FakeMessage(json.dumps(m)) for m in self.message_data]
+        self.sess_giraffe = FakeSession('giraffe')
+        self.sess_pigeon = FakeSession('pigeon')
+
+        self.queue = MagicMock()
+        self.queue.__iter__.return_value = self.messages
+
+        self.manager = MagicMock()
+        self.manager.active_sessions.return_value = [self.sess_giraffe,
+                                                     self.sess_pigeon]
+
+        self.send_patcher = patch('h.streamer.send_annotation_event')
+        self.send = self.send_patcher.start()
+
+    def tearDown(self):
+        self.send_patcher.stop()
+
+    def test_non_sending_session_receives_all(self):
+        broadcast_from_queue(self.queue, self.manager)
+
+        sess = self.sess_giraffe
+
+        expected = [
+            call(sess, ObjectIncluding({'id': 1}), 'delete'),
+            call(sess, ObjectIncluding({'id': 2}), 'update'),
+            call(sess, ObjectIncluding({'id': 3}), 'delete'),
+        ]
+
+        assert has_ordered_sublist(self.send.mock_calls, expected)
+
+    def test_sending_session_does_not_receive_own(self):
+        broadcast_from_queue(self.queue, self.manager)
+
+        sess = self.sess_pigeon
+
+        expected = call(sess, ObjectIncluding({'id': 3}), 'delete')
+        unexpected = [
+            call(sess, ObjectIncluding({'id': 1}), 'delete'),
+            call(sess, ObjectIncluding({'id': 2}), 'update'),
+        ]
+
+        assert expected in self.send.mock_calls
+        for c in unexpected:
+            assert c not in self.send.mock_calls
 
 
-class TestStreamClient(unittest.TestCase):
+class TestSendAnnotationEvent(unittest.TestCase):
     def setUp(self):
         self.session = MagicMock()
         self.session.filter.match.return_value = True
-        self.c = StreamClient(self.session)
 
     def test_send_annotation_event_no_filter(self):
         self.session.filter = None
 
-        self.c.send_annotation_event({}, 'update')
+        send_annotation_event(self.session, {}, 'update')
         assert self.session.send.called
 
     def test_send_annotation_event_doesnt_send_reads(self):
-        self.c.send_annotation_event({}, 'read')
+        send_annotation_event(self.session, {}, 'read')
         assert not self.session.send.called
 
     def test_send_annotation_event_filtered(self):
         self.session.filter.match.return_value = False
 
-        self.c.send_annotation_event({}, 'update')
+        send_annotation_event(self.session, {}, 'update')
         assert not self.session.send.called
 
     def test_send_annotation_event_check_permissions(self):
@@ -221,6 +310,6 @@ class TestStreamClient(unittest.TestCase):
 
         anno = object()
 
-        self.c.send_annotation_event(anno, 'update')
+        send_annotation_event(self.session, anno, 'update')
         assert not self.session.send.called
         assert self.session.request.has_permission.called_with('read', anno)
