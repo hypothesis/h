@@ -85,7 +85,10 @@
     }
 
     function isChromeURL(url) {
-      return url.indexOf('chrome://') === 0 || url.indexOf('chrome-devtools://') === 0;
+      var isBrowser = url.indexOf('chrome:') === 0;
+      var isDevtools = url.indexOf('chrome-devtools:') == 0;
+      var isExtension = url.indexOf('chrome-extension:') === 0;
+      return isBrowser || isDevtools || isExtension;
     }
 
     function injectionFailed(tab) {

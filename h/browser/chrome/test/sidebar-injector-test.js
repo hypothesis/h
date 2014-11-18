@@ -50,6 +50,17 @@ describe('SidebarInjector', function () {
       });
     });
 
+    it('bails early when trying to load a extension url', function (done) {
+      var spy = fakeChromeTabs.executeScript;
+      var url = 'chrome-extension://foobar/';
+
+      injector.injectIntoTab({id: 1, url: url}, function (err) {
+        assert.instanceOf(err, h.RestrictedProtocolError);
+        sinon.assert.notCalled(spy);
+        done();
+      });
+    });
+
     describe('when viewing a remote PDF', function () {
       it('injects hypothesis into the page', function (done) {
         var spy = fakeChromeTabs.update.yields({tab: 1});
@@ -142,27 +153,39 @@ describe('SidebarInjector', function () {
   });
 
   describe('.removeFromTab', function () {
-    it('bails early when trying to load a chrome url', function (done) {
+    it('bails early when trying to unload a chrome url', function (done) {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome://extensions/';
 
-      injector.injectIntoTab({id: 1, url: url}, function (err) {
+      injector.removeFromTab({id: 1, url: url}, function (err) {
         assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
         done();
       });
     });
 
-    it('bails early when trying to load a devtools url', function (done) {
+    it('bails early when trying to unload a devtools url', function (done) {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome-devtools://foobar/';
 
-      injector.injectIntoTab({id: 1, url: url}, function (err) {
+      injector.removeFromTab({id: 1, url: url}, function (err) {
         assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
         done();
       });
     });
+
+    it('bails early when trying to unload a extension url', function (done) {
+      var spy = fakeChromeTabs.executeScript;
+      var url = 'chrome-extension://foobar/';
+
+      injector.removeFromTab({id: 1, url: url}, function (err) {
+        assert.instanceOf(err, h.RestrictedProtocolError);
+        sinon.assert.notCalled(spy);
+        done();
+      });
+    });
+
 
     describe('when viewing a PDF', function () {
       it('reverts the tab back to the original document', function () {
