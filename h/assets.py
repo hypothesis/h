@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-import logging
 import re
 
 from deform.field import Field
 import pyramid
-
-log = logging.getLogger(__name__)
 
 
 class WebassetsResourceRegistry(object):
@@ -18,7 +15,6 @@ class WebassetsResourceRegistry(object):
 
         urls = []
         for name, _ in requirements:
-            log.info('name: ' + str(name))
             if name in self.env:
                 bundle = self.env[name]
                 urls.extend(bundle.urls())

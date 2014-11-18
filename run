@@ -9,12 +9,12 @@ fi
 ARGS=("$@")
 
 if test $# -eq 0; then
-  ARGS+=("--reload --paste development.ini")
+  ARGS+=("--reload" "--log-config" "development.ini" "--paste" "development.ini")
 elif test $# -eq 1; then
-  ARGS=("--paste ${ARGS[*]}")
+  ARGS=("--log-config" "$1" "--paste" "$1")
 fi
 
-gunicorn ${ARGS[*]}
+gunicorn "${ARGS[@]}"
 SERVE_EXIT_STATUS=$?
 
 if [ "$SERVE_EXIT_STATUS" -ne 0 ]; then
