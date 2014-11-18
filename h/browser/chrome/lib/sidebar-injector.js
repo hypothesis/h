@@ -86,13 +86,9 @@
 
     function isChromeURL(url) {
       var isBrowser = url.indexOf('chrome:') === 0;
-      var isDevtools = url.indexOf('chrome-devtools:') == 0;
+      var isDevtools = url.indexOf('chrome-devtools:') === 0;
       var isExtension = url.indexOf('chrome-extension:') === 0;
       return isBrowser || isDevtools || isExtension;
-    }
-
-    function injectionFailed(tab) {
-      setBrowserAction(tab.id, state(tab.id, 'sleeping'));
     }
 
     function injectIntoPDF(tab, fn) {
@@ -135,7 +131,7 @@
 
       chromeTabs.executeScript(tab.id, {code: code.replace('{}', src)}, fn);
     }
-  };
+  }
 
   h.SidebarInjector = SidebarInjector;
 })(window.h || (window.h = {}));

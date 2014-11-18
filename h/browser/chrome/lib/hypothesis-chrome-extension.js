@@ -16,9 +16,9 @@
 
     this.listen = function (window) {
       chromeBrowserAction.onClicked.addListener(onBrowserActionClicked);
-      chromeTabs.onCreated.addListener(onTabCreated)
-      chromeTabs.onUpdated.addListener(onTabUpdated)
-      chromeTabs.onRemoved.addListener(onTabRemoved)
+      chromeTabs.onCreated.addListener(onTabCreated);
+      chromeTabs.onUpdated.addListener(onTabUpdated);
+      chromeTabs.onRemoved.addListener(onTabRemoved);
 
       window.addEventListener('storage', function (event) {
         if (event.key === 'state' && event.newValue !== null) {
@@ -53,7 +53,7 @@
         store.unset(tabId);
         tabErrors.unsetTabError(tabId);
       }
-    };
+    }
 
     function onBrowserActionClicked(tab) {
       var tabError = tabErrors.getTabError(tab.id);
@@ -66,7 +66,7 @@
       else {
         state.activateTab(tab.id);
       }
-    };
+    }
 
     function onTabUpdated(tabId, changeInfo, tab) {
       if (state.isTabErrored(tabId)) {
