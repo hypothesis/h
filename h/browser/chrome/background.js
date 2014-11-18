@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var browserExtension = new h.HypotheisChromeExtension({
+  var browserExtension = new h.HypothesisChromeExtension({
     chromeTabs: chrome.tabs,
     chromeBrowserAction: chrome.browserAction,
     extensionURL: function (path) {

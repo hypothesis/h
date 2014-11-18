@@ -1,7 +1,7 @@
 (function (h) {
   'use strict';
 
-  function HypotheisChromeExtension(options) {
+  function HypothesisChromeExtension(options) {
     var chromeTabs = options.chromeTabs;
     var chromeBrowserAction = options.chromeBrowserAction;
     var help  = new h.HelpPage(chromeTabs, options.extensionURL);
@@ -105,5 +105,5 @@
     }
   }
 
-  h.HypotheisChromeExtension = HypotheisChromeExtension;
+  h.HypothesisChromeExtension = HypothesisChromeExtension;
 })(window.h || (window.h = {}));

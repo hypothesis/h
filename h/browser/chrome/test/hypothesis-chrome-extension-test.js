@@ -1,9 +1,9 @@
-describe('HypotheisChromeExtension', function () {
+describe('HypothesisChromeExtension', function () {
   'use strict';
 
   var assert = chai.assert;
   var sandbox = sinon.sandbox.create();
-  var HypotheisChromeExtension = h.HypotheisChromeExtension;
+  var HypothesisChromeExtension = h.HypothesisChromeExtension;
   var ext;
   var fakeChromeTabs;
   var fakeChromeBrowserAction;
@@ -15,7 +15,7 @@ describe('HypotheisChromeExtension', function () {
   var fakeSidebarInjector;
 
   function createExt() {
-    return new HypotheisChromeExtension({
+    return new HypothesisChromeExtension({
       chromeTabs: fakeChromeTabs,
       chromeBrowserAction: fakeChromeBrowserAction,
       extensionURL: sinon.stub(),
