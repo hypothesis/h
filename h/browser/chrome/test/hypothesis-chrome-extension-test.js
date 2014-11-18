@@ -18,8 +18,8 @@ describe('HypothesisChromeExtension', function () {
     return new HypothesisChromeExtension({
       chromeTabs: fakeChromeTabs,
       chromeBrowserAction: fakeChromeBrowserAction,
-      extensionURL: sinon.stub(),
-      isAllowedFileSchemeAccess: sinon.stub().yields(true)
+      extensionURL: sandbox.stub(),
+      isAllowedFileSchemeAccess: sandbox.stub().yields(true)
     });
   }
 
@@ -27,35 +27,35 @@ describe('HypothesisChromeExtension', function () {
     fakeChromeTabs = {};
     fakeChromeBrowserAction = {};
     fakeHelpPage = {
-      showHelpForError: sinon.spy()
+      showHelpForError: sandbox.spy()
     };
     fakeTabStore = {
-      all: sinon.spy(),
-      set: sinon.spy(),
-      unset: sinon.spy(),
+      all: sandbox.spy(),
+      set: sandbox.spy(),
+      unset: sandbox.spy(),
     };
     fakeTabState = {
-      activateTab: sinon.spy(),
-      deactivateTab: sinon.spy(),
-      errorTab: sinon.spy(),
-      previousState: sinon.spy(),
-      isTabActive: sinon.stub().returns(false),
-      isTabInactive: sinon.stub().returns(false),
-      isTabErrored: sinon.stub().returns(false),
+      activateTab: sandbox.spy(),
+      deactivateTab: sandbox.spy(),
+      errorTab: sandbox.spy(),
+      previousState: sandbox.spy(),
+      isTabActive: sandbox.stub().returns(false),
+      isTabInactive: sandbox.stub().returns(false),
+      isTabErrored: sandbox.stub().returns(false),
     };
     fakeTabErrorCache = {
-      getTabError: sinon.stub(),
-      setTabError: sinon.stub(),
-      unsetTabError: sinon.stub(),
+      getTabError: sandbox.stub(),
+      setTabError: sandbox.stub(),
+      unsetTabError: sandbox.stub(),
     };
     fakeBrowserAction = {
-      setState: sinon.spy(),
-      activate: sinon.spy(),
-      deactivate: sinon.spy(),
+      setState: sandbox.spy(),
+      activate: sandbox.spy(),
+      deactivate: sandbox.spy(),
     };
     fakeSidebarInjector = {
-      injectIntoTab: sinon.stub(),
-      removeFromTab: sinon.stub(),
+      injectIntoTab: sandbox.stub(),
+      removeFromTab: sandbox.stub(),
     };
 
     sandbox.stub(h, 'HelpPage').returns(fakeHelpPage);
@@ -77,11 +77,11 @@ describe('HypothesisChromeExtension', function () {
 
     beforeEach(function () {
       tabs = [];
-      fakeChromeTabs.query = sinon.stub().yields(tabs);
+      fakeChromeTabs.query = sandbox.stub().yields(tabs);
 
-      fakeTabState.isTabActive = sinon.stub().returns(false);
-      fakeTabState.activateTab = sinon.spy();
-      fakeTabState.deactivateTab = sinon.spy();
+      fakeTabState.isTabActive = sandbox.stub().returns(false);
+      fakeTabState.activateTab = sandbox.spy();
+      fakeTabState.deactivateTab = sandbox.spy();
     });
 
     it('sets up the state for tabs', function () {
@@ -106,29 +106,29 @@ describe('HypothesisChromeExtension', function () {
 
     beforeEach(function () {
       fakeChromeBrowserAction.onClicked = {
-        addListener: sinon.spy(function (fn) {
+        addListener: sandbox.spy(function (fn) {
           onClickedHandler = fn;
         })
       };
       fakeChromeTabs.onCreated = {
-        addListener: sinon.spy(function (fn) {
+        addListener: sandbox.spy(function (fn) {
           onCreatedHandler = fn;
         })
       };
       fakeChromeTabs.onUpdated = {
-        addListener: sinon.spy(function (fn) {
+        addListener: sandbox.spy(function (fn) {
           onUpdatedHandler = fn;
         })
       };
       fakeChromeTabs.onRemoved = {
-        addListener: sinon.spy(function (fn) {
+        addListener: sandbox.spy(function (fn) {
           onRemovedHandler = fn;
         })
       };
     });
 
     it('sets up event listeners', function () {
-      ext.listen({addEventListener: sinon.stub()});
+      ext.listen({addEventListener: sandbox.stub()});
       sinon.assert.called(fakeChromeBrowserAction.onClicked.addListener);
       sinon.assert.called(fakeChromeTabs.onCreated.addListener);
       sinon.assert.called(fakeChromeTabs.onUpdated.addListener);
@@ -137,8 +137,8 @@ describe('HypothesisChromeExtension', function () {
 
     describe('when a tab is created', function () {
       beforeEach(function () {
-        fakeTabState.deactivateTab = sinon.spy();
-        ext.listen({addEventListener: sinon.stub()});
+        fakeTabState.deactivateTab = sandbox.spy();
+        ext.listen({addEventListener: sandbox.stub()});
       });
 
       it('registers the new tab', function () {
@@ -149,9 +149,9 @@ describe('HypothesisChromeExtension', function () {
 
     describe('when a tab is updated', function () {
       beforeEach(function () {
-        fakeTabState.restorePreviousState = sinon.spy();
+        fakeTabState.restorePreviousState = sandbox.spy();
 
-        ext.listen({addEventListener: sinon.stub()});
+        ext.listen({addEventListener: sandbox.stub()});
       });
 
       it('injects the sidebar if the tab is active', function () {
@@ -193,8 +193,8 @@ describe('HypothesisChromeExtension', function () {
 
     describe('when a tab is removed', function () {
       beforeEach(function () {
-        fakeTabState.clearTab = sinon.spy();
-        ext.listen({addEventListener: sinon.stub()});
+        fakeTabState.clearTab = sandbox.spy();
+        ext.listen({addEventListener: sandbox.stub()});
       });
 
       it('clears the tab', function () {
@@ -205,7 +205,7 @@ describe('HypothesisChromeExtension', function () {
 
     describe('when the browser icon is clicked', function () {
       beforeEach(function () {
-        ext.listen({addEventListener: sinon.stub()});
+        ext.listen({addEventListener: sandbox.stub()});
       });
 
       it('activate the tab if the tab is inactive', function () {
@@ -301,7 +301,7 @@ describe('HypothesisChromeExtension', function () {
     var onChangeHandler;
 
     beforeEach(function () {
-      fakeChromeTabs.get = sinon.stub().yields({id: 1});
+      fakeChromeTabs.get = sandbox.stub().yields({id: 1});
       onChangeHandler = h.TabState.lastCall.args[1];
     });
 
