@@ -10,9 +10,11 @@ import unicodedata
 from dateutil.tz import tzutc
 from jsonpointer import resolve_pointer
 from jsonschema import validate
+from pyramid.events import subscriber
 from pyramid_sockjs.session import Session
 import transaction
 
+from h import events
 from h.api import get_user
 from h.models import Annotation
 
