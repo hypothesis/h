@@ -21,6 +21,7 @@ module.exports = function(config) {
       'lib/errors.js',
       'lib/tab-store.js',
       'lib/tab-state.js',
+      'lib/tab-error-cache.js',
       'lib/sidebar-injector.js',
       'lib/browser-action.js',
       'lib/help-page.js',
