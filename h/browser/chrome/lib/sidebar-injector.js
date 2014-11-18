@@ -19,25 +19,22 @@
       fn = fn || function () {};
 
       if (isChromeURL(tab.url)) {
-        return setTimeout(fn.bind(null, null));
+        return setTimeout(fn.bind(null, new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages')));
       }
 
       function checkPDF(success, fallback) {
-        injectConfig(tab, function () {
-          if (isPDFURL(tab.url)) {
-            success(tab, fn);
-          } else {
-            fallback(tab, fn);
-          }
-        });
+        if (isPDFURL(tab.url)) {
+          success(tab, fn);
+        } else {
+          fallback(tab, fn);
+        }
       }
 
       if (isFileURL(tab.url)) {
-        if (isPDFURL(tab.url)) {
-          checkPDF(injectIntoLocalPDF, showLocalFileHelpPage);
-        } else {
-          fn(createError('local-file', 'Local non-PDF files are not supported'));
-        }
+        checkPDF(injectIntoLocalPDF, function () {
+          var err = new h.LocalFileError('Local non-PDF files are not supported');
+          setTimeout(fn.bind(null, err));
+        });
       } else {
         checkPDF(injectIntoPDF, injectIntoHTML);
       }
@@ -48,7 +45,7 @@
       fn = fn || function () {};
 
       if (isChromeURL(tab.url)) {
-        return setTimeout(fn.bind(null, null));
+        return setTimeout(fn.bind(null, new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages')));
       }
 
       if (isPDFViewerURL(tab.url)) {
@@ -110,42 +107,22 @@
         if (isAllowed) {
           injectIntoPDF(tab, fn);
         } else {
-          setTimeout(fn.bind(null, createError('no-file-access', 'Local file scheme access denied')));
+          setTimeout(fn.bind(null, new h.NoFileAccessError('Local file scheme access denied')));
         }
       });
     }
 
     function injectIntoHTML(tab, fn) {
-      chromeTabs.executeScript(tab.id, {
-        file: 'public/embed.js'
-      }, function (result) {
-        if (result !== undefined) {
+      injectConfig(tab, function () {
+        chromeTabs.executeScript(tab.id, {
+          file: 'public/embed.js'
+        }, function () {
           chromeTabs.executeScript(tab.id, {
             code: 'window.annotator = true;'
           }, fn.bind(null, null));
-        } else {
-          setTimeout(fn.bind(null, createError('local-file', 'Local non-PDF files are not supported')));
-        }
+        });
       });
     }
-
-    function createError(type, description) {
-      var err = new Error(description);
-      err.type = type;
-      return err;
-    }
-
-    // Render the help page. The helpSection should correspond to the id of a
-    // section within the help page.
-    function showHelpPage(helpSection, tab) {
-      injectionFailed(tab);
-      chromeTabs.update(tab.id, {
-        url:  extensionURL('/help/permissions.html#' + helpSection)
-      });
-    }
-
-    var showLocalFileHelpPage = showHelpPage.bind(null, 'local-file');
-    var showNoFileAccessHelpPage = showHelpPage.bind(null, 'no-file-access');
 
     function injectConfig(tab, fn) {
       var src  = extensionURL('/public/config.js');

@@ -32,7 +32,8 @@ describe('SidebarInjector', function () {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome://extensions/';
 
-      injector.injectIntoTab({id: 1, url: url}, function () {
+      injector.injectIntoTab({id: 1, url: url}, function (err) {
+        assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
         done();
       });
@@ -42,7 +43,8 @@ describe('SidebarInjector', function () {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome-devtools://foobar/';
 
-      injector.injectIntoTab({id: 1, url: url}, function () {
+      injector.injectIntoTab({id: 1, url: url}, function (err) {
+        assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
         done();
       });
@@ -113,7 +115,7 @@ describe('SidebarInjector', function () {
           var url = 'file://foo.pdf';
 
           injector.injectIntoTab({id: 1, url: url}, function (err) {
-            assert.ok(err, 'An error was returned');
+            assert.instanceOf(err, h.NoFileAccessError);
             done();
           });
         });
@@ -124,7 +126,7 @@ describe('SidebarInjector', function () {
       it('returns an error', function (done) {
         var url = 'file://foo.html';
         injector.injectIntoTab({id: 1, url: url}, function (err) {
-          assert(err, 'An error was returned');
+          assert.instanceOf(err, h.LocalFileError);
           done();
         });
       });
@@ -144,7 +146,8 @@ describe('SidebarInjector', function () {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome://extensions/';
 
-      injector.injectIntoTab({id: 1, url: url}, function () {
+      injector.injectIntoTab({id: 1, url: url}, function (err) {
+        assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
         done();
       });
@@ -154,7 +157,8 @@ describe('SidebarInjector', function () {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome-devtools://foobar/';
 
-      injector.injectIntoTab({id: 1, url: url}, function () {
+      injector.injectIntoTab({id: 1, url: url}, function (err) {
+        assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
         done();
       });
