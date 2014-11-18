@@ -4,6 +4,7 @@
   function HypotheisChromeExtension(options) {
     var chromeTabs = options.chromeTabs;
     var chromeBrowserAction = options.chromeBrowserAction;
+    var help  = new h.HelpPage(chromeTabs, options.extensionURL);
     var store = new h.TabStore(localStorage);
     var state = new h.TabState(store.all(), onTabStateChange);
     var browserAction = new h.BrowserAction(chromeBrowserAction);
@@ -11,6 +12,7 @@
       extensionURL: options.extensionURL,
       isAllowedFileSchemeAccess: options.isAllowedFileSchemeAccess,
     });
+    var tabErrors = new h.TabErrorCache();
 
     this.listen = function (window) {
       chromeBrowserAction.onClicked.addListener(onBrowserActionClicked);
@@ -44,16 +46,19 @@
 
         if (!state.isTabErrored(tabId)) {
           store.set(tabId, current);
+          tabErrors.unsetTabError(tabId);
           chromeTabs.get(tabId, updateTabDocument);
         }
       } else {
         store.unset(tabId);
+        tabErrors.unsetTabError(tabId);
       }
     };
 
     function onBrowserActionClicked(tab) {
-      if (state.isTabErrored(tab.id)) {
-        // Show Help
+      var tabError = tabErrors.getTabError(tab.id);
+      if (state.isTabErrored(tab.id) && tabError) {
+        help.showHelpForError(tab.id, tabError);
       }
       else if (state.isTabActive(tab.id)) {
         state.deactivateTab(tab.id);
@@ -68,7 +73,7 @@
         state.restorePreviousState(tabId);
       }
 
-      if (state.isTabActive(tab.id)) {
+      if (state.isTabActive(tabId)) {
         browserAction.activate(tabId);
       } else {
         browserAction.deactivate(tabId);
@@ -87,7 +92,12 @@
 
     function updateTabDocument(tab) {
       if (state.isTabActive(tab.id)) {
-        sidebar.injectIntoTab(tab);
+        sidebar.injectIntoTab(tab, function (err) {
+          if (err) {
+            tabErrors.setTabError(tab.id, err);
+            state.errorTab(tab.id);
+          }
+        });
       }
       else if (state.isTabInactive(tab.id)) {
         sidebar.removeFromTab(tab);

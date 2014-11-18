@@ -7,8 +7,10 @@ describe('HypotheisChromeExtension', function () {
   var ext;
   var fakeChromeTabs;
   var fakeChromeBrowserAction;
+  var fakeHelpPage;
   var fakeTabStore;
   var fakeTabState;
+  var fakeTabErrorCache;
   var fakeBrowserAction;
   var fakeSidebarInjector;
 
@@ -24,6 +26,9 @@ describe('HypotheisChromeExtension', function () {
   beforeEach(function () {
     fakeChromeTabs = {};
     fakeChromeBrowserAction = {};
+    fakeHelpPage = {
+      showHelpForError: sinon.spy()
+    };
     fakeTabStore = {
       all: sinon.spy(),
       set: sinon.spy(),
@@ -38,18 +43,25 @@ describe('HypotheisChromeExtension', function () {
       isTabInactive: sinon.stub().returns(false),
       isTabErrored: sinon.stub().returns(false),
     };
+    fakeTabErrorCache = {
+      getTabError: sinon.stub(),
+      setTabError: sinon.stub(),
+      unsetTabError: sinon.stub(),
+    };
     fakeBrowserAction = {
       setState: sinon.spy(),
       activate: sinon.spy(),
       deactivate: sinon.spy(),
     };
     fakeSidebarInjector = {
-      injectIntoTab: sinon.spy(),
-      removeFromTab: sinon.spy(),
+      injectIntoTab: sinon.stub(),
+      removeFromTab: sinon.stub(),
     };
 
+    sandbox.stub(h, 'HelpPage').returns(fakeHelpPage);
     sandbox.stub(h, 'TabStore').returns(fakeTabStore);
     sandbox.stub(h, 'TabState').returns(fakeTabState);
+    sandbox.stub(h, 'TabErrorCache').returns(fakeTabErrorCache);
     sandbox.stub(h, 'BrowserAction').returns(fakeBrowserAction);
     sandbox.stub(h, 'SidebarInjector').returns(fakeSidebarInjector);
 
@@ -210,7 +222,78 @@ describe('HypotheisChromeExtension', function () {
         sinon.assert.calledWith(fakeTabState.deactivateTab, 1);
       });
 
-      it('shows help if the tab is errored');
+      describe('when a tab has an local-file error', function () {
+        it('puts the tab into an errored state', function () {
+          var tab = {id: 1, url: 'file://foo.html'};
+
+          fakeTabState.isTabActive.withArgs(1).returns(true);
+          fakeSidebarInjector.injectIntoTab.yields(new h.LocalFileError('msg'));
+          onUpdatedHandler(tab.id, {}, tab); // Trigger failed render.
+
+          sinon.assert.called(fakeTabState.errorTab);
+          sinon.assert.calledWith(fakeTabState.errorTab, 1);
+        });
+
+        it('shows the local file help page', function () {
+          var tab = {id: 1, url: 'file://foo.html'};
+
+          fakeTabErrorCache.getTabError.returns(new h.LocalFileError('msg'));
+          fakeTabState.isTabErrored.withArgs(1).returns(true);
+          onClickedHandler(tab);
+
+          sinon.assert.called(fakeHelpPage.showHelpForError);
+          sinon.assert.calledWith(fakeHelpPage.showHelpForError, 1, sinon.match.instanceOf(h.LocalFileError));
+        });
+      });
+
+      describe('when a tab has an file-access error', function () {
+        it('puts the tab into an errored state', function () {
+          var tab = {id: 1, url: 'file://foo.html'};
+
+          fakeTabState.isTabActive.withArgs(1).returns(true);
+          fakeSidebarInjector.injectIntoTab.yields(new h.NoFileAccessError('msg'));
+          onUpdatedHandler(tab.id, {}, tab); // Trigger failed render.
+
+          sinon.assert.called(fakeTabState.errorTab);
+          sinon.assert.calledWith(fakeTabState.errorTab, 1);
+        });
+
+        it('shows the local file help page', function () {
+          var tab = {id: 1, url: 'file://foo.html'};
+
+          fakeTabErrorCache.getTabError.returns(new h.NoFileAccessError('msg'));
+          fakeTabState.isTabErrored.withArgs(1).returns(true);
+          onClickedHandler(tab);
+
+          sinon.assert.called(fakeHelpPage.showHelpForError);
+          sinon.assert.calledWith(fakeHelpPage.showHelpForError, 1, sinon.match.instanceOf(h.NoFileAccessError));
+        });
+      });
+
+      describe('when a tab has an chrome error', function () {
+        it('puts the tab into an errored state', function () {
+          var tab = {id: 1, url: 'file://foo.html'};
+
+          fakeTabState.isTabActive.withArgs(1).returns(true);
+          fakeSidebarInjector.injectIntoTab.yields(new h.RestrictedProtocolError('msg'));
+          onUpdatedHandler(tab.id, {}, tab); // Trigger failed render.
+
+          sinon.assert.called(fakeTabState.errorTab);
+          sinon.assert.calledWith(fakeTabState.errorTab, 1);
+        });
+
+        it('shows the local file help page', function () {
+          var tab = {id: 1, url: 'file://foo.html'};
+
+          fakeTabErrorCache.getTabError.returns(new h.RestrictedProtocolError('msg'));
+          fakeTabState.isTabErrored.withArgs(1).returns(true);
+          onClickedHandler(tab);
+
+          sinon.assert.called(fakeHelpPage.showHelpForError);
+          sinon.assert.calledWith(fakeHelpPage.showHelpForError, 1, sinon.match.instanceOf(h.RestrictedProtocolError));
+        });
+      });
+
     });
   });
 
@@ -261,6 +344,22 @@ describe('HypotheisChromeExtension', function () {
       onChangeHandler(1, null, 'inactive');
       sinon.assert.called(fakeTabStore.unset);
       sinon.assert.calledWith(fakeTabStore.unset);
+    });
+
+    describe('when a tab with an error is updated', function () {
+      it('resets the tab error state when no longer errored', function () {
+        var tab = {id: 1, url: 'file://foo.html'};
+        onChangeHandler(1, 'active', 'errored');
+        sinon.assert.called(fakeTabErrorCache.unsetTabError);
+        sinon.assert.calledWith(fakeTabErrorCache.unsetTabError, 1);
+      });
+
+      it('resets the tab error state when the tab is closed', function () {
+        var tab = {id: 1, url: 'file://foo.html'};
+        onChangeHandler(1, null, 'errored');
+        sinon.assert.called(fakeTabErrorCache.unsetTabError);
+        sinon.assert.calledWith(fakeTabErrorCache.unsetTabError, 1);
+      });
     });
   });
 });
