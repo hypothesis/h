@@ -7,8 +7,8 @@
     extensionURL: function (path) {
       return chrome.extension.getURL(path);
     },
-    isAllowedFileSchemeAccess: function () {
-      return chrome.extension.isAllowedFileSchemeAccess();
+    isAllowedFileSchemeAccess: function (fn) {
+      return chrome.extension.isAllowedFileSchemeAccess(fn);
     },
   });
 
