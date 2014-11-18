@@ -435,6 +435,15 @@ class ViewFilter
     any:
       fields: ['quote', 'text', 'tag', 'user']
 
+  this.$inject = ['searchfilter','stringHelpers']
+  constructor: (searchfilter, stringHelpers) ->
+    @searchfilter = searchfilter
+
+    @_normalize = (e) ->
+      if typeof e is 'string'
+        return stringHelpers.uniFold(e)
+      else return e
+
   _matches: (filter, value, match) ->
     matches = true
 
@@ -468,11 +477,12 @@ class ViewFilter
 
     value = checker.value annotation
     if angular.isArray value
-      if typeof(value[0]) == 'string'
-        value = value.map (v) -> v.toLowerCase()
+      value = value.map (e) -> e.toLowerCase()
+      value = value.map (e) => @_normalize(e)
       return @_arrayMatches filter, value, checker.match
     else
-      value = value.toLowerCase() if typeof(value) == 'string'
+      value = value.toLowerCase()
+      value = @_normalize(value)
       return @_matches filter, value, checker.match
 
   # Filters a set of annotations, according to a given query.
@@ -497,7 +507,15 @@ class ViewFilter
     limit = Math.min((filters.result?.terms or [])...)
     count = 0
 
-    results = for annotation in annotations
+    # Normalizing the filters, need to do only once.
+    for _, filter of filters
+      if filter.terms
+        filter.terms = filter.terms.map (e) =>
+          e = e.toLowerCase()
+          e = @_normalize e
+          e
+
+    for annotation in annotations
       break if count >= limit
 
       match = true

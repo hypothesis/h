@@ -2,6 +2,7 @@
 # It expects a search query string where the search term are separated by space character
 # and collects them into the given term arrays
 class SearchFilter
+
   # This function will slice the search-text input
   # Slice character: space,
   # but an expression between quotes (' or ") is considered one
@@ -73,7 +74,7 @@ class SearchFilter
         filter = term.slice 0, term.indexOf ":"
         unless filter? then filter = ""
         switch filter
-          when 'quote' then quote.push term[6..].toLowerCase()
+          when 'quote' then quote.push term[6..]
           when 'result' then result.push term[7..]
           when 'since'
             # We'll turn this into seconds
@@ -109,11 +110,11 @@ class SearchFilter
               # Time given in year
               t = /^(\d+)year$/.exec(time)[1]
               since.push t * 60 * 60 * 24 * 365
-          when 'tag' then tag.push term[4..].toLowerCase()
-          when 'text' then text.push term[5..].toLowerCase()
-          when 'uri' then uri.push term[4..].toLowerCase()
-          when 'user' then user.push term[5..].toLowerCase()
-          else any.push term.toLowerCase()
+          when 'tag' then tag.push term[4..]
+          when 'text' then text.push term[5..]
+          when 'uri' then uri.push term[4..]
+          when 'user' then user.push term[5..]
+          else any.push term
 
     any:
       terms: any
@@ -140,7 +141,6 @@ class SearchFilter
       terms: user
       operator: 'or'
 
-
 # This class will process the results of search and generate the correct filter
 # It expects the following dict format as rules
 # { facet_name : {
@@ -152,7 +152,7 @@ class SearchFilter
 #
 #      options: backend specific options
 #      options.es: elasticsearch specific options
-#      options.es.query_type : can be: simple, query_string, match, multi_match
+#      options.es.query_type : can be: simple (term), query_string, match, multi_match
 #         defaults to: simple, determines which es query type to use
 #      options.es.cutoff_frequency: if set, the query will be given a cutoff_frequency for this facet
 #      options.es.and_or: match and multi_match queries can use this, defaults to and
@@ -164,25 +164,20 @@ class QueryParser
   rules:
     user:
       path: '/user'
-      case_sensitive: false
       and_or: 'or'
     text:
       path: '/text'
-      case_sensitive: false
       and_or: 'and'
     tag:
       path: '/tags'
-      case_sensitive: false
       and_or: 'and'
     quote:
       path: '/quote'
-      case_sensitive: false
       and_or: 'and'
     uri:
       formatter: (uri) ->
         uri.toLowerCase()
       path: '/uri'
-      case_sensitive: false
       and_or: 'or'
       options:
         es:
@@ -203,11 +198,9 @@ class QueryParser
             when '1 year' then 365*24*60*60
         new Date(new Date().valueOf() - seconds*1000)
       path: '/created'
-      case_sensitive: true
       and_or: 'and'
       operator: 'ge'
     any:
-      case_sensitive: false
       and_or: 'and'
       path:   ['/quote', '/tags', '/text', '/uri', '/user']
       options:
@@ -224,7 +217,6 @@ class QueryParser
       terms = value.terms
       unless terms.length then continue
       rule = @rules[category] 
-
 
       # Now generate the clause with the help of the rule
       case_sensitive = if rule.case_sensitive? then rule.case_sensitive else false
