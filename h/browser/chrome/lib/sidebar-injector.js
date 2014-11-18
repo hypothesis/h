@@ -1,6 +1,18 @@
 (function (h) {
   'use strict';
 
+  /* The SidebarInjector is used to deploy and remove the Hypothesis from
+   * tabs. It also deals with loading PDF documents into the PDFjs viewer
+   * when applicable.
+   *
+   * chromeTabs - An instance of chrome.tabs.
+   * options    - An options oblect with additional helper methods.
+   *   isAllowedFileSchemeAccess: A function that returns true if the user
+   *   can access resources over the file:// protocol. See:
+   *   https://developer.chrome.com/extensions/extension#method-isAllowedFileSchemeAccess
+   *   extensionURL: A function that recieves a path and returns an absolute
+   *   url. See: https://developer.chrome.com/extensions/extension#method-getURL
+   */
   function SidebarInjector(chromeTabs, options) {
     options = options || {};
 
@@ -15,6 +27,15 @@
       throw new TypeError('isAllowedFileSchemeAccess must be a function');
     }
 
+    /* Injects the Hypothesis sidebar into the tab provided. The callback
+     * will recieve an error if the injection fails. See errors.js
+     * for the full list of errors.
+     *
+     * tab - A tab object representing the tab to insert the sidebar into.
+     * fn  - A callback called when the insertion is complete.
+     *
+     * Returns nothing.
+     */
     this.injectIntoTab = function (tab, fn) {
       fn = fn || function () {};
 
@@ -40,6 +61,15 @@
       }
     };
 
+    /* Removes the Hypothesis sidebar from the tab provided. The callback
+     * will be called when removal is complete. An error is passed as the
+     * first argument to the callback if removal failed.
+     *
+     * tab - A tab object representing the tab to remove the sidebar from.
+     * fn  - A callback called when the removal is complete.
+     *
+     * Returns nothing.
+     */
     this.removeFromTab = function (tab, fn) {
       var url;
       fn = fn || function () {};
@@ -86,9 +116,13 @@
 
     function isChromeURL(url) {
       var isBrowser = url.indexOf('chrome:') === 0;
-      var isDevtools = url.indexOf('chrome-devtools:') === 0;
+      var isDevtools = url.indexOf('chrome-devtools:') == 0;
       var isExtension = url.indexOf('chrome-extension:') === 0;
       return isBrowser || isDevtools || isExtension;
+    }
+
+    function injectionFailed(tab) {
+      setBrowserAction(tab.id, state(tab.id, 'sleeping'));
     }
 
     function injectIntoPDF(tab, fn) {
@@ -131,7 +165,7 @@
 
       chromeTabs.executeScript(tab.id, {code: code.replace('{}', src)}, fn);
     }
-  }
+  };
 
   h.SidebarInjector = SidebarInjector;
 })(window.h || (window.h = {}));
