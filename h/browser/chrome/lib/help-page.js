@@ -10,7 +10,7 @@
         return this.showNoFileAccessHelpPage(tab);
       }
 
-      throw new Error('showHelpForError does not support the error: ' + e.message);
+      throw new Error('showHelpForError does not support the error: ' + error.message);
     };
     this.showLocalFileHelpPage = showHelpPage.bind(null, 'local-file');
     this.showNoFileAccessHelpPage = showHelpPage.bind(null, 'no-file-access');
