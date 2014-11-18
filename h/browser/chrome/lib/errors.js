@@ -1,24 +1,29 @@
 (function (h) {
-  function ExtensionError() {
+  function ExtensionError(message) {
     Error.apply(this, arguments);
+    this.message = message;
   }
   ExtensionError.prototype = Object.create(Error);
 
-  function LocalFileError() {
+  function LocalFileError(message) {
     Error.apply(this, arguments);
+    this.message = message;
   }
   LocalFileError.prototype = Object.create(ExtensionError);
 
-  function NoFileAccessError() {
+  function NoFileAccessError(message) {
     Error.apply(this, arguments);
+    this.message = message;
   }
   NoFileAccessError.prototype = Object.create(ExtensionError);
 
-  function RestrictedProtocolError() {
+  function RestrictedProtocolError(message) {
     Error.apply(this, arguments);
+    this.message = message;
   }
   RestrictedProtocolError.prototype = Object.create(ExtensionError);
 
+  h.ExtensionError = ExtensionError;
   h.LocalFileError = LocalFileError;
   h.NoFileAccessError = NoFileAccessError;
   h.RestrictedProtocolError = RestrictedProtocolError;
