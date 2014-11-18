@@ -1,6 +1,33 @@
 (function (h) {
   'use strict';
 
+  /* The main extension application. This wires together all the smaller
+   * modules. The app listens to all new created/updated/removed tab events
+   * and uses the TabState object to keep track of whether the sidebar is
+   * active or inactive in the tab. The app also listens to click events on
+   * the browser action and toggles the state and uses the BrowserAction module
+   * to update the visual style of the button.
+   *
+   * The SidebarInjector handles the insertion of the Hypothesis code. If it
+   * runs into errors the tab is put into an errored state and when the
+   * browser aciton is clicked again the HelpPage module displays more
+   * information to the user.
+   *
+   * Lastly the TabStore listens to changes to the TabState module and persists
+   * the current settings to localStorage. This is then loaded into the
+   * application on startup.
+   *
+   * Relevant Chrome Extension documentation:
+   * - https://developer.chrome.com/extensions/browserAction
+   * - https://developer.chrome.com/extensions/tabs
+   * - https://developer.chrome.com/extensions/extension
+   *
+   * options - An options object to set up the application.
+   *   chromeTabs: An instance of chrome.tabs.
+   *   chromeBrowserAction: An instance of chrome.browserAction.
+   *   extensionURL: chrome.extension.getURL.
+   *   isAllowedFileSchemeAccess: chrome.extension.isAllowedFileSchemeAccess.
+   */
   function HypothesisChromeExtension(options) {
     var chromeTabs = options.chromeTabs;
     var chromeBrowserAction = options.chromeBrowserAction;
@@ -14,20 +41,33 @@
     });
     var tabErrors = new h.TabErrorCache();
 
+    /* Sets up the extension and binds event listeners. Requires a window
+     * object to be passed so that it can listen for localStorage events.
+     */
     this.listen = function (window) {
       chromeBrowserAction.onClicked.addListener(onBrowserActionClicked);
       chromeTabs.onCreated.addListener(onTabCreated);
       chromeTabs.onUpdated.addListener(onTabUpdated);
       chromeTabs.onRemoved.addListener(onTabRemoved);
 
+      // FIXME: Find out why we used to reload the data on every get.
       window.addEventListener('storage', function (event) {
-        if (event.key === 'state' && event.newValue !== null) {
+        var key = 'state';
+        var isState = event.key === key;
+        var isUpdate = event.newValue !== null;
+
+        // Check the event is for the store and check that something has
+        // actually changed externally by validating the new value.
+        if (isState && isUpdate && event.newValue !== JSON.stringify(store.all())) {
           store.reload();
           state.load(store.all());
         }
       });
     };
 
+    /* A method that can be used to setup the extension on existing tabs
+     * when the extension is installed.
+     */
     this.install = function () {
       chromeTabs.query({}, function (tabs) {
         tabs.forEach(function (tab) {

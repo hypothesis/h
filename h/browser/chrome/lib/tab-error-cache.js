@@ -1,4 +1,11 @@
 (function (h) {
+  'use strict';
+
+  /* A wrapper around an Object for storing and retrieving error objects
+   * created when trying to inject the Sidebar into the document. This
+   * primarily exists to simplify the testing of the error handling. As
+   * the setters/getters can easily be stubbed.
+   */
   function TabErrorCache() {
     var cache = {};
 
