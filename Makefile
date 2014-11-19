@@ -13,6 +13,7 @@ clean:
 		-exec rm {} \;
 	find h/static/styles \
 		-iname '*.css' \
+		-prune -o -iname 'icomoon.css' \
 		-exec rm {} \;
 
 test:
