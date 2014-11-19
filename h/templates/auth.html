@@ -2,13 +2,13 @@
 
 {% block content %}
   <div id="auth" class="content paper ng-cloak">
-    {% include "includes/header.html" %}
+    {% include "h:templates/includes/header.html" %}
     <main ng-view></main>
   </div>
 {% endblock %}
 
 {% block templates %}
   <script type="text/ng-template" id="auth.html">
-    {% include_raw "client/auth.html" %}
+    {% include_raw "h:templates/client/auth.html" %}
   </script>
 {% endblock %}

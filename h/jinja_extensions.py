@@ -25,10 +25,5 @@ class IncludeRawExtension(Extension):
         lineno = parser.stream.next().lineno
         filename = parser.parse_expression()
         env = self.environment
-
-        # For some reason the current loader has no knowledge of the template
-        # paths requiring us to manually build the template path.
-        template_path = '%s:%s/%s' % ('h', 'templates', filename.value)
-        template, _, _ = env.loader.get_source(env, template_path)
-
+        template, _, _ = env.loader.get_source(env, filename)
         return nodes.Const(template).set_lineno(lineno)

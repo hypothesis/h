@@ -49,10 +49,10 @@
            title="Close"
            ng-click="dialog.visible = false"></i>
         <div ng-if="persona">
-          {% include_raw "client/account.html" %}
+          {% include_raw "h:templates/client/account.html" %}
         </div>
         <div ng-if="!persona">
-          {% include_raw "client/auth.html" %}
+          {% include_raw "h:templates/client/auth.html" %}
         </div>
       </div>
     </div>
@@ -66,22 +66,22 @@
 
 {% block templates %}
   <script type="text/ng-template" id="annotation.html">
-    {% include_raw "client/annotation.html" %}
+    {% include_raw "h:templates/client/annotation.html" %}
   </script>
   <script type="text/ng-template" id="markdown.html">
-    {% include_raw "client/markdown.html" %}
+    {% include_raw "h:templates/client/markdown.html" %}
   </script>
   <script type="text/ng-template" id="privacy.html">
-    {% include_raw "client/privacy.html" %}
+    {% include_raw "h:templates/client/privacy.html" %}
   </script>
   <script type="text/ng-template" id="viewer.html">
-    {% include_raw "client/viewer.html" %}
+    {% include_raw "h:templates/client/viewer.html" %}
   </script>
   <script type="text/ng-template" id="thread.html">
-    {% include_raw "client/thread.html" %}
+    {% include_raw "h:templates/client/thread.html" %}
   </script>
   <script type="text/ng-template" id="notification.html">
-    {% include_raw "client/notification.html" %}
+    {% include_raw "h:templates/client/notification.html" %}
   </script>
 {% endblock %}
 
