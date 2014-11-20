@@ -80,11 +80,16 @@ def embed(embed_path, context, request):
 def manifest(context, request):
     # Chrome is strict about the format of the version string
     ext_version = '.'.join(version.replace('-', '.').split('.')[:4])
-    assets_url = request.webassets_env.url
     manifest_file = resolve('h:browser/chrome/manifest.json').stream()
     manifest_tpl = Template(manifest_file.read())
+    src = request.resource_url(context)
+    # We need to use only the host and port for the CSP script-src when
+    # developing. If we provide a path such as /assets the CSP check fails.
+    #
+    # See: https://developer.chrome.com/extensions/contentSecurityPolicy#relaxing-remote-script
+    if urlparse(src).hostname not in ('localhost', '127.0.0.1'):
+        src = urljoin(src, request.webassets_env.url)
     with open('manifest.json', 'w') as f:
-        src = urljoin(request.resource_url(context), assets_url)
         f.write(manifest_tpl.render(src=src, version=ext_version))
 
 
