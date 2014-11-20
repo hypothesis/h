@@ -43,21 +43,10 @@
         return setTimeout(fn.bind(null, new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages')));
       }
 
-      function checkPDF(success, fallback) {
-        if (isPDFURL(tab.url)) {
-          success(tab, fn);
-        } else {
-          fallback(tab, fn);
-        }
-      }
-
       if (isFileURL(tab.url)) {
-        checkPDF(injectIntoLocalPDF, function () {
-          var err = new h.LocalFileError('Local non-PDF files are not supported');
-          setTimeout(fn.bind(null, err));
-        });
+        injectIntoLocalDocument(tab, fn);
       } else {
-        checkPDF(injectIntoPDF, injectIntoHTML);
+        injectIntoRemoteDocument(tab, fn);
       }
     };
 
@@ -121,8 +110,22 @@
       return isBrowser || isDevtools || isExtension;
     }
 
-    function injectionFailed(tab) {
-      setBrowserAction(tab.id, state(tab.id, 'sleeping'));
+    function injectIntoLocalDocument(tab, fn) {
+      var err;
+      if (isPDFURL(tab.url)) {
+        injectIntoLocalPDF(tab, fn);
+      } else {
+        err = new h.LocalFileError('Local non-PDF files are not supported');
+        setTimeout(fn.bind(null, err));
+      }
+    }
+
+    function injectIntoRemoteDocument(tab, fn) {
+      if (isPDFURL(tab.url)) {
+        injectIntoPDF(tab, fn);
+      } else {
+        injectIntoHTML(tab, fn);
+      }
     }
 
     function injectIntoPDF(tab, fn) {
