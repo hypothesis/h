@@ -90,6 +90,14 @@ describe('TabState', function () {
       assert.equal(state.isTabErrored(1), false);
       assert.equal(state.isTabActive(1), true);
     });
+
+    it('is not possible for the previous state to be the same as the current state', function () {
+      state.errorTab(1);
+      state.errorTab(1);
+      state.restorePreviousState(1);
+      assert.equal(state.isTabErrored(1), false, 'Expected isTabErrored to return false');
+      assert.equal(state.isTabActive(1), true, 'Expected isTabActive to return true');
+    });
   });
 
   describe('.isTabActive', function () {

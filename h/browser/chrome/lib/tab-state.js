@@ -69,6 +69,7 @@
     };
 
     function transition (tabId, state, fn) {
+      if (state === currentState[tabId]) { return; }
       previousState[tabId] = currentState[tabId];
       currentState[tabId] = state;
       if (typeof fn === 'function') {
