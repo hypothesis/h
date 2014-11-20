@@ -33,7 +33,7 @@ Add the tools' path to the $PATH variable:
 
 .. code-block:: bash
 
-    echo "export PATH=/usr/local/share/python:\$PATH" >> ~/.profile
+    echo "export PATH=$(brew --prefix)/share/python:\$PATH" >> ~/.profile
     source ~/.profile
 
 Install Elasticsearch
@@ -59,20 +59,20 @@ To have Elasticsearch run automatically at login:
 
 .. code-block:: bash
 
-    ln -sfv /usr/local/opt/elasticsearch/*.plist ~/Library/LaunchAgents
+    ln -sfv "$(brew --prefix)"/opt/elasticsearch/*.plist ~/Library/LaunchAgents
     launchctl load ~/Library/LaunchAgents/homebrew.mxcl.elasticsearch.plist
 
 To launch it manually without launchctl:
 
 .. code-block:: bash
 
-    elasticsearch -D es.config=/usr/local/opt/elasticsearch/config/elasticsearch.yml
+    elasticsearch -D es.config="$(brew --prefix)"/opt/elasticsearch/config/elasticsearch.yml
 
 Finally we depend on the ICU Analysis plugin for ElasticSearch this can also be installed via Homebrew:
 
 .. code-block:: bash
 
-    cd "$(brew --prefix)"/opt/elasticsearch && ./bin/plugin -install elasticsearch/elasticsearch-analysis-icu/2.2.0 && cd -
+    "$(brew --prefix)"/opt/elasticsearch/bin/plugin -install elasticsearch/elasticsearch-analysis-icu
     
 NOTE: You will also need a Java runtime to be able to run elasticsearch. OSX
 should prompt you to install one. If not, an installer can be downloaded
