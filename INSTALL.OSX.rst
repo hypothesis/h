@@ -29,13 +29,6 @@ Install Node and other required tools:
     gem install sass:3.4.5 compass
     brew install node
 
-Add the tools' path to the $PATH variable:
-
-.. code-block:: bash
-
-    echo "export PATH=$(brew --prefix)/share/python:\$PATH" >> ~/.profile
-    source ~/.profile
-
 Install Elasticsearch
 ---------------------
 
