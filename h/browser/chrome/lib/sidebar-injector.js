@@ -60,7 +60,6 @@
      * Returns nothing.
      */
     this.removeFromTab = function (tab, fn) {
-      var url;
       fn = fn || function () {};
 
       if (isChromeURL(tab.url)) {
@@ -68,21 +67,9 @@
       }
 
       if (isPDFViewerURL(tab.url)) {
-        url = tab.url.slice(getPDFViewerURL('').length).split('#')[0];
-        chromeTabs.update(tab.id, {
-          url: decodeURIComponent(url)
-        }, fn.bind(null, null));
+        removeFromPDF(tab, fn);
       } else {
-        // TODO: Needs to check for local file permissions or just not run
-        // when not injected.
-        chromeTabs.executeScript(tab.id, {
-          code: [
-            'var script = document.createElement("script");',
-            'script.src = "' + extensionURL('/public/destroy.js') + '";',
-            'document.body.appendChild(script);',
-            'delete window.annotator;',
-          ].join('\n')
-        }, fn.bind(null, null));
+        removeFromHTML(tab, fn);
       }
     };
 
@@ -160,13 +147,36 @@
       });
     }
 
+    function removeFromPDF(tab, fn) {
+      var url = tab.url.slice(getPDFViewerURL('').length).split('#')[0];
+      chromeTabs.update(tab.id, {
+        url: decodeURIComponent(url)
+      }, fn.bind(null, null));
+    }
+
+    function removeFromHTML(tab, fn) {
+      var src  = extensionURL('/public/destroy.js');
+      var code = 'var script = document.createElement("script");' +
+                 'script.src = "{}";' +
+                 'document.body.appendChild(script);' +
+                 'delete window.annotator;';
+
+      // TODO: Needs to check for local file permissions or just not run
+      // when not injected.
+      chromeTabs.executeScript(tab.id, {
+        code: code.replace('{}', src)
+      }, fn.bind(null, null));
+    }
+
     function injectConfig(tab, fn) {
       var src  = extensionURL('/public/config.js');
       var code = 'var script = document.createElement("script");' +
         'script.src = "{}";' +
         'document.body.appendChild(script);';
 
-      chromeTabs.executeScript(tab.id, {code: code.replace('{}', src)}, fn);
+      chromeTabs.executeScript(tab.id, {
+        code: code.replace('{}', src)
+      }, fn.bind(null, null));
     }
   };
 
