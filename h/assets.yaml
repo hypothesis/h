@@ -145,7 +145,6 @@ angular_tags_input:
 
 # jQuery
 jquery:
-  output: scripts/vendor/jquery.min.js
   contents:
     - h:static/scripts/vendor/jquery.min.js
 jquery_scrollintoview:
