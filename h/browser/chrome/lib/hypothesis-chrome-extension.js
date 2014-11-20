@@ -98,7 +98,7 @@
     function onBrowserActionClicked(tab) {
       var tabError = tabErrors.getTabError(tab.id);
       if (state.isTabErrored(tab.id) && tabError) {
-        help.showHelpForError(tab.id, tabError);
+        help.showHelpForError(tab, tabError);
       }
       else if (state.isTabActive(tab.id)) {
         state.deactivateTab(tab.id);

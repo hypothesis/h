@@ -242,7 +242,7 @@ describe('HypothesisChromeExtension', function () {
           onClickedHandler(tab);
 
           sinon.assert.called(fakeHelpPage.showHelpForError);
-          sinon.assert.calledWith(fakeHelpPage.showHelpForError, 1, sinon.match.instanceOf(h.LocalFileError));
+          sinon.assert.calledWith(fakeHelpPage.showHelpForError, tab, sinon.match.instanceOf(h.LocalFileError));
         });
       });
 
@@ -266,7 +266,7 @@ describe('HypothesisChromeExtension', function () {
           onClickedHandler(tab);
 
           sinon.assert.called(fakeHelpPage.showHelpForError);
-          sinon.assert.calledWith(fakeHelpPage.showHelpForError, 1, sinon.match.instanceOf(h.NoFileAccessError));
+          sinon.assert.calledWith(fakeHelpPage.showHelpForError, tab, sinon.match.instanceOf(h.NoFileAccessError));
         });
       });
 
@@ -290,7 +290,7 @@ describe('HypothesisChromeExtension', function () {
           onClickedHandler(tab);
 
           sinon.assert.called(fakeHelpPage.showHelpForError);
-          sinon.assert.calledWith(fakeHelpPage.showHelpForError, 1, sinon.match.instanceOf(h.RestrictedProtocolError));
+          sinon.assert.calledWith(fakeHelpPage.showHelpForError, tab, sinon.match.instanceOf(h.RestrictedProtocolError));
         });
       });
 
