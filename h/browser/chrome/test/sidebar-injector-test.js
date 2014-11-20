@@ -158,7 +158,6 @@ describe('SidebarInjector', function () {
       var url = 'chrome://extensions/';
 
       injector.removeFromTab({id: 1, url: url}, function (err) {
-        assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
         done();
       });
@@ -169,7 +168,6 @@ describe('SidebarInjector', function () {
       var url = 'chrome-devtools://foobar/';
 
       injector.removeFromTab({id: 1, url: url}, function (err) {
-        assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
         done();
       });
@@ -180,7 +178,6 @@ describe('SidebarInjector', function () {
       var url = 'chrome-extension://foobar/';
 
       injector.removeFromTab({id: 1, url: url}, function (err) {
-        assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
         done();
       });

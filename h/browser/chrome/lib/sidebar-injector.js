@@ -152,7 +152,7 @@
 
     function removeFromHTML(tab, fn) {
       if (isChromeURL(tab.url)) {
-        return;
+        return setTimeout(fn.bind(null, null));
       }
 
       var src  = extensionURL('/public/destroy.js');
