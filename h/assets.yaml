@@ -145,8 +145,9 @@ angular_tags_input:
 
 # jQuery
 jquery:
+  output: scripts/vendor/jquery.min.js
   contents:
-    - h:static/scripts/vendor/jquery.min.js
+    - h:static/scripts/vendor/jquery-1.10.2.min.js
 jquery_scrollintoview:
   filters: uglifyjs
   output: scripts/vendor/jquery.scrollintoview.min.js
