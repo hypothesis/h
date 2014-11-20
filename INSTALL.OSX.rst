@@ -68,6 +68,12 @@ To launch it manually without launchctl:
 
     elasticsearch -D es.config=/usr/local/opt/elasticsearch/config/elasticsearch.yml
 
+Finally we depend on the ICU Analysis plugin for ElasticSearch this can also be installed via Homebrew:
+
+.. code-block:: bash
+
+    cd "$(brew --prefix)"/opt/elasticsearch && ./bin/plugin -install elasticsearch/elasticsearch-analysis-icu/2.2.0 && cd -
+    
 NOTE: You will also need a Java runtime to be able to run elasticsearch. OSX
 should prompt you to install one. If not, an installer can be downloaded
 from the `Oracle website
