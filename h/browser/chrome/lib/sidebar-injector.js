@@ -94,7 +94,8 @@
       var isBrowser = url.indexOf('chrome:') === 0;
       var isDevtools = url.indexOf('chrome-devtools:') == 0;
       var isExtension = url.indexOf('chrome-extension:') === 0;
-      return isBrowser || isDevtools || isExtension;
+      var isOurExtension = url.indexOf(extensionURL('/')) === 0;
+      return isBrowser || isDevtools || (isExtension && !isOurExtension);
     }
 
     function injectIntoLocalDocument(tab, fn) {
