@@ -20,6 +20,7 @@
    * onchange     - A function that recieves onchange(tabId, current, prev).
    */
   function TabState(initialState, onchange) {
+    var _this = this;
     var currentState;
     var previousState;
 
@@ -36,20 +37,20 @@
       currentState = newState;
     };
 
-    this.activateTab = function (tabId) {
-      transition(tabId, states.ACTIVE, this.onchange);
+    this.activateTab = function (tabId, options) {
+      transition(tabId, states.ACTIVE, options);
     };
 
-    this.deactivateTab = function (tabId) {
-      transition(tabId, states.INACTIVE, this.onchange);
+    this.deactivateTab = function (tabId, options) {
+      transition(tabId, states.INACTIVE, options);
     };
 
-    this.errorTab = function (tabId) {
-      transition(tabId, states.ERRORED, this.onchange);
+    this.errorTab = function (tabId, options) {
+      transition(tabId, states.ERRORED, options);
     };
 
     this.clearTab = function (tabId) {
-      transition(tabId, null, this.onchange);
+      transition(tabId, null);
     };
 
     this.restorePreviousState = function (tabId) {
@@ -68,12 +69,21 @@
       return currentState[tabId] === states.ERRORED;
     };
 
-    function transition (tabId, state, fn) {
-      if (state === currentState[tabId]) { return; }
-      previousState[tabId] = currentState[tabId];
-      currentState[tabId] = state;
-      if (typeof fn === 'function') {
-        fn(tabId, state, previousState[tabId] || null);
+    // options.force allows the caller to re-trigger an onchange event for
+    // the current state without modifying the previous state. This is useful
+    // for restoring tab state after the extension is re-loaded.
+    function transition (tabId, state, options) {
+      var isForced = !!options && options.force === true;
+      var hasChanged = state !== currentState[tabId];
+      if (!isForced && !hasChanged) { return; }
+
+      if (!isForced || hasChanged) {
+        previousState[tabId] = currentState[tabId];
+        currentState[tabId] = state;
+      }
+
+      if (typeof _this.onchange === 'function') {
+        _this.onchange(tabId, state, previousState[tabId] || null);
       }
     }
 

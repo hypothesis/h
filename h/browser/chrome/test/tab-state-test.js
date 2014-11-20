@@ -43,6 +43,13 @@ describe('TabState', function () {
       state.activateTab(2);
       sinon.assert.calledWith(onChange, 2, TabState.states.ACTIVE, null);
     });
+
+    it('options.force can be used to re-trigger the current state', function () {
+      state.activateTab(2);
+      state.activateTab(2, {force: true});
+      sinon.assert.calledWith(onChange, 2, TabState.states.ACTIVE, null);
+      sinon.assert.calledTwice(onChange);
+    });
   });
 
   describe('.deactivateTab', function () {
@@ -55,6 +62,13 @@ describe('TabState', function () {
       state.deactivateTab(2);
       sinon.assert.calledWith(onChange, 2, TabState.states.INACTIVE, null);
     });
+
+    it('options.force can be used to re-trigger the current state', function () {
+      state.deactivateTab(2);
+      state.deactivateTab(2, {force: true});
+      sinon.assert.calledWith(onChange, 2, TabState.states.INACTIVE, null);
+      sinon.assert.calledTwice(onChange);
+    });
   });
 
   describe('.errorTab', function () {
@@ -66,6 +80,13 @@ describe('TabState', function () {
     it('triggers an onchange handler', function () {
       state.errorTab(2);
       sinon.assert.calledWith(onChange, 2, TabState.states.ERRORED, null);
+    });
+
+    it('options.force can be used to re-trigger the current state', function () {
+      state.errorTab(2);
+      state.errorTab(2, {force: true});
+      sinon.assert.calledWith(onChange, 2, TabState.states.ERRORED, null);
+      sinon.assert.calledTwice(onChange);
     });
   });
 
@@ -97,6 +118,13 @@ describe('TabState', function () {
       state.restorePreviousState(1);
       assert.equal(state.isTabErrored(1), false, 'Expected isTabErrored to return false');
       assert.equal(state.isTabActive(1), true, 'Expected isTabActive to return true');
+    });
+
+    it('if options.force is used to set the same value it ignores the value', function () {
+      state.errorTab(1);
+      state.deactivateTab(1);
+      state.deactivateTab(1, {force: true});
+      sinon.assert.calledWith(onChange, 1, TabState.states.INACTIVE, TabState.states.ERRORED);
     });
   });
 

@@ -72,9 +72,9 @@
       chromeTabs.query({}, function (tabs) {
         tabs.forEach(function (tab) {
           if (state.isTabActive(tab.id)) {
-            state.activateTab(tab.id);
+            state.activateTab(tab.id, {force: true});
           } else {
-            state.deactivateTab(tab.id);
+            state.deactivateTab(tab.id, {force: true});
           }
         });
       });
