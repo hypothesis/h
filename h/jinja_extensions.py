@@ -25,5 +25,5 @@ class IncludeRawExtension(Extension):
         lineno = parser.stream.next().lineno
         filename = parser.parse_expression()
         env = self.environment
-        template, _, _ = env.loader.get_source(env, filename)
+        template, _, _ = env.loader.get_source(env, filename.value)
         return nodes.Const(template).set_lineno(lineno)
