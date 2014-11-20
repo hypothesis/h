@@ -44,6 +44,7 @@
     "public/*",
     "content/*",
     "lib/*",
+    "help/*",
     "content/web/viewer.html"
   ]
 }

@@ -39,10 +39,6 @@
     this.injectIntoTab = function (tab, fn) {
       fn = fn || function () {};
 
-      if (isChromeURL(tab.url)) {
-        return setTimeout(fn.bind(null, new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages')));
-      }
-
       if (isFileURL(tab.url)) {
         injectIntoLocalDocument(tab, fn);
       } else {
@@ -61,10 +57,6 @@
      */
     this.removeFromTab = function (tab, fn) {
       fn = fn || function () {};
-
-      if (isChromeURL(tab.url)) {
-        return setTimeout(fn.bind(null, new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages')));
-      }
 
       if (isPDFViewerURL(tab.url)) {
         removeFromPDF(tab, fn);
@@ -94,8 +86,7 @@
       var isBrowser = url.indexOf('chrome:') === 0;
       var isDevtools = url.indexOf('chrome-devtools:') == 0;
       var isExtension = url.indexOf('chrome-extension:') === 0;
-      var isOurExtension = url.indexOf(extensionURL('/')) === 0;
-      return isBrowser || isDevtools || (isExtension && !isOurExtension);
+      return isBrowser || isDevtools || isExtension;
     }
 
     function injectIntoLocalDocument(tab, fn) {
@@ -137,6 +128,10 @@
     }
 
     function injectIntoHTML(tab, fn) {
+      if (isChromeURL(tab.url)) {
+        return setTimeout(fn.bind(null, new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages')));
+      }
+
       injectConfig(tab, function () {
         chromeTabs.executeScript(tab.id, {
           file: 'public/embed.js'
@@ -156,6 +151,10 @@
     }
 
     function removeFromHTML(tab, fn) {
+      if (isChromeURL(tab.url)) {
+        return;
+      }
+
       var src  = extensionURL('/public/destroy.js');
       var code = 'var script = document.createElement("script");' +
                  'script.src = "{}";' +
