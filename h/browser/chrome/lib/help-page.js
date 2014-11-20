@@ -36,8 +36,10 @@
     // Render the help page. The helpSection should correspond to the id of a
     // section within the help page.
     function showHelpPage(helpSection, tab) {
-      chromeTabs.update(tab.id, {
-        url:  extensionURL('/help/permissions.html#' + helpSection)
+      chromeTabs.create({
+        index: tab.index + 1,
+        url:  extensionURL('/help/permissions.html#' + helpSection),
+        openerTabId: tab.id,
       });
     }
   }
