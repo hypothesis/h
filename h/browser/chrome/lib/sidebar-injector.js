@@ -131,7 +131,7 @@
 
       injectConfig(tab, function () {
         chromeTabs.executeScript(tab.id, {
-          file: extensionURL('/public/embed.js')
+          file: 'public/embed.js'
         }, function () {
           chromeTabs.executeScript(tab.id, {
             code: 'window.annotator = true'

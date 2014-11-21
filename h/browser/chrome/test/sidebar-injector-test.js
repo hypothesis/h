@@ -83,7 +83,7 @@ describe('SidebarInjector', function () {
         injector.injectIntoTab({id: 1, url: url}, function () {
           sinon.assert.calledThrice(spy);
           sinon.assert.calledWith(spy, 1, {
-            file: 'CRX_PATH/public/embed.js'
+            file: 'public/embed.js'
           });
           done();
         });
