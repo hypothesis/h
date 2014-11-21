@@ -25,6 +25,7 @@ describe('SidebarInjector', function () {
   describe('.injectIntoTab', function () {
     beforeEach(function () {
       // Handle loading the config.
+      fakeChromeTabs.executeScript.withArgs(1, {code: 'window.annotator'}).yields([false]);
       fakeChromeTabs.executeScript.yields([]);
     });
 
@@ -81,7 +82,7 @@ describe('SidebarInjector', function () {
         var url = 'http://example.com/foo.html';
 
         injector.injectIntoTab({id: 1, url: url}, function () {
-          sinon.assert.calledThrice(spy);
+          sinon.assert.callCount(spy, 4);
           sinon.assert.calledWith(spy, 1, {
             file: 'public/embed.js'
           });
@@ -94,10 +95,21 @@ describe('SidebarInjector', function () {
         var url = 'http://example.com/foo.html';
 
         injector.injectIntoTab({id: 1, url: url}, function () {
-          sinon.assert.calledThrice(spy);
+          sinon.assert.callCount(spy, 4);
           sinon.assert.calledWith(spy, 1, {
             code: 'window.annotator = true'
           });
+          done();
+        });
+      });
+
+      it('is not injected twice', function (done) {
+        fakeChromeTabs.executeScript.withArgs(1, {code: 'window.annotator'}).yields([true]);
+        var spy = fakeChromeTabs.executeScript;
+        var url = 'http://example.com/foo.html';
+
+        injector.injectIntoTab({id: 1, url: url}, function () {
+          sinon.assert.calledOnce(spy);
           done();
         });
       });

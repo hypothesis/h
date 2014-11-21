@@ -129,13 +129,18 @@
         return setTimeout(fn.bind(null, new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages')));
       }
 
-      injectConfig(tab, function () {
-        chromeTabs.executeScript(tab.id, {
-          file: 'public/embed.js'
-        }, function () {
+      isSidebarInjected(tab.id, function (isInjected) {
+        fn = fn.bind(null, null);
+        if (isInjected) { return setTimeout(fn); }
+
+        injectConfig(tab.id, function () {
           chromeTabs.executeScript(tab.id, {
             code: 'window.annotator = true'
-          }, fn.bind(null, null));
+          }, function () {
+            chromeTabs.executeScript(tab.id, {
+              file: 'public/embed.js'
+            }, fn);
+          });
         });
       });
     }
@@ -148,8 +153,10 @@
     }
 
     function removeFromHTML(tab, fn) {
+      fn = fn.bind(null, null);
+
       if (!isHTTPURL(tab.url)) {
-        return setTimeout(fn.bind(null, null));
+        return setTimeout(fn);
       }
 
       isSidebarInjected(tab.id, function (isInjected) {
@@ -164,24 +171,26 @@
           // when not injected.
           chromeTabs.executeScript(tab.id, {
             code: code.replace('{}', src)
-          }, fn.bind(null, null));
+          }, fn);
+        } else {
+          return setTimeout(fn);
         }
       });
     }
 
     function isSidebarInjected(tabId, fn) {
       chromeTabs.executeScript(tabId, {code: 'window.annotator'}, function (result) {
-        fn(result && result[0] === true || false);
+        fn((result && result[0] === true) || false);
       });
     }
 
-    function injectConfig(tab, fn) {
+    function injectConfig(tabId, fn) {
       var src  = extensionURL('/public/config.js');
       var code = 'var script = document.createElement("script");' +
         'script.src = "{}";' +
         'document.body.appendChild(script);';
 
-      chromeTabs.executeScript(tab.id, {
+      chromeTabs.executeScript(tabId, {
         code: code.replace('{}', src)
       }, fn.bind(null, null));
     }
