@@ -37,8 +37,8 @@ validate = (value) ->
 # {@link annotator annotator service} for persistence.
 ###
 AnnotationController = [
-  '$scope', 'annotator', 'drafts', 'flash', 'documentHelpers',
-  ($scope,   annotator,   drafts,   flash,   documentHelpers) ->
+  '$sce', '$scope', 'annotator', 'drafts', 'flash', 'documentHelpers',
+  ($sce,   $scope,   annotator,   drafts,   flash,   documentHelpers) ->
     @annotation = {}
     @action = 'view'
     @document = null
@@ -226,6 +226,17 @@ AnnotationController = [
           drafts.add model, => this.revert()
       else
         this.render()
+
+    # Calculate things neded for the visual diff support
+    $scope.$watch (-> model.target), (targets) =>
+      for target in targets
+        if target.diffHTML?
+          target.trustedDiffHTML = $sce.trustAsHtml target.diffHTML
+          target.showDiff = not target.diffCaseOnly
+        else
+          delete target.trustedDiffHTML
+          target.showDiff = false
+      this.render()
 
     $scope.$watch (=> @annotation.id), =>
       vm.annotationURI = documentHelpers.absoluteURI("/a/#{@annotation.id}")

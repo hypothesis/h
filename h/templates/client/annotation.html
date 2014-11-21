@@ -44,10 +44,21 @@
 <section class="annotation-target"
          ng-repeat="target in vm.annotation.target track by $index">
   <blockquote class="annotation-quote"
+              ng-hide="target.showDiff"
               ng-bind-html="selector.exact"
               ng-repeat="selector in target.selector
                          | filter : {'type': 'TextQuoteSelector'}
                          track by $index"></blockquote>
+  <blockquote class="annotation-quote"
+	      ng-bind-html="target.trustedDiffHTML"
+	      ng-show="target.showDiff"></blockquote>
+  <div class="small pull-right"
+       ng-show="target.trustedDiffHTML">
+    <input type="checkbox"
+	   ng-model="target.showDiff"
+	   ng-click="$event.stopPropagation()"> Show differences</input>
+  </div>
+
 </section>
 <!-- / Excerpts -- >
 
