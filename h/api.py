@@ -427,7 +427,11 @@ def create_db():
         msg = ('Can not access ElasticSearch at {0}! '
                'Check to ensure it is running.').format(es.host)
         raise elasticsearch_exceptions.ConnectionError('N/A', msg, e)
+    # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
+    #
+    # pylint: disable=unexpected-keyword-arg
     es.conn.cluster.health(wait_for_status='yellow')
+    # pylint: enable=unexpected-keyword-arg
     Annotation.update_settings()
     Annotation.create_all()
     Document.create_all()

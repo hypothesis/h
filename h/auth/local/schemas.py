@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pkg_resources import resource_stream
+from pkg_resources import resource_stream  # pylint: disable-msg=E0611
 
 import colander
 import deform
