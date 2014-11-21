@@ -80,6 +80,13 @@
       });
     };
 
+    /* Opens the onboarding page */
+    this.firstRun = function () {
+      chromeTabs.create({url: 'https://hypothes.is/welcome'}, function (tab) {
+        state.activateTab(tab.id);
+      });
+    };
+
     function onTabStateChange(tabId, current, previous) {
       if (current) {
         browserAction.setState(tabId, current);

@@ -98,6 +98,26 @@ describe('HypothesisChromeExtension', function () {
     });
   });
 
+  describe('.firstRun', function () {
+    beforeEach(function () {
+      fakeChromeTabs.create = sandbox.stub().yields({id: 1});
+    });
+
+    it('opens a new tab pointing to the welcome page', function () {
+      ext.firstRun();
+      sinon.assert.called(fakeChromeTabs.create);
+      sinon.assert.calledWith(fakeChromeTabs.create, {
+        url: 'https://hypothes.is/welcome'
+      });
+    });
+
+    it('sets the browser state to active', function () {
+      ext.firstRun();
+      sinon.assert.called(fakeTabState.activateTab);
+      sinon.assert.calledWith(fakeTabState.activateTab, 1);
+    });
+  });
+
   describe('.listen', function () {
     var onClickedHandler;
     var onCreatedHandler;
