@@ -62,21 +62,6 @@
     })();
   }
 
-  // Check for deployment conditions
-  var isLocal = document.location.protocol == 'file:';
-  var isPDF = document.location.pathname.toLowerCase().indexOf('.pdf') > 0;
-  var hasPDFjs = window.PDFJS !== undefined
-
-  // Check for file:// URLs, which are not supported, as of now.
-  if (isLocal && !isPDF) {
-    window.alert("Sorry, but as of now, this service can't be used on local HTMLs documents loaded via the file:/// protocol. (Local PDF documents are supported, though.)");
-    return;
-  }
-  if (isPDF && !hasPDFjs) {
-    window.alert("Annotating PDF documents is supported via the PDF.js software. In order to use it, you need a browser which ships PDF.js embedded (like Firefox), or you need the Hypothes.is Chrome extension.");
-    return;
-  }
-
   var baseUrl = document.createElement('link');
   baseUrl.rel = 'sidebar';
   baseUrl.href = '{{ base_url }}app.html';
