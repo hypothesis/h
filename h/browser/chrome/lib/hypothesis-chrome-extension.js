@@ -116,6 +116,12 @@
     }
 
     function onTabUpdated(tabId, changeInfo, tab) {
+      // This function will be called multiple times as the tab reloads.
+      // https://developer.chrome.com/extensions/tabs#event-onUpdated
+      if (changeInfo.status !== 'complete') {
+        return;
+      }
+
       if (state.isTabErrored(tabId)) {
         state.restorePreviousState(tabId);
       }
