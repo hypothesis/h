@@ -83,7 +83,7 @@ describe('SidebarInjector', function () {
         injector.injectIntoTab({id: 1, url: url}, function () {
           sinon.assert.calledThrice(spy);
           sinon.assert.calledWith(spy, 1, {
-            file: 'public/embed.js'
+            file: 'CRX_PATH/public/embed.js'
           });
           done();
         });
@@ -96,7 +96,7 @@ describe('SidebarInjector', function () {
         injector.injectIntoTab({id: 1, url: url}, function () {
           sinon.assert.calledThrice(spy);
           sinon.assert.calledWith(spy, 1, {
-            code: 'window.annotator = true;'
+            code: 'window.annotator = true'
           });
           done();
         });
@@ -183,7 +183,6 @@ describe('SidebarInjector', function () {
       });
     });
 
-
     describe('when viewing a PDF', function () {
       it('reverts the tab back to the original document', function () {
         var spy = fakeChromeTabs.update;
@@ -198,10 +197,19 @@ describe('SidebarInjector', function () {
 
     describe('when viewing an HTML page', function () {
       it('injects a destroy script into the page', function () {
-        var spy = fakeChromeTabs.executeScript;
+        var stub = fakeChromeTabs.executeScript.yields([true]);
         injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'});
-        sinon.assert.calledWith(spy, 1, {
-          code: sinon.match.string
+        sinon.assert.calledWith(stub, 1, {
+          code: sinon.match('/public/destroy.js')
+        });
+      });
+
+      it('does nothing if the sidebar has not been injected into the page', function () {
+        var stub = fakeChromeTabs.executeScript.yields([false]);
+        injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'});
+        sinon.assert.calledOnce(stub);
+        sinon.assert.calledWith(stub, 1, {
+          code: sinon.match('window.annotator')
         });
       });
     });

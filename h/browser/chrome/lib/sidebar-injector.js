@@ -79,14 +79,11 @@
     }
 
     function isFileURL(url) {
-      return url.indexOf("file://") === 0;
+      return url.indexOf("file:") === 0;
     }
 
-    function isChromeURL(url) {
-      var isBrowser = url.indexOf('chrome:') === 0;
-      var isDevtools = url.indexOf('chrome-devtools:') == 0;
-      var isExtension = url.indexOf('chrome-extension:') === 0;
-      return isBrowser || isDevtools || isExtension;
+    function isHTTPURL(url) {
+      return url.indexOf('http:') === 0 || url.indexOf('https:') === 0;
     }
 
     function injectIntoLocalDocument(tab, fn) {
@@ -128,16 +125,16 @@
     }
 
     function injectIntoHTML(tab, fn) {
-      if (isChromeURL(tab.url)) {
+      if (!isHTTPURL(tab.url)) {
         return setTimeout(fn.bind(null, new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages')));
       }
 
       injectConfig(tab, function () {
         chromeTabs.executeScript(tab.id, {
-          file: 'public/embed.js'
+          file: extensionURL('/public/embed.js')
         }, function () {
           chromeTabs.executeScript(tab.id, {
-            code: 'window.annotator = true;'
+            code: 'window.annotator = true'
           }, fn.bind(null, null));
         });
       });
@@ -151,21 +148,31 @@
     }
 
     function removeFromHTML(tab, fn) {
-      if (isChromeURL(tab.url)) {
+      if (!isHTTPURL(tab.url)) {
         return setTimeout(fn.bind(null, null));
       }
 
-      var src  = extensionURL('/public/destroy.js');
-      var code = 'var script = document.createElement("script");' +
-                 'script.src = "{}";' +
-                 'document.body.appendChild(script);' +
-                 'delete window.annotator;';
+      isSidebarInjected(tab.id, function (isInjected) {
+        if (isInjected) {
+          var src  = extensionURL('/public/destroy.js');
+          var code = 'var script = document.createElement("script");' +
+                     'script.src = "{}";' +
+                     'document.body.appendChild(script);' +
+                     'delete window.annotator;';
 
-      // TODO: Needs to check for local file permissions or just not run
-      // when not injected.
-      chromeTabs.executeScript(tab.id, {
-        code: code.replace('{}', src)
-      }, fn.bind(null, null));
+          // TODO: Needs to check for local file permissions or just not run
+          // when not injected.
+          chromeTabs.executeScript(tab.id, {
+            code: code.replace('{}', src)
+          }, fn.bind(null, null));
+        }
+      });
+    }
+
+    function isSidebarInjected(tabId, fn) {
+      chromeTabs.executeScript(tabId, {code: 'window.annotator'}, function (result) {
+        fn(result && result[0] === true || false);
+      });
     }
 
     function injectConfig(tab, fn) {
@@ -178,7 +185,7 @@
         code: code.replace('{}', src)
       }, fn.bind(null, null));
     }
-  };
+  }
 
   h.SidebarInjector = SidebarInjector;
 })(window.h || (window.h = {}));
