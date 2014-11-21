@@ -26,12 +26,16 @@
       else if (error instanceof h.NoFileAccessError) {
         return this.showNoFileAccessHelpPage(tab);
       }
+      else if (error instanceof h.RestrictedProtocolError) {
+        return this.showRestrictedProtocolPage(tab);
+      }
 
       throw new Error('showHelpForError does not support the error: ' + error.message);
     };
 
     this.showLocalFileHelpPage = showHelpPage.bind(null, 'local-file');
     this.showNoFileAccessHelpPage = showHelpPage.bind(null, 'no-file-access');
+    this.showRestrictedProtocolPage = showHelpPage.bind(null, 'restricted-protocol');
 
     // Render the help page. The helpSection should correspond to the id of a
     // section within the help page.

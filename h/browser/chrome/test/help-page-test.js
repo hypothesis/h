@@ -13,7 +13,7 @@ describe('HelpPage', function () {
 
   describe('.showHelpForError', function () {
     it('renders the "local-file" page when passed a LocalFileError', function () {
-      help.showLocalFileHelpPage({id: 1, index: 1});
+      help.showHelpForError({id: 1, index: 1}, new h.LocalFileError('msg'));
       sinon.assert.called(fakeChromeTabs.create);
       sinon.assert.calledWith(fakeChromeTabs.create, {
         index: 2,
@@ -23,12 +23,22 @@ describe('HelpPage', function () {
     });
 
     it('renders the "no-file-access" page when passed a NoFileAccessError', function () {
-      help.showNoFileAccessHelpPage({id: 1, index: 1});
+      help.showHelpForError({id: 1, index: 1}, new h.NoFileAccessError('msg'));
       sinon.assert.called(fakeChromeTabs.create);
       sinon.assert.calledWith(fakeChromeTabs.create, {
         index: 2,
         openerTabId: 1,
         url: 'CRX_PATH/help/index.html#no-file-access'
+      });
+    });
+
+    it('renders the "no-file-access" page when passed a RestrictedProtocolError', function () {
+      help.showHelpForError({id: 1, index: 1}, new h.RestrictedProtocolError('msg'));
+      sinon.assert.called(fakeChromeTabs.create);
+      sinon.assert.calledWith(fakeChromeTabs.create, {
+        index: 2,
+        openerTabId: 1,
+        url: 'CRX_PATH/help/index.html#restricted-protocol'
       });
     });
 
@@ -59,6 +69,18 @@ describe('HelpPage', function () {
         index: 2,
         openerTabId: 1,
         url: 'CRX_PATH/help/index.html#no-file-access'
+      });
+    });
+  });
+
+  describe('.showRestrictedProtocolPage', function () {
+    it('should load the help page with the "restricted-protocol" fragment', function () {
+      help.showRestrictedProtocolPage({id: 1, index: 1});
+      sinon.assert.called(fakeChromeTabs.create);
+      sinon.assert.calledWith(fakeChromeTabs.create, {
+        index: 2,
+        openerTabId: 1,
+        url: 'CRX_PATH/help/index.html#restricted-protocol'
       });
     });
   });
