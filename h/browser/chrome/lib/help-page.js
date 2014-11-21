@@ -38,7 +38,7 @@
     function showHelpPage(helpSection, tab) {
       chromeTabs.create({
         index: tab.index + 1,
-        url:  extensionURL('/help/permissions.html#' + helpSection),
+        url:  extensionURL('/help/index.html#' + helpSection),
         openerTabId: tab.id,
       });
     }

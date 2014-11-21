@@ -18,7 +18,7 @@ describe('HelpPage', function () {
       sinon.assert.calledWith(fakeChromeTabs.create, {
         index: 2,
         openerTabId: 1,
-        url: 'CRX_PATH/help/permissions.html#local-file'
+        url: 'CRX_PATH/help/index.html#local-file'
       });
     });
 
@@ -28,7 +28,7 @@ describe('HelpPage', function () {
       sinon.assert.calledWith(fakeChromeTabs.create, {
         index: 2,
         openerTabId: 1,
-        url: 'CRX_PATH/help/permissions.html#no-file-access'
+        url: 'CRX_PATH/help/index.html#no-file-access'
       });
     });
 
@@ -46,7 +46,7 @@ describe('HelpPage', function () {
       sinon.assert.calledWith(fakeChromeTabs.create, {
         index: 2,
         openerTabId: 1,
-        url: 'CRX_PATH/help/permissions.html#local-file'
+        url: 'CRX_PATH/help/index.html#local-file'
       });
     });
   });
@@ -58,7 +58,7 @@ describe('HelpPage', function () {
       sinon.assert.calledWith(fakeChromeTabs.create, {
         index: 2,
         openerTabId: 1,
-        url: 'CRX_PATH/help/permissions.html#no-file-access'
+        url: 'CRX_PATH/help/index.html#no-file-access'
       });
     });
   });
