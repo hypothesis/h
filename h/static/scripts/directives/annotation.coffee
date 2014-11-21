@@ -207,7 +207,7 @@ AnnotationController = [
 
       # Calculate the visual diff flag
       @annotation.target?.forEach (t) ->
-        t.showDiff = t.diffHTML? and not t.diffCaseOnly
+        t.showDiff ?= t.diffHTML? and not t.diffCaseOnly
 
     # Export the baseURI for the share link
     this.baseURI = documentHelpers.baseURI
