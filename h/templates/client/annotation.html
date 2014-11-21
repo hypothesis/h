@@ -50,10 +50,10 @@
                          | filter : {'type': 'TextQuoteSelector'}
                          track by $index"></blockquote>
   <blockquote class="annotation-quote"
-	      ng-bind-html="target.trustedDiffHTML"
+	      ng-bind-html="target.diffHTML"
 	      ng-show="target.showDiff"></blockquote>
   <div class="small pull-right"
-       ng-show="target.trustedDiffHTML">
+       ng-show="target.diffHTML">
     <input type="checkbox"
 	   ng-model="target.showDiff"
 	   ng-click="$event.stopPropagation()"> Show differences</input>

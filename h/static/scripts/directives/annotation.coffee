@@ -37,8 +37,8 @@ validate = (value) ->
 # {@link annotator annotator service} for persistence.
 ###
 AnnotationController = [
-  '$sce', '$scope', 'annotator', 'drafts', 'flash', 'documentHelpers',
-  ($sce,   $scope,   annotator,   drafts,   flash,   documentHelpers) ->
+  '$scope', 'annotator', 'drafts', 'flash', 'documentHelpers',
+  ($scope,   annotator,   drafts,   flash,   documentHelpers) ->
     @annotation = {}
     @action = 'view'
     @document = null
@@ -205,6 +205,10 @@ AnnotationController = [
       # Form the tags for ngTagsInput.
       @annotation.tags = ({text} for text in (model.tags or []))
 
+      # Calculate the visual diff flag
+      @annotation.target?.forEach (t) ->
+        t.showDiff = t.diffHTML? and not t.diffCaseOnly
+
     # Export the baseURI for the share link
     this.baseURI = documentHelpers.baseURI
 
@@ -228,15 +232,7 @@ AnnotationController = [
         this.render()
 
     # Calculate things neded for the visual diff support
-    $scope.$watch (-> model.target), (targets) =>
-      for target in targets
-        if target.diffHTML?
-          target.trustedDiffHTML = $sce.trustAsHtml target.diffHTML
-          target.showDiff = not target.diffCaseOnly
-        else
-          delete target.trustedDiffHTML
-          target.showDiff = false
-      this.render()
+    $scope.$watch (-> model.target), (=> this.render()), true
 
     $scope.$watch (=> @annotation.id), =>
       vm.annotationURI = documentHelpers.absoluteURI("/a/#{@annotation.id}")
