@@ -216,8 +216,11 @@ AnnotationController = [
 
       # Calculate the visual diff flags
       @hasDiff = false
-      for t in @annotation.target or [] when t.diffHTML? and not t.diffCaseOnly
-        @hasDiff = t.hasDiff = true
+      for t in @annotation.target or []
+        if t.diffHTML? and not t.diffCaseOnly
+          @hasDiff = t.hasDiff = true
+        else
+          t.hasDiff = false
       @showDiff ?= @hasDiff or undefined
 
     updateTimestamp = (repeat=false) =>
@@ -252,7 +255,7 @@ AnnotationController = [
           annotator.publish 'annotationCreated', model
           highlight = false  # skip this on future updates
         else
-          drafts.add model, -> this.revert()
+          drafts.add model, => this.revert()
 
       updateTimestamp(model is old)  # repeat on first run
       this.render()

@@ -152,11 +152,11 @@ describe 'h.directives.annotation', ->
         assert.isTrue(controller.showDiff)
 
       it 'sets `hasDiff` to true on targets with differences', ->
-        assert.match(targets[0].hasDiff, sinon.match.falsy)
-        assert.match(targets[1].hasDiff, sinon.match.truthy)
+        assert.isFalse(targets[0].hasDiff)
+        assert.isTrue(targets[1].hasDiff)
 
       it 'sets `hasDiff` to false on targets with only case differences', ->
-        assert.match(targets[2].hasDiff, sinon.match.falsy)
+        assert.isFalse(targets[2].hasDiff)
 
       it 'preserves the `showDiff` value on update', ->
         controller.showDiff = false
