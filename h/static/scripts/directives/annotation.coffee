@@ -179,6 +179,9 @@ AnnotationController = [
       # Note that copy is used so that deep properties aren't shared.
       angular.extend @annotation, angular.copy model
 
+      # Set the URI
+      @annotationURI = documentHelpers.absoluteURI("/a/#{@annotation.id}")
+
       # Extract the document metadata.
       if model.document
         uri = model.uri
@@ -221,25 +224,29 @@ AnnotationController = [
       drafts.remove model
 
     # Render on updates.
-    $scope.$watch (-> model.updated), (updated) =>
+    $scope.$watch (-> model.updated), (updated, old) =>
+      return if updated is old
       if updated then drafts.remove model
       this.render()  # XXX: TODO: don't clobber the view when collaborating
 
     # Update once logged in.
-    $scope.$watch (-> model.user), (user) =>
-      if highlight and this.isHighlight()
+    $scope.$watch (-> model.user), (user, old) =>
+      return if user is old
+      if highlight and vm.isHighlight()
         if user
           annotator.publish 'annotationCreated', model
         else
-          drafts.add model, => this.revert()
+          drafts.add model, -> this.revert()
       else
         this.render()
 
     # Calculate things neded for the visual diff support
-    $scope.$watch (-> model.target), (=> this.render()), true
+    $scope.$watch (-> model.target), (targets, old) =>
+      return if targets is old
+      this.render()
+    , true
 
-    $scope.$watch (=> @annotation.id), =>
-      vm.annotationURI = documentHelpers.absoluteURI("/a/#{@annotation.id}")
+    $scope.$watch (-> model), => this.render()
 
     # Start editing brand new annotations immediately
     unless model.id? or (highlight and this.isHighlight()) then this.edit()
