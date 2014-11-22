@@ -45,6 +45,8 @@ AnnotationController = [
     @preview = 'no'
     @editing = false
     @embedded = false
+    @hasDiff = false
+    @showDiff = undefined
 
     highlight = annotator.tool is 'highlight'
     model = $scope.annotationGet()
@@ -177,6 +179,9 @@ AnnotationController = [
       # Note that copy is used so that deep properties aren't shared.
       angular.extend @annotation, angular.copy model
 
+      # Set the URI
+      @annotationURI = documentHelpers.absoluteURI("/a/#{@annotation.id}")
+
       # Extract the document metadata.
       if model.document
         uri = model.uri
@@ -205,6 +210,12 @@ AnnotationController = [
       # Form the tags for ngTagsInput.
       @annotation.tags = ({text} for text in (model.tags or []))
 
+      # Calculate the visual diff flags
+      @hasDiff = false
+      for t in @annotation.target or [] when t.diffHTML? and not t.diffCaseOnly
+        @hasDiff = t.hasDiff = true
+      @showDiff ?= @hasDiff or undefined
+
     # Export the baseURI for the share link
     this.baseURI = documentHelpers.baseURI
 
@@ -212,23 +223,23 @@ AnnotationController = [
     $scope.$on '$destroy', ->
       drafts.remove model
 
-    # Render on updates.
-    $scope.$watch (-> model.updated), (updated) =>
-      if updated then drafts.remove model
-      this.render()  # XXX: TODO: don't clobber the view when collaborating
+    # Watch the model.
+    # XXX: TODO: don't clobber the view when collaborating
+    $scope.$watch (-> model), (model, old) =>
+      # Discard saved drafts
+      if model.updated != old.updated
+        drafts.remove model
 
-    # Update once logged in.
-    $scope.$watch (-> model.user), (user) =>
+      # Save highlights once logged in.
       if highlight and this.isHighlight()
-        if user
+        if model.user
           annotator.publish 'annotationCreated', model
+          highlight = false  # skip this on future updates
         else
-          drafts.add model, => this.revert()
-      else
-        this.render()
+          drafts.add model, -> this.revert()
 
-    $scope.$watch (=> @annotation.id), =>
-      vm.annotationURI = documentHelpers.absoluteURI("/a/#{@annotation.id}")
+      this.render()
+    , true
 
     # Start editing brand new annotations immediately
     unless model.id? or (highlight and this.isHighlight()) then this.edit()

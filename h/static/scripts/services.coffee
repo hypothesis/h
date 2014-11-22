@@ -313,6 +313,9 @@ class Hypothesis extends Annotator
       # Check the root
       update scope.threading.root
 
+      # Update the view
+      this.digest()
+
   considerSocialView: (query) ->
     switch @socialView.name
       when "none"
