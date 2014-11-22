@@ -3,6 +3,7 @@ sandbox = sinon.sandbox.create()
 
 describe 'h.directives.annotation', ->
   $scope = null
+  $timeout = null
   annotator = null
   annotation = null
   createController = null
@@ -10,7 +11,8 @@ describe 'h.directives.annotation', ->
 
   beforeEach module('h')
 
-  beforeEach inject ($controller, $rootScope) ->
+  beforeEach inject ($controller, $rootScope, _$timeout_) ->
+    $timeout = _$timeout_
     $scope = $rootScope.$new()
     $scope.annotationGet = (locals) -> annotation
     annotator = {plugins: {}, publish: sandbox.spy()}
@@ -166,3 +168,35 @@ describe 'h.directives.annotation', ->
         annotation.target = annotation.target.splice(0, 1)
         controller.render()
         assert.isFalse(controller.hasDiff)
+
+    describe 'timestamp', ->
+      clock = null
+
+      beforeEach ->
+        clock = sinon.useFakeTimers()
+        annotation.created = (new Date()).toString()
+        annotation.updated = (new Date()).toString()
+
+      afterEach ->
+        clock.restore()
+
+      it 'is updated on first digest', ->
+        $scope.$digest()
+        assert.isNotNull(controller.timestamp)
+
+      it 'is updated after a timeout', ->
+        $scope.$digest()
+        timestamp = controller.timestamp
+        clock.tick(30000)
+        $timeout.flush()
+        assert.notEqual(timestamp, controller.timestamp)
+        timestamp = controller.timestamp
+        clock.tick(30000)
+        $timeout.flush()
+        assert.notEqual(timestamp, controller.timestamp)
+
+      it 'is no longer updated after the scope is destroyed', ->
+        $scope.$digest()
+        $scope.$destroy()
+        $timeout.flush()
+        $timeout.verifyNoPendingTasks()
