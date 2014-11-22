@@ -6,7 +6,7 @@
   <span ng-if="vm.annotation.user">
     <a class="annotation-user"
        target="_blank"
-       ng-href="{{baseURI}}u/{{vm.annotation.user}}"
+       ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
        >{{vm.annotation.user | persona}}</a>
     <i class="small h-icon-locked" ng-show="vm.isPrivate() && !vm.editing"></i>
     <i class="small h-icon-highlighter" ng-show="vm.isHighlight() && !vm.editing"></i>
@@ -34,10 +34,10 @@
   <!-- Timestamp -->
   <a class="annotation-timestamp small pull-right"
      target="_blank"
-     title="{{vm.annotation.update | moment:'LLLL'}}"
+     title="{{vm.annotation.updated | moment:'LLLL'}}"
      ng-if="!vm.editing && vm.annotation.updated"
-     ng-href="{{baseURI}}a/{{vm.annotation.id}}"
-     >{{timestamp}}</a>
+     ng-href="{{vm.baseURI}}a/{{vm.annotation.id}}"
+     >{{vm.timestamp}}</a>
 </header>
 
 <!-- Excerpts -->

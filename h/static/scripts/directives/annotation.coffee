@@ -37,8 +37,11 @@ validate = (value) ->
 # {@link annotator annotator service} for persistence.
 ###
 AnnotationController = [
-  '$scope', 'annotator', 'drafts', 'flash', 'documentHelpers',
-  ($scope,   annotator,   drafts,   flash,   documentHelpers) ->
+  '$scope', '$timeout',
+  'annotator', 'drafts', 'flash', 'documentHelpers', 'timeHelpers',
+  ($scope,   $timeout,
+   annotator,   drafts,   flash,   documentHelpers,   timeHelpers
+  ) ->
     @annotation = {}
     @action = 'view'
     @document = null
@@ -47,6 +50,7 @@ AnnotationController = [
     @embedded = false
     @hasDiff = false
     @showDiff = undefined
+    @timestamp = null
 
     highlight = annotator.tool is 'highlight'
     model = $scope.annotationGet()
@@ -216,11 +220,23 @@ AnnotationController = [
         @hasDiff = t.hasDiff = true
       @showDiff ?= @hasDiff or undefined
 
+    updateTimestamp = (repeat=false) =>
+      @timestamp = timeHelpers.toFuzzyString model.updated
+      fuzzyUpdate = timeHelpers.nextFuzzyUpdate model.updated
+      fuzzyUpdate = 5 if fuzzyUpdate < 5  # minimum 5 seconds
+      nextUpdate = (1000 * fuzzyUpdate) + 500
+      return unless repeat
+      $timeout =>
+        updateTimestamp(true)
+        $scope.$digest()
+      , nextUpdate, false
+
     # Export the baseURI for the share link
     this.baseURI = documentHelpers.baseURI
 
     # Discard the draft if the scope goes away.
     $scope.$on '$destroy', ->
+      updateTimestamp = angular.noop
       drafts.remove model
 
     # Watch the model.
@@ -238,6 +254,7 @@ AnnotationController = [
         else
           drafts.add model, -> this.revert()
 
+      updateTimestamp(model is old)  # repeat on first run
       this.render()
     , true
 
@@ -261,8 +278,8 @@ AnnotationController = [
 # an embedded widget.
 ###
 annotation = [
-  'annotator', 'documentHelpers', 'render', 'timeHelpers', '$timeout',
-  (annotator,   documentHelpers,   render,   timeHelpers,   $timeout) ->
+  'annotator',
+  (annotator) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
       # Helper function to remove the temporary thread created for a new reply.
       prune = (message) ->
@@ -306,19 +323,6 @@ annotation = [
         # Clean up when the thread is destroyed
         scope.$on '$destroy', ->
           if ctrl.editing then counter?.count 'edit', -1
-
-      updateTimeStamp = ->
-        stamp = ctrl.annotation.updated
-        scope.timestamp = timeHelpers.toFuzzyString stamp
-
-        fuzzyUpdate = timeHelpers.nextFuzzyUpdate(stamp)
-        # Handle null value, give default 5 sec
-        fuzzyUpdate ?=5
-        nextUpdate = 1000*fuzzyUpdate+500
-
-        $timeout (-> render updateTimeStamp), nextUpdate, false
-
-      render updateTimeStamp
 
     controller: 'AnnotationController'
     controllerAs: 'vm'
