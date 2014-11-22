@@ -45,6 +45,8 @@ AnnotationController = [
     @preview = 'no'
     @editing = false
     @embedded = false
+    @hasDiff = false
+    @showDiff = undefined
 
     highlight = annotator.tool is 'highlight'
     model = $scope.annotationGet()
@@ -206,8 +208,10 @@ AnnotationController = [
       @annotation.tags = ({text} for text in (model.tags or []))
 
       # Calculate the visual diff flags
-      @hasDiff = @annotation.target.filter((t) -> t.diffHTML?).length > 0
-      @showDiff ?= @hasDiff && @annotation.target.filter((t) -> t.diffHTML? and not t.diffCaseOnly).length > 0
+      @hasDiff = false
+      for t in @annotation.target or [] when t.diffHTML? and not t.diffCaseOnly
+        @hasDiff = t.hasDiff = true
+      @showDiff ?= @hasDiff or undefined
 
     # Export the baseURI for the share link
     this.baseURI = documentHelpers.baseURI
