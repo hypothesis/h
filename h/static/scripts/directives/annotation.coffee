@@ -205,9 +205,9 @@ AnnotationController = [
       # Form the tags for ngTagsInput.
       @annotation.tags = ({text} for text in (model.tags or []))
 
-      # Calculate the visual diff flag
-      @annotation.target?.forEach (t) ->
-        t.showDiff ?= t.diffHTML? and not t.diffCaseOnly
+      # Calculate the visual diff flags
+      @hasDiff = @annotation.target.filter((t) -> t.diffHTML?).length > 0
+      @showDiff ?= @hasDiff && @annotation.target.filter((t) -> t.diffHTML? and not t.diffCaseOnly).length > 0
 
     # Export the baseURI for the share link
     this.baseURI = documentHelpers.baseURI
