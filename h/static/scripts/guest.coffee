@@ -325,7 +325,7 @@ class Annotator.Guest extends Annotator
       method: 'setVisibleHighlights'
       params: shouldShowHighlights
 
-    this.toggleHighlightClass(shouldShowHighlights or @tool == 'highlight')
+    this.toggleHighlightClass(shouldShowHighlights)
 
   toggleHighlightClass: (shouldShowHighlights) ->
     if shouldShowHighlights
