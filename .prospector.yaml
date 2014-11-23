@@ -8,6 +8,9 @@ pylint:
     #
     #     https://bitbucket.org/logilab/pylint/issue/205
     - E1120
+    # This check (for inherited objects to be classes) is broken in pylint 1.4
+    # for zope.interface.Interface.
+    - E0239
 pep8:
   options:
     max-line-length: 79
