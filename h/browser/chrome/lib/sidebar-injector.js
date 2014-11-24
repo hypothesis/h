@@ -78,8 +78,11 @@
       return url.indexOf("file:") === 0;
     }
 
-    function isHTTPURL(url) {
-      return url.indexOf('http:') === 0 || url.indexOf('https:') === 0;
+    function isSupportedURL(url) {
+      var SUPPORTED_PROTOCOLS = ['http:', 'https:', 'ftp:'];
+      return SUPPORTED_PROTOCOLS.some(function (protocol) {
+        return url.indexOf(protocol) === 0;
+      });
     }
 
     function injectIntoLocalDocument(tab) {
@@ -120,8 +123,9 @@
 
     function injectIntoHTML(tab) {
       return new Promise(function (resolve, reject) {
-        if (!isHTTPURL(tab.url)) {
-          return reject(new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages'));
+        if (!isSupportedURL(tab.url)) {
+          var protocol = tab.url.split(':')[0];
+          return reject(new h.RestrictedProtocolError('Cannot load Hypothesis into ' + protocol + ' pages'));
         }
 
         return isSidebarInjected(tab.id).then(function (isInjected) {
@@ -153,7 +157,7 @@
 
     function removeFromHTML(tab) {
       return new Promise(function (resolve, reject) {
-        if (!isHTTPURL(tab.url)) {
+        if (!isSupportedURL(tab.url)) {
           return resolve();
         }
 

@@ -35,33 +35,16 @@ describe('SidebarInjector', function () {
       fakeChromeTabs.executeScript.yields([]);
     });
 
-    it('bails early when trying to load a chrome url', function () {
-      var spy = fakeChromeTabs.executeScript;
-      var url = 'chrome://extensions/';
+    var protocols = ['chrome:', 'chrome-devtools:', 'chrome-extension'];
+    protocols.forEach(function (protocol) {
+      it('bails early when trying to load an unsupported ' + protocol + ' url', function () {
+        var spy = fakeChromeTabs.executeScript;
+        var url = protocol + '//foo/';
 
-      return injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
-        assert.instanceOf(err, h.RestrictedProtocolError);
-        sinon.assert.notCalled(spy);
-      });
-    });
-
-    it('bails early when trying to load a devtools url', function () {
-      var spy = fakeChromeTabs.executeScript;
-      var url = 'chrome-devtools://foobar/';
-
-      return injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
-        assert.instanceOf(err, h.RestrictedProtocolError);
-        sinon.assert.notCalled(spy);
-      });
-    });
-
-    it('bails early when trying to load a extension url', function () {
-      var spy = fakeChromeTabs.executeScript;
-      var url = 'chrome-extension://foobar/';
-
-      return injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
-        assert.instanceOf(err, h.RestrictedProtocolError);
-        sinon.assert.notCalled(spy);
+        return injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
+          assert.instanceOf(err, h.RestrictedProtocolError);
+          sinon.assert.notCalled(spy);
+        });
       });
     });
 
@@ -171,21 +154,15 @@ describe('SidebarInjector', function () {
       });
     });
 
-    it('bails early when trying to unload a devtools url', function () {
-      var spy = fakeChromeTabs.executeScript;
-      var url = 'chrome-devtools://foobar/';
+    var protocols = ['chrome:', 'chrome-devtools:', 'chrome-extension'];
+    protocols.forEach(function (protocol) {
+      it('bails early when trying to unload an unsupported ' + protocol + ' url', function () {
+        var spy = fakeChromeTabs.executeScript;
+        var url = protocol + '//foobar/';
 
-      return injector.removeFromTab({id: 1, url: url}).then(function () {
-        sinon.assert.notCalled(spy);
-      });
-    });
-
-    it('bails early when trying to unload a extension url', function () {
-      var spy = fakeChromeTabs.executeScript;
-      var url = 'chrome-extension://foobar/';
-
-      return injector.removeFromTab({id: 1, url: url}).then(function () {
-        sinon.assert.notCalled(spy);
+        return injector.removeFromTab({id: 1, url: url}).then(function () {
+          sinon.assert.notCalled(spy);
+        });
       });
     });
 
