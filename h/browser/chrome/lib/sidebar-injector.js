@@ -27,22 +27,20 @@
       throw new TypeError('isAllowedFileSchemeAccess must be a function');
     }
 
-    /* Injects the Hypothesis sidebar into the tab provided. The callback
-     * will recieve an error if the injection fails. See errors.js
+    /* Injects the Hypothesis sidebar into the tab provided. The promise
+     * will be rejected with an error if the injection fails. See errors.js
      * for the full list of errors.
      *
      * tab - A tab object representing the tab to insert the sidebar into.
-     * fn  - A callback called when the insertion is complete.
      *
-     * Returns nothing.
+     * Returns a promise that will be resolved if the injection went well
+     * otherwise it will be rejected with an error.
      */
-    this.injectIntoTab = function (tab, fn) {
-      fn = fn || function () {};
-
+    this.injectIntoTab = function (tab) {
       if (isFileURL(tab.url)) {
-        injectIntoLocalDocument(tab, fn);
+        return injectIntoLocalDocument(tab);
       } else {
-        injectIntoRemoteDocument(tab, fn);
+        return injectIntoRemoteDocument(tab);
       }
     };
 
@@ -51,17 +49,15 @@
      * first argument to the callback if removal failed.
      *
      * tab - A tab object representing the tab to remove the sidebar from.
-     * fn  - A callback called when the removal is complete.
      *
-     * Returns nothing.
+     * Returns a promise that will be resolved if the removal succeeded
+     * otherwise it will be rejected with an error.
      */
-    this.removeFromTab = function (tab, fn) {
-      fn = fn || function () {};
-
+    this.removeFromTab = function (tab) {
       if (isPDFViewerURL(tab.url)) {
-        removeFromPDF(tab, fn);
+        return removeFromPDF(tab);
       } else {
-        removeFromHTML(tab, fn);
+        return removeFromHTML(tab);
       }
     };
 
@@ -86,95 +82,96 @@
       return url.indexOf('http:') === 0 || url.indexOf('https:') === 0;
     }
 
-    function injectIntoLocalDocument(tab, fn) {
-      var err;
+    function injectIntoLocalDocument(tab) {
       if (isPDFURL(tab.url)) {
-        injectIntoLocalPDF(tab, fn);
+        return injectIntoLocalPDF(tab);
       } else {
-        err = new h.LocalFileError('Local non-PDF files are not supported');
-        setTimeout(fn.bind(null, err));
+        return Promise.reject(new h.LocalFileError('Local non-PDF files are not supported'));
       }
     }
 
-    function injectIntoRemoteDocument(tab, fn) {
-      if (isPDFURL(tab.url)) {
-        injectIntoPDF(tab, fn);
-      } else {
-        injectIntoHTML(tab, fn);
-      }
+    function injectIntoRemoteDocument(tab) {
+      return isPDFURL(tab.url) ? injectIntoPDF(tab) : injectIntoHTML(tab);
     }
 
-    function injectIntoPDF(tab, fn) {
-      if (!isPDFViewerURL(tab.url)) {
-        chromeTabs.update(tab.id, {
-          url: getPDFViewerURL(tab.url)
-        }, fn.bind(null, null));
-      } else {
-        setTimeout(fn);
-      }
-    }
-
-    function injectIntoLocalPDF(tab, fn) {
-      isAllowedFileSchemeAccess(function (isAllowed) {
-        if (isAllowed) {
-          injectIntoPDF(tab, fn);
+    function injectIntoPDF(tab) {
+      return new Promise(function (resolve, reject) {
+        if (!isPDFViewerURL(tab.url)) {
+          chromeTabs.update(tab.id, {url: getPDFViewerURL(tab.url)}, function () {
+            resolve();
+          });
         } else {
-          setTimeout(fn.bind(null, new h.NoFileAccessError('Local file scheme access denied')));
+          resolve();
         }
       });
     }
 
-    function injectIntoHTML(tab, fn) {
-      if (!isHTTPURL(tab.url)) {
-        return setTimeout(fn.bind(null, new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages')));
-      }
+    function injectIntoLocalPDF(tab) {
+      return new Promise(function (resolve, reject) {
+        isAllowedFileSchemeAccess(function (isAllowed) {
+          if (isAllowed) {
+            resolve(injectIntoPDF(tab));
+          } else {
+            reject(new h.NoFileAccessError('Local file scheme access denied'));
+          }
+        });
+      });
+    }
 
-      isSidebarInjected(tab.id, function (isInjected) {
-        fn = fn.bind(null, null);
-        if (isInjected) { return setTimeout(fn); }
+    function injectIntoHTML(tab) {
+      return new Promise(function (resolve, reject) {
+        if (!isHTTPURL(tab.url)) {
+          return reject(new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages'));
+        }
 
-        injectConfig(tab.id, function () {
-          chromeTabs.executeScript(tab.id, {
-            code: 'window.annotator = true'
-          }, function () {
+        isSidebarInjected(tab.id, function (isInjected) {
+          if (isInjected) { return resolve(); }
+
+          injectConfig(tab.id, function () {
             chromeTabs.executeScript(tab.id, {
-              file: 'public/embed.js'
-            }, fn);
+              code: 'window.annotator = true'
+            }, function () {
+              chromeTabs.executeScript(tab.id, {
+                file: 'public/embed.js'
+              }, resolve);
+            });
           });
         });
       });
     }
 
-    function removeFromPDF(tab, fn) {
-      var url = tab.url.slice(getPDFViewerURL('').length).split('#')[0];
-      chromeTabs.update(tab.id, {
-        url: decodeURIComponent(url)
-      }, fn.bind(null, null));
+    function removeFromPDF(tab) {
+      return new Promise(function (resolve) {
+        var url = tab.url.slice(getPDFViewerURL('').length).split('#')[0];
+        chromeTabs.update(tab.id, {
+          url: decodeURIComponent(url)
+        }, resolve);
+      });
     }
 
-    function removeFromHTML(tab, fn) {
-      fn = fn.bind(null, null);
-
-      if (!isHTTPURL(tab.url)) {
-        return setTimeout(fn);
-      }
-
-      isSidebarInjected(tab.id, function (isInjected) {
-        if (isInjected) {
-          var src  = extensionURL('/public/destroy.js');
-          var code = 'var script = document.createElement("script");' +
-                     'script.src = "{}";' +
-                     'document.body.appendChild(script);' +
-                     'delete window.annotator;';
-
-          // TODO: Needs to check for local file permissions or just not run
-          // when not injected.
-          chromeTabs.executeScript(tab.id, {
-            code: code.replace('{}', src)
-          }, fn);
-        } else {
-          return setTimeout(fn);
+    function removeFromHTML(tab) {
+      return new Promise(function (resolve, reject) {
+        if (!isHTTPURL(tab.url)) {
+          return resolve();
         }
+
+        isSidebarInjected(tab.id, function (isInjected) {
+          if (isInjected) {
+            var src  = extensionURL('/public/destroy.js');
+            var code = 'var script = document.createElement("script");' +
+                       'script.src = "{}";' +
+                       'document.body.appendChild(script);' +
+                       'delete window.annotator;';
+
+            // TODO: Needs to check for local file permissions or just not run
+            // when not injected.
+            chromeTabs.executeScript(tab.id, {
+              code: code.replace('{}', src)
+            }, resolve);
+          } else {
+            return resolve();
+          }
+        });
       });
     }
 

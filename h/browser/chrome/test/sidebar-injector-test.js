@@ -22,6 +22,12 @@ describe('SidebarInjector', function () {
     });
   });
 
+  // Used when asserting rejected promises to raise an error if the resolved
+  // path is taken. Otherwise Mocha will just assume the test passed.
+  function assertReject() {
+    assert(false, 'Expected the promise to reject the call');
+  }
+
   describe('.injectIntoTab', function () {
     beforeEach(function () {
       // Handle loading the config.
@@ -29,88 +35,81 @@ describe('SidebarInjector', function () {
       fakeChromeTabs.executeScript.yields([]);
     });
 
-    it('bails early when trying to load a chrome url', function (done) {
+    it('bails early when trying to load a chrome url', function () {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome://extensions/';
 
-      injector.injectIntoTab({id: 1, url: url}, function (err) {
+      return injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
         assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
-        done();
       });
     });
 
-    it('bails early when trying to load a devtools url', function (done) {
+    it('bails early when trying to load a devtools url', function () {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome-devtools://foobar/';
 
-      injector.injectIntoTab({id: 1, url: url}, function (err) {
+      return injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
         assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
-        done();
       });
     });
 
-    it('bails early when trying to load a extension url', function (done) {
+    it('bails early when trying to load a extension url', function () {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome-extension://foobar/';
 
-      injector.injectIntoTab({id: 1, url: url}, function (err) {
+      return injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
         assert.instanceOf(err, h.RestrictedProtocolError);
         sinon.assert.notCalled(spy);
-        done();
       });
     });
 
     describe('when viewing a remote PDF', function () {
-      it('injects hypothesis into the page', function (done) {
+      it('injects hypothesis into the page', function () {
         var spy = fakeChromeTabs.update.yields({tab: 1});
         var url = 'http://example.com/foo.pdf';
 
-        injector.injectIntoTab({id: 1, url: url}, function () {
+        return injector.injectIntoTab({id: 1, url: url}).then(function () {
           sinon.assert.calledWith(spy, 1, {
             url: 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent(url)
           });
-          done();
         });
       });
     });
 
     describe('when viewing an remote HTML page', function () {
-      it('injects hypothesis into the page', function (done) {
+      it('injects hypothesis into the page', function () {
         var spy = fakeChromeTabs.executeScript;
         var url = 'http://example.com/foo.html';
 
-        injector.injectIntoTab({id: 1, url: url}, function () {
+        return injector.injectIntoTab({id: 1, url: url}).then(function () {
           sinon.assert.callCount(spy, 4);
           sinon.assert.calledWith(spy, 1, {
             file: 'public/embed.js'
           });
-          done();
         });
       });
 
-      it('sets the global annotator variable to true', function (done) {
+      it('sets the global annotator variable to true', function () {
         var spy = fakeChromeTabs.executeScript;
         var url = 'http://example.com/foo.html';
 
-        injector.injectIntoTab({id: 1, url: url}, function () {
+        return injector.injectIntoTab({id: 1, url: url}).then(function () {
           sinon.assert.callCount(spy, 4);
           sinon.assert.calledWith(spy, 1, {
             code: 'window.annotator = true'
           });
-          done();
         });
       });
 
-      it('is not injected twice', function (done) {
+      it('is not injected twice', function () {
         fakeChromeTabs.executeScript.withArgs(1, {code: 'window.annotator'}).yields([true]);
         var spy = fakeChromeTabs.executeScript;
         var url = 'http://example.com/foo.html';
 
-        injector.injectIntoTab({id: 1, url: url}, function () {
+        return injector.injectIntoTab({id: 1, url: url}).then(function () {
           sinon.assert.calledOnce(spy);
-          done();
         });
       });
     });
@@ -118,91 +117,87 @@ describe('SidebarInjector', function () {
     describe('when viewing a local PDF', function () {
       describe('when file access is enabled', function () {
         it('loads the PDFjs viewer', function () {
-          var spy = fakeChromeTabs.update;
+          var spy = fakeChromeTabs.update.yields([]);
           var url = 'file://foo.pdf';
 
-          injector.injectIntoTab({id: 1, url: url});
-          sinon.assert.called(spy);
-          sinon.assert.calledWith(spy, 1, {
-            url: 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent('file://foo.pdf')
+          return injector.injectIntoTab({id: 1, url: url}).then(function () {
+            sinon.assert.called(spy);
+            sinon.assert.calledWith(spy, 1, {
+              url: 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent('file://foo.pdf')
+            });
           });
         });
       });
 
-      describe('when file access is disabled', function (done) {
+      describe('when file access is disabled', function () {
         beforeEach(function () {
           fakeFileAccess.yields(false);
         });
 
-        it('returns an error', function (done) {
+        it('returns an error', function () {
           var url = 'file://foo.pdf';
 
-          injector.injectIntoTab({id: 1, url: url}, function (err) {
+          return injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
             assert.instanceOf(err, h.NoFileAccessError);
-            done();
           });
         });
       });
     });
 
     describe('when viewing a local HTML file', function () {
-      it('returns an error', function (done) {
+      it('returns an error', function () {
         var url = 'file://foo.html';
-        injector.injectIntoTab({id: 1, url: url}, function (err) {
+        return injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
           assert.instanceOf(err, h.LocalFileError);
-          done();
         });
       });
 
-      it('retuns an error before loading the config', function (done) {
+      it('retuns an error before loading the config', function () {
         var url = 'file://foo.html';
-        injector.injectIntoTab({id: 1, url: url}, function (err) {
+        return injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
           sinon.assert.notCalled(fakeChromeTabs.executeScript);
-          done();
         });
       });
     });
   });
 
   describe('.removeFromTab', function () {
-    it('bails early when trying to unload a chrome url', function (done) {
+    it('bails early when trying to unload a chrome url', function () {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome://extensions/';
 
-      injector.removeFromTab({id: 1, url: url}, function (err) {
+      return injector.removeFromTab({id: 1, url: url}).then(function () {
         sinon.assert.notCalled(spy);
-        done();
       });
     });
 
-    it('bails early when trying to unload a devtools url', function (done) {
+    it('bails early when trying to unload a devtools url', function () {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome-devtools://foobar/';
 
-      injector.removeFromTab({id: 1, url: url}, function (err) {
+      return injector.removeFromTab({id: 1, url: url}).then(function () {
         sinon.assert.notCalled(spy);
-        done();
       });
     });
 
-    it('bails early when trying to unload a extension url', function (done) {
+    it('bails early when trying to unload a extension url', function () {
       var spy = fakeChromeTabs.executeScript;
       var url = 'chrome-extension://foobar/';
 
-      injector.removeFromTab({id: 1, url: url}, function (err) {
+      return injector.removeFromTab({id: 1, url: url}).then(function () {
         sinon.assert.notCalled(spy);
-        done();
       });
     });
 
     describe('when viewing a PDF', function () {
       it('reverts the tab back to the original document', function () {
-        var spy = fakeChromeTabs.update;
+        var spy = fakeChromeTabs.update.yields([]);
         var url = 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent('http://example.com/foo.pdf');
 
-        injector.removeFromTab({id: 1, url: url});
-        sinon.assert.calledWith(spy, 1, {
-          url: 'http://example.com/foo.pdf'
+        return injector.removeFromTab({id: 1, url: url}).then(function () {
+          sinon.assert.calledWith(spy, 1, {
+            url: 'http://example.com/foo.pdf'
+          });
         });
       });
     });
@@ -210,18 +205,20 @@ describe('SidebarInjector', function () {
     describe('when viewing an HTML page', function () {
       it('injects a destroy script into the page', function () {
         var stub = fakeChromeTabs.executeScript.yields([true]);
-        injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'});
-        sinon.assert.calledWith(stub, 1, {
-          code: sinon.match('/public/destroy.js')
+        return injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'}).then(function () {
+          sinon.assert.calledWith(stub, 1, {
+            code: sinon.match('/public/destroy.js')
+          });
         });
       });
 
       it('does nothing if the sidebar has not been injected into the page', function () {
         var stub = fakeChromeTabs.executeScript.yields([false]);
-        injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'});
-        sinon.assert.calledOnce(stub);
-        sinon.assert.calledWith(stub, 1, {
-          code: sinon.match('window.annotator')
+        return injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'}).then(function () {
+          sinon.assert.calledOnce(stub);
+          sinon.assert.calledWith(stub, 1, {
+            code: sinon.match('window.annotator')
+          });
         });
       });
     });

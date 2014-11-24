@@ -132,7 +132,7 @@
         browserAction.deactivate(tabId);
       }
 
-      updateTabDocument(tab);
+      return updateTabDocument(tab);
     }
 
     function onTabCreated(tab) {
@@ -145,15 +145,13 @@
 
     function updateTabDocument(tab) {
       if (state.isTabActive(tab.id)) {
-        sidebar.injectIntoTab(tab, function (err) {
-          if (err) {
-            tabErrors.setTabError(tab.id, err);
-            state.errorTab(tab.id);
-          }
+        return sidebar.injectIntoTab(tab).catch(function (err) {
+          tabErrors.setTabError(tab.id, err);
+          state.errorTab(tab.id);
         });
       }
       else if (state.isTabInactive(tab.id)) {
-        sidebar.removeFromTab(tab);
+        return sidebar.removeFromTab(tab);
       }
     }
   }

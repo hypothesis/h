@@ -54,8 +54,8 @@ describe('HypothesisChromeExtension', function () {
       deactivate: sandbox.spy(),
     };
     fakeSidebarInjector = {
-      injectIntoTab: sandbox.stub(),
-      removeFromTab: sandbox.stub(),
+      injectIntoTab: sandbox.stub().returns(Promise.resolve()),
+      removeFromTab: sandbox.stub().returns(Promise.resolve()),
     };
 
     sandbox.stub(h, 'HelpPage').returns(fakeHelpPage);
@@ -254,11 +254,14 @@ describe('HypothesisChromeExtension', function () {
           var tab = {id: 1, url: 'file://foo.html'};
 
           fakeTabState.isTabActive.withArgs(1).returns(true);
-          fakeSidebarInjector.injectIntoTab.yields(new h.LocalFileError('msg'));
-          onUpdatedHandler(tab.id, {status: 'complete'}, tab); // Trigger failed render.
+          fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new h.LocalFileError('msg')));
 
-          sinon.assert.called(fakeTabState.errorTab);
-          sinon.assert.calledWith(fakeTabState.errorTab, 1);
+          // Trigger failed render.
+          onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(function () {
+            sinon.assert.called(fakeTabState.errorTab);
+            sinon.assert.calledWith(fakeTabState.errorTab, 1);
+            resolve();
+          });
         });
 
         it('shows the local file help page', function () {
@@ -278,11 +281,13 @@ describe('HypothesisChromeExtension', function () {
           var tab = {id: 1, url: 'file://foo.html'};
 
           fakeTabState.isTabActive.withArgs(1).returns(true);
-          fakeSidebarInjector.injectIntoTab.yields(new h.NoFileAccessError('msg'));
-          onUpdatedHandler(tab.id, {status: 'complete'}, tab); // Trigger failed render.
+          fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new h.NoFileAccessError('msg')));
 
-          sinon.assert.called(fakeTabState.errorTab);
-          sinon.assert.calledWith(fakeTabState.errorTab, 1);
+          // Trigger failed render.
+          onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(function () {
+            sinon.assert.called(fakeTabState.errorTab);
+            sinon.assert.calledWith(fakeTabState.errorTab, 1);
+          });
         });
 
         it('shows the local file help page', function () {
@@ -302,11 +307,13 @@ describe('HypothesisChromeExtension', function () {
           var tab = {id: 1, url: 'file://foo.html'};
 
           fakeTabState.isTabActive.withArgs(1).returns(true);
-          fakeSidebarInjector.injectIntoTab.yields(new h.RestrictedProtocolError('msg'));
-          onUpdatedHandler(tab.id, {status: 'complete'}, tab); // Trigger failed render.
+          fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new h.RestrictedProtocolError('msg')));
 
-          sinon.assert.called(fakeTabState.errorTab);
-          sinon.assert.calledWith(fakeTabState.errorTab, 1);
+          // Trigger failed render.
+          onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(function () {
+            sinon.assert.called(fakeTabState.errorTab);
+            sinon.assert.calledWith(fakeTabState.errorTab, 1);
+          });
         });
 
         it('shows the local file help page', function () {
