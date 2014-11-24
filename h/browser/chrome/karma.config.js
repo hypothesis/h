@@ -18,6 +18,7 @@ module.exports = function(config) {
       '../../static/scripts/vendor/sinon.js',
       '../../static/scripts/vendor/chai.js',
       '../../static/scripts/vendor/bind.js',
+      '../../static/scripts/vendor/promise.js',
       'lib/errors.js',
       'lib/tab-store.js',
       'lib/tab-state.js',
