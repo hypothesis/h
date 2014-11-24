@@ -53,6 +53,13 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
     this.pruneEmpties(@root)
     @root
 
+  pruneEmpties: (parent) ->
+    for container in parent.children
+      this.pruneEmpties(container)
+
+      if !container.message && container.children.length == 0
+        parent.removeChild(container)
+
   beforeAnnotationCreated: (annotation) =>
     this.thread([annotation])
 
