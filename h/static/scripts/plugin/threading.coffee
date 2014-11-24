@@ -1,4 +1,6 @@
 class Annotator.Plugin.Threading extends Annotator.Plugin
+  $.extend(this.prototype, mail.messageThread())
+
   events:
     'beforeAnnotationCreated': 'beforeAnnotationCreated'
     'annotationDeleted': 'annotationDeleted'
@@ -11,7 +13,7 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
     @root = mail.messageContainer()
 
     # Mix in message thread properties, preserving local overrides.
-    $.extend(this, mail.messageThread(), thread: this.thread)
+    $.extend(this, thread: this.thread)
 
   # TODO: Refactor the jwz API for progressive updates.
   # Right now the idTable is wiped when `messageThread.thread()` is called and
