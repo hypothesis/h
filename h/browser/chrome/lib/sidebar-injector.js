@@ -124,18 +124,20 @@
           return reject(new h.RestrictedProtocolError('Cannot load Hypothesis into chrome pages'));
         }
 
-        isSidebarInjected(tab.id, function (isInjected) {
-          if (isInjected) { return resolve(); }
-
-          injectConfig(tab.id, function () {
-            chromeTabs.executeScript(tab.id, {
-              code: 'window.annotator = true'
-            }, function () {
+        return isSidebarInjected(tab.id).then(function (isInjected) {
+          if (!isInjected) {
+            injectConfig(tab.id).then(function () {
               chromeTabs.executeScript(tab.id, {
-                file: 'public/embed.js'
-              }, resolve);
+                code: 'window.annotator = true'
+              }, function () {
+                chromeTabs.executeScript(tab.id, {
+                  file: 'public/embed.js'
+                }, resolve);
+              });
             });
-          });
+          } else {
+            resolve();
+          }
         });
       });
     }
@@ -155,41 +157,41 @@
           return resolve();
         }
 
-        isSidebarInjected(tab.id, function (isInjected) {
-          if (isInjected) {
-            var src  = extensionURL('/public/destroy.js');
-            var code = 'var script = document.createElement("script");' +
-                       'script.src = "{}";' +
-                       'document.body.appendChild(script);' +
-                       'delete window.annotator;';
+        return isSidebarInjected(tab.id).then(function (isInjected) {
+          var src  = extensionURL('/public/destroy.js');
+          var code = 'var script = document.createElement("script");' +
+            'script.src = "{}";' +
+            'document.body.appendChild(script);' +
+            'delete window.annotator;';
 
-            // TODO: Needs to check for local file permissions or just not run
-            // when not injected.
+          if (isInjected) {
             chromeTabs.executeScript(tab.id, {
               code: code.replace('{}', src)
             }, resolve);
           } else {
-            return resolve();
+            resolve();
           }
         });
       });
     }
 
-    function isSidebarInjected(tabId, fn) {
-      chromeTabs.executeScript(tabId, {code: 'window.annotator'}, function (result) {
-        fn((result && result[0] === true) || false);
+    function isSidebarInjected(tabId) {
+      return new Promise(function (resolve, reject) {
+        return chromeTabs.executeScript(tabId, {code: 'window.annotator'}, function (result) {
+          resolve((result && result[0] === true) || false);
+        });
       });
     }
 
-    function injectConfig(tabId, fn) {
-      var src  = extensionURL('/public/config.js');
-      var code = 'var script = document.createElement("script");' +
-        'script.src = "{}";' +
-        'document.body.appendChild(script);';
+    function injectConfig(tabId) {
+      return new Promise(function (resolve) {
+        var src  = extensionURL('/public/config.js');
+        var code = 'var script = document.createElement("script");' +
+          'script.src = "{}";' +
+          'document.body.appendChild(script);';
 
-      chromeTabs.executeScript(tabId, {
-        code: code.replace('{}', src)
-      }, fn.bind(null, null));
+        chromeTabs.executeScript(tabId, {code: code.replace('{}', src)}, resolve);
+      });
     }
   }
 
