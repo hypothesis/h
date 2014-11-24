@@ -239,7 +239,6 @@ def extension(args, console, settings):
     settings['webassets.manifest'] = None
 
     config = Configurator(settings=settings)
-    config.include('h.queue.nsq')
     config.include('h')
     config.add_subscriber(add_base_url, BeforeRender)
     config.commit()

@@ -31,6 +31,7 @@ install_requires = [
     'SQLAlchemy>=0.8.0',
     'alembic>=0.6.3',
     'annotator>=0.12.0,<0.13',
+    'blinker>=1.3,<1.4',
     'clik==0.3.1',
     'deform>=0.9,<1.0',
     'elasticsearch',
