@@ -38,7 +38,10 @@
     ]
   },
   "browser_action": {
-    "placeholder": "work around http://crbug.com/86449"
+    "default_icon": {
+      "19": "images/browser-icon-inactive.png",
+      "38": "images/browser-icon-inactive@2x.png"
+    }
   },
   "web_accessible_resources": [
     "public/*",
