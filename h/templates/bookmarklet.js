@@ -1,6 +1,6 @@
 (function (window, document, location) {
-  var embedUrl = '{{request.resource_url(context, 'embed.js')}}';
-  var isHTTPS = !!location.protocol.indexOf('https') === 0;
+  var embedUrl = '{{request.resource_url(context, "embed.js")}}';
+  var isHTTPS = location.protocol.indexOf('https') === 0;
   var isEmbedHTTPS = embedUrl.indexOf('https') === 0;
   var isLocal = location.protocol === 'file:';
   var isPDF = location.pathname.toLowerCase().indexOf('.pdf') > 0;
@@ -12,11 +12,11 @@
     return;
   }
   if (isPDF && !hasPDFjs) {
-    window.alert('Sorry, this bookmarklet doesn\'t work with PDF documents. Please use one of our browser extensions.');
+    window.alert('Sorry, this bookmarklet doesn\'t work with PDF documents. Please use one of our browser extensions or the Firefox browser.');
     return;
   }
   if (isHTTPS && !isEmbedHTTPS) {
-    window.alert('Sorry, but this service is unavailable on pages served with HTTPS at this time. Please contact support for further assistance.');
+    window.alert('Sorry, but this bookmarklet is unavailable on pages served with HTTPS at this time. Please contact support for further assistance.');
     return;
   }
 
