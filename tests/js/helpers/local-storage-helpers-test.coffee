@@ -3,7 +3,7 @@ assert = chai.assert
 describe 'localStorageHelpers', ->
   beforeEach module('h.helpers')
 
-  describe 'failsafe', ->
+  describe 'fallback', ->
     fakeWindow  = null
     sandbox = null
     localStorageHelpers = null
@@ -28,13 +28,14 @@ describe 'localStorageHelpers', ->
 
       assert.isFalse spy.threw()
 
-    it 'returns undefined when localStorage is not available', ->
-      localStorageHelpers.setVisibility 'Test'
+    it 'uses memoryStorage when localStorage is not available', ->
+      visibility = 'private'
+      localStorageHelpers.setVisibility visibility
       storedVisibility = localStorageHelpers.getVisibility()
 
-      assert.isTrue storedVisibility is undefined
+      assert.equal storedVisibility, visibility
 
-  describe 'privacy', ->
+  describe 'visibility', ->
     localStorageHelpers = null
 
     beforeEach inject (_localStorageHelpers_) ->

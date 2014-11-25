@@ -18,18 +18,22 @@ createLocalStorageHelpers = [
         catch exception
           false
 
+    memoryStorage = {}
+
     VISIBILITY_PUBLIC: 'public'
     VISIBILITY_PRIVATE: 'private'
 
-    setVisibility: (privacy) ->
+    setVisibility: (visibility) ->
       if hasStorage
-        $window.localStorage[PRIVACY_KEY] = privacy
+        $window.localStorage[PRIVACY_KEY] = visibility
+      else
+        memoryStorage[PRIVACY_KEY] = visibility
 
     getVisibility: ->
       if hasStorage
         return $window.localStorage[PRIVACY_KEY]
       else
-        undefined
+        return memoryStorage[PRIVACY_KEY]
 ]
 
 angular.module('h.helpers')
