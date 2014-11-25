@@ -24,6 +24,7 @@ describe 'h.directives', ->
     return
 
   beforeEach module('h')
+  beforeEach module('h.templates')
 
   beforeEach inject (_$compile_, _$rootScope_, _$injector_) ->
     $compile = _$compile_
@@ -167,3 +168,61 @@ describe 'h.directives', ->
 
       controller = $element.controller('ngModel')
       assert.isTrue(controller.$error.match)
+
+
+  describe '.privacy', ->
+    $element = null
+    $isolateScope = null
+    modelCtrl = null
+    settings = null
+
+    beforeEach ->
+      $scope.permissions = {read: ['acct:user@example.com']}
+      settings = $injector.get('DSCacheFactory').createCache('ui-settings')
+
+    afterEach ->
+      $injector.get('DSCacheFactory').clearAll()
+
+    it 'initializes the default privacy to "Only Me"', ->
+      $element = $compile('<privacy ng-model="permissions">')($scope)
+      $scope.$digest()
+      assert.equal(settings.get('privacy'), 'Only Me')
+
+    it 'stores the default privacy level when it changes', ->
+      $element = $compile('<privacy ng-model="permissions">')($scope)
+      $scope.$digest()
+      $isolateScope = $element.isolateScope()
+      $isolateScope.setLevel('Public')
+      assert.equal(settings.get('privacy'), 'Public')
+
+    describe 'when privacy-default attribute is absent', ->
+      beforeEach ->
+        settings.put('privacy', 'Public')
+        $element = $compile('<privacy ng-model="permissions">')($scope)
+        $scope.$digest()
+        $isolateScope = $element.isolateScope()
+
+      it 'sets the initial permissions based on the stored privacy level', ->
+        assert.equal($isolateScope.level, 'Public')
+
+      it 'does not alter the level on subsequent renderings', ->
+        modelCtrl = $element.controller('ngModel')
+        settings.put('privacy', 'Only Me')
+        $scope.permissions.read = ['acct:user@example.com']
+        $scope.$digest()
+        assert.equal($isolateScope.level, 'Public')
+
+    describe 'when privacy-default attribute is present', ->
+      it 'does not alter the level if the value is "false"', ->
+        $element = $compile('<privacy ng-model="permissions" privacy-default="false">')($scope)
+        $scope.permissions.read = ['group:__world__']
+        $scope.$digest()
+        $isolateScope = $element.isolateScope()
+        assert.equal($isolateScope.level, 'Public')
+
+      it 'alters the level if the value is not "false"', ->
+        $element = $compile('<privacy ng-model="permissions" privacy-default>')($scope)
+        $scope.permissions.read = ['group:__world__']
+        $scope.$digest()
+        $isolateScope = $element.isolateScope()
+        $isolateScope.level = 'Public'

@@ -3,6 +3,7 @@ imports = [
   'ngRoute'
   'ngSanitize'
   'ngTagsInput'
+  'angular-data.DSCacheFactory'
   'h.auth'
   'h.helpers'
   'h.identity'
