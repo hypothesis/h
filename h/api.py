@@ -3,6 +3,7 @@
 """HTTP/REST API for interacting with the annotation store."""
 
 import logging
+import time
 
 from annotator import auth, es
 from elasticsearch import exceptions as elasticsearch_exceptions
@@ -432,9 +433,22 @@ def create_db():
     # pylint: disable=unexpected-keyword-arg
     es.conn.cluster.health(wait_for_status='yellow')
     # pylint: enable=unexpected-keyword-arg
-    Annotation.update_settings()
-    Annotation.create_all()
-    Document.create_all()
+
+    try:
+        Annotation.update_settings()
+        Annotation.create_all()
+        Document.create_all()
+    except elasticsearch_exceptions.RequestError as e:
+        if e.error.startswith('MergeMappingException'):
+            date = time.strftime('%Y-%m-%d')
+            message = ("Elasticsearch index mapping is incorrect! Please "
+                       "reindex it. You can use reindex.py for this, e.g. "
+                       "./bin/python h/reindex.py --host {0} {1} {1}-{2}"
+                       .format(es.host, es.index, date)
+                       )
+            log.fatal(message)
+            raise RuntimeError(message)
+        raise
 
 
 def delete_db():
