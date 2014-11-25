@@ -1,4 +1,7 @@
 class Annotator.Plugin.Threading extends Annotator.Plugin
+  # Mix in message thread properties into the prototype. The body of the
+  # class will overwrite any methods applied here. If you need inheritance
+  # assign the message thread to a local varible.
   $.extend(this.prototype, mail.messageThread())
 
   events:
@@ -11,9 +14,6 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
   pluginInit: ->
     # Create a root container.
     @root = mail.messageContainer()
-
-    # Mix in message thread properties, preserving local overrides.
-    $.extend(this, thread: this.thread)
 
   # TODO: Refactor the jwz API for progressive updates.
   # Right now the idTable is wiped when `messageThread.thread()` is called and
