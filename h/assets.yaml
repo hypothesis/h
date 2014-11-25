@@ -121,6 +121,11 @@ angular_bootstrap:
   output: scripts/vendor/angular-bootstrap.min.js
   contents:
     - h:static/scripts/vendor/angular-bootstrap.js
+angular_cache:
+  filters: uglifyjs
+  output: scripts/vendor/angular-cache.min.js
+  contents:
+    - h:static/scripts/vendor/angular-cache.js
 angular_resource:
   filters: uglifyjs
   output: scripts/vendor/angular-resource.min.js
@@ -233,6 +238,7 @@ app:
 app_js:
   output: scripts/app.min.js
   contents:
+    - angular_cache
     - angular_tags_input
     - gettext
     - annotator

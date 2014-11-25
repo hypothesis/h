@@ -20,6 +20,7 @@ module.exports = function(config) {
       'h/static/scripts/vendor/angular-mocks.js',
       'h/static/scripts/vendor/angular-animate.js',
       'h/static/scripts/vendor/angular-bootstrap.js',
+      'h/static/scripts/vendor/angular-cache.js',
       'h/static/scripts/vendor/angular-resource.js',
       'h/static/scripts/vendor/angular-route.js',
       'h/static/scripts/vendor/angular-sanitize.js',

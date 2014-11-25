@@ -1,5 +1,10 @@
-privacy = ->
+privacy = ['DSCacheFactory', (DSCacheFactory) ->
   levels = ['Public', 'Only Me']
+  settings = DSCacheFactory.get('ui-settings')
+  unless settings?
+    settings = DSCacheFactory.createCache('ui-settings')
+  unless settings.get('privacy')?
+    settings.put('privacy', 'Only Me')
 
   link: (scope, elem, attrs, controller) ->
     return unless controller?
@@ -30,16 +35,21 @@ privacy = ->
       permissions
 
     controller.$render = ->
+      unless attrs.privacyDefault and attrs.privacyDefault == 'false'
+        attrs.privacyDefault = 'false'
+        controller.$setViewValue settings.get('privacy')
       scope.level = controller.$viewValue
 
     scope.levels = levels
     scope.setLevel = (level) ->
+      settings.put('privacy', level)
       controller.$setViewValue level
       controller.$render()
   require: '?ngModel'
   restrict: 'E'
   scope: {}
   templateUrl: 'privacy.html'
+]
 
 
 repeatAnim = ->
