@@ -1,0 +1,98 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Hypothes.is Help</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+        font-weight: 300;
+        font-size: 16px;
+        margin: 0;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+        margin: 1em 0;
+      }
+
+      .center {
+        text-align: center;
+      }
+
+      .help-container {
+        width: 640px;
+        margin: auto;
+        line-height: 1.5;
+      }
+
+      .help-item {
+        display: none;
+        padding: 40px 20px;
+      }
+
+      .help-item:target {
+        display: block;
+      }
+
+      .help-item__heading {
+        text-align: center;
+        font-size: 1em;
+        font-weight: 800;
+        font-weight: 500;
+        margin-top: 2em;
+        margin-bottom: 1em;
+      }
+
+      .help-item__icon {
+        display: block;
+        width: 99px;
+        margin: auto;
+      }
+
+      .help-item__image {
+        outline: 1px solid #CCC;
+      }
+
+      .help-item ol {
+        list-style-type: none;
+        padding: 0;
+        margin: 1em 0;
+      }
+
+      .help-item li {
+        position: relative;
+        margin-top: 1.5em;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="help-container">
+      <section id="no-file-access" class="help-item">
+        <img class="help-item__icon" src="sad-annotation.svg" />
+        <h1 class="help-item__heading">We’re sorry, Hypothes.is couldn’t open that file…</h1>
+        <p>If it’s a local PDF document that you’ve opened from your computer
+          you’ll need to change your settings to allow us to access these files.
+        </p>
+        <p>You can do this from the extensions menu, using the following steps…</p>
+        <ol class="stepped-list">
+          <li class="stepped-list__item">
+            <strong>Step One:</strong>
+            Open the Extensions Settings page via <em>Settings&nbsp;&gt;&nbsp;Extensions</em>.
+            <img class="help-item__image" src="step-1.png" />
+          </li>
+          <li class="stepped-list__item">
+            <strong>Step Two:</strong>
+            Check the “Allow access to file URLs” checkbox under the Hypothesis&nbsp;extension.
+            <img class="help-item__image" src="step-2.png" />
+          </li>
+        </ol>
+      </section>
+      <section id="local-file" class="help-item">
+        <img class="help-item__icon" src="sad-annotation.svg" />
+        <h1 class="help-item__heading">We’re sorry, Hypothes.is couldn’t open that file…</h1>
+        <p class="center">This extension can’t be used on local HTML documents at the moment.</p>
+      </section>
+    </article>
+  </body>
+</html>

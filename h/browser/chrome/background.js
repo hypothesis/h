@@ -27,34 +27,87 @@ function isPDFURL(url) {
 }
 
 function isPDFViewerURL(url) {
-  return url.indexOf(getPDFViewerURL('')) == 0
+  return url.indexOf(getPDFViewerURL('')) === 0
 }
 
+function isFileURL(url) {
+  return url.indexOf("file://") === 0
+}
 
-function inject(tab) {
-  chrome.tabs.executeScript(tab.id, {
-    code: [
-      'var script = document.createElement("script");',
-      'script.src = "' + CRX_BASE_URL + 'public/config.js' + '";',
-      'document.body.appendChild(script);'
-    ].join('\n')
-  }, function () {
-    if (isPDFURL(tab.url) && !isPDFViewerURL(tab.url)) {
-      chrome.tabs.update(tab.id, {
-        url: getPDFViewerURL(tab.url)
-      })
+function injectionFailed(tab) {
+  setBrowserAction(tab.id, state(tab.id, 'sleeping'))
+}
+
+function injectIntoPDF(tab) {
+  if (!isPDFViewerURL(tab.url)) {
+    chrome.tabs.update(tab.id, {
+      url: getPDFViewerURL(tab.url)
+    })
+  }
+}
+
+function injectIntoLocalPDF(tab) {
+  chrome.extension.isAllowedFileSchemeAccess(function (allowed) {
+    if (allowed) {
+      injectIntoPDF(tab)
     } else {
-      chrome.tabs.executeScript(tab.id, {
-        file: 'public/embed.js'
-      }, function () {
-        chrome.tabs.executeScript(tab.id, {
-          code: 'window.annotator = true;'
-        })
-      })
+      showNoFileAccessHelpPage(tab)
     }
   });
 }
 
+function injectIntoHTML(tab) {
+  chrome.tabs.executeScript(tab.id, {
+    file: 'public/embed.js'
+  }, function (result) {
+    if (result !== undefined) {
+      chrome.tabs.executeScript(tab.id, {
+        code: 'window.annotator = true;'
+      })
+    } else {
+      injectionFailed(tab)
+    }
+  })
+}
+
+// Render the help page. The helpSection should correspond to the id of a
+// section within the help page.
+function showHelpPage(helpSection, tab) {
+  injectionFailed(tab)
+  chrome.tabs.update(tab.id, {
+    url: CRX_BASE_URL + "help/permissions.html#" + helpSection
+  })
+}
+
+var showLocalFileHelpPage = showHelpPage.bind(null, 'local-file')
+var showNoFileAccessHelpPage = showHelpPage.bind(null, 'no-file-access')
+
+function injectConfig(tab, fn) {
+  var src  = CRX_BASE_URL + 'public/config.js'
+  var code = 'var script = document.createElement("script");' +
+             'script.src = "{}";' +
+             'document.body.appendChild(script);'
+
+  chrome.tabs.executeScript(tab.id, {code: code.replace('{}', src)}, fn);
+}
+
+function inject(tab) {
+  injectConfig(tab, function () {
+    function checkPDF(success, fallback) {
+      if (isPDFURL(tab.url)) {
+        success(tab)
+      } else {
+        fallback(tab)
+      }
+    }
+
+    if (isFileURL(tab.url)) {
+      checkPDF(injectIntoLocalPDF, showLocalFileHelpPage)
+    } else {
+      checkPDF(injectIntoPDF, injectIntoHTML)
+    }
+  })
+}
 
 function remove(tab) {
   if (isPDFViewerURL(tab.url)) {
@@ -144,7 +197,7 @@ function onUpdateAvailable() {
 function onBrowserAction(tab) {
   var newState
 
-  if (state(tab.id) == 'active') {
+  if (state(tab.id) === 'active') {
     newState = state(tab.id, 'sleeping')
     remove(tab)
   } else {
@@ -171,7 +224,7 @@ function onTabUpdated(tabId, info, tab) {
 
   setBrowserAction(tabId, currentState)
 
-  if (currentState == 'active' && info.status == 'complete') {
+  if (currentState === 'active' && info.status === 'complete') {
     inject(tab)
   }
 }
