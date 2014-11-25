@@ -6,6 +6,7 @@ from shutil import copyfile, rmtree
 from urlparse import urljoin, urlparse, urlunparse, uses_netloc, uses_relative
 
 from clik import App
+from elasticsearch import Elasticsearch
 from jinja2 import Template
 from pyramid.config import Configurator
 from pyramid.events import BeforeRender, ContextFound
@@ -17,7 +18,7 @@ from pyramid.view import render_view
 from pyramid_basemodel import bind_engine
 from sqlalchemy import engine_from_config
 
-from h import __version__, api
+from h import __version__, api, reindexer
 
 
 def get_config(args):
@@ -255,5 +256,32 @@ def extension(args, console, settings):
     except OSError:
         pass  # newer Sass doesn't write this it seems
 
+
+@command(usage='config_file old_index new_index [alias]')
+def reindex(args, settings):
+    """Reindex the annotations into a new Elasticsearch index"""
+
+    if 'es.host' in settings:
+        host = settings['es.host']
+        conn = Elasticsearch([host])
+    else:
+        conn = Elasticsearch()
+
+    if len(args) < 3:
+        console.error('Please provide a config file and index names.')
+
+    old_index = args[1]
+    new_index = args[2]
+    try:
+        alias = args[3]
+    except IndexError:
+        alias = None
+
+    r = reindexer.Reindexer(conn, interactive=True)
+
+    r.reindex(old_index, new_index)
+
+    if alias:
+        r.alias(new_index, alias)
 
 main = command.main
