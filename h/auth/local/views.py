@@ -339,14 +339,6 @@ class AsyncProfileController(ProfileController):
 
 
 def includeme(config):
-    registry = config.registry
-    settings = registry.settings
-
-    authz_endpoint = settings.get('auth.local.authorize', '/oauth/authorize')
-    config.add_route('auth.local.authorize', authz_endpoint)
-
-    token_endpoint = settings.get('auth.local.token', '/oauth/token')
-    config.add_route('auth.local.token', token_endpoint)
     config.add_route('disable_user', '/disable/{user_id}',
                      factory=UserFactory,
                      traverse="/{user_id}")
@@ -354,4 +346,5 @@ def includeme(config):
                      traverse="/{subscription_id}")
 
     config.include('horus')
+    config.add_request_method(name='user')  # horus override
     config.scan(__name__)
