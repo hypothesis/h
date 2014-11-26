@@ -148,9 +148,6 @@ describe 'h.directives.annotation', ->
         assert.isTrue(controller.hasDiff)
         assert.isTrue(controller.showDiff)
 
-      it 'sets `hasDiff` on the target to true', ->
-        assert.isTrue(targets[0].hasDiff)
-
     describe 'when thre are only upper case/lower case difference between the text in the single target, and what was saved in a selector', ->
       targets = null
 
@@ -165,9 +162,6 @@ describe 'h.directives.annotation', ->
         controller.render()
         assert.isTrue(controller.hasDiff)
         assert.isFalse(controller.showDiff)
-
-      it 'sets `hasDiff` on the target to true', ->
-        assert.isTrue(targets[0].hasDiff)
 
     describe 'when there are multiple targets, some with differences in text', ->
       targets = null
@@ -186,11 +180,6 @@ describe 'h.directives.annotation', ->
 
       it 'sets `showDiff` to true', ->
         assert.isTrue(controller.showDiff)
-
-      it 'sets `hasDiff` to true on targets with any differences', ->
-        assert.isFalse(targets[0].hasDiff)
-        assert.isTrue(targets[1].hasDiff)
-        assert.isTrue(targets[2].hasDiff)
 
       it 'preserves the `showDiff` value on update', ->
         controller.showDiff = false

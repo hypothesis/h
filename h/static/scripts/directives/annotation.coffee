@@ -130,6 +130,18 @@ AnnotationController = [
 
     ###*
     # @ngdoc method
+    # @name annotation.AnnotationController.diffFromTarget
+    # @description Calculates the visual diff flags from the targets
+    ###
+    this.diffFromTargets = (targets) ->
+      hasDiff = targets.filter((t) -> t.diffHTML?).length > 0
+      shouldShowDiff = hasDiff and
+        targets.filter((t) -> t.diffHTML? and not t.diffCaseOnly).length > 0
+
+      {hasDiff, shouldShowDiff}
+
+    ###*
+    # @ngdoc method
     # @name annotation.AnnotationController#save
     # @description Saves any edits and returns to the viewer.
     ###
@@ -215,16 +227,15 @@ AnnotationController = [
       @annotation.tags = ({text} for text in (model.tags or []))
 
       # Calculate the visual diff flags
-      @hasDiff = false
-      for t in @annotation.target or []
-        if t.diffHTML?
-          @hasDiff = t.hasDiff = true
-          unless t.diffCaseOnly
-            @showDiff ?= true
-        else
-          t.hasDiff = false
+      diffFlags = this.diffFromTargets(@annotation.target)
+      @hasDiff = diffFlags.hasDiff
       if @hasDiff
-        @showDiff ?= false
+        # We don't want to override the showDiff value manually changed
+        # by the user, that's why we use a conditional assignment here,
+        # instead of directly setting showDiff to the calculated value
+        @showDiff ?= diffFlags.shouldShowDiff
+      else
+        @showDiff = undefined
 
     updateTimestamp = (repeat=false) =>
       @timestamp = timeHelpers.toFuzzyString model.updated
