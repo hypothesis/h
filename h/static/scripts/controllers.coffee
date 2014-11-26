@@ -345,7 +345,7 @@ class ViewerController
           method: 'setActiveHighlights'
           params: highlights
 
-    $scope.scrollto = (annotation) ->
+    $scope.scrollTo = (annotation) ->
       if angular.isObject annotation
         for p in annotator.providers
           p.channel.notify
