@@ -151,18 +151,44 @@ describe 'h.directives.annotation', ->
       it 'sets `showDiff` to true', ->
         assert.isTrue(controller.showDiff)
 
-      it 'sets `hasDiff` to true on targets with differences', ->
+      it 'sets `hasDiff` to true on targets with any differences', ->
         assert.isFalse(targets[0].hasDiff)
         assert.isTrue(targets[1].hasDiff)
-
-      it 'sets `hasDiff` to false on targets with only case differences', ->
-        assert.isFalse(targets[2].hasDiff)
+        assert.isTrue(targets[2].hasDiff)
 
       it 'preserves the `showDiff` value on update', ->
         controller.showDiff = false
         annotation.target = annotation.target.slice(1)
         controller.render()
         assert.isFalse(controller.showDiff)
+
+      it 'unsets `hasDiff` if differences go away', ->
+        annotation.target = annotation.target.splice(0, 1)
+        controller.render()
+        assert.isFalse(controller.hasDiff)
+
+    describe 'when targets have almost the same selection text from the anchor', ->
+      targets = null
+
+      beforeEach ->
+        annotation.target = [
+          {otherProperty: 'bar'},
+          {diffHTML: "stuff", diffCaseOnly: true},
+        ]
+        controller.render()
+        targets = controller.annotation.target
+
+      it 'sets `hasDiff` to true', ->
+        assert.isTrue(controller.hasDiff)
+
+      it 'sets `showDiff` to false', ->
+        assert.isFalse(controller.showDiff)
+
+      it 'preserves the `showDiff` value on update', ->
+        controller.showDiff = true
+        annotation.target = annotation.target.slice(1)
+        controller.render()
+        assert.isTrue(controller.showDiff)
 
       it 'unsets `hasDiff` if differences go away', ->
         annotation.target = annotation.target.splice(0, 1)

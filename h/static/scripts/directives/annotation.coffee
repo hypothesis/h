@@ -217,11 +217,16 @@ AnnotationController = [
       # Calculate the visual diff flags
       @hasDiff = false
       for t in @annotation.target or []
-        if t.diffHTML? and not t.diffCaseOnly
+        if t.diffHTML?
           @hasDiff = t.hasDiff = true
+          unless t.diffCaseOnly
+            @showDiff ?= true
         else
           t.hasDiff = false
-      @showDiff ?= @hasDiff or undefined
+      if @hasDiff
+        @showDiff ?= false
+      else
+        @showDiff ?= undefined
 
     updateTimestamp = (repeat=false) =>
       @timestamp = timeHelpers.toFuzzyString model.updated
