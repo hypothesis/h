@@ -128,12 +128,12 @@ AnnotationController = [
         @action = 'view'
         @editing = false
 
-    ###*
-    # @ngdoc method
-    # @name annotation.AnnotationController.diffFromTarget
-    # @description Calculates the visual diff flags from the targets
-    ###
-    this.diffFromTargets = (targets) ->
+    # Calculates the visual diff flags from the targets
+    #
+    # hasDiff is set to true is there are any targets with a difference
+    # shouldShowDiff is set to true if there are some meaningful differences
+    #  - that is, more than just uppercase / lowercase
+    diffFromTargets = (targets) ->
       hasDiff = targets.filter((t) -> t.diffHTML?).length > 0
       shouldShowDiff = hasDiff and
         targets.filter((t) -> t.diffHTML? and not t.diffCaseOnly).length > 0
@@ -227,7 +227,7 @@ AnnotationController = [
       @annotation.tags = ({text} for text in (model.tags or []))
 
       # Calculate the visual diff flags
-      diffFlags = this.diffFromTargets(@annotation.target)
+      diffFlags = diffFromTargets(@annotation.target)
       @hasDiff = diffFlags.hasDiff
       if @hasDiff
         # We don't want to override the showDiff value manually changed
