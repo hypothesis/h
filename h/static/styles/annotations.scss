@@ -46,6 +46,12 @@
 
 .annotation-quote {
   @include quote;
+  del {
+    background:#ffe6e6;
+  }
+  ins {
+    background:#e6ffe6;
+  }
 }
 
 .annotation-citation-domain {
