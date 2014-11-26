@@ -52,13 +52,13 @@
   <blockquote class="annotation-quote"
               ng-bind-html="target.diffHTML"
               ng-show="target.diffHTML && vm.showDiff"></blockquote>
+  <div class="small show-differences"
+       ng-show="vm.hasDiff">
+    <input type="checkbox"
+           ng-model="vm.showDiff"
+           ng-click="$event.stopPropagation()"> Show differences</input>
+  </div>
 </section>
-<div class="small pull-right"
-     ng-show="vm.hasDiff">
-  <input type="checkbox"
-         ng-model="vm.showDiff"
-         ng-click="$event.stopPropagation()"> Show differences</input>
-</div>
 
 <!-- / Excerpts -- >
 
