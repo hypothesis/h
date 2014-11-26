@@ -442,9 +442,9 @@ def create_db():
         if e.error.startswith('MergeMappingException'):
             date = time.strftime('%Y-%m-%d')
             message = ("Elasticsearch index mapping is incorrect! Please "
-                       "reindex it. You can use reindex.py for this, e.g. "
-                       "./bin/python h/reindex.py --host {0} {1} {1}-{2}"
-                       .format(es.host, es.index, date)
+                       "reindex it. For example, run: "
+                       "./bin/hypothesis reindex {0} {1} {1}-{2}"
+                       .format('yourconfig.ini', es.index, date)
                        )
             log.fatal(message)
             raise RuntimeError(message)
