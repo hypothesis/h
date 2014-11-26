@@ -233,8 +233,17 @@ app:
 app_js:
   output: scripts/app.min.js
   contents:
+    - jschannel
+    - jwz
+    - momentjs
+    - pagedown
+    - autofill
+    - sockjs
+    - unorm
+    - uuid
     - angular_tags_input
     - gettext
+    - h:static/scripts/vendor/katex/katex.min.js
     - annotator
     - annotator_auth
     - annotator_bridge
@@ -243,15 +252,6 @@ app_js:
     - annotator_permissions
     - annotator_store
     - annotator_threading
-    - jschannel
-    - jwz
-    - h:static/scripts/vendor/katex/katex.min.js
-    - momentjs
-    - pagedown
-    - autofill
-    - sockjs
-    - unorm
-    - uuid
     - filters: uglifyjs
       contents:
         - filters: coffeescript
