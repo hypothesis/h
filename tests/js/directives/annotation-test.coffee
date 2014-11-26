@@ -127,20 +127,50 @@ describe 'h.directives.annotation', ->
       controller.render()
       assert.isNull(controller.document)
 
-    describe 'when targets have the same selection text as the anchor', ->
+    describe 'when a single target has text identical to what was in the selectors', ->
       it 'sets `showDiff` to undefined and `hasDiff` to false', ->
         controller.render()
         assert.isFalse(controller.hasDiff)
         assert.isUndefined(controller.showDiff)
 
-    describe 'when targets have different selection text from the anchor', ->
+    describe 'when a single target has different text, compared to what was in the selector', ->
+      targets = null
+
+      beforeEach ->
+        annotation.target = [
+          {diffHTML: "This is <ins>not</ins> the same quote", diffCaseOnly: false},
+        ]
+        controller.render()
+        targets = controller.annotation.target
+
+      it 'sets both `hasDiff` and `showDiff` to true', ->
+        controller.render()
+        assert.isTrue(controller.hasDiff)
+        assert.isTrue(controller.showDiff)
+
+    describe 'when thre are only upper case/lower case difference between the text in the single target, and what was saved in a selector', ->
+      targets = null
+
+      beforeEach ->
+        annotation.target = [
+          {diffHTML: "<ins>s</ins><del>S</del>tuff", diffCaseOnly: true},
+        ]
+        controller.render()
+        targets = controller.annotation.target
+
+      it 'sets `hasDiff` to true and `showDiff` to false', ->
+        controller.render()
+        assert.isTrue(controller.hasDiff)
+        assert.isFalse(controller.showDiff)
+
+    describe 'when there are multiple targets, some with differences in text', ->
       targets = null
 
       beforeEach ->
         annotation.target = [
           {otherProperty: 'bar'},
-          {diffHTML: "things"},
-          {diffHTML: "stuff", diffCaseOnly: true},
+          {diffHTML: "This is <ins>not</ins> the same quote", diffCaseOnly: false},
+          {diffHTML: "<ins>s</ins><del>S</del>tuff", diffCaseOnly: true},
         ]
         controller.render()
         targets = controller.annotation.target
@@ -151,18 +181,39 @@ describe 'h.directives.annotation', ->
       it 'sets `showDiff` to true', ->
         assert.isTrue(controller.showDiff)
 
-      it 'sets `hasDiff` to true on targets with differences', ->
-        assert.isFalse(targets[0].hasDiff)
-        assert.isTrue(targets[1].hasDiff)
-
-      it 'sets `hasDiff` to false on targets with only case differences', ->
-        assert.isFalse(targets[2].hasDiff)
-
       it 'preserves the `showDiff` value on update', ->
         controller.showDiff = false
         annotation.target = annotation.target.slice(1)
         controller.render()
         assert.isFalse(controller.showDiff)
+
+      it 'unsets `hasDiff` if differences go away', ->
+        annotation.target = annotation.target.splice(0, 1)
+        controller.render()
+        assert.isFalse(controller.hasDiff)
+
+    describe 'when there are multiple targets, some with differences, but only upper case / lower case', ->
+      targets = null
+
+      beforeEach ->
+        annotation.target = [
+          {otherProperty: 'bar'},
+          {diffHTML: "<ins>s</ins><del>S</del>tuff", diffCaseOnly: true},
+        ]
+        controller.render()
+        targets = controller.annotation.target
+
+      it 'sets `hasDiff` to true', ->
+        assert.isTrue(controller.hasDiff)
+
+      it 'sets `showDiff` to false', ->
+        assert.isFalse(controller.showDiff)
+
+      it 'preserves the `showDiff` value on update', ->
+        controller.showDiff = true
+        annotation.target = annotation.target.slice(1)
+        controller.render()
+        assert.isTrue(controller.showDiff)
 
       it 'unsets `hasDiff` if differences go away', ->
         annotation.target = annotation.target.splice(0, 1)

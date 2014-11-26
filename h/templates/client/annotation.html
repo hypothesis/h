@@ -44,14 +44,14 @@
 <section class="annotation-target"
          ng-repeat="target in vm.annotation.target track by $index">
   <blockquote class="annotation-quote"
-              ng-hide="target.hasDiff && vm.showDiff"
+              ng-hide="target.diffHTML && vm.showDiff"
               ng-bind-html="selector.exact"
               ng-repeat="selector in target.selector
                          | filter : {'type': 'TextQuoteSelector'}
                          track by $index"></blockquote>
   <blockquote class="annotation-quote"
               ng-bind-html="target.diffHTML"
-              ng-show="target.hasDiff && vm.showDiff"></blockquote>
+              ng-show="target.diffHTML && vm.showDiff"></blockquote>
 </section>
 <div class="small pull-right"
      ng-show="vm.hasDiff">

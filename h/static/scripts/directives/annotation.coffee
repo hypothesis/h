@@ -128,6 +128,19 @@ AnnotationController = [
         @action = 'view'
         @editing = false
 
+    # Calculates the visual diff flags from the targets
+    #
+    # hasDiff is set to true is there are any targets with a difference
+    # shouldShowDiff is set to true if there are some meaningful differences
+    #  - that is, more than just uppercase / lowercase
+    diffFromTargets = (targets) ->
+      hasDiff = targets.some (t) ->
+        t.diffHTML?
+      shouldShowDiff = hasDiff and targets.some (t) ->
+        t.diffHTML? and not t.diffCaseOnly
+
+      {hasDiff, shouldShowDiff}
+
     ###*
     # @ngdoc method
     # @name annotation.AnnotationController#save
@@ -215,13 +228,15 @@ AnnotationController = [
       @annotation.tags = ({text} for text in (model.tags or []))
 
       # Calculate the visual diff flags
-      @hasDiff = false
-      for t in @annotation.target or []
-        if t.diffHTML? and not t.diffCaseOnly
-          @hasDiff = t.hasDiff = true
-        else
-          t.hasDiff = false
-      @showDiff ?= @hasDiff or undefined
+      diffFlags = diffFromTargets(@annotation.target)
+      @hasDiff = diffFlags.hasDiff
+      if @hasDiff
+        # We don't want to override the showDiff value manually changed
+        # by the user, that's why we use a conditional assignment here,
+        # instead of directly setting showDiff to the calculated value
+        @showDiff ?= diffFlags.shouldShowDiff
+      else
+        @showDiff = undefined
 
     updateTimestamp = (repeat=false) =>
       @timestamp = timeHelpers.toFuzzyString model.updated
