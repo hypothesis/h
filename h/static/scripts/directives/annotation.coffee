@@ -225,8 +225,6 @@ AnnotationController = [
           t.hasDiff = false
       if @hasDiff
         @showDiff ?= false
-      else
-        @showDiff ?= undefined
 
     updateTimestamp = (repeat=false) =>
       @timestamp = timeHelpers.toFuzzyString model.updated
