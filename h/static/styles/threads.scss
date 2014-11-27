@@ -74,10 +74,6 @@ $threadexp-width: .6em;
   }
 
   &.thread-collapsed {
-    &:hover {
-      background-color: $gray-lightest;
-    }
-
     & > ul {
       display: none;
     }
