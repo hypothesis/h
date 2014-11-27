@@ -127,6 +127,17 @@ describe 'h.directives.annotation', ->
       controller.render()
       assert.isNull(controller.document)
 
+    describe 'when there are no targets', ->
+      beforeEach ->
+        annotation.target = []
+        controller.render()
+        targets = controller.annotation.target
+
+      it 'sets `hasDiff` to false and `showDiff` to undefined', ->
+        controller.render()
+        assert.isFalse(controller.hasDiff)
+        assert.isUndefined(controller.showDiff)
+
     describe 'when a single target has text identical to what was in the selectors', ->
       it 'sets `showDiff` to undefined and `hasDiff` to false', ->
         controller.render()
