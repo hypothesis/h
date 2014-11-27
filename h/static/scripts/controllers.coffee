@@ -346,10 +346,11 @@ class ViewerController
           params: highlights
 
     $scope.scrollTo = (annotation) ->
-      for p in annotator.providers
-        p.channel.notify
-          method: 'scrollTo'
-          params: annotation.$$tag
+      if angular.isObject annotation
+        for p in annotator.providers
+          p.channel.notify
+            method: 'scrollTo'
+            params: annotation.$$tag
 
     $scope.shouldShowThread = (container) ->
       if $scope.selectedAnnotations? and not container.parent.parent
