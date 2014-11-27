@@ -25,6 +25,8 @@
       <privacy ng-click="$event.stopPropagation()"
                ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
                ng-model="vm.annotation.permissions"
+               user="{{vm.annotation.user}}"
+               privacy-default="{{!vm.annotation.references && !vm.annotation.id}}"
                class="dropdown privacy pull-right"
                name="privacy" />
     </aside>

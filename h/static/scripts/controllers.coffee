@@ -173,10 +173,10 @@ class AppController
           user: token.userId
           userAuthorize: authorizeAction
           permissions:
-            read: [token.userId]
-            update: [token.userId]
-            delete: [token.userId]
-            admin: [token.userId]
+            read: []
+            update: []
+            delete: []
+            admin: []
         $scope.$apply ->
           $scope.persona = token.userId
           reset()
