@@ -164,6 +164,12 @@ class Hypothesis extends Annotator
         this.updateViewer this._getLocalAnnotations(tags)
     )
 
+    .bind('setFocusState', (ctx, data) =>
+      @element.scope().$apply =>
+        annotations = this._getLocalAnnotations data.tags
+        this.setViewerFocusState annotations, data.state
+    )
+
     .bind('toggleViewerSelection', (ctx, tags=[]) =>
       @element.scope().$apply =>
         this.toggleViewerSelection this._getLocalAnnotations(tags)
@@ -229,6 +235,16 @@ class Hypothesis extends Annotator
       else
         selected[a.id] = true
     @_setSelectedAnnotations selected
+    this
+
+  setViewerFocusState: (annotations, state) ->
+    scope = @element.scope()
+    focused = scope.focusedAnnotations ?= {}
+    for a in annotations
+      if state
+        focused[a.id] = true
+      else
+        delete focused[a.id]
     this
 
   updateViewer: (annotations=[]) ->

@@ -6,9 +6,11 @@ $threadexp-width: .6em;
     margin-bottom: .72em;
   }
 
+  li.thread:hover,
   .card-emphasis {
-    box-shadow: 6px 6px 8px -2px $gray-light;
+    box-shadow: 4px 4px 4px -2px $gray-light;
   }
+
 }
 
 .thread-list {
