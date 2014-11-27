@@ -258,7 +258,7 @@ def extension(args, console, settings):
 
 
 @command(usage='config_file old_index new_index [alias]')
-def reindex(args, settings):
+def reindex(args, settings, console):
     """Reindex the annotations into a new Elasticsearch index"""
 
     if 'es.host' in settings:
@@ -269,6 +269,7 @@ def reindex(args, settings):
 
     if len(args) < 3:
         console.error('Please provide a config file and index names.')
+        return 2
 
     old_index = args[1]
     new_index = args[2]
