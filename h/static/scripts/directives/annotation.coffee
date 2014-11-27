@@ -134,6 +134,7 @@ AnnotationController = [
     # shouldShowDiff is set to true if there are some meaningful differences
     #  - that is, more than just uppercase / lowercase
     diffFromTargets = (targets) ->
+      return {hasDiff: false, shouldShowDiff: false} unless targets?
       hasDiff = targets.some (t) ->
         t.diffHTML?
       shouldShowDiff = hasDiff and targets.some (t) ->
