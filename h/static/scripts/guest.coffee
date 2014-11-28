@@ -143,7 +143,7 @@ class Annotator.Guest extends Annotator
       if value then @plugins.Heatmap._update()
     )
 
-    .bind('setActiveHighlights', (ctx, tags=[]) =>
+    .bind('setFocusedHighlights', (ctx, tags=[]) =>
       for hl in @getHighlights()
         if hl.annotation.$$tag in tags
           hl.setActive true, true
