@@ -34,7 +34,7 @@
     </span>
   </li>
   <li class="paper thread"
-      ng-class="{'card-emphasis': focusedAnnotations[child.message.id]}"
+      ng-class="{'card-emphasis': focusedAnnotations[child.message.$$tag]}"
       deep-count="count"
       thread="child" thread-filter
       thread-collapsed="!search.query"

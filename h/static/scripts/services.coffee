@@ -242,9 +242,9 @@ class Hypothesis extends Annotator
     focused = scope.focusedAnnotations ?= {}
     for a in annotations
       if state
-        focused[a.id] = true
+        focused[a.$$tag] = true
       else
-        delete focused[a.id]
+        delete focused[a.$$tag]
     this
 
   updateViewer: (annotations=[]) ->
