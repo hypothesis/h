@@ -143,14 +143,12 @@ class Annotator.Guest extends Annotator
       if value then @plugins.Heatmap._update()
     )
 
-    .bind('setFocusedHighlights', (ctx, tags=[]) =>
+    .bind('focusAnnotations', (ctx, tags=[]) =>
       for hl in @getHighlights()
         if hl.annotation.$$tag in tags
-          hl.setActive true, true
+          hl.setFocused true
         else
-          unless hl.isTemporary()
-            hl.setActive false, true
-      this.publish "finalizeHighlights"
+          hl.setFocused false
     )
 
     .bind('scrollTo', (ctx, tag) =>
@@ -250,9 +248,9 @@ class Annotator.Guest extends Annotator
       method: "showEditor"
       params: annotation.$$tag
 
-  focusInViewer: (annotations) =>
+  focusAnnotations: (annotations) =>
     @panel?.notify
-      method: "setViewerFocus"
+      method: "focusAnnotations"
       params: (a.$$tag for a in annotations)
 
   onAnchorMousedown: ->
@@ -303,14 +301,14 @@ class Annotator.Guest extends Annotator
     if @visibleHighlights or @tool is 'highlight'
       event.stopPropagation()
       annotations = event.data.getAnnotations(event)
-      this.focusInViewer annotations
+      this.focusAnnotations annotations
 
   # When leaving a highlight (with the cursor) in highlighting mode,
   # tell the sidebar to stop hiliting the relevant annotations
   onAnchorMouseout: (event) ->
     if @visibleHighlights or @tool is 'highlight'
       event.stopPropagation()
-      this.focusInViewer []
+      this.focusAnnotations []
 
   # When clicking on a highlight in highlighting mode,
   # tell the sidebar to bring up the viewer for the relevant annotations
