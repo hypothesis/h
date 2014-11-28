@@ -48,8 +48,7 @@ privacy = ['$window', ($window) ->
       permissions
 
     controller.$render = ->
-      unless attrs.privacyDefault and attrs.privacyDefault == 'false'
-        attrs.privacyDefault = 'false'
+      unless controller.$modelValue.read.length
         visibility = storage.getItem VISIBILITY_KEY
         level = if visibility is VISIBILITY_PUBLIC
           'Public'
