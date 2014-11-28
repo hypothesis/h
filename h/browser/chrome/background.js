@@ -36,6 +36,7 @@
   }
 
   function onUpdateAvailable() {
-    chrome.runtime.reload();
+    // TODO: Implement a "reload" notification that tears down the current
+    // tabs and calls chrome.runtime.reload().
   }
 })();
