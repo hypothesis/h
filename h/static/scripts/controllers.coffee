@@ -305,7 +305,7 @@ class AnnotationViewerController
 
     # Provide no-ops until these methods are moved elsewere. They only apply
     # to annotations loaded into the stream.
-    $scope.activate = angular.noop
+    $scope.focus = angular.noop
 
     $scope.shouldShowThread = -> true
 
@@ -335,14 +335,14 @@ class ViewerController
     $scope.isEmbedded = true
     $scope.isStream = true
 
-    $scope.activate = (annotation) ->
+    $scope.focus = (annotation) ->
       if angular.isObject annotation
         highlights = [annotation.$$tag]
       else
         highlights = []
       for p in annotator.providers
         p.channel.notify
-          method: 'setActiveHighlights'
+          method: 'setFocusedHighlights'
           params: highlights
 
     $scope.scrollTo = (annotation) ->
