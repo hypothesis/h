@@ -22,22 +22,22 @@
    * - https://developer.chrome.com/extensions/tabs
    * - https://developer.chrome.com/extensions/extension
    *
-   * options - An options object to set up the application.
+   * dependencies - An object to set up the application.
    *   chromeTabs: An instance of chrome.tabs.
    *   chromeBrowserAction: An instance of chrome.browserAction.
    *   extensionURL: chrome.extension.getURL.
    *   isAllowedFileSchemeAccess: chrome.extension.isAllowedFileSchemeAccess.
    */
-  function HypothesisChromeExtension(options) {
-    var chromeTabs = options.chromeTabs;
-    var chromeBrowserAction = options.chromeBrowserAction;
-    var help  = new h.HelpPage(chromeTabs, options.extensionURL);
+  function HypothesisChromeExtension(dependencies) {
+    var chromeTabs = dependencies.chromeTabs;
+    var chromeBrowserAction = dependencies.chromeBrowserAction;
+    var help  = new h.HelpPage(chromeTabs, dependencies.extensionURL);
     var store = new h.TabStore(localStorage);
     var state = new h.TabState(store.all(), onTabStateChange);
     var browserAction = new h.BrowserAction(chromeBrowserAction);
     var sidebar = new h.SidebarInjector(chromeTabs, {
-      extensionURL: options.extensionURL,
-      isAllowedFileSchemeAccess: options.isAllowedFileSchemeAccess,
+      extensionURL: dependencies.extensionURL,
+      isAllowedFileSchemeAccess: dependencies.isAllowedFileSchemeAccess,
     });
     var tabErrors = new h.TabErrorCache();
 

@@ -6,21 +6,21 @@
    * when applicable.
    *
    * chromeTabs - An instance of chrome.tabs.
-   * options    - An options object with additional helper methods.
+   * dependencies - An object with additional helper methods.
    *   isAllowedFileSchemeAccess: A function that returns true if the user
    *   can access resources over the file:// protocol. See:
    *   https://developer.chrome.com/extensions/extension#method-isAllowedFileSchemeAccess
    *   extensionURL: A function that receives a path and returns an absolute
    *   url. See: https://developer.chrome.com/extensions/extension#method-getURL
    */
-  function SidebarInjector(chromeTabs, options) {
-    options = options || {};
+  function SidebarInjector(chromeTabs, dependencies) {
+    dependencies = dependencies || {};
 
-    var isAllowedFileSchemeAccess = options.isAllowedFileSchemeAccess;
-    var extensionURL = options.extensionURL;
+    var isAllowedFileSchemeAccess = dependencies.isAllowedFileSchemeAccess;
+    var extensionURL = dependencies.extensionURL;
 
     if (typeof extensionURL !== 'function') {
-      throw new TypeError('createURL must be a function');
+      throw new TypeError('extensionURL must be a function');
     }
 
     if (typeof isAllowedFileSchemeAccess !== 'function') {
