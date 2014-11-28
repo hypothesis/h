@@ -15,8 +15,8 @@
    * Each state has a method to enable it such as activateTab() and a method
    * to query the current state such as isTabActive().
    *
-   * initialState - An Object of tabId/state keys. Ideal for loading state
-   *   from a persisted store such as local storage.
+   * initialState - An Object of tabId/state keys. Used when loading state
+   *   from a persisted store such as localStorage.
    * onchange     - A function that recieves onchange(tabId, current, prev).
    */
   function TabState(initialState, onchange) {
@@ -71,7 +71,7 @@
 
     // options.force allows the caller to re-trigger an onchange event for
     // the current state without modifying the previous state. This is useful
-    // for restoring tab state after the extension is re-loaded.
+    // for restoring tab state after the extension is reloaded.
     function transition (tabId, state, options) {
       var isForced = !!options && options.force === true;
       var hasChanged = state !== currentState[tabId];

@@ -1,16 +1,16 @@
 (function (h) {
   'use strict';
 
-  /* The SidebarInjector is used to deploy and remove the Hypothesis from
-   * tabs. It also deals with loading PDF documents into the PDFjs viewer
+  /* The SidebarInjector is used to deploy and remove the Hypothesis sidebar
+   * from tabs. It also deals with loading PDF documents into the PDF.js viewer
    * when applicable.
    *
    * chromeTabs - An instance of chrome.tabs.
-   * options    - An options oblect with additional helper methods.
+   * options    - An options object with additional helper methods.
    *   isAllowedFileSchemeAccess: A function that returns true if the user
    *   can access resources over the file:// protocol. See:
    *   https://developer.chrome.com/extensions/extension#method-isAllowedFileSchemeAccess
-   *   extensionURL: A function that recieves a path and returns an absolute
+   *   extensionURL: A function that receives a path and returns an absolute
    *   url. See: https://developer.chrome.com/extensions/extension#method-getURL
    */
   function SidebarInjector(chromeTabs, options) {
@@ -27,13 +27,11 @@
       throw new TypeError('isAllowedFileSchemeAccess must be a function');
     }
 
-    /* Injects the Hypothesis sidebar into the tab provided. The promise
-     * will be rejected with an error if the injection fails. See errors.js
-     * for the full list of errors.
+    /* Injects the Hypothesis sidebar into the tab provided.
      *
      * tab - A tab object representing the tab to insert the sidebar into.
      *
-     * Returns a promise that will be resolved if the injection went well
+     * Returns a promise that will be resolved if the injection succeeded
      * otherwise it will be rejected with an error.
      */
     this.injectIntoTab = function (tab) {
@@ -44,9 +42,7 @@
       }
     };
 
-    /* Removes the Hypothesis sidebar from the tab provided. The callback
-     * will be called when removal is complete. An error is passed as the
-     * first argument to the callback if removal failed.
+    /* Removes the Hypothesis sidebar from the tab provided.
      *
      * tab - A tab object representing the tab to remove the sidebar from.
      *
