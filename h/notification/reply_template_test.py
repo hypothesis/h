@@ -49,6 +49,17 @@ store_fake_data = [
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:elephant@nomouse.pls'
     },
+    {
+        # Reply to the root with the same user
+        'id': '3',
+        'created': '2014-10-27T20:40:53.245691+00:00',
+        'document': {'title': ''},
+        'text': 'The animals went in two by two, hurrah! hurrah!',
+        'references': [0],
+        'uri': 'www.howtoreachtheark.now',
+        'user': 'acct:elephant@nomouse.pls'
+    },
+
 ]
 
 
@@ -164,6 +175,22 @@ def test_template_map_key_values():
         unsubscribe = "".join(seq)
 
         assert tmap['unsubscribe'] == unsubscribe
+
+
+def test_fallback_title():
+    """Checks that the title falls back to using the url"""
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
+        request = DummyRequest()
+        request.domain = 'www.howtoreachtheark.now'
+        annotation = store_fake_data[4]
+
+        data = {
+            'parent': rt.parent_values(annotation),
+            'subscription': {'id': 1}
+        }
+        tmap = rt.create_template_map(request, annotation, data)
+        assert tmap['document_title'] == annotation['uri']
 
 
 # Tests for the get_recipients function
