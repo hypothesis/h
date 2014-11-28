@@ -8,7 +8,7 @@ $threadexp-width: .6em;
 
   & > li.thread:hover,
   .card-emphasis {
-    box-shadow: 4px 4px 4px -2px $gray-light;
+    @include focus-outline;
   }
 }
 
