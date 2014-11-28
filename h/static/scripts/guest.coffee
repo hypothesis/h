@@ -250,12 +250,10 @@ class Annotator.Guest extends Annotator
       method: "showEditor"
       params: annotation.$$tag
 
-  focusInViewer: (annotations, state) =>
+  focusInViewer: (annotations) =>
     @panel?.notify
-      method: "setFocusState"
-      params:
-        tags: (a.$$tag for a in annotations)
-        state: state
+      method: "setViewerFocus"
+      params: (a.$$tag for a in annotations)
 
   onAnchorMousedown: ->
 
@@ -305,15 +303,14 @@ class Annotator.Guest extends Annotator
     if @visibleHighlights or @tool is 'highlight'
       event.stopPropagation()
       annotations = event.data.getAnnotations(event)
-      this.focusInViewer annotations, true
+      this.focusInViewer annotations
 
   # When leaving a highlight (with the cursor) in highlighting mode,
   # tell the sidebar to stop hiliting the relevant annotations
   onAnchorMouseout: (event) ->
     if @visibleHighlights or @tool is 'highlight'
       event.stopPropagation()
-      annotations = event.data.getAnnotations(event)
-      this.focusInViewer annotations, false
+      this.focusInViewer []
 
   # When clicking on a highlight in highlighting mode,
   # tell the sidebar to bring up the viewer for the relevant annotations
