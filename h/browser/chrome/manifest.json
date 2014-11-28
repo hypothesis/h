@@ -25,14 +25,29 @@
 
   "background": {
     "persistent": true,
-    "scripts": ["background.js"]
+    "scripts": [
+      "lib/tab-store.js",
+      "lib/tab-state.js",
+      "lib/tab-error-cache.js",
+      "lib/sidebar-injector.js",
+      "lib/browser-action.js",
+      "lib/help-page.js",
+      "lib/errors.js",
+      "lib/hypothesis-chrome-extension.js",
+      "background.js"
+    ]
   },
   "browser_action": {
-    "placeholder": "work around http://crbug.com/86449"
+    "default_icon": {
+      "19": "images/browser-icon-inactive.png",
+      "38": "images/browser-icon-inactive@2x.png"
+    }
   },
   "web_accessible_resources": [
     "public/*",
     "content/*",
+    "lib/*",
+    "help/*",
     "content/web/viewer.html"
   ]
 }

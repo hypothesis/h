@@ -1,24 +1,5 @@
-<a class="bookmarklet"
+
+  <a class="bookmarklet"
    title="Drag this to your bookmarks"
    onclick="alert('Drag this to your bookmarks bar first');return false"
-   href="javascript:(function() {
-           var ssl = !!document.location.protocol.match(/^https:/)
-           , embedUrl = '{{request.resource_url(context, 'embed.js')}}'
-           ;
-
-           if (ssl && !embedUrl.match(/^https:/)) {
-             var msg = (
-               'Sorry, but this service is unavailable on pages ' +
-               'served with HTTPS at this time. Please contact support for ' +
-               'further assistance.'
-             );
-             alert(msg);
-           } else {
-             window.hypothesisConfig = function () {
-               return {showHighlights: true};
-             };
-             var embed = document.createElement('script');
-             embed.setAttribute('src', embedUrl);
-             document.body.appendChild(embed);
-           }
-           })();"><i class="h-icon-move"></i> Annotate</a>
+   href="javascript:{% filter urlencode %}{% include "../bookmarklet.js" %}{% endfilter %}"><i class="h-icon-move"></i> Annotate</a>
