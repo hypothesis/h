@@ -41,6 +41,9 @@ def create_template_map(request, reply, data):
     if 'document' in reply:
         document_title = reply['document'].get('title', '')
 
+    if document_title is '':
+        document_title = data['parent']['uri']
+
     parent_user = user_name(data['parent']['user'])
     reply_user = user_name(reply['user'])
 
