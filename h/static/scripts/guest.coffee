@@ -153,16 +153,6 @@ class Annotator.Guest extends Annotator
       this.publish "finalizeHighlights"
     )
 
-    .bind('setFocusedHighlights', (ctx, tags=[]) =>
-      for hl in @getHighlights()
-        annotation = hl.annotation
-        if annotation.$$tag in tags
-          hl.setFocused true, true
-        else
-          hl.setFocused false, true
-      this.publish "finalizeHighlights"
-    )
-
     .bind('scrollTo', (ctx, tag) =>
       for hl in @getHighlights()
         if hl.annotation.$$tag is tag
