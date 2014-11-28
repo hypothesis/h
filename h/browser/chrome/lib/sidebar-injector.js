@@ -178,7 +178,8 @@
     function isSidebarInjected(tabId) {
       return new Promise(function (resolve, reject) {
         return chromeTabs.executeScript(tabId, {code: 'window.annotator'}, function (result) {
-          resolve((result && result[0] === true) || false);
+          var isAnnotatorSet = !!(result && result[0]);
+          resolve(isAnnotatorSet);
         });
       });
     }
