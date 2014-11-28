@@ -7,7 +7,7 @@ $threadexp-width: .6em;
   }
 
   & > li.thread:hover,
-  .card-emphasis {
+  & > li.thread.js-hover {
     @include focus-outline;
   }
 }
