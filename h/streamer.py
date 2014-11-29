@@ -9,13 +9,13 @@ import random
 import re
 import struct
 import unicodedata
+import weakref
 
 from dateutil.tz import tzutc
 import gevent
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.events import subscriber
-from pyramid_sockjs import get_session_manager
 from pyramid_sockjs import Session
 import transaction
 
@@ -436,11 +436,39 @@ class FilterHandler(object):
 
 
 class StreamerSession(Session):
+    # Class attributes
+    queue = None
+    instances = weakref.WeakSet()
+
+    # Instance attributes
     client_id = None
     filter = None
+    request = None
+
+    def __new__(cls, *args, **kwargs):
+        instance = super(StreamerSession, cls).__new__(cls, *args, **kwargs)
+        cls.instances.add(instance)
+        return instance
+
+    @classmethod
+    def start_reader(cls, request):
+        cls.queue = gevent.queue.Queue()
+        reader_id = 'stream-{}#ephemeral'.format(_random_id())
+        reader = request.get_queue_reader('annotations', reader_id)
+        reader.on_message.connect(cls.on_queue_message)
+        reader.start(block=False)
+        gevent.spawn(broadcast_from_queue, cls.queue, cls.instances)
+
+    @classmethod
+    def on_queue_message(cls, reader, message=None):
+        if message is not None:
+            cls.queue.put(message)
 
     def on_open(self):
         transaction.commit()  # Release the database transaction
+
+        if self.queue is None:
+            self.start_reader(self.request)
 
     def send_annotations(self):
         request = self.request
@@ -513,16 +541,17 @@ def _annotation_packet(annotations, action):
     }
 
 
-def broadcast_from_queue(queue, manager):
+def broadcast_from_queue(queue, sessions):
     """
     Pulls messages from a passed queue object, and handles dispatching them to
-    appropriate active sessions of the manager. Manager is a
-    :py:func:`pyramid_sockjs.SessionManager` or an object with a similar API.
+    appropriate active sessions.
     """
     for message in queue:
         data = json.loads(message.body)
 
-        for session in manager.active_sessions():
+        for session in list(sessions):
+            if session.expired:
+                continue
             if session.client_id == data['src_client_id']:
                 continue
 
@@ -562,17 +591,3 @@ def includeme(config):
                             prefix='__streamer__',
                             session=StreamerSession)
     config.scan(__name__)
-
-    if config.registry.feature('streamer'):
-        # Process-internal queue to pass messages between greenlets
-        q = gevent.queue.Queue()
-
-        # Start a greenlet to read from the external NSQ queue
-        reader = config.get_queue_reader('annotations',
-                                         'stream-' + _random_id() + '#ephemeral')
-        reader.on_message.connect(lambda r, message: q.put(message), weak=False)
-        reader.start(block=False)
-
-        # Start a greenlet to process the messages
-        manager = get_session_manager('streamer', config.registry)
-        gevent.spawn(broadcast_from_queue, q, manager)

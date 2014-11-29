@@ -5,6 +5,7 @@ import blinker
 import gevent
 import gevent.queue
 from pyramid.decorator import reify
+from zope.interface import implementer
 
 from . import interfaces
 
@@ -14,8 +15,12 @@ QUEUES = {}
 log = logging.getLogger(__name__)
 
 
+@implementer(interfaces.IQueueHelper)
 class LocalQueueHelper(object):
-    def get_reader(self, settings, topic, channel):
+    def __init__(self, settings):
+        self.settings = settings
+
+    def get_reader(self, topic, channel):
         """
         Get a :py:class:`h.queue.local.Reader` instance, providing access to a
         queue within the current thread. The reader will read from the
@@ -26,7 +31,7 @@ class LocalQueueHelper(object):
         """
         return Reader(topic, channel)
 
-    def get_writer(self, settings):
+    def get_writer(self):
         """
         Get a :py:class:`h.queue.local.Writer` instance, providing a mechanism
         to write to queues within the current thread.
@@ -103,6 +108,8 @@ def _get_queue(topic):
 
 def includeme(config):
     registry = config.registry
+    settings = registry.settings
 
     if not registry.queryUtility(interfaces.IQueueHelper):
-        registry.registerUtility(LocalQueueHelper, interfaces.IQueueHelper)
+        qh = LocalQueueHelper(settings)
+        registry.registerUtility(qh, interfaces.IQueueHelper)

@@ -17,7 +17,7 @@ from h.streamer import broadcast_from_queue
 
 
 FakeMessage = namedtuple('FakeMessage', 'body')
-FakeSession = namedtuple('FakeSession', 'client_id')
+FakeSession = namedtuple('FakeSession', ('client_id', 'expired'))
 
 
 def has_ordered_sublist(lst, sublist):
@@ -239,15 +239,12 @@ class TestBroadcast(unittest.TestCase):
              'src_client_id': 'cat'},
         ]
         self.messages = [FakeMessage(json.dumps(m)) for m in self.message_data]
-        self.sess_giraffe = FakeSession('giraffe')
-        self.sess_pigeon = FakeSession('pigeon')
+        self.sess_giraffe = FakeSession('giraffe', False)
+        self.sess_pigeon = FakeSession('pigeon', False)
+        self.sess_roadkill = FakeSession('roadkill', True)
 
         self.queue = MagicMock()
         self.queue.__iter__.return_value = self.messages
-
-        self.manager = MagicMock()
-        self.manager.active_sessions.return_value = [self.sess_giraffe,
-                                                     self.sess_pigeon]
 
         self.send_patcher = patch('h.streamer.send_annotation_event')
         self.send = self.send_patcher.start()
@@ -256,7 +253,7 @@ class TestBroadcast(unittest.TestCase):
         self.send_patcher.stop()
 
     def test_non_sending_session_receives_all(self):
-        broadcast_from_queue(self.queue, self.manager)
+        broadcast_from_queue(self.queue, [self.sess_giraffe])
 
         sess = self.sess_giraffe
 
@@ -269,7 +266,7 @@ class TestBroadcast(unittest.TestCase):
         assert has_ordered_sublist(self.send.mock_calls, expected)
 
     def test_sending_session_does_not_receive_own(self):
-        broadcast_from_queue(self.queue, self.manager)
+        broadcast_from_queue(self.queue, [self.sess_pigeon])
 
         sess = self.sess_pigeon
 
@@ -282,6 +279,10 @@ class TestBroadcast(unittest.TestCase):
         assert expected in self.send.mock_calls
         for c in unexpected:
             assert c not in self.send.mock_calls
+
+    def test_expired_session_does_not_recieve_any(self):
+        broadcast_from_queue(self.queue, [self.sess_roadkill])
+        assert self.send.called is False
 
 
 class TestSendAnnotationEvent(unittest.TestCase):

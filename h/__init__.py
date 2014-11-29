@@ -17,9 +17,12 @@ def includeme(config):
     config.include('h.api')
     config.include('h.features')
     config.include('h.queue')
-    config.include('h.streamer')
     config.include('h.subscribers')
     config.include('h.views')
+
+    if config.registry.feature('streamer'):
+        config.include('h.streamer')
+
     config.set_root_factory('h.resources.RootFactory')
 
     config.add_jinja2_renderer('.js')

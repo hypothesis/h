@@ -81,10 +81,10 @@ class TestWriter(unittest.TestCase):
 def test_queue_integration():
     messages = []
 
-    helper = LocalQueueHelper()
+    helper = LocalQueueHelper({})
 
-    reader = helper.get_reader({}, 'foo', 'bar')
-    writer = helper.get_writer({})
+    reader = helper.get_reader('foo', 'bar')
+    writer = helper.get_writer()
 
     reader.on_message.connect(lambda r, message: messages.append(message),
                               weak=False)
