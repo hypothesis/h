@@ -446,7 +446,7 @@ def create_db():
                        "./bin/hypothesis reindex {0} {1} {1}-{2}"
                        .format('yourconfig.ini', es.index, date)
                        )
-            log.fatal(message)
+            log.critical(message)
             raise RuntimeError(message)
         raise
 
