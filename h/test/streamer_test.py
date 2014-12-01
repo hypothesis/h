@@ -13,7 +13,7 @@ from mock import patch
 from pyramid.testing import DummyRequest
 
 from h.streamer import FilterToElasticFilter
-from h.streamer import StreamerSession
+from h.streamer import WebSocket
 from h.streamer import broadcast_from_queue
 from h.streamer import should_send_event
 
@@ -240,14 +240,15 @@ def test_operator_call():
     assert query['term']['text'] == expected
 
 
-class TestStreamerSession(unittest.TestCase):
+class TestWebSocket(unittest.TestCase):
 
     def test_on_open_starts_reader(self):
         fake_request = MagicMock()
+        fake_sock = object()
 
-        s = StreamerSession(123)
+        s = WebSocket(fake_sock)
         s.request = fake_request
-        s.on_open()
+        s.opened()
 
         s.request.get_queue_reader.assert_called_once_with('annotations', ANY)
 
