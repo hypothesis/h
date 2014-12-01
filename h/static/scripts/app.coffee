@@ -6,6 +6,7 @@ imports = [
   'h.account'
   'h.helpers'
   'h.identity'
+  'h.session'
   'h.streamer'
 ]
 
@@ -57,7 +58,10 @@ configure = [
     basePattern = baseURI.replace /\/[^\/]*$/, '/**.html'
     $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
 
-    streamerProvider.url = baseURI.replace('http', 'ws') + 'ws'
+    streamerProvider.urlFn = ['xsrf', (xsrf) ->
+      base = baseURI.replace(/^http/, 'ws')
+      "#{base}ws?csrf_token=#{xsrf.token}"
+    ]
 ]
 
 

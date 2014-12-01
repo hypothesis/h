@@ -40,19 +40,13 @@ class SessionProvider
   #   });
   ###
   $get: [
-    '$http', '$q', '$resource', 'documentHelpers', 'flash',
-    ($http,   $q,   $resource,   documentHelpers,   flash) ->
+    '$http', '$q', '$resource', 'documentHelpers', 'flash', 'xsrf',
+    ($http,   $q,   $resource,   documentHelpers,   flash,   xsrf) ->
       actions = {}
       provider = this
 
-      # Capture the state of the cross site request forgery token.
-      # If cookies are blocked this is our only way to get it.
-      xsrfToken = null
-
       prepare = (data, headersGetter) ->
-        if xsrfToken
-          headers = headersGetter()
-          headers[$http.defaults.xsrfHeaderName] = xsrfToken
+        headersGetter()[$http.defaults.xsrfHeaderName] = xsrf.token
         return angular.toJson data
 
       process = (data, headersGetter) ->
@@ -68,7 +62,7 @@ class SessionProvider
         for q, msgs of data.flash
           flash q, msgs
 
-        xsrfToken = model.csrf
+        xsrf.token = model.csrf
 
         # Return the model
         model
@@ -85,3 +79,4 @@ class SessionProvider
 
 angular.module('h.session')
 .provider('session', SessionProvider)
+.value('xsrf', token: null)

@@ -17,7 +17,8 @@ describe 'streamer', ->
     WebSocket = sandbox.stub().returns(fakeSock)
     $provide.decorator '$window', ($delegate) ->
       angular.extend $delegate, {WebSocket}
-    streamerProvider.url = 'http://magicstreemz/giraffe'
+    $provide.value 'webSocketUrl', 'wss://magicstreemz/giraffe'
+    streamerProvider.urlFn = (webSocketUrl) -> webSocketUrl
     return
 
   beforeEach inject (_streamer_) ->
@@ -26,10 +27,14 @@ describe 'streamer', ->
   afterEach ->
     sandbox.restore()
 
+  it 'calls the transport function with the new keyword', ->
+    streamer.open()
+    assert.calledWithNew(WebSocket)
+
   it 'creates a socket with the correct base URL', ->
     streamer.open()
 
-    assert.calledWith(WebSocket, 'http://magicstreemz/giraffe')
+    assert.calledWith(WebSocket, 'wss://magicstreemz/giraffe')
 
   it 'does not open another socket while a socket is connecting', ->
     streamer.open()

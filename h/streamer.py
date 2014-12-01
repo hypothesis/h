@@ -16,8 +16,10 @@ import gevent
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.events import subscriber
+from pyramid.exceptions import BadCSRFToken
+from pyramid.session import check_csrf_token
 from pyramid.threadlocal import get_current_request
-from pyramid.wsgi import wsgiapp
+from pyramid.view import view_config
 import transaction
 from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
@@ -526,6 +528,19 @@ class WebSocket(_WebSocket):
             transaction.commit()
 
 
+@view_config(route_name='ws')
+def websocket(request):
+    try:
+        # WebSockets can be opened across origins and send cookies. To prevent
+        # scripts on other sites from using this socket, require the script to
+        # prove it has access to our session by sending the csrf token.
+        check_csrf_token(request)
+    except BadCSRFToken:
+        request.environ['ws4py.websocket'] = None  # Avoid a traceback in ws4py
+        raise
+    return request.get_response(request.registry.ws)
+
+
 @subscriber(events.AnnotationEvent)
 def cb_annotation_event(event):
     queue = event.request.get_queue_writer()
@@ -598,8 +613,6 @@ def _random_id():
 
 
 def includeme(config):
-    ws_app = WebSocketWSGIApplication(handler_cls=WebSocket)
-    ws_view = wsgiapp(ws_app)
+    config.registry.ws = WebSocketWSGIApplication(handler_cls=WebSocket)
     config.add_route('ws', 'ws')
-    config.add_view(ws_view, route_name='ws')
     config.scan(__name__)
