@@ -1,3 +1,4 @@
 -e .[YAML]
 psycopg2
 pyramid_redis_sessions==1.0a2
+wsaccel

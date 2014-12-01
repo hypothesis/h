@@ -16,8 +16,12 @@ import gevent
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.events import subscriber
-from pyramid_sockjs import Session
+from pyramid.threadlocal import get_current_request
+from pyramid.wsgi import wsgiapp
 import transaction
+from ws4py.websocket import WebSocket as _WebSocket
+from ws4py.server.wsgiutils import WebSocketWSGIApplication
+
 
 from h import events
 from h.api import get_user
@@ -435,7 +439,7 @@ class FilterHandler(object):
             return False
 
 
-class StreamerSession(Session):
+class WebSocket(_WebSocket):
     # Class attributes
     event_queue = None
     instances = weakref.WeakSet()
@@ -445,8 +449,12 @@ class StreamerSession(Session):
     filter = None
     request = None
 
+    def __init__(self, *args, **kwargs):
+        super(WebSocket, self).__init__(*args, **kwargs)
+        self.request = get_current_request()
+
     def __new__(cls, *args, **kwargs):
-        instance = super(StreamerSession, cls).__new__(cls, *args, **kwargs)
+        instance = super(WebSocket, cls).__new__(cls, *args, **kwargs)
         cls.instances.add(instance)
         return instance
 
@@ -464,7 +472,7 @@ class StreamerSession(Session):
         if message is not None:
             cls.event_queue.put(message)
 
-    def on_open(self):
+    def opened(self):
         transaction.commit()  # Release the database transaction
 
         if self.event_queue is None:
@@ -478,12 +486,13 @@ class StreamerSession(Session):
 
         # Can send zero to indicate that no past data is matched
         packet = _annotation_packet(annotations, 'past')
-        self.send(packet)
+        data = json.dumps(packet)
+        self.send(data)
 
-    def on_message(self, msg):
+    def received_message(self, msg):
         transaction.begin()
         try:
-            data = json.loads(msg)
+            data = json.loads(msg.data)
             msg_type = data.get('messageType', 'filter')
 
             if msg_type == 'filter':
@@ -541,42 +550,45 @@ def _annotation_packet(annotations, action):
     }
 
 
-def broadcast_from_queue(queue, sessions):
+def broadcast_from_queue(queue, sockets):
     """
     Pulls messages from a passed queue object, and handles dispatching them to
     appropriate active sessions.
     """
     for message in queue:
-        data = json.loads(message.body)
-
-        for session in list(sessions):
-            if session.expired:
-                continue
-            if session.client_id == data['src_client_id']:
-                continue
-
-            annotation = Annotation(**data['annotation'])
-            send_annotation_event(session, annotation, data['action'])
+        data_in = json.loads(message.body)
+        action = data_in['action']
+        annotation = Annotation(**data_in['annotation'])
+        payload = _annotation_packet([annotation], action)
+        data_out = json.dumps(payload)
+        for socket in list(sockets):
+            if should_send_event(socket, annotation, data_in):
+                socket.send(data_out)
 
 
-def send_annotation_event(session, annotation, action):
+def should_send_event(socket, annotation, event_data):
     """
     Inspects the passed annotation and action and decides whether or not
     the underlying session should receive the event. If it should, the
     action is wrapped up in a websocket packet and sent to the client.
     """
-    if action == 'read':
-        return
+    if socket.terminated:
+        return False
 
-    if not session.request.has_permission('read', annotation):
-        return
+    if event_data['action'] == 'read':
+        return False
 
-    if session.filter is not None:
-        if not session.filter.match(annotation, action):
-            return
+    if event_data['src_client_id'] == socket.client_id:
+        return False
 
-    packet = _annotation_packet([annotation], action)
-    session.send(packet)
+    if not socket.request.has_permission('read', annotation):
+        return False
+
+    if socket.filter is not None:
+        if not socket.filter.match(annotation, event_data['action']):
+            return False
+
+    return True
 
 
 def _random_id():
@@ -586,8 +598,8 @@ def _random_id():
 
 
 def includeme(config):
-    config.include('pyramid_sockjs')
-    config.add_sockjs_route(name='streamer',
-                            prefix='__streamer__',
-                            session=StreamerSession)
+    ws_app = WebSocketWSGIApplication(handler_cls=WebSocket)
+    ws_view = wsgiapp(ws_app)
+    config.add_route('ws', 'ws')
+    config.add_view(ws_view, route_name='ws')
     config.scan(__name__)

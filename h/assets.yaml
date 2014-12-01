@@ -202,11 +202,6 @@ pagedown:
   output: scripts/vendor/Markdown.Converter.min.js
   contents:
     - h:static/scripts/vendor/Markdown.Converter.js
-sockjs:
-  filters: uglifyjs
-  output: scripts/vendor/sockjs.min.js
-  contents:
-    - h:static/scripts/vendor/sockjs-0.3.4.js
 unorm:
   filters: uglifyjs
   output: scripts/vendor/unorm.min.js
@@ -238,7 +233,6 @@ app_js:
     - momentjs
     - pagedown
     - autofill
-    - sockjs
     - unorm
     - uuid
     - angular_tags_input
