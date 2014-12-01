@@ -6,12 +6,14 @@ import unittest
 from collections import namedtuple
 import json
 
+from mock import ANY
 from mock import MagicMock
 from mock import call
 from mock import patch
 from pyramid.testing import DummyRequest
 
 from h.streamer import FilterToElasticFilter
+from h.streamer import StreamerSession
 from h.streamer import send_annotation_event
 from h.streamer import broadcast_from_queue
 
@@ -223,6 +225,18 @@ def test_operator_call():
     expected = 'foo bar'
 
     assert query['term']['text'] == expected
+
+
+class TestStreamerSession(unittest.TestCase):
+
+    def test_on_open_starts_reader(self):
+        fake_request = MagicMock()
+
+        s = StreamerSession(123)
+        s.request = fake_request
+        s.on_open()
+
+        s.request.get_queue_reader.assert_called_once_with('annotations', ANY)
 
 
 class TestBroadcast(unittest.TestCase):
