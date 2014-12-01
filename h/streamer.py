@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
+import base64
 import copy
 import datetime
 import json
 import logging
 import operator
+import random
 import re
+import struct
 import unicodedata
+import weakref
 
 from dateutil.tz import tzutc
+import gevent
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.events import subscriber
-from pyramid_sockjs.session import Session
+from pyramid_sockjs import Session
 import transaction
 
 from h import events
@@ -431,11 +436,39 @@ class FilterHandler(object):
 
 
 class StreamerSession(Session):
+    # Class attributes
+    event_queue = None
+    instances = weakref.WeakSet()
+
+    # Instance attributes
     client_id = None
     filter = None
+    request = None
+
+    def __new__(cls, *args, **kwargs):
+        instance = super(StreamerSession, cls).__new__(cls, *args, **kwargs)
+        cls.instances.add(instance)
+        return instance
+
+    @classmethod
+    def start_reader(cls, request):
+        cls.event_queue = gevent.queue.Queue()
+        reader_id = 'stream-{}#ephemeral'.format(_random_id())
+        reader = request.get_queue_reader('annotations', reader_id)
+        reader.on_message.connect(cls.on_queue_message)
+        reader.start(block=False)
+        gevent.spawn(broadcast_from_queue, cls.event_queue, cls.instances)
+
+    @classmethod
+    def on_queue_message(cls, reader, message=None):
+        if message is not None:
+            cls.event_queue.put(message)
 
     def on_open(self):
         transaction.commit()  # Release the database transaction
+
+        if self.event_queue is None:
+            self.start_reader(self.request)
 
     def send_annotations(self):
         request = self.request
@@ -444,23 +477,17 @@ class StreamerSession(Session):
         self.received = len(annotations)
 
         # Can send zero to indicate that no past data is matched
-        packet = {
-            'payload': annotations,
-            'type': 'annotation-notification',
-            'options': {
-                'action': 'past',
-            }
-        }
+        packet = _annotation_packet(annotations, 'past')
         self.send(packet)
 
     def on_message(self, msg):
         transaction.begin()
         try:
-            struct = json.loads(msg)
-            msg_type = struct.get('messageType', 'filter')
+            data = json.loads(msg)
+            msg_type = data.get('messageType', 'filter')
 
             if msg_type == 'filter':
-                payload = struct['filter']
+                payload = data['filter']
                 self.offsetFrom = 0
 
                 # Let's try to validate the schema
@@ -474,14 +501,14 @@ class StreamerSession(Session):
                         self.offsetFrom = int(self.query.query['size'])
                     self.send_annotations()
             elif msg_type == 'more_hits':
-                more_hits = struct.get('moreHits', 50)
+                more_hits = data.get('moreHits', 50)
                 if 'size' in self.query.query:
                     self.query.query['from'] = self.offsetFrom
                     self.query.query['size'] = more_hits
                     self.send_annotations()
                     self.offsetFrom += self.received
             elif msg_type == 'client_id':
-                self.client_id = struct.get('value')
+                self.client_id = data.get('value')
         except:
             log.exception("Parsing filter: %s", msg)
             transaction.abort()
@@ -491,51 +518,76 @@ class StreamerSession(Session):
 
 
 @subscriber(events.AnnotationEvent)
-def after_action(event):
-    if not event.request.feature('streamer'):
-        return
-    try:
-        request = event.request
-        client_id = request.headers.get('X-Client-Id')
+def cb_annotation_event(event):
+    queue = event.request.get_queue_writer()
 
-        action = event.action
-        if action == 'read':
-            return
+    data = {
+        'action': event.action,
+        'annotation': event.annotation,
+        'src_client_id': event.request.headers.get('X-Client-Id'),
+    }
+    queue.publish('annotations', json.dumps(data))
 
-        annotation = event.annotation
-        manager = request.get_sockjs_manager()
-        for session in manager.active_sessions():
-            if session.client_id == client_id:
+
+def _annotation_packet(annotations, action):
+    """
+    Generate a packet suitable for sending down the websocket that represents
+    the specified action applied to the passed annotations.
+    """
+    return {
+        'payload': annotations,
+        'type': 'annotation-notification',
+        'options': {'action': action},
+    }
+
+
+def broadcast_from_queue(queue, sessions):
+    """
+    Pulls messages from a passed queue object, and handles dispatching them to
+    appropriate active sessions.
+    """
+    for message in queue:
+        data = json.loads(message.body)
+
+        for session in list(sessions):
+            if session.expired:
+                continue
+            if session.client_id == data['src_client_id']:
                 continue
 
-            try:
-                if not session.request.has_permission('read', annotation):
-                    continue
+            annotation = Annotation(**data['annotation'])
+            send_annotation_event(session, annotation, data['action'])
 
-                flt = session.filter
-                if not (flt and flt.match(annotation, action)):
-                    continue
 
-                packet = {
-                    'payload': [annotation],
-                    'type': 'annotation-notification',
-                    'options': {
-                        'action': action,
-                    },
-                }
+def send_annotation_event(session, annotation, action):
+    """
+    Inspects the passed annotation and action and decides whether or not
+    the underlying session should receive the event. If it should, the
+    action is wrapped up in a websocket packet and sent to the client.
+    """
+    if action == 'read':
+        return
 
-                session.send(packet)
-            except:
-                log.exception(
-                    'Checking stream match:\n%s\n%s',
-                    annotation,
-                    session.filter
-                )
-    except:
-        log.exception('Streaming event: %s', event)
+    if not session.request.has_permission('read', annotation):
+        return
+
+    if session.filter is not None:
+        if not session.filter.match(annotation, action):
+            return
+
+    packet = _annotation_packet([annotation], action)
+    session.send(packet)
+
+
+def _random_id():
+    """Generate a short random string"""
+    data = struct.pack('Q', random.getrandbits(64))
+    return base64.urlsafe_b64encode(data).strip(b'=')
 
 
 def includeme(config):
     config.include('pyramid_sockjs')
-    config.add_sockjs_route(prefix='__streamer__', session=StreamerSession)
+    config.add_sockjs_route(name='streamer',
+                            prefix='__streamer__',
+                            session=StreamerSession)
     config.scan(__name__)
