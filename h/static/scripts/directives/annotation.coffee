@@ -270,6 +270,10 @@ AnnotationController = [
       # Save highlights once logged in.
       if highlight and this.isHighlight()
         if model.user
+          model.permissions.read = [model.user]
+          model.permissions.update = [model.user]
+          model.permissions.delete = [model.user]
+          model.permissions.admin = [model.user]
           annotator.publish 'annotationCreated', model
           highlight = false  # skip this on future updates
         else
