@@ -14,12 +14,25 @@ from pyramid.testing import DummyRequest
 
 from h.streamer import FilterToElasticFilter
 from h.streamer import StreamerSession
-from h.streamer import send_annotation_event
 from h.streamer import broadcast_from_queue
+from h.streamer import should_send_event
 
 
 FakeMessage = namedtuple('FakeMessage', 'body')
-FakeSession = namedtuple('FakeSession', ('client_id', 'expired'))
+
+
+class FakeSocket(object):
+    client_id = None
+    filter = None
+    request = None
+    terminated = None
+
+    def __init__(self, client_id):
+        self.client_id = client_id
+        self.terminated = False
+        self.filter = MagicMock()
+        self.request = MagicMock()
+        self.send = MagicMock()
 
 
 def has_ordered_sublist(lst, sublist):
@@ -253,78 +266,69 @@ class TestBroadcast(unittest.TestCase):
              'src_client_id': 'cat'},
         ]
         self.messages = [FakeMessage(json.dumps(m)) for m in self.message_data]
-        self.sess_giraffe = FakeSession('giraffe', False)
-        self.sess_pigeon = FakeSession('pigeon', False)
-        self.sess_roadkill = FakeSession('roadkill', True)
 
         self.queue = MagicMock()
         self.queue.__iter__.return_value = self.messages
 
-        self.send_patcher = patch('h.streamer.send_annotation_event')
-        self.send = self.send_patcher.start()
+        self.should_patcher = patch('h.streamer.should_send_event')
+        self.should = self.should_patcher.start()
 
     def tearDown(self):
-        self.send_patcher.stop()
+        self.should_patcher.stop()
 
-    def test_non_sending_session_receives_all(self):
-        broadcast_from_queue(self.queue, [self.sess_giraffe])
+    def test_send_when_socket_should_receive_event(self):
+        self.should.return_value = True
+        sock = FakeSocket('giraffe')
+        broadcast_from_queue(self.queue, [sock])
+        assert sock.send.called
 
-        sess = self.sess_giraffe
-
-        expected = [
-            call(sess, ObjectIncluding({'id': 1}), 'delete'),
-            call(sess, ObjectIncluding({'id': 2}), 'update'),
-            call(sess, ObjectIncluding({'id': 3}), 'delete'),
-        ]
-
-        assert has_ordered_sublist(self.send.mock_calls, expected)
-
-    def test_sending_session_does_not_receive_own(self):
-        broadcast_from_queue(self.queue, [self.sess_pigeon])
-
-        sess = self.sess_pigeon
-
-        expected = call(sess, ObjectIncluding({'id': 3}), 'delete')
-        unexpected = [
-            call(sess, ObjectIncluding({'id': 1}), 'delete'),
-            call(sess, ObjectIncluding({'id': 2}), 'update'),
-        ]
-
-        assert expected in self.send.mock_calls
-        for c in unexpected:
-            assert c not in self.send.mock_calls
-
-    def test_expired_session_does_not_recieve_any(self):
-        broadcast_from_queue(self.queue, [self.sess_roadkill])
-        assert self.send.called is False
+    def test_no_send_when_socket_should_not_receive_event(self):
+        self.should.return_value = False
+        sock = FakeSocket('pidgeon')
+        broadcast_from_queue(self.queue, [sock])
+        assert sock.send.called is False
 
 
-class TestSendAnnotationEvent(unittest.TestCase):
+class TestShouldSendEvent(unittest.TestCase):
     def setUp(self):
-        self.session = MagicMock()
-        self.session.filter.match.return_value = True
+        self.sock_giraffe = FakeSocket('giraffe')
+        self.sock_giraffe.filter.match.return_value = True
 
-    def test_send_annotation_event_no_filter(self):
-        self.session.filter = None
+        self.sock_pigeon = FakeSocket('pigeon')
 
-        send_annotation_event(self.session, {}, 'update')
-        assert self.session.send.called
+        self.sock_roadkill = FakeSocket('roadkill')
+        self.sock_roadkill.terminated = True
 
-    def test_send_annotation_event_doesnt_send_reads(self):
-        send_annotation_event(self.session, {}, 'read')
-        assert not self.session.send.called
+    def test_non_sending_socket_receives_event(self):
+        data = {'action': 'update', 'src_client_id': 'pigeon'}
+        assert should_send_event(self.sock_giraffe, {}, data)
 
-    def test_send_annotation_event_filtered(self):
-        self.session.filter.match.return_value = False
+    def test_sending_socket_does_not_receive_event(self):
+        data = {'action': 'update', 'src_client_id': 'pigeon'}
+        assert should_send_event(self.sock_pigeon, {}, data) is False
 
-        send_annotation_event(self.session, {}, 'update')
-        assert not self.session.send.called
+    def test_terminated_socket_does_not_recieve_event(self):
+        data = {'action': 'update', 'src_client_id': 'pigeon'}
+        assert should_send_event(self.sock_roadkill, {}, data) is False
 
-    def test_send_annotation_event_check_permissions(self):
-        self.session.request.has_permission.return_value = False
+    def test_should_send_event_no_filter(self):
+        self.sock_giraffe.filter = None
+        data = {'action': 'update', 'src_client_id': 'pigeon'}
+        assert should_send_event(self.sock_giraffe, {}, data)
 
+    def test_should_send_event_doesnt_send_reads(self):
+        data = {'action': 'read', 'src_client_id': 'pigeon'}
+        assert should_send_event(self.sock_giraffe, {}, data) is False
+
+    def test_should_send_event_filtered(self):
+        self.sock_pigeon.filter.match.return_value = False
+        data = {'action': 'update', 'src_client_id': 'giraffe'}
+        assert should_send_event(self.sock_pigeon, {}, data) is False
+
+    def test_should_send_event_check_permissions(self):
+        self.sock_giraffe.request.has_permission.return_value = False
         anno = object()
-
-        send_annotation_event(self.session, anno, 'update')
-        assert not self.session.send.called
-        assert self.session.request.has_permission.called_with('read', anno)
+        data = {'action': 'update', 'src_client_id': 'pigeon'}
+        sock = self.sock_giraffe
+        assert should_send_event(sock, anno, data) is False
+        assert sock.request.has_permission.called_with('read', anno)

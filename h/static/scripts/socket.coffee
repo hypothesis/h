@@ -11,28 +11,27 @@ run = ['clientID', (clientID) ->
       "X-Client-Id": clientID
 ]
 
+
 socket = ['documentHelpers', 'clientID', (documentHelpers, clientID) ->
-  -> new Socket(clientID, "#{documentHelpers.baseURI}__streamer__")
-]
-
-
-class Socket extends SockJS
-  constructor: (clientID, args...)->
-    SockJS.apply(this, args)
-
-    send = this.send
-    this.send = (data) =>
+  ->
+    uri = "#{documentHelpers.baseURI}ws".replace /^http/, 'ws'
+    sock = new WebSocket(uri)
+    send = sock.send
+    sock.send = (data) ->
       # Set the client ID before the first message.
       cid = JSON.stringify
         messageType: 'client_id'
         value: clientID
 
       # Send the messages.
-      send.call(this, cid)
-      send.call(this, data)
+      send.call(sock, cid)
+      send.call(sock, data)
 
       # Restore the original send method.
-      this.send = send
+      sock.send = send
+
+    sock
+]
 
 
 angular.module('h')

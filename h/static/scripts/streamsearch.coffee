@@ -31,9 +31,9 @@ class StreamSearchController
     $scope.shouldShowThread = (container) -> true
 
     $scope.$watch 'updater', (updater) ->
-      updater?.then (sock) ->
-        filter = streamfilter.getFilter()
-        sock.send(JSON.stringify({filter}))
+      return unless updater?
+      filter = streamfilter.getFilter()
+      updater.send(JSON.stringify({filter}))
 
     $scope.$on '$destroy', ->
       $scope.search.query = ''

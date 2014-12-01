@@ -26,12 +26,12 @@ authorizeAction = (action, annotation, user) ->
 
 class AppController
   this.$inject = [
-    '$location', '$q', '$route', '$scope', '$timeout',
+    '$location', '$route', '$scope', '$timeout',
     'annotator', 'flash', 'identity', 'socket', 'streamfilter',
     'documentHelpers', 'drafts'
   ]
   constructor: (
-     $location,   $q,   $route,   $scope,   $timeout,
+     $location,   $route,   $scope,   $timeout,
      annotator,   flash,   identity,   socket,   streamfilter,
      documentHelpers,   drafts
   ) ->
@@ -114,33 +114,33 @@ class AppController
 
     initUpdater = (failureCount=0) ->
       """Initialize the websocket used for realtime updates."""
-      _dfdSock = $q.defer()
       _sock = socket()
 
-      $scope.updater?.then (sock) ->
-        sock.onclose = null  # break automatic reconnect
-        sock.close()
-
-      $scope.updater = _dfdSock.promise
+      if $scope.updater?
+        $scope.updater.onclose = null  # break automatic reconnect
+        $scope.updater.close()
+        $scope.updater = null
 
       _sock.onopen = ->
         failureCount = 0
-        _dfdSock.resolve(_sock)
-        _dfdSock = null
+        $scope.updater = _sock
+        $scope.$digest()
 
       _sock.onclose = ->
+        $scope.updater = null
         failureCount = Math.min(10, ++failureCount)
         slots = Math.random() * (Math.pow(2, failureCount) - 1)
         $timeout ->
-          _retry = initUpdater(failureCount)
-          _dfdSock?.resolve(_retry)
+          initUpdater(failureCount)
         , slots * 500
+        console.log 'Sleeping', slots * 500
 
       _sock.onmessage = (msg) ->
-        unless msg.data.type? and msg.data.type is 'annotation-notification'
+        data = JSON.parse(msg.data)
+        unless data.type? and data.type is 'annotation-notification'
           return
-        data = msg.data.payload
-        action = msg.data.options.action
+        action = data.options.action
+        data = data.payload
 
         unless data instanceof Array then data = [data]
 
@@ -155,8 +155,6 @@ class AppController
           applyUpdates action, data
 
         $scope.$digest()
-
-      _dfdSock.promise
 
     onlogin = (assertion) ->
       checkingToken = true
@@ -244,9 +242,14 @@ class AppController
           .resetFilter()
           .addClause('/uri', 'one_of', entities)
 
-        $scope.updater.then (sock) ->
-          filter = streamfilter.getFilter()
-          sock.send(JSON.stringify({filter}))
+      if $scope.updater?
+        filter = streamfilter.getFilter()
+        $scope.updater.send(JSON.stringify({filter}))
+
+    $scope.$watch 'updater', (updater) ->
+      return unless updater?
+      filter = streamfilter.getFilter()
+      updater.send(JSON.stringify({filter}))
 
     $scope.login = ->
       $scope.dialog.visible = true
@@ -263,9 +266,7 @@ class AppController
       sockmsg =
         messageType: 'more_hits'
         moreHits: number
-
-      $scope.updater.then (sock) ->
-        sock.send(JSON.stringify(sockmsg))
+      $scope.updater.send(JSON.stringify(sockmsg))
 
     $scope.clearSelection = ->
       $scope.search.query = ''
@@ -313,20 +314,19 @@ class AnnotationViewerController
       $location.path('/stream').search('q', query)
 
     $scope.$watch 'updater', (updater) ->
-      if updater?
-        updater.then (sock) ->
-          if $routeParams.id?
-            _id = $routeParams.id
-            annotator.plugins.Store?.loadAnnotationsFromSearch({_id}).then ->
-              annotator.plugins.Store?.loadAnnotationsFromSearch({references: _id})
+      return unless updater?
+      if $routeParams.id?
+        _id = $routeParams.id
+        annotator.plugins.Store?.loadAnnotationsFromSearch({_id}).then ->
+          annotator.plugins.Store?.loadAnnotationsFromSearch({references: _id})
 
-            filter = streamfilter
-              .setPastDataNone()
-              .setMatchPolicyIncludeAny()
-              .addClause('/references', 'first_of', _id, true)
-              .addClause('/id', 'equals', _id, true)
-              .getFilter()
-            sock.send(JSON.stringify({filter}))
+        filter = streamfilter
+          .setPastDataNone()
+          .setMatchPolicyIncludeAny()
+          .addClause('/references', 'first_of', _id, true)
+          .addClause('/id', 'equals', _id, true)
+          .getFilter()
+        updater.send(JSON.stringify({filter}))
 
 class ViewerController
   this.$inject = ['$scope', 'annotator']
