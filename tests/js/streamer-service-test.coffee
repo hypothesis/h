@@ -3,24 +3,25 @@ sinon.assert.expose assert, prefix: null
 sandbox = sinon.sandbox.create()
 
 describe 'streamer', ->
+  WebSocket = null
   fakeSock = null
   streamer = null
 
   beforeEach module('h.streamer')
 
-  beforeEach module (streamerProvider) ->
+  beforeEach module ($provide, streamerProvider) ->
+    fakeSock = {
+      send: sandbox.spy()
+      close: sandbox.spy()
+    }
+    WebSocket = sandbox.stub().returns(fakeSock)
+    $provide.decorator '$window', ($delegate) ->
+      angular.extend $delegate, {WebSocket}
     streamerProvider.url = 'http://magicstreemz/giraffe'
     return
 
   beforeEach inject (_streamer_) ->
     streamer = _streamer_
-
-  beforeEach ->
-    fakeSock = {
-      send: sandbox.spy()
-      close: sandbox.spy()
-    }
-    sandbox.stub(window, 'SockJS').returns(fakeSock)
 
   afterEach ->
     sandbox.restore()
@@ -28,13 +29,13 @@ describe 'streamer', ->
   it 'creates a socket with the correct base URL', ->
     streamer.open()
 
-    assert.calledWith(SockJS, 'http://magicstreemz/giraffe')
+    assert.calledWith(WebSocket, 'http://magicstreemz/giraffe')
 
   it 'does not open another socket while a socket is connecting', ->
     streamer.open()
     streamer.open()
 
-    assert.calledOnce(SockJS)
+    assert.calledOnce(WebSocket)
 
   it 'queues messages until the socket is open', ->
     streamer.open()
@@ -82,7 +83,7 @@ describe 'streamer', ->
 
     clock.tick(500)
 
-    assert.calledTwice(SockJS)
+    assert.calledTwice(WebSocket)
 
   it 'closes the socket when close is called', ->
     streamer.open()
@@ -104,4 +105,4 @@ describe 'streamer', ->
     fakeSock.onclose()
 
     clock.tick(500)
-    assert.calledOnce(SockJS)
+    assert.calledOnce(WebSocket)

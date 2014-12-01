@@ -57,23 +57,22 @@ class AppController
             annotator.deleteAnnotation(annotation)
 
     streamer.onmessage = (msg) ->
-      unless msg.data.type? and msg.data.type is 'annotation-notification'
+      data = JSON.parse(msg.data)
+      unless data.type? and data.type is 'annotation-notification'
         return
-      data = msg.data.payload
-      action = msg.data.options.action
+      payload = data.payload
+      action = data.options.action
 
-      unless data instanceof Array then data = [data]
+      unless payload instanceof Array then payload = [payload]
 
       p = $scope.persona
       user = if p? then "acct:" + p.username + "@" + p.provider else ''
-      unless data instanceof Array then data = [data]
+      unless payload instanceof Array then payload = [payload]
 
       if $scope.socialView.name is 'single-player'
-        owndata = data.filter (d) -> d.user is user
-        applyUpdates action, owndata
-      else
-        applyUpdates action, data
+        payload = payload.filter (d) -> d.user is user
 
+      applyUpdates action, payload
       $scope.$digest()
 
     initStore = ->

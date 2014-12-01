@@ -35,7 +35,6 @@ install_requires = [
     'clik==0.3.1',
     'deform>=0.9,<1.0',
     'elasticsearch>=1.1.0',
-    'gevent-websocket==0.3.6',
     'gnsq>=0.2.0,<0.3.0',
     'gunicorn>=19.1,<20',
     'horus>=0.9.15',
@@ -51,10 +50,10 @@ install_requires = [
     'pyramid_tm>=0.7',
     'python-dateutil>=2.1',
     'python-statsd>=1.7.0,<1.8.0',
-    'pyramid-sockjs==0.3.9',
     'pyramid_webassets>=0.9,<1.0',
     'pyramid-jinja2>=2.3.3',
     'requests>=2.2.1',
+    'ws4py>=0.3,<0.4',
 
     # Version pin for known bug
     # https://github.com/repoze/repoze.sendmail/issues/31

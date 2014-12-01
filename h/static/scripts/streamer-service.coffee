@@ -12,12 +12,13 @@ ST_OPEN = 3
 # Provides access to the streamer websocket.
 ###
 class Streamer
-  constructor: (url) ->
+  constructor: (transport, url) ->
     this.onmessage = ->
 
     this._failCount = 0
     this._queue = []
     this._state = ST_CLOSED
+    this._transport = transport
     this._url = url
 
   ###*
@@ -33,7 +34,7 @@ class Streamer
       return
 
     self = this
-    this._sock = new SockJS(this._url)
+    this._sock = new this._transport(this._url)
     this._state = ST_CONNECTING
 
     this._sock.onopen = ->
@@ -112,7 +113,9 @@ setAjaxClientId = (clientId) ->
 streamerProvider = ->
   provider = {}
   provider.url = null
-  provider.$get = -> new Streamer(provider.url)
+  provider.$get = ['$window', ($window) ->
+    new Streamer($window.WebSocket, provider.url)
+  ]
   return provider
 
 
