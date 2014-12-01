@@ -8,7 +8,7 @@
   var embed;
 
   if (isLocal && !isPDF) {
-    window.alert('Sorry, Hypothes.is doesn\'t work on this type of file. Only PDF\'s can be annotated locally.');
+    window.alert('Sorry, Hypothesis doesn\'t work on this type of file. Only PDF\'s can be annotated locally.');
     return;
   }
   if (isPDF && !hasPDFjs) {

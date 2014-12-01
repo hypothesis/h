@@ -1,5 +1,5 @@
 {
-  "name": "Hypothes.is",
+  "name": "Hypothesis",
   "version": "{{ version }}",
   "manifest_version": 2,
 

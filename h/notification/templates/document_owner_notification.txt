@@ -10,4 +10,4 @@ From:
 On {{ timestamp }} at ({{ path }})
 About {{ document_path }}
 --
-This is an annotation on your document from Hypothes.is / Annotator (URL here)
+This is an annotation on your document from Hypothesis / Annotator (URL here)

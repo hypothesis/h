@@ -1,5 +1,5 @@
-Installing Hypothes.is on OSX
-#############################
+Installing Hypothesis on OSX
+############################
 
 Run the following commands from the directory where you've cloned this repository.
 

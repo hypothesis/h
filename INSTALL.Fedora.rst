@@ -1,5 +1,5 @@
-Installing Hypothes.is on Fedora
-################################
+Installing Hypothesis on Fedora
+###############################
 
 To install the dependencies, run these commands:
 

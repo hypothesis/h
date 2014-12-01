@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# The Hypothes.is Annotation Framework documentation build configuration file, created by
+# The Hypothesis Annotation Framework documentation build configuration file, created by
 # sphinx-quickstart on Fri Oct 12 19:21:42 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'The Hypothes.is Annotation Framework'
+project = u'The Hypothesis Annotation Framework'
 copyright = u'2012, Hypothes.is Project and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -183,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'TheHypothesisAnnotationFramework.tex', u'The Hypothes.is Annotation Framework Documentation',
+  ('index', 'TheHypothesisAnnotationFramework.tex', u'The Hypothesis Annotation Framework Documentation',
    u'Hypothes.is Project and contributors', 'manual'),
 ]
 
@@ -213,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'thehypothesisannotationframework', u'The Hypothes.is Annotation Framework Documentation',
+    ('index', 'thehypothesisannotationframework', u'The Hypothesis Annotation Framework Documentation',
      [u'Hypothes.is Project and contributors'], 1)
 ]
 
@@ -227,7 +227,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'TheHypothesisAnnotationFramework', u'The Hypothes.is Annotation Framework Documentation',
+  ('index', 'TheHypothesisAnnotationFramework', u'The Hypothesis Annotation Framework Documentation',
    u'Hypothes.is Project and contributors', 'TheHypothesisAnnotationFramework', 'One line description of project.',
    'Miscellaneous'),
 ]

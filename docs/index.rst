@@ -1,10 +1,10 @@
-.. The Hypothes.is Annotation Framework documentation master file, created by
+.. The Hypothesis Annotation Framework documentation master file, created by
    sphinx-quickstart on Fri Oct 12 19:21:42 2012.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to The Hypothes.is Annotation Framework's documentation!
-================================================================
+Welcome to The Hypothesis Annotation Framework's documentation!
+===============================================================
 
 Contents:
 
