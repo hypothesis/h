@@ -1,5 +1,5 @@
-Installing Hypothes.is on Ubuntu Server 12.04.2 LTS
-###################################################
+Installing Hypothesis on Ubuntu Server 12.04.2 LTS
+##################################################
 
 To install the dependencies, run these commands:
 

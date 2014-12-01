@@ -30,7 +30,7 @@ def get_config(args):
 
 version = __version__
 description = """\
-The Hypothes.is Project Annotation System
+The Hypothesis Project Annotation System
 """
 
 command = App(

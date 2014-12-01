@@ -1,9 +1,9 @@
-Installing Hypothes.is with Vagrant
-###################################
+Installing Hypothesis with Vagrant
+##################################
 
-Running Hypothes.is on a VM enables development on Windows machines, and also provides a "clean box"
+Running Hypothesis on a VM enables development on Windows machines, and also provides a "clean box"
 for testing dependencies.  The following instructions will use Vagrant to create and manage
-a VirtualBox Ubuntu VM with Hypothes.is and all its dependencies on it.
+a VirtualBox Ubuntu VM with Hypothesis and all its dependencies on it.
 
 Install Vagrant
 ---------------

@@ -1,5 +1,5 @@
-Hypothes.is
-===========
+Hypothesis
+==========
 
 .. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
    :target: https://travis-ci.org/hypothesis/h
@@ -8,7 +8,7 @@ Hypothes.is
 About
 -----
 
-Hypothes.is brings community peer review to The Internet. It is a web
+Hypothesis brings community peer review to The Internet. It is a web
 application which enables rich annotation of web content. The project acts as
 a community aggregator for annotations and identity provider [*]_ for
 annotators. It also serves embed code for an annotation agent designed with
@@ -183,7 +183,7 @@ To build the documentation, ensure that Sphinx_ is installed and issue the
 License
 -------
 
-Hypothes.is is released under the `2-Clause BSD License`_, sometimes referred
+Hypothesis is released under the `2-Clause BSD License`_, sometimes referred
 to as the "Simplified BSD License" or the "FreeBSD License". Some third-party
 components are included. They are subject to their own licenses. All of the
 license information can be found in the included `<LICENSE>`_ file.

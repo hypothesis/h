@@ -1,5 +1,5 @@
-Installing Hypothes.is on ArchLinux
-###################################
+Installing Hypothesis on ArchLinux
+##################################
 
 Install the following packages:
 

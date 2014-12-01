@@ -1,5 +1,5 @@
-Installing Hypothes.is on Debian
-################################
+Installing Hypothesis on Debian
+###############################
 
 Currently (november 2012), the required packages are not part of the stable
 distribution; you need to fetch some stuff from the unstable ditribution.
