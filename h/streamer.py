@@ -437,7 +437,7 @@ class FilterHandler(object):
 
 class StreamerSession(Session):
     # Class attributes
-    queue = None
+    event_queue = None
     instances = weakref.WeakSet()
 
     # Instance attributes
@@ -452,22 +452,22 @@ class StreamerSession(Session):
 
     @classmethod
     def start_reader(cls, request):
-        cls.queue = gevent.queue.Queue()
+        cls.event_queue = gevent.queue.Queue()
         reader_id = 'stream-{}#ephemeral'.format(_random_id())
         reader = request.get_queue_reader('annotations', reader_id)
         reader.on_message.connect(cls.on_queue_message)
         reader.start(block=False)
-        gevent.spawn(broadcast_from_queue, cls.queue, cls.instances)
+        gevent.spawn(broadcast_from_queue, cls.event_queue, cls.instances)
 
     @classmethod
     def on_queue_message(cls, reader, message=None):
         if message is not None:
-            cls.queue.put(message)
+            cls.event_queue.put(message)
 
     def on_open(self):
         transaction.commit()  # Release the database transaction
 
-        if self.queue is None:
+        if self.event_queue is None:
             self.start_reader(self.request)
 
     def send_annotations(self):
