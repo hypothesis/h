@@ -42,7 +42,7 @@ describe 'h.directives.privacy', ->
         $element = $compile('<privacy ng-model="permissions">')($scope)
         $scope.$digest()
         $isolateScope = $element.isolateScope()
-        $isolateScope.setLevel('Public')
+        $isolateScope.setLevel(name: VISIBILITY_PUBLIC)
 
         $scope2.permissions = {read: []}
         $element = $compile('<privacy ng-model="permissions">')($scope2)
@@ -71,7 +71,7 @@ describe 'h.directives.privacy', ->
         $element = $compile('<privacy ng-model="permissions">')($scope)
         $scope.$digest()
         $isolateScope = $element.isolateScope()
-        $isolateScope.setLevel('Public')
+        $isolateScope.setLevel(name: VISIBILITY_PUBLIC)
 
         expected = VISIBILITY_PUBLIC
         stored = store.getItem VISIBILITY_KEY
@@ -94,14 +94,14 @@ describe 'h.directives.privacy', ->
           $isolateScope = $element.isolateScope()
 
         it 'sets the initial permissions based on the stored privacy level', ->
-          assert.equal $isolateScope.level, 'Public'
+          assert.equal $isolateScope.level.name, VISIBILITY_PUBLIC
 
         it 'does not alter the level on subsequent renderings', ->
           modelCtrl = $element.controller('ngModel')
           store.setItem VISIBILITY_KEY, VISIBILITY_PRIVATE
           $scope.permissions.read = ['acct:user@example.com']
           $scope.$digest()
-          assert.equal $isolateScope.level, 'Public'
+          assert.equal $isolateScope.level.name, VISIBILITY_PUBLIC
 
       describe 'when permissions.read is filled', ->
         it 'does not alter the level', ->
@@ -111,7 +111,7 @@ describe 'h.directives.privacy', ->
           $element = $compile('<privacy ng-model="permissions">')($scope)
           $scope.$digest()
           $isolateScope = $element.isolateScope()
-          assert.equal($isolateScope.level, 'Public')
+          assert.equal($isolateScope.level.name, VISIBILITY_PUBLIC)
 
       describe 'user attribute', ->
         beforeEach ->

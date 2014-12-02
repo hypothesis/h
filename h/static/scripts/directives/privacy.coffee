@@ -2,6 +2,18 @@ privacy = ['$window', ($window) ->
   VISIBILITY_KEY ='hypothesis.visibility'
   VISIBILITY_PUBLIC = 'public'
   VISIBILITY_PRIVATE = 'private'
+
+  levels = [
+    {name: VISIBILITY_PUBLIC, text: 'Public'}
+    {name: VISIBILITY_PRIVATE, text: 'Only Me'}
+  ]
+
+  getLevel = (name) ->
+    for level in levels
+      if level.name == name
+        return level
+    undefined
+
   # Detection is needed because we run often as a third party widget and
   # third party storage blocking often blocks cookies and local storage
   # https://github.com/Modernizr/Modernizr/blob/master/feature-detects/storage/localstorage.js
@@ -18,8 +30,6 @@ privacy = ['$window', ($window) ->
       setItem: (key, value) ->
         memoryStorage[key] = value
 
-  levels = ['Public', 'Only Me']
-
   link: (scope, elem, attrs, controller) ->
     return unless controller?
 
@@ -27,16 +37,16 @@ privacy = ['$window', ($window) ->
       return unless permissions?
 
       if 'group:__world__' in (permissions.read or [])
-        'Public'
+        getLevel(VISIBILITY_PUBLIC)
       else
-        'Only Me'
+        getLevel(VISIBILITY_PRIVATE)
 
     controller.$parsers.push (privacy) ->
       return unless privacy?
 
       permissions = controller.$modelValue
 
-      if privacy is 'Public'
+      if privacy.name is VISIBILITY_PUBLIC
           permissions.read = ['group:__world__']
       else
           permissions.read = [attrs.user]
@@ -49,22 +59,15 @@ privacy = ['$window', ($window) ->
 
     controller.$render = ->
       unless controller.$modelValue.read.length
-        visibility = storage.getItem VISIBILITY_KEY
-        level = if visibility is VISIBILITY_PUBLIC
-          'Public'
-        else
-          'Only Me'
+        name = storage.getItem VISIBILITY_KEY
+        level = getLevel(name)
         controller.$setViewValue level
 
       scope.level = controller.$viewValue
 
     scope.levels = levels
     scope.setLevel = (level) ->
-      visibility = if level is 'Public'
-          VISIBILITY_PUBLIC
-        else
-          VISIBILITY_PRIVATE
-      storage.setItem VISIBILITY_KEY, visibility
+      storage.setItem VISIBILITY_KEY, level.name
       controller.$setViewValue level
       controller.$render()
   require: '?ngModel'
