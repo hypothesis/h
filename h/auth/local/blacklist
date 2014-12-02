@@ -116,6 +116,7 @@ feed
 feedback
 file
 files
+finadmin
 find
 find_sources
 find_users
@@ -132,6 +133,7 @@ friend_request
 friendrequest
 friends
 ftp
+fund
 get
 gist
 goodies
@@ -175,7 +177,9 @@ irc
 issues
 job
 jobs
+join
 js
+kickstarter
 knowledgebase
 last
 law
@@ -191,6 +195,7 @@ login
 logout
 logs
 mail
+mailchimp
 mailer
 mailing
 make
@@ -238,6 +243,7 @@ panel
 partner
 partners
 password
+payrollreports
 personal
 photos
 pic
@@ -256,6 +262,7 @@ privacy
 private
 pro
 processor
+product
 profile
 project
 projects
@@ -264,6 +271,7 @@ pub
 public
 put
 random
+reg
 register
 registration
 relay
