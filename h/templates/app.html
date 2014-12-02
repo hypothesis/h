@@ -9,25 +9,25 @@
   <div class="ng-cloak topbar" ng-class="frame.visible && 'shown'">
     <div class="inner" ng-switch="persona">
       <span class="pull-right" ng-switch-when="undefined">⋯</span>
-      <a class="pull-right" href=""
-         ng-click="login()"
-         ng-switch-when="null">Sign in</a>
-      <div class="dropdown pull-right user-picker" ng-switch-default>
+      <div class="dropdown pull-right user-picker">
         <span role="button"
               class="dropdown-toggle"
               data-toggle="dropdown">{% raw %}{{ persona|persona }}{% endraw %}<!--
-          --><span class="provider">/{% raw %}{{ persona|persona:'provider' }}{% endraw %}</span><!--
+          --><span class="provider" ng-show="persona">/{% raw %}{{ persona|persona:'provider' }}{% endraw %}</span><!--
           --><i class="h-icon-triangle"></i></span>
         <ul class="dropdown-menu pull-right" role="menu">
-          <li><a href="" ng-click="dialog.visible='true'">Account</a></li>
-          <li><a href="http://hypothes.is/contact/"
+          <li ng-show="persona"><a href="" ng-click="dialog.visible='true'">Account</a></li>
+          <li><a href="mailto:support@hypothes.is"
                  target="_blank">Feedback</a></li>
           <li><a href="/docs/help" target="_blank">Help</a></li>
-          <li><a href="/stream?q=user:{% raw %}{{ persona|persona }}{% endraw %}"
+          <li ng-show="persona"><a href="/stream?q=user:{% raw %}{{ persona|persona }}{% endraw %}"
                  target="_blank">My Annotations</a></li>
-          <li ng-click="logout()">Sign out</li>
+          <li ng-show="persona" ng-click="logout()">Sign out</li>
         </ul>
       </div>
+      <a class="pull-right" href=""
+         ng-click="login()"
+         ng-switch-when="null">Sign in</a>
 
       <!-- Searchbar -->
       <div class="simple-search"
