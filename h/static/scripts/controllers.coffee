@@ -337,7 +337,7 @@ class ViewerController
         highlights = []
       for p in annotator.providers
         p.channel.notify
-          method: 'setFocusedHighlights'
+          method: 'focusAnnotations'
           params: highlights
 
     $scope.scrollTo = (annotation) ->
@@ -353,7 +353,7 @@ class ViewerController
       else
         true
 
-    $scope.isFocused = (annotation) ->
+    $scope.hasFocus = (annotation) ->
       annotation?.$$tag in ($scope.focusedAnnotations ? [])
 
 angular.module('h')
