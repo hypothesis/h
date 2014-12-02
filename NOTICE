@@ -55,3 +55,7 @@ This product also includes the following third-party components:
  * Autofill event polyfill (https://github.com/tbosch/autofill-event)
 
    Copyright 2014 Google, Inc.
+
+ * KaTex (http://khan.github.io/KaTeX/)
+
+   Copyright (c) 2014 Khan Academy
