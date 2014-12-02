@@ -172,11 +172,6 @@ class AppController
         annotator.addPlugin 'Permissions',
           user: token.userId
           userAuthorize: authorizeAction
-          permissions:
-            read: [token.userId]
-            update: [token.userId]
-            delete: [token.userId]
-            admin: [token.userId]
         $scope.$apply ->
           $scope.persona = token.userId
           reset()

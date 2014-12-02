@@ -1,47 +1,3 @@
-privacy = ->
-  levels = ['Public', 'Only Me']
-
-  link: (scope, elem, attrs, controller) ->
-    return unless controller?
-
-    controller.$formatters.push (permissions) ->
-      return unless permissions?
-
-      if 'group:__world__' in (permissions.read or [])
-        'Public'
-      else
-        'Only Me'
-
-    controller.$parsers.push (privacy) ->
-      return unless privacy?
-
-      permissions = controller.$modelValue
-      if privacy is 'Public'
-        if permissions.read
-          unless 'group:__world__' in permissions.read
-            permissions.read.push 'group:__world__'
-        else
-          permissions.read = ['group:__world__']
-      else
-        read = permissions.read or []
-        read = (role for role in read when role isnt 'group:__world__')
-        permissions.read = read
-
-      permissions
-
-    controller.$render = ->
-      scope.level = controller.$viewValue
-
-    scope.levels = levels
-    scope.setLevel = (level) ->
-      controller.$setViewValue level
-      controller.$render()
-  require: '?ngModel'
-  restrict: 'E'
-  scope: {}
-  templateUrl: 'privacy.html'
-
-
 repeatAnim = ->
   restrict: 'A'
   scope:
@@ -95,7 +51,6 @@ match = ->
 
 
 angular.module('h')
-.directive('privacy', privacy)
 .directive('repeatAnim', repeatAnim)
 .directive('whenscrolled', whenscrolled)
 .directive('match', match)
