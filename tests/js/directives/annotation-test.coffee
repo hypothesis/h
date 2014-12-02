@@ -2,6 +2,8 @@ assert = chai.assert
 sandbox = sinon.sandbox.create()
 
 describe 'h.directives.annotation', ->
+  $compile = null
+  $document = null
   $scope = null
   $timeout = null
   annotator = null
@@ -10,8 +12,11 @@ describe 'h.directives.annotation', ->
   flash = null
 
   beforeEach module('h')
+  beforeEach module('h.templates')
 
-  beforeEach inject ($controller, $rootScope, _$timeout_) ->
+  beforeEach inject (_$compile_, $controller, _$document_, $rootScope, _$timeout_) ->
+    $compile = _$compile_
+    $document = _$document_
     $timeout = _$timeout_
     $scope = $rootScope.$new()
     $scope.annotationGet = (locals) -> annotation
@@ -262,3 +267,23 @@ describe 'h.directives.annotation', ->
         $scope.$destroy()
         $timeout.flush()
         $timeout.verifyNoPendingTasks()
+
+    describe 'share', ->
+      $element = null
+      $isolateScope = null
+      dialog = null
+
+      beforeEach ->
+        template = '<div annotation="annotation">'
+        $scope.annotation = annotation
+        $element = $compile(template)($scope)
+        $scope.$digest()
+        $isolateScope = $element.isolateScope()
+        dialog = $element.find('.share-dialog-wrapper')
+
+      it 'sets and unsets the open class on the share wrapper', ->
+        $element.find('a').filter(-> this.title == 'Share').click()
+        $isolateScope.$digest()
+        assert.ok(dialog.hasClass('open'))
+        $document.click()
+        assert.notOk(dialog.hasClass('open'))
