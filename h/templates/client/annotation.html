@@ -117,7 +117,7 @@
     ng-click="vm.reply()"
     ><i class="h-icon-reply"></i> Reply</a>
   <span class="magicontrol share-dialog-wrapper">
-    <a class="small dropdown-toggle" href="" title="Share"
+    <a class="small" href="" title="Share" ng-click="share($event)"
       ><i class="h-icon-export"></i> Share</a>
     <span class="share-dialog" ng-click="$event.stopPropagation()">
       <a class="h-icon-export"

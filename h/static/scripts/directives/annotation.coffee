@@ -302,8 +302,8 @@ AnnotationController = [
 # an embedded widget.
 ###
 annotation = [
-  'annotator',
-  (annotator) ->
+  '$document', 'annotator',
+  ($document,   annotator) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
       # Helper function to remove the temporary thread created for a new reply.
       prune = (message) ->
@@ -326,6 +326,12 @@ annotation = [
           event.preventDefault()
           scope.$evalAsync ->
             ctrl.save()
+
+      scope.share = (event) ->
+        scope.$evalAsync ->
+          $container = angular.element(event.target).parent()
+          $container.addClass('open').find('input').focus().select()
+          $document.one('click', (event) -> $container.removeClass('open'))
 
       # Keep track of edits going on in the thread.
       if counter?
