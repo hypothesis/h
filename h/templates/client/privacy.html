@@ -3,15 +3,15 @@
         role="button"
         class="dropdown-toggle"
         data-toggle="dropdown">
-        <i class="small" ng-class="{'h-icon-earth': level.name == 'public',
-                                    'h-icon-locked': level.name == 'private'}"></i>
+        <i class="small" ng-class="{'h-icon-earth': isPublic(level.name),
+                                    'h-icon-locked': !isPublic(level.name)}"></i>
         {{level.text}}
         <i class="h-icon-triangle"></i>
   </span>
   <ul class="dropdown-menu" role="menu">
     <li ng-repeat="level in levels" ng-click="setLevel(level)">
-      <i class="small" ng-class="{'h-icon-earth': level.name == 'public',
-                                  'h-icon-locked': level.name == 'private'}"></i>
+      <i class="small" ng-class="{'h-icon-earth': isPublic(level.name),
+                                  'h-icon-locked': !isPublic(level.name)}"></i>
       {{level.text}}
     </li>
   </ul>

@@ -14,6 +14,8 @@ privacy = ['$window', ($window) ->
         return level
     undefined
 
+  isPublic  = (level) -> level == VISIBILITY_PUBLIC
+
   # Detection is needed because we run often as a third party widget and
   # third party storage blocking often blocks cookies and local storage
   # https://github.com/Modernizr/Modernizr/blob/master/feature-detects/storage/localstorage.js
@@ -46,7 +48,7 @@ privacy = ['$window', ($window) ->
 
       permissions = controller.$modelValue
 
-      if privacy.name is VISIBILITY_PUBLIC
+      if isPublic(privacy.name)
           permissions.read = ['group:__world__']
       else
           permissions.read = [attrs.user]
@@ -70,6 +72,8 @@ privacy = ['$window', ($window) ->
       storage.setItem VISIBILITY_KEY, level.name
       controller.$setViewValue level
       controller.$render()
+    scope.isPublic = isPublic
+
   require: '?ngModel'
   restrict: 'E'
   scope: {}
