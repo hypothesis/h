@@ -6,8 +6,9 @@ $threadexp-width: .6em;
     margin-bottom: .72em;
   }
 
-  .card-emphasis {
-    box-shadow: 6px 6px 8px -2px $gray-light;
+  & > li.thread:hover,
+  & > li.thread.js-hover {
+    @include focus-outline;
   }
 }
 

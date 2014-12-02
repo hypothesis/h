@@ -353,6 +353,8 @@ class ViewerController
       else
         true
 
+    $scope.isFocused = (annotation) ->
+      annotation?.$$tag in ($scope.focusedAnnotations ? [])
 
 angular.module('h')
 .controller('AppController', AppController)
