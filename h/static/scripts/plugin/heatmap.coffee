@@ -320,14 +320,14 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
         bucket = @tabs.index(event.currentTarget)
         for hl in @annotator.getHighlights()
           if hl.annotation in @buckets[bucket]
-            hl.setFocus true
+            hl.setFocused true
           else
-            hl.setFocus false
+            hl.setFocused false
 
       # Gets rid of them after
       .on 'mouseout', =>
         for hl in @annotator.getHighlights()
-          hl.setFocus false
+          hl.setFocused false
 
       # Does one of a few things when a tab is clicked depending on type
       .on 'click', (event) =>
