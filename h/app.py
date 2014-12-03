@@ -8,7 +8,7 @@ def create_app(settings):
 
 
 def main(global_config, **settings):
-    from . import config
+    from h import config
     environ_config = config.settings_from_environment()
     settings.update(environ_config)  # from environment variables
     settings.update(global_config)   # from paste [DEFAULT] + command line

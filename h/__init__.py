@@ -7,7 +7,7 @@ __version__ = get_versions()['version']
 del get_versions
 
 from .app import main
-__all__ = [main]
+__all__ = ['main']
 
 
 def includeme(config):
