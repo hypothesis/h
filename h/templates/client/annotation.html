@@ -23,7 +23,7 @@
     <!-- Editing controls -->
     <aside class="pull-right" ng-if="vm.editing">
       <privacy ng-click="$event.stopPropagation()"
-               ng-if="vm.editing && action != 'delete'"
+               ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
                ng-model="vm.annotation.permissions"
                user="{{vm.annotation.user}}"
                class="dropdown privacy pull-right"
