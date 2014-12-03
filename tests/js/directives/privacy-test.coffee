@@ -29,6 +29,7 @@ describe 'h.directives.privacy', ->
 
     afterEach ->
       sandbox.restore()
+
     describe 'has memory fallback', ->
       $scope2 = null
 
