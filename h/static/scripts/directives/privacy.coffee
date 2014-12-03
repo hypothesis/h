@@ -31,6 +31,8 @@ privacy = ['$window', ($window) ->
         if key of memoryStorage then memoryStorage[key] else null
       setItem: (key, value) ->
         memoryStorage[key] = value
+      removeItem: (key) ->
+        delete memoryStorage[key]
 
   link: (scope, elem, attrs, controller) ->
     return unless controller?
