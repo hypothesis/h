@@ -344,7 +344,7 @@ class ViewerController
       if angular.isObject annotation
         for p in annotator.providers
           p.channel.notify
-            method: 'scrollTo'
+            method: 'scrollToAnnotation'
             params: annotation.$$tag
 
     $scope.shouldShowThread = (container) ->
