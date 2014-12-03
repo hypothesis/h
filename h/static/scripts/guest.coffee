@@ -22,8 +22,6 @@ class Annotator.Guest extends Annotator
     TextPosition: {}
     TextQuote: {}
     FuzzyTextAnchors: {}
-    PDF: {}
-    Document: {}
 
   # Internal state
   tool: 'comment'
@@ -37,8 +35,14 @@ class Annotator.Guest extends Annotator
     super
     delete @options.noScan
 
+    # Are going to be able to use the PDF plugin here?
     if window.PDFTextMapper?.applicable()
-      delete @options.Document
+      # If we can, let's load the PDF plugin.
+      @options.PDF = {}
+    else
+      # If we can't use the PDF plugin,
+      # let's load the Document plugin instead.
+      @options.Document = {}
 
     @frame = $('<div></div>')
     .appendTo(@wrapper)
