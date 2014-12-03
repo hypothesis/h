@@ -230,17 +230,17 @@ class Annotator.Guest extends Annotator
 
   showAnnotations: (annotations) =>
     @panel?.notify
-      method: "showViewer"
+      method: "showAnnotations"
       params: (a.$$tag for a in annotations)
 
   toggleAnnotationSelection: (annotations) =>
     @panel?.notify
-      method: "toggleViewerSelection"
+      method: "toggleAnnotationSelection"
       params: (a.$$tag for a in annotations)
 
   updateAnnotations: (annotations) =>
     @panel?.notify
-      method: "updateViewer"
+      method: "updateAnnotations"
       params: (a.$$tag for a in annotations)
 
   showEditor: (annotation) =>

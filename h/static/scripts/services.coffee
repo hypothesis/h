@@ -154,12 +154,12 @@ class Hypothesis extends Annotator
         this.showEditor this._getLocalAnnotation(tag)
     )
 
-    .bind('showViewer', (ctx, tags=[]) =>
+    .bind('showAnnotations', (ctx, tags=[]) =>
       @element.scope().$apply =>
         this.showViewer this._getLocalAnnotations(tags)
     )
 
-    .bind('updateViewer', (ctx, tags=[]) =>
+    .bind('updateAnnotations', (ctx, tags=[]) =>
       @element.scope().$apply =>
         this.updateViewer this._getLocalAnnotations(tags)
     )
@@ -169,7 +169,7 @@ class Hypothesis extends Annotator
         this.focusAnnotations tags
     )
 
-    .bind('toggleViewerSelection', (ctx, tags=[]) =>
+    .bind('toggleAnnotationSelection', (ctx, tags=[]) =>
       @element.scope().$apply =>
         this.toggleViewerSelection this._getLocalAnnotations(tags)
     )
