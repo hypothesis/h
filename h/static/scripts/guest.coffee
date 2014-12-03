@@ -151,7 +151,7 @@ class Annotator.Guest extends Annotator
           hl.setFocused false
     )
 
-    .bind('scrollTo', (ctx, tag) =>
+    .bind('scrollToAnnotation', (ctx, tag) =>
       for hl in @getHighlights()
         if hl.annotation.$$tag is tag
           hl.scrollTo()
@@ -228,17 +228,17 @@ class Annotator.Guest extends Annotator
     this.plugins.Bridge.sync([annotation])
     annotation
 
-  showViewer: (annotations) =>
+  showAnnotations: (annotations) =>
     @panel?.notify
       method: "showViewer"
       params: (a.$$tag for a in annotations)
 
-  toggleViewerSelection: (annotations) =>
+  toggleAnnotationSelection: (annotations) =>
     @panel?.notify
       method: "toggleViewerSelection"
       params: (a.$$tag for a in annotations)
 
-  updateViewer: (annotations) =>
+  updateAnnotations: (annotations) =>
     @panel?.notify
       method: "updateViewer"
       params: (a.$$tag for a in annotations)
@@ -290,10 +290,10 @@ class Annotator.Guest extends Annotator
 
     if toggle
       # Tell sidebar to add these annotations to the sidebar
-      this.toggleViewerSelection annotations
+      this.toggleAnnotationSelection annotations
     else
       # Tell sidebar to show the viewer for these annotations
-      this.showViewer annotations
+      this.showAnnotations annotations
 
   # When hovering on a highlight in highlighting mode,
   # tell the sidebar to hilite the relevant annotations

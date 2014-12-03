@@ -351,7 +351,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     this._buildTabs(@tabs, @buckets)
 
     if @dynamicBucket
-      @annotator.updateViewer this._getDynamicBucket()
+      @annotator.updateAnnotations this._getDynamicBucket()
 
   _buildTabs: ->
     @tabs.each (d, el) =>
@@ -395,4 +395,4 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
   # Simulate clicking on the comments tab
   commentClick: =>
     @dynamicBucket = false
-    annotator.showViewer @buckets[@_getCommentBucket()]
+    annotator.showAnnotations @buckets[@_getCommentBucket()]
