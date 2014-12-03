@@ -18,11 +18,12 @@ from pyramid.view import render_view
 from pyramid_basemodel import bind_engine
 from sqlalchemy import engine_from_config
 
-from h import __version__, api, reindexer
+from h import __version__, api, config, reindexer
 
 
 def get_config(args):
     settings = get_appsettings(args[0])
+    settings.update(config.settings_from_environment())
     settings['basemodel.should_create_all'] = False
     settings['basemodel.should_drop_all'] = False
     settings['pyramid.includes'] = []
