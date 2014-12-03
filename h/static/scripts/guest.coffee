@@ -37,7 +37,7 @@ class Annotator.Guest extends Annotator
     super
     delete @options.noScan
 
-    if window.PDFJS
+    if window.PDFTextMapper?.applicable()
       delete @options.Document
 
     @frame = $('<div></div>')
