@@ -6,6 +6,7 @@ describe 'h.directives.annotation', ->
   $document = null
   $scope = null
   $timeout = null
+  rootScope = null
   annotator = null
   annotation = null
   createController = null
@@ -20,6 +21,7 @@ describe 'h.directives.annotation', ->
     $timeout = _$timeout_
     $scope = $rootScope.$new()
     $scope.annotationGet = (locals) -> annotation
+    rootScope = $rootScope
     annotator = {plugins: {}, publish: sandbox.spy()}
     annotation =
       id: 'deadbeef'
@@ -45,6 +47,7 @@ describe 'h.directives.annotation', ->
     beforeEach ->
       controller = createController()
 
+      rootScope.persona = 'acct:bill@localhost'
       annotation.permissions =
         read: ['acct:joe@localhost']
         update: ['acct:joe@localhost']
@@ -70,10 +73,17 @@ describe 'h.directives.annotation', ->
       newAnnotation = annotator.publish.lastCall.args[1]
       assert.include(newAnnotation.permissions.read, 'group:__world__')
 
-    it 'does not add the world readable principal if the parent is privace', ->
+    it 'does not add the world readable principal if the parent is private', ->
       controller.reply()
       newAnnotation = annotator.publish.lastCall.args[1]
       assert.notInclude(newAnnotation.permissions.read, 'group:__world__')
+
+    it 'fills the other permissions too', ->
+      controller.reply()
+      newAnnotation = annotator.publish.lastCall.args[1]
+      assert.equal(newAnnotation.permissions.update[0], 'acct:bill@localhost')
+      assert.equal(newAnnotation.permissions.delete[0], 'acct:bill@localhost')
+      assert.equal(newAnnotation.permissions.admin[0], 'acct:bill@localhost')
 
   describe '#render', ->
     controller = null
