@@ -1,6 +1,8 @@
 (function (h) {
   'use strict';
 
+  var TAB_STATUS_COMPLETE = 'complete';
+
   /* The main extension application. This wires together all the smaller
    * modules. The app listens to all new created/updated/removed tab events
    * and uses the TabState object to keep track of whether the sidebar is
@@ -118,7 +120,7 @@
     function onTabUpdated(tabId, changeInfo, tab) {
       // This function will be called multiple times as the tab reloads.
       // https://developer.chrome.com/extensions/tabs#event-onUpdated
-      if (changeInfo.status !== 'complete') {
+      if (changeInfo.status !== TAB_STATUS_COMPLETE) {
         return;
       }
 
@@ -144,6 +146,11 @@
     }
 
     function updateTabDocument(tab) {
+      // If the tab has not yet finished loading then just quietly return.
+      if (tab.status !== TAB_STATUS_COMPLETE) {
+        return Promise.resolve();
+      }
+
       if (state.isTabActive(tab.id)) {
         return sidebar.injectIntoTab(tab).catch(function (err) {
           tabErrors.setTabError(tab.id, err);
