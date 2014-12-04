@@ -141,10 +141,10 @@ class Annotator.Guest extends Annotator
     .bind('onEditorSubmit', this.onEditorSubmit)
 
     .bind('setDynamicBucketMode', (ctx, value) =>
-      return unless @plugins.Heatmap
-      return if @plugins.Heatmap.dynamicBucket is value
-      @plugins.Heatmap.dynamicBucket = value
-      if value then @plugins.Heatmap._update()
+      return unless @plugins.BucketBar
+      return if @plugins.BucketBar.dynamicBucket is value
+      @plugins.BucketBar.dynamicBucket = value
+      if value then @plugins.BucketBar._update()
     )
 
     .bind('focusAnnotations', (ctx, tags=[]) =>
@@ -183,10 +183,6 @@ class Annotator.Guest extends Annotator
 
     .bind('setVisibleHighlights', (ctx, state) =>
       this.publish 'setVisibleHighlights', state
-    )
-
-    .bind('updateHeatmap', =>
-      @plugins.Heatmap._scheduleUpdate()
     )
 
   _setupWrapper: ->
@@ -290,7 +286,7 @@ class Annotator.Guest extends Annotator
   # toggle: should this toggle membership in an existing selection?
   selectAnnotations: (annotations, toggle) =>
     # Switch off dynamic mode; we are going to "Selection" scope
-    @plugins.Heatmap.dynamicBucket = false
+    @plugins.BucketBar.dynamicBucket = false
 
     if toggle
       # Tell sidebar to add these annotations to the sidebar

@@ -42,9 +42,9 @@ class Annotator.Host extends Annotator.Guest
       this.setTool('comment')
       this.setVisibleHighlights(!!options.showHighlights)
 
-    if @plugins.Heatmap?
+    if @plugins.BucketBar?
       this._setupDragEvents()
-      @plugins.Heatmap.element.on 'click', (event) =>
+      @plugins.BucketBar.element.on 'click', (event) =>
         if @frame.hasClass 'annotator-collapsed'
           this.showFrame()
 
@@ -118,7 +118,7 @@ class Annotator.Host extends Annotator.Guest
       @drag.enabled = false
       @drag.last = null
 
-    for handle in [@plugins.Heatmap.element[0], @plugins.Toolbar.buttons[0]]
+    for handle in [@plugins.BucketBar.element[0], @plugins.Toolbar.buttons[0]]
       handle.draggable = true
       handle.addEventListener 'dragstart', dragStart
       handle.addEventListener 'dragend', dragEnd

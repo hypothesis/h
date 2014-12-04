@@ -84,16 +84,16 @@ annotator_bridge:
   output: scripts/plugin/bridge.js
   contents:
     - h:static/scripts/plugin/bridge.coffee
+annotator_bucket_bar:
+  filters: coffeescript, uglifyjs
+  output: scripts/plugin/bucket-bar.js
+  contents:
+    - h:static/scripts/plugin/bucket-bar.coffee
 annotator_discovery:
   filters: coffeescript, uglifyjs
   output: scripts/plugin/discovery.js
   contents:
     - h:static/scripts/plugin/discovery.coffee
-annotator_heatmap:
-  filters: coffeescript, uglifyjs
-  output: scripts/plugin/heatmap.js
-  contents:
-    - h:static/scripts/plugin/heatmap.coffee
 annotator_threading:
   filters: coffeescript, uglifyjs
   output: scripts/plugin/threading.js
@@ -362,8 +362,8 @@ inject_js:
     - gettext
     - annotator
     - annotator_bridge
+    - annotator_bucket_bar
     - annotator_document
-    - annotator_heatmap
     - annotator_fuzzytextanchors
     - annotator_textrange
     - annotator_textposition
@@ -392,7 +392,7 @@ inject_css:
         - h:static/styles/inject.scss
       depends:
         - h:static/styles/base.scss
-        - h:static/styles/pointers.scss
+        - h:static/styles/bucket-bar.scss
         - h:static/styles/reset.scss
 
 
