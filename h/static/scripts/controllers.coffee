@@ -26,12 +26,12 @@ authorizeAction = (action, annotation, user) ->
 
 class AppController
   this.$inject = [
-    '$location', '$q', '$route', '$scope', '$timeout',
+    '$location', '$q', '$rootScope', '$route', '$scope', '$timeout',
     'annotator', 'flash', 'identity', 'socket', 'streamfilter',
     'documentHelpers', 'drafts'
   ]
   constructor: (
-     $location,   $q,   $route,   $scope,   $timeout,
+     $location,   $q, $rootScope,   $route,   $scope,   $timeout,
      annotator,   flash,   identity,   socket,   streamfilter,
      documentHelpers,   drafts
   ) ->
@@ -61,7 +61,7 @@ class AppController
       Store = plugins.Store
       delete plugins.Store
 
-      if $scope.persona or annotator.socialView.name is 'none'
+      if $rootScope.persona or annotator.socialView.name is 'none'
         annotator.addPlugin 'Store', annotator.options.Store
 
         $scope.store = plugins.Store
@@ -86,7 +86,7 @@ class AppController
       Store.updateAnnotation = angular.noop
 
       # Sort out which annotations should remain in place.
-      user = $scope.persona
+      user = $rootScope.persona
       view = annotator.socialView.name
       cull = (acc, annotation) ->
         if view is 'single-player' and annotation.user != user
@@ -144,7 +144,7 @@ class AppController
 
         unless data instanceof Array then data = [data]
 
-        p = $scope.persona
+        p = $rootScope.persona
         user = if p? then "acct:" + p.username + "@" + p.provider else ''
         unless data instanceof Array then data = [data]
 
@@ -173,7 +173,7 @@ class AppController
           user: token.userId
           userAuthorize: authorizeAction
         $scope.$apply ->
-          $scope.persona = token.userId
+          $rootScope.persona = token.userId
           reset()
 
     onlogout = ->
@@ -185,15 +185,15 @@ class AppController
       plugins.Permissions?.destroy()
       delete plugins.Permissions
 
-      $scope.persona = null
+      $rootScope.persona = null
       checkingToken = false
       reset()
 
     onready = ->
-      if not checkingToken and typeof $scope.persona == 'undefined'
+      if not checkingToken and typeof $rootScope.persona == 'undefined'
         # If we're not checking the token and persona is undefined, onlogin
         # hasn't run, which means we aren't authenticated.
-        $scope.persona = null
+        $rootScope.persona = null
         reset()
 
         if isFirstRun
@@ -218,7 +218,7 @@ class AppController
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
       initStore()
-      if newValue is 'single-player' and not $scope.persona
+      if newValue is 'single-player' and not $rootScope.persona
         annotator.show()
         flash 'info',
           'You will need to sign in for your highlights to be saved.'
