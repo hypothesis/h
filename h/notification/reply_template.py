@@ -15,7 +15,7 @@ from h.notification import types
 from h.notification.models import Subscriptions
 from h.notification.gateway import user_name, \
     user_profile_url, standalone_url, get_user_by_name
-from h.notification.types import ROOT_PATH
+from h.notification.types import ROOT_PATH, REPLY_TYPE
 from h.events import LoginEvent, AnnotationEvent
 from h.models import Annotation
 
@@ -48,10 +48,11 @@ def create_template_map(request, reply, data):
     parent_user = user_name(data['parent']['user'])
     reply_user = user_name(reply['user'])
 
-    seq = ('http://', str(request.domain),
-           '/app?__formid__=unsubscribe&subscription_id=',
-           str(data['subscription']['id']))
-    unsubscribe = "".join(seq)
+    token = request.registry.notification_serializer.dumps({
+        'type': REPLY_TYPE,
+        'uri': data['parent']['user'],
+    })
+    unsubscribe = request.route_url('unsubscribe', token=token)
 
     return {
         'document_title': document_title,
