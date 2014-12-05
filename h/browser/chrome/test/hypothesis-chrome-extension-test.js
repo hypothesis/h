@@ -168,28 +168,31 @@ describe('HypothesisChromeExtension', function () {
     });
 
     describe('when a tab is updated', function () {
+      function createTab() {
+        return {id: 1, url: 'http://example.com/foo.html', status: 'complete'};
+      }
+
       beforeEach(function () {
         fakeTabState.restorePreviousState = sandbox.spy();
-
         ext.listen({addEventListener: sandbox.stub()});
       });
 
       it('injects the sidebar if the tab is active', function () {
-        var tab = {id: 1, url: 'http://example.com/foo.html'};
+        var tab = createTab();
         fakeTabState.isTabActive.withArgs(1).returns(true);
         onUpdatedHandler(tab.id, {status: 'complete'}, tab);
         sinon.assert.calledWith(fakeSidebarInjector.injectIntoTab, tab);
       });
 
       it('removes the sidebar if inactive', function () {
-        var tab = {id: 1, url: 'http://example.com/foo.html'};
+        var tab = {id: 1, url: 'http://example.com/foo.html', status: 'complete'};
         fakeTabState.isTabInactive.withArgs(1).returns(true);
         onUpdatedHandler(tab.id, {status: 'complete'}, tab);
         sinon.assert.calledWith(fakeSidebarInjector.removeFromTab, tab);
       });
 
       it('updates the browser action to the active state when active', function () {
-        var tab = {id: 1, url: 'http://example.com/foo.html'};
+        var tab = createTab();
         fakeTabState.isTabActive.withArgs(1).returns(true);
         onUpdatedHandler(tab.id, {status: 'complete'}, tab);
         sinon.assert.called(fakeBrowserAction.activate);
@@ -197,21 +200,21 @@ describe('HypothesisChromeExtension', function () {
       });
 
       it('updates the browser action to the inactive state when inactive', function () {
-        var tab = {id: 1, url: 'http://example.com/foo.html'};
+        var tab = createTab();
         fakeTabState.isTabActive.withArgs(1).returns(false);
         onUpdatedHandler(tab.id, {status: 'complete'}, tab);
         sinon.assert.calledWith(fakeBrowserAction.deactivate, tab.id);
       });
 
       it('restores the tab state if errored', function () {
-        var tab = {id: 1, url: 'http://example.com/foo.html'};
+        var tab = createTab();
         fakeTabState.isTabErrored.returns(true);
         onUpdatedHandler(tab.id, {status: 'complete'}, tab);
         sinon.assert.calledWith(fakeTabState.restorePreviousState, 1);
       });
 
       it('does nothing until the tab status is complete', function () {
-        var tab = {id: 1, url: 'http://example.com/foo.html'};
+        var tab = createTab();
         fakeTabState.isTabActive.withArgs(1).returns(true);
         onUpdatedHandler(tab.id, {status: 'loading'}, tab);
         sinon.assert.notCalled(fakeSidebarInjector.injectIntoTab);
@@ -333,9 +336,11 @@ describe('HypothesisChromeExtension', function () {
 
   describe('TabState.onchange', function () {
     var onChangeHandler;
+    var tab;
 
     beforeEach(function () {
-      fakeChromeTabs.get = sandbox.stub().yields({id: 1});
+      tab = {id: 1, status: 'complete'};
+      fakeChromeTabs.get = sandbox.stub().yields(tab);
       onChangeHandler = h.TabState.lastCall.args[1];
     });
 
@@ -358,13 +363,13 @@ describe('HypothesisChromeExtension', function () {
     it('injects the sidebar if the tab has been activated', function () {
       fakeTabState.isTabActive.returns(true);
       onChangeHandler(1, 'active', 'inactive');
-      sinon.assert.calledWith(fakeSidebarInjector.injectIntoTab, {id: 1});
+      sinon.assert.calledWith(fakeSidebarInjector.injectIntoTab, tab);
     });
 
     it('removes the sidebar if the tab has been deactivated', function () {
       fakeTabState.isTabInactive.returns(true);
       onChangeHandler(1, 'inactive', 'active');
-      sinon.assert.calledWith(fakeSidebarInjector.removeFromTab, {id: 1});
+      sinon.assert.calledWith(fakeSidebarInjector.removeFromTab, tab);
     });
 
     it('does nothing with the sidebar if the tab is errored', function () {
@@ -372,6 +377,12 @@ describe('HypothesisChromeExtension', function () {
       onChangeHandler(1, 'errored', 'inactive');
       sinon.assert.notCalled(fakeSidebarInjector.injectIntoTab);
       sinon.assert.notCalled(fakeSidebarInjector.removeFromTab);
+    });
+
+    it('does nothing if the tab is still loading', function () {
+      fakeChromeTabs.get = sandbox.stub().yields({id: 1, status: 'loading'});
+      onChangeHandler(1, 'active', 'inactive');
+      sinon.assert.notCalled(fakeSidebarInjector.injectIntoTab);
     });
 
     it('removes the tab from the store if the tab was closed', function () {
@@ -382,14 +393,14 @@ describe('HypothesisChromeExtension', function () {
 
     describe('when a tab with an error is updated', function () {
       it('resets the tab error state when no longer errored', function () {
-        var tab = {id: 1, url: 'file://foo.html'};
+        var tab = {id: 1, url: 'file://foo.html', status: 'complete'};
         onChangeHandler(1, 'active', 'errored');
         sinon.assert.called(fakeTabErrorCache.unsetTabError);
         sinon.assert.calledWith(fakeTabErrorCache.unsetTabError, 1);
       });
 
       it('resets the tab error state when the tab is closed', function () {
-        var tab = {id: 1, url: 'file://foo.html'};
+        var tab = {id: 1, url: 'file://foo.html', status: 'complete'};
         onChangeHandler(1, null, 'errored');
         sinon.assert.called(fakeTabErrorCache.unsetTabError);
         sinon.assert.calledWith(fakeTabErrorCache.unsetTabError, 1);
