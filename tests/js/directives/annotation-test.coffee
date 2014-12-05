@@ -6,14 +6,21 @@ describe 'h.directives.annotation', ->
   $document = null
   $scope = null
   $timeout = null
-  rootScope = null
   annotator = null
   annotation = null
   createController = null
   flash = null
+  fakeUser = null
 
   beforeEach module('h')
   beforeEach module('h.templates')
+
+  beforeEach module ($provide) ->
+    fakeUser =
+      getPersona: (-> 'acct:bill@localhost')
+
+    $provide.value 'user', fakeUser
+    return
 
   beforeEach inject (_$compile_, $controller, _$document_, $rootScope, _$timeout_) ->
     $compile = _$compile_
@@ -21,7 +28,6 @@ describe 'h.directives.annotation', ->
     $timeout = _$timeout_
     $scope = $rootScope.$new()
     $scope.annotationGet = (locals) -> annotation
-    rootScope = $rootScope
     annotator = {plugins: {}, publish: sandbox.spy()}
     annotation =
       id: 'deadbeef'
@@ -47,7 +53,6 @@ describe 'h.directives.annotation', ->
     beforeEach ->
       controller = createController()
 
-      rootScope.persona = 'acct:bill@localhost'
       annotation.permissions =
         read: ['acct:joe@localhost']
         update: ['acct:joe@localhost']
