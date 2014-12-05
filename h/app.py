@@ -4,6 +4,7 @@ from pyramid.config import Configurator
 
 def create_app(settings):
     config = Configurator(settings=settings)
+    config.include('h')
     return config.make_wsgi_app()
 
 
