@@ -1,43 +1,16 @@
-# User authorization function for the Permissions plugin.
-authorizeAction = (action, annotation, user) ->
-  if annotation.permissions
-    tokens = annotation.permissions[action] || []
-
-    if tokens.length == 0
-      # Empty or missing tokens array: only admin can perform action.
-      return false
-
-    for token in tokens
-      if user == token
-        return true
-      if token == 'group:__world__'
-        return true
-
-    # No tokens matched: action should not be performed.
-    return false
-
-  # Coarse-grained authorization
-  else if annotation.user
-    return user and user == annotation.user
-
-  # No authorization info on annotation: free-for-all!
-  true
-
-
 class AppController
   this.$inject = [
     '$location', '$route', '$scope', '$timeout',
     'annotator', 'flash', 'identity', 'streamer', 'streamfilter',
-    'documentHelpers', 'drafts'
+    'documentHelpers', 'drafts', 'user'
   ]
   constructor: (
      $location,   $route,   $scope,   $timeout,
      annotator,   flash,   identity,   streamer,   streamfilter,
-     documentHelpers,   drafts
+     documentHelpers,   drafts, user
   ) ->
     {plugins, host, providers} = annotator
 
-    checkingToken = false
     isFirstRun = $location.search().hasOwnProperty('firstrun')
 
     applyUpdates = (action, data) ->
@@ -81,7 +54,7 @@ class AppController
       Store = plugins.Store
       delete plugins.Store
 
-      if $rootScope.persona or annotator.socialView.name is 'none'
+      if user.getPersona() or annotator.socialView.name is 'none'
         annotator.addPlugin 'Store', annotator.options.Store
 
         $scope.store = plugins.Store
@@ -106,12 +79,12 @@ class AppController
       Store.updateAnnotation = angular.noop
 
       # Sort out which annotations should remain in place.
-      user = $rootScope.persona
+      persona = user.getPersona()
       view = annotator.socialView.name
       cull = (acc, annotation) ->
-        if view is 'single-player' and annotation.user != user
+        if view is 'single-player' and annotation.user != persona
           acc.drop.push annotation
-        else if authorizeAction 'read', annotation, user
+        else if authorizeAction 'read', annotation, persona
           acc.keep.push annotation
         else
           acc.drop.push annotation
@@ -133,41 +106,18 @@ class AppController
         $timeout -> cleanup rest
 
     onlogin = (assertion) ->
-      checkingToken = true
-
-      # Configure the Auth plugin with the issued assertion as refresh token.
-      annotator.addPlugin 'Auth',
-        tokenUrl: documentHelpers.absoluteURI(
-          "/api/token?assertion=#{assertion}")
-
-      # Set the user from the token.
-      plugins.Auth.withToken (token) ->
-        checkingToken = false
-        annotator.addPlugin 'Permissions',
-          user: token.userId
-          userAuthorize: authorizeAction
-        $scope.$apply ->
-          $rootScope.persona = token.userId
-          reset()
+      user.login assertion, reset
 
     onlogout = ->
-      plugins.Auth?.element.removeData('annotator:headers')
-      plugins.Auth?.destroy()
-      delete plugins.Auth
-
-      plugins.Permissions?.setUser(null)
-      plugins.Permissions?.destroy()
-      delete plugins.Permissions
-
-      $rootScope.persona = null
-      checkingToken = false
+      user.logout()
       reset()
 
     onready = ->
-      if not checkingToken and typeof $rootScope.persona == 'undefined'
+      persona = user.getPersona()
+      if not user.checkingInProgress() and typeof persona == 'undefined'
         # If we're not checking the token and persona is undefined, onlogin
         # hasn't run, which means we aren't authenticated.
-        $rootScope.persona = null
+        user.noPersona()
         reset()
 
         if isFirstRun
@@ -177,6 +127,7 @@ class AppController
       $scope.dialog.visible = false
 
     reset = ->
+      $scope.persona = user.getPersona()
       $scope.dialog.visible = false
 
       # Update any edits in progress.
@@ -193,7 +144,7 @@ class AppController
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
       initStore()
-      if newValue is 'single-player' and not $rootScope.persona
+      if newValue is 'single-player' and not user.getPersona()
         annotator.show()
         flash 'info',
           'You will need to sign in for your highlights to be saved.'
