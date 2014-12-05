@@ -1,10 +1,25 @@
 # -*- coding: utf-8 -*-
 from pyramid.config import Configurator
+from pyramid.path import AssetResolver
+from pyramid.response import FileResponse
 
 
 def create_app(settings):
     config = Configurator(settings=settings)
     config.include('h')
+
+    favicon = AssetResolver().resolve('h:favicon.ico')
+    config.add_route('favicon', '/favicon.ico')
+    config.add_view(
+        lambda request: FileResponse(favicon.abspath(), request=request),
+        route_name='favicon'
+    )
+
+    config.add_route('ok', '/ruok')
+    config.add_view(lambda request: 'imok', renderer='string', route_name='ok')
+
+    config.set_root_factory('h.resources.RootFactory')
+
     return config.make_wsgi_app()
 
 
