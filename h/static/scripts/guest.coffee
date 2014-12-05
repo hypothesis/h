@@ -140,13 +140,6 @@ class Annotator.Guest extends Annotator
     .bind('onEditorHide', this.onEditorHide)
     .bind('onEditorSubmit', this.onEditorSubmit)
 
-    .bind('setDynamicBucketMode', (ctx, value) =>
-      return unless @plugins.BucketBar
-      return if @plugins.BucketBar.dynamicBucket is value
-      @plugins.BucketBar.dynamicBucket = value
-      if value then @plugins.BucketBar._update()
-    )
-
     .bind('focusAnnotations', (ctx, tags=[]) =>
       for hl in @getHighlights()
         if hl.annotation.$$tag in tags
@@ -285,9 +278,6 @@ class Annotator.Guest extends Annotator
   #
   # toggle: should this toggle membership in an existing selection?
   selectAnnotations: (annotations, toggle) =>
-    # Switch off dynamic mode; we are going to "Selection" scope
-    @plugins.BucketBar.dynamicBucket = false
-
     if toggle
       # Tell sidebar to add these annotations to the sidebar
       this.toggleAnnotationSelection annotations

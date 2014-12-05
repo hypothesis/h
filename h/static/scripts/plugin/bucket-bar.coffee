@@ -27,9 +27,6 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
   # tab elements
   tabs: null
 
-  # whether to update the viewer as the window is scrolled
-  dynamicBucket: true
-
   constructor: (element, options) ->
     super $(@html), options
 
@@ -336,11 +333,9 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
 
         # If it's the upper tab, scroll to next anchor above
         if (@isUpper bucket)
-          @dynamicBucket = true
           @_jumpMinMax @buckets[bucket], "up"
         # If it's the lower tab, scroll to next anchor below
         else if (@isLower bucket)
-          @dynamicBucket = true
           @_jumpMinMax @buckets[bucket], "down"
         else
           annotations = @buckets[bucket].slice()
@@ -348,9 +343,6 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
             (event.ctrlKey or event.metaKey),
 
     this._buildTabs(@tabs, @buckets)
-
-    if @dynamicBucket
-      @annotator.updateAnnotations this._getDynamicBucket()
 
   _buildTabs: ->
     @tabs.each (d, el) =>
@@ -376,22 +368,5 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       if bucket
         el.html("<div class='label'>#{bucketLength}</div>")
 
-  _getDynamicBucket: ->
-    top = window.pageYOffset
-    bottom = top + $(window).innerHeight()
-    anchors = @annotator.getHighlights()
-    visible = anchors.reduce (acc, hl) =>
-      if top <= hl.getTop() <= bottom
-        if hl.annotation not in acc
-          acc.push hl.annotation
-      acc
-    , []
-
-  isUpper:   (i) => i == 1
-  isLower:   (i) => i == @index.length - 2
-  isComment: (i) => i is @_getCommentBucket()
-
-  # Simulate clicking on the comments tab
-  commentClick: =>
-    @dynamicBucket = false
-    annotator.showAnnotations @buckets[@_getCommentBucket()]
+  isUpper:   (i) -> i == 1
+  isLower:   (i) -> i == @index.length - 2
