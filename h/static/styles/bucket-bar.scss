@@ -1,4 +1,13 @@
-.heatmap-pointer {
+.annotator-bucket-bar {
+  background: hsla(0, 0, 0, .1);
+  cursor: ew-resize;
+  position: absolute;
+  height: 100%;
+  width: $bucket-bar-width;
+  left: -($bucket-bar-width);
+}
+
+.annotator-bucket-indicator {
   @include box-sizing(border-box);
   background: $white;
   border: solid 1px $gray-lighter;

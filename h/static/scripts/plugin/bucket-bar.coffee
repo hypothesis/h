@@ -1,14 +1,13 @@
 $ = Annotator.$
 
-class Annotator.Plugin.Heatmap extends Annotator.Plugin
+class Annotator.Plugin.BucketBar extends Annotator.Plugin
   # prototype constants
   BUCKET_THRESHOLD_PAD: 30
   BUCKET_SIZE: 16
 
-  # heatmap svg skeleton
+  # svg skeleton
   html: """
-        <div class="annotator-heatmap">
-          <div class="annotator-heatmap-bar"></div>
+        <div class="annotator-bucket-bar">
         </div>
         """
 
@@ -97,7 +96,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
     addEventListener "docPageScrolling", this._scheduleUpdate
 
-  # Update the heatmap sometimes soon
+  # Update sometime soon
   _scheduleUpdate: =>
     return if @_updatePending
     @_updatePending = true
@@ -200,7 +199,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
     $.merge above, this._collectVirtualAnnotations 0, currentPage-1
     $.merge below, this._collectVirtualAnnotations currentPage+1, lastPage
 
-    # Construct control points for the heatmap
+    # Construct indicator points
     points = highlights.reduce (points, hl, i) =>
       d = hl.annotation
       x = hl.getTop() - defaultView.pageYOffset
@@ -312,7 +311,7 @@ class Annotator.Plugin.Heatmap extends Annotator.Plugin
 
       @tabs.push(div[0])
 
-      div.addClass('heatmap-pointer')
+      div.addClass('annotator-bucket-indicator')
 
       # Creates highlights corresponding bucket when mouse is hovered
       # TODO: This should use event delegation on the container.

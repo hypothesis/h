@@ -128,14 +128,6 @@ class Hypothesis extends Annotator
       options.origin = '*'
 
     provider = Channel.build options
-        # Dodge toolbars [DISABLE]
-        #@provider.getMaxBottom (max) =>
-        #  @element.css('margin-top', "#{max}px")
-        #  @element.find('.topbar').css("top", "#{max}px")
-        #  @element.find('#gutter').css("margin-top", "#{max}px")
-        #  @plugins.Heatmap.BUCKET_THRESHOLD_PAD += max
-
-    provider
 
     .bind('publish', (ctx, args...) => this.publish args...)
 

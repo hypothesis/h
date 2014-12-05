@@ -48,7 +48,7 @@ module.exports = function(config) {
       'h/static/scripts/helpers.js',
       'h/static/scripts/session.js',
       'h/static/scripts/hypothesis.js',
-      'h/static/scripts/plugin/heatmap.js',
+      'h/static/scripts/plugin/bucket-bar.js',
       'h/static/scripts/vendor/sinon.js',
       'h/static/scripts/vendor/chai.js',
       'h/static/scripts/hypothesis.js',

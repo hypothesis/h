@@ -2,7 +2,7 @@ var Klass = window.Annotator.Host;
 var docs = 'https://github.com/hypothesis/h/blob/master/README.rst#customized-embedding';
 var options = {
   app: jQuery('link[type="application/annotator+html"]').attr('href'),
-  Heatmap: {container: '.annotator-frame'},
+  BucketBar: {container: '.annotator-frame'},
   Toolbar: {container: '.annotator-frame'}
 };
 

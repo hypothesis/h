@@ -72,32 +72,6 @@ $base-font-size: 14px;
 }
 
 
-//HEATMAP STUFF////////////////////////////////
-.annotator-frame {
-  .annotator-heatmap {
-    cursor: ew-resize;
-    position: absolute;
-    overflow: hidden;
-
-    height: 100%;
-    width: $heatmap-width + 18px;
-    left: -($heatmap-width + 18px);
-  }
-
-  .annotator-heatmap-bar {
-    @include stretch-y;
-    background: hsla(0, 0, 0, .1);
-    border-left: solid 1px $gray-lighter;
-    height: 100%;
-    left: 18px;
-    width: $heatmap-width;
-  }
-}
-
-.annotator-frame {
-  @import 'pointers';
-}
-
 //HIGHLIGHTS////////////////////////////////
 .annotator-hl {
   &::-moz-selection {
@@ -131,6 +105,7 @@ $base-font-size: 14px;
 // Sidebar
 .annotator-frame {
   @import 'reset';
+  @import 'bucket-bar';
   @include nested-reset;
   @include reset-box-model;
   @include user-select(none);
@@ -178,7 +153,7 @@ $base-font-size: 14px;
 //CONTROLBAR STUFF////////////////////////////////
 .annotator-frame .annotator-toolbar {
   position: absolute;
-  left: -($heatmap-width + 18px - 7px);
+  left: -($bucket-bar-width + 18px - 7px);
   width: 37px;
   z-index: 2;
 
