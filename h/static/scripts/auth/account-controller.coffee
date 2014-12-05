@@ -1,8 +1,8 @@
 class AccountController
-  @inject = [  '$rootScope', '$scope', '$filter',
-               'flash', 'session', 'identity', 'formHelpers']
-  constructor: ($rootScope,   $scope,   $filter,
-                flash, session, identity, formHelpers) ->
+  @inject = [  '$scope', '$filter',
+               'flash', 'formHelpers', 'identity', 'session', 'user']
+  constructor: ($scope,   $filter,
+                flash,   formHelpers,   identity,   session,   user ) ->
     persona_filter = $filter('persona')
     $scope.subscriptionDescription =
       reply: 'Receive notification emails when: - Someone replies to one of my annotations'
@@ -33,7 +33,7 @@ class AccountController
       $scope.$broadcast 'formState', form.$name, ''  # Update status btn
 
     $scope.tab = 'Account'
-    session.profile({user_id: $rootScope.persona}).$promise
+    session.profile({user_id: user.getPersona()}).$promise
       .then (result) =>
         $scope.subscriptions = result.subscriptions
 
@@ -47,7 +47,7 @@ class AccountController
       # The extension is then removed from the page.
       # Confirmation of success is given.
       return unless form.$valid
-      username = persona_filter $rootScope.persona
+      username = persona_filter user.getPersona()
       packet =
         username: username
         pwd: form.pwd.$modelValue
@@ -62,7 +62,7 @@ class AccountController
       formHelpers.applyValidationErrors(form)
       return unless form.$valid
 
-      username = persona_filter $rootScope.persona
+      username = persona_filter user.getPersona()
       packet =
         username: username
         pwd: form.pwd.$modelValue
@@ -77,7 +77,7 @@ class AccountController
 
     $scope.updated = (index, form) ->
       packet =
-        username: $rootScope.persona
+        username: user.getPersona()
         subscriptions: JSON.stringify $scope.subscriptions[index]
 
       successHandler = angular.bind(null, onSuccess, form)

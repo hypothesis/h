@@ -37,10 +37,10 @@ validate = (value) ->
 # {@link annotator annotator service} for persistence.
 ###
 AnnotationController = [
-  '$rootScope', '$scope', '$timeout',
-  'annotator', 'drafts', 'flash', 'documentHelpers', 'timeHelpers',
-  ($rootScope,   $scope,   $timeout,
-   annotator,   drafts,   flash,   documentHelpers,   timeHelpers
+  '$scope', '$timeout',
+  'annotator', 'drafts', 'flash', 'documentHelpers', 'timeHelpers', 'user'
+  ($scope,   $timeout,
+   annotator,   drafts,   flash,   documentHelpers,   timeHelpers,   user
   ) ->
     @annotation = {}
     @action = 'view'
@@ -182,16 +182,17 @@ AnnotationController = [
       reply = {references, uri}
       annotator.publish 'beforeAnnotationCreated', reply
 
-      if $rootScope.persona?
-        reply.permissions.update = [$rootScope.persona]
-        reply.permissions.delete = [$rootScope.persona]
-        reply.permissions.admin = [$rootScope.persona]
+      persona = user.getPersona()
+      if persona?
+        reply.permissions.update = [persona]
+        reply.permissions.delete = [persona]
+        reply.permissions.admin = [persona]
 
         # If replying to a public annotation make the response public.
         if 'group:__world__' in (model.permissions.read or [])
           reply.permissions.read = ['group:__world__']
         else
-          reply.permissions.read = [$rootScope.persona]
+          reply.permissions.read = [persona]
 
     ###*
     # @ngdoc method
