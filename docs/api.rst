@@ -59,8 +59,8 @@ https://hypothes.is/api/search?limit=1000&quote=limber
 
 https://hypothes.is/api/search?limit=1000&text=consider
 
-
 params:
+
 * limit - number of results to return
 * uri - url encoded uri to get annotations for
 * user - get annotations for a particular user.
