@@ -1,3 +1,4 @@
+====================
 Source Documentation
 ====================
 
@@ -6,115 +7,107 @@ It is targeted at developers interested in integrating functionality from
 Hypothesis into their own Python applications. ::
 
     {
-      "message": "Annotator Store API", 
-      "links": {
-        "search": {
-          "url": "https://api.hypothes.is/search", 
-          "method": "GET", 
-          "desc": "Basic search API"
-        }, 
-        "annotation": {
-          "read": {
-            "url": "https://api.hypothes.is/annotations/:id", 
-            "method": "GET", 
-            "desc": "Get an existing annotation"
-          }, 
-          "create": {
-            "url": "https://api.hypothes.is/annotations", 
-            "query": {
-              "refresh": {
-                "type": "bool", 
-                "desc": "Force an index refresh after create (default: true)"
-              }
+        "links": {
+            "annotation": {
+                "delete": {
+                    "desc": "Delete an annotation", 
+                    "method": "DELETE", 
+                    "url": "https://hypothes.is/api/annotations/:id"
+                }, 
+                "update": {
+                    "desc": "Update an existing annotation", 
+                    "method": "PUT", 
+                    "url": "https://hypothes.is/api/annotations/:id"
+                }, 
+                "create": {
+                    "desc": "Create a new annotation", 
+                    "method": "POST", 
+                    "url": "https://hypothes.is/api/annotations"
+                }, 
+                "read": {
+                    "desc": "Get an existing annotation", 
+                    "method": "GET", 
+                    "url": "https://hypothes.is/api/annotations/:id"
+                }
             }, 
-            "method": "POST", 
-            "desc": "Create a new annotation"
-          }, 
-          "update": {
-            "url": "https://api.hypothes.is/annotations/:id", 
-            "query": {
-              "refresh": {
-                "type": "bool", 
-                "desc": "Force an index refresh after update (default: true)"
-              }
-            }, 
-            "method": "PUT", 
-            "desc": "Update an existing annotation"
-          }, 
-          "delete": {
-            "url": "https://api.hypothes.is/annotations/:id", 
-            "method": "DELETE", 
-            "desc": "Delete an annotation"
-          }
+            "search": {
+                "desc": "Basic search API", 
+                "method": "GET", 
+                "url": "https://hypothes.is/api/search"
+            }
         }, 
-        "search_raw": {
-          "url": "https://api.hypothes.is/search_raw", 
-          "method": "GET/POST", 
-          "desc": "Advanced search API -- direct access to ElasticSearch. Uses the same API as the ElasticSearch query endpoint."
-        }
-      }
+        "message": "Annotator Store API"
+    }
 
 
-===============
+--------------
 API Endpoints:
-===============
+--------------
 
-**/search**
+/search
+=======
 
 Search for annotations annotations
 
 Examples:
 
-https://api.hypothes.is/search?limit=1000&uri=http%3A%2F%2Fepubjs-reader.appspot.com%2F%2Fmoby-dick%2FOPS%2Fchapter_003.xhtml&user=acct:gluejar@hypothes.is
+https://hypothes.is/api/search?limit=1000&uri=http%3A%2F%2Fepubjs-reader.appspot.com%2F%2Fmoby-dick%2FOPS%2Fchapter_003.xhtml&user=acct:gluejar@hypothes.is
 
-https://api.hypothes.is/search?limit=1000&user=acct:gluejar@hypothes.is
+https://hypothes.is/api/search?limit=1000&user=gluejar@hypothes.is
 
-https://api.hypothes.is/search?limit=1000&quote=limber
+https://hypothes.is/api/search?limit=1000&quote=limber
 
-https://api.hypothes.is/search?limit=1000&text=consider
+https://hypothes.is/api/search?limit=1000&text=consider
 
 
 params:
 * limit - number of results to return
 * uri - url encoded uri to get annotations for
-* user - get annotations for a particular user. syntax: acct:<username>@<provider> . Until there are other annotation providers, the provider is "hypothes.is". 
-quote - words that the annotation is quoting. This is very brittle - text is not completely indexed, is punctuation sensitive and appears to index single words only. change your search word to lower case.
-* text - search annotation text. This is very brittle - text is not completely indexed, is punctuation sensitive and appears to index single words only. change your search word to lower case.
+* user - get annotations for a particular user.
+* quote - words that the annotation is quoting.
+* text - search annotation text.
 
-**/annotations**
+/annotations
+============
 
-https://api.hypothes.is/annotations/<annotation id>
+Read
+----
+
+https://hypothes.is/api/annotations/<annotation id>
 
 method: GET
 
 get an annotation
-    
+
 Examples:
 
-https://api.hypothes.is/annotations/utalbWjUQZK5ifydnohjmA
+https://hypothes.is/api/annotations/utalbWjUQZK5ifydnohjmA
+
+Create
+------
+
+https://hypothes.is/api/annotations/
 
 method: POST
 
 create a new annotation (needs authentication)
 
-params: 
-
-refresh - a boolean that forces a refresh
+Update
+------
 
 method: PUT
 
 update an existing annotation (needs authentication)
 
-params: 
-* refresh - a boolean that forces a refresh
+Delete
+------
 
-method: PUT
+https://hypothes.is/api/annotations/<annotation id>
+
+method: DELETE
+
 delete an existing annotation (needs authentication)
 
-
-**/search_raw**
-
-Advanced search API - direct access to ElasticSearch. Uses the same API as the ElasticSearch query endpoint.
 
 .. toctree::
    :maxdepth: 1
