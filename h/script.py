@@ -242,6 +242,7 @@ def extension(args, console, settings):
 
     config = Configurator(settings=settings)
     config.include('h')
+    config.set_root_factory('h.resources.RootFactory')
     config.add_subscriber(add_base_url, BeforeRender)
     config.commit()
 
