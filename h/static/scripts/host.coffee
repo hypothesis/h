@@ -35,7 +35,7 @@ class Annotator.Host extends Annotator.Guest
     app.appendTo(@frame)
 
     if options.firstRun
-      this.on 'panelReady', => this.actuallyShowFrame(transition: false)
+      this.on 'panelReady', => this.showFrame(transition: false)
 
     # Host frame dictates the toolbar options.
     this.on 'panelReady', =>
@@ -49,7 +49,7 @@ class Annotator.Host extends Annotator.Guest
         if @frame.hasClass 'annotator-collapsed'
           this.showFrame()
 
-  actuallyShowFrame: (options={transition: true}) ->
+  showFrame: (options={transition: true}) ->
     unless @drag.enabled
       @frame.css 'margin-left': "#{-1 * @frame.width()}px"
     if options.transition
@@ -63,7 +63,7 @@ class Annotator.Host extends Annotator.Guest
 
     channel
 
-    .bind 'showFrame', (ctx) => this.actuallyShowFrame()
+    .bind 'showFrame', (ctx) => this.showFrame()
 
     .bind('hideFrame', (ctx) =>
       @frame.css 'margin-left': ''
