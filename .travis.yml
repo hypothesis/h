@@ -2,6 +2,9 @@ language:
   - python
 python:
   - '2.7'
+before_install:
+  - sudo /usr/share/elasticsearch/bin/plugin -install elasticsearch/elasticsearch-analysis-icu/2.3.0
+  - sudo service elasticsearch restart
 install:
   # Install temporarily pinned to avoid a regression in sass==3.4.6
   #
