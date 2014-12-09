@@ -8,8 +8,6 @@ __all__ = ['main']
 
 
 def includeme(config):
-    config.include('pyramid_jinja2')
-    config.include('pyramid_multiauth')
     config.include('h.api')
     config.include('h.features')
     config.include('h.queue')
@@ -19,6 +17,7 @@ def includeme(config):
     if config.registry.feature('streamer'):
         config.include('h.streamer')
 
+    config.include('pyramid_jinja2')
     config.add_jinja2_renderer('.js')
     config.add_jinja2_renderer('.txt')
     config.add_jinja2_renderer('.html')
