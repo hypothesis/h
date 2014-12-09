@@ -149,7 +149,7 @@ def test_index():
     assert links['annotation']['update']['method'] == 'PUT'
     assert links['annotation']['update']['url'] == host + '/annotations/:id'
     assert links['search']['method'] == 'GET'
-    assert links['search']['url'] == host + '/search'
+    assert links['search']['url'] == host + '/annotations'
 
 
 def test_search_parameters():
