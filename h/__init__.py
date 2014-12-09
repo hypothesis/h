@@ -8,11 +8,13 @@ __all__ = ['main']
 
 
 def includeme(config):
-    config.include('h.api')
     config.include('h.features')
     config.include('h.queue')
     config.include('h.subscribers')
     config.include('h.views')
+
+    if config.registry.feature('api'):
+        config.include('h.api')
 
     if config.registry.feature('streamer'):
         config.include('h.streamer')
