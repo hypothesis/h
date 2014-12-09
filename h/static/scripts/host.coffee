@@ -40,6 +40,7 @@ class Annotator.Host extends Annotator.Guest
     # Host frame dictates the toolbar options.
     this.on 'panelReady', =>
       this.setTool('comment')
+      this._scan() # Scan the document
       this.setVisibleHighlights(!!options.showHighlights)
 
     if @plugins.BucketBar?
@@ -47,9 +48,6 @@ class Annotator.Host extends Annotator.Guest
       @plugins.BucketBar.element.on 'click', (event) =>
         if @frame.hasClass 'annotator-collapsed'
           this.showFrame()
-
-    # Scan the document
-    this._scan()
 
   actuallyShowFrame: (options={transition: true}) ->
     unless @drag.enabled
