@@ -21,7 +21,7 @@
     "tabs"
   ],
   "content_security_policy":
-    "script-src 'self' 'unsafe-eval' {{ src }}; object-src 'self'",
+    "script-src 'self' 'unsafe-eval' {{ src }} https://cdn.mathjax.org; object-src 'self'; font-src 'self';",
 
   "background": {
     "persistent": true,
