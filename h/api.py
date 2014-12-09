@@ -416,6 +416,20 @@ def store_from_settings(settings):
     return es
 
 
+def _ensure_es_plugins(es_conn):
+    """Ensure that the ICU analysis plugin is installed for ES"""
+    # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
+    #
+    # pylint: disable=unexpected-keyword-arg
+    es_plugins = es_conn.cat.plugins(h='component').strip().split('\n')
+    if 'analysis-icu' not in es_plugins:
+        message = ("ICU Analysis plugin is not installed for ElasticSearch\n"
+                   "  See the installation instructions for more details:\n"
+                   "  https://github.com/hypothesis/h/blob/master/"
+                   "INSTALL.rst#installing")
+        raise RuntimeError(message)
+
+
 def create_db():
     """Create the ElasticSearch index for Annotations and Documents"""
     try:
@@ -475,6 +489,7 @@ def includeme(config):
 
     # Configure ElasticSearch
     store_from_settings(settings)
+    _ensure_es_plugins(es.conn)
 
     # Maybe initialize the models
     if asbool(settings.get('basemodel.should_drop_all', False)):
