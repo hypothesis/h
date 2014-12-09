@@ -240,6 +240,9 @@ def extension(args, console, settings):
     settings['webassets.cache'] = None
     settings['webassets.manifest'] = None
 
+    # Turn off the API
+    settings['h.feature.api'] = False
+
     config = Configurator(settings=settings)
     config.include('h')
     config.set_root_factory('h.resources.RootFactory')
