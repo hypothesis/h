@@ -96,16 +96,15 @@ class Hypothesis extends Annotator
         entities = []
         channel = this._setupXDM options
 
-        channel.call
-          method: 'getDocumentInfo'
-          success: (info) =>
-            entityUris = {}
-            entityUris[info.uri] = true
-            for link in info.metadata.link
-              entityUris[link.href] = true if link.href
-            for href of entityUris
-              entities.push href
-            this.plugins.Store?.loadAnnotations()
+        channel.bind('setDocumentInfo', (txn, info) =>
+          entityUris = {}
+          entityUris[info.uri] = true
+          for link in info.metadata.link
+            entityUris[link.href] = true if link.href
+          for href of entityUris
+            entities.push href
+          this.plugins.Store?.loadAnnotations()
+        )
 
         # Allow the host to define it's own state
         unless source is $window.parent

@@ -67,7 +67,15 @@ class Annotator.Guest extends Annotator
           origin: origin
           scope: "#{scope}:provider"
           onReady: =>
-            this.publish('panelReady')
+            this._getDocumentInfo (err, info) =>
+              if err
+                console.log 'Error processing document:', err
+              else
+                @panel.call
+                  method: 'setDocumentInfo'
+                  params: info
+                  success: =>
+                    this.publish('panelReady')
 
     # Load plugins
     for own name, opts of @options
@@ -122,6 +130,21 @@ class Annotator.Guest extends Annotator
   getHref: =>
     @plugins.PDF?.uri() ? @plugins.Document.uri() ? super
 
+  _getDocumentInfo: (cb) ->
+    {PDF, Document} = @plugins
+    uri = this.getHref()
+
+    if PDF?
+      PDF.getMetaData()
+        .then (md) =>
+          cb(null, {uri: uri, metadata: md})
+        .catch (problem) =>
+          cb(problem)
+    else if Document?
+      cb(null, {uri: uri, metadata: Document.metadata})
+    else
+      cb(null, {uri: uri})
+
   _setupXDM: (options) ->
     # jschannel chokes FF and Chrome extension origins.
     if (options.origin.match /^chrome-extension:\/\//) or
@@ -148,20 +171,6 @@ class Annotator.Guest extends Annotator
         if hl.annotation.$$tag is tag
           hl.scrollTo()
           return
-    )
-
-    .bind('getDocumentInfo', (trans) =>
-      (@plugins.PDF?.getMetaData() ? Promise.reject())
-        .then (md) =>
-           trans.complete
-             uri: @getHref()
-             metadata: md
-        .catch (problem) =>
-           trans.complete
-             uri: @getHref()
-             metadata: @plugins.Document?.metadata
-
-      trans.delayReturn(true)
     )
 
     .bind('setTool', (ctx, name) =>
