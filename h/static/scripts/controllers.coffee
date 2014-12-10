@@ -312,7 +312,14 @@ class AnnotationViewerController
         updater.then (sock) ->
           if $routeParams.id?
             _id = $routeParams.id
-            annotator.plugins.Store?.loadAnnotationsFromSearch({_id}).then ->
+            annotator.plugins.Store?.loadAnnotationsFromSearch({_id}).then (results) ->
+              # Remove references to parent annotations before loading children.
+              ann = results.rows[0]
+              ann.references = []
+
+              # Update the current thread.
+              $scope.threading.thread([ann])
+
               annotator.plugins.Store?.loadAnnotationsFromSearch({references: _id})
 
             filter = streamfilter
