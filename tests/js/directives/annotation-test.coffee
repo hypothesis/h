@@ -16,10 +16,10 @@ describe 'h.directives.annotation', ->
   beforeEach module('h.templates')
 
   beforeEach module ($provide) ->
-    fakeUser =
-      getPersona: (-> 'acct:bill@localhost')
+    fakeAuth =
+      user: 'acct:bill@localhost'
 
-    $provide.value 'user', fakeUser
+    $provide.value 'auth', fakeAuth
     return
 
   beforeEach inject (_$compile_, $controller, _$document_, $rootScope, _$timeout_) ->
