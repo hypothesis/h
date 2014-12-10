@@ -284,7 +284,14 @@ class AnnotationViewerController
 
     $scope.$watch 'store', ->
       if $scope.store
-        $scope.store.loadAnnotationsFromSearch({_id: id}).then ->
+        $scope.store.loadAnnotationsFromSearch({_id: id}).then (results) ->
+          # Remove references to parent annotations before loading children.
+          ann = results.rows[0]
+          ann.references = []
+
+          # Update the current thread.
+          $scope.threading.thread([ann])
+
           $scope.store.loadAnnotationsFromSearch({references: id})
 
     streamfilter
