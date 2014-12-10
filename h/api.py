@@ -401,8 +401,9 @@ def store_from_settings(settings):
     # read-permissions, which is done in the store itself.
     es.authorization_enabled = True
 
-    # Note that we do not have to actually open the database connection or
-    # anything, annotator-store will do so on the first invoked action.
+    # Check for required plugin(s)
+    _ensure_es_plugins(es.conn)
+
     return es
 
 
@@ -479,7 +480,6 @@ def includeme(config):
 
     # Configure ElasticSearch
     store_from_settings(settings)
-    _ensure_es_plugins(es.conn)
 
     # Maybe initialize the models
     if asbool(settings.get('basemodel.should_drop_all', False)):
