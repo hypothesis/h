@@ -8,7 +8,7 @@ describe 'h.account.AccountController', ->
   fakeSession = null
   fakeIdentity = null
   fakeFormHelpers = null
-  fakeUser = null
+  fakeAuth = null
   editProfilePromise = null
   disableUserPromise = null
   profilePromise = null
@@ -23,7 +23,7 @@ describe 'h.account.AccountController', ->
       logout: sandbox.spy()
     fakeFormHelpers =
       applyValidationErrors: sandbox.spy()
-    fakeUser =
+    fakeAuth =
       getPersona: (-> 'egon@columbia.edu')
 
     $filterProvider.register 'persona', ->
@@ -33,7 +33,7 @@ describe 'h.account.AccountController', ->
     $provide.value 'flash', fakeFlash
     $provide.value 'identity', fakeIdentity
     $provide.value 'formHelpers', fakeFormHelpers
-    $provide.value 'user', fakeUser
+    $provide.value 'auth', fakeAuth
     return
 
   beforeEach inject ($rootScope, $q, $controller) ->

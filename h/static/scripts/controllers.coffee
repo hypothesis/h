@@ -2,16 +2,14 @@ class AppController
   this.$inject = [
     '$location', '$route', '$scope', '$timeout',
     'annotator', 'flash', 'identity', 'streamer', 'streamfilter',
-    'documentHelpers', 'drafts', 'user'
+    'documentHelpers', 'drafts', 'auth'
   ]
   constructor: (
      $location,   $route,   $scope,   $timeout,
      annotator,   flash,   identity,   streamer,   streamfilter,
-     documentHelpers,   drafts, user
+     documentHelpers,   drafts, auth
   ) ->
     {plugins, host, providers} = annotator
-
-    isFirstRun = $location.search().hasOwnProperty('firstrun')
 
     applyUpdates = (action, data) ->
       """Update the application with new data from the websocket."""
@@ -54,7 +52,7 @@ class AppController
       Store = plugins.Store
       delete plugins.Store
 
-      if user.getPersona() or annotator.socialView.name is 'none'
+      if auth.user or annotator.socialView.name is 'none'
         annotator.addPlugin 'Store', annotator.options.Store
 
         $scope.store = plugins.Store
@@ -79,12 +77,12 @@ class AppController
       Store.updateAnnotation = angular.noop
 
       # Sort out which annotations should remain in place.
-      persona = user.getPersona()
+      persona = auth.user
       view = annotator.socialView.name
       cull = (acc, annotation) ->
         if view is 'single-player' and annotation.user != persona
           acc.drop.push annotation
-        else if authorizeAction 'read', annotation, persona
+        else if auth.permits 'read', annotation, persona
           acc.keep.push annotation
         else
           acc.drop.push annotation
@@ -127,8 +125,10 @@ class AppController
       $scope.dialog.visible = false
 
     reset = ->
-      $scope.persona = user.getPersona()
+      $scope.persona = auth.user
       $scope.dialog.visible = false
+
+      firstRun = false
 
       # Update any edits in progress.
       for draft in drafts.all()
@@ -139,12 +139,10 @@ class AppController
       streamer.close()
       streamer.open()
 
-    identity.watch {onlogin, onlogout, onready}
-
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
       initStore()
-      if newValue is 'single-player' and not user.getPersona()
+      if newValue is 'single-player' and not auth.user
         annotator.show()
         flash 'info',
           'You will need to sign in for your highlights to be saved.'
@@ -158,7 +156,7 @@ class AppController
       $scope.sort = {name, predicate}
 
     $scope.$watch 'store.entities', (entities, oldEntities) ->
-      return if entities is oldEntities
+      return if entities is oldEntities or not entities
 
       if entities.length
         streamfilter
@@ -169,12 +167,12 @@ class AppController
 
     $scope.login = ->
       $scope.dialog.visible = true
-      identity.request {oncancel}
+      auth.login().then(reset, oncancel)
 
     $scope.logout = ->
       return unless drafts.discard()
       $scope.dialog.visible = false
-      identity.logout()
+      auth.logout().then(reset)
 
     $scope.loadMore = (number) ->
       unless streamfilter.getPastData().hits then return
@@ -202,6 +200,11 @@ class AppController
     $scope.socialView = annotator.socialView
     $scope.sort = name: 'Location'
     $scope.threading = plugins.Threading
+
+    auth.getInitialUser().then(reset, ->
+      reset()
+      $scope.login()
+    )
 
 
 class AnnotationViewerController
