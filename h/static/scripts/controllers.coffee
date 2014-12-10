@@ -136,8 +136,6 @@ class AppController
       $scope.persona = auth.user
       $scope.dialog.visible = false
 
-      firstRun = false
-
       # Update any edits in progress.
       for draft in drafts.all()
         annotator.publish 'beforeAnnotationCreated', draft
