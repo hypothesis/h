@@ -25,3 +25,5 @@
 *.pyo
 
 *.log
+
+.DS_Store
