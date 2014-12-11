@@ -424,10 +424,9 @@ def _ensure_es_plugins(es_conn):
 def create_db():
     """Create the ElasticSearch index for Annotations and Documents"""
     try:
-        es.conn.indices.create(es.index)
+        es.conn.indices.create(es.index, ignore=400)
     except elasticsearch_exceptions.RequestError as e:
-        if not (e.error.startswith('IndexAlreadyExistsException')
-                or e.error.startswith('InvalidIndexNameException')):
+        if not e.error.startswith('InvalidIndexNameException'):
             raise
     except elasticsearch_exceptions.ConnectionError as e:
         msg = ('Can not access ElasticSearch at {0}! '
