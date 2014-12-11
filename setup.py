@@ -34,7 +34,7 @@ install_requires = [
     'blinker>=1.3,<1.4',
     'clik==0.3.1',
     'deform>=0.9,<1.0',
-    'elasticsearch',
+    'elasticsearch>=1.1.0',
     'gevent-websocket==0.3.6',
     'gnsq>=0.2.0,<0.3.0',
     'gunicorn>=19.1,<20',
