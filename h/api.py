@@ -412,7 +412,7 @@ def _ensure_es_plugins(es_conn):
     # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
     #
     # pylint: disable=unexpected-keyword-arg
-    es_plugins = es_conn.cat.plugins(h='component').strip().split('\n')
+    es_plugins = [x.strip() for x in es_conn.cat.plugins(h='component').split('\n')]
     if 'analysis-icu' not in es_plugins:
         message = ("ICU Analysis plugin is not installed for ElasticSearch\n"
                    "  See the installation instructions for more details:\n"
