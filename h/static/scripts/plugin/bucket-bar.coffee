@@ -188,6 +188,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
 
     # Get the page numbers
     mapper = @annotator.domMapper
+    return unless mapper? # Maybe it's too soon to do this
     firstPage = 0
     currentPage = mapper.getPageIndex()
     lastPage = mapper.getPageCount() - 1
