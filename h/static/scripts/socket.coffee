@@ -1,10 +1,3 @@
-getClientId = ->
-  # Generate client ID
-  buffer = (new Array(16))
-  uuid.v4 null, buffer, 0
-  uuid.unparse buffer
-
-
 socket = ['documentHelpers', (documentHelpers) ->
   -> new Socket("#{documentHelpers.baseURI}__streamer__")
 ]
@@ -16,7 +9,7 @@ class Socket extends SockJS
 
     send = this.send
     this.send = (data) =>
-      clientId = getClientId()
+      clientId = uuid.v4()
 
       $.ajaxSetup
         headers:
