@@ -95,6 +95,13 @@
 <footer class="annotation-footer form-actions"
         ng-if="vm.editing"
         ng-switch="vm.action">
+  <div class="pull-right">
+  <span class="form-actions-message pull-right">
+    <a href="http://creativecommons.org/publicdomain/zero/1.0/" target="_blank">
+      Licensed under CC0.
+    </a>
+  </span>
+  </div>
   <div class="form-actions-buttons form-actions-left">
     <button ng-switch-when="edit"
             ng-click="vm.save()"
