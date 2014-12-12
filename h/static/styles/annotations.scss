@@ -1,3 +1,5 @@
+@import "mixins/icons";
+
 //ANNOTATION////////////////////////////////
 //This is for everything that is formatted as an annotation.
 .annotation {
@@ -57,6 +59,24 @@
 .annotation-citation-domain {
   color: $gray-light;
   font-size: .923em;
+}
+
+.annotation-license {
+  clear: both;
+  border-top: #cccccc 1px solid;
+  font-size: 0.9em;
+  padding-top: 0.583em;
+
+  a {
+    color: $gray-light;
+    display: block;
+  }
+
+  @include icons {
+    font-size: 16px;
+    vertical-align: -3px;
+    margin-right: 1px;
+  }
 }
 
 .show-differences {
