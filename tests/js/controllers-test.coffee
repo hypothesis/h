@@ -6,7 +6,7 @@ describe 'h', ->
   fakeIdentity = null
   fakeLocation = null
   fakeParams = null
-  fakeSocket = null
+  fakeStreamer = null
   sandbox = null
 
   beforeEach module('h')
@@ -30,14 +30,15 @@ describe 'h', ->
       search: sandbox.stub().returns({})
     }
     fakeParams = {id: 'test'}
-    fakeSocket = sandbox.stub().returns({
-      onclose: null
+    fakeStreamer = {
+      open: sandbox.spy()
       close: sandbox.spy()
-    })
+      send: sandbox.spy()
+    }
 
     $provide.value 'annotator', fakeAnnotator
     $provide.value 'identity', fakeIdentity
-    $provide.value 'socket', fakeSocket
+    $provide.value 'streamer', fakeStreamer
     $provide.value '$location', fakeLocation
     $provide.value '$routeParams', fakeParams
     return

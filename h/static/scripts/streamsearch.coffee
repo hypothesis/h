@@ -1,14 +1,14 @@
 class StreamSearchController
   this.inject = [
     '$scope', '$rootScope', '$routeParams',
-    'annotator', 'queryparser', 'searchfilter', 'streamfilter'
+    'annotator', 'queryparser', 'searchfilter', 'streamer', 'streamfilter'
   ]
   constructor: (
      $scope,   $rootScope,   $routeParams
-     annotator,   queryparser,   searchfilter,   streamfilter
+     annotator,   queryparser,   searchfilter,   streamer,   streamfilter
   ) ->
     # Clear out loaded annotations and threads
-    # XXX: Resolve threading, storage, and updater better for all routes.
+    # XXX: Resolve threading, storage, and streamer better for all routes.
     annotator.plugins.Threading?.pluginInit()
     annotator.plugins.Store?.annotations = []
 
@@ -30,10 +30,7 @@ class StreamSearchController
 
     $scope.shouldShowThread = (container) -> true
 
-    $scope.$watch 'updater', (updater) ->
-      updater?.then (sock) ->
-        filter = streamfilter.getFilter()
-        sock.send(JSON.stringify({filter}))
+    streamer.send({filter: streamfilter.getFilter()})
 
     $scope.$on '$destroy', ->
       $scope.search.query = ''
