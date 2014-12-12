@@ -31,7 +31,7 @@ General Instructions
 --------------------
 
 Once the basic dependencies are installed, the `ElasticSearch ICU Analysis`_
-plugin is needed. Follow the instructions available from that project.
+plugin is needed. Follow the instructions_ available from that project.
 
 The project code itself is a pyramid_ application which can be integrated
 into any WSGI_ compatible framework and run on any WSGI web server (such
@@ -89,3 +89,4 @@ turn off discovery.
 .. _OSX: INSTALL.OSX.rst
 .. _Ubuntu: INSTALL.Ubuntu.rst
 .. _Vagrant: INSTALL.Vagrant.rst
+.. _instructions: http://www.elasticsearch.org/guide/en/elasticsearch/guide/master/icu-plugin.html
