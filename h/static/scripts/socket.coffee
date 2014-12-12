@@ -1,31 +1,31 @@
-clientID = ->
+getClientId = ->
   # Generate client ID
   buffer = (new Array(16))
   uuid.v4 null, buffer, 0
   uuid.unparse buffer
 
 
-run = ['clientID', (clientID) ->
-  $.ajaxSetup
-    headers:
-      "X-Client-Id": clientID
-]
-
-socket = ['documentHelpers', 'clientID', (documentHelpers, clientID) ->
-  -> new Socket(clientID, "#{documentHelpers.baseURI}__streamer__")
+socket = ['documentHelpers', (documentHelpers) ->
+  -> new Socket("#{documentHelpers.baseURI}__streamer__")
 ]
 
 
 class Socket extends SockJS
-  constructor: (clientID, args...)->
-    SockJS.apply(this, args)
+  constructor: ->
+    SockJS.apply(this, arguments)
 
     send = this.send
     this.send = (data) =>
+      clientId = getClientId()
+
+      $.ajaxSetup
+        headers:
+          "X-Client-Id": clientId
+
       # Set the client ID before the first message.
       cid = JSON.stringify
         messageType: 'client_id'
-        value: clientID
+        value: clientId
 
       # Send the messages.
       send.call(this, cid)
@@ -36,6 +36,4 @@ class Socket extends SockJS
 
 
 angular.module('h')
-.factory('clientID', clientID)
 .factory('socket', socket)
-.run(run)
