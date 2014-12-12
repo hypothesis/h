@@ -254,8 +254,14 @@ class AppController
 
 
 class AnnotationViewerController
-  this.$inject = ['$location', '$routeParams', '$scope', 'annotator', 'streamer', 'streamfilter']
-  constructor: ($location, $routeParams, $scope, annotator, streamer, streamfilter) ->
+  this.$inject = [
+    '$location', '$routeParams', '$scope',
+    'annotator', 'streamer', 'streamfilter'
+  ]
+  constructor: (
+     $location,   $routeParams,   $scope,
+     annotator,   streamer,   streamfilter
+  ) ->
     # Tells the view that these annotations are standalone
     $scope.isEmbedded = false
     $scope.isStream = false
