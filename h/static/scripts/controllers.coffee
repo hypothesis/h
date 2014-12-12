@@ -27,12 +27,12 @@ authorizeAction = (action, annotation, user) ->
 class AppController
   this.$inject = [
     '$location', '$q', '$route', '$scope', '$timeout',
-    'annotator', 'flash', 'identity', 'socket', 'streamfilter',
+    'annotator', 'flash', 'identity', 'streamer', 'streamfilter',
     'documentHelpers', 'drafts'
   ]
   constructor: (
      $location,   $q,   $route,   $scope,   $timeout,
-     annotator,   flash,   identity,   socket,   streamfilter,
+     annotator,   flash,   identity,   streamer,   streamfilter,
      documentHelpers,   drafts
   ) ->
     {plugins, host, providers} = annotator
@@ -55,6 +55,26 @@ class AppController
             continue unless annotation?
             plugins.Store?.unregisterAnnotation(annotation)
             annotator.deleteAnnotation(annotation)
+
+    streamer.onmessage = (msg) ->
+      unless msg.data.type? and msg.data.type is 'annotation-notification'
+        return
+      data = msg.data.payload
+      action = msg.data.options.action
+
+      unless data instanceof Array then data = [data]
+
+      p = $scope.persona
+      user = if p? then "acct:" + p.username + "@" + p.provider else ''
+      unless data instanceof Array then data = [data]
+
+      if $scope.socialView.name is 'single-player'
+        owndata = data.filter (d) -> d.user is user
+        applyUpdates action, owndata
+      else
+        applyUpdates action, data
+
+      $scope.$digest()
 
     initStore = ->
       """Initialize the storage component."""
@@ -112,52 +132,6 @@ class AppController
         annotator.deleteAnnotation first
         $timeout -> cleanup rest
 
-    initUpdater = (failureCount=0) ->
-      """Initialize the websocket used for realtime updates."""
-      _dfdSock = $q.defer()
-      _sock = socket()
-
-      $scope.updater?.then (sock) ->
-        sock.onclose = null  # break automatic reconnect
-        sock.close()
-
-      $scope.updater = _dfdSock.promise
-
-      _sock.onopen = ->
-        failureCount = 0
-        _dfdSock.resolve(_sock)
-        _dfdSock = null
-
-      _sock.onclose = ->
-        failureCount = Math.min(10, ++failureCount)
-        slots = Math.random() * (Math.pow(2, failureCount) - 1)
-        $timeout ->
-          _retry = initUpdater(failureCount)
-          _dfdSock?.resolve(_retry)
-        , slots * 500
-
-      _sock.onmessage = (msg) ->
-        unless msg.data.type? and msg.data.type is 'annotation-notification'
-          return
-        data = msg.data.payload
-        action = msg.data.options.action
-
-        unless data instanceof Array then data = [data]
-
-        p = $scope.persona
-        user = if p? then "acct:" + p.username + "@" + p.provider else ''
-        unless data instanceof Array then data = [data]
-
-        if $scope.socialView.name is 'single-player'
-          owndata = data.filter (d) -> d.user is user
-          applyUpdates action, owndata
-        else
-          applyUpdates action, data
-
-        $scope.$digest()
-
-      _dfdSock.promise
-
     onlogin = (assertion) ->
       checkingToken = true
 
@@ -211,7 +185,8 @@ class AppController
 
       # Reload services
       initStore()
-      initUpdater()
+      streamer.close()
+      streamer.open()
 
     identity.watch {onlogin, onlogout, onready}
 
@@ -239,9 +214,7 @@ class AppController
           .resetFilter()
           .addClause('/uri', 'one_of', entities)
 
-        $scope.updater.then (sock) ->
-          filter = streamfilter.getFilter()
-          sock.send(JSON.stringify({filter}))
+        streamer.send({filter: streamfilter.getFilter()})
 
     $scope.login = ->
       $scope.dialog.visible = true
@@ -254,13 +227,7 @@ class AppController
 
     $scope.loadMore = (number) ->
       unless streamfilter.getPastData().hits then return
-      unless $scope.updater? then return
-      sockmsg =
-        messageType: 'more_hits'
-        moreHits: number
-
-      $scope.updater.then (sock) ->
-        sock.send(JSON.stringify(sockmsg))
+      streamer.send({messageType: 'more_hits', moreHits: number})
 
     $scope.clearSelection = ->
       $scope.search.query = ''
@@ -287,14 +254,20 @@ class AppController
 
 
 class AnnotationViewerController
-  this.$inject = ['$location', '$routeParams', '$scope', 'annotator', 'streamfilter']
-  constructor: ($location, $routeParams, $scope, annotator, streamfilter) ->
+  this.$inject = [
+    '$location', '$routeParams', '$scope',
+    'annotator', 'streamer', 'streamfilter'
+  ]
+  constructor: (
+     $location,   $routeParams,   $scope,
+     annotator,   streamer,   streamfilter
+  ) ->
     # Tells the view that these annotations are standalone
     $scope.isEmbedded = false
     $scope.isStream = false
 
     # Clear out loaded annotations and threads
-    # XXX: Resolve threading, storage, and updater better for all routes.
+    # XXX: Resolve threading, storage, and streamer better for all routes.
     annotator.plugins.Threading?.pluginInit()
     annotator.plugins.Store?.annotations = []
 
@@ -307,21 +280,20 @@ class AnnotationViewerController
     $scope.search.update = (query) ->
       $location.path('/stream').search('q', query)
 
-    $scope.$watch 'updater', (updater) ->
-      if updater?
-        updater.then (sock) ->
-          if $routeParams.id?
-            _id = $routeParams.id
-            annotator.plugins.Store?.loadAnnotationsFromSearch({_id}).then ->
-              annotator.plugins.Store?.loadAnnotationsFromSearch({references: _id})
+    id = $routeParams.id
 
-            filter = streamfilter
-              .setPastDataNone()
-              .setMatchPolicyIncludeAny()
-              .addClause('/references', 'first_of', _id, true)
-              .addClause('/id', 'equals', _id, true)
-              .getFilter()
-            sock.send(JSON.stringify({filter}))
+    $scope.$watch 'store', ->
+      if $scope.store
+        $scope.store.loadAnnotationsFromSearch({_id: id}).then ->
+          $scope.store.loadAnnotationsFromSearch({references: id})
+
+    streamfilter
+      .setPastDataNone()
+      .setMatchPolicyIncludeAny()
+      .addClause('/references', 'first_of', id, true)
+      .addClause('/id', 'equals', id, true)
+
+    streamer.send({filter: streamfilter.getFilter()})
 
 class ViewerController
   this.$inject = ['$scope', 'annotator']

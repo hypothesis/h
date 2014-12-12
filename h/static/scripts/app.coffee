@@ -6,6 +6,7 @@ imports = [
   'h.auth'
   'h.helpers'
   'h.identity'
+  'h.streamer'
 ]
 
 
@@ -24,8 +25,8 @@ resolve =
 
 
 configure = [
-  '$locationProvider', '$routeProvider', '$sceDelegateProvider',
-  ($locationProvider,   $routeProvider,   $sceDelegateProvider) ->
+  '$locationProvider', '$routeProvider', '$sceDelegateProvider', 'streamerProvider',
+  ($locationProvider,   $routeProvider,   $sceDelegateProvider,   streamerProvider) ->
     $locationProvider.html5Mode(true)
 
     $routeProvider.when '/a/:id',
@@ -55,6 +56,8 @@ configure = [
     # TODO: move all front-end templates into their own directory for safety
     basePattern = baseURI.replace /\/[^\/]*$/, '/**.html'
     $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
+
+    streamerProvider.url = baseURI + '__streamer__'
 ]
 
 
