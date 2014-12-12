@@ -8,6 +8,7 @@ describe 'h.auth.AccountController', ->
   fakeSession = null
   fakeIdentity = null
   fakeFormHelpers = null
+  fakeAuth = null
   editProfilePromise = null
   disableUserPromise = null
   profilePromise = null
@@ -22,6 +23,8 @@ describe 'h.auth.AccountController', ->
       logout: sandbox.spy()
     fakeFormHelpers =
       applyValidationErrors: sandbox.spy()
+    fakeAuth =
+      getPersona: (-> 'egon@columbia.edu')
 
     $filterProvider.register 'persona', ->
       sandbox.stub().returns('STUBBED_PERSONA_FILTER')
@@ -30,11 +33,11 @@ describe 'h.auth.AccountController', ->
     $provide.value 'flash', fakeFlash
     $provide.value 'identity', fakeIdentity
     $provide.value 'formHelpers', fakeFormHelpers
+    $provide.value 'auth', fakeAuth
     return
 
   beforeEach inject ($rootScope, $q, $controller) ->
     $scope = $rootScope.$new()
-    $scope.persona = 'egon@columbia.edu'
 
     disableUserPromise = {then: sandbox.stub()}
     editProfilePromise = {then: sandbox.stub()}
