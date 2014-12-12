@@ -33,7 +33,7 @@ The quickest way to install elastisearch is to simply install the deb package:
     wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.4.1.deb
     sudo dpkg -i elasticsearch-1.4.1.deb
 
-Use the following commands to ensure, that elasticsearch starts when the system is 
+Use the following commands to ensure, that elasticsearch starts when the system is
 booted and then start up elasticsearch:
 
 .. code-block:: bash
