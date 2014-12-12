@@ -7,6 +7,7 @@ describe 'h', ->
   fakeLocation = null
   fakeParams = null
   fakeStreamer = null
+  fakeIdentity = null
   sandbox = null
 
   beforeEach module('h')
@@ -19,6 +20,11 @@ describe 'h', ->
       getInitialUser: ->
         then: (resolve, reject) ->
           resolve()
+    }
+
+    fakeIdentity = {
+      watch: sandbox.spy()
+      request: sandbox.spy()
     }
 
     fakeAnnotator = {

@@ -11,6 +11,9 @@ class AppController
   ) ->
     {plugins, host, providers} = annotator
 
+    $scope.auth = auth
+    isFirstRun = $location.search().hasOwnProperty('firstrun')
+
     applyUpdates = (action, data) ->
       """Update the application with new data from the websocket."""
       return unless data?.length
@@ -103,24 +106,6 @@ class AppController
         annotator.deleteAnnotation first
         $timeout -> cleanup rest
 
-    onlogin = (assertion) ->
-      user.login assertion, reset
-
-    onlogout = ->
-      user.logout()
-      reset()
-
-    onready = ->
-      persona = user.getPersona()
-      if not user.checkingInProgress() and typeof persona == 'undefined'
-        # If we're not checking the token and persona is undefined, onlogin
-        # hasn't run, which means we aren't authenticated.
-        user.noPersona()
-        reset()
-
-        if isFirstRun
-          $scope.login()
-
     oncancel = ->
       $scope.dialog.visible = false
 
@@ -154,7 +139,7 @@ class AppController
       $scope.sort = {name, predicate}
 
     $scope.$watch 'store.entities', (entities, oldEntities) ->
-      return if entities is oldEntities or not entities
+      return if entities is oldEntities
 
       if entities.length
         streamfilter
@@ -163,14 +148,18 @@ class AppController
 
         streamer.send({filter: streamfilter.getFilter()})
 
+    $scope.$watch 'auth.user', (newVal, oldVal) ->
+      reset() if newVal isnt undefined
+      $scope.login() if isFirstRun and newVal is null and oldVal is undefined
+
     $scope.login = ->
       $scope.dialog.visible = true
-      auth.login().then(reset, oncancel)
+      identity.request(oncancel)
 
     $scope.logout = ->
       return unless drafts.discard()
       $scope.dialog.visible = false
-      auth.logout().then(reset)
+      identity.logout()
 
     $scope.loadMore = (number) ->
       unless streamfilter.getPastData().hits then return
@@ -198,11 +187,6 @@ class AppController
     $scope.socialView = annotator.socialView
     $scope.sort = name: 'Location'
     $scope.threading = plugins.Threading
-
-    auth.getInitialUser().then(reset, ->
-      reset()
-      $scope.login()
-    )
 
 
 class AnnotationViewerController
