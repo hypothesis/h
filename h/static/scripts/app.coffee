@@ -3,7 +3,7 @@ imports = [
   'ngRoute'
   'ngSanitize'
   'ngTagsInput'
-  'h.auth'
+  'h.account'
   'h.helpers'
   'h.identity'
   'h.streamer'

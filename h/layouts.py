@@ -51,14 +51,14 @@ class BaseLayout(object):
 class AppLayout(BaseLayout):
     app = 'h'
     controller = 'AppController'
-    requirements = (('app', None), ('auth', None), ('topbar', None))
+    requirements = (('app', None), ('account', None), ('topbar', None))
 
 
 @layout_config(name='auth', template='h:templates/layouts/base.html')
 class AuthLayout(BaseLayout):
     app = 'h'
     controller = 'AuthAppController'
-    requirements = (('app', None), ('auth', None))
+    requirements = (('app', None), ('account', None))
 
 
 def includeme(config):

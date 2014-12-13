@@ -22,16 +22,16 @@ class AuthAppController
     onlogin = ->
       $window.location.href = '/stream'
 
-    $scope.auth = {}
+    $scope.account = {}
     $scope.model = {}
 
-    $scope.auth.tab = $location.path().split('/')[1]
+    $scope.account.tab = $location.path().split('/')[1]
 
     $scope.$on 'auth', (event, err, data) ->
       if data?.userid
         $timeout onlogin, 1000
 
-    $scope.$watch 'auth.tab', (tab, old) ->
+    $scope.$watch 'account.tab', (tab, old) ->
       unless tab is old then $location.path("/#{tab}")
 
     # TODO: We should be calling identity.beginProvisioning() here in order to
@@ -126,6 +126,6 @@ configure = [
 ]
 
 
-angular.module('h.auth', imports, configure)
+angular.module('h.account', imports, configure)
 .controller('AuthAppController', AuthAppController)
 .controller('AuthPageController', AuthPageController)
