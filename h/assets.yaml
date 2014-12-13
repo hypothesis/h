@@ -298,22 +298,22 @@ app_css:
           - h:static/styles/help-page.scss
 
 
-auth:
+account:
   contents:
     - jquery
     - angular
     - angular_route
     - helpers
     - session
-    - output: scripts/auth.min.js
+    - output: scripts/account.min.js
       filters: uglifyjs
       contents:
-        - output: scripts/auth.js
+        - output: scripts/account.js
           filters: coffeescript
           contents:
-            - h:static/scripts/auth/auth.coffee
-            - h:static/scripts/auth/*-controller.coffee
-            - h:static/scripts/auth/*-service.coffee
+            - h:static/scripts/account/account.coffee
+            - h:static/scripts/account/*-controller.coffee
+            - h:static/scripts/account/*-service.coffee
 
 
 helpers:

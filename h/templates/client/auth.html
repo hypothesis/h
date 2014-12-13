@@ -2,8 +2,8 @@
      tab-reveal="['forgot_password', 'reset_password']"
      ng-controller="AuthController as vm"
      ng-form="form"
-     ng-model="auth.tab"
-     ng-submit="vm.submit(form[auth.tab])">
+     ng-model="account.tab"
+     ng-submit="vm.submit(form[account.tab])">
   <!-- Login -->
   <form data-title="Sign in"
         data-value="login"
@@ -54,7 +54,7 @@
 
     <div class="form-actions">
       <div class="form-actions-message">
-        <a href="" ng-click="auth.tab = 'forgot_password'"
+        <a href="" ng-click="account.tab = 'forgot_password'"
            >Forgot your password?</a>
       </div>
       <div class="form-actions-buttons">

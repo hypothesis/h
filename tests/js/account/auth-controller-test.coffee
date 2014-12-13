@@ -19,8 +19,8 @@ class MockSession
 mockFlash = sandbox.spy()
 mockFormHelpers = applyValidationErrors: sandbox.spy()
 
-describe 'h.auth', ->
-  beforeEach module('h.auth')
+describe 'h.account', ->
+  beforeEach module('h.account')
   beforeEach module('h.templates')
 
   beforeEach module ($provide) ->

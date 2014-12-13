@@ -7,12 +7,12 @@ class AuthController
       if data.userid
         $scope.$emit 'auth', null, data
 
-      $scope.auth.tab =
-        switch $scope.auth.tab
+      $scope.account.tab =
+        switch $scope.account.tab
           when 'register' then 'login'
           when 'forgot_password' then 'reset_password'
           when 'reset_password' then 'login'
-          else $scope.auth.tab
+          else $scope.account.tab
 
       angular.copy {}, $scope.model
       $scope.form?.$setPristine()
@@ -30,7 +30,7 @@ class AuthController
         angular.bind(this, failure, form)
       .$promise.finally -> $scope.$broadcast 'formState', form.$name, ''
 
-    $scope.auth ?= tab: 'login'
+    $scope.account ?= tab: 'login'
     $scope.model ?= {}
 
     $scope.$on 'auth', do ->
@@ -53,5 +53,5 @@ class AuthController
         , 300000
 
 
-angular.module('h.auth')
+angular.module('h.account')
 .controller('AuthController', AuthController)

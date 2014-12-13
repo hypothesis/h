@@ -44,7 +44,7 @@ module.exports = function(config) {
       'h/static/scripts/plugin/discovery.js',
       'h/static/scripts/plugin/threading.js',
       'h/static/scripts/app.js',
-      'h/static/scripts/auth.js',
+      'h/static/scripts/account.js',
       'h/static/scripts/helpers.js',
       'h/static/scripts/session.js',
       'h/static/scripts/hypothesis.js',
