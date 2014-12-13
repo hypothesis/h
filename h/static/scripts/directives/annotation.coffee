@@ -38,9 +38,9 @@ validate = (value) ->
 ###
 AnnotationController = [
   '$scope', '$timeout',
-  'annotator', 'drafts', 'flash', 'documentHelpers', 'timeHelpers', 'auth'
+  'annotator', 'auth', 'drafts', 'flash', 'documentHelpers', 'timeHelpers'
   ($scope,   $timeout,
-   annotator,   drafts,   flash,   documentHelpers,   timeHelpers,   auth
+   annotator,   auth,   drafts,   flash,   documentHelpers,   timeHelpers
   ) ->
     @annotation = {}
     @action = 'view'

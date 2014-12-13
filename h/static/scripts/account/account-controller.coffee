@@ -1,8 +1,8 @@
 class AccountController
   @inject = [  '$scope', '$filter',
-               'flash', 'formHelpers', 'identity', 'session', 'auth']
+               'auth', 'flash', 'formHelpers', 'identity', 'session']
   constructor: ($scope,   $filter,
-                flash,   formHelpers,   identity,   session,   auth ) ->
+                auth,   flash,   formHelpers,   identity,   session) ->
     persona_filter = $filter('persona')
     $scope.subscriptionDescription =
       reply: 'Receive notification emails when: - Someone replies to one of my annotations'

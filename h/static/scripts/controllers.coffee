@@ -1,13 +1,15 @@
 class AppController
   this.$inject = [
     '$location', '$route', '$scope', '$timeout',
-    'annotator', 'flash', 'identity', 'streamer', 'streamfilter',
-    'documentHelpers', 'drafts', 'auth'
+    'annotator', 'auth', 'documentHelpers', 'drafts', 'flash', 'identity',
+    'streamer', 'streamfilter'
+
   ]
   constructor: (
      $location,   $route,   $scope,   $timeout,
-     annotator,   flash,   identity,   streamer,   streamfilter,
-     documentHelpers,   drafts, auth
+     annotator,   auth,   documentHelpers,   drafts,   flash,   identity,
+     streamer,   streamfilter,
+
   ) ->
     {plugins, host, providers} = annotator
 
