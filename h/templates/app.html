@@ -7,21 +7,21 @@
 {% block content %}
   <!-- Toolbar -->
   <div class="ng-cloak topbar" ng-class="frame.visible && 'shown'">
-    <div class="inner" ng-switch="persona">
+    <div class="inner" ng-switch="auth.user">
       <span class="pull-right" ng-switch-when="undefined">⋯</span>
       <div class="dropdown pull-right user-picker">
         <span role="button"
               class="dropdown-toggle"
-              data-toggle="dropdown">{% raw %}{{ persona|persona }}{% endraw %}<!--
-          --><span class="provider" ng-show="persona">/{% raw %}{{ persona|persona:'provider' }}{% endraw %}</span><!--
+              data-toggle="dropdown">{% raw %}{{ auth.user|persona }}{% endraw %}<!--
+          --><span class="provider" ng-show="auth.user">/{% raw %}{{ auth.user|persona:'provider' }}{% endraw %}</span><!--
           --><i class="h-icon-triangle"></i></span>
         <ul class="dropdown-menu pull-right" role="menu">
-          <li ng-show="persona"><a href="" ng-click="dialog.visible='true'">Account</a></li>
+          <li ng-show="auth.user"><a href="" ng-click="dialog.visible='true'">Account</a></li>
           <li><a href="mailto:support@hypothes.is">Feedback</a></li>
           <li><a href="/docs/help" target="_blank">Help</a></li>
-          <li ng-show="persona"><a href="/stream?q=user:{% raw %}{{ persona|persona }}{% endraw %}"
+          <li ng-show="auth.user"><a href="/stream?q=user:{% raw %}{{ auth.user|persona }}{% endraw %}"
                  target="_blank">My Annotations</a></li>
-          <li ng-show="persona" ng-click="logout()">Sign out</li>
+          <li ng-show="auth.user" ng-click="logout()">Sign out</li>
         </ul>
       </div>
       <a class="pull-right" href=""
@@ -47,10 +47,10 @@
            role="button"
            title="Close"
            ng-click="dialog.visible = false"></i>
-        <div ng-if="persona">
+        <div ng-if="auth.user">
           {% include_raw "h:templates/client/account.html" %}
         </div>
-        <div ng-if="!persona">
+        <div ng-if="!auth.user">
           {% include_raw "h:templates/client/auth.html" %}
         </div>
       </div>

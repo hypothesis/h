@@ -40,7 +40,7 @@ class AppController
 
       unless data instanceof Array then data = [data]
 
-      p = $scope.persona
+      p = auth.user
       user = if p? then "acct:" + p.username + "@" + p.provider else ''
       unless data instanceof Array then data = [data]
 
@@ -82,12 +82,12 @@ class AppController
       Store.updateAnnotation = angular.noop
 
       # Sort out which annotations should remain in place.
-      persona = auth.user
+      user = auth.user
       view = annotator.socialView.name
       cull = (acc, annotation) ->
-        if view is 'single-player' and annotation.user != persona
+        if view is 'single-player' and annotation.user != user
           acc.drop.push annotation
-        else if auth.permits 'read', annotation, persona
+        else if auth.permits 'read', annotation, user
           acc.keep.push annotation
         else
           acc.drop.push annotation
@@ -112,7 +112,6 @@ class AppController
       $scope.dialog.visible = false
 
     reset = ->
-      $scope.persona = auth.user
       $scope.dialog.visible = false
 
       # Update any edits in progress.
@@ -151,12 +150,13 @@ class AppController
         streamer.send({filter: streamfilter.getFilter()})
 
     $scope.$watch 'auth.user', (newVal, oldVal) ->
-      reset() if newVal isnt undefined
-      $scope.login() if isFirstRun and newVal is null and oldVal is undefined
+      return if newVal is undefined
+      reset()
+      $scope.login() if isFirstRun and not (newVal or oldVal)
 
     $scope.login = ->
       $scope.dialog.visible = true
-      identity.request(oncancel)
+      identity.request {oncancel}
 
     $scope.logout = ->
       return unless drafts.discard()

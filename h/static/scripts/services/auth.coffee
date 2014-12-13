@@ -1,5 +1,4 @@
 class Auth
-  user: undefined
 
   this.$inject = ['$location', '$rootScope',
                   'annotator', 'documentHelpers', 'identity']
@@ -7,6 +6,7 @@ class Auth
                    annotator,   documentHelpers,   identity) ->
     {plugins} = annotator
     _checkingToken = false
+    @user = undefined
 
     onlogin = (assertion) =>
       _checkingToken = true
