@@ -107,14 +107,14 @@ describe 'streamer', ->
     clock.tick(500)
     assert.calledOnce(WebSocket)
 
-  it 'calls the onmessage handler when the socket recieves a message', ->
+  it 'calls the onmessage handler when the socket receives a message', ->
     streamer.onmessage = sinon.spy()
     streamer.open()
-    fakeSock.onmessage(JSON.stringify({animal: 'baboon'}))
+    fakeSock.onmessage(data: JSON.stringify({animal: 'baboon'}))
     assert.called(streamer.onmessage)
 
   it 'calls the onmessage handler with parsed JSON', ->
     streamer.onmessage = sinon.spy()
     streamer.open()
-    fakeSock.onmessage(JSON.stringify({animal: 'baboon'}))
+    fakeSock.onmessage(data: JSON.stringify({animal: 'baboon'}))
     assert.calledWith(streamer.onmessage, {animal: 'baboon'})

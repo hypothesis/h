@@ -17,7 +17,7 @@ class AppController
     isFirstRun = $location.search().hasOwnProperty('firstrun')
 
     applyUpdates = (action, data) ->
-      """Update the application with new data from the websocket."""
+      # Update the application with new data from the websocket.
       return unless data?.length
       if action == 'past'
         action = 'create'
@@ -32,28 +32,21 @@ class AppController
             plugins.Store?.unregisterAnnotation(annotation)
             annotator.deleteAnnotation(annotation)
 
-    streamer.onmessage = (msg) ->
-      data = msg.data
-      unless data.type? and data.type is 'annotation-notification'
+    streamer.onmessage = (data) ->
+      if !data or data.type != 'annotation-notification'
         return
 
-      payload = data.payload
       action = data.options.action
-
-      unless payload instanceof Array then payload = [payload]
-
-      p = auth.user
-      user = if p? then "acct:" + p.username + "@" + p.provider else ''
-      unless payload instanceof Array then payload = [payload]
+      payload = data.payload
 
       if $scope.socialView.name is 'single-player'
-        payload = payload.filter (d) -> d.user is user
+        payload = payload.filter (ann) -> ann.user is auth.user
 
-      applyUpdates action, payload
+      applyUpdates(action, payload)
       $scope.$digest()
 
     initStore = ->
-      """Initialize the storage component."""
+      # Initialize the storage component.
       Store = plugins.Store
       delete plugins.Store
 

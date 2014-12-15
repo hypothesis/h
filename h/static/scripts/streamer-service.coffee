@@ -59,7 +59,7 @@ class Streamer
       setTimeout((-> self.open()), backoff(self._failCount, 10))
 
     this._sock.onmessage = (msg) ->
-      self.onmessage(JSON.parse(msg))
+      self.onmessage(JSON.parse(msg.data))
 
   ###*
   # @ngdoc method
