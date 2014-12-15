@@ -57,7 +57,7 @@ configure = [
     basePattern = baseURI.replace /\/[^\/]*$/, '/**.html'
     $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
 
-    streamerProvider.url = baseURI + '__streamer__'
+    streamerProvider.url = baseURI.replace('http', 'ws') + 'ws'
 ]
 
 
