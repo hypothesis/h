@@ -1,0 +1,36 @@
+@import "variables";
+
+// Newer versions of PDFjs use apply a transparency to the textLayer element.
+// In order for our highlights to be visible we need to use solid colors. The
+// PDFjs plugin provides a compatibility class to the PDFjs container that
+// we can use to detect this.
+.has-transparent-text-layer {
+  .annotator-hl {
+    &::-moz-selection {
+      background: rgba($highlight-color, 1);
+    }
+    &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
+      background: rgba($highlight-color, 1);
+    }
+    &::selection, &::selection:window-inactive {
+      background: rgba($highlight-color, 1);
+    }
+  }
+
+  .annotator-highlights-always-on & .annotator-hl {
+    background: rgba($highlight-color, 1);
+
+    .annotator-hl {
+      background-color: rgba($highlight-color-second, 1);
+    }
+
+    .annotator-hl .annotator-hl {
+      background-color: rgba($highlight-color-third, 1);
+    }
+  }
+
+  .annotator-hl-focused,
+  .annotator-highlights-always-on & .annotator-hl.annotator-hl-focused {
+    background-color: rgba($highlight-color-focus, 1);
+  }
+}
