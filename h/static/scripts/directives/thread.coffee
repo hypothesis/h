@@ -16,6 +16,7 @@ COLLAPSED_CLASS = 'thread-collapsed'
 ###
 ThreadController = [
   ->
+    @isRoot = false
     @container = null
     @collapsed = false
 
@@ -36,7 +37,7 @@ ThreadController = [
     # current thread.
     ###
     this.showReplyToggle = (messageCount) ->
-      messageCount > 1 && !(@collapsed && @container.parent.parent)
+      messageCount > 1 && !(@collapsed && @container.isRoot)
 
     this
 ]
@@ -52,11 +53,17 @@ ThreadController = [
 # If the `thread-collapsed` attribute is specified, it is treated as an
 # expression to watch in the context of the current scope that controls
 # the collapsed state of the thread.
+#
+# If the `thread-root` attribute is `true` then this thread container is
+# assumed to be the top level of a conversation and not a reply. It will
+# be presented accordingly.
 ###
 thread = [
   '$parse', '$window', 'render',
   ($parse,   $window,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter]) ->
+      ctrl.isRoot = $parse(attrs.threadRoot)(scope) == true
+
       # Toggle collapse on click.
       elem.on 'click', (event) ->
         event.stopPropagation()
@@ -84,9 +91,12 @@ thread = [
 
       # Queue a render frame to complete the binding and show the element.
       render ->
-        ctrl.container = $parse(attrs.thread)(scope)
         counter.count 'message', 1
         scope.$digest()
+
+      # Observe the thread for changes.
+      scope.$watch $parse(attrs.thread), (container) ->
+        ctrl.container = container
 
       scope.$on '$destroy', -> counter.count 'message', -1
 

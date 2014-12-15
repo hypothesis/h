@@ -1,6 +1,6 @@
 <a href="" class="threadexp"
    title="{{vm.collapsed && 'Expand' || 'Collapse'}}"
-   ng-if="vm.container.parent.parent"
+   ng-if="!vm.isRoot"
    ><span ng-class="{'h-icon-plus': !!vm.collapsed,
                      'h-icon-minus': !vm.collapsed}"></span></a>
 

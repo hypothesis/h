@@ -285,12 +285,13 @@ class AnnotationViewerController
     $scope.$watch 'store', ->
       if $scope.store
         $scope.store.loadAnnotationsFromSearch({_id: id}).then (results) ->
-          # Remove references to parent annotations before loading children.
+          # Find the container for the current result in the thread.
           ann = results.rows[0]
-          ann.references = []
+          container = $scope.threading.root.getSpecificChild(ann.id)
 
-          # Update the current thread.
-          $scope.threading.thread([ann])
+          # Use the parent as the root for the viewer. This will then render
+          # the loaded container as the only child.
+          $scope.threading.root = container.parent
 
           $scope.store.loadAnnotationsFromSearch({references: id})
 
