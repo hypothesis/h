@@ -89,12 +89,12 @@ describe 'h.directives.privacy', ->
         beforeEach ->
           store.removeItem VISIBILITY_KEY
 
-        it 'defaults to private', ->
+        it 'defaults to public', ->
           $scope.permissions = {read: []}
           $element = $compile('<privacy ng-model="permissions">')($scope)
           $scope.$digest()
           $isolateScope = $element.isolateScope()
-          assert.equal $isolateScope.level.name, VISIBILITY_PRIVATE
+          assert.equal $isolateScope.level.name, VISIBILITY_PUBLIC
 
       describe 'when permissions.read is empty', ->
         beforeEach ->
