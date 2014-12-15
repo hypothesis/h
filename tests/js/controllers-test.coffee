@@ -3,6 +3,7 @@ sinon.assert.expose assert, prefix: null
 
 describe 'h', ->
   $scope = null
+  fakeAuth = null
   fakeIdentity = null
   fakeLocation = null
   fakeParams = null
@@ -22,10 +23,16 @@ describe 'h', ->
       socialView: {name: 'none'}
       addPlugin: sandbox.spy()
     }
+
+    fakeAuth = {
+      user: null
+    }
+
     fakeIdentity = {
       watch: sandbox.spy()
       request: sandbox.spy()
     }
+
     fakeLocation = {
       search: sandbox.stub().returns({})
     }
@@ -55,41 +62,9 @@ describe 'h', ->
       createController = ->
         $controller('AppController', {$scope: $scope})
 
-    it 'watches the identity service for identity change events', ->
-      app = createController()
-      assert.calledOnce(fakeIdentity.watch)
-
-    it 'sets the persona to null when the identity has been checked', ->
-      app = createController()
-      {onlogin, onlogout, onready} = fakeIdentity.watch.args[0][0]
-      onready()
-      assert.isNull($scope.persona)
-
-    it 'does not set the persona to null while token is still being checked', ->
-      app = createController()
-      {onlogin, onlogout, onready} = fakeIdentity.watch.args[0][0]
-      onlogin()
-      onready()
-      assert.isNotNull($scope.persona)
-
-    it 'shows login form for logged out users on first run', ->
-      fakeLocation.search.returns({'firstrun': ''})
-      app = createController()
-      {onlogin, onlogout, onready} = fakeIdentity.watch.args[0][0]
-      onready()
-      assert.isTrue($scope.dialog.visible)
-
-    it 'does not show login form for logged out users if not first run', ->
-      app = createController()
-      {onlogin, onlogout, onready} = fakeIdentity.watch.args[0][0]
-      onready()
-      assert.isFalse($scope.dialog.visible)
-
     it 'does not show login form for logged in users', ->
-      app = createController()
-      {onlogin, onlogout, onready} = fakeIdentity.watch.args[0][0]
-      onlogin('abcdef123')
-      onready()
+      createController()
+      $scope.$digest()
       assert.isFalse($scope.dialog.visible)
 
   describe 'AnnotationViewerController', ->

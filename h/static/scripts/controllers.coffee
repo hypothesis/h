@@ -1,43 +1,19 @@
-# User authorization function for the Permissions plugin.
-authorizeAction = (action, annotation, user) ->
-  if annotation.permissions
-    tokens = annotation.permissions[action] || []
-
-    if tokens.length == 0
-      # Empty or missing tokens array: only admin can perform action.
-      return false
-
-    for token in tokens
-      if user == token
-        return true
-      if token == 'group:__world__'
-        return true
-
-    # No tokens matched: action should not be performed.
-    return false
-
-  # Coarse-grained authorization
-  else if annotation.user
-    return user and user == annotation.user
-
-  # No authorization info on annotation: free-for-all!
-  true
-
-
 class AppController
   this.$inject = [
     '$location', '$route', '$scope', '$timeout',
-    'annotator', 'flash', 'identity', 'streamer', 'streamfilter',
-    'documentHelpers', 'drafts'
+    'annotator', 'auth', 'documentHelpers', 'drafts', 'flash', 'identity',
+    'streamer', 'streamfilter'
+
   ]
   constructor: (
      $location,   $route,   $scope,   $timeout,
-     annotator,   flash,   identity,   streamer,   streamfilter,
-     documentHelpers,   drafts
+     annotator,   auth,   documentHelpers,   drafts,   flash,   identity,
+     streamer,   streamfilter,
+
   ) ->
     {plugins, host, providers} = annotator
 
-    checkingToken = false
+    $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
 
     applyUpdates = (action, data) ->
@@ -65,7 +41,7 @@ class AppController
 
       unless payload instanceof Array then payload = [payload]
 
-      p = $scope.persona
+      p = auth.user
       user = if p? then "acct:" + p.username + "@" + p.provider else ''
       unless payload instanceof Array then payload = [payload]
 
@@ -80,7 +56,7 @@ class AppController
       Store = plugins.Store
       delete plugins.Store
 
-      if $scope.persona or annotator.socialView.name is 'none'
+      if auth.user or annotator.socialView.name is 'none'
         annotator.addPlugin 'Store', annotator.options.Store
 
         $scope.store = plugins.Store
@@ -105,12 +81,12 @@ class AppController
       Store.updateAnnotation = angular.noop
 
       # Sort out which annotations should remain in place.
-      user = $scope.persona
+      user = auth.user
       view = annotator.socialView.name
       cull = (acc, annotation) ->
         if view is 'single-player' and annotation.user != user
           acc.drop.push annotation
-        else if authorizeAction 'read', annotation, user
+        else if auth.permits 'read', annotation, user
           acc.keep.push annotation
         else
           acc.drop.push annotation
@@ -131,47 +107,6 @@ class AppController
         annotator.deleteAnnotation first
         $timeout -> cleanup rest
 
-    onlogin = (assertion) ->
-      checkingToken = true
-
-      # Configure the Auth plugin with the issued assertion as refresh token.
-      annotator.addPlugin 'Auth',
-        tokenUrl: documentHelpers.absoluteURI(
-          "/api/token?assertion=#{assertion}")
-
-      # Set the user from the token.
-      plugins.Auth.withToken (token) ->
-        checkingToken = false
-        annotator.addPlugin 'Permissions',
-          user: token.userId
-          userAuthorize: authorizeAction
-        $scope.$apply ->
-          $scope.persona = token.userId
-          reset()
-
-    onlogout = ->
-      plugins.Auth?.element.removeData('annotator:headers')
-      plugins.Auth?.destroy()
-      delete plugins.Auth
-
-      plugins.Permissions?.setUser(null)
-      plugins.Permissions?.destroy()
-      delete plugins.Permissions
-
-      $scope.persona = null
-      checkingToken = false
-      reset()
-
-    onready = ->
-      if not checkingToken and typeof $scope.persona == 'undefined'
-        # If we're not checking the token and persona is undefined, onlogin
-        # hasn't run, which means we aren't authenticated.
-        $scope.persona = null
-        reset()
-
-        if isFirstRun
-          $scope.login()
-
     oncancel = ->
       $scope.dialog.visible = false
 
@@ -187,12 +122,10 @@ class AppController
       streamer.close()
       streamer.open()
 
-    identity.watch {onlogin, onlogout, onready}
-
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue
       initStore()
-      if newValue is 'single-player' and not $scope.persona
+      if newValue is 'single-player' and not auth.user
         annotator.show()
         flash 'info',
           'You will need to sign in for your highlights to be saved.'
@@ -214,6 +147,11 @@ class AppController
           .addClause('/uri', 'one_of', entities)
 
         streamer.send({filter: streamfilter.getFilter()})
+
+    $scope.$watch 'auth.user', (newVal, oldVal) ->
+      return if newVal is undefined
+      reset()
+      $scope.login() if isFirstRun and not (newVal or oldVal)
 
     $scope.login = ->
       $scope.dialog.visible = true

@@ -10,9 +10,17 @@ describe 'h.directives.annotation', ->
   annotation = null
   createController = null
   flash = null
+  fakeUser = null
 
   beforeEach module('h')
   beforeEach module('h.templates')
+
+  beforeEach module ($provide) ->
+    fakeAuth =
+      user: 'acct:bill@localhost'
+
+    $provide.value 'auth', fakeAuth
+    return
 
   beforeEach inject (_$compile_, $controller, _$document_, $rootScope, _$timeout_) ->
     $compile = _$compile_
@@ -70,10 +78,17 @@ describe 'h.directives.annotation', ->
       newAnnotation = annotator.publish.lastCall.args[1]
       assert.include(newAnnotation.permissions.read, 'group:__world__')
 
-    it 'does not add the world readable principal if the parent is privace', ->
+    it 'does not add the world readable principal if the parent is private', ->
       controller.reply()
       newAnnotation = annotator.publish.lastCall.args[1]
       assert.notInclude(newAnnotation.permissions.read, 'group:__world__')
+
+    it 'fills the other permissions too', ->
+      controller.reply()
+      newAnnotation = annotator.publish.lastCall.args[1]
+      assert.equal(newAnnotation.permissions.update[0], 'acct:bill@localhost')
+      assert.equal(newAnnotation.permissions.delete[0], 'acct:bill@localhost')
+      assert.equal(newAnnotation.permissions.admin[0], 'acct:bill@localhost')
 
   describe '#render', ->
     controller = null
