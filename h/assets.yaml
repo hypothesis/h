@@ -237,7 +237,7 @@ app_js:
     - uuid
     - angular_tags_input
     - gettext
-    - h:static/scripts/vendor/katex/katex.min.js
+    - h:static/scripts/vendor/katex/katex.js
     - annotator
     - annotator_auth
     - annotator_bridge
