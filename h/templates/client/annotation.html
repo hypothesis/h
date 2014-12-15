@@ -92,7 +92,7 @@
 </div>
 <!-- / Tags -->
 
-<footer class="annotation-footer form-actions"
+<div class="annotation-section form-actions"
         ng-if="vm.editing"
         ng-switch="vm.action">
   <div class="form-actions-buttons form-actions-left">
@@ -109,7 +109,16 @@
             ng-click="vm.revert()"
             ><i class="h-icon-x btn-icon"></i> Cancel</button>
   </div>
-</footer>
+</div>
+
+<div class="annotation-section annotation-license" ng-if="vm.editing">
+  <a href="http://creativecommons.org/publicdomain/zero/1.0/"
+     title="View more information about the Creative Commons Public Domain license"
+     target="_blank">
+    <i class="h-icon-cc-logo"></i><i class="h-icon-cc-zero"></i>
+    Annotations can be freely reused by anyone for any purpose.
+  </a>
+</div>
 
 <footer class="annotation-footer annotation-actions"
         ng-if="!vm.editing && vm.annotation.id">
