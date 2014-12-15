@@ -64,7 +64,7 @@ privacy = ['$window', ($window) ->
     controller.$render = ->
       unless controller.$modelValue.read.length
         name = storage.getItem VISIBILITY_KEY
-        name ?= VISIBILITY_PRIVATE
+        name ?= VISIBILITY_PUBLIC
         level = getLevel(name)
         controller.$setViewValue level
 
