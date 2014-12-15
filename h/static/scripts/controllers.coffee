@@ -33,9 +33,10 @@ class AppController
             annotator.deleteAnnotation(annotation)
 
     streamer.onmessage = (msg) ->
-      data = JSON.parse(msg.data)
+      data = msg.data
       unless data.type? and data.type is 'annotation-notification'
         return
+
       payload = data.payload
       action = data.options.action
 
