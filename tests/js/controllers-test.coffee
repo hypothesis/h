@@ -4,28 +4,16 @@ sinon.assert.expose assert, prefix: null
 describe 'h', ->
   $scope = null
   fakeAuth = null
+  fakeIdentity = null
   fakeLocation = null
   fakeParams = null
   fakeStreamer = null
-  fakeIdentity = null
   sandbox = null
 
   beforeEach module('h')
 
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
-
-    fakeAuth = {
-      user: null
-      getInitialUser: ->
-        then: (resolve, reject) ->
-          resolve()
-    }
-
-    fakeIdentity = {
-      watch: sandbox.spy()
-      request: sandbox.spy()
-    }
 
     fakeAnnotator = {
       plugins: {
@@ -34,6 +22,15 @@ describe 'h', ->
       options: {}
       socialView: {name: 'none'}
       addPlugin: sandbox.spy()
+    }
+
+    fakeAuth = {
+      user: null
+    }
+
+    fakeIdentity = {
+      watch: sandbox.spy()
+      request: sandbox.spy()
     }
 
     fakeLocation = {
@@ -66,7 +63,8 @@ describe 'h', ->
         $controller('AppController', {$scope: $scope})
 
     it 'does not show login form for logged in users', ->
-      app = createController()
+      createController()
+      $scope.$digest()
       assert.isFalse($scope.dialog.visible)
 
   describe 'AnnotationViewerController', ->

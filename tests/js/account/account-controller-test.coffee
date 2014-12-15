@@ -24,7 +24,7 @@ describe 'h.account.AccountController', ->
     fakeFormHelpers =
       applyValidationErrors: sandbox.spy()
     fakeAuth =
-      getPersona: (-> 'egon@columbia.edu')
+      user: 'egon@columbia.edu'
 
     $filterProvider.register 'persona', ->
       sandbox.stub().returns('STUBBED_PERSONA_FILTER')
