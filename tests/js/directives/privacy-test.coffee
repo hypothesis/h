@@ -16,14 +16,22 @@ describe 'h.directives.privacy', ->
   beforeEach module('h.templates')
 
   describe 'memory fallback', ->
+    fakeAuth = null
     fakeWindow  = null
     sandbox = null
 
     beforeEach module ($provide) ->
       sandbox = sinon.sandbox.create()
+
+      fakeAuth = {
+        user: 'acct:angry.joe@texas.com'
+      }
+
       fakeWindow = {
         localStorage: undefined
       }
+
+      $provide.value 'auth', fakeAuth
       $provide.value '$window', fakeWindow
       return
 
@@ -55,6 +63,22 @@ describe 'h.directives.privacy', ->
         assert.equal readPermissions, 'group:__world__'
 
   describe 'has localStorage', ->
+    sandbox = null
+    fakeAuth = null
+
+    beforeEach module ($provide) ->
+      sandbox = sinon.sandbox.create()
+
+      fakeAuth = {
+        user: 'acct:angry.joe@texas.com'
+      }
+
+      $provide.value 'auth', fakeAuth
+      return
+
+    afterEach ->
+      sandbox.restore()
+
     beforeEach inject (_$compile_, _$rootScope_, _$injector_, _$window_) ->
       $compile = _$compile_
       $scope = _$rootScope_.$new()
@@ -129,32 +153,30 @@ describe 'h.directives.privacy', ->
         beforeEach ->
           $scope.permissions = {read: []}
 
-        it 'fills the permissions fields with the given user name', ->
+        it 'fills the permissions fields with the auth.user name', ->
           store.setItem VISIBILITY_KEY, VISIBILITY_PRIVATE
-          $element = $compile('<privacy ng-model="permissions" user="acct:user@example.com">')($scope)
+          $element = $compile('<privacy ng-model="permissions">')($scope)
           $scope.$digest()
 
-          user = "acct:user@example.com"
           readPermissions = $scope.permissions.read[0]
           updatePermissions = $scope.permissions.update[0]
           deletePermissions = $scope.permissions.delete[0]
           adminPermissions = $scope.permissions.admin[0]
-          assert.equal readPermissions, user
-          assert.equal updatePermissions, user
-          assert.equal deletePermissions, user
-          assert.equal adminPermissions, user
+          assert.equal readPermissions, fakeAuth.user
+          assert.equal updatePermissions, fakeAuth.user
+          assert.equal deletePermissions, fakeAuth.user
+          assert.equal adminPermissions, fakeAuth.user
 
         it 'puts group_world into the read permissions for public visibility', ->
           store.setItem VISIBILITY_KEY, VISIBILITY_PUBLIC
-          $element = $compile('<privacy ng-model="permissions" user="acct:user@example.com">')($scope)
+          $element = $compile('<privacy ng-model="permissions">')($scope)
           $scope.$digest()
 
-          user = "acct:user@example.com"
           readPermissions = $scope.permissions.read[0]
           updatePermissions = $scope.permissions.update[0]
           deletePermissions = $scope.permissions.delete[0]
           adminPermissions = $scope.permissions.admin[0]
           assert.equal readPermissions, 'group:__world__'
-          assert.equal updatePermissions, user
-          assert.equal deletePermissions, user
-          assert.equal adminPermissions, user
+          assert.equal updatePermissions, fakeAuth.user
+          assert.equal deletePermissions, fakeAuth.user
+          assert.equal adminPermissions, fakeAuth.user

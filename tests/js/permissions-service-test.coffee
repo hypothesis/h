@@ -1,0 +1,61 @@
+assert = chai.assert
+sinon.assert.expose assert, prefix: null
+
+describe 'h', ->
+  sandbox = null
+  fakeAuth = null
+
+  beforeEach module('h')
+
+  beforeEach module ($provide) ->
+    sandbox = sinon.sandbox.create()
+    fakeAuth = {
+      user: 'acct:flash@gordon'
+    }
+
+    $provide.value 'auth', fakeAuth
+    return
+
+  afterEach ->
+    sandbox.restore()
+
+
+  describe 'permissions service', ->
+    permissions = null
+
+    beforeEach inject (_permissions_) ->
+      permissions = _permissions_
+
+    it 'private call fills all permissions with auth.user', ->
+      perms = permissions.private()
+      assert.equal(perms.read[0], 'acct:flash@gordon')
+      assert.equal(perms.update[0], 'acct:flash@gordon')
+      assert.equal(perms.delete[0], 'acct:flash@gordon')
+      assert.equal(perms.admin[0], 'acct:flash@gordon')
+
+    it 'public call fills the read property with group:__world__', ->
+      perms = permissions.public()
+      assert.equal(perms.read[0], 'group:__world__')
+      assert.equal(perms.update[0], 'acct:flash@gordon')
+      assert.equal(perms.delete[0], 'acct:flash@gordon')
+      assert.equal(perms.admin[0], 'acct:flash@gordon')
+
+    it 'isPublic() true if the read permission has group:__world__ in it', ->
+      annotation = {
+        permissions: {
+          read: ['group:__world__', 'acct:angry@birds.com']
+        }
+      }
+      assert.isTrue(permissions.isPublic(annotation))
+
+    it 'isPublic() false otherwise', ->
+      annotation = {
+        permissions: {
+          read: ['acct:angry@birds.com']
+        }
+      }
+      assert.isFalse(permissions.isPublic(annotation))
+      annotation.permissions.read = []
+      assert.isFalse(permissions.isPublic(annotation))
+      annotation.permissions.read = ['one', 'two', 'three']
+      assert.isFalse(permissions.isPublic(annotation))
