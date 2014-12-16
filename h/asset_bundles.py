@@ -3,10 +3,13 @@ from pyramid_webassets import PyramidResolver
 
 resolver = PyramidResolver()
 
+# First argument is the context, we don't have one here.
+root = resolver.search_for_source(None, 'h:static/')
+
 
 def resolve_glob(path):
-    # First argument is the context, we don't have one here.
-    return resolver.search_for_source(None, path)
+    matches = resolver.search_for_source(None, path)
+    return (p.replace(root, '') for p in matches)
 
 
 def process_path(path):
