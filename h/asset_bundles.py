@@ -1,6 +1,6 @@
 from .asset_helpers import create_bundle
 
-app_dependencies_js = create_bundle(
+app_js = create_bundle(
     'scripts/vendor/jschannel.js',
     'scripts/vendor/jwz.js',
     'scripts/vendor/moment-with-langs.js',
@@ -20,9 +20,7 @@ app_dependencies_js = create_bundle(
     'scripts/vendor/annotator.store.js',
     'scripts/plugin/bridge.coffee',
     'scripts/plugin/discovery.coffee',
-    'scripts/plugin/threading.coffee')
-
-app_js = create_bundle(
+    'scripts/plugin/threading.coffee',
     'scripts/app.coffee',
     'scripts/controllers.coffee',
     'scripts/directives.coffee',
@@ -80,36 +78,42 @@ app_css = create_bundle(
     'styles/icomoon.css',
     'styles/app.scss')
 
-inject_css = create_bundle(
+hypothesis_css = create_bundle(
     'styles/inject.scss')
 
-topbar_css = create_bundle(
-    'styles/topbar.scss')
+topbar_bundle = create_bundle(
+    'styles/topbar.scss', output='styles/topbar.css')
+
+jquery_bundle = create_bundle(
+    'scripts/vendor/jquery.js',
+    output='scripts/vendor/jquery.js'),
 
 inject_bundle = create_bundle(
-    'scripts/vendor/jquery.js',
-    hypothesis_js,
-    inject_css)
+    jquery_bundle,
+    create_bundle(hypothesis_js, output='scripts/hypothesis.js'),
+    create_bundle(hypothesis_css, output='styles/hypothesis.css'))
 
 app_bundle = create_bundle(
-    'scripts/vendor/jquery.js',
-    'scripts/vendor/angular.js',
-    'scripts/vendor/angular-animate.js',
-    'scripts/vendor/angular-route.js',
-    'scripts/vendor/angular-sanitize.js',
-    'scripts/vendor/ng-tags-input.js',
-    app_dependencies_js,
-    helpers_js,
-    account_js,
-    session_js,
-    app_js,
-    app_css)
+    jquery_bundle,
+    create_bundle(
+        'scripts/vendor/angular.js',
+        'scripts/vendor/angular-animate.js',
+        'scripts/vendor/angular-route.js',
+        'scripts/vendor/angular-sanitize.js',
+        'scripts/vendor/ng-tags-input.js',
+        output='scripts/vendor/angular.js'),
+    create_bundle(app_js, output='scripts/app.js'),
+    create_bundle(helpers_js, output='scripts/helpers.js'),
+    create_bundle(account_js, output='scripts/account.js'),
+    create_bundle(session_js, output='scripts/session.js'),
+    create_bundle(app_css, output='styles/app.css'))
+
+wgxpath_bundle = create_bundle('scripts/vendor/polyfills/wgxpath.install.js')
 
 
 def register_bundles(config):
+    """ Registers the bundles with the application """
     config.add_webasset('inject', inject_bundle)
     config.add_webasset('app', app_bundle)
-    config.add_webasset('topbar', topbar_css)
-    config.add_webasset(
-        'wgxpath',
-        create_bundle('scripts/vendor/polyfills/wgxpath.install.js'))
+    config.add_webasset('topbar', topbar_bundle)
+    config.add_webasset('wgxpath', wgxpath_bundle)

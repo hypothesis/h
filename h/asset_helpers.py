@@ -15,10 +15,10 @@ DEBUG_PREFIX = 'debug/'
 STATIC_ROOT = RESOLVER.search_for_source(None, PKG_PREFIX)
 
 
-def create_bundle(*assets):
+def create_bundle(*assets, **kwargs):
     """ Creates a new Bundle """
     assets = (_process_path(path) for path in assets)
-    return Bundle(*assets)
+    return Bundle(*assets, **kwargs)
 
 
 def _process_path(path):
