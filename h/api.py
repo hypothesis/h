@@ -70,15 +70,14 @@ def index(context, request):
             },
             'search': {
                 'method': 'GET',
-                'url': request.resource_url(context, 'annotations'),
+                'url': request.resource_url(context, 'search'),
                 'desc': 'Basic search API'
             },
         }
     }
 
 
-@api_config(context='h.resources.AnnotationFactory')
-@api_config(context='h.resources.APIResource', name='search')  # deprecated
+@api_config(context='h.resources.APIResource', name='search')
 def search(context, request):
     """Search the database for annotations matching with the given query."""
 
@@ -106,6 +105,17 @@ def token(context, request):
     """Return the user's API authentication token."""
     response = request.create_token_response()
     return response.json_body.get('access_token', response)
+
+
+@api_config(context='h.resources.AnnotationFactory', request_method='GET')
+def annotations_index(context, request):
+    """Do a search for all annotations on anything and return results.
+
+    This will use the default limit, 20 at time of writing, and results
+    are ordered most recent first.
+    """
+    user = get_user(request)
+    return Annotation.search(user=user)
 
 
 @api_config(context='h.resources.AnnotationFactory',
