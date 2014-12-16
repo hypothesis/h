@@ -1,40 +1,4 @@
-from webassets import Bundle
-from pyramid_webassets import PyramidResolver
-
-resolver = PyramidResolver()
-
-# First argument is the context, we don't have one here.
-root = resolver.search_for_source(None, 'h:static/')
-
-
-def resolve_glob(path):
-    matches = resolver.search_for_source(None, path)
-    return (p.replace(root, '') for p in matches)
-
-
-def process_path(path):
-    if not isinstance(path, basestring):
-        return path
-
-    source = 'h:static/%s' % path
-
-    # Process globs individually.
-    if '*' in source:
-        assets = (process_path(p) for p in resolve_glob(source))
-        return Bundle(*assets)
-
-    # Create a bundle per coffee file.
-    if path.endswith('.coffee'):
-        output = ('debug/%s' % path).replace('.coffee', '.js')
-        return Bundle(path, filters='coffeescript', output=output)
-
-    return source
-
-
-def create_bundle(*assets):
-    assets = (process_path(path) for path in assets)
-    return Bundle(*assets)
-
+from .asset_helpers import create_bundle
 
 app_dependencies_js = create_bundle(
     'scripts/vendor/jschannel.js',
@@ -111,51 +75,41 @@ hypothesis_js = create_bundle(
     'scripts/host.coffee',
     'bootstrap.js')
 
-app_css = Bundle(
-    'h:static/scripts/vendor/katex/katex.min.css',
-    Bundle('h:static/styles/icomoon.css',
-           output='debug/styles/icomoon.css',
-           filters='cssrewrite'),
-    Bundle('h:static/styles/app.scss',
-           filters='compass,cssrewrite',
-           output='debug/styles/app.css',
-           depends='h:static/styles/**/*.scss'))
+app_css = create_bundle(
+    'scripts/vendor/katex/katex.min.css',
+    'styles/icomoon.css',
+    'styles/app.scss')
 
-inject_css = Bundle(
-    'h:static/styles/inject.scss',
-    filters='compass,cssrewrite',
-    output='debug/styles/inject.css',
-    depends='h:static/styles/**/*.scss')
+inject_css = create_bundle(
+    'styles/inject.scss')
 
-topbar_css = Bundle(
-    'h:static/styles/topbar.scss',
-    filters='compass',
-    output='debug/styles/topbar.css',
-    depends='h:static/styles/**/*.scss')
+topbar_css = create_bundle(
+    'styles/topbar.scss')
 
-inject_bundle = Bundle(
-    'h:static/scripts/vendor/jquery.js',
-    hypothesis_js, inject_css)
+inject_bundle = create_bundle(
+    'scripts/vendor/jquery.js',
+    hypothesis_js,
+    inject_css)
 
-app_bundle = Bundle(
-    'h:static/scripts/vendor/jquery.js',
-    Bundle('h:static/scripts/vendor/angular.js',
-           'h:static/scripts/vendor/angular-animate.js',
-           'h:static/scripts/vendor/angular-route.js',
-           'h:static/scripts/vendor/angular-sanitize.js',
-           'h:static/scripts/vendor/ng-tags-input.js'),
+app_bundle = create_bundle(
+    'scripts/vendor/jquery.js',
+    'scripts/vendor/angular.js',
+    'scripts/vendor/angular-animate.js',
+    'scripts/vendor/angular-route.js',
+    'scripts/vendor/angular-sanitize.js',
+    'scripts/vendor/ng-tags-input.js',
     app_dependencies_js,
     helpers_js,
     account_js,
     session_js,
     app_js,
-    app_css,
-    topbar_css)
+    app_css)
 
 
 def register_bundles(config):
     config.add_webasset('inject', inject_bundle)
     config.add_webasset('app', app_bundle)
+    config.add_webasset('topbar', topbar_css)
     config.add_webasset(
         'wgxpath',
-        Bundle('h:static/scripts/vendor/polyfills/wgxpath.install.js'))
+        create_bundle('scripts/vendor/polyfills/wgxpath.install.js'))
