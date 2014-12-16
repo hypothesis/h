@@ -1,5 +1,7 @@
 ### global -COLLAPSED_CLASS ###
 
+__root = null # TMP VAR
+
 COLLAPSED_CLASS = 'thread-collapsed'
 
 ###*
