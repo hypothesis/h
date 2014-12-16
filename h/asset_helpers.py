@@ -11,6 +11,7 @@ RESOLVER = PyramidResolver()
 
 # First argument is the context, we don't have one here.
 PKG_PREFIX = 'h:static/'
+DEBUG_PREFIX = 'debug/'
 STATIC_ROOT = RESOLVER.search_for_source(None, PKG_PREFIX)
 
 
@@ -43,15 +44,15 @@ def _process_path(path):
 
 def _build_coffee_bundle(source, original_path):
     """ Creates a bundle for a single CoffeeScript file """
-    output = ('debug/%s' % original_path).replace('.coffee', '.js')
+    output = _output_path(original_path, '.coffee', '.js')
     return Bundle(source, filters='coffeescript', output=output)
 
 
 def _build_scss_bundle(source, original_path):
     """ Creates a bundle for a single SCSS file """
-    output = ('debug/%s' % original_path).replace('.scss', '.css')
+    output = _output_path(original_path, '.scss', '.css')
     return Bundle(source, filters='compass,cssrewrite', output=output,
-                  depends='h:static/styles/**/*.scss')
+                  depends=PKG_PREFIX + 'styles/**/*.scss')
 
 
 def _build_glob_bundle(source):
@@ -66,3 +67,8 @@ def _resolve_glob(source):
         namespace so that it can be passed to _process_path. """
     matches = RESOLVER.search_for_source(None, source)
     return (p.replace(STATIC_ROOT, '') for p in matches)
+
+
+def _output_path(path, source_ext, output_ext):
+    """ Returns a path for a compiled asset during development """
+    return (DEBUG_PREFIX + path).replace(source_ext, output_ext)
