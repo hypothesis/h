@@ -267,9 +267,14 @@ AnnotationController = [
     # Watch the model.
     # XXX: TODO: don't clobber the view when collaborating
     $scope.$watch (-> model), (model, old) =>
-      # Discard saved drafts
       if model.updated != old.updated
+        # Discard saved drafts
         drafts.remove model
+
+        # Propagate an update event up the thread (to pulse changing threads),
+        # but only if this is someone else's annotation.
+        if model.user != auth.user
+          $scope.$emit('annotationUpdate')
 
       # Save highlights once logged in.
       if highlight and this.isHighlight()
