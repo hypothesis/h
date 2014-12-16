@@ -19,11 +19,8 @@ class AppController
     applyUpdates = (action, data) ->
       # Update the application with new data from the websocket.
       return unless data?.length
-      if action == 'past'
-        action = 'create'
-
       switch action
-        when 'create', 'update'
+        when 'create', 'update', 'past'
           plugins.Store?._onLoadAnnotations data
         when 'delete'
           for annotation in data
