@@ -10,6 +10,7 @@
 /docs/_build
 /h/static/.sass-cache
 /h/static/.webassets-cache
+/h/static/debug
 /include
 /lib
 /local

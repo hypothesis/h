@@ -4,6 +4,8 @@ import re
 from deform.field import Field
 import pyramid
 
+from .asset_bundles import register_bundles
+
 
 class WebassetsResourceRegistry(object):
 
@@ -62,8 +64,8 @@ def asset_response_subscriber(event):
 
 
 def includeme(config):
-    config.registry.settings.setdefault('webassets.bundles', 'h:assets.yaml')
     config.include('pyramid_webassets')
+    register_bundles(config)
 
     # Set up a predicate and subscriber to set CORS headers on asset responses
     config.add_subscriber_predicate('asset_request', AssetRequest)

@@ -4,7 +4,6 @@ __version__ = get_versions()['version']
 del get_versions
 
 from .app import main
-from .asset_bundles import register_bundles
 __all__ = ['main']
 
 
@@ -24,5 +23,3 @@ def includeme(config):
     config.add_jinja2_renderer('.js')
     config.add_jinja2_renderer('.txt')
     config.add_jinja2_renderer('.html')
-
-    register_bundles(config)
