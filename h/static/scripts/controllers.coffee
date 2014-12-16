@@ -182,6 +182,8 @@ class AppController
     $scope.socialView = annotator.socialView
     $scope.sort = name: 'Location'
     $scope.threading = plugins.Threading
+    $scope.streamItems = $scope.threading.root.children
+    __root = $scope.threading.root
 
 
 class AnnotationViewerController
@@ -215,7 +217,16 @@ class AnnotationViewerController
 
     $scope.$watch 'store', ->
       if $scope.store
-        $scope.store.loadAnnotationsFromSearch({_id: id}).then ->
+        $scope.store.loadAnnotationsFromSearch({_id: id}).then (results) ->
+          # Find the container for the current result in the thread and
+          # set it as the primary content for the stream
+          ann = results.rows[0]
+          container = $scope.threading.root.getSpecificChild(ann.id)
+          $scope.streamItems = [container]
+
+          # The threading root object has changed by this point...
+          console.log($scope.threading.root == __root) #=> false
+
           $scope.store.loadAnnotationsFromSearch({references: id})
 
     streamfilter

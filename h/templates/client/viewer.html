@@ -38,12 +38,13 @@
       deep-count="count"
       thread="child" thread-filter
       thread-collapsed="!search.query"
+      thread-root="true"
       ng-include="'thread.html'"
       ng-mouseenter="focus(child.message)"
       ng-click="scrollTo(child.message)""
       ng-mouseleave="focus()"
-      ng-repeat="child in vm.container.children | orderBy : sort.predicate"
-      ng-show="vm.container && shouldShowThread(child) &&
+      ng-repeat="child in streamItems | orderBy : sort.predicate"
+      ng-show="child && shouldShowThread(child) &&
                (count('edit') || count('match') || !threadFilter.active())">
   </li>
 </ul>
