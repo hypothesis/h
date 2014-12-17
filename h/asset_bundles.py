@@ -1,3 +1,5 @@
+from os import path
+from pyramid.settings import asbool
 from .asset_helpers import create_bundle
 
 app_js = create_bundle(
@@ -81,43 +83,79 @@ app_css = create_bundle(
 hypothesis_css = create_bundle(
     'styles/inject.scss')
 
-# Define output files for dependencies.
-
-topbar_bundle = create_bundle(
-    'styles/topbar.scss',
-    output='build/styles/topbar.css')
-
-jquery_bundle = create_bundle(
-    'scripts/vendor/jquery.js',
-    output='build/scripts/vendor/jquery.js')
-
-angular_bundle = create_bundle(
-    'scripts/vendor/angular.js',
-    'scripts/vendor/angular-animate.js',
-    'scripts/vendor/angular-route.js',
-    'scripts/vendor/angular-sanitize.js',
-    'scripts/vendor/ng-tags-input.js',
-    output='build/scripts/vendor/angular.js')
-
-inject_bundle = create_bundle(
-    jquery_bundle,
-    create_bundle(hypothesis_js, output='build/scripts/hypothesis.js'),
-    create_bundle(hypothesis_css, output='build/styles/hypothesis.css'))
-
-app_bundle = create_bundle(
-    jquery_bundle,
-    angular_bundle,
-    create_bundle(app_js, output='build/scripts/app.js'),
-    create_bundle(helpers_js, output='build/scripts/helpers.js'),
-    create_bundle(account_js, output='build/scripts/account.js'),
-    create_bundle(session_js, output='build/scripts/session.js'),
-    create_bundle(app_css, output='build/styles/app.css'))
-
-wgxpath_bundle = create_bundle('scripts/vendor/polyfills/wgxpath.install.js')
-
 
 def register_bundles(config):
     """ Registers the bundles with the application """
+
+    def output_bundle(*bundles, **kwargs):
+        """
+        Helper class to apply the correct filters and filename to each bundle
+        depending on whether they should be minified or not. This should
+        be called with a series of bundle instances and an output filepath.
+        """
+        output = kwargs['output']
+        filters = None
+
+        if asbool(config.registry.settings['hassets.minify']):
+            filename, ext = path.splitext(output)
+            output = '%s.min%s' % (filename, ext)
+            if ext.endswith('.css'):
+                filters = 'cleancss'
+            elif ext.endswith('.js'):
+                filters = 'uglifyjs'
+
+        return create_bundle(*bundles, output=output, filters=filters)
+
+    # Define output files for dependencies.
+    topbar_bundle = output_bundle(
+        'styles/topbar.scss',
+        output='build/styles/topbar.css')
+
+    jquery_bundle = output_bundle(
+        'scripts/vendor/jquery.js',
+        output='build/scripts/vendor/jquery.js')
+
+    angular_bundle = output_bundle(
+        'scripts/vendor/angular.js',
+        'scripts/vendor/angular-animate.js',
+        'scripts/vendor/angular-route.js',
+        'scripts/vendor/angular-sanitize.js',
+        'scripts/vendor/ng-tags-input.js',
+        output='build/scripts/vendor/angular.js')
+
+    inject_bundle = create_bundle(
+        jquery_bundle,
+        output_bundle(
+            hypothesis_js,
+            output='build/scripts/hypothesis.js'),
+        output_bundle(
+            hypothesis_css,
+            output='build/styles/hypothesis.css'))
+
+    app_bundle = create_bundle(
+        jquery_bundle,
+        angular_bundle,
+        output_bundle(
+            app_js,
+            output='build/scripts/app.js'),
+        output_bundle(
+            helpers_js,
+            output='build/scripts/helpers.js'),
+        output_bundle(
+            account_js,
+            output='build/scripts/account.js'),
+        output_bundle(
+            session_js,
+            output='build/scripts/session.js'),
+        output_bundle(
+            app_css,
+            output='build/styles/app.css'))
+
+    wgxpath_bundle = output_bundle(
+        'scripts/vendor/polyfills/wgxpath.install.js',
+        output='build/scripts/vendor/polyfills/wgxpath')
+
+    # Register the bundles with the application.
     config.add_webasset('inject', inject_bundle)
     config.add_webasset('app', app_bundle)
     config.add_webasset('topbar', topbar_bundle)
