@@ -7,14 +7,9 @@ default:
 clean:
 	@rm -rf h/static/.sass-cache
 	@rm -rf h/static/.webassets-cache
-	find h/static/scripts \
-		-path 'h/static/scripts/vendor' -prune \
-		-o -iname '*.js' \
-		-exec rm {} \;
-	find h/static/styles \
-		-iname '*.css' \
-		-prune -o -iname 'icomoon.css' \
-		-exec rm {} \;
+	@rm -rf h/static/build
+	@rm -rf h/static/debug
+	@mkdir h/static/debug h/static/build
 
 test:
 	@echo -n "Checking to see if elasticsearch is running..."

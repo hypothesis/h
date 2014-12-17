@@ -11,6 +11,7 @@
 /h/static/.sass-cache
 /h/static/.webassets-cache
 /h/static/debug
+/h/static/build
 /include
 /lib
 /local
