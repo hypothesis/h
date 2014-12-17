@@ -40,7 +40,7 @@
       thread-collapsed="!search.query"
       ng-include="'thread.html'"
       ng-mouseenter="focus(child.message)"
-      ng-click="scrollTo(child.message)""
+      ng-click="scrollTo(child.message)"
       ng-mouseleave="focus()"
       ng-repeat="child in vm.container.children | orderBy : sort.predicate"
       ng-show="vm.container && shouldShowThread(child) &&
