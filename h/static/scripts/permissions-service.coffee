@@ -1,3 +1,4 @@
+
 ###*
 # @ngdoc service
 # @name  Permissions
@@ -7,6 +8,8 @@
 # offers some utility functions regarding those.
 ###
 class Permissions
+  GROUP_WORLD = 'group:__world__'
+
   this.$inject = ['auth']
   constructor:    (auth) ->
     ###*
@@ -33,7 +36,7 @@ class Permissions
     ###
     @public = ->
       return {
-        read: ['group:__world__']
+        read: [GROUP_WORLD]
         update: [auth.user]
         delete: [auth.user]
         admin: [auth.user]
@@ -49,7 +52,7 @@ class Permissions
   # visible(readable) or not.
   ###
   isPublic: (annotation) ->
-    'group:__world__' in (annotation.permissions?.read or [])
+    GROUP_WORLD in (annotation.permissions?.read or [])
 
   ###*
   # @ngdoc method
@@ -72,7 +75,7 @@ class Permissions
       for token in tokens
         if user == token
           return true
-        if token == 'group:__world__'
+        if token == GROUP_WORLD
           return true
 
       # No tokens matched: action should not be performed.
