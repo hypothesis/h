@@ -48,7 +48,7 @@
            title="Close"
            ng-click="dialog.visible = false"></i>
         <div ng-if="auth.user">
-          {% include_raw "h:templates/client/account.html" %}
+          {% include "h:templates/client/account.html" %}
         </div>
         <div ng-if="!auth.user">
           {% include_raw "h:templates/client/auth.html" %}

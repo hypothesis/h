@@ -30,7 +30,7 @@ def js(context, request):
 @view_config(layout='app', name='editor', renderer='h:templates/app.html')
 @view_config(layout='app', name='page_search', renderer='h:templates/app.html')
 def page(context, request):
-    return {}
+    return {'notifications_enabled': request.registry.feature('notification')}
 
 
 @view_config(renderer='h:templates/help.html', route_name='index')

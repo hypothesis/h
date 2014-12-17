@@ -19,6 +19,9 @@ def includeme(config):
     if config.registry.feature('streamer'):
         config.include('h.streamer')
 
+    if config.registry.feature('notification'):
+        config.include('h.notification')
+
     config.include('pyramid_jinja2')
     config.add_jinja2_renderer('.js')
     config.add_jinja2_renderer('.txt')
