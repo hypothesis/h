@@ -71,7 +71,7 @@ hypothesis_js = create_bundle(
     'scripts/plugin/toolbar.coffee',
     'scripts/guest.coffee',
     'scripts/host.coffee',
-    'bootstrap.js')
+    'scripts/bootstrap.js')
 
 app_css = create_bundle(
     'scripts/vendor/katex/katex.min.css',

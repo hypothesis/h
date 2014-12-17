@@ -119,7 +119,7 @@ def build_extension(env, browser, content_dir):
     merge('../../h/browser/' + browser, './')
 
     # Copy over the bootstrap and destroy scripts
-    copyfile('../../h/static/bootstrap.js', content_dir + '/bootstrap.js')
+    copyfile('../../h/static/scripts/bootstrap.js', content_dir + '/bootstrap.js')
     copyfile('../../h/static/extension/destroy.js', content_dir + '/destroy.js')
     copyfile('../../h/static/extension/config.js', content_dir + '/config.js')
 
