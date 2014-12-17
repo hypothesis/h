@@ -34,9 +34,10 @@ class Auth
       # Set the user from the token.
       plugins.Auth.withToken (token) =>
         _checkingToken = false
-        annotator.addPlugin 'Permissions',
-          user: token.userId
-          userAuthorize: @permits
+        # Annotator needs to access the user property without the permissions
+        # plugin and since auth service depends on annotator, the annotator
+        # service cannot use the auth service
+        annotator.user = token.userId
         @user = token.userId
         $rootScope.$apply()
 
@@ -48,10 +49,7 @@ class Auth
       plugins.Auth?.destroy()
       delete plugins.Auth
 
-      plugins.Permissions?.setUser(null)
-      plugins.Permissions?.destroy()
-      delete plugins.Permissions
-
+      annotator.user = null
       @user = null
       _checkingToken = false
 
@@ -62,43 +60,10 @@ class Auth
     onready = =>
       if @user is undefined and not _checkingToken
         @user = null
+        annotator.user = null
 
     identity.watch {onlogin, onlogout, onready}
 
-
-  ###*
-  # @ngdoc method
-  # @name auth#permits
-  #
-  # @param {String} action action to authorize (read|update|delete|admin)
-  # @param {Object} annotation to permit action on it or not
-  # @param {String} user the userId
-  #
-  # User authorization function used by (not solely) the Permissions plugin
-  ###
-  permits: (action, annotation, user) ->
-    if annotation.permissions
-      tokens = annotation.permissions[action] || []
-
-      if tokens.length == 0
-        # Empty or missing tokens array: only admin can perform action.
-        return false
-
-      for token in tokens
-        if user == token
-          return true
-        if token == 'group:__world__'
-          return true
-
-      # No tokens matched: action should not be performed.
-      return false
-
-    # Coarse-grained authorization
-    else if annotation.user
-      return user and user == annotation.user
-
-    # No authorization info on annotation: free-for-all!
-    true
 
 angular.module('h')
 .service('auth', Auth)

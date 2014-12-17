@@ -94,7 +94,7 @@ AnnotationController = [
     ###
     this.authorize = (action) ->
       return false unless model?
-      annotator.plugins.Permissions?.authorize action, model
+      permissions.permits action, model, auth.user
 
     ###*
     # @ngdoc method
@@ -275,7 +275,7 @@ AnnotationController = [
 
       # Save highlights once logged in.
       if highlight and this.isHighlight()
-        if model.user
+        if auth.user
           model.permissions = permissions.private()
           annotator.publish 'annotationCreated', model
           highlight = false  # skip this on future updates

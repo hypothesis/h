@@ -40,7 +40,7 @@ privacy = ['$window', 'permissions', ($window, permissions) ->
     controller.$formatters.push (selectedPermissions) ->
       return unless selectedPermissions?
 
-      if permissions.isPublic {permissions: selectedPermissions}
+      if permissions.isPublic({permissions: selectedPermissions})
         getLevel(VISIBILITY_PUBLIC)
       else
         getLevel(VISIBILITY_PRIVATE)
@@ -61,7 +61,7 @@ privacy = ['$window', 'permissions', ($window, permissions) ->
       controller.$modelValue
 
     controller.$render = ->
-      unless controller.$modelValue.read.length
+      unless controller.$modelValue.read?.length
         name = storage.getItem VISIBILITY_KEY
         name ?= VISIBILITY_PUBLIC
         level = getLevel(name)

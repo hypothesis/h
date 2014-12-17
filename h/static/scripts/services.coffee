@@ -28,7 +28,7 @@ renderFactory = ['$$rAF', ($$rAF) ->
 
 class Hypothesis extends Annotator
   events:
-    'beforeAnnotationCreated': 'digest'
+    'beforeAnnotationCreated': 'beforeAnnotationCreated'
     'annotationCreated': 'digest'
     'annotationDeleted': 'annotationDeleted'
     'annotationUpdated': 'digest'
@@ -46,13 +46,6 @@ class Hypothesis extends Annotator
 
   tool: 'comment'
   visibleHighlights: false
-
-  # Here as a noop just to make the Permissions plugin happy
-  # XXX: Change me when Annotator stops assuming things about viewers
-  editor:
-    addField: angular.noop
-  viewer:
-    addField: angular.noop
 
   this.$inject = ['$document', '$window']
   constructor:   ( $document,   $window ) ->
@@ -260,6 +253,11 @@ class Hypothesis extends Annotator
   digest: ->
     @element.scope().$evalAsync angular.noop
 
+  beforeAnnotationCreated: (annotation) ->
+    annotation.user = @user
+    annotation.permissions = {}
+    @digest()
+
   annotationDeleted: (annotation) ->
     scope = @element.scope()
     if scope.selectedAnnotations?[annotation.id]
@@ -323,8 +321,8 @@ class Hypothesis extends Annotator
         # Sweet, nothing to do, just clean up previous filters
         delete query.user
       when "single-player"
-        if @plugins.Permissions?.user
-          query.user = @plugins.Permissions.user
+        if @user?
+          query.user = @user
         else
           delete query.user
 
