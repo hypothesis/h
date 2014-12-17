@@ -97,11 +97,6 @@ thread = [
         else
           attrs.$removeClass COLLAPSED_CLASS
 
-      # Watch the thread-collapsed attribute.
-      if attrs.threadCollapsed
-        scope.$watch $parse(attrs.threadCollapsed), (collapsed) ->
-          ctrl.toggleCollapsed() if !!collapsed != ctrl.collapsed
-
     controller: 'ThreadController'
     controllerAs: 'vm'
     link: linkFn
