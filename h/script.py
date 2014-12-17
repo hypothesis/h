@@ -215,6 +215,7 @@ def extension(args, console, settings):
     if browser == 'chrome':
         settings['webassets.base_dir'] = abspath('./build/chrome/public')
     elif browser == 'firefox':
+        settings['hassets.minify'] = False # Never minify FF assets.
         settings['webassets.base_dir'] = abspath('./build/firefox/data')
     else:
         console.error('You must supply a browser name: `chrome` or `firefox`.')
