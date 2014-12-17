@@ -81,32 +81,37 @@ app_css = create_bundle(
 hypothesis_css = create_bundle(
     'styles/inject.scss')
 
+# Define output files for dependencies.
+
 topbar_bundle = create_bundle(
-    'styles/topbar.scss', output='styles/topbar.css')
+    'styles/topbar.scss',
+    output='build/styles/topbar.css')
 
 jquery_bundle = create_bundle(
     'scripts/vendor/jquery.js',
-    output='scripts/vendor/jquery.js'),
+    output='build/scripts/vendor/jquery.js')
+
+angular_bundle = create_bundle(
+    'scripts/vendor/angular.js',
+    'scripts/vendor/angular-animate.js',
+    'scripts/vendor/angular-route.js',
+    'scripts/vendor/angular-sanitize.js',
+    'scripts/vendor/ng-tags-input.js',
+    output='build/scripts/vendor/angular.js')
 
 inject_bundle = create_bundle(
     jquery_bundle,
-    create_bundle(hypothesis_js, output='scripts/hypothesis.js'),
-    create_bundle(hypothesis_css, output='styles/hypothesis.css'))
+    create_bundle(hypothesis_js, output='build/scripts/hypothesis.js'),
+    create_bundle(hypothesis_css, output='build/styles/hypothesis.css'))
 
 app_bundle = create_bundle(
     jquery_bundle,
-    create_bundle(
-        'scripts/vendor/angular.js',
-        'scripts/vendor/angular-animate.js',
-        'scripts/vendor/angular-route.js',
-        'scripts/vendor/angular-sanitize.js',
-        'scripts/vendor/ng-tags-input.js',
-        output='scripts/vendor/angular.js'),
-    create_bundle(app_js, output='scripts/app.js'),
-    create_bundle(helpers_js, output='scripts/helpers.js'),
-    create_bundle(account_js, output='scripts/account.js'),
-    create_bundle(session_js, output='scripts/session.js'),
-    create_bundle(app_css, output='styles/app.css'))
+    angular_bundle,
+    create_bundle(app_js, output='build/scripts/app.js'),
+    create_bundle(helpers_js, output='build/scripts/helpers.js'),
+    create_bundle(account_js, output='build/scripts/account.js'),
+    create_bundle(session_js, output='build/scripts/session.js'),
+    create_bundle(app_css, output='build/styles/app.css'))
 
 wgxpath_bundle = create_bundle('scripts/vendor/polyfills/wgxpath.install.js')
 
