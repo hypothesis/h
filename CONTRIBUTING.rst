@@ -36,10 +36,10 @@ possible.
 
 There is a version for individuals
 [`HTML <http://hypothes.is/contribute/individual-cla>`_ or
-`PDF <http://hypothes.is/docs/Hypothes.is%20Project-Individual.pdf>`_]
+`PDF <https://hypothes.is/wp-content/uploads/2014/12/Hypothes.is-Project-Individual.pdf>`_]
 and a version for those making contributions on behalf of an employer
 [`HTML <http://hypothes.is/contribute/entity-cla>`_ or
-`PDF <http://hypothes.is/docs/Hypothes.is%20Project-Entity.pdf>`_].
+`PDF <https://hypothes.is/wp-content/uploads/2014/12/Hypothes.is-Project-Entity.pdf>`_].
 
 A completed form can either be sent by electronic mail to
 license@hypothes.is or via conventional mail at the address below. If
