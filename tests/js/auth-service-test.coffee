@@ -56,24 +56,20 @@ describe 'h', ->
       onready()
       assert.isNull(auth.user)
 
-    it 'sets the Permissions plugin and sets auth.user at login', ->
+    it 'sets auth.user at login', ->
       {onlogin} = fakeIdentity.watch.args[0][0]
       onlogin('test-assertion')
       fakeToken = { userId: 'acct:hey@joe'}
       userSetter = fakeAnnotator.plugins.Auth.withToken.args[0][0]
       userSetter(fakeToken)
       assert.equal(auth.user, 'acct:hey@joe')
-      secondPlugin = fakeAnnotator.addPlugin.args[1]
-      assert.equal(secondPlugin[0], 'Permissions')
 
-    it 'destroys the plugins at logout and sets auth.user to null', ->
+    it 'destroys the plugin at logout and sets auth.user to null', ->
       {onlogout} = fakeIdentity.watch.args[0][0]
       auth.user = 'acct:hey@joe'
       authPlugin = fakeAnnotator.plugins.Auth
-      permissionsPlugin = fakeAnnotator.plugins.Permissions
       onlogout()
 
       assert.called(authPlugin.destroy)
-      assert.called(permissionsPlugin.destroy)
       assert.equal(auth.user, null)
 
