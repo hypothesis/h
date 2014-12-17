@@ -70,3 +70,6 @@ command -v compass || {
 	echo
 	exit 1
 }
+
+echo "Creating asset directories"
+make clean
