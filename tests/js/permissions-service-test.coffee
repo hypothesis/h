@@ -40,22 +40,50 @@ describe 'h', ->
       assert.equal(perms.delete[0], 'acct:flash@gordon')
       assert.equal(perms.admin[0], 'acct:flash@gordon')
 
-    it 'isPublic() true if the read permission has group:__world__ in it', ->
-      annotation = {
-        permissions: {
-          read: ['group:__world__', 'acct:angry@birds.com']
+    describe 'isPublic', ->
+      it 'isPublic() true if the read permission has group:__world__ in it', ->
+        annotation = {
+          permissions: {
+            read: ['group:__world__', 'acct:angry@birds.com']
+          }
         }
-      }
-      assert.isTrue(permissions.isPublic(annotation))
+        assert.isTrue(permissions.isPublic(annotation))
 
-    it 'isPublic() false otherwise', ->
-      annotation = {
-        permissions: {
-          read: ['acct:angry@birds.com']
+      it 'isPublic() false otherwise', ->
+        annotation = {
+          permissions: {
+            read: ['acct:angry@birds.com']
+          }
         }
-      }
-      assert.isFalse(permissions.isPublic(annotation))
-      annotation.permissions.read = []
-      assert.isFalse(permissions.isPublic(annotation))
-      annotation.permissions.read = ['one', 'two', 'three']
-      assert.isFalse(permissions.isPublic(annotation))
+        assert.isFalse(permissions.isPublic(annotation))
+        annotation.permissions.read = []
+        assert.isFalse(permissions.isPublic(annotation))
+        annotation.permissions.read = ['one', 'two', 'three']
+        assert.isFalse(permissions.isPublic(annotation))
+
+    describe 'permits', ->
+      it 'returns true when annotation has no permissions', ->
+        annotation = {}
+        assert.isTrue(permissions.permits(null, annotation, null))
+
+      it 'returns false for unknown action', ->
+        annotation = {permissions: permissions.private()}
+        action = 'Hadouken-ing'
+        assert.isFalse(permissions.permits(action, annotation, null))
+
+      it 'returns true if user different, but permissions has group:__world__', ->
+        annotation = {permissions: permissions.public()}
+        annotation.permissions.read.push 'acct:darthsidious@deathstar.emp'
+        user = 'acct:darthvader@deathstar.emp'
+        assert.isTrue(permissions.permits('read', annotation, user))
+
+      it 'returns true if user is in permissions[action] list', ->
+        annotation = {permissions: permissions.private()}
+        user = 'acct:rogerrabbit@toonland'
+        annotation.permissions.read.push user
+        assert.isTrue(permissions.permits('read', annotation, user))
+
+      it 'returns false if the user name is missing from the list', ->
+        annotation = {permissions: permissions.private()}
+        user = 'acct:rogerrabbit@toonland'
+        assert.isFalse(permissions.permits('read', annotation, user))
