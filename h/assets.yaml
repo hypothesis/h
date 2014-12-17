@@ -145,9 +145,10 @@ angular_tags_input:
 
 # jQuery
 jquery:
+  filters: uglifyjs
   output: scripts/vendor/jquery.min.js
   contents:
-    - h:static/scripts/vendor/jquery-1.10.2.min.js
+    - h:static/scripts/vendor/jquery.js
 jquery_scrollintoview:
   filters: uglifyjs
   output: scripts/vendor/jquery.scrollintoview.min.js
@@ -237,7 +238,7 @@ app_js:
     - uuid
     - angular_tags_input
     - gettext
-    - h:static/scripts/vendor/katex/katex.min.js
+    - h:static/scripts/vendor/katex/katex.js
     - annotator
     - annotator_auth
     - annotator_bridge
