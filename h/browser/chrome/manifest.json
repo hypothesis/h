@@ -1,9 +1,9 @@
 {
-  "name": "Hypothesis",
+  "name": "Hypothesis - Collaborative Web and PDF Annotation",
   "version": "{{ version }}",
   "manifest_version": 2,
 
-  "description": "The Internet, peer reviewed.",
+  "description": "Collaboratively annotate, highlight, and tag web pages and PDF documents.",
   "icons": {
     "16": "images/icon16.png",
     "48": "images/icon48.png",
