@@ -141,6 +141,10 @@ class AppController
 
     $scope.$watch 'auth.user', (newVal, oldVal) ->
       return if newVal is undefined
+      # Annotator needs to access the user property without the permissions
+      # plugin and since auth service depends on annotator, the annotator
+      # service cannot use the auth service
+      annotator.user = newVal
       reset()
       $scope.login() if isFirstRun and not (newVal or oldVal)
 

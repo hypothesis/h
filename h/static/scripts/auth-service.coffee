@@ -34,10 +34,6 @@ class Auth
       # Set the user from the token.
       plugins.Auth.withToken (token) =>
         _checkingToken = false
-        # Annotator needs to access the user property without the permissions
-        # plugin and since auth service depends on annotator, the annotator
-        # service cannot use the auth service
-        annotator.user = token.userId
         @user = token.userId
         $rootScope.$apply()
 
@@ -49,7 +45,6 @@ class Auth
       plugins.Auth?.destroy()
       delete plugins.Auth
 
-      annotator.user = null
       @user = null
       _checkingToken = false
 
@@ -60,7 +55,6 @@ class Auth
     onready = =>
       if @user is undefined and not _checkingToken
         @user = null
-        annotator.user = null
 
     identity.watch {onlogin, onlogout, onready}
 
