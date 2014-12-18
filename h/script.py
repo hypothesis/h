@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
-from os import chdir, getcwd, makedirs, mkdir, walk
+from os import chdir, getcwd, makedirs, mkdir, walk, remove
 from os.path import abspath, exists, join
 from shutil import copyfile, rmtree
 from urlparse import urljoin, urlparse, urlunparse, uses_netloc, uses_relative
@@ -118,20 +118,14 @@ def build_extension(env, browser, content_dir):
     # Copy the extension code
     merge('../../h/browser/' + browser, './')
 
-    # Copy over the bootstrap and destroy scripts
-    copyfile('../../h/static/bootstrap.js', content_dir + '/bootstrap.js')
+    # Copy over the config and destroy scripts
     copyfile('../../h/static/extension/destroy.js', content_dir + '/destroy.js')
     copyfile('../../h/static/extension/config.js', content_dir + '/config.js')
 
     # Build the app html and copy assets if they are being bundled
     if (request.webassets_env.url.startswith('chrome-extension://') or
             request.webassets_env.url.startswith('resource://')):
-        makedirs(content_dir + '/styles/images')
-        merge('../../h/static/styles/images', content_dir + '/styles/images')
         merge('../../h/static/images', content_dir + '/images')
-        merge('../../h/static/fonts', content_dir + '/fonts')
-        copyfile('../../h/static/styles/icomoon.css',
-                 content_dir + '/styles/icomoon.css')
 
         # Copy over the vendor assets since they won't be processed otherwise
         if request.webassets_env.debug:
@@ -143,6 +137,9 @@ def build_extension(env, browser, content_dir):
 
     if browser == 'chrome':
         manifest(context, request)
+        remove('./karma.config.js')
+        rmtree('./test/')
+
     embed(content_dir + '/embed.js', context, request)
 
     # Reset the directory
