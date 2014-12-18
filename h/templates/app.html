@@ -52,16 +52,16 @@
             <div class="tabbable"
                  ng-controller="AccountController"
                  ng-model="tab">
-              {% include_raw "h:templates/client/settings/account.html" %}
+              {{ include_raw("h:templates/client/settings/account.html") }}
               {% if feature('notification') %}
-                {% include_raw "h:templates/client/settings/notifications.html" %}
+                {{ include_raw("h:templates/client/settings/notifications.html") }}
               {% endif %}
             </div>
           {% endblock %}
         </div>
         <div ng-if="!auth.user">
           {% block auth %}
-            {% include_raw "h:templates/client/auth.html" %}
+            {{ include_raw("h:templates/client/auth.html") }}
           {% endblock %}
         </div>
       </div>
@@ -76,19 +76,19 @@
 
 {% block templates %}
   <script type="text/ng-template" id="annotation.html">
-    {% include_raw "h:templates/client/annotation.html" %}
+    {{ include_raw("h:templates/client/annotation.html") }}
   </script>
   <script type="text/ng-template" id="markdown.html">
-    {% include_raw "h:templates/client/markdown.html" %}
+    {{ include_raw("h:templates/client/markdown.html") }}
   </script>
   <script type="text/ng-template" id="privacy.html">
-    {% include_raw "h:templates/client/privacy.html" %}
+    {{ include_raw("h:templates/client/privacy.html") }}
   </script>
   <script type="text/ng-template" id="viewer.html">
-    {% include_raw "h:templates/client/viewer.html" %}
+    {{ include_raw("h:templates/client/viewer.html") }}
   </script>
   <script type="text/ng-template" id="thread.html">
-    {% include_raw "h:templates/client/thread.html" %}
+    {{ include_raw("h:templates/client/thread.html") }}
   </script>
 {% endblock %}
 
