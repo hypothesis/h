@@ -42,24 +42,21 @@ describe 'h', ->
 
     describe 'isPublic', ->
       it 'isPublic() true if the read permission has group:__world__ in it', ->
-        annotation = {
-          permissions: {
+        permission = {
             read: ['group:__world__', 'acct:angry@birds.com']
-          }
         }
-        assert.isTrue(permissions.isPublic(annotation))
+        assert.isTrue(permissions.isPublic(permission))
 
       it 'isPublic() false otherwise', ->
-        annotation = {
-          permissions: {
+        permission = {
             read: ['acct:angry@birds.com']
-          }
         }
-        assert.isFalse(permissions.isPublic(annotation))
-        annotation.permissions.read = []
-        assert.isFalse(permissions.isPublic(annotation))
-        annotation.permissions.read = ['one', 'two', 'three']
-        assert.isFalse(permissions.isPublic(annotation))
+
+        assert.isFalse(permissions.isPublic(permission))
+        permission.read = []
+        assert.isFalse(permissions.isPublic(permission))
+        permission.read = ['one', 'two', 'three']
+        assert.isFalse(permissions.isPublic(permission))
 
     describe 'permits', ->
       it 'returns true when annotation has no permissions', ->

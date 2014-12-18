@@ -185,7 +185,7 @@ AnnotationController = [
       annotator.publish 'beforeAnnotationCreated', reply
 
       if auth.user?
-        if permissions.isPublic model
+        if permissions.isPublic model.permissions
           reply.permissions = permissions.public()
         else
           reply.permissions = permissions.private()

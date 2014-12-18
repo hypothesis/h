@@ -46,13 +46,12 @@ class Permissions
   # @ngdoc method
   # @name permissions#isPublic
   #
-  # @param {Object} annotation annotation to check permissions
+  # @param {Object} permissions
   #
-  # This function determines whether the annotation is publicly
-  # visible(readable) or not.
+  # This function determines whether the permissions allow public visibility
   ###
-  isPublic: (annotation) ->
-    GROUP_WORLD in (annotation.permissions?.read or [])
+  isPublic: (permissions) ->
+    GROUP_WORLD in (permissions?.read or [])
 
   ###*
   # @ngdoc method

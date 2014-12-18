@@ -40,7 +40,7 @@ privacy = ['$window', 'permissions', ($window, permissions) ->
     controller.$formatters.push (selectedPermissions) ->
       return unless selectedPermissions?
 
-      if permissions.isPublic({permissions: selectedPermissions})
+      if permissions.isPublic(selectedPermissions)
         getLevel(VISIBILITY_PUBLIC)
       else
         getLevel(VISIBILITY_PRIVATE)
