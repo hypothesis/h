@@ -1,5 +1,6 @@
 {
-  "name": "Hypothesis - Collaborative Web and PDF Annotation",
+  "name": "Hypothesis - Web & PDF Annotation",
+  "short_name": "Hypothesis",
   "version": "{{ version }}",
   "manifest_version": 2,
 
