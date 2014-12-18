@@ -8,11 +8,10 @@
 /build
 /dist
 /docs/_build
-/h/css
-/h/js
-/h/lib
 /h/static/.sass-cache
 /h/static/.webassets-cache
+/h/static/debug
+/h/static/build
 /include
 /lib
 /local
