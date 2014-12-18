@@ -22,5 +22,5 @@ cfx run
 Building an XPI version of the extension is just as simple:
 
 ```
-cfx build
+cfx xpi
 ```
