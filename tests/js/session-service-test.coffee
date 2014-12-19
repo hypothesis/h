@@ -23,10 +23,12 @@ describe 'session', ->
   describe 'sessionService', ->
     $httpBackend = null
     session = null
+    xsrf = null
 
-    beforeEach inject (_$httpBackend_, _session_) ->
+    beforeEach inject (_$httpBackend_, _session_, _xsrf_) ->
       $httpBackend = _$httpBackend_
       session = _session_
+      xsrf = _xsrf_
 
     describe '#<action>()', ->
       url = '/login'
@@ -60,15 +62,17 @@ describe 'session', ->
         assert.match result.reason, response.reason, 'the reason is present'
 
       it 'should capture and send the xsrf token', ->
-        xsrf = 'deadbeef'
+        token = 'deadbeef'
         headers =
           'Accept': 'application/json, text/plain, */*'
           'Content-Type': 'application/json;charset=utf-8'
-          'X-XSRF-TOKEN': xsrf
-        model = {csrf: xsrf}
+          'X-XSRF-TOKEN': token
+        model = {csrf: token}
         request = $httpBackend.expectPOST(url).respond({model})
         result = session.login({})
         $httpBackend.flush()
+        assert.equal xsrf.token, token
+
         $httpBackend.expectPOST(url, {}, headers).respond({})
         session.login({})
         $httpBackend.flush()

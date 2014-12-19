@@ -6,20 +6,21 @@ ST_OPEN = 3
 # @ngdoc service
 # @name Streamer
 #
-# @param {String} url The base URL for the socket connection
+# @param {String} urlFn A function that will be called with injections to
+# generate the socket URL.
 #
 # @description
 # Provides access to the streamer websocket.
 ###
 class Streamer
-  constructor: (transport, url) ->
+  constructor: (transport, urlFn) ->
     this.onmessage = ->
 
     this._failCount = 0
     this._queue = []
     this._state = ST_CLOSED
     this._transport = transport
-    this._url = url
+    this._urlFn = urlFn
 
   ###*
   # @ngdoc method
@@ -34,7 +35,7 @@ class Streamer
       return
 
     self = this
-    this._sock = new this._transport(this._url)
+    this._sock = new this._transport(this._urlFn())
     this._state = ST_CONNECTING
 
     this._sock.onopen = ->
@@ -112,9 +113,10 @@ setAjaxClientId = (clientId) ->
 
 streamerProvider = ->
   provider = {}
-  provider.url = null
-  provider.$get = ['$window', ($window) ->
-    new Streamer($window.WebSocket, provider.url)
+  provider.urlFn = null
+  provider.$get = ['$injector', '$window', ($injector, $window) ->
+    urlFn = angular.bind $injector, $injector.invoke, provider.urlFn
+    new Streamer($window.WebSocket, urlFn)
   ]
   return provider
 
