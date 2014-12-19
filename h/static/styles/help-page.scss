@@ -3,7 +3,7 @@
 .help-page {
   padding-top: 2.5em;
   padding-bottom: 2.5em;
-  background: white;
+  background: $body-background;
 
   @include breakpoint(920px) {
     padding-right: 460px;
