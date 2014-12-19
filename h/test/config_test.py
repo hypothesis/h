@@ -5,6 +5,18 @@ from h.config import settings_from_environment
 
 
 @patch.dict(os.environ)
+def test_es_bonsai():
+    url = 'http://ql9lsrn8:img5ndnsbtaahloy@redwood-94865.us-east-1.bonsai.io/'
+    os.environ['BONSAI_URL'] = url
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'es.host': url,
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
 def test_es_environment():
     os.environ['ELASTICSEARCH_PORT'] = 'tcp://127.0.0.1:1234'
     os.environ['ELASTICSEARCH_PORT_9200_TCP_ADDR'] = '127.0.0.1'

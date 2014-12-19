@@ -121,8 +121,14 @@ Deployment
 ----------
 
 Deployment is mostly left as an exercise to the reader until we document this
-better. Using `Docker`_ or the shell environment it is easy to customize a few
-different deployment options.
+better.
+
+The project is set up to run out of the box on Heroku using the Bonsai add-on
+for Elasticsearch and Heroku PostgreSQL.
+
+Using `Docker`_ or the shell environment it is easy to customize a few
+different deployment options for deploying in other environments. See below
+for detail on these options.
 
 Docker links
 ^^^^^^^^^^^^

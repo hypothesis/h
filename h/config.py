@@ -5,6 +5,10 @@ import urlparse
 def settings_from_environment():
     settings = {}
 
+    # BONSAI_URL matches the Heroku environment variable for the Bonsai add-on
+    if 'BONSAI_URL' in os.environ:
+        settings['es.host'] = os.environ['BONSAI_URL']
+
     # DATABASE_URL matches the Heroku environment variable
     if 'DATABASE_URL' in os.environ:
         urlparse.uses_netloc.append("postgres")
