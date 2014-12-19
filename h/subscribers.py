@@ -9,6 +9,8 @@ def add_renderer_globals(event):
     event['base_url'] = request.resource_url(request.root, '')
     # Set the service url to use for API discovery
     event['service_url'] = request.resource_url(request.root, 'api', '')
+    # Allow templates to check for feature flags
+    event['feature'] = request.registry.feature
 
 
 def includeme(config):
