@@ -1,29 +1,36 @@
-from jinja2 import nodes
+from functools import wraps
+
+from jinja2 import Markup
 from jinja2.ext import Extension
 
 
 class IncludeRawExtension(Extension):
-    ''' A Jinja extension for requiring raw files using a familiar syntax.
-        this is particularly useful for including JS template files which
-        use the same syntax.'''
-
-    tags = set(['include_raw'])
+    """
+    An extension which provides a simple include_raw function to include the
+    content of a file without further processing.
+    """
 
     def __init__(self, environment):
-        # This check (for use of super in old-style classes) is broken in
-        # latest pylint but fixed on pylint tip:
-        #
-        #     https://bitbucket.org/logilab/pylint/issue/24
-        #
-        # FIXME: remove when pylint>1.3.1 is released.
-        #
-        # pylint: disable=super-on-old-class
         super(IncludeRawExtension, self).__init__(environment)
-        # pylint: enable=super-on-old-class
 
-    def parse(self, parser):
-        lineno = parser.stream.next().lineno
-        filename = parser.parse_expression()
-        env = self.environment
-        template, _, _ = env.loader.get_source(env, filename.value)
-        return nodes.Const(template).set_lineno(lineno)
+        environment.globals['include_raw'] = _get_includer(environment)
+
+
+def _get_includer(environment):
+    def _include(name):
+        return Markup(environment.loader.get_source(environment, name)[0])
+    # Memoize results when [jinja2.]debug_templates is false.
+    if not environment.loader.debug:
+        _include = _memoize(_include)
+    return _include
+
+
+def _memoize(f):
+    cache = {}
+    @wraps(f)
+    def memoizer(*args, **kwargs):
+        # NB: this memoizer ignores kwargs.
+        if args not in cache:
+            cache[args] = f(*args, **kwargs)
+        return cache[args]
+    return memoizer
