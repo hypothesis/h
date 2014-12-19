@@ -58,6 +58,22 @@ describe 'h', ->
         permission.read = ['one', 'two', 'three']
         assert.isFalse(permissions.isPublic(permission))
 
+    describe 'isPrivate', ->
+      it 'returns true if the given user is in the permissions', ->
+        user = 'acct:angry@birds.com'
+        permission = {read: [user]}
+        assert.isTrue(permissions.isPrivate(permission, user))
+
+      it 'returns false if another user is in the permissions', ->
+        users = ['acct:angry@birds.com', 'acct:angry@joe.com']
+        permission = {read: users}
+        assert.isFalse(permissions.isPrivate(permission, 'acct:angry@birds.com'))
+
+      it 'returns false if different user in the permissions', ->
+        user = 'acct:angry@joe.com'
+        permission = {read: ['acct:angry@birds.com']}
+        assert.isFalse(permissions.isPrivate(permission, user))
+
     describe 'permits', ->
       it 'returns true when annotation has no permissions', ->
         annotation = {}

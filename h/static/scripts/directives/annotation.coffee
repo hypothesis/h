@@ -82,7 +82,7 @@ AnnotationController = [
     # @returns {boolean} True if the annotation is private to the current user.
     ###
     this.isPrivate = ->
-      model.user and angular.equals(model.permissions?.read or [], [model.user])
+      permissions.isPrivate model.permissions, model.user
 
     ###*
     # @ngdoc method

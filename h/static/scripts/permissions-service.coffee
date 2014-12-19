@@ -55,6 +55,18 @@ class Permissions
 
   ###*
   # @ngdoc method
+  # @name permissions#isPrivate
+  #
+  # @param {Object} permissions
+  # @param {String} user
+  #
+  # @returns {boolean} True if the annotation is private to the user.
+  ###
+  isPrivate: (permissions, user) ->
+    user and angular.equals(permissions?.read or [], [user])
+
+  ###*
+  # @ngdoc method
   # @name permissions#permits
   #
   # @param {String} action action to authorize (read|update|delete|admin)
