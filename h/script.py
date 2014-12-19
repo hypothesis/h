@@ -26,7 +26,7 @@ def get_config(args):
     settings.update(config.settings_from_environment())
     settings['basemodel.should_create_all'] = False
     settings['basemodel.should_drop_all'] = False
-    settings['pyramid.includes'] = []
+    settings['redis.sessions.secret'] = ''
 
     return dict(settings=settings)
 
@@ -160,11 +160,9 @@ def merge(src, dst):
 @command(usage='CONFIG_FILE')
 def init_db(settings):
     """Create the database models."""
-    api.store_from_settings(settings)
-    api.create_db()
-
-    engine = engine_from_config(settings, 'sqlalchemy.')
-    bind_engine(engine, should_create=True)
+    settings['basemodel.should_create_all'] = True
+    settings['basemodel.should_drop_all'] = False
+    config = Configurator(settings=settings)
 
 
 @command(usage='config_file')
