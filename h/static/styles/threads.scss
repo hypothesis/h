@@ -35,6 +35,18 @@ $threadexp-width: .6em;
     &:focus { outline: 0; }
   }
 
+  @-webkit-keyframes pulse {
+    10% { background-color: #ffc; }
+  }
+  @keyframes pulse {
+    10% { background-color: #ffc; }
+  }
+
+  &.pulse {
+    -webkit-animation: pulse 1200ms ease-in-out;
+    animation: pulse 1200ms ease-in-out;
+  }
+
   .thread {
     border-left: 1px dotted $gray-light;
     padding: 0;

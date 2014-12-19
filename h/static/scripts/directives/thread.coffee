@@ -42,6 +42,37 @@ ThreadController = [
 ]
 
 
+pulseFactory = [
+  '$animate',
+  ($animate) ->
+
+    ###*
+    # @ngdoc service
+    # @name pulse
+    # @param {Element} elem Element to pulse.
+    # @description
+    # Pulses an element to indicate activity in that element.
+    ###
+    (elem) ->
+      $animate.addClass elem, 'pulse', ->
+        $animate.removeClass(elem, 'pulse')
+]
+
+
+###*
+# @ngdoc function
+# @name isHiddenThread
+# @param {Element} elem An element bound to a ThreadController
+# @returns {Boolean} True if the the thread is hidden
+###
+isHiddenThread = (elem) ->
+  parent = elem.parent()
+  parentThread = parent.controller('thread')
+  if !parentThread
+    return false
+  return parentThread.collapsed || isHiddenThread(parent)
+
+
 ###*
 # @ngdoc directive
 # @name thread
@@ -54,8 +85,8 @@ ThreadController = [
 # the collapsed state of the thread.
 ###
 thread = [
-  '$parse', '$window', 'render',
-  ($parse,   $window,   render) ->
+  '$parse', '$window', 'pulse', 'render',
+  ($parse,   $window,   pulse,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter]) ->
       # Toggle collapse on click.
       elem.on 'click', (event) ->
@@ -90,6 +121,15 @@ thread = [
 
       scope.$on '$destroy', -> counter.count 'message', -1
 
+      # Flash the thread when any child annotations are updated.
+      scope.$on 'annotationUpdate', (event) ->
+        # If we're hidden, we let the event propagate up to the parent thread.
+        if isHiddenThread(elem)
+          return
+        # Otherwise, stop the event from bubbling, and pulse this thread.
+        event.stopPropagation()
+        pulse(elem)
+
       # Add and remove the collapsed class when the collapsed property changes.
       scope.$watch (-> ctrl.collapsed), (collapsed) ->
         if collapsed
@@ -113,3 +153,4 @@ thread = [
 angular.module('h')
 .controller('ThreadController', ThreadController)
 .directive('thread', thread)
+.factory('pulse', pulseFactory)

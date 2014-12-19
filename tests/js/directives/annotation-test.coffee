@@ -10,6 +10,7 @@ describe 'h.directives.annotation', ->
   annotation = null
   createController = null
   flash = null
+  fakeAuth = null
   fakeUser = null
 
   beforeEach module('h')
@@ -35,6 +36,7 @@ describe 'h.directives.annotation', ->
         title: 'A special document'
       target: [{}]
       uri: 'http://example.com'
+      user: 'acct:bill@localhost'
     flash = sinon.spy()
 
     createController = ->
@@ -302,3 +304,23 @@ describe 'h.directives.annotation', ->
         assert.ok(dialog.hasClass('open'))
         $document.click()
         assert.notOk(dialog.hasClass('open'))
+
+  describe 'annotationUpdate event', ->
+    controller = null
+
+    beforeEach ->
+      controller = createController()
+      sandbox.spy($scope, '$emit')
+      annotation.updated = '123'
+      $scope.$digest()
+
+    it "does not fire when this user's annotations are updated", ->
+      annotation.updated = '456'
+      $scope.$digest()
+      assert.notCalled($scope.$emit)
+
+    it "fires when another user's annotation is updated", ->
+      fakeAuth.user = 'acct:jane@localhost'
+      annotation.updated = '456'
+      $scope.$digest()
+      assert.calledWith($scope.$emit, 'annotationUpdate')
