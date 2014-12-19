@@ -389,6 +389,7 @@ inject_css:
         - h:static/styles/base.scss
         - h:static/styles/bucket-bar.scss
         - h:static/styles/reset.scss
+        - h:static/styles/mixins/icons.scss
 
 
 topbar:
