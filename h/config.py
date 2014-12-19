@@ -18,6 +18,10 @@ def settings_from_environment():
             url[0] = 'postgresql+psycopg2'
         settings['sqlalchemy.url'] = urlparse.urlunparse(url)
 
+    # REDISTOGO_URL matches the Heroku environment variable for Redis To Go
+    if 'REDISTOGO_URL' in os.environ:
+        settings['redis.sessions.url'] = os.environ['REDISTOGO_URL'] + '0'
+
     if 'ELASTICSEARCH_INDEX' in os.environ:
         settings['es.index'] = os.environ['ELASTICSEARCH_INDEX']
 

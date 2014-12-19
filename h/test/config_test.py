@@ -5,13 +5,45 @@ from h.config import settings_from_environment
 
 
 @patch.dict(os.environ)
-def test_es_bonsai():
+def test_heroku_bonsai():
     url = 'http://ql9lsrn8:img5ndnsbtaahloy@redwood-94865.us-east-1.bonsai.io/'
     os.environ['BONSAI_URL'] = url
 
     actual_config = settings_from_environment()
     expected_config = {
         'es.host': url,
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
+def test_heroku_redistogo():
+    url = 'redis://redistogo:12345@mummichog.redistogo.com:9128/'
+    os.environ['REDISTOGO_URL'] = url
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'redis.sessions.url': url + '0',
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
+def test_heroku_database_sqlite():
+    os.environ['DATABASE_URL'] = 'sqlite:///tmp/database.db'
+
+    actual_config = settings_from_environment()
+    expected_config = {'sqlalchemy.url': 'sqlite:///tmp/database.db'}
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
+def test_heroku_database_postgres():
+    os.environ['DATABASE_URL'] = 'postgres://postgres:1234/database'
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'sqlalchemy.url': 'postgresql+psycopg2://postgres:1234/database'
     }
     assert actual_config == expected_config
 
@@ -41,26 +73,6 @@ def test_mail_environment():
     expected_config = {
         'mail.host': '127.0.0.1',
         'mail.port': '4567',
-    }
-    assert actual_config == expected_config
-
-
-@patch.dict(os.environ)
-def test_sqlite_database_environment():
-    os.environ['DATABASE_URL'] = 'sqlite:///tmp/database.db'
-
-    actual_config = settings_from_environment()
-    expected_config = {'sqlalchemy.url': 'sqlite:///tmp/database.db'}
-    assert actual_config == expected_config
-
-
-@patch.dict(os.environ)
-def test_postgres_database_environment():
-    os.environ['DATABASE_URL'] = 'postgres://postgres:1234/database'
-
-    actual_config = settings_from_environment()
-    expected_config = {
-        'sqlalchemy.url': 'postgresql+psycopg2://postgres:1234/database'
     }
     assert actual_config == expected_config
 
