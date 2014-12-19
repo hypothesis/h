@@ -433,26 +433,30 @@ def _ensure_es_plugins(es_conn):
 
 def create_db():
     """Create the ElasticSearch index for Annotations and Documents"""
+
+    mappings = {}
+    mappings.update(Annotation.get_mapping())
+    mappings.update(Document.get_mapping())
+
+    settings = {}
+    settings.update(Annotation.get_settings())
+    settings.update(Document.get_settings())
+
+    body = {'mappings': mappings, 'settings': settings}
+
     try:
-        es.conn.indices.create(es.index)
+        es.conn.indices.create(es.index, body=body)
     except elasticsearch_exceptions.RequestError as e:
-        if not (e.error.startswith('IndexAlreadyExistsException')
-                or e.error.startswith('InvalidIndexNameException')):
+        if not ('IndexAlreadyExistsException' in e.error):
             raise
     except elasticsearch_exceptions.ConnectionError as e:
         msg = ('Can not access ElasticSearch at {0}! '
                'Check to ensure it is running.').format(es.host)
         raise elasticsearch_exceptions.ConnectionError('N/A', msg, e)
-    # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
-    #
-    # pylint: disable=unexpected-keyword-arg
-    es.conn.cluster.health(wait_for_status='yellow')
-    # pylint: enable=unexpected-keyword-arg
 
     try:
-        Annotation.update_settings()
-        Annotation.create_all()
-        Document.create_all()
+        for doc_type, body in mappings.items():
+            es.conn.indices.put_mapping(es.index, body=body)
     except elasticsearch_exceptions.RequestError as e:
         if e.error.startswith('MergeMappingException'):
             date = time.strftime('%Y-%m-%d')
