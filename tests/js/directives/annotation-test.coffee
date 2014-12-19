@@ -28,7 +28,8 @@ describe 'h.directives.annotation', ->
     $document = _$document_
     $timeout = _$timeout_
     $scope = $rootScope.$new()
-    $scope.annotationGet = (locals) -> annotation
+    $scope.parseAnnotationAttr = (locals) -> annotation
+    $scope.parseOnModeChangeAttr = ->
     annotator = {plugins: {}, publish: sandbox.spy()}
     annotation =
       id: 'deadbeef'

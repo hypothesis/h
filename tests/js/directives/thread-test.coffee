@@ -23,6 +23,17 @@ describe 'h.directives.thread.ThreadController', ->
       after = controller.collapsed
       assert.equal(before, !after)
 
+  describe '#onAnnotationModeChange', ->
+    it 'sets the inEditMode property to true when editing an annotation', ->
+      controller = createController()
+      controller.onAnnotationModeChange(value: 'edit', EDIT: 'edit', VIEW: 'view')
+      assert.isTrue(controller.inEditMode)
+
+    it 'sets the inEditMode property to false when viewing an annotation', ->
+      controller = createController()
+      controller.onAnnotationModeChange(value: 'view', EDIT: 'edit', VIEW: 'view')
+      assert.isFalse(controller.inEditMode)
+
 
 describe 'h.directives.thread.thread', ->
   $element = null

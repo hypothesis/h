@@ -13,12 +13,15 @@
          name="annotation"
          annotation="vm.container.message"
          annotation-embedded="{{isEmbedded}}"
+         annotation-on-mode-change="vm.onAnnotationModeChange"
          ng-if="vm.container.message"
          ng-show="threadFilter.check(vm.container)">
 </article>
 
 <!-- Reply count -->
-<div class="thread-reply" ng-show="vm.showReplyToggle(count('message')) && (!threadFilter.active() || count('message') == count('match'))">
+<div class="thread-reply"
+     ng-class="{'thread-reply-pull-up': !vm.inEditMode}"
+     ng-show="vm.showReplyToggle(count('message')) && (!threadFilter.active() || count('message') == count('match'))">
   <a class="reply-count small"
      href=""
      ng-pluralize count="count('message') - 1"
