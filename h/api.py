@@ -411,9 +411,6 @@ def store_from_settings(settings):
     # read-permissions, which is done in the store itself.
     es.authorization_enabled = True
 
-    # Check for required plugin(s)
-    _ensure_es_plugins(es.conn)
-
     return es
 
 
@@ -433,6 +430,8 @@ def _ensure_es_plugins(es_conn):
 
 def create_db():
     """Create the ElasticSearch index for Annotations and Documents"""
+    # Check for required plugin(s)
+    _ensure_es_plugins(es.conn)
 
     mappings = {}
     mappings.update(Annotation.get_mapping())
