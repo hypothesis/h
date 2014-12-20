@@ -178,13 +178,20 @@ class Annotation(annotation.Annotation):
     }
 
     @classmethod
-    def get_settings(cls):
-        return cls.__settings__
+    def update_settings(cls):
+        # Due to metaprogramming magic happening in the annotator library, we
+        # have to pretend to pylint that cls.es exists
+        #
+        # pylint: disable=no-member
+        cls.es.conn.indices.close(index=cls.es.index)
+        try:
+            cls.es.conn.indices.put_settings(
+                index=cls.es.index,
+                body=getattr(cls, '__settings__', {})
+            )
+        finally:
+            cls.es.conn.indices.open(index=cls.es.index)
 
 
 class Document(document.Document):
-    __settings__ = {}
-
-    @classmethod
-    def get_settings(cls):
-        return cls.__settings__
+    pass
