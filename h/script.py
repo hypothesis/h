@@ -10,7 +10,7 @@ from elasticsearch import Elasticsearch
 from jinja2 import Template
 from pyramid.config import Configurator
 from pyramid.events import BeforeRender, ContextFound
-from pyramid.paster import get_appsettings
+from pyramid.paster import get_appsettings, setup_logging
 from pyramid.path import AssetResolver
 from pyramid.request import Request
 from pyramid.scripting import prepare
@@ -20,6 +20,7 @@ from h import __version__, config, reindexer
 
 
 def get_config(args):
+    setup_logging(args[0])
     settings = get_appsettings(args[0])
     settings.update(config.settings_from_environment())
     settings['basemodel.should_create_all'] = False
