@@ -15,10 +15,8 @@ from pyramid.path import AssetResolver
 from pyramid.request import Request
 from pyramid.scripting import prepare
 from pyramid.view import render_view
-from pyramid_basemodel import bind_engine
-from sqlalchemy import engine_from_config
 
-from h import __version__, api, config, reindexer
+from h import __version__, config, reindexer
 
 
 def get_config(args):
