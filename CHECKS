@@ -1,0 +1,5 @@
+# Zero-downtime deploys on dokku
+# https://labnotes.org/zero-downtime-deploy-with-dokku/
+# These routes should ensure the server is up and that assets are built.
+/app.html
+/embed.js
