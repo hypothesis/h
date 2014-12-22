@@ -1,0 +1,11 @@
+@import 'compass/css3/selection';
+
+@mixin highlight($color) {
+  background: $color;
+  @include selection {
+    background: $color;
+    &:window-inactive {
+      background: $color;
+    }
+  }
+}

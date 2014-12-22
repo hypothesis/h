@@ -1,4 +1,5 @@
 @import 'base';
+@import 'mixins/highlight';
 @import 'mixins/icons';
 @import 'compass/css3/user-interface';
 @import 'compass/layout/stretching';
@@ -73,33 +74,25 @@ $base-font-size: 14px;
 
 
 //HIGHLIGHTS////////////////////////////////
-.annotator-hl {
-  &::-moz-selection {
-    background: $highlight-color;
-  }
-  &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
-    background: $highlight-color;
-  }
-  &::selection, &::selection:window-inactive {
-    background: $highlight-color;
-  }
-}
-
-.annotator-highlights-always-on .annotator-hl {
-  background: $highlight-color;
-
+.annotator-highlights-always-on {
   .annotator-hl {
-    background-color: $highlight-color-second;
+    @include highlight($highlight-color);
   }
 
   .annotator-hl .annotator-hl {
-    background-color: $highlight-color-third;
+    @include highlight($highlight-color-second);
+  }
+
+  .annotator-hl .annotator-hl .annotator-hl {
+    @include highlight($highlight-color-third);
   }
 }
 
-.annotator-hl-focused,
-.annotator-highlights-always-on .annotator-hl.annotator-hl-focused {
-  background-color: $highlight-color-focus;
+.annotator-hl.annotator-hl-focused {
+  @include highlight($highlight-color-focus !important);
+  .annotator-hl {
+    @include highlight(transparent !important);
+  }
 }
 
 // Sidebar
