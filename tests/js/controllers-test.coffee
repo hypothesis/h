@@ -73,6 +73,7 @@ describe 'h', ->
     beforeEach inject ($controller, $rootScope) ->
       $scope = $rootScope.$new()
       $scope.search = {}
+      $scope.threading = {}
       annotationViewer = $controller 'AnnotationViewerController',
         $scope: $scope
 
