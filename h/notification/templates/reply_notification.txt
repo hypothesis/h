@@ -1,7 +1,7 @@
 {{ reply_user }} has just left a reply to your annotation on "{{ document_title }}".
 {{ document_path }}
 
-On {{ parent_timestamp }} you said:
+On {{ parent_timestamp }} {{ parent_user }} said:
 
 "{{ parent_text }}"
 
