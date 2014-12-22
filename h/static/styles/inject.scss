@@ -1,5 +1,4 @@
 @import 'base';
-@import 'mixins/highlight';
 @import 'mixins/icons';
 @import 'compass/css3/user-interface';
 @import 'compass/layout/stretching';
@@ -76,22 +75,23 @@ $base-font-size: 14px;
 //HIGHLIGHTS////////////////////////////////
 .annotator-highlights-always-on {
   .annotator-hl {
-    @include highlight($highlight-color);
+    background-color: $highlight-color;
   }
 
   .annotator-hl .annotator-hl {
-    @include highlight($highlight-color-second);
+    background-color: $highlight-color-second;
   }
 
   .annotator-hl .annotator-hl .annotator-hl {
-    @include highlight($highlight-color-third);
+    background-color: $highlight-color-third;
   }
 }
 
 .annotator-hl.annotator-hl-focused {
-  @include highlight($highlight-color-focus !important);
+  background-color: $highlight-color-focus !important;
+
   .annotator-hl {
-    @include highlight(transparent !important);
+    background-color: transparent !important;
   }
 }
 
