@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import re
 from datetime import datetime
 
 from pyramid.events import subscriber
@@ -47,15 +48,6 @@ def create_template_map(request, reply, data):
     parent_user = user_name(data['parent']['user'])
     reply_user = user_name(reply['user'])
 
-    # Currently we cut the UTC format because time.strptime has problems
-    # parsing it, and of course it'd only correct the backend's timezone
-    # which is not meaningful for international users
-    date_format = '%Y-%m-%dT%H:%M:%S.%f'
-    parent_timestamp = datetime.strptime(data['parent']['created'][:-6],
-                                         date_format)
-    reply_timestamp = datetime.strptime(reply['created'][:-6],
-                                        date_format)
-
     seq = ('http://', str(request.domain),
            '/app?__formid__=unsubscribe&subscription_id=',
            str(data['subscription']['id']))
@@ -66,17 +58,32 @@ def create_template_map(request, reply, data):
         'document_path': data['parent']['uri'],
         'parent_text': data['parent']['text'],
         'parent_user': parent_user,
-        'parent_timestamp': parent_timestamp,
+        'parent_timestamp': format_timestamp(data['parent']['created']),
         'parent_user_profile': user_profile_url(
             request, data['parent']['user']),
         'parent_path': standalone_url(request, data['parent']['id']),
         'reply_text': reply['text'],
         'reply_user': reply_user,
-        'reply_timestamp': reply_timestamp,
+        'reply_timestamp': format_timestamp(reply['created']),
         'reply_user_profile': user_profile_url(request, reply['user']),
         'reply_path': standalone_url(request, reply['id']),
         'unsubscribe': unsubscribe
     }
+
+
+def format_timestamp(timestamp):
+    # Currently we cut the UTC format because time.strptime has problems
+    # parsing it, and of course it'd only correct the backend's timezone
+    # which is not meaningful for international users. This trims the
+    # timezone in the format +00:00.
+    timestamp = re.sub(r'\+\d\d:\d\d$', '', timestamp)
+    timestamp_format = '%Y-%m-%dT%H:%M:%S.%f'
+    parsed = datetime.strptime(timestamp, timestamp_format)
+
+    template_format = '%d %B at %H:%M'
+    if parsed.year < datetime.now().year:
+        template_format = '%d %B %Y at %H:%M'
+    return parsed.strftime(template_format)
 
 
 def get_recipients(request, data):

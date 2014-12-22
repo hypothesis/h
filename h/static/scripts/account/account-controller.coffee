@@ -5,7 +5,7 @@ class AccountController
                 auth,   flash,   formHelpers,   identity,   session) ->
     persona_filter = $filter('persona')
     $scope.subscriptionDescription =
-      reply: 'Receive notification emails when: - Someone replies to one of my annotations'
+      reply: 'Someone replies to one of my annotations'
 
     onSuccess = (form, response) ->
       # Fire flash messages.
