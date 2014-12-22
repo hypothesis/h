@@ -451,17 +451,23 @@ def create_db():
 
     # Create the index
     try:
-        es.conn.indices.create(es.index, body={
+        # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
+        #
+        # pylint: disable=unexpected-keyword-arg
+        response = es.conn.indices.create(es.index, ignore=400, body={
             'mappings': mappings,
             'settings': {'analysis': analysis},
         })
-    except elasticsearch_exceptions.RequestError as e:
-        if not ('IndexAlreadyExistsException' in e.error):
-            raise
     except elasticsearch_exceptions.ConnectionError as e:
         msg = ('Can not access ElasticSearch at {0}! '
                'Check to ensure it is running.').format(es.host)
         raise elasticsearch_exceptions.ConnectionError('N/A', msg, e)
+
+    # Bad request (400) is ignored above, to prevent warnings in the log, but
+    # the failure could be for reasons other than that the index exists. If so,
+    # raise the error here.
+    if 'error' in response and 'IndexAlreadyExists' not in response['error']:
+        raise elasticsearch_exceptions.RequestError(400, response['error'])
 
     # Update analysis settings
     settings = es.conn.indices.get_settings(index=es.index)
