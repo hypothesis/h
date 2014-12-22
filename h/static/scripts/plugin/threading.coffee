@@ -1,8 +1,8 @@
 class Annotator.Plugin.Threading extends Annotator.Plugin
   # Mix in message thread properties into the prototype. The body of the
-  # class will overwrite any methods applied here. If you need inheritance
-  # assign the message thread to a local varible.
-  $.extend(this.prototype, mail.messageThread())
+  # class will overwrite any methods applied here.
+  messageThread = mail.messageThread()
+  $.extend(this.prototype, messageThread)
 
   events:
     'beforeAnnotationCreated': 'beforeAnnotationCreated'
@@ -14,6 +14,9 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
   pluginInit: ->
     # Create a root container.
     @root = mail.messageContainer()
+
+    # Set to true if empty parent annotations should be removed.
+    @shouldRemoveEmptyParents = false
 
   # TODO: Refactor the jwz API for progressive updates.
   # Right now the idTable is wiped when `messageThread.thread()` is called and
@@ -59,6 +62,22 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
 
       if !container.message && container.children.length == 0
         parent.removeChild(container)
+
+      else if @shouldRemoveEmptyParents
+        this.pruneParents(container)
+
+  # Removes empty root messages and promotes the child up a level. This
+  # is used on the standalone annotation page to show a reply in a thread
+  # as an annotation card.
+  pruneParents: (container) ->
+    hasParentWithMessage = (c) ->
+      while c = c.parent
+        return true if c.message
+      return false
+
+    if !container.message && container.children.length > 0
+      if !hasParentWithMessage(container)
+        this.promoteChildren(container.parent, container)
 
   beforeAnnotationCreated: (annotation) =>
     this.thread([annotation])
