@@ -1,11 +1,11 @@
 {{ reply_user }} has just left a reply to your annotation on "{{ document_title }}".
 {{ document_path }}
 
-On {{ parent_timestamp.strftime('%d %B at %H:%M') }} you said:
+On {{ parent_timestamp }} you said:
 
 "{{ parent_text }}"
 
-On {{ reply_timestamp.strftime('%d %B at %H:%M') }} {{ reply_user }} said:
+On {{ reply_timestamp }} {{ reply_user }} said:
 
 "{{ reply_text }}"
 

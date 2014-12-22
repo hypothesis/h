@@ -13,7 +13,7 @@ store_fake_data = [
     {
         # Root (parent)
         'id': '0',
-        'created': '2014-10-27T19:40:53.245691+00:00',
+        'created': '2013-10-27T19:40:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
         'text': 'The animals went in two by two, hurrah! hurrah!',
         'uri': 'www.howtoreachtheark.now',
@@ -162,13 +162,8 @@ def test_template_map_key_values():
         assert tmap['reply_user_profile'] == user_profile_url(request, annotation['user'])
         assert tmap['reply_path'] == standalone_url(request, annotation['id'])
 
-        # Timestamps
-        date_format = '%Y-%m-%dT%H:%M:%S.%f'
-        parent_timestamp = datetime.strptime(parent['created'][:-6], date_format)
-        reply_timestamp = datetime.strptime(annotation['created'][:-6], date_format)
-
-        assert tmap['parent_timestamp'] == parent_timestamp
-        assert tmap['reply_timestamp'] == reply_timestamp
+        assert tmap['parent_timestamp'] == '27 October 2013 at 19:40'
+        assert tmap['reply_timestamp'] == '27 October at 19:50'
 
         # Unsubscribe link
         seq = ('http://', str(request.domain), '/app?__formid__=unsubscribe&subscription_id=', str(data['subscription']['id']))
