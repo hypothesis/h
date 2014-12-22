@@ -326,16 +326,4 @@ html {
 .search-hl-active {
   background: $highlight-color;
   box-shadow:3px 3px 4px -1px #999999;
-  &::-moz-selection {
-    background: $highlight-color;
-    box-shadow:3px 3px 4px #999999;
-  }
-  &::-moz-selection, &::-moz-window-inactive, &::window-inactive {
-    background: $highlight-color;
-    box-shadow:3px 3px 4px #999999;
-  }
-  &::selection, &::selection:window-inactive {
-    background: $highlight-color;
-    box-shadow:3px 3px 4px #999999;
-  }
 }
