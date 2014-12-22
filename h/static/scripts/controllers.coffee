@@ -114,6 +114,7 @@ class AppController
 
     $scope.sort = name: 'Location'
     $scope.threading = plugins.Threading
+    $scope.threadRoot = $scope.threading?.root
 
 
 class AnnotationViewerController
@@ -139,9 +140,11 @@ class AnnotationViewerController
       $location.path('/stream').search('q', query)
 
     id = $routeParams.id
-    store.SearchResource.get _id: $routeParams.id, ({rows}) ->
+    store.SearchResource.get _id: id, ({rows}) ->
       annotator.loadAnnotations(rows)
-    store.SearchResource.get references: $routeParams.id, ({rows}) ->
+      $scope.threadRoot = children: [$scope.threading.getContainer(id)]
+
+    store.SearchResource.get references: id, ({rows}) ->
       annotator.loadAnnotations(rows)
 
     streamfilter

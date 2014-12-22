@@ -28,16 +28,6 @@ ThreadController = [
     this.toggleCollapsed = ->
       @collapsed = not @collapsed
 
-    ###*
-    # @ngdoc method
-    # @name thread.ThreadController#showReplyToggle
-    # @description
-    # Determines whether the reply toggle button should be displayed for the
-    # current thread.
-    ###
-    this.showReplyToggle = (messageCount) ->
-      messageCount > 1 && !(@collapsed && @container.parent.parent)
-
     this
 ]
 
@@ -113,13 +103,10 @@ thread = [
         scope.$evalAsync ->
           ctrl.toggleCollapsed()
 
-      # Queue a render frame to complete the binding and show the element.
-      render ->
-        ctrl.container = $parse(attrs.thread)(scope)
+      # Track the number of messages in the thread
+      if counter?
         counter.count 'message', 1
-        scope.$digest()
-
-      scope.$on '$destroy', -> counter.count 'message', -1
+        scope.$on '$destroy', -> counter.count 'message', -1
 
       # Flash the thread when any child annotations are updated.
       scope.$on 'annotationUpdate', (event) ->
@@ -136,6 +123,12 @@ thread = [
           attrs.$addClass COLLAPSED_CLASS
         else
           attrs.$removeClass COLLAPSED_CLASS
+
+      scope.$watch $parse(attrs.thread), (thread) ->
+        # Queue a render frame to complete the binding and show the element.
+        render ->
+          ctrl.container = thread
+          scope.$digest()
 
       # Watch the thread-collapsed attribute.
       if attrs.threadCollapsed
