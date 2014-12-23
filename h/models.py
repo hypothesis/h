@@ -131,67 +131,58 @@ class Annotation(annotation.Annotation):
             'analyzer': 'thread'
         }
     }
-    __settings__ = {
-        'analysis': {
-            'filter': {
-                'uri': {
-                    'type': 'pattern_capture',
-                    'preserve_original': 1,
-                    'patterns': [
-                        '([^\\/\\?\\#\\.]+)',
-                        '([a-zA-Z0-9]+)(?:\\.([a-zA-Z0-9]+))*',
-                        '([a-zA-Z0-9-]+)(?:\\.([a-zA-Z0-9-]+))*',
-                    ]
-                },
-                'user': {
-                    'type': 'pattern_capture',
-                    'preserve_original': 1,
-                    'patterns': ['^acct:((.+)@.*)$']
-                }
+    __analysis__ = {
+        'filter': {
+            'uri': {
+                'type': 'pattern_capture',
+                'preserve_original': '1',
+                'patterns': [
+                    '([^\\/\\?\\#\\.]+)',
+                    '([a-zA-Z0-9]+)(?:\\.([a-zA-Z0-9]+))*',
+                    '([a-zA-Z0-9-]+)(?:\\.([a-zA-Z0-9-]+))*',
+                ]
             },
-            'analyzer': {
-                'thread': {
-                    'tokenizer': 'path_hierarchy'
-                },
-                'lower_keyword': {
-                    'type': 'custom',
-                    'tokenizer': 'keyword',
-                    'filter': 'lowercase'
-                },
-                'uri_index': {
-                    'tokenizer': 'keyword',
-                    'filter': ['uri', 'unique']
-                },
-                'uri_search': {
-                    'tokenizer': 'keyword',
-                },
-                'user': {
-                    'tokenizer': 'keyword',
-                    'filter': ['user', 'lowercase']
-                },
-                'uni_normalizer': {
-                    'tokenizer': 'icu_tokenizer',
-                    'filter': ['icu_folding']
-                }
+            'user': {
+                'type': 'pattern_capture',
+                'preserve_original': '1',
+                'patterns': ['^acct:((.+)@.*)$']
+            }
+        },
+        'analyzer': {
+            'thread': {
+                'tokenizer': 'path_hierarchy'
+            },
+            'lower_keyword': {
+                'type': 'custom',
+                'tokenizer': 'keyword',
+                'filter': 'lowercase'
+            },
+            'uri_index': {
+                'tokenizer': 'keyword',
+                'filter': ['uri', 'unique']
+            },
+            'uri_search': {
+                'tokenizer': 'keyword',
+            },
+            'user': {
+                'tokenizer': 'keyword',
+                'filter': ['user', 'lowercase']
+            },
+            'uni_normalizer': {
+                'tokenizer': 'icu_tokenizer',
+                'filter': ['icu_folding']
             }
         }
     }
 
     @classmethod
-    def update_settings(cls):
-        # Due to metaprogramming magic happening in the annotator library, we
-        # have to pretend to pylint that cls.es exists
-        #
-        # pylint: disable=no-member
-        cls.es.conn.indices.close(index=cls.es.index)
-        try:
-            cls.es.conn.indices.put_settings(
-                index=cls.es.index,
-                body=getattr(cls, '__settings__', {})
-            )
-        finally:
-            cls.es.conn.indices.open(index=cls.es.index)
+    def get_analysis(cls):
+        return cls.__analysis__
 
 
 class Document(document.Document):
-    pass
+    __analysis__ = {}
+
+    @classmethod
+    def get_analysis(cls):
+        return cls.__analysis__

@@ -432,26 +432,63 @@ def create_db():
     """Create the ElasticSearch index for Annotations and Documents"""
     # Check for required plugin(s)
     _ensure_es_plugins(es.conn)
+
+    models = [Annotation, Document]
+    mappings = {}
+    analysis = {}
+
+    # Collect the mappings and analysis settings
+    for model in models:
+        mappings.update(model.get_mapping())
+        for section, items in model.get_analysis().items():
+            existing_items = analysis.setdefault(section, {})
+            for name in items:
+                if name in existing_items:
+                    fmt = "Duplicate definition of 'index.analysis.{}.{}'."
+                    msg = fmt.format(section, name)
+                    raise RuntimeError(msg)
+            existing_items.update(items)
+
+    # Create the index
     try:
-        es.conn.indices.create(es.index)
-    except elasticsearch_exceptions.RequestError as e:
-        if not (e.error.startswith('IndexAlreadyExistsException')
-                or e.error.startswith('InvalidIndexNameException')):
-            raise
+        # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
+        #
+        # pylint: disable=unexpected-keyword-arg
+        response = es.conn.indices.create(es.index, ignore=400, body={
+            'mappings': mappings,
+            'settings': {'analysis': analysis},
+        })
     except elasticsearch_exceptions.ConnectionError as e:
         msg = ('Can not access ElasticSearch at {0}! '
                'Check to ensure it is running.').format(es.host)
         raise elasticsearch_exceptions.ConnectionError('N/A', msg, e)
-    # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
-    #
-    # pylint: disable=unexpected-keyword-arg
-    es.conn.cluster.health(wait_for_status='yellow')
-    # pylint: enable=unexpected-keyword-arg
 
+    # Bad request (400) is ignored above, to prevent warnings in the log, but
+    # the failure could be for reasons other than that the index exists. If so,
+    # raise the error here.
+    if 'error' in response and 'IndexAlreadyExists' not in response['error']:
+        raise elasticsearch_exceptions.RequestError(400, response['error'])
+
+    # Update analysis settings
+    settings = es.conn.indices.get_settings(index=es.index)
+    existing = settings[es.index]['settings']['index'].get('analysis', {})
+    if existing != analysis:
+        try:
+            es.conn.indices.close(index=es.index)
+            es.conn.indices.put_settings(index=es.index, body={
+                'analysis': analysis
+            })
+        finally:
+            es.conn.indices.open(index=es.index)
+
+    # Update mappings
     try:
-        Annotation.update_settings()
-        Annotation.create_all()
-        Document.create_all()
+        for doc_type, body in mappings.items():
+            es.conn.indices.put_mapping(
+                index=es.index,
+                doc_type=doc_type,
+                body=body
+            )
     except elasticsearch_exceptions.RequestError as e:
         if e.error.startswith('MergeMappingException'):
             date = time.strftime('%Y-%m-%d')
