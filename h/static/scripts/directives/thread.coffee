@@ -18,6 +18,7 @@ ThreadController = [
   ->
     @container = null
     @collapsed = false
+    @inEditMode = false
 
     ###*
     # @ngdoc method
@@ -37,6 +38,19 @@ ThreadController = [
     ###
     this.showReplyToggle = (messageCount) ->
       messageCount > 1 && !(@collapsed && @container.parent.parent)
+
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#showReplyToggle
+    # @description
+    # Callback called when an annotation directive switches between the
+    # edit and view modes. This allows the thread to present itself
+    # differently.
+    # We need a double arrow here as the annotation directive will call this
+    # funciton under it's own scope.
+    ###
+    this.onAnnotationModeChange = (mode) =>
+      this.inEditMode = mode.value == mode.EDIT
 
     this
 ]

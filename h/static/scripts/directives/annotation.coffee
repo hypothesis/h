@@ -29,6 +29,8 @@ validate = (value) ->
 # @property {string} preview If previewing an edit then 'yes', else 'no'.
 # @property {boolean} editing True if editing components are shown.
 # @property {boolean} embedded True if the annotation is an embedded widget.
+# @property {Function} onModeChange A callback set by the directive that is
+# called when the mode switches between edit and view.
 #
 # @description
 #
@@ -51,11 +53,18 @@ AnnotationController = [
     @hasDiff = false
     @showDiff = undefined
     @timestamp = null
+    @onModeChange = ->
 
     highlight = annotator.tool is 'highlight'
-    model = $scope.annotationGet()
+    model = $scope.parseAnnotationAttr()
     original = null
     vm = this
+
+    # Updates the @editing flag and calls the onModeChange handler.
+    updateEditing = ({isEditing}) =>
+      @editing = isEditing
+      value = if isEditing then 'edit' else 'view'
+      @onModeChange({value: value, EDIT: 'edit', VIEW: 'view'})
 
     ###*
     # @ngdoc method
@@ -111,8 +120,8 @@ AnnotationController = [
     this.edit = ->
       drafts.add model, => this.revert()
       @action = if model.id? then 'edit' else 'create'
-      @editing = true
       @preview = 'no'
+      updateEditing(isEditing: true)
 
     ###*
     # @ngdoc method
@@ -126,7 +135,7 @@ AnnotationController = [
       else
         this.render()
         @action = 'view'
-        @editing = false
+        updateEditing(isEditing: false)
 
     # Calculates the visual diff flags from the targets
     #
@@ -161,8 +170,8 @@ AnnotationController = [
         when 'delete', 'edit'
           annotator.publish 'annotationUpdated', model
 
-      @editing = false
       @action = 'view'
+      updateEditing(isEditing: false)
 
     ###*
     # @ngdoc method
@@ -315,6 +324,8 @@ annotation = [
   '$document', 'annotator',
   ($document,   annotator) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
+      ctrl.onModeChange = scope.parseOnModeChangeAttr()
+
       # Helper function to remove the temporary thread created for a new reply.
       prune = (message) ->
         return if message.id?  # threading plugin will take care of it
@@ -369,7 +380,8 @@ annotation = [
     link: linkFn
     require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount']
     scope:
-      annotationGet: '&annotation'
+      parseAnnotationAttr: '&annotation'
+      parseOnModeChangeAttr: '&annotationOnModeChange'
     templateUrl: 'annotation.html'
 ]
 

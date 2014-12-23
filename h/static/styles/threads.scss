@@ -110,8 +110,11 @@ $threadexp-width: .6em;
 }
 
 .thread-reply {
-  margin-top: -2.153em;
   margin-bottom: .8em;
+}
+
+.thread-reply-pull-up {
+  margin-top: -2.153em;
 }
 
 .thread-message:hover + .thread-reply {
