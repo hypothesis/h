@@ -84,3 +84,20 @@ describe 'Annotator.Threading', ->
       instance.pruneEmpties(root)
 
       assert.equal(root.children.length, 0)
+
+  describe 'when @shouldRemoveEmptyParents is set to true', ->
+    it 'promotes children with empty parents to the root', ->
+      threadA = mail.messageContainer()
+      threadA1 = mail.messageContainer()
+      threadA11 = mail.messageContainer(mail.message('subject a11', 'a11'))
+
+      root = mail.messageContainer()
+      root.addChild(threadA)
+      threadA.addChild(threadA1)
+      threadA1.addChild(threadA11)
+
+      instance = createThreadingInstance()
+      instance.shouldRemoveEmptyParents = true
+      instance.pruneEmpties(root)
+
+      assert.equal(root.children[0], threadA11)

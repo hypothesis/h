@@ -203,6 +203,9 @@ class AnnotationViewerController
     # to annotations loaded into the stream.
     $scope.focus = angular.noop
 
+    # Remove empty parent annotations when rendering a reply.
+    $scope.threading.shouldRemoveEmptyParents = true
+
     $scope.shouldShowThread = -> true
 
     $scope.search.update = (query) ->
