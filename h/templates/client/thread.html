@@ -17,7 +17,7 @@
 </article>
 
 <!-- Reply count -->
-<div class="thread-reply" ng-show="count('message') > 0 && (!threadFilter.active() || count('message') == count('match'))">
+<div class="thread-reply" ng-show="!(vm.collapsed && !vm.isRoot) && count('message') > 0 && (!threadFilter.active() || count('message') == count('match'))">
   <a class="reply-count small"
      href=""
      ng-pluralize count="count('message') - 1"

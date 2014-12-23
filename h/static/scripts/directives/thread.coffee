@@ -18,6 +18,7 @@ ThreadController = [
   ->
     @container = null
     @collapsed = false
+    @isRoot = false
 
     ###*
     # @ngdoc method
@@ -78,6 +79,9 @@ thread = [
   '$parse', '$window', 'pulse', 'render',
   ($parse,   $window,   pulse,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter]) ->
+      # Determine if this is a top level thread.
+      ctrl.isRoot = $parse(attrs.threadRoot)(scope) == true
+
       # Toggle collapse on click.
       elem.on 'click', (event) ->
         event.stopPropagation()
