@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
 from mock import patch, Mock, MagicMock
-from pyramid.testing import DummyRequest, testConfig
+from pyramid.testing import DummyRequest
 
 from h import events
 from h.notification.gateway import user_name, user_profile_url, standalone_url
 from h.notification import reply_template as rt
+from h.notification.types import REPLY_TYPE
 
 
 def _create_request():
+    mock_dumps = Mock(return_value='TOKEN')
     request = DummyRequest()
     request.domain = 'www.howtoreachtheark.now'
-    request.registry.notification_serializer = Mock(dumps=Mock())
+    request.registry.notification_serializer = Mock(dumps=mock_dumps)
     request.route_url = Mock()
     request.route_url.return_value = 'UNSUBSCRIBE_URL'
     return request
@@ -187,6 +189,41 @@ def test_fallback_title():
         tmap = rt.create_template_map(request, annotation, data)
         assert tmap['document_title'] == annotation['uri']
 
+
+def test_unsubscribe_token_generation():
+    """ensures that a serialized token is generated for the unsubsribe url"""
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
+        request = _create_request()
+        annotation = store_fake_data[4]
+
+        data = {
+            'parent': rt.parent_values(annotation),
+            'subscription': {'id': 1}
+        }
+        rt.create_template_map(request, annotation, data)
+
+        notification_serializer = request.registry.notification_serializer
+        notification_serializer.dumps.assert_called_with({
+            'type': REPLY_TYPE,
+            'uri': data['parent']['user'],
+        })
+
+
+def test_unsubscribe_url_generation():
+    """ensures that a serialized token is generated for the unsubsribe url"""
+    with patch('h.notification.reply_template.Annotation') as mock_annotation:
+        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
+        request = _create_request()
+        annotation = store_fake_data[4]
+
+        data = {
+            'parent': rt.parent_values(annotation),
+            'subscription': {'id': 1}
+        }
+        rt.create_template_map(request, annotation, data)
+
+        request.route_url.assert_called_with('unsubscribe', token='TOKEN')
 
 # Tests for the get_recipients function
 def test_get_email():

@@ -20,6 +20,7 @@ def _unsubscribe_request():
     request.matchdict['token'] = token
     return request
 
+
 def test_successful_unsubscribe():
     """ ensure unsubscribe unsets the active flag on the subscription """
     with testConfig() as config:
@@ -39,7 +40,7 @@ def test_successful_unsubscribe():
                 unsubscribe(request)
 
                 assert mock_subscription.active is False
-                assert mock_db.add.called_with(mock_subscription)
+                mock_db.add.assert_called_with(mock_subscription)
 
 
 def test_idempotent_unsubscribe():
