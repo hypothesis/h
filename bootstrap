@@ -48,11 +48,6 @@ if test -z "$VIRTUAL_ENV"; then
 	fi
 fi
 
-
-if test -z "$PIP_DOWNLOAD_CACHE"; then
-	export PIP_DOWNLOAD_CACHE=.pip
-fi
-
 echo "Ensuring an up-to-date pip..."
 pip install -qU pip
 
