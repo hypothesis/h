@@ -1,4 +1,4 @@
-<header class="annotation-header">
+<header class="annotation-header annotation-section">
   <!-- Deletion notice -->
   <span ng-if="!vm.editing && vm.annotation.deleted">Annotation deleted.</span>
 
@@ -42,7 +42,7 @@
 </header>
 
 <!-- Excerpts -->
-<section class="annotation-target"
+<section class="annotation-target annotation-section"
          ng-repeat="target in vm.annotation.target track by $index">
   <blockquote class="annotation-quote"
               ng-hide="target.diffHTML && vm.showDiff"
@@ -120,7 +120,7 @@
   </a>
 </div>
 
-<footer class="annotation-footer annotation-actions"
+<footer class="annotation-footer annotation-actions annotation-section"
         ng-if="!vm.editing && vm.annotation.id">
   <a class="small magicontrol" href="" title="Reply"
     ng-click="vm.reply()"

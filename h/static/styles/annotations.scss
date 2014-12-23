@@ -6,7 +6,6 @@
   font-family: $sans-font-family;
   font-weight: 300;
   position: relative;
-  @include pie-clearfix;
 
   &:hover .annotation-timestamp, &:hover .reply-count {
     color: $link-color;
@@ -20,10 +19,13 @@
   &:focus { outline: 0; }
 }
 
-.annotation-header { margin-bottom: .8em }
-.annotation-section { margin: .8em 0 }
-.annotation-target { margin: .8em 0 }
-.annotation-footer { margin-top: .8em }
+.annotation-section {
+  @include pie-clearfix;
+  margin: .8em 0;
+}
+
+.annotation-header { margin-top: 0 }
+.annotation-footer { margin-bottom: 0 }
 
 .annotation-user {
   color: $text-color;
