@@ -19,7 +19,9 @@
   &:focus { outline: 0; }
 }
 
-.annotation-section {
+.annotation-section,
+.annotation-header,
+.annotation-footer {
   @include pie-clearfix;
   margin: .8em 0;
 }
