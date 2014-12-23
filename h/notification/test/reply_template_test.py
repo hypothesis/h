@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
-from datetime import datetime
-
 from mock import patch, Mock, MagicMock
-from pyramid.testing import DummyRequest
+from pyramid.testing import DummyRequest, testConfig
 
 from h import events
 from h.notification.gateway import user_name, user_profile_url, standalone_url
 from h.notification import reply_template as rt
+
+
+def _create_request():
+    request = DummyRequest()
+    request.domain = 'www.howtoreachtheark.now'
+    request.registry.notification_serializer = Mock(dumps=Mock())
+    request.route_url = Mock()
+    request.route_url.return_value = 'UNSUBSCRIBE_URL'
+    return request
 
 store_fake_data = [
     {
@@ -105,8 +112,7 @@ def test_all_keys_are_there():
     """Checks for the existence of every needed key for the template"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = DummyRequest()
-        request.domain = 'www.howtoreachtheark.now'
+        request = _create_request()
         annotation = store_fake_data[1]
 
         data = {
@@ -134,8 +140,7 @@ def test_template_map_key_values():
     """This test checks whether the keys holds the correct values"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = DummyRequest()
-        request.domain = 'www.howtoreachtheark.now'
+        request = _create_request()
         annotation = store_fake_data[1]
 
         data = {
@@ -165,19 +170,14 @@ def test_template_map_key_values():
         assert tmap['parent_timestamp'] == '27 October 2013 at 19:40'
         assert tmap['reply_timestamp'] == '27 October 2014 at 19:50'
 
-        # Unsubscribe link
-        seq = ('http://', str(request.domain), '/app?__formid__=unsubscribe&subscription_id=', str(data['subscription']['id']))
-        unsubscribe = "".join(seq)
-
-        assert tmap['unsubscribe'] == unsubscribe
+        assert tmap['unsubscribe'] == 'UNSUBSCRIBE_URL'
 
 
 def test_fallback_title():
     """Checks that the title falls back to using the url"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = DummyRequest()
-        request.domain = 'www.howtoreachtheark.now'
+        request = _create_request()
         annotation = store_fake_data[4]
 
         data = {
@@ -197,8 +197,7 @@ def test_get_email():
             user = Mock()
             user.email = 'testmail@test.com'
             mock_user_db.return_value = user
-            request = DummyRequest()
-            request.domain = 'www.howtoreachtheark.now'
+            request = _create_request()
 
             annotation = store_fake_data[1]
             data = {
@@ -216,8 +215,7 @@ def test_no_email():
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
             mock_user_db.return_value = {}
-            request = DummyRequest()
-            request.domain = 'www.howtoreachtheark.now'
+            request = _create_request()
 
             annotation = store_fake_data[1]
             data = {
@@ -239,8 +237,7 @@ def test_dont_send_to_the_same_user():
     then this function returns False"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = DummyRequest()
-        request.domain = 'www.howtoreachtheark.now'
+        request = _create_request()
 
         annotation = store_fake_data[0]
         data = {
@@ -318,8 +315,7 @@ def test_action_create():
     """If the action is create, it'll try to get the subscriptions"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = DummyRequest()
-        request.domain = 'www.howtoreachtheark.now'
+        request = _create_request()
 
         annotation = store_fake_data[1]
         event = events.AnnotationEvent(request, annotation, 'create')
@@ -341,8 +337,7 @@ def test_check_conditions_false_stops_sending():
     """If the check conditions() returns False, no notification is sent"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = DummyRequest()
-        request.domain = 'www.howtoreachtheark.now'
+        request = _create_request()
 
         annotation = store_fake_data[1]
         event = events.AnnotationEvent(request, annotation, 'create')
@@ -361,8 +356,7 @@ def test_send_if_everything_is_okay():
     """Test whether we call the send_email() if every condition is okay"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = DummyRequest()
-        request.domain = 'www.howtoreachtheark.now'
+        request = _create_request()
 
         annotation = store_fake_data[1]
         event = events.AnnotationEvent(request, annotation, 'create')
