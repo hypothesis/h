@@ -12,8 +12,8 @@ def unsubscribe(request):
 
     subscriptions = Subscriptions.get_templates_for_uri_and_type(
         request,
-        payload['type'],
         payload['uri'],
+        payload['type'],
     )
 
     db = get_session(request)
