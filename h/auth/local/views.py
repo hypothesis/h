@@ -311,12 +311,14 @@ class ProfileController(horus.views.ProfileController):
 
     def profile(self):
         request = self.request
+        model = {}
         user_id = request.authenticated_userid
-        subscriptions = Subscriptions.get_subscriptions_for_uri(
-            request,
-            user_id
-        )
-        return {'model': {'subscriptions': subscriptions}}
+        if request.registry.feature('notification'):
+            model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
+                request,
+                user_id
+            )
+        return {'model': model}
 
     def unsubscribe(self):
         request = self.request
