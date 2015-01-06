@@ -163,7 +163,7 @@ def test_template_map_key_values():
         assert tmap['reply_path'] == standalone_url(request, annotation['id'])
 
         assert tmap['parent_timestamp'] == '27 October 2013 at 19:40'
-        assert tmap['reply_timestamp'] == '27 October at 19:50'
+        assert tmap['reply_timestamp'] == '27 October 2014 at 19:50'
 
         # Unsubscribe link
         seq = ('http://', str(request.domain), '/app?__formid__=unsubscribe&subscription_id=', str(data['subscription']['id']))
