@@ -6,6 +6,7 @@ simpleSearch = ['$parse', ($parse) ->
     scope.reset = (event) ->
       event.preventDefault()
       scope.query = ''
+      scope.searchtext = ''
 
     scope.search = (event) ->
       event.preventDefault()

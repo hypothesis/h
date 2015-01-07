@@ -46,6 +46,8 @@ describe 'h.directives', ->
       assert($scope.clear.called)
 
     it 'clears the search-bar', ->
+      isolate.query = ''
+      isolate.$digest()
       isolate.searchtext = "Test query"
       isolate.$digest()
       $element.find('.simple-search-clear').click()
