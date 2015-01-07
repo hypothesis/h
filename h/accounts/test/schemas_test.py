@@ -5,7 +5,7 @@ from mock import PropertyMock, patch
 from pyramid.exceptions import BadCSRFToken
 from pyramid.testing import DummyRequest, testConfig
 
-from h.auth.local import models, schemas
+from h.accounts import models, schemas
 
 valid_username = 'test'
 valid_email = 'raven@poe.net'
@@ -37,7 +37,7 @@ def mock_user_ctor():
         return password == valid_user['password']
 
     is_activated = PropertyMock(return_value=False)
-    with patch('h.auth.local.models.User', autospec=True) as MockUser:
+    with patch('h.accounts.models.User', autospec=True) as MockUser:
         MockUser.get_by_username.side_effect = get_by_username
         MockUser.get_by_email.side_effect = get_by_email
         MockUser.validate_user.side_effect = validate_user

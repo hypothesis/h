@@ -43,6 +43,12 @@ def settings_from_environment():
         settings['redis.sessions.host'] = redis_host
         settings['redis.sessions.port'] = redis_port
 
+    if 'CLIENT_ID' in os.environ:
+        settings['h.client_id'] = os.environ['CLIENT_ID']
+
+    if 'CLIENT_SECRET' in os.environ:
+        settings['h.client_secret'] = os.environ['CLIENT_SECRET']
+
     if 'SESSION_SECRET' in os.environ:
         settings['session.secret'] = os.environ['SESSION_SECRET']
         settings['redis.sessions.secret'] = os.environ['SESSION_SECRET']

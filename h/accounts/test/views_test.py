@@ -8,7 +8,7 @@ from horus.models import UserMixin, ActivationMixin
 from horus.strings import UIStringsBase
 from hem.interfaces import IDBSession
 
-from h.auth.local.views import ProfileController
+from h.accounts.views import ProfileController
 from h.models import _
 
 
@@ -105,7 +105,7 @@ def test_subscription_update():
     print "request", request.POST
     with testConfig() as config:
         configure(config)
-        with patch('h.auth.local.views.Subscriptions') as mock_subs:
+        with patch('h.accounts.views.Subscriptions') as mock_subs:
             mock_subs.get_by_id = MagicMock()
             mock_subs.get_by_id.return_value = Mock(active=True)
             profile = ProfileController(request)
@@ -125,7 +125,7 @@ def test_disable_invalid_password():
         configure(config)
         with patch('horus.models.UserMixin') as mock_user:
             with patch('horus.lib.FlashMessage') as mock_flash:
-                with patch('h.auth.local.schemas.EditProfileSchema') as mock_schema:
+                with patch('h.accounts.schemas.EditProfileSchema') as mock_schema:
                     mock_schema.validator = MagicMock(name='validator')
                     mock_user.get_user = MagicMock(side_effect=_bad_password)
                     profile = ProfileController(request)
@@ -143,7 +143,7 @@ def test_user_disabled():
         configure(config)
         with patch('horus.models.UserMixin') as mock_user:
             with patch('horus.lib.FlashMessage') as mock_flash:
-                with patch('h.auth.local.schemas.EditProfileSchema') as mock_schema:
+                with patch('h.accounts.schemas.EditProfileSchema') as mock_schema:
                     mock_schema.validator = MagicMock(name='validator')
                     mock_user.get_user = MagicMock(side_effect=_good_password)
                     profile = ProfileController(request)

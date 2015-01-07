@@ -92,6 +92,19 @@ def test_redis_database_environment():
 
 
 @patch.dict(os.environ)
+def test_client_credentials_environment():
+    os.environ['CLIENT_ID'] = 'annotate'
+    os.environ['CLIENT_SECRET'] = 'unsecret'
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'h.client_id': 'annotate',
+        'h.client_secret': 'unsecret',
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
 def test_session_secret_environment():
     os.environ['SESSION_SECRET'] = 's3kr1t'
 

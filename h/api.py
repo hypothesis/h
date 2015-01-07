@@ -7,13 +7,11 @@ import time
 
 from annotator import auth, es
 from elasticsearch import exceptions as elasticsearch_exceptions
-from oauthlib.oauth2 import BearerToken
-from pyramid.authentication import RemoteUserAuthenticationPolicy
 from pyramid.renderers import JSON
 from pyramid.settings import asbool
 from pyramid.view import view_config
 
-from h import events, interfaces
+from h import events
 from h.models import Annotation, Document
 
 
@@ -100,10 +98,18 @@ def search(context, request):
     }
 
 
+@api_config(context='h.resources.APIResource', name='access_token')
+def access_token(context, request):
+    """The OAuth 2 access token view."""
+    if request.grant_type is None:
+        request.grant_type = 'client_credentials'
+    return request.create_token_response()
+
+
 @api_config(context='h.resources.APIResource', name='token', renderer='string')
-def token(context, request):
-    """Return the user's API authentication token."""
-    response = request.create_token_response()
+def annotator_token(context, request):
+    """The Annotator Auth token view."""
+    response = access_token(context, request)
     return response.json_body.get('access_token', response)
 
 
@@ -214,85 +220,9 @@ def get_user(request):
     """Create a User object for annotator-store"""
     userid = request.authenticated_userid
     if userid is not None:
-        try:
-            consumer_api = request.client
-        except AttributeError:
-            consumer_api = get_consumer(request)
-        consumer_ann = auth.Consumer(consumer_api.client_id)
-        return auth.User(userid, consumer_ann, False)
+        consumer = auth.Consumer(request.client.client_id)
+        return auth.User(userid, consumer, False)
     return None
-
-
-def get_consumer(request):
-    registry = request.registry
-    settings = registry.settings
-
-    key = request.params.get('client_id', settings['api.key'])
-    secret = request.params.get('client_secret', settings.get('api.secret'))
-
-    consumer_ctor = registry.getUtility(interfaces.IConsumerClass)
-
-    if key == settings['api.key'] and secret is not None:
-        consumer = consumer_ctor(key=key, secret=secret)
-    else:
-        consumer = consumer_ctor.get_by_key(request, key)
-
-    return consumer
-
-
-class OAuthAuthenticationPolicy(RemoteUserAuthenticationPolicy):
-    def unauthenticated_userid(self, request):
-        token = request.environ.get(self.environ_key)
-
-        if token is None:
-            return None
-
-        if request.verify_request():
-            return getattr(request, 'user', None)
-        else:
-            return None
-
-
-class Token(BearerToken):
-    def create_token(self, request, refresh_token=False):
-        client = request.client
-        message = dict(consumerKey=client.client_id, ttl=client.ttl)
-        message.update(request.extra_credentials or {})
-        token = {
-            'access_token': auth.encode_token(message, client.client_secret),
-            'expires_in': client.ttl,
-            'token_type': 'http://annotateit.org/api/token',
-        }
-        return token
-
-    def validate_request(self, request):
-        client = get_consumer(request)
-        request.client = client
-
-        token = request.headers.get('X-Annotator-Auth-Token')
-        if token is None:
-            return False
-
-        if client is None:
-            return False
-
-        try:
-            token = auth.decode_token(token, client.client_secret, client.ttl)
-        except auth.TokenInvalid:
-            return False
-
-        if token['consumerKey'] != client.client_id:
-            return False
-
-        request.user = token.get('userId')
-
-        return True
-
-    def estimate_type(self, request):
-        if request.headers.get('X-Annotator-Auth-Token') is not None:
-            return 9
-        else:
-            return 0
 
 
 def _trigger_event(request, annotation, action):
@@ -512,17 +442,6 @@ def includeme(config):
     settings = registry.settings
 
     config.add_renderer('json', JSON(indent=4))
-
-    config.include('pyramid_oauthlib')
-    config.add_token_type(Token)
-
-    # Configure the token policy
-    authn_debug = config.registry.settings.get('debug_authorization')
-    authn_policy = OAuthAuthenticationPolicy(
-        environ_key='HTTP_X_ANNOTATOR_AUTH_TOKEN',
-        debug=authn_debug,
-    )
-    config.set_authentication_policy(authn_policy)
 
     # Configure ElasticSearch
     store_from_settings(settings)

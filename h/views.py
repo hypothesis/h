@@ -6,6 +6,7 @@ from pyramid import httpexceptions
 from pyramid.events import ContextFound
 from pyramid.view import view_config, notfound_view_config
 
+from h import session
 
 log = logging.getLogger(__name__)
 
@@ -43,6 +44,14 @@ def help_page(context, request):
         'is_help': current_route == 'help',
         'is_onboarding': current_route == 'onboarding',
     }
+
+
+@view_config(accept='application/json', name='app', renderer='json')
+def session_view(request):
+    request.add_response_callback(session.set_csrf_token)
+    flash = session.pop_flash(request)
+    model = session.model(request)
+    return dict(status='okay', flash=flash, model=model)
 
 
 @view_config(
