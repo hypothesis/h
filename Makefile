@@ -11,10 +11,9 @@ clean:
 		-path 'h/static/scripts/vendor' -prune \
 		-o -iname '*.js' \
 		-exec rm {} \;
-	find h/static/styles \
-		-iname '*.css' \
-		-prune -o -iname 'icomoon.css' \
-		-exec rm {} \;
+	find h/static/styles/*.css \
+		-iname 'icomoon.css' -prune \
+		-o -exec rm {} \;
 
 test:
 	@echo -n "Checking to see if elasticsearch is running..."
