@@ -2,12 +2,12 @@
 """OAuth integration support."""
 from .interfaces import IClient, IClientFactory
 from .lib import get_client, set_client_factory
-from .tokens import AnnotatorToken
+from .grant_types import JWTBearerGrant
 
 __all__ = [
-    'AnnotatorToken',
     'IClient',
     'IClientFactory',
+    'JWTBearerGrant',
 ]
 
 

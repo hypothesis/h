@@ -11,7 +11,7 @@ from pyramid.renderers import JSON
 from pyramid.settings import asbool
 from pyramid.view import view_config
 
-from h import events
+from h import authorization, events
 from h.models import Annotation, Document
 
 
@@ -95,8 +95,7 @@ def access_token(context, request):
 @api_config(context='h.resources.APIResource', name='token', renderer='string')
 def annotator_token(context, request):
     """The Annotator Auth token view."""
-    response = access_token(context, request)
-    return response.json_body.get('access_token', response)
+    return authorization.token_generator(request)
 
 
 @api_config(context='h.resources.AnnotationFactory', request_method='GET')

@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
+import datetime
 import unittest
 
-from annotator.auth import TokenInvalid
-from mock import patch
+import jwt
+from mock import ANY, patch
 from pyramid.testing import DummyRequest
 
 from h.authorization import RequestValidator
 from h.security import WEB_SCOPES
 
+EPOCH = datetime.datetime(1970, 1, 1)
 FakeClient = namedtuple('FakeClient', ['client_id', 'client_secret'])
+
+
+def posix_seconds(t):
+    return int((t - EPOCH).total_seconds())
 
 
 class TestRequestValidator(unittest.TestCase):
@@ -29,9 +35,6 @@ class TestRequestValidator(unittest.TestCase):
         )
         self.request.registry.web_client = self.client
         self.validator = RequestValidator()
-
-        self.decode_patcher = patch('annotator.auth.decode_token')
-        self.decode = self.decode_patcher.start()
 
     def test_authenticate_client_ok(self):
         self.request.client_id = 'someclient'
@@ -58,18 +61,32 @@ class TestRequestValidator(unittest.TestCase):
         res = self.validator.authenticate_client(self.request)
         assert res is False
 
-    def test_validate_bearer_token_invalid(self):
-        self.decode.side_effect = TokenInvalid
-        res = self.validator.validate_bearer_token('', [], self.request)
-        assert res is False
+    def test_validate_bearer_token(self):
+        now = datetime.datetime.utcnow().replace(microsecond=0)
+        ttl = datetime.timedelta(seconds=30)
+        exp = posix_seconds(now + ttl)
+        payload = {
+            'aud': self.request.host_url,
+            'sub': 'citizen',
+            'exp': exp,
+            'iss': self.client.client_id,
+        }
+        token = jwt.encode(payload, self.client.client_secret)
 
-    def test_validate_bearer_token_valid(self):
-        self.decode.return_value = {'userId': 'citizen', 'scopes': ['world']}
-        res = self.validator.validate_bearer_token('', [], self.request)
-        assert res is True
-        assert self.request.client is self.client
-        assert self.request.user == 'citizen'
-        assert self.request.scopes == ['world']
+        with patch('jwt.verify_signature') as verify:
+            res = self.validator.validate_bearer_token(token, [], self.request)
+
+            verify.assert_called_with(payload, ANY, ANY, ANY,
+                                      key=self.client.client_secret,
+                                      audience=payload['aud'],
+                                      issuer=payload['iss'],
+                                      leeway=ANY)
+
+            assert res is True
+            assert self.request.client is self.client
+            assert self.request.scopes == WEB_SCOPES
+            assert self.request.user == 'citizen'
+
 
     def test_validate_scopes_ok(self):
         client = FakeClient('other', 'secret')

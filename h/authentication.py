@@ -21,6 +21,13 @@ from .authorization import WEB_SCOPES
 from .oauth import IClientFactory
 
 
+def normalize_authorization_header(request):  # bw compat
+    """Convert any X-Annotator-Auth-Token header to an Authorization header."""
+    token = request.headers.get('X-Annotator-Auth-Token', None)
+    if token is not None:
+        request.authorization = ('Bearer', token)
+
+
 class OAuthPolicy(SessionAuthenticationPolicy):
 
     """
@@ -38,6 +45,7 @@ class OAuthPolicy(SessionAuthenticationPolicy):
         userid = super(OAuthPolicy, self).unauthenticated_userid(request)
 
         if userid is None:
+            normalize_authorization_header(request)  # bw compat
             request.verify_request()
             request.client = getattr(request, 'client', None)
             request.user = getattr(request, 'user', None)
