@@ -55,6 +55,9 @@ def settings_from_environment():
         settings['mail.port'] = 587
         settings['mail.tls'] = True
 
+    if 'MAIL_DEFAULT_SENDER' in os.environ:
+        settings['mail.default_sender'] = os.environ['MAIL_DEFAULT_SENDER']
+
     if 'MAIL_PORT' in os.environ:
         mail_host = os.environ['MAIL_PORT_25_TCP_ADDR']
         mail_port = os.environ['MAIL_PORT_25_TCP_PORT']

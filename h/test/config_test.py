@@ -112,6 +112,17 @@ def test_mail_sendgrid():
 
 
 @patch.dict(os.environ)
+def test_mail_sender():
+    os.environ['MAIL_DEFAULT_SENDER'] = 'zardoz@vortex.org'
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'mail.default_sender': 'zardoz@vortex.org',
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
 def test_mail_environment():
     os.environ['MAIL_PORT'] = 'tcp://127.0.0.1:4567'
     os.environ['MAIL_PORT_25_TCP_ADDR'] = '127.0.0.1'
