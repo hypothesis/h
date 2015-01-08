@@ -16,18 +16,20 @@
   box-sizing: border-box;
 }
 
-.simple-search-icon {
-  float: left;
-  display: inline;
-  font-size: 1.1em;
-  line-height: 2;
-  margin-left: -100%;
-  position: relative;
-  right: 19 / 14 * 1em;
-
-  :not(:focus) ~ & {
-    color: $gray-lighter;
+@include icons {
+  &.simple-search-icon {
+    float: left;
+    display: inline;
+    font-size: 1.1em;
+    line-height: 2;
+    margin-left: -100%;
+    position: relative;
+    right: 19 / 14 * 1em;
   }
+}
+
+:not(:focus) ~ .simple-search-icon {
+  color: $gray-lighter;
 }
 
 .simple-search-input {
