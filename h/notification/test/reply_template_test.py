@@ -191,7 +191,7 @@ def test_fallback_title():
 
 
 def test_unsubscribe_token_generation():
-    """ensures that a serialized token is generated for the unsubsribe url"""
+    """ensures that a serialized token is generated for the unsubscribe url"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         request = _create_request()
@@ -211,7 +211,7 @@ def test_unsubscribe_token_generation():
 
 
 def test_unsubscribe_url_generation():
-    """ensures that a serialized token is generated for the unsubsribe url"""
+    """ensures that a serialized token is generated for the unsubscribe url"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         request = _create_request()
