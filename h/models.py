@@ -2,9 +2,6 @@
 from annotator import annotation, document
 from pyramid.i18n import TranslationStringFactory
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
-from zope.interface import implementer, provider
-
-from h.oauth import IClient, IClientFactory
 
 _ = TranslationStringFactory(__package__)
 
