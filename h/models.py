@@ -56,27 +56,14 @@ class Annotation(annotation.Annotation):
         'consumer': {'type': 'string'},
         'target': {
             'properties': {
-                'id': {
-                    'type': 'multi_field',
-                    'path': 'just_name',
-                    'fields': {
-                        'id': {'type': 'string'},
-                        'uri': {
-                            'type': 'string',
-                            'index_analyzer': 'uri_index',
-                            'search_analyzer': 'uri_search'
-                        },
-                    },
-                },
                 'source': {
-                    'type': 'multi_field',
                     'path': 'just_name',
+                    'type': 'string',
                     'fields': {
-                        'source': {'type': 'string'},
                         'uri': {
                             'type': 'string',
                             'index_analyzer': 'uri_index',
-                            'search_analyzer': 'uri_search'
+                            'search_analyzer': 'uri_search',
                         },
                     },
                 },
@@ -92,14 +79,13 @@ class Annotation(annotation.Annotation):
 
                         # Open Annotation TextQuoteSelector
                         'exact': {
-                            'type': 'multi_field',
                             'path': 'just_name',
+                            'type': 'string',
                             'fields': {
-                                'exact': {'type': 'string'},
                                 'quote': {
                                     'type': 'string',
-                                    'analyzer': 'uni_normalizer'
-                                }
+                                    'analyzer': 'uni_normalizer',
+                                },
                             },
                         },
                         'prefix': {'type': 'string'},
