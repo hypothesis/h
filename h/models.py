@@ -21,13 +21,8 @@ class Annotation(annotation.Annotation):
                         raise NotImplementedError("API consumer groups")
                     else:
                         principal = role
-                elif role.startswith('acct:'):
-                    principal = role
                 else:
-                    raise ValueError(
-                        "Unrecognized role '%s' in annotation '%s'" %
-                        (role, self.get('id'))
-                    )
+                    principal = role
 
                 # Append the converted rule tuple to the ACL
                 rule = (Allow, principal, action)
