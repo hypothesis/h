@@ -120,18 +120,17 @@ Note: Bundling the assets in the extension only works at the moment when the
 Deployment
 ----------
 
-Deployment is mostly left as an exercise to the reader until we document this
-better.
+Heroku
+^^^^^^
 
-The project is set up to run out of the box on Heroku using the Bonsai add-on
-for Elasticsearch and Heroku PostgreSQL.
+The project is set up to run out of the box on Heroku using these add-ons:
 
-Using `Docker`_ or the shell environment it is easy to customize a few
-different deployment options for deploying in other environments. See below
-for detail on these options.
+- Heroku PostgreSQL
+- Mailgun, Mandrill, or SendGrid for sending e-mail
+- RedisToGo for session storage
 
-Docker links
-^^^^^^^^^^^^
+Docker
+^^^^^^
 
 The following docker link names are supported for automatic configuration of
 services:
@@ -141,12 +140,16 @@ services:
 - ``redis``
 - ``statsd``
 
-Shell environment
-^^^^^^^^^^^^^^^^^
+Manual
+^^^^^^
 
 The following shell environment variables are supported:
 
+- ``CLIENT_ID`` a unique API key for authentication
+- ``CLIENT_SECRET`` a unique API secret for signing authentication requests
 - ``DATABASE_URL`` in the format used by Heroku
+- ``ELASTICSEARCH_INDEX`` the Elasticsearch index for annotation storage
+- ``MAIL_DEFAULT_SENDER`` a sender address for outbound mail
 - ``SESSION_SECRET`` a unique string secret for cookie validation
 
 Customized embedding
