@@ -31,6 +31,30 @@ def settings_from_environment():
         es_port = os.environ['ELASTICSEARCH_PORT_9200_TCP_PORT']
         settings['es.host'] = 'http://{}:{}'.format(es_host, es_port)
 
+    # MAILGUN_SMTP_LOGIN matches the Heroku environment variable
+    if 'MAILGUN_SMTP_LOGIN' in os.environ:
+        settings['mail.username'] = os.environ['MAILGUN_SMTP_LOGIN']
+        settings['mail.password'] = os.environ['MAILGUN_SMTP_PASSWORD']
+        settings['mail.host'] = 'smtp.mailgun.org'
+        settings['mail.port'] = 587
+        settings['mail.tls'] = True
+
+    # MANDRILL_USERNAME matches the Heroku environment variable
+    if 'MANDRILL_USERNAME' in os.environ:
+        settings['mail.username'] = os.environ['MANDRILL_USERNAME']
+        settings['mail.password'] = os.environ['MANDRILL_APIKEY']
+        settings['mail.host'] = 'smtp.mandrillapp.com'
+        settings['mail.port'] = 587
+        settings['mail.tls'] = True
+
+    # SENDGRID_USERNAME matches the Heroku environment variable
+    if 'SENDGRID_USERNAME' in os.environ:
+        settings['mail.username'] = os.environ['SENDGRID_USERNAME']
+        settings['mail.password'] = os.environ['SENDGRID_PASSWORD']
+        settings['mail.host'] = 'smtp.sendgrid.net'
+        settings['mail.port'] = 587
+        settings['mail.tls'] = True
+
     if 'MAIL_PORT' in os.environ:
         mail_host = os.environ['MAIL_PORT_25_TCP_ADDR']
         mail_port = os.environ['MAIL_PORT_25_TCP_PORT']

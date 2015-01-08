@@ -64,6 +64,54 @@ def test_es_environment():
 
 
 @patch.dict(os.environ)
+def test_mail_mailgun():
+    os.environ['MAILGUN_SMTP_LOGIN'] = 'hollywood'
+    os.environ['MAILGUN_SMTP_PASSWORD'] = 'wolfman'
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'mail.username': 'hollywood',
+        'mail.password': 'wolfman',
+        'mail.host': 'smtp.mailgun.org',
+        'mail.port': 587,
+        'mail.tls': True,
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
+def test_mail_mandrill():
+    os.environ['MANDRILL_USERNAME'] = 'maverick'
+    os.environ['MANDRILL_APIKEY'] = 'ace'
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'mail.username': 'maverick',
+        'mail.password': 'ace',
+        'mail.host': 'smtp.mandrillapp.com',
+        'mail.port': 587,
+        'mail.tls': True,
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
+def test_mail_sendgrid():
+    os.environ['SENDGRID_USERNAME'] = 'goose'
+    os.environ['SENDGRID_PASSWORD'] = 'stud'
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'mail.username': 'goose',
+        'mail.password': 'stud',
+        'mail.host': 'smtp.sendgrid.net',
+        'mail.port': 587,
+        'mail.tls': True,
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
 def test_mail_environment():
     os.environ['MAIL_PORT'] = 'tcp://127.0.0.1:4567'
     os.environ['MAIL_PORT_25_TCP_ADDR'] = '127.0.0.1'
