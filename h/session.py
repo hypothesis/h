@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from pyramid.interfaces import ISessionFactory
 from pyramid.session import SignedCookieSessionFactory
-from pyramid.view import view_config
 
 
 def model(request):
