@@ -1,4 +1,5 @@
 @import 'base';
+@import 'mixins/icons';
 @import 'compass/css3/user-interface';
 @import 'compass/layout/stretching';
 @import 'compass/reset/utilities';
@@ -130,6 +131,10 @@ $base-font-size: 14px;
     width: 100%;
     z-index: 3;
     position: relative;
+  }
+
+  @include icons {
+    font-family: 'h';
   }
 }
 
