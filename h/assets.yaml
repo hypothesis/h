@@ -323,6 +323,7 @@ helpers:
           contents:
             - h:static/scripts/helpers/helpers.coffee
             - h:static/scripts/helpers/*-helpers.coffee
+            - h:static/scripts/helpers/*-service.coffee
 
 
 session:

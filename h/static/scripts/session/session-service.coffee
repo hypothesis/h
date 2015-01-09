@@ -79,4 +79,3 @@ class SessionProvider
 
 angular.module('h.session')
 .provider('session', SessionProvider)
-.value('xsrf', token: null)

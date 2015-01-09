@@ -1,1 +1,1 @@
-angular.module('h.session', ['ngResource'])
+angular.module('h.session', ['ngResource', 'h.helpers'])
