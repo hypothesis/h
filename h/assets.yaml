@@ -225,7 +225,6 @@ app:
     - app_css
     - app_js
     - helpers
-    - session
 
 app_js:
   output: scripts/app.min.js
