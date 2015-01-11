@@ -89,8 +89,17 @@ def search(context, request):
               user.id if user else 'None',
               search_params.get('uri'))
 
-    results = Annotation.search(**search_params)
-    total = Annotation.count(**search_params)
+    # Handle any field
+    if 'any' in search_params['query']:
+        query = _multi_match_query(search_params)
+        params = {'search_type': 'count'}
+
+        results = Annotation.search_raw(query)
+        count = Annotation.search_raw(query, params, raw_result=True)
+        total = count['hits']['total']
+    else:
+        results = Annotation.search(**search_params)
+        total = Annotation.count(**search_params)
 
     return {
         'rows': results,
@@ -260,6 +269,30 @@ def _search_params(request_params, user=None):
 
     search_params['user'] = user
     return search_params
+
+
+def _multi_match_query(search_params):
+    any_terms = search_params['query'].getall('any')
+    del search_params['query']['any']
+
+    offset = search_params.get('offset', None)
+    limit = search_params.get('limit', None)
+    query = Annotation._build_query(search_params['query'], offset, limit)
+
+    multi_match_query = {
+        'multi_match': {
+            'query': any_terms,
+            'type': 'cross_fields',
+            'fields': ['quote', 'tag', 'text', 'uri', 'user']
+        }
+    }
+
+    # Remove match_all if we add the multi-match part
+    if 'match_all' in query['query']['bool']['must'][0]:
+        query['query']['bool']['must'] = []
+    query['query']['bool']['must'].append(multi_match_query)
+
+    return query
 
 
 def _create_annotation(fields, user):
