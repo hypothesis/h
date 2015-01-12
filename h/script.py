@@ -78,7 +78,7 @@ def embed(embed_path, context, request):
     delattr(request, 'view_name')
 
 
-def manifest(context, request):
+def chrome_manifest(context, request):
     # Chrome is strict about the format of the version string
     ext_version = '.'.join(version.replace('-', '.').split('.')[:4])
     manifest_file = resolve('h:browser/chrome/manifest.json').stream()
@@ -92,6 +92,14 @@ def manifest(context, request):
         src = urljoin(src, request.webassets_env.url)
     with open('manifest.json', 'w') as f:
         f.write(manifest_tpl.render(src=src, version=ext_version))
+
+
+def firefox_manifest(context, request):
+    ext_version = version.split('-')[0]
+    manifest_file = resolve('h:browser/firefox/package.json').stream()
+    manifest_tpl = Template(manifest_file.read())
+    with open('package.json', 'w') as f:
+        f.write(manifest_tpl.render(version=ext_version))
 
 
 def build_extension(env, browser, content_dir):
@@ -135,9 +143,11 @@ def build_extension(env, browser, content_dir):
         app(content_dir + '/app.html', context, request)
 
     if browser == 'chrome':
-        manifest(context, request)
+        chrome_manifest(context, request)
         remove('./karma.config.js')
         rmtree('./test/')
+    elif browser == 'firefox':
+        firefox_manifest(context, request)
 
     embed(content_dir + '/embed.js', context, request)
 
