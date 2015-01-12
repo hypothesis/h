@@ -137,6 +137,7 @@ services:
 
 - ``elasticsearch``
 - ``mail``
+- ``nsqd``
 - ``redis``
 - ``statsd``
 
