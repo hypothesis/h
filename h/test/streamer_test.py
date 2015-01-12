@@ -315,7 +315,7 @@ class TestShouldSendEvent(unittest.TestCase):
     def test_should_send_event_no_filter(self):
         self.sock_giraffe.filter = None
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(self.sock_giraffe, {}, data)
+        assert should_send_event(self.sock_giraffe, {}, data) is False
 
     def test_should_send_event_doesnt_send_reads(self):
         data = {'action': 'read', 'src_client_id': 'pigeon'}

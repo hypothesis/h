@@ -599,9 +599,12 @@ def should_send_event(socket, annotation, event_data):
     if not socket.request.has_permission('read', annotation):
         return False
 
-    if socket.filter is not None:
-        if not socket.filter.match(annotation, event_data['action']):
-            return False
+    # We don't send anything until we have received a filter from the client
+    if socket.filter is None:
+        return False
+
+    if not socket.filter.match(annotation, event_data['action']):
+        return False
 
     return True
 
