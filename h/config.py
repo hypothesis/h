@@ -64,6 +64,14 @@ def settings_from_environment():
         settings['mail.host'] = mail_host
         settings['mail.port'] = mail_port
 
+    if 'NSQD_PORT' in os.environ:
+        r_host = os.environ['NSQD_PORT_4150_TCP_ADDR']
+        r_port = os.environ['NSQD_PORT_4150_TCP_PORT']
+        settings['nsq.reader.addresses'] = '{}:{}'.format(r_host, r_port)
+        w_host = os.environ['NSQD_PORT_4151_TCP_ADDR']
+        w_port = os.environ['NSQD_PORT_4151_TCP_PORT']
+        settings['nsq.writer.address'] = '{}:{}'.format(w_host, w_port)
+
     if 'REDIS_PORT' in os.environ:
         redis_host = os.environ['REDIS_PORT_6379_TCP_ADDR']
         redis_port = os.environ['REDIS_PORT_6379_TCP_PORT']

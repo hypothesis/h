@@ -137,6 +137,22 @@ def test_mail_environment():
 
 
 @patch.dict(os.environ)
+def test_nsqd_environment():
+    os.environ['NSQD_PORT'] = 'tcp://127.0.0.1:4150'
+    os.environ['NSQD_PORT_4150_TCP_ADDR'] = 'tcp.nsqd.local'
+    os.environ['NSQD_PORT_4150_TCP_PORT'] = '4150'
+    os.environ['NSQD_PORT_4151_TCP_ADDR'] = 'http.nsqd.local'
+    os.environ['NSQD_PORT_4151_TCP_PORT'] = '4151'
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'nsq.reader.addresses': 'tcp.nsqd.local:4150',
+        'nsq.writer.address': 'http.nsqd.local:4151',
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
 def test_redis_database_environment():
     os.environ['REDIS_PORT'] = 'tcp://127.0.0.1:4567'
     os.environ['REDIS_PORT_6379_TCP_ADDR'] = '127.0.0.1'
