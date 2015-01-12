@@ -43,6 +43,28 @@ class SearchFilter
 
     tokens
 
+  toObject: (searchtext) ->
+    obj = {}
+
+    addToObj = (key, data) ->
+      if obj[key]?
+        obj[key].push data
+      else
+        obj[key] = [data]
+
+    if searchtext
+      terms = @_tokenize(searchtext)
+      for term in terms
+        filter = term.slice 0, term.indexOf ":"
+        unless filter? then filter = ""
+        if (term.indexOf ":") > -1
+          data = term.slice term.indexOf(":")+1
+          addToObj(filter, data)
+        else
+          addToObj('any', term)
+    obj
+
+
   # This function will generate the facets from the search-text input
   # It'll first tokenize it and then sorts them into facet lists
   # The output will be a dict with the following structure:
