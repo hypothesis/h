@@ -531,9 +531,11 @@ class ViewFilter
           when 'any'
             categoryMatch = false
             for field in @checkers.any.fields
-              if @_checkMatch(filter, annotation, @checkers[field])
-                categoryMatch = true
-                break
+              for term in filter.terms
+                termFilter = {terms: [term], operator: "and"}
+                if @_checkMatch(termFilter, annotation, @checkers[field])
+                  categoryMatch = true
+                  break
             match = categoryMatch
           else
             match = @_checkMatch filter, annotation, @checkers[category]
