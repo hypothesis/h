@@ -59,7 +59,6 @@ class Streamer
 
       # Give the application a chance to initialize the connection
       self.onopen(name: 'open')
-
       # Process queued messages
       self._sendQueue()
 

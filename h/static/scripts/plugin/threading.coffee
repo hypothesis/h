@@ -6,6 +6,7 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
 
   events:
     'beforeAnnotationCreated': 'beforeAnnotationCreated'
+    'annotationCreated': 'annotationCreated'
     'annotationDeleted': 'annotationDeleted'
     'annotationsLoaded': 'annotationsLoaded'
 
@@ -59,14 +60,25 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
 
       if !container.message && container.children.length == 0
         parent.removeChild(container)
+        delete this.idTable[container.message?.id]
 
   beforeAnnotationCreated: (annotation) =>
     this.thread([annotation])
 
+  annotationCreated: (annotation) =>
+    references = annotation.references or []
+    if typeof(annotation.references) == 'string' then references = []
+    ref = references[references.length-1]
+    parent = if ref then @idTable[ref] else @root
+    for child in (parent.children or []) when child.message is annotation
+      @idTable[annotation.id] = child
+      break
+
   annotationDeleted: ({id}) =>
-    container = this.getContainer id
-    container.message = null
-    this.pruneEmpties(@root)
+    container = this.idTable[id]
+    if container?
+      container.message = null
+      this.pruneEmpties(@root)
 
   annotationsLoaded: (annotations) =>
     messages = (@root.flattenChildren() or []).concat(annotations)

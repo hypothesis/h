@@ -29,15 +29,12 @@ renderFactory = ['$$rAF', ($$rAF) ->
 class Hypothesis extends Annotator
   events:
     'beforeAnnotationCreated': 'beforeAnnotationCreated'
-    'annotationCreated': 'digest'
     'annotationDeleted': 'annotationDeleted'
-    'annotationUpdated': 'digest'
     'annotationsLoaded': 'digest'
 
   # Plugin configuration
   options:
     noDocAccess: true
-    Discovery: {}
     Threading: {}
 
   # Internal state
@@ -47,17 +44,12 @@ class Hypothesis extends Annotator
   tool: 'comment'
   visibleHighlights: false
 
-  this.$inject = ['$document', '$window']
-  constructor:   ( $document,   $window ) ->
+  this.$inject = ['$document', '$window', 'store']
+  constructor:   ( $document,   $window,   store ) ->
     super ($document.find 'body')
 
-    window.annotator = this
-
     @providers = []
-    @socialView =
-      name: "none" # "single-player"
-
-    this.patch_store()
+    @store = store
 
     # Load plugins
     for own name, opts of @options
@@ -69,13 +61,13 @@ class Hypothesis extends Annotator
     whitelist = ['target', 'document', 'uri']
     this.addPlugin 'Bridge',
       gateway: true
-      formatter: (annotation) =>
+      formatter: (annotation) ->
         formatted = {}
         for k, v of annotation when k in whitelist
           formatted[k] = v
         formatted
-      parser: (annotation) =>
-        parsed = {}
+      parser: (annotation) ->
+        parsed = new store.annotation()
         for k, v of annotation when k in whitelist
           parsed[k] = v
         parsed
@@ -84,21 +76,16 @@ class Hypothesis extends Annotator
           window: source
           origin: origin
           scope: "#{scope}:provider"
-          onReady: =>
-            if source is $window.parent then @host = channel
-        entities = []
+          onReady: => if source is $window.parent then @host = channel
         channel = this._setupXDM options
+        provider = channel: channel, entities: []
 
         channel.call
           method: 'getDocumentInfo'
           success: (info) =>
-            entityUris = {}
-            entityUris[info.uri] = true
-            for link in info.metadata.link
-              entityUris[link.href] = true if link.href
-            for href of entityUris
-              entities.push href
-            this.plugins.Store?.loadAnnotations()
+            provider.entities = (link.href for link in info.metadata.link)
+            @providers.push provider
+            @element.scope().$digest()
             this.digest()
 
         # Allow the host to define it's own state
@@ -110,10 +97,6 @@ class Hypothesis extends Annotator
           channel.notify
             method: 'setVisibleHighlights'
             params: this.visibleHighlights
-
-        @providers.push
-          channel: channel
-          entities: entities
 
   _setupXDM: (options) ->
     # jschannel chokes FF and Chrome extension origins.
@@ -195,6 +178,27 @@ class Hypothesis extends Annotator
   _setupDocumentAccessStrategies: -> this
   _scan: -> this
 
+  createAnnotation: (annotation) ->
+    annotation = new @store.annotation(annotation)
+    this.publish 'beforeAnnotationCreated', annotation
+    annotation
+
+  deleteAnnotation: (annotation) ->
+    annotation.$delete(id: annotation.id).then =>
+      this.publish 'annotationDeleted', annotation
+    annotation
+
+  loadAnnotations: (annotations) ->
+    annotations = for annotation in annotations
+      container = @plugins.Threading.idTable[annotation.id]
+      if container?.message
+        angular.copy annotation, container.message
+        this.publish 'annotationUpdated', container.message
+        continue
+      else
+        annotation
+    super (new @store.annotation(a) for a in annotations)
+
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) -> annotation
 
@@ -263,77 +267,9 @@ class Hypothesis extends Annotator
     if scope.selectedAnnotations?[annotation.id]
       delete scope.selectedAnnotations[annotation.id]
       @_setSelectedAnnotations scope.selectedAnnotations
-    @digest()
-
-  patch_store: ->
-    scope = @element.scope()
-    Store = Annotator.Plugin.Store
-
-    # When the Store plugin is first instantiated, don't load annotations.
-    # They will be loaded manually as entities are registered by participating
-    # frames.
-    Store.prototype.loadAnnotations = ->
-      query = limit: 1000
-      @annotator.considerSocialView.call @annotator, query
-
-      entities = {}
-
-      for p in @annotator.providers
-        for uri in p.entities
-          unless entities[uri]?
-            entities[uri] = true
-            this.loadAnnotationsFromSearch (angular.extend {}, query, uri: uri)
-
-      this.entities = Object.keys(entities)
-
-    # When the store plugin finishes a request, update the annotation
-    # using a monkey-patched update function which updates the threading
-    # if the annotation has a newly-assigned id and ensures that the id
-    # is enumerable.
-    Store.prototype.updateAnnotation = (annotation, data) =>
-      # Update the annotation with the new data
-      annotation = angular.extend annotation, data
-
-      # Update the thread table
-      update = (parent) ->
-        for child in parent.children when child.message is annotation
-          scope.threading.idTable[data.id] = child
-          return true
-        return false
-
-      # Check its references
-      references = annotation.references or []
-      if typeof(annotation.references) == 'string' then references = []
-      for ref in references.slice().reverse()
-        container = scope.threading.idTable[ref]
-        continue unless container?
-        break if update container
-
-      # Check the root
-      update scope.threading.root
-
-      # Update the view
-      this.digest()
-
-  considerSocialView: (query) ->
-    switch @socialView.name
-      when "none"
-        # Sweet, nothing to do, just clean up previous filters
-        delete query.user
-      when "single-player"
-        if @user?
-          query.user = @element.injector().get('auth').user
-        else
-          delete query.user
 
   setTool: (name) ->
     return if name is @tool
-
-    if name is 'highlight'
-      this.socialView.name = 'single-player'
-    else
-      this.socialView.name = 'none'
-
     @tool = name
     this.publish 'setTool', name
     for p in @providers

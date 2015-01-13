@@ -159,9 +159,11 @@ AnnotationController = [
 
       switch @action
         when 'create'
-          annotator.publish 'annotationCreated', model
+          model.$create().then ->
+            annotator.publish 'annotationCreated', model
         when 'delete', 'edit'
-          annotator.publish 'annotationUpdated', model
+          model.$update(id: model.id).then ->
+            annotator.publish 'annotationUpdated', model
 
       @editing = false
       @action = 'view'
@@ -181,8 +183,7 @@ AnnotationController = [
       # Construct the reply.
       references = [references..., id]
 
-      reply = {references, uri}
-      annotator.publish 'beforeAnnotationCreated', reply
+      reply = annotator.createAnnotation {references, uri}
 
       if auth.user?
         if permissions.isPublic model.permissions
@@ -275,9 +276,10 @@ AnnotationController = [
 
       # Save highlights once logged in.
       if highlight and this.isHighlight()
-        if auth.user
-          model.permissions = permissions.private()
-          annotator.publish 'annotationCreated', model
+        if model.user and not model.id
+          highlight = false  # skip this on future updates
+          model.$create().then ->
+            annotator.publish 'annotationCreated', model
           highlight = false  # skip this on future updates
         else
           drafts.add model, => this.revert()

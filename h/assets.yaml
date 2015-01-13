@@ -215,6 +215,7 @@ app:
     - jquery
     - angular
     - angular_animate
+    - angular_resource
     - angular_route
     - angular_sanitize
     - app_css
@@ -323,7 +324,6 @@ helpers:
 session:
   output: scripts/session.min.js
   contents:
-    - angular_resource
     - contents:
       - filters: uglifyjs
         contents:

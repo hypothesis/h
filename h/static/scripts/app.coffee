@@ -12,22 +12,12 @@ imports = [
 
 
 resolve =
-  storeConfig: ['$q', 'annotator', ($q, annotator) ->
-    if annotator.plugins.Store then return
-    storeReady = $q.defer()
-    resolve = (options) ->
-      annotator.options.Store ?= {}
-      angular.extend annotator.options.Store, options
-      storeReady.resolve()
-    annotator.subscribe 'serviceDiscovery', resolve
-    storeReady.promise.finally ->
-      annotator.unsubscribe 'serviceDiscovery', resolve
-  ]
+  store: ['store', (store) -> store.$promise]
 
 
 configure = [
-  '$locationProvider', '$routeProvider', '$sceDelegateProvider', 'streamerProvider',
-  ($locationProvider,   $routeProvider,   $sceDelegateProvider,   streamerProvider) ->
+  '$locationProvider', '$routeProvider', '$sceDelegateProvider',
+  ($locationProvider,   $routeProvider,   $sceDelegateProvider) ->
     $locationProvider.html5Mode(true)
 
     $routeProvider.when '/a/:id',
