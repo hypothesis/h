@@ -17,10 +17,12 @@ from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.events import subscriber
 from pyramid.exceptions import BadCSRFToken
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.session import check_csrf_token
 from pyramid.threadlocal import get_current_request
 from pyramid.view import view_config
 import transaction
+from ws4py.exc import HandshakeError
 from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
@@ -538,7 +540,10 @@ def websocket(request):
     except BadCSRFToken:
         request.environ['ws4py.websocket'] = None  # Avoid a traceback in ws4py
         raise
-    return request.get_response(request.registry.ws)
+    try:
+        return request.get_response(request.registry.ws)
+    except HandshakeError:
+        raise HTTPBadRequest
 
 
 @subscriber(events.AnnotationEvent)
