@@ -106,6 +106,7 @@ class Hypothesis extends Annotator
             for href of entityUris
               entities.push href
             this.plugins.Store?.loadAnnotations()
+            this.digest()
 
         # Allow the host to define it's own state
         unless source is $window.parent
