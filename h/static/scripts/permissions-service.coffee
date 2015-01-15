@@ -9,6 +9,8 @@
 ###
 class Permissions
   GROUP_WORLD = 'group:__world__'
+  EVERYONE = 'Everyone'
+  ALL_PERMISSIONS = 'ALL_PERMISSIONS'
 
   this.$inject = ['auth']
   constructor:    (auth) ->
@@ -65,39 +67,62 @@ class Permissions
   isPrivate: (permissions, user) ->
     user and angular.equals(permissions?.read or [], [user])
 
+  # Creates access-level-control object list
+  _acl = (context) ->
+    acl = []
+
+    for action, roles of context.permissions or []
+      for role in roles
+        allow = true
+        if not role.indexOf('group:')
+          if role == GROUP_WORLD
+            principal = EVERYONE
+          else
+            # unhandled group
+            allow = false
+            principal = role
+        else
+          if not role.indexOf('acct:')
+            principal = role
+          else
+            allow = false
+            principal = role
+
+        acl.push
+          allow: allow
+          principal: principal
+          action: action
+
+    if acl.length
+      acl
+    else
+      return [
+        allow: true
+        principal: EVERYONE
+        action: ALL_PERMISSIONS
+      ]
+
   ###*
   # @ngdoc method
   # @name permissions#permits
   #
   # @param {String} action action to authorize (read|update|delete|admin)
-  # @param {Object} annotation to permit action on it or not
+  # @param {Object} context to permit action on it or not
   # @param {String} user the userId
   #
-  # User authorization function used by (not solely) the Permissions plugin
+  # User access-level-control function
   ###
-  permits: (action, annotation, user) ->
-    if annotation.permissions
-      tokens = annotation.permissions[action] || []
+  permits: (action, context, user) ->
+    acls = _acl context
 
-      if tokens.length == 0
-        # Empty or missing tokens array: only admin can perform action.
-        return false
+    for acl in acls
+      if acl.principal not in [user, EVERYONE]
+        continue
+      if acl.action not in [action, ALL_PERMISSIONS]
+        continue
+      return acl.allow
 
-      for token in tokens
-        if user == token
-          return true
-        if token == GROUP_WORLD
-          return true
-
-      # No tokens matched: action should not be performed.
-      return false
-
-    # Coarse-grained authorization
-    else if annotation.user
-      return user and user == annotation.user
-
-    # No authorization info on annotation: free-for-all!
-    true
+    false
 
 
 angular.module('h')
