@@ -254,7 +254,7 @@ class Hypothesis extends Annotator
     @element.scope().$evalAsync angular.noop
 
   beforeAnnotationCreated: (annotation) ->
-    annotation.user = @user
+    annotation.user = @element.injector().get('auth').user
     annotation.permissions = {}
     @digest()
 
@@ -322,7 +322,7 @@ class Hypothesis extends Annotator
         delete query.user
       when "single-player"
         if @user?
-          query.user = @user
+          query.user = @element.injector().get('auth').user
         else
           delete query.user
 
