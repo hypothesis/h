@@ -95,9 +95,9 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
         input.value[index - 1] == '\n' or
         (input.value[index - 1] == '$' and input.value[index - 2] == '$')
       )
-        applyInlineMarkup('$$', 'LaTeX or MathML')
+        applyInlineMarkup('$$', 'Insert LaTeX')
       else
-        applyInlineMarkup('\\(', 'LaTeX or MathML', '\\)')
+        applyInlineMarkup('\\(', 'Insert LaTeX', '\\)')
 
     scope.insertLink = ->
       text = userSelection()
