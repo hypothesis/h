@@ -97,6 +97,7 @@ describe 'streamer', ->
 
     msg = fakeSock.send.getCall(0).args[0]
     data = JSON.parse(msg)
+
     assert.equal(data.messageType, 'client_id')
     assert.equal(typeof data.value, 'string')
 
