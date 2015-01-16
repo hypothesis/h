@@ -260,7 +260,6 @@ class Annotator.Guest extends Annotator
     return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
 
   onSuccessfulSelection: (event, immediate) ->
-    return unless @canAnnotate
     if @tool is 'highlight'
       # Do we really want to make this selection?
       return false unless this.confirmSelection()
