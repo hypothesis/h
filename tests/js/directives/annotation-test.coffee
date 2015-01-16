@@ -54,6 +54,30 @@ describe 'h.directives.annotation', ->
   afterEach ->
     sandbox.restore()
 
+  describe 'when the annotation is a highlight', ->
+    beforeEach ->
+      annotator.tool = 'highlight'
+      annotation.$create = sinon.stub().returns
+        then: angular.noop
+        catch: angular.noop
+        finally: angular.noop
+
+    it 'persists upon login', ->
+      delete annotation.id
+      delete annotation.user
+      controller = createController()
+      $scope.$digest()
+      assert.notCalled annotation.$create
+      annotation.user = 'acct:ted@wyldstallyns.com'
+      $scope.$digest()
+      assert.calledOnce annotation.$create
+
+    it 'is private', ->
+      delete annotation.id
+      controller = createController()
+      $scope.$digest()
+      assert controller.isPrivate()
+
   describe '#reply', ->
     controller = null
     container = null

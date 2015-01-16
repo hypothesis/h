@@ -278,6 +278,7 @@ AnnotationController = [
       if highlight and this.isHighlight()
         if model.user and not model.id
           highlight = false  # skip this on future updates
+          model.permissions = permissions.private()
           model.$create().then ->
             annotator.publish 'annotationCreated', model
           highlight = false  # skip this on future updates
