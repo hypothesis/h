@@ -1,4 +1,3 @@
-
 ###*
 # @ngdoc service
 # @name  Permissions
