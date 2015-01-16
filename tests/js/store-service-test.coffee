@@ -1,0 +1,52 @@
+
+assert = chai.assert
+sinon.assert.expose assert, prefix: null
+
+describe 'store', ->
+  $httpBackend = null
+  sandbox = null
+  store = null
+  fakeDocument = null
+
+  beforeEach module('h')
+
+  beforeEach module ($provide) ->
+    sandbox = sinon.sandbox.create()
+
+    link = document.createElement("link")
+    link.rel = 'service'
+    link.type = 'application/annotatorsvc+json'
+    link.href = 'http://example.com/api'
+
+    fakeDocument = {
+      find: sandbox.stub().returns($(link))
+    }
+
+    $provide.value '$document', fakeDocument
+
+    return
+
+  afterEach ->
+    sandbox.restore()
+
+  beforeEach inject ($q, _$httpBackend_, _store_) ->
+    $httpBackend = _$httpBackend_
+    store = _store_
+
+  it 'reads the operations from the backend', ->
+    $httpBackend.expectGET('http://example.com/api').respond
+      links:
+         annotation:
+           create: {}
+           delete: {}
+           read: {}
+           update: {}
+         search:
+           url: 'http://0.0.0.0:5000/api/search'
+         beware_dragons:
+           url: 'http://0.0.0.0:5000/api/roar'
+    $httpBackend.flush()
+
+    assert.isFunction(store.annotation)
+    assert.isFunction(store.beware_dragons)
+    assert.isFunction(store.search)
