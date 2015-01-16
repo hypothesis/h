@@ -19,9 +19,10 @@ class Auth
     @user = undefined
 
     # Fired when the identity-service successfully requests authentication.
-    # Sets up the Annotator.Auth plugin instance and the auth.user property.
-    # It sets a flag between that time period to indicate that the token is
-    # being checked.
+    # Sets up the Annotator.Auth plugin instance and after the plugin
+    # initialization it sets up an Annotator.Permissions plugin instance
+    # and finally it sets the auth.user property. It sets a flag between
+    # that time period to indicate that the token is being checked.
     onlogin = (assertion) =>
       _checkingToken = true
 
@@ -37,7 +38,7 @@ class Auth
         $rootScope.$apply()
 
     # Fired when the identity-service forgets authentication.
-    # Destroys the Annotator.Auth plugin instance and sets
+    # Destroys the Annotator.Auth and Permissions plugin instances and sets
     # the user to null.
     onlogout = =>
       plugins.Auth?.element.removeData('annotator:headers')
