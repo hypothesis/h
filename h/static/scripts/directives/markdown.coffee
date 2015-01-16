@@ -1,7 +1,7 @@
 loadMathJax = ->
   if !MathJax?
     $.ajax {
-      url: "//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"
+      url: "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"
       dataType: 'script'
       cache: true
       complete: ->
