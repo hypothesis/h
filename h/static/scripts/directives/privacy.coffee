@@ -1,4 +1,4 @@
-privacy = ['$window', ($window) ->
+privacy = ['$window', 'permissions', ($window, permissions) ->
   VISIBILITY_KEY ='hypothesis.visibility'
   VISIBILITY_PUBLIC = 'public'
   VISIBILITY_PRIVATE = 'private'
@@ -37,10 +37,10 @@ privacy = ['$window', ($window) ->
   link: (scope, elem, attrs, controller) ->
     return unless controller?
 
-    controller.$formatters.push (permissions) ->
-      return unless permissions?
+    controller.$formatters.push (selectedPermissions) ->
+      return unless selectedPermissions?
 
-      if 'group:__world__' in (permissions.read or [])
+      if permissions.isPublic(selectedPermissions)
         getLevel(VISIBILITY_PUBLIC)
       else
         getLevel(VISIBILITY_PRIVATE)
@@ -48,21 +48,20 @@ privacy = ['$window', ($window) ->
     controller.$parsers.push (privacy) ->
       return unless privacy?
 
-      permissions = controller.$modelValue
-
       if isPublic(privacy.name)
-          permissions.read = ['group:__world__']
+        newPermissions = permissions.public()
       else
-          permissions.read = [attrs.user]
+        newPermissions = permissions.private()
 
-      permissions.update = [attrs.user]
-      permissions.delete = [attrs.user]
-      permissions.admin = [attrs.user]
+      # Cannot change the $modelValue into a new object
+      # Just update its properties
+      for key,val of newPermissions
+        controller.$modelValue[key] = val
 
-      permissions
+      controller.$modelValue
 
     controller.$render = ->
-      unless controller.$modelValue.read.length
+      unless controller.$modelValue.read?.length
         name = storage.getItem VISIBILITY_KEY
         name ?= VISIBILITY_PUBLIC
         level = getLevel(name)

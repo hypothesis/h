@@ -23,11 +23,6 @@ annotator_document:
   output: scripts/vendor/annotator.document.min.js
   contents:
     - h:static/scripts/vendor/annotator.document.js
-annotator_permissions:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.permissions.min.js
-  contents:
-    - h:static/scripts/vendor/annotator.permissions.js
 annotator_store:
   filters: uglifyjs
   output: scripts/vendor/annotator.store.min.js
@@ -244,7 +239,6 @@ app_js:
     - annotator_bridge
     - annotator_discovery
     - annotator_document
-    - annotator_permissions
     - annotator_store
     - annotator_threading
     - filters: uglifyjs

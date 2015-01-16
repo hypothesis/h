@@ -34,9 +34,6 @@ class Auth
       # Set the user from the token.
       plugins.Auth.withToken (token) =>
         _checkingToken = false
-        annotator.addPlugin 'Permissions',
-          user: token.userId
-          userAuthorize: @permits
         @user = token.userId
         $rootScope.$apply()
 
@@ -47,10 +44,6 @@ class Auth
       plugins.Auth?.element.removeData('annotator:headers')
       plugins.Auth?.destroy()
       delete plugins.Auth
-
-      plugins.Permissions?.setUser(null)
-      plugins.Permissions?.destroy()
-      delete plugins.Permissions
 
       @user = null
       _checkingToken = false
@@ -65,40 +58,6 @@ class Auth
 
     identity.watch {onlogin, onlogout, onready}
 
-
-  ###*
-  # @ngdoc method
-  # @name auth#permits
-  #
-  # @param {String} action action to authorize (read|update|delete|admin)
-  # @param {Object} annotation to permit action on it or not
-  # @param {String} user the userId
-  #
-  # User authorization function used by (not solely) the Permissions plugin
-  ###
-  permits: (action, annotation, user) ->
-    if annotation.permissions
-      tokens = annotation.permissions[action] || []
-
-      if tokens.length == 0
-        # Empty or missing tokens array: only admin can perform action.
-        return false
-
-      for token in tokens
-        if user == token
-          return true
-        if token == 'group:__world__'
-          return true
-
-      # No tokens matched: action should not be performed.
-      return false
-
-    # Coarse-grained authorization
-    else if annotation.user
-      return user and user == annotation.user
-
-    # No authorization info on annotation: free-for-all!
-    true
 
 angular.module('h')
 .service('auth', Auth)

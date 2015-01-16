@@ -38,9 +38,11 @@ validate = (value) ->
 ###
 AnnotationController = [
   '$scope', '$timeout',
-  'annotator', 'auth', 'drafts', 'flash', 'documentHelpers', 'timeHelpers'
+  'annotator', 'auth', 'drafts', 'flash', 'documentHelpers', 'permissions',
+  'timeHelpers'
   ($scope,   $timeout,
-   annotator,   auth,   drafts,   flash,   documentHelpers,   timeHelpers
+   annotator,   auth,   drafts,   flash,   documentHelpers,   permissions,
+   timeHelpers
   ) ->
     @annotation = {}
     @action = 'view'
@@ -80,7 +82,7 @@ AnnotationController = [
     # @returns {boolean} True if the annotation is private to the current user.
     ###
     this.isPrivate = ->
-      model.user and angular.equals(model.permissions?.read or [], [model.user])
+      permissions.isPrivate model.permissions, model.user
 
     ###*
     # @ngdoc method
@@ -92,7 +94,7 @@ AnnotationController = [
     ###
     this.authorize = (action) ->
       return false unless model?
-      annotator.plugins.Permissions?.authorize action, model
+      permissions.permits action, model, auth.user
 
     ###*
     # @ngdoc method
@@ -183,15 +185,10 @@ AnnotationController = [
       annotator.publish 'beforeAnnotationCreated', reply
 
       if auth.user?
-        reply.permissions.update = [auth.user]
-        reply.permissions.delete = [auth.user]
-        reply.permissions.admin = [auth.user]
-
-        # If replying to a public annotation make the response public.
-        if 'group:__world__' in (model.permissions.read or [])
-          reply.permissions.read = ['group:__world__']
+        if permissions.isPublic model.permissions
+          reply.permissions = permissions.public()
         else
-          reply.permissions.read = [auth.user]
+          reply.permissions = permissions.private()
 
     ###*
     # @ngdoc method
@@ -278,11 +275,8 @@ AnnotationController = [
 
       # Save highlights once logged in.
       if highlight and this.isHighlight()
-        if model.user
-          model.permissions.read = [model.user]
-          model.permissions.update = [model.user]
-          model.permissions.delete = [model.user]
-          model.permissions.admin = [model.user]
+        if auth.user
+          model.permissions = permissions.private()
           annotator.publish 'annotationCreated', model
           highlight = false  # skip this on future updates
         else

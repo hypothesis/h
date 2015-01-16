@@ -2,13 +2,13 @@ class AppController
   this.$inject = [
     '$location', '$route', '$scope', '$timeout',
     'annotator', 'auth', 'documentHelpers', 'drafts', 'flash', 'identity',
-    'streamer', 'streamfilter'
+    'permissions', 'streamer', 'streamfilter'
 
   ]
   constructor: (
      $location,   $route,   $scope,   $timeout,
      annotator,   auth,   documentHelpers,   drafts,   flash,   identity,
-     streamer,   streamfilter,
+     permissions,   streamer,   streamfilter,
 
   ) ->
     {plugins, host, providers} = annotator
@@ -77,7 +77,7 @@ class AppController
       cull = (acc, annotation) ->
         if view is 'single-player' and annotation.user != user
           acc.drop.push annotation
-        else if auth.permits 'read', annotation, user
+        else if permissions.permits('read', annotation, user)
           acc.keep.push annotation
         else
           acc.drop.push annotation
