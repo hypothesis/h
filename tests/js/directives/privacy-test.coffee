@@ -17,7 +17,6 @@ describe 'h.directives.privacy', ->
 
   describe 'memory fallback', ->
     fakeAuth = null
-    fakeWindow  = null
     sandbox = null
 
     beforeEach module ($provide) ->
@@ -27,24 +26,23 @@ describe 'h.directives.privacy', ->
         user: 'acct:angry.joe@texas.com'
       }
 
-      fakeWindow = {
-        localStorage: undefined
-      }
-
       $provide.value 'auth', fakeAuth
-      $provide.value '$window', fakeWindow
       return
 
     afterEach ->
       sandbox.restore()
 
     describe 'has memory fallback', ->
+      $window = null
       $scope2 = null
 
-      beforeEach inject (_$compile_, _$rootScope_) ->
+      beforeEach inject (_$compile_, _$rootScope_, _$window_) ->
         $compile = _$compile_
         $scope = _$rootScope_.$new()
         $scope2 = _$rootScope_.$new()
+        $window = _$window_
+
+        $window.localStorage = null
 
       it 'stores the default visibility level when it changes', ->
         $scope.permissions = {read: ['acct:user@example.com']}
