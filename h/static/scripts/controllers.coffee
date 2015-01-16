@@ -1,12 +1,11 @@
 class AppController
   this.$inject = [
-    '$location', '$route', '$scope', '$timeout',
+    '$location', '$route', '$scope', '$timeout', '$window',
     'annotator', 'auth', 'documentHelpers', 'drafts', 'flash', 'identity',
     'permissions', 'streamer', 'streamfilter'
-
   ]
   constructor: (
-     $location,   $route,   $scope,   $timeout,
+     $location,   $route,   $scope,   $timeout,   $window,
      annotator,   auth,   documentHelpers,   drafts,   flash,   identity,
      permissions,   streamer,   streamfilter,
 
@@ -15,6 +14,7 @@ class AppController
 
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
+    streamerUrl = documentHelpers.baseURI.replace(/^http/, 'ws') + 'ws'
 
     applyUpdates = (action, data) ->
       # Update the application with new data from the websocket.
@@ -110,8 +110,9 @@ class AppController
 
       # Reload services
       initStore()
+
       streamer.close()
-      streamer.open()
+      streamer.open($window.WebSocket, streamerUrl)
 
     $scope.$watch 'socialView.name', (newValue, oldValue) ->
       return if newValue is oldValue

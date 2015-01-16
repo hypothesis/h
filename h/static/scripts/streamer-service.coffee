@@ -1,55 +1,65 @@
-ST_CLOSED = 1
-ST_CONNECTING = 2
-ST_OPEN = 3
+ST_CONNECTING = 0
+ST_OPEN = 1
+ST_CLOSING = 2
+ST_CLOSED = 3
 
 ###*
 # @ngdoc service
 # @name Streamer
 #
-# @param {String} urlFn A function that will be called with injections to
-# generate the socket URL.
+# @property {string} clientId A unique identifier for this client.
 #
 # @description
 # Provides access to the streamer websocket.
 ###
 class Streamer
-  constructor: (transport, urlFn) ->
-    this.onmessage = ->
+  constructor: ->
+    this.clientId = null
+
+    this.onopen = angular.noop
+    this.onclose = angular.noop
+    this.onmessage = angular.noop
 
     this._failCount = 0
     this._queue = []
     this._state = ST_CLOSED
-    this._transport = transport
-    this._urlFn = urlFn
 
   ###*
   # @ngdoc method
   # @name Streamer#open
   #
+  # @param {Object} transport The transport class to create.
+  # @param {string} url The URL to which to connect.
+  # @param {Object|Array} protocols The protocol (or protocols) to use.
+  #
   # @description
   # Open the streamer websocket if it is not already open or connecting. Handles
   # connection failures and sets up onmessage handlers.
   ###
-  open: ->
+  open: (transport, url, protocols) ->
     if this._state == ST_OPEN || this._state == ST_CONNECTING
       return
 
     self = this
-    this._sock = new this._transport(this._urlFn())
+
+    if protocols
+      this._sock = new transport(url, protocols)
+    else
+      this._sock = new transport(url)
+
     this._state = ST_CONNECTING
 
     this._sock.onopen = ->
       self._state = ST_OPEN
       self._failCount = 0
 
-      clientId = uuid.v4()
-      setAjaxClientId(clientId)
+      # Send the client id
+      if self.clientId
+        self.send(messageType: 'client_id', value: self.clientId)
 
-      # Generate and send our client ID
-      self.send({
-        messageType: 'client_id'
-        value: clientId
-      })
+      # Give the application a chance to initialize the connection
+      self.onopen(name: 'open')
+
       # Process queued messages
       self._sendQueue()
 
@@ -57,7 +67,9 @@ class Streamer
       self._state = ST_CLOSED
       self._failCount++
 
-      setTimeout((-> self.open()), backoff(self._failCount, 10))
+      reconnect = angular.bind(self, self.open, transport, url, protocols)
+      waitFor = backoff(self._failCount, 10)
+      setTimeout(reconnect, waitFor)
 
     this._sock.onmessage = (msg) ->
       self.onmessage(JSON.parse(msg.data))
@@ -70,13 +82,18 @@ class Streamer
   # Close the streamer socket.
   ###
   close: ->
-    if this._state == ST_CLOSED
+    if this._state == ST_CLOSING or this._state == ST_CLOSED
       return
 
+    self = this
+
     this._sock.onclose = ->
+      self._state = ST_CLOSED
+      self.onclose()
+
     this._sock.close()
     this._sock = null
-    this._state = ST_CLOSED
+    this._state = ST_CLOSING
 
   ###*
   # @ngdoc method
@@ -104,22 +121,16 @@ backoff = (index, max) ->
   index = Math.min(index, max)
   return 500 * Math.random() * (Math.pow(2, index) - 1)
 
-setAjaxClientId = (clientId) ->
-  $.ajaxSetup({
-    headers: {
-      'X-Client-Id': clientId
-    }
-  })
 
-streamerProvider = ->
-  provider = {}
-  provider.urlFn = null
-  provider.$get = ['$injector', '$window', ($injector, $window) ->
-    urlFn = angular.bind $injector, $injector.invoke, provider.urlFn
-    new Streamer($window.WebSocket, urlFn)
-  ]
-  return provider
-
+run = [
+  '$http', '$window', 'streamer'
+  ($http,   $window,   streamer) ->
+    clientId = uuid.v4()
+    streamer.clientId = clientId
+    $.ajaxSetup(headers: {'X-Client-Id': clientId})
+    $http.defaults.headers.common['X-Client-Id'] = clientId
+]
 
 angular.module('h.streamer', [])
-.provider('streamer', streamerProvider)
+.service('streamer', Streamer)
+.run(run)
