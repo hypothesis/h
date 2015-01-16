@@ -289,6 +289,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
         if startMath > endMath
           endMath = index + 2
           try
+            # \\displaystyle tells KaTeX to render the math in display style (full sized fonts).
             katex.renderToString($sanitize "\\displaystyle {" + textToCheck.substring(startMath, index) + "}")
           catch
             loadMathJax()
