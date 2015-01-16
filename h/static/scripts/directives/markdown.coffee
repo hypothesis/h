@@ -289,7 +289,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
         if startMath > endMath
           endMath = index + 2
           try
-            katex.renderToString($sanitize textToCheck.substring(startMath, index))
+            katex.renderToString($sanitize "\\displaystyle {" + textToCheck.substring(startMath, index) + "}")
           catch
             loadMathJax()
             mathJaxFallback = true
