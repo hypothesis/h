@@ -15,12 +15,11 @@ from dateutil.tz import tzutc
 import gevent
 from jsonpointer import resolve_pointer
 from jsonschema import validate
+from pyramid.config import aslist
 from pyramid.events import subscriber
-from pyramid.exceptions import BadCSRFToken
-from pyramid.httpexceptions import HTTPBadRequest
-from pyramid.session import check_csrf_token
+from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
 from pyramid.threadlocal import get_current_request
-from pyramid.view import view_config
+from pyramid.wsgi import wsgiapp
 import transaction
 from ws4py.exc import HandshakeError
 from ws4py.websocket import WebSocket as _WebSocket
@@ -447,6 +446,7 @@ class WebSocket(_WebSocket):
     # Class attributes
     event_queue = None
     instances = weakref.WeakSet()
+    origins = []
 
     # Instance attributes
     client_id = None
@@ -530,22 +530,6 @@ class WebSocket(_WebSocket):
             transaction.commit()
 
 
-@view_config(route_name='ws')
-def websocket(request):
-    try:
-        # WebSockets can be opened across origins and send cookies. To prevent
-        # scripts on other sites from using this socket, require the script to
-        # prove it has access to our session by sending the csrf token.
-        check_csrf_token(request)
-    except BadCSRFToken:
-        request.environ['ws4py.websocket'] = None  # Avoid a traceback in ws4py
-        raise
-    try:
-        return request.get_response(request.registry.ws)
-    except HandshakeError:
-        raise HTTPBadRequest
-
-
 @subscriber(events.AnnotationEvent)
 def cb_annotation_event(event):
     queue = event.request.get_queue_writer()
@@ -620,7 +604,27 @@ def _random_id():
     return base64.urlsafe_b64encode(data).strip(b'=')
 
 
+def websocket(request):
+    # WebSockets can be opened across origins and send cookies. To prevent
+    # scripts on other sites from using this socket, ensure that the Origin
+    # header (if present) matches the request host URL or is whitelisted.
+    origin = request.headers.get('Origin')
+    allowed = getattr(request.registry, 'websocket_origins', [])
+    if origin is not None:
+        if origin != request.host_url and origin not in allowed:
+            return HTTPForbidden()
+    return request.get_response(request.registry.websocket)
+
+
+def bad_handshake(request):
+    return HTTPBadRequest()
+
+
 def includeme(config):
-    config.registry.ws = WebSocketWSGIApplication(handler_cls=WebSocket)
+    origins = aslist(config.registry.settings.get('origins', ''))
+    config.registry.websocket = WebSocketWSGIApplication(handler_cls=WebSocket)
+    config.registry.websocket_origins = origins
     config.add_route('ws', 'ws')
+    config.add_view(websocket, route_name='ws')
+    config.add_view(bad_handshake, context=HandshakeError)
     config.scan(__name__)

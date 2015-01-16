@@ -8,14 +8,15 @@ import json
 
 from mock import ANY
 from mock import MagicMock
-from mock import call
 from mock import patch
 from pyramid.testing import DummyRequest
+from pyramid.testing import testConfig
 
 from h.streamer import FilterToElasticFilter
 from h.streamer import WebSocket
 from h.streamer import should_send_event
 from h.streamer import broadcast_from_queue
+from h.streamer import websocket
 
 
 FakeMessage = namedtuple('FakeMessage', 'body')
@@ -240,8 +241,36 @@ def test_operator_call():
     assert query['term']['text'] == expected
 
 
-class TestWebSocket(unittest.TestCase):
+def test_websocket_bad_origin():
+    settings = {'origins': 'http://good'}
+    with testConfig(settings=settings) as config:
+        config.include('h.streamer')
+        req = DummyRequest(headers={'Origin': 'http://bad'})
+        res = websocket(req)
+        assert res.code == 403
 
+
+def test_websocket_good_origin():
+    settings = {'origins': 'http://good'}
+    with testConfig(settings=settings) as config:
+        config.include('h.streamer')
+        req = DummyRequest(headers={'Origin': 'http://good'})
+        req.get_response = MagicMock()
+        res = websocket(req)
+        assert res.code != 403
+
+
+def test_websocket_same_origin():
+    with testConfig() as config:
+        config.include('h.streamer')
+        # example.com is the dummy request default host URL
+        req = DummyRequest(headers={'Origin': 'http://example.com'})
+        req.get_response = MagicMock()
+        res = websocket(req)
+        assert res.code != 403
+
+
+class TestWebSocket(unittest.TestCase):
     def test_opened_starts_reader(self):
         fake_request = MagicMock()
         fake_socket = MagicMock()

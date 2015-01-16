@@ -57,12 +57,6 @@ configure = [
     # TODO: move all front-end templates into their own directory for safety
     basePattern = baseURI.replace /\/[^\/]*$/, '/**.html'
     $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
-
-    streamerProvider.urlFn = ['xsrf', (xsrf) ->
-      base = baseURI.replace(/^http/, 'ws')
-      "#{base}ws?csrf_token=#{xsrf.token}"
-    ]
 ]
-
 
 angular.module('h', imports, configure)
