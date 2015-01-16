@@ -11,6 +11,7 @@ describe 'h.directives.annotation', ->
   createController = null
   flash = null
   fakeAuth = null
+  fakeStore = null
   fakeUser = null
 
   beforeEach module('h')
@@ -21,6 +22,7 @@ describe 'h.directives.annotation', ->
       user: 'acct:bill@localhost'
 
     $provide.value 'auth', fakeAuth
+    $provide.value 'store', fakeStore
     return
 
   beforeEach inject (_$compile_, $controller, _$document_, $rootScope, _$timeout_) ->
