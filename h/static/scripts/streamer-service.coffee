@@ -5,7 +5,7 @@ ST_CLOSED = 3
 
 ###*
 # @ngdoc service
-# @name Streamer
+# @name streamer
 #
 # @property {string} clientId A unique identifier for this client.
 #
@@ -59,7 +59,6 @@ class Streamer
 
       # Give the application a chance to initialize the connection
       self.onopen(name: 'open')
-
       # Process queued messages
       self._sendQueue()
 

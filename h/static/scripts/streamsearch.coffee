@@ -1,22 +1,18 @@
 class StreamSearchController
   this.inject = [
     '$scope', '$rootScope', '$routeParams',
-    'annotator', 'queryparser', 'searchfilter', 'streamer', 'streamfilter'
+    'annotator', 'auth', 'queryparser', 'searchfilter', 'store',
+    'streamer', 'streamfilter'
   ]
   constructor: (
      $scope,   $rootScope,   $routeParams
-     annotator,   queryparser,   searchfilter,   streamer,   streamfilter
+     annotator,   auth,   queryparser,   searchfilter,   store,
+     streamer,   streamfilter
   ) ->
-    # Clear out loaded annotations and threads
-    # XXX: Resolve threading, storage, and streamer better for all routes.
-    annotator.plugins.Threading?.pluginInit()
-    annotator.plugins.Store?.annotations = []
-
     # Initialize the base filter
     streamfilter
       .resetFilter()
       .setMatchPolicyIncludeAll()
-      .setPastDataHits(50)
 
     # Apply query clauses
     $scope.search.query = $routeParams.q
@@ -30,10 +26,14 @@ class StreamSearchController
 
     $scope.shouldShowThread = (container) -> true
 
-    streamer.send({filter: streamfilter.getFilter()})
-
     $scope.$on '$destroy', ->
       $scope.search.query = ''
+
+    $scope.$watch (-> auth.user), ->
+      query = angular.extend limit: 10, $scope.search.query
+      store.SearchResource.get query, ({rows}) ->
+        annotator.loadAnnotations(rows)
+
 
 angular.module('h')
 .controller('StreamSearchController', StreamSearchController)

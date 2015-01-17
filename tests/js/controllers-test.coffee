@@ -1,6 +1,11 @@
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
 
+fakeStore =
+  SearchResource:
+    get: sinon.spy()
+
+
 describe 'h', ->
   $scope = null
   fakeAuth = null
@@ -75,6 +80,7 @@ describe 'h', ->
       $scope.search = {}
       annotationViewer = $controller 'AnnotationViewerController',
         $scope: $scope
+        store: fakeStore
 
     it 'sets the isEmbedded property to false', ->
       assert.isFalse($scope.isEmbedded)

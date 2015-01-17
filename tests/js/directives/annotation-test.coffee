@@ -11,6 +11,7 @@ describe 'h.directives.annotation', ->
   createController = null
   flash = null
   fakeAuth = null
+  fakeStore = null
   fakeUser = null
 
   beforeEach module('h')
@@ -21,6 +22,7 @@ describe 'h.directives.annotation', ->
       user: 'acct:bill@localhost'
 
     $provide.value 'auth', fakeAuth
+    $provide.value 'store', fakeStore
     return
 
   beforeEach inject (_$compile_, $controller, _$document_, $rootScope, _$timeout_) ->
@@ -29,7 +31,11 @@ describe 'h.directives.annotation', ->
     $timeout = _$timeout_
     $scope = $rootScope.$new()
     $scope.annotationGet = (locals) -> annotation
-    annotator = {plugins: {}, publish: sandbox.spy()}
+    annotator = {
+      createAnnotation: sandbox.spy (data) -> data
+      plugins: {},
+      publish: sandbox.spy()
+    }
     annotation =
       id: 'deadbeef'
       document:
@@ -47,6 +53,30 @@ describe 'h.directives.annotation', ->
 
   afterEach ->
     sandbox.restore()
+
+  describe 'when the annotation is a highlight', ->
+    beforeEach ->
+      annotator.tool = 'highlight'
+      annotation.$create = sinon.stub().returns
+        then: angular.noop
+        catch: angular.noop
+        finally: angular.noop
+
+    it 'persists upon login', ->
+      delete annotation.id
+      delete annotation.user
+      controller = createController()
+      $scope.$digest()
+      assert.notCalled annotation.$create
+      annotation.user = 'acct:ted@wyldstallyns.com'
+      $scope.$digest()
+      assert.calledOnce annotation.$create
+
+    it 'is private', ->
+      delete annotation.id
+      controller = createController()
+      $scope.$digest()
+      assert controller.isPrivate()
 
   describe '#reply', ->
     controller = null
@@ -72,22 +102,22 @@ describe 'h.directives.annotation', ->
     it 'creates a new reply with the proper uri and references', ->
       controller.reply()
       match = sinon.match {references: [annotation.id], uri: annotation.uri}
-      assert.calledWith(annotator.publish, 'beforeAnnotationCreated', match)
+      assert.calledWith(annotator.createAnnotation, match)
 
     it 'adds the world readable principal if the parent is public', ->
       annotation.permissions.read.push('group:__world__')
       controller.reply()
-      newAnnotation = annotator.publish.lastCall.args[1]
+      newAnnotation = annotator.createAnnotation.lastCall.args[0]
       assert.include(newAnnotation.permissions.read, 'group:__world__')
 
     it 'does not add the world readable principal if the parent is private', ->
       controller.reply()
-      newAnnotation = annotator.publish.lastCall.args[1]
+      newAnnotation = annotator.createAnnotation.lastCall.args[0]
       assert.notInclude(newAnnotation.permissions.read, 'group:__world__')
 
     it 'fills the other permissions too', ->
       controller.reply()
-      newAnnotation = annotator.publish.lastCall.args[1]
+      newAnnotation = annotator.createAnnotation.lastCall.args[0]
       assert.equal(newAnnotation.permissions.update[0], 'acct:bill@localhost')
       assert.equal(newAnnotation.permissions.delete[0], 'acct:bill@localhost')
       assert.equal(newAnnotation.permissions.admin[0], 'acct:bill@localhost')

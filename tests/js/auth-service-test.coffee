@@ -43,9 +43,11 @@ describe 'h', ->
 
 
   describe 'auth service', ->
+    $http = null
     auth = null
 
-    beforeEach inject (_auth_) ->
+    beforeEach inject (_$http_, _auth_) ->
+      $http = _$http_
       auth = _auth_
 
     it 'watches the identity service for identity change events', ->
@@ -56,20 +58,36 @@ describe 'h', ->
       onready()
       assert.isNull(auth.user)
 
-    it 'sets auth.user at login', ->
-      {onlogin} = fakeIdentity.watch.args[0][0]
-      onlogin('test-assertion')
-      fakeToken = { userId: 'acct:hey@joe'}
-      userSetter = fakeAnnotator.plugins.Auth.withToken.args[0][0]
-      userSetter(fakeToken)
-      assert.equal(auth.user, 'acct:hey@joe')
+    describe 'at login', ->
+      beforeEach ->
+        {onlogin} = fakeIdentity.watch.args[0][0]
+        onlogin('test-assertion')
+        fakeToken = { userId: 'acct:hey@joe'}
+        userSetter = fakeAnnotator.plugins.Auth.withToken.args[0][0]
+        userSetter(fakeToken)
 
-    it 'destroys the plugin at logout and sets auth.user to null', ->
-      {onlogout} = fakeIdentity.watch.args[0][0]
-      auth.user = 'acct:hey@joe'
-      authPlugin = fakeAnnotator.plugins.Auth
-      onlogout()
+      it 'sets auth.user', ->
+        assert.equal(auth.user, 'acct:hey@joe')
 
-      assert.called(authPlugin.destroy)
-      assert.equal(auth.user, null)
+      it 'sets the token header as a default header', ->
+        token = $http.defaults.headers.common['X-Annotator-Auth-Token']
+        assert.equal(token, 'test-assertion')
 
+    describe 'at logout', ->
+      authPlugin = null
+
+      beforeEach ->
+        {onlogout} = fakeIdentity.watch.args[0][0]
+        auth.user = 'acct:hey@joe'
+        authPlugin = fakeAnnotator.plugins.Auth
+        onlogout()
+
+      it 'destroys the plugin', ->
+        assert.called(authPlugin.destroy)
+
+      it 'sets auth.user to null', ->
+        assert.equal(auth.user, null)
+
+      it 'unsets the token header', ->
+        token = $http.defaults.headers.common['X-Annotator-Auth-Token']
+        assert.isUndefined(token)

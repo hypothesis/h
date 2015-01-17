@@ -1,12 +1,12 @@
 class AppController
   this.$inject = [
-    '$location', '$route', '$scope', '$timeout', '$window',
-    'annotator', 'auth', 'documentHelpers', 'drafts', 'flash', 'identity',
+    '$location', '$route', '$scope', '$window',
+    'annotator', 'auth', 'documentHelpers', 'drafts', 'identity',
     'permissions', 'streamer', 'streamfilter'
   ]
   constructor: (
-     $location,   $route,   $scope,   $timeout,   $window,
-     annotator,   auth,   documentHelpers,   drafts,   flash,   identity,
+     $location,   $route,   $scope,   $window,
+     annotator,   auth,   documentHelpers,   drafts,   identity,
      permissions,   streamer,   streamfilter,
 
   ) ->
@@ -21,106 +21,33 @@ class AppController
       return unless data?.length
       switch action
         when 'create', 'update', 'past'
-          plugins.Store?._onLoadAnnotations data
+          annotator.loadAnnotations data
         when 'delete'
           for annotation in data
-            annotation = plugins.Threading.idTable[annotation.id]?.message
-            continue unless annotation?
-            plugins.Store?.unregisterAnnotation(annotation)
-            annotator.deleteAnnotation(annotation)
+            annotator.publish 'annotationDeleted', (annotation)
 
     streamer.onmessage = (data) ->
-      if !data or data.type != 'annotation-notification'
-        return
-
+      return if !data or data.type != 'annotation-notification'
       action = data.options.action
       payload = data.payload
-
-      if $scope.socialView.name is 'single-player'
-        payload = payload.filter (ann) -> ann.user is auth.user
-
       applyUpdates(action, payload)
       $scope.$digest()
-
-    initStore = ->
-      # Initialize the storage component.
-      Store = plugins.Store
-      delete plugins.Store
-
-      if auth.user or annotator.socialView.name is 'none'
-        annotator.addPlugin 'Store', annotator.options.Store
-
-        $scope.store = plugins.Store
-
-      return unless Store
-      Store.destroy()
-
-      # XXX: Hacky hacky stuff to ensure that any search requests in-flight
-      # at this time have no effect when they resolve and that future events
-      # have no effect on this Store. Unfortunately, it's not possible to
-      # unregister all the events or properly unload the Store because the
-      # registration loses the closure. The approach here is perhaps
-      # cleaner than fishing them out of the jQuery private data.
-      # * Overwrite the Store's handle to the annotator, giving it one
-      #   with a noop `loadAnnotations` method.
-      Store.annotator = loadAnnotations: angular.noop
-      # * Make all api requests into a noop.
-      Store._apiRequest = angular.noop
-      # * Ignore pending searches
-      Store._onLoadAnnotations = angular.noop
-      # * Make the update function into a noop.
-      Store.updateAnnotation = angular.noop
-
-      # Sort out which annotations should remain in place.
-      user = auth.user
-      view = annotator.socialView.name
-      cull = (acc, annotation) ->
-        if view is 'single-player' and annotation.user != user
-          acc.drop.push annotation
-        else if permissions.permits('read', annotation, user)
-          acc.keep.push annotation
-        else
-          acc.drop.push annotation
-        acc
-
-      {keep, drop} = Store.annotations.reduce cull, {keep: [], drop: []}
-      Store.annotations = []
-
-      if plugins.Store?
-        plugins.Store.annotations = keep
-      else
-        drop = drop.concat keep
-
-      # Clean up the ones that should be removed.
-      do cleanup = (drop) ->
-        return if drop.length == 0
-        [first, rest...] = drop
-        annotator.deleteAnnotation first
-        $timeout -> cleanup rest
 
     oncancel = ->
       $scope.dialog.visible = false
 
-    reset = ->
-      $scope.dialog.visible = false
-
-      # Update any edits in progress.
-      for draft in drafts.all()
-        annotator.publish 'beforeAnnotationCreated', draft
-
-      # Reload services
-      initStore()
-
-      streamer.close()
-      streamer.open($window.WebSocket, streamerUrl)
-
-    $scope.$watch 'socialView.name', (newValue, oldValue) ->
-      return if newValue is oldValue
-      initStore()
-      if newValue is 'single-player' and not auth.user
-        annotator.show()
-        flash 'info',
-          'You will need to sign in for your highlights to be saved.'
+    $scope.$on '$routeChangeStart', (event, newRoute, oldRoute) ->
+      return if newRoute.redirectTo
+      # Clean up any annotations that need to be unloaded.
+      for id, container of $scope.threading.idTable when container.message
+        # Remove annotations not belonging to this user when highlighting.
+        if annotator.tool is 'highlight' and annotation.user != auth.user
+          annotator.publish 'annotationDeleted', container.message
+          drafts.remove annotation
+        # Remove annotations the user is not authorized to view.
+        else if not permissions.permits 'read', container.message, auth.user
+          annotator.publish 'annotationDeleted', container.message
+          drafts.remove container.message
 
     $scope.$watch 'sort.name', (name) ->
       return unless name
@@ -130,20 +57,27 @@ class AppController
         when 'Location' then ['-!!message', 'message.target[0].pos.top']
       $scope.sort = {name, predicate}
 
-    $scope.$watch 'store.entities', (entities, oldEntities) ->
-      return if entities is oldEntities
+    $scope.$watch (-> auth.user), (newVal, oldVal) ->
+      return if newVal is oldVal
 
-      if entities.length
-        streamfilter
-          .resetFilter()
-          .addClause('/uri', 'one_of', entities)
+      if isFirstRun and not (newVal or oldVal)
+        $scope.login()
+      else
+        $scope.dialog.visible = false
 
-        streamer.send({filter: streamfilter.getFilter()})
+      # Skip the remaining if this is the first evaluation.
+      return if oldVal is undefined
 
-    $scope.$watch 'auth.user', (newVal, oldVal) ->
-      return if newVal is undefined
-      reset()
-      $scope.login() if isFirstRun and not (newVal or oldVal)
+      # Update any edits in progress.
+      for draft in drafts.all()
+        annotator.publish 'beforeAnnotationCreated', draft
+
+      # Reopen the streamer.
+      streamer.close()
+      streamer.open($window.WebSocket, streamerUrl)
+
+      # Reload the view.
+      $route.reload()
 
     $scope.login = ->
       $scope.dialog.visible = true
@@ -177,7 +111,6 @@ class AppController
           delete $scope.selectedAnnotations
           delete $scope.selectedAnnotationsCount
 
-    $scope.socialView = annotator.socialView
     $scope.sort = name: 'Location'
     $scope.threading = plugins.Threading
 
@@ -185,20 +118,15 @@ class AppController
 class AnnotationViewerController
   this.$inject = [
     '$location', '$routeParams', '$scope',
-    'annotator', 'streamer', 'streamfilter'
+    'annotator', 'streamer', 'store', 'streamfilter'
   ]
   constructor: (
      $location,   $routeParams,   $scope,
-     annotator,   streamer,   streamfilter
+     annotator,   streamer,   store,   streamfilter
   ) ->
     # Tells the view that these annotations are standalone
     $scope.isEmbedded = false
     $scope.isStream = false
-
-    # Clear out loaded annotations and threads
-    # XXX: Resolve threading, storage, and streamer better for all routes.
-    annotator.plugins.Threading?.pluginInit()
-    annotator.plugins.Store?.annotations = []
 
     # Provide no-ops until these methods are moved elsewere. They only apply
     # to annotations loaded into the stream.
@@ -210,11 +138,10 @@ class AnnotationViewerController
       $location.path('/stream').search('q', query)
 
     id = $routeParams.id
-
-    $scope.$watch 'store', ->
-      if $scope.store
-        $scope.store.loadAnnotationsFromSearch({_id: id}).then ->
-          $scope.store.loadAnnotationsFromSearch({references: id})
+    store.SearchResource.get _id: $routeParams.id, ({rows}) ->
+      annotator.loadAnnotations(rows)
+    store.SearchResource.get references: $routeParams.id, ({rows}) ->
+      annotator.loadAnnotations(rows)
 
     streamfilter
       .setPastDataNone()
@@ -225,11 +152,43 @@ class AnnotationViewerController
     streamer.send({filter: streamfilter.getFilter()})
 
 class ViewerController
-  this.$inject = ['$scope', 'annotator']
-  constructor:   ( $scope,   annotator ) ->
+  this.$inject = [
+    '$scope', '$route',
+    'annotator', 'auth', 'flash', 'streamer', 'streamfilter', 'store'
+  ]
+  constructor:   (
+     $scope,   $route,
+     annotator,   auth,   flash,   streamer,   streamfilter,   store
+  ) ->
     # Tells the view that these annotations are embedded into the owner doc
     $scope.isEmbedded = true
     $scope.isStream = true
+
+    loaded = []
+
+    loadAnnotations = ->
+      if annotator.tool is 'highlight'
+        return unless auth.user
+        query = user: auth.user
+
+      for p in annotator.providers
+        for e in p.entities when e not in loaded
+          loaded.push e
+          store.SearchResource.get angular.extend(uri: e, query), (results) ->
+            annotator.loadAnnotations(results.rows)
+
+      streamfilter.resetFilter().addClause('/uri', 'one_of', loaded)
+
+      if auth.user and annotator.tool is 'highlight'
+        streamfilter.addClause('/user', auth.user)
+
+      streamer.send({filter: streamfilter.getFilter()})
+
+    $scope.$watch (-> annotator.tool), (newVal, oldVal) ->
+      return if newVal is oldVal
+      $route.reload()
+
+    $scope.$watchCollection (-> annotator.providers), loadAnnotations
 
     $scope.focus = (annotation) ->
       if angular.isObject annotation

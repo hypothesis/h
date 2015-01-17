@@ -10,9 +10,9 @@
 ###
 class Auth
 
-  this.$inject = ['$location', '$rootScope',
+  this.$inject = ['$http', '$location', '$rootScope',
                   'annotator', 'documentHelpers', 'identity']
-  constructor:   ( $location,   $rootScope,
+  constructor:   ( $http,   $location,   $rootScope,
                    annotator,   documentHelpers,   identity) ->
     {plugins} = annotator
     _checkingToken = false
@@ -34,15 +34,16 @@ class Auth
       plugins.Auth.withToken (token) =>
         _checkingToken = false
         @user = token.userId
+        $http.defaults.headers.common['X-Annotator-Auth-Token'] = assertion
         $rootScope.$apply()
 
     # Fired when the identity-service forgets authentication.
     # Destroys the Annotator.Auth plugin instance and sets
     # the user to null.
     onlogout = =>
-      plugins.Auth?.element.removeData('annotator:headers')
       plugins.Auth?.destroy()
       delete plugins.Auth
+      delete $http.defaults.headers.common['X-Annotator-Auth-Token']
 
       @user = null
       _checkingToken = false

@@ -159,9 +159,11 @@ AnnotationController = [
 
       switch @action
         when 'create'
-          annotator.publish 'annotationCreated', model
+          model.$create().then ->
+            annotator.publish 'annotationCreated', model
         when 'delete', 'edit'
-          annotator.publish 'annotationUpdated', model
+          model.$update(id: model.id).then ->
+            annotator.publish 'annotationUpdated', model
 
       @editing = false
       @action = 'view'
@@ -181,8 +183,7 @@ AnnotationController = [
       # Construct the reply.
       references = [references..., id]
 
-      reply = {references, uri}
-      annotator.publish 'beforeAnnotationCreated', reply
+      reply = annotator.createAnnotation {references, uri}
 
       if auth.user?
         if permissions.isPublic model.permissions
@@ -275,9 +276,11 @@ AnnotationController = [
 
       # Save highlights once logged in.
       if highlight and this.isHighlight()
-        if auth.user
+        if model.user and not model.id
+          highlight = false  # skip this on future updates
           model.permissions = permissions.private()
-          annotator.publish 'annotationCreated', model
+          model.$create().then ->
+            annotator.publish 'annotationCreated', model
           highlight = false  # skip this on future updates
         else
           drafts.add model, => this.revert()
@@ -309,17 +312,6 @@ annotation = [
   '$document', 'annotator',
   ($document,   annotator) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
-      # Helper function to remove the temporary thread created for a new reply.
-      prune = (message) ->
-        return if message.id?  # threading plugin will take care of it
-        return unless thread.container.message is message
-        thread.container.parent?.removeChild(thread.container)
-
-      if thread?
-        annotator.subscribe 'annotationDeleted', prune
-        scope.$on '$destroy', ->
-          annotator.unsubscribe 'annotationDeleted', prune
-
       # Observe the embedded attribute
       attrs.$observe 'annotationEmbedded', (value) ->
         ctrl.embedded = value? and value != 'false'
