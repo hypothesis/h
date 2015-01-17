@@ -16,83 +16,54 @@ annotator:
     - h:static/scripts/annotator/viewer.coffee
     - h:static/scripts/annotator/notification.coffee
 
-# Annotator plugins maintained upstream
-annotator_auth:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.auth.min.js
+# Annotator app plugins
+annotator_plugins_app:
+  filters: coffeescript, uglifyjs
+  output: scripts/annotator/annotator-app.min.js
   contents:
-    - h:static/scripts/vendor/annotator.auth.js
-annotator_document:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.document.min.js
-  contents:
-    - h:static/scripts/vendor/annotator.document.js
+    - h:static/scripts/annotator/plugin/auth.coffee
+    - h:static/scripts/annotator/plugin/document.coffee
+    - h:static/scripts/plugin/bridge.coffee
+    - h:static/scripts/plugin/threading.coffee
 
-# Annotator plugins maintained out of tree by Hypothesis
-annotator_fuzzytextanchors:
+# Annotator inject plugins
+annotator_plugins_inject:
   filters: uglifyjs
-  output: scripts/vendor/annotator.fuzzytextanchors.min.js
+  output: scripts/annotator/annotator-inject.min.js
+  contents:
+    - filters: coffeescript
+      output: scripts/annotator/annotator.inject.js
+      contents:
+        - h:static/scripts/annotator/plugin/document.coffee
+        - h:static/scripts/annotator/plugin/textrange.coffee
+        - h:static/scripts/annotator/plugin/textposition.coffee
+        - h:static/scripts/annotator/plugin/textquote.coffee
+        - h:static/scripts/annotator/plugin/texthighlights.coffee
+        - h:static/scripts/plugin/bridge.coffee
+        - h:static/scripts/plugin/bucket-bar.coffee
+        - h:static/scripts/plugin/toolbar.coffee
+    - annotator_pdf
+    - annotator_fuzzy
+
+annotator_pdf:
+  contents:
+    - h:static/scripts/vendor/page_text_mapper_core.js
+    - filters: coffeescript
+      output: scripts/annotator/annotator.pdf.js
+      contents: h:static/scripts/annotator/plugin/pdf.coffee
+
+annotator_fuzzy:
   contents:
     - h:static/scripts/vendor/diff_match_patch_uncompressed.js
     - h:static/scripts/vendor/dom_text_mapper.js
     - h:static/scripts/vendor/dom_text_matcher.js
     - h:static/scripts/vendor/text_match_engines.js
-    - h:static/scripts/vendor/annotator.domtextmapper.js
-    - h:static/scripts/vendor/annotator.textanchors.js
-    - h:static/scripts/vendor/annotator.fuzzytextanchors.js
-annotator_pdf:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.pdf.min.js
-  contents:
-    - h:static/scripts/vendor/page_text_mapper_core.js
-    - h:static/scripts/vendor/annotator.pdf.js
-annotator_textanchors:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.textanchors.min.js
-  contents:
-    - h:static/scripts/vendor/annotator.textanchors.js
-annotator_textrange:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.textrange.min.js
-  contents:
-    - h:static/scripts/vendor/annotator.textrange.js
-annotator_textposition:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.textposition.min.js
-  contents:
-    - h:static/scripts/vendor/annotator.textposition.js
-annotator_textquote:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.textquote.min.js
-  contents:
-    - h:static/scripts/vendor/annotator.textquote.js
-annotator_texthighlights:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.texthighlights.min.js
-  contents:
-    - h:static/scripts/vendor/annotator.texthighlights.js
-
-# Annotator plugins maintained in tree
-annotator_bridge:
-  filters: coffeescript, uglifyjs
-  output: scripts/plugin/bridge.js
-  contents:
-    - h:static/scripts/plugin/bridge.coffee
-annotator_bucket_bar:
-  filters: coffeescript, uglifyjs
-  output: scripts/plugin/bucket-bar.js
-  contents:
-    - h:static/scripts/plugin/bucket-bar.coffee
-annotator_threading:
-  filters: coffeescript, uglifyjs
-  output: scripts/plugin/threading.js
-  contents:
-    - h:static/scripts/plugin/threading.coffee
-annotator_toolbar:
-  filters: coffeescript, uglifyjs
-  output: scripts/plugin/toolbar.js
-  contents:
-    - h:static/scripts/plugin/toolbar.coffee
+    - filters: coffeescript
+      output: scripts/annotator/annotator.fuzzy.js
+      contents:
+        - h:static/scripts/annotator/plugin/domtextmapper.coffee
+        - h:static/scripts/annotator/plugin/textanchors.coffee
+        - h:static/scripts/annotator/plugin/fuzzytextanchors.coffee
 
 # Angular
 angular:
@@ -229,10 +200,7 @@ app_js:
     - angular_tags_input
     - h:static/scripts/vendor/katex/katex.js
     - annotator
-    - annotator_auth
-    - annotator_bridge
-    - annotator_document
-    - annotator_threading
+    - annotator_plugins_app
     - filters: uglifyjs
       contents:
         - filters: coffeescript
@@ -341,16 +309,7 @@ inject_js:
     - jquery_scrollintoview
     - jschannel
     - annotator
-    - annotator_bridge
-    - annotator_bucket_bar
-    - annotator_document
-    - annotator_fuzzytextanchors
-    - annotator_textrange
-    - annotator_textposition
-    - annotator_textquote
-    - annotator_texthighlights
-    - annotator_pdf
-    - annotator_toolbar
+    - annotator_plugins_inject
     - filters: uglifyjs
       contents:
         - filters: coffeescript
