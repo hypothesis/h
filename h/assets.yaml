@@ -4,7 +4,7 @@ annotator:
   output: scripts/annotator/annotator.min.js
   contents:
     - h:static/scripts/annotator/xpath.coffee
-    - h:static/scripts/annotator/extensions.coffee
+    - h:static/scripts/annotator/util.coffee
     - h:static/scripts/annotator/console.coffee
     - h:static/scripts/annotator/class.coffee
     - h:static/scripts/annotator/range.coffee
