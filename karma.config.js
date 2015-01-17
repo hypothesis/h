@@ -33,7 +33,6 @@ module.exports = function(config) {
       'h/static/scripts/vendor/Markdown.Converter.js',
       'h/static/scripts/vendor/unorm.js',
       'h/static/scripts/vendor/uuid.js',
-      'h/static/scripts/vendor/gettext.js',
       'h/static/scripts/vendor/annotator.js',
       'h/static/scripts/vendor/annotator.auth.js',
       'h/static/scripts/vendor/annotator.document.js',

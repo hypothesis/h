@@ -16,13 +16,6 @@ annotator:
     - h:static/scripts/annotator/viewer.coffee
     - h:static/scripts/annotator/notification.coffee
 
-# Annotator i18n
-gettext:
-  filters: uglifyjs
-  output: scripts/vendor/gettext.min.js
-  contents:
-    - h:static/scripts/vendor/gettext.js
-
 # Annotator plugins maintained upstream
 annotator_auth:
   filters: uglifyjs
@@ -234,7 +227,6 @@ app_js:
     - unorm
     - uuid
     - angular_tags_input
-    - gettext
     - h:static/scripts/vendor/katex/katex.js
     - annotator
     - annotator_auth
@@ -348,7 +340,6 @@ inject_js:
     - jquery
     - jquery_scrollintoview
     - jschannel
-    - gettext
     - annotator
     - annotator_bridge
     - annotator_bucket_bar
