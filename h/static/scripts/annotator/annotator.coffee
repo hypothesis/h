@@ -64,15 +64,13 @@ class Annotator extends Delegator
     # Return early if the annotator is not supported.
     return this unless Annotator.supported()
     this._setupDocumentEvents() unless @options.readOnly
-    this._setupWrapper()
-    this._setupViewer()._setupEditor()
+    this._setupWrapper()._setupViewer()._setupEditor()
     this._setupDynamicStyle()
-
-    # Perform initial DOM scan, unless told not to.
-    #this._scan() unless @options.noScan
 
     # Create adder
     this.adder = $(this.html.adder).appendTo(@wrapper).hide()
+
+    Annotator._instances.push(this)
 
   # Wraps the children of @element in a @wrapper div. NOTE: This method will also
   # remove any script elements inside @element to prevent them re-executing.
@@ -179,6 +177,8 @@ class Annotator extends Delegator
   #
   # Returns nothing.
   destroy: ->
+    super
+
     $(document).unbind({
       "mouseup":   this.checkForEndSelection
       "mousedown": this.checkForStartSelection
@@ -199,9 +199,11 @@ class Annotator extends Delegator
     @element.data('annotator', null)
 
     for name, plugin of @plugins
-      @plugins[name].destroy()
+      @plugins[name].destroy?()
 
-    this.removeEvents()
+    idx = Annotator._instances.indexOf(this)
+    if idx != -1
+      Annotator._instances.splice(idx, 1)
 
 
   # Utility function to get the decoded form of the document URI
@@ -295,6 +297,7 @@ class Annotator extends Delegator
   # Returns annotation Object.
   updateAnnotation: (annotation) ->
     this.publish('beforeAnnotationUpdated', [annotation])
+    $(annotation.highlights).attr('data-annotation-id', annotation.id)
     this.publish('annotationUpdated', [annotation])
     annotation
 
@@ -540,7 +543,7 @@ class Annotator extends Delegator
   #
   # Returns true if the element is a child of an annotator element.
   isAnnotator: (element) ->
-    !!$(element).parents().andSelf().filter('[class^=annotator-]').not(@wrapper).length
+    !!$(element).parents().addBack().filter('[class^=annotator-]').not(@wrapper).length
 
   # Annotator#element callback. 
   #
@@ -559,7 +562,7 @@ class Annotator extends Delegator
   #
   # Returns nothing.
   onAdderClick: (event) =>
-    event?.preventDefault?()
+    event?.preventDefault()
 
     # Hide the adder
     position = @adder.position()
@@ -596,7 +599,6 @@ class Annotator extends Delegator
       this.unsubscribe('annotationEditorHidden', cancel)
       this.unsubscribe('annotationEditorSubmit', save)
 
-    # Subscribe to the editor events
     this.subscribe('annotationEditorHidden', cancel)
     this.subscribe('annotationEditorSubmit', save)
 
@@ -613,17 +615,18 @@ class Annotator extends Delegator
   onEditAnnotation: (annotation) =>
     offset = @viewer.element.position()
 
+    # Subscribe once to editor events
+
     # Update the annotation when the editor is saved
     update = =>
       do cleanup
       this.updateAnnotation(annotation)
 
-    # Remove handlers when finished
+    # Remove handlers when the editor is hidden
     cleanup = =>
       this.unsubscribe('annotationEditorHidden', cleanup)
       this.unsubscribe('annotationEditorSubmit', update)
 
-    # Subscribe to the editor events
     this.subscribe('annotationEditorHidden', cleanup)
     this.subscribe('annotationEditorSubmit', update)
 
@@ -667,9 +670,6 @@ class Annotator.Plugin extends Delegator
     super
 
   pluginInit: ->
-
-  destroy: ->
-    this.removeEvents()
 
 # Sniff the browser environment and attempt to add missing functionality.
 g = Util.getGlobal()
@@ -731,7 +731,10 @@ $.fn.annotator = (options) ->
   this.each ->
     # check the data() cache, if it's there we'll call the method requested
     instance = $.data(this, 'annotator')
-    if instance
+    if options is 'destroy'
+      $.removeData(this, 'annotator')
+      instance?.destroy(args)
+    else if instance
       options && instance[options].apply(instance, args)
     else
       instance = new Annotator(this, options)
