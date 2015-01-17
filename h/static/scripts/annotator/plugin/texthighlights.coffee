@@ -2,6 +2,12 @@
 # required for annotating text.
 
 class TextHighlight extends Annotator.Highlight
+
+  @createFrom: (segment, anchor, page) ->
+    return null if segment.type isnt "magic range"
+
+    new TextHighlight anchor, page, segment.data
+ 
   # XXX: This is a temporay workaround until the Highlighter extension
   # PR will be merged which will restore separation properly
   @highlightClass = 'annotator-hl'
@@ -110,7 +116,7 @@ class TextHighlight extends Annotator.Highlight
   removeFromDocument: ->
     for hl in @_highlights
       # Is this highlight actually the part of the document?
-      if hl.parentNode? and @annotator.domMapper.isPageMapped @pageIndex
+      if hl.parentNode? and @anchoring.document.isPageMapped @pageIndex
         # We should restore original state
         child = hl.childNodes[0]
         @$(hl).replaceWith hl.childNodes

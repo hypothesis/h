@@ -4,11 +4,11 @@ class TextPositionAnchor extends Annotator.Anchor
 
   @Annotator = Annotator
 
-  constructor: (annotator, annotation, target,
+  constructor: (anchoring, annotation, target,
       @start, @end, startPage, endPage,
       quote, diffHTML, diffCaseOnly) ->
 
-    super annotator, annotation, target,
+    super anchoring, annotation, target,
       startPage, endPage,
       quote, diffHTML, diffCaseOnly
 
@@ -20,10 +20,10 @@ class TextPositionAnchor extends Annotator.Anchor
     @Annotator = TextPositionAnchor.Annotator
 
   # This is how we create a highlight out of this kind of anchor
-  _createHighlight: (page) ->
+  _getSegment: (page) ->
 
     # First we create the range from the stored stard and end offsets
-    mappings = @annotator.domMapper.getMappingsForCharRange @start, @end, [page]
+    mappings = @anchoring.document.getMappingsForCharRange @start, @end, [page]
 
     # Get the wanted range out of the response of DTM
     realRange = mappings.sections[page].realRange
@@ -32,11 +32,10 @@ class TextPositionAnchor extends Annotator.Anchor
     browserRange = new @Annotator.Range.BrowserRange realRange
 
     # Get a NormalizedRange
-    normedRange = browserRange.normalize @annotator.wrapper[0]
+    normedRange = browserRange.normalize @anchoring.annotator.wrapper[0]
 
-    # Create the highligh
-    new @Annotator.TextHighlight this, page, normedRange
-
+    type: "magic range"
+    data: normedRange
 
 # Annotator plugin for text position-based anchoring
 class Annotator.Plugin.TextPosition extends Annotator.Plugin
@@ -45,12 +44,14 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
 
     @Annotator = Annotator
 
+    @anchoring = @annotator.anchoring
+
     # Register the creator for text quote selectors
-    @annotator.selectorCreators.push
+    @anchoring.selectorCreators.push
       name: "TextPositionSelector"
       describe: @_getTextPositionSelector
 
-    @annotator.anchoringStrategies.push
+    @anchoring.strategies.push
       # Position-based strategy. (The quote is verified.)
       # This can handle document structure changes,
       # but not the content changes.
@@ -65,11 +66,13 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
     # We only care about "text range" selections.
     return [] unless selection.type is "text range"
 
-    # We need dom-text-mapper - style functionality
-    return [] unless @annotator.domMapper.getStartPosForNode?
+    document = @anchoring.document
 
-    startOffset = @annotator.domMapper.getStartPosForNode selection.range.start
-    endOffset = @annotator.domMapper.getEndPosForNode selection.range.end
+    # We need dom-text-mapper - style functionality
+    return [] unless document.getStartPosForNode?
+
+    startOffset = document.getStartPosForNode selection.range.start
+    endOffset = document.getEndPosForNode selection.range.end
 
     if startOffset? and endOffset?
       [
@@ -95,7 +98,7 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
   createFromPositionSelector: (annotation, target) =>
 
     # We need the TextPositionSelector
-    selector = @annotator.findSelector target.selector, "TextPositionSelector"
+    selector = @anchoring.findSelector target.selector, "TextPositionSelector"
     return unless selector?
 
     unless selector.start?
@@ -106,13 +109,15 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
       console.log "Warning: 'end' field is missing from TextPositionSelector. Skipping."
       return null
 
-    corpus = @annotator.domMapper.getCorpus?()
+    document = @anchoring.document
+
+    corpus = document.getCorpus?()
     # This won't work without d-t-m
     return null unless corpus
 
     content = corpus[selector.start ... selector.end].trim()
-    currentQuote = @annotator.normalizeString content
-    savedQuote = @annotator.getQuoteForTarget? target
+    currentQuote = @anchoring.normalizeString content
+    savedQuote = @anchoring.getQuoteForTarget? target
     if savedQuote? and currentQuote isnt savedQuote
       # We have a saved quote, let's compare it to current content
       #console.log "Could not apply position selector" +
@@ -123,8 +128,9 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
       return null
 
     # Create a TextPositionAnchor from this data
-    new TextPositionAnchor @annotator, annotation, target,
+    new TextPositionAnchor @anchoring, annotation, target,
       selector.start, selector.end,
-      (@annotator.domMapper.getPageIndexForPos selector.start),
-      (@annotator.domMapper.getPageIndexForPos selector.end),
+      (document.getPageIndexForPos selector.start),
+      (document.getPageIndexForPos selector.end),
       currentQuote
+

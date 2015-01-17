@@ -8,7 +8,6 @@ annotator:
     - h:static/scripts/annotator/console.coffee
     - h:static/scripts/annotator/class.coffee
     - h:static/scripts/annotator/range.coffee
-    - h:static/scripts/annotator/anchors.coffee
     - h:static/scripts/annotator/highlights.coffee
     - h:static/scripts/annotator/annotator.coffee
     - h:static/scripts/annotator/widget.coffee
@@ -39,6 +38,8 @@ annotator_plugins_inject:
   filters: uglifyjs
   output: scripts/annotator/annotator-inject.min.js
   contents:
+
+    # Non-anchoring-related stuff
     - filters: coffeescript
       output: scripts/annotator/plugin/bridge.js
       contents: h:static/scripts/annotator/plugin/bridge.coffee
@@ -49,20 +50,29 @@ annotator_plugins_inject:
       output: scripts/annotator/plugin/document.js
       contents: h:static/scripts/annotator/plugin/document.coffee
     - filters: coffeescript
-      output: scripts/annotator/plugin/texthighlights.js
-      contents: h:static/scripts/annotator/plugin/texthighlights.coffee
-    - filters: coffeescript
-      output: scripts/annotator/plugin/textposition.js
-      contents: h:static/scripts/annotator/plugin/textposition.coffee
-    - filters: coffeescript
-      output: scripts/annotator/plugin/textquote.js
-      contents: h:static/scripts/annotator/plugin/textquote.coffee
-    - filters: coffeescript
-      output: scripts/annotator/plugin/textrange.js
-      contents: h:static/scripts/annotator/plugin/textrange.coffee
-    - filters: coffeescript
       output: scripts/annotator/plugin/toolbar.js
       contents: h:static/scripts/annotator/plugin/toolbar.coffee
+
+    # Drawing highlights
+    - filters: coffeescript
+      output: scripts/annotator/plugin/texthighlights.js
+      contents: h:static/scripts/annotator/plugin/texthighlights.coffee
+
+    # Creating selections
+    - filters: coffeescript
+      output: scripts/annotator/plugin/textselection.js
+      contents: h:static/scripts/annotator/plugin/textselection.coffee
+
+    # Anchoring
+    - h:static/scripts/vendor/dom_text_mapper.js
+    - filters: coffeescript
+      output: scripts/annotator/annotator.anchoring.js
+      contents:
+       - h:static/scripts/annotator/plugin/enhancedanchoring.coffee
+       - h:static/scripts/annotator/plugin/domtextmapper.coffee
+       - h:static/scripts/annotator/plugin/textposition.coffee
+       - h:static/scripts/annotator/plugin/textquote.coffee
+       - h:static/scripts/annotator/plugin/textrange.coffee
 
     # PDF
     - h:static/scripts/vendor/page_text_mapper_core.js
@@ -72,14 +82,11 @@ annotator_plugins_inject:
 
     # Fuzzy
     - h:static/scripts/vendor/diff_match_patch_uncompressed.js
-    - h:static/scripts/vendor/dom_text_mapper.js
     - h:static/scripts/vendor/dom_text_matcher.js
     - h:static/scripts/vendor/text_match_engines.js
     - filters: coffeescript
       output: scripts/annotator/annotator.fuzzy.js
       contents:
-        - h:static/scripts/annotator/plugin/domtextmapper.coffee
-        - h:static/scripts/annotator/plugin/textanchors.coffee
         - h:static/scripts/annotator/plugin/fuzzytextanchors.coffee
 
 # Angular

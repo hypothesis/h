@@ -1,11 +1,10 @@
 # This plugin implements the UI code for creating text annotations
-class Annotator.Plugin.TextAnchors extends Annotator.Plugin
+class Annotator.Plugin.TextSelection extends Annotator.Plugin
 
-  # Plugin initialization
   pluginInit: ->
     # We need text highlights
     unless @annotator.plugins.TextHighlights
-      throw new Error "The TextAnchors Annotator plugin requires the TextHighlights plugin."
+      throw new Error "The TextSelection Annotator plugin requires the TextHighlights plugin."
 
     @Annotator = Annotator
     @$ = Annotator.$
@@ -114,3 +113,4 @@ class Annotator.Plugin.TextAnchors extends Annotator.Plugin
       @annotator.onFailedSelection event
 
   # Strategies used for creating anchors from saved data
+

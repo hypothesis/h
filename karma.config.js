@@ -38,6 +38,8 @@ module.exports = function(config) {
       'h/static/scripts/annotator/plugin/bridge.js',
       'h/static/scripts/annotator/plugin/bucket-bar.js',
       'h/static/scripts/annotator/plugin/threading.js',
+      'h/static/scripts/vendor/dom_text_mapper.js',
+      'h/static/scripts/annotator/annotator.anchoring.js',
       'h/static/scripts/app.js',
       'h/static/scripts/account.js',
       'h/static/scripts/helpers.js',

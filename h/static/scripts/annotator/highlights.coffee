@@ -2,8 +2,9 @@
 class Highlight
 
   constructor: (@anchor, @pageIndex) ->
-    @annotator = @anchor.annotator
     @annotation = @anchor.annotation
+    @anchoring = @anchor.anchoring
+    @annotator = @anchoring.annotator
 
   # Mark/unmark this hl as temporary (while creating an annotation)
   setTemporary: (value) ->
@@ -80,3 +81,4 @@ class Highlight
 
   # Scroll down to the highlight, with a comfortable margin.
   paddedScrollDownTo: -> @paddedScrollTo "down"
+
