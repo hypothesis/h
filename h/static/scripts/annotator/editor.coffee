@@ -243,7 +243,7 @@ class Annotator.Editor extends Annotator.Widget
       when 'input', 'checkbox' then input = $('<input />')
       when 'select' then input = $('<select />')
 
-    element.append(input);
+    element.append(input)
 
     input.attr({
       id: field.id
@@ -293,7 +293,7 @@ class Annotator.Editor extends Annotator.Widget
   #
   # Returns nothing
   onCancelButtonMouseover: =>
-    @element.find('.' + @classes.focus).removeClass(@classes.focus);
+    @element.find('.' + @classes.focus).removeClass(@classes.focus)
 
   # Sets up mouse events for resizing and dragging the editor window.
   # window events are bound only when needed and throttled to only update
@@ -335,10 +335,10 @@ class Annotator.Editor extends Annotator.Widget
           'mouseup.annotator-editor-resize':   onMouseup
           'mousemove.annotator-editor-resize': onMousemove
         })
-        event.preventDefault();
+        event.preventDefault()
 
     onMouseup = ->
-      mousedown = null;
+      mousedown = null
       $(window).unbind '.annotator-editor-resize'
 
     onMousemove = (event) =>
@@ -376,7 +376,7 @@ class Annotator.Editor extends Annotator.Widget
         throttle = true;
         setTimeout(->
           throttle = false
-        , 1000/60);
+        , 1000/60)
 
     resize.bind   'mousedown', onMousedown
     controls.bind 'mousedown', onMousedown
