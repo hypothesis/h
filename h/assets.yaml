@@ -79,11 +79,6 @@ annotator_bucket_bar:
   output: scripts/plugin/bucket-bar.js
   contents:
     - h:static/scripts/plugin/bucket-bar.coffee
-annotator_discovery:
-  filters: coffeescript, uglifyjs
-  output: scripts/plugin/discovery.js
-  contents:
-    - h:static/scripts/plugin/discovery.coffee
 annotator_threading:
   filters: coffeescript, uglifyjs
   output: scripts/plugin/threading.js
@@ -233,7 +228,6 @@ app_js:
     - annotator
     - annotator_auth
     - annotator_bridge
-    - annotator_discovery
     - annotator_document
     - annotator_threading
     - filters: uglifyjs
