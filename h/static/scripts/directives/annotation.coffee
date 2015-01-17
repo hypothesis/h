@@ -312,17 +312,6 @@ annotation = [
   '$document', 'annotator',
   ($document,   annotator) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
-      # Helper function to remove the temporary thread created for a new reply.
-      prune = (message) ->
-        return if message.id?  # threading plugin will take care of it
-        return unless thread.container.message is message
-        thread.container.parent?.removeChild(thread.container)
-
-      if thread?
-        annotator.subscribe 'annotationDeleted', prune
-        scope.$on '$destroy', ->
-          annotator.unsubscribe 'annotationDeleted', prune
-
       # Observe the embedded attribute
       attrs.$observe 'annotationEmbedded', (value) ->
         ctrl.embedded = value? and value != 'false'

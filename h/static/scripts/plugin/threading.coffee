@@ -74,11 +74,18 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
       @idTable[annotation.id] = child
       break
 
-  annotationDeleted: ({id}) =>
-    container = this.idTable[id]
-    if container?
+  annotationDeleted: (annotation) =>
+    if id of this.idTable
+      container = this.idTable[id]
       container.message = null
+      delete this.idTable[id]
       this.pruneEmpties(@root)
+    else
+      for id, container of this.idTable
+        for child in container.children when child.message is annotation
+          child.message = null
+          this.pruneEmpties(@root)
+          return
 
   annotationsLoaded: (annotations) =>
     messages = (@root.flattenChildren() or []).concat(annotations)
