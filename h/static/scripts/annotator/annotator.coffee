@@ -41,16 +41,6 @@ util =
 # Store a reference to the current Annotator object.
 _Annotator = this.Annotator
 
-# Fake two-phase / pagination support, used for HTML documents
-class DummyDocumentAccess
-
-  @applicable: -> true
-  getPageIndex: -> 0
-  getPageCount: -> 1
-  getPageIndexForPos: -> 0
-  isPageMapped: -> true
-  scan: ->
-
 class Annotator extends Delegator
   # Events to be bound on Annotator#element.
   events:
@@ -104,74 +94,19 @@ class Annotator extends Delegator
   constructor: (element, options) ->
     super
     @plugins = {}
-    @selectorCreators = []
-    @anchoringStrategies = []
 
     # Return early if the annotator is not supported.
     return this unless Annotator.supported()
     this._setupDocumentEvents() unless @options.readOnly
-    this._setupAnchorEvents()
     this._setupWrapper()
-    this._setupDocumentAccessStrategies()
     this._setupViewer()._setupEditor()
     this._setupDynamicStyle()
 
     # Perform initial DOM scan, unless told not to.
-    this._scan() unless @options.noScan
+    #this._scan() unless @options.noScan
 
     # Create adder
     this.adder = $(this.html.adder).appendTo(@wrapper).hide()
-
-  # Initializes the available document access strategies
-  _setupDocumentAccessStrategies: ->
-    @documentAccessStrategies = [
-      # Default dummy strategy for simple HTML documents.
-      # The generic fallback.
-      name: "Dummy"
-      mapper: DummyDocumentAccess
-    ]
-
-    this
-
-  # Initializes the components used for analyzing the document
-  _chooseAccessPolicy: ->
-    if @domMapper? then return
-
-    # Go over the available strategies
-    for s in @documentAccessStrategies
-      # Can we use this strategy for this document?
-      if s.mapper.applicable()
-        @documentAccessStrategy = s
-        @domMapper = new s.mapper()
-        @anchors = {}
-        addEventListener "docPageMapped", (evt) =>
-          @_realizePage evt.pageIndex
-        addEventListener "docPageUnmapped", (evt) =>
-          @_virtualizePage evt.pageIndex
-        s.init?()
-        return this
-
-  # Remove the current document access policy
-  _removeCurrentAccessPolicy: ->
-    return unless @domMapper?
-
-    list = @documentAccessStrategies
-    index = list.indexOf @documentAccessStrategy
-    list.splice(index, 1) unless index is -1
-
-    @domMapper.destroy?()
-    delete @domMapper
-
-  # Perform a scan of the DOM. Required for finding anchors.
-  _scan: ->
-    # Ensure that we have a document access strategy
-    this._chooseAccessPolicy()
-    try
-      @pendingScan = @domMapper.scan()
-    catch
-      @_removeCurrentAccessPolicy()
-      @_scan()
-      return
 
   # Wraps the children of @element in a @wrapper div. NOTE: This method will also
   # remove any script elements inside @element to prevent them re-executing.
@@ -242,14 +177,6 @@ class Annotator extends Delegator
       "mousedown": this.checkForStartSelection
     })
     this
-
-  # Sets up handlers to anchor-related events
-  _setupAnchorEvents: ->
-    # When annotations are updated
-    @on 'annotationUpdated', (annotation) =>
-      # Notify the anchors
-      for anchor in annotation.anchors or []
-        anchor.annotationUpdated()
 
   # Sets up any dynamically calculated CSS for the Annotator.
   #
@@ -336,37 +263,6 @@ class Annotator extends Delegator
     this.publish('beforeAnnotationCreated', [annotation])
     annotation
 
-  # Do some normalization to get a "canonical" form of a string.
-  # Used to even out some browser differences.
-  normalizeString: (string) -> string.replace /\s{2,}/g, " "
-
-  # Find the given type of selector from an array of selectors, if it exists.
-  # If it does not exist, null is returned.
-  findSelector: (selectors, type) ->
-    for selector in selectors
-      if selector.type is type then return selector
-    null
-
-  # Try to find the right anchoring point for a given target
-  #
-  # Returns an Anchor object if succeeded, null otherwise
-  createAnchor: (annotation, target) ->
-    unless target?
-      throw new Error "Trying to find anchor for null target!"
-
-    error = null
-    anchor = null
-    for s in @anchoringStrategies
-      try
-        a = s.code.call this, annotation, target
-        if a
-          return result: a
-      catch error
-        console.log "Strategy '" + s.name + "' has thrown an error.",
-          error.stack ? error
-
-    return error: "No strategies worked."
-
   # Public: Initialises an annotation either from an object representation or
   # an annotation created with Annotator#createAnnotation(). It finds the
   # selected range and higlights the selection in the DOM, extracts the
@@ -397,7 +293,7 @@ class Annotator extends Delegator
     for t in annotation.target ? []
       try
         # Create an anchor for this target
-        result = this.createAnchor annotation, t
+        result = this.anchoring.createAnchor annotation, t
         anchor = result.result
         if result.error? instanceof Range.RangeError
           this.publish 'rangeNormalizeFail', [annotation, result.error.range, result.error]
@@ -407,14 +303,6 @@ class Annotator extends Delegator
 
           # Store this anchor for the annotation
           annotation.anchors.push anchor
-
-          # Store the anchor for all involved pages
-          for pageIndex in [anchor.startPage .. anchor.endPage]
-            @anchors[pageIndex] ?= []
-            @anchors[pageIndex].push anchor
-
-          # Realizing the anchor
-          anchor.realize()
 
       catch exception
         console.log "Error in setupAnnotation for", annotation.id,
@@ -451,7 +339,7 @@ class Annotator extends Delegator
   #
   # Returns deleted annotation.
   deleteAnnotation: (annotation) ->
-    if annotation.anchors?
+    if annotation.anchors?    
       for a in annotation.anchors
         a.remove()
 
@@ -560,7 +448,7 @@ class Annotator extends Delegator
     this
 
   # Callback method called when the @editor fires the "hide" event. Itself
-  # publishes the 'annotationEditorHidden' event
+  # publishes the 'annotationEditorHidden' event 
   #
   # Returns nothing.
   onEditorHide: =>
@@ -624,19 +512,6 @@ class Annotator extends Delegator
       this.startViewerHideTimer()
     @mouseIsDown = true
 
-  # This is called to create a target from a raw selection,
-  # using selectors created by the registered selector creators
-  _getTargetFromSelection: (selection) =>
-    selectors = []
-    for c in @selectorCreators
-      description = c.describe selection
-      for selector in description
-        selectors.push selector
-
-    # Create the target
-    source: @getHref()
-    selector: selectors
-
   # This method is to be called by the mechanisms responsible for
   # triggering annotation (and highlight) creation.
   #
@@ -673,6 +548,12 @@ class Annotator extends Delegator
 
     true
 
+  # This is called to create a target from a raw selection,
+  # using selectors created by the registered selector creators
+  _getTargetFromSelection: (selection) ->
+    source: @getHref()
+    selector: @anchoring.getSelectorsFromSelection(selection)
+
   onFailedSelection: (event) ->
     @adder.hide()
     @selectedTargets = []
@@ -695,7 +576,7 @@ class Annotator extends Delegator
   isAnnotator: (element) ->
     !!$(element).parents().andSelf().filter('[class^=annotator-]').not(@wrapper).length
 
-  # Annotator#element callback.
+  # Annotator#element callback. 
   #
   # event - A mousedown Event object
   #
@@ -796,36 +677,6 @@ class Annotator extends Delegator
     # Delete highlight elements.
     this.deleteAnnotation annotation
 
-  # Collect all the highlights (optionally for a given set of annotations)
-  getHighlights: (annotations) ->
-    results = []
-    if annotations?
-      # Collect only the given set of annotations
-      for annotation in annotations
-        for anchor in annotation.anchors
-          for page, hl of anchor.highlight
-            results.push hl
-    else
-      # Collect from everywhere
-      for page, anchors of @anchors
-        $.merge results, (anchor.highlight[page] for anchor in anchors when anchor.highlight[page]?)
-    results
-
-  # Realize anchors on a given pages
-  _realizePage: (index) ->
-    # If the page is not mapped, give up
-    return unless @domMapper.isPageMapped index
-
-    # Go over all anchors related to this page
-    for anchor in @anchors[index] ? []
-      anchor.realize()
-
-  # Virtualize anchors on a given page
-  _virtualizePage: (index) ->
-    # Go over all anchors related to this page
-    for anchor in @anchors[index] ? []
-      anchor.virtualize index
-
   onAnchorMouseover: (event) ->
     # Cancel any pending hiding of the viewer.
     this.clearViewerHideTimer()
@@ -896,7 +747,6 @@ Annotator.Util = Util
 Annotator._instances = []
 
 Annotator.Highlight = Highlight
-Annotator.Anchor = Anchor
 
 # Bind gettext helper so plugins can use localisation.
 Annotator._t = _t

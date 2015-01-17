@@ -222,7 +222,9 @@ class Annotator.Plugin.PDF extends Annotator.Plugin
       console.warn "The PDF Annotator plugin requires the DomTextMapper plugin. Skipping."
       return
 
-    @annotator.documentAccessStrategies.unshift
+    @anchoring = @annotator.anchoring
+
+    @anchoring.documentAccessStrategies.unshift
       # Strategy to handle PDF documents rendered by PDF.js
       name: "PDF.js"
       mapper: PDFTextMapper
@@ -247,7 +249,7 @@ class Annotator.Plugin.PDF extends Annotator.Plugin
 
   # Get a PDF fingerPrint-based URI
   _getFingerPrintURI: ->
-    fingerprint = @annotator.domMapper.getDocumentFingerprint()
+    fingerprint = @anchoring.document.getDocumentFingerprint()
 
     # This is an experimental URN,
     # as per http://tools.ietf.org/html/rfc3406#section-3.0
@@ -266,7 +268,7 @@ class Annotator.Plugin.PDF extends Annotator.Plugin
 
   # Try to extract the title; first from metadata, then HTML header
   _getTitle: ->
-    title = @annotator.domMapper.getDocumentInfo().Title?.trim()
+    title = @anchoring.document.getDocumentInfo().Title?.trim()
     if title? and title isnt ""
       title
     else
@@ -291,8 +293,8 @@ class Annotator.Plugin.PDF extends Annotator.Plugin
   # Public: Get metadata (when the doc is loaded). Returns a promise.
   getMetaData: =>
     new Promise (resolve, reject) =>
-      if @annotator.domMapper.waitForInit?
-        @annotator.domMapper.waitForInit().then =>
+      if @anchoring.document.waitForInit?
+        @anchoring.document.waitForInit().then =>
           try
             resolve @_metadata()
           catch error

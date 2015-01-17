@@ -7,22 +7,26 @@ class Annotator.Plugin.TextQuote extends Annotator.Plugin
   # Plugin initialization
   pluginInit: ->
 
+    @anchoring = @annotator.anchoring
+
     # Register the creator for text quote selectors
-    @annotator.selectorCreators.push
+    @anchoring.selectorCreators.push
       name: "TextQuoteSelector"
       describe: @_getTextQuoteSelector
 
     # Register function to get quote from this selector
-    @annotator.getQuoteForTarget = (target) =>
-      selector = @annotator.findSelector target.selector, "TextQuoteSelector"
+    @anchoring.getQuoteForTarget = (target) =>
+      selector = @anchoring.findSelector target.selector, "TextQuoteSelector"
       if selector?
-        @annotator.normalizeString selector.exact
+        @anchoring.normalizeString selector.exact
       else
         null
 
   # Create a TextQuoteSelector around a range
   _getTextQuoteSelector: (selection) =>
     return [] unless selection.type is "text range"
+
+    document = @anchoring.document
 
     unless selection.range?
       throw new Error "Called getTextQuoteSelector() with null range!"
@@ -34,15 +38,15 @@ class Annotator.Plugin.TextQuote extends Annotator.Plugin
     unless rangeEnd?
       throw new Error "Called getTextQuoteSelector() on a range with no valid end."
 
-    if @annotator.domMapper.getStartPosForNode?
+    if document.getStartPosForNode?
       # Calculate the quote and context using DTM
 
-      startOffset = @annotator.domMapper.getStartPosForNode rangeStart
-      endOffset = @annotator.domMapper.getEndPosForNode rangeEnd
+      startOffset = document.getStartPosForNode rangeStart
+      endOffset = document.getEndPosForNode rangeEnd
 
       if startOffset? and endOffset?
-        quote = @annotator.domMapper.getCorpus()[startOffset .. endOffset-1].trim()
-        [prefix, suffix] = @annotator.domMapper.getContextForCharRange startOffset, endOffset
+        quote = document.getCorpus()[startOffset .. endOffset-1].trim()
+        [prefix, suffix] = document.getContextForCharRange startOffset, endOffset
 
         [
           type: "TextQuoteSelector"
@@ -61,3 +65,4 @@ class Annotator.Plugin.TextQuote extends Annotator.Plugin
         type: "TextQuoteSelector"
         exact: selection.range.text().trim()
       ]
+

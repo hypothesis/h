@@ -3,24 +3,26 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 
   pluginInit: ->
     # Do we have the basic text anchors plugin loaded?
-    unless @annotator.plugins.TextAnchors
-      console.warn "The FuzzyTextAnchors Annotator plugin requires the TextAnchors plugin. Skipping."
+    unless @annotator.plugins.TextPosition
+      console.warn "The FuzzyTextAnchors Annotator plugin requires the TextPosition plugin. Skipping."
       return
 
     @Annotator = Annotator
 
+    @anchoring = @annotator.anchoring
+
     # Initialize the text matcher library
-    @textFinder = new DomTextMatcher => @annotator.domMapper.getCorpus()
+    @textFinder = new DomTextMatcher => @anchoring.document.getCorpus()
 
     # Register our fuzzy strategies
-    @annotator.anchoringStrategies.push
+    @anchoring.strategies.push
       # Two-phased fuzzy text matching strategy. (Using context and quote.)
       # This can handle document structure changes,
       # and also content changes.
       name: "two-phase fuzzy"
       code: this.twoPhaseFuzzyMatching
 
-    @annotator.anchoringStrategies.push
+    @anchoring.strategies.push
       # Naive fuzzy text matching strategy. (Using only the quote.)
       # This can handle document structure changes,
       # and also content changes.
@@ -28,11 +30,14 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
       code: this.fuzzyMatching
 
   twoPhaseFuzzyMatching: (annotation, target) =>
+
+    document = @anchoring.document
+
     # This won't work without DTM
-    return unless @annotator.domMapper.getInfoForNode?
+    return unless document.getInfoForNode?
 
     # Fetch the quote and the context
-    quoteSelector = @annotator.findSelector target.selector, "TextQuoteSelector"
+    quoteSelector = @anchoring.findSelector target.selector, "TextQuoteSelector"
     prefix = quoteSelector?.prefix
     suffix = quoteSelector?.suffix
     quote = quoteSelector?.exact
@@ -41,12 +46,12 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
     unless (prefix? and suffix?) then return null
 
     # Fetch the expected start and end positions
-    posSelector = @annotator.findSelector target.selector, "TextPositionSelector"
+    posSelector = @anchoring.findSelector target.selector, "TextPositionSelector"
     expectedStart = posSelector?.start
     expectedEnd = posSelector?.end
 
     options =
-      contextMatchDistance: @annotator.domMapper.getCorpus().length * 2
+      contextMatchDistance: document.getCorpus().length * 2
       contextMatchThreshold: 0.5
       patternMatchThreshold: 0.5
       flexContext: true
@@ -65,20 +70,23 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 
     # OK, we have everything
     # Create a TextPositionAnchor from this data
-    new @Annotator.TextPositionAnchor @annotator, annotation, target,
+    new @Annotator.TextPositionAnchor @anchoring, annotation, target,
       match.start, match.end,
-      (@annotator.domMapper.getPageIndexForPos match.start),
-      (@annotator.domMapper.getPageIndexForPos match.end),
+      (document.getPageIndexForPos match.start),
+      (document.getPageIndexForPos match.end),
       match.found,
       unless match.exact then match.comparison.diffHTML,
       unless match.exact then match.exactExceptCase
 
   fuzzyMatching: (annotation, target) =>
+
+    document = @anchoring.document
+
     # This won't work without DTM
-    return unless @annotator.domMapper.getInfoForNode?
+    return unless document.getInfoForNode?
 
     # Fetch the quote
-    quoteSelector = @annotator.findSelector target.selector, "TextQuoteSelector"
+    quoteSelector = @anchoring.findSelector target.selector, "TextQuoteSelector"
     quote = quoteSelector?.exact
 
     # No quote, no joy
@@ -89,11 +97,11 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
     return unless quote.length >= 32
 
     # Get a starting position for the search
-    posSelector = @annotator.findSelector target.selector, "TextPositionSelector"
+    posSelector = @anchoring.findSelector target.selector, "TextPositionSelector"
     expectedStart = posSelector?.start
 
     # Get full document length
-    len = @annotator.domMapper.getCorpus().length
+    len = document.getCorpus().length
 
     # If we don't have the position saved, start at the middle of the doc
     expectedStart ?= Math.floor(len / 2)
@@ -116,10 +124,11 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 
     # OK, we have everything
     # Create a TextPosutionAnchor from this data
-    new @Annotator.TextPositionAnchor @annotator, annotation, target,
+    new @Annotator.TextPositionAnchor @anchoring, annotation, target,
       match.start, match.end,
-      (@annotator.domMapper.getPageIndexForPos match.start),
-      (@annotator.domMapper.getPageIndexForPos match.end),
+      (document.getPageIndexForPos match.start),
+      (document.getPageIndexForPos match.end),
       match.found,
       unless match.exact then match.comparison.diffHTML,
       unless match.exact then match.exactExceptCase
+

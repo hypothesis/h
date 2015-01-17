@@ -30,11 +30,9 @@ class TextRangeAnchor extends Annotator.Anchor
     @Annotator = TextRangeAnchor.Annotator
 
   # This is how we create a highlight out of this kind of anchor
-  _createHighlight: ->
-
-    # Create the highligh
-    new @Annotator.TextHighlight this, 0, @range
-
+  _getSegment: ->
+    type: "magic range"
+    data: @range
 
 # Annotator plugin for creating, and anchoring based on text range
 # selectors
@@ -44,13 +42,15 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
 
     @Annotator = Annotator
 
+    @anchoring = @annotator.anchoring
+
     # Register the creator for range selectors
-    @annotator.selectorCreators.push
+    @anchoring.selectorCreators.push
       name: "RangeSelector"
       describe: @_getRangeSelector
 
     # Register our anchoring strategies
-    @annotator.anchoringStrategies.push
+    @anchoring.strategies.push
       # Simple strategy based on DOM Range
       name: "range"
       code: @createFromRangeSelector
@@ -74,7 +74,10 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
   # Create and anchor using the saved Range selector.
   # The quote is verified.
   createFromRangeSelector: (annotation, target) =>
-    selector = @annotator.findSelector target.selector, "RangeSelector"
+
+    document = @anchoring.document
+
+    selector = @anchoring.findSelector target.selector, "RangeSelector"
     unless selector? then return null
 
     # Try to apply the saved XPath
@@ -85,24 +88,24 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
       return null
 
     # Get the text of this range
-    if @annotator.domMapper.getInfoForNode?
+    if document.getInfoForNode?
       # Determine the current content of the given range using DTM
 
-      startInfo = @annotator.domMapper.getInfoForNode normedRange.start
+      startInfo = document.getInfoForNode normedRange.start
       return null unless startInfo # Don't fret if page is not mapped
       startOffset = startInfo.start
-      endInfo = @annotator.domMapper.getInfoForNode normedRange.end
+      endInfo = document.getInfoForNode normedRange.end
       return null unless endInfo # Don't fret if page is not mapped
       endOffset = endInfo.end
-      rawQuote = @annotator.domMapper.getCorpus()[startOffset .. endOffset-1].trim()
+      rawQuote = document.getCorpus()[startOffset .. endOffset-1].trim()
     else
       # Determine the current content of the given range directly
       rawQuote = normedRange.text().trim()
 
-    currentQuote = @annotator.normalizeString rawQuote
+    currentQuote = @anchoring.normalizeString rawQuote
 
     # Look up the saved quote
-    savedQuote = @annotator.getQuoteForTarget? target
+    savedQuote = @anchoring.getQuoteForTarget? target
     if savedQuote? and currentQuote isnt savedQuote
       #console.log "Could not apply XPath selector to current document, " +
       #  "because the quote has changed. (Saved quote is '#{savedQuote}'." +
@@ -113,12 +116,13 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
       # Create a TextPositionAnchor from the start and end offsets
       # of this range
       # (to be used with dom-text-mapper)
-      new @Annotator.TextPositionAnchor @annotator, annotation, target,
+      new @Annotator.TextPositionAnchor @anchoring, annotation, target,
         startInfo.start, endInfo.end,
         (startInfo.pageIndex ? 0), (endInfo.pageIndex ? 0),
         currentQuote
     else
       # Create a TextRangeAnchor from this range
       # (to be used whithout dom-text-mapper)
-      new TextRangeAnchor @annotator, annotation, target,
+      new TextRangeAnchor @anchoring, annotation, target,
         normedRange, currentQuote
+

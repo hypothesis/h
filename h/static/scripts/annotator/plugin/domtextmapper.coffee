@@ -6,9 +6,11 @@ class Annotator.Plugin.DomTextMapper extends Annotator.Plugin
       console.log "Not registering DOM-Text-Mapper."
       return
 
-    @annotator.documentAccessStrategies.unshift
+    @anchoring = @annotator.anchoring
+
+    @anchoring.documentAccessStrategies.unshift
       # Document access strategy for simple HTML documents,
       # with enhanced text extraction and mapping features.
       name: "DOM-Text-Mapper"
       mapper: window.DomTextMapper
-      init: => @annotator.domMapper.setRootNode @annotator.wrapper[0]
+      init: => @anchoring.document.setRootNode @annotator.wrapper[0]
