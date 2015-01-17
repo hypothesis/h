@@ -353,7 +353,7 @@ class Annotator.Guest extends Annotator
     event.stopPropagation()
     @adder.hide()
     annotation = this.setupAnnotation(this.createAnnotation())
-    Annotator.util.getGlobal().getSelection().removeAllRanges()
+    Annotator.Util.getGlobal().getSelection().removeAllRanges()
     this.showEditor(annotation)
 
   onSetTool: (name) ->

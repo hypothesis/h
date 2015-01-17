@@ -34,7 +34,7 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
   #
   # Returns Array of NormalizedRange instances.
   _getSelectedRanges: ->
-    selection = @Annotator.util.getGlobal().getSelection()
+    selection = @Annotator.Util.getGlobal().getSelection()
 
     ranges = []
     rangesToIgnore = []

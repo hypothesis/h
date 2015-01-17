@@ -72,7 +72,7 @@ class Annotator.Editor extends Annotator.Widget
   #
   # Returns itself.
   show: (event) =>
-    util.preventEventDefault event
+    Annotator.Util.preventEventDefault event
 
     @element.removeClass(@classes.hide)
     @element.find('.annotator-save').addClass(@classes.focus)
@@ -104,7 +104,7 @@ class Annotator.Editor extends Annotator.Widget
   #
   # Returns itself.
   hide: (event) =>
-    util.preventEventDefault event
+    Annotator.Util.preventEventDefault event
 
     @element.addClass(@classes.hide)
     this.publish('hide')
@@ -161,7 +161,7 @@ class Annotator.Editor extends Annotator.Widget
   #
   # Returns itself.
   submit: (event) =>
-    util.preventEventDefault event
+    Annotator.Util.preventEventDefault event
 
     for field in @fields
       field.submit(field.element, @annotation)
@@ -227,7 +227,7 @@ class Annotator.Editor extends Annotator.Widget
   # Returns the created <li> Element.
   addField: (options) ->
     field = $.extend({
-      id:     'annotator-field-' + util.uuid()
+      id:     'annotator-field-' + Annotator.Util.uuid()
       type:   'input'
       label:  ''
       load:   ->
