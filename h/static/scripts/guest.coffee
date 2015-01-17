@@ -16,8 +16,9 @@ class Annotator.Guest extends Annotator
   # Plugin configuration
   options:
     TextHighlights: {}
+    EnhancedAnchoring: {}
     DomTextMapper: {}
-    TextAnchors: {}
+    TextSelection: {}
     TextRange: {}
     TextPosition: {}
     TextQuote: {}
@@ -76,7 +77,7 @@ class Annotator.Guest extends Annotator
 
     unless config.dontScan
       # Scan the document text with the DOM Text libraries
-      this._scan()
+      this.anchoring._scan()
 
     # Watch for newly rendered highlights, and update positions in sidebar
     this.subscribe "highlightsCreated", (highlights) =>
@@ -136,7 +137,7 @@ class Annotator.Guest extends Annotator
     .bind('onEditorSubmit', this.onEditorSubmit)
 
     .bind('focusAnnotations', (ctx, tags=[]) =>
-      for hl in @getHighlights()
+      for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag in tags
           hl.setFocused true
         else
@@ -144,7 +145,7 @@ class Annotator.Guest extends Annotator
     )
 
     .bind('scrollToAnnotation', (ctx, tag) =>
-      for hl in @getHighlights()
+      for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag is tag
           hl.scrollTo()
           return

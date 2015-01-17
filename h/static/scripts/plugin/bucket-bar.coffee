@@ -113,7 +113,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
   _collectVirtualAnnotations: (startPage, endPage) ->
     results = []
     for page in [startPage .. endPage]
-      anchors = @annotator.anchors[page]
+      anchors = @annotator.anchoring.anchors[page]
       if anchors?
         $.merge results, (anchor.annotation for anchor in anchors when not anchor.fullyRealized)
     results
@@ -128,7 +128,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     dir = if direction is "up" then +1 else -1
     {next} = annotations.reduce (acc, ann) ->
       {start, next} = acc
-      anchor = ann.anchors[0]
+      anchor = ann.anchoring.anchors[0]
       if not next? or start.page*dir < anchor.startPage*dir
         # This one is obviously better
         start:
@@ -164,7 +164,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     startPage = anchor.startPage
 
     # Is this rendered?
-    if @annotator.domMapper.isPageMapped startPage
+    if @annotator.anchoring.document.isPageMapped startPage
       # If it was rendered, then we only have one result. Go there.
       hl = anchor.highlight[startPage]
       hl.paddedScrollTo direction
@@ -175,11 +175,11 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
         count: next.length
         page: startPage
         direction: direction
-      @annotator.domMapper.setPageIndex startPage
+      @annotator.anchoring.document.setPageIndex startPage
 
   _update: =>
     wrapper = @annotator.wrapper
-    highlights = @annotator.getHighlights()
+    highlights = @annotator.anchoring.getHighlights()
     defaultView = wrapper[0].ownerDocument.defaultView
 
     # Keep track of buckets of annotations above and below the viewport
@@ -187,7 +187,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     below = []
 
     # Get the page numbers
-    mapper = @annotator.domMapper
+    mapper = @annotator.anchoring.document
     return unless mapper? # Maybe it's too soon to do this
     firstPage = 0
     currentPage = mapper.getPageIndex()
@@ -315,7 +315,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       # TODO: This should use event delegation on the container.
       .on 'mousemove', (event) =>
         bucket = @tabs.index(event.currentTarget)
-        for hl in @annotator.getHighlights()
+        for hl in @annotator.anchoring.getHighlights()
           if hl.annotation in @buckets[bucket]
             hl.setFocused true
           else
@@ -323,7 +323,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
 
       # Gets rid of them after
       .on 'mouseout', =>
-        for hl in @annotator.getHighlights()
+        for hl in @annotator.anchoring.getHighlights()
           hl.setFocused false
 
       # Does one of a few things when a tab is clicked depending on type

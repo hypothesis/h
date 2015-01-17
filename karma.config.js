@@ -37,6 +37,7 @@ module.exports = function(config) {
       'h/static/scripts/vendor/annotator.js',
       'h/static/scripts/vendor/annotator.auth.js',
       'h/static/scripts/vendor/annotator.document.js',
+      'h/static/scripts/vendor/annotator.enhancedanchoring.js',	
       'h/static/scripts/vendor/annotator.store.js',
       'h/static/scripts/plugin/bridge.js',
       'h/static/scripts/plugin/discovery.js',
