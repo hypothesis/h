@@ -16,8 +16,9 @@ class Annotator.Guest extends Annotator
   # Plugin configuration
   options:
     TextHighlights: {}
+    EnhancedAnchoring: {}
     DomTextMapper: {}
-    TextAnchors: {}
+    TextSelection: {}
     TextRange: {}
     TextPosition: {}
     TextQuote: {}
@@ -76,7 +77,7 @@ class Annotator.Guest extends Annotator
 
     unless config.dontScan
       # Scan the document text with the DOM Text libraries
-      this._scan()
+      this.anchoring._scan()
 
     # Watch for newly rendered highlights, and update positions in sidebar
     this.subscribe "highlightsCreated", (highlights) =>
