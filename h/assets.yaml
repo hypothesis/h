@@ -23,11 +23,6 @@ annotator_document:
   output: scripts/vendor/annotator.document.min.js
   contents:
     - h:static/scripts/vendor/annotator.document.js
-annotator_store:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.store.min.js
-  contents:
-    - h:static/scripts/vendor/annotator.store.js
 
 # Annotator plugins maintained out of tree by Hypothesis
 annotator_fuzzytextanchors:
@@ -240,7 +235,6 @@ app_js:
     - annotator_bridge
     - annotator_discovery
     - annotator_document
-    - annotator_store
     - annotator_threading
     - filters: uglifyjs
       contents:
