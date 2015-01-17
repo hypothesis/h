@@ -22,9 +22,9 @@ annotator_plugins_app:
   output: scripts/annotator/annotator-app.min.js
   contents:
     - h:static/scripts/annotator/plugin/auth.coffee
+    - h:static/scripts/annotator/plugin/bridge.coffee
     - h:static/scripts/annotator/plugin/document.coffee
-    - h:static/scripts/plugin/bridge.coffee
-    - h:static/scripts/plugin/threading.coffee
+    - h:static/scripts/annotator/plugin/threading.coffee
 
 # Annotator inject plugins
 annotator_plugins_inject:
@@ -34,14 +34,14 @@ annotator_plugins_inject:
     - filters: coffeescript
       output: scripts/annotator/annotator.inject.js
       contents:
+        - h:static/scripts/annotator/plugin/bridge.coffee
+        - h:static/scripts/annotator/plugin/bucket-bar.coffee
         - h:static/scripts/annotator/plugin/document.coffee
-        - h:static/scripts/annotator/plugin/textrange.coffee
+        - h:static/scripts/annotator/plugin/texthighlights.coffee
         - h:static/scripts/annotator/plugin/textposition.coffee
         - h:static/scripts/annotator/plugin/textquote.coffee
-        - h:static/scripts/annotator/plugin/texthighlights.coffee
-        - h:static/scripts/plugin/bridge.coffee
-        - h:static/scripts/plugin/bucket-bar.coffee
-        - h:static/scripts/plugin/toolbar.coffee
+        - h:static/scripts/annotator/plugin/textrange.coffee
+        - h:static/scripts/annotator/plugin/toolbar.coffee
     - annotator_pdf
     - annotator_fuzzy
 
