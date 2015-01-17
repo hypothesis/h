@@ -37,9 +37,9 @@ annotator_fuzzytextanchors:
     - h:static/scripts/vendor/diff_match_patch_uncompressed.js
     - h:static/scripts/vendor/dom_text_mapper.js
     - h:static/scripts/vendor/dom_text_matcher.js
+    - h:static/scripts/vendor/annotator.enhancedanchoring.js    
     - h:static/scripts/vendor/text_match_engines.js
     - h:static/scripts/vendor/annotator.domtextmapper.js
-    - h:static/scripts/vendor/annotator.textanchors.js
     - h:static/scripts/vendor/annotator.fuzzytextanchors.js
 annotator_pdf:
   filters: uglifyjs
@@ -47,11 +47,11 @@ annotator_pdf:
   contents:
     - h:static/scripts/vendor/page_text_mapper_core.js
     - h:static/scripts/vendor/annotator.pdf.js
-annotator_textanchors:
+annotator_textselection:
   filters: uglifyjs
-  output: scripts/vendor/annotator.textanchors.min.js
+  output: scripts/vendor/annotator.textselection.min.js
   contents:
-    - h:static/scripts/vendor/annotator.textanchors.js
+    - h:static/scripts/vendor/annotator.textselection.js
 annotator_textrange:
   filters: uglifyjs
   output: scripts/vendor/annotator.textrange.min.js
@@ -354,6 +354,7 @@ inject_js:
     - annotator_bridge
     - annotator_bucket_bar
     - annotator_document
+    - annotator_textselection    
     - annotator_fuzzytextanchors
     - annotator_textrange
     - annotator_textposition
