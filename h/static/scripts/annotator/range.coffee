@@ -16,13 +16,6 @@ Range.sniff = (r) ->
   if r.commonAncestorContainer?
     new Range.BrowserRange(r)
   else if typeof r.start is "string"
-    # Annotator <= 1.2.6 upgrade code
-    new Range.SerializedRange
-      startContainer: r.start
-      startOffset: r.startOffset
-      endContainer: r.end
-      endOffset: r.endOffset
-  else if typeof r.startContainer is "string"
     new Range.SerializedRange(r)
   else if r.start and typeof r.start is "object"
     new Range.NormalizedRange(r)
@@ -143,7 +136,7 @@ class Range.BrowserRange
 
     # Look at the start
     if @startContainer.nodeType is Node.ELEMENT_NODE
-      # We are dealing with element nodes
+      # We are dealing with element nodes  
       r.start = Util.getFirstTextNodeNotBefore @startContainer.childNodes[@startOffset]
       r.startOffset = 0
     else
@@ -162,24 +155,12 @@ class Range.BrowserRange
         while n? and (n.nodeType isnt Node.TEXT_NODE)
           n = n.firstChild
         if n? # Did we find a text node at the start of this element?
-          # Check the previous sibling
-          prev = n.previousSibling
-          if prev? and (prev.nodeType is Node.TEXT_NODE)
-            # We have another text righ before us. Use that instead.
-            r.end = prev
-            r.endOffset = prev.nodeValue.length
-          else
-            # No, we need to stick to this node.
-            r.end = n
-            r.endOffset = 0
+          r.end = n
+          r.endOffset = 0
 
-      unless r.end?
-        # We need to find a text node in the previous sibling of the node at the
-        # given offset, if one exists, or in the previous sibling of its container.
-        if @endOffset
-          node = @endContainer.childNodes[@endOffset - 1]
-        else
-          node = @endContainer.previousSibling
+      unless r.end?  
+        # We need to find a text node in the previous node.
+        node = @endContainer.childNodes[@endOffset - 1]
         r.end = Util.getLastTextNodeUpTo node
         r.endOffset = r.end.nodeValue.length
 
@@ -191,14 +172,12 @@ class Range.BrowserRange
 
     # Now let's start to slice & dice the text elements!
     nr = {}
-    changed = false
 
     if r.startOffset > 0
       # Do we really have to cut?
       if r.start.nodeValue.length > r.startOffset
         # Yes. Cut.
         nr.start = r.start.splitText(r.startOffset)
-        changed = true
       else
         # Avoid splitting off zero-length pieces.
         nr.start = r.start.nextSibling
@@ -209,26 +188,17 @@ class Range.BrowserRange
     if r.start is r.end
       if nr.start.nodeValue.length > (r.endOffset - r.startOffset)
         nr.start.splitText(r.endOffset - r.startOffset)
-        changed = true
       nr.end = nr.start
     else # no, the end of the selection is in a separate text element
       # does the end need to be cut?
       if r.end.nodeValue.length > r.endOffset
         r.end.splitText(r.endOffset)
-        changed = true
       nr.end = r.end
 
     # Make sure the common ancestor is an element node.
     nr.commonAncestor = @commonAncestorContainer
     while nr.commonAncestor.nodeType isnt Node.ELEMENT_NODE
       nr.commonAncestor = nr.commonAncestor.parentNode
-
-    if changed
-      event = document.createEvent "UIEvents"
-      event.initUIEvent "domChange", true, false, window, 0
-      event.reason = "range normalization"
-      event.data = nr
-      nr.commonAncestor.dispatchEvent event
 
     new Range.NormalizedRange(nr)
 
@@ -327,8 +297,8 @@ class Range.NormalizedRange
 
     new Range.SerializedRange({
       # XPath strings
-      startContainer: start[0]
-      endContainer: end[0]
+      start: start[0]
+      end: end[0]
       # Character offsets (integer)
       startOffset: start[1]
       endOffset: end[1]
@@ -375,18 +345,18 @@ class Range.SerializedRange
   # Public: Creates a SerializedRange
   #
   # obj - The stored object. It should have the following properties.
-  #       startContainer: An xpath to the Element containing the first TextNode
-  #                       relative to the root Element.
-  #       startOffset:    The offset to the start of the selection from obj.start.
-  #       endContainer:   An xpath to the Element containing the last TextNode
-  #                       relative to the root Element.
-  #       startOffset:    The offset to the end of the selection from obj.end.
+  #       start:       An xpath to the Element containing the first TextNode
+  #                    relative to the root Element.
+  #       startOffset: The offset to the start of the selection from obj.start.
+  #       end:         An xpath to the Element containing the last TextNode
+  #                    relative to the root Element.
+  #       startOffset: The offset to the end of the selection from obj.end.
   #
   # Returns an instance of SerializedRange
   constructor: (obj) ->
-    @startContainer  = obj.startContainer
+    @start       = obj.start
     @startOffset = obj.startOffset
-    @endContainer    = obj.endContainer
+    @end         = obj.end
     @endOffset   = obj.endOffset
 
   # Public: Creates a NormalizedRange.
@@ -398,14 +368,13 @@ class Range.SerializedRange
     range = {}
 
     for p in ['start', 'end']
-      xpath = this[p + 'Container']
       try
-        node = Range.nodeFromXPath(xpath, root)
+        node = Range.nodeFromXPath(this[p], root)
       catch e
-        throw new Range.RangeError(p, "Error while finding #{p} node: #{xpath}: #{e}", e)
+        throw new Range.RangeError(p, "Error while finding #{p} node: #{this[p]}: " + e, e)
 
       if not node
-        throw new Range.RangeError(p, "Couldn't find #{p} node: #{xpath}")
+        throw new Range.RangeError(p, "Couldn't find #{p} node: #{this[p]}")
 
       # Unfortunately, we *can't* guarantee only one textNode per
       # elementNode, so we have to walk along the element's textNodes until
@@ -430,7 +399,7 @@ class Range.SerializedRange
       # 'startOffset'/'endOffset', the element has shorter content than when
       # we annotated, so throw an error:
       if not range[p + 'Offset']?
-        throw new Range.RangeError(p, "#{p}offset", "Couldn't find offset #{this[p + 'Offset']} in element #{this[p]}")
+        throw new Range.RangeError("#{p}offset", "Couldn't find offset #{this[p + 'Offset']} in element #{this[p]}")
 
     # Here's an elegant next step...
     #
@@ -453,12 +422,13 @@ class Range.SerializedRange
     # Node.compareDocumentPosition() to decide when to set the
     # commonAncestorContainer and bail out.
 
-    contains = if not document.compareDocumentPosition?
-                 # IE
-                 (a, b) -> a.contains(b)
-               else
-                 # Everyone else
-                 (a, b) -> a.compareDocumentPosition(b) & 16
+    contains =
+      if not document.compareDocumentPosition?
+        # IE
+        (a, b) -> a.contains(b)
+      else
+        # Everyone else
+        (a, b) -> a.compareDocumentPosition(b) & 16
 
     $(range.startContainer).parents().each ->
       if contains(this, range.endContainer)
@@ -480,8 +450,8 @@ class Range.SerializedRange
   # Public: Returns the range as an Object literal.
   toObject: ->
     {
-      startContainer: @startContainer
+      start: @start
       startOffset: @startOffset
-      endContainer: @endContainer
+      end: @end
       endOffset: @endOffset
     }

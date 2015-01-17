@@ -14,6 +14,9 @@ annotator:
     - h:static/scripts/annotator/editor.coffee
     - h:static/scripts/annotator/viewer.coffee
 
+    # Monkeypatch range.coffee
+    - h:static/scripts/annotator/range_monkey.coffee
+
 # Annotator app plugins
 annotator_plugins_app:
   filters: uglifyjs
