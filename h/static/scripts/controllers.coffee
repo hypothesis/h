@@ -1,3 +1,57 @@
+class UISyncController
+  constructor: (@appScope) ->
+
+  listen: ->
+    @appScope.$on('showAnnotations', this._onShowAnnotations)
+    @appScope.$on('focusAnnotations', this._onFocusAnnotations)
+    @appScope.$on('toggleAnnotationSelection', this._onToggleAnnotationSelection)
+
+  _getAnnotationsForTags: (tags) ->
+    # TODO: Should be implemented in the bridge or the threading plugin.
+
+  # Properly set the selectedAnnotations- and the Count variables
+  _setSelectedAnnotations: (selected) ->
+    count = Object.keys(selected).length
+    @appScope.selectedAnnotationsCount = count
+
+    if count
+      @appScope.selectedAnnotations = selected
+    else
+      @appScope.selectedAnnotations = null
+
+  _onToggleAnnotationSelection: (annotations=[]) ->
+    @appScope.search.query = ''
+
+    selected = @appScope.selectedAnnotations or {}
+    for a in annotations
+      if selected[a.id]
+        delete selected[a.id]
+      else
+        selected[a.id] = true
+    @_setSelectedAnnotations(selected)
+    this
+
+  _onFocusAnnotations: (tags) ->
+    @appScope.focusedAnnotations = tags
+
+  _onShowAnnotations: (tags) ->
+    annotations = _getAnnotationsForTags(tags)
+    @appScope.search.query = ''
+    selected = {}
+    for a in annotations
+      selected[a.id] = true
+    @_setSelectedAnnotations selected
+
+  _onAnnotationDeleted: (tag) =>
+    annotation = _getAnnotationForTag(tag)
+    if scope.selectedAnnotations?[annotation.id]
+      delete @appScope.selectedAnnotations[annotation.id]
+      @_setSelectedAnnotations(@appScope.selectedAnnotations)
+
+  _onGetDocumentInfo: ->
+    @appScope.$digest()
+
+
 class AppController
   this.$inject = [
     '$document', '$location', '$route', '$scope', '$window',
