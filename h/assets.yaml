@@ -1,9 +1,20 @@
 # Annotator core
 annotator:
-  filters: uglifyjs
-  output: scripts/vendor/annotator.min.js
+  filters: coffeescript, uglifyjs
+  output: scripts/annotator/annotator.min.js
   contents:
-    - h:static/scripts/vendor/annotator.js
+    - h:static/scripts/annotator/xpath.coffee
+    - h:static/scripts/annotator/extensions.coffee
+    - h:static/scripts/annotator/console.coffee
+    - h:static/scripts/annotator/class.coffee
+    - h:static/scripts/annotator/range.coffee
+    - h:static/scripts/annotator/anchors.coffee
+    - h:static/scripts/annotator/highlights.coffee
+    - h:static/scripts/annotator/annotator.coffee
+    - h:static/scripts/annotator/widget.coffee
+    - h:static/scripts/annotator/editor.coffee
+    - h:static/scripts/annotator/viewer.coffee
+    - h:static/scripts/annotator/notification.coffee
 
 # Annotator i18n
 gettext:
