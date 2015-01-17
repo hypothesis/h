@@ -31,7 +31,7 @@ class StreamSearchController
 
     $scope.$watch (-> auth.user), ->
       query = angular.extend limit: 10, $scope.search.query
-      store.search.get query, ({rows}) ->
+      store.SearchResource.get query, ({rows}) ->
         annotator.loadAnnotations(rows)
 
 

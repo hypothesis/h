@@ -3,7 +3,11 @@
 # @name store
 #
 # @description
-# The `store` service handles the backend calls for the restful API.
+# The `store` service handles the backend calls for the restful API. This is
+# created dynamically from the API index as the angular $resource() method
+# supports the same keys as the index document. This will make a resource
+# constructor for each endpoint eg. store.AnnotationResource() and
+# store.SearchResource().
 ###
 angular.module('h')
 .service('store', [
@@ -16,6 +20,9 @@ angular.module('h')
     .filter -> @href
     .prop('href')
 
+    camelize = (string) ->
+      string.replace /(?:^|_)([a-z])/g, (_, char) -> char.toUpperCase()
+
     store =
       $resolved: false
       # We call the service_url and the backend api gives back
@@ -27,6 +34,7 @@ angular.module('h')
             # For each action name we configure an ng-resource.
             # For the search resource, one URL is given for all actions.
             # For the annotations, each action has its own URL.
-            store[name] = $resource(actions.url or svc, {}, actions)
+            prop = "#{camelize(name)}Resource"
+            store[prop] = $resource(actions.url or svc, {}, actions)
           store
 ])

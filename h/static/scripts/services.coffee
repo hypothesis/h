@@ -67,7 +67,7 @@ class Hypothesis extends Annotator
           formatted[k] = v
         formatted
       parser: (annotation) ->
-        parsed = new store.annotation()
+        parsed = new store.AnnotationResource()
         for k, v of annotation when k in whitelist
           parsed[k] = v
         parsed
@@ -179,7 +179,7 @@ class Hypothesis extends Annotator
   _scan: -> this
 
   createAnnotation: (annotation) ->
-    annotation = new @store.annotation(annotation)
+    annotation = new @store.AnnotationResource(annotation)
     this.publish 'beforeAnnotationCreated', annotation
     annotation
 
@@ -197,7 +197,7 @@ class Hypothesis extends Annotator
         continue
       else
         annotation
-    super (new @store.annotation(a) for a in annotations)
+    super (new @store.AnnotationResource(a) for a in annotations)
 
   # Do nothing in the app frame, let the host handle it.
   setupAnnotation: (annotation) -> annotation

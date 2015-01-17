@@ -2,7 +2,7 @@ assert = chai.assert
 sinon.assert.expose assert, prefix: null
 
 fakeStore =
-  search:
+  SearchResource:
     get: sinon.spy()
 
 

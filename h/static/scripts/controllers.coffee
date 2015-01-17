@@ -138,9 +138,9 @@ class AnnotationViewerController
       $location.path('/stream').search('q', query)
 
     id = $routeParams.id
-    store.search.get _id: $routeParams.id, ({rows}) ->
+    store.SearchResource.get _id: $routeParams.id, ({rows}) ->
       annotator.loadAnnotations(rows)
-    store.search.get references: $routeParams.id, ({rows}) ->
+    store.SearchResource.get references: $routeParams.id, ({rows}) ->
       annotator.loadAnnotations(rows)
 
     streamfilter
@@ -174,7 +174,7 @@ class ViewerController
       for p in annotator.providers
         for e in p.entities when e not in loaded
           loaded.push e
-          store.search.get angular.extend(uri: e, query), (results) ->
+          store.SearchResource.get angular.extend(uri: e, query), (results) ->
             annotator.loadAnnotations(results.rows)
 
       streamfilter.resetFilter().addClause('/uri', 'one_of', loaded)

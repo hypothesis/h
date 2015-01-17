@@ -50,13 +50,13 @@ describe 'store', ->
     $httpBackend.flush()
 
   it 'reads the operations from the backend', ->
-    assert.isFunction(store.annotation)
-    assert.isFunction(store.beware_dragons)
-    assert.isFunction(store.search)
+    assert.isFunction(store.AnnotationResource, 'expected store.AnnotationResource to be a function')
+    assert.isFunction(store.BewareDragonsResource, 'expected store.BewareDragonsResource to be a function')
+    assert.isFunction(store.SearchResource, 'expected store.SearchResource to be a function')
 
   it 'saves a new annotation', ->
     annotation = { id: 'test'}
-    annotation = new store.annotation(annotation)
+    annotation = new store.AnnotationResource(annotation)
     saved = {}
 
     annotation.$create().then ->
