@@ -137,7 +137,7 @@ class Annotator.Guest extends Annotator
     .bind('onEditorSubmit', this.onEditorSubmit)
 
     .bind('focusAnnotations', (ctx, tags=[]) =>
-      for hl in @getHighlights()
+      for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag in tags
           hl.setFocused true
         else
@@ -145,7 +145,7 @@ class Annotator.Guest extends Annotator
     )
 
     .bind('scrollToAnnotation', (ctx, tag) =>
-      for hl in @getHighlights()
+      for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag is tag
           hl.scrollTo()
           return
