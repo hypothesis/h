@@ -44,8 +44,8 @@ class Hypothesis extends Annotator
   tool: 'comment'
   visibleHighlights: false
 
-  this.$inject = ['$document', '$window', 'store']
-  constructor:   ( $document,   $window,   store ) ->
+  this.$inject = ['$document', '$rootScope', '$window', 'store']
+  constructor:   ( $document,   $rootScope,   $window,   store ) ->
     super ($document.find 'body')
 
     @providers = []
@@ -56,10 +56,12 @@ class Hypothesis extends Annotator
       if not @plugins[name] and name of Annotator.Plugin
         this.addPlugin(name, opts)
 
+    new Persistence($rootScope, this)
+
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
     whitelist = ['target', 'document', 'uri']
-    this.addPlugin 'Bridge',
+    @bridge = new CrossFrameSync $rootScope,
       gateway: true
       formatter: (annotation) ->
         formatted = {}
@@ -152,7 +154,7 @@ class Hypothesis extends Annotator
     )
 
    # Look up an annotation based on its bridge tag
-  _getLocalAnnotation: (tag) -> @plugins.Bridge.cache[tag]
+  _getLocalAnnotation: (tag) -> @bridge.cache[tag]
 
    # Look up a list of annotations, based on their bridge tags
   _getLocalAnnotations: (tags) -> this._getLocalAnnotation t for t in tags
