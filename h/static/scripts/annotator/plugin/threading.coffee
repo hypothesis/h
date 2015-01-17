@@ -75,17 +75,23 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
       break
 
   annotationDeleted: (annotation) =>
-    if id of this.idTable
-      container = this.idTable[id]
+    if this.idTable[annotation.id]
+      container = this.idTable[annotation.id]
       container.message = null
-      delete this.idTable[id]
+      delete this.idTable[annotation.id]
       this.pruneEmpties(@root)
     else
-      for id, container of this.idTable
-        for child in container.children when child.message is annotation
-          child.message = null
-          this.pruneEmpties(@root)
-          return
+      if annotation.references
+        refs = annotation.references
+        unless  angular.isArray(refs) then refs = [refs]
+        parentRef = refs[refs.length-1]
+        parent = this.idTable[parentRef]
+      else
+        parent = @root
+      for child in parent.children when child.message is annotation
+        child.message = null
+        this.pruneEmpties(@root)
+        break
 
   annotationsLoaded: (annotations) =>
     messages = (@root.flattenChildren() or []).concat(annotations)

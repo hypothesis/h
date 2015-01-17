@@ -1,5 +1,6 @@
 assert = chai.assert
-sinon.assert.expose(assert, prefix: '')
+sinon.assert.expose(assert, prefix: null)
+sandbox = sinon.sandbox.create()
 
 describe 'Annotator.Threading', ->
   createThreadingInstance = (options) ->
@@ -84,3 +85,60 @@ describe 'Annotator.Threading', ->
       instance.pruneEmpties(root)
 
       assert.equal(root.children.length, 0)
+
+  describe 'handles events', ->
+    annotator = null
+    instance = null
+
+    beforeEach ->
+      instance = createThreadingInstance()
+      instance.pluginInit()
+      annotator =
+        publish: (event, args) ->
+          unless angular.isArray(args) then args = [args]
+          meth = instance.events[event]
+          instance[meth].apply(instance, args)
+
+    afterEach ->
+      sandbox.restore()
+
+    it 'calls the thread method on beforeAnnotationCreated', ->
+      annotation = {id: 'foo'}
+      sandbox.spy(instance, 'thread')
+      annotator.publish 'beforeAnnotationCreated', annotation
+      assert.calledWithMatch instance.thread, [annotation]
+
+    it 'calls the thread method on annotationsLoaded', ->
+      annotation = {id: 'foo'}
+      sandbox.spy(instance, 'thread')
+      annotator.publish 'annotationsLoaded', [annotation]
+      assert.calledWithMatch instance.thread, [annotation]
+
+    it 'removes matching top level threads when annotationDeleted is called', ->
+      annotation = {id: 'foo'}
+      instance.thread([annotation])
+
+      assert.equal(instance.root.children.length, 1)
+      assert.equal(instance.idTable['foo'].message, annotation)
+
+      sandbox.spy(instance, 'pruneEmpties')
+      annotator.publish 'annotationDeleted', annotation
+      assert.called(instance.pruneEmpties)
+
+      assert.equal(instance.root.children.length, 0)
+      assert.isUndefined(instance.idTable['foo'])
+
+    it 'removes matching reply threads when annotationDeleted is called', ->
+      parent = {id: 'foo'}
+      reply = {id: 'bar', references: ['foo']}
+      instance.thread([parent, reply])
+
+      assert.equal(instance.idTable['foo'].children.length, 1)
+      assert.equal(instance.idTable['bar'].message, reply)
+
+      sandbox.spy(instance, 'pruneEmpties')
+      annotator.publish 'annotationDeleted', reply
+      assert.called(instance.pruneEmpties)
+
+      assert.equal(instance.idTable['foo'].children.length, 0)
+      assert.isUndefined(instance.idTable['bar'])
