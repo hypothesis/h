@@ -228,9 +228,13 @@ app_js:
           contents:
             - h:static/scripts/app.coffee
             - h:static/scripts/controllers.coffee
+            - h:static/scripts/cross-frame-communication.coffee
+            - h:static/scripts/cross-frame-discovery.coffee
+            - h:static/scripts/cross-frame-sync.coffee
             - h:static/scripts/directives.coffee
             - h:static/scripts/directives/*.coffee
             - h:static/scripts/filters.coffee
+            - h:static/scripts/persistence.coffee
             - h:static/scripts/searchfilters.coffee
             - h:static/scripts/services.coffee
             - h:static/scripts/*-service.coffee
