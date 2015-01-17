@@ -33,11 +33,13 @@ describe 'store', ->
     $httpBackend = _$httpBackend_
     store = _store_
 
-  it 'reads the operations from the backend', ->
     $httpBackend.expectGET('http://example.com/api').respond
       links:
          annotation:
-           create: {}
+           create: {
+             method: 'POST'
+             url: 'http://example.com/api/annotations'
+           }
            delete: {}
            read: {}
            update: {}
@@ -47,6 +49,20 @@ describe 'store', ->
            url: 'http://0.0.0.0:5000/api/roar'
     $httpBackend.flush()
 
+  it 'reads the operations from the backend', ->
     assert.isFunction(store.annotation)
     assert.isFunction(store.beware_dragons)
     assert.isFunction(store.search)
+
+  it 'saves a new annotation', ->
+    annotation = { id: 'test'}
+    annotation = new store.annotation(annotation)
+    saved = {}
+
+    annotation.$create().then ->
+      assert.isNotNull(saved.id)
+
+    $httpBackend.expectPOST('http://example.com/api/annotations', annotation).respond ->
+      saved.id = annotation.id
+      return [201, {}, {}]
+    $httpBackend.flush()
