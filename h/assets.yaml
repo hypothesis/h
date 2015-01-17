@@ -13,7 +13,6 @@ annotator:
     - h:static/scripts/annotator/widget.coffee
     - h:static/scripts/annotator/editor.coffee
     - h:static/scripts/annotator/viewer.coffee
-    - h:static/scripts/annotator/notification.coffee
 
 # Annotator app plugins
 annotator_plugins_app:
