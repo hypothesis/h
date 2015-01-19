@@ -6,9 +6,7 @@ annotator:
     - h:static/scripts/vendor/annotator.js
     - filters: coffeescript
       output: scripts/annotator/monkey.js
-      contents:
-        - h:static/scripts/annotator/annotator_monkey.coffee
-        - h:static/scripts/annotator/range_monkey.coffee
+      contents: h:static/scripts/annotator/monkey.coffee
 
 # Annotator app plugins
 annotator_plugins_app:
