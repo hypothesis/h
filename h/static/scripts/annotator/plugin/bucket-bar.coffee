@@ -84,6 +84,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
               acc
           , {}
 
+          # Scroll down to the annotation from the top of the annotation's page
           next.paddedScrollTo('down')
           delete @pendingScroll
 
