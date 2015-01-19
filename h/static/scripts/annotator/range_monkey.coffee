@@ -1,3 +1,8 @@
+# Save references to Range and Util (because we call Annotator.noConflict() when
+# bootstrapping)
+Range = Annotator.Range
+Util = Annotator.Util
+
 Range.BrowserRange.prototype.normalize = (root) ->
   if @tainted
     console.error(_t("You may only call normalize() once on a BrowserRange!"))

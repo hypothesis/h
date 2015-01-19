@@ -1,3 +1,9 @@
+# Save references to Range and Util (because we call Annotator.noConflict() when
+# bootstrapping)
+Range = Annotator.Range
+Util = Annotator.Util
+
+
 # Disable Annotator's default highlight events
 delete Annotator.prototype.events[".annotator-hl mouseover"]
 delete Annotator.prototype.events[".annotator-hl mouseout"]
