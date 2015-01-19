@@ -239,7 +239,7 @@ app_js:
             - h:static/scripts/filters.coffee
             - h:static/scripts/searchfilters.coffee
             - h:static/scripts/services.coffee
-            - h:static/scripts/*-service.coffee
+            - h:static/scripts/services/*.coffee
             - h:static/scripts/streamsearch.coffee
 
 app_css:
