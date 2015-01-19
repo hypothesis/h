@@ -14,12 +14,9 @@ class Annotator.Plugin.FragmentSelector extends Annotator.Plugin
 
   # Create a FragmentSelector around a range
   _getFragmentSelector: (annotation, target) =>
-    console.log "Should create a fragment selector"
-    return []
+    fragment = (new URL(@annotator.getRawHref())).hash
 
     [
-      type: "TextPositionSelector"
-      start: startOffset
-      end: endOffset
+      type: "FragmentSelector"
+      value: fragment
     ]
-

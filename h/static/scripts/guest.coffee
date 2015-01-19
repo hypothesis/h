@@ -127,12 +127,16 @@ class Annotator.Guest extends Annotator
     url.toString()
 
   # Utility function to get the decoded form of the document URI
-  getHref: =>
+  getRawHref: ->
     if @plugins.PDF
       @plugins.PDF.uri()
     else
-      @_removeHash @plugins.Document.uri()
+      @plugins.Document.uri()
 
+  # Utility function to get a de-hashed form of the document URI
+  getHref: -> @_removeHash @getRawHref()
+
+  # Utility function to filter metadata and de-hash the URIs
   getMetadata: =>
     metadata = @plugins.Document?.metadata
     metadata.link?.forEach (link) => link.href = @_removeHash link.href
