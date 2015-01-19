@@ -43,6 +43,26 @@ class SearchFilter
 
     tokens
 
+  # Turns string query into object, where the properties are the search terms
+  toObject: (searchtext) ->
+    obj = {}
+
+    addToObj = (key, data) ->
+      if obj[key]?
+        obj[key].push data
+      else
+        obj[key] = [data]
+
+    if searchtext
+      terms = @_tokenize(searchtext)
+      for term in terms
+        [filter, data] = term.split(':')
+        unless data
+          filter = 'any'
+          data = term
+        addToObj(filter, data)
+    obj
+
   # This function will generate the facets from the search-text input
   # It'll first tokenize it and then sorts them into facet lists
   # The output will be a dict with the following structure:

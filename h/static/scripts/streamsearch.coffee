@@ -20,7 +20,8 @@ class StreamSearchController
     queryparser.populateFilter streamfilter, terms
 
     # Perform the search
-    query = angular.extend limit: 10, $scope.search.query
+    searchParams = searchfilter.toObject $scope.search.query
+    query = angular.extend limit: 10, searchParams
     store.SearchResource.get query, ({rows}) ->
       annotator.loadAnnotations(rows)
 
