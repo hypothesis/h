@@ -1,59 +1,61 @@
-class UISyncController
-  constructor: (@appScope, @crossFrameUI) ->
-    @appScope.$on('showAnnotations', this._onShowAnnotations)
-    @appScope.$on('focusAnnotations', this._onFocusAnnotations)
-    @appScope.$on('toggleAnnotationSelection', this._onToggleAnnotationSelection)
-    @appScope.$on('getDocumentInfo', this._onGetDocumentInfo)
-    @appScope.$on('annotationsLoaded', this._onAnnotationsLoaded)
+class ToolsetSyncController
+  constructor: ($rootScope, appScope, crossFrameUI) ->
+    getAnnotationsForTags = (tags) ->
+      tags.map(crossFrameUI.getAnnotationForTag, crossFrameUI)
 
-  _getAnnotationsForTags: (event, tags) ->
-    tags.map(@crossFrameUI.getAnnotationForTag, @crossFrameUI)
+    # Properly set the selectedAnnotations- and the Count variables
+    setSelectedAnnotations = (selected) ->
+      count = Object.keys(selected).length
+      appScope.selectedAnnotationsCount = count
 
-  # Properly set the selectedAnnotations- and the Count variables
-  _setSelectedAnnotations: (event, selected) ->
-    count = Object.keys(selected).length
-    @appScope.selectedAnnotationsCount = count
-
-    if count
-      @appScope.selectedAnnotations = selected
-    else
-      @appScope.selectedAnnotations = null
-
-  _onToggleAnnotationSelection: (event, annotations=[]) ->
-    @appScope.search.query = ''
-
-    selected = @appScope.selectedAnnotations or {}
-    for a in annotations
-      if selected[a.id]
-        delete selected[a.id]
+      if count
+        appScope.selectedAnnotations = selected
       else
+        appScope.selectedAnnotations = null
+
+      appScope.$digest()
+
+    onToggleAnnotationSelection = (event, annotations=[]) ->
+      appScope.search.query = ''
+
+      selected = appScope.selectedAnnotations or {}
+      for a in annotations
+        if selected[a.id]
+          delete selected[a.id]
+        else
+          selected[a.id] = true
+      setSelectedAnnotations(selected)
+
+    onFocusAnnotations = (event, tags) ->
+      appScope.focusedAnnotations = tags
+
+    onShowAnnotations = (event, tags) ->
+      annotations = getAnnotationsForTags(tags)
+      appScope.search.query = ''
+      selected = {}
+      for a in annotations
         selected[a.id] = true
-    @_setSelectedAnnotations(selected)
-    this
+      setSelectedAnnotations selected
 
-  _onFocusAnnotations: (event, tags) ->
-    @appScope.focusedAnnotations = tags
+    onAnnotationDeleted = (event, tag) =>
+      annotation = getAnnotationForTags([tag])[0]
+      if scope.selectedAnnotations?[annotation.id]
+        delete appScope.selectedAnnotations[annotation.id]
+        setSelectedAnnotations(appScope.selectedAnnotations)
 
-  _onShowAnnotations: (event, tags) ->
-    annotations = this._getAnnotationsForTags(tags)
-    @appScope.search.query = ''
-    selected = {}
-    for a in annotations
-      selected[a.id] = true
-    @_setSelectedAnnotations selected
+    onGetDocumentInfo = =>
+      appScope.$digest()
+      appScope.$evalAsync(angular.noop)
 
-  _onAnnotationDeleted: (event, tag) =>
-    annotation = this._getAnnotationForTags([tag])[0]
-    if scope.selectedAnnotations?[annotation.id]
-      delete @appScope.selectedAnnotations[annotation.id]
-      @_setSelectedAnnotations(@appScope.selectedAnnotations)
+    onAnnotationsLoaded = (event, annotations) =>
+      appScope.$evalAsync(angular.noop)
 
-  _onGetDocumentInfo: =>
-    @appScope.$digest()
-    @appScope.$evalAsync(angular.noop)
+    $rootScope.$on('showAnnotations', onShowAnnotations)
+    $rootScope.$on('focusAnnotations', onFocusAnnotations)
+    $rootScope.$on('toggleAnnotationSelection', onToggleAnnotationSelection)
+    $rootScope.$on('getDocumentInfo', onGetDocumentInfo)
+    $rootScope.$on('annotationsLoaded', onAnnotationsLoaded)
 
-  _onAnnotationsLoaded: (event, annotations) =>
-    @appScope.$evalAsync(angular.noop)
 
 
 class AppController
@@ -69,7 +71,7 @@ class AppController
      permissions,   streamer,   streamfilter, crossFrameUI,
      annotationMapper, threading
   ) ->
-    uiSyncController = new UISyncController($rootScope, crossFrameUI)
+    new ToolsetSyncController($rootScope, $scope, crossFrameUI)
 
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')

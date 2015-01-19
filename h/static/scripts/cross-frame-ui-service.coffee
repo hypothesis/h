@@ -109,7 +109,7 @@ class CrossFrameUIService
   setTool: (name) ->
     return if name is @tool
     @tool = name
-    this.publish 'setTool', name
+    this._emit('setTool', name)
     for p in @providers
       p.channel.notify
         method: 'setTool'
@@ -118,7 +118,7 @@ class CrossFrameUIService
   setVisibleHighlights: (state) ->
     return if state is @visibleHighlights
     @visibleHighlights = state
-    this.publish 'setVisibleHighlights', state
+    this._emit('setVisibleHighlights', state)
     for p in @providers
       p.channel.notify
         method: 'setVisibleHighlights'
