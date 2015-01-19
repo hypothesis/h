@@ -70,55 +70,48 @@ class CrossFrameSync
   destructor: =>
     $(window).off 'message', this._onMessage
 
-  _emit: (event) ->
-    @$rootScope.$emit(event, arguments)
+  _emit: (args...) ->
+    @$rootScope.$emit.apply(@$rootScope, args)
 
   bind_channel_listeners: (channel) ->
     # Channel message --> trigger events on $rootScope
-    channel
-    .bind('beforeCreateAnnotation', (txn, annotation) =>
+    channel.bind 'beforeCreateAnnotation', (txn, annotation) =>
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
       @_emit 'beforeAnnotationCreated', annotation
       @cache[annotation.$$tag] = annotation
       this._format annotation
-    )
 
-    .bind('createAnnotation', (txn, annotation) =>
+    channel.bind 'createAnnotation', (txn, annotation) =>
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
       @_emit 'annotationCreated', annotation
       @cache[annotation.$$tag] = annotation
       this._format annotation
-    )
 
-    .bind('updateAnnotation', (txn, annotation) =>
+    channel.bind 'updateAnnotation', (txn, annotation) =>
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
       @_emit('beforeAnnotationUpdated', [annotation])
       @_emit('annotationUpdated', [annotation])
       @cache[annotation.$$tag] = annotation
       this._format annotation
-    )
 
-    .bind('deleteAnnotation', (txn, annotation) =>
+    channel.bind 'deleteAnnotation', (txn, annotation) =>
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
       @_emit('annotationDeleted', [annotation])
       res = this._format annotation
       delete @cache[annotation.$$tag]
       res
-    )
 
-    .bind('sync', (ctx, annotations) =>
+    channel.bind 'sync', (ctx, annotations) =>
       (this._format (this._parse a) for a in annotations)
-    )
 
     ## Notifications
-    .bind('loadAnnotations', (txn, annotations) =>
+    channel.bind 'loadAnnotations', (txn, annotations) =>
       annotations = (this._parse a for a in annotations)
       @_emit('loadAnnotations', annotations)
-    )
 
 
 
