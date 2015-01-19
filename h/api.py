@@ -232,7 +232,7 @@ def _search(request_params, user = None):
 
     log.debug("Searching with user=%s, for uri=%s",
               user.id if user else 'None',
-              search_params.get('uri'))
+              request_params.get('uri'))
 
     if 'any' in search_params['query']:
         # Handle any field parameters
