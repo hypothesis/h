@@ -88,8 +88,6 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
 
     for range in selectedRanges
       container = range.commonAncestor
-      if @$(container).hasClass('annotator-hl')
-        container = @$(container).parents(':not([class^=annotator-hl])')[0]
       return if @annotator.isAnnotator(container)
 
     if selectedRanges.length
