@@ -84,7 +84,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
               acc
           , {}
 
-          next.paddedScrollDownTo()
+          next.paddedScrollTo('down')
           delete @pendingScroll
 
     @annotator.subscribe "highlightRemoved", (highlight) =>

@@ -83,12 +83,6 @@ class Anchor
       # Kill the list if it's empty
       delete @anchoring.anchors[index] unless anchors.length
 
-  # This is called when the underlying Annotator has been udpated
-  annotationUpdated: ->
-    # Notify the highlights
-    for index in [@startPage .. @endPage]
-      @highlight[index]?.annotationUpdated()
-
 Annotator.Anchor = Anchor
 
 # This plugin contains the enhanced anchoring framework.
@@ -107,13 +101,6 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
 
     this
 
-  # Sets up handlers to anchor-related events
-  _setupAnchorEvents: ->
-    # When annotations are updated
-    @annotator.on 'annotationUpdated', (annotation) =>
-      # Notify the anchors
-      for anchor in annotation.anchors or []
-        anchor.annotationUpdated()
 
   # Initializes the components used for analyzing the document
   _chooseAccessPolicy: ->
@@ -161,7 +148,6 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
     @selectorCreators = []
     @strategies = []
     @_setupDocumentAccessStrategies()
-    this._setupAnchorEvents()
 
     self = this
     @annotator.anchoring = this

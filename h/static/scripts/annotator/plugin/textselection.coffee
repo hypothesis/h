@@ -88,9 +88,8 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
 
     for range in selectedRanges
       container = range.commonAncestor
-      # TODO: what is selection ends inside a different type of highlight?
-      if @Annotator.TextHighlight.isInstance container
-        container = @Annotator.TextHighlight.getIndependentParent container
+      if @$(container).hasClass('annotator-hl')
+        container = @$(container).parents(':not([class^=annotator-hl])')[0]
       return if @annotator.isAnnotator(container)
 
     if selectedRanges.length
