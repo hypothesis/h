@@ -74,55 +74,10 @@ def test_zero_clauses():
     request = DummyRequest()
     filter_json = {
         'clauses': [],
-        'past_data': {'load_past': 'none'}
     }
 
     fef = FilterToElasticFilter(filter_json, request)
     assert fef.query['query'] == {"match_all": {}}
-
-
-def test_hits():
-    """Test setting the query size limit right
-    """
-    request = DummyRequest()
-    filter_json = {
-        'match_policy': 'include_all',
-        'clauses': [{
-            'field': 'text',
-            'operator': 'equals',
-            'value': 'foo bar',
-            'options': {}
-        }],
-        'past_data': {
-            'load_past': 'hits',
-            'hits': 75
-        }
-    }
-
-    fef = FilterToElasticFilter(filter_json, request)
-    assert fef.query['size'] is 75
-
-
-def test_past_time():
-    """Test setting the time range filter right
-    """
-    request = DummyRequest()
-    filter_json = {
-        'match_policy': 'include_all',
-        'clauses': [{
-            'field': 'text',
-            'operator': 'equals',
-            'value': 'foo bar',
-            'options': {}
-        }],
-        'past_data': {
-            'load_past': 'time',
-            'go_back': 60
-        }
-    }
-
-    fef = FilterToElasticFilter(filter_json, request)
-    assert 'gte' in fef.query['filter']['range']['created']
 
 
 def test_policy_include_any():
@@ -140,7 +95,6 @@ def test_policy_include_any():
             'value': 'bar',
             'options': {}
         }],
-        'past_data': {'load_past': 'none'}
     }
 
     fef = FilterToElasticFilter(filter_json, request)
@@ -162,7 +116,6 @@ def test_policy_include_all():
             'value': 'bar',
             'options': {}
         }],
-        'past_data': {'load_past': 'none'}
     }
 
     fef = FilterToElasticFilter(filter_json, request)
@@ -184,7 +137,6 @@ def test_policy_exclude_any():
             'value': 'bar',
             'options': {}
         }],
-        'past_data': {'load_past': 'none'}
     }
 
     fef = FilterToElasticFilter(filter_json, request)
@@ -206,7 +158,6 @@ def test_policy_exclude_all():
             'value': 'bar',
             'options': {}
         }],
-        'past_data': {'load_past': 'none'}
     }
 
     fef = FilterToElasticFilter(filter_json, request)
@@ -228,10 +179,6 @@ def test_operator_call():
                 }
             }
         }],
-        'past_data': {
-            'load_past': 'time',
-            'go_back': 60
-        }
     }
 
     generated = FilterToElasticFilter(filter_json, request)
