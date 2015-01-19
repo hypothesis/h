@@ -62,10 +62,35 @@ class ThreadingService
   beforeAnnotationCreated: (event, annotation) =>
     this.thread([annotation])
 
-  annotationDeleted: (event, {id}) =>
-    container = this.getContainer id
-    container.message = null
-    this.pruneEmpties(@root)
+  annotationCreated: (event, annotation) =>
+    references = annotation.references or []
+    if typeof(annotation.references) == 'string' then references = []
+    ref = references[references.length-1]
+    parent = if ref then @idTable[ref] else @root
+    for child in (parent.children or []) when child.message is annotation
+      @idTable[annotation.id] = child
+      break
+
+  annotationDeleted: (event, annotation) =>
+    console.log(this.root)
+    if this.idTable[annotation.id]
+      container = this.idTable[annotation.id]
+      container.message = null
+      delete this.idTable[annotation.id]
+      this.pruneEmpties(@root)
+    else
+      if annotation.references
+        refs = annotation.references
+        unless  angular.isArray(refs) then refs = [refs]
+        parentRef = refs[refs.length-1]
+        parent = this.idTable[parentRef]
+      else
+        parent = @root
+      for child in parent.children when child.message is annotation
+        child.message = null
+        this.pruneEmpties(@root)
+        break
+    console.log(this.root)
 
   annotationsLoaded: (event, annotations) =>
     messages = (@root.flattenChildren() or []).concat(annotations)
