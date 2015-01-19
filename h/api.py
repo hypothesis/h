@@ -81,21 +81,7 @@ def search(context, request):
 
     # The search results are filtered for the authenticated user
     user = get_user(request)
-
-    # Compile search parameters
-    search_params = _search_params(request.params, user=user)
-
-    log.debug("Searching with user=%s, for uri=%s",
-              user.id if user else 'None',
-              search_params.get('uri'))
-
-    results = Annotation.search(**search_params)
-    total = Annotation.count(**search_params)
-
-    return {
-        'rows': results,
-        'total': total,
-    }
+    return _search(request.params, user)
 
 
 @api_config(context='h.resources.APIResource', name='access_token')
@@ -240,6 +226,32 @@ def _api_error(request, reason, status_code):
     return response_info
 
 
+def _search(request_params, user = None):
+    # Compile search parameters
+    search_params = _search_params(request_params, user=user)
+
+    log.debug("Searching with user=%s, for uri=%s",
+              user.id if user else 'None',
+              search_params.get('uri'))
+
+    if 'any' in search_params['query']:
+        # Handle any field parameters
+        query = _add_any_field_params_into_query(search_params)
+        results = Annotation.search_raw(query)
+
+        params = {'search_type': 'count'}
+        count = Annotation.search_raw(query, params, raw_result=True)
+        total = count['hits']['total']
+    else:
+        results = Annotation.search(**search_params)
+        total = Annotation.count(**search_params)
+
+    return {
+        'rows': results,
+        'total': total,
+    }
+
+
 def _search_params(request_params, user=None):
     """Turn request parameters into annotator-store search parameters"""
     request_params = request_params.copy()
@@ -260,6 +272,31 @@ def _search_params(request_params, user=None):
 
     search_params['user'] = user
     return search_params
+
+
+def _add_any_field_params_into_query(search_params):
+    """Add any_field parameters to ES query"""
+    any_terms = search_params['query'].getall('any')
+    del search_params['query']['any']
+
+    offset = search_params.get('offset', None)
+    limit = search_params.get('limit', None)
+    query = Annotation._build_query(search_params['query'], offset, limit)
+
+    multi_match_query = {
+        'multi_match': {
+            'query': any_terms,
+            'type': 'cross_fields',
+            'fields': ['quote', 'tag', 'text', 'uri', 'user']
+        }
+    }
+
+    # Remove match_all if we add the multi-match part
+    if 'match_all' in query['query']['bool']['must'][0]:
+        query['query']['bool']['must'] = []
+    query['query']['bool']['must'].append(multi_match_query)
+
+    return query
 
 
 def _create_annotation(fields, user):
