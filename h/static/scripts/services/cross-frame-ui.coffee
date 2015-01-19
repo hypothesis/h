@@ -15,6 +15,9 @@ class CrossFrameUI
     @providers = []
     @store = store
 
+    this._emit = (event, args...) ->
+      $rootScope.$emit(event, args...)
+
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
     whitelist = ['target', 'document', 'uri']
@@ -44,7 +47,7 @@ class CrossFrameUI
           success: (info) =>
             provider.entities = (link.href for link in info.metadata.link)
             @providers.push(provider)
-            $rootScope.$emit('getDocumentInfo')
+            this._emit('getDocumentInfo')
 
         # Allow the host to define it's own state
         unless source is $window.parent
@@ -63,40 +66,30 @@ class CrossFrameUI
       options.origin = '*'
 
     provider = Channel.build options
-
-    .bind('back', =>
+    provider.bind 'back', =>
       # Navigate "back" out of the interface.
       this.hide()
-    )
-
-    .bind('open', =>
+    provider.bind 'open', =>
       this.show()
-    )
 
-    .bind('showEditor', (ctx, tag) =>
+    provider.bind 'showEditor', (ctx, tag) =>
       this.show()
-    )
 
-    .bind('showAnnotations', (ctx, tags=[]) =>
+    provider.bind 'showAnnotations', (ctx, tags=[]) =>
       this.show()
-      $rootScope.$emit('showAnnotations', tags)
-    )
+      this._emit('showAnnotations', tags)
 
-    .bind('focusAnnotations', (ctx, tags=[]) =>
-      $rootScope.$emit('focusAnnotations', tags)
-    )
+    provider.bind 'focusAnnotations', (ctx, tags=[]) =>
+      this._emit('focusAnnotations', tags)
 
-    .bind('toggleAnnotationSelection', (ctx, tags=[]) =>
-      $rootScope.$emit('toggleViewerSelection', tags)
-    )
+    provider.bind 'toggleAnnotationSelection', (ctx, tags=[]) =>
+      this._emit('toggleViewerSelection', tags)
 
-    .bind('setTool', (ctx, name) =>
+    provider.bind 'setTool', (ctx, name) =>
       this.setTool(name)
-    )
 
-    .bind('setVisibleHighlights', (ctx, state) =>
+    provider.bind 'setVisibleHighlights', (ctx, state) =>
       this.setVisibleHighlights(state)
-    )
 
   _setupDocumentEvents: ->
     $document.addEventListener 'dragover', (event) =>

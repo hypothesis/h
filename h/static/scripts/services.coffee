@@ -47,6 +47,7 @@ class Hypothesis extends Annotator
   this.$inject = ['$document', '$rootScope', '$window', 'store']
   constructor:   ( $document,   $rootScope,   $window,   store ) ->
     super ($document.find 'body')
+    return
 
     @providers = []
     @store = store
