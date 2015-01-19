@@ -1,5 +1,5 @@
 # Wraps the annotation store to trigger events for the CRUD actions
-class AnnotationMapper
+class AnnotationMapperService
   this.$inject = ['$rootScope', 'threading', 'store']
   constructor: ($rootScope, threading, store) ->
     this.setupAnnotation = (ann) -> ann
@@ -51,4 +51,4 @@ class AnnotationMapper
           loader(annotations)
       this
 
-angular.module('h').service('annotationMapper', AnnotationMapper)
+angular.module('h').service('annotationMapper', AnnotationMapperService)

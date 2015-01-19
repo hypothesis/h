@@ -1,6 +1,6 @@
 # Uses a channel between the sidebar and the attached providers to ensure
 # the interface remains in sync.
-class CrossFrameUI
+class CrossFrameUIService
   # Internal state
   providers: null
   host: null
@@ -124,4 +124,4 @@ class CrossFrameUI
         method: 'setVisibleHighlights'
         params: state
 
-angular.module('h').service('crossFrameUI', CrossFrameUI)
+angular.module('h').service('crossFrameUI', CrossFrameUIService)
