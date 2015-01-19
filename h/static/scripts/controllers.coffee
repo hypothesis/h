@@ -36,8 +36,7 @@ class AppController
     oncancel = ->
       $scope.dialog.visible = false
 
-    $scope.$on '$routeChangeStart', (event, newRoute, oldRoute) ->
-      return if newRoute.redirectTo
+    cleanupAnnotations = ->
       # Clean up any annotations that need to be unloaded.
       for id, container of $scope.threading.idTable when container.message
         # Remove annotations not belonging to this user when highlighting.
@@ -75,6 +74,9 @@ class AppController
       # Reopen the streamer.
       streamer.close()
       streamer.open($window.WebSocket, streamerUrl)
+
+      # Clean up annotations that should be removed
+      cleanupAnnotations()
 
       # Reload the view.
       $route.reload()

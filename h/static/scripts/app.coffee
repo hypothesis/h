@@ -12,6 +12,14 @@ imports = [
 
 
 resolve =
+  auth: ['$q', '$rootScope', 'auth', ($q, $rootScope, auth) ->
+    dfd = $q.defer()
+    unwatch = $rootScope.$watch (-> auth.user), (user) ->
+      return if user is undefined
+      dfd.resolve(auth)
+      unwatch()
+    dfd.promise
+  ]
   store: ['store', (store) -> store.$promise]
 
 
