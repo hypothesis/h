@@ -7,9 +7,13 @@
 # offers some utility functions regarding those.
 ###
 class Permissions
+  ALL_PERMISSIONS = {}
   GROUP_WORLD = 'group:__world__'
-  EVERYONE = 'Everyone'
-  ALL_PERMISSIONS = 'ALL_PERMISSIONS'
+  ADMIN_PARTY = [{
+    allow: true
+    principal: GROUP_WORLD
+    action: ALL_PERMISSIONS
+  }]
 
   this.$inject = ['auth']
   constructor:    (auth) ->
@@ -68,38 +72,17 @@ class Permissions
 
   # Creates access-level-control object list
   _acl = (context) ->
-    acl = []
-
-    for action, roles of context.permissions or []
-      for role in roles
-        allow = true
-        if role.indexOf('group:') is 0
-          if role == GROUP_WORLD
-            principal = EVERYONE
-          else
-            # unhandled group
-            allow = false
-            principal = role
-        else
-          if role.indexOf('acct:') is 0
-            principal = role
-          else
-            allow = false
-            principal = role
-
-        acl.push
-          allow: allow
-          principal: principal
+    parts =
+      for action, roles of context.permissions or []
+        for role in roles
+          allow: true
+          principal: role
           action: action
 
-    if acl.length
-      acl
+    if parts.length
+      acl = Array::concat parts...
     else
-      return [
-        allow: true
-        principal: EVERYONE
-        action: ALL_PERMISSIONS
-      ]
+      acl = ADMIN_PARTY
 
   ###*
   # @ngdoc method
@@ -112,14 +95,14 @@ class Permissions
   # User access-level-control function
   ###
   permits: (action, context, user) ->
-    acls = _acl context
+    acl = _acl context
 
-    for acl in acls
-      if acl.principal not in [user, EVERYONE]
+    for ace in acl
+      if ace.principal not in [user, GROUP_WORLD]
         continue
-      if acl.action not in [action, ALL_PERMISSIONS]
+      if ace.action not in [action, ALL_PERMISSIONS]
         continue
-      return acl.allow
+      return ace.allow
 
     false
 
