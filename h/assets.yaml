@@ -8,13 +8,13 @@ annotator:
     - h:static/scripts/annotator/console.coffee
     - h:static/scripts/annotator/class.coffee
     - h:static/scripts/annotator/range.coffee
-    - h:static/scripts/annotator/highlights.coffee
     - h:static/scripts/annotator/annotator.coffee
     - h:static/scripts/annotator/widget.coffee
     - h:static/scripts/annotator/editor.coffee
     - h:static/scripts/annotator/viewer.coffee
 
-    # Monkeypatch range.coffee
+    # Monkeypatches
+    - h:static/scripts/annotator/annotator_monkey.coffee
     - h:static/scripts/annotator/range_monkey.coffee
 
 # Annotator app plugins
