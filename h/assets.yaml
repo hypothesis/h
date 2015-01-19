@@ -17,7 +17,6 @@ annotator_plugins_app:
     - filters: coffeescript
       output: scripts/annotator/plugin/bridge.js
       contents: h:static/scripts/annotator/plugin/bridge.coffee
-    - h:static/scripts/vendor/annotator.document.js
     - filters: coffeescript
       output: scripts/annotator/plugin/threading.js
       contents: h:static/scripts/annotator/plugin/threading.coffee
