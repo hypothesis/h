@@ -13,7 +13,8 @@ annotator:
     - h:static/scripts/annotator/editor.coffee
     - h:static/scripts/annotator/viewer.coffee
 
-    # Monkeypatch range.coffee
+    # Monkeypatches
+    - h:static/scripts/annotator/annotator_monkey.coffee
     - h:static/scripts/annotator/range_monkey.coffee
 
 # Annotator app plugins

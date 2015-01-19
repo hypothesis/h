@@ -163,7 +163,19 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
     @_setupDocumentAccessStrategies()
     this._setupAnchorEvents()
 
+    self = this
     @annotator.anchoring = this
+
+    # Override loadAnnotations to account for the possibility that the anchoring
+    # plugin is currently scanning the page.
+    _loadAnnotations = Annotator.prototype.loadAnnotations
+    Annotator.prototype.loadAnnotations = (annotations=[]) ->
+      if self.pendingScan?
+        # Schedule annotation load for when scan has finished
+        self.pendingScan.then =>
+          _loadAnnotations.call(this, annotations)
+      else
+        _loadAnnotations.call(this, annotations)
 
   # PUBLIC Try to find the right anchoring point for a given target
   #

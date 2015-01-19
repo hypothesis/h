@@ -12,6 +12,8 @@ class Annotator extends Delegator
   events:
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
+    ".annotator-hl mouseover":           "onHighlightMouseover"
+    ".annotator-hl mouseout":            "startViewerHideTimer"
 
   html:
     adder:   '<div class="annotator-adder"><button>' + _t('Annotate') + '</button></div>'
@@ -26,11 +28,11 @@ class Annotator extends Delegator
 
   viewer: null
 
-  selectedTargets: null
+  selectedRanges: null
 
   mouseIsDown: false
 
-  inAdderClick: false
+  ignoreMouseup: false
 
   viewerHideTimer: null
 
@@ -138,6 +140,7 @@ class Annotator extends Delegator
   # Returns itself for chaining.
   _setupDocumentEvents: ->
     $(document).bind({
+      "mouseup":   this.checkForEndSelection
       "mousedown": this.checkForStartSelection
     })
     this
@@ -205,14 +208,51 @@ class Annotator extends Delegator
     if idx != -1
       Annotator._instances.splice(idx, 1)
 
+  # Public: Gets the current selection excluding any nodes that fall outside of
+  # the @wrapper. Then returns and Array of NormalizedRange instances.
+  #
+  # Examples
+  #
+  #   # A selection inside @wrapper
+  #   annotation.getSelectedRanges()
+  #   # => Returns [NormalizedRange]
+  #
+  #   # A selection outside of @wrapper
+  #   annotation.getSelectedRanges()
+  #   # => Returns []
+  #
+  # Returns Array of NormalizedRange instances.
+  getSelectedRanges: ->
+    selection = Util.getGlobal().getSelection()
 
-  # Utility function to get the decoded form of the document URI
-  getHref: =>
-    uri = decodeURIComponent document.location.href
-    if document.location.hash then uri = uri.slice 0, (-1 * location.hash.length)
-    $('meta[property^="og:url"]').each -> uri = decodeURIComponent this.content
-    $('link[rel^="canonical"]').each -> uri = decodeURIComponent this.href
-    return uri
+    ranges = []
+    rangesToIgnore = []
+    unless selection.isCollapsed
+      ranges = for i in [0...selection.rangeCount]
+        r = selection.getRangeAt(i)
+        browserRange = new Range.BrowserRange(r)
+        normedRange = browserRange.normalize().limit(@wrapper[0])
+
+        # If the new range falls fully outside the wrapper, we
+        # should add it back to the document but not return it from
+        # this method
+        rangesToIgnore.push(r) if normedRange is null
+
+        normedRange
+
+      # BrowserRange#normalize() modifies the DOM structure and deselects the
+      # underlying text as a result. So here we remove the selected ranges and
+      # reapply the new ones.
+      selection.removeAllRanges()
+
+    for r in rangesToIgnore
+      selection.addRange(r)
+
+    # Remove any ranges that fell outside of @wrapper.
+    $.grep ranges, (range) ->
+      # Add the normed range back to the selection if it exists.
+      selection.addRange(range.toRange()) if range
+      range
 
   # Public: Creates and returns a new annotation object. Publishes the
   # 'beforeAnnotationCreated' event to allow the new annotation to be modified.
@@ -233,8 +273,7 @@ class Annotator extends Delegator
 
   # Public: Initialises an annotation either from an object representation or
   # an annotation created with Annotator#createAnnotation(). It finds the
-  # selected range and higlights the selection in the DOM, extracts the
-  # quoted text and serializes the range.
+  # selected range and higlights the selection in the DOM.
   #
   # annotation - An annotation Object to initialise.
   #
@@ -252,29 +291,35 @@ class Annotator extends Delegator
   #
   # Returns the initialised annotation.
   setupAnnotation: (annotation) ->
-    # If this is a new annotation, we might have to add the targets
-    annotation.target ?= @selectedTargets
-    @selectedTargets = []
+    root = @wrapper[0]
+    annotation.ranges or= @selectedRanges
 
-    annotation.anchors = []
-
-    for t in annotation.target ? []
+    normedRanges = []
+    for r in annotation.ranges
       try
-        # Create an anchor for this target
-        result = this.anchoring.createAnchor annotation, t
-        anchor = result.result
-        if result.error? instanceof Range.RangeError
-          this.publish 'rangeNormalizeFail', [annotation, result.error.range, result.error]
-        if anchor?
-          t.diffHTML = anchor.diffHTML
-          t.diffCaseOnly = anchor.diffCaseOnly
+        normedRanges.push(Range.sniff(r).normalize(root))
+      catch e
+        if e instanceof Range.RangeError
+          this.publish('rangeNormalizeFail', [annotation, r, e])
+        else
+          # Oh Javascript, why you so crap? This will lose the traceback.
+          throw e
 
-          # Store this anchor for the annotation
-          annotation.anchors.push anchor
+    annotation.quote      = []
+    annotation.ranges     = []
+    annotation.highlights = []
 
-      catch exception
-        console.log "Error in setupAnnotation for", annotation.id,
-          ":", exception.stack ? exception
+    for normed in normedRanges
+      annotation.quote.push      $.trim(normed.text())
+      annotation.ranges.push     normed.serialize(@wrapper[0], '.annotator-hl')
+      $.merge annotation.highlights, this.highlightRange(normed)
+
+    # Join all the quotes into one string.
+    annotation.quote = annotation.quote.join(' / ')
+
+    # Save the annotation data on each highlighter element.
+    $(annotation.highlights).data('annotation', annotation)
+    $(annotation.highlights).attr('data-annotation-id', annotation.id)
 
     annotation
 
@@ -308,9 +353,10 @@ class Annotator extends Delegator
   #
   # Returns deleted annotation.
   deleteAnnotation: (annotation) ->
-    if annotation.anchors?
-      for a in annotation.anchors
-        a.remove()
+    if annotation.highlights?
+      for h in annotation.highlights when h.parentNode?
+        child = h.childNodes[0]
+        $(h).replaceWith(h.childNodes)
 
     this.publish('annotationDeleted', [annotation])
     annotation
@@ -341,16 +387,8 @@ class Annotator extends Delegator
         this.publish 'annotationsLoaded', [clone]
 
     clone = annotations.slice()
+    loader annotations
 
-    if annotations.length # Do we have to do something?
-      if @pendingScan?    # Is there a pending scan?
-        # Schedule the parsing the annotations for
-        # when scan has finished
-        @pendingScan.then =>
-          setTimeout => loader annotations
-      else # no pending scan
-        # We can start parsing them right away
-        loader annotations
     this
 
   # Public: Calls the Store#dumpAnnotations() method.
@@ -362,6 +400,38 @@ class Annotator extends Delegator
     else
       console.warn(_t("Can't dump annotations without Store plugin."))
       return false
+
+  # Public: Wraps the DOM Nodes within the provided range with a highlight
+  # element of the specified class and returns the highlight Elements.
+  #
+  # normedRange - A NormalizedRange to be highlighted.
+  # cssClass - A CSS class to use for the highlight (default: 'annotator-hl')
+  #
+  # Returns an array of highlight Elements.
+  highlightRange: (normedRange, cssClass='annotator-hl') ->
+    white = /^\s*$/
+
+    hl = $("<span class='#{cssClass}'></span>")
+
+    # Ignore text nodes that contain only whitespace characters. This prevents
+    # spans being injected between elements that can only contain a restricted
+    # subset of nodes such as table rows and lists. This does mean that there
+    # may be the odd abandoned whitespace node in a paragraph that is skipped
+    # but better than breaking table layouts.
+    for node in normedRange.textNodes() when not white.test(node.nodeValue)
+      $(node).wrapAll(hl).parent().show()[0]
+
+  # Public: highlight a list of ranges
+  #
+  # normedRanges - An array of NormalizedRanges to be highlighted.
+  # cssClass - A CSS class to use for the highlight (default: 'annotator-hl')
+  #
+  # Returns an array of highlight Elements.
+  highlightRanges: (normedRanges, cssClass='annotator-hl') ->
+    highlights = []
+    for r in normedRanges
+      $.merge highlights, this.highlightRange(r, cssClass)
+    highlights
 
   # Public: Registers a plugin with the Annotator. A plugin can only be
   # registered once. The plugin will be instantiated in the following order.
@@ -417,11 +487,13 @@ class Annotator extends Delegator
     this
 
   # Callback method called when the @editor fires the "hide" event. Itself
-  # publishes the 'annotationEditorHidden' event
+  # publishes the 'annotationEditorHidden' event and resets the @ignoreMouseup
+  # property to allow listening to mouse events.
   #
   # Returns nothing.
   onEditorHide: =>
     this.publish('annotationEditorHidden', [@editor])
+    @ignoreMouseup = false
 
   # Callback method called when the @editor fires the "save" event. Itself
   # publishes the 'annotationEditorSubmit' event and creates/updates the
@@ -481,52 +553,36 @@ class Annotator extends Delegator
       this.startViewerHideTimer()
     @mouseIsDown = true
 
-  # This method is to be called by the mechanisms responsible for
-  # triggering annotation (and highlight) creation.
+  # Annotator#element callback. Checks to see if a selection has been made
+  # on mouseup and if so displays the Annotator#adder. If @ignoreMouseup is
+  # set will do nothing. Also resets the @mouseIsDown property.
   #
-  # event - any event which has triggered this.
-  #         The following fields are used:
-  #   targets: an array of targets, which should be used to anchor the
-  #            newly created annotation
-  #   pageX and pageY: if the adder button is shown, use there coordinates
+  # event - A mouseup Event object.
   #
-  # immadiate - should we show the adder button, or should be proceed
-  #             to create the annotation/highlight immediately ?
-  #
-  # returns false if the creation of annotations is forbidden at the moment,
-  # true otherwise.
-  onSuccessfulSelection: (event, immediate = false) ->
-    # Check whether we got a proper event
-    unless event?
-      throw "Called onSuccessfulSelection without an event!"
-    unless event.segments?
-      throw "Called onSuccessulSelection with an event with missing segments!"
+  # Returns nothing.
+  checkForEndSelection: (event) =>
+    @mouseIsDown = false
 
-    # Describe the selection with targets
-    @selectedTargets = (@_getTargetFromSelection s for s in event.segments)
+    # This prevents the note image from jumping away on the mouseup
+    # of a click on icon.
+    if @ignoreMouseup
+      return
 
-    # Do we want immediate annotation?
-    if immediate
-      # Create an annotation
-      @onAdderClick event
-    else
-      # Show the adder button
+    # Get the currently selected ranges.
+    @selectedRanges = this.getSelectedRanges()
+
+    for range in @selectedRanges
+      container = range.commonAncestor
+      if $(container).hasClass('annotator-hl')
+        container = $(container).parents('[class!=annotator-hl]')[0]
+      return if this.isAnnotator(container)
+
+    if event and @selectedRanges.length
       @adder
         .css(Util.mousePosition(event, @wrapper[0]))
         .show()
-
-    true
-
-  # This is called to create a target from a raw selection,
-  # using selectors created by the registered selector creators
-  _getTargetFromSelection: (selection) ->
-    source: @getHref()
-    selector: @anchoring.getSelectorsFromSelection(selection)
-
-  onFailedSelection: (event) ->
-    @adder.hide()
-    @selectedTargets = []
-
+    else
+      @adder.hide()
 
   # Public: Determines if the provided element is part of the annotator plugin.
   # Useful for ignoring mouse actions on the annotator elements.
@@ -545,14 +601,40 @@ class Annotator extends Delegator
   isAnnotator: (element) ->
     !!$(element).parents().addBack().filter('[class^=annotator-]').not(@wrapper).length
 
-  # Annotator#element callback.
+  # Annotator#element callback. Displays viewer with all annotations
+  # associated with highlight Elements under the cursor.
+  #
+  # event - A mouseover Event object.
+  #
+  # Returns nothing.
+  onHighlightMouseover: (event) =>
+    # Cancel any pending hiding of the viewer.
+    this.clearViewerHideTimer()
+
+    # Don't do anything if we're making a selection
+    return false if @mouseIsDown
+
+    # If the viewer is already shown, hide it first
+    @viewer.hide() if @viewer.isShown()
+
+    annotations = $(event.target)
+      .parents('.annotator-hl')
+      .addBack()
+      .map( -> return $(this).data("annotation"))
+      .toArray()
+
+    # Now show the viewer with the wanted annotations
+    this.showViewer(annotations, Util.mousePosition(event, @wrapper[0]))
+
+  # Annotator#element callback. Sets @ignoreMouseup to true to prevent
+  # the annotation selection events firing when the adder is clicked.
   #
   # event - A mousedown Event object
   #
   # Returns nothing.
   onAdderMousedown: (event) =>
     event?.preventDefault()
-    @inAdderClick = true
+    @ignoreMouseup = true
 
   # Annotator#element callback. Displays the @editor in place of the @adder and
   # loads in a newly created annotation Object. The click event is used as well
@@ -567,25 +649,18 @@ class Annotator extends Delegator
     # Hide the adder
     position = @adder.position()
     @adder.hide()
-    @inAdderClick = false
-
-    # Create a new annotation.
-    annotation = this.createAnnotation()
-
-    # Extract the quotation and serialize the ranges
-    annotation = this.setupAnnotation(annotation)
 
     # Show a temporary highlight so the user can see what they selected
-    for anchor in annotation.anchors
-      for page, hl of anchor.highlight
-        hl.setTemporary true
+    # Also extract the quotation and serialize the ranges
+    annotation = this.setupAnnotation(this.createAnnotation())
+    $(annotation.highlights).addClass('annotator-hl-temporary')
+
+    # Subscribe to the editor events
 
     # Make the highlights permanent if the annotation is saved
     save = =>
       do cleanup
-      for anchor in annotation.anchors
-        for page, hl of anchor.highlight
-          hl.setTemporary false
+      $(annotation.highlights).removeClass('annotator-hl-temporary')
       # Fire annotationCreated events so that plugins can react to them
       this.publish('annotationCreated', [annotation])
 
@@ -646,24 +721,6 @@ class Annotator extends Delegator
     # Delete highlight elements.
     this.deleteAnnotation annotation
 
-  onAnchorMouseover: (event) ->
-    # Cancel any pending hiding of the viewer.
-    this.clearViewerHideTimer()
-
-    # Don't do anything if we're making a selection or
-    # already displaying the viewer
-    return false if @mouseIsDown or @viewer.isShown()
-
-    this.showViewer event.data.getAnnotations(event),
-      Util.mousePosition(event, @wrapper[0])
-
-  onAnchorMouseout: (event) ->
-    this.startViewerHideTimer()
-
-  onAnchorMousedown: (event) ->
-
-  onAnchorClick: (event) ->
-
 # Create namespace for Annotator plugins
 class Annotator.Plugin extends Delegator
   constructor: (element, options) ->
@@ -674,9 +731,8 @@ class Annotator.Plugin extends Delegator
 # Sniff the browser environment and attempt to add missing functionality.
 g = Util.getGlobal()
 
-# Checks for the presence of wicked-good-xpath
-# It is always safe to install it, it'll not overwrite existing functions
-if g.wgxpath? then g.wgxpath.install()
+if not g.document?.evaluate?
+  $.getScript('http://assets.annotateit.org/vendor/xpath.min.js')
 
 if not g.getSelection?
   $.getScript('http://assets.annotateit.org/vendor/ierange.min.js')
