@@ -80,9 +80,9 @@ class Permissions
           action: action
 
     if parts.length
-      acl = Array::concat parts...
+      Array::concat parts...
     else
-      acl = ADMIN_PARTY
+      ADMIN_PARTY
 
   ###*
   # @ngdoc method
