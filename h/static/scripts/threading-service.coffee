@@ -72,7 +72,6 @@ class ThreadingService
       break
 
   annotationDeleted: (event, annotation) =>
-    console.log(this.root)
     if this.idTable[annotation.id]
       container = this.idTable[annotation.id]
       container.message = null
@@ -90,7 +89,6 @@ class ThreadingService
         child.message = null
         this.pruneEmpties(@root)
         break
-    console.log(this.root)
 
   annotationsLoaded: (event, annotations) =>
     messages = (@root.flattenChildren() or []).concat(annotations)
