@@ -49,7 +49,11 @@ def test_oauth_policy_session_user():
 
 
 def test_includeme_sets_authentication_policy():
-    config = setUp()
+    settings = {
+        'h.client_id': 'nosuchclient',
+        'h.client_secret': 'nosuchsecret',
+    }
+    config = setUp(settings=settings)
     config.set_authorization_policy(Mock())
     config.include('h.authentication')
     policy = config.registry.queryUtility(IAuthenticationPolicy)
@@ -57,7 +61,11 @@ def test_includeme_sets_authentication_policy():
 
 
 def test_includeme_sets_client_factory():
-    config = setUp()
+    settings = {
+        'h.client_id': 'nosuchclient',
+        'h.client_secret': 'nosuchsecret',
+    }
+    config = setUp(settings=settings)
     config.set_authorization_policy(Mock())
     config.include('h.authentication')
     factory = config.registry.queryUtility(IClientFactory)
@@ -66,7 +74,11 @@ def test_includeme_sets_client_factory():
 
 @patch.dict('sys.modules', {'awesome_oauth': mock_client_module(make_client)})
 def test_includeme_sets_client_factory_custom():
-    settings = {'h.client_factory': 'awesome_oauth.client_factory'}
+    settings = {
+        'h.client_factory': 'awesome_oauth.client_factory',
+        'h.client_id': 'nosuchclient',
+        'h.client_secret': 'nosuchsecret',
+    }
     config = setUp(settings=settings)
     config.set_authorization_policy(Mock())
     config.include('h.authentication')

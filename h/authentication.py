@@ -55,8 +55,8 @@ def register_web_client(config):
     settings = registry.settings
 
     client_factory = registry.getUtility(IClientFactory)
-    client_id = settings.get('h.client_id')
-    client_secret = settings.get('h.client_secret')
+    client_id = settings['h.client_id']
+    client_secret = settings['h.client_secret']
 
     if client_id is None:
         client_id = base64.urlsafe_b64encode(os.urandom(18))
