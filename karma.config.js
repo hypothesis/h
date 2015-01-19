@@ -35,7 +35,7 @@ module.exports = function(config) {
       'h/static/scripts/vendor/uuid.js',
       'h/static/scripts/vendor/annotator.js',
       'h/static/scripts/annotator/monkey.js',
-      'h/static/scripts/annotator/plugin/auth.js',
+      'h/static/scripts/vendor/annotator.auth.js',
       'h/static/scripts/annotator/plugin/bridge.js',
       'h/static/scripts/annotator/plugin/bucket-bar.js',
       'h/static/scripts/annotator/plugin/threading.js',

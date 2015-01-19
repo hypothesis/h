@@ -15,9 +15,7 @@ annotator_plugins_app:
   filters: uglifyjs
   output: scripts/annotator/annotator-app.min.js
   contents:
-    - filters: coffeescript
-      output: scripts/annotator/plugin/auth.js
-      contents: h:static/scripts/annotator/plugin/auth.coffee
+    - h:static/scripts/vendor/annotator.auth.js
     - filters: coffeescript
       output: scripts/annotator/plugin/bridge.js
       contents: h:static/scripts/annotator/plugin/bridge.coffee
