@@ -64,9 +64,6 @@ class AppController
       else
         $scope.dialog.visible = false
 
-      # Skip the remaining if this is the first evaluation.
-      return if oldVal is undefined
-
       # Update any edits in progress.
       for draft in drafts.all()
         annotator.publish 'beforeAnnotationCreated', draft
@@ -91,7 +88,6 @@ class AppController
       identity.logout()
 
     $scope.loadMore = (number) ->
-      unless streamfilter.getPastData().hits then return
       streamer.send({messageType: 'more_hits', moreHits: number})
 
     $scope.clearSelection = ->
@@ -146,7 +142,6 @@ class AnnotationViewerController
       annotator.loadAnnotations(rows)
 
     streamfilter
-      .setPastDataNone()
       .setMatchPolicyIncludeAny()
       .addClause('/references', 'first_of', id, true)
       .addClause('/id', 'equals', id, true)
