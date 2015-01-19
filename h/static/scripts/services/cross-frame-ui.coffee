@@ -59,6 +59,8 @@ class CrossFrameUI
             method: 'setVisibleHighlights'
             params: this.visibleHighlights
 
+    this.getAnnotationForTag = (tag) -> bridge.getAnnotationForTag(tag)
+
   _setupXDM: (options) ->
     # jschannel chokes FF and Chrome extension origins.
     if (options.origin.match /^chrome-extension:\/\//) or

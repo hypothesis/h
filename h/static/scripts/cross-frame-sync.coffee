@@ -73,6 +73,9 @@ class CrossFrameSync
   _emit: (args...) ->
     @$rootScope.$emit.apply(@$rootScope, args)
 
+  getAnnotationForTag: (tag) ->
+    @cache[tag] or null
+
   bind_channel_listeners: (channel) ->
     # Channel message --> trigger events on $rootScope
     channel.bind 'beforeCreateAnnotation', (txn, annotation) =>
