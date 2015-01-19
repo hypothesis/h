@@ -1,10 +1,10 @@
 class UISyncController
   constructor: (@appScope) ->
-
-  listen: ->
     @appScope.$on('showAnnotations', this._onShowAnnotations)
     @appScope.$on('focusAnnotations', this._onFocusAnnotations)
     @appScope.$on('toggleAnnotationSelection', this._onToggleAnnotationSelection)
+    @appScope.$on('getDocumentInfo', this._onGetDocumentInfo)
+    @appScope.$on('annotationsLoaded', this._onAnnotationsLoaded)
 
   _getAnnotationsForTags: (tags) ->
     # TODO: Should be implemented in the bridge or the threading plugin.
@@ -48,8 +48,12 @@ class UISyncController
       delete @appScope.selectedAnnotations[annotation.id]
       @_setSelectedAnnotations(@appScope.selectedAnnotations)
 
-  _onGetDocumentInfo: ->
+  _onGetDocumentInfo: =>
     @appScope.$digest()
+    @appScope.$evalAsync(angular.noop)
+
+  _onAnnotationsLoaded: =>
+    @appScope.$evalAsync(angular.noop)
 
 
 class AppController
@@ -230,7 +234,7 @@ class ViewerController
       for p in crossFrameUI.providers
         for e in p.entities when e not in loaded
           loaded.push e
-          store.SearchResource.get angular.extend(uri: e, query), (results) ->
+          r = store.SearchResource.get angular.extend(uri: e, query), (results) ->
             annotationMapper.loadAnnotations(results.rows)
 
       streamfilter.resetFilter().addClause('/uri', 'one_of', loaded)
