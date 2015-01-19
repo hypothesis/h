@@ -57,13 +57,13 @@ class AppController
     '$document', '$location', '$route', '$scope', '$window', '$rootScope',
     'auth', 'documentHelpers', 'drafts', 'identity',
     'permissions', 'streamer', 'streamfilter', 'crossFrameUI',
-    'annotationLoader', 'threading'
+    'annotationMapper', 'threading'
   ]
   constructor: (
      $document,   $location,   $route,   $scope,   $window, $rootScope,
      auth,   documentHelpers,   drafts,   identity,
      permissions,   streamer,   streamfilter, crossFrameUI,
-     annotationLoader, threading
+     annotationMapper, threading
   ) ->
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
@@ -77,7 +77,7 @@ class AppController
       return unless data?.length
       switch action
         when 'create', 'update', 'past'
-          annotationLoader.loadAnnotations data
+          annotationMapper.loadAnnotations data
         when 'delete'
           for annotation in data
             $rootScope.$emit('annotationDeleted', annotation)
@@ -173,11 +173,11 @@ class AppController
 class AnnotationViewerController
   this.$inject = [
     '$location', '$routeParams', '$scope',
-    'streamer', 'store', 'streamfilter', 'annotationLoader'
+    'streamer', 'store', 'streamfilter', 'annotationMapper'
   ]
   constructor: (
      $location,   $routeParams,   $scope,
-     streamer,   store,   streamfilter,   annotationLoader
+     streamer,   store,   streamfilter,   annotationMapper
   ) ->
     # Tells the view that these annotations are standalone
     $scope.isEmbedded = false
@@ -194,10 +194,10 @@ class AnnotationViewerController
 
     id = $routeParams.id
     store.SearchResource.get _id: id, ({rows}) ->
-      annotationLoader.loadAnnotations(rows)
+      annotationMapper.loadAnnotations(rows)
       $scope.threadRoot = children: [$scope.threading.getContainer(id)]
     store.SearchResource.get references: id, ({rows}) ->
-      annotationLoader.loadAnnotations(rows)
+      annotationMapper.loadAnnotations(rows)
 
     streamfilter
       .setMatchPolicyIncludeAny()
@@ -208,11 +208,11 @@ class AnnotationViewerController
 
 class ViewerController
   this.$inject = [
-    '$scope', '$route', 'crossFrameUI', 'annotationLoader',
+    '$scope', '$route', 'crossFrameUI', 'annotationMapper',
     'auth', 'flash', 'streamer', 'streamfilter', 'store'
   ]
   constructor:   (
-     $scope,   $route, crossFrameUI, annotationLoader,
+     $scope,   $route, crossFrameUI, annotationMapper,
      auth,   flash,   streamer,   streamfilter,   store
   ) ->
     # Tells the view that these annotations are embedded into the owner doc
@@ -231,7 +231,7 @@ class ViewerController
         for e in p.entities when e not in loaded
           loaded.push e
           store.SearchResource.get angular.extend(uri: e, query), (results) ->
-            annotationLoader.loadAnnotations(results.rows)
+            annotationMapper.loadAnnotations(results.rows)
 
       streamfilter.resetFilter().addClause('/uri', 'one_of', loaded)
 

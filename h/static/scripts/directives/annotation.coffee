@@ -26,13 +26,15 @@ validate = (value) ->
 #
 # `AnnotationController` provides an API for the annotation directive. It
 # manages the interaction between the domain and view models and uses the
-# {@link annotator annotator service} for persistence.
+# {@link annotationMapper service} for persistence.
 ###
 AnnotationController = [
   '$document', '$scope', '$timeout', '$rootScope',
-  'annotator', 'auth', 'drafts', 'flash', 'permissions', 'timeHelpers'
+  'auth', 'drafts', 'flash', 'permissions',
+  'timeHelpers', 'crossFrameUI', 'annotationMapper'
   ($document,   $scope,   $timeout,   $rootScope,
-   annotator,   auth,   drafts,   flash,   permissions,   timeHelpers) ->
+   auth,   drafts,   flash,   permissions,
+   timeHelpers, crossFrameUI, annotationMapper) ->
     @annotation = {}
     @action = 'view'
     @document = null
@@ -43,7 +45,7 @@ AnnotationController = [
     @showDiff = undefined
     @timestamp = null
 
-    highlight = annotator.tool is 'highlight'
+    highlight = crossFrameUI.tool is 'highlight'
     model = $scope.annotationGet()
     original = null
     vm = this
@@ -92,7 +94,7 @@ AnnotationController = [
     ###
     this.delete = ->
       if confirm "Are you sure you want to delete this annotation?"
-        annotator.deleteAnnotation model
+        annotationMapper.deleteAnnotation model
 
     ###*
     # @ngdoc method
@@ -172,7 +174,7 @@ AnnotationController = [
       # Construct the reply.
       references = [references..., id]
 
-      reply = annotator.createAnnotation {references, uri}
+      reply = annotationMapper.createAnnotation({references, uri})
 
       if auth.user?
         if permissions.isPublic model.permissions
@@ -298,8 +300,8 @@ AnnotationController = [
 # an embedded widget.
 ###
 annotation = [
-  '$document', 'annotator',
-  ($document,   annotator) ->
+  '$document', 'annotationMapper',
+  ($document,   annotationMapper) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
       # Observe the embedded attribute
       attrs.$observe 'annotationEmbedded', (value) ->
