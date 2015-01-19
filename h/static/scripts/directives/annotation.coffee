@@ -29,11 +29,10 @@ validate = (value) ->
 # {@link annotator annotator service} for persistence.
 ###
 AnnotationController = [
-  '$document', '$scope', '$timeout',
+  '$document', '$scope', '$timeout', '$rootScope',
   'annotator', 'auth', 'drafts', 'flash', 'permissions', 'timeHelpers'
-  ($document,   $scope,   $timeout,
-   annotator,   auth,   drafts,   flash,   permissions,   timeHelpers
-  ) ->
+  ($document,   $scope,   $timeout,   $rootScope,
+   annotator,   auth,   drafts,   flash,   permissions,   timeHelpers) ->
     @annotation = {}
     @action = 'view'
     @document = null
@@ -150,10 +149,10 @@ AnnotationController = [
       switch @action
         when 'create'
           model.$create().then ->
-            annotator.publish 'annotationCreated', model
+            $rootScope.$emit('annotationCreated', model)
         when 'delete', 'edit'
           model.$update(id: model.id).then ->
-            annotator.publish 'annotationUpdated', model
+            $rootScope.$emit('annotationUpdated', model)
 
       @editing = false
       @action = 'view'
@@ -270,7 +269,7 @@ AnnotationController = [
           highlight = false  # skip this on future updates
           model.permissions = permissions.private()
           model.$create().then ->
-            annotator.publish 'annotationCreated', model
+            $rootScope.$emit('annotationCreated', model)
           highlight = false  # skip this on future updates
         else
           drafts.add model, => this.revert()
