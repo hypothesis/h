@@ -18,15 +18,6 @@ Annotator.prototype._setupDocumentEvents = ->
   this
 
 
-# Utility function to get the decoded form of the document URI
-Annotator.prototype.getHref = ->
-  uri = decodeURIComponent document.location.href
-  if document.location.hash then uri = uri.slice 0, (-1 * location.hash.length)
-  $('meta[property^="og:url"]').each -> uri = decodeURIComponent this.content
-  $('link[rel^="canonical"]').each -> uri = decodeURIComponent this.href
-  return uri
-
-
 # Override setupAnnotation
 Annotator.prototype.setupAnnotation = (annotation) ->
   # If this is a new annotation, we might have to add the targets
