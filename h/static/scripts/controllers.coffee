@@ -1,16 +1,16 @@
 class UISyncController
-  constructor: (@appScope) ->
+  constructor: (@appScope, @crossFrameUI) ->
     @appScope.$on('showAnnotations', this._onShowAnnotations)
     @appScope.$on('focusAnnotations', this._onFocusAnnotations)
     @appScope.$on('toggleAnnotationSelection', this._onToggleAnnotationSelection)
     @appScope.$on('getDocumentInfo', this._onGetDocumentInfo)
     @appScope.$on('annotationsLoaded', this._onAnnotationsLoaded)
 
-  _getAnnotationsForTags: (tags) ->
-    # TODO: Should be implemented in the bridge or the threading plugin.
+  _getAnnotationsForTags: (event, tags) ->
+    tags.map(@crossFrameUI.getAnnotationForTag, @crossFrameUI)
 
   # Properly set the selectedAnnotations- and the Count variables
-  _setSelectedAnnotations: (selected) ->
+  _setSelectedAnnotations: (event, selected) ->
     count = Object.keys(selected).length
     @appScope.selectedAnnotationsCount = count
 
@@ -19,7 +19,7 @@ class UISyncController
     else
       @appScope.selectedAnnotations = null
 
-  _onToggleAnnotationSelection: (annotations=[]) ->
+  _onToggleAnnotationSelection: (event, annotations=[]) ->
     @appScope.search.query = ''
 
     selected = @appScope.selectedAnnotations or {}
@@ -31,19 +31,19 @@ class UISyncController
     @_setSelectedAnnotations(selected)
     this
 
-  _onFocusAnnotations: (tags) ->
+  _onFocusAnnotations: (event, tags) ->
     @appScope.focusedAnnotations = tags
 
-  _onShowAnnotations: (tags) ->
-    annotations = _getAnnotationsForTags(tags)
+  _onShowAnnotations: (event, tags) ->
+    annotations = this._getAnnotationsForTags(tags)
     @appScope.search.query = ''
     selected = {}
     for a in annotations
       selected[a.id] = true
     @_setSelectedAnnotations selected
 
-  _onAnnotationDeleted: (tag) =>
-    annotation = _getAnnotationForTag(tag)
+  _onAnnotationDeleted: (event, tag) =>
+    annotation = this._getAnnotationForTags([tag])[0]
     if scope.selectedAnnotations?[annotation.id]
       delete @appScope.selectedAnnotations[annotation.id]
       @_setSelectedAnnotations(@appScope.selectedAnnotations)
@@ -52,7 +52,7 @@ class UISyncController
     @appScope.$digest()
     @appScope.$evalAsync(angular.noop)
 
-  _onAnnotationsLoaded: =>
+  _onAnnotationsLoaded: (event, annotations) =>
     @appScope.$evalAsync(angular.noop)
 
 
@@ -69,7 +69,7 @@ class AppController
      permissions,   streamer,   streamfilter, crossFrameUI,
      annotationMapper, threading
   ) ->
-    uiSyncController = new UISyncController($rootScope)
+    uiSyncController = new UISyncController($rootScope, crossFrameUI)
 
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
