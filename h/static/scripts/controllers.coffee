@@ -69,6 +69,8 @@ class AppController
      permissions,   streamer,   streamfilter, crossFrameUI,
      annotationMapper, threading
   ) ->
+    uiSyncController = new UISyncController($rootScope)
+
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
 
