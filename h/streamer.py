@@ -74,14 +74,6 @@ filter_schema = {
                 "options": {"type": "object", "default": {}}
             }
         },
-        "past_data": {
-            "load_past": {
-                "type": "string",
-                "enum": ["time", "hits", "none"]
-            },
-            "go_back": {"type": "minutes", "default": 5},
-            "hits": {"type": "number", "default": 100},
-        }
     },
     "required": ["match_policy", "clauses", "actions"]
 }
@@ -115,16 +107,6 @@ class FilterToElasticFilter(object):
             policy(self.query['query']['bool'], clauses)
         else:
             self.query['query'] = {"match_all": {}}
-
-        if self.filter['past_data']['load_past'] == 'time':
-            back = self.filter['past_data']['go_back']
-            now = datetime.datetime.utcnow().replace(tzinfo=tzutc())
-            delta = datetime.timedelta(minutes=back)
-            past = now - delta
-            converted = past.strftime("%Y-%m-%dT%H:%M:%S")
-            self.query['filter'] = {"range": {"created": {"gte": converted}}}
-        elif self.filter['past_data']['load_past'] == 'hits':
-            self.query['size'] = self.filter['past_data']['hits']
 
         if len(self.filter_scripts_to_add):
             if 'filter' not in self.query:
@@ -488,7 +470,6 @@ class WebSocket(_WebSocket):
         annotations = Annotation.search_raw(query=self.query.query, user=user)
         self.received = len(annotations)
 
-        # Can send zero to indicate that no past data is matched
         packet = _annotation_packet(annotations, 'past')
         data = json.dumps(packet)
         self.send(data)
@@ -506,20 +487,15 @@ class WebSocket(_WebSocket):
                 # Let's try to validate the schema
                 validate(payload, filter_schema)
                 self.filter = FilterHandler(payload)
-
-                # If past is given, send the annotations back.
-                if payload.get('past_data', {}).get('load_past') != 'none':
-                    self.query = FilterToElasticFilter(payload, self.request)
-                    if 'size' in self.query.query:
-                        self.offsetFrom = int(self.query.query['size'])
-                    self.send_annotations()
+                self.query = FilterToElasticFilter(payload, self.request)
+                self.offsetFrom = 0
             elif msg_type == 'more_hits':
-                more_hits = data.get('moreHits', 50)
-                if 'size' in self.query.query:
-                    self.query.query['from'] = self.offsetFrom
-                    self.query.query['size'] = more_hits
-                    self.send_annotations()
-                    self.offsetFrom += self.received
+                more_hits = data.get('moreHits', 10)
+
+                self.query.query['from'] = self.offsetFrom
+                self.query.query['size'] = more_hits
+                self.send_annotations()
+                self.offsetFrom += self.received
             elif msg_type == 'client_id':
                 self.client_id = data.get('value')
         except:

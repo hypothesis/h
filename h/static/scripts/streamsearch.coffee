@@ -18,6 +18,7 @@ class StreamSearchController
     $scope.search.query = $routeParams.q
     terms = searchfilter.generateFacetedFilter $scope.search.query
     queryparser.populateFilter streamfilter, terms
+    streamer.send({filter: streamfilter.getFilter()})
 
     # Perform the search
     searchParams = searchfilter.toObject $scope.search.query
