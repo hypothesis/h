@@ -1,36 +1,23 @@
 # Annotator core
 annotator:
-  filters: coffeescript, uglifyjs
+  filters: uglifyjs
   output: scripts/annotator/annotator.min.js
   contents:
-    - h:static/scripts/annotator/xpath.coffee
-    - h:static/scripts/annotator/util.coffee
-    - h:static/scripts/annotator/console.coffee
-    - h:static/scripts/annotator/class.coffee
-    - h:static/scripts/annotator/range.coffee
-    - h:static/scripts/annotator/annotator.coffee
-    - h:static/scripts/annotator/widget.coffee
-    - h:static/scripts/annotator/editor.coffee
-    - h:static/scripts/annotator/viewer.coffee
-
-    # Monkeypatches
-    - h:static/scripts/annotator/annotator_monkey.coffee
-    - h:static/scripts/annotator/range_monkey.coffee
+    - h:static/scripts/vendor/annotator.js
+    - filters: coffeescript
+      output: scripts/annotator/monkey.js
+      contents: h:static/scripts/annotator/monkey.coffee
 
 # Annotator app plugins
 annotator_plugins_app:
   filters: uglifyjs
   output: scripts/annotator/annotator-app.min.js
   contents:
-    - filters: coffeescript
-      output: scripts/annotator/plugin/auth.js
-      contents: h:static/scripts/annotator/plugin/auth.coffee
+    - h:static/scripts/vendor/annotator.auth.js
     - filters: coffeescript
       output: scripts/annotator/plugin/bridge.js
       contents: h:static/scripts/annotator/plugin/bridge.coffee
-    - filters: coffeescript
-      output: scripts/annotator/plugin/document.js
-      contents: h:static/scripts/annotator/plugin/document.coffee
+    - h:static/scripts/vendor/annotator.document.js
     - filters: coffeescript
       output: scripts/annotator/plugin/threading.js
       contents: h:static/scripts/annotator/plugin/threading.coffee
@@ -48,9 +35,7 @@ annotator_plugins_inject:
     - filters: coffeescript
       output: scripts/annotator/plugin/bucket-bar.js
       contents: h:static/scripts/annotator/plugin/bucket-bar.coffee
-    - filters: coffeescript
-      output: scripts/annotator/plugin/document.js
-      contents: h:static/scripts/annotator/plugin/document.coffee
+    - h:static/scripts/vendor/annotator.document.js
     - filters: coffeescript
       output: scripts/annotator/plugin/toolbar.js
       contents: h:static/scripts/annotator/plugin/toolbar.coffee
