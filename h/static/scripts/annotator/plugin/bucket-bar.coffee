@@ -128,7 +128,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     dir = if direction is "up" then +1 else -1
     {next} = annotations.reduce (acc, ann) ->
       {start, next} = acc
-      anchor = ann.anchoring.anchors[0]
+      anchor = ann.anchors[0]
       if not next? or start.page*dir < anchor.startPage*dir
         # This one is obviously better
         start:
