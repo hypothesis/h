@@ -12,7 +12,9 @@ class Annotation(annotation.Annotation):
         # Convert annotator-store roles to pyramid principals
         for action, roles in self.get('permissions', {}).items():
             for role in roles:
-                if role.startswith('group:'):
+                if role.startswith('system.'):
+                    raise ValueError('{} is a reserved role.'.format(role))
+                elif role.startswith('group:'):
                     if role == 'group:__world__':
                         principal = Everyone
                     elif role == 'group:__authenticated__':
@@ -21,13 +23,8 @@ class Annotation(annotation.Annotation):
                         raise NotImplementedError("API consumer groups")
                     else:
                         principal = role
-                elif role.startswith('acct:'):
-                    principal = role
                 else:
-                    raise ValueError(
-                        "Unrecognized role '%s' in annotation '%s'" %
-                        (role, self.get('id'))
-                    )
+                    principal = role
 
                 # Append the converted rule tuple to the ACL
                 rule = (Allow, principal, action)

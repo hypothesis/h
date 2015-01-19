@@ -26,8 +26,12 @@ momentFilter = ->
 
 
 persona = (user, part='username') ->
-  part = ['term', 'username', 'provider'].indexOf(part)
-  (user?.match /^acct:([^@]+)@(.+)/)?[part]
+  index = ['term', 'username', 'provider'].indexOf(part)
+  groups = user?.match /^acct:([^@]+)@(.+)/
+  if groups
+    groups[index]
+  else if part != 'provider'
+    user
 
 
 angular.module('h')
