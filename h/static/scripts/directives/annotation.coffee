@@ -299,7 +299,7 @@ AnnotationController = [
 # value is used to signal whether the annotation is being displayed inside
 # an embedded widget.
 ###
-annotation = [
+annotationDirective = [
   '$document', 'annotationMapper',
   ($document,   annotationMapper) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
@@ -353,4 +353,4 @@ annotation = [
 
 angular.module('h')
 .controller('AnnotationController', AnnotationController)
-.directive('annotation', annotation)
+.directive('annotation', annotationDirective)
