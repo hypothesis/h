@@ -49,6 +49,11 @@ annotator_plugins_inject:
       output: scripts/annotator/plugin/textselection.js
       contents: h:static/scripts/annotator/plugin/textselection.coffee
 
+    # URL fragments
+    - filters: coffeescript
+      output: scripts/annotator/plugin/fragmentselectorjs
+      contents: h:static/scripts/annotator/plugin/fragmentselector.coffee
+
     # Anchoring
     - h:static/scripts/vendor/dom_text_mapper.js
     - filters: coffeescript

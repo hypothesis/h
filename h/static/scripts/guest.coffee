@@ -23,6 +23,7 @@ class Annotator.Guest extends Annotator
     TextPosition: {}
     TextQuote: {}
     FuzzyTextAnchors: {}
+    FragmentSelector: {}
 
   # Internal state
   tool: 'comment'
@@ -119,9 +120,23 @@ class Annotator.Guest extends Annotator
       # Announce the new positions, so that the sidebar knows
       this.plugins.Bridge.sync([highlight.annotation])
 
+  # Utility function to remove the hash part from a URL
+  _removeHash: (url) ->
+    url = new URL url
+    url.hash = ""
+    url.toString()
+
   # Utility function to get the decoded form of the document URI
   getHref: =>
-    @plugins.PDF?.uri() ? @plugins.Document.uri() ? super
+    if @plugins.PDF
+      @plugins.PDF.uri()
+    else
+      @_removeHash @plugins.Document.uri()
+
+  getMetadata: =>
+    metadata = @plugins.Document?.metadata
+    metadata.link?.forEach (link) => link.href = @_removeHash link.href
+    metadata
 
   _setupXDM: (options) ->
     # jschannel chokes FF and Chrome extension origins.
@@ -160,7 +175,7 @@ class Annotator.Guest extends Annotator
         .catch (problem) =>
            trans.complete
              uri: @getHref()
-             metadata: @plugins.Document?.metadata
+             metadata: @getMetadata()
 
       trans.delayReturn(true)
     )
