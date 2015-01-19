@@ -1,13 +1,13 @@
 class StreamSearchController
   this.inject = [
     '$scope', '$rootScope', '$routeParams',
-    'annotator', 'auth', 'queryparser', 'searchfilter', 'store',
-    'streamer', 'streamfilter'
+    'auth', 'queryparser', 'searchfilter', 'store',
+    'streamer', 'streamfilter', 'annotationLoader'
   ]
   constructor: (
      $scope,   $rootScope,   $routeParams
-     annotator,   auth,   queryparser,   searchfilter,   store,
-     streamer,   streamfilter
+     auth,   queryparser,   searchfilter,   store,
+     streamer,   streamfilter, annotationLoader
   ) ->
     # Initialize the base filter
     streamfilter

@@ -54,18 +54,17 @@ class UISyncController
 
 class AppController
   this.$inject = [
-    '$document', '$location', '$route', '$scope', '$window',
-    'annotator', 'auth', 'drafts', 'identity',
-    'permissions', 'streamer', 'streamfilter'
+    '$document', '$location', '$route', '$scope', '$window', '$rootScope',
+    'auth', 'documentHelpers', 'drafts', 'identity',
+    'permissions', 'streamer', 'streamfilter', 'crossFrameUI',
+    'annotationLoader', 'threading'
   ]
   constructor: (
-     $document,   $location,   $route,   $scope,   $window,
-     annotator,   auth,   drafts,   identity,
-     permissions,   streamer,   streamfilter,
-
+     $document,   $location,   $route,   $scope,   $window, $rootScope,
+     auth,   documentHelpers,   drafts,   identity,
+     permissions,   streamer,   streamfilter, crossFrameUI,
+     annotationLoader, threading
   ) ->
-    {plugins, host, providers} = annotator
-
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
 
@@ -78,10 +77,10 @@ class AppController
       return unless data?.length
       switch action
         when 'create', 'update', 'past'
-          annotator.loadAnnotations data
+          annotationLoader.loadAnnotations data
         when 'delete'
           for annotation in data
-            annotator.publish 'annotationDeleted', (annotation)
+            $rootScope.$emit('annotationDeleted', annotation)
 
     streamer.onmessage = (data) ->
       return if !data or data.type != 'annotation-notification'
@@ -97,12 +96,12 @@ class AppController
       # Clean up any annotations that need to be unloaded.
       for id, container of $scope.threading.idTable when container.message
         # Remove annotations not belonging to this user when highlighting.
-        if annotator.tool is 'highlight' and annotation.user != auth.user
-          annotator.publish 'annotationDeleted', container.message
+        if crossFrameUI.tool is 'highlight' and annotation.user != auth.user
+          $rootScope.$emit('annotationDeleted', container.message)
           drafts.remove annotation
         # Remove annotations the user is not authorized to view.
         else if not permissions.permits 'read', container.message, auth.user
-          annotator.publish 'annotationDeleted', container.message
+          $rootScope.$emit('annotationDeleted', container.message)
           drafts.remove container.message
 
     $scope.$watch 'sort.name', (name) ->
@@ -123,7 +122,7 @@ class AppController
 
       # Update any edits in progress.
       for draft in drafts.all()
-        annotator.publish 'beforeAnnotationCreated', draft
+        $rootScope.$emit('beforeAnnotationCreated', draft)
 
       # Reopen the streamer.
       streamer.close()
@@ -167,18 +166,18 @@ class AppController
           delete $scope.selectedAnnotationsCount
 
     $scope.sort = name: 'Location'
-    $scope.threading = plugins.Threading
+    $scope.threading = threading
     $scope.threadRoot = $scope.threading?.root
 
 
 class AnnotationViewerController
   this.$inject = [
     '$location', '$routeParams', '$scope',
-    'annotator', 'streamer', 'store', 'streamfilter'
+    'streamer', 'store', 'streamfilter', 'annotationLoader'
   ]
   constructor: (
      $location,   $routeParams,   $scope,
-     annotator,   streamer,   store,   streamfilter
+     streamer,   store,   streamfilter,   annotationLoader
   ) ->
     # Tells the view that these annotations are standalone
     $scope.isEmbedded = false
@@ -195,11 +194,10 @@ class AnnotationViewerController
 
     id = $routeParams.id
     store.SearchResource.get _id: id, ({rows}) ->
-      annotator.loadAnnotations(rows)
+      annotationLoader.loadAnnotations(rows)
       $scope.threadRoot = children: [$scope.threading.getContainer(id)]
-
     store.SearchResource.get references: id, ({rows}) ->
-      annotator.loadAnnotations(rows)
+      annotationLoader.loadAnnotations(rows)
 
     streamfilter
       .setMatchPolicyIncludeAny()
@@ -210,12 +208,12 @@ class AnnotationViewerController
 
 class ViewerController
   this.$inject = [
-    '$scope', '$route',
-    'annotator', 'auth', 'flash', 'streamer', 'streamfilter', 'store'
+    '$scope', '$route', 'crossFrameUI', 'annotationLoader',
+    'auth', 'flash', 'streamer', 'streamfilter', 'store'
   ]
   constructor:   (
-     $scope,   $route,
-     annotator,   auth,   flash,   streamer,   streamfilter,   store
+     $scope,   $route, crossFrameUI, annotationLoader,
+     auth,   flash,   streamer,   streamfilter,   store
   ) ->
     # Tells the view that these annotations are embedded into the owner doc
     $scope.isEmbedded = true
@@ -225,42 +223,42 @@ class ViewerController
 
     loadAnnotations = ->
       query = limit: 200
-      if annotator.tool is 'highlight'
+      if crossFrameUI.tool is 'highlight'
         return unless auth.user
         query.user = auth.user
 
-      for p in annotator.providers
+      for p in crossFrameUI.providers
         for e in p.entities when e not in loaded
           loaded.push e
           store.SearchResource.get angular.extend(uri: e, query), (results) ->
-            annotator.loadAnnotations(results.rows)
+            annotationLoader.loadAnnotations(results.rows)
 
       streamfilter.resetFilter().addClause('/uri', 'one_of', loaded)
 
-      if auth.user and annotator.tool is 'highlight'
+      if auth.user and crossFrameUI.tool is 'highlight'
         streamfilter.addClause('/user', auth.user)
 
       streamer.send({filter: streamfilter.getFilter()})
 
-    $scope.$watch (-> annotator.tool), (newVal, oldVal) ->
+    $scope.$watch (-> crossFrameUI.tool), (newVal, oldVal) ->
       return if newVal is oldVal
       $route.reload()
 
-    $scope.$watchCollection (-> annotator.providers), loadAnnotations
+    $scope.$watchCollection (-> crossFrameUI.providers), loadAnnotations
 
     $scope.focus = (annotation) ->
       if angular.isObject annotation
         highlights = [annotation.$$tag]
       else
         highlights = []
-      for p in annotator.providers
+      for p in crossFrameUI.providers
         p.channel.notify
           method: 'focusAnnotations'
           params: highlights
 
     $scope.scrollTo = (annotation) ->
       if angular.isObject annotation
-        for p in annotator.providers
+        for p in crossFrameUI.providers
           p.channel.notify
             method: 'scrollToAnnotation'
             params: annotation.$$tag
