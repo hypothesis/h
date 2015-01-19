@@ -26,7 +26,7 @@ class CrossFrameUI
           formatted[k] = v
         formatted
       parser: (annotation) ->
-        parsed = new store.annotation()
+        parsed = new store.AnnotationResource()
         for k, v of annotation when k in whitelist
           parsed[k] = v
         parsed
