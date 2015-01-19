@@ -37,6 +37,12 @@ class Delegator
     this.on = this.subscribe
     this.addEvents()
 
+  # Public: Destroy the instance, unbinding all events.
+  #
+  # Returns nothing.
+  destroy: ->
+    this.removeEvents()
+
   # Public: binds the function names in the @events Object to their events.
   #
   # The @events Object should be a set of key/value pairs where the key is the
@@ -99,11 +105,7 @@ class Delegator
   #
   # Returns itself.
   _addEvent: (selector, event, functionName) ->
-    f = if typeof functionName is 'string'
-      this[functionName]
-    else
-      functionName
-    closure = => f.apply(this, arguments)
+    closure = => this[functionName].apply(this, arguments)
 
     if selector == '' and Delegator._isCustomEvent(event)
       this.subscribe(event, closure)

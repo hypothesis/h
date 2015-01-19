@@ -33,6 +33,19 @@ Util.flatten = (array) ->
 
   flatten(array)
 
+
+# Public: decides whether node A is an ancestor of node B.
+#
+# This function purposefully ignores the native browser function for this,
+# because it acts weird in PhantomJS.
+# Issue: https://github.com/ariya/phantomjs/issues/11479
+Util.contains = (parent, child) ->
+  node = child
+  while node?
+    if node is parent then return true
+    node = node.parentNode
+  return false
+
 # Public: Finds all text nodes within the elements in the current collection.
 #
 # Returns a new jQuery collection of text nodes.
@@ -97,6 +110,17 @@ Util.getFirstTextNodeNotBefore = (n) ->
   else
     null
 
+# Public: read out the text value of a range using the selection API
+#
+# This method selects the specified range, and asks for the string
+# value of the selection. What this returns is very close to what the user
+# actually sees.
+Util.readRangeViaSelection = (range) ->
+  sel = Util.getGlobal().getSelection() # Get the browser selection object
+  sel.removeAllRanges()                 # clear the selection
+  sel.addRange range.toRange()          # Select the range
+  sel.toString()                        # Read out the selection
+
 Util.xpathFromNode = (el, relativeRoot) ->
   try
     result = simpleXPathJQuery.call el, relativeRoot
@@ -121,3 +145,36 @@ Util.escape = (html) ->
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+
+Util.uuid = (-> counter = 0; -> counter++)()
+
+Util.getGlobal = -> (-> this)()
+
+# Return the maximum z-index of any element in $elements (a jQuery collection).
+Util.maxZIndex = ($elements) ->
+  all = for el in $elements
+          if $(el).css('position') == 'static'
+            -1
+          else
+            # Use parseFloat since we may get scientific notation for large
+            # values.
+            parseFloat($(el).css('z-index')) or -1
+  Math.max.apply(Math, all)
+
+Util.mousePosition = (e, offsetEl) ->
+  # If the offset element is not a positioning root use its offset parent
+  unless $(offsetEl).css('position') in ['absolute', 'fixed', 'relative']
+    offsetEl = $(offsetEl).offsetParent()[0]
+  offset = $(offsetEl).offset()
+  {
+    top:  e.pageY - offset.top,
+    left: e.pageX - offset.left
+  }
+
+# Checks to see if an event parameter is provided and contains the prevent
+# default method. If it does it calls it.
+#
+# This is useful for methods that can be optionally used as callbacks
+# where the existance of the parameter must be checked before calling.
+Util.preventEventDefault = (event) ->
+  event?.preventDefault?()

@@ -4,40 +4,6 @@
 # I've removed any support for IE TextRange (see commit d7085bf2 for code)
 # for the moment, having no means of testing it.
 
-util =
-  uuid: (-> counter = 0; -> counter++)()
-
-  getGlobal: -> (-> this)()
-
-  # Return the maximum z-index of any element in $elements (a jQuery collection).
-  maxZIndex: ($elements) ->
-    all = for el in $elements
-            if $(el).css('position') == 'static'
-              -1
-            else
-              # Use parseFloat since we may get scientific notation for large
-              # values.
-              parseFloat($(el).css('z-index')) or -1
-    Math.max.apply(Math, all)
-
-  mousePosition: (e, offsetEl) ->
-    # If the offset element is not a positioning root use its offset parent
-    unless $(offsetEl).css('position') in ['absolute', 'fixed', 'relative']
-      offsetEl = $(offsetEl).offsetParent()[0]
-    offset = $(offsetEl).offset()
-    {
-      top:  e.pageY - offset.top,
-      left: e.pageX - offset.left
-    }
-
-  # Checks to see if an event parameter is provided and contains the prevent
-  # default method. If it does it calls it.
-  #
-  # This is useful for methods that can be optionally used as callbacks
-  # where the existance of the parameter must be checked before calling.
-  preventEventDefault: (event) ->
-    event?.preventDefault?()
-
 # Store a reference to the current Annotator object.
 _Annotator = this.Annotator
 
@@ -98,15 +64,13 @@ class Annotator extends Delegator
     # Return early if the annotator is not supported.
     return this unless Annotator.supported()
     this._setupDocumentEvents() unless @options.readOnly
-    this._setupWrapper()
-    this._setupViewer()._setupEditor()
+    this._setupWrapper()._setupViewer()._setupEditor()
     this._setupDynamicStyle()
-
-    # Perform initial DOM scan, unless told not to.
-    #this._scan() unless @options.noScan
 
     # Create adder
     this.adder = $(this.html.adder).appendTo(@wrapper).hide()
+
+    Annotator._instances.push(this)
 
   # Wraps the children of @element in a @wrapper div. NOTE: This method will also
   # remove any script elements inside @element to prevent them re-executing.
@@ -190,7 +154,7 @@ class Annotator extends Delegator
     sel = '*' + (":not(.annotator-#{x})" for x in ['adder', 'outer', 'notice', 'filter']).join('')
 
     # use the maximum z-index in the page
-    max = util.maxZIndex($(document.body).find(sel))
+    max = Util.maxZIndex($(document.body).find(sel))
 
     # but don't go smaller than 1010, because this isn't bulletproof --
     # dynamic elements in the page (notifications, dialogs, etc.) may well
@@ -213,6 +177,8 @@ class Annotator extends Delegator
   #
   # Returns nothing.
   destroy: ->
+    super
+
     $(document).unbind({
       "mouseup":   this.checkForEndSelection
       "mousedown": this.checkForStartSelection
@@ -233,9 +199,11 @@ class Annotator extends Delegator
     @element.data('annotator', null)
 
     for name, plugin of @plugins
-      @plugins[name].destroy()
+      @plugins[name].destroy?()
 
-    this.removeEvents()
+    idx = Annotator._instances.indexOf(this)
+    if idx != -1
+      Annotator._instances.splice(idx, 1)
 
 
   # Utility function to get the decoded form of the document URI
@@ -329,6 +297,7 @@ class Annotator extends Delegator
   # Returns annotation Object.
   updateAnnotation: (annotation) ->
     this.publish('beforeAnnotationUpdated', [annotation])
+    $(annotation.highlights).attr('data-annotation-id', annotation.id)
     this.publish('annotationUpdated', [annotation])
     annotation
 
@@ -543,7 +512,7 @@ class Annotator extends Delegator
     else
       # Show the adder button
       @adder
-        .css(util.mousePosition(event, @wrapper[0]))
+        .css(Util.mousePosition(event, @wrapper[0]))
         .show()
 
     true
@@ -574,7 +543,7 @@ class Annotator extends Delegator
   #
   # Returns true if the element is a child of an annotator element.
   isAnnotator: (element) ->
-    !!$(element).parents().andSelf().filter('[class^=annotator-]').not(@wrapper).length
+    !!$(element).parents().addBack().filter('[class^=annotator-]').not(@wrapper).length
 
   # Annotator#element callback. 
   #
@@ -593,7 +562,7 @@ class Annotator extends Delegator
   #
   # Returns nothing.
   onAdderClick: (event) =>
-    event?.preventDefault?()
+    event?.preventDefault()
 
     # Hide the adder
     position = @adder.position()
@@ -630,7 +599,6 @@ class Annotator extends Delegator
       this.unsubscribe('annotationEditorHidden', cancel)
       this.unsubscribe('annotationEditorSubmit', save)
 
-    # Subscribe to the editor events
     this.subscribe('annotationEditorHidden', cancel)
     this.subscribe('annotationEditorSubmit', save)
 
@@ -647,17 +615,18 @@ class Annotator extends Delegator
   onEditAnnotation: (annotation) =>
     offset = @viewer.element.position()
 
+    # Subscribe once to editor events
+
     # Update the annotation when the editor is saved
     update = =>
       do cleanup
       this.updateAnnotation(annotation)
 
-    # Remove handlers when finished
+    # Remove handlers when the editor is hidden
     cleanup = =>
       this.unsubscribe('annotationEditorHidden', cleanup)
       this.unsubscribe('annotationEditorSubmit', update)
 
-    # Subscribe to the editor events
     this.subscribe('annotationEditorHidden', cleanup)
     this.subscribe('annotationEditorSubmit', update)
 
@@ -686,7 +655,7 @@ class Annotator extends Delegator
     return false if @mouseIsDown or @viewer.isShown()
 
     this.showViewer event.data.getAnnotations(event),
-      util.mousePosition(event, @wrapper[0])
+      Util.mousePosition(event, @wrapper[0])
 
   onAnchorMouseout: (event) ->
     this.startViewerHideTimer()
@@ -702,11 +671,8 @@ class Annotator.Plugin extends Delegator
 
   pluginInit: ->
 
-  destroy: ->
-    this.removeEvents()
-
 # Sniff the browser environment and attempt to add missing functionality.
-g = util.getGlobal()
+g = Util.getGlobal()
 
 # Checks for the presence of wicked-good-xpath
 # It is always safe to install it, it'll not overwrite existing functions
@@ -740,7 +706,6 @@ Annotator.$ = $
 # Export other modules for use in plugins.
 Annotator.Delegator = Delegator
 Annotator.Range = Range
-Annotator.util = util
 Annotator.Util = Util
 
 # Expose a global instance registry
@@ -757,7 +722,7 @@ Annotator.supported = -> (-> !!this.getSelection)()
 # Restores the Annotator property on the global object to it's
 # previous value and returns the Annotator.
 Annotator.noConflict = ->
-  util.getGlobal().Annotator = _Annotator
+  Util.getGlobal().Annotator = _Annotator
   this
 
 # Create global access for Annotator
@@ -766,7 +731,10 @@ $.fn.annotator = (options) ->
   this.each ->
     # check the data() cache, if it's there we'll call the method requested
     instance = $.data(this, 'annotator')
-    if instance
+    if options is 'destroy'
+      $.removeData(this, 'annotator')
+      instance?.destroy(args)
+    else if instance
       options && instance[options].apply(instance, args)
     else
       instance = new Annotator(this, options)

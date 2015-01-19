@@ -34,7 +34,7 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
   #
   # Returns Array of NormalizedRange instances.
   _getSelectedRanges: ->
-    selection = @Annotator.util.getGlobal().getSelection()
+    selection = @Annotator.Util.getGlobal().getSelection()
 
     ranges = []
     rangesToIgnore = []
@@ -100,17 +100,6 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
           type: "text range"
           range: r
 
-      # Do we have valid page coordinates inside the event
-      # which has triggered this function?
-      unless event.pageX
-        # No, we don't. Adding fake coordinates
-        pos = selectedRanges[0].getEndCoords()
-        event.pageX = pos.x
-        event.pageY = pos.y #- window.scrollY
-
       @annotator.onSuccessfulSelection event
     else
       @annotator.onFailedSelection event
-
-  # Strategies used for creating anchors from saved data
-

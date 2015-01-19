@@ -65,9 +65,9 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
     sr = selection.range.serialize @annotator.wrapper[0], '.' + @Annotator.TextHighlight.highlightClass
     [
       type: "RangeSelector"
-      startContainer: sr.startContainer
+      startContainer: sr.start
       startOffset: sr.startOffset
-      endContainer: sr.endContainer
+      endContainer: sr.end
       endOffset: sr.endOffset
     ]
 
@@ -80,9 +80,16 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
     selector = @anchoring.findSelector target.selector, "RangeSelector"
     unless selector? then return null
 
+    serializedRange = {
+      start: selector.startContainer
+      startOffset: selector.startOffset
+      end: selector.endContainer
+      endOffset: selector.endOffset
+    }
+
     # Try to apply the saved XPath
     try
-      range = @Annotator.Range.sniff selector
+      range = @Annotator.Range.sniff serializedRange
       normedRange = range.normalize @annotator.wrapper[0]
     catch error
       return null

@@ -4,7 +4,7 @@ annotator:
   output: scripts/annotator/annotator.min.js
   contents:
     - h:static/scripts/annotator/xpath.coffee
-    - h:static/scripts/annotator/extensions.coffee
+    - h:static/scripts/annotator/util.coffee
     - h:static/scripts/annotator/console.coffee
     - h:static/scripts/annotator/class.coffee
     - h:static/scripts/annotator/range.coffee
@@ -13,6 +13,9 @@ annotator:
     - h:static/scripts/annotator/widget.coffee
     - h:static/scripts/annotator/editor.coffee
     - h:static/scripts/annotator/viewer.coffee
+
+    # Monkeypatch range.coffee
+    - h:static/scripts/annotator/range_monkey.coffee
 
 # Annotator app plugins
 annotator_plugins_app:
