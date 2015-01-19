@@ -73,7 +73,7 @@ class Permissions
     for action, roles of context.permissions or []
       for role in roles
         allow = true
-        if not role.indexOf('group:')
+        if role.indexOf('group:') is 0
           if role == GROUP_WORLD
             principal = EVERYONE
           else
@@ -81,7 +81,7 @@ class Permissions
             allow = false
             principal = role
         else
-          if not role.indexOf('acct:')
+          if role.indexOf('acct:') is 0
             principal = role
           else
             allow = false
