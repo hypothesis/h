@@ -10,8 +10,6 @@ class CrossFrameUI
 
   this.$inject = ['$document', '$window', 'store', '$rootScope', 'threading']
   constructor:   ( $document,   $window,   store ,  $rootScope,   threading) ->
-    super($document.find('body'))
-
     $rootScope.$on('annotationDeleted', this.annotationDeleted)
 
     @providers = []
@@ -131,4 +129,4 @@ class CrossFrameUI
         method: 'setVisibleHighlights'
         params: state
 
-angular.module('h').service('cross-frame-ui', CrossFrameUI)
+angular.module('h').service('crossFrameUI', CrossFrameUI)
