@@ -8,7 +8,6 @@ annotator:
     - h:static/scripts/annotator/console.coffee
     - h:static/scripts/annotator/class.coffee
     - h:static/scripts/annotator/range.coffee
-    - h:static/scripts/annotator/highlights.coffee
     - h:static/scripts/annotator/annotator.coffee
     - h:static/scripts/annotator/widget.coffee
     - h:static/scripts/annotator/editor.coffee

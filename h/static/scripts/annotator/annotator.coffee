@@ -308,7 +308,7 @@ class Annotator extends Delegator
   #
   # Returns deleted annotation.
   deleteAnnotation: (annotation) ->
-    if annotation.anchors?    
+    if annotation.anchors?
       for a in annotation.anchors
         a.remove()
 
@@ -417,7 +417,7 @@ class Annotator extends Delegator
     this
 
   # Callback method called when the @editor fires the "hide" event. Itself
-  # publishes the 'annotationEditorHidden' event 
+  # publishes the 'annotationEditorHidden' event
   #
   # Returns nothing.
   onEditorHide: =>
@@ -545,7 +545,7 @@ class Annotator extends Delegator
   isAnnotator: (element) ->
     !!$(element).parents().addBack().filter('[class^=annotator-]').not(@wrapper).length
 
-  # Annotator#element callback. 
+  # Annotator#element callback.
   #
   # event - A mousedown Event object
   #
@@ -710,8 +710,6 @@ Annotator.Util = Util
 
 # Expose a global instance registry
 Annotator._instances = []
-
-Annotator.Highlight = Highlight
 
 # Bind gettext helper so plugins can use localisation.
 Annotator._t = _t
