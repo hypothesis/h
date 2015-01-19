@@ -40,7 +40,7 @@ class AnnotationMapper
         if annList.length > 0
           setTimeout((-> loader(annList)), 10)
         else
-          $rootScope.$emit('annotationsLoaded', [clone])
+          $rootScope.$emit('annotationsLoaded', clone)
 
       clone = annotations.slice()
 
