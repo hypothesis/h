@@ -189,6 +189,12 @@ class Annotator.Guest extends Annotator
   _setupDynamicStyle: -> this
   _setupViewer: -> this
   _setupEditor: -> this
+  _setupDocumentEvents: ->
+    $(document).bind({
+      # omit the "mouseup" check
+      "mousedown": this.checkForStartSelection
+    })
+    this
 
   destroy: ->
     $(document).unbind({
@@ -251,6 +257,12 @@ class Annotator.Guest extends Annotator
     unless event and this.isAnnotator(event.target)
       @mouseIsDown = true
 
+  # This is called to create a target from a raw selection,
+  # using selectors created by the registered selector creators
+  _getTargetFromSelection: (selection) ->
+    source: @getHref()
+    selector: @anchoring.getSelectorsFromSelection(selection)
+
   confirmSelection: ->
     return true unless @selectedTargets.length is 1
 
@@ -267,7 +279,30 @@ class Annotator.Guest extends Annotator
       # Describe the selection with targets
       @selectedTargets = (@_getTargetFromSelection(s) for s in event.segments)
       return
-    super
+
+    unless event?
+      throw "Called onSuccessfulSelection without an event!"
+    unless event.segments?
+      throw "Called onSuccessulSelection with an event with missing segments!"
+
+    # Describe the selection with targets
+    @selectedTargets = (@_getTargetFromSelection s for s in event.segments)
+
+    # Do we want immediate annotation?
+    if immediate
+      # Create an annotation
+      @onAdderClick event
+    else
+      # Show the adder button
+      @adder
+        .css(Annotator.Util.mousePosition(event, @wrapper[0]))
+        .show()
+
+    true
+
+  onFailedSelection: (event) ->
+    @adder.hide()
+    @selectedTargets = []
 
   # Select some annotations.
   #
