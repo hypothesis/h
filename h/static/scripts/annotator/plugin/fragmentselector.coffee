@@ -3,12 +3,8 @@ class Annotator.Plugin.FragmentSelector extends Annotator.Plugin
 
   pluginInit: ->
 
-    @Annotator = Annotator
-
-    @anchoring = @annotator.anchoring
-
     # Register the creator Fragment selectors
-    @anchoring.selectorCreators.push
+    @annotator.anchoring.selectorCreators.push
       name: "FragmentSelector"
       describe: @_getFragmentSelector
 
