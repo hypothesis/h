@@ -51,7 +51,7 @@ annotator_plugins_inject:
 
     # URL fragments
     - filters: coffeescript
-      output: scripts/annotator/plugin/fragmentselectorjs
+      output: scripts/annotator/plugin/fragmentselector.js
       contents: h:static/scripts/annotator/plugin/fragmentselector.coffee
 
     # Anchoring
