@@ -214,7 +214,6 @@ app_js:
     - momentjs
     - pagedown
     - autofill
-    - url
     - unorm
     - uuid
     - angular_tags_input
@@ -330,6 +329,7 @@ inject_js:
     - jschannel
     - annotator
     - annotator_plugins_inject
+    - url
     - filters: uglifyjs
       contents:
         - filters: coffeescript
