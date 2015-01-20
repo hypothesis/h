@@ -29,12 +29,6 @@ configureLocation = ['$locationProvider', ($locationProvider) ->
 ]
 
 
-configureHttp = ['$httpProvider', ($httpProvider) ->
-  # Inject the authorization token on HTTP requests
-  $httpProvider.interceptors.push('jwtInterceptor')
-]
-
-
 configureRoutes = ['$routeProvider', ($routeProvider) ->
   $routeProvider.when '/a/:id',
     controller: 'AnnotationViewerController'
@@ -70,7 +64,6 @@ configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
 
 
 configure = ['$injector', ($injector) ->
-  $injector.invoke(configureHttp)
   $injector.invoke(configureLocation)
   $injector.invoke(configureRoutes)
   $injector.invoke(configureTemplates)
