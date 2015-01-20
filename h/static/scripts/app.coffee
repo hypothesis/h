@@ -23,38 +23,57 @@ resolve =
   store: ['store', (store) -> store.$promise]
 
 
-configure = [
-  '$locationProvider', '$routeProvider', '$sceDelegateProvider',
-  ($locationProvider,   $routeProvider,   $sceDelegateProvider) ->
-    $locationProvider.html5Mode(true)
+configureLocation = ['$locationProvider', ($locationProvider) ->
+  # Use HTML5 history
+  $locationProvider.html5Mode(true)
+]
 
-    $routeProvider.when '/a/:id',
-      controller: 'AnnotationViewerController'
-      templateUrl: 'viewer.html'
-      resolve: resolve
-    $routeProvider.when '/viewer',
-      controller: 'ViewerController'
-      templateUrl: 'viewer.html'
-      reloadOnSearch: false
-      resolve: resolve
-    $routeProvider.when '/stream',
-      controller: 'StreamSearchController'
-      templateUrl: 'viewer.html'
-      resolve: resolve
-    $routeProvider.otherwise
-      redirectTo: '/viewer'
 
-    # Configure CSP for templates
-    # XXX: IE workaround for the lack of document.baseURI property
-    baseURI = document.baseURI
-    if not baseURI
-      baseTags = document.getElementsByTagName "base"
-      baseURI = if baseTags.length then baseTags[0].href else document.URL
+configureHttp = ['$httpProvider', ($httpProvider) ->
+  # Inject the authorization token on HTTP requests
+  $httpProvider.interceptors.push('jwtInterceptor')
+]
 
-    # Explicitly whitelist '.html' paths adjacent to application base URI
-    # TODO: move all front-end templates into their own directory for safety
-    basePattern = baseURI.replace /\/[^\/]*$/, '/**.html'
-    $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
+
+configureRoutes = ['$routeProvider', ($routeProvider) ->
+  $routeProvider.when '/a/:id',
+    controller: 'AnnotationViewerController'
+    templateUrl: 'viewer.html'
+    resolve: resolve
+  $routeProvider.when '/viewer',
+    controller: 'ViewerController'
+    templateUrl: 'viewer.html'
+    reloadOnSearch: false
+    resolve: resolve
+  $routeProvider.when '/stream',
+    controller: 'StreamSearchController'
+    templateUrl: 'viewer.html'
+    resolve: resolve
+  $routeProvider.otherwise
+    redirectTo: '/viewer'
+]
+
+
+configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
+  # Configure CSP for templates
+  # XXX: IE workaround for the lack of document.baseURI property
+  baseURI = document.baseURI
+  if not baseURI
+    baseTags = document.getElementsByTagName "base"
+    baseURI = if baseTags.length then baseTags[0].href else document.URL
+
+  # Explicitly whitelist '.html' paths adjacent to application base URI
+  # TODO: move all front-end templates into their own directory for safety
+  basePattern = baseURI.replace /\/[^\/]*$/, '/**.html'
+  $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
+]
+
+
+configure = ['$injector', ($injector) ->
+  $injector.invoke(configureHttp)
+  $injector.invoke(configureLocation)
+  $injector.invoke(configureRoutes)
+  $injector.invoke(configureTemplates)
 ]
 
 angular.module('h', imports, configure)
