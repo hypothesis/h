@@ -1,13 +1,13 @@
 
 /*
-** Annotator v1.2.9-dev-b091a74
+** Annotator v1.2.9-dev-368b5cf
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2015, the Annotator project contributors.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2015-01-19 11:35:26Z
+** Built at: 2015-01-19 16:53:10Z
  */
 
 
@@ -1236,9 +1236,6 @@
       for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
         range = _ref1[_k];
         container = range.commonAncestor;
-        if ($(container).hasClass('annotator-hl')) {
-          container = $(container).parents('[class!=annotator-hl]')[0];
-        }
         if (this.isAnnotator(container)) {
           return;
         }
@@ -1251,7 +1248,7 @@
     };
 
     Annotator.prototype.isAnnotator = function(element) {
-      return !!$(element).parents().addBack().filter('[class^=annotator-]').not(this.wrapper).length;
+      return !!$(element).parents().addBack().filter('[class^=annotator-]').not('[class=annotator-hl]').not(this.wrapper).length;
     };
 
     Annotator.prototype.onHighlightMouseover = function(event) {

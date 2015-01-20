@@ -2,10 +2,6 @@
 class Annotator.Plugin.TextSelection extends Annotator.Plugin
 
   pluginInit: ->
-    # We need text highlights
-    unless @annotator.plugins.TextHighlights
-      throw new Error "The TextSelection Annotator plugin requires the TextHighlights plugin."
-
     @Annotator = Annotator
     @$ = Annotator.$
 
@@ -88,9 +84,6 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
 
     for range in selectedRanges
       container = range.commonAncestor
-      # TODO: what is selection ends inside a different type of highlight?
-      if @Annotator.TextHighlight.isInstance container
-        container = @Annotator.TextHighlight.getIndependentParent container
       return if @annotator.isAnnotator(container)
 
     if selectedRanges.length

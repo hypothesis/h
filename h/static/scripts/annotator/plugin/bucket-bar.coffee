@@ -84,7 +84,8 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
               acc
           , {}
 
-          next.paddedScrollDownTo()
+          # Scroll down to the annotation from the top of the annotation's page
+          next.paddedScrollTo('down')
           delete @pendingScroll
 
     @annotator.subscribe "highlightRemoved", (highlight) =>
@@ -128,7 +129,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     dir = if direction is "up" then +1 else -1
     {next} = annotations.reduce (acc, ann) ->
       {start, next} = acc
-      anchor = ann.anchoring.anchors[0]
+      anchor = ann.anchors[0]
       if not next? or start.page*dir < anchor.startPage*dir
         # This one is obviously better
         start:
