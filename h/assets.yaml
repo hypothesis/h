@@ -49,6 +49,11 @@ annotator_plugins_inject:
       output: scripts/annotator/plugin/textselection.js
       contents: h:static/scripts/annotator/plugin/textselection.coffee
 
+    # URL fragments
+    - filters: coffeescript
+      output: scripts/annotator/plugin/fragmentselectorjs
+      contents: h:static/scripts/annotator/plugin/fragmentselector.coffee
+
     # Anchoring
     - h:static/scripts/vendor/dom_text_mapper.js
     - filters: coffeescript
@@ -137,7 +142,11 @@ wgxpath:
   output: scripts/vendor/polyfills/wgxpath.install.min.js
   contents:
     - h:static/scripts/vendor/polyfills/wgxpath.install.js
-
+url:
+  filters: uglifyjs
+  output: scripts/vendor/polyfills/url.min.js
+  contents:
+    - h:static/scripts/vendor/polyfills/url.js
 
 # Other dependencies
 jschannel:
@@ -205,6 +214,7 @@ app_js:
     - momentjs
     - pagedown
     - autofill
+    - url
     - unorm
     - uuid
     - angular_tags_input
