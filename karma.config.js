@@ -50,7 +50,7 @@ module.exports = function(config) {
       'h/static/scripts/vendor/sinon.js',
       'h/static/scripts/vendor/chai.js',
       'h/static/scripts/hypothesis.js',
-      'h/static/scripts/services/*.js',
+      'h/static/scripts/*-service.js',
       'h/templates/client/*.html',
       'tests/js/**/*-test.coffee'
     ],
