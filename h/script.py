@@ -180,7 +180,7 @@ def assets(settings):
     config = Configurator(settings=settings)
     config.include('h.assets')
     for bundle in config.get_webassets_env():
-        bundle.build()
+        bundle.urls()
 
 
 @command(usage='config_file browser base_url [static_url]')
