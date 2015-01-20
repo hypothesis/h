@@ -5,15 +5,12 @@ class CrossFrameUIService
   providers: null
   host: null
 
-  tool: 'comment'
-  visibleHighlights: false
-
-  this.$inject = ['$document', '$window', 'store', '$rootScope', 'threading']
-  constructor:   ( $document,   $window,   store ,  $rootScope,   threading) ->
+  this.$inject = ['$document', '$window', 'store', 'toolkit', '$rootScope', 'threading']
+  constructor:   ( $document,   $window,   store ,  toolkit,   $rootScope,   threading) ->
     $rootScope.$on('annotationDeleted', this.annotationDeleted)
 
     @providers = []
-    @store = store
+    @toolkit = toolkit
 
     this._emit = (event, args...) ->
       $rootScope.$emit(event, args...)
@@ -53,13 +50,14 @@ class CrossFrameUIService
         unless source is $window.parent
           channel.notify
             method: 'setTool'
-            params: this.tool
+            params: @toolkit.tool
 
           channel.notify
             method: 'setVisibleHighlights'
-            params: this.visibleHighlights
+            params: @toolkit.visibleHighlights
 
-    this.getAnnotationForTag = (tag) -> bridge.getAnnotationForTag(tag)
+    this.getAnnotationsByTags = (tags) ->
+      tags.map(bridge.getAnnotationForTag, bridge)
 
   _setupXDM: (options) ->
     # jschannel chokes FF and Chrome extension origins.
@@ -67,10 +65,12 @@ class CrossFrameUIService
         (options.origin.match /^resource:\/\//)
       options.origin = '*'
 
-    provider = Channel.build options
+    provider = Channel.build(options)
+
     provider.bind 'back', =>
       # Navigate "back" out of the interface.
       this.hide()
+
     provider.bind 'open', =>
       this.show()
 
@@ -80,18 +80,34 @@ class CrossFrameUIService
     provider.bind 'showAnnotations', (ctx, tags=[]) =>
       this.show()
       this._emit('showAnnotations', tags)
+      annotations = this.getAnnotationsByTags(tags)
+      toolkit.mergeSelectedAnnotations(annotations)
 
     provider.bind 'focusAnnotations', (ctx, tags=[]) =>
       this._emit('focusAnnotations', tags)
+      annotations = this.getAnnotationsByTags(tags)
+      toolkit.focusedAnnotations = annotations
 
     provider.bind 'toggleAnnotationSelection', (ctx, tags=[]) =>
       this._emit('toggleViewerSelection', tags)
+      annotations = this.getAnnotationsByTags(tags)
+      toolkit.selectedAnnotations = annotations
 
     provider.bind 'setTool', (ctx, name) =>
-      this.setTool(name)
+      @toolkit.tool = name
+      for p in @providers
+        p.channel.notify({
+          method: 'setTool'
+          params: name
+        })
 
     provider.bind 'setVisibleHighlights', (ctx, state) =>
-      this.setVisibleHighlights(state)
+      @toolkit.visibleHighlights = Boolean(state)
+      for p in @providers
+        p.channel.notify({
+          method: 'setVisibleHighlights'
+          params: state
+        })
 
   _setupDocumentEvents: ->
     $document.addEventListener 'dragover', (event) =>
@@ -105,23 +121,5 @@ class CrossFrameUIService
 
   hide: ->
     @host.notify(method: 'hideFrame')
-
-  setTool: (name) ->
-    return if name is @tool
-    @tool = name
-    this._emit('setTool', name)
-    for p in @providers
-      p.channel.notify
-        method: 'setTool'
-        params: name
-
-  setVisibleHighlights: (state) ->
-    return if state is @visibleHighlights
-    @visibleHighlights = state
-    this._emit('setVisibleHighlights', state)
-    for p in @providers
-      p.channel.notify
-        method: 'setVisibleHighlights'
-        params: state
 
 angular.module('h').service('crossFrameUI', CrossFrameUIService)
