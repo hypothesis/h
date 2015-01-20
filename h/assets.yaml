@@ -215,6 +215,7 @@ app_js:
     - pagedown
     - autofill
     - unorm
+    - url
     - uuid
     - angular_tags_input
     - h:static/scripts/vendor/katex/katex.js

@@ -1,12 +1,12 @@
 class AppController
   this.$inject = [
-    '$location', '$route', '$scope', '$window',
-    'annotator', 'auth', 'documentHelpers', 'drafts', 'identity',
+    '$document', '$location', '$route', '$scope', '$window',
+    'annotator', 'auth', 'drafts', 'identity',
     'permissions', 'streamer', 'streamfilter'
   ]
   constructor: (
-     $location,   $route,   $scope,   $window,
-     annotator,   auth,   documentHelpers,   drafts,   identity,
+     $document,   $location,   $route,   $scope,   $window,
+     annotator,   auth,   drafts,   identity,
      permissions,   streamer,   streamfilter,
 
   ) ->
@@ -14,7 +14,10 @@ class AppController
 
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
-    streamerUrl = documentHelpers.baseURI.replace(/^http/, 'ws') + 'ws'
+
+    streamerUrl = new URL('/ws', $document.prop('baseURI'))
+    streamerUrl.protocol = streamerUrl.protocol.replace('http', 'ws')
+    streamerUrl = streamerUrl.href
 
     applyUpdates = (action, data) ->
       # Update the application with new data from the websocket.

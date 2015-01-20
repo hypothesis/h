@@ -1,12 +1,4 @@
-### global -extractURIComponent, -validate ###
-
-# Use an anchor tag to extract specific components within a uri.
-extractURIComponent = (uri, component) ->
-  unless extractURIComponent.a
-    extractURIComponent.a = document.createElement('a')
-  extractURIComponent.a.href = uri
-  extractURIComponent.a[component]
-
+### global -validate ###
 
 # Validate an annotation.
 # Annotations must be attributed to a user or marked as deleted.
@@ -37,12 +29,10 @@ validate = (value) ->
 # {@link annotator annotator service} for persistence.
 ###
 AnnotationController = [
-  '$scope', '$timeout',
-  'annotator', 'auth', 'drafts', 'flash', 'documentHelpers', 'permissions',
-  'timeHelpers'
-  ($scope,   $timeout,
-   annotator,   auth,   drafts,   flash,   documentHelpers,   permissions,
-   timeHelpers
+  '$document', '$scope', '$timeout',
+  'annotator', 'auth', 'drafts', 'flash', 'permissions', 'timeHelpers'
+  ($document,   $scope,   $timeout,
+   annotator,   auth,   drafts,   flash,   permissions,   timeHelpers
   ) ->
     @annotation = {}
     @action = 'view'
@@ -202,7 +192,7 @@ AnnotationController = [
       angular.extend @annotation, angular.copy model
 
       # Set the URI
-      @annotationURI = documentHelpers.absoluteURI("/a/#{@annotation.id}")
+      @annotationURI = new URL("/a/#{@annotation.id}", this.baseURI).href
 
       # Extract the document metadata.
       if model.document
@@ -213,7 +203,7 @@ AnnotationController = [
             uri = link.href
             break
 
-        domain = extractURIComponent(uri, 'hostname')
+        domain = new URL(uri).hostname
         documentTitle = if Array.isArray(model.document.title)
           model.document.title[0]
         else
@@ -255,7 +245,7 @@ AnnotationController = [
       , nextUpdate, false
 
     # Export the baseURI for the share link
-    this.baseURI = documentHelpers.baseURI
+    this.baseURI = $document.prop('baseURI')
 
     # Discard the draft if the scope goes away.
     $scope.$on '$destroy', ->
