@@ -2,10 +2,6 @@
 class Annotator.Plugin.TextSelection extends Annotator.Plugin
 
   pluginInit: ->
-    # We need text highlights
-    unless @annotator.plugins.TextHighlights
-      throw new Error "The TextSelection Annotator plugin requires the TextHighlights plugin."
-
     @Annotator = Annotator
     @$ = Annotator.$
 
