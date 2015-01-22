@@ -88,13 +88,14 @@ class CrossFrameSync
         method: 'loadAnnotations'
         params: annotations
 
-  _emit: (event, args...) =>
-    @$rootScope.$emit(event, args...)
+  _emit: (args...) =>
+    @$rootScope.$emit.call(@$rootScope, args...)
 
   _on: (event, handler) =>
     @$rootScope.$on(event, handler)
 
-
+  getAnnotationForTag: (tag) ->
+    @cache[tag] or null
 
   # Handlers for events coming from this frame, to send them across the channel
   eventListeners:
