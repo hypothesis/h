@@ -63,10 +63,16 @@ configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
 ]
 
 
-configure = ['$injector', ($injector) ->
+configure = ['$injector', '$provide', ($injector, $provide) ->
   $injector.invoke(configureLocation)
   $injector.invoke(configureRoutes)
   $injector.invoke(configureTemplates)
+
+  $provide.decorator '$document', ($delegate) ->
+    baseURI = $delegate.prop('baseURI')
+    baseURI ?= $delegate.find('base').prop('href')  # fallback
+    baseURI ?= $delegate.prop('URL')                # fallback
+    $delegate.prop('baseURI', baseURI)
 ]
 
 angular.module('h', imports, configure)

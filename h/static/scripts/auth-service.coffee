@@ -10,10 +10,10 @@
 ###
 class Auth
 
-  this.$inject = ['$http', '$location', '$rootScope',
-                  'annotator', 'documentHelpers', 'identity']
-  constructor:   ( $http,   $location,   $rootScope,
-                   annotator,   documentHelpers,   identity) ->
+  this.$inject = ['$document', '$http', '$location', '$rootScope',
+                  'annotator', 'identity']
+  constructor:   ( $document,   $http,   $location,   $rootScope,
+                   annotator,   identity) ->
     {plugins} = annotator
     _checkingToken = false
     @user = undefined
@@ -25,10 +25,11 @@ class Auth
     onlogin = (assertion) =>
       _checkingToken = true
 
+      base = $document.prop('baseURI')
+      tokenUrl = new URL("/api/token?assertion=#{assertion}", base).href
+
       # Configure the Auth plugin with the issued assertion as refresh token.
-      annotator.addPlugin 'Auth',
-        tokenUrl: documentHelpers.absoluteURI(
-          "/api/token?assertion=#{assertion}")
+      annotator.addPlugin 'Auth', tokenUrl: tokenUrl
 
       # Set the user from the token.
       plugins.Auth.withToken (token) =>

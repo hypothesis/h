@@ -40,8 +40,8 @@ class SessionProvider
   #   });
   ###
   $get: [
-    '$http', '$q', '$resource', 'documentHelpers', 'flash', 'xsrf',
-    ($http,   $q,   $resource,   documentHelpers,   flash,   xsrf) ->
+    '$document', '$http', '$q', '$resource', 'flash', 'xsrf',
+    ($document,   $http,   $q,   $resource,   flash,   xsrf) ->
       actions = {}
       provider = this
 
@@ -72,7 +72,8 @@ class SessionProvider
         actions[name].transformRequest = prepare
         actions[name].transformResponse = process
 
-      endpoint = documentHelpers.absoluteURI('/app')
+      base = $document.prop('baseURI')
+      endpoint = new URL('/app', base).href
       $resource(endpoint, {}, actions)
   ]
 
