@@ -1,16 +1,16 @@
 # Uses a channel between the sidebar and the attached providers to ensure
 # the interface remains in sync.
-class CrossFrameUIService
+class AnnotationUISyncService
   # Internal state
   providers: null
   host: null
 
-  this.$inject = ['$document', '$window', 'store', 'toolkit', '$rootScope', 'threading']
-  constructor:   ( $document,   $window,   store ,  toolkit,   $rootScope,   threading) ->
+  this.$inject = ['$document', '$window', 'store', 'annotationUI', '$rootScope', 'threading']
+  constructor:   ( $document,   $window,   store ,  annotationUI,   $rootScope,   threading) ->
     $rootScope.$on('annotationDeleted', this.annotationDeleted)
 
     @providers = []
-    @toolkit = toolkit
+    @annotationUI = annotationUI
 
     this._emit = (event, args...) ->
       $rootScope.$emit(event, args...)
@@ -50,11 +50,11 @@ class CrossFrameUIService
         unless source is $window.parent
           channel.notify
             method: 'setTool'
-            params: @toolkit.tool
+            params: @annotationUI.tool
 
           channel.notify
             method: 'setVisibleHighlights'
-            params: @toolkit.visibleHighlights
+            params: @annotationUI.visibleHighlights
 
     this.getAnnotationsByTags = (tags) ->
       tags.map(bridge.getAnnotationForTag, bridge)
@@ -79,22 +79,19 @@ class CrossFrameUIService
 
     provider.bind 'showAnnotations', (ctx, tags=[]) =>
       this.show()
-      this._emit('showAnnotations', tags)
       annotations = this.getAnnotationsByTags(tags)
-      toolkit.mergeSelectedAnnotations(annotations)
+      @annotationUI.xorSelectedAnnotations(annotations)
 
     provider.bind 'focusAnnotations', (ctx, tags=[]) =>
-      this._emit('focusAnnotations', tags)
       annotations = this.getAnnotationsByTags(tags)
-      toolkit.focusedAnnotations = annotations
+      @annotationUI.focusAnnotations(annotations)
 
     provider.bind 'toggleAnnotationSelection', (ctx, tags=[]) =>
-      this._emit('toggleViewerSelection', tags)
       annotations = this.getAnnotationsByTags(tags)
-      toolkit.selectedAnnotations = annotations
+      @annotationUI.selectAnnotations(annotations)
 
     provider.bind 'setTool', (ctx, name) =>
-      @toolkit.tool = name
+      @annotationUI.tool = name
       for p in @providers
         p.channel.notify({
           method: 'setTool'
@@ -102,7 +99,7 @@ class CrossFrameUIService
         })
 
     provider.bind 'setVisibleHighlights', (ctx, state) =>
-      @toolkit.visibleHighlights = Boolean(state)
+      @annotationUI.visibleHighlights = Boolean(state)
       for p in @providers
         p.channel.notify({
           method: 'setVisibleHighlights'
@@ -122,4 +119,4 @@ class CrossFrameUIService
   hide: ->
     @host.notify(method: 'hideFrame')
 
-angular.module('h').service('crossFrameUI', CrossFrameUIService)
+angular.module('h').service('annotationUISync', AnnotationUISyncService)
