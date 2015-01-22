@@ -1,8 +1,8 @@
-class ToolsetSyncController
-  constructor: ($rootScope, appScope, crossFrameUI) ->
-    getAnnotationsForTags = (tags) ->
-      tags.map(crossFrameUI.getAnnotationForTag, crossFrameUI)
-
+# Keeps the annotation scope properties up to date by watching for changes
+# in the annotationUI object and reacting to user input. This is not a
+# controller in the Angular sense, but rather just keeps UI and state in sync.
+class AnnotationUIController
+  constructor: (annotationUI, $rootScope, appScope) ->
     # Properly set the selectedAnnotations- and the Count variables
     setSelectedAnnotations = (selected) ->
       count = Object.keys(selected).length
@@ -27,7 +27,6 @@ class ToolsetSyncController
       setSelectedAnnotations(selected)
 
     onFocusAnnotations = (event, tags) ->
-      appScope.focusedAnnotations = tags
 
     onShowAnnotations = (event, tags) ->
       annotations = getAnnotationsForTags(tags)
@@ -50,6 +49,18 @@ class ToolsetSyncController
     onAnnotationsLoaded = (event, annotations) =>
       appScope.$evalAsync(angular.noop)
 
+    $rootScope.$watch (-> annotationUI.selectedAnnotationMap), (map={}) ->
+      count = Object.keys(map).length
+      appScope.selectedAnnotationsCount = count
+
+      if count
+        appScope.selectedAnnotations = map
+      else
+        appScope.selectedAnnotations = null
+
+    $rootScope.$watch (-> annotationUI.focusedAnnotationMap), (map={}) ->
+      appScope.focusedAnnotations = map
+
     $rootScope.$on('showAnnotations', onShowAnnotations)
     $rootScope.$on('focusAnnotations', onFocusAnnotations)
     $rootScope.$on('toggleAnnotationSelection', onToggleAnnotationSelection)
@@ -62,16 +73,16 @@ class AppController
   this.$inject = [
     '$document', '$location', '$route', '$scope', '$window', '$rootScope',
     'auth', 'documentHelpers', 'drafts', 'identity',
-    'permissions', 'streamer', 'streamfilter', 'crossFrameUI',
+    'permissions', 'streamer', 'streamfilter', 'annotationUI',
     'annotationMapper', 'threading'
   ]
   constructor: (
      $document,   $location,   $route,   $scope,   $window, $rootScope,
      auth,   documentHelpers,   drafts,   identity,
-     permissions,   streamer,   streamfilter, crossFrameUI,
+     permissions,   streamer,   streamfilter, annotationUI,
      annotationMapper, threading
   ) ->
-    new ToolsetSyncController($rootScope, $scope, crossFrameUI)
+    new AnnotationUIController(annotationUI, $rootScope, $scope)
 
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
@@ -104,7 +115,7 @@ class AppController
       # Clean up any annotations that need to be unloaded.
       for id, container of $scope.threading.idTable when container.message
         # Remove annotations not belonging to this user when highlighting.
-        if crossFrameUI.tool is 'highlight' and annotation.user != auth.user
+        if annotationUI.tool is 'highlight' and annotation.user != auth.user
           $rootScope.$emit('annotationDeleted', container.message)
           drafts.remove annotation
         # Remove annotations the user is not authorized to view.
@@ -216,11 +227,11 @@ class AnnotationViewerController
 
 class ViewerController
   this.$inject = [
-    '$scope', '$route', 'crossFrameUI', 'annotationMapper',
+    '$scope', '$route', 'annotationUI', 'annotationUISync', 'annotationMapper',
     'auth', 'flash', 'streamer', 'streamfilter', 'store'
   ]
   constructor:   (
-     $scope,   $route, crossFrameUI, annotationMapper,
+     $scope,   $route, annotationUI, annotationUISync, annotationMapper,
      auth,   flash,   streamer,   streamfilter,   store
   ) ->
     # Tells the view that these annotations are embedded into the owner doc
@@ -235,7 +246,7 @@ class ViewerController
         return unless auth.user
         query.user = auth.user
 
-      for p in crossFrameUI.providers
+      for p in annotationUISync.providers
         for e in p.entities when e not in loaded
           loaded.push e
           r = store.SearchResource.get angular.extend(uri: e, query), (results) ->
@@ -243,30 +254,30 @@ class ViewerController
 
       streamfilter.resetFilter().addClause('/uri', 'one_of', loaded)
 
-      if auth.user and crossFrameUI.tool is 'highlight'
+      if auth.user and annotationUI.tool is 'highlight'
         streamfilter.addClause('/user', auth.user)
 
       streamer.send({filter: streamfilter.getFilter()})
 
-    $scope.$watch (-> crossFrameUI.tool), (newVal, oldVal) ->
+    $scope.$watch (-> annotationUI.tool), (newVal, oldVal) ->
       return if newVal is oldVal
       $route.reload()
 
-    $scope.$watchCollection (-> crossFrameUI.providers), loadAnnotations
+    $scope.$watchCollection (-> annotationUISync.providers), loadAnnotations
 
     $scope.focus = (annotation) ->
       if angular.isObject annotation
         highlights = [annotation.$$tag]
       else
         highlights = []
-      for p in crossFrameUI.providers
+      for p in annotationUISync.providers
         p.channel.notify
           method: 'focusAnnotations'
           params: highlights
 
     $scope.scrollTo = (annotation) ->
       if angular.isObject annotation
-        for p in crossFrameUI.providers
+        for p in annotationUISync.providers
           p.channel.notify
             method: 'scrollToAnnotation'
             params: annotation.$$tag

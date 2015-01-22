@@ -29,12 +29,12 @@ validate = (value) ->
 # {@link annotationMapper service} for persistence.
 ###
 AnnotationController = [
-  '$document', '$scope', '$timeout', '$rootScope',
+  '$scope', '$timeout', '$rootScope',
   'auth', 'drafts', 'flash', 'permissions',
-  'timeHelpers', 'crossFrameUI', 'annotationMapper'
-  ($document,   $scope,   $timeout,   $rootScope,
+  'timeHelpers', 'annotationUI', 'annotationMapper'
+  ($scope,   $timeout,   $rootScope,
    auth,   drafts,   flash,   permissions,
-   timeHelpers, crossFrameUI, annotationMapper) ->
+   timeHelpers, annotationUI, annotationMapper) ->
     @annotation = {}
     @action = 'view'
     @document = null
@@ -45,7 +45,7 @@ AnnotationController = [
     @showDiff = undefined
     @timestamp = null
 
-    highlight = crossFrameUI.tool is 'highlight'
+    highlight = annotationUI.tool is 'highlight'
     model = $scope.annotationGet()
     original = null
     vm = this
