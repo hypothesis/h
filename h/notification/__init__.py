@@ -10,6 +10,9 @@ def includeme(config):
     config.include('.reply_template')
     config.include('.views')
 
-    secret = config.registry.settings['h.notification.secret']
-    serializer = SignedSerializer(secret, 'h.notification.secret')
+    # We use the shared session secret, but salt it with the namespace
+    # 'h.notification' -- only messages serialized with this salt will
+    # authenticate on deserialization.
+    secret = config.registry.settings['session.secret']
+    serializer = SignedSerializer(secret, 'h.notification')
     config.registry.notification_serializer = serializer
