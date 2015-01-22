@@ -12,4 +12,4 @@ On {{ reply_timestamp }} {{ reply_user }} said:
 View this reply: {{ reply_path }}
 or view {{ reply_user }}'s stream: {{ reply_user_profile }}
 
-If you'd rather not recieve these notifications you can unsubscribe here: {{ unsubscribe }}
+If you'd rather not receive these notifications you can unsubscribe here: {{ unsubscribe }}
