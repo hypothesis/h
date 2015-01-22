@@ -48,7 +48,6 @@ describe 'h', ->
       send: sandbox.spy()
     }
 
-    $provide.value 'annotator', fakeAnnotator
     $provide.value 'identity', fakeIdentity
     $provide.value 'streamer', fakeStreamer
     $provide.value '$location', fakeLocation
@@ -69,7 +68,6 @@ describe 'h', ->
 
     it 'does not show login form for logged in users', ->
       createController()
-      $scope.$digest()
       assert.isFalse($scope.dialog.visible)
 
   describe 'AnnotationViewerController', ->

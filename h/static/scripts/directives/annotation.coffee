@@ -300,8 +300,8 @@ AnnotationController = [
 # an embedded widget.
 ###
 annotationDirective = [
-  '$document', 'annotationMapper',
-  ($document,   annotationMapper) ->
+  '$document',
+  ($document) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
       # Observe the embedded attribute
       attrs.$observe 'annotationEmbedded', (value) ->
