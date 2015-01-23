@@ -142,8 +142,15 @@ thread = [
         else
           attrs.$removeClass COLLAPSED_CLASS
 
+      # The watch is necessary because the computed value of the attribute
+      # expression may change. This won't happen when we use the thread
+      # directive in a repeat, since the element will be torn down whenever the
+      # thread might have changed, but we shouldn't assume that here, unless we
+      # want to advertise that the thread expression is fixed at link time and
+      # should not change.
       scope.$watch $parse(attrs.thread), (thread) ->
         # Queue a render frame to complete the binding and show the element.
+        # We call $digest to trigger a scope local update.
         render ->
           ctrl.container = thread
           scope.$digest()
