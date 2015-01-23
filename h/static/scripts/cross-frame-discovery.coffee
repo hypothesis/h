@@ -70,7 +70,7 @@ class CrossFrameDiscovery
     # Process the received message
     {reply, discovered, token} = this._processMessage(messageType, token)
     if reply?
-      source.postMessage reply, origin
+      source.postMessage '__cross_frame_dhcp_' + reply, origin
     if discovered is true
       @onDiscovery(source, origin, token)
 
@@ -86,11 +86,11 @@ class CrossFrameDiscovery
     if @options.server # We are configured as server
       if messageType is 'discovery'
         # A client joined the party. Offer it to connect.
-        reply = '__cross_frame_dhcp_offer'
+        reply = 'offer'
       else if messageType is 'request'
         # Create a channel with random identifier
         token = ':' + ('' + Math.random()).replace(/\D/g, '')
-        reply = '__cross_frame_dhcp_ack' + token
+        reply = 'ack' + token
         discovered = true
     else # We are configured as a client
       if messageType is 'offer'
@@ -98,7 +98,7 @@ class CrossFrameDiscovery
         # Request it to set up a channel if we did not already do so.
         unless @requestInProgress?
           @requestInProgress = true # prevent creating two channels
-          reply = '__cross_frame_dhcp_request'
+          reply = 'request'
       else if messageType is 'ack'
         # The other side opened a channel to us. We note its scope and create
         # a matching channel end on this side.

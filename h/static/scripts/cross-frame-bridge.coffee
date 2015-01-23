@@ -7,17 +7,18 @@ class CrossFrameBridge
     # Scope identifier to distinguish this channel from any others
     scope: 'crossFrameBridge'
 
-    # Callbacks to invoke when a connection is established. The functions are
+    # Callback to invoke when a connection is established. The function is
     # passed:
     # - the newly created channel object
-    onConnectListeners: []
+    # - the window just connected to
+    onConnect: -> true
 
     # Any callbacks for messages on the channel. Max one callback per method.
     channelListeners: {}
 
   constructor: (options) ->
     @options = $.extend(true, {}, @options, options)
-    @onConnectListeners = @options.onConnectListeners
+    @onConnectListeners = [@options.onConnect]
     @channelListeners = @options.channelListeners
     @links = []
 
