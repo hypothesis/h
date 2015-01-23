@@ -1,4 +1,4 @@
-class CrossFrameCommunication
+class CrossFrameBridge
 
   # Connected links to other frames
   links: null

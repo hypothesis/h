@@ -11,7 +11,7 @@ class CrossFrameService
     createBridge = ->
       options =
         gateway: true # TODO: Gerben, where does this go now?
-      new CrossFrameCommunication(options)
+      new CrossFrameBridge(options)
 
     createAnnotationSync = ->
       whitelist = ['target', 'document', 'uri']
