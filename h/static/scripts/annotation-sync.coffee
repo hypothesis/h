@@ -155,15 +155,14 @@ class AnnotationSync
 
   # Parse returned annotations to update cache with any changes made remotely
   _parseResults: (results) ->
-    if Array.isArray(results[0])
-      acc = []
-      foldFn = (_, cur) =>
-        (this._parse(a) for a in cur)
-    else
-      acc = {}
-      foldFn = (_, cur) =>
-        this._parse(cur)
-    results.reduce(foldFn, acc)
+    for annotations in results
+      if Array.isArray(annotations)
+        for a in annotations
+          this._parse(a)
+      else
+        # 'annotations' is in fact just a single annotation
+        this._parse(annotations)
+    return
 
   # Assign a non-enumerable tag to objects which cross the bridge.
   # This tag is used to identify the objects between message.
