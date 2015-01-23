@@ -99,7 +99,9 @@ describe 'h.directives.thread.ThreadController', ->
 
 
 describe 'h.directives.thread.thread', ->
+  createElement = null
   $element = null
+  $isolateScope = null
   fakePulse = null
   sandbox = null
 
@@ -112,11 +114,21 @@ describe 'h.directives.thread.thread', ->
     return
 
   beforeEach inject ($compile, $rootScope) ->
-    $element = $compile('<div thread></div>')($rootScope.$new())
+    createElement = (html) -> $compile(html or '<div thread></div>')($rootScope.$new())
+    $element = createElement()
     $isolateScope = $element.scope()
 
   afterEach ->
     sandbox.restore()
+
+  it 'sets the threadRoot on the controller to false', ->
+    controller = $element.controller('thread')
+    assert.isFalse(controller.isRoot)
+
+  it 'sets the threadRoot on the controller to true when the thread-root attr is set', ->
+    $element = createElement('<div thread thread-root="true"></div>')
+    controller = $element.controller('thread')
+    assert.isTrue(controller.isRoot)
 
   it 'pulses the current thread on an annotationUpdated event', ->
     $element.scope().$emit('annotationUpdate')
