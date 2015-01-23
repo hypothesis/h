@@ -36,3 +36,16 @@ class AnnotationUISync
 
     for channel, listener in channelListeners
       bridge.on(channel, listener)
+
+    onConnect = (channel, source) ->
+      # Allow the host to define its own state
+      unless source is $window.parent
+        channel.notify
+          method: 'setTool'
+          params: annotationUI.tool
+
+        channel.notify
+          method: 'setVisibleHighlights'
+          params: annotationUI.visibleHighlights
+
+    bridge.onConnect(onConnect)

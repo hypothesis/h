@@ -33,34 +33,24 @@ class CrossFrameService
           parsed
       new AnnotationSync($rootScope, options, bridge)
 
-      createAnnotationUISync = (bridge) ->
-        new AnnotationUISync($rootScope, $window, bridge, annotationUI)
+    createAnnotationUISync = (bridge) ->
+      new AnnotationUISync($rootScope, $window, bridge, annotationUI)
 
-      # TODO: This now needs to be called or passed to discovery.
-      onConnect = (channel, source) =>
-        provider = {channel: channel, entities: []}
+    addProvider = (channel) =>
+      provider = {channel: channel, entities: []}
 
-        channel.call
-          method: 'getDocumentInfo'
-          success: (info) =>
-            provider.entities = (link.href for link in info.metadata.link)
-            @providers.push(provider)
-            $rootScope.$emit('getDocumentInfo')
-
-        # Allow the host to define it's own state
-        unless source is $window.parent
-          channel.notify
-            method: 'setTool'
-            params: annotationUI.tool
-
-          channel.notify
-            method: 'setVisibleHighlights'
-            params: annotationUI.visibleHighlights
+      channel.call
+        method: 'getDocumentInfo'
+        success: (info) =>
+          provider.entities = (link.href for link in info.metadata.link)
+          @providers.push(provider)
+          $rootScope.$emit('getDocumentInfo')
 
     this.connect = ->
       discovery = createDiscovery()
       bridge = createBridge()
 
+      bridge.onConnect(addProvider)
       annotationSync = createAnnotationSync(bridge)
       annotationUISync = createAnnotationUISync(bridge)
 
