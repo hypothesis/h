@@ -29,6 +29,20 @@ ThreadController = [
     this.toggleCollapsed = ->
       @collapsed = not @collapsed
 
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#shouldShowReply
+    # @description
+    # Determines if the reply counter should be rendered. Requires the
+    # `count` directive to be passed and a boolean that indicates whether
+    # the thread is currently filtered.
+    ###
+    this.shouldShowReply = (count, isFilterActive) ->
+      isCollapsedReply = (@collapsed && !@isRoot)
+      hasChildren = count('message') > 0
+      hasFilterMatch = !isFilterActive || count('message') == count('match')
+      !isCollapsedReply && hasChildren && hasFilterMatch
+
     this
 ]
 

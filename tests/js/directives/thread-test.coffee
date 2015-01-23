@@ -23,6 +23,80 @@ describe 'h.directives.thread.ThreadController', ->
       after = controller.collapsed
       assert.equal(before, !after)
 
+  describe '#shouldShowReply', ->
+    count = null
+    controller = null
+
+    beforeEach ->
+      controller = createController()
+      count = sinon.stub()
+
+    describe 'when root', ->
+      beforeEach -> controller.isRoot = true
+
+      describe 'and when not filtered', ->
+        it 'shows the reply if the thread is not collapsed and has children', ->
+          count.withArgs('message').returns(1)
+          assert.isTrue(controller.shouldShowReply(count, false))
+
+        it 'does not show the reply if the thread is not collapsed and has no children', ->
+          count.withArgs('message').returns(0)
+          assert.isFalse(controller.shouldShowReply(count, false))
+
+        it 'shows the reply if the thread is collapsed and has children', ->
+          count.withArgs('message').returns(1)
+          controller.collapsed = true
+          assert.isTrue(controller.shouldShowReply(count, false))
+
+        it 'does not show the reply if the thread is collapsed and has no children', ->
+          count.withArgs('message').returns(0)
+          controller.collapsed = true
+          assert.isFalse(controller.shouldShowReply(count, false))
+
+      describe 'and when filtered with children', ->
+        it 'shows the reply if the thread is not collapsed', ->
+          count.withArgs('match').returns(1)
+          count.withArgs('message').returns(1)
+          assert.isTrue(controller.shouldShowReply(count, true))
+
+        it 'does not show the reply if the thread is not collapsed and the message count does not match the match count', ->
+          count.withArgs('match').returns(0)
+          count.withArgs('message').returns(1)
+          assert.isFalse(controller.shouldShowReply(count, true))
+
+    describe 'when reply', ->
+      beforeEach -> controller.isRoot = false
+
+      describe 'and when not filtered', ->
+        it 'shows the reply if the thread is not collapsed and has children', ->
+          count.withArgs('message').returns(1)
+          assert.isTrue(controller.shouldShowReply(count, false))
+
+        it 'does not show the reply if the thread is not collapsed and has no children', ->
+          count.withArgs('message').returns(0)
+          assert.isFalse(controller.shouldShowReply(count, false))
+
+        it 'does not show the reply if the thread is collapsed and has children', ->
+          count.withArgs('message').returns(1)
+          controller.collapsed = true
+          assert.isFalse(controller.shouldShowReply(count, false))
+
+        it 'does not show the reply if the thread is collapsed and has no children', ->
+          count.withArgs('message').returns(0)
+          controller.collapsed = true
+          assert.isFalse(controller.shouldShowReply(count, false))
+
+      describe 'and when filtered with children', ->
+        it 'shows the reply if the thread is not collapsed', ->
+          count.withArgs('match').returns(1)
+          count.withArgs('message').returns(1)
+          assert.isTrue(controller.shouldShowReply(count, true))
+
+        it 'does not show the reply if the thread is not collapsed and the message count does not match the match count', ->
+          count.withArgs('match').returns(0)
+          count.withArgs('message').returns(1)
+          assert.isFalse(controller.shouldShowReply(count, true))
+
 
 describe 'h.directives.thread.thread', ->
   $element = null
