@@ -6,14 +6,19 @@ class CrossFrameService
   constructor: ($rootScope, $document, $window, store, annotationUI) ->
     @providers = []
 
+    createDiscovery = ->
+      options =
+        server: true
+      new CrossFrameDiscovery(options)
+
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
     createBridge = ->
       options =
-        gateway: true # TODO: Gerben, where does this go now?
+        scope: 'annotator:bridge'
       new CrossFrameBridge(options)
 
-    createAnnotationSync = ->
+    createAnnotationSync = (bridge) ->
       whitelist = ['target', 'document', 'uri']
       options =
         formatter: (annotation) ->
@@ -28,7 +33,7 @@ class CrossFrameService
           parsed
       new AnnotationSync($rootScope, options, bridge)
 
-      createAnnotationUISync = ->
+      createAnnotationUISync = (bridge) ->
         new AnnotationUISync($rootScope, $window, bridge, annotationUI)
 
       # TODO: This now needs to be called or passed to discovery.
@@ -53,9 +58,15 @@ class CrossFrameService
             params: annotationUI.visibleHighlights
 
     this.connect = ->
+      discovery = createDiscovery()
       bridge = createBridge()
-      annotationSync = createAnnotationSync()
-      annotationUISync = createAnnotationUISync()
+
+      annotationSync = createAnnotationSync(bridge)
+      annotationUISync = createAnnotationUISync(bridge)
+
+      onDiscoveryCallback = (source, origin, token) =>
+        bridge.createChannel(source, origin, token)
+      discovery.startDiscovery(onDiscoveryCallback)
 
       this.notify = bridge.notify.bind(bridge)
 

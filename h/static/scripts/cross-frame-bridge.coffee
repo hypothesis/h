@@ -5,7 +5,7 @@ class CrossFrameBridge
 
   options:
     # Scope identifier to distinguish this channel from any others
-    scope: 'annotator:bridge'
+    scope: 'crossFrameBridge'
 
     # Callbacks to invoke when a connection is established. The functions are
     # passed:
@@ -21,16 +21,7 @@ class CrossFrameBridge
     @channelListeners = @options.channelListeners
     @links = []
 
-    # Start discovery of cooperating frames
-    discoveryOptions =
-      server: @options.server
-      origin: @options.origin
-    @crossFrameDiscovery = new CrossFrameDiscovery(discoveryOptions)
-    onDiscoveryCallback = (source, origin, token) =>
-      this._create_channel(source, origin, token)
-    @crossFrameDiscovery.startDiscovery(onDiscoveryCallback)
-
-  _create_channel: (source, origin, token) ->
+  createChannel: (source, origin, token) ->
     # Set up a channel
     scope = @options.scope + token
     channelOptions =
