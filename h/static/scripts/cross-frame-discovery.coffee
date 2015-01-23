@@ -80,7 +80,9 @@ class CrossFrameDiscovery
     # Process an incoming message, returns:
     # - a reply message
     # - whether the discovery has completed
-    reply = null, discovered = false
+    reply = null
+    discovered = false
+
     if @options.server # We are configured as server
       if messageType is 'discovery'
         # A client joined the party. Offer it to connect.

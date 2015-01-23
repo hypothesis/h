@@ -1,6 +1,6 @@
 # Instantiates all objects used for cross frame discovery and communication.
 class CrossFrameService
-  providers: null,
+  providers: null
 
   this.inject = ['$rootScope', '$document', '$window', 'store', 'annotationUI']
   constructor: ($rootScope, $document, $window, store, annotationUI) ->
@@ -8,12 +8,12 @@ class CrossFrameService
 
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.
-    createBridge =
+    createBridge = ->
       options =
         gateway: true # TODO: Gerben, where does this go now?
       new CrossFrameCommunication(options)
 
-    createAnnotationSync =
+    createAnnotationSync = ->
       whitelist = ['target', 'document', 'uri']
       options =
         formatter: (annotation) ->

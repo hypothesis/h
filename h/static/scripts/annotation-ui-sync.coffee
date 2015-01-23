@@ -29,10 +29,10 @@ class AnnotationUISync
         annotationUI.selectAnnotations(annotations)
       setTool: (ctx, name) =>
         annotationUI.tool = name
-        bridge.notify(method: 'setTool' params: name)
+        bridge.notify(method: 'setTool', params: name)
       setVisibleHighlights: (ctx, state) =>
         annotationUI.visibleHighlights = Boolean(state)
-        bridge.notify(method: 'setVisibleHighlights' params: state)
+        bridge.notify(method: 'setVisibleHighlights', params: state)
 
     for channel, listener in channelListeners
       bridge.on(channel, listener)
