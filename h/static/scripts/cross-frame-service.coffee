@@ -31,7 +31,12 @@ class CrossFrameService
           for k, v of annotation when k in whitelist
             parsed[k] = v
           parsed
-      new AnnotationSync($rootScope, options, bridge)
+        emit: (args...) =>
+          $rootScope.$emit.call($rootScope, args...)
+        on: (event, handler) =>
+          $rootScope.$on(event, handler)
+
+      new AnnotationSync(options, bridge)
 
     createAnnotationUISync = (bridge) ->
       new AnnotationUISync($rootScope, $window, bridge, annotationUI)

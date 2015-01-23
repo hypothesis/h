@@ -16,6 +16,14 @@ class AnnotationSync
         local[k] = v
       local
 
+    # Function used to emit annotation events
+    emit: (event, args...) ->
+      throw new Error('options.emit unspecified for AnnotationSync.')
+
+    # Function used to register handlers for annotation events
+    on: (event, handler) ->
+      throw new Error('options.on unspecified for AnnotationSync.')
+
   # Handlers for messages arriving through a channel
   channelListeners:
     'beforeCreateAnnotation': (txn, annotation) =>
@@ -59,12 +67,13 @@ class AnnotationSync
   # association of annotations received in arguments to window-local copies.
   cache: null
 
-  ## TODO this.$inject = ['$rootScope']
-  constructor: ($rootScope, options, bridge) ->
+  constructor: (options, bridge) ->
     @options = $.extend(true, {}, @options, options)
 
     @cache = {}
-    @$rootScope = $rootScope
+
+    @_on = @options.on
+    @_emit = @options.emit
 
     # Listen locally for interesting events
     for event, handler of @eventListeners
@@ -86,12 +95,6 @@ class AnnotationSync
       channel.notify
         method: 'loadAnnotations'
         params: annotations
-
-  _emit: (args...) =>
-    @$rootScope.$emit.call(@$rootScope, args...)
-
-  _on: (event, handler) =>
-    @$rootScope.$on(event, handler)
 
   getAnnotationForTag: (tag) ->
     @cache[tag] or null
@@ -119,8 +122,6 @@ class AnnotationSync
         callback: wrappedCallback
         params: this._format(annotation)
       @bridge.call(options)
-
-  # Handlers for sidebar events on $rootScope. Pass events through channel to guest code.
 
   beforeAnnotationCreated: (event, annotation) =>
     return if annotation.$$tag?
