@@ -68,7 +68,7 @@ class CrossFrameDiscovery
     token = match[2]
 
     # Process the received message
-    {reply, discovered} = this._processMessage(messageType, token)
+    {reply, discovered, token} = this._processMessage(messageType, token)
     if reply?
       source.postMessage reply, origin
     if discovered is true
@@ -99,10 +99,9 @@ class CrossFrameDiscovery
         unless @requestInProgress?
           @requestInProgress = true # prevent creating two channels
           reply = '__cross_frame_dhcp_request'
-        return
       else if messageType is 'ack'
         # The other side opened a channel to us. We note its scope and create
         # a matching channel end on this side.
         @requestInProgress = false # value should not actually matter anymore.
         discovered = true
-    return {reply: reply, discovered: discovered}
+    return {reply: reply, discovered: discovered, token: token}
