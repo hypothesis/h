@@ -33,7 +33,7 @@ class CrossFrameBridge
           callback.call(this, channel, source)
 
     # Create the channel
-    channel = this._build_channel channelOptions
+    channel = this._buildChannel channelOptions
 
     # Attach channel message listeners
     for method, callback of @channelListeners
@@ -47,7 +47,7 @@ class CrossFrameBridge
     channel
 
   # Construct a channel to another frame
-  _build_channel: (options) ->
+  _buildChannel: (options) ->
     # jschannel chokes on FF and Chrome extension origins.
     if (options.origin.match /^chrome-extension:\/\//) or
         (options.origin.match /^resource:\/\//)

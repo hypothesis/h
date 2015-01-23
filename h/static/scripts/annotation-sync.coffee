@@ -72,14 +72,14 @@ class AnnotationSync
 
     onConnect = (channel) =>
       # Upon new connections, send over the items in our cache
-      this._sync_cache(channel)
+      this._syncCache(channel)
     bridge.onConnect(onConnect)
 
     # Register remotely invokable methods
     for method, func in @channelListeners
       bridge.on(method, func)
 
-  _sync_cache: (channel) =>
+  _syncCache: (channel) =>
     # Synchronise (here to there) the items in our cache
     annotations = (this._format a for t, a of @cache)
     if annotations.length

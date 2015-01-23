@@ -35,7 +35,7 @@ class CrossFrameDiscovery
 
   # Send out a beacon to discover frames to connect with
   _beacon: ->
-    beacon_message = if @options.server
+    beaconMessage = if @options.server
       '__cross_frame_dhcp_offer'
     else
       '__cross_frame_dhcp_discovery'
@@ -46,7 +46,7 @@ class CrossFrameDiscovery
     while queue.length
       parent = queue.shift()
       if parent isnt window
-        parent.postMessage beacon_message, @options.origin
+        parent.postMessage beaconMessage, @options.origin
       for child in parent.frames
         queue.push child
     return
@@ -68,7 +68,7 @@ class CrossFrameDiscovery
     token = match[2]
 
     # Process the received message
-    {reply, discovered} = this._process_message(messageType, token)
+    {reply, discovered} = this._processMessage(messageType, token)
     if reply?
       source.postMessage reply, origin
     if discovered is true
@@ -76,7 +76,7 @@ class CrossFrameDiscovery
 
     return
 
-  _process_message: (messageType, token) ->
+  _processMessage: (messageType, token) ->
     # Process an incoming message, returns:
     # - a reply message
     # - whether the discovery has completed
@@ -96,13 +96,13 @@ class CrossFrameDiscovery
       if messageType is 'offer'
         # The server joined the party, or replied to our discovery message.
         # Request it to set up a channel if we did not already do so.
-        unless @request_in_progress?
-          @request_in_progress = true # prevent creating two channels
+        unless @requestInProgress?
+          @requestInProgress = true # prevent creating two channels
           reply = '__cross_frame_dhcp_request'
         return
       else if messageType is 'ack'
         # The other side opened a channel to us. We note its scope and create
         # a matching channel end on this side.
-        @request_in_progress = false # value should not actually matter anymore.
+        @requestInProgress = false # value should not actually matter anymore.
         discovered = true
     return {reply: reply, discovered: discovered}
