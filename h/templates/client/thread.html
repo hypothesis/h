@@ -1,6 +1,5 @@
 <a href="" class="threadexp"
    title="{{vm.collapsed && 'Expand' || 'Collapse'}}"
-   ng-if="vm.container.parent.parent"
    ><span ng-class="{'h-icon-plus': !!vm.collapsed,
                      'h-icon-minus': !vm.collapsed}"></span></a>
 
@@ -18,7 +17,7 @@
 </article>
 
 <!-- Reply count -->
-<div class="thread-reply" ng-show="vm.showReplyToggle(count('message')) && (!threadFilter.active() || count('message') == count('match'))">
+<div class="thread-reply" ng-show="vm.shouldShowReply(count, threadFilter.active())">
   <a class="reply-count small"
      href=""
      ng-pluralize count="count('message') - 1"

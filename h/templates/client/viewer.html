@@ -1,7 +1,7 @@
 <!-- Thread view -->
 <ul class="stream-list"
     deep-count="count"
-    thread="threading.root"
+    thread="threadRoot"
     thread-filter="search.query">
   <li ng-show="threadFilter.active()"
       ><span ng-pluralize
@@ -38,6 +38,7 @@
       deep-count="count"
       thread="child" thread-filter
       thread-collapsed="!search.query"
+      thread-root="true"
       ng-include="'thread.html'"
       ng-mouseenter="focus(child.message)"
       ng-click="scrollTo(child.message)"

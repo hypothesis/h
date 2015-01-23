@@ -18,6 +18,7 @@ ThreadController = [
   ->
     @container = null
     @collapsed = false
+    @isRoot = false
 
     ###*
     # @ngdoc method
@@ -30,13 +31,17 @@ ThreadController = [
 
     ###*
     # @ngdoc method
-    # @name thread.ThreadController#showReplyToggle
+    # @name thread.ThreadController#shouldShowReply
     # @description
-    # Determines whether the reply toggle button should be displayed for the
-    # current thread.
+    # Determines if the reply counter should be rendered. Requires the
+    # `count` directive to be passed and a boolean that indicates whether
+    # the thread is currently filtered.
     ###
-    this.showReplyToggle = (messageCount) ->
-      messageCount > 1 && !(@collapsed && @container.parent.parent)
+    this.shouldShowReply = (count, isFilterActive) ->
+      isCollapsedReply = (@collapsed && !@isRoot)
+      hasChildren = count('message') > 0
+      hasFilterMatch = !isFilterActive || count('message') == count('match')
+      !isCollapsedReply && hasChildren && hasFilterMatch
 
     this
 ]
@@ -88,6 +93,9 @@ thread = [
   '$parse', '$window', 'pulse', 'render',
   ($parse,   $window,   pulse,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter]) ->
+      # Determine if this is a top level thread.
+      ctrl.isRoot = $parse(attrs.threadRoot)(scope) == true
+
       # Toggle collapse on click.
       elem.on 'click', (event) ->
         event.stopPropagation()
@@ -113,13 +121,10 @@ thread = [
         scope.$evalAsync ->
           ctrl.toggleCollapsed()
 
-      # Queue a render frame to complete the binding and show the element.
-      render ->
-        ctrl.container = $parse(attrs.thread)(scope)
+      # Track the number of messages in the thread
+      if counter?
         counter.count 'message', 1
-        scope.$digest()
-
-      scope.$on '$destroy', -> counter.count 'message', -1
+        scope.$on '$destroy', -> counter.count 'message', -1
 
       # Flash the thread when any child annotations are updated.
       scope.$on 'annotationUpdate', (event) ->
@@ -136,6 +141,12 @@ thread = [
           attrs.$addClass COLLAPSED_CLASS
         else
           attrs.$removeClass COLLAPSED_CLASS
+
+      scope.$watch $parse(attrs.thread), (thread) ->
+        # Queue a render frame to complete the binding and show the element.
+        render ->
+          ctrl.container = thread
+          scope.$digest()
 
       # Watch the thread-collapsed attribute.
       if attrs.threadCollapsed
