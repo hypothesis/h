@@ -39,7 +39,7 @@ class CrossFrameCommunication
       scope: scope
       onReady: (channel) =>
         for callback in @onConnectListeners
-          callback.call(this, channel)
+          callback.call(this, channel, source)
 
     # Create the channel
     channel = this._build_channel channelOptions

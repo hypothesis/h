@@ -227,11 +227,11 @@ class AnnotationViewerController
 
 class ViewerController
   this.$inject = [
-    '$scope', '$route', 'annotationUI', 'annotationUISync', 'annotationMapper',
+    '$scope', '$route', 'annotationUI', 'crossframe', 'annotationMapper',
     'auth', 'flash', 'streamer', 'streamfilter', 'store'
   ]
   constructor:   (
-     $scope,   $route, annotationUI, annotationUISync, annotationMapper,
+     $scope,   $route, annotationUI, crossframe, annotationMapper,
      auth,   flash,   streamer,   streamfilter,   store
   ) ->
     # Tells the view that these annotations are embedded into the owner doc
@@ -246,7 +246,7 @@ class ViewerController
         return unless auth.user
         query.user = auth.user
 
-      for p in annotationUISync.providers
+      for p in crossframe.providers
         for e in p.entities when e not in loaded
           loaded.push e
           r = store.SearchResource.get angular.extend(uri: e, query), (results) ->
@@ -263,24 +263,22 @@ class ViewerController
       return if newVal is oldVal
       $route.reload()
 
-    $scope.$watchCollection (-> annotationUISync.providers), loadAnnotations
+    $scope.$watchCollection (-> crossframe.providers), loadAnnotations
 
     $scope.focus = (annotation) ->
       if angular.isObject annotation
         highlights = [annotation.$$tag]
       else
         highlights = []
-      for p in annotationUISync.providers
-        p.channel.notify
-          method: 'focusAnnotations'
-          params: highlights
+      crossframe.notify
+        method: 'focusAnnotations'
+        params: highlights
 
     $scope.scrollTo = (annotation) ->
       if angular.isObject annotation
-        for p in annotationUISync.providers
-          p.channel.notify
-            method: 'scrollToAnnotation'
-            params: annotation.$$tag
+        crossframe.notify
+          method: 'scrollToAnnotation'
+          params: annotation.$$tag
 
     $scope.shouldShowThread = (container) ->
       if $scope.selectedAnnotations? and not container.parent.parent

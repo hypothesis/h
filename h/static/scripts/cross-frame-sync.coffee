@@ -1,5 +1,4 @@
 class CrossFrameSync
-
   # Default configuration
   options:
     # Formats an annotation for sending across the bridge
