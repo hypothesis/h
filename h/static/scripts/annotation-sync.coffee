@@ -24,8 +24,37 @@ class AnnotationSync
     on: (event, handler) ->
       throw new Error('options.on unspecified for AnnotationSync.')
 
+  # Cache of annotations which have crossed the bridge for fast, encapsulated
+  # association of annotations received in arguments to window-local copies.
+  cache: null
+
+  constructor: (options, bridge) ->
+    @options = $.extend(true, {}, @options, options)
+
+    @cache = {}
+
+    @_on = @options.on
+    @_emit = @options.emit
+
+    # Listen locally for interesting events
+    for event, handler of @_eventListeners
+      this._on(event, handler)
+
+    # Register remotely invokable methods
+    for method, func in @_channelListeners
+      bridge.on(method, func)
+
+    # Upon new connections, send over the items in our cache
+    onConnect = (channel) =>
+      this._syncCache(channel)
+    bridge.onConnect(onConnect)
+
+  getAnnotationForTag: (tag) ->
+    @cache[tag] or null
+
+
   # Handlers for messages arriving through a channel
-  channelListeners:
+  _channelListeners:
     'beforeCreateAnnotation': (txn, annotation) =>
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
@@ -63,30 +92,38 @@ class AnnotationSync
       annotations = (this._parse a for a in annotations)
       @_emit('loadAnnotations', annotations)
 
-  # Cache of annotations which have crossed the bridge for fast, encapsulated
-  # association of annotations received in arguments to window-local copies.
-  cache: null
+  # Handlers for events coming from this frame, to send them across the channel
+  _eventListeners:
+    'beforeAnnotationCreated': (event, annotation) =>
+      return if annotation.$$tag?
+      this._mkCallRemotelyAndParseResults('beforeCreateAnnotation')(annotation)
+      this
 
-  constructor: (options, bridge) ->
-    @options = $.extend(true, {}, @options, options)
+    'annotationCreated': (event, annotation) =>
+      return unless annotation.$$tag? and @cache[annotation.$$tag]
+      this._mkCallRemotelyAndParseResults('createAnnotation')(annotation)
+      this
 
-    @cache = {}
+    'annotationUpdated': (event, annotation) =>
+      return unless annotation.$$tag? and @cache[annotation.$$tag]
+      this._mkCallRemotelyAndParseResults('updateAnnotation')(annotation)
+      this
 
-    @_on = @options.on
-    @_emit = @options.emit
+    'annotationDeleted': (event, annotation) =>
+      return unless annotation.$$tag? and @cache[annotation.$$tag]
+      onFailure = (err) =>
+        if err then @annotator.setupAnnotation annotation # TODO
+        else delete @cache[annotation.$$tag]
+      this._mkCallRemotelyAndParseResults('deleteAnnotation', onFailure)(annotation)
+      this
 
-    # Listen locally for interesting events
-    for event, handler of @eventListeners
-      this._on(event, handler)
-
-    onConnect = (channel) =>
-      # Upon new connections, send over the items in our cache
-      this._syncCache(channel)
-    bridge.onConnect(onConnect)
-
-    # Register remotely invokable methods
-    for method, func in @channelListeners
-      bridge.on(method, func)
+    'annotationsLoaded': (event, annotations) =>
+      annotations = (this._format a for a in annotations when not a.$$tag)
+      return unless annotations.length
+      this._notify
+        method: 'loadAnnotations'
+        params: annotations
+      this
 
   _syncCache: (channel) =>
     # Synchronise (here to there) the items in our cache
@@ -95,18 +132,6 @@ class AnnotationSync
       channel.notify
         method: 'loadAnnotations'
         params: annotations
-
-  getAnnotationForTag: (tag) ->
-    @cache[tag] or null
-
-  # Handlers for events coming from this frame, to send them across the channel
-  eventListeners:
-    'beforeAnnotationCreated': @beforeAnnotationCreated
-    'annotationCreated': @annotationCreated
-    'annotationUpdated': @annotationUpdated
-    'annotationDeleted': @annotationDeleted
-    'annotationsLoaded': @annotationsLoaded
-
 
   _mkCallRemotelyAndParseResults: (method, callBack) ->
     fn = (annotation) ->
@@ -122,37 +147,6 @@ class AnnotationSync
         callback: wrappedCallback
         params: this._format(annotation)
       @bridge.call(options)
-
-  beforeAnnotationCreated: (event, annotation) =>
-    return if annotation.$$tag?
-    this._mkCallRemotelyAndParseResults('beforeCreateAnnotation')(annotation)
-    this
-
-  annotationCreated: (event, annotation) =>
-    return unless annotation.$$tag? and @cache[annotation.$$tag]
-    this._mkCallRemotelyAndParseResults('createAnnotation')(annotation)
-    this
-
-  annotationUpdated: (event, annotation) =>
-    return unless annotation.$$tag? and @cache[annotation.$$tag]
-    this._mkCallRemotelyAndParseResults('updateAnnotation')(annotation)
-    this
-
-  annotationDeleted: (event, annotation) =>
-    return unless annotation.$$tag? and @cache[annotation.$$tag]
-    onFailure = (err) =>
-      if err then @annotator.setupAnnotation annotation # TODO
-      else delete @cache[annotation.$$tag]
-    this._mkCallRemotelyAndParseResults('deleteAnnotation', onFailure)(annotation)
-    this
-
-  annotationsLoaded: (event, annotations) =>
-    annotations = (this._format a for a in annotations when not a.$$tag)
-    return unless annotations.length
-    this._notify
-      method: 'loadAnnotations'
-      params: annotations
-    this
 
   # Parse returned annotations to update cache with any changes made remotely
   _parseResults: (results) ->

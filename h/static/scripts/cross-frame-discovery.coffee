@@ -33,6 +33,7 @@ class CrossFrameDiscovery
     $(window).off 'message', this._onMessage
     return
 
+
   # Send out a beacon to discover frames to connect with
   _beacon: ->
     beaconMessage = if @options.server

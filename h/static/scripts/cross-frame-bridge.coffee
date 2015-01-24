@@ -1,8 +1,4 @@
 class CrossFrameBridge
-
-  # Connected links to other frames
-  links: null
-
   options:
     # Scope identifier to distinguish this channel from any others
     scope: 'crossFrameBridge'
@@ -15,6 +11,9 @@ class CrossFrameBridge
 
     # Any callbacks for messages on the channel. Max one callback per method.
     channelListeners: {}
+
+  # Connected links to other frames
+  links: null
 
   constructor: (options) ->
     @options = $.extend(true, {}, @options, options)
@@ -32,8 +31,6 @@ class CrossFrameBridge
       onReady: (channel) =>
         for callback in @onConnectListeners
           callback.call(this, channel, source)
-
-    # Create the channel
     channel = this._buildChannel channelOptions
 
     # Attach channel message listeners
@@ -46,14 +43,6 @@ class CrossFrameBridge
       window: source
 
     channel
-
-  # Construct a channel to another frame
-  _buildChannel: (options) ->
-    # jschannel chokes on FF and Chrome extension origins.
-    if (options.origin.match /^chrome-extension:\/\//) or
-        (options.origin.match /^resource:\/\//)
-      options = $.extend {}, options, {origin: '*'}
-    channel = Channel.build(options)
 
   # Make a method call on all links, collect the results and pass them to a
   # callback when all results are collected. Parameters:
@@ -109,3 +98,12 @@ class CrossFrameBridge
   # Add a function to be called upon a new connection
   onConnect: (callback) ->
     @onConnectListeners.push(callback)
+
+
+  # Construct a channel to another frame
+  _buildChannel: (options) ->
+    # jschannel chokes on FF and Chrome extension origins.
+    if (options.origin.match /^chrome-extension:\/\//) or
+        (options.origin.match /^resource:\/\//)
+      options = $.extend {}, options, {origin: '*'}
+    channel = Channel.build(options)
