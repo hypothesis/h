@@ -287,7 +287,7 @@ def _add_any_field_params_into_query(search_params):
         'multi_match': {
             'query': any_terms,
             'type': 'cross_fields',
-            'fields': ['quote', 'tag', 'text', 'uri', 'user']
+            'fields': ['quote', 'tags', 'text', 'uri', 'user']
         }
     }
 
