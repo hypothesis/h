@@ -84,15 +84,15 @@ class CrossFrameBridge
     return
 
   on: (method, callback) ->
-    @channelListeners[event] = callback
+    @channelListeners[method] = callback
     for l in @links
-      l.channel.bind event, callback
+      l.channel.bind method, callback
     return this
 
   off: (method) ->
     for l in @links
-      l.channel.unbind event
-    delete @channelListeners[event]
+      l.channel.unbind method
+    delete @channelListeners[method]
     return this
 
   # Add a function to be called upon a new connection

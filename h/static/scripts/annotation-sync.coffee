@@ -28,7 +28,7 @@ class AnnotationSync
   # association of annotations received in arguments to window-local copies.
   cache: null
 
-  constructor: (options, bridge) ->
+  constructor: (options, @bridge) ->
     @options = $.extend(true, {}, @options, options)
 
     @cache = {}
@@ -41,13 +41,13 @@ class AnnotationSync
       this._on(event, handler)
 
     # Register remotely invokable methods
-    for method, func in @_channelListeners
-      bridge.on(method, func)
+    for method, func of @_channelListeners
+      @bridge.on(method, func)
 
     # Upon new connections, send over the items in our cache
     onConnect = (channel) =>
       this._syncCache(channel)
-    bridge.onConnect(onConnect)
+    @bridge.onConnect(onConnect)
 
   getAnnotationForTag: (tag) ->
     @cache[tag] or null
