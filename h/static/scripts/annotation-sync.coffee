@@ -38,11 +38,11 @@ class AnnotationSync
 
     # Listen locally for interesting events
     for event, handler of @_eventListeners
-      this._on(event, handler)
+      this._on(event, handler.bind(this))
 
     # Register remotely invokable methods
     for method, func of @_channelListeners
-      @bridge.on(method, func)
+      @bridge.on(method, func.bind(this))
 
     # Upon new connections, send over the items in our cache
     onConnect = (channel) =>
@@ -56,21 +56,21 @@ class AnnotationSync
 
   # Handlers for messages arriving through a channel
   _channelListeners:
-    'beforeCreateAnnotation': (txn, annotation) =>
+    'beforeCreateAnnotation': (txn, annotation) ->
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
       @_emit 'beforeAnnotationCreated', annotation
       @cache[annotation.$$tag] = annotation
       this._format annotation
 
-    'createAnnotation': (txn, annotation) =>
+    'createAnnotation': (txn, annotation) ->
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
       @_emit 'annotationCreated', annotation
       @cache[annotation.$$tag] = annotation
       this._format annotation
 
-    'updateAnnotation': (txn, annotation) =>
+    'updateAnnotation': (txn, annotation) ->
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
       @_emit('beforeAnnotationUpdated', [annotation])
@@ -78,7 +78,7 @@ class AnnotationSync
       @cache[annotation.$$tag] = annotation
       this._format annotation
 
-    'deleteAnnotation': (txn, annotation) =>
+    'deleteAnnotation': (txn, annotation) ->
       annotation = this._parse annotation
       delete @cache[annotation.$$tag]
       @_emit('annotationDeleted', [annotation])
@@ -86,38 +86,38 @@ class AnnotationSync
       delete @cache[annotation.$$tag]
       res
 
-    'sync': (ctx, annotations) =>
+    'sync': (ctx, annotations) ->
       (this._format (this._parse a) for a in annotations)
 
-    'loadAnnotations': (txn, annotations) =>
+    'loadAnnotations': (txn, annotations) ->
       annotations = (this._parse a for a in annotations)
       @_emit('loadAnnotations', annotations)
 
   # Handlers for events coming from this frame, to send them across the channel
   _eventListeners:
-    'beforeAnnotationCreated': (event, annotation) =>
+    'beforeAnnotationCreated': (event, annotation) ->
       return if annotation.$$tag?
       this._mkCallRemotelyAndParseResults('beforeCreateAnnotation')(annotation)
       this
 
-    'annotationCreated': (event, annotation) =>
+    'annotationCreated': (event, annotation) ->
       return unless annotation.$$tag? and @cache[annotation.$$tag]
       this._mkCallRemotelyAndParseResults('createAnnotation')(annotation)
       this
 
-    'annotationUpdated': (event, annotation) =>
+    'annotationUpdated': (event, annotation) ->
       return unless annotation.$$tag? and @cache[annotation.$$tag]
       this._mkCallRemotelyAndParseResults('updateAnnotation')(annotation)
       this
 
-    'annotationDeleted': (event, annotation) =>
+    'annotationDeleted': (event, annotation) ->
       return unless annotation.$$tag? and @cache[annotation.$$tag]
       onFailure = (err) =>
         delete @cache[annotation.$$tag] unless err
       this._mkCallRemotelyAndParseResults('deleteAnnotation', onFailure)(annotation)
       this
 
-    'annotationsLoaded': (event, annotations) =>
+    'annotationsLoaded': (event, annotations) ->
       annotations = (this._format a for a in annotations when not a.$$tag)
       return unless annotations.length
       this._notify
@@ -125,7 +125,7 @@ class AnnotationSync
         params: annotations
       this
 
-  _syncCache: (channel) =>
+  _syncCache: (channel) ->
     # Synchronise (here to there) the items in our cache
     annotations = (this._format a for t, a of @cache)
     if annotations.length
@@ -134,7 +134,7 @@ class AnnotationSync
         params: annotations
 
   _mkCallRemotelyAndParseResults: (method, callBack) ->
-    (annotation) ->
+    (annotation) =>
       # Wrap the callback function to first parse returned items
       wrappedCallback = (failure, results) =>
         unless failure?
