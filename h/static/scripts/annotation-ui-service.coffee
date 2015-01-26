@@ -52,7 +52,17 @@ createAnnotationUI = ->
           delete selection[id]
         else
           selection[id] = true
-      @selectedAnnotations = selection
+      @selectedAnnotationMap = selection
+
+    ###*
+    # @ngdoc method
+    # @name annotationUI.removeSelectedAnnotation()
+    # @returns nothing
+    # @description removes an annotation from the current selection.
+    ###
+    removeSelectedAnnotation: (annotation) ->
+      return unless @selectedAnnotationMap
+      delete @selectedAnnotationMap[annotation.id]
   }
 
 angular.module('h').factory('annotationUI', createAnnotationUI)
