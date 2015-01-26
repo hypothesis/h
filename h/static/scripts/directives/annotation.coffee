@@ -26,7 +26,7 @@ validate = (value) ->
 #
 # `AnnotationController` provides an API for the annotation directive. It
 # manages the interaction between the domain and view models and uses the
-# {@link annotationMapper service} for persistence.
+# {@link annotationMapper AnnotationMapper service} for persistence.
 ###
 AnnotationController = [
   '$scope', '$timeout', '$rootScope',
