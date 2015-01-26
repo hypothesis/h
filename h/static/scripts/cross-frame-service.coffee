@@ -38,8 +38,8 @@ class CrossFrameService
 
       new AnnotationSync(options, bridge)
 
-    createAnnotationUISync = (bridge) ->
-      new AnnotationUISync($rootScope, $window, bridge, annotationUI)
+    createAnnotationUISync = (bridge, annotationSync) ->
+      new AnnotationUISync($window, bridge, annotationSync, annotationUI)
 
     addProvider = (channel) =>
       provider = {channel: channel, entities: []}
@@ -57,7 +57,7 @@ class CrossFrameService
 
       bridge.onConnect(addProvider)
       annotationSync = createAnnotationSync(bridge)
-      annotationUISync = createAnnotationUISync(bridge)
+      annotationUISync = createAnnotationUISync(bridge, annotationSync)
 
       onDiscoveryCallback = (source, origin, token) ->
         bridge.createChannel(source, origin, token)

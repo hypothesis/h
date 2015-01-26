@@ -1,9 +1,9 @@
 # Uses a channel between the sidebar and the attached providers to ensure
 # the interface remains in sync.
 class AnnotationUISync
-  constructor: ($rootScope, $window, bridge, annotationUI) ->
+  constructor: ($window, bridge, annotationSync, annotationUI) ->
     getAnnotationsByTags = (tags) ->
-      tags.map(bridge.getAnnotationForTag, bridge)
+      tags.map(annotationSync.getAnnotationForTag, bridge)
 
     notifyHost = (message) ->
       for {channel, window} in bridge.links where window is $window.parent
@@ -17,20 +17,20 @@ class AnnotationUISync
       back: hide
       open: show
       showEditor: show
-      showAnnotations: (ctx, tags=[]) =>
+      showAnnotations: (ctx, tags=[]) ->
         show()
         annotations = getAnnotationsByTags(tags)
         annotationUI.xorSelectedAnnotations(annotations)
-      focusAnnotations: (ctx, tags=[]) =>
+      focusAnnotations: (ctx, tags=[]) ->
         annotations = getAnnotationsByTags(tags)
         annotationUI.focusAnnotations(annotations)
-      toggleAnnotationSelection: (ctx, tags=[]) =>
+      toggleAnnotationSelection: (ctx, tags=[]) ->
         annotations = getAnnotationsByTags(tags)
         annotationUI.selectAnnotations(annotations)
-      setTool: (ctx, name) =>
+      setTool: (ctx, name) ->
         annotationUI.tool = name
         bridge.notify(method: 'setTool', params: name)
-      setVisibleHighlights: (ctx, state) =>
+      setVisibleHighlights: (ctx, state) ->
         annotationUI.visibleHighlights = Boolean(state)
         bridge.notify(method: 'setVisibleHighlights', params: state)
 
@@ -49,3 +49,5 @@ class AnnotationUISync
           params: annotationUI.visibleHighlights
 
     bridge.onConnect(onConnect)
+
+angular.module('h').value('AnnotationUISync', AnnotationUISync)

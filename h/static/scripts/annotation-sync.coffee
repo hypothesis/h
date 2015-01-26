@@ -49,6 +49,8 @@ class AnnotationSync
       this._syncCache(channel)
     @bridge.onConnect(onConnect)
 
+  # Provide a public interface to the annotation cache so that other
+  # sync services can lookup annotations by tag.
   getAnnotationForTag: (tag) ->
     @cache[tag] or null
 
