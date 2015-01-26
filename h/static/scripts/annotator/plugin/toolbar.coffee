@@ -39,10 +39,6 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
             @annotator.showFrame()
           else
             @annotator.hideFrame()
-        # Remove focus from the anchor when clicked, this removes the focus
-        # styles intended only for keyboard navigation. IE/FF apply the focus
-        # psuedo-class to a clicked element.
-        "mouseup": (event) -> $(event.target).blur()
     ,
       "title": "Show Annotations"
       "class": "h-icon-visible"
@@ -77,6 +73,11 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     @buttons.appendTo(list)
     @toolbar.append(list)
 
+    # Remove focus from the anchors when clicked, this removes the focus
+    # styles intended only for keyboard navigation. IE/FF apply the focus
+    # psuedo-class to a clicked element.
+    @toolbar.on('mouseup', 'a', (event) -> $(event.target).blur())
+
   show: -> this.toolbar.removeClass('annotator-hide')
 
   hide: -> this.toolbar.addClass('annotator-hide')
@@ -104,4 +105,4 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
       height = 35
       this.toolbar.css("min-height", "")
     this.annotator.plugins.BucketBar?.BUCKET_THRESHOLD_PAD = height
-    this.annotator.plugins.BucketBar?._update();
+    this.annotator.plugins.BucketBar?._update()
