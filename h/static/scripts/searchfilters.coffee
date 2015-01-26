@@ -46,6 +46,11 @@ class SearchFilter
   # Turns string query into object, where the properties are the search terms
   toObject: (searchtext) ->
     obj = {}
+    filterToBackendFilter = (filter) ->
+      if filter is 'tag'
+        'tags'
+      else
+        filter
 
     addToObj = (key, data) ->
       if obj[key]?
@@ -60,7 +65,7 @@ class SearchFilter
         unless data
           filter = 'any'
           data = term
-        addToObj(filter, data)
+        addToObj(filterToBackendFilter(filter), data)
     obj
 
   # This function will generate the facets from the search-text input
@@ -228,7 +233,7 @@ class QueryParser
          query_type: 'multi_match'
          match_type: 'cross_fields'
          and_or: 'and'
-         fields:   ['quote', 'tag', 'text', 'uri', 'user']
+         fields:   ['quote', 'tags', 'text', 'uri', 'user']
 
   populateFilter: (filter, query) =>
     # Populate a filter with a query object

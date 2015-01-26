@@ -25,16 +25,21 @@ momentFilter = ->
       momentDate.format('LLLL')
 
 
-persona = (user, part='username') ->
-  index = ['term', 'username', 'provider'].indexOf(part)
-  groups = user?.match /^acct:([^@]+)@(.+)/
-  if groups
-    groups[index]
-  else if part != 'provider'
-    user
+personaFilter = ->
+  (user, part='username') ->
+    index = ['term', 'username', 'provider'].indexOf(part)
+    groups = user?.match /^acct:([^@]+)@(.+)/
+    if groups
+      groups[index]
+    else if part != 'provider'
+      user
+
+urlEncodeFilter = ->
+  (value) -> encodeURIComponent(value)
 
 
 angular.module('h')
 .filter('converter', -> (new Converter()).makeHtml)
 .filter('moment', momentFilter)
-.filter('persona', -> persona)
+.filter('persona', personaFilter)
+.filter('urlencode', urlEncodeFilter)
