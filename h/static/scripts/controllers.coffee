@@ -3,52 +3,6 @@
 # controller in the Angular sense, but rather just keeps UI and state in sync.
 class AnnotationUIController
   constructor: (annotationUI, $rootScope, appScope) ->
-    # Properly set the selectedAnnotations- and the Count variables
-    setSelectedAnnotations = (selected) ->
-      count = Object.keys(selected).length
-      appScope.selectedAnnotationsCount = count
-
-      if count
-        appScope.selectedAnnotations = selected
-      else
-        appScope.selectedAnnotations = null
-
-      appScope.$digest()
-
-    onToggleAnnotationSelection = (event, annotations=[]) ->
-      appScope.search.query = ''
-
-      selected = appScope.selectedAnnotations or {}
-      for a in annotations
-        if selected[a.id]
-          delete selected[a.id]
-        else
-          selected[a.id] = true
-      setSelectedAnnotations(selected)
-
-    onFocusAnnotations = (event, tags) ->
-
-    onShowAnnotations = (event, tags) ->
-      annotations = getAnnotationsForTags(tags)
-      appScope.search.query = ''
-      selected = {}
-      for a in annotations
-        selected[a.id] = true
-      setSelectedAnnotations selected
-
-    onAnnotationDeleted = (event, tag) =>
-      annotation = getAnnotationForTags([tag])[0]
-      if scope.selectedAnnotations?[annotation.id]
-        delete appScope.selectedAnnotations[annotation.id]
-        setSelectedAnnotations(appScope.selectedAnnotations)
-
-    onGetDocumentInfo = =>
-      appScope.$digest()
-      appScope.$evalAsync(angular.noop)
-
-    onAnnotationsLoaded = (event, annotations) =>
-      appScope.$evalAsync(angular.noop)
-
     $rootScope.$watch (-> annotationUI.selectedAnnotationMap), (map={}) ->
       count = Object.keys(map).length
       appScope.selectedAnnotationsCount = count
@@ -61,12 +15,15 @@ class AnnotationUIController
     $rootScope.$watch (-> annotationUI.focusedAnnotationMap), (map={}) ->
       appScope.focusedAnnotations = map
 
-    $rootScope.$on('showAnnotations', onShowAnnotations)
-    $rootScope.$on('focusAnnotations', onFocusAnnotations)
-    $rootScope.$on('toggleAnnotationSelection', onToggleAnnotationSelection)
-    $rootScope.$on('getDocumentInfo', onGetDocumentInfo)
-    $rootScope.$on('annotationsLoaded', onAnnotationsLoaded)
+    $rootScope.$on 'getDocumentInfo', ->
+      appScope.$digest()
+      appScope.$evalAsync(angular.noop)
 
+    $rootScope.$on 'annotationsLoaded', ->
+      appScope.$evalAsync(angular.noop)
+
+    $rootScope.$on 'annotationDeleted', (event, annotation) ->
+      annotationUI.removeSelectedAnnotation(annotation)
 
 
 class AppController
@@ -293,3 +250,4 @@ angular.module('h')
 .controller('AppController', AppController)
 .controller('ViewerController', ViewerController)
 .controller('AnnotationViewerController', AnnotationViewerController)
+.value('AnnotationUIController', AnnotationUIController)

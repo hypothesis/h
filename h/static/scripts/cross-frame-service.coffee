@@ -31,9 +31,9 @@ class CrossFrameService
           for k, v of annotation when k in whitelist
             parsed[k] = v
           parsed
-        emit: (args...) =>
+        emit: (args...) ->
           $rootScope.$emit.call($rootScope, args...)
-        on: (event, handler) =>
+        on: (event, handler) ->
           $rootScope.$on(event, handler)
 
       new AnnotationSync(options, bridge)
@@ -59,7 +59,7 @@ class CrossFrameService
       annotationSync = createAnnotationSync(bridge)
       annotationUISync = createAnnotationUISync(bridge)
 
-      onDiscoveryCallback = (source, origin, token) =>
+      onDiscoveryCallback = (source, origin, token) ->
         bridge.createChannel(source, origin, token)
       discovery.startDiscovery(onDiscoveryCallback)
 

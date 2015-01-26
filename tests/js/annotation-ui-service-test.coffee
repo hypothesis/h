@@ -47,3 +47,11 @@ describe 'AnnotationUI', ->
       annotationUI.selectedAnnotationMap = {1: true, 2: true}
       annotationUI.xorSelectedAnnotations([{id: 1}, {id: 2}])
       assert.deepEqual(annotationUI.selectedAnnotationMap, {})
+
+  describe '.removeSelectedAnnotation', ->
+    it 'removes an annotation from the selectedAnnotationMap', ->
+      annotationUI.selectedAnnotationMap = {1: true, 2: true, 3: true}
+      annotationUI.removeSelectedAnnotation(id: 2)
+      assert.deepEqual(annotationUI.selectedAnnotationMap, {
+        1: true, 3: true
+      })
