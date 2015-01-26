@@ -29,6 +29,7 @@ class AnnotationMapperService
 
     # From Annotator core.
     setupAndLoadAnnotations = (annotations) =>
+      clone = annotations.slice()
       loader = (annList=[]) =>
         now = annList.splice(0,10)
 
@@ -42,13 +43,10 @@ class AnnotationMapperService
         else
           $rootScope.$emit('annotationsLoaded', clone)
 
-      clone = annotations.slice()
-
       if annotations.length # Do we have to do something?
-          setTimeout -> loader(annotations)
-        else # no pending scan
-          # We can start parsing them right away
-          loader(annotations)
-      this
+        setTimeout -> loader(annotations)
+      else # no pending scan
+        # We can start parsing them right away
+        loader(annotations)
 
 angular.module('h').service('annotationMapper', AnnotationMapperService)
