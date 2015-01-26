@@ -2,6 +2,7 @@ class ThreadingService
   # Mix in message thread properties into the prototype. The body of the
   # class will overwrite any methods applied here. If you need inheritance
   # assign the message thread to a local varible.
+  # The mail object is exported by the jwz.js library.
   $.extend(this.prototype, mail.messageThread())
 
   root: null
