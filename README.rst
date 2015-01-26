@@ -95,6 +95,12 @@ Or, to load the assets from within the extension::
     $ ./bin/hypothesis extension development.ini chrome http://localhost:5000 \
     chrome-extension://extensionid/public
 
+To build an extension with a feature flag enabled use the environment variable::
+
+    FEATURE_NOTIFICATION=true SESSION_SECRET=foo \
+    hypothesis extension production.ini chrome \
+    https://hypothes.is chrome-extension://extensionid/public
+
 To build the Firefox extension, run the following::
 
     $ ./bin/hypothesis extension development.ini firefox \
