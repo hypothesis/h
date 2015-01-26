@@ -87,7 +87,7 @@
      ng-if="vm.annotation.tags.length && !vm.editing">
   <ul class="tag-list">
     <li class="tag-item" ng-repeat="tag in vm.annotation.tags">
-      <a href="/stream?q=tag:'{{tag.text}}'" target="_blank">{{tag.text}}</a>
+      <a href="/stream?q=tag:'{{tag.text|urlencode}}'" target="_blank">{{tag.text}}</a>
     </li>
   </ul>
 </div>
