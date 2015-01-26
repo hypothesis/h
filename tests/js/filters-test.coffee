@@ -10,7 +10,8 @@ describe 'persona', ->
     filter = $filter('persona')
 
   it 'should return the whole term by request', ->
-    assert.equal filter('acct:hacker@example.com', 'term'), 'acct:hacker@example.com'
+    result = filter('acct:hacker@example.com', 'term')
+    assert.equal result, 'acct:hacker@example.com'
 
   it 'should return the requested part', ->
     assert.equal filter(term), 'hacker'
@@ -25,3 +26,13 @@ describe 'persona', ->
   it 'should handle error cases', ->
     assert.notOk filter()
     assert.notOk filter('bogus', 'provider')
+
+describe 'urlencode', ->
+  filter = null
+
+  beforeEach module('h')
+  beforeEach inject ($filter) ->
+    filter = $filter('urlencode')
+
+  it 'encodes reserved characters in the term', ->
+    assert.equal(filter('#hello world'), '%23hello%20world')
