@@ -15,6 +15,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'h/static/scripts/vendor/polyfills/bind.js',
+      'h/static/scripts/vendor/polyfills/url.js',
       'h/static/scripts/vendor/jquery.js',
       'h/static/scripts/vendor/angular.js',
       'h/static/scripts/vendor/angular-mocks.js',
@@ -36,7 +38,6 @@ module.exports = function(config) {
       'h/static/scripts/vendor/annotator.js',
       'h/static/scripts/annotator/monkey.js',
       'h/static/scripts/vendor/annotator.auth.js',
-      'h/static/scripts/vendor/polyfills/url.js',
       'h/static/scripts/annotator/plugin/bridge.js',
       'h/static/scripts/annotator/plugin/bucket-bar.js',
       'h/static/scripts/annotator/plugin/threading.js',
