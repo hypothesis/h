@@ -52,7 +52,6 @@ class AnnotationSync
   getAnnotationForTag: (tag) ->
     @cache[tag] or null
 
-
   # Handlers for messages arriving through a channel
   _channelListeners:
     'beforeCreateAnnotation': (txn, annotation) =>
@@ -112,8 +111,7 @@ class AnnotationSync
     'annotationDeleted': (event, annotation) =>
       return unless annotation.$$tag? and @cache[annotation.$$tag]
       onFailure = (err) =>
-        if err then @annotator.setupAnnotation annotation # TODO
-        else delete @cache[annotation.$$tag]
+        delete @cache[annotation.$$tag] unless err
       this._mkCallRemotelyAndParseResults('deleteAnnotation', onFailure)(annotation)
       this
 
@@ -134,7 +132,7 @@ class AnnotationSync
         params: annotations
 
   _mkCallRemotelyAndParseResults: (method, callBack) ->
-    fn = (annotation) ->
+    (annotation) ->
       # Wrap the callback function to first parse returned items
       wrappedCallback = (failure, results) =>
         unless failure?
