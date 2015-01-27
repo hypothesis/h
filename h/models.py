@@ -44,11 +44,7 @@ class Annotation(annotation.Annotation):
         'tags': {'type': 'string', 'analyzer': 'uni_normalizer'},
         'text': {'type': 'string', 'analyzer': 'uni_normalizer'},
         'deleted': {'type': 'boolean'},
-        'uri': {
-            'type': 'string',
-            'index_analyzer': 'uri_index',
-            'search_analyzer': 'uri_search'
-        },
+        'uri': {'type': 'string', 'index': 'analyzed', 'analyzer': 'uri'},
         'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'user'},
         'consumer': {'type': 'string'},
         'target': {
@@ -59,8 +55,8 @@ class Annotation(annotation.Annotation):
                     'fields': {
                         'uri': {
                             'type': 'string',
-                            'index_analyzer': 'uri_index',
-                            'search_analyzer': 'uri_search',
+                            'index': 'analyzed',
+                            'analyzer': 'uri',
                         },
                     },
                 },
@@ -139,12 +135,9 @@ class Annotation(annotation.Annotation):
                 'tokenizer': 'keyword',
                 'filter': 'lowercase'
             },
-            'uri_index': {
+            'uri': {
                 'tokenizer': 'keyword',
                 'filter': ['uri', 'unique']
-            },
-            'uri_search': {
-                'tokenizer': 'keyword',
             },
             'user': {
                 'tokenizer': 'keyword',

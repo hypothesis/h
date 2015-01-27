@@ -365,7 +365,7 @@ class ViewFilter
     uri:
       autofalse: (annotation) -> return not annotation.uri?
       value: (annotation) -> return annotation.uri
-      match: (term, value) -> return value is term
+      match: (term, value) -> return value.indexOf(term) > -1
     user:
       autofalse: (annotation) -> return not annotation.user?
       value: (annotation) -> return annotation.user
@@ -373,9 +373,8 @@ class ViewFilter
     any:
       fields: ['quote', 'text', 'tag', 'user']
 
-  this.$inject = ['searchfilter','stringHelpers']
-  constructor: (searchfilter, stringHelpers) ->
-    @searchfilter = searchfilter
+  this.$inject = ['stringHelpers']
+  constructor: (stringHelpers) ->
 
     @_normalize = (e) ->
       if typeof e is 'string'
@@ -399,10 +398,10 @@ class ViewFilter
   _arrayMatches: (filter, value, match) ->
     matches = true
     # Make copy for filtering
-    copy = value.slice()
+    copy = filter.terms.slice()
 
     copy = copy.filter (e) ->
-      match filter.terms, e
+      match value, e
 
     if (filter.operator is 'and' and copy.length < filter.terms.length) or
     (filter.operator is 'or' and not copy.length)
