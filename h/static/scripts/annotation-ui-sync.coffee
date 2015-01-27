@@ -1,15 +1,29 @@
 # Uses a channel between the sidebar and the attached providers to ensure
 # the interface remains in sync.
 class AnnotationUISync
+  ###*
+  # @name AnnotationUISync
+  # @param {$window} $window An Angular window service.
+  # @param {CrossFrameBridge} bridge
+  # @param {AnnotationSync} annotationSync
+  # @param {AnnotationUI} annotationUI An instance of the AnnotatonUI service
+  # @description
+  # Listens for incoming events over the bridge concerning the annotation
+  # interface and updates the applications internal state. It also ensures
+  # that the messages are broadcast out to other frames.
+  ###
   constructor: ($window, bridge, annotationSync, annotationUI) ->
+    # Retrieves annotations from the annotationSync cache.
     getAnnotationsByTags = (tags) ->
       tags.map(annotationSync.getAnnotationForTag, annotationSync)
 
+    # Sends a message to the host frame only.
     notifyHost = (message) ->
       for {channel, window} in bridge.links when window is $window.parent
         channel.notify(message)
         break
 
+    # Send messages to host to hide/show sidebar iframe.
     hide = notifyHost.bind(null, method: 'hideFrame')
     show = notifyHost.bind(null, method: 'showFrame')
 
