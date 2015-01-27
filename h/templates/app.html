@@ -21,7 +21,7 @@
           <li><a href="/docs/help" target="_blank">Help</a></li>
           <li ng-show="auth.user"><a href="/stream?q=user:{% raw %}{{ auth.user|persona }}{% endraw %}"
                  target="_blank">My Annotations</a></li>
-          <li ng-show="auth.user" ng-click="logout()">Sign out</li>
+          <li ng-show="auth.user"><a href="" ng-click="logout()">Sign out</a></li>
         </ul>
       </div>
       <a class="pull-right" href=""

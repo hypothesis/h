@@ -179,11 +179,14 @@ html {
   z-index: 2;
 
   li:not(.ng-hide) {
-    cursor: pointer;
-    line-height: 1;
     text-align: left;
-    padding: .5em;
-    white-space: nowrap;
+
+    a {
+      display: block;
+      line-height: 1;
+      padding: .5em;
+      white-space: nowrap;
+    }
 
     &:hover {
       color: black;

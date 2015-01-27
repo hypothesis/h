@@ -10,9 +10,11 @@
   </span>
   <ul class="dropdown-menu" role="menu">
     <li ng-repeat="level in levels" ng-click="setLevel(level)">
-      <i class="small" ng-class="{'h-icon-earth': isPublic(level.name),
-                                  'h-icon-locked': !isPublic(level.name)}"></i>
-      {{level.text}}
+      <a href="">
+        <i class="small" ng-class="{'h-icon-earth': isPublic(level.name),
+                                    'h-icon-locked': !isPublic(level.name)}"></i>
+        {{level.text}}
+      </a>
     </li>
   </ul>
 </div>
