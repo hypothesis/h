@@ -2,8 +2,16 @@
 class CrossFrameService
   providers: null
 
-  this.inject = ['$rootScope', '$document', '$window', 'store', 'annotationUI']
-  constructor: ($rootScope, $document, $window, store, annotationUI) ->
+  this.inject = [
+    '$rootScope', '$document', '$window', 'store', 'annotationUI'
+    'CrossFrameDiscovery', 'CrossFrameBridge',
+    'AnnotationSync', 'AnnotationUISync'
+  ]
+  constructor: (
+    $rootScope, $document, $window, store, annotationUI
+    CrossFrameDiscovery, CrossFrameBridge,
+    AnnotationSync, AnnotationUISync
+  ) ->
     @providers = []
 
     createDiscovery = ->

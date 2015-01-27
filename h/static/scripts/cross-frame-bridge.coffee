@@ -34,8 +34,8 @@ class CrossFrameBridge
     channel = this._buildChannel channelOptions
 
     # Attach channel message listeners
-    for method, callback of @channelListeners
-        channel.bind method, callback
+    for own method, callback of @channelListeners
+      channel.bind method, callback
 
     # Store the newly created channel in our collection
     @links.push
@@ -107,3 +107,6 @@ class CrossFrameBridge
         (options.origin.match /^resource:\/\//)
       options = $.extend {}, options, {origin: '*'}
     channel = Channel.build(options)
+
+if typeof angular != 'undefined'
+  angular.module('h').value('CrossFrameBridge', CrossFrameBridge)

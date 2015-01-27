@@ -106,3 +106,6 @@ class CrossFrameDiscovery
         @requestInProgress = false # value should not actually matter anymore.
         discovered = true
     return {reply: reply, discovered: discovered, token: token}
+
+if typeof angular != 'undefined'
+  angular.module('h').value('CrossFrameDiscovery', CrossFrameDiscovery)
