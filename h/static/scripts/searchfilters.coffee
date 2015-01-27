@@ -203,12 +203,7 @@ class QueryParser
       formatter: (uri) ->
         uri.toLowerCase()
       path: '/uri'
-      and_or: 'or'
-      options:
-        es:
-         query_type: 'match'
-         cutoff_frequency: 0.001
-         and_or: 'and'
+      and_or: 'and'
     since:
       formatter: (past) ->
         seconds =
