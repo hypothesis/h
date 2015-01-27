@@ -373,9 +373,8 @@ class ViewFilter
     any:
       fields: ['quote', 'text', 'tag', 'user']
 
-  this.$inject = ['searchfilter','stringHelpers']
-  constructor: (searchfilter, stringHelpers) ->
-    @searchfilter = searchfilter
+  this.$inject = ['stringHelpers']
+  constructor: (stringHelpers) ->
 
     @_normalize = (e) ->
       if typeof e is 'string'
