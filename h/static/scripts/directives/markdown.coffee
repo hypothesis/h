@@ -8,6 +8,7 @@ loadMathJax = ->
         # MathJax configuration overides.
         MathJax.Hub.Config({
           showMathMenu: false
+          displayAlign: "left"
         })
     }
 
