@@ -4,19 +4,31 @@ sinon.assert.expose(assert, prefix: '')
 describe 'AnnotationUISync', ->
   sandbox = sinon.sandbox.create()
   uiSync = null
+  publish = null
   fakeBridge = null
+  fakeAnnotationUI = null
+  fakeAnnotationSync = null
   createAnnotationUISync = null
-  PARENT_WINDOW = {}
+  createChannel = -> {notify: sandbox.stub()}
+  PARENT_WINDOW = 'PARENT_WINDOW'
 
   beforeEach module('h')
   beforeEach inject (AnnotationUISync) ->
+    listeners = {}
+    publish = ({method, params}) -> listeners[method]('ctx', params)
+
     fakeWindow = parent: PARENT_WINDOW
     fakeBridge =
-      on: sandbox.stub()
+      on: sandbox.spy((method, fn) -> listeners[method] = fn)
       notify: sandbox.stub()
       onConnect: sandbox.stub()
+      links: [
+        {window: PARENT_WINDOW,    channel: createChannel()}
+        {window: 'ANOTHER_WINDOW', channel: createChannel()}
+        {window: 'THIRD_WINDOW',   channel: createChannel()}
+      ]
     fakeAnnotationSync =
-      getAnnotationForTag: (x) -> x
+      getAnnotationForTag: (tag) -> {id: Number(tag.replace('tag', ''))}
     fakeAnnotationUI =
       focusAnnotations: sandbox.stub()
       selectAnnotations: sandbox.stub()
@@ -33,7 +45,7 @@ describe 'AnnotationUISync', ->
   describe 'on bridge connection', ->
     describe 'when the source is not the parent window', ->
       it 'broadcasts the tool/visibility settings to the channel', ->
-        channel = notify: sandbox.stub()
+        channel = createChannel()
         fakeBridge.onConnect.callsArgWith(0, channel, {})
 
         createAnnotationUISync()
@@ -57,28 +69,111 @@ describe 'AnnotationUISync', ->
         assert.notCalled(channel.notify)
 
   describe 'on "back" event', ->
-    it 'sends the "hideFrame" message to the host only'
+    it 'sends the "hideFrame" message to the host only', ->
+      createAnnotationUISync()
+      publish({method: 'back'})
+      assert.calledWith(fakeBridge.links[0].channel.notify, method: 'hideFrame')
+      assert.notCalled(fakeBridge.links[1].channel.notify)
+      assert.notCalled(fakeBridge.links[2].channel.notify)
 
   describe 'on "open" event', ->
-    it 'sends the "showFrame" message to the host only'
+    it 'sends the "showFrame" message to the host only', ->
+      createAnnotationUISync()
+      publish({method: 'open'})
+      assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
+      assert.notCalled(fakeBridge.links[1].channel.notify)
+      assert.notCalled(fakeBridge.links[2].channel.notify)
 
   describe 'on "showEditor" event', ->
-    it 'sends the "showFrame" message to the host only'
+    it 'sends the "showFrame" message to the host only', ->
+      createAnnotationUISync()
+      publish({method: 'showEditor'})
+      assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
+      assert.notCalled(fakeBridge.links[1].channel.notify)
+      assert.notCalled(fakeBridge.links[2].channel.notify)
 
   describe 'on "showAnnotations" event', ->
-    it 'sends the "showFrame" message to the host only'
-    it 'updates the annotationUI to include the shown annotations'
+    it 'sends the "showFrame" message to the host only', ->
+      createAnnotationUISync()
+      publish({
+        method: 'showAnnotations',
+        params: ['tag1', 'tag2', 'tag3']
+      })
+      assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
+      assert.notCalled(fakeBridge.links[1].channel.notify)
+      assert.notCalled(fakeBridge.links[2].channel.notify)
+
+    it 'updates the annotationUI to include the shown annotations', ->
+      createAnnotationUISync()
+      publish({
+        method: 'showAnnotations',
+        params: ['tag1', 'tag2', 'tag3']
+      })
+      assert.called(fakeAnnotationUI.xorSelectedAnnotations)
+      assert.calledWith(fakeAnnotationUI.xorSelectedAnnotations, [
+        {id: 1}, {id: 2}, {id: 3}
+      ])
 
   describe 'on "focusAnnotations" event', ->
-    it 'updates the annotationUI to show the provided annotations'
+    it 'updates the annotationUI to show the provided annotations', ->
+      createAnnotationUISync()
+      publish({
+        method: 'focusAnnotations',
+        params: ['tag1', 'tag2', 'tag3']
+      })
+      assert.called(fakeAnnotationUI.focusAnnotations)
+      assert.calledWith(fakeAnnotationUI.focusAnnotations, [
+        {id: 1}, {id: 2}, {id: 3}
+      ])
 
   describe 'on "toggleAnnotationSelection" event', ->
-    it 'updates the annotationUI to show the provided annotations'
+    it 'updates the annotationUI to show the provided annotations', ->
+      createAnnotationUISync()
+      publish({
+        method: 'toggleAnnotationSelection',
+        params: ['tag1', 'tag2', 'tag3']
+     })
+      assert.called(fakeAnnotationUI.selectAnnotations)
+      assert.calledWith(fakeAnnotationUI.selectAnnotations, [
+        {id: 1}, {id: 2}, {id: 3}
+      ])
 
   describe 'on "setTool" event', ->
-    it 'updates the annotationUI with the new tool'
-    it 'notifies the other frames of the change'
+    it 'updates the annotationUI with the new tool', ->
+      createAnnotationUISync()
+      publish({
+        method: 'setTool',
+        params: 'highlighter'
+      })
+      assert.equal(fakeAnnotationUI.tool, 'highlighter')
+
+    it 'notifies the other frames of the change', ->
+      createAnnotationUISync()
+      publish({
+        method: 'setTool',
+        params: 'highlighter'
+      })
+      assert.calledWith(fakeBridge.notify, {
+        method: 'setTool'
+        params: 'highlighter'
+      })
 
   describe 'on "setVisibleHighlights" event', ->
-    it 'updates the annotationUI with the new value'
-    it 'notifies the other frames of the change'
+    it 'updates the annotationUI with the new value', ->
+      createAnnotationUISync()
+      publish({
+        method: 'setVisibleHighlights',
+        params: true
+      })
+      assert.equal(fakeAnnotationUI.visibleHighlights, true)
+
+    it 'notifies the other frames of the change', ->
+      createAnnotationUISync()
+      publish({
+        method: 'setVisibleHighlights',
+        params: true
+      })
+      assert.calledWith(fakeBridge.notify, {
+        method: 'setVisibleHighlights'
+        params: true
+      })

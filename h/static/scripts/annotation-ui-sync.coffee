@@ -3,10 +3,10 @@
 class AnnotationUISync
   constructor: ($window, bridge, annotationSync, annotationUI) ->
     getAnnotationsByTags = (tags) ->
-      tags.map(annotationSync.getAnnotationForTag, bridge)
+      tags.map(annotationSync.getAnnotationForTag, annotationSync)
 
     notifyHost = (message) ->
-      for {channel, window} in bridge.links where window is $window.parent
+      for {channel, window} in bridge.links when window is $window.parent
         channel.notify(message)
         break
 
@@ -34,7 +34,7 @@ class AnnotationUISync
         annotationUI.visibleHighlights = Boolean(state)
         bridge.notify(method: 'setVisibleHighlights', params: state)
 
-    for channel, listener in channelListeners
+    for own channel, listener of channelListeners
       bridge.on(channel, listener)
 
     onConnect = (channel, source) ->
