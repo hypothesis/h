@@ -153,10 +153,10 @@ class AnnotationSync
     for annotations in results
       if Array.isArray(annotations)
         for a in annotations
-          this._parse(a)
+          this._parse(a) unless a is null
       else
         # 'annotations' is in fact just a single annotation
-        this._parse(annotations)
+        this._parse(annotations) unless annotations is null
     return
 
   # Assign a non-enumerable tag to objects which cross the bridge.
