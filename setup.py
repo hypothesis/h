@@ -51,6 +51,7 @@ install_requires = [
     'python-statsd>=1.7.0,<1.8.0',
     'pyramid_webassets>=0.9,<1.0',
     'pyramid-jinja2>=2.3.3',
+    'pyramid_redis_sessions>=1.0a2',
     'requests>=2.2.1',
     'ws4py>=0.3,<0.4',
 
