@@ -398,10 +398,10 @@ class ViewFilter
   _arrayMatches: (filter, value, match) ->
     matches = true
     # Make copy for filtering
-    copy = value.slice()
+    copy = filter.terms.slice()
 
     copy = copy.filter (e) ->
-      match filter.terms, e
+      match value, e
 
     if (filter.operator is 'and' and copy.length < filter.terms.length) or
     (filter.operator is 'or' and not copy.length)
