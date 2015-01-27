@@ -365,7 +365,7 @@ class ViewFilter
     uri:
       autofalse: (annotation) -> return not annotation.uri?
       value: (annotation) -> return annotation.uri
-      match: (term, value) -> return value is term
+      match: (term, value) -> return value.indexOf(term) > -1
     user:
       autofalse: (annotation) -> return not annotation.user?
       value: (annotation) -> return annotation.user
