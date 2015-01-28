@@ -52,24 +52,29 @@ class Annotator.Guest extends Annotator
 
     delete @options.app
 
-    this.addPlugin 'Bridge',
-      formatter: (annotation) =>
-        formatted = {}
-        formatted['uri'] = @getHref()
-        for k, v of annotation when k isnt 'anchors'
-          formatted[k] = v
-        # Work around issue in jschannel where a repeated object is considered
-        # recursive, even if it is not its own ancestor.
-        if formatted.document?.title
-          formatted.document.title = formatted.document.title.slice()
-        formatted
-      onConnect: (source, origin, scope) =>
-        @panel = this._setupXDM
-          window: source
-          origin: origin
-          scope: "#{scope}:provider"
-          onReady: =>
-            this.publish('panelReady')
+    bridgePluginOptions =
+      discoveryOptions: {}
+      bridgeOptions:
+        onConnect: (source, origin, scope) => # TODO
+          @panel = this._setupXDM
+            window: source
+            origin: origin
+            scope: "#{scope}:provider"
+            onReady: =>
+              this.publish('panelReady')
+      annotationSyncOptions:
+        formatter: (annotation) =>
+          formatted = {}
+          formatted['uri'] = @getHref()
+          for k, v of annotation when k isnt 'anchors'
+            formatted[k] = v
+          # Work around issue in jschannel where a repeated object is considered
+          # recursive, even if it is not its own ancestor.
+          if formatted.document?.title
+            formatted.document.title = formatted.document.title.slice()
+          formatted
+
+    this.addPlugin 'Bridge', bridgePluginOptions
 
     # Load plugins
     for own name, opts of @options
