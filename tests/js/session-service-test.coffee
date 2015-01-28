@@ -3,13 +3,13 @@ sinon.assert.expose assert, prefix: null
 sandbox = sinon.sandbox.create()
 
 mockFlash = sandbox.spy()
-mockDocumentHelpers = {absoluteURI: -> '/session'}
+mockDocument = {prop: -> '/session'}
 
 describe 'session', ->
   beforeEach module('h.session')
 
   beforeEach module ($provide, sessionProvider) ->
-    $provide.value 'documentHelpers', mockDocumentHelpers
+    $provide.value '$document', mockDocument
     $provide.value 'flash', mockFlash
     sessionProvider.actions =
       login:
