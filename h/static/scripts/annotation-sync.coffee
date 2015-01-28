@@ -74,17 +74,16 @@ class AnnotationSync
     'updateAnnotation': (txn, body) ->
       annotation = this._parse(body)
       delete @cache[annotation.$$tag]
-      @_emit('beforeAnnotationUpdated', [annotation])
-      @_emit('annotationUpdated', [annotation])
+      @_emit('beforeAnnotationUpdated', annotation)
+      @_emit('annotationUpdated', annotation)
       @cache[annotation.$$tag] = annotation
       this._format annotation
 
     'deleteAnnotation': (txn, body) ->
       annotation = this._parse(body)
       delete @cache[annotation.$$tag]
-      @_emit('annotationDeleted', [annotation])
+      @_emit('annotationDeleted', annotation)
       res = this._format(annotation)
-      delete @cache[annotation.$$tag]
       res
 
     'sync': (ctx, bodies) ->
