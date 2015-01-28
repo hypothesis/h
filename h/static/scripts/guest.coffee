@@ -54,14 +54,7 @@ class Annotator.Guest extends Annotator
 
     bridgePluginOptions =
       discoveryOptions: {}
-      bridgeOptions:
-        onConnect: (source, origin, scope) => # TODO
-          @panel = this._setupXDM
-            window: source
-            origin: origin
-            scope: "#{scope}:provider"
-            onReady: =>
-              this.publish('panelReady')
+      bridgeOptions: {}
       annotationSyncOptions:
         formatter: (annotation) =>
           formatted = {}
@@ -75,6 +68,7 @@ class Annotator.Guest extends Annotator
           formatted
 
     this.addPlugin 'Bridge', bridgePluginOptions
+    @panel = this._connectAnnotationUISync(this.plugins.Bridge.bridge)
 
     # Load plugins
     for own name, opts of @options
@@ -147,20 +141,13 @@ class Annotator.Guest extends Annotator
     metadata.link?.forEach (link) => link.href = @_removeHash link.href
     metadata
 
-  _setupXDM: (options) ->
-    # jschannel chokes FF and Chrome extension origins.
-    if (options.origin.match /^chrome-extension:\/\//) or
-        (options.origin.match /^resource:\/\//)
-      options.origin = '*'
+  _connectAnnotationUISync: (bridge) ->
+    bridge
+    .onConnect(=> this.publish('panelReady'))
+    .on('onEditorHide', this.onEditorHide)
+    .on('onEditorSubmit', this.onEditorSubmit)
 
-    channel = Channel.build options
-
-    channel
-
-    .bind('onEditorHide', this.onEditorHide)
-    .bind('onEditorSubmit', this.onEditorSubmit)
-
-    .bind('focusAnnotations', (ctx, tags=[]) =>
+    .on('focusAnnotations', (ctx, tags=[]) =>
       for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag in tags
           hl.setFocused true
@@ -168,14 +155,14 @@ class Annotator.Guest extends Annotator
           hl.setFocused false
     )
 
-    .bind('scrollToAnnotation', (ctx, tag) =>
+    .on('scrollToAnnotation', (ctx, tag) =>
       for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag is tag
           hl.scrollTo()
           return
     )
 
-    .bind('getDocumentInfo', (trans) =>
+    .on('getDocumentInfo', (trans) =>
       (@plugins.PDF?.getMetaData() ? Promise.reject())
         .then (md) =>
            trans.complete
@@ -189,12 +176,12 @@ class Annotator.Guest extends Annotator
       trans.delayReturn(true)
     )
 
-    .bind('setTool', (ctx, name) =>
+    .on('setTool', (ctx, name) =>
       @tool = name
       this.publish 'setTool', name
     )
 
-    .bind('setVisibleHighlights', (ctx, state) =>
+    .on('setVisibleHighlights', (ctx, state) =>
       this.publish 'setVisibleHighlights', state
     )
 
