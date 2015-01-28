@@ -87,10 +87,10 @@ class AnnotationSync
       res
 
     'sync': (ctx, bodies) ->
-      this._format(this._parse(b)) for b in bodies
+      (this._format(this._parse(b)) for b in bodies)
 
     'loadAnnotations': (txn, bodies) ->
-      annotations = (this._parse(a) for a in annotations)
+      annotations = (this._parse(a) for a in bodies)
       @_emit('loadAnnotations', annotations)
 
   # Handlers for events coming from this frame, to send them across the channel

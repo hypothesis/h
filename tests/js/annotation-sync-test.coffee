@@ -144,3 +144,29 @@ describe 'AnnotationSync', ->
 
         assert(!annSync.cache['tag1'])
 
+    describe 'on "sync" event', ->
+      it 'returns an array of parsed and formatted annotations', ->
+        options.parser = sinon.spy((x) -> x)
+        options.formatter = sinon.spy((x) -> x)
+        annSync = createAnnotationSync()
+
+        annotations = [{id: 1, $$tag: 'tag1'}, {id: 2, $$tag: 'tag2'}, {id: 3, $$tag: 'tag3'}]
+        bodies = ({msg: ann, tag: ann.$$tag} for ann in annotations)
+        ret = publish(method: 'sync', params: bodies)
+
+        assert.deepEqual(ret, ret)
+        assert.called(options.parser)
+        assert.called(options.formatter)
+
+    describe 'on "loadAnnotations" event', ->
+      it 'publishes the "loadAnnotations" event with parsed annotations', ->
+        options.parser = sinon.spy((x) -> x)
+        annSync = createAnnotationSync()
+
+        annotations = [{id: 1, $$tag: 'tag1'}, {id: 2, $$tag: 'tag2'}, {id: 3, $$tag: 'tag3'}]
+        bodies = ({msg: ann, tag: ann.$$tag} for ann in annotations)
+        ret = publish(method: 'loadAnnotations', params: bodies)
+
+        assert.called(options.parser)
+        assert.calledWith(options.emit, 'loadAnnotations', annotations)
+
