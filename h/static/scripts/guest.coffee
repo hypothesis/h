@@ -56,6 +56,20 @@ class Annotator.Guest extends Annotator
       discoveryOptions: {}
       bridgeOptions: {}
       annotationSyncOptions:
+        on: (event, handler) =>
+          this.subscribe(event, handler)
+        emit: (event, args...) =>
+          switch event
+            # AnnotationSync tries to emit some events without taking actions.
+            # We catch them and perform the right action (which will then emit
+            # the event for real)
+            when 'annotationDeleted'
+              this.deleteAnnotation(annotation)
+            when 'loadAnnotations'
+              this.loadAnnotations args...
+            # Other events can simply be emitted.
+            else
+              this.publish(event, args...)
         formatter: (annotation) =>
           formatted = {}
           formatted['uri'] = @getHref()
