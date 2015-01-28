@@ -49,24 +49,11 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
   # Connected bridge links
   links: null
 
-  # Annotations currently being updated -- used to avoid event callback loops
-  updating: null
-
   constructor: (elem, options) ->
-    if options.window?
-      # Pull the option out and restore it after the super constructor is
-      # called. Unfortunately, Delegator uses a jQuery function which
-      # inspects this too closely and causes security errors.
-      window = options.window
-      delete options.window
-      super elem, options
-      @options.window = window
-    else
-      super
+    super
 
     @cache = {}
     @links = []
-    @updating = {}
 
   pluginInit: ->
     $(window).on 'message', this._onMessage
