@@ -188,3 +188,5 @@ class AnnotationSync
       tag: annotation.$$tag
       msg: msg
     }
+
+angular.module('h').value('AnnotationSync', AnnotationSync)

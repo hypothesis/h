@@ -29,13 +29,13 @@ class AnnotationUIController
 class AppController
   this.$inject = [
     '$document', '$location', '$route', '$scope', '$window', '$rootScope',
-    'auth', 'documentHelpers', 'drafts', 'identity',
+    'auth', 'drafts', 'identity',
     'permissions', 'streamer', 'streamfilter', 'annotationUI',
     'annotationMapper', 'threading'
   ]
   constructor: (
      $document,   $location,   $route,   $scope,   $window, $rootScope,
-     auth,   documentHelpers,   drafts,   identity,
+     auth,   drafts,   identity,
      permissions,   streamer,   streamfilter, annotationUI,
      annotationMapper, threading
   ) ->
