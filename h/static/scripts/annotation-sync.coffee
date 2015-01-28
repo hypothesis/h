@@ -174,7 +174,7 @@ class AnnotationSync
     else
       merged = remote
 
-    this._tag(merged, tag)
+    this._tag(merged, body.tag)
 
   # Format an annotation into an RPC message body with the provided formatter.
   _format: (ann) ->
