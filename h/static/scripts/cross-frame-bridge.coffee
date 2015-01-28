@@ -108,5 +108,4 @@ class CrossFrameBridge
       options = $.extend {}, options, {origin: '*'}
     channel = Channel.build(options)
 
-if typeof angular != 'undefined'
-  angular.module('h').value('CrossFrameBridge', CrossFrameBridge)
+angular?.module('h').value('CrossFrameBridge', CrossFrameBridge)

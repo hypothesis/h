@@ -107,5 +107,4 @@ class CrossFrameDiscovery
         discovered = true
     return {reply: reply, discovered: discovered, token: token}
 
-if typeof angular != 'undefined'
-  angular.module('h').value('CrossFrameDiscovery', CrossFrameDiscovery)
+angular?.module('h').value('CrossFrameDiscovery', CrossFrameDiscovery)
