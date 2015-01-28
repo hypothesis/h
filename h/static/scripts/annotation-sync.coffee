@@ -192,4 +192,4 @@ class AnnotationSync
       msg: @options.formatter(ann)
     }
 
-angular.module('h').value('AnnotationSync', AnnotationSync)
+angular?.module('h').value('AnnotationSync', AnnotationSync)
