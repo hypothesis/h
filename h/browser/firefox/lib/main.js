@@ -2,8 +2,7 @@ const self = require("sdk/self");
 const data = self.data;
 const tabs = require("sdk/tabs");
 const { ToggleButton } = require("sdk/ui/button/toggle");
-var bgScriptDidLoad = false;
-var btn_config = {};
+var btnConfig = {};
 var btn;
 
 // NOTE: The 18 and 36 icons are actually 16x16 and 32x32 respectively as
@@ -61,11 +60,11 @@ function deactivate(btn, tab) {
   });
 }
 
-btn_config = {
+btnConfig = {
   id: "hypothesis",
   label: "Annotate",
   icon: icons.sleeping,
-  onClick: function (state) {
+  onClick: function onButtonClick(state) {
     // delete the window-wide state default
     this.state('window', null);
     // but turn it back on for this tab
@@ -79,10 +78,10 @@ btn_config = {
   }
 };
 
-if (undefined === ToggleButton) {
-  btn = require("sdk/widget").Widget(btn_config);
+if (typeof ToggleButton === 'undefined') {
+  btn = require("sdk/widget").Widget(btnConfig);
 } else {
-  btn = ToggleButton(btn_config);
+  btn = ToggleButton(btnConfig);
 }
 
 tabs.on('pageshow', function onPageShow(tab) {
@@ -102,7 +101,7 @@ exports.main = function main(options, callbacks) {
   if (options.loadReason === 'install') {
     tabs.open({
       url: 'https://hypothes.is/welcome',
-      onReady: function (tab) {
+      onReady: function onTabReady(tab) {
         activate(btn, tab);
       }
     });
