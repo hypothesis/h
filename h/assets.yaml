@@ -16,7 +16,11 @@ annotator_plugins_app:
     - h:static/scripts/vendor/annotator.auth.js
     - filters: coffeescript
       output: scripts/annotator/plugin/bridge.js
-      contents: h:static/scripts/annotator/plugin/bridge.coffee
+      contents:
+       - h:static/scripts/annotator/plugin/bridge.coffee
+       - h:static/scripts/cross-frame-discovery.coffee
+       - h:static/scripts/cross-frame-bridge.coffee
+       - h:static/scripts/annotation-sync.coffee
     - filters: coffeescript
       output: scripts/annotator/plugin/threading.js
       contents: h:static/scripts/annotator/plugin/threading.coffee
