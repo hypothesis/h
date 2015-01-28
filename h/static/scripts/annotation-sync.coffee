@@ -1,11 +1,11 @@
 class AnnotationSync
   # Default configuration
   options:
-    # Formats an annotation for sending across the bridge
+    # Formats an annotation into a message body for sending across the bridge.
     formatter: (annotation) -> annotation
 
-    # Parses an annotation received from the bridge
-    parser: (annotation) -> annotation
+    # Parses a message body received from the bridge and returns an annotation.
+    parser: (body) -> body
 
     # Merge function. If specified, it will be called with the local copy of
     # an annotation and a parsed copy received as an argument to an RPC call
@@ -56,41 +56,41 @@ class AnnotationSync
 
   # Handlers for messages arriving through a channel
   _channelListeners:
-    'beforeCreateAnnotation': (txn, annotation) ->
-      annotation = this._parse annotation
+    'beforeCreateAnnotation': (txn, body) ->
+      annotation = this._parse(body)
       delete @cache[annotation.$$tag]
       @_emit 'beforeAnnotationCreated', annotation
       @cache[annotation.$$tag] = annotation
       this._format annotation
 
-    'createAnnotation': (txn, annotation) ->
-      annotation = this._parse annotation
+    'createAnnotation': (txn, body) ->
+      annotation = this._parse(body)
       delete @cache[annotation.$$tag]
       @_emit 'annotationCreated', annotation
       @cache[annotation.$$tag] = annotation
       this._format annotation
 
-    'updateAnnotation': (txn, annotation) ->
-      annotation = this._parse annotation
+    'updateAnnotation': (txn, body) ->
+      annotation = this._parse(body)
       delete @cache[annotation.$$tag]
       @_emit('beforeAnnotationUpdated', [annotation])
       @_emit('annotationUpdated', [annotation])
       @cache[annotation.$$tag] = annotation
       this._format annotation
 
-    'deleteAnnotation': (txn, annotation) ->
-      annotation = this._parse annotation
+    'deleteAnnotation': (txn, body) ->
+      annotation = this._parse(body)
       delete @cache[annotation.$$tag]
       @_emit('annotationDeleted', [annotation])
-      res = this._format annotation
+      res = this._format(annotation)
       delete @cache[annotation.$$tag]
       res
 
-    'sync': (ctx, annotations) ->
-      (this._format (this._parse a) for a in annotations)
+    'sync': (ctx, bodies) ->
+      this._format(this._parse(b)) for b in bodies
 
-    'loadAnnotations': (txn, annotations) ->
-      annotations = (this._parse a for a in annotations)
+    'loadAnnotations': (txn, bodies) ->
+      annotations = (this._parse(a) for a in annotations)
       @_emit('loadAnnotations', annotations)
 
   # Handlers for events coming from this frame, to send them across the channel
@@ -148,45 +148,40 @@ class AnnotationSync
         params: this._format(annotation)
       @bridge.call(options)
 
-  # Parse returned annotations to update cache with any changes made remotely
+  # Parse returned message bodies to update cache with any changes made remotely
   _parseResults: (results) ->
-    for annotations in results
-      if Array.isArray(annotations)
-        for a in annotations
-          this._parse(a) unless a is null
-      else
-        # 'annotations' is in fact just a single annotation
-        this._parse(annotations) unless annotations is null
+    for bodies in results
+      bodies = [].concat(bodies) # Ensure always an array.
+      this._parse(body) for body in bodies when body != null
     return
 
   # Assign a non-enumerable tag to objects which cross the bridge.
   # This tag is used to identify the objects between message.
-  _tag: (msg, tag) ->
-    return msg if msg.$$tag
-    tag = tag or (window.btoa Math.random())
-    Object.defineProperty msg, '$$tag', value: tag
-    @cache[tag] = msg
-    msg
+  _tag: (ann, tag) ->
+    return ann if ann.$$tag
+    tag = tag or window.btoa(Math.random())
+    Object.defineProperty(ann, '$$tag', value: tag)
+    @cache[tag] = ann
+    ann
 
-  # Parse an annotation from a RPC with the configured parser
-  _parse: ({tag, msg}) ->
-    local = @cache[tag]
-    remote = @options.parser msg
+  # Parse a message body from a RPC call with the provided parser.
+  _parse: (body) ->
+    local = @cache[body.tag]
+    remote = @options.parser(body.msg)
 
     if local?
-      merged = @options.merge local, remote
+      merged = @options.merge(local, remote)
     else
       merged = remote
 
-    this._tag merged, tag
+    this._tag(merged, tag)
 
-  # Format an annotation for RPC with the configured formatter
-  _format: (annotation) ->
-    this._tag annotation
-    msg = @options.formatter annotation
+  # Format an annotation into an RPC message body with the provided formatter.
+  _format: (ann) ->
+    this._tag(ann)
     {
-      tag: annotation.$$tag
-      msg: msg
+      tag: ann.$$tag
+      msg: @options.formatter(ann)
     }
 
 angular.module('h').value('AnnotationSync', AnnotationSync)
