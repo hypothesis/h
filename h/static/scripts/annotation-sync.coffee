@@ -4,8 +4,9 @@ class AnnotationSync
     # Formats an annotation into a message body for sending across the bridge.
     formatter: (annotation) -> annotation
 
-    # Parses a message body received from the bridge and returns an annotation.
-    parser: (body) -> body
+    # Recieves an annotation extracted from the message body received
+    # via the bridge and returns an annotation for use in the local app.
+    parser: (annotation) -> annotation
 
     # Merge function. If specified, it will be called with the local copy of
     # an annotation and a parsed copy received as an argument to an RPC call
