@@ -55,6 +55,14 @@ class AnnotationSync
   getAnnotationForTag: (tag) ->
     @cache[tag] or null
 
+  sync: (annotations, cb) ->
+    annotations = (this._format a for a in annotations)
+    @bridge._call
+      method: 'sync'
+      params: annotations
+      callback: cb
+    this
+
   # Handlers for messages arriving through a channel
   _channelListeners:
     'beforeCreateAnnotation': (txn, body) ->
