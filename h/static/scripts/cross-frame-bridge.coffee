@@ -98,7 +98,7 @@ class CrossFrameBridge
   # Add a function to be called upon a new connection
   onConnect: (callback) ->
     @onConnectListeners.push(callback)
-
+    this
 
   # Construct a channel to another frame
   _buildChannel: (options) ->
