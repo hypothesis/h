@@ -11,13 +11,14 @@ describe 'AnnotationSync', ->
   PARENT_WINDOW = 'PARENT_WINDOW'
 
   beforeEach module('h')
-  beforeEach inject (AnnotationSync) ->
+  beforeEach inject (AnnotationSync, $rootScope) ->
     listeners = {}
     publish = ({method, params}) -> listeners[method]('ctx', params)
 
     fakeWindow = parent: PARENT_WINDOW
     fakeBridge =
       on: sandbox.spy((method, fn) -> listeners[method] = fn)
+      call: sandbox.stub()
       notify: sandbox.stub()
       onConnect: sandbox.stub()
       links: [
@@ -25,16 +26,19 @@ describe 'AnnotationSync', ->
         {window: 'ANOTHER_WINDOW', channel: createChannel()}
         {window: 'THIRD_WINDOW',   channel: createChannel()}
       ]
+
+    # TODO: Fix this hack to remove pre-existing bound listeners.
+    $rootScope.$$listeners = []
     options =
-      on: sandbox.stub()
-      emit: sandbox.stub()
+      on: sandbox.spy($rootScope.$on.bind($rootScope))
+      emit: sandbox.spy($rootScope.$emit.bind($rootScope))
 
     createAnnotationSync = ->
       new AnnotationSync(options, fakeBridge)
 
   afterEach: -> sandbox.restore()
 
-  describe 'on bridge connection', ->
+  describe 'the bridge connection', ->
     it 'sends over the current annotation cache', ->
       ann = {id: 1, $$tag: 'tag1'}
       annSync = createAnnotationSync()
@@ -107,23 +111,23 @@ describe 'AnnotationSync', ->
 
         assert.equal(annSync.cache['tag1'], ann)
 
-    describe 'on "beforeCreateAnnotation" event', ->
+    describe 'the "beforeCreateAnnotation" event', ->
       assertBroadcast('beforeCreateAnnotation', 'beforeAnnotationCreated')
       assertReturnValue('beforeCreateAnnotation')
       assertCacheState('beforeCreateAnnotation')
 
-    describe 'on "createAnnotation" event', ->
+    describe 'the "createAnnotation" event', ->
       assertBroadcast('createAnnotation', 'annotationCreated')
       assertReturnValue('createAnnotation')
       assertCacheState('createAnnotation')
 
-    describe 'on "updateAnnotation" event', ->
+    describe 'the "updateAnnotation" event', ->
       assertBroadcast('updateAnnotation', 'annotationUpdated')
       assertBroadcast('updateAnnotation', 'beforeAnnotationUpdated')
       assertReturnValue('updateAnnotation')
       assertCacheState('updateAnnotation')
 
-    describe 'on "deleteAnnotation" event', ->
+    describe 'the "deleteAnnotation" event', ->
       assertBroadcast('deleteAnnotation', 'annotationDeleted')
       assertReturnValue('deleteAnnotation')
 
@@ -144,7 +148,7 @@ describe 'AnnotationSync', ->
 
         assert(!annSync.cache['tag1'])
 
-    describe 'on "sync" event', ->
+    describe 'the "sync" event', ->
       it 'returns an array of parsed and formatted annotations', ->
         options.parser = sinon.spy((x) -> x)
         options.formatter = sinon.spy((x) -> x)
@@ -158,7 +162,7 @@ describe 'AnnotationSync', ->
         assert.called(options.parser)
         assert.called(options.formatter)
 
-    describe 'on "loadAnnotations" event', ->
+    describe 'the "loadAnnotations" event', ->
       it 'publishes the "loadAnnotations" event with parsed annotations', ->
         options.parser = sinon.spy((x) -> x)
         annSync = createAnnotationSync()
@@ -170,3 +174,178 @@ describe 'AnnotationSync', ->
         assert.called(options.parser)
         assert.calledWith(options.emit, 'loadAnnotations', annotations)
 
+  describe 'application event handlers', ->
+    describe 'the "beforeAnnotationCreated" event', ->
+      it 'proxies the event over the bridge', ->
+        ann = {id: 1}
+        annSync = createAnnotationSync()
+        options.emit('beforeAnnotationCreated', ann)
+
+        assert.called(fakeBridge.call)
+        assert.calledWith(fakeBridge.call, {
+          method: 'beforeCreateAnnotation',
+          params: {msg: ann, tag: ann.$$tag},
+          callback: sinon.match.func
+        })
+
+      it 'returns early if the annotation has a tag', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        options.emit('beforeAnnotationCreated', ann)
+
+        assert.notCalled(fakeBridge.call)
+
+    describe 'the "annotationCreated" event', ->
+      it 'proxies the event over the bridge', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        annSync.cache.tag1 = ann
+        options.emit('annotationCreated', ann)
+
+        assert.called(fakeBridge.call)
+        assert.calledWith(fakeBridge.call, {
+          method: 'createAnnotation',
+          params: {msg: ann, tag: ann.$$tag},
+          callback: sinon.match.func
+        })
+
+      it 'returns early if the annotation has a tag but is not cached', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        options.emit('annotationCreated', ann)
+
+        assert.notCalled(fakeBridge.call)
+
+      it 'returns early if the annotation has no tag', ->
+        ann = {id: 1}
+        annSync = createAnnotationSync()
+        options.emit('annotationCreated', ann)
+
+        assert.notCalled(fakeBridge.call)
+
+    describe 'the "annotationUpdated" event', ->
+      it 'proxies the event over the bridge', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        annSync.cache.tag1 = ann
+        options.emit('annotationUpdated', ann)
+
+        assert.called(fakeBridge.call)
+        assert.calledWith(fakeBridge.call, {
+          method: 'updateAnnotation',
+          params: {msg: ann, tag: ann.$$tag},
+          callback: sinon.match.func
+        })
+
+      it 'returns early if the annotation has a tag but is not cached', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        options.emit('annotationUpdated', ann)
+
+        assert.notCalled(fakeBridge.call)
+
+      it 'returns early if the annotation has no tag', ->
+        ann = {id: 1}
+        annSync = createAnnotationSync()
+        options.emit('annotationUpdated', ann)
+
+        assert.notCalled(fakeBridge.call)
+
+    describe 'the "annotationDeleted" event', ->
+      it 'proxies the event over the bridge', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        annSync.cache.tag1 = ann
+        options.emit('annotationDeleted', ann)
+
+        assert.called(fakeBridge.call)
+        assert.calledWith(fakeBridge.call, {
+          method: 'deleteAnnotation',
+          params: {msg: ann, tag: ann.$$tag},
+          callback: sinon.match.func
+        })
+
+      it 'parses the result returned by the call', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        options.parser = sinon.spy((x) -> x)
+        annSync = createAnnotationSync()
+        annSync.cache.tag1 = ann
+        options.emit('annotationDeleted', ann)
+
+        body = {msg: {}, tag: 'tag1'}
+        fakeBridge.call.yieldTo('callback', null, [body])
+        assert.called(options.parser)
+        assert.calledWith(options.parser, {})
+
+      it 'removes the annotation from the cache on success', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        annSync.cache.tag1 = ann
+        options.emit('annotationDeleted', ann)
+
+        fakeBridge.call.yieldTo('callback', null, [])
+        assert.isUndefined(annSync.cache.tag1)
+
+      it 'does not remove the annotation from the cache if an error occurs', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        annSync.cache.tag1 = ann
+        options.emit('annotationDeleted', ann)
+
+        fakeBridge.call.yieldTo('callback', new Error('Error'), [])
+        assert.equal(annSync.cache.tag1, ann)
+
+      it 'returns early if the annotation has a tag but is not cached', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        options.emit('annotationDeleted', ann)
+
+        assert.notCalled(fakeBridge.call)
+
+      it 'returns early if the annotation has no tag', ->
+        ann = {id: 1}
+        annSync = createAnnotationSync()
+        options.emit('annotationDeleted', ann)
+
+        assert.notCalled(fakeBridge.call)
+
+    describe 'the "annotationsLoaded" event', ->
+      it 'formats the provided annotations', ->
+        annotations = [{id: 1}, {id: 2}, {id: 3}]
+        options.formatter = sinon.spy((x) -> x)
+        annSync = createAnnotationSync()
+        options.emit('annotationsLoaded', annotations)
+
+        assert.calledWith(options.formatter, {id: 1})
+        assert.calledWith(options.formatter, {id: 2})
+        assert.calledWith(options.formatter, {id: 3})
+
+      it 'sends the annotations over the bridge', ->
+        annotations = [{id: 1}, {id: 2}, {id: 3}]
+        options.formatter = sinon.spy((x) -> x)
+        annSync = createAnnotationSync()
+        options.emit('annotationsLoaded', annotations)
+
+        assert.called(fakeBridge.notify)
+        assert.calledWith(fakeBridge.notify, {
+          method: 'loadAnnotations',
+          params: {msg: a, tag: a.$$tag} for a in annotations
+        })
+
+      it 'does not send annotations that have already been tagged', ->
+        annotations = [{id: 1, $$tag: 'tag1'}, {id: 2, $$tag: 'tag2'}, {id: 3}]
+        options.formatter = sinon.spy((x) -> x)
+        annSync = createAnnotationSync()
+        options.emit('annotationsLoaded', annotations)
+
+        assert.called(fakeBridge.notify)
+        assert.calledWith(fakeBridge.notify, {
+          method: 'loadAnnotations',
+          params: [{msg: annotations[2], tag: annotations[2].$$tag}]
+        })
+
+      it 'returns early if no annotations are loaded', ->
+        annSync = createAnnotationSync()
+        options.emit('annotationsLoaded', [])
+
+        assert.notCalled(fakeBridge.notify)

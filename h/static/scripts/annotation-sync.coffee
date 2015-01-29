@@ -106,32 +106,27 @@ class AnnotationSync
     'beforeAnnotationCreated': (event, annotation) ->
       return if annotation.$$tag?
       this._mkCallRemotelyAndParseResults('beforeCreateAnnotation')(annotation)
-      this
 
     'annotationCreated': (event, annotation) ->
       return unless annotation.$$tag? and @cache[annotation.$$tag]
       this._mkCallRemotelyAndParseResults('createAnnotation')(annotation)
-      this
 
     'annotationUpdated': (event, annotation) ->
       return unless annotation.$$tag? and @cache[annotation.$$tag]
       this._mkCallRemotelyAndParseResults('updateAnnotation')(annotation)
-      this
 
     'annotationDeleted': (event, annotation) ->
       return unless annotation.$$tag? and @cache[annotation.$$tag]
       onFailure = (err) =>
         delete @cache[annotation.$$tag] unless err
       this._mkCallRemotelyAndParseResults('deleteAnnotation', onFailure)(annotation)
-      this
 
     'annotationsLoaded': (event, annotations) ->
-      annotations = (this._format a for a in annotations when not a.$$tag)
-      return unless annotations.length
-      this._notify
+      bodies = (this._format a for a in annotations when not a.$$tag)
+      return unless bodies.length
+      @bridge.notify
         method: 'loadAnnotations'
-        params: annotations
-      this
+        params: bodies
 
   _syncCache: (channel) ->
     # Synchronise (here to there) the items in our cache
