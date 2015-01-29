@@ -30,7 +30,8 @@ describe 'AnnotationSync', ->
     # TODO: Fix this hack to remove pre-existing bound listeners.
     $rootScope.$$listeners = []
     options =
-      on: sandbox.spy($rootScope.$on.bind($rootScope))
+      on: sandbox.spy (event, fn) ->
+        $rootScope.$on(event, (evt, args...) -> fn(args...))
       emit: sandbox.spy($rootScope.$emit.bind($rootScope))
 
     createAnnotationSync = ->
