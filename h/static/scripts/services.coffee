@@ -26,6 +26,13 @@ renderFactory = ['$$rAF', ($$rAF) ->
 ]
 
 
+# Dummy class that wraps annotator until the Auth plugin is removed.
+class AngularAnnotator extends Annotator
+  this.$inject = ['$document']
+  constructor: ($document) ->
+    super(document.createElement('div'))
+
+
 class Hypothesis extends Annotator
   events:
     'beforeAnnotationCreated': 'beforeAnnotationCreated'
@@ -476,5 +483,5 @@ class ViewFilter
 angular.module('h')
 .factory('render', renderFactory)
 .provider('drafts', DraftProvider)
-.service('annotator', Hypothesis)
+.service('annotator', AngularAnnotator)
 .service('viewFilter', ViewFilter)
