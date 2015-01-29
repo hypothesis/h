@@ -64,9 +64,9 @@ class Annotator.Guest extends Annotator
             # We catch them and perform the right action (which will then emit
             # the event for real)
             when 'annotationDeleted'
-              this.deleteAnnotation(annotation)
+              this.deleteAnnotation(args...)
             when 'loadAnnotations'
-              this.loadAnnotations args...
+              this.loadAnnotations(args...)
             # Other events can simply be emitted.
             else
               this.publish(event, args)
