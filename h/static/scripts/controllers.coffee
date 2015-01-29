@@ -19,6 +19,9 @@ class AnnotationUIController
       appScope.$digest()
       appScope.$evalAsync(angular.noop)
 
+    $rootScope.$on 'beforeAnnotationCreated', ->
+      appScope.$evalAsync(angular.noop)
+
     $rootScope.$on 'annotationsLoaded', ->
       appScope.$evalAsync(angular.noop)
 
