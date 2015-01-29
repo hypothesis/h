@@ -57,7 +57,7 @@ class AnnotationSync
 
   sync: (annotations, cb) ->
     annotations = (this._format a for a in annotations)
-    @bridge._call
+    @bridge.call
       method: 'sync'
       params: annotations
       callback: cb
@@ -103,25 +103,25 @@ class AnnotationSync
 
   # Handlers for events coming from this frame, to send them across the channel
   _eventListeners:
-    'beforeAnnotationCreated': (event, annotation) ->
+    'beforeAnnotationCreated': (annotation) ->
       return if annotation.$$tag?
       this._mkCallRemotelyAndParseResults('beforeCreateAnnotation')(annotation)
 
-    'annotationCreated': (event, annotation) ->
+    'annotationCreated': (annotation) ->
       return unless annotation.$$tag? and @cache[annotation.$$tag]
       this._mkCallRemotelyAndParseResults('createAnnotation')(annotation)
 
-    'annotationUpdated': (event, annotation) ->
+    'annotationUpdated': (annotation) ->
       return unless annotation.$$tag? and @cache[annotation.$$tag]
       this._mkCallRemotelyAndParseResults('updateAnnotation')(annotation)
 
-    'annotationDeleted': (event, annotation) ->
+    'annotationDeleted': (annotation) ->
       return unless annotation.$$tag? and @cache[annotation.$$tag]
       onFailure = (err) =>
         delete @cache[annotation.$$tag] unless err
       this._mkCallRemotelyAndParseResults('deleteAnnotation', onFailure)(annotation)
 
-    'annotationsLoaded': (event, annotations) ->
+    'annotationsLoaded': (annotations) ->
       bodies = (this._format a for a in annotations when not a.$$tag)
       return unless bodies.length
       @bridge.notify

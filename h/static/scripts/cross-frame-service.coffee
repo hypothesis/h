@@ -42,7 +42,7 @@ class CrossFrameService
         emit: (args...) ->
           $rootScope.$emit.call($rootScope, args...)
         on: (event, handler) ->
-          $rootScope.$on(event, handler)
+          $rootScope.$on(event, (event, args...) -> handler.apply(this, args))
 
       new AnnotationSync(options, bridge)
 
