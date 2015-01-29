@@ -69,7 +69,7 @@ class Annotator.Guest extends Annotator
               this.loadAnnotations args...
             # Other events can simply be emitted.
             else
-              this.publish(event, args...)
+              this.publish(event, args)
         formatter: (annotation) =>
           formatted = {}
           formatted['uri'] = @getHref()
