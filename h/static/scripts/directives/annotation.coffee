@@ -29,10 +29,10 @@ validate = (value) ->
 # {@link annotationMapper AnnotationMapper service} for persistence.
 ###
 AnnotationController = [
-  '$scope', '$timeout', '$rootScope',
+  '$scope', '$timeout', '$rootScope', '$document',
   'auth', 'drafts', 'flash', 'permissions',
   'timeHelpers', 'annotationUI', 'annotationMapper'
-  ($scope,   $timeout,   $rootScope,
+  ($scope,   $timeout,   $rootScope,   $document,
    auth,   drafts,   flash,   permissions,
    timeHelpers, annotationUI, annotationMapper) ->
     @annotation = {}
