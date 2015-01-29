@@ -232,8 +232,10 @@ app_js:
             - h:static/scripts/services.coffee
             - h:static/scripts/*-service.coffee
             - h:static/scripts/streamsearch.coffee
-            - h:static/scripts/annotation-*.coffee
-            - h:static/scripts/cross-frame-*.coffee
+            - h:static/scripts/annotation-sync.coffee
+            - h:static/scripts/annotation-ui-sync.coffee
+            - h:static/scripts/cross-frame-bridge.coffee
+            - h:static/scripts/cross-frame-discovery.coffee
 
 app_css:
     filters: cleancss, cssrewrite
