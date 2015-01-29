@@ -18,7 +18,7 @@ angular.module('h')
     svc = $document.find('link')
     .filter -> @rel is 'service' and @type is 'application/annotatorsvc+json'
     .filter -> @href
-    .prop('href')
+    .prop('href') or ''
 
     camelize = (string) ->
       string.replace /(?:^|_)([a-z])/g, (_, char) -> char.toUpperCase()
