@@ -12,6 +12,7 @@ class ThreadingService
     # Create a root container.
     @root = mail.messageContainer()
     $rootScope.$on('beforeAnnotationCreated', this.beforeAnnotationCreated)
+    $rootScope.$on('annotationCreated', this.annotationCreated)
     $rootScope.$on('annotationDeleted', this.annotationDeleted)
     $rootScope.$on('annotationsLoaded', this.annotationsLoaded)
 
