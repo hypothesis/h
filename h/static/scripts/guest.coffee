@@ -54,7 +54,8 @@ class Annotator.Guest extends Annotator
 
     bridgePluginOptions =
       discoveryOptions: {}
-      bridgeOptions: {}
+      bridgeOptions:
+        scope: 'annotator:bridge'
       annotationSyncOptions:
         on: (event, handler) =>
           this.subscribe(event, handler)
