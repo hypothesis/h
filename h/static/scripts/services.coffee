@@ -435,11 +435,7 @@ class ViewFilter
   #   value: a function to extract to facet value for the annotation.
   #   match: a function to check if the extracted value matches with the facet value
   #
-  # Returns a two-element list:
-  # [
-  #   matched annotation IDs list,
-  #   the faceted filters
-  # ]
+  # Returns the matched annotation IDs list,
   filter: (annotations, filters) ->
     limit = Math.min((filters.result?.terms or [])...)
     count = 0
