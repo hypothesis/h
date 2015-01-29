@@ -20,6 +20,8 @@ class Auth
 
     # TODO: Remove this once Auth has been migrated.
     $rootScope.$on 'beforeAnnotationCreated', (event, annotation) =>
+      annotation.user = @user
+      annotation.permissions = {}
       annotator.publish('beforeAnnotationCreated', annotation)
 
     $rootScope.$on 'annotationCreated', (event, annotation) =>
