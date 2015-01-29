@@ -170,9 +170,10 @@ class ViewerController
     loaded = []
 
     loadAnnotations = ->
+      query = limit: 200
       if annotator.tool is 'highlight'
         return unless auth.user
-        query = user: auth.user
+        query.user = auth.user
 
       for p in annotator.providers
         for e in p.entities when e not in loaded
