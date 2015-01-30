@@ -27,7 +27,6 @@ versioneer.tag_prefix = 'v'
 versioneer.parentdir_prefix = 'h-'
 
 install_requires = [
-    'BeautifulSoup4>=4.2.1',
     'SQLAlchemy>=0.8.0',
     'alembic>=0.6.3',
     'annotator>=0.13.0,<0.14',
