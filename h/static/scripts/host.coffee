@@ -39,9 +39,13 @@ class Annotator.Host extends Annotator.Guest
 
     # Host frame dictates the toolbar options.
     this.on 'panelReady', =>
-      this.setTool('comment')
       this.anchoring._scan() # Scan the document
-      this.setVisibleHighlights(!!options.showHighlights)
+
+      # Guest is designed to respond to events rather than direct method
+      # calls. If we call set directly the other plugins will never recieve
+      # these events and the UI will be out of sync.
+      this.publish('setTool', 'comment')
+      this.publish('setVisibleHighlights', !!options.showHighlights)
 
     if @plugins.BucketBar?
       this._setupDragEvents()
