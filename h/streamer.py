@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
 import copy
-import datetime
 import json
 import logging
 import operator
@@ -11,7 +10,6 @@ import struct
 import unicodedata
 import weakref
 
-from dateutil.tz import tzutc
 import gevent
 from jsonpointer import resolve_pointer
 from jsonschema import validate
@@ -19,7 +17,6 @@ from pyramid.config import aslist
 from pyramid.events import subscriber
 from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
 from pyramid.threadlocal import get_current_request
-from pyramid.wsgi import wsgiapp
 import transaction
 from ws4py.exc import HandshakeError
 from ws4py.websocket import WebSocket as _WebSocket
@@ -434,6 +431,10 @@ class WebSocket(_WebSocket):
     client_id = None
     filter = None
     request = None
+    query = None
+
+    offsetFrom = 0
+    received = 0
 
     def __init__(self, *args, **kwargs):
         super(WebSocket, self).__init__(*args, **kwargs)
