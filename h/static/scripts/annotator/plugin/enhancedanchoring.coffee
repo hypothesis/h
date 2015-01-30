@@ -220,18 +220,23 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
   # Collect all the highlights (optionally for a given set of annotations)
   getHighlights: (annotations) ->
     results = []
+    for anchor in @getAnchors(annotations)
+      for page, highlight of anchor.highlight
+        results.push highlight
+    results
+
+  # Collect all the anchors (optionally for a given set of annotations)
+  getAnchors: (annotations) ->
+    results = []
     if annotations?
       # Collect only the given set of annotations
       for annotation in annotations
-        for anchor in annotation.anchors
-          for page, hl of anchor.highlight
-            results.push hl
+        @$.merge results, annotator.anchors
     else
       # Collect from everywhere
       for page, anchors of @anchors
-        @$.merge results, (anchor.highlight[page] for anchor in anchors when anchor.highlight[page]?)
+        @$.merge results, anchors
     results
-
 
   # PUBLIC entry point 1:
   # This is called to create a target from a raw selection,
