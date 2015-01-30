@@ -17,6 +17,7 @@ module.exports = function(config) {
     files: [
       'h/static/scripts/vendor/polyfills/bind.js',
       'h/static/scripts/vendor/polyfills/url.js',
+      'h/static/scripts/vendor/polyfills/promise.js',
       'h/static/scripts/vendor/jquery.js',
       'h/static/scripts/vendor/jschannel.js',
       'h/static/scripts/vendor/jwz.js',
@@ -55,6 +56,7 @@ module.exports = function(config) {
       'h/static/scripts/hypothesis.js',
       'h/static/scripts/*-service.js',
       'h/templates/client/*.html',
+      'tests/js/bootstrap.coffee',
       'tests/js/**/*-test.coffee'
     ],
 
