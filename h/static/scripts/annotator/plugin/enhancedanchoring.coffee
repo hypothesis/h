@@ -55,6 +55,12 @@ class Anchor
     # Announce the creation of the highlights
     @anchoring.annotator.publish 'highlightsCreated', created
 
+    # If we are supposed to scroll to the highlight on a page,
+    # and it's available now, go scroll there.
+    if @pendingScroll? and (hl = @highlight[@pendingScroll])
+      hl.scrollTo()
+      delete @pendingScroll
+
   # Remove the highlights for the given set of pages
   virtualize: (pageIndex) =>
     highlight = @highlight[pageIndex]
@@ -93,7 +99,6 @@ class Anchor
       # It's all in one page. Simply scrolling
       @highlight[@startPage].scrollTo()
     else
-      console.log "This is a multi-page situation"
       if currentPage < @startPage
         # We need to go forward
         wantedPage = @startPage
@@ -103,19 +108,18 @@ class Anchor
         wantedPage = @endPage
         scrollPage = wantedPage + 1
       else
-        # We have no idea where we need to go
+        # We have no idea where we need to go.
+        # Let's just go to the start.
         wantedPage = @startPage
         scrollPage = wantedPage
 
       # Is this rendered?
       if @anchoring.document.isPageMapped wantedPage
-        # If it was rendered, we can simply go there.
-        console.log "Page rendered, scrolling directly"
+        # The wanted page is already rendered, we can simply go there
         @highlight[wantedPage].scrollTo()
       else
-        # Not rendered yet. Go to the page, and see what happens.
-        console.log "Scrolling to page first"
-        @pendingScroll = true
+        # Not rendered yet. Go to the page, we will continue from there
+        @pendingScroll = wantedPage
         @anchoring.document.setPageIndex scrollPage
 
 Annotator.Anchor = Anchor
