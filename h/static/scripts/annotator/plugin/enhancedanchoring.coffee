@@ -90,8 +90,6 @@ class Anchor
       delete @anchoring.anchors[index] unless anchors.length
 
   # Scroll to this anchor
-
-  # Scroll to this anchor
   scrollTo: ->
     currentPage = @anchoring.document.getPageIndex()
 
