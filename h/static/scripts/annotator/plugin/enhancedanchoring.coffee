@@ -83,6 +83,41 @@ class Anchor
       # Kill the list if it's empty
       delete @anchoring.anchors[index] unless anchors.length
 
+  # Scroll to this anchor
+
+  # Scroll to this anchor
+  scrollTo: ->
+    currentPage = @anchoring.document.getPageIndex()
+
+    if @startPage is @endPage and currentPage is @startPage
+      # It's all in one page. Simply scrolling
+      @highlight[@startPage].scrollTo()
+    else
+      console.log "This is a multi-page situation"
+      if currentPage < @startPage
+        # We need to go forward
+        wantedPage = @startPage
+        scrollPage = wantedPage - 1
+      else if currentPage > @endPage
+        # We need to go backwards
+        wantedPage = @endPage
+        scrollPage = wantedPage + 1
+      else
+        # We have no idea where we need to go
+        wantedPage = @startPage
+        scrollPage = wantedPage
+
+      # Is this rendered?
+      if @anchoring.document.isPageMapped wantedPage
+        # If it was rendered, we can simply go there.
+        console.log "Page rendered, scrolling directly"
+        @highlight[wantedPage].scrollTo()
+      else
+        # Not rendered yet. Go to the page, and see what happens.
+        console.log "Scrolling to page first"
+        @pendingScroll = true
+        @anchoring.document.setPageIndex scrollPage
+
 Annotator.Anchor = Anchor
 
 # This plugin contains the enhanced anchoring framework.
