@@ -58,7 +58,7 @@ class Anchor
     # If we are supposed to scroll to the highlight on a page,
     # and it's available now, go scroll there.
     if @pendingScroll? and (hl = @highlight[@pendingScroll])
-      hl.scrollTo()
+      hl.scrollIntoView()
       delete @pendingScroll
 
   # Remove the highlights for the given set of pages
@@ -90,12 +90,12 @@ class Anchor
       delete @anchoring.anchors[index] unless anchors.length
 
   # Scroll to this anchor
-  scrollTo: ->
+  scrollIntoView: ->
     currentPage = @anchoring.document.getPageIndex()
 
     if @startPage is @endPage and currentPage is @startPage
       # It's all in one page. Simply scrolling
-      @highlight[@startPage].scrollTo()
+      @highlight[@startPage].scrollIntoView()
     else
       if currentPage < @startPage
         # We need to go forward
@@ -114,7 +114,7 @@ class Anchor
       # Is this rendered?
       if @anchoring.document.isPageMapped wantedPage
         # The wanted page is already rendered, we can simply go there
-        @highlight[wantedPage].scrollTo()
+        @highlight[wantedPage].scrollIntoView()
       else
         # Not rendered yet. Go to the page, we will continue from there
         @pendingScroll = wantedPage

@@ -86,7 +86,7 @@ class TextHighlight
   getHeight: -> $(@_highlights).outerHeight true
 
   # Scroll the highlight into view, with a comfortable margin
-  scrollTo: ->
+  scrollIntoView: ->
     wrapper = @annotator.wrapper
     defaultView = wrapper[0].ownerDocument.defaultView
     pad = defaultView.innerHeight * .2

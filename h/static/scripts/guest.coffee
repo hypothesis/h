@@ -166,7 +166,7 @@ class Annotator.Guest extends Annotator
     .bind('scrollToAnnotation', (ctx, tag) =>
       for a in @anchoring.getAnchors()
         if a.annotation.$$tag is tag
-          a.scrollTo()
+          a.scrollIntoView()
           return
     )
 
