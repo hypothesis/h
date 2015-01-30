@@ -1,12 +1,15 @@
 ﻿/*!
  * jQuery scrollintoview() plugin and :scrollable selector filter
  *
- * Version 1.8 (14 Jul 2011)
- * Requires jQuery 1.4 or newer
+ * https://github.com/hypothesis/jquery-scrollintoview
  *
- * Copyright (c) 2011 Robert Koritnik
+ * Copyright (c) Hypothes.is Project and contributors
  * Licensed under the terms of the MIT license
  * http://www.opensource.org/licenses/mit-license.php
+ *
+ * Forked from the version maintained by Robert Koritnik
+ * https://github.com/litera/jquery-scrollintoview
+ * Version 1.8 (14 Jul 2011)
  */
 
 (function ($) {
