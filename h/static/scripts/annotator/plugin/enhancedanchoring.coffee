@@ -270,7 +270,7 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
     if annotations?
       # Collect only the given set of annotations
       for annotation in annotations
-        @$.merge results, annotator.anchors
+        @$.merge results, annotation.anchors
     else
       # Collect from everywhere
       for page, anchors of @anchors
