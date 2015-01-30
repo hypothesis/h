@@ -7,7 +7,7 @@ from collections import namedtuple
 import json
 
 from mock import ANY
-from mock import MagicMock
+from mock import MagicMock, Mock
 from mock import patch
 from pyramid.testing import DummyRequest
 
@@ -214,15 +214,47 @@ def test_websocket_same_origin(config):
 
 
 class TestWebSocket(unittest.TestCase):
-    def test_opened_starts_reader(self):
+    def setUp(self):
         fake_request = MagicMock()
         fake_socket = MagicMock()
 
-        s = WebSocket(fake_socket)
-        s.request = fake_request
-        s.opened()
+        self.s = WebSocket(fake_socket)
+        self.s.request = fake_request
 
-        s.request.get_queue_reader.assert_called_once_with('annotations', ANY)
+    def test_opened_starts_reader(self):
+        self.s.opened()
+        self.s.request.get_queue_reader.assert_called_once_with('annotations', ANY)
+
+    def test_filter_message_with_uri_gets_patched(self):
+        filter_message = json.dumps({
+            'filter': {
+                'actions': {},
+                'match_policy': 'include_all',
+                'clauses': [{
+                    'field': '/uri',
+                    'operator': 'equals',
+                    'value': 'http://example.com',
+                }],
+            }
+        })
+
+        with patch('annotator.document.Document.get_by_uri') as doc:
+            uris = Mock()
+            uris.return_value = ['http://example.com',
+                                 'http://example.com/alter',
+                                 'http://example.com/print']
+            doc.return_value = Mock(uris=uris)
+            msg = MagicMock()
+            msg.data = filter_message
+
+            self.s.received_message(msg)
+
+            uri_filter = self.s.filter.filter['clauses'][0]
+            uri_values = uri_filter['value']
+            assert len(uri_values) == 3
+            assert 'http://example.com' in uri_values
+            assert 'http://example.com/alter' in uri_values
+            assert 'http://example.com/print' in uri_values
 
 
 class TestBroadcast(unittest.TestCase):
