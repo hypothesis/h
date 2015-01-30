@@ -75,6 +75,4 @@ class CrossFrameService
 
     this.notify = -> throw new Error('connect() must be called before notify()')
 
-run = ['crossframe', (crossframe) -> crossframe.connect()]
-
-angular.module('h').service('crossframe', CrossFrameService).run(run)
+angular.module('h').service('crossframe', CrossFrameService)

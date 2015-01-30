@@ -72,8 +72,22 @@ configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
 ]
 
 
-angular.module('h', imports)
+setupCrossFrame = ['crossframe', (crossframe) -> crossframe.connect()]
+setupStreamer = [
+  '$http', '$window', 'streamer'
+  ($http,   $window,   streamer) ->
+    clientId = uuid.v4()
+    streamer.clientId = clientId
+    $.ajaxSetup(headers: {'X-Client-Id': clientId})
+    $http.defaults.headers.common['X-Client-Id'] = clientId
+]
+
+module = angular.module('h', imports)
 .config(configureDocument)
 .config(configureLocation)
 .config(configureRoutes)
 .config(configureTemplates)
+
+unless mocha? # Crude method of detecting test environment.
+  module.run(setupCrossFrame)
+  module.run(setupStreamer)
