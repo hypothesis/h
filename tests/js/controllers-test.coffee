@@ -87,7 +87,6 @@ describe 'AnnotationUIController', ->
   $scope = null
   $rootScope = null
   fakeAnnotationUI = null
-  cacheAsyncQueue = null
 
   beforeEach module('h')
   beforeEach inject (_$rootScope_, AnnotationUIController) ->
@@ -100,17 +99,7 @@ describe 'AnnotationUIController', ->
       focusedAnnotationsMap: null
       removeSelectedAnnotation: sandbox.stub()
 
-    # FIXME: No idea why, but we cannot call $digest() here without angular
-    # attempting to make an ajax request to an undefined url. This causes
-    # an internal angular method to throw an exception as it tries to read
-    # the url protocol. I'm assuming this is caused by a call to $evalAsync
-    # somewhere in the application.
-    cacheAsyncQueue = $rootScope.$$asyncQueue
-    $rootScope.$$asyncQueue = []
-
     new AnnotationUIController(fakeAnnotationUI, $rootScope, $scope)
-
-  afterEach -> $rootScope.$$asyncQueue = cacheAsyncQueue
 
   it 'updates the view when the selection changes', ->
     fakeAnnotationUI.selectedAnnotationMap = {1: true, 2: true}
