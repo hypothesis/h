@@ -57,9 +57,9 @@ class Anchor
 
     # If we are supposed to scroll to the highlight on a page,
     # and it's available now, go scroll there.
-    if @pendingScroll? and (hl = @highlight[@pendingScroll])
+    if @pendingScrollTargetPage? and (hl = @highlight[@pendingScrollTargetPage])
       hl.scrollIntoView()
-      delete @pendingScroll
+      delete @pendingScrollTargetPage
 
   # Remove the highlights for the given set of pages
   virtualize: (pageIndex) =>
@@ -117,7 +117,7 @@ class Anchor
         @highlight[wantedPage].scrollIntoView()
       else
         # Not rendered yet. Go to the page, we will continue from there
-        @pendingScroll = wantedPage
+        @pendingScrollTargetPage = wantedPage
         @anchoring.document.setPageIndex scrollPage
 
 Annotator.Anchor = Anchor
