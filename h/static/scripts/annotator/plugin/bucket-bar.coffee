@@ -53,8 +53,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     $(window).on 'resize scroll', this._scheduleUpdate
     $(document.body).on 'resize scroll', '*', this._scheduleUpdate
 
-    # Event handler to finish scrolling when we have to
-    # wait for anchors to be realized
+    # Event handler to to update when new highlights have been created
     @annotator.subscribe "highlightsCreated", (highlights) =>
       # All the highlights are guaranteed to belong to one anchor,
       # so we can do this:
@@ -68,26 +67,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       if anchor.annotation.id? # Is this a finished annotation ?
         this._scheduleUpdate()
 
-      if @pendingScroll? and anchor in @pendingScroll.anchors
-        # One of the wanted anchors has been realized
-        unless --@pendingScroll.count
-          # All anchors have been realized
-          page = @pendingScroll.page
-          dir = if @pendingScroll.direction is "up" then +1 else -1
-          {next} = @pendingScroll.anchors.reduce (acc, anchor) ->
-            {start, next} = acc
-            hl = anchor.highlight[page]
-            if not next? or hl.getTop()*dir > start*dir
-              start: hl.getTop()
-              next: hl
-            else
-              acc
-          , {}
-
-          # Scroll down to the annotation from the top of the annotation's page
-          next.paddedScrollTo('down')
-          delete @pendingScroll
-
+    # Event handler to to update when highlights have been removed
     @annotator.subscribe "highlightRemoved", (highlight) =>
       if highlight.annotation.id? # Is this a finished annotation ?
         this._scheduleUpdate()
@@ -162,21 +142,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
 
     # Get an anchor from the page we want to go to
     anchor = next[0]
-    startPage = anchor.startPage
-
-    # Is this rendered?
-    if @annotator.anchoring.document.isPageMapped startPage
-      # If it was rendered, then we only have one result. Go there.
-      hl = anchor.highlight[startPage]
-      hl.paddedScrollTo direction
-    else
-      # Not rendered yet. Go to the page, and see what happens.
-      @pendingScroll =
-        anchors: next
-        count: next.length
-        page: startPage
-        direction: direction
-      @annotator.anchoring.document.setPageIndex startPage
+    anchor.scrollIntoView()
 
   _update: =>
     wrapper = @annotator.wrapper

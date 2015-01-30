@@ -85,27 +85,11 @@ class TextHighlight
   # Get the height of the highlight.
   getHeight: -> $(@_highlights).outerHeight true
 
-  # Scroll the highlight into view.
-  scrollTo: -> $(@_highlights).scrollintoview()
-
-  # Scroll the highlight into view, with a comfortable margin.
-  # up should be true if we need to scroll up; false otherwise
-  paddedScrollTo: (direction) ->
-    unless direction? then throw "Direction is required"
-    dir = if direction is "up" then -1 else +1
-    wrapper = @annotator.wrapper
-    defaultView = wrapper[0].ownerDocument.defaultView
-    pad = defaultView.innerHeight * .2
-    $(@_highlights).scrollintoview
-      complete: ->
-        scrollable = if this.parentNode is this.ownerDocument
-          $(this.ownerDocument.body)
-        else
-          $(this)
-        top = scrollable.scrollTop()
-        correction = pad * dir
-        scrollable.stop().animate {scrollTop: top + correction}, 300
-
+  # Scroll the highlight into view
+  scrollIntoView: ->
+    new Promise (resolve, reject) ->
+      $(@_highlights).scrollintoview complete: ->
+        resolve()
 
 # Public: Wraps the DOM Nodes within the provided range with a highlight
 # element of the specified class and returns the highlight Elements.

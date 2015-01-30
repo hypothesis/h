@@ -57,6 +57,14 @@ class Anchor
     # Announce the creation of the highlights
     @anchoring.annotator.publish 'highlightsCreated', created
 
+    # If we are supposed to scroll to the highlight on a page,
+    # and it's available now, go scroll there.
+    if @pendingScrollTargetPage? and (hl = @highlight[@pendingScrollTargetPage])
+      hl.scrollIntoView().then =>
+        @pendingScrollResolve()
+        delete @pendingScrollTargetPage
+        delete @pendingScrollResolve
+
   # Remove the highlights for the given set of pages
   virtualize: (pageIndex) =>
     highlight = @highlight[pageIndex]
@@ -84,6 +92,39 @@ class Anchor
       anchors[i..i] = []
       # Kill the list if it's empty
       delete @anchoring.anchors[index] unless anchors.length
+
+  # Scroll to this anchor
+  scrollIntoView: ->
+    currentPage = @anchoring.document.getPageIndex()
+
+    if @startPage is @endPage and currentPage is @startPage
+      # It's all in one page. Simply scrolling
+      @highlight[@startPage].scrollIntoView()
+    else
+      if currentPage < @startPage
+        # We need to go forward
+        wantedPage = @startPage
+        scrollPage = wantedPage - 1
+      else if currentPage > @endPage
+        # We need to go backwards
+        wantedPage = @endPage
+        scrollPage = wantedPage + 1
+      else
+        # We have no idea where we need to go.
+        # Let's just go to the start.
+        wantedPage = @startPage
+        scrollPage = wantedPage
+
+      # Is this rendered?
+      if @anchoring.document.isPageMapped wantedPage
+        # The wanted page is already rendered, we can simply go there
+        @highlight[wantedPage].scrollIntoView()
+      else
+        # Not rendered yet. Go to the page, we will continue from there
+        @pendingScrollTargetPage = wantedPage
+        new Promise (resolve, reject) =>
+          @pendingScrollResolve = resolve
+          @anchoring.document.setPageIndex scrollPage
 
 Annotator.Anchor = Anchor
 
