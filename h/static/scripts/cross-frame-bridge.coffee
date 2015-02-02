@@ -7,19 +7,23 @@ class CrossFrameBridge
     # passed:
     # - the newly created channel object
     # - the window just connected to
-    onConnect: -> true
+    onConnect: null
 
     # Any callbacks for messages on the channel. Max one callback per method.
-    channelListeners: {}
+    channelListeners: null
 
   # Connected links to other frames
   links: null
+  channelListeners: null
+  onConnectListeners: null
 
   constructor: (options) ->
     @options = $.extend(true, {}, @options, options)
-    @onConnectListeners = [@options.onConnect]
-    @channelListeners = @options.channelListeners
     @links = []
+    @channelListeners = @options.channelListeners || {}
+    @onConnectListeners = []
+    if typeof @options.onConnect == 'function'
+      @onConnectListeners.push(@options.onConnect)
 
   createChannel: (source, origin, token) ->
     # Set up a channel
