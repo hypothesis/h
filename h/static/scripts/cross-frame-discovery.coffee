@@ -1,3 +1,25 @@
+# A module for establishing connections between multiple frames in the same
+# document. This model requires one frame (and only one) to be designated the
+# server (created with options.server: true) which can then connect to as
+# many clients as required. Once a handshake between two frames has been
+# completed the onDiscovery callback will be called with information about
+# both frames.
+#
+# Example:
+#
+#   // host.html
+#   var server = new CrossFrameDiscovery(window, {server: true})
+#   server.startDiscovery(function (window, source, token) {
+#     // Establish a message bus to the new client window.
+#     server.stopDiscovery();
+#   }
+#
+#   // client.html
+#   var client = new CrossFrameDiscovery(window)
+#   client.startDiscovery(function (window, source, token) {
+#     // Establish a message bus to the new server window.
+#     server.stopDiscovery();
+#   }
 class CrossFrameDiscovery
   @defaults:
     # Origins allowed to communicate on the channel
@@ -14,6 +36,9 @@ class CrossFrameDiscovery
     @origin = options.origin or CrossFrameDiscovery.defaults.origin
 
   startDiscovery: (onDiscovery) ->
+    if @onDiscovery
+      throw new Error('CrossFrameDiscovery is already in progress, call .stopDiscovery() first')
+
     # Find other frames that run the same discovery mechanism. Sends a beacon
     # and listens for beacons.
     #
@@ -21,7 +46,6 @@ class CrossFrameDiscovery
     # onDiscovery: (source, origin, token) -> ()
     #   When two frames discover each other, onDiscovery will be called on both
     #   sides with the same token string.
-    #   <this> will be bound to the CrossFrameDiscovery instance.
     @onDiscovery = onDiscovery
 
     # Listen to discovery messages from other frames
@@ -33,6 +57,7 @@ class CrossFrameDiscovery
 
   stopDiscovery: =>
     # Remove the listener for discovery messages
+    @onDiscovery = null
     @target.removeEventListener('message', this._onMessage)
     return
 
@@ -50,14 +75,14 @@ class CrossFrameDiscovery
     while queue.length
       parent = queue.shift()
       if parent isnt @target
-        parent.postMessage beaconMessage, @origin
+        parent.postMessage(beaconMessage, @origin)
       for child in parent.frames
-        queue.push child
+        queue.push(child)
     return
 
 
-  _onMessage: (e) =>
-    {source, origin, data} = e.originalEvent
+  _onMessage: (event) =>
+    {source, origin, data} = event
 
     # Fix for local testing (needed at least in Firefox 34.0)
     if origin is 'null'
@@ -72,15 +97,17 @@ class CrossFrameDiscovery
     token = match[2]
 
     # Process the received message
-    {reply, discovered, token} = this._processMessage(messageType, token)
-    if reply?
+    {reply, discovered, token} = this._processMessage(messageType, token, origin)
+
+    if reply
       source.postMessage '__cross_frame_dhcp_' + reply, origin
-    if discovered is true
-      @onDiscovery(source, origin, token)
+
+    if discovered
+      @onDiscovery.call(null, source, origin, token)
 
     return
 
-  _processMessage: (messageType, token) ->
+  _processMessage: (messageType, token, origin) ->
     # Process an incoming message, returns:
     # - a reply message
     # - whether the discovery has completed
@@ -96,6 +123,10 @@ class CrossFrameDiscovery
         token = ':' + ('' + Math.random()).replace(/\D/g, '')
         reply = 'ack' + token
         discovered = true
+      else if messageType is 'offer'
+        throw new Error("""
+          A second CrossFrameDiscovery server has been detected at #{origin}.
+          This is unsupported and will cause unexpected behaviour.""")
     else # We are configured as a client
       if messageType is 'offer'
         # The server joined the party, or replied to our discovery message.
