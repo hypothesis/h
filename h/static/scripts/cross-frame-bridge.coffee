@@ -88,6 +88,9 @@ class CrossFrameBridge
     return
 
   on: (method, callback) ->
+    if @channelListeners[method]
+      throw new Error("Listener '#{method}' already bound in CrossFrameBridge")
+
     @channelListeners[method] = callback
     for l in @links
       l.channel.bind method, callback
