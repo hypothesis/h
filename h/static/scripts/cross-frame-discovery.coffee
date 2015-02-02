@@ -118,7 +118,7 @@ class CrossFrameDiscovery
         reply = 'offer'
       else if messageType is 'request'
         # Create a channel with random identifier
-        token = ':' + ('' + Math.random()).replace(/\D/g, '')
+        token = this._generateToken()
         reply = 'ack' + token
         discovered = true
       else if messageType is 'offer' or messageType is 'ack'
@@ -138,5 +138,8 @@ class CrossFrameDiscovery
         @requestInProgress = false # value should not actually matter anymore.
         discovered = true
     return {reply: reply, discovered: discovered, token: token}
+
+  _generateToken: ->
+    ':' + ('' + Math.random()).replace(/\D/g, '')
 
 angular?.module('h').value('CrossFrameDiscovery', CrossFrameDiscovery)
