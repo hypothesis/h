@@ -14,7 +14,7 @@ services:
   - elasticsearch
 script:
   - make test
-  - prospector -P .prospector.yaml h
+  - prospector -P ../.prospector.yaml h
   - hypothesis extension development.ini chrome http://localhost
   - SESSION_SECRET=foo hypothesis extension production.ini chrome https://hypothes.is chrome-extension://notarealkey/public
   - hypothesis extension development.ini firefox http://localhost
