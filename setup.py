@@ -35,7 +35,7 @@ install_requires = [
     'deform>=0.9,<1.0',
     'elasticsearch>=1.1.0',
     'gnsq>=0.2.0,<0.3.0',
-    'gunicorn>=19.1,<20',
+    'gunicorn>=19.2,<20',
     'horus>=0.9.15',
     'jsonpointer==1.0',
     'jsonschema==1.3.0',
