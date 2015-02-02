@@ -32,10 +32,11 @@ class Auth
       annotator.addPlugin 'Auth', tokenUrl: tokenUrl
 
       # Set the user from the token.
-      plugins.Auth.withToken (token) =>
+      plugins.Auth.withToken (payload) =>
         _checkingToken = false
-        @user = token.userId
-        $http.defaults.headers.common['X-Annotator-Auth-Token'] = assertion
+        @user = payload.userId
+        token = plugins.Auth.token
+        $http.defaults.headers.common['X-Annotator-Auth-Token'] = token
         $rootScope.$apply()
 
     # Fired when the identity-service forgets authentication.
