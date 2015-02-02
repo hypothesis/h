@@ -84,10 +84,6 @@ class CrossFrameDiscovery
   _onMessage: (event) =>
     {source, origin, data} = event
 
-    # Fix for local testing (needed at least in Firefox 34.0)
-    if origin is 'null'
-      origin = '*'
-
     # Check if the message is at all related to our discovery mechanism
     match = data.match? /^__cross_frame_dhcp_(discovery|offer|request|ack)(:\d+)?$/
     return unless match
