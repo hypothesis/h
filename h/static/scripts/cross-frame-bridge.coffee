@@ -27,7 +27,7 @@ class CrossFrameBridge
 
   createChannel: (source, origin, token) ->
     # Set up a channel
-    scope = @options.scope + token
+    scope = @options.scope + ':' + token
     channelOptions =
       window: source
       origin: origin

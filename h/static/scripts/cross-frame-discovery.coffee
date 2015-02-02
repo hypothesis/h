@@ -87,7 +87,7 @@ class CrossFrameDiscovery
     {source, origin, data} = event
 
     # Check if the message is at all related to our discovery mechanism
-    match = data.match? /^__cross_frame_dhcp_(discovery|offer|request|ack)(:\d+)?$/
+    match = data.match? /^__cross_frame_dhcp_(discovery|offer|request|ack)(?::(\d+))?$/
     return unless match
 
     # Read message type and optional token from message data
@@ -119,7 +119,7 @@ class CrossFrameDiscovery
       else if messageType is 'request'
         # Create a channel with random identifier
         token = this._generateToken()
-        reply = 'ack' + token
+        reply = 'ack' + ':' + token
         discovered = true
       else if messageType is 'offer' or messageType is 'ack'
         throw new Error("""
@@ -140,6 +140,6 @@ class CrossFrameDiscovery
     return {reply: reply, discovered: discovered, token: token}
 
   _generateToken: ->
-    ':' + ('' + Math.random()).replace(/\D/g, '')
+    ('' + Math.random()).replace(/\D/g, '')
 
 angular?.module('h').value('CrossFrameDiscovery', CrossFrameDiscovery)

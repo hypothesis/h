@@ -80,7 +80,7 @@ describe 'CrossFrameDiscovery', ->
         handler = sandbox.stub()
         server.startDiscovery(handler)
         assert.called(handler)
-        assert.calledWith(handler, fakeTopWindow, 'top', sinon.match(/:\d+/))
+        assert.calledWith(handler, fakeTopWindow, 'top', sinon.match(/\d+/))
 
       it 'raises an error if it recieves an event from another server', ->
         fakeFrameWindow.addEventListener.yields({
@@ -167,7 +167,7 @@ describe 'CrossFrameDiscovery', ->
         client.startDiscovery(callback)
 
         assert.called(callback)
-        assert.calledWith(callback, fakeFrameWindow, 'iframe', ':1234')
+        assert.calledWith(callback, fakeFrameWindow, 'iframe', '1234')
 
   describe 'stopDiscovery', ->
     it 'removes the "message" listener from the window', ->
