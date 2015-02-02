@@ -93,29 +93,39 @@ describe 'CrossFrameBridge', ->
       assert.isNumber(message.timeout)
 
     it 'calls options.callback when all channels return successfully', ->
-      channel = createChannel()
-      channel.call.yieldsTo('success', 'result')
-      Channel.build.returns(channel)
+      channel1 = createChannel()
+      channel2 = createChannel()
+      channel1.call.yieldsTo('success', 'result1')
+      channel2.call.yieldsTo('success', 'result2')
 
       callback = sandbox.stub()
 
       bridge = createBridge()
+      Channel.build.returns(channel1)
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
+      Channel.build.returns(channel2)
+      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
+
       bridge.call({method: 'method1', params: 'params1', callback: callback})
 
       assert.called(callback)
-      assert.calledWith(callback, null, ['result'])
+      assert.calledWith(callback, null, ['result1', 'result2'])
 
     it 'calls options.callback with an error when one or more channels fail', ->
       err = new Error('Uh oh')
-      channel = createChannel()
-      channel.call.yieldsTo('error', err, 'A reason for the error')
-      Channel.build.returns(channel)
+      channel1 = createChannel()
+      channel1.call.yieldsTo('error', err, 'A reason for the error')
+      channel2 = createChannel()
+      channel2.call.yieldsTo('success', 'result2')
 
       callback = sandbox.stub()
-
       bridge = createBridge()
+
+      Channel.build.returns(channel1)
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
+      Channel.build.returns(channel2)
+      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
+
       bridge.call({method: 'method1', params: 'params1', callback: callback})
 
       assert.called(callback)
