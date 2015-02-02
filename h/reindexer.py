@@ -1,4 +1,3 @@
-from elasticsearch import helpers
 import annotator.reindexer
 
 from h.models import Annotation, Document
