@@ -17,7 +17,7 @@ class CrossFrameService
     createDiscovery = ->
       options =
         server: true
-      new CrossFrameDiscovery(options)
+      new CrossFrameDiscovery($window, options)
 
     # Set up the bridge plugin, which bridges the main annotation methods
     # between the host page and the panel widget.

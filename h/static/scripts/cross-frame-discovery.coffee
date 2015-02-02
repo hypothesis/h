@@ -1,5 +1,5 @@
 class CrossFrameDiscovery
-  options:
+  @defaults:
     # Origins allowed to communicate on the channel
     origin: '*'
 
@@ -7,8 +7,11 @@ class CrossFrameDiscovery
     # offer to connect to bridges in other frames it discovers.
     server: false
 
-  constructor: (options) ->
-    @options = $.extend({}, @options, options)
+  # Accepts a target window and an object of options. The window provided will
+  # act as a starting point for discovering other windows.
+  constructor: (@target, options={}) ->
+    @server = options.server or CrossFrameDiscovery.defaults.server
+    @origin = options.origin or CrossFrameDiscovery.defaults.origin
 
   startDiscovery: (onDiscovery) ->
     # Find other frames that run the same discovery mechanism. Sends a beacon
@@ -22,7 +25,7 @@ class CrossFrameDiscovery
     @onDiscovery = onDiscovery
 
     # Listen to discovery messages from other frames
-    $(window).on 'message', this._onMessage
+    @target.addEventListener('message', this._onMessage, false)
 
     # Send a discovery message to other frames to create channels
     this._beacon()
@@ -30,24 +33,24 @@ class CrossFrameDiscovery
 
   stopDiscovery: =>
     # Remove the listener for discovery messages
-    $(window).off 'message', this._onMessage
+    @target.removeEventListener('message', this._onMessage)
     return
 
 
   # Send out a beacon to discover frames to connect with
   _beacon: ->
-    beaconMessage = if @options.server
+    beaconMessage = if @server
       '__cross_frame_dhcp_offer'
     else
       '__cross_frame_dhcp_discovery'
 
     # Starting at the top window, walk through all frames, and ping each frame
     # that is not our own.
-    queue = [window.top]
+    queue = [@target.top]
     while queue.length
       parent = queue.shift()
-      if parent isnt window
-        parent.postMessage beaconMessage, @options.origin
+      if parent isnt @target
+        parent.postMessage beaconMessage, @origin
       for child in parent.frames
         queue.push child
     return
@@ -84,7 +87,7 @@ class CrossFrameDiscovery
     reply = null
     discovered = false
 
-    if @options.server # We are configured as server
+    if @server # We are configured as server
       if messageType is 'discovery'
         # A client joined the party. Offer it to connect.
         reply = 'offer'

@@ -4,7 +4,7 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
 
   constructor: (elem, options) ->
     super
-    @discovery = new CrossFrameDiscovery(options.discoveryOptions)
+    @discovery = new CrossFrameDiscovery(window, options.discoveryOptions)
     @bridge = new CrossFrameBridge(options.bridgeOptions)
     @annotationSync = new AnnotationSync(options.annotationSyncOptions, @bridge)
 
