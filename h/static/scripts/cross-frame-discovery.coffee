@@ -21,19 +21,21 @@
 #     server.stopDiscovery();
 #   }
 class CrossFrameDiscovery
-  @defaults:
-    # Origins allowed to communicate on the channel
-    origin: '*'
+  # Origins allowed to communicate on the channel
+  server: false
 
-    # When this is true, this bridge will act as a server and, similar to DHCP,
-    # offer to connect to bridges in other frames it discovers.
-    server: false
+  # When this is true, this bridge will act as a server and, similar to DHCP,
+  # offer to connect to bridges in other frames it discovers.
+  origin: '*'
+
+  onDiscovery: null
+  requestInProgress: false
 
   # Accepts a target window and an object of options. The window provided will
   # act as a starting point for discovering other windows.
   constructor: (@target, options={}) ->
-    @server = options.server or CrossFrameDiscovery.defaults.server
-    @origin = options.origin or CrossFrameDiscovery.defaults.origin
+    @server = options.server if options.server
+    @origin = options.origin if options.origin
 
   startDiscovery: (onDiscovery) ->
     if @onDiscovery
@@ -119,7 +121,7 @@ class CrossFrameDiscovery
         token = ':' + ('' + Math.random()).replace(/\D/g, '')
         reply = 'ack' + token
         discovered = true
-      else if messageType is 'offer'
+      else if messageType is 'offer' or messageType is 'ack'
         throw new Error("""
           A second CrossFrameDiscovery server has been detected at #{origin}.
           This is unsupported and will cause unexpected behaviour.""")
@@ -127,7 +129,7 @@ class CrossFrameDiscovery
       if messageType is 'offer'
         # The server joined the party, or replied to our discovery message.
         # Request it to set up a channel if we did not already do so.
-        unless @requestInProgress?
+        unless @requestInProgress
           @requestInProgress = true # prevent creating two channels
           reply = 'request'
       else if messageType is 'ack'
