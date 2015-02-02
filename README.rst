@@ -75,12 +75,18 @@ Check out the documentation for information on how to use and configure it.
 Testing
 -------
 
-To run the test suite, ensure the assets are built and then invoke the tests
-in the usual fashion of Python::
+There are test suites for both the front- and back-end code.
+
+To run the Python suite, invoke the tests in the standard fashion::
 
     $ ./bin/python setup.py test
 
-As a convenience, there is a make target for this::
+To run the JavaScript suite, ensure the assets are built and then invoke the
+karma test runner::
+
+    $ $(npm bin)/karma start karma.config.js --single-run
+
+As a convenience, there is a make target which will do all of the above::
 
     $ make test
 
