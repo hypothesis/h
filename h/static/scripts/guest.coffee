@@ -73,7 +73,7 @@ class Annotator.Guest extends Annotator
               this.publish(event, args)
         formatter: (annotation) =>
           formatted = {}
-          formatted['uri'] = @getHref()
+          formatted.uri = @getHref()
           for k, v of annotation when k isnt 'anchors'
             formatted[k] = v
           # Work around issue in jschannel where a repeated object is considered
@@ -181,6 +181,8 @@ class Annotator.Guest extends Annotator
            trans.complete
              uri: @getHref()
              metadata: @getMetadata()
+        .catch (e) ->
+          setTimeout -> throw e
 
       trans.delayReturn(true)
     bridge.on 'setTool', (ctx, name) =>
