@@ -23,6 +23,15 @@ resolve =
   store: ['store', (store) -> store.$promise]
 
 
+configureDocument = ['$provide', ($provide) ->
+  $provide.decorator '$document', ($delegate) ->
+    baseURI = $delegate.prop('baseURI')
+    baseURI ?= $delegate.find('base').prop('href')  # fallback
+    baseURI ?= $delegate.prop('URL')                # fallback
+    $delegate.prop('baseURI', baseURI)
+]
+
+
 configureLocation = ['$locationProvider', ($locationProvider) ->
   # Use HTML5 history
   $locationProvider.html5Mode(true)
@@ -63,16 +72,8 @@ configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
 ]
 
 
-configure = ['$injector', '$provide', ($injector, $provide) ->
-  $injector.invoke(configureLocation)
-  $injector.invoke(configureRoutes)
-  $injector.invoke(configureTemplates)
-
-  $provide.decorator '$document', ($delegate) ->
-    baseURI = $delegate.prop('baseURI')
-    baseURI ?= $delegate.find('base').prop('href')  # fallback
-    baseURI ?= $delegate.prop('URL')                # fallback
-    $delegate.prop('baseURI', baseURI)
-]
-
-angular.module('h', imports, configure)
+angular.module('h', imports)
+.config(configureDocument)
+.config(configureLocation)
+.config(configureRoutes)
+.config(configureTemplates)
