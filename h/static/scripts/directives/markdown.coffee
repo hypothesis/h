@@ -247,9 +247,6 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
 
     scope.insertQuote = ->
       scope.applyBlockMarkup("> ")
-      
-    scope.insertCode = ->
-      scope.applyBlockMarkup("    ")
 
     # Keyboard shortcuts for bold, italic, and link.
     elem.on
