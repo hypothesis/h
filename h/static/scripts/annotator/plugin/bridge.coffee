@@ -6,18 +6,18 @@ extract = extract = (obj, keys...) ->
   ret[key] = obj[key] for key in keys when obj.hasOwnProperty(key)
   ret
 
-class Annotator.Plugin.Bridge extends Annotator.Plugin
+Bridge = class Annotator.Plugin.Bridge extends Annotator.Plugin
   constructor: (elem, options) ->
     super
 
     opts = extract(options, 'server')
-    discovery = new window.CrossFrameDiscovery(window, opts)
+    discovery = new Bridge.CrossFrameDiscovery(window, opts)
 
     opts = extract(options, 'scope')
-    bridge = new window.CrossFrameBridge(opts)
+    bridge = new Bridge.CrossFrameBridge(opts)
 
     opts = extract(options, 'on', 'emit', 'formatter', 'parser')
-    annotationSync = new window.AnnotationSync(bridge, opts)
+    annotationSync = new Bridge.AnnotationSync(bridge, opts)
 
     this.pluginInit = ->
       onDiscoveryCallback = (source, origin, token) ->

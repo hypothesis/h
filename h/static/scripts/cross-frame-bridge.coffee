@@ -115,4 +115,7 @@ class CrossFrameBridge
       options = $.extend {}, options, {origin: '*'}
     channel = Channel.build(options)
 
-angular?.module('h').value('CrossFrameBridge', CrossFrameBridge)
+if angular?
+  angular.module('h').value('CrossFrameBridge', CrossFrameBridge)
+else
+  Annotator.Plugin.Bridge.CrossFrameBridge = CrossFrameBridge

@@ -142,4 +142,7 @@ class CrossFrameDiscovery
   _generateToken: ->
     ('' + Math.random()).replace(/\D/g, '')
 
-angular?.module('h').value('CrossFrameDiscovery', CrossFrameDiscovery)
+if angular?
+  angular.module('h').value('CrossFrameDiscovery', CrossFrameDiscovery)
+else
+  Annotator.Plugin.Bridge.CrossFrameDiscovery = CrossFrameDiscovery

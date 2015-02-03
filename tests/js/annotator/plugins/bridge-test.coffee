@@ -2,6 +2,7 @@ assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
 describe 'Annotator.Plugin.Bridge', ->
+  Bridge = null
   fakeCFDiscovery = null
   fakeCFBridge = null
   fakeAnnotationSync = null
@@ -28,46 +29,44 @@ describe 'Annotator.Plugin.Bridge', ->
     fakeAnnotationSync =
       sync: sandbox.stub()
 
-    window.AnnotationSync = sandbox.stub().returns(fakeAnnotationSync)
-    window.CrossFrameDiscovery = sandbox.stub().returns(fakeCFDiscovery)
-    window.CrossFrameBridge = sandbox.stub().returns(fakeCFBridge)
+    Bridge = Annotator.Plugin.Bridge
+    sandbox.stub(Bridge, 'AnnotationSync').returns(fakeAnnotationSync)
+    sandbox.stub(Bridge, 'CrossFrameDiscovery').returns(fakeCFDiscovery)
+    sandbox.stub(Bridge, 'CrossFrameBridge').returns(fakeCFBridge)
 
   afterEach ->
-    delete window.AnnotationSync
-    delete window.CrossFrameBridge
-    delete window.CrossFrameDiscovery
     sandbox.restore()
 
   describe 'constructor', ->
     it 'instantiates the CrossFrameDiscovery component', ->
       createBridge()
-      assert.called(CrossFrameDiscovery)
-      assert.calledWith(CrossFrameDiscovery, window)
+      assert.called(Bridge.CrossFrameDiscovery)
+      assert.calledWith(Bridge.CrossFrameDiscovery, window)
 
     it 'passes the options along to the bridge', ->
       createBridge(server: true)
-      assert.called(CrossFrameDiscovery)
-      assert.calledWith(CrossFrameDiscovery, window, server: true)
+      assert.called(Bridge.CrossFrameDiscovery)
+      assert.calledWith(Bridge.CrossFrameDiscovery, window, server: true)
 
     it 'instantiates the CrossFrameBridge component', ->
       createBridge()
-      assert.called(CrossFrameBridge)
-      assert.calledWith(CrossFrameDiscovery)
+      assert.called(Bridge.CrossFrameBridge)
+      assert.calledWith(Bridge.CrossFrameDiscovery)
 
     it 'passes the options along to the bridge', ->
       createBridge(scope: 'myscope')
-      assert.called(CrossFrameBridge)
-      assert.calledWith(CrossFrameBridge, scope: 'myscope')
+      assert.called(Bridge.CrossFrameBridge)
+      assert.calledWith(Bridge.CrossFrameBridge, scope: 'myscope')
 
     it 'instantiates the AnnotationSync component', ->
       createBridge()
-      assert.called(AnnotationSync)
+      assert.called(Bridge.AnnotationSync)
 
     it 'passes along options to AnnotationSync', ->
       formatter = (x) -> x
       createBridge(formatter: formatter)
-      assert.called(AnnotationSync)
-      assert.calledWith(AnnotationSync, fakeCFBridge, {
+      assert.called(Bridge.AnnotationSync)
+      assert.calledWith(Bridge.AnnotationSync, fakeCFBridge, {
         on: sinon.match.func
         emit: sinon.match.func
         formatter: formatter

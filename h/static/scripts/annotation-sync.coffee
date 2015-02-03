@@ -187,4 +187,7 @@ class AnnotationSync
       msg: @options.formatter(ann)
     }
 
-angular?.module('h').value('AnnotationSync', AnnotationSync)
+if angular?
+  angular.module('h').value('AnnotationSync', AnnotationSync)
+else
+  Annotator.Plugin.Bridge.AnnotationSync = AnnotationSync
