@@ -3,7 +3,7 @@ sinon.assert.expose(assert, prefix: '')
 
 describe 'Annotator.Guest', ->
   sandbox = sinon.sandbox.create()
-  fakeCFBridge = null
+  fakeBridge = null
   createGuest = (options) ->
     element = document.createElement('div')
     return new Annotator.Guest(element, options || {})
@@ -13,12 +13,11 @@ describe 'Annotator.Guest', ->
   afterEach -> sandbox.restore()
 
   beforeEach ->
-    fakeCFBridge =
+    fakeBridge =
       onConnect: sandbox.stub()
       on: sandbox.stub()
 
-    sandbox.stub(Annotator.Plugin, 'Bridge').returns
-      bridge: fakeCFBridge
+    sandbox.stub(Annotator.Plugin, 'Bridge').returns(fakeBridge)
 
   describe 'setting up the bridge', ->
     it 'sets the scope for the cross frame bridge', ->
@@ -41,7 +40,7 @@ describe 'Annotator.Guest', ->
       handler = sandbox.stub()
       guest = createGuest()
       guest.subscribe('panelReady', handler)
-      fakeCFBridge.onConnect.yield()
+      fakeBridge.onConnect.yield()
       assert.called(handler)
 
     describe 'the event bus .on method', ->
@@ -155,7 +154,7 @@ describe 'Annotator.Guest', ->
 
   describe 'annotation UI events', ->
     emitGuestEvent = (event, args...) ->
-      fn(args...) for [evt, fn] in fakeCFBridge.on.args when event == evt
+      fn(args...) for [evt, fn] in fakeBridge.on.args when event == evt
 
     describe 'on "onEditorHide" event', ->
       it 'hides the editor', ->

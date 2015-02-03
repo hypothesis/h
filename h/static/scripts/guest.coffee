@@ -82,8 +82,8 @@ class Annotator.Guest extends Annotator
             formatted.document.title = formatted.document.title.slice()
           formatted
 
-    this.addPlugin 'Bridge', bridgePluginOptions
-    @panel = this._connectAnnotationUISync(this.plugins.Bridge.bridge)
+    this.addPlugin('Bridge', bridgePluginOptions)
+    @panel = this._connectAnnotationUISync(this.plugins.Bridge)
 
     # Load plugins
     for own name, opts of @options
@@ -182,7 +182,6 @@ class Annotator.Guest extends Annotator
              uri: @getHref()
              metadata: @getMetadata()
         .catch (e) ->
-          setTimeout -> throw e
 
       trans.delayReturn(true)
     bridge.on 'setTool', (ctx, name) =>

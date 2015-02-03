@@ -22,6 +22,9 @@ describe 'Annotator.Plugin.Bridge', ->
 
     fakeCFBridge =
       createChannel: sandbox.stub()
+      onConnect: sandbox.stub()
+      notify: sandbox.stub()
+      on: sandbox.stub()
 
     fakeAnnotationSync =
       sync: sandbox.stub()
@@ -95,3 +98,22 @@ describe 'Annotator.Plugin.Bridge', ->
       bridge = createBridge()
       bridge.sync()
       assert.called(fakeAnnotationSync.sync)
+
+  describe '.on', ->
+    it 'proxies the call to the bridge', ->
+      bridge = createBridge()
+      bridge.on('event', 'arg')
+      assert.calledWith(fakeCFBridge.on, 'event', 'arg')
+
+  describe '.notify', ->
+    it 'proxies the call to the bridge', ->
+      bridge = createBridge()
+      bridge.notify(method: 'method')
+      assert.calledWith(fakeCFBridge.notify, method: 'method')
+
+  describe '.onConnect', ->
+    it 'proxies the call to the bridge', ->
+      bridge = createBridge()
+      fn = ->
+      bridge.onConnect(fn)
+      assert.calledWith(fakeCFBridge.onConnect, fn)
