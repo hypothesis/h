@@ -202,7 +202,7 @@ class ViewerController
 
     loadAnnotations = ->
       query = limit: 200
-      if crossFrameUI.tool is 'highlight'
+      if annotationUI.tool is 'highlight'
         return unless auth.user
         query.user = auth.user
 
