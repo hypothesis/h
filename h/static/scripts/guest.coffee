@@ -83,7 +83,7 @@ class Annotator.Guest extends Annotator
           formatted
 
     this.addPlugin('Bridge', bridgePluginOptions)
-    @panel = this._connectAnnotationUISync(this.plugins.Bridge)
+    @bridge = this._connectAnnotationUISync(this.plugins.Bridge)
 
     # Load plugins
     for own name, opts of @options
@@ -240,27 +240,27 @@ class Annotator.Guest extends Annotator
     annotation
 
   showAnnotations: (annotations) =>
-    @panel?.notify
+    @bridge?.notify
       method: "showAnnotations"
       params: (a.$$tag for a in annotations)
 
   toggleAnnotationSelection: (annotations) =>
-    @panel?.notify
+    @bridge?.notify
       method: "toggleAnnotationSelection"
       params: (a.$$tag for a in annotations)
 
   updateAnnotations: (annotations) =>
-    @panel?.notify
+    @bridge?.notify
       method: "updateAnnotations"
       params: (a.$$tag for a in annotations)
 
   showEditor: (annotation) =>
-    @panel?.notify
+    @bridge?.notify
       method: "showEditor"
       params: annotation.$$tag
 
   focusAnnotations: (annotations) =>
-    @panel?.notify
+    @bridge?.notify
       method: "focusAnnotations"
       params: (a.$$tag for a in annotations)
 
@@ -355,7 +355,7 @@ class Annotator.Guest extends Annotator
         (event.metaKey or event.ctrlKey)
 
   setTool: (name) ->
-    @panel?.notify
+    @bridge?.notify
       method: 'setTool'
       params: name
 
@@ -363,7 +363,7 @@ class Annotator.Guest extends Annotator
   setVisibleHighlights: (shouldShowHighlights) ->
     return if @visibleHighlights == shouldShowHighlights
 
-    @panel?.notify
+    @bridge?.notify
       method: 'setVisibleHighlights'
       params: shouldShowHighlights
 
@@ -382,11 +382,11 @@ class Annotator.Guest extends Annotator
 
   # Open the sidebar
   showFrame: ->
-    @panel?.notify method: 'open'
+    @bridge?.notify method: 'open'
 
   # Close the sidebar
   hideFrame: ->
-    @panel?.notify method: 'back'
+    @bridge?.notify method: 'back'
 
   addToken: (token) =>
     @api.notify
