@@ -1,10 +1,3 @@
-imports = [
-  'ngRoute'
-  'h.identity'
-  'h.helpers'
-  'h.session'
-]
-
 AUTH_SESSION_ACTIONS = [
   'login'
   'logout'
@@ -126,6 +119,7 @@ configure = [
 ]
 
 
-angular.module('h.account', imports, configure)
+angular.module('h')
+.config(configure)
 .controller('AuthAppController', AuthAppController)
 .controller('AuthPageController', AuthPageController)
