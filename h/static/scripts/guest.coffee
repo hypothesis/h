@@ -157,27 +157,21 @@ class Annotator.Guest extends Annotator
     metadata
 
   _connectAnnotationUISync: (bridge) ->
-    bridge
-    .onConnect(=> this.publish('panelReady'))
-    .on('onEditorHide', this.onEditorHide)
-    .on('onEditorSubmit', this.onEditorSubmit)
-
-    .on('focusAnnotations', (ctx, tags=[]) =>
+    bridge.onConnect(=> this.publish('panelReady'))
+    bridge.on('onEditorHide', this.onEditorHide)
+    bridge.on('onEditorSubmit', this.onEditorSubmit)
+    bridge.on 'focusAnnotations', (ctx, tags=[]) =>
       for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag in tags
           hl.setFocused true
         else
           hl.setFocused false
-    )
-
-    .on('scrollToAnnotation', (ctx, tag) =>
+    bridge.on 'scrollToAnnotation', (ctx, tag) =>
       for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag is tag
           hl.scrollTo()
           return
-    )
-
-    .on('getDocumentInfo', (trans) =>
+    bridge.on 'getDocumentInfo', (trans) =>
       (@plugins.PDF?.getMetaData() ? Promise.reject())
         .then (md) =>
            trans.complete
@@ -189,16 +183,11 @@ class Annotator.Guest extends Annotator
              metadata: @getMetadata()
 
       trans.delayReturn(true)
-    )
-
-    .on('setTool', (ctx, name) =>
+    bridge.on 'setTool', (ctx, name) =>
       @tool = name
       this.publish 'setTool', name
-    )
-
-    .on('setVisibleHighlights', (ctx, state) =>
+    bridge.on 'setVisibleHighlights', (ctx, state) =>
       this.publish 'setVisibleHighlights', state
-    )
 
   _setupWrapper: ->
     @wrapper = @element
