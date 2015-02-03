@@ -63,6 +63,7 @@ describe 'h', ->
         {onlogin} = fakeIdentity.watch.args[0][0]
         onlogin('test-assertion')
         fakeToken = { userId: 'acct:hey@joe'}
+        fakeAnnotator.plugins.Auth.token = 'test-token'
         userSetter = fakeAnnotator.plugins.Auth.withToken.args[0][0]
         userSetter(fakeToken)
 
@@ -71,7 +72,7 @@ describe 'h', ->
 
       it 'sets the token header as a default header', ->
         token = $http.defaults.headers.common['X-Annotator-Auth-Token']
-        assert.equal(token, 'test-assertion')
+        assert.equal(token, 'test-token')
 
     describe 'at logout', ->
       authPlugin = null
