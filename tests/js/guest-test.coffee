@@ -12,59 +12,269 @@ describe 'Annotator.Guest', ->
   beforeEach -> sandbox.stub(console, 'log')
   afterEach -> sandbox.restore()
 
+  beforeEach ->
+    fakeCFBridge =
+      onConnect: sandbox.stub()
+      on: sandbox.stub()
+
+    sandbox.stub(Annotator.Plugin, 'Bridge').returns
+      bridge: fakeCFBridge
+
   describe 'setting up the bridge', ->
-    beforeEach ->
-      fakeCFBridge =
-        onConnect: sandbox.stub()
-        on: sandbox.stub()
-
-      sinon.stub(Annotator.Plugin, 'Bridge').returns
-        bridge: fakeCFBridge
-
     it 'sets the scope for the cross frame bridge', ->
       guest = createGuest()
       options = Annotator.Plugin.Bridge.lastCall.args[1]
       assert.equal(options.bridgeOptions.scope, 'annotator:bridge')
 
-    it 'provides an event bus for the annotation sync module'
-    it 'provides a formatter for the annotation sync module'
-    it 'publishes the "panelReady event when a connection is established'
+    it 'provides an event bus for the annotation sync module', ->
+      guest = createGuest()
+      options = Annotator.Plugin.Bridge.lastCall.args[1]
+      assert.isFunction(options.annotationSyncOptions.on)
+      assert.isFunction(options.annotationSyncOptions.emit)
+
+    it 'provides a formatter for the annotation sync module', ->
+      guest = createGuest()
+      options = Annotator.Plugin.Bridge.lastCall.args[1]
+      assert.isFunction(options.annotationSyncOptions.formatter)
+
+    it 'publishes the "panelReady" event when a connection is established', ->
+      handler = sandbox.stub()
+      guest = createGuest()
+      guest.subscribe('panelReady', handler)
+      fakeCFBridge.onConnect.yield()
+      assert.called(handler)
 
     describe 'the event bus .on method', ->
-      it 'proxies the event into the annotator event system'
+      options = null
+      guest = null
+
+      beforeEach ->
+        guest = createGuest()
+        options = Annotator.Plugin.Bridge.lastCall.args[1].annotationSyncOptions
+
+      it 'proxies the event into the annotator event system', ->
+        fooHandler = sandbox.stub()
+        barHandler = sandbox.stub()
+
+        options.on('foo', fooHandler)
+        options.on('bar', barHandler)
+
+        guest.publish('foo', ['1', '2'])
+        guest.publish('bar', ['1', '2'])
+
+        assert.calledWith(fooHandler, '1', '2')
+        assert.calledWith(barHandler, '1', '2')
 
     describe 'the event bus .emit method', ->
-      it 'calls deleteAnnotations when an annotationDeleted event is recieved'
-      it 'does not proxy the deleteAnnotations event'
-      it 'calls loadAnnotations when an loadAnnotations event is recieved'
-      it 'does not proxy the loadAnnotations event'
-      it 'proxies all other events into the annotator event system'
+      options = null
+      guest = null
+
+      beforeEach ->
+        guest = createGuest()
+        options = Annotator.Plugin.Bridge.lastCall.args[1].annotationSyncOptions
+
+      it 'calls deleteAnnotation when an annotationDeleted event is recieved', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        sandbox.stub(guest, 'deleteAnnotation')
+
+        options.emit('annotationDeleted', ann)
+        assert.called(guest.deleteAnnotation)
+        assert.calledWith(guest.deleteAnnotation, ann)
+
+      it 'does not proxy the annotationDeleted event', ->
+        handler = sandbox.stub()
+        guest.subscribe('annotationDeleted', handler)
+
+        options.emit('annotationDeleted', {})
+        # Called only once by the deleteAnnotation() method.
+        assert.calledOnce(handler)
+
+      it 'calls loadAnnotations when an loadAnnotations event is recieved', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        target = sandbox.stub(guest, 'loadAnnotations')
+
+        options.emit('loadAnnotations', [ann])
+        assert.called(target)
+        assert.calledWith(target, [ann])
+
+      it 'does not proxy the loadAnnotations event', ->
+        handler = sandbox.stub()
+        guest.subscribe('loadAnnotations', handler)
+
+        options.emit('loadAnnotations', [])
+        assert.notCalled(handler)
+
+      it 'proxies all other events into the annotator event system', ->
+        fooHandler = sandbox.stub()
+        barHandler = sandbox.stub()
+
+        guest.subscribe('foo', fooHandler)
+        guest.subscribe('bar', barHandler)
+
+        options.emit('foo', '1', '2')
+        options.emit('bar', '1', '2')
+
+        assert.calledWith(fooHandler, '1', '2')
+        assert.calledWith(barHandler, '1', '2')
 
     describe 'the formatter', ->
-      it 'applies a "uri" property to the formatted object'
-      it 'copies the properties from the provided annotation'
-      it 'strips the "anchors" property'
-      it 'clones the document.title array if present'
+      options = null
+      guest = null
+
+      beforeEach ->
+        guest = createGuest()
+        guest.plugins.Document = {uri: -> 'http://example.com'}
+        options = Annotator.Plugin.Bridge.lastCall.args[1].annotationSyncOptions
+
+      it 'applies a "uri" property to the formatted object', ->
+        ann = {$$tag: 'tag1'}
+        formatted = options.formatter(ann)
+        assert.equal(formatted.uri, 'http://example.com/')
+
+      it 'keeps an existing uri property', ->
+        ann = {$$tag: 'tag1', uri: 'http://example.com/foo'}
+        formatted = options.formatter(ann)
+        assert.equal(formatted.uri, 'http://example.com/foo')
+
+      it 'copies the properties from the provided annotation', ->
+        ann = {$$tag: 'tag1'}
+        formatted = options.formatter(ann)
+        assert.equal(formatted.$$tag, 'tag1')
+
+      it 'strips the "anchors" property', ->
+        ann = {$$tag: 'tag1', anchors: []}
+        formatted = options.formatter(ann)
+        assert.notProperty(formatted, 'anchors')
+
+      it 'clones the document.title array if present', ->
+        title = ['Page Title']
+        ann = {$$tag: 'tag1', document: {title: title}}
+        formatted = options.formatter(ann)
+        assert.notStrictEqual(title, formatted.document.title)
+        assert.deepEqual(title, formatted.document.title)
 
   describe 'annotation UI events', ->
+    emitGuestEvent = (event, args...) ->
+      fn(args...) for [evt, fn] in fakeCFBridge.on.args when event == evt
+
     describe 'on "onEditorHide" event', ->
-      it 'hides the editor'
+      it 'hides the editor', ->
+        target = sandbox.stub(Annotator.Guest.prototype, 'onEditorHide')
+        guest = createGuest()
+        emitGuestEvent('onEditorHide')
+        assert.called(target)
+
     describe 'on "onEditorSubmit" event', ->
-      it 'sumbits the editor'
+      it 'sumbits the editor', ->
+        target = sandbox.stub(Annotator.Guest.prototype, 'onEditorSubmit')
+        guest = createGuest()
+        emitGuestEvent('onEditorSubmit')
+        assert.called(target)
+
     describe 'on "focusAnnotations" event', ->
-      it 'focuses any annotations with a matching tag'
-      it 'unfocuses any annotations without a matching tag'
+      it 'focuses any annotations with a matching tag', ->
+        guest = createGuest()
+        highlights = [
+          {annotation: {$$tag: 'tag1'}, setFocused: sandbox.stub()}
+          {annotation: {$$tag: 'tag2'}, setFocused: sandbox.stub()}
+        ]
+        sandbox.stub(guest.anchoring, 'getHighlights').returns(highlights)
+        emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
+        assert.called(highlights[0].setFocused)
+        assert.calledWith(highlights[0].setFocused, true)
+
+      it 'unfocuses any annotations without a matching tag', ->
+        guest = createGuest()
+        highlights = [
+          {annotation: {$$tag: 'tag1'}, setFocused: sandbox.stub()}
+          {annotation: {$$tag: 'tag2'}, setFocused: sandbox.stub()}
+        ]
+        sandbox.stub(guest.anchoring, 'getHighlights').returns(highlights)
+        emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
+        assert.called(highlights[1].setFocused)
+        assert.calledWith(highlights[1].setFocused, false)
+
     describe 'on "scrollToAnnotation" event', ->
-      it 'scrolls to the highlight with the matching tag'
+      it 'scrolls to the highLight with the matching tag', ->
+        guest = createGuest()
+        highlights = [
+          {annotation: {$$tag: 'tag1'}, scrollTo: sandbox.stub()}
+        ]
+        sandbox.stub(guest.anchoring, 'getHighlights').returns(highlights)
+        emitGuestEvent('scrollToAnnotation', 'ctx', 'tag1')
+        assert.called(highlights[0].scrollTo)
+
     describe 'on "getDocumentInfo" event', ->
-      it 'calls the callback with the href and pdf metadata'
-      it 'calls the callback with the href and document metadata if pdf check fails'
-      it 'notifies the channel that the return value is async'
+      guest = null
+
+      beforeEach ->
+        guest = createGuest()
+        guest.plugins.PDF =
+          uri: sandbox.stub().returns('http://example.com')
+          getMetaData: sandbox.stub()
+
+      it 'calls the callback with the href and pdf metadata', (done) ->
+        assertComplete = (payload) ->
+          try
+            assert.equal(payload.uri, 'http://example.com/')
+            assert.equal(payload.metadata, metadata)
+            done()
+          catch e
+            done(e)
+
+        ctx = {complete: assertComplete, delayReturn: sandbox.stub()}
+        metadata = {title: 'hi'}
+        promise = Promise.resolve(metadata)
+        guest.plugins.PDF.getMetaData.returns(promise)
+
+        emitGuestEvent('getDocumentInfo', ctx)
+
+      it 'calls the callback with the href and document metadata if pdf check fails', (done) ->
+        assertComplete = (payload) ->
+          try
+            assert.equal(payload.uri, 'http://example.com/')
+            assert.equal(payload.metadata, metadata)
+            done()
+          catch e
+            done(e)
+
+        ctx = {complete: assertComplete, delayReturn: sandbox.stub()}
+        metadata = {title: 'hi'}
+        guest.plugins.Document = {metadata: metadata}
+
+        promise = Promise.reject(new Error('Not a PDF document'))
+        guest.plugins.PDF.getMetaData.returns(promise)
+
+        emitGuestEvent('getDocumentInfo', ctx)
+      it 'notifies the channel that the return value is async', ->
+        delete guest.plugins.PDF
+
+        ctx = {complete: sandbox.stub(), delayReturn: sandbox.stub()}
+        emitGuestEvent('getDocumentInfo', ctx)
+        assert.calledWith(ctx.delayReturn, true)
+
     describe 'on "setTool" event', ->
-      it 'updates the .tool property'
-      it 'publishes the "setTool" event'
+      it 'updates the .tool property', ->
+        guest = createGuest()
+        emitGuestEvent('setTool', 'ctx', 'highlighter')
+        assert.equal(guest.tool, 'highlighter')
+
+      it 'publishes the "setTool" event', ->
+        handler = sandbox.stub()
+        guest = createGuest()
+        guest.subscribe('setTool', handler)
+        emitGuestEvent('setTool', 'ctx', 'highlighter')
+        assert.called(handler)
+        assert.calledWith(handler, 'highlighter')
+
     describe 'on "setVisibleHighlights" event', ->
-      it 'publishes the "setVisibleHighlights" event'
+      it 'publishes the "setVisibleHighlights" event', ->
+        handler = sandbox.stub()
+        guest = createGuest()
+        guest.subscribe('setTool', handler)
+        emitGuestEvent('setTool', 'ctx', 'highlighter')
+        assert.called(handler)
+        assert.calledWith(handler, 'highlighter')
 
   describe 'onAdderMouseUp', ->
     it 'it prevents the default browser action when triggered', () ->
