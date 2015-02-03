@@ -9,11 +9,10 @@ describe 'Annotator.Plugin.Bridge', ->
 
   createBridge = (options) ->
     defaults =
-      annotationSyncOptions:
-        on: sandbox.stub()
-        emit: sandbox.stub()
+      on: sandbox.stub()
+      emit: sandbox.stub()
     element = document.createElement('div')
-    return new Annotator.Plugin.Bridge(element, $.extend(true, {}, defaults, options))
+    return new Annotator.Plugin.Bridge(element, $.extend({}, defaults, options))
 
   beforeEach ->
     fakeCFDiscovery =
@@ -46,7 +45,7 @@ describe 'Annotator.Plugin.Bridge', ->
       assert.calledWith(CrossFrameDiscovery, window)
 
     it 'passes the options along to the bridge', ->
-      createBridge(discoveryOptions: {server: true})
+      createBridge(server: true)
       assert.called(CrossFrameDiscovery)
       assert.calledWith(CrossFrameDiscovery, window, server: true)
 
@@ -56,7 +55,7 @@ describe 'Annotator.Plugin.Bridge', ->
       assert.calledWith(CrossFrameDiscovery)
 
     it 'passes the options along to the bridge', ->
-      createBridge(bridgeOptions: {scope: 'myscope'})
+      createBridge(scope: 'myscope')
       assert.called(CrossFrameBridge)
       assert.calledWith(CrossFrameBridge, scope: 'myscope')
 
@@ -66,7 +65,7 @@ describe 'Annotator.Plugin.Bridge', ->
 
     it 'passes along options to AnnotationSync', ->
       formatter = (x) -> x
-      createBridge(annotationSyncOptions: {formatter: formatter})
+      createBridge(formatter: formatter)
       assert.called(AnnotationSync)
       assert.calledWith(AnnotationSync, {
         on: sinon.match.func

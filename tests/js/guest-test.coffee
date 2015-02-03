@@ -23,18 +23,18 @@ describe 'Annotator.Guest', ->
     it 'sets the scope for the cross frame bridge', ->
       guest = createGuest()
       options = Annotator.Plugin.Bridge.lastCall.args[1]
-      assert.equal(options.bridgeOptions.scope, 'annotator:bridge')
+      assert.equal(options.scope, 'annotator:bridge')
 
     it 'provides an event bus for the annotation sync module', ->
       guest = createGuest()
       options = Annotator.Plugin.Bridge.lastCall.args[1]
-      assert.isFunction(options.annotationSyncOptions.on)
-      assert.isFunction(options.annotationSyncOptions.emit)
+      assert.isFunction(options.on)
+      assert.isFunction(options.emit)
 
     it 'provides a formatter for the annotation sync module', ->
       guest = createGuest()
       options = Annotator.Plugin.Bridge.lastCall.args[1]
-      assert.isFunction(options.annotationSyncOptions.formatter)
+      assert.isFunction(options.formatter)
 
     it 'publishes the "panelReady" event when a connection is established', ->
       handler = sandbox.stub()
@@ -49,7 +49,7 @@ describe 'Annotator.Guest', ->
 
       beforeEach ->
         guest = createGuest()
-        options = Annotator.Plugin.Bridge.lastCall.args[1].annotationSyncOptions
+        options = Annotator.Plugin.Bridge.lastCall.args[1]
 
       it 'proxies the event into the annotator event system', ->
         fooHandler = sandbox.stub()
@@ -70,7 +70,7 @@ describe 'Annotator.Guest', ->
 
       beforeEach ->
         guest = createGuest()
-        options = Annotator.Plugin.Bridge.lastCall.args[1].annotationSyncOptions
+        options = Annotator.Plugin.Bridge.lastCall.args[1]
 
       it 'calls deleteAnnotation when an annotationDeleted event is recieved', ->
         ann = {id: 1, $$tag: 'tag1'}
@@ -123,7 +123,7 @@ describe 'Annotator.Guest', ->
       beforeEach ->
         guest = createGuest()
         guest.plugins.Document = {uri: -> 'http://example.com'}
-        options = Annotator.Plugin.Bridge.lastCall.args[1].annotationSyncOptions
+        options = Annotator.Plugin.Bridge.lastCall.args[1]
 
       it 'applies a "uri" property to the formatted object', ->
         ann = {$$tag: 'tag1'}

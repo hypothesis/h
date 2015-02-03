@@ -1,11 +1,18 @@
 $ = Annotator.$
 
+extract = extract = (obj, keys...) ->
+  ret = {}
+  ret[key] = obj[key] for key in keys when obj.hasOwnProperty(key)
+  ret
+
 class Annotator.Plugin.Bridge extends Annotator.Plugin
   constructor: (elem, options) ->
     super
-    discovery = new window.CrossFrameDiscovery(window, options.discoveryOptions)
-    bridge = new window.CrossFrameBridge(options.bridgeOptions)
-    annotationSync = new window.AnnotationSync(options.annotationSyncOptions, @bridge)
+    discovery = new window.CrossFrameDiscovery(window, extract(options, 'server'))
+    bridge = new window.CrossFrameBridge(extract(options, 'scope'))
+
+    syncOpts = extract(options, 'on', 'emit', 'formatter', 'parser')
+    annotationSync = new window.AnnotationSync(syncOpts, @bridge)
 
     this.pluginInit = ->
       onDiscoveryCallback = (source, origin, token) ->
@@ -13,7 +20,8 @@ class Annotator.Plugin.Bridge extends Annotator.Plugin
       discovery.startDiscovery(onDiscoveryCallback)
 
     this.destroy = ->
-      Annotator.Plugin::destroy.apply(this, arguments) # super doesnt work here :(
+      # super doesnt work here :(
+      Annotator.Plugin::destroy.apply(this, arguments)
       discovery.stopDiscovery()
 
     this.sync = (annotations, cb) ->

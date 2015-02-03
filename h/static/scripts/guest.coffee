@@ -52,37 +52,34 @@ class Annotator.Guest extends Annotator
 
     delete @options.app
 
-    bridgePluginOptions =
-      discoveryOptions: {}
-      bridgeOptions:
-        scope: 'annotator:bridge'
-      annotationSyncOptions:
-        on: (event, handler) =>
-          this.subscribe(event, handler)
-        emit: (event, args...) =>
-          switch event
-            # AnnotationSync tries to emit some events without taking actions.
-            # We catch them and perform the right action (which will then emit
-            # the event for real)
-            when 'annotationDeleted'
-              this.deleteAnnotation(args...)
-            when 'loadAnnotations'
-              this.loadAnnotations(args...)
-            # Other events can simply be emitted.
-            else
-              this.publish(event, args)
-        formatter: (annotation) =>
-          formatted = {}
-          formatted.uri = @getHref()
-          for k, v of annotation when k isnt 'anchors'
-            formatted[k] = v
-          # Work around issue in jschannel where a repeated object is considered
-          # recursive, even if it is not its own ancestor.
-          if formatted.document?.title
-            formatted.document.title = formatted.document.title.slice()
-          formatted
+    bridgeOptions =
+      scope: 'annotator:bridge'
+      on: (event, handler) =>
+        this.subscribe(event, handler)
+      emit: (event, args...) =>
+        switch event
+          # AnnotationSync tries to emit some events without taking actions.
+          # We catch them and perform the right action (which will then emit
+          # the event for real)
+          when 'annotationDeleted'
+            this.deleteAnnotation(args...)
+          when 'loadAnnotations'
+            this.loadAnnotations(args...)
+          # Other events can simply be emitted.
+          else
+            this.publish(event, args)
+      formatter: (annotation) =>
+        formatted = {}
+        formatted.uri = @getHref()
+        for k, v of annotation when k isnt 'anchors'
+          formatted[k] = v
+        # Work around issue in jschannel where a repeated object is considered
+        # recursive, even if it is not its own ancestor.
+        if formatted.document?.title
+          formatted.document.title = formatted.document.title.slice()
+        formatted
 
-    this.addPlugin('Bridge', bridgePluginOptions)
+    this.addPlugin('Bridge', bridgeOptions)
     @bridge = this._connectAnnotationUISync(this.plugins.Bridge)
 
     # Load plugins
