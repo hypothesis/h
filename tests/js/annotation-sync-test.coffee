@@ -35,7 +35,7 @@ describe 'AnnotationSync', ->
       emit: sandbox.spy($rootScope.$emit.bind($rootScope))
 
     createAnnotationSync = ->
-      new AnnotationSync(options, fakeBridge)
+      new AnnotationSync(fakeBridge, options)
 
   afterEach: -> sandbox.restore()
 

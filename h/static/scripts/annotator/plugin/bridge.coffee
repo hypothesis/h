@@ -1,5 +1,6 @@
 $ = Annotator.$
 
+# Extracts individual keys from an object and returns a new one.
 extract = extract = (obj, keys...) ->
   ret = {}
   ret[key] = obj[key] for key in keys when obj.hasOwnProperty(key)
@@ -8,11 +9,15 @@ extract = extract = (obj, keys...) ->
 class Annotator.Plugin.Bridge extends Annotator.Plugin
   constructor: (elem, options) ->
     super
-    discovery = new window.CrossFrameDiscovery(window, extract(options, 'server'))
-    bridge = new window.CrossFrameBridge(extract(options, 'scope'))
 
-    syncOpts = extract(options, 'on', 'emit', 'formatter', 'parser')
-    annotationSync = new window.AnnotationSync(syncOpts, @bridge)
+    opts = extract(options, 'server')
+    discovery = new window.CrossFrameDiscovery(window, opts)
+
+    opts = extract(options, 'scope')
+    bridge = new window.CrossFrameBridge(opts)
+
+    opts = extract(options, 'on', 'emit', 'formatter', 'parser')
+    annotationSync = new window.AnnotationSync(bridge, opts)
 
     this.pluginInit = ->
       onDiscoveryCallback = (source, origin, token) ->

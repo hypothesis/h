@@ -67,7 +67,7 @@ describe 'Annotator.Plugin.Bridge', ->
       formatter = (x) -> x
       createBridge(formatter: formatter)
       assert.called(AnnotationSync)
-      assert.calledWith(AnnotationSync, {
+      assert.calledWith(AnnotationSync, fakeCFBridge, {
         on: sinon.match.func
         emit: sinon.match.func
         formatter: formatter

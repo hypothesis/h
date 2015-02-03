@@ -44,7 +44,7 @@ class CrossFrameService
         on: (event, handler) ->
           $rootScope.$on(event, (event, args...) -> handler.apply(this, args))
 
-      new AnnotationSync(options, bridge)
+      new AnnotationSync(bridge, options)
 
     createAnnotationUISync = (bridge, annotationSync) ->
       new AnnotationUISync($window, bridge, annotationSync, annotationUI)

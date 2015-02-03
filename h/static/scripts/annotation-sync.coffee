@@ -29,7 +29,7 @@ class AnnotationSync
   # association of annotations received in arguments to window-local copies.
   cache: null
 
-  constructor: (options, @bridge) ->
+  constructor: (@bridge, options) ->
     @options = $.extend(true, {}, @options, options)
 
     @cache = {}
