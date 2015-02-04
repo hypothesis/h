@@ -109,8 +109,8 @@ describe 'AnnotationUISync', ->
         method: 'showAnnotations',
         params: ['tag1', 'tag2', 'tag3']
       })
-      assert.called(fakeAnnotationUI.xorSelectedAnnotations)
-      assert.calledWith(fakeAnnotationUI.xorSelectedAnnotations, [
+      assert.called(fakeAnnotationUI.selectAnnotations)
+      assert.calledWith(fakeAnnotationUI.selectAnnotations, [
         {id: 1}, {id: 2}, {id: 3}
       ])
 
@@ -133,8 +133,8 @@ describe 'AnnotationUISync', ->
         method: 'toggleAnnotationSelection',
         params: ['tag1', 'tag2', 'tag3']
      })
-      assert.called(fakeAnnotationUI.selectAnnotations)
-      assert.calledWith(fakeAnnotationUI.selectAnnotations, [
+      assert.called(fakeAnnotationUI.xorSelectedAnnotations)
+      assert.calledWith(fakeAnnotationUI.xorSelectedAnnotations, [
         {id: 1}, {id: 2}, {id: 3}
       ])
 

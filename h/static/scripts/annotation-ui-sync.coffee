@@ -34,13 +34,13 @@ class AnnotationUISync
       showAnnotations: (ctx, tags=[]) ->
         show()
         annotations = getAnnotationsByTags(tags)
-        annotationUI.xorSelectedAnnotations(annotations)
+        annotationUI.selectAnnotations(annotations)
       focusAnnotations: (ctx, tags=[]) ->
         annotations = getAnnotationsByTags(tags)
         annotationUI.focusAnnotations(annotations)
       toggleAnnotationSelection: (ctx, tags=[]) ->
         annotations = getAnnotationsByTags(tags)
-        annotationUI.selectAnnotations(annotations)
+        annotationUI.xorSelectedAnnotations(annotations)
       setTool: (ctx, name) ->
         annotationUI.tool = name
         bridge.notify(method: 'setTool', params: name)
