@@ -145,4 +145,4 @@ class Discovery
 if angular?
   angular.module('h').value('Discovery', Discovery)
 else
-  Annotator.Plugin.Bridge.Discovery = Discovery
+  Annotator.Plugin.CrossFrame.Discovery = Discovery

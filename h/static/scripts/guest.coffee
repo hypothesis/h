@@ -52,7 +52,7 @@ class Annotator.Guest extends Annotator
 
     delete @options.app
 
-    bridgeOptions =
+    cfOptions =
       scope: 'annotator:bridge'
       on: (event, handler) =>
         this.subscribe(event, handler)
@@ -79,8 +79,8 @@ class Annotator.Guest extends Annotator
           formatted.document.title = formatted.document.title.slice()
         formatted
 
-    this.addPlugin('Bridge', bridgeOptions)
-    @bridge = this._connectAnnotationUISync(this.plugins.Bridge)
+    this.addPlugin('CrossFrame', cfOptions)
+    @crossframe = this._connectAnnotationUISync(this.plugins.CrossFrame)
 
     # Load plugins
     for own name, opts of @options
@@ -110,7 +110,7 @@ class Annotator.Guest extends Annotator
       annotations = (hl.annotation for hl in highlights)
 
       # Announce the new positions, so that the sidebar knows
-      this.plugins.Bridge.sync(annotations)
+      this.plugins.CrossFrame.sync(annotations)
 
     # Watch for removed highlights, and update positions in sidebar
     this.subscribe "highlightRemoved", (highlight) =>
@@ -129,7 +129,7 @@ class Annotator.Guest extends Annotator
         delete highlight.anchor.target.pos
 
       # Announce the new positions, so that the sidebar knows
-      this.plugins.Bridge.sync([highlight.annotation])
+      this.plugins.CrossFrame.sync([highlight.annotation])
 
   # Utility function to remove the hash part from a URL
   _removeHash: (url) ->
@@ -153,22 +153,22 @@ class Annotator.Guest extends Annotator
     metadata.link?.forEach (link) => link.href = @_removeHash link.href
     metadata
 
-  _connectAnnotationUISync: (bridge) ->
-    bridge.onConnect(=> this.publish('panelReady'))
-    bridge.on('onEditorHide', this.onEditorHide)
-    bridge.on('onEditorSubmit', this.onEditorSubmit)
-    bridge.on 'focusAnnotations', (ctx, tags=[]) =>
+  _connectAnnotationUISync: (crossframe) ->
+    crossframe.onConnect(=> this.publish('panelReady'))
+    crossframe.on('onEditorHide', this.onEditorHide)
+    crossframe.on('onEditorSubmit', this.onEditorSubmit)
+    crossframe.on 'focusAnnotations', (ctx, tags=[]) =>
       for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag in tags
           hl.setFocused true
         else
           hl.setFocused false
-    bridge.on 'scrollToAnnotation', (ctx, tag) =>
+    crossframe.on 'scrollToAnnotation', (ctx, tag) =>
       for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag is tag
           hl.scrollTo()
           return
-    bridge.on 'getDocumentInfo', (trans) =>
+    crossframe.on 'getDocumentInfo', (trans) =>
       (@plugins.PDF?.getMetaData() ? Promise.reject())
         .then (md) =>
            trans.complete
@@ -181,10 +181,10 @@ class Annotator.Guest extends Annotator
         .catch (e) ->
 
       trans.delayReturn(true)
-    bridge.on 'setTool', (ctx, name) =>
+    crossframe.on 'setTool', (ctx, name) =>
       @tool = name
       this.publish 'setTool', name
-    bridge.on 'setVisibleHighlights', (ctx, state) =>
+    crossframe.on 'setVisibleHighlights', (ctx, state) =>
       this.publish 'setVisibleHighlights', state
 
   _setupWrapper: ->
@@ -233,31 +233,31 @@ class Annotator.Guest extends Annotator
 
   createAnnotation: ->
     annotation = super
-    this.plugins.Bridge.sync([annotation])
+    this.plugins.CrossFrame.sync([annotation])
     annotation
 
   showAnnotations: (annotations) =>
-    @bridge?.notify
+    @crossframe?.notify
       method: "showAnnotations"
       params: (a.$$tag for a in annotations)
 
   toggleAnnotationSelection: (annotations) =>
-    @bridge?.notify
+    @crossframe?.notify
       method: "toggleAnnotationSelection"
       params: (a.$$tag for a in annotations)
 
   updateAnnotations: (annotations) =>
-    @bridge?.notify
+    @crossframe?.notify
       method: "updateAnnotations"
       params: (a.$$tag for a in annotations)
 
   showEditor: (annotation) =>
-    @bridge?.notify
+    @crossframe?.notify
       method: "showEditor"
       params: annotation.$$tag
 
   focusAnnotations: (annotations) =>
-    @bridge?.notify
+    @crossframe?.notify
       method: "focusAnnotations"
       params: (a.$$tag for a in annotations)
 
@@ -353,7 +353,7 @@ class Annotator.Guest extends Annotator
         (event.metaKey or event.ctrlKey)
 
   setTool: (name) ->
-    @bridge?.notify
+    @crossframe?.notify
       method: 'setTool'
       params: name
 
@@ -361,7 +361,7 @@ class Annotator.Guest extends Annotator
   setVisibleHighlights: (shouldShowHighlights) ->
     return if @visibleHighlights == shouldShowHighlights
 
-    @bridge?.notify
+    @crossframe?.notify
       method: 'setVisibleHighlights'
       params: shouldShowHighlights
 
@@ -380,11 +380,11 @@ class Annotator.Guest extends Annotator
 
   # Open the sidebar
   showFrame: ->
-    @bridge?.notify method: 'open'
+    @crossframe?.notify method: 'open'
 
   # Close the sidebar
   hideFrame: ->
-    @bridge?.notify method: 'back'
+    @crossframe?.notify method: 'back'
 
   addToken: (token) =>
     @api.notify

@@ -6,18 +6,23 @@ extract = extract = (obj, keys...) ->
   ret[key] = obj[key] for key in keys when obj.hasOwnProperty(key)
   ret
 
-Bridge = class Annotator.Plugin.Bridge extends Annotator.Plugin
+# Class for establishing a messaging connection to the parent sidebar as well
+# as keeping the annotation state in sync with the sidebar application, this
+# frame acts as the bridge client, the sidebar is the server. This plugin
+# can also be used to send messages through to the sidebar using the
+# notify method.
+CrossFrame = class Annotator.Plugin.CrossFrame extends Annotator.Plugin
   constructor: (elem, options) ->
     super
 
     opts = extract(options, 'server')
-    discovery = new Bridge.Discovery(window, opts)
+    discovery = new CrossFrame.Discovery(window, opts)
 
     opts = extract(options, 'scope')
-    bridge = new Bridge.Bridge(opts)
+    bridge = new CrossFrame.Bridge(opts)
 
     opts = extract(options, 'on', 'emit', 'formatter', 'parser')
-    annotationSync = new Bridge.AnnotationSync(bridge, opts)
+    annotationSync = new CrossFrame.AnnotationSync(bridge, opts)
 
     this.pluginInit = ->
       onDiscoveryCallback = (source, origin, token) ->

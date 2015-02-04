@@ -190,4 +190,4 @@ class AnnotationSync
 if angular?
   angular.module('h').value('AnnotationSync', AnnotationSync)
 else
-  Annotator.Plugin.Bridge.AnnotationSync = AnnotationSync
+  Annotator.Plugin.CrossFrame.AnnotationSync = AnnotationSync

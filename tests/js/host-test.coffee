@@ -12,11 +12,11 @@ describe 'Annotator.Host', ->
     # Disable Annotator's ridiculous logging.
     sandbox.stub(console, 'log')
 
-    fakeBridge =
+    fakeCrossFrame =
       onConnect: sandbox.stub()
       on: sandbox.stub()
 
-    sandbox.stub(Annotator.Plugin, 'Bridge').returns(fakeBridge)
+    sandbox.stub(Annotator.Plugin, 'CrossFrame').returns(fakeCrossFrame)
 
   afterEach -> sandbox.restore()
 

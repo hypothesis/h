@@ -24,7 +24,7 @@ annotator_plugins_inject:
     - filters: coffeescript
       output: scripts/annotator/plugin/bridge.js
       contents:
-       - h:static/scripts/annotator/plugin/bridge.coffee
+       - h:static/scripts/annotator/plugin/cross-frame.coffee
        - h:static/scripts/discovery.coffee
        - h:static/scripts/bridge.coffee
        - h:static/scripts/annotation-sync.coffee

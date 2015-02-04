@@ -118,4 +118,4 @@ class Bridge
 if angular?
   angular.module('h').value('Bridge', Bridge)
 else
-  Annotator.Plugin.Bridge.Bridge = Bridge
+  Annotator.Plugin.CrossFrame.Bridge = Bridge

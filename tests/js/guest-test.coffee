@@ -3,7 +3,7 @@ sinon.assert.expose(assert, prefix: '')
 
 describe 'Annotator.Guest', ->
   sandbox = sinon.sandbox.create()
-  fakeBridge = null
+  fakeCrossFrame = null
   createGuest = (options) ->
     element = document.createElement('div')
     return new Annotator.Guest(element, options || {})
@@ -13,34 +13,34 @@ describe 'Annotator.Guest', ->
   afterEach -> sandbox.restore()
 
   beforeEach ->
-    fakeBridge =
+    fakeCrossFrame =
       onConnect: sandbox.stub()
       on: sandbox.stub()
 
-    sandbox.stub(Annotator.Plugin, 'Bridge').returns(fakeBridge)
+    sandbox.stub(Annotator.Plugin, 'CrossFrame').returns(fakeCrossFrame)
 
   describe 'setting up the bridge', ->
     it 'sets the scope for the cross frame bridge', ->
       guest = createGuest()
-      options = Annotator.Plugin.Bridge.lastCall.args[1]
+      options = Annotator.Plugin.CrossFrame.lastCall.args[1]
       assert.equal(options.scope, 'annotator:bridge')
 
     it 'provides an event bus for the annotation sync module', ->
       guest = createGuest()
-      options = Annotator.Plugin.Bridge.lastCall.args[1]
+      options = Annotator.Plugin.CrossFrame.lastCall.args[1]
       assert.isFunction(options.on)
       assert.isFunction(options.emit)
 
     it 'provides a formatter for the annotation sync module', ->
       guest = createGuest()
-      options = Annotator.Plugin.Bridge.lastCall.args[1]
+      options = Annotator.Plugin.CrossFrame.lastCall.args[1]
       assert.isFunction(options.formatter)
 
     it 'publishes the "panelReady" event when a connection is established', ->
       handler = sandbox.stub()
       guest = createGuest()
       guest.subscribe('panelReady', handler)
-      fakeBridge.onConnect.yield()
+      fakeCrossFrame.onConnect.yield()
       assert.called(handler)
 
     describe 'the event bus .on method', ->
@@ -49,7 +49,7 @@ describe 'Annotator.Guest', ->
 
       beforeEach ->
         guest = createGuest()
-        options = Annotator.Plugin.Bridge.lastCall.args[1]
+        options = Annotator.Plugin.CrossFrame.lastCall.args[1]
 
       it 'proxies the event into the annotator event system', ->
         fooHandler = sandbox.stub()
@@ -70,7 +70,7 @@ describe 'Annotator.Guest', ->
 
       beforeEach ->
         guest = createGuest()
-        options = Annotator.Plugin.Bridge.lastCall.args[1]
+        options = Annotator.Plugin.CrossFrame.lastCall.args[1]
 
       it 'calls deleteAnnotation when an annotationDeleted event is recieved', ->
         ann = {id: 1, $$tag: 'tag1'}
@@ -123,7 +123,7 @@ describe 'Annotator.Guest', ->
       beforeEach ->
         guest = createGuest()
         guest.plugins.Document = {uri: -> 'http://example.com'}
-        options = Annotator.Plugin.Bridge.lastCall.args[1]
+        options = Annotator.Plugin.CrossFrame.lastCall.args[1]
 
       it 'applies a "uri" property to the formatted object', ->
         ann = {$$tag: 'tag1'}
@@ -154,7 +154,7 @@ describe 'Annotator.Guest', ->
 
   describe 'annotation UI events', ->
     emitGuestEvent = (event, args...) ->
-      fn(args...) for [evt, fn] in fakeBridge.on.args when event == evt
+      fn(args...) for [evt, fn] in fakeCrossFrame.on.args when event == evt
 
     describe 'on "onEditorHide" event', ->
       it 'hides the editor', ->
