@@ -127,8 +127,7 @@ class AppController
 
     $scope.clearSelection = ->
       $scope.search.query = ''
-      $scope.selectedAnnotations = null
-      $scope.selectedAnnotationsCount = 0
+      annotationUI.clearSelectedAnnotations()
 
     $scope.dialog = visible: false
 
@@ -141,8 +140,7 @@ class AppController
       update: (query) ->
         unless angular.equals $location.search()['q'], query
           $location.search('q', query or null)
-          delete $scope.selectedAnnotations
-          delete $scope.selectedAnnotationsCount
+          annotationUI.clearSelectedAnnotations()
 
     $scope.sort = name: 'Location'
     $scope.threading = threading
@@ -241,8 +239,8 @@ class ViewerController
           params: annotation.$$tag
 
     $scope.shouldShowThread = (container) ->
-      if $scope.selectedAnnotations? and not container.parent.parent
-        $scope.selectedAnnotations[container.message?.id]
+      if annotationUI.hasSelectedAnnotations() and not container.parent.parent
+        annotationUI.isAnnotationSelected(container.message?.id)
       else
         true
 
