@@ -9,6 +9,7 @@ def settings_from_environment():
     settings = {}
 
     _setup_heroku(settings)
+    _setup_db(settings)
     _setup_elasticsearch(settings)
     _setup_email(settings)
     _setup_features(settings)
@@ -38,6 +39,16 @@ def _setup_heroku(settings):
     # REDISTOGO_URL matches the Heroku environment variable for Redis To Go
     if 'REDISTOGO_URL' in os.environ:
         settings['redis.sessions.url'] = os.environ['REDISTOGO_URL'] + '0'
+
+
+def _setup_db(settings):
+    # Allow overriding the model autocreation/deletion from the environment
+    if 'MODEL_CREATE_ALL' in os.environ:
+        settings['basemodel.should_create_all'] = asbool(
+            os.environ['MODEL_CREATE_ALL'])
+    if 'MODEL_DROP_ALL' in os.environ:
+        settings['basemodel.should_drop_all'] = asbool(
+            os.environ['MODEL_DROP_ALL'])
 
 
 def _setup_elasticsearch(settings):
