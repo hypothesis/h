@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import datetime
 
 from pyramid import security
@@ -27,8 +28,6 @@ def login(event):
     request = event.request
     user = event.user
     userid = 'acct:{}@{}'.format(user.username, request.domain)
-
-    request.user = userid
 
     # Record a login event
     stats(request).get_counter('auth.local.login').increment()

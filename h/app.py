@@ -1,26 +1,58 @@
 # -*- coding: utf-8 -*-
 """The main h application."""
 from pyramid.config import Configurator
-from pyramid.path import AssetResolver
-from pyramid.response import FileResponse
+from pyramid.renderers import JSON
+from pyramid.wsgi import wsgiapp2
+
+from .auth import acl_authz, remote_authn, session_authn
 
 
 def create_app(settings):
     """Configure and add static routes and views. Return the WSGI app."""
     config = Configurator(settings=settings)
-    config.include('h')
 
-    favicon = AssetResolver().resolve('h:favicon.ico')
-    config.add_route('favicon', '/favicon.ico')
-    config.add_view(
-        lambda request: FileResponse(favicon.abspath(), request=request),
-        route_name='favicon'
-    )
-
-    config.add_route('ok', '/ruok')
-    config.add_view(lambda request: 'imok', renderer='string', route_name='ok')
-
+    config.set_authentication_policy(session_authn)
+    config.set_authorization_policy(acl_authz)
     config.set_root_factory('h.resources.RootFactory')
+
+    config.add_subscriber('h.subscribers.add_renderer_globals',
+                          'pyramid.events.BeforeRender')
+
+    config.include('.')
+    config.include('.features')
+
+    if config.registry.feature('api'):
+        api_app = create_api(settings)
+        api_view = wsgiapp2(api_app)
+        config.add_view(api_view, name='api')
+
+    if config.registry.feature('streamer'):
+        config.include('.streamer')
+
+    if config.registry.feature('notification'):
+        config.include('.notification')
+
+    return config.make_wsgi_app()
+
+
+def create_api(settings):
+    config = Configurator(settings=settings)
+
+    config.set_authentication_policy(remote_authn)
+    config.set_authorization_policy(acl_authz)
+    config.set_root_factory('h.resources.APIResource')
+
+    config.add_renderer('json', JSON(indent=4))
+    config.add_subscriber('h.subscribers.set_user_from_oauth',
+                          'pyramid.events.ContextFound')
+    config.add_tween('h.tweens.annotator_tween_factory')
+
+    config.include('.api')
+    config.include('.auth')
+    config.include('.features')
+
+    if config.registry.feature('streamer'):
+        config.include('.streamer')
 
     return config.make_wsgi_app()
 

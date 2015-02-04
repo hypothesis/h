@@ -5,14 +5,14 @@
 import logging
 import time
 
-from annotator import auth, es
+from annotator import es
+from annotator.auth import Consumer, User
 from elasticsearch import exceptions as elasticsearch_exceptions
-from pyramid.renderers import JSON
 from pyramid.settings import asbool
 from pyramid.view import view_config
 
-from h import events
-from h.models import Annotation, Document
+from .events import AnnotationEvent
+from .models import Annotation, Document
 
 
 log = logging.getLogger(__name__)
@@ -35,7 +35,6 @@ def api_config(**kwargs):
 
 
 @api_config(context='h.resources.APIResource')
-@api_config(context='h.resources.APIResource', route_name='index')
 def index(context, request):
     """Return the API descriptor document.
 
@@ -87,14 +86,13 @@ def search(context, request):
 @api_config(context='h.resources.APIResource', name='access_token')
 def access_token(context, request):
     """The OAuth 2 access token view."""
-    if request.grant_type is None:
-        request.grant_type = 'client_credentials'
     return request.create_token_response()
 
 
 @api_config(context='h.resources.APIResource', name='token', renderer='string')
 def annotator_token(context, request):
     """The Annotator Auth token view."""
+    request.grant_type = 'client_credentials'
     response = access_token(context, request)
     return response.json_body.get('access_token', response)
 
@@ -204,16 +202,19 @@ def delete(context, request):
 
 def get_user(request):
     """Create a User object for annotator-store."""
-    userid = request.authenticated_userid
+    userid = request.unauthenticated_userid
     if userid is not None:
-        consumer = auth.Consumer(request.client.client_id)
-        return auth.User(userid, consumer, False)
+        for principal in request.effective_principals:
+            if principal.startswith('consumer:'):
+                key = principal[9:]
+                consumer = Consumer(key)
+                return User(userid, consumer, False)
     return None
 
 
 def _trigger_event(request, annotation, action):
     """Trigger any callback functions listening for AnnotationEvents."""
-    event = events.AnnotationEvent(request, annotation, action)
+    event = AnnotationEvent(request, annotation, action)
     request.registry.notify(event)
 
 
@@ -489,8 +490,6 @@ def includeme(config):
     """Configure and possibly initialize ElasticSearch and its models."""
     registry = config.registry
     settings = registry.settings
-
-    config.add_renderer('json', JSON(indent=4))
 
     # Configure ElasticSearch
     store_from_settings(settings)

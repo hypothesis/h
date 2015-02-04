@@ -100,17 +100,16 @@ class AnnotationFactory(BaseResource):
 class APIResource(InnerResource):
     annotations = AnnotationFactory
 
-
-class RootFactory(Stream, InnerResource):
-    a = AnnotationFactory
-    t = TagStreamFactory
-    u = UserStreamFactory
-    api = APIResource
-    stream = Stream
-
     def __acl__(self):
         defaultlist = [
             (Allow, 'group:admin', ALL_PERMISSIONS),
             (Allow, Authenticated, 'create'),
         ]
         return defaultlist
+
+
+class RootFactory(InnerResource):
+    a = AnnotationFactory
+    t = TagStreamFactory
+    u = UserStreamFactory
+    stream = Stream

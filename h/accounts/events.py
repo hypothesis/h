@@ -5,6 +5,5 @@ class LoginEvent(object):
 
 
 class LogoutEvent(object):
-    def __init__(self, request, user):
+    def __init__(self, request):
         self.request = request
-        self.user = user

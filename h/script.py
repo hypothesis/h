@@ -16,7 +16,7 @@ from pyramid.request import Request
 from pyramid.scripting import prepare
 from pyramid.view import render_view
 
-from h import __version__, config, reindexer
+from h import __version__, config, reindexer, subscribers
 
 
 def get_config(args):
@@ -51,7 +51,8 @@ uses_relative.append('resource')
 resolve = AssetResolver().resolve
 
 
-def add_base_url(event):
+def add_renderer_globals(event):
+    subscribers.add_renderer_globals(event)
     request = event['request']
 
     assets_env = request.webassets_env
@@ -59,11 +60,7 @@ def add_base_url(event):
 
     if (view_name == 'embed.js' and
             assets_env.url.startswith('chrome-extension')):
-        base_url = join(request.webassets_env.url, '')
-    else:
-        base_url = request.resource_url(request.context, '')
-
-    event['base_url'] = base_url
+        event['base_url'] = join(request.webassets_env.url, '')
 
 
 def app(app_path, context, request):
@@ -172,6 +169,7 @@ def init_db(settings):
     settings['basemodel.should_create_all'] = True
     settings['basemodel.should_drop_all'] = False
     config = Configurator(settings=settings)
+    config.include('h.api')
 
 
 @command(usage='config_file')
@@ -249,8 +247,9 @@ def extension(args, console, settings):
 
     config = Configurator(settings=settings)
     config.include('h')
+    config.include('h.features')
     config.set_root_factory('h.resources.RootFactory')
-    config.add_subscriber(add_base_url, BeforeRender)
+    config.add_subscriber(add_renderer_globals, BeforeRender)
     config.commit()
 
     # Build it

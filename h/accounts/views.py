@@ -126,8 +126,7 @@ class AuthController(horus.views.AuthController):
         return {'status': 'okay'}
 
     def logout(self):
-        user = self.User.get_by_id(self.request, self.request.user)
-        self.request.registry.notify(LogoutEvent(self.request, user))
+        self.request.registry.notify(LogoutEvent(self.request))
         return super(AuthController, self).logout()
 
 
@@ -284,7 +283,5 @@ def includeme(config):
     config.add_route('disable_user', '/disable/{user_id}',
                      factory=UserFactory,
                      traverse="/{user_id}")
-
     config.include('horus')
-    config.add_request_method(name='user')  # horus override (unset property)
     config.scan(__name__)
