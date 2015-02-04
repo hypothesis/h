@@ -164,9 +164,9 @@ class Annotator.Guest extends Annotator
     )
 
     .bind('scrollToAnnotation', (ctx, tag) =>
-      for hl in @anchoring.getHighlights()
-        if hl.annotation.$$tag is tag
-          hl.scrollTo()
+      for a in @anchoring.getAnchors()
+        if a.annotation.$$tag is tag
+          a.scrollIntoView()
           return
     )
 
