@@ -1,4 +1,4 @@
-class CrossFrameBridge
+class Bridge
   options:
     # Scope identifier to distinguish this channel from any others
     scope: 'crossFrameBridge'
@@ -89,7 +89,7 @@ class CrossFrameBridge
 
   on: (method, callback) ->
     if @channelListeners[method]
-      throw new Error("Listener '#{method}' already bound in CrossFrameBridge")
+      throw new Error("Listener '#{method}' already bound in Bridge")
 
     @channelListeners[method] = callback
     for l in @links
@@ -116,6 +116,6 @@ class CrossFrameBridge
     channel = Channel.build(options)
 
 if angular?
-  angular.module('h').value('CrossFrameBridge', CrossFrameBridge)
+  angular.module('h').value('Bridge', Bridge)
 else
-  Annotator.Plugin.Bridge.CrossFrameBridge = CrossFrameBridge
+  Annotator.Plugin.Bridge.Bridge = Bridge

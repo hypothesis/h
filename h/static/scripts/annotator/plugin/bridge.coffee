@@ -14,7 +14,7 @@ Bridge = class Annotator.Plugin.Bridge extends Annotator.Plugin
     discovery = new Bridge.CrossFrameDiscovery(window, opts)
 
     opts = extract(options, 'scope')
-    bridge = new Bridge.CrossFrameBridge(opts)
+    bridge = new Bridge.Bridge(opts)
 
     opts = extract(options, 'on', 'emit', 'formatter', 'parser')
     annotationSync = new Bridge.AnnotationSync(bridge, opts)

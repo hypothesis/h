@@ -1,15 +1,15 @@
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
 
-describe 'CrossFrameBridge', ->
+describe 'Bridge', ->
   sandbox = sinon.sandbox.create()
   createBridge = null
   createChannel = null
 
   beforeEach module('h')
-  beforeEach inject (CrossFrameBridge) ->
+  beforeEach inject (Bridge) ->
     createBridge = (options) ->
-      new CrossFrameBridge(options)
+      new Bridge(options)
 
     createChannel = ->
       call: sandbox.stub()

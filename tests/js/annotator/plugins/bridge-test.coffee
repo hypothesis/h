@@ -4,7 +4,7 @@ sinon.assert.expose(assert, prefix: '')
 describe 'Annotator.Plugin.Bridge', ->
   Bridge = null
   fakeCFDiscovery = null
-  fakeCFBridge = null
+  fakeBridge = null
   fakeAnnotationSync = null
   sandbox = sinon.sandbox.create()
 
@@ -20,7 +20,7 @@ describe 'Annotator.Plugin.Bridge', ->
       startDiscovery: sandbox.stub()
       stopDiscovery: sandbox.stub()
 
-    fakeCFBridge =
+    fakeBridge =
       createChannel: sandbox.stub()
       onConnect: sandbox.stub()
       notify: sandbox.stub()
@@ -32,7 +32,7 @@ describe 'Annotator.Plugin.Bridge', ->
     Bridge = Annotator.Plugin.Bridge
     sandbox.stub(Bridge, 'AnnotationSync').returns(fakeAnnotationSync)
     sandbox.stub(Bridge, 'CrossFrameDiscovery').returns(fakeCFDiscovery)
-    sandbox.stub(Bridge, 'CrossFrameBridge').returns(fakeCFBridge)
+    sandbox.stub(Bridge, 'Bridge').returns(fakeBridge)
 
   afterEach ->
     sandbox.restore()
@@ -48,15 +48,15 @@ describe 'Annotator.Plugin.Bridge', ->
       assert.called(Bridge.CrossFrameDiscovery)
       assert.calledWith(Bridge.CrossFrameDiscovery, window, server: true)
 
-    it 'instantiates the CrossFrameBridge component', ->
+    it 'instantiates the Bridge component', ->
       createBridge()
-      assert.called(Bridge.CrossFrameBridge)
+      assert.called(Bridge.Bridge)
       assert.calledWith(Bridge.CrossFrameDiscovery)
 
     it 'passes the options along to the bridge', ->
       createBridge(scope: 'myscope')
-      assert.called(Bridge.CrossFrameBridge)
-      assert.calledWith(Bridge.CrossFrameBridge, scope: 'myscope')
+      assert.called(Bridge.Bridge)
+      assert.calledWith(Bridge.Bridge, scope: 'myscope')
 
     it 'instantiates the AnnotationSync component', ->
       createBridge()
@@ -66,7 +66,7 @@ describe 'Annotator.Plugin.Bridge', ->
       formatter = (x) -> x
       createBridge(formatter: formatter)
       assert.called(Bridge.AnnotationSync)
-      assert.calledWith(Bridge.AnnotationSync, fakeCFBridge, {
+      assert.calledWith(Bridge.AnnotationSync, fakeBridge, {
         on: sinon.match.func
         emit: sinon.match.func
         formatter: formatter
@@ -82,8 +82,8 @@ describe 'Annotator.Plugin.Bridge', ->
       bridge = createBridge()
       bridge.pluginInit()
       fakeCFDiscovery.startDiscovery.yield('SOURCE', 'ORIGIN', 'TOKEN')
-      assert.called(fakeCFBridge.createChannel)
-      assert.calledWith(fakeCFBridge.createChannel, 'SOURCE', 'ORIGIN', 'TOKEN')
+      assert.called(fakeBridge.createChannel)
+      assert.calledWith(fakeBridge.createChannel, 'SOURCE', 'ORIGIN', 'TOKEN')
 
   describe '.destroy', ->
     it 'stops the discovery of new frames', ->
@@ -101,17 +101,17 @@ describe 'Annotator.Plugin.Bridge', ->
     it 'proxies the call to the bridge', ->
       bridge = createBridge()
       bridge.on('event', 'arg')
-      assert.calledWith(fakeCFBridge.on, 'event', 'arg')
+      assert.calledWith(fakeBridge.on, 'event', 'arg')
 
   describe '.notify', ->
     it 'proxies the call to the bridge', ->
       bridge = createBridge()
       bridge.notify(method: 'method')
-      assert.calledWith(fakeCFBridge.notify, method: 'method')
+      assert.calledWith(fakeBridge.notify, method: 'method')
 
   describe '.onConnect', ->
     it 'proxies the call to the bridge', ->
       bridge = createBridge()
       fn = ->
       bridge.onConnect(fn)
-      assert.calledWith(fakeCFBridge.onConnect, fn)
+      assert.calledWith(fakeBridge.onConnect, fn)

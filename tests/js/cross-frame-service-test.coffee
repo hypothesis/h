@@ -10,7 +10,7 @@ describe 'CrossFrameService', ->
   fakeStore = null
   fakeAnnotationUI = null
   fakeCrossFrameDiscovery = null
-  fakeCrossFrameBridge = null
+  fakeBridge = null
   fakeAnnotationSync = null
   fakeAnnotationUISync = null
 
@@ -22,7 +22,7 @@ describe 'CrossFrameService', ->
     fakeAnnotationUI = {}
     fakeCrossFrameDiscovery =
       startDiscovery: sandbox.stub()
-    fakeCrossFrameBridge =
+    fakeBridge =
       notify: sandbox.stub()
       createChannel: sandbox.stub()
       onConnect: sandbox.stub()
@@ -35,8 +35,8 @@ describe 'CrossFrameService', ->
     $provide.value('annotationUI', fakeAnnotationUI)
     $provide.value('CrossFrameDiscovery',
       sandbox.stub().returns(fakeCrossFrameDiscovery))
-    $provide.value('CrossFrameBridge',
-      sandbox.stub().returns(fakeCrossFrameBridge))
+    $provide.value('Bridge',
+      sandbox.stub().returns(fakeBridge))
     $provide.value('AnnotationSync',
       sandbox.stub().returns(fakeAnnotationSync))
     $provide.value('AnnotationUISync',
@@ -54,13 +54,13 @@ describe 'CrossFrameService', ->
     it 'creates a new channel when the discovery module finds a frame', ->
       fakeCrossFrameDiscovery.startDiscovery.yields('source', 'origin', 'token')
       crossframe.connect()
-      assert.calledWith(fakeCrossFrameBridge.createChannel,
+      assert.calledWith(fakeBridge.createChannel,
         'source', 'origin', 'token')
 
     it 'queries discovered frames for metadata', ->
       info = {metadata: link: [{href: 'http://example.com'}]}
       channel = {call: sandbox.stub().yieldsTo('success', info)}
-      fakeCrossFrameBridge.onConnect.yields(channel)
+      fakeBridge.onConnect.yields(channel)
       crossframe.connect()
       assert.calledWith(channel.call, {
         method: 'getDocumentInfo'
@@ -70,7 +70,7 @@ describe 'CrossFrameService', ->
     it 'updates the providers array', ->
       info = {metadata: link: [{href: 'http://example.com'}]}
       channel = {call: sandbox.stub().yieldsTo('success', info)}
-      fakeCrossFrameBridge.onConnect.yields(channel)
+      fakeBridge.onConnect.yields(channel)
       crossframe.connect()
       assert.deepEqual(crossframe.providers, [
         {channel: channel, entities: ['http://example.com']}
@@ -82,5 +82,5 @@ describe 'CrossFrameService', ->
       message = {method: 'foo', params: 'bar'}
       crossframe.connect() # create the bridge.
       crossframe.notify(message)
-      assert.calledOn(fakeCrossFrameBridge.notify, fakeCrossFrameBridge)
-      assert.calledWith(fakeCrossFrameBridge.notify, message)
+      assert.calledOn(fakeBridge.notify, fakeBridge)
+      assert.calledWith(fakeBridge.notify, message)

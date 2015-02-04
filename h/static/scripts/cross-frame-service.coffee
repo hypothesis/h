@@ -4,12 +4,12 @@ class CrossFrameService
 
   this.inject = [
     '$rootScope', '$document', '$window', 'store', 'annotationUI'
-    'CrossFrameDiscovery', 'CrossFrameBridge',
+    'CrossFrameDiscovery', 'Bridge',
     'AnnotationSync', 'AnnotationUISync'
   ]
   constructor: (
     $rootScope, $document, $window, store, annotationUI
-    CrossFrameDiscovery, CrossFrameBridge,
+    CrossFrameDiscovery, Bridge,
     AnnotationSync, AnnotationUISync
   ) ->
     @providers = []
@@ -24,7 +24,7 @@ class CrossFrameService
     createBridge = ->
       options =
         scope: 'annotator:bridge'
-      new CrossFrameBridge(options)
+      new Bridge(options)
 
     createAnnotationSync = (bridge) ->
       whitelist = ['target', 'document', 'uri']

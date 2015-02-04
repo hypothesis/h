@@ -4,7 +4,7 @@ class AnnotationUISync
   ###*
   # @name AnnotationUISync
   # @param {$window} $window An Angular window service.
-  # @param {CrossFrameBridge} bridge
+  # @param {Bridge} bridge
   # @param {AnnotationSync} annotationSync
   # @param {AnnotationUI} annotationUI An instance of the AnnotatonUI service
   # @description

@@ -26,7 +26,7 @@ annotator_plugins_inject:
       contents:
        - h:static/scripts/annotator/plugin/bridge.coffee
        - h:static/scripts/cross-frame-discovery.coffee
-       - h:static/scripts/cross-frame-bridge.coffee
+       - h:static/scripts/bridge.coffee
        - h:static/scripts/annotation-sync.coffee
     - filters: coffeescript
       output: scripts/annotator/plugin/bucket-bar.js
@@ -234,7 +234,7 @@ app_js:
             - h:static/scripts/streamsearch.coffee
             - h:static/scripts/annotation-sync.coffee
             - h:static/scripts/annotation-ui-sync.coffee
-            - h:static/scripts/cross-frame-bridge.coffee
+            - h:static/scripts/bridge.coffee
             - h:static/scripts/cross-frame-discovery.coffee
 
 app_css:
