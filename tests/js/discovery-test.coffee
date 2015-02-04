@@ -1,16 +1,16 @@
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
 
-describe 'CrossFrameDiscovery', ->
+describe 'Discovery', ->
   sandbox = sinon.sandbox.create()
   fakeTopWindow = null
   fakeFrameWindow = null
   createDiscovery = null
 
   beforeEach module('h')
-  beforeEach inject (CrossFrameDiscovery) ->
+  beforeEach inject (Discovery) ->
     createDiscovery = (win, options) ->
-      new CrossFrameDiscovery(win, options)
+      new Discovery(win, options)
 
     createWindow = ->
       top: null

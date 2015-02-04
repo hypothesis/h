@@ -25,7 +25,7 @@ annotator_plugins_inject:
       output: scripts/annotator/plugin/bridge.js
       contents:
        - h:static/scripts/annotator/plugin/bridge.coffee
-       - h:static/scripts/cross-frame-discovery.coffee
+       - h:static/scripts/discovery.coffee
        - h:static/scripts/bridge.coffee
        - h:static/scripts/annotation-sync.coffee
     - filters: coffeescript
@@ -235,7 +235,7 @@ app_js:
             - h:static/scripts/annotation-sync.coffee
             - h:static/scripts/annotation-ui-sync.coffee
             - h:static/scripts/bridge.coffee
-            - h:static/scripts/cross-frame-discovery.coffee
+            - h:static/scripts/discovery.coffee
 
 app_css:
     filters: cleancss, cssrewrite

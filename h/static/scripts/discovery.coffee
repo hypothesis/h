@@ -8,19 +8,19 @@
 # Example:
 #
 #   // host.html
-#   var server = new CrossFrameDiscovery(window, {server: true})
+#   var server = new Discovery(window, {server: true})
 #   server.startDiscovery(function (window, source, token) {
 #     // Establish a message bus to the new client window.
 #     server.stopDiscovery();
 #   }
 #
 #   // client.html
-#   var client = new CrossFrameDiscovery(window)
+#   var client = new Discovery(window)
 #   client.startDiscovery(function (window, source, token) {
 #     // Establish a message bus to the new server window.
 #     server.stopDiscovery();
 #   }
-class CrossFrameDiscovery
+class Discovery
   # Origins allowed to communicate on the channel
   server: false
 
@@ -39,7 +39,7 @@ class CrossFrameDiscovery
 
   startDiscovery: (onDiscovery) ->
     if @onDiscovery
-      throw new Error('CrossFrameDiscovery is already in progress, call .stopDiscovery() first')
+      throw new Error('Discovery is already in progress, call .stopDiscovery() first')
 
     # Find other frames that run the same discovery mechanism. Sends a beacon
     # and listens for beacons.
@@ -123,7 +123,7 @@ class CrossFrameDiscovery
         discovered = true
       else if messageType is 'offer' or messageType is 'ack'
         throw new Error("""
-          A second CrossFrameDiscovery server has been detected at #{origin}.
+          A second Discovery server has been detected at #{origin}.
           This is unsupported and will cause unexpected behaviour.""")
     else # We are configured as a client
       if messageType is 'offer'
@@ -143,6 +143,6 @@ class CrossFrameDiscovery
     ('' + Math.random()).replace(/\D/g, '')
 
 if angular?
-  angular.module('h').value('CrossFrameDiscovery', CrossFrameDiscovery)
+  angular.module('h').value('Discovery', Discovery)
 else
-  Annotator.Plugin.Bridge.CrossFrameDiscovery = CrossFrameDiscovery
+  Annotator.Plugin.Bridge.Discovery = Discovery

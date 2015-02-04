@@ -11,7 +11,7 @@ Bridge = class Annotator.Plugin.Bridge extends Annotator.Plugin
     super
 
     opts = extract(options, 'server')
-    discovery = new Bridge.CrossFrameDiscovery(window, opts)
+    discovery = new Bridge.Discovery(window, opts)
 
     opts = extract(options, 'scope')
     bridge = new Bridge.Bridge(opts)

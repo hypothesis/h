@@ -1,7 +1,7 @@
 class Bridge
   options:
     # Scope identifier to distinguish this channel from any others
-    scope: 'crossFrameBridge'
+    scope: 'bridge'
 
     # Callback to invoke when a connection is established. The function is
     # passed:

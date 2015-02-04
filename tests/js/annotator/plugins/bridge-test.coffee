@@ -31,27 +31,27 @@ describe 'Annotator.Plugin.Bridge', ->
 
     Bridge = Annotator.Plugin.Bridge
     sandbox.stub(Bridge, 'AnnotationSync').returns(fakeAnnotationSync)
-    sandbox.stub(Bridge, 'CrossFrameDiscovery').returns(fakeCFDiscovery)
+    sandbox.stub(Bridge, 'Discovery').returns(fakeCFDiscovery)
     sandbox.stub(Bridge, 'Bridge').returns(fakeBridge)
 
   afterEach ->
     sandbox.restore()
 
   describe 'constructor', ->
-    it 'instantiates the CrossFrameDiscovery component', ->
+    it 'instantiates the Discovery component', ->
       createBridge()
-      assert.called(Bridge.CrossFrameDiscovery)
-      assert.calledWith(Bridge.CrossFrameDiscovery, window)
+      assert.called(Bridge.Discovery)
+      assert.calledWith(Bridge.Discovery, window)
 
     it 'passes the options along to the bridge', ->
       createBridge(server: true)
-      assert.called(Bridge.CrossFrameDiscovery)
-      assert.calledWith(Bridge.CrossFrameDiscovery, window, server: true)
+      assert.called(Bridge.Discovery)
+      assert.calledWith(Bridge.Discovery, window, server: true)
 
     it 'instantiates the Bridge component', ->
       createBridge()
       assert.called(Bridge.Bridge)
-      assert.calledWith(Bridge.CrossFrameDiscovery)
+      assert.calledWith(Bridge.Discovery)
 
     it 'passes the options along to the bridge', ->
       createBridge(scope: 'myscope')

@@ -33,7 +33,7 @@ describe 'Bridge', ->
       assert.calledWith(Channel.build, {
         window: 'WINDOW'
         origin: 'ORIGIN'
-        scope: 'crossFrameBridge:TOKEN'
+        scope: 'bridge:TOKEN'
         onReady: sinon.match.func
       })
 

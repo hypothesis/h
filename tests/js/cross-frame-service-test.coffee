@@ -9,7 +9,7 @@ describe 'CrossFrameService', ->
   $fakeWindow = null
   fakeStore = null
   fakeAnnotationUI = null
-  fakeCrossFrameDiscovery = null
+  fakeDiscovery = null
   fakeBridge = null
   fakeAnnotationSync = null
   fakeAnnotationUISync = null
@@ -20,7 +20,7 @@ describe 'CrossFrameService', ->
     $fakeWindow = {}
     fakeStore = {}
     fakeAnnotationUI = {}
-    fakeCrossFrameDiscovery =
+    fakeDiscovery =
       startDiscovery: sandbox.stub()
     fakeBridge =
       notify: sandbox.stub()
@@ -33,8 +33,8 @@ describe 'CrossFrameService', ->
     $provide.value('$window', $fakeWindow)
     $provide.value('store', fakeStore)
     $provide.value('annotationUI', fakeAnnotationUI)
-    $provide.value('CrossFrameDiscovery',
-      sandbox.stub().returns(fakeCrossFrameDiscovery))
+    $provide.value('Discovery',
+      sandbox.stub().returns(fakeDiscovery))
     $provide.value('Bridge',
       sandbox.stub().returns(fakeBridge))
     $provide.value('AnnotationSync',
@@ -52,7 +52,7 @@ describe 'CrossFrameService', ->
 
   describe '.connect()', ->
     it 'creates a new channel when the discovery module finds a frame', ->
-      fakeCrossFrameDiscovery.startDiscovery.yields('source', 'origin', 'token')
+      fakeDiscovery.startDiscovery.yields('source', 'origin', 'token')
       crossframe.connect()
       assert.calledWith(fakeBridge.createChannel,
         'source', 'origin', 'token')
