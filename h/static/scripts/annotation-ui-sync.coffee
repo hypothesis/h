@@ -12,7 +12,7 @@ class AnnotationUISync
   # interface and updates the applications internal state. It also ensures
   # that the messages are broadcast out to other frames.
   ###
-  constructor: ($window, bridge, annotationSync, annotationUI) ->
+  constructor: ($rootScope, $window, bridge, annotationSync, annotationUI) ->
     # Retrieves annotations from the annotationSync cache.
     getAnnotationsByTags = (tags) ->
       tags.map(annotationSync.getAnnotationForTag, annotationSync)
@@ -26,6 +26,7 @@ class AnnotationUISync
     # Send messages to host to hide/show sidebar iframe.
     hide = notifyHost.bind(null, method: 'hideFrame')
     show = notifyHost.bind(null, method: 'showFrame')
+
 
     channelListeners =
       back: hide
@@ -48,8 +49,16 @@ class AnnotationUISync
         annotationUI.visibleHighlights = Boolean(state)
         bridge.notify(method: 'setVisibleHighlights', params: state)
 
+    # Because the channel events are all outside of the angular framework we
+    # need to inform Angular that it needs to re-check it's state and re-draw
+    # any UI that may have been affected by the handlers.
+    ensureDigest = (fn) ->
+      ->
+        fn.apply(this, arguments)
+        $rootScope.$digest()
+
     for own channel, listener of channelListeners
-      bridge.on(channel, listener)
+      bridge.on(channel, ensureDigest(listener))
 
     onConnect = (channel, source) ->
       # Allow the host to define its own state

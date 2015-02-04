@@ -322,7 +322,8 @@ class Annotator.Guest extends Annotator
   # toggle: should this toggle membership in an existing selection?
   selectAnnotations: (annotations, toggle) =>
     if toggle
-      # Tell sidebar to add these annotations to the sidebar
+      # Tell sidebar to add these annotations to the sidebar if not already
+      # selected, otherwise remove them.
       this.toggleAnnotationSelection annotations
     else
       # Tell sidebar to show the viewer for these annotations

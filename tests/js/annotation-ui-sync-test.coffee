@@ -3,6 +3,7 @@ sinon.assert.expose(assert, prefix: '')
 
 describe 'AnnotationUISync', ->
   sandbox = sinon.sandbox.create()
+  $digest = null
   uiSync = null
   publish = null
   fakeBridge = null
@@ -13,7 +14,8 @@ describe 'AnnotationUISync', ->
   PARENT_WINDOW = 'PARENT_WINDOW'
 
   beforeEach module('h')
-  beforeEach inject (AnnotationUISync) ->
+  beforeEach inject (AnnotationUISync, $rootScope) ->
+    $digest = sandbox.stub($rootScope, '$digest')
     listeners = {}
     publish = ({method, params}) -> listeners[method]('ctx', params)
 
@@ -38,7 +40,7 @@ describe 'AnnotationUISync', ->
 
     createAnnotationUISync = ->
       new AnnotationUISync(
-        fakeWindow, fakeBridge, fakeAnnotationSync, fakeAnnotationUI)
+        $rootScope, fakeWindow, fakeBridge, fakeAnnotationSync, fakeAnnotationUI)
 
   afterEach: -> sandbox.restore()
 
@@ -76,6 +78,11 @@ describe 'AnnotationUISync', ->
       assert.notCalled(fakeBridge.links[1].channel.notify)
       assert.notCalled(fakeBridge.links[2].channel.notify)
 
+    it 'triggers a digest', ->
+      createAnnotationUISync()
+      publish({method: 'back'})
+      assert.called($digest)
+
   describe 'on "open" event', ->
     it 'sends the "showFrame" message to the host only', ->
       createAnnotationUISync()
@@ -84,6 +91,11 @@ describe 'AnnotationUISync', ->
       assert.notCalled(fakeBridge.links[1].channel.notify)
       assert.notCalled(fakeBridge.links[2].channel.notify)
 
+    it 'triggers a digest', ->
+      createAnnotationUISync()
+      publish({method: 'open'})
+      assert.called($digest)
+
   describe 'on "showEditor" event', ->
     it 'sends the "showFrame" message to the host only', ->
       createAnnotationUISync()
@@ -91,6 +103,11 @@ describe 'AnnotationUISync', ->
       assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
       assert.notCalled(fakeBridge.links[1].channel.notify)
       assert.notCalled(fakeBridge.links[2].channel.notify)
+
+    it 'triggers a digest', ->
+      createAnnotationUISync()
+      publish({method: 'showEditor'})
+      assert.called($digest)
 
   describe 'on "showAnnotations" event', ->
     it 'sends the "showFrame" message to the host only', ->
@@ -114,6 +131,14 @@ describe 'AnnotationUISync', ->
         {id: 1}, {id: 2}, {id: 3}
       ])
 
+    it 'triggers a digest', ->
+      createAnnotationUISync()
+      publish({
+        method: 'showAnnotations',
+        params: ['tag1', 'tag2', 'tag3']
+      })
+      assert.called($digest)
+
   describe 'on "focusAnnotations" event', ->
     it 'updates the annotationUI to show the provided annotations', ->
       createAnnotationUISync()
@@ -126,6 +151,14 @@ describe 'AnnotationUISync', ->
         {id: 1}, {id: 2}, {id: 3}
       ])
 
+    it 'triggers a digest', ->
+      createAnnotationUISync()
+      publish({
+        method: 'focusAnnotations',
+        params: ['tag1', 'tag2', 'tag3']
+      })
+      assert.called($digest)
+
   describe 'on "toggleAnnotationSelection" event', ->
     it 'updates the annotationUI to show the provided annotations', ->
       createAnnotationUISync()
@@ -137,6 +170,14 @@ describe 'AnnotationUISync', ->
       assert.calledWith(fakeAnnotationUI.xorSelectedAnnotations, [
         {id: 1}, {id: 2}, {id: 3}
       ])
+
+    it 'triggers a digest', ->
+      createAnnotationUISync()
+      publish({
+        method: 'toggleAnnotationSelection',
+        params: ['tag1', 'tag2', 'tag3']
+      })
+      assert.called($digest)
 
   describe 'on "setTool" event', ->
     it 'updates the annotationUI with the new tool', ->
@@ -158,6 +199,14 @@ describe 'AnnotationUISync', ->
         params: 'highlighter'
       })
 
+    it 'triggers a digest of the application state', ->
+      createAnnotationUISync()
+      publish({
+        method: 'setTool',
+        params: 'highlighter'
+      })
+      assert.called($digest)
+
   describe 'on "setVisibleHighlights" event', ->
     it 'updates the annotationUI with the new value', ->
       createAnnotationUISync()
@@ -177,3 +226,11 @@ describe 'AnnotationUISync', ->
         method: 'setVisibleHighlights'
         params: true
       })
+
+    it 'triggers a digest of the application state', ->
+      createAnnotationUISync()
+      publish({
+        method: 'setVisibleHighlights',
+        params: true
+      })
+      assert.called($digest)

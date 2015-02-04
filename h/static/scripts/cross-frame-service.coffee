@@ -47,7 +47,7 @@ class CrossFrameService
       new AnnotationSync(bridge, options)
 
     createAnnotationUISync = (bridge, annotationSync) ->
-      new AnnotationUISync($window, bridge, annotationSync, annotationUI)
+      new AnnotationUISync($rootScope, $window, bridge, annotationSync, annotationUI)
 
     addProvider = (channel) =>
       provider = {channel: channel, entities: []}
