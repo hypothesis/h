@@ -2,6 +2,9 @@
 # attached iframes for display in the sidebar. This covers both tool and
 # rendered state such as selected highlights.
 createAnnotationUI = ->
+  value = (selection) ->
+    if Object.keys(selection).length then selection else null
+
   {
     TOOL_COMMENT: 'comment'
     TOOL_HIGHLIGHT: 'highlight'
@@ -10,8 +13,10 @@ createAnnotationUI = ->
 
     visibleHighlights: false
 
+    # Contains a map of annotation id:true pairs.
     focusedAnnotationMap: null
 
+    # Contains a map of annotation id:true pairs.
     selectedAnnotationMap: null
 
     ###*
@@ -24,7 +29,23 @@ createAnnotationUI = ->
     focusAnnotations: (annotations) ->
       selection = {}
       selection[id] = true for {id} in annotations
-      @focusedAnnotationMap = selection
+      @focusedAnnotationMap = value(selection)
+
+    ###*
+    # @ngdoc method
+    # @name annotationUI.hasSelectedAnnotations
+    # @returns true if there are any selected annotations.
+    ###
+    hasSelectedAnnotations: ->
+      !!@selectedAnnotationMap
+
+    ###*
+    # @ngdoc method
+    # @name annotationUI.isAnnotationSelected
+    # @returns true if the provided annotation is selected.
+    ###
+    isAnnotationSelected: (id) ->
+      !!@selectedAnnotationMap?[id]
 
     ###*
     # @ngdoc method
@@ -36,7 +57,7 @@ createAnnotationUI = ->
     selectAnnotations: (annotations) ->
       selection = {}
       selection[id] = true for {id} in annotations
-      @selectedAnnotationMap = selection
+      @selectedAnnotationMap = value(selection)
 
     ###*
     # @ngdoc method
@@ -46,13 +67,13 @@ createAnnotationUI = ->
     # selectedAnnotationMap if not present otherwise removes them.
     ###
     xorSelectedAnnotations: (annotations) ->
-      selection = @selectedAnnotationMap or {}
+      selection = angular.extend({}, @selectedAnnotationMap)
       for {id} in annotations
         if selection[id]
           delete selection[id]
         else
           selection[id] = true
-      @selectedAnnotationMap = selection
+      @selectedAnnotationMap = value(selection)
 
     ###*
     # @ngdoc method
@@ -61,8 +82,19 @@ createAnnotationUI = ->
     # @description removes an annotation from the current selection.
     ###
     removeSelectedAnnotation: (annotation) ->
-      return unless @selectedAnnotationMap
-      delete @selectedAnnotationMap[annotation.id]
+      selection = angular.extend({}, @selectedAnnotationMap)
+      if selection
+        delete selection[annotation.id]
+        @selectedAnnotationMap = value(selection)
+
+    ###*
+    # @ngdoc method
+    # @name annotationUI.clearSelectedAnnotations()
+    # @returns nothing
+    # @description removes all annotations from the current selection.
+    ###
+    clearSelectedAnnotations: ->
+      @selectedAnnotationMap = null
   }
 
 angular.module('h').factory('annotationUI', createAnnotationUI)

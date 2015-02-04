@@ -22,6 +22,38 @@ describe 'AnnotationUI', ->
         2: true, 3: true
       })
 
+    it 'does not modify the original map object', ->
+      orig = annotationUI.focusedAnnotationMap = {1: true}
+      annotationUI.focusAnnotations([{id: 2}, {id: 3}])
+      assert.notEqual(annotationUI.focusedAnnotationMap, orig)
+
+    it 'nulls the map if no annotations are focused', ->
+      orig = annotationUI.focusedAnnotationMap = {1: true}
+      annotationUI.focusAnnotations([])
+      assert.isNull(annotationUI.focusedAnnotationMap)
+
+  describe '.hasSelectedAnnotations', ->
+    it 'returns true if there are any selected annotations', ->
+      annotationUI.selectedAnnotationMap = {1: true}
+      assert.isTrue(annotationUI.hasSelectedAnnotations())
+
+    it 'returns false if there are no selected annotations', ->
+      annotationUI.selectedAnnotationMap = null
+      assert.isFalse(annotationUI.hasSelectedAnnotations())
+
+  describe '.isAnnotationSelected', ->
+    it 'returns true if the id provided is selected', ->
+      annotationUI.selectedAnnotationMap = {1: true}
+      assert.isTrue(annotationUI.isAnnotationSelected(1))
+
+    it 'returns false if the id provided is not selected', ->
+      annotationUI.selectedAnnotationMap = {1: true}
+      assert.isFalse(annotationUI.isAnnotationSelected(2))
+
+    it 'returns false if there are no selected annotations', ->
+      annotationUI.selectedAnnotationMap = null
+      assert.isFalse(annotationUI.isAnnotationSelected(1))
+
   describe '.selectAnnotations()', ->
     it 'adds the passed annotations to the selectedAnnotationMap', ->
       annotationUI.selectAnnotations([{id: 1}, {id: 2}, {id: 3}])
@@ -36,6 +68,16 @@ describe 'AnnotationUI', ->
         2: true, 3: true
       })
 
+    it 'does not modify the original map object', ->
+      orig = annotationUI.selectedAnnotationMap = {1: true}
+      annotationUI.selectAnnotations([{id: 2}, {id: 3}])
+      assert.notEqual(annotationUI.selectedAnnotationMap, orig)
+
+    it 'nulls the map if no annotations are selected', ->
+      orig = annotationUI.selectedAnnotationMap = {1: true}
+      annotationUI.selectAnnotations([])
+      assert.isNull(annotationUI.selectedAnnotationMap)
+
   describe '.xorSelectedAnnotations()', ->
     it 'adds annotations missing from the selectedAnnotationMap', ->
       annotationUI.selectedAnnotationMap = {1: true, 2: true}
@@ -43,10 +85,21 @@ describe 'AnnotationUI', ->
       assert.deepEqual(annotationUI.selectedAnnotationMap, {
         1: true, 2: true, 3: true, 4: true
       })
+
     it 'removes annotations already in the selectedAnnotationMap', ->
-      annotationUI.selectedAnnotationMap = {1: true, 2: true}
+      annotationUI.selectedAnnotationMap = {1: true, 3: true}
       annotationUI.xorSelectedAnnotations([{id: 1}, {id: 2}])
-      assert.deepEqual(annotationUI.selectedAnnotationMap, {})
+      assert.deepEqual(annotationUI.selectedAnnotationMap, 2:true, 3: true)
+
+    it 'does not modify the original map object', ->
+      orig = annotationUI.selectedAnnotationMap = {1: true}
+      annotationUI.xorSelectedAnnotations([{id: 2}, {id: 3}])
+      assert.notEqual(annotationUI.selectedAnnotationMap, orig)
+
+    it 'nulls the map if no annotations are selected', ->
+      orig = annotationUI.selectedAnnotationMap = {1: true}
+      annotationUI.xorSelectedAnnotations([id: 1])
+      assert.isNull(annotationUI.selectedAnnotationMap)
 
   describe '.removeSelectedAnnotation', ->
     it 'removes an annotation from the selectedAnnotationMap', ->
@@ -55,3 +108,19 @@ describe 'AnnotationUI', ->
       assert.deepEqual(annotationUI.selectedAnnotationMap, {
         1: true, 3: true
       })
+
+    it 'does not modify the original map object', ->
+      orig = annotationUI.selectedAnnotationMap = {1: true}
+      annotationUI.removeSelectedAnnotation(id: 1)
+      assert.notEqual(annotationUI.selectedAnnotationMap, orig)
+
+    it 'nulls the map if no annotations are selected', ->
+      orig = annotationUI.selectedAnnotationMap = {1: true}
+      annotationUI.removeSelectedAnnotation(id: 1)
+      assert.isNull(annotationUI.selectedAnnotationMap)
+
+  describe '.clearSelectedAnnotations', ->
+    it 'removes all annotations from the selection', ->
+      annotationUI.selectedAnnotationMap = {1: true, 2: true, 3: true}
+      annotationUI.clearSelectedAnnotations()
+      assert.isNull(annotationUI.selectedAnnotationMap)
