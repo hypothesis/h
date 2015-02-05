@@ -26,9 +26,6 @@ Annotator.prototype.setupAnnotation = (annotation) ->
         t.diffHTML = anchor.diffHTML
         t.diffCaseOnly = anchor.diffCaseOnly
 
-        # Store this anchor for the annotation
-        annotation.anchors.push anchor
-
     catch exception
       console.log "Error in setupAnnotation for", annotation.id,
         ":", exception.stack ? exception
