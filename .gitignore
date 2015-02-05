@@ -2,7 +2,6 @@
 /*.db-journal
 /*.egg
 /*.egg-info
-/*.ini
 /MANIFEST
 /bin
 /build

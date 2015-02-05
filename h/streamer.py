@@ -11,6 +11,7 @@ import unicodedata
 import weakref
 
 import gevent
+import gevent.queue
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.config import aslist
