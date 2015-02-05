@@ -53,5 +53,5 @@ class AuthController
         , 300000
 
 
-angular.module('h.account')
+angular.module('h')
 .controller('AuthController', AuthController)

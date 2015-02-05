@@ -87,5 +87,5 @@ class AccountController
 
 
 
-angular.module('h.account')
+angular.module('h')
 .controller('AccountController', AccountController)

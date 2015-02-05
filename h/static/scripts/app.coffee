@@ -3,7 +3,6 @@ imports = [
   'ngRoute'
   'ngSanitize'
   'ngTagsInput'
-  'h.account'
   'h.helpers'
   'h.identity'
   'h.session'

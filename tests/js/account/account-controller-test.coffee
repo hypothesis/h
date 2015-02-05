@@ -2,7 +2,7 @@ assert = chai.assert
 sinon.assert.expose assert, prefix: null
 sandbox = sinon.sandbox.create()
 
-describe 'h.account.AccountController', ->
+describe 'AccountController', ->
   $scope = null
   fakeFlash = null
   fakeSession = null
@@ -14,7 +14,7 @@ describe 'h.account.AccountController', ->
   profilePromise = null
   createController = null
 
-  beforeEach module('h.account')
+  beforeEach module('h')
 
   beforeEach module ($provide, $filterProvider) ->
     fakeSession = {}
