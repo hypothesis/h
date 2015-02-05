@@ -3,7 +3,7 @@ import colander
 import pytest
 from mock import PropertyMock, patch
 from pyramid.exceptions import BadCSRFToken
-from pyramid.testing import DummyRequest, testConfig
+from pyramid.testing import DummyRequest
 
 from h.accounts import models, schemas
 
@@ -45,97 +45,91 @@ def mock_user_ctor():
         yield MockUser
 
 
-def test_unblacklisted_username():
+def test_unblacklisted_username(config):
+    config.include(models)
+
     request = DummyRequest()
     node = colander.SchemaNode(colander.String()).bind(request=request)
     blacklist = set(['admin', 'root', 'postmaster'])
 
-    with testConfig() as config:
-        config.include(models)
-        # Should not raise for valid usernames
-        schemas.unblacklisted_username(node, "john", blacklist)
-        schemas.unblacklisted_username(node, "Abigail", blacklist)
-        # Should raise for usernames in blacklist
-        pytest.raises(colander.Invalid,
-                      schemas.unblacklisted_username,
-                      node,
-                      "admin",
-                      blacklist)
-        # Should raise for case variants of usernames in blacklist
-        pytest.raises(colander.Invalid,
-                      schemas.unblacklisted_username,
-                      node,
-                      "PostMaster",
-                      blacklist)
+    # Should not raise for valid usernames
+    schemas.unblacklisted_username(node, "john", blacklist)
+    schemas.unblacklisted_username(node, "Abigail", blacklist)
+    # Should raise for usernames in blacklist
+    pytest.raises(colander.Invalid,
+                  schemas.unblacklisted_username,
+                  node,
+                  "admin",
+                  blacklist)
+    # Should raise for case variants of usernames in blacklist
+    pytest.raises(colander.Invalid,
+                  schemas.unblacklisted_username,
+                  node,
+                  "PostMaster",
+                  blacklist)
 
 
-def test_login_bad_csrf():
-    with testConfig() as config:
-        request = DummyRequest(registry=config.registry)
-        schema = schemas.LoginSchema().bind(request=request)
-        with pytest.raises(BadCSRFToken):
-            schema.deserialize(valid_user)
+def test_login_bad_csrf(config):
+    request = DummyRequest(registry=config.registry)
+    schema = schemas.LoginSchema().bind(request=request)
+    with pytest.raises(BadCSRFToken):
+        schema.deserialize(valid_user)
 
 
-def test_login_bad_username():
-    with testConfig() as config:
-        config.include(models)
-        request = csrf_request(config)
-        schema = schemas.LoginSchema().bind(request=request)
-        with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({'username': 'bogus', 'password': 'foo'})
-        assert 'username' in exc.value.asdict()
+def test_login_bad_username(config):
+    config.include(models)
+    request = csrf_request(config)
+    schema = schemas.LoginSchema().bind(request=request)
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({'username': 'bogus', 'password': 'foo'})
+    assert 'username' in exc.value.asdict()
 
 
-def test_login_bad_password():
-    with testConfig() as config:
-        config.include(models)
-        request = csrf_request(config)
-        schema = schemas.LoginSchema().bind(request=request)
-        with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize({
-                'username': valid_username,
-                'password': 'bogus',
-            })
-        assert 'password' in exc.value.asdict()
-
-
-def test_login_good():
-    settings = {'horus.require_activation': False}
-    with testConfig(settings=settings) as config:
-        config.include(models)
-        request = csrf_request(config)
-        schema = schemas.LoginSchema().bind(request=request)
-        assert 'user' in schema.deserialize({
+def test_login_bad_password(config):
+    config.include(models)
+    request = csrf_request(config)
+    schema = schemas.LoginSchema().bind(request=request)
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({
             'username': valid_username,
-            'password': valid_password,
+            'password': 'bogus',
         })
+    assert 'password' in exc.value.asdict()
 
 
-def test_login_email():
-    settings = {
+def test_login_good(config):
+    config.registry.settings.update({'horus.require_activation': False})
+    config.include(models)
+    request = csrf_request(config)
+    schema = schemas.LoginSchema().bind(request=request)
+    assert 'user' in schema.deserialize({
+        'username': valid_username,
+        'password': valid_password,
+    })
+
+
+def test_login_email(config):
+    config.registry.settings.update({
         'horus.allow_email_auth': True,
         'horus.require_activation': False,
-    }
-    with testConfig(settings=settings) as config:
-        config.include(models)
-        request = csrf_request(config)
-        schema = schemas.LoginSchema().bind(request=request)
-        assert 'user' in schema.deserialize({
-            'username': valid_email,
-            'password': valid_password,
-        })
+    })
+    config.include(models)
+    request = csrf_request(config)
+    schema = schemas.LoginSchema().bind(request=request)
+    assert 'user' in schema.deserialize({
+        'username': valid_email,
+        'password': valid_password,
+    })
 
 
-def test_login_inactive():
-    settings = {
+def test_login_inactive(config):
+    config.registry.settings.update({
         'horus.allow_inactive_login': False,
         'horus.require_activation': True,
-    }
-    with testConfig(settings=settings) as config:
-        config.include(models)
-        request = csrf_request(config)
-        schema = schemas.LoginSchema().bind(request=request)
-        with pytest.raises(colander.Invalid) as exc:
-            schema.deserialize(valid_user)
-        assert 'not active' in exc.value.msg
+    })
+    config.include(models)
+    request = csrf_request(config)
+    schema = schemas.LoginSchema().bind(request=request)
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize(valid_user)
+    assert 'not active' in exc.value.msg

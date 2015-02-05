@@ -1,6 +1,6 @@
 from mock import patch, Mock, MagicMock
 
-from pyramid.testing import DummyRequest, testConfig
+from pyramid.testing import DummyRequest
 from horus.interfaces import IUserClass, IActivationClass, IUIStrings, IProfileSchema, IProfileForm
 from horus.schemas import ProfileSchema
 from horus.forms import SubmitForm
@@ -64,91 +64,86 @@ def _bad_password(request, username, password):
 
 
 # Tests for edit_profile calls
-def test_profile_invalid_password():
+def test_profile_invalid_password(config):
     """ Make sure our edit_profile call validates the user password
     """
     request = _get_fake_request('john', 'doe')
 
-    with testConfig() as config:
-        configure(config)
-        with patch('horus.models.UserMixin') as mock_user:
-            with patch('horus.lib.FlashMessage') as mock_flash:
-                mock_user.get_user = MagicMock(side_effect=_bad_password)
-                profile = ProfileController(request)
-                profile.User = mock_user
-                profile.edit_profile()
-                assert mock_flash.called_with(request, _('Invalid password.'), kind='error')
+    configure(config)
+    with patch('horus.models.UserMixin') as mock_user:
+        with patch('horus.lib.FlashMessage') as mock_flash:
+            mock_user.get_user = MagicMock(side_effect=_bad_password)
+            profile = ProfileController(request)
+            profile.User = mock_user
+            profile.edit_profile()
+            assert mock_flash.called_with(request, _('Invalid password.'), kind='error')
 
 
-def test_profile_calls_super():
+def test_profile_calls_super(config):
     """Make sure our method calls the superclasses edit_profile
        if the validations are successful
     """
     request = _get_fake_request('john', 'smith')
-    with testConfig() as config:
-        configure(config)
-        with patch('horus.models.UserMixin') as mock_user:
-            with patch('horus.views.ProfileController.edit_profile') as mock_super_profile:
-                mock_user.get_user = MagicMock(side_effect=_good_password_simple)
-                profile = ProfileController(request)
-                profile.User = mock_user
-                profile.edit_profile()
-                assert profile.request.context is True
-                assert mock_super_profile.called
+    configure(config)
+    with patch('horus.models.UserMixin') as mock_user:
+        with patch('horus.views.ProfileController.edit_profile') as mock_super_profile:
+            mock_user.get_user = MagicMock(side_effect=_good_password_simple)
+            profile = ProfileController(request)
+            profile.User = mock_user
+            profile.edit_profile()
+            assert profile.request.context is True
+            assert mock_super_profile.called
 
 
 # Tests for changing the subscription state
-def test_subscription_update():
+def test_subscription_update(config):
     """Make sure that the new status is written into the DB
     """
     request = _get_fake_request('acct:john@doe', 'smith', True, True)
     print "request", request.POST
-    with testConfig() as config:
-        configure(config)
-        with patch('h.accounts.views.Subscriptions') as mock_subs:
-            mock_subs.get_by_id = MagicMock()
-            mock_subs.get_by_id.return_value = Mock(active=True)
-            profile = ProfileController(request)
-            profile.db = Mock()
-            profile.db.add = MagicMock(name='add')
-            profile.edit_profile()
-            assert profile.db.add.called
+    configure(config)
+    with patch('h.accounts.views.Subscriptions') as mock_subs:
+        mock_subs.get_by_id = MagicMock()
+        mock_subs.get_by_id.return_value = Mock(active=True)
+        profile = ProfileController(request)
+        profile.db = Mock()
+        profile.db.add = MagicMock(name='add')
+        profile.edit_profile()
+        assert profile.db.add.called
 
 
 # Tests for disable_user calls
-def test_disable_invalid_password():
+def test_disable_invalid_password(config):
     """ Make sure our disable_user call validates the user password
     """
     request = _get_fake_request('john', 'doe')
 
-    with testConfig() as config:
-        configure(config)
-        with patch('horus.models.UserMixin') as mock_user:
-            with patch('horus.lib.FlashMessage') as mock_flash:
-                with patch('h.accounts.schemas.EditProfileSchema') as mock_schema:
-                    mock_schema.validator = MagicMock(name='validator')
-                    mock_user.get_user = MagicMock(side_effect=_bad_password)
-                    profile = ProfileController(request)
-                    profile.User = mock_user
-                    profile.disable_user()
-                    assert mock_flash.called_with(request, _('Invalid password.'), kind='error')
+    configure(config)
+    with patch('horus.models.UserMixin') as mock_user:
+        with patch('horus.lib.FlashMessage') as mock_flash:
+            with patch('h.accounts.schemas.EditProfileSchema') as mock_schema:
+                mock_schema.validator = MagicMock(name='validator')
+                mock_user.get_user = MagicMock(side_effect=_bad_password)
+                profile = ProfileController(request)
+                profile.User = mock_user
+                profile.disable_user()
+                assert mock_flash.called_with(request, _('Invalid password.'), kind='error')
 
 
-def test_user_disabled():
+def test_user_disabled(config):
     """Check if the disabled user flag is set
     """
     request = _get_fake_request('john', 'doe')
 
-    with testConfig() as config:
-        configure(config)
-        with patch('horus.models.UserMixin') as mock_user:
-            with patch('horus.lib.FlashMessage') as mock_flash:
-                with patch('h.accounts.schemas.EditProfileSchema') as mock_schema:
-                    mock_schema.validator = MagicMock(name='validator')
-                    mock_user.get_user = MagicMock(side_effect=_good_password)
-                    profile = ProfileController(request)
-                    profile.User = mock_user
-                    profile.db = FakeDB()
-                    profile.db.add = MagicMock(name='add')
-                    profile.disable_user()
-                    assert profile.db.add.called
+    configure(config)
+    with patch('horus.models.UserMixin') as mock_user:
+        with patch('horus.lib.FlashMessage') as mock_flash:
+            with patch('h.accounts.schemas.EditProfileSchema') as mock_schema:
+                mock_schema.validator = MagicMock(name='validator')
+                mock_user.get_user = MagicMock(side_effect=_good_password)
+                profile = ProfileController(request)
+                profile.User = mock_user
+                profile.db = FakeDB()
+                profile.db.add = MagicMock(name='add')
+                profile.disable_user()
+                assert profile.db.add.called

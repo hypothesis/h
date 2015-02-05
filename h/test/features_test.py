@@ -1,7 +1,7 @@
 import unittest
 
 from mock import patch
-from pyramid.testing import DummyRequest, testConfig
+from pyramid.testing import DummyRequest
 import pytest
 
 from h.features import Client
@@ -30,19 +30,17 @@ class TestClient(unittest.TestCase):
 
 
 @patch('h.features.Client')
-def test_get_client(client_mock):
-    settings = {
+def test_get_client(client_mock, config):
+    config.registry.settings.update({
         'h.feature.enabled_feature': 'on',
         'h.feature.disabled_feature': False,
         'unrelated_feature': 123,
-    }
+    })
 
-    with testConfig(settings=settings) as config:
-        request = DummyRequest(registry=config.registry)
+    request = DummyRequest(registry=config.registry)
+    get_client(request)
 
-        get_client(request)
-
-        client_mock.assert_called_with({
-            'enabled_feature': True,
-            'disabled_feature': False
-        })
+    client_mock.assert_called_with({
+        'enabled_feature': True,
+        'disabled_feature': False
+    })
