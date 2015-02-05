@@ -33,7 +33,6 @@ module.exports = function(config) {
       'h/static/scripts/vendor/annotator.auth.js',
       'h/static/scripts/annotator/plugin/bridge.js',
       'h/static/scripts/annotator/plugin/bucket-bar.js',
-      'h/static/scripts/annotator/plugin/threading.js',
       'h/static/scripts/vendor/dom_text_mapper.js',
       'h/static/scripts/annotator/annotator.anchoring.js',
       // Angular needs to be included after annotator to avoid the
@@ -53,8 +52,6 @@ module.exports = function(config) {
       'h/static/scripts/hypothesis.js',
       'h/static/scripts/vendor/sinon.js',
       'h/static/scripts/vendor/chai.js',
-      'h/static/scripts/hypothesis.js',
-      'h/static/scripts/*-service.js',
       'h/templates/client/*.html',
       'tests/js/bootstrap.coffee',
       'tests/js/**/*-test.coffee'
