@@ -19,12 +19,14 @@ $threadexp-width: .6em;
 .thread-list {
   margin-top: 0.5em;
 
-  .thread-reply { display: inline-block }
-
   .thread-collapsed {
     .tag-list, .annotation-body {display: none;}
     .thread-reply { margin-top: 0 }
   }
+}
+
+.thread-reply {
+  display: inline-block
 }
 
 .thread {
