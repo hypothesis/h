@@ -1,23 +1,23 @@
 import logging
 
+from raven.base import Client
+from raven.conf import setup_logging
+from raven.handlers.logging import SentryHandler
 
-def configure_sentry_logger(dsn):
-    """
-    Configure the Sentry log handler for the provided DSN.
-    """
-    # Import raven modules at runtime because this is an optional module. This
-    # function will only be called if the 'sentry.dsn' setting is provided.
-    # pylint: disable=import-error
-    from raven.conf import setup_logging
-    from raven.handlers.logging import SentryHandler
-    # pylint: enable=import-error
 
-    handler = SentryHandler(dsn, level=logging.WARN)
+def configure_logger(client):
+    """
+    Configure the Sentry log handler using the provided Sentry client.
+    """
+    handler = SentryHandler(client, level=logging.WARN)
     setup_logging(handler)
 
 
 def includeme(config):
     dsn = config.registry.settings.get('sentry.dsn')
+    if dsn is None:
+        return
 
-    if dsn is not None:
-        configure_sentry_logger(dsn)
+    client = Client(dsn)
+    configure_logger(client)
+    config.registry.handle_exception = client.captureException
