@@ -17,6 +17,13 @@ log = logging.getLogger(__name__)
     renderer='h:templates/app.html',
 )
 def annotation(context, request):
+    request.layout_manager.layout.meta_properties = [
+            ('og:title', 'Annotation by {user} on {title}'.format(
+                user=context['user'].replace('acct:', ''),
+                title=context['document']['title'])),
+            ('og:image', '/assets/images/logo.png'),
+            ('og:site_name', 'Hypothes.is'),
+            ('og:url', request.url)]
     return {}
 
 
