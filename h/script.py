@@ -21,7 +21,7 @@ from h import __version__, config, reindexer
 
 def get_config(args):
     setup_logging(args[0])
-    settings = get_appsettings(args[0])
+    settings = get_appsettings(args[0], name='h')
     settings.update(config.settings_from_environment())
     settings['basemodel.should_create_all'] = False
     settings['basemodel.should_drop_all'] = False

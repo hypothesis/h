@@ -45,10 +45,6 @@ def _setup_heroku(settings):
     if 'REDISTOGO_URL' in os.environ:
         settings['redis.sessions.url'] = os.environ['REDISTOGO_URL'] + '0'
 
-    # SENTRY_DSN is set by the Heroku Sentry addon
-    if 'SENTRY_DSN' in os.environ:
-        settings['sentry.dsn'] = os.environ['SENTRY_DSN']
-
 
 def _setup_db(settings):
     # Allow overriding the model autocreation/deletion from the environment
