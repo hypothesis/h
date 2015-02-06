@@ -17,7 +17,9 @@ from horus.models import (
 from horus.strings import UIStringsBase
 from pyramid_basemodel import Base, Session
 from pyramid.threadlocal import get_current_request
-from sqlalchemy import func, or_
+import sqlalchemy as sa
+from sqlalchemy import or_
+from sqlalchemy.ext.declarative import declared_attr
 
 
 class Activation(ActivationMixin, Base):
@@ -40,6 +42,26 @@ class Group(GroupMixin, Base):
 
 
 class User(UserMixin, Base):
+    # Normalised user identifier
+    uid = sa.Column(sa.Unicode(30), nullable=False, unique=True)
+    # Username as chosen by the user on registration
+    _username = sa.Column('username',
+                          sa.Unicode(30),
+                          nullable=False,
+                          unique=True)
+
+    def _get_username(self):
+        return self._username
+
+    def _set_username(self, value):
+        self._username = value
+        self.uid = _username_to_uid(value)
+
+    @declared_attr
+    def username(self):
+        return sa.orm.synonym('_username',
+                              descriptor=property(self._get_username,
+                                                  self._set_username))
 
     @classmethod
     def get_by_id(cls, request, userid):
@@ -53,21 +75,17 @@ class User(UserMixin, Base):
     def get_by_username(cls, request, username):
         session = get_session(request)
 
-        lhs = func.replace(cls.username, '.', '')
-        rhs = username.replace('.', '')
-        return session.query(cls).filter(
-            func.lower(lhs) == rhs.lower()
-        ).first()
+        uid = _username_to_uid(username)
+        return session.query(cls).filter(cls.uid == uid).first()
 
     @classmethod
     def get_by_username_or_email(cls, request, username, email):
         session = get_session(request)
 
-        lhs = func.replace(cls.username, '.', '')
-        rhs = username.replace('.', '')
+        uid = _username_to_uid(username)
         return session.query(cls).filter(
             or_(
-                func.lower(lhs) == rhs.lower(),
+                cls.uid == uid,
                 cls.email == email
             )
         ).first()
@@ -104,6 +122,12 @@ class User(UserMixin, Base):
             self.status = (self.status or 0) | 0b100
         else:
             self.status = (self.status or 0) & ~0b100
+
+
+def _username_to_uid(username):
+    # We normalise usernames by dots and case in order to discourage attempts
+    # at impersonation.
+    return username.replace('.', '').lower()
 
 
 class UserGroup(UserGroupMixin, Base):

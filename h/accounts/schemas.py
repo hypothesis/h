@@ -3,7 +3,6 @@ from pkg_resources import resource_stream  # pylint: disable-msg=E0611
 
 import colander
 import deform
-from hem.db import get_session
 from horus import interfaces
 from horus.schemas import email_exists, unique_email
 from pyramid.settings import asbool
@@ -32,12 +31,12 @@ def get_blacklist():
 
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
-    req = node.bindings['request']
-    user_ctor = req.registry.getUtility(interfaces.IUserClass)
-    query = get_session(req).query(user_ctor)
-    if query.filter(user_ctor.username.ilike(value)).count():
-        str_ = req.registry.getUtility(interfaces.IUIStrings)
-        raise colander.Invalid(node, str_.registration_username_exists)
+    request = node.bindings['request']
+    user_ctor = request.registry.getUtility(interfaces.IUserClass)
+    user = user_ctor.get_by_username(request, value)
+    if user:
+        strings = request.registry.getUtility(interfaces.IUIStrings)
+        raise colander.Invalid(node, strings.registration_username_exists)
 
 
 def unblacklisted_username(node, value, blacklist=None):
