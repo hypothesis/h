@@ -32,38 +32,60 @@ Almost no support for 3rd party applications exists yet. Applications can use
 their client credentials, but they do not confer any authorizations and no
 mechanism exists yet for users to grant authorizations to clients.
 """
-from annotator import auth
+import datetime
+
+import jwt
+from oauthlib.oauth2 import BearerToken
 from oauthlib.oauth2 import ClientCredentialsGrant
 from oauthlib.oauth2 import RequestValidator as _RequestValidator
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.exceptions import BadCSRFToken
 from pyramid.session import check_csrf_token
 
-from .oauth import AnnotatorToken
+from .oauth import JWTBearerGrant
 from .security import WEB_SCOPES
 
-
-try:
-    # pylint: disable=no-name-in-module
-    from hmac import compare_digest as is_equal
-except ImportError:
-    def is_equal(lhs, rhs):
-        """Returns True if the two strings are equal, False otherwise.
-
-        The comparison is based on a common implementation found in Django.
-        This version avoids a short-circuit even for unequal lengths to reveal
-        as little as possible. It takes time proportional to the length of its
-        second argument.
-        """
-        result = 0 if len(lhs) == len(rhs) else 1
-        lhs = lhs.ljust(len(rhs))
-        for x, y in zip(lhs, rhs):
-            result |= ord(x) ^ ord(y)
-        return result == 0
+DEFAULT_TTL = 3600
+LEEWAY = 240  # allowance for clock skew in verification
 
 
 def is_web_client(request, client_id):
     return client_id == request.registry.web_client.client_id
+
+
+def token_generator(request):
+    """
+    Generate a token from a request.
+
+    The request must have the ``client`` and `extra_credentials`` properties
+    added by OAuthLib, and a ``user`` (possibly ``None``).
+    """
+    client = request.client
+    now = datetime.datetime.utcnow().replace(microsecond=0)
+    ttl = datetime.timedelta(seconds=DEFAULT_TTL)
+
+    payload = {
+        'aud': request.host_url,
+        'iss': client.client_id,
+        'exp': now + ttl,
+        'iat': now,
+        'nbf': now,
+    }
+
+    if request.user is not None:
+        payload['sub'] = request.user
+        payload['userId'] = request.user  # bw compat
+
+    # bw compat
+    payload['issuedAt'] = now.isoformat()
+    payload['ttl'] = ttl.total_seconds()
+    payload['consumerKey'] = client.client_id
+
+    credentials = getattr(request, 'extra_credentials', None)
+    if credentials is not None:
+        payload.update(credentials)
+
+    return jwt.encode(payload, client.client_secret)
 
 
 class RequestValidator(_RequestValidator):
@@ -90,7 +112,10 @@ class RequestValidator(_RequestValidator):
             if client is None:
                 return False
 
-            if not is_equal(client.client_secret, request.client_secret):
+            if not jwt.constant_time_compare(
+                    client.client_secret,
+                    request.client_secret
+            ):
                 return False
 
         request.client = client
@@ -101,6 +126,10 @@ class RequestValidator(_RequestValidator):
             return WEB_SCOPES
         else:
             return []
+
+    def get_original_scopes(self, assertion, request):
+        # TODO: 3rd party authorizations
+        return WEB_SCOPES
 
     def save_bearer_token(self, token, request):
         # TODO: 3rd party authorizations
@@ -113,15 +142,33 @@ class RequestValidator(_RequestValidator):
     def validate_bearer_token(self, token, scopes, request):
         if token is None:
             return False
-        client = request.registry.web_client
-        ttl = auth.DEFAULT_TTL
+
         try:
-            token = auth.decode_token(token, client.client_secret, ttl)
-        except auth.TokenInvalid:
+            payload, signing_input, header, signature = jwt.load(token)
+        except jwt.InvalidTokenError:
             return False
-        request.client = client  # TODO: 3rd party authorizations
-        request.user = token.get('userId')
-        request.scopes = token.get('scopes', [])
+
+        aud = request.host_url
+        iss = payload['iss']
+
+        if is_web_client(request, iss):
+            client = request.registry.web_client
+            secret = client.client_secret
+            scopes = WEB_SCOPES
+        else:
+            # TODO: 3rd party authorizations
+            return False
+
+        try:
+            jwt.verify_signature(payload, signing_input, header, signature,
+                                 key=secret, audience=aud, issuer=iss,
+                                 leeway=LEEWAY)
+        except jwt.InvalidTokenError:
+            return False
+
+        request.client = client
+        request.user = payload.get('sub', None)
+        request.scopes = scopes
         return True
 
     def validate_grant_type(self, client_id, grant_type, client, request):
@@ -140,11 +187,19 @@ class RequestValidator(_RequestValidator):
 
 def includeme(config):
     config.include('.oauth')
+    config.add_oauth_param('assertion')
+    config.add_oauth_param('client_assertion')
+    config.add_oauth_param('client_assertion_type')
 
     request_validator = RequestValidator()
     config.add_grant_type(ClientCredentialsGrant, 'client_credentials',
                           request_validator=request_validator)
-    config.add_token_type(AnnotatorToken, request_validator=request_validator)
+    config.add_grant_type(JWTBearerGrant, JWTBearerGrant.uri,
+                          request_validator=request_validator)
+    config.add_token_type(BearerToken,
+                          request_validator=request_validator,
+                          token_generator=token_generator,
+                          expires_in=DEFAULT_TTL)
 
     # Configure the authorization policy
     authz_policy = ACLAuthorizationPolicy()
