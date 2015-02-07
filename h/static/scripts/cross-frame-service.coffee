@@ -40,9 +40,11 @@ class CrossFrameService
             parsed[k] = v
           parsed
         emit: (args...) ->
-          $rootScope.$emit.call($rootScope, args...)
+          $rootScope.$apply ->
+            $rootScope.$emit.call($rootScope, args...)
         on: (event, handler) ->
-          $rootScope.$on(event, (event, args...) -> handler.apply(this, args))
+          $rootScope.$apply ->
+            $rootScope.$on(event, (event, args...) -> handler.apply(this, args))
 
       new AnnotationSync(bridge, options)
 
@@ -55,9 +57,9 @@ class CrossFrameService
       channel.call
         method: 'getDocumentInfo'
         success: (info) =>
-          provider.entities = (link.href for link in info.metadata.link)
-          @providers.push(provider)
-          $rootScope.$emit('getDocumentInfo')
+          $rootScope.$apply =>
+            provider.entities = (link.href for link in info.metadata.link)
+            @providers.push(provider)
 
     this.connect = ->
       discovery = createDiscovery()

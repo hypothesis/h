@@ -86,55 +86,43 @@ describe 'h', ->
 describe 'AnnotationUIController', ->
   $scope = null
   $rootScope = null
-  fakeAnnotationUI = null
+  annotationUI = null
 
   beforeEach module('h')
-  beforeEach inject (_$rootScope_, AnnotationUIController) ->
+  beforeEach inject ($controller, _$rootScope_) ->
     $rootScope = _$rootScope_
     $scope = $rootScope.$new()
     $scope.search = {}
-    fakeAnnotationUI =
+    annotationUI =
       tool: 'comment'
       selectedAnnotationMap: null
       focusedAnnotationsMap: null
       removeSelectedAnnotation: sandbox.stub()
 
-    new AnnotationUIController(fakeAnnotationUI, $rootScope, $scope)
+    $controller 'AnnotationUIController', {$scope, annotationUI}
 
   it 'updates the view when the selection changes', ->
-    fakeAnnotationUI.selectedAnnotationMap = {1: true, 2: true}
+    annotationUI.selectedAnnotationMap = {1: true, 2: true}
     $rootScope.$digest()
     assert.deepEqual($scope.selectedAnnotations, {1: true, 2: true})
 
   it 'updates the selection counter when the selection changes', ->
-    fakeAnnotationUI.selectedAnnotationMap = {1: true, 2: true}
+    annotationUI.selectedAnnotationMap = {1: true, 2: true}
     $rootScope.$digest()
     assert.deepEqual($scope.selectedAnnotationsCount, 2)
 
   it 'clears the selection when no annotations are selected', ->
-    fakeAnnotationUI.selectedAnnotationMap = {}
+    annotationUI.selectedAnnotationMap = {}
     $rootScope.$digest()
     assert.deepEqual($scope.selectedAnnotations, null)
     assert.deepEqual($scope.selectedAnnotationsCount, 0)
 
   it 'updates the focused annotations when the focus map changes', ->
-    fakeAnnotationUI.focusedAnnotationMap = {1: true, 2: true}
+    annotationUI.focusedAnnotationMap = {1: true, 2: true}
     $rootScope.$digest()
     assert.deepEqual($scope.focusedAnnotations, {1: true, 2: true})
-
-  describe 'on annotationsLoaded', ->
-    it 'enqueues a re-render of the current scope', ->
-      target = sandbox.stub($scope, '$evalAsync')
-      $rootScope.$emit('annotationsLoaded', [{}, {}, {}])
-      assert.called(target)
-
-  describe 'on getDocumentInfo', ->
-    it 'enqueues a re-render of the current scope', ->
-      target = sandbox.stub($scope, '$evalAsync')
-      $rootScope.$emit('getDocumentInfo', [{}, {}, {}])
-      assert.called(target)
 
   describe 'on annotationDeleted', ->
     it 'removes the deleted annotation from the selection', ->
       $rootScope.$emit('annotationDeleted', {id: 1})
-      assert.calledWith(fakeAnnotationUI.removeSelectedAnnotation, {id: 1})
+      assert.calledWith(annotationUI.removeSelectedAnnotation, {id: 1})

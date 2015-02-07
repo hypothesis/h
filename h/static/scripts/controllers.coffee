@@ -1,29 +1,18 @@
-# Keeps the annotation scope properties up to date by watching for changes
-# in the annotationUI object and reacting to user input. This is not a
-# controller in the Angular sense, but rather just keeps UI and state in sync.
+# Watch the UI state and update scope properties.
 class AnnotationUIController
-  constructor: (annotationUI, $rootScope, appScope) ->
+  this.$inject = ['$rootScope', '$scope', 'annotationUI']
+  constructor:   ( $rootScope,   $scope,   annotationUI ) ->
     $rootScope.$watch (-> annotationUI.selectedAnnotationMap), (map={}) ->
       count = Object.keys(map).length
-      appScope.selectedAnnotationsCount = count
+      $scope.selectedAnnotationsCount = count
 
       if count
-        appScope.selectedAnnotations = map
+        $scope.selectedAnnotations = map
       else
-        appScope.selectedAnnotations = null
+        $scope.selectedAnnotations = null
 
     $rootScope.$watch (-> annotationUI.focusedAnnotationMap), (map={}) ->
-      appScope.focusedAnnotations = map
-
-    $rootScope.$on 'getDocumentInfo', ->
-      appScope.$digest()
-      appScope.$evalAsync(angular.noop)
-
-    $rootScope.$on 'beforeAnnotationCreated', ->
-      appScope.$evalAsync(angular.noop)
-
-    $rootScope.$on 'annotationsLoaded', ->
-      appScope.$evalAsync(angular.noop)
+      $scope.focusedAnnotations = map
 
     $rootScope.$on 'annotationDeleted', (event, annotation) ->
       annotationUI.removeSelectedAnnotation(annotation)
@@ -31,18 +20,18 @@ class AnnotationUIController
 
 class AppController
   this.$inject = [
-    '$document', '$location', '$route', '$scope', '$window', '$rootScope',
+    '$controller', '$document', '$location', '$route', '$scope', '$window',
     'auth', 'drafts', 'identity',
     'permissions', 'streamer', 'streamfilter', 'annotationUI',
     'annotationMapper', 'threading'
   ]
   constructor: (
-     $document,   $location,   $route,   $scope,   $window, $rootScope,
+     $controller,   $document,   $location,   $route,   $scope,   $window,
      auth,   drafts,   identity,
      permissions,   streamer,   streamfilter, annotationUI,
      annotationMapper, threading
   ) ->
-    new AnnotationUIController(annotationUI, $rootScope, $scope)
+    $controller(AnnotationUIController, {$scope})
 
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
@@ -59,7 +48,7 @@ class AppController
           annotationMapper.loadAnnotations data
         when 'delete'
           for annotation in data
-            $rootScope.$emit('annotationDeleted', annotation)
+            $scope.$emit('annotationDeleted', annotation)
 
     streamer.onmessage = (data) ->
       return if !data or data.type != 'annotation-notification'
@@ -76,11 +65,11 @@ class AppController
       for id, container of $scope.threading.idTable when container.message
         # Remove annotations not belonging to this user when highlighting.
         if annotationUI.tool is 'highlight' and annotation.user != auth.user
-          $rootScope.$emit('annotationDeleted', container.message)
+          $scope.$emit('annotationDeleted', container.message)
           drafts.remove annotation
         # Remove annotations the user is not authorized to view.
         else if not permissions.permits 'read', container.message, auth.user
-          $rootScope.$emit('annotationDeleted', container.message)
+          $scope.$emit('annotationDeleted', container.message)
           drafts.remove container.message
 
     $scope.$watch 'sort.name', (name) ->
@@ -101,7 +90,7 @@ class AppController
 
       # Update any edits in progress.
       for draft in drafts.all()
-        $rootScope.$emit('beforeAnnotationCreated', draft)
+        $scope.$emit('beforeAnnotationCreated', draft)
 
       # Reopen the streamer.
       streamer.close()
@@ -251,4 +240,4 @@ angular.module('h')
 .controller('AppController', AppController)
 .controller('ViewerController', ViewerController)
 .controller('AnnotationViewerController', AnnotationViewerController)
-.value('AnnotationUIController', AnnotationUIController)
+.controller('AnnotationUIController', AnnotationUIController)
