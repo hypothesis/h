@@ -73,6 +73,8 @@ configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
 
 
 setupCrossFrame = ['crossframe', (crossframe) -> crossframe.connect()]
+
+
 setupStreamer = [
   '$http', '$window', 'streamer'
   ($http,   $window,   streamer) ->
