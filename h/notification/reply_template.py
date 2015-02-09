@@ -16,7 +16,8 @@ from h.notification.models import Subscriptions
 from h.notification.gateway import user_name, \
     user_profile_url, standalone_url, get_user_by_name
 from h.notification.types import ROOT_PATH, REPLY_TYPE
-from h.events import LoginEvent, AnnotationEvent
+from h.accounts.events import LoginEvent
+from h.events import AnnotationEvent
 from h.models import Annotation
 
 log = logging.getLogger(__name__)
