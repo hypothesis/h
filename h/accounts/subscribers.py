@@ -8,7 +8,10 @@ from horus.events import (
     RegistrationActivatedEvent,
     PasswordResetEvent,
 )
-from .events import LoginEvent
+from .events import (
+    LoginEvent,
+    LogoutEvent,
+)
 
 from h.stats import get_client as stats
 
@@ -41,6 +44,11 @@ def login(event):
 
     headers = security.remember(request, userid)
     request.response.headerlist.extend(headers)
+
+
+@subscriber(LogoutEvent)
+def logout(event):
+    stats(event.request).get_counter('auth.local.logout').increment()
 
 
 class AutoLogin(object):

@@ -17,7 +17,7 @@ from h.stats import get_client as stats
 from h.notification.models import Subscriptions
 
 from . import schemas
-from .events import LoginEvent
+from .events import LoginEvent, LogoutEvent
 
 
 def ajax_form(request, result):
@@ -133,7 +133,8 @@ class AuthController(horus.views.AuthController):
         return {'status': 'okay'}
 
     def logout(self):
-        stats(self.request).get_counter('auth.local.logout').increment()
+        user = self.User.get_by_id(self.request, self.request.user)
+        self.request.registry.notify(LogoutEvent(self.request, user))
         return super(AuthController, self).logout()
 
 
