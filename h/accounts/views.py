@@ -5,10 +5,13 @@ import colander
 import deform
 import horus.views
 import json
+from hem.db import get_session
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
+from horus.events import PasswordResetEvent
 from pyramid import httpexceptions, security
 from pyramid.view import view_config, view_defaults
+from pyramid.events import subscriber
 
 from h import session
 from h.events import LoginEvent
@@ -115,6 +118,18 @@ class AsyncFormViewMapper(object):
         return wrapper
 
 
+def _login_user(request, user):
+    db = get_session(request)
+
+    stats(request).get_counter('auth.local.login').increment()
+    user.last_login_date = datetime.datetime.utcnow()
+    db.add(user)
+    remember(request, user)
+
+    event = LoginEvent(request, user)
+    request.registry.notify(event)
+
+
 @view_auth_defaults
 @view_config(attr='login', route_name='login')
 @view_config(attr='logout', route_name='logout')
@@ -131,12 +146,7 @@ class AuthController(horus.views.AuthController):
                 'reason': e.error.msg,
             }
 
-        stats(request).get_counter('auth.local.login').increment()
-        user.last_login_date = datetime.datetime.utcnow()
-        self.db.add(user)
-        remember(request, user)
-        event = LoginEvent(self.request, user)
-        self.request.registry.notify(event)
+        _login_user(request, user)
 
         return {'status': 'okay'}
 
@@ -162,6 +172,11 @@ class ForgotPasswordController(horus.views.ForgotPasswordController):
         stats(request).get_counter('auth.local.reset_password').increment()
         remember(request, request.user)
         return result
+
+
+@subscriber(PasswordResetEvent)
+def _login_on_password_reset(event):
+    _login_user(event.request, event.request.user)
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
