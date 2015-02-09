@@ -5,19 +5,16 @@
       <meta charset="UTF-8" />
       <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
       <meta name="viewport" content="width=device-width,initial-scale=1" />
-      {% for property, content in layout.meta_properties %}
-        <meta property="{{ property }}" content="{{ content }}" />
-      {% endfor %}
-      {% for name, content in layout.meta_attrs %}
-        <meta name="{{ name }}" content="{{ content }}" />
-      {% endfor %}
+      {% for attrs in meta_attrs -%}
+        <meta {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
+      {% endfor -%}
     {% endblock %}
 
     <title>{% block title %}Hypothesis{% endblock %}</title>
 
-    {% for rel, href in layout.link_attrs %}
-      <link rel="{{ rel }}" href="{{ href }}" />
-    {% endfor %}
+    {% for attrs in link_attrs -%}
+      <link {% for key, value in attrs %}key="{{value}}" {% endfor %}/>
+    {% endfor -%}
     {% for href in layout.css_links %}
       <link rel="stylesheet" href="{{ href }}" />
     {% endfor %}
