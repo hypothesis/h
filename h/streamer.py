@@ -492,15 +492,13 @@ class WebSocket(_WebSocket):
                 self.query = FilterToElasticFilter(payload, self.request)
                 self.offsetFrom = 0
             elif msg_type == 'more_hits':
-                if self.query is None:
-                    return
+                if self.query is not None:
+                    more_hits = data.get('moreHits', 10)
 
-                more_hits = data.get('moreHits', 10)
-
-                self.query.query['from'] = self.offsetFrom
-                self.query.query['size'] = more_hits
-                self.send_annotations()
-                self.offsetFrom += self.received
+                    self.query.query['from'] = self.offsetFrom
+                    self.query.query['size'] = more_hits
+                    self.send_annotations()
+                    self.offsetFrom += self.received
             elif msg_type == 'client_id':
                 self.client_id = data.get('value')
         except:
