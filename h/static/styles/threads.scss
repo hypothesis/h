@@ -25,6 +25,10 @@ $threadexp-width: .6em;
   }
 }
 
+.thread-reply {
+  display: inline-block
+}
+
 .thread {
   @include pie-clearfix;
   cursor: pointer;

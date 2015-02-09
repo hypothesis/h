@@ -202,7 +202,7 @@ class ViewerController
       streamfilter.resetFilter().addClause('/uri', 'one_of', loaded)
 
       if auth.user and annotationUI.tool is 'highlight'
-        streamfilter.addClause('/user', auth.user)
+        streamfilter.addClause('/user', 'equals', auth.user)
 
       streamer.send({filter: streamfilter.getFilter()})
 

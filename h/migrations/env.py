@@ -1,11 +1,12 @@
 from __future__ import with_statement
 
 import os
-import urlparse
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
+
+from h.config import normalise_database_url
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -27,15 +28,10 @@ target_metadata = None
 # ... etc.
 
 
-def get_database_url(hint):
+def get_database_url():
     if 'DATABASE_URL' in os.environ:
-        urlparse.uses_netloc.append("postgres")
-        urlparse.uses_netloc.append("sqlite")
-        url = urlparse.urlparse(os.environ["DATABASE_URL"])
-        if url.scheme == 'postgres':
-            url.scheme = url.scheme + '+psycopg2'
-        return urlparse.urlunparse(url)
-    return hint
+        return normalise_database_url(os.environ['DATABASE_URL'])
+    return config.get_main_option("sqlalchemy.url")
 
 
 def run_migrations_offline():
@@ -50,9 +46,7 @@ def run_migrations_offline():
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
-    url = get_database_url(url)
-    context.configure(url=url)
+    context.configure(url=get_database_url())
 
     with context.begin_transaction():
         context.run_migrations()
@@ -67,13 +61,10 @@ def run_migrations_online():
     """
     section = config.config_ini_section
 
-    url = config.get_section_option(section, 'sqlalchemy.url')
-    url = get_database_url(url)
-
-    config.set_section_option(section, 'sqlalchemy.url', url)
+    config.set_section_option(section, 'sqlalchemy.url', get_database_url())
 
     engine = engine_from_config(
-        config.get_section(config.config_ini_section),
+        config.get_section(section),
         prefix='sqlalchemy.',
         poolclass=pool.NullPool)
 

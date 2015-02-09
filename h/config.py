@@ -22,6 +22,15 @@ def settings_from_environment():
     return settings
 
 
+def normalise_database_url(url):
+    # Heroku database URLs start with postgres://, which is an old and
+    # deprecated dialect as far as sqlalchemy is concerned. We upgrade this
+    # to postgresql+psycopg2 by default.
+    if url.startswith('postgres://'):
+        url = 'postgresql+psycopg2://' + url[len('postgres://'):]
+    return url
+
+
 def _setup_heroku(settings):
     # BONSAI_URL matches the Heroku environment variable for the Bonsai add-on
     if 'BONSAI_URL' in os.environ:
@@ -29,16 +38,16 @@ def _setup_heroku(settings):
 
     # DATABASE_URL matches the Heroku environment variable
     if 'DATABASE_URL' in os.environ:
-        urlparse.uses_netloc.append("postgres")
-        urlparse.uses_netloc.append("sqlite")
-        url = list(urlparse.urlparse(os.environ["DATABASE_URL"]))
-        if url[0] == 'postgres':
-            url[0] = 'postgresql+psycopg2'
-        settings['sqlalchemy.url'] = urlparse.urlunparse(url)
+        settings['sqlalchemy.url'] = normalise_database_url(
+            os.environ['DATABASE_URL'])
 
     # REDISTOGO_URL matches the Heroku environment variable for Redis To Go
     if 'REDISTOGO_URL' in os.environ:
         settings['redis.sessions.url'] = os.environ['REDISTOGO_URL'] + '0'
+
+    # SENTRY_DSN is set by the Heroku Sentry addon
+    if 'SENTRY_DSN' in os.environ:
+        settings['sentry.dsn'] = os.environ['SENTRY_DSN']
 
 
 def _setup_db(settings):

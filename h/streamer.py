@@ -11,6 +11,7 @@ import unicodedata
 import weakref
 
 import gevent
+import gevent.queue
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.config import aslist
@@ -491,6 +492,9 @@ class WebSocket(_WebSocket):
                 self.query = FilterToElasticFilter(payload, self.request)
                 self.offsetFrom = 0
             elif msg_type == 'more_hits':
+                if self.query is None:
+                    return
+
                 more_hits = data.get('moreHits', 10)
 
                 self.query.query['from'] = self.offsetFrom

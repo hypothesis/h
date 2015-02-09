@@ -19,8 +19,13 @@ class MockSession
 mockFlash = sandbox.spy()
 mockFormHelpers = applyValidationErrors: sandbox.spy()
 
-describe 'h.account', ->
-  beforeEach module('h.account')
+describe 'AuthController', ->
+  $scope = null
+  $timeout = null
+  auth = null
+  session = null
+
+  beforeEach module('h')
   beforeEach module('h.templates')
 
   beforeEach module ($provide) ->
@@ -30,95 +35,89 @@ describe 'h.account', ->
     $provide.value 'formHelpers', mockFormHelpers
     return
 
+  beforeEach inject ($controller, $rootScope, _$timeout_, _session_) ->
+    $scope = $rootScope.$new()
+    $timeout = _$timeout_
+    auth = $controller 'AuthController', {$scope}
+    session = _session_
+    sandbox.spy session, 'login'
+
   afterEach ->
     sandbox.restore()
 
-  describe 'AuthController', ->
-    $scope = null
-    $timeout = null
-    auth = null
-    session = null
+  describe '#submit()', ->
+    it 'should call session methods on submit', ->
 
-    beforeEach inject ($controller, $rootScope, _$timeout_, _session_) ->
-      $scope = $rootScope.$new()
-      $timeout = _$timeout_
-      auth = $controller 'AuthController', {$scope}
-      session = _session_
-      sandbox.spy session, 'login'
+      auth.submit
+        $name: 'login'
+        $valid: true
+        $setValidity: sandbox.stub()
 
-    describe '#submit()', ->
-      it 'should call session methods on submit', ->
+      assert.called session.login
 
-        auth.submit
-          $name: 'login'
-          $valid: true
+    it 'should do nothing when the form is invalid', ->
+      auth.submit
+        $name: 'login'
+        $valid: false
+        $setValidity: sandbox.stub()
+
+      assert.notCalled session.login
+
+    it 'should apply validation errors on submit', ->
+      form =
+        $name: 'register'
+        $valid: true
+        $setValidity: sandbox.stub()
+        username:
+          $setValidity: sandbox.stub()
+        email:
           $setValidity: sandbox.stub()
 
-        assert.called session.login
+      auth.submit(form)
 
-      it 'should do nothing when the form is invalid', ->
-        auth.submit
-          $name: 'login'
-          $valid: false
-          $setValidity: sandbox.stub()
+      assert.calledWith mockFormHelpers.applyValidationErrors, form,
+        {username: 'taken'},
+        'registration error'
 
-        assert.notCalled session.login
+    it 'should emit an auth event once authenticated', ->
+      form =
+        $name: 'login'
+        $valid: true
+        $setValidity: sandbox.stub()
 
-      it 'should apply validation errors on submit', ->
-        form =
-          $name: 'register'
-          $valid: true
-          $setValidity: sandbox.stub()
-          username:
-            $setValidity: sandbox.stub()
-          email:
-            $setValidity: sandbox.stub()
+      sandbox.spy $scope, '$emit'
 
-        auth.submit(form)
+      auth.submit(form)
+      assert.calledWith $scope.$emit, 'auth', null, userid: 'alice'
 
-        assert.calledWith mockFormHelpers.applyValidationErrors, form,
-          {username: 'taken'},
-          'registration error'
+    it 'should emit an auth event if destroyed before authentication', ->
+      sandbox.spy $scope, '$emit'
+      $scope.$destroy()
+      assert.calledWith $scope.$emit, 'auth', 'cancel'
 
-      it 'should emit an auth event once authenticated', ->
-        form =
-          $name: 'login'
-          $valid: true
-          $setValidity: sandbox.stub()
+  describe 'timeout', ->
+    it 'should happen after a period of inactivity', ->
+      sandbox.spy $scope, '$broadcast'
+      $scope.form = $setPristine: sandbox.stub()
+      $scope.model =
+        username: 'test'
+        email: 'test@example.com'
+        password: 'secret'
+        code: '1234'
 
-        sandbox.spy $scope, '$emit'
+      $scope.$digest()
+      assert.called $timeout
 
-        auth.submit(form)
-        assert.calledWith $scope.$emit, 'auth', null, userid: 'alice'
+      $timeout.lastCall.args[0]()
+      assert.called $scope.form.$setPristine, 'the form is pristine'
+      assert.deepEqual $scope.model, {}, 'the model is erased'
+      assert.called mockFlash, 'a notification is flashed'
 
-      it 'should emit an auth event if destroyed before authentication', ->
-        sandbox.spy $scope, '$emit'
-        $scope.$destroy()
-        assert.calledWith $scope.$emit, 'auth', 'cancel'
+    it 'should not happen if the model is empty', ->
+      $scope.model = undefined
+      $scope.$digest()
+      assert.notCalled $timeout
 
-    describe 'timeout', ->
-      it 'should happen after a period of inactivity', ->
-        sandbox.spy $scope, '$broadcast'
-        $scope.form = $setPristine: sandbox.stub()
-        $scope.model =
-          username: 'test'
-          email: 'test@example.com'
-          password: 'secret'
-          code: '1234'
-
-        $scope.$digest()
-        assert.called $timeout
-
-        $timeout.lastCall.args[0]()
-        assert.called $scope.form.$setPristine, 'the form is pristine'
-        assert.deepEqual $scope.model, {}, 'the model is erased'
-        assert.called mockFlash, 'a notification is flashed'
-
-      it 'should not happen if the model is empty', ->
-        $scope.model = undefined
-        $scope.$digest()
-        assert.notCalled $timeout
-
-        $scope.model = {}
-        $scope.$digest()
-        assert.notCalled $timeout
+      $scope.model = {}
+      $scope.$digest()
+      assert.notCalled $timeout
