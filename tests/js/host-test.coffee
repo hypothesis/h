@@ -3,8 +3,9 @@ sinon.assert.expose(assert, prefix: '')
 
 describe 'Annotator.Host', ->
   sandbox = sinon.sandbox.create()
+  fakeCrossFrame = null
 
-  createHost = (options) ->
+  createHost = (options={}) ->
     element = document.createElement('div')
     return new Annotator.Host(element, options)
 
@@ -12,9 +13,10 @@ describe 'Annotator.Host', ->
     # Disable Annotator's ridiculous logging.
     sandbox.stub(console, 'log')
 
-    fakeCrossFrame =
-      onConnect: sandbox.stub()
-      on: sandbox.stub()
+    fakeCrossFrame = {}
+    fakeCrossFrame.onConnect = sandbox.stub().returns(fakeCrossFrame)
+    fakeCrossFrame.on = sandbox.stub().returns(fakeCrossFrame)
+    fakeCrossFrame.notify = sandbox.stub().returns(fakeCrossFrame)
 
     sandbox.stub(Annotator.Plugin, 'CrossFrame').returns(fakeCrossFrame)
 
@@ -34,3 +36,21 @@ describe 'Annotator.Host', ->
         assert.isFalse(host.visibleHighlights)
         done()
       host.publish('panelReady')
+
+  describe 'crossframe listeners', ->
+    emitHostEvent = (event, args...) ->
+      fn(args...) for [evt, fn] in fakeCrossFrame.on.args when event == evt
+
+    describe 'on "showFrame" event', ->
+      it 'shows the frame', ->
+        target = sandbox.stub(Annotator.Host.prototype, 'showFrame')
+        host = createHost()
+        emitHostEvent('showFrame')
+        assert.called(target)
+
+    describe 'on "hideFrame" event', ->
+      it 'hides the frame', ->
+        target = sandbox.stub(Annotator.Host.prototype, 'hideFrame')
+        host = createHost()
+        emitHostEvent('hideFrame')
+        assert.called(target)

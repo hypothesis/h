@@ -31,6 +31,7 @@ class Annotator.Host extends Annotator.Guest
     .attr('src', src)
 
     super element, options, dontScan: true
+    this._addCrossFrameListeners()
 
     app.appendTo(@frame)
 
@@ -62,41 +63,14 @@ class Annotator.Host extends Annotator.Guest
       @frame.addClass 'annotator-no-transition'
     @frame.removeClass 'annotator-collapsed'
 
-  _setupXDM: (options) ->
-    channel = super
-
-    channel
-
-    .bind 'showFrame', (ctx) => this.showFrame()
-
-    .bind('hideFrame', (ctx) =>
+  hideFrame: ->
       @frame.css 'margin-left': ''
       @frame.removeClass 'annotator-no-transition'
       @frame.addClass 'annotator-collapsed'
-    )
 
-    .bind('dragFrame', (ctx, screenX) => this._dragUpdate screenX)
-
-    .bind('getMaxBottom', =>
-      sel = '*' + (":not(.annotator-#{x})" for x in [
-        'adder', 'outer', 'notice', 'filter', 'frame'
-      ]).join('')
-
-      # use the maximum bottom position in the page
-      all = for el in $(document.body).find(sel)
-        p = $(el).css('position')
-        t = $(el).offset().top
-        z = $(el).css('z-index')
-        if (y = /\d+/.exec($(el).css('top'))?[0])
-          t = Math.min(Number y, t)
-        if (p == 'absolute' or p == 'fixed') and t == 0 and z != 'auto'
-          bottom = $(el).outerHeight(false)
-          # but don't go larger than 80, because this isn't bulletproof
-          if bottom > 80 then 0 else bottom
-        else
-          0
-      Math.max.apply(Math, all)
-    )
+  _addCrossFrameListeners: ->
+    @crossframe.on('showFrame', this.showFrame.bind(this, null))
+    @crossframe.on('hideFrame', this.hideFrame.bind(this, null))
 
   _setupDragEvents: ->
     el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
