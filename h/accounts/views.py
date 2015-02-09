@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import json
-import datetime
 
 import colander
 import deform
@@ -13,7 +12,6 @@ from pyramid.view import view_config, view_defaults
 
 from h import session
 from h.models import _
-from h.stats import get_client as stats
 from h.notification.models import Subscriptions
 
 from . import schemas
@@ -114,10 +112,8 @@ class AsyncFormViewMapper(object):
 @view_config(attr='logout', route_name='logout')
 class AuthController(horus.views.AuthController):
     def login(self):
-        request = self.request
-
         try:
-            user = self.form.validate(request.POST.items())['user']
+            user = self.form.validate(self.request.POST.items())['user']
         except deform.ValidationFailure as e:
             return {
                 'status': 'failure',
@@ -125,9 +121,6 @@ class AuthController(horus.views.AuthController):
                 'reason': e.error.msg,
             }
 
-        stats(request).get_counter('auth.local.login').increment()
-        user.last_login_date = datetime.datetime.utcnow()
-        self.db.add(user)
         self.request.registry.notify(LoginEvent(self.request, user))
 
         return {'status': 'okay'}
