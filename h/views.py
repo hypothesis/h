@@ -23,7 +23,18 @@ def error(context, request):
     renderer='h:templates/app.html',
 )
 def annotation(context, request):
-    return {}
+    title = 'Annotation by {user} on {title}'.format(
+        user=context['user'].replace('acct:', ''),
+        title=context['document']['title'])
+
+    return {
+        'meta_attrs': (
+            {'property': 'og:title', 'content': title},
+            {'property': 'og:image', 'content': '/assets/images/logo.png'},
+            {'property': 'og:site_name', 'content': 'Hypothes.is'},
+            {'property': 'og:url', 'content': request.url},
+        )
+    }
 
 
 @view_config(name='embed.js', renderer='h:templates/embed.js')
