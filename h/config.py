@@ -18,6 +18,7 @@ def settings_from_environment():
     _setup_client(settings)
     _setup_sessions(settings)
     _setup_statsd(settings)
+    _setup_websocket(settings)
 
     return settings
 
@@ -155,3 +156,8 @@ def _setup_statsd(settings):
         statsd_host = urlparse.urlparse(os.environ['STATSD_PORT_8125_UDP'])
         settings['statsd.host'] = statsd_host.hostname
         settings['statsd.port'] = statsd_host.port
+
+
+def _setup_websocket(settings):
+    if 'ALLOWED_ORIGINS' in os.environ:
+        settings['origins'] = os.environ['ALLOWED_ORIGINS']
