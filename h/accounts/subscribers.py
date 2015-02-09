@@ -36,6 +36,11 @@ def login(event):
 
 
 class AutoLogin(object):
+    """
+    AutoLogin is a subscriber predicate that ensures that the marked subscriber
+    will only be called if the value of the ``horus.autologin`` setting matches
+    the value provided to the predicate.
+    """
 
     def __init__(self, val, config):
         self.val = val
