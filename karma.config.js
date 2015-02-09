@@ -15,15 +15,10 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'h/static/scripts/vendor/polyfills/bind.js',
+      'h/static/scripts/vendor/polyfills/url.js',
+      'h/static/scripts/vendor/polyfills/promise.js',
       'h/static/scripts/vendor/jquery.js',
-      'h/static/scripts/vendor/angular.js',
-      'h/static/scripts/vendor/angular-mocks.js',
-      'h/static/scripts/vendor/angular-animate.js',
-      'h/static/scripts/vendor/angular-bootstrap.js',
-      'h/static/scripts/vendor/angular-resource.js',
-      'h/static/scripts/vendor/angular-route.js',
-      'h/static/scripts/vendor/angular-sanitize.js',
-      'h/static/scripts/vendor/ng-tags-input.js',
       'h/static/scripts/vendor/jschannel.js',
       'h/static/scripts/vendor/jwz.js',
       'h/static/scripts/vendor/moment-with-langs.js',
@@ -36,12 +31,20 @@ module.exports = function(config) {
       'h/static/scripts/vendor/annotator.js',
       'h/static/scripts/annotator/monkey.js',
       'h/static/scripts/vendor/annotator.auth.js',
-      'h/static/scripts/vendor/polyfills/url.js',
       'h/static/scripts/annotator/plugin/bridge.js',
       'h/static/scripts/annotator/plugin/bucket-bar.js',
-      'h/static/scripts/annotator/plugin/threading.js',
       'h/static/scripts/vendor/dom_text_mapper.js',
       'h/static/scripts/annotator/annotator.anchoring.js',
+      // Angular needs to be included after annotator to avoid the
+      // CrossFrame dependencies in Bridge picking up the angular object.
+      'h/static/scripts/vendor/angular.js',
+      'h/static/scripts/vendor/angular-mocks.js',
+      'h/static/scripts/vendor/angular-animate.js',
+      'h/static/scripts/vendor/angular-bootstrap.js',
+      'h/static/scripts/vendor/angular-resource.js',
+      'h/static/scripts/vendor/angular-route.js',
+      'h/static/scripts/vendor/angular-sanitize.js',
+      'h/static/scripts/vendor/ng-tags-input.js',
       'h/static/scripts/app.js',
       'h/static/scripts/account.js',
       'h/static/scripts/helpers.js',
@@ -49,8 +52,8 @@ module.exports = function(config) {
       'h/static/scripts/hypothesis.js',
       'h/static/scripts/vendor/sinon.js',
       'h/static/scripts/vendor/chai.js',
-      'h/static/scripts/hypothesis.js',
       'h/templates/client/*.html',
+      'tests/js/bootstrap.coffee',
       'tests/js/**/*-test.coffee'
     ],
 

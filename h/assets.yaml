@@ -12,14 +12,7 @@ annotator:
 annotator_plugins_app:
   filters: uglifyjs
   output: scripts/annotator/annotator-app.min.js
-  contents:
-    - h:static/scripts/vendor/annotator.auth.js
-    - filters: coffeescript
-      output: scripts/annotator/plugin/bridge.js
-      contents: h:static/scripts/annotator/plugin/bridge.coffee
-    - filters: coffeescript
-      output: scripts/annotator/plugin/threading.js
-      contents: h:static/scripts/annotator/plugin/threading.coffee
+  contents: h:static/scripts/vendor/annotator.auth.js
 
 # Annotator inject plugins
 annotator_plugins_inject:
@@ -30,7 +23,11 @@ annotator_plugins_inject:
     # Non-anchoring-related stuff
     - filters: coffeescript
       output: scripts/annotator/plugin/bridge.js
-      contents: h:static/scripts/annotator/plugin/bridge.coffee
+      contents:
+       - h:static/scripts/annotator/plugin/cross-frame.coffee
+       - h:static/scripts/discovery.coffee
+       - h:static/scripts/bridge.coffee
+       - h:static/scripts/annotation-sync.coffee
     - filters: coffeescript
       output: scripts/annotator/plugin/bucket-bar.js
       contents: h:static/scripts/annotator/plugin/bucket-bar.coffee
@@ -235,6 +232,10 @@ app_js:
             - h:static/scripts/services.coffee
             - h:static/scripts/*-service.coffee
             - h:static/scripts/streamsearch.coffee
+            - h:static/scripts/annotation-sync.coffee
+            - h:static/scripts/annotation-ui-sync.coffee
+            - h:static/scripts/bridge.coffee
+            - h:static/scripts/discovery.coffee
 
 app_css:
     filters: cleancss, cssrewrite

@@ -15,9 +15,9 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      '../../static/scripts/vendor/polyfills/bind.js',
       '../../static/scripts/vendor/sinon.js',
       '../../static/scripts/vendor/chai.js',
-      '../../static/scripts/vendor/bind.js',
       '../../static/scripts/vendor/promise.js',
       'lib/errors.js',
       'lib/tab-store.js',

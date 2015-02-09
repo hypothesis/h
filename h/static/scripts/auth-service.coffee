@@ -18,6 +18,21 @@ class Auth
     _checkingToken = false
     @user = undefined
 
+    # TODO: Remove this once Auth has been migrated.
+    $rootScope.$on 'beforeAnnotationCreated', (event, annotation) =>
+      annotation.user = @user
+      annotation.permissions = {}
+      annotator.publish('beforeAnnotationCreated', annotation)
+
+    $rootScope.$on 'annotationCreated', (event, annotation) =>
+      annotator.publish('annotationCreated', annotation)
+
+    $rootScope.$on 'annotationUpdated', (event, annotation) =>
+      annotator.publish('annotationUpdated', annotation)
+
+    $rootScope.$on 'beforeAnnotationUpdated', (event, annotation) =>
+      annotator.publish('beforeAnnotationUpdated', annotation)
+
     # Fired when the identity-service successfully requests authentication.
     # Sets up the Annotator.Auth plugin instance and the auth.user property.
     # It sets a flag between that time period to indicate that the token is

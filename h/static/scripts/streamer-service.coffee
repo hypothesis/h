@@ -121,15 +121,5 @@ backoff = (index, max) ->
   return 500 * Math.random() * (Math.pow(2, index) - 1)
 
 
-run = [
-  '$http', '$window', 'streamer'
-  ($http,   $window,   streamer) ->
-    clientId = uuid.v4()
-    streamer.clientId = clientId
-    $.ajaxSetup(headers: {'X-Client-Id': clientId})
-    $http.defaults.headers.common['X-Client-Id'] = clientId
-]
-
 angular.module('h.streamer', [])
 .service('streamer', Streamer)
-.run(run)

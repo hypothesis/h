@@ -1,20 +1,20 @@
-class Annotator.Plugin.Threading extends Annotator.Plugin
+class ThreadingService
   # Mix in message thread properties into the prototype. The body of the
   # class will overwrite any methods applied here. If you need inheritance
   # assign the message thread to a local varible.
+  # The mail object is exported by the jwz.js library.
   $.extend(this.prototype, mail.messageThread())
-
-  events:
-    'beforeAnnotationCreated': 'beforeAnnotationCreated'
-    'annotationCreated': 'annotationCreated'
-    'annotationDeleted': 'annotationDeleted'
-    'annotationsLoaded': 'annotationsLoaded'
 
   root: null
 
-  pluginInit: ->
+  this.$inject = ['$rootScope']
+  constructor: ($rootScope) ->
     # Create a root container.
     @root = mail.messageContainer()
+    $rootScope.$on('beforeAnnotationCreated', this.beforeAnnotationCreated)
+    $rootScope.$on('annotationCreated', this.annotationCreated)
+    $rootScope.$on('annotationDeleted', this.annotationDeleted)
+    $rootScope.$on('annotationsLoaded', this.annotationsLoaded)
 
   # TODO: Refactor the jwz API for progressive updates.
   # Right now the idTable is wiped when `messageThread.thread()` is called and
@@ -60,12 +60,11 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
 
       if !container.message && container.children.length == 0
         parent.removeChild(container)
-        delete this.idTable[container.message?.id]
 
-  beforeAnnotationCreated: (annotation) =>
+  beforeAnnotationCreated: (event, annotation) =>
     this.thread([annotation])
 
-  annotationCreated: (annotation) =>
+  annotationCreated: (event, annotation) =>
     references = annotation.references or []
     if typeof(annotation.references) == 'string' then references = []
     ref = references[references.length-1]
@@ -74,7 +73,7 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
       @idTable[annotation.id] = child
       break
 
-  annotationDeleted: (annotation) =>
+  annotationDeleted: (event, annotation) =>
     if this.idTable[annotation.id]
       container = this.idTable[annotation.id]
       container.message = null
@@ -93,6 +92,8 @@ class Annotator.Plugin.Threading extends Annotator.Plugin
         this.pruneEmpties(@root)
         break
 
-  annotationsLoaded: (annotations) =>
+  annotationsLoaded: (event, annotations) =>
     messages = (@root.flattenChildren() or []).concat(annotations)
     this.thread(messages)
+
+angular.module('h').service('threading', ThreadingService)

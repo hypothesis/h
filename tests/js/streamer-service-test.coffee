@@ -20,6 +20,7 @@ describe 'streamer', ->
 
   beforeEach inject (_streamer_) ->
     streamer = _streamer_
+    streamer.clientId = 'FAKE_CLIENT_ID'
 
   afterEach ->
     sandbox.restore()

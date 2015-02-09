@@ -2,13 +2,23 @@ assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
 describe 'Annotator.Host', ->
+  sandbox = sinon.sandbox.create()
+
   createHost = (options) ->
     element = document.createElement('div')
     return new Annotator.Host(element, options)
 
-  # Disable Annotator's ridiculous logging.
-  before -> sinon.stub(console, 'log')
-  after  -> console.log.restore()
+  beforeEach ->
+    # Disable Annotator's ridiculous logging.
+    sandbox.stub(console, 'log')
+
+    fakeCrossFrame =
+      onConnect: sandbox.stub()
+      on: sandbox.stub()
+
+    sandbox.stub(Annotator.Plugin, 'CrossFrame').returns(fakeCrossFrame)
+
+  afterEach -> sandbox.restore()
 
   describe 'options', ->
     it 'enables highlighting when showHighlights option is provided', (done) ->

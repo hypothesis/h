@@ -6,13 +6,14 @@ describe 'h.directives.annotation', ->
   $document = null
   $scope = null
   $timeout = null
-  annotator = null
   annotation = null
   createController = null
   flash = null
   fakeAuth = null
   fakeStore = null
   fakeUser = null
+  fakeAnnotationMapper = null
+  fakeAnnotationUI = null
 
   beforeEach module('h')
   beforeEach module('h.templates')
@@ -20,9 +21,20 @@ describe 'h.directives.annotation', ->
   beforeEach module ($provide) ->
     fakeAuth =
       user: 'acct:bill@localhost'
+    fakeAnnotationMapper =
+      createAnnotation: sandbox.stub().returns
+        permissions:
+          read: ['acct:bill@localhost']
+          update: ['acct:bill@localhost']
+          destroy: ['acct:bill@localhost']
+          admin: ['acct:bill@localhost']
+      deleteAnnotation: sandbox.stub()
+    fakeAnnotationUI = {}
 
     $provide.value 'auth', fakeAuth
     $provide.value 'store', fakeStore
+    $provide.value 'annotationMapper', fakeAnnotationMapper
+    $provide.value 'annotationUI', fakeAnnotationUI
     return
 
   beforeEach inject (_$compile_, $controller, _$document_, $rootScope, _$timeout_) ->
@@ -31,11 +43,6 @@ describe 'h.directives.annotation', ->
     $timeout = _$timeout_
     $scope = $rootScope.$new()
     $scope.annotationGet = (locals) -> annotation
-    annotator = {
-      createAnnotation: sandbox.spy (data) -> data
-      plugins: {},
-      publish: sandbox.spy()
-    }
     annotation =
       id: 'deadbeef'
       document:
@@ -48,7 +55,6 @@ describe 'h.directives.annotation', ->
     createController = ->
       $controller 'AnnotationController',
         $scope: $scope
-        annotator: annotator
         flash: flash
 
   afterEach ->
@@ -56,7 +62,7 @@ describe 'h.directives.annotation', ->
 
   describe 'when the annotation is a highlight', ->
     beforeEach ->
-      annotator.tool = 'highlight'
+      fakeAnnotationUI.tool = 'highlight'
       annotation.$create = sinon.stub().returns
         then: angular.noop
         catch: angular.noop
@@ -91,36 +97,31 @@ describe 'h.directives.annotation', ->
         destroy: ['acct:joe@localhost']
         admin: ['acct:joe@localhost']
 
-      annotator.publish = sinon.spy (event, ann) ->
-        return unless event == 'beforeAnnotationCreated'
-        ann.permissions =
-          read: ['acct:bill@localhost']
-          update: ['acct:bill@localhost']
-          destroy: ['acct:bill@localhost']
-          admin: ['acct:bill@localhost']
-
     it 'creates a new reply with the proper uri and references', ->
       controller.reply()
       match = sinon.match {references: [annotation.id], uri: annotation.uri}
-      assert.calledWith(annotator.createAnnotation, match)
+      assert.calledWith(fakeAnnotationMapper.createAnnotation, match)
 
     it 'adds the world readable principal if the parent is public', ->
+      reply = {}
+      fakeAnnotationMapper.createAnnotation.returns(reply)
       annotation.permissions.read.push('group:__world__')
       controller.reply()
-      newAnnotation = annotator.createAnnotation.lastCall.args[0]
-      assert.include(newAnnotation.permissions.read, 'group:__world__')
+      assert.include(reply.permissions.read, 'group:__world__')
 
     it 'does not add the world readable principal if the parent is private', ->
+      reply = {}
+      fakeAnnotationMapper.createAnnotation.returns(reply)
       controller.reply()
-      newAnnotation = annotator.createAnnotation.lastCall.args[0]
-      assert.notInclude(newAnnotation.permissions.read, 'group:__world__')
+      assert.notInclude(reply.permissions.read, 'group:__world__')
 
     it 'fills the other permissions too', ->
+      reply = {}
+      fakeAnnotationMapper.createAnnotation.returns(reply)
       controller.reply()
-      newAnnotation = annotator.createAnnotation.lastCall.args[0]
-      assert.equal(newAnnotation.permissions.update[0], 'acct:bill@localhost')
-      assert.equal(newAnnotation.permissions.delete[0], 'acct:bill@localhost')
-      assert.equal(newAnnotation.permissions.admin[0], 'acct:bill@localhost')
+      assert.equal(reply.permissions.update[0], 'acct:bill@localhost')
+      assert.equal(reply.permissions.delete[0], 'acct:bill@localhost')
+      assert.equal(reply.permissions.admin[0], 'acct:bill@localhost')
 
   describe '#render', ->
     controller = null

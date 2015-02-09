@@ -52,10 +52,25 @@ class Annotator.Guest extends Annotator
 
     delete @options.app
 
-    this.addPlugin 'Bridge',
+    cfOptions =
+      scope: 'annotator:bridge'
+      on: (event, handler) =>
+        this.subscribe(event, handler)
+      emit: (event, args...) =>
+        switch event
+          # AnnotationSync tries to emit some events without taking actions.
+          # We catch them and perform the right action (which will then emit
+          # the event for real)
+          when 'annotationDeleted'
+            this.deleteAnnotation(args...)
+          when 'loadAnnotations'
+            this.loadAnnotations(args...)
+          # Other events can simply be emitted.
+          else
+            this.publish(event, args)
       formatter: (annotation) =>
         formatted = {}
-        formatted['uri'] = @getHref()
+        formatted.uri = @getHref()
         for k, v of annotation when k isnt 'anchors'
           formatted[k] = v
         # Work around issue in jschannel where a repeated object is considered
@@ -63,13 +78,9 @@ class Annotator.Guest extends Annotator
         if formatted.document?.title
           formatted.document.title = formatted.document.title.slice()
         formatted
-      onConnect: (source, origin, scope) =>
-        @panel = this._setupXDM
-          window: source
-          origin: origin
-          scope: "#{scope}:provider"
-          onReady: =>
-            this.publish('panelReady')
+
+    this.addPlugin('CrossFrame', cfOptions)
+    @crossframe = this._connectAnnotationUISync(this.plugins.CrossFrame)
 
     # Load plugins
     for own name, opts of @options
@@ -99,7 +110,7 @@ class Annotator.Guest extends Annotator
       annotations = (hl.annotation for hl in highlights)
 
       # Announce the new positions, so that the sidebar knows
-      this.plugins.Bridge.sync(annotations)
+      this.plugins.CrossFrame.sync(annotations)
 
     # Watch for removed highlights, and update positions in sidebar
     this.subscribe "highlightRemoved", (highlight) =>
@@ -118,7 +129,7 @@ class Annotator.Guest extends Annotator
         delete highlight.anchor.target.pos
 
       # Announce the new positions, so that the sidebar knows
-      this.plugins.Bridge.sync([highlight.annotation])
+      this.plugins.CrossFrame.sync([highlight.annotation])
 
   # Utility function to remove the hash part from a URL
   _removeHash: (url) ->
@@ -142,35 +153,22 @@ class Annotator.Guest extends Annotator
     metadata.link?.forEach (link) => link.href = @_removeHash link.href
     metadata
 
-  _setupXDM: (options) ->
-    # jschannel chokes FF and Chrome extension origins.
-    if (options.origin.match /^chrome-extension:\/\//) or
-        (options.origin.match /^resource:\/\//)
-      options.origin = '*'
-
-    channel = Channel.build options
-
-    channel
-
-    .bind('onEditorHide', this.onEditorHide)
-    .bind('onEditorSubmit', this.onEditorSubmit)
-
-    .bind('focusAnnotations', (ctx, tags=[]) =>
+  _connectAnnotationUISync: (crossframe) ->
+    crossframe.onConnect(=> this.publish('panelReady'))
+    crossframe.on('onEditorHide', this.onEditorHide)
+    crossframe.on('onEditorSubmit', this.onEditorSubmit)
+    crossframe.on 'focusAnnotations', (ctx, tags=[]) =>
       for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag in tags
           hl.setFocused true
         else
           hl.setFocused false
-    )
-
-    .bind('scrollToAnnotation', (ctx, tag) =>
+    crossframe.on 'scrollToAnnotation', (ctx, tag) =>
       for hl in @anchoring.getHighlights()
         if hl.annotation.$$tag is tag
           hl.scrollTo()
           return
-    )
-
-    .bind('getDocumentInfo', (trans) =>
+    crossframe.on 'getDocumentInfo', (trans) =>
       (@plugins.PDF?.getMetaData() ? Promise.reject())
         .then (md) =>
            trans.complete
@@ -180,18 +178,14 @@ class Annotator.Guest extends Annotator
            trans.complete
              uri: @getHref()
              metadata: @getMetadata()
+        .catch (e) ->
 
       trans.delayReturn(true)
-    )
-
-    .bind('setTool', (ctx, name) =>
+    crossframe.on 'setTool', (ctx, name) =>
       @tool = name
       this.publish 'setTool', name
-    )
-
-    .bind('setVisibleHighlights', (ctx, state) =>
+    crossframe.on 'setVisibleHighlights', (ctx, state) =>
       this.publish 'setVisibleHighlights', state
-    )
 
   _setupWrapper: ->
     @wrapper = @element
@@ -239,31 +233,31 @@ class Annotator.Guest extends Annotator
 
   createAnnotation: ->
     annotation = super
-    this.plugins.Bridge.sync([annotation])
+    this.plugins.CrossFrame.sync([annotation])
     annotation
 
   showAnnotations: (annotations) =>
-    @panel?.notify
+    @crossframe?.notify
       method: "showAnnotations"
       params: (a.$$tag for a in annotations)
 
   toggleAnnotationSelection: (annotations) =>
-    @panel?.notify
+    @crossframe?.notify
       method: "toggleAnnotationSelection"
       params: (a.$$tag for a in annotations)
 
   updateAnnotations: (annotations) =>
-    @panel?.notify
+    @crossframe?.notify
       method: "updateAnnotations"
       params: (a.$$tag for a in annotations)
 
   showEditor: (annotation) =>
-    @panel?.notify
+    @crossframe?.notify
       method: "showEditor"
       params: annotation.$$tag
 
   focusAnnotations: (annotations) =>
-    @panel?.notify
+    @crossframe?.notify
       method: "focusAnnotations"
       params: (a.$$tag for a in annotations)
 
@@ -328,7 +322,8 @@ class Annotator.Guest extends Annotator
   # toggle: should this toggle membership in an existing selection?
   selectAnnotations: (annotations, toggle) =>
     if toggle
-      # Tell sidebar to add these annotations to the sidebar
+      # Tell sidebar to add these annotations to the sidebar if not already
+      # selected, otherwise remove them.
       this.toggleAnnotationSelection annotations
     else
       # Tell sidebar to show the viewer for these annotations
@@ -358,7 +353,7 @@ class Annotator.Guest extends Annotator
         (event.metaKey or event.ctrlKey)
 
   setTool: (name) ->
-    @panel?.notify
+    @crossframe?.notify
       method: 'setTool'
       params: name
 
@@ -366,7 +361,7 @@ class Annotator.Guest extends Annotator
   setVisibleHighlights: (shouldShowHighlights) ->
     return if @visibleHighlights == shouldShowHighlights
 
-    @panel?.notify
+    @crossframe?.notify
       method: 'setVisibleHighlights'
       params: shouldShowHighlights
 
@@ -385,11 +380,11 @@ class Annotator.Guest extends Annotator
 
   # Open the sidebar
   showFrame: ->
-    @panel?.notify method: 'open'
+    @crossframe?.notify method: 'open'
 
   # Close the sidebar
   hideFrame: ->
-    @panel?.notify method: 'back'
+    @crossframe?.notify method: 'back'
 
   addToken: (token) =>
     @api.notify

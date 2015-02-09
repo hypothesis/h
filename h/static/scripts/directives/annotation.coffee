@@ -26,14 +26,15 @@ validate = (value) ->
 #
 # `AnnotationController` provides an API for the annotation directive. It
 # manages the interaction between the domain and view models and uses the
-# {@link annotator annotator service} for persistence.
+# {@link annotationMapper AnnotationMapper service} for persistence.
 ###
 AnnotationController = [
-  '$document', '$scope', '$timeout',
-  'annotator', 'auth', 'drafts', 'flash', 'permissions', 'timeHelpers'
-  ($document,   $scope,   $timeout,
-   annotator,   auth,   drafts,   flash,   permissions,   timeHelpers
-  ) ->
+  '$scope', '$timeout', '$rootScope', '$document',
+  'auth', 'drafts', 'flash', 'permissions',
+  'timeHelpers', 'annotationUI', 'annotationMapper'
+  ($scope,   $timeout,   $rootScope,   $document,
+   auth,   drafts,   flash,   permissions,
+   timeHelpers, annotationUI, annotationMapper) ->
     @annotation = {}
     @action = 'view'
     @document = null
@@ -44,7 +45,7 @@ AnnotationController = [
     @showDiff = undefined
     @timestamp = null
 
-    highlight = annotator.tool is 'highlight'
+    highlight = annotationUI.tool is 'highlight'
     model = $scope.annotationGet()
     original = null
     vm = this
@@ -93,7 +94,7 @@ AnnotationController = [
     ###
     this.delete = ->
       if confirm "Are you sure you want to delete this annotation?"
-        annotator.deleteAnnotation model
+        annotationMapper.deleteAnnotation model
 
     ###*
     # @ngdoc method
@@ -114,7 +115,7 @@ AnnotationController = [
     this.revert = ->
       drafts.remove model
       if @action is 'create'
-        annotator.publish 'annotationDeleted', model
+        $rootScope.$emit('annotationDeleted', model)
       else
         this.render()
         @action = 'view'
@@ -150,10 +151,10 @@ AnnotationController = [
       switch @action
         when 'create'
           model.$create().then ->
-            annotator.publish 'annotationCreated', model
+            $rootScope.$emit('annotationCreated', model)
         when 'delete', 'edit'
           model.$update(id: model.id).then ->
-            annotator.publish 'annotationUpdated', model
+            $rootScope.$emit('annotationUpdated', model)
 
       @editing = false
       @action = 'view'
@@ -173,7 +174,7 @@ AnnotationController = [
       # Construct the reply.
       references = [references..., id]
 
-      reply = annotator.createAnnotation {references, uri}
+      reply = annotationMapper.createAnnotation({references, uri})
 
       if auth.user?
         if permissions.isPublic model.permissions
@@ -270,7 +271,7 @@ AnnotationController = [
           highlight = false  # skip this on future updates
           model.permissions = permissions.private()
           model.$create().then ->
-            annotator.publish 'annotationCreated', model
+            $rootScope.$emit('annotationCreated', model)
           highlight = false  # skip this on future updates
         else
           drafts.add model, => this.revert()
@@ -298,9 +299,9 @@ AnnotationController = [
 # value is used to signal whether the annotation is being displayed inside
 # an embedded widget.
 ###
-annotation = [
-  '$document', 'annotator',
-  ($document,   annotator) ->
+annotationDirective = [
+  '$document',
+  ($document) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
       # Observe the embedded attribute
       attrs.$observe 'annotationEmbedded', (value) ->
@@ -352,4 +353,4 @@ annotation = [
 
 angular.module('h')
 .controller('AnnotationController', AnnotationController)
-.directive('annotation', annotation)
+.directive('annotation', annotationDirective)
