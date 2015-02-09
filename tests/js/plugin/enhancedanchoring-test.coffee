@@ -37,6 +37,8 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
     am.chooseAccessPolicy()
 
+    am.document.setPageIndex = sinon.spy()
+
     am.strategies.push
       name: "dummy anchoring strategy"
       code: (annotation, target) ->
@@ -57,6 +59,11 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         anchor: anchor
         page: page
         removeFromDocument: sinon.spy()
+        scrollIntoView: sinon.spy ->
+          new Promise (resolve, reject) =>
+            setTimeout =>
+              @anchor.anchoring.document.setPageIndex @page
+              resolve()
 
   afterEach ->
     sandbox.restore()
@@ -219,16 +226,52 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
       assert.include hls, anchor2.highlight[anchor2.startPage]
       assert.notInclude hls, anchor3.highlight[anchor3.startPage]
 
+  describe 'Anchor.scrollIntoView()', ->
+    it 'calls scrollIntoView() on the highlight', ->
+      am = createAnchoringManager()
+      ann = createTestAnnotation "a1"
+      anchor = am.createAnchor(ann, ann.target[0]).result
+      anchor.scrollIntoView().then ->
+
+        assert.called anchor.highlight[anchor.startPage].scrollIntoView
+
   describe 'two-phased anchoring', ->
 
+    # Simple lazy rendering document simulation for testing,
+    # which emulates the user movement prediction (and page rendering)
+    # behavior of PDF.js
     class DummyDocumentAccess
 
       @applicable: -> true
 
       isPageMapped: (index) -> index in @_rendered
+      getPageIndex: -> @currentIndex
+
+      setPageIndex: (index) ->
+
+        # Do this when the wanted page is ready
+        onPageReady = =>
+          # Try to find out where will the reader proceed
+          prediction = if @currentIndex < index
+            index + 1  # If we went forward, we'll want the next page, too
+          else
+            index - 1  # if we want backward, we'll want the prev. page, too
+
+          # Set the page index where we want to be
+          @currentIndex = index
+
+          # Render the predicted next page
+          renderPage(this, prediction) unless @isPageMapped prediction
+
+        # Try to move where we need to be
+        if @isPageMapped index
+          onPageReady()
+        else
+          renderPage(this, index).then onPageReady
 
       constructor: ->
         @_rendered = []
+        @currentIndex = -10
 
     # Helper function to trigger a page rendering
     # This is an asynchronous method; returns a promise.
@@ -634,3 +677,29 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             anchor.realize()
 
             assert anchor.fullyRealized
+
+    describe 'when scrolling to a virtual anchor', ->
+
+      it 'gets the right page rendered', ->
+        am = createAnchoringManagerAndLazyDocument()
+        ann = createTestAnnotationForPages "a1", [1]
+        anchor = am.createAnchor(ann, ann.target[0]).result
+
+        anchor.scrollIntoView().then ->
+          assert am.document.isPageMapped 1
+
+      it 'scrolls to the right page', ->
+        am = createAnchoringManagerAndLazyDocument()
+        ann = createTestAnnotationForPages "a1", [1]
+        anchor = am.createAnchor(ann, ann.target[0]).result
+
+        anchor.scrollIntoView().then ->
+          assert.equal am.document.getPageIndex(), 1
+
+      it 'calls scrollIntoView() on the highlight', ->
+        am = createAnchoringManagerAndLazyDocument()
+        ann = createTestAnnotationForPages "a1", [1]
+        anchor = am.createAnchor(ann, ann.target[0]).result
+
+        anchor.scrollIntoView().then ->
+          assert.called anchor.highlight[1].scrollIntoView
