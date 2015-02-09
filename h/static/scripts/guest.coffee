@@ -195,7 +195,7 @@ class Annotator.Guest extends Annotator
           # Create the annotation
           annotation = this.setupAnnotation(this.createAnnotation())
       else
-        @hideFrame()
+        @triggerHideFrame()
     this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
@@ -379,11 +379,11 @@ class Annotator.Guest extends Annotator
     this.showEditor(this.createAnnotation())
 
   # Open the sidebar
-  showFrame: ->
+  triggerShowFrame: ->
     @crossframe?.notify method: 'open'
 
   # Close the sidebar
-  hideFrame: ->
+  triggerHideFrame: ->
     @crossframe?.notify method: 'back'
 
   addToken: (token) =>
