@@ -61,7 +61,7 @@ install_requires = [
 ]
 
 development_extras = ['pyramid_debugtoolbar>=2.1']
-testing_extras = ['mock', 'pytest>=2.5', 'pytest-cov', 'selenium']
+testing_extras = ['mock', 'pytest>=2.5', 'pytest-cov']
 
 setup(
     name='h',
