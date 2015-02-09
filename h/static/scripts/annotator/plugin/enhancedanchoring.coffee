@@ -1,3 +1,5 @@
+Annotator = @Annotator
+$ = Annotator.$
 
 # Fake two-phase / pagination support, used for HTML documents
 class DummyDocumentAccess
@@ -47,7 +49,7 @@ class Anchor
       # Don't call TextHighlight directly; instead, make a system
       # For registering highlight creators, or publish an event, or
       # whatever
-      @highlight[page] = @Annotator.TextHighlight.createFrom @_getSegment(page), this, page
+      @highlight[page] = Annotator.TextHighlight.createFrom @_getSegment(page), this, page
 
     # Check if everything is rendered now
     @fullyRealized = renderedPages.length is @endPage - @startPage + 1
@@ -103,7 +105,7 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
 
 
   # Initializes the components used for analyzing the document
-  _chooseAccessPolicy: ->
+  chooseAccessPolicy: ->
     if @document? then return
 
     # Go over the available strategies
@@ -134,7 +136,7 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
   # Perform a scan of the DOM. Required for finding anchors.
   _scan: ->
     # Ensure that we have a document access strategy
-    this._chooseAccessPolicy()
+    @chooseAccessPolicy()
     try
       @pendingScan = @document.scan()
     catch
@@ -144,7 +146,6 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
 
   # Plugin initialization
   pluginInit: ->
-    @$ = Annotator.$
     @selectorCreators = []
     @strategies = []
     @_setupDocumentAccessStrategies()
@@ -176,6 +177,9 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
       try
         a = s.code.call this, annotation, target
         if a
+          # Store this anchor for the annotation
+          annotation.anchors.push a
+
           # Store the anchor for all involved pages
           for pageIndex in [a.startPage .. a.endPage]
             @anchors[pageIndex] ?= []
@@ -220,16 +224,22 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
   # Collect all the highlights (optionally for a given set of annotations)
   getHighlights: (annotations) ->
     results = []
+    for anchor in @getAnchors(annotations)
+      for page, highlight of anchor.highlight
+        results.push highlight
+    results
+
+  # Collect all the anchors (optionally for a given set of annotations)
+  getAnchors: (annotations) ->
+    results = []
     if annotations?
       # Collect only the given set of annotations
       for annotation in annotations
-        for anchor in annotation.anchors
-          for page, hl of anchor.highlight
-            results.push hl
+        $.merge results, annotation.anchors
     else
       # Collect from everywhere
       for page, anchors of @anchors
-        @$.merge results, (anchor.highlight[page] for anchor in anchors when anchor.highlight[page]?)
+        $.merge results, anchors
     results
 
 

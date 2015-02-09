@@ -45,6 +45,7 @@ module.exports = function(config) {
       'h/static/scripts/vendor/angular-route.js',
       'h/static/scripts/vendor/angular-sanitize.js',
       'h/static/scripts/vendor/ng-tags-input.js',
+      'h/static/scripts/annotator/plugin/texthighlights.js',
       'h/static/scripts/app.js',
       'h/static/scripts/account.js',
       'h/static/scripts/helpers.js',
