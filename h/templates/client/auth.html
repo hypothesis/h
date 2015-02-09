@@ -216,7 +216,9 @@
       {{reset_password.responseErrorMessage}}
     </p>
 
-    <div class="form-field">
+    <input type="hidden" name="code" value="{{model.code}}" ng-if="hasActivationCode"/>
+
+    <div class="form-field" ng-if="!hasActivationCode">
       <label class="form-label" for="field-activate-code"
              >Your activation code:</label>
       <input class="form-input" id="field-activate-code"

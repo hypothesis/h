@@ -36,7 +36,8 @@ class AuthAppController
 class AuthPageController
   this.$inject = ['$routeParams', '$scope']
   constructor:   ( $routeParams,   $scope ) ->
-    angular.extend $scope.model, $routeParams
+    $scope.model.code = $routeParams.code
+    $scope.hasActivationCode = !!$routeParams.code
 
 
 configure = [
