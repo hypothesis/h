@@ -11,6 +11,12 @@ from h import session
 log = logging.getLogger(__name__)
 
 
+@view_config(context=Exception, renderer='h:templates/5xx.html')
+def error(context, request):
+    """Display an error message."""
+    return {}
+
+
 @view_config(
     layout='app',
     context='h.models.Annotation',
