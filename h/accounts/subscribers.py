@@ -11,8 +11,18 @@ from horus.events import (
 from h.stats import get_client as stats
 
 
+@subscriber(NewRegistrationEvent)
+def new_registration(event):
+    stats(event.request).get_counter('auth.local.register').increment()
+
+
+@subscriber(PasswordResetEvent)
+def password_reset(event):
+    stats(event.request).get_counter('auth.local.reset_password').increment()
+
+
 @subscriber(RegistrationActivatedEvent)
-def activate(event):
+def registration_activated(event):
     stats(event.request).get_counter('auth.local.activate').increment()
 
 

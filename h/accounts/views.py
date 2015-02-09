@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+import json
 import datetime
 
 import colander
 import deform
+import horus.events
 import horus.views
-import json
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
 from pyramid import httpexceptions, security
@@ -159,7 +160,6 @@ class ForgotPasswordController(horus.views.ForgotPasswordController):
     def reset_password(self):
         request = self.request
         result = super(ForgotPasswordController, self).reset_password()
-        stats(request).get_counter('auth.local.reset_password').increment()
         remember(request, request.user)
         return result
 
@@ -189,7 +189,6 @@ class RegisterController(horus.views.RegisterController):
     def register(self):
         request = self.request
         result = super(RegisterController, self).register()
-        stats(request).get_counter('auth.local.register').increment()
         remember(request, request.user)
         return result
 
