@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pyramid import security
 from pyramid.events import subscriber
 from pyramid.settings import asbool
 
@@ -7,6 +8,7 @@ from horus.events import (
     RegistrationActivatedEvent,
     PasswordResetEvent,
 )
+from .events import LoginEvent
 
 from h.stats import get_client as stats
 
@@ -26,13 +28,19 @@ def registration_activated(event):
     stats(event.request).get_counter('auth.local.activate').increment()
 
 
+@subscriber(LoginEvent)
 @subscriber(NewRegistrationEvent, autologin=True)
 @subscriber(PasswordResetEvent, autologin=True)
 @subscriber(RegistrationActivatedEvent)
 def login(event):
     request = event.request
     user = event.user
-    request.user = user
+    userid = 'acct:{}@{}'.format(user.username, request.domain)
+
+    request.user = userid
+
+    headers = security.remember(request, userid)
+    request.response.headerlist.extend(headers)
 
 
 class AutoLogin(object):

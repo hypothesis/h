@@ -8,16 +8,16 @@ import horus.events
 import horus.views
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
-from pyramid import httpexceptions, security
+from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 
 from h import session
-from h.events import LoginEvent
 from h.models import _
 from h.stats import get_client as stats
 from h.notification.models import Subscriptions
 
 from . import schemas
+from .events import LoginEvent
 
 
 def ajax_form(request, result):
@@ -53,13 +53,6 @@ def ajax_form(request, result):
     result['flash'] = flash
 
     return result
-
-
-def remember(request, user):
-    if user is not None:
-        userid = 'acct:{}@{}'.format(user.username, request.domain)
-        headers = security.remember(request, userid)
-        request.response.headerlist.extend(headers)
 
 
 def ensure_csrf_token(view_fn):
@@ -135,9 +128,7 @@ class AuthController(horus.views.AuthController):
         stats(request).get_counter('auth.local.login').increment()
         user.last_login_date = datetime.datetime.utcnow()
         self.db.add(user)
-        remember(request, user)
-        event = LoginEvent(self.request, user)
-        self.request.registry.notify(event)
+        self.request.registry.notify(LoginEvent(self.request, user))
 
         return {'status': 'okay'}
 
@@ -157,11 +148,7 @@ class AsyncAuthController(AuthController):
 @view_config(attr='forgot_password', route_name='forgot_password')
 @view_config(attr='reset_password', route_name='reset_password')
 class ForgotPasswordController(horus.views.ForgotPasswordController):
-    def reset_password(self):
-        request = self.request
-        result = super(ForgotPasswordController, self).reset_password()
-        remember(request, request.user)
-        return result
+    pass
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
@@ -186,11 +173,7 @@ class AsyncForgotPasswordController(ForgotPasswordController):
 @view_config(attr='register', route_name='register')
 @view_config(attr='activate', route_name='activate')
 class RegisterController(horus.views.RegisterController):
-    def register(self):
-        request = self.request
-        result = super(RegisterController, self).register()
-        remember(request, request.user)
-        return result
+    pass
 
 
 @view_defaults(accept='application/json', name='app', renderer='json')
