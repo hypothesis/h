@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mock import patch, MagicMock, Mock
 from pytest import fixture, raises
-from pyramid import security, testing
+from pyramid import security
 
 from h import models
 
@@ -15,7 +14,8 @@ class TestAnnotationPermissions(unittest.TestCase):
             'read': ['saoirse'],
         }
         actual = annotation.__acl__()
-        expect = [(security.Allow, 'saiorse', 'read')]
+        expect = [(security.Allow, 'saoirse', 'read')]
+        assert actual == expect
 
     def test_admin_party(self):
         annotation = models.Annotation()
@@ -38,6 +38,7 @@ class TestAnnotationPermissions(unittest.TestCase):
         }
         actual = annotation.__acl__()
         expect = [(security.Allow, 'group:lulapalooza', 'read')]
+        assert actual == expect
 
     def test_group_world(self):
         annotation = models.Annotation()
