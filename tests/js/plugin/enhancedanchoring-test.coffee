@@ -231,6 +231,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         @_rendered = []
 
     # Helper function to trigger a page rendering
+    # This is an asynchronous method; returns a promise.
     renderPage = (doc, index) ->
       if doc.isPageMapped(index)
         throw new Error "Cannot call renderPage with an already mapped index: #{index}, ensure the document is setup correctly"
@@ -248,11 +249,13 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
           # Resolve the promise
           resolve()
 
-    # Helper function to trigger a page rendering
+    # Helper function to trigger the rendering of several pages.
+    # This is an asynchronous method; returns a promise.
     renderPages = (doc, indexes) ->
       Promise.all(renderPage(doc, index) for index in indexes)
 
     # Helper function to trigger a page unrendering
+    # This is an asynchronous method; returns a promise.
     unrenderPage = (doc, index) ->
       unless doc.isPageMapped index
         throw new Error "Cannot call unrenderPage with an unmapped index: #{index}, ensure the document is setup correctly"
