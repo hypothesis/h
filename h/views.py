@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 @view_config(context=Exception, renderer='h:templates/5xx.html')
 def error(context, request):
     """Display an error message."""
+    log.exception("Uncaught exception generating response.")
     return {}
 
 
