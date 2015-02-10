@@ -22,10 +22,6 @@ $threadexp-width: .6em;
   }
 }
 
-.thread-reply {
-  display: inline-block
-}
-
 .thread {
   @include pie-clearfix;
   cursor: pointer;
@@ -34,11 +30,6 @@ $threadexp-width: .6em;
   & > ul {
     padding-left: $thread-padding + .15em;
     margin-left: -$thread-padding;
-  }
-
-  .reply-count {
-    color: $gray-light;
-    &:focus { outline: 0; }
   }
 
   @-webkit-keyframes pulse {
@@ -91,16 +82,6 @@ $threadexp-width: .6em;
 
 .thread-deleted {
   margin: .8em 0;
-}
-
-.thread-message:hover + .thread-reply {
-  .reply-count {
-    color: $link-color;
-
-    &:hover, &:focus {
-      color: $link-color-hover;
-    }
-  }
 }
 
 .thread-load-more {

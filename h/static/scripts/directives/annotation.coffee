@@ -346,6 +346,9 @@ annotationDirective = [
     require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount']
     scope:
       annotationGet: '&annotation'
+      replyCount: '@annotationReplyCount'
+      replyCountClick: '&annotationReplyCountClick'
+      showReplyCount: '@annotationShowReplyCount'
     templateUrl: 'annotation.html'
 ]
 
