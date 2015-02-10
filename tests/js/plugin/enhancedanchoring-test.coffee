@@ -231,32 +231,49 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         @_rendered = []
 
     # Helper function to trigger a page rendering
+    # This is an asynchronous method; returns a promise.
     renderPage = (doc, index) ->
       if doc.isPageMapped(index)
         throw new Error "Cannot call renderPage with an already mapped index: #{index}, ensure the document is setup correctly"
 
-      doc._rendered.push index
+      new Promise (resolve, reject) ->
+        setTimeout ->
+          doc._rendered.push index
 
-      # Publish an event
-      event = document.createEvent "UIEvents"
-      event.initUIEvent "docPageMapped", false, false, window, 0
-      event.pageIndex = index
-      window.dispatchEvent event
+          # Publish an event
+          event = document.createEvent "UIEvents"
+          event.initUIEvent "docPageMapped", false, false, window, 0
+          event.pageIndex = index
+          window.dispatchEvent event
+
+          # Resolve the promise
+          resolve()
+
+    # Helper function to trigger the rendering of several pages.
+    # This is an asynchronous method; returns a promise.
+    renderPages = (doc, indexes) ->
+      Promise.all(renderPage(doc, index) for index in indexes)
 
     # Helper function to trigger a page unrendering
+    # This is an asynchronous method; returns a promise.
     unrenderPage = (doc, index) ->
       unless doc.isPageMapped index
         throw new Error "Cannot call unrenderPage with an unmapped index: #{index}, ensure the document is setup correctly"
 
-      i = doc._rendered.indexOf index
+      new Promise (resolve, reject) ->
+        setTimeout ->
+          i = doc._rendered.indexOf index
 
-      doc._rendered.splice(i, 1)
+          doc._rendered.splice(i, 1)
 
-      # Publish an event
-      event = document.createEvent "UIEvents"
-      event.initUIEvent "docPageUnmapped", false, false, window, 0
-      event.pageIndex = index
-      window.dispatchEvent event
+          # Publish an event
+          event = document.createEvent "UIEvents"
+          event.initUIEvent "docPageUnmapped", false, false, window, 0
+          event.pageIndex = index
+          window.dispatchEvent event
+
+          # Resolve the promise
+          resolve()
 
     # Helper function to set up an anchoring manager
     # with a document access policy that mimics
@@ -309,67 +326,66 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
       it 'creates real anchors', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        assert anchor.fullyRealized
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          assert anchor.fullyRealized
 
       it 'creates highlights', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        hl = anchor.highlight[1]
-        assert.ok hl
-        assert.equal hl.page, 1
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          hl = anchor.highlight[1]
+          assert.ok hl
+          assert.equal hl.page, 1
 
       it 'announces the highlights with the appropriate event', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        hl = anchor.highlight[1]
-        assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          hl = anchor.highlight[1]
+
+          assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
 
     describe 'when a page is unrendered', ->
 
       it 'calls removeFromDocument an the correct highlight', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        hl = anchor.highlight[1]
-        unrenderPage am.document, 1
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          hl = anchor.highlight[1]
+          unrenderPage(am.document, 1).then ->
 
-        assert.called hl.removeFromDocument
+            assert.called hl.removeFromDocument
 
       it 'removes highlights from the relevant page', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        unrenderPage am.document, 1
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          unrenderPage(am.document, 1).then ->
 
-        assert !anchor.fullyRealized
+            assert !anchor.fullyRealized
 
       it 'announces the removal of the highlights from the relevant page', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        hl = anchor.highlight[1]
-        unrenderPage am.document, 1
-
-        assert.calledWith am.annotator.publish, 'highlightRemoved', hl
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          hl = anchor.highlight[1]
+          unrenderPage(am.document, 1).then ->
+            assert.calledWith am.annotator.publish, 'highlightRemoved', hl
 
       it 'switches the anchor to virtual', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        unrenderPage am.document, 1
-
-        assert !anchor.fullyRealized
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          unrenderPage(am.document, 1).then ->
+            assert !anchor.fullyRealized
 
     describe 'when the wanted page is not rendered', ->
 
@@ -400,225 +416,221 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
           am = createAnchoringManagerAndLazyDocument()
           ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
-          renderPage am.document, 1
-          assert anchor.fullyRealized
+          renderPage(am.document, 1).then ->
+            assert anchor.fullyRealized
 
         it 'creates the highlight', ->
           am = createAnchoringManagerAndLazyDocument()
           ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
-          renderPage am.document, 1
-
-          hl = anchor.highlight[1]
-          assert.ok hl
-          assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
+          renderPage(am.document, 1).then ->
+            hl = anchor.highlight[1]
+            assert.ok hl
+            assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
 
         it 'announces the highlight', ->
           am = createAnchoringManagerAndLazyDocument()
           ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
-          renderPage am.document, 1
-
-          hl = anchor.highlight[1]
-          assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
+          renderPage(am.document, 1).then ->
+            hl = anchor.highlight[1]
+            assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
 
     describe 'when an anchor spans several pages, some of them rendered', ->
 
       it 'creates partially realized anchors', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 2
-        ann = createTestAnnotationForPages "a1", [[2,3]]
-        anchor = am.createAnchor(ann, ann.target[0]).result
+        renderPage(am.document, 2).then ->
+          ann = createTestAnnotationForPages "a1", [[2,3]]
+          anchor = am.createAnchor(ann, ann.target[0]).result
 
-        assert !anchor.fullyRealized
+          assert !anchor.fullyRealized
 
       it 'creates the highlights for the rendered pages', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 2
-        ann = createTestAnnotationForPages "a1", [[2,3]]
-        anchor = am.createAnchor(ann, ann.target[0]).result
+        renderPage(am.document, 2).then ->
+          ann = createTestAnnotationForPages "a1", [[2,3]]
+          anchor = am.createAnchor(ann, ann.target[0]).result
 
-        assert.ok anchor.highlight[2]
+          assert.ok anchor.highlight[2]
 
       it 'creates no highlights for the missing pages', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 2
-        ann = createTestAnnotationForPages "a1", [[2,3]]
-        anchor = am.createAnchor(ann, ann.target[0]).result
+        renderPage(am.document, 2).then ->
+          ann = createTestAnnotationForPages "a1", [[2,3]]
+          anchor = am.createAnchor(ann, ann.target[0]).result
 
-        assert.notOk anchor.highlight[3]
+          assert.notOk anchor.highlight[3]
 
       it 'announces the creation of highlights for the rendered pages', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 2
-        ann = createTestAnnotationForPages "a1", [[2,3]]
-        anchor = am.createAnchor(ann, ann.target[0]).result
+        renderPage(am.document, 2).then ->
+          ann = createTestAnnotationForPages "a1", [[2,3]]
+          anchor = am.createAnchor(ann, ann.target[0]).result
 
-        assert.calledWith am.annotator.publish,
-          'highlightsCreated', [anchor.highlight[2]]
+          assert.calledWith am.annotator.publish,
+            'highlightsCreated', [anchor.highlight[2]]
 
       describe 'when the missing pages are rendered', ->
 
         it 'the anchor is fully realized', ->
           am = createAnchoringManagerAndLazyDocument()
-          renderPage am.document, 2
-          ann = createTestAnnotationForPages "a1", [[2,3]]
-          anchor = am.createAnchor(ann, ann.target[0]).result
-          renderPage am.document, 3
+          renderPage(am.document, 2).then ->
+            ann = createTestAnnotationForPages "a1", [[2,3]]
+            anchor = am.createAnchor(ann, ann.target[0]).result
+            renderPage(am.document, 3).then ->
 
-          assert anchor.fullyRealized
+              assert anchor.fullyRealized
 
         it 'creates the missing highlights', ->
           am = createAnchoringManagerAndLazyDocument()
-          renderPage am.document, 2
-          ann = createTestAnnotationForPages "a1", [[2,3]]
-          anchor = am.createAnchor(ann, ann.target[0]).result
-          renderPage am.document, 3
+          renderPage(am.document, 2).then ->
+            ann = createTestAnnotationForPages "a1", [[2,3]]
+            anchor = am.createAnchor(ann, ann.target[0]).result
+            renderPage(am.document, 3).then ->
 
-          assert.ok anchor.highlight[3]
+              assert.ok anchor.highlight[3]
 
         it 'announces the creation of the missing highlights', ->
           am = createAnchoringManagerAndLazyDocument()
-          renderPage am.document, 2
-          ann = createTestAnnotationForPages "a1", [[2,3]]
-          anchor = am.createAnchor(ann, ann.target[0]).result
+          renderPage(am.document, 2).then ->
+            ann = createTestAnnotationForPages "a1", [[2,3]]
+            anchor = am.createAnchor(ann, ann.target[0]).result
 
-          renderPage am.document, 3
+            renderPage(am.document, 3).then ->
 
-          assert.calledWith am.annotator.publish,
-            'highlightsCreated', [anchor.highlight[3]]
+              assert.calledWith am.annotator.publish,
+                'highlightsCreated', [anchor.highlight[3]]
 
     describe 'when an achor spans several pages, and a page is unrendered', ->
 
       it 'calls removeFromDocument() on the involved highlight', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 2
-        renderPage am.document, 3
-        ann = createTestAnnotationForPages "a1", [[2,3]]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        hl = anchor.highlight[2]
-        unrenderPage am.document, 2
-        assert.called hl.removeFromDocument
+        renderPages(am.document, [2,3]).then ->
+          ann = createTestAnnotationForPages "a1", [[2,3]]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          hl = anchor.highlight[2]
+          unrenderPage(am.document, 2).then ->
+
+            assert.called hl.removeFromDocument
 
       it 'does not call removeFromDocument() on the other highlights', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 2
-        renderPage am.document, 3
-        ann = createTestAnnotationForPages "a1", [[2,3]]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        hl = anchor.highlight[3]
-        unrenderPage am.document, 2
+        renderPages(am.document, [2,3]).then ->
+          ann = createTestAnnotationForPages "a1", [[2,3]]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          hl = anchor.highlight[3]
+          unrenderPage(am.document, 2).then ->
 
-        assert.notCalled hl.removeFromDocument
+            assert.notCalled hl.removeFromDocument
 
       it 'removes the involved highlight', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 2
-        renderPage am.document, 3
-        ann = createTestAnnotationForPages "a1", [[2,3]]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        unrenderPage am.document, 2
+        renderPages(am.document, [2, 3]).then ->
+          ann = createTestAnnotationForPages "a1", [[2,3]]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          unrenderPage(am.document, 2).then ->
 
-        assert.notOk anchor.highlight[2]
+            assert.notOk anchor.highlight[2]
 
       it 'retains the other highlights', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 2
-        renderPage am.document, 3
-        ann = createTestAnnotationForPages "a1", [[2,3]]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        unrenderPage am.document, 2
+        renderPages(am.document, [2,3]).then ->
+          ann = createTestAnnotationForPages "a1", [[2,3]]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          unrenderPage(am.document, 2).then ->
 
-        assert.ok anchor.highlight[3]
+          assert.ok anchor.highlight[3]
 
       it 'announces the removal of the involved highlight', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 2
-        renderPage am.document, 3
-        ann = createTestAnnotationForPages "a1", [[2,3]]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        hl = anchor.highlight[2]
-        unrenderPage am.document, 2
+        renderPages(am.document, [2, 3]).then ->
+          ann = createTestAnnotationForPages "a1", [[2,3]]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          hl = anchor.highlight[2]
+          unrenderPage(am.document, 2).then ->
 
-        assert.calledWith am.annotator.publish, 'highlightRemoved', hl
+            assert.calledWith am.annotator.publish, 'highlightRemoved', hl
 
       it 'switched the anchor to virtual', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 2
-        renderPage am.document, 3
-        ann = createTestAnnotationForPages "a1", [[2,3]]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        hl = anchor.highlight[2]
-        unrenderPage am.document, 2
+        renderPages(am.document, [2, 3]).then ->
+          ann = createTestAnnotationForPages "a1", [[2,3]]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          hl = anchor.highlight[2]
+          unrenderPage(am.document, 2).then ->
 
-        assert !anchor.fullyRealized
+            assert !anchor.fullyRealized
 
     describe 'manually virtualizing an anchor', ->
 
       it 'calls removeFromDocument() on the highlight', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        hl = anchor.highlight[1]
-        anchor.virtualize 1
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          hl = anchor.highlight[1]
+          anchor.virtualize 1
 
-        assert.called hl.removeFromDocument
+          assert.called hl.removeFromDocument
 
       it 'removes the highlight', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        anchor.virtualize 1
-        assert.notOk anchor.highlight[1], "the highlight should be no more"
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          anchor.virtualize 1
+
+          assert.notOk anchor.highlight[1], "the highlight should be no more"
 
       it 'announces the removal of the highlight', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        hl = anchor.highlight[1]
-        anchor.virtualize 1
-        assert.calledWith am.annotator.publish, 'highlightRemoved', hl
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          hl = anchor.highlight[1]
+          anchor.virtualize 1
+
+          assert.calledWith am.annotator.publish, 'highlightRemoved', hl
 
       it 'switches the anchor to virtual', ->
         am = createAnchoringManagerAndLazyDocument()
-        renderPage am.document, 1
-        ann = createTestAnnotationForPages "a1", [1]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        anchor.virtualize 1
-        assert !anchor.fullyRealized
+        renderPage(am.document, 1).then ->
+          ann = createTestAnnotationForPages "a1", [1]
+          anchor = am.createAnchor(ann, ann.target[0]).result
+          anchor.virtualize 1
+
+          assert !anchor.fullyRealized
 
       describe 'when re-realizing a manually virtualized anchor', ->
 
         it 're-creates the highlight', ->
           am = createAnchoringManagerAndLazyDocument()
-          renderPage am.document, 1
-          ann = createTestAnnotationForPages "a1", [1]
-          anchor = am.createAnchor(ann, ann.target[0]).result
-          anchor.virtualize 1
-          anchor.realize()
+          renderPage(am.document, 1).then ->
+            ann = createTestAnnotationForPages "a1", [1]
+            anchor = am.createAnchor(ann, ann.target[0]).result
+            anchor.virtualize 1
+            anchor.realize()
 
-          assert.ok anchor.highlight[1]
+            assert.ok anchor.highlight[1]
 
         it 'announces the creation of the highlight', ->
           am = createAnchoringManagerAndLazyDocument()
-          renderPage am.document, 1
-          ann = createTestAnnotationForPages "a1", [1]
-          anchor = am.createAnchor(ann, ann.target[0]).result
-          anchor.virtualize 1
-          anchor.realize()
+          renderPage(am.document, 1).then ->
+            ann = createTestAnnotationForPages "a1", [1]
+            anchor = am.createAnchor(ann, ann.target[0]).result
+            anchor.virtualize 1
+            anchor.realize()
 
-          hl = anchor.highlight[1]
-          assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
+            hl = anchor.highlight[1]
+            assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
 
         it 'realizes the anchor', ->
           am = createAnchoringManagerAndLazyDocument()
-          renderPage am.document, 1
-          ann = createTestAnnotationForPages "a1", [1]
-          anchor = am.createAnchor(ann, ann.target[0]).result
-          anchor.virtualize 1
-          anchor.realize()
+          renderPage(am.document, 1).then ->
+            ann = createTestAnnotationForPages "a1", [1]
+            anchor = am.createAnchor(ann, ann.target[0]).result
+            anchor.virtualize 1
+            anchor.realize()
 
-          assert anchor.fullyRealized
+            assert anchor.fullyRealized
