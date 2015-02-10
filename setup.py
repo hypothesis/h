@@ -60,7 +60,7 @@ install_requires = [
     'repoze.sendmail<4.2',
 ]
 
-development_extras = ['pyramid_debugtoolbar>=2.1']
+development_extras = ['pyramid_debugtoolbar>=2.1', 'prospector']
 testing_extras = ['mock', 'pytest>=2.5', 'pytest-cov']
 
 setup(
