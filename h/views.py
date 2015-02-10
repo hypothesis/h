@@ -27,14 +27,19 @@ def annotation(context, request):
     title = 'Annotation by {user} on {title}'.format(
         user=context['user'].replace('acct:', ''),
         title=context['document']['title'])
-
+    alternate = request.resource_url(request.root, 'api', 'annotations',
+            context['id'])
     return {
         'meta_attrs': (
             {'property': 'og:title', 'content': title},
             {'property': 'og:image', 'content': '/assets/images/logo.png'},
             {'property': 'og:site_name', 'content': 'Hypothes.is'},
             {'property': 'og:url', 'content': request.url},
-        )
+        ),
+        'link_attrs': (
+            {'rel': 'alternate', 'href': alternate,
+                'type': 'application/json'},
+        ),
     }
 
 
