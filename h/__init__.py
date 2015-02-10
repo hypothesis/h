@@ -13,7 +13,6 @@ def includeme(config):
     config.include('h.features')
     config.include('h.queue')
     config.include('h.subscribers')
-    config.include('h.tweens')
     config.include('h.views')
 
     if config.registry.feature('api'):
