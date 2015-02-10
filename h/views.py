@@ -34,7 +34,7 @@ def annotation(context, request):
             user=context['user'].replace('acct:', ''))
 
     alternate = request.resource_url(request.root, 'api', 'annotations',
-            context['id'])
+                                     context['id'])
 
     return {
         'meta_attrs': (
