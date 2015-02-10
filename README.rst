@@ -81,11 +81,6 @@ via the ``lint`` make command::
 
     $ make lint
 
-Prospector needs to be available to the environment, it is not installed by
-default so install it using pip::
-
-    $ pip install prospector
-
 Testing
 -------
 
