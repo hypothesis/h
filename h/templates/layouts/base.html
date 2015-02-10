@@ -13,7 +13,7 @@
     <title>{% block title %}Hypothesis{% endblock %}</title>
 
     {% for attrs in link_attrs -%}
-      <link {% for key, value in attrs %}key="{{value}}" {% endfor %}/>
+      <link {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
     {% endfor -%}
     {% for href in layout.css_links %}
       <link rel="stylesheet" href="{{ href }}" />

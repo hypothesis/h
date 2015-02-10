@@ -24,9 +24,16 @@ def error(context, request):
     renderer='h:templates/app.html',
 )
 def annotation(context, request):
-    title = 'Annotation by {user} on {title}'.format(
-        user=context['user'].replace('acct:', ''),
-        title=context['document']['title'])
+    if 'title' in context['document']:
+        title = 'Annotation by {user} on {title}'.format(
+            user=context['user'].replace('acct:', ''),
+            title=context['document']['title'])
+    else:
+        title = 'Annotation by {user}'.format(
+            user=context['user'].replace('acct:', ''))
+
+    alternate = request.resource_url(request.root, 'api', 'annotations',
+            context['id'])
 
     return {
         'meta_attrs': (
@@ -34,7 +41,11 @@ def annotation(context, request):
             {'property': 'og:image', 'content': '/assets/images/logo.png'},
             {'property': 'og:site_name', 'content': 'Hypothes.is'},
             {'property': 'og:url', 'content': request.url},
-        )
+        ),
+        'link_attrs': (
+            {'rel': 'alternate', 'href': alternate,
+                'type': 'application/json'},
+        ),
     }
 
 
