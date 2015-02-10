@@ -9,7 +9,7 @@ class WSGIHandler(PyWSGIHandler, WebSocketWSGIHandler):
         # confuses some strict WebSocket clients.
         for name, value in self.response_headers:
             if name == 'Upgrade' and value == 'websocket':
-               return
+                return
         super(WSGIHandler, self).finalize_headers()
 
 
