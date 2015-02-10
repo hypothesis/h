@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 def error(context, request):
     """Display an error message."""
     log.exception("Uncaught exception generating response.")
+    request.response.status_int = 500
     return {}
 
 
