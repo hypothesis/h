@@ -41,8 +41,9 @@ in `<INSTALL.rst>`_. You can check what is available via Homebrew with:
 
     brew info elasticsearch
 
-If an appropriate version is available then follow the instructions below,
-otherwise get a version from `<http://www.elasticsearch.org/>`_.
+If an appropriate version (see `<INSTALL.rst>`_) is available then follow the
+instructions below, otherwise get a version from
+`<http://www.elasticsearch.org/>`_.
 
 .. code-block:: bash
 

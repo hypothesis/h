@@ -1,7 +1,8 @@
 Installing Hypothesis on Fedora
 ###############################
 
-To install the dependencies, run these commands:
+To install the dependencies, run these commands
+(from the directory where you've cloned the repository):
 
 .. code-block:: bash
 
@@ -36,7 +37,5 @@ Before you start the elasticsearch daemon:
 
 After installing the above, create the virtualenv,
 as described in the INSTALL.rst
-
-(Run the commands from the directory where you've cloned the repository.)
 
 .. _elasticsearch_rpm: https://github.com/tavisto/elasticsearch-rpms

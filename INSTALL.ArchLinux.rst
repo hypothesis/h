@@ -65,4 +65,5 @@ Finally, cd into docs/ and make your favourite documentation target. I did:
 
 .. code-block:: bash
 
+    cd docs/
     make html

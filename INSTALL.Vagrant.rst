@@ -5,6 +5,22 @@ Running Hypothesis on a VM enables development on Windows machines, and also pro
 for testing dependencies.  The following instructions will use Vagrant to create and manage
 a VirtualBox Ubuntu VM with Hypothesis and all its dependencies on it.
 
+
+Notes for Windows Development
+-----------------------------
+
+If you are working with a Windows host, you want the shared directory to use Unix line endings.
+Do that by configuring this git repository as follows:
+
+.. code-block:: bash
+
+    git config core.eol lf
+    git config core.autocrlf input
+
+You will probably also need to ``git reset --hard`` to re-extract all files with approproate line endings.
+Do this *before* proceeding with bootstrapping.
+
+
 Install Vagrant
 ---------------
 
@@ -63,18 +79,3 @@ not affect this directory.
 The configuration process is run each time the VM is brought up; if this gets annoying, it is
 possible to make a snapshot of the VM and use that instead. You can also add ``--no-provision``
 to avoid re-running the bash installation-time scripts.
-
-
-Notes for Windows Development
------------------------------
-
-If you are working with a Windows host, you want the shared directory to use Unix line endings.
-Do that by configuring this git repository as follows:
-
-.. code-block:: bash
-
-    git config core.eol lf
-    git config core.autocrlf input
-
-You will probably also need to ``git reset --hard`` to re-extract all files with approproate line endings.
-Do this *before* proceeding with bootstrapping.

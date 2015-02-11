@@ -22,10 +22,10 @@ To install the dependencies on any specific platform, follow the instructions in
 * Ubuntu_
 * Vagrant_ (*contains information for installing on Windows*)
 
-Feel free to add a section for a new platform, particularly if you think it
-may be a niche use case. Pull requests which create an
-``Install.<Platform>.rst`` are preferred. And of course, edits to existing
-docs should be done in a pull request.
+Feel free to add instructions for a new platform in a file named
+``Install.<Platform>.rst`` particularly if you think it
+may be a niche use case. Contributions (and updates) to the other install
+instruction files are *very* welcome.
 
 General Instructions
 --------------------
