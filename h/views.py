@@ -26,7 +26,7 @@ def error(context, request):
     renderer='h:templates/app.html',
 )
 def annotation(context, request):
-    if 'title' in context['document']:
+    if 'title' in context.get('document', {}):
         title = 'Annotation by {user} on {title}'.format(
             user=context['user'].replace('acct:', ''),
             title=context['document']['title'])
