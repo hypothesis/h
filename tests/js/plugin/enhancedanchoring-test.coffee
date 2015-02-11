@@ -660,7 +660,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
     describe 'when scrolling to a virtual anchor', ->
 
-      it 'jumpings close to the wanted page', ->
+      it 'scrolls right next to the wanted page (to get it rendered)', ->
         am = createAnchoringManagerAndLazyDocument()
         ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
@@ -675,7 +675,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         anchor.scrollIntoView().then ->
           assert.calledWith am.document.setPageIndex, 9
 
-      it 'has the wanted page rendered', ->
+      it 'gets the wanted page rendered', ->
         am = createAnchoringManagerAndLazyDocument()
         ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
@@ -690,7 +690,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         anchor.scrollIntoView().then ->
           assert am.document.isPageMapped 10
 
-      it 'gets to the wanted page, eventually', ->
+      it 'scrolls to the wanted page, eventually', ->
         am = createAnchoringManagerAndLazyDocument()
         ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
