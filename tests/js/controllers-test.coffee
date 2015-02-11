@@ -1,37 +1,22 @@
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
 
-fakeStore =
-  SearchResource:
-    get: sinon.spy()
-
-
 describe 'h', ->
   $scope = null
-  fakeAuth = null
   fakeIdentity = null
   fakeLocation = null
   fakeParams = null
   fakeStreamer = null
+  fakeStore =
+    SearchResource:
+      get: sinon.spy()
+
   sandbox = null
 
   beforeEach module('h')
 
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
-
-    fakeAnnotator = {
-      plugins: {
-        Auth: {withToken: sandbox.spy()}
-      }
-      options: {}
-      socialView: {name: 'none'}
-      addPlugin: sandbox.spy()
-    }
-
-    fakeAuth = {
-      user: null
-    }
 
     fakeIdentity = {
       watch: sandbox.spy()
@@ -41,7 +26,9 @@ describe 'h', ->
     fakeLocation = {
       search: sandbox.stub().returns({})
     }
+
     fakeParams = {id: 'test'}
+
     fakeStreamer = {
       open: sandbox.spy()
       close: sandbox.spy()
@@ -82,6 +69,69 @@ describe 'h', ->
 
     it 'sets the isEmbedded property to false', ->
       assert.isFalse($scope.isEmbedded)
+
+describe 'ViewerController', ->
+  $scope = null
+  fakeAnnotationMapper = null
+  fakeAuth = null
+  fakeCrossFrame = null
+  fakeStore = null
+  fakeStreamer = null
+  sandbox = null
+  viewer = null
+
+  beforeEach module('h')
+
+  beforeEach module ($provide) ->
+    sandbox = sinon.sandbox.create()
+
+    fakeAnnotationMapper = {loadAnnotations: sandbox.spy()}
+    fakeAuth = {user: null}
+    fakeCrossFrame = {providers: []}
+
+    fakeStore = {
+      SearchResource:
+        get: (query, callback) ->
+          offset = query.offset or 0
+          limit = query.limit or 20
+          result =
+            total: 100
+            rows: [offset..offset+limit-1]
+
+          callback result
+    }
+
+    fakeStreamer = {
+      open: sandbox.spy()
+      close: sandbox.spy()
+      send: sandbox.spy()
+    }
+
+    $provide.value 'annotationMapper', fakeAnnotationMapper
+    $provide.value 'auth', fakeAuth
+    $provide.value 'crossframe', fakeCrossFrame
+    $provide.value 'store', fakeStore
+    $provide.value 'streamer', fakeStreamer
+    return
+
+  beforeEach inject ($controller, $rootScope) ->
+    $scope = $rootScope.$new()
+    viewer = $controller 'ViewerController', {$scope}
+
+  afterEach ->
+    sandbox.restore()
+
+  describe 'loadAnnotations', ->
+    it 'loads all annotation for a provider', ->
+      fakeCrossFrame.providers.push {entities: ['http://example.com']}
+      $scope.$digest()
+      loadSpy = fakeAnnotationMapper.loadAnnotations
+      assert.callCount(loadSpy, 5)
+      assert.calledWith(loadSpy, [0..19])
+      assert.calledWith(loadSpy, [20..39])
+      assert.calledWith(loadSpy, [40..59])
+      assert.calledWith(loadSpy, [60..79])
+      assert.calledWith(loadSpy, [80..99])
 
 describe 'AnnotationUIController', ->
   $scope = null
