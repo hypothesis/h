@@ -60,10 +60,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         page: page
         removeFromDocument: sinon.spy()
         scrollIntoView: sinon.spy ->
-          new Promise (resolve, reject) ->
-            setTimeout ->
-              anchor.anchoring.document.setPageIndex page
-              resolve()
+          new Promise (resolve, reject) -> setTimeout -> resolve()
 
   afterEach ->
     sandbox.restore()
@@ -237,9 +234,6 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
   describe 'two-phased anchoring', ->
 
-    # Simple lazy rendering document simulation for testing,
-    # which emulates the user movement prediction (and page rendering)
-    # behavior of PDF.js
     class DummyDocumentAccess
 
       @applicable: -> true
@@ -247,11 +241,8 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
       isPageMapped: (index) -> index in @_rendered
       getPageIndex: -> @currentIndex
 
-      setPageIndex: sinon.spy()
-
       constructor: ->
         @_rendered = []
-        @currentIndex = -10
 
     # Helper function to trigger a page rendering
     # This is an asynchronous method; returns a promise.
@@ -665,6 +656,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
         am.document.currentIndex = 5  # We start from page 5
+        am.document.setPageIndex = sinon.spy()
 
         # Now we trigger the actual action
         anchor.scrollIntoView()
@@ -684,21 +676,6 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         # Now we trigger the actual action
         anchor.scrollIntoView().then ->
           assert am.document.isPageMapped 10
-
-      it 'scrolls to the wanted page, eventually', ->
-        am = createAnchoringManagerAndLazyDocument()
-        ann = createTestAnnotationForPages "a1", [10]
-        anchor = am.createAnchor(ann, ann.target[0]).result
-        am.document.currentIndex = 5  # We start from page 5
-        am.document.setPageIndex = sinon.spy (index) ->
-          am.document.currentIndex = index
-          if index is 9
-            renderPage am.document, 9
-            renderPage am.document, 10
-
-        # Now we trigger the actual action
-        anchor.scrollIntoView().then ->
-          assert.calledWith am.document.setPageIndex, 10
 
       it 'calls scrollIntoView() on the highlight', ->
         am = createAnchoringManagerAndLazyDocument()
