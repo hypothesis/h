@@ -665,15 +665,10 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
         am.document.currentIndex = 5  # We start from page 5
-        am.document.setPageIndex = sinon.spy (index) ->
-          am.document.currentIndex = index
-          if index is 9
-            renderPage am.document, 9
-            renderPage am.document, 10
 
         # Now we trigger the actual action
-        anchor.scrollIntoView().then ->
-          assert.calledWith am.document.setPageIndex, 9
+        anchor.scrollIntoView()
+        assert.calledWith am.document.setPageIndex, 9
 
       it 'gets the wanted page rendered', ->
         am = createAnchoringManagerAndLazyDocument()
