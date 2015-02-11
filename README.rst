@@ -20,16 +20,21 @@ Installation
 See `<INSTALL.rst>`_ for installation instructions. Platform specific
 instructions can be found in the install documents as well.
 
+*TL;DR*
+
+    $ # install dependencies
+    $ ./bootstrap
+    $ ./run
+
+
 Running
 -------
 
-Installation has, hopefully, gone smoothly. If you ran into any problems, be
-sure to seek help on IRC or the mailing list. To run the server, simply use
-the ``run`` command::
+To run the server in development mode, simply use the ``run`` command::
 
     $ ./run
 
-This command will start the server on port 5000 (http://localhost:5000),
+This will start the server on port 5000 (http://localhost:5000),
 reload the application whenever changes are made to the source code, and
 restart it should it crash for some reason.
 
@@ -52,25 +57,25 @@ contribution.
 Additionally, work is underway to support the data model described by the
 `Open Annotation Core`_ specification document.
 
-See the `project wiki`_ for the roadmap and additional information and
-join us in `#hypothes.is`_ on freenode_ for discussion.
+Join us in `#hypothes.is`_ on freenode_ for discussion.
 
-Those wishing to contribute to the project should also `subscribe`_ to the
-development mailing list and read about `contributing`_. Then consider getting
+If you'd like to contribute to the project should also `subscribe`_ to the
+`development mailing list`_ and read about `contributing`_. Then consider getting
 started on one of the issues that are ready for work. Issues tagged with the
-label 'New Contributor Friendly' are ideal for those just getting started.
+label '`New Contributor Friendly`_' are ideal for those just getting started.
 
 Debugging
 ---------
 
-The `debugtoolbar`_ package is loaded by default in the development
+The `pyramid_debugtoolbar`_ package is loaded by default in the development
 environment.  This will provide stack traces for exceptions and allow basic
 debugging. A more advanced profiler can also be accessed at the /_debug_toolbar
 path.
 
     http://localhost:5000/_debug_toolbar/
 
-Check out the documentation for information on how to use and configure it.
+Check out the `pyramid_debugtoolbar documentation`_ for information on how to
+use and configure it.
 
 Code Quality
 ------------
@@ -236,9 +241,12 @@ license information can be found in the included `<LICENSE>`_ file.
 .. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
 .. _freenode: http://freenode.net/
 .. _subscribe: mailto:dev+subscribe@list.hypothes.is
+.. _development mailing list: http://list.hypothes.is/archive/
+.. _New Contributor Friendly: https://github.com/hypothesis/h/issues?q=is%3Aopen+is%3Aissue+label%3A%22New+Contributor+Friendly%22
 .. _contributing: CONTRIBUTING.rst
 .. _Annotator project: http://okfnlabs.org/projects/annotator/
 .. _Open Knowledge Foundation: http://okfn.org/
 .. _2-Clause BSD License: http://www.opensource.org/licenses/BSD-2-Clause
-.. _debugtoolbar: http://docs.pylonsproject.org/projects/pyramid-debugtoolbar/en/latest/
+.. _pyramid_debugtoolbar: https://github.com/Pylons/pyramid_debugtoolbar
+.. _pyramid_debugtoolbar documentation: http://docs.pylonsproject.org/projects/pyramid-debugtoolbar/en/latest/
 .. _Sphinx: http://sphinx-doc.org/
