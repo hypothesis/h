@@ -438,6 +438,7 @@ class WebSocket(_WebSocket):
     received = 0
 
     def __init__(self, *args, **kwargs):
+        kwargs.setdefault('heartbeat_freq', 30.0)
         super(WebSocket, self).__init__(*args, **kwargs)
         self.request = get_current_request()
 
