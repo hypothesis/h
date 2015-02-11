@@ -164,7 +164,7 @@
   <!-- / Register -->
 
   <!-- Forgot password -->
-  <form data-title="Confirm account"
+  <form data-title="Password reset"
         data-value="forgot_password"
         class="form tab-pane"
         name="forgot_password"
@@ -197,14 +197,14 @@
     <div class="form-actions">
       <div class="form-actions-buttons">
         <button class="btn" type="submit" name="forgot_password"
-                status-button="forgot_password">Request access</button>
+                status-button="forgot_password">Request reset</button>
       </div>
     </div>
   </form>
   <!-- / Forgot password -->
 
   <!-- Reset password -->
-  <form data-title="Activate an account"
+  <form data-title="New password"
         data-value="reset_password"
         class="form tab-pane"
         name="reset_password"
@@ -220,7 +220,9 @@
 
     <div class="form-field" ng-if="!hasActivationCode">
       <label class="form-label" for="field-activate-code"
-             >Your activation code:</label>
+        >Your reset code:
+        <span class="form-hint">(this will be emailed to you)</span>
+      </label>
       <input class="form-input" id="field-activate-code"
              type="text" name="code" value=""
              required autocorrect="false" autocapitalize="false"
@@ -228,7 +230,7 @@
       <ul class="form-error-list">
         <li class="form-error"
             ng-show="reset_password.code.$error.required"
-            >Please enter your activation code</li>
+            >Please enter your reset code</li>
         <li class="form-error"
             ng-show="reset_password.code.$error.response"
             >{{reset_password.code.responseErrorMessage}}</li>
@@ -237,7 +239,7 @@
 
     <div class="form-field">
       <label class="form-label" for="field-activate-password"
-             >Account password:
+             >New password:
         <span class="form-hint">(at least two characters)</span>
       </label>
       <input class="form-input" id="field-activate-password"
@@ -260,7 +262,7 @@
     <div class="form-actions">
       <div class="form-actions-buttons">
         <button class="btn" type="submit" name="activate"
-                status-button="activate">Activate</button>
+                status-button="activate">Save</button>
       </div>
     </div>
   </form>
