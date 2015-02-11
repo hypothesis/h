@@ -60,9 +60,9 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         page: page
         removeFromDocument: sinon.spy()
         scrollIntoView: sinon.spy ->
-          new Promise (resolve, reject) =>
-            setTimeout =>
-              @anchor.anchoring.document.setPageIndex @page
+          new Promise (resolve, reject) ->
+            setTimeout ->
+              anchor.anchoring.document.setPageIndex page
               resolve()
 
   afterEach ->
