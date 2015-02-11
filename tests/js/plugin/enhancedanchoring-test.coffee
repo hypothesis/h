@@ -247,27 +247,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
       isPageMapped: (index) -> index in @_rendered
       getPageIndex: -> @currentIndex
 
-      setPageIndex: (index) ->
-
-        # Do this when the wanted page is ready
-        onPageReady = =>
-          # Try to find out where will the reader proceed
-          prediction = if @currentIndex < index
-            index + 1  # If we went forward, we'll want the next page, too
-          else
-            index - 1  # if we want backward, we'll want the prev. page, too
-
-          # Set the page index where we want to be
-          @currentIndex = index
-
-          # Render the predicted next page
-          renderPage(this, prediction) unless @isPageMapped prediction
-
-        # Try to move where we need to be
-        if @isPageMapped index
-          onPageReady()
-        else
-          renderPage(this, index).then onPageReady
+      setPageIndex: sinon.spy()
 
       constructor: ->
         @_rendered = []
@@ -680,26 +660,61 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
     describe 'when scrolling to a virtual anchor', ->
 
-      it 'gets the right page rendered', ->
+      it 'jumpings close to the wanted page', ->
         am = createAnchoringManagerAndLazyDocument()
-        ann = createTestAnnotationForPages "a1", [1]
+        ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
+        am.document.currentIndex = 5  # We start from page 5
+        am.document.setPageIndex = sinon.spy (index) ->
+          am.document.currentIndex = index
+          if index is 9
+            renderPage am.document, 9
+            renderPage am.document, 10
 
+        # Now we trigger the actual action
         anchor.scrollIntoView().then ->
-          assert am.document.isPageMapped 1
+          assert.calledWith am.document.setPageIndex, 9
 
-      it 'scrolls to the right page', ->
+      it 'has the wanted page rendered', ->
         am = createAnchoringManagerAndLazyDocument()
-        ann = createTestAnnotationForPages "a1", [1]
+        ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
+        am.document.currentIndex = 5  # We start from page 5
+        am.document.setPageIndex = sinon.spy (index) ->
+          am.document.currentIndex = index
+          if index is 9
+            renderPage am.document, 9
+            renderPage am.document, 10
 
+        # Now we trigger the actual action
         anchor.scrollIntoView().then ->
-          assert.equal am.document.getPageIndex(), 1
+          assert am.document.isPageMapped 10
+
+      it 'gets to the wanted page, eventually', ->
+        am = createAnchoringManagerAndLazyDocument()
+        ann = createTestAnnotationForPages "a1", [10]
+        anchor = am.createAnchor(ann, ann.target[0]).result
+        am.document.currentIndex = 5  # We start from page 5
+        am.document.setPageIndex = sinon.spy (index) ->
+          am.document.currentIndex = index
+          if index is 9
+            renderPage am.document, 9
+            renderPage am.document, 10
+
+        # Now we trigger the actual action
+        anchor.scrollIntoView().then ->
+          assert.calledWith am.document.setPageIndex, 10
 
       it 'calls scrollIntoView() on the highlight', ->
         am = createAnchoringManagerAndLazyDocument()
-        ann = createTestAnnotationForPages "a1", [1]
+        ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
+        am.document.currentIndex = 5  # We start from page 5
+        am.document.setPageIndex = sinon.spy (index) ->
+          am.document.currentIndex = index
+          if index is 9
+            renderPage am.document, 9
+            renderPage am.document, 10
 
         anchor.scrollIntoView().then ->
-          assert.called anchor.highlight[1].scrollIntoView
+          assert.called anchor.highlight[10].scrollIntoView
