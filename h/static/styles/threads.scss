@@ -17,7 +17,9 @@ $threadexp-width: .6em;
 }
 
 .thread-replies {
-  margin-top: 0.5em;
+  .thread:first-child {
+    margin-top: 0.5em;
+  }
 
   .thread-collapsed {
     .tag-list, .annotation-body {display: none;}
