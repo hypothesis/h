@@ -1,7 +1,3 @@
-### global -COLLAPSED_CLASS ###
-
-COLLAPSED_CLASS = 'thread-collapsed'
-
 ###*
 # @ngdoc type
 # @name thread.ThreadController
@@ -94,10 +90,6 @@ isHiddenThread = (elem) ->
 # @restrict A
 # @description
 # Directive that instantiates {@link thread.ThreadController ThreadController}.
-#
-# If the `thread-collapsed` attribute is specified, it is treated as an
-# expression to watch in the context of the current scope that controls
-# the collapsed state of the thread.
 ###
 thread = [
   'RecursionHelper', '$parse', '$window', 'pulse', 'render',
@@ -145,13 +137,6 @@ thread = [
         event.stopPropagation()
         pulse(elem)
 
-      # Add and remove the collapsed class when the collapsed property changes.
-      scope.$watch (-> ctrl.isCollapsed()), (collapsed) ->
-        if collapsed
-          attrs.$addClass COLLAPSED_CLASS
-        else
-          attrs.$removeClass COLLAPSED_CLASS
-
       # The watch is necessary because the computed value of the attribute
       # expression may change. This won't happen when we use the thread
       # directive in a repeat, since the element will be torn down whenever the
@@ -164,11 +149,6 @@ thread = [
         render ->
           ctrl.container = thread
           scope.$digest()
-
-      # Watch the thread-collapsed attribute.
-      if attrs.threadCollapsed
-        scope.$watch $parse(attrs.threadCollapsed), (collapsed) ->
-          ctrl.toggleCollapsed(collapsed)
 
     controller: 'ThreadController'
     controllerAs: 'vm'
