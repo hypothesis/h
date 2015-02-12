@@ -486,7 +486,7 @@ def includeme(config):
     # Maybe initialize the models
     if asbool(settings.get('basemodel.should_drop_all', False)):
         delete_db()
-    if asbool(settings.get('basemodel.should_create_all', True)):
+    if asbool(settings.get('basemodel.should_create_all', False)):
         create_db()
 
     config.scan(__name__)
