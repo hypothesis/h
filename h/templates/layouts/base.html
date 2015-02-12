@@ -10,7 +10,13 @@
       {% endfor -%}
     {% endblock %}
 
-    <title>{% block title %}Hypothesis{% endblock %}</title>
+    <title>
+      {%- block title -%}
+        {%- block page_title %}{% endblock -%}
+        {%- if self.page_title() %} | {% endif -%}
+        Hypothesis
+      {%- endblock -%}
+    </title>
 
     {% for attrs in link_attrs -%}
       <link {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
