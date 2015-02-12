@@ -36,13 +36,12 @@
 </div>
 
 <!-- Replies -->
-<ul class="thread-replies">
+<ul class="thread-replies" ng-hide="vm.collapsed">
   <li class="thread"
       deep-count="count"
       thread="child" thread-filter
       ng-include="'thread.html'"
       ng-init="child.message.id || threadFilter.active(false)"
-      ng-class="{'thread-collapsed': vm.collapsed}"
       ng-repeat="child in vm.container.children
                  | orderBy : 'message.updated' : true"
       ng-show="count('edit') || count('match') || !threadFilter.active()">
