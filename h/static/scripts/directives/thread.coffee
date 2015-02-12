@@ -13,7 +13,7 @@
 ThreadController = [
   ->
     @container = null
-    @_collapsed = false
+    @_collapsed = true
 
     ###*
     # @ngdoc method
