@@ -1,0 +1,16 @@
+<li class="paper thread"
+    ng-class="{'js-hover': hasFocus({annotation: child.message})}"
+
+    ng-repeat="child in vm.container.children | orderBy : orderBy"
+    thread="child"
+    thread-collapsed="collapsed"
+    thread-root="true"
+
+    deep-count="count"
+    thread-filter
+
+    ng-mouseenter="focus({annotation: child.message})"
+    ng-click="scrollTo({annotation: child.message})"
+    ng-mouseleave="focus({annotation: undefined})"
+    ng-show="shouldShow({container: child}) && (count('edit') || count('match') || !threadFilter.active())">
+</li>

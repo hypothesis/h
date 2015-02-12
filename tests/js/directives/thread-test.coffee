@@ -101,11 +101,21 @@ describe 'h.directives.thread.ThreadController', ->
 describe 'h.directives.thread.thread', ->
   createElement = null
   $element = null
-  $isolateScope = null
   fakePulse = null
   sandbox = null
 
-  beforeEach module('h')
+  beforeEach module 'h', ($compileProvider) ->
+    # The thread directive instantiates the annotation directive, which in turn
+    # injects a whole bunch of other stuff (auth service, permissions service,
+    # etc.) which we really don't want to have to mock individually here. As
+    # such, it's easier to just mock out the whole annotation directive for now.
+    $compileProvider.directive 'annotation', ->
+      priority: 9999
+      terminal: true
+      template: ''
+    return
+
+  beforeEach module('h.templates')
 
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
@@ -114,9 +124,11 @@ describe 'h.directives.thread.thread', ->
     return
 
   beforeEach inject ($compile, $rootScope) ->
-    createElement = (html) -> $compile(html or '<div thread></div>')($rootScope.$new())
+    createElement = (html) ->
+      el = $compile(html or '<div thread></div>')($rootScope.$new())
+      $rootScope.$digest()
+      return el
     $element = createElement()
-    $isolateScope = $element.scope()
 
   afterEach ->
     sandbox.restore()
