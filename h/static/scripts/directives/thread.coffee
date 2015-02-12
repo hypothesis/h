@@ -18,7 +18,6 @@ ThreadController = [
   ->
     @container = null
     @collapsed = false
-    @isRoot = false
 
     ###*
     # @ngdoc method
@@ -41,10 +40,9 @@ ThreadController = [
     # the thread is currently filtered.
     ###
     this.shouldShowReply = (count, isFilterActive) ->
-      isCollapsedReply = (@collapsed && !@isRoot)
       hasChildren = count('message') > 0
       hasFilterMatch = !isFilterActive || count('message') == count('match')
-      !isCollapsedReply && hasChildren && hasFilterMatch
+      hasChildren && hasFilterMatch
 
     this
 ]
@@ -96,8 +94,6 @@ thread = [
   '$parse', '$window', 'pulse', 'render',
   ($parse,   $window,   pulse,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter]) ->
-      # Determine if this is a top level thread.
-      ctrl.isRoot = $parse(attrs.threadRoot)(scope) == true
 
       # Toggle collapse on click.
       elem.on 'click', (event) ->
