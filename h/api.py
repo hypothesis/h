@@ -23,7 +23,7 @@ PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 
 
 def api_config(**kwargs):
-    """Pyramid's @view_config decorator but with modified defaults"""
+    """Extend Pyramid's @view_config decorator with modified defaults."""
     config = {
         # The containment predicate ensures we only respond to API calls
         'containment': 'h.resources.APIResource',
@@ -37,7 +37,7 @@ def api_config(**kwargs):
 @api_config(context='h.resources.APIResource')
 @api_config(context='h.resources.APIResource', route_name='index')
 def index(context, request):
-    """Return the API descriptor document
+    """Return the API descriptor document.
 
     Clients may use this to discover endpoints for the API.
     """
@@ -139,7 +139,7 @@ def create(context, request):
             request_method='GET',
             permission='read')
 def read(context, request):
-    """Return the annotation (simply how it was stored in the database)"""
+    """Return the annotation (simply how it was stored in the database)."""
     annotation = context
 
     # Notify any subscribers
@@ -152,7 +152,7 @@ def read(context, request):
             request_method='PUT',
             permission='update')
 def update(context, request):
-    """Update the fields we received and store the updated version"""
+    """Update the fields we received and store the updated version."""
     annotation = context
 
     # Read the new fields for the annotation
@@ -203,7 +203,7 @@ def delete(context, request):
 
 
 def get_user(request):
-    """Create a User object for annotator-store"""
+    """Create a User object for annotator-store."""
     userid = request.authenticated_userid
     if userid is not None:
         consumer = auth.Consumer(request.client.client_id)
@@ -212,7 +212,7 @@ def get_user(request):
 
 
 def _trigger_event(request, annotation, action):
-    """Trigger any callback functions listening for AnnotationEvents"""
+    """Trigger any callback functions listening for AnnotationEvents."""
     event = events.AnnotationEvent(request, annotation, action)
     request.registry.notify(event)
 
@@ -226,7 +226,7 @@ def _api_error(request, reason, status_code):
     return response_info
 
 
-def _search(request_params, user = None):
+def _search(request_params, user=None):
     # Compile search parameters
     search_params = _search_params(request_params, user=user)
 
@@ -253,7 +253,7 @@ def _search(request_params, user = None):
 
 
 def _search_params(request_params, user=None):
-    """Turn request parameters into annotator-store search parameters"""
+    """Turn request parameters into annotator-store search parameters."""
     request_params = request_params.copy()
     search_params = {}
 
@@ -283,7 +283,7 @@ def _search_params(request_params, user=None):
 
 
 def _add_any_field_params_into_query(search_params):
-    """Add any_field parameters to ES query"""
+    """Add any_field parameters to ES query."""
     any_terms = search_params['query'].getall('any')
     del search_params['query']['any']
 
@@ -310,7 +310,7 @@ def _add_any_field_params_into_query(search_params):
 
 
 def _create_annotation(fields, user):
-    """Create and store an annotation"""
+    """Create and store an annotation."""
 
     # Some fields are not to be set by the user, ignore them
     for field in PROTECTED_FIELDS:
@@ -357,7 +357,7 @@ def _update_annotation(annotation, fields, has_admin_permission):
 
 
 def _anonymize_deletes(annotation):
-    """Clear the author and remove the user from the annotation permissions"""
+    """Clear the author and remove the user from the annotation permissions."""
 
     # Delete the annotation author, if present
     user = annotation.pop('user')
@@ -374,7 +374,7 @@ def _anonymize_deletes(annotation):
 
 
 def store_from_settings(settings):
-    """Configure the Elasticsearch wrapper provided by annotator-store"""
+    """Configure the Elasticsearch wrapper provided by annotator-store."""
     if 'es.host' in settings:
         es.host = settings['es.host']
 
@@ -392,7 +392,7 @@ def store_from_settings(settings):
 
 
 def _ensure_es_plugins(es_conn):
-    """Ensure that the ICU analysis plugin is installed for ES"""
+    """Ensure that the ICU analysis plugin is installed for ES."""
     # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
     #
     # pylint: disable=unexpected-keyword-arg
@@ -406,7 +406,7 @@ def _ensure_es_plugins(es_conn):
 
 
 def create_db():
-    """Create the ElasticSearch index for Annotations and Documents"""
+    """Create the ElasticSearch index for Annotations and Documents."""
     # Check for required plugin(s)
     _ensure_es_plugins(es.conn)
 
@@ -480,11 +480,13 @@ def create_db():
 
 
 def delete_db():
+    """Delete the Annotation and Document databases."""
     Annotation.drop_all()
     Document.drop_all()
 
 
 def includeme(config):
+    """Configure and possibly initialize ElasticSearch and its models."""
     registry = config.registry
     settings = registry.settings
 
