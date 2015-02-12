@@ -106,7 +106,7 @@ class Annotation(annotation.Annotation):
         },
         'references': {'type': 'string'},
         'document': {
-            'properties': document.MAPPING
+            'enabled': False,  # indexed explicitly by the save function
         },
         'thread': {
             'type': 'string',
@@ -168,6 +168,12 @@ class Document(document.Document):
     @classmethod
     def get_analysis(cls):
         return cls.__analysis__
+
+    @classmethod
+    def get_mapping(cls):
+        mapping = super(Document, cls).get_mapping()
+        mapping['document']['date_detection'] = False
+        return mapping
 
 
 class Client(object):
