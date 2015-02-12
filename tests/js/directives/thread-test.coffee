@@ -16,12 +16,23 @@ describe 'h.directives.thread.ThreadController', ->
       controller
 
   describe '#toggleCollapsed', ->
-    it 'sets the collapsed property', ->
+    it 'toggles whether or not the thread is collapsed', ->
       controller = createController()
-      before = controller.collapsed
+      before = controller.isCollapsed()
       controller.toggleCollapsed()
-      after = controller.collapsed
+      after = controller.isCollapsed()
       assert.equal(before, !after)
+
+    it 'can accept an argument to force a particular state', ->
+      controller = createController()
+      controller.toggleCollapsed(true)
+      assert.isTrue(controller.isCollapsed())
+      controller.toggleCollapsed(true)
+      assert.isTrue(controller.isCollapsed())
+      controller.toggleCollapsed(false)
+      assert.isFalse(controller.isCollapsed())
+      controller.toggleCollapsed(false)
+      assert.isFalse(controller.isCollapsed())
 
   describe '#shouldShowReply', ->
     count = null
@@ -45,12 +56,12 @@ describe 'h.directives.thread.ThreadController', ->
 
         it 'shows the reply if the thread is collapsed and has children', ->
           count.withArgs('message').returns(1)
-          controller.collapsed = true
+          controller.toggleCollapsed(true)
           assert.isTrue(controller.shouldShowReply(count, false))
 
         it 'does not show the reply if the thread is collapsed and has no children', ->
           count.withArgs('message').returns(0)
-          controller.collapsed = true
+          controller.toggleCollapsed(true)
           assert.isFalse(controller.shouldShowReply(count, false))
 
       describe 'and when filtered with children', ->
@@ -78,12 +89,12 @@ describe 'h.directives.thread.ThreadController', ->
 
         it 'does not show the reply if the thread is collapsed and has children', ->
           count.withArgs('message').returns(1)
-          controller.collapsed = true
+          controller.toggleCollapsed(true)
           assert.isFalse(controller.shouldShowReply(count, false))
 
         it 'does not show the reply if the thread is collapsed and has no children', ->
           count.withArgs('message').returns(0)
-          controller.collapsed = true
+          controller.toggleCollapsed(true)
           assert.isFalse(controller.shouldShowReply(count, false))
 
       describe 'and when filtered with children', ->
@@ -148,7 +159,7 @@ describe 'h.directives.thread.thread', ->
 
   it 'does not pulse the thread if it is hidden (parent collapsed)', ->
     fakeParent = {
-      controller: -> {collapsed: true}
+      controller: -> {isCollapsed: sinon.stub().returns(true)}
     }
     sandbox.stub(angular.element.prototype, 'parent').returns(fakeParent)
     $element.scope().$emit('annotationUpdate')
@@ -156,10 +167,10 @@ describe 'h.directives.thread.thread', ->
 
   it 'does not pulse the thread if it is hidden (grandparent collapsed)', ->
     fakeGrandParent = {
-      controller: -> {collapsed: true}
+      controller: -> {isCollapsed: sinon.stub().returns(true)}
     }
     fakeParent = {
-      controller: -> {collapsed: false}
+      controller: -> {isCollapsed: sinon.stub().returns(false)}
       parent: -> fakeGrandParent
     }
     sandbox.stub(angular.element.prototype, 'parent').returns(fakeParent)

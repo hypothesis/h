@@ -17,8 +17,18 @@ COLLAPSED_CLASS = 'thread-collapsed'
 ThreadController = [
   ->
     @container = null
-    @collapsed = false
     @isRoot = false
+
+    @_collapsed = false
+
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#isCollapsed
+    # @description
+    # Return whether or not the current thread is collapsed.
+    ###
+    this.isCollapsed = ->
+      @_collapsed
 
     ###*
     # @ngdoc method
@@ -26,8 +36,11 @@ ThreadController = [
     # @description
     # Toggle the collapsed property.
     ###
-    this.toggleCollapsed = ->
-      @collapsed = not @collapsed
+    this.toggleCollapsed = (value) ->
+      @_collapsed = if value?
+                      !!value
+                    else
+                      not @_collapsed
 
     ###*
     # @ngdoc method
@@ -38,7 +51,7 @@ ThreadController = [
     # the thread is currently filtered.
     ###
     this.shouldShowReply = (count, isFilterActive) ->
-      isCollapsedReply = (@collapsed && !@isRoot)
+      isCollapsedReply = (@_collapsed && !@isRoot)
       hasChildren = count('message') > 0
       hasFilterMatch = !isFilterActive || count('message') == count('match')
       !isCollapsedReply && hasChildren && hasFilterMatch
@@ -75,7 +88,7 @@ isHiddenThread = (elem) ->
   parentThread = parent.controller('thread')
   if !parentThread
     return false
-  return parentThread.collapsed || isHiddenThread(parent)
+  return parentThread.isCollapsed() || isHiddenThread(parent)
 
 
 ###*
@@ -138,7 +151,7 @@ thread = [
         pulse(elem)
 
       # Add and remove the collapsed class when the collapsed property changes.
-      scope.$watch (-> ctrl.collapsed), (collapsed) ->
+      scope.$watch (-> ctrl.isCollapsed()), (collapsed) ->
         if collapsed
           attrs.$addClass COLLAPSED_CLASS
         else
@@ -160,7 +173,7 @@ thread = [
       # Watch the thread-collapsed attribute.
       if attrs.threadCollapsed
         scope.$watch $parse(attrs.threadCollapsed), (collapsed) ->
-          ctrl.toggleCollapsed() if !!collapsed != ctrl.collapsed
+          ctrl.toggleCollapsed(collapsed)
 
     controller: 'ThreadController'
     controllerAs: 'vm'
