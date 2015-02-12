@@ -86,6 +86,18 @@ via the ``lint`` make command::
 
     $ make lint
 
+Our linting is set to low by default. However, if you'd like to help dust it
+off a but more, you can run the ``prospector`` command directly and add the
+``-s medium`` to get more nagging results from pep8, pylint, etc.
+
+Additionally, we'd love help spiffing up our docstrings! You can give those a
+detailed look (and scrub!) by running::
+
+    $ ./bin/pep257 h
+
+Or...for your own sanity, you can pass it the name of a specific file, instead
+of ``h`` (ex: ``h/api.py``).
+
 Testing
 -------
 
