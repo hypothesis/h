@@ -53,7 +53,7 @@ def annotation(context, request):
 
 @view_config(name='embed.js', renderer='h:templates/embed.js')
 def js(context, request):
-    request.response.content_type = 'text/javascript'
+    request.response.content_type = b'text/javascript'
     return {}
 
 
