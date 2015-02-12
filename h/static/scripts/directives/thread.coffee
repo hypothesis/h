@@ -125,6 +125,8 @@ thread = [
       if counter?
         counter.count 'message', 1
         scope.$on '$destroy', -> counter.count 'message', -1
+      else
+        scope.count = -> 1
 
       # Flash the thread when any child annotations are updated.
       scope.$on 'annotationUpdate', (event) ->
