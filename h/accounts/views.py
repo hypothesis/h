@@ -251,11 +251,11 @@ class ProfileController(horus.views.ProfileController):
     def profile(self):
         request = self.request
         model = {}
-        user_id = request.authenticated_userid
+        userid = request.authenticated_userid
         if request.registry.feature('notification'):
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
                 request,
-                user_id
+                userid
             )
         return {'model': model}
 
@@ -280,8 +280,9 @@ class AsyncProfileController(ProfileController):
 
 
 def includeme(config):
-    config.add_route('disable_user', '/disable/{user_id}',
+    config.add_route('disable_user', '/disable/{userid}',
                      factory=UserFactory,
-                     traverse="/{user_id}")
+                     traverse="/{userid}")
+
     config.include('horus')
     config.scan(__name__)
