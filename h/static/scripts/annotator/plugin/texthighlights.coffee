@@ -87,7 +87,7 @@ class TextHighlight
 
   # Scroll the highlight into view
   scrollIntoView: ->
-    new Promise (resolve, reject) ->
+    new Promise (resolve, reject) =>
       $(@_highlights).scrollintoview complete: ->
         resolve()
 
