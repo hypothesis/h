@@ -29,6 +29,8 @@ highlightRange = (normedRange, cssClass='annotator-hl') ->
 
 class TextHighlight
 
+  @highlightRange: highlightRange
+
   @createFrom: (segment, anchor, page) ->
     return null if segment.type isnt "magic range"
 
@@ -71,7 +73,7 @@ class TextHighlight
     TextHighlight._init @annotator
 
     # Create highlights and link them with the annotation
-    @_highlights = highlightRange(normedRange)
+    @_highlights = TextHighlight.highlightRange(normedRange)
     $(@_highlights).data "annotation", @annotation
 
   # Is this a temporary hl?
