@@ -62,7 +62,7 @@ describe 'Annotator.Plugin.TextHighlight', ->
 
   describe "scrollIntoView", ->
 
-    it 'actually calls jQuery scrollintoviews', ->
+    it 'calls jQuery scrollintoview', ->
       hl = createTestHighlight()
       hl.scrollIntoView()
       assert.called jqElement.scrollintoview
