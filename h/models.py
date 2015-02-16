@@ -115,13 +115,23 @@ class Annotation(annotation.Annotation):
     }
     __analysis__ = {
         'filter': {
-            'uri': {
+            'uri_index': {
                 'type': 'pattern_capture',
                 'preserve_original': '1',
                 'patterns': [
                     '([^\\/\\?\\#\\.]+)',
                     '([a-zA-Z0-9]+)(?:\\.([a-zA-Z0-9]+))*',
                     '([a-zA-Z0-9-]+)(?:\\.([a-zA-Z0-9-]+))*',
+                    '://(.+)',
+                    '://(.+)\\#',
+                ]
+            },
+            'uri_search': {
+                'type': 'pattern_capture',
+                'preserve_original': '1',
+                'patterns': [
+                    '://(.+)',
+                    '://(.+)\\#',
                 ]
             },
             'user': {
@@ -141,10 +151,11 @@ class Annotation(annotation.Annotation):
             },
             'uri_index': {
                 'tokenizer': 'keyword',
-                'filter': ['uri', 'unique']
+                'filter': ['uri_index', 'unique', 'lowercase']
             },
             'uri_search': {
                 'tokenizer': 'keyword',
+                'filter': ['uri_search', 'unique', 'lowercase']
             },
             'user': {
                 'tokenizer': 'keyword',
