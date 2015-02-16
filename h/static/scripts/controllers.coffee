@@ -187,8 +187,24 @@ class ViewerController
 
     loaded = []
 
+    _loadAnnotationsFrom = (query, offset) ->
+      queryCore =
+        limit: 20
+        offset: offset
+        sort: 'created'
+        order: 'asc'
+      q = angular.extend(queryCore, query)
+
+      store.SearchResource.get q, (results) ->
+        total = results.total
+        offset += results.rows.length
+        if offset < total
+          _loadAnnotationsFrom query, offset
+
+        annotationMapper.loadAnnotations(results.rows)
+
     loadAnnotations = ->
-      query = limit: 200
+      query = {}
       if annotationUI.tool is 'highlight'
         return unless auth.user
         query.user = auth.user
@@ -196,8 +212,8 @@ class ViewerController
       for p in crossframe.providers
         for e in p.entities when e not in loaded
           loaded.push e
-          r = store.SearchResource.get angular.extend(uri: e, query), (results) ->
-            annotationMapper.loadAnnotations(results.rows)
+          q = angular.extend(uri: e, query)
+          _loadAnnotationsFrom q, 0
 
       streamfilter.resetFilter().addClause('/uri', 'one_of', loaded)
 
