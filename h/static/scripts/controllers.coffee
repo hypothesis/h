@@ -188,7 +188,12 @@ class ViewerController
     loaded = []
 
     _loadAnnotationsFrom = (query, offset) ->
-      q = angular.extend({limit: 20, offset: offset}, query)
+      queryCore =
+        limit: 20
+        offset: offset
+        sort: 'created'
+        order: 'asc'
+      q = angular.extend(queryCore, query)
 
       store.SearchResource.get q, (results) ->
         total = results.total
