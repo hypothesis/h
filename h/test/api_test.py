@@ -92,6 +92,8 @@ def test_search_parameters():
     request_params = {
         'offset': '3',
         'limit': '100',
+        'sort': 'text',
+        'order': 'asc',
         'uri': 'http://bla.test',
         'some_field': 'something',
     }
@@ -103,6 +105,8 @@ def test_search_parameters():
         },
         'offset': 3,
         'limit': 100,
+        'sort': 'text',
+        'order': 'asc',
         'user': user,
     }
 

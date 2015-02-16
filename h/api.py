@@ -257,13 +257,21 @@ def _search_params(request_params, user=None):
     request_params = request_params.copy()
     search_params = {}
 
-    # Take limit and offset out of the parameters
+    # Take limit, offset, sort and order out of the parameters
     try:
         search_params['offset'] = int(request_params.pop('offset'))
     except (KeyError, ValueError):
         pass
     try:
         search_params['limit'] = int(request_params.pop('limit'))
+    except (KeyError, ValueError):
+        pass
+    try:
+        search_params['sort'] = request_params.pop('sort')
+    except (KeyError, ValueError):
+        pass
+    try:
+        search_params['order'] = request_params.pop('order')
     except (KeyError, ValueError):
         pass
 
@@ -281,7 +289,9 @@ def _add_any_field_params_into_query(search_params):
 
     offset = search_params.get('offset', None)
     limit = search_params.get('limit', None)
-    query = Annotation._build_query(search_params['query'], offset, limit)
+    sort = search_params.get('sort', None)
+    order = search_params.get('order', None)
+    query = Annotation._build_query(search_params['query'], offset, limit, sort, order)
 
     multi_match_query = {
         'multi_match': {
