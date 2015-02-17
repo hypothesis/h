@@ -11,7 +11,7 @@
 <article class="annotation thread-message"
          name="annotation"
          annotation="vm.container.message"
-         annotation-embedded="{{isEmbedded}}"
+         annotation-embedded="{{embedded}}"
          ng-if="vm.container.message"
          ng-show="threadFilter.check(vm.container)">
 </article>
@@ -36,12 +36,16 @@
 </div>
 
 <!-- Replies -->
-<ul class="thread-list" ng-hide="vm.collapsed">
+<ul class="thread-replies">
   <li class="thread"
+
+      thread="child"
+
       deep-count="count"
-      thread="child" thread-filter
-      ng-include="'thread.html'"
+      thread-filter
+
       ng-init="child.message.id || threadFilter.active(false)"
+      ng-class="{'thread-collapsed': vm.collapsed}"
       ng-repeat="child in vm.container.children
                  | orderBy : 'message.updated' : true"
       ng-show="count('edit') || count('match') || !threadFilter.active()">

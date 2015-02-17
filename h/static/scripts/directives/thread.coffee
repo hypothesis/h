@@ -90,8 +90,8 @@ isHiddenThread = (elem) ->
 # the collapsed state of the thread.
 ###
 thread = [
-  '$parse', '$window', 'pulse', 'render',
-  ($parse,   $window,   pulse,   render) ->
+  'RecursionHelper', '$parse', '$window', 'pulse', 'render',
+  (RecursionHelper,   $parse,   $window,   pulse,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter]) ->
       # Determine if this is a top level thread.
       ctrl.isRoot = $parse(attrs.threadRoot)(scope) == true
@@ -125,6 +125,8 @@ thread = [
       if counter?
         counter.count 'message', 1
         scope.$on '$destroy', -> counter.count 'message', -1
+      else
+        scope.count = -> 1
 
       # Flash the thread when any child annotations are updated.
       scope.$on 'annotationUpdate', (event) ->
@@ -162,9 +164,10 @@ thread = [
 
     controller: 'ThreadController'
     controllerAs: 'vm'
-    link: linkFn
+    compile: (el) -> RecursionHelper.compile(el, linkFn)
     require: ['thread', '?^deepCount']
     scope: true
+    templateUrl: 'thread.html'
 ]
 
 

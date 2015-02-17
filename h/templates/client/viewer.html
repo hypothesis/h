@@ -1,8 +1,5 @@
 <!-- Thread view -->
-<ul class="stream-list"
-    deep-count="count"
-    thread="threadRoot"
-    thread-filter="search.query">
+<ul class="stream-list">
   <li ng-show="threadFilter.active()"
       ><span ng-pluralize
              count="count('match')"
@@ -33,19 +30,20 @@
       </ul>
     </span>
   </li>
-  <li class="paper thread"
-      ng-class="{'js-hover': hasFocus(child.message)}"
-      deep-count="count"
-      thread="child" thread-filter
-      thread-collapsed="!search.query"
-      thread-root="true"
-      ng-include="'thread.html'"
-      ng-mouseenter="focus(child.message)"
-      ng-click="scrollTo(child.message)"
-      ng-mouseleave="focus()"
-      ng-repeat="child in vm.container.children | orderBy : sort.predicate"
-      ng-show="vm.container && shouldShowThread(child) &&
-               (count('edit') || count('match') || !threadFilter.active())">
-  </li>
+</ul>
+<ul class="stream-list"
+
+    thread-list="threadRoot"
+    thread-list-collapsed="!search.query"
+    thread-list-embedded="isEmbedded"
+    thread-list-order-by="sort.predicate"
+    thread-list-focus="focus(annotation)"
+    thread-list-has-focus="hasFocus(annotation)"
+    thread-list-scroll-to="scrollTo(annotation)"
+    thread-list-should-show="shouldShowThread(container)"
+
+    deep-count="count"
+    thread-filter="search.query"
+    >
 </ul>
 <!-- / Thread view -->

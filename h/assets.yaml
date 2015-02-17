@@ -93,6 +93,11 @@ angular_bootstrap:
   output: scripts/vendor/angular-bootstrap.min.js
   contents:
     - h:static/scripts/vendor/angular-bootstrap.js
+angular_recursion:
+  filters: uglifyjs
+  output: scripts/vendor/angular-recursion.min.js
+  contents:
+    - h:static/scripts/vendor/angular-recursion.js
 angular_resource:
   filters: uglifyjs
   output: scripts/vendor/angular-resource.min.js
@@ -196,6 +201,7 @@ app:
     - jquery
     - angular
     - angular_animate
+    - angular_recursion
     - angular_resource
     - angular_route
     - angular_sanitize
