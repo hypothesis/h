@@ -10,7 +10,6 @@ th.pluginInit()
 
 describe 'Annotator.Plugin.TextHighlight', ->
   sandbox = null
-  jqElement = null
   scrollTarget = null
 
   createTestHighlight = ->
@@ -29,15 +28,14 @@ describe 'Annotator.Plugin.TextHighlight', ->
   beforeEach ->
     sandbox = sinon.sandbox.create()
     sandbox.stub Annotator.TextHighlight, 'highlightRange',
-      (normedRange, cssClass) -> "test highlight span"
+      (normedRange, cssClass) ->
+        hl = document.createElement "hl"
+        hl.appendChild document.createTextNode "test highlight span"
+        hl
 
-    sandbox.stub Annotator.$.fn, "init", (selector, context) ->
-      jqElement =
-        selector: selector
-        data: sinon.spy()
-        scrollintoview: sinon.spy (options) ->
-          scrollTarget = this.selector
-          options?.complete?()
+    Annotator.$.fn.scrollintoview = sinon.spy (options) ->
+      scrollTarget = this[0]
+      options?.complete?()
 
   afterEach ->
     sandbox.restore()
@@ -50,22 +48,19 @@ describe 'Annotator.Plugin.TextHighlight', ->
 
     it 'stores the created highlight spans in _highlights', ->
       hl = createTestHighlight()
-      assert.equal hl._highlights, "test highlight span"
-
-    it "wraps a jQuery element around the highlight span", ->
-      hl = createTestHighlight()
-      assert.equal jqElement.selector, "test highlight span"
+      assert.equal hl._highlights.textContent, "test highlight span"
 
     it "assigns the annotation as data to the highlight span", ->
       hl = createTestHighlight()
-      assert.calledWith jqElement.data, "annotation", "test annotation"
+      annotation = $(hl._highlights).data "annotation"
+      assert.equal annotation, "test annotation"
 
   describe "scrollIntoView", ->
 
     it 'calls jQuery scrollintoview', ->
       hl = createTestHighlight()
       hl.scrollIntoView()
-      assert.called jqElement.scrollintoview
+      assert.called Annotator.$.fn.scrollintoview
 
     it 'scrolls to the created highlight span', ->
       hl = createTestHighlight()
