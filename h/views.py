@@ -24,6 +24,7 @@ def error(context, request):
 @view_config(
     layout='app',
     context='h.models.Annotation',
+    permission='read',
     renderer='h:templates/app.html',
 )
 def annotation(context, request):
