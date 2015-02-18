@@ -55,19 +55,14 @@ describe 'Annotator.Plugin.TextHighlight', ->
       annotation = $(hl._highlights).data "annotation"
       assert.equal annotation, "test annotation"
 
-  describe "scrollIntoView", ->
+  describe "scrollToView", ->
 
     it 'calls jQuery scrollintoview', ->
       hl = createTestHighlight()
-      hl.scrollIntoView()
+      hl.scrollToView()
       assert.called Annotator.$.fn.scrollintoview
 
     it 'scrolls to the created highlight span', ->
       hl = createTestHighlight()
-      hl.scrollIntoView()
+      hl.scrollToView()
       assert.equal scrollTarget, hl._highlights
-
-    it 'resolves the promise after scrolling', ->
-      hl = createTestHighlight()
-      hl.scrollIntoView().then ->
-        assert.ok scrollTarget

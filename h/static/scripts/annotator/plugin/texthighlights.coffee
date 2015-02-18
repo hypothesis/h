@@ -115,10 +115,9 @@ class TextHighlight
   getHeight: -> $(@_highlights).outerHeight true
 
   # Scroll the highlight into view
-  scrollIntoView: ->
-    new Promise (resolve, reject) =>
-      $(@_highlights).scrollintoview complete: ->
-        resolve()
+  scrollToView: ->
+    $(@_highlights).scrollintoview()
+    null
 
 class Annotator.Plugin.TextHighlights extends Annotator.Plugin
 

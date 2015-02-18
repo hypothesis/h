@@ -166,7 +166,7 @@ class Annotator.Guest extends Annotator
     crossframe.on 'scrollToAnnotation', (ctx, tag) =>
       for a in @anchoring.getAnchors()
         if a.annotation.$$tag is tag
-          a.scrollIntoView()
+          a.scrollToView()
           return
     crossframe.on 'getDocumentInfo', (trans) =>
       (@plugins.PDF?.getMetaData() ? Promise.reject())

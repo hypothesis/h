@@ -26,6 +26,11 @@ class TestAnchor extends Annotator.Anchor
 
 describe 'Annotator.Plugin.EnhancedAnchoring', ->
   sandbox = null
+  pendingTest = null
+
+  watchForScroll = ->
+    new Promise (resolve, reject) ->
+      pendingTest = resolve: resolve
 
   createAnchoringManager = ->
     annotator =
@@ -59,11 +64,11 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         anchor: anchor
         page: page
         removeFromDocument: sinon.spy()
-        scrollIntoView: sinon.spy ->
-          new Promise (resolve, reject) -> setTimeout -> resolve()
+        scrollToView: sinon.spy -> pendingTest?.resolve()
 
   afterEach ->
     sandbox.restore()
+    pendingTest = null
 
   describe "createAnchor", ->
 
@@ -223,14 +228,13 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
       assert.include hls, anchor2.highlight[anchor2.startPage]
       assert.notInclude hls, anchor3.highlight[anchor3.startPage]
 
-  describe 'Anchor.scrollIntoView()', ->
+  describe 'Anchor.scrollToView()', ->
     it 'calls scrollIntoView() on the highlight', ->
       am = createAnchoringManager()
       ann = createTestAnnotation "a1"
       anchor = am.createAnchor(ann, ann.target[0]).result
-      anchor.scrollIntoView().then ->
-
-        assert.called anchor.highlight[anchor.startPage].scrollIntoView
+      anchor.scrollToView()
+      assert.called anchor.highlight[anchor.startPage].scrollToView
 
   describe 'two-phased anchoring', ->
 
@@ -658,8 +662,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         am.document.currentIndex = 5  # We start from page 5
         am.document.setPageIndex = sinon.spy()
 
-        # Now we trigger the actual action
-        anchor.scrollIntoView()
+        anchor.scrollToView()
         assert.calledWith am.document.setPageIndex, 9
 
       it 'gets the wanted page rendered', ->
@@ -673,11 +676,11 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             renderPage am.document, 9
             renderPage am.document, 10
 
-        # Now we trigger the actual action
-        anchor.scrollIntoView().then ->
+        anchor.scrollToView()
+        watchForScroll().then ->
           assert am.document.isPageMapped 10
 
-      it 'calls scrollIntoView() on the highlight', ->
+      it 'calls scrollToView() on the highlight', ->
         am = createAnchoringManagerAndLazyDocument()
         ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
@@ -688,5 +691,6 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             renderPage am.document, 9
             renderPage am.document, 10
 
-        anchor.scrollIntoView().then ->
-          assert.called anchor.highlight[10].scrollIntoView
+        anchor.scrollToView()
+        watchForScroll().then ->
+          assert.called anchor.highlight[10].scrollToView
