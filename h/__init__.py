@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
+"""Initialize configuration."""
+
+from .app import main
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
 
-from .app import main
 __all__ = ['main']
 
 
 def includeme(config):
+    """Include config sections and setup Jinja."""
     config.include('h.authentication')
     config.include('h.authorization')
     config.include('h.features')

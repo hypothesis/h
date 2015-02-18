@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+"""The main h application."""
 from pyramid.config import Configurator
 from pyramid.path import AssetResolver
 from pyramid.response import FileResponse
 
 
 def create_app(settings):
+    """Configure and add static routes and views. Return the WSGI app."""
     config = Configurator(settings=settings)
     config.include('h')
 
@@ -24,6 +26,7 @@ def create_app(settings):
 
 
 def main(global_config, **settings):
+    """Create the h application with all the awesomeness that is configured."""
     from h import config
     environ_config = config.settings_from_environment()
     settings.update(environ_config)  # from environment variables
