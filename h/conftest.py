@@ -87,5 +87,34 @@ def es_connection(request, settings):
     request.addfinalizer(delete_db)
 
 
+@pytest.fixture()
+def mailer(config):
+    from pyramid_mailer.interfaces import IMailer
+    from pyramid_mailer.testing import DummyMailer
+    mailer = DummyMailer()
+    config.registry.registerUtility(mailer, IMailer)
+    return mailer
+
+
+@pytest.fixture()
+def routes_mapper(config):
+    from pyramid.interfaces import IRoutesMapper
+
+    class DummyRoute(object):
+        def __init__(self):
+            self.pregenerator = None
+
+        def generate(self, kw):
+            return '/dummy/route'
+
+    class DummyMapper(object):
+        def get_route(self, route_name):
+            return DummyRoute()
+
+    mapper = DummyMapper()
+    config.registry.registerUtility(mapper, IRoutesMapper)
+    return mapper
+
+
 def _make_session():
     return scoped_session(sessionmaker(extension=ZopeTransactionExtension()))

@@ -2,11 +2,15 @@ from mock import patch, Mock, MagicMock
 import pytest
 
 from pyramid.testing import DummyRequest
-from horus.interfaces import IUserClass, IActivationClass, IUIStrings, IProfileSchema, IProfileForm
+from horus.interfaces import (
+    IUserClass, IActivationClass, IUIStrings, IProfileSchema, IProfileForm,
+    IRegisterSchema, IRegisterForm
+)
 from horus.schemas import ProfileSchema
 from horus.forms import SubmitForm
 from horus.strings import UIStringsBase
 
+from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
 from h.models import _
 
@@ -26,6 +30,8 @@ def configure(config):
     config.registry.registerUtility(UIStringsBase, IUIStrings)
     config.registry.registerUtility(ProfileSchema, IProfileSchema)
     config.registry.registerUtility(SubmitForm, IProfileForm)
+    config.registry.registerUtility(MagicMock(), IRegisterSchema)
+    config.registry.registerUtility(MagicMock(), IRegisterForm)
 
 
 def _get_fake_request(username, password, with_subscriptions=False, active=True):
@@ -117,6 +123,26 @@ def test_user_disabled(config, user_model):
     assert user.password == user_model.generate_random_password.return_value
 
 
+@pytest.mark.usefixtures('activation_model',
+                         'dummy_db_session',
+                         'mailer',
+                         'routes_mapper',
+                         'user_model')
+def test_registration_does_not_autologin(config, authn_policy):
+    configure(config)
+
+    request = DummyRequest()
+    request.method = 'POST'
+    request.POST.update({'email': 'giraffe@example.com',
+                         'password': 'secret',
+                         'username': 'giraffe'})
+
+    ctrl = RegisterController(request)
+    ctrl.register()
+
+    assert not authn_policy.remember.called
+
+
 @pytest.fixture
 def user_model(config):
     mock = MagicMock()
@@ -129,3 +155,16 @@ def activation_model(config):
     mock = MagicMock()
     config.registry.registerUtility(mock, IActivationClass)
     return mock
+
+
+@pytest.fixture
+def authn_policy(config):
+    authn_policy = MagicMock()
+
+    class DummyAuthorizationPolicy(object):
+        def permits(self, *args, **kwargs):
+            return True
+
+    config.set_authorization_policy(DummyAuthorizationPolicy())
+    config.set_authentication_policy(authn_policy)
+    return authn_policy
