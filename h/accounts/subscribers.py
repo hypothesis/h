@@ -63,7 +63,7 @@ def registration_activated(event):
 class AutoLogin(object):
     """
     AutoLogin is a subscriber predicate that ensures that the marked subscriber
-    will only be called if the value of the ``horus.autologin`` setting matches
+    will only be called if the value of the ``h.autologin`` setting matches
     the value provided to the predicate.
     """
 
@@ -78,7 +78,9 @@ class AutoLogin(object):
     def __call__(self, event):
         request = event.request
         settings = request.registry.settings
-        autologin = asbool(settings.get('horus.autologin', False))
+        # We use our own autologin setting in order to prevent horus autologin
+        # interfering with the value of the logged-in user in the session.
+        autologin = asbool(settings.get('h.autologin', False))
         return self.val == autologin
 
 
