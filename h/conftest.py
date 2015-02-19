@@ -57,6 +57,26 @@ def db_session(request, settings):
 
 
 @pytest.fixture()
+def dummy_db_session(config):
+    from hem.interfaces import IDBSession
+
+    class DummySession(object):
+        def __init__(self):
+            self.added = []
+            self.flushed = False
+
+        def add(self, obj):
+            self.added.append(obj)
+
+        def flush(self):
+            self.flushed = True
+
+    sess = DummySession()
+    config.registry.registerUtility(sess, IDBSession)
+    return sess
+
+
+@pytest.fixture()
 def es_connection(request, settings):
     es = store_from_settings(settings)
     create_db()
