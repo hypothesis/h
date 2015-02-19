@@ -49,7 +49,15 @@ createTimeHelpers = ->
     return null if not date
     {_, breakpoint} = getBreakpoint(date)
     return null unless breakpoint
-    return breakpoint[2]
+    secs = breakpoint[2]
+
+    # We don't want to refresh anything more often than 5 seconds
+    secs = Math.max secs, 5
+
+    # setTimeout limit is MAX_INT32=(2^31-1) (in ms),
+    # which is about 24.8 days. So we don't set up any timeouts
+    # longer than 24 days, that is, 2073600 seconds.
+    secs = Math.min secs, 2073600
 
 angular.module('h.helpers')
 .factory('timeHelpers', createTimeHelpers)
