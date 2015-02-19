@@ -42,6 +42,9 @@ class Group(GroupMixin, Base):
 
 
 class User(UserMixin, Base):
+    # Database primary key
+    _id = sa.Column('id', sa.Integer, autoincrement=True, primary_key=True)
+
     # Normalised user identifier
     uid = sa.Column(sa.Unicode(30), nullable=False, unique=True)
     # Username as chosen by the user on registration
@@ -56,6 +59,12 @@ class User(UserMixin, Base):
     def _set_username(self, value):
         self._username = value
         self.uid = _username_to_uid(value)
+
+    @declared_attr
+    def id(self):
+        return sa.orm.synonym('_username',
+                              descriptor=property(self._get_username,
+                                                  self._set_username))
 
     @declared_attr
     def username(self):
