@@ -3,6 +3,7 @@ imports = [
   'ngRoute'
   'ngSanitize'
   'ngTagsInput'
+  'RecursionHelper'
   'h.helpers'
   'h.identity'
   'h.session'

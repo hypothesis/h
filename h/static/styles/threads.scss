@@ -16,12 +16,9 @@ $threadexp-width: .6em;
   }
 }
 
-.thread-list {
-  margin-top: 0.5em;
-
-  .thread-collapsed {
-    .tag-list, .annotation-body {display: none;}
-    .thread-reply { margin-top: 0 }
+.thread-replies {
+  .thread:first-child {
+    margin-top: 0.5em;
   }
 }
 
@@ -60,14 +57,6 @@ $threadexp-width: .6em;
     border-left: 1px dotted $gray-light;
     padding: 0;
     padding-left: $thread-padding;
-
-    &.thread-collapsed {
-      border-color: transparent;
-
-      & > article markdown {
-        display: none;
-      }
-    }
   }
 
   .threadexp {
@@ -92,19 +81,6 @@ $threadexp-width: .6em;
         top: 0;
         left: 0;
       }
-    }
-  }
-
-  &.thread-collapsed {
-    & > ul {
-      display: none;
-    }
-
-    & > .thread-message {
-      .thread &,
-      .thread & .annotation-header,
-      .thread & .annotation-section { margin: 0 }
-      .thread & footer { display: none }
     }
   }
 }

@@ -1,7 +1,7 @@
 <a href="" class="threadexp"
-   title="{{vm.collapsed && 'Expand' || 'Collapse'}}"
-   ><span ng-class="{'h-icon-plus': !!vm.collapsed,
-                     'h-icon-minus': !vm.collapsed}"></span></a>
+   title="{{vm.isCollapsed() && 'Expand' || 'Collapse'}}"
+   ><span ng-class="{'h-icon-plus': vm.isCollapsed(),
+                     'h-icon-minus': !vm.isCollapsed()}"></span></a>
 
 <!-- Annotation -->
 <div ng-if="vm.container && !vm.container.message" class="thread-deleted">
@@ -11,24 +11,27 @@
 <article class="annotation thread-message"
          name="annotation"
          annotation="vm.container.message"
-         annotation-embedded="{{isEmbedded}}"
+         annotation-embedded="{{embedded}}"
          ng-if="vm.container.message"
-         ng-show="threadFilter.check(vm.container)">
+         ng-show="vm.matchesFilter()">
 </article>
 
 <!-- Reply count -->
-<div class="thread-reply" ng-show="vm.shouldShowReply(count, threadFilter.active())">
+<div class="thread-reply"
+     ng-show="vm.shouldShowNumReplies()">
   <a class="reply-count small"
      href=""
-     ng-pluralize count="count('message') - 1"
+     ng-pluralize
+     count="vm.numReplies()"
      when="{'0': '', one: '1 reply', other: '{} replies'}"></a>
 </div>
 
-<div class="thread-load-more" ng-show="vm.container.message.id && threadFilter.active()">
+<div class="thread-load-more" ng-show="vm.shouldShowLoadMore()">
   <a class="load-more small"
      href=""
-     ng-click="threadFilter.active(false)"
-     ng-pluralize count="count('message') - count('match')"
+     ng-click="vm.loadMore()"
+     ng-pluralize
+     count="vm.numLoadMore()"
      when="{'0': '',
            one: 'View one more in conversation',
            other: 'View {} more in conversation'}"
@@ -36,14 +39,16 @@
 </div>
 
 <!-- Replies -->
-<ul class="thread-list" ng-hide="vm.collapsed">
+<ul class="thread-replies">
   <li class="thread"
+
+      thread="child"
+
       deep-count="count"
-      thread="child" thread-filter
-      ng-include="'thread.html'"
-      ng-init="child.message.id || threadFilter.active(false)"
+      thread-filter
+
       ng-repeat="child in vm.container.children
                  | orderBy : 'message.updated' : true"
-      ng-show="count('edit') || count('match') || !threadFilter.active()">
+      ng-show="vm.shouldShowAsReply()">
   </li>
 </ul>

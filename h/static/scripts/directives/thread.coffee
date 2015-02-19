@@ -1,7 +1,3 @@
-### global -COLLAPSED_CLASS ###
-
-COLLAPSED_CLASS = 'thread-collapsed'
-
 ###*
 # @ngdoc type
 # @name thread.ThreadController
@@ -17,31 +13,145 @@ COLLAPSED_CLASS = 'thread-collapsed'
 ThreadController = [
   ->
     @container = null
-    @collapsed = false
-    @isRoot = false
+    @parent = null
+    @counter = null
+    @filter = null
+    @_collapsed = true
+
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#isCollapsed
+    # @description
+    # Returns a boolean indicating whether the replies to this thread are
+    # currently hidden by default. Note that the visibility of replies is also
+    # dependent on the state of the thread filter, if present.
+    ###
+    this.isCollapsed = ->
+      @_collapsed
 
     ###*
     # @ngdoc method
     # @name thread.ThreadController#toggleCollapsed
     # @description
-    # Toggle the collapsed property.
+    # Toggle whether or not the replies to this thread are hidden by default.
+    # Note that the visibility of replies is also dependent on the state of the
+    # thread filter, if present.
     ###
-    this.toggleCollapsed = ->
-      @collapsed = not @collapsed
+    this.toggleCollapsed = (value) ->
+      @_collapsed = if value?
+                      !!value
+                    else
+                      not @_collapsed
 
     ###*
     # @ngdoc method
-    # @name thread.ThreadController#shouldShowReply
+    # @name thread.ThreadController#shouldShowAsReply
     # @description
-    # Determines if the reply counter should be rendered. Requires the
-    # `count` directive to be passed and a boolean that indicates whether
-    # the thread is currently filtered.
+    # Return a boolean indicating whether this thread should be shown if it is
+    # being rendered as a reply to another annotation.
     ###
-    this.shouldShowReply = (count, isFilterActive) ->
-      isCollapsedReply = (@collapsed && !@isRoot)
-      hasChildren = count('message') > 0
-      hasFilterMatch = !isFilterActive || count('message') == count('match')
-      !isCollapsedReply && hasChildren && hasFilterMatch
+    this.shouldShowAsReply = ->
+      shouldShowUnfiltered = not @parent?.isCollapsed()
+      shouldShowFiltered = this._count('match') > 0
+
+      # We always show replies that contain an editor
+      if this._count('edit') > 0
+        return true
+
+      if this._isFilterActive()
+        return shouldShowFiltered
+      else
+        return shouldShowUnfiltered
+
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#shouldShowNumReplies
+    # @description
+    # Returns a boolean indicating whether the reply count should be rendered
+    # for the annotation at the root of this thread.
+    ###
+    this.shouldShowNumReplies = ->
+      hasChildren = this._count('message') > 0
+      allRepliesShown = this._count('message') == this._count('match')
+      hasFilterMatch = !this._isFilterActive() || allRepliesShown
+      hasChildren && hasFilterMatch
+
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#numReplies
+    # @description
+    # Returns the cumulative number of replies to the annotation at the root of
+    # this thread.
+    ###
+    this.numReplies = ->
+      if @counter
+        this._count('message') - 1
+      else
+        0
+
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#shouldShowLoadMore
+    # @description
+    # Return a boolean indicating whether the "load more" link should be shown
+    # for the annotation at the root of this thread. The "load more" link can be
+    # shown when the thread filter is active (although it may not be visible if
+    # no replies are hidden in this thread).
+    ###
+    this.shouldShowLoadMore = ->
+      this.container?.message?.id? and this._isFilterActive()
+
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#numLoadMore
+    # @description
+    # Returns the number of replies in this thread which are currently hidden as
+    # a result of the thread filter.
+    ###
+    this.numLoadMore = ->
+      this._count('message') - this._count('match')
+
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#loadMore
+    # @description
+    # Makes visible any replies in this thread which have been hidden by the
+    # thread filter.
+    ###
+    this.loadMore = ->
+      # If we want to show the rest of the replies in the thread, we need to
+      # uncollapse all parent threads.
+      ctrl = this
+      while ctrl
+        ctrl.toggleCollapsed(false)
+        ctrl = ctrl.parent
+      # Deactivate the thread filter for this thread.
+      @filter?.active(false)
+
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#matchesFilter
+    # @description
+    # Returns a boolean indicating whether the annotation at the root of this
+    # thread is marked as a match by the current thread filter. If there is no
+    # thread filter attached to this thread, it will return true.
+    ###
+    this.matchesFilter = ->
+      if not @filter
+        return true
+      return @filter.check(@container)
+
+    this._isFilterActive = ->
+      if @filter
+        @filter.active()
+      else
+        false
+
+    this._count = (name) ->
+      if @counter
+        @counter.count(name)
+      else
+        0
 
     this
 ]
@@ -75,7 +185,7 @@ isHiddenThread = (elem) ->
   parentThread = parent.controller('thread')
   if !parentThread
     return false
-  return parentThread.collapsed || isHiddenThread(parent)
+  return parentThread.isCollapsed() || isHiddenThread(parent)
 
 
 ###*
@@ -84,17 +194,17 @@ isHiddenThread = (elem) ->
 # @restrict A
 # @description
 # Directive that instantiates {@link thread.ThreadController ThreadController}.
-#
-# If the `thread-collapsed` attribute is specified, it is treated as an
-# expression to watch in the context of the current scope that controls
-# the collapsed state of the thread.
 ###
 thread = [
-  '$parse', '$window', 'pulse', 'render',
-  ($parse,   $window,   pulse,   render) ->
-    linkFn = (scope, elem, attrs, [ctrl, counter]) ->
-      # Determine if this is a top level thread.
-      ctrl.isRoot = $parse(attrs.threadRoot)(scope) == true
+  'RecursionHelper', '$parse', '$window', 'pulse', 'render',
+  (RecursionHelper,   $parse,   $window,   pulse,   render) ->
+    linkFn = (scope, elem, attrs, [ctrl, counter, filter]) ->
+
+      # We would ideally use require for this, but searching parents only for a
+      # controller is a feature of Angular 1.3 and above only.
+      ctrl.parent = elem.parent().controller('thread')
+      ctrl.counter = counter
+      ctrl.filter = filter
 
       # Toggle collapse on click.
       elem.on 'click', (event) ->
@@ -135,13 +245,6 @@ thread = [
         event.stopPropagation()
         pulse(elem)
 
-      # Add and remove the collapsed class when the collapsed property changes.
-      scope.$watch (-> ctrl.collapsed), (collapsed) ->
-        if collapsed
-          attrs.$addClass COLLAPSED_CLASS
-        else
-          attrs.$removeClass COLLAPSED_CLASS
-
       # The watch is necessary because the computed value of the attribute
       # expression may change. This won't happen when we use the thread
       # directive in a repeat, since the element will be torn down whenever the
@@ -155,16 +258,12 @@ thread = [
           ctrl.container = thread
           scope.$digest()
 
-      # Watch the thread-collapsed attribute.
-      if attrs.threadCollapsed
-        scope.$watch $parse(attrs.threadCollapsed), (collapsed) ->
-          ctrl.toggleCollapsed() if !!collapsed != ctrl.collapsed
-
     controller: 'ThreadController'
     controllerAs: 'vm'
-    link: linkFn
-    require: ['thread', '?^deepCount']
+    compile: (el) -> RecursionHelper.compile(el, linkFn)
+    require: ['thread', '?^deepCount', '?^threadFilter']
     scope: true
+    templateUrl: 'thread.html'
 ]
 
 
