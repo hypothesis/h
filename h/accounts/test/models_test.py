@@ -8,6 +8,13 @@ from .. import models
 
 
 class TestUser(object):
+    def test_user_id_is_username(self):
+        fred = models.User(username='fredbloggs',
+                           email='fred@example.com',
+                           password='123')
+
+        assert fred.id == 'fredbloggs'
+
     def test_cannot_create_dot_variant_of_user(self, db_session):
         fred = models.User(username='fredbloggs',
                            email='fred@example.com',
