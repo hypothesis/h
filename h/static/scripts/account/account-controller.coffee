@@ -33,7 +33,7 @@ class AccountController
       $scope.$broadcast 'formState', form.$name, ''  # Update status btn
 
     $scope.tab = 'Account'
-    session.profile({user_id: auth.user}).$promise
+    session.profile().$promise
       .then (result) =>
         $scope.subscriptions = result.subscriptions
 
