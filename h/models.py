@@ -189,10 +189,8 @@ class Document(document.Document):
 
 class Client(object):
 
-    """A basic implementation of :class:`h.oauth.IClient`."""
+    """A basic implementation of :class:`h.interfaces.IClient`."""
 
-    client_id = None
-    client_secret = None
-
-    def __init__(self, client_id):
+    def __init__(self, request, client_id):
         self.client_id = client_id
+        self.client_secret = None

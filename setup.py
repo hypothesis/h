@@ -27,6 +27,7 @@ versioneer.tag_prefix = 'v'
 versioneer.parentdir_prefix = 'h-'
 
 install_requires = [
+    'PyJWT>=0.4.3,<0.5',
     'SQLAlchemy>=0.8.0',
     'alembic>=0.6.3',
     'annotator>=0.14.0,<0.15',

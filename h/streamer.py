@@ -607,4 +607,5 @@ def includeme(config):
     config.add_route('ws', 'ws')
     config.add_view(websocket, route_name='ws')
     config.add_view(bad_handshake, context=HandshakeError)
+    config.include('.queue')
     config.scan(__name__)
