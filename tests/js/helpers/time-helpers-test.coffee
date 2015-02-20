@@ -21,16 +21,16 @@ FIXTURES_TO_FUZZY_STRING = [
 ]
 
 FIXTURES_NEXT_FUZZY_UPDATE = [
-  [10, 1]
-  [29, 1]
-  [49, 1]
+  [10, 5] # we have a minimum of 5 secs
+  [29, 5]
+  [49, 5]
   [minute + 5, minute]
   [3 * minute + 5, minute]
   [4 * hour, hour]
   [27 * hour, day]
   [3 * day + 30 * minute, day]
-  [6 * month + 2 * day, month]
-  [8 * year, year]
+  [6 * month + 2 * day, 24 * day] # longer times are not supported
+  [8 * year, 24 * day]            # by setTimout
 ]
 
 describe 'timeHelpers', ->
