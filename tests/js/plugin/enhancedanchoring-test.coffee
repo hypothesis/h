@@ -28,34 +28,6 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
   sandbox = null
   pendingTest = null
 
-  watchForScroll = ->
-    new Promise (resolve, reject) ->
-      pendingTest = resolve: resolve
-
-  createAnchoringManager = ->
-    annotator =
-      publish: sinon.spy()
-
-    am = new Annotator.Plugin.EnhancedAnchoring()
-    am.annotator = annotator
-    am.pluginInit()
-
-    am.chooseAccessPolicy()
-
-    am.document.setPageIndex = sinon.spy()
-
-    am.strategies.push
-      name: "dummy anchoring strategy"
-      code: (annotation, target) ->
-        new TestAnchor am, annotation, target, 42, 42
-
-    am
-
-  createTestAnnotation = (id, targets = 1) ->
-    id: "annotation " + id
-    target: (("target " + id + "-" + num) for num in [1 .. targets])
-    anchors: []
-
   beforeEach ->
     sandbox = sinon.sandbox.create()
     sandbox.stub Annotator.TextHighlight, 'createFrom',
@@ -70,171 +42,206 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
     sandbox.restore()
     pendingTest = null
 
-  describe "createAnchor", ->
+  describe "single-phase anchoring", ->
 
-    it 'adds an anchor property to the annotations', ->
-      am = createAnchoringManager()
-      ann = createTestAnnotation "a1", 2
+    createTestAnnotation = (id, targets = 1) ->
+      id: "annotation " + id
+      target: (("target " + id + "-" + num) for num in [1 .. targets])
+      anchors: []
 
-      anchor1 = am.createAnchor(ann, ann.target[0]).result
-      anchor2 = am.createAnchor(ann, ann.target[1]).result
+    createAnchoringManager = ->
+      annotator =
+        publish: sinon.spy()
 
-      assert.isArray ann.anchors
-      assert.include ann.anchors, anchor1
-      assert.include ann.anchors, anchor2
-      assert.equal ann.anchors.length, 2
+      am = new Annotator.Plugin.EnhancedAnchoring()
+      am.annotator = annotator
+      am.pluginInit()
 
-    it 'adds an annotation property to the created anchors', ->
-      am = createAnchoringManager()
-      ann = createTestAnnotation "a1"
-      anchor = am.createAnchor(ann, ann.target[0]).result
-      assert.equal anchor.annotation, ann
+      am.chooseAccessPolicy()
 
-    it 'adds a target property to the created anchors', ->
-      am = createAnchoringManager()
-      ann = createTestAnnotation "a1"
-      anchor = am.createAnchor(ann, ann.target[0]).result
+      am.document.setPageIndex = sinon.spy()
 
-      assert.equal anchor.target, ann.target[0]
+      am.strategies.push
+        name: "dummy anchoring strategy"
+        code: (annotation, target) ->
+          new TestAnchor am, annotation, target, 42, 42
 
-    it 'creates the anchors from the right targets', ->
-      am = createAnchoringManager()
-      ann = createTestAnnotation "a1"
-      anchor = am.createAnchor(ann, ann.target[0]).result
-      assert.equal anchor.id, "fake anchor for " + anchor.target.id
+      am
 
-    it 'adds the created anchors to the correct per-page array', ->
-      am = createAnchoringManager()
-      ann = createTestAnnotation "a1"
-      anchor = am.createAnchor(ann, ann.target[0]).result
-      assert.include am.anchors[anchor.startPage], anchor
+    describe "createAnchor() - single-phase", ->
 
-    it 'adds the created highlights to the anchors', ->
-      am = createAnchoringManager()
-      ann = createTestAnnotation "a1"
-      anchor = am.createAnchor(ann, ann.target[0]).result
+      it 'adds an anchor property to the annotations', ->
+        am = createAnchoringManager()
+        ann = createTestAnnotation "a1", 2
 
-      assert.isObject anchor.highlight
-      page = anchor.startPage
-      hl = anchor.highlight[page]
-      assert.ok hl
-      assert.equal hl.page, page
+        anchor1 = am.createAnchor(ann, ann.target[0]).result
+        anchor2 = am.createAnchor(ann, ann.target[1]).result
 
-    it 'announces the creation of the highlights in an event', ->
-      am = createAnchoringManager()
+        assert.isArray ann.anchors
+        assert.include ann.anchors, anchor1
+        assert.include ann.anchors, anchor2
+        assert.equal ann.anchors.length, 2
 
-      assert.notCalled am.annotator.publish
+      it 'adds an annotation property to the created anchors', ->
+        am = createAnchoringManager()
+        ann = createTestAnnotation "a1"
+        anchor = am.createAnchor(ann, ann.target[0]).result
 
-      ann = createTestAnnotation "a1"
-      anchor = am.createAnchor(ann, ann.target[0]).result
+        assert.equal anchor.annotation, ann
 
-      hl = anchor.highlight[anchor.startPage]
-      assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
+      it 'adds a target property to the created anchors', ->
+        am = createAnchoringManager()
+        ann = createTestAnnotation "a1"
+        anchor = am.createAnchor(ann, ann.target[0]).result
 
-    it 'adds an anchor property to the created Highlights', ->
-      am = createAnchoringManager()
-      ann = createTestAnnotation "a1"
-      anchor = am.createAnchor(ann, ann.target[0]).result
+        assert.equal anchor.target, ann.target[0]
 
-      page = anchor.startPage
-      hl = anchor.highlight[page]
-      assert.equal hl.anchor, anchor
+      it 'creates the anchors from the right targets', ->
+        am = createAnchoringManager()
+        ann = createTestAnnotation "a1"
+        anchor = am.createAnchor(ann, ann.target[0]).result
 
-  describe "getAnchors", ->
+        assert.equal anchor.id, "fake anchor for " + anchor.target.id
 
-    it 'returns an empty array by default', ->
-      am = createAnchoringManager()
-      anchors = am.getAnchors()
-      assert.isArray anchors
-      assert.equal anchors.length, 0
+      it 'adds the created anchors to the correct per-page array', ->
+        am = createAnchoringManager()
+        ann = createTestAnnotation "a1"
+        anchor = am.createAnchor(ann, ann.target[0]).result
 
-    it 'returns all the anchors', ->
-      am = createAnchoringManager()
+        assert.include am.anchors[anchor.startPage], anchor
 
-      ann1 = createTestAnnotation "a1", 2
-      ann2 = createTestAnnotation "a2"
-      ann3 = createTestAnnotation "a3"
-      anchor11 = am.createAnchor(ann1, ann1.target[0]).result
-      anchor12 = am.createAnchor(ann1, ann1.target[1]).result
-      anchor2 = am.createAnchor(ann2, ann2.target).result
-      anchor3 = am.createAnchor(ann3, ann2.target).result
+      it 'adds the created highlights to the anchors', ->
+        am = createAnchoringManager()
+        ann = createTestAnnotation "a1"
+        anchor = am.createAnchor(ann, ann.target[0]).result
 
-      anchors = am.getAnchors()
+        assert.isObject anchor.highlight
 
-      assert.isArray anchors
-      assert.include anchors, anchor11
-      assert.include anchors, anchor12
-      assert.include anchors, anchor2
-      assert.include anchors, anchor3
+        page = anchor.startPage
+        hl = anchor.highlight[page]
 
-    it 'returns the anchors belonging to a set of annotations', ->
-      am = createAnchoringManager()
-      ann1 = createTestAnnotation "a1", 2
-      ann2 = createTestAnnotation "a2"
-      ann3 = createTestAnnotation "a3"
-      anchor11 = am.createAnchor(ann1, ann1.target[0]).result
-      anchor12 = am.createAnchor(ann1, ann1.target[1]).result
-      anchor2 = am.createAnchor(ann2, ann2.target).result
-      anchor3 = am.createAnchor(ann3, ann2.target).result
+        assert.ok hl
+        assert.equal hl.page, page
 
-      anchors = am.getAnchors [ann1, ann2]
+      it 'announces the creation of the highlights in an event', ->
+        am = createAnchoringManager()
 
-      assert.isArray anchors
-      assert.include anchors, anchor11
-      assert.include anchors, anchor12
-      assert.include anchors, anchor2
-      assert.notInclude anchors, anchor3
+        assert.notCalled am.annotator.publish
 
-  describe 'getHighlights', ->
-    it 'returns an empty array by default', ->
-      am = createAnchoringManager()
-      hls = am.getHighlights()
-      assert.isArray hls
-      assert.equal hls.length, 0
+        ann = createTestAnnotation "a1"
+        anchor = am.createAnchor(ann, ann.target[0]).result
 
-    it 'returns all the highlights', ->
-      am = createAnchoringManager()
-      ann1 = createTestAnnotation "a1", 2
-      ann2 = createTestAnnotation "a2"
-      ann3 = createTestAnnotation "a3"
-      anchor11 = am.createAnchor(ann1, ann1.target[0]).result
-      anchor12 = am.createAnchor(ann1, ann1.target[1]).result
-      anchor2 = am.createAnchor(ann2, ann2.target).result
-      anchor3 = am.createAnchor(ann3, ann2.target).result
+        hl = anchor.highlight[anchor.startPage]
 
-      hls = am.getHighlights()
+        assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
 
-      assert.isArray hls
-      assert.include hls, anchor11.highlight[anchor11.startPage]
-      assert.include hls, anchor12.highlight[anchor12.startPage]
-      assert.include hls, anchor2.highlight[anchor2.startPage]
-      assert.include hls, anchor3.highlight[anchor3.startPage]
+      it 'adds an anchor property to the created Highlights', ->
+        am = createAnchoringManager()
+        ann = createTestAnnotation "a1"
+        anchor = am.createAnchor(ann, ann.target[0]).result
 
-    it 'returns the highlights belonging to a set of annotations', ->
-      am = createAnchoringManager()
-      ann1 = createTestAnnotation "a1", 2
-      ann2 = createTestAnnotation "a2"
-      ann3 = createTestAnnotation "a3"
-      anchor11 = am.createAnchor(ann1, ann1.target[0]).result
-      anchor12 = am.createAnchor(ann1, ann1.target[1]).result
-      anchor2 = am.createAnchor(ann2, ann2.target).result
-      anchor3 = am.createAnchor(ann3, ann2.target).result
+        page = anchor.startPage
+        hl = anchor.highlight[page]
 
-      hls = am.getHighlights [ann1, ann2]
+        assert.equal hl.anchor, anchor
 
-      assert.isArray hls
-      assert.include hls, anchor11.highlight[anchor11.startPage]
-      assert.include hls, anchor12.highlight[anchor12.startPage]
-      assert.include hls, anchor2.highlight[anchor2.startPage]
-      assert.notInclude hls, anchor3.highlight[anchor3.startPage]
+    describe "getAnchors()", ->
 
-  describe 'Anchor.scrollToView()', ->
-    it 'calls scrollIntoView() on the highlight', ->
-      am = createAnchoringManager()
-      ann = createTestAnnotation "a1"
-      anchor = am.createAnchor(ann, ann.target[0]).result
-      anchor.scrollToView()
-      assert.called anchor.highlight[anchor.startPage].scrollToView
+      it 'returns an empty array by default', ->
+        am = createAnchoringManager()
+        anchors = am.getAnchors()
+        assert.isArray anchors
+        assert.equal anchors.length, 0
+
+      it 'returns all the anchors', ->
+        am = createAnchoringManager()
+
+        ann1 = createTestAnnotation "a1", 2
+        ann2 = createTestAnnotation "a2"
+        ann3 = createTestAnnotation "a3"
+        anchor11 = am.createAnchor(ann1, ann1.target[0]).result
+        anchor12 = am.createAnchor(ann1, ann1.target[1]).result
+        anchor2 = am.createAnchor(ann2, ann2.target).result
+        anchor3 = am.createAnchor(ann3, ann2.target).result
+
+        anchors = am.getAnchors()
+
+        assert.isArray anchors
+        assert.include anchors, anchor11
+        assert.include anchors, anchor12
+        assert.include anchors, anchor2
+        assert.include anchors, anchor3
+
+      it 'returns the anchors belonging to a set of annotations', ->
+        am = createAnchoringManager()
+        ann1 = createTestAnnotation "a1", 2
+        ann2 = createTestAnnotation "a2"
+        ann3 = createTestAnnotation "a3"
+        anchor11 = am.createAnchor(ann1, ann1.target[0]).result
+        anchor12 = am.createAnchor(ann1, ann1.target[1]).result
+        anchor2 = am.createAnchor(ann2, ann2.target).result
+        anchor3 = am.createAnchor(ann3, ann2.target).result
+
+        anchors = am.getAnchors [ann1, ann2]
+
+        assert.isArray anchors
+        assert.include anchors, anchor11
+        assert.include anchors, anchor12
+        assert.include anchors, anchor2
+        assert.notInclude anchors, anchor3
+
+    describe 'getHighlights()', ->
+      it 'returns an empty array by default', ->
+        am = createAnchoringManager()
+        hls = am.getHighlights()
+
+        assert.isArray hls
+        assert.equal hls.length, 0
+
+      it 'returns all the highlights', ->
+        am = createAnchoringManager()
+        ann1 = createTestAnnotation "a1", 2
+        ann2 = createTestAnnotation "a2"
+        ann3 = createTestAnnotation "a3"
+        anchor11 = am.createAnchor(ann1, ann1.target[0]).result
+        anchor12 = am.createAnchor(ann1, ann1.target[1]).result
+        anchor2 = am.createAnchor(ann2, ann2.target).result
+        anchor3 = am.createAnchor(ann3, ann2.target).result
+
+        hls = am.getHighlights()
+
+        assert.isArray hls
+        assert.include hls, anchor11.highlight[anchor11.startPage]
+        assert.include hls, anchor12.highlight[anchor12.startPage]
+        assert.include hls, anchor2.highlight[anchor2.startPage]
+        assert.include hls, anchor3.highlight[anchor3.startPage]
+
+      it 'returns the highlights belonging to a set of annotations', ->
+        am = createAnchoringManager()
+        ann1 = createTestAnnotation "a1", 2
+        ann2 = createTestAnnotation "a2"
+        ann3 = createTestAnnotation "a3"
+        anchor11 = am.createAnchor(ann1, ann1.target[0]).result
+        anchor12 = am.createAnchor(ann1, ann1.target[1]).result
+        anchor2 = am.createAnchor(ann2, ann2.target).result
+        anchor3 = am.createAnchor(ann3, ann2.target).result
+
+        hls = am.getHighlights [ann1, ann2]
+
+        assert.isArray hls
+        assert.include hls, anchor11.highlight[anchor11.startPage]
+        assert.include hls, anchor12.highlight[anchor12.startPage]
+        assert.include hls, anchor2.highlight[anchor2.startPage]
+        assert.notInclude hls, anchor3.highlight[anchor3.startPage]
+
+    describe 'Anchor.scrollToView() - single-phase', ->
+      it 'calls scrollIntoView() on the highlight', ->
+        am = createAnchoringManager()
+        ann = createTestAnnotation "a1"
+        anchor = am.createAnchor(ann, ann.target[0]).result
+        anchor.scrollToView()
+
+        assert.called anchor.highlight[anchor.startPage].scrollToView
 
   describe 'two-phased anchoring', ->
 
@@ -654,6 +661,10 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             assert anchor.fullyRealized
 
     describe 'when scrolling to a virtual anchor', ->
+
+      watchForScroll = ->
+        new Promise (resolve, reject) ->
+          pendingTest = resolve: resolve
 
       it 'scrolls right next to the wanted page (to get it rendered)', ->
         am = createAnchoringManagerAndLazyDocument()
