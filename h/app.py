@@ -21,6 +21,9 @@ def create_app(settings):
     config.include('.')
     config.include('.features')
 
+    if config.registry.feature('accounts'):
+        config.include('.accounts')
+
     if config.registry.feature('api'):
         api_app = create_api(settings)
         api_view = wsgiapp2(api_app)
