@@ -48,7 +48,8 @@ class AppController
           annotationMapper.loadAnnotations data
         when 'delete'
           for annotation in data
-            $scope.$emit('annotationDeleted', annotation)
+            if a = threading.idTable[annotation.id]?.message
+              $scope.$emit('annotationDeleted', a)
 
     streamer.onmessage = (data) ->
       return if !data or data.type != 'annotation-notification'
