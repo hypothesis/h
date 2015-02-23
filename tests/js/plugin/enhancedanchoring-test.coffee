@@ -125,10 +125,8 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
       it 'announces the creation of the highlights in an event', ->
         am = createAnchoringManager()
-
-        assert.notCalled am.annotator.publish
-
         ann = createTestAnnotation "a1"
+        am.annotator.publish.reset()
         anchor = am.createAnchor(ann, ann.target[0]).result
 
         hl = anchor.highlight[anchor.startPage]
@@ -431,6 +429,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
       it 'announces no highlihts', ->
         am = createAnchoringManagerAndLazyDocument()
         ann = createTestAnnotationForPages "a1", [1]
+        am.annotator.publish.reset()
         anchor = am.createAnchor(ann, ann.target[0]).result
 
         assert.notCalled am.annotator.publish
