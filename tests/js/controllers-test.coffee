@@ -42,6 +42,8 @@ describe 'h', ->
 
     fakeThreading =
       idTable: {}
+      register: (annotation) ->
+        @idTable[annotation.id] = message: annotation
 
     $provide.value 'identity', fakeIdentity
     $provide.value 'streamer', fakeStreamer
@@ -101,25 +103,24 @@ describe 'h', ->
         createController()
         $scope.$emit = sinon.spy()
 
-        # Prepare the annotation that will come "from the wire"
-        anns = [
-          id: "fakeId"
-          data: "remote data"
-        ]
-
         # Prepare the annotation that we have locally
         localAnnotation =
-          id: "fake it"
+          id: "fake ID"
           data: "local data"
 
-        # Put our annotation into the threading id table
-        fakeThreading.idTable.fakeId = message: localAnnotation
+        # Introduce our annotation into threading
+        fakeThreading.register localAnnotation
+
+        # Prepare the annotation that will come "from the wire"
+        remoteAnnotation =
+          id: localAnnotation.id  # same id as locally
+          data: "remote data"     # different data
 
         # Simulate a delete action
         fakeStreamer.onmessage
           type: "annotation-notification"
           options: action: "delete"
-          payload: anns
+          payload: [ remoteAnnotation ]
 
         assert.calledWith $scope.$emit, "annotationDeleted", localAnnotation
 
