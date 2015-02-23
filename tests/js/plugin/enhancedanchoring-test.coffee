@@ -27,6 +27,9 @@ class TestAnchor extends Annotator.Anchor
 describe 'Annotator.Plugin.EnhancedAnchoring', ->
   sandbox = null
   pendingTest = null
+  am = null
+  ann = null
+  anchor = null
 
   beforeEach ->
     sandbox = sinon.sandbox.create()
@@ -41,6 +44,9 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
   afterEach ->
     sandbox.restore()
     pendingTest = null
+    am = null
+    ann = null
+    anchor = null
 
   describe "single-phase anchoring", ->
 
@@ -68,10 +74,16 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
       am
 
+    beforeEach ->
+      am = createAnchoringManager()
+
     describe "createAnchor() - single-phase", ->
 
+      beforeEach ->
+        ann = createTestAnnotation "a1"
+        anchor = am.createAnchor(ann, ann.target[0]).result
+
       it 'adds an anchor property to the annotations', ->
-        am = createAnchoringManager()
         ann = createTestAnnotation "a1", 2
 
         anchor1 = am.createAnchor(ann, ann.target[0]).result
@@ -83,37 +95,22 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         assert.equal ann.anchors.length, 2
 
       it 'adds an annotation property to the created anchors', ->
-        am = createAnchoringManager()
-        ann = createTestAnnotation "a1"
-        anchor = am.createAnchor(ann, ann.target[0]).result
 
         assert.equal anchor.annotation, ann
 
       it 'adds a target property to the created anchors', ->
-        am = createAnchoringManager()
-        ann = createTestAnnotation "a1"
-        anchor = am.createAnchor(ann, ann.target[0]).result
 
         assert.equal anchor.target, ann.target[0]
 
       it 'creates the anchors from the right targets', ->
-        am = createAnchoringManager()
-        ann = createTestAnnotation "a1"
-        anchor = am.createAnchor(ann, ann.target[0]).result
 
         assert.equal anchor.id, "fake anchor for " + anchor.target.id
 
       it 'adds the created anchors to the correct per-page array', ->
-        am = createAnchoringManager()
-        ann = createTestAnnotation "a1"
-        anchor = am.createAnchor(ann, ann.target[0]).result
 
         assert.include am.anchors[anchor.startPage], anchor
 
       it 'adds the created highlights to the anchors', ->
-        am = createAnchoringManager()
-        ann = createTestAnnotation "a1"
-        anchor = am.createAnchor(ann, ann.target[0]).result
 
         assert.isObject anchor.highlight
 
@@ -124,19 +121,12 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         assert.equal hl.page, page
 
       it 'announces the creation of the highlights in an event', ->
-        am = createAnchoringManager()
-        ann = createTestAnnotation "a1"
-        am.annotator.publish.reset()
-        anchor = am.createAnchor(ann, ann.target[0]).result
 
         hl = anchor.highlight[anchor.startPage]
 
         assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
 
       it 'adds an anchor property to the created Highlights', ->
-        am = createAnchoringManager()
-        ann = createTestAnnotation "a1"
-        anchor = am.createAnchor(ann, ann.target[0]).result
 
         page = anchor.startPage
         hl = anchor.highlight[page]
@@ -146,14 +136,11 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
     describe "getAnchors()", ->
 
       it 'returns an empty array by default', ->
-        am = createAnchoringManager()
         anchors = am.getAnchors()
         assert.isArray anchors
         assert.equal anchors.length, 0
 
       it 'returns all the anchors', ->
-        am = createAnchoringManager()
-
         ann1 = createTestAnnotation "a1", 2
         ann2 = createTestAnnotation "a2"
         ann3 = createTestAnnotation "a3"
@@ -171,7 +158,6 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         assert.include anchors, anchor3
 
       it 'returns the anchors belonging to a set of annotations', ->
-        am = createAnchoringManager()
         ann1 = createTestAnnotation "a1", 2
         ann2 = createTestAnnotation "a2"
         ann3 = createTestAnnotation "a3"
@@ -190,14 +176,12 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
     describe 'getHighlights()', ->
       it 'returns an empty array by default', ->
-        am = createAnchoringManager()
         hls = am.getHighlights()
 
         assert.isArray hls
         assert.equal hls.length, 0
 
       it 'returns all the highlights', ->
-        am = createAnchoringManager()
         ann1 = createTestAnnotation "a1", 2
         ann2 = createTestAnnotation "a2"
         ann3 = createTestAnnotation "a3"
@@ -215,7 +199,6 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         assert.include hls, anchor3.highlight[anchor3.startPage]
 
       it 'returns the highlights belonging to a set of annotations', ->
-        am = createAnchoringManager()
         ann1 = createTestAnnotation "a1", 2
         ann2 = createTestAnnotation "a2"
         ann3 = createTestAnnotation "a3"
@@ -234,7 +217,6 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
     describe 'Anchor.scrollToView() - single-phase', ->
       it 'calls scrollIntoView() on the highlight', ->
-        am = createAnchoringManager()
         ann = createTestAnnotation "a1"
         anchor = am.createAnchor(ann, ann.target[0]).result
         anchor.scrollToView()
@@ -345,28 +327,28 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
       result
 
+    ann = null
+
+    beforeEach ->
+      am = createAnchoringManagerAndLazyDocument()
+      ann = createTestAnnotationForPages "a1", [1]
+
     describe "when the wanted page is already rendered", ->
 
       it 'creates real anchors', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           assert anchor.fullyRealized
 
       it 'creates highlights', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           hl = anchor.highlight[1]
           assert.ok hl
           assert.equal hl.page, 1
 
       it 'announces the highlights with the appropriate event', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           hl = anchor.highlight[1]
 
@@ -375,9 +357,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
     describe 'when a page is unrendered', ->
 
       it 'calls removeFromDocument an the correct highlight', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           hl = anchor.highlight[1]
           unrenderPage(am.document, 1).then ->
@@ -385,27 +365,21 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             assert.called hl.removeFromDocument
 
       it 'removes highlights from the relevant page', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           unrenderPage(am.document, 1).then ->
 
             assert !anchor.fullyRealized
 
       it 'announces the removal of the highlights from the relevant page', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           hl = anchor.highlight[1]
           unrenderPage(am.document, 1).then ->
             assert.calledWith am.annotator.publish, 'highlightRemoved', hl
 
       it 'switches the anchor to virtual', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           unrenderPage(am.document, 1).then ->
             assert !anchor.fullyRealized
@@ -413,22 +387,16 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
     describe 'when the wanted page is not rendered', ->
 
       it 'creates virtual anchors', ->
-        am = createAnchoringManagerAndLazyDocument()
-        ann = createTestAnnotationForPages "a1", [1]
         anchor = am.createAnchor(ann, ann.target[0]).result
 
         assert !anchor.fullyRealized
 
       it 'creates no highlights', ->
-        am = createAnchoringManagerAndLazyDocument()
-        ann = createTestAnnotationForPages "a1", [1]
         anchor = am.createAnchor(ann, ann.target[0]).result
 
         assert.notOk anchor.highlight[1], "Should not have a highlight on page 1"
 
       it 'announces no highlihts', ->
-        am = createAnchoringManagerAndLazyDocument()
-        ann = createTestAnnotationForPages "a1", [1]
         am.annotator.publish.reset()
         anchor = am.createAnchor(ann, ann.target[0]).result
 
@@ -437,15 +405,11 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
       describe 'when the pages are rendered later on', ->
 
         it 'realizes the anchor', ->
-          am = createAnchoringManagerAndLazyDocument()
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           renderPage(am.document, 1).then ->
             assert anchor.fullyRealized
 
         it 'creates the highlight', ->
-          am = createAnchoringManagerAndLazyDocument()
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           renderPage(am.document, 1).then ->
             hl = anchor.highlight[1]
@@ -453,8 +417,6 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
 
         it 'announces the highlight', ->
-          am = createAnchoringManagerAndLazyDocument()
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           renderPage(am.document, 1).then ->
             hl = anchor.highlight[1]
@@ -462,34 +424,29 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
     describe 'when an anchor spans several pages, some of them rendered', ->
 
+      beforeEach ->
+        ann = createTestAnnotationForPages "a1", [[2,3]]
+
       it 'creates partially realized anchors', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 2).then ->
-          ann = createTestAnnotationForPages "a1", [[2,3]]
           anchor = am.createAnchor(ann, ann.target[0]).result
 
           assert !anchor.fullyRealized
 
       it 'creates the highlights for the rendered pages', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 2).then ->
-          ann = createTestAnnotationForPages "a1", [[2,3]]
           anchor = am.createAnchor(ann, ann.target[0]).result
 
           assert.ok anchor.highlight[2]
 
       it 'creates no highlights for the missing pages', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 2).then ->
-          ann = createTestAnnotationForPages "a1", [[2,3]]
           anchor = am.createAnchor(ann, ann.target[0]).result
 
           assert.notOk anchor.highlight[3]
 
       it 'announces the creation of highlights for the rendered pages', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 2).then ->
-          ann = createTestAnnotationForPages "a1", [[2,3]]
           anchor = am.createAnchor(ann, ann.target[0]).result
 
           assert.calledWith am.annotator.publish,
@@ -498,27 +455,21 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
       describe 'when the missing pages are rendered', ->
 
         it 'the anchor is fully realized', ->
-          am = createAnchoringManagerAndLazyDocument()
           renderPage(am.document, 2).then ->
-            ann = createTestAnnotationForPages "a1", [[2,3]]
             anchor = am.createAnchor(ann, ann.target[0]).result
             renderPage(am.document, 3).then ->
 
               assert anchor.fullyRealized
 
         it 'creates the missing highlights', ->
-          am = createAnchoringManagerAndLazyDocument()
           renderPage(am.document, 2).then ->
-            ann = createTestAnnotationForPages "a1", [[2,3]]
             anchor = am.createAnchor(ann, ann.target[0]).result
             renderPage(am.document, 3).then ->
 
               assert.ok anchor.highlight[3]
 
         it 'announces the creation of the missing highlights', ->
-          am = createAnchoringManagerAndLazyDocument()
           renderPage(am.document, 2).then ->
-            ann = createTestAnnotationForPages "a1", [[2,3]]
             anchor = am.createAnchor(ann, ann.target[0]).result
 
             renderPage(am.document, 3).then ->
@@ -526,12 +477,13 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
               assert.calledWith am.annotator.publish,
                 'highlightsCreated', [anchor.highlight[3]]
 
-    describe 'when an achor spans several pages, and a page is unrendered', ->
+    describe 'when an anchor spans several pages, and a page is unrendered', ->
+
+      beforeEach ->
+        ann = createTestAnnotationForPages "a1", [[2,3]]
 
       it 'calls removeFromDocument() on the involved highlight', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPages(am.document, [2,3]).then ->
-          ann = createTestAnnotationForPages "a1", [[2,3]]
           anchor = am.createAnchor(ann, ann.target[0]).result
           hl = anchor.highlight[2]
           unrenderPage(am.document, 2).then ->
@@ -539,9 +491,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             assert.called hl.removeFromDocument
 
       it 'does not call removeFromDocument() on the other highlights', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPages(am.document, [2,3]).then ->
-          ann = createTestAnnotationForPages "a1", [[2,3]]
           anchor = am.createAnchor(ann, ann.target[0]).result
           hl = anchor.highlight[3]
           unrenderPage(am.document, 2).then ->
@@ -549,27 +499,21 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             assert.notCalled hl.removeFromDocument
 
       it 'removes the involved highlight', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPages(am.document, [2, 3]).then ->
-          ann = createTestAnnotationForPages "a1", [[2,3]]
           anchor = am.createAnchor(ann, ann.target[0]).result
           unrenderPage(am.document, 2).then ->
 
             assert.notOk anchor.highlight[2]
 
       it 'retains the other highlights', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPages(am.document, [2,3]).then ->
-          ann = createTestAnnotationForPages "a1", [[2,3]]
           anchor = am.createAnchor(ann, ann.target[0]).result
           unrenderPage(am.document, 2).then ->
 
           assert.ok anchor.highlight[3]
 
       it 'announces the removal of the involved highlight', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPages(am.document, [2, 3]).then ->
-          ann = createTestAnnotationForPages "a1", [[2,3]]
           anchor = am.createAnchor(ann, ann.target[0]).result
           hl = anchor.highlight[2]
           unrenderPage(am.document, 2).then ->
@@ -577,9 +521,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             assert.calledWith am.annotator.publish, 'highlightRemoved', hl
 
       it 'switched the anchor to virtual', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPages(am.document, [2, 3]).then ->
-          ann = createTestAnnotationForPages "a1", [[2,3]]
           anchor = am.createAnchor(ann, ann.target[0]).result
           hl = anchor.highlight[2]
           unrenderPage(am.document, 2).then ->
@@ -588,10 +530,11 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
     describe 'manually virtualizing an anchor', ->
 
+      beforeEach ->
+        ann = createTestAnnotationForPages "a1", [1]
+
       it 'calls removeFromDocument() on the highlight', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           hl = anchor.highlight[1]
           anchor.virtualize 1
@@ -599,18 +542,14 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
           assert.called hl.removeFromDocument
 
       it 'removes the highlight', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           anchor.virtualize 1
 
           assert.notOk anchor.highlight[1], "the highlight should be no more"
 
       it 'announces the removal of the highlight', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           hl = anchor.highlight[1]
           anchor.virtualize 1
@@ -618,9 +557,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
           assert.calledWith am.annotator.publish, 'highlightRemoved', hl
 
       it 'switches the anchor to virtual', ->
-        am = createAnchoringManagerAndLazyDocument()
         renderPage(am.document, 1).then ->
-          ann = createTestAnnotationForPages "a1", [1]
           anchor = am.createAnchor(ann, ann.target[0]).result
           anchor.virtualize 1
 
@@ -629,9 +566,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
       describe 'when re-realizing a manually virtualized anchor', ->
 
         it 're-creates the highlight', ->
-          am = createAnchoringManagerAndLazyDocument()
           renderPage(am.document, 1).then ->
-            ann = createTestAnnotationForPages "a1", [1]
             anchor = am.createAnchor(ann, ann.target[0]).result
             anchor.virtualize 1
             anchor.realize()
@@ -639,9 +574,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             assert.ok anchor.highlight[1]
 
         it 'announces the creation of the highlight', ->
-          am = createAnchoringManagerAndLazyDocument()
           renderPage(am.document, 1).then ->
-            ann = createTestAnnotationForPages "a1", [1]
             anchor = am.createAnchor(ann, ann.target[0]).result
             anchor.virtualize 1
             anchor.realize()
@@ -650,9 +583,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
             assert.calledWith am.annotator.publish, 'highlightsCreated', [hl]
 
         it 'realizes the anchor', ->
-          am = createAnchoringManagerAndLazyDocument()
           renderPage(am.document, 1).then ->
-            ann = createTestAnnotationForPages "a1", [1]
             anchor = am.createAnchor(ann, ann.target[0]).result
             anchor.virtualize 1
             anchor.realize()
@@ -665,9 +596,10 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         new Promise (resolve, reject) ->
           pendingTest = resolve: resolve
 
-      it 'scrolls right next to the wanted page (to get it rendered)', ->
-        am = createAnchoringManagerAndLazyDocument()
+      beforeEach ->
         ann = createTestAnnotationForPages "a1", [10]
+
+      it 'scrolls right next to the wanted page (to get it rendered)', ->
         anchor = am.createAnchor(ann, ann.target[0]).result
         am.document.currentIndex = 5  # We start from page 5
         am.document.setPageIndex = sinon.spy()
@@ -676,8 +608,6 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
         assert.calledWith am.document.setPageIndex, 9
 
       it 'gets the wanted page rendered', ->
-        am = createAnchoringManagerAndLazyDocument()
-        ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
         am.document.currentIndex = 5  # We start from page 5
         am.document.setPageIndex = sinon.spy (index) ->
@@ -691,8 +621,6 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
           assert am.document.isPageMapped 10
 
       it 'calls scrollToView() on the highlight', ->
-        am = createAnchoringManagerAndLazyDocument()
-        ann = createTestAnnotationForPages "a1", [10]
         anchor = am.createAnchor(ann, ann.target[0]).result
         am.document.currentIndex = 5  # We start from page 5
         am.document.setPageIndex = sinon.spy (index) ->
