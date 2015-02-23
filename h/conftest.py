@@ -40,6 +40,20 @@ def config(request, settings):
 
 
 @pytest.fixture()
+def authn_policy(config):
+    from mock import MagicMock
+
+    class DummyAuthorizationPolicy(object):
+        def permits(self, *args, **kwargs):
+            return True
+
+    config.set_authorization_policy(DummyAuthorizationPolicy())
+    policy = MagicMock()
+    config.set_authentication_policy(policy)
+    return policy
+
+
+@pytest.fixture()
 def db_session(request, settings):
     """SQLAlchemy session."""
     engine = engine_from_config(settings, 'sqlalchemy.')

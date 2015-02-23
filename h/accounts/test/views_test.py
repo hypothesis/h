@@ -155,16 +155,3 @@ def activation_model(config):
     mock = MagicMock()
     config.registry.registerUtility(mock, IActivationClass)
     return mock
-
-
-@pytest.fixture
-def authn_policy(config):
-    authn_policy = MagicMock()
-
-    class DummyAuthorizationPolicy(object):
-        def permits(self, *args, **kwargs):
-            return True
-
-    config.set_authorization_policy(DummyAuthorizationPolicy())
-    config.set_authentication_policy(authn_policy)
-    return authn_policy
