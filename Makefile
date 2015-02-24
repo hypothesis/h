@@ -9,7 +9,7 @@ clean:
 	@rm -rf h/static/.webassets-cache
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
-	find h/stat/scripts \
+	find h/static/scripts \
 		-path 'h/static/scripts/vendor' -prune \
 		-o -iname '*.js' \
 		-exec rm {} \;
