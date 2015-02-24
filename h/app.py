@@ -1,10 +1,29 @@
 # -*- coding: utf-8 -*-
 """The main h application."""
+import functools
+
 from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from pyramid.wsgi import wsgiapp2
 
 from .auth import acl_authz, remote_authn, session_authn
+
+
+def strip_vhm(view):
+    """A view decorator that strips the X-Vhm-Root header from the request.
+
+    The X-Vhm-Root header is used by Pyramid for virtual hosting. The router
+    treats the value of this header as a traversal prefix. When a view
+    callable itself is an embedded Pyramid application, the inner application
+    should not process this header again. In this situation, this decorator
+    makes the virtual root work as intended.
+    """
+    @functools.wraps(view)
+    def wrapped(context, request):
+        request.headers.pop('X-Vhm-Root', None)
+        return view(context, request)
+
+    return wrapped
 
 
 def create_app(settings):
@@ -27,7 +46,11 @@ def create_app(settings):
     if config.registry.feature('api'):
         api_app = create_api(settings)
         api_view = wsgiapp2(api_app)
-        config.add_view(api_view, name='api')
+        config.add_view(api_view, name='api', decorator=strip_vhm)
+        # Add the view again with the 'index' route name, otherwise it will
+        # not take precedence over the index when a virtual root is in use.
+        config.add_view(api_view, name='api', decorator=strip_vhm,
+                        route_name='index')
 
     if config.registry.feature('streamer'):
         config.include('.streamer')
