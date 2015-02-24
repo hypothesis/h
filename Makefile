@@ -9,13 +9,11 @@ clean:
 	@rm -rf h/static/.webassets-cache
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
-	find h/static/scripts \
-		-path 'h/static/scripts/vendor' -prune \
-		-o -iname '*.js' \
-		-exec rm {} \;
-	find h/static/styles/*.css \
-		-iname 'icomoon.css' -prune \
-		-o -exec rm {} \;
+	find h/static/scripts -mindepth 1 -name '*.min.js' \
+		-delete
+	find h/static/styles -mindepth 1 \
+		-name 'icomoon.css' -prune \
+		-o -name '*.css' -delete
 
 test:
 	@echo -n "Checking to see if elasticsearch is running..."

@@ -1,3 +1,6 @@
+angular = require('angular')
+unorm = require('../vendor/unorm')
+
 # Shared helper methods for working with strings/unicode strings
 # For unicode normalization we use the unorm library
 createStringHelpers = ->

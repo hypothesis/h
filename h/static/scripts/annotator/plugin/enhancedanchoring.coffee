@@ -1,4 +1,4 @@
-Annotator = @Annotator
+Annotator = require('annotator')
 $ = Annotator.$
 
 # Fake two-phase / pagination support, used for HTML documents

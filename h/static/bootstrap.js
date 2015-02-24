@@ -1,4 +1,7 @@
-var Klass = window.Annotator.Host;
+require('./scripts/vendor/jquery.scrollintoview');
+
+var Annotator = require('annotator');
+var Klass = require('./scripts/host');
 var docs = 'https://github.com/hypothesis/h/blob/master/README.rst#customized-embedding';
 var options = {
   app: jQuery('link[type="application/annotator+html"]').attr('href'),
@@ -23,4 +26,4 @@ if (window.hasOwnProperty('hypothesisConfig')) {
 }
 
 window.annotator = new Klass(document.body, options);
-window.Annotator.noConflict().$.noConflict(true);
+Annotator.noConflict().$.noConflict(true);

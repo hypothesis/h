@@ -1,3 +1,5 @@
+angular = require('angular')
+
 AUTH_SESSION_ACTIONS = [
   'login'
   'logout'
@@ -124,3 +126,6 @@ angular.module('h')
 .config(configure)
 .controller('AuthAppController', AuthAppController)
 .controller('AuthPageController', AuthPageController)
+
+require('./account-controller')
+require('./auth-controller')
