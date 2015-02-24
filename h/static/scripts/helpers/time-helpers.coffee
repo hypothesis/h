@@ -14,6 +14,7 @@ BREAKPOINTS = [
   [2 * day,    'yesterday',      day   ]
   [month,      '{} days ago',    day   ]
   [year,       '{} months ago',  month ]
+  [2 * year,   'one year ago',   year  ]
   [Infinity,   '{} years ago',   year  ]
 ]
 
