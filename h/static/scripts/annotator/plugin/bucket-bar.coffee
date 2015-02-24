@@ -142,7 +142,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
 
     # Get an anchor from the page we want to go to
     anchor = next[0]
-    anchor.scrollIntoView()
+    anchor.scrollToView()
 
   _update: =>
     wrapper = @annotator.wrapper

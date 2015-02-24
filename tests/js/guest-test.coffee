@@ -197,11 +197,11 @@ describe 'Annotator.Guest', ->
       it 'scrolls to the anchor with the matching tag', ->
         guest = createGuest()
         anchors = [
-          {annotation: {$$tag: 'tag1'}, scrollIntoView: sandbox.stub()}
+          {annotation: {$$tag: 'tag1'}, scrollToView: sandbox.stub()}
         ]
         sandbox.stub(guest.anchoring, 'getAnchors').returns(anchors)
         emitGuestEvent('scrollToAnnotation', 'ctx', 'tag1')
-        assert.called(anchors[0].scrollIntoView)
+        assert.called(anchors[0].scrollToView)
 
     describe 'on "getDocumentInfo" event', ->
       guest = null
