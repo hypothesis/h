@@ -118,7 +118,6 @@ class TestRequestValidator(unittest.TestCase):
         assert res is True
         assert self.request.client is client
         assert self.request.user == 'citizen'
-        assert self.request.scopes is None
 
 
 def test_get_client(config):
