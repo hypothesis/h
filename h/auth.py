@@ -90,8 +90,8 @@ class RequestValidator(_RequestValidator):
 
         try:
             jwt.api.verify_signature(payload, signing_input, header, signature,
-                                 key=client.client_secret, audience=aud,
-                                 leeway=LEEWAY)
+                                     key=client.client_secret, audience=aud,
+                                     leeway=LEEWAY)
         except jwt.InvalidTokenError:
             return False
 
