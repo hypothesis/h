@@ -13,8 +13,8 @@
   },
   "devDependencies": {
     "karma": "^0.12.17",
+    "karma-browserify": "^3.0.3",
     "karma-cli": "0.0.4",
-    "karma-coffee-preprocessor": "^0.2.1",
     "karma-mocha": "^0.1.4",
     "karma-ng-html2js-preprocessor": "^0.1.0",
     "karma-phantomjs-launcher": "^0.1.4",
@@ -42,12 +42,14 @@
   "browser": {
     "jquery": "./h/static/scripts/vendor/jquery.js",
     "annotator": "./h/static/scripts/vendor/annotator.js",
-    "angular": "./h/static/scripts/vendor/angular.js"
+    "angular": "./h/static/scripts/vendor/angular.js",
+    "angular-mock": "./h/static/scripts/vendor/angular-mocks.js"
   },
   "browserify-shim": {
     "jquery": "global:jQuery",
     "annotator": "global:Annotator",
     "angular": "global:angular",
+    "angular-mock": "global:angular.mock",
     "./h/static/scripts/vendor/jschannel.js": "Channel",
     "./h/static/scripts/vendor/page_text_mapper_core.js": "PageTextMapperCore",
     "./h/static/scripts/vendor/dom_text_matcher.js": {

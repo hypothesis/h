@@ -1,11 +1,18 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
+
 
 describe 'store', ->
   $httpBackend = null
   sandbox = null
   store = null
   fakeDocument = null
+
+  before ->
+    angular.module('h', ['ngResource'])
+    require('../../h/static/scripts/store-service')
 
   beforeEach module('h')
 

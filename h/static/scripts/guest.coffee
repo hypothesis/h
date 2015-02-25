@@ -2,48 +2,6 @@ $ = require('jquery')
 Annotator = require('annotator')
 Channel = require('./vendor/jschannel')
 
-# Monkeypatch annotator!
-require('./annotator/monkey')
-
-# Cross-frame communication
-require('./annotator/plugin/cross-frame')
-require('./annotation-sync')
-require('./bridge')
-require('./discovery')
-
-# Document plugin
-require('./vendor/annotator.document')
-
-# Bucket bar
-require('./annotator/plugin/bucket-bar')
-
-# Toolbar
-require('./annotator/plugin/toolbar')
-
-# Drawing highlights
-require('./annotator/plugin/texthighlights')
-
-# Creating selections
-require('./annotator/plugin/textselection')
-
-# URL fragments
-require('./annotator/plugin/fragmentselector')
-
-# Anchoring
-require('./vendor/dom_text_mapper')
-require('./annotator/plugin/enhancedanchoring')
-require('./annotator/plugin/domtextmapper')
-require('./annotator/plugin/textposition')
-require('./annotator/plugin/textquote')
-require('./annotator/plugin/textrange')
-
-# PDF
-require('./vendor/page_text_mapper_core')
-require('./annotator/plugin/pdf')
-
-# Fuzzy
-require('./vendor/dom_text_matcher')
-require('./annotator/plugin/fuzzytextanchors')
 
 module.exports = class Annotator.Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'

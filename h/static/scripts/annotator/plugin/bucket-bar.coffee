@@ -1,3 +1,5 @@
+Annotator = require('annotator')
+
 $ = Annotator.$
 
 class Annotator.Plugin.BucketBar extends Annotator.Plugin
@@ -338,3 +340,5 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
 
   isUpper:   (i) -> i == 1
   isLower:   (i) -> i == @index.length - 2
+
+exports.BucketBar = Annotator.Plugin.BucketBar

@@ -1,10 +1,18 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 
-describe 'h.directives', ->
-  $scope = null
+
+describe 'h:directives.simple-search', ->
   $compile = null
+  $element = null
+  $scope = null
   fakeWindow = null
   isolate = null
+
+  before ->
+    angular.module('h', [])
+    require('../../../h/static/scripts/directives/simple-search')
 
   beforeEach module('h')
 
@@ -12,62 +20,59 @@ describe 'h.directives', ->
     $compile = _$compile_
     $scope = _$rootScope_.$new()
 
-  describe '.simpleSearch', ->
-    $element = null
-    beforeEach ->
-      $scope.update = sinon.spy()
-      $scope.clear = sinon.spy()
+    $scope.update = sinon.spy()
+    $scope.clear = sinon.spy()
 
-      template= '''
-      <div class="simpleSearch"
-            query="query"
-            on-search="update(query)"
-            on-clear="clear()">
-      </div>
-      '''
+    template= '''
+    <div class="simpleSearch"
+          query="query"
+          on-search="update(query)"
+          on-clear="clear()">
+    </div>
+    '''
 
-      $element = $compile(angular.element(template))($scope)
-      $scope.$digest()
-      isolate = $element.isolateScope()
+    $element = $compile(angular.element(template))($scope)
+    $scope.$digest()
+    isolate = $element.isolateScope()
 
-    it 'updates the search-bar', ->
-      $scope.query = "Test query"
-      $scope.$digest()
-      assert.equal(isolate.searchtext, $scope.query)
+  it 'updates the search-bar', ->
+    $scope.query = "Test query"
+    $scope.$digest()
+    assert.equal(isolate.searchtext, $scope.query)
 
-    it 'calls the given search function', ->
-      isolate.searchtext = "Test query"
-      isolate.$digest()
-      $element.find('form').triggerHandler('submit')
-      sinon.assert.calledWith($scope.update, "Test query")
+  it 'calls the given search function', ->
+    isolate.searchtext = "Test query"
+    isolate.$digest()
+    $element.find('form').triggerHandler('submit')
+    sinon.assert.calledWith($scope.update, "Test query")
 
-    it 'calls the given clear function', ->
-      $element.find('.simple-search-clear').click()
-      assert($scope.clear.called)
+  it 'calls the given clear function', ->
+    $element.find('.simple-search-clear').click()
+    assert($scope.clear.called)
 
-    it 'clears the search-bar', ->
-      isolate.query = ''
-      isolate.$digest()
-      isolate.searchtext = "Test query"
-      isolate.$digest()
-      $element.find('.simple-search-clear').click()
-      assert.equal(isolate.searchtext, '')
+  it 'clears the search-bar', ->
+    isolate.query = ''
+    isolate.$digest()
+    isolate.searchtext = "Test query"
+    isolate.$digest()
+    $element.find('.simple-search-clear').click()
+    assert.equal(isolate.searchtext, '')
 
-    it 'invokes callbacks when the input model changes', ->
-      $scope.query = "Test query"
-      $scope.$digest()
-      sinon.assert.calledOnce($scope.update)
-      $scope.query = ""
-      $scope.$digest()
-      sinon.assert.calledOnce($scope.clear)
+  it 'invokes callbacks when the input model changes', ->
+    $scope.query = "Test query"
+    $scope.$digest()
+    sinon.assert.calledOnce($scope.update)
+    $scope.query = ""
+    $scope.$digest()
+    sinon.assert.calledOnce($scope.clear)
 
-    it 'adds a class to the form when there is no input value', ->
-      $form = $element.find('.simple-search-form')
-      assert.include($form.prop('className'), 'simple-search-inactive')
+  it 'adds a class to the form when there is no input value', ->
+    $form = $element.find('.simple-search-form')
+    assert.include($form.prop('className'), 'simple-search-inactive')
 
-    it 'removes the class from the form when there is an input value', ->
-      $scope.query = "Test query"
-      $scope.$digest()
+  it 'removes the class from the form when there is an input value', ->
+    $scope.query = "Test query"
+    $scope.$digest()
 
-      $form = $element.find('.simple-search-form')
-      assert.notInclude($form.prop('className'), 'simple-search-inactive')
+    $form = $element.find('.simple-search-form')
+    assert.notInclude($form.prop('className'), 'simple-search-inactive')

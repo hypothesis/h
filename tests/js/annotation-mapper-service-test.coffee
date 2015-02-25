@@ -1,5 +1,8 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
+
 
 describe 'AnnotationMapperService', ->
   sandbox = sinon.sandbox.create()
@@ -8,6 +11,10 @@ describe 'AnnotationMapperService', ->
   fakeStore = null
   fakeThreading = null
   annotationMapper = null
+
+  before ->
+    angular.module('h', [])
+    require('../../h/static/scripts/annotation-mapper-service')
 
   beforeEach module('h')
   beforeEach module ($provide) ->

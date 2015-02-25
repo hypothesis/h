@@ -1,12 +1,9 @@
+Annotator = require('annotator')
+th = require('../../../h/static/scripts/annotator/plugin/texthighlights')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
-# In order to be able to create highlights,
-# the Annotator.TextHighlight class must exist.
-# This class is registered then the TextHighlights plugin
-# is initialized, so we will do that.
-th = new Annotator.Plugin.TextHighlights()
-th.pluginInit()
 
 describe 'Annotator.Plugin.TextHighlight', ->
   sandbox = null
@@ -23,11 +20,11 @@ describe 'Annotator.Plugin.TextHighlight', ->
           element:
             delegate: sinon.spy()
 
-    new Annotator.TextHighlight anchor, "test page", "test range"
+    new th.TextHighlight anchor, "test page", "test range"
 
   beforeEach ->
     sandbox = sinon.sandbox.create()
-    sandbox.stub Annotator.TextHighlight, 'highlightRange',
+    sandbox.stub th.TextHighlight, 'highlightRange',
       (normedRange, cssClass) ->
         hl = document.createElement "hl"
         hl.appendChild document.createTextNode "test highlight span"
@@ -44,7 +41,7 @@ describe 'Annotator.Plugin.TextHighlight', ->
   describe "constructor", ->
     it 'wraps a highlight span around the given range', ->
       hl = createTestHighlight()
-      assert.calledWith Annotator.TextHighlight.highlightRange, "test range"
+      assert.calledWith th.TextHighlight.highlightRange, "test range"
 
     it 'stores the created highlight spans in _highlights', ->
       hl = createTestHighlight()

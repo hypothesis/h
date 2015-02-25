@@ -1,3 +1,5 @@
+{inject, module} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
 sandbox = sinon.sandbox.create()
@@ -19,11 +21,15 @@ class MockSession
 mockFlash = sandbox.spy()
 mockFormHelpers = applyValidationErrors: sandbox.spy()
 
-describe 'AuthController', ->
+describe 'h:AuthController', ->
   $scope = null
   $timeout = null
   auth = null
   session = null
+
+  before ->
+    angular.module('h', [])
+    require('../../../h/static/scripts/account/auth-controller')
 
   beforeEach module('h')
   beforeEach module('h.templates')

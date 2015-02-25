@@ -293,3 +293,5 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
 
     selectors
 
+exports.Anchor = Anchor
+exports.EnhancedAnchoring = Annotator.Plugin.EnhancedAnchoring

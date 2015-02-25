@@ -1,8 +1,15 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
+
 describe 'Threading', ->
   instance = null
+
+  before ->
+    angular.module('h', [])
+    require('../../h/static/scripts/threading-service')
 
   beforeEach module('h')
 

@@ -1,3 +1,5 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 
 minute = 60
@@ -33,10 +35,15 @@ FIXTURES_NEXT_FUZZY_UPDATE = [
   [8 * year, 24 * day]            # by setTimout
 ]
 
-describe 'timeHelpers', ->
-  beforeEach module('h.helpers')
+describe 'h.helpers:time-helpers', ->
   timeHelpers = null
   sandbox = null
+
+  before ->
+    angular.module('h.helpers', [])
+    require('../../../h/static/scripts/helpers/time-helpers')
+
+  beforeEach module('h.helpers')
 
   beforeEach inject (_timeHelpers_) ->
     timeHelpers = _timeHelpers_

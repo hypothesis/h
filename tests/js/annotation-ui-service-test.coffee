@@ -1,8 +1,15 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
+
 describe 'AnnotationUI', ->
   annotationUI = null
+
+  before ->
+    angular.module('h', [])
+    require('../../h/static/scripts/annotation-ui-service')
 
   beforeEach module('h')
   beforeEach inject (_annotationUI_) ->

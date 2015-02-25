@@ -1,11 +1,18 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
+
 
 describe 'Discovery', ->
   sandbox = sinon.sandbox.create()
   fakeTopWindow = null
   fakeFrameWindow = null
   createDiscovery = null
+
+  before ->
+    angular.module('h', [])
+    require('../../h/static/scripts/discovery')
 
   beforeEach module('h')
   beforeEach inject (Discovery) ->

@@ -1,10 +1,17 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
+
 
 describe 'h', ->
   fakeAnnotator = null
   fakeIdentity = null
   sandbox = null
+
+  before ->
+    angular.module('h', [])
+    require('../../h/static/scripts/auth-service')
 
   beforeEach module('h')
 

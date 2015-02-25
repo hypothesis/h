@@ -1,8 +1,10 @@
+{inject, module} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
-sandbox = sinon.sandbox.create()
 
-describe 'AccountController', ->
+
+describe 'h:AccountController', ->
   $scope = null
   fakeFlash = null
   fakeSession = null
@@ -13,10 +15,16 @@ describe 'AccountController', ->
   disableUserPromise = null
   profilePromise = null
   createController = null
+  sandbox = null
+
+  before ->
+    angular.module('h', [])
+    require('../../../h/static/scripts/account/account-controller')
 
   beforeEach module('h')
 
   beforeEach module ($provide, $filterProvider) ->
+    sandbox = sinon.sandbox.create()
     fakeSession = {}
     fakeFlash = sandbox.spy()
     fakeIdentity =
@@ -48,6 +56,9 @@ describe 'AccountController', ->
 
     createController = ->
       $controller('AccountController', {$scope: $scope})
+
+  afterEach ->
+    sandbox.restore()
 
   describe '.submit', ->
     createFakeForm = (overrides={}) ->

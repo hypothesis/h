@@ -1,10 +1,12 @@
+bb = require('../../../../h/static/scripts/annotator/plugin/bucket-bar')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
 describe 'Annotator.BucketBar', ->
   createBucketBar = (options) ->
     element = document.createElement('div')
-    new Annotator.Plugin.BucketBar(element, options || {})
+    new bb.BucketBar(element, options || {})
 
   # Yes this is testing a private method. Yes this is bad practice, but I'd
   # rather test this functionality in a private method than not test it at all.

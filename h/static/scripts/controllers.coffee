@@ -22,13 +22,13 @@ class AppController
   this.$inject = [
     '$controller', '$document', '$location', '$route', '$scope', '$window',
     'auth', 'drafts', 'identity',
-    'permissions', 'streamer', 'streamfilter', 'annotationUI',
+    'permissions', 'streamer', 'annotationUI',
     'annotationMapper', 'threading'
   ]
   constructor: (
      $controller,   $document,   $location,   $route,   $scope,   $window,
      auth,   drafts,   identity,
-     permissions,   streamer,   streamfilter, annotationUI,
+     permissions,   streamer,   annotationUI,
      annotationMapper, threading
   ) ->
     $controller(AnnotationUIController, {$scope})
@@ -176,11 +176,11 @@ class AnnotationViewerController
 class ViewerController
   this.$inject = [
     '$scope', '$route', 'annotationUI', 'crossframe', 'annotationMapper',
-    'auth', 'flash', 'streamer', 'streamfilter', 'store'
+    'auth', 'streamer', 'streamfilter', 'store'
   ]
   constructor:   (
      $scope,   $route, annotationUI, crossframe, annotationMapper,
-     auth,   flash,   streamer,   streamfilter,   store
+     auth,   streamer,   streamfilter,   store
   ) ->
     # Tells the view that these annotations are embedded into the owner doc
     $scope.isEmbedded = true

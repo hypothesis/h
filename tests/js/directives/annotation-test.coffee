@@ -1,5 +1,7 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
-sandbox = sinon.sandbox.create()
+
 
 describe 'h.directives.annotation', ->
   $compile = null
@@ -8,17 +10,28 @@ describe 'h.directives.annotation', ->
   $timeout = null
   annotation = null
   createController = null
-  flash = null
-  fakeAuth = null
-  fakeStore = null
-  fakeUser = null
   fakeAnnotationMapper = null
   fakeAnnotationUI = null
+  fakeAuth = null
+  fakeDrafts = null
+  fakeFlash = null
+  fakeMomentFilter = null
+  fakePermissions = null
+  fakePersonaFilter = null
+  fakeStore = null
+  fakeTimeHelpers = null
+  fakeUrlEncodeFilter = null
+  sandbox = null
+
+  before ->
+    angular.module('h', [])
+    require('../../../h/static/scripts/directives/annotation')
 
   beforeEach module('h')
   beforeEach module('h.templates')
 
   beforeEach module ($provide) ->
+    sandbox = sinon.sandbox.create()
     fakeAuth =
       user: 'acct:bill@localhost'
     fakeAnnotationMapper =
@@ -30,11 +43,37 @@ describe 'h.directives.annotation', ->
           admin: ['acct:bill@localhost']
       deleteAnnotation: sandbox.stub()
     fakeAnnotationUI = {}
+    fakeDrafts = {
+      add: sandbox.stub()
+      remove: sandbox.stub()
+    }
+    fakeFlash = sandbox.stub()
+    fakeMomentFilter = sandbox.stub().returns('ages ago')
+    fakePermissions = {
+      isPublic: sandbox.stub().returns(true)
+      isPrivate: sandbox.stub().returns(false)
+      permits: sandbox.stub().returns(true)
+      public: sandbox.stub().returns({read: ['everybody']})
+      private: sandbox.stub().returns({read: ['justme']})
+    }
+    fakePersonaFilter = sandbox.stub().returnsArg(0)
+    fakeTimeHelpers = {
+      toFuzzyString: sandbox.stub().returns('a while ago')
+      nextFuzzyUpdate: sandbox.stub().returns(30)
+    }
+    fakeUrlEncodeFilter = (v) -> encodeURIComponent(v)
 
-    $provide.value 'auth', fakeAuth
-    $provide.value 'store', fakeStore
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
+    $provide.value 'auth', fakeAuth
+    $provide.value 'drafts', fakeDrafts
+    $provide.value 'flash', fakeFlash
+    $provide.value 'momentFilter', fakeMomentFilter
+    $provide.value 'permissions', fakePermissions
+    $provide.value 'personaFilter', fakePersonaFilter
+    $provide.value 'store', fakeStore
+    $provide.value 'timeHelpers', fakeTimeHelpers
+    $provide.value 'urlencodeFilter', fakeUrlEncodeFilter
     return
 
   beforeEach inject (_$compile_, $controller, _$document_, $rootScope, _$timeout_) ->
@@ -50,12 +89,10 @@ describe 'h.directives.annotation', ->
       target: [{}]
       uri: 'http://example.com'
       user: 'acct:bill@localhost'
-    flash = sinon.spy()
 
     createController = ->
       $controller 'AnnotationController',
         $scope: $scope
-        flash: flash
 
   afterEach ->
     sandbox.restore()
@@ -82,7 +119,7 @@ describe 'h.directives.annotation', ->
       delete annotation.id
       controller = createController()
       $scope.$digest()
-      assert controller.isPrivate()
+      assert.deepEqual annotation.permissions, {read: ['justme']}
 
   describe '#reply', ->
     controller = null
@@ -102,26 +139,19 @@ describe 'h.directives.annotation', ->
       match = sinon.match {references: [annotation.id], uri: annotation.uri}
       assert.calledWith(fakeAnnotationMapper.createAnnotation, match)
 
-    it 'adds the world readable principal if the parent is public', ->
+    it 'makes the annotation public if the parent is public', ->
       reply = {}
       fakeAnnotationMapper.createAnnotation.returns(reply)
-      annotation.permissions.read.push('group:__world__')
+      fakePermissions.isPublic.returns(true)
       controller.reply()
-      assert.include(reply.permissions.read, 'group:__world__')
+      assert.deepEqual(reply.permissions, {read: ['everybody']})
 
     it 'does not add the world readable principal if the parent is private', ->
       reply = {}
       fakeAnnotationMapper.createAnnotation.returns(reply)
+      fakePermissions.isPublic.returns(false)
       controller.reply()
-      assert.notInclude(reply.permissions.read, 'group:__world__')
-
-    it 'fills the other permissions too', ->
-      reply = {}
-      fakeAnnotationMapper.createAnnotation.returns(reply)
-      controller.reply()
-      assert.equal(reply.permissions.update[0], 'acct:bill@localhost')
-      assert.equal(reply.permissions.delete[0], 'acct:bill@localhost')
-      assert.equal(reply.permissions.admin[0], 'acct:bill@localhost')
+      assert.deepEqual(reply.permissions, {read: ['justme']})
 
   describe '#render', ->
     controller = null
@@ -297,18 +327,15 @@ describe 'h.directives.annotation', ->
 
       it 'is updated on first digest', ->
         $scope.$digest()
-        assert.isNotNull(controller.timestamp)
+        assert.equal(controller.timestamp, 'a while ago')
 
       it 'is updated after a timeout', ->
+        fakeTimeHelpers.nextFuzzyUpdate.returns(10)
         $scope.$digest()
-        timestamp = controller.timestamp
-        clock.tick(30000)
+        clock.tick(11000)
+        fakeTimeHelpers.toFuzzyString.returns('ages ago')
         $timeout.flush()
-        assert.notEqual(timestamp, controller.timestamp)
-        timestamp = controller.timestamp
-        clock.tick(30000)
-        $timeout.flush()
-        assert.notEqual(timestamp, controller.timestamp)
+        assert.equal(controller.timestamp, 'ages ago')
 
       it 'is no longer updated after the scope is destroyed', ->
         $scope.$digest()

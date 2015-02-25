@@ -1,5 +1,8 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
+
 
 describe 'CrossFrameService', ->
   sandbox = sinon.sandbox.create()
@@ -13,6 +16,10 @@ describe 'CrossFrameService', ->
   fakeBridge = null
   fakeAnnotationSync = null
   fakeAnnotationUISync = null
+
+  before ->
+    angular.module('h', [])
+    require('../../h/static/scripts/cross-frame-service')
 
   beforeEach module('h')
   beforeEach module ($provide) ->
