@@ -213,32 +213,33 @@ $base-font-size: 14px;
     z-index: 1;
 
     a {
-      color: $link-color;
+      color: $text-color;
     }
   }
 
   a {
+    @include single-transition(background-color, .25s, .25s);
     background: $white;
-    font-size: 1.3em;
+    font-size: 18px;
+    padding: 1px 6px;
     line-height: 28px;
+    top: -1px;
+    left: -1px;
 
     position: absolute;
-    left: 5px;
-    color: rgba(200, 200, 200, .3);
+    color: fade-out($text-color, .75);
 
     text-decoration: none;
-    text-shadow: 0 0 2px $gray-lightest, 0 0 0 $gray;
+  }
+
+  a:active {
+    @include single-transition(background-color, .25s);
+    background-color: $gray-lighter;
   }
 
   a:focus, a:hover {
     outline: 0;
-    color: $link-color-hover;
-  }
-
-  .annotator-toolbar-toggle {
-    &:hover, &:focus {
-      color: fade-out($gray-lightest, .9);
-    }
+    color: $text-color;
   }
 }
 
