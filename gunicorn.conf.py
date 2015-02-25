@@ -10,9 +10,6 @@ if 'heroku' in os.environ.get('LD_LIBRARY_PATH', ''):
 if 'STATSD_PORT' in os.environ:
     statsd_host = urlparse.urlparse(os.environ['STATSD_PORT_8125_UDP']).netloc
 
-if 'WEB_CONCURRENCY' in os.environ:
-    workers = int(os.environ['WEB_CONCURRENCY'])
-
 
 def post_fork(_server, _worker):
     try:
