@@ -30,7 +30,7 @@ simpleSearch = ['$parse', ($parse) ->
               <input id="simple-search-{{viewId}}" class="simple-search-input" type="text" ng-model="searchtext" name="searchText" placeholder="Search…" />
               <label for="simple-search-{{viewId}}" class="simple-search-icon h-icon-search"></label>
               <button class="simple-search-clear" type="reset" ng-hide="!searchtext" ng-click="reset($event)">
-                <i class="h-icon-x"></i>
+                <i class="h-icon-clear"></i>
               </button>
             </form>
             '''

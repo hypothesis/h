@@ -29,7 +29,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
 
     items = [
       "title": "Toggle Sidebar"
-      "class": "annotator-toolbar-toggle h-icon-comment"
+      "class": "annotator-toolbar-toggle h-icon-forum"
       "on":
         "click": (event) =>
           event.preventDefault()
@@ -41,7 +41,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
             @annotator.triggerHideFrame()
     ,
       "title": "Show Annotations"
-      "class": "h-icon-visible"
+      "class": "h-icon-visibility"
       "on":
         "click": (event) =>
           event.preventDefault()
@@ -59,7 +59,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     #       @annotator.onHighlighterClick()
     # ,
       "title": "New Comment"
-      "class": "h-icon-plus"
+      "class": "h-icon-add"
       "on":
         "click": (event) =>
           event.preventDefault()

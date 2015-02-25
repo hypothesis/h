@@ -1,9 +1,8 @@
 <a href=""
    class="threadexp"
-   title="{{vm.collapsed && 'Expand' || 'Collapse'}}"
-   ng-click="vm.toggleCollapsed()">
-  <span ng-class="{'h-icon-plus': vm.collapsed,
-                   'h-icon-minus': !vm.collapsed}"></span>
+   title="{{vm.collapsed && 'Expand' || 'Collapse'}}">
+   <span ng-class="{'h-icon-expand-more': !!vm.collapsed,
+                    'h-icon-expand-less': !vm.collapsed}"></span>
 </a>
 
 <!-- Annotation -->
