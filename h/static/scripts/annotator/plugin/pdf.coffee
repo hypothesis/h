@@ -50,20 +50,8 @@ class window.PDFTextMapper extends PageTextMapperCore
     if PDFViewerApplication?
       @_app = PDFViewerApplication
       @_viewer = @_app.pdfViewer
-      @_tryExtractPage = (index) => @_viewer.getPageTextContent(index)
     else
       @_app = @_viewer = PDFView
-      @_finder = @_app.findController ? # PDF.js v1.0.712
-        PDFFindController               # up to PDF.js v1.0.437
-      @_tryExtractPage = (index) =>
-        new Promise (resolve, reject) =>
-          tryIt = =>
-            page = @_finder.pdfPageSource.pages[index]
-            if page?.pdfPage?
-              page.getTextContent().then(resolve)
-            else
-              setTimeout tryIt, 100
-          tryIt()
 
     @setEvents()
 
@@ -147,37 +135,42 @@ class window.PDFTextMapper extends PageTextMapperCore
       @_pendingScanResolve = resolve
       @waitForInit().then =>
 
-        # Wait for the document to load
-        @_app.pdfDocument.getPage(1).then =>
-          @pageInfo = []
-          @_extractPageText 0
+        # Initialize our main page data array
+        @pageInfo = []
+
+        # Start the text extraction
+        @_extractPageText 0
 
   # Manually extract the text from the PDF document.
   # This workaround is here to avoid depending PDFFindController's
   # own text extraction routines, which sometimes fail to add
   # adequate spacing.
   _extractPageText: (pageIndex) ->
-    @_tryExtractPage(pageIndex).then (data) =>
+    # Wait for the page to load
+    @_app.pdfDocument.getPage(pageIndex + 1).then (page) =>
 
-      # There is some variation about what I might find here,
-      # depending on PDF.js version, so we need to do some guesswork.
-      textData = data.bidiTexts ? data.items ? data
+      # Wait for the data to be extracted
+      page.getTextContent().then (data) =>
 
-      # First, join all the pieces from the bidiTexts
-      rawContent = (text.str for text in textData).join " "
+        # There is some variation about what I might find here,
+        # depending on PDF.js version, so we need to do some guesswork.
+        textData = data.bidiTexts ? data.items ? data
 
-      # Do some post-processing
-      content = @_parseExtractedText rawContent
+        # First, join all the pieces from the bidiTexts
+        rawContent = (text.str for text in textData).join " "
 
-      # Save the extracted content to our page information registery
-      @pageInfo[pageIndex] =
-        index: pageIndex
-        content: content
+        # Do some post-processing
+        content = @_parseExtractedText rawContent
 
-      if pageIndex is @getPageCount() - 1
-        @_finishScan()
-      else
-        @_extractPageText pageIndex + 1
+        # Save the extracted content to our page information registery
+        @pageInfo[pageIndex] =
+          index: pageIndex
+          content: content
+
+        if pageIndex is @getPageCount() - 1
+          @_finishScan()
+        else
+          @_extractPageText pageIndex + 1
 
   # This is called when scanning is finished
   _finishScan: =>
