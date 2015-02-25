@@ -152,12 +152,8 @@ class window.PDFTextMapper extends PageTextMapperCore
       # Wait for the data to be extracted
       page.getTextContent().then (data) =>
 
-        # There is some variation about what I might find here,
-        # depending on PDF.js version, so we need to do some guesswork.
-        textData = data.bidiTexts ? data.items ? data
-
         # First, join all the pieces from the bidiTexts
-        rawContent = (text.str for text in textData).join " "
+        rawContent = (text.str for text in data.items).join " "
 
         # Do some post-processing
         content = @_parseExtractedText rawContent
