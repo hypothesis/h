@@ -17,7 +17,6 @@ from h.notification.gateway import user_name, \
     user_profile_url, standalone_url, get_user_by_name
 from h.notification.types import ROOT_PATH, REPLY_TYPE
 from h.accounts.events import LoginEvent
-from h.events import AnnotationEvent
 from h.models import Annotation
 
 log = logging.getLogger(__name__)
@@ -109,13 +108,7 @@ def check_conditions(annotation, data):
     return True
 
 
-@subscriber(AnnotationEvent)
-def send_notifications(event):
-    # Extract data
-    action = event.action
-    request = event.request
-    annotation = event.annotation
-
+def send_notifications(request, annotation, action):
     # And for them we need only the creation action
     if action != 'create':
         return
