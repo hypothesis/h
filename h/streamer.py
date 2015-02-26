@@ -15,7 +15,6 @@ import gevent.queue
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.config import aslist
-from pyramid.events import subscriber
 from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
 from pyramid.threadlocal import get_current_request
 import transaction
@@ -23,10 +22,8 @@ from ws4py.exc import HandshakeError
 from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
-
-from h import events
-from h.api import get_user
-from h.models import Annotation
+from .api import get_user
+from .models import Annotation
 
 log = logging.getLogger(__name__)
 
@@ -510,18 +507,6 @@ class WebSocket(_WebSocket):
             transaction.commit()
 
 
-@subscriber(events.AnnotationEvent)
-def cb_annotation_event(event):
-    queue = event.request.get_queue_writer()
-
-    data = {
-        'action': event.action,
-        'annotation': event.annotation,
-        'src_client_id': event.request.headers.get('X-Client-Id'),
-    }
-    queue.publish('annotations', json.dumps(data))
-
-
 def _annotation_packet(annotations, action):
     """
     Generate a packet suitable for sending down the websocket that represents
@@ -607,5 +592,4 @@ def includeme(config):
     config.add_route('ws', 'ws')
     config.add_view(websocket, route_name='ws')
     config.add_view(bad_handshake, context=HandshakeError)
-    config.include('.queue')
     config.scan(__name__)

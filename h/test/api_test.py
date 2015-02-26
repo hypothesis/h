@@ -46,12 +46,9 @@ class DictMock(Mock):
 @fixture(autouse=True)
 def replace_io(monkeypatch):
     """For all tests, mock paths to the "outside" world"""
-    Annotation = DictMock()
-    _trigger_event = MagicMock()
-    _api_error = MagicMock()
-    monkeypatch.setattr(api, 'Annotation', Annotation)
-    monkeypatch.setattr(api, '_trigger_event', _trigger_event)
-    monkeypatch.setattr(api, '_api_error', _api_error)
+    monkeypatch.setattr(api, 'Annotation', DictMock())
+    monkeypatch.setattr(api, '_publish_annotation_event', MagicMock())
+    monkeypatch.setattr(api, '_api_error', MagicMock())
 
 
 @fixture()
@@ -131,7 +128,7 @@ def test_create(mock_create_annotation, user):
 
     api._create_annotation.assert_called_once_with(_new_annotation, user)
     assert annotation == api._create_annotation.return_value
-    _assert_event_triggered('create')
+    _assert_event_published('create')
 
 
 def test_create_annotation(user):
@@ -148,7 +145,7 @@ def test_read():
 
     result = api.read(annotation, DummyRequest())
 
-    _assert_event_triggered('read')
+    _assert_event_published('read')
     assert result == annotation, "Annotation should have been returned"
 
 
@@ -163,7 +160,7 @@ def test_update(mock_update_annotation):
     api._update_annotation.assert_called_once_with(annotation,
                                                    _new_annotation,
                                                    True)
-    _assert_event_triggered('update')
+    _assert_event_published('update')
     assert result is annotation, "Annotation should have been returned"
 
 
@@ -222,13 +219,13 @@ def test_delete():
     result = api.delete(annotation, DummyRequest())
 
     assert annotation.delete.assert_called_once()
-    _assert_event_triggered('delete')
+    _assert_event_published('delete')
     assert result == {'id': '1234', 'deleted': True}, "Deletion confirmation should have been returned"
 
 
-def _assert_event_triggered(action):
-    assert api._trigger_event.call_count == 1, "Annotation event should have occured"
-    assert api._trigger_event.call_args[0][2] == action, "Annotation event action should be " % action
+def _assert_event_published(action):
+    assert api._publish_annotation_event.call_count == 1
+    assert api._publish_annotation_event.call_args[0][2] == action
 
 
 _new_annotation = {

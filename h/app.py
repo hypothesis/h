@@ -39,6 +39,7 @@ def create_app(settings):
 
     config.include('.')
     config.include('.features')
+    config.include('.queue')
 
     if config.registry.feature('accounts'):
         config.include('.accounts')
@@ -76,6 +77,7 @@ def create_api(settings):
     config.include('.api')
     config.include('.auth')
     config.include('.features')
+    config.include('.queue')
 
     if config.registry.feature('streamer'):
         config.include('.streamer')

@@ -3,7 +3,6 @@
 from mock import patch, Mock, MagicMock
 from pyramid.testing import DummyRequest
 
-from h import events
 from h.notification.gateway import user_name, user_profile_url, standalone_url
 from h.notification import reply_template as rt
 from h.notification.types import REPLY_TYPE
@@ -262,7 +261,6 @@ def test_dont_send_to_the_same_user():
     then this function returns False"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = _create_request()
 
         annotation = store_fake_data[0]
         data = {
@@ -330,9 +328,8 @@ def test_action_update():
     """It action is not create, it should immediately return"""
     annotation = {}
     request = DummyRequest()
-    event = events.AnnotationEvent(request, annotation, 'update')
     with patch('h.notification.reply_template.parent_values') as mock_parent:
-        rt.send_notifications(event)
+        rt.send_notifications(request, annotation, 'update')
         assert mock_parent.call_count == 0
 
 
@@ -343,10 +340,9 @@ def test_action_create():
         request = _create_request()
 
         annotation = store_fake_data[1]
-        event = events.AnnotationEvent(request, annotation, 'create')
         with patch('h.notification.reply_template.Subscriptions') as mock_subs:
             mock_subs.get_active_subscriptions_for_a_type.return_value = []
-            rt.send_notifications(event)
+            rt.send_notifications(request, annotation, 'create')
             assert mock_subs.get_active_subscriptions_for_a_type.called
 
 
@@ -365,7 +361,6 @@ def test_check_conditions_false_stops_sending():
         request = _create_request()
 
         annotation = store_fake_data[1]
-        event = events.AnnotationEvent(request, annotation, 'create')
         with patch('h.notification.reply_template.Subscriptions') as mock_subs:
             mock_subs.get_active_subscriptions_for_a_type.return_value = [
                 MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
@@ -373,7 +368,7 @@ def test_check_conditions_false_stops_sending():
             with patch('h.notification.reply_template.check_conditions') as mock_conditions:
                 mock_conditions.return_value = False
                 with patch('h.notification.reply_template.send_email') as mock_mail:
-                    rt.send_notifications(event)
+                    rt.send_notifications(request, annotation, 'create')
                     assert mock_mail.called is False
 
 
@@ -384,7 +379,6 @@ def test_send_if_everything_is_okay():
         request = _create_request()
 
         annotation = store_fake_data[1]
-        event = events.AnnotationEvent(request, annotation, 'create')
         with patch('h.notification.reply_template.Subscriptions') as mock_subs:
             mock_subs.get_active_subscriptions_for_a_type.return_value = [
                 MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
@@ -398,5 +392,5 @@ def test_send_if_everything_is_okay():
                         user.email = 'testmail@test.com'
                         mock_user_db.return_value = user
                         with patch('h.notification.reply_template.send_email') as mock_mail:
-                            rt.send_notifications(event)
+                            rt.send_notifications(request, annotation, 'create')
                             assert mock_mail.called is True
