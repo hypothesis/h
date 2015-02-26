@@ -505,5 +505,4 @@ def includeme(config):
     if asbool(settings.get('basemodel.should_create_all', False)):
         create_db()
 
-    config.include('.queue')
     config.scan(__name__)
