@@ -85,7 +85,6 @@ def test_parent_values_reply():
         parent = rt.parent_values(annotation)
 
         assert parent['id'] == '0'
-        assert 'quote' not in parent
 
 
 def test_parent_values_root_annotation():
@@ -96,17 +95,6 @@ def test_parent_values_root_annotation():
         parent = rt.parent_values(annotation)
 
         assert len(parent.items()) == 0
-
-
-def test_parent_values_second_level_reply():
-    """Test if it the grandparent values are filled for a second level reply"""
-    with patch('h.notification.reply_template.Annotation') as mock_annotation:
-        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        annotation = store_fake_data[2]
-        parent = rt.parent_values(annotation)
-
-        assert parent['id'] == '1'
-        assert parent['quote'] == store_fake_data[0]['text']
 
 
 # Tests for the create_template_map function
