@@ -17,6 +17,9 @@ FIXTURES_TO_FUZZY_STRING = [
   [27 * hour, 'yesterday']
   [3 * day + 30 * minute, '3 days ago']
   [6 * month + 2 * day, '6 months ago']
+  [1 * year, 'one year ago']
+  [1 * year + 2 * month, 'one year ago']
+  [2 * year, '2 years ago']
   [8 * year, '8 years ago']
 ]
 
