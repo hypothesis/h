@@ -121,6 +121,9 @@ setup(
         'console_scripts': [
             'hypothesis=h.script:main',
             'hypothesis-worker=h.worker:main',
+        ],
+        'h.worker': [
+            'notification=h.notification.worker:run',
         ]
     },
 )
