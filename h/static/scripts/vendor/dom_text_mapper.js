@@ -5,7 +5,7 @@
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   window.DomTextMapper = (function() {
-    var CONTEXT_LEN, SELECT_CHILDREN_INSTEAD, USE_EMPTY_TEXT_WORKAROUND, USE_TABLE_TEXT_WORKAROUND, WHITESPACE;
+    var CONTEXT_LEN, SELECT_CHILDREN_INSTEAD, USE_EMPTY_TEXT_WORKAROUND, USE_TABLE_TEXT_WORKAROUND, WHITESPACE, WHITESPACE_REGEX;
 
     DomTextMapper.applicable = function() {
       return true;
@@ -18,6 +18,8 @@
     SELECT_CHILDREN_INSTEAD = ["thead", "tbody", "tfoot", "ol", "a", "caption", "p", "span", "div", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "li", "form"];
 
     CONTEXT_LEN = 32;
+
+    WHITESPACE_REGEX = /\s+/g;
 
     DomTextMapper.instances = 0;
 
@@ -649,7 +651,7 @@
 
     DomTextMapper.prototype.readSelectionText = function(sel) {
       sel || (sel = this.rootWin.getSelection());
-      return sel.toString().trim().replace(/\n/g, " ").replace(/\s{2,}/g, " ");
+      return sel.toString().trim().replace(WHITESPACE_REGEX, ' ');
     };
 
     DomTextMapper.prototype.getNodeSelectionText = function(node, shouldRestoreSelection) {
@@ -670,8 +672,8 @@
 
     DomTextMapper.prototype.computeSourcePositions = function(match) {
       var dc, displayEnd, displayIndex, displayStart, displayText, sc, sourceEnd, sourceIndex, sourceStart, sourceText;
-      sourceText = match.element.node.data.replace(/\n/g, " ");
-      displayText = match.element.content;
+      sourceText = match.element.node.data.replace(WHITESPACE_REGEX, " ");
+      displayText = match.element.content.replace(WHITESPACE_REGEX, " ");
       displayStart = match.start != null ? match.start : 0;
       displayEnd = match.end != null ? match.end : displayText.length;
       if (displayEnd === 0) {
@@ -692,6 +694,8 @@
           if (displayIndex === displayEnd) {
             sourceEnd = sourceIndex + 1;
           }
+        } else if ((sc == null) || (dc == null)) {
+          throw new Error("display and source text mismatch: '" + sourceText + "' vs. '" + displayText + "'");
         }
         sourceIndex++;
       }
@@ -843,3 +847,5 @@
   })();
 
 }).call(this);
+
+//# sourceMappingURL=dom_text_mapper.map
