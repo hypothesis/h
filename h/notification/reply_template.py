@@ -30,9 +30,6 @@ SUBJECT_TEMPLATE = ROOT_PATH + 'reply_notification_subject.txt'
 def parent_values(annotation):
     if 'references' in annotation:
         parent = Annotation.fetch(annotation['references'][-1])
-        if 'references' in parent:
-            grandparent = Annotation.fetch(parent['references'][-1])
-            parent['quote'] = grandparent['text']
         return parent
     else:
         return {}

@@ -4,9 +4,11 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy import func, and_
 
-from pyramid_basemodel import Base
 from hem.db import get_session
+from hem.interfaces import IDBSession
 from horus.models import BaseModel
+from pyramid_basemodel import Base
+from pyramid_basemodel import Session
 
 log = logging.getLogger(__name__)
 
@@ -69,4 +71,9 @@ class Subscriptions(SubscriptionsMixin, Base):
 
 
 def includeme(config):
+    registry = config.registry
+
+    if not registry.queryUtility(IDBSession):
+        registry.registerUtility(Session, IDBSession)
+
     config.scan(__name__)

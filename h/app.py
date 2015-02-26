@@ -80,6 +80,15 @@ def create_api(settings):
     if config.registry.feature('streamer'):
         config.include('.streamer')
 
+    if config.registry.feature('notification'):
+        config.include('pyramid_jinja2')
+        config.add_jinja2_renderer('.txt')
+        config.add_jinja2_renderer('.html')
+
+        # FIXME: move subscribers into .notification.subscribers so we don't
+        # have to include the whole package
+        config.include('.notification')
+
     return config.make_wsgi_app()
 
 
