@@ -2,6 +2,7 @@
 
 """HTTP/REST API for interacting with the annotation store."""
 
+import json
 import logging
 import time
 
@@ -11,7 +12,6 @@ from elasticsearch import exceptions as elasticsearch_exceptions
 from pyramid.settings import asbool
 from pyramid.view import view_config
 
-from .events import AnnotationEvent
 from .models import Annotation, Document
 
 
@@ -127,7 +127,7 @@ def create(context, request):
     annotation = _create_annotation(fields, user)
 
     # Notify any subscribers
-    _trigger_event(request, annotation, 'create')
+    _publish_annotation_event(request, annotation, 'create')
 
     # Return it so the client gets to know its ID and such
     return annotation
@@ -141,7 +141,7 @@ def read(context, request):
     annotation = context
 
     # Notify any subscribers
-    _trigger_event(request, annotation, 'read')
+    _publish_annotation_event(request, annotation, 'read')
 
     return annotation
 
@@ -174,7 +174,7 @@ def update(context, request):
             status_code=err.args[1])
 
     # Notify any subscribers
-    _trigger_event(request, annotation, 'update')
+    _publish_annotation_event(request, annotation, 'update')
 
     # Return the updated version that was just stored.
     return annotation
@@ -191,7 +191,7 @@ def delete(context, request):
     annotation.delete()
 
     # Notify any subscribers
-    _trigger_event(request, annotation, 'delete')
+    _publish_annotation_event(request, annotation, 'delete')
 
     # Return a confirmation
     return {
@@ -212,10 +212,15 @@ def get_user(request):
     return None
 
 
-def _trigger_event(request, annotation, action):
-    """Trigger any callback functions listening for AnnotationEvents."""
-    event = AnnotationEvent(request, annotation, action)
-    request.registry.notify(event)
+def _publish_annotation_event(request, annotation, action):
+    """Publish an event to the annotations queue for this annotation action"""
+    queue = request.get_queue_writer()
+    data = {
+        'action': action,
+        'annotation': annotation,
+        'src_client_id': request.headers.get('X-Client-Id'),
+    }
+    queue.publish('annotations', json.dumps(data))
 
 
 def _api_error(request, reason, status_code):
@@ -500,4 +505,5 @@ def includeme(config):
     if asbool(settings.get('basemodel.should_create_all', False)):
         create_db()
 
+    config.include('.queue')
     config.scan(__name__)
