@@ -1,8 +1,11 @@
 import os
+import logging
 import re
 import urlparse
 
 from pyramid.settings import asbool
+
+log = logging.getLogger(__name__)
 
 
 def settings_from_environment():
@@ -15,8 +18,8 @@ def settings_from_environment():
     _setup_features(settings)
     _setup_nsqd(settings)
     _setup_redis(settings)
+    _setup_secrets(settings)
     _setup_client(settings)
-    _setup_sessions(settings)
     _setup_statsd(settings)
     _setup_websocket(settings)
 
@@ -141,10 +144,13 @@ def _setup_client(settings):
         settings['h.client_secret'] = os.environ['CLIENT_SECRET']
 
 
-def _setup_sessions(settings):
-    if 'SESSION_SECRET' in os.environ:
-        settings['session.secret'] = os.environ['SESSION_SECRET']
-        settings['redis.sessions.secret'] = os.environ['SESSION_SECRET']
+def _setup_secrets(settings):
+    if 'SECRET_KEY' in os.environ:
+        settings['secret_key'] = os.environ['SECRET_KEY']
+    elif 'SESSION_SECRET' in os.environ:
+        log.warn('Found deprecated SESSION_SECRET environment variable. '
+                 'Please use SECRET_KEY instead!')
+        settings['secret_key'] = os.environ['SESSION_SECRET']
 
 
 def _setup_statsd(settings):

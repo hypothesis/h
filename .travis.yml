@@ -16,9 +16,9 @@ script:
   - make test
   - make lint
   - hypothesis extension development.ini chrome http://localhost
-  - SESSION_SECRET=foo hypothesis extension production.ini chrome https://hypothes.is chrome-extension://notarealkey/public
+  - hypothesis extension production.ini chrome https://hypothes.is chrome-extension://notarealkey/public
   - hypothesis extension development.ini firefox http://localhost
-  - SESSION_SECRET=foo hypothesis extension production.ini firefox https://hypothes.is resource://notarealkey/hypothesis/data
+  - hypothesis extension production.ini firefox https://hypothes.is resource://notarealkey/hypothesis/data
 notifications:
   irc:
     channels:

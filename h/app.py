@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 """The main h application."""
 import functools
+import logging
+import os
 
 from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from pyramid.wsgi import wsgiapp2
 
 from .auth import acl_authz, remote_authn, session_authn
+from .security import derive_key
+
+log = logging.getLogger(__name__)
 
 
 def strip_vhm(view):
@@ -83,10 +88,31 @@ def create_api(settings):
     return config.make_wsgi_app()
 
 
+def missing_secrets(settings):
+    missing = {}
+
+    if 'secret_key' not in settings:
+        log.warn('No secret key provided: using transient key. Please '
+                 'configure the secret_key setting or the SECRET_KEY '
+                 'environment variable!')
+        missing['secret_key'] = os.urandom(64)
+
+    # If the redis session secret hasn't been set explicitly, derive it from
+    # the global secret key.
+    if 'redis.sessions.secret' not in settings:
+        secret = settings.get('secret_key')
+        if secret is None:
+            secret = missing['secret_key']
+        missing['redis.sessions.secret'] = derive_key(secret, 'h.session')
+
+    return missing
+
+
 def main(global_config, **settings):
     """Create the h application with all the awesomeness that is configured."""
     from h import config
     environ_config = config.settings_from_environment()
     settings.update(environ_config)  # from environment variables
     settings.update(global_config)   # from paste [DEFAULT] + command line
+    settings.update(missing_secrets(settings))
     return create_app(settings)
