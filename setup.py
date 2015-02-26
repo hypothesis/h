@@ -118,6 +118,9 @@ setup(
     },
     entry_points={
         'paste.app_factory': ['main=h:main'],
-        'console_scripts': ['hypothesis=h.script:main'],
+        'console_scripts': [
+            'hypothesis=h.script:main',
+            'hypothesis-worker=h.worker:main',
+        ]
     },
 )
