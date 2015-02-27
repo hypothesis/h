@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
 from mock import patch, Mock, MagicMock
+
+from pytest import raises
 from pyramid.testing import DummyRequest
 
 from h.notification.gateway import user_name, user_profile_url, standalone_url
@@ -323,13 +325,15 @@ def test_good_conditions():
         assert send is True
 
 
-# Tests for the send_notifications function
+# Tests for the generate_notifications function
 def test_action_update():
     """It action is not create, it should immediately return"""
     annotation = {}
     request = DummyRequest()
     with patch('h.notification.reply_template.parent_values') as mock_parent:
-        rt.send_notifications(request, annotation, 'update')
+        msgs = rt.generate_notifications(request, annotation, 'update')
+        with raises(StopIteration):
+            msgs.next()
         assert mock_parent.call_count == 0
 
 
@@ -342,7 +346,9 @@ def test_action_create():
         annotation = store_fake_data[1]
         with patch('h.notification.reply_template.Subscriptions') as mock_subs:
             mock_subs.get_active_subscriptions_for_a_type.return_value = []
-            rt.send_notifications(request, annotation, 'create')
+            msgs = rt.generate_notifications(request, annotation, 'create')
+            with raises(StopIteration):
+                msgs.next()
             assert mock_subs.get_active_subscriptions_for_a_type.called
 
 
@@ -355,7 +361,7 @@ class MockSubscription(Mock):
 
 
 def test_check_conditions_false_stops_sending():
-    """If the check conditions() returns False, no notification is sent"""
+    """If the check conditions() returns False, no notifications are generated"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         request = _create_request()
@@ -367,13 +373,13 @@ def test_check_conditions_false_stops_sending():
             ]
             with patch('h.notification.reply_template.check_conditions') as mock_conditions:
                 mock_conditions.return_value = False
-                with patch('h.notification.reply_template.send_email') as mock_mail:
-                    rt.send_notifications(request, annotation, 'create')
-                    assert mock_mail.called is False
+                with raises(StopIteration):
+                    msgs = rt.generate_notifications(request, annotation, 'create')
+                    msgs.next()
 
 
 def test_send_if_everything_is_okay():
-    """Test whether we call the send_email() if every condition is okay"""
+    """Test whether we generate notifications if every condition is okay"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
         mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
         request = _create_request()
@@ -391,6 +397,5 @@ def test_send_if_everything_is_okay():
                         user = Mock()
                         user.email = 'testmail@test.com'
                         mock_user_db.return_value = user
-                        with patch('h.notification.reply_template.send_email') as mock_mail:
-                            rt.send_notifications(request, annotation, 'create')
-                            assert mock_mail.called is True
+                        msgs = rt.generate_notifications(request, annotation, 'create')
+                        msgs.next()

@@ -1,9 +1,10 @@
 import json
 
-import transaction
+from pyramid_mailer import get_mailer
+from pyramid_mailer.message import Message
 
 from ..models import Annotation
-from .reply_template import send_notifications
+from .reply_template import generate_notifications
 
 
 def run(request):
@@ -21,8 +22,12 @@ def run(request):
         data = json.loads(message.body)
         action = data['action']
         annotation = Annotation(**data['annotation'])
-        send_notifications(request, annotation, action)
-        transaction.commit()
+        mailer = get_mailer(request)
+        notifications = generate_notifications(request, annotation, action)
+        for (subject, body, html, recipients) in notifications:
+            m = Message(subject=subject, recipients=recipients,
+                        body=body, html=html)
+            mailer.send_immediately(m)
 
     reader = request.get_queue_reader('annotations', 'notification')
     reader.on_message.connect(handle_message)

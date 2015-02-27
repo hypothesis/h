@@ -10,7 +10,7 @@ from hem.db import get_session
 from horus.events import NewRegistrationEvent
 
 
-from h.notification.notifier import send_email, TemplateRenderException
+from h.notification.notifier import TemplateRenderException
 from h.notification import types
 from h.notification.models import Subscriptions
 from h.notification.gateway import user_name, \
@@ -108,7 +108,7 @@ def check_conditions(annotation, data):
     return True
 
 
-def send_notifications(request, annotation, action):
+def generate_notifications(request, annotation, action):
     # And for them we need only the creation action
     if action != 'create':
         return
@@ -140,7 +140,7 @@ def send_notifications(request, annotation, action):
                 html = render(HTML_TEMPLATE, tmap, request).strip()
                 subject = render(SUBJECT_TEMPLATE, tmap, request).strip()
                 recipients = get_recipients(request, data)
-                send_email(request, subject, text, html, recipients)
+                yield subject, text, html, recipients
             # ToDo: proper exception handling here
             except TemplateRenderException:
                 log.exception('Failed to render subscription'
