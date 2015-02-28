@@ -33,6 +33,7 @@ install_requires = [
     'annotator>=0.14.0,<0.15',
     'blinker>=1.3,<1.4',
     'clik==0.3.1',
+    'cryptography>=0.7',
     'deform>=0.9,<1.0',
     'elasticsearch>=1.1.0',
     'gnsq>=0.2.0,<0.3.0',

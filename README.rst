@@ -140,7 +140,7 @@ Or, to load the assets from within the extension::
 
 To build an extension with a feature flag enabled use the environment variable::
 
-    FEATURE_NOTIFICATION=true SESSION_SECRET=foo \
+    FEATURE_NOTIFICATION=true \
     hypothesis extension production.ini chrome \
     https://hypothes.is chrome-extension://extensionid/public
 
@@ -200,7 +200,7 @@ The following shell environment variables are supported:
 - ``DATABASE_URL`` in the format used by Heroku
 - ``ELASTICSEARCH_INDEX`` the Elasticsearch index for annotation storage
 - ``MAIL_DEFAULT_SENDER`` a sender address for outbound mail
-- ``SESSION_SECRET`` a unique string secret for cookie validation
+- ``SECRET_KEY`` a unique string secret
 
 Customized embedding
 --------------------

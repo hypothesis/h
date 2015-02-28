@@ -180,12 +180,22 @@ def test_client_credentials_environment():
 
 
 @patch.dict(os.environ)
-def test_session_secret_environment():
+def test_secret_key_environment():
+    os.environ['SECRET_KEY'] = 's3kr1t'
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'secret_key': 's3kr1t',
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
+def test_session_secret_environment():  # bw compat
     os.environ['SESSION_SECRET'] = 's3kr1t'
 
     actual_config = settings_from_environment()
     expected_config = {
-        'session.secret': 's3kr1t',
-        'redis.sessions.secret': 's3kr1t',
+        'secret_key': 's3kr1t',
     }
     assert actual_config == expected_config

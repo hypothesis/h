@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import os
-
 from pyramid.session import SignedCookieSessionFactory
 
+from .security import derive_key
 
 def model(request):
     session = {k: v for k, v in request.session.items() if k[0] != '_'}
@@ -34,23 +33,11 @@ def set_csrf_token(request, response):
         response.set_cookie('XSRF-TOKEN', csrft)
 
 
-def session_factory_from_settings(settings, prefix='session.'):
-    """Return a session factory from the provided settings."""
-    secret_key = '{}secret'.format(prefix)
-    secret = settings.get(secret_key)
-    if secret is None:
-        # Get 32 bytes (256 bits) from a secure source (urandom) as a secret.
-        # Pyramid will add a salt to this. The salt and the secret together
-        # will still be less than the, and therefore right zero-padded to,
-        # 1024-bit block size of the default hash algorithm, sha512. However,
-        # 256 bits of random should be more than enough for session secrets.
-        secret = os.urandom(32)
-
-    return SignedCookieSessionFactory(secret)
-
-
 def includeme(config):
     registry = config.registry
     settings = registry.settings
-    session_factory = session_factory_from_settings(settings)
+
+    session_secret = derive_key(settings['secret_key'], 'h.session')
+    session_factory = SignedCookieSessionFactory(session_secret)
+
     config.set_session_factory(session_factory)
