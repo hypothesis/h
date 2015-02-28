@@ -1,6 +1,3 @@
-from mock import MagicMock
-from pytest import fixture
-
 from pyramid import testing
 
 from ..events import LoginEvent
@@ -22,16 +19,3 @@ def test_login_subscriber(authn_policy):
 class DummyUser(object):
     def __init__(self, username):
         self.username = username
-
-
-class DummyAuthorizationPolicy(object):
-    def permits(self, *args, **kwargs):
-        return True
-
-
-@fixture()
-def authn_policy(config):
-    authn_policy = MagicMock()
-    config.set_authorization_policy(DummyAuthorizationPolicy())
-    config.set_authentication_policy(authn_policy)
-    return authn_policy

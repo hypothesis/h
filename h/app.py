@@ -58,6 +58,9 @@ def create_app(settings):
         config.add_view(api_view, name='api', decorator=strip_vhm,
                         route_name='index')
 
+    if config.registry.feature('claim'):
+        config.include('.claim')
+
     if config.registry.feature('streamer'):
         config.include('.streamer')
 
