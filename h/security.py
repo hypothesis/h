@@ -1,11 +1,11 @@
-import hashlib
-import hmac
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.hkdf import HKDFExpand
+from cryptography.hazmat.backends import default_backend
+
+backend = default_backend()
 
 
-def derive_key(secret, salt):
-    if secret is None:
-        raise ValueError('secret must be supplied')
-    if salt is None:
-        raise ValueError('salt must be supplied')
-    mac = hmac.new(secret, msg=salt, digestmod=hashlib.sha512)
-    return mac.digest()
+def derive_key(key_material, info, algorithm=None, length=32):
+    if algorithm is None:
+        algorithm = hashes.SHA256()
+    return HKDFExpand(algorithm, length, info, backend).derive(key_material)
