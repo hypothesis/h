@@ -1,13 +1,12 @@
 from webob.cookies import SignedSerializer
 
+from ..security import derive_key
+
 
 def includeme(config):
     config.include('.views')
     config.include('.util')
-
-    # We use the shared session secret, but salt it with the namespace
-    # 'h.claim' -- only messages serialized with this salt will
-    # authenticate on deserialization.
-    secret = config.registry.settings['session.secret']
-    serializer = SignedSerializer(secret, 'h.claim')
+    secret = config.registry.settings['secret_key']
+    derived = derive_key(secret, 'h.claim')
+    serializer = SignedSerializer(derived, None)
     config.registry.claim_serializer = serializer
