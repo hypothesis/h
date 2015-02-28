@@ -106,7 +106,7 @@ def missing_secrets(settings):
         log.warn('No secret key provided: using transient key. Please '
                  'configure the secret_key setting or the SECRET_KEY '
                  'environment variable!')
-        missing['secret_key'] = os.urandom(32)
+        missing['secret_key'] = os.urandom(64)
 
     # If the redis session secret hasn't been set explicitly, derive it from
     # the global secret key.
