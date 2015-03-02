@@ -1,4 +1,5 @@
 -e .[YAML]
+cffi
 psycogreen
 psycopg2
 pyramid_redis_sessions==1.0a2
