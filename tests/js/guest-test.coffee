@@ -1,23 +1,42 @@
+Annotator = require('annotator')
+Guest = require('../../h/static/scripts/guest')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
+
 describe 'Annotator.Guest', ->
-  sandbox = sinon.sandbox.create()
+  sandbox = null
   fakeCrossFrame = null
+
   createGuest = (options) ->
     element = document.createElement('div')
-    return new Annotator.Guest(element, options || {})
-
-  # Silence Annotator's sassy backchat
-  beforeEach -> sandbox.stub(console, 'log')
-  afterEach -> sandbox.restore()
+    return new Guest(element, options || {})
 
   beforeEach ->
+    sandbox = sinon.sandbox.create()
+
     fakeCrossFrame =
       onConnect: sandbox.stub()
       on: sandbox.stub()
 
-    sandbox.stub(Annotator.Plugin, 'CrossFrame').returns(fakeCrossFrame)
+    # Mock out the anchoring plugin. Oh how I wish I didn't have to do crazy
+    # shit like this.
+    Annotator.Plugin.EnhancedAnchoring = -> {
+      pluginInit: ->
+        @annotator.anchoring = this
+
+      _scan: sandbox.stub()
+
+      getHighlights: sandbox.stub().returns([])
+      getAnchors: sandbox.stub().returns([])
+    }
+
+    Annotator.Plugin.CrossFrame = -> fakeCrossFrame
+    sandbox.spy(Annotator.Plugin, 'CrossFrame')
+
+  afterEach ->
+    sandbox.restore()
 
   describe 'setting up the bridge', ->
     it 'sets the scope for the cross frame bridge', ->
@@ -177,7 +196,7 @@ describe 'Annotator.Guest', ->
           {annotation: {$$tag: 'tag1'}, setFocused: sandbox.stub()}
           {annotation: {$$tag: 'tag2'}, setFocused: sandbox.stub()}
         ]
-        sandbox.stub(guest.anchoring, 'getHighlights').returns(highlights)
+        guest.anchoring.getHighlights.returns(highlights)
         emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
         assert.called(highlights[0].setFocused)
         assert.calledWith(highlights[0].setFocused, true)
@@ -188,7 +207,7 @@ describe 'Annotator.Guest', ->
           {annotation: {$$tag: 'tag1'}, setFocused: sandbox.stub()}
           {annotation: {$$tag: 'tag2'}, setFocused: sandbox.stub()}
         ]
-        sandbox.stub(guest.anchoring, 'getHighlights').returns(highlights)
+        guest.anchoring.getHighlights.returns(highlights)
         emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
         assert.called(highlights[1].setFocused)
         assert.calledWith(highlights[1].setFocused, false)
@@ -199,7 +218,7 @@ describe 'Annotator.Guest', ->
         anchors = [
           {annotation: {$$tag: 'tag1'}, scrollToView: sandbox.stub()}
         ]
-        sandbox.stub(guest.anchoring, 'getAnchors').returns(anchors)
+        guest.anchoring.getAnchors.returns(anchors)
         emitGuestEvent('scrollToAnnotation', 'ctx', 'tag1')
         assert.called(anchors[0].scrollToView)
 

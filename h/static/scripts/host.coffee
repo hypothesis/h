@@ -1,8 +1,9 @@
-Annotator = @Annotator
-$ = Annotator.$
+$ = require('jquery')
+Annotator = require('annotator')
+Guest = require('./guest')
 
 
-class Annotator.Host extends Annotator.Guest
+module.exports = class Annotator.Host extends Annotator.Guest
   # Drag state variables
   drag:
     delta: 0

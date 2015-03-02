@@ -1,3 +1,11 @@
+angular = require('angular')
+uuid = require('./vendor/uuid')
+
+# These services are provided in their own angular modules and thus must be
+# loaded first.
+require('./identity-service')
+require('./streamer-service')
+
 imports = [
   'ngAnimate'
   'ngRoute'
@@ -92,3 +100,38 @@ module = angular.module('h', imports)
 unless mocha? # Crude method of detecting test environment.
   module.run(setupCrossFrame)
   module.run(setupStreamer)
+
+require('./vendor/annotator.auth.js')
+require('./annotator/monkey')
+
+require('./controllers')
+
+require('./directives')
+require('./directives/annotation')
+require('./directives/deep-count')
+require('./directives/markdown')
+require('./directives/privacy')
+require('./directives/simple-search')
+require('./directives/status-button')
+require('./directives/thread-filter')
+require('./directives/thread')
+
+require('./filters')
+require('./searchfilters')
+
+require('./services')
+require('./annotation-mapper-service')
+require('./annotation-ui-service')
+require('./auth-service')
+require('./cross-frame-service')
+require('./flash-service')
+require('./permissions-service')
+require('./store-service')
+require('./threading-service')
+
+require('./streamsearch')
+
+require('./annotation-sync')
+require('./annotation-ui-sync')
+require('./bridge')
+require('./discovery')

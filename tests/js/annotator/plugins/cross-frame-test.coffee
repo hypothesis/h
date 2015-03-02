@@ -1,8 +1,10 @@
+cf = require('../../../../h/static/scripts/annotator/plugin/cross-frame')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
+
 describe 'Annotator.Plugin.CrossFrame', ->
-  CrossFrame = null
   fakeDiscovery = null
   fakeBridge = null
   fakeAnnotationSync = null
@@ -13,7 +15,7 @@ describe 'Annotator.Plugin.CrossFrame', ->
       on: sandbox.stub()
       emit: sandbox.stub()
     element = document.createElement('div')
-    return new Annotator.Plugin.CrossFrame(element, $.extend({}, defaults, options))
+    return new cf.CrossFrame(element, $.extend({}, defaults, options))
 
   beforeEach ->
     fakeDiscovery =
@@ -29,10 +31,9 @@ describe 'Annotator.Plugin.CrossFrame', ->
     fakeAnnotationSync =
       sync: sandbox.stub()
 
-    CrossFrame = Annotator.Plugin.CrossFrame
-    sandbox.stub(CrossFrame, 'AnnotationSync').returns(fakeAnnotationSync)
-    sandbox.stub(CrossFrame, 'Discovery').returns(fakeDiscovery)
-    sandbox.stub(CrossFrame, 'Bridge').returns(fakeBridge)
+    cf.CrossFrame.AnnotationSync = sandbox.stub().returns(fakeAnnotationSync)
+    cf.CrossFrame.Discovery = sandbox.stub().returns(fakeDiscovery)
+    cf.CrossFrame.Bridge = sandbox.stub().returns(fakeBridge)
 
   afterEach ->
     sandbox.restore()
@@ -40,33 +41,28 @@ describe 'Annotator.Plugin.CrossFrame', ->
   describe 'constructor', ->
     it 'instantiates the Discovery component', ->
       createCrossFrame()
-      assert.called(CrossFrame.Discovery)
-      assert.calledWith(CrossFrame.Discovery, window)
+      assert.calledWith(cf.CrossFrame.Discovery, window)
 
     it 'passes the options along to the bridge', ->
       createCrossFrame(server: true)
-      assert.called(CrossFrame.Discovery)
-      assert.calledWith(CrossFrame.Discovery, window, server: true)
+      assert.calledWith(cf.CrossFrame.Discovery, window, server: true)
 
     it 'instantiates the CrossFrame component', ->
       createCrossFrame()
-      assert.called(CrossFrame.Bridge)
-      assert.calledWith(CrossFrame.Discovery)
+      assert.calledWith(cf.CrossFrame.Discovery)
 
     it 'passes the options along to the bridge', ->
       createCrossFrame(scope: 'myscope')
-      assert.called(CrossFrame.Bridge)
-      assert.calledWith(CrossFrame.Bridge, scope: 'myscope')
+      assert.calledWith(cf.CrossFrame.Bridge, scope: 'myscope')
 
     it 'instantiates the AnnotationSync component', ->
       createCrossFrame()
-      assert.called(CrossFrame.AnnotationSync)
+      assert.called(cf.CrossFrame.AnnotationSync)
 
     it 'passes along options to AnnotationSync', ->
       formatter = (x) -> x
       createCrossFrame(formatter: formatter)
-      assert.called(CrossFrame.AnnotationSync)
-      assert.calledWith(CrossFrame.AnnotationSync, fakeBridge, {
+      assert.calledWith(cf.CrossFrame.AnnotationSync, fakeBridge, {
         on: sinon.match.func
         emit: sinon.match.func
         formatter: formatter

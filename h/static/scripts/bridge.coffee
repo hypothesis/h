@@ -1,3 +1,6 @@
+$ = require('jquery')
+Channel = require('./vendor/jschannel')
+
 class Bridge
   options:
     # Scope identifier to distinguish this channel from any others

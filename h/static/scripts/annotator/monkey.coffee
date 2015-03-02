@@ -1,3 +1,5 @@
+Annotator = require('annotator')
+
 # Save references to Range and Util (because we call Annotator.noConflict() when
 # bootstrapping)
 Range = Annotator.Range

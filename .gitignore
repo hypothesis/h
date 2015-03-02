@@ -20,6 +20,9 @@
 /share
 /src
 
+# All minified javascript is built
+*.min.js
+
 *.pyc
 *.pyo
 

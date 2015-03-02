@@ -1,8 +1,9 @@
-Annotator = @Annotator
-$ = Annotator.$
+$ = require('jquery')
+Annotator = require('annotator')
+Channel = require('./vendor/jschannel')
 
 
-class Annotator.Guest extends Annotator
+module.exports = class Annotator.Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
 
   # Events to be bound on Annotator#element.

@@ -1,4 +1,4 @@
-Annotator = @Annotator
+Annotator = require('annotator')
 $ = Annotator.$
 
 # Fake two-phase / pagination support, used for HTML documents
@@ -293,3 +293,5 @@ class Annotator.Plugin.EnhancedAnchoring extends Annotator.Plugin
 
     selectors
 
+exports.Anchor = Anchor
+exports.EnhancedAnchoring = Annotator.Plugin.EnhancedAnchoring

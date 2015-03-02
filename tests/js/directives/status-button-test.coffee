@@ -1,9 +1,16 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 
-describe 'h.directives.statusButton', ->
+
+describe 'h:directives.status-button', ->
   $scope = null
   $compile = null
   $element = null
+
+  before ->
+    angular.module('h', [])
+    require('../../../h/static/scripts/directives/status-button')
 
   beforeEach module('h')
 

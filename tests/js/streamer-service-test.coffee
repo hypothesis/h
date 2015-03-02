@@ -1,16 +1,23 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
-sandbox = sinon.sandbox.create()
+
 
 describe 'streamer', ->
   WebSocket = null
   fakeSock = null
   streamer = null
   url = 'wss://magicstreemz/giraffe'
+  sandbox = null
+
+  before ->
+    require('../../h/static/scripts/streamer-service')
 
   beforeEach module('h.streamer')
 
   beforeEach module ->
+    sandbox = sinon.sandbox.create()
     fakeSock = {
       send: sandbox.spy()
       close: sandbox.spy()

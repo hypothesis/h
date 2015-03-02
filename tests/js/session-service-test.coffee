@@ -1,20 +1,37 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
-sandbox = sinon.sandbox.create()
 
-mockFlash = sandbox.spy()
-mockDocument = {prop: -> '/session'}
 
-describe 'session', ->
+describe 'h.session', ->
+  fakeFlash = null
+  fakeDocument = null
+  fakeXsrf = null
+  sandbox = null
+
+  before ->
+    angular.module('h.session', ['ngResource'])
+    require('../../h/static/scripts/session/session-service')
+
   beforeEach module('h.session')
 
   beforeEach module ($provide, sessionProvider) ->
-    $provide.value '$document', mockDocument
-    $provide.value 'flash', mockFlash
+    sandbox = sinon.sandbox.create()
+
+    fakeFlash = sandbox.spy()
+    fakeDocument = {prop: -> '/session'}
+    fakeXsrf = {token: 'faketoken'}
+
+    $provide.value '$document', fakeDocument
+    $provide.value 'flash', fakeFlash
+    $provide.value 'xsrf', fakeXsrf
+
     sessionProvider.actions =
       login:
         url: '/login'
         method: 'POST'
+
     return
 
   afterEach ->
@@ -23,12 +40,10 @@ describe 'session', ->
   describe 'sessionService', ->
     $httpBackend = null
     session = null
-    xsrf = null
 
-    beforeEach inject (_$httpBackend_, _session_, _xsrf_) ->
+    beforeEach inject (_$httpBackend_, _session_) ->
       $httpBackend = _$httpBackend_
       session = _session_
-      xsrf = _xsrf_
 
     describe '#<action>()', ->
       url = '/login'
@@ -45,7 +60,7 @@ describe 'session', ->
         $httpBackend.expectPOST(url).respond(response)
         result = session.login({})
         $httpBackend.flush()
-        assert.calledWith mockFlash, 'error', 'fail'
+        assert.calledWith fakeFlash, 'error', 'fail'
 
       it 'should assign errors and status reasons to the model', ->
         response =
@@ -71,7 +86,7 @@ describe 'session', ->
         request = $httpBackend.expectPOST(url).respond({model})
         result = session.login({})
         $httpBackend.flush()
-        assert.equal xsrf.token, token
+        assert.equal fakeXsrf.token, token
 
         $httpBackend.expectPOST(url, {}, headers).respond({})
         session.login({})

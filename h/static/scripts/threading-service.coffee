@@ -1,3 +1,6 @@
+angular = require('angular')
+mail = require('./vendor/jwz')
+
 class ThreadingService
   # Mix in message thread properties into the prototype. The body of the
   # class will overwrite any methods applied here. If you need inheritance

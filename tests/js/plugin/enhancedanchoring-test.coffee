@@ -1,12 +1,8 @@
+Annotator = require('annotator')
+ea = require('../../../h/static/scripts/annotator/plugin/enhancedanchoring')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
-
-# In order to be able to create highlights,
-# the Annotator.TextHighlight class must exist.
-# This class is registered then the TextHighlights plugin
-# is initialized, so we will do that.
-th = new Annotator.Plugin.TextHighlights()
-th.pluginInit()
 
 # Then Anchor class is not supposed to be used directly.
 # Every concrete implementation should have it's own class,
@@ -14,7 +10,7 @@ th.pluginInit()
 #
 # For testing, we will use the TestAnchor class,
 # which does not actually identify a real segment of the HTML document.
-class TestAnchor extends Annotator.Anchor
+class TestAnchor extends ea.Anchor
 
   _getSegment: -> "html segment for " + @id
 
@@ -23,6 +19,7 @@ class TestAnchor extends Annotator.Anchor
       "fake quote for" + target.id
 
     @id = "fake anchor for " + target.id
+
 
 describe 'Annotator.Plugin.EnhancedAnchoring', ->
   sandbox = null
@@ -33,13 +30,15 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
 
   beforeEach ->
     sandbox = sinon.sandbox.create()
-    sandbox.stub Annotator.TextHighlight, 'createFrom',
-      (segment, anchor, page) ->
+
+    Annotator.TextHighlight = {
+      createFrom: (segment, anchor, page) ->
         segment: segment
         anchor: anchor
         page: page
         removeFromDocument: sinon.spy()
         scrollToView: sinon.spy -> pendingTest?.resolve()
+    }
 
   afterEach ->
     sandbox.restore()
@@ -59,7 +58,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
       annotator =
         publish: sinon.spy()
 
-      am = new Annotator.Plugin.EnhancedAnchoring()
+      am = new ea.EnhancedAnchoring()
       am.annotator = annotator
       am.pluginInit()
 
@@ -287,7 +286,7 @@ describe 'Annotator.Plugin.EnhancedAnchoring', ->
       annotator =
         publish: sinon.spy()
 
-      am = new Annotator.Plugin.EnhancedAnchoring()
+      am = new ea.EnhancedAnchoring()
       am.annotator = annotator
       am.pluginInit()
 

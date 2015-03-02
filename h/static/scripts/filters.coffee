@@ -1,3 +1,6 @@
+angular = require('angular')
+Markdown = require('./vendor/Markdown.Converter')
+
 class Converter extends Markdown.Converter
   constructor: ->
     super

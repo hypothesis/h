@@ -1,3 +1,5 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
 
@@ -13,13 +15,25 @@ poem =
           “’Tis some visitor,” I muttered, “tapping at my chamber door—
           Only this and nothing more.”'
 
-describe 'h', ->
+
+describe 'h:services', ->
   sandbox = null
+  fakeStringHelpers = null
+
+  before ->
+    angular.module('h', [])
+    require('../../h/static/scripts/services')
 
   beforeEach module('h')
 
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
+
+    fakeStringHelpers = {
+      uniFold: sinon.stub().returnsArg(0)
+    }
+
+    $provide.value('stringHelpers', fakeStringHelpers)
     return
 
   afterEach ->
@@ -27,22 +41,19 @@ describe 'h', ->
 
   describe 'viewFilter service', ->
     viewFilter = null
-    stringHelpers = null
 
-    beforeEach inject (_stringHelpers_, _viewFilter_) ->
-      stringHelpers = _stringHelpers_
+    beforeEach inject (_viewFilter_) ->
       viewFilter = _viewFilter_
 
     describe 'filter', ->
       it 'normalizes the filter terms', ->
-        stringHelpers.uniFold = sandbox.spy()
         filters =
           text:
             terms: ['Tiger']
             operator: 'and'
 
         viewFilter.filter [], filters
-        assert.calledWith stringHelpers.uniFold, 'tiger'
+        assert.calledWith fakeStringHelpers.uniFold, 'tiger'
 
       describe 'filter operators', ->
         annotations = null

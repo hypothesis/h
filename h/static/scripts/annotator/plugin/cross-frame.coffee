@@ -1,3 +1,5 @@
+Annotator = require('annotator')
+
 $ = Annotator.$
 
 # Extracts individual keys from an object and returns a new one.
@@ -45,3 +47,5 @@ CrossFrame = class Annotator.Plugin.CrossFrame extends Annotator.Plugin
 
     this.onConnect = (fn) ->
       bridge.onConnect(fn)
+
+exports.CrossFrame = CrossFrame

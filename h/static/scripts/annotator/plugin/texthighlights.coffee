@@ -1,3 +1,5 @@
+require('../../vendor/jquery.scrollintoview')
+
 $ = Annotator.$
 
 # Public: Wraps the DOM Nodes within the provided range with a highlight
@@ -125,3 +127,5 @@ class Annotator.Plugin.TextHighlights extends Annotator.Plugin
   pluginInit: ->
     # Export the text highlight class for other plugins
     Annotator.TextHighlight = TextHighlight
+
+exports.TextHighlight = TextHighlight

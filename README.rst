@@ -107,10 +107,8 @@ To run the Python suite, invoke the tests in the standard fashion::
 
     $ ./bin/python setup.py test
 
-To run the JavaScript suite, ensure the assets are built and then invoke the
-karma test runner::
+To run the JavaScript suite, run::
 
-    $ hypothesis assets development.ini
     $ $(npm bin)/karma start karma.config.js --single-run
 
 As a convenience, there is a make target which will do all of the above::
@@ -120,8 +118,7 @@ As a convenience, there is a make target which will do all of the above::
 It's also possible to run a subset of the tests using ``karma run``::
 
     $ $(npm bin)/karma start karma.config.js & # Start the server in the bg.
-    $ hypothesis assets development.ini && \
-      $(npm bin)/karma run karma.config.js -- --grep={FILTER_STRING}
+    $ $(npm bin)/karma run karma.config.js -- --grep={FILTER_STRING}
 
 This will run generally be much faster than running ``karma start --single-run``
 each time. The frontend tests can also be debugged by visiting

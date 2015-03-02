@@ -1,10 +1,18 @@
+{module, inject} = require('angular-mock')
+Channel = require('../../h/static/scripts/vendor/jschannel.js')
+
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
+
 
 describe 'Bridge', ->
   sandbox = sinon.sandbox.create()
   createBridge = null
   createChannel = null
+
+  before ->
+    angular.module('h', [])
+    require('../../h/static/scripts/bridge')
 
   beforeEach module('h')
   beforeEach inject (Bridge) ->

@@ -1,8 +1,15 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
-describe 'h.helpers.stringHelpers', ->
+
+describe 'h.helpers:string-helpers', ->
   stringHelpers = null
+
+  before ->
+    angular.module('h.helpers', [])
+    require('../../../h/static/scripts/helpers/string-helpers')
 
   beforeEach module('h.helpers')
 

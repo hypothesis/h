@@ -1,3 +1,6 @@
+Annotator = require('annotator')
+Host = require('../../h/static/scripts/host')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
@@ -7,7 +10,7 @@ describe 'Annotator.Host', ->
 
   createHost = (options={}) ->
     element = document.createElement('div')
-    return new Annotator.Host(element, options)
+    return new Host(element, options)
 
   beforeEach ->
     # Disable Annotator's ridiculous logging.

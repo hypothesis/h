@@ -1,5 +1,8 @@
+{module, inject} = require('angular-mock')
+
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
+
 
 describe 'AnnotationSync', ->
   sandbox = sinon.sandbox.create()
@@ -9,6 +12,10 @@ describe 'AnnotationSync', ->
   createChannel = -> {notify: sandbox.stub()}
   options = null
   PARENT_WINDOW = 'PARENT_WINDOW'
+
+  before ->
+    angular.module('h', [])
+    require('../../h/static/scripts/annotation-sync')
 
   beforeEach module('h')
   beforeEach inject (AnnotationSync, $rootScope) ->
