@@ -156,15 +156,15 @@
       if (this.metadata.highwire.title) {
         return this.metadata.title = this.metadata.highwire.title[0];
       } else if (this.metadata.eprints.title) {
-        return this.metadata.title = this.metadata.eprints.title;
+        return this.metadata.title = this.metadata.eprints.title[0];
       } else if (this.metadata.prism.title) {
-        return this.metadata.title = this.metadata.prism.title;
+        return this.metadata.title = this.metadata.prism.title[0];
       } else if (this.metadata.facebook.title) {
-        return this.metadata.title = this.metadata.facebook.title;
+        return this.metadata.title = this.metadata.facebook.title[0];
       } else if (this.metadata.twitter.title) {
-        return this.metadata.title = this.metadata.twitter.title;
+        return this.metadata.title = this.metadata.twitter.title[0];
       } else if (this.metadata.dc.title) {
-        return this.metadata.title = this.metadata.dc.title;
+        return this.metadata.title = this.metadata.dc.title[0];
       } else {
         return this.metadata.title = $("head title").text();
       }
