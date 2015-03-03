@@ -22,7 +22,7 @@ from ws4py.exc import HandshakeError
 from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
-from .api import get_user
+from .api.auth import get_user  # FIXME: should not import from .api
 from .models import Annotation
 
 log = logging.getLogger(__name__)

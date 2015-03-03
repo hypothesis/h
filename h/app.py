@@ -32,7 +32,6 @@ def strip_vhm(view):
     return wrapped
 
 
-
 def create_app(global_config, **settings):
     """Configure and add static routes and views. Return the WSGI app."""
     settings = get_settings(global_config, **settings)
@@ -93,7 +92,7 @@ def create_api(global_config, **settings):
                           'pyramid.events.ContextFound')
     config.add_tween('h.tweens.annotator_tween_factory')
 
-    config.include('.api')
+    config.include('.api.views')
     config.include('.auth')
     config.include('.features')
     config.include('.queue')

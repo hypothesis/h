@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""Defines unit tests for h.api."""
+"""Defines unit tests for h.api.views."""
 
 from mock import patch, MagicMock, Mock
 from pytest import fixture, raises
 from pyramid.testing import DummyRequest, DummyResource
 
-from h import api
+from .. import views
 
 
 class DictMock(Mock):
@@ -46,9 +46,9 @@ class DictMock(Mock):
 @fixture(autouse=True)
 def replace_io(monkeypatch):
     """For all tests, mock paths to the "outside" world"""
-    monkeypatch.setattr(api, 'Annotation', DictMock())
-    monkeypatch.setattr(api, '_publish_annotation_event', MagicMock())
-    monkeypatch.setattr(api, '_api_error', MagicMock())
+    monkeypatch.setattr(views, 'Annotation', DictMock())
+    monkeypatch.setattr(views, '_publish_annotation_event', MagicMock())
+    monkeypatch.setattr(views, '_api_error', MagicMock())
 
 
 @fixture()
@@ -58,17 +58,16 @@ def user(monkeypatch):
     user.id = 'alice'
     user.consumer.key = 'consumer_key'
 
-    # Make api.get_user() return our alice
-    get_user = MagicMock()
-    get_user.return_value = user
-    monkeypatch.setattr(api, 'get_user', get_user)
+    # Make auth.get_user() return our alice
+    monkeypatch.setattr(views, 'get_user', lambda r: user)
+
     return user
 
 
 def test_index():
     """Get the API descriptor"""
 
-    result = api.index(DummyResource(), DummyRequest())
+    result = views.index(DummyResource(), DummyRequest())
 
     # Pyramid's host url defaults to http://example.com
     host = 'http://example.com'
@@ -95,7 +94,7 @@ def test_search_parameters():
         'some_field': 'something',
     }
     user = object()
-    assert api._search_params(request_params, user=user) == {
+    assert views._search_params(request_params, user=user) == {
         'query': {
             'uri': 'http://bla.test',
             'some_field': 'something',
@@ -114,25 +113,25 @@ def test_bad_search_parameters():
         'limit': '\' drop table annotations',
     }
     user = object()
-    assert api._search_params(request_params, user=user) == {
+    assert views._search_params(request_params, user=user) == {
         'query': {},
         'user': user,
     }
 
 
-@patch('h.api._create_annotation')
+@patch('h.api.views._create_annotation')
 def test_create(mock_create_annotation, user):
     request = DummyRequest(json_body=_new_annotation)
 
-    annotation = api.create(DummyResource, request)
+    annotation = views.create(DummyResource, request)
 
-    api._create_annotation.assert_called_once_with(_new_annotation, user)
-    assert annotation == api._create_annotation.return_value
+    views._create_annotation.assert_called_once_with(_new_annotation, user)
+    assert annotation == views._create_annotation.return_value
     _assert_event_published('create')
 
 
 def test_create_annotation(user):
-    annotation = api._create_annotation(_new_annotation, user)
+    annotation = views._create_annotation(_new_annotation, user)
     assert annotation['text'] == 'blabla'
     assert annotation['user'] == 'alice'
     assert annotation['consumer'] == 'consumer_key'
@@ -143,21 +142,21 @@ def test_create_annotation(user):
 def test_read():
     annotation = DummyResource()
 
-    result = api.read(annotation, DummyRequest())
+    result = views.read(annotation, DummyRequest())
 
     _assert_event_published('read')
     assert result == annotation, "Annotation should have been returned"
 
 
-@patch('h.api._update_annotation')
+@patch('h.api.views._update_annotation')
 def test_update(mock_update_annotation):
-    annotation = api.Annotation(_old_annotation)
+    annotation = views.Annotation(_old_annotation)
     request = DummyRequest(json_body=_new_annotation)
     request.has_permission = MagicMock(return_value=True)
 
-    result = api.update(annotation, request)
+    result = views.update(annotation, request)
 
-    api._update_annotation.assert_called_once_with(annotation,
+    views._update_annotation.assert_called_once_with(annotation,
                                                    _new_annotation,
                                                    True)
     _assert_event_published('update')
@@ -165,9 +164,9 @@ def test_update(mock_update_annotation):
 
 
 def test_update_annotation(user):
-    annotation = api.Annotation(_old_annotation)
+    annotation = views.Annotation(_old_annotation)
 
-    api._update_annotation(annotation, _new_annotation, True)
+    views._update_annotation(annotation, _new_annotation, True)
 
     assert annotation['text'] == 'blabla'
     assert annotation['quote'] == 'original_quote'
@@ -177,22 +176,22 @@ def test_update_annotation(user):
     annotation.save.assert_called_once()
 
 
-@patch('h.api._anonymize_deletes')
+@patch('h.api.views._anonymize_deletes')
 def test_update_anonymize_deletes(mock_anonymize_deletes):
-    annotation = api.Annotation(_old_annotation)
+    annotation = views.Annotation(_old_annotation)
     annotation['deleted'] = True
     request = DummyRequest(json_body=_new_annotation)
 
-    api.update(annotation, request)
+    views.update(annotation, request)
 
-    api._anonymize_deletes.assert_called_once_with(annotation)
+    views._anonymize_deletes.assert_called_once_with(annotation)
 
 
 def test_anonymize_deletes():
-    annotation = api.Annotation(_old_annotation)
+    annotation = views.Annotation(_old_annotation)
     annotation['deleted'] = True
 
-    api._anonymize_deletes(annotation)
+    views._anonymize_deletes(annotation)
 
     assert 'user' not in annotation
     assert annotation['permissions'] == {
@@ -204,19 +203,19 @@ def test_anonymize_deletes():
 
 
 def test_update_change_permissions_disallowed():
-    annotation = api.Annotation(_old_annotation)
+    annotation = views.Annotation(_old_annotation)
 
     with raises(RuntimeError):
-        api._update_annotation(annotation, _new_annotation, False)
+        views._update_annotation(annotation, _new_annotation, False)
 
     assert annotation['text'] == 'old_text'
     assert annotation.save.call_count == 0
 
 
 def test_delete():
-    annotation = api.Annotation(_old_annotation)
+    annotation = views.Annotation(_old_annotation)
 
-    result = api.delete(annotation, DummyRequest())
+    result = views.delete(annotation, DummyRequest())
 
     assert annotation.delete.assert_called_once()
     _assert_event_published('delete')
@@ -224,8 +223,8 @@ def test_delete():
 
 
 def _assert_event_published(action):
-    assert api._publish_annotation_event.call_count == 1
-    assert api._publish_annotation_event.call_args[0][2] == action
+    assert views._publish_annotation_event.call_count == 1
+    assert views._publish_annotation_event.call_args[0][2] == action
 
 
 _new_annotation = {
