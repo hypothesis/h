@@ -5,6 +5,7 @@ import re
 
 from pyramid import httpexceptions
 from pyramid.events import ContextFound
+from pyramid.settings import asbool
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
@@ -55,8 +56,28 @@ def annotation(context, request):
 
 @view_config(name='embed.js', renderer='h:templates/embed.js')
 def js(context, request):
+    settings = request.registry.settings
     request.response.content_type = b'text/javascript'
-    return {}
+
+    appstruct = {}
+
+    # If we are building a browser extension when rendering embed.js, we may
+    # need to link to the app.html embedded within the extension rather than
+    # the one hosted by the application.
+    #
+    # FIXME: remove this hack
+    if asbool(settings.get('h.use_bundled_app_html')):
+        # A base URL of http://example.com/public means that app.html will be
+        # at http://example.com/public/app.html, so make sure we append the
+        # trailing slash as necessary.
+        base = request.webassets_env.url
+        if not base.endswith('/'):
+            base += '/'
+        appstruct['app_html'] = base + 'app.html'
+    else:
+        appstruct['app_html'] = request.resource_url(request.root, 'app.html')
+
+    return appstruct
 
 
 @view_config(layout='app', name='app.html', renderer='h:templates/app.html')

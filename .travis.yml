@@ -15,10 +15,10 @@ services:
 script:
   - make test
   - make lint
-  - hypothesis extension development.ini chrome http://localhost
-  - hypothesis extension production.ini chrome https://hypothes.is chrome-extension://notarealkey/public
-  - hypothesis extension development.ini firefox http://localhost
-  - hypothesis extension production.ini firefox https://hypothes.is resource://notarealkey/hypothesis/data
+  - hypothesis-buildext development.ini chrome --base http://localhost
+  - hypothesis-buildext production.ini chrome --base https://hypothes.is --assets chrome-extension://notarealkey/public
+  - hypothesis-buildext development.ini firefox --base http://localhost
+  - hypothesis-buildext production.ini firefox --base https://hypothes.is --assets resource://notarealkey/hypothesis/data
 notifications:
   irc:
     channels:
