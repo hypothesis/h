@@ -43,7 +43,7 @@
     };
 
     if (!window.document.evaluate) {
-      resources = resources.concat(['{{ layout.xpath_polyfil_urls | map("string") | join("', '") | safe }}']);
+      resources = resources.concat(['{{ layout.xpath_polyfill_urls | map("string") | join("', '") | safe }}']);
     }
 
     if (typeof window.Annotator === 'undefined') {
