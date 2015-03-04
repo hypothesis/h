@@ -85,7 +85,7 @@ def create_api(global_config, **settings):
 
     config.set_authentication_policy(remote_authn)
     config.set_authorization_policy(acl_authz)
-    config.set_root_factory('h.resources.APIResource')
+    config.set_root_factory('h.api.resources.create_root')
 
     config.add_renderer('json', JSON(indent=4))
     config.add_subscriber('h.subscribers.set_user_from_oauth',

@@ -123,7 +123,7 @@ def test_bad_search_parameters():
 def test_create(mock_create_annotation, user):
     request = DummyRequest(json_body=_new_annotation)
 
-    annotation = views.create(DummyResource, request)
+    annotation = views.create(request)
 
     views._create_annotation.assert_called_once_with(_new_annotation, user)
     assert annotation == views._create_annotation.return_value

@@ -9,6 +9,8 @@ from pyramid.view import view_config
 
 from .auth import get_user
 from .models import Annotation
+from .resources import Root
+from .resources import Annotations
 
 log = logging.getLogger(__name__)
 
@@ -20,8 +22,6 @@ PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 def api_config(**kwargs):
     """Extend Pyramid's @view_config decorator with modified defaults."""
     config = {
-        # The containment predicate ensures we only respond to API calls
-        'containment': 'h.resources.APIResource',
         'accept': 'application/json',
         'renderer': 'json',
     }
@@ -29,7 +29,7 @@ def api_config(**kwargs):
     return view_config(**config)
 
 
-@api_config(context='h.resources.APIResource')
+@api_config(context=Root)
 def index(context, request):
     """Return the API descriptor document.
 
@@ -69,8 +69,8 @@ def index(context, request):
     }
 
 
-@api_config(context='h.resources.APIResource', name='search')
-def search(context, request):
+@api_config(context=Root, name='search')
+def search(request):
     """Search the database for annotations matching with the given query."""
 
     # The search results are filtered for the authenticated user
@@ -78,22 +78,22 @@ def search(context, request):
     return _search(request.params, user)
 
 
-@api_config(context='h.resources.APIResource', name='access_token')
-def access_token(context, request):
+@api_config(context=Root, name='access_token')
+def access_token(request):
     """The OAuth 2 access token view."""
     return request.create_token_response()
 
 
-@api_config(context='h.resources.APIResource', name='token', renderer='string')
-def annotator_token(context, request):
+@api_config(context=Root, name='token', renderer='string')
+def annotator_token(request):
     """The Annotator Auth token view."""
     request.grant_type = 'client_credentials'
-    response = access_token(context, request)
+    response = access_token(request)
     return response.json_body.get('access_token', response)
 
 
-@api_config(context='h.resources.AnnotationFactory', request_method='GET')
-def annotations_index(context, request):
+@api_config(context=Annotations, request_method='GET')
+def annotations_index(request):
     """Do a search for all annotations on anything and return results.
 
     This will use the default limit, 20 at time of writing, and results
@@ -103,10 +103,8 @@ def annotations_index(context, request):
     return Annotation.search(user=user)
 
 
-@api_config(context='h.resources.AnnotationFactory',
-            request_method='POST',
-            permission='create')
-def create(context, request):
+@api_config(context=Annotations, request_method='POST', permission='create')
+def create(request):
     """Read the POSTed JSON-encoded annotation and persist it."""
     user = get_user(request)
 
@@ -128,9 +126,7 @@ def create(context, request):
     return annotation
 
 
-@api_config(context='h.models.Annotation',
-            request_method='GET',
-            permission='read')
+@api_config(context=Annotation, request_method='GET', permission='read')
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     annotation = context
@@ -141,9 +137,7 @@ def read(context, request):
     return annotation
 
 
-@api_config(context='h.models.Annotation',
-            request_method='PUT',
-            permission='update')
+@api_config(context=Annotation, request_method='PUT', permission='update')
 def update(context, request):
     """Update the fields we received and store the updated version."""
     annotation = context
@@ -175,9 +169,7 @@ def update(context, request):
     return annotation
 
 
-@api_config(context='h.models.Annotation',
-            request_method='DELETE',
-            permission='delete')
+@api_config(context=Annotation, request_method='DELETE', permission='delete')
 def delete(context, request):
     """Delete the annotation permanently."""
     annotation = context
