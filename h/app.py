@@ -88,7 +88,7 @@ def create_api(global_config, **settings):
     config.set_root_factory('h.api.resources.create_root')
 
     config.add_renderer('json', JSON(indent=4))
-    config.add_subscriber('h.subscribers.set_user_from_oauth',
+    config.add_subscriber('h.api.subscribers.set_user_from_oauth',
                           'pyramid.events.ContextFound')
     config.add_tween('h.api.tweens.auth_token')
 
