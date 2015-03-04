@@ -90,7 +90,7 @@ def create_api(global_config, **settings):
     config.add_renderer('json', JSON(indent=4))
     config.add_subscriber('h.subscribers.set_user_from_oauth',
                           'pyramid.events.ContextFound')
-    config.add_tween('h.tweens.annotator_tween_factory')
+    config.add_tween('h.api.tweens.auth_token')
 
     config.include('.api.views')
     config.include('.auth')

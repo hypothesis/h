@@ -72,7 +72,6 @@ def index(context, request):
 @api_config(context=Root, name='search')
 def search(request):
     """Search the database for annotations matching with the given query."""
-
     # The search results are filtered for the authenticated user
     user = get_user(request)
     return _search(request.params, user)
