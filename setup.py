@@ -121,6 +121,7 @@ setup(
         'paste.app_factory': ['main=h:main'],
         'console_scripts': [
             'hypothesis=h.script:main',
+            'hypothesis-buildext=h.buildext:main',
             'hypothesis-worker=h.worker:main',
         ],
         'h.worker': [

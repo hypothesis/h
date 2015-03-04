@@ -31,7 +31,7 @@ class BaseLayout(object):
         return self.request.registry.resources(requirements)
 
     @property
-    def xpath_polyfil_urls(self):
+    def xpath_polyfill_urls(self):
         return self.request.webassets_env['wgxpath'].urls()
 
     @property

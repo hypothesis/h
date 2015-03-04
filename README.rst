@@ -128,31 +128,19 @@ Browser Extensions
 ^^^^^^^^^^^^^^^^^^
 Run the following command at the prompt to build the Chrome extension::
 
-    $ ./bin/hypothesis extension development.ini chrome http://localhost:5000
+    $ hypothesis-buildext development.ini chrome
 
 Or, to load the assets from within the extension::
 
-    $ ./bin/hypothesis extension development.ini chrome http://localhost:5000 \
-    chrome-extension://extensionid/public
+    $ hypothesis-buildext development.ini chrome --base http://localhost:5000 --assets chrome-extension://extensionid/public
 
 To build an extension with a feature flag enabled use the environment variable::
 
-    FEATURE_NOTIFICATION=true \
-    hypothesis extension production.ini chrome \
-    https://hypothes.is chrome-extension://extensionid/public
+    $ FEATURE_NOTIFICATION=true hypothesis-buildext production.ini chrome --base https://hypothes.is --assets chrome-extension://extensionid/public
 
 To build the Firefox extension, run the following::
 
-    $ ./bin/hypothesis extension development.ini firefox \
-    http://localhost:5000 resource://firefox-at-hypothes-dot-is/hypothesis/data
-
-If you are managing your virtual environment yourself, the script may not be
-located in the ``bin`` directory, but should be available in your path when the
-virtual environment is activated.
-
-The fourth argument is the base URL for the application. An optional (for the
-Chrome extension), fifth argument may be passed to override the URL prefix used
-for static assets.
+    $ hypothesis-buildext development.ini firefox --base http://localhost:5000 --assets resource://firefox-at-hypothes-dot-is/hypothesis/data
 
 At this point, a working extension should exist in either ``./build/chrome``
 or ``./build/firefox`` but with the development configuration the static assets

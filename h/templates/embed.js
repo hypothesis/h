@@ -43,7 +43,7 @@
     };
 
     if (!window.document.evaluate) {
-      resources = resources.concat(['{{ layout.xpath_polyfil_urls | map("string") | join("', '") | safe }}']);
+      resources = resources.concat(['{{ layout.xpath_polyfill_urls | map("string") | join("', '") | safe }}']);
     }
 
     if (typeof window.Annotator === 'undefined') {
@@ -64,7 +64,7 @@
 
   var baseUrl = document.createElement('link');
   baseUrl.rel = 'sidebar';
-  baseUrl.href = '{{ base_url }}app.html';
+  baseUrl.href = '{{ app_html }}';
   baseUrl.type = 'application/annotator+html';
   document.head.appendChild(baseUrl);
 
