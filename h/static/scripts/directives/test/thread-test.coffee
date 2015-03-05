@@ -24,12 +24,23 @@ describe 'h:directives.thread', ->
         controller
 
     describe '#toggleCollapsed', ->
-      it 'sets the collapsed property', ->
+      it 'toggles whether or not the thread is collapsed', ->
         controller = createController()
         before = controller.collapsed
         controller.toggleCollapsed()
         after = controller.collapsed
         assert.equal(before, !after)
+
+      it 'can accept an argument to force a particular state', ->
+        controller = createController()
+        controller.toggleCollapsed(true)
+        assert.isTrue(controller.collapsed)
+        controller.toggleCollapsed(true)
+        assert.isTrue(controller.collapsed)
+        controller.toggleCollapsed(false)
+        assert.isFalse(controller.collapsed)
+        controller.toggleCollapsed(false)
+        assert.isFalse(controller.collapsed)
 
     describe '#shouldShowReply', ->
       count = null
@@ -53,12 +64,12 @@ describe 'h:directives.thread', ->
 
           it 'shows the reply if the thread is collapsed and has children', ->
             count.withArgs('message').returns(1)
-            controller.collapsed = true
+            controller.toggleCollapsed(true)
             assert.isTrue(controller.shouldShowReply(count, false))
 
           it 'does not show the reply if the thread is collapsed and has no children', ->
             count.withArgs('message').returns(0)
-            controller.collapsed = true
+            controller.toggleCollapsed(true)
             assert.isFalse(controller.shouldShowReply(count, false))
 
         describe 'and when filtered with children', ->
@@ -86,12 +97,12 @@ describe 'h:directives.thread', ->
 
           it 'does not show the reply if the thread is collapsed and has children', ->
             count.withArgs('message').returns(1)
-            controller.collapsed = true
+            controller.toggleCollapsed(true)
             assert.isFalse(controller.shouldShowReply(count, false))
 
           it 'does not show the reply if the thread is collapsed and has no children', ->
             count.withArgs('message').returns(0)
-            controller.collapsed = true
+            controller.toggleCollapsed(true)
             assert.isFalse(controller.shouldShowReply(count, false))
 
         describe 'and when filtered with children', ->

@@ -26,8 +26,11 @@ ThreadController = [
     # @description
     # Toggle the collapsed property.
     ###
-    this.toggleCollapsed = ->
-      @collapsed = not @collapsed
+    this.toggleCollapsed = (value) ->
+      @collapsed = if value?
+                     !!value
+                   else
+                     not @collapsed
 
     ###*
     # @ngdoc method
@@ -160,7 +163,7 @@ thread = [
       # Watch the thread-collapsed attribute.
       if attrs.threadCollapsed
         scope.$watch $parse(attrs.threadCollapsed), (collapsed) ->
-          ctrl.toggleCollapsed() if !!collapsed != ctrl.collapsed
+          ctrl.toggleCollapsed(collapsed)
 
     controller: 'ThreadController'
     controllerAs: 'vm'
