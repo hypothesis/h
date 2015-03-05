@@ -197,7 +197,9 @@ inject_js:
   - jquery
   - annotator
   - output: scripts/hypothesis.min.js
-    filters: browserify
+    filters:
+      - browserify
+      - uglifyjs
     contents: h:static/bootstrap.js
     depends:
       - h:static/scripts/*.coffee
