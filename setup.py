@@ -30,7 +30,7 @@ install_requires = [
     'PyJWT>=0.4.3,<0.5',
     'SQLAlchemy>=0.8.0',
     'alembic>=0.6.3',
-    'annotator>=0.14.0,<0.15',
+    'annotator>=0.14.1,<0.15',
     'blinker>=1.3,<1.4',
     'clik==0.3.1',
     'cryptography>=0.7',
