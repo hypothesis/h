@@ -1,11 +1,12 @@
 // Karma configuration
 // Generated on Mon Jul 14 2014 14:06:50 GMT+0200 (CEST)
+var path = require('path');
 
 module.exports = function(config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '',
+    basePath: 'h/static/scripts',
 
 
     // frameworks to use
@@ -19,34 +20,34 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       // Application external deps
-      'h/static/scripts/vendor/jquery.js',
-      'h/static/scripts/vendor/angular.js',
-      'h/static/scripts/vendor/angular-animate.js',
-      'h/static/scripts/vendor/angular-bootstrap.js',
-      'h/static/scripts/vendor/angular-resource.js',
-      'h/static/scripts/vendor/angular-route.js',
-      'h/static/scripts/vendor/angular-sanitize.js',
-      'h/static/scripts/vendor/ng-tags-input.js',
-      'h/static/scripts/vendor/annotator.js',
-      'h/static/scripts/vendor/polyfills/autofill-event.js',
-      'h/static/scripts/vendor/polyfills/bind.js',
-      'h/static/scripts/vendor/katex/katex.js',
-      'h/static/scripts/vendor/moment-with-langs.js',
-      'h/static/scripts/vendor/jstz.js',
-      'h/static/scripts/vendor/moment-timezone.js',
-      'h/static/scripts/vendor/moment-timezone-data.js',
-      'h/static/scripts/vendor/polyfills/url.js',
+      'vendor/jquery.js',
+      'vendor/angular.js',
+      'vendor/angular-animate.js',
+      'vendor/angular-bootstrap.js',
+      'vendor/angular-resource.js',
+      'vendor/angular-route.js',
+      'vendor/angular-sanitize.js',
+      'vendor/ng-tags-input.js',
+      'vendor/annotator.js',
+      'vendor/polyfills/autofill-event.js',
+      'vendor/polyfills/bind.js',
+      'vendor/katex/katex.js',
+      'vendor/moment-with-langs.js',
+      'vendor/jstz.js',
+      'vendor/moment-timezone.js',
+      'vendor/moment-timezone-data.js',
+      'vendor/polyfills/url.js',
 
       // Test deps
-      'h/static/scripts/vendor/angular-mocks.js',
-      'h/static/scripts/vendor/polyfills/promise.js',
-      'h/static/scripts/vendor/sinon.js',
-      'h/static/scripts/vendor/chai.js',
-      'h/templates/client/*.html',
-      'h/static/scripts/test/bootstrap.coffee',
+      'vendor/angular-mocks.js',
+      'vendor/polyfills/promise.js',
+      'vendor/sinon.js',
+      'vendor/chai.js',
+      '../../templates/client/*.html',
+      'test/bootstrap.coffee',
 
       // Tests
-      'h/static/scripts/**/*-test.coffee'
+      '**/*-test.coffee'
     ],
 
 
@@ -57,14 +58,14 @@ module.exports = function(config) {
     // strip templates of leading path
     ngHtml2JsPreprocessor: {
       moduleName: 'h.templates',
-      stripPrefix: 'h/templates/client/'
+      cacheIdFromPath: path.basename
     },
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       '**/*.coffee': ['browserify'],
-      'h/templates/client/*.html': ['ng-html2js'],
+      '../../templates/client/*.html': ['ng-html2js'],
     },
 
     browserify: {
