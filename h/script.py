@@ -94,6 +94,35 @@ parser_reindex.add_argument('alias', nargs='?',
                                  'reindexing is complete')
 
 
+def token(args):
+    """Generate an OAuth bearer token for the specified principal."""
+    from h.auth import get_client, generate_signed_token
+
+    if not args.config_uri.endswith('#api'):
+        args.config_uri += '#api'
+
+    paster.setup_logging(args.config_uri)
+    env = paster.bootstrap(args.config_uri)
+    request = env['request']
+    registry = env['registry']
+
+    request.client = get_client(request, registry.settings['h.client_id'])
+    request.user = args.sub
+    request.expires_in = args.ttl
+    request.extra_credentials = {}
+
+    token = generate_signed_token(request)
+
+    print(token)
+
+parser_token = subparsers.add_parser('token', help=token.__doc__)
+_add_common_args(parser_token)
+parser_token.add_argument('--sub',
+                          help='Subject (userid, group, etc.) of the token')
+parser_token.add_argument('--ttl', type=int, default=3600,
+                          help='Token time-to-live (default: 1h)')
+
+
 def version(args):
     """Print the package version"""
     print('{prog} {version}'.format(prog=parser.prog, version=__version__))
@@ -106,6 +135,7 @@ COMMANDS = {
     'extension': extension,
     'init_db': init_db,
     'reindex': reindex,
+    'token': token,
     'version': version,
 }
 
