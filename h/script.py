@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-import os
+from __future__ import print_function
 
-from clik import App
+import argparse
+import os
+import sys
+
 from elasticsearch import Elasticsearch
 from pyramid import paster
 import webassets.script
@@ -16,69 +19,56 @@ ENV_OVERRIDES = {
 }
 os.environ.update(ENV_OVERRIDES)
 
-version = __version__
-description = """\
-The Hypothesis Project Annotation System
-"""
 
-command = App(
+parser = argparse.ArgumentParser(
     'hypothesis',
-    version=version,
-    description=description,
-)
+    description='The Hypothesis Project Annotation System')
+
+subparsers = parser.add_subparsers(title='command', dest='command')
+subparsers.required = True
 
 
-@command(usage='config_uri')
-def init_db(args, console):
+def _add_common_args(parser):
+    parser.add_argument('config_uri', help='paster configuration URI')
+
+
+def init_db(args):
     """Create database tables and elasticsearch indices."""
-
-    if len(args) != 1:
-        console.error('Requires a config file argument')
-        return 2
-
-    config_uri = args[0]
-
     # Force model creation using the MODEL_CREATE_ALL env var
     os.environ['MODEL_CREATE_ALL'] = 'True'
 
     # Start the application, triggering model creation
-    paster.setup_logging(config_uri)
-    paster.bootstrap(config_uri)
+    paster.setup_logging(args.config_uri)
+    paster.bootstrap(args.config_uri)
+
+parser_init_db = subparsers.add_parser('init_db', help=init_db.__doc__)
+_add_common_args(parser_init_db)
 
 
-@command(usage='config_file')
-def assets(args, console):
+def assets(args):
     """Build the static assets."""
-
-    if len(args) != 1:
-        console.error('Requires a config file argument')
-        return 2
-
-    config_uri = args[0]
-
-    paster.setup_logging(config_uri)
-    env = paster.bootstrap(config_uri)
+    paster.setup_logging(args.config_uri)
+    env = paster.bootstrap(args.config_uri)
 
     assets_env = env['request'].webassets_env
     webassets.script.main(['build'], assets_env)
 
-
-@command()
-def extension(args, console):
-    console.error('This command has been removed. Please use the '
-                  'hypothesis-buildext tool instead.')
+parser_assets = subparsers.add_parser('assets', help=assets.__doc__)
+_add_common_args(parser_assets)
 
 
-@command(usage='config_file old_index new_index [alias]')
-def reindex(args, console):
-    """Reindex the annotations into a new Elasticsearch index"""
-    if len(args) < 3:
-        console.error('Please provide a config file and index names.')
-        return 2
+def extension(args):
+    print('This command has been removed. Please use the hypothesis-buildext '
+          'tool instead.', file=sys.stderr)
+    sys.exit(1)
 
-    config_uri = args[0]
-    paster.setup_logging(config_uri)
-    env = paster.bootstrap(config_uri)
+parser_extension = subparsers.add_parser('extension', help='DEPRECATED.')
+
+
+def reindex(args):
+    """Reindex the annotations into a new Elasticsearch index."""
+    paster.setup_logging(args.config_uri)
+    env = paster.bootstrap(args.config_uri)
 
     if 'es.host' in env['registry'].settings:
         host = env['registry'].settings['es.host']
@@ -86,18 +76,42 @@ def reindex(args, console):
     else:
         conn = Elasticsearch()
 
-    old_index = args[1]
-    new_index = args[2]
-    try:
-        alias = args[3]
-    except IndexError:
-        alias = None
-
     r = reindexer.Reindexer(conn, interactive=True)
 
-    r.reindex(old_index, new_index)
+    r.reindex(args.old_index, args.new_index)
 
-    if alias:
-        r.alias(new_index, alias)
+    if args.alias is not None:
+        r.alias(args.new_index, args.alias)
 
-main = command.main
+parser_reindex = subparsers.add_parser('reindex', help=reindex.__doc__)
+_add_common_args(parser_reindex)
+parser_reindex.add_argument('old_index', help='The index to read from')
+parser_reindex.add_argument('new_index', help='The index to write to')
+parser_reindex.add_argument('alias', nargs='?',
+                            help='Alias to repoint to new_index when '
+                                 'reindexing is complete')
+
+
+def version(args):
+    """Print the package version"""
+    print('{prog} {version}'.format(prog=parser.prog, version=__version__))
+
+parser_version = subparsers.add_parser('version', help=version.__doc__)
+
+
+COMMANDS = {
+    'assets': assets,
+    'extension': extension,
+    'init_db': init_db,
+    'reindex': reindex,
+    'version': version,
+}
+
+
+def main():
+    args = parser.parse_args()
+    COMMANDS[args.command](args)
+
+
+if __name__ == '__main__':
+    main()
