@@ -43,10 +43,10 @@ module.exports = function(config) {
       'h/static/scripts/vendor/sinon.js',
       'h/static/scripts/vendor/chai.js',
       'h/templates/client/*.html',
-      'tests/js/bootstrap.coffee',
+      'h/static/scripts/test/bootstrap.coffee',
 
       // Tests
-      'tests/js/**/*-test.coffee',
+      'h/static/scripts/**/*-test.coffee'
     ],
 
 
