@@ -35,7 +35,7 @@
       "lib/help-page.js",
       "lib/errors.js",
       "lib/hypothesis-chrome-extension.js",
-      "background.js"
+      "lib/install.js"
     ]
   },
   "browser_action": {
