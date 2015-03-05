@@ -74,8 +74,6 @@ def js(context, request):
         if not base.endswith('/'):
             base += '/'
         appstruct['app_html'] = base + 'app.html'
-    else:
-        appstruct['app_html'] = request.resource_url(request.root, 'app.html')
 
     return appstruct
 

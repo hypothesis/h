@@ -64,7 +64,7 @@
 
   var baseUrl = document.createElement('link');
   baseUrl.rel = 'sidebar';
-  baseUrl.href = '{{ app_html }}';
+  baseUrl.href = '{{ app_html or request.resource_url(context, 'app.html') }}';
   baseUrl.type = 'application/annotator+html';
   document.head.appendChild(baseUrl);
 
