@@ -5,27 +5,16 @@ sinon.assert.expose assert, prefix: null
 
 
 describe 'h:directives.thread', ->
-  fakeRender = null
-  sandbox = null
 
   before ->
     angular.module('h', [])
     require('../thread')
 
-  beforeEach module('h')
-
-  beforeEach module ($provide) ->
-    sandbox = sinon.sandbox.create()
-    fakeRender = sandbox.spy()
-    $provide.value 'render', fakeRender
-    return
-
-  afterEach ->
-    sandbox.restore()
-
   describe '.ThreadController', ->
     $scope = null
     createController = null
+
+    beforeEach module('h')
 
     beforeEach inject ($controller, $rootScope) ->
       $scope = $rootScope.$new()
@@ -120,18 +109,26 @@ describe 'h:directives.thread', ->
   describe '.thread', ->
     createElement = null
     $element = null
-    $isolateScope = null
     fakePulse = null
+    fakeRender = null
+    sandbox = null
+
+    beforeEach module('h')
 
     beforeEach module ($provide) ->
+      sandbox = sinon.sandbox.create()
       fakePulse = sandbox.spy()
+      fakeRender = sandbox.spy()
       $provide.value 'pulse', fakePulse
+      $provide.value 'render', fakeRender
       return
 
     beforeEach inject ($compile, $rootScope) ->
-      createElement = (html) -> $compile(html or '<div thread></div>')($rootScope.$new())
-      $element = createElement()
-      $isolateScope = $element.scope()
+      $element = $compile('<div thread></div>')($rootScope.$new())
+      $rootScope.$digest()
+
+    afterEach ->
+      sandbox.restore()
 
     it 'sets the threadRoot on the controller to false', ->
       controller = $element.controller('thread')

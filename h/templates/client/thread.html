@@ -42,6 +42,7 @@
       thread="child" thread-filter
       ng-include="'thread.html'"
       ng-init="child.message.id || threadFilter.active(false)"
+      ng-class="{'thread-collapsed': vm.collapsed}"
       ng-repeat="child in vm.container.children
                  | orderBy : 'message.updated' : true"
       ng-show="count('edit') || count('match') || !threadFilter.active()">
