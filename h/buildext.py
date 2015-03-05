@@ -3,12 +3,10 @@
 is exposed as the command-line utility hypothesis-buildext.
 """
 import argparse
-import errno
 import logging
 import os
 import os.path
 import shutil
-import sys
 import textwrap
 import urlparse
 
@@ -17,6 +15,7 @@ from pyramid import paster
 from pyramid.events import ContextFound
 from pyramid.path import AssetResolver
 from pyramid.request import Request
+from pyramid.renderers import render
 from pyramid.view import render_view
 
 import h
@@ -33,67 +32,34 @@ urlparse.uses_relative.append('resource')
 resolve = AssetResolver().resolve
 
 
-def build_extension_common(env, src, dest, bundle_assets=False):
+def build_extension_common(env, bundle_app=False):
     """
-    Copy the contents of src to dest, including some generic extension helpers
-    scripts and, if necessary, a full complement of bundled static assets.
+    Copy the contents of src to dest, including some generic extension scripts.
     """
+    # Create the assets directory
     request = env['request']
-
-    request.registry.notify(ContextFound(request))  # pyramid_layout attrs
-    request.layout_manager.layout.csp = ''
-
     content_dir = request.webassets_env.directory
 
-    # Make sure we use the bundled app.html if we're bundling assets
-    if bundle_assets:
-        request.registry.settings['h.use_bundled_app_html'] = True
-
-    # Remove any existing build
-    if os.path.exists(dest):
-        shutil.rmtree(dest)
-
-    # Copy the extension code
-    os.makedirs(dest)
-    copytree(src, dest)
-
-    # Create the new build directory
-    try:
-        os.makedirs(content_dir)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-
-    # Change to the output directory
-    old_dir = os.getcwd()
-    os.chdir(dest)
-
     # Copy over the config and destroy scripts
-    shutil.copyfile('../../h/static/extension/destroy.js',
+    shutil.copyfile('h/static/extension/destroy.js',
                     content_dir + '/destroy.js')
-    shutil.copyfile('../../h/static/extension/config.js',
+    shutil.copyfile('h/static/extension/config.js',
                     content_dir + '/config.js')
 
-    # Build the app html and copy assets if they are being bundled
-    if bundle_assets:
-        copytree('../../h/static/images', content_dir + '/images')
-
-        # Copy over the vendor assets since they won't be processed otherwise
-        if request.webassets_env.debug:
-            os.makedirs(content_dir + '/scripts/vendor')
-            copytree('../../h/static/scripts/vendor',
-                     content_dir + '/scripts/vendor')
-
-        with open(content_dir + '/app.html', 'w') as fp:
-            data = render_view(request.context, request, 'app.html')
-            fp.write(data)
-
+    # Render the embed code.
     with open(content_dir + '/embed.js', 'w') as fp:
-        data = render_view(request.context, request, 'embed.js')
+        if bundle_app:
+            app_uri = request.webassets_env.url + '/app.html'
+        else:
+            app_uri = request.resource_url(request.root, 'app.html')
+        value = {'app_uri': app_uri}
+        data = render('h:templates/embed.js', value, request=request)
         fp.write(data)
 
-    # Reset the CWD
-    os.chdir(old_dir)
+
+def clean(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
 
 
 def copytree(src, dst):
@@ -162,6 +128,8 @@ def get_env(config_uri, base_url):
     request.webassets_env.append_path(resolve('h:static').abspath(),
                                       request.webassets_env.url)
 
+    request.registry.notify(ContextFound(request))  # pyramid_layout attrs
+
     return env
 
 
@@ -188,18 +156,31 @@ def build_chrome(args):
 
     env = get_env(args.config_uri, args.base)
 
-    # Only bundle assets if we need to.
-    assets_url = env['request'].webassets_env.url
-    bundle_assets = assets_url.startswith('chrome-extension://')
+    # Prepare a fresh build.
+    clean('build/chrome')
+    os.makedirs('build/chrome')
 
-    build_extension_common(env,
-                           src='h/browser/chrome',
-                           dest='build/chrome',
-                           bundle_assets=bundle_assets)
+    # Bundle the extension assets.
+    webassets_env = env['request'].webassets_env
+    content_dir = webassets_env.directory
+    os.makedirs(content_dir)
+    copytree('h/browser/chrome/content', 'build/chrome/content')
+    copytree('h/browser/chrome/help', 'build/chrome/help')
+    copytree('h/browser/chrome/images', 'build/chrome/images')
+    copytree('h/browser/chrome/lib', 'build/chrome/lib')
+    copytree('h/static/images', 'build/chrome/public/images')
 
-    os.remove('build/chrome/karma.config.js')
-    shutil.rmtree('build/chrome/test/')
+    # Render the sidebar html.
+    if webassets_env.url.startswith('chrome-extension:'):
+        build_extension_common(env, bundle_app=True)
+        env['request'].layout_manager.layout.csp = ''
+        with open(content_dir + '/app.html', 'w') as fp:
+            data = render_view(env['root'], env['request'], 'app.html')
+            fp.write(data)
+    else:
+        build_extension_common(env)
 
+    # Render the manifest.
     with open('build/chrome/manifest.json', 'w') as fp:
         data = chrome_manifest(env['request'])
         fp.write(data)
@@ -228,15 +209,39 @@ def build_firefox(args):
 
     env = get_env(args.config_uri, args.base)
 
-    # Only bundle assets if we need to.
-    assets_url = env['request'].webassets_env.url
-    bundle_assets = assets_url.startswith('resource://')
+    # Prepare a fresh build.
+    clean('build/firefox')
+    os.makedirs('build/firefox')
 
-    build_extension_common(env,
-                           src='h/browser/firefox',
-                           dest='build/firefox',
-                           bundle_assets=bundle_assets)
+    # Bundle the extension assets.
+    webassets_env = env['request'].webassets_env
+    content_dir = webassets_env.directory
+    os.makedirs(content_dir)
+    copytree('h/browser/firefox/data', 'build/firefox/data')
+    copytree('h/browser/firefox/lib', 'build/firefox/lib')
 
+    # Don't minify vendor libs per Mozilla policy.
+    # This is a bit hacky.
+    if webassets_env.debug is False:
+        webassets_env.debug = True
+        os.makedirs(content_dir + '/scripts/vendor')
+        os.makedirs(content_dir + '/scripts/vendor/katex')
+        os.makedirs(content_dir + '/scripts/vendor/polyfills')
+        for bundle in webassets_env:
+            if bundle.output is None:
+                continue
+            if 'vendor' in bundle.output:
+                for _, src in bundle.resolve_contents():
+                    dst = os.path.join(content_dir, bundle.output)
+                    dst = dst.replace('.min.js', '.js')
+                    shutil.copyfile(src, dst)
+            else:
+                bundle.debug = False
+
+    # Build the common components.
+    build_extension_common(env)
+
+    # Render the manifest.
     with open('build/firefox/package.json', 'w') as fp:
         data = firefox_manifest(env['request'])
         fp.write(data)
