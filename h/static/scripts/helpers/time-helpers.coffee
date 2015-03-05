@@ -11,7 +11,7 @@ BREAKPOINTS = [
   [hour,       '{} minutes ago', minute]
   [2 * hour,   'an hour ago',    hour  ]
   [day,        '{} hours ago',   hour  ]
-  [2 * day,    'yesterday',      day   ]
+  [2 * day,    'a day ago',      day   ]
   [month,      '{} days ago',    day   ]
   [year,       '{} months ago',  month ]
   [2 * year,   'one year ago',   year  ]
