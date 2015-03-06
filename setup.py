@@ -7,10 +7,20 @@ import versioneer
 
 
 class PyTest(TestCommand):
+    user_options = [
+        ('cov', None, 'measure coverage')
+    ]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.cov = None
+
     def finalize_options(self):
         TestCommand.finalize_options(self)
         self.test_args = ['h']
         self.test_suite = True
+        if self.cov:
+            self.test_args += ['--cov', 'h']
 
     def run_tests(self):
         import pytest
