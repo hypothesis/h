@@ -7,7 +7,12 @@
   font-weight: 300;
   position: relative;
 
-  &:hover .annotation-timestamp, &:hover .reply-count {
+  .reply-count {
+    color: $gray-light;
+    &:focus { outline: 0; }
+  }
+
+  &:hover .annotation-timestamp, &:hover .reply-count  {
     color: $link-color;
   }
 }
@@ -38,6 +43,10 @@
     cursor: pointer;
     text-decoration: underline;
   }
+}
+
+.annotation-replies {
+  display: inline-block;
 }
 
 .annotation-actions {

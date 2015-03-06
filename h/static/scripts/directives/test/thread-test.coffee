@@ -24,15 +24,22 @@ describe 'h:directives.thread', ->
         controller
 
     describe '#toggleCollapsed', ->
-      it 'toggles whether or not the thread is collapsed', ->
+      controller = null
+      count = null
+
+      beforeEach ->
         controller = createController()
+        count = sinon.stub().returns(0)
+        count.withArgs('message').returns(2)
+        controller.counter = {count: count}
+
+      it 'toggles whether or not the thread is collapsed', ->
         before = controller.collapsed
         controller.toggleCollapsed()
         after = controller.collapsed
         assert.equal(before, !after)
 
       it 'can accept an argument to force a particular state', ->
-        controller = createController()
         controller.toggleCollapsed(true)
         assert.isTrue(controller.collapsed)
         controller.toggleCollapsed(true)
@@ -41,6 +48,15 @@ describe 'h:directives.thread', ->
         assert.isFalse(controller.collapsed)
         controller.toggleCollapsed(false)
         assert.isFalse(controller.collapsed)
+
+      it 'does not allow uncollapsing the thread if there are no replies', ->
+        count.withArgs('message').returns(1)
+        controller.toggleCollapsed()
+        assert.isTrue(controller.collapsed)
+        controller.toggleCollapsed()
+        assert.isTrue(controller.collapsed)
+        controller.toggleCollapsed(false)
+        assert.isTrue(controller.collapsed)
 
     describe '#shouldShowAsReply', ->
       controller = null

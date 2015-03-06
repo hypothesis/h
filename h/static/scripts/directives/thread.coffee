@@ -27,10 +27,16 @@ ThreadController = [
     # thread filter, if present.
     ###
     this.toggleCollapsed = (value) ->
-      @collapsed = if value?
-                     !!value
-                   else
-                     not @collapsed
+      newval = if value?
+                 !!value
+               else
+                 not @collapsed
+
+      # We only allow uncollapsing of the thread if there are some replies to
+      # display.
+      if newval == false and this.numReplies() <= 0
+        return
+      @collapsed = newval
 
     ###*
     # @ngdoc method
@@ -194,31 +200,6 @@ thread = [
       ctrl.parent = elem.parent().controller('thread')
       ctrl.counter = counter
       ctrl.filter = filter
-
-      # Toggle collapse on click.
-      elem.on 'click', (event) ->
-        event.stopPropagation()
-
-        # Ignore if the target scope has been destroyed.
-        # Prevents collapsing when e.g. a child is deleted by a click event.
-        if angular.element(event.target).scope() is undefined
-          return
-
-        # Ignore if the user just created a non-empty selection.
-        sel = $window.getSelection()  # XXX: Portable containsNode?
-        if sel.containsNode?(event.target, true) and sel.toString().length
-          return
-
-        # Ignore if the user clicked a link
-        if event.target.tagName in ['A', 'INPUT']
-          return unless angular.element(event.target).hasClass 'reply-count'
-
-        # Ignore a collapse if edit interactions are present in the view.
-        if counter?.count('edit') > 0 and not ctrl.collapsed
-          return
-
-        scope.$evalAsync ->
-          ctrl.toggleCollapsed()
 
       # Track the number of messages in the thread
       if counter?

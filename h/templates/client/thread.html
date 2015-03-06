@@ -1,7 +1,10 @@
-<a href="" class="threadexp"
+<a href=""
+   class="threadexp"
    title="{{vm.collapsed && 'Expand' || 'Collapse'}}"
-   ><span ng-class="{'h-icon-plus': !!vm.collapsed,
-                     'h-icon-minus': !vm.collapsed}"></span></a>
+   ng-click="vm.toggleCollapsed()">
+  <span ng-class="{'h-icon-plus': vm.collapsed,
+                   'h-icon-minus': !vm.collapsed}"></span>
+</a>
 
 <!-- Annotation -->
 <div ng-if="vm.container && !vm.container.message" class="thread-deleted">
@@ -12,19 +15,12 @@
          name="annotation"
          annotation="vm.container.message"
          annotation-embedded="{{isEmbedded}}"
+         annotation-show-reply-count="{{vm.shouldShowNumReplies()}}"
+         annotation-reply-count="{{vm.numReplies()}}"
+         annotation-reply-count-click="vm.toggleCollapsed()"
          ng-if="vm.container.message"
          ng-show="vm.matchesFilter()">
 </article>
-
-<!-- Reply count -->
-<div class="thread-reply"
-     ng-show="vm.shouldShowNumReplies()">
-  <a class="reply-count small"
-     href=""
-     ng-pluralize
-     count="vm.numReplies()"
-     when="{'0': '', one: '1 reply', other: '{} replies'}"></a>
-</div>
 
 <div class="thread-load-more" ng-show="vm.shouldShowLoadMore()">
   <a class="load-more small"

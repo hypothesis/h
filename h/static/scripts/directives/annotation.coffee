@@ -314,10 +314,15 @@ annotationDirective = [
             ctrl.save()
 
       scope.share = (event) ->
-        scope.$evalAsync ->
-          $container = angular.element(event.target).parent()
-          $container.addClass('open').find('input').focus().select()
-          $document.one('click', (event) -> $container.removeClass('open'))
+        $container = angular.element(event.currentTarget).parent()
+        $container.addClass('open').find('input').focus().select()
+
+        # We have to stop propagation here otherwise this click event will
+        # re-close the share dialog immediately.
+        event.stopPropagation()
+
+        $document.one('click', (event) -> $container.removeClass('open'))
+        return
 
       # Keep track of edits going on in the thread.
       if counter?
@@ -346,6 +351,9 @@ annotationDirective = [
     require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount']
     scope:
       annotationGet: '&annotation'
+      replyCount: '@annotationReplyCount'
+      replyCountClick: '&annotationReplyCountClick'
+      showReplyCount: '@annotationShowReplyCount'
     templateUrl: 'annotation.html'
 ]
 

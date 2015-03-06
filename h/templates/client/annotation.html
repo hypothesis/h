@@ -121,27 +121,37 @@
   </a>
 </div>
 
-<footer class="annotation-footer annotation-actions"
+<footer class="annotation-footer"
         ng-if="!vm.editing && vm.annotation.id">
-  <a class="small magicontrol" href="" title="Reply"
-    ng-click="vm.reply()"
-    ><i class="h-icon-reply"></i> Reply</a>
-  <span class="magicontrol share-dialog-wrapper">
-    <a class="small" href="" title="Share" ng-click="share($event)"
-      ><i class="h-icon-export"></i> Share</a>
-    <span class="share-dialog" ng-click="$event.stopPropagation()">
-      <a class="h-icon-export"
-        target="_blank"
-        ng-href="{{vm.annotationURI}}"></a>
-      <input type="text" value="{{vm.annotationURI}}" readonly>
+
+  <div class="annotation-replies">
+    <a class="reply-count small" href=""
+       ng-click="replyCountClick()"
+       ng-pluralize count="replyCount"
+       when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
+  </div>
+
+  <div class="annotation-actions">
+    <a class="small magicontrol" href="" title="Reply"
+      ng-click="vm.reply()"
+      ><i class="h-icon-reply"></i> Reply</a>
+    <span class="magicontrol share-dialog-wrapper">
+      <a class="small" href="" title="Share" ng-click="share($event)"
+        ><i class="h-icon-export"></i> Share</a>
+      <span class="share-dialog" ng-click="$event.stopPropagation()">
+        <a class="h-icon-export"
+          target="_blank"
+          ng-href="{{vm.annotationURI}}"></a>
+        <input type="text" value="{{vm.annotationURI}}" readonly>
+      </span>
     </span>
-  </span>
-  <a class="small magicontrol" href="" title="Edit"
-    ng-show="vm.authorize('update')"
-    ng-click="vm.edit()"
-    ><i class="h-icon-copy"></i> Edit</a>
-  <a class="small magicontrol" href="" title="Delete"
-    ng-show="vm.authorize('delete')"
-    ng-click="vm.delete()"
-    ><i class="h-icon-x"></i> Delete…</a>
+    <a class="small magicontrol" href="" title="Edit"
+      ng-show="vm.authorize('update')"
+      ng-click="vm.edit()"
+      ><i class="h-icon-copy"></i> Edit</a>
+    <a class="small magicontrol" href="" title="Delete"
+      ng-show="vm.authorize('delete')"
+      ng-click="vm.delete()"
+      ><i class="h-icon-x"></i> Delete…</a>
+  </div>
 </footer>
