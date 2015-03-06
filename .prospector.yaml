@@ -4,10 +4,6 @@ inherits:
   - strictness_low
 pylint:
   disable:
-    # This check (for missing method arguments) is broken in latest pylint:
-    #
-    #     https://bitbucket.org/logilab/pylint/issue/205
-    - E1120
     # This check (for inherited objects to be classes) is broken in pylint 1.4
     # for zope.interface.Interface.
     - E0239
