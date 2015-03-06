@@ -40,7 +40,7 @@ def create_app(global_config, **settings):
 
     config.set_authentication_policy(session_authn)
     config.set_authorization_policy(acl_authz)
-    config.set_root_factory('h.resources.RootFactory')
+    config.set_root_factory('h.resources.create_root')
 
     config.add_subscriber('h.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')

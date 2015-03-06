@@ -31,7 +31,3 @@ class IClient(Interface):
         The secret should be a URL-safe base64 encoded string.
         """
     )
-
-
-class IStreamResource(Interface):
-    pass

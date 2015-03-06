@@ -13,6 +13,7 @@ from pyramid.view import view_config, view_defaults
 from h import session
 from h.models import _
 from h.notification.models import Subscriptions
+from h.resources import Application
 
 from . import schemas
 from .events import LoginEvent, LogoutEvent
@@ -130,7 +131,7 @@ class AuthController(horus.views.AuthController):
         return super(AuthController, self).logout()
 
 
-@view_defaults(accept='application/json', name='app', renderer='json')
+@view_defaults(accept='application/json', context=Application, renderer='json')
 @view_config(attr='login', request_param='__formid__=login')
 @view_config(attr='logout', request_param='__formid__=logout')
 class AsyncAuthController(AuthController):
@@ -144,7 +145,7 @@ class ForgotPasswordController(horus.views.ForgotPasswordController):
     pass
 
 
-@view_defaults(accept='application/json', name='app', renderer='json')
+@view_defaults(accept='application/json', context=Application, renderer='json')
 @view_config(
     attr='forgot_password',
     request_param='__formid__=forgot_password'
@@ -169,7 +170,7 @@ class RegisterController(horus.views.RegisterController):
     pass
 
 
-@view_defaults(accept='application/json', name='app', renderer='json')
+@view_defaults(accept='application/json', context=Application, renderer='json')
 @view_config(attr='register', request_param='__formid__=register')
 @view_config(attr='activate', request_param='__formid__=activate')
 class AsyncRegisterController(RegisterController):
@@ -270,7 +271,7 @@ class ProfileController(horus.views.ProfileController):
         return {}
 
 
-@view_defaults(accept='application/json', name='app', renderer='json')
+@view_defaults(accept='application/json', context=Application, renderer='json')
 @view_config(attr='edit_profile', request_param='__formid__=edit_profile')
 @view_config(attr='disable_user', request_param='__formid__=disable_user')
 @view_config(attr='profile', request_param='__formid__=profile')

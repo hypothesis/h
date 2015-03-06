@@ -8,7 +8,9 @@ from pyramid.events import ContextFound
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
-from h import session
+from . import session
+from .models import Annotation
+from .resources import Application, Stream
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +25,7 @@ def error(context, request):
 
 @view_config(
     layout='app',
-    context='h.models.Annotation',
+    context=Annotation,
     permission='read',
     renderer='h:templates/app.html',
 )
@@ -79,7 +81,7 @@ def help_page(context, request):
     }
 
 
-@view_config(accept='application/json', name='app', renderer='json')
+@view_config(accept='application/json', context=Application, renderer='json')
 def session_view(request):
     request.add_response_callback(session.set_csrf_token)
     flash = session.pop_flash(request)
@@ -87,16 +89,7 @@ def session_view(request):
     return dict(status='okay', flash=flash, model=model)
 
 
-@view_config(
-    layout='app',
-    context='h.interfaces.IStreamResource',
-    renderer='h:templates/app.html',
-)
-@view_config(
-    layout='app',
-    route_name='stream',
-    renderer='h:templates/app.html'
-)
+@view_config(layout='app', context=Stream, renderer='h:templates/app.html')
 def stream(context, request):
     stream_type = context.get('stream_type')
     stream_key = context.get('stream_key')
@@ -134,7 +127,6 @@ def includeme(config):
     config.include('h.panels')
 
     config.add_route('index', '/')
-    config.add_route('stream', '/stream')
     config.add_route('help', '/docs/help')
     config.add_route('onboarding', '/welcome')
 
