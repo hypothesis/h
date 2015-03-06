@@ -21,6 +21,6 @@ test:
 	"$$(npm bin)"/karma start h/browser/chrome/karma.config.js --single-run
 
 lint:
-	prospector -P ../.prospector.yaml h
+	@prospector
 
 .PHONY: clean test

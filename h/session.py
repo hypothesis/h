@@ -3,6 +3,7 @@ from pyramid.session import SignedCookieSessionFactory
 
 from .security import derive_key
 
+
 def model(request):
     session = {k: v for k, v in request.session.items() if k[0] != '_'}
     session['csrf'] = request.session.get_csrf_token()

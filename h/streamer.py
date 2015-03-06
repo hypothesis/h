@@ -160,7 +160,6 @@ class FilterToElasticFilter(object):
     def ge(field, value):
         return {"range": {field: {"gte": value}}}
 
-
     @staticmethod
     def _query_string_query(field, value):
         # Generate query_string query
