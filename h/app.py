@@ -92,6 +92,7 @@ def create_api(global_config, **settings):
                           'pyramid.events.ContextFound')
     config.add_tween('h.api.tweens.auth_token')
 
+    config.include('.api.db')
     config.include('.api.views')
     config.include('.auth')
     config.include('.queue')
