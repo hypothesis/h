@@ -4,6 +4,9 @@ Hypothesis
 .. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
    :target: https://travis-ci.org/hypothesis/h
    :alt: Build Status
+.. image:: https://coveralls.io/repos/hypothesis/h/badge.svg
+   :target: https://coveralls.io/r/hypothesis/h
+   :alt: Code Coverage
 .. image:: https://landscape.io/github/hypothesis/h/master/landscape.svg?style=flat
    :target: https://landscape.io/github/hypothesis/h/master
    :alt: Code Health

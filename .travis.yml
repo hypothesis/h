@@ -8,6 +8,7 @@ before_install:
 install:
   - gem install sass
   - gem install compass
+  - pip install coveralls
   - pip install prospector
   - make
 services:
@@ -19,6 +20,8 @@ script:
   - hypothesis-buildext production.ini chrome --base https://hypothes.is --assets chrome-extension://notarealkey/public
   - hypothesis-buildext development.ini firefox --base http://localhost
   - hypothesis-buildext production.ini firefox --base https://hypothes.is --assets resource://notarealkey/hypothesis/data
+after_success:
+  - coveralls
 notifications:
   irc:
     channels:
