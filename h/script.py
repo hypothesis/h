@@ -7,6 +7,7 @@ import sys
 
 from elasticsearch import Elasticsearch
 from pyramid import paster
+from pyramid.request import Request
 import webassets.script
 
 from h import __version__, reindexer
@@ -48,7 +49,8 @@ _add_common_args(parser_init_db)
 def assets(args):
     """Build the static assets."""
     paster.setup_logging(args.config_uri)
-    env = paster.bootstrap(args.config_uri)
+    request = Request.blank('', base_url=os.environ.get('APP_URL'))
+    env = paster.bootstrap(args.config_uri, request=request)
 
     assets_env = env['request'].webassets_env
     webassets.script.main(['build'], assets_env)
