@@ -143,7 +143,7 @@ ThreadFilterController = [
 threadFilter = [
   '$parse', 'searchfilter'
   ($parse,   searchfilter) ->
-    linkFn = (scope, elem, attrs, [ctrl, thread, counter]) ->
+    linkFn = (scope, elem, attrs, [ctrl, counter]) ->
       if counter?
         scope.$watch (-> ctrl.match), (match, old) ->
           if match and not old
@@ -169,7 +169,7 @@ threadFilter = [
     controller: 'ThreadFilterController'
     controllerAs: 'threadFilter'
     link: linkFn
-    require: ['threadFilter', 'thread', '?^deepCount']
+    require: ['threadFilter', '?^deepCount']
 ]
 
 
