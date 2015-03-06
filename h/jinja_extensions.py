@@ -27,6 +27,7 @@ def _get_includer(environment):
 
 def _memoize(f):
     cache = {}
+
     @wraps(f)
     def memoizer(*args, **kwargs):
         # NB: this memoizer ignores kwargs.

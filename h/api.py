@@ -293,11 +293,12 @@ def _add_any_field_params_into_query(search_params):
     any_terms = search_params['query'].getall('any')
     del search_params['query']['any']
 
+    query = search_params.get('query', None)
     offset = search_params.get('offset', None)
     limit = search_params.get('limit', None)
     sort = search_params.get('sort', None)
     order = search_params.get('order', None)
-    query = Annotation._build_query(search_params['query'], offset, limit, sort, order)
+    query = Annotation._build_query(query, offset, limit, sort, order)
 
     multi_match_query = {
         'multi_match': {
@@ -344,8 +345,8 @@ def _update_annotation(annotation, fields, has_admin_permission):
 
     # If the user is changing access permissions, check if it's allowed.
     changing_permissions = (
-        'permissions' in fields
-        and fields['permissions'] != annotation.get('permissions', {})
+        'permissions' in fields and
+        fields['permissions'] != annotation.get('permissions', {})
     )
     if changing_permissions and not has_admin_permission:
         raise RuntimeError("Not authorized to change annotation permissions.",

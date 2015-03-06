@@ -8,7 +8,6 @@ import logging
 import os
 import os.path
 import shutil
-import sys
 import textwrap
 import urlparse
 

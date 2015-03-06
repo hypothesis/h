@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
-
 from pyramid.view import view_config
 from pyramid_layout.layout import layout_config
 from pyramid_mailer.interfaces import IMailer
