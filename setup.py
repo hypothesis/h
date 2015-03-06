@@ -127,7 +127,10 @@ setup(
         ]
     },
     entry_points={
-        'paste.app_factory': ['main=h:main'],
+        'paste.app_factory': [
+            'main=h.app:create_app',
+            'api=h.app:create_api',
+        ],
         'console_scripts': [
             'hypothesis=h.script:main',
             'hypothesis-buildext=h.buildext:main',

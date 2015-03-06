@@ -9,6 +9,7 @@ from pyramid.renderers import JSON
 from pyramid.wsgi import wsgiapp2
 
 from .auth import acl_authz, remote_authn, session_authn
+from .config import settings_from_environment
 from .security import derive_key
 
 log = logging.getLogger(__name__)
@@ -31,8 +32,10 @@ def strip_vhm(view):
     return wrapped
 
 
-def create_app(settings):
+def create_app(global_config, **settings):
     """Configure and add static routes and views. Return the WSGI app."""
+    settings = get_settings(global_config, **settings)
+
     config = Configurator(settings=settings)
 
     config.set_authentication_policy(session_authn)
@@ -42,9 +45,14 @@ def create_app(settings):
     config.add_subscriber('h.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
 
-    config.include('.')
     config.include('.features')
     config.include('.queue')
+    config.include('.views')
+
+    config.include('pyramid_jinja2')
+    config.add_jinja2_renderer('.js')
+    config.add_jinja2_renderer('.txt')
+    config.add_jinja2_renderer('.html')
 
     if config.registry.feature('accounts'):
         config.include('.accounts')
@@ -70,36 +78,38 @@ def create_app(settings):
     return config.make_wsgi_app()
 
 
-def create_api(settings):
+def create_api(global_config, **settings):
+    settings = get_settings(global_config, **settings)
+
     config = Configurator(settings=settings)
 
     config.set_authentication_policy(remote_authn)
     config.set_authorization_policy(acl_authz)
-    config.set_root_factory('h.resources.APIResource')
+    config.set_root_factory('h.api.resources.create_root')
 
     config.add_renderer('json', JSON(indent=4))
-    config.add_subscriber('h.subscribers.set_user_from_oauth',
+    config.add_subscriber('h.api.subscribers.set_user_from_oauth',
                           'pyramid.events.ContextFound')
-    config.add_tween('h.tweens.annotator_tween_factory')
+    config.add_tween('h.api.tweens.auth_token')
 
-    config.include('.api')
+    config.include('.api.views')
     config.include('.auth')
-    config.include('.features')
     config.include('.queue')
 
-    if config.registry.feature('streamer'):
-        config.include('.streamer')
-
-    if config.registry.feature('notification'):
-        config.include('pyramid_jinja2')
-        config.add_jinja2_renderer('.txt')
-        config.add_jinja2_renderer('.html')
-
-        # FIXME: move subscribers into .notification.subscribers so we don't
-        # have to include the whole package
-        config.include('.notification')
-
     return config.make_wsgi_app()
+
+
+def get_settings(global_config, **settings):
+    """
+    Return a paste settings objects extended as necessary with data from the
+    environment.
+    """
+    result = {}
+    result.update(settings)
+    result.update(settings_from_environment())
+    result.update(global_config)
+    result.update(missing_secrets(result))
+    return result
 
 
 def missing_secrets(settings):
@@ -120,13 +130,3 @@ def missing_secrets(settings):
         missing['redis.sessions.secret'] = derive_key(secret, 'h.session')
 
     return missing
-
-
-def main(global_config, **settings):
-    """Create the h application with all the awesomeness that is configured."""
-    from h import config
-    environ_config = config.settings_from_environment()
-    settings.update(environ_config)  # from environment variables
-    settings.update(global_config)   # from paste [DEFAULT] + command line
-    settings.update(missing_secrets(settings))
-    return create_app(settings)

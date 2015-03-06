@@ -4,16 +4,13 @@
 
 import json
 import logging
-import time
 
-from annotator import es
-from annotator.auth import Consumer, User
-from elasticsearch import exceptions as elasticsearch_exceptions
-from pyramid.settings import asbool
 from pyramid.view import view_config
 
-from .models import Annotation, Document
-
+from .auth import get_user
+from .models import Annotation
+from .resources import Root
+from .resources import Annotations
 
 log = logging.getLogger(__name__)
 
@@ -25,8 +22,6 @@ PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 def api_config(**kwargs):
     """Extend Pyramid's @view_config decorator with modified defaults."""
     config = {
-        # The containment predicate ensures we only respond to API calls
-        'containment': 'h.resources.APIResource',
         'accept': 'application/json',
         'renderer': 'json',
     }
@@ -34,7 +29,7 @@ def api_config(**kwargs):
     return view_config(**config)
 
 
-@api_config(context='h.resources.APIResource')
+@api_config(context=Root)
 def index(context, request):
     """Return the API descriptor document.
 
@@ -74,31 +69,30 @@ def index(context, request):
     }
 
 
-@api_config(context='h.resources.APIResource', name='search')
-def search(context, request):
+@api_config(context=Root, name='search')
+def search(request):
     """Search the database for annotations matching with the given query."""
-
     # The search results are filtered for the authenticated user
     user = get_user(request)
     return _search(request.params, user)
 
 
-@api_config(context='h.resources.APIResource', name='access_token')
-def access_token(context, request):
+@api_config(context=Root, name='access_token')
+def access_token(request):
     """The OAuth 2 access token view."""
     return request.create_token_response()
 
 
-@api_config(context='h.resources.APIResource', name='token', renderer='string')
-def annotator_token(context, request):
+@api_config(context=Root, name='token', renderer='string')
+def annotator_token(request):
     """The Annotator Auth token view."""
     request.grant_type = 'client_credentials'
-    response = access_token(context, request)
+    response = access_token(request)
     return response.json_body.get('access_token', response)
 
 
-@api_config(context='h.resources.AnnotationFactory', request_method='GET')
-def annotations_index(context, request):
+@api_config(context=Annotations, request_method='GET')
+def annotations_index(request):
     """Do a search for all annotations on anything and return results.
 
     This will use the default limit, 20 at time of writing, and results
@@ -108,10 +102,8 @@ def annotations_index(context, request):
     return Annotation.search(user=user)
 
 
-@api_config(context='h.resources.AnnotationFactory',
-            request_method='POST',
-            permission='create')
-def create(context, request):
+@api_config(context=Annotations, request_method='POST', permission='create')
+def create(request):
     """Read the POSTed JSON-encoded annotation and persist it."""
     user = get_user(request)
 
@@ -133,9 +125,7 @@ def create(context, request):
     return annotation
 
 
-@api_config(context='h.models.Annotation',
-            request_method='GET',
-            permission='read')
+@api_config(context=Annotation, request_method='GET', permission='read')
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     annotation = context
@@ -146,9 +136,7 @@ def read(context, request):
     return annotation
 
 
-@api_config(context='h.models.Annotation',
-            request_method='PUT',
-            permission='update')
+@api_config(context=Annotation, request_method='PUT', permission='update')
 def update(context, request):
     """Update the fields we received and store the updated version."""
     annotation = context
@@ -180,9 +168,7 @@ def update(context, request):
     return annotation
 
 
-@api_config(context='h.models.Annotation',
-            request_method='DELETE',
-            permission='delete')
+@api_config(context=Annotation, request_method='DELETE', permission='delete')
 def delete(context, request):
     """Delete the annotation permanently."""
     annotation = context
@@ -198,18 +184,6 @@ def delete(context, request):
         'id': id,
         'deleted': True,
     }
-
-
-def get_user(request):
-    """Create a User object for annotator-store."""
-    userid = request.unauthenticated_userid
-    if userid is not None:
-        for principal in request.effective_principals:
-            if principal.startswith('consumer:'):
-                key = principal[9:]
-                consumer = Consumer(key)
-                return User(userid, consumer, False)
-    return None
 
 
 def _publish_annotation_event(request, annotation, action):
@@ -380,130 +354,5 @@ def _anonymize_deletes(annotation):
         annotation['permissions'][action] = filtered
 
 
-def store_from_settings(settings):
-    """Configure the Elasticsearch wrapper provided by annotator-store."""
-    if 'es.host' in settings:
-        es.host = settings['es.host']
-
-    if 'es.index' in settings:
-        es.index = settings['es.index']
-
-    if 'es.compatibility' in settings:
-        es.compatibility_mode = settings['es.compatibility']
-
-    # We want search results to be filtered according to their
-    # read-permissions, which is done in the store itself.
-    es.authorization_enabled = True
-
-    return es
-
-
-def _ensure_es_plugins(es_conn):
-    """Ensure that the ICU analysis plugin is installed for ES."""
-    # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
-    #
-    # pylint: disable=unexpected-keyword-arg
-    names = [x.strip() for x in es_conn.cat.plugins(h='component').split('\n')]
-    if 'analysis-icu' not in names:
-        message = ("ICU Analysis plugin is not installed for ElasticSearch\n"
-                   "  See the installation instructions for more details:\n"
-                   "  https://github.com/hypothesis/h/blob/master/"
-                   "INSTALL.rst#installing")
-        raise RuntimeError(message)
-
-
-def create_db():
-    """Create the ElasticSearch index for Annotations and Documents."""
-    # Check for required plugin(s)
-    _ensure_es_plugins(es.conn)
-
-    models = [Annotation, Document]
-    mappings = {}
-    analysis = {}
-
-    # Collect the mappings and analysis settings
-    for model in models:
-        mappings.update(model.get_mapping())
-        for section, items in model.get_analysis().items():
-            existing_items = analysis.setdefault(section, {})
-            for name in items:
-                if name in existing_items:
-                    fmt = "Duplicate definition of 'index.analysis.{}.{}'."
-                    msg = fmt.format(section, name)
-                    raise RuntimeError(msg)
-            existing_items.update(items)
-
-    # Create the index
-    try:
-        # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
-        #
-        # pylint: disable=unexpected-keyword-arg
-        response = es.conn.indices.create(es.index, ignore=400, body={
-            'mappings': mappings,
-            'settings': {'analysis': analysis},
-        })
-    except elasticsearch_exceptions.ConnectionError as e:
-        msg = ('Can not access ElasticSearch at {0}! '
-               'Check to ensure it is running.').format(es.host)
-        raise elasticsearch_exceptions.ConnectionError('N/A', msg, e)
-
-    # Bad request (400) is ignored above, to prevent warnings in the log, but
-    # the failure could be for reasons other than that the index exists. If so,
-    # raise the error here.
-    if 'error' in response and 'IndexAlreadyExists' not in response['error']:
-        raise elasticsearch_exceptions.RequestError(400, response['error'])
-
-    # Update analysis settings
-    settings = es.conn.indices.get_settings(index=es.index)
-    existing = settings[es.index]['settings']['index'].get('analysis', {})
-    if existing != analysis:
-        try:
-            es.conn.indices.close(index=es.index)
-            es.conn.indices.put_settings(index=es.index, body={
-                'analysis': analysis
-            })
-        finally:
-            es.conn.indices.open(index=es.index)
-
-    # Update mappings
-    try:
-        for doc_type, body in mappings.items():
-            es.conn.indices.put_mapping(
-                index=es.index,
-                doc_type=doc_type,
-                body=body
-            )
-    except elasticsearch_exceptions.RequestError as e:
-        if e.error.startswith('MergeMappingException'):
-            date = time.strftime('%Y-%m-%d')
-            message = ("Elasticsearch index mapping is incorrect! Please "
-                       "reindex it. For example, run: "
-                       "./bin/hypothesis reindex {0} {1} {1}-{2}"
-                       .format('yourconfig.ini', es.index, date)
-                       )
-            log.critical(message)
-            raise RuntimeError(message)
-        raise
-
-
-def delete_db():
-    """Delete the Annotation and Document databases."""
-    Annotation.drop_all()
-    Document.drop_all()
-
-
 def includeme(config):
-    """Configure and possibly initialize ElasticSearch and its models."""
-    registry = config.registry
-    settings = registry.settings
-
-    # Configure ElasticSearch
-    store_from_settings(settings)
-
-    # Maybe initialize the models
-    if asbool(settings.get('basemodel.should_drop_all', False)):
-        delete_db()
-    if asbool(settings.get('basemodel.should_create_all', False)):
-        create_db()
-
     config.scan(__name__)

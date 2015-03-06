@@ -15,8 +15,8 @@ from sqlalchemy import engine_from_config
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
 
-from h.api import create_db, delete_db
-from h.api import store_from_settings
+from h.api.db import create_db, delete_db
+from h.api.db import store_from_settings
 
 
 @pytest.fixture(scope='session', autouse=True)

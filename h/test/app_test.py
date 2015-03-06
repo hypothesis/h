@@ -1,31 +1,30 @@
 # -*- coding: utf-8 -*-
 from mock import patch
 
-from h import app, config
+from h import app
 
 
-@patch('h.config.settings_from_environment')
-@patch('h.app.create_app')
-def test_global_settings_precedence(create_app, settings_from_environment):
-    base_settings = {
-        'foo': 'bar',
-    }
-    env_settings = {
-        'foo': 'override',
-        'booz': 'baz',
-    }
-    global_settings = {
-        'booz': 'override',
-    }
+@patch('h.app.settings_from_environment')
+def test_get_settings_env_overrides_base(settings_from_environment):
+    base_settings = {'foo': 'base'}
+    env_settings = {'foo': 'env'}
 
     settings_from_environment.return_value = env_settings
-    app.main(global_settings, **base_settings)
-    assert config.settings_from_environment.call_count == 1
+    result = app.get_settings({}, **base_settings)
 
-    args, kwargs = app.create_app.call_args
-    result = args[0]
-    assert result['foo'] == 'override'
-    assert result['booz'] == 'override'
+    assert result['foo'] == 'env'
+
+
+@patch('h.app.settings_from_environment')
+def test_get_settings_global_overrides_all(settings_from_environment):
+    base_settings = {'bar': 'base'}
+    global_settings = {'bar': 'global'}
+    env_settings = {'bar': 'env'}
+
+    settings_from_environment.return_value = env_settings
+    result = app.get_settings(global_settings, **base_settings)
+
+    assert result['bar'] == 'global'
 
 
 def test_missing_secrets_generates_secret_key():

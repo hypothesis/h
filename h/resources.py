@@ -2,7 +2,6 @@
 import logging
 
 from pyramid.interfaces import ILocation
-from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS
 from zope.interface import implementer
 from zope.interface.exceptions import DoesNotImplement
 from zope.interface.verify import verifyClass, verifyObject
@@ -97,17 +96,6 @@ class AnnotationFactory(BaseResource):
         annotation.__parent__ = self
 
         return annotation
-
-
-class APIResource(InnerResource):
-    annotations = AnnotationFactory
-
-    def __acl__(self):
-        defaultlist = [
-            (Allow, 'group:admin', ALL_PERMISSIONS),
-            (Allow, Authenticated, 'create'),
-        ]
-        return defaultlist
 
 
 class RootFactory(InnerResource):
