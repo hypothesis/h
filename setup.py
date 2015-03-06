@@ -32,7 +32,6 @@ install_requires = [
     'alembic>=0.6.3',
     'annotator>=0.14.1,<0.15',
     'blinker>=1.3,<1.4',
-    'clik==0.3.1',
     'cryptography>=0.7',
     'deform>=0.9,<1.0',
     'elasticsearch>=1.1.0',
