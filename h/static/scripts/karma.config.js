@@ -1,12 +1,11 @@
 // Karma configuration
-// Generated on Mon Jul 14 2014 14:06:50 GMT+0200 (CEST)
 var path = require('path');
 
 module.exports = function(config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: 'h/static/scripts',
+    basePath: './',
 
 
     // frameworks to use

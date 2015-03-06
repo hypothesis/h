@@ -23,7 +23,7 @@ modern web browsers in mind.
 Installation
 ------------
 
-See `<INSTALL.rst>`_ for installation instructions. Platform specific
+See `<docs/INSTALL.rst>`_ for installation instructions. Platform specific
 instructions can be found in the install documents as well.
 
 The short version::
@@ -47,10 +47,7 @@ restart it should it crash for some reason.
 .. note::
     Using the bookmarklet or otherwise embedding the application may not
     be possible on sites accessed via HTTPS due to browser policy restricting
-    the inclusion of non-SSL content. If you wish to test the development server
-    with these sites uncomment the line beginning with "certfile" in the
-    development server configuration file, "development.ini". This will cause
-    the server to use a self-signed certificate included for testing.
+    the inclusion of non-SSL content.
 
 Development
 -----------
