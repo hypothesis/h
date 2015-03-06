@@ -4,6 +4,8 @@ import logging
 from pyramid.interfaces import ILocation
 from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS
 from zope.interface import implementer
+from zope.interface.exceptions import DoesNotImplement
+from zope.interface.verify import verifyClass, verifyObject
 
 from h import interfaces
 from h.models import Annotation
@@ -51,21 +53,21 @@ class InnerResource(BaseResource):
 
         factory_or_resource = getattr(self, name, None)
 
-        if factory_or_resource:
+        if factory_or_resource is not None:
             try:
-                if ILocation.implementedBy(factory_or_resource):
+                if verifyClass(ILocation, factory_or_resource):
                     inst = factory_or_resource(self.request)
                     inst.__name__ = name
                     inst.__parent__ = self
                     self.__dict__[name] = inst
                     return inst
-            except TypeError:
+            except DoesNotImplement:
                 pass
 
             try:
-                if ILocation.providedBy(factory_or_resource):
+                if verifyObject(ILocation, factory_or_resource):
                     return factory_or_resource
-            except TypeError:
+            except DoesNotImplement:
                 pass
 
         raise KeyError(name)
