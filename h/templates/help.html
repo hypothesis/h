@@ -5,6 +5,14 @@
   {% if is_onboarding %}
     <meta name="hypothesis-intent" content="first-run" />
   {% endif %}
+  {% if not is_onboarding %}
+    <script>
+      function hypothesisConfig() { return {firstRun: true} }
+    </script>
+    <script async defer>
+      {% include "embed.js" %}
+    </script>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -155,16 +163,4 @@
       <div id="help-2"></div>
     </div>
   </div>
-{% endblock %}
-
-{% block scripts %}
-  {{ super() }}
-  {% if not is_onboarding %}
-    <script>
-      function hypothesisConfig() { return {firstRun: true} }
-    </script>
-    <script defer>
-      {% include "embed.js" %}
-    </script>
-  {% endif %}
 {% endblock %}
