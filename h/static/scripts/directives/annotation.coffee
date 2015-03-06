@@ -314,7 +314,7 @@ annotationDirective = [
             ctrl.save()
 
       scope.share = (event) ->
-        $container = angular.element(event.target).parent()
+        $container = angular.element(event.currentTarget).parent()
         $container.addClass('open').find('input').focus().select()
 
         # We have to stop propagation here otherwise this click event will
