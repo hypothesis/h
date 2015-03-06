@@ -1,4 +1,4 @@
-output_format: grouped
+output-format: grouped
 inherits:
   - full_pep8
   - strictness_low
@@ -14,6 +14,7 @@ pylint:
 pep8:
   options:
     max-line-length: 79
-ignore:
-  - "^_version.py"
-  - "^migrations/"
+ignore-paths:
+  - h/_version.py
+  - h/migrations/
+  - versioneer.py
