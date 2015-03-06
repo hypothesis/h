@@ -27,10 +27,16 @@ ThreadController = [
     # thread filter, if present.
     ###
     this.toggleCollapsed = (value) ->
-      @collapsed = if value?
-                     !!value
-                   else
-                     not @collapsed
+      newval = if value?
+                 !!value
+               else
+                 not @collapsed
+
+      # We only allow uncollapsing of the thread if there are some replies to
+      # display.
+      if newval == false and this.numReplies() <= 0
+        return
+      @collapsed = newval
 
     ###*
     # @ngdoc method
