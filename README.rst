@@ -4,6 +4,9 @@ Hypothesis
 .. image:: https://travis-ci.org/hypothesis/h.svg?branch=master
    :target: https://travis-ci.org/hypothesis/h
    :alt: Build Status
+.. image:: https://landscape.io/github/hypothesis/h/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/hypothesis/h/master
+   :alt: Code Health
 
 About
 -----
