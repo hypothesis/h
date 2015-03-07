@@ -129,5 +129,6 @@ def includeme(config):
     config.add_route('index', '/')
     config.add_route('help', '/docs/help')
     config.add_route('onboarding', '/welcome')
+    config.add_route('stream', '/stream')
 
     config.scan(__name__)
