@@ -18,12 +18,12 @@ script:
   - make test
   - make cover
   - make lint
-  - hypothesis-buildext development.ini chrome --base http://localhost
-  - hypothesis-buildext development.ini firefox --base http://localhost
-  - "hypothesis-buildext production.ini chrome
+  - hypothesis-buildext conf/development.ini chrome --base http://localhost
+  - hypothesis-buildext conf/development.ini firefox --base http://localhost
+  - "hypothesis-buildext conf/production.ini chrome
     --base https://hypothes.is
     --assets chrome-extension://notarealkey/public"
-  - "hypothesis-buildext production.ini firefox
+  - "hypothesis-buildext conf/production.ini firefox
     --base https://hypothes.is
     --assets resource://notarealkey/hypothesis/data"
 after_success:

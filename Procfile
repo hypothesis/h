@@ -1,2 +1,2 @@
-web: gunicorn --paster production.ini
-notification: hypothesis-worker production.ini notification
+web: gunicorn --paster conf/production.ini
+notification: hypothesis-worker conf/production.ini notification

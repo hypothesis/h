@@ -16,7 +16,7 @@ clean:
 	find h/static/styles -mindepth 1 -name '*.css' -delete
 
 dev: deps
-	@gunicorn --reload --paste development.ini
+	@gunicorn --reload --paste conf/development.ini
 
 test: deps
 	@echo -n "Checking to see if elasticsearch is running..."
