@@ -1,6 +1,13 @@
 SHELL := bash
 PATH := bin:${PATH}
 
+# Unless the user has specified otherwise in their environment, it's probably a
+# good idea to refuse to install unless we're in an activated virtualenv.
+ifndef PIP_REQUIRE_VIRTUALENV
+PIP_REQUIRE_VIRTUALENV = 1
+endif
+export PIP_REQUIRE_VIRTUALENV
+
 default: deps
 
 deps:
