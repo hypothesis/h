@@ -13,6 +13,7 @@ install:
   - make
 services:
   - elasticsearch
+env: BROWSERIFY_PIPE_BIN=bin/browserify-pipe
 script:
   - make test
   - make lint
