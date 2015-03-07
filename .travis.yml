@@ -16,12 +16,12 @@ services:
 script:
   - make test
   - make lint
-  - hypothesis-buildext config/development.ini chrome --base http://localhost
-  - hypothesis-buildext config/development.ini firefox --base http://localhost
-  - "hypothesis-buildext config/production.ini chrome
+  - hypothesis-buildext development.ini chrome --base http://localhost
+  - hypothesis-buildext development.ini firefox --base http://localhost
+  - "hypothesis-buildext production.ini chrome
     --base https://hypothes.is
     --assets chrome-extension://notarealkey/public"
-  - "hypothesis-buildext config/production.ini firefox
+  - "hypothesis-buildext production.ini firefox
     --base https://hypothes.is
     --assets resource://notarealkey/hypothesis/data"
 after_success:

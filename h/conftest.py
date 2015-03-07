@@ -22,7 +22,7 @@ from h.api.db import store_from_settings
 @pytest.fixture(scope='session', autouse=True)
 def settings():
     """Default app settings (test.ini)."""
-    return get_appsettings('config/test.ini')
+    return get_appsettings('test.ini')
 
 
 @pytest.fixture(autouse=True)
