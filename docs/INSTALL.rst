@@ -34,22 +34,9 @@ Once the basic dependencies are installed, the `ElasticSearch ICU Analysis`_
 plugin is needed. Follow the instructions_ available from that project.
 
 The project code itself is a pyramid_ application which can be integrated
-into any WSGI_ compatible framework and run on any WSGI web server (such
-as gunicorn_ or uWSGI_). Until the project is ready for general testing
-it will not be installable from the Python Package Index. Instead, the
-application should be built in a virtual environment which can be set up as
-follows:
-
-.. code-block:: bash
-
-    ./bootstrap
-
-The command will set up the development environment and check for development
-dependencies. Warnings will be issued for missing dependencies. When this
-script runs successfully, the environment should be prepared. It is good
-practice to run this script whenever the source code changes, such as after
-pulling new commits from upstream, or checking out a new branch, which may
-have changed (for example: updated) requirements.
+into any WSGI_ compatible framework and run on any WSGI web server, such as
+as gunicorn_ or uWSGI_. However, at this time support for the WebSocket
+protocol assumes gunicorn.
 
 For building the static assets, requirements currently include CoffeeScript_
 and Sass_ with Compass_ installed. CoffeeScript will be installed for you but

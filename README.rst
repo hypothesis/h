@@ -26,19 +26,12 @@ Installation
 See `<docs/INSTALL.rst>`_ for installation instructions. Platform specific
 instructions can be found in the install documents as well.
 
-The short version::
-
-    $ # install dependencies
-    $ ./bootstrap
-    $ ./run
-
-
 Running
 -------
 
-To run the server in development mode, simply use the ``run`` command::
+Once dependencies are installed::
 
-    $ ./run
+    $ make dev
 
 This will start the server on port 5000 (http://localhost:5000),
 reload the application whenever changes are made to the source code, and
@@ -52,15 +45,7 @@ restart it should it crash for some reason.
 Development
 -----------
 
-The project builds heavily on components developed for the `Annotator Project`_
-and is structured to encourage upstream contribution where possible. However,
-work is required to make Annotator more extensible in order to facilitate
-contribution.
-
-Additionally, work is underway to support the data model described by the
-`Open Annotation Core`_ specification document.
-
-Join us in `#hypothes.is`_ on freenode_ for discussion.
+oin us in `#hypothes.is`_ on freenode_ for discussion.
 
 If you'd like to contribute to the project should also `subscribe`_ to the
 `development mailing list`_ and read about `contributing`_. Then consider getting
@@ -108,51 +93,46 @@ There are test suites for both the front- and back-end code.
 
 To run the Python suite, invoke the tests in the standard fashion::
 
-    $ ./bin/python setup.py test
+    $ python setup.py test
 
 To run the JavaScript suite, run::
 
-    $ $(npm bin)/karma start karma.config.js --single-run
+    $ $(npm bin)/karma start h/static/scripts/karma.config.js --single-run
 
 As a convenience, there is a make target which will do all of the above::
 
     $ make test
 
-It's also possible to run a subset of the tests using ``karma run``::
-
-    $ $(npm bin)/karma start karma.config.js & # Start the server in the bg.
-    $ $(npm bin)/karma run karma.config.js -- --grep={FILTER_STRING}
-
-This will run generally be much faster than running ``karma start --single-run``
-each time. The frontend tests can also be debugged by visiting
-http://localhost:9876/debug.html and opening the browser console.
-
 Browser Extensions
 ^^^^^^^^^^^^^^^^^^
-Run the following command at the prompt to build the Chrome extension::
+To build the browser extensions, use the hypothesis-buildext tool::
 
-    $ hypothesis-buildext development.ini chrome
+    usage: hypothesis-buildext [-h] config_uri {chrome,firefox} ...
 
-Or, to load the assets from within the extension::
+    positional arguments:
+      config_uri        paster configuration URI
 
-    $ hypothesis-buildext development.ini chrome --base http://localhost:5000 --assets chrome-extension://extensionid/public
+    optional arguments:
+      -h, --help        show this help message and exit
 
-To build an extension with a feature flag enabled use the environment variable::
-
-    $ FEATURE_NOTIFICATION=true hypothesis-buildext production.ini chrome --base https://hypothes.is --assets chrome-extension://extensionid/public
-
-To build the Firefox extension, run the following::
-
-    $ hypothesis-buildext development.ini firefox --base http://localhost:5000 --assets resource://firefox-at-hypothes-dot-is/hypothesis/data
+    browser:
+      {chrome,firefox}
+        chrome          build the Google Chrome extension
+        firefox         build the Mozilla Firefox extension
 
 At this point, a working extension should exist in either ``./build/chrome``
-or ``./build/firefox`` but with the development configuration the static assets
-are still loaded from the server. Start the application and ensure that the
-assets are built by visiting the home page or by running
-``./bin/hypothesis assets``.
+or ``./build/firefox``. If the development configuration was used, static
+assets are loaded from the server. Start the application and ensure that the
+assets are built by visiting the start page or by running the ``assets``
+command::
 
-Note: Bundling the assets in the extension only works at the moment when the
-``webassets.debug`` setting is falsy.
+    usage: hypothesis assets [-h] config_uri
+
+    positional arguments:
+      config_uri  paster configuration URI
+
+    optional arguments:
+      -h, --help  show this help message and exit
 
 Deployment
 ----------
@@ -165,6 +145,7 @@ The project is set up to run out of the box on Heroku using these add-ons:
 - Heroku PostgreSQL
 - Mailgun, Mandrill, or SendGrid for sending e-mail
 - RedisToGo for session storage
+- NSQ
 
 Docker
 ^^^^^^
@@ -183,12 +164,16 @@ Manual
 
 The following shell environment variables are supported:
 
+- ``ALLOWED_ORIGINS`` origins allowed to connect over the WebSocket protocol
+- ``APP_URL`` the base URL of the application
 - ``CLIENT_ID`` a unique API key for authentication
 - ``CLIENT_SECRET`` a unique API secret for signing authentication requests
 - ``DATABASE_URL`` in the format used by Heroku
 - ``ELASTICSEARCH_INDEX`` the Elasticsearch index for annotation storage
 - ``MAIL_DEFAULT_SENDER`` a sender address for outbound mail
 - ``SECRET_KEY`` a unique string secret
+- ``WEBASSETS_BASE_DIR`` the base directory for static assets
+- ``WEBASSETS_BASE_URL`` the base URL for static asset routes
 
 Customized embedding
 --------------------
