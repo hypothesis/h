@@ -5,7 +5,6 @@ default: deps
 
 deps:
 	@npm install
-	@pip install -qU pip
 	@pip install -q --use-wheel -e .[dev,testing,YAML]
 
 clean:
