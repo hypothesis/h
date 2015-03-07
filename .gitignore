@@ -1,24 +1,15 @@
-/*.db
-/*.db-journal
-/*.egg
-/*.egg-info
-/MANIFEST
-/bin
-/build
-/dist
-/docs/_build
-/h/css
-/h/js
-/h/lib
-/h/static/.sass-cache
-/h/static/.webassets-cache
-/include
-/lib
-/local
-/man
-/node_modules
-/share
-/src
+MANIFEST
+build/
+dist/
+docs/_build/
+node_modules/
+
+*.egg
+*.egg-info
+
+*.db
+*.db-journal
+.webassets-cache
 
 # All minified javascript is built
 *.min.js
