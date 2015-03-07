@@ -16,6 +16,7 @@ services:
 env: BROWSERIFY_PIPE_BIN=bin/browserify-pipe
 script:
   - make test
+  - make cover
   - make lint
   - hypothesis-buildext development.ini chrome --base http://localhost
   - hypothesis-buildext development.ini firefox --base http://localhost
