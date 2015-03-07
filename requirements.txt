@@ -1,5 +1,4 @@
--e .
-PyYAML
+-e .[YAML]
 cffi
 gunicorn
 psycogreen
