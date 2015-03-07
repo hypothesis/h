@@ -14,11 +14,15 @@ Hypothesis
 About
 -----
 
-Hypothesis brings community peer review to The Internet. It is a web
-application which enables rich annotation of web content. The project acts as
-a community aggregator for annotations and identity provider [*]_ for
-annotators. It also serves embed code for an annotation agent designed with
-modern web browsers in mind.
+Hypothesis is a tool for annotating the web.
+
+- A service for storing community annotations
+- An account system for user registration
+- Authorization for client applications
+- A browser-based annotator client featuring:
+  - Chrome and Firefox browser extensions
+  - A bookmarklet
+  - A publisher embed code
 
 Installation
 ------------
