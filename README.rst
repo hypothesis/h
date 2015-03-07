@@ -225,7 +225,6 @@ to as the "Simplified BSD License" or the "FreeBSD License". Some third-party
 components are included. They are subject to their own licenses. All of the
 license information can be found in the included `<LICENSE>`_ file.
 
-.. [*] Community and identity features are not finished. Get involved and help!
 .. _Open Annotation Core: http://openannotation.org/spec/core/
 .. _project wiki: https://github.com/hypothesis/h/wiki
 .. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
