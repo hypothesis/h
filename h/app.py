@@ -38,8 +38,6 @@ def create_app(global_config, **settings):
 
     config = Configurator(settings=settings)
 
-    config.set_authentication_policy(session_authn)
-    config.set_authorization_policy(acl_authz)
     config.set_root_factory('h.resources.create_root')
 
     config.add_subscriber('h.subscribers.add_renderer_globals',
@@ -55,7 +53,9 @@ def create_app(global_config, **settings):
     config.add_jinja2_renderer('.html')
 
     if config.registry.feature('accounts'):
-        config.include('.accounts')
+         config.set_authentication_policy(session_authn)
+         config.set_authorization_policy(acl_authz)
+         config.include('.accounts')
 
     if config.registry.feature('api'):
         api_app = create_api(settings)
