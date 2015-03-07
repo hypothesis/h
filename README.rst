@@ -20,6 +20,7 @@ Hypothesis is a tool for annotating the web.
 - An account system for user registration
 - Authorization for client applications
 - A browser-based annotator client featuring:
+
   - Chrome and Firefox browser extensions
   - A bookmarklet
   - A publisher embed code
