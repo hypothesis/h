@@ -90,6 +90,7 @@ def session_view(request):
 
 
 @view_config(layout='app', context=Stream, renderer='h:templates/app.html')
+@view_config(layout='app', route_name='stream', renderer='h:templates/app.html')
 def stream(context, request):
     stream_type = context.get('stream_type')
     stream_key = context.get('stream_key')
