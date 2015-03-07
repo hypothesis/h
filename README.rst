@@ -28,8 +28,8 @@ Hypothesis is a tool for annotating the web.
 Installation
 ------------
 
-See `<docs/INSTALL.rst>`_ for installation instructions. Platform specific
-instructions can be found in the install documents as well.
+See `<docs/INSTALL.rst>`_.
+
 
 Running
 -------

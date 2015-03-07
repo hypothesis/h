@@ -20,7 +20,6 @@ To install the dependencies on any specific platform, follow the instructions in
 * Fedora_
 * OSX_
 * Ubuntu_
-* Vagrant_ (*contains information for installing on Windows*)
 
 Feel free to add instructions for a new platform in a file named
 ``Install.<Platform>.rst`` particularly if you think it
