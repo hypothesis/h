@@ -117,7 +117,11 @@ describe 'AppController', ->
 
   it 'does not show login form for logged in users', ->
     createController()
-    assert.isFalse($scope.dialog.visible)
+    assert.isFalse($scope.accountDialog.visible)
+
+  it 'does not show the share dialog at start', ->
+    createController()
+    assert.isFalse($scope.shareDialog.visible)
 
   describe 'applyUpdate', ->
 
