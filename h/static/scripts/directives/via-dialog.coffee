@@ -1,6 +1,6 @@
 ###*
 # @ngdoc directive
-# @name viaLink
+# @name viaLinkDialog
 # @restrict A
 # @description The dialog that generates a via link to the page h is currently
 # loaded on.
