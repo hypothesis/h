@@ -1,4 +1,5 @@
 [run]
+branch = True
 omit =
     # versioneer
     h/_version.py
