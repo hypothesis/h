@@ -20,7 +20,8 @@ class PyTest(TestCommand):
         self.test_args = ['h']
         self.test_suite = True
         if self.cov:
-            self.test_args += ['--cov', 'h']
+            self.test_args += ['--cov', 'h',
+                               '--cov-config', '.coveragerc']
 
     def run_tests(self):
         import pytest
