@@ -26,6 +26,29 @@ Feel free to add instructions for a new platform in a file named
 may be a niche use case. Contributions (and updates) to the other install
 instruction files are *very* welcome.
 
+Setting up the python virtual environment
+-----------------------------------------
+
+First, install virtualenvwrapper_.
+Then
+
+.. code-block:: bash
+
+    mkvirtualenv h
+
+and now you have a virtual environment for h, and you will
+install any python dependencies there.
+
+You will notice that the your shell prompt changes to include a (h) symbol.
+That means that you now have your virtual environment activated. This is
+required for running the code.
+
+At any later time, you can activate your virtualenv by running
+
+.. code-block:: bash
+
+    workon h
+
 General Instructions
 --------------------
 
@@ -76,3 +99,4 @@ turn off discovery.
 .. _Ubuntu: INSTALL.Ubuntu.rst
 .. _Vagrant: INSTALL.Vagrant.rst
 .. _instructions: http://www.elasticsearch.org/guide/en/elasticsearch/guide/master/icu-plugin.html
+.. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
