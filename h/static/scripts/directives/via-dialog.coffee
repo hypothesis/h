@@ -5,7 +5,6 @@
 # @description The dialog that generates a via link to the page h is currently
 # loaded on.
 ###
-
 viaLinkDialog = ['$timeout', ($timeout) ->
     link: (scope, elem, attrs, ctrl) ->
         ## Watch vialinkvisble: when it changes to true, focus input and selection.
