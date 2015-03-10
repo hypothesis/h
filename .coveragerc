@@ -1,0 +1,11 @@
+[run]
+omit =
+    # versioneer
+    h/_version.py
+
+    # development
+    h/testing.py
+
+    # test
+    */conftest.py
+    */test/*
