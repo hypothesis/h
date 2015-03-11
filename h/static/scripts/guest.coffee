@@ -1,6 +1,12 @@
 $ = require('jquery')
 Annotator = require('annotator')
-Channel = require('./vendor/jschannel')
+Channel = require('jschannel')
+
+require('diff-match-patch')
+require('dom-text-mapper')
+require('dom-text-matcher')
+require('page-text-mapper-core')
+require('text-match-engines')
 
 
 module.exports = class Annotator.Guest extends Annotator

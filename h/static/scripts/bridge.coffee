@@ -1,5 +1,5 @@
 $ = require('jquery')
-Channel = require('./vendor/jschannel')
+Channel = require('jschannel')
 
 class Bridge
   options:

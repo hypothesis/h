@@ -1,6 +1,6 @@
-require('../../vendor/jquery.scrollintoview')
-
 $ = Annotator.$
+require('jquery-scrollintoview')
+
 
 # Public: Wraps the DOM Nodes within the provided range with a highlight
 # element of the specified class and returns the highlight Elements.

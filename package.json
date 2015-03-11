@@ -40,24 +40,29 @@
     "transform": ["coffeeify", "browserify-shim"]
   },
   "browser": {
-    "jquery": "./h/static/scripts/vendor/jquery.js",
     "annotator": "./h/static/scripts/vendor/annotator.js",
     "angular": "./h/static/scripts/vendor/angular.js",
-    "angular-mock": "./h/static/scripts/vendor/angular-mocks.js"
+    "angular-mock": "./h/static/scripts/vendor/angular-mocks.js",
+    "diff-match-patch": "./h/static/scripts/vendor/diff_match_patch_uncompressed.js",
+    "dom-text-mapper": "./h/static/scripts/vendor/dom_text_mapper.js",
+    "dom-text-matcher": "./h/static/scripts/vendor/dom_text_matcher.js",
+    "jquery": "./h/static/scripts/vendor/jquery.js",
+    "jquery-scrollintoview": "./h/static/scripts/vendor/jquery.scrollintoview.js",
+    "jschannel": "./h/static/scripts/vendor/jschannel.js",
+    "page-text-mapper-core": "./h/static/scripts/vendor/page_text_mapper_core.js",
+    "text-match-engines": "./h/static/scripts/vendor/text_match_engines.js"
   },
   "browserify-shim": {
-    "jquery": "global:jQuery",
     "annotator": "global:Annotator",
     "angular": "global:angular",
     "angular-mock": "global:angular.mock",
-    "./h/static/scripts/vendor/jschannel.js": "Channel",
-    "./h/static/scripts/vendor/page_text_mapper_core.js": "PageTextMapperCore",
-    "./h/static/scripts/vendor/dom_text_matcher.js": {
-      "exports": "DomTextMatcher",
-      "depends": [
-        "./h/static/scripts/vendor/diff_match_patch_uncompressed.js",
-        "./h/static/scripts/vendor/text_match_engines.js"
-      ]
-    }
+    "diff-match-patch": "diff_match_patch",
+    "dom-text-mapper": "DomTextMapper",
+    "dom-text-matcher": "DomTextMatcher",
+    "jquery": "global:jQuery",
+    "jquery-scrollintoview": {"depends": ["jquery"]},
+    "jschannel": "Channel",
+    "page-text-mapper-core": "PageTextMapperCore",
+    "text-match-engines": "TextMatchEngines"
   }
 }

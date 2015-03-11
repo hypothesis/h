@@ -1,5 +1,5 @@
 {module, inject} = require('angular-mock')
-Channel = require('../vendor/jschannel.js')
+Channel = require('jschannel')
 
 assert = chai.assert
 sinon.assert.expose assert, prefix: null
@@ -266,4 +266,3 @@ describe 'Bridge', ->
 
       assert.called(callback1)
       assert.called(callback2)
-
