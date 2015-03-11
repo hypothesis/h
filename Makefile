@@ -38,4 +38,4 @@ cover:
 lint:
 	@prospector
 
-.PHONY: clean test
+.PHONY: clean cover deps dev lint test
