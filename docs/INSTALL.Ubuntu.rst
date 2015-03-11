@@ -5,7 +5,7 @@ To install the dependencies, run these commands:
 
 .. code-block:: bash
 
-    sudo apt-get install build-essential git libyaml-dev
+    sudo apt-get install build-essential git libyaml-dev libffi-dev
     sudo apt-get install python-{dev,pip,virtualenv} ruby-compass
 
 You will need the latest Node:
