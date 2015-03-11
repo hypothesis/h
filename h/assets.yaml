@@ -84,7 +84,11 @@ momentjs:
     - filters: uglifyjs
       output: scripts/vendor/moment-timezone-data.min.js
       contents: h:static/scripts/vendor/moment-timezone-data.js
-
+dmp:
+  contents:
+    - filters: uglifyjs
+      output: scripts/vendor/diff_match_patch_uncompressed.min.js
+      contents: h:static/scripts/vendor/diff_match_patch_uncompressed.js
 
 # Application
 app:
@@ -197,6 +201,7 @@ inject_js:
   contents:
   - jquery
   - annotator
+  - dmp
   - output: scripts/hypothesis.min.js
     filters:
       - browserify
