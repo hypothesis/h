@@ -1,0 +1,7 @@
+#!/bin/sh
+exec 2>&1
+
+set -e
+
+cd /src/h
+/srv/h/bin/hypothesis-worker conf/production.ini notification
