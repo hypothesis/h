@@ -1,4 +1,4 @@
-privacy = ['$window', 'localstorage', 'permissions', ($window, localstorage, permissions) ->
+privacy = ['localstorage', 'permissions', (localstorage, permissions) ->
   VISIBILITY_KEY ='hypothesis.visibility'
   VISIBILITY_PUBLIC = 'public'
   VISIBILITY_PRIVATE = 'private'

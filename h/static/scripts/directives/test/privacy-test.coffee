@@ -12,6 +12,7 @@ describe 'h.directives.privacy', ->
   $window = null
   fakeAuth = null
   fakePermissions = null
+  fakeLocalStorage = null
   sandbox = null
 
   before ->
@@ -28,6 +29,13 @@ describe 'h.directives.privacy', ->
       user: 'acct:angry.joe@texas.com'
     }
 
+    storage = {}
+    fakeLocalStorage = {
+      getItem: sandbox.spy (key) -> storage[key]
+      setItem: sandbox.spy (key, value) -> storage[key] = value
+      removeItem: sandbox.spy (key) -> delete storage[key]
+    }
+
     fakePermissions = {
       isPublic: sandbox.stub().returns(true)
       isPrivate: sandbox.stub().returns(false)
@@ -37,6 +45,7 @@ describe 'h.directives.privacy', ->
     }
 
     $provide.value 'auth', fakeAuth
+    $provide.value 'localstorage', fakeLocalStorage
     $provide.value 'permissions', fakePermissions
     return
 
@@ -48,31 +57,7 @@ describe 'h.directives.privacy', ->
   afterEach ->
     sandbox.restore()
 
-  describe 'memory fallback', ->
-    $scope2 = null
-
-    beforeEach inject (_$rootScope_) ->
-      $scope2 = _$rootScope_.$new()
-
-      $window.localStorage = null
-
-    it 'stores the default visibility level when it changes', ->
-      $scope.permissions = {read: ['acct:user@example.com']}
-      $element = $compile('<privacy ng-model="permissions">')($scope)
-      $scope.$digest()
-      $isolateScope = $element.isolateScope()
-      $isolateScope.setLevel(name: VISIBILITY_PUBLIC)
-
-      $scope2.permissions = {read: []}
-      $element = $compile('<privacy ng-model="permissions">')($scope2)
-      $scope2.$digest()
-
-      # Roundabout way: the storage works because the directive
-      # could read out the privacy level
-      readPermissions = $scope2.permissions.read[0]
-      assert.equal readPermissions, 'everybody'
-
-  describe 'has localStorage', ->
+  describe 'saves visibility level', ->
 
     it 'stores the default visibility level when it changes', ->
       $scope.permissions = {read: ['acct:user@example.com']}
@@ -82,19 +67,15 @@ describe 'h.directives.privacy', ->
       $isolateScope.setLevel(name: VISIBILITY_PUBLIC)
 
       expected = VISIBILITY_PUBLIC
-      stored = $window.localStorage.getItem VISIBILITY_KEY
+      stored = fakeLocalStorage.getItem VISIBILITY_KEY
       assert.equal stored, expected
 
     describe 'setting permissions', ->
       $element = null
-      store = null
-
-      beforeEach ->
-        store = $window.localStorage
 
       describe 'when no setting is stored', ->
         beforeEach ->
-          store.removeItem VISIBILITY_KEY
+          fakeLocalStorage.removeItem VISIBILITY_KEY
 
         it 'defaults to public', ->
           $scope.permissions = {read: []}
@@ -105,7 +86,7 @@ describe 'h.directives.privacy', ->
 
       describe 'when permissions.read is empty', ->
         beforeEach ->
-          store.setItem VISIBILITY_KEY, VISIBILITY_PUBLIC
+          fakeLocalStorage.setItem VISIBILITY_KEY, VISIBILITY_PUBLIC
 
           $scope.permissions = {read: []}
           $element = $compile('<privacy ng-model="permissions">')($scope)
@@ -115,14 +96,14 @@ describe 'h.directives.privacy', ->
           assert.equal $element.isolateScope().level.name, VISIBILITY_PUBLIC
 
         it 'does not alter the level on subsequent renderings', ->
-          store.setItem VISIBILITY_KEY, VISIBILITY_PRIVATE
+          fakeLocalStorage.setItem VISIBILITY_KEY, VISIBILITY_PRIVATE
           $scope.permissions.read = ['acct:user@example.com']
           $scope.$digest()
           assert.equal $element.isolateScope().level.name, VISIBILITY_PUBLIC
 
       describe 'when permissions.read is filled', ->
         it 'does not alter the level', ->
-          store.setItem VISIBILITY_KEY, VISIBILITY_PRIVATE
+          fakeLocalStorage.setItem VISIBILITY_KEY, VISIBILITY_PRIVATE
 
           $scope.permissions = {read: ['group:__world__']}
           $element = $compile('<privacy ng-model="permissions">')($scope)
@@ -135,14 +116,14 @@ describe 'h.directives.privacy', ->
           $scope.permissions = {read: []}
 
         it 'fills the permissions fields with the auth.user name', ->
-          store.setItem VISIBILITY_KEY, VISIBILITY_PRIVATE
+          fakeLocalStorage.setItem VISIBILITY_KEY, VISIBILITY_PRIVATE
           $element = $compile('<privacy ng-model="permissions">')($scope)
           $scope.$digest()
 
           assert.deepEqual $scope.permissions, fakePermissions.private()
 
         it 'puts group_world into the read permissions for public visibility', ->
-          store.setItem VISIBILITY_KEY, VISIBILITY_PUBLIC
+          fakeLocalStorage.setItem VISIBILITY_KEY, VISIBILITY_PUBLIC
           $element = $compile('<privacy ng-model="permissions">')($scope)
           $scope.$digest()
 
