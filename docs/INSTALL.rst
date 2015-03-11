@@ -97,6 +97,5 @@ turn off discovery.
 .. _Fedora: INSTALL.Fedora.rst
 .. _OSX: INSTALL.OSX.rst
 .. _Ubuntu: INSTALL.Ubuntu.rst
-.. _Vagrant: INSTALL.Vagrant.rst
 .. _instructions: http://www.elasticsearch.org/guide/en/elasticsearch/guide/master/icu-plugin.html
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
