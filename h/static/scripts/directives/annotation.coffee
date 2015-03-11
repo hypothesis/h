@@ -45,8 +45,8 @@ AnnotationController = [
     @showDiff = undefined
     @timestamp = null
 
-    highlight = annotationUI.tool is 'highlight'
     model = $scope.annotationGet()
+    highlight = model.$highlight
     original = null
     vm = this
 

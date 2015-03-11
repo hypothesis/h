@@ -7,7 +7,7 @@
 $base-font-size: 14px;
 
 //ADDER////////////////////////////////
-.annotator-adder {
+.adder-group {
   $border: $gray;
   $hoverborder: $gray-dark;
   @include box-sizing(border-box);
@@ -19,7 +19,7 @@ $base-font-size: 14px;
   position: absolute;
   border: 4px solid $border;
   border-radius: 8px;
-  width: 40px;
+  // width: 40px;
   z-index: 999;
 
   &:before {
@@ -45,7 +45,7 @@ $base-font-size: 14px;
     border: none;
     cursor: pointer;
     height: 100%;
-    width: 100%;
+    width: 40px;
     font-size: 18px;
     margin: 0;
     padding: 0;

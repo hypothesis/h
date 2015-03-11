@@ -17,6 +17,7 @@ module.exports = class Annotator.Guest extends Annotator
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-adder button mouseup":   "onAdderMouseup"
+    ".annotator-highlighter button click": "onHighlighterClick"
     "setTool": "onSetTool"
     "setVisibleHighlights": "setVisibleHighlights"
 
@@ -37,7 +38,7 @@ module.exports = class Annotator.Guest extends Annotator
   visibleHighlights: false
 
   html: jQuery.extend {}, Annotator::html,
-    adder: '<div class="annotator-adder"><button class="h-icon-pen"></button></div>'
+    adder: '<div class="adder-group"><span class="annotator-adder"><button class="h-icon-plus"></button></span><span class="annotator-highlighter"><button class="h-icon-highlighter"></button></span>'
 
   constructor: (element, options, config = {}) ->
     options.noScan = true
@@ -242,6 +243,11 @@ module.exports = class Annotator.Guest extends Annotator
     this.plugins.CrossFrame.sync([annotation])
     annotation
 
+  createHighlight: ->
+    annotation = super
+    this.plugins.CrossFrame.sync([annotation])
+    annotation
+
   showAnnotations: (annotations) =>
     @crossframe?.notify
       method: "showAnnotations"
@@ -335,25 +341,22 @@ module.exports = class Annotator.Guest extends Annotator
       # Tell sidebar to show the viewer for these annotations
       this.showAnnotations annotations
 
-  # When hovering on a highlight in highlighting mode,
-  # tell the sidebar to hilite the relevant annotations
+  # When Mousing over a highlight, tell the sidebar to focus the relevant annotations
   onAnchorMouseover: (event) ->
-    if @visibleHighlights or @tool is 'highlight'
+    if @visibleHighlights
       event.stopPropagation()
       annotations = event.data.getAnnotations(event)
       this.focusAnnotations annotations
 
-  # When leaving a highlight (with the cursor) in highlighting mode,
-  # tell the sidebar to stop hiliting the relevant annotations
+  # Tell the sidebar to stop highlighting the relevant annotations
   onAnchorMouseout: (event) ->
-    if @visibleHighlights or @tool is 'highlight'
+    if @visibleHighlights
       event.stopPropagation()
       this.focusAnnotations []
 
-  # When clicking on a highlight in highlighting mode,
-  # tell the sidebar to bring up the viewer for the relevant annotations
+  # When clicking on a highlight, tell the sidebar to bring up the viewer for the relevant annotations
   onAnchorClick: (event) =>
-    if @visibleHighlights or @tool is 'highlight'
+    if @visibleHighlights
       event.stopPropagation()
       this.selectAnnotations (event.data.getAnnotations event),
         (event.metaKey or event.ctrlKey)
@@ -381,8 +384,12 @@ module.exports = class Annotator.Guest extends Annotator
 
     @visibleHighlights = shouldShowHighlights
 
+  # Might not be needed anymore. Perhaps should just use on adderclick or perhaps new note?
   addComment: ->
-    this.showEditor(this.createAnnotation())
+    @adder.hide()
+    annotation = this.setupAnnotation(this.createAnnotation())
+    Annotator.Util.getGlobal().getSelection().removeAllRanges()
+    this.showEditor(annotation)
 
   # Open the sidebar
   triggerShowFrame: ->
@@ -410,6 +417,13 @@ module.exports = class Annotator.Guest extends Annotator
     annotation = this.setupAnnotation(this.createAnnotation())
     Annotator.Util.getGlobal().getSelection().removeAllRanges()
     this.showEditor(annotation)
+
+  onHighlighterClick: (event) =>
+    event.preventDefault()
+    event.stopPropagation()
+    @adder.hide()
+    annotation = this.setupAnnotation(this.createHighlight())
+    Annotator.Util.getGlobal().getSelection().removeAllRanges()
 
   onSetTool: (name) ->
     switch name
