@@ -1,4 +1,4 @@
-privacy = ['$window', 'permissions', ($window, permissions) ->
+privacy = ['$window', 'localstorage', 'permissions', ($window, localstorage, permissions) ->
   VISIBILITY_KEY ='hypothesis.visibility'
   VISIBILITY_PUBLIC = 'public'
   VISIBILITY_PRIVATE = 'private'
@@ -15,24 +15,6 @@ privacy = ['$window', 'permissions', ($window, permissions) ->
     undefined
 
   isPublic  = (level) -> level == VISIBILITY_PUBLIC
-
-  # Detection is needed because we run often as a third party widget and
-  # third party storage blocking often blocks cookies and local storage
-  # https://github.com/Modernizr/Modernizr/blob/master/feature-detects/storage/localstorage.js
-  storage = do ->
-    key = 'hypothesis.testKey'
-    try
-      $window.localStorage.setItem  key, key
-      $window.localStorage.removeItem key
-      $window.localStorage
-    catch
-      memoryStorage = {}
-      getItem: (key) ->
-        if key of memoryStorage then memoryStorage[key] else null
-      setItem: (key, value) ->
-        memoryStorage[key] = value
-      removeItem: (key) ->
-        delete memoryStorage[key]
 
   link: (scope, elem, attrs, controller) ->
     return unless controller?
@@ -62,7 +44,7 @@ privacy = ['$window', 'permissions', ($window, permissions) ->
 
     controller.$render = ->
       unless controller.$modelValue.read?.length
-        name = storage.getItem VISIBILITY_KEY
+        name = localstorage.getItem VISIBILITY_KEY
         name ?= VISIBILITY_PUBLIC
         level = getLevel(name)
         controller.$setViewValue level
@@ -71,7 +53,7 @@ privacy = ['$window', 'permissions', ($window, permissions) ->
 
     scope.levels = levels
     scope.setLevel = (level) ->
-      storage.setItem VISIBILITY_KEY, level.name
+      localstorage.setItem VISIBILITY_KEY, level.name
       controller.$setViewValue level
       controller.$render()
     scope.isPublic = isPublic
