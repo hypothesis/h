@@ -9,6 +9,7 @@
     "clean-css": "2.2.2",
     "coffee-script": "1.7.1",
     "coffeeify": "^1.0.0",
+    "node-uuid": "^1.4.3",
     "uglify-js": "2.4.14"
   },
   "devDependencies": {
@@ -19,7 +20,6 @@
     "karma-ng-html2js-preprocessor": "^0.1.0",
     "karma-phantomjs-launcher": "^0.1.4",
     "mocha": "^1.20.1",
-    "node-uuid": "^1.4.3",
     "phantomjs": "^1.9.7"
   },
   "engines": {
