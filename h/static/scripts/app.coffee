@@ -1,5 +1,5 @@
 angular = require('angular')
-uuid = require('./vendor/uuid')
+uuid = require('node-uuid')
 
 # These services are provided in their own angular modules and thus must be
 # loaded first.
