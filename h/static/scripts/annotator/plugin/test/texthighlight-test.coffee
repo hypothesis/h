@@ -49,7 +49,7 @@ describe 'Annotator.Plugin.TextHighlight', ->
 
     it "assigns the annotation as data to the highlight span", ->
       hl = createTestHighlight()
-      annotation = $(hl._highlights).data "annotation"
+      annotation = Annotator.$(hl._highlights).data "annotation"
       assert.equal annotation, "test annotation"
 
   describe "scrollToView", ->
