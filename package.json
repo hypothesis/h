@@ -38,7 +38,10 @@
   },
   "homepage": "https://github.com/hypothesis/h",
   "browserify": {
-    "transform": ["coffeeify", "browserify-shim"]
+    "transform": [
+      "coffeeify",
+      "browserify-shim"
+    ]
   },
   "browser": {
     "annotator": "./h/static/scripts/vendor/annotator.js",
@@ -61,7 +64,11 @@
     "dom-text-mapper": "DomTextMapper",
     "dom-text-matcher": "DomTextMatcher",
     "jquery": "global:jQuery",
-    "jquery-scrollintoview": {"depends": ["jquery"]},
+    "jquery-scrollintoview": {
+      "depends": [
+        "jquery"
+      ]
+    },
     "jschannel": "Channel",
     "page-text-mapper-core": "PageTextMapperCore",
     "text-match-engines": "TextMatchEngines"
