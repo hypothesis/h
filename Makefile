@@ -21,7 +21,7 @@ clean:
 	find h/static/scripts -mindepth 1 -name '*.min.js' -delete
 	find h/static/styles -mindepth 1 -name '*.css' -delete
 
-dev: deps
+dev:
 	@gunicorn --reload --paste conf/development.ini
 
 test: deps

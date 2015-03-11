@@ -34,7 +34,11 @@ See `<docs/INSTALL.rst>`_.
 Running
 -------
 
-Once dependencies are installed::
+Once platform dependencies are installed::
+
+    $ make deps
+
+This will install the rest of the libraries needed for the application. Then::
 
     $ make dev
 
