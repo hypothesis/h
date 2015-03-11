@@ -7,7 +7,7 @@ To install the dependencies, run these commands
 .. code-block:: bash
 
     yum install nodejs npm python-{pip,virtualenv} rubygem-{compass,sass}
-    yum install libyaml-devel
+    yum install libyaml-devel libffi-devel
 
 Make sure to install at least version 0.12.2 of rubygem-compass.
 If not available as an RPM, you can use this:
