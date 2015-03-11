@@ -49,15 +49,14 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           state = not @annotator.visibleHighlights
           @annotator.setVisibleHighlights state
     ,
+    ## TODO: if we are going to allow highlighting on mobile we should showe this button on a selection (mobile only)
     #   "title": "Highlighting Mode"
     #   "class": "h-icon-highlighter"
     #   "on":
     #     "click": (event) =>
     #       event.preventDefault()
     #       event.stopPropagation()
-    #       state = not (@annotator.tool is 'highlight')
-    #       tool = if state then 'highlight' else 'comment'
-    #       @annotator.setTool tool
+    #       @annotator.onHighlighterClick()
     # ,
       "title": "New Comment"
       "class": "h-icon-plus"

@@ -18,7 +18,6 @@ module.exports = class Annotator.Guest extends Annotator
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-adder button mouseup":   "onAdderMouseup"
     ".annotator-highlighter button click": "onHighlighterClick"
-    "setTool": "onSetTool"
     "setVisibleHighlights": "setVisibleHighlights"
 
   # Plugin configuration
@@ -34,7 +33,6 @@ module.exports = class Annotator.Guest extends Annotator
     FragmentSelector: {}
 
   # Internal state
-  tool: 'comment'
   visibleHighlights: false
 
   html: jQuery.extend {}, Annotator::html,
@@ -188,20 +186,13 @@ module.exports = class Annotator.Guest extends Annotator
         .catch (e) ->
 
       trans.delayReturn(true)
-    crossframe.on 'setTool', (ctx, name) =>
-      @tool = name
-      this.publish 'setTool', name
     crossframe.on 'setVisibleHighlights', (ctx, state) =>
       this.publish 'setVisibleHighlights', state
 
   _setupWrapper: ->
     @wrapper = @element
     .on 'click', (event) =>
-      if @selectedTargets?.length
-        if @tool is 'highlight'
-          # Create the annotation
-          annotation = this.setupAnnotation(this.createAnnotation())
-      else
+      if !@selectedTargets?.length
         @triggerHideFrame()
     this
 
@@ -298,13 +289,6 @@ module.exports = class Annotator.Guest extends Annotator
     return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
 
   onSuccessfulSelection: (event, immediate) ->
-    if @tool is 'highlight'
-      # Do we really want to make this selection?
-      return false unless this.confirmSelection()
-      # Describe the selection with targets
-      @selectedTargets = (@_getTargetFromSelection(s) for s in event.segments)
-      return
-
     unless event?
       throw "Called onSuccessfulSelection without an event!"
     unless event.segments?
@@ -360,11 +344,6 @@ module.exports = class Annotator.Guest extends Annotator
       event.stopPropagation()
       this.selectAnnotations (event.data.getAnnotations event),
         (event.metaKey or event.ctrlKey)
-
-  setTool: (name) ->
-    @crossframe?.notify
-      method: 'setTool'
-      params: name
 
   # Pass true to show the highlights in the frame or false to disable.
   setVisibleHighlights: (shouldShowHighlights) ->
@@ -422,12 +401,6 @@ module.exports = class Annotator.Guest extends Annotator
     event.preventDefault()
     event.stopPropagation()
     @adder.hide()
+    this.setVisibleHighlights true
     annotation = this.setupAnnotation(this.createHighlight())
     Annotator.Util.getGlobal().getSelection().removeAllRanges()
-
-  onSetTool: (name) ->
-    switch name
-      when 'comment'
-        this.setVisibleHighlights this.visibleHighlights
-      when 'highlight'
-        this.setVisibleHighlights true
