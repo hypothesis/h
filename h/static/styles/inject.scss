@@ -19,7 +19,6 @@ $base-font-size: 14px;
   position: absolute;
   border: 4px solid $border;
   border-radius: 4px;
-  // width: 40px;
   z-index: 999;
 
   &:before {
@@ -51,7 +50,7 @@ $base-font-size: 14px;
     padding: 0;
     text-align: center;
     background: white !important;
-    color: $border !important;
+    color: $gray-light !important;
 
     &::-moz-focus-inner {
       border: 0;
@@ -227,7 +226,7 @@ $base-font-size: 14px;
     left: -1px;
 
     position: absolute;
-    color: fade-out($text-color, .75);
+    color: $gray-light;
 
     text-decoration: none;
   }

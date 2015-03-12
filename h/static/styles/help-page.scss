@@ -1,13 +1,5 @@
 @import "./mixins/icons";
 
-/* HACKY THINGS */
-@import url(https://fonts.googleapis.com/css?family=Lato:400,300,300italic);
-
-html, body {
-  font-family: "lato", sans-serif !important;
-}
-/* / HACKY THINGS */
-
 .help-page {
   padding-top: 2.5em;
   padding-bottom: 2.5em;
