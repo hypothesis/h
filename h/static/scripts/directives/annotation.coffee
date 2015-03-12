@@ -46,6 +46,7 @@ AnnotationController = [
     @timestamp = null
 
     model = $scope.annotationGet()
+    highlight = model.$highlight
     original = null
     vm = this
 
@@ -63,11 +64,8 @@ AnnotationController = [
     # @returns {boolean} True if the annotation is a highlight.
     ###
     this.isHighlight = ->
-      if model.id
-        model.target?.length and not model.references?.length and
-        not (model.text or model.deleted or model.tags?.length)
-      else
-        model.$highlight
+      model.target?.length and not model.references?.length and
+      not (model.text or model.deleted or model.tags?.length)
 
     ###*
     # @ngdoc method
@@ -267,11 +265,12 @@ AnnotationController = [
           $scope.$emit('annotationUpdate')
 
       # Save highlights once logged in.
-      if this.isHighlight()
+      if this.isHighlight() and highlight
         if model.user and not model.id
           model.permissions = permissions.private()
           model.$create().then ->
             $rootScope.$emit('annotationCreated', model)
+          highlight = false # Prevents double highlight creation.
         else
           drafts.add model, => this.revert()
 
@@ -280,7 +279,7 @@ AnnotationController = [
     , true
 
     # Start editing brand new annotations immediately
-    unless model.id? or this.isHighlight() then this.edit()
+    unless model.id? or (this.isHighlight() and highlight) then this.edit()
 
     this
 ]
