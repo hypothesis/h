@@ -32,8 +32,11 @@ Prerequisites
 Installing h's system dependencies requires different approaches on different
 platforms. Pick a document below for your platform and follow the instructions.
 
--  :doc:`HACKING.Debian`
--  :doc:`HACKING.OSX`
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   HACKING.*
 
 Next, install and configure ElasticSearch. Follow the :doc:`instructions on
 setting up ElasticSearch <elasticsearch>`. Make sure ElasticSearch is running.
