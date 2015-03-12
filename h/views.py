@@ -2,17 +2,22 @@
 from __future__ import unicode_literals
 import logging
 import re
+import urlparse
+
+import requests
 
 from pyramid import httpexceptions
 from pyramid.events import ContextFound
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
+import pyramid.i18n
 
 from . import session
 from .models import Annotation
 from .resources import Application, Stream
 
 log = logging.getLogger(__name__)
+_ = pyramid.i18n.TranslationStringFactory(__package__)
 
 
 @view_config(context=Exception, renderer='h:templates/5xx.html')
@@ -113,6 +118,68 @@ def stream(context, request):
         return context
 
 
+@view_config(layout='app', route_name='atom_stream',
+             renderer='h:templates/stream.atom')
+def atom_stream(context, request):
+    api_url = request.registry.settings.get(
+        "h.api_url", request.resource_url(request.root, "api"))
+
+    # TODO: Handle requests failures.
+    response = requests.get(
+        api_url.rstrip("/") + "/search", params={"limit": 10})
+
+    annotations = response.json()["rows"]
+
+    entries = []
+    for annotation in annotations:
+        entry = {}
+        entry["id"] = request.resource_url(request.root, "a", annotation["id"])
+        entry["document_title"] = annotation["document"]["title"]
+        entry["updated"] = annotation["updated"]
+        entry["created"] = annotation["created"]
+        entry["text"] = annotation["text"]
+
+        match = re.match(r'^acct:([^@]+)@(.*)$', annotation["user"])
+        username, domain = match.groups()
+        entry["username"] = username
+
+        entry["domain"] = urlparse.urlparse(annotation["uri"]).netloc
+
+        def get_selection(annotation):
+            for target in annotation["target"]:
+                for selector in target["selector"]:
+                    if "exact" in selector:
+                        return selector["exact"]
+
+        entry["selection"] = get_selection(annotation)
+
+        entry["links"] = [
+            {"rel": "alternate", "type": "text/html", "href": entry["id"]},
+            {"rel": "alternate", "type": "application/json",
+             "href": request.resource_url(
+                 request.root, "api", "annotation", annotation["id"])},
+        ]
+
+        entries.append(entry)
+
+    return {
+        "feed": {
+            "id": request.route_url("stream"),
+            "title": request.registry.settings.get(
+                "h.feed.title", _("Hypothes.is Stream")),
+            "subtitle": request.registry.settings.get(
+                "h.feed.subtitle", _("The Web. Annotated")),
+            "links": [
+                {"rel": "self", "type": "application/atom",
+                 "href": request.route_url("atom_stream")},
+                {"rel": "alternate", "type": "text/html",
+                 "href": request.route_url("stream")},
+            ],
+            "entries": entries,
+        },
+    }
+
+
 @forbidden_view_config(renderer='h:templates/notfound.html')
 @notfound_view_config(renderer='h:templates/notfound.html')
 def notfound(context, request):
@@ -132,5 +199,6 @@ def includeme(config):
     config.add_route('help', '/docs/help')
     config.add_route('onboarding', '/welcome')
     config.add_route('stream', '/stream')
+    config.add_route('atom_stream', '/stream.atom')
 
     config.scan(__name__)
