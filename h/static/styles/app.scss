@@ -161,6 +161,11 @@ ol {
 
   img {
     float: left;
+    opacity: .7;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
