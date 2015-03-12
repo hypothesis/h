@@ -111,35 +111,35 @@ class FilterToElasticFilter(object):
 
     @staticmethod
     def equals(field, value):
-        if type(value) is list:
+        if isinstance(value, list):
             return {"terms": {field: value}}
         else:
             return {"term": {field: value}}
 
     @staticmethod
     def one_of(field, value):
-        if type(value) is list:
+        if isinstance(value, list):
             return {"terms": {field: value}}
         else:
             return {"term": {field: value}}
 
     @staticmethod
     def first_of(field, value):
-        if type(value) is list:
+        if isinstance(value, list):
             return {"terms": {field: value}}
         else:
             return {"term": {field: value}}
 
     @staticmethod
     def match_of(field, value):
-        if type(value) is list:
+        if isinstance(value, list):
             return {"terms": {field: value}}
         else:
             return {"term": {field: value}}
 
     @staticmethod
     def matches(field, value):
-        if type(value) is list:
+        if isinstance(value, list):
             return {"terms": {field: value}}
         else:
             return {"term": {field: value}}
@@ -217,7 +217,7 @@ class FilterToElasticFilter(object):
             else:
                 query_type = 'match'
 
-            if type(clause['value']) is list:
+            if isinstance(clause['value'], list):
                 value = [x.lower() for x in clause['value']]
             else:
                 value = clause['value'].lower()
@@ -338,7 +338,7 @@ class FilterHandler(object):
             cval = clause['value']
             fval = field_value
 
-            if type(cval) is list:
+            if isinstance(cval, list):
                 tval = []
                 for cv in cval:
                     tval.append(uni_fold(cv))
@@ -346,7 +346,7 @@ class FilterHandler(object):
             else:
                 cval = uni_fold(cval)
 
-            if type(fval) is list:
+            if isinstance(fval, list):
                 tval = []
                 for fv in fval:
                     tval.append(uni_fold(fv))
@@ -364,13 +364,13 @@ class FilterHandler(object):
 
             # But!
             # Reversed operator order for contains (b in a)
-            if type(cval) is list or type(fval) is list:
+            if isinstance(cval, list) or isinstance(fval, list):
                 if clause['operator'] in ['one_of', 'matches']:
                     reversed_order = True
                     # But not in every case. (i.e. tags matches 'b')
                     # Here field_value is a list, because an annotation can
                     # have many tags.
-                    if type(field_value) is list:
+                    if isinstance(field_value, list):
                         reversed_order = False
 
             if reversed_order:
