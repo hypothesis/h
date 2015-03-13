@@ -36,7 +36,7 @@ module.exports = class Annotator.Guest extends Annotator
   visibleHighlights: false
 
   html: jQuery.extend {}, Annotator::html,
-    adder: '<div class="adder-group"><span class="annotator-adder"><button class="h-icon-plus"></button></span><span class="annotator-highlighter"><button class="h-icon-highlighter"></button></span>'
+    adder: '<div class="adder-group"><span class="annotator-adder"><button class="h-icon-mode-comment"></button></span><span class="annotator-highlighter"><button class="h-icon-border-color"></button></span>'
 
   constructor: (element, options, config = {}) ->
     options.noScan = true

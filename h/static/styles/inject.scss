@@ -17,7 +17,7 @@ $base-font-size: 14px;
   margin-top: -50px;
   padding: 0;
   position: absolute;
-  border: 4px solid $border;
+  border: 3px solid $border;
   border-radius: 4px;
   z-index: 999;
 
@@ -113,8 +113,17 @@ $base-font-size: 14px;
   z-index: 2147483638;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
+  .h-icon-arrow-back {
+    transform: rotate(180deg);
+    font-weight: 600;
+  }
+
   &.annotator-collapsed {
     margin-left: 0;
+
+    .h-icon-arrow-back {
+      transform: rotate(0deg);
+    }
   }
 
   * {
@@ -233,7 +242,7 @@ $base-font-size: 14px;
 
   a:active {
     @include single-transition(background-color, .25s);
-    background-color: $gray-lighter;
+    background-color: $gray-light;
   }
 
   a:focus, a:hover {

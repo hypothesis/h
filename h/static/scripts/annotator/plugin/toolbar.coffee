@@ -29,7 +29,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
 
     items = [
       "title": "Toggle Sidebar"
-      "class": "annotator-toolbar-toggle h-icon-forum"
+      "class": "annotator-toolbar-toggle h-icon-arrow-back"
       "on":
         "click": (event) =>
           event.preventDefault()
@@ -59,7 +59,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     #       @annotator.onHighlighterClick()
     # ,
       "title": "New Comment"
-      "class": "h-icon-add"
+      "class": "h-icon-mode-comment"
       "on":
         "click": (event) =>
           event.preventDefault()
