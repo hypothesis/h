@@ -118,8 +118,17 @@ class TextHighlight
 
   # Scroll the highlight into view
   scrollToView: ->
-    $(@_highlights).scrollintoview()
-    null
+    $(@_highlights).scrollintoview
+      complete: (xDirStr, yDirStr) ->
+        return if yDirStr is "none"
+        scrollable = if this.parentNode is this.ownerDocument
+          $(this.ownerDocument.body)
+        else
+          $(this)
+        top = scrollable.scrollTop()
+        pad = scrollable.innerHeight() * .33
+        correction = pad * (if yDirStr is "up" then -1 else +1)
+        scrollable.stop().animate {scrollTop: top + correction}, 300
 
 class Annotator.Plugin.TextHighlights extends Annotator.Plugin
 
