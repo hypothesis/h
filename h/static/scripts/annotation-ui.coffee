@@ -80,12 +80,3 @@ module.exports = ->
     if selection
       delete selection[annotation.id]
       @selectedAnnotationMap = value(selection)
-
-  ###*
-  # @ngdoc method
-  # @name annotationUI.clearSelectedAnnotations()
-  # @returns nothing
-  # @description removes all annotations from the current selection.
-  ###
-  clearSelectedAnnotations: ->
-    @selectedAnnotationMap = null

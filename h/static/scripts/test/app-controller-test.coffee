@@ -48,6 +48,8 @@ describe 'AppController', ->
       user: undefined
     }
 
+    fakeCrossFrame = {providers: []}
+
     fakeDrafts = {
       remove: sandbox.spy()
       all: sandbox.stub().returns([])
@@ -96,6 +98,7 @@ describe 'AppController', ->
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'auth', fakeAuth
+    $provide.value 'crossframe', fakeCrossFrame
     $provide.value 'drafts', fakeDrafts
     $provide.value 'identity', fakeIdentity
     $provide.value '$location', fakeLocation

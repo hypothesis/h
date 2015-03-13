@@ -309,6 +309,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
           @_jumpMinMax @buckets[bucket], "down"
         else
           annotations = @buckets[bucket].slice()
+          annotator.triggerShowFrame() # Open sidebar
           annotator.selectAnnotations annotations,
             (event.ctrlKey or event.metaKey),
 

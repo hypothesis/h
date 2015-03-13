@@ -5,14 +5,14 @@ module.exports = class AppController
   this.$inject = [
     '$controller', '$document', '$location', '$rootScope', '$route', '$scope',
     '$window',
-    'auth', 'drafts', 'identity',
+    'auth', 'crossframe', 'drafts', 'identity',
     'permissions', 'streamer', 'annotationUI',
     'annotationMapper', 'threading'
   ]
   constructor: (
      $controller,   $document,   $location,   $rootScope,   $route,   $scope,
      $window,
-     auth,   drafts,   identity,
+     auth,   crossframe,   drafts,   identity,
      permissions,   streamer,   annotationUI,
      annotationMapper, threading
   ) ->
@@ -101,7 +101,7 @@ module.exports = class AppController
 
     $scope.clearSelection = ->
       $scope.search.query = ''
-      annotationUI.clearSelectedAnnotations()
+      crossframe.notify method: 'selectAnnotations', params: []
 
     $scope.dialog = visible: false
 
@@ -114,7 +114,7 @@ module.exports = class AppController
       update: (query) ->
         unless angular.equals $location.search()['q'], query
           $location.search('q', query or null)
-          annotationUI.clearSelectedAnnotations()
+          crossframe.notify method: 'selectAnnotations', params: []
 
     $scope.sort = name: 'Location'
     $scope.threading = threading

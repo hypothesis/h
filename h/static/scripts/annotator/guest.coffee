@@ -154,6 +154,9 @@ module.exports = class Guest extends Annotator
     metadata.link?.forEach (link) => link.href = @_removeHash link.href
     metadata
 
+  _getAnnotationsForTags: (tags) ->
+    (a.annotation for a in @anchoring.getAnchors() when a.annotation.$$tag in tags)
+
   _connectAnnotationUISync: (crossframe) ->
     crossframe.onConnect(=> this.publish('panelReady'))
     crossframe.on('onEditorHide', this.onEditorHide)
@@ -164,6 +167,8 @@ module.exports = class Guest extends Annotator
           hl.setFocused true
         else
           hl.setFocused false
+    crossframe.on 'selectAnnotations', (ctx, tags=[]) =>
+      this.selectAnnotations this._getAnnotationsForTags tags
     crossframe.on 'scrollToAnnotation', (ctx, tag) =>
       for a in @anchoring.getAnchors()
         if a.annotation.$$tag is tag
@@ -315,33 +320,59 @@ module.exports = class Guest extends Annotator
   # toggle: should this toggle membership in an existing selection?
   selectAnnotations: (annotations, toggle) =>
     if toggle
-      # Tell sidebar to add these annotations to the sidebar if not already
-      # selected, otherwise remove them.
+      # Tell sidebar to XOR these annotations to the sidebar selection
       this.toggleAnnotationSelection annotations
+
+      # Toggle the selection state of the highlights
+      for hl in @anchoring.getHighlights()
+        if hl.annotation in annotations
+          hl.toggleSelected()
+
     else
-      # Tell sidebar to show the viewer for these annotations
-      this.triggerShowFrame()
+      # Tell sidebar to set the sidebar selection to this set of annotations
       this.showAnnotations annotations
+
+      # Switch the highlights into selected mode
+      for hl in @anchoring.getHighlights()
+        if hl.annotation in annotations
+          hl.setSelected true
+        else
+          hl.setSelected false
+
+  # Collect the visible annotations impacted by an event
+  _getAnnotationsForEvent: (event) ->
+    annotations = []
+    event.data.getHighlights(event)             # get all impacted highlights
+      .filter((hl) => @visibleHighlights or hl.isSelected()) # that are visible
+      .map((hl) -> hl.annotation)               # get the annotations
+      .forEach (a) -> unless a in annotations   # do some deduplication
+        annotations.push a                      # collect the results
+
+    annotations
 
   # When Mousing over a highlight, tell the sidebar to focus the relevant annotations
   onAnchorMouseover: (event) ->
-    if @visibleHighlights
+    annotations = @_getAnnotationsForEvent event
+    if annotations.length
       event.stopPropagation()
-      annotations = event.data.getAnnotations(event)
       this.focusAnnotations annotations
 
   # Tell the sidebar to stop highlighting the relevant annotations
   onAnchorMouseout: (event) ->
-    if @visibleHighlights
+    annotations = @_getAnnotationsForEvent event
+    if annotations.length
       event.stopPropagation()
       this.focusAnnotations []
 
-  # When clicking on a highlight, tell the sidebar to bring up the viewer for the relevant annotations
+  # When clicking on a highlight, tell the sidebar to
+  # bring up the viewer for the relevant annotations
   onAnchorClick: (event) =>
-    if @visibleHighlights
+    annotations = @_getAnnotationsForEvent event
+    if annotations.length
       event.stopPropagation()
-      this.selectAnnotations (event.data.getAnnotations event),
-        (event.metaKey or event.ctrlKey)
+      this.triggerShowFrame()   # Tell sidebar to open
+      # Tell sidebar to select these annotations / toggle their selection
+      this.selectAnnotations annotations, (event.metaKey or event.ctrlKey)
 
   # Pass true to show the highlights in the frame or false to disable.
   setVisibleHighlights: (shouldShowHighlights) ->
