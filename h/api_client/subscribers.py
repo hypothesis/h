@@ -30,7 +30,7 @@ def _make_api_client(request):
 
 @pyramid.events.subscriber(pyramid.events.NewRequest)
 def add_api_client(event):
-    """Add an API client object to the registry.
+    """Add an API client object to the request.
 
     This avoids each view that needs it having to initialize an API client
     object itself.
