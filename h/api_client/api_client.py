@@ -7,7 +7,7 @@ import pyramid.traversal
 class HypothesisAPIClient(object):
     """A client for the Hypothesis API.
 
-    Provides simple methods for calling the Hypothes API over HTTP from Python.
+    Provides simple methods for calling the API over HTTP.
 
     Note that this class is deliberately decoupled from the Hypothesis Pyramid
     app and from Pyramid.
