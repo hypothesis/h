@@ -42,7 +42,6 @@ describe 'AnnotationUISync', ->
       focusAnnotations: sandbox.stub()
       selectAnnotations: sandbox.stub()
       xorSelectedAnnotations: sandbox.stub()
-      tool: 'comment'
       visibleHighlights: false
 
     createAnnotationUISync = ->
@@ -53,16 +52,11 @@ describe 'AnnotationUISync', ->
 
   describe 'on bridge connection', ->
     describe 'when the source is not the parent window', ->
-      it 'broadcasts the tool/visibility settings to the channel', ->
+      it 'broadcasts the visibility settings to the channel', ->
         channel = createChannel()
         fakeBridge.onConnect.callsArgWith(0, channel, {})
 
         createAnnotationUISync()
-
-        assert.calledWith(channel.notify, {
-          method: 'setTool'
-          params: 'comment'
-        })
 
         assert.calledWith(channel.notify, {
           method: 'setVisibleHighlights'
@@ -183,34 +177,6 @@ describe 'AnnotationUISync', ->
       publish({
         method: 'toggleAnnotationSelection',
         params: ['tag1', 'tag2', 'tag3']
-      })
-      assert.called($digest)
-
-  describe 'on "setTool" event', ->
-    it 'updates the annotationUI with the new tool', ->
-      createAnnotationUISync()
-      publish({
-        method: 'setTool',
-        params: 'highlighter'
-      })
-      assert.equal(fakeAnnotationUI.tool, 'highlighter')
-
-    it 'notifies the other frames of the change', ->
-      createAnnotationUISync()
-      publish({
-        method: 'setTool',
-        params: 'highlighter'
-      })
-      assert.calledWith(fakeBridge.notify, {
-        method: 'setTool'
-        params: 'highlighter'
-      })
-
-    it 'triggers a digest of the application state', ->
-      createAnnotationUISync()
-      publish({
-        method: 'setTool',
-        params: 'highlighter'
       })
       assert.called($digest)
 
