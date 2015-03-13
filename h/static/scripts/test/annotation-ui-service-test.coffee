@@ -17,25 +17,25 @@ describe 'AnnotationUI', ->
 
   describe '.focusAnnotations()', ->
     it 'adds the passed annotations to the focusedAnnotationMap', ->
-      annotationUI.focusAnnotations([{id: 1}, {id: 2}, {id: 3}])
+      annotationUI.focusAnnotations([{$$tag: 1}, {$$tag: 2}, {$$tag: 3}])
       assert.deepEqual(annotationUI.focusedAnnotationMap, {
         1: true, 2: true, 3: true
       })
 
     it 'replaces any annotations originally in the map', ->
       annotationUI.focusedAnnotationMap = {1: true}
-      annotationUI.focusAnnotations([{id: 2}, {id: 3}])
+      annotationUI.focusAnnotations([{$$tag: 2}, {$$tag: 3}])
       assert.deepEqual(annotationUI.focusedAnnotationMap, {
         2: true, 3: true
       })
 
     it 'does not modify the original map object', ->
       orig = annotationUI.focusedAnnotationMap = {1: true}
-      annotationUI.focusAnnotations([{id: 2}, {id: 3}])
+      annotationUI.focusAnnotations([{$$tag: 2}, {$$tag: 3}])
       assert.notEqual(annotationUI.focusedAnnotationMap, orig)
 
     it 'nulls the map if no annotations are focused', ->
-      orig = annotationUI.focusedAnnotationMap = {1: true}
+      orig = annotationUI.focusedAnnotationMap = {$$tag: true}
       annotationUI.focusAnnotations([])
       assert.isNull(annotationUI.focusedAnnotationMap)
 

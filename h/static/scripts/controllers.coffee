@@ -251,7 +251,7 @@ class ViewerController
         true
 
     $scope.hasFocus = (annotation) ->
-      annotation?.$$tag in ($scope.focusedAnnotations ? [])
+      !!($scope.focusedAnnotations ? {})[annotation?.$$tag]
 
 angular.module('h')
 .controller('AppController', AppController)
