@@ -123,7 +123,7 @@ def stream(context, request):
 @view_config(layout='app', route_name='atom_stream',
              renderer='h:templates/stream.atom')
 def atom_stream(context, request):
-    annotations = request.registry.api_client.get(
+    annotations = request.api_client.get(
         "/search", params={"limit": 10})["rows"]
 
     entries = []

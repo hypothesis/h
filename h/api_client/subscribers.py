@@ -19,7 +19,16 @@ def _get_api_url(request):
         "h.api_url", request.resource_url(request.root, "api")).rstrip("/")
 
 
-@pyramid.events.subscriber(pyramid.events.ContextFound)
+def _make_api_client(request):
+    """Return a HypothesisAPIClient instance for this app.
+
+    Configured with this app's configured API base URL.
+
+    """
+    return api_client.HypothesisAPIClient(_get_api_url(request))
+
+
+@pyramid.events.subscriber(pyramid.events.NewRequest)
 def add_api_client(event):
     """Add an API client object to the registry.
 
@@ -27,9 +36,9 @@ def add_api_client(event):
     object itself.
 
     """
-    if not hasattr(event.request.registry, "api_client"):
-        event.request.registry.api_client = api_client.HypothesisAPIClient(
-            _get_api_url(event.request))
+    if not hasattr(event.request, "api_client"):
+        event.request.set_property(
+            _make_api_client, name="api_client", reify=True)
 
 
 def includeme(config):
