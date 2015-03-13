@@ -4,8 +4,6 @@ import logging
 import re
 import urlparse
 
-import requests
-
 from pyramid import httpexceptions
 from pyramid.events import ContextFound
 from pyramid.view import forbidden_view_config, notfound_view_config
@@ -15,8 +13,6 @@ import pyramid.i18n
 from . import session
 from .models import Annotation
 from .resources import Application, Stream
-import h.api_client as api
-import h.config as config
 
 log = logging.getLogger(__name__)
 _ = pyramid.i18n.TranslationStringFactory(__package__)
