@@ -122,7 +122,13 @@ class TextHighlight
       complete: (xDirStr, yDirStr) ->
         return if yDirStr is "none"
         scrollable = if this.parentNode is this.ownerDocument
-          $(this.ownerDocument.body)
+          # Does the scrollTop method work on the body?
+          if this.ownerDocument.body.scrollTop
+            # We are all good    
+            $(this.ownerDocument.body)
+          else # With FF, it doesn't.
+            # For FF, use the html node instead.
+            $(this.ownerDocument.body.parentNode)
         else
           $(this)
         top = scrollable.scrollTop()
