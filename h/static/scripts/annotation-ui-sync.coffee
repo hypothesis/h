@@ -27,6 +27,9 @@ class AnnotationUISync
     hide = notifyHost.bind(null, method: 'hideFrame')
     show = notifyHost.bind(null, method: 'showFrame')
 
+    # Export show and hide functions to AnnotationUI
+    annotationUI.hideFrame = hide
+    annotationUI.showFrame = show
 
     channelListeners =
       back: hide
