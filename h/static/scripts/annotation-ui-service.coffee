@@ -13,7 +13,7 @@ createAnnotationUI = ->
 
     visibleHighlights: false
 
-    # Contains a map of annotation id:true pairs.
+    # Contains a map of annotation tag:true pairs.
     focusedAnnotationMap: null
 
     # Contains a map of annotation id:true pairs.
@@ -28,7 +28,7 @@ createAnnotationUI = ->
     ###
     focusAnnotations: (annotations) ->
       selection = {}
-      selection[id] = true for {id} in annotations
+      selection[$$tag] = true for {$$tag} in annotations
       @focusedAnnotationMap = value(selection)
 
     ###*
