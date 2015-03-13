@@ -258,11 +258,6 @@ module.exports = class Annotator.Guest extends Annotator
       method: "updateAnnotations"
       params: (a.$$tag for a in annotations)
 
-  showEditor: (annotation) =>
-    @crossframe?.notify
-      method: "showEditor"
-      params: annotation.$$tag
-
   focusAnnotations: (annotations) =>
     @crossframe?.notify
       method: "focusAnnotations"
@@ -327,6 +322,7 @@ module.exports = class Annotator.Guest extends Annotator
       this.toggleAnnotationSelection annotations
     else
       # Tell sidebar to show the viewer for these annotations
+      this.triggerShowFrame()
       this.showAnnotations annotations
 
   # When Mousing over a highlight, tell the sidebar to focus the relevant annotations
@@ -370,9 +366,9 @@ module.exports = class Annotator.Guest extends Annotator
   # Might not be needed anymore. Perhaps should just use on adderclick or perhaps new note?
   addComment: ->
     @adder.hide()
-    annotation = this.setupAnnotation(this.createAnnotation())
+    this.setupAnnotation(this.createAnnotation())
     Annotator.Util.getGlobal().getSelection().removeAllRanges()
-    this.showEditor(annotation)
+    this.triggerShowFrame()
 
   # Open the sidebar
   triggerShowFrame: ->
@@ -400,8 +396,8 @@ module.exports = class Annotator.Guest extends Annotator
     switch event.target.dataset.action
       when 'highlight'
         this.setVisibleHighlights true
-        annotation = this.setupAnnotation(this.createHighlight())
+        this.setupAnnotation(this.createHighlight())
       when 'comment'
-        annotation = this.setupAnnotation(this.createAnnotation())
-        this.showEditor(annotation)
+        this.setupAnnotation(this.createAnnotation())
+        this.triggerShowFrame()
     Annotator.Util.getGlobal().getSelection().removeAllRanges()

@@ -82,6 +82,7 @@ configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
 
 setupCrossFrame = ['crossframe', (crossframe) -> crossframe.connect()]
 
+setupHost = ['host', (host) -> ]
 
 setupStreamer = [
   '$http', '$window', 'streamer'
@@ -101,6 +102,7 @@ module = angular.module('h', imports)
 unless mocha? # Crude method of detecting test environment.
   module.run(setupCrossFrame)
   module.run(setupStreamer)
+  module.run(setupHost)
 
 require('./vendor/annotator.auth.js')
 require('./annotator/monkey')
@@ -125,6 +127,7 @@ require('./annotation-mapper-service')
 require('./annotation-ui-service')
 require('./auth-service')
 require('./cross-frame-service')
+require('./host-service')
 require('./flash-service')
 require('./permissions-service')
 require('./local-storage-service')

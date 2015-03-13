@@ -28,11 +28,7 @@ describe 'AnnotationSync', ->
       call: sandbox.stub()
       notify: sandbox.stub()
       onConnect: sandbox.stub()
-      links: [
-        {window: PARENT_WINDOW,    channel: createChannel()}
-        {window: 'ANOTHER_WINDOW', channel: createChannel()}
-        {window: 'THIRD_WINDOW',   channel: createChannel()}
-      ]
+      links: []
 
     # TODO: Fix this hack to remove pre-existing bound listeners.
     $rootScope.$$listeners = []

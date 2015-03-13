@@ -17,23 +17,8 @@ class AnnotationUISync
     getAnnotationsByTags = (tags) ->
       tags.map(annotationSync.getAnnotationForTag, annotationSync)
 
-    # Sends a message to the host frame only.
-    notifyHost = (message) ->
-      for {channel, window} in bridge.links when window is $window.parent
-        channel.notify(message)
-        break
-
-    # Send messages to host to hide/show sidebar iframe.
-    hide = notifyHost.bind(null, method: 'hideFrame')
-    show = notifyHost.bind(null, method: 'showFrame')
-
-
     channelListeners =
-      back: hide
-      open: show
-      showEditor: show
       showAnnotations: (ctx, tags=[]) ->
-        show()
         annotations = getAnnotationsByTags(tags)
         annotationUI.selectAnnotations(annotations)
       focusAnnotations: (ctx, tags=[]) ->
