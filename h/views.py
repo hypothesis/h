@@ -15,7 +15,8 @@ import pyramid.i18n
 from . import session
 from .models import Annotation
 from .resources import Application, Stream
-import h.util as util
+import h.api_client as api
+import h.config as config
 
 log = logging.getLogger(__name__)
 _ = pyramid.i18n.TranslationStringFactory(__package__)
@@ -122,12 +123,8 @@ def stream(context, request):
 @view_config(layout='app', route_name='atom_stream',
              renderer='h:templates/stream.atom')
 def atom_stream(context, request):
-    api_url = util.api_url(request)
-
-    # TODO: Handle requests failures.
-    response = requests.get(api_url + "/search", params={"limit": 10})
-
-    annotations = response.json()["rows"]
+    annotations = api.get(
+        config.api_url(request), "/search", params={"limit": 10})["rows"]
 
     entries = []
     for annotation in annotations:

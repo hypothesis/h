@@ -171,3 +171,18 @@ def _setup_webassets(settings):
 def _setup_websocket(settings):
     if 'ALLOWED_ORIGINS' in os.environ:
         settings['origins'] = os.environ['ALLOWED_ORIGINS']
+
+
+def api_url(request):
+    """Return this app's configured Hypothesis API URL.
+
+    Returns the value of the h.api_url setting from the config file,
+    or if that doesn't exist the "/api" route from the WSGI app (which assumes
+    that we're running the app with the "api" feature enabled).
+
+    Always returns the URL _without_ a trailing /, despite what the user might
+    have entered in the config file.
+
+    """
+    return request.registry.settings.get(
+        "h.api_url", request.resource_url(request.root, "api")).rstrip("/")
