@@ -5,12 +5,12 @@ class CrossFrameService
   this.inject = [
     '$rootScope', '$document', '$window', 'store', 'annotationUI'
     'Discovery', 'bridge',
-    'AnnotationSync', 'AnnotationUISync'
+    'AnnotationSync', 'AnnotationUISync', 'host'
   ]
   constructor: (
     $rootScope, $document, $window, store, annotationUI
     Discovery, bridge,
-    AnnotationSync, AnnotationUISync
+    AnnotationSync, AnnotationUISync, host
   ) ->
     @providers = []
 
@@ -42,7 +42,7 @@ class CrossFrameService
       new AnnotationSync(bridge, options)
 
     createAnnotationUISync = (bridge, annotationSync) ->
-      new AnnotationUISync($rootScope, $window, bridge, annotationSync, annotationUI)
+      new AnnotationUISync($rootScope, $window, bridge, annotationSync, annotationUI, host)
 
     addProvider = (channel) =>
       provider = {channel: channel, entities: []}
@@ -58,6 +58,7 @@ class CrossFrameService
       discovery = createDiscovery()
 
       bridge.onConnect(addProvider)
+      host.setBridge bridge
       annotationSync = createAnnotationSync(bridge)
       annotationUISync = createAnnotationUISync(bridge, annotationSync)
 

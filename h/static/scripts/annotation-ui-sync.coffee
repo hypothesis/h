@@ -7,36 +7,23 @@ class AnnotationUISync
   # @param {Bridge} bridge
   # @param {AnnotationSync} annotationSync
   # @param {AnnotationUI} annotationUI An instance of the AnnotatonUI service
+  # @param {Host} host An instance of the Host service
   # @description
   # Listens for incoming events over the bridge concerning the annotation
   # interface and updates the applications internal state. It also ensures
   # that the messages are broadcast out to other frames.
   ###
-  constructor: ($rootScope, $window, bridge, annotationSync, annotationUI) ->
+  constructor: ($rootScope, $window, bridge, annotationSync, annotationUI, host) ->
     # Retrieves annotations from the annotationSync cache.
     getAnnotationsByTags = (tags) ->
       tags.map(annotationSync.getAnnotationForTag, annotationSync)
 
-    # Sends a message to the host frame only.
-    notifyHost = (message) ->
-      for {channel, window} in bridge.links when window is $window.parent
-        channel.notify(message)
-        break
-
-    # Send messages to host to hide/show sidebar iframe.
-    hide = notifyHost.bind(null, method: 'hideFrame')
-    show = notifyHost.bind(null, method: 'showFrame')
-
-    # Export show and hide functions to AnnotationUI
-    annotationUI.hideFrame = hide
-    annotationUI.showFrame = show
-
     channelListeners =
-      back: hide
-      open: show
-      showEditor: show
+      back: -> host.hideSidebar()
+      open: -> host.showSidebar()
+      showEditor: -> host.showSidebar()
       showAnnotations: (ctx, tags=[]) ->
-        show()
+        host.showSidebar()
         annotations = getAnnotationsByTags(tags)
         annotationUI.selectAnnotations(annotations)
       focusAnnotations: (ctx, tags=[]) ->
