@@ -12,8 +12,6 @@ class HostService
   this.inject = [ '$window', 'bridge' ]
   constructor:  (  $window,   bridge  ) ->
 
-    console.log "Configuring Host service", bridge
-
     # Sends a message to the host frame
     @_notifyHost = (message) ->
       for {channel, window} in bridge.links when window is $window.parent
