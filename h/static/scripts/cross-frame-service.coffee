@@ -4,12 +4,12 @@ class CrossFrameService
 
   this.inject = [
     '$rootScope', '$document', '$window', 'store', 'annotationUI'
-    'Discovery', 'Bridge',
+    'Discovery', 'bridge',
     'AnnotationSync', 'AnnotationUISync'
   ]
   constructor: (
     $rootScope, $document, $window, store, annotationUI
-    Discovery, Bridge,
+    Discovery, bridge,
     AnnotationSync, AnnotationUISync
   ) ->
     @providers = []
@@ -18,13 +18,6 @@ class CrossFrameService
       options =
         server: true
       new Discovery($window, options)
-
-    # Set up the bridge plugin, which bridges the main annotation methods
-    # between the host page and the panel widget.
-    createBridge = ->
-      options =
-        scope: 'annotator:bridge'
-      new Bridge(options)
 
     createAnnotationSync = (bridge) ->
       whitelist = ['target', 'document', 'uri']
@@ -63,7 +56,6 @@ class CrossFrameService
 
     this.connect = ->
       discovery = createDiscovery()
-      bridge = createBridge()
 
       bridge.onConnect(addProvider)
       annotationSync = createAnnotationSync(bridge)

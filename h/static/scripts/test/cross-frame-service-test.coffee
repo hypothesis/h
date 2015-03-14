@@ -42,8 +42,7 @@ describe 'CrossFrameService', ->
     $provide.value('annotationUI', fakeAnnotationUI)
     $provide.value('Discovery',
       sandbox.stub().returns(fakeDiscovery))
-    $provide.value('Bridge',
-      sandbox.stub().returns(fakeBridge))
+    $provide.value('bridge', fakeBridge)
     $provide.value('AnnotationSync',
       sandbox.stub().returns(fakeAnnotationSync))
     $provide.value('AnnotationUISync',
