@@ -5,7 +5,7 @@
 # @description
 # The `host` service relay the instructions the sidebar needs to send
 # to the host doument. (As opposed to all guests)
-# It uses the cross-frame service to talk to the host.
+# It uses the bridge service to talk to the host.
 ###
 class HostService
 
