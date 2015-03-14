@@ -5,12 +5,12 @@ class CrossFrameService
   this.inject = [
     '$rootScope', '$document', '$window', 'store', 'annotationUI'
     'Discovery', 'bridge',
-    'AnnotationSync', 'AnnotationUISync',
+    'AnnotationSync', 'AnnotationUISync'
   ]
   constructor: (
     $rootScope, $document, $window, store, annotationUI
     Discovery, bridge,
-    AnnotationSync, AnnotationUISync,
+    AnnotationSync, AnnotationUISync
   ) ->
     @providers = []
 
