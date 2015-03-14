@@ -3,14 +3,14 @@
 # @name host
 #
 # @description
-# The `host` service relay the instructions the sidebar needs to send
-# to the host doument. (As opposed to all guests)
+# The `host` service relays the instructions the sidebar needs to send
+# to the host document. (As opposed to all guests)
 # It uses the bridge service to talk to the host.
 ###
 class HostService
 
-  this.inject = [ '$window', 'bridge' ]
-  constructor:  (  $window,   bridge  ) ->
+  this.inject = ['$window', 'bridge']
+  constructor:  ( $window,   bridge ) ->
 
     # Sends a message to the host frame
     @_notifyHost = (message) ->
