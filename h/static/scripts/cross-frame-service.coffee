@@ -19,7 +19,7 @@ class CrossFrameService
         server: true
       new Discovery($window, options)
 
-    createAnnotationSync = (bridge) ->
+    createAnnotationSync = ->
       whitelist = ['target', 'document', 'uri']
       options =
         formatter: (annotation) ->
@@ -41,7 +41,7 @@ class CrossFrameService
 
       new AnnotationSync(bridge, options)
 
-    createAnnotationUISync = (bridge, annotationSync) ->
+    createAnnotationUISync = (annotationSync) ->
       new AnnotationUISync($rootScope, $window, bridge, annotationSync, annotationUI)
 
     addProvider = (channel) =>
@@ -58,8 +58,8 @@ class CrossFrameService
       discovery = createDiscovery()
 
       bridge.onConnect(addProvider)
-      annotationSync = createAnnotationSync(bridge)
-      annotationUISync = createAnnotationUISync(bridge, annotationSync)
+      annotationSync = createAnnotationSync()
+      annotationUISync = createAnnotationUISync(annotationSync)
 
       onDiscoveryCallback = (source, origin, token) ->
         bridge.createChannel(source, origin, token)
