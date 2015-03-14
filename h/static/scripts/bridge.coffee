@@ -1,36 +1,21 @@
 $ = require('jquery')
 Channel = require('jschannel')
 
+# The Bridge service sets up a channel between frames
+# and provides an events API on top of it.
 class Bridge
-  options:
-    # Scope identifier to distinguish this channel from any others
-    scope: 'bridge'
-
-    # Callback to invoke when a connection is established. The function is
-    # passed:
-    # - the newly created channel object
-    # - the window just connected to
-    onConnect: null
-
-    # Any callbacks for messages on the channel. Max one callback per method.
-    channelListeners: null
-
   # Connected links to other frames
   links: null
   channelListeners: null
   onConnectListeners: null
 
-  constructor: (options) ->
-    @options = $.extend(true, {}, @options, options)
+  constructor: ->
     @links = []
-    @channelListeners = @options.channelListeners || {}
+    @channelListeners = {}
     @onConnectListeners = []
-    if typeof @options.onConnect == 'function'
-      @onConnectListeners.push(@options.onConnect)
 
-  createChannel: (source, origin, token) ->
+  createChannel: (source, origin, scope) ->
     # Set up a channel
-    scope = @options.scope + ':' + token
     channelOptions =
       window: source
       origin: origin
@@ -119,6 +104,6 @@ class Bridge
     channel = Channel.build(options)
 
 if angular?
-  angular.module('h').value('Bridge', Bridge)
+  angular.module('h').service 'bridge', Bridge
 else
   Annotator.Plugin.CrossFrame.Bridge = Bridge

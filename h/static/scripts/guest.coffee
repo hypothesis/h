@@ -60,7 +60,6 @@ module.exports = class Annotator.Guest extends Annotator
     delete @options.app
 
     cfOptions =
-      scope: 'annotator:bridge'
       on: (event, handler) =>
         this.subscribe(event, handler)
       emit: (event, args...) =>

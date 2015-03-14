@@ -20,8 +20,7 @@ CrossFrame = class Annotator.Plugin.CrossFrame extends Annotator.Plugin
     opts = extract(options, 'server')
     discovery = new CrossFrame.Discovery(window, opts)
 
-    opts = extract(options, 'scope')
-    bridge = new CrossFrame.Bridge(opts)
+    bridge = new CrossFrame.Bridge()
 
     opts = extract(options, 'on', 'emit', 'formatter', 'parser')
     annotationSync = new CrossFrame.AnnotationSync(bridge, opts)

@@ -39,10 +39,6 @@ describe 'Annotator.Guest', ->
     sandbox.restore()
 
   describe 'setting up the bridge', ->
-    it 'sets the scope for the cross frame bridge', ->
-      guest = createGuest()
-      options = Annotator.Plugin.CrossFrame.lastCall.args[1]
-      assert.equal(options.scope, 'annotator:bridge')
 
     it 'provides an event bus for the annotation sync module', ->
       guest = createGuest()

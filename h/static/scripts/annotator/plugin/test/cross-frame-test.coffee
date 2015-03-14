@@ -51,10 +51,6 @@ describe 'Annotator.Plugin.CrossFrame', ->
       createCrossFrame()
       assert.calledWith(cf.CrossFrame.Discovery)
 
-    it 'passes the options along to the bridge', ->
-      createCrossFrame(scope: 'myscope')
-      assert.calledWith(cf.CrossFrame.Bridge, scope: 'myscope')
-
     it 'instantiates the AnnotationSync component', ->
       createCrossFrame()
       assert.called(cf.CrossFrame.AnnotationSync)
