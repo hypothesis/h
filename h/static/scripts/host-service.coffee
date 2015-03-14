@@ -11,22 +11,28 @@ class HostService
 
   this.inject = [ '$window' ]
   constructor: (   $window ) ->
-    console.log "HostService inited!"
 
     # Sends a message to the host frame
     @_notifyHost = (message) ->
-      for {channel, window} in @bridge.links when window is $window.parent
+      for {channel, window} in @_bridge.links when window is $window.parent
         channel.notify(message)
         break
 
-  setBridge: (@bridge) ->
-    console.log "Configured bridge", @bridge
+  setBridge: (bridge) ->
+    @_bridge = bridge
+    console.log "Configured bridge", @_bridge
 
+    channelListeners =
+      back: @hideSidebar
+      open: @showSidebar
+
+    for own channel, listener of channelListeners
+      @_bridge.on(channel, listener)
 
   # Tell the host to show the sidebar
-  showSidebar: -> @_notifyHost method: 'showFrame'
+  showSidebar: => @_notifyHost method: 'showFrame'
 
   # Tell the host to hide the sidebar
-  hideSidebar: -> @_notifyHost method: 'hideFrame'
+  hideSidebar: => @_notifyHost method: 'hideFrame'
 
 angular.module('h').service('host', HostService)

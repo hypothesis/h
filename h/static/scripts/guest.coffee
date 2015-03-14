@@ -257,11 +257,6 @@ module.exports = class Annotator.Guest extends Annotator
       method: "updateAnnotations"
       params: (a.$$tag for a in annotations)
 
-  showEditor: (annotation) =>
-    @crossframe?.notify
-      method: "showEditor"
-      params: annotation.$$tag
-
   focusAnnotations: (annotations) =>
     @crossframe?.notify
       method: "focusAnnotations"
@@ -333,6 +328,7 @@ module.exports = class Annotator.Guest extends Annotator
       this.toggleAnnotationSelection annotations
     else
       # Tell sidebar to show the viewer for these annotations
+      this.triggerShowFrame()
       this.showAnnotations annotations
 
   # When hovering on a highlight in highlighting mode,
@@ -382,7 +378,8 @@ module.exports = class Annotator.Guest extends Annotator
     @visibleHighlights = shouldShowHighlights
 
   addComment: ->
-    this.showEditor(this.createAnnotation())
+    this.createAnnotation()
+    this.triggerShowFrame()
 
   # Open the sidebar
   triggerShowFrame: ->
@@ -409,7 +406,7 @@ module.exports = class Annotator.Guest extends Annotator
     @adder.hide()
     annotation = this.setupAnnotation(this.createAnnotation())
     Annotator.Util.getGlobal().getSelection().removeAllRanges()
-    this.showEditor(annotation)
+    this.triggerShowFrame()
 
   onSetTool: (name) ->
     switch name

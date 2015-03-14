@@ -7,23 +7,18 @@ class AnnotationUISync
   # @param {Bridge} bridge
   # @param {AnnotationSync} annotationSync
   # @param {AnnotationUI} annotationUI An instance of the AnnotatonUI service
-  # @param {Host} host An instance of the Host service
   # @description
   # Listens for incoming events over the bridge concerning the annotation
   # interface and updates the applications internal state. It also ensures
   # that the messages are broadcast out to other frames.
   ###
-  constructor: ($rootScope, $window, bridge, annotationSync, annotationUI, host) ->
+  constructor: ($rootScope, $window, bridge, annotationSync, annotationUI) ->
     # Retrieves annotations from the annotationSync cache.
     getAnnotationsByTags = (tags) ->
       tags.map(annotationSync.getAnnotationForTag, annotationSync)
 
     channelListeners =
-      back: -> host.hideSidebar()
-      open: -> host.showSidebar()
-      showEditor: -> host.showSidebar()
       showAnnotations: (ctx, tags=[]) ->
-        host.showSidebar()
         annotations = getAnnotationsByTags(tags)
         annotationUI.selectAnnotations(annotations)
       focusAnnotations: (ctx, tags=[]) ->
