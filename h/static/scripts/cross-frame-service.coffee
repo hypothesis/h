@@ -58,7 +58,6 @@ class CrossFrameService
       discovery = createDiscovery()
 
       bridge.onConnect(addProvider)
-      host.setBridge bridge
       annotationSync = createAnnotationSync(bridge)
       annotationUISync = createAnnotationUISync(bridge, annotationSync)
 
