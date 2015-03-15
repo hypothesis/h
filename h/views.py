@@ -41,9 +41,14 @@ def annotation(context, request):
     alternate = request.resource_url(request.root, 'api', 'annotations',
                                      context['id'])
 
+    description = context.get('text')
+    if len(description) > 200:
+        description = description[:200] + '...'
+
     return {
         'meta_attrs': (
             {'property': 'og:title', 'content': title},
+            {'property': 'og:description', 'content': description},
             {'property': 'og:image', 'content': '/assets/images/logo.png'},
             {'property': 'og:site_name', 'content': 'Hypothes.is'},
             {'property': 'og:url', 'content': request.url},
