@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 import logging
 import re
-import urlparse
 
 from pyramid import httpexceptions
 from pyramid.events import ContextFound
