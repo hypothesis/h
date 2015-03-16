@@ -1,6 +1,7 @@
 import re
 import urlparse
 import cgi
+import datetime
 
 import pyramid.i18n
 
@@ -19,6 +20,31 @@ def _username_from_annotation(annotation):
     return username
 
 
+def _created_day_string_from_annotation(annotation):
+    """Return a simple created day string for an annotation.
+
+    Returns a day string like '2015-03-11' from a Hypothesis API "created"
+    datetime string like '2015-03-11T10:43:54.537626+00:00'.
+
+    """
+    return datetime.datetime.strptime(
+        annotation["created"][:10], "%Y-%m-%d").strftime("%Y-%m-%d")
+
+
+def _atom_id_for_annotation(annotation):
+    """Return an Atom entry ID for the given annotation.
+
+    Returns a tag URI for use as the ID for the Atom entry.
+
+    See: http://web.archive.org/web/20110514113830/http://diveintomark.org/archives/2004/05/28/howto-atom-id
+
+    """
+    return "tag:{domain},{day}:{id_}".format(
+        domain=urlparse.urlparse(annotation["html_url"]).netloc,
+        day=_created_day_string_from_annotation(annotation),
+        id_=annotation["id"])
+
+
 def _feed_entry_from_annotation(annotation):
     """Return an Atom feed entry for the given annotation.
 
@@ -32,12 +58,13 @@ def _feed_entry_from_annotation(annotation):
     :rtype: dict
 
     """
-    entry = {}
-    entry["id"] = None  # FIXME
-    entry["author"] = {"name": _username_from_annotation(annotation)}
-    entry["title"] = annotation["document"]["title"]
-    entry["updated"] = annotation["updated"]
-    entry["published"] = annotation["created"]
+    entry = {
+        "id": _atom_id_for_annotation(annotation),
+        "author": {"name": _username_from_annotation(annotation)},
+        "title": annotation["document"]["title"],
+        "updated": annotation["updated"],
+        "published": annotation["created"],
+    }
 
     def get_selection(annotation):
         for target in annotation["target"]:
