@@ -123,10 +123,10 @@ def atom_stream(context, request):
     try:
         annotations = request.api_client.get(
             "/search", params={"limit": 10})["rows"]
-    except api_client.APIError as err:
-        raise httpexceptions.HTTPGatewayTimeout
-    except api_client.Timeout:
-        raise httpexceptions.HTTPGatewayTimeout
+    except api_client.ConnectionError as err:
+        raise httpexceptions.HTTPServiceUnavailable(err)
+    except api_client.Timeout as err:
+        raise httpexceptions.HTTPGatewayTimeout(err)
 
     entries = []
     for annotation in annotations:

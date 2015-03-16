@@ -11,6 +11,13 @@ class APIError(Exception):
     pass
 
 
+class ConnectionError(APIError):
+
+    """Raised when a request to the API fails because of a network problem."""
+
+    pass
+
+
 class Timeout(APIError):
 
     """Raised when a request to the API times out."""
@@ -53,6 +60,6 @@ class HypothesisAPIClient(object):
         try:
             return requests.get(url, params=params, timeout=0.2).json()
         except requests.exceptions.ConnectionError as err:
-            raise APIError(err)
+            raise ConnectionError(err)
         except requests.exceptions.Timeout as err:
             raise Timeout(err)
