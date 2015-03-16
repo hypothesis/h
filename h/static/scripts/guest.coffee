@@ -35,7 +35,12 @@ module.exports = class Annotator.Guest extends Annotator
   visibleHighlights: false
 
   html: jQuery.extend {}, Annotator::html,
-    adder: '<div class="annotator-adder"><button class="h-icon-mode-comment"></button><button class="h-icon-border-color annotator-highlighter"></button></div>'
+    adder: '''
+      <div class="annotator-adder">
+        <button class="h-icon-mode-comment" data-action="comment"></button>
+        <button class="h-icon-border-color" data-action="highlight"></button>
+      </div>
+    '''
 
   constructor: (element, options, config = {}) ->
     options.noScan = true
@@ -392,11 +397,11 @@ module.exports = class Annotator.Guest extends Annotator
     event.preventDefault()
     event.stopPropagation()
     @adder.hide()
-    # Check to see if the highlight or note button was pushed.
-    if event.target.className == "h-icon-border-color annotator-highlighter"
-      this.setVisibleHighlights true
-      annotation = this.setupAnnotation(this.createHighlight())   
-    else
-      annotation = this.setupAnnotation(this.createAnnotation())
-      this.showEditor(annotation)
+    switch event.target.dataset.action
+      when 'highlight'
+        this.setVisibleHighlights true
+        annotation = this.setupAnnotation(this.createHighlight())
+      when 'comment'
+        annotation = this.setupAnnotation(this.createAnnotation())
+        this.showEditor(annotation)
     Annotator.Util.getGlobal().getSelection().removeAllRanges()
